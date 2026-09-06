@@ -331,8 +331,12 @@
 
       refresh: function (btn, api) {
         var A = G.OAAccounts;
+        /* through txt(), as carry() reads them: a search box holding only
+           spaces is a value the engine's own matches() drops, so it narrows
+           nothing; counted raw it lit the button and the press then went
+           nowhere, because carry() found nothing to carry */
         var set = arr(api && api.filters).some(function (f) {
-          return f && arr(f.values).length;
+          return f && arr(f.values).map(txt).filter(Boolean).length;
         });
         if (!A || !G.OAGate || (A.failed && A.failed())) {
           btn.disabled = true;

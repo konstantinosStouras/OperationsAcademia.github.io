@@ -107,6 +107,38 @@
     m.className = 'oa-form-msg' + (kind ? ' is-' + kind : '');
   }
 
+  /**
+   * A message that survives the form being HIDDEN.
+   *
+   * `#oa-msg` is inside `<form id="oa-cand-form">`, so the two edit-load
+   * failures -- the profile is gone, or this account may not read it -- wrote
+   * their explanation into the form and then hid the form with it. The reader
+   * was left with a blank panel and nothing said. `#oa-msg-out` is the sibling
+   * that stays, and it is the only thing on the page that speaks after the
+   * form goes.
+   */
+  function sayOutside(msg) {
+    var m = $('oa-msg-out');
+    if (!m) { say(msg, 'err'); return; }
+    m.textContent = msg || '';
+    m.className = 'oa-form-msg is-err';
+    m.hidden = !msg;
+  }
+
+  /** The forum page draws itself from the join this device remembers
+      (localStorage 'oa-forum-me', keyed on the uid) and asks forumJoin again
+      only BEHIND the page. A take-down deletes the membership marker the
+      rules read on every request, and a later edit puts the profile back
+      without anything rewriting the marker, since only forumJoin may: drawn
+      from the memory, the room's first read was refused before the join
+      behind it had written the marker back. So whatever changes a profile's
+      standing forgets the memory, and the next forum visit waits for the
+      function, which rewrites the marker from the profile as it stands. The
+      key is the forum page's own. */
+  function forgetForumJoin() {
+    try { localStorage.removeItem('oa-forum-me'); } catch (e) { /* private mode */ }
+  }
+
   /* The job market year rule, same as oa-jobform.js (and jobs-model.mjs
      MARKET_ROLL_MONTH): named for the calendar year it ENDS in, rolling on
      1 JULY in UTC. The previous year is offered too — a candidate filing in
@@ -578,7 +610,20 @@
         urlEl.placeholder = slot.file
           ? 'the uploaded file will be the ' + what + ' link'
           : 'https://';
-        if (slot.file) urlEl.value = '';
+        /* ...AND THE SUPERSEDED LINK COMES BACK when the file is un-chosen.
+           Blanking it here and never restoring it is what made Remove destroy
+           a profile's own CV: fill() puts the stored link in the box, choosing
+           a file empties it, and pressing Remove -- which the handler below
+           documents as "un-chooses it, and what it would have replaced is back
+           on the profile, untouched" -- left the box empty, so saving wrote an
+           empty cvUrl and the CV was gone. */
+        if (slot.file) {
+          if (urlEl.value) slot.urlWas = urlEl.value;
+          urlEl.value = '';
+        } else if (slot.urlWas) {
+          if (!urlEl.value) urlEl.value = slot.urlWas;
+          slot.urlWas = '';
+        }
       }
     }
 
@@ -847,8 +892,18 @@
       .then(function (cfg) {
         var revealAt = /^\d{4}-\d{2}-\d{2}$/.test(String((cfg || {}).revealAt || ''))
           ? String(cfg.revealAt) : '';
-        var today = new Date().toISOString().slice(0, 10);
-        var held = !revealAt || today < revealAt;
+        /* THE REVEAL IS AN INSTANT, NOT A DAY -- 14:00 UTC on the reveal day,
+           so it is still that calendar day from California to Shanghai. This
+           panel compared a UTC calendar day against the date, which is the
+           reading seven other files were taken off, and it is wrong for the
+           fourteen hours of reveal morning: it told a candidate their profile
+           was public and had no figures yet while the gate was still holding
+           it. `assets/oa-reveal.js` is the one definition, and it is already
+           this file's dependency (paintPreviewNote reads it); without it, hold
+           -- the safe reading the comment above already states. */
+        var R = window.OAReveal;
+        var held = !R || !R.isRevealed ? true : !R.isRevealed(revealAt);
+        var revealDay = (R && R.formatDay && R.formatDay(revealAt)) || revealAt;
         var st = v && v.stats && typeof v.stats === 'object' ? v.stats : null;
 
         box.innerHTML = '';
@@ -858,7 +913,7 @@
         if (held && !st) {
           box.appendChild(line(revealAt
             ? 'Your profile is not public yet. Profiles appear on the candidates page all ' +
-              'at once on ' + revealAt + ', so there is nothing to count until then.'
+              'at once on ' + revealDay + ', so there is nothing to count until then.'
             : 'Your profile is not public yet. Profiles appear on the candidates page all ' +
               'at once on the reveal date, so there is nothing to count until then.'));
         } else if (!st) {
@@ -1038,15 +1093,15 @@
         return fb.firestore().collection(col()).doc(EDIT_ID).get();
       }).then(function (snap) {
         if (!snap.exists) {
-          say('That profile no longer exists.', 'err');
+          sayOutside('That profile no longer exists.');
           show($('oa-cand-form'), false);
           return;
         }
         fill(snap.data() || {});
       }).catch(function (err) {
-        say(err && err.code === 'permission-denied'
+        sayOutside(err && err.code === 'permission-denied'
           ? 'You are not allowed to edit this profile.'
-          : 'We could not load that profile. Please try again.', 'err');
+          : 'We could not load that profile. Please try again.');
         show($('oa-cand-form'), false);
         if (window.console) console.error('edit:', err);
       });
@@ -1091,9 +1146,25 @@
              marker of their own to touch here, so the delete runs only when
              the account taking the profile down is the one that filed it.
              Best-effort; a refusal changes nothing about the take-down. */
+          /* ...AND ONLY WHEN THIS IS THE PROFILE THE MARKER WAS EARNED BY.
+             There is ONE marker per account, and it names the profile it was
+             written for (`sub`), so withdrawing a PAST season's profile used
+             to revoke the room access the CURRENT one earns -- the reader
+             keeps the tab the join cached and is refused by the function
+             until their next session re-joins. A marker naming another
+             profile, or naming none at all (an older document), is left
+             alone: the rules re-read the profile on every request, so the
+             marker by itself grants nothing, and absence of evidence must
+             not revoke. */
           if (!OAAccounts.isAdmin() && user && user.uid && OAFB.col && OAFB.col.candidateMarkers) {
-            fb.firestore().collection(OAFB.col.candidateMarkers).doc(user.uid)['delete']().catch(function () {});
+            var mref = fb.firestore().collection(OAFB.col.candidateMarkers).doc(user.uid);
+            mref.get().then(function (m) {
+              var sub = m && m.exists ? String((m.data() || {}).sub || '') : '';
+              if (sub && sub === String(EDIT_ID)) return mref['delete']();
+              return null;
+            }).catch(function () {});
           }
+          forgetForumJoin();
           return fb.firestore().collection(col()).doc(EDIT_ID).update({
             /* WHO took it down. 'hidden' is the maintainer, 'withdrawn' is
                the owner — the card buttons have always drawn that distinction
@@ -1354,6 +1425,12 @@
              later edit un-withdraws one. */
           if (EDIT_ID) {
             doc.status = 'queued';
+            /* PUTTING A PROFILE BACK re-earns the Candidates' room, and only
+               forumJoin can rewrite the marker the take-down deleted: the
+               forum page trusts a cached "yes" for the tab's life and never
+               asks again, so the room stayed refused until the next session.
+               Forgetting the cache makes the next forum visit ask. */
+            forgetForumJoin();
             /* `updatedAt` is stamped only when something CHANGED (`dirty`,
                the same test the preview draws its "Profile updated on" line
                by): the card prints that line from it, and a Save pressed

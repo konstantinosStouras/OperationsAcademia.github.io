@@ -697,6 +697,53 @@ simply typed). `reviewDate` is in
 every surface. The `/v2/` archive deliberately ignores the new key — its
 frozen assets read `applyBy`/`applyByDate` exactly as before.
 
+### "Until filled" is ONE rule, and it had four copies
+
+`OPEN_ENDED_RX` in `_scraper/jobs-model.mjs` decides whether a line means the
+search stays open, and its own comment has called itself the single definition
+since the day it was written. It was not one: `import-sheet.mjs`,
+`jobreview.mjs` and `assets/oa-fresh.js` each carried the same characters
+written out again, and the served-file guard in `selftest.mjs` pinned one of
+those copies against ANOTHER copy rather than against the constant. Change the
+rule and the build moves while the legacy import, the review card and the
+maintainer's edit echo keep the old one, silently — the drift
+`oa-countries.js`, `oa-schools.js`, `oa-news.js` and `oa-jobnav.js` all exist
+to prevent, and the reason it survived is that nothing compared any copy to the
+thing it was a copy of.
+
+**The two Node writers IMPORT it now**, the browser twin is held to the
+literal CHARACTER FOR CHARACTER (the `EMAIL_RX` idiom — a browser file cannot
+import, and an echo reading the rule differently from the build would show the
+maintainer a date the published row will not carry), and the guard scans
+**the whole `_scraper/` directory** rather than a list of the files somebody
+remembered: any `.mjs` but `jobs-model.mjs` containing the literal's own first
+alternative fails the build. A list only ever pins the copies you thought of,
+which is how there came to be four.
+
+**And the rule itself was wrong about one word.** *"On a rolling basis"* says
+how applications are REVIEWED, not when the search closes, and reading it as
+an open-ended search threw away the closing date beside it: "March 16, 2026.
+Applications will be reviewed on a rolling basis" published with an EMPTY
+`applyByDate` under a line still printing March 16 — a card naming a date the
+Final-deadline filter buckets "Until filled" and the market roll treats as
+never closing. Measured over the served corpus the word appears in nine
+distinct contexts and every one is either that review-cadence phrase or a bare
+"Rolling — full consideration <date>", which `rolling(?!\s+basis)` still
+reads.
+
+**The `until…filled` leg stays LITERAL, and that is the same measurement in
+reverse.** Widening it to reach "until the position is filled" flips SIXTEEN
+served rows that state a real closing date beside "review will continue until
+the position is filled" — and the served-file guard would then refuse all
+sixteen and stop the whole site publishing, which is the failure this file
+already records four times. The narrow adjacency is what the tracking workbook
+writes when a search really is open-ended, and it is load-bearing.
+
+Tests: the two-way unit pin (a rolling review cadence never discards the date
+beside it; a bare "Rolling" still does), the directory scan both ways (a
+private copy in an existing file AND in a new one), and the character-for-
+character twin.
+
 ## The frozen archives, and how the maintainer edits them
 
 `data/past-postings.json`, `data/recent-faculty.json` and
@@ -744,8 +791,11 @@ stands down wherever `oa-jobedit.js` has drawn.
 
 **None of this is live until the rules are deployed.** No workflow runs
 `firebase deploy` — it needs an interactive login — so after any change to
-`_firestore.rules`, run `firebase deploy --only firestore:rules` from the
-repository root. See `_SETUP-FIREBASE.md` §4.
+`_firestore.rules`, run `firebase deploy --only firestore:rules --project
+operations-academia` from the repository root. (The rules publish themselves
+behind a green check since 2026-08-24 — see "…and the FIRESTORE rules publish
+themselves" — so this is the hand path, and `--project` is never optional:
+see `_SETUP-FIREBASE.md` §4.)
 
 ## The Universities directory — one card per university, editable by anyone signed in
 
@@ -1128,6 +1178,26 @@ copy of the row is refreshed by `refreshQueued` on every sync, and an APPROVED
 one is re-derived at publish time (`approvedRow` reads the fresh row and lays
 the maintainer's edits over it). An edit the maintainer typed is still theirs.
 
+**AND A ROW WHOSE OWN DATES RUN BACKWARDS IS REPORTED.** `deadlineDay`
+refuses a closing date before its own posting date when it PARSES a cell —
+"on or after it" is its definition of a believable deadline — and that is
+where the test has always stopped. A row reaching the served file has been
+through more hands than the parse: `carryUnreadColumns` restores a stored date
+onto a row whose posting date the workbook may since have corrected, the two
+verify caches fill one from an advertisement, a review-card edit types one,
+and a mirror hands the whole posting over to a document. None of them
+re-applies the test, and four served rows carry a date before their own
+posting date today with nothing anywhere saying so.
+
+`backdatedDeadlines` (pure, in `jobmarket-sheet.mjs`) names them in the sync's
+run log, beside the deadline disagreements it already names and AFTER both
+advertisement caches have had their say, so it cannot name a date one of them
+was about to fill. **Reported, never repaired, and never a guard over `data/`**
+— the remedy is a cell in a crowdsourced workbook this repository cannot edit,
+so a check no commit could turn green is the crying-wolf cost already paid
+here once, and a run that silently blanked the date would be worse: a
+maintainer's typed date is theirs.
+
 **A deadline the pipeline is unsure of publishes as "Until filled."** (owner,
 2026-08-23). `sheetDay` guesses US order on an ambiguous all-numeric cell —
 right for a date Google itself wrote, wrong for a contributor typing
@@ -1174,7 +1244,8 @@ cascade — never a guess. **To make a future posting resolve, add its
 same rule as everywhere else: grow the database, never hand-edit `data/`.
 
 **It is inert until `_firestore.rules` is redeployed** (`firebase deploy --only
-firestore:rules`) — until then the panel says permission-denied — and the
+firestore:rules --project operations-academia`) — until then the panel says
+permission-denied — and the
 e-mail half is inert until `SMTP_*` is set, which stamps nothing, so the
 postings are announced once it exists.
 
@@ -2317,6 +2388,40 @@ own key list has none, and a signed-out visitor can send one — so joining it t
 an account by the address typed into a public form would be a guess. It is
 removed on request, like everything else that has to be asked for.
 
+### Three ways the sweep could stop, or leave a key behind
+
+**ONE ORDER MUST NOT STOP THE RUN.** The loop had no `try` around it, so a
+single account whose clear or purge threw took every other queued deletion
+with it — and the collection comes back in a stable order, so the next run met
+the same order first and stopped in the same place. A queue that cannot get
+past its first bad row is a queue that stops, and nothing in the log named the
+account. Each order is carried out inside its own `try` now, the failure is
+counted and warned about **by uid and never by the person**, and the rest of
+the queue is carried on with.
+
+**CLEARED MEANS THE CLEAR FINISHED, which is what `clearedAt` records.** The
+status alone decided it and was stamped only after `clearAccount` RETURNED, so
+an order that threw half way through still read `requested` — the one status
+the rules let the maintainer cancel, and cancelling then is a lie: the sign-in
+has already gone. The status goes on BEFORE the work now, so a half-cleared
+order reads `clearing` and cancel is refused; `clearedAt` still goes on after,
+so gate 4's hour runs from the moment the sign-in really went and a `clearing`
+order WITHOUT it is resumed rather than skipped.
+
+**AND THE ORCID iD RIDES ON THE WORK ORDER**, because the sweep cannot find it
+afterwards. `accountKeys/orcid:<iD>` is claimed from `profiles.orcid` whatever
+put it there, and a member may TYPE their iD into their profile with no ORCID
+sign-in behind it. The browser deletes `profiles/{uid}` itself, minutes before
+the sweep runs — so for such an account the profile is gone AND there is no
+`oidc.orcid` provider entry to recover the iD from, and nothing but the sweep
+can delete an identity key. The key outlived the account it named and went on
+offering a merge with a uid that no longer exists, which is exactly the
+failure the sweep's own comment already describes for the other route. It is
+carried like the address, omitted when there is none, preferred over both
+readings, and dropped again by `redacted()` when the order is finished.
+`orcid` joined `REQUEST_KEYS` and the rules' create list in the same change,
+which the selftest pins both ways.
+
 ### The rules, and the one place an Admin-SDK stamp is safe
 
 `accountDeletions/{uid}` is keyed on the uid itself (the `messages/{uid}` and
@@ -2909,6 +3014,38 @@ on. `hiddenBy` says which of the two it was, `'author'` or `'admin'`, so the
 page says *"deleted by its author"* or *"removed by the maintainer"* rather
 than guessing.
 
+**AND THE ANSWERS GO WITH THE THREAD, in the database and not only on the
+page.** The tombstone argument above — hiding is not erasing, because the
+rules let any admitted member read this collection — was applied to the
+thread's title and excerpt and to nothing else, so every ANSWER under a
+question the maintainer removed kept its body, `hidden: false`, one
+`where('hidden','==',true)` query away; and its author could never take it
+down themselves, because a post under a hidden thread is refused `locked`.
+It was the one post on this forum nobody could delete. A closing thread now
+sweeps them, bounded at `SWEEP_MAX` (400) for the transaction's write cap and
+refused with `big` rather than half-erased above it — the removal script has
+no such cap and is what that case is for. **The sweep is the MAINTAINER'S
+alone**: an author closing a LEGACY headless thread must not become this
+forum's one way to take another member's words away, and a fresh question
+with a live answer is already refused to its asker. **And since 2026-09-06 the
+SECOND PRESS is held by the same rule** (`refuseIfAnswered`, one helper on
+both roads): an asker who could close a headless thread over live answers
+erased nothing, and `tv.hidden` then refused everyone on it, the maintainer
+included, so the answers were readable for ever and deletable by nobody. The
+thread stays open until every answer has gone, or the maintainer removes it,
+which sweeps them; the page says so on the disabled control.
+
+**THE ROOM'S GUIDE IS REFUSED OUTRIGHT** (`guidethread` — `guide` is already
+"tick the box to say you have read it", which is nonsense addressed to
+somebody pressing Remove). `forumSeasons/{Y}.guides.{room}` names the thread
+and never clears, so a removed guide is a room that can never have one again:
+the maintainer's card then reads "Update the guide" and takes the refresh
+branch, which writes the words back into a thread that is still hidden.
+`_scraper/remove-forum-thread.mjs` has refused it from the day it shipped, in
+these words; the maintainer's own Remove button had no such rule and one press
+was all it took. Both ends carry it now — the callable refuses, and the button
+is drawn disabled with the reason, because a page can be got round.
+
 **A QUOTE OF IT SURVIVES, deliberately.** `forumPost` stores a COPY of the
 quoted words on the reply, which is already what keeps an edit from rewriting
 somebody else's reply; the same rule means deleting your post does not blank
@@ -2966,7 +3103,8 @@ and wording), the emulator test's own block against the real function
 a second press a success, a quote of it surviving, an answered question
 refused, the maintainer removing other people's replies with `hiddenBy:
 'admin'`, the asker then able to delete the question, a reply refused on a
-headless thread and one press closing it), and the browser block in
+headless thread and one press closing it, the asker refused over another
+member's live answer and the maintainer's press sweeping it), and the browser block in
 `page-test.mjs`, which posts a reply, deletes it, reads the stored document
 back, finds Delete disabled on the question the reply answers, and deletes a
 question of its own to watch the whole thread leave the list.
@@ -3156,9 +3294,10 @@ one season document read is the season passed in. The runbook is in
 renames every handle so it is the answer to a suspected leak and nothing
 else, and on 1 August the previous season's version is destroyed with
 `gcloud secrets versions destroy`, after which an archived season's handles
-cannot be re-derived by anyone. The housekeeping that runs that and stamps
-`secretDestroyedAt` is step 2; the field is in the model's comment now so the
-key list gains it with its writer. The emulator has no Secret Manager, so
+cannot be re-derived by anyone. The housekeeping that follows it, which
+deletes the closed season's markers, handles and names and stamps
+`secretDestroyedAt`, is `_scraper/roll-forum-season.mjs` (see "The July roll
+takes the closed season's markers and handles with it" below). The emulator has no Secret Manager, so
 under `FUNCTIONS_EMULATOR === 'true'` only, versions `env` and `env2` read
 `FORUM_SECRET_TEST` and `FORUM_SECRET_TEST_2`, and the emulator test proves
 two versions give two handles for one uid.
@@ -3352,6 +3491,86 @@ with tokens alone (no raw colour, pinned), so both themes are covered, and
 rule 13 in `_MOBILE-STANDARDS.md` is what its phone block holds to: a 16px
 textarea, 42px tabs, votes, actions and Post; the vote column stands beside
 a post on a desktop and lies above it on a phone.
+
+### A quote is a text a member sends, so the guard runs on it
+
+`forumPost` guarded the title, the body and every tag, and NOT the quote, on
+the reading that a quote is a passage of a post that already passed the guard.
+The FLATTENING the passage test uses is what makes that false: the comparison
+is on the whitespace-collapsed forms while the stored copy is the reader's own
+string. Measured against the real guard, a body reading
+*"…on&nbsp;&nbsp;617&nbsp;&nbsp;253&nbsp;&nbsp;1000&nbsp;&nbsp;during…"*
+passes it — the phone rule is nine digits joined by at most ONE separator each
+— and the single-spaced quote of it does not. And single-spaced is exactly
+what the browser hands over, because a DOM selection has already collapsed the
+spaces: **two presses of the site's own Quote button publish a telephone
+number the guard refuses.** `guard.check(text)` runs on it now, after the
+passage test so a quote of nothing is still refused as a quote, and the page
+runs it on the press, where the reader can still do something about it.
+
+### Four measured surfaces, and an audit that was not measuring them
+
+`outline: none` makes whatever replaces it the focus indicator, and
+`--brand-soft` on a white input is **1.19:1** against a 3:1 floor: a keyboard
+reader could not tell the compose box or a tag suggestion was focused. `--mut`
+is **4.44:1** on `--brand-soft` and **4.04:1** on the hover step, both under
+the 4.5:1 floor the token was chosen to clear "everywhere" — everywhere did
+not include a chip. And a chip is an `<a>`, so `body.v3 a:hover` (0,2,2) beat
+`.oa-forum-tagchip:hover` (0,2,0) whatever the load order: the chip hovered in
+`--brand-2` **with an underline**, which is the "specificity AND load order"
+trap already recorded for the Leaflet attribution and the sponsor rail.
+
+**The audit that should have caught the chip was not running its own list.**
+`FORUM_INK` in `page-test.mjs` was declared, commented and never PASSED — the
+`evaluate` carried a second copy — so a selector added to it measured nothing
+and said so nowhere. Worse, **nineteen of the thirty-two had never been on
+screen** in either of the two views it was run over: it reported green over
+surfaces it had never seen. It reads its own list now, **five views** are
+audited (the maintainer's list, a member's list with cards and a tag cloud, a
+busy thread with a quote and a removed answer, the guide thread, and the ask
+form with its picker open), and **a selector that matched nothing in any of
+them fails**. The New badge is staged by winding the seen-mark back, since
+`since` is stamped at join and nothing posted before that is ever new.
+
+The two icon buttons are OUT of the list rather than in it measuring nothing:
+the audit compares INK to its ground and skips an element with no text, so a
+bookmark and a bell need the 3:1 non-text measurement, which this suite does
+not make yet. **Measured and left**: `--gold` as the saved bookmark's ink is
+2.90:1 on the accepted answer's wash and 3.10:1 on a card, and `--gold` as ink
+is 2.90:1 on `--bg` everywhere else it is used too — a token-level question
+rather than a forum one, and changing it would move the analytics chart
+accent.
+
+### A paint that lands after the reader has moved
+
+The list, a thread and the ask form are three views of ONE page swapped with
+`pushState`, and each of them paints from a read that is still in flight when
+the reader goes on. The list mount already had a guard against that and it
+named the wrong invariant — the ROOM and the SEASON, which do not change when
+a reader opens a thread in the room they are already in. Two things followed:
+
+* a LIST read landing after the reader opened a thread repainted the
+  watched-tags banner `hideViews` had just put away, over the open thread;
+* a THREAD read landing after they pressed Back drew a whole **"Your answer"**
+  editor under the list of questions — `renderThread` ends by showing
+  `#oa-forum-compose`, which is a SIBLING of the thread rather than a child of
+  it, so hiding the thread view did not hide it — wired to an empty thread id,
+  so pressing Post asked the server to open a question with no title and got
+  "Too long, or empty" back. It marked the thread read, and spent a
+  `forumThreadVotes` call, for a thread nobody was looking at.
+
+**`viewKey()` is the one definition**: room, season, thread, ask — the whole
+address, because the address IS the view. The list mount and both of
+`drawThread`'s terminal callbacks are held to it, and so is the step before
+the votes call, so a thread the reader has left spends no callable.
+
+**The shim can HOLD a read now** (`holdReads`, runtime-settable, released with
+`window.__fb.release()`), which is the sibling of `refuseReads` and exists for
+the same stated reason: this is a state no browser check can reach while every
+read lands before the next line of the test. `page-test.mjs` is the reader who
+pressed Back while the thread was loading, and reverting either guard puts the
+answer box back on the list under the questions, which is what the check
+prints.
 
 **The browser suite drives the page through a SIMULATOR, never the
 functions.** `_scraper/_fake-firebase.js` gained `forumSim`, a stand-in for
@@ -3680,6 +3899,53 @@ would be satisfied by deleting the explanation) and `testForumThreadRemoval` in
 spawned and pins the one document it writes against `KEYS.tags`, the
 collections it may never reach, the dispatch-only workflow with its
 plan-by-default input and its list-to-find-the-id line, and this section.
+
+### The July roll takes the closed season's markers and handles with it
+
+The second review sweep of 2026-09-06 confirmed a join the writer scan cannot
+see. Firestore stamps every document with a server-side `createTime`, at
+nanosecond precision, that is metadata rather than a field, and `forumJoin`
+creates `forumHandles/{H}` and `candidateMarkers/{uid}` in ONE call: the two
+carry the same instant, so anyone holding the Admin credential can list both
+collections with their metadata and pair a handle with an account, with no
+secret, and after the season's version has been destroyed, which is the moment
+the Privacy Policy promises nobody can. R7 dropped the marker's own `joinedAt`
+for exactly this join; the metadata is the same join in a place no key list
+reaches, and `updateTime` moves while `createTime` never does.
+
+**The promise is kept by not keeping the records.** `_scraper/roll-forum-season.mjs`
+(`.github/workflows/oa-forum-roll-season.yml`, pressed and never scheduled,
+plan by default) retires a CLOSED season: every `candidateMarkers` document
+whose `year` is that season or earlier (one with no year predates the field
+and the next join rewrites it), the `forumHandles` and `forumNames` documents
+of that season, and nothing else. The threads, posts, votes and tallies stay:
+the archive is readable by design, a post carries its author's handle as a
+word, and with the names gone that word maps to nothing. Once a season is
+closed all three sets are dead weight, since its markers name a profile the
+rules no longer admit, its handle ids nothing can derive, and its names map a
+slug to a hash nobody can compute; dead weight with a timestamp on it is a
+join. The season under way is refused whatever is typed, because a current
+candidate's marker is what admits them to their room.
+
+**And it records the destruction, keyed on the number.** `--destroyed=<N>`
+says the runbook's gcloud command has been run for version N; the run checks
+N against the closed season's own `secretVersion` and against the season
+under way's (the runbook's June trap: a version both seasons name must
+neither be destroyed nor recorded as destroyed), and only then stamps
+`secretDestroyedAt`, the one key of a season head no function writes. It is
+in `KEYS.season` now, and the `@doc` writer scan walks this script and the
+thread remover beside the functions so the union pin still holds. Deleting
+without the stamp is allowed; the log says the destruction is still owed and
+prints the exact line it is waiting on. Counts only in that log, which is
+public: never a uid, never a hash, never a slug.
+
+Tests: the script's own `--selftest` (the arguments, the season under way
+refused, the stamp's three refusals, which markers go, and the writer half
+scanned with its comments stripped for the collections it must never reach),
+`testForumSeasonRoll` in `_scraper/selftest.mjs` (spawning it, the model's
+key, the two season queries, the declared stamp, the dispatch-only workflow
+with its plan default, the runbook and this section) and the union scan's two
+extra writers.
 
 ### A question, its answers, and the tick that says which one worked
 
@@ -6232,11 +6498,102 @@ merge re-authentication asks for the password in a `window.prompt`;
 "University of Leeds, UK" is served as an institution with an empty country
 (an alias moves its id, which is the join key to the queue); the archive lists
 the same San Diego advertisement under two seasons; JobPosting structured data
-is only viable if the gated fields are shown to crawlers.
+is only viable if the gated fields are shown to crawlers; and `directoryEdits`
+is public-read while carrying the writer's RAW uid in `by`, so anyone can join
+it to the unsalted `owner` tag every posting publishes and name the account
+behind a posting (the same class as the `accountKeys` item above, and salting
+the tag would rewrite the `owner` of all 577 served rows, which is the join key
+a takedown is scoped by).
 
 **Running the browser suite locally**: `node_modules` may be a SYMLINK to a
 global install that holds `playwright` (`ln -s /opt/node22/lib/node_modules
 node_modules`) — `.gitignore` names the bare form for exactly this reason.
+
+## The 2026-09-06 review sweep, part 2: what a second fan-out found
+
+A second fan-out over the site and the forum (sixty-three static readers, one
+adversarial verifier per finding) ran against this tree on 2026-09-06, after
+the first sweep of the same day, and confirmed twenty-six defects. Each fix is
+pinned in `testSweep20260906` (`_scraper/selftest.mjs`), with the behavioural
+halves beside the fixtures that own them; every pin was verified by putting
+the defect back. The decisions worth keeping, so nobody undoes them:
+
+* **An asker cannot close a legacy headless thread over other people's live
+  answers.** The sweep on a closing thread is the maintainer's alone (see "A
+  post is its author's to delete"), and the second press that shuts a thread
+  left headless by the old rule skipped the answered check: an asker could hide
+  the thread, nothing erased the answers, and `tv.hidden` then refused everyone
+  on it, the maintainer included, so the answers stayed readable to any
+  admitted member for ever and deletable by nobody, the very defect the sweep
+  was written to remove. `refuseIfAnswered` in `delete.js` is the ONE check,
+  run on both roads; the page draws Close this thread disabled with the
+  reason, the maintainer's confirmation names the answers their close sweeps,
+  the shim mirrors both halves, and the emulator drives the refusal, the
+  answer's own delete and the maintainer's sweep against the real function.
+* **`publishOnReview` rings only on a transition.** A CREATE has no `before`,
+  and `before && ...` let every document the sync creates already decided
+  (grandfathered rows, dropped repeats) fall through to the ring the guard was
+  written to stop. It is `!before ||` now.
+* **Saving an edit repaints the post in place.** `editPost`'s save was the one
+  in-thread action still routed through `go()`, which rebuilds the answer box
+  and loses whatever was half written in it. The Saved card's remove keeps the
+  keyboard too: the row that takes its place, the thread's own bookmark, or
+  the page, never `<body>`.
+* **A profile put back re-earns the Candidates' room.** The take-down deletes
+  `candidateMarkers/{uid}` and only `forumJoin` can rewrite it, while the
+  forum page draws itself from the join this device remembers and asks the
+  function again only behind the page, so the room's first read was refused
+  before the join had written the marker back. The candidate form forgets
+  `oa-forum-me` (localStorage since the same day's merge) on a take-down and
+  on the edit that restores, and the forum page re-asks once when a read the
+  memory promised is refused.
+* **`createdAt` is pinned on the owner's UPDATE as well** (`createdAtUnchanged`,
+  two-sided, on all three owner clauses). `update()` merges and carries the
+  stored stamp; `set()` replaces, and `request.resource.data` is then what the
+  client sent, which the build reads `posted` and `addedAt` off. Every form
+  here updates, so nothing legitimate changes. The three profile flags
+  (`orcidVerified`, `orcidSeeded`, `photoSeeded`) are bounded to a bool, so the
+  one write an unverified account may make has no unbounded key.
+* **A kept closing date applies whatever the cache entry's status.**
+  `cacheEntry`'s `keep` carries the last good deadline onto an entry that has
+  since gone unreadable, and both applies refused it by STATUS, so the morning
+  rebuild of `jobmarket.json` put the posting back to "Until filled." one
+  function after the keep had saved it. The date is the test.
+* **The change e-mail's "Posted by" join is scoped to the owner**, like every
+  other join on `ref` here: a reference is client-minted, bounded by length
+  alone and published, so on it alone a document carrying somebody else's
+  reference named the wrong person in the maintainer's inbox.
+* **The edit echo applies three rules the build applies**: the country goes
+  through the injected canon (or the editor's own Location filter forks), a
+  line saying the search stays open takes the date with it, and an EMPTY
+  suggested date is not echoed at all, because the build may heal one out of
+  the prose and the echo has no twin of that heal; left out, the served value
+  stands.
+* **The verify page** stands its countdown down under a dialog the site opened
+  (the first-run profile card, which it used to replace the page under), and
+  its headings say what happened on every branch, settled before focus lands
+  on them. The verification card's already-verified branch has its own catch;
+  a merge that stopped drops the pre-move survey, so "try again" can succeed.
+* **Forms and pickers.** The job and placement forms gained the candidate
+  form's `#oa-msg-out`, so an edit-load failure is said outside the form it
+  hides. The directory refuses a second row for a place it already lists
+  (`rowKeyOf` is the one definition of "the same place", used by the fold and
+  the refusal), since the collision folded the add document into the built row
+  where no control could reach it and the maintainer's Hide did nothing.
+  `oa-uniinfo.js` never fills the characteristics checklist in edit mode,
+  treats an emptied checklist as a decision, and names a hidden row so
+  `commit()` can refuse it; a non-2xx read of the vocabulary or the directory
+  is no longer memoised for the page's life. A search box holding only spaces
+  neither lights Save as e-mail alert nor is recorded as a filter in the
+  workbook's About sheet.
+
+**Reported, and answered by the roll housekeeping rather than here**:
+Firestore's own `createTime` on `forumHandles/{H}` and `candidateMarkers/{uid}`,
+created in one `forumJoin` call, is a join between a handle and an account
+that outlives the season's secret. It is metadata, not a field, so the writer
+scan cannot see it, and `updateTime` moves while `createTime` never does. See
+"The July roll takes the closed season's markers and handles with it" under
+the forum.
 
 ## Mobile standards for tables and lists — MUST consult
 
@@ -7372,6 +7729,31 @@ cached, and on 2026-08-18 a failing-over Ubuntu mirror hung it until the job
 cap killed three runs of the same commit. The libraries ship with the runner
 image; the apt call is kept bounded and best-effort, and the browser launch is
 what proves it.
+
+**A DELEGATE SPAWNS THE SUITE; IT NEVER IMPORTS IT.** `build-jobs.mjs`,
+`sync-jobmarket-sheet.mjs` and `migrate-to-firestore.mjs` all answer
+`--selftest` by running this file as itself. The first two spawn a child
+process; the third IMPORTED it — and `selftest.mjs` statically imports
+`migrate-to-firestore.mjs` (`docIdFor`, `migrationDoc`, `lostFields`,
+`migratable`), so the dynamic import closed a cycle across a top-level await:
+the suite waited for the module and the module waited for the suite, and node
+ended the process with *"Detected unsettled top-level await"* and exit code
+13. It had never once worked, and the orphan rule counted it as covered
+because a delegate was all it asked for — a command that reports a failure
+having checked nothing is the same shape as the doorbell that was never
+deployed. A child process closes no cycle, so that is what the rule now
+requires, checked by SHAPE because running the delegate would run this suite
+again.
+
+There is also **no three-suite subset** any more. `runSelftest()` ran three of
+this file's suites and printed `selftest: N checks passed`, which is what a
+whole green run prints — so a caller reaching for it reported complete
+coverage of a fraction. `build-jobs.mjs` and `sync-jobmarket-sheet.mjs` had
+already written that lesson into their own comments and moved off it;
+`migrate-to-firestore.mjs` was the last caller, so the subset is deleted
+rather than left for the next one to find. The guard's needle is COMPOSED from
+two strings, because a guard that spells out what it forbids puts that text
+into the very file it is reading.
 
 `page-test.mjs` drives BOTH served designs: the checks that assert on the old
 chrome (`#nav`, `#header-wrapper`, `#titleBar`, `#navPanel`, `window.ga`,

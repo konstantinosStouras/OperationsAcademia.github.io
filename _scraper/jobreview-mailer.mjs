@@ -49,6 +49,7 @@ import { longDate, postedBy } from './jobs-model.mjs';
 import { sheetEditUrl, SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import {
   shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
+  safeError,
 } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -217,9 +218,16 @@ export function renderReviewEmail(doc, { site = SITE, sheetUrl = '' } = {}) {
     'approving. Approving publishes it within a couple of minutes; ' +
     'rejecting keeps it off the site for good.</p>';
 
+  /* manageUrl: null — THE MAINTAINER SUBSCRIBED TO NOTHING. The footer's other
+     branch says "You are receiving this because you asked Operations Academia to
+     tell you about new postings" and offers an Unsubscribe link, and there is
+     nothing to unsubscribe from: this goes to one address because that address
+     runs the site. The Admin-area button is in the BODY of both messages, so the
+     way there is not lost. The poster's own "your posting is live" e-mail has
+     passed null since it shipped, for the same reason. */
   return {
     subject: 'Job posting to approve: ' + (title || r.id || 'untitled'),
-    html: shell({ title: 'A posting is waiting for you', bodyHtml, manageUrl: reviewUrl }),
+    html: shell({ title: 'A posting is waiting for you', bodyHtml, manageUrl: null }),
   };
 }
 
@@ -275,7 +283,7 @@ export function renderDigestEmail(docs, { site = SITE, sheetUrl = '' } = {}) {
   return {
     subject: docs.length + ' job postings to approve',
     html: shell({ title: docs.length + ' postings are waiting for you',
-                  bodyHtml, manageUrl: reviewUrl }),
+                  bodyHtml, manageUrl: null }),
   };
 }
 
@@ -373,7 +381,7 @@ async function main() {
     } catch (e) {
       /* Left unstamped on purpose, so the next run tries it again — the
          failure that matters is a posting nobody hears about. */
-      warn(`could not e-mail about ${doc.rowId}: ${e.message}`);
+      warn(`could not e-mail about ${doc.rowId}: ${safeError(e)}`);
       continue;
     }
 

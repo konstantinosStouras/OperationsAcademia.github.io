@@ -115,11 +115,28 @@
   }
 
   /** A line that says the search has no closing date rather than naming one —
-      jobreview.mjs OPEN_ENDED. */
-  var OPEN_ENDED = /until\s*filled|open\s*until|rolling/i;
+      jobs-model.mjs OPEN_ENDED_RX, which jobreview.mjs now imports. A browser
+      file cannot import it, so the selftest holds this literal to that one
+      CHARACTER FOR CHARACTER (the EMAIL_RX idiom): an echo reading the rule
+      differently from the build is a date shown to the maintainer that the
+      published row will not carry, which is exactly what this module's third
+      promise — echo only what the build would publish — forbids. */
+  var OPEN_ENDED = /until\s*filled|open\s*until|rolling(?!\s+basis)/i;
   /** jobs-model EMAIL_RX. Nothing under data/ may carry an address, and the
       echo must not show one the build is about to remove. */
   var EMAIL_RX = /[A-Za-z0-9._%+-]*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/g;
+
+  /** jobs-model url(), the browser twin — host-shaped http(s) or nothing.
+      A link the maintainer typed that this refuses is a link the build
+      publishes as EMPTY, so an echo that showed it would show a posting whose
+      advertisement link the site is about to drop. */
+  function url(v) {
+    var t = String(v == null ? '' : v).trim();
+    return /^https?:\/\/[^\s<>"']+\.[^\s<>"']+$/i.test(t) ? t.slice(0, 500) : '';
+  }
+
+  /** The three fields jobreview.mjs EDITABLE marks `url: true`. */
+  var URL_EDITS = ['adUrl', 'postedAtUrl', 'furtherInfoUrl'];
 
   /**
    * jobreview.mjs approvedRow(), the browser twin — the row an APPROVED queue
@@ -137,18 +154,38 @@
    * no dependency of its own and the parity test can drive it offline, exactly
    * as the storage and the meta fetch are injected elsewhere here.
    *
-   * `edits` arrive ALREADY CLEAN: they are what the panel just wrote, read
-   * through the same field list `cleanEdits` uses (FIELDS in oa-jobreview.js,
-   * pinned against EDITABLE both ways), so re-cleaning them here would be a
-   * second answer to a settled question.
+   * `edits` arrive AS THE MAINTAINER TYPED THEM, and this used to claim they
+   * arrived clean. They do not: `readEdits` reads the boxes through the field
+   * LIST, never through `cleanEdit`, so the two rules a text input cannot
+   * enforce for itself were missing from the echo. `maxlength` bounds the
+   * length, the type is a select and the levels are checkboxes and the dates
+   * are date inputs, so what was left to differ was exactly two things, and
+   * both are applied here as twins of the build's own: a link that is not
+   * host-shaped http(s) PUBLISHES AS EMPTY, and a country is canonicalised
+   * ("USA" is served as "United States"). `canonCountry` is injected beside
+   * `canonColumns` for the same reason — this file keeps no dependency of its
+   * own — and with it absent the echo simply does not re-spell, which is a
+   * spelling and never a value the build would refuse.
    */
   function approvedRow(row, doc, opts) {
     var o = opts || {};
     var canon = o.canonColumns || function (place) { return place; };
+    var canonCountry = o.canonCountry || function (v) { return v; };
     var clean = (doc && doc.edits) || {};
-    var out = {}, k;
+    var out = {}, k, i;
     for (k in (row || {})) if (Object.prototype.hasOwnProperty.call(row, k)) out[k] = row[k];
     for (k in clean) if (Object.prototype.hasOwnProperty.call(clean, k)) out[k] = clean[k];
+
+    /* cleanEdit: an EDITED url and an EDITED country only. A value the row
+       already carried came through the pipeline and is settled. */
+    for (i = 0; i < URL_EDITS.length; i++) {
+      if (Object.prototype.hasOwnProperty.call(clean, URL_EDITS[i])) {
+        out[URL_EDITS[i]] = url(text(clean[URL_EDITS[i]], 600));
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(clean, 'country')) {
+      out.country = canonCountry(text(clean.country, 80)) || '';
+    }
 
     /* A line the maintainer wrote that says the search stays open takes the
        date with it — the one direction where their words are the fact. */
@@ -285,7 +322,15 @@
    * carrying a fresh FILE upload echoes no advert link, because the build
    * replaces it with the Drive link and until then the posting has none.
    */
-  function echoFields(doc) {
+  function echoFields(doc, opts) {
+    var o = opts || {};
+    /* INJECTED, like approvedRow's: this file keeps no dependency, and the
+       country box is free text the BUILD canonicalises ("USA" publishes as
+       "United States"). Echoed raw, the editor's own Location filter forked
+       into two spellings of one country for the whole window, and the echo
+       could never stand down on its own, since the raw value never equals
+       the served one. */
+    var canonCountry = o.canonCountry || function (v) { return v; };
     var f = {
       institution: doc.institution || '',
       school: doc.school || '',
@@ -293,14 +338,26 @@
       department: doc.department || '',
       type: doc.type || '',
       levels: (doc.levels || []).slice(),
-      country: doc.country || '',
+      country: canonCountry(doc.country || '') || '',
       applyByDate: doc.applyByDate || '',
-      reviewDate: doc.reviewDate || '',
       applyBy: composeApplyBy(doc),
       comments: doc.comments || '',
       characteristics: (doc.characteristics || []).slice(),
       postedAtUrl: doc.postedAtUrl || '',
     };
+    /* THE SUGGESTED DATE IS ECHOED ONLY WHEN THE FORM STATED ONE. Where the
+       box is empty the build reads a first-review date out of the apply-by
+       prose or the comments (healReviewDate), and that heal has no browser
+       twin here; echoing the empty box deleted the "Suggested apply by" row
+       the build was about to keep. Left out of the echo, the served row's
+       own value stands, which is what the build will publish or a date one
+       build stale, and never a row that vanishes and comes back. */
+    if (doc.reviewDate) f.reviewDate = doc.reviewDate;
+    /* the build's two rules on the pair, the same ones approvedRow carries:
+       a line saying the search stays open takes the date with it, and a
+       suggested date on or after the closing date is not published */
+    if (f.applyByDate && OPEN_ENDED.test(f.applyBy)) f.applyByDate = '';
+    if (f.reviewDate && f.applyByDate && f.reviewDate >= f.applyByDate) delete f.reviewDate;
     if (!doc.adUploadPath) f.adUrl = doc.adUrl || '';
     return f;
   }

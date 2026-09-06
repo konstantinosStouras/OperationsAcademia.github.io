@@ -231,12 +231,26 @@
   function dupHtml(dups) {
     var items = dups.map(function (d) {
       var name = [d.institution, d.department].filter(Boolean).join(' — ');
-      var jobsUrl = '/jobs?institution=' + encodeURIComponent(d.institution || '');
+      /* WHICH PAGE, and the posting itself. This was
+         `/jobs?institution=<name>`, and both halves of it were wrong: a
+         flagged duplicate is by definition of the crawled row's own market
+         year, which is routinely a season the jobs page cannot show, so the
+         link opened a list that by construction could not hold the posting;
+         and even where it could, it opened a search rather than the card. The
+         site has one answer to both — OAJobNav.hrefFor, the module that owns
+         `inCurrentMarket` and the `?job=` permalink, which is why `dupEntry`
+         now carries the season and the closing date it reads. Without the
+         module the name is drawn with NO link: a link that is right most of
+         the time is the worst shape for one. */
+      var nav = window.OAJobNav;
+      var href = (nav && nav.hrefFor) ? nav.hrefFor(d) : '';
       return '<li>' + esc(name || d.id) +
         (d.posted ? ' <span class="oa-hint" style="display:inline">(posted ' +
           esc(d.posted) + (DUP_SOURCE[d.source] ? ', ' + esc(DUP_SOURCE[d.source]) : '') +
           ')</span>' : '') +
-        ' &middot; <a href="' + esc(jobsUrl) + '" target="_blank" rel="noopener">see it live</a>' +
+        (href
+          ? ' &middot; <a href="' + esc(href) + '" target="_blank" rel="noopener">see it live</a>'
+          : '') +
         '</li>';
     }).join('');
     return '<div class="oa-note is-warn" data-dup>' +
@@ -548,7 +562,14 @@
           edits: edits || doc.edits || {},
           queuedAt: doc.queuedAt || '',
           reviewedAt: reviewedAt || '',
-        }, { canonColumns: OASchools.canonColumns }),
+        }, {
+          canonColumns: OASchools.canonColumns,
+          /* the same canon the build applies to an edited country, so the
+             echo shows "United States" where the maintainer typed "USA".
+             Optional: absent, the echo does not re-spell, which is a
+             spelling and never a value the build would refuse. */
+          canonCountry: (window.OACountries && OACountries.canon) || null,
+        }),
       });
     } catch (e) { /* an echo is a courtesy: never let it cost the approval */ }
   }

@@ -35,8 +35,9 @@ minutes again, and an approval up to half an hour.
 
 **THE FIRST THREE ARE LIVE.** They were deployed on 2026-08-27 and have dispatched
 on every decision since. `revealCandidates` (2026-09-04) rides along with the
-next `firebase deploy --only functions` and is inert until that deploy has
-run; read the count back (five) rather than trusting the deploy log. To check rather than trust: filter this repository's
+next `firebase deploy --only functions --project operations-academia` and is
+inert until that deploy has run; read the count back (FOURTEEN, see "Deploying"
+below) rather than trusting the deploy log. To check rather than trust: filter this repository's
 Actions by `event:repository_dispatch` and read the ACTOR — the function
 carries the PAT from step 1 and shows as a person, where the two verify
 workflows' own curls carry `GITHUB_TOKEN` and show as `github-actions[bot]`.
@@ -50,7 +51,7 @@ do — deploys nothing, and the doorbell that was never deployed looks exactly
 like a site that is simply slow.
 
 **PULL BEFORE YOU DEPLOY, AND COUNT THE LINES.** `firebase deploy --only
-functions` deploys what is in the working copy, so a clone a few commits behind
+functions --project operations-academia` deploys what is in the working copy, so a clone a few commits behind
 deploys the older set and reports success over it. That is not hypothetical:
 the 2026-08-29 run printed `Deploy complete!` over three functions when
 `_functions/index.js` on master held four — `recordVisit` (the
@@ -174,7 +175,7 @@ firebase functions:secrets:set FORUM_SECRET --project operations-academia
 ```
 
 Paste 32 random bytes in base64 (`openssl rand -base64 32`). The `secrets:`
-binding on the six callables grants the runtime account access to the secret,
+binding on the eight forum callables grants the runtime account access to the secret,
 and `_functions/forum/identity.js` reads the version each season's document
 names (`forumSeasons/{Y}.secretVersion`, written on the season's first join
 from whatever `latest` resolved to at that moment). It never reads another
@@ -188,6 +189,27 @@ rotating at once (`secrets:set`, then set `secretVersion` on the current
 season's document to the new version number in the Firestore console) and
 saying so in the guide thread; nothing else is cheaper or safer.
 
+**BEFORE THE JULY ROLL, ADD A VERSION. This is the one step in the year that
+must not be missed**, and the forum now refuses rather than let it be. The new
+season's first join takes whatever `latest` resolves to at that moment; if
+nothing has been added since the closed season was set up, that is the SAME
+version the closed season is using, and the 1 August destruction below then has
+only two outcomes and both are bad: destroy it and the live forum can no longer
+derive a single handle, which is unrecoverable; leave it and the promise in the
+Privacy Policy, that after the destruction nobody can link a handle to an
+account, is false for ever. Nothing else in the year would notice. So
+`ensureSeason` in `_functions/forum/identity.js` refuses to mint a season under
+a version another season already claims: on 1 July the forum answers *"The
+forum is being set up for the new season"* until
+
+```
+firebase functions:secrets:set FORUM_SECRET --project operations-academia
+```
+
+has been run with fresh bytes. No season document is written by the refusal, so
+the next join after the new version exists mints the season normally. Do it in
+late June and nobody sees the message at all.
+
 **On 1 August the previous season's version is destroyed**, so an archived
 season's handles can never again be linked to accounts by anyone, the
 maintainer included:
@@ -196,10 +218,27 @@ maintainer included:
 gcloud secrets versions destroy <N> --secret FORUM_SECRET --project operations-academia
 ```
 
-where `<N>` is the `secretVersion` the previous season's document names. The
-housekeeping run that does this and stamps `secretDestroyedAt` on that
-document arrives with the forum's step 2; until then it is this command, by
-hand, once a year.
+where `<N>` is the `secretVersion` the previous season's document names. Read
+it off that document rather than assuming, and check it is not the number the
+CURRENT season's document names; with the June step above done it never is.
+
+**Then press "OA: retire a closed forum season"** (`_scraper/roll-forum-season.mjs`,
+`workflow_dispatch` only), with the number you destroyed typed into `destroyed`
+and `write` ticked. It deletes the closed season's `candidateMarkers`,
+`forumHandles` and `forumNames` documents and stamps `secretDestroyedAt` on the
+season head. The deletions are the other half of the promise: Firestore stamps
+every document with a `createTime` no field carries, `forumJoin` creates a
+member's handle and marker in one call, and two documents born in the same
+instant are a join between a handle and an account that the Admin credential
+can read whether or not the secret still exists. The run refuses the season
+under way, refuses a `destroyed` number the closed season does not name or the
+current season also names, and with `write` unticked prints the plan and the
+exact gcloud line (`--destroyed=<N>`) it is waiting on. Run locally:
+
+```
+node _scraper/roll-forum-season.mjs --season=<Y>                       plan
+node _scraper/roll-forum-season.mjs --season=<Y> --write --destroyed=<N>
+```
 
 First deploy asks to enable a few APIs (Cloud Functions, Cloud Build,
 Artifact Registry, Eventarc) — say yes. It takes a few minutes.

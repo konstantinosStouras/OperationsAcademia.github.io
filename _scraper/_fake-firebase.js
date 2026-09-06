@@ -31,6 +31,17 @@
   window.__fb = {
     log: log,
     docs: docs,
+    /* the reads `holdReads` is keeping, and the release that lands them. The
+       list is RUNTIME-settable, not seed-only: a check that reproduces a late
+       paint has to hold one read and let the next one through, which it can
+       only do between two clicks. */
+    holdReads: (seed.holdReads || []).slice(),
+    holding: [],
+    release: function () {
+      var q = window.__fb.holding.splice(0, window.__fb.holding.length);
+      q.forEach(function (fn) { fn(); });
+      return q.length;
+    },
     dump: function () { return JSON.parse(JSON.stringify(docs)); },
     ops: function (kind) {
       return log.filter(function (e) { return !kind || e.op === kind; })
@@ -68,7 +79,8 @@
   DocRef.prototype.collection = function (name) { return new Col(this.path + '/' + name); };
   DocRef.prototype.get = function () {
     record('get', this.path);
-    return refusedRead(this.path) || Promise.resolve(snapOf(this.path));
+    var p = this.path;
+    return gate(p, function () { return snapOf(p); });
   };
   /* Like the SDK: `merge` DEEP-merges (a nested map's keys are added to,
      not replaced — which is exactly why oa-jobreview writes `edits` with
@@ -154,6 +166,36 @@
     return null;
   }
 
+  /** A READ THAT HAS NOT LANDED YET. `holdReads: ['threads/']` makes every
+      matching read wait until the check calls `window.__fb.release()`, which
+      resolves them all in the order they were asked for.
+
+      Its sibling above exists for a state no shim can reach any other way,
+      and so does this one: a page that swaps three views under one address
+      paints each of them from a read that is still in flight when the reader
+      moves, and whether the late paint writes over the view they moved TO is
+      not a question a browser check can ask while every read lands before the
+      next line of the test. Holding the read is the only way to be the reader
+      who pressed Back while the thread was loading. */
+  function heldRead(path) {
+    var pre = (window.__fb && window.__fb.holdReads) || [];
+    for (var i = 0; i < pre.length; i++) {
+      if (String(path).indexOf(pre[i]) !== -1) return true;
+    }
+    return false;
+  }
+
+  /** Refused, held, or answered — the one gate every read in this shim goes
+      through, so a read that can be refused can also be held. */
+  function gate(path, make) {
+    var no = refusedRead(path);
+    if (no) return no;
+    if (!heldRead(path)) return Promise.resolve(make());
+    return new Promise(function (res) {
+      window.__fb.holding.push(function () { res(make()); });
+    });
+  }
+
   function Col(path) { this.path = path; }
   Col.prototype.doc = function (id) {
     // no id = mint one, as the real SDK does for `collection(x).doc()`
@@ -170,8 +212,8 @@
   };
   Col.prototype.get = function () {
     record('list', this.path);
-    return refusedRead(this.path) ||
-      Promise.resolve(querySnap(childrenOf(this.path).map(snapOf)));
+    var p = this.path;
+    return gate(p, function () { return querySnap(childrenOf(p).map(snapOf)); });
   };
   /* The queries the pages actually issue — where(==), orderBy, limit, get —
      chainable the way the compat SDK chains them. Grown for the Admin area
@@ -198,8 +240,10 @@
     record('query', this.path + this.__f.map(function (f) {
       return '?' + f[0] + '==' + f[1];
     }).join(''));
-    var no = refusedRead(this.path);
-    if (no) return no;
+    var self = this;
+    return gate(this.path, function () { return self.__run(); });
+  };
+  Query.prototype.__run = function () {
     var snaps = childrenOf(this.path).map(snapOf);
     this.__f.forEach(function (f) {
       snaps = snaps.filter(function (s) { return s.data()[f[0]] === f[1]; });
@@ -212,7 +256,7 @@
       });
     }
     if (this.__n) snaps = snaps.slice(0, this.__n);
-    return Promise.resolve(querySnap(snaps));
+    return querySnap(snaps);
   };
   Col.prototype.where = function (field, op, value) {
     return new Query(this.path, [[field, value]]);
@@ -484,7 +528,7 @@
     if (name === 'forumJoin') {
       if (!verified) return simRefuse('permission-denied', 'verified');
       if (profile && !docs['candidateMarkers/' + u.uid]) {
-        simWrite('candidateMarkers/' + u.uid, { sub: profile.id, year: Y, joinedAt: now });
+        simWrite('candidateMarkers/' + u.uid, { sub: profile.id, year: Y });
       }
       if (!docs['forumSeasons/' + Y]) {
         simWrite('forumSeasons/' + Y, { season: Y, createdAt: now, secretVersion: 'env', guides: {} });
@@ -570,6 +614,14 @@
         if (bad(title)) return simRefuse('invalid-argument', bad(title));
         var tags = Array.isArray(data.tags) ? data.tags.map(simSlug) : [];
         if (!tags.length || tags.length > 5) return simRefuse('invalid-argument', 'tags');
+        /* AND EVERY TAG THROUGH THE GUARD, as _functions/forum/post.js does:
+           a tag is [a-z0-9-]{2,24}, which is the shape a telephone number and
+           an ORCID iD survive, and rule 7 does not say "unless you put it in
+           the tag box". */
+        for (var ti = 0; ti < tags.length; ti++) {
+          var tagWhy = bad(tags[ti]);
+          if (tagWhy) return simRefuse('invalid-argument', tagWhy);
+        }
         var tid = 'sim-t' + (++simN);
         var pid1 = 'sim-p' + (++simN);
         simWrite(threads + '/' + tid, {
@@ -601,7 +653,12 @@
         var qtext = String(data.quote.text || '').trim();
         var src = null;
         childrenOf(tp + '/posts').forEach(function (pp) { if (Number(docs[pp].n) === qn) src = docs[pp]; });
-        if (!src || src.hidden || !qtext || qtext.length > 600 || String(src.body).indexOf(qtext) === -1) {
+        /* THE FLATTENED SHAPE, as _functions/forum/member.js flatten() does
+           it: what the reader selected comes out of the DOM with the stored
+           whitespace already collapsed, so a byte-exact test refuses an
+           ordinary selection spanning a paragraph break. */
+        var flat = function (t) { return String(t == null ? '' : t).replace(/\s+/g, ' ').trim(); };
+        if (!src || src.hidden || !qtext || qtext.length > 600 || flat(src.body).indexOf(flat(qtext)) === -1) {
           return simRefuse('invalid-argument', 'quote');
         }
         quote = { n: qn, by: src.by, text: qtext };
@@ -663,26 +720,60 @@
        (_functions/forum/delete.js) */
     if (name === 'forumDelete') {
       if (th.hidden) return simRefuse('failed-precondition', 'locked');
+      /* WHAT A THREAD THAT GOES LEAVES BEHIND, as the function does it: no
+         title and no excerpt (the excerpt is a verbatim copy of the body the
+         post patch erases, and any admitted member may list the hidden rows),
+         and its tags handed back to the room's tally by value, floored at
+         zero. Mirrored here so the browser checks measure what the deployed
+         function would really leave. */
+      var closeSimThread = function () {
+        th = Object.assign({}, th, { hidden: true, title: '', excerpt: '' });
+        simWrite(tpath2, th);
+        /* THE MAINTAINER'S CLOSE SWEEPS THE ANSWERS, as delete.js does: the
+           words go, the slot stays, and hiddenBy says who did it */
+        if (isAdmin) {
+          Object.keys(docs).forEach(function (k) {
+            if (k.indexOf(tpath2 + '/posts/') !== 0 || k === ppath || !docs[k] || docs[k].hidden) return;
+            simWrite(k, Object.assign({}, docs[k], { body: '', hidden: true, hiddenBy: 'admin', editedAt: now }));
+          });
+        }
+        var tp = 'forumTags/' + Y + '_' + room;
+        var cs = Object.assign({}, (docs[tp] || {}).counts || {});
+        var moved = false;
+        (Array.isArray(th.tags) ? th.tags : []).forEach(function (t) {
+          if (!Object.prototype.hasOwnProperty.call(cs, t)) return;
+          cs[t] = Math.max(0, (Number(cs[t]) || 0) - 1);
+          moved = true;
+        });
+        if (moved) simWrite(tp, { counts: cs });
+      };
       var isAdmin = String((seed.user && seed.user.email) || '').toLowerCase() === 'kstouras@gmail.com';
       if (!isAdmin && post.by !== handle) return simRefuse('permission-denied', 'author');
+      /* the replies still standing: what holds an asker's question down, on
+         both roads, and what the maintainer's close sweeps */
+      var liveReplies = function () {
+        return Object.keys(docs).filter(function (k) {
+          return k.indexOf(tpath2 + '/posts/') === 0 && docs[k] && !docs[k].hidden
+            && Number(docs[k].n) !== 1;
+        });
+      };
       var whole = false;
       /* already gone: a second press is a success, and for a QUESTION it
-         finishes the job by shutting a thread left standing */
+         finishes the job by shutting a thread left standing -- unless other
+         people's answers still stand under it, which the asker may not lock
+         away (the function's refuseIfAnswered, on this road too) */
       if (post.hidden) {
         if (Number(post.n) === 1 && !th.hidden) {
+          if (!isAdmin && liveReplies().length) return simRefuse('failed-precondition', 'answered');
           whole = true;
-          simWrite(tpath2, Object.assign({}, th, { hidden: true }));
+          closeSimThread();
         }
         return Promise.resolve({ data: { ok: true, thread: whole } });
       }
       if (!post.hidden) {
         var question = Number(post.n) === 1;
         if (question && !isAdmin) {
-          var live = Object.keys(docs).filter(function (k) {
-            return k.indexOf(tpath2 + '/posts/') === 0 && docs[k] && !docs[k].hidden
-              && Number(docs[k].n) !== 1;
-          });
-          if (live.length) return simRefuse('failed-precondition', 'answered');
+          if (liveReplies().length) return simRefuse('failed-precondition', 'answered');
         }
         simWrite(ppath, Object.assign({}, post, {
           body: '', hidden: true,
@@ -695,7 +786,7 @@
         }
         if (question) {
           whole = true;
-          simWrite(tpath2, Object.assign({}, th, { hidden: true }));
+          closeSimThread();
         }
       }
       return Promise.resolve({ data: { ok: true, thread: whole } });

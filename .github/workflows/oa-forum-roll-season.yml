@@ -1,0 +1,89 @@
+name: "OA: retire a closed forum season"
+
+# THE FORUM'S STEP-2 HOUSEKEEPING, PRESSED AND NEVER SCHEDULED. A closed
+# season's membership markers, handle documents and reverse index are dead
+# weight once nothing can derive a handle, and dead weight with Firestore's
+# own createTime on it is a join between a handle and an account that the
+# Admin credential can read after the season's secret version is destroyed,
+# which is the moment the Privacy Policy promises nobody can. So they go.
+#
+# THE INPUT DEFAULTS TO A PLAN. `write: false` says what would go and touches
+# nothing; tick it to delete. The season under way is refused whatever is
+# typed: a current candidate's marker is what admits them to their room.
+#
+# THE STAMP NEEDS THE NUMBER. Run the gcloud destroy from the runbook first
+# (_SETUP-INSTANT-PUBLISH.md, "The forum secret"), then type the version
+# number it destroyed into `destroyed`: the run checks it against the closed
+# season's own record and against the season under way's before it records
+# the destruction. Blank means "not yet", and the log says so.
+#
+# Counts only in this log: never a uid, never a hash, never a slug. Nothing
+# here is scheduled: no cron may touch the forum (the selftest pins that).
+# Without FIREBASE_SERVICE_ACCOUNT nothing is read or written; the run warns
+# and exits 0.
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: 'Closed season to retire (blank = the season before the one under way)'
+        type: string
+        default: ''
+      write:
+        description: 'Delete (unticked = print the plan only). This cannot be undone.'
+        type: boolean
+        default: false
+      destroyed:
+        description: 'The FORUM_SECRET version number the gcloud command destroyed (blank = not yet)'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-forum-roll-season
+  cancel-in-progress: false
+
+jobs:
+  retire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credential is present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: nothing will be read or written."
+          fi
+
+      # firebase-admin 12, like every other workflow here that runs a _scraper/
+      # script: _mail.mjs's firebaseAdmin() uses the NAMESPACED admin.* surface,
+      # and 14 removed it whole.
+      - name: Install firebase-admin
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      - name: The script's own checks
+        run: node _scraper/roll-forum-season.mjs --selftest
+
+      # The inputs go through the ENVIRONMENT, never interpolated into the
+      # script: `season` and `destroyed` are free text.
+      - name: Retire
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          IN_SEASON: ${{ inputs.season }}
+          IN_WRITE: ${{ inputs.write }}
+          IN_DESTROYED: ${{ inputs.destroyed }}
+        run: |
+          set --
+          if [ -n "$IN_SEASON" ]; then set -- "$@" "--season=$IN_SEASON"; fi
+          if [ -n "$IN_DESTROYED" ]; then set -- "$@" "--destroyed=$IN_DESTROYED"; fi
+          if [ "$IN_WRITE" = "true" ]; then set -- "$@" --write; fi
+          node _scraper/roll-forum-season.mjs "$@"

@@ -715,6 +715,13 @@
         editing = null;
         alerts = [];
         renderList();
+        /* AND THE EXAMPLE DIGEST GOES WITH THEM. It carries real postings, so
+           renderPreview refuses to build one for a signed-out reader; but the
+           app is only HIDDEN on sign-out, and hidden is not absent, so the
+           one built for the reader who has just left stayed in the document
+           for whoever is now at the machine. */
+        var box = $('oa-preview');
+        if (box) box.innerHTML = '';
         showUnsubNotice('signin');
         return;
       }

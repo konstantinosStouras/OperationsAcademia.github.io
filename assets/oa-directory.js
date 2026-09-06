@@ -183,6 +183,40 @@
     return best;
   }
 
+  /** The names a row is ONE ROW by: its university, school and department
+      through the same canon the posting form applies, so a correction lands
+      on the site's one spelling. regroup() folds two rows sharing it into the
+      first, and addRow() refuses to make a second. One definition, so the
+      fold and the refusal cannot disagree about what "the same place" is. */
+  function rowKeyOf(r) {
+    var canon = window.OASchools ? OASchools.canonColumns : null;
+    var inst = r.institution || '', school = r.school || '', dept = r.department || '';
+    if (canon) {
+      var c = canon({ institution: inst, school: school, unit: dept });
+      inst = c.institution; school = c.school; dept = c.unit;
+    }
+    if (!inst) return '';
+    return instKey(inst) + '||' + fold(school) + '||' + fold(dept);
+  }
+
+  /** The row the table already lists under these names, if any: a user-added
+      document that collides with one is unreachable rather than a duplicate.
+      regroup() folds it into the built row, the built row keeps the id every
+      control carries, the add row's values fill the built row's blanks, the
+      maintainer's Hide on the built row is undone by the add row standing in
+      for it, and nothing on the page reaches the add document at all. */
+  function existingRow(doc, exceptId) {
+    var key = rowKeyOf({ institution: doc.institution, school: doc.school, department: doc.department });
+    if (!key) return null;
+    var rows = overlaid();
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (exceptId && r.id === exceptId) continue;
+      if (rowKeyOf(r) === key) return r;
+    }
+    return null;
+  }
+
   function regroup() {
     var rows = overlaid();
     var canon = window.OASchools ? OASchools.canonColumns : null;
@@ -202,7 +236,7 @@
         r.institution = c.institution; r.school = c.school; r.department = c.unit;
       }
       if (!r.institution) continue;
-      var key = instKey(r.institution) + '||' + fold(r.school || '') + '||' + fold(r.department || '');
+      var key = rowKeyOf(r);
       var held = merged[key];
       if (!held) { merged[key] = r; order.push(key); continue; }
       // the fuller row wins the display fields; counts and provenance add up
@@ -508,7 +542,19 @@
       window.alert('The university name is required. Nothing was saved.');
       return;
     }
+    if (refuseClash(doc, docId)) return;
     save(docId, doc, { replace: true });
+  }
+
+  /** Say no to a row the table already lists (see existingRow), naming it. */
+  function refuseClash(doc, exceptId) {
+    var clash = existingRow(doc, exceptId);
+    if (!clash) return false;
+    var name = [clash.institution, clash.school, clash.department].filter(Boolean).join(' · ');
+    window.alert('The directory already lists ' + name + '.' +
+      (clash._hidden ? ' That row is hidden; the maintainer can restore it.' : ' Edit that row instead.') +
+      ' Nothing was saved.');
+    return true;
   }
 
   function addRow(institution) {
@@ -538,6 +584,7 @@
       window.alert('The university name is required. Nothing was saved.');
       return;
     }
+    if (refuseClash(doc, '')) return;
     save(docId, doc, { replace: true });
   }
 
@@ -569,9 +616,16 @@
       for (var a in had) if (Object.prototype.hasOwnProperty.call(had, a)) doc[a] = had[a];
     }
     for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) doc[k] = patch[k];
-    /* hidden is the maintainer's mark and survives an ordinary edit — a user
-       correcting a hidden row must not silently republish it. */
-    if (had && had.hidden && !('hidden' in patch)) doc.hidden = true;
+    /* hidden is the maintainer's mark and survives an ordinary edit: a user
+       correcting a hidden row must not silently republish it.
+
+       CARRIED WHENEVER THE ROW HAS THE KEY, not only when it is TRUE. This is
+       a full set(), so a field left out of `doc` is a field deleted from the
+       document, and the rules read the RESULTING document: on a row the
+       maintainer had RESTORED, `hidden` is stored as false, `had.hidden` is
+       falsy, the key was dropped, and the write is refused. Omitting it is
+       changing it, which is the maintainer's alone. */
+    if (had && ('hidden' in had) && !('hidden' in patch)) doc.hidden = !!had.hidden;
     doc.rowId = rowId;
     doc.by = state.user.uid;
     doc.name = editorName();

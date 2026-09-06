@@ -30,6 +30,7 @@
 'use strict';
 
 const crypto = require('node:crypto');
+const logger = require('firebase-functions/logger');
 const { ADJ, NOUN, RESERVED } = require('./words.js');
 const M = require('../forum-model.js');
 
@@ -87,13 +88,44 @@ async function accessVersion(version) {
 const cache = new Map();
 
 /** The season head, created on first use with the version `latest` resolves
-    to at that moment. Returns the document's data. */
+    to at that moment. Returns the document's data.
+
+    NO TWO SEASONS MAY SHARE A VERSION, and this is the only place that can
+    say so. The runbook destroys the closed season's version a month after
+    it ends, so that its handles can never again be linked to accounts. If
+    the new season's first join resolved `latest` to the version the closed
+    season is already using, that destruction has only two outcomes and
+    both are bad: destroy it and the LIVE forum can no longer derive a
+    single handle, which is unrecoverable; leave it and the promise in the
+    Privacy Policy is false for ever. Nothing else in the year notices
+    either. So a season is refused rather than minted under a version
+    another season claims, at the roll, where one command fixes it and the
+    message says which. */
 async function ensureSeason(db, season) {
   const ref = db.collection('forumSeasons').doc(String(season));
   const snap = await ref.get();
   if (snap.exists && snap.data().secretVersion) return snap.data();
   /* the create branch: the ONE place `latest` is named */
   const fresh = await accessVersion('latest');
+  const heads = await db.collection('forumSeasons').get();
+  const claimed = heads.docs.some((d) => Number(d.id) !== Number(season)
+    && String((d.data() || {}).secretVersion || '') === String(fresh.version));
+  if (claimed) {
+    /* SAID OUT LOUD, because nothing else in the year would say it. The
+       member's sentence cannot promise that waiting fixes this, since only
+       a person can; the log is where the person looks, and it carries the
+       command rather than a description of it. */
+    logger.error('forum: season ' + season + ' cannot open under secret version ' + fresh.version
+      + ', which season ' + (heads.docs.find((dd) => Number(dd.id) !== Number(season)
+        && String((dd.data() || {}).secretVersion || '') === String(fresh.version)) || {}).id
+      + ' already uses. Add a version first: firebase functions:secrets:set '
+      + SECRET_NAME + ' --project operations-academia');
+    /* REQUIRED HERE, NOT AT THE TOP. member.js requires this file for
+       secretForSeason, so a top-level require back would be a cycle and
+       would bind an empty object. By the time any callable runs, member.js
+       is fully loaded and its one ERRORS table is what words the refusal. */
+    require('./member.js').refuse('failed-precondition', 'season');
+  }
   cache.set(season + ':' + fresh.version, fresh.payload);
   return db.runTransaction(async (tx) => {
     const again = await tx.get(ref);

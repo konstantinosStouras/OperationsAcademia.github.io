@@ -109,7 +109,7 @@ export const SUBMISSIONS = [
 /** Everything else keyed on the account, deleted whole. `users/{uid}` carries
     the alerts and the test-e-mail requests as subcollections and is walked
     rather than named, so a subcollection added later is not left behind. */
-export const OWNED_DOCS = ['profiles', 'registeredUsers', 'userDirectory'];
+export const OWNED_DOCS = ['profiles', 'registeredUsers', 'userDirectory', 'candidateMarkers'];
 
 /** …and the documents keyed on the account that NO client may touch in either
     direction, so only this job can ever remove them. `verifyMail/{uid}` is the
@@ -283,7 +283,19 @@ async function killUserSubtree(db, uid) {
   const root = db.collection('users').doc(uid);
   let n = 0;
   let subs = [];
-  try { subs = await root.listCollections(); } catch { subs = []; }
+  try {
+    subs = await root.listCollections();
+  } catch (e) {
+    /* UNREADABLE IS NOT EMPTY, the rule this file already applies to a served
+       file it cannot parse. Swallowed, a transient failure here reads as "this
+       account had no alerts", the order is stamped cleared, and the
+       subscription is left in the database for ever: the mailer enumerates
+       every alert by collection group and never asks whether the uid still
+       exists, and unsubscribing needs a sign-in that has just been deleted.
+       That is the one outcome this whole job is shaped to prevent, so the
+       order is left open and the run says why. */
+    throw new Error(`could not list the subcollections of users/${uid} (${e && e.message})`);
+  }
   for (const sub of subs) {
     const snap = await sub.get();
     n += await killAll(db, snap.docs.map((d) => d.ref));
@@ -421,13 +433,35 @@ async function clearAccount(fb, uid, order, held) {
         the identity keys are derived from them. A work order usually carries
         the address already, but an admin-filed one for an account with no
         roster row may not. */
-  let orcid = '';
+  /* THE ORDER FIRST, and that is the only source that survives the browser.
+     `accountKeys/orcid:<iD>` is claimed from `profiles.orcid` whatever put it
+     there, and a member may TYPE their iD with no ORCID sign-in behind it --
+     so for such an account BOTH readings below are empty by the time this
+     runs, the profile because the browser deleted it minutes ago and the
+     provider because there never was one. The key then outlived the account
+     it named, offering a merge with a uid that no longer exists, which is the
+     failure the comment below already describes for the other route. The
+     browser puts the iD on the work order for this. */
+  let orcid = String(order.orcid || '');
   try {
-    orcid = ((await db.collection('profiles').doc(uid).get()).data() || {}).orcid || '';
-  } catch { orcid = ''; }
+    if (!orcid) orcid = ((await db.collection('profiles').doc(uid).get()).data() || {}).orcid || '';
+  } catch { /* already gone */ }
   let email = order.email || '';
+  /* AND THE AUTH RECORD IS THE OTHER PLACE BOTH LIVE, which matters because
+     the profile may already be gone: a person deleting their own account
+     deletes `profiles/{uid}` in their browser (it is an owner-delete and the
+     card says "Cleared your details"), and this pass runs minutes later. Read
+     only from the profile, the ORCID iD was then empty and
+     `accountKeys/orcid:<iD>` outlived the account it named, pointing a merge
+     offer at a uid that no longer exists. The provider entry carries the iD
+     itself, and nothing but this job can delete an identity key. */
   try {
-    if (!email) email = (await fb.auth.getUser(uid)).email || '';
+    const rec = await fb.auth.getUser(uid);
+    if (!email) email = rec.email || '';
+    if (!orcid) {
+      const pd = (rec.providerData || []).filter((x) => x && x.providerId === 'oidc.orcid');
+      if (pd.length && pd[0].uid) orcid = String(pd[0].uid);
+    }
   } catch { /* already gone, or never had one */ }
 
   /* 1. THE SIGN-IN FIRST, and this is the OPPOSITE of the order the browser
@@ -497,10 +531,18 @@ async function clearAccount(fb, uid, order, held) {
   return removed;
 }
 
-/** The three documents an account owns outright. Swept on the clearing pass
-    AND again before the order is closed, because a tab holding a token minted
-    before the sign-in was deleted can re-create two of them for up to an
-    hour. */
+/** The documents an account owns outright. Swept on the clearing pass AND
+    again before the order is closed, because a tab holding a token minted
+    before the sign-in was deleted can re-create three of them for up to an
+    hour: enterSession re-writes the tally mark, syncDirectoryRow the roster
+    row, and opening the forum re-writes the membership marker.
+
+    `candidateMarkers/{uid}` is the forum's, and it was missing from this
+    list. It is written by forumJoin and deleted by its owner when they take
+    their profile down; a deletion that skipped it left a uid-keyed document
+    naming a candidate profile and a season behind, readable by the
+    maintainer, that nothing could ever reach again once the sign-in it
+    belonged to was gone. */
 async function sweepOwned(db, uid) {
   let n = 0;
   for (const col of OWNED_DOCS) {
@@ -620,8 +662,16 @@ async function main() {
   log(`${orders.length} account deletion(s) to carry out.`);
   if (!orders.length) return 0;
 
-  let cleared = 0, finished = 0, waiting = 0;
+  let cleared = 0, finished = 0, waiting = 0, failed = 0;
   for (const { uid, data } of orders) {
+    /* ONE ORDER MUST NOT STOP THE RUN. There was no catch here, so a single
+       account whose clear or purge threw took every other queued deletion
+       with it -- and since the collection comes back in a stable order, the
+       next run met the same order first and stopped in the same place. A
+       queue that cannot get past its first bad row is a queue that stops.
+       The uid names it and nothing else does: an address in a public Actions
+       log is the thing this whole sweep exists to remove. */
+    try {
     const held = await submissionsOf(db, uid);
     const counts = Object.fromEntries(SUBMISSIONS.map((s) => [s.what, (held[s.col] || []).length]));
 
@@ -633,7 +683,20 @@ async function main() {
 
     let removed = data.removed || null;
     let clearedAt = Number(data.clearedAt) || 0;
-    if (data.status !== 'clearing') {
+    /* CLEARED means the clear FINISHED, which is what `clearedAt` records.
+       The status alone used to decide it, and the status was stamped only
+       after `clearAccount` returned -- so an order that threw half way
+       through still read `requested`, which is the ONE status the rules let
+       the maintainer cancel. Cancelling then is a lie: the sign-in has
+       already gone. The status is stamped BEFORE the work now, so a
+       half-cleared order reads `clearing` and cancel is refused; `clearedAt`
+       is still stamped after, so gate 4's hour is measured from the moment
+       the sign-in really went, and a `clearing` order without it is resumed
+       rather than skipped. */
+    if (!(data.status === 'clearing' && clearedAt)) {
+      if (data.status !== 'clearing') {
+        await db.collection(COLLECTION).doc(uid).set({ status: 'clearing' }, { merge: true });
+      }
       removed = await clearAccount(fb, uid, data, held);
       clearedAt = Date.now();
       await db.collection(COLLECTION).doc(uid).set(
@@ -660,11 +723,16 @@ async function main() {
     finished++;
     log(orderLine(uid, data, `done: ${purged.deleted} document(s) deleted` +
       (purged.drive ? `, ${purged.drive} file(s) removed from Drive` : '')));
+    } catch (e) {
+      failed++;
+      warn(`${uid}: could not be carried out (${e.code || e.name || 'error'}) — ` +
+           'left open, and the rest of the queue was carried on with');
+    }
   }
 
   if (DRY) { log('--dry-run: nothing written.'); return 0; }
   log(`${cleared} account(s) cleared, ${finished} finished, ${waiting} still open ` +
-      '(each line above says why).');
+      '(each line above says why)' + (failed ? `, ${failed} threw and were left open` : '') + '.');
   return 0;
 }
 
@@ -693,7 +761,16 @@ async function selftest() {
   ok(stillServed(rows, { owner: '', refs: ['R2'], ids: [] })[0].id === 'b',
     'a ref matches even where the tag does not — the removalSpecs belt and braces');
   ok(stillServed(rows, { owner: '', refs: [], ids: ['c'] })[0].id === 'c',
-    '…and so does an id');
+    '…and so does an id, on a row published before the tag existed');
+  /* AN ID IS NOT A REFERENCE. It is (market year, institution, posting date)
+     plus an ordinal, so when this account's row comes off the site a same-day
+     SIBLING can be renumbered into the id it had published under; matched on
+     that stale id, a row that plainly belongs to somebody else read as "still
+     served" and the deletion waited on it once a build, for ever. */
+  ok(stillServed(rows, { owner: '', refs: [], ids: ['b'] }).length === 0,
+    'but an id never overrules a row that says whose it is, or a renumbered sibling stalls the deletion for ever');
+  ok(stillServed(rows, { owner: ownerTag('u9'), refs: ['R2'], ids: [] })[0].id === 'b',
+    'while a reference does, since the form issues one per submission and nothing reuses it');
 
   /* specOf reads every key a row can be joined on */
   const s2 = specOf('u1', [{ id: 'd1', data: { ref: 'R', publishedId: 'p1', sheetId: 's1' } }]);
@@ -734,6 +811,19 @@ async function selftest() {
     src.indexOf('async function purgeSubmissions'));
   ok(clearSrc.length > 500 && clearSrc.length < 6000,
     'clearAccount was really sliced, at both ends');
+  /* UNREADABLE IS NOT EMPTY, here as everywhere else in this file: swallowed,
+     a failed listCollections() reads as "this account had no alerts", the
+     order is stamped cleared, and the subscription is left in the database
+     for ever. */
+  const subSrc = src.slice(src.indexOf('async function killUserSubtree'), src.indexOf('const USAGE_PAGE'));
+  ok(subSrc.length > 300 && /throw new Error\(`could not list the subcollections/.test(subSrc)
+     && !/catch \{ subs = \[\]; \}/.test(subSrc),
+  'a users/ subtree that cannot be LISTED holds the order open rather than reading as empty');
+  /* AND THE ORCID iD IS READ FROM AUTH TOO. The browser deletes profiles/{uid}
+     itself, minutes before this pass runs, so read only from the profile the
+     iD was empty and accountKeys/orcid:<iD> outlived the account it named. */
+  ok(/providerId === 'oidc\.orcid'/.test(clearSrc) && clearSrc.indexOf("providerId === 'oidc.orcid'") < clearSrc.indexOf('deleteUser'),
+    'the ORCID iD is taken off the Auth record as well as the profile, and before the sign-in goes');
   ok(clearSrc.indexOf('deleteUser') < clearSrc.indexOf('killUserSubtree'),
     'the sign-in goes FIRST here, the OPPOSITE of the browser’s order and for ' +
     'the mirror-image reason: this job needs no session, and while the sign-in ' +
@@ -758,6 +848,13 @@ async function selftest() {
   ok(/\[k, ''\]/.test(anonSrc) && !/FieldValue\.delete/.test(anonSrc),
     'and it BLANKS the field rather than deleting it: the rules bound these keys ' +
     'with str(), and a key that has gone is a different shape from a blank one');
+  /* THE FORUM'S MEMBERSHIP MARKER IS THE ACCOUNT'S TOO. `candidateMarkers/
+     {uid}` is written by forumJoin and deleted by its owner when they take
+     their profile down; missing from this list, a deletion left a uid-keyed
+     document naming a candidate profile and a season behind, readable by the
+     maintainer, that nothing could reach again once the sign-in was gone. */
+  ok(OWNED_DOCS.includes('candidateMarkers'),
+    'purge: the forum membership marker is swept with the account\'s other owned documents');
   ok(CLOSED_DOCS.includes('verifyMail') && new RegExp('CLOSED_DOCS').test(clearSrc),
     'the verification mailer’s own rate-limit document goes too: it is keyed on ' +
     'the account and closed to every client, so nothing else could ever reach it');

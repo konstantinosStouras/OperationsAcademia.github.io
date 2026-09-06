@@ -463,6 +463,12 @@
                     </div>
                   </form>
 
+                  <!-- OUTSIDE the form, deliberately. #oa-msg is inside it, so
+                       an edit-load failure wrote its explanation into the form
+                       and then hid the form with it: a blank panel, and nothing
+                       said. This is what speaks once the form has gone. -->
+                  <p class="oa-form-msg" id="oa-msg-out" role="alert" hidden></p>
+
                   <!-- ------------------------- suggest a name correction
 
                        A poster who knows a university, school or department

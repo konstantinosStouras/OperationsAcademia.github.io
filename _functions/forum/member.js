@@ -66,8 +66,11 @@ const ERRORS = {
   asker: 'Only the member who asked the question can tick the answer.',
   answer: 'Only an answer can be ticked, and only while its words are still there.',
   answered: 'A question that has been answered cannot be deleted.',
+  guidethread: 'The room\'s guide cannot be removed; it is the one thread every new member has to be able to read.',
+  big: 'That thread carries too many answers to remove from here.',
   own: 'You cannot vote on your own post.',
   busy: 'The forum is busy. Try again in a moment.',
+  season: 'The forum is not open for the new season yet. Only the maintainer can open it.',
   bounds: 'That is too long, or empty.',
   tags: 'Choose one to five tags of letters, digits and hyphens.',
   quote: 'The quote must be a passage of the post it names, as it stands now.',
@@ -167,7 +170,20 @@ async function member(req, room) {
   return { uid, H, ref, doc, handle: doc.handle, isAdmin: who.admin, Y, D };
 }
 
-/** The handle's counters, reset when the UTC day has moved on. */
+/** The handle's counters, reset when the UTC day has moved on.
+ *
+ *  EVERY WRITER MUST PERSIST ALL THREE, and that is not tidiness. This
+ *  function zeroes the counters the stored `day` has outlived, but the
+ *  reset only actually happens if the patch that follows writes them back:
+ *  a writer that stamps the new `day` beside its OWN counter alone leaves
+ *  yesterday's other two in the document, and the next read, which now
+ *  sees a matching day, takes them for today's. Measured against the
+ *  emulator: a member who had spent their thread allowance yesterday and
+ *  whose first act today was a vote came back as
+ *  { day: today, dayThreads: 3, dayPosts: 40, dayVotes: 1 } and was refused
+ *  every question and every post for the whole day. So post.js and vote.js
+ *  each carry `dayThreads`, `dayPosts` and `dayVotes` out of `c`, bumping
+ *  the one they are spending. */
 function counters(doc, now) {
   const day = M.today(now);
   const same = doc && doc.day === day;
@@ -199,9 +215,17 @@ function textField(v, max, required) {
   return s;
 }
 
+/** Text as a browser renders it: every run of whitespace one space, ends
+    trimmed. The one place the forum compares words a reader SELECTED against
+    the words that were stored, since a selection comes out of the DOM with
+    the whitespace already collapsed (see the quote check in post.js). */
+function flatten(v) {
+  return String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
+}
+
 /** The first BOUNDS.excerpt characters of a body, cut at a word. */
 function excerptOf(body) {
-  const s = String(body || '').replace(/\s+/g, ' ').trim();
+  const s = flatten(body);
   if (s.length <= M.BOUNDS.excerpt) return s;
   const cut = s.slice(0, M.BOUNDS.excerpt);
   const at = cut.lastIndexOf(' ');
@@ -224,5 +248,5 @@ async function run(D, fn) {
 module.exports = {
   ADMIN, OPTS, ERRORS, FORUM_SECRET,
   refuse, db, season, verifiedToken, adminToken, currentCandidate, admitted, member,
-  counters, checkLimit, checkGap, textField, excerptOf, run,
+  counters, checkLimit, checkGap, textField, excerptOf, flatten, run,
 };

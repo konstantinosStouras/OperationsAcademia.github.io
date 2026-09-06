@@ -79,7 +79,15 @@ jobs:
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          ALERTS_FROM: ${{ vars.ALERTS_FROM }}
+          # The From: line and the address the footers show. This was
+          # ALERTS_FROM, which NOTHING in this repository reads — so the review
+          # e-mails went out under the default "Operations Academia
+          # <SMTP_USER>" and showed the default contact address, while every
+          # other mailer honoured the maintainer's own settings. Same two
+          # variables as oa-alerts-mail.yml, oa-feedback-mail.yml and
+          # oa-submissions-mail.yml.
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
         run: |
           node _scraper/jobreview-mailer.mjs \
             ${{ inputs.scan && '--scan' || '' }} \

@@ -219,6 +219,17 @@ body.v3 .oa-forum-q {
    not have to be is a line of its own weight under every question, so on this
    card it is small, muted and tucked against the right, where a reader finds
    it when they look for it and reads past it when they do not. */
+/* THE FOOTER IS A SIBLING OF THE HEAD, NOT A CHILD OF IT. The engine draws
+   the head as a <button>, and a control inside a button is not markup a
+   browser will make focusable, so the tag chips were reachable by pointer and
+   by nothing else. Out here they are real links; they take the head's own
+   column and its horizontal padding so they sit where they always did. */
+body.v3 .oa-forum-q .oa-forum-qfoot {
+  grid-column: 2 / -1;
+  padding: 0 24px 0 6px;
+  margin-top: -10px;
+}
+
 body.v3 .oa-forum-q .oa-card-lock {
   grid-column: 2 / -1;
   justify-content: flex-end;
@@ -389,7 +400,10 @@ body.v3 .oa-label-tag:hover {
 
 body.v3 .oa-label-tag:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
-body.v3 .oa-label-pinned { background-color: var(--gold); color: var(--on-brand); }
+/* --on-gold, NOT --on-brand: --on-brand flips with the theme because --brand
+   does, and gold does not. White on the light gold measured 3.10:1, which is
+   ordinary label text under AA. */
+body.v3 .oa-label-pinned { background-color: var(--gold); color: var(--on-gold); }
 body.v3 .oa-label-locked { background-color: var(--bg-3); color: var(--ink-2); border: 1px solid var(--line); }
 body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 
@@ -615,9 +629,23 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   cursor: pointer;
 }
 
-.oa-forum-pacts .oa-forum-act:hover { background: var(--bg-3); color: var(--ink); }
+.oa-forum-pacts .oa-forum-act:hover:not([disabled]) { background: var(--bg-3); color: var(--ink); }
 .oa-forum-pacts .oa-forum-act:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
+/* A DISABLED CONTROL MUST LOOK DISABLED. Delete on a question somebody has
+   answered is drawn and refused, with the reason in its title, so that the
+   rule is legible before it is pressed rather than after; drawn at full
+   strength and lighting up under the pointer, it read as a live button that
+   silently did nothing. The pointer says so too, so the reason in the title
+   is what the reader gets when they go looking. */
+.oa-forum-pacts .oa-forum-act[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* --ink-2, not --mut: this block paints its own ground, and --mut was tuned
+   against --bg, --bg-2 and --bg-3 rather than against --brand-soft, where it
+   measured 4.44:1 in light theme. */
 .oa-forum-who {
   display: inline-flex;
   align-items: center;
@@ -625,7 +653,7 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   padding: 7px 12px;
   border-radius: 8px;
   background: var(--brand-soft);
-  color: var(--mut);
+  color: var(--ink-2);
   font-size: 12.5px;
 }
 
@@ -723,7 +751,11 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   box-sizing: border-box;
 }
 
-.oa-forum-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand-soft); }
+/* THE RING IS THE BRAND, NEVER THE WASH. `outline: none` takes the site-wide
+   focus ring away, so whatever replaces it IS the indicator, and --brand-soft
+   on a white input measures 1.19:1 against a 3:1 floor: a keyboard reader had
+   no way to tell the box was focused. --brand is 10.16:1 on the same ground. */
+.oa-forum-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand); }
 
 /* The compose bar under a textarea. It used to carry the "how do you know"
    radios on the left with the send button on the right; the radios are gone
@@ -786,7 +818,14 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   font-size: 13.5px;
 }
 
-.oa-forum-quotebox p { margin: 4px 0 0; white-space: pre-wrap; }
+/* A LONG ADDRESS IN A QUOTE MUST BREAK. `pre-wrap` wraps at whitespace, and
+   an unbroken URL has none: quoted into a post it ran off the card and took
+   the whole page sideways with it, which rule 12 of the mobile standards
+   refuses. `.oa-forum-text` has carried `overflow-wrap: anywhere` all along;
+   the two quote blocks were the ones without it. */
+.oa-forum-quotebox p { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.oa-forum-quotebox, .oa-forum-quote { min-width: 0; overflow-wrap: anywhere; }
+.oa-forum-quote p { overflow-wrap: anywhere; }
 
 .oa-forum-send {
   min-height: 42px;
@@ -919,7 +958,13 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 }
 
 .oa-forum-tagsugg li:last-child button { border-bottom: 0; }
-.oa-forum-tagsugg button:hover, .oa-forum-tagsugg button:focus-visible { background: var(--brand-soft); color: var(--brand); outline: none; }
+/* A WASH IS A HOVER, NOT A FOCUS RING. Both states shared one rule that
+   removed the outline and put --brand-soft behind the row, which is 1.19:1
+   against the panel it sits on: pointing at a row and tabbing to it looked
+   the same, and neither looked focused. The wash stays for both; the ring
+   comes back for the keyboard, inset so the list does not clip it. */
+.oa-forum-tagsugg button:hover, .oa-forum-tagsugg button:focus-visible { background: var(--brand-soft); color: var(--brand); }
+.oa-forum-tagsugg button:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
 .oa-forum-tagsugg i { font-style: normal; color: var(--mut); }
 
 .oa-forum-actions {
@@ -968,15 +1013,29 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-/* the same step as a chip anywhere else, never the near-black flip */
-.oa-forum-tagchip:hover {
+/* the same step as a chip anywhere else, never the near-black flip.
+
+   `body.v3` IS LOAD-BEARING: a chip is an <a>, and `body.v3 a:hover` in
+   v3.css is (0,2,2) against this rule's (0,2,0), so it won on specificity
+   whatever the load order and the chip hovered in --brand-2 WITH AN
+   UNDERLINE, which is the one thing a chip must not do. This is the
+   "specificity AND load order" trap this repository already records for the
+   Leaflet attribution and the sponsor rail: a rule that a rule of equal or
+   greater weight can beat is not a rule. */
+body.v3 .oa-forum-tagchip:hover {
   background-color: var(--line-soft);
   color: var(--brand);
   box-shadow: inset 0 0 0 1px var(--line);
+  text-decoration: none;
 }
 
 .oa-forum-tagchip:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-.oa-forum-tagchip i { font-style: normal; font-weight: 500; color: var(--mut); margin-left: 7px; }
+/* THE COUNT IS QUIETER BY WEIGHT, NOT BY A COLOUR THAT FAILS. --mut measures
+   4.44:1 on --brand-soft and 4.04:1 on the hover step, both under the 4.5:1
+   floor this site holds every ink to; the token was chosen as "the smallest
+   change that clears 4.5:1 everywhere", and everywhere did not include a chip.
+   --brand is 8.51:1 and 7.75:1 on the same two grounds. */
+.oa-forum-tagchip i { font-style: normal; font-weight: 400; color: var(--brand); margin-left: 7px; }
 
 /* the bell: quiet until it is pressed, then the room's own green, so a
    watched tag is legible at a glance down the card */
@@ -1109,9 +1168,13 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   .oa-forum-post { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 22px 0; }
   .oa-forum-post.is-accepted { padding-left: 10px; padding-right: 8px; }
   .oa-forum-vote { flex-direction: row; justify-content: flex-start; align-items: center; gap: 10px; }
-  /* rule 13: every control the thread offers is a 42px target on a phone */
+  /* rule 13: every control the thread offers is a 42px target on a phone.
+     The bell and the Saved card's remove are controls too, and both were
+     measured under it: the bell had a width and no height, so it took the
+     row's own 20px, and the remove sat at its 26px minimum. */
   .oa-forum-acc, .oa-forum-save { width: 42px; height: 42px; }
-  .oa-forum-watch { width: 42px; }
+  .oa-forum-watch { width: 42px; min-height: 42px; }
+  .oa-forum-unsave { min-width: 42px; min-height: 42px; }
   .oa-forum-sort select { min-height: 42px; font-size: 16px; }
   .oa-forum-answers-h { align-items: flex-start; flex-direction: column; }
   .oa-forum-pacts .oa-forum-act { min-height: 42px; }

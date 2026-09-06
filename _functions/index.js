@@ -288,8 +288,16 @@ exports.publishOnReview = onDocumentWritten(
        read plus a chained build — for a row that was never waiting. */
     const before = event.data && event.data.before && event.data.before.exists
       ? event.data.before.data() : null;
-    if (before && before.status === after.status) {
-      logger.debug('skip: already decided', { status: after.status });
+    /* A CREATE HAS NO `before`, and a create is exactly the case the sentence
+       above describes: the sync writes those documents already decided, so
+       there is no transition and nothing was waiting. `before && ...` let
+       every one of them fall through to the ring, which is the very thing
+       the guard was written to stop; a decision is a document that WAS
+       pending and is not any more. The browser never creates a decided
+       document (the panel decides on the pending document the sync made),
+       so nothing that should ring is lost. */
+    if (!before || before.status === after.status) {
+      logger.debug(before ? 'skip: already decided' : 'skip: created already decided', { status: after.status });
       return;
     }
 
@@ -489,11 +497,11 @@ exports.sendVerificationEmail = onCall(
     return { sent: true, to: redact(email) };
   });
 
-/* ====================================================================   WHICH UNIVERSITY A VISITOR CAME FROM — the fourth function, and one of the
-   two here that are not doorbells.
-=======
-   WHICH UNIVERSITY A VISITOR CAME FROM: the fifth function, and one of the
-   two here that are not doorbells.
+/* ===========================================================================
+   WHICH UNIVERSITY A VISITOR CAME FROM: the sixth function in this file, and
+   one of the two here that are not doorbells (the other is the verification
+   mailer above; the four doorbells are publishOnChange,
+   publishOnCandidateChange, revealCandidates and publishOnReview).
 
    THE CHART THIS RESTORES, AND THE CLAIM IT CORRECTS. analytics.html used to
    show "which universities visited", measured from Universal Analytics'

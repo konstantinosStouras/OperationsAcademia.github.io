@@ -60,10 +60,12 @@
   var KEYS = {
     /* forumSeasons/{Y}: the season head. `secretVersion` is the Secret
        Manager VERSION the season's handles are derived under (a number, never
-       the secret); `guides` maps each room to its pinned guide thread. Step 2
-       adds `secretDestroyedAt` when the 1 August housekeeping destroys the
-       previous season's version. */
-    season: ['season', 'createdAt', 'secretVersion', 'guides'],
+       the secret); `guides` maps each room to its pinned guide thread.
+       `secretDestroyedAt` is stamped by the 1 August housekeeping
+       (_scraper/roll-forum-season.mjs) once the previous season's version has
+       been destroyed, and is the one key of a season head no function
+       writes. */
+    season: ['season', 'createdAt', 'secretVersion', 'guides', 'secretDestroyedAt'],
     /* forumSeasons/{Y}/rooms/{room}/threads/{tid}. `accepted` is the id of
        the post the ASKER ticked as the answer, '' when none: one field, on
        one document, so the list card can say a question is answered without
@@ -101,8 +103,20 @@
     name: ['season', 'key'],
     /* candidateMarkers/{uid}: the membership marker the rules re-read. The
        one document keyed on a uid, and it carries a profile id, never a
-       handle. */
-    marker: ['sub', 'year', 'joinedAt']
+       handle.
+
+       AND NO STAMP, WHICH IS THE POINT. It used to carry `joinedAt`, set
+       from the same M.minute() as the forumHandles document written in the
+       same call, and the maintainer may read both collections. So the two
+       could be joined on an exact minute: with a few hundred members
+       spread over weeks, a minute usually names one person, and the join
+       needed neither the secret nor the Admin SDK and would go on working
+       after the season's secret version was destroyed, which the Privacy
+       Policy says makes the link impossible for everyone. R7 exists so
+       that "a minute cannot be joined exactly to any other record of the
+       same moment"; two documents written by one call with one minute on
+       both were exactly that. Nothing ever read the field. */
+    marker: ['sub', 'year']
   };
 
   /** Text bounds, in characters. The functions refuse anything longer with
@@ -142,7 +156,13 @@
 
   /** Per handle, per UTC day; `gapMs` is the minimum between two posts. The
       refusal carries the counter's NAME and never a count. */
-  var RATE = { threads: 3, posts: 40, votes: 60, gapMs: 20000 };
+  /* `gapMs` is ONE CLOCK MINUTE and cannot be anything else. Both stamps it
+     is measured between are truncated to the minute (R7), so their
+     difference is always a whole number of minutes: any value from 1 to
+     60000 enforces exactly "not twice in the same UTC minute", and 20000
+     said twenty seconds while enforcing sixty. The number now says what the
+     rule is. */
+  var RATE = { threads: 3, posts: 40, votes: 60, gapMs: 60000 };
 
   /* THERE IS NO EDIT WINDOW (owner, 2026-09-06: "the user can delete and
      edit the post any time"). A member's own post is theirs to edit and to

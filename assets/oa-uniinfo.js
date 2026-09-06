@@ -140,11 +140,13 @@
     var ik = S.institutionKey(inst);
     if (!ik) return out;
     var own = [];
+    var hidden = [];
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i];
-      if (r && !r._hidden && S.institutionKey(r.institution || '') === ik) own.push(r);
+      if (!r || S.institutionKey(r.institution || '') !== ik) continue;
+      if (r._hidden) hidden.push(r); else own.push(r);
     }
-    if (!own.length) return out;
+    if (!own.length && !hidden.length) return out;
 
     var foldSchool = function (v) { return v ? S.fold(S.canonSchool(v, inst)) : ''; };
     var foldUnit = function (v) { return v ? S.fold(S.canonUnit(v, inst)) : ''; };
@@ -215,6 +217,19 @@
     if (!out.rowId && S.directoryRowKey) {
       out.rowId = S.directoryRowKey(inst, school || out.school, unit || out.unit);
     }
+    /* A ROW THE MAINTAINER TOOK DOWN IS NAMED, NOT MATCHED. It is out of
+       `own` so it can never fill anything -- and that is exactly why the
+       guard in commit() ("a hidden row is never written to") could never
+       fire: with nothing matched the correction filed under the id the
+       build mints for these names, which is the hidden row's own id, and the
+       merge landed on it. The flag is what commit() reads now. */
+    if (!out.row && hidden.length) {
+      var hs = wantSchool, hu = wantUnit;
+      out.hiddenRow = hidden.some(function (r) {
+        return (r.id && r.id === out.rowId)
+          || (hu && foldUnit(r.department) === hu && foldSchool(r.school) === hs);
+      });
+    }
     return out;
   }
 
@@ -238,7 +253,10 @@
   function loadRows(url) {
     if (!state.rowsPending) {
       state.rowsPending = fetch(url || DIR_URL, { cache: 'no-cache' })
-        .then(function (r) { return r.ok ? r.json() : null; })
+        /* a non-2xx answer throws so the catch forgets the memo (the place
+           picker's rule, and OAList.load's): resolved to null it was kept
+           for the page's life */
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function (rows) { return Array.isArray(rows) ? rows : null; })
         .catch(function () { state.rowsPending = null; return null; });
     }
@@ -386,7 +404,20 @@
     function fillChars(list) {
       var boxes = charBoxes();
       if (!boxes.length) return;
+      if (declined.chars) return;
       var ticked = charSig(tickedChars());
+      /* AN EMPTIED CHECKLIST IS A DECISION, the rule every other field here
+         keeps (autoFill's "our fill, cleared"): an empty signature is falsy,
+         so "untouched" and "the poster unticked every box we ticked" read
+         the same, and the next resolve ticked them all back. Our fill is on
+         record in lastAutoChars; nothing ticked after it is the poster's
+         clearing, remembered for the page's life and never refilled. */
+      if (!ticked && lastAutoChars) {
+        declined.chars = true;
+        lastAutoChars = '';
+        if (els.charsNote) els.charsNote.textContent = '';
+        return;
+      }
       // an untouched checklist, or exactly this module's own earlier fill
       if (ticked && ticked !== lastAutoChars) return;
       var want = {};
@@ -459,7 +490,10 @@
         autoFill(els.country, 'data-oa-auto-country', f.country);
         autoFill(els.deptUrl, 'data-oa-auto-depturl', f.row ? f.deptUrl : '');
         noteDeptUrl(f);
-        fillChars(f.row ? f.characteristics : []);
+        /* the checklist is the posting's own, exactly like its names: a stored
+           posting that carries none must not gain the directory's because the
+           form was opened (it used to, since only the names were gated) */
+        if (opts.fillNames !== false) fillChars(f.row ? f.characteristics : []);
         if (typeof opts.onFacts === 'function') opts.onFacts(f);
       });
     }
@@ -514,7 +548,7 @@
     if (!S) return Promise.resolve(null);
     return record(args.dirUrl).then(function (rows) {
       var f = facts(rows || [], args.place, S);
-      if (f.row && f.row._hidden) return null;        // the maintainer took it down
+      if ((f.row && f.row._hidden) || f.hiddenRow) return null;   // the maintainer took it down
       var patch = deptUrlPatch(f.deptUrl, args.deptUrl);
       if (!patch || !f.rowId) return null;
       var doc = {

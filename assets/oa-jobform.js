@@ -49,6 +49,19 @@
     m.className = 'oa-form-msg' + (kind ? ' is-' + kind : '');
   }
 
+  /* `#oa-msg` is INSIDE the form, so the two edit-load failures (the posting
+     is gone, or this account may not read it) wrote their explanation into
+     the form and then hid the form with it: a blank panel under an intro
+     announcing an edit that never started. `#oa-msg-out` is the sibling
+     after </form> that stays (the candidate form's own fix, swept here). */
+  function sayOutside(msg) {
+    var m = $('oa-msg-out');
+    if (!m) { say(msg, 'err'); return; }
+    m.textContent = msg || '';
+    m.className = 'oa-form-msg is-err';
+    m.hidden = !msg;
+  }
+
   /* The job market year is named for the calendar year it ENDS in: the
      2025-2026 market is "2026". It turns over in the summer, when postings for
      the next one start going up. Offer the previous year too — a posting made
@@ -646,10 +659,17 @@
       var f = input.files && input.files[0];
       var bad = adFileProblem(f);
       if (bad) {
+        /* A REFUSED FILE LEAVES NO FILE, so the link box comes back with it.
+           Choosing a good advert disables that box and hides its placeholder
+           behind "the uploaded file will be the File link"; choosing a BAD one
+           after it cleared the file and hid Remove — the one control that
+           re-enables the box — and returned, leaving the poster with no way to
+           give a link at all short of reloading the page. */
         input.value = '';
         adFile = null;
         name.textContent = 'No file chosen';
         clear.hidden = true;
+        if (urlEl) { urlEl.disabled = false; urlEl.placeholder = 'https://'; }
         sayFile(bad);
         return;
       }
@@ -844,15 +864,15 @@
         return fb.firestore().collection(OAFB.col.jobSubmissions).doc(EDIT_ID).get();
       }).then(function (snap) {
         if (!snap.exists) {
-          say('That posting no longer exists.', 'err');
+          sayOutside('That posting no longer exists.');
           show($('oa-job-form'), false);
           return;
         }
         fill(snap.data() || {});
       }).catch(function (err) {
-        say(err && err.code === 'permission-denied'
+        sayOutside(err && err.code === 'permission-denied'
           ? 'You are not allowed to edit this posting.'
-          : 'We could not load that posting. Please try again.', 'err');
+          : 'We could not load that posting. Please try again.');
         show($('oa-job-form'), false);
         if (window.console) console.error('edit:', err);
       });
@@ -903,7 +923,13 @@
     }, true);
     form.addEventListener('change', function (e) {
       if (e.target.getAttribute('aria-invalid') === 'true') setError(e.target, '');
+      /* A group's error lives on the GROUP, never on the box that was ticked,
+         so `aria-invalid` above cannot see it. Levels had this and
+         characteristics did not, so "Please tick at least one characteristic"
+         sat under a group the poster had already ticked until the next failed
+         submit. */
       if (e.target.name === 'levels') setError($('f-levels'), '');
+      if (e.target.name === 'characteristics') setError($('f-chars'), '');
     }, true);
 
     // toggling "until filled" relaxes the date requirement
@@ -1045,7 +1071,13 @@
               if (window.console) console.error('uniinfo:', err);
             });
           }
-          draftClear();
+          /* THE DRAFT IS THE UNSENT NEW POSTING, and an EDIT is not it. The
+             draft key holds one half-written posting for this browser, and
+             saving a CORRECTION to an existing one threw it away — the poster
+             opened an old posting to fix a typo and lost the new one they had
+             been writing. It is cleared by a successful NEW posting, which is
+             what it was. */
+          if (!EDIT_ID) draftClear();
           sent = true;
           /* The confirmation is written for a NEW posting — a reference to keep,
              a copy e-mailed, "post another". None of that is true of a
@@ -1058,7 +1090,13 @@
                the posting will publish. */
             if (window.OAFresh) {
               OAFresh.stash({ docId: EDIT_ID, ref: EDIT_REF,
-                              fields: OAFresh.echoFields(doc) });
+                              /* the same canon the build applies to the
+                                 country, so the echo shows "United States"
+                                 where the box says "USA" (approvedRow's own
+                                 injection, one file over) */
+                              fields: OAFresh.echoFields(doc, {
+                                canonCountry: window.OACountries ? OACountries.canon : null
+                              }) });
             }
             var done = $('oa-done');
             done.innerHTML =
@@ -1069,6 +1107,14 @@
               '<a class="button blue" href="jobs.html">Back to the job postings</a></p>';
           } else {
             $('oa-ref').textContent = ref || '—';
+            /* A NEW posting is one more than the account held, and the menu's
+               "My postings" row is drawn from that count (oa-accounts.js's
+               `data-held` rule: born hidden, revealed when the number is
+               KNOWN and above zero). Without this the poster's own posting
+               was unreachable from the menu until the next session refreshed
+               the badge. An EDIT changes nothing here: the posting already
+               counted. */
+            if (window.OAAccounts && OAAccounts.addCount) OAAccounts.addCount('postings', 1);
           }
           show(form, false);
           show($('oa-intro'), false);

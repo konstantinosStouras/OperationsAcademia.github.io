@@ -85,6 +85,17 @@ jobs:
             fi
             echo "push rejected — rebasing onto the new tip (attempt $i)"
             git pull --rebase origin ${{ github.ref_name }} || exit 1
+            # THE REBUILT TREE GOES THROUGH THE SAME GATE, exactly as the
+            # build's own retry does. A rebase brings another writer's data/ in
+            # under this run's commit, and the re-apply above then rewrites the
+            # served files against it -- so what is about to be pushed is NOT
+            # what the gate passed before the loop. Without this, a retry can
+            # commit precisely what the gate exists to refuse, which is the
+            # rule this repository already wrote down for oa-jobs-build.yml.
+            if ! node _scraper/selftest.mjs --publishing; then
+              echo "::error::the rebuilt data/ does not pass the publishing gate - pushing nothing"
+              exit 1
+            fi
             sleep $((i * 3))
           done
           echo "could not push after 5 attempts"

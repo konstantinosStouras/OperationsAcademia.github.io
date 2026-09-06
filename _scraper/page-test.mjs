@@ -141,6 +141,115 @@ async function contrastOf(page, sel) {
   return page.evaluate(`(${CONTRAST_IN_PAGE})(${JSON.stringify(sel)})`);
 }
 
+/* ------------------------------------------- the forum's own contrast audit
+
+   forum.html cannot join the THEME_PAGES loop: signed out it draws a sign-in
+   card and nothing else, so every surface INSIDE a room went unmeasured. Same
+   compositing arithmetic as contrastOf, run over whichever of these the view
+   on screen actually shows. */
+const FORUM_INK = ['.oa-label-pinned', '.oa-label-locked', '.oa-label-new', '.oa-label-tag',
+  '.oa-forum-who', '.oa-forum-handle', '.oa-forum-text', '.oa-forum-quote',
+  '.oa-forum-removed', '.oa-forum-act', '.oa-forum-score', '.oa-forum-updown',
+  '.oa-forum-cardnote', '.oa-forum-hint', '.oa-forum-bs', '.oa-forum-ex',
+  '.oa-forum-asker', '.oa-forum-when', '.oa-forum-stat i', '.oa-forum-stat b',
+  '.oa-forum-tab', '.oa-forum-crumbs', '.oa-forum-thmeta', '.oa-forum-lede',
+  '.oa-forum-answers-h h2', '.oa-forum-sort', '.oa-forum-n',
+  /* THE TAG SURFACES, added after a sweep found the count inside a chip at
+     4.44:1 on its own ground. This is a LIST, and a list only ever measures
+     what somebody remembered: anything that paints ink on a ground of its own
+     belongs in it, and a chip paints two of them. */
+  '.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg button',
+  '.oa-forum-tagsugg i'];
+/* .oa-forum-watch and .oa-forum-save are NOT in it, and that is a limit of
+   this audit rather than an oversight: it measures INK against its ground and
+   skips an element with no text, and those two are icon buttons. They are
+   held to the 3:1 non-text floor instead, which is a different measurement
+   from a different pair of colours, and nothing here makes it yet. Said
+   rather than left as two selectors that quietly measure nothing. */
+
+/* WHICH OF THEM WERE ACTUALLY ON SCREEN. A selector that matches nothing
+   measures nothing and says so nowhere, which is the same defect as the
+   named list that was never passed: the check goes green having audited a
+   surface it never saw. Accumulated across both views, since some of these
+   are only ever drawn in one of them, and asserted once the forum block has
+   shown the reader both. */
+const FORUM_INK_SEEN = new Set();
+
+async function forumContrast(q, where) {
+  for (const theme of ['light', 'dark']) {
+    await q.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+    /* WAIT FOR THE DESIGN TO BE IN FORCE, not for a stopwatch: until the
+       cascade settles the body paints a default grey that is neither theme,
+       and measured then every muted line reads as a dark-theme failure. The
+       THEME_PAGES loop learnt this in 2026-08; the same wait, for the same
+       reason. */
+    await q.waitForFunction(() => {
+      const want = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+      if (!want) return false;
+      const probe = document.createElement('span');
+      probe.style.color = want;
+      document.body.appendChild(probe);
+      const resolved = getComputedStyle(probe).color;
+      probe.remove();
+      return getComputedStyle(document.body).backgroundColor === resolved;
+    }, { timeout: 8000 });
+      const low = await q.evaluate((sels) => {
+        const parse = (css) => {
+          const m = String(css).match(/[\d.]+/g);
+          if (!m || m.length < 3) return null;
+          return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 };
+        };
+        const over = (fg, bg) => ({
+          r: fg.r * fg.a + bg.r * (1 - fg.a),
+          g: fg.g * fg.a + bg.g * (1 - fg.a),
+          b: fg.b * fg.a + bg.b * (1 - fg.a), a: 1,
+        });
+        const ground = (el) => {
+          let layers = [], n = el;
+          while (n && n.nodeType === 1) {
+            const c = parse(getComputedStyle(n).backgroundColor);
+            if (c && c.a > 0) { layers.push(c); if (c.a === 1) break; }
+            n = n.parentElement;
+          }
+          if (!layers.length) return { r: 255, g: 255, b: 255, a: 1 };
+          let out = layers[layers.length - 1];
+          for (let i = layers.length - 2; i >= 0; i--) out = over(layers[i], out);
+          return out;
+        };
+        const lum = (c) => {
+          const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+          return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+        };
+        const out = [];
+        for (const sel of sels) {
+          for (const el of document.querySelectorAll(sel)) {
+            if (!el.offsetParent && el.tagName !== 'BODY') continue;
+            const txt = (el.textContent || '').trim();
+            if (!txt) continue;
+            const fg = parse(getComputedStyle(el).color);
+            if (!fg) continue;
+            const bg = ground(el);
+            const a = lum(fg.a < 1 ? over(fg, bg) : fg), b = lum(bg);
+            const r = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+            out.push({ sel, r: Math.round(r * 100) / 100, txt: txt.slice(0, 24),
+              fg: getComputedStyle(el).color, bg: `rgb(${Math.round(bg.r)}, ${Math.round(bg.g)}, ${Math.round(bg.b)})` });
+            break;
+          }
+        }
+        return { low: out.filter((x) => x.r < 4.5), seen: out.map((x) => x.sel) };
+      /* FORUM_INK, not a second copy of it. There WAS a second copy here, and
+         it was the one that ran: the named list above was declared, commented
+         and never referenced, so a selector added to it measured nothing and
+         said so nowhere. That is the four-copies-of-one-answer shape the
+         shared modules on this site all exist to prevent, in the file whose
+         job is to catch it. */
+      }, FORUM_INK);
+      low.seen.forEach((s) => FORUM_INK_SEEN.add(s));
+      eq(low.low, [], `forum (${where}, ${theme}): every surface reads at 4.5:1 or better`);
+  }
+  await q.evaluate(() => document.documentElement.removeAttribute('data-theme'));
+}
+
 /* ------------------------------------- opening a page as a SIGNED-IN reader
 
    Since 2026-08-29 the lists themselves are gated: a reader who has not
@@ -1732,9 +1841,20 @@ for (const [name, expect] of [
 
   const heldPanel = await onSiteRouted('post-a-candidate.html?edit=c9', oneSeed,
     { revealAt: '2099-01-01' }, readPanel);
+  /* THE DAY AS THE SITE WRITES IT, asked of the module rather than typed: the
+     panel used to compare a UTC calendar day against the date (the reading
+     seven other files were taken off, wrong for the fourteen hours of reveal
+     morning) and to print the raw ISO string. Both go through
+     assets/oa-reveal.js now, so this check cannot disagree with the page
+     about either. */
+  const { createRequire: reqFor } = await import('node:module');
+  const RevealNode = reqFor(import.meta.url)(path.join(ROOT, 'assets', 'oa-reveal.js'));
+  const heldDay = RevealNode.formatDay('2099-01-01');
   ok(/Your profile on the site/.test(heldPanel.text) && /not public yet/.test(heldPanel.text) &&
-     /2099-01-01/.test(heldPanel.text),
-    'before the reveal the panel says the profile is not public yet, and names the day');
+     heldPanel.text.indexOf(heldDay) !== -1,
+    `before the reveal the panel says the profile is not public yet, and names the day (${heldDay})`);
+  ok(heldPanel.text.indexOf('2099-01-01') === -1,
+    'as the site writes a day, never as a raw ISO string');
   ok(!/Opened \d/.test(heldPanel.text), 'and shows no count that would read as "nobody is interested"');
 
   const shownPanel = await onSiteRouted('post-a-candidate.html?edit=c9',
@@ -2389,6 +2509,72 @@ for (const [name, expect] of [
     return m ? Number(m[1]) : NaN;
   });
 
+  /* A NAME THE SITE KNOWS BY ANOTHER SPELLING. The e-mail matcher has always
+     tried the needle's own canonical forms and this page's search had not, so
+     "UC Berkeley", "Penn State" or "Imperial Business School" typed here found
+     NOTHING while an alert holding the same words matched and was e-mailed —
+     31 spellings apart, measured over the served postings. "What I see on the
+     site" and "what I am e-mailed" cannot mean different things.
+
+     The alias is picked FROM THE PAGE, never named here: the corpus is rebuilt
+     every morning and a check that names a university goes red for a reason
+     that is not a regression. It asks the names module for an alias whose
+     canonical value is an institution this listing is actually showing. */
+  const alias = await j.evaluate(async () => {
+    const S = window.OASchools;
+    if (!S || !S.INSTITUTION_ALIASES) return null;
+    /* the institutions the LISTING holds, not the ten cards on its first
+       page: the search runs over every row, so an alias whose university
+       sits on page four is as good a pick as one on page one, and a page
+       whose first ten happen to offer only an all-caps alias is not a page
+       on which this check cannot run */
+    const rows = await fetch('data/jobs.json', { cache: 'no-cache' }).then((r) => r.json());
+    const now = new Date();
+    const on = new Set(rows.filter((r) => window.OAJobNav.inCurrentMarket(r, now)).map((r) => S.fold(r.institution)));
+    for (const k of Object.keys(S.INSTITUTION_ALIASES)) {
+      const canon = S.fold(S.INSTITUTION_ALIASES[k]);
+      if (!canon || S.fold(k) === canon) continue;
+      /* NOT AN ALL-CAPS ALIAS. The engine matches an all-caps needle against
+         the INITIALS of a field's words, its own documented rule, so "CUHK"
+         also finds City University of Hong Kong, and this check, which is
+         about the canonical-form leg alone, then fails on a rule it is not
+         measuring. An alias with a lowercase letter reaches only that leg. */
+      if (!/[a-z]/.test(k)) continue;
+      for (const name of on) {
+        /* the alias must not already be a substring of the name, or the bare
+           fold would have found it and this proves nothing */
+        if (name.indexOf(canon) !== -1 && name.indexOf(S.fold(k)) === -1) {
+          return { typed: k, expect: S.INSTITUTION_ALIASES[k] };
+        }
+      }
+    }
+    return null;
+  });
+  if (alias) {
+    await j.fill('#oaf-institution', alias.typed);
+    await j.waitForTimeout(320);
+    const hits = await j.evaluate((a) => {
+      const S = window.OASchools;
+      return [...document.querySelectorAll('.oa-card .oa-card-title')].map((n) => ({
+        text: n.textContent.trim(),
+        /* folded on BOTH sides, and either spelling counts: the row is a hit
+           because the needle named it, whichever of its two names it did so by */
+        named: S.fold(n.textContent).indexOf(S.fold(a.expect)) !== -1
+            || S.fold(n.textContent).indexOf(S.fold(a.typed)) !== -1,
+      }));
+    }, alias);
+    ok(hits.length > 0,
+      `jobs: "${alias.typed}" finds the postings the site publishes as "${alias.expect}"`);
+    eq(hits.filter((h) => !h.named).map((h) => h.text), [],
+      `jobs: …and only those, so the canonical form narrows rather than widening ` +
+      `(typed "${alias.typed}", canonical "${alias.expect}")`);
+    await j.fill('#oaf-institution', '');
+    await j.waitForTimeout(320);
+  } else {
+    ok(false, 'jobs: no alias in the tables names an institution this listing shows — ' +
+      'the check cannot run, which is not the same as passing');
+  }
+
   /* TWO TERMS THAT MUST WIDEN, DERIVED FROM THE PAGE ITSELF. data/jobs.json is
      rebuilt from the tracking sheet every morning, so naming institutions here
      ("utah", "princeton") would make this check pass or fail on whatever the
@@ -2498,11 +2684,42 @@ for (const [name, expect] of [
   eq(stranded, [pair.b],
     'jobs: erasing the box and pressing Enter drops the draft, it does not strand it');
 
+  /* A DRAFT THAT FOLDS TO NOTHING MUST NOT TURN THE FILTER OFF. The terms are
+     OR'd and an empty needle matched every row, so a box holding only a space
+     or a bracket — which every reader types in the middle of a name — showed
+     the WHOLE list while the chips above it still said otherwise. */
+  await j.fill('#oaf-institution', ' ');
+  await j.waitForTimeout(350);
+  eq(await j.$$eval('.oa-filter:not(.oa-pick) .oa-chip .oa-chip-label',
+    (ns) => ns.map((n) => n.textContent)), [pair.b],
+    'jobs: a punctuation-only draft leaves the banked chip standing');
+  ok(await shown() < total,
+    'jobs: ...and the list it narrowed stays narrowed rather than opening up');
+  await j.fill('#oaf-institution', '');
+  await j.waitForTimeout(350);
+
   await j.click('.oa-clear');
   await j.waitForTimeout(250);
   eq(await j.$$eval('.oa-chip', (ns) => ns.length), 0,
     'jobs: Clear filters drops the banked terms too');
   eq(await shown(), total, 'jobs: and the whole listing comes back');
+
+  /* THE PAGER KEEPS THE KEYBOARD. render() rebuilds the result bar, so the
+     button just pressed is gone and focus fell to <body>: a reader turning
+     pages from the keyboard had to Tab all the way back in for every page. */
+  const pagerState = async () => j.evaluate(() => {
+    const a = document.activeElement;
+    return { tag: a ? a.tagName.toLowerCase() : '', label: a ? (a.getAttribute('aria-label') || '') : '' };
+  });
+  await j.$eval('.oa-pager button[aria-label="Next page"]', (n) => n.focus());
+  await j.click('.oa-pager button[aria-label="Next page"]');
+  await j.waitForTimeout(250);
+  eq(await pagerState(), { tag: 'button', label: 'Next page' },
+    'jobs: turning to the next page leaves the focus on the pager, not on <body>');
+  await j.click('.oa-pager button[aria-label="Previous page"]');
+  await j.waitForTimeout(250);
+  eq((await pagerState()).tag, 'button',
+    'jobs: and back again — a keyboard reader can turn more than one page per Tab');
 
   /* EVERY CONTROL ON ONE BASELINE, CHIPS OR NO CHIPS, and CLEAR CLOSES ITS ROW.
      The bar is a grid whose items were bottom-aligned, so a filter carrying
@@ -9467,6 +9684,29 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
   {
+    /* THE COUNTDOWN STANDS DOWN UNDER THE FIRST-RUN PROFILE CARD. The lift
+       that confirms the address also opens the accounts module's Welcome
+       dialog for an account with no profile yet, asking for a name and a
+       photo; the page used to replace itself under it four seconds later and
+       throw the half-typed profile away. This is the fixture above WITHOUT
+       the oaProfileAsked mark that kept the dialog shut. */
+    const { ctx, page: q, errors } = await signedInPage(LINK,
+      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    await q.waitForSelector('#oa-profile [aria-modal="true"]', { timeout: 15000 });
+    await q.waitForFunction(() => /Press Continue when you are ready/.test(document.getElementById('ve-count').textContent), null, { timeout: 8000 });
+    await q.waitForTimeout(6000);
+    const held = await q.evaluate(() => ({
+      here: /verify-email\.html/.test(location.pathname),
+      modal: !!document.querySelector('#oa-profile [aria-modal="true"]'),
+      cont: !document.getElementById('ve-continue').hidden,
+    }));
+    ok(held.here && held.modal, 'verify page: with the profile card open the page is NOT replaced after five seconds');
+    ok(held.cont, 'verify page: and Continue stays for when the reader is done with it');
+    eq(errors, [], 'verify page: no uncaught script error while the countdown stands down');
+    await ctx.close();
+  }
+  {
     // a reader with no session at all (the commonest case: the link opened in
     // another browser) still gets the confirmation, and a way to sign in
     const { ctx, page: q, errors } = await signedOutPage(LINK, { selector: '#main' });
@@ -10387,6 +10627,16 @@ for (const w of [320, 360, 390, 430]) {
     eq(geom.clash, 0, 'forum (candidate): no two chips overlap, none reaches up into the excerpt, and none runs into the tally column');
     ok(geom.tallyLeft, 'forum (candidate): the tally column sits to the LEFT of the title, the arrangement the owner asked for');
     ok(geom.footRow, 'forum (candidate): the tags and who asked share the footer, tags left and asker right');
+    /* AND THE CHIPS IN IT ARE REAL LINKS, not spans inside the head <button>:
+       a control inside a button is not markup a browser will make focusable,
+       so they were reachable by pointer and by nothing else. */
+    const chip = await q.evaluate(() => {
+      const c = document.querySelector('#oa-forum-list .oa-forum-qfoot .oa-label-tag');
+      if (!c) return null;
+      return { tag: c.tagName, href: c.getAttribute('href') || '', inButton: !!c.closest('.oa-card-head') };
+    });
+    ok(chip && chip.tag === 'A' && /^forum\.html\?/.test(chip.href) && !chip.inButton,
+      `forum (candidate): a card's tag chip is a link beside the head button, not a span inside it (${JSON.stringify(chip)})`);
     eq(geom.answers, 1, 'forum (candidate): and the answer count is printed once, in the tally');
     eq(geom.replies, 0, 'forum (candidate): the card says answers, never replies');
     eq(geom.comments, 0, 'forum (candidate): and offers no comment on anything, which is the whole model');
@@ -10399,8 +10649,74 @@ for (const w of [320, 360, 390, 430]) {
     eq(list.count, '1 question this season', 'forum (candidate): the count line');
     eq(list.cloud.sort(), ['europe', 'flyouts'], 'forum (candidate): the Popular tags card is drawn from the tally');
     ok(list.ask, 'forum (candidate): Ask a question is offered');
+    /* THE LIST AS A MEMBER SEES IT, with cards on it and the tag cloud beside
+       them. The maintainer's own list is audited further down and holds only
+       the guide, so the card's own surfaces and the chips went unmeasured.
 
-    /* open the seeded thread: hostile body inert, votes up, down, withdrawn */
+       The seen-mark is wound back first so the New badge is actually DRAWN:
+       `since` is stamped when the account joins, so nothing posted before that
+       is ever new, and the badge could not otherwise be measured at all. The
+       store is per account and the next thread opened rewrites it. */
+    await q.evaluate((uid) => localStorage.setItem('oa-forum-seen',
+      JSON.stringify({ uid, since: 0, seen: {} })), CAND.uid);
+    /* out of the room and back, because the list reads the mark when it is
+       DRAWN and pressing the tab it is already on redraws nothing */
+    await q.click('#oa-forum-rooms .oa-forum-tab[data-room="open"]');
+    await q.waitForFunction(() => /room=open/.test(location.search), null, { timeout: 15000 });
+    await q.click('#oa-forum-rooms .oa-forum-tab[data-room="candidates"]');
+    await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    await forumContrast(q, 'the candidate list');
+
+    /* A PAINT THAT LANDS AFTER THE READER HAS MOVED MUST NOT WRITE THE VIEW
+       THEY MOVED TO. The list, a thread and the ask form are three views of
+       one page swapped with pushState, and each paints from a read still in
+       flight when the reader goes on. renderThread ends by showing
+       #oa-forum-compose, which is a SIBLING of the thread rather than a child
+       of it, so a thread read landing after the reader pressed Back drew a
+       whole "Your answer" editor under the list of questions, wired to an
+       empty thread id: pressing Post asked the server to open a question with
+       no title. The list mount's own guard could not see it, because it
+       compared the ROOM and the SEASON and opening a thread changes neither.
+
+       The shim HOLDS the thread's reads for this, which is the only way to be
+       the reader who pressed Back while it was loading; the list's own query
+       is on `.../threads` with no trailing slash, so it is not held and the
+       page really does come back. */
+    await q.evaluate(() => { window.__fb.holdReads = ['/threads/']; });
+    await q.click('#oa-forum-list .oa-card .oa-card-head');
+    await q.evaluate(() => { window.__fb.holdReads = []; history.back(); });
+    await q.waitForFunction(() => {
+      const l = document.getElementById('oa-forum-listview');
+      return l && !l.hidden && l.querySelector('.oa-card');
+    }, null, { timeout: 15000 });
+    const late = await q.evaluate(() => window.__fb.release());
+    ok(late > 0, `forum (candidate): the thread's reads were really held (${late} of them)`);
+    await q.evaluate(() => new Promise((r) => setTimeout(r, 200)));
+    const stray = await q.evaluate(() => {
+      const c = document.getElementById('oa-forum-compose');
+      const w = document.getElementById('oa-forum-watchnew');
+      const t = document.getElementById('oa-forum-thread');
+      return {
+        compose: !!c && !c.hidden,
+        composeText: c ? c.textContent.trim().slice(0, 40) : '',
+        watch: !!w && !w.hidden,
+        thread: !!t && !t.hidden,
+        list: !document.getElementById('oa-forum-listview').hidden,
+      };
+    });
+    ok(stray.list, 'forum (candidate): pressing Back while a thread loads comes back to the list');
+    ok(!stray.compose,
+      `forum (candidate): and the late thread paint draws no answer box over it (${stray.composeText})`);
+    ok(!stray.thread, 'forum (candidate): nor re-opens the thread the reader left');
+    ok(!stray.watch, 'forum (candidate): and no banner from a superseded read is unhidden over it');
+
+    /* open the seeded thread: hostile body inert, votes up, down, withdrawn.
+       The votes count is a DELTA: since the 2026-09-06 merge the page asks
+       for the reader's votes the moment a thread is opened, in parallel with
+       the posts, so the thread the reader left while it was loading (the
+       block above) has already spent one call by design, and the paint of
+       that answer is what the view guard withholds. */
+    const votesBefore = await q.evaluate(() => window.__fb.ops('callable').filter((n) => n === 'forumThreadVotes').length);
     await q.click('#oa-forum-list .oa-card .oa-card-head');
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
     const th = await q.evaluate(() => ({
@@ -10423,7 +10739,7 @@ for (const w of [320, 360, 390, 430]) {
     eq(th.kinds, 0, 'forum (candidate): no post declares a kind and no compose box asks for one (the control was removed, owner 2026-09-05)');
     eq(th.votes, 2, 'forum (candidate): another member\'s post offers like and dislike');
     ok(th.score === '0' && th.updown === '0 / 0', 'forum (candidate): the counts start at nought');
-    eq(th.threadVotes, 1, 'forum (candidate): the caller\'s own votes are asked for once when the thread opens');
+    eq(th.threadVotes - votesBefore, 1, 'forum (candidate): the caller\'s own votes are asked for once when the thread opens');
     ok(th.reply, 'forum (candidate): the reply box is drawn');
 
     await q.click('.oa-forum-post.is-first .oa-forum-v.up');
@@ -10519,7 +10835,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(rep.hash === '#p2' && rep.acceptGone, 'forum (candidate): the page lands on the new post and the acceptance box is gone');
     eq(rep.warm, { n: 1, first: true, keys: ['room', 'warm'] },
       'forum (candidate): the posting function was woken ONCE, when the box took focus, with the room and nothing else, before the answer was sent');
-    eq(rep.votesCalls, 1, 'forum (candidate): landing the answer asked for no second round of votes: the page drew it from the receipt');
+    eq(rep.votesCalls, votesBefore + 1, 'forum (candidate): landing the answer asked for no second round of votes: the page drew it from the receipt');
     ok(rep.boxEmpty, 'forum (candidate): the box is drawn again empty, the quote gone with it');
 
     /* edit the reply: the author's own, at any time (there is no window) */
@@ -10531,6 +10847,26 @@ for (const w of [320, 360, 390, 430]) {
       null, { timeout: 8000 });
     ok(await q.evaluate(() => /edited/.test(document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-who').textContent)),
       'forum (candidate): an edit saves through forumEdit and the post says edited');
+    /* AND SAVING AN EDIT LEAVES THE ANSWER BOX ALONE. The save used to go
+       through go(), which rebuilt the thread and the box below it, so
+       whatever was half written there went the moment an edit elsewhere was
+       saved; every other in-thread action kept it. */
+    await q.fill('#oa-forum-body', 'A draft that must survive the edit above.');
+    await q.click('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="edit"]');
+    await q.waitForSelector('.oa-forum-editing textarea', { timeout: 8000 });
+    await q.fill('.oa-forum-editing textarea', 'Thank you. The teaching load question worked for me as well, twice over.');
+    await q.click('.oa-forum-editing [data-edit="save"]');
+    await q.waitForFunction(() => /twice over/.test((document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-text') || {}).textContent || ''),
+      null, { timeout: 8000 });
+    const keptDraft = await q.evaluate(() => ({
+      draft: document.getElementById('oa-forum-body').value,
+      editors: document.querySelectorAll('.oa-forum-editing').length,
+      focusIn: !!(document.activeElement && document.activeElement.closest && document.activeElement.closest('.oa-forum-post[data-n="2"]')),
+    }));
+    eq(keptDraft.draft, 'A draft that must survive the edit above.', 'forum (candidate): saving an edit leaves what was half written in the answer box');
+    eq(keptDraft.editors, 0, 'forum (candidate): and the editor is closed');
+    ok(keptDraft.focusIn, 'forum (candidate): with focus back on the edited post');
+    await q.fill('#oa-forum-body', '');
 
     /* A LINK POSTS, and the page draws it (owner, 2026-09-05). The guard used
        to refuse a web address; what it still refuses is a way to be contacted
@@ -10598,6 +10934,10 @@ for (const w of [320, 360, 390, 430]) {
     eq(del.acts, [], 'forum (candidate): a deleted post offers no reply, quote, edit or delete');
     ok(del.still, 'forum (candidate): the other replies are untouched');
     eq(del.title, HOSTILE_TITLE, 'forum (candidate): and the thread keeps its title, since the opening post was not the one deleted');
+    /* AND THE THREAD AT ITS RICHEST: a quoted answer, a removed one, the
+       answers band with its sort control, and the bookmark on each post. The
+       guide thread audited further down has one post and none of them. */
+    await forumContrast(q, 'a busy thread');
     /* the seeded question is another handle's, so an ordinary member is
        offered nothing on it: delete is the author's or the maintainer's */
     ok(await q.evaluate(() => !document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]')),
@@ -10634,6 +10974,11 @@ for (const w of [320, 360, 390, 430]) {
        like any other: the room describing itself rather than the site
        recommending it. */
     ok(!suggested.includes('rumour'), 'forum (candidate): the curated half of the picker offers no rumour tag');
+    /* THE ASK FORM, with its suggestion list open. Its lede, its hints and the
+       rows of the tag picker are drawn nowhere else, so none of them had ever
+       been measured; the picker's rows are open right now because a prefix has
+       just been typed into the box. */
+    await forumContrast(q, 'the ask form');
     await q.fill('#oa-forum-tag-in', 'Rumour');
     await q.press('#oa-forum-tag-in', 'Enter');
     const chips = await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag')));
@@ -10754,6 +11099,22 @@ for (const w of [320, 360, 390, 430]) {
     ok(saved.mine && Object.keys(saved.store.items).length === 1,
       'forum (saved): the mark is in this browser, keyed to the account');
     ok(!saved.leaks, 'forum (saved): and carries no address');
+    /* REMOVING IT FROM THE CARD KEEPS THE KEYBOARD. The button pressed goes
+       with its row, so there is nothing to put focus back on; it goes to the
+       thread's own bookmark rather than falling to <body>, where the removal
+       is announced to nobody and the next Tab starts from the top. */
+    await q.focus('#oa-forum-saved .oa-forum-unsave');
+    await q.click('#oa-forum-saved .oa-forum-unsave');
+    await q.waitForFunction(() => document.getElementById('oa-forum-savedcard').hidden, null, { timeout: 8000 });
+    const unsaved = await q.evaluate(() => ({
+      tag: document.activeElement && document.activeElement.tagName,
+      onBookmark: !!(document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('oa-forum-save')),
+      pressed: document.querySelector('.oa-forum-post.is-first [data-act="save"]').getAttribute('aria-pressed'),
+    }));
+    ok(unsaved.onBookmark, 'forum (saved): removing the last saved item puts focus on the post\'s own bookmark, not on <body> (' + unsaved.tag + ')');
+    eq(unsaved.pressed, 'false', 'forum (saved): and the bookmark on the post says it is off');
+    await q.click('.oa-forum-post.is-first [data-act="save"]');
+    await q.waitForSelector('#oa-forum-savedcard:not([hidden])', { timeout: 8000 });
     /* the tag cards are beside every view, so this needs no navigation, and
        the thread stays on screen for the step below */
     const before = await q.evaluate(() => window.__fb.log.filter((e) => e.op === 'set' || e.op === 'update').length);
@@ -10771,6 +11132,17 @@ for (const w of [320, 360, 390, 430]) {
     ok(watched.card && watched.chips === 1, 'forum (watched): and the side card lists it');
     eq(watched.pressed, 'true', 'forum (watched): the bell says it is on');
     eq(watched.wrote, before, 'forum (watched): watching a tag writes NOTHING to the database, which is the whole point of it');
+    /* AND THE BELL KEEPS THE FOCUS ITS OWN REDRAW WOULD DROP: the press
+       rebuilds both cards, so without putting it back focus falls to <body>
+       and the new pressed state is announced to nobody. */
+    await q.evaluate(() => document.querySelector('#oa-forum-tags [data-watch]').focus());
+    await q.click('#oa-forum-tags [data-watch]');
+    await q.waitForTimeout(300);
+    eq(await q.evaluate(() => (document.activeElement.closest && document.activeElement.closest('#oa-forum-tags'))
+      ? 'in the tag card' : document.activeElement.tagName),
+    'in the tag card', 'forum (watched): pressing the bell leaves focus on the bell, not on <body>');
+    await q.click('#oa-forum-tags [data-watch]');
+    await q.waitForTimeout(200);
 
     eq(await q.evaluate(() => JSON.parse(localStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
       'forum (candidate): the join is remembered on this device under the handle, for the next visit');
@@ -10793,6 +11165,53 @@ for (const w of [320, 360, 390, 430]) {
     eq(gone.thread, true, 'forum (candidate): deleting a question nobody answered takes the whole thread');
     ok(!gone.listed.some((t2) => /second-year teaching release/.test(t2)),
       'forum (candidate): and it is off the list, rather than standing there headless');
+    /* AND THE WORDS REALLY GO. Erasing the post's body is not the whole of it
+       while the thread head keeps the title and an `excerpt` that is a copy of
+       that body, and any admitted member may list the hidden rows. The tags
+       come back to the room's tally in the same breath, or Popular tags counts
+       a question nobody can open. */
+    const after = await q.evaluate((t) => {
+      const tid = window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumDelete').pop().data.tid;
+      const th = window.__fb.docs[t + '/' + tid];
+      const tally = Object.values(window.__fb.docs).find((d2) => d2 && d2.counts) || { counts: {} };
+      return { title: th.title, excerpt: th.excerpt, tags: th.tags, counts: tally.counts };
+    }, T);
+    ok(after.title === '' && after.excerpt === '',
+      'forum (candidate): and it keeps no title and no excerpt, so the words really are gone');
+    ok(Array.isArray(after.tags) && after.tags.length > 0,
+      'forum (candidate): while its tags stay on the row, which is what the removal tool reads');
+    ok(after.tags.every((t2) => Number(after.counts[t2] || 0) === 0),
+      `forum (candidate): and the room's tally has them back (${JSON.stringify(after.counts)})`);
+    /* THE ROOM TABS TAKE THE KEYBOARD. A roving tabindex puts the unselected
+       room out of the tab order, so without arrow keys it is reachable by
+       pointer and by nothing else. */
+    await q.evaluate(() => document.querySelector('.oa-forum-tab[aria-selected="true"]').focus());
+    await q.press('.oa-forum-tab[aria-selected="true"]', 'ArrowRight');
+    await q.waitForFunction(() => document.querySelector('.oa-forum-tab[aria-selected="true"]')
+      && document.querySelector('.oa-forum-tab[aria-selected="true"]').getAttribute('data-room') === 'open',
+    null, { timeout: 8000 });
+    ok(true, 'forum (candidate): the arrow keys move between the rooms');
+    eq(await q.evaluate(() => document.activeElement.getAttribute('data-room')), 'open',
+      'forum (candidate): and focus follows the room that opened');
+
+    /* SIGNING OUT FORGETS THE READER. popstate repaints whenever S.me is set,
+       and S.me used to survive a sign-out along with the handle and the room,
+       so Back brought the forum back for whoever is now at the machine. */
+    await q.evaluate(() => window.OAAccounts.signOut());
+    await q.waitForFunction(() => !document.getElementById('oa-needauth').hidden, null, { timeout: 10000 });
+    await q.goBack();
+    await q.waitForTimeout(600);
+    const afterOut = await q.evaluate(() => ({
+      forum: !document.getElementById('oa-forum').hidden,
+      needauth: !document.getElementById('oa-needauth').hidden,
+      handle: (document.getElementById('oa-forum-me') || {}).textContent || '',
+      body: document.body.textContent,
+    }));
+    ok(!afterOut.forum && afterOut.needauth,
+      'forum (signed out): pressing Back does not repaint the forum for whoever is now reading');
+    ok(!/quiet heron 42/.test(afterOut.handle) && !/quiet heron 42/.test(afterOut.body),
+      'forum (signed out): and the previous reader\'s handle is nowhere in the page');
+    await forumContrast(q, 'the list');
     eq(errors, [], 'forum (candidate): no uncaught script error through the whole conversation');
     await ctx.close();
   }
@@ -10913,9 +11332,39 @@ for (const w of [320, 360, 390, 430]) {
       reply: !!document.getElementById('oa-forum-body'),
       note: document.getElementById('oa-forum-compose').textContent,
       rules: /Thirteen rules|rules/i.test(document.querySelector('.oa-forum-text').textContent),
+      del: !!document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]'),
+      delOff: (() => {
+        const b = document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+        return b ? { off: b.disabled, why: b.getAttribute('title') || '' } : null;
+      })(),
     }));
     ok(guide.votes === 0 && !guide.reply && /locked/.test(guide.note), 'forum (maintainer): the locked guide thread draws no vote button and no reply box');
+    /* BUT DELETE IS NOT A NEW POST. forumDelete refuses on an archive and a
+       hidden thread and ALLOWS a locked one, because locking stops new posts
+       and does not make somebody's words un-removable. Drawn under the same
+       readOnly as the reply box, the control was withheld exactly where the
+       function would have allowed it. */
+    ok(guide.del, 'forum (maintainer): and yet Remove IS drawn on it, since locking is not what withholds it');
+    /* …AND IT SAYS NO BEFORE IT IS PRESSED, because this is the ONE thread
+       Remove must never take. The guide's id is stamped on the season head
+       and never cleared, so seedGuide would take its refresh branch for ever
+       after and write the words back into a thread that is still hidden: one
+       press and the room has no guide for the season and no way to post one.
+       forumDelete refuses it too; a page can be got round. */
+    ok(guide.delOff && guide.delOff.off && /guide cannot be removed/i.test(guide.delOff.why),
+      'forum (maintainer): …disabled, with the reason, because the guide is the one thread Remove must not take');
     ok(guide.rules, 'forum (maintainer): its body is the guide text');
+    /* AND THE THREAD'S OWN SURFACES, which the list view never shows: the
+       body, the who-block, the crumbs, the meta bar, the Pinned and Locked
+       badges and the vote column. */
+    await forumContrast(q, 'a thread');
+    /* A SELECTOR THAT MATCHED NOTHING AUDITED NOTHING, and said so nowhere.
+       FORUM_INK is a list, and a list only holds what somebody remembered;
+       one that has drifted off the markup is a check reporting green over a
+       surface it never saw. Accumulated over BOTH views, since several of
+       these are drawn in only one of them. */
+    const unseen = FORUM_INK.filter((s) => !FORUM_INK_SEEN.has(s));
+    eq(unseen, [], 'forum: every surface the contrast audit names was really on screen in one of the two views');
     await q.click('.oa-forum-crumbs a');
     await q.waitForSelector('#oa-forum-askbtn', { timeout: 15000 });
     await q.click('#oa-forum-askbtn');
@@ -10972,6 +11421,51 @@ for (const w of [320, 360, 390, 430]) {
 
     eq(errors, [], 'forum (maintainer): no uncaught script error');
     await ctx.close();
+  }
+
+  /* -- a legacy headless thread with a live answer: the asker cannot close it,
+        the maintainer's close sweeps ---------------------------------------- */
+  {
+    const HEADLESS = [
+      { path: `${T}/seed-t3`, data: { season: FY, room: 'candidates', title: 'A question its asker deleted, answered', tags: ['waiting'],
+        by: 'quiet heron 42', t: OLD, lastAt: OLD, lastBy: 'patient owl 7', n: 2, excerpt: '', score: 0, pinned: false, locked: false, hidden: false } },
+      { path: `${T}/seed-t3/posts/seed-t3-p1`, data: { season: FY, room: 'candidates', tid: 'seed-t3', n: 1, by: 'quiet heron 42',
+        body: '', t: OLD, up: 0, down: 0, quote: null, hidden: true, hiddenBy: 'author' } },
+      { path: `${T}/seed-t3/posts/seed-t3-p2`, data: { season: FY, room: 'candidates', tid: 'seed-t3', n: 2, by: 'patient owl 7',
+        body: 'An answer that must stay reachable by its own author.', t: OLD, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
+    ];
+    const { ctx, page: q, errors } = await signedInPage('forum.html?room=candidates&t=seed-t3',
+      { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...HEADLESS], selector: '#oa-forum' });
+    await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
+    const asker = await q.evaluate(() => {
+      const b = document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+      return { label: b && b.textContent.trim(), off: !!(b && b.disabled), why: (b && b.getAttribute('title')) || '',
+        closed: !!document.querySelector('#oa-forum-compose .oa-note'),
+        answers: document.querySelectorAll('#oa-forum-answers .oa-forum-post').length };
+    });
+    eq(asker.label, 'Close this thread', 'forum (headless): the asker is offered the close');
+    ok(asker.off && /still has answers/.test(asker.why),
+      'forum (headless): ...disabled with the reason, because another member\'s answer still stands under it');
+    ok(asker.closed && asker.answers === 1, 'forum (headless): the thread takes no new answers, and the answer is still there to read');
+    eq(errors, [], 'forum (headless): no uncaught script error');
+    await ctx.close();
+    /* the maintainer, as the block below defines them (that constant is its own) */
+    const MAINTAINER = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
+      emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
+    const m = await signedInPage('forum.html?room=candidates&t=seed-t3',
+      { user: MAINTAINER, docs: [CAND_PROFILE, ...SEEDED, ...HEADLESS], selector: '#oa-forum' });
+    await m.page.waitForSelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]:not([disabled])', { timeout: 15000 });
+    let closeDialog = '';
+    m.page.once('dialog', (d) => { closeDialog = d.message(); d.accept(); });
+    await m.page.click('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+    await m.page.waitForFunction((t) => (window.__fb.docs[t + '/seed-t3'] || {}).hidden === true, T, { timeout: 15000 });
+    ok(/still standing under it/.test(closeDialog) && /removed with it/.test(closeDialog),
+      'forum (headless): the maintainer\'s confirmation names the answer their close sweeps (' + closeDialog.slice(0, 60) + ')');
+    const swept = await m.page.evaluate((t) => window.__fb.docs[t + '/seed-t3/posts/seed-t3-p2'], T);
+    ok(swept && swept.hidden === true && swept.body === '' && swept.hiddenBy === 'admin',
+      'forum (headless): and the answer is erased with the thread, saying the maintainer removed it');
+    eq(m.errors, [], 'forum (headless): no uncaught script error for the maintainer');
+    await m.ctx.close();
   }
 
   /* -- an archived season: read-only ----------------------------------------- */

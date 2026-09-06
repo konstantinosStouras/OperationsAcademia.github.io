@@ -100,6 +100,27 @@ export function redact(email) {
   }).join(', ');
 }
 
+/**
+ * An SMTP failure's message, with any address in it taken out.
+ *
+ * A rejection QUOTES THE RECIPIENT: "550 5.1.1 <someone@example.edu>:
+ * Recipient address rejected". Every mailer here logs `err.message` from its
+ * catch, and those logs are the Actions log of a PUBLIC repository — so the
+ * one line printed when a subscriber's or a poster's address fails is the one
+ * line that publishes it, which is exactly what `redact` exists to stop
+ * everywhere else. The rule is already written down for the verification
+ * callable ("neither is an SMTP error's message text, which quotes the
+ * rejected address in full"); this is it, shared, so every mailer keeps it.
+ *
+ * The message is kept otherwise whole — the code and the reason are what a
+ * person needs — and bounded, because a server may return a wall of text.
+ */
+export function safeError(err) {
+  const msg = String((err && err.message) || err || '').slice(0, 500);
+  return msg.replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/g,
+    (a) => redact(a));
+}
+
 export function shell({ title, bodyHtml, manageUrl, unsubUrl }) {
   const foot = manageUrl
     ? `You are receiving this because you asked Operations Academia to tell you about
@@ -196,12 +217,27 @@ export async function send(tx, msg, { dryRun = false } = {}) {
        the alerts mailer runs as a dry run whenever SMTP is unset — so a
        subscriber's, a poster's or a feedback submitter's address printed
        here in full was world-readable. The same rule the served files are
-       held to: nothing public carries an address. */
+       held to: nothing public carries an address.
+
+       THE `To:` WAS REDACTED AND THE OTHER TWO LINES WERE NOT, which made the
+       redaction decorative. `Reply-To` is the FEEDBACK SUBMITTER's own address
+       — that is what it is for — and it was printed whole. And the BODY is
+       every one of these messages' worst line: the maintainer's announcement
+       carries "Posted by: <name> <address>", a held candidate's e-mail carries
+       their name and affiliation weeks before the reveal puts either on the
+       site, and the poster's carries their own address. On a runner the body
+       is not printed at all; a run on somebody's own machine keeps the preview
+       that makes a dry run worth doing, with the addresses in it redacted
+       anyway. */
+    const onRunner = !!(process.env.GITHUB_ACTIONS || process.env.CI);
     console.log(`\n--- ${dryRun ? 'DRY RUN' : 'NO SMTP'}: would send ---`);
     console.log(`To:      ${redact(full.to)}`);
     console.log(`Subject: ${full.subject}`);
-    if (full.replyTo) console.log(`Reply-To: ${full.replyTo}`);
-    console.log(full.text.slice(0, 800));
+    if (full.replyTo) console.log(`Reply-To: ${redact(full.replyTo)}`);
+    console.log(onRunner
+      ? `(body withheld: ${full.text.length} characters — a public log is not the place)`
+      : full.text.slice(0, 800).replace(
+        /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/g, (a) => redact(a)));
     console.log('--- end ---\n');
     return false;
   }
@@ -257,6 +293,31 @@ export async function firebaseAdmin() {
   const app = admin.default || admin;
   if (!app.apps.length) app.initializeApp({ credential: app.credential.cert(creds) });
   return { db: app.firestore(), auth: app.auth() };
+}
+
+/** THE MAINTAINER'S OWN UIDS, resolved from Auth by the addresses isAdmin()
+    is keyed on. The builds need them for one thing: an upload's Storage path
+    is `uploads/{the UPLOADER's uid}/...`, and when the maintainer attaches an
+    advert or a CV while correcting somebody else's submission, that uid is
+    theirs and not the document's. Checked against the document's owner alone,
+    the file was cleared with a warning in a log nobody reads and the
+    attachment silently never published.
+
+    ANSWERS AN EMPTY SET RATHER THAN THROWING. Without the credential, or with
+    an address Auth has never seen, the builds are left exactly as they were
+    before this existed: a path that is not the document owner's is refused.
+    Nothing here may be a reason a build stops publishing. */
+export async function adminUids(emails) {
+  const fb = await firebaseAdmin();
+  if (!fb || !fb.auth) return new Set();
+  const out = new Set();
+  for (const email of emails || []) {
+    try {
+      const rec = await fb.auth.getUserByEmail(String(email));
+      if (rec && rec.uid) out.add(rec.uid);
+    } catch { /* no such account: the set is simply smaller */ }
+  }
+  return out;
 }
 
 /** Firestore alone, for the mailers that never touch Auth. */

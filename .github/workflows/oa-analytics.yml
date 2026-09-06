@@ -83,6 +83,17 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: node _scraper/build-candidate-stats.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 
+      # THIS JOB WRITES data/, so it runs the selftest in the publishing role
+      # before it commits and again on anything it rebuilds — the rule every
+      # other data writer here has kept since the day a red guard stopped the
+      # site publishing. It was the one writer without it: the selftest
+      # asserts over data/analytics.json (its shape, its paths, and that no
+      # file under data/ carries an address), so a bad figure was committed
+      # and turned the checks red on MASTER instead of failing this run.
+      - name: Re-check what is about to be committed
+        if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
+        run: node _scraper/selftest.mjs --publishing
+
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
         run: |
@@ -106,6 +117,12 @@ jobs:
             if [ -z "$(git status --porcelain data/analytics.json data/analytics-meta.json)" ]; then
               echo "the other writer published it all."
               exit 0
+            fi
+            # the rebuilt dataset goes through the SAME gate the first pass
+            # passed, or a retry commits exactly what the gate exists to refuse
+            if ! node _scraper/selftest.mjs --publishing; then
+              echo "::error::the rebuilt data/ does not pass the publishing gate - pushing nothing"
+              exit 1
             fi
             git add data/analytics.json data/analytics-meta.json
             git commit -m 'data: refresh the analytics figures'

@@ -44,9 +44,12 @@
    --------------------------------------------------------------------------- */
 
 import {
-  text, url, longDate, OPEN_ENDED_RX, healReviewDate, canonColumns,
-} from './jobs-model.mjs';
-import { isHigherEdJobsUrl } from './higheredjobs.mjs';
+  text, url, longDate, OPEN_ENDED_RX, healReviewDate, canonColumns, withMarketYears,
+  stripEmails } from './jobs-model.mjs';
+/* believableDeadline is ONE definition, shared with the pass it was written
+   for: the same guard on both roads, or the two disagree about what an
+   advertisement could have meant. */
+import { isHigherEdJobsUrl, believableDeadline } from './higheredjobs.mjs';
 import { universityForSchool, schoolForUnit, SCHOOLS } from './vocab.mjs';
 
 /* fold(), for "is this stated name the organisation repeated?" — the same
@@ -102,6 +105,24 @@ const TRACKING_PARAM_RX = /^(utm_[a-z]+|linksource|mc_cid|mc_eid|fbclid|gclid)$/
     matching none of them is parsed normally. */
 const GONE_RX =
   /(no longer (?:available|active|accepting|being accepted|posted)|has (?:expired|been (?:removed|filled|closed|cancell?ed))|this (?:job|position|posting|vacancy|requisition) (?:is (?:closed|no longer)|has been)|position (?:has been )?filled|job (?:posting )?not found)/i;
+
+/**
+ * "...and will continue until the position has been filled" is the OPEN-ENDED
+ * search phrase, and it is on a LIVE advertisement — it is the very sentence
+ * the two-deadlines rule reads a first-review date out of. GONE_RX matched it
+ * twice over ("has been filled", "position has been filled"), so any ad
+ * carrying it and no JobPosting block parsed as `gone` — and `gone` FREEZES an
+ * advertisement in `needFetch`, which means the closing date is never read
+ * again and the posting stays "Until filled." for ever.
+ *
+ * Struck out of the text before the closure test rather than narrowed into
+ * GONE_RX itself, so the phrases stay readable one per line and a page that
+ * really says "The position has been filled." still answers gone. Its sibling
+ * in higheredjobs.mjs never had the hole: every branch there demands the word
+ * "this" in front.
+ */
+const OPEN_ENDED_CLAUSE_RX =
+  /\b(?:until|till)\s+(?:such\s+time\s+as\s+)?(?:the\s+)?(?:position|positions|posting|vacancy|vacancies|role|roles|job|opening|openings)\s+(?:is|are|has\s+been|have\s+been)\s+filled/gi;
 
 /* -------------------------------------------------------------------- urls */
 
@@ -530,7 +551,7 @@ export function parseAdvert(html) {
      believed, like higheredjobs' GONE_RX, and only when no JobPosting block
      contradicts it (a live posting whose description QUOTES such a phrase
      stays live). */
-  if (GONE_RX.test(body) && !ld) {
+  if (GONE_RX.test(body.replace(OPEN_ENDED_CLAUSE_RX, ' ')) && !ld) {
     out.gone = true;
     return out;
   }
@@ -562,7 +583,18 @@ export function parseAdvert(html) {
   out.applyByProse = prose;
   out.listedUntil = listingEndFrom(ld, fields);
 
-  out.ok = !!(out.title || out.institution || out.applyByDate);
+  /* READ means the page stated a FACT ABOUT THE JOB. A title alone does not:
+     every page has an <h1> or an og:title, so a bot wall headed "Careers" and
+     a JavaScript shell headed with the tenant's name both parsed `ok`, were
+     cached as read with no closing date, and were then left alone for the
+     whole TTL. `unreadable` is the honest answer — it changes nothing
+     (applyAdverts ignores it, and `keep` above now holds what was known), and
+     the ad is re-read on the next pass. The title still counts BESIDE a fact,
+     which is what keeps a sparse but genuinely parsed ad readable. */
+  const facts = !!(out.institution || out.applyByDate || out.applyByProse
+    || out.posted || out.location || out.school || out.department
+    || out.employmentType || out.listedUntil);
+  out.ok = facts;
   return out;
 }
 
@@ -585,7 +617,24 @@ export function emptyCache() {
  */
 export function cacheEntry(parsed, { adUrl = '', checkedAt = '', previous = null, via = 'page' } = {}) {
   const prev = previous || {};
-  const keep = (now, before) => (parsed.gone && !now) ? (before || '') : (now || '');
+  /* A page that could not be READ carries nothing, so it must not un-say what
+     an earlier read of the same advertisement learnt: the run would blank the
+     closing date, `sync-jobmarket-sheet.mjs` would stop re-applying it, and the
+     posting would silently return to "Until filled." — the one statement now
+     known to be wrong. This is the file's own "an ad that cannot be read
+     changes nothing", which held for a failed FETCH (the caller leaves the
+     entry alone) and not for a page fetched and not understood. A readable
+     page that simply no longer states a field still clears it: there the page
+     is the authority. */
+  /* NOTHING UNDER data/ MAY CARRY AN E-MAIL, and this cache is served like
+     everything else there: CI greps the whole directory, and one address in a
+     captured sentence ("apply to hr@example.edu by 15 October 2026") turns
+     the checks red on master with the writer having already committed it.
+     Stripped where the text is stored, the stripRowEmails rule applied to the
+     one other place free prose reaches a served file; the URL is left alone,
+     exactly as there. */
+  const keep = (now, before) => stripEmails(
+    ((parsed.gone || !parsed.ok) && !now) ? (before || '') : (now || ''));
 
   return {
     url: adUrl,
@@ -665,9 +714,14 @@ export function applyAdverts(rows, cache, { today = '' } = {}) {
   const out = (rows || []).map((row) => {
     const key = advertKeyOf(row && row.adUrl);
     const ad = key ? ads[key] : null;
-    /* 'gone' counts alongside 'ok': the entry then carries what the page said
-       while it was up (see cacheEntry). 'unreadable' carries nothing. */
-    if (!ad || (ad.status !== 'ok' && ad.status !== 'gone') || !ad.applyByDate) return row;
+    /* THE DATE IS THE TEST, NOT THE STATUS. 'gone' carries what the page said
+       while it was up, and since cacheEntry's `keep` an 'unreadable' entry
+       carries what an EARLIER read learnt: refusing it by status threw that
+       date away one function later than the keep had saved it, and the
+       morning rebuild of jobmarket.json (deadline cell empty) then put the
+       posting back to "Until filled." through this very apply. An entry with
+       no date, whatever its status, changes nothing. */
+    if (!ad || !ad.applyByDate) return row;
 
     if (row.applyByDate) {
       if (row.applyByDate !== ad.applyByDate) {
@@ -676,12 +730,33 @@ export function applyAdverts(rows, cache, { today = '' } = {}) {
       return row;
     }
 
+    /* AND IT HAS TO BE A DATE THE ADVERTISEMENT COULD HAVE MEANT — the same
+       guard the HigherEdJobs apply uses, from the same function, because a
+       date mis-read into the past is published, rolls the posting out of the
+       market it is recruiting for, and is then frozen by `needFetch` for ever
+       ("the search is over and the page will not change again"). Refused, the
+       posting stays open-ended, which is what it already said. */
+    if (!believableDeadline(row.posted, ad.applyByDate)) {
+      conflicts.push({
+        id: row.id, key, sheet: row.applyByDate || '(none)', ad: ad.applyByDate,
+        implausible: true, posted: row.posted || '',
+      });
+      return row;
+    }
+
     /* …and the SUGGESTED date is re-settled against the date that just
        arrived (healReviewDate, exactly as the HigherEdJobs apply does): a
        first-review date on or after the ad's closing date is the closing
        date said twice, or a contradiction. */
-    const next = healReviewDate(
-      { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate });
+    /* AND THE SPAN IS RE-DERIVED, because `years` is derived FROM the two
+       apply-by dates and this is where one of them arrives. The served file
+       this writes is held by the publishing gate to stating the seasons each
+       posting is listed under, so a closing date that reaches into the next
+       season and leaves the stored span behind turns the whole suite red and
+       stops every data writer committing. See patchDeadlines in
+       jobs-model.mjs, which carries the same correction for data/jobs.json. */
+    const next = withMarketYears(healReviewDate(
+      { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate }));
     changed.push({
       id: row.id, key, from: row.applyBy, to: next.applyBy,
       past: !!(today && ad.applyByDate < today),

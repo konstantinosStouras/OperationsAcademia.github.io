@@ -156,6 +156,8 @@
 
   /* ------------------------------------------------------------- the copy */
 
+  var TAG_HINT = 'Up to five. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.';
+
   var REASONS = {
     auth: 'Sign in first.',
     room: 'That room does not exist.',
@@ -171,8 +173,11 @@
     asker: 'Only the member who asked the question can tick the answer.',
     answer: 'Only an answer can be ticked, and only while its words are still there.',
     answered: 'This question has answers, so it cannot be deleted. It can go once every answer has been deleted.',
+    guidethread: 'The forum guide cannot be removed. It is the thread every new member reads first, and once it went there would be no way to post it again this season.',
+    big: 'This thread carries too many answers to remove from here. The removal tool in the repository takes one off with no such limit.',
     own: 'You cannot vote on your own post.',
     busy: 'The forum is busy right now. Please try again in a moment.',
+    season: 'The forum is not open for the new season yet. Only the maintainer can open it.',
     bounds: 'Too long, or empty. A title is at most ' + M.BOUNDS.title + ' characters and a post at most ' + M.BOUNDS.body + '.',
     tags: 'One to five tags, each 2 to 24 characters of letters, digits and hyphens.',
     quote: 'A quote must be a passage of the post as it stands now, at most ' + M.BOUNDS.quote + ' characters.',
@@ -238,7 +243,9 @@
     sort: 'score',                  // how the answers band is ordered
     thread: null,                   // the thread on screen, and its posts
     posts: [],
-    readOnly: false,
+    painted: false,                 // a view has been drawn at least once
+    readOnly: false,                // nothing new may be POSTED to it
+    frozen: false,                  // nothing at all may be written to it
     live: 0,                        // answers still standing in it
     list: null
   };
@@ -293,12 +300,41 @@
      modified click (a new tab) is left to the browser. */
   document.addEventListener('click', function (e) {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    /* "Read the forum guide" points at a <details>, and a fragment link
+       scrolls to one without opening it: for every member who has already
+       accepted the guide the panel is collapsed, so the link jumped to a
+       shut box and read as a control that does nothing. */
+    var g = e.target && e.target.closest ? e.target.closest('a[href="#oa-forum-guide"]') : null;
+    if (g) {
+      var panel = $('oa-forum-guide');
+      if (panel) {
+        e.preventDefault();
+        panel.open = true;
+        panel.scrollIntoView({ block: 'center' });
+        var sum = panel.querySelector('summary');
+        if (sum) { sum.setAttribute('tabindex', '-1'); sum.focus({ preventScroll: true }); }
+        return;
+      }
+    }
     var a = e.target && e.target.closest ? e.target.closest('a[href^="forum.html?"]') : null;
     if (!a || !S.me) return;
     var app = $('oa-forum');
     if (!app || !app.contains(a)) return;
     e.preventDefault();
     var to = a.getAttribute('href');
+    /* A POST'S OWN #n IS A PLACE ON THIS PAGE, not another view of it.
+       Following it through draw() rebuilt the thread and threw away whatever
+       was half written in the answer box below, which is the very thing
+       paintAnswers is careful not to do. Same room, same season, same
+       thread: move the address, scroll, and leave the page as it is. */
+    var here = href({ room: S.room, season: S.season, t: S.tid });
+    if (S.tid && to.split('#')[0] === here.split('#')[0]) {
+      try { history.pushState(null, '', to); } catch (err) { location.href = to; return; }
+      var frag = to.indexOf('#') === -1 ? '' : to.slice(to.indexOf('#') + 1);
+      var at = frag ? document.getElementById(frag) : null;
+      if (at) at.scrollIntoView();
+      return;
+    }
     try { history.pushState(null, '', to); } catch (err) { location.href = to; return; }
     readState();
     draw();
@@ -337,12 +373,20 @@
     } catch (e) { /* private mode */ }
     return '';
   }
+  /** THE FRESH MARK IS PERSISTED WHERE IT IS MINTED, or `since` is "now" on
+      every read and nothing is ever newer than it. Only opening a thread
+      wrote this store, so until a reader had done that, unreadOf compared
+      each thread's lastAt against the current instant: no New badge, and no
+      "questions carrying a tag you watch have arrived" line, for the whole
+      of a reader's first visit. */
   function readSeen(uid) {
     try {
       var v = JSON.parse(localStorage.getItem(SEEN_KEY) || 'null');
       if (v && v.uid === uid && v.seen) return v;
     } catch (e) { /* private mode */ }
-    return { uid: uid, since: Date.now(), seen: {} };
+    var fresh = { uid: uid, since: Date.now(), seen: {} };
+    writeSeen(fresh);
+    return fresh;
   }
   function writeSeen(v) {
     try { localStorage.setItem(SEEN_KEY, JSON.stringify(v)); } catch (e) { /* ignore */ }
@@ -473,6 +517,38 @@
 
   /* ------------------------------------------------------------- the gate */
 
+  /** SIGNING OUT FORGETS WHOEVER WAS READING, and hiding the sections is not
+      that. `popstate` and the page's own link handler both repaint whenever
+      `S.me` is set, and S.me survived a sign-out along with the handle, the
+      marks, the thread on screen and the room: press Back after signing out
+      and the forum came back, under the previous reader's handle, for
+      whoever is now sitting there. The two browser stores are cleared by
+      OAAccounts.signOut(); this is the same clearing for what the page is
+      holding in memory and in the markup it has already drawn. */
+  function forgetReader() {
+    S.me = null;
+    S.saved = { uid: '', items: {}, tags: [] };
+    S.votes = {};
+    S.tally = {};
+    S.rows = [];
+    S.thread = null;
+    S.posts = [];
+    S.tid = '';
+    S.list = null;
+    ['oa-forum-thread', 'oa-forum-compose', 'oa-forum-list', 'oa-forum-tags',
+     'oa-forum-watch', 'oa-forum-saved', 'oa-forum-admin', 'oa-forum-me',
+     'oa-forum-rooms', 'oa-forum-roomcard'].forEach(function (id) {
+      var n = $(id);
+      if (n) n.innerHTML = '';
+    });
+    var c = $('oa-forum-listcount');
+    if (c) c.textContent = '';
+  }
+
+  /** set while a room change came from the keyboard, so the redrawn tab row
+      can put focus back where the reader left it */
+  var keyboardTab = false;
+
   function hideAll() {
     ['oa-offline', 'oa-needauth', 'oa-forum-verify', 'oa-forum-loading', 'oa-forum-error', 'oa-forum']
       .forEach(function (id) { show($(id), false); });
@@ -526,9 +602,12 @@
          SDK could not renew, an account removed. The accounts module forgets
          its own hint on this path, and the join memory goes with it, so the
          device keeps the handle beside the account exactly as long as the
-         site itself remembers the account and not a moment longer. */
+         site itself remembers the account and not a moment longer.
+         forgetReader() clears what the page holds in memory and in the
+         markup it has drawn, or Back after a sign-out repainted the forum
+         under the previous reader's handle. */
       if (A.pendingUser()) { hideAll(); show($('oa-forum-verify'), true); started = null; S.me = null; forgetMe(); return; }
-      if (!u) { hideAll(); show($('oa-needauth'), true); started = null; S.me = null; forgetMe(); return; }
+      if (!u) { forgetReader(); forgetMe(); hideAll(); show($('oa-needauth'), true); started = null; return; }
       if (started === u.uid) return;
       started = u.uid;
       var remembered = S.me && S.me.uid === u.uid ? S.me : readMe(u.uid);
@@ -625,6 +704,27 @@
     S.quote = null;
   }
 
+  /** WHICH VIEW A PAINT IS FOR: the ONE definition, and the guard every
+      async completion on this page is held to.
+
+      The list, a thread and the ask form are three views of one page swapped
+      with pushState, and each of them paints from a read that is still in
+      flight when the reader moves. The list mount already had a guard and it
+      named the wrong invariant: ROOM and SEASON, which do not change when a
+      reader opens a thread in the room they are already in. So a list read
+      that landed after the reader had opened a thread went on to repaint the
+      watched-tags banner over it (hideViews had just hidden it), and a THREAD
+      read that landed after they had gone back showed the answer box, a
+      whole "Your answer" editor under the list of questions, wired to a
+      thread id that was now empty, so pressing Post asked the server to open
+      a new question with no title and got "Too long, or empty" back.
+
+      The address is the view, so the key is the address: room, season, the
+      thread and whether the ask form is open. */
+  function viewKey() {
+    return S.room + '|' + S.season + '|' + (S.tid || '') + '|' + (S.ask ? '1' : '');
+  }
+
   function draw() {
     hideAll();
     hideViews();
@@ -639,6 +739,14 @@
     if (S.tid) drawThread();
     else if (S.ask && !S.archive) drawAsk();
     else drawList();
+    /* THE TAB THE READER PRESSED KEEPS THE FOCUS, and it is claimed here
+       rather than in drawTabs because the view drawn between the two takes
+       focus of its own: whichever ran last would win, and it must be this. */
+    if (keyboardTab) {
+      keyboardTab = false;
+      var back = document.querySelector('#oa-forum-rooms .oa-forum-tab[aria-selected="true"]');
+      if (back) back.focus({ preventScroll: true });
+    }
     loadSide();
     window.scrollTo(0, 0);
   }
@@ -659,6 +767,35 @@
       }, [el('span', { class: 'oa-forum-dot', 'aria-hidden': 'true' }), pair[1]]);
       host.appendChild(b);
     });
+
+    /* A ROVING TABINDEX NEEDS ARROW KEYS, or the tab that is not selected is
+       reachable by pointer and by nothing else: tabindex="-1" takes it out of
+       the tab order and there was no handler to put focus on it.
+
+       ONCE PER HOST, not once per draw. drawTabs runs on every render and
+       `innerHTML = ''` clears the buttons but not a listener on the row
+       itself, so binding here without the flag stacks one handler per draw
+       and a single ArrowRight then walks the selection as many times. */
+    if (host.getAttribute('data-keys') !== 'on') {
+      host.setAttribute('data-keys', 'on');
+      host.addEventListener('keydown', function (e) {
+        var keys = { ArrowLeft: -1, ArrowRight: 1, Home: 'first', End: 'last' };
+        if (!(e.key in keys)) return;
+        var all = [].slice.call(host.querySelectorAll('.oa-forum-tab'));
+        if (all.length < 2) return;
+        var at = all.indexOf(document.activeElement);
+        if (at === -1) return;
+        e.preventDefault();
+        var to = keys[e.key] === 'first' ? 0
+          : keys[e.key] === 'last' ? all.length - 1
+          : (at + keys[e.key] + all.length) % all.length;
+        /* the press redraws this row, so the node just focused is discarded;
+           drawTabs puts focus back on whichever tab is then selected */
+        keyboardTab = true;
+        all[to].focus();
+        all[to].click();
+      });
+    }
     if (note) {
       if (!rooms.candidates) {
         note.innerHTML = 'The Candidates’ room opens to accounts holding a ' +
@@ -792,9 +929,32 @@
       b.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
+        /* the press redraws both cards, so this very button is discarded;
+           without this, focus falls to <body> and the new pressed state is
+           announced to nobody */
+        refocus = { host: host.id, key: b.getAttribute('data-watch') };
         toggleWatch(b.getAttribute('data-watch'));
       });
     });
+    keepFocus(host, '[data-watch="%"]');
+  }
+
+  /** Set while a press redrew the panel that held the button, so the panel can
+      put focus back on the control the reader pressed rather than dropping it
+      to <body> with the new state unannounced. */
+  var refocus = null;
+
+  /** Put focus back on the control the reader pressed, in the panel they
+      pressed it in: the same tag can have a bell in both cards, and landing
+      in the other one is its own small lie about where the reader is. */
+  function keepFocus(host, sel) {
+    if (!refocus || !host || host.id !== refocus.host) return;
+    var back = host.querySelector(sel.replace('%', cssEscape(refocus.key)));
+    refocus = null;
+    if (back) back.focus();
+  }
+  function cssEscape(v) {
+    return String(v).replace(/["\\]/g, '\\$&');
   }
 
   function drawTags() {
@@ -849,7 +1009,10 @@
     }).filter(function (v) { return v.room === S.room && Number(v.season) === Number(S.season) && v.tid; })
       .sort(function (a, b) { return b.at - a.at; })
       .slice(0, 8);
-    if (!items.length) { show(card, false); return; }
+    /* EMPTIED, not merely hidden: the rows stay in a hidden card otherwise,
+       and the remove handler below then finds the button it just pressed
+       still there and puts focus back on a control nobody can see */
+    if (!items.length) { host.innerHTML = ''; show(card, false); return; }
     host.innerHTML = items.map(function (v) {
       var to = href({ room: v.room, season: v.season, t: v.tid, hash: v.pid ? 'p' + v.n : '' });
       return '<div class="oa-forum-savedrow">' +
@@ -862,10 +1025,25 @@
     Array.prototype.forEach.call(host.querySelectorAll('[data-unsave]'), function (b) {
       b.addEventListener('click', function (e) {
         e.preventDefault();
+        /* THE BUTTON PRESSED GOES WITH ITS ROW, so keepFocus's put-it-back has
+           nothing to put it back on: focus goes to the row that takes its
+           place (the last one left, at the end), and when the card itself
+           goes, to the post's own bookmark where the thread is open, else to
+           the page. Never to <body>, where the removal is announced to nobody
+           and the next Tab starts from the top of the page. */
+        var at = Array.prototype.indexOf.call(host.querySelectorAll('[data-unsave]'), b);
         delete S.saved.items[b.getAttribute('data-unsave')];
         writeSaved();
         drawSaved();
         if (S.tid) paintSaveButtons();
+        var left = host.querySelectorAll('[data-unsave]');
+        var next = left[Math.min(at, left.length - 1)];
+        if (!next && S.tid) next = document.querySelector('#oa-forum-thread .oa-forum-save');
+        if (!next) {
+          next = $('main');
+          if (next) next.setAttribute('tabindex', '-1');
+        }
+        if (next) next.focus({ preventScroll: true });
       });
     });
     show(card, true);
@@ -877,9 +1055,17 @@
     Array.prototype.forEach.call(document.querySelectorAll('#oa-forum-thread [data-act="save"]'), function (b) {
       var li = b.closest ? b.closest('.oa-forum-post') : null;
       if (!li) return;
-      var on = isSaved(S.tid, li.getAttribute('data-n') === '1' ? '' : li.getAttribute('data-pid'));
+      var first = li.getAttribute('data-n') === '1';
+      var what = first ? 'question' : 'answer';
+      var on = isSaved(S.tid, first ? '' : li.getAttribute('data-pid'));
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      b.title = on ? 'Saved in this browser. Press to remove it.' : 'Save this in this browser';
+      b.title = on ? 'Saved in this browser. Press to remove it.' : 'Save this ' + what + ' in this browser';
+      /* THE ACCESSIBLE NAME MOVES WITH THE STATE, or a reader who removes a
+         mark from the Saved card is still told the button removes it. It is
+         the name postHTML draws, said the same way. */
+      b.setAttribute('aria-label', on
+        ? 'Remove this ' + what + ' from your saved list'
+        : 'Save this ' + what);
     });
   }
 
@@ -930,6 +1116,25 @@
   function readThreads() {
     return db().then(function (d) {
       return threadsCol(d, S.season, S.room).orderBy('lastAt', 'desc').limit(200).get();
+    }).catch(function (err) {
+      /* A ROOM THE CACHE PROMISED AND THE RULES REFUSED. The rules re-read
+         the membership marker on every request and only forumJoin writes it;
+         a profile taken down and put back has none until the function is
+         asked again, and join() trusts a cached "yes" for the tab's life.
+         So a refused read while the cache says yes is the one signal that the
+         answer has changed: forget it, ask once, and read again. Any other
+         failure, or a second refusal, is reported as it was. */
+      var code = String((err && err.code) || '');
+      if (!/permission-denied/.test(code) || !S.me || !S.me.rooms || !S.me.rooms[S.room] || S.rejoined) throw err;
+      S.rejoined = true;
+      forgetMe();
+      return join({ uid: S.me.uid }).then(function (me) {
+        writeMe(me);
+        S.me = me;
+        return db();
+      }).then(function (d) {
+        return threadsCol(d, S.season, S.room).orderBy('lastAt', 'desc').limit(200).get();
+      });
     }).then(function (snap) {
       var rows = [];
       snap.forEach(function (doc) {
@@ -983,6 +1188,17 @@
     show($('oa-forum-listview'), true);
     var title = $('oa-forum-listtitle');
     if (title) title.textContent = S.room === 'candidates' ? 'Questions from candidates' : 'Questions in the Open forum';
+    /* THE VIEW TAKES FOCUS, as the thread and the ask form already do. These
+       are three views of one page swapped with pushState, so a reader coming
+       back from a thread with the keyboard was returned to a page whose focus
+       was still wherever the thread had left it, or on <body>. Never on the
+       first paint, where the reader has not moved yet and stealing focus
+       would scroll the page out from under them. */
+    if (title && S.painted && !keyboardTab) {
+      title.setAttribute('tabindex', '-1');
+      title.focus({ preventScroll: true });
+    }
+    S.painted = true;
     /* The Ask button lives in the list HEAD, not in the engine's action bar:
        the bar is hidden with an empty dataset (v3's .oa-data-empty rule), and
        an empty room is exactly where the first question has to come from. */
@@ -1006,6 +1222,19 @@
        has left keeps its rows to itself. */
     var mine = ++listSeq;
 
+    /* WHICH VIEW THIS MOUNT IS FOR. Switching rooms mounts the engine again
+       while the previous mount's read is still in flight, and its prepare()
+       then wrote the OLD room's count and rows over the new room's. Ordering,
+       not a race worth locking: the superseded mount just stops writing the
+       shared state.
+
+       It used to compare the ROOM and the SEASON, which is right for that
+       case and blind to the commoner one: opening a thread changes neither,
+       so a read landing a moment later still repainted the watched-tags
+       banner hideViews had just put away, on top of the open thread. The
+       whole address is the invariant. */
+    var forView = viewKey();
+
     S.list = OAList.mount({
       mount: '#oa-forum-list',
       source: readThreads,
@@ -1016,7 +1245,7 @@
           if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
           return (b.lastAt || 0) - (a.lastAt || 0);
         });
-        if (mine !== listSeq) return rows;
+        if (mine !== listSeq || forView !== viewKey()) return rows;
         var count = $('oa-forum-listcount');
         if (count) count.textContent = plural(rows.length, 'question', 'questions') + ' this season';
         S.rows = rows;
@@ -1099,16 +1328,22 @@
           if (r.lastAt) sub.appendChild(el('span', { class: 'oa-forum-when', text: 'active ' + ago(r.lastAt) }));
           foot.appendChild(sub);
         }
-        if (head) head.appendChild(foot);
-        Array.prototype.forEach.call(li.querySelectorAll('.oa-label-tag'), function (b) {
+        /* OUTSIDE THE HEAD, WHICH IS A BUTTON. The engine draws the card's
+           head as a <button>, and a control inside a button is not markup a
+           browser will make focusable: the tag chips carried role="link" and
+           a click handler and were reachable by pointer and by nothing else.
+           As a sibling of the head they can be real anchors, which the
+           keyboard, the middle button and "open in a new tab" all understand,
+           and which the page's own link handler already follows in place. */
+        if (head) head.insertAdjacentElement('afterend', foot);
+        Array.prototype.forEach.call(foot.querySelectorAll('.oa-label-tag'), function (b) {
           var tag = b.textContent;
-          b.setAttribute('data-tag', tag);
-          b.setAttribute('role', 'link');
-          b.title = 'Questions tagged ' + tag;
-          b.addEventListener('click', function (e) {
-            e.stopPropagation();
-            go({ room: S.room, season: S.season, tags: tag });
+          var a = el('a', {
+            class: b.className, 'data-tag': tag, text: tag,
+            href: href({ room: S.room, season: S.season, tags: tag }),
+            title: 'Questions tagged ' + tag
           });
+          b.parentNode.replaceChild(a, b);
         });
       },
       strings: {
@@ -1163,6 +1398,11 @@
     if (!host) return;
     show(host, true);
     var tid = S.tid;
+    /* THE VIEW THIS PAINT IS FOR, captured before any read: `S.tid` alone is
+       the thread, and viewKey() is the whole address (see viewKey), so a
+       completion landing after the reader went back to the list, or on to
+       the ask form, writes nothing over the view they moved to */
+    var forView = viewKey();
     var known = rowOf(tid);
     /* the heading from the list's row where there is one, so pressing a card
        moves the page at once; the posts follow */
@@ -1177,13 +1417,13 @@
        the list already says is locked, where no button is drawn. */
     if (!S.archive && !(known && known.locked)) {
       call('forumThreadVotes', { room: S.room, tid: tid }).then(function (r) {
-        if (S.tid !== tid) return;
+        if (S.tid !== tid || forView !== viewKey()) return;
         S.votes = (r && r.votes) || {};
         if (painted) paintVotes();
       }).catch(function () { /* the buttons simply show no pressed state */ });
     }
     readThread(tid).then(function (r) {
-      if (S.tid !== tid || host.hidden) return;   // the reader has moved on
+      if (S.tid !== tid || host.hidden || forView !== viewKey()) return;   // the reader has moved on
       markSeen(tid, Number(r.thread.n) || r.posts.length);
       renderThread(host, r.thread, r.posts);
       painted = true;
@@ -1195,7 +1435,7 @@
       var h1 = $('oa-forum-title');
       if (h1 && !location.hash) { h1.setAttribute('tabindex', '-1'); h1.focus(); }
     }).catch(function (err) {
-      if (S.tid !== tid) return;
+      if (S.tid !== tid || forView !== viewKey()) return;
       host.innerHTML = '<div class="oa-note is-warn"><p><strong>The thread could not be loaded.</strong> ' +
         esc(friendly(err)) + '</p><p><a href="' + esc(href({ room: S.room, season: S.season })) + '">Back to the questions</a></p></div>';
     });
@@ -1306,15 +1546,36 @@
      nobody can crawl cannot be used to pass rank. Trailing sentence
      punctuation is not part of the address; a closing bracket only counts as
      punctuation when the address does not open one of its own. */
-  var LINK_RX = /(^|[\s(])((?:https?:\/\/|www\.)[^\s<]+)/g;
+  /* The lead admits the two ENTITIES esc() has already made of a quote and an
+     apostrophe: a URL between quotation marks ("see https://x.org/y") was
+     preceded by a `;` by the time this ran and so was never linked at all.
+     Case-insensitive because a phone capitalises the first letter of a
+     sentence, and `Www.example.org` is the same address. */
+  var LINK_RX = /(^|[\s(]|&quot;|&#39;)((?:https?:\/\/|www\.)[^\s<]+)/gi;
+  var TRAIL_ENTITIES = ['&quot;', '&#39;', '&gt;', '&amp;'];
 
   function linkify(escaped) {
     return escaped.replace(LINK_RX, function (all, lead, raw) {
       var url = raw;
       var trail = '';
       while (url) {
+        /* an entity the escaper made of the punctuation AFTER the address:
+           the closing quotation mark of "see https://x.org/y" is five
+           characters by now, and taking one at a time would leave `&quot` */
+        var ent = '';
+        for (var ei = 0; ei < TRAIL_ENTITIES.length; ei++) {
+          var e2 = TRAIL_ENTITIES[ei];
+          if (url.length > e2.length && url.slice(-e2.length) === e2) { ent = e2; break; }
+        }
+        if (ent) { trail = ent + trail; url = url.slice(0, -ent.length); continue; }
         var last = url.charAt(url.length - 1);
-        if (last === ')' && url.split('(').length > url.split(')').length) break;
+        /* A CLOSING BRACKET THE ADDRESS OPENED IS PART OF IT. Wikipedia's
+           own titles end that way, and the test read the wrong way round:
+           with one of each it stripped the bracket and linked
+           `..._(discipline`, which 404s. Keep it while the address closes no
+           more brackets than it opens; strip it when it closes more, which
+           is the "(see https://x.org/y)" case. */
+        if (last === ')' && url.split(')').length <= url.split('(').length) break;
         if ('.,!?)'.indexOf(last) === -1) break;
         trail = last + trail;
         url = url.slice(0, -1);
@@ -1355,6 +1616,12 @@
     out.sort(function (a, b) {
       var av = a.id === acc, bv = b.id === acc;
       if (av !== bv) return av ? -1 : 1;
+      /* A TOMBSTONE KEEPS ITS LIKES AND LOSES ITS PLACE. The words are gone,
+         so the votes are about something nobody can read; sorted by them a
+         well-liked deleted answer sat at the top of the band, above every
+         answer that is still there. It stays in the thread, at the bottom,
+         because `n` is its name and a reply may quote it. */
+      if (!!a.hidden !== !!b.hidden) return a.hidden ? 1 : -1;
       var an = (Number(a.up) || 0) - (Number(a.down) || 0);
       var bn = (Number(b.up) || 0) - (Number(b.down) || 0);
       if (an !== bn) return bn - an;
@@ -1365,15 +1632,32 @@
 
   /** The answers band alone, repainted where it stands: an answer ticked or
       the order changed must not rebuild the box below it, which may be
-      holding something half written. */
+      holding something half written.
+
+      AND AN OPEN EDITOR IS CARRIED ACROSS, for the same reason one layer in:
+      an in-place edit lives INSIDE the band, so `innerHTML =` threw away
+      whatever the reader had typed the moment they ticked an answer or
+      changed the order. It is detached before the repaint and put back on
+      the post it belongs to, with its own listeners intact. */
   function paintAnswers() {
     var ol = $('oa-forum-answers');
     if (!ol || !S.thread) return;
+    var open = ol.querySelector('.oa-forum-editing');
+    var openFor = open ? open.getAttribute('data-editing-pid') : '';
+    if (open) open.parentNode.removeChild(open);
     var answers = S.posts.slice(1);
     ol.innerHTML = sortAnswers(answers, S.thread, S.sort).map(function (p) {
       return postHTML(p, S.thread, S.readOnly, false, S.live);
     }).join('');
     wirePosts(ol, S.thread, answers, S.readOnly);
+    keepFocus(ol, 'li[data-pid="%"] .oa-forum-acc');
+    if (open) {
+      var host = ol.querySelector('li[data-pid="' + String(openFor).replace(/"/g, '\\"') + '"] .oa-forum-text');
+      if (host) {
+        host.hidden = true;
+        host.insertAdjacentElement('afterend', open);
+      }
+    }
   }
 
   /** The crumbs and the heading: drawn from the LIST's own row the moment a
@@ -1445,7 +1729,11 @@
     paintHeading();
     paintAnswers();
     paintVotes();
-    if (keep) reopenEdit(keep.pid, keep.text);
+    /* paintAnswers carries an open editor in the band across its own repaint
+       (node and listeners intact), so only the QUESTION's editor, which
+       paintQuestion rebuilt, is opened again here; opening a second box on a
+       post that already has one is what the guard prevents */
+    if (keep && !document.querySelector('#oa-forum-thread .oa-forum-editing')) reopenEdit(keep.pid, keep.text);
   }
 
   /** The edit box again, on the same post, with the words as they were. */
@@ -1474,6 +1762,7 @@
     if (closed.readOnly !== S.readOnly || !$('oa-forum-posts')) { renderThread(host, thread, posts); return; }
     S.thread = thread;
     S.posts = posts;
+    S.frozen = S.archive || !!thread.hidden;
     S.live = liveOf(posts);
     paintPosts();
   }
@@ -1487,6 +1776,10 @@
     S.thread = thread;
     S.posts = posts;
     S.readOnly = readOnly;
+    /* the half of readOnly the delete and the tick share (see postHTML):
+       forumAccept and forumDelete refuse on an archive and a hidden thread
+       and allow a locked one */
+    S.frozen = S.archive || !!thread.hidden;
     /* answers still standing: a deleted one no longer holds the question down */
     S.live = liveOf(posts);
     var out = '<div id="oa-forum-thhead">' + headerHTML(thread) + '</div>';
@@ -1530,6 +1823,10 @@
 
   function postHTML(p, thread, readOnly, isFirst, liveAnswers) {
     var mine = p.by === S.me.handle;
+    /* what each control's own function allows; see renderThread */
+    var frozen = S.archive || !!(thread && thread.hidden);
+    var canVote = !frozen && !(thread && thread.locked) && !p.hidden;
+    var canTouch = !frozen;
     var up = Number(p.up) || 0, down = Number(p.down) || 0;
     var net = up - down;
     var v = Number(S.votes[p.id]) || 0;
@@ -1538,17 +1835,17 @@
     /* the tick: on the thread, never on the post, so there is one place it
        can be read from and nothing to keep in step */
     var accepted = !isFirst && String((thread && thread.accepted) || '') === p.id;
-    var canAccept = !isFirst && !readOnly && !p.hidden && !!thread && thread.by === S.me.handle;
+    var canAccept = !isFirst && canTouch && !p.hidden && !!thread && thread.by === S.me.handle;
     var saved = isSaved(S.tid, isFirst ? '' : p.id);
     var out = '<li class="oa-forum-post' + (isFirst ? ' is-first' : '') + (accepted ? ' is-accepted' : '') +
       '" id="p' + n + '" data-pid="' + esc(p.id) + '" data-n="' + n + '">';
     out += '<div class="oa-forum-vote">';
-    if (!readOnly) {
+    if (canVote) {
       out += '<button type="button" class="oa-forum-v up" data-v="1" aria-pressed="' + (v === 1 ? 'true' : 'false') + '" ' +
         'aria-label="Like this ' + what + '"' + (mine ? ' disabled title="You cannot vote on your own post"' : '') + '>&#9650;</button>';
     }
     out += '<b class="oa-forum-score" title="' + plural(up, 'like', 'likes') + ', ' + plural(down, 'dislike', 'dislikes') + '">' + (net > 0 ? '+' : '') + net + '</b>';
-    if (!readOnly) {
+    if (canVote) {
       out += '<button type="button" class="oa-forum-v down" data-v="-1" aria-pressed="' + (v === -1 ? 'true' : 'false') + '" ' +
         'aria-label="Dislike this ' + what + '"' + (mine ? ' disabled title="You cannot vote on your own post"' : '') + '>&#9660;</button>';
     }
@@ -1596,11 +1893,35 @@
        maintainer (owner, 2026-09-05). A question somebody has answered cannot
        be deleted at all, so the control says why rather than failing on the
        press; a maintainer is not held by that rule. */
-    if (!readOnly && !p.hidden && (mine || amAdmin())) {
-      var stuck = isFirst && !amAdmin() && liveAnswers > 0;
+    if (canTouch && !p.hidden && (mine || amAdmin())) {
+      /* THE ROOM'S GUIDE IS NOT REMOVABLE, and the button says so rather than
+         failing on the press. Its id never leaves the season head, so the
+         seed control takes the refresh branch for ever after and would write
+         the words back into a hidden thread: one press would cost the room
+         its guide for the season with no route back. forumDelete refuses it
+         too -- a page can be got round, which is why both ends carry it. */
+      var isGuide = isFirst && String(S.guides[S.room] || '') === String(S.tid || '');
+      var stuck = isGuide || (isFirst && !amAdmin() && liveAnswers > 0);
       out += '<button type="button" class="oa-forum-act is-del" data-act="delete"' +
-        (stuck ? ' disabled title="A question with answers cannot be deleted. It can go once every answer has been deleted."' : '') +
+        (stuck ? ' disabled title="' + esc(isGuide
+          ? 'The forum guide cannot be removed. Update it instead, from your own card above.'
+          : 'A question with answers cannot be deleted. It can go once every answer has been deleted.') + '"' : '') +
         '>' + (mine ? 'Delete' : 'Remove') + '</button>';
+    } else if (canTouch && isFirst && p.hidden && (mine || amAdmin())) {
+      /* A THREAD LEFT HEADLESS BY THE OLD RULE. Its question is already a
+         tombstone and its thread is still standing, so forumDelete's second
+         press has one thing to do: shut it. That path had no control at
+         all, because every button here hung off !p.hidden.
+
+         AND NOT OVER OTHER PEOPLE'S ANSWERS: the asker's press is held by
+         the same answered rule as a fresh question, because closing the
+         thread would lock every live answer under it away for good (the
+         function refuses it too; the maintainer's press sweeps them). */
+      var held = !amAdmin() && liveAnswers > 0;
+      out += '<button type="button" class="oa-forum-act is-del" data-act="delete"' +
+        (held ? ' disabled' : '') + ' title="' + esc(held
+          ? 'This question is already deleted, but it still has answers, so the thread stays open for them. It can be closed once every answer has been deleted.'
+          : 'This question is already deleted. Closing the thread takes it off the list.') + '">Close this thread</button>';
     }
     out += '</div><div class="oa-forum-who">' +
       '<span class="oa-forum-handle' + (mine ? ' is-me' : '') + '">' + esc(p.by) + '</span>' +
@@ -1649,12 +1970,16 @@
      from, and the band is repainted so the answer moves to the top where the
      order says it should be. Pressing the ticked one again unticks it. */
   function acceptAnswer(thread, p, btn) {
-    if (S.readOnly) return;
+    if (S.frozen) return;
     var on = String(thread.accepted || '') === p.id;
     btn.disabled = true;
     call('forumAccept', { room: S.room, tid: S.tid, pid: on ? '' : p.id }).then(function (r) {
       thread.accepted = String((r && r.accepted) || '');
       S.thread = thread;
+      /* the band is repainted and reordered under the press, so the button
+         itself is discarded; without this, focus falls to <body> and the new
+         pressed state is announced to nobody */
+      refocus = { host: 'oa-forum-answers', key: p.id };
       paintAnswers();
       say(thread.accepted ? 'Ticked as the answer.' : 'The tick is off.');
     }).catch(function (err) {
@@ -1684,6 +2009,29 @@
   function deletePost(thread, p, btn) {
     var isFirst = Number(p.n) === 1;
     var mine = p.by === S.me.handle;
+    /* The question is ALREADY a tombstone and the thread is still standing:
+       there are no words left to take away, so the wording does not promise
+       to take any. */
+    if (isFirst && p.hidden) {
+      /* the maintainer's close SWEEPS the answers still standing, so their
+         confirmation says so; an asker's press is only offered when there
+         are none, and then nothing more is taken away */
+      var standing = Number(S.live) || 0;
+      var closeMsg = amAdmin() && standing > 0
+        ? 'Close this thread as the maintainer? Its question was already deleted; the ' +
+          standing + (standing === 1 ? ' answer' : ' answers') + ' still standing under it ' +
+          (standing === 1 ? 'is' : 'are') + ' removed with it, and the words cannot be brought back.'
+        : 'Close this thread? Its question was already deleted, so nothing more is taken away; the thread simply comes off the list.';
+      if (!window.confirm(closeMsg)) return;
+      btn.disabled = true;
+      call('forumDelete', { room: S.room, tid: S.tid, pid: p.id }).then(function () {
+        go({ room: S.room, season: S.season });
+      }).catch(function (err) {
+        btn.disabled = false;
+        say(friendly(err), true);
+      });
+      return;
+    }
     var msg = isFirst
       ? (mine
           ? 'Delete this question? The whole thread goes with it, and the words cannot be brought back.'
@@ -1712,7 +2060,7 @@
   }
 
   function vote(li, p, want) {
-    if (S.archive) return;
+    if (S.frozen || (S.thread && S.thread.locked) || p.hidden) return;
     var had = Number(S.votes[p.id]) || 0;
     var v = had === want ? 0 : want;
     var btns = li.querySelectorAll('.oa-forum-v');
@@ -1810,6 +2158,16 @@
       text = (sp > M.BOUNDS.quote * 0.6 ? cut.slice(0, sp) : cut).trim();
     }
     if (!text) return;
+    /* THE GUARD RUNS ON A QUOTE, and it has to run HERE as well as in the
+       function, because this is where the reader can still do something about
+       it. A DOM selection comes back with its whitespace already collapsed,
+       so a passage posted with double spaces between the groups of a
+       telephone number (which the guard's own rule lets through: nine digits
+       joined by at most ONE separator each) is handed over single-spaced,
+       which the guard refuses. Saying so on the press beats a refusal after
+       the answer has been written. */
+    var badQuote = G.check(text);
+    if (badQuote) { say(REASONS[badQuote] || 'That cannot be quoted.', true); return; }
     S.quote = { n: Number(p.n) || 0, by: p.by, text: text };
     var box = $('oa-forum-quotebox');
     if (box) {
@@ -1879,13 +2237,18 @@
         '<button type="button" class="oa-forum-send" data-edit="save">Save</button></span></div>' +
       '<p class="oa-forum-guardmsg" aria-live="polite"></p>';
     text.hidden = true;
+    box.setAttribute('data-editing-pid', String(p.id));
     text.insertAdjacentElement('afterend', box);
     var ta = box.querySelector('textarea');
     var guard = box.querySelector('.oa-forum-guardmsg');
     ta.addEventListener('input', function () { liveGuard(ta, guard); });
     box.querySelector('[data-edit="cancel"]').addEventListener('click', function () {
+      /* the body is found from the box's OWN parent rather than held from
+         when it opened: the band may have been repainted under it since,
+         and putting a detached node back would show nothing */
+      var body = box.parentNode && box.parentNode.querySelector('.oa-forum-text');
       box.remove();
-      text.hidden = false;
+      if (body) body.hidden = false;
     });
     box.querySelector('[data-edit="save"]').addEventListener('click', function () {
       var body = String(ta.value || '').trim();
@@ -1905,6 +2268,11 @@
           repaintPosts(S.thread, S.posts);
           arrive({ room: S.room, season: S.season, t: S.tid, hash: 'p' + p.n });
           refreshThread();
+          /* the keyboard lands back on the post it was editing, on its Edit
+             control, rather than on <body> once the box it was in is gone */
+          var back = document.getElementById('p' + p.n);
+          var focusOn = back && (back.querySelector('.oa-forum-act[data-act="edit"]') || back.querySelector('.oa-forum-act'));
+          if (focusOn) focusOn.focus({ preventScroll: true });
         })
         .catch(function (err) { save.disabled = false; guard.textContent = friendly(err); });
     });
@@ -1939,7 +2307,7 @@
           '<div class="oa-forum-tagsin" id="oa-forum-tagsin"><span id="oa-forum-tagchips"></span>' +
             '<input type="text" id="oa-forum-tag-in" autocomplete="off" placeholder="Type a tag and press Enter" aria-describedby="oa-forum-taghint"></div>' +
           '<ul class="oa-forum-tagsugg" id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags"></ul>' +
-          '<p class="oa-forum-hint" id="oa-forum-taghint">Up to five. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.</p></div>' +
+          '<p class="oa-forum-hint" id="oa-forum-taghint" aria-live="polite">' + TAG_HINT + '</p></div>' +
         acceptBox('oa-forum-ask-accept') +
         '<p class="oa-forum-msg" id="oa-forum-ask-msg" aria-live="polite"></p>' +
         '<div class="oa-forum-actions" style="margin-top:18px">' +
@@ -1974,9 +2342,26 @@
       input.disabled = tags.length >= M.TAG_MAX;
       input.placeholder = tags.length >= M.TAG_MAX ? 'Five is the most' : (tags.length ? 'Another tag' : 'Type a tag and press Enter');
     }
+    function tagHint(msg) {
+      var n = $('oa-forum-taghint');
+      if (n) n.textContent = msg || TAG_HINT;
+    }
     function add(raw) {
       var s = M.slug(raw);
       if (!s || !M.tagOk(s) || tags.indexOf(s) !== -1 || tags.length >= M.TAG_MAX) { input.value = ''; drawSugg(); return; }
+      /* THE GUARD RUNS HERE TOO. A tag is [a-z0-9-]{2,24}, which is exactly
+         the shape a telephone number and an ORCID iD survive, so forumPost
+         checks every one of them; shown here first, the refusal names the
+         box the reader is typing in rather than arriving on the send with a
+         sentence about a post. */
+      var why = G.check(s);
+      if (why) {
+        input.value = '';
+        tagHint(REASONS[why]);
+        drawSugg();
+        return;
+      }
+      tagHint('');
       tags.push(s);
       input.value = '';
       drawChips();
@@ -2005,7 +2390,7 @@
         sugg.appendChild(li2);
       }
     }
-    input.addEventListener('input', drawSugg);
+    input.addEventListener('input', function () { tagHint(''); drawSugg(); });
     input.addEventListener('focus', drawSugg);
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(input.value); }

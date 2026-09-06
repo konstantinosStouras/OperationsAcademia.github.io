@@ -193,7 +193,24 @@ async function main() {
   try {
     live = await rules.getFirestoreRuleset();
   } catch (e) {
-    warn(`could not read the live ruleset (${e.message}) — treating it as not yet published`);
+    /* A READ FAILURE MUST NOT CAUSE A WRITE, which is this repository's rule
+       everywhere else ("an unreachable source changes nothing"). Any error at
+       all was swallowed and read as "not yet published", so a transient API
+       blip or a permissions wobble published a fresh ruleset — every run,
+       against a project-wide cap of 2500 of them, and while knowing nothing
+       about what is live. The ONE case the comment above is really about is a
+       project with no ruleset at all, which answers NOT FOUND; anything else
+       stops the run and says so. */
+    const why = String((e && e.code) || '') + ' ' + String((e && e.message) || '');
+    if (!/not.?found|no such|does not exist/i.test(why)) {
+      fail(`could not read the live ruleset (${e.message}). Nothing published: ` +
+        'a read that fails says nothing about what is deployed, and publishing ' +
+        'on it would mint a ruleset on every failed run. Try again, or check ' +
+        `that the credential still holds roles/firebaserules.admin on ${want}.`);
+      process.exitCode = 1;
+      return;
+    }
+    warn(`no ruleset is published on ${want} yet — this is the first deploy`);
   }
 
   if (live && sameSource(live.source, source)) {

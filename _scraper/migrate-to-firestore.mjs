@@ -216,8 +216,23 @@ async function main() {
    as well as run. */
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   if (argv.has('--selftest')) {
-    const { runSelftest } = await import('./selftest.mjs');
-    process.exit(runSelftest() ? 0 : 1);
+    /* SPAWNED, never imported, and that is not a preference. selftest.mjs
+       imports THIS file (docIdFor, migrationDoc, lostFields, migratable), so
+       `await import('./selftest.mjs')` from inside this module's own top-level
+       body closed a cycle across a top-level await: the suite's evaluation
+       waited for this module to finish, this module waited for the suite, and
+       node ended the process with "Detected unsettled top-level await" and
+       exit code 13 — a command that reports a FAILURE having checked nothing,
+       every time it was ever run. A child process has no cycle to close, and
+       it is what build-jobs.mjs and sync-jobmarket-sheet.mjs already do.
+
+       The WHOLE suite, too, for their other recorded reason: runSelftest()'s
+       three-suite subset covered none of the migration checks in this file
+       while printing a passing total, which reads as covered when it is
+       not. */
+    const { spawnSync } = await import('node:child_process');
+    const r = spawnSync(process.execPath, [path.join(HERE, 'selftest.mjs')], { stdio: 'inherit' });
+    process.exit(r.status === 0 ? 0 : 1);
   }
   await main();
 }

@@ -47,6 +47,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   shell, esc, safeUrl, headerSafe, send, transport, firestore, unsubHeaders, SITE, toPlain,
+  safeError,
 } from './_mail.mjs';
 import { longDate } from './jobs-model.mjs';
 /* WHICH PAGE a posting is on, and the link that opens THAT one — the same
@@ -123,7 +124,14 @@ function redact(email) {
 
 /* --------------------------------------------------------------- rendering */
 
-function jobHtml(r) {
+/* `now` so the permalink can name the page that CARRIES the posting. The
+   digest is headed "New job postings" and lists whatever was ADDED, which is
+   what the alerts page promises — and a posting added from a closed season is
+   on Previous markets, not on the jobs page. livePostingUrl is the site's own
+   rule (OAJobNav.hrefFor), the same one the closing-soon section and the
+   poster's own "your posting is live" e-mail already use, so the reader is
+   taken to the card wherever it is rather than left to find it. */
+function jobHtml(r, now) {
   // Every field here is submitted through the posting form, so each part is
   // escaped BEFORE the separators are joined in — the separator is the only
   // markup in this string. (Escaping the joined result would eat the &middot;.)
@@ -137,7 +145,9 @@ function jobHtml(r) {
   ].filter(Boolean).map(esc).join(' &middot; ');
 
   const posted = safeUrl(r.postedAtUrl), ad = safeUrl(r.adUrl);
+  const here = safeUrl(livePostingUrl(r, { now }));
   const links = [
+    here ? `<a href="${esc(here)}">open the posting</a>` : '',
     posted ? `<a href="${esc(posted)}">official advertisement</a>` : '',
     ad ? `<a href="${esc(ad)}">job ad (PDF)</a>` : '',
   ].filter(Boolean).join(' &middot; ');
@@ -235,7 +245,7 @@ export function renderAlertEmail({ alert, jobs, updates, candidates = [], closin
       ? 'One new job posting matches your alert:'
       : `${n} new job postings match your alert:`}</p>`);
     parts.push('<ul style="padding-left:20px;margin:0 0 18px;">');
-    parts.push(jobs.slice(0, MAX_ROWS).map(jobHtml).join(''));
+    parts.push(jobs.slice(0, MAX_ROWS).map((r) => jobHtml(r, now)).join(''));
     parts.push('</ul>');
     if (n > MAX_ROWS) {
       parts.push(`<p style="color:#666;font-size:13px;">…and ${n - MAX_ROWS} more.
@@ -775,6 +785,22 @@ async function selftest() {
   ok(!/href="data:/i.test(links), 'a data: job link is not linked');
   ok(safeUrl('https://example.org/a') === 'https://example.org/a', 'an https link survives');
 
+  /* AND THE POSTING'S OWN PAGE. The digest is headed "New job postings" and
+     lists whatever was ADDED, which is what the alerts page promises — so a
+     posting added from a closed season is listed and is on Previous markets,
+     not on the jobs page. livePostingUrl is the site's own rule, already used
+     by the closing-soon section and by the poster's "your posting is live"
+     e-mail, so the reader is taken to the card wherever it is. */
+  const here = renderAlertEmail({
+    alert: { id: 'x', name: 'n' },
+    jobs: [rows[0]],
+    updates: [],
+    now: new Date('2026-08-20T00:00:00Z'),
+  });
+  ok(/open the posting/.test(here), 'a listed posting carries a link to its own card');
+  ok(here.includes(livePostingUrl(rows[0], { now: new Date('2026-08-20T00:00:00Z') })),
+    'and it is the site\'s own page rule, not a guess at the jobs page');
+
   // A header ends at the first newline; an alert name becomes the subject.
   ok(!/[\r\n]/.test(headerSafe('News\r\nBcc: everyone@example.com')),
     'a newline cannot be smuggled into a header');
@@ -1077,7 +1103,7 @@ async function main() {
         }
       } catch (err) {
         failed++;
-        console.log(`::warning::could not send to ${redact(a.email)}: ${err.message}`);
+        console.log(`::warning::could not send to ${redact(a.email)}: ${safeError(err)}`);
       }
     }
 
@@ -1158,7 +1184,7 @@ async function main() {
         `${closing.length} closing this week`);
     } catch (err) {
       failed++;
-      console.log(`::warning::could not send to ${redact(a.email)}: ${err.message}`);
+      console.log(`::warning::could not send to ${redact(a.email)}: ${safeError(err)}`);
     }
   }
 

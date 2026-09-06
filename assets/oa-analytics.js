@@ -73,9 +73,16 @@
      wrong number wearing a right label. The day rows keep carrying all three
      fields (the file format is not the interface), so the button returns the
      day a source that can really count sessions owns the record. */
+  /* THE NOTE DESCRIBES THE NUMBER, NEVER THE SOURCE. "as the site’s own record
+     counts them" attributed every plotted day to the first-party record, and
+     most of them are not its: a day belongs to ONE source (mergeDays), and on
+     this installation GA4 owns the great majority of them — where a "visitor"
+     is a cookieless `totalUsers`, nearer a session than a person. Which
+     sources are actually in view is said under the chart, from the file's own
+     `sources` block, rather than guessed at here. */
   var METRICS = [
     { id: 'visitors', label: 'Visitors', unit: 'visitors',
-      note: 'distinct browsers, as the site’s own record counts them' },
+      note: 'distinct browsers, counted per day' },
     { id: 'pageviews', label: 'Pageviews', unit: 'pageviews',
       note: 'every page opened' },
   ];
@@ -403,6 +410,21 @@
       'weekend is taken out of it. Press a name in the legend to put either line away. ' +
       'The chart also takes the keyboard, so the arrow keys walk it day by day.');
     root.appendChild(f1.section);
+    /* WHICH SOURCE MEASURED WHAT, said where the days are drawn. A day
+       belongs to exactly ONE source and the file records how many each gave,
+       so the reader is told rather than left to assume the caption's subject.
+       The dimension figures have carried this line all along; the chart the
+       page opens on did not. */
+    var srcs = (data.sources || []).filter(function (r) { return r && r.days > 0; });
+    if (srcs.length) {
+      var sp = document.createElement('p');
+      sp.className = 'oa-figure-src';   // the same line the dimension figures carry
+      sp.textContent = 'Measured by ' + srcs.map(function (r) {
+        return sourceName(r.source) + ' (' + r.days +
+          (r.days === 1 ? ' day' : ' days') + ')';
+      }).join(' and ') + '.';
+      f1.body.appendChild(sp);
+    }
     chooser(f1.body, {
       label: 'Which number to plot',
       className: 'oa-switch',

@@ -568,10 +568,18 @@
   function spell(v) {
     return clean(String(v == null ? '' : v)
       .replace(/\s+&\s+/g, ' and ')   /* " & " joins names; "A&M" is one */
-      .replace(/\bDept\.?\b/gi, 'Department')
+      /* THE FULL STOP IS PART OF THE ABBREVIATION, so the boundary goes
+         BEFORE it. Written `\bDept\.?\b` the trailing \b matches straight
+         after "Dept" — "t" to "." is a boundary — so `\.?` matched nothing
+         and "Dept. of Operations Management" was spelt "Department. of
+         Operations Management": the stray stop then stopped the
+         "Department of X" wrapper rule firing, and the whole wrapper was
+         published as the department's name. `Info` was the one written the
+         right way round; the other three are now too. */
+      .replace(/\bDept\b\.?/gi, 'Department')
       .replace(/\bInfo\b\.?/g, 'Information')
-      .replace(/\bMgmt\.?\b/gi, 'Management')
-      .replace(/\bOps\.?\b/gi, 'Operations')
+      .replace(/\bMgmt\b\.?/gi, 'Management')
+      .replace(/\bOps\b\.?/gi, 'Operations')
       .replace(/\s+/g, ' '));
   }
 
@@ -1257,13 +1265,21 @@
 
   var TYPE_BUSINESS_SCHOOL =
     /business school|school of business|college of business|business college|school of management|management school|graduate school of business|school of commerce|business administration/;
+  /* THE BARE WORD IS EVIDENCE ENOUGH (owner, 2026-08-23), and the pipeline's
+     twin has said so since. Without it this form answered differently from
+     `typeFromNames` for 36 of the 577 served postings — "Faculty of Business"
+     at Hong Kong Polytechnic, "Economics and Business" at KU Leuven,
+     "Business Analytics" at St John Fisher — so the box the poster was shown
+     named one thing and the row the build published named another.
+     Word-bounded, so "agribusiness" is not it. */
+  var TYPE_BUSINESS_WORD = /\bbusiness\b/;
   var TYPE_UNIVERSITY = /universit|college|institute|polytechnic|\bacademy\b|\bschool\b/;
 
   function typeGuess(institution, school, unit) {
     var inst = clean(institution).slice(0, 300);
     var all = [inst, clean(school).slice(0, 300), clean(unit).slice(0, 300)]
       .join(' · ').toLowerCase();
-    if (TYPE_BUSINESS_SCHOOL.test(all)) return 'Business School';
+    if (TYPE_BUSINESS_SCHOOL.test(all) || TYPE_BUSINESS_WORD.test(all)) return 'Business School';
     // only the EMPLOYER's own name answers "what kind of institution is this?"
     return TYPE_UNIVERSITY.test(inst.toLowerCase()) ? 'University' : '';
   }
@@ -1387,6 +1403,31 @@
     };
   }
 
+  /**
+   * WHAT A FREE-TEXT NAME COULD REASONABLY MEAN: the words as typed, plus the
+   * university, school and department names this module publishes for them.
+   * Deduplicated, empties dropped, and never folded -- the caller folds with
+   * its own fold, and the two folds are pinned equal.
+   *
+   * It is ONE definition because two searches on this site must agree. The
+   * alert matcher had it and `assets/oa-list.js` did not, so a reader typing
+   * "UC Berkeley", "Penn State" or "Imperial Business School" into the jobs
+   * page's University box found NOTHING while an alert holding the same words
+   * matched and was e-mailed -- 31 spellings apart, measured over the served
+   * postings. "What I see on the site" and "what I am e-mailed" cannot mean
+   * different things, which this file already says of the fold and the
+   * acronym rule; this is the leg that had only one implementation.
+   */
+  function nameNeedles(text) {
+    var out = [];
+    var tries = [text, canonInstitution(text), canonSchool(text), canonUnit(text)];
+    for (var i = 0; i < tries.length; i++) {
+      var v = String(tries[i] == null ? '' : tries[i]).trim();
+      if (v && out.indexOf(v) === -1) out.push(v);
+    }
+    return out;
+  }
+
   return {
     INSTITUTION_ALIASES: INSTITUTION_ALIASES,
     SCHOOL_LIST: SCHOOL_LIST,
@@ -1404,6 +1445,7 @@
     directoryRowKey: directoryRowKey,
     canonSchool: canonSchool,
     canonUnit: canonUnit,
+    nameNeedles: nameNeedles,
     canonPlace: canonPlace,
     canonColumns: canonColumns,
     splitFused: splitFused,

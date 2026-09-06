@@ -56,12 +56,36 @@ export const PUBLIC_FIELDS = [
   'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner',
 ];
 
-/* Prose that means the search stays open. ONE definition: import-sheet.mjs
-   clears parsed dates with it, rowFromSubmission clears stored dates with it,
-   and the selftest rejects any served row whose applyBy matches it while a
-   date is set — the page buckets "Until filled" purely on the date being
-   empty, so a row carrying both would sort as dated and read as open-ended. */
-export const OPEN_ENDED_RX = /until\s*filled|open\s*until|rolling/i;
+/* Prose that means the search stays open. ONE definition — and it is one for
+   the first time: import-sheet.mjs and jobreview.mjs IMPORT it, and the
+   browser twin in assets/oa-fresh.js is pinned against this literal character
+   for character (selftest.mjs, the EMAIL_RX idiom). It had been four
+   hand-written copies of one rule under a comment already calling itself the
+   single definition, which is the drift oa-countries.js, oa-schools.js and
+   oa-jobnav.js all exist to prevent: change the rule and three writers keep
+   the old one, silently. rowFromSubmission clears a stored date with it, the
+   sheet ingest clears a parsed one, and the served-file guard rejects any row
+   whose applyBy matches while a date is set — the page buckets "Until filled"
+   purely on the date being empty, so a row carrying both would sort as dated
+   and read as open-ended.
+
+   "ON A ROLLING BASIS" IS NOT SUCH PROSE. It says how applications are
+   REVIEWED, not when the search closes, and reading it as an open-ended
+   search discarded a closing date the advertisement had stated: "March 16,
+   2026. Applications will be reviewed on a rolling basis" published with an
+   EMPTY applyByDate under a line still printing March 16 — a card naming a
+   date the Deadline filter buckets "Until filled" and the market roll treats
+   as never closing. Measured over the served corpus the word appears nine
+   ways and every one is either that review-cadence phrase or a bare
+   "Rolling — full consideration <date>", which this still reads.
+
+   THE `until…filled` LEG STAYS LITERAL, for the same reason in reverse.
+   Sixteen served rows state a real closing date beside "review will continue
+   until the position is filled"; widening the leg to reach them flips all
+   sixteen to open-ended, and the served-file guard would then refuse
+   every one of them and stop the whole site publishing — the failure this
+   repository has already shipped four times. */
+export const OPEN_ENDED_RX = /until\s*filled|open\s*until|rolling(?!\s+basis)/i;
 
 export const LEVELS = [
   'Assistant Professor',
@@ -170,13 +194,38 @@ export function patchDeadlines(jobsRows, applied, source) {
   const byId = new Map((applied.rows || []).map((r) => [r.id, r]));
   return jobsRows.map((r) => {
     if (!r || r.source !== source || !changed.has(r.id) || !byId.has(r.id)) return r;
+    /* AND NEVER ONTO A ROW THAT ALREADY STATES A CLOSING DATE — the apply's
+       own first rule, which this side needs for itself because the two files
+       can disagree about one posting. Once the maintainer edits a tracking
+       sheet MIRROR the posting is published from their document (which keeps
+       `source: 'jobmarket-sheet'`, so it looks exactly like a workbook row
+       here), while data/jobmarket.json still carries the workbook's own
+       open-ended copy. The pass then filled the sheet row from the
+       advertisement and patched the maintainer's typed deadline out of
+       data/jobs.json, taking their suggested date with it. What the two files
+       disagree about is the document's to settle, and the next build does. */
+    if (r.applyByDate) return r;
     const fresh = byId.get(r.id);
     const next = { ...r, applyBy: fresh.applyBy, applyByDate: fresh.applyByDate };
     /* healReviewDate ran over the filled row, so its verdict on the suggested
        date is authoritative for it — including "there is none". */
     if (fresh.reviewDate) next.reviewDate = fresh.reviewDate;
     else delete next.reviewDate;
-    return next;
+    /* AND THE SPAN IS RE-DERIVED, because the two dates this just moved are
+       what it is derived FROM. `years` is written by build-jobs over the
+       merged set; these passes write data/jobs.json and data/jobmarket.json
+       themselves, hours before the next build, and a filled closing date
+       that reaches into the next season widens the span without touching the
+       stored one. The publishing gate asserts over the SERVED files that
+       every row states the seasons it is listed under, so the first such
+       fill turned the whole suite red and every data writer then committed
+       nothing: the site stops publishing, which is the failure this
+       repository has already recorded four times. Measured on the committed
+       data: 2027-university-of-iowa-20260903 stores [2027] and derives
+       [2027, 2028] the moment a deadline of 2027-10-01 is filled in.
+       withMarketYears is pure, idempotent and by value, so a row this
+       function did not touch is returned untouched. */
+    return withMarketYears(next);
   });
 }
 
@@ -756,7 +805,10 @@ export function healPlace(row, fixes = []) {
      an OVERLAY after canon, never a second canon — normalizeFixes made every
      target canonical, so a fixed row still satisfies the "every posting names
      its place the one way" guard whether or not it has heard of the fix */
-  const canoned = canonPlace({
+  /* canonCOLUMNS here too, and for the same reason: a carried row's three
+     names are in three columns already. canonPlace would take a school with a
+     comma in it apart on every build. */
+  const canoned = canonColumns({
     institution: row.institution,
     school: row.school || '',
     unit: row.unit || '',
@@ -813,12 +865,22 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
     ? { school: text(doc.school, MAXLEN.school), unit: text(doc.unit, MAXLEN.unit) }
     : splitDepartment(text(doc.department, MAXLEN.department));
 
-  /* …and then all three names are canonicalised together, because which of
-     the three a name belongs in is part of what canon() decides — and the
-     approved name corrections are laid on top, the same overlay healPlace
+  /* …and then all three names are canonicalised together — with
+     canonCOLUMNS, never canonPlace. THREE NAMES ALREADY IN THREE COLUMNS say
+     which is which, and canonPlace's job is to take a value APART: over these
+     boxes it split "Rutgers Business School, Newark and New Brunswick" and
+     prepended the campus to the department ("Newark and New Brunswick, Supply
+     Chain Management"), and did the same to half of Clemson's college — the
+     exact mangling this repository already recorded and fixed in the form's
+     own preview and in the review card, and left here, so the row the poster
+     read back and the row the build published disagreed. `splitDepartment`
+     above has already put a document that carries only `department` into two
+     columns, so by this line there is nothing left to take apart.
+
+     The approved name corrections are laid on top, the same overlay healPlace
      applies to a carried row, so a fresh submission typed under a corrected
      spelling publishes under the corrected one. */
-  const canoned = canonPlace({
+  const canoned = canonColumns({
     institution: text(doc.institution, MAXLEN.institution),
     school: parts.school,
     unit: parts.unit,
@@ -1932,8 +1994,29 @@ export function mergeRows(existing, fresh, remove = []) {
      the served file. */
   const { rows: kept, collapsed } = collapseSameDay([...by.values()]);
 
-  const rows = uniqueIds(kept.sort(displayOrder));
-  return { rows, added, updated, removed, collapsed };
+  const ordered = kept.sort(displayOrder);
+  const rows = uniqueIds(ordered);
+  /* WHICH ROWS `uniqueIds` HAD TO RENAME, and it is not bookkeeping. An id is
+     (market year, institution, posting date) and names no department, so two
+     sources can mint one: a posting made through the form and an unclaimed row
+     in the tracking workbook, for one university on one day. The renamed one
+     is whichever the merge saw second, and the workbook's rows are last in
+     `freshVisible` -- so the row renamed is exactly the one whose id is a JOIN
+     KEY, to its review-queue document, its mirror, and the maintainer's Edit
+     and Take-down controls.
+
+     This file already records that two sources can mint one id and that the
+     later writer wins, and that fixing it would move permalinks: it is the
+     maintainer's call. What was missing is that NOTHING SAID SO -- the only
+     reason it was ever noticed is that a guard happened to name the two ids.
+     So the merge reports it, by value, and repairs nothing. */
+  const renamed = [];
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i].id !== ordered[i].id) {
+      renamed.push({ from: ordered[i].id, to: rows[i].id, source: String(ordered[i].source || '') });
+    }
+  }
+  return { rows, added, updated, removed, collapsed, renamed };
 }
 
 /**

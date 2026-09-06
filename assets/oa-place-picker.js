@@ -49,7 +49,11 @@
     var key = url || DEFAULT_URL;
     if (!pending[key]) {
       pending[key] = fetch(key, { cache: 'no-cache' })
-        .then(function (r) { return r.ok ? r.json() : null; })
+        /* a non-2xx answer THROWS, as OAList.load does, so it reaches the
+           catch that forgets the memo: turned into a resolved null it was
+           remembered for the page's life, and one bad answer became every
+           later mount's answer */
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .catch(function () { delete pending[key]; return null; });
     }
     return pending[key];

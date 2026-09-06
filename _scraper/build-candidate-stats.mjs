@@ -164,11 +164,36 @@ export function cardIdOf(click) {
   return c.startsWith('job-') ? c.slice(4) : '';
 }
 
+/**
+ * The list mounts that draw a CANDIDATE card, by the id the page gives them.
+ *
+ * `placementId` and `candidateId` are the same string — `<year>-<last>-
+ * <first>` — so a candidate who filed a profile AND has a confirmed placement
+ * in one season has the SAME card element id on both lists, and the one-pager
+ * draws both. Every open of their placement card was counted as an open of
+ * their candidate profile, on a figure shown to that person as theirs.
+ *
+ * The click carries the mount it landed in (`m`, oa-usage.js), so the two are
+ * told apart by WHERE the card was rather than by an id they share. Curated
+ * and pinned against the page that mounts the list, never guessed; a click
+ * with NO mount is a record written before this and is read as before, since
+ * withholding those would zero the figures for everyone who was measured
+ * first. The candidate's own preview on account.html and the form is not
+ * here and does not need to be: those are the owner's own, and the owner is
+ * excluded by uid.
+ */
+export const CANDIDATE_MOUNTS = new Set(['oa-candidates']);
+
 /** What ONE click means for ONE card: 'open', 'cv' or null. Pure. */
 export function attribute(click, card) {
   if (!click || !card) return null;
+  /* The MOUNT gates the two legs that read the shared card id, and neither of
+     the two that read the CV's own address: an href that IS this candidate's
+     CV is unambiguous wherever it was clicked. */
+  const m = str(click && click.m);
+  const sameList = !m || CANDIDATE_MOUNTS.has(m);
   const c = cardIdOf(click);
-  const inCard = !!c && card.ids.has(c);
+  const inCard = sameList && !!c && card.ids.has(c);
   if (inCard && click.o === 1) return 'open';
   if (str(click.k) === 'a') {
     const h = str(click.h);
@@ -184,11 +209,17 @@ export function attribute(click, card) {
  *   sessions  [{ uid, email, clicks:[{t,k,x,h,c,o}] }]
  *   cards     the Map cardsFor() returns
  *   from      epoch ms; clicks before it are ignored (the season start)
+ *   until     epoch ms; clicks AFTER it are ignored (the run's own clock plus
+ *             one day of skew — see the note in the loop)
  *
  * Returns a Map docId -> { opens, cvClicks, days: { 'YYYY-MM-DD': [o, c] } }
  * for every PUBLISHED card, zeros included.
  */
-export function tally(sessions, cards, { from = 0, adminEmails = ADMIN_EMAILS } = {}) {
+export const CLOCK_SKEW_MS = 24 * 60 * 60 * 1000;
+
+export function tally(sessions, cards, {
+  from = 0, until = Date.now() + CLOCK_SKEW_MS, adminEmails = ADMIN_EMAILS,
+} = {}) {
   const out = new Map();
   const byCardId = new Map();
   const byCv = new Map();
@@ -213,8 +244,15 @@ export function tally(sessions, cards, { from = 0, adminEmails = ADMIN_EMAILS } 
     const email = str(sess && sess.email).toLowerCase();
     if (email && admins.has(email)) continue;             // the maintainer
     for (const click of (sess && Array.isArray(sess.clicks)) ? sess.clicks : []) {
+      /* A CLICK CANNOT HAVE HAPPENED AFTER THE RUN READ IT. `t` is Date.now()
+         in the reader's own browser, so a machine with a wrong clock — or
+         anyone who cares to write one — files a click under a day in the
+         future, and a future day is newer than the cutoff FOR EVER: it sits
+         in the candidate's "last 7 days" figure permanently. A day of skew is
+         allowed, because a reader's clock being a few hours out is ordinary
+         and dropping those clicks would under-count a real profile. */
       const t = Number(click && click.t);
-      if (!t || t < from) continue;
+      if (!t || t < from || t > until) continue;
       const candidates = new Set();
       const c = cardIdOf(click);
       if (c && byCardId.has(c)) candidates.add(byCardId.get(c));
@@ -348,7 +386,7 @@ async function main() {
     last = snap.docs[snap.docs.length - 1];
   }
   if (pages > 1) log(`usageSessions: read in ${pages} pages of up to ${READ_CAP}`);
-  const counts = tally(sessions, cards, { from });
+  const counts = tally(sessions, cards, { from, until: +now + CLOCK_SKEW_MS });
   log(`read ${sessions.length} session(s)`);
 
   /* Only a document the build has marked 'published' is stamped: a client
@@ -478,13 +516,52 @@ export function selftest() {
     ] },
     { uid: 'anon:zzz', clicks: 'not a list' },
   ];
-  const counts = tally(sessions, cards, { from });
+  /* THE CLOCK IS PASSED IN, like every other date rule here: `until` defaults
+     to "now, plus a day of skew" so a caller that forgets it cannot let a
+     click from the future into a candidate's figures, and this fixture lives
+     in October 2026, so it says which run it is standing in for. */
+  const counts = tally(sessions, cards, { from, until: +now + CLOCK_SKEW_MS });
   eq(counts.get('docA'), { opens: 2, cvClicks: 1, days: { '2026-10-10': [1, 1], '2026-10-12': [1, 0] } },
     'opens: the anonymous one and the signed-in reader; not the close, not her own, not the ' +
     'maintainer\'s, not last season\'s; the CV once');
   eq(counts.get('docB'), { opens: 2, cvClicks: 0, days: { '2026-10-11': [1, 0], '2026-10-12': [1, 0] } },
     'the namesake counts its own two opens — one of them from the other Jane\'s account');
-  eq(tally(sessions, held, { from }).size, 0, 'nothing published, nothing tallied');
+  eq(tally(sessions, held, { from, until: +now + CLOCK_SKEW_MS }).size, 0,
+    'nothing published, nothing tallied');
+
+  /* A CLICK CANNOT HAVE HAPPENED AFTER THE RUN READ IT. `t` is Date.now() in
+     the reader's own browser, so a wrong clock — or anyone who cares to write
+     one — files a click under a future day, and a future day is newer than
+     the seven-day cutoff FOR EVER: it sits in that candidate's "last 7 days"
+     figure permanently. */
+  const future = [{ uid: 'reader-9', clicks: [
+    { t: T('2030-01-01'), k: 'button', c: 'job-2027-doe-jane', o: 1 },
+  ] }];
+  eq(tally(future, cards, { from, until: +now + CLOCK_SKEW_MS }).get('docA').opens, 0,
+    'a click stamped in the future is not counted');
+  eq(tally(future, cards, { from, until: Date.parse('2030-01-02T00:00:00Z') }).get('docA').opens, 1,
+    'while the same click on a run that really is after it counts once');
+
+  /* WHICH LIST the card was in. placementId and candidateId are the same
+     string, and the one-pager draws both lists, so an open of a placement
+     card was counted as an open of that person's candidate profile. */
+  const elsewhere = [{ uid: 'reader-8', clicks: [
+    { t: T('2026-10-12'), k: 'button', c: 'job-2027-doe-jane', o: 1, m: 'oa-placements' },
+  ] }];
+  eq(tally(elsewhere, cards, { from, until: +now + CLOCK_SKEW_MS }).get('docA').opens, 0,
+    'an open on the placements list is not an open of the candidate profile');
+  const onList = [{ uid: 'reader-7', clicks: [
+    { t: T('2026-10-12'), k: 'button', c: 'job-2027-doe-jane', o: 1, m: 'oa-candidates' },
+  ] }];
+  eq(tally(onList, cards, { from, until: +now + CLOCK_SKEW_MS }).get('docA').opens, 1,
+    'while the same open on the candidates list counts');
+  ok(CANDIDATE_MOUNTS.has('oa-candidates'),
+    'and the mount that draws them is named, never guessed');
+  const cvElsewhere = [{ uid: 'reader-6', clicks: [
+    { t: T('2026-10-12'), k: 'a', h: base.cvUrl, m: 'oa-placements' },
+  ] }];
+  eq(tally(cvElsewhere, cards, { from, until: +now + CLOCK_SKEW_MS }).get('docA').cvClicks, 1,
+    'a click on the CV\'s own address is that candidate\'s wherever it was made');
 
   /* --- the cap, the map ------------------------------------------------- */
   const many = {};

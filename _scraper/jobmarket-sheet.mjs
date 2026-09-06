@@ -358,6 +358,43 @@ export const DEADLINE_WINDOW_DAYS = 730;
  * The deadline a sheet cell states, believed only when it is plausible
  * against the day the posting went up — or ''.
  */
+/**
+ * The rows whose own dates run BACKWARDS: a closing date, or a suggested one,
+ * that falls before the day the advertisement went up.
+ *
+ * `deadlineDay` refuses exactly that when it PARSES a cell — "on or after it"
+ * is its definition of a believable deadline — but a row reaching the served
+ * file has been through more hands than the parse: the carry restores a stored
+ * date onto a row whose posting date the workbook may since have corrected,
+ * the two verify caches fill one from an advertisement, a review-card edit
+ * types one, and a mirror hands the whole posting over to a document. None of
+ * those re-applies the test, and none of them should — a maintainer's typed
+ * date is theirs, and a run that silently blanked one would be the opposite of
+ * this repository's rule about postings.
+ *
+ * So it is REPORTED, never repaired, and reported HERE rather than as a guard
+ * over data/: the remedy is a cell in a crowdsourced workbook this repository
+ * cannot edit, so a red check nobody can turn green is a check people learn to
+ * ignore -- the crying-wolf cost this repository has already paid once. The
+ * run's log names the rows, beside the deadline disagreements it already
+ * names, which is where the maintainer is looking anyway.
+ *
+ * Pure, and it reads no clock: a date before its own posting date is wrong on
+ * every day.
+ */
+export function backdatedDeadlines(rows) {
+  const out = [];
+  for (const r of rows || []) {
+    const posted = String((r && r.posted) || '');
+    if (!posted) continue;
+    for (const field of ['applyByDate', 'reviewDate']) {
+      const d = String((r && r[field]) || '');
+      if (d && d < posted) out.push({ id: String(r.id || ''), field, date: d, posted });
+    }
+  }
+  return out;
+}
+
 export function deadlineDay(v, posted = '') {
   const s = text(v, 40);
   if (!s) return '';
@@ -785,7 +822,12 @@ export function levelsFromRank(rank, kind = '') {
     return kind === 'ntt-pd' ? ['Non-tenure track (teaching) position'] : ['Other Ranks'];
   }
 
-  if (/post.?doc|postdoctoral|\bpd\b|research fellow|research associate/.test(s)) {
+  /* `research associate` is a post-doctoral title; "Research ASSOCIATE
+     PROFESSOR" is not one, and matched here it filed a research-track
+     professorship as a post-doc. Left to fall through, it reaches the
+     tenure-track collection below and comes out as Other Ranks, which is
+     where a reader looking for a senior post will find it. */
+  if (/post.?doc|postdoctoral|\bpd\b|research fellow|research associate(?!\s+professor)/.test(s)) {
     return ['Post-Doc'];
   }
   if (/visiting|\bvap\b/.test(s)) return ['Visiting Faculty (various levels)'];
@@ -813,7 +855,7 @@ export function levelsFromRank(rank, kind = '') {
      have all returned already, so what reaches this line is a tenure-track
      rank column. "AP"/"asst"/"TTAP" are the sheet's abbreviations of the same
      thing, and a search advertised at ALL ranks includes this one. */
-  if (/\bassistant\b|\basst\b|\bap\b|\bttap\b|tenure.?track|entry.?level|\bjunior\b|open.?rank|all ranks|any rank/.test(s)) {
+  if (/\bassistant\b|\basst\b|\bassist\b|\bap\b|\bttap\b|tenure.?track|entry.?level|\bjunior\b|open.?rank|all ranks|any rank/.test(s)) {
     out.push('Assistant Professor');
   }
   /* "Other Ranks" is tested against what is LEFT once the entry-level title is
@@ -829,8 +871,16 @@ export function levelsFromRank(rank, kind = '') {
      Full" — because that is how the workbook writes an open search, and
      demanding the word "Professor" beside them read half of them as
      entry-level-only. */
+  /* THE TITLE COMES OUT IN EVERY SPELLING THE ENTRY TEST ACCEPTS, or the
+     invariant above holds only for the long one: "Asst. Professor" and
+     "Assist. Professor" left `professor` standing in `rest`, so an
+     entry-level-only rank was also filed under Other Ranks, and "Assist."
+     was not read as entry level at all and came out Other Ranks ALONE.
+     Stripped as a TITLE and never as a bare word: taking "assistant" out of
+     "Assistant Professor" would leave "professor" behind and do the very
+     thing this is here to prevent. */
   const rest = s
-    .replace(/assistant\s+professors?/g, ' ')
+    .replace(/\b(?:assistant|asst|assist|ttap)\b\.?\s*professors?/g, ' ')
     .replace(/full\s*-?\s*time/g, ' ');
   if (/open.?rank|all ranks|any rank|\bassociate\b|\bassoc\b|\bfull\b|\bprofessor\b|chair|\bsenior\b|reader/.test(rest)) {
     out.push('Other Ranks');
@@ -1154,6 +1204,20 @@ export function carryUnreadColumns(rows, known = [], tabs = []) {
     }
     if (!cols.has('country') && !r.country && (prev.country || '')) take.country = prev.country;
     if (!cols.has('link') && !r.adUrl && (prev.adUrl || '')) take.adUrl = prev.adUrl;
+    /* The TYPE is derived from the whole posting's text, and two of the columns
+       it reads are the two inference is worst at — the notes, which it can
+       never find, and the field column on a thin sample. `typeFromNames` only
+       ever ESCALATES with more text (the University leg reads the employer's
+       name alone, which inference does claim), so a degraded read can lose
+       "Business School" and can never invent it. Carrying it back is therefore
+       exactly un-saying the loss: it is the deadline rule again, on the one
+       other field a header-less read quietly rewrites. Restoring `comments`
+       above does not fix this on its own — the type was computed from the
+       empty notes before ever reaching here. */
+    if ((!cols.has('notes') || !cols.has('area')) &&
+        prev.type === 'Business School' && r.type !== 'Business School') {
+      take.type = prev.type;
+    }
 
     if (!Object.keys(take).length) return r;
     carried.push({ id: r.id, tab: r._tab || '', fields: Object.keys(take).sort() });

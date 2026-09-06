@@ -32,7 +32,8 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { shell, esc, send, transport, firestore, SITE, CONTACT, toPlain } from './_mail.mjs';
+import { shell, esc, send, transport, firestore, SITE, CONTACT, toPlain,
+  safeError } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const RESOLUTIONS = path.join(HERE, '..', '_feedback-resolutions');
@@ -314,7 +315,7 @@ async function main() {
       }, { dryRun: DRY });
       if (forwarded) await doc.ref.update({ forwarded: true, forwardedAt: new Date().toISOString() });
     } catch (err) {
-      console.log(`::warning::could not forward ${v.ticket}: ${err.message}`);
+      console.log(`::warning::could not forward ${v.ticket}: ${safeError(err)}`);
       continue;   // leave it unforwarded so the next run retries
     }
 
@@ -329,7 +330,7 @@ async function main() {
         }, { dryRun: DRY });
         if (acked) await doc.ref.update({ ackSent: true });
       } catch (err) {
-        console.log(`::warning::could not send the receipt for ${v.ticket}: ${err.message}`);
+        console.log(`::warning::could not send the receipt for ${v.ticket}: ${safeError(err)}`);
       }
     }
     console.log(`${forwarded ? 'forwarded' : 'would forward'} ${v.ticket}`);
@@ -397,7 +398,7 @@ async function main() {
         ? `resolved ${r.ticket} and told ${redact(v.email)}`
         : `would resolve ${r.ticket}`);
     } catch (err) {
-      console.log(`::warning::closed ${r.ticket} but could not e-mail: ${err.message}`);
+      console.log(`::warning::closed ${r.ticket} but could not e-mail: ${safeError(err)}`);
     }
   }
 }

@@ -78,11 +78,14 @@ async function writeMarker(D, uid, sub, Y) {
   const snap = await ref.get();
   const have = snap.exists ? snap.data() : null;
   if (have && Number(have.year) === Number(Y) && have.sub === sub) return;
+  /* NO STAMP HERE. The handle document written by the same call carries
+     M.minute(), the maintainer may read both collections, and a marker
+     stamped with the same minute joins a uid to a hash without the secret
+     and without the Admin SDK, for ever. See KEYS.marker in the model. */
   /* @doc marker */
   const marker = {
     sub,
     year: Y,
-    joinedAt: M.minute(),
   };
   /* @end */
   await ref.set(marker);

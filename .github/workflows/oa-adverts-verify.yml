@@ -84,12 +84,20 @@ jobs:
       - name: Read the advertisements
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # THE FREE-TEXT INPUTS GO THROUGH THE ENVIRONMENT, never interpolated
+          # into the script: ${{ }} pastes a dispatcher's own words in before
+          # the shell ever sees them, and this step holds the credentials. Only
+          # a writer can press the button, so it is hygiene rather than a hole
+          # -- but it is the shape that is not a hole whoever presses it, and
+          # oa-forum-remove-thread.yml already uses it.
+          IN_LIMIT: ${{ inputs.limit }}
         run: |
-          node _scraper/adverts-verify.mjs \
+          set -- \
             ${{ inputs.scan && '--scan' || '' }} \
             ${{ inputs.dry_run && '--dry-run' || '' }} \
-            ${{ inputs.force && '--force' || '' }} \
-            ${{ inputs.limit && format('--limit {0}', inputs.limit) || '' }}
+            ${{ inputs.force && '--force' || '' }}
+          if [ -n "$IN_LIMIT" ]; then set -- "$@" "--limit" "$IN_LIMIT"; fi
+          node _scraper/adverts-verify.mjs "$@"
 
       # The same gate every other writer of data/ runs before committing: a red
       # selftest must stop the publish rather than ship a broken dataset.
@@ -124,6 +132,17 @@ jobs:
             if [ -n "$(git status --porcelain data)" ]; then
               git add data
               git commit --amend --no-edit
+            fi
+            # THE REBUILT TREE GOES THROUGH THE SAME GATE, exactly as the
+            # build's own retry does. A rebase brings another writer's data/ in
+            # under this run's commit, and the re-apply above then rewrites the
+            # served files against it -- so what is about to be pushed is NOT
+            # what the gate passed before the loop. Without this, a retry can
+            # commit precisely what the gate exists to refuse, which is the
+            # rule this repository already wrote down for oa-jobs-build.yml.
+            if ! node _scraper/selftest.mjs --publishing; then
+              echo "::error::the rebuilt data/ does not pass the publishing gate - pushing nothing"
+              exit 1
             fi
             sleep $((i * 3))
           done

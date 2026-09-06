@@ -979,7 +979,14 @@
   }
 
   /** Two alerts that would send the same e-mail. Used to skip a copy rather
-      than leave the kept account subscribed twice to one thing. */
+      than leave the kept account subscribed twice to one thing.
+
+      A PAUSED ALERT SENDS NOTHING, so it is not the same alert. `enabled` is
+      the flag Pause and the e-mail's Unsubscribe link both clear, and left
+      out of this signature a PAUSED twin on the kept account absorbed the
+      duplicate's ACTIVE one: the copy was skipped, the duplicate's document
+      was then deleted with the rest of it, and the person came out of the
+      merge silently unsubscribed from something they were subscribed to. */
   function alertSig(a) {
     a = a || {};
     var c = a.criteria || {};
@@ -988,6 +995,7 @@
       String(a.name || '').trim().toLowerCase(),
       String(a.email || '').trim().toLowerCase(),
       String(a.frequency || ''),
+      a.enabled === false ? 'off' : 'on',
       set(c.topics), String(c.text || '').trim().toLowerCase(),
       set(c.type), set(c.level), set(c.country), set(c.characteristics)
     ].join('~');
@@ -1008,6 +1016,15 @@
     PROFILE_FIELDS.forEach(function (k) {
       if (!String(kept[k] || '').trim() && String(dup[k] || '').trim()) patch[k] = dup[k];
     });
+    /* THE PICTURE IS A DETAIL LIKE THE OTHERS, and the same fill-empty rule
+       answers for it: the duplicate's profile document is DELETED at the end
+       of the merge, so a photo not carried here is a photo the person loses.
+       `photoSeeded` travels with it or the picture would be labelled as one
+       the account chose when it came from a provider. */
+    if (!String(kept.photo || '').trim() && String(dup.photo || '').trim()) {
+      patch.photo = dup.photo;
+      patch.photoSeeded = !!dup.photoSeeded;
+    }
     var mine = kept.orcid || '', theirs = dup.orcid || '';
     if (theirs && (!mine || mine === theirs)) {
       if (!mine) patch.orcid = theirs;
@@ -1274,6 +1291,13 @@
         .catch(function (err) {
           go.disabled = false;
           $('#oa-merge-other', wrap).hidden = false;
+          /* THE RETRY MUST SURVEY AGAIN. `mine` was taken when the card opened,
+             and a merge that stopped half way has already handed some postings
+             over: replayed, handOver's "already the kept account's" test reads
+             the old snapshot, re-issues the move on a document the caller no
+             longer owns, and the rules refuse it, so "try again" could never
+             succeed. Dropping the snapshot makes runMerge take a fresh one. */
+          mine = null;
           say('The merge stopped: ' + (friendly(err) || (err && err.message) || 'unknown error') +
               ' Nothing was deleted — you can try again.', 'err');
           if (window.console) console.error('OA merge:', err);

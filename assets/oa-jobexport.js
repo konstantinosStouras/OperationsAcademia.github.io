@@ -299,9 +299,19 @@
     meta = meta || {};
     var at = meta.at instanceof Date ? meta.at : new Date();
     var data = (rows || []).filter(Boolean);
-    var filters = (meta.filters || []).filter(function (f) {
-      return f && f.values && f.values.length;
-    });
+    /* through txt(), and only the values that survive it: a search box
+       holding spaces reaches the engine's activeFilters() raw and narrows
+       nothing, and recorded here it made the About sheet claim a filter
+       over a file that in fact held every posting the page was showing */
+    var filters = (meta.filters || []).map(function (f) {
+      if (!f) return null;
+      var vals = (f.values || []).map(txt).filter(Boolean);
+      if (!vals.length) return null;
+      var copy = {};
+      for (var k in f) if (Object.prototype.hasOwnProperty.call(f, k)) copy[k] = f[k];
+      copy.values = vals;
+      return copy;
+    }).filter(Boolean);
 
     var dataRows = [COLUMNS.map(function (c) { return c.header; })];
     data.forEach(function (r) {

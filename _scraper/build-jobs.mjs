@@ -40,6 +40,8 @@ import {
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
 import { buildVocab, serialiseVocab, SCHOOLS, campusCountries, healCountry } from './vocab.mjs';
+import { adminUids } from './_mail.mjs';
+import { ADMIN_EMAILS } from './build-candidate-stats.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -220,6 +222,14 @@ async function transferUploads(db, live, { now }) {
     return patched;
   }
 
+  /* AND THE MAINTAINER'S OWN UIDS. A Storage path is `uploads/{the
+     UPLOADER's uid}/...`, so when the maintainer attaches an advert while
+     correcting somebody else's posting, the uid in the path is theirs and
+     not the document's. Checked against the poster alone, the file was
+     cleared with a warning in a log nobody reads and the advert silently
+     never published. An empty set is the old behaviour exactly. */
+  const admins = await adminUids(ADMIN_EMAILS);
+
   for (const d of pending) {
     const v = d.data();
     try {
@@ -234,8 +244,8 @@ async function transferUploads(db, live, { now }) {
         await d.ref.update({ adUploadPath: null, adUploadName: null, adUploadType: null, adUploadSize: null });
         continue;
       }
-      if (v.uid && m[1] !== v.uid) {
-        warn(`advert uploads: ${v.ref || d.id} path does not belong to its poster — cleared`);
+      if (v.uid && m[1] !== v.uid && !admins.has(m[1])) {
+        warn(`advert uploads: ${v.ref || d.id} path belongs to neither its poster nor the maintainer — cleared`);
         await d.ref.update({ adUploadPath: null, adUploadName: null, adUploadType: null, adUploadSize: null });
         continue;
       }
@@ -608,7 +618,9 @@ async function main() {
      with only a warning in the log. A hand-over that cannot publish falls back
      to the workbook instead. */
   const claimedSheetIds = new Set(sheetDocs.keys());
-  if (db && sheetPresent) {
+  if (db && sheetPresent && DRY) {
+    log('--dry-run: not refreshing the tracking sheet\'s edit handles.');
+  } else if (db && sheetPresent) {
     try {
       await syncSheetMirrors(col, sheetRows, mirrorSnap.docs, claimedSheetIds, { now });
     } catch (e) {
@@ -634,7 +646,20 @@ async function main() {
      season — each is warned about and the posting publishes WITHOUT its File
      link; the upload stays in Storage and the next run retries. A failure here
      must never stop the postings pipeline. */
-  const filed = db ? (await transferUploads(db, live, { now })) || new Map() : new Map();
+  /* NOT UNDER --dry-run, WHICH PROMISES TO WRITE NOTHING. This one uploads
+     the advert to Drive, writes the link onto the document and DELETES the
+     landing-strip object in Storage: the most irreversible thing the build
+     does, and it ran on a dry run, which is documented three lines from the
+     top of this file as "do everything, write nothing". The stamping pass at
+     the end is gated; these two were not. A dry run therefore prints the
+     rows WITHOUT the File links a real run would have filed, and says so. */
+  let filed = new Map();
+  if (db && DRY) {
+    const waiting = live.filter((d) => { const v = d.data() || {}; return v.adUploadPath && !v.adUrl; });
+    log(`--dry-run: not filing ${waiting.length} uploaded advert(s) into Drive; the rows below carry no File link.`);
+  } else if (db) {
+    filed = (await transferUploads(db, live, { now })) || new Map();
+  }
 
   const fresh = [];
   const rejected = [];
@@ -856,6 +881,24 @@ async function main() {
 
   const merged = mergeRows(healed, freshVisible, applicable);
   const visible = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+
+  /* TWO SOURCES CAN MINT ONE ID, and the merge has just renamed whichever it
+     saw second. An id is (market year, institution, posting date) and names no
+     department, so a posting made through the form and an unclaimed row in the
+     tracking workbook can derive the same one for one university on one day.
+     The workbook's rows are LAST in `freshVisible`, so the row renamed is
+     exactly the one whose id is a join key -- to its review-queue document, to
+     its mirror, and to the maintainer's Edit and Take-down controls, none of
+     which follow it.
+
+     Reported, never repaired: a fix would move permalinks and every key joined
+     on them, which this file records as the maintainer's call. What was
+     missing is that nothing said so at all. */
+  for (const r of merged.renamed) {
+    warn(`${r.from} was published as ${r.to}: two sources derived one id` +
+         (r.source ? ` (this row came from ${r.source})` : '') +
+         ' — the id is a join key, so correct one of the two at its source');
+  }
 
   /* EVERY ROW NAMES THE COUNTRY ITS UNIVERSITY IS IN.
 
@@ -1123,12 +1166,19 @@ async function main() {
            all eight "edits" in the reported message were the tracking-sheet
            crawler republishing a degraded read — a fact the message gave the
            maintainer no way to see. */
+        /* SCOPED TO THE OWNER, as every other join on `ref` here is (keyOf,
+           removalSpecs): the reference is minted in the browser, bounded by
+           length alone and published, so keyed on it alone a document
+           carrying somebody else's reference named the wrong person in the
+           maintainer's inbox. The row publishes its owner tag; a document
+           that does not derive it is not the poster's own. */
         const docByRef = new Map();
         for (const d of live.concat(pulled)) {
           const v = d.data() || {};
-          if (v.ref) docByRef.set(v.ref, v);
+          if (v.ref) docByRef.set(v.ref + '|' + (ownerTag(v.uid) || ''), v);
         }
-        const whoFor = (row) => postedBy((row && row.ref && docByRef.get(row.ref)) || null, row);
+        const whoFor = (row) => postedBy(
+          (row && row.ref && docByRef.get(row.ref + '|' + String(row.owner || ''))) || null, row);
         await mail.send(tx, {
           to: process.env.ADMIN_NOTIFY || 'kstouras@gmail.com',
           subject: `[OA] Job postings changed: ${what}`,

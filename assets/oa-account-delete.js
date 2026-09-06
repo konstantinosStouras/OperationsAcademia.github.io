@@ -71,7 +71,18 @@
       Pinned against the create rule's hasOnly() in _firestore.rules BOTH
       WAYS: a key with no rule is a permission-denied nobody can debug, and a
       rule with no writer is dead. */
-  var REQUEST_KEYS = ['uid', 'by', 'email', 'name', 'askedAt', 'status'];
+  /* `orcid` IS ON THE ORDER because the sweep cannot find it afterwards.
+     `accountKeys/orcid:<iD>` is claimed from `profiles.orcid` whatever put it
+     there, and a member may TYPE their iD into their profile with no ORCID
+     sign-in behind it. The browser deletes `profiles/{uid}` itself, minutes
+     before the sweep runs, so by then the profile is gone and there is no
+     `oidc.orcid` provider entry to recover the iD from either -- and nothing
+     but the sweep can delete an identity key. The key then outlived the
+     account it named and went on offering a merge with a uid that no longer
+     exists, which is the exact failure the sweep's own comment describes for
+     the other route. Carried here, like the address, and dropped by
+     `redacted()` when the order is finished. */
+  var REQUEST_KEYS = ['uid', 'by', 'email', 'name', 'orcid', 'askedAt', 'status'];
 
   /** …and every key the SWEEP adds afterwards with the Admin SDK. They are
       deliberately DISJOINT from the list above, and no browser ever updates
@@ -104,7 +115,7 @@
     return s.length > max ? s.slice(0, max) : s;
   }
 
-  var MAXLEN = { email: 200, name: 200, note: 500 };
+  var MAXLEN = { email: 200, name: 200, orcid: 40, note: 500 };
 
   /** The work order itself, as a plain object. Pure, so both writers and the
       selftest mint the identical document, and `now` is injected rather than
@@ -120,8 +131,10 @@
     var doc = { uid: uid, by: by, askedAt: Number(s.now) || 0, status: 'requested' };
     var email = str(s.email, MAXLEN.email).trim();
     var name = str(s.name, MAXLEN.name).trim();
+    var orcid = str(s.orcid, MAXLEN.orcid).trim();
     if (email) doc.email = email;
     if (name) doc.name = name;
+    if (orcid) doc.orcid = orcid;
     return doc;
   }
 
@@ -263,8 +276,19 @@
     return (rows || []).filter(function (r) {
       if (!r) return false;
       if (tag && r.owner === tag) return true;
+      /* A REFERENCE IS ISSUED BY THE FORM AND BY NOTHING ELSE, so it names
+         one submission and cannot be reused: it answers for a row whatever
+         its tag says, which is what makes it the belt.
+
+         AN ID IS NOT LIKE THAT. It is (market year, institution, posting
+         date) plus an ordinal, so when this account's row comes off the site
+         a same-day SIBLING can be renumbered into the id it had published
+         under; matched on that stale id, a row that plainly belongs to
+         somebody else read as "still served", and the deletion waited on it
+         once a build, for ever. So the id answers only where the tag cannot:
+         on a row published before the tag existed. */
       if (r.ref && refs[r.ref]) return true;
-      return !!(r.id && ids[r.id]);
+      return !r.owner && !!(r.id && ids[r.id]);
     });
   }
 
@@ -500,6 +524,7 @@
       by: 'self',
       email: user.email || '',
       name: root.OAAccounts.displayName(),
+      orcid: (root.OAAccounts.profile() || {}).orcid || '',
       now: Date.now()
     });
 
@@ -578,14 +603,21 @@
         return d;
       });
     }).then(function (d) {
-      /* 4. The details, the tally and the roster row. All three are
-            owner-deletes by the rules, and the tally and the row are deleted
-            for the same reason the merge deletes them: the count is of
-            PEOPLE, and a row left behind lists somebody who has gone. */
+      /* 4. The details, the tally, the roster row and the forum's membership
+            marker. All four are owner-deletes by the rules; the tally and the
+            row are deleted for the same reason the merge deletes them (the
+            count is of PEOPLE, and a row left behind lists somebody who has
+            gone), and the marker because it is a uid-keyed document naming a
+            candidate profile and a season, which nothing could reach again
+            once this sign-in has gone. The sweep removes all four as well,
+            since a tab holding a token minted before the sign-in went can
+            put three of them back for up to an hour. */
       return Promise.all([
         d.collection(root.OAFB.col.profiles).doc(uid)['delete']()['catch'](function () {}),
         d.collection(root.OAFB.col.registered).doc(uid)['delete']()['catch'](function () {}),
         d.collection((root.OAFB.col && root.OAFB.col.userDirectory) || 'userDirectory')
+          .doc(uid)['delete']()['catch'](function () {}),
+        d.collection((root.OAFB.col && root.OAFB.col.candidateMarkers) || 'candidateMarkers')
           .doc(uid)['delete']()['catch'](function () {})
       ]).then(function () { stepLine(log, 'Cleared your details.'); });
     }).then(function () {

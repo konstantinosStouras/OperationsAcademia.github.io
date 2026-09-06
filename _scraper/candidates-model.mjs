@@ -334,16 +334,33 @@ export function publicCandidateRow(row) {
 /* Identity must not truncate — jobs-model learned this the hard way when
    slug()'s 48-character cap made two long department names agree. slug() is
    for IDS; this is the same fold with no cap. */
+/* IT KEEPS EVERY SCRIPT'S LETTERS, and that is not tidiness. The fold was
+   `[^a-z0-9]`, so a name written in Chinese, Japanese, Korean, Greek,
+   Cyrillic, Arabic or Hebrew had NO surviving character: every one of them
+   folded to the empty string, every one produced the key "<year>|", and
+   `collapseSameCandidate` therefore read the whole set as ONE person and
+   silently dropped all but the fullest. On a site whose candidates come from
+   everywhere, that is the worst kind of data loss — invisible, and worse the
+   more such profiles there are. Accents still fold (NFD strips the combining
+   marks first, in every script that has them), so "José" and "Jose" are still
+   one name, and two different Chinese names are now two keys instead of one.
+
+   A name that fold leaves EMPTY — punctuation or emoji alone — collapses
+   nothing at all: `sameCandidateKey` answers null, which `collapseBy` already
+   treats as "keyless, never folded", exactly as the owner leg does for an
+   imported row with no account. Two profiles is a visible duplicate; a
+   profile silently removed is not. */
 function normName(s) {
   return String(s ?? '')
     .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
+    .normalize('NFD').replace(/\p{M}+/gu, '')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '');
 }
 
 export function sameCandidateKey(row) {
-  return [row.year, normName(row.name)].join('|');
+  const name = normName(row.name);
+  return name ? [row.year, name].join('|') : null;
 }
 
 /** How much a row carries, so the fullest of a set of repeats is kept. The

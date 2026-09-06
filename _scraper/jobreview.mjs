@@ -32,7 +32,7 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
-  ownUniversitiesLink, universitiesLink, stripRowEmails,
+  ownUniversitiesLink, universitiesLink, stripRowEmails, OPEN_ENDED_RX,
 } from './jobs-model.mjs';
 import { joinDepartment, businessSchoolOf, BUSINESS_SCHOOL_NAME_RX } from './vocab.mjs';
 
@@ -207,7 +207,17 @@ export function cleanEdit(key, value) {
   if (field.list) {
     const want = Array.isArray(value) ? value : [value];
     const kept = want.map((v) => text(v, 80)).filter((v) => field.oneOf.includes(v));
-    return kept.length ? Array.from(new Set(kept)) : undefined;
+    /* AN EMPTY LIST IS A DECISION, not junk. The panel sends `levels: []` when
+       the maintainer unticks every Entry level box, and returning undefined
+       here dropped the key, so `applyEdits` republished the workbook's own
+       levels: the card said "Saved." and nothing changed — the tick box that
+       saves and silently does nothing, which is what "Associate Professor" and
+       "Full Professor" were. A value that is not an array at all is still
+       dropped, which is the rule for junk. The ingest always names at least
+       one level (`levelsFromRank` falls back to Other Ranks), so an empty list
+       can only ever be the maintainer clearing it. */
+    if (!kept.length) return Array.isArray(value) ? [] : undefined;
+    return Array.from(new Set(kept));
   }
 
   let v = text(value, field.max);
@@ -269,8 +279,12 @@ export function applyEdits(row, edits) {
   return stripRowEmails(settlePlace(settleDeadline(out), row));
 }
 
-/** A line that says the search has no closing date rather than naming one. */
-const OPEN_ENDED = /until\s*filled|open\s*until|rolling/i;
+/** A line that says the search has no closing date rather than naming one —
+    jobs-model's OPEN_ENDED_RX, imported. It was a second hand-written copy of
+    that literal, so a change to the rule reached the build and the sheet
+    ingest and stopped here, which is a review card settling a deadline by a
+    rule the row is then published under a different one. */
+const OPEN_ENDED = OPEN_ENDED_RX;
 
 /**
  * The closing date and the line the card shows for it, settled against each
@@ -427,6 +441,16 @@ function dupEntry(r) {
     institution: String(r.institution || ''),
     department: String(r.department || ''),
     posted: String(r.posted || ''),
+    /* THE SEASON AND THE CLOSING DATE, so the card can say WHICH PAGE carries
+       the posting it is naming. The warning linked `/jobs?institution=...`,
+       and a flagged duplicate is by definition of the crawled row's own market
+       year — which is routinely a season the jobs page cannot show, so the
+       link opened a list that by construction did not hold it. These are the
+       two fields beside `posted` that `OAJobNav.inCurrentMarket` reads, which
+       is the site's ONE definition of which of the two list pages a posting is
+       on ("Open the posting opens THE POSTING, on the page that has it"). */
+    year: Number(r.year) || 0,
+    applyByDate: String(r.applyByDate || ''),
   };
 }
 
