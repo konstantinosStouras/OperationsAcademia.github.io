@@ -11537,6 +11537,38 @@ for (const w of [320, 360, 390, 430]) {
     ok(tabsM.tabH.length === 2 && tabsM.tabH.every((h) => h >= 42), `forum mobile (list): the room tabs are 42px targets (got ${tabsM.tabH})`);
     ok(tabsM.askH >= 42, `forum mobile (list): Ask a question is a 42px target (got ${tabsM.askH})`);
     eq(tabsM.overflowX, 0, 'forum mobile (list): no sideways scroll');
+    /* THE CARD ON A PHONE (owner, 2026-09-06, from a screenshot: the tally
+       painted over the title). Measured as geometry off the rendered page:
+       one grid column and no implicit second, the tally a row ABOVE the
+       title, the footer under the question, the strip tucked right, and
+       the lone picker taking the row. */
+    const cardM = await m.evaluate(() => {
+      const card = document.querySelector('#oa-forum-list .oa-card');
+      const box = (n) => n.getBoundingClientRect();
+      const stats = box(card.querySelector('.oa-forum-stats'));
+      const title = box(card.querySelector('.oa-card-title'));
+      const foot = box(card.querySelector('.oa-forum-qfoot'));
+      const note = card.querySelector('.oa-card-lock-note');
+      const c = box(card);
+      const pick = document.querySelector('#oa-forum-list .oa-pick');
+      const bar = document.querySelector('#oa-forum-list .oa-filters');
+      return {
+        cols: getComputedStyle(card).gridTemplateColumns.split(' ').length,
+        statsAbove: stats.bottom <= title.top + 0.5,
+        statsWide: stats.right - stats.left > 100,
+        footBelow: foot.top >= title.bottom - 0.5,
+        noteRight: note ? Math.round(c.right - box(note).right) : null,
+        noteLeft: note ? Math.round(box(note).left - c.left) : null,
+        pickW: pick ? Math.round(box(pick).width) : 0,
+        barW: bar ? Math.round(box(bar).width) : 0,
+      };
+    });
+    eq(cardM.cols, 1, 'forum mobile (card): the question card is ONE column, with no implicit second one for the footer to sit in');
+    ok(cardM.statsAbove && cardM.statsWide, `forum mobile (card): the tally lies ABOVE the title as a row and never over it (${JSON.stringify(cardM)})`);
+    ok(cardM.footBelow, 'forum mobile (card): the tags and the asker sit under the question, not beside it');
+    ok(cardM.noteRight !== null && cardM.noteRight < 40 && cardM.noteLeft > 100,
+      `forum mobile (card): "Open the thread" is tucked to the right, as on a desktop (${cardM.noteLeft}/${cardM.noteRight})`);
+    ok(cardM.pickW >= cardM.barW * 0.8, `forum mobile (list): the lone Tags picker takes the row rather than half of it (${cardM.pickW} of ${cardM.barW})`);
 
     /* one thread, with the reply box open */
     await m.click('#oa-forum-list .oa-card .oa-card-head');
@@ -11555,9 +11587,14 @@ for (const w of [320, 360, 390, 430]) {
         taFont: parseFloat(getComputedStyle(document.getElementById('oa-forum-body')).fontSize),
         send: h(document.getElementById('oa-forum-send')),
         sendRight: document.getElementById('oa-forum-send').getBoundingClientRect().right <= window.innerWidth,
+        accept: (() => { const a = document.querySelector('.oa-forum-accept'); return a ? { h: h(a), parts: a.children.length } : null; })(),
+        h1: parseFloat(getComputedStyle(document.querySelector('.oa-forum-th h1')).fontSize),
       };
     });
     eq(thM.overflowX, 0, 'forum mobile (thread): no sideways scroll');
+    ok(thM.accept && thM.accept.h >= 42 && thM.accept.parts === 2,
+      `forum mobile (thread): the guide tick box is a 42px row of a box and ONE run of words, not three columns (${JSON.stringify(thM.accept)})`);
+    ok(thM.h1 <= 24, `forum mobile (thread): the question title comes down to phone size (${thM.h1}px)`);
     ok(thM.votes.length === 2 && thM.votes.every((h) => h >= 42), `forum mobile (thread): like and dislike are 42px targets (got ${thM.votes})`);
     ok(thM.acts.length >= 3 && thM.acts.every((h) => h >= 42), `forum mobile (thread): Answer, Quote and the post link are 42px targets (got ${thM.acts})`);
     ok(thM.marks.length >= 1 && thM.marks.every((h) => h >= 42), `forum mobile (thread): the bookmark and the tick are 42px targets too (got ${thM.marks})`);
