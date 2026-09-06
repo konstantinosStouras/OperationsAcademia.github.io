@@ -781,7 +781,10 @@ export function healPlace(row, fixes = []) {
      an OVERLAY after canon, never a second canon — normalizeFixes made every
      target canonical, so a fixed row still satisfies the "every posting names
      its place the one way" guard whether or not it has heard of the fix */
-  const canoned = canonPlace({
+  /* canonCOLUMNS here too, and for the same reason: a carried row's three
+     names are in three columns already. canonPlace would take a school with a
+     comma in it apart on every build. */
+  const canoned = canonColumns({
     institution: row.institution,
     school: row.school || '',
     unit: row.unit || '',
@@ -838,12 +841,22 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
     ? { school: text(doc.school, MAXLEN.school), unit: text(doc.unit, MAXLEN.unit) }
     : splitDepartment(text(doc.department, MAXLEN.department));
 
-  /* …and then all three names are canonicalised together, because which of
-     the three a name belongs in is part of what canon() decides — and the
-     approved name corrections are laid on top, the same overlay healPlace
+  /* …and then all three names are canonicalised together — with
+     canonCOLUMNS, never canonPlace. THREE NAMES ALREADY IN THREE COLUMNS say
+     which is which, and canonPlace's job is to take a value APART: over these
+     boxes it split "Rutgers Business School, Newark and New Brunswick" and
+     prepended the campus to the department ("Newark and New Brunswick, Supply
+     Chain Management"), and did the same to half of Clemson's college — the
+     exact mangling this repository already recorded and fixed in the form's
+     own preview and in the review card, and left here, so the row the poster
+     read back and the row the build published disagreed. `splitDepartment`
+     above has already put a document that carries only `department` into two
+     columns, so by this line there is nothing left to take apart.
+
+     The approved name corrections are laid on top, the same overlay healPlace
      applies to a carried row, so a fresh submission typed under a corrected
      spelling publishes under the corrected one. */
-  const canoned = canonPlace({
+  const canoned = canonColumns({
     institution: text(doc.institution, MAXLEN.institution),
     school: parts.school,
     unit: parts.unit,

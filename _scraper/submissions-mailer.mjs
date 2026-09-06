@@ -53,6 +53,7 @@ import { isMain } from './_main.mjs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -62,6 +63,7 @@ import {
 import { postedBy, longDate, marketLabel, assignIds } from './jobs-model.mjs';
 import {
   shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
+  safeError,
 } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -183,7 +185,9 @@ export function renderSubmissionEmail(kind, entry,
  * subject. Deliberately NOT the per-submission card repeated: a hundred of
  * those is not a digest, it is the same mail bomb in one message.
  */
-export function renderSubmissionDigest(items, { site = SITE } = {}) {
+export function renderSubmissionDigest(items, {
+  site = SITE, revealAt = '', now = new Date(),
+} = {}) {
   const reviewUrl = site + '/admin-area';
   /* WHO, per row: a digest is still the only thing the maintainer reads about
      these, so the answer cannot be dropped for arriving in company. Plain
@@ -218,9 +222,21 @@ export function renderSubmissionDigest(items, { site = SITE } = {}) {
     '<p><a href="' + esc(reviewUrl) + '" style="display:inline-block;background:#426394;' +
       'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
       'Look at them on the site</a></p>' +
-    '<p style="color:#5a5f6b;font-size:13px">Nothing is waiting on you — every job posting ' +
-    'is already live, and candidate profiles are held until the reveal date. Each one can be ' +
-    'corrected or taken down from there.</p>';
+    /* WHAT IS TRUE OF THIS DIGEST, on the day it goes. The line said
+       "candidate profiles are held until the reveal date" whatever the date
+       was and whatever the digest contained — so after 14:00 UTC on the
+       reveal day it went on calling live profiles held, and a digest of job
+       postings alone mentioned candidates at all. The single-submission
+       e-mail has asked the module since the reveal became an instant; this
+       one does too. */
+    '<p style="color:#5a5f6b;font-size:13px">Nothing is waiting on you — ' +
+      [items.some((i) => i.kind.tellsPoster) ? 'every job posting is already live' : '',
+       items.some((i) => i.kind.key === 'candidate')
+         ? (OAReveal.describeReveal(revealAt, { now }) || {}).revealed
+           ? 'candidate profiles are on the site'
+           : 'candidate profiles are held until the reveal date'
+         : ''].filter(Boolean).join(', and ') +
+      '. Each one can be corrected or taken down from there.</p>';
 
   return {
     subject: items.length + ' new submissions on Operations Academia',
@@ -447,7 +463,7 @@ async function main() {
     return 0;
   }
 
-  await announceToMaintainer(db, tx, all, revealAt);
+  await announceToMaintainer(db, tx, all, revealAt, now);
   await thankPosters(db, tx, live);
   return 0;
 }
@@ -460,11 +476,11 @@ async function main() {
  * mark, and a stamp that fails is warned about rather than thrown: the e-mail
  * has gone, and leaving the rest unstamped would send it again.
  */
-async function announceToMaintainer(db, tx, all, revealAt) {
+async function announceToMaintainer(db, tx, all, revealAt, now = new Date()) {
   if (!all.length) return;
 
   if (all.length > BURST) {
-    const { subject, html } = renderSubmissionDigest(all);
+    const { subject, html } = renderSubmissionDigest(all, { revealAt, now });
     if (DRY) {
       /* The subject and the ids only: the body carries every poster's
          address ("Posted by: …") and every held candidate's name, and a
@@ -477,7 +493,7 @@ async function announceToMaintainer(db, tx, all, revealAt) {
     try {
       await send(tx, { from: fromAddress(), to: TO, subject, html, text: toPlain(html) });
     } catch (e) {
-      warn(`could not e-mail the digest: ${e.message}`);
+      warn(`could not e-mail the digest: ${safeError(e)}`);
       return;
     }
     const at = new Date().toISOString();
@@ -498,8 +514,15 @@ async function announceToMaintainer(db, tx, all, revealAt) {
     const { subject, html } = renderSubmissionEmail(kind, entry, { revealAt });
 
     if (DRY) {
+      /* THE DOCUMENT, NEVER THE PERSON — the rule --scan already keeps a few
+         lines down, and this branch broke it. The subject is "New <kind>:
+         <headline>", and a candidate's headline is their NAME and their
+         affiliation: for a profile the reveal gate is holding back, a name
+         that is by design in no served file, printed into the Actions log of
+         a PUBLIC repository. A job posting's headline names a university and
+         a department, which the site publishes anyway. */
       log(`\n--- would send to the maintainer about ${kind.one} ${entry.id} ---`);
-      log('subject: ' + subject);   // the body names the poster — see the digest branch
+      log('subject: ' + (kind.tellsPoster ? subject : `New ${kind.one} (held)`));
       continue;
     }
 
@@ -508,7 +531,7 @@ async function announceToMaintainer(db, tx, all, revealAt) {
     } catch (e) {
       /* Left unstamped on purpose, so the next run tries it again — the
          failure that matters is a submission nobody hears about. */
-      warn(`could not e-mail about ${entry.id}: ${e.message}`);
+      warn(`could not e-mail about ${entry.id}: ${safeError(e)}`);
       continue;
     }
 
@@ -560,7 +583,7 @@ async function thankPosters(db, tx, live) {
                        subject, html, text: toPlain(html) });
     } catch (e) {
       /* Unstamped on purpose: the next run tries again. */
-      warn(`could not tell the poster of ${entry.id} that it is live: ${e.message}`);
+      warn(`could not tell the poster of ${entry.id} that it is live: ${safeError(e)}`);
       continue;
     }
 
@@ -584,6 +607,9 @@ function selftest() {
   let pass = 0;
   const fails = [];
   const ok = (c, what) => { if (c) pass++; else fails.push(what); };
+  /* this file's own source, for the checks about what a BRANCH prints — the
+     ones that need a mailbox and a database to reach */
+  const SRC = readFileSync(fileURLToPath(import.meta.url), 'utf8');
 
   const job = KINDS.find((k) => k.key === 'job');
   const cand = KINDS.find((k) => k.key === 'candidate');
@@ -658,6 +684,35 @@ function selftest() {
     'and lists every one of them');
   ok(!/posted through the site[\s\S]*posted through the site/.test(digest.html),
     'said once, not once per submission');
+
+  /* WHAT IS TRUE OF THIS DIGEST, on the day it goes. The closing line said
+     "candidate profiles are held until the reveal date" whatever the date was
+     and whatever the digest held — so from 14:00 UTC on the reveal day it
+     went on calling live profiles held, and a digest of job postings alone
+     mentioned candidates at all. */
+  ok(!/candidate profiles/.test(digest.html),
+    'a digest of job postings alone does not mention candidate profiles');
+  const candMany = Array.from({ length: BURST + 1 }, (_, i) => ({
+    kind: cand, entry: { id: 'c' + i, data: candDoc.data, row: cand.row(candDoc.data) },
+  }));
+  ok(/held until the reveal date/.test(renderSubmissionDigest(candMany,
+    { site: 'https://x.test', revealAt: '2026-10-11', now: new Date('2026-10-10T00:00:00Z') }).html),
+    'a burst of profiles before the reveal is held, and says so');
+  const revealedDigest = renderSubmissionDigest(candMany,
+    { site: 'https://x.test', revealAt: '2026-10-11', now: new Date('2026-10-11T14:00:00Z') });
+  ok(/candidate profiles are on the site/.test(revealedDigest.html)
+     && !/held until/.test(revealedDigest.html),
+    'and from the instant on it stops calling them held — the single e-mail\'s own rule');
+
+  /* THE DOCUMENT, NEVER THE PERSON, in the dry run as well as in --scan. The
+     subject is "New <kind>: <headline>", and a candidate's headline is their
+     NAME and affiliation: for a profile the reveal gate is holding back, a
+     name that is by design in no served file, printed into a public log. */
+  const dryBranch = SRC.slice(SRC.indexOf('--- would send to the maintainer about'),
+    SRC.indexOf('--- would send to the poster of'));
+  ok(dryBranch.length > 200 && dryBranch.length < 3000, 'the dry-run branch is bounded');
+  ok(/kind\.tellsPoster \? subject :/.test(dryBranch),
+    'the dry run prints a headline only for a kind whose posting is public anyway');
 
   /* --- WHO posted it (owner, 2026-08-29) --------------------------------- */
   ok(/Posted by:/.test(one.html), 'the maintainer is told who posted it');

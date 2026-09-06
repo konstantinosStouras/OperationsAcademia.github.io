@@ -100,6 +100,27 @@ export function redact(email) {
   }).join(', ');
 }
 
+/**
+ * An SMTP failure's message, with any address in it taken out.
+ *
+ * A rejection QUOTES THE RECIPIENT: "550 5.1.1 <someone@example.edu>:
+ * Recipient address rejected". Every mailer here logs `err.message` from its
+ * catch, and those logs are the Actions log of a PUBLIC repository — so the
+ * one line printed when a subscriber's or a poster's address fails is the one
+ * line that publishes it, which is exactly what `redact` exists to stop
+ * everywhere else. The rule is already written down for the verification
+ * callable ("neither is an SMTP error's message text, which quotes the
+ * rejected address in full"); this is it, shared, so every mailer keeps it.
+ *
+ * The message is kept otherwise whole — the code and the reason are what a
+ * person needs — and bounded, because a server may return a wall of text.
+ */
+export function safeError(err) {
+  const msg = String((err && err.message) || err || '').slice(0, 500);
+  return msg.replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/g,
+    (a) => redact(a));
+}
+
 export function shell({ title, bodyHtml, manageUrl, unsubUrl }) {
   const foot = manageUrl
     ? `You are receiving this because you asked Operations Academia to tell you about

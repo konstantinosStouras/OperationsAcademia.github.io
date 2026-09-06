@@ -49,6 +49,7 @@ import { longDate, postedBy } from './jobs-model.mjs';
 import { sheetEditUrl, SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import {
   shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
+  safeError,
 } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -373,7 +374,7 @@ async function main() {
     } catch (e) {
       /* Left unstamped on purpose, so the next run tries it again — the
          failure that matters is a posting nobody hears about. */
-      warn(`could not e-mail about ${doc.rowId}: ${e.message}`);
+      warn(`could not e-mail about ${doc.rowId}: ${safeError(e)}`);
       continue;
     }
 

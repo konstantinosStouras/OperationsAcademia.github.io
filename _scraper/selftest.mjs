@@ -2274,6 +2274,42 @@ async function testSchools() {
   eq(S.canonColumns({ institution: 'X', school: 'Ross School of Business Technology and Operations', unit: '' }),
     { institution: 'X', school: 'Stephen M. Ross School of Business', unit: 'Technology and Operations Management' },
     'but a pair somebody wrote down as naming both still names both');
+
+  /* THE ABBREVIATION'S OWN FULL STOP. `\bDept\.?\b` puts the boundary AFTER
+     the optional stop, and "t" to "." is already a boundary — so the stop was
+     never consumed, "Dept. of Operations Management" was spelt "Department.
+     of Operations Management", and the stray stop then stopped the
+     "Department of X" wrapper rule firing at all: the whole wrapper published
+     as the department's name. Three of the four abbreviations were written
+     that way round. */
+  eq(S.canonUnit('Dept. of Operations Management'), 'Operations Management',
+    'a department written "Dept." is the bare field name, like any other');
+  eq(S.canonSchool('Dept. of Operations'), 'Department of Operations',
+    'and the stop never survives into a name');
+  eq(S.canonSchool('Mgmt. Science'), 'Management Science', 'nor after Mgmt.');
+  eq(S.canonSchool('Ops. Management'), 'Operations Management', 'nor after Ops.');
+  eq(S.canonSchool('Info. Systems'), 'Information Systems',
+    'as it never did after Info., which was the one written the right way round');
+  /* ...AND THE BUILD APPLIES THE SAME ONE, which is what makes the preview a
+     preview. `rowFromSubmission` and `healPlace` both take a row whose three
+     names are already in three columns and both went through canonPlace, so
+     the row the poster read back and the row the build published disagreed
+     for exactly the names above: "Rutgers Business School, Newark and New
+     Brunswick" published its campus as part of the DEPARTMENT, and half of
+     Clemson's college did the same. Read with the comments stripped, since
+     the file explains the function it no longer calls. */
+  const modelSrc = (await readFile(path.join(HERE, 'jobs-model.mjs'), 'utf8'))
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  for (const fn of ['rowFromSubmission', 'healPlace']) {
+    const at = modelSrc.indexOf(`export function ${fn}(`);
+    ok(at > 0, `jobs-model: ${fn} is where this expects it`);
+    const body = modelSrc.slice(at, at + 2000);
+    ok(/const canoned = canonColumns\(\{/.test(body),
+      `jobs-model: ${fn} canonicalises three columns with canonColumns`);
+    ok(!/canonPlace\(\{/.test(body),
+      `jobs-model: ...and never with canonPlace, which takes a value APART`);
+  }
+
   const page = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
   ok(page.indexOf('oa-schools.js') !== -1 &&
      page.indexOf('oa-schools.js') < page.indexOf('oa-jobform.js'),
@@ -7060,9 +7096,30 @@ async function testNameFixes() {
     ['University of Nevada, Las Vegas', 'Lee Business School'],
     ['KU Leuven', ''],
     ['ESMT Berlin', ''],
+    /* THE BARE WORD, which is the half the fixture used to coincide on: every
+       case above states "business" only inside a phrase the LONG list already
+       carries, so a twin missing the bare-word rule passed all eight while
+       answering differently from the pipeline for 36 of the 577 served
+       postings. The three below are those postings' own shapes. */
+    ['The Hong Kong Polytechnic University', 'Faculty of Business'],
+    ['KU Leuven', 'Economics and Business'],
+    ['St John Fisher University', 'Business Analytics, Operations Management'],
+    // …and word-bounded, so this is still a university
+    ['Agribusiness University', 'Operations'],
   ]) {
     eq(S.typeGuess(inst, more, ''), typeFromNames(inst, more),
       `typeGuess("${inst}") answers exactly as the pipeline's typeFromNames does`);
+  }
+  /* Over the WHOLE served corpus, not a fixture list — the two halves
+     disagreeing is the failure this twin exists to remove, and a fixture
+     cannot show it if every case coincides. */
+  if (existsSync(JOBS)) {
+    const served = JSON.parse(await readFile(JOBS, 'utf8'));
+    const apart = served.filter((r) =>
+      S.typeGuess(r.institution, r.school || '', r.unit || '')
+        !== typeFromNames(r.institution, r.school || '', r.unit || ''));
+    eq(apart.map((r) => r.id), [],
+      'the form types every served posting exactly as the pipeline does');
   }
   ok(/type: \$\('f-type'\)/.test(await readFile(
     path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8')),
@@ -10533,6 +10590,45 @@ async function testAdminArea() {
    was the worse half: their profiles are held behind the reveal date, so they
    reach no served file, draw no card anywhere on the site, and there was no
    screen that could show them at all.                                        */
+
+/* --------------------------------------------- what a failed send may PRINT
+
+   AN SMTP REJECTION QUOTES THE RECIPIENT: "550 5.1.1 <someone@example.edu>:
+   Recipient address rejected". Every mailer here logs `err.message` from its
+   catch and those logs are the Actions log of a PUBLIC repository, so the one
+   line printed when a subscriber's, a poster's or a feedback submitter's
+   address fails was the one line that published it -- while the same line was
+   carefully calling `redact()` on the address it already had. The rule was
+   written down for the verification callable and kept nowhere else; it is one
+   shared function now, and pinned over every mailer rather than over the four
+   that had it. */
+async function testMailerErrorLogs() {
+  const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
+  ok(/export function safeError\(err\)/.test(mail),
+    'the scrubber is defined once, beside redact()');
+  const M = await import('./_mail.mjs');
+  eq(M.safeError(new Error('550 5.1.1 <someone@example.edu>: Recipient address rejected')),
+    '550 5.1.1 <so***@example.edu>: Recipient address rejected',
+    'and it takes the address out while keeping the code and the reason');
+  eq(M.safeError(new Error('connect ETIMEDOUT 1.2.3.4:587')),
+    'connect ETIMEDOUT 1.2.3.4:587',
+    'a failure with no address in it is printed whole');
+  ok(M.safeError(new Error('x'.repeat(900))).length <= 500,
+    'and a server that answers with a wall of text is bounded');
+
+  for (const f of ['alerts-mailer.mjs', 'submissions-mailer.mjs',
+    'feedback-mailer.mjs', 'jobreview-mailer.mjs']) {
+    const src = (await readFile(path.join(HERE, f), 'utf8'))
+      .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+    ok(/safeError/.test(src), `${f} scrubs the failures it prints`);
+    /* Every line that reports a SEND failure — the ones an SMTP server can
+       answer with a quoted address. A stamp failure is Firestore's and
+       carries none. */
+    const bad = (src.match(/^.*could not (?:send|e-mail|forward|tell)[^\n]*$/gm) || [])
+      .filter((l) => /\$\{(?:e|err)\.message\}/.test(l));
+    eq(bad, [], `${f}: no send failure prints a raw SMTP message`);
+  }
+}
 
 async function testSubmissionNotices() {
   const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
@@ -16843,6 +16939,7 @@ if (isMain(import.meta.url)) {
   await testReviewWiring();
   testTwoDeadlines();
   await testTwoDeadlinesWiring();
+  await testMailerErrorLogs();
   await testSubmissionNotices();
   await testPostedByAndLiveEmail();
   await testCandidateProfilePolicy();
