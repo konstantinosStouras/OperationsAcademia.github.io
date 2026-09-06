@@ -179,6 +179,153 @@
     el.textContent = (EDIT_ID ? 'Listed under the ' : 'Will be listed under the ') +
       (y - 1) + '\u2013' + y + ' job market \u2014 worked out from the date, ' +
       'so there is nothing to choose.';
+    paintMeetingNote();
+  }
+
+  /* ------------------------------------------------ the talks, per day
+
+     Owner, 2026-09-06: a calendar of every candidate's talk at INFORMS,
+     with its time, date and location. The profile has always asked WHICH
+     DAYS a candidate presents; for each ticked day it now asks WHEN and
+     WHERE, in a block drawn under the tick boxes while the day is ticked:
+     the session's start time, its code in the programme, the room and the
+     talk's title. What is read is what a TICKED day's block says (readTalks),
+     so unticking a day drops its details from the next save without the
+     candidate having to clear four boxes. The date is never asked: it is
+     the meeting's Sunday plus the day's index (assets/oa-informs.js), which
+     is also what names the block. The keys and bounds are candidates-model's
+     TALK_KEYS / TALK_MAXLEN, pinned by the selftest. */
+  var TALK_KEYS = ['at', 'session', 'room', 'title'];
+  var TALK_MAXLEN = { at: 5, session: 40, room: 120, title: 200 };
+  var TALK_LABELS = {
+    at: 'Session starts at',
+    session: 'Session code',
+    room: 'Room',
+    title: 'Title of your talk'
+  };
+  var TALK_HINTS = {
+    at: 'The meeting\u2019s local time, as the programme prints it. Sessions run 90 minutes.',
+    session: 'e.g. MB12',
+    room: 'e.g. Moscone Center, Room 2004',
+    title: ''
+  };
+
+  function meeting() {
+    var M = window.OAInforms;
+    return M && M.meetingFor ? M.meetingFor(postingYear()) : null;
+  }
+
+  /** "2026 INFORMS Annual Meeting, San Francisco, 1 to 4 November 2026" in
+      the hint, where the season's meeting is recorded; the bare words
+      otherwise. */
+  function paintMeetingNote() {
+    var el = $('f-days-meeting');
+    if (!el) return;
+    var m = meeting();
+    el.textContent = (m && window.OAInforms.describe(m)) || 'INFORMS Annual Meeting';
+    syncTalkBlocks();
+  }
+
+  function talkBlockEl(day) {
+    return $('f-talk-' + String(day).toLowerCase());
+  }
+
+  /** The block for one day, built once and shown while the day is ticked. */
+  function talkBlock(day) {
+    var slug = String(day).toLowerCase();
+    var block = document.createElement('div');
+    block.className = 'oa-talk';
+    block.id = 'f-talk-' + slug;
+    block.setAttribute('data-day', day);
+    block.hidden = true;
+    var h = document.createElement('p');
+    h.className = 'oa-talk-h';
+    block.appendChild(h);
+    var row = document.createElement('div');
+    row.className = 'oa-row oa-talk-row';
+    TALK_KEYS.forEach(function (k) {
+      var field = document.createElement('div');
+      field.className = 'oa-field oa-talk-f oa-talk-' + k;
+      var label = document.createElement('label');
+      label.htmlFor = 'f-talk-' + slug + '-' + k;
+      label.textContent = TALK_LABELS[k];
+      var input = document.createElement('input');
+      input.type = k === 'at' ? 'time' : 'text';
+      input.id = label.htmlFor;
+      input.setAttribute('data-day', day);
+      input.setAttribute('data-key', k);
+      input.autocomplete = 'off';
+      if (k === 'at') input.step = '300';
+      else input.maxLength = TALK_MAXLEN[k];
+      if (TALK_HINTS[k] && k !== 'at') input.placeholder = TALK_HINTS[k];
+      field.appendChild(label);
+      field.appendChild(input);
+      if (k === 'at') {
+        var hint = document.createElement('p');
+        hint.className = 'oa-hint';
+        hint.textContent = TALK_HINTS.at;
+        field.appendChild(hint);
+      }
+      row.appendChild(field);
+    });
+    block.appendChild(row);
+    return block;
+  }
+
+  /** Draw the four blocks once, under the tick boxes, in day order. */
+  function buildTalkBlocks() {
+    var host = $('f-talks');
+    if (!host || host.childNodes.length) return;
+    var days = (window.OAInforms && window.OAInforms.DAYS) ||
+      ['Sunday', 'Monday', 'Tuesday', 'Wednesday'];
+    days.forEach(function (d) { host.appendChild(talkBlock(d)); });
+  }
+
+  /** Show a day's block while its box is ticked, and name the block for the
+      season's meeting ("Your talk on Monday 2 November 2026"). */
+  function syncTalkBlocks() {
+    var host = $('f-talks');
+    if (!host) return;
+    var m = meeting();
+    var M = window.OAInforms;
+    Array.prototype.forEach.call(host.querySelectorAll('.oa-talk'), function (block) {
+      var day = block.getAttribute('data-day');
+      var box = document.querySelector('input[name="informsDays"][value="' + day + '"]');
+      block.hidden = !(box && box.checked);
+      var h = block.querySelector('.oa-talk-h');
+      if (h) h.textContent = 'Your talk on ' + ((m && M.dayLabel) ? M.dayLabel(m, day) : day);
+    });
+  }
+
+  /** The talk map as the submission carries it: the ticked days' blocks,
+      each field trimmed and bounded, a day with nothing typed left out. */
+  function readTalks(days) {
+    var out = {};
+    (days || []).forEach(function (day) {
+      var block = talkBlockEl(day);
+      if (!block) return;
+      var talk = {}, any = false;
+      TALK_KEYS.forEach(function (k) {
+        var el = block.querySelector('[data-key="' + k + '"]');
+        var v = String((el && el.value) || '').trim().slice(0, TALK_MAXLEN[k]);
+        if (v) { talk[k] = v; any = true; }
+      });
+      if (any) out[day] = talk;
+    });
+    return out;
+  }
+
+  /** The inverse, for a loaded profile. */
+  function fillTalks(talks) {
+    buildTalkBlocks();
+    var host = $('f-talks');
+    if (!host) return;
+    Array.prototype.forEach.call(host.querySelectorAll('.oa-talk input'), function (el) {
+      var day = el.getAttribute('data-day'), k = el.getAttribute('data-key');
+      var t = talks && typeof talks === 'object' ? talks[day] : null;
+      el.value = t && t[k] != null ? String(t[k]) : '';
+    });
+    syncTalkBlocks();
   }
 
   function checked(name) {
@@ -291,6 +438,11 @@
     var tickedAreas = checked('researchAreas');
     out.researchAreas = tickedAreas.concat(ownAreas(tickedAreas));
     out.informsDays = checked('informsDays');
+    /* the talk details of the ticked days (owner, 2026-09-06): always an
+       object, and sent even when empty, because an EDIT is an update() and
+       a key left out of the payload would leave last time's details on the
+       document after the candidate cleared them */
+    out.talks = readTalks(out.informsDays);
 
     out.cvUrl = val('f-cvUrl', 'cvUrl');
     out.webUrl = val('f-webUrl', 'webUrl');
@@ -662,6 +814,7 @@
         .filter(function (x) { return x && !listed[x]; }).join(', ');
     })();
     ticks('informsDays', v.informsDays);
+    fillTalks(v.talks);
 
     var ep = $('f-emailPublic');
     if (ep) ep.checked = v.emailPublic === true;
@@ -1087,6 +1240,11 @@
     cvSlot = makeSlot('cv', 'CV');
     // a file chosen, un-chosen or removed is a change, like a typed field
     cvSlot.onChange = function () { dirty = true; paintCardPreview(); };
+    /* the per-day talk blocks: built once, shown while their day is ticked;
+       the form's own delegated change listener repaints the preview */
+    buildTalkBlocks();
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="informsDays"]'),
+      function (box) { box.addEventListener('change', syncTalkBlocks); });
     enterEditMode();
     wireTakeDown();
     paintYearNote();

@@ -1374,6 +1374,42 @@ body.v3 .oa-jobbtn {
   background: var(--bg-2); color: var(--ink-2);
 }
 body.v3 .oa-jobbtn:hover { border-color: var(--brand); color: var(--brand); }
+/* THE DEADLINES TO A CALENDAR (assets/oa-jobcal.js, owner 2026-09-06): the
+   tick box under a dated posting's head and the strip above the list, in
+   the live design's tokens. oa-list.css carries the engine's own rules;
+   both are pinned by selftest.mjs, since a rule in one alone is either
+   invisible on the site or lost on the next page. */
+body.v3 .oa-cal-pick { color: var(--mut); }
+body.v3 .oa-cal-pick .oa-cal-box { accent-color: var(--brand); }
+body.v3 .oa-cal-pick-text { color: var(--ink-2); }
+body.v3 .oa-cal-when { color: var(--mut); }
+body.v3 .oa-cal-picked .oa-cal-pick-text { color: var(--brand); }
+body.v3 .oa-cal-tray {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  color: var(--ink-2);
+}
+body.v3 .oa-cal-btn {
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-2);
+  color: var(--ink-2);
+}
+body.v3 .oa-cal-btn:hover:not([disabled]) { border-color: var(--brand); color: var(--brand); }
+body.v3 .oa-cal-go {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+body.v3 .oa-cal-go:hover:not([disabled]) { background: var(--brand); color: var(--on-brand); border-color: var(--brand); }
+@media (max-width: 640px) {
+  body.v3 .oa-cal-btn { height: 42px; font-size: 15px; }
+  /* a tap has no hover: the press itself answers, gated on the control
+     doing anything, as every phone rule here is */
+  body.v3 .oa-cal-go:active:not([disabled]) { background: var(--brand); color: var(--on-brand); }
+}
 
 /* ==========================================================================
    OA UI (forms, notes, gates, account, modals) — retinted with the tokens.
@@ -1455,6 +1491,10 @@ body.v3 .oa-form input[disabled], body.v3 .oa-modal-card input[disabled] {
   background: var(--bg-3); color: var(--mut);
 }
 body.v3 .oa-check span { color: var(--ink-2); }
+/* the candidate form's per-day talk blocks (oa-ui.css .oa-talk), in the live
+   design's tokens: a panel that paints its own ground names its own ink */
+body.v3 .oa-talk { border-color: var(--line); background: var(--bg-3); color: var(--ink); border-radius: 10px; }
+body.v3 .oa-talk-h { color: var(--ink); }
 
 body.v3 .oa-gate {
   background: var(--bg-2);

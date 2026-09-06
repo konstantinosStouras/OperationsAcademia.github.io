@@ -482,25 +482,44 @@ only describe it, and the maintainer could only guess which one they meant.
 details on every list that draws a posting (`jobs.html`, the one-pager's
 teaser and `previous-markets.html`): the id as a link to its own permalink
 (`hrefFor`, so "copy link address" is the shareable form of the same
-reference), with the form's reference number beside it where the posting has
-one — that is the number the poster was told to keep, and the two together
-answer both people. It lives in `oa-jobnav.js` because that module already
-owns `hrefFor`, and a row that names a page belongs beside the rule that
-decides which page. The html carries its own escaping: an id is derived from
-a name somebody typed.
+reference), and nothing beside it. It lives in `oa-jobnav.js` because that
+module already owns `hrefFor`, and a row that names a page belongs beside the
+rule that decides which page. The html carries its own escaping: an id is
+derived from a name somebody typed.
+
+**ONE identifier, and it is the id** (owner, 2026-09-06, of a card reading
+`2027-university-of-iowa-20260903 · reference OA-JOB-260903-94R8`: *"why do
+you have two 'OA posting ID'? Keep one of them and don't make things too
+complicated. Include one OA posting ID across all postings made this job
+market year."*). The first build printed the form's own reference number
+(`ref`) beside the id where a posting had one, on the reasoning that it was
+the number the poster had been told to keep — so a posting made through the
+form carried two ID-shaped strings under one label while a crawled one
+carried one. The id is the identifier EVERY posting has: the workbook's rows
+and the legacy import mint no `ref`, so it is the only one that can be the
+same across all of them, and it is the permalink. `refRow` does not read
+`ref` at all now, which the selftest pins on a fixture that HAS one and by a
+comment-stripped scan of the function. `ref` keeps every job it had
+elsewhere — the thank-you screen, My postings and the poster's own e-mail
+still print it as "Reference", it is the join for `matchServed` and the
+takedown — none of which is the card; folding those into the id is a further
+step the owner has not asked for.
 
 **"Publicly shown" means every signed-in reader, not the maintainer alone**
 — it is a card row like the others, so the gate treats it as one: a reader
 who has not registered sees its LABEL in the blurred strip and nothing else,
 which is the same answer the gate gives every other detail. The leak check
-skips `id` already (it is the element's own id attribute), and the reference
-never reaches a locked card because no row does.
+skips `id` already (it is the element's own id attribute), and there is
+nothing else in the row to leak, since the reference is not drawn at all.
 
-Tests: `testJobNavModule` (the row's label and link, the reference beside it,
-a crawled posting showing the id alone, markup rendered inert, and the wiring
-on all three pages — last row, through the module, module loaded first) and
-the gated-list block in `page-test.mjs`, which opens a card signed in on both
-pages and reads the last row against the card's own element id.
+Tests: `testJobNavModule` (the row's label and link, the same html with or
+without a reference so `ref` is provably unread, the retired second half's
+class absent, a crawled posting's row pinned whole, markup rendered inert,
+the function's own source free of `ref`, and the wiring on all three pages —
+last row, through the module, module loaded first) and the gated-list block
+in `page-test.mjs`, which opens a card signed in on both pages and reads the
+last row against the card's own element id, the whole cell asserted to hold
+that one identifier and nothing beside it.
 
 ## The HigherEdJobs postings are checked against their own ads
 
@@ -5163,6 +5182,151 @@ sign-in box and goes nowhere; signed in it lands on the alerts page with the
 boxes ticked and the note naming the characteristics; a reload does not
 re-fill; a signed-out arrival on the alerts page keeps the prefill across the
 sign-in; the row at 1280px and the stack at 390px).
+
+## Two calendar files: the deadlines a reader chooses, and the candidates' INFORMS talks
+
+Owner, 2026-09-06: *"users can select jobs and then download a calendar
+invitation with their respective deadlines (if any). Jobs with deadline
+'until filled' won't be added on that calendar"*, and *"a calendar with all
+candidates talks times, dates and locations at INFORMS conference. That
+should help anyone who wants to attend their talk."*
+
+    assets/oa-ics.js          the iCalendar writer (RFC 5545: CRLF, TEXT escaping, 75-octet
+                              folding, VTIMEZONE), dual-mode like oa-xlsx.js
+    _scraper/_ics-read.mjs    reads one back, for the two checks (the _xlsx-read.mjs shape)
+    assets/oa-jobcal.js       the deadlines: which dates a posting can give, the tick box on
+                              its card, the strip above the list, the file
+    assets/oa-informs.js      WHEN and WHERE each season's INFORMS meeting is, keyed by market year
+    assets/oa-talkcal.js      the talks: one entry per presenting day, timed where the profile
+                              gives a time, the button in the candidates list's bar
+
+**What a deadline entry is.** A posting carries up to two dates, the final
+apply-by and the suggested apply-by (see "Two deadlines per posting"), and
+each becomes an ALL-DAY, TRANSPARENT entry named for what it is, because the
+suggested date matters most to exactly the searches that have no final one.
+A posting with neither is the "until filled" case the owner named: it puts
+nothing on a calendar, so its card is offered NO TICK BOX at all, and a date
+that has already passed adds nothing either (a calendar of expired deadlines
+is noise). **The entry's lines are the owner's own list** (2026-09-06, the
+second instruction): the **Suggested deadline** and the **Final deadline**,
+ALWAYS both, in the card's order, "none given" standing where the posting
+has no such date so an entry never hides the date that closes the search;
+the deadline as listed where the listing says more than the date; the entry
+levels; the **link to the job ad** and the **"posted online at" link**, each
+where the posting has one; the **OA posting ID** under the card's own label
+(`OAJobNav.REF_LABEL`, so the two cannot word it two ways); and the posting's
+own permalink through `OAJobNav.hrefFor`, the one rule for which page
+carries a posting today. The Contact details are not in `data/jobs.json`
+and so cannot be here; the selftest sweeps the built file for anything
+shaped like an address, the way it sweeps the Excel workbook, and pins that
+every field the module reads is in `PUBLIC_FIELDS`.
+
+**The calendar is called "Ops JM '27", and the name follows the season**
+(owner, 2026-09-06: "for any future year, it should update to e.g. Ops JM
+'28, Ops JM '29"). `calName(year)` in `oa-jobcal.js` is the two digits of
+the market year, and the year is `OAJobNav.marketYear(now)`, the one
+definition of the season under way, so the file the jobs page writes is
+named for the market it shows and nothing is edited at the July roll; the
+selftest pins the name for 2027, 2028 and 2029, and that the same code a
+year on names the next season. The talks file is named under the same
+scheme, "Ops JM '27 INFORMS talks", every season it covers named, so the
+two files are one family and tellable apart when both are imported.
+
+**The selection is page memory and nothing else.** Which postings a reader
+ticked is kept in a variable in `oa-jobcal.js`: a reload forgets it, a
+sign-out clears it (a selection made in one session must not be handed to
+whoever signs in next on the same machine), and nothing about it is stored
+or sent anywhere. The ticks survive a repaint because `onCard` redraws each
+box from that memory, and "Tick all listed" ticks every dated posting in the
+filtered set across every page, not the page on screen.
+
+**A strip above the list, not a fourth button in the bar, and that was
+measured.** The filter bar's actions cell holds Clear, the Excel download and
+Save as e-mail alert on one line at 1280px with about 570px to spend; a
+fourth button wraps, and the browser check that the last button holds the
+bar's right edge goes red. More to the point the calendar is about the
+SELECTION the reader makes on the cards, not about the filters, so it sits
+between the bar and the result bar: a sentence saying what to do and how many
+listed postings carry a date still to come, Tick all listed, the download,
+and Untick all while anything is ticked. The engine gained ONE generic hook
+for it, `cfg.onRender(snapshot)`, called after every repaint with what an
+action is handed, so the strip's numbers follow the filters without the page
+guessing when to recount. Drawn for a signed-in reader only, through the
+gate's one definition, and the sign-in card names it as a reason to
+register; the download goes through `whenSignedIn`, the Excel download's own
+gate. The tick strip under a card's head and the strip's buttons are 42px
+targets on a phone (rule 14 in `_MOBILE-STANDARDS.md`).
+
+**The talk details live on the profile, keyed by the day.** A candidate's
+profile has always said WHICH DAYS they present (`informsDays`, Sunday to
+Wednesday); for each ticked day it may now say WHEN and WHERE: `talks` is a
+map keyed by the day name, each day a map of at most `at` (HH:MM, the
+meeting's local time), `session`, `room` and `title`, bounded by
+`TALK_MAXLEN` in `candidates-model.mjs` and pinned against the rules'
+`talkOk` both ways, key by key and bound by bound. Keying on the day is what
+ties a talk to a day the candidate actually ticked, and the DATE is never
+stored: it is the meeting's Sunday plus the day's index. The form draws one
+block per day under the tick boxes, shown while the day is ticked, and reads
+only the ticked days' blocks, so unticking a day drops its details at the
+next save without four boxes being cleared; `talks` is sent on every save,
+empty or not, because an edit is an `update()` and a key left out would leave
+last time's details on the document. The card gains one "Talk on Monday
+2 November 2026" row per day with details, through `oa-candcard.js`, so the
+list, the account page's preview and the form's live preview say the same
+thing; the twin fixture table carries the talk cases. The create-key
+ceiling went from 34 to 35, and the candidate-stats guard against a
+`keys().hasOnly()` on the document was narrowed to the DOCUMENT's own keys,
+since a nested map's key list is not the trap it guards against.
+
+**`oa-informs.js` is the one record of the meeting**, keyed by market year
+(the meeting held in the autumn of 2026 belongs to 2026-2027, key 2027):
+the opening Sunday, the city, the venue, the programme's address, the zone
+and how long a session runs. 2026-2027 is San Francisco, Moscone Center,
+Sunday 1 to Wednesday 4 November 2026, checked against informs.org on
+2026-09-06. The selftest pins that every `opens` is a Sunday and that `DAYS`
+is the profile's own vocabulary. A season with no record still publishes its
+day names and offers neither dates nor a talks calendar, which is honest
+rather than a guess; when a season's meeting is announced, add its record
+there and nothing else.
+
+**A talk is a TIMED entry in the meeting's own zone, with the VTIMEZONE
+written into the file.** A floating time would be wrong in the one place
+the file is used: a phone imports 10:45 in Boston, flies to San Francisco,
+and shows the talk three hours late. The RFC requires the zone's definition
+beside its TZID, and an app that meets a bare TZID it does not know reads the
+time as the reader's own; the 2026 meeting opens on the very Sunday US clocks
+go back, so the rule is written out with its transitions rather than assumed
+from one day's offset. The entry runs the length of a session (90 minutes)
+from the start given, so whoever attends is there whichever slot the talk
+takes. A day whose time is not on the profile yet is an ALL-DAY entry saying
+so, so a committee still has the day blocked and the profile to come back
+to. The location is the room, the venue (once, even where the room already
+names it) and the city. The candidate's e-mail address is never in the
+file, even where they opted to publish it on the card: the file is where and
+when the talk is, and the way to reach the person stays on the site, behind
+the sign-in the card is behind; the entry links the profile instead, through
+the candidates list narrowed by the engine's own `c_name` key, and the CV.
+The button writes what the list is SHOWING, so a committee can narrow by
+research area first, and is gated like the Excel download.
+
+Tests: `testCalendars` and `testCalendarsWiring` in `_scraper/selftest.mjs`
+(the writer's escaping, folding on octets with no split surrogate, CRLF, the
+all-day and timed shapes, a zone the file does not define left floating, a
+junk date or a bad link refused, the VTIMEZONE's two halves; the meeting
+record; the deadlines over a fixture and over the whole served file, one
+entry per upcoming date, no address, every field read a published one; the
+talk map's sanitising against its twin, the rules' keys, bounds and days
+both ways, the ceiling; the talks over a fixture, the dedupe, the address
+never read; the wiring on every page, the engine hook, both stylesheets, the
+form, the FAQ, the change log, this section, and the frozen archives loading
+none of it) and the calendar block of `_scraper/page-test.mjs` (signed out
+no tick box and no strip; signed in a box on exactly the dated postings,
+ticks surviving a repaint, a real .ics read back with exactly the ticked
+postings' dates, Untick all and Tick all listed, the phone targets; the
+talks calendar over a seeded candidates file, the card's talk row, the file
+with its zone and TZID, narrowing by name narrowing the file, signed out the
+sign-in box; and the form's block appearing with the day, feeding the
+preview, and the document carrying the map).
 
 ## A department that SPONSORED the site, and what that may change
 

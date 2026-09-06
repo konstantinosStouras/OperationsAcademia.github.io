@@ -63,9 +63,48 @@ const OAReveal = require('../assets/oa-reveal.js');
     `addedAt` alone, so an edit never re-announces a profile. */
 export const CANDIDATE_PUBLIC_FIELDS = [
   'id', 'year', 'posted', 'first', 'last', 'name', 'affiliation', 'position',
-  'researchAreas', 'informsDays', 'cvUrl', 'rsUrl', 'webUrl', 'email',
+  'researchAreas', 'informsDays', 'talks', 'cvUrl', 'rsUrl', 'webUrl', 'email',
   'source', 'addedAt', 'updatedAt', 'ref', 'owner',
 ];
+
+/* THE TALK DETAILS (owner, 2026-09-06: "a calendar with all candidates talks
+   times, dates and locations at INFORMS conference"). A profile may say, for
+   each day it is ticked as presenting, WHEN and WHERE: the session's start
+   time, its code in the programme, the room, and the talk's title. Stored
+   as a map keyed by the DAY NAME — the profile's own vocabulary, so a talk
+   can only ever hang off a day the candidate ticked — with these four keys
+   and no others; the rules pin the same four (`talksOk`), and selftest.mjs
+   pins the two lists against each other both ways. `at` is 'HH:MM' on the
+   24-hour clock, the meeting's own local time; anything else is dropped
+   rather than guessed at, and a day with nothing left is dropped whole, so
+   an empty map is the ordinary case and publicCandidateRow skips it. The
+   DATE is never stored: it is the meeting's Sunday plus the day's index,
+   from assets/oa-informs.js, decided where it is drawn. */
+export const TALK_KEYS = ['at', 'session', 'room', 'title'];
+export const TALK_MAXLEN = { at: 5, session: 40, room: 120, title: 200 };
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * The talk map, sanitised: only the days in `days` (the row's own published
+ * informsDays), only TALK_KEYS, every value text()-scrubbed and bounded, the
+ * time refused unless it is a real 'HH:MM'. Pure; `{}` when nothing is left.
+ */
+export function talksFrom(v, days) {
+  const out = {};
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return out;
+  for (const d of days || []) {
+    const t = v[d];
+    if (!t || typeof t !== 'object' || Array.isArray(t)) continue;
+    const talk = {};
+    for (const k of TALK_KEYS) {
+      let s = text(t[k], TALK_MAXLEN[k]);
+      if (k === 'at' && s && !TIME_RE.test(s)) s = '';
+      if (s) talk[k] = s;
+    }
+    if (Object.keys(talk).length) out[d] = talk;
+  }
+  return out;
+}
 
 /* The days an INFORMS Annual Meeting runs, PINNED. The old sheet's display
    tab had to clean this column on the way out — drop `Saturday`, expand
@@ -211,6 +250,7 @@ export function rowFromCandidateSubmission(doc, { now = new Date() } = {}) {
     position,
     researchAreas: freeList(doc.researchAreas),
     informsDays: pickList(doc.informsDays, INFORMS_DAYS),
+    talks: {},           // filled below, from the days that survived
     /* The typed link is preferred over the Drive upload BY CONSTRUCTION, the
        way the old display tab's formula preferred it: the build only files an
        upload into Drive when the document has no cvUrl/rsUrl (see
@@ -231,6 +271,7 @@ export function rowFromCandidateSubmission(doc, { now = new Date() } = {}) {
     ref: text(doc.ref, 40),
     owner: ownerTag(doc.uid),
   };
+  row.talks = talksFrom(doc.talks, row.informsDays);
   row.id = candidateId(row);
   return row;
 }
@@ -267,6 +308,9 @@ export function publicCandidateRow(row) {
     // `updatedAt` too: a profile never edited has no "updated on" line, and
     // an empty stamp on every row would be diff noise for nothing
     if ((k === 'ref' || k === 'email' || k === 'updatedAt') && !row[k]) continue;
+    // `talks` too: most profiles give no session details, and an empty
+    // map on every row would be diff noise for nothing
+    if (k === 'talks' && (!row[k] || !Object.keys(row[k]).length)) continue;
     out[k] = row[k];
   }
   return out;

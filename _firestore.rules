@@ -284,6 +284,7 @@ service cloud.firestore {
             && str('rsUploadPath', 400) && str('rsUploadName', 200)
             && str('rsUploadType', 100)
             && list('researchAreas', 10) && list('informsDays', 10)
+            && talksOk()
             && (!('emailPublic' in request.resource.data)
                 || request.resource.data.emailPublic is bool)
             && request.resource.data.year is int
@@ -293,6 +294,33 @@ service cloud.firestore {
             && !('postedOn' in request.resource.data)
             && !('owner' in request.resource.data)
             && !('featured' in request.resource.data);
+      }
+
+      /* THE TALK DETAILS (owner, 2026-09-06): a map keyed by the day the
+         candidate presents, each day a map of at most four bounded strings
+         (TALK_KEYS / TALK_MAXLEN in _scraper/candidates-model.mjs, pinned
+         against these lists both ways by selftest.mjs). The rules language
+         cannot loop over a map, so the four days are named one by one — the
+         same four the profile's own informsDays vocabulary allows. */
+      function talkStr(d, k, maxLen) {
+        return !(k in request.resource.data.talks[d])
+            || (request.resource.data.talks[d][k] is string
+                && request.resource.data.talks[d][k].size() <= maxLen);
+      }
+      function talkOk(d) {
+        return !(d in request.resource.data.talks)
+            || (request.resource.data.talks[d] is map
+                && request.resource.data.talks[d].keys().hasOnly(['at', 'session', 'room', 'title'])
+                && talkStr(d, 'at', 5) && talkStr(d, 'session', 40)
+                && talkStr(d, 'room', 120) && talkStr(d, 'title', 200));
+      }
+      function talksOk() {
+        return !('talks' in request.resource.data)
+            || (request.resource.data.talks is map
+                && request.resource.data.talks.keys()
+                     .hasOnly(['Sunday', 'Monday', 'Tuesday', 'Wednesday'])
+                && talkOk('Sunday') && talkOk('Monday')
+                && talkOk('Tuesday') && talkOk('Wednesday'));
       }
 
       /* `stats` is written by the Admin SDK alone (_scraper/build-candidate-
@@ -317,10 +345,11 @@ service cloud.firestore {
                     && candShapeOk()
                     && !('stats' in request.resource.data)
                     && !('mergedFrom' in request.resource.data)
-                    // 34 like jobSubmissions: the three affiliation parts
-                    // (2026-08-24) took the form's worst-case key inventory
-                    // past the old 30 — the selftest counts it against this
-                    && request.resource.data.keys().size() <= 34;
+                    // 35: the three affiliation parts (2026-08-24) took the
+                    // form's worst-case key inventory past the old 30, and
+                    // the talk details (2026-09-06) added one more — the
+                    // selftest counts the inventory against this
+                    && request.resource.data.keys().size() <= 35;
 
       allow read: if isOwner(resource.data.uid) || isAdmin();
 

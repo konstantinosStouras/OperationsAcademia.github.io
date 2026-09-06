@@ -31,6 +31,11 @@
    rows, for a list whose dataset is not a served file (the forum reads its
    threads from Firestore). Everything after the rows land is the same.
 
+   `onRender: fn(snapshot)` is called after every repaint with what an
+   action is handed ({ view, rows, total, filters }), for a page that draws
+   something of its own beside the list and needs its numbers to follow the
+   filters (the jobs page's calendar strip, assets/oa-jobcal.js).
+
    FILTER SEMANTICS (matching what Awesome Table did, so results do not shift
    under returning visitors):
      - every filter ANDs with every other filter;
@@ -1046,6 +1051,17 @@
           if (window.console) console.error('OAList: action refresh failed', e);
         }
       });
+      /* PAGE HOOK: the page learns that the list has repainted, with the
+         same snapshot an action is handed. The jobs page's calendar strip
+         (assets/oa-jobcal.js) counts what is listed from it, so its numbers
+         are never a step behind the list — the reason actions are refreshed
+         here rather than by the page guessing when to. After the actions,
+         so a hook may read whatever they set. */
+      if (typeof cfg.onRender === 'function') {
+        try { cfg.onRender(snap || apiSnapshot()); } catch (e) {
+          if (window.console) console.error('OAList: onRender failed', e);
+        }
+      }
       maybeScrollToFocus();
     }
 
