@@ -15804,6 +15804,170 @@ async function testRegisteredUsersFigure() {
     'CLAUDE.md: the chart section records the one function, the constants, the accent, the table override, no em dash');
 }
 
+/* =========================================================================
+   WHAT REGISTRATION ASKS FOR (owner, 2026-09-05)
+
+   Two changes to the "Create your account" card, and they are asymmetric on
+   purpose:
+
+   - the AFFILIATION is compulsory. In this card a required field is a BARE
+     label carrying the `required` attribute (First name, Last name, E-mail,
+     Password) and an optional one carries a "(optional)" chip, so becoming
+     compulsory means losing the chip AND gaining the attribute. The submit
+     guard is not redundant beside it: `required` is satisfied by a box
+     holding only spaces, and the whole point is that the stored profile
+     names a place;
+   - the ORCID iD is still optional and now SAYS it is worth giving, on both
+     cards that ask for it, since the two ask one question and a reader who
+     registers and then opens Edit account must not be told two things.
+
+   The PROFILE card keeps an optional affiliation, and that is the recorded
+   "an edit must stay correctable" rule rather than an oversight: every
+   Google and ORCID registration reaches it with no affiliation (those paths
+   never see this form), as does every account made before the rule, and
+   holding their name and their photograph hostage to a field they were
+   never asked for is the trap this repository has already shipped twice.
+   ====================================================================== */
+async function testRegistrationFields() {
+  const acct = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+
+  /* --- the registration card's own markup ------------------------------- */
+  const regAt = acct.indexOf('\'<form id="oa-auth-form">\'');
+  const regEnd = acct.indexOf('\'<div class="oa-auth-links">\'', regAt);
+  ok(regAt > 0 && regEnd > regAt, 'registration: the card markup was found');
+  const card = acct.slice(regAt, regEnd);
+  ok(card.length > 1500 && card.length < 6000, 'registration: the card slice is the right size');
+
+  ok(/'<label>Affiliation' \+/.test(card),
+    'registration: Affiliation is a BARE label — no "(optional)" chip, which is how this card says a field is required');
+  ok(!/Affiliation <span class="oa-opt">\(optional\)<\/span>/.test(card),
+    'registration: …and the old optional chip is gone, not merely moved');
+  ok(/name="affiliation" maxlength="160" required/.test(card),
+    'registration: …and the box carries the `required` attribute, like the two name boxes');
+  for (const f of ['firstName', 'lastName']) {
+    ok(new RegExp(`name="${f}"[\\s\\S]{0,120}required`).test(card),
+      `registration: ${f} still carries required, so affiliation joins a rule rather than inventing one`);
+  }
+  ok(/'<label>Website <span class="oa-opt">\(optional\)<\/span>'/.test(card),
+    'registration: the website stays optional, so the card still distinguishes the two kinds of field');
+  /* It compels a personal field, so it says where the field goes — in the
+     SITE's own words, the ones the profile card's lede already uses, so the two
+     cards cannot make two different claims about one box. */
+  ok(/'<span class="oa-opt oa-fine">Never published\.<\/span><\/label>'/.test(card),
+    'registration: the affiliation box says where the field goes, under it');
+  ok(/Your affiliation is never published\./.test(acct),
+    'registration: …in the phrase the profile card already uses, so the two agree');
+  const welcomeAt = acct.indexOf("? '<label>Affiliation' +");
+  const welcome = welcomeAt > 0 ? acct.slice(welcomeAt, welcomeAt + 400) : '';
+  ok(welcomeAt > 0 && !/Never published/.test(welcome),
+    'welcome card: …and is NOT given it twice, since its own lede already says it');
+
+  ok(/autocomplete="organization"/.test(card),
+    'registration: the affiliation keeps autocomplete="organization" — it describes the person filling the form in, ' +
+    'which is exactly the test the posting form\'s own autocomplete rule applies');
+
+  /* --- the ORCID wording, on BOTH cards --------------------------------- */
+  const CHIP = '<span class="oa-opt">(highly recommended but optional)</span>';
+  eq((acct.match(/\(highly recommended but optional\)/g) || []).length, 2,
+    'ORCID: the new wording appears exactly twice — the registration card and the profile card, the two places the iD is asked for');
+  ok(card.includes('\'<label>ORCID iD ' + CHIP + '\''),
+    'registration: the ORCID chip reads "highly recommended but optional"');
+  const orcidAt = acct.indexOf('function orcidFieldHTML(');
+  const orcidFn = acct.slice(orcidAt, acct.indexOf('\n  }', orcidAt));
+  ok(orcidAt > 0 && orcidFn.includes('<label>ORCID iD ' + CHIP),
+    'profile card: orcidFieldHTML says the same thing, so the two cards cannot tell a reader different things');
+  ok(!/ORCID iD <span class="oa-opt">\(optional\)<\/span>/.test(acct),
+    'ORCID: no card still calls the iD plainly optional');
+
+  /* --- the profile card is deliberately NOT held to the new rule -------- */
+  const profAt = acct.indexOf('\'<form id="oa-profile-form">\'');
+  const profEnd = acct.indexOf('\'<div class="oa-auth-actions">\'', profAt);
+  ok(profAt > 0 && profEnd > profAt, 'profile card: the form markup was found');
+  const prof = acct.slice(profAt, profEnd);
+  ok(/'<label>Affiliation <span class="oa-opt">\(optional\)<\/span>'/.test(prof),
+    'profile card: an ordinary EDIT still gets the optional chip — correcting a name must not demand an ' +
+    'affiliation of the accounts that were never asked for one');
+  /* The card has a second branch since the provider ask (below): the compulsory
+     box exists, and what keeps the edit surface safe is that NOTHING but an
+     explicit option can reach it. Pin that rather than the absence of the word. */
+  ok(/\(mustAff\s*[\s\S]{0,400}\? '<label>Affiliation' \+/.test(prof),
+    'profile card: the compulsory box is behind mustAff, never the default');
+  ok(/var mustAff = !!\(opts && opts\.requireAffiliation\);/.test(acct),
+    'profile card: …and mustAff is nothing but a caller-passed option, so openProfile() alone is never compulsory');
+  ok(/if \(mustAff && !out\.affiliation\) \{/.test(acct),
+    'profile card: the save guard is conditioned on it too, so an ordinary edit can still clear the box');
+
+  /* --- the guard, and where it sits ------------------------------------- */
+  const subAt = acct.indexOf("$('#oa-auth-form').addEventListener('submit'");
+  const createAt = acct.indexOf('createUserWithEmailAndPassword(f.email.value', subAt);
+  ok(subAt > 0 && createAt > subAt, 'registration: the submit handler and the account creation were found');
+  const guards = acct.slice(subAt, createAt);
+  ok(/var affiliation = String\(f\.affiliation\.value \|\| ''\)\.trim\(\);/.test(guards),
+    'registration: the guard TRIMS, so a box holding only spaces is empty — which is the case `required` lets through');
+  ok(/if \(!affiliation\) \{[\s\S]{0,220}f\.affiliation\.focus\(\);[\s\S]{0,40}return;/.test(guards),
+    'registration: …an empty one refuses, puts the cursor in the box and never reaches the account creation');
+  ok(/say\('Please give your affiliation, the university or company you are at\.'\);/.test(guards),
+    'registration: …with the card\'s own voice, naming the field rather than reporting a code');
+  const affAt = acct.indexOf('var affiliation = String(f.affiliation', subAt);
+  ok(affAt > subAt && affAt < createAt,
+    'registration: the guard sits between the submit handler and the account creation, so a refusal leaves nothing behind');
+
+  /* the trimmed value is what is stored — not a second read of the box, which
+     would put the spaces back on the very field the guard just insisted on */
+  ok(/affiliation: affiliation\.slice\(0, 300\),/.test(acct),
+    'registration: the profile is built from the value the guard trimmed');
+  ok(!/affiliation: String\(f\.affiliation\.value/.test(acct),
+    'registration: …and never from a second, untrimmed read of the box');
+
+  /* --- and NOTHING here needs a rules deploy ---------------------------- */
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  ok(/function str\(field, maxLen\) \{\s*return !\(field in request\.resource\.data\)/.test(rules),
+    'rules: str() makes a field optional BY PRESENCE, so a browser-side requirement needs no rule');
+  ok(/str\('affiliation', 300\)/.test(rules),
+    'rules: the affiliation is still bounded and still optional in profileShape — a profile written before the rule ' +
+    'stays writable by its owner, which is what makes this change inert-free (no deploy)');
+
+  /* the header records the decision, both halves of it */
+  const head = acct.slice(0, acct.indexOf('(function ()'));
+  ok(/AFFILIATION/.test(head) && /2026-09-05/.test(head) && /profile card is deliberately NOT held/.test(head),
+    'accounts: the module header records the compulsory affiliation and why the profile card is exempt');
+
+  /* --- the third road in: a Google or ORCID sign-up ---------------------- */
+  ok(/if \(fresh && cred\.user && cred\.user\.uid\) markAskAffiliation\(cred\.user\.uid\);/.test(acct),
+    'provider sign-up: a BRAND NEW Google or ORCID account is marked to be asked for its affiliation');
+  ok(/var fresh = !!\(cred && cred\.additionalUserInfo && cred\.additionalUserInfo\.isNewUser\);/.test(acct),
+    'provider sign-up: …decided by the credential\'s own isNewUser, so a later sign-in is never asked again');
+  const linkAt = acct.indexOf('function linkProvider(');
+  const link = linkAt > 0 ? acct.slice(linkAt, acct.indexOf('\n  }', linkAt)) : '';
+  ok(linkAt > 0 && !/markAskAffiliation/.test(link),
+    'provider sign-up: LINKING a provider to an existing account marks nothing — that account is not new');
+  ok(/localStorage\.removeItem\(ASK_AFF \+ uid\);/.test(acct) && /var askAff = !leaving && takeAskAffiliation\(uid\);/.test(acct),
+    'provider sign-up: the mark is taken exactly once, so a second page load does not ask again');
+  ok(/if \(dest\) \{ leaving = true; location\.href = dest; \}/.test(acct),
+    'provider sign-up: a sign-up that navigates opens no card on the page it is leaving, or the mark is spent for nothing');
+  ok(/requireAffiliation: askAff && !\(state\.profile \|\| \{\}\)\.affiliation/.test(acct),
+    'provider sign-up: …and an account that somehow already has an affiliation is not asked for one');
+  ok(/additionalUserInfo: \{ isNewUser: !!seed\.newUser \}/.test(
+       await readFile(path.join(HERE, '..', '_scraper', '_fake-firebase.js'), 'utf8')),
+    'shim: a sign-in answers isNewUser, opt-in per seed, so the browser suite can drive a real sign-up');
+
+  /* --- and it is announced, and written down ---------------------------- */
+  const changelog = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
+  const entry = (changelog.updates || []).find((u) => u.id === 'registration-affiliation-2026-09');
+  ok(entry && entry.date === '2026-09-05' && entry.url && /affiliation/i.test(entry.title),
+    'changelog.json announces the compulsory affiliation, dated, with a link');
+  ok(entry && /highly recommended/.test(entry.summary) && /never published/.test(entry.summary)
+     && !/\u2014/.test(entry.title + entry.summary),
+    'changelog: …and says what the ORCID box now claims and where the affiliation goes, with no em dash');
+
+  const claude = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
+  const secAt = claude.indexOf('### …and it asks for an AFFILIATION');
+  const sec = secAt > 0 ? claude.slice(secAt, claude.indexOf('\n## The forum', secAt)) : '';
+  ok(sec.length > 1500 && /2026-09-05/.test(sec) && /required/.test(sec)
+     && /spaces/.test(sec) && /NO RULES CHANGE/.test(sec) && /EDIT surface/.test(sec),
+    'CLAUDE.md: the section records the owner ruling, the two guards, the profile card exemption and that no rules deploy is needed');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -15816,6 +15980,7 @@ if (isMain(import.meta.url)) {
   await testCascadeWiring();
   await testRenamedNamesStillFound();
   await testAccountCounts();
+  await testRegistrationFields();
   await testEveryDatasetNamesPlacesTheSameWay();
   await testNoDuplicateKeys();
   await testScopedUnits();
