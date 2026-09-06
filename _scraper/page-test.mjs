@@ -4617,19 +4617,27 @@ for (const [from, hash] of [
     /* THE POSTING'S OWN ID IS THE LAST LINE (owner, 2026-09-02): the id the
        site uses for it everywhere, as a link to its own permalink, so a
        reader can quote it or copy the address. Measured against the card's
-       own element id rather than a fixture. */
+       own element id rather than a fixture. And the CELL holds that one
+       identifier and nothing else (owner, 2026-09-06: "why do you have two
+       'OA posting ID'? Keep one of them"): the whole row's text is the link's
+       text, so a reference number printed beside it would fail here whether
+       or not this card's posting has one. */
     const idRow = await q.$eval(`${host} .oa-card:first-child`, (li) => {
       const ths = [...li.querySelectorAll('.oa-kv th')];
       const last = ths[ths.length - 1];
       const a = li.querySelector('.oa-kv a.oa-ref');
+      const cell = a ? a.closest('td') : null;
       return { label: last ? last.textContent.trim() : '',
         text: a ? a.textContent.trim() : '', href: a ? a.getAttribute('href') : '',
+        cell: cell ? cell.textContent.replace(/\s+/g, ' ').trim() : '',
         id: li.id.replace(/^job-/, '') };
     });
     eq(idRow.label, 'OA posting ID', `${pageName}: the last row is the posting's ID`);
     eq(idRow.text, idRow.id, `${pageName}: …showing the id the card itself carries`);
     eq(idRow.href, `${pageName}?job=${encodeURIComponent(idRow.id)}`,
       `${pageName}: …as a link to this one posting on this page`);
+    eq(idRow.cell, idRow.id,
+      `${pageName}: …and the cell holds that one identifier and nothing beside it`);
     eq(errors, [], `${pageName}: signed-in run — no uncaught script error`);
     await ctx.close();
   }

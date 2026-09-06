@@ -482,12 +482,28 @@ only describe it, and the maintainer could only guess which one they meant.
 details on every list that draws a posting (`jobs.html`, the one-pager's
 teaser and `previous-markets.html`): the id as a link to its own permalink
 (`hrefFor`, so "copy link address" is the shareable form of the same
-reference), with the form's reference number beside it where the posting has
-one — that is the number the poster was told to keep, and the two together
-answer both people. It lives in `oa-jobnav.js` because that module already
-owns `hrefFor`, and a row that names a page belongs beside the rule that
-decides which page. The html carries its own escaping: an id is derived from
-a name somebody typed.
+reference), and nothing beside it. It lives in `oa-jobnav.js` because that
+module already owns `hrefFor`, and a row that names a page belongs beside the
+rule that decides which page. The html carries its own escaping: an id is
+derived from a name somebody typed.
+
+**ONE identifier, and it is the id** (owner, 2026-09-06, of a card reading
+`2027-university-of-iowa-20260903 · reference OA-JOB-260903-94R8`: *"why do
+you have two 'OA posting ID'? Keep one of them and don't make things too
+complicated. Include one OA posting ID across all postings made this job
+market year."*). The first build printed the form's own reference number
+(`ref`) beside the id where a posting had one, on the reasoning that it was
+the number the poster had been told to keep — so a posting made through the
+form carried two ID-shaped strings under one label while a crawled one
+carried one. The id is the identifier EVERY posting has: the workbook's rows
+and the legacy import mint no `ref`, so it is the only one that can be the
+same across all of them, and it is the permalink. `refRow` does not read
+`ref` at all now, which the selftest pins on a fixture that HAS one and by a
+comment-stripped scan of the function. `ref` keeps every job it had
+elsewhere — the thank-you screen, My postings and the poster's own e-mail
+still print it as "Reference", it is the join for `matchServed` and the
+takedown — none of which is the card; folding those into the id is a further
+step the owner has not asked for.
 
 **"Publicly shown" means every signed-in reader, not the maintainer alone**
 — it is a card row like the others, so the gate treats it as one: a reader
@@ -496,11 +512,14 @@ which is the same answer the gate gives every other detail. The leak check
 skips `id` already (it is the element's own id attribute), and the reference
 never reaches a locked card because no row does.
 
-Tests: `testJobNavModule` (the row's label and link, the reference beside it,
-a crawled posting showing the id alone, markup rendered inert, and the wiring
-on all three pages — last row, through the module, module loaded first) and
-the gated-list block in `page-test.mjs`, which opens a card signed in on both
-pages and reads the last row against the card's own element id.
+Tests: `testJobNavModule` (the row's label and link, the same html with or
+without a reference so `ref` is provably unread, the retired second half's
+class absent, a crawled posting's row pinned whole, markup rendered inert,
+the function's own source free of `ref`, and the wiring on all three pages —
+last row, through the module, module loaded first) and the gated-list block
+in `page-test.mjs`, which opens a card signed in on both pages and reads the
+last row against the card's own element id, the whole cell asserted to hold
+that one identifier and nothing beside it.
 
 ## The HigherEdJobs postings are checked against their own ads
 

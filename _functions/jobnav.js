@@ -163,11 +163,20 @@
 
      It is drawn as a link to the posting's own permalink (hrefFor: the one
      card, on whichever page carries it today), so "copy link address" is the
-     shareable form of the same reference. The form's own reference number is
-     printed beside it where the posting has one — that is the number the
-     poster was told to keep, and the two together answer both people. The
-     html is built here with its own escaping because an id is derived from
-     a name somebody typed. */
+     shareable form of the same reference. The html is built here with its
+     own escaping because an id is derived from a name somebody typed.
+
+     ONE identifier, and it is the id (owner, 2026-09-06: "why do you have two
+     'OA posting ID'? Keep one of them and don't make things too complicated.
+     Include one OA posting ID across all postings made this job market
+     year"). The first build printed the form's own reference number (`ref`,
+     OA-JOB-…) beside the id on a posting that had one, so a posting made
+     through the form carried two ID-shaped strings under one label while a
+     crawled one carried one. The id is the identifier EVERY posting has —
+     the workbook's rows and the legacy import mint no `ref` — so it is the
+     one that can be the same across all of them, and `ref` is not read here
+     at all. It keeps its own jobs elsewhere: the poster's own receipt, the
+     takedown and the join in the pipeline. */
   var REF_LABEL = 'OA posting ID';
 
   function escapeHtml(s) {
@@ -179,12 +188,10 @@
   function refRow(row, now) {
     var id = String((row && row.id) || '');
     if (!id) return null;
-    var ref = String((row && row.ref) || '');
     return {
       label: REF_LABEL,
       html: '<a class="oa-ref" href="' + escapeHtml(hrefFor(row, now)) + '">' +
-        escapeHtml(id) + '</a>' +
-        (ref ? ' <span class="oa-ref-sub">&middot; reference ' + escapeHtml(ref) + '</span>' : '')
+        escapeHtml(id) + '</a>'
     };
   }
 

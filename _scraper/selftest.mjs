@@ -1472,7 +1472,15 @@ async function testJobNavModule() {
   /* 3b. THE POSTING'S OWN ID ON THE CARD (owner, 2026-09-02: "add the OA job
      posting ID to each job posting at the bottom of it to be publicly shown
      for easy reference"). One definition, drawn as the last row of every job
-     card, linking to the posting's own permalink. */
+     card, linking to the posting's own permalink.
+
+     AND ONE IDENTIFIER ONLY (owner, 2026-09-06: "why do you have two 'OA
+     posting ID'? Keep one of them … Include one OA posting ID across all
+     postings made this job market year"). The first build printed the form's
+     reference number beside the id where a posting had one, so the row read
+     two ID-shaped strings on a form posting and one on a crawled one. The id
+     is the identifier every posting has, so it is the one kept, and `ref` is
+     not read by the row at all — pinned on a row that HAS one. */
   const refRow = NAV.refRow({ ...NANYANG, ref: 'OA-JOB-260924-AB12' }, NOW);
   eq(refRow.label, NAV.REF_LABEL, 'the row is labelled by the module\'s own constant');
   eq(NAV.REF_LABEL, 'OA posting ID', 'and the label is the owner\'s words');
@@ -1480,17 +1488,36 @@ async function testJobNavModule() {
     'the id itself is the visible text');
   ok(refRow.html.includes('href="' + NAV.hrefFor(NANYANG, NOW) + '"'),
     'linking to the posting\'s own permalink, on the page that carries it');
-  ok(refRow.html.includes('reference OA-JOB-260924-AB12'),
-    'and the form\'s reference is printed beside it where the posting has one');
-  ok(!NAV.refRow(MCGILL, NOW).html.includes('reference'),
-    'while a crawled posting, which has none, shows the id alone');
+  ok(!refRow.html.includes('OA-JOB-260924-AB12') && !/reference/i.test(refRow.html),
+    'and NOTHING beside it: a posting made through the form shows the same one ' +
+    'identifier a crawled posting shows, never its reference number as a second');
+  eq(refRow.html, NAV.refRow({ ...NANYANG, ref: '' }, NOW).html,
+    'the row is the same html with or without a reference — `ref` is not read');
+  ok(!/oa-ref-sub/.test(refRow.html),
+    'and the retired second half\'s class is not in the markup either');
+  eq(NAV.refRow(MCGILL, NOW).html,
+    '<a class="oa-ref" href="' + NAV.hrefFor(MCGILL, NOW) + '">' + MCGILL.id + '</a>',
+    'a crawled posting: the id, the link, and nothing else');
   eq(NAV.refRow({ posted: '2026-08-01' }, NOW), null,
     'no id, no row — the engine skips a null');
   const hostile = NAV.refRow({ id: '<img src=x onerror=alert(1)>', ref: '"><b>x',
     posted: '2026-08-01', year: 2027 }, NOW).html;
   ok(!/<img/.test(hostile) && !/<b>/.test(hostile) && /&lt;img/.test(hostile),
-    'an id or reference carrying markup is rendered inert — the row is html, ' +
-    'and an id is derived from a name somebody typed');
+    'an id carrying markup is rendered inert — the row is html, and an id is ' +
+    'derived from a name somebody typed');
+  {
+    /* The source says so too, comments stripped: the row's builder reads no
+       `ref` and prints no second half, so it cannot be put back by a stray
+       edit while the pins above stay green on a fixture without one. */
+    const navSrc = (await readFile(path.join(HERE, '..', 'assets', 'oa-jobnav.js'), 'utf8'))
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    const fnStart = navSrc.indexOf('function refRow(');
+    const fnEnd = navSrc.indexOf('\n  }', fnStart);
+    ok(fnStart > 0 && fnEnd > fnStart, 'refRow is where the scan expects it');
+    const fnSrc = navSrc.slice(fnStart, fnEnd);
+    ok(!/\.ref\b/.test(fnSrc) && !/reference/.test(fnSrc) && !/oa-ref-sub/.test(fnSrc),
+      'refRow reads no `ref` and prints no reference: one identifier, by construction');
+  }
 
   /* …and every list that draws a posting draws it LAST, through the module —
      the jobs page, the one-pager's teaser and Previous markets. */
@@ -5726,7 +5753,13 @@ async function testAccountDeletion() {
     'the FAQ answers it where people look');
 
   const changelog = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8'));
-  ok(/delet/i.test(changelog.updates[0].title + changelog.updates[0].summary),
+  /* Found by id, not at index 0: the log is newest first, so anything shipped
+     since sits above it, and "announced, newest first" means nothing OLDER
+     than its own day is above it. */
+  const delAt = changelog.updates.findIndex((u) => u.id === 'delete-your-account-2026-09');
+  ok(delAt >= 0 && /delet/i.test(changelog.updates[delAt].title + changelog.updates[delAt].summary),
+    'and it is announced');
+  ok(changelog.updates.slice(0, delAt).every((u) => u.date >= changelog.updates[delAt].date),
     'and it is announced, newest first');
 
   /* ------------------------------------------------------------ the styling */
@@ -15856,10 +15889,11 @@ async function testRegisteredUsersFigure() {
   /* the announcements */
   const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
   /* Found by id rather than by index: a later feature shipped the same day
-     (the forum) sits above them, and "at the top" means among that day's
-     entries, adjacent and in this order. */
+     (the forum) or since sits above them, and "at the top" means under
+     nothing OLDER than their own day, adjacent and in this order. An index
+     bound here went red the day the next entry landed. */
   const figAt = log.findIndex((u) => u.id === 'registered-users-figure-2026-09');
-  ok(figAt >= 0 && figAt <= 2 && log.slice(0, figAt).every((u) => u.date === '2026-09-05'),
+  ok(figAt >= 0 && log.slice(0, figAt).every((u) => u.date >= '2026-09-05'),
     'changelog: the two figures are announced at the top, under nothing older than their own day');
   eq([log[figAt].id, log[figAt + 1].id], ['registered-users-figure-2026-09', 'community-growth-chart-2026-09'],
     'changelog: the two figures are announced together, in this order');
