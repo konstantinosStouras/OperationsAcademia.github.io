@@ -9,6 +9,20 @@
    COPY {n, by, text} (null on a reply that quotes nothing), so a later edit
    or removal of the original never rewrites the reply. Thread and post ids are Firestore auto-ids.
 
+   forumPost({ room, warm: true }) -> { warm: true }
+
+   A WARM-UP, and nothing else. A callable is a Cloud Run service that goes
+   cold after a few idle minutes, and this forum is quiet enough that most
+   posts would otherwise land on a cold one: two to five seconds of module
+   loading and a Secret Manager read before the post is even looked at. The
+   page sends this the moment a reader starts writing, so the instance, its
+   modules and the season's secret are ready by the time they press Post. It
+   runs the whole preamble (who is calling, which room, which handle), then
+   answers without reading or writing anything else; a refused caller is
+   refused exactly as a post would be. Before this branch was deployed the
+   same call was refused for its empty body, which warmed the instance just
+   the same, so the page ignores whatever the answer is.
+
    The first post a member ever makes needs acceptGuide: true, which stamps
    guideAt on the handle. Every text goes through the guard; every write is
    refused on a locked or hidden thread, on a thread whose QUESTION has been
@@ -60,6 +74,7 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
   const d = req.data || {};
   const room = d.room;
   const m = await P.member(req, room);
+  if (d.warm === true) return { warm: true };
   const { D, Y } = m;
   const body = P.textField(d.body, M.BOUNDS.body, true);
   const accept = d.acceptGuide === true;

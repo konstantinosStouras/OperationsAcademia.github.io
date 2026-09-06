@@ -14,6 +14,11 @@
 
    The caller's own votes for a thread come back from forumThreadVotes in one
    round trip (getAll over the vote refs), so the page can highlight them.
+
+   forumVote({ room, warm: true }) -> { warm: true } is the same warm-up
+   forumPost carries (see post.js): the page sends it when a reader first
+   reaches for a vote button, so the press that follows lands on an instance
+   that is already up. The preamble runs; nothing is read or written after it.
    --------------------------------------------------------------------------- */
 
 'use strict';
@@ -31,6 +36,7 @@ function threadRefFor(D, Y, room, tid) {
 exports.forumVote = onCall(P.OPTS, async (req) => {
   const d = req.data || {};
   const m = await P.member(req, d.room);
+  if (d.warm === true) return { warm: true };
   const { D, Y } = m;
   const v = Number(d.v);
   if (v !== 1 && v !== -1 && v !== 0) P.refuse('invalid-argument', 'bounds');

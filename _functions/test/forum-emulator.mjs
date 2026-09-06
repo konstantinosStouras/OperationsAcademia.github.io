@@ -23,7 +23,7 @@
      the callables  join is idempotent and gives one handle per season; the
                     maintainer joins with no profile and enters both rooms; a
                     thread, a reply with a verified quote (a copy), an edit
-                    inside the window, a vote up / down / withdrawn with the
+                    at any time (there is no window), a vote up / down / withdrawn with the
                     counts and the first post's score following, own-post
                     refused, the guide seeded once per room and refused twice,
                     every guard fixture refused with its reason, a wrong quote
@@ -283,14 +283,39 @@ async function main() {
   /* ------------------------------------------------------------- edit */
   console.log('\nforumEdit');
   const e1 = await call('forumEdit', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'Edited: is a second-year release normal to ask for?' });
-  ok(!e1.error && e1.result.editedAt % 60000 === 0, 'the author edits within the window, stamp on the minute');
+  ok(!e1.error && e1.result.editedAt % 60000 === 0, 'the author edits their own post, stamp on the minute');
   const th1b = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
   ok(/^Edited:/.test(th1b.data().excerpt), 'editing post 1 recomputes the excerpt');
   const e2 = await call('forumEdit', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'not mine' });
   ok(status(e2) === 'PERMISSION_DENIED' && reason(e2) === 'author', 'somebody else cannot edit it');
   await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${t1.result.pid}`).update({ t: M.minute() - 16 * 60000 });
-  const e3 = await call('forumEdit', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'too late' });
-  ok(status(e3) === 'FAILED_PRECONDITION' && reason(e3) === 'window', 'sixteen minutes on, the window has closed');
+  const e3 = await call('forumEdit', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'Edited again, sixteen minutes on: is a second-year release normal to ask for?' });
+  ok(!e3.error && e3.result.editedAt % 60000 === 0, 'sixteen minutes on, still the author\'s to edit: there is no window (owner, 2026-09-06)', JSON.stringify(e3));
+  const th1late = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
+  ok(/^Edited again, sixteen minutes on:/.test(th1late.data().excerpt), 'and the excerpt follows the late edit too');
+
+  /* --------------------------------------------------------- warm-up */
+  console.log('\nforumPost / forumVote warm-up');
+  /* The page sends { room, warm: true } when a reader starts writing, so the
+     post that follows lands on an instance that is already up. It runs the
+     preamble and then nothing: no thread, no post, no tally, no counter. */
+  const countDocs = async () => {
+    const th = await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads`).get();
+    let posts = 0;
+    for (const t of th.docs) posts += (await t.ref.collection('posts').get()).size;
+    return th.size + ':' + posts;
+  };
+  const handleBefore = (await admin.collection('forumHandles').get()).docs.map((d) => JSON.stringify(d.data())).sort().join('|');
+  const docsBefore = await countDocs();
+  const w1 = await call('forumPost', tokens.cand, { room: 'candidates', warm: true });
+  ok(!w1.error && w1.result.warm === true, 'forumPost answers a warm-up with { warm: true }', JSON.stringify(w1));
+  const w2 = await call('forumVote', tokens.cand, { room: 'candidates', warm: true });
+  ok(!w2.error && w2.result.warm === true, 'and so does forumVote', JSON.stringify(w2));
+  ok((await countDocs()) === docsBefore, 'a warm-up writes no thread and no post');
+  const handleAfter = (await admin.collection('forumHandles').get()).docs.map((d) => JSON.stringify(d.data())).sort().join('|');
+  ok(handleAfter === handleBefore, 'and touches no counter on the handle');
+  const w3 = await call('forumPost', tokens.open, { room: 'candidates', warm: true });
+  ok(status(w3) === 'PERMISSION_DENIED' && reason(w3) === 'candidate', 'a warm-up from somebody the room refuses is refused exactly as a post would be');
 
   /* ------------------------------------------------------------- vote */
   console.log('\nforumVote');

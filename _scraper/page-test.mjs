@@ -10103,13 +10103,17 @@ for (const w of [320, 360, 390, 430]) {
       pressed: [...document.querySelectorAll('.oa-forum-post.is-first .oa-forum-v')].map((b) => b.getAttribute('aria-pressed')),
       thread: window.__fb.docs[t + '/seed-t1'].score,
       voteDocs: Object.keys(window.__fb.docs).filter((p) => /\/votes\//.test(p)),
-      sent: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumVote').map((e) => e.data.v),
+      /* the warm-up the page sends when the pointer first reaches a vote
+         column is a call of its own ({ room, warm: true }) and carries no v */
+      sent: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumVote' && !e.data.warm).map((e) => e.data.v),
+      warm: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumVote' && e.data.warm === true).map((e) => Object.keys(e.data).sort()),
     }), T);
     eq(v0.score, '0', 'forum (candidate): pressing the same button again withdraws the vote');
     eq(v0.pressed, ['false', 'false'], 'forum (candidate): and nothing is highlighted');
     eq(v0.thread, 0, 'forum (candidate): the thread head\'s score followed the first post\'s net all the way');
     eq(v0.voteDocs, [], 'forum (candidate): a withdrawn vote leaves no vote document');
     eq(v0.sent, [1, -1, 0], 'forum (candidate): the page sent 1, -1 and 0, never a delta of its own');
+    eq(v0.warm, [['room', 'warm']], 'forum (candidate): and woke the voting function ONCE, before the first press, with the room and nothing else');
 
     /* reply with a quote: the copy carries the quoted handle and number */
     await q.click('.oa-forum-post.is-first .oa-forum-act[data-act="quote"]');
@@ -10146,13 +10150,23 @@ for (const w of [320, 360, 390, 430]) {
         sent: { keys: Object.keys(sent).sort(), quote: sent.quote, accept: sent.acceptGuide },
         hash: location.hash,
         acceptGone: !document.getElementById('oa-forum-accept'),
+        /* FASTER POSTED (owner, 2026-09-06): the posting function woken when
+           the box took focus, before the answer was sent; the answer on the
+           page from the receipt, with no second round of votes asked for;
+           the box drawn again empty, the quote gone with it */
+        warm: (() => {
+          const calls = window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumPost');
+          return { n: calls.filter((c) => c.data.warm === true).length, first: calls[0].data.warm === true, keys: Object.keys(calls[0].data).sort() };
+        })(),
+        votesCalls: window.__fb.ops('callable').filter((n) => n === 'forumThreadVotes').length,
+        boxEmpty: document.getElementById('oa-forum-body').value === '' && document.getElementById('oa-forum-quotebox').hidden,
       };
     });
     eq(rep.cite, 'patient owl 7 wrote in #1', 'forum (candidate): the reply carries the quote as a blockquote headed by handle and number');
     eq(rep.link, '#p1', 'forum (candidate): the heading links the quoted post');
     ok(/teaching load question worked/.test(rep.body), 'forum (candidate): the reply\'s own words follow');
     ok(rep.mine && rep.own === 2, 'forum (candidate): the reply is marked as the reader\'s own, with both vote buttons disabled');
-    ok(/^Edit · \d+ min left$/.test(rep.edit || ''), 'forum (candidate): the author is offered Edit with the minutes left');
+    eq(rep.edit, 'Edit', 'forum (candidate): the author is offered Edit, with no countdown: there is no window (owner, 2026-09-06)');
     eq(rep.heading, '1 Answer', 'forum (candidate): the answers band counts, and says answers');
     eq(rep.sortOptions, ['score', 'oldest'], 'forum (candidate): and offers the two orders, highest score first');
     eq(rep.accept, 0, 'forum (candidate): NO tick is offered on somebody else\'s question, whatever this reader thinks of the answer');
@@ -10161,8 +10175,12 @@ for (const w of [320, 360, 390, 430]) {
     eq(rep.sent.keys, ['acceptGuide', 'body', 'quote', 'room', 'tid'], 'forum (candidate): the answer sent room, tid, body, the quote and the acceptance, and no kind');
     eq(Object.keys(rep.sent.quote).sort(), ['n', 'text'], 'forum (candidate): the quote sent is n and text only');
     ok(rep.hash === '#p2' && rep.acceptGone, 'forum (candidate): the page lands on the new post and the acceptance box is gone');
+    eq(rep.warm, { n: 1, first: true, keys: ['room', 'warm'] },
+      'forum (candidate): the posting function was woken ONCE, when the box took focus, with the room and nothing else, before the answer was sent');
+    eq(rep.votesCalls, 1, 'forum (candidate): landing the answer asked for no second round of votes: the page drew it from the receipt');
+    ok(rep.boxEmpty, 'forum (candidate): the box is drawn again empty, the quote gone with it');
 
-    /* edit the reply inside the window */
+    /* edit the reply: the author's own, at any time (there is no window) */
     await q.click('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="edit"]');
     await q.waitForSelector('.oa-forum-editing textarea', { timeout: 8000 });
     await q.fill('.oa-forum-editing textarea', 'Thank you. The teaching load question worked for me as well.');
@@ -10195,6 +10213,13 @@ for (const w of [320, 360, 390, 430]) {
     eq(lk.text, 'https://ec26.sigecom.org/cfp', 'forum (candidate): the full stop after it is sentence punctuation, not part of the address');
     ok(/Worth a look\./.test(lk.after), 'forum (candidate): and the words after it are still there');
 
+    /* AN EDIT IN PROGRESS SURVIVES A REPAINT (owner, 2026-09-06, the quiet
+       re-read): the box is opened on the reply and half filled, then another
+       post is deleted, which repaints every post; the box has to come back on
+       the same post with the same words. */
+    await q.click('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="edit"]');
+    await q.waitForSelector('.oa-forum-post[data-n="2"] .oa-forum-editing textarea', { timeout: 8000 });
+    await q.fill('.oa-forum-post[data-n="2"] .oa-forum-editing textarea', 'A half-typed correction, not yet saved');
     /* DELETING it: the author's own post, no window, the words really gone */
     q.once('dialog', (d) => d.accept());
     await q.click('.oa-forum-post[data-n="3"] .oa-forum-act[data-act="delete"]');
@@ -10202,6 +10227,14 @@ for (const w of [320, 360, 390, 430]) {
       const p3 = document.querySelector('.oa-forum-post[data-n="3"]');
       return p3 && p3.querySelector('.oa-forum-removed');
     }, null, { timeout: 15000 });
+    const kept = await q.evaluate(() => {
+      const ta = document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-editing textarea');
+      return { open: !!ta, text: ta ? ta.value : '', boxes: document.querySelectorAll('#oa-forum-thread .oa-forum-editing').length };
+    });
+    ok(kept.open && kept.text === 'A half-typed correction, not yet saved' && kept.boxes === 1,
+      'forum (candidate): an edit box open on another post survives the repaint with its words, and once');
+    await q.click('.oa-forum-post[data-n="2"] .oa-forum-editing [data-edit="cancel"]');
+    await q.waitForFunction(() => !document.querySelector('#oa-forum-thread .oa-forum-editing'), null, { timeout: 8000 });
     const del = await q.evaluate((t) => {
       const p3 = document.querySelector('.oa-forum-post[data-n="3"]');
       const pid = p3.getAttribute('data-pid');
@@ -10397,8 +10430,8 @@ for (const w of [320, 360, 390, 430]) {
     eq(watched.pressed, 'true', 'forum (watched): the bell says it is on');
     eq(watched.wrote, before, 'forum (watched): watching a tag writes NOTHING to the database, which is the whole point of it');
 
-    eq(await q.evaluate(() => JSON.parse(sessionStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
-      'forum (candidate): the join is remembered for the session under the handle');
+    eq(await q.evaluate(() => JSON.parse(localStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
+      'forum (candidate): the join is remembered on this device under the handle, for the next visit');
     /* THEIR OWN QUESTION, WHICH NOBODY HAS ANSWERED: it goes, and the whole
        thread goes with it, so none is ever left headless (owner, 2026-09-05).
        The thread just posted is the one case an ordinary member may delete. */
@@ -10420,6 +10453,80 @@ for (const w of [320, 360, 390, 430]) {
       'forum (candidate): and it is off the list, rather than standing there headless');
     eq(errors, [], 'forum (candidate): no uncaught script error through the whole conversation');
     await ctx.close();
+  }
+
+  /* -- THE SECOND VISIT (owner, 2026-09-06: "when I enter the forum the page
+        doesn't load immediately"): drawn from this browser's memory BEFORE the
+        session resolves, the join called again behind the page; a join that
+        cannot be reached changes nothing, a join refused by reason forgets
+        the memory and says why ---------------------------------------------- */
+  {
+    const memory = JSON.stringify({ uid: CAND.uid, season: FY, handle: 'quiet heron 42', guideAt: 1, banned: false,
+      rooms: { candidates: true, open: true } });
+    const remember = `try { localStorage.setItem('oa-forum-me', ${JSON.stringify(memory)});
+      localStorage.setItem('oaAuthHint', JSON.stringify({ uid: ${JSON.stringify(CAND.uid)}, name: 'C.' })); } catch (e) {}\n`;
+    /* whether the room was on screen before the session resolved: the
+       attribute mutation that reveals #oa-forum, against OAAccounts.resolved()
+       at that moment (the shim resolves the session only after the three
+       routed bundles have loaded, so a draw from memory lands well before it).
+       Observed on the DOCUMENT node: an init script runs before the document
+       element exists, so that is the one node there is to observe. */
+    const watchEarly = `window.__earlyDraw = null;
+      new MutationObserver(function () {
+        var app = document.getElementById('oa-forum');
+        if (app && !app.hidden && window.__earlyDraw === null) window.__earlyDraw = !(window.OAAccounts && window.OAAccounts.resolved());
+      }).observe(document, { attributes: true, subtree: true, attributeFilter: ['hidden'] });\n`;
+    const { ctx, page: q, errors } = await signedInPage('forum.html',
+      { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum', init: remember + watchEarly });
+    await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    const again = await q.evaluate(() => ({
+      early: window.__earlyDraw,
+      tabs: [...document.querySelectorAll('#oa-forum-rooms .oa-forum-tab')].map((n) => n.getAttribute('data-room')),
+      handle: document.getElementById('oa-forum-myhandle').textContent,
+      joined: window.__fb.ops('callable'),
+      error: document.getElementById('oa-forum-error').hidden,
+      memory: JSON.parse(localStorage.getItem('oa-forum-me') || 'null'),
+    }));
+    eq(again.early, true, 'forum (second visit): the room is drawn from this browser\'s memory BEFORE the session resolves');
+    eq(again.tabs, ['candidates', 'open'], 'forum (second visit): both tabs, from the remembered rooms');
+    eq(again.handle, 'quiet heron 42', 'forum (second visit): under the remembered handle');
+    eq(again.joined, ['forumJoin'], 'forum (second visit): one forumJoin, behind the page, and nothing else');
+    ok(again.error && again.memory && again.memory.uid === CAND.uid, 'forum (second visit): no error, and the memory kept from the answer');
+    eq(errors, [], 'forum (second visit): no uncaught script error');
+    await ctx.close();
+
+    /* the join UNREACHABLE: the room stands, the unreachable-source rule */
+    {
+      const { ctx: c2, page: q2, errors: e2 } = await signedInPage('forum.html',
+        { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum', init: remember,
+          seed: { refuse: { forumJoin: { code: 'unavailable', reason: '' } } } });
+      await q2.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+      const down = await q2.evaluate(() => ({
+        app: !document.getElementById('oa-forum').hidden,
+        error: document.getElementById('oa-forum-error').hidden,
+        tried: window.__fb.ops('callable'),
+        memory: !!localStorage.getItem('oa-forum-me'),
+      }));
+      ok(down.app && down.error && down.memory, 'forum (second visit): a join that cannot be reached changes nothing: the room stays, the memory stays');
+      eq(down.tried, ['forumJoin'], 'forum (second visit): it was tried, once');
+      eq(e2, [], 'forum (second visit, join down): no uncaught script error');
+      await c2.close();
+    }
+    /* the join REFUSED BY REASON: the memory goes and the refusal is shown */
+    {
+      const { ctx: c3, page: q3, errors: e3 } = await signedInPage('forum.html',
+        { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum-error:not([hidden])', init: remember,
+          seed: { refuse: { forumJoin: { code: 'permission-denied', reason: 'verified' } } } });
+      const refused = await q3.evaluate(() => ({
+        app: document.getElementById('oa-forum').hidden,
+        text: document.getElementById('oa-forum-error').textContent,
+        memory: localStorage.getItem('oa-forum-me'),
+      }));
+      ok(refused.app && /Confirm your e-mail address/.test(refused.text), 'forum (second visit): a join refused by reason takes the room off and says why');
+      eq(refused.memory, null, 'forum (second visit): and forgets the memory, so the next visit asks again');
+      eq(e3, [], 'forum (second visit, refused): no uncaught script error');
+      await c3.close();
+    }
   }
 
   /* -- the maintainer, with no profile: both rooms, the guide seeded, a post -- */

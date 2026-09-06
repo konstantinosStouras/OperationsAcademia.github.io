@@ -2845,11 +2845,12 @@ edit or removal of the original never rewrites it. Never the quoted pid.
 ### A post is its author's to delete, at any time
 
 Owner, 2026-09-05: *"a user can delete a post anytime they want"*. There was
-no window on this and there is none now: `forumEdit`'s fifteen minutes are
-about rewriting words other people may already have replied to, and taking
-your own words away is a different act with a different answer.
-`_functions/forum/delete.js` is the seventh callable, and it reads no
-`EDIT_WINDOW_MS` at all, which the selftest pins rather than trusting.
+no window on this and there is none now, and since 2026-09-06 there is none
+on EDITING either (see "The forum opens from what this browser remembers"
+below, where the owner had the fifteen-minute note taken off the page).
+`_functions/forum/delete.js` is the seventh callable, and neither it nor
+`edit.js` reads any window constant, which the selftest pins as an absence
+rather than trusting.
 
 **BUT NOT A QUESTION SOMEBODY HAS ANSWERED**, and that is the owner changing
 their own instruction the same day after seeing what it produced: *"a user
@@ -2942,7 +2943,7 @@ hidden refusals, the locked one NOT refused, the answered refusal counting
 REPLIES, `DELETED_TITLE` gone from the model too, a question always taking its
 thread, the maintainer's two exemptions, and the page's control, confirmation
 and wording), the emulator test's own block against the real function
-(somebody else refused, the author's reply deleted long past the edit window,
+(somebody else refused, the author's reply deleted long after it was posted,
 a second press a success, a quote of it surviving, an answered question
 refused, the maintainer removing other people's replies with `hiddenBy:
 'admin'`, the asker then able to delete the question, a reply refused on a
@@ -3272,9 +3273,12 @@ loading `oa-firebase`, `oa-accounts`, `oa-jobnav`, the three forum modules,
 `OAAccounts.hint()` before the SDK lands (a remembered signed-in reader sees
 "Joining the forum", never a flash of the sign-in card); when the session
 resolves, `pendingUser()` gets the verify prompt (`#oa-forum-verify`), a
-usable account calls `forumJoin` ONCE per session and caches
-`{uid, season, handle, guideAt, banned, rooms}` in `sessionStorage
-'oa-forum-me'`, trusted only for the same uid and season. **The tabs are
+usable account calls `forumJoin` and remembers
+`{uid, season, handle, guideAt, banned, rooms}` in `localStorage
+'oa-forum-me'`, trusted only for the same uid and season, so the next visit
+on that device is drawn from the memory before the session resolves and the
+join is called again behind the page (see "The forum opens from what this
+browser remembers" below). **The tabs are
 drawn from `rooms` in that answer**, never from anything the page decides: a
 non-candidate sees the Open forum alone and one line saying what opens the
 other room (`#oa-forum-roomnote`), a current candidate and the maintainer see
@@ -3304,8 +3308,9 @@ drawn from `forumThreadVotes` once per thread open and a press calls
 `forumVote` with the toggled value (`aria-pressed` on `.oa-forum-v`, own
 posts disabled with a title saying why); Quote takes the selection inside
 that post's body or the whole body cut to `BOUNDS.quote` at a word boundary
-and sends `{n, text}` only; Edit appears on the author's own post for the
-window (a countdown from `t`, the function the authority). Every refusal is
+and sends `{n, text}` only; Edit appears on the author's own live post at
+any time (no window and no countdown since 2026-09-06; the function is the
+authority). Every refusal is
 worded through `REASONS`, which the selftest pins against `ERRORS` in
 `member.js` both ways (plus `auth`), so a code never reaches the screen; the
 guard runs on every keystroke so the refusal the function would give is
@@ -3429,7 +3434,7 @@ back and flips the switch:
   "id": "forum-2026-09",
   "date": "2026-09-05",
   "title": "An anonymous forum, in two rooms",
-  "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post is yours to edit for fifteen minutes and to delete, a question once every reply has gone. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
+  "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post is yours to edit and to delete at any time, a question once every reply has gone. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
   "url": "/forum.html"
 }
 ```
@@ -3799,6 +3804,128 @@ asker ticking their own thread with the answer moving to the top and the
 thread's row following, the untick, the bookmark with its side card, the bell
 writing to localStorage and NOTHING to the database, the archive offering the
 bookmark but no tick, and rule 13's 42px targets for both new controls.
+
+### The forum opens from what this browser remembers, and a post is on the page before the database is asked again
+
+Owner, 2026-09-06: *"make posting appear faster. Also, when I enter the forum
+the page doesn't load immediately and needs a few seconds to refresh."* Both
+were one shape: the page waited on a Cloud Function it did not need to wait
+on. A callable here is a Cloud Run service that goes cold after a few idle
+minutes, and on a forum nobody has been told about yet nearly every call is a
+cold one: seconds of module loading and a Secret Manager read before the
+request is even looked at.
+
+**On entry** the page drew nothing until the SDK had loaded, the session had
+restored and `forumJoin` had answered, and it kept that answer in
+`sessionStorage`, so a forum opened from the address bar in a new tab (which,
+unannounced, is how it is opened at all) paid the cold join every time. Three
+changes, each pinned:
+
+* **The join is remembered on the DEVICE** (`localStorage 'oa-forum-me'`, the
+  same key, trusted only for the same account and season, removed by sign-out
+  beside the seen-marks and the saved posts that were already there), and **a
+  remembered reader is drawn on the first frame**: `boot` reads the account
+  the header hint names, the way the page's own head snippet reads it (a
+  pending account is no account), and draws the rooms, the banner, the side
+  cards and the list with its loading line before the SDK has landed. `db()`
+  waits for the SDK's own first auth answer rather than for this page's
+  listener, so a read started then goes out with the token and never before
+  it. Then `forumJoin` is called again BEHIND the page (`revalidate`): a
+  difference a reader would see (the handle, the rooms, a ban) repaints; a
+  refusal by reason (`verified`, `candidate`, `auth`: the account is no longer
+  admitted) forgets the memory and shows the refusal; anything else, the
+  function unreachable or cold past its timeout, changes nothing, the
+  unreachable-source rule this file applies everywhere. The first visit on a
+  device still waits for the join, because the handle is drawn on the server
+  and nowhere else. **The memory is written only once the session is
+  confirmed** (after the answer, never before the check), or a sign-out
+  pressed while the function was cold would be undone by its answer; and it
+  is forgotten on EVERY path that ends the session, a sign-out press or the
+  SDK answering null for a token it could not renew, the same path on which
+  the accounts module forgets its own hint. The cost, said: until one of
+  those, a device that is not signed out keeps the season's handle beside
+  the account, as it already keeps the account beside the threads it has
+  read and the posts it has saved, and the header hint beside its name and
+  picture. A quiet re-read that lands while an EDIT BOX is open inside a
+  post carries the box and its words across the repaint (`paintPosts`,
+  `reopenEdit`), and a list read from a mount the reader has already left
+  keeps its rows to itself (`listSeq`), since the read now waits for the
+  session and a room can be switched while it does.
+* **The SDK is fetched from the first byte of the page.** `forum.html`
+  preloads the four bundles `oa-firebase.js` appends and preconnects to the
+  two hosts every read and every post goes to. The home page and the forms
+  deliberately do NOT preload it (nothing on screen waits for it there, the
+  rule under "What the page does before the reader sees anything"); this page
+  is the exception, because everything on it is read under the rules. The
+  selftest pins the preload list against `SDK` and `PARTS` in the loader, so
+  a version bump cannot leave the page fetching a bundle nobody asks for. The
+  Functions bundle is fetched at boot for a remembered reader rather than at
+  the first call.
+* **Opening a thread paints its heading from the list's own row** before the
+  posts land, and asks `forumThreadVotes` IN PARALLEL with the posts rather
+  than after them; the buttons take the pressed state when the votes arrive,
+  whichever lands first (`paintVotes`).
+
+**On posting** the page threw the thread away after the function had said yes
+and read it back whole: the thread, every post, and `forumThreadVotes` again,
+a second callable and a second cold start. Now every write of the page's own
+is painted from the function's answer and the reader's own words, then read
+back QUIETLY: an answer (`localPost` from `{tid, pid, n}`, the box drawn again
+empty, the page scrolled to it), a question (`openLocalThread`, the thread
+from the receipt, the room's tag tally moved), an edit, and a deletion (a
+tombstone where it stands, the tick cleared with it). `refreshThread` is the
+quiet half: no loading line, no rebuilt answer box, a repaint only where
+`shapeOf` (the facts the page draws, never the stamps) differs, so anything
+somebody else wrote in the meantime arrives without the reader waiting for it
+and a half-written next answer is never thrown away. `repaintPosts` draws the
+thread whole again only when its STATE changed meanwhile (locked, closed),
+since the box then has to say so.
+
+**And the function is woken before it is needed.** `forumPost` and
+`forumVote` answer `{ room, warm: true }` right after the preamble with
+`{ warm: true }` and no read or write (the emulator test counts the documents
+and the handle's counters before and after); the page sends it once per page
+and per function, the moment a reader focuses a compose box and the moment
+the pointer first reaches a vote column, so the press that follows lands on an
+instance that is already up with its modules loaded and the season's secret
+read. **Until the functions are redeployed the same call is refused for its
+empty body, which warms the instance just the same**, so the page ignores the
+answer either way. Not `minInstances`: that is a monthly bill per function for
+a forum nobody has been told about yet, and it is the owner's call rather than
+a code change.
+
+**THERE IS NO EDIT WINDOW** (owner, the same day, of the side note under the
+sidebar that said a post was editable for fifteen minutes: *"remove this, as
+the user can delete and edit the post any time. A post that has received at
+least one answer cannot be deleted as long as it has at least one reply."*).
+The note is deleted from the page with its stylesheet rule, never hidden;
+`EDIT_WINDOW_MS` is gone from the model (pinned as an absence, so no writer
+can measure against it); `forumEdit` refuses no `window` and `member.js` has
+no such reason; the Edit button is a plain "Edit" on the author's own live
+post; the ask form says "Yours to edit or delete afterwards"; rule 13 of the
+guide says so (press Update the guide in both rooms); and the emulator test
+edits a post sixteen minutes on and expects it to save. The second sentence
+of the instruction was already the rule (`forumDelete`, "A post is its
+author's to delete, at any time" above) and is unchanged. Until the functions
+are redeployed the old `forumEdit` still refuses after fifteen minutes, and
+the page then prints the function's own sentence rather than a worded reason
+of its own.
+
+Tests: `testForum` in `_scraper/selftest.mjs` (the memory in localStorage and
+the sign-out clearing it, the head snippet's own reading of the hint, the read
+that waits for the auth answer, the preload list pinned against the loader,
+the votes asked for before the posts are read, the warm branch after the
+preamble and before any read in both functions, the shim answering it with no
+write, no window anywhere and Edit with no countdown, the side note gone from
+the page and the stylesheet), `_functions/test/forum-emulator.mjs` (the late
+edit saved with its excerpt, the warm-up answered without a document or a
+counter moving, and refused for a caller the room refuses), and the forum
+block of `_scraper/page-test.mjs` (the second visit drawn before the session
+resolves with one `forumJoin` behind it; a join that cannot be reached
+changing nothing; a join refused by reason forgetting the memory and saying
+why; the warm-up sent once on the first focus and once on the first reach for
+a vote, with the room and nothing else; an answer on the page with no second
+votes call and the box drawn again empty; Edit with no countdown).
 
 ## What "immediate" costs, and where the waiting used to be
 

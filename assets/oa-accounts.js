@@ -2922,7 +2922,8 @@
        the next person on this machine must not inherit it, the marks of what
        the last one had read, or the list of what they had saved */
     try {
-      sessionStorage.removeItem('oa-forum-me');
+      localStorage.removeItem('oa-forum-me');
+      sessionStorage.removeItem('oa-forum-me');   // where a page before 2026-09-06 kept it
       localStorage.removeItem('oa-forum-seen');
       localStorage.removeItem('oa-forum-saved');
     } catch (e) { /* ignore */ }

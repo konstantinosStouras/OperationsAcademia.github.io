@@ -503,6 +503,14 @@
     var guard = window.OAForumGuard;
     function bad(text) { return guard && guard.check ? guard.check(String(text || '')) : ''; }
 
+    /* THE WARM-UP the page sends when a reader starts writing or reaches for
+       a vote button ({ room, warm: true }, _functions/forum/post.js and
+       vote.js): the preamble above has run, and the answer is a receipt that
+       writes nothing, so the checks can see it was sent and cost no document */
+    if ((name === 'forumPost' || name === 'forumVote') && data.warm === true) {
+      return Promise.resolve({ data: { warm: true } });
+    }
+
     if (name === 'forumModerate') {
       if (!admin) return simRefuse('permission-denied', 'admin');
       if (data.op === 'seedGuide') {
@@ -642,7 +650,6 @@
 
     if (name === 'forumEdit') {
       if (post.by !== handle) return simRefuse('permission-denied', 'author');
-      if (Date.now() >= Number(post.t) + 15 * 60 * 1000) return simRefuse('failed-precondition', 'window');
       var nb = String(data.body || '').trim();
       if (!nb || nb.length > 4000) return simRefuse('invalid-argument', 'bounds');
       if (bad(nb)) return simRefuse('invalid-argument', bad(nb));
