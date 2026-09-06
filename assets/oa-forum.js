@@ -257,6 +257,22 @@
      modified click (a new tab) is left to the browser. */
   document.addEventListener('click', function (e) {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    /* "Read the forum guide" points at a <details>, and a fragment link
+       scrolls to one without opening it: for every member who has already
+       accepted the guide the panel is collapsed, so the link jumped to a
+       shut box and read as a control that does nothing. */
+    var g = e.target && e.target.closest ? e.target.closest('a[href="#oa-forum-guide"]') : null;
+    if (g) {
+      var panel = $('oa-forum-guide');
+      if (panel) {
+        e.preventDefault();
+        panel.open = true;
+        panel.scrollIntoView({ block: 'center' });
+        var sum = panel.querySelector('summary');
+        if (sum) { sum.setAttribute('tabindex', '-1'); sum.focus({ preventScroll: true }); }
+        return;
+      }
+    }
     var a = e.target && e.target.closest ? e.target.closest('a[href^="forum.html?"]') : null;
     if (!a || !S.me) return;
     var app = $('oa-forum');

@@ -561,7 +561,15 @@ async function main() {
   ok(await canRead(ctx(people.adm), threadPath) && await canRead(ctx(people.adm), openGuide), 'rules: the maintainer reads both rooms with no profile');
   ok(await canList(ctx(people.cand), `forumSeasons/${Y}/rooms/candidates/threads`), 'rules: a candidate LISTS the candidates room threads');
   ok(!(await canList(ctx(people.open), `forumSeasons/${Y}/rooms/candidates/threads`)), 'rules: a non-candidate cannot list them');
-  ok(await canRead(ctx(people.open), `forumSeasons/${Y}`) && await canRead(ctx(people.open), `forumTags/${Y}_candidates`), 'rules: the season head and the tag tally are readable to any verified account');
+  ok(await canRead(ctx(people.open), `forumSeasons/${Y}`), 'rules: the season head is readable to any verified account');
+  /* THE TALLY IS THE ROOM'S. Its id is `{season}_{room}`, so the room is in
+     the path here as surely as it is under forumSeasons, and `verified()`
+     alone handed the Candidates' room's tally, which tags this season's
+     candidates are using and how often, to every member of the Open forum. */
+  ok(await canRead(ctx(people.open), `forumTags/${Y}_open`), 'rules: the OPEN room\'s tag tally is readable to any verified account');
+  ok(!(await canRead(ctx(people.open), `forumTags/${Y}_candidates`)), 'rules: and the CANDIDATES room\'s tally is not, since a tally is a summary of what a room is talking about');
+  ok(await canRead(ctx(people.cand), `forumTags/${Y}_candidates`) && await canRead(ctx(people.adm), `forumTags/${Y}_candidates`),
+    'rules: while a candidate and the maintainer read it, as they read the room');
   ok(!(await canRead(ctx(people.adm), `${postPath}/votes/${newIds[0]}`)), 'rules: nobody reads a vote, the maintainer included');
   ok(!(await canList(ctx(people.adm), `${postPath}/votes`)), 'rules: nor lists them');
   ok(!(await canList(ctx(people.adm), 'forumNames')), 'rules: nobody reads forumNames, the maintainer included');

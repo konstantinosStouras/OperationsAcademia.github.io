@@ -400,7 +400,10 @@ body.v3 .oa-label-tag:hover {
 
 body.v3 .oa-label-tag:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
-body.v3 .oa-label-pinned { background-color: var(--gold); color: var(--on-brand); }
+/* --on-gold, NOT --on-brand: --on-brand flips with the theme because --brand
+   does, and gold does not. White on the light gold measured 3.10:1, which is
+   ordinary label text under AA. */
+body.v3 .oa-label-pinned { background-color: var(--gold); color: var(--on-gold); }
 body.v3 .oa-label-locked { background-color: var(--bg-3); color: var(--ink-2); border: 1px solid var(--line); }
 body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 
@@ -640,6 +643,9 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   cursor: not-allowed;
 }
 
+/* --ink-2, not --mut: this block paints its own ground, and --mut was tuned
+   against --bg, --bg-2 and --bg-3 rather than against --brand-soft, where it
+   measured 4.44:1 in light theme. */
 .oa-forum-who {
   display: inline-flex;
   align-items: center;
@@ -647,7 +653,7 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   padding: 7px 12px;
   border-radius: 8px;
   background: var(--brand-soft);
-  color: var(--mut);
+  color: var(--ink-2);
   font-size: 12.5px;
 }
 
@@ -808,7 +814,14 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   font-size: 13.5px;
 }
 
-.oa-forum-quotebox p { margin: 4px 0 0; white-space: pre-wrap; }
+/* A LONG ADDRESS IN A QUOTE MUST BREAK. `pre-wrap` wraps at whitespace, and
+   an unbroken URL has none: quoted into a post it ran off the card and took
+   the whole page sideways with it, which rule 12 of the mobile standards
+   refuses. `.oa-forum-text` has carried `overflow-wrap: anywhere` all along;
+   the two quote blocks were the ones without it. */
+.oa-forum-quotebox p { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.oa-forum-quotebox, .oa-forum-quote { min-width: 0; overflow-wrap: anywhere; }
+.oa-forum-quote p { overflow-wrap: anywhere; }
 
 .oa-forum-send {
   min-height: 42px;

@@ -690,8 +690,15 @@ service cloud.firestore {
 
     // The tag tallies a room's threads carry, one document per season and
     // room, written by the thread transaction alone.
+    //
+    // READ BY THE ROOM'S OWN READERS, not by every confirmed account. The id
+    // is `{season}_{room}`, so the room is in the path here as surely as it
+    // is under forumSeasons, and `verified()` alone handed the Candidates'
+    // room's tally (which tags this season's candidates are using, and how
+    // often) to every member of the Open forum. A tally is a summary of
+    // what a room is talking about, which is the room's.
     match /forumTags/{id} {
-      allow read: if verified();
+      allow read: if forumReader(id.split('_')[1]);
       allow write: if false;
     }
 
@@ -1014,14 +1021,26 @@ service cloud.firestore {
                        || request.resource.data.t is number)
                    // …and a row the maintainer has RESTORED keeps `hidden:
                    // false` on the document, which every later merge from an
-                   // ordinary account then carries — so an unchanged value
+                   // ordinary account then carries, so an unchanged value
                    // is anyone's, and only CHANGING it is the maintainer's.
+                   //
+                   // OMITTING IT IS CHANGING IT. `request.resource.data` is
+                   // the RESULTING document, so a full set() that leaves the
+                   // field out produces a document without it: tested only
+                   // for the value when present, an ordinary account could
+                   // un-hide the maintainer's takedown by writing the row
+                   // again and simply not mentioning `hidden` (measured
+                   // against the rules engine: ALLOWED). So the field must
+                   // be there exactly when the stored row has it, and carry
+                   // the stored value; introducing it, dropping it and
+                   // flipping it are all the maintainer's alone.
                    && (!('hidden' in request.resource.data)
-                       || (request.resource.data.hidden is bool
-                           && (isAdmin()
-                               || (resource != null
-                                   && 'hidden' in resource.data
-                                   && request.resource.data.hidden == resource.data.hidden))));
+                       || request.resource.data.hidden is bool)
+                   && (isAdmin()
+                       || (('hidden' in request.resource.data)
+                             == (resource != null && 'hidden' in resource.data)
+                           && (!('hidden' in request.resource.data)
+                               || request.resource.data.hidden == resource.data.hidden)));
       allow delete: if isAdmin();
     }
 

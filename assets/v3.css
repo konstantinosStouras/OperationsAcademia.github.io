@@ -61,6 +61,13 @@
   --brand-soft: #e9ebee;
   --on-brand: #ffffff;
   --gold: #b98a3e;
+  /* THE INK ON A GOLD GROUND, AND IT DOES NOT FLIP. --on-brand is white in
+     light and near-black in dark because --brand flips with the theme; gold
+     does not: it is a mid tan in light and a lighter tan in dark, and near-
+     black is the only ink that clears AA on both (7.0:1 and 9.9:1). White on
+     the light gold measured 3.10:1 on the forum's Pinned badge, which is
+     ordinary label text. */
+  --on-gold: #14161a;
   --ok: #2e7d4f;
   --err: #b3413d;
   /* the soft wash each of those two paints its own button with — the filter
@@ -103,6 +110,8 @@
   --brand-soft: rgba(198, 204, 212, 0.13);
   --on-brand: #0d0f12;
   --gold: #d9a55e;
+  /* the same near-black: see the light block above */
+  --on-gold: #14161a;
   --ok: #6fbf92;
   --err: #e08a86;
   /* translucent rather than a mixed hex, like --brand-soft above: the tint

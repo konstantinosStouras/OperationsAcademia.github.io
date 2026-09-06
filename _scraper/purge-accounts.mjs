@@ -109,7 +109,7 @@ export const SUBMISSIONS = [
 /** Everything else keyed on the account, deleted whole. `users/{uid}` carries
     the alerts and the test-e-mail requests as subcollections and is walked
     rather than named, so a subcollection added later is not left behind. */
-export const OWNED_DOCS = ['profiles', 'registeredUsers', 'userDirectory'];
+export const OWNED_DOCS = ['profiles', 'registeredUsers', 'userDirectory', 'candidateMarkers'];
 
 /** …and the documents keyed on the account that NO client may touch in either
     direction, so only this job can ever remove them. `verifyMail/{uid}` is the
@@ -497,10 +497,18 @@ async function clearAccount(fb, uid, order, held) {
   return removed;
 }
 
-/** The three documents an account owns outright. Swept on the clearing pass
-    AND again before the order is closed, because a tab holding a token minted
-    before the sign-in was deleted can re-create two of them for up to an
-    hour. */
+/** The documents an account owns outright. Swept on the clearing pass AND
+    again before the order is closed, because a tab holding a token minted
+    before the sign-in was deleted can re-create three of them for up to an
+    hour: enterSession re-writes the tally mark, syncDirectoryRow the roster
+    row, and opening the forum re-writes the membership marker.
+
+    `candidateMarkers/{uid}` is the forum's, and it was missing from this
+    list. It is written by forumJoin and deleted by its owner when they take
+    their profile down; a deletion that skipped it left a uid-keyed document
+    naming a candidate profile and a season behind, readable by the
+    maintainer, that nothing could ever reach again once the sign-in it
+    belonged to was gone. */
 async function sweepOwned(db, uid) {
   let n = 0;
   for (const col of OWNED_DOCS) {
@@ -758,6 +766,13 @@ async function selftest() {
   ok(/\[k, ''\]/.test(anonSrc) && !/FieldValue\.delete/.test(anonSrc),
     'and it BLANKS the field rather than deleting it: the rules bound these keys ' +
     'with str(), and a key that has gone is a different shape from a blank one');
+  /* THE FORUM'S MEMBERSHIP MARKER IS THE ACCOUNT'S TOO. `candidateMarkers/
+     {uid}` is written by forumJoin and deleted by its owner when they take
+     their profile down; missing from this list, a deletion left a uid-keyed
+     document naming a candidate profile and a season behind, readable by the
+     maintainer, that nothing could reach again once the sign-in was gone. */
+  ok(OWNED_DOCS.includes('candidateMarkers'),
+    'purge: the forum membership marker is swept with the account\'s other owned documents');
   ok(CLOSED_DOCS.includes('verifyMail') && new RegExp('CLOSED_DOCS').test(clearSrc),
     'the verification mailer’s own rate-limit document goes too: it is keyed on ' +
     'the account and closed to every client, so nothing else could ever reach it');

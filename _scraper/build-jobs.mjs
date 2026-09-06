@@ -40,6 +40,8 @@ import {
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
 import { buildVocab, serialiseVocab, SCHOOLS, campusCountries, healCountry } from './vocab.mjs';
+import { adminUids } from './_mail.mjs';
+import { ADMIN_EMAILS } from './build-candidate-stats.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -220,6 +222,14 @@ async function transferUploads(db, live, { now }) {
     return patched;
   }
 
+  /* AND THE MAINTAINER'S OWN UIDS. A Storage path is `uploads/{the
+     UPLOADER's uid}/...`, so when the maintainer attaches an advert while
+     correcting somebody else's posting, the uid in the path is theirs and
+     not the document's. Checked against the poster alone, the file was
+     cleared with a warning in a log nobody reads and the advert silently
+     never published. An empty set is the old behaviour exactly. */
+  const admins = await adminUids(ADMIN_EMAILS);
+
   for (const d of pending) {
     const v = d.data();
     try {
@@ -234,8 +244,8 @@ async function transferUploads(db, live, { now }) {
         await d.ref.update({ adUploadPath: null, adUploadName: null, adUploadType: null, adUploadSize: null });
         continue;
       }
-      if (v.uid && m[1] !== v.uid) {
-        warn(`advert uploads: ${v.ref || d.id} path does not belong to its poster — cleared`);
+      if (v.uid && m[1] !== v.uid && !admins.has(m[1])) {
+        warn(`advert uploads: ${v.ref || d.id} path belongs to neither its poster nor the maintainer — cleared`);
         await d.ref.update({ adUploadPath: null, adUploadName: null, adUploadType: null, adUploadSize: null });
         continue;
       }

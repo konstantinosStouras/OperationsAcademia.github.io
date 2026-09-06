@@ -140,6 +140,93 @@ async function contrastOf(page, sel) {
   return page.evaluate(`(${CONTRAST_IN_PAGE})(${JSON.stringify(sel)})`);
 }
 
+/* ------------------------------------------- the forum's own contrast audit
+
+   forum.html cannot join the THEME_PAGES loop: signed out it draws a sign-in
+   card and nothing else, so every surface INSIDE a room went unmeasured. Same
+   compositing arithmetic as contrastOf, run over whichever of these the view
+   on screen actually shows. */
+const FORUM_INK = ['.oa-label-pinned', '.oa-label-locked', '.oa-label-new', '.oa-label-tag',
+  '.oa-forum-who', '.oa-forum-handle', '.oa-forum-text', '.oa-forum-quote',
+  '.oa-forum-removed', '.oa-forum-act', '.oa-forum-score', '.oa-forum-updown',
+  '.oa-forum-cardnote', '.oa-forum-hint', '.oa-forum-bs', '.oa-forum-ex',
+  '.oa-forum-asker', '.oa-forum-when', '.oa-forum-stat i', '.oa-forum-stat b',
+  '.oa-forum-tab', '.oa-forum-crumbs', '.oa-forum-thmeta', '.oa-forum-lede',
+  '.oa-forum-answers-h h2', '.oa-forum-sort', '.oa-forum-n'];
+
+async function forumContrast(q, where) {
+  for (const theme of ['light', 'dark']) {
+    await q.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+    /* WAIT FOR THE DESIGN TO BE IN FORCE, not for a stopwatch: until the
+       cascade settles the body paints a default grey that is neither theme,
+       and measured then every muted line reads as a dark-theme failure. The
+       THEME_PAGES loop learnt this in 2026-08; the same wait, for the same
+       reason. */
+    await q.waitForFunction(() => {
+      const want = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+      if (!want) return false;
+      const probe = document.createElement('span');
+      probe.style.color = want;
+      document.body.appendChild(probe);
+      const resolved = getComputedStyle(probe).color;
+      probe.remove();
+      return getComputedStyle(document.body).backgroundColor === resolved;
+    }, { timeout: 8000 });
+      const low = await q.evaluate((sels) => {
+        const parse = (css) => {
+          const m = String(css).match(/[\d.]+/g);
+          if (!m || m.length < 3) return null;
+          return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 };
+        };
+        const over = (fg, bg) => ({
+          r: fg.r * fg.a + bg.r * (1 - fg.a),
+          g: fg.g * fg.a + bg.g * (1 - fg.a),
+          b: fg.b * fg.a + bg.b * (1 - fg.a), a: 1,
+        });
+        const ground = (el) => {
+          let layers = [], n = el;
+          while (n && n.nodeType === 1) {
+            const c = parse(getComputedStyle(n).backgroundColor);
+            if (c && c.a > 0) { layers.push(c); if (c.a === 1) break; }
+            n = n.parentElement;
+          }
+          if (!layers.length) return { r: 255, g: 255, b: 255, a: 1 };
+          let out = layers[layers.length - 1];
+          for (let i = layers.length - 2; i >= 0; i--) out = over(layers[i], out);
+          return out;
+        };
+        const lum = (c) => {
+          const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+          return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+        };
+        const out = [];
+        for (const sel of sels) {
+          for (const el of document.querySelectorAll(sel)) {
+            if (!el.offsetParent && el.tagName !== 'BODY') continue;
+            const txt = (el.textContent || '').trim();
+            if (!txt) continue;
+            const fg = parse(getComputedStyle(el).color);
+            if (!fg) continue;
+            const bg = ground(el);
+            const a = lum(fg.a < 1 ? over(fg, bg) : fg), b = lum(bg);
+            const r = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+            out.push({ sel, r: Math.round(r * 100) / 100, txt: txt.slice(0, 24),
+              fg: getComputedStyle(el).color, bg: `rgb(${Math.round(bg.r)}, ${Math.round(bg.g)}, ${Math.round(bg.b)})` });
+            break;
+          }
+        }
+        return out.filter((x) => x.r < 4.5);
+      }, ['.oa-label-pinned', '.oa-label-locked', '.oa-label-new', '.oa-label-tag',
+        '.oa-forum-who', '.oa-forum-handle', '.oa-forum-text', '.oa-forum-quote',
+        '.oa-forum-removed', '.oa-forum-act', '.oa-forum-score', '.oa-forum-updown',
+        '.oa-forum-cardnote', '.oa-forum-hint', '.oa-forum-bs', '.oa-forum-ex',
+        '.oa-forum-asker', '.oa-forum-when', '.oa-forum-stat i', '.oa-forum-stat b',
+        '.oa-forum-tab', '.oa-forum-crumbs', '.oa-forum-thmeta']);
+      eq(low, [], `forum (${where}, ${theme}): every surface reads at 4.5:1 or better`);
+  }
+  await q.evaluate(() => document.documentElement.removeAttribute('data-theme'));
+}
+
 /* ------------------------------------- opening a page as a SIGNED-IN reader
 
    Since 2026-08-29 the lists themselves are gated: a reader who has not
@@ -10295,6 +10382,7 @@ for (const w of [320, 360, 390, 430]) {
       'forum (signed out): pressing Back does not repaint the forum for whoever is now reading');
     ok(!/quiet heron 42/.test(afterOut.handle) && !/quiet heron 42/.test(afterOut.body),
       'forum (signed out): and the previous reader\'s handle is nowhere in the page');
+    await forumContrast(q, 'the list');
     eq(errors, [], 'forum (candidate): no uncaught script error through the whole conversation');
     await ctx.close();
   }
@@ -10351,6 +10439,10 @@ for (const w of [320, 360, 390, 430]) {
        function would have allowed it. */
     ok(guide.del, 'forum (maintainer): and yet Remove IS offered on it, as forumDelete allows');
     ok(guide.rules, 'forum (maintainer): its body is the guide text');
+    /* AND THE THREAD'S OWN SURFACES, which the list view never shows: the
+       body, the who-block, the crumbs, the meta bar, the Pinned and Locked
+       badges and the vote column. */
+    await forumContrast(q, 'a thread');
     await q.click('.oa-forum-crumbs a');
     await q.waitForSelector('#oa-forum-askbtn', { timeout: 15000 });
     await q.click('#oa-forum-askbtn');

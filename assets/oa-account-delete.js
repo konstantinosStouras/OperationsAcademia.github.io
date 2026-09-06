@@ -578,14 +578,21 @@
         return d;
       });
     }).then(function (d) {
-      /* 4. The details, the tally and the roster row. All three are
-            owner-deletes by the rules, and the tally and the row are deleted
-            for the same reason the merge deletes them: the count is of
-            PEOPLE, and a row left behind lists somebody who has gone. */
+      /* 4. The details, the tally, the roster row and the forum's membership
+            marker. All four are owner-deletes by the rules; the tally and the
+            row are deleted for the same reason the merge deletes them (the
+            count is of PEOPLE, and a row left behind lists somebody who has
+            gone), and the marker because it is a uid-keyed document naming a
+            candidate profile and a season, which nothing could reach again
+            once this sign-in has gone. The sweep removes all four as well,
+            since a tab holding a token minted before the sign-in went can
+            put three of them back for up to an hour. */
       return Promise.all([
         d.collection(root.OAFB.col.profiles).doc(uid)['delete']()['catch'](function () {}),
         d.collection(root.OAFB.col.registered).doc(uid)['delete']()['catch'](function () {}),
         d.collection((root.OAFB.col && root.OAFB.col.userDirectory) || 'userDirectory')
+          .doc(uid)['delete']()['catch'](function () {}),
+        d.collection((root.OAFB.col && root.OAFB.col.candidateMarkers) || 'candidateMarkers')
           .doc(uid)['delete']()['catch'](function () {})
       ]).then(function () { stepLine(log, 'Cleared your details.'); });
     }).then(function () {

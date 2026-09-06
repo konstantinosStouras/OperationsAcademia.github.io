@@ -40,6 +40,8 @@ import {
   revealGate,
 } from './candidates-model.mjs';
 import { marketYear, inCurrentMarket, ownerTag, removalSpecs, specMatches } from './jobs-model.mjs';
+import { adminUids } from './_mail.mjs';
+import { ADMIN_EMAILS } from './build-candidate-stats.mjs';
 import { createRequire } from 'node:module';
 
 // the reveal INSTANT (14:00 UTC on the reveal day), the one definition the
@@ -192,6 +194,14 @@ async function transferUploads(db, live, { now }) {
     return patched;
   }
 
+  /* AND THE MAINTAINER'S OWN UIDS. A Storage path is `uploads/{the
+     UPLOADER's uid}/...`, so when the maintainer attaches a CV while
+     correcting somebody else's profile, the uid in the path is theirs and
+     not the document's. Checked against the candidate alone, the file was
+     cleared with a warning in a log nobody reads and never published. An
+     empty set is the old behaviour exactly. */
+  const admins = await adminUids(ADMIN_EMAILS);
+
   for (const d of pending) {
     const v = d.data();
     for (const slot of SLOTS) {
@@ -210,8 +220,8 @@ async function transferUploads(db, live, { now }) {
           await d.ref.update(clearedSlot(slot));
           continue;
         }
-        if (v.uid && m[1] !== v.uid) {
-          warn(`candidate uploads: ${v.ref || d.id} ${slot.label} path does not belong to its poster — cleared`);
+        if (v.uid && m[1] !== v.uid && !admins.has(m[1])) {
+          warn(`candidate uploads: ${v.ref || d.id} ${slot.label} path belongs to neither its owner nor the maintainer — cleared`);
           await d.ref.update(clearedSlot(slot));
           continue;
         }

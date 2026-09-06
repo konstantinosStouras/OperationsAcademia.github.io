@@ -5682,12 +5682,40 @@ async function testAccountDeletion() {
   /* every uid-keyed collection the rules carry is either swept, anonymised or
      named as deliberately left — the inventory, kept honest rather than
      remembered */
+  /* AN UPLOAD THE MAINTAINER ATTACHED IS NOT A PATH THAT BELONGS TO NOBODY.
+     A Storage path is `uploads/{the UPLOADER's uid}/...`, and when the
+     maintainer attaches an advert or a CV while correcting somebody else's
+     submission, that uid is theirs and not the document's: checked against
+     the owner alone, both builds cleared the file with a warning in a log
+     nobody reads and the attachment silently never published. `adminUids`
+     answers an EMPTY SET without the credential, which is the old behaviour
+     exactly, so nothing here can be a reason a build stops publishing. */
+  for (const [f, what] of [['build-jobs.mjs', 'advert'], ['build-candidates.mjs', 'CV']]) {
+    const src = await readFile(path.join(HERE, f), 'utf8');
+    ok(/const admins = await adminUids\(ADMIN_EMAILS\);/.test(src)
+       && /m\[1\] !== v\.uid && !admins\.has\(m\[1\]\)/.test(src),
+    `${f}: an ${what} the maintainer attached is kept, not cleared as a stranger's path`);
+  }
+  ok(/export async function adminUids\(emails\)/.test(await readFile(path.join(HERE, '_mail.mjs'), 'utf8'))
+     && /if \(!fb \|\| !fb\.auth\) return new Set\(\);/.test(await readFile(path.join(HERE, '_mail.mjs'), 'utf8')),
+  'and adminUids answers an empty set rather than throwing, so a build never stops on it');
+
   const purge = await readFile(path.join(HERE, 'purge-accounts.mjs'), 'utf8');
   for (const col of ['profiles', 'registeredUsers', 'userDirectory', 'messages',
     'accountKeys', 'usageSessions', 'verifyMail', 'directoryEdits', 'nameFixes',
-    'jobSubmissions', 'candidateSubmissions', 'placementSubmissions']) {
+    'jobSubmissions', 'candidateSubmissions', 'placementSubmissions',
+    /* the forum's membership marker: written by forumJoin, owner-deleted when
+       a candidate takes their profile down, and missing from this sweep, so a
+       deletion left a uid-keyed document naming a candidate profile and a
+       season behind that nothing could reach once the sign-in had gone */
+    'candidateMarkers']) {
     ok(purge.includes(col), `the sweep accounts for ${col}`);
   }
+  ok(/'candidateMarkers'\]/.test(purge.slice(purge.indexOf('export const OWNED_DOCS'), purge.indexOf('export const CLOSED_DOCS'))),
+    '…and the marker is in OWNED_DOCS, so it is swept twice like the tally and the roster row');
+  ok(/col\.candidateMarkers\) \|\| 'candidateMarkers'\)\s*\n\s*\.doc\(uid\)\['delete'\]\(\)/.test(
+    await readFile(path.join(root, 'assets', 'oa-account-delete.js'), 'utf8')),
+  '…and the browser deletes it too, while it still has a session that may');
   ok(/feedback/.test(purge) && !/collection\('feedback'\)/.test(stripJs(purge)),
     '…and feedback is named as deliberately LEFT rather than quietly missed: it ' +
     'carries no uid, a signed-out visitor can send one, and joining it by the ' +
@@ -15202,7 +15230,14 @@ async function testForum() {
   ok(/match \/rooms\/\{room\}\/threads\/\{tid\} \{\s*allow read: if forumReader\(room\);\s*allow write: if false;/.test(fr), 'forum: a thread is read through forumReader and written by nobody');
   ok(/match \/posts\/\{pid\} \{\s*allow read: if forumReader\(room\);\s*allow write: if false;/.test(fr), 'forum: a post likewise');
   ok(/match \/votes\/\{key\} \{\s*allow read, write: if false;/.test(fr), 'forum: a vote is closed to everyone in both directions');
-  ok(/match \/forumTags\/\{id\} \{\s*allow read: if verified\(\);\s*allow write: if false;/.test(fr), 'forum: the tag tally is verified-read, function-written');
+  /* READ BY THE ROOM'S OWN READERS, not by every confirmed account. The id is
+     `{season}_{room}`, so the room is in the path here as surely as it is
+     under forumSeasons, and `verified()` alone handed the Candidates' room's
+     tally (which tags this season's candidates are using, and how often) to
+     every member of the Open forum. Measured against the rules engine before
+     the change: ALLOWED. */
+  ok(/match \/forumTags\/\{id\} \{\s*allow read: if forumReader\(id\.split\('_'\)\[1\]\);\s*allow write: if false;/.test(fr),
+    'forum: the tag tally is read by its own room and written by the functions');
   ok(/match \/forumNames\/\{slug\}\s*\{ allow read, write: if false; \}/.test(fr), 'forum: the reverse index is nobody\'s');
   ok(/match \/forumHandles\/\{key\}\s*\{ allow read: if isAdmin\(\); allow write: if false; \}/.test(fr), 'forum: the handle table is the maintainer\'s to read');
   const mailLine = (fr.match(/match \/forumMail\/\{document=\*\*\}[^\n]*/) || [''])[0];
@@ -15822,6 +15857,26 @@ async function testForum() {
     'oa-forum.css: the bell and the Saved card\'s remove are 42px targets on a phone');
   ok(/\.oa-forum-pacts \.oa-forum-act\[disabled\] \{/.test(pageCss) && /cursor: not-allowed;/.test(pageCss),
     'oa-forum.css: and a disabled action looks disabled rather than lighting up under the pointer');
+  /* MEASURED IN A BROWSER, in both themes, over the list AND a thread (see
+     forumContrast in page-test.mjs). forum.html cannot join the THEME_PAGES
+     loop, because signed out it draws a sign-in card and nothing else, so
+     every surface inside a room went unmeasured: the Pinned badge read at
+     3.10:1 and the who-block at 4.44:1, both in light theme, both ordinary
+     label text. */
+  ok(/--on-gold: #14161a;/.test(await read('assets', 'v3.css'))
+     && (await read('assets', 'v3.css')).match(/--on-gold:/g).length === 2,
+  'v3.css: --on-gold is defined in BOTH themes, and does not flip, because gold does not');
+  ok(/body\.v3 \.oa-label-pinned \{ background-color: var\(--gold\); color: var\(--on-gold\); \}/.test(pageCss),
+    'oa-forum.css: the Pinned badge names an ink that clears AA on gold in both themes');
+  ok(/background: var\(--brand-soft\);\s*\n\s*color: var\(--ink-2\);/.test(pageCss),
+    'oa-forum.css: and the who-block, which paints its own ground, names ink measured against THAT ground');
+  ok(/\.oa-forum-quotebox, \.oa-forum-quote \{ min-width: 0; overflow-wrap: anywhere; \}/.test(pageCss),
+    'oa-forum.css: a long address quoted into a post breaks rather than taking the page sideways');
+  /* A FRAGMENT LINK SCROLLS TO A <details>, IT DOES NOT OPEN ONE, so for
+     every member who had accepted the guide "Read the forum guide" jumped to
+     a shut box and read as a control that does nothing. */
+  ok(/a\[href="#oa-forum-guide"\]/.test(pageJs) && /panel\.open = true;/.test(pageJs),
+    'oa-forum.js: and the guide link opens the panel it points at');
   /* A SUPERSEDED MOUNT MUST NOT WRITE THE NEW ROOM'S STATE. */
   ok(/var forRoom = S\.room;/.test(pageJs) && /if \(forRoom !== S\.room \|\| forSeason !== S\.season\) return rows;/.test(pageJs),
     'oa-forum.js: a list read still in flight when the room changes stops writing the shared state');

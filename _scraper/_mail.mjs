@@ -259,6 +259,31 @@ export async function firebaseAdmin() {
   return { db: app.firestore(), auth: app.auth() };
 }
 
+/** THE MAINTAINER'S OWN UIDS, resolved from Auth by the addresses isAdmin()
+    is keyed on. The builds need them for one thing: an upload's Storage path
+    is `uploads/{the UPLOADER's uid}/...`, and when the maintainer attaches an
+    advert or a CV while correcting somebody else's submission, that uid is
+    theirs and not the document's. Checked against the document's owner alone,
+    the file was cleared with a warning in a log nobody reads and the
+    attachment silently never published.
+
+    ANSWERS AN EMPTY SET RATHER THAN THROWING. Without the credential, or with
+    an address Auth has never seen, the builds are left exactly as they were
+    before this existed: a path that is not the document owner's is refused.
+    Nothing here may be a reason a build stops publishing. */
+export async function adminUids(emails) {
+  const fb = await firebaseAdmin();
+  if (!fb || !fb.auth) return new Set();
+  const out = new Set();
+  for (const email of emails || []) {
+    try {
+      const rec = await fb.auth.getUserByEmail(String(email));
+      if (rec && rec.uid) out.add(rec.uid);
+    } catch { /* no such account: the set is simply smaller */ }
+  }
+  return out;
+}
+
 /** Firestore alone, for the mailers that never touch Auth. */
 export async function firestore() {
   const fb = await firebaseAdmin();
