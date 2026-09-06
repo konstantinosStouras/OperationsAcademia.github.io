@@ -10058,7 +10058,7 @@ for (const w of [320, 360, 390, 430]) {
       const adaHead = await q.$('#oa-candidates #job-tc-ada .oa-card-head');
       await adaHead.click();
       await q.waitForTimeout(250);
-      const rows = await q.$eval('#oa-candidates #job-tc-ada .oa-kv tr', (trs) =>
+      const rows = await q.$$eval('#oa-candidates #job-tc-ada .oa-kv tr', (trs) =>
         trs.map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent]));
       const talk = rows.find((r) => /^Talk on Monday/.test(r[0]));
       eq(talk && talk[0], 'Talk on Monday 2 November 2026', 'talks calendar: the card names the talk\'s day with its date');
@@ -10093,7 +10093,7 @@ for (const w of [320, 360, 390, 430]) {
       /* narrowing the list narrows the file */
       await q.fill('#oaf-c_name', 'Grace');
       await q.waitForTimeout(500);
-      eq(await q.$eval('#oa-candidates .oa-card', (n) => n.length), 1, 'talks calendar: the name search narrowed the list to one');
+      eq(await q.$$eval('#oa-candidates .oa-card', (n) => n.length), 1, 'talks calendar: the name search narrowed the list to one');
       ok(/1 candidate /.test(await q.$eval('#oa-candidates .oa-talkcal', (b) => b.title)),
         'talks calendar: …and the button already says so');
       const dl2 = q.waitForEvent('download', { timeout: 30000 });
@@ -10145,7 +10145,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.fill('#f-talk-monday-title', 'Queues and prices');
     await q.waitForFunction(() => [...document.querySelectorAll('#oa-cand-preview .oa-kv th')]
       .some((th) => /^Talk on Monday/.test(th.textContent)), null, { timeout: 8000 });
-    const previewed = await q.$eval('#oa-cand-preview .oa-kv tr', (trs) => trs
+    const previewed = await q.$$eval('#oa-cand-preview .oa-kv tr', (trs) => trs
       .map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent])
       .find((r) => /^Talk on Monday/.test(r[0])));
     eq(previewed[1], '10:45 · session MB12 · Room 2004 · “Queues and prices”',
