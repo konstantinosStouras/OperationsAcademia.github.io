@@ -49,6 +49,19 @@
     m.className = 'oa-form-msg' + (kind ? ' is-' + kind : '');
   }
 
+  /* `#oa-msg` is INSIDE the form, so the two edit-load failures (the posting
+     is gone, or this account may not read it) wrote their explanation into
+     the form and then hid the form with it: a blank panel under an intro
+     announcing an edit that never started. `#oa-msg-out` is the sibling
+     after </form> that stays (the candidate form's own fix, swept here). */
+  function sayOutside(msg) {
+    var m = $('oa-msg-out');
+    if (!m) { say(msg, 'err'); return; }
+    m.textContent = msg || '';
+    m.className = 'oa-form-msg is-err';
+    m.hidden = !msg;
+  }
+
   /* The job market year is named for the calendar year it ENDS in: the
      2025-2026 market is "2026". It turns over in the summer, when postings for
      the next one start going up. Offer the previous year too — a posting made
@@ -851,15 +864,15 @@
         return fb.firestore().collection(OAFB.col.jobSubmissions).doc(EDIT_ID).get();
       }).then(function (snap) {
         if (!snap.exists) {
-          say('That posting no longer exists.', 'err');
+          sayOutside('That posting no longer exists.');
           show($('oa-job-form'), false);
           return;
         }
         fill(snap.data() || {});
       }).catch(function (err) {
-        say(err && err.code === 'permission-denied'
+        sayOutside(err && err.code === 'permission-denied'
           ? 'You are not allowed to edit this posting.'
-          : 'We could not load that posting. Please try again.', 'err');
+          : 'We could not load that posting. Please try again.');
         show($('oa-job-form'), false);
         if (window.console) console.error('edit:', err);
       });
@@ -1077,7 +1090,13 @@
                the posting will publish. */
             if (window.OAFresh) {
               OAFresh.stash({ docId: EDIT_ID, ref: EDIT_REF,
-                              fields: OAFresh.echoFields(doc) });
+                              /* the same canon the build applies to the
+                                 country, so the echo shows "United States"
+                                 where the box says "USA" (approvedRow's own
+                                 injection, one file over) */
+                              fields: OAFresh.echoFields(doc, {
+                                canonCountry: window.OACountries ? OACountries.canon : null
+                              }) });
             }
             var done = $('oa-done');
             done.innerHTML =

@@ -1291,6 +1291,13 @@
         .catch(function (err) {
           go.disabled = false;
           $('#oa-merge-other', wrap).hidden = false;
+          /* THE RETRY MUST SURVEY AGAIN. `mine` was taken when the card opened,
+             and a merge that stopped half way has already handed some postings
+             over: replayed, handOver's "already the kept account's" test reads
+             the old snapshot, re-issues the move on a document the caller no
+             longer owns, and the rules refuse it, so "try again" could never
+             succeed. Dropping the snapshot makes runMerge take a fresh one. */
+          mine = null;
           say('The merge stopped: ' + (friendly(err) || (err && err.message) || 'unknown error') +
               ' Nothing was deleted — you can try again.', 'err');
           if (window.console) console.error('OA merge:', err);

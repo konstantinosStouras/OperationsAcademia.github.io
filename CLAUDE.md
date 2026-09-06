@@ -2889,7 +2889,13 @@ refused with `big` rather than half-erased above it — the removal script has
 no such cap and is what that case is for. **The sweep is the MAINTAINER'S
 alone**: an author closing a LEGACY headless thread must not become this
 forum's one way to take another member's words away, and a fresh question
-with a live answer is already refused to its asker.
+with a live answer is already refused to its asker. **And since 2026-09-06 the
+SECOND PRESS is held by the same rule** (`refuseIfAnswered`, one helper on
+both roads): an asker who could close a headless thread over live answers
+erased nothing, and `tv.hidden` then refused everyone on it, the maintainer
+included, so the answers were readable for ever and deletable by nobody. The
+thread stays open until every answer has gone, or the maintainer removes it,
+which sweeps them; the page says so on the disabled control.
 
 **THE ROOM'S GUIDE IS REFUSED OUTRIGHT** (`guidethread` — `guide` is already
 "tick the box to say you have read it", which is nonsense addressed to
@@ -2959,7 +2965,8 @@ and wording), the emulator test's own block against the real function
 a second press a success, a quote of it surviving, an answered question
 refused, the maintainer removing other people's replies with `hiddenBy:
 'admin'`, the asker then able to delete the question, a reply refused on a
-headless thread and one press closing it), and the browser block in
+headless thread and one press closing it, the asker refused over another
+member's live answer and the maintainer's press sweeping it), and the browser block in
 `page-test.mjs`, which posts a reply, deletes it, reads the stored document
 back, finds Delete disabled on the question the reply answers, and deletes a
 question of its own to watch the whole thread leave the list.
@@ -3149,9 +3156,10 @@ one season document read is the season passed in. The runbook is in
 renames every handle so it is the answer to a suspected leak and nothing
 else, and on 1 August the previous season's version is destroyed with
 `gcloud secrets versions destroy`, after which an archived season's handles
-cannot be re-derived by anyone. The housekeeping that runs that and stamps
-`secretDestroyedAt` is step 2; the field is in the model's comment now so the
-key list gains it with its writer. The emulator has no Secret Manager, so
+cannot be re-derived by anyone. The housekeeping that follows it, which
+deletes the closed season's markers, handles and names and stamps
+`secretDestroyedAt`, is `_scraper/roll-forum-season.mjs` (see "The July roll
+takes the closed season's markers and handles with it" below). The emulator has no Secret Manager, so
 under `FUNCTIONS_EMULATOR === 'true'` only, versions `env` and `env2` read
 `FORUM_SECRET_TEST` and `FORUM_SECRET_TEST_2`, and the emulator test proves
 two versions give two handles for one uid.
@@ -3749,6 +3757,53 @@ would be satisfied by deleting the explanation) and `testForumThreadRemoval` in
 spawned and pins the one document it writes against `KEYS.tags`, the
 collections it may never reach, the dispatch-only workflow with its
 plan-by-default input and its list-to-find-the-id line, and this section.
+
+### The July roll takes the closed season's markers and handles with it
+
+The second review sweep of 2026-09-06 confirmed a join the writer scan cannot
+see. Firestore stamps every document with a server-side `createTime`, at
+nanosecond precision, that is metadata rather than a field, and `forumJoin`
+creates `forumHandles/{H}` and `candidateMarkers/{uid}` in ONE call: the two
+carry the same instant, so anyone holding the Admin credential can list both
+collections with their metadata and pair a handle with an account, with no
+secret, and after the season's version has been destroyed, which is the moment
+the Privacy Policy promises nobody can. R7 dropped the marker's own `joinedAt`
+for exactly this join; the metadata is the same join in a place no key list
+reaches, and `updateTime` moves while `createTime` never does.
+
+**The promise is kept by not keeping the records.** `_scraper/roll-forum-season.mjs`
+(`.github/workflows/oa-forum-roll-season.yml`, pressed and never scheduled,
+plan by default) retires a CLOSED season: every `candidateMarkers` document
+whose `year` is that season or earlier (one with no year predates the field
+and the next join rewrites it), the `forumHandles` and `forumNames` documents
+of that season, and nothing else. The threads, posts, votes and tallies stay:
+the archive is readable by design, a post carries its author's handle as a
+word, and with the names gone that word maps to nothing. Once a season is
+closed all three sets are dead weight, since its markers name a profile the
+rules no longer admit, its handle ids nothing can derive, and its names map a
+slug to a hash nobody can compute; dead weight with a timestamp on it is a
+join. The season under way is refused whatever is typed, because a current
+candidate's marker is what admits them to their room.
+
+**And it records the destruction, keyed on the number.** `--destroyed=<N>`
+says the runbook's gcloud command has been run for version N; the run checks
+N against the closed season's own `secretVersion` and against the season
+under way's (the runbook's June trap: a version both seasons name must
+neither be destroyed nor recorded as destroyed), and only then stamps
+`secretDestroyedAt`, the one key of a season head no function writes. It is
+in `KEYS.season` now, and the `@doc` writer scan walks this script and the
+thread remover beside the functions so the union pin still holds. Deleting
+without the stamp is allowed; the log says the destruction is still owed and
+prints the exact line it is waiting on. Counts only in that log, which is
+public: never a uid, never a hash, never a slug.
+
+Tests: the script's own `--selftest` (the arguments, the season under way
+refused, the stamp's three refusals, which markers go, and the writer half
+scanned with its comments stripped for the collections it must never reach),
+`testForumSeasonRoll` in `_scraper/selftest.mjs` (spawning it, the model's
+key, the two season queries, the declared stamp, the dispatch-only workflow
+with its plan default, the runbook and this section) and the union scan's two
+extra writers.
 
 ### A question, its answers, and the tick that says which one worked
 
@@ -6044,6 +6099,89 @@ a takedown is scoped by).
 **Running the browser suite locally**: `node_modules` may be a SYMLINK to a
 global install that holds `playwright` (`ln -s /opt/node22/lib/node_modules
 node_modules`) — `.gitignore` names the bare form for exactly this reason.
+
+## The 2026-09-06 review sweep, part 2: what a second fan-out found
+
+A second fan-out over the site and the forum (sixty-three static readers, one
+adversarial verifier per finding) ran against this tree on 2026-09-06, after
+the first sweep of the same day, and confirmed twenty-six defects. Each fix is
+pinned in `testSweep20260906` (`_scraper/selftest.mjs`), with the behavioural
+halves beside the fixtures that own them; every pin was verified by putting
+the defect back. The decisions worth keeping, so nobody undoes them:
+
+* **An asker cannot close a legacy headless thread over other people's live
+  answers.** The sweep on a closing thread is the maintainer's alone (see "A
+  post is its author's to delete"), and the second press that shuts a thread
+  left headless by the old rule skipped the answered check: an asker could hide
+  the thread, nothing erased the answers, and `tv.hidden` then refused everyone
+  on it, the maintainer included, so the answers stayed readable to any
+  admitted member for ever and deletable by nobody, the very defect the sweep
+  was written to remove. `refuseIfAnswered` in `delete.js` is the ONE check,
+  run on both roads; the page draws Close this thread disabled with the
+  reason, the maintainer's confirmation names the answers their close sweeps,
+  the shim mirrors both halves, and the emulator drives the refusal, the
+  answer's own delete and the maintainer's sweep against the real function.
+* **`publishOnReview` rings only on a transition.** A CREATE has no `before`,
+  and `before && ...` let every document the sync creates already decided
+  (grandfathered rows, dropped repeats) fall through to the ring the guard was
+  written to stop. It is `!before ||` now.
+* **Saving an edit repaints the post in place.** `editPost`'s save was the one
+  in-thread action still routed through `go()`, which rebuilds the answer box
+  and loses whatever was half written in it. The Saved card's remove keeps the
+  keyboard too: the row that takes its place, the thread's own bookmark, or
+  the page, never `<body>`.
+* **A profile put back re-earns the Candidates' room.** The take-down deletes
+  `candidateMarkers/{uid}` and only `forumJoin` can rewrite it, while the
+  forum page trusted a cached "yes" for the tab's life. The candidate form
+  forgets `oa-forum-me` on a take-down and on the edit that restores, and the
+  forum page re-asks once when a read the cache promised is refused.
+* **`createdAt` is pinned on the owner's UPDATE as well** (`createdAtUnchanged`,
+  two-sided, on all three owner clauses). `update()` merges and carries the
+  stored stamp; `set()` replaces, and `request.resource.data` is then what the
+  client sent, which the build reads `posted` and `addedAt` off. Every form
+  here updates, so nothing legitimate changes. The three profile flags
+  (`orcidVerified`, `orcidSeeded`, `photoSeeded`) are bounded to a bool, so the
+  one write an unverified account may make has no unbounded key.
+* **A kept closing date applies whatever the cache entry's status.**
+  `cacheEntry`'s `keep` carries the last good deadline onto an entry that has
+  since gone unreadable, and both applies refused it by STATUS, so the morning
+  rebuild of `jobmarket.json` put the posting back to "Until filled." one
+  function after the keep had saved it. The date is the test.
+* **The change e-mail's "Posted by" join is scoped to the owner**, like every
+  other join on `ref` here: a reference is client-minted, bounded by length
+  alone and published, so on it alone a document carrying somebody else's
+  reference named the wrong person in the maintainer's inbox.
+* **The edit echo applies three rules the build applies**: the country goes
+  through the injected canon (or the editor's own Location filter forks), a
+  line saying the search stays open takes the date with it, and an EMPTY
+  suggested date is not echoed at all, because the build may heal one out of
+  the prose and the echo has no twin of that heal; left out, the served value
+  stands.
+* **The verify page** stands its countdown down under a dialog the site opened
+  (the first-run profile card, which it used to replace the page under), and
+  its headings say what happened on every branch, settled before focus lands
+  on them. The verification card's already-verified branch has its own catch;
+  a merge that stopped drops the pre-move survey, so "try again" can succeed.
+* **Forms and pickers.** The job and placement forms gained the candidate
+  form's `#oa-msg-out`, so an edit-load failure is said outside the form it
+  hides. The directory refuses a second row for a place it already lists
+  (`rowKeyOf` is the one definition of "the same place", used by the fold and
+  the refusal), since the collision folded the add document into the built row
+  where no control could reach it and the maintainer's Hide did nothing.
+  `oa-uniinfo.js` never fills the characteristics checklist in edit mode,
+  treats an emptied checklist as a decision, and names a hidden row so
+  `commit()` can refuse it; a non-2xx read of the vocabulary or the directory
+  is no longer memoised for the page's life. A search box holding only spaces
+  neither lights Save as e-mail alert nor is recorded as a filter in the
+  workbook's About sheet.
+
+**Reported, and answered by the roll housekeeping rather than here**:
+Firestore's own `createTime` on `forumHandles/{H}` and `candidateMarkers/{uid}`,
+created in one `forumJoin` call, is a join between a handle and an account
+that outlives the season's secret. It is metadata, not a field, so the writer
+scan cannot see it, and `updateTime` moves while `createTime` never does. See
+"The July roll takes the closed season's markers and handles with it" under
+the forum.
 
 ## Mobile standards for tables and lists — MUST consult
 

@@ -542,10 +542,12 @@ export function applyVerified(rows, cache, { today = '' } = {}) {
   const out = (rows || []).map((row) => {
     const code = jobCodeOf(row && row.adUrl);
     const ad = code ? ads[code] : null;
-    /* 'gone' counts alongside 'ok': the entry then carries what the page said
-       while it was up (see cacheEntry), and a search that has closed still
-       closed on a date. 'unreadable' does not — it carries nothing. */
-    if (!ad || (ad.status !== 'ok' && ad.status !== 'gone') || !ad.applyByDate) return row;
+    /* THE DATE IS THE TEST, NOT THE STATUS (the adverts.mjs rule, the same
+       reason): 'gone' carries what the page said while it was up, and an
+       'unreadable' entry carries what an earlier read learnt through
+       cacheEntry's `keep`. Refused by status, that kept date was lost here,
+       and the morning rebuild put the posting back to "Until filled.". */
+    if (!ad || !ad.applyByDate) return row;
 
     if (row.applyByDate) {
       if (row.applyByDate !== ad.applyByDate) {

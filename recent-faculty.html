@@ -228,6 +228,11 @@
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
+    <!-- oa-schools.js BEFORE the engine: the University search tries the
+         needle's own canonical forms (OASchools.nameNeedles), which is what
+         keeps this page's search and the e-mail alerts meaning the same
+         thing. Without it the box is the words alone. -->
+    <script defer src="assets/oa-schools.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-rowedit.js"></script>
     <script>

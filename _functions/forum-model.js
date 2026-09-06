@@ -60,10 +60,12 @@
   var KEYS = {
     /* forumSeasons/{Y}: the season head. `secretVersion` is the Secret
        Manager VERSION the season's handles are derived under (a number, never
-       the secret); `guides` maps each room to its pinned guide thread. Step 2
-       adds `secretDestroyedAt` when the 1 August housekeeping destroys the
-       previous season's version. */
-    season: ['season', 'createdAt', 'secretVersion', 'guides'],
+       the secret); `guides` maps each room to its pinned guide thread.
+       `secretDestroyedAt` is stamped by the 1 August housekeeping
+       (_scraper/roll-forum-season.mjs) once the previous season's version has
+       been destroyed, and is the one key of a season head no function
+       writes. */
+    season: ['season', 'createdAt', 'secretVersion', 'guides', 'secretDestroyedAt'],
     /* forumSeasons/{Y}/rooms/{room}/threads/{tid}. `accepted` is the id of
        the post the ASKER ticked as the answer, '' when none: one field, on
        one document, so the list card can say a question is answered without

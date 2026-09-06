@@ -288,8 +288,16 @@ exports.publishOnReview = onDocumentWritten(
        read plus a chained build — for a row that was never waiting. */
     const before = event.data && event.data.before && event.data.before.exists
       ? event.data.before.data() : null;
-    if (before && before.status === after.status) {
-      logger.debug('skip: already decided', { status: after.status });
+    /* A CREATE HAS NO `before`, and a create is exactly the case the sentence
+       above describes: the sync writes those documents already decided, so
+       there is no transition and nothing was waiting. `before && ...` let
+       every one of them fall through to the ring, which is the very thing
+       the guard was written to stop; a decision is a document that WAS
+       pending and is not any more. The browser never creates a decided
+       document (the panel decides on the pending document the sync made),
+       so nothing that should ring is lost. */
+    if (!before || before.status === after.status) {
+      logger.debug(before ? 'skip: already decided' : 'skip: created already decided', { status: after.status });
       return;
     }
 

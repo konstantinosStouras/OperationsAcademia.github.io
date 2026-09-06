@@ -1403,6 +1403,31 @@
     };
   }
 
+  /**
+   * WHAT A FREE-TEXT NAME COULD REASONABLY MEAN: the words as typed, plus the
+   * university, school and department names this module publishes for them.
+   * Deduplicated, empties dropped, and never folded -- the caller folds with
+   * its own fold, and the two folds are pinned equal.
+   *
+   * It is ONE definition because two searches on this site must agree. The
+   * alert matcher had it and `assets/oa-list.js` did not, so a reader typing
+   * "UC Berkeley", "Penn State" or "Imperial Business School" into the jobs
+   * page's University box found NOTHING while an alert holding the same words
+   * matched and was e-mailed -- 31 spellings apart, measured over the served
+   * postings. "What I see on the site" and "what I am e-mailed" cannot mean
+   * different things, which this file already says of the fold and the
+   * acronym rule; this is the leg that had only one implementation.
+   */
+  function nameNeedles(text) {
+    var out = [];
+    var tries = [text, canonInstitution(text), canonSchool(text), canonUnit(text)];
+    for (var i = 0; i < tries.length; i++) {
+      var v = String(tries[i] == null ? '' : tries[i]).trim();
+      if (v && out.indexOf(v) === -1) out.push(v);
+    }
+    return out;
+  }
+
   return {
     INSTITUTION_ALIASES: INSTITUTION_ALIASES,
     SCHOOL_LIST: SCHOOL_LIST,
@@ -1420,6 +1445,7 @@
     directoryRowKey: directoryRowKey,
     canonSchool: canonSchool,
     canonUnit: canonUnit,
+    nameNeedles: nameNeedles,
     canonPlace: canonPlace,
     canonColumns: canonColumns,
     splitFused: splitFused,

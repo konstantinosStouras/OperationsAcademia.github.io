@@ -42,6 +42,18 @@
     m.className = 'oa-form-msg' + (kind ? ' is-' + kind : '');
   }
 
+  /* `#oa-msg` is INSIDE the form, so the two edit-load failures wrote their
+     explanation into the form and then hid the form with it (the candidate
+     form's own defect, swept here). `#oa-msg-out` is the sibling after
+     </form> that stays. */
+  function sayOutside(msg) {
+    var m = $('oa-msg-out');
+    if (!m) { say(msg, 'err'); return; }
+    m.textContent = msg || '';
+    m.className = 'oa-form-msg is-err';
+    m.hidden = !msg;
+  }
+
   /* The job market year is named for the calendar year it ENDS in: the
      2026-2027 market is "2027". It turns over in the summer. Offer the
      previous year too — a placement accepted in the spring is often reported
@@ -247,15 +259,15 @@
         return fb.firestore().collection(colName()).doc(EDIT_ID).get();
       }).then(function (snap) {
         if (!snap.exists) {
-          say('That placement no longer exists.', 'err');
+          sayOutside('That placement no longer exists.');
           show($('oa-placement-form'), false);
           return;
         }
         fill(snap.data() || {});
       }).catch(function (err) {
-        say(err && err.code === 'permission-denied'
+        sayOutside(err && err.code === 'permission-denied'
           ? 'You are not allowed to edit this placement.'
-          : 'We could not load that placement. Please try again.', 'err');
+          : 'We could not load that placement. Please try again.');
         show($('oa-placement-form'), false);
         if (window.console) console.error('edit:', err);
       });

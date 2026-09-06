@@ -1166,12 +1166,19 @@ async function main() {
            all eight "edits" in the reported message were the tracking-sheet
            crawler republishing a degraded read — a fact the message gave the
            maintainer no way to see. */
+        /* SCOPED TO THE OWNER, as every other join on `ref` here is (keyOf,
+           removalSpecs): the reference is minted in the browser, bounded by
+           length alone and published, so keyed on it alone a document
+           carrying somebody else's reference named the wrong person in the
+           maintainer's inbox. The row publishes its owner tag; a document
+           that does not derive it is not the poster's own. */
         const docByRef = new Map();
         for (const d of live.concat(pulled)) {
           const v = d.data() || {};
-          if (v.ref) docByRef.set(v.ref, v);
+          if (v.ref) docByRef.set(v.ref + '|' + (ownerTag(v.uid) || ''), v);
         }
-        const whoFor = (row) => postedBy((row && row.ref && docByRef.get(row.ref)) || null, row);
+        const whoFor = (row) => postedBy(
+          (row && row.ref && docByRef.get(row.ref + '|' + String(row.owner || ''))) || null, row);
         await mail.send(tx, {
           to: process.env.ADMIN_NOTIFY || 'kstouras@gmail.com',
           subject: `[OA] Job postings changed: ${what}`,

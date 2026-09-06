@@ -2006,8 +2006,15 @@
     }
     if (r.alreadyVerified) {
       // the function refused because the address IS confirmed: lift the gate
+      /* WITH ITS OWN CATCH: this chain is started inside the send handler's
+         .then and its promise is discarded, so the handler's catch cannot
+         reach it, and confirmVerified's reload and token refresh are both
+         network calls. Unhandled, a lost connection left the card reading
+         "Sending." for ever. */
       confirmVerified(u).then(function (done) {
         if (!done) verifySay('Not confirmed yet. Press the link in the message first, then try again.');
+      }).catch(function (err) {
+        verifySay('We could not check the address just now (' + (friendly(err) || 'a connection problem') + '). Reload the page and try again.');
       });
       return;
     }
@@ -2544,6 +2551,13 @@
         .catch(function (err) {
           go.disabled = false;
           $('#oa-merge-other', wrap).hidden = false;
+          /* THE RETRY MUST SURVEY AGAIN. `mine` was taken when the card opened,
+             and a merge that stopped half way has already handed some postings
+             over: replayed, handOver's "already the kept account's" test reads
+             the old snapshot, re-issues the move on a document the caller no
+             longer owns, and the rules refuse it, so "try again" could never
+             succeed. Dropping the snapshot makes runMerge take a fresh one. */
+          mine = null;
           say('The merge stopped: ' + (friendly(err) || (err && err.message) || 'unknown error') +
               ' Nothing was deleted — you can try again.', 'err');
           if (window.console) console.error('OA merge:', err);

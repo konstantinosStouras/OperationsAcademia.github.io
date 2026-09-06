@@ -322,7 +322,15 @@
    * carrying a fresh FILE upload echoes no advert link, because the build
    * replaces it with the Drive link and until then the posting has none.
    */
-  function echoFields(doc) {
+  function echoFields(doc, opts) {
+    var o = opts || {};
+    /* INJECTED, like approvedRow's: this file keeps no dependency, and the
+       country box is free text the BUILD canonicalises ("USA" publishes as
+       "United States"). Echoed raw, the editor's own Location filter forked
+       into two spellings of one country for the whole window, and the echo
+       could never stand down on its own, since the raw value never equals
+       the served one. */
+    var canonCountry = o.canonCountry || function (v) { return v; };
     var f = {
       institution: doc.institution || '',
       school: doc.school || '',
@@ -330,14 +338,26 @@
       department: doc.department || '',
       type: doc.type || '',
       levels: (doc.levels || []).slice(),
-      country: doc.country || '',
+      country: canonCountry(doc.country || '') || '',
       applyByDate: doc.applyByDate || '',
-      reviewDate: doc.reviewDate || '',
       applyBy: composeApplyBy(doc),
       comments: doc.comments || '',
       characteristics: (doc.characteristics || []).slice(),
       postedAtUrl: doc.postedAtUrl || '',
     };
+    /* THE SUGGESTED DATE IS ECHOED ONLY WHEN THE FORM STATED ONE. Where the
+       box is empty the build reads a first-review date out of the apply-by
+       prose or the comments (healReviewDate), and that heal has no browser
+       twin here; echoing the empty box deleted the "Suggested apply by" row
+       the build was about to keep. Left out of the echo, the served row's
+       own value stands, which is what the build will publish or a date one
+       build stale, and never a row that vanishes and comes back. */
+    if (doc.reviewDate) f.reviewDate = doc.reviewDate;
+    /* the build's two rules on the pair, the same ones approvedRow carries:
+       a line saying the search stays open takes the date with it, and a
+       suggested date on or after the closing date is not published */
+    if (f.applyByDate && OPEN_ENDED.test(f.applyBy)) f.applyByDate = '';
+    if (f.reviewDate && f.applyByDate && f.reviewDate >= f.applyByDate) delete f.reviewDate;
     if (!doc.adUploadPath) f.adUrl = doc.adUrl || '';
     return f;
   }

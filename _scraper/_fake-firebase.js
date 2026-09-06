@@ -718,6 +718,14 @@
       var closeSimThread = function () {
         th = Object.assign({}, th, { hidden: true, title: '', excerpt: '' });
         simWrite(tpath2, th);
+        /* THE MAINTAINER'S CLOSE SWEEPS THE ANSWERS, as delete.js does: the
+           words go, the slot stays, and hiddenBy says who did it */
+        if (isAdmin) {
+          Object.keys(docs).forEach(function (k) {
+            if (k.indexOf(tpath2 + '/posts/') !== 0 || k === ppath || !docs[k] || docs[k].hidden) return;
+            simWrite(k, Object.assign({}, docs[k], { body: '', hidden: true, hiddenBy: 'admin', editedAt: now }));
+          });
+        }
         var tp = 'forumTags/' + Y + '_' + room;
         var cs = Object.assign({}, (docs[tp] || {}).counts || {});
         var moved = false;
@@ -730,11 +738,22 @@
       };
       var isAdmin = String((seed.user && seed.user.email) || '').toLowerCase() === 'kstouras@gmail.com';
       if (!isAdmin && post.by !== handle) return simRefuse('permission-denied', 'author');
+      /* the replies still standing: what holds an asker's question down, on
+         both roads, and what the maintainer's close sweeps */
+      var liveReplies = function () {
+        return Object.keys(docs).filter(function (k) {
+          return k.indexOf(tpath2 + '/posts/') === 0 && docs[k] && !docs[k].hidden
+            && Number(docs[k].n) !== 1;
+        });
+      };
       var whole = false;
       /* already gone: a second press is a success, and for a QUESTION it
-         finishes the job by shutting a thread left standing */
+         finishes the job by shutting a thread left standing -- unless other
+         people's answers still stand under it, which the asker may not lock
+         away (the function's refuseIfAnswered, on this road too) */
       if (post.hidden) {
         if (Number(post.n) === 1 && !th.hidden) {
+          if (!isAdmin && liveReplies().length) return simRefuse('failed-precondition', 'answered');
           whole = true;
           closeSimThread();
         }
@@ -743,11 +762,7 @@
       if (!post.hidden) {
         var question = Number(post.n) === 1;
         if (question && !isAdmin) {
-          var live = Object.keys(docs).filter(function (k) {
-            return k.indexOf(tpath2 + '/posts/') === 0 && docs[k] && !docs[k].hidden
-              && Number(docs[k].n) !== 1;
-          });
-          if (live.length) return simRefuse('failed-precondition', 'answered');
+          if (liveReplies().length) return simRefuse('failed-precondition', 'answered');
         }
         simWrite(ppath, Object.assign({}, post, {
           body: '', hidden: true,

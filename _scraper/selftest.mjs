@@ -2971,6 +2971,14 @@ async function testRenamedNamesStillFound() {
     ["replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '')", 'folds a search'],
     ['var ACRONYM = /^[A-Z]{2,6}$/;', 'takes an all-caps needle for an acronym'],
     ['function initials(s) {', 'and matches it against the initials'],
+    /* THE THIRD LEG, and the one that had drifted. This list pinned the fold
+       and the acronym rule in both files and NOT the needle's own canonical
+       forms — which the matcher had and oa-list.js did not, so a reader typing
+       "UC Berkeley", "Penn State" or "Imperial Business School" into the jobs
+       page's University box found nothing while an alert holding the same
+       words matched and was e-mailed. Measured over the served postings: 31
+       spellings apart. One definition now, in the module that owns the names. */
+    ['OASchools.nameNeedles(', 'tries the needle\'s own canonical forms'],
   ];
   for (const f of ['oa-list.js', 'oa-alert-match.js']) {
     const src = await readFile(path.join(HERE, '..', 'assets', f), 'utf8');
@@ -2984,6 +2992,45 @@ async function testRenamedNamesStillFound() {
   const at = alerts.indexOf('oa-schools.js');
   ok(at !== -1 && at < alerts.indexOf('oa-alert-match.js'),
     'alerts.html: loads the names module before the matcher');
+
+  /* …AND SO DOES EVERY PAGE THAT SEARCHES NAMES WITH THE ENGINE, before the
+     engine, or the box is the words alone and the gap comes straight back. */
+  for (const p of ['jobs.html', 'index.html', 'previous-markets.html',
+    'recent-faculty.html', 'universities.html']) {
+    const src = await readFile(path.join(HERE, '..', p), 'utf8');
+    const s1 = src.indexOf('assets/oa-schools.js');
+    const s2 = src.indexOf('assets/oa-list.js');
+    ok(s1 !== -1 && s2 !== -1 && s1 < s2,
+      `${p}: loads the names module before the list engine`);
+  }
+
+  /* THE GAP ITSELF, measured over the served postings rather than argued
+     about: every alias the tables know that the matcher can find, the page's
+     own search must find too. This is the check that would have caught it. */
+  {
+    const S2 = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+    const served = existsSync(JOBS) ? JSON.parse(await readFile(JOBS, 'utf8')) : [];
+    const foldS = S2.fold;
+    const initialsOf = (v) => foldS(v).split(' ').filter(Boolean).map((w) => w[0]).join('');
+    const ACR = /^[A-Z]{2,6}$/;
+    const hit = (row, term, withNeedles) => {
+      const acr = ACR.test(String(term).trim()) ? String(term).trim().toLowerCase() : '';
+      const ns = withNeedles ? S2.nameNeedles(term).map(foldS).filter(Boolean) : [foldS(term)];
+      return ['institution', 'department'].some((f) => ns.some((n) => foldS(row[f]).indexOf(n) !== -1)
+        || (!!acr && initialsOf(row[f]).indexOf(acr) !== -1));
+    };
+    const keys = new Set();
+    for (const t of ['INSTITUTION_ALIASES', 'SCHOOL_ALIASES', 'UNIT_ALIASES']) {
+      Object.keys(S2[t] || {}).forEach((k) => keys.add(k));
+    }
+    const gap = [...keys].filter((k) => served.some((r) => hit(r, k, true))
+      && !served.some((r) => hit(r, k, false)));
+    ok(gap.length > 0,
+      `the alias tables really do reach ${gap.length} spellings a bare fold does not — ` +
+      'a fixture that cannot reproduce the defect proves nothing about it');
+    const stillMissing = gap.filter((k) => !served.some((r) => hit(r, k, true)));
+    eq(stillMissing, [], 'and with the canonical forms tried, the page finds every one of them');
+  }
 }
 
 /* ------------------------------ the six units their school names its own way
@@ -4156,8 +4203,11 @@ function testChanges() {
   const whoSrc = readFileSync(path.join(HERE, 'build-jobs.mjs'), 'utf8');
   ok(/renderChangesHtml\(changes, \{ whoFor \}\)/.test(whoSrc),
     'the build passes the attribution into the message it sends');
-  ok(/docByRef\.set\(v\.ref, v\)/.test(whoSrc),
-    'joined on the reference the form issues, never on a derived id');
+  ok(/docByRef\.set\(v\.ref \+ '\|' \+ \(ownerTag\(v\.uid\) \|\| ''\), v\)/.test(whoSrc)
+     && /docByRef\.get\(row\.ref \+ '\|' \+ String\(row\.owner \|\| ''\)\)/.test(whoSrc)
+     && !/docByRef\.set\(v\.ref, v\)/.test(whoSrc),
+    'joined on the reference the form issues, never on a derived id, and SCOPED TO THE OWNER: ' +
+    'a reference is client-minted and published, so on it alone a stranger\'s document named the wrong person');
 
   /* ---- "22 edited" every day, and nobody had edited anything ----------
 
@@ -6678,6 +6728,21 @@ async function testUniInfo() {
   const tom = U.facts(rows,
     { institution: 'INSEAD', unit: 'Technology and Operations Management' }, SCHOOLS);
   ok(!!tom.row, 'uniinfo: naming the department identifies its row');
+  /* A ROW THE MAINTAINER TOOK DOWN IS NAMED, NOT MATCHED. Dropped from the
+     match it filled nothing, and for that very reason commit()'s "a hidden
+     row is never written to" could never fire: with nothing matched the
+     correction filed under the id the build mints for these names, which is
+     the hidden row's own, and the merge landed on it. */
+  {
+    const withHidden = rows.concat([{ id: 'hidden-u__school-of-business__operations',
+      institution: 'Hidden U', school: 'School of Business', department: 'Operations',
+      deptUrl: 'https://hidden.example/old', _hidden: true }]);
+    const onHidden = U.facts(withHidden, { institution: 'Hidden U', school: 'School of Business', unit: 'Operations' }, SCHOOLS);
+    ok(!onHidden.row && onHidden.hiddenRow === true,
+      'uniinfo: a hidden row matches nothing and is NAMED, so commit() can refuse to write onto it');
+    eq(onHidden.deptUrl, '', 'uniinfo: and fills nothing from it');
+    ok(!tom.hiddenRow, 'uniinfo: a visible match names no hidden row');
+  }
   eq(tom.rowId, 'insead__school-of-business__technology-and-operations-management',
     'uniinfo: a school-less ask finds its schooled home — the build\'s own fold');
   eq(tom.deptUrl, 'https://www.insead.edu/tom', 'uniinfo: …and serves its recorded link');
@@ -8310,6 +8375,14 @@ function testHigherEdJobsApply() {
     'an unreadable advertisement leaves the posting exactly as it was');
   eq(serialise(applyVerified(openEnded, null, {}).rows), serialise(openEnded),
     'and so does a missing cache');
+  /* ...BUT A DATE AN EARLIER READ KEPT STILL APPLIES. cacheEntry's `keep` carries
+     the last good deadline on an entry that has since gone unreadable, and the
+     gate here refused it by STATUS, so the morning rebuild of jobmarket.json
+     put the posting back to "Until filled." one function after the keep had
+     saved it. The date is the test, not the status. */
+  const keptUnread = { ads: { 179529368: { status: 'unreadable', applyByDate: '2026-08-20' } } };
+  eq(applyVerified(openEnded, keptUnread, { today: '2026-08-18' }).rows[0].applyByDate, '2026-08-20',
+    'a closing date an earlier read kept applies whatever the entry\'s status now says');
 
   // a posting that is not advertised on HigherEdJobs is not touched
   const elsewhere = [{ id: 'c', adUrl: 'https://jobs.chronicle.com/job/1', applyBy: 'Until filled.', applyByDate: '' }];
@@ -8658,6 +8731,11 @@ function testAdvertsApply() {
   const unread = { ads: { [key]: { status: 'unreadable', applyByDate: '' } } };
   eq(serialise(applyAdverts(openEnded, unread, {}).rows), serialise(openEnded),
     'an unreadable advertisement leaves the posting exactly as it was');
+  /* but a date an earlier read KEPT on such an entry still applies: refused by
+     status, the keep below saved a deadline the apply then threw away */
+  const keptUnread = { ads: { [key]: { status: 'unreadable', applyByDate: '2026-10-15' } } };
+  eq(applyAdverts(openEnded, keptUnread, { today: '2026-08-18' }).rows[0].applyByDate, '2026-10-15',
+    'a closing date an earlier read kept applies whatever the entry\'s status now says');
 
   /* ...AND A RE-READ THAT CANNOT BE UNDERSTOOD MUST NOT UN-SAY WHAT WAS READ.
      `keep` held the previous values only for a listing that had come DOWN, so
@@ -9081,6 +9159,25 @@ async function testFreshEcho() {
     'while a fresh file upload echoes no link at all');
   eq(Object.keys(echoed).filter((k) => !F.FIELDS.includes(k)), [],
     'and echoFields emits nothing outside the pinned list');
+  /* THREE RULES THE BUILD APPLIES THAT THE ECHO DID NOT (2026-09-06). The
+     fixture above is canonical, dated and explicit, which is why none of them
+     showed: an alias typed into the country box forked the editor's own
+     Location filter for the whole window (the raw value never equals the
+     served one, so the echo could never stand down); an empty suggested date
+     deleted the row the build was about to heal out of the prose; and a line
+     saying the search stays open kept a date the build clears. */
+  {
+    const CC = require('../assets/oa-countries.js');
+    eq(F.echoFields({ ...doc, country: 'USA' }, { canonCountry: CC.canon }).country, 'United States',
+      'the country is echoed through the canon the build applies, when it is injected');
+    eq(F.echoFields({ ...doc, country: 'USA' }).country, 'USA', 'and the module keeps no dependency of its own');
+    ok(!('reviewDate' in F.echoFields({ ...doc, reviewDate: '' })),
+      'an EMPTY suggested date is not echoed: the build may heal one out of the prose, and this file has no twin of that heal');
+    eq(F.echoFields({ ...doc, untilFilled: true }).applyByDate, '',
+      'a line saying the search stays open takes the date with it, as the build does');
+    ok(!('reviewDate' in F.echoFields({ ...doc, reviewDate: '2026-10-15' })),
+      'and a suggested date on or after the closing date is not echoed, since it is not published');
+  }
 
   /* THE OVERLAY, driven pure. A saved edit shows at once; a takedown removes
      the row; and the echo STANDS DOWN the moment its job is done — the served
@@ -9157,7 +9254,7 @@ async function testFreshEcho() {
   ok(list.includes('OAFresh.apply(url, data)'),
     'every dataset read through OAList.load passes through the echo');
   const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
-  ok(form.includes('OAFresh.stash(') && form.includes('OAFresh.echoFields(doc)'),
+  ok(form.includes('OAFresh.stash(') && form.includes('OAFresh.echoFields(doc, {'),
     'the edit form stashes what it just saved');
   ok(/already shows your\s+.?edit on this device/.test(form.replace(/['+]/g, '')),
     'and its confirmation claims exactly what the echo delivers — this device, now');
@@ -12418,6 +12515,15 @@ async function testJobExport() {
   eq(sheets[0].rows[0], headers, 'export: the header row is the columns');
   eq(sheets[1].rows.length, E.COLUMNS.length + 1,
     'export: the dictionary describes every column, and only them');
+  /* a search box holding only spaces reaches activeFilters() raw and narrows
+     nothing; recorded, the About sheet claimed a filter over every posting */
+  {
+    const blank = E.sheets(rows.slice(0, 3), { ...meta, filters: [{ label: 'University search', values: ['   '] }] });
+    /* a cell is a string or a { link } object, and String.prototype.link exists */
+    const about = blank[2].rows.map((r) => r.map((c) => (c && typeof c === 'object' && c.link) ? c.link : String(c)).join(' | ')).join('\n');
+    ok(/Filters in force \| None/.test(about) && !/University search/.test(about),
+      'export: a search box holding only spaces narrowed nothing, and the About sheet says so rather than recording a filter');
+  }
 
   const book = X.build(sheets);
   const files = unzipStore(book);
@@ -15674,7 +15780,7 @@ async function testEmailVerification() {
      && vjs.indexOf('history.replaceState(') < vjs.indexOf('OAFB.ready()'),
     'oa-verify.js takes the code OFF the address bar as soon as it is read, before any async work');
   ok(/querySelector\('h2'\);\s*if \(h && typeof h\.focus === 'function'\) h\.focus\(\);/.test(vjs)
-     && (vpage.match(/<h2 class="v3-h3" style="font-size:26px" tabindex="-1">/g) || []).length === 3,
+     && (vpage.match(/<h2 class="v3-h3"(?: id="[^"]+")? style="font-size:26px" tabindex="-1">/g) || []).length === 3,
     'oa-verify.js moves focus to the shown card\'s heading, and the three result headings can take it');
   ok(/A\.onChange\(function \(\) \{\s*if \(!\$\('ve-done'\)\.hidden\) showDone\(\);\s*else if \(!\$\('ve-nocode'\)\.hidden\) showNoCode\(\);/.test(vjs),
     'oa-verify.js re-decides the shown card\'s buttons when the session changes (a sign-in on the verified card)');
@@ -16268,6 +16374,238 @@ async function testVerifyExistingUsers() {
    (load order, QUIET_PAGES, share-check, link-check, the FAQ) arrive with
    forum.html. */
 
+/* ------------------------------------- the 2026-09-06 review sweep, part 2 */
+
+/** The second fan-out over the site and the forum (2026-09-06) confirmed
+    twenty-six defects. Each fix is held here by a pin that goes red when the
+    defect is put back (every one was verified that way); the behavioural
+    halves sit in the suites that own the fixtures: the two advert applies,
+    the edit echo, uniinfo, and the export. */
+async function testSweep20260906() {
+  const rd = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
+  /* 1. an asker cannot close a legacy headless thread over live answers */
+  const del = await rd('_functions', 'forum', 'delete.js');
+  ok(/const refuseIfAnswered = async \(\) => \{\s*\n\s*if \(admin\) return;\s*\n\s*const live = await tx\.get\(liveQuery\);/.test(del),
+    'sweep: forum delete holds the answered rule in ONE helper, and the maintainer is not held by it');
+  eq((del.match(/await refuseIfAnswered\(\);/g) || []).length, 2,
+    'sweep: ...called on BOTH roads, the fresh delete and the second press that shuts a headless thread');
+  ok(/if \(pv\.hidden\) \{\s*\n\s*if \(!isQuestion\) return;\s*\n\s*await refuseIfAnswered\(\);\s*\n\s*wholeThread = true;\s*\n\s*closeThread\(\);/.test(del),
+    'sweep: ...and on the second press it runs BEFORE the thread is closed, so an asker cannot lock other people\'s answers away');
+  ok(!/if \(!admin\) \{\s*\n\s*const live = await tx\.get\(liveQuery\)/.test(del), 'sweep: the old private copy of the check is gone');
+  const fj = await rd('assets', 'oa-forum.js');
+  ok(/var held = !amAdmin\(\) && liveAnswers > 0;/.test(fj) && /\(held \? ' disabled' : ''\)/.test(fj)
+     && /still has answers, so the thread stays open for them/.test(fj),
+    'sweep: the page draws Close this thread disabled with the reason for an asker while answers stand');
+  ok(/var standing = Number\(S\.live\) \|\| 0;/.test(fj) && /still standing under it/.test(fj) && /amAdmin\(\) && standing > 0/.test(fj),
+    'sweep: and the maintainer\'s confirmation names the answers their close sweeps');
+  const shim = await rd('_scraper', '_fake-firebase.js');
+  const simHidden = shim.slice(shim.indexOf('if (post.hidden) {'), shim.indexOf('if (!post.hidden) {'));
+  ok(simHidden.length > 50 && simHidden.length < 900
+     && /if \(!isAdmin && liveReplies\(\)\.length\) return simRefuse\('failed-precondition', 'answered'\);/.test(simHidden),
+    'sweep: the shim refuses the asker\'s second press over live replies, as the function does');
+  const simClose = shim.slice(shim.indexOf('var closeSimThread = function () {'), shim.indexOf('var isAdmin = String('));
+  ok(simClose.length > 50 && simClose.length < 2500 && /if \(isAdmin\) \{/.test(simClose) && /hiddenBy: 'admin'/.test(simClose),
+    'sweep: and its maintainer close sweeps the answers');
+  const emu = await rd('_functions', 'test', 'forum-emulator.mjs');
+  ok(/the asker cannot close a headless thread while another member/.test(emu)
+     && /the answer\\?'s own author can still delete it there/.test(emu)
+     && /and the answer under it is erased and hidden with the thread/.test(emu),
+    'sweep: the emulator drives the refusal, the answer\'s own delete and the maintainer\'s sweep against the real function');
+
+  /* 2. publishOnReview: a document CREATED already decided does not ring */
+  const idx = await rd('_functions', 'index.js');
+  ok(/if \(!before \|\| before\.status === after\.status\) \{/.test(idx)
+     && !/if \(before && before\.status === after\.status\)/.test(strip(idx)),
+    'sweep: publishOnReview rings only on a TRANSITION into a decision, and a create already decided is not one');
+
+  /* 3. saving an edit repaints the post where it stands */
+  const editSave = fj.slice(fj.indexOf("call('forumEdit', { room: S.room, tid: S.tid, pid: p.id, body: body })"),
+    fj.indexOf('/* ------------------------------------------------------ asking */'));
+  ok(editSave.length > 200 && editSave.length < 2500, 'sweep: the edit save was sliced');
+  ok(!/go\(\{ room: S\.room, season: S\.season, t: S\.tid, hash: 'p' \+ p\.n \}\)/.test(editSave)
+     && /box\.remove\(\);/.test(editSave) && /paintAnswers\(\);/.test(editSave) && /p\.body = body;/.test(editSave),
+    'sweep: a saved edit repaints the post in place and never through go(), which rebuilt the answer box and lost what was half written');
+
+  /* 4. removing a saved question keeps the keyboard */
+  const unsave = fj.slice(fj.indexOf("host.querySelectorAll('[data-unsave]'), function (b) {"), fj.indexOf('function paintSaveButtons'));
+  ok(unsave.length > 100 && unsave.length < 2500
+     && /var at = Array\.prototype\.indexOf\.call\(host\.querySelectorAll\('\[data-unsave\]'\), b\);/.test(unsave)
+     && /next\.focus\(\{ preventScroll: true \}\)/.test(unsave) && /\$\('main'\)/.test(unsave),
+    'sweep: the Saved card\'s remove puts focus on the row that takes its place, the thread\'s bookmark, or the page, never on <body>');
+
+  /* 5. a profile put back re-earns the Candidates' room */
+  const cf = await rd('assets', 'oa-candidateform.js');
+  ok(/function forgetForumJoin\(\) \{\s*\n\s*try \{ sessionStorage\.removeItem\('oa-forum-me'\); \}/.test(cf),
+    'sweep: the candidate form forgets the forum\'s cached join');
+  eq((cf.match(/forgetForumJoin\(\);/g) || []).length, 2, 'sweep: ...on a take-down and on the edit that puts a profile back');
+  ok(/if \(!\/permission-denied\/\.test\(code\) \|\| !S\.me \|\| !S\.me\.rooms \|\| !S\.me\.rooms\[S\.room\] \|\| S\.rejoined\) throw err;/.test(fj)
+     && /S\.rejoined = true;/.test(fj) && /sessionStorage\.removeItem\(ME_KEY\)/.test(fj),
+    'sweep: and the forum page re-asks forumJoin once when a read the cache promised is refused');
+
+  /* 7. the three profile flags are bounded */
+  const rules = await rd('_firestore.rules');
+  ok(/function flag\(field\) \{[\s\S]{0,300}?request\.resource\.data\[field\] is bool;\s*\n\s*\}/.test(rules)
+     && /&& flag\('orcidVerified'\) && flag\('orcidSeeded'\) && flag\('photoSeeded'\);/.test(rules),
+    'sweep: profileShape() bounds the three flags to a bool, so the one write an unverified account may make has no unbounded key');
+
+  /* 8. createdAt is pinned on the owner's update as well */
+  ok(/function createdAtUnchanged\(\) \{[\s\S]{0,400}?request\.resource\.data\.createdAt == resource\.data\.createdAt\);\s*\n\s*\}/.test(rules),
+    'sweep: the rules carry a two-sided createdAtUnchanged()');
+  eq((rules.match(/&& createdAtUnchanged\(\)/g) || []).length, 3,
+    'sweep: ...on all three owner-update clauses (jobs, candidates, placements), where a set() could re-stamp the posting date');
+  eq((rules.match(/status in \['queued', 'withdrawn'\]/g) || []).length, 3, 'sweep: three such clauses, so the count above is the whole of them');
+  for (const f of ['oa-jobform.js', 'oa-jobedit.js', 'oa-candidateform.js', 'oa-placementform.js', 'oa-myjobs.js']) {
+    const src = await rd('assets', f);
+    ok(!/\.doc\(EDIT_ID\)\.set\(|\.doc\(id\)\.set\(/.test(src), 'sweep: ' + f + ' updates rather than sets, so the pinned createdAt costs no legitimate write');
+  }
+
+  /* 9, 10. the verification card's catch; the merge retry's fresh survey */
+  const acc = await rd('assets', 'oa-accounts.js');
+  ok(/r\.alreadyVerified\) \{[\s\S]{0,900}?confirmVerified\(u\)\.then\(function \(done\) \{[\s\S]{0,300}?\}\)\.catch\(function \(err\) \{/.test(acc),
+    'sweep: the already-verified branch of verifySent catches, so a lost connection cannot leave the card reading "Sending."');
+  ok(/\.catch\(function \(err\) \{\s*\n\s*go\.disabled = false;\s*\n\s*\$\('#oa-merge-other', wrap\)\.hidden = false;[\s\S]{0,900}?mine = null;\s*\n\s*say\('The merge stopped: /.test(acc),
+    'sweep: a merge that stopped drops the pre-move survey, so "try again" surveys afresh and skips what was already handed over');
+
+  /* 12, 13. the verify page */
+  const vjs = await rd('assets', 'oa-verify.js');
+  const vpage = await rd('verify-email.html');
+  ok(/var tick = function \(\) \{\s*\n[\s\S]{0,900}?if \(dialogOpen\(\)\) \{\s*\n\s*clearInterval\(countdown\); countdown = null;/.test(vjs)
+     && /function dialogOpen\(\) \{[\s\S]{0,500}?cs\.display !== 'none' && cs\.visibility !== 'hidden' && dialogs\[i\]\.getClientRects\(\)\.length/.test(vjs)
+     && vjs.indexOf('if (dialogOpen())') < vjs.indexOf('location.replace(href)'),
+    'sweep: the countdown stands down under a dialog the site opened (the first-run profile card), before it can replace the page');
+  ok(/id="ve-done-h"/.test(vpage) && /id="ve-done-kicker"/.test(vpage) && /id="ve-error-h"/.test(vpage) && /id="ve-error-kicker"/.test(vpage),
+    'sweep: the two headings and kickers can be addressed');
+  ok(/\$\('ve-done-h'\)\.textContent = mismatch \? 'The link confirmed a different address'/.test(vjs)
+     && vjs.indexOf("$('ve-done-h').textContent") < vjs.indexOf("show('ve-done');"),
+    'sweep: the confirmed card\'s heading says what happened, and is settled BEFORE focus lands on it');
+  ok(/\$\('ve-error-h'\)\.textContent = 'Sign-in is unavailable at the moment';/.test(vjs)
+     && /\$\('ve-error-h'\)\.textContent = 'That link did not work';/.test(vjs),
+    'sweep: and the error card\'s heading blames the link only when the link is what failed');
+
+  /* 15. a closing date an earlier read kept applies whatever the entry's status */
+  for (const f of ['adverts.mjs', 'higheredjobs.mjs']) {
+    const src = await rd('_scraper', f);
+    ok(/if \(!ad \|\| !ad\.applyByDate\) return row;/.test(src) && !/ad\.status !== 'ok' && ad\.status !== 'gone'/.test(strip(src)),
+      'sweep: ' + f + ' gates the apply on the DATE, not the status, so a kept date on an unreadable entry still fills');
+  }
+
+  /* 16. the job and placement forms speak from outside the form they hide */
+  for (const [page, js, formId, gone] of [
+    ['post-a-job.html', 'oa-jobform.js', 'oa-job-form', 'That posting no longer exists.'],
+    ['post-a-placement.html', 'oa-placementform.js', 'oa-placement-form', 'That placement no longer exists.']]) {
+    const html = await rd(page);
+    const src = await rd('assets', js);
+    const formAt = html.indexOf('id="' + formId + '"');
+    const formEnd = html.indexOf('</form>', formAt);
+    ok(formAt > 0 && html.indexOf('id="oa-msg"') > formAt && html.indexOf('id="oa-msg"') < formEnd
+       && html.indexOf('id="oa-msg-out"') > formEnd,
+      'sweep: ' + page + ' carries a message host OUTSIDE the form, beside the one inside it');
+    ok(/function sayOutside\(msg\)/.test(src) && src.includes("sayOutside('" + gone + "')")
+       && /sayOutside\(err && err\.code === 'permission-denied'/.test(src),
+      'sweep: ' + js + ': both edit-load failures speak through it before the form goes');
+  }
+
+  /* 17. the directory refuses a second row for a place it lists */
+  const dir = await rd('assets', 'oa-directory.js');
+  ok(/function rowKeyOf\(r\) \{/.test(dir) && /var key = rowKeyOf\(r\);/.test(dir)
+     && /function existingRow\(doc, exceptId\) \{/.test(dir) && /function refuseClash\(doc, exceptId\) \{/.test(dir),
+    'sweep: the directory has ONE definition of "the same place", used by the fold and by the refusal');
+  eq((dir.match(/if \(refuseClash\(doc, /g) || []).length, 2,
+    'sweep: ...and both addRow and editAdd refuse a row the table already lists, naming it');
+
+  /* 18, 19, 20, 21. uniinfo and the place picker */
+  const uni = await rd('assets', 'oa-uniinfo.js');
+  ok(/if \(opts\.fillNames !== false\) fillChars\(f\.row \? f\.characteristics : \[\]\);/.test(uni),
+    'sweep: edit mode never fills the characteristics checklist either');
+  ok(/if \(declined\.chars\) return;/.test(uni) && /if \(!ticked && lastAutoChars\) \{\s*\n\s*declined\.chars = true;/.test(uni),
+    'sweep: a checklist the poster emptied after our fill is a decision, never refilled');
+  ok(/if \(\(f\.row && f\.row\._hidden\) \|\| f\.hiddenRow\) return null;/.test(uni) && /out\.hiddenRow = hidden\.some\(/.test(uni),
+    'sweep: commit() refuses a hidden row facts() names, which its old guard could never see');
+  const pick = await rd('assets', 'oa-place-picker.js');
+  const throwsOnBad = /if \(!r\.ok\) throw new Error\('HTTP ' \+ r\.status\); return r\.json\(\);/;
+  ok(throwsOnBad.test(pick) && throwsOnBad.test(uni),
+    'sweep: a non-2xx read of the vocabulary or the directory throws, so the memo forgets it as OAList.load does');
+
+  /* 22, 23. a search box holding spaces narrows nothing */
+  const as = await rd('assets', 'oa-alertsave.js');
+  ok(/return f && arr\(f\.values\)\.map\(txt\)\.filter\(Boolean\)\.length;/.test(as),
+    'sweep: Save as e-mail alert lights only for a value carry() would carry');
+  const ex = await rd('assets', 'oa-jobexport.js');
+  ok(/var vals = \(f\.values \|\| \[\]\)\.map\(txt\)\.filter\(Boolean\);\s*\n\s*if \(!vals\.length\) return null;/.test(ex),
+    'sweep: the About sheet records only a filter that narrowed');
+
+  /* 24 to 26. the edit echo */
+  const fresh = await rd('assets', 'oa-fresh.js');
+  ok(/function echoFields\(doc, opts\) \{/.test(fresh) && /country: canonCountry\(doc\.country \|\| ''\) \|\| '',/.test(fresh)
+     && /if \(doc\.reviewDate\) f\.reviewDate = doc\.reviewDate;/.test(fresh)
+     && /if \(f\.applyByDate && OPEN_ENDED\.test\(f\.applyBy\)\) f\.applyByDate = '';/.test(fresh),
+    'sweep: echoFields takes the country canon, echoes a suggested date only when the form stated one, and applies the open-ended rule');
+  const jf = await rd('assets', 'oa-jobform.js');
+  ok(/OAFresh\.echoFields\(doc, \{\s*\n[\s\S]{0,400}?canonCountry: window\.OACountries \? OACountries\.canon : null/.test(jf),
+    'sweep: and the form hands it the site\'s own canon');
+
+  /* 14. the change e-mail's join is pinned beside its own test (testChanges) */
+
+  /* the record */
+  const cl = await rd('CLAUDE.md');
+  ok(/## The 2026-09-06 review sweep, part 2/.test(cl) && /refuseIfAnswered/.test(cl) && /createdAtUnchanged/.test(cl),
+    'sweep: CLAUDE.md records the sweep');
+}
+
+/* ------------------------------------- the July roll's housekeeping */
+
+/** _scraper/roll-forum-season.mjs retires a CLOSED season: its markers, its
+    handle documents and its names go, so Firestore's own createTime on the
+    first two (one forumJoin call writes both) stops being a join between a
+    handle and an account that outlives the season's secret; and it records
+    the destruction of the season's secret version, keyed on the number. */
+async function testForumSeasonRoll() {
+  const root = path.join(HERE, '..');
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'roll-forum-season.mjs'), '--selftest'], { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/roll-forum-season selftest: \d+ checks passed/.test(out), "the season roll's own selftest is green:\n" + out.slice(0, 1500));
+
+  const FM = require(path.join(root, 'assets', 'oa-forum-model.js'));
+  const R = await import('./roll-forum-season.mjs');
+  ok(FM.KEYS.season.includes('secretDestroyedAt'), 'the model names the stamp on the season head');
+  const src = await readFile(path.join(HERE, 'roll-forum-season.mjs'), 'utf8');
+  const code = src.slice(0, src.indexOf('async function selftest')).replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  ok(code.length > 2500, 'the slice under scan is the script, not an empty string');
+  const entry = src.slice(src.lastIndexOf('if (process.argv[1]'));
+  ok(/import\.meta\.url === pathToFileURL\(process\.argv\[1\]\)\.href/.test(entry) && /await main\(argv\)/.test(entry),
+    'roll-forum-season runs only when it is the file being run, never on import');
+  /* the three collections, and only those; the archive is never touched */
+  for (const c of ['candidateMarkers', 'forumHandles', 'forumNames']) ok(code.includes("'" + c + "'"), 'it reaches ' + c);
+  for (const never of ['threads', 'posts', 'votes', 'forumTags', 'jobSubmissions']) ok(!new RegExp(never).test(code), 'and never ' + never);
+  ok(/where\('season', '==', o\.season\)/.test(code) && (code.match(/where\('season', '==', o\.season\)/g) || []).length === 2,
+    'handles and names are taken for the closed season alone');
+  ok(/markerIsRetired\(doc\.data\(\), o\.season\)/.test(code), 'and a marker by its year, so a current candidate keeps theirs');
+  ok(/const stamp = \{\s*\n\s*secretDestroyedAt: M\.minute\(\),\s*\n\s*\};/.test(src), 'the stamp is a declared @doc block with the one key');
+  /* the pure halves, driven */
+  ok(R.refusalFor({ season: 2028, current: 2028 }) !== '' && R.refusalFor({ season: 2027, current: 2028 }) === '',
+    'the season under way is refused and a closed one retired');
+  ok(!R.stampDecision({ season: 2027, current: 2028, destroyed: '3' }, { secretVersion: '3' }, { secretVersion: '3' }).stamp,
+    'a version both seasons name is never recorded as destroyed');
+  ok(R.markerIsRetired({}, 2027) && !R.markerIsRetired({ year: 2028 }, 2027), 'a marker with no year goes, a current one stays');
+
+  const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-forum-roll-season.yml'), 'utf8');
+  ok(/^on:\s*\n\s*workflow_dispatch:/m.test(wf) && !/schedule:/.test(wf), 'the workflow is pressed, never scheduled');
+  ok(/write:\s*\n\s*description:[^\n]*\n\s*type: boolean\s*\n\s*default: false/.test(wf), 'and its write input defaults to a plan');
+  ok(/IN_DESTROYED: \$\{\{ inputs\.destroyed \}\}/.test(wf) && /"--destroyed=\$IN_DESTROYED"/.test(wf), 'the destroyed number reaches the script through the environment');
+  ok(/node _scraper\/roll-forum-season\.mjs --selftest/.test(wf), 'and the script checks itself first');
+  const runbook = await readFile(path.join(root, '_SETUP-INSTANT-PUBLISH.md'), 'utf8');
+  ok(/roll-forum-season\.mjs/.test(runbook) && /--destroyed=/.test(runbook), 'the runbook names the housekeeping and its number');
+  const cl = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  ok(/### The July roll takes the closed season's markers and handles with it/.test(cl) && /createTime/.test(cl),
+    'CLAUDE.md records why the records go');
+}
+
 async function testForum() {
   const root = path.join(HERE, '..');
   const read = (...p) => readFile(path.join(root, ...p), 'utf8');
@@ -16360,9 +16698,16 @@ async function testForum() {
   const vendoredSrc = {};
   for (const [, v] of VENDOR_PAIRS) vendoredSrc[v] = await read(v);
 
+  /* THE TWO WRITERS OUTSIDE THE FUNCTIONS walk with them: remove-forum-thread.mjs
+     writes a thread's tombstone and roll-forum-season.mjs the season head's
+     `secretDestroyedAt`, the one key of a season head no function writes.
+     Left out, that key would fail the union below as one nobody writes. The
+     inline-literal scan further down stays over the functions alone. */
+  const scriptSrc = {};
+  for (const f of ['remove-forum-thread.mjs', 'roll-forum-season.mjs']) scriptSrc['_scraper/' + f] = await read('_scraper', f);
   const written = {};
   let blocks = 0;
-  for (const [f, src] of Object.entries(forumSrc)) {
+  for (const [f, src] of Object.entries({ ...forumSrc, ...scriptSrc })) {
     for (const m of src.matchAll(/\/\* @doc (\w+) \*\/([\s\S]*?)\/\* @end \*\//g)) {
       blocks++;
       const kind = m[1];
@@ -17004,7 +17349,7 @@ async function testForum() {
   ok(/wholeThread = true;/.test(delSrc) && /const gonePatch = \{\s*\n\s*hidden: true,/.test(delSrc),
     'forum delete: deleting a question always takes the thread, so none is ever left headless');
   ok(/const admin = P\.adminToken\(/.test(delSrc) && /if \(!admin && pv\.by !== m\.handle\)/.test(delSrc)
-     && /if \(!admin\) \{/.test(delSrc),
+     && /if \(admin\) return;/.test(delSrc),
     'forum delete: the maintainer may remove any post, and is not held by the answered rule');
   ok(/hiddenBy: admin && pv\.by !== m\.handle \? 'admin' : 'author'/.test(delSrc),
     'forum delete: hiddenBy says which of the two it was, so the page never has to guess');
@@ -17797,6 +18142,8 @@ if (isMain(import.meta.url)) {
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
   await testForum();
+  await testSweep20260906();
+  await testForumSeasonRoll();
   await testForumSeed();
   await testForumThreadRemoval();
   await testModuleSuites();

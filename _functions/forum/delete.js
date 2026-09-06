@@ -201,6 +201,23 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
        finishes those. */
     const sweep = isQuestion && admin ? await tx.get(sweepQuery) : null;
     if (sweep && sweep.size > SWEEP_MAX) P.refuse('failed-precondition', 'big');
+    /* A QUESTION IS REFUSED TO ITS ASKER WHILE ANY REPLY STILL STANDS, and
+       the maintainer is not held by it. ONE check for both roads below: the
+       fresh delete, and the second press that shuts a legacy headless thread.
+       The second road used to skip it, and that was the hole: an asker could
+       CLOSE such a thread over other people's live answers, the sweep above
+       is the maintainer's alone so nothing erased them, and `tv.hidden` then
+       refused everyone on the thread, the maintainer included -- the answers
+       stayed readable to any admitted member for ever and deletable by
+       nobody, which is the defect the sweep was written to remove. Refusing
+       the asker keeps the thread open, so the answers' own authors can still
+       take their words back and the maintainer's Remove still sweeps. */
+    const refuseIfAnswered = async () => {
+      if (admin) return;
+      const live = await tx.get(liveQuery);
+      const answered = live.docs.some((doc) => Number((doc.data() || {}).n) !== 1);
+      if (answered) P.refuse('failed-precondition', 'answered');
+    };
 
     /** What a thread that is going leaves behind: no words, and its tags
         handed back to the room. */
@@ -244,17 +261,14 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
        Delete is what finishes it. */
     if (pv.hidden) {
       if (!isQuestion) return;
+      await refuseIfAnswered();
       wholeThread = true;
       closeThread();
       return;
     }
 
     if (isQuestion) {
-      if (!admin) {
-        const live = await tx.get(liveQuery);
-        const answered = live.docs.some((doc) => Number((doc.data() || {}).n) !== 1);
-        if (answered) P.refuse('failed-precondition', 'answered');
-      }
+      await refuseIfAnswered();
       wholeThread = true;
     }
 

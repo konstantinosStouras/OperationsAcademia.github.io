@@ -311,6 +311,12 @@
                     </div>
                   </form>
 
+                  <!-- OUTSIDE the form, deliberately. #oa-msg is inside it, so
+                       an edit-load failure wrote its explanation into the form
+                       and then hid the form with it: a blank panel, and nothing
+                       said. This is what speaks once the form has gone. -->
+                  <p class="oa-form-msg" id="oa-msg-out" role="alert" hidden></p>
+
                   <div class="oa-done" id="oa-done" hidden>
                     <h3>Thank you &mdash; and congratulations again.</h3>
                     <p>Reference <span class="oa-ticket" id="oa-ref"></span> &mdash; keep this if

@@ -867,10 +867,25 @@
     Array.prototype.forEach.call(host.querySelectorAll('[data-unsave]'), function (b) {
       b.addEventListener('click', function (e) {
         e.preventDefault();
+        /* THE BUTTON PRESSED GOES WITH ITS ROW, so keepFocus's put-it-back has
+           nothing to put it back on: focus goes to the row that takes its
+           place (the last one left, at the end), and when the card itself
+           goes, to the post's own bookmark where the thread is open, else to
+           the page. Never to <body>, where the removal is announced to nobody
+           and the next Tab starts from the top of the page. */
+        var at = Array.prototype.indexOf.call(host.querySelectorAll('[data-unsave]'), b);
         delete S.saved.items[b.getAttribute('data-unsave')];
         writeSaved();
         drawSaved();
         if (S.tid) paintSaveButtons();
+        var left = host.querySelectorAll('[data-unsave]');
+        var next = left[Math.min(at, left.length - 1)];
+        if (!next && S.tid) next = document.querySelector('#oa-forum-thread .oa-forum-save');
+        if (!next) {
+          next = $('main');
+          if (next) next.setAttribute('tabindex', '-1');
+        }
+        if (next) next.focus({ preventScroll: true });
       });
     });
     show(card, true);
@@ -943,6 +958,24 @@
   function readThreads() {
     return db().then(function (d) {
       return threadsCol(d, S.season, S.room).orderBy('lastAt', 'desc').limit(200).get();
+    }).catch(function (err) {
+      /* A ROOM THE CACHE PROMISED AND THE RULES REFUSED. The rules re-read
+         the membership marker on every request and only forumJoin writes it;
+         a profile taken down and put back has none until the function is
+         asked again, and join() trusts a cached "yes" for the tab's life.
+         So a refused read while the cache says yes is the one signal that the
+         answer has changed: forget it, ask once, and read again. Any other
+         failure, or a second refusal, is reported as it was. */
+      var code = String((err && err.code) || '');
+      if (!/permission-denied/.test(code) || !S.me || !S.me.rooms || !S.me.rooms[S.room] || S.rejoined) throw err;
+      S.rejoined = true;
+      try { sessionStorage.removeItem(ME_KEY); } catch (e) { /* private mode */ }
+      return join({ uid: S.me.uid }).then(function (me) {
+        S.me = me;
+        return db();
+      }).then(function (d) {
+        return threadsCol(d, S.season, S.room).orderBy('lastAt', 'desc').limit(200).get();
+      });
     }).then(function (snap) {
       var rows = [];
       snap.forEach(function (doc) {
@@ -1512,9 +1545,17 @@
       /* A THREAD LEFT HEADLESS BY THE OLD RULE. Its question is already a
          tombstone and its thread is still standing, so forumDelete's second
          press has one thing to do: shut it. That path had no control at
-         all, because every button here hung off !p.hidden. */
-      out += '<button type="button" class="oa-forum-act is-del" data-act="delete" ' +
-        'title="This question is already deleted. Closing the thread takes it off the list.">Close this thread</button>';
+         all, because every button here hung off !p.hidden.
+
+         AND NOT OVER OTHER PEOPLE'S ANSWERS: the asker's press is held by
+         the same answered rule as a fresh question, because closing the
+         thread would lock every live answer under it away for good (the
+         function refuses it too; the maintainer's press sweeps them). */
+      var held = !amAdmin() && liveAnswers > 0;
+      out += '<button type="button" class="oa-forum-act is-del" data-act="delete"' +
+        (held ? ' disabled' : '') + ' title="' + esc(held
+          ? 'This question is already deleted, but it still has answers, so the thread stays open for them. It can be closed once every answer has been deleted.'
+          : 'This question is already deleted. Closing the thread takes it off the list.') + '">Close this thread</button>';
     }
     out += '</div><div class="oa-forum-who">' +
       '<span class="oa-forum-handle' + (mine ? ' is-me' : '') + '">' + esc(p.by) + '</span>' +
@@ -1601,7 +1642,16 @@
        there are no words left to take away, so the wording does not promise
        to take any. */
     if (isFirst && p.hidden) {
-      if (!window.confirm('Close this thread? Its question was already deleted, so nothing more is taken away; the thread simply comes off the list.')) return;
+      /* the maintainer's close SWEEPS the answers still standing, so their
+         confirmation says so; an asker's press is only offered when there
+         are none, and then nothing more is taken away */
+      var standing = Number(S.live) || 0;
+      var closeMsg = amAdmin() && standing > 0
+        ? 'Close this thread as the maintainer? Its question was already deleted; the ' +
+          standing + (standing === 1 ? ' answer' : ' answers') + ' still standing under it ' +
+          (standing === 1 ? 'is' : 'are') + ' removed with it, and the words cannot be brought back.'
+        : 'Close this thread? Its question was already deleted, so nothing more is taken away; the thread simply comes off the list.';
+      if (!window.confirm(closeMsg)) return;
       btn.disabled = true;
       call('forumDelete', { room: S.room, tid: S.tid, pid: p.id }).then(function () {
         go({ room: S.room, season: S.season });
@@ -1806,7 +1856,30 @@
       var save = box.querySelector('[data-edit="save"]');
       save.disabled = true;
       call('forumEdit', { room: S.room, tid: S.tid, pid: p.id, body: body })
-        .then(function () { go({ room: S.room, season: S.season, t: S.tid, hash: 'p' + p.n }); })
+        .then(function () {
+          /* IN PLACE, NEVER THROUGH go(): draw() rebuilds the thread and,
+             with it, the answer box below, which may be holding something
+             half written (the #n permalink learnt the same lesson). The
+             post's own row is repainted from the edited words; `p` is the
+             entry in S.posts, so the band's next repaint reads them too.
+             The editor is closed first, or paintAnswers would carry it
+             across as an editor still open. */
+          p.body = body;
+          p.editedAt = Date.now() - (Date.now() % 60000);
+          box.remove();
+          if (Number(p.n) === 1) {
+            var ol = $('oa-forum-posts');
+            if (ol && S.thread) {
+              ol.innerHTML = postHTML(p, S.thread, S.readOnly, true, S.live);
+              wirePosts(ol, S.thread, S.posts, S.readOnly);
+            }
+          } else {
+            paintAnswers();
+          }
+          var back = document.getElementById('p' + p.n);
+          var focusOn = back && (back.querySelector('.oa-forum-act[data-act="edit"]') || back.querySelector('.oa-forum-act'));
+          if (focusOn) focusOn.focus({ preventScroll: true });
+        })
         .catch(function (err) { save.disabled = false; guard.textContent = friendly(err); });
     });
     ta.focus();

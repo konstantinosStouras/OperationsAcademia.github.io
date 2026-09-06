@@ -125,6 +125,19 @@
     m.hidden = !msg;
   }
 
+  /** The forum page keeps forumJoin's answer for the tab's life
+      (sessionStorage 'oa-forum-me', keyed on the uid) and trusts a cached
+      "yes" without asking again. A take-down deletes the membership marker
+      the rules read on every request, and a later edit puts the profile back
+      without anything rewriting the marker, since only forumJoin may: with
+      the cache still saying yes the room was refused for the rest of the
+      session. So whatever changes a profile's standing forgets the cache,
+      and the next forum visit asks the function, which rewrites the marker
+      from the profile as it stands. The key is the forum page's own. */
+  function forgetForumJoin() {
+    try { sessionStorage.removeItem('oa-forum-me'); } catch (e) { /* private mode */ }
+  }
+
   /* The job market year rule, same as oa-jobform.js (and jobs-model.mjs
      MARKET_ROLL_MONTH): named for the calendar year it ENDS in, rolling on
      1 JULY in UTC. The previous year is offered too — a candidate filing in
@@ -997,6 +1010,7 @@
               return null;
             }).catch(function () {});
           }
+          forgetForumJoin();
           return fb.firestore().collection(col()).doc(EDIT_ID).update({
             /* WHO took it down. 'hidden' is the maintainer, 'withdrawn' is
                the owner — the card buttons have always drawn that distinction
@@ -1252,6 +1266,12 @@
              later edit un-withdraws one. */
           if (EDIT_ID) {
             doc.status = 'queued';
+            /* PUTTING A PROFILE BACK re-earns the Candidates' room, and only
+               forumJoin can rewrite the marker the take-down deleted: the
+               forum page trusts a cached "yes" for the tab's life and never
+               asks again, so the room stayed refused until the next session.
+               Forgetting the cache makes the next forum visit ask. */
+            forgetForumJoin();
             /* `updatedAt` is stamped only when something CHANGED (`dirty`,
                the same test the preview draws its "Profile updated on" line
                by): the card prints that line from it, and a Save pressed

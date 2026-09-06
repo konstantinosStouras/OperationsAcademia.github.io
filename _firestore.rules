@@ -72,6 +72,22 @@ service cloud.firestore {
               || request.resource.data.mergedFrom == resource.data.mergedFrom);
     }
 
+    /* THE POSTING DATE IS THE SERVER'S, ON AN UPDATE TOO. The create clauses
+       pin createdAt to request.time, and their comment argued the update
+       path needed nothing, since "request.resource.data carries the EXISTING
+       stamp". True of update(), which merges, and false of set(), which
+       REPLACES: request.resource.data is then exactly what the client sent,
+       and the build reads `posted` and `addedAt` (the e-mail alerts' cursor)
+       off this field, so an owner could re-stamp their posting to today, or
+       to 2100, and hold the top of the list for ever. Two-sided, like the
+       two helpers above, so a set() that drops the key is refused too. Every
+       form here writes with update(), so nothing legitimate changes. */
+    function createdAtUnchanged() {
+      return ('createdAt' in request.resource.data) == ('createdAt' in resource.data)
+          && (!('createdAt' in request.resource.data)
+              || request.resource.data.createdAt == resource.data.createdAt);
+    }
+
     // A field may be ABSENT, a bounded string — or NULL. The builds clear
     // the landing-strip fields (adUploadPath, cvUploadPath, …) by writing
     // null once a file is filed into Drive, and on an update
@@ -93,10 +109,21 @@ service cloud.firestore {
               'orcidVerified', 'orcidSeeded', 'photo', 'photoSeeded'];
     }
 
+    /* A flag is a bool or absent (null reads as cleared, like str()). The
+       three flags used to carry no test at all, and str() answers true for
+       a field it is not asked about, so the one write an UNVERIFIED account
+       may make could hold a megabyte under a key named photoSeeded. */
+    function flag(field) {
+      return !(field in request.resource.data)
+        || request.resource.data[field] == null
+        || request.resource.data[field] is bool;
+    }
+
     function profileShape() {
       return str('firstName', 300) && str('lastName', 300)
         && str('affiliation', 300) && str('website', 300)
-        && str('orcid', 40) && str('photo', 120000);
+        && str('orcid', 40) && str('photo', 120000)
+        && flag('orcidVerified') && flag('orcidSeeded') && flag('photoSeeded');
     }
 
     function list(field, maxItems) {
@@ -188,6 +215,7 @@ service cloud.firestore {
                     && request.resource.data.status in ['queued', 'withdrawn']
                     && featuredUnchanged()
                     && mergedFromUnchanged()
+                    && createdAtUnchanged()
                     && shapeOk();
 
       // MERGING TWO ACCOUNTS hands a posting over to the account its owner is
@@ -301,6 +329,7 @@ service cloud.firestore {
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
                     && mergedFromUnchanged()
+                    && createdAtUnchanged()
                     && statsUntouched()
                     && candShapeOk();
 
@@ -352,6 +381,7 @@ service cloud.firestore {
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
                     && mergedFromUnchanged()
+                    && createdAtUnchanged()
                     && plShapeOk();
 
       // account merge hand-over — same shape and reasoning as jobSubmissions

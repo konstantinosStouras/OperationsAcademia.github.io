@@ -220,10 +220,25 @@ gcloud secrets versions destroy <N> --secret FORUM_SECRET --project operations-a
 
 where `<N>` is the `secretVersion` the previous season's document names. Read
 it off that document rather than assuming, and check it is not the number the
-CURRENT season's document names; with the June step above done it never is. The
-housekeeping run that does this and stamps `secretDestroyedAt` on that
-document arrives with the forum's step 2; until then it is this command, by
-hand, once a year.
+CURRENT season's document names; with the June step above done it never is.
+
+**Then press "OA: retire a closed forum season"** (`_scraper/roll-forum-season.mjs`,
+`workflow_dispatch` only), with the number you destroyed typed into `destroyed`
+and `write` ticked. It deletes the closed season's `candidateMarkers`,
+`forumHandles` and `forumNames` documents and stamps `secretDestroyedAt` on the
+season head. The deletions are the other half of the promise: Firestore stamps
+every document with a `createTime` no field carries, `forumJoin` creates a
+member's handle and marker in one call, and two documents born in the same
+instant are a join between a handle and an account that the Admin credential
+can read whether or not the secret still exists. The run refuses the season
+under way, refuses a `destroyed` number the closed season does not name or the
+current season also names, and with `write` unticked prints the plan and the
+exact gcloud line (`--destroyed=<N>`) it is waiting on. Run locally:
+
+```
+node _scraper/roll-forum-season.mjs --season=<Y>                       plan
+node _scraper/roll-forum-season.mjs --season=<Y> --write --destroyed=<N>
+```
 
 First deploy asks to enable a few APIs (Cloud Functions, Cloud Build,
 Artifact Registry, Eventarc) — say yes. It takes a few minutes.

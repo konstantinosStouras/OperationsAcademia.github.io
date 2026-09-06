@@ -714,9 +714,14 @@ export function applyAdverts(rows, cache, { today = '' } = {}) {
   const out = (rows || []).map((row) => {
     const key = advertKeyOf(row && row.adUrl);
     const ad = key ? ads[key] : null;
-    /* 'gone' counts alongside 'ok': the entry then carries what the page said
-       while it was up (see cacheEntry). 'unreadable' carries nothing. */
-    if (!ad || (ad.status !== 'ok' && ad.status !== 'gone') || !ad.applyByDate) return row;
+    /* THE DATE IS THE TEST, NOT THE STATUS. 'gone' carries what the page said
+       while it was up, and since cacheEntry's `keep` an 'unreadable' entry
+       carries what an EARLIER read learnt: refusing it by status threw that
+       date away one function later than the keep had saved it, and the
+       morning rebuild of jobmarket.json (deadline cell empty) then put the
+       posting back to "Until filled." through this very apply. An entry with
+       no date, whatever its status, changes nothing. */
+    if (!ad || !ad.applyByDate) return row;
 
     if (row.applyByDate) {
       if (row.applyByDate !== ad.applyByDate) {

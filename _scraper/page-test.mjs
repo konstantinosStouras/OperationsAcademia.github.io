@@ -2508,6 +2508,66 @@ for (const [name, expect] of [
     return m ? Number(m[1]) : NaN;
   });
 
+  /* A NAME THE SITE KNOWS BY ANOTHER SPELLING. The e-mail matcher has always
+     tried the needle's own canonical forms and this page's search had not, so
+     "UC Berkeley", "Penn State" or "Imperial Business School" typed here found
+     NOTHING while an alert holding the same words matched and was e-mailed —
+     31 spellings apart, measured over the served postings. "What I see on the
+     site" and "what I am e-mailed" cannot mean different things.
+
+     The alias is picked FROM THE PAGE, never named here: the corpus is rebuilt
+     every morning and a check that names a university goes red for a reason
+     that is not a regression. It asks the names module for an alias whose
+     canonical value is an institution this listing is actually showing. */
+  const alias = await j.evaluate(() => {
+    const S = window.OASchools;
+    if (!S || !S.INSTITUTION_ALIASES) return null;
+    const on = new Set([...document.querySelectorAll('.oa-card .oa-card-title')]
+      .map((t) => S.fold(t.textContent)));
+    for (const k of Object.keys(S.INSTITUTION_ALIASES)) {
+      const canon = S.fold(S.INSTITUTION_ALIASES[k]);
+      if (!canon || S.fold(k) === canon) continue;
+      /* NOT AN ALL-CAPS ALIAS. The engine matches an all-caps needle against
+         the INITIALS of a field's words, its own documented rule, so "CUHK"
+         also finds City University of Hong Kong, and this check, which is
+         about the canonical-form leg alone, then fails on a rule it is not
+         measuring. An alias with a lowercase letter reaches only that leg. */
+      if (!/[a-z]/.test(k)) continue;
+      for (const name of on) {
+        /* the alias must not already be a substring of the name, or the bare
+           fold would have found it and this proves nothing */
+        if (name.indexOf(canon) !== -1 && name.indexOf(S.fold(k)) === -1) {
+          return { typed: k, expect: S.INSTITUTION_ALIASES[k] };
+        }
+      }
+    }
+    return null;
+  });
+  if (alias) {
+    await j.fill('#oaf-institution', alias.typed);
+    await j.waitForTimeout(320);
+    const hits = await j.evaluate((a) => {
+      const S = window.OASchools;
+      return [...document.querySelectorAll('.oa-card .oa-card-title')].map((n) => ({
+        text: n.textContent.trim(),
+        /* folded on BOTH sides, and either spelling counts: the row is a hit
+           because the needle named it, whichever of its two names it did so by */
+        named: S.fold(n.textContent).indexOf(S.fold(a.expect)) !== -1
+            || S.fold(n.textContent).indexOf(S.fold(a.typed)) !== -1,
+      }));
+    }, alias);
+    ok(hits.length > 0,
+      `jobs: "${alias.typed}" finds the postings the site publishes as "${alias.expect}"`);
+    eq(hits.filter((h) => !h.named).map((h) => h.text), [],
+      `jobs: …and only those, so the canonical form narrows rather than widening ` +
+      `(typed "${alias.typed}", canonical "${alias.expect}")`);
+    await j.fill('#oaf-institution', '');
+    await j.waitForTimeout(320);
+  } else {
+    ok(false, 'jobs: no alias in the tables names an institution this listing shows — ' +
+      'the check cannot run, which is not the same as passing');
+  }
+
   /* TWO TERMS THAT MUST WIDEN, DERIVED FROM THE PAGE ITSELF. data/jobs.json is
      rebuilt from the tracking sheet every morning, so naming institutions here
      ("utah", "princeton") would make this check pass or fail on whatever the
@@ -9609,6 +9669,29 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
   {
+    /* THE COUNTDOWN STANDS DOWN UNDER THE FIRST-RUN PROFILE CARD. The lift
+       that confirms the address also opens the accounts module's Welcome
+       dialog for an account with no profile yet, asking for a name and a
+       photo; the page used to replace itself under it four seconds later and
+       throw the half-typed profile away. This is the fixture above WITHOUT
+       the oaProfileAsked mark that kept the dialog shut. */
+    const { ctx, page: q, errors } = await signedInPage(LINK,
+      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    await q.waitForSelector('#oa-profile [aria-modal="true"]', { timeout: 15000 });
+    await q.waitForFunction(() => /Press Continue when you are ready/.test(document.getElementById('ve-count').textContent), null, { timeout: 8000 });
+    await q.waitForTimeout(6000);
+    const held = await q.evaluate(() => ({
+      here: /verify-email\.html/.test(location.pathname),
+      modal: !!document.querySelector('#oa-profile [aria-modal="true"]'),
+      cont: !document.getElementById('ve-continue').hidden,
+    }));
+    ok(held.here && held.modal, 'verify page: with the profile card open the page is NOT replaced after five seconds');
+    ok(held.cont, 'verify page: and Continue stays for when the reader is done with it');
+    eq(errors, [], 'verify page: no uncaught script error while the countdown stands down');
+    await ctx.close();
+  }
+  {
     // a reader with no session at all (the commonest case: the link opened in
     // another browser) still gets the confirmation, and a way to sign in
     const { ctx, page: q, errors } = await signedOutPage(LINK, { selector: '#main' });
@@ -10202,6 +10285,26 @@ for (const w of [320, 360, 390, 430]) {
       null, { timeout: 8000 });
     ok(await q.evaluate(() => /edited/.test(document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-who').textContent)),
       'forum (candidate): an edit saves through forumEdit and the post says edited');
+    /* AND SAVING AN EDIT LEAVES THE ANSWER BOX ALONE. The save used to go
+       through go(), which rebuilt the thread and the box below it, so
+       whatever was half written there went the moment an edit elsewhere was
+       saved; every other in-thread action kept it. */
+    await q.fill('#oa-forum-body', 'A draft that must survive the edit above.');
+    await q.click('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="edit"]');
+    await q.waitForSelector('.oa-forum-editing textarea', { timeout: 8000 });
+    await q.fill('.oa-forum-editing textarea', 'Thank you. The teaching load question worked for me as well, twice over.');
+    await q.click('.oa-forum-editing [data-edit="save"]');
+    await q.waitForFunction(() => /twice over/.test((document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-text') || {}).textContent || ''),
+      null, { timeout: 8000 });
+    const keptDraft = await q.evaluate(() => ({
+      draft: document.getElementById('oa-forum-body').value,
+      editors: document.querySelectorAll('.oa-forum-editing').length,
+      focusIn: !!(document.activeElement && document.activeElement.closest && document.activeElement.closest('.oa-forum-post[data-n="2"]')),
+    }));
+    eq(keptDraft.draft, 'A draft that must survive the edit above.', 'forum (candidate): saving an edit leaves what was half written in the answer box');
+    eq(keptDraft.editors, 0, 'forum (candidate): and the editor is closed');
+    ok(keptDraft.focusIn, 'forum (candidate): with focus back on the edited post');
+    await q.fill('#oa-forum-body', '');
 
     /* A LINK POSTS, and the page draws it (owner, 2026-09-05). The guard used
        to refuse a web address; what it still refuses is a way to be contacted
@@ -10419,6 +10522,22 @@ for (const w of [320, 360, 390, 430]) {
     ok(saved.mine && Object.keys(saved.store.items).length === 1,
       'forum (saved): the mark is in this browser, keyed to the account');
     ok(!saved.leaks, 'forum (saved): and carries no address');
+    /* REMOVING IT FROM THE CARD KEEPS THE KEYBOARD. The button pressed goes
+       with its row, so there is nothing to put focus back on; it goes to the
+       thread's own bookmark rather than falling to <body>, where the removal
+       is announced to nobody and the next Tab starts from the top. */
+    await q.focus('#oa-forum-saved .oa-forum-unsave');
+    await q.click('#oa-forum-saved .oa-forum-unsave');
+    await q.waitForFunction(() => document.getElementById('oa-forum-savedcard').hidden, null, { timeout: 8000 });
+    const unsaved = await q.evaluate(() => ({
+      tag: document.activeElement && document.activeElement.tagName,
+      onBookmark: !!(document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('oa-forum-save')),
+      pressed: document.querySelector('.oa-forum-post.is-first [data-act="save"]').getAttribute('aria-pressed'),
+    }));
+    ok(unsaved.onBookmark, 'forum (saved): removing the last saved item puts focus on the post\'s own bookmark, not on <body> (' + unsaved.tag + ')');
+    eq(unsaved.pressed, 'false', 'forum (saved): and the bookmark on the post says it is off');
+    await q.click('.oa-forum-post.is-first [data-act="save"]');
+    await q.waitForSelector('#oa-forum-savedcard:not([hidden])', { timeout: 8000 });
     /* the tag cards are beside every view, so this needs no navigation, and
        the thread stays on screen for the step below */
     const before = await q.evaluate(() => window.__fb.log.filter((e) => e.op === 'set' || e.op === 'update').length);
@@ -10651,6 +10770,51 @@ for (const w of [320, 360, 390, 430]) {
 
     eq(errors, [], 'forum (maintainer): no uncaught script error');
     await ctx.close();
+  }
+
+  /* -- a legacy headless thread with a live answer: the asker cannot close it,
+        the maintainer's close sweeps ---------------------------------------- */
+  {
+    const HEADLESS = [
+      { path: `${T}/seed-t3`, data: { season: FY, room: 'candidates', title: 'A question its asker deleted, answered', tags: ['waiting'],
+        by: 'quiet heron 42', t: OLD, lastAt: OLD, lastBy: 'patient owl 7', n: 2, excerpt: '', score: 0, pinned: false, locked: false, hidden: false } },
+      { path: `${T}/seed-t3/posts/seed-t3-p1`, data: { season: FY, room: 'candidates', tid: 'seed-t3', n: 1, by: 'quiet heron 42',
+        body: '', t: OLD, up: 0, down: 0, quote: null, hidden: true, hiddenBy: 'author' } },
+      { path: `${T}/seed-t3/posts/seed-t3-p2`, data: { season: FY, room: 'candidates', tid: 'seed-t3', n: 2, by: 'patient owl 7',
+        body: 'An answer that must stay reachable by its own author.', t: OLD, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
+    ];
+    const { ctx, page: q, errors } = await signedInPage('forum.html?room=candidates&t=seed-t3',
+      { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...HEADLESS], selector: '#oa-forum' });
+    await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
+    const asker = await q.evaluate(() => {
+      const b = document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+      return { label: b && b.textContent.trim(), off: !!(b && b.disabled), why: (b && b.getAttribute('title')) || '',
+        closed: !!document.querySelector('#oa-forum-compose .oa-note'),
+        answers: document.querySelectorAll('#oa-forum-answers .oa-forum-post').length };
+    });
+    eq(asker.label, 'Close this thread', 'forum (headless): the asker is offered the close');
+    ok(asker.off && /still has answers/.test(asker.why),
+      'forum (headless): ...disabled with the reason, because another member\'s answer still stands under it');
+    ok(asker.closed && asker.answers === 1, 'forum (headless): the thread takes no new answers, and the answer is still there to read');
+    eq(errors, [], 'forum (headless): no uncaught script error');
+    await ctx.close();
+    /* the maintainer, as the block below defines them (that constant is its own) */
+    const MAINTAINER = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
+      emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
+    const m = await signedInPage('forum.html?room=candidates&t=seed-t3',
+      { user: MAINTAINER, docs: [CAND_PROFILE, ...SEEDED, ...HEADLESS], selector: '#oa-forum' });
+    await m.page.waitForSelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]:not([disabled])', { timeout: 15000 });
+    let closeDialog = '';
+    m.page.once('dialog', (d) => { closeDialog = d.message(); d.accept(); });
+    await m.page.click('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+    await m.page.waitForFunction((t) => (window.__fb.docs[t + '/seed-t3'] || {}).hidden === true, T, { timeout: 15000 });
+    ok(/still standing under it/.test(closeDialog) && /removed with it/.test(closeDialog),
+      'forum (headless): the maintainer\'s confirmation names the answer their close sweeps (' + closeDialog.slice(0, 60) + ')');
+    const swept = await m.page.evaluate((t) => window.__fb.docs[t + '/seed-t3/posts/seed-t3-p2'], T);
+    ok(swept && swept.hidden === true && swept.body === '' && swept.hiddenBy === 'admin',
+      'forum (headless): and the answer is erased with the thread, saying the maintainer removed it');
+    eq(m.errors, [], 'forum (headless): no uncaught script error for the maintainer');
+    await m.ctx.close();
   }
 
   /* -- an archived season: read-only ----------------------------------------- */

@@ -86,12 +86,10 @@
    */
   function canonNeedles(text) {
     var out = [], i;
-    var tries = [text];
-    if (OASchools) {
-      tries.push(OASchools.canonInstitution(text));
-      tries.push(OASchools.canonSchool(text));
-      tries.push(OASchools.canonUnit(text));
-    }
+    /* ONE DEFINITION, in the module that owns the names. It was written out
+       here and NOT in assets/oa-list.js, so the jobs page's own search found
+       31 spellings fewer than the alerts it is meant to agree with. */
+    var tries = OASchools ? OASchools.nameNeedles(text) : [text];
     for (i = 0; i < tries.length; i++) {
       var f = fold(tries[i]);
       if (f && out.indexOf(f) === -1) out.push(f);

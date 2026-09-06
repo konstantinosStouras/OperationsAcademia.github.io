@@ -436,6 +436,47 @@ async function main() {
   const healed = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${head.result.tid}`).get();
   ok(healed.data().hidden === true, 'so a thread left headless can always be closed');
 
+  /* BUT NOT OVER OTHER PEOPLE'S LIVE ANSWERS. The sweep is the maintainer's
+     alone, so an asker closing a legacy headless thread erased nothing --
+     and `tv.hidden` then refused everyone on it, the maintainer included: the
+     answers stayed readable to any admitted member for ever and deletable
+     by nobody. The second press is held by the same answered rule as a
+     fresh question; the thread stays open, so the answer's own author can
+     still take it back, and the maintainer's press sweeps. Two ordinary
+     members meet in the open room, which is where this is driven. */
+  const resetAll = () => admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
+  await resetAll();
+  const lh = await call('forumPost', tokens.open, { room: 'open', title: 'A legacy headless thread with an answer', tags: ['waiting'], body: 'A question whose words will be taken away by hand.', acceptGuide: true });
+  ok(!lh.error, 'a thread in the open room, to make headless with an answer under it', JSON.stringify(lh));
+  await resetAll();
+  const lhA = await call('forumPost', tokens.cand, { room: 'open', tid: lh.result.tid, body: 'An answer that must stay reachable by its own author.' });
+  ok(!lhA.error, 'with an answer by another member', JSON.stringify(lhA));
+  await admin.doc(`forumSeasons/${Y}/rooms/open/threads/${lh.result.tid}/posts/${lh.result.pid}`).update({ body: '', hidden: true, hiddenBy: 'author' });
+  const lhClose = await call('forumDelete', tokens.open, { room: 'open', tid: lh.result.tid, pid: lh.result.pid });
+  ok(status(lhClose) === 'FAILED_PRECONDITION' && reason(lhClose) === 'answered',
+    'the asker cannot close a headless thread while another member\'s answer still stands', JSON.stringify(lhClose));
+  const lhStill = await admin.doc(`forumSeasons/${Y}/rooms/open/threads/${lh.result.tid}`).get();
+  ok(lhStill.data().hidden !== true, 'so the thread stays open');
+  const lhOwn = await call('forumDelete', tokens.cand, { room: 'open', tid: lh.result.tid, pid: lhA.result.pid });
+  ok(!lhOwn.error, 'and the answer\'s own author can still delete it there', JSON.stringify(lhOwn));
+  const lhClose2 = await call('forumDelete', tokens.open, { room: 'open', tid: lh.result.tid, pid: lh.result.pid });
+  ok(!lhClose2.error && lhClose2.result.thread === true, 'after which the asker\'s press closes the thread', JSON.stringify(lhClose2));
+  /* and the maintainer's press on the same shape sweeps the answers */
+  await resetAll();
+  const lh2 = await call('forumPost', tokens.open, { room: 'open', title: 'A second legacy headless thread', tags: ['waiting'], body: 'Another question to blank by hand.' });
+  ok(!lh2.error, 'a second headless thread, for the maintainer', JSON.stringify(lh2));
+  await resetAll();
+  const lh2A = await call('forumPost', tokens.cand, { room: 'open', tid: lh2.result.tid, body: 'An answer the maintainer\'s close will take with it.' });
+  ok(!lh2A.error, 'with an answer under it', JSON.stringify(lh2A));
+  await admin.doc(`forumSeasons/${Y}/rooms/open/threads/${lh2.result.tid}/posts/${lh2.result.pid}`).update({ body: '', hidden: true, hiddenBy: 'author' });
+  const lh2Close = await call('forumDelete', tokens.adm, { room: 'open', tid: lh2.result.tid, pid: lh2.result.pid });
+  ok(!lh2Close.error && lh2Close.result.thread === true, 'the maintainer closes it', JSON.stringify(lh2Close));
+  const lh2Posts = await admin.collection(`forumSeasons/${Y}/rooms/open/threads/${lh2.result.tid}/posts`).get();
+  ok(lh2Posts.docs.every((d) => (d.data().body || '') === '' && d.data().hidden === true),
+    'and the answer under it is erased and hidden with the thread');
+  const lh2Answer = lh2Posts.docs.find((d) => Number(d.data().n) !== 1);
+  ok(lh2Answer && lh2Answer.data().hiddenBy === 'admin', 'saying the maintainer removed it');
+
   /* A QUOTE IS A TEXT A MEMBER SENDS, so the guard runs on it. "It is a
      passage of a post that already passed the guard" was the argument for
      not doing so, and the flattening the passage test uses is what makes it

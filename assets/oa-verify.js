@@ -100,12 +100,36 @@
     document.body.classList.remove('ve-focus');
   }
 
+  /** Whether a dialog is SHOWN over the page. Only a shown one counts: the
+      site's phone navigation sheet is a dialog too (v3.js gives it
+      aria-modal) and sits in the document on every page, closed, so a bare
+      querySelector would find a modal on a page with nothing over it. */
+  function dialogOpen() {
+    var dialogs = document.querySelectorAll('[aria-modal="true"]');
+    for (var i = 0; i < dialogs.length; i++) {
+      var cs = window.getComputedStyle(dialogs[i]);
+      if (cs.display !== 'none' && cs.visibility !== 'hidden' && dialogs[i].getClientRects().length) return true;
+    }
+    return false;
+  }
+
   function startCountdown(href) {
     if (countdown) return;
     document.body.classList.add('ve-focus');
     var c = $('ve-count');
     var left = MOVE_ON_S;
     var tick = function () {
+      /* THE SITE MAY HAVE PUT A CARD OVER THIS BOX. The lift that confirmed
+         the address also runs the accounts module's first-run profile prompt
+         for an account with no profile yet, a dialog asking for a name, an
+         affiliation and a photo, and replacing the page under it threw the
+         half-typed profile away with no word said. A dialog on screen ends
+         the countdown; Continue stays for when the reader is done with it. */
+      if (dialogOpen()) {
+        clearInterval(countdown); countdown = null;
+        if (c) { c.hidden = false; c.textContent = 'Press Continue when you are ready.'; }
+        return;
+      }
       if (left <= 0) {
         clearInterval(countdown); countdown = null;
         location.replace(href);
@@ -132,7 +156,6 @@
       link belonged to another address (a second registration after a typo,
       say), so Continue would only lead to a locked account page. */
   function showDone(mismatch) {
-    show('ve-done');
     /* CONTINUE MEANS THE ACCOUNT ON THIS PAGE CAN BE USED, and a PENDING
        session cannot: `|| !!pendingUser()` let one through, and since this
        card re-decides itself on every auth change (see boot), a pending
@@ -142,7 +165,19 @@
        and the card redraws with Continue the moment the session is usable. */
     var waiting = !mismatch && !signedIn() && !!pendingUser();
     var inside = !mismatch && signedIn();
+    /* THE HEADING IS THE FIRST THING HEARD: show() moves focus onto it, so
+       for a reader who cannot see the page it is often the whole verdict.
+       It used to say "Your e-mail address is verified" on every branch,
+       the mismatch included, where the account signed in here is NOT, with
+       only the muted note beneath saying the opposite. */
+    $('ve-done-h').textContent = mismatch ? 'The link confirmed a different address'
+      : (waiting ? 'The address in the link is confirmed' : 'Your e-mail address is verified');
+    $('ve-done-kicker').textContent = mismatch ? 'Not this account' : (waiting ? 'Nearly there' : 'Done');
     $('ve-done-note').textContent = mismatch ? MISMATCH_NOTE : (waiting ? WAITING_NOTE : DONE_NOTE);
+    /* show() AFTER the words are set: it moves focus onto the heading, and
+       a heading renamed after focus has landed on it is announced under
+       its old name */
+    show('ve-done');
     $('ve-continue').hidden = !inside;
     $('ve-signin').hidden = inside;
     $('ve-signin').textContent = mismatch ? 'Use a different account'
@@ -153,6 +188,8 @@
   }
 
   function showError(err) {
+    $('ve-error-h').textContent = 'That link did not work';
+    $('ve-error-kicker').textContent = 'Something went wrong';
     show('ve-error');
     $('ve-error-why').textContent = A.friendly(err);
     var p = pendingUser();
@@ -182,6 +219,10 @@
   }
 
   function showUnavailable(text) {
+    /* the same card, its own words: the link is fine, the sign-in is not,
+       and a heading blaming the link sent the reader after a new one */
+    $('ve-error-h').textContent = 'Sign-in is unavailable at the moment';
+    $('ve-error-kicker').textContent = 'Please try again later';
     show('ve-error');
     $('ve-error-why').textContent = text;
     $('ve-resend').hidden = true;

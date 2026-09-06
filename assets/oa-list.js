@@ -220,8 +220,30 @@
     var needle = fold(term);
     if (!needle) return true;
     var acr = ACRONYM.test(String(term).trim()) ? String(term).trim().toLowerCase() : '';
+    /* …AND THE NEEDLE'S OWN CANONICAL FORMS, which is the leg this file was
+       missing. assets/oa-alert-match.js has always tried them, and this file's
+       own comment claims the two search by the same rules — so a reader typing
+       "UC Berkeley", "Penn State" or "Imperial Business School" here found
+       nothing while an alert holding the same words matched and was e-mailed.
+       Measured over the served postings: 31 spellings apart.
+
+       `OASchools.nameNeedles` is the one definition of what a free-text name
+       could mean. Without the module on the page this is the words alone,
+       exactly as before, which is what keeps every list that does not carry
+       names behaving as it did. */
+    var needles = [needle];
+    if (window.OASchools && window.OASchools.nameNeedles) {
+      var alt = window.OASchools.nameNeedles(term);
+      for (var i = 0; i < alt.length; i++) {
+        var fa = fold(alt[i]);
+        if (fa && needles.indexOf(fa) === -1) needles.push(fa);
+      }
+    }
     return asArray(f.fields || [f.field]).some(function (name) {
-      if (fold(row[name]).indexOf(needle) !== -1) return true;
+      var hay = fold(row[name]);
+      for (var j = 0; j < needles.length; j++) {
+        if (hay.indexOf(needles[j]) !== -1) return true;
+      }
       return !!acr && initials(row[name]).indexOf(acr) !== -1;
     });
   }
