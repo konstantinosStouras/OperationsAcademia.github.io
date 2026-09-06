@@ -189,9 +189,9 @@
             <h3>&#128274; Sign in to read the postings</h3>
             <p>The universities hiring this season are listed below either way. Opening a
             posting (its entry level, its deadlines and how to apply), along with
-            searching, filtering, downloading the full list as an Excel file and saving a
-            search as an e-mail alert, is free with an account, which takes a moment to
-            create.</p>
+            searching, filtering, downloading the full list as an Excel file, putting the
+            deadlines you choose in your calendar and saving a search as an e-mail alert,
+            is free with an account, which takes a moment to create.</p>
             <div class="v3-cta-row">
               <button type="button" class="v3-btn primary" id="v3-lock-signin">Sign in</button>
               <button type="button" class="v3-btn ghost" id="v3-lock-register">Create account</button>
@@ -278,6 +278,12 @@
     <!-- the current search, saved as an e-mail alert: reads OACountries and
          the gate above, and hands the filters to alerts.html -->
     <script defer src="assets/oa-alertsave.js"></script>
+    <!-- THE DEADLINES AS A CALENDAR FILE (owner, 2026-09-06): oa-ics.js writes
+         the .ics, oa-jobcal.js decides which dates a posting can put on a
+         calendar, draws the tick box on each dated card and the strip above
+         the list. After oa-gate.js and oa-jobnav.js, which it reads. -->
+    <script defer src="assets/oa-ics.js"></script>
+    <script defer src="assets/oa-jobcal.js"></script>
     <script>
     /* The external scripts above are DEFERRED, so they execute after the
        document has been parsed — which is AFTER an inline script like this one
@@ -494,6 +500,16 @@
              added, so a re-render can never leave a stale one behind */
           OASponsors.markCard(li, r);
           window.OAJobEdit && OAJobEdit.onCard(li, r);
+          /* the "Add to calendar" tick box, on a posting with an apply-by
+             date still to come, for a signed-in reader (assets/oa-jobcal.js);
+             a locked card gets none, since its dates are withheld */
+          window.OAJobCal && OAJobCal.onCard(li, r);
+        },
+
+        /* the calendar strip above the list counts what is listed from the
+           engine's own snapshot, so it follows every filter */
+        onRender: function (api) {
+          if (window.OAJobCal) OAJobCal.refresh(api);
         },
 
         card: {
@@ -530,6 +546,15 @@
       });
 
       if (window.OAJobEdit) OAJobEdit.attach(jobs);
+      /* THE DEADLINES TO A CALENDAR (owner, 2026-09-06): tick postings, then
+         download an .ics of their apply-by dates. The strip sits above the
+         result bar and is drawn for a signed-in reader only; a posting that
+         is open until filled has no date to add and gets no tick box. */
+      if (window.OAJobCal) {
+        OAJobCal.attach(jobs, document.getElementById('oa-jobs'), {
+          market: function () { return (marketYear() - 1) + '-' + marketYear(); }
+        });
+      }
       /* The gate is painted from the auth HINT so a signed-in reader never
          sees a flash of locked cards; this is what reconciles it a moment
          later, and what opens the posting whose lock was pressed once the

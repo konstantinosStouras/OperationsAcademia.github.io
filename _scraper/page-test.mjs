@@ -16,6 +16,7 @@ import http from 'node:http';
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { unzipStore, sheetCells, lastRow } from './_xlsx-read.mjs';
+import { parseIcs } from './_ics-read.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marketYear, inCurrentMarket } from './jobs-model.mjs';
@@ -9653,6 +9654,334 @@ for (const w of [320, 360, 390, 430]) {
     eq(r.short, [], `verify page (${label}): every button is a 42px target`);
     eq(r.wide, [], `verify page (${label}): …and none runs off the screen`);
     eq(errors, [], `verify page (${label}): no uncaught script error at 390px`);
+    await ctx.close();
+  }
+}
+
+/* --------------------------------------- the two calendar files, measured
+
+   Owner, 2026-09-06: tick postings on jobs.html and download their apply-by
+   dates as a calendar file, a posting that is open until filled adding
+   nothing; and a calendar of every candidate's INFORMS talk with its time,
+   date and room. selftest.mjs pins the writer, the record, both modules and
+   the wiring; this proves what only a browser can: a tick box on exactly the
+   dated postings and on none signed out, the ticks surviving a repaint, a
+   real .ics read back holding exactly the ticked postings' dates, the
+   candidates' file with its zone, the card's talk row, the form's per-day
+   block feeding the preview and the document, and the phone targets.
+
+   The jobs fixture is read off the served file under the page's own market
+   rule: a guard about a corpus must not move with the corpus. */
+{
+  const EMAILISH = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
+  const noAddress = (t) => !EMAILISH.test(String(t).replace(/\r\n[ \t]/g, '').replace(/@operationsacademia\.org/g, ''));
+  const TODAY = new Date().toISOString().slice(0, 10);
+  const served = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'))
+    .filter((r) => inCurrentMarket(r));
+  const upcomingDates = (r) => ['applyByDate', 'reviewDate']
+    .map((k) => String(r[k] || '').slice(0, 10))
+    .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= TODAY);
+  const datedIds = new Set(served.filter((r) => upcomingDates(r).length).map((r) => r.id));
+  ok(datedIds.size >= 2, `calendar: the served file holds current postings with an upcoming date (${datedIds.size})`);
+  ok(served.some((r) => !upcomingDates(r).length), 'calendar: …and at least one without (open until filled, or passed)');
+
+  /* -- signed OUT: no tick box, no strip, and the lock card names it ----- */
+  {
+    const { ctx, page: q, errors } = await signedOutPage('jobs.html');
+    const s = await q.evaluate(() => ({
+      boxes: document.querySelectorAll('.oa-cal-box').length,
+      tray: (t) => t,
+      trayHidden: (() => { const t = document.querySelector('.oa-cal-tray'); return t ? t.hidden : null; })(),
+      locked: document.querySelectorAll('.oa-card-locked').length,
+      card: document.getElementById('v3-lock-card').textContent.replace(/\s+/g, ' '),
+    }));
+    eq(s.boxes, 0, 'calendar: signed out, no card offers a tick box (its dates are withheld)');
+    eq(s.trayHidden, true, 'calendar: …and the strip is hidden');
+    ok(s.locked > 0 && /in your calendar/.test(s.card), 'calendar: the sign-in card names the calendar as a reason to register');
+    eq(errors, [], 'calendar: signed-out run, no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- signed IN: tick, repaint, download, read the file back ------------ */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html', { acceptDownloads: true });
+    const first = await q.evaluate(() => {
+      const cards = [...document.querySelectorAll('.oa-card')].map((li) => ({
+        id: li.id.replace(/^job-/, ''), box: !!li.querySelector('.oa-cal-box'),
+        when: (li.querySelector('.oa-cal-when') || { textContent: '' }).textContent }));
+      const tray = document.querySelector('.oa-cal-tray');
+      return { cards, hidden: tray.hidden, msg: tray.querySelector('.oa-cal-msg').textContent,
+        go: tray.querySelector('.oa-cal-go').disabled, none: tray.querySelector('.oa-cal-none').hidden,
+        all: tray.querySelector('.oa-cal-all').disabled,
+        above: tray.getBoundingClientRect().bottom <= document.querySelector('.oa-resultbar').getBoundingClientRect().top + 1 };
+    });
+    ok(first.cards.every((c) => c.box === datedIds.has(c.id)),
+      'calendar: a tick box on exactly the postings with an apply-by date still to come, and on no other');
+    ok(first.cards.filter((c) => c.box).every((c) => /apply-by [A-Z][a-z]+ \d{1,2}, \d{4}/.test(c.when)),
+      'calendar: …each naming the date it would add');
+    ok(!first.hidden && first.above, 'calendar: the strip is drawn, above the result bar');
+    ok(/^Tick a posting/.test(first.msg) && first.msg.includes(String(datedIds.size)),
+      `calendar: it says what to do and how many listed postings carry a date (${datedIds.size})`);
+    ok(first.go && first.none && !first.all, 'calendar: the download waits for a tick, Untick all is hidden, Tick all is live');
+
+    const ticked = await q.evaluate(() => {
+      const boxes = [...document.querySelectorAll('.oa-cal-box')].slice(0, 2);
+      boxes.forEach((b) => b.click());
+      return boxes.map((b) => b.closest('.oa-card').id.replace(/^job-/, ''));
+    });
+    ok(ticked.length >= 1, `calendar: page one offers boxes to tick (${ticked.length})`);
+    await q.waitForTimeout(150);
+    const after = await q.evaluate(() => {
+      const tray = document.querySelector('.oa-cal-tray');
+      return { msg: tray.querySelector('.oa-cal-msg').textContent, go: tray.querySelector('.oa-cal-go').disabled,
+        none: tray.querySelector('.oa-cal-none').hidden, picked: document.querySelectorAll('.oa-cal-picked').length };
+    });
+    eq(after.picked, ticked.length, 'calendar: a ticked card is marked');
+    ok(new RegExp('^' + ticked.length + ' postings? ticked').test(after.msg) && !after.go && !after.none,
+      'calendar: the strip counts the ticks and the download comes live');
+
+    await q.click('.oa-pager button[aria-label="Next page"]');
+    await q.waitForTimeout(200);
+    await q.click('.oa-pager button[aria-label="Previous page"]');
+    await q.waitForTimeout(200);
+    eq(await q.evaluate(() => [...document.querySelectorAll('.oa-cal-box:checked')]
+      .map((b) => b.closest('.oa-card').id.replace(/^job-/, ''))), ticked,
+      'calendar: the ticks survive a repaint of the list');
+
+    const dl = q.waitForEvent('download', { timeout: 30000 });
+    await q.click('.oa-cal-go');
+    const d = await dl;
+    ok(/^operations-academia-job-deadlines-\d{4}-\d{4}-\d{4}-\d{2}-\d{2}\.ics$/.test(d.suggestedFilename()),
+      `calendar: it downloads a named .ics (${d.suggestedFilename()})`);
+    const text = await readFile(await d.path(), 'utf8');
+    const cal = parseIcs(text);
+    const want = served.filter((r) => ticked.includes(r.id)).reduce((n, r) => n + upcomingDates(r).length, 0);
+    eq(cal.events.length, want, 'calendar: the file carries one entry per upcoming date of the ticked postings and nothing else');
+    ok(cal.events.every((e) => ticked.some((id) => e.UID.value.includes(id))), 'calendar: every entry is one of the ticked postings');
+    ok(cal.events.every((e) => e.DTSTART.params.VALUE === 'DATE' && e.TRANSP.value === 'TRANSPARENT'),
+      'calendar: every entry is an all-day, transparent reminder');
+    ok(cal.events.every((e) => /jobs\.html\?job=/.test(e.URL.value)), 'calendar: each links its permalink on the jobs page');
+    ok(noAddress(text), 'calendar: no contact address reaches the reader\'s machine');
+    eq(cal.props.VERSION, '2.0', 'calendar: …and it is a calendar');
+
+    await q.click('.oa-cal-none');
+    await q.waitForTimeout(150);
+    eq(await q.evaluate(() => ({ checked: document.querySelectorAll('.oa-cal-box:checked').length,
+      go: document.querySelector('.oa-cal-go').disabled })), { checked: 0, go: true },
+      'calendar: Untick all clears every box and disables the download again');
+    await q.click('.oa-cal-all');
+    await q.waitForTimeout(150);
+    const everything = await q.evaluate(() => ({
+      checked: document.querySelectorAll('.oa-cal-box:checked').length,
+      boxes: document.querySelectorAll('.oa-cal-box').length,
+      msg: document.querySelector('.oa-cal-msg').textContent,
+      allBtn: document.querySelector('.oa-cal-all').disabled }));
+    eq(everything.checked, everything.boxes, 'calendar: Tick all listed ticks every box on the page');
+    ok(new RegExp('^' + datedIds.size + ' postings ticked').test(everything.msg) && everything.allBtn,
+      `calendar: …and every dated posting on every other page too (${datedIds.size}), after which it has nothing left to tick`);
+    eq(errors, [], 'calendar: signed-in run, no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- a phone: the tick strip and the buttons are targets (rule 14) ----- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html', { viewport: { width: 390, height: 844 } });
+    await q.evaluate(() => document.querySelector('.oa-cal-box').click());
+    await q.waitForTimeout(150);
+    const m = await q.evaluate(() => {
+      const pick = document.querySelector('.oa-cal-pick').getBoundingClientRect();
+      const box = document.querySelector('.oa-cal-box').getBoundingClientRect();
+      const btns = [...document.querySelectorAll('.oa-cal-btn')].filter((b) => !b.hidden).map((b) => b.getBoundingClientRect());
+      const tray = document.querySelector('.oa-cal-tray').getBoundingClientRect();
+      return { pickH: pick.height, boxW: box.width, btnH: btns.map((r) => Math.round(r.height)),
+        btnW: btns.map((r) => Math.round(r.width)), trayW: Math.round(tray.width),
+        over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    ok(m.pickH >= 42, `calendar mobile: the tick strip is a 42px target (got ${m.pickH})`);
+    ok(m.boxW >= 20, `calendar mobile: the box itself is 20px (got ${m.boxW})`);
+    ok(m.btnH.length === 3 && m.btnH.every((h) => h >= 42), `calendar mobile: the three buttons are 42px targets (got ${m.btnH})`);
+    ok(m.btnW.every((w) => w >= m.trayW - 40), 'calendar mobile: …stacked full width');
+    eq(m.over, 0, 'calendar mobile: no sideways scroll');
+    eq(errors, [], 'calendar mobile: no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- the talks calendar, over a seeded candidates file ------------------ */
+  {
+    /* year 2027 FIXED, posted today: in the current market through the
+       posting date whatever the season, and the 2026-2027 meeting record
+       (San Francisco, 1 to 4 November 2026) is the one the entries need */
+    const SEED = [
+      { id: 'tc-ada', year: 2027, posted: TODAY, first: 'Ada', last: 'Reader', name: 'Ada Reader',
+        affiliation: 'Kellogg School of Management, Northwestern University', position: 'PhD Candidate',
+        researchAreas: ['Supply Chain Management'], informsDays: ['Monday', 'Tuesday'],
+        talks: { Monday: { at: '10:45', session: 'MB12', room: 'Moscone Center, Room 2004', title: 'Queues and prices' } },
+        cvUrl: 'https://example.edu/cv.pdf', email: 'ada@example.edu', addedAt: TODAY + 'T09:00:00Z' },
+      { id: 'tc-grace', year: 2027, posted: TODAY, first: 'Grace', last: 'Hopper', name: 'Grace Hopper',
+        affiliation: 'Wharton, University of Pennsylvania', position: 'Post-Doc',
+        researchAreas: ['Healthcare Operations'], informsDays: ['Sunday'], addedAt: TODAY + 'T09:00:00Z' },
+      { id: 'tc-none', year: 2027, posted: TODAY, first: 'Not', last: 'Presenting', name: 'Not Presenting',
+        affiliation: 'Somewhere University', position: 'PhD Candidate',
+        researchAreas: ['Operations'], informsDays: [], addedAt: TODAY + 'T09:00:00Z' },
+    ];
+    const seed = (pg) => pg.route('**/data/candidates.json', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+    const open = async (opts) => {
+      const got = await signedInPage('index.html', { wait: false, ...opts });
+      await seed(got.page);
+      await got.page.goto(BASE + 'index.html', { waitUntil: 'load' });
+      await got.page.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()), null, { timeout: 15000 });
+      await got.page.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+      await got.page.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+      await got.page.waitForTimeout(300);
+      return got;
+    };
+
+    /* signed out: the button is there, sells the account, and downloads nothing */
+    {
+      const { ctx, page: q, errors } = await open({ user: null });
+      let downloaded = false;
+      q.on('download', () => { downloaded = true; });
+      const b = await q.evaluate(() => {
+        const b = document.querySelector('#oa-candidates .oa-talkcal');
+        return { there: !!b, disabled: b ? b.disabled : null, title: b ? b.title : '' };
+      });
+      ok(b.there && !b.disabled && /with an account/.test(b.title),
+        'talks calendar: signed out, the button says the file is free with an account');
+      await q.evaluate(() => document.querySelector('#oa-candidates .oa-talkcal').click());
+      await q.waitForTimeout(1000);
+      ok(!downloaded && await q.evaluate(() => !!document.querySelector('.oa-modal')),
+        'talks calendar: pressing it signed out downloads nothing and offers the sign-in box');
+      eq(errors, [], 'talks calendar: signed-out run, no uncaught script error');
+      await ctx.close();
+    }
+
+    /* signed in: the card's talk row, the file with its zone, and a narrowed file */
+    {
+      const { ctx, page: q, errors } = await open({ acceptDownloads: true });
+      const b = await q.evaluate(() => {
+        const b = document.querySelector('#oa-candidates .oa-talkcal');
+        return { text: b.textContent.trim(), title: b.title, disabled: b.disabled, h: Math.round(b.getBoundingClientRect().height) };
+      });
+      ok(/download talks calendar/i.test(b.text) && !b.disabled && /2 candidates/.test(b.title) && /1 of 3 presenting days/.test(b.title),
+        `talks calendar: the button says what it would write (${JSON.stringify(b.title)})`);
+      const adaHead = await q.$('#oa-candidates #job-tc-ada .oa-card-head');
+      await adaHead.click();
+      await q.waitForTimeout(250);
+      const rows = await q.$$eval('#oa-candidates #job-tc-ada .oa-kv tr', (trs) =>
+        trs.map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent]));
+      const talk = rows.find((r) => /^Talk on Monday/.test(r[0]));
+      eq(talk && talk[0], 'Talk on Monday 2 November 2026', 'talks calendar: the card names the talk\'s day with its date');
+      eq(talk && talk[1], '10:45 · session MB12 · Moscone Center, Room 2004 · “Queues and prices”',
+        'talks calendar: …and its time, session, room and title');
+      eq(rows.findIndex((r) => /^Talk on/.test(r[0])), rows.findIndex((r) => r[0] === 'Presenting at INFORMS') + 1,
+        'talks calendar: right after the days row');
+
+      const dl = q.waitForEvent('download', { timeout: 30000 });
+      await q.click('#oa-candidates .oa-talkcal');
+      const d = await dl;
+      ok(/^operations-academia-informs-talks-2026-\d{4}-\d{2}-\d{2}\.ics$/.test(d.suggestedFilename()),
+        `talks calendar: it downloads a named .ics (${d.suggestedFilename()})`);
+      const text = await readFile(await d.path(), 'utf8');
+      const cal = parseIcs(text);
+      eq(cal.timezones, ['America/Los_Angeles'], 'talks calendar: the file defines the meeting\'s zone');
+      eq(cal.events.map((e) => e.UID.value).sort(),
+        ['oa-talk-tc-ada-monday@operationsacademia.org', 'oa-talk-tc-ada-tuesday@operationsacademia.org',
+          'oa-talk-tc-grace-sunday@operationsacademia.org'],
+        'talks calendar: one entry per presenting day of the two presenting candidates');
+      const timed = cal.events.find((e) => /ada-monday/.test(e.UID.value));
+      eq([timed.DTSTART.params.TZID, timed.DTSTART.value, timed.DTEND.value, timed.LOCATION.value],
+        ['America/Los_Angeles', '20261102T104500', '20261102T121500', 'Moscone Center, Room 2004, San Francisco, California'],
+        'talks calendar: the timed entry is Monday 2 November 10:45 Pacific, a session long, at the room');
+      ok(/Queues and prices/.test(timed.SUMMARY.value), 'talks calendar: …named for the talk');
+      const untimed = cal.events.find((e) => /grace-sunday/.test(e.UID.value));
+      eq([untimed.DTSTART.params.VALUE, untimed.DTSTART.value], ['DATE', '20261101'],
+        'talks calendar: a day without a time is an all-day entry on the meeting\'s Sunday');
+      ok(noAddress(text), 'talks calendar: the address on the card is NOT in the file');
+      ok(/c_name=Ada%20Reader/.test(timed.URL.value), 'talks calendar: the entry links the profile on the site');
+
+      /* narrowing the list narrows the file */
+      await q.fill('#oaf-c_name', 'Grace');
+      await q.waitForTimeout(500);
+      eq(await q.$$eval('#oa-candidates .oa-card', (n) => n.length), 1, 'talks calendar: the name search narrowed the list to one');
+      ok(/1 candidate /.test(await q.$eval('#oa-candidates .oa-talkcal', (b) => b.title)),
+        'talks calendar: …and the button already says so');
+      const dl2 = q.waitForEvent('download', { timeout: 30000 });
+      await q.click('#oa-candidates .oa-talkcal');
+      const cal2 = parseIcs(await readFile(await (await dl2).path(), 'utf8'));
+      eq(cal2.events.map((e) => e.UID.value), ['oa-talk-tc-grace-sunday@operationsacademia.org'],
+        'talks calendar: the file follows the filters');
+      eq(errors, [], 'talks calendar: signed-in run, no uncaught script error');
+      await ctx.close();
+    }
+
+    /* the phone: the button is a target like every other action */
+    {
+      const { ctx, page: q } = await open({ viewport: { width: 390, height: 844 } });
+      const h = await q.$eval('#oa-candidates .oa-talkcal', (b) => Math.round(b.getBoundingClientRect().height));
+      ok(h >= 42, `talks calendar mobile: the button is a 42px target (got ${h})`);
+      await ctx.close();
+    }
+  }
+
+  /* -- the form: a day ticked opens its block, which feeds the preview and the document -- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('post-a-candidate.html',
+      { docs: [], selector: '#oa-cand-preview:not([hidden])' });
+    const before = await q.evaluate(() => ({
+      blocks: [...document.querySelectorAll('.oa-talk')].map((b) => [b.getAttribute('data-day'), b.hidden]),
+      meeting: document.getElementById('f-days-meeting').textContent,
+    }));
+    eq(before.blocks, [['Sunday', true], ['Monday', true], ['Tuesday', true], ['Wednesday', true]],
+      'talk form: four blocks, one per day, all hidden until a day is ticked');
+    ok(/INFORMS Annual Meeting/.test(before.meeting), 'talk form: the hint names the meeting');
+    await q.check('input[name="informsDays"][value="Monday"]');
+    await q.waitForTimeout(150);
+    const opened = await q.evaluate(() => {
+      const b = document.getElementById('f-talk-monday');
+      return { hidden: b.hidden, head: b.querySelector('.oa-talk-h').textContent,
+        time: document.getElementById('f-talk-monday-at').type,
+        others: [...document.querySelectorAll('.oa-talk')].filter((x) => x !== b).every((x) => x.hidden) };
+    });
+    ok(!opened.hidden && opened.others && /^Your talk on Monday/.test(opened.head) && opened.time === 'time',
+      `talk form: ticking Monday opens Monday's block and no other (${JSON.stringify(opened.head)})`);
+    await q.fill('#f-first', 'Grace');
+    await q.fill('#f-last', 'Hopper');
+    await q.fill('#f-institution', 'Northwestern University');
+    await q.selectOption('#f-position', 'PhD Candidate');
+    await q.fill('#f-talk-monday-at', '10:45');
+    await q.fill('#f-talk-monday-session', 'MB12');
+    await q.fill('#f-talk-monday-room', 'Room 2004');
+    await q.fill('#f-talk-monday-title', 'Queues and prices');
+    await q.waitForFunction(() => [...document.querySelectorAll('#oa-cand-preview .oa-kv th')]
+      .some((th) => /^Talk on Monday/.test(th.textContent)), null, { timeout: 8000 });
+    const previewed = await q.$$eval('#oa-cand-preview .oa-kv tr', (trs) => trs
+      .map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent])
+      .find((r) => /^Talk on Monday/.test(r[0])));
+    eq(previewed[1], '10:45 · session MB12 · Room 2004 · “Queues and prices”',
+      'talk form: the live preview draws the talk row as the list will');
+    await q.uncheck('input[name="informsDays"][value="Monday"]');
+    await q.waitForTimeout(250);
+    const closed = await q.evaluate(() => ({
+      hidden: document.getElementById('f-talk-monday').hidden,
+      kept: document.getElementById('f-talk-monday-session').value,
+      row: [...document.querySelectorAll('#oa-cand-preview .oa-kv th')].some((th) => /^Talk on/.test(th.textContent)) }));
+    eq([closed.hidden, closed.kept, closed.row], [true, 'MB12', false],
+      'talk form: unticking the day hides its block and takes the talk out of the preview, keeping what was typed');
+    await q.check('input[name="informsDays"][value="Monday"]');
+    await q.fill('#f-email', 'grace@example.edu');
+    await q.fill('#f-personalEmail', 'grace.hopper@gmail.example');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    const doc = await q.evaluate(() => {
+      const d = window.__fb.dump();
+      const k = Object.keys(d).find((p) => p.startsWith('candidateSubmissions/'));
+      return d[k];
+    });
+    eq(doc.informsDays, ['Monday'], 'talk form: the day is on the document');
+    eq(doc.talks, { Monday: { at: '10:45', session: 'MB12', room: 'Room 2004', title: 'Queues and prices' } },
+      'talk form: …and the talk, keyed by the day, with exactly the four keys');
+    eq(errors, [], 'talk form: no uncaught script error');
     await ctx.close();
   }
 }

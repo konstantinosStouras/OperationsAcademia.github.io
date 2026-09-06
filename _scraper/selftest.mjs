@@ -40,7 +40,9 @@ import {
 import {
   CANDIDATE_PUBLIC_FIELDS, rowFromCandidateSubmission, assignCandidateIds, publicCandidateRow,
   mergeCandidateRows, revealGate, buildCandidatesMeta,
+  INFORMS_DAYS, TALK_KEYS, TALK_MAXLEN, talksFrom,
 } from './candidates-model.mjs';
+import { parseIcs, longestLineOctets } from './_ics-read.mjs';
 import {
   splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey, businessSchoolOf,
   campusCountries, healCountry, SCHOOLS,
@@ -5726,7 +5728,12 @@ async function testAccountDeletion() {
     'the FAQ answers it where people look');
 
   const changelog = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8'));
-  ok(/delet/i.test(changelog.updates[0].title + changelog.updates[0].summary),
+  /* found by id rather than by index: a later feature (the calendar files,
+     2026-09-06) sits above it, and "newest first" means nothing OLDER than
+     its own day is above it */
+  const delAt = changelog.updates.findIndex((u) => u.id === 'delete-your-account-2026-09');
+  ok(delAt >= 0 && /delet/i.test(changelog.updates[delAt].title + changelog.updates[delAt].summary)
+     && changelog.updates.slice(0, delAt).every((u) => u.date >= '2026-09-05'),
     'and it is announced, newest first');
 
   /* ------------------------------------------------------------ the styling */
@@ -10702,7 +10709,7 @@ async function testCandidateReveal() {
   const rules = await read('_firestore.rules');
   const candBlock = rules.slice(rules.indexOf('match /candidateSubmissions/{id}'),
     rules.indexOf('// ---------------------------------------------------------- placements'));
-  ok(candBlock.length > 1500 && candBlock.length < 6000, 'updatedAt: the rules slice is the candidates block');
+  ok(candBlock.length > 1500 && candBlock.length < 9000, 'updatedAt: the rules slice is the candidates block');
   ok(/&& str\('updatedAt', 40\)/.test(candBlock), 'updatedAt: candShapeOk bounds it as a string');
   ok(!/hasOnly\(\[[^\]]*updatedAt/.test(candBlock), 'updatedAt: never in the merge hand-over’s hasOnly');
   ok(/allow update: if isOwner\(resource\.data\.uid\)\n\s+&& request\.resource\.data\.uid == resource\.data\.uid[\s\S]*?&& candShapeOk\(\);/.test(candBlock),
@@ -10864,6 +10871,21 @@ async function testCandidateReveal() {
     ['research areas named like prototype members (the seen-set is prototype-free)',
       { ...ok3, researchAreas: ['constructor', 'toString', 'Operations', 'constructor'] }],
     ['an INFORMS day off the list, and a repeat', { ...ok3, informsDays: ['Saturday', 'Monday', 'Monday'] }],
+    /* the talk details (2026-09-06): only a ticked day's, only the four
+       keys, the time refused unless it is a real HH:MM, a title cut to its
+       bound, a day with nothing left dropped, an empty map left out */
+    ['a talk on a ticked day, every field', { ...ok3, talks: { Monday: { at: '10:45', session: 'MB12',
+      room: 'Moscone Center, Room 2004', title: 'Dynamic pricing with a queue' } } }],
+    ['a talk on a day NOT ticked (dropped)', { ...ok3, talks: { Tuesday: { at: '09:00', room: 'R1' } } }],
+    ['a talk with a junk time and blank room (the time goes, the day stays for its title)',
+      { ...ok3, talks: { Sunday: { at: '25:00', room: '   ', title: 'Kept' } } }],
+    ['a talk with only a junk time (the day goes whole)', { ...ok3, talks: { Sunday: { at: 'ten' } } }],
+    ['a talk with an extra key and an over-long title', { ...ok3, talks: { Monday: { at: '08:00',
+      title: 'x'.repeat(260), extra: 'no', uid: 'never' } } }],
+    ['talks as junk (an array, a string)', { ...ok3, talks: ['Monday'] }],
+    ['talks as a string', { ...ok3, talks: 'Monday 10:45' }],
+    ['talks empty (left out of the row)', { ...ok3, talks: {} }],
+    ['a talk on a day not in the vocabulary', { ...ok3, talks: { Saturday: { at: '10:00' } } }],
     ['no source (defaults to the form)', { ...ok3, source: undefined }],
     ['an import source', { ...ok3, source: 'legacy-sheet' }],
     ['no ref', { ...ok3, ref: '' }],
@@ -10917,6 +10939,18 @@ async function testCandidateReveal() {
     eq(rows[4].html, null, 'candcard: an empty research-summary link draws nothing');
     ok(/parts\[parts\.length - 1\]/.test(await read('assets', 'oa-candcard.js')),
       'candcard: the default university link reads the LAST part of the line, like index.html’s');
+    /* a profile WITH talk details gains one row per day, right after the
+       days, in the days' own order; a day without details gains none */
+    const talky = C.publicRowFromDoc({ ...ok3, talks: {
+      Sunday: { at: '08:00', session: 'SA10', room: 'Room 1', title: 'Second' },
+      Monday: { at: '10:45', session: 'MB12', room: 'Moscone Center, Room 2004', title: 'First' } } }, inject);
+    const trows = cfg.rows(talky);
+    eq(trows.map((r) => r.label).slice(0, 4),
+      ['Research area(s)', 'Presenting at INFORMS', 'Talk on Monday', 'Talk on Sunday'],
+      'candcard: one "Talk on <day>" row per day with details, in the order the days were given');
+    eq(trows[2].value, '10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
+      'candcard: the talk row reads time, session, room, title');
+    eq(trows.length, rows.length + 2, 'candcard: …and nothing else moved');
   }
   eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' }, R.formatDay),
     'Profile updated on 2 October 2026', 'candcard: the updated line, day-month-year, no suffix');
@@ -12619,6 +12653,432 @@ async function testClosingSoonDigest() {
     'closing: nor does the lede');
 }
 
+/* ------------------------------------------ the two calendar files (.ics)
+
+   Owner, 2026-09-06: a reader ticks postings on jobs.html and downloads a
+   calendar file of their apply-by dates, a posting that is open until filled
+   adding nothing; and a calendar of every candidate's INFORMS talk with its
+   time, date and room. One writer (assets/oa-ics.js), one meeting record
+   (assets/oa-informs.js), two modules that decide what leaves the site
+   (oa-jobcal.js, oa-talkcal.js), and the talk details on the profile
+   (candidates-model.mjs, its browser twin, the rules). CLAUDE.md, "Two
+   calendar files". */
+
+async function testCalendars() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  const I = require(path.join(HERE, '..', 'assets', 'oa-ics.js'));
+  const M = require(path.join(HERE, '..', 'assets', 'oa-informs.js'));
+  const J = require(path.join(HERE, '..', 'assets', 'oa-jobcal.js'));
+  const T = require(path.join(HERE, '..', 'assets', 'oa-talkcal.js'));
+  const C = require(path.join(HERE, '..', 'assets', 'oa-candcard.js'));
+  const E = require(path.join(HERE, '..', 'assets', 'oa-jobexport.js'));
+  const NAV = require(path.join(HERE, '..', 'assets', 'oa-jobnav.js'));
+  const NOW = new Date('2026-09-06T10:00:00Z');
+  const TODAY = '2026-09-06';
+  const EMAILISH = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
+  const unfold = (t) => String(t).replace(/\r\n[ \t]/g, '');
+  const noAddress = (t) => !EMAILISH.test(unfold(t).replace(/@operationsacademia\.org/g, ''));
+  const octets = (s) => Buffer.byteLength(s, 'utf8');
+
+  /* ---- the writer: the RFC's own rules, each pinned ------------------- */
+  eq(I.escape('a,b;c\\d\ne'), 'a\\,b\\;c\\\\d\\ne',
+    'ics: TEXT escapes the comma, the semicolon, the backslash and the newline');
+  eq(I.escape('ab\tc'), 'ab\tc', 'ics: control characters go, a tab stays');
+  eq(I.escape('x\r\ny'), 'x\\ny', 'ics: a CRLF in a value is one escaped newline');
+  const longLine = 'DESCRIPTION:' + 'word '.repeat(60);
+  const folded = I.fold(longLine);
+  const pieces = folded.split('\r\n');
+  ok(pieces.length > 3 && pieces.every((p) => octets(p) <= I.LINE_OCTETS),
+    `ics: a long line is folded into pieces of at most 75 octets (${pieces.length} pieces)`);
+  ok(pieces.slice(1).every((p) => p[0] === ' '), 'ics: every continuation line begins with one space');
+  eq(unfold(folded), longLine, 'ics: unfolded, it is the line again');
+  const accents = I.fold('X:' + 'é'.repeat(80)).split('\r\n');
+  ok(accents.length >= 3 && accents.every((p) => octets(p) <= 75),
+    'ics: folded on OCTETS, not characters: a two-byte letter counts twice');
+  const emoji = I.fold('X:' + '😀'.repeat(40)).split('\r\n');
+  ok(emoji.every((p) => octets(p) <= 75 && !/[\ud800-\udbff]$/.test(p) && !/^ ?[\udc00-\udfff]/.test(p)),
+    'ics: a surrogate pair is never split across a fold');
+  eq(I.fold('short'), 'short', 'ics: a short line is left alone');
+  eq(I.stamp(new Date('2026-09-06T10:11:12Z')), '20260906T101112Z', 'ics: DTSTAMP is the UTC instant');
+  eq(I.uidOf('oa job/x'), 'oa-job-x@operationsacademia.org', 'ics: a UID is made ASCII-safe and given the site\'s domain');
+  eq(I.uidOf('a@b.org'), 'a@b.org', 'ics: …unless it already is an address');
+  eq(I.uidOf('///'), '', 'ics: nothing usable is no UID');
+  eq(I.nextDay('2026-12-31'), '2027-01-01', 'ics: the day after, across a year end');
+  eq([I.isoDayOk('2026-02-29'), I.isoDayOk('2028-02-29'), I.isoDayOk('2026-11-1')], [false, true, false],
+    'ics: a day is a real calendar day, in the one shape');
+  eq(I.safeUrl('javascript:alert(1)'), '', 'ics: a javascript: URL is not one');
+
+  const tz = M.usZone('America/Los_Angeles', '-0800', '-0700', 'PST', 'PDT');
+  const probe = I.build([
+    { uid: 'p-1', summary: 'Héllo, wörld; ok', day: '2026-11-14', description: 'line1\nline2, x',
+      location: 'Paris, France', url: 'https://example.org/a?b=1', categories: ['One', 'Two'] },
+    { uid: 'p-2', summary: 'Talk', start: '2026-11-02T10:45', tzid: 'America/Los_Angeles', minutes: 90 },
+    { uid: 'p-3', summary: 'floats', start: '2026-11-02T10:45', tzid: 'Europe/Nowhere', minutes: 30 },
+    { uid: 'p-4', summary: 'junk day', day: '2026-02-31' },
+    { uid: '', summary: 'no uid', day: '2026-11-14' },
+    { uid: 'p-6', summary: '', day: '2026-11-14' },
+    { uid: 'p-7', summary: 'no when' },
+    { uid: 'p-8', summary: 'bad link', day: '2026-11-14', url: 'javascript:alert(1)' },
+    { uid: 'p-9', summary: 'junk start', start: '2026-11-02T25:00' },
+  ], { name: 'Probe', description: 'about', now: NOW, timezones: [tz] });
+  ok(probe.split('\n').every((l) => l === '' || l.endsWith('\r')), 'ics: every line ends CRLF');
+  ok(longestLineOctets(probe) <= 75, 'ics: no line of the file is longer than 75 octets');
+  const cal = parseIcs(probe);
+  eq([cal.props.VERSION, cal.props.METHOD, cal.props.CALSCALE, cal.props['X-WR-CALNAME'], cal.props['X-WR-CALDESC']],
+    ['2.0', 'PUBLISH', 'GREGORIAN', 'Probe', 'about'], 'ics: the calendar names itself');
+  ok(/^-\/\/Operations Academia\/\//.test(cal.props.PRODID), 'ics: …and its producer');
+  eq(cal.timezones, ['America/Los_Angeles'], 'ics: the zone handed in is defined in the file');
+  eq(cal.events.map((e) => e.UID.value),
+    ['p-1@operationsacademia.org', 'p-2@operationsacademia.org', 'p-3@operationsacademia.org', 'p-8@operationsacademia.org'],
+    'ics: a junk day, a junk start, no uid, no summary and no date are refused; the rest are written');
+  const [allDay, timed, floating, badLink] = cal.events;
+  eq([allDay.DTSTART.params.VALUE, allDay.DTSTART.value, allDay.DTEND.value], ['DATE', '20261114', '20261115'],
+    'ics: an all-day entry runs to the NEXT day, exclusive');
+  eq(allDay.TRANSP.value, 'TRANSPARENT', 'ics: …and does not mark the reader busy');
+  eq([allDay.SUMMARY.value, allDay.DESCRIPTION.value, allDay.LOCATION.value, allDay.URL.value, allDay.CATEGORIES.value],
+    ['Héllo, wörld; ok', 'line1\nline2, x', 'Paris, France', 'https://example.org/a?b=1', 'One,Two'],
+    'ics: the text properties read back unescaped');
+  ok(probe.includes('SUMMARY:Héllo\\, wörld\\; ok'), 'ics: …and are escaped on the wire');
+  eq([timed.DTSTART.params.TZID, timed.DTSTART.value, timed.DTEND.value],
+    ['America/Los_Angeles', '20261102T104500', '20261102T121500'],
+    'ics: a timed entry carries its zone and runs the minutes given');
+  ok(!timed.TRANSP, 'ics: a timed entry is not transparent');
+  ok(!floating.DTSTART.params.TZID && floating.DTEND.value === '20261102T111500',
+    'ics: a zone the file does not define is not named: the time floats rather than pointing at nothing');
+  ok(!badLink.URL, 'ics: a javascript: URL is never written');
+  ok(/BEGIN:VTIMEZONE\r\nTZID:America\/Los_Angeles\r\nBEGIN:STANDARD\r\nDTSTART:19701101T020000\r\nRRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU\r\nTZOFFSETFROM:-0700\r\nTZOFFSETTO:-0800\r\nTZNAME:PST\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:19700308T020000\r\nRRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU\r\nTZOFFSETFROM:-0800\r\nTZOFFSETTO:-0700\r\nTZNAME:PDT\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE/.test(probe),
+    'ics: the US daylight-saving rule, written out: back on the first Sunday of November, forward on the second of March');
+  eq(I.build([], { now: NOW }), '', 'ics: with nothing to write there is no file');
+  eq(I.build([{ uid: 'x', summary: 'y', day: '2026-02-31' }], { now: NOW }), '',
+    'ics: …nor when nothing survives');
+  eq(I.build([{ uid: 's', summary: 't', day: '2026-11-14' }], { now: NOW }),
+    I.build([{ uid: 's', summary: 't', day: '2026-11-14' }], { now: NOW }),
+    'ics: the same input twice is the same file, so a re-import updates rather than duplicates');
+
+  /* ---- the meeting record --------------------------------------------- */
+  eq(M.DAYS, INFORMS_DAYS, 'informs: DAYS is the profile\'s own vocabulary, in order');
+  eq(M.DAYS, C.INFORMS_DAYS, 'informs: …and the card twin\'s');
+  ok(Object.keys(M.MEETINGS).length >= 1, 'informs: at least one season is recorded');
+  for (const [y, m] of Object.entries(M.MEETINGS)) {
+    eq(String(m.year), y, `informs: the ${y} record names its own year`);
+    ok(/^\d{4}-\d{2}-\d{2}$/.test(m.opens) && new Date(m.opens + 'T00:00:00Z').getUTCDay() === 0,
+      `informs: ${y} opens on a SUNDAY (${m.opens})`);
+    ok(m.city && m.venue && m.name && /^https:\/\//.test(m.url),
+      `informs: ${y} names the city, the venue, the meeting and the programme`);
+    ok(m.tz && m.tz.id && m.tz.parts.length === 2 && m.tz.parts.every((p) => /^[+-]\d{4}$/.test(p.from) && /^[+-]\d{4}$/.test(p.to)),
+      `informs: ${y} carries a zone with both halves of its rule`);
+    ok(m.sessionMinutes > 0, `informs: ${y} says how long a session runs`);
+    eq(Number(m.opens.slice(0, 4)), m.year - 1, `informs: the ${y} meeting is held in the autumn of ${m.year - 1}`);
+  }
+  const m27 = M.meetingFor(2027);
+  ok(m27 && m27.opens === '2026-11-01' && /San Francisco/.test(m27.city) && m27.tz.id === 'America/Los_Angeles',
+    'informs: 2026-2027 is San Francisco, opening Sunday 1 November 2026 (checked against informs.org, 2026-09-06)');
+  eq([M.dateOf(m27, 'Sunday'), M.dateOf(m27, 'Wednesday'), M.dateOf(m27, 'Saturday'), M.dateOf(null, 'Sunday')],
+    ['2026-11-01', '2026-11-04', '', ''], 'informs: a day is the Sunday plus its index, and nothing else is a day');
+  eq([M.dayLabel(m27, 'Monday'), M.dayLabel(null, 'Monday')], ['Monday 2 November 2026', 'Monday'],
+    'informs: a day with its date where the meeting is known, the bare day where it is not');
+  eq(M.describe(m27), '2026 INFORMS Annual Meeting, San Francisco, California, 1 to 4 November 2026',
+    'informs: the one sentence the form, the file and the card print');
+  eq(M.span({ opens: '2026-10-30' }), '30 October to 2 November 2026', 'informs: a span across a month end names both');
+  eq([M.meetingFor(2026), M.meetingFor('2027') === m27, M.describe(null)], [null, true, ''],
+    'informs: a season with no record answers null and describes as nothing');
+
+  /* ---- the deadlines ---------------------------------------------------- */
+  const row = (o) => ({ id: 'x', institution: 'Somewhere University', department: 'Operations',
+    country: 'Ireland', levels: ['Assistant Professor'], applyBy: 'Until filled.', ...o });
+  const keys = (r) => J.datesOf(r, TODAY).map((d) => [d.kind.key, d.day]);
+  eq(keys(row({})), [], 'jobcal: an open-ended posting has no date to give');
+  eq(keys(row({ applyByDate: '2026-11-14' })), [['final', '2026-11-14']], 'jobcal: a final date');
+  eq(keys(row({ reviewDate: '2026-10-01' })), [['review', '2026-10-01']], 'jobcal: a suggested date on its own');
+  eq(keys(row({ applyByDate: '2026-11-14', reviewDate: '2026-11-13' })).map((d) => d[0]), ['final', 'review'],
+    'jobcal: both, the final first');
+  eq(keys(row({ applyByDate: '2026-09-05' })), [], 'jobcal: a date that has passed adds nothing');
+  eq(keys(row({ applyByDate: '2026-09-06' })).length, 1, 'jobcal: today still counts: applications close at the end of the day');
+  eq(keys(row({ applyByDate: 'soon', reviewDate: '2026-1-1' })), [], 'jobcal: prose is not a date');
+  const both = row({ id: '2027-somewhere-university-20260901', applyByDate: '2026-11-14',
+    applyBy: 'November 14, 2026 (INFORMS interviews)', reviewDate: '2026-11-13',
+    postedAtUrl: 'https://jobs.example.edu/1', posted: '2026-09-01', year: 2027 });
+  const evs = J.eventsFor([both, row({ id: 'open' })], { now: NOW, today: TODAY });
+  eq(evs.map((e) => e.uid),
+    ['oa-job-2027-somewhere-university-20260901-final', 'oa-job-2027-somewhere-university-20260901-review'],
+    'jobcal: one entry per upcoming date, keyed stably on the posting and the kind; the open-ended posting gives none');
+  eq([evs[0].day, evs[0].summary, evs[1].day, evs[1].summary],
+    ['2026-11-14', 'Final apply-by: Somewhere University - Operations',
+      '2026-11-13', 'Suggested apply-by: Somewhere University - Operations'],
+    'jobcal: each entry is all-day and named for what it is');
+  eq(evs[0].url, 'https://www.operationsacademia.org/' + NAV.hrefFor(both, NOW),
+    'jobcal: the entry links the posting\'s own permalink, on the page that carries it (OAJobNav.hrefFor)');
+  ok(/jobs\.html\?job=2027-somewhere-university-20260901$/.test(evs[0].url), 'jobcal: …which is the jobs page today');
+  ok(/Final apply-by: November 14, 2026\./.test(evs[0].description) &&
+     /As listed: November 14, 2026 \(INFORMS interviews\)/.test(evs[0].description) &&
+     /Suggested apply-by: November 13, 2026/.test(evs[0].description) &&
+     /Entry level: Assistant Professor/.test(evs[0].description) &&
+     /Advertisement: https:\/\/jobs\.example\.edu\/1/.test(evs[0].description) &&
+     /Posting on Operations Academia: https:\/\/www\.operationsacademia\.org\/jobs\.html\?job=/.test(evs[0].description),
+    'jobcal: the description says both dates, the deadline as listed, the level, the advert and the way back');
+  ok(/does not close the search/.test(evs[1].description) && /Final apply-by: November 14, 2026/.test(evs[1].description),
+    'jobcal: the suggested entry says it closes nothing and names the final date beside it');
+  const reviewOnly = J.eventsFor([row({ id: 'r', reviewDate: '2026-10-01' })], { now: NOW, today: TODAY })[0];
+  ok(/Final apply-by: none given \(open until filled\)\./.test(reviewOnly.description),
+    'jobcal: …or says that there is none');
+  eq(evs[0].location, 'Somewhere University, Ireland', 'jobcal: the location is the university and its country');
+  eq(evs[0].categories, ['Operations Academia', 'Job deadline'], 'jobcal: categorised');
+  eq(J.eventsFor([{ id: 'no-where', applyByDate: '2026-11-14' }], { now: NOW, today: TODAY }), [],
+    'jobcal: a row naming no institution is not an entry');
+  eq(J.calendar([row({})], { now: NOW }), '', 'jobcal: nothing to give, no file');
+  eq(J.fileName({ at: new Date(2026, 8, 6, 12), market: '2026-2027' }),
+    'operations-academia-job-deadlines-2026-2027-2026-09-06.ics', 'jobcal: the file names the market and the day');
+
+  const served = JSON.parse(await readFile(JOBS, 'utf8'));
+  const dated = served.filter((r) => J.hasDate(r, TODAY));
+  const all = J.eventsFor(served, { now: NOW, today: TODAY });
+  eq(all.length, served.reduce((n, r) => n + J.datesOf(r, TODAY).length, 0),
+    'jobcal: over the served file, one entry per upcoming date');
+  ok(dated.length > 10 && all.length >= dated.length,
+    `jobcal: …and the corpus exercises it (${dated.length} dated postings, ${all.length} entries)`);
+  eq(new Set(all.map((e) => e.uid)).size, all.length, 'jobcal: every UID is distinct');
+  ok(all.every((e) => e.day >= TODAY), 'jobcal: no entry is in the past');
+  ok(served.filter((r) => !J.hasDate(r, TODAY))
+    .every((r) => J.eventsFor([r], { now: NOW, today: TODAY }).length === 0),
+    'jobcal: a posting with no upcoming date gives none, whatever else it carries');
+  const text = J.calendar(served, { now: NOW, market: '2026-2027' });
+  const parsed = parseIcs(text);
+  eq(parsed.events.length, all.length, 'jobcal: the file carries every entry');
+  ok(longestLineOctets(text) <= 75, 'jobcal: folded');
+  ok(noAddress(text), 'jobcal: no e-mail address anywhere in the file');
+  eq(parsed.props['X-WR-CALNAME'], J.CAL_NAME, 'jobcal: the calendar is named');
+  ok(parsed.events.every((e) => e.DTSTART.params.VALUE === 'DATE' && e.TRANSP && e.TRANSP.value === 'TRANSPARENT'),
+    'jobcal: every deadline is an all-day, transparent entry');
+  ok(/2026-2027 job market/.test(parsed.props['X-WR-CALDESC']) && /open until filled/.test(parsed.props['X-WR-CALDESC']),
+    'jobcal: the file says what it is and what it leaves out');
+  const jsrc = await read('assets', 'oa-jobcal.js');
+  const reads = new Set([...jsrc.matchAll(/\brow\.([A-Za-z]+)\b/g)].map((m) => m[1]));
+  reads.delete('id');
+  for (const f of J.KINDS.map((k) => k.field)) ok(PUBLIC_FIELDS.includes(f), `jobcal: ${f} is a published field`);
+  eq([...reads].filter((f) => !PUBLIC_FIELDS.includes(f)), [],
+    'jobcal: every field the module reads off a posting is one the build publishes');
+  eq([...reads].filter((f) => E.CONTACT_FIELDS.includes(f)), [], 'jobcal: …and none is a Contact detail');
+  ok(!/\bcomments\b/.test(jsrc.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'jobcal: the posting\'s comments stay off the calendar (prose, and where a stripped address leaves its marker)');
+
+  /* ---- the talk details on the profile ---------------------------------- */
+  eq(TALK_KEYS, ['at', 'session', 'room', 'title'], 'talks: the four keys');
+  eq(C.TALK_KEYS, TALK_KEYS, 'talks: the card twin knows the same four');
+  eq(C.TALK_MAXLEN, TALK_MAXLEN, 'talks: …and the same bounds');
+  eq(talksFrom({ Monday: { at: '10:45', session: ' MB12 ', room: 'R', title: 't', extra: 1 } }, ['Monday']),
+    { Monday: { at: '10:45', session: 'MB12', room: 'R', title: 't' } },
+    'talks: only the four keys, each trimmed');
+  eq(talksFrom({ Monday: { at: '10:45' } }, ['Sunday']), {}, 'talks: a day not ticked is dropped');
+  eq(talksFrom({ Monday: { at: '24:00' } }, ['Monday']), {}, 'talks: a junk time goes, and a day with nothing left goes whole');
+  eq(talksFrom({ Monday: { at: '9:00', title: 'x' } }, ['Monday']), { Monday: { title: 'x' } },
+    'talks: a time without its leading zero is not HH:MM and goes; the title stays');
+  eq([talksFrom('junk', ['Monday']), talksFrom(['Monday'], ['Monday']), talksFrom({ Monday: 'x' }, ['Monday']),
+    talksFrom({ Monday: ['x'] }, ['Monday']), talksFrom(null, ['Monday'])], [{}, {}, {}, {}, {}],
+    'talks: anything that is not a map of maps is nothing');
+  eq(talksFrom({ Monday: { title: 'x'.repeat(300) } }, ['Monday']).Monday.title.length, TALK_MAXLEN.title,
+    'talks: a title is cut to its bound');
+  for (const [v, days] of [
+    [{ Monday: { at: '10:45', session: 'MB12', room: 'R', title: 't' } }, ['Monday', 'Sunday']],
+    [{ Sunday: { at: '25:00', room: '  ', title: 'k' }, Tuesday: { at: '09:00' } }, ['Sunday']],
+    ['junk', ['Monday']], [{}, ['Monday']], [{ Monday: { title: 'x'.repeat(300), uid: 'no' } }, ['Monday']],
+  ]) {
+    eq(JSON.stringify(C.talksFrom(v, days)), JSON.stringify(talksFrom(v, days)),
+      `talks: the browser twin sanitises ${JSON.stringify(v).slice(0, 40)} exactly as the build does`);
+  }
+  eq(CANDIDATE_PUBLIC_FIELDS.indexOf('talks'), CANDIDATE_PUBLIC_FIELDS.indexOf('informsDays') + 1,
+    'talks: published right after the days it hangs off');
+  const rules = await read('_firestore.rules');
+  const cand = rules.slice(rules.indexOf('match /candidateSubmissions/{id}'), rules.indexOf('match /placementSubmissions/'));
+  ok(/&& talksOk\(\)/.test(cand.slice(cand.indexOf('function candShapeOk'), cand.indexOf('function talkStr'))),
+    'rules: candShapeOk requires talksOk()');
+  const keyList = /function talkOk[\s\S]*?keys\(\)\.hasOnly\(\[([^\]]*)\]\)/.exec(cand);
+  eq(keyList && keyList[1].split(',').map((s) => s.trim().replace(/'/g, '')), TALK_KEYS,
+    'rules: a day\'s talk may carry exactly TALK_KEYS (both ways, by equality)');
+  const dayList = /function talksOk[\s\S]*?hasOnly\(\[([^\]]*)\]\)/.exec(cand);
+  eq(dayList && dayList[1].split(',').map((s) => s.trim().replace(/'/g, '')), INFORMS_DAYS,
+    'rules: the days a talk may hang off are the profile\'s own four');
+  for (const k of TALK_KEYS) {
+    const b = new RegExp(`talkStr\\(d, '${k}', (\\d+)\\)`).exec(cand);
+    ok(b && Number(b[1]) === TALK_MAXLEN[k], `rules: ${k} is bounded at ${TALK_MAXLEN[k]}, as the model bounds it`);
+  }
+  eq((cand.match(/talkOk\('(\w+)'\)/g) || []).map((s) => /'(\w+)'/.exec(s)[1]), INFORMS_DAYS,
+    'rules: every day is checked, in order');
+  ok(/keys\(\)\.size\(\) <= 35/.test(cand), 'rules: the create ceiling took the talk map into account (35)');
+
+  /* ---- the talks calendar ----------------------------------------------- */
+  const cands = [
+    { id: '2027-reader-ada', year: 2027, posted: '2026-09-01', first: 'Ada', last: 'Reader', name: 'Ada Reader',
+      affiliation: 'Operations, Kellogg School of Management, Northwestern University', position: 'PhD Candidate',
+      researchAreas: ['Supply Chain Management', 'Queueing Theory'], informsDays: ['Monday', 'Tuesday'],
+      talks: { Monday: { at: '10:45', session: 'MB12', room: 'Moscone Center, Room 2004',
+        title: 'Dynamic pricing with, and without, a queue; a field study' } },
+      cvUrl: 'https://example.edu/cv.pdf', email: 'ada@example.edu', source: 'oa-form', addedAt: '2026-09-01T09:00:00Z' },
+    { id: '2027-hopper-grace', year: 2027, posted: '2026-09-02', name: 'Grace Hopper',
+      affiliation: 'Wharton, University of Pennsylvania', position: 'Post-Doc',
+      researchAreas: ['Healthcare Operations'], informsDays: ['Sunday'], source: 'oa-form' },
+    { id: '2027-nobody-not', year: 2027, posted: '2026-09-03', name: 'Not Presenting',
+      affiliation: 'Somewhere University', position: 'PhD Candidate', researchAreas: ['Operations'],
+      informsDays: [], source: 'oa-form' },
+  ];
+  const tevs = T.eventsFor(cands, { now: NOW });
+  eq(tevs.map((e) => e.uid), ['oa-talk-2027-reader-ada-monday', 'oa-talk-2027-reader-ada-tuesday', 'oa-talk-2027-hopper-grace-sunday'],
+    'talkcal: one entry per presenting day, keyed on the profile and the day; no day, no entry');
+  eq([tevs[0].start, tevs[0].tzid, tevs[0].minutes, tevs[0].day],
+    ['2026-11-02T10:45', 'America/Los_Angeles', 90, undefined],
+    'talkcal: a day with a time is a timed entry in the meeting\'s zone, a session long');
+  eq(tevs[0].summary, 'INFORMS talk: Ada Reader - Dynamic pricing with, and without, a queue; a field study',
+    'talkcal: the summary is the candidate and the title');
+  eq(tevs[0].location, 'Moscone Center, Room 2004, San Francisco, California',
+    'talkcal: the location is the room, the venue ONCE where the room already names it, and the city');
+  eq(T.eventsFor([{ ...cands[0], talks: { Monday: { at: '10:45', room: 'Room 2004' } } }])[0].location,
+    'Room 2004, Moscone Center, San Francisco, California', 'talkcal: …and the venue added where the room does not');
+  eq([tevs[1].day, tevs[1].start, tevs[1].summary, tevs[1].location],
+    ['2026-11-03', undefined, 'INFORMS: Ada Reader presents (time to be announced)', 'Moscone Center, San Francisco, California'],
+    'talkcal: a day without a time is an all-day entry that says so, at the venue');
+  eq(tevs[2].day, '2026-11-01', 'talkcal: Sunday is the opening day');
+  ok(/Talk: Dynamic pricing/.test(tevs[0].description) && /Session: MB12/.test(tevs[0].description) &&
+     /Room: Moscone Center, Room 2004/.test(tevs[0].description) &&
+     /Session starts at 10:45 \(America\/Los Angeles, the meeting’s local time\); INFORMS sessions run 90 minutes\./.test(tevs[0].description) &&
+     /Affiliation: Operations, Kellogg School of Management, Northwestern University, PhD Candidate/.test(tevs[0].description) &&
+     /Research areas: Supply Chain Management, Queueing Theory/.test(tevs[0].description) &&
+     /CV: https:\/\/example\.edu\/cv\.pdf/.test(tevs[0].description) &&
+     /Profile on Operations Academia: https:\/\/www\.operationsacademia\.org\/\?c_name=Ada%20Reader#candidates/.test(tevs[0].description),
+    'talkcal: the description says the talk, the session, the room, the clock, who they are, the CV and the profile');
+  ok(/not on the profile yet/.test(tevs[1].description), 'talkcal: an all-day entry says the details are still to come');
+  ok(!/ada@example\.edu/.test(JSON.stringify(tevs)), 'talkcal: the address is NOT in any entry, though the row carries it');
+  eq(tevs[0].url, 'https://www.operationsacademia.org/?c_name=Ada%20Reader#candidates',
+    'talkcal: the entry links the profile: the candidates list, narrowed to the name');
+  eq(T.eventsFor([{ ...cands[0], year: 2026 }], { now: NOW }), [], 'talkcal: a season with no meeting recorded gives no entry');
+  eq(T.eventsFor([cands[2]], { now: NOW }), [], 'talkcal: no presenting day, no entry');
+  eq(T.eventsFor([{ ...cands[0], informsDays: ['Saturday'] }], { now: NOW }), [], 'talkcal: a day off the vocabulary is no day');
+  eq(T.describe(cands), { candidates: 2, days: 3, timed: 1 }, 'talkcal: what the button says: 2 candidates, 3 days, 1 timed');
+  eq(T.timezonesFor(cands).map((z) => z.id), ['America/Los_Angeles'], 'talkcal: one zone definition per meeting');
+  const ttext = T.calendar(cands, { now: NOW });
+  const tcal = parseIcs(ttext);
+  eq(tcal.timezones, ['America/Los_Angeles'], 'talkcal: the file defines the zone it names');
+  eq(tcal.events.length, 3, 'talkcal: three entries');
+  eq([tcal.events[0].DTSTART.params.TZID, tcal.events[0].DTSTART.value, tcal.events[0].DTEND.value],
+    ['America/Los_Angeles', '20261102T104500', '20261102T121500'], 'talkcal: the timed entry, read back with its zone');
+  eq(tcal.events[1].DTSTART.params.VALUE, 'DATE', 'talkcal: the untimed one is all-day');
+  ok(noAddress(ttext), 'talkcal: no e-mail address anywhere in the file');
+  ok(longestLineOctets(ttext) <= 75, 'talkcal: folded');
+  ok(/San Francisco/.test(tcal.props['X-WR-CALDESC']) && /all-day entry/.test(tcal.props['X-WR-CALDESC']),
+    'talkcal: the file says which meeting and what an untimed entry means');
+  eq(T.calendar([cands[2]], { now: NOW }), '', 'talkcal: nothing to give, no file');
+  eq(T.fileName({ at: new Date(2026, 9, 20, 12), meetingYear: '2026' }),
+    'operations-academia-informs-talks-2026-2026-10-20.ics', 'talkcal: the file names the meeting\'s year and the day');
+  const tsrc = await read('assets', 'oa-talkcal.js');
+  const treads = new Set([...tsrc.matchAll(/\brow\.([A-Za-z]+)\b/g)].map((m) => m[1]));
+  ok(!treads.has('email'), 'talkcal: the module never reads the address, even where the candidate published it');
+  eq([...treads].filter((f) => !CANDIDATE_PUBLIC_FIELDS.includes(f)), [],
+    'talkcal: every field it reads is a published one');
+  eq(T.profileUrl({ name: 'Ada Reader' }), 'https://www.operationsacademia.org/?c_name=Ada%20Reader#candidates',
+    'talkcal: the profile link is the candidates list narrowed by the engine\'s own key');
+  const index = await read('index.html');
+  const candMount = index.slice(index.indexOf("mount: '#oa-candidates'"), index.indexOf("V3.lazy('#oa-placements'"));
+  ok(/urlPrefix: 'c_'/.test(candMount) && /key: 'name',\s+label: 'Name',\s+type: 'text'/.test(candMount),
+    'talkcal: …which the mount really declares (c_ plus name)');
+}
+
+/* ------------------------------------------------- …and how it is wired */
+
+async function testCalendarsWiring() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  const jobs = await read('jobs.html');
+  const index = await read('index.html');
+  const cand = await read('post-a-candidate.html');
+  const acct = await read('account.html');
+  const list = await read('assets', 'oa-list.js');
+  const listCss = await read('assets', 'oa-list.css');
+  const v3css = await read('assets', 'v3.css');
+  const uiCss = await read('assets', 'oa-ui.css');
+  const formJs = await read('assets', 'oa-candidateform.js');
+  const jobcal = await read('assets', 'oa-jobcal.js');
+  const talkcal = await read('assets', 'oa-talkcal.js');
+  const claude = await read('CLAUDE.md');
+  const mobile = await read('_MOBILE-STANDARDS.md');
+  const log = JSON.parse(await read('changelog.json'));
+  const tagAt = (html, src) => html.indexOf(`<script defer src="${src}"></script>`);
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  /* --- jobs.html: the deadlines ------------------------------------------ */
+  for (const src of ['assets/oa-ics.js', 'assets/oa-jobcal.js']) {
+    ok(tagAt(jobs, src) !== -1, `calendar: jobs.html loads ${src}, deferred like every other script on it`);
+  }
+  for (const dep of ['assets/oa-gate.js', 'assets/oa-jobnav.js', 'assets/oa-list.js', 'assets/oa-ics.js']) {
+    ok(tagAt(jobs, dep) !== -1 && tagAt(jobs, dep) < tagAt(jobs, 'assets/oa-jobcal.js'),
+      `calendar: jobs.html loads ${dep} before oa-jobcal.js, which reads it`);
+  }
+  ok(/window\.OAJobCal && OAJobCal\.onCard\(li, r\);/.test(jobs), 'calendar: the mount draws the tick box through onCard');
+  ok(/onRender: function \(api\) \{\s*if \(window\.OAJobCal\) OAJobCal\.refresh\(api\);/.test(jobs),
+    'calendar: …and refreshes the strip from the engine\'s own snapshot after every repaint');
+  ok(/OAJobCal\.attach\(jobs, document\.getElementById\('oa-jobs'\)/.test(jobs), 'calendar: the strip is attached to the list');
+  ok(/putting the\s+deadlines you choose in your calendar/.test(jobs),
+    'calendar: the sign-in card names it as a reason to register');
+  ok(/cfg\.onRender/.test(list) && list.indexOf('a.def.refresh(a.btn, snap)') < list.indexOf('cfg.onRender(snap || apiSnapshot())'),
+    'calendar: OAList calls onRender in render(), after the actions');
+  ok(/`onRender: fn\(snapshot\)`/.test(list), 'calendar: …and documents it in its header');
+  ok(/whenSignedIn/.test(jobcal) && /function signedIn\(\)\s*\{[\s\S]{0,200}?OAGate/.test(jobcal),
+    'calendar: the download goes through whenSignedIn and asks the gate who is reading');
+  ok(/oa-card-gated/.test(jobcal) && /!signedIn\(\)\) return;/.test(jobcal),
+    'calendar: a gated or locked card, and a signed-out reader, get no tick box');
+  ok(!/localStorage|sessionStorage|firestore\(\)|\.collection\(/.test(strip(jobcal)),
+    'calendar: the selection is page memory: nothing stored, nothing sent');
+  ok(/onChange\(function \(u\) \{ if \(!u\) picked = \{\};/.test(jobcal), 'calendar: a sign-out empties it');
+  for (const [name, src] of [['oa-jobcal.js', jobcal], ['oa-talkcal.js', talkcal]]) {
+    ok(!/—/.test(strip(src)), `calendar: ${name} shows no em dash to a reader`);
+    ok(/factory\(root\.OAIcs, root\./.test(src), `calendar: ${name} takes the writer through its factory, like every dual-mode module`);
+  }
+  for (const sel of ['.oa-cal-pick', '.oa-cal-tray', '.oa-cal-btn', '.oa-cal-go']) {
+    ok(new RegExp(sel.replace('.', '\\.') + '\\s*\\{').test(listCss), `calendar: oa-list.css styles ${sel}`);
+    ok(v3css.includes('body.v3 ' + sel), `calendar: v3.css restates ${sel} in the live design\'s tokens`);
+  }
+  ok(/\.oa-cal-go\s*\{[\s\S]{0,200}?color:\s*var\(--brand/.test(listCss) &&
+     /body\.v3 \.oa-cal-go\s*\{[\s\S]{0,200}?color:\s*var\(--brand\)/.test(v3css),
+    'calendar: the download button names its own ink as well as its ground');
+  ok(/max-width:\s*640px[\s\S]{0,1500}?\.oa-cal-pick\s*\{[^}]*min-height:\s*42px/.test(listCss) &&
+     /max-width:\s*640px[\s\S]{0,1800}?\.oa-cal-btn\s*\{[^}]*height:\s*42px/.test(listCss),
+    'calendar: on a phone the tick strip and the buttons are 42px targets');
+  ok(/@media print \{ \.oa-cal-pick, \.oa-cal-tray \{ display: none; \} \}/.test(listCss), 'calendar: neither prints');
+
+  /* --- the candidates' side ------------------------------------------------ */
+  for (const [name, html] of [['index.html', index], ['post-a-candidate.html', cand], ['account.html', acct]]) {
+    ok(tagAt(html, 'assets/oa-informs.js') !== -1 && tagAt(html, 'assets/oa-informs.js') < tagAt(html, 'assets/oa-candcard.js'),
+      `calendar: ${name} loads oa-informs.js before oa-candcard.js, which names the day\'s date from it`);
+  }
+  ok(tagAt(index, 'assets/oa-ics.js') !== -1 && tagAt(index, 'assets/oa-ics.js') < tagAt(index, 'assets/oa-talkcal.js') &&
+     tagAt(index, 'assets/oa-informs.js') < tagAt(index, 'assets/oa-talkcal.js'),
+    'calendar: index.html loads the writer and the meeting record before the module whose factory takes them');
+  ok(/actions: \[\s*window\.OATalkCal \? OATalkCal\.action\(\) : null\s*\]/.test(index.slice(index.indexOf("mount: '#oa-candidates'"))),
+    'calendar: the candidates mount declares the talks-calendar action');
+  ok(/download the\s+talks as a calendar file/.test(index), 'calendar: the candidates lede says so');
+  ok(/Can I put the deadlines in my calendar\?/.test(index) && /calendar file of every talk/.test(index),
+    'calendar: the FAQ answers both');
+  ok(/id="f-talks"/.test(cand) && /id="f-days-meeting"/.test(cand),
+    'calendar: the form has the talk blocks\' host and the meeting line');
+  ok(/Times are the meeting&rsquo;s own local time/.test(cand), 'calendar: …and says whose clock the time is');
+  ok(/out\.talks = readTalks\(out\.informsDays\);/.test(formJs) && /fillTalks\(v\.talks\);/.test(formJs),
+    'calendar: the form reads the ticked days\' blocks and fills them back');
+  ok(/input\.type = k === 'at' \? 'time' : 'text';/.test(formJs), 'calendar: the time is asked with a time box');
+  const fk = /var TALK_KEYS = \[([^\]]*)\]/.exec(formJs);
+  eq(fk && fk[1].split(',').map((s) => s.trim().replace(/'/g, '')), TALK_KEYS, 'calendar: the form\'s keys are the model\'s');
+  const fm = /var TALK_MAXLEN = \{([^}]*)\}/.exec(formJs);
+  eq(fm && Object.fromEntries(fm[1].split(',').map((p) => p.split(':').map((s) => s.trim())).map(([k, v]) => [k, Number(v)])),
+    TALK_MAXLEN, 'calendar: …and its bounds');
+  ok(/\.oa-form input\[type='time'\],/.test(uiCss) && /\.oa-talk \{/.test(uiCss) && /body\.v3 \.oa-talk \{/.test(v3css),
+    'calendar: the time box and the talk block are styled in both stylesheets');
+
+  /* --- the record ----------------------------------------------------------- */
+  ok(log.updates[0].id === 'calendar-files-2026-09' && /calendar/i.test(log.updates[0].summary) && /INFORMS/.test(log.updates[0].summary),
+    'calendar: announced in the change log');
+  ok(/^## Two calendar files/m.test(claude), 'calendar: CLAUDE.md records the decisions');
+  ok(/^14\. \*\*A tick box on a card is a control\.\*\*/m.test(mobile), 'calendar: the mobile standard gained its rule');
+  for (const f of ['v2/jobs.html', 'v2/index.html', 'v2/candidates.html']) {
+    if (!existsSync(path.join(HERE, '..', f))) continue;
+    ok(!/oa-jobcal|oa-talkcal|oa-ics|oa-informs/.test(await read(f)), `calendar: ${f} (frozen) loads none of it`);
+  }
+}
+
 async function testAnalytics() {
   const A = require(path.join(HERE, '..', 'assets', 'oa-analytics-model.js'));
 
@@ -13737,7 +14197,10 @@ async function testCandidateStats() {
     'the owner’s correct-and-withdraw update requires it');
   ok(/allow create: if verified\(\)[\s\S]*?!\('stats' in request\.resource\.data\)/.test(block),
     'and a new profile may not arrive with a count of its own');
-  ok(!/keys\(\)\.hasOnly\(/.test(block),
+  /* the DOCUMENT's own keys, precisely: the talk map (2026-09-06) pins the
+     keys of a NESTED map, which the owner writes whole on every save and the
+     Admin SDK never touches, so it is not the trap this guards against */
+  ok(!/request\.resource\.data\.keys\(\)\.hasOnly\(/.test(block),
     'no rule pins the document to a fixed key SET, so the Admin-SDK stamp cannot freeze ' +
     'the profile against its own owner (the sync-user-directory trap)');
   ok(!/str\('stats'/.test(block), 'stats is a map, not one of the bounded strings');
@@ -15775,7 +16238,7 @@ async function testRegisteredUsersFigure() {
      (the forum) sits above them, and "at the top" means among that day's
      entries, adjacent and in this order. */
   const figAt = log.findIndex((u) => u.id === 'registered-users-figure-2026-09');
-  ok(figAt >= 0 && figAt <= 2 && log.slice(0, figAt).every((u) => u.date === '2026-09-05'),
+  ok(figAt >= 0 && figAt <= 3 && log.slice(0, figAt).every((u) => u.date >= '2026-09-05'),
     'changelog: the two figures are announced at the top, under nothing older than their own day');
   eq([log[figAt].id, log[figAt + 1].id], ['registered-users-figure-2026-09', 'community-growth-chart-2026-09'],
     'changelog: the two figures are announced together, in this order');
@@ -15902,6 +16365,8 @@ if (isMain(import.meta.url)) {
   await testReaderGate();
   await testClosingSoonDigest();
   await testSaveSearchAsAlert();
+  await testCalendars();
+  await testCalendarsWiring();
   await testAnalytics();
   await testGa4Tag();
   await testUniversityVisits();

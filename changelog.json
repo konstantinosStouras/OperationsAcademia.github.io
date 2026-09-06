@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "calendar-files-2026-09",
+      "date": "2026-09-06",
+      "title": "Deadlines and INFORMS talks, straight into your calendar",
+      "summary": "On the job postings page, tick the postings you are interested in and press Download calendar: their apply-by dates land in your calendar as all-day reminders, each naming the posting and linking back to it (a posting that is open until filled has no date to add, so it offers no tick box). Candidates can now give the start time, session code, room and title of each INFORMS talk on their profile, and the candidates list offers a calendar file of every talk, with its date, time and room in the meeting's own time zone, so anyone who wants to attend can. Both downloads are free with an account.",
+      "url": "/jobs.html"
+    },
+    {
       "id": "delete-your-account-2026-09",
       "date": "2026-09-05",
       "title": "You can delete your account yourself",
