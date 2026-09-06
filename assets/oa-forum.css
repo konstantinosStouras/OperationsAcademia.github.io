@@ -615,8 +615,19 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   cursor: pointer;
 }
 
-.oa-forum-pacts .oa-forum-act:hover { background: var(--bg-3); color: var(--ink); }
+.oa-forum-pacts .oa-forum-act:hover:not([disabled]) { background: var(--bg-3); color: var(--ink); }
 .oa-forum-pacts .oa-forum-act:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* A DISABLED CONTROL MUST LOOK DISABLED. Delete on a question somebody has
+   answered is drawn and refused, with the reason in its title, so that the
+   rule is legible before it is pressed rather than after; drawn at full
+   strength and lighting up under the pointer, it read as a live button that
+   silently did nothing. The pointer says so too, so the reason in the title
+   is what the reader gets when they go looking. */
+.oa-forum-pacts .oa-forum-act[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 .oa-forum-who {
   display: inline-flex;
@@ -1119,9 +1130,13 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   .oa-forum-post { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 22px 0; }
   .oa-forum-post.is-accepted { padding-left: 10px; padding-right: 8px; }
   .oa-forum-vote { flex-direction: row; justify-content: flex-start; align-items: center; gap: 10px; }
-  /* rule 13: every control the thread offers is a 42px target on a phone */
+  /* rule 13: every control the thread offers is a 42px target on a phone.
+     The bell and the Saved card's remove are controls too, and both were
+     measured under it: the bell had a width and no height, so it took the
+     row's own 20px, and the remove sat at its 26px minimum. */
   .oa-forum-acc, .oa-forum-save { width: 42px; height: 42px; }
-  .oa-forum-watch { width: 42px; }
+  .oa-forum-watch { width: 42px; min-height: 42px; }
+  .oa-forum-unsave { min-width: 42px; min-height: 42px; }
   .oa-forum-sort select { min-height: 42px; font-size: 16px; }
   .oa-forum-answers-h { align-items: flex-start; flex-direction: column; }
   .oa-forum-pacts .oa-forum-act { min-height: 42px; }

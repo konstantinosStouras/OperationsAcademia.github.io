@@ -14913,7 +14913,12 @@ async function testForum() {
      curated list no longer suggests it. */
   ok(!('TAG_BANNED' in FM) && FM.tagOk('rumour') && FM.tagsOk(['rumour']) && FM.tagsOk(['offers', 'gossip']),
     'forum: a poster may still tag a post rumour, alone or beside another tag');
-  eq(FM.RATE, { threads: 3, posts: 40, votes: 60, gapMs: 20000 }, 'forum: the rate limits as written');
+  /* `gapMs` is ONE CLOCK MINUTE and cannot be anything else: both stamps it
+     is measured between are truncated to the minute (R7), so their difference
+     is always a whole number of minutes and any value from 1 to 60000
+     enforces exactly "not twice in the same UTC minute". It said twenty
+     seconds while enforcing sixty. */
+  eq(FM.RATE, { threads: 3, posts: 40, votes: 60, gapMs: 60000 }, 'forum: the rate limits as written');
   eq(FM.slug('Quiet Heron 42'), 'quiet-heron-42', 'forum: slug() folds a handle');
   eq(FM.slug('  Two-Body!! Problem '), 'two-body-problem', 'forum: slug() folds punctuation to one hyphen and trims');
   eq(FM.slug('Écoles européennes'), 'ecoles-europeennes', 'forum: slug() folds accents');
@@ -15133,6 +15138,8 @@ async function testForum() {
     'forum: the shared options as written');
   ok(/mapAborted|code === 10 \|\| e\.code === 'aborted'/.test(memberSrc) && /refuse\('resource-exhausted', 'busy'\)/.test(memberSrc),
     'forum: a contended transaction answers busy, never a raw code');
+  ok(/const now = M\.minute\(\);/.test(forumSrc['post.js']) && /now - c\.lastPostAt < M\.RATE\.gapMs/.test(forumSrc['member.js']),
+    'forum: the gap is measured between two minute-truncated stamps, which is why gapMs can only be a minute');
   ok(/if \(pv\.by === m\.handle\) P\.refuse\('failed-precondition', 'own'\);/.test(forumSrc['vote.js']), 'forum: no voting on your own post');
   ok(/FieldValue\.increment\(du\)/.test(forumSrc['vote.js']) && /score: FieldValue\.increment\(du - dd\)/.test(forumSrc['vote.js']),
     'forum: votes move by delta with increment, and the first post\'s net lands on the thread head');
@@ -15228,6 +15235,23 @@ async function testForum() {
     ['0000-0002-1825-0097', 'orcid'], ['read https://x.org, then mail jane@mit.edu', 'email']]) {
     eq(FG.check(s), why, `forum guard: refuses "${s}" as ${why}`);
   }
+  /* A CURRENCY SIGN EXEMPTS A PRICE, NOT WHAT FOLLOWS IT. The run is greedy,
+     so "$1 617-253-1000" was one match, exempted whole, and the scan then
+     resumed PAST the telephone number, which could never be matched again.
+     Resuming one character on finds the number on its own while the price
+     still passes. And a run with exactly ONE separator group is an
+     identifier rather than a number to dial: an arXiv id is nine digits and
+     a dot, so the guard refused every arxiv.org address, which rule 7 and
+     the owner both say must post. */
+  for (const s of ['$1 617-253-1000', 'the fee is $5 and my number is +1 617 253 1000', '123456789']) {
+    eq(FG.check(s), 'phone', `forum guard: refuses "${s}" as phone`);
+  }
+  for (const s of ['arXiv:2401.12345', 'https://arxiv.org/abs/2401.12345', 'see arXiv 2401.12345 for the proof', '$123456789']) {
+    eq(FG.check(s), '', `forum guard: allows "${s}"`);
+  }
+  ok(/separatorGroups\(run\) !== 1/.test(await read('assets', 'oa-forum-guard.js'))
+     && /PHONE_RX\.lastIndex = priced \|\| run\.length === 0 \? m\.index \+ 1 : PHONE_RX\.lastIndex;/.test(await read('assets', 'oa-forum-guard.js')),
+    'forum guard: both rules are in the module, not only in its fixtures');
   eq(FG.check(''), '', 'forum guard: nothing is fine');
   ok(Object.keys(FG.WHY).sort().join() === 'email,orcid,phone', 'forum guard: a sentence per reason');
 
@@ -15719,6 +15743,56 @@ async function testForum() {
     'oa-forum.js: and the handlers refuse on the same terms the controls are drawn on');
   ok(/cached && cached\.rooms && cached\.rooms\.candidates/.test(pageJs),
     'oa-forum.js: the join cache is trusted only while it says YES, so filing a profile opens the room in the same session');
+  /* THE FRESH SEEN-MARK IS PERSISTED WHERE IT IS MINTED, or `since` is "now"
+     on every read and nothing is ever newer than it: only opening a thread
+     wrote the store, so a reader's whole first visit had no New badge and no
+     "questions carrying a tag you watch have arrived" line. */
+  ok(/var fresh = \{ uid: uid, since: Date\.now\(\), seen: \{\} \};\s*\n\s*writeSeen\(fresh\);/.test(pageJs),
+    'oa-forum.js: readSeen persists the mark it mints, so the New badge works on a first visit');
+  /* A TOMBSTONE KEEPS ITS LIKES AND LOSES ITS PLACE: sorted by them, a
+     well-liked deleted answer sat above every answer still standing. */
+  ok(/if \(!!a\.hidden !== !!b\.hidden\) return a\.hidden \? 1 : -1;/.test(pageJs),
+    'oa-forum.js: a deleted answer sorts below the live ones, whatever its score');
+  /* A POST'S OWN #n IS A PLACE ON THIS PAGE, not another view of it: followed
+     through draw() it rebuilt the thread and threw away a half-written
+     answer, which is the very thing paintAnswers is careful not to do. */
+  ok(/if \(S\.tid && to\.split\('#'\)\[0\] === here\.split\('#'\)\[0\]\) \{/.test(pageJs),
+    'oa-forum.js: a #n link inside the thread on screen scrolls rather than redrawing it');
+  /* THE TAG BOX RUNS THE GUARD, so a tag the function would refuse is named
+     where the reader is typing rather than on the send. */
+  ok(/var why = G\.check\(s\);/.test(pageJs) && /tagHint\(REASONS\[why\]\);/.test(pageJs) && /var TAG_HINT =/.test(pageJs),
+    'oa-forum.js: the tag box runs the same guard forumPost runs, and puts its own hint back');
+  /* THE BOOKMARK'S ACCESSIBLE NAME MOVES WITH ITS STATE. */
+  ok(/b\.setAttribute\('aria-label', on\s*\n\s*\? 'Remove this ' \+ what \+ ' from your saved list'/.test(pageJs),
+    'oa-forum.js: and the bookmark stops naming the opposite action after a removal from the Saved card');
+  /* SIGNING OUT FORGETS WHOEVER WAS READING. popstate and the page's own link
+     handler both repaint whenever S.me is set, and S.me survived a sign-out
+     along with the handle, the marks, the thread on screen and the room, so
+     pressing Back after signing out brought the forum back under the previous
+     reader's handle for whoever is now at the machine. */
+  ok(/function forgetReader\(\)/.test(pageJs)
+     && /if \(!u\) \{ forgetReader\(\);/.test(pageJs)
+     && /S\.me = null;/.test(pageJs),
+    'oa-forum.js: signing out forgets the reader in memory, not only on screen');
+  ok(/'oa-forum-me',\s*\n\s*'oa-forum-rooms', 'oa-forum-roomcard'\]/.test(pageJs),
+    'oa-forum.js: and empties the panels that printed their handle');
+  /* A ROVING TABINDEX NEEDS ARROW KEYS: tabindex="-1" takes the unselected
+     room out of the tab order, so without a handler it was reachable by
+     pointer and by nothing else. */
+  ok(/host\.addEventListener\('keydown'/.test(pageJs) && /ArrowLeft: -1, ArrowRight: 1, Home: 'first', End: 'last'/.test(pageJs),
+    'oa-forum.js: the room tabs take the arrow keys, Home and End');
+  /* ONCE PER HOST, not once per draw: drawTabs runs on every render and
+     `innerHTML = ''` clears the buttons but not a listener on the row itself,
+     so binding without the flag stacks one handler per draw and a single
+     ArrowRight walks the selection as many times (with two rooms, an even
+     number of handlers lands back where it started). */
+  ok(/host\.getAttribute\('data-keys'\) !== 'on'/.test(pageJs) && /host\.setAttribute\('data-keys', 'on'\)/.test(pageJs),
+    'oa-forum.js: and that listener is bound once per host, never once per draw');
+  ok(/keyboardTab = true;/.test(pageJs) && /if \(keyboardTab\) \{/.test(pageJs),
+    'oa-forum.js: focus follows the room a keyboard press opened, whose button the redraw discards');
+  /* A SUPERSEDED MOUNT MUST NOT WRITE THE NEW ROOM'S STATE. */
+  ok(/var forRoom = S\.room;/.test(pageJs) && /if \(forRoom !== S\.room \|\| forSeason !== S\.season\) return rows;/.test(pageJs),
+    'oa-forum.js: a list read still in flight when the room changes stops writing the shared state');
 
   /* the withdraw path */
   const candForm = await read('assets', 'oa-candidateform.js');
@@ -15819,7 +15893,10 @@ async function testForum() {
 
   const pt = await read('_scraper', 'page-test.mjs');
   const fb = pt.slice(pt.indexOf('/* ---------------------------------------------------------- the forum'), pt.indexOf('/* ------------------------------------------------------------------ done */'));
-  ok(fb.length > 15000 && fb.length < 60000, 'page-test: the forum block was sliced');
+  /* the ceiling is a sanity bound on the SLICE, not a budget for the block:
+     it only has to be far below the whole file, so that a marker that moved
+     cannot pass this as "sliced" */
+  ok(fb.length > 15000 && fb.length < pt.length / 4, 'page-test: the forum block was sliced');
   for (const reader of ['forum (signed out)', 'forum (unverified)', 'forum (no profile)', 'forum (candidate)', 'forum (maintainer)', 'forum (archive)', 'forum mobile']) {
     ok(fb.includes(reader + ' (') || fb.includes(reader + ':') || fb.includes(`${reader}`), `page-test: drives ${reader}`);
   }

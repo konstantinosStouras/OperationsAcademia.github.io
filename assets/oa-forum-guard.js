@@ -68,18 +68,36 @@
     return EMAIL_RX.test(s);
   }
 
+  /** How many SEPARATOR GROUPS a run holds: the stretches of non-digits
+      between its digit runs, a leading + or ( not counted. A telephone
+      number written with separators uses more than one of them
+      ("617-253-1000", "+1 617 253 1000", "(617) 253-1000"); a run with
+      exactly one is an identifier rather than a number to dial, which is
+      what an arXiv id is ("2401.12345", nine digits and one dot) and what
+      an arXiv LINK carries. Rule 7 of the guide says a link is fine, and
+      the owner asked for links to work, so a guard that refuses every
+      arxiv.org address is refusing the thing it was told to allow. */
+  function separatorGroups(run) {
+    return run.replace(/^[+(]+/, '').split(/\d+/).filter(Boolean).length;
+  }
+
   function hasPhone(s) {
     PHONE_RX.lastIndex = 0;
     var m;
     while ((m = PHONE_RX.exec(s)) !== null) {
       var run = m[0];
       var digits = run.replace(/\D/g, '').length;
-      if (digits >= PHONE_MIN_DIGITS) {
-        var before = m.index > 0 ? s.charAt(m.index - 1) : '';
-        /* a currency sign in front of the run is a price, not a number to dial */
-        if (CURRENCY.indexOf(before) === -1 || before === '') return true;
-      }
-      if (run.length === 0) PHONE_RX.lastIndex++;
+      var before = m.index > 0 ? s.charAt(m.index - 1) : '';
+      /* A CURRENCY SIGN IN FRONT OF THE RUN IS A PRICE, not a number to
+         dial. But the run is GREEDY, so a price with a number after it is
+         one run: "$1 617-253-1000" was exempted whole and, because the
+         scan then resumed past it, the telephone number could never be
+         matched again. Resuming ONE CHARACTER ON instead lets the number
+         inside be found on its own, while "$123456789" still passes,
+         having only eight digits left once the first is stepped over. */
+      var priced = before !== '' && CURRENCY.indexOf(before) !== -1;
+      if (!priced && digits >= PHONE_MIN_DIGITS && separatorGroups(run) !== 1) return true;
+      PHONE_RX.lastIndex = priced || run.length === 0 ? m.index + 1 : PHONE_RX.lastIndex;
     }
     return false;
   }

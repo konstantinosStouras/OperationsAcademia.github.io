@@ -115,6 +115,8 @@
 
   /* ------------------------------------------------------------- the copy */
 
+  var TAG_HINT = 'Up to five. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.';
+
   var REASONS = {
     auth: 'Sign in first.',
     room: 'That room does not exist.',
@@ -260,6 +262,19 @@
     if (!app || !app.contains(a)) return;
     e.preventDefault();
     var to = a.getAttribute('href');
+    /* A POST'S OWN #n IS A PLACE ON THIS PAGE, not another view of it.
+       Following it through draw() rebuilt the thread and threw away whatever
+       was half written in the answer box below, which is the very thing
+       paintAnswers is careful not to do. Same room, same season, same
+       thread: move the address, scroll, and leave the page as it is. */
+    var here = href({ room: S.room, season: S.season, t: S.tid });
+    if (S.tid && to.split('#')[0] === here.split('#')[0]) {
+      try { history.pushState(null, '', to); } catch (err) { location.href = to; return; }
+      var frag = to.indexOf('#') === -1 ? '' : to.slice(to.indexOf('#') + 1);
+      var at = frag ? document.getElementById(frag) : null;
+      if (at) at.scrollIntoView();
+      return;
+    }
     try { history.pushState(null, '', to); } catch (err) { location.href = to; return; }
     readState();
     draw();
@@ -277,12 +292,20 @@
   function writeMe(me) {
     try { sessionStorage.setItem(ME_KEY, JSON.stringify(me)); } catch (e) { /* ignore */ }
   }
+  /** THE FRESH MARK IS PERSISTED WHERE IT IS MINTED, or `since` is "now" on
+      every read and nothing is ever newer than it. Only opening a thread
+      wrote this store, so until a reader had done that, unreadOf compared
+      each thread's lastAt against the current instant: no New badge, and no
+      "questions carrying a tag you watch have arrived" line, for the whole
+      of a reader's first visit. */
   function readSeen(uid) {
     try {
       var v = JSON.parse(localStorage.getItem(SEEN_KEY) || 'null');
       if (v && v.uid === uid && v.seen) return v;
     } catch (e) { /* private mode */ }
-    return { uid: uid, since: Date.now(), seen: {} };
+    var fresh = { uid: uid, since: Date.now(), seen: {} };
+    writeSeen(fresh);
+    return fresh;
   }
   function writeSeen(v) {
     try { localStorage.setItem(SEEN_KEY, JSON.stringify(v)); } catch (e) { /* ignore */ }
@@ -372,6 +395,38 @@
 
   /* ------------------------------------------------------------- the gate */
 
+  /** SIGNING OUT FORGETS WHOEVER WAS READING, and hiding the sections is not
+      that. `popstate` and the page's own link handler both repaint whenever
+      `S.me` is set, and S.me survived a sign-out along with the handle, the
+      marks, the thread on screen and the room: press Back after signing out
+      and the forum came back, under the previous reader's handle, for
+      whoever is now sitting there. The two browser stores are cleared by
+      OAAccounts.signOut(); this is the same clearing for what the page is
+      holding in memory and in the markup it has already drawn. */
+  function forgetReader() {
+    S.me = null;
+    S.saved = { uid: '', items: {}, tags: [] };
+    S.votes = {};
+    S.tally = {};
+    S.rows = [];
+    S.thread = null;
+    S.posts = [];
+    S.tid = '';
+    S.list = null;
+    ['oa-forum-thread', 'oa-forum-compose', 'oa-forum-list', 'oa-forum-tags',
+     'oa-forum-watch', 'oa-forum-saved', 'oa-forum-admin', 'oa-forum-me',
+     'oa-forum-rooms', 'oa-forum-roomcard'].forEach(function (id) {
+      var n = $(id);
+      if (n) n.innerHTML = '';
+    });
+    var c = $('oa-forum-listcount');
+    if (c) c.textContent = '';
+  }
+
+  /** set while a room change came from the keyboard, so the redrawn tab row
+      can put focus back where the reader left it */
+  var keyboardTab = false;
+
   function hideAll() {
     ['oa-offline', 'oa-needauth', 'oa-forum-verify', 'oa-forum-loading', 'oa-forum-error', 'oa-forum']
       .forEach(function (id) { show($(id), false); });
@@ -404,7 +459,7 @@
     var started = null;
     A.onChange(function (u) {
       if (A.pendingUser()) { hideAll(); show($('oa-forum-verify'), true); started = null; return; }
-      if (!u) { hideAll(); show($('oa-needauth'), true); started = null; return; }
+      if (!u) { forgetReader(); hideAll(); show($('oa-needauth'), true); started = null; return; }
       if (started === u.uid) return;
       started = u.uid;
       S.saved = readSaved(u.uid);
@@ -509,6 +564,39 @@
       }, [el('span', { class: 'oa-forum-dot', 'aria-hidden': 'true' }), pair[1]]);
       host.appendChild(b);
     });
+    if (keyboardTab) {
+      keyboardTab = false;
+      var now = host.querySelector('.oa-forum-tab[aria-selected="true"]');
+      if (now) now.focus();
+    }
+    /* A ROVING TABINDEX NEEDS ARROW KEYS, or the tab that is not selected is
+       reachable by pointer and by nothing else: tabindex="-1" takes it out of
+       the tab order and there was no handler to put focus on it.
+
+       ONCE PER HOST, not once per draw. drawTabs runs on every render and
+       `innerHTML = ''` clears the buttons but not a listener on the row
+       itself, so binding here without the flag stacks one handler per draw
+       and a single ArrowRight then walks the selection as many times. */
+    if (host.getAttribute('data-keys') !== 'on') {
+      host.setAttribute('data-keys', 'on');
+      host.addEventListener('keydown', function (e) {
+        var keys = { ArrowLeft: -1, ArrowRight: 1, Home: 'first', End: 'last' };
+        if (!(e.key in keys)) return;
+        var all = [].slice.call(host.querySelectorAll('.oa-forum-tab'));
+        if (all.length < 2) return;
+        var at = all.indexOf(document.activeElement);
+        if (at === -1) return;
+        e.preventDefault();
+        var to = keys[e.key] === 'first' ? 0
+          : keys[e.key] === 'last' ? all.length - 1
+          : (at + keys[e.key] + all.length) % all.length;
+        /* the press redraws this row, so the node just focused is discarded;
+           drawTabs puts focus back on whichever tab is then selected */
+        keyboardTab = true;
+        all[to].focus();
+        all[to].click();
+      });
+    }
     if (note) {
       if (!rooms.candidates) {
         note.innerHTML = 'The Candidates’ room opens to accounts holding a ' +
@@ -727,9 +815,17 @@
     Array.prototype.forEach.call(document.querySelectorAll('#oa-forum-thread [data-act="save"]'), function (b) {
       var li = b.closest ? b.closest('.oa-forum-post') : null;
       if (!li) return;
-      var on = isSaved(S.tid, li.getAttribute('data-n') === '1' ? '' : li.getAttribute('data-pid'));
+      var first = li.getAttribute('data-n') === '1';
+      var what = first ? 'question' : 'answer';
+      var on = isSaved(S.tid, first ? '' : li.getAttribute('data-pid'));
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      b.title = on ? 'Saved in this browser. Press to remove it.' : 'Save this in this browser';
+      b.title = on ? 'Saved in this browser. Press to remove it.' : 'Save this ' + what + ' in this browser';
+      /* THE ACCESSIBLE NAME MOVES WITH THE STATE, or a reader who removes a
+         mark from the Saved card is still told the button removes it. It is
+         the name postHTML draws, said the same way. */
+      b.setAttribute('aria-label', on
+        ? 'Remove this ' + what + ' from your saved list'
+        : 'Save this ' + what);
     });
   }
 
@@ -848,6 +944,14 @@
     var mount = $('oa-forum-list');
     if (!mount) return;
 
+    /* WHICH ROOM THIS MOUNT IS FOR. Switching rooms mounts the engine again
+       while the previous mount's read is still in flight, and its prepare()
+       then wrote the OLD room's count and rows over the new room's. Ordering,
+       not a race worth locking: the superseded mount just stops writing the
+       shared state. */
+    var forRoom = S.room;
+    var forSeason = S.season;
+
     S.list = OAList.mount({
       mount: '#oa-forum-list',
       source: readThreads,
@@ -858,6 +962,7 @@
           if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
           return (b.lastAt || 0) - (a.lastAt || 0);
         });
+        if (forRoom !== S.room || forSeason !== S.season) return rows;
         var count = $('oa-forum-listcount');
         if (count) count.textContent = plural(rows.length, 'question', 'questions') + ' this season';
         S.rows = rows;
@@ -1019,15 +1124,36 @@
      nobody can crawl cannot be used to pass rank. Trailing sentence
      punctuation is not part of the address; a closing bracket only counts as
      punctuation when the address does not open one of its own. */
-  var LINK_RX = /(^|[\s(])((?:https?:\/\/|www\.)[^\s<]+)/g;
+  /* The lead admits the two ENTITIES esc() has already made of a quote and an
+     apostrophe: a URL between quotation marks ("see https://x.org/y") was
+     preceded by a `;` by the time this ran and so was never linked at all.
+     Case-insensitive because a phone capitalises the first letter of a
+     sentence, and `Www.example.org` is the same address. */
+  var LINK_RX = /(^|[\s(]|&quot;|&#39;)((?:https?:\/\/|www\.)[^\s<]+)/gi;
+  var TRAIL_ENTITIES = ['&quot;', '&#39;', '&gt;', '&amp;'];
 
   function linkify(escaped) {
     return escaped.replace(LINK_RX, function (all, lead, raw) {
       var url = raw;
       var trail = '';
       while (url) {
+        /* an entity the escaper made of the punctuation AFTER the address:
+           the closing quotation mark of "see https://x.org/y" is five
+           characters by now, and taking one at a time would leave `&quot` */
+        var ent = '';
+        for (var ei = 0; ei < TRAIL_ENTITIES.length; ei++) {
+          var e2 = TRAIL_ENTITIES[ei];
+          if (url.length > e2.length && url.slice(-e2.length) === e2) { ent = e2; break; }
+        }
+        if (ent) { trail = ent + trail; url = url.slice(0, -ent.length); continue; }
         var last = url.charAt(url.length - 1);
-        if (last === ')' && url.split('(').length > url.split(')').length) break;
+        /* A CLOSING BRACKET THE ADDRESS OPENED IS PART OF IT. Wikipedia's
+           own titles end that way, and the test read the wrong way round:
+           with one of each it stripped the bracket and linked
+           `..._(discipline`, which 404s. Keep it while the address closes no
+           more brackets than it opens; strip it when it closes more, which
+           is the "(see https://x.org/y)" case. */
+        if (last === ')' && url.split(')').length <= url.split('(').length) break;
         if ('.,!?)'.indexOf(last) === -1) break;
         trail = last + trail;
         url = url.slice(0, -1);
@@ -1068,6 +1194,12 @@
     out.sort(function (a, b) {
       var av = a.id === acc, bv = b.id === acc;
       if (av !== bv) return av ? -1 : 1;
+      /* A TOMBSTONE KEEPS ITS LIKES AND LOSES ITS PLACE. The words are gone,
+         so the votes are about something nobody can read; sorted by them a
+         well-liked deleted answer sat at the top of the band, above every
+         answer that is still there. It stays in the thread, at the bottom,
+         because `n` is its name and a reply may quote it. */
+      if (!!a.hidden !== !!b.hidden) return a.hidden ? 1 : -1;
       var an = (Number(a.up) || 0) - (Number(a.down) || 0);
       var bn = (Number(b.up) || 0) - (Number(b.down) || 0);
       if (an !== bn) return bn - an;
@@ -1583,7 +1715,7 @@
           '<div class="oa-forum-tagsin" id="oa-forum-tagsin"><span id="oa-forum-tagchips"></span>' +
             '<input type="text" id="oa-forum-tag-in" autocomplete="off" placeholder="Type a tag and press Enter" aria-describedby="oa-forum-taghint"></div>' +
           '<ul class="oa-forum-tagsugg" id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags"></ul>' +
-          '<p class="oa-forum-hint" id="oa-forum-taghint">Up to five. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.</p></div>' +
+          '<p class="oa-forum-hint" id="oa-forum-taghint" aria-live="polite">' + TAG_HINT + '</p></div>' +
         acceptBox('oa-forum-ask-accept') +
         '<p class="oa-forum-msg" id="oa-forum-ask-msg" aria-live="polite"></p>' +
         '<div class="oa-forum-actions" style="margin-top:18px">' +
@@ -1614,9 +1746,26 @@
       input.disabled = tags.length >= M.TAG_MAX;
       input.placeholder = tags.length >= M.TAG_MAX ? 'Five is the most' : (tags.length ? 'Another tag' : 'Type a tag and press Enter');
     }
+    function tagHint(msg) {
+      var n = $('oa-forum-taghint');
+      if (n) n.textContent = msg || TAG_HINT;
+    }
     function add(raw) {
       var s = M.slug(raw);
       if (!s || !M.tagOk(s) || tags.indexOf(s) !== -1 || tags.length >= M.TAG_MAX) { input.value = ''; drawSugg(); return; }
+      /* THE GUARD RUNS HERE TOO. A tag is [a-z0-9-]{2,24}, which is exactly
+         the shape a telephone number and an ORCID iD survive, so forumPost
+         checks every one of them; shown here first, the refusal names the
+         box the reader is typing in rather than arriving on the send with a
+         sentence about a post. */
+      var why = G.check(s);
+      if (why) {
+        input.value = '';
+        tagHint(REASONS[why]);
+        drawSugg();
+        return;
+      }
+      tagHint('');
       tags.push(s);
       input.value = '';
       drawChips();
@@ -1645,7 +1794,7 @@
         sugg.appendChild(li2);
       }
     }
-    input.addEventListener('input', drawSugg);
+    input.addEventListener('input', function () { tagHint(''); drawSugg(); });
     input.addEventListener('focus', drawSugg);
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(input.value); }

@@ -154,7 +154,13 @@
 
   /** Per handle, per UTC day; `gapMs` is the minimum between two posts. The
       refusal carries the counter's NAME and never a count. */
-  var RATE = { threads: 3, posts: 40, votes: 60, gapMs: 20000 };
+  /* `gapMs` is ONE CLOCK MINUTE and cannot be anything else. Both stamps it
+     is measured between are truncated to the minute (R7), so their
+     difference is always a whole number of minutes: any value from 1 to
+     60000 enforces exactly "not twice in the same UTC minute", and 20000
+     said twenty seconds while enforcing sixty. The number now says what the
+     rule is. */
+  var RATE = { threads: 3, posts: 40, votes: 60, gapMs: 60000 };
 
   /** A member may edit their own post for fifteen minutes from the MINUTE it
       was stamped. Both stamps are truncated to the minute (R7), so the real

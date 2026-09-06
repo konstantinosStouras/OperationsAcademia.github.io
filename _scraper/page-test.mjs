@@ -10228,6 +10228,52 @@ for (const w of [320, 360, 390, 430]) {
     eq(gone.thread, true, 'forum (candidate): deleting a question nobody answered takes the whole thread');
     ok(!gone.listed.some((t2) => /second-year teaching release/.test(t2)),
       'forum (candidate): and it is off the list, rather than standing there headless');
+    /* AND THE WORDS REALLY GO. Erasing the post's body is not the whole of it
+       while the thread head keeps the title and an `excerpt` that is a copy of
+       that body, and any admitted member may list the hidden rows. The tags
+       come back to the room's tally in the same breath, or Popular tags counts
+       a question nobody can open. */
+    const after = await q.evaluate((t) => {
+      const tid = window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumDelete').pop().data.tid;
+      const th = window.__fb.docs[t + '/' + tid];
+      const tally = Object.values(window.__fb.docs).find((d2) => d2 && d2.counts) || { counts: {} };
+      return { title: th.title, excerpt: th.excerpt, tags: th.tags, counts: tally.counts };
+    }, T);
+    ok(after.title === '' && after.excerpt === '',
+      'forum (candidate): and it keeps no title and no excerpt, so the words really are gone');
+    ok(Array.isArray(after.tags) && after.tags.length > 0,
+      'forum (candidate): while its tags stay on the row, which is what the removal tool reads');
+    ok(after.tags.every((t2) => Number(after.counts[t2] || 0) === 0),
+      `forum (candidate): and the room's tally has them back (${JSON.stringify(after.counts)})`);
+    /* THE ROOM TABS TAKE THE KEYBOARD. A roving tabindex puts the unselected
+       room out of the tab order, so without arrow keys it is reachable by
+       pointer and by nothing else. */
+    await q.evaluate(() => document.querySelector('.oa-forum-tab[aria-selected="true"]').focus());
+    await q.press('.oa-forum-tab[aria-selected="true"]', 'ArrowRight');
+    await q.waitForFunction(() => document.querySelector('.oa-forum-tab[aria-selected="true"]')
+      && document.querySelector('.oa-forum-tab[aria-selected="true"]').getAttribute('data-room') === 'open',
+    null, { timeout: 8000 });
+    ok(true, 'forum (candidate): the arrow keys move between the rooms');
+    eq(await q.evaluate(() => document.activeElement.getAttribute('data-room')), 'open',
+      'forum (candidate): and focus follows the room that opened');
+
+    /* SIGNING OUT FORGETS THE READER. popstate repaints whenever S.me is set,
+       and S.me used to survive a sign-out along with the handle and the room,
+       so Back brought the forum back for whoever is now at the machine. */
+    await q.evaluate(() => window.OAAccounts.signOut());
+    await q.waitForFunction(() => !document.getElementById('oa-needauth').hidden, null, { timeout: 10000 });
+    await q.goBack();
+    await q.waitForTimeout(600);
+    const afterOut = await q.evaluate(() => ({
+      forum: !document.getElementById('oa-forum').hidden,
+      needauth: !document.getElementById('oa-needauth').hidden,
+      handle: (document.getElementById('oa-forum-me') || {}).textContent || '',
+      body: document.body.textContent,
+    }));
+    ok(!afterOut.forum && afterOut.needauth,
+      'forum (signed out): pressing Back does not repaint the forum for whoever is now reading');
+    ok(!/quiet heron 42/.test(afterOut.handle) && !/quiet heron 42/.test(afterOut.body),
+      'forum (signed out): and the previous reader\'s handle is nowhere in the page');
     eq(errors, [], 'forum (candidate): no uncaught script error through the whole conversation');
     await ctx.close();
   }
@@ -10274,8 +10320,15 @@ for (const w of [320, 360, 390, 430]) {
       reply: !!document.getElementById('oa-forum-body'),
       note: document.getElementById('oa-forum-compose').textContent,
       rules: /Thirteen rules|rules/i.test(document.querySelector('.oa-forum-text').textContent),
+      del: !!document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]'),
     }));
     ok(guide.votes === 0 && !guide.reply && /locked/.test(guide.note), 'forum (maintainer): the locked guide thread draws no vote button and no reply box');
+    /* BUT DELETE IS NOT A NEW POST. forumDelete refuses on an archive and a
+       hidden thread and ALLOWS a locked one, because locking stops new posts
+       and does not make somebody's words un-removable. Drawn under the same
+       readOnly as the reply box, the control was withheld exactly where the
+       function would have allowed it. */
+    ok(guide.del, 'forum (maintainer): and yet Remove IS offered on it, as forumDelete allows');
     ok(guide.rules, 'forum (maintainer): its body is the guide text');
     await q.click('.oa-forum-crumbs a');
     await q.waitForSelector('#oa-forum-askbtn', { timeout: 15000 });
