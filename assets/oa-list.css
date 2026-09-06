@@ -918,6 +918,97 @@
 
 @media print { .oa-card-actions { display: none; } }
 
+/* ----------------------------------- the deadlines to a calendar (jobs.html)
+
+   assets/oa-jobcal.js (owner, 2026-09-06): a tick box under the head of every
+   posting that has an apply-by date still to come, and a strip above the list
+   that says what is ticked and downloads the .ics. Drawn for a signed-in
+   reader only; a locked card carries neither. The strip is a small panel of
+   its own rather than a row in the filter bar, because it is about the
+   SELECTION the reader makes on the cards, not about the filters, and the bar
+   is already three buttons wide. v3.css restates both in the live design's
+   tokens; a rule in one stylesheet alone is either invisible on the site or
+   lost on the next page (CLAUDE.md, under the Excel button). Every surface
+   names its own ink as well as its ground. */
+.oa-cal-pick {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  /* tucked into the head's bottom padding, so the card does not grow by a
+     whole row for a control that is one line tall */
+  margin: -12px 22px 0;
+  padding: 0 0 12px;
+  font-size: 13px;
+  color: var(--mut, #646c78);
+  cursor: pointer;
+}
+.oa-cal-pick .oa-cal-box {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: var(--brand, #3a424d);
+  cursor: pointer;
+}
+.oa-cal-pick-text { font-weight: 600; color: var(--ink-2, #3a424d); }
+.oa-cal-when { color: var(--mut, #646c78); }
+.oa-cal-picked .oa-cal-pick-text { color: var(--brand, #3a424d); }
+
+.oa-cal-tray {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 1px dashed var(--line, #d3d9df);
+  border-radius: 6px;
+  background: var(--bg-2, #fff);
+  color: var(--ink-2, #3a424d);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.oa-cal-msg { margin: 0; flex: 1 1 280px; }
+.oa-cal-btn {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--line, #d3d9df);
+  border-radius: 6px;
+  background: var(--bg-2, #fff);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2, #3a424d);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.oa-cal-btn:hover:not([disabled]) { border-color: var(--brand, #3a424d); color: var(--brand, #3a424d); }
+.oa-cal-btn[disabled] { opacity: 0.45; cursor: default; }
+/* the download is the one that DOES something with the ticks, so it wears the
+   brand: border, ink and a pale ground, filling on hover the way the Excel
+   button does in green */
+.oa-cal-go {
+  border-color: var(--brand, #3a424d);
+  color: var(--brand, #3a424d);
+  background: var(--brand-soft, #eef0f3);
+}
+.oa-cal-go:hover:not([disabled]) { background: var(--brand, #3a424d); color: var(--on-brand, #fff); }
+.oa-cal-btn:focus-visible { outline: 2px solid var(--brand, #3a424d); outline-offset: 1px; }
+
+@media screen and (max-width: 640px) {
+  /* a tick box strip is a control: a 42px target, following the head's
+     phone gutter (rule 3 in _MOBILE-STANDARDS.md), and the strip's buttons
+     stack full width like every other control on a phone */
+  .oa-cal-pick { min-height: 42px; margin: -8px 16px 0; padding: 0 0 8px; }
+  .oa-cal-pick .oa-cal-box { width: 20px; height: 20px; }
+  .oa-cal-tray { padding: 12px 14px; }
+  .oa-cal-msg { flex-basis: 100%; }
+  .oa-cal-btn { flex: 0 0 100%; width: 100%; height: 42px; font-size: 15px; }
+}
+
+@media print { .oa-cal-pick, .oa-cal-tray { display: none; } }
+
 /* ------------------------------------------------- My postings (my-postings.html)
 
    The signed-in poster's own postings, every state included. Reuses the same

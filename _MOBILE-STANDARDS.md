@@ -139,6 +139,15 @@ marked global.
     cannot join `MOBILE_PAGES`, because signed out it shows a sign-in card and
     mounts no list, and the loop waits for a rendered list and a visible bar.
 
+14. **A tick box on a card is a control.** The jobs page's "Add to calendar"
+    strip under a dated posting's head (`assets/oa-jobcal.js`) is a 42px
+    target on a phone, following the head's 16px gutter, with a 20px box;
+    and the strip above the list that downloads the file stacks its three
+    buttons full width at 42px, like the filter bar's own pair (rule 11).
+    Both are drawn for a signed-in reader only, so the `MOBILE_PAGES` loop
+    (signed out) never sees them; the calendar block of `page-test.mjs`
+    measures them at 390px itself, the way the forum block does.
+
 ## The test gate
 
 `_scraper/page-test.mjs` runs every list page at a 390px viewport and

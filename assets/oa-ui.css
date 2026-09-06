@@ -484,6 +484,7 @@
 .oa-form input[type='email'],
 .oa-form input[type='url'],
 .oa-form input[type='date'],
+.oa-form input[type='time'],
 .oa-form input[type='number'],
 .oa-form select,
 .oa-form textarea,
@@ -655,6 +656,26 @@
 }
 
 .oa-check input { flex: 0 0 auto; margin-top: 5px; }
+
+/* THE TALK BLOCKS on the candidate form (oa-candidateform.js talkBlock, owner
+   2026-09-06): one per ticked INFORMS day, under the tick boxes, holding the
+   session's start time, its code, the room and the title. A quiet panel with
+   a hairline, its own ground AND its own ink (the rule in CLAUDE.md); the
+   four fields share the form's own .oa-row so they wrap the way every other
+   pair of fields does. The time box takes the same styling as a date box
+   (the selector list above), so it is not the one unstyled control. */
+.oa-talk {
+  margin: 12px 0 4px;
+  padding: 12px 14px 0;
+  border: 1px solid var(--line, #e3e7ec);
+  border-radius: 8px;
+  background: var(--bg-3, #f7f8fa);
+  color: var(--ink, #222);
+}
+.oa-talk-h { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--ink, #222); }
+.oa-talk-row > .oa-field { flex: 1 1 180px; margin-bottom: 12px; }
+.oa-talk-row > .oa-talk-title { flex-basis: 100%; }
+.oa-talk .oa-hint { margin: 4px 0 0; }
 
 .oa-row {
   display: flex;
