@@ -1727,6 +1727,16 @@
       text = (sp > M.BOUNDS.quote * 0.6 ? cut.slice(0, sp) : cut).trim();
     }
     if (!text) return;
+    /* THE GUARD RUNS ON A QUOTE, and it has to run HERE as well as in the
+       function, because this is where the reader can still do something about
+       it. A DOM selection comes back with its whitespace already collapsed,
+       so a passage posted with double spaces between the groups of a
+       telephone number (which the guard's own rule lets through: nine digits
+       joined by at most ONE separator each) is handed over single-spaced,
+       which the guard refuses. Saying so on the press beats a refusal after
+       the answer has been written. */
+    var badQuote = G.check(text);
+    if (badQuote) { say(REASONS[badQuote] || 'That cannot be quoted.', true); return; }
     S.quote = { n: Number(p.n) || 0, by: p.by, text: text };
     var box = $('oa-forum-quotebox');
     if (box) {

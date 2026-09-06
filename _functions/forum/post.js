@@ -213,6 +213,19 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
          that is stored is still the reader's own words. It is the same
          normalisation excerptOf already uses. */
       if (!src || src.hidden || P.flatten(String(src.body)).indexOf(P.flatten(text)) === -1) P.refuse('invalid-argument', 'quote');
+      /* AND THE GUARD RUNS ON IT, like every other text a member sends.
+         "It is a passage of a post that already passed the guard" was the
+         argument for not doing so, and the FLATTENING above is what makes it
+         false: the test compares the whitespace-collapsed forms while the
+         stored copy is the reader's own string, so a body posted with DOUBLE
+         spaces between the groups of a telephone number passes the guard
+         (its rule is nine digits joined by at most one separator each) and a
+         quote of it with single spaces does not -- and that quote is exactly
+         what the browser hands over, because a DOM selection has already
+         collapsed the spaces. Two ordinary presses of the site's own Quote
+         button, and a telephone number the guard refuses is published. */
+      const hit = guard.check(text);
+      if (hit) P.refuse('invalid-argument', hit);
       /* @doc quote */
       quote = {
         n: qn,

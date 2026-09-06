@@ -436,6 +436,26 @@ async function main() {
   const healed = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${head.result.tid}`).get();
   ok(healed.data().hidden === true, 'so a thread left headless can always be closed');
 
+  /* A QUOTE IS A TEXT A MEMBER SENDS, so the guard runs on it. "It is a
+     passage of a post that already passed the guard" was the argument for
+     not doing so, and the flattening the passage test uses is what makes it
+     false: a body with DOUBLE spaces between the groups of a telephone
+     number passes the guard (nine digits joined by at most one separator
+     each) and the single-spaced quote of it does not, while flattened they
+     are the same passage. Single-spaced is exactly what a browser hands
+     over, because a DOM selection has already collapsed the spaces. */
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
+  const spaced = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A question with a spaced number in it', tags: ['waiting'], body: 'You can reach the department on  617  253  1000  during office hours.' });
+  ok(!spaced.error, 'a body the guard lets through, with doubled spaces', JSON.stringify(spaced));
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
+  const smuggle = await call('forumPost', tokens.adm, { room: 'candidates', tid: spaced.result.tid, body: 'Thank you, that is what I needed.', quote: { n: 1, text: '617 253 1000' } });
+  ok(status(smuggle) === 'INVALID_ARGUMENT' && reason(smuggle) === 'phone',
+    'the single-spaced quote of it is refused, as the guard refuses the same words in a body',
+    JSON.stringify(smuggle));
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
+  const plainQuote = await call('forumPost', tokens.adm, { room: 'candidates', tid: spaced.result.tid, body: 'Noted, thank you.', quote: { n: 1, text: 'during office hours' } });
+  ok(!plainQuote.error, 'while an ordinary passage of the same post still quotes', JSON.stringify(plainQuote));
+
   /* THE MAINTAINER REMOVING A QUESTION TAKES THE ANSWERS' WORDS WITH IT.
      Hiding the thread is not erasing: the rules let any admitted member read
      this collection, so an answer left `hidden: false` under a removed

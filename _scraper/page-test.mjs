@@ -152,7 +152,27 @@ const FORUM_INK = ['.oa-label-pinned', '.oa-label-locked', '.oa-label-new', '.oa
   '.oa-forum-cardnote', '.oa-forum-hint', '.oa-forum-bs', '.oa-forum-ex',
   '.oa-forum-asker', '.oa-forum-when', '.oa-forum-stat i', '.oa-forum-stat b',
   '.oa-forum-tab', '.oa-forum-crumbs', '.oa-forum-thmeta', '.oa-forum-lede',
-  '.oa-forum-answers-h h2', '.oa-forum-sort', '.oa-forum-n'];
+  '.oa-forum-answers-h h2', '.oa-forum-sort', '.oa-forum-n',
+  /* THE TAG SURFACES, added after a sweep found the count inside a chip at
+     4.44:1 on its own ground. This is a LIST, and a list only ever measures
+     what somebody remembered: anything that paints ink on a ground of its own
+     belongs in it, and a chip paints two of them. */
+  '.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg button',
+  '.oa-forum-tagsugg i'];
+/* .oa-forum-watch and .oa-forum-save are NOT in it, and that is a limit of
+   this audit rather than an oversight: it measures INK against its ground and
+   skips an element with no text, and those two are icon buttons. They are
+   held to the 3:1 non-text floor instead, which is a different measurement
+   from a different pair of colours, and nothing here makes it yet. Said
+   rather than left as two selectors that quietly measure nothing. */
+
+/* WHICH OF THEM WERE ACTUALLY ON SCREEN. A selector that matches nothing
+   measures nothing and says so nowhere, which is the same defect as the
+   named list that was never passed: the check goes green having audited a
+   surface it never saw. Accumulated across both views, since some of these
+   are only ever drawn in one of them, and asserted once the forum block has
+   shown the reader both. */
+const FORUM_INK_SEEN = new Set();
 
 async function forumContrast(q, where) {
   for (const theme of ['light', 'dark']) {
@@ -215,14 +235,16 @@ async function forumContrast(q, where) {
             break;
           }
         }
-        return out.filter((x) => x.r < 4.5);
-      }, ['.oa-label-pinned', '.oa-label-locked', '.oa-label-new', '.oa-label-tag',
-        '.oa-forum-who', '.oa-forum-handle', '.oa-forum-text', '.oa-forum-quote',
-        '.oa-forum-removed', '.oa-forum-act', '.oa-forum-score', '.oa-forum-updown',
-        '.oa-forum-cardnote', '.oa-forum-hint', '.oa-forum-bs', '.oa-forum-ex',
-        '.oa-forum-asker', '.oa-forum-when', '.oa-forum-stat i', '.oa-forum-stat b',
-        '.oa-forum-tab', '.oa-forum-crumbs', '.oa-forum-thmeta']);
-      eq(low, [], `forum (${where}, ${theme}): every surface reads at 4.5:1 or better`);
+        return { low: out.filter((x) => x.r < 4.5), seen: out.map((x) => x.sel) };
+      /* FORUM_INK, not a second copy of it. There WAS a second copy here, and
+         it was the one that ran: the named list above was declared, commented
+         and never referenced, so a selector added to it measured nothing and
+         said so nowhere. That is the four-copies-of-one-answer shape the
+         shared modules on this site all exist to prevent, in the file whose
+         job is to catch it. */
+      }, FORUM_INK);
+      low.seen.forEach((s) => FORUM_INK_SEEN.add(s));
+      eq(low.low, [], `forum (${where}, ${theme}): every surface reads at 4.5:1 or better`);
   }
   await q.evaluate(() => document.documentElement.removeAttribute('data-theme'));
 }
@@ -10006,6 +10028,23 @@ for (const w of [320, 360, 390, 430]) {
     eq(list.count, '1 question this season', 'forum (candidate): the count line');
     eq(list.cloud.sort(), ['europe', 'flyouts'], 'forum (candidate): the Popular tags card is drawn from the tally');
     ok(list.ask, 'forum (candidate): Ask a question is offered');
+    /* THE LIST AS A MEMBER SEES IT, with cards on it and the tag cloud beside
+       them. The maintainer's own list is audited further down and holds only
+       the guide, so the card's own surfaces and the chips went unmeasured.
+
+       The seen-mark is wound back first so the New badge is actually DRAWN:
+       `since` is stamped when the account joins, so nothing posted before that
+       is ever new, and the badge could not otherwise be measured at all. The
+       store is per account and the next thread opened rewrites it. */
+    await q.evaluate((uid) => localStorage.setItem('oa-forum-seen',
+      JSON.stringify({ uid, since: 0, seen: {} })), CAND.uid);
+    /* out of the room and back, because the list reads the mark when it is
+       DRAWN and pressing the tab it is already on redraws nothing */
+    await q.click('#oa-forum-rooms .oa-forum-tab[data-room="open"]');
+    await q.waitForFunction(() => /room=open/.test(location.search), null, { timeout: 15000 });
+    await q.click('#oa-forum-rooms .oa-forum-tab[data-room="candidates"]');
+    await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    await forumContrast(q, 'the candidate list');
 
     /* A PAINT THAT LANDS AFTER THE READER HAS MOVED MUST NOT WRITE THE VIEW
        THEY MOVED TO. The list, a thread and the ask form are three views of
@@ -10215,6 +10254,10 @@ for (const w of [320, 360, 390, 430]) {
     eq(del.acts, [], 'forum (candidate): a deleted post offers no reply, quote, edit or delete');
     ok(del.still, 'forum (candidate): the other replies are untouched');
     eq(del.title, HOSTILE_TITLE, 'forum (candidate): and the thread keeps its title, since the opening post was not the one deleted');
+    /* AND THE THREAD AT ITS RICHEST: a quoted answer, a removed one, the
+       answers band with its sort control, and the bookmark on each post. The
+       guide thread audited further down has one post and none of them. */
+    await forumContrast(q, 'a busy thread');
     /* the seeded question is another handle's, so an ordinary member is
        offered nothing on it: delete is the author's or the maintainer's */
     ok(await q.evaluate(() => !document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]')),
@@ -10251,6 +10294,11 @@ for (const w of [320, 360, 390, 430]) {
        like any other: the room describing itself rather than the site
        recommending it. */
     ok(!suggested.includes('rumour'), 'forum (candidate): the curated half of the picker offers no rumour tag');
+    /* THE ASK FORM, with its suggestion list open. Its lede, its hints and the
+       rows of the tag picker are drawn nowhere else, so none of them had ever
+       been measured; the picker's rows are open right now because a prefix has
+       just been typed into the box. */
+    await forumContrast(q, 'the ask form');
     await q.fill('#oa-forum-tag-in', 'Rumour');
     await q.press('#oa-forum-tag-in', 'Enter');
     const chips = await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag')));
@@ -10515,6 +10563,10 @@ for (const w of [320, 360, 390, 430]) {
       note: document.getElementById('oa-forum-compose').textContent,
       rules: /Thirteen rules|rules/i.test(document.querySelector('.oa-forum-text').textContent),
       del: !!document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]'),
+      delOff: (() => {
+        const b = document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+        return b ? { off: b.disabled, why: b.getAttribute('title') || '' } : null;
+      })(),
     }));
     ok(guide.votes === 0 && !guide.reply && /locked/.test(guide.note), 'forum (maintainer): the locked guide thread draws no vote button and no reply box');
     /* BUT DELETE IS NOT A NEW POST. forumDelete refuses on an archive and a
@@ -10522,12 +10574,27 @@ for (const w of [320, 360, 390, 430]) {
        and does not make somebody's words un-removable. Drawn under the same
        readOnly as the reply box, the control was withheld exactly where the
        function would have allowed it. */
-    ok(guide.del, 'forum (maintainer): and yet Remove IS offered on it, as forumDelete allows');
+    ok(guide.del, 'forum (maintainer): and yet Remove IS drawn on it, since locking is not what withholds it');
+    /* …AND IT SAYS NO BEFORE IT IS PRESSED, because this is the ONE thread
+       Remove must never take. The guide's id is stamped on the season head
+       and never cleared, so seedGuide would take its refresh branch for ever
+       after and write the words back into a thread that is still hidden: one
+       press and the room has no guide for the season and no way to post one.
+       forumDelete refuses it too; a page can be got round. */
+    ok(guide.delOff && guide.delOff.off && /guide cannot be removed/i.test(guide.delOff.why),
+      'forum (maintainer): …disabled, with the reason, because the guide is the one thread Remove must not take');
     ok(guide.rules, 'forum (maintainer): its body is the guide text');
     /* AND THE THREAD'S OWN SURFACES, which the list view never shows: the
        body, the who-block, the crumbs, the meta bar, the Pinned and Locked
        badges and the vote column. */
     await forumContrast(q, 'a thread');
+    /* A SELECTOR THAT MATCHED NOTHING AUDITED NOTHING, and said so nowhere.
+       FORUM_INK is a list, and a list only holds what somebody remembered;
+       one that has drifted off the markup is a check reporting green over a
+       surface it never saw. Accumulated over BOTH views, since several of
+       these are drawn in only one of them. */
+    const unseen = FORUM_INK.filter((s) => !FORUM_INK_SEEN.has(s));
+    eq(unseen, [], 'forum: every surface the contrast audit names was really on screen in one of the two views');
     await q.click('.oa-forum-crumbs a');
     await q.waitForSelector('#oa-forum-askbtn', { timeout: 15000 });
     await q.click('#oa-forum-askbtn');

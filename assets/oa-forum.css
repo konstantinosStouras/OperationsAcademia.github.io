@@ -751,7 +751,11 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   box-sizing: border-box;
 }
 
-.oa-forum-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand-soft); }
+/* THE RING IS THE BRAND, NEVER THE WASH. `outline: none` takes the site-wide
+   focus ring away, so whatever replaces it IS the indicator, and --brand-soft
+   on a white input measures 1.19:1 against a 3:1 floor: a keyboard reader had
+   no way to tell the box was focused. --brand is 10.16:1 on the same ground. */
+.oa-forum-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand); }
 
 /* The compose bar under a textarea. It used to carry the "how do you know"
    radios on the left with the send button on the right; the radios are gone
@@ -954,7 +958,13 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 }
 
 .oa-forum-tagsugg li:last-child button { border-bottom: 0; }
-.oa-forum-tagsugg button:hover, .oa-forum-tagsugg button:focus-visible { background: var(--brand-soft); color: var(--brand); outline: none; }
+/* A WASH IS A HOVER, NOT A FOCUS RING. Both states shared one rule that
+   removed the outline and put --brand-soft behind the row, which is 1.19:1
+   against the panel it sits on: pointing at a row and tabbing to it looked
+   the same, and neither looked focused. The wash stays for both; the ring
+   comes back for the keyboard, inset so the list does not clip it. */
+.oa-forum-tagsugg button:hover, .oa-forum-tagsugg button:focus-visible { background: var(--brand-soft); color: var(--brand); }
+.oa-forum-tagsugg button:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
 .oa-forum-tagsugg i { font-style: normal; color: var(--mut); }
 
 .oa-forum-actions {
@@ -1003,15 +1013,29 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-/* the same step as a chip anywhere else, never the near-black flip */
-.oa-forum-tagchip:hover {
+/* the same step as a chip anywhere else, never the near-black flip.
+
+   `body.v3` IS LOAD-BEARING: a chip is an <a>, and `body.v3 a:hover` in
+   v3.css is (0,2,2) against this rule's (0,2,0), so it won on specificity
+   whatever the load order and the chip hovered in --brand-2 WITH AN
+   UNDERLINE, which is the one thing a chip must not do. This is the
+   "specificity AND load order" trap this repository already records for the
+   Leaflet attribution and the sponsor rail: a rule that a rule of equal or
+   greater weight can beat is not a rule. */
+body.v3 .oa-forum-tagchip:hover {
   background-color: var(--line-soft);
   color: var(--brand);
   box-shadow: inset 0 0 0 1px var(--line);
+  text-decoration: none;
 }
 
 .oa-forum-tagchip:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-.oa-forum-tagchip i { font-style: normal; font-weight: 500; color: var(--mut); margin-left: 7px; }
+/* THE COUNT IS QUIETER BY WEIGHT, NOT BY A COLOUR THAT FAILS. --mut measures
+   4.44:1 on --brand-soft and 4.04:1 on the hover step, both under the 4.5:1
+   floor this site holds every ink to; the token was chosen as "the smallest
+   change that clears 4.5:1 everywhere", and everywhere did not include a chip.
+   --brand is 8.51:1 and 7.75:1 on the same two grounds. */
+.oa-forum-tagchip i { font-style: normal; font-weight: 400; color: var(--brand); margin-left: 7px; }
 
 /* the bell: quiet until it is pressed, then the room's own green, so a
    watched tag is legible at a glance down the card */

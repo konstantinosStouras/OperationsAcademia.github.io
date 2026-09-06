@@ -16449,6 +16449,91 @@ async function testForum() {
     'forum: excerptOf reads the same normaliser, so there is one definition of it');
   ok(/quote = \{\s*\n\s*n: qn,\s*\n\s*by: src\.by,\s*\n\s*text,/.test(forumSrc['post.js']),
     'forum: what is STORED is the reader\'s own words, never the flattened form');
+  /* …AND THE GUARD RUNS ON IT, like every other text a member sends. "It is a
+     passage of a post that already passed the guard" was the argument for not
+     doing so, and the FLATTENING two paragraphs up is what makes it false: the
+     test compares the collapsed forms while the stored copy is the reader's
+     own string. Measured against the real guard: a body reading
+     "…on  617  253  1000  during…" passes it (the phone rule is nine digits
+     joined by at most ONE separator each) and the single-spaced quote of it
+     does not — and single-spaced is exactly what the browser hands over,
+     because a DOM selection has already collapsed the spaces. Two presses of
+     the site's own Quote button and a telephone number the guard refuses is
+     published. */
+  {
+    const G2 = require(path.join(HERE, '..', 'assets', 'oa-forum-guard.js'));
+    const body = 'You can reach the department on  617  253  1000  during office hours.';
+    eq(G2.check(body), '', 'forum: the doubled-space body is one the guard lets through');
+    eq(G2.check('617 253 1000'), 'phone', '…while the single-spaced quote of it is refused');
+    const flat = (v) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
+    ok(flat(body).indexOf(flat('617 253 1000')) !== -1,
+      '…and the flattened test would have accepted it, which is the hole');
+  }
+  ok(/const hit = guard\.check\(text\);\s*\n\s*if \(hit\) P\.refuse\('invalid-argument', hit\);/.test(forumSrc['post.js']),
+    'forum: so forumPost guards the quote it is about to store');
+  ok(forumSrc['post.js'].indexOf('const hit = guard.check(text);') >
+     forumSrc['post.js'].indexOf('P.flatten(String(src.body))'),
+    '…after the passage test, so a quote of nothing is still refused as a quote');
+  {
+    const fjs = await readFile(path.join(HERE, '..', 'assets', 'oa-forum.js'), 'utf8');
+    ok(/var badQuote = G\.check\(text\);/.test(fjs) && /'That cannot be quoted\.'/.test(fjs),
+      '…and the page says so on the press, where the reader can still do something about it');
+  }
+
+  /* FOUR MEASURED SURFACES. `outline: none` makes whatever replaces it the
+     focus indicator, and --brand-soft on a white input is 1.19:1 against a
+     3:1 floor, so a keyboard reader could not tell the compose box or a tag
+     suggestion was focused. --mut is 4.44:1 on --brand-soft and 4.04:1 on the
+     hover step, both under the 4.5:1 floor the token was chosen to clear
+     "everywhere" — everywhere did not include a chip. And a chip is an <a>,
+     so `body.v3 a:hover` (0,2,2) beat `.oa-forum-tagchip:hover` (0,2,0)
+     whatever the load order: the chip hovered in --brand-2 with an UNDERLINE,
+     which is the "specificity AND load order" trap already recorded for the
+     Leaflet attribution and the sponsor rail. */
+  {
+    const fcss = await readFile(path.join(HERE, '..', 'assets', 'oa-forum.css'), 'utf8');
+    ok(/textarea:focus \{ outline: none; box-shadow: inset 0 0 0 2px var\(--brand\); \}/.test(fcss),
+      'forum css: the compose box\'s focus ring is the brand, never the wash');
+    ok(/\.oa-forum-tagsugg button:focus-visible \{ outline: 2px solid var\(--brand\); outline-offset: -2px; \}/.test(fcss),
+      'forum css: a tag suggestion keeps a real focus ring, separately from its hover wash');
+    ok(/\.oa-forum-tagchip i \{[^}]*color: var\(--brand\)/.test(fcss)
+       && !/\.oa-forum-tagchip i \{[^}]*var\(--mut\)/.test(fcss),
+      'forum css: the count inside a chip is quieter by weight, not by an ink that fails');
+    ok(/body\.v3 \.oa-forum-tagchip:hover \{/.test(fcss)
+       && /body\.v3 \.oa-forum-tagchip:hover \{[^}]*text-decoration: none;/.test(fcss),
+      'forum css: the chip hover outranks body.v3 a:hover, underline and all');
+    ok(!/^\.oa-forum-tagchip:hover \{/m.test(fcss),
+      '…and the rule it could beat is gone, not left beside it');
+  }
+  /* THE AUDIT'S OWN LIST, and the two things it must not claim to measure.
+     FORUM_INK was declared, commented and never PASSED — the evaluate carried
+     a second copy of it — so a selector added to it audited nothing and said
+     so nowhere, and nineteen of the thirty-two had never been on screen in
+     either of the two views it was run over. It reads its own list now, four
+     views are driven, and a selector that matched nothing in any of them
+     fails. The two icon buttons are OUT of it rather than in it measuring
+     nothing: the audit compares INK to its ground and skips an element with
+     no text, so a bookmark and a bell are a 3:1 non-text measurement this
+     suite does not make yet, and saying that is better than two entries that
+     look like coverage. */
+  {
+    const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+    const ink = pt.slice(pt.indexOf('const FORUM_INK'), pt.indexOf('async function forumContrast'));
+    for (const sel of ['.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg button',
+      '.oa-forum-tagsugg i']) {
+      ok(ink.includes(`'${sel}'`), `forum css: the contrast audit measures ${sel}`);
+    }
+    for (const sel of ['.oa-forum-watch', '.oa-forum-save']) {
+      ok(!new RegExp(`'\\${sel}'`).test(ink),
+        `forum css: …and does not claim to measure ${sel}, which carries no text`);
+    }
+    ok(/\}, FORUM_INK\);/.test(pt) && (pt.match(/'\.oa-label-pinned'/g) || []).length === 1,
+      'forum css: the audit reads its own named list, and there is only one of it');
+    ok(/const unseen = FORUM_INK\.filter\(\(s\) => !FORUM_INK_SEEN\.has\(s\)\);/.test(pt),
+      'forum css: and a selector that was never on screen fails, rather than passing unmeasured');
+    eq((pt.match(/await forumContrast\(q, /g) || []).length, 5,
+      'forum css: five views are audited — the two lists, a busy thread, the guide thread and the ask form');
+  }
   ok(/quote = \{\s*n: qn,\s*by: src\.by,\s*text,\s*\}/.test(forumSrc['post.js']), 'forum: and is stored as a copy {n, by, text}');
   ok(/const body = guide\.text\(\);/.test(forumSrc['moderate.js']) && !/d\.body/.test(forumSrc['moderate.js']),
     'forum: seedGuide renders the guide itself and takes no body');

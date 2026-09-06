@@ -3308,6 +3308,55 @@ rule 13 in `_MOBILE-STANDARDS.md` is what its phone block holds to: a 16px
 textarea, 42px tabs, votes, actions and Post; the vote column stands beside
 a post on a desktop and lies above it on a phone.
 
+### A quote is a text a member sends, so the guard runs on it
+
+`forumPost` guarded the title, the body and every tag, and NOT the quote, on
+the reading that a quote is a passage of a post that already passed the guard.
+The FLATTENING the passage test uses is what makes that false: the comparison
+is on the whitespace-collapsed forms while the stored copy is the reader's own
+string. Measured against the real guard, a body reading
+*"…on&nbsp;&nbsp;617&nbsp;&nbsp;253&nbsp;&nbsp;1000&nbsp;&nbsp;during…"*
+passes it — the phone rule is nine digits joined by at most ONE separator each
+— and the single-spaced quote of it does not. And single-spaced is exactly
+what the browser hands over, because a DOM selection has already collapsed the
+spaces: **two presses of the site's own Quote button publish a telephone
+number the guard refuses.** `guard.check(text)` runs on it now, after the
+passage test so a quote of nothing is still refused as a quote, and the page
+runs it on the press, where the reader can still do something about it.
+
+### Four measured surfaces, and an audit that was not measuring them
+
+`outline: none` makes whatever replaces it the focus indicator, and
+`--brand-soft` on a white input is **1.19:1** against a 3:1 floor: a keyboard
+reader could not tell the compose box or a tag suggestion was focused. `--mut`
+is **4.44:1** on `--brand-soft` and **4.04:1** on the hover step, both under
+the 4.5:1 floor the token was chosen to clear "everywhere" — everywhere did
+not include a chip. And a chip is an `<a>`, so `body.v3 a:hover` (0,2,2) beat
+`.oa-forum-tagchip:hover` (0,2,0) whatever the load order: the chip hovered in
+`--brand-2` **with an underline**, which is the "specificity AND load order"
+trap already recorded for the Leaflet attribution and the sponsor rail.
+
+**The audit that should have caught the chip was not running its own list.**
+`FORUM_INK` in `page-test.mjs` was declared, commented and never PASSED — the
+`evaluate` carried a second copy — so a selector added to it measured nothing
+and said so nowhere. Worse, **nineteen of the thirty-two had never been on
+screen** in either of the two views it was run over: it reported green over
+surfaces it had never seen. It reads its own list now, **five views** are
+audited (the maintainer's list, a member's list with cards and a tag cloud, a
+busy thread with a quote and a removed answer, the guide thread, and the ask
+form with its picker open), and **a selector that matched nothing in any of
+them fails**. The New badge is staged by winding the seen-mark back, since
+`since` is stamped at join and nothing posted before that is ever new.
+
+The two icon buttons are OUT of the list rather than in it measuring nothing:
+the audit compares INK to its ground and skips an element with no text, so a
+bookmark and a bell need the 3:1 non-text measurement, which this suite does
+not make yet. **Measured and left**: `--gold` as the saved bookmark's ink is
+2.90:1 on the accepted answer's wash and 3.10:1 on a card, and `--gold` as ink
+is 2.90:1 on `--bg` everywhere else it is used too — a token-level question
+rather than a forum one, and changing it would move the analytics chart
+accent.
+
 ### A paint that lands after the reader has moved
 
 The list, a thread and the ask form are three views of ONE page swapped with
