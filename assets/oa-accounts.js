@@ -1767,7 +1767,16 @@
               // box holding only spaces, which `required` accepts.
               '<label>Affiliation' +
                 '<input type="text" name="affiliation" maxlength="160" required ' +
-                  'autocomplete="organization" placeholder="University or company"></label>' +
+                  'autocomplete="organization" placeholder="University or company">' +
+                /* The card asks for a personal field and compels it, so it says
+                   where the field goes. The SITE's own phrase for it, the one
+                   the profile card's lede and the Privacy Policy already use,
+                   so the two cards make one claim rather than two: profiles are
+                   owner-read with no admin clause, the roster carries name,
+                   address and the two dates and never this, and nothing under
+                   data/ carries it. The WELCOME card says it in its lede
+                   already and is deliberately not given it twice. */
+                '<span class="oa-opt oa-fine">Never published.</span></label>' +
               '<label>Website <span class="oa-opt">(optional)</span>' +
                 '<input type="url" name="website" maxlength="300" ' +
                   'autocomplete="url" placeholder="https://…"></label>'

@@ -9689,6 +9689,11 @@ for (const w of [320, 360, 390, 430]) {
     };
     return {
       affLabel: lab('affiliation'), affReq: req('affiliation'),
+      affNote: (() => {
+        const i = document.querySelector('#oa-auth-form [name="affiliation"]');
+        const n = i.closest('label').querySelector('.oa-fine');
+        return n ? n.textContent.trim() : null;
+      })(),
       siteLabel: lab('website'), siteReq: req('website'),
       firstReq: req('firstName'), lastReq: req('lastName'),
       orcidLabel: lab('orcid'), orcidReq: req('orcid'),
@@ -9697,6 +9702,8 @@ for (const w of [320, 360, 390, 430]) {
   ok(card.affReq === true, 'registration card: the affiliation box is required');
   ok(!/optional/i.test(card.affLabel || ''),
     `registration card: …and its label no longer says optional (got "${card.affLabel}")`);
+  eq(card.affNote, 'Never published.',
+    'registration card: …and it says where the compelled field goes, under the box');
   ok(card.firstReq === true && card.lastReq === true,
     'registration card: the two name boxes are required too, so the affiliation joins an existing rule');
   ok(card.siteReq === false && /\(optional\)/.test(card.siteLabel || ''),

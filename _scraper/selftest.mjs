@@ -15554,6 +15554,18 @@ async function testRegistrationFields() {
   }
   ok(/'<label>Website <span class="oa-opt">\(optional\)<\/span>'/.test(card),
     'registration: the website stays optional, so the card still distinguishes the two kinds of field');
+  /* It compels a personal field, so it says where the field goes — in the
+     SITE's own words, the ones the profile card's lede already uses, so the two
+     cards cannot make two different claims about one box. */
+  ok(/'<span class="oa-opt oa-fine">Never published\.<\/span><\/label>'/.test(card),
+    'registration: the affiliation box says where the field goes, under it');
+  ok(/Your affiliation is never published\./.test(acct),
+    'registration: …in the phrase the profile card already uses, so the two agree');
+  const welcomeAt = acct.indexOf("? '<label>Affiliation' +");
+  const welcome = welcomeAt > 0 ? acct.slice(welcomeAt, welcomeAt + 400) : '';
+  ok(welcomeAt > 0 && !/Never published/.test(welcome),
+    'welcome card: …and is NOT given it twice, since its own lede already says it');
+
   ok(/autocomplete="organization"/.test(card),
     'registration: the affiliation keeps autocomplete="organization" — it describes the person filling the form in, ' +
     'which is exactly the test the posting form\'s own autocomplete rule applies');
