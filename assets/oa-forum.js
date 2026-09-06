@@ -854,7 +854,10 @@
     }).filter(function (v) { return v.room === S.room && Number(v.season) === Number(S.season) && v.tid; })
       .sort(function (a, b) { return b.at - a.at; })
       .slice(0, 8);
-    if (!items.length) { show(card, false); return; }
+    /* EMPTIED, not merely hidden: the rows stay in a hidden card otherwise,
+       and the remove handler below then finds the button it just pressed
+       still there and puts focus back on a control nobody can see */
+    if (!items.length) { host.innerHTML = ''; show(card, false); return; }
     host.innerHTML = items.map(function (v) {
       var to = href({ room: v.room, season: v.season, t: v.tid, hash: v.pid ? 'p' + v.n : '' });
       return '<div class="oa-forum-savedrow">' +

@@ -2519,11 +2519,17 @@ for (const [name, expect] of [
      every morning and a check that names a university goes red for a reason
      that is not a regression. It asks the names module for an alias whose
      canonical value is an institution this listing is actually showing. */
-  const alias = await j.evaluate(() => {
+  const alias = await j.evaluate(async () => {
     const S = window.OASchools;
     if (!S || !S.INSTITUTION_ALIASES) return null;
-    const on = new Set([...document.querySelectorAll('.oa-card .oa-card-title')]
-      .map((t) => S.fold(t.textContent)));
+    /* the institutions the LISTING holds, not the ten cards on its first
+       page: the search runs over every row, so an alias whose university
+       sits on page four is as good a pick as one on page one, and a page
+       whose first ten happen to offer only an all-caps alias is not a page
+       on which this check cannot run */
+    const rows = await fetch('data/jobs.json', { cache: 'no-cache' }).then((r) => r.json());
+    const now = new Date();
+    const on = new Set(rows.filter((r) => window.OAJobNav.inCurrentMarket(r, now)).map((r) => S.fold(r.institution)));
     for (const k of Object.keys(S.INSTITUTION_ALIASES)) {
       const canon = S.fold(S.INSTITUTION_ALIASES[k]);
       if (!canon || S.fold(k) === canon) continue;
