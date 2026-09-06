@@ -10368,7 +10368,13 @@ for (const w of [320, 360, 390, 430]) {
     ok(!stray.thread, 'forum (candidate): nor re-opens the thread the reader left');
     ok(!stray.watch, 'forum (candidate): and no banner from a superseded read is unhidden over it');
 
-    /* open the seeded thread: hostile body inert, votes up, down, withdrawn */
+    /* open the seeded thread: hostile body inert, votes up, down, withdrawn.
+       The votes count is a DELTA: since the 2026-09-06 merge the page asks
+       for the reader's votes the moment a thread is opened, in parallel with
+       the posts, so the thread the reader left while it was loading (the
+       block above) has already spent one call by design, and the paint of
+       that answer is what the view guard withholds. */
+    const votesBefore = await q.evaluate(() => window.__fb.ops('callable').filter((n) => n === 'forumThreadVotes').length);
     await q.click('#oa-forum-list .oa-card .oa-card-head');
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
     const th = await q.evaluate(() => ({
@@ -10391,7 +10397,7 @@ for (const w of [320, 360, 390, 430]) {
     eq(th.kinds, 0, 'forum (candidate): no post declares a kind and no compose box asks for one (the control was removed, owner 2026-09-05)');
     eq(th.votes, 2, 'forum (candidate): another member\'s post offers like and dislike');
     ok(th.score === '0' && th.updown === '0 / 0', 'forum (candidate): the counts start at nought');
-    eq(th.threadVotes, 1, 'forum (candidate): the caller\'s own votes are asked for once when the thread opens');
+    eq(th.threadVotes - votesBefore, 1, 'forum (candidate): the caller\'s own votes are asked for once when the thread opens');
     ok(th.reply, 'forum (candidate): the reply box is drawn');
 
     await q.click('.oa-forum-post.is-first .oa-forum-v.up');
@@ -10487,7 +10493,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(rep.hash === '#p2' && rep.acceptGone, 'forum (candidate): the page lands on the new post and the acceptance box is gone');
     eq(rep.warm, { n: 1, first: true, keys: ['room', 'warm'] },
       'forum (candidate): the posting function was woken ONCE, when the box took focus, with the room and nothing else, before the answer was sent');
-    eq(rep.votesCalls, 1, 'forum (candidate): landing the answer asked for no second round of votes: the page drew it from the receipt');
+    eq(rep.votesCalls, votesBefore + 1, 'forum (candidate): landing the answer asked for no second round of votes: the page drew it from the receipt');
     ok(rep.boxEmpty, 'forum (candidate): the box is drawn again empty, the quote gone with it');
 
     /* edit the reply: the author's own, at any time (there is no window) */
