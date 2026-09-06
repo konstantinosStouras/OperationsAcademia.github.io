@@ -29,7 +29,7 @@
    never read; DEADLINE_FIELDS below is the whole list of what is.
    --------------------------------------------------------------------------- */
 
-import { text, url, longDate, OPEN_ENDED_RX, healReviewDate } from './jobs-model.mjs';
+import { text, url, longDate, OPEN_ENDED_RX, healReviewDate, withMarketYears } from './jobs-model.mjs';
 
 /** Hosts whose /faculty/details.cfm pages this module knows how to read. */
 const HOSTS = new Set(['higheredjobs.com', 'www.higheredjobs.com']);
@@ -518,9 +518,17 @@ export function applyVerified(rows, cache, { today = '' } = {}) {
        the card and file it under "Until filled" in the filter. */
     /* …and the SUGGESTED date is re-settled against the date that just
        arrived (healReviewDate): a first-review date on or after the ad's
-       closing date is the closing date said twice, or a contradiction. */
-    const next = healReviewDate(
-      { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate });
+       closing date is the closing date said twice, or a contradiction.
+
+       AND THE SPAN IS RE-DERIVED, because `years` is derived FROM the two
+       apply-by dates and this is where one of them arrives. The served file
+       this writes is held by the publishing gate to stating the seasons each
+       posting is listed under, so a closing date that reaches into the next
+       season and leaves the stored span behind turns the whole suite red and
+       stops every data writer committing. See patchDeadlines in
+       jobs-model.mjs, which carries the same correction for data/jobs.json. */
+    const next = withMarketYears(healReviewDate(
+      { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate }));
     changed.push({
       id: row.id, jobCode: code, from: row.applyBy, to: next.applyBy,
       past: !!(today && ad.applyByDate < today),

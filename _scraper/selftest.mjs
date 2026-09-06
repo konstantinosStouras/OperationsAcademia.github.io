@@ -1233,6 +1233,29 @@ async function testMarketYearCascade() {
       `data/${file}: every posting states the seasons it is listed under`);
   }
 
+  /* …AND EVERY OTHER WRITER OF THOSE FILES RE-DERIVES IT TOO. `years` is
+     derived FROM the two apply-by dates, and the two advert-verify passes
+     move one of them and write data/jobs.json and data/jobmarket.json
+     themselves, hours before the next build. Left behind, the stored span
+     disagrees with the row's own dates, the assertion just above turns red
+     over the SERVED file, and every data writer then commits nothing: the
+     site stops publishing. Measured on the committed data before the fix:
+     2027-university-of-iowa-20260903 stores [2027] and derives [2027, 2028]
+     the moment a closing date of 2027-10-01 is filled in. */
+  {
+    const model = await readFile(path.join(HERE, 'jobs-model.mjs'), 'utf8');
+    const patch = model.slice(model.indexOf('export function patchDeadlines'), model.indexOf('export function day('));
+    ok(patch.length > 400 && /return withMarketYears\(next\);/.test(patch),
+      'patchDeadlines re-derives the span it has just moved the dates under');
+    for (const [f, fn] of [['adverts.mjs', 'applyAdverts'], ['higheredjobs.mjs', 'applyVerified']]) {
+      const src = await readFile(path.join(HERE, f), 'utf8');
+      const block = src.slice(src.indexOf(`export function ${fn}(`));
+      ok(/const next = withMarketYears\(healReviewDate\(/.test(block)
+         && /withMarketYears/.test(src.slice(0, src.indexOf('export function'))),
+      `${f}: ${fn} does the same for the sheet's own served file, and imports it`);
+    }
+  }
+
   /* 10. THE WIRING, read from the source. */
   ok(/healedRows\.map\(withMarketYears\)/.test(build),
     'build-jobs spans the MERGED set — a carried orphan never goes back ' +

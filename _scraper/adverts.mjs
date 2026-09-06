@@ -44,8 +44,7 @@
    --------------------------------------------------------------------------- */
 
 import {
-  text, url, longDate, OPEN_ENDED_RX, healReviewDate, canonColumns,
-} from './jobs-model.mjs';
+  text, url, longDate, OPEN_ENDED_RX, healReviewDate, canonColumns, withMarketYears } from './jobs-model.mjs';
 import { isHigherEdJobsUrl } from './higheredjobs.mjs';
 import { universityForSchool, schoolForUnit, SCHOOLS } from './vocab.mjs';
 
@@ -680,8 +679,15 @@ export function applyAdverts(rows, cache, { today = '' } = {}) {
        arrived (healReviewDate, exactly as the HigherEdJobs apply does): a
        first-review date on or after the ad's closing date is the closing
        date said twice, or a contradiction. */
-    const next = healReviewDate(
-      { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate });
+    /* AND THE SPAN IS RE-DERIVED, because `years` is derived FROM the two
+       apply-by dates and this is where one of them arrives. The served file
+       this writes is held by the publishing gate to stating the seasons each
+       posting is listed under, so a closing date that reaches into the next
+       season and leaves the stored span behind turns the whole suite red and
+       stops every data writer committing. See patchDeadlines in
+       jobs-model.mjs, which carries the same correction for data/jobs.json. */
+    const next = withMarketYears(healReviewDate(
+      { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate }));
     changed.push({
       id: row.id, key, from: row.applyBy, to: next.applyBy,
       past: !!(today && ad.applyByDate < today),

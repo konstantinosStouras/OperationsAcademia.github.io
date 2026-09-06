@@ -176,7 +176,21 @@ export function patchDeadlines(jobsRows, applied, source) {
        date is authoritative for it — including "there is none". */
     if (fresh.reviewDate) next.reviewDate = fresh.reviewDate;
     else delete next.reviewDate;
-    return next;
+    /* AND THE SPAN IS RE-DERIVED, because the two dates this just moved are
+       what it is derived FROM. `years` is written by build-jobs over the
+       merged set; these passes write data/jobs.json and data/jobmarket.json
+       themselves, hours before the next build, and a filled closing date
+       that reaches into the next season widens the span without touching the
+       stored one. The publishing gate asserts over the SERVED files that
+       every row states the seasons it is listed under, so the first such
+       fill turned the whole suite red and every data writer then committed
+       nothing: the site stops publishing, which is the failure this
+       repository has already recorded four times. Measured on the committed
+       data: 2027-university-of-iowa-20260903 stores [2027] and derives
+       [2027, 2028] the moment a deadline of 2027-10-01 is filled in.
+       withMarketYears is pure, idempotent and by value, so a row this
+       function did not touch is returned untouched. */
+    return withMarketYears(next);
   });
 }
 
