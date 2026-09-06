@@ -60,6 +60,7 @@ import {
   sheetCsvUrl, sheetHtmlUrl, sheetEditUrl, sheetId,
   tabsFromHtml, sheetIdsFromHtml, classifyTab, isIntroTab, conventionalTabs,
   rowsFromTab, collectRows, stampAddedAt, carryUnreadColumns, serialiseSheetRows, buildSheetMeta,
+  backdatedDeadlines,
   stalenessOf, shouldWarn, emptyRegistry, adoptSheets, activeSheets, rollRegistry,
 } from './jobmarket-sheet.mjs';
 import { applyVerified, emptyCache } from './higheredjobs.mjs';
@@ -719,6 +720,19 @@ async function main() {
         warn(`${c.id}: the sheet says ${c.sheet}, the advertisement says ${c.ad} — ` +
              'the sheet wins; correct it there if the advertisement is right');
       }
+      /* …AND THE ROWS WHOSE DATES RUN BACKWARDS. Everything above has had its
+         say about a deadline — the workbook, the carry, and the two
+         advertisement caches — so this is the first point at which the row is
+         what it will publish. `deadlineDay` refuses a closing date before its
+         own posting date when it PARSES one; nothing re-applies that test to a
+         date another hand put there, and nothing should, so the run says which
+         rows have one rather than quietly moving somebody's date. */
+      for (const b of backdatedDeadlines(rows)) {
+        warn(`${b.id}: its ${b.field === 'reviewDate' ? 'suggested' : 'final'} ` +
+             `apply-by (${b.date}) falls BEFORE the day it was advertised ` +
+             `(${b.posted}) — correct the row in the workbook`);
+      }
+
       if (stamped.backfill && fresh) {
         log(`first run: ${fresh} posting(s) were dated from the day they were advertised, ` +
             'so the backfill announces nothing by e-mail.');

@@ -52,6 +52,7 @@ import {
   normHeader, mapColumns,
   inferColumns, resolveColumns, looksLikeData, repairColumns, institutionColumn,
   levelsFromRank, typeFromNames, rowsFromTab, collectRows, carryUnreadColumns,
+  backdatedDeadlines,
   stampAddedAt, serialiseSheetRows, buildSheetMeta, stalenessOf, shouldWarn,
   tabsFromHtml, sheetIdsFromHtml, sheetId, sheetCsvUrl, sheetHtmlUrl,
   emptyRegistry, adoptSheets, activeSheets, rollRegistry,
@@ -7931,6 +7932,59 @@ async function testSheetMirrors() {
   const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
   ok(/allow write: if isAdmin\(\);/.test(rules),
     'the maintainer may write any posting document — the buttons are only a UI hint');
+}
+
+/* ------------------- the rows whose own dates run backwards, REPORTED
+
+   `deadlineDay` refuses a closing date before its own posting date when it
+   PARSES a cell, and that is where the test stops: the carry restores a stored
+   date onto a row whose posting date the workbook may since have corrected,
+   the two verify caches fill one from an advertisement, a review-card edit
+   types one, and a mirror hands the whole posting to a document. Four served
+   rows carry one today and nothing anywhere said so.
+
+   It is a REPORT and never a guard over data/, deliberately: the remedy is a
+   cell in a crowdsourced workbook this repository cannot edit, so a check that
+   no commit could turn green would be the crying-wolf cost already paid once
+   here — and a run that silently blanked the date would be worse, because a
+   maintainer's typed date is theirs. */
+async function testBackdatedDeadlines() {
+  const posted = '2026-08-21';
+  eq(backdatedDeadlines([]), [], 'nothing to say about no rows');
+  eq(backdatedDeadlines([{ id: 'a', posted, applyByDate: '2026-08-21' }]), [],
+    'a deadline on the posting day is not backwards');
+  eq(backdatedDeadlines([{ id: 'a', posted, applyByDate: '2026-09-01' }]), [],
+    'nor one after it');
+  eq(backdatedDeadlines([{ id: 'a', applyByDate: '2020-01-01' }]), [],
+    'a row with no posting date says nothing — there is nothing to test against');
+  eq(backdatedDeadlines([{ id: 'a', posted, applyByDate: '', reviewDate: '' }]), [],
+    'and an open-ended row carries no date to be wrong about');
+  eq(backdatedDeadlines([{ id: 'a', posted, applyByDate: '2026-08-12' }]),
+    [{ id: 'a', field: 'applyByDate', date: '2026-08-12', posted }],
+    'a final apply-by before its own posting date is named');
+  eq(backdatedDeadlines([{ id: 'a', posted, reviewDate: '2026-07-31' }]),
+    [{ id: 'a', field: 'reviewDate', date: '2026-07-31', posted }],
+    '…and so is a suggested one');
+  eq(backdatedDeadlines([{ id: 'a', posted, applyByDate: '2026-08-12', reviewDate: '2026-07-31' }]).length, 2,
+    'both fields are reported, not the first one found');
+
+  /* IT IS THE SAME RULE `deadlineDay` APPLIES, and asserted as such rather
+     than written out twice: a cell it refuses against a posting date is a
+     value this would report if some later hand put it there anyway. */
+  eq(deadlineDay('August 12, 2026', posted), '', 'deadlineDay refuses it at the parse');
+  eq(deadlineDay('September 1, 2026', posted), '2026-09-01', '…and believes the other way round');
+
+  /* the report is wired where the other deadline warnings are, over the rows
+     as they will publish — after the carry and after BOTH advertisement
+     caches have had their say, or it would report a date one of them was
+     about to correct */
+  const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  ok(/backdatedDeadlines\(rows\)/.test(sync),
+    'the sync reports the backwards rows it is about to write');
+  ok(sync.indexOf('backdatedDeadlines(rows)') > sync.indexOf('applyAdverts(rows'),
+    '…after the advertisement caches, so it names no date they were about to fill');
+  ok(/falls BEFORE the day it was advertised/.test(sync) && /correct the row in the workbook/.test(sync),
+    '…and says where the fix is, which is not in this repository');
 }
 
 async function testJobMarketSheetWiring() {
@@ -17457,6 +17511,7 @@ if (isMain(import.meta.url)) {
   await testMirrorLifecycle();
   await testRefLessTakedown();
   await testSheetMirrors();
+  await testBackdatedDeadlines();
   await testJobMarketSheetWiring();
   testHigherEdJobsParsing();
   testHigherEdJobsApply();

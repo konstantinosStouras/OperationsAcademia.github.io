@@ -358,6 +358,43 @@ export const DEADLINE_WINDOW_DAYS = 730;
  * The deadline a sheet cell states, believed only when it is plausible
  * against the day the posting went up — or ''.
  */
+/**
+ * The rows whose own dates run BACKWARDS: a closing date, or a suggested one,
+ * that falls before the day the advertisement went up.
+ *
+ * `deadlineDay` refuses exactly that when it PARSES a cell — "on or after it"
+ * is its definition of a believable deadline — but a row reaching the served
+ * file has been through more hands than the parse: the carry restores a stored
+ * date onto a row whose posting date the workbook may since have corrected,
+ * the two verify caches fill one from an advertisement, a review-card edit
+ * types one, and a mirror hands the whole posting over to a document. None of
+ * those re-applies the test, and none of them should — a maintainer's typed
+ * date is theirs, and a run that silently blanked one would be the opposite of
+ * this repository's rule about postings.
+ *
+ * So it is REPORTED, never repaired, and reported HERE rather than as a guard
+ * over data/: the remedy is a cell in a crowdsourced workbook this repository
+ * cannot edit, so a red check nobody can turn green is a check people learn to
+ * ignore -- the crying-wolf cost this repository has already paid once. The
+ * run's log names the rows, beside the deadline disagreements it already
+ * names, which is where the maintainer is looking anyway.
+ *
+ * Pure, and it reads no clock: a date before its own posting date is wrong on
+ * every day.
+ */
+export function backdatedDeadlines(rows) {
+  const out = [];
+  for (const r of rows || []) {
+    const posted = String((r && r.posted) || '');
+    if (!posted) continue;
+    for (const field of ['applyByDate', 'reviewDate']) {
+      const d = String((r && r[field]) || '');
+      if (d && d < posted) out.push({ id: String(r.id || ''), field, date: d, posted });
+    }
+  }
+  return out;
+}
+
 export function deadlineDay(v, posted = '') {
   const s = text(v, 40);
   if (!s) return '';

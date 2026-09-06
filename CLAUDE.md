@@ -1159,6 +1159,26 @@ copy of the row is refreshed by `refreshQueued` on every sync, and an APPROVED
 one is re-derived at publish time (`approvedRow` reads the fresh row and lays
 the maintainer's edits over it). An edit the maintainer typed is still theirs.
 
+**AND A ROW WHOSE OWN DATES RUN BACKWARDS IS REPORTED.** `deadlineDay`
+refuses a closing date before its own posting date when it PARSES a cell —
+"on or after it" is its definition of a believable deadline — and that is
+where the test has always stopped. A row reaching the served file has been
+through more hands than the parse: `carryUnreadColumns` restores a stored date
+onto a row whose posting date the workbook may since have corrected, the two
+verify caches fill one from an advertisement, a review-card edit types one,
+and a mirror hands the whole posting over to a document. None of them
+re-applies the test, and four served rows carry a date before their own
+posting date today with nothing anywhere saying so.
+
+`backdatedDeadlines` (pure, in `jobmarket-sheet.mjs`) names them in the sync's
+run log, beside the deadline disagreements it already names and AFTER both
+advertisement caches have had their say, so it cannot name a date one of them
+was about to fill. **Reported, never repaired, and never a guard over `data/`**
+— the remedy is a cell in a crowdsourced workbook this repository cannot edit,
+so a check no commit could turn green is the crying-wolf cost already paid
+here once, and a run that silently blanked the date would be worse: a
+maintainer's typed date is theirs.
+
 **A deadline the pipeline is unsure of publishes as "Until filled."** (owner,
 2026-08-23). `sheetDay` guesses US order on an ambiguous all-numeric cell —
 right for a date Google itself wrote, wrong for a contributor typing
