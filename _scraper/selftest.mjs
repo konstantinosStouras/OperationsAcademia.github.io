@@ -5759,7 +5759,7 @@ async function testAccountDeletion() {
   const delAt = changelog.updates.findIndex((u) => u.id === 'delete-your-account-2026-09');
   ok(delAt >= 0 && /delet/i.test(changelog.updates[delAt].title + changelog.updates[delAt].summary),
     'and it is announced');
-  ok(changelog.updates.slice(0, delAt).every((u) => u.date >= changelog.updates[delAt].date),
+  ok(delAt >= 0 && changelog.updates.slice(0, delAt).every((u) => u.date >= changelog.updates[delAt].date),
     'and it is announced, newest first');
 
   /* ------------------------------------------------------------ the styling */

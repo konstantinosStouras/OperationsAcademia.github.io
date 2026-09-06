@@ -509,8 +509,8 @@ step the owner has not asked for.
 — it is a card row like the others, so the gate treats it as one: a reader
 who has not registered sees its LABEL in the blurred strip and nothing else,
 which is the same answer the gate gives every other detail. The leak check
-skips `id` already (it is the element's own id attribute), and the reference
-never reaches a locked card because no row does.
+skips `id` already (it is the element's own id attribute), and there is
+nothing else in the row to leak, since the reference is not drawn at all.
 
 Tests: `testJobNavModule` (the row's label and link, the same html with or
 without a reference so `ref` is provably unread, the retired second half's
