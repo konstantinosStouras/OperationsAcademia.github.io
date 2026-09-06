@@ -10263,12 +10263,14 @@ for (const w of [320, 360, 390, 430]) {
     /* whether the room was on screen before the session resolved: the
        attribute mutation that reveals #oa-forum, against OAAccounts.resolved()
        at that moment (the shim resolves the session only after the three
-       routed bundles have loaded, so a draw from memory lands well before it) */
+       routed bundles have loaded, so a draw from memory lands well before it).
+       Observed on the DOCUMENT node: an init script runs before the document
+       element exists, so that is the one node there is to observe. */
     const watchEarly = `window.__earlyDraw = null;
       new MutationObserver(function () {
         var app = document.getElementById('oa-forum');
         if (app && !app.hidden && window.__earlyDraw === null) window.__earlyDraw = !(window.OAAccounts && window.OAAccounts.resolved());
-      }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['hidden'] });\n`;
+      }).observe(document, { attributes: true, subtree: true, attributeFilter: ['hidden'] });\n`;
     const { ctx, page: q, errors } = await signedInPage('forum.html',
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum', init: remember + watchEarly });
     await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
