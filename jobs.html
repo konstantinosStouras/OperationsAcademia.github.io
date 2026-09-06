@@ -551,9 +551,9 @@
          result bar and is drawn for a signed-in reader only; a posting that
          is open until filled has no date to add and gets no tick box. */
       if (window.OAJobCal) {
-        OAJobCal.attach(jobs, document.getElementById('oa-jobs'), {
-          market: function () { return (marketYear() - 1) + '-' + marketYear(); }
-        });
+        /* the file is named for the market under way ("Ops JM '27"), which
+           the module reads from OAJobNav itself */
+        OAJobCal.attach(jobs, document.getElementById('oa-jobs'));
       }
       /* The gate is painted from the auth HINT so a signed-in reader never
          sees a flash of locked cards; this is what reconciles it a moment

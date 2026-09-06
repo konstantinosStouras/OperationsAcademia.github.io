@@ -41,6 +41,17 @@
    reader chose is stored or sent anywhere. That is deliberate, and it is
    also why the strip says what is ticked in words rather than relying on
    the reader to remember.
+
+   THE OWNER'S SECOND INSTRUCTION (2026-09-06): the calendar is called
+   "Ops JM '27", and "Ops JM '28" the year after; every entry says the
+   Suggested deadline and the Final deadline where the posting has them,
+   and carries the link to the job ad, the "posted online at" link and the
+   OA posting ID. The name follows OAJobNav.marketYear, the one definition
+   of the season under way, so nothing is edited at the July roll; the two
+   deadline lines are ALWAYS both written, in the card's order, "none
+   given" standing where a posting has no such date, so an entry never
+   hides the date that closes the search; and the ID's label is
+   OAJobNav.REF_LABEL, the card's own, so the two cannot word it two ways.
    --------------------------------------------------------------------------- */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -54,15 +65,26 @@
   var G = (typeof window !== 'undefined') ? window : null;
 
   var SITE = 'https://www.operationsacademia.org/';
-  var CAL_NAME = 'Job deadlines (Operations Academia)';
 
-  /* The two dates, in the order they close a search. `label` heads the
-     calendar entry; `note` is the one sentence a reader needs about it. */
+  /** "Ops JM '27" for market year 2027: the two digits of the season the
+      jobs page shows. Nothing for a year that is not one. */
+  function calName(year) {
+    var y = Math.trunc(Number(year) || 0);
+    if (y < 1000) return '';
+    return "Ops JM '" + String(y).slice(-2);
+  }
+
+  /* The two dates, in the order the card prints them. `label` heads the
+     calendar entry and its line in the description; `note` is the one
+     phrase a reader needs about it; `none` is the line where the posting
+     has no such date. */
   var KINDS = [
-    { key: 'final', field: 'applyByDate', label: 'Final apply-by',
-      note: 'The closing date of the search.' },
-    { key: 'review', field: 'reviewDate', label: 'Suggested apply-by',
-      note: 'The first-review or full-consideration date. A date passing here does not close the search.' }
+    { key: 'review', field: 'reviewDate', label: 'Suggested deadline',
+      note: 'the first-review or full-consideration date; the search stays open after it',
+      none: 'none given' },
+    { key: 'final', field: 'applyByDate', label: 'Final deadline',
+      note: 'the closing date of the search',
+      none: 'none given (open until filled)' }
   ];
 
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -118,9 +140,18 @@
     return SITE + OAJobNav.hrefFor(row, now);
   }
 
-  /** The advertisement, where the posting links one. */
-  function advertOf(row) {
-    return OAIcs.safeUrl(row.postedAtUrl) || OAIcs.safeUrl(row.adUrl) || '';
+  /** The lines every entry ends with: the two links the card draws, each
+      where the posting has one, the posting's own ID under the card's own
+      label, and the way back to it on the site. */
+  function linkLines(row, now) {
+    var lines = [];
+    var ad = OAIcs.safeUrl(row.adUrl);
+    if (ad) lines.push('Link to job ad: ' + ad);
+    var at = OAIcs.safeUrl(row.postedAtUrl);
+    if (at) lines.push('Posted online at: ' + at);
+    lines.push(OAJobNav.REF_LABEL + ': ' + txt(row.id));
+    lines.push('Posting on Operations Academia: ' + permalink(row, now));
+    return lines;
   }
 
   /**
@@ -139,24 +170,20 @@
       if (!where) return;
       var dates = datesOf(row, today);
       dates.forEach(function (d) {
-        var lines = [d.kind.label + ': ' + longDate(d.day) + '. ' + d.kind.note];
-        /* the OTHER date, so an entry never hides the one that closes the
-           search: a suggested date beside "until filled", or the final date
-           beside a suggested one */
-        KINDS.forEach(function (k) {
-          if (k === d.kind) return;
-          var other = day(row[k.field]);
-          lines.push(k.label + ': ' + (other ? longDate(other) : 'none given (open until filled).'));
+        /* BOTH deadlines, always, in the card's order: the entry is one of
+           them (its summary says which) and the other is the one a reader
+           would otherwise go back for, a suggested date beside "until
+           filled" or the final date beside a suggested one */
+        var lines = KINDS.map(function (k) {
+          var v = day(row[k.field]);
+          return k.label + ': ' + (v ? longDate(v) + ' (' + k.note + ')' : k.none);
         });
+        var fin = day(row.applyByDate);
         var listed = txt(row.applyBy);
-        if (d.kind.key === 'final' && listed && listed !== longDate(d.day)) {
-          lines.push('As listed: ' + listed);
-        }
+        if (fin && listed && listed !== longDate(fin)) lines.push('Final deadline as listed: ' + listed);
         var levels = (row.levels || []).map(txt).filter(Boolean).join(', ');
         if (levels) lines.push('Entry level: ' + levels);
-        var ad = advertOf(row);
-        if (ad) lines.push('Advertisement: ' + ad);
-        lines.push('Posting on Operations Academia: ' + permalink(row, now));
+        lines = lines.concat(linkLines(row, now));
         out.push({
           uid: 'oa-job-' + row.id + '-' + d.kind.key,
           day: d.day,
@@ -190,17 +217,21 @@
   /**
    * The whole file, or '' when not one of the rows has a date to give.
    * @param rows  the postings chosen
-   * @param meta  { now, today, market }
+   * @param meta  { now, today, year, market }: the season is the one under way
+   *              at `now` (OAJobNav.marketYear, the one definition) unless
+   *              the caller names it, and the name and the description say it
    */
   function calendar(rows, meta) {
     meta = meta || {};
     var now = meta.now instanceof Date ? meta.now : new Date();
     var events = eventsFor(rows, { now: now, today: meta.today });
     if (!events.length) return '';
+    var year = Math.trunc(Number(meta.year) || 0) || OAJobNav.marketYear(now);
+    var market = txt(meta.market) || OAJobNav.marketLabel(year);
     return OAIcs.build(events, {
-      name: CAL_NAME,
+      name: calName(year),
       description: 'Application deadlines of job postings listed on Operations Academia' +
-        (meta.market ? ' for the ' + txt(meta.market) + ' job market' : '') +
+        (market ? ' for the ' + market + ' job market' : '') +
         ', as they stood on ' + longDate(todayIso(now)) + '. ' +
         'Each entry is an all-day reminder; a posting with no closing date (open until filled) has no entry. ' +
         SITE + 'jobs.html',
@@ -316,8 +347,8 @@
 
   /**
    * Mount the strip above the list's result bar. `list` is the OAList
-   * mount's api (rows(), view()); `opts.market` names the season for the
-   * file name. The page's `onRender` hands `refresh` the engine's snapshot
+   * mount's api (rows(), view()); `opts.market`, where given, names the
+   * season for the file name, which is otherwise read from OAJobNav. The page's `onRender` hands `refresh` the engine's snapshot
    * after every repaint, so the strip's counts are never a step behind.
    */
   function attach(list, host, opts) {
@@ -399,22 +430,22 @@
     var allTicked = dated.length > 0 && dated.every(function (r) { return isPicked(r.id); });
 
     ui.msg.textContent = n
-      ? plural(n, 'posting', 'postings') + ' ticked. Download the file and their apply-by dates land in your calendar, each as an all-day reminder.'
-      : 'Tick a posting to put its apply-by dates in your calendar. ' +
+      ? plural(n, 'posting', 'postings') + ' ticked. Download the file and their deadlines land in your calendar, each as an all-day reminder.'
+      : 'Tick a posting to put its deadlines in your calendar. ' +
         plural(dated.length, 'of the postings listed carries', 'of the postings listed carry') +
         ' a date still to come; a posting that is open until filled has none to add.';
 
     ui.go.disabled = !n;
     ui.go.title = n
-      ? 'Download a calendar file (.ics) with the apply-by dates of the ' + plural(n, 'posting', 'postings') + ' you ticked'
+      ? 'Download a calendar file (.ics) with the deadlines of the ' + plural(n, 'posting', 'postings') + ' you ticked'
       : 'Tick at least one posting first';
     ui.go.setAttribute('aria-label', ui.go.title);
 
     ui.all.disabled = !dated.length || allTicked;
     ui.all.title = dated.length
       ? (allTicked ? 'Every listed posting with a date is already ticked'
-        : 'Tick every posting listed that has an apply-by date still to come (' + dated.length + ')')
-      : 'No posting listed has an apply-by date still to come';
+        : 'Tick every posting listed that has a deadline still to come (' + dated.length + ')')
+      : 'No posting listed has a deadline still to come';
     ui.all.setAttribute('aria-label', ui.all.title);
 
     ui.none.hidden = !n;
@@ -425,10 +456,12 @@
   function run(list, opts) {
     var rows = pickedRows(list.rows());
     var now = new Date();
-    var meta = { now: now, at: now, market: (opts && opts.market && opts.market()) || '' };
+    var year = OAJobNav.marketYear(now);
+    var meta = { now: now, at: now, year: year,
+      market: (opts && opts.market && opts.market()) || OAJobNav.marketLabel(year) };
     var text = calendar(rows, meta);
     if (!text) {
-      if (G.alert) G.alert('None of the postings you ticked has an apply-by date still to come, so there is nothing to put on a calendar.');
+      if (G.alert) G.alert('None of the postings you ticked has a deadline still to come, so there is nothing to put on a calendar.');
       return '';
     }
     var name = fileName(meta);
@@ -446,7 +479,7 @@
 
   return {
     SITE: SITE,
-    CAL_NAME: CAL_NAME,
+    calName: calName,
     KINDS: KINDS,
     longDate: longDate,
     datesOf: datesOf,

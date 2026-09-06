@@ -9907,7 +9907,7 @@ for (const w of [320, 360, 390, 430]) {
     });
     ok(first.cards.every((c) => c.box === datedIds.has(c.id)),
       'calendar: a tick box on exactly the postings with an apply-by date still to come, and on no other');
-    ok(first.cards.filter((c) => c.box).every((c) => /apply-by [A-Z][a-z]+ \d{1,2}, \d{4}/.test(c.when)),
+    ok(first.cards.filter((c) => c.box).every((c) => /deadline [A-Z][a-z]+ \d{1,2}, \d{4}/.test(c.when)),
       'calendar: …each naming the date it would add');
     ok(!first.hidden && first.above, 'calendar: the strip is drawn, above the result bar');
     ok(/^Tick a posting/.test(first.msg) && first.msg.includes(String(datedIds.size)),
@@ -9953,6 +9953,11 @@ for (const w of [320, 360, 390, 430]) {
     ok(cal.events.every((e) => /jobs\.html\?job=/.test(e.URL.value)), 'calendar: each links its permalink on the jobs page');
     ok(noAddress(text), 'calendar: no contact address reaches the reader\'s machine');
     eq(cal.props.VERSION, '2.0', 'calendar: …and it is a calendar');
+    const yr = await q.evaluate(() => OAJobNav.marketYear(new Date()));
+    eq(cal.props['X-WR-CALNAME'], "Ops JM '" + String(yr).slice(-2),
+      `calendar: the file is named Ops JM and the two digits of the market under way (${cal.props['X-WR-CALNAME']})`);
+    ok(cal.events.every((e) => /^Suggested deadline: .*\nFinal deadline: /.test(e.DESCRIPTION.value) && /\nOA posting ID: /.test(e.DESCRIPTION.value)),
+      'calendar: every entry opens with the two deadlines and carries the OA posting ID');
 
     await q.click('.oa-cal-none');
     await q.waitForTimeout(150);

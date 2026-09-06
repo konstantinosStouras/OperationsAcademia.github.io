@@ -4795,13 +4795,30 @@ suggested date matters most to exactly the searches that have no final one.
 A posting with neither is the "until filled" case the owner named: it puts
 nothing on a calendar, so its card is offered NO TICK BOX at all, and a date
 that has already passed adds nothing either (a calendar of expired deadlines
-is noise). The entry says both dates, the deadline as listed, the entry
-levels, the advertisement and the posting's own permalink through
-`OAJobNav.hrefFor`, the one rule for which page carries a posting today.
-The Contact details are not in `data/jobs.json` and so cannot be here;
-the selftest sweeps the built file for anything shaped like an address, the
-way it sweeps the Excel workbook, and pins that every field the module reads
-is in `PUBLIC_FIELDS`.
+is noise). **The entry's lines are the owner's own list** (2026-09-06, the
+second instruction): the **Suggested deadline** and the **Final deadline**,
+ALWAYS both, in the card's order, "none given" standing where the posting
+has no such date so an entry never hides the date that closes the search;
+the deadline as listed where the listing says more than the date; the entry
+levels; the **link to the job ad** and the **"posted online at" link**, each
+where the posting has one; the **OA posting ID** under the card's own label
+(`OAJobNav.REF_LABEL`, so the two cannot word it two ways); and the posting's
+own permalink through `OAJobNav.hrefFor`, the one rule for which page
+carries a posting today. The Contact details are not in `data/jobs.json`
+and so cannot be here; the selftest sweeps the built file for anything
+shaped like an address, the way it sweeps the Excel workbook, and pins that
+every field the module reads is in `PUBLIC_FIELDS`.
+
+**The calendar is called "Ops JM '27", and the name follows the season**
+(owner, 2026-09-06: "for any future year, it should update to e.g. Ops JM
+'28, Ops JM '29"). `calName(year)` in `oa-jobcal.js` is the two digits of
+the market year, and the year is `OAJobNav.marketYear(now)`, the one
+definition of the season under way, so the file the jobs page writes is
+named for the market it shows and nothing is edited at the July roll; the
+selftest pins the name for 2027, 2028 and 2029, and that the same code a
+year on names the next season. The talks file is named under the same
+scheme, "Ops JM '27 INFORMS talks", every season it covers named, so the
+two files are one family and tellable apart when both are imported.
 
 **The selection is page memory and nothing else.** Which postings a reader
 ticked is kept in a variable in `oa-jobcal.js`: a reload forgets it, a

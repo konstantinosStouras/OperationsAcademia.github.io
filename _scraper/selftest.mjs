@@ -12790,42 +12790,66 @@ async function testCalendars() {
   eq(keys(row({})), [], 'jobcal: an open-ended posting has no date to give');
   eq(keys(row({ applyByDate: '2026-11-14' })), [['final', '2026-11-14']], 'jobcal: a final date');
   eq(keys(row({ reviewDate: '2026-10-01' })), [['review', '2026-10-01']], 'jobcal: a suggested date on its own');
-  eq(keys(row({ applyByDate: '2026-11-14', reviewDate: '2026-11-13' })).map((d) => d[0]), ['final', 'review'],
-    'jobcal: both, the final first');
+  eq(keys(row({ applyByDate: '2026-11-14', reviewDate: '2026-11-13' })).map((d) => d[0]), ['review', 'final'],
+    'jobcal: both, in the order the card prints them');
   eq(keys(row({ applyByDate: '2026-09-05' })), [], 'jobcal: a date that has passed adds nothing');
   eq(keys(row({ applyByDate: '2026-09-06' })).length, 1, 'jobcal: today still counts: applications close at the end of the day');
   eq(keys(row({ applyByDate: 'soon', reviewDate: '2026-1-1' })), [], 'jobcal: prose is not a date');
   const both = row({ id: '2027-somewhere-university-20260901', applyByDate: '2026-11-14',
     applyBy: 'November 14, 2026 (INFORMS interviews)', reviewDate: '2026-11-13',
-    postedAtUrl: 'https://jobs.example.edu/1', posted: '2026-09-01', year: 2027 });
+    adUrl: 'https://ads.example.edu/1', postedAtUrl: 'https://jobs.example.edu/1', posted: '2026-09-01', year: 2027 });
   const evs = J.eventsFor([both, row({ id: 'open' })], { now: NOW, today: TODAY });
   eq(evs.map((e) => e.uid),
-    ['oa-job-2027-somewhere-university-20260901-final', 'oa-job-2027-somewhere-university-20260901-review'],
+    ['oa-job-2027-somewhere-university-20260901-review', 'oa-job-2027-somewhere-university-20260901-final'],
     'jobcal: one entry per upcoming date, keyed stably on the posting and the kind; the open-ended posting gives none');
   eq([evs[0].day, evs[0].summary, evs[1].day, evs[1].summary],
-    ['2026-11-14', 'Final apply-by: Somewhere University - Operations',
-      '2026-11-13', 'Suggested apply-by: Somewhere University - Operations'],
-    'jobcal: each entry is all-day and named for what it is');
+    ['2026-11-13', 'Suggested deadline: Somewhere University - Operations',
+      '2026-11-14', 'Final deadline: Somewhere University - Operations'],
+    'jobcal: each entry is all-day and named for what it is, in the owner\'s words (2026-09-06)');
   eq(evs[0].url, 'https://www.operationsacademia.org/' + NAV.hrefFor(both, NOW),
     'jobcal: the entry links the posting\'s own permalink, on the page that carries it (OAJobNav.hrefFor)');
   ok(/jobs\.html\?job=2027-somewhere-university-20260901$/.test(evs[0].url), 'jobcal: …which is the jobs page today');
-  ok(/Final apply-by: November 14, 2026\./.test(evs[0].description) &&
-     /As listed: November 14, 2026 \(INFORMS interviews\)/.test(evs[0].description) &&
-     /Suggested apply-by: November 13, 2026/.test(evs[0].description) &&
-     /Entry level: Assistant Professor/.test(evs[0].description) &&
-     /Advertisement: https:\/\/jobs\.example\.edu\/1/.test(evs[0].description) &&
-     /Posting on Operations Academia: https:\/\/www\.operationsacademia\.org\/jobs\.html\?job=/.test(evs[0].description),
-    'jobcal: the description says both dates, the deadline as listed, the level, the advert and the way back');
-  ok(/does not close the search/.test(evs[1].description) && /Final apply-by: November 14, 2026/.test(evs[1].description),
-    'jobcal: the suggested entry says it closes nothing and names the final date beside it');
+  const sug = evs[0], fin = evs[1];
+  const heads = (e) => e.description.split('\n').map((l) => l.split(':')[0]);
+  eq(heads(fin), ['Suggested deadline', 'Final deadline', 'Final deadline as listed', 'Entry level',
+    'Link to job ad', 'Posted online at', NAV.REF_LABEL, 'Posting on Operations Academia'],
+    'jobcal: the lines of an entry, in order: both deadlines, the deadline as listed, the level, the link to the job ad, the posted-online-at link, the OA posting ID and the way back (owner, 2026-09-06)');
+  eq(fin.description.split('\n').slice(0, 2),
+    ['Suggested deadline: November 13, 2026 (the first-review or full-consideration date; the search stays open after it)',
+      'Final deadline: November 14, 2026 (the closing date of the search)'],
+    'jobcal: the two deadlines open the entry, each saying what it is');
+  eq(sug.description.split('\n').slice(0, 2), fin.description.split('\n').slice(0, 2),
+    'jobcal: …the same two lines on either entry, so neither hides the other date');
+  ok(/\nFinal deadline as listed: November 14, 2026 \(INFORMS interviews\)\n/.test(fin.description) &&
+     /\nEntry level: Assistant Professor\n/.test(fin.description) &&
+     /\nLink to job ad: https:\/\/ads\.example\.edu\/1\n/.test(fin.description) &&
+     /\nPosted online at: https:\/\/jobs\.example\.edu\/1\n/.test(fin.description) &&
+     /\nOA posting ID: 2027-somewhere-university-20260901\n/.test(fin.description) &&
+     /\nPosting on Operations Academia: https:\/\/www\.operationsacademia\.org\/jobs\.html\?job=2027-somewhere-university-20260901$/.test(fin.description),
+    'jobcal: …and each line says what the card says');
+  eq(NAV.REF_LABEL, 'OA posting ID', 'jobcal: the ID\'s label is the card\'s own (OAJobNav.REF_LABEL)');
   const reviewOnly = J.eventsFor([row({ id: 'r', reviewDate: '2026-10-01' })], { now: NOW, today: TODAY })[0];
-  ok(/Final apply-by: none given \(open until filled\)\./.test(reviewOnly.description),
-    'jobcal: …or says that there is none');
+  ok(/\nFinal deadline: none given \(open until filled\)\n/.test(reviewOnly.description) && !/as listed/.test(reviewOnly.description),
+    'jobcal: a search with no closing date says so, and nothing is "as listed"');
+  const finalOnly = J.eventsFor([row({ id: 'f', applyByDate: '2026-11-14', applyBy: 'November 14, 2026' })], { now: NOW, today: TODAY })[0];
+  ok(/^Suggested deadline: none given\nFinal deadline: November 14, 2026/.test(finalOnly.description) && !/as listed/.test(finalOnly.description),
+    'jobcal: a search with no suggested date says so, and a listing that is only the date is not repeated');
+  const bare = J.eventsFor([row({ id: 'b', applyByDate: '2026-11-14', adUrl: 'javascript:alert(1)' })], { now: NOW, today: TODAY })[0];
+  ok(!/Link to job ad/.test(bare.description) && !/Posted online at/.test(bare.description) && /\nOA posting ID: b\n/.test(bare.description),
+    'jobcal: a link the posting does not have is not a line, a javascript: one never is, and the ID is always there');
+  ok(!/Advertisement:|apply-by/.test(fin.description + sug.description + reviewOnly.description), 'jobcal: the old wording is gone');
   eq(evs[0].location, 'Somewhere University, Ireland', 'jobcal: the location is the university and its country');
   eq(evs[0].categories, ['Operations Academia', 'Job deadline'], 'jobcal: categorised');
   eq(J.eventsFor([{ id: 'no-where', applyByDate: '2026-11-14' }], { now: NOW, today: TODAY }), [],
     'jobcal: a row naming no institution is not an entry');
   eq(J.calendar([row({})], { now: NOW }), '', 'jobcal: nothing to give, no file');
+  eq([J.calName(2027), J.calName(2028), J.calName(2029), J.calName(2105), J.calName('x'), J.calName(0)],
+    ["Ops JM '27", "Ops JM '28", "Ops JM '29", "Ops JM '05", '', ''],
+    'jobcal: the calendar is "Ops JM \'27" for the 2026-2027 market and follows the year (owner, 2026-09-06)');
+  eq(parseIcs(J.calendar([row({ id: 'n', applyByDate: '2027-11-14' })], { now: new Date('2027-09-06T10:00:00Z') })).props['X-WR-CALNAME'],
+    "Ops JM '28", 'jobcal: …a year on, the same code names the next season with nothing edited');
+  eq(parseIcs(J.calendar([both], { now: NOW, year: 2029 })).props['X-WR-CALNAME'], "Ops JM '29",
+    'jobcal: a caller may name the season');
   eq(J.fileName({ at: new Date(2026, 8, 6, 12), market: '2026-2027' }),
     'operations-academia-job-deadlines-2026-2027-2026-09-06.ics', 'jobcal: the file names the market and the day');
 
@@ -12841,16 +12865,17 @@ async function testCalendars() {
   ok(served.filter((r) => !J.hasDate(r, TODAY))
     .every((r) => J.eventsFor([r], { now: NOW, today: TODAY }).length === 0),
     'jobcal: a posting with no upcoming date gives none, whatever else it carries');
-  const text = J.calendar(served, { now: NOW, market: '2026-2027' });
+  const text = J.calendar(served, { now: NOW });
   const parsed = parseIcs(text);
   eq(parsed.events.length, all.length, 'jobcal: the file carries every entry');
   ok(longestLineOctets(text) <= 75, 'jobcal: folded');
   ok(noAddress(text), 'jobcal: no e-mail address anywhere in the file');
-  eq(parsed.props['X-WR-CALNAME'], J.CAL_NAME, 'jobcal: the calendar is named');
+  eq(parsed.props['X-WR-CALNAME'], J.calName(NAV.marketYear(NOW)), 'jobcal: the file is named for the market under way, read from OAJobNav');
+  eq(parsed.props['X-WR-CALNAME'], "Ops JM '27", 'jobcal: …which on 2026-09-06 is Ops JM \'27');
   ok(parsed.events.every((e) => e.DTSTART.params.VALUE === 'DATE' && e.TRANSP && e.TRANSP.value === 'TRANSPARENT'),
     'jobcal: every deadline is an all-day, transparent entry');
   ok(/2026-2027 job market/.test(parsed.props['X-WR-CALDESC']) && /open until filled/.test(parsed.props['X-WR-CALDESC']),
-    'jobcal: the file says what it is and what it leaves out');
+    'jobcal: the file says what it is (the season from the same rule, with no caller naming it) and what it leaves out');
   const jsrc = await read('assets', 'oa-jobcal.js');
   const reads = new Set([...jsrc.matchAll(/\brow\.([A-Za-z]+)\b/g)].map((m) => m[1]));
   reads.delete('id');
@@ -12860,6 +12885,8 @@ async function testCalendars() {
   eq([...reads].filter((f) => E.CONTACT_FIELDS.includes(f)), [], 'jobcal: …and none is a Contact detail');
   ok(!/\bcomments\b/.test(jsrc.replace(/\/\*[\s\S]*?\*\//g, '')),
     'jobcal: the posting\'s comments stay off the calendar (prose, and where a stripped address leaves its marker)');
+  ok(/OAJobNav\.REF_LABEL \+ ': '/.test(jsrc) && /OAJobNav\.marketYear\(now\)/.test(jsrc) && /name: calName\(year\)/.test(jsrc),
+    'jobcal: the ID line takes the card\'s own label, and the name the season under way, from OAJobNav');
 
   /* ---- the talk details on the profile ---------------------------------- */
   eq(TALK_KEYS, ['at', 'session', 'room', 'title'], 'talks: the four keys');
@@ -12956,6 +12983,10 @@ async function testCalendars() {
   const ttext = T.calendar(cands, { now: NOW });
   const tcal = parseIcs(ttext);
   eq(tcal.timezones, ['America/Los_Angeles'], 'talkcal: the file defines the zone it names');
+  eq([T.calName(2027), T.calName([2027, 2028, 2027]), T.calName([]), T.calName('x')],
+    ["Ops JM '27 INFORMS talks", "Ops JM '27, '28 INFORMS talks", '', ''],
+    'talkcal: named under the same scheme as the deadlines file, every season it covers');
+  eq(tcal.props['X-WR-CALNAME'], "Ops JM '27 INFORMS talks", 'talkcal: the file carries it');
   eq(tcal.events.length, 3, 'talkcal: three entries');
   eq([tcal.events[0].DTSTART.params.TZID, tcal.events[0].DTSTART.value, tcal.events[0].DTEND.value],
     ['America/Los_Angeles', '20261102T104500', '20261102T121500'], 'talkcal: the timed entry, read back with its zone');

@@ -59,7 +59,18 @@
   var G = (typeof window !== 'undefined') ? window : null;
 
   var SITE = 'https://www.operationsacademia.org/';
-  var CAL_NAME = 'INFORMS talks by job market candidates (Operations Academia)';
+
+  /** The name follows the season, as the deadlines file's does (owner,
+      2026-09-06: "Ops JM '27", and "Ops JM '28" the year after): the talks
+      are the market's, so "Ops JM '27 INFORMS talks", every season the
+      file covers named where a list spans two. */
+  function calName(years) {
+    var ys = (Array.isArray(years) ? years : [years]).map(function (y) {
+      return Math.trunc(Number(y) || 0);
+    }).filter(function (y, i, a) { return y >= 1000 && a.indexOf(y) === i; }).sort();
+    if (!ys.length) return '';
+    return 'Ops JM ' + ys.map(function (y) { return "'" + String(y).slice(-2); }).join(', ') + ' INFORMS talks';
+  }
 
   function txt(v) {
     return String(v == null ? '' : v).replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
@@ -201,7 +212,7 @@
     });
     var named = Object.keys(meetings).map(function (y) { return OAInforms.describe(meetings[y]); });
     return OAIcs.build(events, {
-      name: CAL_NAME,
+      name: calName(Object.keys(meetings)),
       description: 'The talks of the job market candidates listed on Operations Academia at the ' +
         named.join(' and the ') + ', as their profiles stood on ' +
         OAInforms.longDay(now.toISOString().slice(0, 10)) + '. ' +
@@ -286,7 +297,7 @@
 
   return {
     SITE: SITE,
-    CAL_NAME: CAL_NAME,
+    calName: calName,
     profileUrl: profileUrl,
     eventsFor: eventsFor,
     describe: describe,
