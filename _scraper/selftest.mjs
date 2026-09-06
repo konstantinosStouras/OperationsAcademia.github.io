@@ -13727,6 +13727,46 @@ async function testAnalytics() {
   const paths = (served.pages || []).map((r) => r.path);
   eq(paths.length, new Set(paths).size, 'and no path is listed twice');
 
+  /* THE PAGES LIST BELONGS TO ONE SOURCE — the one whose WINDOW it prints —
+     and the carry was mixing it back together. mergePages keeps a live
+     source's own spelling, but a carried path no live source happened to
+     claim was still added, so the list under the usage fortnight's heading
+     picked up GA4's ninety days a row at a time: the very mixing this file
+     already fixed once, arriving by the carry instead of by a leg. */
+  const buildSrc = await readFile(path.join(HERE, 'build-analytics.mjs'), 'utf8');
+  ok(/if \(!pages\.size\) \{\s*\n\s*A\.mergePages\(pages, carry\.pages \|\| \[\]\);/.test(buildSrc),
+    'the carry claims the pages list only when nothing live did');
+
+  /* AND THE USAGE READ IS PAGED. A single `.limit(50000)` ordered by `start`
+     ASCENDING keeps the OLDEST fifty thousand and silently drops the newest
+     days, which is a figure going quietly wrong on a page whose whole point
+     is that a thing which stops measuring must say so. */
+  ok(/q\.startAfter\(cursor\)/.test(buildSrc) && /chunk\.size < READ_PAGE/.test(buildSrc),
+    'usageSessions is read through a cursor, page after page');
+  ok(!/\.limit\(50000\)\.get\(\)/.test(buildSrc),
+    '…never as one capped read');
+
+  /* GA4'S OWN FLOOR IS FOR THE FIRST RUN and was unreachable: `since` is never
+     0 (with no served days it falls back to the ninety-day window), so the
+     '2015-08-14' branch could not be taken and the record could never reach
+     further back than ninety days however much history the property held. */
+  ok(/const ga4Since = incremental \? since : 0;/.test(buildSrc)
+     && /fromGa4\(\{ since: ga4Since,/.test(buildSrc),
+    'a first run asks GA4 for everything it has, and later runs for the window');
+  ok(/since \? iso\(new Date\(since\)\) : '2015-08-14'/.test(buildSrc),
+    '…which is what makes the floor reachable at all');
+
+  /* THE DAILY CHART'S CAPTION DESCRIBES THE NUMBER, NEVER THE SOURCE. "as the
+     site's own record counts them" attributed every plotted day to the
+     first-party record while a day belongs to ONE source and most of them are
+     GA4's — where a "visitor" is a cookieless totalUsers, nearer a session
+     than a person. */
+  ok(!/as the site’s own record counts them/.test(page),
+    'the Visitors note no longer claims a source for every day');
+  ok(/var srcs = \(data\.sources \|\| \[\]\)/.test(page)
+     && /'Measured by ' \+ srcs\.map/.test(page),
+    'and the chart says which sources measured how many days, from the file itself');
+
   /* the page defends itself too, for a file cached before this shipped */
   ok(/isPublicPath/.test(page),
     'the page filters as a second line — the builder is the defence, but a ' +

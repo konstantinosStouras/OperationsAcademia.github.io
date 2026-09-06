@@ -60,6 +60,10 @@ const ROOT = path.join(HERE, '..');
 const DATA = path.join(ROOT, 'data');
 const OUT = path.join(DATA, 'analytics.json');
 const META = path.join(DATA, 'analytics-meta.json');
+/** How many usageSessions documents one read asks for. The collection is
+    read through a CURSOR, page after page, so this is a request size and
+    never a ceiling on what the window holds. */
+const READ_PAGE = 50000;
 const HISTORY = path.join(DATA, 'analytics-history.json');
 
 /* The SAME definition the page loads, so a number cannot mean one thing here
@@ -201,11 +205,31 @@ async function fromUsage(db, { since, windowFrom }) {
   let winSessions = 0, winSeconds = 0, winViews = 0;
   let winFrom = '', winTo = '';
 
-  let q = db.collection('usageSessions').orderBy('start');
-  if (since) q = q.where('start', '>=', since);
+  /* PAGED, with a cursor, until a page comes back short — the shape
+     build-candidate-stats.mjs already reads this collection in. A single
+     `.limit(50000)` ordered by `start` ASCENDING keeps the OLDEST fifty
+     thousand and silently drops everything after them, so the day the window
+     holds more than that the newest days would simply stop appearing: a
+     figure that goes quietly wrong in the direction nobody checks, on a page
+     whose whole point is that a thing which stops measuring must say so. */
+  let base = db.collection('usageSessions').orderBy('start');
+  if (since) base = base.where('start', '>=', since);
 
-  const snap = await q.limit(50000).get();
-  snap.forEach((doc) => {
+  const docs = [];
+  let cursor = null, readPages = 0;
+  for (;;) {
+    let q = base;
+    if (cursor) q = q.startAfter(cursor);
+    const chunk = await q.limit(READ_PAGE).get();
+    readPages++;
+    for (const d of chunk.docs) docs.push(d);
+    if (chunk.size < READ_PAGE) break;
+    cursor = chunk.docs[chunk.docs.length - 1];
+  }
+  if (readPages > 1) {
+    console.log(`usageSessions: read in ${readPages} pages of up to ${READ_PAGE}`);
+  }
+  docs.forEach((doc) => {
     const d = doc.data() || {};
     const started = Number(d.start || 0);
     if (!started) return;
@@ -670,15 +694,21 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
      where those numbers came from has changed. */
   if (carry) {
     A.mergeDays(data.days, carry.days || {}, 'carried');
-    const beforeCarry = pages.size;
-    A.mergePages(pages, carry.pages || []);
+    /* THE PAGES LIST BELONGS TO ONE SOURCE — the one whose window it PRINTS.
+       `mergePages` keeps a live source's own spelling of a path, but a
+       carried path no live source happened to claim was still added, so the
+       list under the usage fortnight's heading picked up GA4's ninety days a
+       row at a time: the very mixing this file already fixed once, arriving
+       by the carry instead of by a leg. Either the carry owns the list (and
+       its window) or nothing of it is taken. */
+    if (!pages.size) {
+      A.mergePages(pages, carry.pages || []);
+      if (!pagesWindow && carry.pagesWindow && pages.size) pagesWindow = carry.pagesWindow;
+    }
     for (const id of A.BREAKDOWN_IDS) {
       A.mergeBreakdown(breakdowns, id, (carry.breakdowns || {})[id]);
     }
     if (!engagement && carry.engagement) engagement = carry.engagement;
-    if (!pagesWindow && carry.pagesWindow && pages.size > beforeCarry) {
-      pagesWindow = carry.pagesWindow;
-    }
     /* the carried UNIVERSITIES are handled below rather than here: the block
        carries a frozen flag, a range and its coverage counts as one object,
        and re-offering only its rows would republish a live section as an
@@ -794,6 +824,14 @@ async function main() {
      read stays bounded as the site grows. */
   const windowFrom = Date.now() - A.BREAKDOWN_DAYS * 86400000;
   const since = Math.min(incremental || windowFrom, windowFrom);
+  /* GA4'S OWN FLOOR IS FOR THE FIRST RUN, and it was unreachable: `since` is
+     never 0 (with no served days it falls back to `windowFrom`), so
+     `fromGa4`'s `'2015-08-14'` branch could not be taken and the day record
+     could never reach further back than ninety days however much history the
+     property held. A report request is one call whatever its range, so the
+     first run asks for everything; the FIRST-PARTY read keeps its bounded
+     window, because that one is a collection scan and its cost is real. */
+  const ga4Since = incremental ? since : 0;
 
   const results = [];
 
@@ -842,7 +880,7 @@ async function main() {
   }
 
   try {
-    const ga4 = await fromGa4({ since, windowFrom, windowTo: iso(new Date()) });
+    const ga4 = await fromGa4({ since: ga4Since, windowFrom, windowTo: iso(new Date()) });
     if (ga4) {
       const dims = A.BREAKDOWN_IDS.filter((id) => (ga4.breakdowns || {})[id]);
       log(`ga4: ${Object.keys(ga4.days).length} day(s), ${ga4.pages.length} page(s)` +
