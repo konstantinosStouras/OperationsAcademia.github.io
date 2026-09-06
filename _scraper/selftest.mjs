@@ -1256,6 +1256,20 @@ async function testMarketYearCascade() {
     }
   }
 
+  /* --dry-run PROMISES TO WRITE NOTHING, and two passes ran regardless. The
+     upload transfer is the most irreversible thing this build does: it
+     uploads the advert to Drive, writes the link onto the document and
+     DELETES the landing-strip object in Storage. The mirror sync creates,
+     rewrites and deletes jobSubmissions documents. The stamping pass at the
+     end was gated; these two were not. */
+  {
+    const b2 = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+    ok(/if \(db && DRY\) \{[\s\S]{0,400}?not filing/.test(b2) && /\} else if \(db\) \{\s*\n\s*filed = \(await transferUploads/.test(b2),
+      'build-jobs: a dry run does not file an upload into Drive or delete it from Storage');
+    ok(/if \(db && sheetPresent && DRY\) \{/.test(b2) && /not refreshing the tracking sheet/.test(b2),
+      'build-jobs: nor does it write the tracking sheet\'s edit handles');
+  }
+
   /* 10. THE WIRING, read from the source. */
   ok(/healedRows\.map\(withMarketYears\)/.test(build),
     'build-jobs spans the MERGED set — a carried orphan never goes back ' +
@@ -9384,6 +9398,31 @@ async function testTwoDeadlinesWiring() {
 }
 
 async function testReviewWiring() {
+  /* A WRITER'S CHANGE TEST COVERS WHAT IT COMMITS. `git add data _functions`
+     under `git status --porcelain data` is a run whose only change is the
+     regenerated _functions/ copy exiting "no change" and committing nothing:
+     the deployed function then resolves visitors against a stale domain map,
+     and the byte-for-byte drift pin sits red on master. Read as a RULE over
+     every workflow rather than as a fact about the one that had it. */
+  {
+    let checked = 0;
+    for (const name of await readdir(path.join(HERE, '..', '.github', 'workflows'))) {
+      if (!/\.yml$/.test(name)) continue;
+      const wf = await readFile(path.join(HERE, '..', '.github', 'workflows', name), 'utf8');
+      const adds = [...wf.matchAll(/git add ([^\n]+)/g)].map((m) => m[1].trim().split(/\s+/));
+      if (!adds.length) continue;
+      const tests = [...wf.matchAll(/git status --porcelain ([^)"]+)/g)].map((m) => m[1].trim().split(/\s+/));
+      for (const add of adds) {
+        for (const test of tests) {
+          const missed = add.filter((p2) => !test.some((t) => t === p2 || t.startsWith(p2 + '/')));
+          eq(missed, [], `${name}: the change test covers everything the commit adds`);
+          checked++;
+        }
+      }
+    }
+    ok(checked >= 8, `the add-versus-test rule was applied to ${checked} pairs`);
+  }
+
   /* NO SOURCE FILE CARRIES AN UNRESOLVED MERGE MARKER. One shipped in
      _functions/index.js and survived every check here: it sat inside a block
      comment, so nothing failed to parse, and what it left behind was a stray
@@ -15400,7 +15439,13 @@ async function testForum() {
     'forum: oa-checks.yml runs the emulator test in its own job, with Java, CI set and a demo project');
   ok((checks.match(/- '_functions\/\*\*'/g) || []).length === 2, 'forum: a functions-only change now runs the checks (both trigger lists)');
   for (const file of (await readdir(wfDir)).filter((f) => f.endsWith('.yml'))) {
-    const src = await readFile(path.join(wfDir, file), 'utf8');
+    const raw = await readFile(path.join(wfDir, file), 'utf8');
+    /* READ WITH THE COMMENTS STRIPPED. A scheduled workflow that merely
+       EXPLAINS something about the forum is not a cron that touches one, and
+       a guard that cannot tell the explanation from the thing has to be
+       satisfied by deleting the explanation (the analytics page's own
+       no-iframes lesson, and this file's own merge-marker one). */
+    const src = raw.replace(/(^|\s)#[^\n]*/g, '$1');
     ok(!(/schedule:/.test(src) && /forum/i.test(src)), `forum: ${file} has no cron that touches the forum`);
   }
   const fbj = JSON.parse(await read('firebase.json'));

@@ -618,7 +618,9 @@ async function main() {
      with only a warning in the log. A hand-over that cannot publish falls back
      to the workbook instead. */
   const claimedSheetIds = new Set(sheetDocs.keys());
-  if (db && sheetPresent) {
+  if (db && sheetPresent && DRY) {
+    log('--dry-run: not refreshing the tracking sheet\'s edit handles.');
+  } else if (db && sheetPresent) {
     try {
       await syncSheetMirrors(col, sheetRows, mirrorSnap.docs, claimedSheetIds, { now });
     } catch (e) {
@@ -644,7 +646,20 @@ async function main() {
      season — each is warned about and the posting publishes WITHOUT its File
      link; the upload stays in Storage and the next run retries. A failure here
      must never stop the postings pipeline. */
-  const filed = db ? (await transferUploads(db, live, { now })) || new Map() : new Map();
+  /* NOT UNDER --dry-run, WHICH PROMISES TO WRITE NOTHING. This one uploads
+     the advert to Drive, writes the link onto the document and DELETES the
+     landing-strip object in Storage: the most irreversible thing the build
+     does, and it ran on a dry run, which is documented three lines from the
+     top of this file as "do everything, write nothing". The stamping pass at
+     the end is gated; these two were not. A dry run therefore prints the
+     rows WITHOUT the File links a real run would have filed, and says so. */
+  let filed = new Map();
+  if (db && DRY) {
+    const waiting = live.filter((d) => { const v = d.data() || {}; return v.adUploadPath && !v.adUrl; });
+    log(`--dry-run: not filing ${waiting.length} uploaded advert(s) into Drive; the rows below carry no File link.`);
+  } else if (db) {
+    filed = (await transferUploads(db, live, { now })) || new Map();
+  }
 
   const fresh = [];
   const rejected = [];

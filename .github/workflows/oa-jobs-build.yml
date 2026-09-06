@@ -157,7 +157,13 @@ jobs:
         run: |
           REF='${{ github.ref_name }}'
 
-          if [ -z "$(git status --porcelain data)" ]; then
+          # BOTH TREES, because both are committed one line below. The
+          # netmap builder writes into _functions/ as well as data/, and the
+          # vendored forum modules live there too; tested on data/ alone, a
+          # run whose only change was a regenerated _functions/ copy exited
+          # "no change" and left the deployed function resolving against a
+          # stale map, with the byte-for-byte drift pin red on master.
+          if [ -z "$(git status --porcelain data _functions)" ]; then
             echo "no change — nothing to commit"
             exit 0
           fi
@@ -214,7 +220,7 @@ jobs:
               exit 1
             fi
 
-            if [ -z "$(git status --porcelain data)" ]; then
+            if [ -z "$(git status --porcelain data _functions)" ]; then
               # Not a failure, and the commonest outcome of a real race: the
               # writer that beat us had already published everything we had.
               echo "the other writer published it all — nothing left to commit"
