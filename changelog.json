@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "one-posting-id-2026-09",
+      "date": "2026-09-06",
+      "title": "One ID per job posting",
+      "summary": "The OA posting ID line at the foot of every job posting now carries one identifier, the same kind on every posting this market year, and nothing beside it. A posting made through the site's form used to show its reference number there as well, which read as two IDs for one posting. The ID is still a link to the posting's own page, and if you posted a job, the reference number in your receipt and on My postings still works when you write to us.",
+      "url": "/jobs.html"
+    },
+    {
       "id": "calendar-files-2026-09",
       "date": "2026-09-06",
       "title": "Deadlines and INFORMS talks, straight into your calendar",
