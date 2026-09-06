@@ -35,8 +35,9 @@ minutes again, and an approval up to half an hour.
 
 **THE FIRST THREE ARE LIVE.** They were deployed on 2026-08-27 and have dispatched
 on every decision since. `revealCandidates` (2026-09-04) rides along with the
-next `firebase deploy --only functions` and is inert until that deploy has
-run; read the count back (five) rather than trusting the deploy log. To check rather than trust: filter this repository's
+next `firebase deploy --only functions --project operations-academia` and is
+inert until that deploy has run; read the count back (FOURTEEN, see "Deploying"
+below) rather than trusting the deploy log. To check rather than trust: filter this repository's
 Actions by `event:repository_dispatch` and read the ACTOR — the function
 carries the PAT from step 1 and shows as a person, where the two verify
 workflows' own curls carry `GITHUB_TOKEN` and show as `github-actions[bot]`.
@@ -50,7 +51,7 @@ do — deploys nothing, and the doorbell that was never deployed looks exactly
 like a site that is simply slow.
 
 **PULL BEFORE YOU DEPLOY, AND COUNT THE LINES.** `firebase deploy --only
-functions` deploys what is in the working copy, so a clone a few commits behind
+functions --project operations-academia` deploys what is in the working copy, so a clone a few commits behind
 deploys the older set and reports success over it. That is not hypothetical:
 the 2026-08-29 run printed `Deploy complete!` over three functions when
 `_functions/index.js` on master held four — `recordVisit` (the

@@ -113,13 +113,22 @@ jobs:
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          # THE FREE-TEXT INPUTS GO THROUGH THE ENVIRONMENT, never interpolated
+          # into the script: ${{ }} pastes a dispatcher's own words in before
+          # the shell ever sees them, and this step holds the credentials. Only
+          # a writer can press the button, so it is hygiene rather than a hole
+          # -- but it is the shape that is not a hole whoever presses it, and
+          # oa-forum-remove-thread.yml already uses it.
+          IN_SHEET: ${{ inputs.sheet }}
+          IN_MIN_YEAR: ${{ inputs.min_year }}
         run: |
-          node _scraper/sync-jobmarket-sheet.mjs \
+          set -- \
             ${{ inputs.scan && '--scan' || '' }} \
             ${{ inputs.dry_run && '--dry-run' || '' }} \
-            ${{ inputs.no_mail && '--no-mail' || '' }} \
-            ${{ inputs.sheet && format('--sheet {0}', inputs.sheet) || '' }} \
-            ${{ inputs.min_year && format('--min-year {0}', inputs.min_year) || '' }}
+            ${{ inputs.no_mail && '--no-mail' || '' }}
+          if [ -n "$IN_SHEET" ]; then set -- "$@" "--sheet" "$IN_SHEET"; fi
+          if [ -n "$IN_MIN_YEAR" ]; then set -- "$@" "--min-year" "$IN_MIN_YEAR"; fi
+          node _scraper/sync-jobmarket-sheet.mjs "$@"
 
       # The same gate every other writer of data/ runs before committing: a red
       # selftest must stop the publish rather than ship a broken dataset.

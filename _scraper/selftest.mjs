@@ -5144,6 +5144,30 @@ async function testDeployGuard() {
   }
   ok(cfg.firestore && cfg.storage && cfg.functions,
     'and all three of this repository\'s deployable sections are still configured');
+
+  /* ...AND THE PAGES THAT TELL A PERSON WHAT TO TYPE SAY `--project` TOO. The
+     guard is the net, not the practice: _SETUP-FIREBASE.md carried a command
+     WITH the flag under a sentence saying "that is the whole command — no
+     `--project` flag", which is the practice that published this repository's
+     rules into an unrelated database twice. Read out of the setup pages, not
+     out of the decision log, because a page is what somebody follows. */
+  for (const page of (await readdir(root)).filter((f) => /^_SETUP-.*\.md$/.test(f))) {
+    const src = await readFile(path.join(root, page), 'utf8');
+    const flat = src.replace(/\n\s*/g, ' ');
+    for (const m of flat.matchAll(
+      /firebase deploy --only [A-Za-z:,]+((?:\s+--?[a-zA-Z-]+(?:\s+[A-Za-z0-9:,._-]+)?)*)/g)) {
+      ok(/--project operations-academia/.test(m[0]),
+        `${page}: "${m[0].slice(0, 70)}" names its project — the CLI's remembered ` +
+        'target wins over .firebaserc, invisibly');
+    }
+    /* …with the QUOTED text removed: the page explains the retired wording in
+       the very words this refuses, and a guard that cannot tell the
+       explanation from the instruction has to be satisfied by deleting the
+       explanation — the trap this repository records for the Commit step's
+       rebase and the analytics page's iframes. */
+    ok(!/no `--project` flag/.test(src.replace(/"[^"]*"/g, '""')),
+      `${page}: and nothing tells the reader to leave it off`);
+  }
 }
 
 /* ------------------------------------- the rules publish themselves now
@@ -5203,6 +5227,21 @@ async function testRulesDeploy() {
   ok(mod.sourceProblem(storage) !== '',
     'and the STORAGE rules are refused — a different service, one argument away');
   ok(mod.sourceProblem('') !== '', 'an empty read never publishes');
+
+  /* A READ FAILURE MUST NOT CAUSE A WRITE. Every error from
+     getFirestoreRuleset() was swallowed and read as "not yet published", so a
+     transient API blip or a permissions wobble published a fresh ruleset on
+     every failed run — against a project-wide cap of 2500 of them, and while
+     knowing nothing about what is live. The ONE case that comment is really
+     about is a project with no ruleset at all, which answers NOT FOUND. */
+  const readCatch = src.slice(src.indexOf('live = await rules.getFirestoreRuleset();'),
+    src.indexOf('if (live && sameSource('));
+  ok(readCatch.length > 200 && readCatch.length < 2000,
+    'the live-ruleset read is where this expects it');
+  ok(/not\.\?found\|no such\|does not exist/.test(readCatch),
+    'only a NOT FOUND is read as "nothing is published yet"');
+  ok(/process\.exitCode = 1;/.test(readCatch),
+    'any other failure stops the run rather than publishing on it');
 
   /* Identical rules are a no-op, which is what makes a run per check cheap. */
   eq(mod.sameSource([{ name: 'firestore.rules', content: rules }], rules), true,
@@ -9988,10 +10027,39 @@ async function testReviewWiring() {
      caught and fixed. Pinned in both directions: the flag missing from a
      writer is the outage this file records, and the flag CREEPING INTO the PR
      check would leave nothing enforcing it anywhere. */
-  const WRITERS = ['oa-jobs-build.yml', 'oa-jobmarket-sheet.yml', 'oa-higheredjobs-verify.yml',
+  /* EVERY WORKFLOW THAT COMMITS UNDER data/, derived from the workflows
+     themselves rather than typed: a writer left off this list is a writer
+     with no gate, which is how oa-analytics.yml came to commit
+     data/analytics.json with none — the selftest asserts over that file, so a
+     bad figure was committed and turned the checks red on MASTER instead of
+     failing its own run. The literal list stays as the floor, so a workflow
+     that stops matching the scan still has to be dealt with deliberately. */
+  const WRITERS_KNOWN = ['oa-jobs-build.yml', 'oa-jobmarket-sheet.yml', 'oa-higheredjobs-verify.yml',
     'oa-adverts-verify.yml', 'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml',
     // the roster sync writes data/users-meta.json and data/users-growth.json (2026-09-05)
-    'oa-user-directory.yml'];
+    'oa-user-directory.yml',
+    // the analytics build writes data/analytics.json (2026-09-06)
+    'oa-analytics.yml'];
+  const wfAll = (await readdir(path.join(HERE, '..', '.github', 'workflows')))
+    .filter((f) => f.endsWith('.yml')).sort();
+  const WRITERS = [];
+  for (const f of wfAll) {
+    const src = (await readFile(path.join(HERE, '..', '.github', 'workflows', f), 'utf8'))
+      .replace(/^\s*#.*$/gm, '');
+    /* `git add $FILES` is a writer too — the roster sync names its two served
+       files in a shell variable — so the simple assignments are expanded
+       before the scan rather than the indirection being special-cased away. */
+    let flat = src;
+    for (const m of src.matchAll(/^\s*([A-Z_]+)='([^']*)'\s*$/gm)) {
+      flat = flat.split('$' + m[1]).join(m[2]);
+    }
+    if (/git add\s+[^\n]*\bdata\b/.test(flat) && /git commit/.test(flat)) WRITERS.push(f);
+  }
+  eq(WRITERS_KNOWN.filter((f) => !WRITERS.includes(f)), [],
+    'every workflow named as a data writer really commits under data/');
+  eq(WRITERS.filter((f) => !WRITERS_KNOWN.includes(f)), [],
+    'and every workflow that commits under data/ is named as one — a writer off ' +
+    'the list is a writer with no publishing gate');
   for (const name of WRITERS) {
     const src = await readFile(path.join(HERE, '..', '.github', 'workflows', name), 'utf8');
     const runs = [...src.matchAll(/node _scraper\/selftest\.mjs([^\n]*)/g)].map((m) => m[1]);
@@ -10012,7 +10080,7 @@ async function testReviewWiring() {
   for (const name of WRITERS) {
     const src = (await readFile(path.join(HERE, '..', '.github', 'workflows', name), 'utf8'))
       .replace(/^\s*#.*$/gm, '');
-    const at = src.indexOf('for i in 1 2 3 4 5');
+    const at = src.indexOf('for i in 1 2 3');
     if (at < 0) continue;
     const loop = src.slice(at, src.indexOf('done', at));
     ok(/node _scraper\/selftest\.mjs --publishing/.test(loop),
@@ -10026,6 +10094,21 @@ async function testReviewWiring() {
     path.join(HERE, '..', '.github', 'workflows', 'oa-checks.yml'), 'utf8');
   ok(/node _scraper\/selftest\.mjs\s*$/m.test(prCheck),
     'while the PR check runs it strict — the one place a naming duplicate is meant to fail');
+
+  /* ...AND IT RUNS ON EVERY PUSH AND EVERY PULL REQUEST, which its own comment
+     has always claimed. A `paths:` filter made that false for exactly the
+     changes these checks are the only guard on: this file pins the other
+     workflows clause by clause, plus firebase.json, .firebaserc,
+     check-project.mjs, changelog.json and the setup guides — and every one of
+     those was OUTSIDE the list, so a change that broke a pin ran no check and
+     went green by not running. A list of paths rots away from what the guards
+     read; there is none now, and this is what stops one coming back. */
+  const onBlock = prCheck.slice(prCheck.indexOf('\non:'), prCheck.indexOf('\npermissions:'))
+    .replace(/^\s*#.*$/gm, '');
+  ok(!/paths(?:-ignore)?:/.test(onBlock),
+    'oa-checks.yml runs on every push and pull request — no paths filter to fall out of date');
+  ok(/^\s*push:\s*$/m.test(onBlock) && /^\s*pull_request:\s*$/m.test(onBlock),
+    '…on both events, so a pull request is checked as well as its merge');
 
   /* ------------------------------- ONE EVENT, ONE BUILD (2026-08-26)
 
@@ -10067,6 +10150,39 @@ async function testReviewWiring() {
      tidying it away would now break the instant path outright. */
   ok(/repository_dispatch:\s*\n\s*types:\s*\[oa-jobs-changed\]/.test(buildSrc),
     'oa-jobs-build still answers oa-jobs-changed — the Cloud Function\'s own doorbell');
+
+  /* EVERY CHAIN NAMES A WORKFLOW THAT EXISTS. `workflow_run` matches on the
+     literal string, so renaming a workflow silently unchains every listener —
+     and there are five of these now: the build behind the sheet read, the
+     alerts, the submissions mailer and the account purge behind the build, and
+     the RULES DEPLOY behind these very checks. A rename would stop the rules
+     publishing themselves with nothing anywhere saying so, which is the
+     inert-feature failure this repository has already paid for six times.
+     Pinned as a rule over all of them rather than as a fact about one. */
+  const wfNames = new Set();
+  const chainFiles = (await readdir(wfDir)).filter((f) => f.endsWith('.yml'));
+  for (const f of chainFiles) {
+    const m = (await readFile(path.join(wfDir, f), 'utf8')).match(/^name:\s*(.+)$/m);
+    if (m) wfNames.add(m[1].trim());
+  }
+  let chains = 0;
+  for (const f of chainFiles) {
+    const src = await readFile(path.join(wfDir, f), 'utf8');
+    const at = src.indexOf('workflow_run:');
+    if (at < 0) continue;
+    const listed = (src.slice(at, at + 400).match(/workflows:\s*\[([^\]]*)\]/) || [])[1] || '';
+    /* Split on the QUOTES, not on commas: "OA data — publish queued postings,
+       candidates and placements" has one in its own name. */
+    const quoted = [...listed.matchAll(/"([^"]*)"|'([^']*)'/g)].map((q) => q[1] ?? q[2]);
+    for (const raw of (quoted.length ? quoted : listed.split(','))) {
+      const want = String(raw).trim().replace(/^["']|["']$/g, '');
+      if (!want) continue;
+      chains++;
+      ok(wfNames.has(want),
+        `${f} is chained to a workflow called "${want}" — and one exists by that name`);
+    }
+  }
+  ok(chains >= 5, 'and every chain in the repository was checked');
 
   /* ---------------------- NOTHING STILL CALLS THE DOORBELLS UNDEPLOYED
 
@@ -10616,6 +10732,41 @@ async function testMailerErrorLogs() {
   ok(M.safeError(new Error('x'.repeat(900))).length <= 500,
     'and a server that answers with a wall of text is bounded');
 
+  /* AND THE DRY-RUN PRINT ITSELF, which is the line that runs most often: the
+     alerts mailer IS a dry run whenever SMTP is unset, hourly. The `To:` was
+     redacted and the other two lines were not, which made the redaction
+     decorative — `Reply-To` is the FEEDBACK SUBMITTER's own address, that is
+     what it is for, and the BODY carries "Posted by: <name> <address>", a
+     held candidate's name weeks before the reveal, and the poster's own
+     address. */
+  const dry = mail.slice(mail.indexOf('if (!tx || dryRun) {'), mail.indexOf("return false;"));
+  ok(dry.length > 300 && dry.length < 3000, 'the dry-run branch is bounded at both ends');
+  ok(/redact\(full\.replyTo\)/.test(dry), 'the Reply-To is redacted like the To');
+  ok(!/console\.log\(full\.text\.slice/.test(dry),
+    'and the body is not dumped whole');
+  ok(/GITHUB_ACTIONS \|\| process\.env\.CI/.test(dry) && /body withheld/.test(dry),
+    'on a runner it is withheld entirely — a public log is not the place');
+  {
+    const was = { CI: process.env.CI, GA: process.env.GITHUB_ACTIONS };
+    const lines = [];
+    const realLog = console.log;
+    console.log = (...a) => lines.push(a.join(' '));
+    try {
+      process.env.CI = 'true'; delete process.env.GITHUB_ACTIONS;
+      await M.send(null, { to: 'sub@example.edu', replyTo: 'writer@example.org',
+        subject: 'Hi', html: '<p>Posted by: Ada Lovelace ada@x.edu</p>' });
+    } finally {
+      console.log = realLog;
+      if (was.CI === undefined) delete process.env.CI; else process.env.CI = was.CI;
+      if (was.GA !== undefined) process.env.GITHUB_ACTIONS = was.GA;
+    }
+    const printed = lines.join('\n');
+    ok(printed.includes('would send'), 'the dry-run print was captured');
+    ok(!/writer@example\.org/.test(printed) && !/sub@example\.edu/.test(printed)
+       && !/ada@x\.edu/.test(printed) && !/Ada Lovelace/.test(printed),
+      'and driven for real, a dry run on a runner prints no address and no name');
+  }
+
   for (const f of ['alerts-mailer.mjs', 'submissions-mailer.mjs',
     'feedback-mailer.mjs', 'jobreview-mailer.mjs']) {
     const src = (await readFile(path.join(HERE, f), 'utf8'))
@@ -10628,6 +10779,95 @@ async function testMailerErrorLogs() {
       .filter((l) => /\$\{(?:e|err)\.message\}/.test(l));
     eq(bad, [], `${f}: no send failure prints a raw SMTP message`);
   }
+}
+
+/* -------------------------------------- every mailer is given the same mailbox
+
+   `ALERTS_FROM` is read by NOTHING in this repository, and oa-jobreview-mail
+   passed it in place of the two variables `_mail.mjs` really reads — so the
+   review e-mails went out under the default From: line and showed the default
+   contact address in their footer, while every other mailer honoured the
+   maintainer's own settings. Pinned as a RULE over every workflow that runs a
+   mailer, and both ways: a mailer missing one of the two, or a workflow
+   passing an environment variable no source reads. */
+async function testMailerEnv() {
+  const wfDir = path.join(HERE, '..', '.github', 'workflows');
+  const files = (await readdir(wfDir)).filter((f) => f.endsWith('.yml'));
+  const scraper = (await readdir(HERE)).filter((f) => f.endsWith('.mjs'));
+  const allSrc = (await Promise.all(scraper.map((f) => readFile(path.join(HERE, f), 'utf8'))))
+    .join('\n');
+
+  let seen = 0;
+  for (const f of files) {
+    const src = await readFile(path.join(wfDir, f), 'utf8');
+    /* A workflow that only runs a mailer's own --selftest sends nothing and
+       needs no mailbox; what is checked here is the steps that really send. */
+    const sends = src.split('\n').some((l) =>
+      /node _scraper\/([a-z-]*mailer|verify-existing-users)\.mjs/.test(l)
+      && !/--selftest/.test(l));
+    if (!sends) continue;
+    seen++;
+    const code = src.replace(/^\s*#.*$/gm, '');
+    for (const v of ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'MAIL_FROM', 'CONTACT_EMAIL']) {
+      ok(code.includes(v + ':'), `${f} gives the mailer its ${v}`);
+    }
+    /* …and nothing it does not read. An env line nobody consumes is a setting
+       the maintainer believes they have made. */
+    for (const m of code.matchAll(/^\s{6,}([A-Z][A-Z0-9_]{2,}):\s*\$\{\{/gm)) {
+      const name = m[1];
+      if (name === 'GITHUB_TOKEN' || name === 'GH_TOKEN') continue;
+      ok(allSrc.includes(name) || /^SMTP_/.test(name),
+        `${f}: ${name} is read by something under _scraper/`);
+    }
+  }
+  ok(seen >= 4, 'and there really are mailer workflows to check');
+}
+
+/* --------------------------- a dispatcher's own words are not part of a script
+
+   `${{ inputs.x }}` inside a `run:` block is pasted in BEFORE the shell sees
+   it, so a free-text input becomes shell code — in steps that hold
+   FIREBASE_SERVICE_ACCOUNT and SMTP_*. Four did it (`limit` twice, `sheet`,
+   `min_year`). Only a writer can press these buttons, so it is hygiene rather
+   than a hole; it is also the shape that is not a hole whoever presses it, and
+   oa-forum-remove-thread.yml was already written that way. A boolean or a
+   choice is bounded by GitHub itself and stays inline. */
+async function testDispatchInputs() {
+  const wfDir = path.join(HERE, '..', '.github', 'workflows');
+  const files = (await readdir(wfDir)).filter((f) => f.endsWith('.yml'));
+  let free = 0;
+  for (const f of files) {
+    const src = await readFile(path.join(wfDir, f), 'utf8');
+    /* which inputs are FREE TEXT — anything GitHub does not bound for us */
+    const inputsAt = src.indexOf('  workflow_dispatch:');
+    if (inputsAt < 0) continue;
+    const names = [];
+    for (const m of src.matchAll(/^ {6}([a-z_][a-z0-9_]*):\s*$\n((?:^ {8}.*$\n)+)/gm)) {
+      if (m.index < inputsAt) continue;
+      if (!/type:\s*(boolean|choice|environment)/.test(m[2])) names.push(m[1]);
+    }
+    if (!names.length) continue;
+    free += names.length;
+
+    /* every line inside a `run:` block */
+    const lines = src.split('\n');
+    let inRun = false, ind = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const m = lines[i].match(/^(\s*)run:\s*\|/);
+      if (m) { inRun = true; ind = m[1].length; continue; }
+      if (inRun && lines[i].trim() && (lines[i].length - lines[i].trimStart().length) <= ind) {
+        inRun = false;
+      }
+      if (!inRun) continue;
+      for (const n of names) {
+        ok(!new RegExp('\\$\\{\\{\\s*(?:inputs|github\\.event\\.inputs)\\.' + n + '\\b')
+          .test(lines[i]),
+          `${f}:${i + 1}: the free-text input "${n}" is not pasted into a run: block ` +
+          '— pass it through env: and read it as "$IN_..."');
+      }
+    }
+  }
+  ok(free >= 4, 'and there really are free-text dispatch inputs to check');
 }
 
 async function testSubmissionNotices() {
@@ -16038,7 +16278,12 @@ async function testForum() {
   ok(/^  emulator:$/m.test(checks) && /_functions\/test\/forum-emulator\.mjs/.test(checks) && /actions\/setup-java@v4/.test(checks)
      && /CI: true/.test(checks) && /FORUM_SECRET_TEST_2:/.test(checks) && /demo-oa-forum/.test(checks),
     'forum: oa-checks.yml runs the emulator test in its own job, with Java, CI set and a demo project');
-  ok((checks.match(/- '_functions\/\*\*'/g) || []).length === 2, 'forum: a functions-only change now runs the checks (both trigger lists)');
+  /* A functions-only change runs the checks. It used to need `_functions/**`
+     in both trigger lists; there is no paths filter at all now (see the
+     testReviewWiring block), so what is pinned is the ABSENCE of one — a list
+     that has to name every directory a guard reads is the thing that rots. */
+  ok(!/paths(?:-ignore)?:/.test(checks.replace(/^\s*#.*$/gm, '')),
+    'forum: a functions-only change runs the checks, because nothing is filtered out');
   for (const file of (await readdir(wfDir)).filter((f) => f.endsWith('.yml'))) {
     const raw = await readFile(path.join(wfDir, file), 'utf8');
     /* READ WITH THE COMMENTS STRIPPED. A scheduled workflow that merely
@@ -16940,6 +17185,8 @@ if (isMain(import.meta.url)) {
   testTwoDeadlines();
   await testTwoDeadlinesWiring();
   await testMailerErrorLogs();
+  await testMailerEnv();
+  await testDispatchInputs();
   await testSubmissionNotices();
   await testPostedByAndLiveEmail();
   await testCandidateProfilePolicy();

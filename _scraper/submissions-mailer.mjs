@@ -174,9 +174,16 @@ export function renderSubmissionEmail(kind, entry,
       'Open it to correct anything</a></p>' +
     '<p><a href="' + esc(reviewUrl) + '">See everything waiting for a look</a></p>';
 
+  /* manageUrl: null — THE MAINTAINER SUBSCRIBED TO NOTHING. The footer's other
+     branch says "You are receiving this because you asked Operations Academia to
+     tell you about new postings" and offers an Unsubscribe link, and there is
+     nothing to unsubscribe from: this goes to one address because that address
+     runs the site. The Admin-area button is in the BODY of both messages, so the
+     way there is not lost. The poster's own "your posting is live" e-mail has
+     passed null since it shipped, for the same reason. */
   return {
     subject: 'New ' + kind.one + ': ' + (title || entry.id),
-    html: shell({ title: 'A ' + kind.one + ' has been posted', bodyHtml, manageUrl: reviewUrl }),
+    html: shell({ title: 'A ' + kind.one + ' has been posted', bodyHtml, manageUrl: null }),
   };
 }
 
@@ -240,7 +247,7 @@ export function renderSubmissionDigest(items, {
 
   return {
     subject: items.length + ' new submissions on Operations Academia',
-    html: shell({ title: items.length + ' new submissions', bodyHtml, manageUrl: reviewUrl }),
+    html: shell({ title: items.length + ' new submissions', bodyHtml, manageUrl: null }),
   };
 }
 

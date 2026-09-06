@@ -217,12 +217,27 @@ export async function send(tx, msg, { dryRun = false } = {}) {
        the alerts mailer runs as a dry run whenever SMTP is unset — so a
        subscriber's, a poster's or a feedback submitter's address printed
        here in full was world-readable. The same rule the served files are
-       held to: nothing public carries an address. */
+       held to: nothing public carries an address.
+
+       THE `To:` WAS REDACTED AND THE OTHER TWO LINES WERE NOT, which made the
+       redaction decorative. `Reply-To` is the FEEDBACK SUBMITTER's own address
+       — that is what it is for — and it was printed whole. And the BODY is
+       every one of these messages' worst line: the maintainer's announcement
+       carries "Posted by: <name> <address>", a held candidate's e-mail carries
+       their name and affiliation weeks before the reveal puts either on the
+       site, and the poster's carries their own address. On a runner the body
+       is not printed at all; a run on somebody's own machine keeps the preview
+       that makes a dry run worth doing, with the addresses in it redacted
+       anyway. */
+    const onRunner = !!(process.env.GITHUB_ACTIONS || process.env.CI);
     console.log(`\n--- ${dryRun ? 'DRY RUN' : 'NO SMTP'}: would send ---`);
     console.log(`To:      ${redact(full.to)}`);
     console.log(`Subject: ${full.subject}`);
-    if (full.replyTo) console.log(`Reply-To: ${full.replyTo}`);
-    console.log(full.text.slice(0, 800));
+    if (full.replyTo) console.log(`Reply-To: ${redact(full.replyTo)}`);
+    console.log(onRunner
+      ? `(body withheld: ${full.text.length} characters — a public log is not the place)`
+      : full.text.slice(0, 800).replace(
+        /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/g, (a) => redact(a)));
     console.log('--- end ---\n');
     return false;
   }

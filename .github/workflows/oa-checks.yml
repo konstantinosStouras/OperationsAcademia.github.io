@@ -6,49 +6,21 @@ name: OA — checks
 # at /v2/, and the 2014-2026 site at /v1/.
 
 on:
+  # NO PATHS FILTER, and that is the fix rather than an omission. The comment
+  # above has always said "this runs on every push and every pull request",
+  # and the filter made it false for exactly the changes these checks are the
+  # only guard on: selftest.mjs pins the OTHER workflows clause by clause (the
+  # publishing gate, the branch tip, the retry loop, one doorbell per event,
+  # the cron the forum may not have), it pins firebase.json's predeploy hooks,
+  # .firebaserc, check-project.mjs, changelog.json, the setup guides and this
+  # file's own prose -- and every one of those lived OUTSIDE the list, so a
+  # change that broke a pin ran no check at all and went green by not running.
+  # A guard that reports green while running none of its checks is worse than
+  # no guard; a list of paths is exactly the thing that rots away from what
+  # the guards read. The cost is a run on a README change, and the data
+  # writers' own commits already matched the old list.
   push:
-    paths:
-      - '*.html'
-      - 'assets/**'
-      - 'data/**'
-      - '_scraper/**'
-      # The forum's Cloud Functions and their emulator test live under
-      # _functions/; without this a functions-only change ran no check.
-      - '_functions/**'
-      # share-check.mjs measures the real pixels of every og:image against the
-      # numbers the pages declare, so a card regenerated at a new size has to
-      # run the checks even when no HTML moved.
-      - 'images/**'
-      - '_firestore.rules'
-      - '_storage.rules'
-      - 'v1/**'
-      - 'v2/**'
-      - 'v3/**'
-      - '.github/workflows/oa-checks.yml'
   pull_request:
-    paths:
-      - '*.html'
-      - 'assets/**'
-      - 'data/**'
-      - '_scraper/**'
-      # The forum's Cloud Functions and their emulator test live under
-      # _functions/; without this a functions-only change ran no check.
-      - '_functions/**'
-      # share-check.mjs measures the real pixels of every og:image against the
-      # numbers the pages declare, so a card regenerated at a new size has to
-      # run the checks even when no HTML moved.
-      - 'images/**'
-      - '_firestore.rules'
-      - '_storage.rules'
-      - 'v1/**'
-      - 'v2/**'
-      - 'v3/**'
-      # …and this file, which the push list has always carried and this one
-      # did not: a pull request that changes only the checks themselves got no
-      # check run, which is exactly the change most worth running before it
-      # lands. Noticed while fixing the browser step, whose own follow-up
-      # commit touched nothing else.
-      - '.github/workflows/oa-checks.yml'
   workflow_dispatch:
 
 permissions:

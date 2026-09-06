@@ -66,12 +66,21 @@ jobs:
           node _scraper/higheredjobs-verify.mjs --selftest
 
       - name: Read the advertisements
+        env:
+          # THE FREE-TEXT INPUTS GO THROUGH THE ENVIRONMENT, never interpolated
+          # into the script: ${{ }} pastes a dispatcher's own words in before
+          # the shell ever sees them, and this step holds the credentials. Only
+          # a writer can press the button, so it is hygiene rather than a hole
+          # -- but it is the shape that is not a hole whoever presses it, and
+          # oa-forum-remove-thread.yml already uses it.
+          IN_LIMIT: ${{ inputs.limit }}
         run: |
-          node _scraper/higheredjobs-verify.mjs \
+          set -- \
             ${{ inputs.scan && '--scan' || '' }} \
             ${{ inputs.dry_run && '--dry-run' || '' }} \
-            ${{ inputs.force && '--force' || '' }} \
-            ${{ inputs.limit && format('--limit {0}', inputs.limit) || '' }}
+            ${{ inputs.force && '--force' || '' }}
+          if [ -n "$IN_LIMIT" ]; then set -- "$@" "--limit" "$IN_LIMIT"; fi
+          node _scraper/higheredjobs-verify.mjs "$@"
 
       # The same gate every other writer of data/ runs before committing: a red
       # selftest must stop the publish rather than ship a broken dataset.

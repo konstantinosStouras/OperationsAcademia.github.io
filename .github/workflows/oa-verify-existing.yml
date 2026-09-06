@@ -73,6 +73,14 @@ jobs:
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          # The From: line, the address the footer shows and the site the
+          # confirmation link points at. This step writes a real message to
+          # every unverified account and had none of the three, so those
+          # messages went out under the defaults while every other mailer
+          # honoured the maintainer's own settings.
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          SITE_URL: ${{ vars.SITE_URL }}
         run: |
           if [ "${{ inputs.send }}" = "true" ]; then
             node _scraper/verify-existing-users.mjs

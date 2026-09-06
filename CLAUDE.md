@@ -725,8 +725,11 @@ stands down wherever `oa-jobedit.js` has drawn.
 
 **None of this is live until the rules are deployed.** No workflow runs
 `firebase deploy` — it needs an interactive login — so after any change to
-`_firestore.rules`, run `firebase deploy --only firestore:rules` from the
-repository root. See `_SETUP-FIREBASE.md` §4.
+`_firestore.rules`, run `firebase deploy --only firestore:rules --project
+operations-academia` from the repository root. (The rules publish themselves
+behind a green check since 2026-08-24 — see "…and the FIRESTORE rules publish
+themselves" — so this is the hand path, and `--project` is never optional:
+see `_SETUP-FIREBASE.md` §4.)
 
 ## The Universities directory — one card per university, editable by anyone signed in
 
@@ -1155,7 +1158,8 @@ cascade — never a guess. **To make a future posting resolve, add its
 same rule as everywhere else: grow the database, never hand-edit `data/`.
 
 **It is inert until `_firestore.rules` is redeployed** (`firebase deploy --only
-firestore:rules`) — until then the panel says permission-denied — and the
+firestore:rules --project operations-academia`) — until then the panel says
+permission-denied — and the
 e-mail half is inert until `SMTP_*` is set, which stamps nothing, so the
 postings are announced once it exists.
 

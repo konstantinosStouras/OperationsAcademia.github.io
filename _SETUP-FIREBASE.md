@@ -216,7 +216,17 @@ firebase deploy --only firestore:rules --project operations-academia
 
 `firebase.json` at the repository ROOT already points the CLI at
 `_firestore.rules`, and `.firebaserc` already names the project
-(`operations-academia`), so that is the whole command — no `--project` flag.
+(`operations-academia`).
+
+**ALWAYS PASS `--project` ANYWAY**, exactly as written above. This sentence
+used to end "so that is the whole command — no `--project` flag", and that is
+the practice that published THIS repository's rules into the unrelated
+`stouras-answerarena` database, twice: the CLI resolves its target from
+`--project`, then `FIREBASE_PROJECT`, then **the active project it remembers
+PER DIRECTORY in its own global config**, and only then `.firebaserc`. The
+remembered one wins, is invisible in the repository, and survives between
+sessions. `check-project.mjs` runs as a predeploy hook on every deployable
+section and aborts a mismatch, but the guard is the net, not the practice.
 
 **These paths moved with the 2026-08-17 promotion.** The config used to live in
 `v2/` and this page used to say `cd v2`; it does not any more, and running the
