@@ -5289,7 +5289,15 @@ guessing when to recount. Drawn for a signed-in reader only, through the
 gate's one definition, and the sign-in card names it as a reason to
 register; the download goes through `whenSignedIn`, the Excel download's own
 gate. The tick strip under a card's head and the strip's buttons are 42px
-targets on a phone (rule 14 in `_MOBILE-STANDARDS.md`).
+targets on a phone (rule 14 in `_MOBILE-STANDARDS.md`). **And the strip has
+room on every side** (owner, 2026-09-06, of it sitting flush under the filter
+bar: "add a bit more space here so that it looks better"): a gap from the bar
+above and the result bar below, and the bar's own inner padding inside, on a
+desktop and on a phone. The spacing lives in `oa-list.css` ALONE, because
+`v3.css` restates the strip's colours and sets no spacing on it, so the
+engine's rule is the one that reaches the site; the selftest pins both halves
+of that, and page-test reads the gaps off the rendered page at 1280px and
+390px rather than off the stylesheet.
 
 **The talk details live on the profile, keyed by the day.** A candidate's
 profile has always said WHICH DAYS they present (`informsDays`, Sunday to
