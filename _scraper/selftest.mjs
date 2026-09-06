@@ -15498,6 +15498,14 @@ async function testForumSeed() {
   ok(/firestore\(\)/.test(src) && !/initializeApp/.test(src.replace(/\/\*[\s\S]*?\*\//g, '')),
     'it takes its Admin SDK handle from _mail.mjs, the one definition');
 
+  /* THE GUARD RUNS OVER THE TAGS TOO. A tag is text a reader sees and it is
+     stored in the room's own tally; forumPost checks every one, so a
+     committed seed was the one road by which an ORCID iD or a telephone
+     number could reach the forum as a tag. `tagsOk` bounds the SHAPE — this
+     is the privacy rule. */
+  ok(/GUARD\.check\(String\(tag\)\)/.test(src) && /refuses the tag/.test(src),
+    'seed-forum runs the forum guard over every tag as well as every body');
+
   /* and this file says so */
   const doc = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
   ok(/seed-forum\.mjs/.test(doc) && /forum-seed-2026-qa\.json/.test(doc),
@@ -15616,15 +15624,28 @@ async function testForumThreadRemoval() {
      && /await main\(argv\)/.test(entry),
     'remove-forum-thread runs only when it is the file being run, never on import');
 
-  /* IT DELETES, AND WRITES EXACTLY ONE DOCUMENT: the room's tag tally, whose
-     only key the model names. Every other forum document it touches, it takes
-     away -- so there is no shape here for the writer scan to disagree with. */
-  eq((code.match(/batch\.set\(|\.set\(/g) || []).length, 1,
-    'the remover writes exactly one document');
-  ok(/R\.tags\(\)\.set\(\{ counts:/.test(code),
-    'and it is the tag tally, set as a value');
+  /* IT WRITES EXACTLY TWO DOCUMENTS, and the model names every key of both:
+     the room's tag tally, and the THREAD's own tombstone. Everything else it
+     touches -- the posts, their votes -- it deletes.
+
+     The tombstone is why the thread document is written rather than deleted:
+     seed-forum.mjs skips a thread whose id is already there, so a thread
+     deleted outright was quietly re-created by the next press of that button.
+     Hidden and blank, it is off every list and holds none of the words, which
+     is the shape forumDelete already leaves for an answered question. */
+  eq((code.match(/batch\.set\(|\.set\(/g) || []).length, 2,
+    'the remover writes exactly two documents');
+  ok(/tx\.set\(R\.tags\(\), \{ counts: back \}, \{ merge: true \}\)/.test(code),
+    'the tag tally, set as a value inside the transaction that read it');
+  ok(/plan\.refsFor\.thread\.set\(gonePatch, \{ merge: true \}\)/.test(code),
+    'and the thread\'s own tombstone');
   eq(FM.KEYS.tags, ['counts'], "whose one key is what the model names for a tally");
+  for (const k of ['hidden', 'title', 'excerpt']) {
+    ok(FM.KEYS.thread.includes(k), `the tombstone's "${k}" is a key the model names`);
+  }
   ok(/batch\.delete\(/.test(code), 'everything else it touches, it deletes');
+  ok(!/plan\.refsFor\.thread\]/.test(code),
+    '…and the thread document is not among them');
 
   /* the handle is the ACCOUNT'S for the season and is shared by every thread
      it has posted in, so a thread removal must never reach one */
@@ -15638,6 +15659,17 @@ async function testForumThreadRemoval() {
   ok(!/FieldValue/.test(code), 'the tally is never incremented by -1');
   eq(R.tallyAfter({ deadlines: 1 }, ['deadlines']), { deadlines: 0 }, 'a tag is given back one at a time');
   eq(R.tallyAfter({ deadlines: 0 }, ['deadlines']), {}, 'and a tally at zero is never driven below it');
+  /* …AND ONLY ONCE. A thread forumDelete has already CLOSED had its tags
+     returned in the same transaction that hid it, and `hidden` has no other
+     writer, so subtracting again would take one off every OTHER thread
+     carrying those tags — the one number here that cannot be recomputed. */
+  ok(/thread\.hidden \? \{\} : tallyAfter\(counts, tags\)/.test(code),
+    'a thread that was already closed gives its tags back no second time');
+  ok(/if \(!plan\.alreadyReturned && \(plan\.tags \|\| \[\]\)\.length\)/.test(code),
+    'and the write honours that rather than recomputing it');
+  ok(/runTransaction/.test(code) && /tx\.get\(R\.tags\(\)\)/.test(code),
+    'the tally is re-read inside the transaction that writes it — it is an ' +
+    'increment counter, and a flat write would overwrite a count raised mid-run');
 
   /* the room's own guide is refused: forumSeasons names it, and the seed
      button is drawn only while that field is empty */

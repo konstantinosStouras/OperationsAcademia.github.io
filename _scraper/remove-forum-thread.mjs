@@ -184,22 +184,39 @@ export async function planFor(D, ctx, tid) {
     posts: postsSnap.docs.length,
     votes,
     tags,
-    tally: tallyAfter(counts, tags),
+    /* A THREAD forumDelete HAS ALREADY CLOSED HAS HAD ITS TAGS GIVEN BACK, in
+       the same transaction that hid it (`closeThread` in delete.js), and
+       `hidden` has no other writer -- forumModerate carries pin, lock and
+       seedGuide and no removal. Subtracting them again would take one off
+       every OTHER thread carrying those tags, which is the one thing here
+       that cannot be recomputed from what is stored. It is also what makes a
+       SECOND press safe, now that the first leaves a tombstone. */
+    alreadyReturned: !!thread.hidden,
+    tally: thread.hidden ? {} : tallyAfter(counts, tags),
     refsFor: { thread: th.ref, posts: postsSnap.docs.map((p) => p.ref), votes: voteRefs },
   };
 }
 
 /**
  * Remove it. The POSTS and their votes go first and the thread document LAST,
- * so a run interrupted half way leaves the thread standing and a second press
+ * so a run interrupted half way leaves the words gone and a second press
  * finishes it -- the other order would leave posts under a thread nothing can
  * reach. The tally is settled after the deletes, so a thread that failed to go
  * is never subtracted from it.
+ *
+ * THE THREAD DOCUMENT IS LEFT AS A TOMBSTONE, not deleted -- hidden, with its
+ * title and its excerpt erased, which is exactly the shape `forumDelete`
+ * leaves for a question somebody has answered. Everything a reader can see is
+ * gone: the card leaves the list, the words leave the database, the posts and
+ * the votes are really deleted. What the empty document buys is the SEEDER's
+ * idempotence: `seed-forum.mjs` skips a thread whose id is already there, and
+ * with the document deleted outright the next press of that button quietly
+ * re-created every thread the maintainer had removed.
  */
 export async function removeInto(D, ctx, plan, log) {
   const R = refs(D, ctx);
   const say = log || (() => {});
-  const queue = [...plan.refsFor.votes, ...plan.refsFor.posts, plan.refsFor.thread];
+  const queue = [...plan.refsFor.votes, ...plan.refsFor.posts];
   let done = 0;
   for (let i = 0; i < queue.length; i += BATCH) {
     const batch = D.batch();
@@ -208,12 +225,38 @@ export async function removeInto(D, ctx, plan, log) {
     done += Math.min(BATCH, queue.length - i);
     say(`  deleted ${done}/${queue.length} document(s)`);
   }
-  const patch = plan.tally;
-  if (Object.keys(patch).length) {
-    await R.tags().set({ counts: patch }, { merge: true });
-    say(`  tag tally: ${Object.entries(patch).map(([k, n]) => `${k} -> ${n}`).join(', ')}`);
+  /* @doc thread */
+  const gonePatch = {
+    hidden: true,
+    title: '',
+    excerpt: '',
+  };
+  /* @end */
+  await plan.refsFor.thread.set(gonePatch, { merge: true });
+  say('  the thread is closed and blank; its posts and votes are gone');
+
+  /* THE TALLY IS READ AND WRITTEN IN ONE TRANSACTION. It is an `increment`
+     counter and the one thing here that cannot be recomputed from what is
+     stored, so a plan computed minutes ago and written flat would overwrite a
+     count a thread posted during the run had just raised. Floored at zero,
+     never `increment(-1)`: a tag past TAG_COUNT_CAP was never counted, has
+     nothing to give back, and a negative would print in Popular tags. */
+  let moved = {};
+  if (!plan.alreadyReturned && (plan.tags || []).length) {
+    moved = await D.runTransaction(async (tx) => {
+      const snap = await tx.get(R.tags());
+      const counts = (snap.exists && snap.data().counts) || {};
+      const back = tallyAfter(counts, plan.tags);
+      if (Object.keys(back).length) tx.set(R.tags(), { counts: back }, { merge: true });
+      return back;
+    });
+    if (Object.keys(moved).length) {
+      say(`  tag tally: ${Object.entries(moved).map(([k, n]) => `${k} -> ${n}`).join(', ')}`);
+    }
+  } else if (plan.alreadyReturned) {
+    say('  the tag tally was already given back when the thread was closed');
   }
-  return { deleted: queue.length, tags: Object.keys(patch).length };
+  return { deleted: queue.length, tags: Object.keys(moved).length };
 }
 
 /* ------------------------------------------------------------------ main */
@@ -267,7 +310,8 @@ async function main(argv) {
   }
   const { deleted, tags } = await removeInto(D, { room: o.room, season: o.season }, plan,
     (line) => console.log(line));
-  console.log(`remove-forum-thread: removed ${o.tid} -- ${deleted} document(s) deleted, ${tags} tag(s) given back.`);
+  console.log(`remove-forum-thread: removed ${o.tid} -- ${deleted} document(s) deleted, ` +
+    `the thread closed and blanked, ${tags} tag(s) given back.`);
 }
 
 /* -------------------------------------------------------------- selftest */
@@ -345,6 +389,36 @@ async function selftest() {
   const mainSrc = code.slice(code.indexOf('async function main'));
   ok(mainSrc.indexOf('if (!o.write)') < mainSrc.indexOf('removeInto('),
     'main() refuses to remove anything before it has read --write');
+
+  /* THE TAGS ARE GIVEN BACK ONCE. A thread forumDelete has already CLOSED had
+     them returned in the same transaction that hid it, and `hidden` has no
+     other writer -- so subtracting again would take one off every OTHER
+     thread carrying those tags, which is the one number here that cannot be
+     recomputed from what is stored. */
+  const closedPlan = { alreadyReturned: true, tags: ['about'], tally: {} };
+  ok(Object.keys(closedPlan.tally).length === 0 && closedPlan.alreadyReturned,
+    'a plan for an already-closed thread carries no tally patch');
+  ok(/thread\.hidden \? \{\} : tallyAfter\(counts, tags\)/.test(code),
+    'planFor gives nothing back for a thread that was already closed');
+  ok(/if \(!plan\.alreadyReturned && \(plan\.tags \|\| \[\]\)\.length\)/.test(code),
+    'and removeInto honours that rather than recomputing it');
+
+  /* AND IT IS READ AND WRITTEN IN ONE TRANSACTION: the tally is an increment
+     counter, so a plan computed minutes ago and written flat would overwrite
+     a count a thread posted during the run had just raised. */
+  ok(/D\.runTransaction\(async \(tx\) => \{[\s\S]{0,400}?tx\.get\(R\.tags\(\)\)/.test(code),
+    'the tally is re-read inside the transaction that writes it');
+
+  /* THE THREAD DOCUMENT IS A TOMBSTONE, not a delete -- everything a reader
+     can see is gone, and the empty document is what keeps seed-forum.mjs
+     idempotent: it skips a thread whose id is already there, so a deleted one
+     was quietly re-created by the next press of that button. */
+  ok(!/plan\.refsFor\.thread\]/.test(code),
+    'the thread document is not in the delete queue');
+  ok(/plan\.refsFor\.thread\.set\(gonePatch, \{ merge: true \}\)/.test(code),
+    'it is closed and blanked instead, the shape forumDelete already leaves');
+  ok(/hidden: true,[\s\S]{0,80}title: '',[\s\S]{0,80}excerpt: '',/.test(code),
+    'and the tombstone carries exactly those three fields');
 
   console.log(`remove-forum-thread selftest: ${n} checks passed`);
 }

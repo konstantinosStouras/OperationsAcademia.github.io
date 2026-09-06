@@ -148,6 +148,15 @@ export function planFrom(seed, opts) {
     if (!M.tagsOk(t.tags)) problems.push(`${tid}: tags must be ${M.TAG_MIN} to ${M.TAG_MAX} slugs`);
     const bad = GUARD.check(t.title);
     if (bad) problems.push(`${tid}: the forum guard refuses the title (${bad})`);
+    /* THE TAGS TOO. A tag is text a reader sees, it is stored in the room's
+       own tally, and `forumPost` runs the guard over every one of them — so a
+       committed seed was the one road by which an ORCID iD or a telephone
+       number could reach the forum as a tag. `tagsOk` bounds the SHAPE; this
+       is the privacy rule. */
+    for (const tag of (Array.isArray(t.tags) ? t.tags : [])) {
+      const tagBad = GUARD.check(String(tag));
+      if (tagBad) problems.push(`${tid}: the forum guard refuses the tag "${tag}" (${tagBad})`);
+    }
 
     const posts = [];
     t.posts.forEach((p, i) => {
@@ -381,6 +390,19 @@ async function selftest() {
   ok(!/"uid"|"email"|"sub"|"name":/.test(all), 'no seeded document carries a uid, an e-mail, a name or a profile id');
   ok(!GUARD.check(plan.map((t) => t.title + ' ' + t.posts.map((p) => p.body).join(' ')).join(' ')),
     'and the whole seed passes the forum guard');
+  /* …TAGS INCLUDED. A tag is text a reader sees and it is stored in the
+     room's own tally, and forumPost runs the guard over every one — so a
+     committed seed was the one road by which an ORCID iD or a telephone
+     number could reach the forum as a tag. */
+  ok(plan.every((t) => (t.tags || []).every((g) => !GUARD.check(String(g)))),
+    'every tag in the committed seed passes it too');
+  {
+    const withBadTag = JSON.parse(JSON.stringify(seed));
+    withBadTag.threads[0].tags = ['0000-0002-1825-0097'];
+    ok(planFrom(withBadTag, { season: seed.season, room: seed.room }).problems
+      .some((x) => /refuses the tag/.test(x)),
+      'and an ORCID iD typed as a tag is refused rather than published');
+  }
 
   /* the guard is re-run here rather than trusted from the file */
   const withEmail = { ...seed, threads: [{ row: 99, date: '2026-09-04', title: 'Hi', tags: ['about'], posts: [{ by: 'quiet heron 42', body: 'write to me at a@b.edu' }] }] };

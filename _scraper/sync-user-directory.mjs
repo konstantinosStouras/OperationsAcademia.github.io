@@ -162,9 +162,20 @@ export function rowFromAuthUser(user, existing) {
   const hadFirst = typeof had.first === 'number' ? had.first : 0;
   const hadSeen = typeof had.seen === 'number' ? had.seen : 0;
 
+  /* AN EMPTY `email` IS NOT AN EMPTY STRING, IT IS NO KEY AT ALL. The rules
+     pin the address to `request.auth.token.email`, and an ORCID sign-in
+     carries no e-mail claim — so the BROWSER omits the key for such an
+     account (`if (email) row.email = ...` in oa-accounts.js) and the rule's
+     "not present, or equal" passes. Writing `email: ''` from the Admin SDK,
+     which bypasses the rules, left `'' == null` in the merged document the
+     owner's own next write sends: permission-denied, for ever, on the row
+     they are supposed to keep current. That is the sync-user-directory trap
+     this file's own header describes, sprung by a VALUE rather than by a
+     fifth key. */
+  const email = String(user.email || had.email || '').slice(0, 200);
   const row = {
     name: String(had.name || user.displayName || '').slice(0, 200),
-    email: String(user.email || had.email || '').slice(0, 200),
+    ...(email ? { email } : {}),
     // earliest non-zero, so a row opened by the browser is corrected to the
     // real joined date rather than kept at the day the site first saw them
     first: [authFirst, hadFirst].filter(Boolean).sort((a, b) => a - b)[0] || 0,
@@ -178,7 +189,10 @@ export function rowFromAuthUser(user, existing) {
      worth writing. */
   if (!row.first && !row.seen && !row.email && !row.name) return null;
 
-  const same = ROW_KEYS.every((k) => had[k] === row[k]);
+  /* `in` as well as the value, so a row that already holds the poisoned
+     `email: ''` is seen as DIFFERENT from one that omits it and is healed on
+     the next run rather than being read as already current. */
+  const same = ROW_KEYS.every((k) => (k in had) === (k in row) && had[k] === row[k]);
   return same ? null : row;
 }
 
@@ -303,7 +317,12 @@ async function main() {
   const flush = async () => {
     if (!pending.length || SCAN || DRY) { pending = []; return; }
     const batch = fb.db.batch();
-    for (const [uid, row] of pending) batch.set(col.doc(uid), row, { merge: true });
+    /* A REPLACE, NOT A MERGE, and that is what lets the key GO. `row` is the
+       whole document — the rules bound it to exactly these four keys — so a
+       merge could only ever add to it, and an `email: ''` already stored
+       would survive every run and go on freezing that row against its own
+       owner. */
+    for (const [uid, row] of pending) batch.set(col.doc(uid), row);
     await batch.commit();
     pending = [];
   };
@@ -404,8 +423,24 @@ function selftest() {
 
   eq(rowFromAuthUser(user({ displayName: '' }), null).name, '',
     'an account with no name still gets a row — the roster shows a dash');
-  eq(rowFromAuthUser(user({ email: undefined }), null).email, '',
-    'and so does a provider sign-in carrying no e-mail claim');
+  /* AN EMPTY ADDRESS IS NO KEY AT ALL. The rules pin `email` to
+     `request.auth.token.email`, and an ORCID sign-in carries no claim — so
+     the browser omits the key and the rule's "not present, or equal" passes.
+     Writing `email: ''` from the Admin SDK, which bypasses the rules, left
+     `'' == null` in the merged document the OWNER's next write sends:
+     permission-denied for ever, on the row they are meant to keep current. */
+  const noMail = rowFromAuthUser(user({ email: undefined }), null);
+  ok(noMail && !('email' in noMail),
+    'a provider sign-in carrying no e-mail claim gets a row with NO email key');
+  ok(noMail && typeof noMail.name === 'string' && noMail.seen > 0,
+    '…and everything else about it, so the roster still lists them');
+  ok(!rowFromAuthUser(user({ email: undefined }), noMail),
+    'and a run that changes nothing writes nothing');
+  const poisoned = rowFromAuthUser(user({ email: undefined }), { ...noMail, email: '' });
+  ok(poisoned && !('email' in poisoned),
+    'a row already holding the poisoned empty string is HEALED rather than read as current');
+  ok(/@/.test(rowFromAuthUser(user(), null).email || ''),
+    'while an account that really has an address keeps it');
 
   /* --- the no-op, which is what makes a schedule cheap -------------------- */
   eq(rowFromAuthUser(user(), fresh), null,
