@@ -1,12 +1,15 @@
 /* ---------------------------------------------------------------------------
    forumEdit({ room, tid, pid, body }) -> { editedAt }
 
-   The author's own post, within EDIT_WINDOW_MS of the MINUTE it was stamped
-   (so up to 59 seconds more than fifteen minutes; the function is the
-   authority, the page only draws the countdown). The body changes, editedAt
-   is stamped, and the first post's edit recomputes the thread's excerpt.
-   Tags are fixed at creation and are not touched here, so the room tally
-   never drifts.
+   The author's own post, at ANY time while the season is running (owner,
+   2026-09-06: "the user can delete and edit the post any time"). There used
+   to be a fifteen-minute window here, drawn as a countdown on the page; it
+   is gone from the model as well as from this file, so nothing measures
+   against it. The body changes, editedAt is stamped, and the first post's
+   edit recomputes the thread's excerpt. Tags are fixed at creation and are
+   not touched here, so the room tally never drifts. What still refuses an
+   edit: somebody else's post, a deleted one, a locked or hidden thread, and
+   an archived season.
    --------------------------------------------------------------------------- */
 
 'use strict';
@@ -34,9 +37,7 @@ exports.forumEdit = onCall(P.OPTS, async (req) => {
     if (Number(tv.season) !== Number(Y)) P.refuse('failed-precondition', 'archive');
     if (tv.locked || tv.hidden || pv.hidden) P.refuse('failed-precondition', 'locked');
     if (pv.by !== m.handle) P.refuse('permission-denied', 'author');
-    const now = M.minute();
-    if (now >= Number(pv.t) + M.EDIT_WINDOW_MS) P.refuse('failed-precondition', 'window');
-    editedAt = now;
+    editedAt = M.minute();
     /* @doc post */
     const postPatch = {
       body,

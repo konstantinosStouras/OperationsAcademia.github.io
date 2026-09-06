@@ -66,7 +66,6 @@ const ERRORS = {
   asker: 'Only the member who asked the question can tick the answer.',
   answer: 'Only an answer can be ticked, and only while its words are still there.',
   answered: 'A question that has been answered cannot be deleted.',
-  window: 'The fifteen-minute edit window has closed. You can still delete the post.',
   own: 'You cannot vote on your own post.',
   busy: 'The forum is busy. Try again in a moment.',
   bounds: 'That is too long, or empty.',

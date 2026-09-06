@@ -22,10 +22,44 @@
    THE HANDLE IS THE ONLY IDENTITY ON THE PAGE. The uid, the e-mail and the
    profile id never reach the markup: the banner prints the handle, a post
    prints its author's handle, a quote prints the quoted author's handle. The
-   join's answer is kept in sessionStorage ('oa-forum-me', keyed by uid and
-   season) so a second page in the session costs no call, and sign-out clears
-   it (oa-accounts.js). The seen-marks that decide the New badge live in
-   localStorage ('oa-forum-seen', keyed by uid) and are cleared the same way.
+   join's answer is kept in localStorage ('oa-forum-me', keyed by uid and
+   season) so the next visit on this device costs no call, and sign-out
+   clears it (oa-accounts.js). The seen-marks that decide the New badge live
+   beside it ('oa-forum-seen', keyed by uid) and are cleared the same way.
+
+   THE PAGE IS DRAWN FROM WHAT THIS BROWSER REMEMBERS, BEFORE THE DATABASE
+   IS ASKED (owner, 2026-09-06: "when I enter the forum the page doesn't load
+   immediately and needs a few seconds to refresh"). It used to wait for the
+   SDK, then for the session, then for forumJoin, a Cloud Function that is
+   cold on a forum this quiet and takes seconds to wake, and only then draw a
+   thing. Now a reader the header hint remembers, whose join this browser
+   remembers, gets the rooms, the banner, the side cards and the list's
+   loading line on the first frame, from the same localStorage the header
+   chip is painted from; the threads are read the moment the session is
+   known (db() below waits for that, not for this page's own listener), and
+   forumJoin is called again BEHIND the page, quietly: a difference a reader
+   would see (the handle, the rooms, a ban) repaints, a refusal by reason
+   (the account no longer admitted) forgets the memory and says so, and a
+   function that cannot be reached changes nothing, the unreachable-source
+   rule. The first visit on a device still waits for the join, because the
+   handle is drawn on the server and nowhere else. The Functions bundle is
+   fetched at boot for a remembered reader rather than at the first call.
+
+   A POST IS ON THE PAGE THE MOMENT THE FUNCTION ANSWERS. The page used to
+   throw the thread away after every write and read it back (the thread, every
+   post and a second callable for the reader's own votes), which is what made
+   posting feel slow after the function had already said yes. Now an answer,
+   a question, an edit and a deletion are painted from the function's answer
+   and the reader's own words, with the database read again QUIETLY behind
+   them (refreshThread: no loading line, no rebuilt answer box, a repaint only
+   where what came back differs). Opening a thread paints its heading from
+   the list's own row before the posts land, and asks for the reader's votes
+   IN PARALLEL with the posts rather than after them; the buttons take the
+   pressed state when the votes arrive. And because a callable is a service
+   that goes cold, the page WARMS the posting function the moment a reader
+   starts writing and the voting one when they first reach for a vote button
+   ({ room, warm: true }, a call that runs the preamble and writes nothing),
+   so the press that follows lands on an instance that is already up.
 
    THE LIST IS AN OALIST MOUNT FED BY cfg.source, the one generic addition the
    engine gained for this page: the threads come from a Firestore read rather
@@ -57,6 +91,13 @@
    member.js can answer with, so a refusal reads as a sentence and never as
    "functions/permission-denied". The guard runs on every keystroke so the
    refusal the function WOULD give is shown before anything is sent.
+
+   THERE IS NO EDIT WINDOW (owner, 2026-09-06: "the user can delete and edit
+   the post any time"). The fifteen-minute countdown the Edit button used to
+   carry is gone with the constant it read; a member's own post is theirs to
+   edit and to delete while the season runs, and the one thing that holds a
+   post is a question with a live answer under it, which the function refuses
+   to delete and the page draws disabled with the reason.
 
    No em dash anywhere in this file, in the copy or the comments.
    --------------------------------------------------------------------------- */
@@ -130,7 +171,6 @@
     asker: 'Only the member who asked the question can tick the answer.',
     answer: 'Only an answer can be ticked, and only while its words are still there.',
     answered: 'This question has answers, so it cannot be deleted. It can go once every answer has been deleted.',
-    window: 'The fifteen-minute edit window has closed; the post stays as written. You can still delete it.',
     own: 'You cannot vote on your own post.',
     busy: 'The forum is busy right now. Please try again in a moment.',
     bounds: 'Too long, or empty. A title is at most ' + M.BOUNDS.title + ' characters and a post at most ' + M.BOUNDS.body + '.',
@@ -191,6 +231,7 @@
     guides: {},                     // room -> guide thread id, this season
     tally: {},                      // slug -> count, this room and season
     votes: {},                      // pid -> the caller's own vote, this thread
+    votesFor: '',                   // the thread those votes belong to
     quote: null,                    // { n, by, text } waiting above the answer box
     saved: { uid: '', items: {}, tags: [] },   // this browser's own marks
     rows: [],                       // the threads the list last read
@@ -265,15 +306,36 @@
 
   /* ---------------------------------------------------- the memory */
 
+  /* THE JOIN'S ANSWER, REMEMBERED ON THIS DEVICE. In localStorage rather than
+     the session's, because the forum is opened from the address bar in a new
+     tab as often as not, and a memory that empties with the tab put forumJoin
+     back on the critical path of every visit. Trusted only for the same
+     account and the same season (a rolled season needs a new handle), and
+     revalidated behind the page on every visit (see boot). Sign-out removes
+     it, as it removes the seen-marks beside it. */
   function readMe(uid) {
+    if (!uid) return null;
     try {
-      var v = JSON.parse(sessionStorage.getItem(ME_KEY) || 'null');
+      var v = JSON.parse(localStorage.getItem(ME_KEY) || 'null');
       if (v && v.uid === uid && Number(v.season) === Y && v.handle) return v;
     } catch (e) { /* private mode */ }
     return null;
   }
   function writeMe(me) {
-    try { sessionStorage.setItem(ME_KEY, JSON.stringify(me)); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(ME_KEY, JSON.stringify(me)); } catch (e) { /* ignore */ }
+  }
+  function forgetMe() {
+    try { localStorage.removeItem(ME_KEY); } catch (e) { /* ignore */ }
+  }
+  /** The account the header hint remembers, read exactly as the page's own
+      head snippet reads it (a pending account is no account): the uid the
+      memory above may be trusted for before the session has resolved. */
+  function hintUid() {
+    try {
+      var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
+      if (h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid) return String(h.uid);
+    } catch (e) { /* private mode */ }
+    return '';
   }
   function readSeen(uid) {
     try {
@@ -284,6 +346,12 @@
   }
   function writeSeen(v) {
     try { localStorage.setItem(SEEN_KEY, JSON.stringify(v)); } catch (e) { /* ignore */ }
+  }
+  function markSeen(tid, n) {
+    if (!S.me) return;
+    var seen = readSeen(S.me.uid);
+    seen.seen[tid] = Number(n) || 0;
+    writeSeen(seen);
   }
 
   /* WHAT THIS READER HAS SAVED AND WHICH TAGS THEY WATCH, in this browser and
@@ -353,8 +421,43 @@
     }).then(function (r) { return (r && r.data) || {}; });
   }
 
+  /** The database, once the SESSION IS KNOWN. The page is drawn before the
+      SDK has restored the account (see boot), so a read issued then must
+      wait for the first auth answer or it would go out with no token and be
+      refused; it waits on the SDK's own auth event rather than on this page's
+      listener, which is the same instant with nothing of this file's in
+      between. One promise for every reader of it. */
+  var dbP = null;
   function db() {
-    return OAFB.ready().then(function (fb) { return fb.firestore(); });
+    if (dbP) return dbP;
+    dbP = OAFB.ready().then(function (fb) {
+      return new Promise(function (resolve) {
+        var settled = false;
+        var off = fb.auth().onAuthStateChanged(function () {
+          if (settled) return;
+          settled = true;
+          if (typeof off === 'function') off();
+          resolve(fb.firestore());
+        });
+      });
+    });
+    dbP.catch(function () { dbP = null; });
+    return dbP;
+  }
+
+  /* A CALLABLE IS A SERVICE THAT GOES COLD after a few idle minutes, and on a
+     forum this quiet nearly every post would land on a cold one: seconds of
+     module loading and a secret read before the post is even looked at. So
+     the page wakes the function BEFORE it is needed, once per page and per
+     function, with a call the function answers without writing ({ room,
+     warm: true }; before that branch is deployed the same call is refused
+     for its empty body, which warms the instance just the same). Sent when
+     a reader starts writing, and when they first reach for a vote button. */
+  var warmed = {};
+  function warmUp(name) {
+    if (warmed[name] || !S.me || S.me.banned || S.archive || !S.room) return;
+    warmed[name] = true;
+    call(name, { room: S.room, warm: true }).catch(function () { /* a refusal warms it too */ });
   }
   var COL = (window.OAFB && OAFB.col) || {};
   var C = {
@@ -399,12 +502,41 @@
     if (vbtn) vbtn.addEventListener('click', function () { A.openVerifyPanel(); });
     if (!window.OAFB || !OAFB.enabled) return;
 
+    /* A REMEMBERED READER IS DRAWN NOW, from the join this browser kept for
+       the account the header hint names: the rooms, the banner, the side
+       cards and the list with its loading line, on the first frame. The
+       reads it starts wait for the session inside db(); the session, when
+       it resolves, either confirms the account (and revalidates the join
+       behind the page) or turns out to be somebody else, in which case the
+       ordinary path below takes over. */
+    var hinted = A.hint() === 'in' ? readMe(hintUid()) : null;
+    if (hinted) {
+      S.me = hinted;
+      S.saved = readSaved(hinted.uid);
+      draw();
+    }
+    /* the Functions bundle is needed by every remembered reader (the join's
+       revalidation, or the first post), so it is fetched while the session
+       restores rather than at the first call; a failure is said at that call */
+    if (A.hint() === 'in') OAFB.readyFunctions().catch(function () { /* said at the first call */ });
+
     var started = null;
     A.onChange(function (u) {
-      if (A.pendingUser()) { hideAll(); show($('oa-forum-verify'), true); started = null; return; }
-      if (!u) { hideAll(); show($('oa-needauth'), true); started = null; return; }
+      if (A.pendingUser()) { hideAll(); show($('oa-forum-verify'), true); started = null; S.me = null; return; }
+      if (!u) { hideAll(); show($('oa-needauth'), true); started = null; S.me = null; return; }
       if (started === u.uid) return;
       started = u.uid;
+      var remembered = S.me && S.me.uid === u.uid ? S.me : readMe(u.uid);
+      if (remembered) {
+        if (S.me !== remembered) {
+          S.me = remembered;
+          S.saved = readSaved(u.uid);
+          draw();
+        }
+        revalidate(u);
+        return;
+      }
+      S.me = null;
       S.saved = readSaved(u.uid);
       hideAll();
       show($('oa-forum-loading'), true);
@@ -419,21 +551,48 @@
     });
   }
 
-  /** forumJoin, once per session per account: the handle and the rooms. */
+  /** forumJoin's answer in the page's own shape, keyed to the account. */
+  function meOf(u, r) {
+    return {
+      uid: u.uid,
+      season: Number(r.season) || Y,
+      handle: String(r.handle || ''),
+      guideAt: Number(r.guideAt) || 0,
+      banned: !!r.banned,
+      rooms: { candidates: !!(r.rooms && r.rooms.candidates), open: !!(r.rooms && r.rooms.open) }
+    };
+  }
+
+  /** forumJoin, for an account this browser has no memory of: the handle and
+      the rooms, waited for, because there is nothing to draw without them. */
   function join(u) {
-    var cached = readMe(u.uid);
-    if (cached) return Promise.resolve(cached);
     return call('forumJoin', {}).then(function (r) {
-      var me = {
-        uid: u.uid,
-        season: Number(r.season) || Y,
-        handle: String(r.handle || ''),
-        guideAt: Number(r.guideAt) || 0,
-        banned: !!r.banned,
-        rooms: { candidates: !!(r.rooms && r.rooms.candidates), open: !!(r.rooms && r.rooms.open) }
-      };
+      var me = meOf(u, r);
       writeMe(me);
       return me;
+    });
+  }
+
+  /** forumJoin again, BEHIND a page already drawn from the memory. Repaints
+      only for a difference a reader would see; a refusal by reason (the
+      account is no longer admitted) forgets the memory and shows the
+      refusal; anything else (the function unreachable, a cold start that
+      timed out, a claim that was busy) leaves the page as it is. */
+  function revalidate(u) {
+    var A = window.OAAccounts;
+    call('forumJoin', {}).then(function (r) {
+      var me = meOf(u, r);
+      writeMe(me);
+      if (!A.user() || A.user().uid !== u.uid || !S.me || S.me.uid !== u.uid) return;
+      var moved = me.handle !== S.me.handle || me.banned !== S.me.banned ||
+        me.rooms.candidates !== S.me.rooms.candidates || me.rooms.open !== S.me.rooms.open;
+      S.me = me;
+      if (moved) draw();
+    }).catch(function (err) {
+      var reason = String((err && err.details && err.details.reason) || '');
+      if (reason !== 'verified' && reason !== 'candidate' && reason !== 'auth') return;
+      forgetMe();
+      if (A.user() && A.user().uid === u.uid) { S.me = null; fail(friendly(err)); }
     });
   }
 
@@ -457,7 +616,6 @@
       if (id !== 'oa-forum-listview') { n.innerHTML = ''; n.className = ''; }
     });
     S.quote = null;
-    S.votes = {};
   }
 
   function draw() {
@@ -956,33 +1114,64 @@
     return threadsCol(d, S.season, S.room).doc(tid).collection(C.posts);
   }
 
-  function drawThread() {
-    var host = $('oa-forum-thread');
-    if (!host) return;
-    show(host, true);
-    host.innerHTML = '<p class="oa-hint">Loading the thread…</p>';
-    var thread = null, posts = [];
-    db().then(function (d) {
-      var ref = threadsCol(d, S.season, S.room).doc(S.tid);
-      return Promise.all([ref.get(), postsOf(d, S.tid).orderBy('n').get()]);
+  /** The thread and its posts, read once: `{ thread, posts }`, the posts in
+      order of n. Throws for a thread the room does not hold. */
+  function readThread(tid) {
+    return db().then(function (d) {
+      var ref = threadsCol(d, S.season, S.room).doc(tid);
+      return Promise.all([ref.get(), postsOf(d, tid).orderBy('n').get()]);
     }).then(function (r) {
       if (!r[0].exists) throw new Error('That thread could not be found in this room.');
-      thread = r[0].data() || {};
-      thread.id = S.tid;
+      var thread = r[0].data() || {};
+      thread.id = tid;
+      var posts = [];
       r[1].forEach(function (doc) {
         var v = doc.data() || {};
         v.id = doc.id;
         posts.push(v);
       });
       posts.sort(function (a, b) { return (Number(a.n) || 0) - (Number(b.n) || 0); });
-      if (S.archive || thread.locked) return { votes: {} };
-      return call('forumThreadVotes', { room: S.room, tid: S.tid }).catch(function () { return { votes: {} }; });
-    }).then(function (r) {
-      S.votes = (r && r.votes) || {};
-      var seen = readSeen(S.me.uid);
-      seen.seen[S.tid] = Number(thread.n) || posts.length;
-      writeSeen(seen);
-      renderThread(host, thread, posts);
+      return { thread: thread, posts: posts };
+    });
+  }
+
+  /** The list's own row for a thread, if the list has read it: enough to
+      draw the heading before the posts land. */
+  function rowOf(tid) {
+    for (var i = 0; i < S.rows.length; i++) if (S.rows[i].id === tid) return S.rows[i];
+    return null;
+  }
+
+  function drawThread() {
+    var host = $('oa-forum-thread');
+    if (!host) return;
+    show(host, true);
+    var tid = S.tid;
+    var known = rowOf(tid);
+    /* the heading from the list's row where there is one, so pressing a card
+       moves the page at once; the posts follow */
+    host.innerHTML = '<div id="oa-forum-thhead">' + (known ? headerHTML(known) : '') + '</div>' +
+      '<p class="oa-hint" id="oa-forum-thwait">' + (known ? 'Loading the answers…' : 'Loading the thread…') + '</p>';
+    if (S.votesFor !== tid) { S.votes = {}; S.votesFor = tid; }
+    var painted = false;
+    /* the reader's own votes, asked for IN PARALLEL with the posts: a second
+       round trip, and a cold function's worth of waiting, that the thread
+       used to sit behind. The buttons take the pressed state when it lands,
+       before or after the render. Never for an archive, and not for a thread
+       the list already says is locked, where no button is drawn. */
+    if (!S.archive && !(known && known.locked)) {
+      call('forumThreadVotes', { room: S.room, tid: tid }).then(function (r) {
+        if (S.tid !== tid) return;
+        S.votes = (r && r.votes) || {};
+        if (painted) paintVotes();
+      }).catch(function () { /* the buttons simply show no pressed state */ });
+    }
+    readThread(tid).then(function (r) {
+      if (S.tid !== tid || host.hidden) return;   // the reader has moved on
+      markSeen(tid, Number(r.thread.n) || r.posts.length);
+      renderThread(host, r.thread, r.posts);
+      painted = true;
+      paintVotes();
       if (location.hash && /^#p\d+$/.test(location.hash)) {
         var target = document.getElementById(location.hash.slice(1));
         if (target) target.scrollIntoView();
@@ -990,9 +1179,106 @@
       var h1 = $('oa-forum-title');
       if (h1 && !location.hash) { h1.setAttribute('tabindex', '-1'); h1.focus(); }
     }).catch(function (err) {
+      if (S.tid !== tid) return;
       host.innerHTML = '<div class="oa-note is-warn"><p><strong>The thread could not be loaded.</strong> ' +
         esc(friendly(err)) + '</p><p><a href="' + esc(href({ room: S.room, season: S.season })) + '">Back to the questions</a></p></div>';
     });
+  }
+
+  /** The reader's own votes, onto the buttons that are drawn. */
+  function paintVotes() {
+    Array.prototype.forEach.call(document.querySelectorAll('#oa-forum-thread .oa-forum-post'), function (li) {
+      var v = Number(S.votes[li.getAttribute('data-pid')]) || 0;
+      Array.prototype.forEach.call(li.querySelectorAll('.oa-forum-v'), function (b) {
+        b.setAttribute('aria-pressed', Number(b.getAttribute('data-v')) === v ? 'true' : 'false');
+      });
+    });
+  }
+
+  /** What a repaint is decided on: the facts the page draws, not the stamps
+      (a minute the function rounded and the page rounded alike, or an
+      edit's exact instant, are not a difference a reader would see). */
+  function shapeOf(thread, posts) {
+    return JSON.stringify([
+      Number(thread.n) || 0, String(thread.accepted || ''), !!thread.locked, !!thread.hidden,
+      String(thread.title || ''), String(thread.by || ''),
+      posts.map(function (p) {
+        return [p.id, Number(p.n) || 0, String(p.by || ''), String(p.body || ''), Number(p.up) || 0, Number(p.down) || 0,
+          !!p.hidden, String(p.hiddenBy || ''), !!p.editedAt,
+          p.quote && p.quote.text ? [Number(p.quote.n) || 0, String(p.quote.by || ''), String(p.quote.text)] : null];
+      })
+    ]);
+  }
+
+  /** Read the thread on screen again, QUIETLY: no loading line, no rebuilt
+      answer box, and a repaint only where what came back differs from what
+      the page already shows. Run behind every write of the page's own, so a
+      post drawn from the function's answer is checked against the database
+      without the reader waiting for it, and anything somebody else wrote in
+      the meantime arrives with it. A read that fails changes nothing: the
+      page already shows what the function answered. */
+  function refreshThread() {
+    var tid = S.tid;
+    if (!tid || !S.thread) return;
+    readThread(tid).then(function (r) {
+      if (S.tid !== tid || !S.thread) return;
+      if (shapeOf(r.thread, r.posts) === shapeOf(S.thread, S.posts)) return;
+      repaintPosts(r.thread, r.posts);
+    }).catch(function () { /* the page already shows what the function answered */ });
+  }
+
+  /** Move the address WITHOUT redrawing, for a view the page has already
+      drawn from what it knows: a post that is on the page, a thread just
+      asked. The Back button and a reload still land where the address says. */
+  function arrive(o) {
+    try { history.pushState(null, '', href(o)); } catch (e) { /* the address is a convenience */ }
+    readState();
+  }
+
+  /** The first BOUNDS.excerpt characters of a body, cut at a word: the
+      thread's excerpt as forumPost derives it (P.excerptOf in member.js),
+      so a thread the page draws before reading it back lists the same way. */
+  function excerptOf(body) {
+    var t = String(body || '').replace(/\s+/g, ' ').trim();
+    if (t.length <= M.BOUNDS.excerpt) return t;
+    var cut = t.slice(0, M.BOUNDS.excerpt);
+    var at = cut.lastIndexOf(' ');
+    return (at > M.BOUNDS.excerpt / 2 ? cut.slice(0, at) : cut).trim();
+  }
+
+  /** A post as the function has just stored it, from its answer ({ tid,
+      pid, n }) and the reader's own words: the shape KEYS.post names, with
+      the reader's handle as `by` and the minute the function stamps. */
+  function localPost(r, body, quote) {
+    return {
+      id: String(r.pid), season: S.season, room: S.room, tid: String(r.tid || S.tid), n: Number(r.n) || 0,
+      by: S.me.handle, body: String(body || ''), t: M.minute(), up: 0, down: 0,
+      quote: quote && quote.text ? { n: Number(quote.n) || 0, by: String(quote.by || ''), text: String(quote.text) } : null,
+      hidden: false, hiddenBy: ''
+    };
+  }
+
+  function liveOf(posts) {
+    return posts.filter(function (p) { return Number(p.n) !== 1 && !p.hidden; }).length;
+  }
+
+  /** A thread the page draws WITHOUT reading it: the one the reader has just
+      asked, from the function's answer and their own words, read back
+      quietly behind the page. */
+  function openLocalThread(thread, posts) {
+    arrive({ room: S.room, season: S.season, t: thread.id });
+    hideViews();
+    var host = $('oa-forum-thread');
+    if (!host) return;
+    show(host, true);
+    S.votes = {};
+    S.votesFor = thread.id;
+    markSeen(thread.id, Number(thread.n) || posts.length);
+    renderThread(host, thread, posts);
+    var h1 = $('oa-forum-title');
+    if (h1) { h1.setAttribute('tabindex', '-1'); h1.focus(); }
+    window.scrollTo(0, 0);
+    refreshThread();
   }
 
   /* A web address in a post is drawn as a link (owner, 2026-09-05). It runs
@@ -1074,27 +1360,12 @@
     wirePosts(ol, S.thread, answers, S.readOnly);
   }
 
-  function renderThread(host, thread, posts) {
-    var first = posts[0] || {};
-    /* A THREAD WHOSE QUESTION HAS GONE IS CLOSED (owner, 2026-09-05: "the
-       entire thread should be deleted too, and noone should be able to reply
-       in such a thread"). Deleting a question now hides its thread, so this
-       reads as closed only for rows written before that rule; the function
-       refuses an answer to one either way, and the maintainer's Delete on the
-       question finishes it off the list. */
-    var gone = !!first.hidden && Number(first.n) === 1;
-    var readOnly = S.archive || !!thread.locked || !!thread.hidden || gone;
-    /* answers still standing: a deleted one no longer holds the question down */
-    var live = posts.filter(function (p) { return Number(p.n) !== 1 && !p.hidden; }).length;
-    var answers = posts.slice(1);
-    S.thread = thread;
-    S.posts = posts;
-    S.readOnly = readOnly;
-    S.live = live;
-    var out = '';
-    out += '<nav class="oa-forum-crumbs" aria-label="You are here"><a href="' + esc(href({ room: S.room, season: S.season })) + '">Questions</a> &rsaquo; ' +
-      '<span>' + esc(thread.title) + '</span></nav>';
-    out += '<header class="oa-forum-th"><h1 id="oa-forum-title">' + esc(thread.title) + '</h1>' +
+  /** The crumbs and the heading: drawn from the LIST's own row the moment a
+      card is pressed, and again from the thread document once it is read. */
+  function headerHTML(thread) {
+    return '<nav class="oa-forum-crumbs" aria-label="You are here"><a href="' + esc(href({ room: S.room, season: S.season })) + '">Questions</a> &rsaquo; ' +
+      '<span>' + esc(thread.title) + '</span></nav>' +
+      '<header class="oa-forum-th"><h1 id="oa-forum-title">' + esc(thread.title) + '</h1>' +
       '<div class="oa-forum-thmeta">' +
         '<span>Asked <b title="' + esc(stamp(thread.t)) + '">' + esc(ago(thread.t)) + '</b></span>' +
         '<span>Active <b title="' + esc(stamp(thread.lastAt)) + '">' + esc(ago(thread.lastAt)) + '</b></span>' +
@@ -1105,10 +1376,80 @@
       '<div class="oa-forum-thtags">' + (Array.isArray(thread.tags) ? thread.tags : []).map(function (t) {
         return '<a class="oa-label oa-label-tag" data-tag="' + esc(t) + '" href="' + esc(href({ room: S.room, season: S.season, tags: t })) + '">' + esc(t) + '</a>';
       }).join('') + '</div></header>';
+  }
 
-    out += '<ol class="oa-forum-posts oa-forum-qpost" id="oa-forum-posts">' +
-      postHTML(first, thread, readOnly, true, live) + '</ol>';
-    out += '<div class="oa-forum-answers-h"' + (answers.length ? '' : ' hidden') + '>' +
+  /** Whether the thread on screen takes no more writes: an archive, a locked
+      or hidden thread, or a thread whose QUESTION has gone (owner,
+      2026-09-05: "the entire thread should be deleted too, and noone should
+      be able to reply in such a thread"). Deleting a question now hides its
+      thread, so the last case reads as closed only for rows written before
+      that rule; the function refuses an answer to one either way, and the
+      maintainer's Delete on the question finishes it off the list. */
+  function closedOf(thread, posts) {
+    var first = posts[0] || {};
+    var gone = !!first.hidden && Number(first.n) === 1;
+    var readOnly = S.archive || !!thread.locked || !!thread.hidden || gone;
+    return { gone: gone, readOnly: readOnly };
+  }
+
+  function paintHeader() {
+    var head = $('oa-forum-thhead');
+    if (head && S.thread) head.innerHTML = headerHTML(S.thread);
+  }
+  function paintQuestion() {
+    var ol = $('oa-forum-posts');
+    if (!ol || !S.thread) return;
+    ol.innerHTML = postHTML(S.posts[0] || {}, S.thread, S.readOnly, true, S.live);
+    wirePosts(ol, S.thread, S.posts, S.readOnly);
+  }
+  function paintHeading() {
+    var h = $('oa-forum-answers-h');
+    if (!h) return;
+    var answers = S.posts.slice(1);
+    h.hidden = !answers.length;
+    var h2 = h.querySelector('h2');
+    if (h2) h2.textContent = answers.length + ' ' + (answers.length === 1 ? 'Answer' : 'Answers');
+  }
+  /** Everything above the answer box, painted from S: the heading, the
+      question, the answers heading and the band. */
+  function paintPosts() {
+    paintHeader();
+    paintQuestion();
+    paintHeading();
+    paintAnswers();
+    paintVotes();
+  }
+
+  /** New facts about the thread on screen (a post just made, an edit, a
+      deletion, or a quiet re-read that found a difference), painted WITHOUT
+      rebuilding the answer box, which may be holding something half written.
+      Only a thread whose STATE has changed (locked or closed meanwhile) is
+      drawn whole again, box included, since the box has to say so. */
+  function repaintPosts(thread, posts) {
+    var host = $('oa-forum-thread');
+    if (!host || host.hidden) return;
+    var closed = closedOf(thread, posts);
+    if (closed.readOnly !== S.readOnly || !$('oa-forum-posts')) { renderThread(host, thread, posts); return; }
+    S.thread = thread;
+    S.posts = posts;
+    S.live = liveOf(posts);
+    paintPosts();
+  }
+
+  function renderThread(host, thread, posts) {
+    var first = posts[0] || {};
+    var closed = closedOf(thread, posts);
+    var gone = closed.gone;
+    var readOnly = closed.readOnly;
+    var answers = posts.slice(1);
+    S.thread = thread;
+    S.posts = posts;
+    S.readOnly = readOnly;
+    /* answers still standing: a deleted one no longer holds the question down */
+    S.live = liveOf(posts);
+    var out = '<div id="oa-forum-thhead">' + headerHTML(thread) + '</div>';
+    out += '<ol class="oa-forum-posts oa-forum-qpost" id="oa-forum-posts"></ol>';
+    out += '<div class="oa-forum-answers-h" id="oa-forum-answers-h"' + (answers.length ? '' : ' hidden') + '>' +
       '<h2>' + answers.length + ' ' + (answers.length === 1 ? 'Answer' : 'Answers') + '</h2>' +
       '<label class="oa-forum-sort">Sorted by ' +
         '<select id="oa-forum-sort">' +
@@ -1117,8 +1458,8 @@
         '</select></label></div>';
     out += '<ol class="oa-forum-posts" id="oa-forum-answers"></ol>';
     host.innerHTML = out;
+    paintQuestion();
     paintAnswers();
-    wirePosts($('oa-forum-posts'), thread, posts, readOnly);
     var sort = $('oa-forum-sort');
     if (sort) {
       sort.addEventListener('change', function () {
@@ -1204,11 +1545,10 @@
       out += '<button type="button" class="oa-forum-act" data-act="quote">Quote</button>';
     }
     out += '<a class="oa-forum-act" href="' + esc(href({ room: S.room, season: S.season, t: S.tid, hash: 'p' + n })) + '" title="A link to this post">#' + n + '</a>';
+    /* Edit: your own post, at any time (owner, 2026-09-06). The countdown
+       that used to stand here is gone with the window it counted. */
     if (!readOnly && !p.hidden && mine) {
-      var left = Number(p.t) + M.EDIT_WINDOW_MS - Date.now();
-      if (left > 0) {
-        out += '<button type="button" class="oa-forum-act" data-act="edit">Edit · ' + Math.max(1, Math.ceil(left / 60000)) + ' min left</button>';
-      }
+      out += '<button type="button" class="oa-forum-act" data-act="edit">Edit</button>';
     }
     /* Delete: your own post at any time, with no window, and ANY post for the
        maintainer (owner, 2026-09-05). A question somebody has answered cannot
@@ -1239,6 +1579,11 @@
       var pid = li.getAttribute('data-pid');
       var p = byId[pid];
       if (!p) return;
+      var col = li.querySelector('.oa-forum-vote');
+      if (col && !readOnly && !p.hidden) {
+        col.addEventListener('pointerenter', function () { warmUp('forumVote'); });
+        col.addEventListener('focusin', function () { warmUp('forumVote'); });
+      }
       Array.prototype.forEach.call(li.querySelectorAll('.oa-forum-v'), function (b) {
         b.addEventListener('click', function () { vote(li, p, Number(b.getAttribute('data-v'))); });
       });
@@ -1307,8 +1652,17 @@
     if (!window.confirm(msg)) return;
     btn.disabled = true;
     call('forumDelete', { room: S.room, tid: S.tid, pid: p.id }).then(function (r) {
-      if (r && r.thread) go({ room: S.room, season: S.season });
-      else go({ room: S.room, season: S.season, t: S.tid });
+      /* a question takes its thread with it: back to the list, which reads
+         itself again; a reply becomes a tombstone where it stands, painted
+         from what the function did (delete.js) and read back quietly */
+      if (!r || r.thread) { go({ room: S.room, season: S.season }); return; }
+      p.hidden = true;
+      p.body = '';
+      p.hiddenBy = mine ? 'author' : 'admin';
+      p.editedAt = M.minute();
+      if (String(thread.accepted || '') === String(p.id)) thread.accepted = '';
+      repaintPosts(thread, S.posts);
+      refreshThread();
     }).catch(function (err) {
       btn.disabled = false;
       say(friendly(err), true);
@@ -1371,6 +1725,7 @@
     var ta = wrap.querySelector('#oa-forum-body');
     var guard = wrap.querySelector('#oa-forum-guardmsg');
     ta.addEventListener('input', function () { liveGuard(ta, guard); });
+    ta.addEventListener('focus', function () { warmUp('forumPost'); });
     wrap.querySelector('#oa-forum-send').addEventListener('click', function () { sendReply(wrap, ta); });
     return wrap;
   }
@@ -1442,7 +1797,27 @@
     if (accept && accept.checked) data.acceptGuide = true;
     call('forumPost', data).then(function (r) {
       if (accept) { S.me.guideAt = Date.now(); writeMe(S.me); }
-      go({ room: S.room, season: S.season, t: r.tid || S.tid, hash: 'p' + (r.n || '') });
+      /* the answer ON THE PAGE from the function's receipt and the words just
+         sent, the box drawn again empty, then the thread read back quietly */
+      if (!r || !r.pid || !r.n || !S.thread || String(r.tid || S.tid) !== S.tid) {
+        go({ room: S.room, season: S.season, t: (r && r.tid) || S.tid, hash: 'p' + ((r && r.n) || '') });
+        return;
+      }
+      var post = localPost(r, body, S.quote);
+      var thread = S.thread;
+      var posts = S.posts.concat([post]);
+      thread.n = Math.max(Number(thread.n) || 0, post.n);
+      thread.lastAt = post.t;
+      thread.lastBy = S.me.handle;
+      markSeen(S.tid, thread.n);
+      arrive({ room: S.room, season: S.season, t: S.tid, hash: 'p' + post.n });
+      S.quote = null;
+      renderThread($('oa-forum-thread'), thread, posts);
+      paintVotes();
+      var target = document.getElementById('p' + post.n);
+      if (target) target.scrollIntoView();
+      say('Your answer is on the page.');
+      refreshThread();
     }).catch(function (err) {
       btn.disabled = false;
       say(friendly(err), true);
@@ -1477,7 +1852,14 @@
       var save = box.querySelector('[data-edit="save"]');
       save.disabled = true;
       call('forumEdit', { room: S.room, tid: S.tid, pid: p.id, body: body })
-        .then(function () { go({ room: S.room, season: S.season, t: S.tid, hash: 'p' + p.n }); })
+        .then(function (r) {
+          p.body = body;
+          p.editedAt = Number(r && r.editedAt) || M.minute();
+          if (Number(p.n) === 1 && S.thread) S.thread.excerpt = excerptOf(body);
+          repaintPosts(S.thread, S.posts);
+          arrive({ room: S.room, season: S.season, t: S.tid, hash: 'p' + p.n });
+          refreshThread();
+        })
         .catch(function (err) { save.disabled = false; guard.textContent = friendly(err); });
     });
     ta.focus();
@@ -1517,7 +1899,7 @@
         '<div class="oa-forum-actions" style="margin-top:18px">' +
           '<button type="submit" class="oa-forum-send" id="oa-forum-ask-send">Post question</button>' +
           '<a class="oa-forum-cancel" href="' + esc(href({ room: S.room, season: S.season })) + '">Cancel</a>' +
-          '<span class="oa-forum-hint">Editable for fifteen minutes after posting.</span>' +
+          '<span class="oa-forum-hint">Yours to edit or delete afterwards.</span>' +
         '</div>' +
       '</form>';
     show(host, true);
@@ -1529,6 +1911,10 @@
     var body = $('oa-forum-ask-body');
     var guard = $('oa-forum-ask-guardmsg');
     body.addEventListener('input', function () { liveGuard(body, guard); });
+    /* the form takes focus the moment it opens (below), which is when the
+       posting function is woken: by the time the question is written it is up */
+    $('oa-forum-ask-title').addEventListener('focus', function () { warmUp('forumPost'); });
+    body.addEventListener('focus', function () { warmUp('forumPost'); });
 
     function drawChips() {
       chips.innerHTML = '';
@@ -1601,7 +1987,19 @@
       if (accept && accept.checked) data.acceptGuide = true;
       call('forumPost', data).then(function (r) {
         if (accept) { S.me.guideAt = Date.now(); writeMe(S.me); }
-        go({ room: S.room, season: S.season, t: r.tid });
+        if (!r || !r.tid || !r.pid) { go({ room: S.room, season: S.season, t: (r && r.tid) || '' }); return; }
+        /* the thread ON THE PAGE from the receipt and the words just sent,
+           the room's tally moved for its tags, then read back quietly */
+        var now = M.minute();
+        var thread = {
+          id: String(r.tid), season: S.season, room: S.room, title: title, tags: data.tags.slice(), by: S.me.handle,
+          t: now, lastAt: now, lastBy: S.me.handle, n: 1, excerpt: excerptOf(text), score: 0, accepted: '',
+          pinned: false, locked: false, hidden: false
+        };
+        var post = localPost({ tid: r.tid, pid: r.pid, n: 1 }, text, null);
+        data.tags.forEach(function (tag) { S.tally[tag] = (Number(S.tally[tag]) || 0) + 1; });
+        drawTags();
+        openLocalThread(thread, [post]);
       }).catch(function (err) {
         send.disabled = false;
         say(friendly(err), true);

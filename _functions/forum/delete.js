@@ -4,10 +4,9 @@
    Two people may delete a post: its AUTHOR, and the MAINTAINER.
 
    THE AUTHOR, at any time while the season is running (owner, 2026-09-05: "a
-   user can delete a post anytime they want"). There is no window: forumEdit's
-   fifteen minutes are about rewriting words other people may already have
-   replied to, and taking your own words away is a different act with a
-   different answer.
+   user can delete a post anytime they want", and 2026-09-06: "the user can
+   delete and edit the post any time"). There is no window on either: forumEdit
+   used to hold one for fifteen minutes and no longer does.
 
    BUT NOT A QUESTION SOMEBODY HAS ANSWERED (owner, same day: "a user cannot
    delete a question posted that has received at least one answer. If all
