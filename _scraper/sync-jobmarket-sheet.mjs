@@ -1016,9 +1016,17 @@ async function main() {
       const { subject, html } = renderStaleEmail(check, { sheets: scope, now });
       const tx = NO_MAIL ? null : await transport();
       const sent = await send(tx, { to, subject, html, text: toPlain(html) }, { dryRun: DRY });
-      if (sent) log(`told ${to} that the sheet needs looking at.`);
-      state.lastWarnedAt = isoStamp(now);
-      state.lastReason = check.reason;
+      /* Stamped only after a send SUCCEEDS, the mark every other mailer here
+         is held to: `send` answers false when there is no SMTP transport, and
+         stamping then would silence this for a week without a word having
+         reached anybody. A run that cannot send says it again next time. */
+      if (sent) {
+        log(`told ${to} that the sheet needs looking at.`);
+        state.lastWarnedAt = isoStamp(now);
+        state.lastReason = check.reason;
+      } else {
+        log('could not send the staleness warning, so it stays due for the next run.');
+      }
     } else {
       log(`(already warned about "${state.lastReason || check.reason}" on ` +
           `${state.lastWarnedAt} — not saying it again yet)`);

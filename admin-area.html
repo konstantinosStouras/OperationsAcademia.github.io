@@ -440,7 +440,11 @@
     <!-- Approving a posting shows it on the jobs page straight away: the row
          the build is about to publish is echoed into this browser's own
          storage, exactly as a saved EDIT already is. Optional — without it an
-         approval simply waits for the build, as before. -->
+         approval simply waits for the build, as before.
+         oa-countries.js goes with it: the build canonicalises an edited
+         country ("USA" is served as "United States"), so the echo has to as
+         well or it shows a spelling the site will not publish. -->
+    <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-jobreview.js"></script>
     <!-- oa-reveal.js BEFORE the two panels that ask whether the candidate
@@ -458,9 +462,13 @@
     <!-- The market-year report links each flagged posting to the page that
          actually carries it, so it reads the same window rule jobs.html and
          previous-markets.html sort themselves by (oa-jobnav.js), and it
-         records what the maintainer has read (oa-yearcheck.js). Both are
-         optional here: without oa-jobnav the card falls back to the jobs page,
-         and without oa-yearcheck nothing can be settled but every posting is
+         records what the maintainer has read (oa-yearcheck.js). The review
+         panel's duplicate warning reads the same module for the same reason:
+         a flagged duplicate shares the crawled row's market year, which is
+         often a season the jobs page cannot show. Both are optional here:
+         without oa-jobnav the market-year card falls back to the jobs page and
+         the duplicate warning names its postings without linking them, and
+         without oa-yearcheck nothing can be settled but every posting is
          still listed — absence means SHOW. -->
     <script defer src="assets/oa-jobnav.js"></script>
     <script defer src="assets/oa-yearcheck.js"></script>

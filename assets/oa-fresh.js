@@ -121,6 +121,18 @@
       echo must not show one the build is about to remove. */
   var EMAIL_RX = /[A-Za-z0-9._%+-]*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/g;
 
+  /** jobs-model url(), the browser twin — host-shaped http(s) or nothing.
+      A link the maintainer typed that this refuses is a link the build
+      publishes as EMPTY, so an echo that showed it would show a posting whose
+      advertisement link the site is about to drop. */
+  function url(v) {
+    var t = String(v == null ? '' : v).trim();
+    return /^https?:\/\/[^\s<>"']+\.[^\s<>"']+$/i.test(t) ? t.slice(0, 500) : '';
+  }
+
+  /** The three fields jobreview.mjs EDITABLE marks `url: true`. */
+  var URL_EDITS = ['adUrl', 'postedAtUrl', 'furtherInfoUrl'];
+
   /**
    * jobreview.mjs approvedRow(), the browser twin — the row an APPROVED queue
    * document publishes: the maintainer's edits applied, the deadline line and
@@ -137,18 +149,38 @@
    * no dependency of its own and the parity test can drive it offline, exactly
    * as the storage and the meta fetch are injected elsewhere here.
    *
-   * `edits` arrive ALREADY CLEAN: they are what the panel just wrote, read
-   * through the same field list `cleanEdits` uses (FIELDS in oa-jobreview.js,
-   * pinned against EDITABLE both ways), so re-cleaning them here would be a
-   * second answer to a settled question.
+   * `edits` arrive AS THE MAINTAINER TYPED THEM, and this used to claim they
+   * arrived clean. They do not: `readEdits` reads the boxes through the field
+   * LIST, never through `cleanEdit`, so the two rules a text input cannot
+   * enforce for itself were missing from the echo. `maxlength` bounds the
+   * length, the type is a select and the levels are checkboxes and the dates
+   * are date inputs, so what was left to differ was exactly two things, and
+   * both are applied here as twins of the build's own: a link that is not
+   * host-shaped http(s) PUBLISHES AS EMPTY, and a country is canonicalised
+   * ("USA" is served as "United States"). `canonCountry` is injected beside
+   * `canonColumns` for the same reason — this file keeps no dependency of its
+   * own — and with it absent the echo simply does not re-spell, which is a
+   * spelling and never a value the build would refuse.
    */
   function approvedRow(row, doc, opts) {
     var o = opts || {};
     var canon = o.canonColumns || function (place) { return place; };
+    var canonCountry = o.canonCountry || function (v) { return v; };
     var clean = (doc && doc.edits) || {};
-    var out = {}, k;
+    var out = {}, k, i;
     for (k in (row || {})) if (Object.prototype.hasOwnProperty.call(row, k)) out[k] = row[k];
     for (k in clean) if (Object.prototype.hasOwnProperty.call(clean, k)) out[k] = clean[k];
+
+    /* cleanEdit: an EDITED url and an EDITED country only. A value the row
+       already carried came through the pipeline and is settled. */
+    for (i = 0; i < URL_EDITS.length; i++) {
+      if (Object.prototype.hasOwnProperty.call(clean, URL_EDITS[i])) {
+        out[URL_EDITS[i]] = url(text(clean[URL_EDITS[i]], 600));
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(clean, 'country')) {
+      out.country = canonCountry(text(clean.country, 80)) || '';
+    }
 
     /* A line the maintainer wrote that says the search stays open takes the
        date with it — the one direction where their words are the fact. */

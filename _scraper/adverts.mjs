@@ -102,6 +102,24 @@ const TRACKING_PARAM_RX = /^(utm_[a-z]+|linksource|mc_cid|mc_eid|fbclid|gclid)$/
 const GONE_RX =
   /(no longer (?:available|active|accepting|being accepted|posted)|has (?:expired|been (?:removed|filled|closed|cancell?ed))|this (?:job|position|posting|vacancy|requisition) (?:is (?:closed|no longer)|has been)|position (?:has been )?filled|job (?:posting )?not found)/i;
 
+/**
+ * "...and will continue until the position has been filled" is the OPEN-ENDED
+ * search phrase, and it is on a LIVE advertisement — it is the very sentence
+ * the two-deadlines rule reads a first-review date out of. GONE_RX matched it
+ * twice over ("has been filled", "position has been filled"), so any ad
+ * carrying it and no JobPosting block parsed as `gone` — and `gone` FREEZES an
+ * advertisement in `needFetch`, which means the closing date is never read
+ * again and the posting stays "Until filled." for ever.
+ *
+ * Struck out of the text before the closure test rather than narrowed into
+ * GONE_RX itself, so the phrases stay readable one per line and a page that
+ * really says "The position has been filled." still answers gone. Its sibling
+ * in higheredjobs.mjs never had the hole: every branch there demands the word
+ * "this" in front.
+ */
+const OPEN_ENDED_CLAUSE_RX =
+  /\b(?:until|till)\s+(?:such\s+time\s+as\s+)?(?:the\s+)?(?:position|positions|posting|vacancy|vacancies|role|roles|job|opening|openings)\s+(?:is|are|has\s+been|have\s+been)\s+filled/gi;
+
 /* -------------------------------------------------------------------- urls */
 
 /** Is this an advertisement THIS pass reads? Host-validated, http(s) only,
@@ -529,7 +547,7 @@ export function parseAdvert(html) {
      believed, like higheredjobs' GONE_RX, and only when no JobPosting block
      contradicts it (a live posting whose description QUOTES such a phrase
      stays live). */
-  if (GONE_RX.test(body) && !ld) {
+  if (GONE_RX.test(body.replace(OPEN_ENDED_CLAUSE_RX, ' ')) && !ld) {
     out.gone = true;
     return out;
   }
@@ -561,7 +579,18 @@ export function parseAdvert(html) {
   out.applyByProse = prose;
   out.listedUntil = listingEndFrom(ld, fields);
 
-  out.ok = !!(out.title || out.institution || out.applyByDate);
+  /* READ means the page stated a FACT ABOUT THE JOB. A title alone does not:
+     every page has an <h1> or an og:title, so a bot wall headed "Careers" and
+     a JavaScript shell headed with the tenant's name both parsed `ok`, were
+     cached as read with no closing date, and were then left alone for the
+     whole TTL. `unreadable` is the honest answer — it changes nothing
+     (applyAdverts ignores it, and `keep` above now holds what was known), and
+     the ad is re-read on the next pass. The title still counts BESIDE a fact,
+     which is what keeps a sparse but genuinely parsed ad readable. */
+  const facts = !!(out.institution || out.applyByDate || out.applyByProse
+    || out.posted || out.location || out.school || out.department
+    || out.employmentType || out.listedUntil);
+  out.ok = facts;
   return out;
 }
 
@@ -584,7 +613,16 @@ export function emptyCache() {
  */
 export function cacheEntry(parsed, { adUrl = '', checkedAt = '', previous = null, via = 'page' } = {}) {
   const prev = previous || {};
-  const keep = (now, before) => (parsed.gone && !now) ? (before || '') : (now || '');
+  /* A page that could not be READ carries nothing, so it must not un-say what
+     an earlier read of the same advertisement learnt: the run would blank the
+     closing date, `sync-jobmarket-sheet.mjs` would stop re-applying it, and the
+     posting would silently return to "Until filled." — the one statement now
+     known to be wrong. This is the file's own "an ad that cannot be read
+     changes nothing", which held for a failed FETCH (the caller leaves the
+     entry alone) and not for a page fetched and not understood. A readable
+     page that simply no longer states a field still clears it: there the page
+     is the authority. */
+  const keep = (now, before) => ((parsed.gone || !parsed.ok) && !now) ? (before || '') : (now || '');
 
   return {
     url: adUrl,

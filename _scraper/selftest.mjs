@@ -34,7 +34,7 @@ import {
   removalSpecs, buildOwned, ownerTag, specMatches, healPlace,
   parseProseDay, extractReviewDate, extractFinalDate, healReviewDate,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
-  stripEmails, stripRowEmails, patchDeadlines, canonColumns,
+  stripEmails, stripRowEmails, patchDeadlines, canonColumns, canonCountry,
   postedBy, contactEmail, sourceLabel, CRAWLER_SOURCES, FORM_SOURCE,
 } from './jobs-model.mjs';
 import {
@@ -4338,6 +4338,27 @@ function testJobMarketSheetParsing() {
   eq(levelsFromRank('Full-time Assistant Professor'), ['Assistant Professor'],
     'and "full-time" is a contract, not a rank');
   eq(levelsFromRank('Full'), ['Other Ranks'], 'while a full professorship is senior alone');
+  /* ...AND IT HELD FOR ONE SPELLING ONLY. The entry-level title was struck out
+     of `rest` as "assistant professor" and nothing else, so the workbook's own
+     abbreviations left the word "professor" standing and every one of them was
+     ALSO filed under Other Ranks. "Assist." was worse: it was not read as
+     entry level at all, so it came out senior ALONE — a plain assistant
+     professorship missing from the filter a candidate looking for one uses. */
+  eq(levelsFromRank('Asst. Professor'), ['Assistant Professor'],
+    'the sheet\'s "Asst. Professor" is one rank, not two');
+  eq(levelsFromRank('Asst Professor'), ['Assistant Professor'], 'with or without the stop');
+  eq(levelsFromRank('Assist. Professor'), ['Assistant Professor'],
+    'and "Assist." is the same rank again, never a senior one');
+  eq(levelsFromRank('TTAP Professor'), ['Assistant Professor'],
+    'the tenure-track abbreviation spelled out beside its title, likewise');
+  eq(levelsFromRank('Asst./Assoc. Professor'), ['Assistant Professor', 'Other Ranks'],
+    'while a search that really does name a senior rank still ticks both');
+  /* A research-track PROFESSORSHIP is not a post-doc. "research associate" is
+     the post-doc title; the two words in front of "Professor" are not. */
+  eq(levelsFromRank('Research Associate Professor'), ['Other Ranks'],
+    'a research associate professorship is senior, not a post-doc');
+  eq(levelsFromRank('Research Associate'), ['Post-Doc'],
+    'while the post-doc title itself is unchanged');
   eq(levelsFromRank('non TTAP'), ['Non-tenure track (teaching) position'],
     'the sheet\'s "non TTAP" is a NON-tenure-track post — it differs from the ' +
     'tenure-track one by that word alone');
@@ -4630,6 +4651,55 @@ function testJobMarketSheetCarry() {
     'and a posting the site does not know yet has nothing to carry from');
   ok(carryUnreadColumns(bad.rows, good.rows, []).rows === bad.rows,
     'no inferred tab, no work at all');
+
+  /* ...AND THE TYPE, which is the one field the carry used to miss.
+     `typeFromNames` judges the WHOLE posting's text, and one of the columns it
+     reads is the notes column inference can never find. So a degraded read
+     published "University" over a stored "Business School" — the same un-saying
+     the deadlines suffered, on the field that decides which filter the posting
+     answers to. Restoring `comments` does not fix it: the type was derived
+     from the empty notes long before the carry ran. */
+  const TYPE_HEAD = ['University', 'Country', 'Date', 'Field', 'Position', 'Deadline', 'Comment'];
+  const TYPE_BODY = [
+    ['Delta University', 'USA', '25-Aug-26', 'OM', 'AP', '', 'The post sits in the business school.'],
+    ['Epsilon University', 'USA', '26-Aug-26', 'OM', 'AP', '', ''],
+    ['Zeta University', 'USA', '27-Aug-26', 'OM', 'AP', '', ''],
+    ['Eta University', 'USA', '28-Aug-26', 'OM', 'AP', '', ''],
+  ];
+  const tGood = rowsFromTab(csvOf([TYPE_HEAD, ...TYPE_BODY]), at);
+  const tBad = rowsFromTab(csvOf(TYPE_BODY), at);
+  const tReads = [{ sheet: 'S', tab: '2026 Jobs', inferred: tBad.inferred, columns: tBad.columns }];
+  ok(tBad.inferred && !tBad.columns.includes('notes'), 'the type fixture degrades the same way');
+  ok(tBad.columns.includes('area') && tBad.columns.includes('rank'),
+    'with the field and rank columns still claimed, so the notes are the only loss');
+  eq(tGood.rows[0].type, 'Business School',
+    'the header read types the posting off its own comment');
+  eq(tBad.rows[0].type, 'University',
+    'and the degraded read flips it — the defect, on the field the jobs page filters by');
+
+  const tKept = carryUnreadColumns(tBad.rows, tGood.rows, tReads);
+  eq(tKept.rows[0].type, 'Business School', 'the carry puts the stored type back');
+  ok(tKept.carried[0].fields.includes('type'), 'and says so in the run log');
+  eq(tKept.rows.slice(1).map((r) => r.type), ['University', 'University', 'University'],
+    'while a posting that was never business-typed is left exactly as read');
+  eq(carryUnreadColumns(tKept.rows, tGood.rows, tReads).carried.length, 0,
+    'idempotent, like every other field it carries');
+
+  /* FORWARD ONLY, and it falls out of typeFromNames rather than being asserted:
+     more text can only ESCALATE to "Business School" (the University leg reads
+     the employer's name alone, which inference does claim), so a stored
+     "University" beside a fresh "Business School" is the tab genuinely saying
+     something new and is never overwritten. */
+  const flipped = tBad.rows.map((r, i) => (i ? r : { ...r, type: 'Business School' }));
+  const back = carryUnreadColumns(flipped, tGood.rows.map(
+    (r, i) => (i ? r : { ...r, type: 'University' })), tReads);
+  eq(back.rows[0].type, 'Business School',
+    'a fresh Business School is never pushed back to University');
+
+  eq(carryUnreadColumns(tBad.rows, tGood.rows,
+    [{ sheet: 'S', tab: '2026 Jobs', inferred: false, columns: tGood.columns }])
+    .rows[0].type, 'University',
+    'and a tab whose header WAS read keeps its own answer, type included');
 }
 
 function testJobMarketSheetAddedAt() {
@@ -4823,6 +4893,28 @@ function testJobMarketSheetStaleness() {
     'a different kind of failure is new information and goes out at once');
   ok(!shouldWarn({}, stalenessOf({ ok: true, rows: 40, newestPosted: '2026-08-15', now }), { now }),
     'a healthy sheet sends nothing');
+
+  /* AND THE MARK IS THE SEND, not the attempt. `send` answers false whenever
+     there is no SMTP transport, and the stamp was written either way — so on
+     an installation with no mailbox the first stale run silenced the warning
+     for a week without a word having reached anybody, which is exactly the
+     "the sheet has gone quiet and nothing said so" failure the warning exists
+     to end. Every other mailer here stamps only after a send succeeds
+     (announcedAt, liveMailedAt, campaignAt); this one does now too. Read from
+     the file's own source, because the branch needs a workbook and a mailbox. */
+  const syncSrc = readFileSync(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  const warnBlock = syncSrc.slice(syncSrc.indexOf('if (check.stale) {'),
+    syncSrc.indexOf('registry.staleness = state;'));
+  ok(warnBlock.length > 400 && warnBlock.length < 2000,
+    'the staleness branch is bounded at both ends before it is scanned');
+  ok(/if \(sent\) \{[\s\S]*?state\.lastWarnedAt = isoStamp\(now\);/.test(warnBlock),
+    'the warning is marked as said only inside the branch that really sent it');
+  ok(!/^ {6}state\.lastWarnedAt = isoStamp\(now\);/m.test(warnBlock),
+    'and never at the branch\'s own depth beside it — a run that cannot send ' +
+    'says it again next time');
+  ok(/state\.lastReason = check\.reason;/.test(warnBlock) &&
+    warnBlock.indexOf('state.lastReason = check.reason;') > warnBlock.indexOf('if (sent) {'),
+    'the reason travels with the mark, so a failed send cannot leave a stale one');
 }
 
 async function testJobMarketSheetChain() {
@@ -7961,6 +8053,32 @@ function testAdvertsParsing() {
   ok(parseAdvert('<html><body>This position has been filled.</body></html>').gone,
     'and a listing that has come down is recognised as gone');
 
+  /* ...BUT THE OPEN-ENDED SEARCH PHRASE IS NOT A CLOSURE NOTICE. "will
+     continue until the position has been filled" is on a LIVE advertisement —
+     it is the very sentence the suggested apply-by date is read out of — and
+     GONE_RX matched it twice over. `gone` FREEZES an advertisement in
+     needFetch, so such an ad was never read again and its posting stayed
+     "Until filled." for ever. */
+  const stillOpen = parseAdvert('<h1>Assistant Professor</h1><p>First review of ' +
+    'applications will begin on September 8, 2026, and will continue until the ' +
+    'position has been filled.</p><dl><dt>Closing date</dt><dd>15 October 2026</dd></dl>');
+  ok(!stillOpen.gone, 'a search that runs until the position is filled is not "gone"');
+  eq(stillOpen.applyByDate, '2026-10-15', 'and its closing date is still read');
+  ok(parseAdvert('<html><body>The position has been filled.</body></html>').gone,
+    'while a page that really says so still answers gone');
+  ok(parseAdvert('<html><body>Applications are accepted until the vacancy is ' +
+    'filled.</body></html>').gone === false,
+    'in every spelling of the open-ended clause');
+
+  /* A TITLE ALONE IS NOT A READ. Every page has an <h1> or an og:title, so a
+     bot wall headed "Careers" and a JavaScript shell headed with the tenant's
+     name both parsed `ok`, were cached as read with no closing date, and were
+     then left alone for the whole TTL. */
+  eq(parseAdvert('<h1>Careers</h1><p>Sign in to continue.</p>').ok, false,
+    'a page that states nothing about the job has not been read, whatever its heading');
+  eq(parseAdvert('<h1>Post</h1><dl><dt>Closing date</dt><dd>15 October 2026</dd></dl>').ok,
+    true, 'while one fact is enough');
+
   /* ONE URL, ONE OWNER. higheredjobs.com has its own pipeline and cache; two
      caches for one advertisement would disagree silently. The other skips
      each have their reason in adverts.mjs. */
@@ -8111,6 +8229,30 @@ function testAdvertsApply() {
   const unread = { ads: { [key]: { status: 'unreadable', applyByDate: '' } } };
   eq(serialise(applyAdverts(openEnded, unread, {}).rows), serialise(openEnded),
     'an unreadable advertisement leaves the posting exactly as it was');
+
+  /* ...AND A RE-READ THAT CANNOT BE UNDERSTOOD MUST NOT UN-SAY WHAT WAS READ.
+     `keep` held the previous values only for a listing that had come DOWN, so
+     a page fetched and not understood — a bot wall thrown up over a page that
+     read fine last week — blanked the cached deadline; the sheet sync then
+     stopped re-applying it and the posting silently returned to "Until
+     filled.". "An ad that cannot be read changes nothing" held for a failed
+     FETCH (the caller leaves the entry alone) and not for this. */
+  const wasRead = cache.ads[key];
+  const reRead = advertCacheEntry(parseAdvert('<h1>Careers</h1><p>Please sign in.</p>'),
+    { adUrl: link, checkedAt: '2026-08-25T00:00:00Z', previous: wasRead, via: 'page' });
+  eq(reRead.status, 'unreadable', 'a page in a shape it cannot read is unreadable');
+  eq(reRead.applyByDate, wasRead.applyByDate,
+    'and keeps the closing date an earlier read of the same advertisement learnt');
+  eq(reRead.institution, wasRead.institution, 'and everything else it had learnt with it');
+  eq(reRead.checkedAt, '2026-08-25T00:00:00Z', 'while still recording that it looked');
+
+  /* A page that IS read and simply no longer states a field still clears it:
+     there the page is the authority, which is the whole point of reading it. */
+  const stated = advertCacheEntry(
+    parseAdvert('<h1>Post</h1><table><tr><th>Location</th><td>Boston, MA</td></tr></table>'),
+    { adUrl: link, checkedAt: '2026-08-26T00:00:00Z', previous: wasRead, via: 'page' });
+  eq(stated.status, 'ok', 'a page stating a fact has been read');
+  eq(stated.applyByDate, '', 'and a closing date it no longer states is gone');
 
   /* THE TWO PASSES SELECT DISJOINT ROWS — a HigherEdJobs posting is never
      touched by this one, so the order the sheet sync re-applies the two
@@ -8349,10 +8491,33 @@ async function testFreshEcho() {
     ['edited entry levels', { id: 'p-12', year: 2026, posted: '2026-01-02',
       institution: 'Duke University', school: '', unit: 'OM', levels: ['Other Ranks'] },
       { edits: { levels: ['Assistant Professor'] } }],
+    /* The two rules the panel's own boxes cannot enforce, and which the echo
+       therefore had to learn: `readEdits` reads the boxes through the field
+       LIST, never through `cleanEdit`, so a link that is not host-shaped
+       http(s) — which the build publishes as EMPTY — and a country spelling
+       the build canonicalises were both echoed as typed. maxlength bounds the
+       length, the type is a select, the levels are checkboxes and the dates
+       are date inputs, so these two are the whole of what was left. */
+    ['an edited link that is not a link publishes as nothing', { id: 'p-13', year: 2026,
+      posted: '2026-01-02', institution: 'Duke University', school: '', unit: 'OM',
+      adUrl: 'https://old.example/1' }, { edits: { adUrl: 'example.com/job' } }],
+    ['and a javascript: one likewise', { id: 'p-14', year: 2026, posted: '2026-01-02',
+      institution: 'Duke University', school: '', unit: 'OM',
+      adUrl: 'https://old.example/1' },
+      { edits: { adUrl: 'javascript:alert(1)' } }],
+    ['an edited country is canonicalised', { id: 'p-15', year: 2026, posted: '2026-01-02',
+      institution: 'Duke University', school: '', unit: 'OM', country: 'United States' },
+      { edits: { country: 'USA' } }],
+    ['a good edited link survives whole', { id: 'p-16', year: 2026, posted: '2026-01-02',
+      institution: 'Duke University', school: '', unit: 'OM', adUrl: '' },
+      { edits: { adUrl: 'https://jobs.example.org/postings/12' } }],
+    ['an edited levels list cleared to none', { id: 'p-17', year: 2026, posted: '2026-01-02',
+      institution: 'Duke University', school: '', unit: 'OM', levels: ['Other Ranks'] },
+      { edits: { levels: [] } }],
   ];
   for (const [name, row, doc] of APPROVE_CASES) {
     const want = approvedRow(row, doc);
-    const got = F.approvedRow(row, doc, { canonColumns });
+    const got = F.approvedRow(row, doc, { canonColumns, canonCountry });
     eq(JSON.stringify(got, Object.keys(want).sort()),
       JSON.stringify(want, Object.keys(want).sort()),
       `the echoed approved row is the row the build publishes — ${name}`);
@@ -8570,6 +8735,23 @@ async function testGuardRepairs() {
     'its suggested date follows healReviewDate\'s verdict on the filled row — ' +
     'including "there is none"');
   eq(next[2], jobsRows[2], 'a posting the sheet does not own is never touched');
+
+  /* ...AND NEVER ONTO A ROW THAT ALREADY STATES A CLOSING DATE. The two files
+     disagree about exactly one population: a tracking sheet MIRROR the
+     maintainer has edited is published from their document — which keeps
+     `source: 'jobmarket-sheet'`, so it is indistinguishable from a workbook
+     row here — while data/jobmarket.json still carries the workbook's own
+     open-ended copy. The pass filled the sheet row from the advertisement and
+     then patched the maintainer's typed deadline out of the served file,
+     taking their suggested date with it. */
+  const claimed = [{ id: 'm1', source: SHEET_SOURCE, applyBy: 'September 1, 2026',
+    applyByDate: '2026-09-01', reviewDate: '2026-08-01' }];
+  const fill = {
+    rows: [{ id: 'm1', applyBy: longDate('2026-12-01'), applyByDate: '2026-12-01' }],
+    changed: [{ id: 'm1' }],
+  };
+  eq(patchDeadlines(claimed, fill, SHEET_SOURCE)[0], claimed[0],
+    'a deadline the maintainer typed is never overwritten by the advertisement');
 
   /* The wiring, read from the source — a strip only one writer applies is
      undone by whichever writes next, the healCountry lesson. */
@@ -9022,8 +9204,15 @@ function testReviewDuplicates() {
 
   const entry = duplicatesOf(crawled, site)[0];
   eq(Object.keys(entry).sort(),
-    ['department', 'id', 'institution', 'posted', 'ref', 'source'],
+    ['applyByDate', 'department', 'id', 'institution', 'posted', 'ref', 'source', 'year'],
     'a flag carries what the card needs to say and nothing else — never a whole row');
+  /* `year` and `applyByDate` earn their place: with `posted` they are exactly
+     what OAJobNav.inCurrentMarket reads, and without them the card's "see it
+     live" link named a page that by construction could not hold the posting —
+     a flagged duplicate shares the crawled row's market year, which is often a
+     season the jobs page does not show. */
+  ok(typeof entry.year === 'number' && typeof entry.applyByDate === 'string',
+    'and states the season and the closing date in the shape the window rule reads');
 
   ok(sameDups([entry], [entry]) && !sameDups([entry], []),
     'sameDups is what keeps an unchanged sync from writing at all');
@@ -9090,6 +9279,18 @@ function testReviewEdits() {
     'a real URL is kept');
   eq(cleanEdit('type', 'Not A Type'), undefined, 'an unknown institution type is dropped');
   eq(cleanEdit('type', 'University'), 'University', 'a known one is kept');
+  /* AN EMPTY LIST IS A DECISION, not junk. `readEdits` sends `levels: []` when
+     the maintainer unticks every Entry level box; returning undefined dropped
+     the key and `applyEdits` republished the workbook's own levels, so the
+     card said "Saved." and nothing changed — the tick box that saves and
+     silently does nothing. A value that is not an array at all is still
+     dropped, which is the rule for junk. */
+  eq(cleanEdit('levels', []), [], 'unticking every entry level is an edit, not a no-op');
+  eq(cleanEdit('levels', ['Nonsense']), [],
+    'and a list of values the site does not know clears it, rather than reverting');
+  eq(cleanEdit('levels', 'Nonsense'), undefined, 'while a value that is not a list is junk');
+  eq(applyEdits({ ...RV_ROW, levels: ['Other Ranks'] }, { levels: [] }).levels, [],
+    'and the cleared list really reaches the published row');
   eq(cleanEdit('levels', ['Assistant Professor', 'Nonsense']), ['Assistant Professor'],
     'an unknown entry level is dropped from the list');
   eq(cleanEdit('applyByDate', '20/08/2026'), undefined, 'a non-ISO closing date is refused');
@@ -10013,6 +10214,36 @@ async function testReviewWiring() {
     'as a warning panel that names its own colours, per the theme rules');
   ok(mailer.includes('Possibly already on the site'),
     'and the review e-mail warns about it too');
+  /* ...AND ITS LINK OPENS THE POSTING, on the page that has it. It was
+     `/jobs?institution=<name>`, and a flagged duplicate is by definition of
+     the crawled row's own market year — routinely a season the jobs page
+     cannot show — so the link opened a list that by construction could not
+     hold it. OAJobNav is the site's ONE definition of which of the two list
+     pages carries a posting, and of the ?job= permalink. */
+  ok(/nav\.hrefFor\(d\)/.test(panel),
+    'the duplicate warning links each posting through the shared window rule');
+  /* read with the comments stripped: the panel still EXPLAINS the search link
+     it no longer draws, and a guard that could not tell the explanation from
+     the thing would have to be satisfied by deleting the explanation. */
+  ok(!/\/jobs\?institution=/.test(panel.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'and never at a search on a page that may not carry it');
+  ok(/href\s*\?/.test(panel),
+    'with no link at all when the module is absent — a link that is right most ' +
+    'of the time is the worst shape for one');
+  const adminHtml = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(adminHtml.indexOf('assets/oa-jobnav.js') !== -1,
+    'and the Admin area loads the module the warning reads');
+
+  /* THE APPROVAL ECHO IS GIVEN THE SAME CANON THE BUILD APPLIES. `readEdits`
+     reads the boxes through the field LIST, never through `cleanEdit`, so an
+     edited country was echoed as typed while the build serves it
+     canonicalised. The url rule is applied inside oa-fresh.js itself; this is
+     the one that needs a module on the page. */
+  ok(panel.includes('canonCountry:'),
+    'the panel hands the echo the country canon');
+  ok(adminHtml.indexOf('assets/oa-countries.js') !== -1
+    && adminHtml.indexOf('assets/oa-countries.js') < adminHtml.indexOf('assets/oa-fresh.js'),
+    'and the Admin area loads it BEFORE the echo that reads it');
 
   /* THE BUSINESS-SCHOOL FLAG REACHES THE SAME PLACES, the same way (owner,
      2026-08-23): the sync computes it against the site's own vocabulary, the

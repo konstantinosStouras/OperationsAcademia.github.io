@@ -170,6 +170,17 @@ export function patchDeadlines(jobsRows, applied, source) {
   const byId = new Map((applied.rows || []).map((r) => [r.id, r]));
   return jobsRows.map((r) => {
     if (!r || r.source !== source || !changed.has(r.id) || !byId.has(r.id)) return r;
+    /* AND NEVER ONTO A ROW THAT ALREADY STATES A CLOSING DATE — the apply's
+       own first rule, which this side needs for itself because the two files
+       can disagree about one posting. Once the maintainer edits a tracking
+       sheet MIRROR the posting is published from their document (which keeps
+       `source: 'jobmarket-sheet'`, so it looks exactly like a workbook row
+       here), while data/jobmarket.json still carries the workbook's own
+       open-ended copy. The pass then filled the sheet row from the
+       advertisement and patched the maintainer's typed deadline out of
+       data/jobs.json, taking their suggested date with it. What the two files
+       disagree about is the document's to settle, and the next build does. */
+    if (r.applyByDate) return r;
     const fresh = byId.get(r.id);
     const next = { ...r, applyBy: fresh.applyBy, applyByDate: fresh.applyByDate };
     /* healReviewDate ran over the filled row, so its verdict on the suggested
