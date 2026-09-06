@@ -9658,6 +9658,196 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* ------------------------------------ WHAT REGISTRATION ASKS FOR (2026-09-05)
+
+   The affiliation is compulsory on a new account and the ORCID iD says it is
+   worth giving. Both are measured on the RENDERED card rather than in the
+   source, because what is under test is what a person filling the form meets:
+   the chip that is no longer there, the box the browser will not let past
+   empty, and the message the card gives when the box holds only spaces.
+
+   Spaces are the case worth driving. `required` is satisfied by them, so the
+   browser lets the submit through and the JS guard is the only thing standing
+   between a card that has just insisted on an affiliation and a profile
+   stored without one. Driven through the shim, whose operation log is what
+   says whether an account was created.                                      */
+{
+  const UNVERIFIED = { uid: 'newbie-uid-0000', email: 'newbie@example.edu',
+    emailVerified: false, displayName: '', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedOutPage('jobs.html',
+    { seed: { signInUser: UNVERIFIED } });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('#oa-auth-form [name="affiliation"]', { timeout: 8000 });
+
+  const card = await q.evaluate(() => {
+    const lab = (name) => {
+      const i = document.querySelector(`#oa-auth-form [name="${name}"]`);
+      return i && i.closest('label') ? i.closest('label').textContent.trim() : null;
+    };
+    const req = (name) => {
+      const i = document.querySelector(`#oa-auth-form [name="${name}"]`);
+      return i ? i.required : null;
+    };
+    return {
+      affLabel: lab('affiliation'), affReq: req('affiliation'),
+      affNote: (() => {
+        const i = document.querySelector('#oa-auth-form [name="affiliation"]');
+        const n = i.closest('label').querySelector('.oa-fine');
+        return n ? n.textContent.trim() : null;
+      })(),
+      siteLabel: lab('website'), siteReq: req('website'),
+      firstReq: req('firstName'), lastReq: req('lastName'),
+      orcidLabel: lab('orcid'), orcidReq: req('orcid'),
+    };
+  });
+  ok(card.affReq === true, 'registration card: the affiliation box is required');
+  ok(!/optional/i.test(card.affLabel || ''),
+    `registration card: …and its label no longer says optional (got "${card.affLabel}")`);
+  eq(card.affNote, 'Never published.',
+    'registration card: …and it says where the compelled field goes, under the box');
+  ok(card.firstReq === true && card.lastReq === true,
+    'registration card: the two name boxes are required too, so the affiliation joins an existing rule');
+  ok(card.siteReq === false && /\(optional\)/.test(card.siteLabel || ''),
+    'registration card: the website is still optional and still says so, so the card distinguishes the two kinds');
+  ok(card.orcidReq === false,
+    'registration card: the ORCID iD is still genuinely optional; the wording is a recommendation, not a rule');
+  eq(card.orcidLabel, 'ORCID iD (highly recommended but optional)',
+    'registration card: …and it says it is highly recommended');
+
+  /* a box holding only spaces: the browser lets it through, the guard does not */
+  await q.fill('#oa-auth-form [name="firstName"]', 'Ada');
+  await q.fill('#oa-auth-form [name="lastName"]', 'Lovelace');
+  await q.fill('#oa-auth-form [name="affiliation"]', '   ');
+  await q.fill('#oa-auth-form [name="email"]', 'newbie@example.edu');
+  await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+  await q.check('#oa-auth-form [name="terms"]');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+  await q.waitForFunction(
+    () => (document.querySelector('#oa-auth-msg') || {}).textContent,
+    null, { timeout: 8000 });
+  const refused = await q.evaluate(() => ({
+    msg: document.querySelector('#oa-auth-msg').textContent.trim(),
+    focused: document.activeElement && document.activeElement.name,
+    signedIn: window.__fb.at('signIn', ''),
+    wroteProfile: window.__fb.at('set', 'profiles/'),
+    boxOpen: !!document.querySelector('#oa-auth'),
+  }));
+  ok(/affiliation/i.test(refused.msg),
+    `registration card: an affiliation of spaces is refused, and the message names the field (got "${refused.msg}")`);
+  eq(refused.focused, 'affiliation',
+    'registration card: …with the cursor put back in the box, so the fix needs no hunting');
+  eq(refused.signedIn, -1,
+    'registration card: …and NO account was created, so a refusal leaves nothing behind to sign in to or clean up');
+  eq(refused.wroteProfile, -1, 'registration card: …and no profile was stored');
+  ok(refused.boxOpen, 'registration card: …and the card stays open on what the reader typed');
+
+  /* the same form with a real affiliation still registers, trimmed */
+  await q.fill('#oa-auth-form [name="affiliation"]', '  Test University  ');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => window.__fb.at('set', 'profiles/') !== -1, null, { timeout: 8000 });
+  const made = await q.evaluate(() => ({
+    signedIn: window.__fb.at('signIn', '') !== -1,
+    docs: window.__fb.dump(),
+  }));
+  ok(made.signedIn, 'registration card: a complete form still creates the account');
+  const profDoc = Object.keys(made.docs).filter((k) => k.indexOf('profiles/') === 0)[0];
+  eq(made.docs[profDoc].affiliation, 'Test University',
+    'registration card: …and the affiliation is stored TRIMMED, not as the spaces around it');
+  eq(errors, [], 'registration card: no uncaught script error');
+  await ctx.close();
+}
+
+/* -------------------- a GOOGLE sign-up is asked for its affiliation too
+
+   The registration form is one of three ways in and the other two answer no
+   questions at all, so a brand new provider account is asked on the welcome
+   card instead. Driven for real: the shim reports isNewUser, the module marks
+   the account, and the card that opens on the next page has a required box and
+   no Not now. An account that is merely signing in again gets neither.        */
+{
+  const NEWBIE = { uid: 'fresh-google-uid', email: 'fresh@example.edu', emailVerified: true,
+    displayName: 'Fresh Newcomer', providerData: [{ providerId: 'google.com' }] };
+
+  /* the sign-up: press Continue with Google on a page it will NOT navigate
+     away from (firstRunDestination stands down on the posting form), so the
+     card opens in place and can be measured */
+  const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
+    { seed: { signInUser: NEWBIE, newUser: true }, selector: '#main' });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('.oa-auth-provider[data-provider="google"]', { timeout: 8000 });
+  await q.click('.oa-auth-provider[data-provider="google"]');
+  await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
+
+  const card = await q.evaluate(() => {
+    const i = document.querySelector('#oa-profile-form [name="affiliation"]');
+    return {
+      required: i.required,
+      label: i.closest('label').textContent.trim(),
+      later: !!document.querySelector('#oa-profile-later'),
+      heading: (document.querySelector('#oa-profile-h') || {}).textContent,
+      lede: (document.querySelector('.oa-modal-lede') || {}).textContent || '',
+      marked: localStorage.getItem('oaAskAffiliation:fresh-google-uid'),
+    };
+  });
+  ok(card.required === true, 'google sign-up: the welcome card asks for the affiliation and requires it');
+  ok(!/optional/i.test(card.label),
+    `google sign-up: …with no optional chip (got "${card.label}")`);
+  ok(!card.later, 'google sign-up: …and no Not now, since answering is the point of the card');
+  eq(card.heading, 'Welcome', 'google sign-up: it is the welcome card, not the ordinary profile card');
+  ok(/never published/i.test(card.lede),
+    'google sign-up: …and the card still says where the affiliation goes, which is why it may be asked for');
+  eq(card.marked, null, 'google sign-up: the mark is spent, so a second page load does not ask again');
+
+  /* Saving without one is refused, exactly as the registration form refuses it.
+     Counted rather than asserted absent: seedProfileFromUser has legitimately
+     already written the provider's NAME to this same document, so what is under
+     test is that the refused save adds nothing to it. */
+  const before = await q.evaluate(() => window.__fb.ops('set').filter((x) => x.indexOf('profiles/') === 0).length);
+  await q.fill('#oa-profile-form [name="affiliation"]', '   ');
+  await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => (document.querySelector('#oa-profile-msg') || {}).textContent,
+    null, { timeout: 8000 });
+  const refused = await q.evaluate(() => ({
+    msg: document.querySelector('#oa-profile-msg').textContent.trim(),
+    writes: window.__fb.ops('set').filter((x) => x.indexOf('profiles/') === 0).length,
+    stored: (window.__fb.dump()['profiles/fresh-google-uid'] || {}).affiliation,
+  }));
+  ok(/affiliation/i.test(refused.msg),
+    `google sign-up: an affiliation of spaces is refused, naming the field (got "${refused.msg}")`);
+  eq(refused.writes, before, 'google sign-up: …and the refused save writes nothing');
+  ok(!refused.stored, 'google sign-up: …so the profile still holds no affiliation');
+
+  await q.fill('#oa-profile-form [name="affiliation"]', 'Fresh University');
+  await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => window.__fb.at('set', 'profiles/fresh-google-uid') !== -1,
+    null, { timeout: 8000 });
+  const saved = await q.evaluate(() => window.__fb.dump()['profiles/fresh-google-uid']);
+  eq(saved.affiliation, 'Fresh University', 'google sign-up: …and a real one saves');
+  eq(errors, [], 'google sign-up: no uncaught script error');
+  await ctx.close();
+}
+
+{
+  /* the same reader signing in AGAIN is asked nothing: not a new account */
+  const RETURNING = { uid: 'returning-uid', email: 'back@example.edu', emailVerified: true,
+    displayName: 'Back Again', providerData: [{ providerId: 'google.com' }] };
+  const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
+    { seed: { signInUser: RETURNING }, selector: '#main' });
+  await q.evaluate(() => window.OAAccounts.openAuth());
+  await q.waitForSelector('.oa-auth-provider[data-provider="google"]', { timeout: 8000 });
+  await q.click('.oa-auth-provider[data-provider="google"]');
+  await q.waitForFunction(() => !!(window.OAAccounts.user()), null, { timeout: 8000 });
+  await q.waitForTimeout(700);
+  const after = await q.evaluate(() => ({
+    card: !!document.querySelector('#oa-profile-form'),
+    marked: localStorage.getItem('oaAskAffiliation:returning-uid'),
+  }));
+  ok(!after.card, 'returning sign-in: no welcome card, because the account is not new');
+  eq(after.marked, null, 'returning sign-in: …and nothing was marked');
+  eq(errors, [], 'returning sign-in: no uncaught script error');
+  await ctx.close();
+}
+
 /* --------------------------------------- the two calendar files, measured
 
    Owner, 2026-09-06: tick postings on jobs.html and download their apply-by
@@ -9868,7 +10058,7 @@ for (const w of [320, 360, 390, 430]) {
       const adaHead = await q.$('#oa-candidates #job-tc-ada .oa-card-head');
       await adaHead.click();
       await q.waitForTimeout(250);
-      const rows = await q.$$eval('#oa-candidates #job-tc-ada .oa-kv tr', (trs) =>
+      const rows = await q.$eval('#oa-candidates #job-tc-ada .oa-kv tr', (trs) =>
         trs.map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent]));
       const talk = rows.find((r) => /^Talk on Monday/.test(r[0]));
       eq(talk && talk[0], 'Talk on Monday 2 November 2026', 'talks calendar: the card names the talk\'s day with its date');
@@ -9903,7 +10093,7 @@ for (const w of [320, 360, 390, 430]) {
       /* narrowing the list narrows the file */
       await q.fill('#oaf-c_name', 'Grace');
       await q.waitForTimeout(500);
-      eq(await q.$$eval('#oa-candidates .oa-card', (n) => n.length), 1, 'talks calendar: the name search narrowed the list to one');
+      eq(await q.$eval('#oa-candidates .oa-card', (n) => n.length), 1, 'talks calendar: the name search narrowed the list to one');
       ok(/1 candidate /.test(await q.$eval('#oa-candidates .oa-talkcal', (b) => b.title)),
         'talks calendar: …and the button already says so');
       const dl2 = q.waitForEvent('download', { timeout: 30000 });
@@ -9955,7 +10145,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.fill('#f-talk-monday-title', 'Queues and prices');
     await q.waitForFunction(() => [...document.querySelectorAll('#oa-cand-preview .oa-kv th')]
       .some((th) => /^Talk on Monday/.test(th.textContent)), null, { timeout: 8000 });
-    const previewed = await q.$$eval('#oa-cand-preview .oa-kv tr', (trs) => trs
+    const previewed = await q.$eval('#oa-cand-preview .oa-kv tr', (trs) => trs
       .map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent])
       .find((r) => /^Talk on Monday/.test(r[0])));
     eq(previewed[1], '10:45 · session MB12 · Room 2004 · “Queues and prices”',

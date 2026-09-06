@@ -2605,6 +2605,124 @@ writes), Send again reaching the callable and falling back when it is
 absent, "I have verified it" lifting the gate with a fresh token, and the
 verify page's four cards for both readers, at 390px too.
 
+### …and it asks for an AFFILIATION, which the profile card deliberately does not
+
+Owner, 2026-09-05, of the "Create your account" card: *"when a user registers,
+affiliation should be mandatory. Also, ORCID should say 'highly recommended but
+optional'."* Two changes to one card, and they pull in opposite directions on
+purpose: one field stops being optional, the other stays optional and finally
+says it is worth giving.
+
+**A required field in this card is a BARE LABEL plus the `required` attribute.**
+That is the card's own convention, not a new one: First name, Last name, E-mail
+and Password carry it already, and an optional field is marked instead by a
+`<span class="oa-opt">(optional)</span>` chip. So becoming compulsory is losing
+the chip AND gaining the attribute, and the big standalone forms' `oa-req`
+asterisk is deliberately not borrowed here, since nothing else in this card
+uses one.
+
+**The guard beside `required` is not redundant, and the reason is spaces.**
+`required` refuses an EMPTY box and is perfectly satisfied by one holding three
+spaces, which would store an empty affiliation on the very field the card has
+just insisted on. So the submit handler trims once, refuses an empty result
+with the card's own voice ("Please give your affiliation, the university or
+company you are at."), puts the cursor back in the box, and the profile is then
+built from the value the guard trimmed rather than from a second, untrimmed
+read of it. It is the pair the two name fields already carry.
+
+**The PROFILE card keeps an optional affiliation, and that is the recorded rule
+rather than an oversight.** It is the EDIT surface, and this repository has
+twice written down what holding an old record to a new create-time rule costs:
+"an edit keeps the older either-or rule … because a posting that predates the
+rule must stay correctable". Three populations reach that card with no
+affiliation and none of them ever saw this form: every Google registration,
+every ORCID one (`seedProfileFromUser` writes a name and a picture and nothing
+else), and every account made before today. Making the box compulsory there
+would hold their name and their photograph hostage to a field they were never
+asked for. So the asymmetry is the design, and the module header says so where
+the next reader will look.
+
+**AND THE OTHER TWO ROADS IN ARE ASKED TOO** (owner, 2026-09-05, on being
+shown that the rule reached one of the three ways an account is made). A Google
+or ORCID sign-up never sees this form: the account is created by a popup with
+no fields at all. Worse, it could not even fall through to the first-run profile
+prompt, because that prompt fires on having NO profile and
+`seedProfileFromUser` writes the provider's name a moment earlier, which makes
+one. So those accounts are asked once, on the WELCOME card, with the box
+`required` and the "Not now" escape withheld: answering is what the card is for.
+
+**The ask is keyed on the SIGN-IN, not on the account's shape.**
+`additionalUserInfo.isNewUser` is the credential's own word for "this account
+did not exist a moment ago", which is exactly what "brand new" means here, and
+it is the only reading that cannot catch somebody else: an account signing in
+again, a provider LINKED to an existing account, and every account made before
+today are all untouched. Keying it on "has no affiliation" instead would have
+asked half the existing membership on their next visit, which is the trap this
+section is otherwise entirely about.
+
+**It is a MARK, not a call, because the sign-up usually navigates.** A new
+account lands on its personal area, so the card has to open on the page it
+ARRIVES at; `oaAskAffiliation:<uid>` carries it there and is taken exactly once,
+whether or not the card then opens, so a second page load never asks again. And
+`finish()` sets `leaving` before it navigates, or the card would open on the
+page being left behind and spend the mark for nothing. The compulsory box is
+reachable only through `openProfile(true, { requireAffiliation: true })`: the
+selftest pins that `mustAff` is nothing but a caller-passed option, so every
+ordinary edit keeps the chip, keeps the box optional and keeps its save guard
+off.
+
+**What it deliberately does NOT do is trap anybody.** The card still closes on
+its X and on Escape, like every other modal here; what "required" buys is that
+the welcome step cannot be completed without an answer. A modal a reader cannot
+leave is not a thing this site has, and one compulsory field is not the place to
+start.
+
+**The ORCID iD is still genuinely optional and now says it is worth giving**,
+on BOTH cards, because the two ask one question: a reader who registers and
+then opens Edit account must not be told two different things about the same
+box. The wording is a recommendation, never a rule, so no `required` joins it
+and the submit handler's `if (typedOrcid)` branch is untouched: an iD that is
+given is still validated by `normOrcid`, and one that is not given still
+publishes nothing.
+
+**NO RULES CHANGE, and therefore no deploy.** `str()` in `_firestore.rules`
+bounds a field's SHAPE and never its presence (`!(field in
+request.resource.data) || …`), so `str('affiliation', 300)` is what makes a
+profile written before today still writable by its owner. Adding a presence
+clause would refuse the Google and ORCID profile create outright and, because
+`request.resource.data` is the MERGED document on an update, would freeze every
+existing account against itself: the `sync-user-directory` trap exactly. The
+selftest pins the claim rather than leaving it to memory.
+
+**The `/v2/` archive keeps the old wording on both fields**, by the rule the
+three trees are held to. Only the merge region is pinned byte-identical across
+the two copies of `oa-accounts.js` (`var MERGE_APP` to `function signOut`), and
+both cards sit well outside it, so the divergence is expected and permitted.
+
+Tests (the provider half): the pins in `testRegistrationFields` for the mark,
+the `isNewUser` reading, the linking path marking nothing, the once-only take,
+the `leaving` guard and the shim's `additionalUserInfo`; and the Google
+sign-up block in `_scraper/page-test.mjs`, which presses Continue with Google
+as a brand new account and reads the welcome card back (required box, no
+optional chip, no Not now, the mark spent), refuses a save of three spaces
+with nothing added to the document, saves a real one, and drives a RETURNING
+sign-in past the same path to show it is asked nothing.
+
+Tests: `testRegistrationFields` in `_scraper/selftest.mjs` (the bare label with
+the old chip gone, the `required` attribute beside the two name fields, the
+website still optional so the card still distinguishes the two kinds, the new
+ORCID wording appearing exactly twice and no card still calling the iD plainly
+optional, the profile card's affiliation asserted STILL optional and carrying
+no `required`, the guard's trim, its message, its focus and its position ahead
+of the account creation, the profile built from the trimmed value and never
+from a second read, the rules claim both ways, and the module header) and the
+registration block in `_scraper/page-test.mjs`, which drives it in a real
+browser through the fake Firebase shim: the rendered labels and the `required`
+flags read off the card itself, an affiliation of three spaces refused with the
+cursor put back and NO account created and no profile stored, the card left
+open on what was typed, and the same form with a real affiliation still
+registering with the value stored trimmed.
+
 ## The forum
 
 Owner, 2026-09-04 and 05: an anonymous forum for the candidates of the

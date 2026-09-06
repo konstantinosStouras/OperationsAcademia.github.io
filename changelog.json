@@ -31,6 +31,13 @@
       "url": "/analytics.html"
     },
     {
+      "id": "registration-affiliation-2026-09",
+      "date": "2026-09-05",
+      "title": "Creating an account now asks for your affiliation",
+      "summary": "The Create your account form asks for your affiliation, the university or company you are at, and it is no longer optional. Signing up with Google or ORCID asks for it once on the welcome card instead, since those routes fill in no form. It is kept on your profile and never published: only you can read it. The ORCID iD box is still optional and now says it is highly recommended, because recording it lets the site recognise you if you ever sign in with ORCID instead of starting you a second account. Editing your account later is unchanged, so an account made before today is never asked to add anything.",
+      "url": "/account.html"
+    },
+    {
       "id": "verify-existing-2026-09",
       "date": "2026-09-05",
       "title": "Existing members are asked to confirm their e-mail address, once",
