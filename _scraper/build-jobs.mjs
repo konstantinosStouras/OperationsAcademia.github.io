@@ -882,6 +882,24 @@ async function main() {
   const merged = mergeRows(healed, freshVisible, applicable);
   const visible = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 
+  /* TWO SOURCES CAN MINT ONE ID, and the merge has just renamed whichever it
+     saw second. An id is (market year, institution, posting date) and names no
+     department, so a posting made through the form and an unclaimed row in the
+     tracking workbook can derive the same one for one university on one day.
+     The workbook's rows are LAST in `freshVisible`, so the row renamed is
+     exactly the one whose id is a join key -- to its review-queue document, to
+     its mirror, and to the maintainer's Edit and Take-down controls, none of
+     which follow it.
+
+     Reported, never repaired: a fix would move permalinks and every key joined
+     on them, which this file records as the maintainer's call. What was
+     missing is that nothing said so at all. */
+  for (const r of merged.renamed) {
+    warn(`${r.from} was published as ${r.to}: two sources derived one id` +
+         (r.source ? ` (this row came from ${r.source})` : '') +
+         ' — the id is a join key, so correct one of the two at its source');
+  }
+
   /* EVERY ROW NAMES THE COUNTRY ITS UNIVERSITY IS IN.
 
      Applied to the merged set rather than to one source, because the fault it

@@ -71,7 +71,18 @@
       Pinned against the create rule's hasOnly() in _firestore.rules BOTH
       WAYS: a key with no rule is a permission-denied nobody can debug, and a
       rule with no writer is dead. */
-  var REQUEST_KEYS = ['uid', 'by', 'email', 'name', 'askedAt', 'status'];
+  /* `orcid` IS ON THE ORDER because the sweep cannot find it afterwards.
+     `accountKeys/orcid:<iD>` is claimed from `profiles.orcid` whatever put it
+     there, and a member may TYPE their iD into their profile with no ORCID
+     sign-in behind it. The browser deletes `profiles/{uid}` itself, minutes
+     before the sweep runs, so by then the profile is gone and there is no
+     `oidc.orcid` provider entry to recover the iD from either -- and nothing
+     but the sweep can delete an identity key. The key then outlived the
+     account it named and went on offering a merge with a uid that no longer
+     exists, which is the exact failure the sweep's own comment describes for
+     the other route. Carried here, like the address, and dropped by
+     `redacted()` when the order is finished. */
+  var REQUEST_KEYS = ['uid', 'by', 'email', 'name', 'orcid', 'askedAt', 'status'];
 
   /** …and every key the SWEEP adds afterwards with the Admin SDK. They are
       deliberately DISJOINT from the list above, and no browser ever updates
@@ -104,7 +115,7 @@
     return s.length > max ? s.slice(0, max) : s;
   }
 
-  var MAXLEN = { email: 200, name: 200, note: 500 };
+  var MAXLEN = { email: 200, name: 200, orcid: 40, note: 500 };
 
   /** The work order itself, as a plain object. Pure, so both writers and the
       selftest mint the identical document, and `now` is injected rather than
@@ -120,8 +131,10 @@
     var doc = { uid: uid, by: by, askedAt: Number(s.now) || 0, status: 'requested' };
     var email = str(s.email, MAXLEN.email).trim();
     var name = str(s.name, MAXLEN.name).trim();
+    var orcid = str(s.orcid, MAXLEN.orcid).trim();
     if (email) doc.email = email;
     if (name) doc.name = name;
+    if (orcid) doc.orcid = orcid;
     return doc;
   }
 
@@ -511,6 +524,7 @@
       by: 'self',
       email: user.email || '',
       name: root.OAAccounts.displayName(),
+      orcid: (root.OAAccounts.profile() || {}).orcid || '',
       now: Date.now()
     });
 

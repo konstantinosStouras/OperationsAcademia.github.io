@@ -2369,6 +2369,40 @@ own key list has none, and a signed-out visitor can send one — so joining it t
 an account by the address typed into a public form would be a guess. It is
 removed on request, like everything else that has to be asked for.
 
+### Three ways the sweep could stop, or leave a key behind
+
+**ONE ORDER MUST NOT STOP THE RUN.** The loop had no `try` around it, so a
+single account whose clear or purge threw took every other queued deletion
+with it — and the collection comes back in a stable order, so the next run met
+the same order first and stopped in the same place. A queue that cannot get
+past its first bad row is a queue that stops, and nothing in the log named the
+account. Each order is carried out inside its own `try` now, the failure is
+counted and warned about **by uid and never by the person**, and the rest of
+the queue is carried on with.
+
+**CLEARED MEANS THE CLEAR FINISHED, which is what `clearedAt` records.** The
+status alone decided it and was stamped only after `clearAccount` RETURNED, so
+an order that threw half way through still read `requested` — the one status
+the rules let the maintainer cancel, and cancelling then is a lie: the sign-in
+has already gone. The status goes on BEFORE the work now, so a half-cleared
+order reads `clearing` and cancel is refused; `clearedAt` still goes on after,
+so gate 4's hour runs from the moment the sign-in really went and a `clearing`
+order WITHOUT it is resumed rather than skipped.
+
+**AND THE ORCID iD RIDES ON THE WORK ORDER**, because the sweep cannot find it
+afterwards. `accountKeys/orcid:<iD>` is claimed from `profiles.orcid` whatever
+put it there, and a member may TYPE their iD into their profile with no ORCID
+sign-in behind it. The browser deletes `profiles/{uid}` itself, minutes before
+the sweep runs — so for such an account the profile is gone AND there is no
+`oidc.orcid` provider entry to recover the iD from, and nothing but the sweep
+can delete an identity key. The key outlived the account it named and went on
+offering a merge with a uid that no longer exists, which is exactly the
+failure the sweep's own comment already describes for the other route. It is
+carried like the address, omitted when there is none, preferred over both
+readings, and dropped again by `redacted()` when the order is finished.
+`orcid` joined `REQUEST_KEYS` and the rules' create list in the same change,
+which the selftest pins both ways.
+
 ### The rules, and the one place an Admin-SDK stamp is safe
 
 `accountDeletions/{uid}` is keyed on the uid itself (the `messages/{uid}` and

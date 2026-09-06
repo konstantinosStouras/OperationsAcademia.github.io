@@ -337,6 +337,45 @@ function testMerge() {
     createdAt: new Date('2025-08-15T09:00:00Z'),
   });
 
+  /* TWO SOURCES CAN MINT ONE ID, AND THE MERGE NOW SAYS SO. An id is (market
+     year, institution, posting date) and names no department, so a posting
+     made through the form and an unclaimed row in the tracking workbook can
+     derive the same one for one university on one day. `uniqueIds` renames
+     whichever the merge saw SECOND, and the workbook's rows are last in the
+     build's `freshVisible` — so the row renamed is exactly the one whose id
+     is a join key, to its review-queue document, its mirror and the
+     maintainer's Edit and Take-down controls, none of which follow it.
+
+     This file records the collision itself as the maintainer's call, because
+     a fix would move permalinks. What it also records is that NOTHING WARNED,
+     and that the only reason it was ever noticed is that a guard happened to
+     name the two ids. Reported by value, repairing nothing. */
+  {
+    const same = { year: 2027, posted: '2026-09-01', institution: 'Bauer College',
+      department: 'Ops', school: '', unit: 'Ops', type: 'University',
+      levels: ['Assistant Professor'], applyBy: 'Until filled.', applyByDate: '',
+      comments: '', country: 'United States', adUrl: '', adLabel: '',
+      postedAtUrl: '', postedAtLabel: '', furtherInfoUrl: '', characteristics: [],
+      featured: false, addedAt: '2026-09-01T00:00:00Z', owner: '', ref: '' };
+    /* The form's row carries a REFERENCE and the workbook's carries none, so
+       `keyOf` keys them apart (`ref:…` against `id:…`) and both survive the
+       merge as two entries — which is what leaves `uniqueIds` a duplicate id
+       to rename. Where BOTH are ref-less the merge keys both by the id and the
+       second silently replaces the first, which is the same collision one
+       stage earlier and is what this file already records as the maintainer's
+       call. */
+    const fromForm = { ...same, id: 'x-1', ref: 'OA-JOB-260901-AAAA', source: 'form' };
+    const fromSheet = { ...same, id: 'x-1', department: 'SCM', unit: 'SCM', source: 'jobmarket-sheet' };
+    const clash = mergeRows([], [fromForm, fromSheet]);
+    eq(clash.rows.length, 2, 'two departments on one day are two postings');
+    eq(clash.renamed.length, 1, 'and the merge reports the one it had to rename');
+    eq(clash.renamed[0].from, 'x-1', '…naming the id it could not keep');
+    eq(clash.renamed[0].to, 'x-1-2', '…and the one it published instead');
+    eq(clash.renamed[0].source, 'jobmarket-sheet',
+      '…and which source lost it, since that is what says whether a join key moved');
+    eq(mergeRows([], [fromForm]).renamed, [], 'a run with no collision reports nothing');
+  }
+
   let m = mergeRows([], [a, b]);
   eq(m.added, 2, 'both rows are new');
   eq(m.rows.length, 2, 'both kept');
@@ -816,6 +855,14 @@ async function testFleetPins() {
     eq(contradicts.map((r) => r.id).join(', '), '',
       'no served row carries both an "until filled" deadline and a date');
   }
+
+  /* …and the build says which rows the merge had to rename, where the id it
+     could not keep is a join key nothing follows. */
+  const bj = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/for \(const r of merged\.renamed\)/.test(bj)
+     && /two sources derived one id/.test(bj)
+     && /the id is a join key/.test(bj),
+    'build-jobs.mjs names every posting whose id the merge had to change');
 
   // Everything inside /v2/ links relative, so the pages survive the cutover's
   // move up one directory. The account menu was the last absolute holdout.
@@ -5732,9 +5779,32 @@ async function testAccountDeletion() {
      list can agree with the rules perfectly while requestDoc had stopped
      sending one of them (the lesson testRowOverrides and testUsersAndMessages
      both record). */
-  const minted = AD.requestDoc({ uid: 'u1', by: 'self', email: 'a@b.c', name: 'A', now: 7 });
+  const minted = AD.requestDoc({ uid: 'u1', by: 'self', email: 'a@b.c', name: 'A',
+    orcid: '0000-0002-1825-0097', now: 7 });
   eq(Object.keys(minted).sort(), [...AD.REQUEST_KEYS].sort(),
     'requestDoc really mints every key the rules allow');
+  /* THE ORCID iD RIDES ON THE ORDER BECAUSE THE SWEEP CANNOT FIND IT LATER.
+     `accountKeys/orcid:<iD>` is claimed from `profiles.orcid` whatever put it
+     there, and a member may TYPE their iD with no ORCID sign-in behind it. The
+     browser deletes `profiles/{uid}` itself, minutes before the sweep runs, so
+     for such an account the profile is gone AND there is no `oidc.orcid`
+     provider entry to recover it from — and nothing but the sweep can delete
+     an identity key, so it outlived the account it named and went on offering
+     a merge with a uid that no longer exists. */
+  eq(minted.orcid, '0000-0002-1825-0097', '…the ORCID iD among them');
+  ok(!('orcid' in AD.requestDoc({ uid: 'u1', by: 'self', now: 7 })),
+    '…omitted when there is none, like the address, so "none" and "not known" differ');
+  eq(AD.redacted({ ...minted, clearedAt: 9 }, 10).orcid, undefined,
+    '…and gone again when the order is finished, with the name and the address');
+  {
+    const del = await readFile(path.join(root, 'assets', 'oa-account-delete.js'), 'utf8');
+    ok(/orcid: \(root\.OAAccounts\.profile\(\) \|\| \{\}\)\.orcid \|\| '',/.test(del),
+      '…read off the profile the browser is about to delete');
+    const sweep = await readFile(path.join(HERE, 'purge-accounts.mjs'), 'utf8');
+    ok(/let orcid = String\(order\.orcid \|\| ''\);/.test(sweep)
+       && /if \(!orcid\) orcid = \(\(await db\.collection\('profiles'\)/.test(sweep),
+      '…and preferred by the sweep over the two readings that may already be gone');
+  }
   ok(minted.status === 'requested', 'a fresh order is `requested`');
   ok(!('email' in AD.requestDoc({ uid: 'u1', by: 'admin', now: 1 })),
     'an account with no address carries no `email` key at all — an ORCID sign-in ' +
@@ -6004,6 +6074,38 @@ async function testAccountDeletion() {
   ok(/col\.candidateMarkers\) \|\| 'candidateMarkers'\)\s*\n\s*\.doc\(uid\)\['delete'\]\(\)/.test(
     await readFile(path.join(root, 'assets', 'oa-account-delete.js'), 'utf8')),
   '…and the browser deletes it too, while it still has a session that may');
+  /* ONE ORDER MUST NOT STOP THE RUN. There was no catch around the body of
+     the loop, so a single account whose clear or purge threw took every other
+     queued deletion with it — and the collection comes back in a stable order,
+     so the next run met the same order first and stopped in the same place. A
+     queue that cannot get past its first bad row is a queue that stops. */
+  {
+    const loop = purge.slice(purge.indexOf('for (const { uid, data } of orders)'),
+      purge.indexOf('if (DRY) { log(\'--dry-run: nothing written.\'); return 0; }'));
+    ok(loop.length > 400 && /^\s*try \{/m.test(loop) && /\} catch \(e\) \{/.test(loop),
+      'the sweep carries out each order inside its own try, so one failure is not all of them');
+    ok(/could not be carried out/.test(loop) && /left open, and the rest of the queue/.test(loop),
+      '…saying so, and saying the rest of the queue was carried on with');
+    ok(/warn\(`\$\{uid\}: could not be carried out/.test(loop)
+       && !/\$\{data\.email\}|\$\{data\.name\}/.test(loop),
+      '…named by the uid and never by the person, since the log is public');
+
+    /* CLEARED MEANS THE CLEAR FINISHED. The status alone used to decide it and
+       was stamped only after `clearAccount` returned, so an order that threw
+       half way still read `requested` — the ONE status the rules let the
+       maintainer cancel, and cancelling then is a lie: the sign-in has gone.
+       The status goes on BEFORE the work; `clearedAt` still goes on after, so
+       gate 4's hour runs from the moment the sign-in really went and a
+       `clearing` order without it is resumed rather than skipped. */
+    ok(/if \(!\(data\.status === 'clearing' && clearedAt\)\) \{/.test(loop),
+      'the sweep resumes an order whose clear did not finish, rather than skipping it');
+    const at = loop.indexOf("set({ status: 'clearing' }, { merge: true })");
+    ok(at > -1 && at < loop.indexOf('await clearAccount('),
+      '…and stamps `clearing` BEFORE the work, so a half-cleared order cannot be cancelled');
+  }
+  ok(/allow delete: if isAdmin\(\) && resource\.data\.status == 'requested'/.test(rules),
+    '…which is what the cancel window is keyed on');
+
   ok(/feedback/.test(purge) && !/collection\('feedback'\)/.test(stripJs(purge)),
     '…and feedback is named as deliberately LEFT rather than quietly missed: it ' +
     'carries no uid, a signed-out visitor can send one, and joining it by the ' +

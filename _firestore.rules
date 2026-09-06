@@ -804,11 +804,16 @@ service cloud.firestore {
 
       function orderOk() {
         return request.resource.data.keys().hasOnly(
-                 ['uid', 'by', 'email', 'name', 'askedAt', 'status'])
+                 ['uid', 'by', 'email', 'name', 'orcid', 'askedAt', 'status'])
           && request.resource.data.uid == uid
           && request.resource.data.status == 'requested'
           && request.resource.data.askedAt is number
-          && str('email', 200) && str('name', 200);
+          // `orcid` is here because the sweep cannot find it afterwards: the
+          // identity key is claimed from profiles.orcid whatever put it there,
+          // a member may type the iD with no ORCID sign-in behind it, and the
+          // browser deletes the profile before the sweep runs. Dropped again
+          // when the order is finished (redacted()).
+          && str('email', 200) && str('name', 200) && str('orcid', 40);
       }
 
       // The person themselves, and the maintainer. Nobody else can even see

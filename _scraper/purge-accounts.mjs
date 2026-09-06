@@ -433,10 +433,19 @@ async function clearAccount(fb, uid, order, held) {
         the identity keys are derived from them. A work order usually carries
         the address already, but an admin-filed one for an account with no
         roster row may not. */
-  let orcid = '';
+  /* THE ORDER FIRST, and that is the only source that survives the browser.
+     `accountKeys/orcid:<iD>` is claimed from `profiles.orcid` whatever put it
+     there, and a member may TYPE their iD with no ORCID sign-in behind it --
+     so for such an account BOTH readings below are empty by the time this
+     runs, the profile because the browser deleted it minutes ago and the
+     provider because there never was one. The key then outlived the account
+     it named, offering a merge with a uid that no longer exists, which is the
+     failure the comment below already describes for the other route. The
+     browser puts the iD on the work order for this. */
+  let orcid = String(order.orcid || '');
   try {
-    orcid = ((await db.collection('profiles').doc(uid).get()).data() || {}).orcid || '';
-  } catch { orcid = ''; }
+    if (!orcid) orcid = ((await db.collection('profiles').doc(uid).get()).data() || {}).orcid || '';
+  } catch { /* already gone */ }
   let email = order.email || '';
   /* AND THE AUTH RECORD IS THE OTHER PLACE BOTH LIVE, which matters because
      the profile may already be gone: a person deleting their own account
@@ -653,8 +662,16 @@ async function main() {
   log(`${orders.length} account deletion(s) to carry out.`);
   if (!orders.length) return 0;
 
-  let cleared = 0, finished = 0, waiting = 0;
+  let cleared = 0, finished = 0, waiting = 0, failed = 0;
   for (const { uid, data } of orders) {
+    /* ONE ORDER MUST NOT STOP THE RUN. There was no catch here, so a single
+       account whose clear or purge threw took every other queued deletion
+       with it -- and since the collection comes back in a stable order, the
+       next run met the same order first and stopped in the same place. A
+       queue that cannot get past its first bad row is a queue that stops.
+       The uid names it and nothing else does: an address in a public Actions
+       log is the thing this whole sweep exists to remove. */
+    try {
     const held = await submissionsOf(db, uid);
     const counts = Object.fromEntries(SUBMISSIONS.map((s) => [s.what, (held[s.col] || []).length]));
 
@@ -666,7 +683,20 @@ async function main() {
 
     let removed = data.removed || null;
     let clearedAt = Number(data.clearedAt) || 0;
-    if (data.status !== 'clearing') {
+    /* CLEARED means the clear FINISHED, which is what `clearedAt` records.
+       The status alone used to decide it, and the status was stamped only
+       after `clearAccount` returned -- so an order that threw half way
+       through still read `requested`, which is the ONE status the rules let
+       the maintainer cancel. Cancelling then is a lie: the sign-in has
+       already gone. The status is stamped BEFORE the work now, so a
+       half-cleared order reads `clearing` and cancel is refused; `clearedAt`
+       is still stamped after, so gate 4's hour is measured from the moment
+       the sign-in really went, and a `clearing` order without it is resumed
+       rather than skipped. */
+    if (!(data.status === 'clearing' && clearedAt)) {
+      if (data.status !== 'clearing') {
+        await db.collection(COLLECTION).doc(uid).set({ status: 'clearing' }, { merge: true });
+      }
       removed = await clearAccount(fb, uid, data, held);
       clearedAt = Date.now();
       await db.collection(COLLECTION).doc(uid).set(
@@ -693,11 +723,16 @@ async function main() {
     finished++;
     log(orderLine(uid, data, `done: ${purged.deleted} document(s) deleted` +
       (purged.drive ? `, ${purged.drive} file(s) removed from Drive` : '')));
+    } catch (e) {
+      failed++;
+      warn(`${uid}: could not be carried out (${e.code || e.name || 'error'}) — ` +
+           'left open, and the rest of the queue was carried on with');
+    }
   }
 
   if (DRY) { log('--dry-run: nothing written.'); return 0; }
   log(`${cleared} account(s) cleared, ${finished} finished, ${waiting} still open ` +
-      '(each line above says why).');
+      '(each line above says why)' + (failed ? `, ${failed} threw and were left open` : '') + '.');
   return 0;
 }
 

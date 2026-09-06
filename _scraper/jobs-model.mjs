@@ -1994,8 +1994,29 @@ export function mergeRows(existing, fresh, remove = []) {
      the served file. */
   const { rows: kept, collapsed } = collapseSameDay([...by.values()]);
 
-  const rows = uniqueIds(kept.sort(displayOrder));
-  return { rows, added, updated, removed, collapsed };
+  const ordered = kept.sort(displayOrder);
+  const rows = uniqueIds(ordered);
+  /* WHICH ROWS `uniqueIds` HAD TO RENAME, and it is not bookkeeping. An id is
+     (market year, institution, posting date) and names no department, so two
+     sources can mint one: a posting made through the form and an unclaimed row
+     in the tracking workbook, for one university on one day. The renamed one
+     is whichever the merge saw second, and the workbook's rows are last in
+     `freshVisible` -- so the row renamed is exactly the one whose id is a JOIN
+     KEY, to its review-queue document, its mirror, and the maintainer's Edit
+     and Take-down controls.
+
+     This file already records that two sources can mint one id and that the
+     later writer wins, and that fixing it would move permalinks: it is the
+     maintainer's call. What was missing is that NOTHING SAID SO -- the only
+     reason it was ever noticed is that a guard happened to name the two ids.
+     So the merge reports it, by value, and repairs nothing. */
+  const renamed = [];
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i].id !== ordered[i].id) {
+      renamed.push({ from: ordered[i].id, to: rows[i].id, source: String(ordered[i].source || '') });
+    }
+  }
+  return { rows, added, updated, removed, collapsed, renamed };
 }
 
 /**
