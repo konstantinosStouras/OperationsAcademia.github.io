@@ -16825,8 +16825,44 @@ async function testForum() {
     'forum delete: and the page says removed by the maintainer rather than deleted by its author');
   ok(/function amAdmin\(/.test(pageJs) && /mine \|\| amAdmin\(\)/.test(pageJs),
     'forum delete: the page draws the control for the author OR the maintainer');
-  ok(/var stuck = isFirst && !amAdmin\(\) && liveAnswers > 0;/.test(pageJs),
+  ok(/var stuck = isGuide \|\| \(isFirst && !amAdmin\(\) && liveAnswers > 0\);/.test(pageJs),
     'forum delete: an answered question shows the control disabled with the reason, rather than failing on the press');
+
+  /* THE ROOM'S GUIDE IS NOT REMOVABLE, at BOTH ends. Its id is stamped on the
+     season head and never cleared, so seedGuide takes its refresh branch for
+     ever after and writes the words back into a thread that is still hidden:
+     one press of the maintainer's own Remove cost the room its guide for the
+     season with no route back. _scraper/remove-forum-thread.mjs has refused it
+     from the day it shipped, for this reason in these words; the callable had
+     no such rule and the button offered it. */
+  ok(/String\(guides\[d\.room\] \|\| ''\) === threadRef\.id/.test(delSrc)
+     && /P\.refuse\('failed-precondition', 'guidethread'\)/.test(delSrc)
+     && !/refuse\('failed-precondition', 'guide'\)/.test(delSrc),
+    'forum delete: the callable refuses the room\'s own guide thread');
+  ok(/seasonRef\)/.test(delSrc) && delSrc.indexOf('await tx.get(seasonRef)') < delSrc.indexOf('const closeThread'),
+    '…reading the season head BEFORE the first write, like every other read here');
+  ok(/var isGuide = isFirst && String\(S\.guides\[S\.room\] \|\| ''\) === String\(S\.tid \|\| ''\);/.test(pageJs)
+     && /The forum guide cannot be removed/.test(pageJs),
+    '…and the page says no before it is pressed, from the same map the seed button reads');
+
+  /* AND THE ANSWERS GO WITH THE THREAD, in the database and not only on the
+     page. The header's own argument — hiding is not erasing, because the rules
+     let any admitted member read this collection — was applied to the thread's
+     title and excerpt and to nothing else, so every ANSWER under a question the
+     maintainer removed kept its body one direct query away, and its author
+     could never delete it (a post under a hidden thread is refused `locked`).
+     The sweep is the MAINTAINER'S alone: an author closing a legacy headless
+     thread must not be this forum's one way to take another member's words. */
+  ok(/const sweep = isQuestion && admin \? await tx\.get\(sweepQuery\) : null;/.test(delSrc),
+    'forum delete: a closing thread sweeps its answers, and only for the maintainer');
+  ok(/sweepQuery = postsRef\.where\('hidden', '==', false\)\.limit\(SWEEP_MAX \+ 1\)/.test(delSrc)
+     && /sweep\.size > SWEEP_MAX\) P\.refuse\('failed-precondition', 'big'\)/.test(delSrc),
+    '…bounded by the transaction write cap, and refused rather than half-erased');
+  const sweptAt = delSrc.indexOf('const sweptPatch');
+  ok(sweptAt > -1 && /body: '',[\s\S]{0,80}hidden: true,[\s\S]{0,80}hiddenBy: 'admin',/.test(delSrc.slice(sweptAt, sweptAt + 260)),
+    '…erasing the words rather than flagging them, and saying who did it');
+  ok(/if \(doc\.id === postRef\.id\) continue;/.test(delSrc),
+    '…and never writing the question twice, which its own patch below already does');
   {
     const emu = await read('_functions', 'test', 'forum-emulator.mjs');
     ok(/nobody may reply to a thread whose question has been deleted/.test(emu)
@@ -17177,9 +17213,31 @@ async function testForum() {
     'oa-jobform.js: a new posting counts at once, so the menu\'s My postings row appears from that moment');
   ok(/var box = \$\('oa-preview'\);\s*\n\s*if \(box\) box\.innerHTML = '';/.test(await read('assets', 'oa-alerts.js')),
     'oa-alerts.js: signing out takes the example digest, which carries real postings, out of the document');
-  /* A SUPERSEDED MOUNT MUST NOT WRITE THE NEW ROOM'S STATE. */
-  ok(/var forRoom = S\.room;/.test(pageJs) && /if \(forRoom !== S\.room \|\| forSeason !== S\.season\) return rows;/.test(pageJs),
-    'oa-forum.js: a list read still in flight when the room changes stops writing the shared state');
+  /* A SUPERSEDED PAINT MUST NOT WRITE THE VIEW THE READER HAS MOVED TO, and
+     the invariant is the ADDRESS rather than the room. The list mount's guard
+     compared room and season, which is right for a room switch and blind to
+     the commoner move: opening a thread changes neither, so a list read
+     landing a moment later repainted the watched-tags banner hideViews had
+     just put away, on top of the open thread — and a THREAD read landing
+     after the reader went back drew a live "Your answer" box under the list,
+     wired to an empty tid, because renderThread shows #oa-forum-compose and
+     that is a SIBLING of the thread rather than a child of it. One key, one
+     definition, and every async completion on this page held to it. */
+  ok(/function viewKey\(\)/.test(pageJs)
+     && /return S\.room \+ '\|' \+ S\.season \+ '\|' \+ \(S\.tid \|\| ''\) \+ '\|' \+ \(S\.ask \? '1' : ''\);/.test(pageJs),
+    'oa-forum.js: the view a paint is for is the whole address, in one function');
+  ok(/var forView = viewKey\(\);[\s\S]{0,900}if \(forView !== viewKey\(\)\) return rows;/.test(pageJs),
+    '…the list mount stops writing the shared state once the reader has moved');
+  ok(!/forRoom|forSeason/.test(pageJs),
+    '…and the narrower room-and-season guard it replaced is gone, not left beside it');
+  const drawTh = pageJs.slice(pageJs.indexOf('function drawThread('), pageJs.indexOf('var LINK_RX'));
+  eq((drawTh.match(/if \(forView !== viewKey\(\)\) return;/g) || []).length, 2,
+    '…and the thread guards BOTH of its terminal callbacks, the failure one included');
+  ok(drawTh.indexOf("if (forView !== viewKey()) return { votes: {} };") <
+     drawTh.indexOf("call('forumThreadVotes'"),
+    '…and again before the votes call, so a thread the reader has left spends no callable');
+  ok(drawTh.indexOf('var forView = viewKey();') < drawTh.indexOf('db().then('),
+    '…keyed on the view it started in, captured before the read');
 
   /* the withdraw path */
   const candForm = await read('assets', 'oa-candidateform.js');

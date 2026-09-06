@@ -66,6 +66,8 @@ const ERRORS = {
   asker: 'Only the member who asked the question can tick the answer.',
   answer: 'Only an answer can be ticked, and only while its words are still there.',
   answered: 'A question that has been answered cannot be deleted.',
+  guidethread: 'The room\'s guide cannot be removed; it is the one thread every new member has to be able to read.',
+  big: 'That thread carries too many answers to remove from here.',
   window: 'The fifteen-minute edit window has closed, so the post stays as written.',
   own: 'You cannot vote on your own post.',
   busy: 'The forum is busy. Try again in a moment.',

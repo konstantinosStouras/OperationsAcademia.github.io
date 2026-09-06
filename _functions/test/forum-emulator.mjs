@@ -436,6 +436,47 @@ async function main() {
   const healed = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${head.result.tid}`).get();
   ok(healed.data().hidden === true, 'so a thread left headless can always be closed');
 
+  /* THE MAINTAINER REMOVING A QUESTION TAKES THE ANSWERS' WORDS WITH IT.
+     Hiding the thread is not erasing: the rules let any admitted member read
+     this collection, so an answer left `hidden: false` under a removed
+     question is one direct query away, and its author could never take it
+     down themselves, because a post under a hidden thread is refused
+     `locked`. So it was the one post on this forum nobody could delete. */
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
+  const swept = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A question the maintainer will remove', tags: ['waiting'], body: 'Something that turns out not to belong here at all.' });
+  ok(!swept.error, 'a question to remove as moderation', JSON.stringify(swept));
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
+  const sweptReply = await call('forumPost', tokens.adm, { room: 'candidates', tid: swept.result.tid, body: 'An answer that must not survive the removal of its question.' });
+  ok(!sweptReply.error, 'with an answer under it', JSON.stringify(sweptReply));
+  const rmQ = await call('forumDelete', tokens.adm, { room: 'candidates', tid: swept.result.tid, pid: swept.result.pid });
+  ok(!rmQ.error && rmQ.result.thread === true,
+    'the maintainer removes it, and it takes the whole thread', JSON.stringify(rmQ));
+  const sweptPosts = await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads/${swept.result.tid}/posts`).get();
+  ok(sweptPosts.docs.every((d) => (d.data().body || '') === ''),
+    'every post under it is erased, the answers included, not merely flagged');
+  ok(sweptPosts.docs.every((d) => d.data().hidden === true),
+    'and every one is hidden, so nothing is left for the page to draw');
+  const sweptAnswer = sweptPosts.docs.find((d) => Number(d.data().n) !== 1);
+  ok(sweptAnswer && sweptAnswer.data().hiddenBy === 'admin',
+    'the answers say the maintainer removed them, not their own authors');
+
+  /* THE ROOM'S GUIDE IS NOT REMOVABLE. Its id is stamped on the season head
+     and never cleared, so seedGuide takes its refresh branch for ever after
+     and writes the words back into a thread that is still hidden: one press
+     of Remove would cost the room its guide for the season with no route
+     back. The removal script has refused it from the day it shipped. */
+  const seasonHead = await admin.doc(`forumSeasons/${Y}`).get();
+  const guideTid = String(((seasonHead.data() || {}).guides || {}).candidates || '');
+  ok(guideTid, 'the candidates room has a seeded guide to try this on');
+  const guidePosts = await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads/${guideTid}/posts`).get();
+  const guideFirst = guidePosts.docs.find((d) => Number(d.data().n) === 1);
+  const rmGuide = await call('forumDelete', tokens.adm, { room: 'candidates', tid: guideTid, pid: guideFirst.id });
+  ok(status(rmGuide) === 'FAILED_PRECONDITION' && reason(rmGuide) === 'guidethread',
+    'the maintainer cannot remove the room\'s own guide', JSON.stringify(rmGuide));
+  const guideStill = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${guideTid}`).get();
+  ok(guideStill.data().hidden !== true && guideStill.data().title,
+    'and it is still there, with its title, after the refusal');
+
   /* ------------------------------------------------- the daily counters
      THE DAY ROLL ONLY HAPPENS IF EVERY WRITER WRITES IT BACK. counters()
      zeroes what the stored `day` has outlived, but a writer that stamps the

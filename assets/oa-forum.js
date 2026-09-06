@@ -132,6 +132,8 @@
     asker: 'Only the member who asked the question can tick the answer.',
     answer: 'Only an answer can be ticked, and only while its words are still there.',
     answered: 'This question has answers, so it cannot be deleted. It can go once every answer has been deleted.',
+    guidethread: 'The forum guide cannot be removed. It is the thread every new member reads first, and once it went there would be no way to post it again this season.',
+    big: 'This thread carries too many answers to remove from here. The removal tool in the repository takes one off with no such limit.',
     window: 'The fifteen-minute edit window has closed, so the post stays as written.',
     own: 'You cannot vote on your own post.',
     busy: 'The forum is busy right now. Please try again in a moment.',
@@ -545,6 +547,27 @@
     });
     S.quote = null;
     S.votes = {};
+  }
+
+  /** WHICH VIEW A PAINT IS FOR: the ONE definition, and the guard every
+      async completion on this page is held to.
+
+      The list, a thread and the ask form are three views of one page swapped
+      with pushState, and each of them paints from a read that is still in
+      flight when the reader moves. The list mount already had a guard and it
+      named the wrong invariant: ROOM and SEASON, which do not change when a
+      reader opens a thread in the room they are already in. So a list read
+      that landed after the reader had opened a thread went on to repaint the
+      watched-tags banner over it (hideViews had just hidden it), and a THREAD
+      read that landed after they had gone back showed the answer box, a
+      whole "Your answer" editor under the list of questions, wired to a
+      thread id that was now empty, so pressing Post asked the server to open
+      a new question with no title and got "Too long, or empty" back.
+
+      The address is the view, so the key is the address: room, season, the
+      thread and whether the ask form is open. */
+  function viewKey() {
+    return S.room + '|' + S.season + '|' + (S.tid || '') + '|' + (S.ask ? '1' : '');
   }
 
   function draw() {
@@ -999,13 +1022,18 @@
     var mount = $('oa-forum-list');
     if (!mount) return;
 
-    /* WHICH ROOM THIS MOUNT IS FOR. Switching rooms mounts the engine again
+    /* WHICH VIEW THIS MOUNT IS FOR. Switching rooms mounts the engine again
        while the previous mount's read is still in flight, and its prepare()
        then wrote the OLD room's count and rows over the new room's. Ordering,
        not a race worth locking: the superseded mount just stops writing the
-       shared state. */
-    var forRoom = S.room;
-    var forSeason = S.season;
+       shared state.
+
+       It used to compare the ROOM and the SEASON, which is right for that
+       case and blind to the commoner one: opening a thread changes neither,
+       so a read landing a moment later still repainted the watched-tags
+       banner hideViews had just put away, on top of the open thread. The
+       whole address is the invariant. */
+    var forView = viewKey();
 
     S.list = OAList.mount({
       mount: '#oa-forum-list',
@@ -1017,7 +1045,7 @@
           if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
           return (b.lastAt || 0) - (a.lastAt || 0);
         });
-        if (forRoom !== S.room || forSeason !== S.season) return rows;
+        if (forView !== viewKey()) return rows;
         var count = $('oa-forum-listcount');
         if (count) count.textContent = plural(rows.length, 'question', 'questions') + ' this season';
         S.rows = rows;
@@ -1143,10 +1171,16 @@
     show(host, true);
     host.innerHTML = '<p class="oa-hint">Loading the thread…</p>';
     var thread = null, posts = [];
+    var forView = viewKey();
     db().then(function (d) {
       var ref = threadsCol(d, S.season, S.room).doc(S.tid);
       return Promise.all([ref.get(), postsOf(d, S.tid).orderBy('n').get()]);
     }).then(function (r) {
+      /* THE READER MAY HAVE LEFT ALREADY, and the next line of this chain
+         spends a callable on their behalf. Guarding here as well as at the
+         paint keeps a thread they no longer have open from asking the server
+         for their votes in it. */
+      if (forView !== viewKey()) return { votes: {} };
       if (!r[0].exists) throw new Error('That thread could not be found in this room.');
       thread = r[0].data() || {};
       thread.id = S.tid;
@@ -1159,6 +1193,11 @@
       if (S.archive || thread.locked) return { votes: {} };
       return call('forumThreadVotes', { room: S.room, tid: S.tid }).catch(function () { return { votes: {} }; });
     }).then(function (r) {
+      /* THE READER MAY HAVE LEFT. renderThread shows #oa-forum-compose, which
+         is a sibling of the thread rather than a child of it, so a late
+         completion drew a live answer box under the list of questions; and
+         the seen-mark below would record a thread they never saw. */
+      if (forView !== viewKey()) return;
       S.votes = (r && r.votes) || {};
       var seen = readSeen(S.me.uid);
       seen.seen[S.tid] = Number(thread.n) || posts.length;
@@ -1171,6 +1210,7 @@
       var h1 = $('oa-forum-title');
       if (h1 && !location.hash) { h1.setAttribute('tabindex', '-1'); h1.focus(); }
     }).catch(function (err) {
+      if (forView !== viewKey()) return;
       host.innerHTML = '<div class="oa-note is-warn"><p><strong>The thread could not be loaded.</strong> ' +
         esc(friendly(err)) + '</p><p><a href="' + esc(href({ room: S.room, season: S.season })) + '">Back to the questions</a></p></div>';
     });
@@ -1455,9 +1495,18 @@
        be deleted at all, so the control says why rather than failing on the
        press; a maintainer is not held by that rule. */
     if (canTouch && !p.hidden && (mine || amAdmin())) {
-      var stuck = isFirst && !amAdmin() && liveAnswers > 0;
+      /* THE ROOM'S GUIDE IS NOT REMOVABLE, and the button says so rather than
+         failing on the press. Its id never leaves the season head, so the
+         seed control takes the refresh branch for ever after and would write
+         the words back into a hidden thread: one press would cost the room
+         its guide for the season with no route back. forumDelete refuses it
+         too -- a page can be got round, which is why both ends carry it. */
+      var isGuide = isFirst && String(S.guides[S.room] || '') === String(S.tid || '');
+      var stuck = isGuide || (isFirst && !amAdmin() && liveAnswers > 0);
       out += '<button type="button" class="oa-forum-act is-del" data-act="delete"' +
-        (stuck ? ' disabled title="A question with answers cannot be deleted. It can go once every answer has been deleted."' : '') +
+        (stuck ? ' disabled title="' + esc(isGuide
+          ? 'The forum guide cannot be removed. Update it instead, from your own card above.'
+          : 'A question with answers cannot be deleted. It can go once every answer has been deleted.') + '"' : '') +
         '>' + (mine ? 'Delete' : 'Remove') + '</button>';
     } else if (canTouch && isFirst && p.hidden && (mine || amAdmin())) {
       /* A THREAD LEFT HEADLESS BY THE OLD RULE. Its question is already a

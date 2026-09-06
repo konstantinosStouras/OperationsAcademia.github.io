@@ -2842,6 +2842,32 @@ on. `hiddenBy` says which of the two it was, `'author'` or `'admin'`, so the
 page says *"deleted by its author"* or *"removed by the maintainer"* rather
 than guessing.
 
+**AND THE ANSWERS GO WITH THE THREAD, in the database and not only on the
+page.** The tombstone argument above — hiding is not erasing, because the
+rules let any admitted member read this collection — was applied to the
+thread's title and excerpt and to nothing else, so every ANSWER under a
+question the maintainer removed kept its body, `hidden: false`, one
+`where('hidden','==',true)` query away; and its author could never take it
+down themselves, because a post under a hidden thread is refused `locked`.
+It was the one post on this forum nobody could delete. A closing thread now
+sweeps them, bounded at `SWEEP_MAX` (400) for the transaction's write cap and
+refused with `big` rather than half-erased above it — the removal script has
+no such cap and is what that case is for. **The sweep is the MAINTAINER'S
+alone**: an author closing a LEGACY headless thread must not become this
+forum's one way to take another member's words away, and a fresh question
+with a live answer is already refused to its asker.
+
+**THE ROOM'S GUIDE IS REFUSED OUTRIGHT** (`guidethread` — `guide` is already
+"tick the box to say you have read it", which is nonsense addressed to
+somebody pressing Remove). `forumSeasons/{Y}.guides.{room}` names the thread
+and never clears, so a removed guide is a room that can never have one again:
+the maintainer's card then reads "Update the guide" and takes the refresh
+branch, which writes the words back into a thread that is still hidden.
+`_scraper/remove-forum-thread.mjs` has refused it from the day it shipped, in
+these words; the maintainer's own Remove button had no such rule and one press
+was all it took. Both ends carry it now — the callable refuses, and the button
+is drawn disabled with the reason, because a page can be got round.
+
 **A QUOTE OF IT SURVIVES, deliberately.** `forumPost` stores a COPY of the
 quoted words on the reply, which is already what keeps an edit from rewriting
 somebody else's reply; the same rule means deleting your post does not blank
@@ -3281,6 +3307,37 @@ with tokens alone (no raw colour, pinned), so both themes are covered, and
 rule 13 in `_MOBILE-STANDARDS.md` is what its phone block holds to: a 16px
 textarea, 42px tabs, votes, actions and Post; the vote column stands beside
 a post on a desktop and lies above it on a phone.
+
+### A paint that lands after the reader has moved
+
+The list, a thread and the ask form are three views of ONE page swapped with
+`pushState`, and each of them paints from a read that is still in flight when
+the reader goes on. The list mount already had a guard against that and it
+named the wrong invariant — the ROOM and the SEASON, which do not change when
+a reader opens a thread in the room they are already in. Two things followed:
+
+* a LIST read landing after the reader opened a thread repainted the
+  watched-tags banner `hideViews` had just put away, over the open thread;
+* a THREAD read landing after they pressed Back drew a whole **"Your answer"**
+  editor under the list of questions — `renderThread` ends by showing
+  `#oa-forum-compose`, which is a SIBLING of the thread rather than a child of
+  it, so hiding the thread view did not hide it — wired to an empty thread id,
+  so pressing Post asked the server to open a question with no title and got
+  "Too long, or empty" back. It marked the thread read, and spent a
+  `forumThreadVotes` call, for a thread nobody was looking at.
+
+**`viewKey()` is the one definition**: room, season, thread, ask — the whole
+address, because the address IS the view. The list mount and both of
+`drawThread`'s terminal callbacks are held to it, and so is the step before
+the votes call, so a thread the reader has left spends no callable.
+
+**The shim can HOLD a read now** (`holdReads`, runtime-settable, released with
+`window.__fb.release()`), which is the sibling of `refuseReads` and exists for
+the same stated reason: this is a state no browser check can reach while every
+read lands before the next line of the test. `page-test.mjs` is the reader who
+pressed Back while the thread was loading, and reverting either guard puts the
+answer box back on the list under the questions, which is what the check
+prints.
 
 **The browser suite drives the page through a SIMULATOR, never the
 functions.** `_scraper/_fake-firebase.js` gained `forumSim`, a stand-in for

@@ -73,6 +73,30 @@
    good", so they are cleared here. The thread keeps its tags, its handle
    and its stamps, which is what the maintainer's removal tool reads.
 
+   AND THE ANSWERS' OWN WORDS. The paragraph above argues that hiding is not
+   erasing, because the rules let any admitted member read this collection --
+   and that argument was applied to the thread head alone while every ANSWER
+   under a removed question kept its body, `hidden: false`, one direct query
+   away. "Deleting a question as moderation takes the thread with it, replies
+   included" was true of what the page DRAWS and false of what the database
+   HOLDS, which is the same lie the tombstone paragraph refuses one screen up.
+   Their authors could not put it right either: a post under a hidden thread
+   is refused with `locked`, so an answer to a question the maintainer removed
+   was the one post on this forum its own author could never delete. So the
+   thread taking its replies with it is what closing one now does. It is
+   bounded at SWEEP_MAX for the write cap a transaction has; a thread bigger
+   than that is refused with `big` and is the removal script's job, which is
+   what that script is for and where it has no cap.
+
+   THE ROOM'S GUIDE IS REFUSED OUTRIGHT, the one thread that is not the
+   maintainer's to remove. `forumSeasons/{Y}.guides.{room}` names it and never
+   clears, so a removed guide is a room that can never have one again: the
+   panel's button reads "Update the guide" and takes the refresh branch, which
+   writes the words back into a thread that is still hidden and invisible.
+   _scraper/remove-forum-thread.mjs refuses it for exactly this reason; the
+   maintainer's own Remove button had no such rule, and one press was all it
+   took.
+
    THE TAG TALLY. `forumTags/{Y}_{room}` is an increment tally and the one
    thing here that cannot be recomputed from what is stored, so a thread
    that goes without giving its tags back leaves the Popular tags card
@@ -90,6 +114,14 @@
 const { onCall } = require('firebase-functions/v2/https');
 const M = require('../forum-model.js');
 const P = require('./member.js');
+
+/** How many posts a closing thread may erase in its one transaction.
+    Firestore caps a transaction at 500 writes and the thread head, the tally
+    and the question itself take three of them; 400 leaves room to spare. A
+    thread past it is refused rather than half-erased -- a partial sweep is
+    the "merely flagged" answer wearing a success, and the maintainer's own
+    removal script has no cap. */
+const SWEEP_MAX = 400;
 
 /** The tags a thread carried, given back to the room's tally by value and
     floored at zero. Answers null when there is nothing to give back, and
@@ -120,7 +152,11 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
   /* whether ANY post that is not hidden is a reply: two is enough to know,
      since only one of them can be the question */
   const liveQuery = postsRef.where('hidden', '==', false).limit(2);
+  /* every post whose words are still there, for the sweep a closing thread
+     does; one more than the cap, so "there are too many" is answerable */
+  const sweepQuery = postsRef.where('hidden', '==', false).limit(SWEEP_MAX + 1);
   const tagsRef = D.collection('forumTags').doc(Y + '_' + d.room);
+  const seasonRef = D.collection('forumSeasons').doc(String(Y));
   let wholeThread = false;
 
   await P.run(D, async (tx) => {
@@ -135,9 +171,36 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
     const isQuestion = Number(pv.n) === 1;
     /* EVERY READ BEFORE THE FIRST WRITE. Firestore refuses a transaction
        that reads after it has written, and both branches below write. The
-       tally is only needed when the thread is going, which is exactly when
-       the post under the cursor is the question. */
+       tally, the season head and the sweep are only needed when the thread
+       is going, which is exactly when the post under the cursor is the
+       question. */
     const tally = isQuestion ? await tx.get(tagsRef) : null;
+    const head = isQuestion ? await tx.get(seasonRef) : null;
+    if (isQuestion) {
+      /* THE ROOM'S GUIDE IS NOT REMOVABLE. Its id is stamped on the season
+         and never cleared, so the seed button takes the refresh branch for
+         ever after and writes the words back into a hidden thread. One press
+         would cost the room its guide for the season with no route back --
+         the rule _scraper/remove-forum-thread.mjs already refuses on. */
+      const guides = (head && head.exists && head.data().guides) || {};
+      if (String(guides[d.room] || '') === threadRef.id) {
+        /* `guidethread`, not `guide`: that word is already taken by "tick the
+           box to say you have read the guide", which is nonsense addressed to
+           somebody pressing Remove. One reason word, one sentence. */
+        P.refuse('failed-precondition', 'guidethread');
+      }
+    }
+    /* THE SWEEP IS THE MAINTAINER'S, and only theirs. "The admin may delete
+       any post" is the authority that erases somebody else's words; an author
+       has authority over their own alone. A fresh question with a live answer
+       is already refused to its author, and one with none has nothing to
+       sweep -- but a LEGACY headless thread (a question blanked before the
+       rule below existed) can still be closed by its asker with other
+       people's answers standing under it, and erasing those would be this
+       forum's one way to take another member's words away. The maintainer
+       finishes those. */
+    const sweep = isQuestion && admin ? await tx.get(sweepQuery) : null;
+    if (sweep && sweep.size > SWEEP_MAX) P.refuse('failed-precondition', 'big');
 
     /** What a thread that is going leaves behind: no words, and its tags
         handed back to the room. */
@@ -150,6 +213,21 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
       };
       /* @end */
       tx.update(threadRef, gonePatch);
+      /* THE REPLIES GO WITH IT, in the database and not only on the page.
+         The question itself is erased by the patch below, so it is skipped
+         here rather than written twice. */
+      for (const doc of (sweep ? sweep.docs : [])) {
+        if (doc.id === postRef.id) continue;
+        /* @doc post */
+        const sweptPatch = {
+          body: '',
+          hidden: true,
+          hiddenBy: 'admin',
+          editedAt: M.minute(),
+        };
+        /* @end */
+        tx.update(doc.ref, sweptPatch);
+      }
       const back = tallyBack(tally && tally.exists ? tally.data() : null, tv.tags);
       /* @doc tags */
       const tagsPatch = {

@@ -31,6 +31,17 @@
   window.__fb = {
     log: log,
     docs: docs,
+    /* the reads `holdReads` is keeping, and the release that lands them. The
+       list is RUNTIME-settable, not seed-only: a check that reproduces a late
+       paint has to hold one read and let the next one through, which it can
+       only do between two clicks. */
+    holdReads: (seed.holdReads || []).slice(),
+    holding: [],
+    release: function () {
+      var q = window.__fb.holding.splice(0, window.__fb.holding.length);
+      q.forEach(function (fn) { fn(); });
+      return q.length;
+    },
     dump: function () { return JSON.parse(JSON.stringify(docs)); },
     ops: function (kind) {
       return log.filter(function (e) { return !kind || e.op === kind; })
@@ -68,7 +79,8 @@
   DocRef.prototype.collection = function (name) { return new Col(this.path + '/' + name); };
   DocRef.prototype.get = function () {
     record('get', this.path);
-    return refusedRead(this.path) || Promise.resolve(snapOf(this.path));
+    var p = this.path;
+    return gate(p, function () { return snapOf(p); });
   };
   /* Like the SDK: `merge` DEEP-merges (a nested map's keys are added to,
      not replaced — which is exactly why oa-jobreview writes `edits` with
@@ -154,6 +166,36 @@
     return null;
   }
 
+  /** A READ THAT HAS NOT LANDED YET. `holdReads: ['threads/']` makes every
+      matching read wait until the check calls `window.__fb.release()`, which
+      resolves them all in the order they were asked for.
+
+      Its sibling above exists for a state no shim can reach any other way,
+      and so does this one: a page that swaps three views under one address
+      paints each of them from a read that is still in flight when the reader
+      moves, and whether the late paint writes over the view they moved TO is
+      not a question a browser check can ask while every read lands before the
+      next line of the test. Holding the read is the only way to be the reader
+      who pressed Back while the thread was loading. */
+  function heldRead(path) {
+    var pre = (window.__fb && window.__fb.holdReads) || [];
+    for (var i = 0; i < pre.length; i++) {
+      if (String(path).indexOf(pre[i]) !== -1) return true;
+    }
+    return false;
+  }
+
+  /** Refused, held, or answered — the one gate every read in this shim goes
+      through, so a read that can be refused can also be held. */
+  function gate(path, make) {
+    var no = refusedRead(path);
+    if (no) return no;
+    if (!heldRead(path)) return Promise.resolve(make());
+    return new Promise(function (res) {
+      window.__fb.holding.push(function () { res(make()); });
+    });
+  }
+
   function Col(path) { this.path = path; }
   Col.prototype.doc = function (id) {
     // no id = mint one, as the real SDK does for `collection(x).doc()`
@@ -170,8 +212,8 @@
   };
   Col.prototype.get = function () {
     record('list', this.path);
-    return refusedRead(this.path) ||
-      Promise.resolve(querySnap(childrenOf(this.path).map(snapOf)));
+    var p = this.path;
+    return gate(p, function () { return querySnap(childrenOf(p).map(snapOf)); });
   };
   /* The queries the pages actually issue — where(==), orderBy, limit, get —
      chainable the way the compat SDK chains them. Grown for the Admin area
@@ -198,8 +240,10 @@
     record('query', this.path + this.__f.map(function (f) {
       return '?' + f[0] + '==' + f[1];
     }).join(''));
-    var no = refusedRead(this.path);
-    if (no) return no;
+    var self = this;
+    return gate(this.path, function () { return self.__run(); });
+  };
+  Query.prototype.__run = function () {
     var snaps = childrenOf(this.path).map(snapOf);
     this.__f.forEach(function (f) {
       snaps = snaps.filter(function (s) { return s.data()[f[0]] === f[1]; });
@@ -212,7 +256,7 @@
       });
     }
     if (this.__n) snaps = snaps.slice(0, this.__n);
-    return Promise.resolve(querySnap(snaps));
+    return querySnap(snaps);
   };
   Col.prototype.where = function (field, op, value) {
     return new Query(this.path, [[field, value]]);

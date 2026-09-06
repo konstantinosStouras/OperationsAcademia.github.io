@@ -10007,6 +10007,49 @@ for (const w of [320, 360, 390, 430]) {
     eq(list.cloud.sort(), ['europe', 'flyouts'], 'forum (candidate): the Popular tags card is drawn from the tally');
     ok(list.ask, 'forum (candidate): Ask a question is offered');
 
+    /* A PAINT THAT LANDS AFTER THE READER HAS MOVED MUST NOT WRITE THE VIEW
+       THEY MOVED TO. The list, a thread and the ask form are three views of
+       one page swapped with pushState, and each paints from a read still in
+       flight when the reader goes on. renderThread ends by showing
+       #oa-forum-compose, which is a SIBLING of the thread rather than a child
+       of it, so a thread read landing after the reader pressed Back drew a
+       whole "Your answer" editor under the list of questions, wired to an
+       empty thread id: pressing Post asked the server to open a question with
+       no title. The list mount's own guard could not see it, because it
+       compared the ROOM and the SEASON and opening a thread changes neither.
+
+       The shim HOLDS the thread's reads for this, which is the only way to be
+       the reader who pressed Back while it was loading; the list's own query
+       is on `.../threads` with no trailing slash, so it is not held and the
+       page really does come back. */
+    await q.evaluate(() => { window.__fb.holdReads = ['/threads/']; });
+    await q.click('#oa-forum-list .oa-card .oa-card-head');
+    await q.evaluate(() => { window.__fb.holdReads = []; history.back(); });
+    await q.waitForFunction(() => {
+      const l = document.getElementById('oa-forum-listview');
+      return l && !l.hidden && l.querySelector('.oa-card');
+    }, null, { timeout: 15000 });
+    const late = await q.evaluate(() => window.__fb.release());
+    ok(late > 0, `forum (candidate): the thread's reads were really held (${late} of them)`);
+    await q.evaluate(() => new Promise((r) => setTimeout(r, 200)));
+    const stray = await q.evaluate(() => {
+      const c = document.getElementById('oa-forum-compose');
+      const w = document.getElementById('oa-forum-watchnew');
+      const t = document.getElementById('oa-forum-thread');
+      return {
+        compose: !!c && !c.hidden,
+        composeText: c ? c.textContent.trim().slice(0, 40) : '',
+        watch: !!w && !w.hidden,
+        thread: !!t && !t.hidden,
+        list: !document.getElementById('oa-forum-listview').hidden,
+      };
+    });
+    ok(stray.list, 'forum (candidate): pressing Back while a thread loads comes back to the list');
+    ok(!stray.compose,
+      `forum (candidate): and the late thread paint draws no answer box over it (${stray.composeText})`);
+    ok(!stray.thread, 'forum (candidate): nor re-opens the thread the reader left');
+    ok(!stray.watch, 'forum (candidate): and no banner from a superseded read is unhidden over it');
+
     /* open the seeded thread: hostile body inert, votes up, down, withdrawn */
     await q.click('#oa-forum-list .oa-card .oa-card-head');
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
