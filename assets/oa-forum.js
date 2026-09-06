@@ -130,9 +130,10 @@
     asker: 'Only the member who asked the question can tick the answer.',
     answer: 'Only an answer can be ticked, and only while its words are still there.',
     answered: 'This question has answers, so it cannot be deleted. It can go once every answer has been deleted.',
-    window: 'The fifteen-minute edit window has closed; the post stays as written. You can still delete it.',
+    window: 'The fifteen-minute edit window has closed, so the post stays as written.',
     own: 'You cannot vote on your own post.',
     busy: 'The forum is busy right now. Please try again in a moment.',
+    season: 'The forum is not open for the new season yet. Only the maintainer can open it.',
     bounds: 'Too long, or empty. A title is at most ' + M.BOUNDS.title + ' characters and a post at most ' + M.BOUNDS.body + '.',
     tags: 'One to five tags, each 2 to 24 characters of letters, digits and hyphens.',
     quote: 'A quote must be a passage of the post as it stands now, at most ' + M.BOUNDS.quote + ' characters.',
@@ -197,7 +198,8 @@
     sort: 'score',                  // how the answers band is ordered
     thread: null,                   // the thread on screen, and its posts
     posts: [],
-    readOnly: false,
+    readOnly: false,                // nothing new may be POSTED to it
+    frozen: false,                  // nothing at all may be written to it
     live: 0,                        // answers still standing in it
     list: null
   };
@@ -419,10 +421,23 @@
     });
   }
 
-  /** forumJoin, once per session per account: the handle and the rooms. */
+  /** forumJoin, once per session per account: the handle and the rooms.
+
+      THE CACHE IS TRUSTED ONLY WHILE IT SAYS YES. `rooms.candidates` is
+      re-decided by the function on every call, from the profile the account
+      holds RIGHT NOW, which is exactly the answer that changes under a
+      reader: file a candidate profile and come back, and a cached "no"
+      would keep the Candidates' room shut for the rest of the browsing
+      session, with the page's own note still pointing at the form they have
+      just filled in. So a cached answer that already grants the room is
+      kept, and a cached "no" is asked again. The call is idempotent and the
+      population it costs one call per page load is precisely the population
+      whose answer can change. A cached "yes" that has since lapsed (the
+      profile was withdrawn) costs nothing either: every write refuses on
+      its own, and the next session asks again. */
   function join(u) {
     var cached = readMe(u.uid);
-    if (cached) return Promise.resolve(cached);
+    if (cached && cached.rooms && cached.rooms.candidates) return Promise.resolve(cached);
     return call('forumJoin', {}).then(function (r) {
       var me = {
         uid: u.uid,
@@ -1063,15 +1078,31 @@
 
   /** The answers band alone, repainted where it stands: an answer ticked or
       the order changed must not rebuild the box below it, which may be
-      holding something half written. */
+      holding something half written.
+
+      AND AN OPEN EDITOR IS CARRIED ACROSS, for the same reason one layer in:
+      an in-place edit lives INSIDE the band, so `innerHTML =` threw away
+      whatever the reader had typed the moment they ticked an answer or
+      changed the order. It is detached before the repaint and put back on
+      the post it belongs to, with its own listeners intact. */
   function paintAnswers() {
     var ol = $('oa-forum-answers');
     if (!ol || !S.thread) return;
+    var open = ol.querySelector('.oa-forum-editing');
+    var openFor = open ? open.getAttribute('data-editing-pid') : '';
+    if (open) open.parentNode.removeChild(open);
     var answers = S.posts.slice(1);
     ol.innerHTML = sortAnswers(answers, S.thread, S.sort).map(function (p) {
       return postHTML(p, S.thread, S.readOnly, false, S.live);
     }).join('');
     wirePosts(ol, S.thread, answers, S.readOnly);
+    if (open) {
+      var host = ol.querySelector('li[data-pid="' + String(openFor).replace(/"/g, '\\"') + '"] .oa-forum-text');
+      if (host) {
+        host.hidden = true;
+        host.insertAdjacentElement('afterend', open);
+      }
+    }
   }
 
   function renderThread(host, thread, posts) {
@@ -1084,12 +1115,23 @@
        question finishes it off the list. */
     var gone = !!first.hidden && Number(first.n) === 1;
     var readOnly = S.archive || !!thread.locked || !!thread.hidden || gone;
+    /* READ-ONLY IS ABOUT NEW POSTS, AND ONLY THAT. Three controls are not
+       new posts and the functions say so: forumVote refuses on an archive,
+       a locked thread and a hidden post; forumAccept and forumDelete refuse
+       on an archive and a hidden THREAD and allow a LOCKED one, because
+       locking stops new posts and does not make somebody's own words
+       un-deletable or a question un-answerable. Drawn under readOnly they
+       were withheld exactly where the function would have allowed them,
+       which is a control the reader cannot find rather than one that fails
+       on the press. `frozen` is the half both of them share. */
+    var frozen = S.archive || !!thread.hidden;
     /* answers still standing: a deleted one no longer holds the question down */
     var live = posts.filter(function (p) { return Number(p.n) !== 1 && !p.hidden; }).length;
     var answers = posts.slice(1);
     S.thread = thread;
     S.posts = posts;
     S.readOnly = readOnly;
+    S.frozen = frozen;
     S.live = live;
     var out = '';
     out += '<nav class="oa-forum-crumbs" aria-label="You are here"><a href="' + esc(href({ room: S.room, season: S.season })) + '">Questions</a> &rsaquo; ' +
@@ -1147,6 +1189,10 @@
 
   function postHTML(p, thread, readOnly, isFirst, liveAnswers) {
     var mine = p.by === S.me.handle;
+    /* what each control's own function allows; see renderThread */
+    var frozen = S.archive || !!(thread && thread.hidden);
+    var canVote = !frozen && !(thread && thread.locked) && !p.hidden;
+    var canTouch = !frozen;
     var up = Number(p.up) || 0, down = Number(p.down) || 0;
     var net = up - down;
     var v = Number(S.votes[p.id]) || 0;
@@ -1155,17 +1201,17 @@
     /* the tick: on the thread, never on the post, so there is one place it
        can be read from and nothing to keep in step */
     var accepted = !isFirst && String((thread && thread.accepted) || '') === p.id;
-    var canAccept = !isFirst && !readOnly && !p.hidden && !!thread && thread.by === S.me.handle;
+    var canAccept = !isFirst && canTouch && !p.hidden && !!thread && thread.by === S.me.handle;
     var saved = isSaved(S.tid, isFirst ? '' : p.id);
     var out = '<li class="oa-forum-post' + (isFirst ? ' is-first' : '') + (accepted ? ' is-accepted' : '') +
       '" id="p' + n + '" data-pid="' + esc(p.id) + '" data-n="' + n + '">';
     out += '<div class="oa-forum-vote">';
-    if (!readOnly) {
+    if (canVote) {
       out += '<button type="button" class="oa-forum-v up" data-v="1" aria-pressed="' + (v === 1 ? 'true' : 'false') + '" ' +
         'aria-label="Like this ' + what + '"' + (mine ? ' disabled title="You cannot vote on your own post"' : '') + '>&#9650;</button>';
     }
     out += '<b class="oa-forum-score" title="' + plural(up, 'like', 'likes') + ', ' + plural(down, 'dislike', 'dislikes') + '">' + (net > 0 ? '+' : '') + net + '</b>';
-    if (!readOnly) {
+    if (canVote) {
       out += '<button type="button" class="oa-forum-v down" data-v="-1" aria-pressed="' + (v === -1 ? 'true' : 'false') + '" ' +
         'aria-label="Dislike this ' + what + '"' + (mine ? ' disabled title="You cannot vote on your own post"' : '') + '>&#9660;</button>';
     }
@@ -1214,11 +1260,18 @@
        maintainer (owner, 2026-09-05). A question somebody has answered cannot
        be deleted at all, so the control says why rather than failing on the
        press; a maintainer is not held by that rule. */
-    if (!readOnly && !p.hidden && (mine || amAdmin())) {
+    if (canTouch && !p.hidden && (mine || amAdmin())) {
       var stuck = isFirst && !amAdmin() && liveAnswers > 0;
       out += '<button type="button" class="oa-forum-act is-del" data-act="delete"' +
         (stuck ? ' disabled title="A question with answers cannot be deleted. It can go once every answer has been deleted."' : '') +
         '>' + (mine ? 'Delete' : 'Remove') + '</button>';
+    } else if (canTouch && isFirst && p.hidden && (mine || amAdmin())) {
+      /* A THREAD LEFT HEADLESS BY THE OLD RULE. Its question is already a
+         tombstone and its thread is still standing, so forumDelete's second
+         press has one thing to do: shut it. That path had no control at
+         all, because every button here hung off !p.hidden. */
+      out += '<button type="button" class="oa-forum-act is-del" data-act="delete" ' +
+        'title="This question is already deleted. Closing the thread takes it off the list.">Close this thread</button>';
     }
     out += '</div><div class="oa-forum-who">' +
       '<span class="oa-forum-handle' + (mine ? ' is-me' : '') + '">' + esc(p.by) + '</span>' +
@@ -1262,7 +1315,7 @@
      from, and the band is repainted so the answer moves to the top where the
      order says it should be. Pressing the ticked one again unticks it. */
   function acceptAnswer(thread, p, btn) {
-    if (S.readOnly) return;
+    if (S.frozen) return;
     var on = String(thread.accepted || '') === p.id;
     btn.disabled = true;
     call('forumAccept', { room: S.room, tid: S.tid, pid: on ? '' : p.id }).then(function (r) {
@@ -1297,6 +1350,20 @@
   function deletePost(thread, p, btn) {
     var isFirst = Number(p.n) === 1;
     var mine = p.by === S.me.handle;
+    /* The question is ALREADY a tombstone and the thread is still standing:
+       there are no words left to take away, so the wording does not promise
+       to take any. */
+    if (isFirst && p.hidden) {
+      if (!window.confirm('Close this thread? Its question was already deleted, so nothing more is taken away; the thread simply comes off the list.')) return;
+      btn.disabled = true;
+      call('forumDelete', { room: S.room, tid: S.tid, pid: p.id }).then(function () {
+        go({ room: S.room, season: S.season });
+      }).catch(function (err) {
+        btn.disabled = false;
+        say(friendly(err), true);
+      });
+      return;
+    }
     var msg = isFirst
       ? (mine
           ? 'Delete this question? The whole thread goes with it, and the words cannot be brought back.'
@@ -1316,7 +1383,7 @@
   }
 
   function vote(li, p, want) {
-    if (S.archive) return;
+    if (S.frozen || (S.thread && S.thread.locked) || p.hidden) return;
     var had = Number(S.votes[p.id]) || 0;
     var v = had === want ? 0 : want;
     var btns = li.querySelectorAll('.oa-forum-v');
@@ -1462,13 +1529,18 @@
         '<button type="button" class="oa-forum-send" data-edit="save">Save</button></span></div>' +
       '<p class="oa-forum-guardmsg" aria-live="polite"></p>';
     text.hidden = true;
+    box.setAttribute('data-editing-pid', String(p.id));
     text.insertAdjacentElement('afterend', box);
     var ta = box.querySelector('textarea');
     var guard = box.querySelector('.oa-forum-guardmsg');
     ta.addEventListener('input', function () { liveGuard(ta, guard); });
     box.querySelector('[data-edit="cancel"]').addEventListener('click', function () {
+      /* the body is found from the box's OWN parent rather than held from
+         when it opened: the band may have been repainted under it since,
+         and putting a detached node back would show nothing */
+      var body = box.parentNode && box.parentNode.querySelector('.oa-forum-text');
       box.remove();
-      text.hidden = false;
+      if (body) body.hidden = false;
     });
     box.querySelector('[data-edit="save"]').addEventListener('click', function () {
       var body = String(ta.value || '').trim();

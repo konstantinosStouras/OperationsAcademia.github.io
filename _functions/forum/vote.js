@@ -89,6 +89,8 @@ exports.forumVote = onCall(P.OPTS, async (req) => {
     /* @doc handle */
     const handlePatch = {
       day: c.day,
+      dayThreads: c.dayThreads,
+      dayPosts: c.dayPosts,
       dayVotes: c.dayVotes + 1,
     };
     /* @end */

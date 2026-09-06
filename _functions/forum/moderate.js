@@ -82,7 +82,13 @@ exports.forumModerate = onCall(P.OPTS, async (req) => {
     await P.run(D, async (tx) => {
       const again = await tx.get(seasonRef);
       const gv = (again.exists && again.data().guides) || {};
-      if (gv[room]) throw new HttpsError('already-exists', 'This room already has its guide thread.', { reason: 'guide' });
+      /* A RACE, NOT A MISSING TICK BOX. Two presses landing together find no
+         guide outside the transaction and one of them finds one inside it.
+         The reason word decides the sentence the page shows, and `guide` is
+         "tick the box to say you have read the guide", which is nonsense
+         addressed to the maintainer seeding it. `busy` is what the page
+         already says for a contended write, and trying again is right. */
+      if (gv[room]) P.refuse('resource-exhausted', 'busy');
       const now = M.minute();
       /* @doc thread */
       const thread = {

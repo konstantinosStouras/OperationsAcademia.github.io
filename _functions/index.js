@@ -489,11 +489,11 @@ exports.sendVerificationEmail = onCall(
     return { sent: true, to: redact(email) };
   });
 
-/* ====================================================================   WHICH UNIVERSITY A VISITOR CAME FROM — the fourth function, and one of the
-   two here that are not doorbells.
-=======
-   WHICH UNIVERSITY A VISITOR CAME FROM: the fifth function, and one of the
-   two here that are not doorbells.
+/* ===========================================================================
+   WHICH UNIVERSITY A VISITOR CAME FROM: the sixth function in this file, and
+   one of the two here that are not doorbells (the other is the verification
+   mailer above; the four doorbells are publishOnChange,
+   publishOnCandidateChange, revealCandidates and publishOnReview).
 
    THE CHART THIS RESTORES, AND THE CLAIM IT CORRECTS. analytics.html used to
    show "which universities visited", measured from Universal Analytics'

@@ -392,10 +392,30 @@ async function main() {
   await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
   const solo = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A question I will withdraw', tags: ['waiting'], body: 'Something I would rather not have asked after all.' });
   ok(!solo.error, 'a fresh thread with no replies', JSON.stringify(solo));
+  const tallyBefore = (await admin.doc(`forumTags/${Y}_candidates`).get()).data().counts;
   const d3 = await call('forumDelete', tokens.cand, { room: 'candidates', tid: solo.result.tid, pid: solo.result.pid });
   ok(!d3.error && d3.result.thread === true, 'deleting it takes the whole thread');
   const soloTh = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${solo.result.tid}`).get();
   ok(soloTh.data().hidden === true, 'and the thread is hidden, off every list');
+  /* THE WORDS REALLY GO, and that has to include the thread head. `excerpt`
+     is a verbatim copy of the body the post patch just erased, and the rules
+     let any admitted member list this collection, so leaving the two there
+     would keep every deleted question readable to anyone who asks for the
+     hidden rows. Rule 13 of the guide promises the words are gone for good. */
+  ok(soloTh.data().title === '' && soloTh.data().excerpt === '',
+    'and it keeps no title and no excerpt, so the words really are gone');
+  ok(Array.isArray(soloTh.data().tags) && soloTh.data().tags.length > 0,
+    'while the tags, the handle and the stamps stay, which is what the removal tool reads');
+  /* AND THE TAGS GO BACK TO THE ROOM. The tally is an increment map and the
+     one thing here that cannot be recomputed from what is stored, so a
+     thread that goes without giving them back leaves Popular tags counting
+     a question nobody can open. */
+  const tallyAfter = (await admin.doc(`forumTags/${Y}_candidates`).get()).data().counts;
+  ok(Number(tallyAfter.waiting) === Number(tallyBefore.waiting) - 1,
+    `the deleted thread gave its tag back (waiting ${tallyBefore.waiting} -> ${tallyAfter.waiting})`);
+  ok(Object.keys(tallyAfter).length === Object.keys(tallyBefore).length,
+    'and nothing else in the tally moved, so the give-back is by value and not a rewrite');
+  ok(Object.values(tallyAfter).every((v) => Number(v) >= 0), 'no count is ever negative');
 
   /* A THREAD WHOSE QUESTION HAS GONE IS CLOSED, however the thread head
      reads. Rows written before that rule carry a deleted question under a
@@ -415,6 +435,70 @@ async function main() {
   ok(!heal.error && heal.result.thread === true, 'a second press on a deleted question shuts the thread', JSON.stringify(heal));
   const healed = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${head.result.tid}`).get();
   ok(healed.data().hidden === true, 'so a thread left headless can always be closed');
+
+  /* ------------------------------------------------- the daily counters
+     THE DAY ROLL ONLY HAPPENS IF EVERY WRITER WRITES IT BACK. counters()
+     zeroes what the stored `day` has outlived, but a writer that stamps the
+     new day beside its OWN counter alone leaves yesterday's other two in the
+     document, and the next read, seeing a day that now matches, takes them
+     for today's. Measured before the fix: a member who had spent their
+     thread allowance yesterday and whose first act today was a vote came
+     back as { dayThreads: 3, dayPosts: 40 } under today's date and was
+     refused every question and every post for the rest of the day. */
+  console.log('\nthe daily counters roll');
+  const YESTERDAY = M.today(M.minute() - 36 * 3600 * 1000);
+  const spend = () => admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((dd) =>
+    dd.ref.set({ day: YESTERDAY, dayThreads: M.RATE.threads, dayPosts: M.RATE.posts, dayVotes: M.RATE.votes, lastPostAt: 0 }, { merge: true }))));
+  const rollThread = await call('forumPost', tokens.open, { room: 'open', title: 'A question on a brand new day', tags: ['waiting'], body: 'The allowance was spent yesterday, not today.' });
+  ok(!rollThread.error, 'with the counters spent YESTERDAY, a question today is allowed', JSON.stringify(rollThread));
+  await spend();
+  const rollVote = await call('forumVote', tokens.cand, { room: 'open', tid: rollThread.result.tid, pid: rollThread.result.pid, v: 1 });
+  ok(!rollVote.error, 'and a vote is allowed too', JSON.stringify(rollVote));
+  const voterH = await admin.collection('forumHandles').get()
+    .then((s2) => s2.docs.map((dd) => dd.data()).filter((v) => v.day === M.today())[0]);
+  ok(voterH && voterH.dayThreads === 0 && voterH.dayPosts === 0 && voterH.dayVotes === 1,
+    'and the vote carries EVERY counter, so yesterday\'s spent allowance does not become today\'s',
+    JSON.stringify(voterH));
+  await spend();
+  const rollAfterVote = await call('forumVote', tokens.cand, { room: 'open', tid: rollThread.result.tid, pid: rollThread.result.pid, v: 0 });
+  ok(!rollAfterVote.error, 'a vote as the first act of the day', JSON.stringify(rollAfterVote));
+  const askAfterVote = await call('forumPost', tokens.cand, { room: 'open', title: 'Asked after voting on a new day', tags: ['waiting'], body: 'A vote must not resurrect yesterday thread allowance.', acceptGuide: true });
+  ok(!askAfterVote.error, 'and the member may still ask a question afterwards', JSON.stringify(askAfterVote));
+
+  /* ----------------------------------------------------------- quoting
+     A SELECTION COMES OUT OF THE DOM, where the browser has collapsed the
+     whitespace the body was stored with. Compared byte for byte, an
+     ordinary selection spanning a paragraph break was refused as "not a
+     passage of the post", which is untrue and unanswerable. */
+  console.log('\nquoting a selection a browser flattened');
+  await spend();
+  const wsBody = 'First line here.\nSecond line of the same paragraph.\r\n\r\n\r\nA later  paragraph with   runs of spaces\tand a tab.';
+  const wsQ = await call('forumPost', tokens.open, { room: 'open', title: 'A body with collapsible whitespace', tags: ['waiting'], body: wsBody });
+  ok(!wsQ.error, 'a question whose body carries newlines, tabs and runs of spaces', JSON.stringify(wsQ));
+  await spend();
+  const flatSel = 'Second line of the same paragraph. A later paragraph with runs of spaces and a tab.';
+  const wsR = await call('forumPost', tokens.cand, { room: 'open', tid: wsQ.result.tid, body: 'Quoting a passage as the page shows it.', quote: { n: 1, text: flatSel } });
+  ok(!wsR.error, 'a selection spanning a paragraph break is accepted', JSON.stringify(wsR));
+  const wsStored = await admin.doc(`forumSeasons/${Y}/rooms/open/threads/${wsQ.result.tid}/posts/${wsR.result.pid}`).get();
+  ok(wsStored.data().quote.text === flatSel, 'and what is stored is the reader\'s own words, not a re-flattened body');
+  await spend();
+  const wsBad = await call('forumPost', tokens.cand, { room: 'open', tid: wsQ.result.tid, body: 'Quoting words nobody wrote.', quote: { n: 1, text: 'a passage that was never in the post' } });
+  ok(reason(wsBad) === 'quote', 'while words that are not in the post are still refused');
+
+  /* ------------------------------------------------- the season's secret
+     NO TWO SEASONS MAY SHARE A VERSION. The new season's first join takes
+     whatever `latest` resolves to, which at the July roll is still the
+     closed season's version unless one has been added; the runbook's
+     1 August destruction then either takes the live forum down for good or
+     cannot be done at all, and nothing else in the year notices. So a
+     season is refused rather than minted under a claimed version. */
+  console.log('\nthe season secret version');
+  const shareRef = admin.doc(`forumSeasons/${Y + 1}`);
+  const mine = (await admin.doc(`forumSeasons/${Y}`).get()).data().secretVersion;
+  await shareRef.set({ season: Y + 1, createdAt: 0, secretVersion: mine, guides: {} });
+  const shared = await call('forumJoin', tokens.open, {});
+  ok(!shared.error, 'a season that already HAS a head is unaffected by another season naming its version', JSON.stringify(shared));
+  await shareRef.delete();
 
   /* ---------------------------------------------------------- archive */
   console.log('\narchive');

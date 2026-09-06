@@ -480,7 +480,7 @@
     if (name === 'forumJoin') {
       if (!verified) return simRefuse('permission-denied', 'verified');
       if (profile && !docs['candidateMarkers/' + u.uid]) {
-        simWrite('candidateMarkers/' + u.uid, { sub: profile.id, year: Y, joinedAt: now });
+        simWrite('candidateMarkers/' + u.uid, { sub: profile.id, year: Y });
       }
       if (!docs['forumSeasons/' + Y]) {
         simWrite('forumSeasons/' + Y, { season: Y, createdAt: now, secretVersion: 'env', guides: {} });
@@ -558,6 +558,14 @@
         if (bad(title)) return simRefuse('invalid-argument', bad(title));
         var tags = Array.isArray(data.tags) ? data.tags.map(simSlug) : [];
         if (!tags.length || tags.length > 5) return simRefuse('invalid-argument', 'tags');
+        /* AND EVERY TAG THROUGH THE GUARD, as _functions/forum/post.js does:
+           a tag is [a-z0-9-]{2,24}, which is the shape a telephone number and
+           an ORCID iD survive, and rule 7 does not say "unless you put it in
+           the tag box". */
+        for (var ti = 0; ti < tags.length; ti++) {
+          var tagWhy = bad(tags[ti]);
+          if (tagWhy) return simRefuse('invalid-argument', tagWhy);
+        }
         var tid = 'sim-t' + (++simN);
         var pid1 = 'sim-p' + (++simN);
         simWrite(threads + '/' + tid, {
@@ -589,7 +597,12 @@
         var qtext = String(data.quote.text || '').trim();
         var src = null;
         childrenOf(tp + '/posts').forEach(function (pp) { if (Number(docs[pp].n) === qn) src = docs[pp]; });
-        if (!src || src.hidden || !qtext || qtext.length > 600 || String(src.body).indexOf(qtext) === -1) {
+        /* THE FLATTENED SHAPE, as _functions/forum/member.js flatten() does
+           it: what the reader selected comes out of the DOM with the stored
+           whitespace already collapsed, so a byte-exact test refuses an
+           ordinary selection spanning a paragraph break. */
+        var flat = function (t) { return String(t == null ? '' : t).replace(/\s+/g, ' ').trim(); };
+        if (!src || src.hidden || !qtext || qtext.length > 600 || flat(src.body).indexOf(flat(qtext)) === -1) {
           return simRefuse('invalid-argument', 'quote');
         }
         quote = { n: qn, by: src.by, text: qtext };
@@ -652,6 +665,25 @@
        (_functions/forum/delete.js) */
     if (name === 'forumDelete') {
       if (th.hidden) return simRefuse('failed-precondition', 'locked');
+      /* WHAT A THREAD THAT GOES LEAVES BEHIND, as the function does it: no
+         title and no excerpt (the excerpt is a verbatim copy of the body the
+         post patch erases, and any admitted member may list the hidden rows),
+         and its tags handed back to the room's tally by value, floored at
+         zero. Mirrored here so the browser checks measure what the deployed
+         function would really leave. */
+      var closeSimThread = function () {
+        th = Object.assign({}, th, { hidden: true, title: '', excerpt: '' });
+        simWrite(tpath2, th);
+        var tp = 'forumTags/' + Y + '_' + room;
+        var cs = Object.assign({}, (docs[tp] || {}).counts || {});
+        var moved = false;
+        (Array.isArray(th.tags) ? th.tags : []).forEach(function (t) {
+          if (!Object.prototype.hasOwnProperty.call(cs, t)) return;
+          cs[t] = Math.max(0, (Number(cs[t]) || 0) - 1);
+          moved = true;
+        });
+        if (moved) simWrite(tp, { counts: cs });
+      };
       var isAdmin = String((seed.user && seed.user.email) || '').toLowerCase() === 'kstouras@gmail.com';
       if (!isAdmin && post.by !== handle) return simRefuse('permission-denied', 'author');
       var whole = false;
@@ -660,7 +692,7 @@
       if (post.hidden) {
         if (Number(post.n) === 1 && !th.hidden) {
           whole = true;
-          simWrite(tpath2, Object.assign({}, th, { hidden: true }));
+          closeSimThread();
         }
         return Promise.resolve({ data: { ok: true, thread: whole } });
       }
@@ -684,7 +716,7 @@
         }
         if (question) {
           whole = true;
-          simWrite(tpath2, Object.assign({}, th, { hidden: true }));
+          closeSimThread();
         }
       }
       return Promise.resolve({ data: { ok: true, thread: whole } });

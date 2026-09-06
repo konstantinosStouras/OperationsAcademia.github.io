@@ -174,7 +174,7 @@ firebase functions:secrets:set FORUM_SECRET --project operations-academia
 ```
 
 Paste 32 random bytes in base64 (`openssl rand -base64 32`). The `secrets:`
-binding on the six callables grants the runtime account access to the secret,
+binding on the eight forum callables grants the runtime account access to the secret,
 and `_functions/forum/identity.js` reads the version each season's document
 names (`forumSeasons/{Y}.secretVersion`, written on the season's first join
 from whatever `latest` resolved to at that moment). It never reads another
@@ -188,6 +188,27 @@ rotating at once (`secrets:set`, then set `secretVersion` on the current
 season's document to the new version number in the Firestore console) and
 saying so in the guide thread; nothing else is cheaper or safer.
 
+**BEFORE THE JULY ROLL, ADD A VERSION. This is the one step in the year that
+must not be missed**, and the forum now refuses rather than let it be. The new
+season's first join takes whatever `latest` resolves to at that moment; if
+nothing has been added since the closed season was set up, that is the SAME
+version the closed season is using, and the 1 August destruction below then has
+only two outcomes and both are bad: destroy it and the live forum can no longer
+derive a single handle, which is unrecoverable; leave it and the promise in the
+Privacy Policy, that after the destruction nobody can link a handle to an
+account, is false for ever. Nothing else in the year would notice. So
+`ensureSeason` in `_functions/forum/identity.js` refuses to mint a season under
+a version another season already claims: on 1 July the forum answers *"The
+forum is being set up for the new season"* until
+
+```
+firebase functions:secrets:set FORUM_SECRET --project operations-academia
+```
+
+has been run with fresh bytes. No season document is written by the refusal, so
+the next join after the new version exists mints the season normally. Do it in
+late June and nobody sees the message at all.
+
 **On 1 August the previous season's version is destroyed**, so an archived
 season's handles can never again be linked to accounts by anyone, the
 maintainer included:
@@ -196,7 +217,9 @@ maintainer included:
 gcloud secrets versions destroy <N> --secret FORUM_SECRET --project operations-academia
 ```
 
-where `<N>` is the `secretVersion` the previous season's document names. The
+where `<N>` is the `secretVersion` the previous season's document names. Read
+it off that document rather than assuming, and check it is not the number the
+CURRENT season's document names; with the June step above done it never is. The
 housekeeping run that does this and stamps `secretDestroyedAt` on that
 document arrives with the forum's step 2; until then it is this command, by
 hand, once a year.

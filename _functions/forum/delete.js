@@ -59,6 +59,30 @@
    destroyed, so "the author" is not a question that can be answered there.
    A LOCKED thread is not refused: locking stops new posts, it does not make
    somebody's own words un-deletable.
+
+   WHEN THE THREAD GOES, TWO MORE THINGS GO WITH IT.
+
+   THE WORDS ON THE THREAD HEAD. Erasing the post's `body` is not the whole
+   of "the words really go" while `title` and `excerpt` sit beside it, and
+   `excerpt` is a VERBATIM COPY of the body that was just erased. They are
+   not private by being hidden either: the rules let any admitted member
+   read this collection, so a `where('hidden','==',true)` query hands back
+   every deleted question's title and its first 200 words, and the page's
+   own list downloads all 200 threads and drops the hidden ones in the
+   browser. Rule 13 of the guide promises "the words are then gone for
+   good", so they are cleared here. The thread keeps its tags, its handle
+   and its stamps, which is what the maintainer's removal tool reads.
+
+   THE TAG TALLY. `forumTags/{Y}_{room}` is an increment tally and the one
+   thing here that cannot be recomputed from what is stored, so a thread
+   that goes without giving its tags back leaves the Popular tags card
+   counting questions nobody can open, the compose picker suggesting them,
+   and a chip whose press yields an empty list. It is given back BY VALUE
+   and floored at zero, never with increment(-1): a tag past
+   TAG_COUNT_CAP was never counted and has nothing to give back, and the
+   panel must never print a negative. That is the rule
+   _scraper/remove-forum-thread.mjs was written around; this is the same
+   rule, applied where the thread actually goes.
    --------------------------------------------------------------------------- */
 
 'use strict';
@@ -66,6 +90,23 @@
 const { onCall } = require('firebase-functions/v2/https');
 const M = require('../forum-model.js');
 const P = require('./member.js');
+
+/** The tags a thread carried, given back to the room's tally by value and
+    floored at zero. Answers null when there is nothing to give back, and
+    the caller must then write nothing: an empty map handed to
+    set({ merge: true }) REPLACES `counts` rather than leaving it alone
+    (see the trap recorded in post.js). */
+function tallyBack(existing, tags) {
+  const counts = (existing && existing.counts) || {};
+  const back = {};
+  let any = false;
+  for (const t of (Array.isArray(tags) ? tags : [])) {
+    if (!Object.prototype.hasOwnProperty.call(counts, String(t))) continue;
+    back[String(t)] = Math.max(0, (Number(counts[String(t)]) || 0) - 1);
+    any = true;
+  }
+  return any ? back : null;
+}
 
 exports.forumDelete = onCall(P.OPTS, async (req) => {
   const d = req.data || {};
@@ -79,6 +120,7 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
   /* whether ANY post that is not hidden is a reply: two is enough to know,
      since only one of them can be the question */
   const liveQuery = postsRef.where('hidden', '==', false).limit(2);
+  const tagsRef = D.collection('forumTags').doc(Y + '_' + d.room);
   let wholeThread = false;
 
   await P.run(D, async (tx) => {
@@ -91,6 +133,32 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
     if (tv.hidden) P.refuse('failed-precondition', 'locked');
     if (!admin && pv.by !== m.handle) P.refuse('permission-denied', 'author');
     const isQuestion = Number(pv.n) === 1;
+    /* EVERY READ BEFORE THE FIRST WRITE. Firestore refuses a transaction
+       that reads after it has written, and both branches below write. The
+       tally is only needed when the thread is going, which is exactly when
+       the post under the cursor is the question. */
+    const tally = isQuestion ? await tx.get(tagsRef) : null;
+
+    /** What a thread that is going leaves behind: no words, and its tags
+        handed back to the room. */
+    const closeThread = () => {
+      /* @doc thread */
+      const gonePatch = {
+        hidden: true,
+        title: '',
+        excerpt: '',
+      };
+      /* @end */
+      tx.update(threadRef, gonePatch);
+      const back = tallyBack(tally && tally.exists ? tally.data() : null, tv.tags);
+      /* @doc tags */
+      const tagsPatch = {
+        counts: back,
+      };
+      /* @end */
+      if (back) tx.set(tagsRef, tagsPatch, { merge: true });
+    };
+
     /* Already gone. A second press is a SUCCESS rather than an error, and for
        a question there is one thing left to do: SHUT THE THREAD. Data written
        before the rule below existed carries a deleted question under a thread
@@ -99,12 +167,7 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
     if (pv.hidden) {
       if (!isQuestion) return;
       wholeThread = true;
-      /* @doc thread */
-      const shutPatch = {
-        hidden: true,
-      };
-      /* @end */
-      tx.update(threadRef, shutPatch);
+      closeThread();
       return;
     }
 
@@ -136,12 +199,7 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
       tx.update(threadRef, untick);
     }
     if (!isQuestion) return;
-    /* @doc thread */
-    const gonePatch = {
-      hidden: true,
-    };
-    /* @end */
-    tx.update(threadRef, gonePatch);
+    closeThread();
   });
   return { ok: true, thread: wholeThread };
 });

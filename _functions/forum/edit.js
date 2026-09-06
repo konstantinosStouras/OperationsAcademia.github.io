@@ -35,7 +35,12 @@ exports.forumEdit = onCall(P.OPTS, async (req) => {
     if (tv.locked || tv.hidden || pv.hidden) P.refuse('failed-precondition', 'locked');
     if (pv.by !== m.handle) P.refuse('permission-denied', 'author');
     const now = M.minute();
-    if (now >= Number(pv.t) + M.EDIT_WINDOW_MS) P.refuse('failed-precondition', 'window');
+    /* AT LEAST fifteen minutes, never fewer. Both stamps are truncated to
+       the minute (R7), so a post made at 10:00:59 is stamped 10:00:00 and a
+       strict `>=` closed its window 59 seconds early, while the guide
+       promises fifteen minutes and three files said the slack ran the other
+       way. One minute of slack, on the generous side. */
+    if (now > Number(pv.t) + M.EDIT_WINDOW_MS) P.refuse('failed-precondition', 'window');
     editedAt = now;
     /* @doc post */
     const postPatch = {

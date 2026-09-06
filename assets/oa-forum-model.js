@@ -101,8 +101,20 @@
     name: ['season', 'key'],
     /* candidateMarkers/{uid}: the membership marker the rules re-read. The
        one document keyed on a uid, and it carries a profile id, never a
-       handle. */
-    marker: ['sub', 'year', 'joinedAt']
+       handle.
+
+       AND NO STAMP, WHICH IS THE POINT. It used to carry `joinedAt`, set
+       from the same M.minute() as the forumHandles document written in the
+       same call, and the maintainer may read both collections. So the two
+       could be joined on an exact minute: with a few hundred members
+       spread over weeks, a minute usually names one person, and the join
+       needed neither the secret nor the Admin SDK and would go on working
+       after the season's secret version was destroyed, which the Privacy
+       Policy says makes the link impossible for everyone. R7 exists so
+       that "a minute cannot be joined exactly to any other record of the
+       same moment"; two documents written by one call with one minute on
+       both were exactly that. Nothing ever read the field. */
+    marker: ['sub', 'year']
   };
 
   /** Text bounds, in characters. The functions refuse anything longer with
@@ -145,7 +157,11 @@
   var RATE = { threads: 3, posts: 40, votes: 60, gapMs: 20000 };
 
   /** A member may edit their own post for fifteen minutes from the MINUTE it
-      was stamped (so up to 59 seconds more). The function is the authority;
+      was stamped. Both stamps are truncated to the minute (R7), so the real
+      window is fifteen minutes plus up to 59 seconds: the slack is on the
+      generous side deliberately, because the guide promises fifteen and a
+      strict comparison closed the window up to 59 seconds EARLY. The
+      function is the authority;
       the page draws a countdown from the same constant. DELETING has no
       window at all (owner, 2026-09-05), though a question somebody has
       answered cannot be deleted at all; see _functions/forum/delete.js. */

@@ -9333,6 +9333,37 @@ async function testTwoDeadlinesWiring() {
 }
 
 async function testReviewWiring() {
+  /* NO SOURCE FILE CARRIES AN UNRESOLVED MERGE MARKER. One shipped in
+     _functions/index.js and survived every check here: it sat inside a block
+     comment, so nothing failed to parse, and what it left behind was a stray
+     `=======` and two contradictory sentences about the same function in a
+     file that is DEPLOYED. Nothing else in this suite reads a comment, so
+     nothing else could have caught it. Cheap to look for and the only way it
+     is ever found. */
+  {
+    const marker = /^(<{7}|={7}|>{7})( |\t|$)/m;
+    const roots = ['assets', '_scraper', '_functions', '_functions/forum', '_functions/test', '.github/workflows'];
+    let scanned = 0;
+    for (const dir of roots) {
+      let names = [];
+      try { names = await readdir(path.join(HERE, '..', dir)); } catch { names = []; }
+      for (const name of names) {
+        if (!/\.(js|mjs|css|json|rules|yml|html)$/.test(name)) continue;
+        const full = path.join(HERE, '..', dir, name);
+        let src = '';
+        try { src = await readFile(full, 'utf8'); } catch { continue; }
+        scanned++;
+        ok(!marker.test(src), `${dir}/${name} carries no unresolved merge marker`);
+      }
+    }
+    for (const name of ['_firestore.rules', '_storage.rules', 'changelog.json', 'index.html', 'forum.html', 'jobs.html']) {
+      const src = await readFile(path.join(HERE, '..', name), 'utf8');
+      scanned++;
+      ok(!marker.test(src), `${name} carries no unresolved merge marker`);
+    }
+    ok(scanned > 120, `the merge-marker sweep really read the tree (${scanned} files)`);
+  }
+
   /* The three places that must agree on what may be edited: the pure module,
      the browser panel, and the rules. A field in one and not the others is
      either refused by the database or silently dropped — both look to the
@@ -10745,8 +10776,20 @@ async function testCandidateReveal() {
   ok(/revealAt !== today/.test(bell) && /'reveal: not today'/.test(bell),
     'doorbell: on every other day it logs why it did not ring');
   ok(/FOUR doorbells/.test(fnSrc) && !/THREE doorbells/.test(fnSrc), 'doorbell: the header counts four');
-  ok(/the fifth function, and one of the\s+two here that are not doorbells/.test(fnSrc),
-    'doorbell: recordVisit is the fifth function');
+  /* THE ORDINAL IS COMPUTED, NEVER TYPED. It was typed, it went stale the
+     moment revealCandidates was inserted above recordVisit, and the two
+     stale readings ("fourth" and "fifth") then met in a merge and left an
+     unresolved marker in a DEPLOYED file. Counting the exports is the only
+     version of this check that cannot rot. */
+  {
+    const declared = [...fnSrc.matchAll(/^exports\.(\w+) =/gm)].map((mm) => mm[1])
+      .filter((n) => !/^forum/.test(n));
+    const ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth'];
+    const word = ORDINALS[declared.indexOf('recordVisit')];
+    ok(!!word, `doorbell: recordVisit is one of this file's own functions (${declared.join(', ')})`);
+    ok(new RegExp('the ' + word + ' function in this file').test(fnSrc),
+      `doorbell: and the header says so, computed rather than typed (${word})`);
+  }
   /* ONE producer for the event: no GitHub cron may fire at 14:00, the
      duplicate-doorbell outage (One event, one build) in another costume.
      The hour field is EXPANDED before it is tested: a bare star, a step
@@ -15056,7 +15099,17 @@ async function testForum() {
   ok(!/'latest'/.test(idSrc.slice(idSrc.indexOf('async function secretForSeason('))), 'forum R8: secretForSeason never asks for latest');
   const others = Object.entries(forumSrc).filter(([f, src]) => f !== 'identity.js' && /secretVersion/.test(src)).map(([f]) => f);
   eq(others, [], 'forum R8: secretVersion is read in identity.js and nowhere else');
-  ok(/db\.collection\('forumSeasons'\)\.doc\(String\(season\)\)/.test(idSrc) && (idSrc.match(/collection\('forumSeasons'\)/g) || []).length === 1,
+  /* TWO READS OF forumSeasons AND NO MORE: the season's OWN head, and the
+     one-off scan that refuses to mint a season under a secret version
+     another season already claims. Without that scan the July roll silently
+     resolves `latest` to the closed season's version, and the runbook's
+     1 August destruction then either takes the live forum down for good or
+     cannot be done at all. Nothing else in the year notices either. */
+  ok(/const claimed = heads\.docs\.some\(/.test(idSrc)
+     && /require\('\.\/member\.js'\)\.refuse\('failed-precondition', 'season'\)/.test(idSrc)
+     && !/^const P = require\('\.\/member\.js'\);$/m.test(idSrc),
+    'forum R8: a season is refused rather than minted under a version another season claims');
+  ok(/db\.collection\('forumSeasons'\)\.doc\(String\(season\)\)/.test(idSrc) && (idSrc.match(/collection\('forumSeasons'\)/g) || []).length === 2,
     'forum R8: the one season document read is the season passed in');
   ok(/function emulated\(\) \{\s*return process\.env\.FUNCTIONS_EMULATOR === 'true';\s*\}/.test(idSrc), 'forum R8: the emulator branch is guarded on FUNCTIONS_EMULATOR');
   const av = idSrc.slice(idSrc.indexOf('async function accessVersion('), idSrc.indexOf('const cache = new Map()'));
@@ -15084,12 +15137,36 @@ async function testForum() {
   ok(/FieldValue\.increment\(du\)/.test(forumSrc['vote.js']) && /score: FieldValue\.increment\(du - dd\)/.test(forumSrc['vote.js']),
     'forum: votes move by delta with increment, and the first post\'s net lands on the thread head');
   ok(/D\.getAll\(\.\.\.refs\)/.test(forumSrc['vote.js']), 'forum: forumThreadVotes reads the caller\'s votes in one round trip');
-  ok(/text\.length > M\.BOUNDS\.quote/.test(forumSrc['post.js']) && /String\(src\.body\)\.indexOf\(text\) === -1/.test(forumSrc['post.js']),
+  ok(/text\.length > M\.BOUNDS\.quote/.test(forumSrc['post.js'])
+     && /P\.flatten\(String\(src\.body\)\)\.indexOf\(P\.flatten\(text\)\) === -1/.test(forumSrc['post.js']),
     'forum: a quote is bounded and must be a passage of the post as it stands');
+  /* AND THE PASSAGE IS COMPARED AS A BROWSER RENDERS IT. The page hands over
+     what the reader SELECTED, which comes out of the DOM with the whitespace
+     the body was stored with already collapsed: a run of spaces, a tab, a
+     Windows line ending, a third blank line between paragraphs. Byte for
+     byte an ordinary selection spanning a paragraph break was refused with
+     "the quote must be a passage of the post it names", which is untrue and
+     unanswerable, since the reader did select it. flatten() is the one
+     normaliser, shared with excerptOf, and it is applied to BOTH sides of
+     the test and to NEITHER side of what is stored. */
+  ok(/function flatten\(v\) \{\s*\n\s*return String\(v == null \? '' : v\)\.replace\(\/\\s\+\/g, ' '\)\.trim\(\);/.test(forumSrc['member.js'])
+     && /\bflatten,/.test(forumSrc['member.js']),
+    'forum: flatten() collapses whitespace the way a browser does, and is exported');
+  ok(/const s = flatten\(body\);/.test(forumSrc['member.js']),
+    'forum: excerptOf reads the same normaliser, so there is one definition of it');
+  ok(/quote = \{\s*\n\s*n: qn,\s*\n\s*by: src\.by,\s*\n\s*text,/.test(forumSrc['post.js']),
+    'forum: what is STORED is the reader\'s own words, never the flattened form');
   ok(/quote = \{\s*n: qn,\s*by: src\.by,\s*text,\s*\}/.test(forumSrc['post.js']), 'forum: and is stored as a copy {n, by, text}');
   ok(/const body = guide\.text\(\);/.test(forumSrc['moderate.js']) && !/d\.body/.test(forumSrc['moderate.js']),
     'forum: seedGuide renders the guide itself and takes no body');
-  ok(/now >= Number\(pv\.t\) \+ M\.EDIT_WINDOW_MS/.test(forumSrc['edit.js']), 'forum: the edit window is measured from the stamped minute');
+  /* AT LEAST fifteen minutes, never fewer. Both stamps are truncated to the
+     minute (R7), so a post made at 10:00:59 is stamped 10:00:00 and a strict
+     `>=` closed its window 59 seconds early, while rule 13 of the guide
+     promises fifteen minutes and the model's own comment said the slack ran
+     the other way. One minute of slack, on the generous side. */
+  ok(/now > Number\(pv\.t\) \+ M\.EDIT_WINDOW_MS/.test(forumSrc['edit.js'])
+     && !/now >= Number\(pv\.t\)/.test(forumSrc['edit.js']),
+    'forum: the edit window is measured from the stamped minute, and never closes early');
   ok(/ring\('oa-forum-posted'/.test(forumSrc['post.js']) && !/await ring\(/.test(forumSrc['post.js']), 'forum: the step-2 doorbell is an anchor, not a call');
   ok(!/setCustomUserClaims/.test(allForum), 'forum: no custom claim ever carries a hash beside a uid');
 
@@ -15442,8 +15519,38 @@ async function testForum() {
   ok(/where\('n', '==', 1\)\.limit\(1\)/.test(forumSrc['post.js'])
      && /head\.empty \|\| \(head\.docs\[0\]\.data\(\) \|\| \{\}\)\.hidden/.test(forumSrc['post.js']),
     'forum delete: a reply to a thread whose question was deleted is refused by the FUNCTION, not merely hidden on the page');
-  ok(/if \(pv\.hidden\) \{[\s\S]{0,400}?const shutPatch/.test(delSrc),
+  ok(/if \(pv\.hidden\) \{[\s\S]{0,400}?closeThread\(\);/.test(delSrc),
     'forum delete: and pressing Delete on an already-deleted question finishes the job, so a thread left standing by the old rule can be shut');
+  /* WHAT A THREAD THAT GOES LEAVES BEHIND: NOTHING TO READ, AND ITS TAGS
+     BACK. Erasing the post's body is not the whole of "the words really go"
+     while the thread head still carries the title and an `excerpt` that is a
+     VERBATIM COPY of that body, and neither is private by being hidden: the
+     rules let any admitted member list this collection, and the page's own
+     source downloads all 200 threads and drops the hidden ones in the
+     browser. Rule 13 of the guide promises the words are gone for good. And
+     the tally is the one thing here that cannot be recomputed from what is
+     stored, so a thread that goes without giving its tags back leaves
+     Popular tags counting questions nobody can open. BY VALUE and floored at
+     zero, never increment(-1): a tag past TAG_COUNT_CAP was never counted,
+     and the panel must never print a negative. Both are done in ONE place,
+     so the author's delete and the maintainer's removal cannot differ. */
+  ok(/const closeThread = \(\) => \{/.test(delSrc)
+     && (delSrc.match(/closeThread\(\);/g) || []).length === 2,
+    'forum delete: one closeThread(), used by both the fresh delete and the heal');
+  ok(/hidden: true,\s*\n\s*title: '',\s*\n\s*excerpt: '',/.test(delSrc),
+    'forum delete: a thread that goes keeps no title and no excerpt of the question');
+  /* READ WITH THE COMMENTS STRIPPED for the negative half: delete.js explains
+     in as many words why it must not use increment(-1), and a guard that
+     could not tell the explanation from the thing would have to be satisfied
+     by deleting the explanation (the analytics page's no-iframes lesson). */
+  ok(/back\[String\(t\)\] = Math\.max\(0, \(Number\(counts\[String\(t\)\]\) \|\| 0\) - 1\);/.test(delSrc)
+     && !/increment\(-1\)/.test(delSrc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')),
+    'forum delete: the tag tally is given back by value and floored at zero, never with increment(-1)');
+  ok(/return any \? back : null;/.test(delSrc) && /if \(back\) tx\.set\(tagsRef, tagsPatch/.test(delSrc),
+    'forum delete: and nothing is written when there is nothing to give back, or the empty map would erase the tally');
+  ok(/const tally = isQuestion \? await tx\.get\(tagsRef\) : null;/.test(delSrc)
+     && delSrc.indexOf('const tally = isQuestion') < delSrc.indexOf('tx.update(threadRef'),
+    'forum delete: the tally is read before the first write, as a transaction requires');
   ok(/var gone = !!first\.hidden && Number\(first\.n\) === 1;/.test(pageJs)
      && /\|\| gone;/.test(pageJs) && /the thread is closed/.test(pageJs),
     'forum delete: the page reads such a thread as closed and says so where the reply box was');
@@ -15586,7 +15693,32 @@ async function testForum() {
   ok(/M\.BOUNDS\.quote/.test(pageJs) && /S\.quote = \{ n: Number\(p\.n\) \|\| 0, by: p\.by, text: text \}/.test(pageJs), 'oa-forum.js: a quote is cut to the bound and carries n, by, text');
   ok(/data\.quote = \{ n: S\.quote\.n, text: S\.quote\.text \}/.test(pageJs), 'oa-forum.js: and only n and text are sent');
   ok(/history\.pushState\(null, '', to\)/.test(pageJs) && /addEventListener\('popstate'/.test(pageJs), 'oa-forum.js: the three views are one page under three addresses');
-  ok(/if \(!readOnly\)/.test(pageJs) && /S\.archive \|\| !!thread\.locked/.test(pageJs), 'oa-forum.js: an archived or locked thread draws no vote button and no reply box');
+  ok(/\} else if \(readOnly\) \{/.test(pageJs) && /var readOnly = S\.archive \|\| !!thread\.locked \|\| !!thread\.hidden \|\| gone;/.test(pageJs),
+    'oa-forum.js: an archived or locked thread draws no reply box');
+  /* READ-ONLY IS ABOUT NEW POSTS, AND ONLY THAT, so the three controls that
+     are not new posts follow their OWN functions instead. forumVote refuses
+     on an archive, a locked thread and a hidden post; forumAccept and
+     forumDelete refuse on an archive and a hidden THREAD and ALLOW a locked
+     one, because locking stops new posts and does not make somebody's own
+     words un-deletable or a question un-answerable. Drawn under readOnly
+     they were withheld exactly where the function would have allowed them,
+     which is worse than a control that fails on the press: the reader
+     cannot find it at all. */
+  ok(/var frozen = S\.archive \|\| !!\(thread && thread\.hidden\);/.test(pageJs)
+     && /var canVote = !frozen && !\(thread && thread\.locked\) && !p\.hidden;/.test(pageJs)
+     && /var canTouch = !frozen;/.test(pageJs),
+    'oa-forum.js: votes, the tick and Delete follow their own functions, not one blanket readOnly');
+  ok(/if \(canVote\) \{[\s\S]{0,300}?oa-forum-v up/.test(pageJs) && !/if \(!readOnly\) \{[\s\S]{0,200}?oa-forum-v/.test(pageJs),
+    'oa-forum.js: no vote button on a tombstone, whose vote the function refuses as locked');
+  ok(/canTouch && isFirst && p\.hidden && \(mine \|\| amAdmin\(\)\)/.test(pageJs)
+     && /Close this thread/.test(pageJs),
+    'oa-forum.js: and the documented one-press recovery for a headless thread has a control to press');
+  ok(/var canAccept = !isFirst && canTouch && !p\.hidden/.test(pageJs)
+     && /function acceptAnswer\(thread, p, btn\) \{\s*\n\s*if \(S\.frozen\) return;/.test(pageJs)
+     && /function vote\(li, p, want\) \{\s*\n\s*if \(S\.frozen \|\| \(S\.thread && S\.thread\.locked\) \|\| p\.hidden\) return;/.test(pageJs),
+    'oa-forum.js: and the handlers refuse on the same terms the controls are drawn on');
+  ok(/cached && cached\.rooms && cached\.rooms\.candidates/.test(pageJs),
+    'oa-forum.js: the join cache is trusted only while it says YES, so filing a profile opens the room in the same session');
 
   /* the withdraw path */
   const candForm = await read('assets', 'oa-candidateform.js');
@@ -15670,8 +15802,13 @@ async function testForum() {
     ok(sim.includes(`'${reason}'`) && errKeys.includes(reason), `shim: the simulator refuses with ${reason}, a reason member.js can answer with`);
   }
   ok(/'candidateMarkers\/' \+ u\.uid/.test(sim) && /by: 'Moderator'/.test(sim) && /tags: \['about'\]/.test(sim)
-     && /quote = \{ n: qn, by: src\.by, text: qtext \};/.test(sim) && /String\(src\.body\)\.indexOf\(qtext\) === -1/.test(sim),
+     && /quote = \{ n: qn, by: src\.by, text: qtext \};/.test(sim) && /flat\(src\.body\)\.indexOf\(flat\(qtext\)\) === -1/.test(sim),
     'shim: the join writes the marker, the seed posts as Moderator tagged about, and a quote is a verified copy {n, by, text}');
+  ok(!/joinedAt/.test(sim), 'shim: and the marker carries no stamp, the way the function writes it');
+  ok(/hidden: true, title: '', excerpt: ''/.test(sim) && /Math\.max\(0, \(Number\(cs\[t\]\) \|\| 0\) - 1\)/.test(sim),
+    'shim: a thread that goes leaves no words and gives its tags back, as forumDelete does');
+  ok(/var tagWhy = bad\(tags\[ti\]\);/.test(sim),
+    'shim: and every tag runs the guard, as forumPost does');
   ok(/if \(post\.by === handle\) return simRefuse\('failed-precondition', 'own'\);/.test(sim) && /if \(Number\(post\.n\) === 1\) simWrite\(tpath2, Object\.assign\(\{\}, th, \{ score:/.test(sim),
     'shim: no vote on one\'s own post, and the first post\'s net lands on the thread head');
   ok(/if \(!head1 \|\| head1\.hidden\) return simRefuse\('failed-precondition', 'locked'\);/.test(sim)
