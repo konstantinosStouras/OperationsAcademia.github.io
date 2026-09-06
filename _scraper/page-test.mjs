@@ -9855,6 +9855,16 @@ for (const w of [320, 360, 390, 430]) {
     eq(geom.clash, 0, 'forum (candidate): no two chips overlap, none reaches up into the excerpt, and none runs into the tally column');
     ok(geom.tallyLeft, 'forum (candidate): the tally column sits to the LEFT of the title, the arrangement the owner asked for');
     ok(geom.footRow, 'forum (candidate): the tags and who asked share the footer, tags left and asker right');
+    /* AND THE CHIPS IN IT ARE REAL LINKS, not spans inside the head <button>:
+       a control inside a button is not markup a browser will make focusable,
+       so they were reachable by pointer and by nothing else. */
+    const chip = await q.evaluate(() => {
+      const c = document.querySelector('#oa-forum-list .oa-forum-qfoot .oa-label-tag');
+      if (!c) return null;
+      return { tag: c.tagName, href: c.getAttribute('href') || '', inButton: !!c.closest('.oa-card-head') };
+    });
+    ok(chip && chip.tag === 'A' && /^forum\.html\?/.test(chip.href) && !chip.inButton,
+      `forum (candidate): a card's tag chip is a link beside the head button, not a span inside it (${JSON.stringify(chip)})`);
     eq(geom.answers, 1, 'forum (candidate): and the answer count is printed once, in the tally');
     eq(geom.replies, 0, 'forum (candidate): the card says answers, never replies');
     eq(geom.comments, 0, 'forum (candidate): and offers no comment on anything, which is the whole model');
@@ -10206,6 +10216,17 @@ for (const w of [320, 360, 390, 430]) {
     ok(watched.card && watched.chips === 1, 'forum (watched): and the side card lists it');
     eq(watched.pressed, 'true', 'forum (watched): the bell says it is on');
     eq(watched.wrote, before, 'forum (watched): watching a tag writes NOTHING to the database, which is the whole point of it');
+    /* AND THE BELL KEEPS THE FOCUS ITS OWN REDRAW WOULD DROP: the press
+       rebuilds both cards, so without putting it back focus falls to <body>
+       and the new pressed state is announced to nobody. */
+    await q.evaluate(() => document.querySelector('#oa-forum-tags [data-watch]').focus());
+    await q.click('#oa-forum-tags [data-watch]');
+    await q.waitForTimeout(300);
+    eq(await q.evaluate(() => (document.activeElement.closest && document.activeElement.closest('#oa-forum-tags'))
+      ? 'in the tag card' : document.activeElement.tagName),
+    'in the tag card', 'forum (watched): pressing the bell leaves focus on the bell, not on <body>');
+    await q.click('#oa-forum-tags [data-watch]');
+    await q.waitForTimeout(200);
 
     eq(await q.evaluate(() => JSON.parse(sessionStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
       'forum (candidate): the join is remembered for the session under the handle');

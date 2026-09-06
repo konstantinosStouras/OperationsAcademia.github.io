@@ -219,6 +219,17 @@ body.v3 .oa-forum-q {
    not have to be is a line of its own weight under every question, so on this
    card it is small, muted and tucked against the right, where a reader finds
    it when they look for it and reads past it when they do not. */
+/* THE FOOTER IS A SIBLING OF THE HEAD, NOT A CHILD OF IT. The engine draws
+   the head as a <button>, and a control inside a button is not markup a
+   browser will make focusable, so the tag chips were reachable by pointer and
+   by nothing else. Out here they are real links; they take the head's own
+   column and its horizontal padding so they sit where they always did. */
+body.v3 .oa-forum-q .oa-forum-qfoot {
+  grid-column: 2 / -1;
+  padding: 0 24px 0 6px;
+  margin-top: -10px;
+}
+
 body.v3 .oa-forum-q .oa-card-lock {
   grid-column: 2 / -1;
   justify-content: flex-end;

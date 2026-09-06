@@ -200,6 +200,7 @@
     sort: 'score',                  // how the answers band is ordered
     thread: null,                   // the thread on screen, and its posts
     posts: [],
+    painted: false,                 // a view has been drawn at least once
     readOnly: false,                // nothing new may be POSTED to it
     frozen: false,                  // nothing at all may be written to it
     live: 0,                        // answers still standing in it
@@ -544,6 +545,14 @@
     if (S.tid) drawThread();
     else if (S.ask && !S.archive) drawAsk();
     else drawList();
+    /* THE TAB THE READER PRESSED KEEPS THE FOCUS, and it is claimed here
+       rather than in drawTabs because the view drawn between the two takes
+       focus of its own: whichever ran last would win, and it must be this. */
+    if (keyboardTab) {
+      keyboardTab = false;
+      var back = document.querySelector('#oa-forum-rooms .oa-forum-tab[aria-selected="true"]');
+      if (back) back.focus({ preventScroll: true });
+    }
     loadSide();
     window.scrollTo(0, 0);
   }
@@ -564,11 +573,7 @@
       }, [el('span', { class: 'oa-forum-dot', 'aria-hidden': 'true' }), pair[1]]);
       host.appendChild(b);
     });
-    if (keyboardTab) {
-      keyboardTab = false;
-      var now = host.querySelector('.oa-forum-tab[aria-selected="true"]');
-      if (now) now.focus();
-    }
+
     /* A ROVING TABINDEX NEEDS ARROW KEYS, or the tab that is not selected is
        reachable by pointer and by nothing else: tabindex="-1" takes it out of
        the tab order and there was no handler to put focus on it.
@@ -730,9 +735,32 @@
       b.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
+        /* the press redraws both cards, so this very button is discarded;
+           without this, focus falls to <body> and the new pressed state is
+           announced to nobody */
+        refocus = { host: host.id, key: b.getAttribute('data-watch') };
         toggleWatch(b.getAttribute('data-watch'));
       });
     });
+    keepFocus(host, '[data-watch="%"]');
+  }
+
+  /** Set while a press redrew the panel that held the button, so the panel can
+      put focus back on the control the reader pressed rather than dropping it
+      to <body> with the new state unannounced. */
+  var refocus = null;
+
+  /** Put focus back on the control the reader pressed, in the panel they
+      pressed it in: the same tag can have a bell in both cards, and landing
+      in the other one is its own small lie about where the reader is. */
+  function keepFocus(host, sel) {
+    if (!refocus || !host || host.id !== refocus.host) return;
+    var back = host.querySelector(sel.replace('%', cssEscape(refocus.key)));
+    refocus = null;
+    if (back) back.focus();
+  }
+  function cssEscape(v) {
+    return String(v).replace(/["\\]/g, '\\$&');
   }
 
   function drawTags() {
@@ -928,6 +956,17 @@
     show($('oa-forum-listview'), true);
     var title = $('oa-forum-listtitle');
     if (title) title.textContent = S.room === 'candidates' ? 'Questions from candidates' : 'Questions in the Open forum';
+    /* THE VIEW TAKES FOCUS, as the thread and the ask form already do. These
+       are three views of one page swapped with pushState, so a reader coming
+       back from a thread with the keyboard was returned to a page whose focus
+       was still wherever the thread had left it, or on <body>. Never on the
+       first paint, where the reader has not moved yet and stealing focus
+       would scroll the page out from under them. */
+    if (title && S.painted && !keyboardTab) {
+      title.setAttribute('tabindex', '-1');
+      title.focus({ preventScroll: true });
+    }
+    S.painted = true;
     /* The Ask button lives in the list HEAD, not in the engine's action bar:
        the bar is hidden with an empty dataset (v3's .oa-data-empty rule), and
        an empty room is exactly where the first question has to come from. */
@@ -1045,16 +1084,22 @@
           if (r.lastAt) sub.appendChild(el('span', { class: 'oa-forum-when', text: 'active ' + ago(r.lastAt) }));
           foot.appendChild(sub);
         }
-        if (head) head.appendChild(foot);
-        Array.prototype.forEach.call(li.querySelectorAll('.oa-label-tag'), function (b) {
+        /* OUTSIDE THE HEAD, WHICH IS A BUTTON. The engine draws the card's
+           head as a <button>, and a control inside a button is not markup a
+           browser will make focusable: the tag chips carried role="link" and
+           a click handler and were reachable by pointer and by nothing else.
+           As a sibling of the head they can be real anchors, which the
+           keyboard, the middle button and "open in a new tab" all understand,
+           and which the page's own link handler already follows in place. */
+        if (head) head.insertAdjacentElement('afterend', foot);
+        Array.prototype.forEach.call(foot.querySelectorAll('.oa-label-tag'), function (b) {
           var tag = b.textContent;
-          b.setAttribute('data-tag', tag);
-          b.setAttribute('role', 'link');
-          b.title = 'Questions tagged ' + tag;
-          b.addEventListener('click', function (e) {
-            e.stopPropagation();
-            go({ room: S.room, season: S.season, tags: tag });
+          var a = el('a', {
+            class: b.className, 'data-tag': tag, text: tag,
+            href: href({ room: S.room, season: S.season, tags: tag }),
+            title: 'Questions tagged ' + tag
           });
+          b.parentNode.replaceChild(a, b);
         });
       },
       strings: {
@@ -1228,6 +1273,7 @@
       return postHTML(p, S.thread, S.readOnly, false, S.live);
     }).join('');
     wirePosts(ol, S.thread, answers, S.readOnly);
+    keepFocus(ol, 'li[data-pid="%"] .oa-forum-acc');
     if (open) {
       var host = ol.querySelector('li[data-pid="' + String(openFor).replace(/"/g, '\\"') + '"] .oa-forum-text');
       if (host) {
@@ -1453,6 +1499,10 @@
     call('forumAccept', { room: S.room, tid: S.tid, pid: on ? '' : p.id }).then(function (r) {
       thread.accepted = String((r && r.accepted) || '');
       S.thread = thread;
+      /* the band is repainted and reordered under the press, so the button
+         itself is discarded; without this, focus falls to <body> and the new
+         pressed state is announced to nobody */
+      refocus = { host: 'oa-forum-answers', key: p.id };
       paintAnswers();
       say(thread.accepted ? 'Ticked as the answer.' : 'The tick is off.');
     }).catch(function (err) {

@@ -15790,6 +15790,38 @@ async function testForum() {
     'oa-forum.js: and that listener is bound once per host, never once per draw');
   ok(/keyboardTab = true;/.test(pageJs) && /if \(keyboardTab\) \{/.test(pageJs),
     'oa-forum.js: focus follows the room a keyboard press opened, whose button the redraw discards');
+  /* CLAIMED AFTER THE VIEW, not inside drawTabs: the view drawn between the
+     two takes focus of its own, so whichever ran last would win. */
+  ok(pageJs.indexOf('else drawList();') < pageJs.indexOf('if (keyboardTab) {\n      keyboardTab = false;'),
+    'oa-forum.js: and it is claimed after the view is drawn, or the list takes it back');
+  /* THE VIEW TAKES FOCUS ON ARRIVAL, as the thread and the ask form do:
+     three views of one page swapped with pushState, so a reader coming back
+     from a thread was returned to a page whose focus was still where the
+     thread had left it. Never on the first paint. */
+  ok(/if \(title && S\.painted && !keyboardTab\) \{/.test(pageJs) && /S\.painted = true;/.test(pageJs),
+    'oa-forum.js: the questions list takes focus when it is returned to, and never on the first paint');
+  /* THE TAG CHIPS ARE REAL LINKS OUTSIDE THE HEAD BUTTON. A control inside a
+     <button> is not markup a browser will make focusable, so they were
+     reachable by pointer and by nothing else. */
+  ok(/head\.insertAdjacentElement\('afterend', foot\)/.test(pageJs) && /b\.parentNode\.replaceChild\(a, b\)/.test(pageJs)
+     && !/b\.setAttribute\('role', 'link'\)/.test(pageJs),
+    'oa-forum.js: a card\'s tag chips are anchors beside the head button, not spans inside it');
+  ok(/body\.v3 \.oa-forum-q \.oa-forum-qfoot \{/.test(pageCss) && /grid-column: 2 \/ -1;/.test(pageCss),
+    'oa-forum.css: and the footer takes the head\'s own column now that it is a sibling of it');
+  /* A PRESS THAT REDRAWS ITS OWN BUTTON MUST PUT FOCUS BACK, in the panel it
+     was pressed in: without it focus falls to <body> and the new pressed
+     state is announced to nobody. */
+  ok(/function keepFocus\(host, sel\)/.test(pageJs) && /host\.id !== refocus\.host/.test(pageJs)
+     && /refocus = \{ host: host\.id, key: b\.getAttribute\('data-watch'\) \}/.test(pageJs)
+     && /refocus = \{ host: 'oa-forum-answers', key: p\.id \}/.test(pageJs),
+    'oa-forum.js: the watch bell and the accept tick keep the focus their own redraw would drop');
+  /* rule 13 again: the bell had a width and no height, so it took its row's
+     20px, and the Saved card's remove sat at its 26px minimum. */
+  ok(/\.oa-forum-watch \{ width: 42px; min-height: 42px; \}/.test(pageCss)
+     && /\.oa-forum-unsave \{ min-width: 42px; min-height: 42px; \}/.test(pageCss),
+    'oa-forum.css: the bell and the Saved card\'s remove are 42px targets on a phone');
+  ok(/\.oa-forum-pacts \.oa-forum-act\[disabled\] \{/.test(pageCss) && /cursor: not-allowed;/.test(pageCss),
+    'oa-forum.css: and a disabled action looks disabled rather than lighting up under the pointer');
   /* A SUPERSEDED MOUNT MUST NOT WRITE THE NEW ROOM'S STATE. */
   ok(/var forRoom = S\.room;/.test(pageJs) && /if \(forRoom !== S\.room \|\| forSeason !== S\.season\) return rows;/.test(pageJs),
     'oa-forum.js: a list read still in flight when the room changes stops writing the shared state');
