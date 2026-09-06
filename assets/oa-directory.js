@@ -569,9 +569,16 @@
       for (var a in had) if (Object.prototype.hasOwnProperty.call(had, a)) doc[a] = had[a];
     }
     for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) doc[k] = patch[k];
-    /* hidden is the maintainer's mark and survives an ordinary edit — a user
-       correcting a hidden row must not silently republish it. */
-    if (had && had.hidden && !('hidden' in patch)) doc.hidden = true;
+    /* hidden is the maintainer's mark and survives an ordinary edit: a user
+       correcting a hidden row must not silently republish it.
+
+       CARRIED WHENEVER THE ROW HAS THE KEY, not only when it is TRUE. This is
+       a full set(), so a field left out of `doc` is a field deleted from the
+       document, and the rules read the RESULTING document: on a row the
+       maintainer had RESTORED, `hidden` is stored as false, `had.hidden` is
+       falsy, the key was dropped, and the write is refused. Omitting it is
+       changing it, which is the maintainer's alone. */
+    if (had && ('hidden' in had) && !('hidden' in patch)) doc.hidden = !!had.hidden;
     doc.rowId = rowId;
     doc.by = state.user.uid;
     doc.name = editorName();

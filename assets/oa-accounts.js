@@ -490,7 +490,14 @@
     var host = $('#oa-account');
     if (!host) return;
 
+    /* BOTH OF THESE DRAW A PILL, NOT A NAME CHIP, so both stamp the reserve
+       OUT. The head's inline script has already guessed from the remembered
+       hint, and these two branches returned without correcting it: a reader
+       whose last visit was signed in got a 186px floor held open beside a
+       96px pill, with a hole where the chip would have been. Whoever changes
+       the answer says so, which is what stampAuthState is for. */
     if (!window.OAFB || !OAFB.enabled) {
+      stampAuthState(false);
       host.innerHTML =
         '<span class="oa-acct-off" title="Sign-in is not switched on yet — ' +
         'the site is still being set up.">Sign in</span>';
@@ -498,6 +505,7 @@
     }
 
     if (state.failed) {
+      stampAuthState(false);
       host.innerHTML =
         '<span class="oa-acct-off" title="We could not reach the sign-in ' +
         'service. Check your connection and reload.">Sign-in unavailable</span>';
@@ -912,6 +920,20 @@
     counts[what] = n;
     writeCounts(u.uid, counts);
     paintCounts(counts);
+  }
+
+  /** One more of something, for a page that has just CREATED it and does not
+      hold the list. The count may not be known yet — the once-a-session
+      refresh may not have landed — and then one is the honest answer: the
+      account holds at least the thing it has just made. The menu row that
+      row governs appears from this moment rather than from the next
+      session's refresh, which is what `data-held` promises. */
+  function addCount(what, by) {
+    var u = state.user;
+    if (!u) return;
+    var counts = readCounts(u.uid);
+    var had = typeof counts[what] === 'number' ? counts[what] : 0;
+    setCount(what, Math.max(0, had + (typeof by === 'number' ? by : 1)));
   }
 
   /** One read per collection, and only once per session. */
@@ -2210,7 +2232,14 @@
   }
 
   /** Two alerts that would send the same e-mail. Used to skip a copy rather
-      than leave the kept account subscribed twice to one thing. */
+      than leave the kept account subscribed twice to one thing.
+
+      A PAUSED ALERT SENDS NOTHING, so it is not the same alert. `enabled` is
+      the flag Pause and the e-mail's Unsubscribe link both clear, and left
+      out of this signature a PAUSED twin on the kept account absorbed the
+      duplicate's ACTIVE one: the copy was skipped, the duplicate's document
+      was then deleted with the rest of it, and the person came out of the
+      merge silently unsubscribed from something they were subscribed to. */
   function alertSig(a) {
     a = a || {};
     var c = a.criteria || {};
@@ -2219,6 +2248,7 @@
       String(a.name || '').trim().toLowerCase(),
       String(a.email || '').trim().toLowerCase(),
       String(a.frequency || ''),
+      a.enabled === false ? 'off' : 'on',
       set(c.topics), String(c.text || '').trim().toLowerCase(),
       set(c.type), set(c.level), set(c.country), set(c.characteristics)
     ].join('~');
@@ -2239,6 +2269,15 @@
     PROFILE_FIELDS.forEach(function (k) {
       if (!String(kept[k] || '').trim() && String(dup[k] || '').trim()) patch[k] = dup[k];
     });
+    /* THE PICTURE IS A DETAIL LIKE THE OTHERS, and the same fill-empty rule
+       answers for it: the duplicate's profile document is DELETED at the end
+       of the merge, so a photo not carried here is a photo the person loses.
+       `photoSeeded` travels with it or the picture would be labelled as one
+       the account chose when it came from a provider. */
+    if (!String(kept.photo || '').trim() && String(dup.photo || '').trim()) {
+      patch.photo = dup.photo;
+      patch.photoSeeded = !!dup.photoSeeded;
+    }
     var mine = kept.orcid || '', theirs = dup.orcid || '';
     if (theirs && (!mine || mine === theirs)) {
       if (!mine) patch.orcid = theirs;
@@ -2969,9 +3008,15 @@
       // as "signed out, and say why".
       state.failed = true;
       state.resolved = true;
-      queue.length = 0;
+      /* ANYTHING QUEUED DURING THE RESTORE WINDOW IS SOMEBODY'S CLICK, and
+         dropping it silently loses it: they pressed Download Excel, or Save
+         as e-mail alert, and nothing at all happened. openAuth has its own
+         branch for this state and says WHY the sign-in is unreachable, which
+         is the same answer the signed-out branch above gives. */
+      var stranded = queue.splice(0, queue.length);
       paint();
       notify(null);
+      if (stranded.length) openAuth();
       if (window.console) console.error('OA accounts: ' + (err && err.message));
     });
   }
@@ -3013,6 +3058,9 @@
     openAuth: openAuth,
     /** A page holding the real list corrects the menu's badge, for free. */
     setCount: setCount,
+    /** …and a page that has just made ONE thing adds it, so the menu row it
+        governs appears from that moment rather than the next session. */
+    addCount: addCount,
     openProfile: openProfile,
     openMerge: openMerge,
     /* --- what an account holds, and how it goes -------------------------

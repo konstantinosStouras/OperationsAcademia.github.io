@@ -283,7 +283,19 @@ async function killUserSubtree(db, uid) {
   const root = db.collection('users').doc(uid);
   let n = 0;
   let subs = [];
-  try { subs = await root.listCollections(); } catch { subs = []; }
+  try {
+    subs = await root.listCollections();
+  } catch (e) {
+    /* UNREADABLE IS NOT EMPTY, the rule this file already applies to a served
+       file it cannot parse. Swallowed, a transient failure here reads as "this
+       account had no alerts", the order is stamped cleared, and the
+       subscription is left in the database for ever: the mailer enumerates
+       every alert by collection group and never asks whether the uid still
+       exists, and unsubscribing needs a sign-in that has just been deleted.
+       That is the one outcome this whole job is shaped to prevent, so the
+       order is left open and the run says why. */
+    throw new Error(`could not list the subcollections of users/${uid} (${e && e.message})`);
+  }
   for (const sub of subs) {
     const snap = await sub.get();
     n += await killAll(db, snap.docs.map((d) => d.ref));
@@ -426,8 +438,21 @@ async function clearAccount(fb, uid, order, held) {
     orcid = ((await db.collection('profiles').doc(uid).get()).data() || {}).orcid || '';
   } catch { orcid = ''; }
   let email = order.email || '';
+  /* AND THE AUTH RECORD IS THE OTHER PLACE BOTH LIVE, which matters because
+     the profile may already be gone: a person deleting their own account
+     deletes `profiles/{uid}` in their browser (it is an owner-delete and the
+     card says "Cleared your details"), and this pass runs minutes later. Read
+     only from the profile, the ORCID iD was then empty and
+     `accountKeys/orcid:<iD>` outlived the account it named, pointing a merge
+     offer at a uid that no longer exists. The provider entry carries the iD
+     itself, and nothing but this job can delete an identity key. */
   try {
-    if (!email) email = (await fb.auth.getUser(uid)).email || '';
+    const rec = await fb.auth.getUser(uid);
+    if (!email) email = rec.email || '';
+    if (!orcid) {
+      const pd = (rec.providerData || []).filter((x) => x && x.providerId === 'oidc.orcid');
+      if (pd.length && pd[0].uid) orcid = String(pd[0].uid);
+    }
   } catch { /* already gone, or never had one */ }
 
   /* 1. THE SIGN-IN FIRST, and this is the OPPOSITE of the order the browser
@@ -701,7 +726,16 @@ async function selftest() {
   ok(stillServed(rows, { owner: '', refs: ['R2'], ids: [] })[0].id === 'b',
     'a ref matches even where the tag does not — the removalSpecs belt and braces');
   ok(stillServed(rows, { owner: '', refs: [], ids: ['c'] })[0].id === 'c',
-    '…and so does an id');
+    '…and so does an id, on a row published before the tag existed');
+  /* AN ID IS NOT A REFERENCE. It is (market year, institution, posting date)
+     plus an ordinal, so when this account's row comes off the site a same-day
+     SIBLING can be renumbered into the id it had published under; matched on
+     that stale id, a row that plainly belongs to somebody else read as "still
+     served" and the deletion waited on it once a build, for ever. */
+  ok(stillServed(rows, { owner: '', refs: [], ids: ['b'] }).length === 0,
+    'but an id never overrules a row that says whose it is, or a renumbered sibling stalls the deletion for ever');
+  ok(stillServed(rows, { owner: ownerTag('u9'), refs: ['R2'], ids: [] })[0].id === 'b',
+    'while a reference does, since the form issues one per submission and nothing reuses it');
 
   /* specOf reads every key a row can be joined on */
   const s2 = specOf('u1', [{ id: 'd1', data: { ref: 'R', publishedId: 'p1', sheetId: 's1' } }]);
@@ -742,6 +776,19 @@ async function selftest() {
     src.indexOf('async function purgeSubmissions'));
   ok(clearSrc.length > 500 && clearSrc.length < 6000,
     'clearAccount was really sliced, at both ends');
+  /* UNREADABLE IS NOT EMPTY, here as everywhere else in this file: swallowed,
+     a failed listCollections() reads as "this account had no alerts", the
+     order is stamped cleared, and the subscription is left in the database
+     for ever. */
+  const subSrc = src.slice(src.indexOf('async function killUserSubtree'), src.indexOf('const USAGE_PAGE'));
+  ok(subSrc.length > 300 && /throw new Error\(`could not list the subcollections/.test(subSrc)
+     && !/catch \{ subs = \[\]; \}/.test(subSrc),
+  'a users/ subtree that cannot be LISTED holds the order open rather than reading as empty');
+  /* AND THE ORCID iD IS READ FROM AUTH TOO. The browser deletes profiles/{uid}
+     itself, minutes before this pass runs, so read only from the profile the
+     iD was empty and accountKeys/orcid:<iD> outlived the account it named. */
+  ok(/providerId === 'oidc\.orcid'/.test(clearSrc) && clearSrc.indexOf("providerId === 'oidc.orcid'") < clearSrc.indexOf('deleteUser'),
+    'the ORCID iD is taken off the Auth record as well as the profile, and before the sign-in goes');
   ok(clearSrc.indexOf('deleteUser') < clearSrc.indexOf('killUserSubtree'),
     'the sign-in goes FIRST here, the OPPOSITE of the browser’s order and for ' +
     'the mirror-image reason: this job needs no session, and while the sign-in ' +

@@ -1069,6 +1069,14 @@
               '<a class="button blue" href="jobs.html">Back to the job postings</a></p>';
           } else {
             $('oa-ref').textContent = ref || '—';
+            /* A NEW posting is one more than the account held, and the menu's
+               "My postings" row is drawn from that count (oa-accounts.js's
+               `data-held` rule: born hidden, revealed when the number is
+               KNOWN and above zero). Without this the poster's own posting
+               was unreachable from the menu until the next session refreshed
+               the badge. An EDIT changes nothing here: the posting already
+               counted. */
+            if (window.OAAccounts && OAAccounts.addCount) OAAccounts.addCount('postings', 1);
           }
           show(form, false);
           show($('oa-intro'), false);

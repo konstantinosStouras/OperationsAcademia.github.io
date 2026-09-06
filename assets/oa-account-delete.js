@@ -263,8 +263,19 @@
     return (rows || []).filter(function (r) {
       if (!r) return false;
       if (tag && r.owner === tag) return true;
+      /* A REFERENCE IS ISSUED BY THE FORM AND BY NOTHING ELSE, so it names
+         one submission and cannot be reused: it answers for a row whatever
+         its tag says, which is what makes it the belt.
+
+         AN ID IS NOT LIKE THAT. It is (market year, institution, posting
+         date) plus an ordinal, so when this account's row comes off the site
+         a same-day SIBLING can be renumbered into the id it had published
+         under; matched on that stale id, a row that plainly belongs to
+         somebody else read as "still served", and the deletion waited on it
+         once a build, for ever. So the id answers only where the tag cannot:
+         on a row published before the tag existed. */
       if (r.ref && refs[r.ref]) return true;
-      return !!(r.id && ids[r.id]);
+      return !r.owner && !!(r.id && ids[r.id]);
     });
   }
 

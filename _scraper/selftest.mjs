@@ -14469,10 +14469,21 @@ async function testEmailVerification() {
     'oa-verify.js re-decides the shown card\'s buttons when the session changes (a sign-in on the verified card)');
   ok(/showDone\(ok === false\);/.test(vjs) && /function showDone\(mismatch\)/.test(vjs)
      && /MISMATCH_NOTE = 'The link confirmed an address, but not the one this account uses/.test(vjs)
-     && /'Use a different account' : 'Sign in'/.test(vjs),
+     && /'Use a different account'\s*\n?\s*: \(waiting \? 'Check your inbox' : 'Sign in'\)/.test(vjs),
     'oa-verify.js treats a code that applied while THIS account stays unconfirmed as another address\'s link, and does not offer Continue into a locked account');
-  ok(/function signInFromDone\(\) \{\s*if \(pendingUser\(\)\) A\.signOut\(\);\s*A\.openAuth\(\);/.test(vjs),
-    'oa-verify.js signs a pending account out before opening the box for the other one');
+  /* CONTINUE MEANS THE ACCOUNT ON THIS PAGE CAN BE USED, and a PENDING
+     session cannot. The card re-decides itself on every auth change, so
+     `|| !!pendingUser()` let a pending account signing in underneath it be
+     offered Continue and then carried there by the countdown, into an
+     account page that locks. Nothing is lost by waiting: the lift fires an
+     auth change of its own and the card redraws. */
+  ok(/var inside = !mismatch && signedIn\(\);/.test(vjs)
+     && /var waiting = !mismatch && !signedIn\(\) && !!pendingUser\(\);/.test(vjs)
+     && !/signedIn\(\) \|\| !!pendingUser\(\)/.test(vjs),
+    'oa-verify.js offers Continue only to a session that can actually use the account');
+  ok(/function signInFromDone\(\) \{[\s\S]{0,600}?if \(pendingUser\(\)\) A\.signOut\(\);\s*\n\s*A\.openAuth\(\);/.test(vjs)
+     && /A\.openVerifyPanel\(\);/.test(vjs),
+  'oa-verify.js signs a pending account out before opening the box for the other one, and never for its own unconfirmed address');
   ok(/say\(msgId, r\.reason \|\| 'The last message was sent a moment ago/.test(vjs),
     'oa-verify.js prints the function\'s own throttle reason too');
   /* every live page's head snippet reads the marker the pending branch writes */
@@ -15877,6 +15888,37 @@ async function testForum() {
      a shut box and read as a control that does nothing. */
   ok(/a\[href="#oa-forum-guide"\]/.test(pageJs) && /panel\.open = true;/.test(pageJs),
     'oa-forum.js: and the guide link opens the panel it points at');
+  /* THE DIRECTORY'S SAVE IS A FULL set(), so a field left out is a field
+     DELETED, and the rules read the resulting document: `hidden` must be
+     carried whenever the row HAS the key, not only when it is true. On a row
+     the maintainer had RESTORED it is stored as false, and carrying it only
+     when truthy dropped the key and the write was refused. */
+  ok(/if \(had && \('hidden' in had\) && !\('hidden' in patch\)\) doc\.hidden = !!had\.hidden;/.test(
+    await read('assets', 'oa-directory.js')),
+  'oa-directory.js: an ordinary edit carries `hidden` whenever the row has it, false included');
+  /* A PAUSED ALERT SENDS NOTHING, so it is not the same alert: left out of
+     the signature, a paused twin on the kept account absorbed the
+     duplicate's ACTIVE one, whose document the merge then deleted, and the
+     person came out silently unsubscribed. And the PICTURE is a detail like
+     the other four, under the same fill-empty rule: the duplicate's profile
+     is deleted at the end, so a photo not carried is a photo lost. */
+  {
+    const acc = await read('assets', 'oa-accounts.js');
+    ok(/a\.enabled === false \? 'off' : 'on',/.test(acc),
+      'oa-accounts.js: a paused alert is not the twin of an active one, so a merge cannot absorb the live subscription');
+    ok(/patch\.photo = dup\.photo;/.test(acc) && /patch\.photoSeeded = !!dup\.photoSeeded;/.test(acc),
+      'oa-accounts.js: and the duplicate\'s picture travels with the rest of the details');
+    ok(/var stranded = queue\.splice\(0, queue\.length\);/.test(acc) && /if \(stranded\.length\) openAuth\(\);/.test(acc),
+      'oa-accounts.js: a click queued during the restore window is answered when the SDK never loads, not dropped');
+    ok((acc.match(/stampAuthState\(false\);/g) || []).length >= 3,
+      'oa-accounts.js: and every branch that draws a pill rather than a name chip stamps the header reserve out');
+    ok(/function addCount\(what, by\)/.test(acc) && /addCount: addCount,/.test(acc),
+      'oa-accounts.js: addCount is exported for a page that has just made ONE thing');
+  }
+  ok(/OAAccounts\.addCount\('postings', 1\);/.test(await read('assets', 'oa-jobform.js')),
+    'oa-jobform.js: a new posting counts at once, so the menu\'s My postings row appears from that moment');
+  ok(/var box = \$\('oa-preview'\);\s*\n\s*if \(box\) box\.innerHTML = '';/.test(await read('assets', 'oa-alerts.js')),
+    'oa-alerts.js: signing out takes the example digest, which carries real postings, out of the document');
   /* A SUPERSEDED MOUNT MUST NOT WRITE THE NEW ROOM'S STATE. */
   ok(/var forRoom = S\.room;/.test(pageJs) && /if \(forRoom !== S\.room \|\| forSeason !== S\.season\) return rows;/.test(pageJs),
     'oa-forum.js: a list read still in flight when the room changes stops writing the shared state');

@@ -120,6 +120,9 @@
     tick();
     countdown = setInterval(tick, 1000);
   }
+  var WAITING_NOTE = 'The address on the account signed in here has not been confirmed yet, ' +
+    'so there is nothing to continue to. Press the link in the message sent to it, or ask ' +
+    'for a new one.';
   var MISMATCH_NOTE = 'The link confirmed an address, but not the one this account uses: ' +
     'this account is still unconfirmed. Sign in with the account that received the message, ' +
     'or ask for a new link from this one.';
@@ -130,11 +133,20 @@
       say), so Continue would only lead to a locked account page. */
   function showDone(mismatch) {
     show('ve-done');
-    var inside = !mismatch && (signedIn() || !!pendingUser());
-    $('ve-done-note').textContent = mismatch ? MISMATCH_NOTE : DONE_NOTE;
+    /* CONTINUE MEANS THE ACCOUNT ON THIS PAGE CAN BE USED, and a PENDING
+       session cannot: `|| !!pendingUser()` let one through, and since this
+       card re-decides itself on every auth change (see boot), a pending
+       account signing in underneath it was offered Continue and then carried
+       there by the countdown, into an account page that locks. There is
+       nothing to lose by waiting: the lift fires an auth change of its own,
+       and the card redraws with Continue the moment the session is usable. */
+    var waiting = !mismatch && !signedIn() && !!pendingUser();
+    var inside = !mismatch && signedIn();
+    $('ve-done-note').textContent = mismatch ? MISMATCH_NOTE : (waiting ? WAITING_NOTE : DONE_NOTE);
     $('ve-continue').hidden = !inside;
     $('ve-signin').hidden = inside;
-    $('ve-signin').textContent = mismatch ? 'Use a different account' : 'Sign in';
+    $('ve-signin').textContent = mismatch ? 'Use a different account'
+      : (waiting ? 'Check your inbox' : 'Sign in');
     $('ve-title').textContent = 'Address confirmed';
     if (inside) startCountdown($('ve-continue').getAttribute('href') || 'account.html');
     else stopCountdown();
@@ -206,6 +218,15 @@
       openAuth would only reopen the "Check your inbox" card for it, so that
       account is signed out first and the sign-in box opened for the other. */
   function signInFromDone() {
+    /* THE PENDING ACCOUNT IS NOT SIGNED OUT WHEN IT IS THE ONE WAITING. On
+       the mismatch the link belonged to somebody else's address and leaving
+       this account signed in would be the wrong offer, so it goes; on the
+       waiting card it IS this account's address that is unconfirmed, and the
+       thing to press is the link in its inbox, not a sign-in box. */
+    if (pendingUser() && $('ve-signin').textContent === 'Check your inbox') {
+      A.openVerifyPanel();
+      return;
+    }
     if (pendingUser()) A.signOut();
     A.openAuth();
   }
