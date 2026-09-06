@@ -18172,6 +18172,14 @@ async function testForum() {
     'forum card: and its chips are inline-BLOCK, so their padding grows the line rather than bleeding into the rows around them');
   ok(/@media \(max-width: 640px\)[\s\S]*?body\.v3 \.oa-forum-q \{ grid-template-columns: minmax\(0, 1fr\); \}/.test(pageCss),
     'forum card: on a phone the tally lies above the question rather than in a 92px gutter (rule 13)');
+  ok(/@media \(max-width: 640px\)[\s\S]*?body\.v3 \.oa-forum-q \.oa-forum-stats,\s*body\.v3 \.oa-forum-q \.oa-card-head,\s*body\.v3 \.oa-forum-q \.oa-forum-qfoot,\s*body\.v3 \.oa-forum-q \.oa-card-lock \{ grid-column: 1 \/ -1; \}/.test(pageCss),
+    'forum card: …and every part of it is placed in that one column BY NAME, or the footer\'s desktop placement mints an implicit second column and the tally paints over the title (owner, 2026-09-06)');
+  ok(/body\.v3 #oa-forum-list \.oa-filter\.oa-pick \{ grid-column: 1 \/ -1; \}/.test(pageCss),
+    'forum card: the lone Tags picker takes the whole row on a phone (the live bar is a grid, so it is placed, not widened)');
+  ok(/<span>I have read <a href="#oa-forum-guide">the forum guide<\/a>: no names, no contact details, no rumours\.<\/span>/.test(pageJs),
+    'forum compose: the guide tick box\'s words are ONE span beside the box, not three flex items');
+  ok(/\.oa-forum-th h1 \{ font-size: 22px; \}/.test(pageCss) && /\.oa-forum-accept \{ min-height: 42px;/.test(pageCss),
+    'forum phone: the question title comes down a step and the guide tick box is a 42px target');
   ok(/function friendly\(err\)/.test(pageJs) && /err\.details && err\.details\.reason/.test(pageJs), 'oa-forum.js: a refusal is worded by its reason, never shown as a code');
   ok(!/\b(u|user|me|S\.me)\.(email|displayName|uid)\b[^;]*innerHTML|innerHTML[^;]*\b(email|displayName)\b/.test(pageJs), 'oa-forum.js: no address or name is ever drawn');
   ok(/G\.check\(/.test(pageJs) && /OAForumGuard/.test(pageJs), 'oa-forum.js: the guard runs in the browser too');

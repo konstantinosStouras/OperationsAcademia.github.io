@@ -3274,6 +3274,40 @@ or across into the tally, the tags and the asker share a footer row, and the
 word "reply" appears once on the card. That survives a change of markup, which
 a check on class names would not.
 
+### …and it holds on a phone, where the tally was painted over the title
+
+Owner, 2026-09-06, from a screenshot of the Candidates' room on a phone:
+*"the looks of the forum look really bad from a mobile device. fix this and
+make sure users have a smooth experience when accessing the forum from
+mobile devices with small screens, as well accessing it from a laptop,
+desktop or Mac computer."* The card's tally ("0 votes 12 answers") sat on
+the title's own row and painted over the words, and "Open the thread" hung
+under the footer as a stray line.
+
+**One column is not enough on its own.** The phone block set the card's grid
+to one column, and the footer and the strip kept the desktop's
+`grid-column: 2 / -1`, so the browser minted an IMPLICIT second column for
+them, the explicit one collapsed to 0px, and the tally, auto-placed first,
+landed in it beside the head. That is the grid's own rule and nothing
+warned. So every part of the card is placed in the one column BY NAME
+(`grid-column: 1 / -1` on the tally, the head, the footer and the strip, at
+the specificity of the desktop rules it overrides), and the rows follow the
+DOM. The strip keeps the desktop's place, small and to the right. The lone
+Tags picker takes the whole row rather than the half the engine seats
+pickers in (rule 4 is about a wall of them; one at half width truncated its
+own placeholder beside empty space); the question title, the ask form's
+heading and the answers band come down a step on a phone, where a 26px
+title ran to five lines under the page's own hero; and the guide tick box,
+whose words were bare text nodes around a link inside a flex label and so
+wrapped into three narrow columns beside the box, is one span, a 42px row
+with a 20px box. The desktop is untouched, and the browser suite measures
+both: the candidate block's geometry at 1280px as before, and the phone
+block at 390px now reads one grid column, the tally above the title, the
+footer under it, the strip at the right, the picker's width, the tick
+box's row and the title's size off the rendered page. **A phone rule that
+changes a grid must place every child it relies on**, or the desktop's
+placements go on shaping a grid that no longer has those columns.
+
 **Timestamps are whole minutes (R7).** Every `t`, `lastAt`, `joinedAt`,
 `editedAt`, `createdAt` comes from `minute()`; `serverTimestamp()` and
 `Date.now()` appear in no forum function (pinned), and the emulator walk

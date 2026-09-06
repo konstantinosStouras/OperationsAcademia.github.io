@@ -1149,20 +1149,53 @@ body.v3 .oa-forum-tagchip:hover {
 }
 
 @media (max-width: 640px) {
-  /* the tally column lies ABOVE the question on a phone, a row rather than a
-     92px gutter, the same move the vote column makes in a thread (rule 13) */
+  /* THE TALLY LIES ABOVE THE QUESTION on a phone, a row rather than a 104px
+     gutter, the same move the vote column makes in a thread (rule 13).
+
+     ONE COLUMN IS NOT ENOUGH ON ITS OWN, and that is how the owner's
+     screenshot happened (2026-09-06: "the looks of the forum look really
+     bad from a mobile device"). The footer and the "Open the thread" strip
+     kept the desktop's `grid-column: 2 / -1`, so the browser minted an
+     IMPLICIT second column for them, the explicit one collapsed to 0px, and
+     the tally, auto-placed first, sat in it on the title's own row, painted
+     over the words. So every part of the card is placed in the one column
+     BY NAME, at the specificity of the desktop rules it overrides, and the
+     rows follow the DOM: the tally, the head, the footer, then the strip. */
   body.v3 .oa-forum-q { grid-template-columns: minmax(0, 1fr); }
-  body.v3 .oa-forum-q .oa-card-head { padding-left: 16px; }
-  body.v3 .oa-forum-q .oa-card-lock { order: 3; grid-column: 1 / -1; padding-left: 16px; justify-content: flex-start; }
+  body.v3 .oa-forum-q .oa-forum-stats,
+  body.v3 .oa-forum-q .oa-card-head,
+  body.v3 .oa-forum-q .oa-forum-qfoot,
+  body.v3 .oa-forum-q .oa-card-lock { grid-column: 1 / -1; }
+  body.v3 .oa-forum-q .oa-card-head { padding: 8px 16px 14px; }
+  body.v3 .oa-forum-q .oa-card-title { font-size: 16.5px; }
+  body.v3 .oa-forum-q .oa-forum-qfoot { padding: 0 16px; margin-top: -4px; }
+  /* the strip keeps the desktop's place, small and to the right: at the
+     left under the footer it read as a stray line of its own */
+  body.v3 .oa-forum-q .oa-card-lock { order: 3; padding: 4px 16px 12px; margin-top: 0; justify-content: flex-end; }
   .oa-forum-stats {
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    gap: 16px;
+    gap: 14px;
     padding: 14px 16px 0;
   }
   .oa-forum-stat { flex-direction: row; align-items: baseline; gap: 4px; }
   .oa-forum-stat b { font-size: 14px; }
+  /* ONE picker is not a wall: the live design seats value pickers two per
+     row on a phone (rule 4; its bar is a GRID, so a width does nothing
+     here), and the forum has exactly one, which at half width truncated its
+     own placeholder ("Choose a va…") beside empty space */
+  body.v3 #oa-forum-list .oa-filter.oa-pick { grid-column: 1 / -1; }
+  /* the headings come down a step: a 26px question title on a 390px screen
+     ran to five lines before the words began, under the page's own hero */
+  .oa-forum-listhead h2 { font-size: 22px; }
+  .oa-forum-th h1 { font-size: 22px; }
+  .oa-forum-ask h1 { font-size: 24px; }
+  .oa-forum-compose h2 { font-size: 18px; }
+  .oa-forum-answers-h h2 { font-size: 19px; }
+  /* the guide tick box is a control (rule 3): a 42px row with a 20px box */
+  .oa-forum-accept { min-height: 42px; align-items: center; }
+  .oa-forum-accept input { width: 20px; height: 20px; margin: 0; }
   .oa-forum-tabs { width: 100%; }
   .oa-forum-tab { flex: 1 1 0; justify-content: center; }
   .oa-forum-post { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 22px 0; }

@@ -2094,8 +2094,11 @@
 
   function acceptBox(id) {
     if (S.me.guideAt) return '';
+    /* the words in ONE span: the label is a flex row, and as bare text nodes
+       around the link they were three flex items, which on a phone wrapped
+       into three narrow columns beside the box (owner, 2026-09-06) */
     return '<label class="oa-forum-accept"><input type="checkbox" id="' + id + '">' +
-      'I have read <a href="#oa-forum-guide">the forum guide</a>: no names, no contact details, no rumours.</label>';
+      '<span>I have read <a href="#oa-forum-guide">the forum guide</a>: no names, no contact details, no rumours.</span></label>';
   }
 
   function replyBox(thread, first) {
