@@ -327,14 +327,25 @@
                       <div class="oa-field">
                         <span class="oa-label-text" id="lbl-days">INFORMS presentation day(s)</span>
                         <p class="oa-hint">Shown publicly, so hiring committees can find your talk
-                        and attend it. Tick the day(s) you present at the INFORMS Annual Meeting;
-                        leave empty if you are not presenting.</p>
+                        and attend it. Tick the day(s) you present at the
+                        <span id="f-days-meeting">INFORMS Annual Meeting</span>;
+                        leave empty if you are not presenting. For each day you tick you can
+                        add your session&rsquo;s start time, its code in the programme, the room
+                        and your talk&rsquo;s title, so that anyone can put your talk straight
+                        into their calendar (the site offers a calendar file of every
+                        candidate&rsquo;s talk). You can come back and fill these in once the
+                        programme is out. Times are the meeting&rsquo;s own local time.</p>
                         <div class="oa-checks" role="group" aria-labelledby="lbl-days" id="f-days">
                           <label class="oa-check"><input type="checkbox" name="informsDays" value="Sunday"> Sunday</label>
                           <label class="oa-check"><input type="checkbox" name="informsDays" value="Monday"> Monday</label>
                           <label class="oa-check"><input type="checkbox" name="informsDays" value="Tuesday"> Tuesday</label>
                           <label class="oa-check"><input type="checkbox" name="informsDays" value="Wednesday"> Wednesday</label>
                         </div>
+                        <!-- one block per ticked day, drawn by oa-candidateform.js
+                             (talkBlock): the session's start time, its code, the
+                             room and the title. Shown only while the day is ticked;
+                             what is read is what the day's block says. -->
+                        <div id="f-talks"></div>
                       </div>
                     </fieldset>
 
@@ -540,6 +551,9 @@
          the preview. -->
     <script defer src="assets/oa-jobnav.js"></script>
     <script defer src="assets/oa-reveal.js"></script>
+    <!-- oa-informs.js: WHEN and WHERE the season's INFORMS meeting is, so the
+         day tick boxes can name their dates and the card can say them -->
+    <script defer src="assets/oa-informs.js"></script>
     <script defer src="assets/oa-candcard.js"></script>
     <script defer src="assets/oa-candidateform.js"></script>
   </body>

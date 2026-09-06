@@ -288,7 +288,8 @@
             <h2 class="v3-h2" id="oa-cands-heading">Job market candidates (2026-2027)</h2>
             <p class="v3-lede">The candidates applying for faculty positions in Operations this
             season, with their CV and INFORMS presentation day(s) &mdash; so
-            hiring committees can find their talks and attend them. Contact a candidate directly
+            hiring committees can find their talks and attend them, and can download the
+            talks as a calendar file. Contact a candidate directly
             to arrange an interview.</p>
             <div class="v3-section-cta">
               <a class="v3-btn primary" href="post-a-candidate.html">Create your candidate profile</a>
@@ -469,13 +470,32 @@
             </div>
 
             <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">Can I put the deadlines in my calendar?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Yes. On the <a href="jobs.html">job postings</a> page, signed in, every
+                posting with an apply-by date still to come carries an <em>Add to calendar</em>
+                tick box. Tick the ones you are interested in and press <em>Download calendar</em>
+                in the strip above the list: you get a calendar file (.ics) that any calendar
+                app imports, with one all-day reminder per date, each naming the posting and
+                linking back to it. A posting that is open until filled has no date to add, so
+                it has no tick box; a posting can carry two dates, a suggested and a final
+                apply-by, and each gets its own reminder.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
               <button type="button" class="v3-faq-q">How do I create a candidate profile?
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
                 <p>If you are applying to academic jobs in Operations this season, sign in and
                 <a href="post-a-candidate.html">create your job-market profile</a> &mdash; with
                 your CV attached, your research areas, and the day(s) you
-                present at INFORMS, so hiring committees can find your talk and attend it.</p>
+                present at INFORMS, so hiring committees can find your talk and attend it.
+                For each day you can add the session&rsquo;s start time, its code, the room and
+                your talk&rsquo;s title, even later, once the programme is out: the candidates
+                list offers a calendar file of every talk, with its date, time and room, so
+                anyone who wants to attend can put it straight into their calendar.</p>
                 <p>Profiles are collected continuously but revealed <strong>all at once</strong>,
                 at 14:00 UTC on a set date each season, which is morning in the Americas,
                 afternoon in Europe and evening in East Asia, so no one gains from posting
@@ -825,6 +845,14 @@
     <script defer src="assets/oa-gate.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
+    <!-- oa-informs.js BEFORE oa-candcard.js: when and where the season's
+         INFORMS meeting is, so a card's talk rows can name the day's date;
+         oa-ics.js and oa-talkcal.js then turn the candidates' talks into a
+         calendar file, from the button in the candidates list's bar
+         (owner, 2026-09-06). -->
+    <script defer src="assets/oa-informs.js"></script>
+    <script defer src="assets/oa-ics.js"></script>
+    <script defer src="assets/oa-talkcal.js"></script>
     <!-- oa-candcard.js: the candidate card, the ONE renderer the list below
          and the two own-card previews (account.html, post-a-candidate.html)
          share, so a preview cannot drift from the card it previews. -->
@@ -1235,6 +1263,17 @@
              to: candidates live on this page, so a signed-in reader opens the
              card where it stands. */
           cardOpen: OAGate.cardOpen({ note: 'Sign in to see this profile' }),
+
+          /* THE TALKS CALENDAR (owner, 2026-09-06): every listed candidate's
+             INFORMS talk, with its time, date and room where the profile
+             gives them, as an .ics. Declared on the mount because the engine
+             owns the bar (the Excel download's reasoning on jobs.html);
+             writes what the list is SHOWING, so a committee can narrow by
+             research area first. Registered readers only, the module's own
+             gate (assets/oa-talkcal.js). */
+          actions: [
+            window.OATalkCal ? OATalkCal.action() : null
+          ],
 
           /* the "Profile updated on" line first (inside the body, so a locked
              card never gets one), then the owner's Edit / Take down bar */

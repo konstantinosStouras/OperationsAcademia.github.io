@@ -51,9 +51,15 @@
      until it is added to the other. */
   var FIELDS = [
     'id', 'year', 'posted', 'first', 'last', 'name', 'affiliation', 'position',
-    'researchAreas', 'informsDays', 'cvUrl', 'rsUrl', 'webUrl', 'email',
+    'researchAreas', 'informsDays', 'talks', 'cvUrl', 'rsUrl', 'webUrl', 'email',
     'source', 'addedAt', 'updatedAt', 'ref', 'owner'
   ];
+
+  /* the talk details a day may carry (TALK_KEYS / TALK_MAXLEN in
+     candidates-model.mjs, pinned both ways by selftest.mjs) */
+  var TALK_KEYS = ['at', 'session', 'room', 'title'];
+  var TALK_MAXLEN = { at: 5, session: 40, room: 120, title: 200 };
+  var TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
   /* the same bounds as the model; a value longer than these is cut, never
      refused, so the preview shows the cut the build would make */
@@ -127,6 +133,26 @@
       if (allowed.indexOf(t) === -1 || seen[t]) return;
       seen[t] = true;
       out.push(t);
+    });
+    return out;
+  }
+
+  /* candidates-model's talksFrom: only the days published, only the four
+     keys, the time refused unless it is a real 'HH:MM', a day with nothing
+     left dropped whole */
+  function talksFrom(v, days) {
+    var out = {};
+    if (!v || typeof v !== 'object' || Object.prototype.toString.call(v) === '[object Array]') return out;
+    (days || []).forEach(function (d) {
+      var t = v[d];
+      if (!t || typeof t !== 'object' || Object.prototype.toString.call(t) === '[object Array]') return;
+      var talk = {}, any = false;
+      TALK_KEYS.forEach(function (k) {
+        var s = text(t[k], TALK_MAXLEN[k]);
+        if (k === 'at' && s && !TIME_RE.test(s)) s = '';
+        if (s) { talk[k] = s; any = true; }
+      });
+      if (any) out[d] = talk;
     });
     return out;
   }
@@ -243,6 +269,7 @@
       position: position,
       researchAreas: freeList(doc.researchAreas),
       informsDays: pickList(doc.informsDays, INFORMS_DAYS),
+      talks: {},
       cvUrl: url(doc.cvUrl),
       rsUrl: url(doc.rsUrl),
       webUrl: url(doc.webUrl),
@@ -253,22 +280,50 @@
       ref: text(doc.ref, 40),
       owner: tag(doc.uid)
     };
+    row.talks = talksFrom(doc.talks, row.informsDays);
     row.id = candidateId(row);
 
     /* publicCandidateRow: the published keys, in order; an empty `ref`,
-       `email` or `updatedAt` is left out entirely. `owner` is left out when
-       no ownerTag was INJECTED (the browser, which cannot compute it): the
-       build always can, and publishes '' for a document with no uid, so with
-       a helper injected the twin does exactly that. */
+       `email`, `updatedAt` or `talks` is left out entirely. `owner` is left
+       out when no ownerTag was INJECTED (the browser, which cannot compute
+       it): the build always can, and publishes '' for a document with no
+       uid, so with a helper injected the twin does exactly that. */
     var out = {};
     for (var i = 0; i < FIELDS.length; i++) {
       var k = FIELDS[i];
       if (row[k] === undefined) continue;
       if ((k === 'ref' || k === 'email' || k === 'updatedAt') && !row[k]) continue;
+      if (k === 'talks' && (!row[k] || !Object.keys(row[k]).length)) continue;
       if (k === 'owner' && !h.ownerTag) continue;
       out[k] = row[k];
     }
     return out;
+  }
+
+  /* ---------------------------------------- the talks, as the card says them
+
+     One row per day that carries details, after "Presenting at INFORMS":
+     "Talk on Monday 2 November 2026" where assets/oa-informs.js knows the
+     season's meeting (loaded on every page that draws a card; absent, the
+     bare day name), and the details in reading order: the time, the session
+     code, the room, the title. The calendar (assets/oa-talkcal.js) reads the
+     same fields; this is what a committee reads on the page. */
+  function talkRows(r) {
+    var talks = r && r.talks;
+    if (!talks || typeof talks !== 'object') return [];
+    var days = (r.informsDays || []).filter(function (d) { return talks[d]; });
+    var meeting = (root && root.OAInforms && root.OAInforms.meetingFor)
+      ? root.OAInforms.meetingFor(r.year) : null;
+    return days.map(function (d) {
+      var t = talks[d] || {};
+      var parts = [];
+      if (t.at) parts.push(t.at);
+      if (t.session) parts.push('session ' + t.session);
+      if (t.room) parts.push(t.room);
+      if (t.title) parts.push('“' + t.title + '”');
+      var when = meeting && root.OAInforms.dayLabel ? root.OAInforms.dayLabel(meeting, d) : d;
+      return { label: 'Talk on ' + when, value: parts.join(' · ') };
+    });
   }
 
   /* ------------------------------------------------------------ the card */
@@ -348,7 +403,8 @@
       rows: function (r) {
         return [
           { label: 'Research area(s)',      value: (r.researchAreas || []).join(', ') },
-          { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
+          { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') }
+        ].concat(talkRows(r), [
           { label: 'University page',       html: uniLink(r.affiliation) },
           { label: 'CV',                    html: link(r.cvUrl, 'link to CV') },
           // the form stopped asking for a research summary (2026-08-24);
@@ -357,7 +413,7 @@
           { label: 'Research summary',      html: link(r.rsUrl, 'link') },
           { label: 'Web page',              html: link(r.webUrl, 'link') },
           { label: 'Contact',               html: mailto(r.email) }
-        ];
+        ]);
       }
     };
   }
@@ -449,6 +505,10 @@
   return {
     FIELDS: FIELDS,
     INFORMS_DAYS: INFORMS_DAYS,
+    TALK_KEYS: TALK_KEYS,
+    TALK_MAXLEN: TALK_MAXLEN,
+    talksFrom: talksFrom,
+    talkRows: talkRows,
     publicRowFromDoc: publicRowFromDoc,
     cardConfig: cardConfig,
     updatedOnText: updatedOnText,
