@@ -14388,6 +14388,15 @@ async function testCalendarsWiring() {
      /max-width:\s*640px[\s\S]{0,1800}?\.oa-cal-btn\s*\{[^}]*height:\s*42px/.test(listCss),
     'calendar: on a phone the tick strip and the buttons are 42px targets');
   ok(/@media print \{ \.oa-cal-pick, \.oa-cal-tray \{ display: none; \} \}/.test(listCss), 'calendar: neither prints');
+  /* the strip's room (owner, 2026-09-06, of it sitting flush under the
+     filter bar: "add a bit more space here so that it looks better") */
+  ok(/\.oa-cal-tray\s*\{[^}]*margin:\s*20px 0 18px;[^}]*padding:\s*16px 20px;/.test(listCss),
+    'calendar: the strip has room on every side: a gap from the filter bar above and the result bar below, and its own padding inside');
+  ok(/max-width:\s*640px[\s\S]{0,1800}?\.oa-cal-tray\s*\{[^}]*margin:\s*16px 0;[^}]*padding:\s*16px;/.test(listCss),
+    'calendar: …and on a phone');
+  const v3tray = (v3css.match(/body\.v3 \.oa-cal-tray\s*\{[^}]*\}/) || [''])[0];
+  ok(v3tray && !/margin|padding/.test(v3tray),
+    'calendar: v3.css sets no spacing on the strip, so the engine\'s rule is the one definition that reaches the site');
 
   /* --- the candidates' side ------------------------------------------------ */
   for (const [name, html] of [['index.html', index], ['post-a-candidate.html', cand], ['account.html', acct]]) {

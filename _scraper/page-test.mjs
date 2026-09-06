@@ -10151,13 +10151,23 @@ for (const w of [320, 360, 390, 430]) {
       return { cards, hidden: tray.hidden, msg: tray.querySelector('.oa-cal-msg').textContent,
         go: tray.querySelector('.oa-cal-go').disabled, none: tray.querySelector('.oa-cal-none').hidden,
         all: tray.querySelector('.oa-cal-all').disabled,
-        above: tray.getBoundingClientRect().bottom <= document.querySelector('.oa-resultbar').getBoundingClientRect().top + 1 };
+        above: tray.getBoundingClientRect().bottom <= document.querySelector('.oa-resultbar').getBoundingClientRect().top + 1,
+        /* the strip's room (owner, 2026-09-06: "add a bit more space here"):
+           a gap from the filter bar above and the result bar below, and its
+           own padding inside, read off the rendered page rather than the
+           stylesheet, since the engine's rule is what v3 lets through */
+        gapAbove: Math.round(tray.getBoundingClientRect().top - document.querySelector('#oa-jobs .oa-filters').getBoundingClientRect().bottom),
+        gapBelow: Math.round(document.querySelector('.oa-resultbar').getBoundingClientRect().top - tray.getBoundingClientRect().bottom),
+        inset: Math.round(tray.querySelector('.oa-cal-msg').getBoundingClientRect().left - tray.getBoundingClientRect().left) };
     });
     ok(first.cards.every((c) => c.box === datedIds.has(c.id)),
       'calendar: a tick box on exactly the postings with an apply-by date still to come, and on no other');
     ok(first.cards.filter((c) => c.box).every((c) => /deadline [A-Z][a-z]+ \d{1,2}, \d{4}/.test(c.when)),
       'calendar: …each naming the date it would add');
     ok(!first.hidden && first.above, 'calendar: the strip is drawn, above the result bar');
+    ok(first.gapAbove >= 16 && first.gapBelow >= 16,
+      `calendar: …with room from the filter bar above and the result bar below (got ${first.gapAbove}/${first.gapBelow})`);
+    ok(first.inset >= 18, `calendar: …and its sentence set in from the dashed edge (got ${first.inset})`);
     ok(/^Tick a posting/.test(first.msg) && first.msg.includes(String(datedIds.size)),
       `calendar: it says what to do and how many listed postings carry a date (${datedIds.size})`);
     ok(first.go && first.none && !first.all, 'calendar: the download waits for a tick, Untick all is hidden, Tick all is live');
@@ -10238,12 +10248,15 @@ for (const w of [320, 360, 390, 430]) {
       const tray = document.querySelector('.oa-cal-tray').getBoundingClientRect();
       return { pickH: pick.height, boxW: box.width, btnH: btns.map((r) => Math.round(r.height)),
         btnW: btns.map((r) => Math.round(r.width)), trayW: Math.round(tray.width),
+        gapAbove: Math.round(tray.top - document.querySelector('#oa-jobs .oa-filters').getBoundingClientRect().bottom),
+        inset: Math.round(document.querySelector('.oa-cal-msg').getBoundingClientRect().left - tray.left),
         over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
     });
     ok(m.pickH >= 42, `calendar mobile: the tick strip is a 42px target (got ${m.pickH})`);
     ok(m.boxW >= 20, `calendar mobile: the box itself is 20px (got ${m.boxW})`);
     ok(m.btnH.length === 3 && m.btnH.every((h) => h >= 42), `calendar mobile: the three buttons are 42px targets (got ${m.btnH})`);
     ok(m.btnW.every((w) => w >= m.trayW - 40), 'calendar mobile: …stacked full width');
+    ok(m.gapAbove >= 12 && m.inset >= 14, `calendar mobile: the strip keeps its room on a phone (got ${m.gapAbove}/${m.inset})`);
     eq(m.over, 0, 'calendar mobile: no sideways scroll');
     eq(errors, [], 'calendar mobile: no uncaught script error');
     await ctx.close();
