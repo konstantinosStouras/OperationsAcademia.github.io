@@ -15226,10 +15226,40 @@ async function testAnalytics() {
     'growth: the real count is the brand line');
   ok(/if \(actual\.length < 2\) return;/.test(page) && page.indexOf('if (actual.length < 2) return;') < page.indexOf("figure('How the community has grown'"),
     'growth: with no file, a seed, or one point, the figure is not drawn at all');
-  ok(/cols: \['Month', 'Registered users', 'Expected growth'\]/.test(page),
-    'growth: the numbers table is one row per month');
-  ok(/if \(opts\.table && Array\.isArray\(opts\.table\.cols\) && Array\.isArray\(opts\.table\.rows\)\) \{\s*\n\s*table\(host, opts\.table\.cols, opts\.table\.rows\);\s*\n\s*return;/.test(charts),
-    'growth: line() honours a caller\'s own table, the generic override the monthly rows go through');
+
+  /* --- NO "SHOW THE NUMBERS" UNDER ANY PLOT (owner, 2026-09-08) ----------- */
+
+  /* Every chart used to end in a <details> holding a table of its values,
+     and the growth chart handed line() a monthly one of its own. The owner had
+     the block taken off every figure. Pinned as an ABSENCE on every surface it
+     lived on, with the comments stripped, since each file now explains the
+     thing it no longer does: the helper, every call to it, the caller's own
+     table option, the stylesheet's rules, and the lede's promise. */
+  const noc = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const chartsCode = noc(charts);
+  ok(!/function table\(/.test(chartsCode) && !/\btable\(host/.test(chartsCode),
+    'charts: the numbers-table helper is gone, and so is every call to it');
+  ok(!/Show the numbers/.test(chartsCode) && !/oa-chart-table/.test(chartsCode) &&
+     !/createElement\('details'\)/.test(chartsCode) && !/createElement\('table'\)/.test(chartsCode),
+    'charts: …no chart creates a details block or a table, and nothing reads "Show the numbers"');
+  ok(!/opts\.table/.test(chartsCode), 'charts: line() takes no table option any more');
+  ok(!/\btable:\s*\{/.test(noc(page)) && !/subTitle/.test(noc(page)),
+    'page: the growth chart hands line() no monthly table, and the pages list names no table column');
+  ok(!/oa-chart-table/.test(noc(cssText).replace(/\/\*[\s\S]*?\*\//g, '')),
+    'css: the table\'s rules went with it rather than staying to style nothing');
+  ok(/Show the numbers/.test(cssText) || /Show the numbers/.test(charts),
+    '…while the module still records what it used to draw, so the checks above cannot be met by deleting the explanation');
+  ok(!/numbers as a table/.test(html) && /Every one answers a tap, a pointer or the keyboard, and each says underneath it/.test(html),
+    'lede: the page no longer promises a table under every chart');
+  ok(/Average time on the page: ' \+ C\.duration\(p\.avgSec\)/.test(page),
+    'pages: the line under a bar says "Average time on the page:" before the duration, the words the table\'s column carried');
+  const ptSrc = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+  ok(/eq\(seen\.tables, 0,/.test(ptSrc) && /eq\(seen\.numbers, 0,/.test(ptSrc) &&
+     /Average time on the page: 32m 32s/.test(ptSrc) && !/growth\.tableCols/.test(ptSrc),
+    'page-test: the browser suite measures no table and no "Show the numbers" on the rendered page, and the named time line');
+  const claudeMdNumbers = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
+  ok(/No "Show the numbers" under any plot/.test(claudeMdNumbers),
+    'CLAUDE.md records the removal');
   const growthCalls = page.replace(/\/\*[\s\S]*?\*\//g, '').match(/^\s*drawGrowth\(\);$/gm) || [];
   eq(growthCalls.length, 2, 'growth: drawn from draw() with data and from its empty branch, since its file is its own');
   ok(page.indexOf('drawGrowth();\n\n    /* 2 — the weekly rhythm */') > 0 || /drawGrowth\(\);\s*\n\s*\/\* 2 — the weekly rhythm/.test(page),

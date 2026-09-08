@@ -584,7 +584,6 @@
         limit: 12,
         total: pagesTotal,
         xTitle: 'Page',
-        subTitle: 'Average time on the page',
         items: publicPages.map(function (p) {
           return {
             label: p.title || p.path,
@@ -592,8 +591,13 @@
             value: p.views,
             /* SAID IN MINUTES, NOT IN SECONDS (owner, 2026-08-29). This line
                used to read "1,952 seconds on average", which is a number a
-               reader has to divide by sixty before it means anything. */
-            sub: p.avgSec ? C.duration(p.avgSec) + ' on the page, on average' : '',
+               reader has to divide by sixty before it means anything. AND
+               NAMED FOR WHAT IT IS (owner, 2026-09-08): "Average time on the
+               page" was the heading of a column in the numbers table under
+               this list, and when the table went (a bar list is its own
+               numbers; see bars() in oa-charts.js) the heading moved onto the
+               row, so the figure still says what the duration measures. */
+            sub: p.avgSec ? 'Average time on the page: ' + C.duration(p.avgSec) : '',
           };
         }),
       });
@@ -678,9 +682,8 @@
    *  drawn in the chart accent (the site's yellow, re-stepped in the dark
    *  theme so it stays tellable from the brand line) and dashed, so the pair
    *  never relies on colour alone. The legend is the same click-to-hide
-   *  control the daily chart has, and the numbers table lists one row per
-   *  month rather than one per day (a record that grows by a day for ever
-   *  would print a thousand rows under itself). */
+   *  control the daily chart has. (It used to hand line() a numbers table of
+   *  one row per month; no chart draws one since 2026-09-08.) */
   function monthLabel(day) {
     if (!day) return '';
     var p = day.split('-');
@@ -721,16 +724,6 @@
       pretty(proj.horizon) + '. Press a name in the legend to put either line away.');
     root.appendChild(f.section);
 
-    /* one row per MONTH: the last real count in it, and the last expected one */
-    var months = [];
-    var byMonth = {};
-    days.forEach(function (d, i) {
-      var m = d.slice(0, 7);
-      if (!byMonth[m]) { byMonth[m] = { label: monthLabel(d), have: null, expect: null }; months.push(m); }
-      if (have[i] != null) byMonth[m].have = have[i];
-      if (expect[i] != null) byMonth[m].expect = expect[i];
-    });
-
     C.line(f.body, {
       title: 'Registered users over time',
       points: days.map(function (d) { return { label: monthLabel(d), label2: pretty(d) }; }),
@@ -740,13 +733,6 @@
       ],
       xTitle: 'Day',
       height: 260,
-      table: {
-        cols: ['Month', 'Registered users', 'Expected growth'],
-        rows: months.map(function (m) {
-          var r = byMonth[m];
-          return [r.label, r.have == null ? '—' : C.full(r.have), r.expect == null ? '—' : C.full(r.expect)];
-        }),
-      },
     });
   }
 
