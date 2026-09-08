@@ -2071,12 +2071,14 @@ date, Auth's `creationTime`, in place of "first seen by this site".
 
 Three properties, and the first is the one that could have gone badly wrong:
 
-* **Four keys and no more.** `rowOk()` pins a row to
-  `hasOnly(['name','email','first','seen'])`. The Admin SDK bypasses the rules,
-  so a fifth key would be written happily — and would then freeze that row
-  against **its own owner** for ever, because the browser's merge produces a
-  document `hasOnly` refuses. The selftest reads the allowed list out of the
-  rules and pins it against `ROW_KEYS` both ways.
+* **Five keys and no more.** `rowOk()` pins a row to
+  `hasOnly(['name','email','first','seen','affiliation'])`. The Admin SDK
+  bypasses the rules, so a key the rules do not name would be written happily
+  — and would then freeze that row against **its own owner** for ever,
+  because the browser's merge produces a document `hasOnly` refuses. The
+  selftest reads the allowed list out of the rules and pins it against
+  `ROW_KEYS` both ways. (The fifth arrived on 2026-09-08 with its rule, in one
+  change — the next section.)
 * **Dates only move in the safe direction.** `first` takes the earliest known
   (Auth's real joined date corrects a later "first seen"), `seen` the latest, so
   a sync can never contradict what the site itself watched happen.
@@ -2138,6 +2140,70 @@ never rebased). The growth file gains a point every day by construction, so
 the job commits daily, like `data/analytics.json`. The sync's Admin SDK handle
 is `firebaseAdmin()` from `_mail.mjs`, shared with the mailers, so there is
 one definition of "the credential is missing or malformed".
+
+### The roster reads whole, and says where each person is
+
+Owner, 2026-09-08, from a screenshot of the roster in the dark theme: *"I
+can't read the names of the registered users very well. Show them fully.
+Same with their email. Also, show their affiliation in that list."* The
+screenshot showed "Xiaoda / n Shao", an address cut three ways and a status
+chip reading "NO MESSAG / ES", beside an action column with room to spare.
+
+**The squeeze was one CSS property, and it was defeating the container built
+to prevent it.** `.oa-u-wrap` has scrolled sideways since the roster shipped,
+on the stated reasoning that an e-mail address has no spaces and sets the
+table's minimum width. But every cell also carried `overflow-wrap: anywhere`,
+and unlike `break-word` that value COUNTS its break opportunities when the
+table is measured: the browser was told a name could be broken at any
+character, so it did exactly that to fit the table into its panel beside a
+`white-space: nowrap` action column, and the table never needed to scroll at
+all. The name, the e-mail and the status cells are `white-space: nowrap` now
+(`td.oa-u-c-<key>`, one class per column from the `COLS` spec) and the table
+is as wide as its words; the affiliation, which can be a sentence, wraps at
+its SPACES inside a `.oa-u-aff` span bounded on both sides, so it is never a
+word a line and never pushes the dates off the screen. The rules live in
+`oa-ui.css` alone, which `v3.css` does not restate, so the engine's rule is
+the one that reaches the site.
+
+**The affiliation is the PROFILE's, mirrored as a fifth roster key.**
+`profiles/{uid}` is owner-only with no admin clause, so the roster cannot
+read it; the row carries a copy instead, exactly as it carries the name.
+Three writers keep it true, and each has its reason:
+
+* **the browser, on sign-in** — `syncDirectoryRow` runs after `loadProfile`
+  has settled `state.profile`, so it reads the affiliation off it and writes
+  the key when there is one (the field is optional on the profile card for
+  every account that predates the compulsory box, and an absent value is no
+  key at all, the address's own rule);
+* **the browser, on a profile SAVE** — the same function called again with
+  `again` set, past the once-a-session latch, so a corrected affiliation
+  reaches the roster at once rather than at the next session;
+* **the daily sync** — `sync-user-directory.mjs` reads `profiles` once with
+  the Admin SDK and hands each row its own document; because the sync
+  REPLACES the row, this is also what takes an affiliation OFF a row once
+  its owner blanks the field, which a browser merge can never do. A profiles
+  read that FAILS hands `rowFromAuthUser` `undefined` rather than `null`, and
+  the row keeps what it holds: unknown is not none, and a failed read must
+  not strip a hundred affiliations until the next morning.
+
+**The key and its rule arrived in one change**, which is the only safe way a
+key ever joins this row (the sync-user-directory trap: a key the rules do not
+name freezes the row against its own owner). `str('affiliation', 300)` is the
+bound the profile's own field carries, so a value the profile accepts the row
+accepts. The Find box searches it, the CSV carries it beside the address, and
+it is readable by the maintainer alone: the Privacy Policy names it beside
+the name and the address, and the profile card's "never published" stays
+true, because the roster is not the public.
+
+Tests: the one-line rule, the bounded span, the column, the CSV, the Find box,
+both browser writers and the sync's unknown-versus-none in
+`testUsersAndMessages` and `testUserDirectorySync` (`_scraper/selftest.mjs`)
+and the sync's own `--selftest`; and in `page-test.mjs` a row seeded to be
+wider than its panel, measured as geometry at 1280px and 390px — the name,
+the address and the chip each in ONE line box, the affiliation whole and
+within its bounds, the table wider than the panel and scrolling inside it
+with the page not scrolling sideways, a hostile affiliation rendered as text,
+and Find narrowing by affiliation.
 
 ### The front page's fifth key figure is BORN HIDDEN
 

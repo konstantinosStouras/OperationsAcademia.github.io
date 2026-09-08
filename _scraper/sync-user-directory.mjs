@@ -25,13 +25,24 @@
    fills in the one field CLAUDE.md records as unobtainable — the TRUE joined
    date, Auth's own creationTime, rather than "first seen by this site".
 
-   FOUR KEYS AND NO MORE, WHICH IS LOAD-BEARING. `rowOk()` in _firestore.rules
-   pins a roster row to hasOnly(['name','email','first','seen']). The Admin SDK
-   bypasses the rules, so a fifth key would be written happily — and then the
-   OWNER could never update their own row again, because their merge produces a
-   document carrying that key and `hasOnly` refuses it. A sync that quietly
-   froze every row it touched would be a poor trade for a backfill. selftest.mjs
-   pins the shape against the rules both ways.
+   FIVE KEYS AND NO MORE, WHICH IS LOAD-BEARING. `rowOk()` in _firestore.rules
+   pins a roster row to hasOnly(['name','email','first','seen','affiliation']).
+   The Admin SDK bypasses the rules, so a key the rules do not name would be
+   written happily — and then the OWNER could never update their own row
+   again, because their merge produces a document carrying that key and
+   `hasOnly` refuses it. A sync that quietly froze every row it touched would
+   be a poor trade for a backfill. selftest.mjs pins the shape against the
+   rules both ways. (The fifth, `affiliation`, arrived on 2026-09-08 WITH its
+   rule, in one change, which is the only safe way a key ever joins this row.)
+
+   THE AFFILIATION IS COPIED FROM THE PROFILE, not from Auth, which has no
+   such field: profiles/{uid} is owner-only in the rules and the Admin SDK
+   reads it regardless. The profile is the source and the roster row mirrors
+   it — the browser writes the same value beside the name on every sign-in —
+   and because this run REPLACES the row, a person who blanks the field on
+   their profile card is un-placed by the next morning's run, which a browser
+   merge could never do. A profiles read that FAILS keeps every row's
+   affiliation as it is: unknown is not the same as none.
 
    IT NEVER MOVES A DATE BACKWARDS. The browser stamps `seen` on every session;
    Auth's lastSignInTime can lag it. The later of the two wins, so a sync run
@@ -122,9 +133,18 @@ export const DIRECTORY = 'userDirectory';
     against assets/oa-firebase.js by the selftest like DIRECTORY. */
 export const TALLY = 'registeredUsers';
 
-/** EXACTLY the keys _firestore.rules allows on a roster row. A fifth would
-    freeze the row against its own owner — see the header. */
-export const ROW_KEYS = ['name', 'email', 'first', 'seen'];
+/** EXACTLY the keys _firestore.rules allows on a roster row. A key the rules
+    do not name would freeze the row against its own owner — see the header.
+    `affiliation` joined on 2026-09-08 (owner: "show their affiliation in
+    that list"), in the same change as the rule. */
+export const ROW_KEYS = ['name', 'email', 'first', 'seen', 'affiliation'];
+
+/** The collection the affiliation is read from. The profile is the person's
+    own word about where they are and the browser mirrors it onto the roster
+    row on every sign-in; the sync copies it the same way with the Admin SDK,
+    so an account that never signs in again is still placed, and one that
+    blanked its affiliation is un-placed by the next run. */
+export const PROFILES = 'profiles';
 
 /* ------------------------------------------------------------- pure mapping */
 
@@ -152,8 +172,15 @@ export function stamp(v) {
  *          seen by this site". Earliest wins, so it can only ever correct a
  *          later guess backwards to the real one.
  *   seen   the LATER of Auth's last sign-in and what the site last saw.
+ *   affiliation  the PROFILE's, whole: `profile` is that account's
+ *          profiles/{uid} document, or NULL when the collection was read and
+ *          holds none for it, or UNDEFINED when the collection could not be
+ *          read at all. Read and empty means the person has none, and the
+ *          key goes; unreadable means nothing is known, and what the row
+ *          holds is kept — a failed read must not strip a hundred
+ *          affiliations off the roster until the next morning.
  */
-export function rowFromAuthUser(user, existing) {
+export function rowFromAuthUser(user, existing, profile) {
   const had = existing || {};
   const meta = user.metadata || {};
 
@@ -173,6 +200,12 @@ export function rowFromAuthUser(user, existing) {
      this file's own header describes, sprung by a VALUE rather than by a
      fifth key. */
   const email = String(user.email || had.email || '').slice(0, 200);
+  /* The same rule as the address: an EMPTY affiliation is no key at all, so
+     the roster reads "—" for it and the owner's own merge never has to send
+     an empty string back. */
+  const affiliation = profile === undefined
+    ? String(had.affiliation || '').trim().slice(0, 300)
+    : String((profile && profile.affiliation) || '').trim().slice(0, 300);
   const row = {
     name: String(had.name || user.displayName || '').slice(0, 200),
     ...(email ? { email } : {}),
@@ -181,6 +214,7 @@ export function rowFromAuthUser(user, existing) {
     first: [authFirst, hadFirst].filter(Boolean).sort((a, b) => a - b)[0] || 0,
     // never backwards
     seen: Math.max(authSeen, hadSeen),
+    ...(affiliation ? { affiliation } : {}),
   };
 
   /* An account with NO address and NO name is still a person and still gets a
@@ -293,6 +327,20 @@ async function main() {
   (await col.get()).forEach((d) => { existing[d.id] = d.data() || {}; });
   log(`roster holds ${Object.keys(existing).length} row(s) before this run`);
 
+  /* Every profile, read once, for the affiliation each row carries. NULL when
+     the read fails: rowFromAuthUser then keeps whatever affiliation a row
+     already holds rather than reading "could not be read" as "has none". */
+  let profiles = null;
+  try {
+    profiles = {};
+    (await fb.db.collection(PROFILES).get()).forEach((d) => { profiles[d.id] = d.data() || {}; });
+    log(`${PROFILES} holds ${Object.keys(profiles).length} document(s)`);
+  } catch (e) {
+    profiles = null;
+    warn(`${PROFILES} could not be read: every row keeps the affiliation it already holds`);
+  }
+  const profileOf = (uid) => (profiles ? (profiles[uid] || null) : undefined);
+
   /* The tally the Admin area's tile counts: the uids and nothing else (the
      documents carry only a timestamp anyway). A read that fails or answers
      empty leaves the two served files exactly as they are, since a count of
@@ -318,10 +366,11 @@ async function main() {
     if (!pending.length || SCAN || DRY) { pending = []; return; }
     const batch = fb.db.batch();
     /* A REPLACE, NOT A MERGE, and that is what lets the key GO. `row` is the
-       whole document — the rules bound it to exactly these four keys — so a
+       whole document — the rules bound it to exactly these five keys — so a
        merge could only ever add to it, and an `email: ''` already stored
        would survive every run and go on freezing that row against its own
-       owner. */
+       owner. It is also what takes an affiliation OFF a row once its owner
+       has blanked the profile's field, which the browser's merge cannot. */
     for (const [uid, row] of pending) batch.set(col.doc(uid), row);
     await batch.commit();
     pending = [];
@@ -334,7 +383,7 @@ async function main() {
     for (const user of page.users) {
       seen++;
       accounts.push({ uid: user.uid, disabled: !!user.disabled, metadata: { creationTime: (user.metadata || {}).creationTime } });
-      const row = rowFromAuthUser(user, existing[user.uid]);
+      const row = rowFromAuthUser(user, existing[user.uid], profileOf(user.uid));
       if (!row) { skipped++; continue; }
       written++;
       if (SCAN || DRY) {
@@ -403,13 +452,32 @@ function selftest() {
   eq(stamp('not a date'), 0, 'and so is an unreadable one — the rules demand a number');
 
   /* --- the row ----------------------------------------------------------- */
-  const fresh = rowFromAuthUser(user(), null);
+  const fresh = rowFromAuthUser(user(), null, { affiliation: 'MIT Sloan' });
   eq(Object.keys(fresh).sort(), ROW_KEYS.slice().sort(),
-    'a row carries EXACTLY the four keys the rules allow — a fifth would freeze ' +
-    'the row against its own owner');
+    'a row carries EXACTLY the five keys the rules allow — one the rules do not ' +
+    'name would freeze the row against its own owner');
   eq(fresh.email, 'a@b.edu', 'the address comes from Auth, which is authoritative');
   eq(fresh.first, Date.parse(JAN), 'first is the TRUE joined date, not "first seen"');
   eq(fresh.seen, Date.parse(JUN), 'and seen is the last sign-in');
+  eq(fresh.affiliation, 'MIT Sloan', 'and the affiliation is the PROFILE\'s, which Auth has no field for');
+
+  /* --- the affiliation: the profile's word, and unknown is not none ------ */
+  const noAff = rowFromAuthUser(user(), null, null);
+  ok(noAff && !('affiliation' in noAff),
+    'a profile with no affiliation (or no profile at all) gives a row with NO affiliation key, ' +
+    'never an empty string');
+  ok(!('affiliation' in rowFromAuthUser(user(), null, { affiliation: '   ' })),
+    'and blank space is no affiliation');
+  eq(rowFromAuthUser(user(), { ...fresh }, { affiliation: 'Wharton' }).affiliation, 'Wharton',
+    'the profile wins over what the row holds: a corrected affiliation reaches the roster');
+  eq(rowFromAuthUser(user(), { ...fresh }, null), { name: fresh.name, email: fresh.email, first: fresh.first, seen: fresh.seen },
+    'and a profile that has BLANKED its affiliation takes it off the row — the replace is what lets the key go');
+  eq(rowFromAuthUser(user(), { ...fresh }, undefined), null,
+    'while a profiles read that FAILED (undefined, not null) keeps the affiliation the row holds and writes nothing');
+  eq(rowFromAuthUser(user(), { ...noAff }, undefined), null,
+    '…and keeps a row without one without one');
+  eq(rowFromAuthUser(user(), null, { affiliation: 'x'.repeat(400) }).affiliation.length, 300,
+    'bounded to the 300 characters the rules allow the profile\'s own field');
 
   /* --- merging with what the browser wrote -------------------------------- */
   const siteName = rowFromAuthUser(user(), { name: 'K. Stouras', first: 1, seen: 1 });
@@ -443,10 +511,12 @@ function selftest() {
     'while an account that really has an address keeps it');
 
   /* --- the no-op, which is what makes a schedule cheap -------------------- */
-  eq(rowFromAuthUser(user(), fresh), null,
+  eq(rowFromAuthUser(user(), fresh, { affiliation: 'MIT Sloan' }), null,
     'an account already current costs no write');
-  ok(rowFromAuthUser(user({ email: 'new@b.edu' }), fresh) !== null,
+  ok(rowFromAuthUser(user({ email: 'new@b.edu' }), fresh, { affiliation: 'MIT Sloan' }) !== null,
     'a changed address does');
+  ok(rowFromAuthUser(user(), fresh, { affiliation: 'Somewhere else' }) !== null,
+    'and so does a changed affiliation');
   eq(rowFromAuthUser({ uid: 'x', metadata: {} }, null), null,
     'an account with no name, address or dates is not worth a row');
 
@@ -506,6 +576,11 @@ function selftest() {
     'an empty or unreadable tally leaves both served files as they are');
   ok(/collection\(TALLY\)\.get\(\)/.test(run) && /usersMeta\(accounts, now, marks\)/.test(run) && /usersGrowth\(accounts, now, marks\)/.test(run),
     'and the files are built from the tally the Admin area counts');
+  ok(/collection\(PROFILES\)\.get\(\)/.test(run) && /rowFromAuthUser\(user, existing\[user\.uid\], profileOf\(user\.uid\)\)/.test(run),
+    'the run reads the profiles once and hands each row its own, so the affiliation is the profile\'s');
+  ok(/profiles = null;[\s\S]{0,200}could not be read/.test(run)
+     && /profiles \? \(profiles\[uid\] \|\| null\) : undefined/.test(run),
+    'and a profiles read that fails hands rowFromAuthUser UNDEFINED, never null — unknown is not none');
 
   /* --- the run's own log, which prints into a PUBLIC Actions log ---------- */
   const src = readFileSync(fileURLToPath(import.meta.url), 'utf8');
@@ -517,8 +592,9 @@ function selftest() {
   const calls = body.match(/\b(log|warn)\(([\s\S]*?)\);\n/g) || [];
   ok(calls.length >= 5, 'the log lines were really found');
   ok(calls.every((l) => !/row\.name/.test(l) && !/user\.(email|displayName)/.test(l)
+      && !/\.affiliation|profiles\[|profileOf\(/.test(l)
       && !/row\.email/.test(l.replace(/redact\(row\.email\)/g, '')) && !/e\.message/.test(l)),
-    'no log line names a person: an address reaches it through redact() only, and a name never');
+    'no log line names a person: an address reaches it through redact() only, and a name or an affiliation never');
   ok(calls.some((l) => /redact\(row\.email\)/.test(l)), 'and the redact exemption is exercised, so the check is not vacuous');
 
   console.log(fails.length

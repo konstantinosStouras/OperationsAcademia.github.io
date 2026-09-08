@@ -6444,11 +6444,21 @@ for (const w of [320, 360, 390, 430]) {
        markup in a name (it is rendered on the maintainer's screen) and a
        leading '=' (it reaches a spreadsheet through Download CSV) */
     { path: 'userDirectory/u-msg-1', data: { name: '=cmd|calc<img src=x onerror=window.__xssU=1>',
-        email: 'avery@example.edu', first: 1000, seen: 3000 } },
+        email: 'avery@example.edu', first: 1000, seen: 3000,
+        affiliation: '<b>Nowhere</b> & Co' } },
     { path: 'userDirectory/u-msg-2', data: { name: 'Bea Baker',
-        email: 'bea@example.edu', first: 2000, seen: 2000 } },
+        email: 'bea@example.edu', first: 2000, seen: 2000,
+        affiliation: 'Example University, Department of Operations' } },
     { path: 'userDirectory/u-msg-3', data: { name: 'Cy Carter',
         email: 'cy@example.edu', first: 3000, seen: 1000 } },
+    /* …and one row seeded to be TOO WIDE for its panel: a long name, a long
+       address and an affiliation that is a sentence. The owner's report
+       (2026-09-08) was of names and addresses cut mid-word to fit the table
+       beside its action column; the check is that this row reads whole. */
+    { path: 'userDirectory/u-msg-4', data: { name: 'Wilhelmina Featherstonehaugh-Cholmondeley',
+        email: 'wilhelmina.featherstonehaugh-cholmondeley@graduate-school-of-management.example.edu',
+        first: 4000, seen: 500,
+        affiliation: 'Department of Decision Sciences and Operations Management, Example Graduate School of Management' } },
 
     /* Bea has replied and is waiting — the one thing here that is a QUEUE */
     { path: 'messages/u-msg-2', data: { uid: 'u-msg-2', lastAt: 5000, lastFrom: 'user',
@@ -6498,6 +6508,75 @@ for (const w of [320, 360, 390, 430]) {
     const bea = q.locator('#oa-aa-users tr', { hasText: 'bea@example.edu' });
     ok((await bea.textContent()).indexOf('Replied — awaiting you') !== -1,
       'roster: a person who has replied is shown as waiting for the maintainer');
+
+    /* THE AFFILIATION, AS GIVEN ON THE PROFILE (owner, 2026-09-08: "show their
+       affiliation in that list") — a column of its own, a dash where there is
+       none, and markup in one rendered as the characters typed. */
+    ok((await q.textContent('#oa-aa-users thead')).indexOf('Affiliation') !== -1,
+      'roster: an Affiliation column');
+    ok((await bea.locator('td.oa-u-c-affiliation').textContent()).indexOf(
+      'Example University, Department of Operations') !== -1,
+      'roster: …carrying what the profile says');
+    eq((await q.locator('#oa-aa-users tr', { hasText: 'cy@example.edu' })
+      .locator('td.oa-u-c-affiliation').textContent()).trim(), '—',
+      'roster: …and a dash for an account that gave none');
+    ok((await q.locator('#oa-aa-users tr', { hasText: 'avery@example.edu' })
+      .locator('td.oa-u-c-affiliation').textContent()).indexOf('<b>Nowhere</b> & Co') !== -1
+       && (await q.locator('#oa-aa-users td.oa-u-c-affiliation b').count()) === 0,
+      'roster: markup in an affiliation is text, never an element');
+
+    /* THE NAME AND THE ADDRESS READ WHOLE, ON ONE LINE (owner, 2026-09-08: "I
+       can't read the names of the registered users very well. Show them
+       fully. Same with their email."). Measured as GEOMETRY on the row seeded
+       to be wider than its panel: each identity cell's contents lie in one
+       line box, the status chip too, the affiliation wraps at its spaces in a
+       span no narrower than its floor, and the table is allowed to be wider
+       than the panel — it scrolls inside .oa-u-wrap instead of squeezing a
+       word to a few characters a line, which is what the cells' old
+       `overflow-wrap: anywhere` let the browser do. */
+    const measureWide = () => q.evaluate(() => {
+      const tr = Array.from(document.querySelectorAll('#oa-aa-users tbody tr'))
+        .find((r) => r.textContent.indexOf('Featherstonehaugh') !== -1);
+      if (!tr) return null;
+      const lines = (el) => {
+        const r = document.createRange(); r.selectNodeContents(el);
+        return r.getClientRects().length;
+      };
+      const aff = tr.querySelector('td.oa-u-c-affiliation .oa-u-aff');
+      const wrap = document.querySelector('.oa-u-wrap');
+      return {
+        nameLines: lines(tr.querySelector('td.oa-u-c-name')),
+        mailLines: lines(tr.querySelector('td.oa-u-c-email a')),
+        chipLines: lines(tr.querySelector('td.oa-u-c-thread .oa-fb-status')),
+        affText: aff.textContent, affWidth: aff.getBoundingClientRect().width,
+        affMax: parseFloat(getComputedStyle(aff).maxWidth),
+        tableWider: wrap.scrollWidth > wrap.clientWidth + 1,
+        pageOver: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    const wide = await measureWide();
+    ok(wide && wide.nameLines === 1,
+      `roster: a long name is on ONE line (${wide && wide.nameLines} line boxes)`);
+    ok(wide && wide.mailLines === 1,
+      `roster: and so is a long address (${wide && wide.mailLines})`);
+    ok(wide && wide.chipLines === 1,
+      `roster: and the status chip (${wide && wide.chipLines}) — "NO MESSAG / ES" was the same fault`);
+    ok(wide && wide.affText === 'Department of Decision Sciences and Operations Management, Example Graduate School of Management',
+      'roster: the affiliation is printed whole…');
+    ok(wide && wide.affWidth >= 160 && wide.affWidth <= wide.affMax + 1,
+      `roster: …wrapping at its spaces inside its bounds (${wide && Math.round(wide.affWidth)}px)`);
+    ok(wide && wide.tableWider && wide.pageOver <= 1,
+      `roster: the table is wider than its panel and scrolls INSIDE it (page overflow ${wide && wide.pageOver}px)`);
+
+    /* the Find box searches the affiliation too */
+    await q.fill('#oa-u-filter', 'department of operations');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 1, null, { timeout: 10000 });
+    ok((await q.textContent('#oa-aa-users tbody')).indexOf('bea@example.edu') !== -1,
+      'roster: Find narrows by affiliation as well as by name and address');
+    await q.fill('#oa-u-filter', '');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length > 1, null, { timeout: 10000 });
 
     /* the ghost: a thread with no roster row behind it */
     ok((await q.textContent('#oa-aa-users')).indexOf('Threads with no account') !== -1,
@@ -6761,6 +6840,26 @@ for (const w of [320, 360, 390, 430]) {
       const w = document.querySelector('.oa-u-wrap');
       return !!w && getComputedStyle(w).overflowX === 'auto';
     }), 'roster at 390px: …which is what that container is for');
+    /* …and on a phone the one-line rule is not optional: every row is wider
+       than the screen, so a name or an address that was allowed to break
+       anywhere would read a few characters a line. */
+    const phone = await q.evaluate(() => {
+      const tr = Array.from(document.querySelectorAll('#oa-aa-users tbody tr'))
+        .find((r) => r.textContent.indexOf('Featherstonehaugh') !== -1);
+      if (!tr) return null;
+      const lines = (el) => {
+        const r = document.createRange(); r.selectNodeContents(el);
+        return r.getClientRects().length;
+      };
+      const wrap = document.querySelector('.oa-u-wrap');
+      return { nameLines: lines(tr.querySelector('td.oa-u-c-name')),
+        mailLines: lines(tr.querySelector('td.oa-u-c-email a')),
+        scrolls: wrap.scrollWidth > wrap.clientWidth + 1 };
+    });
+    ok(phone && phone.nameLines === 1 && phone.mailLines === 1,
+      `roster at 390px: a long name and address still read on one line each ` +
+      `(${phone && phone.nameLines}/${phone && phone.mailLines})`);
+    ok(phone && phone.scrolls, 'roster at 390px: and the table scrolls inside its container');
     await ctx.close();
   }
 }

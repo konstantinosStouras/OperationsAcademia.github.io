@@ -1091,14 +1091,29 @@
      send back the value already stored; that read is the account's own row,
      which is why the rule lets a person read the row the site keeps on them.
 
+     …AND THE AFFILIATION RIDES WITH THE NAME (owner, 2026-09-08: "show
+     their affiliation in that list"). It is the profile's own field, read
+     off `state.profile`, which loadProfile has settled before it calls this;
+     written only when there IS one, since an affiliation is optional on the
+     profile card for every account that predates the compulsory box. A
+     profile SAVE calls this again with `again` set, past the once-a-session
+     latch, so a corrected affiliation reaches the roster at once rather than
+     at the next session; and the daily sync (sync-user-directory.mjs) copies
+     the profile's value whole, which is also what CLEARS a roster row's
+     affiliation once its owner blanks theirs — a merge here cannot remove a
+     key, and a person who removed the field should not stay listed under it.
+
      Best-effort throughout: an undeployed rule, a private-mode storage
      exception or an offline moment must never block a sign-in, so every leg
      swallows its error exactly as the tally does. */
-  function syncDirectoryRow(u) {
+  function syncDirectoryRow(u, again) {
     if (!u || !window.OAFB) return;
     var latch = 'oaDir:' + u.uid;
-    try { if (sessionStorage.getItem(latch)) return; } catch (e) { /* private mode */ }
+    if (!again) {
+      try { if (sessionStorage.getItem(latch)) return; } catch (e) { /* private mode */ }
+    }
     var email = String(u.email || '');
+    var affiliation = String((state.profile || {}).affiliation || '').trim();
     try { sessionStorage.setItem(latch, '1'); } catch (e) { /* private mode */ }
 
     OAFB.ready().then(function (fb) {
@@ -1118,6 +1133,7 @@
            exactly those accounts off the roster entirely. They get a row with
            a name and their dates, and the roster shows "—". */
         if (email) row.email = email.slice(0, 200);
+        if (affiliation) row.affiliation = affiliation.slice(0, 300);
         return ref.set(row, { merge: true });
       });
     }).catch(function () {
@@ -1478,6 +1494,9 @@
           state.profile = Object.assign({}, state.profile || {}, out);
           paint();
           writeHint(state.user, displayName(state.user));   // the next page starts with the new name
+          // …and the roster row follows the profile: the name it shows and
+          // the affiliation it names, past the once-a-session latch.
+          syncDirectoryRow(state.user, true);
           accountKeysChecked = false;      // a new iD is a new identity to claim
           claimAccountKeys();
           close();
