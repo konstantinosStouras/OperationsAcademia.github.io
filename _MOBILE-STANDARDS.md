@@ -165,6 +165,31 @@ marked global.
     (signed out) never sees them; the calendar block of `page-test.mjs`
     measures them at 390px itself, the way the forum block does.
 
+15. **Rule 9's hover guard is about EVERY control, not only a card — and a
+    control with an ON-STATE needs a second thing beside it.** Rule 9 has said
+    since 2026-08-16 that a hover-only effect is gated on
+    `(hover: hover) and (pointer: fine)` "so a tap does not leave a stuck
+    hover state", and it was read as a rule about `.oa-card`: the forum's
+    thread controls carried plain `:hover` rules, and a tap on a phone applies
+    `:hover` to what it tapped and holds it until something else is tapped.
+    So on a phone a hover style is not a preview of a press, it is **the state
+    the reader is left in afterwards**, and a reload is what clears it.
+
+    The second thing is specificity. `.oa-forum-v:hover:not([disabled])` is
+    (0,3,0) and `.oa-forum-v[aria-pressed='true']` is (0,2,0), so on a button
+    that was both, the hover rule's `color: var(--brand)` beat the pressed
+    rule's over the pressed rule's own `var(--brand)` ground: the glyph was
+    painted in the colour of the block it sits on. `--brand` is near-white in
+    the dark theme, so an answer voted up from a phone left a blank white 42px
+    square (owner, 2026-09-08). **A hover rule for a control with an on-state
+    says so in its selector** -- `:not([aria-pressed='true'])` -- so the two
+    are disjoint and nothing turns on which is written lower in the file.
+
+    `selftest.mjs` audits `oa-forum.css` for both halves, both ways, over
+    every control that has an on-state rather than a list somebody remembered;
+    `page-test.mjs` measures a pressed arrow under the pointer in both themes.
+    A theme audit can never catch this: it measures a page at rest.
+
 ## The test gate
 
 `_scraper/page-test.mjs` runs every list page at a 390px viewport and
