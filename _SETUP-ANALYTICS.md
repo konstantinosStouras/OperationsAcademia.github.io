@@ -241,6 +241,7 @@ departments** rather than against whatever string an ISP happens to publish.
 | `recordVisit` (`_functions/index.js`) | reads the address, reverse-resolves it, keeps the **university name**, discards the rest. |
 | `data/university-domains.json` | domain → university, **derived** from each department's own page in the Universities directory by `_scraper/build-netmap.mjs`. Vendored into `_functions/` because `firebase deploy` ships only that directory. |
 | `universityVisits/{YYYY-MM-DD}` | counters only — `seen`, `resolved`, `academic`, and one tally per university. Closed to every client in `_firestore.rules`. |
+| `data/analytics.json` → `universities` | what the page draws: the whole record (`all`, `seen`, `resolved`, `academic`, `placed`) and, since 2026-09-08, the same counters tallied per period under `windows` (`30`, `90`, `365`, `all` — the page's own range ids, from `RANGES` in `assets/oa-analytics-model.js`), which is what the period row on the figure reads. Tallied by `visitWindows` in the model from the day documents; never per day. |
 
 **The IP is never stored.** It is resolved in memory and goes out of scope
 when the request ends; it is not written and not logged. An ISP or a

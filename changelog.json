@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "analytics-university-periods-2026-09",
+      "date": "2026-09-08",
+      "title": "The universities chart shows a period of your choice",
+      "summary": "On the analytics page, the chart of which universities read the site now has its own row of periods: the last 30 days, the last 90 days, the last 12 months, or everything on record. The sentence above the bars says what the chosen period covers and how large a sample it is.",
+      "url": "/analytics"
+    },
+    {
       "id": "roster-affiliation-2026-09",
       "date": "2026-09-08",
       "title": "The maintainer’s list of registered users now shows affiliations",

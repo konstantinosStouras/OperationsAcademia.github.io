@@ -494,3 +494,14 @@
    came in September", which on a job-market site is backwards rather than
    merely missing. */
 .oa-tick-empty { opacity: .45; }
+
+/* ------------------------------------- the period row on the universities
+
+   The figure carries the page's four periods (last 30 days, 90 days, 12
+   months, everything) as a row of its own under the heading, above the
+   caption the choice rewrites (owner, 2026-09-08). It is the compact
+   `.oa-switch` shape the daily chart's metric switch uses, so the two read
+   as one kind of control; the phone rule for `.oa-switch button` (42px)
+   therefore reaches it with nothing added here. A selector with two classes,
+   because `.oa-switch` alone sets the margin this row overrides. */
+.oa-figure > .oa-unirange { margin: 10px 0 14px; }

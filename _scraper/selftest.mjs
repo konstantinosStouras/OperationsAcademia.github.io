@@ -15607,6 +15607,145 @@ async function testUniversityVisits() {
   ok(/universit/i.test(uniBody) && /u\.all\.length/.test(uniBody),
     '…which the caption really does — the count is not simply lost');
 
+  /* --- THE FIGURE TAKES THE PAGE'S RANGE (owner, 2026-09-08) --------------
+     "Last 30 days, Last 90 days, Last 12 months, Everything", offered on the
+     universities figure itself. ONE definition of the four periods, in the
+     model, read by the page's range control AND by the builder's tally, so a
+     period the control offers is always one the served file carries; the
+     tally pure and pinned on a fixture that separates every period; the
+     served file's periods, where it carries them, under exactly those ids
+     and agreeing with the whole-record figures beside them; and the page
+     reading the chosen period's OWN coverage counts, drawing the row through
+     the same chooser as the control at the top, and keeping the reader's
+     place when it redraws. */
+  const AM = require(path.join(root, 'assets', 'oa-analytics-model.js'));
+  eq(AM.RANGES.map((r) => r.id), ['30', '90', '365', 'all'],
+    'the model names the four periods, under the ids the range control has always used');
+  eq(AM.RANGES.map((r) => r.label), ['Last 30 days', 'Last 90 days', 'Last 12 months', 'Everything'],
+    '…in the owner\'s words and order');
+  eq(AM.RANGES.map((r) => r.days), [30, 90, 365, 0],
+    '…30, 90 and 365 days, and 0 for everything on record');
+  ok(AM.RANGES.every((r) => typeof r.prose === 'string' &&
+      (r.days ? /^the last \d+ (days|months)$/.test(r.prose) : r.prose === '')),
+    'each finite period says itself as a sentence would, and everything says nothing (the caption names the span instead)');
+  ok(/var RANGES = A\.RANGES;/.test(pagejs) && !/label: 'Last 30 days'/.test(pagejs),
+    'the page reads the periods from the model and keeps no list of its own — two lists drift the first time one is added to');
+
+  /* the tally, pure: a fixture whose records fall in DIFFERENT periods, plus
+     the junk a Firestore read can hand over (a bad day, a negative count, an
+     empty name, a day dated after today) */
+  const vrecs = [
+    { day: '2026-09-08', seen: 5, resolved: 2, academic: 1, unis: { 'Yale University': 1, ' ': 3, 'Duke University': 0 } },
+    { day: '2026-08-15', seen: 10, resolved: 4, academic: 0, unis: { 'Duke University': 2 } },
+    { day: '2026-07-01', seen: 100, resolved: 40, academic: 9, unis: { 'Yale University': 7, 'INSEAD': 7 } },
+    { day: '2025-01-01', seen: 1000, resolved: 1, academic: 0, unis: { 'Old University': 1 } },
+    { day: '2026-09-09', seen: 999, unis: { 'Tomorrow University': 5 } },
+    { day: 'junk', seen: 5, unis: { 'Junk University': 5 } },
+    { day: '2026-09-01', seen: -4, resolved: 'x', unis: { 'Negative University': -3 } },
+  ];
+  const vw = AM.visitWindows(vrecs, { now: '2026-09-08' });
+  eq(Object.keys(vw), ['30', '90', '365', 'all'],
+    'visitWindows answers one tally per range, under the range ids');
+  eq(vw['30'], { days: 30, from: '2026-08-15', to: '2026-09-08', seen: 15, resolved: 6, academic: 1, placed: 3,
+    all: [{ name: 'Duke University', visits: 2 }, { name: 'Yale University', visits: 1 }] },
+    'a period of N days is the N calendar days ending today, with its OWN coverage counts and ranking — ' +
+    'a junk day, a negative count, an empty name and a day dated after today all left out');
+  eq(vw['90'], { days: 90, from: '2026-07-01', to: '2026-09-08', seen: 115, resolved: 46, academic: 10, placed: 17,
+    all: [{ name: 'Yale University', visits: 8 }, { name: 'INSEAD', visits: 7 }, { name: 'Duke University', visits: 2 }] },
+    'a longer period reaches the records the shorter one left out, most visits first and by name on a tie');
+  eq(vw['365'].seen, 115, 'a year reaches no further than the record has days for');
+  eq(vw.all, { days: 0, from: '2025-01-01', to: '2026-09-09', seen: 2114, resolved: 47, academic: 10, placed: 23,
+    all: [{ name: 'Yale University', visits: 8 }, { name: 'INSEAD', visits: 7 }, { name: 'Tomorrow University', visits: 5 },
+      { name: 'Duke University', visits: 2 }, { name: 'Old University', visits: 1 }] },
+    'everything on record keeps every valid day, the one dated after today included — that period claims no dates');
+  ok(JSON.stringify(AM.visitWindows(vrecs, { now: '2026-09-08' })) === JSON.stringify(vw),
+    'the tally is deterministic: no clock is read when the day is given');
+  eq(AM.visitWindows(vrecs, { now: Date.UTC(2026, 8, 8, 12) })['30'].seen, 15,
+    '…and a clock given as a number is read as its UTC day');
+  eq(AM.visitWindows([], { now: '2026-09-08' })['30'],
+    { days: 30, from: '', to: '', seen: 0, resolved: 0, academic: 0, placed: 0, all: [] },
+    'no records at all is an empty tally with no dates, never an error');
+  const vgap = AM.visitWindows([{ day: '2026-01-01', seen: 3, unis: { 'INSEAD': 1 } }], { now: '2026-09-08' });
+  ok(vgap['30'].from === '' && vgap['30'].seen === 0 && vgap.all.from === '2026-01-01',
+    'a period with no record inside it carries empty dates, which is how the page knows to say ' +
+    '"nothing was recorded" rather than "nobody was placed"');
+  eq(Object.keys(AM.visitWindows(vrecs, { now: '2026-09-08', ranges: [{ id: 'recent', days: 7 }] })), ['recent'],
+    'a caller may name its own periods (the builder\'s 7-day "recent" list goes through the same tally)');
+  eq(AM.visitWindows(vrecs, { now: '2026-09-08', ranges: [{ id: 'recent', days: 7 }] }).recent.seen, 5,
+    '…seven days being the seven calendar days ending today');
+  ok(AM.emptyDataset().universities && typeof AM.emptyDataset().universities.windows === 'object',
+    'the empty dataset names the periods map, so a served block is self-describing');
+
+  /* the builder tallies through the model and publishes the periods; the
+     archive gets none; a failed read carries them */
+  const bsrc = (await readFile(path.join(root, '_scraper', 'build-analytics.mjs'), 'utf8'))
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const fromVisitsSrc = bsrc.slice(bsrc.indexOf('async function fromVisits('), bsrc.indexOf('function cutWindows('));
+  ok(fromVisitsSrc.length > 300 && /A\.visitWindows\(records, \{ now \}\)/.test(fromVisitsSrc),
+    'fromVisits tallies the day documents through the model\'s visitWindows — one definition of a period');
+  ok(/const whole = windows\.all;/.test(fromVisitsSrc) && /seen: whole\.seen/.test(fromVisitsSrc),
+    '…and the whole-record figures the file always carried are the "all" period\'s, so the two cannot disagree');
+  const asmSrc = bsrc.slice(bsrc.indexOf('export function assemble('), bsrc.indexOf('const uniRows = data.universities.all;'));
+  ok(/windows: cutWindows\(visits\.windows\)/.test(asmSrc), 'assemble publishes the periods on the live section');
+  ok(/windows: cutWindows\(carriedU\.windows\)/.test(asmSrc), '…carries them through a run that could not read the visits');
+  ok(/frozen: true,[\s\S]*?windows: \{\},/.test(asmSrc), '…and gives an archive none: a closed decade has no "last 30 days"');
+  ok(/all: \(win\.all \|\| \[\]\)\.slice\(0, TOP_UNIS\)/.test(bsrc), 'every period\'s list is cut at TOP_UNIS like the whole-record list');
+
+  /* the served file, where it carries them (the committed one gains them on
+     the first daily run after this shipped; until then the pin waits) */
+  const servedU = JSON.parse(await readFile(path.join(root, 'data', 'analytics.json'), 'utf8')).universities || {};
+  if (servedU.windows && Object.keys(servedU.windows).length) {
+    eq(Object.keys(servedU.windows), AM.RANGES.map((r) => r.id),
+      'the served file carries exactly the periods the page offers, under its ids');
+    for (const id of Object.keys(servedU.windows)) {
+      const win = servedU.windows[id];
+      eq(Object.keys(win), ['days', 'from', 'to', 'seen', 'resolved', 'academic', 'placed', 'all'],
+        `served period "${id}" carries the tally\'s shape and nothing else`);
+      ok(win.all.length <= 120, `served period "${id}" is cut at TOP_UNIS`);
+      ok(win.all.every((u) => typeof u.name === 'string' && Number.isInteger(u.visits) && u.visits > 0),
+        `served period "${id}" lists names with whole, positive counts`);
+    }
+    ok(servedU.windows.all.seen === servedU.seen && servedU.windows.all.placed === servedU.placed &&
+        JSON.stringify(servedU.windows.all.all) === JSON.stringify(servedU.all),
+      'the "all" period IS the whole-record block beside it, figure for figure');
+  }
+
+  /* the page: the chosen period's own counts, the row through the same
+     chooser, before the caption, and the reader kept in place */
+  ok(/u\.windows\[pick\.id\]/.test(uniBody) && /var w = win \|\| u;/.test(uniBody),
+    'renderUniversities reads the chosen period, or the whole record where the file carries none');
+  ok(/Number\(w\.seen\)/.test(uniBody) && /Number\(w\.placed\)/.test(uniBody) && /w\.all\.map\(/.test(uniBody),
+    '…and prints THAT period\'s coverage counts and ranking, never the whole record\'s over a month\'s bars');
+  ok(/className: 'oa-switch oa-unirange'/.test(uniBody) && /options: RANGES/.test(uniBody),
+    'the row is the page\'s own range control, drawn through the same chooser in the compact shape');
+  ok(/insertBefore\(bar, f\.section\.querySelector\('\.oa-figure-sub'\)\)/.test(uniBody),
+    '…placed under the heading and above the caption it rewrites');
+  ok(/state\.range = id; redraw\('oa-unirange', id\)/.test(uniBody),
+    '…and a press sets the PAGE\'s range: one notion of "how much of the record" for the whole page');
+  ok(/if \(!hasWindows\)|if \(hasWindows\)/.test(uniBody) && /!u\.frozen && !!u\.windows/.test(uniBody),
+    'no row over an archive or over a file from before the periods existed — a control that changes nothing is not drawn');
+  ok(/as far back as the record goes/.test(uniBody) && /Nothing was recorded in/.test(uniBody) &&
+      /none was placed at a university listed here/.test(uniBody),
+    'a record shorter than the period says so through its dates, and an empty period says which kind of empty it is');
+  const redrawSrc = pagejs.slice(pagejs.indexOf('function redraw('), pagejs.indexOf('function draw()'));
+  ok(redrawSrc.length > 100 && /window\.scrollTo\(0, y\)/.test(redrawSrc) && /preventScroll: true/.test(redrawSrc),
+    'a press keeps the reader where they were and puts the keyboard back on the button they pressed — ' +
+    'draw() rebuilds the page and a chart forces a layout while it is short, which clamps the scroll to the tiles');
+  ok(/redraw\('oa-pagerange', id\)/.test(pagejs) && /redraw\('oa-metric', id\)/.test(pagejs),
+    '…and the control at the top and the metric switch go through the same redraw');
+  const acss = await readFile(path.join(root, 'assets', 'oa-analytics.css'), 'utf8');
+  ok(/\.oa-figure > \.oa-unirange \{ margin:/.test(acss), 'the stylesheet spaces the row under the figure\'s heading');
+  ok(/\.oa-switch button \{ min-height: 42px; \}/.test(acss),
+    '…and the phone rule for the compact control reaches it (42px targets)');
+  const clog = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
+  ok(clog.some((e) => e.url === '/analytics' && /last 30 days/i.test(e.summary) && /12 months/.test(e.summary)),
+    'the change log announces the periods on the analytics page');
+  const claudeMd = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  ok(/visitWindows/.test(claudeMd) && /oa-unirange|period row/.test(claudeMd),
+    'CLAUDE.md records the periods: where they are tallied and where the row is drawn');
+  ok(/windows/.test(await readFile(path.join(root, '_SETUP-ANALYTICS.md'), 'utf8')),
+    '_SETUP-ANALYTICS.md names the served periods');
+
   /* --- the Privacy Policy discloses what is derived from an address ------- */
 
   const pp = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
