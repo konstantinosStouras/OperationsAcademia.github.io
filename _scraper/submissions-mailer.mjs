@@ -291,8 +291,8 @@ export function renderLivePostingEmail(entry, { site = SITE, now = new Date() } 
   const r = entry.published || entry.row || {};
   const title = [r.institution, r.department].filter(Boolean).join(' — ');
   const url = livePostingUrl(r, { site, now });
-  const editUrl = site + '/post-a-job.html?edit=' + encodeURIComponent(entry.id);
-  const mineUrl = site + '/my-postings.html';
+  const editUrl = site + '/post-a-job?edit=' + encodeURIComponent(entry.id);
+  const mineUrl = site + '/my-postings';
   const ad = safeUrl(r.adUrl);
 
   const first = String(doc.firstName || '').trim();
@@ -647,7 +647,7 @@ function selftest() {
   ok(/Tulane University/.test(one.subject), 'the subject names the posting');
   ok(/job posting/.test(one.subject), 'and says what kind of thing it is');
   ok(/Management Science/.test(one.html), 'the body carries the posting itself');
-  ok(/post-a-job\.html\?edit=j1/.test(one.html),
+  ok(/post-a-job\?edit=j1/.test(one.html),
     'and links straight to the form that corrects it');
   ok(/https:\/\/x\.test\/admin-area/.test(one.html), 'and to the page listing everything waiting');
   ok(/already live/.test(one.html),
@@ -661,7 +661,7 @@ function selftest() {
     'and a held profile SAYS it is held, naming the instant (14:00 UTC on the day): the ' +
     'reveal gate is why it cannot be seen on the site');
   ok(!/already live/.test(held.html), 'so it never claims to be live');
-  ok(/post-a-candidate\.html\?edit=c1/.test(held.html), 'and links to its own form');
+  ok(/post-a-candidate\?edit=c1/.test(held.html), 'and links to its own form');
   /* the clock is injected, so the boundary is pinned to the second rather
      than read off the calendar the day this runs */
   const out = renderSubmissionEmail(cand, { ...candDoc, row: cand.row(candDoc.data) },
@@ -804,9 +804,9 @@ function selftest() {
     'and wishes them well filling the position');
   ok(/Management Science/.test(post.html) && /Until filled/.test(post.html),
     'the details of the posting are in it');
-  ok(post.html.includes('https://x.test/jobs.html?job=' + liveRow.id),
+  ok(post.html.includes('https://x.test/jobs?job=' + liveRow.id),
     'with a link to the posting itself, on the page that carries it');
-  ok(/post-a-job\.html\?edit=j7/.test(post.html) && /my-postings\.html/.test(post.html),
+  ok(/post-a-job\?edit=j7/.test(post.html) && /href="[^"]*my-postings"/.test(post.html),
     'and a way to correct it');
 
   /* THE POSTER'S E-MAIL CARRIES NOTHING PRIVATE. It is built from the SERVED
@@ -825,7 +825,7 @@ function selftest() {
   const rolled = { id: 'old-1', year: 2024, years: [2024], posted: '2023-09-01',
                    applyByDate: '2023-11-01', institution: 'Old University' };
   ok(livePostingUrl(rolled, { site: 'https://x.test' })
-       .startsWith('https://x.test/previous-markets.html?job='),
+       .startsWith('https://x.test/previous-markets?job='),
     'a posting whose season has rolled is linked on the archive, not the jobs page');
 
   /* --- and it is sent ONCE ------------------------------------------------ */

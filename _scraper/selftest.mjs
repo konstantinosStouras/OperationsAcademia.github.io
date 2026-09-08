@@ -971,11 +971,11 @@ async function testMyPostingsPage() {
     'the page reads ONLY the signed-in poster\'s own documents');
   ok(/status:\s*'withdrawn'/.test(js) && !/\.delete\(/.test(js),
     'taking down is a status change, never a document delete');
-  ok(/post-a-job\.html\?edit=/.test(js),
+  ok(/post-a-job\?edit=/.test(js),
     'Edit goes through the same editor as the public list');
 
   const acct = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
-  ok((acct.match(/my-postings\.html/g) || []).length >= 2,
+  ok((acct.match(/href="my-postings"/g) || []).length >= 2,
     'both account menus (header and phone panel) link My postings');
 }
 
@@ -1618,21 +1618,21 @@ async function testJobNavModule() {
     posted: '2025-09-24', applyByDate: '2026-07-28', year: 2026 };
   const MCGILL = { id: '2026-mcgill-university-20260728',
     posted: '2026-07-28', applyByDate: '', year: 2026 };
-  eq(NAV.pageFor(NANYANG, NOW), 'previous-markets.html',
+  eq(NAV.pageFor(NANYANG, NOW), 'previous-markets',
     'a posting whose season has closed is opened on Previous markets');
-  eq(NAV.pageFor(MCGILL, NOW), 'jobs.html',
+  eq(NAV.pageFor(MCGILL, NOW), 'jobs',
     'and one still in the season under way on the jobs page');
   eq(NAV.hrefFor(NANYANG, NOW),
-    'previous-markets.html?job=2026-nanyang-technological-university-20250924',
+    'previous-markets?job=2026-nanyang-technological-university-20250924',
     'the link names the page AND the one posting — never a bare list');
   ok(!NAV.hrefFor(NANYANG, NOW).includes('#'),
     'and never a fragment: a card only exists while it is on the page being ' +
     'shown, one of ten, in a list built after the browser has looked for it');
   eq(NAV.pageLabelFor(NANYANG, NOW), 'Previous markets',
     'and the card can say where it is sending the maintainer');
-  eq(NAV.otherPage('/previous-markets.html'), 'jobs.html',
+  eq(NAV.otherPage('/previous-markets'), 'jobs',
     'each page can name the other for the "not here" message');
-  eq(NAV.otherPage('/jobs.html'), 'previous-markets.html', 'both ways');
+  eq(NAV.otherPage('/jobs'), 'previous-markets', 'both ways');
 
   // an id is a query VALUE, so it is encoded — a row id is built from a name
   ok(NAV.hrefFor({ id: 'a b&c', posted: '2026-08-01', year: 2026 }, NOW)
@@ -1717,8 +1717,8 @@ async function testJobNavModule() {
     'and the "not on this page" way out carries the id, so the recovery path ' +
     'is not the bare list this whole mode exists to stop landing people on');
   for (const [rel, other] of [
-    ['jobs.html', 'previous-markets.html'],
-    ['previous-markets.html', 'jobs.html'],
+    ['jobs.html', 'previous-markets'],
+    ['previous-markets.html', 'jobs'],
   ]) {
     const html = await readFile(path.join(HERE, '..', rel), 'utf8');
     ok(/focusParam: NAV\.FOCUS_PARAM/.test(html),
@@ -1761,7 +1761,7 @@ async function testJobNavModule() {
   /* read with the comments stripped: the panel still EXPLAINS the fragment it
      no longer emits, and a guard that could not tell the explanation from the
      link would have to be satisfied by deleting the explanation */
-  ok(!/jobs\.html#job-/.test(panel.replace(/\/\*[\s\S]*?\*\//g, '')),
+  ok(!/jobs(\.html)?#job-/.test(panel.replace(/\/\*[\s\S]*?\*\//g, '')),
     'and no longer links a fragment on a page half these postings are not on');
   const admin = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   ok(admin.includes('assets/oa-jobnav.js'), 'admin-area.html loads the module');
@@ -3315,7 +3315,7 @@ async function testAccountCounts() {
     ok((acct.match(new RegExp(`data-held="${what}" hidden`, 'g')) || []).length >= 2,
       `both menus (header and phone sheet) carry the ${what} row, born hidden`);
   }
-  ok(/href="post-a-candidate\.html" data-held="cands"/.test(acct) &&
+  ok(/href="post-a-candidate" data-held="cands"/.test(acct) &&
      /My candidate profile/.test(acct),
     'the candidate row is "My candidate profile" and opens post-a-candidate.html, ' +
     'which sends an owner straight to their own profile');
@@ -3341,7 +3341,7 @@ async function testAccountCounts() {
     'because the profile still exists');
   const paHtml = await readFile(path.join(HERE, '..', 'account.html'), 'utf8');
   ok(/id="pa-cand-card"/.test(paHtml) &&
-     /candCard\.href = 'post-a-candidate\.html\?edit=' \+ encodeURIComponent\(shown\.id\)/.test(paHtml),
+     /candCard\.href = 'post-a-candidate\?edit=' \+ encodeURIComponent\(shown\.id\)/.test(paHtml),
     'the personal area\'s candidate card links straight to the profile it found');
   for (const what of ['postings', 'alerts', 'cands']) {
     ok(new RegExp(`OAAccounts\\.setCount\\('${what}', `).test(paHtml),
@@ -6209,7 +6209,7 @@ async function testAccountDeletion() {
   ok(pAt > 0, 'the Privacy Policy has a section on deleting an account');
   const pSec = privacy.slice(pAt, privacy.indexOf('<h2>', pAt + 10));
   ok(pSec.length > 800 && pSec.length < 4000, '…and it was really sliced');
-  ok(/account\.html/.test(pSec) && /Delete my account/.test(pSec),
+  ok(/href="account"/.test(pSec) && /Delete my account/.test(pSec),
     '…saying where the control is');
   ok(/feedback/i.test(pSec) && /Universities directory/.test(pSec),
     '…and what is NOT deleted with it, because a policy that claims more than ' +
@@ -6537,7 +6537,7 @@ async function testUsersAndMessages() {
     'exact-where-the-data-is-loaded rule my-postings and alerts follow');
   ok(/data-count="messages"/.test(accts),
     'the account menu carries the Messages badge');
-  ok(/href="messages\.html">Messages<\/a>/.test(accts),
+  ok(/href="messages">Messages<\/a>/.test(accts),
     'and the mobile sheet does too — a menu change missed there hides the ' +
     'feature entirely on a phone');
   ok(/col\.userDirectory\)[\s\S]{0,80}\.doc\(dupUid\)\.delete\(\)/.test(accts)
@@ -11090,7 +11090,7 @@ async function testAdminArea() {
     'depends on, so two merged profiles count as one person');
 
   /* the menu row goes where the page is */
-  ok(/href="admin-area\.html"/.test(acct),
+  ok(/href="admin-area"/.test(acct),
     'the account menu links the Admin area');
 
   /* the reads this page depends on are already allowed — no rules change
@@ -11665,7 +11665,7 @@ async function testCandidateProfilePolicy() {
   ok(/redirectToOwnProfile/.test(form) &&
      /where\('uid', '==', user\.uid\)/.test(form),
     'oa-candidateform: an existing profile is looked up by the OWNER, not by name');
-  ok(/location\.replace\('post-a-candidate\.html\?edit='/.test(form),
+  ok(/location\.replace\('post-a-candidate\?edit='/.test(form),
     'and found, the form reopens it for editing instead of creating a second');
   /* A LAST-SEASON PROFILE IS NAMED, NOT REDIRECTED TO OR PASSED OVER: the
      account menu's "My candidate profile" count has no year filter, so an
@@ -12075,8 +12075,8 @@ async function testCandidateReveal() {
     }
   }
   const setup = await read('_SETUP-INSTANT-PUBLISH.md');
-  ok(/`revealCandidates`/.test(setup) && /which is fourteen/.test(setup) && /read back\s+fourteen/.test(setup),
-    'setup guide: names revealCandidates and counts fourteen functions');
+  ok(/`revealCandidates`/.test(setup) && /which is fifteen/.test(setup) && /read back\s+fifteen/.test(setup),
+    'setup guide: names revealCandidates and counts fifteen functions');
   ok(/functions:revealCandidates/.test(setup), 'setup guide: the explicit --only list carries it');
   ok(/Cloud Scheduler/.test(setup), 'setup guide: says the deploy creates the Cloud Scheduler job');
   ok(!/THESE THREE ARE LIVE/.test(setup), 'setup guide: no longer counts three live doorbells as the whole set');
@@ -12317,7 +12317,7 @@ async function testCandidateReveal() {
     ok(/allow read: if isOwner\(resource\.data\.uid\) \|\| isAdmin\(\);/.test(candBlock),
       'rules: the owner may read their own candidateSubmissions document');
   }
-  ok(/'post-a-candidate\.html\?edit=' \+ encodeURIComponent\(mine\.id\)/.test(acctHtml),
+  ok(/'post-a-candidate\?edit=' \+ encodeURIComponent\(mine\.id\)/.test(acctHtml),
     'account.html: Edit opens the candidate’s own document on the form');
   {
     /* both markers taken FORWARD from the function: the end marker also
@@ -12399,7 +12399,7 @@ async function testCandidateReveal() {
          && (formJs.match(/if \(slot\.onChange\) slot\.onChange\(\);/g) || []).length === 2,
         'oa-candidateform: the CV slot reports a chosen, un-chosen or removed file as a change (Remove is a button, not a field)');
     }
-    ok(/14:00 UTC/.test(editMode) && /account\.html/.test(editMode), 'oa-candidateform: the edit intro names the time and the account page');
+    ok(/14:00 UTC/.test(editMode) && /href="account"/.test(editMode), 'oa-candidateform: the edit intro names the time and the account page');
   }
   {
     const listCss = await read('assets', 'oa-list.css');
@@ -12863,7 +12863,7 @@ async function testMultiSelectFilters() {
   /* announced, and recorded */
   const log = JSON.parse(await read('changelog.json'));
   const entry = (log.updates || []).find((u) => u.id === 'levels-and-characteristics-multi-select');
-  ok(entry && entry.date === '2026-09-04' && entry.url === '/jobs.html',
+  ok(entry && entry.date === '2026-09-04' && entry.url === '/jobs',
     'multi: changelog.json announces it, dated, linking the jobs page');
   ok(entry && /only the departments that have both/.test(entry.summary) &&
      !/—/.test(entry.title + entry.summary),
@@ -12936,7 +12936,7 @@ async function testReaderGate() {
      IN to the posting rather than the posting: it carries the reader to the
      full list with that posting open. No padlock, no blur — nothing is
      locked for them. */
-  const full = GATE.cardOpen({ full: (r) => 'jobs.html?job=' + r.id })(rows[0]);
+  const full = GATE.cardOpen({ full: (r) => 'jobs?job=' + r.id })(rows[0]);
   ok(full && full.blur === false,
     'gate: the signed-in teaser card is gated but NOT locked — nothing is blurred');
   eq(full.note, GATE.NOTE_FULL, 'gate: …and it says where the click goes');
@@ -13585,7 +13585,7 @@ async function testSaveSearchAsAlert() {
 
   /* --- the round trip ---------------------------------------------------- */
   const u = S.url(c);
-  ok(u.startsWith('alerts.html?prefill=1&'),
+  ok(u.startsWith('alerts?prefill=1&'),
     'save-search: the hand-over is a URL on alerts.html carrying the flag');
   eq((u.match(/(^|&)level=/g) || []).length, 2,
     'save-search: one key per value, like the jobs page\'s own links');
@@ -13731,13 +13731,13 @@ async function testSaveSearchAsAlert() {
   /* --- keep-in-sync: the change log, the FAQ, the record ------------------ */
   const log = JSON.parse(await read('changelog.json'));
   const entry = (log.updates || []).find((x) => x.id === 'save-search-as-email-alert');
-  ok(!!entry && entry.date === '2026-09-04' && entry.url === '/jobs.html',
+  ok(!!entry && entry.date === '2026-09-04' && entry.url === '/jobs',
     'save-search: changelog.json announces it, dated, linking the jobs page');
   ok(!!entry && !/—/.test(entry.title + entry.summary) && /Save as e-mail alert/.test(entry.summary),
     'save-search: …naming the button, with no em dash');
   const home = await read('index.html');
   const faq = home.slice(home.indexOf('Can I get e-mail alerts?'), home.indexOf('Do all Operations job postings'));
-  ok(faq.length > 200 && faq.length < 2500 && /Save as e-mail\s+alert/.test(faq) && /jobs\.html/.test(faq),
+  ok(faq.length > 200 && faq.length < 2500 && /Save as e-mail\s+alert/.test(faq) && /href="jobs"/.test(faq),
     'save-search: the FAQ answer on e-mail alerts names the button and links the jobs page');
   ok(!/—|&mdash;/.test(faq.slice(faq.indexOf('Quicker still'))),
     'save-search: …in a sentence with no em dash');
@@ -13923,7 +13923,7 @@ async function testClosingSoonDigest() {
   /* KEEP-IN-SYNC: the change log, the FAQ, the record of the decision. */
   const log = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
   const entry = (log.updates || []).find((u) => u.id === 'closing-this-week-alerts');
-  ok(!!entry && entry.date === '2026-09-04' && /alerts\.html/.test(entry.url || ''),
+  ok(!!entry && entry.date === '2026-09-04' && /\/alerts$/.test(entry.url || ''),
     'closing: changelog.json announces the topic, dated, linking the alerts page');
   const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
   const faq = home.slice(home.indexOf('Can I get e-mail alerts?'), home.indexOf('Do all Operations job postings'));
@@ -14125,7 +14125,7 @@ async function testCalendars() {
     'jobcal: each entry is all-day and named for what it is, in the owner\'s words (2026-09-06)');
   eq(evs[0].url, 'https://www.operationsacademia.org/' + NAV.hrefFor(both, NOW),
     'jobcal: the entry links the posting\'s own permalink, on the page that carries it (OAJobNav.hrefFor)');
-  ok(/jobs\.html\?job=2027-somewhere-university-20260901$/.test(evs[0].url), 'jobcal: …which is the jobs page today');
+  ok(/\/jobs\?job=2027-somewhere-university-20260901$/.test(evs[0].url), 'jobcal: …which is the jobs page today');
   const sug = evs[0], fin = evs[1];
   const heads = (e) => e.description.split('\n').map((l) => l.split(':')[0]);
   eq(heads(fin), ['Suggested deadline', 'Final deadline', 'Final deadline as listed', 'Entry level',
@@ -14142,7 +14142,7 @@ async function testCalendars() {
      /\nLink to job ad: https:\/\/ads\.example\.edu\/1\n/.test(fin.description) &&
      /\nPosted online at: https:\/\/jobs\.example\.edu\/1\n/.test(fin.description) &&
      /\nOA posting ID: 2027-somewhere-university-20260901\n/.test(fin.description) &&
-     /\nPosting on Operations Academia: https:\/\/www\.operationsacademia\.org\/jobs\.html\?job=2027-somewhere-university-20260901$/.test(fin.description),
+     /\nPosting on Operations Academia: https:\/\/www\.operationsacademia\.org\/jobs\?job=2027-somewhere-university-20260901$/.test(fin.description),
     'jobcal: …and each line says what the card says');
   eq(NAV.REF_LABEL, 'OA posting ID', 'jobcal: the ID\'s label is the card\'s own (OAJobNav.REF_LABEL)');
   const reviewOnly = J.eventsFor([row({ id: 'r', reviewDate: '2026-10-01' })], { now: NOW, today: TODAY })[0];
@@ -14604,7 +14604,7 @@ async function testAnalytics() {
   eq(A.normPath('/index.html'), '/', 'the home page is one row, not two');
   eq(A.normPath('/jobs'), '/jobs.html',
     'the canonical form is the one the pages own canonical tags name');
-  eq(A.normPath('/post-a-job.html?ref=abc123'), '/post-a-job.html',
+  eq(A.normPath('/post-a-job?ref=abc123'), '/post-a-job.html',
     'a query string never survives — it can carry a posting id and this file is public');
 
   for (const bad of ['/admin-area', '/admin-area.html', '/admin-area/', '/ADMIN-AREA',
@@ -15725,7 +15725,7 @@ async function testCandidateStats() {
   const entry = log.updates.find((u) => u.id === 'candidate-profile-view-statistics');
   ok(!!entry && /only you and the site maintainer can see them/.test(entry.summary),
     'the change-log entry says the same about who sees them');
-  ok(entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && entry.url === '/post-a-candidate.html',
+  ok(entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && entry.url === '/post-a-candidate',
     'changelog.json announces it, dated, linking the profile page');
   ok(entry && !/—/.test(entry.title + entry.summary), 'with no em dash in the announcement');
 }
@@ -15784,8 +15784,8 @@ async function testEmailVerification() {
   /* --- the message ------------------------------------------------------- */
 
   const V = require(path.join(root, '_functions', 'verify-email.js'));
-  const link = `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC123xyz` +
-    `&continueUrl=${encodeURIComponent(site + '/account.html')}`;
+  const link = `${site}/verify-email?mode=verifyEmail&oobCode=AbC123xyz` +
+    `&continueUrl=${encodeURIComponent(site + '/account')}`;
   const r = V.renderVerifyEmail({ firstName: 'Ada', email: 'ada@example.edu', link });
   const count = (hay, needle) => String(hay).split(needle).length - 1;
   const escLink = V.esc(link);
@@ -15884,9 +15884,9 @@ async function testEmailVerification() {
 
   /* --- siteVerifyLink: the ONE rewrite of the minted address (2026-09-05) --- */
   const minted = 'https://operations-academia.firebaseapp.com/__/auth/action?mode=verifyEmail' +
-    '&oobCode=AbC%2F123&continueUrl=https%3A%2F%2Fwww.operationsacademia.org%2Faccount.html&lang=en';
+    '&oobCode=AbC%2F123&continueUrl=https%3A%2F%2Fwww.operationsacademia.org%2Faccount&lang=en';
   eq(V.siteVerifyLink(minted, site),
-    `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC%2F123&continueUrl=${encodeURIComponent(site + '/account.html')}`,
+    `${site}/verify-email?mode=verifyEmail&oobCode=AbC%2F123&continueUrl=${encodeURIComponent(site + '/account')}`,
     'verify: siteVerifyLink puts the minted code on the site\'s own page with the account page as continueUrl, the code encoded');
   eq(V.siteVerifyLink('https://x.test/?mode=verifyEmail', site), '', 'verify: no code, no link');
   eq(V.siteVerifyLink('not a url', site), '', 'verify: an unparsable address answers nothing rather than throwing');
@@ -15915,8 +15915,8 @@ async function testEmailVerification() {
     'verify: the renderer depends on NOTHING, since firebase deploy ships only _functions');
   ok(!/Date\.now\(/.test(rendererSrc) && !/new Date\(\)/.test(rendererSrc),
     'verify: the renderer reads no clock, so a message is the same whenever it is rendered');
-  ok(/searchParams\.get\('oobCode'\)/.test(rendererSrc) && /verify-email\.html\?mode=verifyEmail/.test(rendererSrc)
-     && /encodeURIComponent\(S \+ '\/account\.html'\)/.test(rendererSrc),
+  ok(/searchParams\.get\('oobCode'\)/.test(rendererSrc) && /verify-email\?mode=verifyEmail/.test(rendererSrc)
+     && /encodeURIComponent\(S \+ '\/account'\)/.test(rendererSrc),
     'verify: the rewrite lives in the renderer (siteVerifyLink) and nowhere else');
   ok(noDash(rendererSrc), 'verify: no em dash in the renderer');
 
@@ -16006,10 +16006,10 @@ async function testEmailVerification() {
   ok(/require\('firebase-admin\/auth'\)/.test(fn) && /require\('nodemailer'\)/.test(fn)
      && /const \{ renderVerifyEmail, siteVerifyLink \} = require\('\.\/verify-email\.js'\);/.test(fn),
     'function: the Admin Auth API, nodemailer, the renderer and the shared link helper are required');
-  ok(/getAuth\(\)\.generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(handler),
+  ok(/getAuth\(\)\.generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account',?\s*\}\)/.test(handler),
     'function: the link is generated by the Admin SDK with the account page as its continue URL');
   ok(/const link = siteVerifyLink\(generated, SITE\);/.test(handler)
-     && !/searchParams\.get\('oobCode'\)/.test(handler) && !/verify-email\.html\?mode=verifyEmail/.test(handler),
+     && !/searchParams\.get\('oobCode'\)/.test(handler) && !/verify-email(\.html)?\?mode=verifyEmail/.test(handler),
     'function: the code is put on the SITE\'s own page by siteVerifyLink, the one helper the campaign mailer shares, never inline');
   ok(/if \(!link\) \{[\s\S]{0,200}await releaseSlot\(\);/.test(handler),
     'function: a minted address that carried no code still gives the slot back');
@@ -16060,10 +16060,10 @@ async function testEmailVerification() {
   const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
   ok(blockAt > 0 && blockEnd > blockAt && noDash(fn.slice(blockAt, blockEnd)),
     'function: no em dash in the verification block');
-  ok(/FOURTEEN functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
-    'function: the file header counts fourteen and names the mailer');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 14,
-    'function: the file exports exactly fourteen functions, the count a deploy must read back');
+  ok(/FIFTEEN functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
+    'function: the file header counts fifteen and names the mailer');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 15,
+    'function: the file exports exactly fifteen functions, the count a deploy must read back');
 
   const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
   ok(pkg.dependencies && pkg.dependencies.nodemailer,
@@ -16082,8 +16082,8 @@ async function testEmailVerification() {
   ok(/npm install --prefix _functions/.test(setup)
      && /firebase deploy --only functions --project operations-academia/.test(setup),
     'setup: install, then deploy, naming the project');
-  ok(/\bfourteen\b/i.test(setup) && /functions:list/.test(setup),
-    'setup: read the deployed list back and count FOURTEEN');
+  ok(/\bfifteen\b/i.test(setup) && /functions:list/.test(setup),
+    'setup: read the deployed list back and count FIFTEEN');
   ok(/fall(s|ing)? back/i.test(setup) && /sendEmailVerification/.test(setup)
      && /firebaseapp\.com/.test(setup),
     'setup: says what the browser does while the function is absent');
@@ -16162,7 +16162,7 @@ async function testEmailVerification() {
   ok(/'functions\/resource-exhausted'/.test(acct) && /throttled: true/.test(acct)
      && /sent a moment ago/.test(acct),
     'accounts: a throttled send is reported as such, never re-sent through Firebase');
-  ok(/u\.sendEmailVerification\(\{ url: SITE \+ '\/verify-email\.html' \}\)/.test(acct)
+  ok(/u\.sendEmailVerification\(\{ url: SITE \+ '\/verify-email' \}\)/.test(acct)
      && /var SITE = 'https:\/\/www\.operationsacademia\.org';/.test(acct),
     'accounts: the fallback is Firebase\'s own message, landing on the site\'s verify page (an authorised domain, never location.origin)');
   ok(acct.indexOf("httpsCallable('sendVerificationEmail')") < acct.indexOf('return fallback();'),
@@ -16298,7 +16298,7 @@ async function testEmailVerification() {
   ok(/Your e-mail address is verified/.test(vpage) && /Continue to your account/.test(vpage)
      && /Send me a new link/.test(vpage) && /That link did not work/.test(vpage),
     'verify page: the four states carry the owner\'s wording');
-  ok(/id="ve-continue" href="account\.html"/.test(vpage), 'verify page: Continue goes to the account page');
+  ok(/id="ve-continue" href="account"/.test(vpage), 'verify page: Continue goes to the account page');
   ok(noDash(vpage), 'verify page: no em dash');
   ok(!/&mdash;/.test(vpage), 'verify page: …not as an entity either');
 
@@ -16374,7 +16374,7 @@ async function testEmailVerification() {
   ok(/file: 'verify-email\.html', card: false,\s*why: '[^']{40,}'/.test(sc),
     'share-check lists verify-email.html card: false, with a reason');
   const sitemap = await readFile(path.join(root, 'sitemap.xml'), 'utf8');
-  ok(!/verify-email\.html/.test(sitemap),
+  ok(!/verify-email/.test(sitemap),
     'the sitemap does not list it, like the other sign-in-only shells');
 
   /* --- the copy, the changelog, the shim ----------------------------------- */
@@ -16410,7 +16410,7 @@ async function testEmailVerification() {
   const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
   ok(/e-mail verification on registration/.test(pt) && /callableFails: 'functions\/not-found'/.test(pt)
      && /applyActionCodeFails: 'auth\/expired-action-code'/.test(pt) && /reloadVerifies: true/.test(pt)
-     && /'Verify your e-mail'/.test(pt) && /verify-email\.html\?mode=verifyEmail&oobCode=/.test(pt),
+     && /'Verify your e-mail'/.test(pt) && /verify-email\?mode=verifyEmail&oobCode=/.test(pt),
     'page-test.mjs drives the pending session, the fallback, the lift and the verify page in a real browser');
   ok(/callableFails: 'functions\/resource-exhausted'/.test(pt) && /callableMessage:/.test(pt)
      && /callableFails: 'functions\/deadline-exceeded'/.test(pt) && /callableFails: 'functions\/permission-denied'/.test(pt)
@@ -16805,17 +16805,17 @@ async function testVerifyExistingUsers() {
   ok(/V\.siteVerifyLink\(generated, SITE\)/.test(mailer) && /siteVerifyLink\(generated, SITE\)/.test(fn),
     'the mailer and the callable both call siteVerifyLink, so the two senders cannot build the link differently');
   const mailerMain = mailer.slice(mailer.indexOf('async function main()'), mailer.indexOf('async function selftest()'));
-  ok(mailerMain.length > 1500 && !/oobCode/.test(mailerMain) && !/verify-email\.html/.test(mailerMain),
+  ok(mailerMain.length > 1500 && !/oobCode/.test(mailerMain) && !/verify-email/.test(mailerMain),
     'the mailer carries no copy of the rewrite (its own selftest may name the page it lands on)');
   ok(/existing: \{ since: stamp\(/.test(mailer), 'and renders the member variant, dated from Auth');
-  ok(/generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(mailer),
+  ok(/generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account',?\s*\}\)/.test(mailer),
     'the link is minted exactly as the callable mints it');
   ok(/from '\.\/_main\.mjs'/.test(mailer) && /isMain\(import\.meta\.url\)/.test(mailer), 'importing the mailer sends nothing');
   const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
   ok(!/function siteVerifyLink\b/.test(fn) && /function siteVerifyLink\(generated, site\)/.test(rendererSrc),
     'siteVerifyLink is defined in verify-email.js and nowhere else, so index.js cannot carry a second copy');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 14,
-    'the helper lives in verify-email.js, so index.js still exports exactly fourteen functions');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 15,
+    'the helper lives in verify-email.js, so index.js still exports exactly fifteen functions');
 
   /* the shared Admin SDK handle */
   const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
@@ -16917,6 +16917,86 @@ async function testVerifyExistingUsers() {
     defect is put back (every one was verified that way); the behavioural
     halves sit in the suites that own the fixtures: the two advert applies,
     the edit echo, uniinfo, and the export. */
+/* ---------------------------------------------------------------------------
+   A PAGE'S ADDRESS CARRIES NO .html (owner, 2026-09-08). Pages serves /forum
+   and /forum.html alike; the extension the owner saw was written by the site
+   itself: every internal link, the forum's own pushState address, the
+   canonical, og:url and sitemap, and the e-mails. Every writer of an address
+   is held to the extensionless form here, and every live page to the head
+   line that turns an old .html arrival into it. CLAUDE.md, "A page's address
+   carries no .html".
+   --------------------------------------------------------------------------- */
+async function testExtensionlessAddresses() {
+  const root = path.join(HERE, '..');
+  const pages = readdirSync(root).filter((n) => n.endsWith('.html'));
+  const NAME = pages.map((n) => n.replace(/\.html$/, '').replace(/[.-]/g, '\\$&')).join('|');
+  /* an internal link to a root page, relative or root-absolute, WITH the
+     extension: in markup, and in the markup the scripts write as strings */
+  const linked = new RegExp('(href|src|action)=\\\\?["\']/?(' + NAME + ')\\.html(?=["\'?#\\\\])');
+  /* an address a script builds: 'jobs.html?job=', "/account.html" */
+  const quoted = new RegExp('[\'"`]/?(' + NAME + ')\\.html(?=[\'"`?#])');
+  const site = new RegExp('operationsacademia\\.org/(' + NAME + ')\\.html');
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`])\/\/[^\n]*/g, '$1');
+  const NORMALISER = "history.replaceState(null, '', p.replace(/\\/index\\.html$/, '/').replace(/\\.html$/, '') + location.search + location.hash);";
+
+  let live = 0;
+  for (const nm of pages) {
+    const html = await readFile(path.join(root, nm), 'utf8');
+    ok(!linked.test(html) && !site.test(html), `${nm}: every link to a root page, and every address of its own, is extensionless`);
+    const canon = /<link rel="canonical" href="([^"]+)"/.exec(html);
+    ok(canon && !/\.html(?:[#?]|$)/.test(canon[1]), `${nm}: the canonical address carries no .html`);
+    if (/http-equiv="refresh"/.test(html)) continue;   // the six section stubs
+    live++;
+    ok(html.includes(NORMALISER),
+      `${nm}: the head turns an old .html arrival into the extensionless address, keeping the search and the fragment`);
+    ok(html.indexOf('THE ADDRESS IS THE EXTENSIONLESS ONE') > 0
+       && html.indexOf('THE ADDRESS IS THE EXTENSIONLESS ONE') < html.indexOf("localStorage.getItem('oaAuthHint')"),
+      `${nm}: …before the hint is read, ahead of everything that paints or reads the address`);
+  }
+  ok(live >= 20, `the head normaliser was measured on ${live} live pages, so the loop above measured something`);
+
+  for (const nm of readdirSync(path.join(root, 'assets')).filter((n) => n.endsWith('.js'))) {
+    const js = strip(await readFile(path.join(root, 'assets', nm), 'utf8'));
+    ok(!linked.test(js) && !quoted.test(js) && !site.test(js), `assets/${nm}: builds no address to a root page with .html`);
+  }
+  for (const f of ['_scraper/submissions-mailer.mjs', '_scraper/submissions-review.mjs', '_scraper/verify-existing-users.mjs',
+    '_scraper/alerts-mailer.mjs', '_scraper/jobreview-mailer.mjs', '_functions/index.js', '_functions/verify-email.js']) {
+    const src = strip(await readFile(path.join(root, f), 'utf8'));
+    ok(!linked.test(src) && !quoted.test(src) && !site.test(src), `${f}: builds no address to a root page with .html`);
+  }
+
+  /* the forum was the reported case: its own address, pushed on every move */
+  const forum = await readFile(path.join(root, 'assets', 'oa-forum.js'), 'utf8');
+  ok(/return 'forum' \+ \(qs \? '\?' \+ qs : ''\)/.test(forum) && !/'forum\.html'/.test(forum.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'oa-forum.js: the page\'s own address is forum or forum?…, so a reader who typed /forum keeps it through every pushState');
+  ok(/closest\('a\[href\^="forum"\]'\)/.test(forum) && /if \(to !== 'forum' && to\.indexOf\('forum\?'\) !== 0\) return;/.test(forum),
+    'oa-forum.js: …and its own links are recognised in that form, bare forum being Home');
+
+  const NAV = require(path.join(root, 'assets', 'oa-jobnav.js'));
+  const nav = await readFile(path.join(root, 'assets', 'oa-jobnav.js'), 'utf8');
+  ok(/var JOBS_PAGE = 'jobs';/.test(nav) && /var PAST_PAGE = 'previous-markets';/.test(nav),
+    'oa-jobnav.js: the two page names carry no extension, so every permalink and e-mail link is extensionless');
+  eq(NAV.otherPage('/previous-markets'), 'jobs', 'oa-jobnav.js: the other page is named from the new address');
+  eq(NAV.otherPage('/previous-markets.html'), 'jobs', 'oa-jobnav.js: …and from the old one, which an archive link can still carry');
+
+  const sitemap = await readFile(path.join(root, 'sitemap.xml'), 'utf8');
+  ok(!/<loc>[^<]*\.html/.test(sitemap), 'sitemap.xml lists every page by its extensionless address');
+  const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8'));
+  ok((log.updates || []).every((u) => !/\.html(?:[#?]|$)/.test(u.url || '')),
+    'changelog.json: every entry links its page without .html');
+  for (const nm of readdirSync(path.join(root, 'v3')).filter((n) => n.endsWith('.html'))) {
+    const stub = await readFile(path.join(root, 'v3', nm), 'utf8');
+    ok(!/url=\/[a-z-]+\.html"/.test(stub), `v3/${nm}: the preview stub redirects to the extensionless address`);
+  }
+
+  const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+  ok(/if \(!existsSync\(file\) && !path\.extname\(file\) && existsSync\(file \+ '\.html'\)\) file \+= '\.html';/.test(pt),
+    'page-test.mjs: its server resolves /jobs to jobs.html the way Pages does, or every link on the site would 404 under test');
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  ok(/## A page's address carries no `\.html`/.test(claude), 'CLAUDE.md records the decision');
+}
+
+
 async function testSweep20260906() {
   const rd = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
   const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
@@ -17230,7 +17310,7 @@ async function testForum() {
 
   const forumDir = path.join(root, '_functions', 'forum');
   const forumFiles = (await readdir(forumDir)).filter((f) => f.endsWith('.js')).sort();
-  eq(forumFiles, ['accept.js', 'delete.js', 'edit.js', 'identity.js', 'index.js', 'join.js', 'member.js', 'moderate.js', 'post.js', 'vote.js', 'words.js'],
+  eq(forumFiles, ['accept.js', 'delete.js', 'edit.js', 'identity.js', 'index.js', 'join.js', 'member.js', 'moderate.js', 'post.js', 'view.js', 'vote.js', 'words.js'],
     'forum: the function files, and only those');
   const forumSrc = {};
   for (const f of forumFiles) forumSrc[f] = await read('_functions', 'forum', f);
@@ -17519,8 +17599,8 @@ async function testForum() {
       'forum css: the audit reads its own named list, and there is only one of it');
     ok(/const unseen = FORUM_INK\.filter\(\(s\) => !FORUM_INK_SEEN\.has\(s\)\);/.test(pt),
       'forum css: and a selector that was never on screen fails, rather than passing unmeasured');
-    eq((pt.match(/await forumContrast\(q, /g) || []).length, 6,
-      'forum css: six views are audited: the two lists, a busy thread, the guide thread, and the ask form twice, with its similar list open and with its tag menu open');
+    eq((pt.match(/await forumContrast\(q, /g) || []).length, 8,
+      'forum css: eight views are audited: the two lists, a busy thread, the guide thread, the ask form twice (with its similar list open and with its tag menu open), Home and the Tags page');
   }
   ok(/quote = \{\s*n: qn,\s*by: src\.by,\s*text,\s*\}/.test(forumSrc['post.js']), 'forum: and is stored as a copy {n, by, text}');
   ok(/const body = guide\.text\(\);/.test(forumSrc['moderate.js']) && !/d\.body/.test(forumSrc['moderate.js']),
@@ -17685,7 +17765,7 @@ async function testForum() {
 
   const fn = await read('_functions', 'index.js');
   ok(/const forum = require\('\.\/forum'\);/.test(fn), 'forum: index.js requires ./forum');
-  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
+  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept', 'forumVote', 'forumThreadVotes', 'forumView', 'forumModerate']) {
     ok(new RegExp(`^exports\\.${name} = forum\\.${name};$`, 'm').test(fn), `forum: index.js re-exports ${name} on its own line`);
   }
   const pkg = JSON.parse(await read('_functions', 'package.json'));
@@ -17771,7 +17851,7 @@ async function testForum() {
   for (const w of [/season \+ ':' \+\s+uid/, /randomInt/, /secretVersion/, /both rooms/, /quote/, /tags/, /`up`/, /Moderator/, /R1\b/, /R10/, /@doc/]) {
     ok(w.test(cf), `forum: CLAUDE.md records ${w}`);
   }
-  ok(/FOURTEEN/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads fourteen');
+  ok(/FIFTEEN/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads fifteen');
   for (const [f, src] of [...Object.entries(forumSrc), ['build-functions-vendor.mjs', await read('_scraper', 'build-functions-vendor.mjs')],
     ['oa-forum-model.js', await read('assets', 'oa-forum-model.js')], ['oa-forum-guard.js', await read('assets', 'oa-forum-guard.js')],
     ['oa-forum-guide.js', await read('assets', 'oa-forum-guide.js')], ['forum-emulator.mjs', em]]) {
@@ -18091,9 +18171,9 @@ async function testForum() {
   /* The row is WRITTEN either way — the switch decides whether it is drawn —
      so both menus are pinned to carry it behind the flag, and the flag is
      pinned to be the only thing between them and the page. */
-  ok(/\(FORUM_ANNOUNCED\s*\n?\s*\? '<a role="menuitem" href="forum\.html">'/.test(acct) && /data-count="forum" hidden/.test(acct),
+  ok(/\(FORUM_ANNOUNCED\s*\n?\s*\? '<a role="menuitem" href="forum">'/.test(acct) && /data-count="forum" hidden/.test(acct),
     'oa-accounts.js: the Forum row with its badge born hidden, behind the announce switch');
-  ok(/\(FORUM_ANNOUNCED \? '<a class="link depth-0" href="forum\.html">Forum<\/a>' : ''\)/.test(acct),
+  ok(/\(FORUM_ANNOUNCED \? '<a class="link depth-0" href="forum">Forum<\/a>' : ''\)/.test(acct),
     'oa-accounts.js: the phone sheet has the row too, behind the same switch');
   ok(!/data-held="forum"/.test(acct), 'oa-accounts.js: the row is drawn for every signed-in account, not held on a count');
   const signOutSrc = acct.slice(acct.indexOf('  function signOut() {'), acct.indexOf('OAFB.ready()', acct.indexOf('  function signOut() {')));
@@ -18106,7 +18186,7 @@ async function testForum() {
   ok(/v\.uid === uid && Number\(v\.season\) === Y && v\.handle/.test(pageJs), 'oa-forum.js: the cached join is trusted only for the same account and season');
 
   /* the callables and their words */
-  for (const n of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept', 'forumVote', 'forumThreadVotes', 'forumModerate']) ok(pageJs.includes(`'${n}'`), `oa-forum.js: calls ${n}`);
+  for (const n of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept', 'forumVote', 'forumThreadVotes', 'forumView', 'forumModerate']) ok(pageJs.includes(`'${n}'`), `oa-forum.js: calls ${n}`);
   ok(/REGION = 'us-central1'/.test(pageJs) && /fb\.app\(\)\.functions\(REGION\)\.httpsCallable\(name\)/.test(pageJs), 'oa-forum.js: the callables by region through OAFB.readyFunctions');
   ok(/OAFB\.readyFunctions\(\)/.test(pageJs), 'oa-forum.js: the Functions SDK is loaded on demand');
   const reasonKeys = [...pageJs.slice(pageJs.indexOf('var REASONS = {'), pageJs.indexOf('};', pageJs.indexOf('var REASONS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
@@ -18455,8 +18535,8 @@ async function testForum() {
      && /if \(!u\) \{ forgetReader\(\);/.test(pageJs)
      && /S\.me = null;/.test(pageJs),
     'oa-forum.js: signing out forgets the reader in memory, not only on screen');
-  ok(/'oa-forum-me',\s*\n\s*'oa-forum-rooms', 'oa-forum-roomcard'\]/.test(pageJs),
-    'oa-forum.js: and empties the panels that printed their handle');
+  ok(/'oa-forum-me',\s*\n\s*'oa-forum-rooms', 'oa-forum-roomcard', 'oa-forum-home', 'oa-forum-nav',\s*\n\s*'oa-forum-tagsview', 'oa-forum-sorts'\]/.test(pageJs),
+    'oa-forum.js: and empties the panels that printed their handle, the home doors and the section nav among them');
   /* A ROVING TABINDEX NEEDS ARROW KEYS: tabindex="-1" takes the unselected
      room out of the tab order, so without a handler it was reachable by
      pointer and by nothing else. */
@@ -18565,8 +18645,8 @@ async function testForum() {
      that is a SIBLING of the thread rather than a child of it. One key, one
      definition, and every async completion on this page held to it. */
   ok(/function viewKey\(\)/.test(pageJs)
-     && /return S\.room \+ '\|' \+ S\.season \+ '\|' \+ \(S\.tid \|\| ''\) \+ '\|' \+ \(S\.ask \? '1' : ''\);/.test(pageJs),
-    'oa-forum.js: the view a paint is for is the whole address, in one function');
+     && /return S\.room \+ '\|' \+ S\.season \+ '\|' \+ \(S\.tid \|\| ''\) \+ '\|' \+ \(S\.ask \? '1' : ''\) \+ '\|' \+ S\.view \+ '\|' \+ S\.order;/.test(pageJs),
+    'oa-forum.js: the view a paint is for is the whole address, in one function, the section and the order included');
   ok(/var forView = viewKey\(\);[\s\S]{0,900}if \(mine !== listSeq \|\| forView !== viewKey\(\)\) return rows;/.test(pageJs),
     '…the list mount stops writing the shared state once the reader has moved');
   ok(!/forRoom|forSeason/.test(pageJs),
@@ -18629,13 +18709,13 @@ async function testForum() {
   /* the home page, the standard, the stylesheet */
   const home = await read('index.html');
   if (announced) {
-    ok(/<a class="v3-btn ghost" href="forum\.html">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');
+    ok(/<a class="v3-btn ghost" href="forum">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');
     const faq = home.slice(home.indexOf('Is there somewhere to talk to other candidates'), home.indexOf('Is my personal information published?'));
-    ok(faq.length > 300 && faq.length < 2500 && /forum\.html/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
+    ok(faq.length > 300 && faq.length < 2500 && /href="forum"/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
       'index.html: the FAQ names both rooms and where the forum is reached');
     ok(noDash(faq.replace(/&mdash;/g, '\u2014')), 'index.html: the FAQ answer carries no em dash');
   } else {
-    ok(!/href="forum\.html"/.test(home) && !/Is there somewhere to talk to other candidates/.test(home),
+    ok(!/href="forum(\.html)?"/.test(home) && !/Is there somewhere to talk to other candidates/.test(home),
       'index.html (not announced): no button and no FAQ answer');
     ok(/FORUM_ANNOUNCED in assets\/oa-accounts\.js/.test(home), 'index.html: the comment says where the button comes back from');
     /* the sweep the switch is actually FOR: not one served page, anywhere,
@@ -18644,7 +18724,7 @@ async function testForum() {
     for (const nm of readdirSync(path.join(HERE, '..'))) {
       if (!nm.endsWith('.html') || nm === 'forum.html') continue;
       const src = await read(nm);
-      ok(!/(href|src)="forum\.html/.test(src), `${nm} (not announced): does not point at the forum`);
+      ok(!/(href|src)="forum(\.html)?["?#]/.test(src), `${nm} (not announced): does not point at the forum`);
     }
     /* …and the words it will need are kept, so announcing is a restore
        rather than a rewrite */
@@ -18663,6 +18743,108 @@ async function testForum() {
   for (const [f, src] of [['forum.html', page], ['oa-forum.js', pageJs], ['oa-forum.css', pageCss]]) ok(noDash(src), `forum page: no em dash in ${f}`);
   ok(/cfg\.source/.test(cf) && /QUIET_PAGES/.test(cf) && /oa-forum-me/.test(cf) && /pushState/.test(cf), 'forum: CLAUDE.md records the page half');
 
+  /* --- the sections, and the views a question counts (owner, 2026-09-08) ----
+
+     "Add views per question thread, similar to Stackexchange. Second, add a
+     column on the left with Home, Questions, Unanswered and Tags." The count
+     is one key on the thread head, moved by a callable of its own that
+     writes nothing else; the sections are four addresses of the one page,
+     Home being the one with no room, where the reader chooses a door. */
+
+  const viewSrc = forumSrc['view.js'];
+  ok(FM.KEYS.thread.includes('views') && !FM.KEYS.post.includes('views'),
+    'forum views: the count is a thread key and never a post one');
+  ok(/exports\.forumView = onCall\(P\.OPTS/.test(viewSrc), 'forum views: a callable of its own, on the shared options');
+  ok(/views: FieldValue\.increment\(1\),/.test(viewSrc) && /tx\.update\(threadRef, viewPatch\)/.test(viewSrc),
+    'forum views: the head moves by one with increment, so a retried transaction never re-applies a stale absolute');
+  ok(!/m\.ref/.test(bare(viewSrc)) && !/handlePatch|dayViews|counters\(/.test(bare(viewSrc)),
+    'forum views: the handle document is not touched: a view spends no counter and leaves no mark on the member');
+  ok(!/minute\(|Date\b|serverTimestamp/.test(bare(viewSrc)), 'forum views: no clock is read, since nothing is stamped');
+  ok(!/\.collection\('votes'\)|\.collection\('viewers'\)|\.doc\(m\.H\)/.test(viewSrc),
+    'forum views: nothing is written under the thread, so there is no record of who opened it');
+  ok(/if \(tv\.hidden\) P\.refuse\('failed-precondition', 'locked'\);/.test(viewSrc) && /P\.refuse\('not-found', 'thread'\)/.test(viewSrc),
+    'forum views: a hidden thread and a missing one are refused with the reasons the page already words');
+  ok(!FM.KEYS.handle.includes('dayViews'), 'forum views: and no day counter joined the handle for it');
+  for (const f of ['post.js', 'moderate.js']) {
+    ok(/hidden: false,\s*\n\s*views: 0,\s*\n\s*\};/.test(forumSrc[f]), `forum views: ${f} starts a thread at nought views`);
+  }
+  ok(/const \{ forumView \} = require\('\.\/view\.js'\);/.test(forumSrc['index.js']) && /forumView, forumModerate,/.test(forumSrc['index.js']),
+    'forum views: the forum index re-exports it');
+  {
+    const shimSrc = await read('_scraper', '_fake-firebase.js');
+    const simSrc = shimSrc.slice(shimSrc.indexOf('  function forumSim(name, data) {'), shimSrc.indexOf('  function functionsFor() {'));
+    ok(/if \(name === 'forumView'\) \{/.test(simSrc) && /views: opened/.test(simSrc) && /hidden: false, views: 0\s*\n/.test(simSrc),
+      'shim: the simulator moves the count as the function does and starts a new thread at nought');
+  }
+
+  /* the page: the four sections, Home, the orders, the Tags page */
+  for (const id of ['oa-forum-top', 'oa-forum-nav', 'oa-forum-home', 'oa-forum-sorts', 'oa-forum-tagsview']) {
+    ok(page.includes(`id="${id}"`), `forum page: carries #${id}`);
+  }
+  ok(/<nav class="oa-forum-nav" id="oa-forum-nav" aria-label="Forum sections"><\/nav>/.test(page),
+    'forum page: the section nav ships empty and is drawn by the script, since every link carries the room and the season');
+  ok(page.indexOf('id="oa-forum-nav"') < page.indexOf('class="oa-forum-main"') && page.indexOf('class="oa-forum-main"') < page.indexOf('class="oa-forum-side"'),
+    'forum page: the sections down the left, the questions in the middle, the room\'s cards on the right');
+  ok(/var SECTIONS = \[\s*\n\s*\['home', 'Home', ICON_HOME\],\s*\n\s*\['questions', 'Questions', ICON_QUESTIONS\],\s*\n\s*\['unanswered', 'Unanswered', ICON_UNANSWERED\],\s*\n\s*\['tags', 'Tags', ICON_TAGS\]\s*\n\s*\];/.test(pageJs),
+    'oa-forum.js: Home, Questions, Unanswered and Tags, in that order, an icon each');
+  ok(/function drawNav\(\)/.test(pageJs) && /aria-current="page"/.test(pageJs)
+     && /var current = S\.view === 'thread' \|\| S\.view === 'ask' \? 'questions' : S\.view;/.test(pageJs),
+    'oa-forum.js: the nav marks the section the reader is in, a thread and the ask form counting as Questions');
+  ok(/: params\.get\('room'\) \? 'questions' : 'home';/.test(pageJs) && /if \(!home\) p\.set\('room'/.test(pageJs),
+    'oa-forum.js: no room on the address is Home, and Home is the one address written without a room');
+  ok(/if \(S\.view === 'home'\) drawHome\(\);/.test(pageJs) && /show\(\$\('oa-forum-top'\), S\.view !== 'home'\);/.test(pageJs),
+    'oa-forum.js: Home draws the doors and puts the room switch away, since the doors are the switch');
+  ok(/function doorHTML\(room\)/.test(pageJs) && /data-enter-room="/.test(pageJs)
+     && /if \(rooms\.candidates\) doors \+= doorHTML\('candidates'\);/.test(pageJs) && /if \(rooms\.open\) doors \+= doorHTML\('open'\);/.test(pageJs),
+    'oa-forum.js: a door per room forumJoin admitted the account to, and no door for a room it did not');
+  ok(/var ORDERS = \[\['newest', 'Newest'\], \['active', 'Active'\], \['score', 'Score'\]\];/.test(pageJs)
+     && /function orderFn\(order\)/.test(pageJs) && /if \(a\.pinned !== b\.pinned\) return a\.pinned \? -1 : 1;/.test(pageJs),
+    'oa-forum.js: three orders for a list, pinned threads leading whichever');
+  ok(/function listed\(r\)/.test(pageJs) && /return r\.n <= 1 && !r\.locked;/.test(pageJs),
+    'oa-forum.js: Unanswered keeps the questions with no answer and leaves out a locked thread nobody can answer');
+  ok(/'Unanswered Questions'/.test(pageJs) && /'Newest Questions'/.test(pageJs) && /' with no answers'/.test(pageJs),
+    'oa-forum.js: the heading and the count line say which section and which order');
+  ok(/var TAGS_INTRO = 'A tag is a keyword or label that categorizes your question with other, similar questions\. Using the right tags makes it easier for others to find and answer your question\.';/.test(pageJs),
+    'oa-forum.js: the Tags page carries the owner\'s words, verbatim');
+  ok(/var TAG_ORDERS = \[\['popular', 'Popular'\], \['name', 'Name'\], \['new', 'New'\]\];/.test(pageJs) && /var NEW_TAGS = 3;/.test(pageJs),
+    'oa-forum.js: Popular, Name and New, the last being the three tags made most recently');
+  ok(/function drawTagsPage\(\)/.test(pageJs) && /id="oa-forum-tagfilter"/.test(pageJs) && /function tagStats\(rows, tally\)/.test(pageJs),
+    'oa-forum.js: the Tags page has its filter box and reads the room\'s tally and threads');
+  ok(/function countView\(tid\)/.test(pageJs) && /if \(seen\.viewed\[tid\] === day\) return;/.test(pageJs) && /var day = M\.today\(\);/.test(pageJs)
+     && /call\('forumView', \{ room: room, tid: tid \}\)/.test(pageJs),
+    'oa-forum.js: a view is counted once per thread per device per UTC day, the mark kept beside the seen-marks');
+  ok(/if \(!S\.me \|\| S\.archive \|\| !tid\) return;/.test(pageJs), 'oa-forum.js: and never for an archive, whose count froze at the roll');
+  ok(/class: 'oa-forum-stat is-views'/.test(pageJs) && /<span>Viewed <b id="oa-forum-views">/.test(pageJs),
+    'oa-forum.js: the card and the heading both print the count');
+  const fcss2 = await read('assets', 'oa-forum.css');
+  ok(/grid-template-columns: 164px minmax\(0, 1fr\) 300px;/.test(fcss2), 'forum css: three columns on a desktop');
+  ok(/body\.v3 \.oa-forum-navlink:hover \{/.test(fcss2) && /body\.v3 \.oa-forum-door:hover \{/.test(fcss2),
+    'forum css: the nav rows and the doors are links, so their hover rules outrank body.v3 a:hover');
+  ok(/\.oa-forum-sortpill \{ flex: 1 1 0; min-height: 42px; \}/.test(fcss2) && /\.oa-forum-tagfilter \{ width: 100%; min-height: 42px; font-size: 16px; \}/.test(fcss2),
+    'forum css: on a phone the order pills are 42px targets and the tag box is 16px (rule 13)');
+  ok(/\.oa-forum-navlink \{ flex-direction: column;/.test(fcss2) && /flex-direction: row;/.test(fcss2.slice(fcss2.indexOf('@media (max-width: 900px)'))),
+    'forum css: on a phone the sections are a row, the icon over the word');
+  {
+    const pt2 = await read('_scraper', 'page-test.mjs');
+    const ink2 = pt2.slice(pt2.indexOf('const FORUM_INK'), pt2.indexOf('async function forumContrast'));
+    for (const sel of ['.oa-forum-navlink', '.oa-forum-sortpill', '.oa-forum-doorname', '.oa-forum-tagsintro', '.oa-forum-tagcard-when']) {
+      ok(ink2.includes(`'${sel}'`), `forum css: the contrast audit measures ${sel}`);
+    }
+  }
+  /* the docs */
+  ok(/^### Home, Questions, Unanswered and Tags, and the views a question counts$/m.test(claude),
+    'forum: CLAUDE.md records the sections and the views');
+  const secAt = claude.indexOf('### Home, Questions, Unanswered and Tags');
+  /* to the next heading of EITHER level: the subsection ends the forum
+     section, so the next `### ` is some other section's */
+  const secDoc = claude.slice(secAt, secAt + 10 + claude.slice(secAt + 10).search(/\n##+ /));
+  ok(secDoc.length > 2000 && /forumView/.test(secDoc) && /per thread per device per UTC day/.test(secDoc) && /no room is Home/i.test(secDoc) && noDash(secDoc),
+    'forum: the section says how a view is counted, what Home is, and carries no em dash');
+  for (const f of ['_SETUP-INSTANT-PUBLISH.md', '_SETUP-EMAIL-VERIFICATION.md']) {
+    ok(/`forumView`/.test(await read(f)), `forum views: ${f} names the callable in the deploy list`);
+  }
+  ok(/section links/.test(await read('_MOBILE-STANDARDS.md')), 'forum: rule 13 in the mobile standards names the section links');
+
   /* --- the browser suite and the shim that drives it -------------------------
 
      The functions themselves are proved against the emulator; what the
@@ -18676,10 +18858,10 @@ async function testForum() {
      the gate can meet, the leak check and the 390px block. */
 
   const shim = await read('_scraper', '_fake-firebase.js');
-  ok(/var FORUM_NAMES = \['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept',\s*\n\s*'forumVote', 'forumThreadVotes', 'forumModerate'\];/.test(shim),
-    'shim: the simulator names the eight forum callables, and only those');
+  ok(/var FORUM_NAMES = \['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept',\s*\n\s*'forumVote', 'forumThreadVotes', 'forumView', 'forumModerate'\];/.test(shim),
+    'shim: the simulator names the nine forum callables, and only those');
   ok(/function forumSim\(name, data\)/.test(shim) && /if \(FORUM_NAMES\.indexOf\(String\(name\)\) !== -1\) return forumSim\(String\(name\), data\);/.test(shim),
-    'shim: httpsCallable dispatches the eight to forumSim');
+    'shim: httpsCallable dispatches the nine to forumSim');
   const fnFor = shim.slice(shim.indexOf('  function functionsFor() {'), shim.indexOf('  var firebase = {'));
   ok(fnFor.length > 300 && fnFor.length < 1500, 'shim: functionsFor was sliced');
   ok(fnFor.indexOf("record('callable', String(name), data || null);") < fnFor.indexOf('if (seed.callableFails)')
@@ -18688,7 +18870,7 @@ async function testForum() {
     'shim: every call is recorded first, callableFails still refuses everything, and sendVerificationEmail keeps its canned receipt');
   const sim = shim.slice(shim.indexOf('  function forumSim(name, data) {'), shim.indexOf('  function functionsFor() {'));
   ok(sim.length > 3000, 'shim: forumSim was sliced');
-  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
+  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept', 'forumVote', 'forumThreadVotes', 'forumView', 'forumModerate']) {
     ok(sim.includes(`name === '${name}'`), `shim: forumSim answers ${name}`);
   }
   ok(/var err = \{ code: 'functions\/' \+ code, message: reason \|\| code, details: \{ reason: reason \} \};/.test(shim),
@@ -18727,12 +18909,13 @@ async function testForum() {
      it only has to be far below the whole file, so that a marker that moved
      cannot pass this as "sliced" */
   ok(fb.length > 15000 && fb.length < pt.length / 4, 'page-test: the forum block was sliced');
-  for (const reader of ['forum (signed out)', 'forum (unverified)', 'forum (no profile)', 'forum (candidate)', 'forum (maintainer)', 'forum (archive)', 'forum mobile']) {
+  for (const reader of ['forum (signed out)', 'forum (unverified)', 'forum (no profile)', 'forum (candidate)', 'forum (sections)', 'forum (maintainer)', 'forum (archive)', 'forum mobile']) {
     ok(fb.includes(reader + ' (') || fb.includes(reader + ':') || fb.includes(`${reader}`), `page-test: drives ${reader}`);
   }
   ok(/signedOutPage\('forum\.html', \{ selector: '#oa-needauth' \}\)/.test(fb) && /selector: '#oa-forum-verify'/.test(fb)
-     && (fb.match(/signedInPage\('forum\.html'/g) || []).length >= 4 && /selector: '#oa-forum'/.test(fb),
-    'page-test: every forum call names its selector, since the page draws no .oa-card until admitted');
+     && (fb.match(/signedInPage\('forum(\.html)?'/g) || []).length >= 2 && (fb.match(/signedInPage\('forum\?room=candidates/g) || []).length >= 4
+     && /selector: '#oa-forum'/.test(fb),
+    'page-test: every forum call names its selector, since the page draws no .oa-card until admitted, and both Home and a room are landed on');
   ok(/'candidateSubmissions\/forum-c1'/.test(fb) && /status: 'queued', year: FY/.test(fb), 'page-test: the candidate is a seeded current profile');
   ok(/email: 'kstouras@gmail\.com'/.test(fb) && /no candidate profile/.test(fb), 'page-test: the maintainer is signed in with no profile');
   ok(/LEAK CHECK/.test(fb) && /const LEAKS = \[CAND\.uid, CAND\.email, 'Cassiopeia', 'Zyxwvut', 'Uncommon University', 'forum-c1'\];/.test(fb)
@@ -18806,10 +18989,10 @@ async function testRegisteredUsersFigure() {
     'v3.css: both phone breakpoints switch back to row flow with their own templates');
 
   /* the FAQ says the count is public and who they are is not */
-  const faq = html.slice(html.indexOf('Is my personal information published?'), html.indexOf('terms-and-conditions.html', html.indexOf('Is my personal information published?')));
+  const faq = html.slice(html.indexOf('Is my personal information published?'), html.indexOf('href="terms-and-conditions"', html.indexOf('Is my personal information published?')));
   ok(faq.length > 300 && faq.length < 2000, 'index.html: the FAQ answer slice is bounded both ends');
   ok(/The one thing about registered accounts that is public is how many\s+there are/.test(faq)
-     && /analytics\.html">analytics\s+page<\/a> shows how it has grown, and neither says who they are/.test(faq),
+     && /analytics">analytics\s+page<\/a> shows how it has grown, and neither says who they are/.test(faq),
     'index.html: the privacy FAQ names the count and the growth chart as the one public fact about accounts');
   ok(!/—/.test(faq.replace(/&mdash;/g, '—').slice(faq.indexOf('The one thing'))), 'index.html: …with no em dash in the new sentence');
 
@@ -19128,6 +19311,7 @@ if (isMain(import.meta.url)) {
   await testRegisteredUsersFigure();
   await testForum();
   await testSweep20260906();
+  await testExtensionlessAddresses();
   await testForumSeasonRoll();
   await testForumSeed();
   await testForumThreadRemoval();

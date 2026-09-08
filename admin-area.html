@@ -12,7 +12,7 @@
          identity for a page that gates everything behind the admin account —
          card: false in _scraper/share-check.mjs, with the six section stubs. -->
     <meta name="robots" content="noindex,nofollow">
-    <link rel="canonical" href="https://www.operationsacademia.org/admin-area.html">
+    <link rel="canonical" href="https://www.operationsacademia.org/admin-area">
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <script>
     (function () {
@@ -26,6 +26,17 @@
       }
       /* Reserve the account chip's space before first paint — the same
          snippet as every other page; see feedback.html for the reasoning. */
+      /* THE ADDRESS IS THE EXTENSIONLESS ONE. GitHub Pages serves /jobs and
+         /jobs.html alike, and the site links, canonicalises and shares the
+         first; so a reader who arrives on the second, through an old link or
+         a bookmark, is shown the address everyone else sees, before anything
+         paints or reads it. The search and the fragment travel with it. */
+      try {
+        var p = location.pathname;
+        if (/\.html$/.test(p) && history.replaceState) {
+          history.replaceState(null, '', p.replace(/\/index\.html$/, '/').replace(/\.html$/, '') + location.search + location.hash);
+        }
+      } catch (e) { /* the address is a convenience */ }
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
@@ -58,7 +69,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="jobs.html">Jobs</a>
+          <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -86,7 +97,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="jobs.html">Jobs</a>
+        <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -309,7 +320,7 @@
                 published &mdash; nobody sees them and no digest carries them until
                 you publish each one.</p>
               <div id="oa-aa-news-list"></div>
-              <p><a href="whats-new.html">Review and publish them on the What&rsquo;s
+              <p><a href="whats-new">Review and publish them on the What&rsquo;s
                 new page &rarr;</a></p>
             </section>
 
@@ -376,7 +387,7 @@
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
-            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            <p>Trusted by <a href="previous-markets">over 200 universities around the
             world</a>.<br>
             Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
             Sponsored by the
@@ -391,17 +402,17 @@
               <li><a href="./#placements">Placements</a></li>
               <li><a href="./#survey">Survey</a></li>
               <li><a href="./#resources">Resources</a></li>
-              <li><a href="analytics.html">Analytics</a></li>
+              <li><a href="analytics">Analytics</a></li>
             </ul>
           </div>
           <div>
             <h4>Participate</h4>
             <ul>
-              <li><a href="post-a-job.html">Post a job</a></li>
-              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
-              <li><a href="post-a-placement.html">Report a placement</a></li>
-              <li><a href="alerts.html">E-mail alerts</a></li>
-              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="post-a-job">Post a job</a></li>
+              <li><a href="post-a-candidate">Post your candidacy</a></li>
+              <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="alerts">E-mail alerts</a></li>
+              <li><a href="feedback">Feedback</a></li>
               <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
@@ -410,8 +421,8 @@
           <span>&copy; 2014-<span class="js-current-year"></span>
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
-            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a>
+            <a href="terms-and-conditions">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy">Privacy</a>
           </span>
         </div>
       </div>

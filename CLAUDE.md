@@ -48,6 +48,61 @@ tree, then rebuild every page the new design was borrowing from the old one —
 a card on the front page that opens a page in the previous design is the
 failure mode, not a missing file.
 
+## A page's address carries no `.html`
+
+Owner, 2026-09-08: *"Why some pages when they open they show the '.html' in
+the end? e.g. operationsacademia.org/forum shows up like
+operationsacademia.org/forum.html. Check for all pages of OA and fix it."*
+
+GitHub Pages serves `/forum` and `/forum.html` alike, so the extension was
+never the server's doing. The site put it there itself, in four places: every
+internal link named `page.html`; the forum page's own address builder
+(`href()` in `assets/oa-forum.js`) wrote `forum.html?room=...` and pushed it
+with `pushState` the moment a reader moved between a room and a thread, which
+is the exact symptom reported; the canonical, `og:url` and `sitemap.xml` named
+the `.html` form, so a shared card and a search result carried it; and the
+e-mails and the Cloud Functions built their links to the site the same way.
+
+**The address is the extensionless one, everywhere the live site writes
+one.** Links in the root pages and in `assets/*.js` are `href="jobs"`,
+`jobs?job=<id>`, `post-a-job?edit=<id>`; `OAJobNav`'s two page names,
+`OAAlertSave.PAGE`, the review panel's `EDIT_PATH` and the forum's `href()`
+carry no extension; the canonical, `og:url` and the sitemap agree on it
+(`share-check.mjs` pins all three through `PAGES`); the mailers and
+`_functions/verify-email.js` build `/verify-email?mode=...` and `/account`;
+the change log's `url`s say the same. **The files keep their names**: a
+relative link still resolves under a preview directory (`/v3/jobs` served
+`v3/jobs.html`), which is what rule 2 of the three trees needs, and
+`link-check.mjs` already resolved an extensionless link to its file.
+
+**A reader arriving on the old form is shown the new one.** Every live page's
+head snippet, before anything paints, turns a `location.pathname` ending in
+`.html` into the extensionless address with `history.replaceState`
+(`index.html` to `/`), keeping the search and the fragment; so a bookmark, an
+old share or a link from the frozen archives lands on `/jobs.html` and reads
+`/jobs`. Nothing else reads the address before that runs, and `oa-list.js`,
+`oa-alertsave.js`, `oa-verify.js` and `v3.js` all rewrite from
+`location.pathname`, so they carry whatever form is there.
+
+**What deliberately did not move.** `/v1/` and `/v2/` keep their own links and
+heads, by the rule the three trees are held to; the six root stubs and the
+`/v3/` stubs still redirect, the latter to the extensionless address now. The
+analytics pipeline keeps `.html` as the STORAGE form of a path (`normPath` in
+`assets/oa-analytics-model.js`), since that is the one form a file on disk has
+and the served `data/analytics.json` already holds it; a usage record written
+under `/jobs` and one under `/jobs.html` are one page there, as before.
+`_scraper/page-test.mjs`'s server resolves an extensionless request the way
+Pages does, or every link on the site would 404 under test.
+
+Tests: `testExtensionlessAddresses` in `_scraper/selftest.mjs` (no live root
+page or live script links a root page with `.html`, every live page carries
+the head normaliser, the forum builds `forum?`, the two `OAJobNav` page names,
+the sitemap and every card's canonical extensionless, the change log's urls,
+and the test server's resolution), `share-check.mjs` for the canonical and
+`og:url`, and the browser suite, whose address checks read `/jobs`,
+`/account` and `/verify-email` off the address bar.
+
+
 ## Two sources of job postings, and only one of them is the database
 
 `data/jobs.json` is built by `_scraper/build-jobs.mjs` from **both**:
@@ -1606,8 +1661,8 @@ lost ring lands the reveal at 14:07 at worst. **Do NOT add a GitHub cron at 14:0
 as well**: two producers for one event is the duplicate-doorbell outage under
 "One event, one build", and the selftest refuses a workflow cron on that hour.
 Like every function here it is inert until deployed; the deploy also creates
-the Cloud Scheduler job, and `firebase functions:list` must read back FOURTEEN
-(the four doorbells, `recordVisit`, `sendVerificationEmail` and the eight forum
+the Cloud Scheduler job, and `firebase functions:list` must read back FIFTEEN
+(the four doorbells, `recordVisit`, `sendVerificationEmail` and the nine forum
 callables).
 
 **The alerts' reveal note is keyed on the instant, and its mark is lifted to
@@ -2662,8 +2717,8 @@ live site's from `assets/v3.css`, the button is a coloured table cell with a
 VML fallback for Outlook, and the link is written out in full as text as well
 as behind the button.
 
-**The deploy count is FOURTEEN now.** Four doorbells (`revealCandidates` among
-them), `recordVisit`, `sendVerificationEmail`, and the eight forum callables
+**The deploy count is FIFTEEN now.** Four doorbells (`revealCandidates` among
+them), `recordVisit`, `sendVerificationEmail`, and the nine forum callables
 (see "The forum"). Read the list back after every deploy; fewer means a stale
 checkout. `npm install --prefix _functions` first, since the CLI loads
 `index.js` and this function requires `nodemailer`.
@@ -3414,19 +3469,24 @@ deliberately NOT named in any workflow: the "every builder has a caller,
 never both" guard refuses a builder both in `BUILDERS` and in a workflow, and
 the byte pin already catches drift, so the `--check` mode is for a hand run.
 
-**The deploy count is FOURTEEN.** `_functions/index.js` re-exports the eight
+**The deploy count is FIFTEEN.** `_functions/index.js` re-exports the nine
 callables one per line (`exports.forumX = forum.forumX;`) so a deploy's
 per-function lines and the selftest's count of them agree; the header, both
 setup pages and the count sentences in this file moved from six together,
-again from twelve when `forumDelete` arrived, and again from thirteen when
-`forumAccept` did.
+again from twelve when `forumDelete` arrived, from thirteen when
+`forumAccept` did, and from fourteen when `forumView` did.
 `npm install --prefix _functions` first, as always: `@google-cloud/secret-
 manager` arrived with the forum and the CLI's own load of `index.js` dies on
 a `require` it cannot resolve. Owner, by hand, once: `firebase
 functions:secrets:set FORUM_SECRET --project operations-academia`, then
 `git pull && npm install --prefix _functions && firebase deploy --only
-functions --project operations-academia`, read fourteen back, and press the
+functions --project operations-academia`, read fifteen back, and press the
 seed for each room. The rules publish themselves behind the green check.
+
+**And `revealCandidates` is not the only count that moves**: `forumView`
+(2026-09-08) is the ninth forum callable, so every sentence above that names
+the count reads fifteen, and the selftest holds the header, both setup pages
+and this file to it.
 
 **The emulator test is the ground truth, and it skips honestly.**
 `_functions/test/forum-emulator.mjs` runs under `firebase emulators:exec
@@ -3660,7 +3720,7 @@ back and flips the switch:
 2. the home page's button, in the candidates section's `.v3-section-cta`,
    where a comment holds its place:
 
-       <a class="v3-btn ghost" href="forum.html">Candidates&rsquo; forum</a>
+       <a class="v3-btn ghost" href="forum">Candidates&rsquo; forum</a>
 
 3. the home page's FAQ answer, restored as a `.v3-faq-item` immediately
    before *Is my personal information published?*. Its question, on one line:
@@ -3668,7 +3728,7 @@ back and flips the switch:
        Is there somewhere to talk to other candidates and to faculty?
 
    and its answer: *Yes. The
-   site has an anonymous [forum](forum.html) in two rooms. The **Candidates'
+   site has an anonymous [forum](forum) in two rooms. The **Candidates'
    room** is for the accounts holding a candidate profile for the season under
    way; the **Open forum** is for every registered account with a confirmed
    e-mail address, faculty included. You post under a random handle drawn for
@@ -3707,7 +3767,7 @@ back and flips the switch:
   "date": "2026-09-05",
   "title": "An anonymous forum, in two rooms",
   "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post is yours to edit and to delete at any time, a question once every reply has gone. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
-  "url": "/forum.html"
+  "url": "/forum"
 }
 ```
 
@@ -3732,7 +3792,7 @@ and it ends for a season when that season's version is destroyed.
 Tests: `testForum` in `_scraper/selftest.mjs` (the model, the writers against
 the model both ways through the `@doc` blocks, R1 to R8 as source scans, the
 rules block clause by clause with the rooms pinned against the model both
-ways, the guard's literal and fixtures, the guide, the fourteen exports, the
+ways, the guard's literal and fixtures, the guide, the fifteen exports, the
 package and lockfile, the emulator test's shape and the workflow job, no
 forum cron, the runbook, the policy paragraph (R9), the change log entry and
 this section; then the page half: noindex and no preview block, charset
@@ -3756,7 +3816,7 @@ chip prints the account's own name and address on every page by design, and
 over the whole document for the uid and the profile id; the maintainer
 seeding the guide through `forumModerate` and posting under a drawn handle;
 the archive view asking for no votes; and the 390px block for the list, one
-thread and the open compose). `testForum` also pins the simulator (the six
+thread and the open compose). `testForum` also pins the simulator (the nine
 names and only those, the refusal shape, the fixed vote id, the reasons it
 answers with) and the browser block (every reader driven, the leak needles,
 the shared measure), so a block deleted or a reader dropped fails the
@@ -4367,6 +4427,135 @@ iD said under the box with the menu shut, shut by Escape and when the
 keyboard leaves; the banner back with the thread; and at
 390px the inset, the stacked buttons, the menu's width, height and rows, and
 the menu opening above a box at the foot of the screen).
+### Home, Questions, Unanswered and Tags, and the views a question counts
+
+Owner, 2026-09-08, with four screenshots of the site the forum was asked to
+resemble: *"Add 'views' per question thread, similar to Stackexchange.
+Second, add a column on the left with 'Home', 'Questions', 'Unanswered' and
+'Tags' (along with the same or similar emoticon as shown in the attached
+picture)"*, the Tags page to open with *"A tag is a keyword or label that
+categorizes your question with other, similar questions. Using the right
+tags makes it easier for others to find and answer your question."* and to
+be ordered by *"popular, name, new"*, and Home to be *"the initial page of
+the forum … allowing them to self-select between 'Open forum' (available to
+all) and 'Candidates forum' (shown only to candidates and the admin)"*.
+
+**THE ADDRESS IS THE SECTION, and no room is Home.** The page already moved
+between its views with `pushState` (a list, a thread, the ask form under one
+address each), so the four sections are four more readings of the one
+address rather than four pages: `forum` with no `room` is Home,
+`?room=X` is the room's questions, `?view=unanswered` and `?view=tags` are
+the two other sections, and `?order=active|score` is the list's order when
+it is not the default. `readState` reads all of it, `href` writes all of
+it, `viewKey` carries the section and the order (a paint landing after the
+reader has moved on is the trap this page already records twice), and the
+nav is drawn by `drawNav` from the room and the season rather than shipped
+in the markup, with `aria-current` on the row the reader is in; a thread and
+the ask form count as Questions, the way the site the owner named marks
+them. The forum used to land a reader in a room straight away; it lands
+them on Home now, which is what "the initial page" asks for, and the doors
+there are links to `?room=`, so a bookmark of a room still opens the room.
+
+**HOME DRAWS A DOOR PER ROOM forumJoin ADMITTED THE ACCOUNT TO**, and
+nothing the page decides: the Open forum's for every member, the
+Candidates' room's for a current candidate and the maintainer, and for
+everybody else the one line the tab row already carried, saying what opens
+it. The room switch at the top is put away on Home (the doors are the
+switch), so are the room's own cards on the right (How this room works,
+Saved, Tags you watch, Popular tags), and the handle is said once in the
+home lede, since the room banner that usually says it names a room. The
+guide panel and the maintainer's seed card stay, being the forum's rather
+than a room's.
+
+**QUESTIONS ORDERS ITS LIST FROM A BAR UNDER THE HEADING**: Newest (asked
+last), Active (moved last) or Score (best liked), the heading following
+("Newest Questions", "Active Questions", "Top Questions") and pinned threads
+leading whichever. The list read (`orderBy lastAt desc, limit 200`) is what
+it was; the order is applied in `prepare`, and a press moves the address
+and draws the list again under the same filters (the engine's own `tags`
+and `q` keys are carried), which is one read per press and the same read
+every navigation on this page already costs. Newest is the default, which
+is a change from the activity order the list used to open in, and the
+default travels in no address, so every link made before there was one
+lands where it did.
+
+**UNANSWERED IS THE LIST NARROWED, NOT A SECOND READ**: the same rows, kept
+where a thread has no answer (`n <= 1`) and is not locked, since a locked
+thread is one nobody can answer and the room's guide is one. `S.rows` keeps
+the whole list either way, so a thread's heading can still be drawn from
+its row and the watched-tags line still counts over the room; what the
+section shows is the part of it, and the count line says "N questions with
+no answers".
+
+**TAGS IS THE ROOM'S TALLY AND ITS THREADS, READ TOGETHER.** The tally is
+the count of record (it counts every question in the room, up to the cap);
+the threads say the rest: how many carrying a tag were asked this week and
+this month, and when a tag was FIRST used, which is what "new" is measured
+by, so "New" is the three tags made most recently in the room, the newest
+first, and a tag in the tally that none of the threads read carries is
+older than any of those and left out of that one order. Popular is by use
+with ties by name, Name is alphabetical, and the box narrows by name as the
+reader types, through the same `slug()` a tag is made with. Every card
+carries the chip that opens the room's questions narrowed to the tag and
+the bell that watches it, which is the same local mark as in the side cards
+(nothing is written; the pressed state flips where it stands, and the
+keyboard stays on the bell).
+
+**A VIEW IS A NUMBER, AND THE NUMBER IS ALL THE FORUM LEARNS.** `views` is
+one key on the thread head (`KEYS.thread`), started at nought by `forumPost`
+and by the guide seed, and moved by one by **`forumView`**
+(`_functions/forum/view.js`), the ninth callable, which writes NOTHING ELSE:
+no document under the thread, no key on the handle, no stamp, and no day
+counter, since the handle document is not touched at all. That is the
+decision rather than a shortcut: a view kept per member is a record of who
+reads what, in a room built so that nothing records that, so the dedupe
+lives in the browser instead. `countView` in `oa-forum.js` counts an
+opening once per thread per device per UTC day, the mark kept in the
+seen-store beside the New badge's (`viewed: { tid: yyyy-mm-dd }`, keyed to
+the account, cleared by sign-out with it), asks the function, and never
+waits for it: the card's tally column prints the count under the votes and
+the answers, the heading says "Viewed N times", and a function that cannot
+be reached (not deployed yet, or cold past its timeout) leaves the number
+the thread already had. The answer is remembered on the page (`VIEWED`) so a
+read of the thread that was in flight when the count moved cannot paint the
+older number over the newer one. An archive counts nothing; its numbers
+froze at the roll. The cost, said: the number can be inflated by anyone
+admitted to the room who cares to, and nothing on the site acts on it.
+
+**The three columns and the phone.** `.oa-forum-cols` is
+`164px minmax(0, 1fr) 300px` on a desktop, the nav a sticky column of rows
+with an icon each (inline SVGs in `oa-forum.js`, `currentColor`, no
+request), the row in force marked by a rail on its left. Under 900px the
+nav is a ROW above the questions, under 640px the icon sits over the word so
+four fit at 320px, and every row, every order pill and the tag box is a
+42px target (rule 13 in `_MOBILE-STANDARDS.md`, which names them). The nav
+rows and the doors are `<a>`s, so their hover rules carry `body.v3` to
+outrank `body.v3 a:hover`, the trap the tag chips already record.
+
+Until the functions are redeployed `forumView` is refused as not found and
+the page ignores it, so the counts stay at nought and everything else here
+works; `firebase deploy --only functions --project operations-academia`
+from a pulled checkout, and read FIFTEEN back.
+
+Tests: the sections block of `testForum` (the key on the thread and not on
+a post, the callable's shape and what it never touches, the nought both
+thread writers start at, the simulator's copy, the page's ids and the four
+sections in order, Home as the address with no room, the doors per admitted
+room, the three orders with pinned threads leading, the Unanswered rule, the
+owner's Tags words verbatim, the three tag orders with New being three, the
+once-per-day count, the stylesheet's columns and phone rules, the audit's
+new surfaces, and the docs), the `forumView` block of the emulator test
+(the count moved by one for two members, no handle document moved, nothing
+under the thread but its posts, a missing thread and a refused room), and
+the sections block of `page-test.mjs` (Home with two doors for a candidate
+and one for anybody else, the room switch and the room's cards put away,
+the three orders read off the rendered list with the heading and the pill
+following, Unanswered keeping the one question nobody answered, the Tags
+page in its three orders with the box narrowing them and a bell writing
+nothing, a view counted once with the heading, the card and the stored
+count following and a second opening asking nothing, the leak check across
+the sections, and at 390px the four links in one row and the pills as 42px
+targets), with Home and the Tags page joining the contrast audit's views.
 
 ## What "immediate" costs, and where the waiting used to be
 
@@ -6338,8 +6527,11 @@ public page".
 **Normalise, THEN filter, and that order is load-bearing.** Pages serves both
 `/admin-area` and `/admin-area.html` for one file and the build recorded both,
 so a filter matching only the spelling somebody thought of would have leaked
-the desk under its other name. The canonical form is the one the pages' own
-canonical tags use — WITH the extension, `/index.html` folding to `/`.
+the desk under its other name. The normal form the FILE stores is the one
+WITH the extension, `/index.html` folding to `/`, because that is the one
+form a path on disk has; the address the site shows and canonicalises is the
+extensionless one since 2026-09-08 (see "A page's address carries no
+`.html`"), and `normPath` folds the two together.
 
 **Two bugs the tests caught rather than opinions I held:**
 
@@ -7707,7 +7899,9 @@ simply re-run. And **`sitemap.xml` listed every page extensionless** while its
 canonical and `og:url` named the `.html` form; Pages serves both, so nothing
 404'd — it was just two addresses for one page, which is the same split as the
 main defect wearing different clothes. The sitemap now names what the pages
-name, and `share-check.mjs` fails if the two part company again.
+name, and `share-check.mjs` fails if the two part company again. (Since
+2026-09-08 what they both name is the EXTENSIONLESS address, `/jobs`; the
+rule that they agree is unchanged.)
 
 **robots.txt now names the preview crawlers explicitly.** They were already
 allowed by the wildcard; the Sharing Debugger has a bug — 2014, and back in

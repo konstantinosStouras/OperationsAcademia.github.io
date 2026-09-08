@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>Survey FAQs — Operations Academia</title>
     <meta name="description" content="Frequently asked questions about the Annual Job Market Survey in Operations — who should answer it, what is asked, and what happens to the answers.">
-    <link rel="canonical" href="https://www.operationsacademia.org/survey-faqs.html">
+    <link rel="canonical" href="https://www.operationsacademia.org/survey-faqs">
 
     <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
          og:* is read by Facebook, Messenger, WhatsApp, LinkedIn, Telegram,
@@ -23,7 +23,7 @@
     <meta property="og:locale" content="en_GB">
     <meta property="og:title" content="Survey FAQs">
     <meta property="og:description" content="Frequently asked questions about the Annual Job Market Survey in Operations — who should answer it, what is asked, and what happens to the answers.">
-    <meta property="og:url" content="https://www.operationsacademia.org/survey-faqs.html">
+    <meta property="og:url" content="https://www.operationsacademia.org/survey-faqs">
     <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:type" content="image/jpeg">
@@ -57,6 +57,17 @@
          62px, the theme toggle by 185px). Reserve the space it will take, from
          the same localStorage hint the chip is painted from, before the browser
          draws anything. */
+      /* THE ADDRESS IS THE EXTENSIONLESS ONE. GitHub Pages serves /jobs and
+         /jobs.html alike, and the site links, canonicalises and shares the
+         first; so a reader who arrives on the second, through an old link or
+         a bookmark, is shown the address everyone else sees, before anything
+         paints or reads it. The search and the fragment travel with it. */
+      try {
+        var p = location.pathname;
+        if (/\.html$/.test(p) && history.replaceState) {
+          history.replaceState(null, '', p.replace(/\/index\.html$/, '/').replace(/\.html$/, '') + location.search + location.hash);
+        }
+      } catch (e) { /* the address is a convenience */ }
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
@@ -102,7 +113,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="jobs.html">Jobs</a>
+          <a href="jobs">Jobs</a>
           <a href="./#candidates">Candidates</a>
           <a href="./#placements">Placements</a>
           <a href="./#survey" class="is-active" aria-current="page">Survey</a>
@@ -130,7 +141,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="jobs.html">Jobs</a>
+        <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey" class="is-active" aria-current="page">Survey</a>
@@ -156,7 +167,7 @@
           <p class="v3-lede" style="margin-top:14px">Besides keeping a clean record of the openings available and the candidates on the market, we set out to collect data on the profiles of the people who accept an Operations-related academic job. These are the questions that come up most.</p>
           <div class="v3-cta-row" style="margin-top:24px">
             <a class="v3-btn primary" href="https://ucdbusiness.eu.qualtrics.com/jfe/form/SV_eWE3b3l2YqZv56l" target="_blank" rel="noopener">Take the survey</a>
-            <a class="v3-btn ghost" href="survey.html">About the survey</a>
+            <a class="v3-btn ghost" href="survey">About the survey</a>
             <a class="v3-btn ghost" href="./#survey">&larr; Back to the overview</a>
           </div>
         </div>
@@ -190,7 +201,7 @@
               <span class="v3-faq-chev" aria-hidden="true">+</span></button>
             <div class="v3-faq-a"><div><div class="v3-faq-body">
               <p>Fill it out and say you accepted a postdoc or an industry position until your academic
-              position begins. <a href="feedback.html">Get in touch if anything is unclear</a>.</p>
+              position begins. <a href="feedback">Get in touch if anything is unclear</a>.</p>
             </div></div></div>
           </div>
 
@@ -240,7 +251,7 @@
               <p>Third, &ldquo;<em>without action the world would still be an idea</em>&rdquo;, to rephrase
               <a href="http://en.wikipedia.org/wiki/Georges_Doriot" target="_blank" rel="noopener">Georges
               Doriot</a>. Either you trust the researcher conducting the survey, by accepting the detailed
-              <a href="informed_consent_statement.html">informed consent statement</a>, or you do not.
+              <a href="informed_consent_statement">informed consent statement</a>, or you do not.
               Given the right data, we promise insight that will help future PhD students, schools, and
               every academic in the field &mdash; as the Marketing community's own executive summaries show
               (<a href="http://docsig.org/wp-content/uploads/2013/10/2013.pdf" target="_blank" rel="noopener">2012&ndash;2013</a>
@@ -284,7 +295,7 @@
             <button type="button" class="v3-faq-q">I have a suggestion for improving the survey, but I would like to hear what others think.
               <span class="v3-faq-chev" aria-hidden="true">+</span></button>
             <div class="v3-faq-a"><div><div class="v3-faq-body">
-              <p>Please <a href="feedback.html">send it to us through the feedback page</a> &mdash;
+              <p>Please <a href="feedback">send it to us through the feedback page</a> &mdash;
               you can do so anonymously, and suggestions that others might weigh in on are
               raised in the survey&rsquo;s own comments.</p>
             </div></div></div>
@@ -292,8 +303,8 @@
         </div>
 
         <p class="v3-mut" style="margin-top:34px">Still unsure about something?
-        <a href="feedback.html">Ask us</a> &mdash; and read the
-        <a href="informed_consent_statement.html">informed consent statement</a> before you
+        <a href="feedback">Ask us</a> &mdash; and read the
+        <a href="informed_consent_statement">informed consent statement</a> before you
         begin.</p>
       </div>
     </main>
@@ -307,7 +318,7 @@
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
-            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            <p>Trusted by <a href="previous-markets">over 200 universities around the
             world</a>.<br>
             Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
             Sponsored by the
@@ -322,17 +333,17 @@
               <li><a href="./#placements">Placements</a></li>
               <li><a href="./#survey">Survey</a></li>
               <li><a href="./#resources">Resources</a></li>
-              <li><a href="analytics.html">Analytics</a></li>
+              <li><a href="analytics">Analytics</a></li>
             </ul>
           </div>
           <div>
             <h4>Participate</h4>
             <ul>
-              <li><a href="post-a-job.html">Post a job</a></li>
-              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
-              <li><a href="post-a-placement.html">Report a placement</a></li>
-              <li><a href="alerts.html">E-mail alerts</a></li>
-              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="post-a-job">Post a job</a></li>
+              <li><a href="post-a-candidate">Post your candidacy</a></li>
+              <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="alerts">E-mail alerts</a></li>
+              <li><a href="feedback">Feedback</a></li>
               <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
@@ -341,8 +352,8 @@
           <span>&copy; 2014-<span class="js-current-year"></span>
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
-            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a>
+            <a href="terms-and-conditions">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy">Privacy</a>
           </span>
         </div>
       </div>

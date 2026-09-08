@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>Annual Job Market Survey — Operations Academia</title>
     <meta name="description" content="The first job market survey ever conducted for candidates in Operations Management and Operations Research — what candidates went through, in their own numbers.">
-    <link rel="canonical" href="https://www.operationsacademia.org/survey.html">
+    <link rel="canonical" href="https://www.operationsacademia.org/survey">
 
     <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
          og:* is read by Facebook, Messenger, WhatsApp, LinkedIn, Telegram,
@@ -23,7 +23,7 @@
     <meta property="og:locale" content="en_GB">
     <meta property="og:title" content="The Annual Operations Job Market Survey">
     <meta property="og:description" content="The first job market survey ever conducted for candidates in Operations Management and Operations Research — what candidates went through, in their own numbers.">
-    <meta property="og:url" content="https://www.operationsacademia.org/survey.html">
+    <meta property="og:url" content="https://www.operationsacademia.org/survey">
     <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:type" content="image/jpeg">
@@ -57,6 +57,17 @@
          62px, the theme toggle by 185px). Reserve the space it will take, from
          the same localStorage hint the chip is painted from, before the browser
          draws anything. */
+      /* THE ADDRESS IS THE EXTENSIONLESS ONE. GitHub Pages serves /jobs and
+         /jobs.html alike, and the site links, canonicalises and shares the
+         first; so a reader who arrives on the second, through an old link or
+         a bookmark, is shown the address everyone else sees, before anything
+         paints or reads it. The search and the fragment travel with it. */
+      try {
+        var p = location.pathname;
+        if (/\.html$/.test(p) && history.replaceState) {
+          history.replaceState(null, '', p.replace(/\/index\.html$/, '/').replace(/\.html$/, '') + location.search + location.hash);
+        }
+      } catch (e) { /* the address is a convenience */ }
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
@@ -102,7 +113,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="jobs.html">Jobs</a>
+          <a href="jobs">Jobs</a>
           <a href="./#candidates">Candidates</a>
           <a href="./#placements">Placements</a>
           <a href="./#survey" class="is-active" aria-current="page">Survey</a>
@@ -130,7 +141,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="jobs.html">Jobs</a>
+        <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey" class="is-active" aria-current="page">Survey</a>
@@ -156,10 +167,10 @@
           <p class="v3-lede" style="margin-top:14px">Have you recently gone through the job market search for an academic job in Operations &mdash; broadly defined, so Operations Research, Management Science, Industrial Engineering and Analytics included? This anonymous survey sets out to understand the profiles of the people our field newly hires. It can be answered <strong>either by candidates or on behalf of a hiring committee</strong>.</p>
           <div class="v3-cta-row" style="margin-top:24px">
             <a class="v3-btn primary" href="https://ucdbusiness.eu.qualtrics.com/jfe/form/SV_eWE3b3l2YqZv56l" target="_blank" rel="noopener">Take the survey</a>
-            <a class="v3-btn ghost" href="survey-faqs.html">Survey FAQs</a>
+            <a class="v3-btn ghost" href="survey-faqs">Survey FAQs</a>
             <a class="v3-btn ghost" href="https://docs.google.com/presentation/d/1D5JdUEeCJnivhtjIIriEjeioUzPMP2pHSMKXYxsPl8s/edit?usp=sharing" target="_blank" rel="noopener">See past results</a>
           </div>
-          <p class="v3-mut" style="font-size:14px;margin-top:18px">It takes about 15 minutes. Read the <a href="informed_consent_statement.html">informed consent statement</a> before you begin.</p>
+          <p class="v3-mut" style="font-size:14px;margin-top:18px">It takes about 15 minutes. Read the <a href="informed_consent_statement">informed consent statement</a> before you begin.</p>
         </div>
       </section>
 
@@ -175,7 +186,7 @@
           right &mdash; candidates into our PhD programmes.</p>
 
           <h2>Before you start</h2>
-          <p>There are <a href="survey-faqs.html">answers to the questions people ask most</a>,
+          <p>There are <a href="survey-faqs">answers to the questions people ask most</a>,
           including how anonymity is protected, and a
           <a href="http://connect.informs.org/communities/community-home/digestviewer/viewthread?GroupId=205&amp;MID=1922&amp;tab=digestViewer" target="_blank" rel="noopener">posting
           about this survey on the INFORMS Connect forum</a> by Professor
@@ -210,7 +221,7 @@
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
-            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            <p>Trusted by <a href="previous-markets">over 200 universities around the
             world</a>.<br>
             Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
             Sponsored by the
@@ -225,17 +236,17 @@
               <li><a href="./#placements">Placements</a></li>
               <li><a href="./#survey">Survey</a></li>
               <li><a href="./#resources">Resources</a></li>
-              <li><a href="analytics.html">Analytics</a></li>
+              <li><a href="analytics">Analytics</a></li>
             </ul>
           </div>
           <div>
             <h4>Participate</h4>
             <ul>
-              <li><a href="post-a-job.html">Post a job</a></li>
-              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
-              <li><a href="post-a-placement.html">Report a placement</a></li>
-              <li><a href="alerts.html">E-mail alerts</a></li>
-              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="post-a-job">Post a job</a></li>
+              <li><a href="post-a-candidate">Post your candidacy</a></li>
+              <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="alerts">E-mail alerts</a></li>
+              <li><a href="feedback">Feedback</a></li>
               <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
@@ -244,8 +255,8 @@
           <span>&copy; 2014-<span class="js-current-year"></span>
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
-            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a>
+            <a href="terms-and-conditions">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy">Privacy</a>
           </span>
         </div>
       </div>

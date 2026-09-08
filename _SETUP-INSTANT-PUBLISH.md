@@ -36,7 +36,7 @@ minutes again, and an approval up to half an hour.
 **THE FIRST THREE ARE LIVE.** They were deployed on 2026-08-27 and have dispatched
 on every decision since. `revealCandidates` (2026-09-04) rides along with the
 next `firebase deploy --only functions --project operations-academia` and is
-inert until that deploy has run; read the count back (FOURTEEN, see "Deploying"
+inert until that deploy has run; read the count back (FIFTEEN, see "Deploying"
 below) rather than trusting the deploy log. To check rather than trust: filter this repository's
 Actions by `event:repository_dispatch` and read the ACTOR — the function
 carries the PAT from step 1 and shows as a person, where the two verify
@@ -140,17 +140,17 @@ npm install --prefix _functions
 firebase deploy --only functions --project operations-academia
 ```
 
-This deploys EVERY function in `_functions/`, which is fourteen: the four
+This deploys EVERY function in `_functions/`, which is fifteen: the four
 doorbells above; **`recordVisit`**, the university-visit resolver behind
 the Analytics page's "which universities visited" chart, which needs no secret
 and is inert until this command has been run (`_SETUP-ANALYTICS.md`, source 4);
 **`sendVerificationEmail`**, the mailer behind e-mail verification on
 registration, which needs the four `SMTP_*` secrets set in Secret Manager
-first (`_SETUP-EMAIL-VERIFICATION.md`); and the eight forum callables
+first (`_SETUP-EMAIL-VERIFICATION.md`); and the nine forum callables
 (**`forumJoin`, `forumPost`, `forumEdit`, `forumDelete`, `forumAccept`,
-`forumVote`, `forumThreadVotes`, `forumModerate`**), which need `FORUM_SECRET`
-set first (the next section).
-`firebase functions:list` must read back fourteen; fewer means the checkout
+`forumVote`, `forumThreadVotes`, `forumView`, `forumModerate`**), which need
+`FORUM_SECRET` set first (the next section).
+`firebase functions:list` must read back fifteen; fewer means the checkout
 predates one of them.
 
 `revealCandidates` is a SCHEDULED function, so its first deploy also creates a

@@ -855,7 +855,7 @@
     if (intro) {
       intro.innerHTML = '<p><strong>You are correcting a posting that is already ' +
         'on the site.</strong> Your changes appear on the ' +
-        '<a href="jobs.html">job postings page</a> within a few minutes. The ' +
+        '<a href="jobs">job postings page</a> within a few minutes. The ' +
         'posting date does not change.</p>';
     }
 
@@ -1101,10 +1101,10 @@
             var done = $('oa-done');
             done.innerHTML =
               '<h3>Your changes have been saved.</h3>' +
-              '<p>The <a href="jobs.html">job postings page</a> already shows your ' +
+              '<p>The <a href="jobs">job postings page</a> already shows your ' +
               'edit on this device. Everyone else sees it within a few minutes.</p>' +
               '<p class="oa-done-actions">' +
-              '<a class="button blue" href="jobs.html">Back to the job postings</a></p>';
+              '<a class="button blue" href="jobs">Back to the job postings</a></p>';
           } else {
             $('oa-ref').textContent = ref || '—';
             /* A NEW posting is one more than the account held, and the menu's

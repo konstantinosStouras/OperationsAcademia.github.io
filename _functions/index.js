@@ -2,15 +2,15 @@
    Operations Academia: instant publish, the visit resolver, and the
    verification mailer.
 
-   FOURTEEN functions live in this file: four doorbells (publishOnChange,
+   FIFTEEN functions live in this file: four doorbells (publishOnChange,
    publishOnCandidateChange, publishOnReview, and the clock, revealCandidates),
    the university-visit resolver (recordVisit), the e-mail verification
    mailer (sendVerificationEmail, set up in _SETUP-EMAIL-VERIFICATION.md), and
-   the eight forum callables re-exported from ./forum (forumJoin, forumPost,
-   forumEdit, forumDelete, forumAccept, forumVote, forumThreadVotes, forumModerate;
-   the FORUM_SECRET runbook is in _SETUP-INSTANT-PUBLISH.md). A deploy lists all
-   fourteen, and reading that count back is how a deploy from a stale checkout
-   is caught.
+   the nine forum callables re-exported from ./forum (forumJoin, forumPost,
+   forumEdit, forumDelete, forumAccept, forumVote, forumThreadVotes, forumView,
+   forumModerate; the FORUM_SECRET runbook is in _SETUP-INSTANT-PUBLISH.md). A
+   deploy lists all fifteen, and reading that count back is how a deploy from
+   a stale checkout is caught.
 
    FOUR doorbells, one job each. When a job posting changes in Firestore,
    start the GitHub build that publishes it, so a new posting or an edit
@@ -433,7 +433,7 @@ exports.sendVerificationEmail = onCall(
     let generated = '';
     try {
       generated = await getAuth().generateEmailVerificationLink(email, {
-        url: SITE + '/account.html',
+        url: SITE + '/account',
       });
     } catch (e) {
       logger.error('verification token not minted', { uid, error: e.code });
@@ -671,12 +671,12 @@ exports.recordVisit = onRequest(
 
 /* ------------------------------------------------------------------- forum
 
-   THE FORUM. Eight callables, one per file under ./forum, sharing the preamble
+   THE FORUM. Nine callables, one per file under ./forum, sharing the preamble
    in ./forum/member.js and the identity in ./forum/identity.js: the one
    HMAC over `season + ':' + uid` under the season's own Secret Manager
    version, a handle drawn at random, and every write inside a transaction.
    Re-exported one per line so a deploy's per-function lines, and the
-   selftest's count of them, read FOURTEEN. */
+   selftest's count of them, read FIFTEEN. */
 exports.forumJoin = forum.forumJoin;
 exports.forumPost = forum.forumPost;
 exports.forumEdit = forum.forumEdit;
@@ -684,4 +684,5 @@ exports.forumDelete = forum.forumDelete;
 exports.forumAccept = forum.forumAccept;
 exports.forumVote = forum.forumVote;
 exports.forumThreadVotes = forum.forumThreadVotes;
+exports.forumView = forum.forumView;
 exports.forumModerate = forum.forumModerate;

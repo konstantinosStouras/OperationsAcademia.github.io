@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>My postings — Operations Academia</title>
     <meta name="description" content="The job postings you have made through Operations Academia — edit any of them, or take one down.">
-    <link rel="canonical" href="https://www.operationsacademia.org/my-postings.html">
+    <link rel="canonical" href="https://www.operationsacademia.org/my-postings">
 
     <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
          og:* is read by Facebook, Messenger, WhatsApp, LinkedIn, Telegram,
@@ -23,7 +23,7 @@
     <meta property="og:locale" content="en_GB">
     <meta property="og:title" content="My postings">
     <meta property="og:description" content="The job postings you have made through Operations Academia — edit any of them, or take one down.">
-    <meta property="og:url" content="https://www.operationsacademia.org/my-postings.html">
+    <meta property="og:url" content="https://www.operationsacademia.org/my-postings">
     <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:type" content="image/jpeg">
@@ -57,6 +57,17 @@
          62px, the theme toggle by 185px). Reserve the space it will take, from
          the same localStorage hint the chip is painted from, before the browser
          draws anything. */
+      /* THE ADDRESS IS THE EXTENSIONLESS ONE. GitHub Pages serves /jobs and
+         /jobs.html alike, and the site links, canonicalises and shares the
+         first; so a reader who arrives on the second, through an old link or
+         a bookmark, is shown the address everyone else sees, before anything
+         paints or reads it. The search and the fragment travel with it. */
+      try {
+        var p = location.pathname;
+        if (/\.html$/.test(p) && history.replaceState) {
+          history.replaceState(null, '', p.replace(/\/index\.html$/, '/').replace(/\.html$/, '') + location.search + location.hash);
+        }
+      } catch (e) { /* the address is a convenience */ }
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
@@ -104,7 +115,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="jobs.html">Jobs</a>
+          <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -132,7 +143,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="jobs.html">Jobs</a>
+        <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -167,7 +178,7 @@
                     <p><strong>Every job posting you have made</strong> &mdash; pending, live, or
                     taken down. Edit one and the correction goes live at the next update; take one
                     down and it disappears the same way. You can also edit a posting straight from
-                    the <a href="jobs.html">job postings page</a> &mdash; the same Edit and Take
+                    the <a href="jobs">job postings page</a> &mdash; the same Edit and Take
                     down buttons appear on your own postings there.</p>
                   </div>
 
@@ -187,7 +198,7 @@
 
                   <div class="oa-note" id="oa-my-empty" hidden>
                     <p>You have not posted any jobs yet.
-                    <a href="post-a-job.html">Post a job</a> and it will appear here.</p>
+                    <a href="post-a-job">Post a job</a> and it will appear here.</p>
                   </div>
 
                 </div>
@@ -204,7 +215,7 @@
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
-            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            <p>Trusted by <a href="previous-markets">over 200 universities around the
             world</a>.<br>
             Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
             Sponsored by the
@@ -219,17 +230,17 @@
               <li><a href="./#placements">Placements</a></li>
               <li><a href="./#survey">Survey</a></li>
               <li><a href="./#resources">Resources</a></li>
-              <li><a href="analytics.html">Analytics</a></li>
+              <li><a href="analytics">Analytics</a></li>
             </ul>
           </div>
           <div>
             <h4>Participate</h4>
             <ul>
-              <li><a href="post-a-job.html">Post a job</a></li>
-              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
-              <li><a href="post-a-placement.html">Report a placement</a></li>
-              <li><a href="alerts.html">E-mail alerts</a></li>
-              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="post-a-job">Post a job</a></li>
+              <li><a href="post-a-candidate">Post your candidacy</a></li>
+              <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="alerts">E-mail alerts</a></li>
+              <li><a href="feedback">Feedback</a></li>
               <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
@@ -238,8 +249,8 @@
           <span>&copy; 2014-<span class="js-current-year"></span>
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
-            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a>
+            <a href="terms-and-conditions">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy">Privacy</a>
           </span>
         </div>
       </div>

@@ -245,7 +245,7 @@
     if (intro) {
       intro.innerHTML = '<p><strong>You are correcting a placement that is already ' +
         'on the site.</strong> Your changes appear on the ' +
-        '<a href="placements.html">confirmed placements page</a> at the next update, ' +
+        '<a href="placements">confirmed placements page</a> at the next update, ' +
         'normally within an hour. Saving a withdrawn placement puts it back on ' +
         'the site.</p>';
     }
@@ -310,11 +310,11 @@
         var done = $('oa-done');
         done.innerHTML =
           '<h3>Your placement has been withdrawn.</h3>' +
-          '<p>It disappears from the <a href="placements.html">confirmed placements ' +
+          '<p>It disappears from the <a href="placements">confirmed placements ' +
           'page</a> at the next update, normally within an hour. Changed your mind? ' +
           'Open the edit link again and save — that puts it back.</p>' +
           '<p class="oa-done-actions">' +
-          '<a class="button blue" href="placements.html">Back to the confirmed placements</a></p>';
+          '<a class="button blue" href="placements">Back to the confirmed placements</a></p>';
         show($('oa-placement-form'), false);
         show($('oa-intro'), false);
         show(done, true);
@@ -447,10 +447,10 @@
             done.innerHTML =
               '<h3>Your changes have been saved.</h3>' +
               '<p>The placement is updated on the ' +
-              '<a href="placements.html">confirmed placements page</a> at the next ' +
+              '<a href="placements">confirmed placements page</a> at the next ' +
               'update, normally within an hour.</p>' +
               '<p class="oa-done-actions">' +
-              '<a class="button blue" href="placements.html">Back to the confirmed placements</a></p>';
+              '<a class="button blue" href="placements">Back to the confirmed placements</a></p>';
           } else {
             $('oa-ref').textContent = ref || '—';
           }

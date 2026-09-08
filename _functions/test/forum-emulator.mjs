@@ -336,6 +336,25 @@ async function main() {
   const votes = await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${t1.result.pid}/votes`).get();
   ok(votes.empty, 'a withdrawn vote leaves no document');
 
+  /* ------------------------------------------------------------- view */
+  console.log('\nforumView');
+  const tPath = `forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`;
+  const viewsBefore = Number((await admin.doc(tPath).get()).data().views) || 0;
+  const viewHandlesBefore = (await admin.collection('forumHandles').get()).docs.map((d) => JSON.stringify([d.id, d.data()])).sort();
+  const vw1 = await call('forumView', tokens.adm, { room: 'candidates', tid: t1.result.tid });
+  ok(!vw1.error && vw1.result.views === viewsBefore + 1, 'a view moves the thread\'s count by one and answers the new count', JSON.stringify(vw1));
+  const vw2 = await call('forumView', tokens.cand, { room: 'candidates', tid: t1.result.tid });
+  ok(!vw2.error && vw2.result.views === viewsBefore + 2, 'another member\'s view moves it again');
+  ok(Number((await admin.doc(tPath).get()).data().views) === viewsBefore + 2, 'and the thread head carries the count');
+  const viewHandlesAfter = (await admin.collection('forumHandles').get()).docs.map((d) => JSON.stringify([d.id, d.data()])).sort();
+  ok(JSON.stringify(viewHandlesAfter) === JSON.stringify(viewHandlesBefore), 'no handle document moved: a view spends no counter and leaves no mark on the member');
+  const underThread = (await admin.doc(tPath).listCollections()).map((c) => c.id);
+  ok(underThread.every((c) => c === 'posts'), `nothing is written under the thread but its posts, so there is no record of who opened it (${underThread})`);
+  const vwNone = await call('forumView', tokens.adm, { room: 'candidates', tid: 'no-such-thread-000000' });
+  ok(status(vwNone) === 'NOT_FOUND' && reason(vwNone) === 'thread', 'a thread the room does not hold is refused');
+  const vwOut = await call('forumView', tokens.open, { room: 'candidates', tid: t1.result.tid });
+  ok(status(vwOut) === 'PERMISSION_DENIED' && reason(vwOut) === 'candidate', 'a reader the room refuses cannot count a view in it');
+
   /* ----------------------------------------------------------- accept */
   console.log('\nforumAccept');
   const accNotAsker = await call('forumAccept', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: q1.result.pid });

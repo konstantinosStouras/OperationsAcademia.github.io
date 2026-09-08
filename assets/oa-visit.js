@@ -17,7 +17,7 @@
    for that — it is exactly a browsing session, it is not shared between tabs
    opened days apart, and it is never read back by anything.
 
-   WHY IT IS ITS OWN FILE, AND NOT ON EVERY PAGE. `admin-area.html` does not
+   WHY IT IS ITS OWN FILE, AND NOT ON EVERY PAGE. `admin-area` does not
    load it, and that is a STRUCTURAL exclusion rather than a runtime check:
    the owner asked that no admin page and no archived tree feed the public
    figures, and a page that never runs the ping cannot be filtered wrongly by

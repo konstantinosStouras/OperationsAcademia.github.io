@@ -13,7 +13,7 @@
          reason (share-check lists it card: false): an og:url on it would
          claim a preview for a page nobody can share into. -->
     <meta name="robots" content="noindex,nofollow">
-    <link rel="canonical" href="https://www.operationsacademia.org/forum.html">
+    <link rel="canonical" href="https://www.operationsacademia.org/forum">
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <!-- theme and account chip before first paint, so neither the mode nor the
          header ever flashes something else first -->
@@ -34,6 +34,17 @@
          62px, the theme toggle by 185px). Reserve the space it will take, from
          the same localStorage hint the chip is painted from, before the browser
          draws anything. */
+      /* THE ADDRESS IS THE EXTENSIONLESS ONE. GitHub Pages serves /jobs and
+         /jobs.html alike, and the site links, canonicalises and shares the
+         first; so a reader who arrives on the second, through an old link or
+         a bookmark, is shown the address everyone else sees, before anything
+         paints or reads it. The search and the fragment travel with it. */
+      try {
+        var p = location.pathname;
+        if (/\.html$/.test(p) && history.replaceState) {
+          history.replaceState(null, '', p.replace(/\/index\.html$/, '/').replace(/\.html$/, '') + location.search + location.hash);
+        }
+      } catch (e) { /* the address is a convenience */ }
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
@@ -91,7 +102,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="jobs.html">Jobs</a>
+          <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -119,7 +130,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="jobs.html">Jobs</a>
+        <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -180,12 +191,23 @@
         <div class="oa-note is-warn" id="oa-forum-error" hidden></div>
 
         <div id="oa-forum" hidden>
-          <div class="oa-forum-top">
+          <!-- the room switch: hidden on the Home view, where the rooms are
+               the two doors in the main column and the switch would say the
+               same thing twice -->
+          <div class="oa-forum-top" id="oa-forum-top">
             <div role="tablist" aria-label="Rooms" class="oa-forum-tabs" id="oa-forum-rooms"></div>
             <p class="oa-forum-roomnote" id="oa-forum-roomnote" hidden></p>
           </div>
 
           <div class="oa-forum-cols">
+            <!-- THE SECTIONS, down the left (owner, 2026-09-08): Home,
+                 Questions, Unanswered and Tags, with an icon each, the way
+                 the site the forum was asked to resemble lays them out.
+                 Drawn by the script, because every link carries the room
+                 and the season; on a phone the column becomes a row above
+                 the questions (assets/oa-forum.css). -->
+            <nav class="oa-forum-nav" id="oa-forum-nav" aria-label="Forum sections"></nav>
+
             <div class="oa-forum-main">
               <div class="oa-archive-banner" id="oa-forum-archive" hidden></div>
               <div class="oa-forum-banner" id="oa-forum-me" hidden></div>
@@ -196,16 +218,33 @@
                    read and leaves no record anywhere but this browser. -->
               <div class="oa-forum-watchnew" id="oa-forum-watchnew" hidden></div>
 
-              <!-- the list of questions: an OAList mount fed by cfg.source -->
+              <!-- HOME: the forum's first page, where a reader chooses a
+                   room. The Open forum's door is drawn for every member;
+                   the Candidates' room's only for the accounts admitted to
+                   it, and everybody else reads one line saying what opens
+                   it. Drawn by the script from forumJoin's answer. -->
+              <div id="oa-forum-home" hidden></div>
+
+              <!-- the list of questions: an OAList mount fed by cfg.source.
+                   The heading and the count follow the section (Questions or
+                   Unanswered) and the order chosen in the bar under them. -->
               <div id="oa-forum-listview" hidden>
                 <div class="oa-forum-listhead">
                   <div>
                     <h2 id="oa-forum-listtitle">Questions</h2>
-                    <p class="oa-forum-n" id="oa-forum-listcount"></p>
                   </div>
+                </div>
+                <div class="oa-forum-listbar">
+                  <p class="oa-forum-n" id="oa-forum-listcount"></p>
+                  <div class="oa-forum-sorts" id="oa-forum-sorts" role="group" aria-label="Order the questions"></div>
                 </div>
                 <div id="oa-forum-list"></div>
               </div>
+
+              <!-- TAGS: every tag in the room, by popularity, by name or the
+                   newest, with a box to narrow them by name; drawn by the
+                   script from the room's tally and the threads it has read -->
+              <div id="oa-forum-tagsview" hidden></div>
 
               <!-- one thread, drawn by the script -->
               <div id="oa-forum-thread" hidden></div>
@@ -255,7 +294,7 @@
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
-            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            <p>Trusted by <a href="previous-markets">over 200 universities around the
             world</a>.<br>
             Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
             Sponsored by the
@@ -270,17 +309,17 @@
               <li><a href="./#placements">Placements</a></li>
               <li><a href="./#survey">Survey</a></li>
               <li><a href="./#resources">Resources</a></li>
-              <li><a href="analytics.html">Analytics</a></li>
+              <li><a href="analytics">Analytics</a></li>
             </ul>
           </div>
           <div>
             <h4>Participate</h4>
             <ul>
-              <li><a href="post-a-job.html">Post a job</a></li>
-              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
-              <li><a href="post-a-placement.html">Report a placement</a></li>
-              <li><a href="alerts.html">E-mail alerts</a></li>
-              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="post-a-job">Post a job</a></li>
+              <li><a href="post-a-candidate">Post your candidacy</a></li>
+              <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="alerts">E-mail alerts</a></li>
+              <li><a href="feedback">Feedback</a></li>
               <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
@@ -289,8 +328,8 @@
           <span>&copy; 2014-<span class="js-current-year"></span>
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
-            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a>
+            <a href="terms-and-conditions">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy">Privacy</a>
           </span>
         </div>
       </div>

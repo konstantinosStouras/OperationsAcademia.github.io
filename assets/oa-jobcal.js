@@ -234,7 +234,7 @@
         (market ? ' for the ' + market + ' job market' : '') +
         ', as they stood on ' + longDate(todayIso(now)) + '. ' +
         'Each entry is an all-day reminder; a posting with no closing date (open until filled) has no entry. ' +
-        SITE + 'jobs.html',
+        SITE + 'jobs',
       now: now
     });
   }

@@ -71,9 +71,15 @@
        one document, so the list card can say a question is answered without
        reading a post per card and the thread view can mark it with what it
        has already read. The post itself carries no flag, because two places
-       saying the same thing is two places that can disagree. */
+       saying the same thing is two places that can disagree.
+       `views` is how many times the thread has been opened (owner,
+       2026-09-08: "views per question thread, similar to Stackexchange"): a
+       bare counter, moved by forumView and by nothing else, with NO record
+       of who opened it. The page counts an opening once per thread per
+       device per UTC day, in the same local store as its seen-marks, so the
+       forum learns a number and never a reader. */
     thread: ['season', 'room', 'title', 'tags', 'by', 't', 'lastAt', 'lastBy', 'n',
-      'excerpt', 'score', 'accepted', 'pinned', 'locked', 'hidden'],
+      'excerpt', 'score', 'accepted', 'pinned', 'locked', 'hidden', 'views'],
     /* .../threads/{tid}/posts/{pid}. `quote` is a COPY {n, by, text} taken
        at reply time, so a later edit or removal of the quoted post never
        rewrites the reply. `up`/`down` are the like and dislike tallies.

@@ -61,6 +61,32 @@
    ({ room, warm: true }, a call that runs the preamble and writes nothing),
    so the press that follows lands on an instance that is already up.
 
+   FOUR SECTIONS DOWN THE LEFT, AND HOME IS THE FIRST PAGE (owner,
+   2026-09-08: "add a column on the left with Home, Questions, Unanswered and
+   Tags", after the site the forum was asked to resemble). The address is
+   the section: `forum` with no room is HOME, where the reader chooses a
+   room from the doors drawn for the rooms forumJoin admitted them to (the
+   Open forum's for every member, the Candidates' room's for candidates and
+   the maintainer, and one line for everybody else saying what opens it);
+   ?room= is the QUESTIONS of that room, ordered Newest, Active or Score
+   from a bar under the heading; ?view=unanswered is the questions nobody
+   has answered yet; ?view=tags is every tag the room carries, by
+   popularity, by name or the three made most recently, with a box to
+   narrow them. The nav is drawn by drawNav from the room and the season,
+   never shipped in the page, and the section a thread or the ask form
+   belongs to is Questions. The room switch at the top stays on every view
+   but Home, where the doors are the switch.
+
+   A QUESTION COUNTS ITS VIEWS, and the count is a number and nothing else.
+   Opening a thread calls forumView once per thread per device per UTC day
+   (countView below, deduped in the same local store as the seen-marks, so
+   nothing records which member read what), and the function moves `views`
+   on the thread head by one. The card prints it in its tally column under
+   the votes and the answers, the thread heading says how many times it was
+   viewed, and a function that cannot be reached (not deployed yet, or
+   cold past its timeout) costs the reader nothing: the count is painted
+   when the answer lands and never waited for.
+
    THE LIST IS AN OALIST MOUNT FED BY cfg.source, the one generic addition the
    engine gained for this page: the threads come from a Firestore read rather
    than a served file, and everything else (the tag filter with its counts,
@@ -127,6 +153,17 @@
   var ICON_WATCH = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" ' +
     'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
+  /* the four section icons, one per row of the nav down the left: a house,
+     two speech bubbles, a question in a circle and a tag, the same shapes
+     the site the forum was asked to resemble uses for the same four rows */
+  function icon(paths) {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
+  }
+  var ICON_HOME = icon('<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/>');
+  var ICON_QUESTIONS = icon('<path d="M20 12a7 7 0 0 1-7 7H9l-4 3v-4.5A7 7 0 1 1 20 12z"/><path d="M11.2 10.3a1.8 1.8 0 1 1 2.6 1.6c-.6.3-.8.7-.8 1.3"/><path d="M13 16h.01"/>');
+  var ICON_UNANSWERED = icon('<circle cx="12" cy="12" r="9"/><path d="M9.7 9.5a2.3 2.3 0 1 1 3.3 2.1c-.7.3-1 .8-1 1.5"/><path d="M12 16.5h.01"/>');
+  var ICON_TAGS = icon('<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M7.5 7.5h.01"/>');
 
   function $(id) { return document.getElementById(id); }
   function show(el, on) { if (el) el.hidden = !on; }
@@ -157,6 +194,22 @@
   /* ------------------------------------------------------------- the copy */
 
   var TAG_HINT = 'Add up to five tags to say what the question is about, pressing Enter after each. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.';
+  /* the Tags page's own words (owner, 2026-09-08, verbatim) */
+  var TAGS_INTRO = 'A tag is a keyword or label that categorizes your question with other, similar questions. Using the right tags makes it easier for others to find and answer your question.';
+  /* the four sections, in the order they are drawn down the left */
+  var SECTIONS = [
+    ['home', 'Home', ICON_HOME],
+    ['questions', 'Questions', ICON_QUESTIONS],
+    ['unanswered', 'Unanswered', ICON_UNANSWERED],
+    ['tags', 'Tags', ICON_TAGS]
+  ];
+  /* how a list of questions may be ordered; the first is the default and
+     travels in no address */
+  var ORDERS = [['newest', 'Newest'], ['active', 'Active'], ['score', 'Score']];
+  /* how the Tags page may be ordered: by use, by name, or the three tags
+     made most recently in the room (owner: "popular, name, new") */
+  var TAG_ORDERS = [['popular', 'Popular'], ['name', 'Name'], ['new', 'New']];
+  var NEW_TAGS = 3;
 
   var REASONS = {
     auth: 'Sign in first.',
@@ -232,6 +285,9 @@
     archive: false,
     tid: '',
     ask: false,
+    view: 'home',                   // home | questions | unanswered | tags | thread | ask
+    order: 'newest',                // how the list of questions is ordered
+    tagOrder: 'popular',            // how the Tags page is ordered
     seasons: [],                    // the forumSeasons documents that exist
     guides: {},                     // room -> guide thread id, this season
     tally: {},                      // slug -> count, this room and season
@@ -262,6 +318,16 @@
     S.archive = S.season !== Y;
     S.tid = String(params.get('t') || '').trim();
     S.ask = params.get('ask') === '1';
+    /* THE ADDRESS IS THE SECTION. A thread and the ask form belong to
+       Questions; ?view= names Unanswered or Tags; a room with neither is the
+       room's questions; and no room at all is Home, the forum's first page,
+       where the reader chooses one. */
+    var view = String(params.get('view') || '');
+    S.view = S.tid ? 'thread' : S.ask ? 'ask'
+      : (view === 'unanswered' || view === 'tags') ? view
+      : params.get('room') ? 'questions' : 'home';
+    var order = String(params.get('order') || '');
+    S.order = ORDERS.some(function (o) { return o[0] === order; }) ? order : 'newest';
   }
   readState();
 
@@ -272,15 +338,25 @@
       URL keys and travel separately. */
   function href(o) {
     var p = new URLSearchParams();
-    p.set('room', (o && o.room) || S.room);
+    var home = !!(o && o.home);
+    /* Home is the one address with no room: the doors on it are the choice */
+    if (!home) p.set('room', (o && o.room) || S.room);
     var season = (o && o.season) || S.season;
     if (season !== Y) p.set('season', String(season));
     if (o && o.t) p.set('t', o.t);
-    if (o && o.ask) p.set('ask', '1');
-    /* the engine's own URL key, one parameter per value, so a link that
+    else if (o && o.ask) p.set('ask', '1');
+    else if (!home && o && (o.view === 'unanswered' || o.view === 'tags')) p.set('view', o.view);
+    /* the order travels only where it is not the default, so every link
+       made before there was one still lands where it did */
+    if (!home && o && o.order && o.order !== 'newest' && !o.t && !o.ask) p.set('order', o.order);
+    /* the engine's own URL keys, one parameter per value, so a link that
        carries every tag a reader watches selects them all */
     if (o && o.tags) [].concat(o.tags).forEach(function (t) { if (t) p.append('tags', t); });
-    return 'forum.html?' + p.toString() + ((o && o.hash) ? '#' + o.hash : '');
+    if (o && o.q) p.set('q', o.q);
+    var qs = p.toString();
+    /* the extensionless address, the one every page of the site writes
+       (CLAUDE.md, "A page's address carries no .html"); Home is bare `forum` */
+    return 'forum' + (qs ? '?' + qs : '') + ((o && o.hash) ? '#' + o.hash : '');
   }
   /** Move between the page's views IN PLACE: push the new address, re-read
       the state from it and draw again. The list, the thread and the ask form
@@ -317,15 +393,18 @@
         return;
       }
     }
-    var a = e.target && e.target.closest ? e.target.closest('a[href^="forum.html?"]') : null;
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="forum"]') : null;
     /* a link the page draws to open in a NEW tab (a similar question under
        the ask form's title) is the browser's: following it in place would
        throw away the question being written */
     if (!a || !S.me || a.getAttribute('target') === '_blank') return;
     var app = $('oa-forum');
     if (!app || !app.contains(a)) return;
-    e.preventDefault();
     var to = a.getAttribute('href');
+    /* the page's own addresses only: bare `forum` is Home, and anything
+       else of the page's begins with its query */
+    if (to !== 'forum' && to.indexOf('forum?') !== 0) return;
+    e.preventDefault();
     /* A POST'S OWN #n IS A PLACE ON THIS PAGE, not another view of it.
        Following it through draw() rebuilt the thread and threw away whatever
        was half written in the answer box below, which is the very thing
@@ -450,8 +529,26 @@
     writeSaved();
     drawWatch();
     drawTags();
+    paintTagPageBells();
     if (!S.tid && !S.ask) paintWatchNew(S.rows, readSeen(S.me.uid));
     return watching(tag);
+  }
+
+  /** The bells on the Tags page follow the same store as the side cards: one
+      press anywhere repaints every bell for that tag. */
+  function paintTagPageBells() {
+    /* the bell pressed here is repainted in place rather than redrawn, so
+       the put-it-back mark wireWatch set has nothing to do; left set, the
+       next paint of the grid (a keystroke in the filter box) would move the
+       keyboard to that bell for no reason */
+    if (refocus && refocus.host === 'oa-forum-taggrid') refocus = null;
+    Array.prototype.forEach.call(document.querySelectorAll('#oa-forum-taggrid [data-watch]'), function (b) {
+      var tag = b.getAttribute('data-watch');
+      var on = watching(tag);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.title = (on ? 'Stop watching ' : 'Watch ') + tag;
+      b.setAttribute('aria-label', (on ? 'Stop watching the tag ' : 'Watch the tag ') + tag);
+    });
   }
 
   /** New TO THIS READER: a thread they have not read to the end of, by the
@@ -542,7 +639,8 @@
     S.list = null;
     ['oa-forum-thread', 'oa-forum-compose', 'oa-forum-list', 'oa-forum-tags',
      'oa-forum-watch', 'oa-forum-saved', 'oa-forum-admin', 'oa-forum-me',
-     'oa-forum-rooms', 'oa-forum-roomcard'].forEach(function (id) {
+     'oa-forum-rooms', 'oa-forum-roomcard', 'oa-forum-home', 'oa-forum-nav',
+     'oa-forum-tagsview', 'oa-forum-sorts'].forEach(function (id) {
       var n = $(id);
       if (n) n.innerHTML = '';
     });
@@ -705,7 +803,7 @@
   function hideViews() {
     show($('oa-forum-watchnew'), false);
     if (askCleanup) { askCleanup(); askCleanup = null; }
-    ['oa-forum-listview', 'oa-forum-thread', 'oa-forum-compose'].forEach(function (id) {
+    ['oa-forum-listview', 'oa-forum-thread', 'oa-forum-compose', 'oa-forum-home', 'oa-forum-tagsview'].forEach(function (id) {
       var n = $(id);
       if (!n) return;
       n.hidden = true;
@@ -732,7 +830,7 @@
       The address is the view, so the key is the address: room, season, the
       thread and whether the ask form is open. */
   function viewKey() {
-    return S.room + '|' + S.season + '|' + (S.tid || '') + '|' + (S.ask ? '1' : '');
+    return S.room + '|' + S.season + '|' + (S.tid || '') + '|' + (S.ask ? '1' : '') + '|' + S.view + '|' + S.order;
   }
 
   function draw() {
@@ -741,13 +839,19 @@
     S.room = chooseRoom();
     if (!S.room) { fail(REASONS.verified); return; }
     show($('oa-forum'), true);
+    /* on Home the doors are the room switch, so the row at the top would
+       say the same thing twice */
+    show($('oa-forum-top'), S.view !== 'home');
     drawTabs();
+    drawNav();
     drawBanner();
     drawGuide();
     drawWatch();
     drawSaved();
-    if (S.tid) drawThread();
+    if (S.view === 'home') drawHome();
+    else if (S.tid) drawThread();
     else if (S.ask && !S.archive) drawAsk();
+    else if (S.view === 'tags') drawTagsPage();
     else drawList();
     /* THE TAB THE READER PRESSED KEEPS THE FOCUS, and it is claimed here
        rather than in drawTabs because the view drawn between the two takes
@@ -809,7 +913,7 @@
     if (note) {
       if (!rooms.candidates) {
         note.innerHTML = 'The Candidates’ room opens to accounts holding a ' +
-          '<a href="post-a-candidate.html">candidate profile</a> for the ' + esc(label(Y)) + ' job market.';
+          '<a href="post-a-candidate">candidate profile</a> for the ' + esc(label(Y)) + ' job market.';
         show(note, true);
       } else {
         show(note, false);
@@ -827,6 +931,14 @@
     var me = $('oa-forum-me');
     if (!me) return;
     var cand = S.room === 'candidates';
+    /* HOME NAMES NO ROOM: the banner is a room's, and the handle is said in
+       the home lede instead, so the two are never on screen together */
+    if (S.view === 'home') {
+      me.innerHTML = '';
+      show(me, false);
+      show($('oa-forum-roomcard'), false);
+      return;
+    }
     me.className = 'oa-forum-banner' + (cand ? '' : ' is-open');
     me.innerHTML =
       '<div><span class="oa-forum-bt">' + (cand ? 'Candidates’ room' : 'Open forum') + ' &middot; ' +
@@ -860,7 +972,7 @@
     if (S.me.banned) {
       var box = $('oa-forum-error');
       if (box) {
-        box.innerHTML = '<p><strong>This handle is banned for the season.</strong> You can read, but nothing you send will be accepted. To appeal, use <a href="feedback.html">Send feedback</a> and quote your handle.</p>';
+        box.innerHTML = '<p><strong>This handle is banned for the season.</strong> You can read, but nothing you send will be accepted. To appeal, use <a href="feedback">Send feedback</a> and quote your handle.</p>';
         show(box, true);
       }
     }
@@ -875,6 +987,17 @@
 
   /* --------------------------------------------------------- the side */
 
+  /** The room's tag tally for the season, slug -> count; empty when there is
+      none or it cannot be read. One definition for the side card, the compose
+      picker and the Tags page. */
+  function readTally() {
+    return db().then(function (d) {
+      return d.collection(C.tags).doc(S.season + '_' + S.room).get();
+    }).then(function (snap) {
+      return snap.exists ? ((snap.data() || {}).counts || {}) : {};
+    }).catch(function () { return {}; });
+  }
+
   function loadSide() {
     db().then(function (d) {
       return Promise.all([
@@ -886,9 +1009,7 @@
           });
           return out;
         }).catch(function () { return []; }),
-        d.collection(C.tags).doc(S.season + '_' + S.room).get().then(function (snap) {
-          return snap.exists ? ((snap.data() || {}).counts || {}) : {};
-        }).catch(function () { return {}; })
+        readTally()
       ]);
     }).then(function (r) {
       S.seasons = r[0];
@@ -976,6 +1097,7 @@
     var card = $('oa-forum-tagcard');
     var host = $('oa-forum-tags');
     if (!card || !host) return;
+    if (S.view === 'home') { show(card, false); return; }
     var pairs = Object.keys(S.tally).map(function (k) { return [k, Number(S.tally[k]) || 0]; })
       .filter(function (p) { return p[1] > 0 && M.tagOk(p[0]); })
       .sort(function (a, b) { return b[1] - a[1] || (a[0] < b[0] ? -1 : 1); })
@@ -994,6 +1116,7 @@
     var card = $('oa-forum-watchcard');
     var host = $('oa-forum-watch');
     if (!card || !host) return;
+    if (S.view === 'home') { show(card, false); return; }
     var tags = S.saved.tags.slice().sort();
     if (!tags.length) {
       host.innerHTML = '<p class="oa-forum-cardnote">No tags yet. Press the bell beside a tag to be told ' +
@@ -1017,6 +1140,7 @@
     var card = $('oa-forum-savedcard');
     var host = $('oa-forum-saved');
     if (!card || !host) return;
+    if (S.view === 'home') { host.innerHTML = ''; show(card, false); return; }
     var items = Object.keys(S.saved.items).map(function (k) {
       var v = S.saved.items[k];
       return { key: k, room: v.room, season: v.season, tid: v.tid, pid: v.pid,
@@ -1168,7 +1292,8 @@
           score: Number(v.score) || 0,
           accepted: String(v.accepted || ''),
           pinned: !!v.pinned,
-          locked: !!v.locked
+          locked: !!v.locked,
+          views: Number(v.views) || 0
         });
       });
       return rows;
@@ -1198,11 +1323,66 @@
     show(box, true);
   }
 
+  /** The comparator for a list order. Pinned threads lead whatever the
+      order, as they always did; then the newest asked, the latest active, or
+      the best scored, ties broken by the next of those. */
+  function orderFn(order) {
+    return function (a, b) {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      if (order === 'score') return (b.score - a.score) || (b.t - a.t);
+      if (order === 'active') return (b.lastAt - a.lastAt) || (b.t - a.t);
+      return (b.t - a.t) || (b.lastAt - a.lastAt);
+    };
+  }
+
+  /** Whether the list shows a question: the Unanswered section keeps the
+      ones nobody has answered, and leaves out a locked thread, which nobody
+      CAN answer (the room's guide is one). */
+  function listed(r) {
+    if (S.view !== 'unanswered') return true;
+    return r.n <= 1 && !r.locked;
+  }
+
+  /** The engine's own filters as they stand on the address, so an order
+      pressed under a search keeps the search: one parameter per tag and the
+      text, exactly as the engine writes them. */
+  function currentFilters() {
+    var now = new URLSearchParams(location.search);
+    return { tags: now.getAll('tags').filter(Boolean), q: String(now.get('q') || '') };
+  }
+
+  /** The bar under the heading: Newest, Active, Score, the one in force
+      pressed. A press moves the address and draws the list again under the
+      same filters; the engine then reads the order off the address. */
+  function drawOrders() {
+    var host = $('oa-forum-sorts');
+    if (!host) return;
+    host.innerHTML = ORDERS.map(function (o) {
+      return '<button type="button" class="oa-forum-sortpill" data-order="' + o[0] + '" aria-pressed="' +
+        (o[0] === S.order ? 'true' : 'false') + '">' + o[1] + '</button>';
+    }).join('');
+    Array.prototype.forEach.call(host.querySelectorAll('[data-order]'), function (b) {
+      b.addEventListener('click', function () {
+        var order = b.getAttribute('data-order');
+        if (order === S.order) return;
+        var f = currentFilters();
+        go({ room: S.room, season: S.season, view: S.view, order: order, tags: f.tags, q: f.q });
+      });
+    });
+  }
+
   var listSeq = 0;
   function drawList() {
     show($('oa-forum-listview'), true);
     var title = $('oa-forum-listtitle');
-    if (title) title.textContent = S.room === 'candidates' ? 'Questions from candidates' : 'Questions in the Open forum';
+    var unanswered = S.view === 'unanswered';
+    if (title) {
+      title.textContent = unanswered ? 'Unanswered Questions'
+        : S.order === 'active' ? 'Active Questions'
+        : S.order === 'score' ? 'Top Questions'
+        : 'Newest Questions';
+    }
+    drawOrders();
     /* THE VIEW TAKES FOCUS, as the thread and the ask form already do. These
        are three views of one page swapped with pushState, so a reader coming
        back from a thread with the keyboard was returned to a page whose focus
@@ -1256,17 +1436,22 @@
       perPage: 20,
       urlPrefix: '',
       prepare: function (rows) {
-        rows.sort(function (a, b) {
-          if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-          return (b.lastAt || 0) - (a.lastAt || 0);
-        });
+        rows.sort(orderFn(S.order));
         if (mine !== listSeq || forView !== viewKey()) return rows;
-        var count = $('oa-forum-listcount');
-        if (count) count.textContent = plural(rows.length, 'question', 'questions') + ' this season';
+        /* the room's whole list is what the page remembers (a thread's heading
+           is drawn from it, and the watched-tags line counts over it); what
+           the section SHOWS may be the part of it nobody has answered */
         S.rows = rows;
         S.rowsKey = S.room + '|' + S.season;
         paintWatchNew(rows, seen);
-        return rows;
+        var shown = rows.filter(listed);
+        var count = $('oa-forum-listcount');
+        if (count) {
+          count.textContent = unanswered
+            ? plural(shown.length, 'question', 'questions') + ' with no answers'
+            : plural(shown.length, 'question', 'questions') + ' this season';
+        }
+        return shown;
       },
       filters: [
         { key: 'tags', label: 'Tags', type: 'pick', field: 'tags', order: M.TAGS },
@@ -1329,6 +1514,11 @@
             title: answered ? 'Answered: the member who asked ticked one of these' : plural(answers, 'answer', 'answers')
           }, [
             el('b', { text: String(answers) }), el('i', { text: answers === 1 ? 'answer' : 'answers' })
+          ]),
+          /* how many times the thread has been opened: a bare count, moved
+             by forumView, with no record of who (see countView) */
+          el('span', { class: 'oa-forum-stat is-views', title: 'Opened ' + plural(r.views, 'time', 'times') }, [
+            el('b', { text: String(r.views) }), el('i', { text: r.views === 1 ? 'view' : 'views' })
           ])
         ]), li.firstChild);
 
@@ -1366,12 +1556,246 @@
         loading: 'Loading questions…',
         emptyFiltered: 'No questions match these filters.',
         emptyFilteredHint: 'Try removing a filter, or clear them all to see every question in the room.',
-        emptyData: S.archive ? 'This room holds no questions from that season.' : 'No questions yet in this room.',
-        emptyDataHint: S.archive ? 'Pick another season from the list beside this one.' : 'Be the first: press Ask a question above.',
+        emptyData: unanswered ? 'Every question in this room has an answer.'
+          : S.archive ? 'This room holds no questions from that season.' : 'No questions yet in this room.',
+        emptyDataHint: unanswered ? 'Open Questions from the left to read them all.'
+          : S.archive ? 'Pick another season from the list beside this one.' : 'Be the first: press Ask a question above.',
         loadError: 'The questions could not be loaded.',
         loadErrorHint: 'Please reload the page. If it keeps happening, this room may not be open to your account.',
         unit: 'questions'
       }
+    });
+  }
+
+  /* ---------------------------------------------------- the sections */
+
+  /** The four rows down the left. Every link carries the room and the
+      season; the row the reader is in says so (aria-current), and a thread
+      or the ask form counts as Questions. */
+  function drawNav() {
+    var host = $('oa-forum-nav');
+    if (!host) return;
+    var current = S.view === 'thread' || S.view === 'ask' ? 'questions' : S.view;
+    host.innerHTML = SECTIONS.map(function (sec) {
+      var to = sec[0] === 'home' ? href({ home: true, season: S.season })
+        : href({ room: S.room, season: S.season, view: sec[0] });
+      var on = sec[0] === current;
+      return '<a class="oa-forum-navlink' + (on ? ' is-on' : '') + '" href="' + esc(to) + '" data-section="' + sec[0] + '"' +
+        (on ? ' aria-current="page"' : '') + '>' + sec[2] + '<span>' + sec[1] + '</span></a>';
+    }).join('');
+  }
+
+  /** HOME: the doors. One per room the join admitted this account to, and
+      a line for the room it did not, saying what opens it. The handle is
+      said here, once, since the room banner is not on this view. */
+  function drawHome() {
+    var host = $('oa-forum-home');
+    if (!host) return;
+    var rooms = S.me.rooms;
+    var doors = '';
+    if (rooms.candidates) doors += doorHTML('candidates');
+    if (rooms.open) doors += doorHTML('open');
+    host.className = 'oa-forum-homeview';
+    host.innerHTML =
+      '<div class="oa-forum-homehead"><h2 id="oa-forum-hometitle">' +
+        (S.archive ? esc(label(S.season)) + ' archive' : 'Choose a room') + '</h2>' +
+      '<p class="oa-forum-homelede">' + (S.archive
+        ? 'Read-only: pick a room to read what was said that season.'
+        : 'Two rooms, one handle. You are posting as <span class="oa-forum-handle is-me" id="oa-forum-myhandle">' +
+          esc(S.me.handle) + '</span> in both, for the ' + esc(label(S.season)) + ' season.') +
+      '</p></div>' +
+      '<div class="oa-forum-doors" id="oa-forum-doors">' + doors + '</div>' +
+      (rooms.candidates ? '' :
+        '<p class="oa-forum-roomnote">The Candidates’ room opens to accounts holding a ' +
+        '<a href="post-a-candidate">candidate profile</a> for the ' + esc(label(Y)) + ' job market.</p>');
+    show(host, true);
+    var h2 = $('oa-forum-hometitle');
+    if (h2 && S.painted && !keyboardTab) {
+      h2.setAttribute('tabindex', '-1');
+      h2.focus({ preventScroll: true });
+    }
+    S.painted = true;
+  }
+
+  function doorHTML(room) {
+    var cand = room === 'candidates';
+    return '<a class="oa-forum-door' + (cand ? ' is-cand' : ' is-open') + '" href="' +
+      esc(href({ room: room, season: S.season })) + '" data-enter-room="' + room + '">' +
+      '<span class="oa-forum-doorname"><span class="oa-forum-dot" aria-hidden="true"></span>' +
+        (cand ? 'Candidates’ room' : 'Open forum') + '</span>' +
+      '<span class="oa-forum-doorwho">' + (cand
+        ? 'For the people holding a candidate profile for the ' + esc(label(S.season)) + ' season, and the maintainer. Nobody else can read or write here.'
+        : 'For every registered account with a confirmed e-mail address, faculty included.') + '</span>' +
+      '<span class="oa-forum-doorgo">' + (S.archive ? 'Read the archive' : 'Enter the ' + (cand ? 'room' : 'forum')) + ' &rsaquo;</span></a>';
+  }
+
+  /** How many times a thread was opened, as the heading says it. */
+  function viewsText(n) {
+    var v = Number(n) || 0;
+    return v + (v === 1 ? ' time' : ' times');
+  }
+  function paintViews(n) {
+    var b = $('oa-forum-views');
+    if (b) b.textContent = viewsText(n);
+  }
+  /** What forumView answered for a thread on this page, so a read of the
+      thread that was in flight when the count moved (the two are started
+      together) cannot paint the older number over the newer one. */
+  var VIEWED = {};
+  function viewsOf(thread) {
+    return Math.max(Number(thread && thread.views) || 0, Number(VIEWED[thread && thread.id]) || 0);
+  }
+
+  /** ONE VIEW PER THREAD PER DEVICE PER UTC DAY, and the record of it is
+      this browser's. The mark sits in the seen-store beside the New badge's,
+      keyed to the account, cleared by sign-out with it; the function is
+      then asked to move the count by one, and told nothing else. Never
+      waited for: a count is painted when the answer lands, and a function
+      that cannot be reached leaves the number the thread already had. */
+  function countView(tid) {
+    if (!S.me || S.archive || !tid) return;
+    var seen = readSeen(S.me.uid);
+    var day = M.today();
+    if (!seen.viewed || typeof seen.viewed !== 'object') seen.viewed = {};
+    if (seen.viewed[tid] === day) return;
+    seen.viewed[tid] = day;
+    writeSeen(seen);
+    var room = S.room;
+    call('forumView', { room: room, tid: tid }).then(function (r) {
+      var n = Number(r && r.views);
+      if (!isFinite(n) || n <= 0) return;
+      VIEWED[tid] = n;
+      var row = rowOf(tid);
+      if (row) row.views = n;
+      if (S.thread && S.thread.id === tid) S.thread.views = n;
+      if (S.tid === tid && S.room === room) paintViews(n);
+    }).catch(function () { /* the count is a convenience; nothing waits for it */ });
+  }
+
+  /* ------------------------------------------------------- the tags page */
+
+  /** Every tag the room carries, with what the threads say about it: how
+      many questions, how many asked this week and this month, and when it
+      was first used, which is what "new" is measured by. The tally is the
+      count of record (it counts every question in the room, up to the cap);
+      the rows say the rest, over the threads the list reads. */
+  function tagStats(rows, tally) {
+    var now = Date.now();
+    var week = now - 7 * 864e5;
+    var month = now - 30 * 864e5;
+    var out = {};
+    function stat(t) {
+      return out[t] || (out[t] = { tag: t, n: 0, week: 0, month: 0, first: 0 });
+    }
+    rows.forEach(function (r) {
+      r.tags.forEach(function (t) {
+        if (!M.tagOk(t)) return;
+        var st = stat(t);
+        st.n++;
+        if (r.t >= week) st.week++;
+        if (r.t >= month) st.month++;
+        if (!st.first || (r.t && r.t < st.first)) st.first = r.t;
+      });
+    });
+    Object.keys(tally || {}).forEach(function (t) {
+      var c = Number(tally[t]) || 0;
+      if (!M.tagOk(t) || c <= 0) return;
+      var st = stat(t);
+      st.n = Math.max(st.n, c);
+    });
+    return Object.keys(out).map(function (k) { return out[k]; }).filter(function (st) { return st.n > 0; });
+  }
+
+  function orderTags(stats, order) {
+    var list = stats.slice();
+    if (order === 'name') {
+      list.sort(function (a, b) { return a.tag < b.tag ? -1 : 1; });
+      return list;
+    }
+    if (order === 'new') {
+      /* the three made most recently: a tag with no first use among the
+         threads read is older than any of those, and is left out */
+      return list.filter(function (st) { return st.first > 0; })
+        .sort(function (a, b) { return (b.first - a.first) || (a.tag < b.tag ? -1 : 1); })
+        .slice(0, NEW_TAGS);
+    }
+    list.sort(function (a, b) { return (b.n - a.n) || (a.tag < b.tag ? -1 : 1); });
+    return list;
+  }
+
+  function drawTagsPage() {
+    var host = $('oa-forum-tagsview');
+    if (!host) return;
+    show(host, true);
+    var forView = viewKey();
+    host.className = 'oa-forum-tagspage';
+    host.innerHTML =
+      '<div class="oa-forum-listhead"><div><h2 id="oa-forum-tagstitle">Tags</h2></div></div>' +
+      '<p class="oa-forum-tagsintro">' + esc(TAGS_INTRO) + '</p>' +
+      '<div class="oa-forum-tagsbar">' +
+        '<input type="search" class="oa-forum-tagfilter" id="oa-forum-tagfilter" placeholder="Filter by tag name" ' +
+          'aria-label="Filter by tag name" autocomplete="off">' +
+        '<div class="oa-forum-sorts" id="oa-forum-tagorders" role="group" aria-label="Order the tags">' +
+          TAG_ORDERS.map(function (o) {
+            return '<button type="button" class="oa-forum-sortpill" data-tag-order="' + o[0] + '" aria-pressed="' +
+              (o[0] === S.tagOrder ? 'true' : 'false') + '">' + o[1] + '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+      '<p class="oa-forum-n" id="oa-forum-tagscount" aria-live="polite">Loading the tags…</p>' +
+      '<div class="oa-forum-taggrid" id="oa-forum-taggrid"></div>';
+    var h2 = $('oa-forum-tagstitle');
+    if (h2 && S.painted && !keyboardTab) {
+      h2.setAttribute('tabindex', '-1');
+      h2.focus({ preventScroll: true });
+    }
+    S.painted = true;
+    var stats = null;
+    var grid = $('oa-forum-taggrid');
+    var count = $('oa-forum-tagscount');
+    var filter = $('oa-forum-tagfilter');
+
+    function paint() {
+      if (!stats || forView !== viewKey()) return;
+      var q = M.slug(filter.value);
+      var list = orderTags(stats, S.tagOrder).filter(function (st) { return !q || st.tag.indexOf(q) !== -1; });
+      if (count) {
+        count.textContent = !stats.length ? 'No tags yet in this room.'
+          : S.tagOrder === 'new' ? 'The ' + list.length + ' ' + (list.length === 1 ? 'tag' : 'tags') + ' made most recently in this room' + (q ? ', narrowed by name' : '')
+          : plural(list.length, 'tag', 'tags') + (q ? ' matching' : ' in this room this season');
+      }
+      grid.innerHTML = list.map(function (st) {
+        var when = S.tagOrder === 'new'
+          ? 'First used ' + esc(ago(st.first))
+          : (st.week ? plural(st.week, 'question', 'questions') + ' asked this week' : 'None asked this week') +
+            ', ' + (st.month ? st.month + ' this month' : 'none this month');
+        return '<div class="oa-forum-tagcard" data-tag="' + esc(st.tag) + '">' +
+          '<div class="oa-forum-tagcard-head">' + tagChip(st.tag, 0) + '</div>' +
+          '<p class="oa-forum-tagcard-n">' + plural(st.n, 'question', 'questions') + '</p>' +
+          '<p class="oa-forum-tagcard-when">' + when + '</p></div>';
+      }).join('');
+      wireWatch(grid);
+    }
+    Array.prototype.forEach.call(host.querySelectorAll('[data-tag-order]'), function (b) {
+      b.addEventListener('click', function () {
+        S.tagOrder = b.getAttribute('data-tag-order');
+        Array.prototype.forEach.call(host.querySelectorAll('[data-tag-order]'), function (x) {
+          x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+        });
+        paint();
+      });
+    });
+    filter.addEventListener('input', paint);
+    Promise.all([readTally(), readThreads()]).then(function (r) {
+      if (forView !== viewKey()) return;
+      S.tally = r[0] || {};
+      S.rows = r[1] || [];
+      stats = tagStats(S.rows, S.tally);
+      paint();
+      drawTags();
+    }).catch(function (err) {
+      if (forView !== viewKey()) return;
+      if (count) count.textContent = 'The tags could not be loaded. ' + friendly(err);
     });
   }
 
@@ -1438,6 +1862,7 @@
         if (painted) paintVotes();
       }).catch(function () { /* the buttons simply show no pressed state */ });
     }
+    countView(tid);
     readThread(tid).then(function (r) {
       if (S.tid !== tid || host.hidden || forView !== viewKey()) return;   // the reader has moved on
       markSeen(tid, Number(r.thread.n) || r.posts.length);
@@ -1686,6 +2111,7 @@
       '<div class="oa-forum-thmeta">' +
         '<span>Asked <b title="' + esc(stamp(thread.t)) + '">' + esc(ago(thread.t)) + '</b></span>' +
         '<span>Active <b title="' + esc(stamp(thread.lastAt)) + '">' + esc(ago(thread.lastAt)) + '</b></span>' +
+        '<span>Viewed <b id="oa-forum-views">' + esc(viewsText(viewsOf(thread))) + '</b></span>' +
         '<span>Season <b>' + esc(label(S.season)) + '</b></span>' +
         (thread.pinned ? '<span class="oa-label oa-label-pinned">Pinned</span>' : '') +
         (thread.locked ? '<span class="oa-label oa-label-locked">Locked</span>' : '') +

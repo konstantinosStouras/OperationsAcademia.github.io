@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>Privacy Policy — Operations Academia</title>
     <meta name="description" content="How Operations Academia uses and protects the information obtained from those visiting and posting on the site.">
-    <link rel="canonical" href="https://www.operationsacademia.org/privacy-policy.html">
+    <link rel="canonical" href="https://www.operationsacademia.org/privacy-policy">
 
     <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
          og:* is read by Facebook, Messenger, WhatsApp, LinkedIn, Telegram,
@@ -23,7 +23,7 @@
     <meta property="og:locale" content="en_GB">
     <meta property="og:title" content="Privacy Policy">
     <meta property="og:description" content="How Operations Academia uses and protects the information obtained from those visiting and posting on the site.">
-    <meta property="og:url" content="https://www.operationsacademia.org/privacy-policy.html">
+    <meta property="og:url" content="https://www.operationsacademia.org/privacy-policy">
     <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:type" content="image/jpeg">
@@ -57,6 +57,17 @@
          62px, the theme toggle by 185px). Reserve the space it will take, from
          the same localStorage hint the chip is painted from, before the browser
          draws anything. */
+      /* THE ADDRESS IS THE EXTENSIONLESS ONE. GitHub Pages serves /jobs and
+         /jobs.html alike, and the site links, canonicalises and shares the
+         first; so a reader who arrives on the second, through an old link or
+         a bookmark, is shown the address everyone else sees, before anything
+         paints or reads it. The search and the fragment travel with it. */
+      try {
+        var p = location.pathname;
+        if (/\.html$/.test(p) && history.replaceState) {
+          history.replaceState(null, '', p.replace(/\/index\.html$/, '/').replace(/\.html$/, '') + location.search + location.hash);
+        }
+      } catch (e) { /* the address is a convenience */ }
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
@@ -102,7 +113,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="jobs.html">Jobs</a>
+          <a href="jobs">Jobs</a>
           <a href="./#candidates">Candidates</a>
           <a href="./#placements">Placements</a>
           <a href="./#survey">Survey</a>
@@ -130,7 +141,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="jobs.html">Jobs</a>
+        <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -157,7 +168,7 @@
           <div class="v3-cta-row" style="margin-top:24px">
             <a class="v3-btn ghost" href="./">&larr; Back to the site</a>
           </div>
-          <p class="v3-mut" style="font-size:14px;margin-top:18px"><strong>By using the Site you consent to the collection, retention and use of your personal information in accordance with this policy.</strong> See also the <a href="terms-and-conditions.html">Terms and Conditions</a>.</p>
+          <p class="v3-mut" style="font-size:14px;margin-top:18px"><strong>By using the Site you consent to the collection, retention and use of your personal information in accordance with this policy.</strong> See also the <a href="terms-and-conditions">Terms and Conditions</a>.</p>
         </div>
       </section>
 
@@ -235,7 +246,7 @@
           behave, but never contacted.</p>
           <h2>Which universities read the Site</h2>
           <p>The Site publishes a chart of the universities its readers come from, on its
-          <a href="analytics.html">Analytics</a> page. It is worked out like this: once per browsing
+          <a href="analytics">Analytics</a> page. It is worked out like this: once per browsing
           session your browser sends us a request carrying no name, no identifier, no cookie and no
           message of any kind. Our server looks at the network address that request arrived from and
           asks the public directory of the internet what that network is called &mdash; the same
@@ -292,7 +303,7 @@
 
           <h2>Deleting your account</h2>
           <p>You can delete your Operations Academia account yourself, at any time and
-          without asking anyone: sign in, open <a href="account.html">your personal
+          without asking anyone: sign in, open <a href="account">your personal
           area</a>, and use <strong>Delete my account</strong> at the foot of the page.
           You are told what the account holds before you confirm it, and you have to
           type the word DELETE, because it cannot be undone.</p>
@@ -314,7 +325,7 @@
           copy of it. Deleting your account removes the conversation itself, on both
           sides.</p>
           <p>Two things are deliberately not removed, and it is fairer to say so than to
-          claim otherwise. Anything you sent through the <a href="feedback.html">feedback
+          claim otherwise. Anything you sent through the <a href="feedback">feedback
           form</a> is not linked to your account (that form can be used without signing
           in at all), so it stays with the maintainer; write to us if you would like it
           taken out too. And a correction you contributed to the Universities directory
@@ -344,7 +355,7 @@
 
           <h2>Contact us</h2>
           <p>If you have any queries concerning your personal information or any questions on our use
-          of the information then please <a href="feedback.html">contact us</a>.</p>
+          of the information then please <a href="feedback">contact us</a>.</p>
         </div>
       </div>
     </main>
@@ -358,7 +369,7 @@
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
-            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            <p>Trusted by <a href="previous-markets">over 200 universities around the
             world</a>.<br>
             Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
             Sponsored by the
@@ -373,17 +384,17 @@
               <li><a href="./#placements">Placements</a></li>
               <li><a href="./#survey">Survey</a></li>
               <li><a href="./#resources">Resources</a></li>
-              <li><a href="analytics.html">Analytics</a></li>
+              <li><a href="analytics">Analytics</a></li>
             </ul>
           </div>
           <div>
             <h4>Participate</h4>
             <ul>
-              <li><a href="post-a-job.html">Post a job</a></li>
-              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
-              <li><a href="post-a-placement.html">Report a placement</a></li>
-              <li><a href="alerts.html">E-mail alerts</a></li>
-              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="post-a-job">Post a job</a></li>
+              <li><a href="post-a-candidate">Post your candidacy</a></li>
+              <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="alerts">E-mail alerts</a></li>
+              <li><a href="feedback">Feedback</a></li>
               <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
@@ -392,8 +403,8 @@
           <span>&copy; 2014-<span class="js-current-year"></span>
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
-            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a>
+            <a href="terms-and-conditions">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy">Privacy</a>
           </span>
         </div>
       </div>

@@ -39,6 +39,8 @@ function serve() {
       let file = path.join(ROOT, rel);
       if (!file.startsWith(ROOT)) { res.writeHead(403).end(); return; }
       if (existsSync(file) && statSync(file).isDirectory()) file = path.join(file, 'index.html');
+      /* Pages serves /jobs for jobs.html, and the site links that form */
+      if (!existsSync(file) && !path.extname(file) && existsSync(file + '.html')) file += '.html';
       if (!existsSync(file)) { res.writeHead(404).end('not found'); return; }
       res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' });
       createReadStream(file).pipe(res);
@@ -164,7 +166,13 @@ const FORUM_INK = ['.oa-label-pinned', '.oa-label-locked', '.oa-label-new', '.oa
      the line under the details box, the card's head, the star, the note
      above the card and the similar-questions list under the title. */
   '.oa-forum-fhint', '.oa-forum-fmt', '.oa-forum-askwhere', '.oa-forum-askreq', '.oa-forum-req',
-  '.oa-forum-askintro li', '.oa-forum-similar p', '.oa-forum-similar a', '.oa-forum-similar i'];
+  '.oa-forum-askintro li', '.oa-forum-similar p', '.oa-forum-similar a', '.oa-forum-similar i',
+  /* THE SECTIONS AND THE TWO PAGES THAT CAME WITH THEM (2026-09-08): the
+     nav rows, the order pills, the doors on Home and the cards on the Tags
+     page, each of which paints ink on a ground of its own. */
+  '.oa-forum-navlink', '.oa-forum-sortpill', '.oa-forum-homelede', '.oa-forum-doorname',
+  '.oa-forum-doorwho', '.oa-forum-doorgo', '.oa-forum-tagsintro', '.oa-forum-tagcard-n',
+  '.oa-forum-tagcard-when'];
 /* .oa-forum-watch and .oa-forum-save are NOT in it, and that is a limit of
    this audit rather than an oversight: it measures INK against its ground and
    skips an element with no text, and those two are icon buttons. They are
@@ -1641,7 +1649,7 @@ for (const [name, expect] of [
       createdAt: '2026-08-10T00:00:00.000Z',
     } }],
   };
-  const edited = await onSite('post-a-job.html?edit=j9', editSeed, async (q) => {
+  const edited = await onSite('post-a-job?edit=j9', editSeed, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
     await q.waitForFunction(() => document.getElementById('f-institution').value !== '',
       null, { timeout: 8000 });
@@ -1747,7 +1755,7 @@ for (const [name, expect] of [
     createdAt: '2026-08-20T00:00:00.000Z',
   } }] };
   const one = await onSite('post-a-candidate.html', oneSeed, async (q) => {
-    await q.waitForURL(/post-a-candidate\.html\?edit=c9/, { timeout: 10000 });
+    await q.waitForURL(/post-a-candidate\?edit=c9/, { timeout: 10000 });
     await q.waitForFunction(() => document.getElementById('f-first').value !== '',
       null, { timeout: 8000 });
     return q.evaluate(() => ({
@@ -1801,7 +1809,7 @@ for (const [name, expect] of [
   ok(new RegExp('You have a profile from the ' + (ly - 1) + '\u2013' + ly + ' job market: open it, ' +
      'or file one for the ' + (marketYear() - 1) + '\u2013' + marketYear() + ' market below\\.').test(last.msg),
     'last season: …and the older profile is named above it, with its market year');
-  eq(last.link, 'post-a-candidate.html?edit=c8',
+  eq(last.link, 'post-a-candidate?edit=c8',
     'last season: the message links straight to that profile');
 
   /* -- the candidate's PRIVATE view statistics (owner, 2026-09-04) ---------
@@ -1844,7 +1852,7 @@ for (const [name, expect] of [
     days: { [longAgo]: [10, 2], [today]: [2, 1] },
   } };
 
-  const heldPanel = await onSiteRouted('post-a-candidate.html?edit=c9', oneSeed,
+  const heldPanel = await onSiteRouted('post-a-candidate?edit=c9', oneSeed,
     { revealAt: '2099-01-01' }, readPanel);
   /* THE DAY AS THE SITE WRITES IT, asked of the module rather than typed: the
      panel used to compare a UTC calendar day against the date (the reading
@@ -1862,7 +1870,7 @@ for (const [name, expect] of [
     'as the site writes a day, never as a raw ISO string');
   ok(!/Opened \d/.test(heldPanel.text), 'and shows no count that would read as "nobody is interested"');
 
-  const shownPanel = await onSiteRouted('post-a-candidate.html?edit=c9',
+  const shownPanel = await onSiteRouted('post-a-candidate?edit=c9',
     { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: statsDoc }] },
     { revealAt: '2000-01-01' }, readPanel);
   ok(/Opened 12 times this season, 2 times in the last 7 days/.test(shownPanel.text),
@@ -1874,7 +1882,7 @@ for (const [name, expect] of [
     'and says the figures are private — naming the maintainer, who sees them on the ' +
     'Admin area inbox card, as the Privacy Policy does');
 
-  const hostilePanel = await onSiteRouted('post-a-candidate.html?edit=c9',
+  const hostilePanel = await onSiteRouted('post-a-candidate?edit=c9',
     { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: { ...statsDoc, stats: {
       opens: '<img src=x onerror=alert(1)>', cvClicks: -4, updatedAt: '<b>x</b>', days: 'nope',
     } } }] },
@@ -2811,7 +2819,7 @@ for (const [name, expect] of [
   // Edit leaves for the form carrying the document id, and does NOT expand
   const before = await j.$eval('#job-' + firstId + ' .oa-card-body', (n) => n.hidden);
   await j.click('.oa-jobbtn-edit');
-  await j.waitForURL(/post-a-job\.html\?edit=/, { timeout: 5000 });
+  await j.waitForURL(/post-a-job\?edit=/, { timeout: 5000 });
   ok(j.url().includes('edit=' + encodeURIComponent(firstId)),
     'jobs: Edit opens the form for that posting');
   ok(before, 'jobs: the card was closed before Edit was pressed');
@@ -3213,7 +3221,7 @@ for (const [pageName, pick] of [
   const someSchool = rf.find((r) => r.placement) || { placement: 'University' };
   const viaE = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   viaE.on('pageerror', (e) => jsErrors.push('recent-faculty filterE: ' + e.message));
-  await viaE.goto(BASE + 'recent-faculty.html?filterE=' +
+  await viaE.goto(BASE + 'recent-faculty?filterE=' +
     encodeURIComponent(someSchool.placement), { waitUntil: 'domcontentloaded' });
   await viaE.waitForSelector('.oa-card', { timeout: 15000 });
   const eCount = Number(((await viaE.$eval('.oa-count', (n) => n.textContent)).match(/\/\s*(\d+)/) || [])[1]);
@@ -3277,7 +3285,7 @@ for (const [pageName, pick] of [
     /* narrowed by university as well, because the list PAGINATES: a season
        holds far more than one page of postings, and "not on page 1" is not
        "not listed" */
-    await alsoUnder.goto(BASE + 'previous-markets.html?year=' + other +
+    await alsoUnder.goto(BASE + 'previous-markets?year=' + other +
       '&university=' + encodeURIComponent(one.institution),
       { waitUntil: 'domcontentloaded' });
     await alsoUnder.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
@@ -3293,7 +3301,7 @@ for (const [pageName, pick] of [
   const someInst = past[past.length - 1].institution.split(' ')[0];
   const viaD = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   viaD.on('pageerror', (e) => jsErrors.push('previous-markets filterD: ' + e.message));
-  await viaD.goto(BASE + 'previous-markets.html?filterD=' + encodeURIComponent(someInst),
+  await viaD.goto(BASE + 'previous-markets?filterD=' + encodeURIComponent(someInst),
     { waitUntil: 'domcontentloaded' });
   await viaD.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
   const dCount = Number(((await viaD.$eval('.oa-count', (n) => n.textContent)).match(/\/\s*(\d+)/) || [])[1]);
@@ -3323,7 +3331,7 @@ for (const [pageName, pick] of [
    default view is all postings folded in from data/jobs.json, which belong to
    the job editor and which this one refuses to touch. */
 for (const [pageName, dataset, patch] of [
-  ['previous-markets.html?year=2015', 'past-postings', { institution: 'Corrected Institution Name' }],
+  ['previous-markets?year=2015', 'past-postings', { institution: 'Corrected Institution Name' }],
   ['recent-faculty.html', 'recent-faculty', { name: 'Corrected Person Name' }],
 ]) {
   const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
@@ -3641,16 +3649,16 @@ for (const [pageName, listSel] of [
      the namespaced key that mount reads, rather than candidates.html, which
      redirects there and would drop the query on the way. */
   for (const [want, what] of [
-    ['recent-faculty.html?placement=', 'recent hires'],
-    ['recent-faculty.html?alma=', 'PhD alumni'],
+    ['recent-faculty?placement=', 'recent hires'],
+    ['recent-faculty?alma=', 'PhD alumni'],
     ['./?c_affiliation=', 'candidates'],
-    ['jobs.html?institution=', 'current openings'],
-    ['previous-markets.html?university=', 'past postings'],
+    ['jobs?institution=', 'current openings'],
+    ['previous-markets?university=', 'past postings'],
   ]) {
     ok(pop.links.some((h) => h.startsWith(want)),
       `universities: the popup links into ${what} pre-filtered`);
   }
-  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+\.html\?|\.\/\?)/.test(h)),
+  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+(\.html)?\?|\.\/\?)/.test(h)),
     'universities: every popup link is a page of this site or a real URL');
 
   /* NOTHING ON THE POPUP IS GREY, IN EITHER THEME.
@@ -3719,7 +3727,7 @@ for (const [pageName, listSel] of [
      the university's whole card, not a pin to hunt for. */
   const viaA = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   viaA.on('pageerror', (e) => jsErrors.push('universities filterA: ' + e.message));
-  await viaA.goto(BASE + 'universities.html?filterA=INSEAD', { waitUntil: 'domcontentloaded' });
+  await viaA.goto(BASE + 'universities?filterA=INSEAD', { waitUntil: 'domcontentloaded' });
   await viaA.waitForSelector('#oa-dir .oa-card, #oa-dir .oa-empty', { timeout: 15000 });
   eq(await viaA.$eval('#oa-dir .oa-chip .oa-chip-label', (n) => n.textContent), 'INSEAD',
     'universities: ?filterA lands on the cards as a chip, as it landed in the vendor filter');
@@ -3820,7 +3828,7 @@ for (const [pageName, listSel] of [
      the archive covers brings them onto the first page. */
   const p2 = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
   p2.on('pageerror', (e) => jsErrors.push('overrides/own2: ' + e.message));
-  await p2.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p2.goto(BASE + 'previous-markets?year=2015', { waitUntil: 'domcontentloaded' });
   await p2.waitForSelector('.oa-card');
   await p2.waitForTimeout(600);
   await p2.evaluate(() => window.OARowEdit.__setForTest('past-postings',
@@ -3874,7 +3882,7 @@ for (const [pageName, listSel] of [
   /* A season only the ARCHIVE covers, so every card is a row this editor owns
      — the folded-in postings from data/jobs.json are another editor's, and it
      refuses to touch them (the block above). */
-  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p.goto(BASE + 'previous-markets?year=2015', { waitUntil: 'domcontentloaded' });
   await p.waitForSelector('.oa-card');
   await p.waitForTimeout(600);
 
@@ -3969,7 +3977,7 @@ for (const [pageName, sel, least, mapBtn] of [
      signed-out visitor never sees a body to smuggle anything into. */
   const { ctx: xCtx, page: p, errors: xErrs } = await signedInPage(
     // an archive season, so the row is one this editor owns (see above)
-    'previous-markets.html?year=2015');
+    'previous-markets?year=2015');
   await p.waitForTimeout(400);
 
   const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
@@ -4285,7 +4293,7 @@ for (const [url, marker] of [
 
 /* -- the preview stubs, and the addresses the one-pager absorbed --------- */
 for (const [from, to] of [
-  ['v3/', '/'], ['v3/jobs.html', '/jobs.html'], ['v3/post-a-job.html', '/post-a-job.html'],
+  ['v3/', '/'], ['v3/jobs.html', '/jobs'], ['v3/post-a-job.html', '/post-a-job'],
 ]) {
   const q = await browser.newPage();
   await q.goto(BASE + from, { waitUntil: 'domcontentloaded' });
@@ -4332,9 +4340,9 @@ for (const [from, hash] of [
     const menu = document.createElement('div');
     menu.className = 'oa-acct-menu';
     menu.innerHTML =
-      '<a href="my-postings.html"><span class="oa-mi">x</span>My postings' +
+      '<a href="my-postings"><span class="oa-mi">x</span>My postings' +
         '<span class="oa-acct-n" data-count="postings" hidden></span></a>' +
-      '<a href="alerts.html"><span class="oa-mi">x</span>E-mail alerts' +
+      '<a href="alerts"><span class="oa-mi">x</span>E-mail alerts' +
         '<span class="oa-acct-n" data-count="alerts" hidden></span></a>';
     document.body.appendChild(menu);
     const paint = (counts) => {
@@ -4413,13 +4421,13 @@ for (const [from, hash] of [
         badge: badge ? (badge.hidden ? '' : badge.textContent) : null };
     };
     return {
-      menuPostings: row('#oa-menu', 'my-postings.html'),
-      menuCand: row('#oa-menu', 'post-a-candidate.html'),
-      sheetPostings: row('#oa-np', 'my-postings.html'),
-      sheetCand: row('#oa-np', 'post-a-candidate.html'),
-      alerts: row('#oa-menu', 'alerts.html'),
-      messages: row('#oa-menu', 'messages.html'),
-      area: row('#oa-menu', 'account.html'),
+      menuPostings: row('#oa-menu', 'my-postings'),
+      menuCand: row('#oa-menu', 'post-a-candidate'),
+      sheetPostings: row('#oa-np', 'my-postings'),
+      sheetCand: row('#oa-np', 'post-a-candidate'),
+      alerts: row('#oa-menu', 'alerts'),
+      messages: row('#oa-menu', 'messages'),
+      area: row('#oa-menu', 'account'),
     };
   });
   async function heldRows(name, docs) {
@@ -4432,8 +4440,8 @@ for (const [from, hash] of [
     await q.click('#oa-chip');
     const rows = await readRows(q);
     const shown = {
-      postings: await q.locator('#oa-menu a[href="my-postings.html"]').isVisible(),
-      cand: await q.locator('#oa-menu a[href="post-a-candidate.html"]').isVisible(),
+      postings: await q.locator('#oa-menu a[href="my-postings"]').isVisible(),
+      cand: await q.locator('#oa-menu a[href="post-a-candidate"]').isVisible(),
     };
     eq(errors, [], `held rows (${name}): no uncaught script error`);
     return { ctx, q, rows, shown };
@@ -4495,9 +4503,9 @@ for (const [from, hash] of [
       'held rows: a WITHDRAWN profile still counts — it exists and is its owner\'s to restore');
     ok(!rows.sheetCand.hidden && rows.sheetPostings.hidden,
       'held rows: the phone sheet draws My candidate profile and not My postings');
-    eq(await q.locator('#oa-menu a[href="post-a-candidate.html"]').getAttribute('href'),
-      'post-a-candidate.html',
-      'held rows: the row opens post-a-candidate.html, which sends an owner to their own profile');
+    eq(await q.locator('#oa-menu a[href="post-a-candidate"]').getAttribute('href'),
+      'post-a-candidate',
+      'held rows: the row opens post-a-candidate, which sends an owner to their own profile');
     await ctx.close();
   }
 
@@ -4512,7 +4520,7 @@ for (const [from, hash] of [
       const el = document.getElementById('pa-cand-card');
       return { href: el.getAttribute('href'), h3: el.querySelector('h3').textContent.trim() };
     });
-    eq(card.href, 'post-a-candidate.html?edit=held-c1',
+    eq(card.href, 'post-a-candidate?edit=held-c1',
       'personal area: the candidate card links straight to the profile the account holds');
     ok(/Your candidate profile/.test(card.h3), 'personal area: …and reads "Your candidate profile"');
     /* and, holding the real lists, it corrected the menu's cache for free */
@@ -4532,7 +4540,7 @@ for (const [from, hash] of [
       const el = document.getElementById('pa-cand-card');
       return { href: el.getAttribute('href'), h3: el.querySelector('h3').textContent.trim() };
     });
-    eq(card.href, 'post-a-candidate.html',
+    eq(card.href, 'post-a-candidate',
       'personal area: with no profile the card still offers the form');
     ok(/^Candidate profile$/.test(card.h3.replace(/^\S+\s*/, '')) || /Candidate profile/.test(card.h3),
       'personal area: …and reads "Candidate profile", not "Your"');
@@ -4857,7 +4865,7 @@ for (const [from, hash] of [
     });
     eq(idRow.label, 'OA posting ID', `${pageName}: the last row is the posting's ID`);
     eq(idRow.text, idRow.id, `${pageName}: …showing the id the card itself carries`);
-    eq(idRow.href, `${pageName}?job=${encodeURIComponent(idRow.id)}`,
+    eq(idRow.href, `${pageName.replace(/\.html$/, '')}?job=${encodeURIComponent(idRow.id)}`,
       `${pageName}: …as a link to this one posting on this page`);
     eq(idRow.cell, idRow.id,
       `${pageName}: …and the cell holds that one identifier and nothing beside it`);
@@ -5682,9 +5690,9 @@ for (const w of [320, 360, 390, 430]) {
     const expected = 3 + 2 + metaHeld + 2 + newsPending + 1;
     const { ctx, q, errors } = await adminAreaPage(ADMIN, 'index.html');
     await q.waitForSelector('#oa-chip', { timeout: 10000 });
-    eq(await q.locator('#oa-menu a[href="admin-area.html"]').count(), 1,
+    eq(await q.locator('#oa-menu a[href="admin-area"]').count(), 1,
       'admin area: the resolved admin session draws the menu row');
-    eq(await q.locator('#oa-np a[href="admin-area.html"]').count(), 1,
+    eq(await q.locator('#oa-np a[href="admin-area"]').count(), 1,
       'admin area: and the mobile sheet panel carries it too');
     await q.waitForFunction((want) => {
       const el = document.querySelector('#oa-menu .oa-acct-n[data-count="admin"]');
@@ -5877,11 +5885,11 @@ for (const w of [320, 360, 390, 430]) {
        is how this was reported. */
     ok(await q.locator('#oa-review-years').isVisible(),
       'admin area: the market-year filter is on screen for the user tab');
-    eq(await q.locator('#oa-review-list a[href="post-a-job.html?edit=u1"]').count(), 1,
+    eq(await q.locator('#oa-review-list a[href="post-a-job?edit=u1"]').count(), 1,
       'admin area: a user-added card opens the poster’s own form to correct it');
 
     // ticking one off writes the one stamp, and the tab count follows live
-    await q.click('article:has(a[href="post-a-job.html?edit=u1"]) button[data-act="reviewed"]');
+    await q.click('article:has(a[href="post-a-job?edit=u1"]) button[data-act="reviewed"]');
     await q.waitForFunction(() => {
       const d = window.__fb.docs['jobSubmissions/u1'];
       return d && typeof d.reviewedAt === 'string' && d.reviewedAt.length > 0;
@@ -6027,10 +6035,10 @@ for (const w of [320, 360, 390, 430]) {
       eq(await q.locator(`#oa-aa-yc-list a[href="${want}"]`).count(), 1,
         `admin area: ${p.institution.slice(0, 24)} is opened at ${want}`);
     }
-    eq(await q.locator('#oa-aa-yc-list a[href^="jobs.html#job-"]').count(), 0,
+    eq(await q.locator('#oa-aa-yc-list a[href^="jobs#job-"], #oa-aa-yc-list a[href^="jobs.html#job-"]').count(), 0,
       'admin area: and no card still links a fragment, which nothing ever acted on');
     eq(await q.locator(
-      '#oa-aa-yc-list a[href="previous-markets.html?job=2025-rolled-university-20240901"]')
+      '#oa-aa-yc-list a[href="previous-markets?job=2025-rolled-university-20240901"]')
       .count(), 1,
       'admin area: a posting whose season has closed is opened on Previous ' +
       'markets — the owner’s own case, which the jobs page could not show');
@@ -6408,7 +6416,7 @@ for (const w of [320, 360, 390, 430]) {
   {
     const { ctx, q } = await adminAreaPage(NOBODY, 'index.html');
     await q.waitForSelector('#oa-chip', { timeout: 10000 });
-    eq(await q.locator('#oa-menu a[href="admin-area.html"]').count(), 0,
+    eq(await q.locator('#oa-menu a[href="admin-area"]').count(), 0,
       'admin area: a resolved non-admin session gets no menu row');
     await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
     await q.waitForTimeout(600);
@@ -7239,7 +7247,7 @@ for (const w of [320, 360, 390, 430]) {
   {
     /* edit mode: the loaded profile is drawn, and typing previews the
        updated-on line SAVING would earn */
-    const { ctx, page: q, errors } = await signedInPage('post-a-candidate.html?edit=cand-me',
+    const { ctx, page: q, errors } = await signedInPage('post-a-candidate?edit=cand-me',
       { docs: [{ path: mine.path, data: { ...mine.data, updatedAt: undefined } }],
         selector: '#oa-cand-preview .oa-card-title' });
     const before = await q.evaluate(() => ({
@@ -7339,7 +7347,7 @@ for (const w of [320, 360, 390, 430]) {
   /* -- a phone --------------------------------------------------------- */
   for (const [url, selector, docs] of [
     ['account.html', '#pa-cand-preview:not([hidden]) .oa-card', [mine]],
-    ['post-a-candidate.html?edit=cand-me', '#oa-cand-preview .oa-card-title', [mine]],
+    ['post-a-candidate?edit=cand-me', '#oa-cand-preview .oa-card-title', [mine]],
   ]) {
     const { ctx, page: q } = await signedInPage(url, { docs, selector,
       viewport: { width: 390, height: 844 } });
@@ -7865,14 +7873,14 @@ for (const w of [320, 360, 390, 430]) {
 
     /* a link from the single-choice days names ONE value, and still selects it;
        the older "a|b" join, which links in the wild still carry, selects both */
-    await q.goto(BASE + 'jobs.html?level=' + encodeURIComponent(L[0]) +
+    await q.goto(BASE + 'jobs?level=' + encodeURIComponent(L[0]) +
       '&chars=' + encodeURIComponent(c0), { waitUntil: 'load' });
     await q.waitForSelector('.oa-card, .oa-empty');
     await q.waitForTimeout(400);
     eq(await shown(), allOf(anyOf(rows, [L[0]]), [c0]).length,
       'multi: a one-value link from the radio days still selects what it names');
     eq(await chips(), [L[0], c0], 'multi: …as one chip each');
-    await q.goto(BASE + 'jobs.html?chars=' + encodeURIComponent(C.join('|')), { waitUntil: 'load' });
+    await q.goto(BASE + 'jobs?chars=' + encodeURIComponent(C.join('|')), { waitUntil: 'load' });
     await q.waitForSelector('.oa-card, .oa-empty');
     await q.waitForTimeout(400);
     eq(await shown(), allOf(rows, C).length,
@@ -7908,7 +7916,7 @@ for (const w of [320, 360, 390, 430]) {
       [opts[1].v], 'one: a second choice REPLACES the first');
     eq(new URL(p.url()).searchParams.getAll('level'), [opts[1].v],
       'one: …and the address names one value');
-    await p.goto(BASE + 'previous-markets.html?level=' + encodeURIComponent(opts[0].v) +
+    await p.goto(BASE + 'previous-markets?level=' + encodeURIComponent(opts[0].v) +
       '&level=' + encodeURIComponent(opts[1].v), { waitUntil: 'load' });
     await p.waitForSelector('.oa-card, .oa-empty');
     await p.waitForTimeout(400);
@@ -9140,7 +9148,7 @@ for (const w of [320, 360, 390, 430]) {
   const LEVEL = pick.levels[0], CHAR = pick.characteristics[0], COUNTRY = pick.country;
   const TERM = pick.institution.slice(0, 6);
   const enc = encodeURIComponent;
-  const SEARCH = `jobs.html?institution=${enc(TERM)}&level=${enc(LEVEL)}` +
+  const SEARCH = `jobs?institution=${enc(TERM)}&level=${enc(LEVEL)}` +
     `&country=${enc(COUNTRY)}&chars=${enc(CHAR)}`;
 
   /* -- signed OUT: the sign-in box, and no navigation --------------------- */
@@ -9158,7 +9166,7 @@ for (const w of [320, 360, 390, 430]) {
        nudge, and what is under test is the module's own gate */
     await q.evaluate(() => document.querySelector('.oa-alert-save').click());
     await q.waitForTimeout(1000);
-    ok(/jobs\.html$/.test(new URL(q.url()).pathname),
+    ok(/\/jobs$/.test(new URL(q.url()).pathname),
       'save-search: pressing it signed out goes NOWHERE');
     ok(await q.evaluate(() => !!document.querySelector('.oa-modal')),
       'save-search: …it offers the sign-in box instead');
@@ -9211,7 +9219,7 @@ for (const w of [320, 360, 390, 430]) {
     eq(row.rows, 2, `save-search: the bar is still two rows deep (${row.rows})`);
 
     await q.click('.oa-alert-save');
-    await q.waitForURL(/alerts\.html/, { timeout: 15000 });
+    await q.waitForURL(/\/alerts(\?|$)/, { timeout: 15000 });
     await q.waitForSelector('#oa-prefill-note:not([hidden])', { timeout: 15000 });
     await q.waitForTimeout(250);
     const landed = await q.evaluate(([level, country]) => {
@@ -9266,7 +9274,7 @@ for (const w of [320, 360, 390, 430]) {
   /* -- arriving signed OUT on the alerts page keeps the prefill ------------ */
   {
     const { ctx, page: q, errors } = await signedOutPage(
-      `alerts.html?prefill=1&level=${enc(LEVEL)}&dropped=chars`, { wait: false });
+      `alerts?prefill=1&level=${enc(LEVEL)}&dropped=chars`, { wait: false });
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
     await q.waitForSelector('#oa-needauth:not([hidden])', { timeout: 15000 });
@@ -9439,7 +9447,7 @@ for (const w of [320, 360, 390, 430]) {
     }, UNVERIFIED.uid);
     ok(fb.callable >= 0 && fb.fallback > fb.callable,
       'verify: with the function not deployed, the card tries it and then FALLS BACK to sendEmailVerification');
-    eq(fb.url, 'https://www.operationsacademia.org/verify-email.html',
+    eq(fb.url, 'https://www.operationsacademia.org/verify-email',
       'verify: …landing Firebase\'s own link on the site\'s verify page');
     ok(/firebaseapp\.com/.test(fb.from) && /Sent to/.test(fb.msg),
       'verify: …and the sender line then names Firebase\'s address, so the reader knows what to look for');
@@ -9609,8 +9617,8 @@ for (const w of [320, 360, 390, 430]) {
   }
 
   /* -- verify-email.html: where the link lands ------------------------------ */
-  const LINK = 'verify-email.html?mode=verifyEmail&oobCode=AbC123xyz&continueUrl=' +
-    encodeURIComponent('https://www.operationsacademia.org/account.html');
+  const LINK = 'verify-email?mode=verifyEmail&oobCode=AbC123xyz&continueUrl=' +
+    encodeURIComponent('https://www.operationsacademia.org/account');
 
   {
     // the signed-in pending reader, whose link works. The registration form
@@ -9644,7 +9652,7 @@ for (const w of [320, 360, 390, 430]) {
       'verify page: …and the keyboard lands on its heading, so a screen reader hears the outcome');
     eq(done.url, '', 'verify page: the one-time code is off the address bar');
     ok(/ready to use/.test(done.note), 'verify page: the card\'s own note stands for a confirmed account');
-    ok(done.contShown && done.contHref === 'account.html' && !done.signinShown,
+    ok(done.contShown && done.contHref === 'account' && !done.signinShown,
       'verify page: …with Continue to your account for the signed-in reader');
     ok(done.applied && done.applied.path === 'AbC123xyz',
       'verify page: the code on the address is the one applied');
@@ -9684,7 +9692,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(box.countShown && /Taking you to your account in [1-5] seconds?\./.test(box.count),
       'verify page: …saying it will move on in a few seconds');
     eq(errors, [], 'verify page: no uncaught script error while the box counts down');
-    await q.waitForURL(/account\.html$/, { timeout: 9000 });
+    await q.waitForURL(/\/account$/, { timeout: 9000 });
     ok(true, 'verify page: after five seconds the reader is on the account page without pressing anything');
     await ctx.close();
   }
@@ -9702,7 +9710,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForFunction(() => /Press Continue when you are ready/.test(document.getElementById('ve-count').textContent), null, { timeout: 8000 });
     await q.waitForTimeout(6000);
     const held = await q.evaluate(() => ({
-      here: /verify-email\.html/.test(location.pathname),
+      here: /\/verify-email$/.test(location.pathname),
       modal: !!document.querySelector('#oa-profile [aria-modal="true"]'),
       cont: !document.getElementById('ve-continue').hidden,
     }));
@@ -10213,7 +10221,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(cal.events.every((e) => ticked.some((id) => e.UID.value.includes(id))), 'calendar: every entry is one of the ticked postings');
     ok(cal.events.every((e) => e.DTSTART.params.VALUE === 'DATE' && e.TRANSP.value === 'TRANSPARENT'),
       'calendar: every entry is an all-day, transparent reminder');
-    ok(cal.events.every((e) => /jobs\.html\?job=/.test(e.URL.value)), 'calendar: each links its permalink on the jobs page');
+    ok(cal.events.every((e) => /\/jobs\?job=/.test(e.URL.value)), 'calendar: each links its permalink on the jobs page');
     ok(noAddress(text), 'calendar: no contact address reaches the reader\'s machine');
     eq(cal.props.VERSION, '2.0', 'calendar: …and it is a calendar');
     const yr = await q.evaluate(() => OAJobNav.marketYear(new Date()));
@@ -10550,10 +10558,45 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
-  /* -- a verified account with no profile: the Open tab alone ------------- */
+  /* -- a verified account with no profile: Home with one door, then the Open tab alone -- */
   {
     const { ctx, page: q, errors } = await signedInPage('forum.html', { selector: '#oa-forum' });
-    eq(await tabs(q), ['open'], 'forum (no profile): only the Open forum tab is drawn');
+    /* HOME IS THE FORUM'S FIRST PAGE (owner, 2026-09-08): a door for each
+       room this account may enter, the line saying what opens the other, the
+       section nav down the left with Home current, the room switch put away,
+       and no list read until a door is pressed */
+    const home = await q.evaluate(() => {
+      const cur = document.querySelector('#oa-forum-nav a[aria-current="page"]');
+      return {
+        shown: !document.getElementById('oa-forum-home').hidden,
+        doors: [...document.querySelectorAll('#oa-forum-doors [data-enter-room]')].map((a) => a.getAttribute('data-enter-room')),
+        note: (document.querySelector('#oa-forum-home .oa-forum-roomnote') || {}).textContent || '',
+        top: document.getElementById('oa-forum-top').hidden,
+        nav: [...document.querySelectorAll('#oa-forum-nav a')].map((a) => a.getAttribute('data-section')),
+        labels: [...document.querySelectorAll('#oa-forum-nav a')].map((a) => a.textContent.trim()),
+        icons: document.querySelectorAll('#oa-forum-nav a svg').length,
+        current: cur ? cur.getAttribute('data-section') : null,
+        handle: (document.getElementById('oa-forum-myhandle') || {}).textContent,
+        list: document.getElementById('oa-forum-listview').hidden,
+        banner: document.getElementById('oa-forum-me').hidden,
+        joined: window.__fb.ops('callable'),
+        url: location.search,
+      };
+    });
+    ok(home.shown && home.url === '', 'forum (no profile): forum.html with no room is Home');
+    eq(home.doors, ['open'], 'forum (no profile): Home draws the Open forum\'s door and no other');
+    ok(/Candidates’ room opens to accounts holding a candidate profile/.test(home.note) && home.note.includes(`${FY - 1}-${FY}`),
+      'forum (no profile): and the line saying what opens the other room, naming the season');
+    eq(home.nav, ['home', 'questions', 'unanswered', 'tags'], 'forum (no profile): the four sections down the left, in that order');
+    eq(home.labels, ['Home', 'Questions', 'Unanswered', 'Tags'], 'forum (no profile): worded as the owner asked');
+    ok(home.icons === 4 && home.current === 'home', 'forum (no profile): each with an icon, and Home marked as the one the reader is in');
+    ok(home.top && home.list && home.banner, 'forum (no profile): the room switch, the list and the room banner are put away on Home');
+    eq(home.handle, 'quiet heron 42', 'forum (no profile): the handle is said once, in the home lede');
+    eq(home.joined, ['forumJoin'], 'forum (no profile): one forumJoin, and nothing else, on entry');
+    await q.click('#oa-forum-doors [data-enter-room="open"]');
+    await q.waitForFunction(() => /room=open/.test(location.search) && !document.getElementById('oa-forum-listview').hidden,
+      null, { timeout: 15000 });
+    eq(await tabs(q), ['open'], 'forum (no profile): through the door, only the Open forum tab is drawn');
     const st = await q.evaluate(() => ({
       note: document.getElementById('oa-forum-roomnote').hidden ? '' : document.getElementById('oa-forum-roomnote').textContent,
       banner: document.getElementById('oa-forum-me').className,
@@ -10564,7 +10607,7 @@ for (const w of [320, 360, 390, 430]) {
       'forum (no profile): the one line says what opens the other room, naming the season');
     ok(/is-open/.test(st.banner), 'forum (no profile): the room banner is the Open forum\'s');
     eq(st.handle, 'quiet heron 42', 'forum (no profile): the handle the simulator drew is what the banner prints');
-    eq(st.joined, ['forumJoin'], 'forum (no profile): one forumJoin, and nothing else, on entry');
+    eq(st.joined, ['forumJoin'], 'forum (no profile): still one forumJoin, and nothing else, through the door');
     const leak = await leakCheck(q);
     eq(leak.main, [], 'forum (no profile): nothing of a stranger\'s seeded profile is on the page (there is none)');
     eq(errors, [], 'forum (no profile): no uncaught script error');
@@ -10573,7 +10616,7 @@ for (const w of [320, 360, 390, 430]) {
 
   /* -- a seeded current candidate: both tabs, then the whole conversation -- */
   {
-    const { ctx, page: q, errors } = await signedInPage('forum.html',
+    const { ctx, page: q, errors } = await signedInPage('forum?room=candidates',
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum' });
     eq(await tabs(q), ['candidates', 'open'], 'forum (candidate): both tabs are drawn');
     eq(await q.$eval('#oa-forum-rooms .oa-forum-tab[aria-selected="true"]', (n) => n.getAttribute('data-room')), 'candidates',
@@ -10593,6 +10636,7 @@ for (const w of [320, 360, 390, 430]) {
         tags: [...card.querySelectorAll('.oa-label-tag')].map((b) => b.getAttribute('data-tag')),
         sub: card.querySelector('.oa-card-sub').textContent,
         likes: card.querySelector('.oa-forum-stat b').textContent,
+        views: card.querySelector('.oa-forum-stat.is-views b').textContent + ' ' + card.querySelector('.oa-forum-stat.is-views i').textContent,
         filterLabels: [...document.querySelectorAll('#oa-forum-list .oa-filter > label')].map((n) => n.textContent),
         count: document.getElementById('oa-forum-listcount').textContent,
         cloud: [...document.querySelectorAll('#oa-forum-tags a')].map((a) => a.getAttribute('data-tag')),
@@ -10604,6 +10648,7 @@ for (const w of [320, 360, 390, 430]) {
     eq(list.tags, ['flyouts', 'europe'], 'forum (candidate): the card carries its tag chips');
     ok(/patient owl 7/.test(list.sub), 'forum (candidate): the footer names the asking handle');
     eq(list.likes, '0', 'forum (candidate): and the tally column carries the first post\'s net score');
+    eq(list.views, '0 views', 'forum (candidate): and, under the answers, how many times the thread was opened (owner, 2026-09-08)');
     /* THE STACK OVERFLOW ARRANGEMENT (owner, 2026-09-05), measured as
        geometry rather than as a class list, so it survives a change of
        markup: a tally column to the LEFT of the title, the tags BELOW the
@@ -10653,7 +10698,7 @@ for (const w of [320, 360, 390, 430]) {
       if (!c) return null;
       return { tag: c.tagName, href: c.getAttribute('href') || '', inButton: !!c.closest('.oa-card-head') };
     });
-    ok(chip && chip.tag === 'A' && /^forum\.html\?/.test(chip.href) && !chip.inButton,
+    ok(chip && chip.tag === 'A' && /^forum\?/.test(chip.href) && !chip.inButton,
       `forum (candidate): a card's tag chip is a link beside the head button, not a span inside it (${JSON.stringify(chip)})`);
     eq(geom.answers, 1, 'forum (candidate): and the answer count is printed once, in the tally');
     eq(geom.replies, 0, 'forum (candidate): the card says answers, never replies');
@@ -10749,8 +10794,15 @@ for (const w of [320, 360, 390, 430]) {
       updown: document.querySelector('.oa-forum-updown').textContent,
       threadVotes: window.__fb.ops('callable').filter((n) => n === 'forumThreadVotes').length,
       reply: !!document.getElementById('oa-forum-body'),
+      viewed: document.getElementById('oa-forum-views').textContent,
+      viewCalls: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumView').map((e) => e.data),
     }));
     ok(/[?&]t=seed-t1/.test(th.url) && /room=candidates/.test(th.url), 'forum (candidate): a card opens its thread in place, on its own address');
+    /* THE VIEW WAS COUNTED ONCE. The first opening above (the one the reader
+       left while it loaded) already asked forumView, so this second opening
+       on the same day asks nothing, and the heading says one. */
+    eq(th.viewCalls, [{ room: 'candidates', tid: 'seed-t1' }], 'forum (candidate): forumView was asked once for the thread, with the room and the thread and nothing else');
+    eq(th.viewed, '1 time', 'forum (candidate): and the heading says how many times it has been viewed');
     eq(th.title, HOSTILE_TITLE, 'forum (candidate): the thread heading prints the title as text');
     ok(th.pwned === undefined && th.injected === 0 && th.text.includes('<img src=x'),
       'forum (candidate): a hostile body renders as text, nothing executes');
@@ -11220,8 +11272,8 @@ for (const w of [320, 360, 390, 430]) {
     ok(asked.sentTags.join() === 'offers,teaching-release' && asked.sentRoom === 'candidates' && !asked.sentTid,
       'forum (candidate): forumPost was sent room, title, tags and body, and no tid for a new thread');
     eq(asked.docBy, 'quiet heron 42', 'forum (candidate): the thread carries the handle, never the account');
-    eq(asked.docKeys, ['accepted', 'by', 'excerpt', 'hidden', 'lastAt', 'lastBy', 'locked', 'n', 'pinned', 'room', 'score', 'season', 't', 'tags', 'title'],
-      'forum (candidate): the simulator writes the thread shape the model names, the tick among it');
+    eq(asked.docKeys, ['accepted', 'by', 'excerpt', 'hidden', 'lastAt', 'lastBy', 'locked', 'n', 'pinned', 'room', 'score', 'season', 't', 'tags', 'title', 'views'],
+      'forum (candidate): the simulator writes the thread shape the model names, the tick and the view count among it');
     eq(asked.tally, { flyouts: 1, europe: 1, offers: 1, 'teaching-release': 1 }, 'forum (candidate): the tag tally was bumped');
     eq(asked.own, 2, 'forum (candidate): one cannot vote on one\'s own question');
     ok(await q.evaluate(() => !document.getElementById('oa-forum-me').hidden),
@@ -11431,6 +11483,193 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* -- THE SECTIONS (owner, 2026-09-08): Home with its doors, the questions
+        in three orders, the ones nobody has answered, the Tags page in its
+        three orders with the filter box, and the views a question counts,
+        once per device per day --------------------------------------------- */
+  {
+    const NEWER = OLD + 2 * 3600 * 1000;   // two hours on, still a whole minute
+    const LATER = OLD + 5 * 3600 * 1000;
+    const SECTIONS_SEED = [
+      /* the seeded question again, quiet since it was asked but ACTIVE later
+         than the newer one, and better scored, so the three orders disagree */
+      { path: `${T}/seed-t1`, data: { season: FY, room: 'candidates', title: HOSTILE_TITLE, tags: ['flyouts', 'europe'],
+        by: 'patient owl 7', t: OLD, lastAt: LATER, lastBy: 'patient owl 7', n: 1, excerpt: 'Congratulations on the flyout',
+        score: 5, pinned: false, locked: false, hidden: false } },
+      { path: `${T}/seed-t2`, data: { season: FY, room: 'candidates', title: 'Do offers come by phone or by e-mail?', tags: ['offers', 'waiting'],
+        by: 'patient owl 7', t: NEWER, lastAt: NEWER, lastBy: 'brisk marten 3', n: 2, excerpt: 'Both, in my case.',
+        score: 3, accepted: '', pinned: false, locked: false, hidden: false, views: 7 } },
+      { path: `${T}/seed-t2/posts/seed-t2-p1`, data: { season: FY, room: 'candidates', tid: 'seed-t2', n: 1, by: 'patient owl 7',
+        body: 'Both, in my case. Which is usual?', t: NEWER, up: 3, down: 0, quote: null, hidden: false, hiddenBy: '' } },
+      { path: `${T}/seed-t2/posts/seed-t2-p2`, data: { season: FY, room: 'candidates', tid: 'seed-t2', n: 2, by: 'brisk marten 3',
+        body: 'A call first, then the letter.', t: NEWER, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
+      /* the tally counts more offers questions than the two threads read
+         carry, which is what makes Popular differ from Name */
+      { path: `forumTags/${FY}_candidates`, data: { counts: { flyouts: 1, europe: 1, offers: 3, waiting: 1 } } },
+    ];
+    const OFFERS = 'Do offers come by phone or by e-mail?';
+    const { ctx, page: q, errors } = await signedInPage('forum',
+      { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...SECTIONS_SEED], selector: '#oa-forum' });
+    const home = await q.evaluate(() => ({
+      doors: [...document.querySelectorAll('#oa-forum-doors [data-enter-room]')].map((a) => a.getAttribute('data-enter-room')),
+      hrefs: [...document.querySelectorAll('#oa-forum-doors [data-enter-room]')].map((a) => a.getAttribute('href')),
+      note: !!document.querySelector('#oa-forum-home .oa-forum-roomnote'),
+      cards: document.querySelectorAll('#oa-forum-roomcard:not([hidden]), #oa-forum-tagcard:not([hidden]), #oa-forum-savedcard:not([hidden]), #oa-forum-watchcard:not([hidden])').length,
+      banner: document.getElementById('oa-forum-me').hidden,
+      guide: !!document.getElementById('oa-forum-guidebody').textContent.trim(),
+      url: location.search,
+    }));
+    eq(home.doors, ['candidates', 'open'], 'forum (sections): Home draws a door for each admitted room, the Candidates\' room first');
+    eq(home.hrefs, ['forum?room=candidates', 'forum?room=open'], 'forum (sections): each door is a link to its room\'s questions, in the extensionless form');
+    ok(!home.note && home.banner && home.cards === 0 && home.url === '',
+      'forum (sections): a candidate is told nothing about what opens the room, and no room\'s cards are drawn on Home');
+    ok(home.guide, 'forum (sections): the guide panel is beside Home, since it is the forum\'s and not a room\'s');
+    /* HOME, with the doors and the lede, which no other view draws */
+    await forumContrast(q, 'the home page');
+
+    /* through the door: the newest first, then the two other orders */
+    await q.click('#oa-forum-doors [data-enter-room="candidates"]');
+    await q.waitForFunction(() => /room=candidates/.test(location.search) && document.querySelectorAll('#oa-forum-list .oa-card').length === 2,
+      null, { timeout: 15000 });
+    const readOrder = () => q.evaluate(() => ({
+      url: location.search,
+      title: document.getElementById('oa-forum-listtitle').textContent,
+      titles: [...document.querySelectorAll('#oa-forum-list .oa-card-title')].map((n) => n.textContent),
+      pills: [...document.querySelectorAll('#oa-forum-sorts [data-order]')].map((b) => b.getAttribute('data-order') + ':' + b.getAttribute('aria-pressed')),
+      views: [...document.querySelectorAll('#oa-forum-list .oa-forum-stat.is-views')].map((n) => n.querySelector('b').textContent + ' ' + n.querySelector('i').textContent),
+      count: document.getElementById('oa-forum-listcount').textContent,
+      current: document.querySelector('#oa-forum-nav a[aria-current="page"]').getAttribute('data-section'),
+      top: document.getElementById('oa-forum-top').hidden,
+    }));
+    const o1 = await readOrder();
+    ok(/room=candidates/.test(o1.url) && !/order=/.test(o1.url), 'forum (sections): the room\'s questions, under no order parameter');
+    eq(o1.title, 'Newest Questions', 'forum (sections): headed Newest Questions');
+    eq(o1.titles, [OFFERS, HOSTILE_TITLE], 'forum (sections): the newest asked first');
+    eq(o1.pills, ['newest:true', 'active:false', 'score:false'], 'forum (sections): three orders under the heading, Newest pressed');
+    eq(o1.views, ['7 views', '0 views'], 'forum (sections): every card says how many times its thread was opened');
+    eq(o1.count, '2 questions this season', 'forum (sections): the count line');
+    ok(o1.current === 'questions' && !o1.top, 'forum (sections): Questions is the section, and the room switch is back');
+    await q.click('#oa-forum-sorts [data-order="active"]');
+    await q.waitForFunction((t) => /order=active/.test(location.search) && document.querySelectorAll('#oa-forum-list .oa-card').length === 2
+      && document.querySelector('#oa-forum-list .oa-card-title').textContent === t, HOSTILE_TITLE, { timeout: 15000 });
+    const o2 = await readOrder();
+    eq(o2.titles, [HOSTILE_TITLE, OFFERS], 'forum (sections): Active puts the thread that moved last first');
+    ok(o2.title === 'Active Questions' && o2.pills.join() === 'newest:false,active:true,score:false',
+      'forum (sections): the heading and the pressed pill follow');
+    await q.click('#oa-forum-sorts [data-order="score"]');
+    await q.waitForFunction(() => /order=score/.test(location.search) && document.querySelectorAll('#oa-forum-list .oa-card').length === 2
+      && document.getElementById('oa-forum-listtitle').textContent === 'Top Questions', null, { timeout: 15000 });
+    const o3 = await readOrder();
+    eq(o3.titles, [HOSTILE_TITLE, OFFERS], 'forum (sections): Score puts the best liked question first');
+
+    /* UNANSWERED: the one nobody has answered, and only that one */
+    await q.click('#oa-forum-nav a[data-section="unanswered"]');
+    await q.waitForFunction(() => /view=unanswered/.test(location.search) && document.querySelector('#oa-forum-list .oa-card'),
+      null, { timeout: 15000 });
+    const un = await readOrder();
+    eq(un.titles, [HOSTILE_TITLE], 'forum (sections): Unanswered lists the question with no answer and leaves out the answered one');
+    ok(un.title === 'Unanswered Questions' && un.count === '1 question with no answers',
+      `forum (sections): headed and counted as such (${un.title}; ${un.count})`);
+    ok(un.current === 'unanswered' && !/order=/.test(un.url) && un.pills[0] === 'newest:true',
+      'forum (sections): the section is marked, and a section link starts from the default order');
+
+    /* TAGS: the owner's words, three orders, a box to narrow by name */
+    await q.click('#oa-forum-nav a[data-section="tags"]');
+    await q.waitForSelector('#oa-forum-taggrid .oa-forum-tagcard', { timeout: 15000 });
+    const readTags = () => q.evaluate(() => ({
+      url: location.search,
+      intro: document.querySelector('.oa-forum-tagsintro').textContent,
+      pills: [...document.querySelectorAll('#oa-forum-tagorders [data-tag-order]')].map((b) => b.getAttribute('data-tag-order') + ':' + b.getAttribute('aria-pressed')),
+      tags: [...document.querySelectorAll('#oa-forum-taggrid .oa-forum-tagcard')].map((c) => c.getAttribute('data-tag')),
+      counts: [...document.querySelectorAll('#oa-forum-taggrid .oa-forum-tagcard-n')].map((n) => n.textContent),
+      when: [...document.querySelectorAll('#oa-forum-taggrid .oa-forum-tagcard-when')].map((n) => n.textContent),
+      count: document.getElementById('oa-forum-tagscount').textContent,
+      current: document.querySelector('#oa-forum-nav a[aria-current="page"]').getAttribute('data-section'),
+      list: document.getElementById('oa-forum-listview').hidden,
+      bells: document.querySelectorAll('#oa-forum-taggrid [data-watch]').length,
+      chipHref: document.querySelector('#oa-forum-taggrid .oa-forum-tagchip').getAttribute('href'),
+    }));
+    const t1 = await readTags();
+    eq(t1.intro, 'A tag is a keyword or label that categorizes your question with other, similar questions. Using the right tags makes it easier for others to find and answer your question.',
+      'forum (sections): the Tags page opens with the owner\'s words, verbatim');
+    eq(t1.pills, ['popular:true', 'name:false', 'new:false'], 'forum (sections): Popular, Name and New, Popular pressed');
+    eq(t1.tags, ['offers', 'europe', 'flyouts', 'waiting'], 'forum (sections): Popular ranks the tags by use, the room\'s tally counting, ties by name');
+    eq(t1.counts[0], '3 questions', 'forum (sections): each card says how many questions carry the tag');
+    ok(/asked this week/.test(t1.when[0]) && /this month/.test(t1.when[0]), 'forum (sections): and how many were asked this week and this month');
+    ok(/view=tags/.test(t1.url) && t1.current === 'tags' && t1.list && t1.count === '4 tags in this room this season',
+      `forum (sections): its own address, its section marked, the list put away, and the count (${t1.count})`);
+    ok(t1.bells === 4 && /room=candidates/.test(t1.chipHref) && /tags=offers/.test(t1.chipHref),
+      'forum (sections): every card carries a bell, and the chip links the room\'s questions narrowed to the tag');
+    /* THE TAGS PAGE, whose intro, counts and cards are drawn nowhere else */
+    await forumContrast(q, 'the tags page');
+    await q.click('#oa-forum-tagorders [data-tag-order="name"]');
+    const t2 = await readTags();
+    eq(t2.tags, ['europe', 'flyouts', 'offers', 'waiting'], 'forum (sections): Name orders them alphabetically');
+    await q.click('#oa-forum-tagorders [data-tag-order="new"]');
+    const t3 = await readTags();
+    eq(t3.tags, ['offers', 'waiting', 'europe'], 'forum (sections): New is the three tags made most recently, the newest first');
+    ok(/^First used /.test(t3.when[0]) && /^The 3 tags made most recently/.test(t3.count),
+      `forum (sections): each says when it was first used, and the count says what the three are (${t3.count})`);
+    await q.click('#oa-forum-tagorders [data-tag-order="popular"]');
+    await q.fill('#oa-forum-tagfilter', 'Eur');
+    const t4 = await readTags();
+    ok(t4.tags.join() === 'europe' && /matching/.test(t4.count), `forum (sections): typing in the box narrows the tags by name (${t4.tags}; ${t4.count})`);
+    await q.fill('#oa-forum-tagfilter', '');
+    /* a bell here is the same local mark as in the side cards: nothing is
+       written, the pressed state flips where it stands, the keyboard stays */
+    const writesBefore = await q.evaluate(() => window.__fb.log.filter((e) => e.op === 'set' || e.op === 'update').length);
+    await q.focus('#oa-forum-taggrid [data-watch="waiting"]');
+    await q.click('#oa-forum-taggrid [data-watch="waiting"]');
+    await q.waitForTimeout(200);
+    const bell = await q.evaluate(() => ({
+      pressed: document.querySelector('#oa-forum-taggrid [data-watch="waiting"]').getAttribute('aria-pressed'),
+      stored: JSON.parse(localStorage.getItem('oa-forum-saved') || '{}').tags,
+      wrote: window.__fb.log.filter((e) => e.op === 'set' || e.op === 'update').length,
+      focus: document.activeElement && document.activeElement.getAttribute('data-watch'),
+      side: !document.getElementById('oa-forum-watchcard').hidden && document.querySelectorAll('#oa-forum-watch .oa-forum-tagrow').length,
+    }));
+    ok(bell.pressed === 'true' && bell.stored.join() === 'waiting' && bell.side === 1,
+      'forum (sections): the bell on a tag card watches the tag in this browser, and the side card lists it');
+    eq(bell.wrote, writesBefore, 'forum (sections): and writes NOTHING to the database');
+    eq(bell.focus, 'waiting', 'forum (sections): the keyboard stays on the bell that was pressed');
+    await q.click('#oa-forum-taggrid [data-watch="waiting"]');
+    await q.waitForTimeout(100);
+
+    /* VIEWS: opening a thread asks forumView once, the heading and the card
+       follow, and opening it again the same day asks nothing more */
+    await q.click('#oa-forum-nav a[data-section="questions"]');
+    await q.waitForSelector('#job-seed-t2 .oa-card-head', { timeout: 15000 });
+    await q.click('#job-seed-t2 .oa-card-head');
+    await q.waitForFunction(() => document.querySelector('#oa-forum-thread .oa-forum-post.is-first')
+      && document.getElementById('oa-forum-views').textContent === '8 times', null, { timeout: 15000 });
+    const v1 = await q.evaluate((t) => ({
+      calls: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumView').map((e) => e.data),
+      stored: window.__fb.docs[t + '/seed-t2'].views,
+      mark: (JSON.parse(localStorage.getItem('oa-forum-seen') || '{}').viewed || {})['seed-t2'],
+      under: Object.keys(window.__fb.docs).filter((p) => p.indexOf(t + '/seed-t2/') === 0 && !/\/posts\//.test(p)),
+    }), T);
+    eq(v1.calls, [{ room: 'candidates', tid: 'seed-t2' }], 'forum (sections): opening a thread asks forumView once, with the room and the thread');
+    eq(v1.stored, 8, 'forum (sections): the count on the thread head moved by one');
+    eq(v1.mark, new Date().toISOString().slice(0, 10), 'forum (sections): the day it was counted is remembered in this browser, beside the seen-marks');
+    eq(v1.under, [], 'forum (sections): and nothing was written under the thread: no record of who opened it');
+    await q.click('.oa-forum-crumbs a');
+    await q.waitForSelector('#job-seed-t2 .oa-card-head', { timeout: 15000 });
+    const card8 = await q.$eval('#job-seed-t2 .oa-forum-stat.is-views b', (n) => n.textContent);
+    eq(card8, '8', 'forum (sections): the card reads the moved count back');
+    await q.click('#job-seed-t2 .oa-card-head');
+    await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
+    await q.waitForTimeout(300);
+    const v2 = await q.evaluate(() => ({
+      calls: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumView').length,
+      viewed: document.getElementById('oa-forum-views').textContent,
+    }));
+    ok(v2.calls === 1 && v2.viewed === '8 times', 'forum (sections): opening it again the same day asks nothing more, and the heading still says eight');
+    const leak3 = await leakCheck(q);
+    eq(leak3.main, [], 'forum (sections): LEAK CHECK across the sections: nothing of the account in #main');
+    eq(errors, [], 'forum (sections): no uncaught script error');
+    await ctx.close();
+  }
+
   /* -- THE SECOND VISIT (owner, 2026-09-06: "when I enter the forum the page
         doesn't load immediately"): drawn from this browser's memory BEFORE the
         session resolves, the join called again behind the page; a join that
@@ -11452,7 +11691,7 @@ for (const w of [320, 360, 390, 430]) {
         var app = document.getElementById('oa-forum');
         if (app && !app.hidden && window.__earlyDraw === null) window.__earlyDraw = !(window.OAAccounts && window.OAAccounts.resolved());
       }).observe(document, { attributes: true, subtree: true, attributeFilter: ['hidden'] });\n`;
-    const { ctx, page: q, errors } = await signedInPage('forum.html',
+    const { ctx, page: q, errors } = await signedInPage('forum?room=candidates',
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum', init: remember + watchEarly });
     await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
     const again = await q.evaluate(() => ({
@@ -11473,7 +11712,7 @@ for (const w of [320, 360, 390, 430]) {
 
     /* the join UNREACHABLE: the room stands, the unreachable-source rule */
     {
-      const { ctx: c2, page: q2, errors: e2 } = await signedInPage('forum.html',
+      const { ctx: c2, page: q2, errors: e2 } = await signedInPage('forum?room=candidates',
         { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum', init: remember,
           seed: { refuse: { forumJoin: { code: 'unavailable', reason: '' } } } });
       await q2.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
@@ -11490,7 +11729,7 @@ for (const w of [320, 360, 390, 430]) {
     }
     /* the join REFUSED BY REASON: the memory goes and the refusal is shown */
     {
-      const { ctx: c3, page: q3, errors: e3 } = await signedInPage('forum.html',
+      const { ctx: c3, page: q3, errors: e3 } = await signedInPage('forum?room=candidates',
         { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum-error:not([hidden])', init: remember,
           seed: { refuse: { forumJoin: { code: 'permission-denied', reason: 'verified' } } } });
       const refused = await q3.evaluate(() => ({
@@ -11509,7 +11748,7 @@ for (const w of [320, 360, 390, 430]) {
   {
     const ADMIN_USER = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
       emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
-    const { ctx, page: q, errors } = await signedInPage('forum.html', { user: ADMIN_USER, selector: '#oa-forum' });
+    const { ctx, page: q, errors } = await signedInPage('forum?room=candidates', { user: ADMIN_USER, selector: '#oa-forum' });
     eq(await tabs(q), ['candidates', 'open'], 'forum (maintainer): both tabs, with no candidate profile');
     ok(await q.evaluate(() => !window.__fb.docs['candidateMarkers/admin-uid-0000000000']), 'forum (maintainer): no marker is written for them');
     await q.waitForSelector('#oa-forum-admin:not([hidden])', { timeout: 15000 });
@@ -11649,7 +11888,7 @@ for (const w of [320, 360, 390, 430]) {
       { path: `${T}/seed-t3/posts/seed-t3-p2`, data: { season: FY, room: 'candidates', tid: 'seed-t3', n: 2, by: 'patient owl 7',
         body: 'An answer that must stay reachable by its own author.', t: OLD, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
     ];
-    const { ctx, page: q, errors } = await signedInPage('forum.html?room=candidates&t=seed-t3',
+    const { ctx, page: q, errors } = await signedInPage('forum?room=candidates&t=seed-t3',
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...HEADLESS], selector: '#oa-forum' });
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
     const asker = await q.evaluate(() => {
@@ -11667,7 +11906,7 @@ for (const w of [320, 360, 390, 430]) {
     /* the maintainer, as the block below defines them (that constant is its own) */
     const MAINTAINER = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
       emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
-    const m = await signedInPage('forum.html?room=candidates&t=seed-t3',
+    const m = await signedInPage('forum?room=candidates&t=seed-t3',
       { user: MAINTAINER, docs: [CAND_PROFILE, ...SEEDED, ...HEADLESS], selector: '#oa-forum' });
     await m.page.waitForSelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]:not([disabled])', { timeout: 15000 });
     let closeDialog = '';
@@ -11694,7 +11933,7 @@ for (const w of [320, 360, 390, 430]) {
       { path: `${PT}/old-t1/posts/old-p1`, data: { season: PY, room: 'candidates', tid: 'old-t1', n: 1, by: 'brisk marten 3',
         body: 'Weeks, in my case. Three to five after the flyout.', t: OLD, up: 5, down: 1, quote: null, hidden: false, hiddenBy: '' } },
     ];
-    const { ctx, page: q, errors } = await signedInPage(`forum.html?room=candidates&season=${PY}`,
+    const { ctx, page: q, errors } = await signedInPage(`forum?room=candidates&season=${PY}`,
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...archive], selector: '#oa-forum' });
     await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
     const arc = await q.evaluate(() => ({
@@ -11737,10 +11976,29 @@ for (const w of [320, 360, 390, 430]) {
 
   /* -- forum mobile: rule 13, measured at 390px ------------------------------ */
   {
-    const { ctx, page: m, errors } = await signedInPage('forum.html',
+    const { ctx, page: m, errors } = await signedInPage('forum?room=candidates',
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum', viewport: { width: 390, height: 844 } });
     await m.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
     await m.waitForTimeout(200);
+    /* THE SECTIONS ARE A ROW ABOVE THE QUESTIONS on a phone, four 42px
+       targets sharing the width, and the order pills under the heading are
+       42px targets too (rule 13); neither pushes the page sideways */
+    const navM = await m.evaluate(() => {
+      const links = [...document.querySelectorAll('#oa-forum-nav a')].map((a) => a.getBoundingClientRect());
+      const pills = [...document.querySelectorAll('#oa-forum-sorts [data-order]')].map((b) => Math.round(b.getBoundingClientRect().height));
+      return {
+        n: links.length,
+        heights: links.map((r) => Math.round(r.height)),
+        oneRow: links.every((r) => Math.abs(r.top - links[0].top) < 1),
+        within: links.every((r) => r.left >= 0 && r.right <= window.innerWidth + 0.5),
+        pills,
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    ok(navM.n === 4 && navM.heights.every((h) => h >= 42), `forum mobile (sections): the four section links are 42px targets (got ${navM.heights})`);
+    ok(navM.oneRow && navM.within, 'forum mobile (sections): in one row above the questions, all of it on screen');
+    ok(navM.pills.length === 3 && navM.pills.every((h) => h >= 42), `forum mobile (sections): the three order pills are 42px targets (got ${navM.pills})`);
+    eq(navM.overflowX, 0, 'forum mobile (sections): no sideways scroll');
     /* the list: the same measure every list page is held to, plus the tabs */
     const mob = await m.evaluate(MOBILE_LIST_MEASURE);
     ok(assertMobileList(mob, 'forum mobile (list):'), 'forum mobile (list): the list has a filter bar to measure');
