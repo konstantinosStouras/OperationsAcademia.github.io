@@ -17854,6 +17854,136 @@ async function testForum() {
   ok(!/min left/.test(pageJs) && /data-act="edit">Edit<\/button>/.test(pageJs) && !/EDIT_WINDOW/.test(pageJs),
     'oa-forum.js: Edit carries no countdown and reads no window (owner, 2026-09-06)');
   ok(/Yours to edit or delete afterwards\./.test(pageJs) && !/fifteen minutes/.test(pageJs), 'oa-forum.js: the ask form says the post stays editable');
+
+  /* THE ASK FORM IS LAID OUT THE WAY STACK EXCHANGE LAYS ONE OUT (owner,
+     2026-09-08, with Mathematics Stack Exchange's ask page beside this one):
+     a "writing a good question" note, then ONE bordered card holding the
+     three fields, each a bold label with its advice UNDER the label and the
+     box under the advice, every field starred and "Required fields" said
+     once at the card's head; the tag suggestions a MENU that opens while the
+     box has the keyboard and never on arrival; similar questions under the
+     title from the rows the list already read; the room said once, with the
+     page's own banner standing down; the Post button under the card. */
+  {
+    const ask = pageJs.slice(pageJs.indexOf('  function drawAsk() {'), pageJs.indexOf('  /* ------------------------------------------------------------- go */'));
+    ok(ask.length > 5000 && ask.length < 20000, 'forum ask: drawAsk was sliced');
+    ok(/<div class="oa-forum-askcard">/.test(ask) && /<div class="oa-forum-askhead">/.test(ask)
+       && (ask.match(/Required fields <span class="oa-forum-req" aria-hidden="true">\*<\/span>/g) || []).length === 1,
+      'forum ask: one bordered card, with "Required fields" said once at its head');
+    for (const id of ['oa-forum-ask-title', 'oa-forum-ask-body', 'oa-forum-tag-in']) {
+      const at = ask.indexOf('for="' + id + '"');
+      const hint = ask.indexOf('class="oa-forum-fhint"', at);
+      const box = ask.indexOf('id="' + id + '"', at);
+      ok(at > 0 && hint > at && box > hint, `forum ask: ${id} reads label, then advice, then the box`);
+      ok(ask.slice(at, box).includes('<span class="oa-forum-req" aria-hidden="true">*</span></label>'), `forum ask: …and the label of ${id} is starred`);
+    }
+    ok((ask.match(/aria-required="true"/g) || []).length === 2 && /role="combobox"/.test(ask) && /aria-controls="oa-forum-tagsugg"/.test(ask),
+      'forum ask: the title and the details are marked required, and the tag box is a combobox over its menu');
+    ok(/id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags" hidden>/.test(ask) && /aria-expanded="false"/.test(ask),
+      'forum ask: the tag menu is born SHUT, never drawn open on arrival');
+    ok(/var open = suggWanted && !input\.disabled && sugg\.children\.length > 0;/.test(ask)
+       && /input\.addEventListener\('focus', function \(\) \{ suggWanted = true; drawSugg\(\); \}\);/.test(ask)
+       && /input\.addEventListener\('blur', function \(e\) \{ if \(inMenu\(e\.relatedTarget\)\) return; suggWanted = false; drawSugg\(\); \}\);/.test(ask)
+       && /sugg\.addEventListener\('mousedown', function \(e\) \{ e\.preventDefault\(\); \}\);/.test(ask),
+      'forum ask: …opens while the box or a row has the keyboard, shuts when it leaves, and a press on a row keeps the box\'s focus');
+    ok(/e\.key === 'Escape'/.test(ask) && /e\.key === 'ArrowDown'/.test(ask) && /e\.key === 'ArrowUp'/.test(ask),
+      'forum ask: the menu is walked with the arrows and shut with Escape');
+    ok(/Posting in the <strong>' \+ roomName \+ '<\/strong>/.test(ask) && !/oa-forum-flabel">Where/.test(ask),
+      'forum ask: the room is said once, at the card\'s head, and the "Where" block is gone');
+    ok(/show\(me, !\(S\.ask && !S\.archive\)\);/.test(pageJs) && /hideViews\(\);\n    show\(\$\('oa-forum-me'\), true\);/.test(pageJs),
+      'forum ask: the page\'s own room banner stands down while the form is open and comes back with the thread');
+    ok(/<p class="oa-forum-fmt" id="oa-forum-ask-fmt">/.test(ask) && /A web address becomes a link/.test(ask) && !/toolbar/.test(bare(ask)),
+      'forum ask: a line under the details says how plain text reads, and no formatting toolbar is drawn');
+    ok(ask.indexOf('oa-forum-askactions') > ask.indexOf('id="oa-forum-ask-msg"') && /id="oa-forum-ask-send">Post your question</.test(ask),
+      'forum ask: the Post button is under the card, not inside it');
+    ok(/'<div class="oa-forum-askintro">'/.test(ask) && /<p class="oa-forum-lede"><strong>Writing a good question\.<\/strong>/.test(ask)
+       && ask.indexOf('oa-forum-askintro') < ask.indexOf('oa-forum-askcard'),
+      'forum ask: a "writing a good question" note stands above the card');
+    ok(/function tagHint\(msg\) \{\s*var n = \$\('oa-forum-taghint'\);\s*if \(n\) n\.textContent = msg \|\| '';/.test(ask)
+       && /<p class="oa-forum-fhint" id="oa-forum-taghelp">' \+ TAG_HINT \+ '<\/p>/.test(ask)
+       && /class="oa-forum-guardmsg" id="oa-forum-taghint" aria-live="polite"><\/p>/.test(ask),
+      'forum ask: the tag advice is said once above the box, and the line under it carries a refusal and nothing else');
+    ok(/^Add up to five tags to say what the question is about\./.test(pageJs.match(/var TAG_HINT = '([^']*)'/)[1]),
+      'forum ask: the advice opens with the count');
+    ok(/a\.getAttribute\('target'\) === '_blank'\) return;/.test(pageJs),
+      'forum ask: a link the page draws to open in a new tab is left to the browser, so the question being written stays');
+    ok(/S\.rowsKey = S\.room \+ '\|' \+ S\.season;/.test(pageJs) && /S\.rowsKey = '';/.test(pageJs),
+      'forum ask: the rows the list read are stamped with their room and season, and forgotten with the reader');
+    ok(noDash(ask), 'forum ask: no em dash in anything the form draws');
+
+    /* SIMILAR QUESTIONS: the pure rule, driven from a slice of the source.
+       The words worth matching are the title's lower-cased words of three
+       letters or more with the stopwords out and a hyphen read as a space;
+       a thread is similar when it shares two of them (one, when the title
+       has fewer than three), the closest first, the newest breaking a tie,
+       five at most, a hidden thread never, and a tag counting as a word. */
+    const simSrc = pageJs.slice(pageJs.indexOf('  var STOPWORDS = '), pageJs.indexOf('  function drawAsk() {'));
+    ok(simSrc.length > 800 && simSrc.length < 5000, 'forum ask: the similar-questions rule was sliced');
+    const sim = new Function(simSrc + '; return { titleWords: titleWords, similarThreads: similarThreads, STOPWORDS: STOPWORDS };')();
+    eq(sim.titleWords('Is a second-year teaching release normal to ask for?'), ['second', 'year', 'teaching', 'release'],
+      'forum ask: a title\'s words worth matching, stopwords out and a hyphen read as a space');
+    eq(sim.titleWords('Teaching, teaching, TEACHING!'), ['teaching'], 'forum ask: …lower-cased, punctuation dropped, no repeats');
+    ok(['ask', 'question', 'questions', 'the', 'normal'].every((w) => sim.STOPWORDS.includes(w)),
+      'forum ask: "ask", "question" and "normal" carry no meaning of their own here, or every title would match every other');
+    const rows = [
+      { id: 'a', title: 'Flyout tips for Europe', tags: ['flyouts', 'europe'], lastAt: 10, n: 1 },
+      { id: 'b', title: 'Second-year release: normal to ask?', tags: ['offers'], lastAt: 20, n: 3 },
+      { id: 'c', title: 'Teaching load at a business school', tags: ['teaching'], lastAt: 30, n: 2 },
+      { id: 'd', title: 'Teaching release in year two', tags: [], lastAt: 40, n: 1, hidden: true },
+      { id: 'e', title: 'Release', tags: ['teaching-release'], lastAt: 5, n: 1 },
+    ];
+    eq(sim.similarThreads('Is a second-year teaching release normal to ask for?', rows).map((r) => r.id), ['b', 'e'],
+      'forum ask: the threads sharing two or more words, the closest first, a hidden one never, a tag counting as a word');
+    eq(sim.similarThreads('Any tips for a flyout in Europe?', rows).map((r) => r.id), ['a'], 'forum ask: the browser check\'s own case finds the seeded thread');
+    eq(sim.similarThreads('Teaching', rows).map((r) => r.id), ['c', 'e'], 'forum ask: a one-word title needs one shared word, the newest first on a tie');
+    eq(sim.similarThreads('Is it normal to ask?', rows), [], 'forum ask: a title of stopwords matches nothing');
+    eq(sim.similarThreads('', rows), [], 'forum ask: …and neither does an empty one');
+    eq(sim.similarThreads('teaching', null), [], 'forum ask: …or one with no rows to read');
+    const many = Array.from({ length: 8 }, (_, i) => ({ id: 'm' + i, title: 'Teaching release ' + i, tags: [], lastAt: i, n: 1 }));
+    eq(sim.similarThreads('teaching release', many).map((r) => r.id), ['m7', 'm6', 'm5', 'm4', 'm3'], 'forum ask: five at most, the newest first');
+
+    /* the stylesheet: the card and the note paint their ground and name
+       their ink, the menu is OVER the page and holds to rules 6 and 10, the
+       details box opens taller than an answer's, and the phone keeps its inset */
+    ok(/\.oa-forum-tagwrap \{ position: relative; \}/.test(pageCss)
+       && /\.oa-forum-tagsugg \{[^}]*position: absolute;[^}]*max-height: 50vh;[^}]*overflow: auto;/.test(pageCss),
+      'forum ask css: the tag menu is over the page, half the screen at most and scrolling inside itself');
+    ok(!/\.oa-forum-tagsugg \{ max-width: none; \}/.test(pageCss), 'forum ask css: the phone-only width rule went with the in-flow list');
+    ok(/\.oa-forum-askcard \{[^}]*border: 1px solid var\(--line\);[^}]*background: var\(--bg-2\);[^}]*color: var\(--ink\);/.test(pageCss),
+      'forum ask css: the card paints its ground and names its ink');
+    ok(/\.oa-forum-askintro \{[^}]*background: var\(--brand-soft\);[^}]*color: var\(--ink-2\);/.test(pageCss), 'forum ask css: so does the note');
+    ok(/\.oa-forum-fmt \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--mut\);/.test(pageCss)
+       && /\.oa-forum-similar \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--ink-2\);/.test(pageCss),
+      'forum ask css: …and the format line and the similar list');
+    ok(/\.oa-forum-fhint \{[^}]*color: var\(--mut\)/.test(pageCss) && /\.oa-forum-req \{ color: var\(--err\)/.test(pageCss),
+      'forum ask css: the advice is muted and the star is the error red');
+    ok(/\.oa-forum-editor\.is-ask textarea \{ min-height: 220px; \}/.test(pageCss), 'forum ask css: the details box opens taller than an answer\'s');
+    ok(/@media \(max-width: 640px\)[\s\S]*\.oa-forum-askcard \{ padding: 16px 14px; \}/.test(pageCss)
+       && /@media \(max-width: 640px\)[\s\S]*\.oa-forum-askreq \{ white-space: normal; \}/.test(pageCss),
+      'forum ask css: on a phone the card keeps a 14px inset and the head\'s note may wrap');
+    ok(!/#[0-9a-f]{3,8}\b/i.test(pageCss.slice(pageCss.indexOf('the ask form'), pageCss.indexOf('side cards'))),
+      'forum ask css: no raw colour in the ask form\'s rules');
+
+    /* the browser suite drives it, and the audit names the new surfaces */
+    const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+    const ink = pt.slice(pt.indexOf('const FORUM_INK'), pt.indexOf('async function forumContrast'));
+    for (const sel of ['.oa-forum-fhint', '.oa-forum-fmt', '.oa-forum-askwhere', '.oa-forum-askreq', '.oa-forum-req',
+      '.oa-forum-askintro li', '.oa-forum-similar p', '.oa-forum-similar a', '.oa-forum-similar i']) {
+      ok(ink.includes(`'${sel}'`), `forum ask: the contrast audit measures ${sel}`);
+    }
+    for (const needle of ['the page\\\'s room banner stands down while the form is open', 'each field reads label, then advice, then the box',
+      'Post your question sits under the card at its left', 'the tag menu is shut, no similar list shows',
+      'a title sharing words with the seeded thread lists that thread under the box', 'no second read of the room',
+      'the tag menu opens while its box has the keyboard', 'a row pressed with the pointer becomes a chip',
+      'the menu shuts when the keyboard leaves the box', 'the room banner is back once the thread is on the page',
+      'the card keeps a 14px inset and its boxes sit inside it', 'Post your question and Cancel stack full width under the card',
+      'its rows are 42px targets']) {
+      ok(pt.includes(needle), `forum ask: the browser suite measures "${needle}"`);
+    }
+    ok(/### The ask form is laid out the way Stack Exchange lays one out/.test(await read('CLAUDE.md')), 'forum ask: CLAUDE.md records the decisions');
+    ok(/the forum's Ask-a-question form[^.]*tag menu/.test(await read('_MOBILE-STANDARDS.md')) || /Ask-a-question form[\s\S]{0,600}rules 6 and 10/.test(await read('_MOBILE-STANDARDS.md')),
+      'forum ask: rule 13 in _MOBILE-STANDARDS.md names the tag menu');
+  }
   ok(/yours to edit and to delete at any time/.test(await read('assets', 'oa-forum-guide.js')), 'forum guide: rule 13 says a post is editable at any time');
   ok(page.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
     'forum page: the head snippet, the exact line every live page carries');

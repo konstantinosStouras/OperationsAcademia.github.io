@@ -159,7 +159,12 @@ const FORUM_INK = ['.oa-label-pinned', '.oa-label-locked', '.oa-label-new', '.oa
      what somebody remembered: anything that paints ink on a ground of its own
      belongs in it, and a chip paints two of them. */
   '.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg button',
-  '.oa-forum-tagsugg i'];
+  '.oa-forum-tagsugg i',
+  /* THE ASK FORM'S OWN SURFACES (2026-09-08): the advice under each label,
+     the line under the details box, the card's head, the star, the note
+     above the card and the similar-questions list under the title. */
+  '.oa-forum-fhint', '.oa-forum-fmt', '.oa-forum-askwhere', '.oa-forum-askreq', '.oa-forum-req',
+  '.oa-forum-askintro li', '.oa-forum-similar p', '.oa-forum-similar a', '.oa-forum-similar i'];
 /* .oa-forum-watch and .oa-forum-save are NOT in it, and that is a limit of
    this audit rather than an oversight: it measures INK against its ground and
    skips an element with no text, and those two are icon buttons. They are
@@ -10969,9 +10974,100 @@ for (const w of [320, 360, 390, 430]) {
     await q.click('#oa-forum-askbtn');
     await q.waitForSelector('#oa-forum-askform', { timeout: 8000 });
     ok(/[?&]ask=1/.test(await q.evaluate(() => location.search)), 'forum (candidate): the ask form has its own address');
+    /* THE FORM IS LAID OUT THE WAY STACK EXCHANGE LAYS ONE OUT (owner,
+       2026-09-08): one bordered card holding the three boxes, each under a
+       bold label and its advice, every label starred and "Required fields"
+       said once at the card's head, the room said there and nowhere else on
+       screen (the page's own banner stands down), the tag menu SHUT until
+       its box has the keyboard, and the Post button under the card at its
+       left. Measured as geometry, so a change of markup cannot pass it. */
+    const askShape = await q.evaluate(() => {
+      const r = (sel) => document.querySelector(sel).getBoundingClientRect();
+      const order = (id) => {
+        const label = document.querySelector(`label[for="${id}"]`);
+        const hint = label && label.nextElementSibling;
+        const box = document.getElementById(id);
+        return !!(label && hint && hint.classList.contains('oa-forum-fhint') && box
+          && label.getBoundingClientRect().bottom <= hint.getBoundingClientRect().top + 1
+          && hint.getBoundingClientRect().bottom <= box.getBoundingClientRect().top + 1);
+      };
+      const card = document.querySelector('.oa-forum-askcard');
+      const cr = card.getBoundingClientRect();
+      const head = document.querySelector('.oa-forum-askwhere');
+      return {
+        banner: document.getElementById('oa-forum-me').hidden,
+        head: head.textContent.replace(/\s+/g, ' ').trim(),
+        headHandle: head.querySelector('.oa-forum-handle').textContent === document.getElementById('oa-forum-myhandle').textContent,
+        req: document.querySelector('.oa-forum-askreq').textContent.replace(/\s+/g, ' ').trim(),
+        stars: card.querySelectorAll('label .oa-forum-req').length,
+        order: ['oa-forum-ask-title', 'oa-forum-ask-body', 'oa-forum-tag-in'].map(order),
+        inCard: ['oa-forum-ask-title', 'oa-forum-ask-body', 'oa-forum-tagsin'].every((id) => card.contains(document.getElementById(id))),
+        menu: document.getElementById('oa-forum-tagsugg').hidden,
+        expanded: document.getElementById('oa-forum-tag-in').getAttribute('aria-expanded'),
+        focused: document.activeElement && document.activeElement.id,
+        postBelow: r('#oa-forum-ask-send').top >= cr.bottom - 1,
+        postLeft: Math.abs(r('#oa-forum-ask-send').left - cr.left) <= 2,
+        similar: document.getElementById('oa-forum-similar').hidden,
+        where: !!document.getElementById('oa-forum-askform').querySelector('.oa-forum-flabel'),
+        intro: document.querySelector('.oa-forum-askintro').getBoundingClientRect().bottom <= cr.top,
+      };
+    });
+    ok(askShape.banner, 'forum (candidate): the page\'s room banner stands down while the form is open');
+    ok(/^Posting in the Candidates’ room · \d{4}-\d{4} as \S+ \S+ \d+\./.test(askShape.head) && askShape.headHandle,
+      `forum (candidate): the card's head says the room, the season and the handle, once (${askShape.head})`);
+    ok(askShape.req === 'Required fields *' && askShape.stars === 3,
+      'forum (candidate): "Required fields" is said once at the card\'s head, and each of the three labels is starred');
+    eq(askShape.order, [true, true, true], 'forum (candidate): each field reads label, then advice, then the box, in that order on screen');
+    ok(askShape.inCard && askShape.postBelow && askShape.postLeft && askShape.intro,
+      'forum (candidate): the note stands above one card holding the three boxes, and Post your question sits under the card at its left');
+    ok(askShape.menu && askShape.expanded === 'false' && askShape.focused === 'oa-forum-ask-title' && askShape.similar && !askShape.where,
+      'forum (candidate): on arrival the title has the keyboard, the tag menu is shut, no similar list shows, and no "Where" block is drawn');
+    /* SIMILAR QUESTIONS under the title as it is typed, from the rows the
+       list read on the way here (no second read): a title sharing words with
+       the seeded thread lists it, as a link that opens in a new tab so the
+       question being written stays, with the hostile title rendered inert;
+       the real title shares nothing with it and the list goes away. */
+    const readsBefore = await q.evaluate(() => window.__fb.ops('query').filter((x) => /\/threads/.test(x)).length);
+    await q.fill('#oa-forum-ask-title', 'Any tips for a flyout in Europe?');
+    await q.waitForFunction(() => !document.getElementById('oa-forum-similar').hidden, null, { timeout: 5000 });
+    const similar = await q.evaluate((needle) => {
+      const box = document.getElementById('oa-forum-similar');
+      const a = box.querySelector('a');
+      return { links: box.querySelectorAll('a').length, text: a.textContent, href: a.getAttribute('href'),
+        target: a.getAttribute('target'), rel: a.getAttribute('rel'), bold: box.querySelectorAll('b').length,
+        pwned: !!window.__pwned, reads: window.__fb.ops('query').filter((x) => /\/threads/.test(x)).length,
+        answers: box.querySelector('i').textContent, heading: box.querySelector('p').textContent };
+    }, HOSTILE_TITLE);
+    eq(similar.links, 1, 'forum (candidate): a title sharing words with the seeded thread lists that thread under the box');
+    ok(similar.text === HOSTILE_TITLE && similar.bold === 0 && !similar.pwned,
+      'forum (candidate): …its title rendered as text, markup and all');
+    ok(/[?&]t=seed-t1/.test(similar.href) && similar.target === '_blank' && /noopener/.test(similar.rel),
+      'forum (candidate): …as a link to the thread that opens in a new tab, so the question being written stays');
+    ok(/^Similar questions/.test(similar.heading) && similar.answers === 'no answers yet',
+      'forum (candidate): …headed as similar questions, with its answer count beside it');
+    eq(similar.reads, readsBefore, 'forum (candidate): …from the rows the list already read: no second read of the room');
     await q.fill('#oa-forum-ask-title', 'Is a second-year teaching release normal to ask for?');
+    await q.waitForFunction(() => document.getElementById('oa-forum-similar').hidden, null, { timeout: 5000 });
+    ok(true, 'forum (candidate): a title that shares nothing with any thread lists none');
     await q.fill('#oa-forum-ask-body', 'Two offers on the table, both silent on teaching release. Is it normal to ask, and how?');
     await q.fill('#oa-forum-tag-in', 'offers');
+    /* THE TAG MENU IS A MENU: open while its box has the keyboard, shut when
+       the keyboard leaves, and a press on one of its rows keeps the box's
+       focus so several tags can be picked in a row */
+    const menuOpen = await q.evaluate(() => ({
+      shown: !document.getElementById('oa-forum-tagsugg').hidden,
+      expanded: document.getElementById('oa-forum-tag-in').getAttribute('aria-expanded'),
+      rows: document.querySelectorAll('#oa-forum-tagsugg button').length,
+      over: (() => {
+        const m = document.getElementById('oa-forum-tagsugg').getBoundingClientRect();
+        const box = document.getElementById('oa-forum-tagsin').getBoundingClientRect();
+        const below = document.querySelector('.oa-forum-askactions').getBoundingClientRect();
+        return m.top >= box.bottom && Math.abs(m.left - box.left) <= 1 && Math.abs(m.right - box.right) <= 1 && below.top < m.bottom;
+      })(),
+    }));
+    ok(menuOpen.shown && menuOpen.expanded === 'true' && menuOpen.rows >= 1,
+      'forum (candidate): the tag menu opens while its box has the keyboard, and the box says so');
+    ok(menuOpen.over, 'forum (candidate): …OVER the page, the width of its box, rather than pushing the buttons down');
     await q.press('#oa-forum-tag-in', 'Enter');
     await q.fill('#oa-forum-tag-in', 'Teaching Release');
     await q.press('#oa-forum-tag-in', 'Enter');
@@ -11000,6 +11096,26 @@ for (const w of [320, 360, 390, 430]) {
     await q.click('#oa-forum-tagchips .oa-chip[data-tag="rumour"]');
     eq(await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag'))),
       ['offers', 'teaching-release'], 'forum (candidate): and it comes off again like any other chip');
+    /* a row picked by the pointer: the tag lands as a chip, the box keeps
+       the keyboard and the menu stays open for the next one */
+    await q.focus('#oa-forum-tag-in');
+    await q.click('#oa-forum-tagsugg button[data-tag="europe"]');
+    const picked = await q.evaluate(() => ({
+      chips: [...document.querySelectorAll('#oa-forum-tagchips .oa-chip')].map((n) => n.getAttribute('data-tag')),
+      focused: document.activeElement && document.activeElement.id,
+      shown: !document.getElementById('oa-forum-tagsugg').hidden,
+    }));
+    eq(picked.chips, ['offers', 'teaching-release', 'europe'], 'forum (candidate): a row pressed with the pointer becomes a chip');
+    ok(picked.focused === 'oa-forum-tag-in' && picked.shown, 'forum (candidate): …and the box keeps the keyboard with the menu still open');
+    await q.click('#oa-forum-tagchips .oa-chip[data-tag="europe"]');
+    await q.focus('#oa-forum-ask-body');
+    const menuShut = await q.evaluate(() => ({
+      shown: !document.getElementById('oa-forum-tagsugg').hidden,
+      expanded: document.getElementById('oa-forum-tag-in').getAttribute('aria-expanded'),
+      chips: [...document.querySelectorAll('#oa-forum-tagchips .oa-chip')].map((n) => n.getAttribute('data-tag')),
+    }));
+    ok(!menuShut.shown && menuShut.expanded === 'false', 'forum (candidate): the menu shuts when the keyboard leaves the box');
+    eq(menuShut.chips, ['offers', 'teaching-release'], 'forum (candidate): …with the chosen tags where they were');
     await q.click('#oa-forum-ask-send');
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
     const asked = await q.evaluate((t) => {
@@ -11024,6 +11140,8 @@ for (const w of [320, 360, 390, 430]) {
       'forum (candidate): the simulator writes the thread shape the model names, the tick among it');
     eq(asked.tally, { flyouts: 1, europe: 1, offers: 1, 'teaching-release': 1 }, 'forum (candidate): the tag tally was bumped');
     eq(asked.own, 2, 'forum (candidate): one cannot vote on one\'s own question');
+    ok(await q.evaluate(() => !document.getElementById('oa-forum-me').hidden),
+      'forum (candidate): the room banner is back once the thread is on the page');
     const leak2 = await leakCheck(q);
     eq(leak2.main, [], 'forum (candidate): LEAK CHECK after posting: nothing of the account in #main');
     eq(leak2.whole, [], 'forum (candidate): …and the uid and the profile id are nowhere in the document');
@@ -11624,17 +11742,53 @@ for (const w of [320, 360, 390, 430]) {
     const askM = await m.evaluate(() => {
       const f = (id) => parseFloat(getComputedStyle(document.getElementById(id)).fontSize);
       const h = (id) => Math.round(document.getElementById(id).getBoundingClientRect().height);
+      const card = document.querySelector('.oa-forum-askcard');
+      const cr = card.getBoundingClientRect();
+      const send = document.getElementById('oa-forum-ask-send').getBoundingClientRect();
+      const cancel = document.querySelector('.oa-forum-cancel').getBoundingClientRect();
       return {
         overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         title: f('oa-forum-ask-title'), body: f('oa-forum-ask-body'), tag: f('oa-forum-tag-in'),
         send: h('oa-forum-ask-send'),
-        cancel: Math.round(document.querySelector('.oa-forum-cancel').getBoundingClientRect().height),
+        cancel: Math.round(cancel.height),
+        /* the card keeps a 14px inset on a phone and its boxes stay inside it */
+        inset: parseFloat(getComputedStyle(card).paddingLeft),
+        boxIn: ['oa-forum-ask-title', 'oa-forum-ask-body', 'oa-forum-tagsin'].every((id) => {
+          const b = document.getElementById(id).getBoundingClientRect();
+          return b.left >= cr.left + 8 && b.right <= cr.right - 8;
+        }),
+        /* the two buttons stack full width under the card, one above the other */
+        stacked: send.bottom <= cancel.top + 1 && Math.abs(send.width - cr.width) <= 2 && Math.abs(cancel.width - cr.width) <= 2,
+        onScreen: send.right <= window.innerWidth && cancel.right <= window.innerWidth,
       };
     });
     eq(askM.overflowX, 0, 'forum mobile (ask): no sideways scroll');
     ok(askM.title >= 16 && askM.body >= 16 && askM.tag >= 16,
       `forum mobile (ask): the title, details and tag inputs are 16px (got ${askM.title}/${askM.body}/${askM.tag})`);
-    ok(askM.send >= 42 && askM.cancel >= 42, `forum mobile (ask): Post question and Cancel are 42px targets (got ${askM.send}/${askM.cancel})`);
+    ok(askM.send >= 42 && askM.cancel >= 42, `forum mobile (ask): Post your question and Cancel are 42px targets (got ${askM.send}/${askM.cancel})`);
+    ok(askM.inset >= 14 && askM.boxIn, `forum mobile (ask): the card keeps a 14px inset and its boxes sit inside it (inset ${askM.inset})`);
+    ok(askM.stacked && askM.onScreen, 'forum mobile (ask): Post your question and Cancel stack full width under the card, on screen');
+    /* THE TAG MENU ON A PHONE holds to rules 6 and 10: open under its box,
+       no wider than the screen, half of it at most, its rows 42px targets */
+    await m.focus('#oa-forum-tag-in');
+    await m.waitForTimeout(150);
+    const menuM = await m.evaluate(() => {
+      const menu = document.getElementById('oa-forum-tagsugg');
+      const r = menu.getBoundingClientRect();
+      const box = document.getElementById('oa-forum-tagsin').getBoundingClientRect();
+      return {
+        shown: !menu.hidden,
+        left: Math.round(r.left), right: Math.round(window.innerWidth - r.right), width: Math.round(r.width), boxW: Math.round(box.width),
+        tall: r.height <= window.innerHeight / 2 + 1,
+        under: r.top >= box.bottom,
+        rows: [...menu.querySelectorAll('button')].map((b) => Math.round(b.getBoundingClientRect().height)),
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    ok(menuM.shown && menuM.under && menuM.left >= 0 && menuM.right >= 0 && menuM.width === menuM.boxW,
+      `forum mobile (ask): the tag menu opens under its box, as wide as the box and on screen (${JSON.stringify(menuM)})`);
+    ok(menuM.tall && menuM.overflowX === 0, 'forum mobile (ask): …no taller than half the screen, and the page still does not scroll sideways');
+    ok(menuM.rows.length >= 1 && menuM.rows.every((x) => x >= 42), `forum mobile (ask): its rows are 42px targets (got ${menuM.rows})`);
     eq(errors, [], 'forum mobile: no uncaught script error');
     await ctx.close();
   }

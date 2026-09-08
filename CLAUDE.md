@@ -4246,6 +4246,96 @@ why; the warm-up sent once on the first focus and once on the first reach for
 a vote, with the room and nothing else; an answer on the page with no second
 votes call and the box drawn again empty; Edit with no countdown).
 
+### The ask form is laid out the way Stack Exchange lays one out
+
+Owner, 2026-09-08, with a screenshot of Mathematics Stack Exchange's ask page
+beside one of this form in the dark theme: *"improve the new question to be
+posted so that it looks like stackexchange … Make sure the experience is
+smooth from mobile devices too."* The screenshot of ours showed what was
+wrong with it before a word was read: eight rows of tag suggestions drawn
+open under a form nobody had typed into, the room said twice (the page's own
+banner and a "Where" block a screen lower), the advice for each box UNDER the
+box rather than where a reader looks before typing, and the three boxes loose
+on the page rather than in the one card the reader's eye expects.
+
+**What is copied is the LAYOUT, and the layout is the part that is a good
+idea.** A short "writing a good question" note; then ONE bordered card
+(`.oa-forum-askcard`) holding the three fields, each a bold label with its
+advice under the label (`.oa-forum-fhint`) and the box under the advice,
+every label starred (`.oa-forum-req`, the error red, `aria-hidden` since the
+boxes carry `aria-required`) and "Required fields" said once at the card's
+head; and the Post button under the card, at its left. Not copied: the
+brand (every colour is a token, the buttons keep the site's pills, and the
+selftest refuses a raw colour in the form's rules), the review step, and the
+formatting toolbar. **A post here is plain text**, and a toolbar over a box
+that renders none would be a lie, so where the toolbar would stand there is
+a line (`.oa-forum-fmt`) saying how the words will read: plain text, a blank
+line starts a paragraph, a web address becomes a link, which is exactly what
+`paragraphs()` and `linkify` do.
+
+**The room is said ONCE, at the card's head**, in the form's own words
+("Posting in the Candidates’ room · 2026-2027 as steady river 90"), and the
+page's room banner (`#oa-forum-me`) stands down while the form is open
+(`drawBanner`, keyed on `S.ask`) and comes back when the form hands over to
+the thread (`openLocalThread`) or the list (`draw`). The "Where" block is
+gone.
+
+**The tag suggestions are a MENU, not a list.** They open while the box or
+one of the rows has the keyboard, shut when it leaves, and are never drawn
+open on arrival; a press on a row stops its `mousedown`, so the box keeps
+the keyboard and several tags can be picked in a row; the arrows walk the
+rows and Escape shuts it; the box is a `combobox` whose `aria-expanded`
+follows. It is drawn OVER the page (`position: absolute` under
+`.oa-forum-tagwrap`) rather than in the flow, where it moved the guide box
+and the buttons down and back with every keystroke, and it holds to rules 6
+and 10 of `_MOBILE-STANDARDS.md`: the width of its box, half the screen at
+most, scrolling inside itself. The line under the box carries a refusal and
+nothing else now; the advice (`TAG_HINT`) is said once, above the box.
+
+**Similar questions, under the title as it is typed.** `similarThreads` in
+`oa-forum.js` is pure: the title's words worth matching (`titleWords`: three
+letters or more, lower-cased, a hyphen read as a space, `STOPWORDS` out, so
+"ask", "question" and "normal" match nothing), a thread listed when it
+shares two of them, or one when the title has fewer than three, the closest
+first and the newest on a tie, five at most, a hidden thread never, a tag
+counting as a word. It reads `S.rows`, the rows the list read on the way
+here, stamped with their room and season (`S.rowsKey`) so another room's
+rows are never matched; a reader who arrived at the form by its address has
+none, and they are read once, the first time the title is worth matching,
+painted only if the form is still the view on screen (`viewKey`). The links
+open in a NEW tab (`target="_blank"`), and the page's own link handler now
+leaves such a link to the browser, so the question being written stays. The
+selftest drives the rule from a slice of the source, and the browser suite
+types a title sharing words with the seeded thread and reads the list back:
+one link, the hostile title rendered as text, no second read of the room.
+
+**The phone** (rule 13, and now rules 6, 10 and 11): the card keeps a 14px
+inset, the boxes 16px, the two buttons stack full width under the card, the
+"Required fields" note may wrap under the room line, and the menu is
+measured open at 390px: under its box, as wide as it, no taller than half
+the screen, its rows 42px.
+
+Tests: the ask block of `testForum` in `_scraper/selftest.mjs` (the card
+and its head, label then advice then box for each field with its star, the
+required marks and the combobox, the menu born shut with its focus and
+mousedown rules, the arrows and Escape, the room said once and the banner
+standing down and coming back, the format line and no toolbar, the button
+under the card, the note above it, the tag advice said once with a refusal
+alone below, the new-tab link left to the browser, the rows stamped by room,
+no em dash, the similarity rule over fixtures including the hidden thread,
+the tag as a word, the one-word title, the stopword title and the cap of
+five, the stylesheet's grounds and inks, the menu's position and cap, the
+phone inset, no raw colour, the audit's new surfaces and the browser suite's
+own messages), and the forum block of `_scraper/page-test.mjs` (the shape as
+GEOMETRY: banner down, head, star count, label-advice-box order, one card
+with Post under it at its left, the menu shut on arrival with the title
+focused; the similar list for the seeded thread, inert, in a new tab, with
+no second read, gone for a title sharing nothing; the menu open with the
+keyboard and over the page, a row picked by the pointer keeping the focus,
+shut when the keyboard leaves; the banner back with the thread; and at
+390px the inset, the stacked buttons, and the menu's width, height and
+rows).
+
 ## What "immediate" costs, and where the waiting used to be
 
 A posting is decided in Firestore and served from `data/` by GitHub Pages, so

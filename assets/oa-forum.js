@@ -156,7 +156,7 @@
 
   /* ------------------------------------------------------------- the copy */
 
-  var TAG_HINT = 'Up to five. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.';
+  var TAG_HINT = 'Add up to five tags to say what the question is about. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.';
 
   var REASONS = {
     auth: 'Sign in first.',
@@ -240,6 +240,7 @@
     quote: null,                    // { n, by, text } waiting above the answer box
     saved: { uid: '', items: {}, tags: [] },   // this browser's own marks
     rows: [],                       // the threads the list last read
+    rowsKey: '',                    // …and for which room and season (room|season)
     sort: 'score',                  // how the answers band is ordered
     thread: null,                   // the thread on screen, and its posts
     posts: [],
@@ -317,7 +318,10 @@
       }
     }
     var a = e.target && e.target.closest ? e.target.closest('a[href^="forum.html?"]') : null;
-    if (!a || !S.me) return;
+    /* a link the page draws to open in a NEW tab (a similar question under
+       the ask form's title) is the browser's: following it in place would
+       throw away the question being written */
+    if (!a || !S.me || a.getAttribute('target') === '_blank') return;
     var app = $('oa-forum');
     if (!app || !app.contains(a)) return;
     e.preventDefault();
@@ -531,6 +535,7 @@
     S.votes = {};
     S.tally = {};
     S.rows = [];
+    S.rowsKey = '';
     S.thread = null;
     S.posts = [];
     S.tid = '';
@@ -828,7 +833,12 @@
       (S.archive ? '' :
         '<div class="oa-forum-as">You are posting as<br><span class="oa-forum-handle is-me" id="oa-forum-myhandle">' +
         esc(S.me.handle) + '</span></div>');
-    show(me, true);
+    /* THE ROOM IS SAID ONCE WHILE A QUESTION IS BEING WRITTEN. The ask form
+       names the room and the handle at the head of its own card, and a
+       banner saying the same thing a screen higher was the reader being told
+       where they are twice before the first box. It comes back the moment
+       the form hands over to the list or the thread. */
+    show(me, !(S.ask && !S.archive));
 
     var card = $('oa-forum-roomcard');
     if (card) {
@@ -1249,6 +1259,7 @@
         var count = $('oa-forum-listcount');
         if (count) count.textContent = plural(rows.length, 'question', 'questions') + ' this season';
         S.rows = rows;
+        S.rowsKey = S.room + '|' + S.season;
         paintWatchNew(rows, seen);
         return rows;
       },
@@ -1524,6 +1535,7 @@
   function openLocalThread(thread, posts) {
     arrive({ room: S.room, season: S.season, t: thread.id });
     hideViews();
+    show($('oa-forum-me'), true);
     var host = $('oa-forum-thread');
     if (!host) return;
     show(host, true);
@@ -2284,37 +2296,126 @@
 
   /* ------------------------------------------------------ asking */
 
+  /* THE ASK FORM IS LAID OUT THE WAY STACK EXCHANGE LAYS ONE OUT (owner,
+     2026-09-08, with Mathematics Stack Exchange's ask page beside this one):
+     a short "writing a good question" note; then ONE bordered card holding
+     the three fields, each a bold label with its advice UNDER the label and
+     the box under the advice, every field starred and "Required fields" said
+     once at the card's head; the tag picker's suggestions a MENU that opens
+     while its box has the keyboard, never a list drawn open on arrival, which
+     is what the owner's screenshot showed: eight rows of tags under a form
+     nobody had typed into; "Similar questions" under the title as it is
+     typed, from the rows the list has already read; and the Post button
+     under the card, at its left. What is NOT copied: the brand, the review
+     step, and the formatting toolbar, because a post here is plain text and
+     a toolbar over a box that renders none would be a lie. The room is said
+     ONCE, at the card's head, and the page's own room banner stands down
+     while the form is open (drawBanner). */
+
+  /* words that carry no meaning of their own when two titles are compared */
+  var STOPWORDS = ('the and for are but not you all any can had her was one our out has his how man new now old see two way who ' +
+    'why did get let put say she too use about after again also anyone before being between could does else ever every ' +
+    'from have here into just like more most much only other over same should since some such than that their them then ' +
+    'there these they this those through under until very were what when where which while will with would your yours ' +
+    'ask asked asking question questions normal know think anybody someone something').split(' ');
+
+  /** The words of a title worth matching: lower-cased, three letters or
+      more, a tag's hyphens read as spaces, the stopwords dropped, no repeats. */
+  function titleWords(s) {
+    var seen = {};
+    return String(s || '').toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').split(/[\s-]+/).filter(function (w) {
+      if (w.length < 3 || STOPWORDS.indexOf(w) !== -1 || seen[w]) return false;
+      seen[w] = true;
+      return true;
+    });
+  }
+
+  /** The threads whose title or tags share the most words with a title being
+      typed: two words, or one when the title itself has fewer than three
+      worth matching, the closest first and the newest breaking a tie, five
+      at most. It reads the rows the list already holds and nothing else, so
+      a similar question costs no document and no record anywhere. */
+  function similarThreads(title, rows) {
+    var q = titleWords(title);
+    if (!q.length || !Array.isArray(rows)) return [];
+    var need = q.length < 3 ? 1 : 2;
+    var out = [];
+    rows.forEach(function (r) {
+      if (!r || r.hidden) return;
+      var have = titleWords(String(r.title || '') + ' ' + (Array.isArray(r.tags) ? r.tags.join(' ') : ''));
+      var n = 0;
+      q.forEach(function (w) { if (have.indexOf(w) !== -1) n++; });
+      if (n >= need) out.push({ row: r, n: n });
+    });
+    out.sort(function (a, b) { return b.n - a.n || (b.row.lastAt || 0) - (a.row.lastAt || 0); });
+    return out.slice(0, 5).map(function (x) { return x.row; });
+  }
+
   function drawAsk() {
     var host = $('oa-forum-compose');
     if (!host) return;
     var cand = S.room === 'candidates';
+    var roomName = cand ? 'Candidates’ room' : 'Open forum';
     host.className = 'oa-forum-ask';
     host.innerHTML =
       '<nav class="oa-forum-crumbs" aria-label="You are here"><a href="' + esc(href({ room: S.room, season: S.season })) + '">Questions</a> &rsaquo; <span>Ask a question</span></nav>' +
       '<h1>Ask a question</h1>' +
-      '<p class="oa-forum-lede">It goes out under your handle, never your name. Take a minute over the title; it is what people scan.</p>' +
+      '<div class="oa-forum-askintro">' +
+        '<p class="oa-forum-lede"><strong>Writing a good question.</strong> It goes out under your handle, never your name, to ' +
+          (cand ? 'this season’s candidates' : 'every member of the Open forum') + '.</p>' +
+        '<ol>' +
+          '<li>Sum the question up in a one-line title.</li>' +
+          '<li>Give the details: what happened, what you have tried, what you expected.</li>' +
+          '<li>Add up to five tags, so the people who can answer find it.</li>' +
+          '<li>Check it over, then post.</li>' +
+        '</ol>' +
+      '</div>' +
       '<form id="oa-forum-askform" novalidate>' +
-        '<div class="oa-forum-f"><span class="oa-forum-flabel">Where</span>' +
-          '<div class="oa-forum-banner' + (cand ? '' : ' is-open') + '"><div><span class="oa-forum-bt">' + (cand ? 'Candidates’ room' : 'Open forum') + ' &middot; ' + esc(label(S.season)) + '</span>' +
-          '<span class="oa-forum-bs">' + (cand ? 'Only this season’s candidates.' : 'Anyone with a confirmed account, faculty included.') +
-          ' You post as <span class="oa-forum-handle is-me">' + esc(S.me.handle) + '</span>.' +
-          (S.me.rooms.candidates && S.me.rooms.open ? ' To ask in the other room, switch rooms at the top of the page first.' : '') +
-          '</span></div></div></div>' +
-        '<div class="oa-forum-f"><label for="oa-forum-ask-title">Title</label>' +
-          '<input type="text" id="oa-forum-ask-title" maxlength="' + M.BOUNDS.title + '" autocomplete="off" placeholder="One sentence, specific">' +
-          '<p class="oa-forum-hint">One sentence, specific. &ldquo;Offer question&rdquo; will get fewer answers than &ldquo;Is a second-year release normal to ask for?&rdquo;</p></div>' +
-        '<div class="oa-forum-f"><label for="oa-forum-ask-body">Details</label>' +
-          '<div class="oa-forum-editor"><textarea id="oa-forum-ask-body" rows="8" maxlength="' + M.BOUNDS.body + '" placeholder="Plain text, a few paragraphs at most."></textarea></div>' +
-          '<p class="oa-forum-guardmsg" id="oa-forum-ask-guardmsg" aria-live="polite"></p></div>' +
-        '<div class="oa-forum-f"><label for="oa-forum-tag-in">Tags</label>' +
-          '<div class="oa-forum-tagsin" id="oa-forum-tagsin"><span id="oa-forum-tagchips"></span>' +
-            '<input type="text" id="oa-forum-tag-in" autocomplete="off" placeholder="Type a tag and press Enter" aria-describedby="oa-forum-taghint"></div>' +
-          '<ul class="oa-forum-tagsugg" id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags"></ul>' +
-          '<p class="oa-forum-hint" id="oa-forum-taghint" aria-live="polite">' + TAG_HINT + '</p></div>' +
-        acceptBox('oa-forum-ask-accept') +
-        '<p class="oa-forum-msg" id="oa-forum-ask-msg" aria-live="polite"></p>' +
-        '<div class="oa-forum-actions" style="margin-top:18px">' +
-          '<button type="submit" class="oa-forum-send" id="oa-forum-ask-send">Post question</button>' +
+        '<div class="oa-forum-askcard">' +
+          '<div class="oa-forum-askhead">' +
+            '<p class="oa-forum-askwhere">Posting in the <strong>' + roomName + '</strong> &middot; ' + esc(label(S.season)) +
+              ' as <span class="oa-forum-handle is-me">' + esc(S.me.handle) + '</span>.' +
+              (S.me.rooms.candidates && S.me.rooms.open ? ' To ask in the other room, switch rooms at the top of the page.' : '') +
+            '</p>' +
+            '<p class="oa-forum-askreq">Required fields <span class="oa-forum-req" aria-hidden="true">*</span></p>' +
+          '</div>' +
+          '<div class="oa-forum-f">' +
+            '<label for="oa-forum-ask-title">Title <span class="oa-forum-req" aria-hidden="true">*</span></label>' +
+            '<p class="oa-forum-fhint" id="oa-forum-ask-titlehint">Be specific, and imagine you are asking a colleague across a table. ' +
+              '&ldquo;Is a second-year teaching release normal to ask for?&rdquo; will get more answers than &ldquo;Offer question&rdquo;.</p>' +
+            '<input type="text" id="oa-forum-ask-title" maxlength="' + M.BOUNDS.title + '" autocomplete="off" ' +
+              'placeholder="What is your question? Be specific." aria-required="true" aria-describedby="oa-forum-ask-titlehint">' +
+            '<div class="oa-forum-similar" id="oa-forum-similar" hidden></div>' +
+          '</div>' +
+          '<div class="oa-forum-f">' +
+            '<label for="oa-forum-ask-body">Details <span class="oa-forum-req" aria-hidden="true">*</span></label>' +
+            '<p class="oa-forum-fhint" id="oa-forum-ask-bodyhint">Include everything someone would need to answer it: what happened, ' +
+              'what you have tried, what you expected. Nothing that says who you are.</p>' +
+            '<div class="oa-forum-editor is-ask">' +
+              '<textarea id="oa-forum-ask-body" rows="10" maxlength="' + M.BOUNDS.body + '" placeholder="Plain text, a few paragraphs at most." ' +
+                'aria-required="true" aria-describedby="oa-forum-ask-bodyhint oa-forum-ask-fmt"></textarea>' +
+              '<p class="oa-forum-fmt" id="oa-forum-ask-fmt"><span>Plain text</span><span>A blank line starts a new paragraph</span>' +
+                '<span>A web address becomes a link</span></p>' +
+            '</div>' +
+            '<p class="oa-forum-guardmsg" id="oa-forum-ask-guardmsg" aria-live="polite"></p>' +
+          '</div>' +
+          '<div class="oa-forum-f">' +
+            '<label for="oa-forum-tag-in">Tags <span class="oa-forum-req" aria-hidden="true">*</span></label>' +
+            '<p class="oa-forum-fhint" id="oa-forum-taghelp">' + TAG_HINT + '</p>' +
+            '<div class="oa-forum-tagwrap">' +
+              '<div class="oa-forum-tagsin" id="oa-forum-tagsin"><span id="oa-forum-tagchips"></span>' +
+                '<input type="text" id="oa-forum-tag-in" autocomplete="off" placeholder="e.g. offers teaching-release flyouts" ' +
+                  'role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="oa-forum-tagsugg" ' +
+                  'aria-describedby="oa-forum-taghelp oa-forum-taghint"></div>' +
+              '<ul class="oa-forum-tagsugg" id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags" hidden></ul>' +
+            '</div>' +
+            '<p class="oa-forum-guardmsg" id="oa-forum-taghint" aria-live="polite"></p>' +
+          '</div>' +
+          acceptBox('oa-forum-ask-accept') +
+          '<p class="oa-forum-msg" id="oa-forum-ask-msg" aria-live="polite"></p>' +
+        '</div>' +
+        '<div class="oa-forum-actions oa-forum-askactions">' +
+          '<button type="submit" class="oa-forum-send" id="oa-forum-ask-send">Post your question</button>' +
           '<a class="oa-forum-cancel" href="' + esc(href({ room: S.room, season: S.season })) + '">Cancel</a>' +
           '<span class="oa-forum-hint">Yours to edit or delete afterwards.</span>' +
         '</div>' +
@@ -2325,13 +2426,58 @@
     var chips = $('oa-forum-tagchips');
     var input = $('oa-forum-tag-in');
     var sugg = $('oa-forum-tagsugg');
+    var titleEl = $('oa-forum-ask-title');
     var body = $('oa-forum-ask-body');
     var guard = $('oa-forum-ask-guardmsg');
     body.addEventListener('input', function () { liveGuard(body, guard); });
     /* the form takes focus the moment it opens (below), which is when the
        posting function is woken: by the time the question is written it is up */
-    $('oa-forum-ask-title').addEventListener('focus', function () { warmUp('forumPost'); });
+    titleEl.addEventListener('focus', function () { warmUp('forumPost'); });
     body.addEventListener('focus', function () { warmUp('forumPost'); });
+
+    /* SIMILAR QUESTIONS, under the title as it is typed. From the rows the
+       list read on the way here; a reader who arrived at the form by its
+       address has none, so they are read once, the first time the title is
+       worth matching, and only painted if this is still the view on screen. */
+    var rowsKey = S.room + '|' + S.season;
+    var rowsAsked = false;
+    var similarTimer = 0;
+    function paintSimilar() {
+      var box = $('oa-forum-similar');
+      if (!box) return;
+      var hits = similarThreads(titleEl.value, S.rowsKey === rowsKey ? S.rows : []);
+      box.innerHTML = '';
+      if (!hits.length) { show(box, false); return; }
+      box.appendChild(el('p', { text: 'Similar questions, already asked in this room' }));
+      var ul = el('ul');
+      hits.forEach(function (r) {
+        var n = Number(r.n) || 0;
+        ul.appendChild(el('li', null, [
+          el('a', { href: href({ room: S.room, season: S.season, t: r.id }), target: '_blank', rel: 'noopener', title: 'Opens in a new tab', text: r.title }),
+          el('i', { text: n > 1 ? plural(n - 1, 'answer', 'answers') : 'no answers yet' })
+        ]));
+      });
+      box.appendChild(ul);
+      show(box, true);
+    }
+    function ensureRows() {
+      if (S.rowsKey === rowsKey || rowsAsked) return;
+      rowsAsked = true;
+      var forView = viewKey();
+      readThreads().then(function (rows) {
+        if (forView !== viewKey()) return;
+        S.rows = rows;
+        S.rowsKey = rowsKey;
+        paintSimilar();
+      }).catch(function () { /* no similar list, then; the form is unaffected */ });
+    }
+    titleEl.addEventListener('input', function () {
+      clearTimeout(similarTimer);
+      similarTimer = setTimeout(function () {
+        if (titleWords(titleEl.value).length) ensureRows();
+        paintSimilar();
+      }, 250);
+    });
 
     function drawChips() {
       chips.innerHTML = '';
@@ -2343,11 +2489,13 @@
         chips.appendChild(chip);
       });
       input.disabled = tags.length >= M.TAG_MAX;
-      input.placeholder = tags.length >= M.TAG_MAX ? 'Five is the most' : (tags.length ? 'Another tag' : 'Type a tag and press Enter');
+      input.placeholder = tags.length >= M.TAG_MAX ? 'Five is the most' : (tags.length ? 'Another tag' : 'e.g. offers teaching-release flyouts');
     }
+    /* the line under the box carries a refusal and nothing else; the advice
+       is said once, above the box, where a reader looks before typing */
     function tagHint(msg) {
       var n = $('oa-forum-taghint');
-      if (n) n.textContent = msg || TAG_HINT;
+      if (n) n.textContent = msg || '';
     }
     function add(raw) {
       var s = M.slug(raw);
@@ -2370,47 +2518,68 @@
       drawChips();
       drawSugg();
     }
+    /* THE SUGGESTIONS ARE A MENU: open while the box or one of the rows has
+       the keyboard, shut otherwise, and never drawn open on arrival. A press
+       on a row keeps the box's focus (the mousedown is stopped, so no blur
+       fires), which is what lets several tags be picked in a row. */
+    var suggWanted = false;
     function drawSugg() {
       var q = M.slug(input.value);
       sugg.innerHTML = '';
-      if (input.disabled) return;
-      var seen = {};
-      var pool = [];
-      Object.keys(S.tally).forEach(function (k) { if (M.tagOk(k)) { pool.push([k, Number(S.tally[k]) || 0]); seen[k] = true; } });
-      M.TAGS.forEach(function (k) { if (!seen[k]) pool.push([k, 0]); });
-      pool = pool.filter(function (p) { return tags.indexOf(p[0]) === -1 && (!q || p[0].indexOf(q) !== -1); })
-        .sort(function (a, b) { return b[1] - a[1] || (a[0] < b[0] ? -1 : 1); });
-      if (!q) pool = pool.slice(0, 8);
-      else pool = pool.slice(0, 6);
-      pool.forEach(function (p) {
-        var li = el('li', { role: 'option' }, [el('button', { type: 'button', 'data-tag': p[0], onclick: function () { add(p[0]); input.focus(); } }, [
-          el('span', { text: p[0] }), el('i', { text: p[1] ? plural(p[1], 'question', 'questions') : 'suggested' })])]);
-        sugg.appendChild(li);
-      });
-      if (q && !seen[q] && M.TAGS.indexOf(q) === -1 && M.tagOk(q)) {
-        var li2 = el('li', { role: 'option' }, [el('button', { type: 'button', 'data-tag': q, onclick: function () { add(q); input.focus(); } }, [
-          el('span', { text: 'Create the tag “' + q + '”' }), el('i', { text: 'press Enter' })])]);
-        sugg.appendChild(li2);
+      if (!input.disabled) {
+        var seen = {};
+        var pool = [];
+        Object.keys(S.tally).forEach(function (k) { if (M.tagOk(k)) { pool.push([k, Number(S.tally[k]) || 0]); seen[k] = true; } });
+        M.TAGS.forEach(function (k) { if (!seen[k]) pool.push([k, 0]); });
+        pool = pool.filter(function (p) { return tags.indexOf(p[0]) === -1 && (!q || p[0].indexOf(q) !== -1); })
+          .sort(function (a, b) { return b[1] - a[1] || (a[0] < b[0] ? -1 : 1); });
+        if (!q) pool = pool.slice(0, 8);
+        else pool = pool.slice(0, 6);
+        pool.forEach(function (p) {
+          var li = el('li', { role: 'option' }, [el('button', { type: 'button', 'data-tag': p[0], onclick: function () { add(p[0]); input.focus(); } }, [
+            el('span', { text: p[0] }), el('i', { text: p[1] ? plural(p[1], 'question', 'questions') : 'suggested' })])]);
+          sugg.appendChild(li);
+        });
+        if (q && !seen[q] && M.TAGS.indexOf(q) === -1 && M.tagOk(q)) {
+          var li2 = el('li', { role: 'option' }, [el('button', { type: 'button', 'data-tag': q, onclick: function () { add(q); input.focus(); } }, [
+            el('span', { text: 'Create the tag “' + q + '”' }), el('i', { text: 'press Enter' })])]);
+          sugg.appendChild(li2);
+        }
       }
+      var open = suggWanted && !input.disabled && sugg.children.length > 0;
+      show(sugg, open);
+      input.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
+    function inMenu(node) { return !!(node && (node === input || sugg.contains(node))); }
     input.addEventListener('input', function () { tagHint(''); drawSugg(); });
-    input.addEventListener('focus', drawSugg);
+    input.addEventListener('focus', function () { suggWanted = true; drawSugg(); });
+    input.addEventListener('blur', function (e) { if (inMenu(e.relatedTarget)) return; suggWanted = false; drawSugg(); });
+    sugg.addEventListener('focusout', function (e) { if (inMenu(e.relatedTarget)) return; suggWanted = false; drawSugg(); });
+    sugg.addEventListener('mousedown', function (e) { e.preventDefault(); });
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(input.value); }
       else if (e.key === 'Backspace' && !input.value && tags.length) { tags.pop(); drawChips(); drawSugg(); }
+      else if (e.key === 'ArrowDown' && !sugg.hidden) { e.preventDefault(); var first = sugg.querySelector('button'); if (first) first.focus(); }
+      else if (e.key === 'Escape' && !sugg.hidden) { e.preventDefault(); suggWanted = false; drawSugg(); }
+    });
+    sugg.addEventListener('keydown', function (e) {
+      var rows = Array.prototype.slice.call(sugg.querySelectorAll('button'));
+      var at = rows.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown' && at < rows.length - 1) { e.preventDefault(); rows[at + 1].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (at > 0) rows[at - 1].focus(); else input.focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); suggWanted = false; drawSugg(); input.focus(); }
     });
     $('oa-forum-tagsin').addEventListener('click', function (e) { if (e.target === e.currentTarget) input.focus(); });
-    drawSugg();
 
     $('oa-forum-askform').addEventListener('submit', function (e) {
       e.preventDefault();
-      var title = String($('oa-forum-ask-title').value || '').trim();
+      var title = String(titleEl.value || '').trim();
       var text = String(body.value || '').trim();
       var accept = $('oa-forum-ask-accept');
       var send = $('oa-forum-ask-send');
       if (input.value.trim()) add(input.value);
-      if (!title) { say('Give the question a title.', true); $('oa-forum-ask-title').focus(); return; }
-      if (G.check(title)) { say(G.WHY[G.check(title)], true); $('oa-forum-ask-title').focus(); return; }
+      if (!title) { say('Give the question a title.', true); titleEl.focus(); return; }
+      if (G.check(title)) { say(G.WHY[G.check(title)], true); titleEl.focus(); return; }
       if (!text) { say('Write the details.', true); body.focus(); return; }
       if (!liveGuard(body, guard)) { say(G.WHY[G.check(text)], true); body.focus(); return; }
       if (!M.tagsOk(tags)) { say(REASONS.tags, true); input.focus(); return; }
@@ -2439,7 +2608,7 @@
         say(friendly(err), true);
       });
     });
-    $('oa-forum-ask-title').focus();
+    titleEl.focus();
   }
 
   /* ------------------------------------------------------------- go */

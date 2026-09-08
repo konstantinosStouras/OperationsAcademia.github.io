@@ -860,23 +860,83 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 
 .oa-forum-cancel:hover { border-color: var(--brand); color: var(--brand); }
 
-/* the ask form */
-.oa-forum-ask h1 { margin: 0 0 6px; font-size: 30px; }
+/* ------------------------------------------------------------ the ask form
+
+   Laid out the way Stack Exchange lays one out (owner, 2026-09-08): a short
+   "writing a good question" note, then ONE bordered card holding the three
+   fields, each a bold label with its advice UNDER the label and the box
+   under the advice, every field starred, "Required fields" said once at the
+   card's head, the tag suggestions a menu OVER the page rather than a list
+   in the flow (which pushed the guide box and the buttons down and back
+   with every keystroke), and the Post button under the card at its left.
+   The brand is not copied: every colour here is a token of v3.css, and the
+   buttons keep the site's own pills. */
+
+.oa-forum-ask h1 { margin: 0 0 14px; font-size: 30px; }
+
+.oa-forum-askintro {
+  margin: 0 0 18px;
+  padding: 14px 18px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--brand-soft);
+  color: var(--ink-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.oa-forum-askintro .oa-forum-lede { margin: 0 0 8px; color: var(--ink); font-size: 14.5px; }
+.oa-forum-askintro ol { margin: 0; padding-left: 20px; }
+.oa-forum-askintro li + li { margin-top: 3px; }
 
 .oa-forum-lede { margin: 0 0 22px; color: var(--ink-2); font-size: 15px; }
 
+.oa-forum-askcard {
+  padding: 20px 24px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+/* the card's head: where the question goes (the one place the room is said
+   while the form is open) at the left, "Required fields" at the right */
+.oa-forum-askhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 20px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.oa-forum-askwhere { flex: 1 1 260px; margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.5; }
+.oa-forum-askwhere strong { color: var(--ink); }
+.oa-forum-askreq { margin: 0; color: var(--mut); font-size: 12.5px; line-height: 1.5; white-space: nowrap; }
+.oa-forum-req { color: var(--err); font-weight: 700; }
+
 .oa-forum-f { margin: 0 0 22px; }
+.oa-forum-askcard > .oa-forum-f:last-child { margin-bottom: 0; }
+.oa-forum-askcard > .oa-forum-accept { margin-top: 0; }
 
 .oa-forum-f > label,
 .oa-forum-f > .oa-forum-flabel {
   display: block;
-  margin: 0 0 6px;
+  margin: 0 0 2px;
   color: var(--ink);
-  font-size: 14.5px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
 }
 
-.oa-forum-f .oa-forum-hint { margin: 6px 0 0; color: var(--mut); font-size: 13px; }
+/* the advice sits between the label and the box, where a reader looks
+   before typing, in the muted ink the site's hints already use */
+.oa-forum-fhint { margin: 0 0 8px; color: var(--mut); font-size: 12.5px; line-height: 1.45; }
+
+.oa-forum-hint { color: var(--mut); font-size: 13px; }
+.oa-forum-f .oa-forum-hint { margin: 6px 0 0; }
 
 .oa-forum-f input[type='text'] {
   display: block;
@@ -894,7 +954,48 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 
 .oa-forum-f input[type='text']:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 
-/* the tag picker: chips and an input in one box, suggestions below */
+/* the details box is taller than an answer's: a question carries its
+   whole context, and the site the owner named opens its box at this size */
+.oa-forum-editor.is-ask textarea { min-height: 220px; }
+
+/* the line under the details box saying how the words will read: plain
+   text, paragraphs on a blank line, an address drawn as a link. It stands
+   where a formatting toolbar would, and says instead of pretending. */
+.oa-forum-fmt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 8px 14px;
+  border-top: 1px solid var(--line-soft);
+  background: var(--bg-3);
+  color: var(--mut);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+/* similar questions, under the title as it is typed */
+.oa-forum-similar {
+  margin: 10px 0 0;
+  padding: 10px 14px 6px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg-3);
+  color: var(--ink-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.oa-forum-similar p { margin: 0 0 6px; color: var(--ink); font-size: 13px; font-weight: 600; }
+.oa-forum-similar ul { list-style: none; margin: 0; padding: 0; }
+.oa-forum-similar li { padding: 4px 0; overflow-wrap: anywhere; }
+.oa-forum-similar a { color: var(--brand); }
+.oa-forum-similar i { margin-left: 8px; color: var(--mut); font-style: normal; font-size: 12.5px; white-space: nowrap; }
+
+/* the tag picker: chips and an input in one box, the suggestions a menu
+   under it */
+.oa-forum-tagwrap { position: relative; }
+
 .oa-forum-tagsin {
   display: flex;
   flex-wrap: wrap;
@@ -924,17 +1025,27 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 
 .oa-forum-tagsin input:focus { outline: none; }
 
+/* THE MENU IS OVER THE PAGE, NOT IN IT. Drawn in the flow it moved the
+   guide box and the buttons down and back with every keystroke; over the
+   page it opens under the box and covers what is below, as a menu does, and
+   holds to rules 6 and 10 of _MOBILE-STANDARDS.md: half the screen at most,
+   scrolling inside itself, never wider than its box. */
 .oa-forum-tagsugg {
+  position: absolute;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
   list-style: none;
-  margin: 6px 0 0;
+  margin: 0;
   padding: 0;
-  max-width: 420px;
+  max-height: 50vh;
+  overflow: auto;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--bg-2);
   color: var(--ink);
-  box-shadow: var(--shadow);
-  overflow: hidden;
+  box-shadow: var(--shadow-lg);
 }
 
 .oa-forum-tagsugg:empty { display: none; }
@@ -973,6 +1084,10 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   gap: 12px;
   flex-wrap: wrap;
 }
+
+/* the buttons under the card, at its left, as the site the owner named
+   places them */
+.oa-forum-askactions { margin-top: 18px; }
 
 /* ------------------------------------------------------------ side cards */
 
@@ -1213,5 +1328,12 @@ body.v3 .oa-forum-tagchip:hover {
   .oa-forum-pacts .oa-forum-act { min-height: 42px; }
   .oa-forum-send, .oa-forum-cancel, .oa-forum-askbtn { width: 100%; }
   .oa-forum-bar { align-items: stretch; }
-  .oa-forum-tagsugg { max-width: none; }
+  /* the ask form on a phone: the card and the note keep a 14px inset, the
+     head's two lines stack, and nothing below the card is wider than it */
+  .oa-forum-askcard { padding: 16px 14px; }
+  .oa-forum-askintro { padding: 12px 14px; }
+  .oa-forum-askhead { margin-bottom: 16px; padding-bottom: 12px; }
+  .oa-forum-askreq { white-space: normal; }
+  .oa-forum-similar i { white-space: normal; margin-left: 6px; }
+  .oa-forum-askactions .oa-forum-hint { width: 100%; }
 }
