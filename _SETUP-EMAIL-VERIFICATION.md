@@ -133,7 +133,8 @@ own template points at its own handler, which applies the code and then
 forwards to the site. One console setting removes that page: Firebase
 console, Authentication, Templates, "Email address verification", the pencil,
 **Customize action URL**, and enter
-`https://www.operationsacademia.org/verify-email.html`. The page reads
+`https://www.operationsacademia.org/verify-email` (the site serves
+its `verify-email.html` at that address). The page reads
 `mode` and `oobCode` off the address exactly as it does for the site's own
 message, so the fallback then lands on the site directly too. The fallback
 also lands in spam far more often than the site's own message: it comes from

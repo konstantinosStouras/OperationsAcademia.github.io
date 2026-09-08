@@ -307,8 +307,10 @@
     p = p.replace(/\/{2,}/g, '/');
     if (/\/index\.html?$/i.test(p)) p = p.replace(/index\.html?$/i, '');
     if (p === '') p = '/';
-    /* extensionless -> the .html the page's own canonical names; a trailing
-       slash is a directory and keeps it */
+    /* extensionless -> the .html of the file it serves, the one form a path
+       on disk has (the ADDRESS the site shows is the extensionless one since
+       2026-09-08, and both spellings of one page fold here); a trailing slash
+       is a directory and keeps it */
     if (p !== '/' && !/\/$/.test(p) && !/\.[a-z0-9]{2,5}$/i.test(p)) p += '.html';
     return p.slice(0, 120);
   }

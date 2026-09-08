@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>My personal area — Operations Academia</title>
     <meta name="description" content="Your Operations Academia account — the postings you have made, the alerts you subscribe to, and the details kept against your name.">
-    <link rel="canonical" href="https://www.operationsacademia.org/account.html">
+    <link rel="canonical" href="https://www.operationsacademia.org/account">
 
     <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
          og:* is read by Facebook, Messenger, WhatsApp, LinkedIn, Telegram,
@@ -23,7 +23,7 @@
     <meta property="og:locale" content="en_GB">
     <meta property="og:title" content="My personal area">
     <meta property="og:description" content="Your Operations Academia account — the postings you have made, the alerts you subscribe to, and the details kept against your name.">
-    <meta property="og:url" content="https://www.operationsacademia.org/account.html">
+    <meta property="og:url" content="https://www.operationsacademia.org/account">
     <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:type" content="image/jpeg">
@@ -57,6 +57,17 @@
          62px, the theme toggle by 185px). Reserve the space it will take, from
          the same localStorage hint the chip is painted from, before the browser
          draws anything. */
+      /* THE ADDRESS IS THE EXTENSIONLESS ONE. GitHub Pages serves /jobs and
+         /jobs.html alike, and the site links, canonicalises and shares the
+         first; so a reader who arrives on the second, through an old link or
+         a bookmark, is shown the address everyone else sees, before anything
+         paints or reads it. The search and the fragment travel with it. */
+      try {
+        var p = location.pathname;
+        if (/\.html$/.test(p) && history.replaceState) {
+          history.replaceState(null, '', p.replace(/\/index\.html$/, '/').replace(/\.html$/, '') + location.search + location.hash);
+        }
+      } catch (e) { /* the address is a convenience */ }
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
@@ -103,7 +114,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="jobs.html">Jobs</a>
+          <a href="jobs">Jobs</a>
           <a href="./#candidates">Candidates</a>
           <a href="./#placements">Placements</a>
           <a href="./#survey">Survey</a>
@@ -131,7 +142,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="jobs.html">Jobs</a>
+        <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -188,37 +199,37 @@
           <p>Post a job, create your candidate profile, or subscribe to e-mail alerts &mdash;
           whatever you add appears here, and you can edit or withdraw it at any time.</p>
           <div class="v3-cta-row" style="justify-content:center">
-            <a class="v3-btn primary" href="post-a-job.html">Post a job</a>
-            <a class="v3-btn ghost" href="alerts.html">Set up e-mail alerts</a>
+            <a class="v3-btn primary" href="post-a-job">Post a job</a>
+            <a class="v3-btn ghost" href="alerts">Set up e-mail alerts</a>
           </div>
         </div>
 
         <!-- signed IN: the sections of the personal area -->
         <div class="v3-pa-grid" id="pa-grid" hidden>
-          <a class="v3-pa-card" href="my-postings.html">
+          <a class="v3-pa-card" href="my-postings">
             <h3><span class="v3-ico" aria-hidden="true">&#128203;</span> My postings</h3>
             <span class="v3-pa-n" id="pa-n-jobs">&mdash;</span>
             <p>The job postings made from this account &mdash; correct, extend or withdraw
             them here.</p>
           </a>
-          <a class="v3-pa-card" href="alerts.html">
+          <a class="v3-pa-card" href="alerts">
             <h3><span class="v3-ico" aria-hidden="true">&#9993;</span> E-mail alerts</h3>
             <span class="v3-pa-n" id="pa-n-alerts">&mdash;</span>
             <p>What we e-mail you about, and how often. Every message carries an
             unsubscribe link.</p>
           </a>
-          <a class="v3-pa-card" href="messages.html">
+          <a class="v3-pa-card" href="messages">
             <h3><span class="v3-ico" aria-hidden="true">&#128172;</span> Messages</h3>
             <span class="v3-pa-n" id="pa-n-messages">&mdash;</span>
             <p>Messages between you and the site&rsquo;s maintainer. The number is how
             many you have not read yet.</p>
           </a>
-          <a class="v3-pa-card" href="post-a-job.html">
+          <a class="v3-pa-card" href="post-a-job">
             <h3><span class="v3-ico" aria-hidden="true">&#128221;</span> Post a job</h3>
             <p>Advertise an academic opening. It publishes automatically, normally within a
             few minutes, and is free.</p>
           </a>
-          <a class="v3-pa-card" href="post-a-candidate.html" id="pa-cand-card">
+          <a class="v3-pa-card" href="post-a-candidate" id="pa-cand-card">
             <h3><span class="v3-ico" aria-hidden="true">&#127891;</span> Candidate profile</h3>
             <p>On the market this season? Create your profile, with your CV attached, and
             see how it will appear before anyone else does.</p>
@@ -228,7 +239,7 @@
             <p>Your name, affiliation, website and ORCID iD &mdash; and merging duplicate
             accounts, if you ever end up with two.</p>
           </a>
-          <a class="v3-pa-card" href="feedback.html">
+          <a class="v3-pa-card" href="feedback">
             <h3><span class="v3-ico" aria-hidden="true">&#128172;</span> Send feedback</h3>
             <p>Tell us what to improve — you can attach screenshots, and every message gets a
             ticket and an answer.</p>
@@ -248,7 +259,7 @@
           <p class="v3-mut" id="pa-cand-preview-note"></p>
           <p class="v3-mut" id="pa-cand-preview-status" hidden></p>
           <div id="pa-cand-preview-card"></div>
-          <p class="v3-cta-row"><a class="v3-btn primary" id="pa-cand-edit" href="post-a-candidate.html">Edit your profile</a></p>
+          <p class="v3-cta-row"><a class="v3-btn primary" id="pa-cand-edit" href="post-a-candidate">Edit your profile</a></p>
         </section>
 
         <!-- DELETING THE ACCOUNT, the last thing on the page (owner,
@@ -268,7 +279,7 @@
             site are removed, and your sign-in is deleted. Afterwards we keep the
             date it happened and how many things came off with it, and nothing
             that says who you were. The
-            <a href="privacy-policy.html">Privacy Policy</a> says exactly what
+            <a href="privacy-policy">Privacy Policy</a> says exactly what
             goes and what stays.</p>
           <p><button type="button" class="v3-btn danger" id="pa-delete-open">Delete my
             account</button></p>
@@ -301,7 +312,7 @@
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
-            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            <p>Trusted by <a href="previous-markets">over 200 universities around the
             world</a>.<br>
             Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
             Sponsored by the
@@ -316,17 +327,17 @@
               <li><a href="./#placements">Placements</a></li>
               <li><a href="./#survey">Survey</a></li>
               <li><a href="./#resources">Resources</a></li>
-              <li><a href="analytics.html">Analytics</a></li>
+              <li><a href="analytics">Analytics</a></li>
             </ul>
           </div>
           <div>
             <h4>Participate</h4>
             <ul>
-              <li><a href="post-a-job.html">Post a job</a></li>
-              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
-              <li><a href="post-a-placement.html">Report a placement</a></li>
-              <li><a href="alerts.html">E-mail alerts</a></li>
-              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="post-a-job">Post a job</a></li>
+              <li><a href="post-a-candidate">Post your candidacy</a></li>
+              <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="alerts">E-mail alerts</a></li>
+              <li><a href="feedback">Feedback</a></li>
               <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
@@ -335,8 +346,8 @@
           <span>&copy; 2014-<span class="js-current-year"></span>
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
-            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a>
+            <a href="terms-and-conditions">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy">Privacy</a>
           </span>
         </div>
       </div>
@@ -510,7 +521,7 @@
             /* straight to the profile — the editor the candidates page's own
                Edit button opens, keyed on the document the preview chose */
             if (shown && shown.thisSeason && shown.id) {
-              candCard.href = 'post-a-candidate.html?edit=' + encodeURIComponent(shown.id);
+              candCard.href = 'post-a-candidate?edit=' + encodeURIComponent(shown.id);
             }
           }
           if (jobs !== null) document.getElementById('pa-n-jobs').textContent = String(jobs);
@@ -566,7 +577,7 @@
 
         var v = mine.data;
         document.getElementById('pa-cand-edit').href =
-          'post-a-candidate.html?edit=' + encodeURIComponent(mine.id);
+          'post-a-candidate?edit=' + encodeURIComponent(mine.id);
 
         var row = OACandCard.publicRowFromDoc(v, {
           canonColumns: window.OASchools && OASchools.canonColumns,

@@ -113,7 +113,7 @@
 
     var bar = el('div', 'oa-card-actions');
     bar.appendChild(jobbtn('Edit', 'oa-jobbtn-edit', 'Correct this posting', function () {
-      location.href = 'post-a-job.html?edit=' + encodeURIComponent(id);
+      location.href = 'post-a-job?edit=' + encodeURIComponent(id);
     }));
     if (v.status === 'queued' || v.status === 'published') {
       bar.appendChild(jobbtn('Take down', 'oa-jobbtn-del',

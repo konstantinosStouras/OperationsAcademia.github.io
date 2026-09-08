@@ -631,7 +631,7 @@ async function selftest() {
   ok(dlDigest.includes('A University') && dlDigest.includes('B University') &&
      dlDigest.includes('SCM'),
     'each row names the institution and the department');
-  ok(dlDigest.includes('jobs.html?job=2027-a-university-20260901'),
+  ok(dlDigest.includes('jobs?job=2027-a-university-20260901'),
     'and links the posting\'s own permalink, through the shared page rule');
   ok(dlDigest.includes('Browse all job postings'),
     'a deadlines-only e-mail still ends on the job board');

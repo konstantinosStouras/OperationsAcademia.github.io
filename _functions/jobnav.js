@@ -65,8 +65,8 @@
       links to them cannot spell it differently. */
   var FOCUS_PARAM = 'job';
 
-  var JOBS_PAGE = 'jobs.html';
-  var PAST_PAGE = 'previous-markets.html';
+  var JOBS_PAGE = 'jobs';
+  var PAST_PAGE = 'previous-markets';
 
   function day(v) {
     return String(v == null ? '' : v).slice(0, 10);

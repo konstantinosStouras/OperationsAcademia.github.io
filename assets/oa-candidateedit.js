@@ -86,7 +86,7 @@
 
     bar.appendChild(button('Edit', 'oa-jobbtn-edit',
       'Edit this profile — its text, its files, or both', function () {
-        location.href = 'post-a-candidate.html?edit=' + encodeURIComponent(id);
+        location.href = 'post-a-candidate?edit=' + encodeURIComponent(id);
       }));
 
     bar.appendChild(button('Take down', 'oa-jobbtn-del',
@@ -103,7 +103,7 @@
       bar.appendChild(button('Post confirmed placement', 'oa-jobbtn-edit',
         'Confirmed a position? Report your placement — only you see this ' +
         'button, on your own profile', function () {
-          location.href = 'post-a-placement.html';
+          location.href = 'post-a-placement';
         }));
     }
 

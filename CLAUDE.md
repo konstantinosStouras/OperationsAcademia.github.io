@@ -48,6 +48,61 @@ tree, then rebuild every page the new design was borrowing from the old one —
 a card on the front page that opens a page in the previous design is the
 failure mode, not a missing file.
 
+## A page's address carries no `.html`
+
+Owner, 2026-09-08: *"Why some pages when they open they show the '.html' in
+the end? e.g. operationsacademia.org/forum shows up like
+operationsacademia.org/forum.html. Check for all pages of OA and fix it."*
+
+GitHub Pages serves `/forum` and `/forum.html` alike, so the extension was
+never the server's doing. The site put it there itself, in four places: every
+internal link named `page.html`; the forum page's own address builder
+(`href()` in `assets/oa-forum.js`) wrote `forum.html?room=...` and pushed it
+with `pushState` the moment a reader moved between a room and a thread, which
+is the exact symptom reported; the canonical, `og:url` and `sitemap.xml` named
+the `.html` form, so a shared card and a search result carried it; and the
+e-mails and the Cloud Functions built their links to the site the same way.
+
+**The address is the extensionless one, everywhere the live site writes
+one.** Links in the root pages and in `assets/*.js` are `href="jobs"`,
+`jobs?job=<id>`, `post-a-job?edit=<id>`; `OAJobNav`'s two page names,
+`OAAlertSave.PAGE`, the review panel's `EDIT_PATH` and the forum's `href()`
+carry no extension; the canonical, `og:url` and the sitemap agree on it
+(`share-check.mjs` pins all three through `PAGES`); the mailers and
+`_functions/verify-email.js` build `/verify-email?mode=...` and `/account`;
+the change log's `url`s say the same. **The files keep their names**: a
+relative link still resolves under a preview directory (`/v3/jobs` served
+`v3/jobs.html`), which is what rule 2 of the three trees needs, and
+`link-check.mjs` already resolved an extensionless link to its file.
+
+**A reader arriving on the old form is shown the new one.** Every live page's
+head snippet, before anything paints, turns a `location.pathname` ending in
+`.html` into the extensionless address with `history.replaceState`
+(`index.html` to `/`), keeping the search and the fragment; so a bookmark, an
+old share or a link from the frozen archives lands on `/jobs.html` and reads
+`/jobs`. Nothing else reads the address before that runs, and `oa-list.js`,
+`oa-alertsave.js`, `oa-verify.js` and `v3.js` all rewrite from
+`location.pathname`, so they carry whatever form is there.
+
+**What deliberately did not move.** `/v1/` and `/v2/` keep their own links and
+heads, by the rule the three trees are held to; the six root stubs and the
+`/v3/` stubs still redirect, the latter to the extensionless address now. The
+analytics pipeline keeps `.html` as the STORAGE form of a path (`normPath` in
+`assets/oa-analytics-model.js`), since that is the one form a file on disk has
+and the served `data/analytics.json` already holds it; a usage record written
+under `/jobs` and one under `/jobs.html` are one page there, as before.
+`_scraper/page-test.mjs`'s server resolves an extensionless request the way
+Pages does, or every link on the site would 404 under test.
+
+Tests: `testExtensionlessAddresses` in `_scraper/selftest.mjs` (no live root
+page or live script links a root page with `.html`, every live page carries
+the head normaliser, the forum builds `forum?`, the two `OAJobNav` page names,
+the sitemap and every card's canonical extensionless, the change log's urls,
+and the test server's resolution), `share-check.mjs` for the canonical and
+`og:url`, and the browser suite, whose address checks read `/jobs`,
+`/account` and `/verify-email` off the address bar.
+
+
 ## Two sources of job postings, and only one of them is the database
 
 `data/jobs.json` is built by `_scraper/build-jobs.mjs` from **both**:
@@ -3665,7 +3720,7 @@ back and flips the switch:
 2. the home page's button, in the candidates section's `.v3-section-cta`,
    where a comment holds its place:
 
-       <a class="v3-btn ghost" href="forum.html">Candidates&rsquo; forum</a>
+       <a class="v3-btn ghost" href="forum">Candidates&rsquo; forum</a>
 
 3. the home page's FAQ answer, restored as a `.v3-faq-item` immediately
    before *Is my personal information published?*. Its question, on one line:
@@ -3673,7 +3728,7 @@ back and flips the switch:
        Is there somewhere to talk to other candidates and to faculty?
 
    and its answer: *Yes. The
-   site has an anonymous [forum](forum.html) in two rooms. The **Candidates'
+   site has an anonymous [forum](forum) in two rooms. The **Candidates'
    room** is for the accounts holding a candidate profile for the season under
    way; the **Open forum** is for every registered account with a confirmed
    e-mail address, faculty included. You post under a random handle drawn for
@@ -3712,7 +3767,7 @@ back and flips the switch:
   "date": "2026-09-05",
   "title": "An anonymous forum, in two rooms",
   "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post is yours to edit and to delete at any time, a question once every reply has gone. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
-  "url": "/forum.html"
+  "url": "/forum"
 }
 ```
 
@@ -4267,7 +4322,7 @@ all) and 'Candidates forum' (shown only to candidates and the admin)"*.
 **THE ADDRESS IS THE SECTION, and no room is Home.** The page already moved
 between its views with `pushState` (a list, a thread, the ask form under one
 address each), so the four sections are four more readings of the one
-address rather than four pages: `forum.html` with no `room` is Home,
+address rather than four pages: `forum` with no `room` is Home,
 `?room=X` is the room's questions, `?view=unanswered` and `?view=tags` are
 the two other sections, and `?order=active|score` is the list's order when
 it is not the default. `readState` reads all of it, `href` writes all of
@@ -6351,8 +6406,11 @@ public page".
 **Normalise, THEN filter, and that order is load-bearing.** Pages serves both
 `/admin-area` and `/admin-area.html` for one file and the build recorded both,
 so a filter matching only the spelling somebody thought of would have leaked
-the desk under its other name. The canonical form is the one the pages' own
-canonical tags use — WITH the extension, `/index.html` folding to `/`.
+the desk under its other name. The normal form the FILE stores is the one
+WITH the extension, `/index.html` folding to `/`, because that is the one
+form a path on disk has; the address the site shows and canonicalises is the
+extensionless one since 2026-09-08 (see "A page's address carries no
+`.html`"), and `normPath` folds the two together.
 
 **Two bugs the tests caught rather than opinions I held:**
 
@@ -7720,7 +7778,9 @@ simply re-run. And **`sitemap.xml` listed every page extensionless** while its
 canonical and `og:url` named the `.html` form; Pages serves both, so nothing
 404'd — it was just two addresses for one page, which is the same split as the
 main defect wearing different clothes. The sitemap now names what the pages
-name, and `share-check.mjs` fails if the two part company again.
+name, and `share-check.mjs` fails if the two part company again. (Since
+2026-09-08 what they both name is the EXTENSIONLESS address, `/jobs`; the
+rule that they agree is unchanged.)
 
 **robots.txt now names the preview crawlers explicitly.** They were already
 allowed by the wildcard; the Sharing Debugger has a bug — 2014, and back in

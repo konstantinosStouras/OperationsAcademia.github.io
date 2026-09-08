@@ -64,7 +64,7 @@
    FOUR SECTIONS DOWN THE LEFT, AND HOME IS THE FIRST PAGE (owner,
    2026-09-08: "add a column on the left with Home, Questions, Unanswered and
    Tags", after the site the forum was asked to resemble). The address is
-   the section: forum.html with no room is HOME, where the reader chooses a
+   the section: `forum` with no room is HOME, where the reader chooses a
    room from the doors drawn for the rooms forumJoin admitted them to (the
    Open forum's for every member, the Candidates' room's for candidates and
    the maintainer, and one line for everybody else saying what opens it);
@@ -353,7 +353,9 @@
     if (o && o.tags) [].concat(o.tags).forEach(function (t) { if (t) p.append('tags', t); });
     if (o && o.q) p.set('q', o.q);
     var qs = p.toString();
-    return 'forum.html' + (qs ? '?' + qs : '') + ((o && o.hash) ? '#' + o.hash : '');
+    /* the extensionless address, the one every page of the site writes
+       (CLAUDE.md, "A page's address carries no .html"); Home is bare `forum` */
+    return 'forum' + (qs ? '?' + qs : '') + ((o && o.hash) ? '#' + o.hash : '');
   }
   /** Move between the page's views IN PLACE: push the new address, re-read
       the state from it and draw again. The list, the thread and the ask form
@@ -390,14 +392,14 @@
         return;
       }
     }
-    var a = e.target && e.target.closest ? e.target.closest('a[href^="forum.html"]') : null;
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="forum"]') : null;
     if (!a || !S.me) return;
     var app = $('oa-forum');
     if (!app || !app.contains(a)) return;
     var to = a.getAttribute('href');
-    /* the page's own addresses only: bare forum.html is Home, and anything
+    /* the page's own addresses only: bare `forum` is Home, and anything
        else of the page's begins with its query */
-    if (to !== 'forum.html' && to.indexOf('forum.html?') !== 0) return;
+    if (to !== 'forum' && to.indexOf('forum?') !== 0) return;
     e.preventDefault();
     /* A POST'S OWN #n IS A PLACE ON THIS PAGE, not another view of it.
        Following it through draw() rebuilt the thread and threw away whatever
@@ -901,7 +903,7 @@
     if (note) {
       if (!rooms.candidates) {
         note.innerHTML = 'The Candidates’ room opens to accounts holding a ' +
-          '<a href="post-a-candidate.html">candidate profile</a> for the ' + esc(label(Y)) + ' job market.';
+          '<a href="post-a-candidate">candidate profile</a> for the ' + esc(label(Y)) + ' job market.';
         show(note, true);
       } else {
         show(note, false);
@@ -955,7 +957,7 @@
     if (S.me.banned) {
       var box = $('oa-forum-error');
       if (box) {
-        box.innerHTML = '<p><strong>This handle is banned for the season.</strong> You can read, but nothing you send will be accepted. To appeal, use <a href="feedback.html">Send feedback</a> and quote your handle.</p>';
+        box.innerHTML = '<p><strong>This handle is banned for the season.</strong> You can read, but nothing you send will be accepted. To appeal, use <a href="feedback">Send feedback</a> and quote your handle.</p>';
         show(box, true);
       }
     }
@@ -1589,7 +1591,7 @@
       '<div class="oa-forum-doors" id="oa-forum-doors">' + doors + '</div>' +
       (rooms.candidates ? '' :
         '<p class="oa-forum-roomnote">The Candidates’ room opens to accounts holding a ' +
-        '<a href="post-a-candidate.html">candidate profile</a> for the ' + esc(label(Y)) + ' job market.</p>');
+        '<a href="post-a-candidate">candidate profile</a> for the ' + esc(label(Y)) + ' job market.</p>');
     show(host, true);
     var h2 = $('oa-forum-hometitle');
     if (h2 && S.painted && !keyboardTab) {

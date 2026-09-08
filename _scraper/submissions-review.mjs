@@ -95,7 +95,7 @@ export const KINDS = [
     collection: 'jobSubmissions',
     one: 'job posting',
     many: 'job postings',
-    editPath: 'post-a-job.html?edit=',
+    editPath: 'post-a-job?edit=',
     dataset: 'jobs.json',
     /* The poster is written to when this becomes publicly shown — see
        `partitionLive` below. A capability rather than a branch in the mailer,
@@ -120,7 +120,7 @@ export const KINDS = [
     collection: 'candidateSubmissions',
     one: 'candidate profile',
     many: 'candidate profiles',
-    editPath: 'post-a-candidate.html?edit=',
+    editPath: 'post-a-candidate?edit=',
     dataset: 'candidates.json',
     row: (doc, opts) => rowFromCandidateSubmission(doc, opts),
     summarise: (doc, row) => [

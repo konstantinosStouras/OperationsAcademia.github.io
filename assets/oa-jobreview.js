@@ -43,7 +43,7 @@
      behind the mailer that announces the same documents; selftest.mjs pins
      the pairing. */
   var SUBS_COL = 'jobSubmissions';
-  var EDIT_PATH = 'post-a-job.html?edit=';
+  var EDIT_PATH = 'post-a-job?edit=';
   /* The stamp the submissions model names (REVIEWED_AT there): ticking a card
      off writes this one field onto the submission itself, so a posting marked
      reviewed here is marked reviewed for the mailer too — and nothing here

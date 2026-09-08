@@ -183,7 +183,7 @@
     $('ve-signin').textContent = mismatch ? 'Use a different account'
       : (waiting ? 'Check your inbox' : 'Sign in');
     $('ve-title').textContent = 'Address confirmed';
-    if (inside) startCountdown($('ve-continue').getAttribute('href') || 'account.html');
+    if (inside) startCountdown($('ve-continue').getAttribute('href') || 'account');
     else stopCountdown();
   }
 

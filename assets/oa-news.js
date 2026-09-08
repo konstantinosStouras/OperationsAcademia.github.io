@@ -263,7 +263,7 @@
    *     limit: 5,           // 0 = the whole log
    *     dates: 'short',     // 'short' = the ISO day (front page), else Aug 18, 2026
    *     link: true,         // link an entry's title to the page it announces
-   *     more: 'whats-new.html'   // where "…and N more" points, when cut
+   *     more: 'whats-new'   // where "…and N more" points, when cut
    *   })
    */
   function mount(cfg) {
