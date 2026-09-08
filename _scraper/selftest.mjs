@@ -17895,8 +17895,10 @@ async function testForum() {
        && /sugg\.classList\.toggle\('is-up', up\);/.test(ask) && /Math\.min\(vH \* 0\.5, up \? above : below\)/.test(ask)
        && /\.oa-forum-tagsugg\.is-up \{ top: auto; bottom: calc\(100% \+ 4px\); \}/.test(pageCss),
       'forum ask: the menu measures the room below and above its box, opens on the roomier side and is capped to it and to half the screen');
-    ok(/window\.removeEventListener\('resize', placeSugg\);/.test(ask) && /if \(!document\.contains\(sugg\)\) \{/.test(ask),
-      'forum ask: …and the listener lets go of a form that has been torn down');
+    ok(/askCleanup = function \(\) \{\s*window\.removeEventListener\('resize', placeSugg\);/.test(ask) && /clearTimeout\(similarTimer\);\s*\};/.test(ask)
+       && /function hideViews\(\) \{[\s\S]{0,200}if \(askCleanup\) \{ askCleanup\(\); askCleanup = null; \}/.test(pageJs)
+       && /if \(!document\.contains\(sugg\)\) \{/.test(ask),
+      'forum ask: …and the listeners and the title timer are let go the moment the view changes, not on some later resize');
     ok(/id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags" hidden>/.test(ask) && /aria-expanded="false"/.test(ask),
       'forum ask: the tag menu is born SHUT, never drawn open on arrival');
     ok(/var open = suggWanted && !input\.disabled && sugg\.children\.length > 0;/.test(ask)
@@ -17924,8 +17926,9 @@ async function testForum() {
       'forum ask: the page\'s own room banner stands down while the form is open and comes back with the thread');
     ok(/<p class="oa-forum-fmt" id="oa-forum-ask-fmt">/.test(ask) && /A web address becomes a link/.test(ask) && !/toolbar/.test(bare(ask)),
       'forum ask: a line under the details says how plain text reads, and no formatting toolbar is drawn');
-    ok(ask.indexOf('oa-forum-askactions') > ask.indexOf('id="oa-forum-ask-msg"') && /id="oa-forum-ask-send">Post your question</.test(ask),
-      'forum ask: the Post button is under the card, not inside it');
+    ok(/id="oa-forum-ask-msg" aria-live="polite"><\/p>' \+\s*'<\/div>' \+\s*'<div class="oa-forum-actions oa-forum-askactions">/.test(ask)
+       && /id="oa-forum-ask-send">Post your question</.test(ask),
+      'forum ask: the card closes on its message line and the Post button\'s row opens after it, under the card and not inside it');
     ok(/'<div class="oa-forum-askintro">'/.test(ask) && /<p class="oa-forum-lede"><strong>Writing a good question\.<\/strong>/.test(ask)
        && ask.indexOf('oa-forum-askintro') < ask.indexOf('oa-forum-askcard'),
       'forum ask: a "writing a good question" note stands above the card');
@@ -18004,8 +18007,13 @@ async function testForum() {
     ok(/@media \(max-width: 640px\)[\s\S]*\.oa-forum-askcard \{ padding: 16px 14px; \}/.test(pageCss)
        && /@media \(max-width: 640px\)[\s\S]*\.oa-forum-askreq \{ white-space: normal; \}/.test(pageCss),
       'forum ask css: on a phone the card keeps a 14px inset and the head\'s note may wrap');
-    ok(!/#[0-9a-f]{3,8}\b/i.test(pageCss.slice(pageCss.indexOf('the ask form'), pageCss.indexOf('side cards'))),
-      'forum ask css: no raw colour in the ask form\'s rules');
+    /* the ask form's section, bounded at BOTH ends and its length asserted:
+       'side cards' is named in the file's header too, and a slice whose end
+       falls before its start is an empty string that satisfies any negative */
+    const askCssAt = pageCss.indexOf('/* ------------------------------------------------------------ the ask form');
+    const askCss = pageCss.slice(askCssAt, pageCss.indexOf('/* ------------------------------------------------------------ side cards */', askCssAt));
+    ok(askCssAt > 0 && askCss.length > 3000 && askCss.length < 12000, 'forum ask css: the section was sliced');
+    ok(!/#[0-9a-f]{3,8}\b/i.test(askCss) && !/\brgba?\(/.test(askCss), 'forum ask css: no raw colour in the ask form\'s rules');
 
     /* the browser suite drives it, and the audit names the new surfaces */
     const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');

@@ -11030,21 +11030,25 @@ for (const w of [320, 360, 390, 430]) {
     const readsBefore = await q.evaluate(() => window.__fb.ops('query').filter((x) => /\/threads/.test(x)).length);
     await q.fill('#oa-forum-ask-title', 'Any tips for a flyout in Europe?');
     await q.waitForFunction(() => !document.getElementById('oa-forum-similar').hidden, null, { timeout: 5000 });
-    const similar = await q.evaluate((needle) => {
+    const similar = await q.evaluate((t) => {
       const box = document.getElementById('oa-forum-similar');
       const a = box.querySelector('a');
+      /* the count it should print is the stored thread head's own: this
+         candidate answered the seeded question earlier in this flow */
+      const n = Number(window.__fb.docs[t + '/seed-t1'].n) || 0;
       return { links: box.querySelectorAll('a').length, text: a.textContent, href: a.getAttribute('href'),
         target: a.getAttribute('target'), rel: a.getAttribute('rel'), bold: box.querySelectorAll('b').length,
         pwned: !!window.__pwned, reads: window.__fb.ops('query').filter((x) => /\/threads/.test(x)).length,
-        answers: box.querySelector('i').textContent, heading: box.querySelector('p').textContent };
-    }, HOSTILE_TITLE);
+        answers: box.querySelector('i').textContent, heading: box.querySelector('p').textContent,
+        expected: n > 1 ? (n - 1) + ' answer' + (n - 1 === 1 ? '' : 's') : 'no answers yet' };
+    }, T);
     eq(similar.links, 1, 'forum (candidate): a title sharing words with the seeded thread lists that thread under the box');
     ok(similar.text === HOSTILE_TITLE && similar.bold === 0 && !similar.pwned,
       'forum (candidate): …its title rendered as text, markup and all');
     ok(/[?&]t=seed-t1/.test(similar.href) && similar.target === '_blank' && /noopener/.test(similar.rel),
       'forum (candidate): …as a link to the thread that opens in a new tab, so the question being written stays');
-    ok(/^Similar questions/.test(similar.heading) && /^(no answers yet|\d+ answers?)$/.test(similar.answers),
-      `forum (candidate): …headed as similar questions, with its answer count beside it (${similar.answers})`);
+    ok(/^Similar questions/.test(similar.heading) && similar.answers === similar.expected,
+      `forum (candidate): …headed as similar questions, with the stored thread's own answer count beside it (${similar.answers}, expected ${similar.expected})`);
     eq(similar.reads, readsBefore, 'forum (candidate): …from the rows the list already read: no second read of the room');
     /* THE LIST'S OWN SURFACES are drawn in no other view, so the audit runs
        here too, while it is open (the tag menu's turn comes below) */

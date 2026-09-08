@@ -698,8 +698,13 @@
     return '';
   }
 
+  /* what the ask form left on the window (its menu's resize listeners, its
+     title timer), let go the moment the view changes; set by drawAsk */
+  var askCleanup = null;
+
   function hideViews() {
     show($('oa-forum-watchnew'), false);
+    if (askCleanup) { askCleanup(); askCleanup = null; }
     ['oa-forum-listview', 'oa-forum-thread', 'oa-forum-compose'].forEach(function (id) {
       var n = $(id);
       if (!n) return;
@@ -2585,6 +2590,14 @@
     }
     window.addEventListener('resize', placeSugg);
     if (window.visualViewport) window.visualViewport.addEventListener('resize', placeSugg);
+    /* …and let go when the view changes (hideViews), not on some later
+       resize: each visit to the form would otherwise leave two listeners
+       holding the torn-down form until the window happened to be resized */
+    askCleanup = function () {
+      window.removeEventListener('resize', placeSugg);
+      if (window.visualViewport) window.visualViewport.removeEventListener('resize', placeSugg);
+      clearTimeout(similarTimer);
+    };
     function drawSugg() {
       var q = M.slug(input.value);
       sugg.innerHTML = '';
