@@ -2985,6 +2985,7 @@ them:
     assets/oa-forum-model.js     rooms, KEYS, BOUNDS, TAGS, RATE, slug(), minute()   (dual-mode)
     assets/oa-forum-guard.js     what a post may not contain, one check() for both sides
     assets/oa-forum-guide.js     the thirteen rules and three notes
+    assets/oa-forum-markup.js    how a post's words are READ: html() for the page, plain() for the excerpt and the quote test (dual-mode)
     _functions/forum/identity.js the ONE HMAC, the handle draw, the season's secret version
     _functions/forum/member.js   the shared preamble: who, which room, limits, ERRORS
     _functions/forum/{join,post,edit,delete,vote,moderate}.js   the seven callables
@@ -3514,23 +3515,27 @@ positive control that a link now posts, and `url` left `WHY`, `ERRORS` and the
 page's `REASONS` with it. What is still refused is a way to be CONTACTED off
 the forum, or an identifier naming exactly one researcher.
 
-**The page draws it as a link, and the safety is the ORDER.** `linkify` in
-`oa-forum.js` runs over text `esc()` has ALREADY escaped, so `&`, `<` and `"`
-are entities by the time it looks: nothing it emits can close an attribute or
-open a tag, and the pattern itself admits only `http`, `https` and `www`,
-never a `javascript:` href. `rel="noopener noreferrer nofollow"` with
-`target="_blank"` keeps the forum's address out of the other site's referrer
-and passes it no rank. Trailing sentence punctuation is not part of the
-address, and a closing bracket counts as punctuation only when the address
-does not open one of its own. The cost, said in rule 7 rather than hidden: a
-link to your own page, paper or profile identifies you as surely as your name
-would.
+**The page draws it as a link, and the safety is where the escaping
+happens.** Since 2026-09-08 a post is read by `assets/oa-forum-markup.js`
+(see "…and a question is written with a formatting toolbar" below), which
+parses the reader's own words into a tree and escapes every character at
+EMISSION: nothing it emits can close an attribute or open a tag, and a link,
+bare or in brackets, is `http`, `https` or `www` and nothing else, so a
+`javascript:` href cannot be made. (Before that the page's own `linkify` ran
+over text `esc()` had already escaped, which was the same safety the other
+way round.) `rel="noopener noreferrer nofollow"` with `target="_blank"`
+keeps the forum's address out of the other site's referrer and passes it no
+rank. Trailing sentence punctuation is not part of a bare address, and a
+closing bracket counts as punctuation only when the address does not open
+one of its own. The cost, said in rule 7 rather than hidden: a link to your
+own page, paper or profile identifies you as surely as your name would.
 
 **Vendored copies are GENERATED, never edited.** `firebase deploy` ships only
 `_functions/`, so `build-functions-vendor.mjs` (in `BUILDERS` after
 `build-netmap.mjs`, offline, `writeIfChanged`) copies `oa-jobnav.js`,
-`oa-forum-model.js`, `oa-forum-guard.js` and `oa-forum-guide.js` to the top
-of `_functions/`, and the selftest pins each pair byte for byte. It is
+`oa-forum-model.js`, `oa-forum-guard.js`, `oa-forum-guide.js` and
+`oa-forum-markup.js` to the top of `_functions/`, and the selftest pins each
+pair byte for byte. It is
 deliberately NOT named in any workflow: the "every builder has a caller,
 never both" guard refuses a builder both in `BUILDERS` and in a workflow, and
 the byte pin already catches drift, so the `--check` mode is for a hand run.
@@ -4396,12 +4401,12 @@ every label starred (`.oa-forum-req`, the error red, `aria-hidden` since the
 boxes carry `aria-required`) and "Required fields" said once at the card's
 head; and the Post button under the card, at its left. Not copied: the
 brand (every colour is a token, the buttons keep the site's pills, and the
-selftest refuses a raw colour in the form's rules), the review step, and the
-formatting toolbar. **A post here is plain text**, and a toolbar over a box
-that renders none would be a lie, so where the toolbar would stand there is
-a line (`.oa-forum-fmt`) saying how the words will read: plain text, a blank
-line starts a paragraph, a web address becomes a link, which is exactly what
-`bodyHTML` and `linkify` do.
+selftest refuses a raw colour in the form's rules) and the review step. The
+formatting toolbar IS copied, since 2026-09-08 (the next section): it stands
+over the body box, the tips row under it (`.oa-forum-fmt`) says what each
+mark writes, and a preview under the box shows the words as the thread will
+draw them. Until then a post was plain text and the line under the box said
+so in place of a toolbar; that line is the tips row now.
 
 **The room is said ONCE, at the card's head**, in the form's own words
 ("Posting in the Candidates’ room · 2026-2027 as steady river 90"), and the
@@ -4477,7 +4482,7 @@ Tests: the ask block of `testForum` in `_scraper/selftest.mjs` (the card
 and its head, label then advice then box for each field with its star, the
 required marks and the combobox, the menu born shut with its focus and
 mousedown rules, the arrows and Escape, the room said once and the banner
-standing down and coming back, the format line and no toolbar, the button
+standing down and coming back, the toolbar and the tips row over the box, the button
 under the card, the note above it, the tag advice said once with a refusal
 alone below on a line always rendered, the combobox contract (named li
 options, never buttons, the highlight named by the box, Enter picking it),
@@ -4499,6 +4504,127 @@ iD said under the box with the menu shut, shut by Escape and when the
 keyboard leaves; the banner back with the thread; and at
 390px the inset, the stacked buttons, the menu's width, height and rows, and
 the menu opening above a box at the foot of the screen).
+### …and a question is written with a formatting toolbar
+
+Owner, 2026-09-08, with a screenshot of Stack Exchange's editor beside the
+ask form: *"add that standard editing menu when someone composes a new
+question"*, and, a message later, *"make sure it looks good both when
+assessed from a laptop/desktop/mac and from a mobile or tablet screens or
+browsers"*. A post here had been plain text, and the line under the box said
+so in place of a toolbar on the reasoning that a toolbar over a box that
+renders none would be a lie. The lie is gone the other way: the box renders
+now, and the toolbar writes what it renders.
+
+    assets/oa-forum-markup.js    ONE reading of a post: parse(), html(), plain(), hasMarkup() (dual-mode)
+    _functions/forum-markup.js   its vendored copy, the fifth pair in build-functions-vendor.mjs
+    oa-forum.js                  the toolbar, the tips row, the preview, on all three boxes
+
+**WHAT IT READS is the Markdown subset the toolbar writes, and no more.**
+Paragraphs on a blank line with a single line break kept, as always here;
+`**bold**` and `*italic*` (and their underscore forms, which need a word
+boundary, so `snake_case` is not italics); `[label](https://…)` and bare
+web addresses; `> quoted` lines; `# headings`; `-` and `1.` lists nested by
+indent; `code` in backticks, blocks in fences or four spaces; a line of three
+dashes as a rule. No raw HTML (every character is escaped at EMISSION, so
+`<img>` in a post is five characters), no tables, no footnotes, and **no
+image**: rule 6 of the guide forbids screenshots and pasted correspondence,
+and an image is a fetch from somebody else's host by every reader's browser,
+which would tell that host who read the thread and when, on a page that
+loads no analytics on purpose. The image button is the one button of that
+toolbar not copied, and the toolbar's own comment says why.
+
+**TWO EMITTERS, ONE PARSE, and that is what makes the rest of the forum
+still true.** `html()` draws a post; `plain()` is the words a reader sees
+(the marks gone, a link's label kept, a bare address kept, the code kept, a
+rule dropped). Three things read `plain()` and had to, each pinned:
+
+* **the excerpt** on a thread head (`excerptOf` in `member.js`, the page's
+  own twin, the seeder's, the shim's) is cut from the rendered words, or a
+  `**` and a `#` would leak onto every card in the list;
+* **the quote passage test** in `post.js` looks for the quote in the body as
+  STORED and in the body as READ: a reader selecting a bold sentence on the
+  rendered post gets the words and not the asterisks around them, and
+  refusing that selection as "not a passage of the post" would be untrue,
+  the same untruth the whitespace flattening already answers. The page's
+  whole-body Quote fallback hands over `plain()` for the same reason;
+* the selftest holds `html()` and `plain()` to agreeing on the words over a
+  fixture list, tag-stripped against plain, so a mark the renderer learns
+  and the stripper does not fails the build.
+
+A link is `http`, `https` or `www` and nothing else, in brackets as well as
+bare: `[x](javascript:…)` is the text it is. The headings a post carries
+step down from the page's own: `#` and `##` are both an h3, the largest a
+post gets (the toolbar writes `##`, as the site the owner named does; the
+thread's title is the h1 and the answers band the h2), and `###` onwards
+step down from there.
+
+**THE TOOLBAR** (`toolbarHTML`, `wireEditor` in `oa-forum.js`) is the same
+row over every box a member writes in, the question, the answer and the
+edit: bold and italic; link, quote and code; numbered list, bulleted list,
+heading and rule; undo and redo; and at its right end the switch for the
+tips row under it, which says what each mark writes and is remembered on the
+device (`oa-forum-tips`, a preference and nothing about the reader). A
+button writes through `document.execCommand('insertText')` where the
+browser has it, so the browser's own undo stack holds the change and Ctrl+Z
+or the Undo button takes it back; `setRangeText` with a hand-dispatched
+input event is the fallback. A press keeps the keyboard in the box (its
+`mousedown` is prevented), so the selection the button acts on is still
+there; the toolbar is ONE Tab stop, a roving tabindex with the arrows between
+the buttons, each named for a screen reader; Ctrl+B, Ctrl+I and Ctrl+K (Cmd
+on a Mac, and the tooltip says which) do what the first three buttons do,
+and nothing else is bound, since Ctrl+R, Ctrl+U and Ctrl+H are the browser's.
+A second press takes a mark off: bold on a bold word unwraps it (italic on a
+BOLD word does not, or one star of each pair would go), a quoted block
+un-quotes, a prefixed list un-prefixes. Code over a selection spanning lines
+is a fenced block; the link button wraps a selected address as the target
+and otherwise writes the syntax with the address selected, so it is the next
+thing typed. **The preview** under the box is the thread's own `html()`,
+shown once the words carry a mark and put away while they do not, since for
+a plain paragraph it would say what the box already says.
+
+**THE SERVER HALF WAITS ON A DEPLOY, and the page half does not.** The
+page renders, previews, excerpts and quotes by the module from the merge.
+The live `forumPost` goes on cutting the excerpt from the stored bytes and
+refusing a quote of the rendered words until the functions are redeployed:
+`git pull && npm install --prefix _functions && firebase deploy --only
+functions --project operations-academia`, and read FIFTEEN back (no
+function was added; the vendored module rides inside the ones that were).
+Until then a question written with a heading carries a `##` in its excerpt
+on the card, and the page's own excerpt, which is right, is overwritten by
+the quiet re-read. Said here so a `##` on a card after the merge is read as
+a deploy still owed rather than as a bug in the module.
+
+**EVERY SCREEN, measured rather than assumed.** At 1280px and on a tablet
+(820px) the eleven buttons sit on one row inside their box with the switch
+beside them; on a phone (390px) each is a 42px target, the row WRAPS to a
+second row rather than shrinking them, and the switch is a full-width 42px
+row of its own (rule 13 in `_MOBILE-STANDARDS.md`, which names it). Every
+colour is a token, so both themes are covered, and the contrast audit
+measures the switch, the marks in the tips row, the preview's heading, and
+what the markup draws inside a post.
+
+Tests: the toolbar block of `testForum` in `_scraper/selftest.mjs` (the
+module driven as a program: escaping, the refused schemes, no image, the
+heading step, lists, code, quotes, rules, the emitters' agreement on the
+words; the vendored pair; the page loading and binding it; the excerpt, the
+quote fallback, the seeder and the shim through `plain()`; the eleven
+buttons in order, the shortcuts, the tab stop, the insertText path and its
+fallback, the toggles, the tips row, the preview; the three boxes; the
+stylesheet's tokens and the phone rules; the audit's surfaces, the browser
+suite's messages, the emulator test and the docs), the emulator test's
+formatted-question block (the excerpt cut from the rendered words, a quote of
+them and of the stored form accepted, words in neither refused, against the
+real function), and the forum block of `_scraper/page-test.mjs`, which
+drives it in a browser: the toolbar's shape and names, one Tab stop and the
+arrows, Bold on a selection and its second press, Ctrl+B, Undo, the link
+syntax with the address selected, the list prefix and its second press, the
+tips switch and its memory, the tablet row, the preview, a question posted
+with every mark and drawn with them read (never a `javascript:` link, never
+an image, the hostile text as text), the stored and the card's excerpt free
+of marks, Quote on it falling back to the words, a quote of the rendered
+words accepted by the simulator, and at 390px the 42px buttons wrapping with
+the switch on its own row.
+
 ### Home, Questions, Unanswered and Tags, and the views a question counts
 
 Owner, 2026-09-08, with four screenshots of the site the forum was asked to

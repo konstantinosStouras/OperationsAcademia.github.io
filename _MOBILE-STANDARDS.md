@@ -144,7 +144,13 @@ marked global.
     viewport (what a phone's keyboard shrinks): under the box while at
     least 200px of room is there, else on the side with more room, growing
     no further than that side allows; the form's card keeps a 14px inset and its two
-    buttons stack full width under it (rule 11). `page-test.mjs` measures the forum's list,
+    buttons stack full width under it (rule 11). The formatting toolbar over
+    every compose box (2026-09-08: bold, italic, link, quote, code, the two
+    lists, heading, rule, undo, redo) is a row of controls too: on a phone
+    each button is a 42px target, the row WRAPS to a second row rather than
+    shrinking them, and the switch for the tips row under it is a full-width
+    42px row of its own; on a tablet the row still fits its box on one line.
+    `page-test.mjs` measures the forum's list,
     one thread, the open compose and the ask form with its menu open at 390px
     in its own forum block: the page
     cannot join `MOBILE_PAGES`, because signed out it shows a sign-in card and

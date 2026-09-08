@@ -70,6 +70,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const M = require('../assets/oa-forum-model.js');
 const GUARD = require('../assets/oa-forum-guard.js');
+const MK = require('../assets/oa-forum-markup.js');
 const NAV = require('../assets/oa-jobnav.js');
 const WORDS = require('../_functions/forum/words.js');
 
@@ -95,9 +96,11 @@ export function postId(prefix, row, n) {
 }
 
 /** The first BOUNDS.excerpt characters of a body, cut at a word — the same
-    rule member.js applies, so a seeded card reads like every other one. */
+    rule member.js applies, of the words as they are READ (OAForumMarkup.plain,
+    the one reading the page draws by), so a seeded card reads like every
+    other one. */
 export function excerptOf(body) {
-  const s = String(body || '').replace(/\s+/g, ' ').trim();
+  const s = MK.plain(String(body || '')).replace(/\s+/g, ' ').trim();
   if (s.length <= M.BOUNDS.excerpt) return s;
   const cut = s.slice(0, M.BOUNDS.excerpt);
   const at = cut.lastIndexOf(' ');

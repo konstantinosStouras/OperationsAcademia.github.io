@@ -17511,8 +17511,8 @@ async function testForum() {
   /* --- the vendored pairs, byte for byte ------------------------------- */
 
   eq(VENDOR_PAIRS.map((p) => p[0]).sort(),
-    ['assets/oa-forum-guard.js', 'assets/oa-forum-guide.js', 'assets/oa-forum-model.js', 'assets/oa-jobnav.js'],
-    'forum: the vendor builder copies the four modules the functions read');
+    ['assets/oa-forum-guard.js', 'assets/oa-forum-guide.js', 'assets/oa-forum-markup.js', 'assets/oa-forum-model.js', 'assets/oa-jobnav.js'],
+    'forum: the vendor builder copies the five modules the functions read');
   for (const [src, vendored] of VENDOR_PAIRS) {
     eq(await read(vendored), await read(src),
       `forum: ${vendored} is byte-identical to ${src}: firebase deploy ships only _functions, so a drifted copy would refuse text the page allows`);
@@ -17716,8 +17716,9 @@ async function testForum() {
     'forum: votes move by delta with increment, and the first post\'s net lands on the thread head');
   ok(/D\.getAll\(\.\.\.refs\)/.test(forumSrc['vote.js']), 'forum: forumThreadVotes reads the caller\'s votes in one round trip');
   ok(/text\.length > M\.BOUNDS\.quote/.test(forumSrc['post.js'])
-     && /P\.flatten\(String\(src\.body\)\)\.indexOf\(P\.flatten\(text\)\) === -1/.test(forumSrc['post.js']),
-    'forum: a quote is bounded and must be a passage of the post as it stands');
+     && /const passage = \(hay\) => P\.flatten\(hay\)\.indexOf\(P\.flatten\(text\)\) !== -1;/.test(forumSrc['post.js'])
+     && /!\(passage\(String\(src\.body\)\) \|\| passage\(markup\.plain\(String\(src\.body\)\)\)\)\) P\.refuse\('invalid-argument', 'quote'\)/.test(forumSrc['post.js']),
+    'forum: a quote is bounded and must be a passage of the post as it stands, stored or as it is read');
   /* AND THE PASSAGE IS COMPARED AS A BROWSER RENDERS IT. The page hands over
      what the reader SELECTED, which comes out of the DOM with the whitespace
      the body was stored with already collapsed: a run of spaces, a tab, a
@@ -17730,8 +17731,8 @@ async function testForum() {
   ok(/function flatten\(v\) \{\s*\n\s*return String\(v == null \? '' : v\)\.replace\(\/\\s\+\/g, ' '\)\.trim\(\);/.test(forumSrc['member.js'])
      && /\bflatten,/.test(forumSrc['member.js']),
     'forum: flatten() collapses whitespace the way a browser does, and is exported');
-  ok(/const s = flatten\(body\);/.test(forumSrc['member.js']),
-    'forum: excerptOf reads the same normaliser, so there is one definition of it');
+  ok(/const s = flatten\(markup\.plain\(body\)\);/.test(forumSrc['member.js']) && /const markup = require\('\.\.\/forum-markup\.js'\);/.test(forumSrc['member.js']),
+    'forum: excerptOf reads the same normaliser over the words as they are READ, so there is one definition of each');
   ok(/quote = \{\s*\n\s*n: qn,\s*\n\s*by: src\.by,\s*\n\s*text,/.test(forumSrc['post.js']),
     'forum: what is STORED is the reader\'s own words, never the flattened form');
   /* …AND THE GUARD RUNS ON IT, like every other text a member sends. "It is a
@@ -17757,7 +17758,7 @@ async function testForum() {
   ok(/const hit = guard\.check\(text\);\s*\n\s*if \(hit\) P\.refuse\('invalid-argument', hit\);/.test(forumSrc['post.js']),
     'forum: so forumPost guards the quote it is about to store');
   ok(forumSrc['post.js'].indexOf('const hit = guard.check(text);') >
-     forumSrc['post.js'].indexOf('P.flatten(String(src.body))'),
+     forumSrc['post.js'].indexOf('passage(String(src.body))'),
     '…after the passage test, so a quote of nothing is still refused as a quote');
   {
     const fjs = await readFile(path.join(HERE, '..', 'assets', 'oa-forum.js'), 'utf8');
@@ -18223,8 +18224,9 @@ async function testForum() {
       'forum ask: the room is said once, at the card\'s head, and the "Where" block is gone');
     ok(/show\(me, !\(S\.ask && !S\.archive\)\);/.test(pageJs) && /hideViews\(\);\n    show\(\$\('oa-forum-me'\), true\);/.test(pageJs),
       'forum ask: the page\'s own room banner stands down while the form is open and comes back with the thread');
-    ok(/<p class="oa-forum-fmt" id="oa-forum-ask-fmt">/.test(ask) && /A web address becomes a link/.test(ask) && !/toolbar/.test(bare(ask)),
-      'forum ask: a line under the body says how plain text reads, and no formatting toolbar is drawn');
+    ok(/toolbarHTML\('oa-forum-ask-body', 'oa-forum-ask-fmt'\) \+\s*\n\s*tipsHTML\('oa-forum-ask-fmt'\) \+\s*\n\s*'<textarea id="oa-forum-ask-body"/.test(ask)
+       && /previewHTML\('oa-forum-ask-preview'\)/.test(ask) && /wireEditor\(body\.parentNode, body\);/.test(ask),
+      'forum ask: the formatting toolbar and the tips row stand over the body box, the preview under it, and the box is wired (owner, 2026-09-08)');
     ok(/id="oa-forum-ask-msg" aria-live="polite"><\/p>' \+\s*'<\/div>' \+\s*'<div class="oa-forum-actions oa-forum-askactions">/.test(ask)
        && /id="oa-forum-ask-send">Post your question</.test(ask),
       'forum ask: the card closes on its message line and the Post button\'s row opens after it, under the card and not inside it');
@@ -18339,13 +18341,197 @@ async function testForum() {
     ok(/the forum's Ask-a-question form[^.]*tag menu/.test(await read('_MOBILE-STANDARDS.md')) || /Ask-a-question form[\s\S]{0,600}rules 6 and 10/.test(await read('_MOBILE-STANDARDS.md')),
       'forum ask: rule 13 in _MOBILE-STANDARDS.md names the tag menu');
   }
+  /* THE FORMATTING TOOLBAR, AND THE ONE READING OF WHAT IT WRITES (owner,
+     2026-09-08, with Stack Exchange's editor beside the ask form: "add that
+     standard editing menu when someone composes a new question"). The
+     module first, driven as a program: every character escaped at emission,
+     a link http, https or www and nothing else, no image, the two emitters
+     walking one tree so what a reader selects on a rendered post is what
+     plain() answers with. Then the vendored copy, the page, the three boxes,
+     the stylesheet, the browser suite and the docs. */
+  {
+    const MKM = require(path.join(HERE, '..', 'assets', 'oa-forum-markup.js'));
+    const mkSrc = await read('assets', 'oa-forum-markup.js');
+    eq(MKM.html('plain para\nline two\n\nsecond'), '<p>plain para<br>line two</p><p>second</p>',
+      'forum markup: a paragraph on a blank line and a line break inside one, as the page has always read them');
+    eq(MKM.html('**bold** and *it* and __b__ and _i_ and ***both***'),
+      '<p><strong>bold</strong> and <em>it</em> and <strong>b</strong> and <em>i</em> and <em><strong>both</strong></em></p>',
+      'forum markup: bold, italic, both, in either spelling');
+    eq(MKM.html('snake_case_var stays'), '<p>snake_case_var stays</p>', 'forum markup: an underscore inside a word is not italics');
+    eq(MKM.html('[call for papers](https://ec26.sigecom.org/) and see https://x.org/y. Also www.example.org, then (https://en.wikipedia.org/wiki/Algorithm_(discipline))'),
+      '<p><a href="https://ec26.sigecom.org/" target="_blank" rel="noopener noreferrer nofollow">call for papers</a> and see '
+      + '<a href="https://x.org/y" target="_blank" rel="noopener noreferrer nofollow">https://x.org/y</a>. Also '
+      + '<a href="https://www.example.org" target="_blank" rel="noopener noreferrer nofollow">www.example.org</a>, then '
+      + '(<a href="https://en.wikipedia.org/wiki/Algorithm_(discipline)" target="_blank" rel="noopener noreferrer nofollow">https://en.wikipedia.org/wiki/Algorithm_(discipline)</a>)</p>',
+      'forum markup: a bracketed link, a bare address with its trailing stop dropped, a www address, and a bracket the address opened kept');
+    eq(MKM.html('"see https://x.org/y" and https://x.org/z'), '<p>&quot;see <a href="https://x.org/y" target="_blank" rel="noopener noreferrer nofollow">https://x.org/y</a>&quot; and <a href="https://x.org/z" target="_blank" rel="noopener noreferrer nofollow">https://x.org/z</a></p>',
+      'forum markup: an address between quotation marks is still one, and the closing mark is not part of it');
+    for (const bad of ['[x](javascript:alert(1))', '[x](mailto:a@b.org)', '[x](data:text/html,hi)', '[x](/local)', '[x](ftp://x.org)']) {
+      eq(MKM.html(bad), '<p>' + MKM.esc(bad) + '</p>', `forum markup: ${bad} is the text it is, never a link`);
+    }
+    eq(MKM.html('<img src=x onerror="window.__pwned=1"><script>x</script> & "q" \'a\''),
+      '<p>&lt;img src=x onerror=&quot;window.__pwned=1&quot;&gt;&lt;script&gt;x&lt;/script&gt; &amp; &quot;q&quot; &#39;a&#39;</p>',
+      'forum markup: raw HTML is the characters, every one escaped at emission');
+    eq(MKM.html('![alt](https://x.org/a.png) <img src=x>'), '<p>!<a href="https://x.org/a.png" target="_blank" rel="noopener noreferrer nofollow">alt</a> &lt;img src=x&gt;</p>',
+      'forum markup: there is no image: image syntax is a link a reader may open, since rule 6 forbids screenshots and an image is a fetch from somebody else\'s host by every reader');
+    ok(!/<a /.test(MKM.html('[see https://x.org](https://y.org)').replace(/^<p><a [^>]*>/, '')),
+      'forum markup: a link cannot nest inside a link\'s own label');
+    eq(MKM.html('> quoted line\n> second\nlazy\n\nafter'), '<blockquote><p>quoted line<br>second<br>lazy</p></blockquote><p>after</p>',
+      'forum markup: a quote, with a line lacking the marker carrying its paragraph on');
+    eq(MKM.html('# Heading\n## Two\n#hashtag\n### three ###\n#### four\n###### six'), '<h3>Heading</h3><h3>Two</h3><p>#hashtag</p><h4>three</h4><h5>four</h5><h6>six</h6>',
+      'forum markup: a heading is an h3 at most (# and ## alike, since the toolbar writes ##), the deeper levels step down, and #hashtag is not one');
+    eq(MKM.html('- a\n- b\n  - nested\n- c\n\n1. one\n2. two\n\n2019. was a year\nnot a list'),
+      '<ul><li>a</li><li><p>b</p><ul><li>nested</li></ul></li><li>c</li></ul><ol><li><p>one</p></li><li><p>two</p></li><li><p>was a year<br>not a list</p></li></ol>',
+      'forum markup: bulleted and numbered lists, nested by indent, tight unless a blank line parts their items (which makes the numbered one loose)');
+    eq(MKM.html('1. one\n2. two'), '<ol><li>one</li><li>two</li></ol>', 'forum markup: …and tight when nothing does');
+    eq(MKM.html('text\n2019. was a year'), '<p>text<br>2019. was a year</p>', 'forum markup: a year at the start of a line does not cut a paragraph into a list');
+    eq(MKM.html('```\ncode **not bold**\n\n<b>\n```\nafter'), '<pre><code>code **not bold**\n\n&lt;b&gt;</code></pre><p>after</p>',
+      'forum markup: a fenced block keeps its blank lines and its characters, escaped');
+    eq(MKM.html('    indented\n    code\ntext'), '<pre><code>indented\ncode</code></pre><p>text</p>', 'forum markup: four spaces of indent is code');
+    eq(MKM.html('a\n    still the paragraph'), '<p>a<br>still the paragraph</p>', 'forum markup: …but not inside a paragraph, where an indented line carries it on');
+    eq(MKM.html('inline `code **x**` and `` a`b `` and unclosed ` tick'), '<p>inline <code>code **x**</code> and <code>a`b</code> and unclosed ` tick</p>',
+      'forum markup: a code span reads no marks inside it, and an unclosed backtick is a backtick');
+    eq(MKM.html('---\n* * *'), '<hr><hr>', 'forum markup: a line of three dashes or stars is a rule');
+    eq(MKM.html('**unclosed and *also'), '<p>**unclosed and *also</p>', 'forum markup: an unclosed mark is the characters');
+    eq(MKM.html(''), '', 'forum markup: an empty post is an empty string');
+    eq(MKM.html('a\r\nb\r\n\r\nc'), '<p>a<br>b</p><p>c</p>', 'forum markup: Windows line endings read as line endings');
+    /* the two emitters walk one tree: plain() is the words a reader sees */
+    const fixture = '## What I am weighing\n\nTwo **silent** offers, *nothing* said.\n\n> The chair said "standard".\n\n- one\n- two\n\n1. ask\n\nSee https://x.org/y and [the guide](https://y.org) and `code`.\n\n---\n\nThanks.';
+    eq(MKM.plain(fixture), 'What I am weighing\n\nTwo silent offers, nothing said.\n\nThe chair said "standard".\n\none\ntwo\n\nask\n\nSee https://x.org/y and the guide and code.\n\nThanks.',
+      'forum markup: plain() is the words as read: the marks gone, a link\'s label kept, a bare address kept, the code kept, a rule dropped');
+    const flat = (v) => String(v).replace(/\s+/g, ' ').trim();
+    const stripTags = (h) => h.replace(/<br>/g, '\n').replace(/<\/(p|li|h[1-6]|blockquote|pre)>/g, '\n').replace(/<[^>]+>/g, '')
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+    for (const t of [fixture, '**a**\n*b*', '> q\n\nafter', '`x` and <b>y</b>', 'www.a.org, (https://b.org/c_(d)) "https://e.org"']) {
+      eq(flat(stripTags(MKM.html(t))), flat(MKM.plain(t)), `forum markup: html() and plain() agree on the words of ${JSON.stringify(t).slice(0, 40)}`);
+    }
+    eq(MKM.plain('<img src=x onerror="1"> Congratulations'), '<img src=x onerror="1"> Congratulations',
+      'forum markup: plain() keeps text that merely looks like markup, so the quote fallback still starts where the body does');
+    ok(MKM.hasMarkup('**a**') && MKM.hasMarkup('- a') && MKM.hasMarkup('see https://x.org') && !MKM.hasMarkup('plain\n\nwords') && !MKM.hasMarkup(''),
+      'forum markup: hasMarkup() says whether a preview would show anything the box does not');
+    ok(/^\(function \(root, factory\) \{\s*\n\s*if \(typeof module === 'object' && module\.exports\) \{\s*\n\s*module\.exports = factory\(\);\s*\n\s*\} else \{\s*\n\s*root\.OAForumMarkup = factory\(\);/m.test(mkSrc),
+      'forum markup: dual-mode, the oa-forum-model.js shape');
+    ok(!/=>|\bconst |\blet |`\$\{/.test(mkSrc.replace(/\/\*[\s\S]*?\*\//g, '')), 'forum markup: written in ES5, like every module the functions vendor');
+    ok(!/<img|createElement|innerHTML|document\./.test(mkSrc.replace(/\/\*[\s\S]*?\*\//g, '')), 'forum markup: the module builds strings and touches no document');
+    ok(noDash(mkSrc), 'forum markup: no em dash in the module');
+    ok(page.includes('<script defer src="assets/oa-forum-markup.js"></script>')
+       && page.indexOf('<script defer src="assets/oa-forum-markup.js">') < page.indexOf('<script defer src="assets/oa-forum.js">'),
+      'forum markup: forum.html loads the module before the page');
+    ok(/var MK = window\.OAForumMarkup;/.test(pageJs), 'forum markup: the page binds it beside the model, the guard and the guide');
+    ok(/var t = MK\.plain\(String\(body \|\| ''\)\)\.replace\(\/\\s\+\/g, ' '\)\.trim\(\);/.test(pageJs),
+      'forum markup: the page\'s own excerpt is cut from the words as read, as the function\'s is');
+    ok(/if \(!text\) text = MK\.plain\(String\(p\.body \|\| ''\)\)\.trim\(\);/.test(pageJs),
+      'forum markup: a quote of the whole post falls back to the words as read, never the marks');
+    ok(/const MK = require\('\.\.\/assets\/oa-forum-markup\.js'\);/.test(await read('_scraper', 'seed-forum.mjs')) && /const s = MK\.plain\(String\(body \|\| ''\)\)/.test(await read('_scraper', 'seed-forum.mjs')),
+      'forum markup: the seeder cuts its excerpts from the same words');
+    {
+      const shimSrc2 = await read('_scraper', '_fake-firebase.js');
+      ok(/var mk = window\.OAForumMarkup;\s*\n\s*var excerpt = \(mk \? mk\.plain\(body\) : body\)/.test(shimSrc2),
+        'forum markup: the shim\'s simulator cuts its excerpt the same way when the module is on the page');
+    }
+
+    /* THE TOOLBAR: the buttons in their groups, what each writes, the
+       shortcuts, one Tab stop, the insertion the browser's undo can take
+       back, and the three boxes it stands over */
+    const tbSrc = pageJs.slice(pageJs.indexOf('  /* ------------------------------------------- the formatting toolbar'), pageJs.indexOf('  function replyBox(thread, first) {'));
+    ok(tbSrc.length > 6000 && tbSrc.length < 20000, 'forum toolbar: the section was sliced');
+    const toolCmds = [...tbSrc.matchAll(/\{ cmd: '([a-z]+)', label: '([^']+)'/g)].map((m) => [m[1], m[2]]);
+    eq(toolCmds, [['bold', 'Bold'], ['italic', 'Italic'], ['link', 'Link'], ['quote', 'Blockquote'], ['code', 'Code'],
+      ['ol', 'Numbered list'], ['ul', 'Bulleted list'], ['heading', 'Heading'], ['hr', 'Horizontal rule'], ['undo', 'Undo'], ['redo', 'Redo']],
+      'forum toolbar: the eleven buttons, in the order and the groups of the site the owner named');
+    ok(!/cmd: 'image'/.test(tbSrc) && /NOT COPIED: the image button\. Rule 6 of the guide forbids screenshots/.test(tbSrc),
+      'forum toolbar: no image button, and the section says why');
+    ok(/key: 'B'/.test(tbSrc) && /key: 'I'/.test(tbSrc) && /key: 'K'/.test(tbSrc)
+       && /var cmd = k === 'b' \? 'bold' : k === 'i' \? 'italic' : k === 'k' \? 'link' : '';/.test(tbSrc)
+       && /if \(!\(e\.ctrlKey \|\| e\.metaKey\) \|\| e\.altKey \|\| e\.shiftKey\) return;/.test(tbSrc),
+      'forum toolbar: B, I and K with Ctrl or Cmd do what the first three buttons do, and nothing else is bound');
+    ok(/var MOD_KEY = \/Mac\|iPhone\|iPad\|iPod\/\.test\(/.test(tbSrc) && /\(' \+ MOD_KEY \+ '\+' \+ t\.key \+ '\)'/.test(tbSrc),
+      'forum toolbar: the tooltip names Cmd on a Mac and Ctrl elsewhere');
+    ok(/role="toolbar" aria-label="Formatting" aria-controls="' \+ taId \+ '"/.test(tbSrc)
+       && /'tabindex="' \+ \(gi === 0 && ti === 0 \? '0' : '-1'\) \+ '"/.test(tbSrc)
+       && /if \(e\.key === 'ArrowRight'\) to = \(at \+ 1\) % list\.length;/.test(tbSrc) && /else if \(e\.key === 'ArrowLeft'\)/.test(tbSrc)
+       && /x\.setAttribute\('tabindex', x === b \? '0' : '-1'\);/.test(tbSrc),
+      'forum toolbar: one Tab stop with the arrows between the buttons (a roving tabindex), each named for a screen reader');
+    ok(/tb\.addEventListener\('mousedown', function \(e\) \{ if \(btnOf\(e\.target\)\) e\.preventDefault\(\); \}\);/.test(tbSrc),
+      'forum toolbar: a press keeps the keyboard in the box, so the selection it acts on is still there');
+    ok(/document\.execCommand\('insertText', false, text\)/.test(tbSrc) && /ta\.setRangeText\(text, start, end, 'end'\);\s*\n\s*ta\.dispatchEvent\(new Event\('input', \{ bubbles: true \}\)\);/.test(tbSrc)
+       && /if \(!done \|\| ta\.value\.slice\(start, start \+ text\.length\) !== text\) \{/.test(tbSrc),
+      'forum toolbar: a button writes through the browser\'s own insertText, so its undo takes the change back, with setRangeText and a hand-made input event as the fallback');
+    ok(/if \(cmd === 'undo' \|\| cmd === 'redo'\) \{/.test(tbSrc) && /document\.execCommand\(cmd, false\)/.test(tbSrc), 'forum toolbar: Undo and Redo are the browser\'s own');
+    ok(/wrapSel\(ta, '\*\*', 'bold text'\)/.test(tbSrc) && /wrapSel\(ta, '\*', 'italic text'\)/.test(tbSrc) && /wrapSel\(ta, '`', 'code'\)/.test(tbSrc)
+       && /if \(sel\.length >= 2 \* m && sel\.slice\(0, m\) === mark && sel\.slice\(-m\) === mark\) \{/.test(tbSrc)
+       && /var bolder = mark === '\*' && v\.charAt\(s - 2\) === '\*' && v\.charAt\(e \+ 1\) === '\*';/.test(tbSrc),
+      'forum toolbar: bold, italic and code wrap the selection or a placeholder, a second press unwraps, and italic on a bold word does not break the bold');
+    ok(/prefixLines\(ta, function \(l, i, blank\) \{ return blank \? '>' : '> '; \}, \/\^ \{0,3\}> \?\/\)/.test(tbSrc)
+       && /return blank \? '' : \(i \+ 1\) \+ '\. ';/.test(tbSrc) && /return blank \? '' : '- ';/.test(tbSrc) && /return blank \? '' : '## ';/.test(tbSrc)
+       && /if \(marked && marked === lines\.filter\(function \(l\) \{ return \/\\S\/\.test\(l\); \}\)\.length\) \{/.test(tbSrc),
+      'forum toolbar: a quote, a list and a heading prefix every line the selection touches, numbered in order, and come off again when every line carries one');
+    ok(/function fenceLines\(ta\)/.test(tbSrc) && /'```\\n' \+ block \+ '\\n```'/.test(tbSrc) && /indexOf\('\\n'\) !== -1\) fenceLines\(ta\);/.test(tbSrc),
+      'forum toolbar: code over a selection spanning lines is a fenced block');
+    ok(/function insertLink\(ta\)/.test(tbSrc) && /if \(\/\^\(https\?:\\\/\\\/\|www\\\.\)\\S\+\$\/i\.test\(sel\)\) \{/.test(tbSrc) && /url = 'https:\/\/';/.test(tbSrc),
+      'forum toolbar: the link button wraps a selected address as the target, else offers the address to type');
+    ok(/var TIPS = \['\*\*bold\*\*', '\*italic\*', '\[link\]\(https:\/\/…\)', '> quote', '`code`', '1\. list', '- list', '## heading', '---'\];/.test(tbSrc)
+       && /'<p class="oa-forum-fmt" id="' \+ id \+ '"' \+ \(tipsHidden\(\) \? ' hidden' : ''\) \+ '>'/.test(tbSrc)
+       && /A blank line starts a new paragraph<\/span><span>A web address becomes a link<\/span><\/p>/.test(tbSrc),
+      'forum toolbar: the tips row says what each mark writes, in the toolbar\'s order, and how a paragraph and an address read');
+    ok(/var TIPS_KEY = 'oa-forum-tips';/.test(tbSrc) && /'Hide' : 'Show'|'Show' : 'Hide'/.test(tbSrc) && /btn\.setAttribute\('aria-expanded', off \? 'false' : 'true'\);/.test(tbSrc),
+      'forum toolbar: the tips are put away by a switch that says which way it is, remembered on the device');
+    ok(/var on = !!v\.trim\(\) && MK\.hasMarkup\(v\);/.test(tbSrc) && /\.innerHTML = on \? MK\.html\(v\) : '';/.test(tbSrc) && /<p class="oa-forum-preview-h">Preview<\/p><div class="oa-forum-text"><\/div>/.test(tbSrc),
+      'forum toolbar: the preview is the thread\'s own rendering, shown once the words carry a mark');
+    ok(noDash(tbSrc), 'forum toolbar: no em dash in the section');
+    /* the three boxes */
+    ok(/toolbarHTML\('oa-forum-body', 'oa-forum-fmt'\) \+\s*\n\s*tipsHTML\('oa-forum-fmt'\) \+\s*\n\s*'<textarea id="oa-forum-body"/.test(pageJs)
+       && /previewHTML\('oa-forum-preview'\)/.test(pageJs) && /wireEditor\(wrap\.querySelector\('\.oa-forum-editor'\), ta\);/.test(pageJs),
+      'forum toolbar: the answer box carries it');
+    ok(/toolbarHTML\(editId, editId \+ '-fmt'\) \+\s*\n\s*tipsHTML\(editId \+ '-fmt'\)/.test(pageJs) && /previewHTML\(editId \+ '-preview'\)/.test(pageJs) && /wireEditor\(box, ta\);/.test(pageJs),
+      'forum toolbar: so does the edit box, under ids of its own');
+    ok(!/Plain text, a few paragraphs/.test(pageJs) && !/plain text and\s*\n\s*a toolbar over a box that renders none/.test(pageJs),
+      'forum toolbar: no copy on the page still calls a post plain text');
+    /* the stylesheet: tokens only, the buttons 42px targets on a phone */
+    const tbCss = pageCss.slice(pageCss.indexOf('/* THE FORMATTING TOOLBAR'), pageCss.indexOf('/* The compose bar under a textarea.'));
+    ok(tbCss.length > 1500 && tbCss.length < 6000, 'forum toolbar css: the section was sliced');
+    ok(/\.oa-forum-tb \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--ink-2\);/.test(tbCss) && /\.oa-forum-tbbtn \{[^}]*color: var\(--ink-2\);/.test(tbCss)
+       && /\.oa-forum-tbtips \{[^}]*color: var\(--brand\);/.test(tbCss) && /\.oa-forum-preview \{[^}]*background: var\(--bg-2\);[^}]*color: var\(--ink\);/.test(tbCss),
+      'forum toolbar css: the bar, its buttons, the switch and the preview paint their ground and name their ink');
+    ok(!/#[0-9a-f]{3,8}\b/i.test(tbCss) && !/\brgba?\(/.test(tbCss), 'forum toolbar css: no raw colour');
+    ok(/\.oa-forum-tbbtn:focus-visible \{ outline: 2px solid var\(--brand\)/.test(tbCss) && /\.oa-forum-tbtips:focus-visible \{ outline: 2px solid var\(--brand\)/.test(tbCss),
+      'forum toolbar css: the keyboard ring is the brand');
+    ok(/@media \(max-width: 640px\)[\s\S]*\.oa-forum-tbbtn \{ width: 42px; height: 42px; \}/.test(pageCss)
+       && /@media \(max-width: 640px\)[\s\S]*\.oa-forum-tbtips \{ width: 100%; min-height: 42px;/.test(pageCss),
+      'forum toolbar css: on a phone the buttons are 42px targets and the switch a row of its own (rule 13)');
+    ok(/\.oa-forum-fmt \{[^}]*border-bottom: 1px solid var\(--line-soft\);/.test(pageCss) && /\.oa-forum-fmt code \{[^}]*color: var\(--ink-2\);/.test(pageCss),
+      'forum toolbar css: the tips row sits under the toolbar and its marks are code in the second ink');
+    const textCss = pageCss.slice(pageCss.indexOf('/* WHAT THE MARKUP DRAWS'), pageCss.indexOf('.oa-forum-removed {'));
+    ok(textCss.length > 1000 && /\.oa-forum-text h3 \{ font-size: 19px; \}/.test(textCss) && /\.oa-forum-text blockquote \{[^}]*border-left: 3px solid var\(--line\);[^}]*color: var\(--ink-2\);/.test(textCss)
+       && /\.oa-forum-text code \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--ink\);/.test(textCss) && /\.oa-forum-text pre \{[^}]*overflow: auto;/.test(textCss)
+       && /\.oa-forum-text hr \{/.test(textCss) && !/#[0-9a-f]{3,8}\b/i.test(textCss) && !/\brgba?\(/.test(textCss),
+      'forum markup css: headings, quotes, code, blocks and rules inside a post, tokens throughout, a code block scrolling inside itself');
+    /* the browser suite and the audit */
+    const pt2 = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+    const ink2 = pt2.slice(pt2.indexOf('const FORUM_INK'), pt2.indexOf('async function forumContrast'));
+    for (const sel of ['.oa-forum-tbtips', '.oa-forum-fmt code', '.oa-forum-preview-h', '.oa-forum-text code', '.oa-forum-text blockquote', '.oa-forum-text h3']) {
+      ok(ink2.includes(`'${sel}'`), `forum toolbar: the contrast audit measures ${sel}`);
+    }
+    for (const needle of ['the toolbar stands over the body box', 'eleven buttons in four groups, each named, and no image button', 'one Tab stop',
+      'Bold wraps the selection', 'Undo takes it back', 'writes the link syntax with the address selected', 'the tips row is put away',
+      'shows the words as the thread will draw them', 'the question is drawn with its marks read', 'never a javascript: link, never an image',
+      'the excerpt on the card carries the words and none of the marks', 'a quote of the rendered words is a passage of the post',
+      "the toolbar's buttons are 42px targets", 'wraps to a second row', 'the toolbar fits the tablet']) {
+      ok(pt2.includes(needle), `forum toolbar: the browser suite measures "${needle}"`);
+    }
+    ok(/quote: \{ n: 1, text: 'bold words in a sentence' \}/.test(await read('_functions', 'test', 'forum-emulator.mjs')),
+      'forum toolbar: the emulator test quotes the rendered words of a formatted post against the real function');
+    ok(/### …and a question is written with a formatting toolbar/.test(await read('CLAUDE.md')), 'forum toolbar: CLAUDE.md records the decisions');
+    ok(/formatting toolbar[\s\S]{0,400}42px/.test(await read('_MOBILE-STANDARDS.md')), 'forum toolbar: rule 13 in _MOBILE-STANDARDS.md names the toolbar');
+  }
+
   ok(/yours to edit and to delete at any time/.test(await read('assets', 'oa-forum-guide.js')), 'forum guide: rule 13 says a post is editable at any time');
   ok(page.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
     'forum page: the head snippet, the exact line every live page carries');
-  const LOAD = ['v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-list.js', 'oa-forum.js'];
+  const LOAD = ['v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-forum-markup.js', 'oa-list.js', 'oa-forum.js'];
   const tagAt = (f) => page.indexOf('<script defer src="assets/' + f + '"></script>');
   ok(LOAD.every((f, i) => tagAt(f) > 0 && (i === 0 || tagAt(f) > tagAt(LOAD[i - 1]))),
-    'forum page: the nine scripts load in dependency order, each deferred');
+    'forum page: the ten scripts load in dependency order, each deferred');
   eq((page.match(/<script[^>]*\ssrc=/g) || []).length, LOAD.length, 'forum page: and no other external script');
   for (const f of ['oa-ga4.js', 'oa-usage.js', 'oa-visit.js']) ok(!page.includes('assets/' + f), `forum page: quiet by design, no ${f}`);
   for (const f of ['oa-list.css', 'oa-ui.css', 'v3.css', 'oa-forum.css']) ok(page.includes('assets/' + f), `forum page: loads ${f}`);
@@ -18637,12 +18823,14 @@ async function testForum() {
 
   /* --- a web address posts, and the page draws it as a link -------------- */
 
-  ok(/function linkify\(/.test(pageJs) && /linkify\(esc\(para\)\)/.test(pageJs),
-    'forum links: the page linkifies text esc() has ALREADY escaped, which is what makes it safe');
-  ok(/rel="noopener noreferrer nofollow"/.test(pageJs) && /target="_blank"/.test(pageJs),
+  const markupSrc = await read('assets', 'oa-forum-markup.js');
+  ok(/function bodyHTML\(text\) \{\s*\n\s*return MK\.html\(text\);/.test(pageJs) && !/function linkify\(/.test(pageJs) && !/var LINK_RX/.test(pageJs),
+    'forum links: the page draws a post through the markup module and keeps no linkifier of its own');
+  ok(/var LINK_ATTRS = ' target="_blank" rel="noopener noreferrer nofollow"';/.test(markupSrc),
     'forum links: opened away, with no referrer and no rank passed');
-  ok(/https\?:\\\/\\\/|www\\\./.test(pageJs.slice(pageJs.indexOf('var LINK_RX'), pageJs.indexOf('var LINK_RX') + 120)),
-    'forum links: the pattern admits http, https and www and nothing else, so a javascript: href cannot match');
+  ok(/var URL_RX = \/\^\(https\?:\\\/\\\/\|www\\\.\)\[\^\\s<\]\+\/i;/.test(markupSrc)
+     && /!\/\^\(https\?:\\\/\\\/\|www\\\.\)\\S\+\$\/i\.test\(url\)\) return null;/.test(markupSrc),
+    'forum links: the module admits http, https and www and nothing else, bare or in brackets, so a javascript: href cannot match');
   ok(!/no links/i.test(pageJs), 'forum links: and no copy on the page still tells a reader they are refused');
   ok(!/no links/i.test(GUIDE.text()), 'forum links: nor does the guide');
   ok(/A link is fine/.test(GUIDE.RULES[6]) && /identifies you/.test(GUIDE.RULES[6]),
@@ -19108,8 +19296,9 @@ async function testForum() {
   ok(/if \(\(name === 'forumPost' \|\| name === 'forumVote'\) && data\.warm === true\) \{\s*\n\s*return Promise\.resolve\(\{ data: \{ warm: true \} \}\);/.test(sim),
     'shim: the simulator answers the warm-up as the functions do, with a receipt and no write');
   ok(/'candidateMarkers\/' \+ u\.uid/.test(sim) && /by: 'Moderator'/.test(sim) && /tags: \['about'\]/.test(sim)
-     && /quote = \{ n: qn, by: src\.by, text: qtext \};/.test(sim) && /flat\(src\.body\)\.indexOf\(flat\(qtext\)\) === -1/.test(sim),
-    'shim: the join writes the marker, the seed posts as Moderator tagged about, and a quote is a verified copy {n, by, text}');
+     && /quote = \{ n: qn, by: src\.by, text: qtext \};/.test(sim)
+     && /!\(passage\(src\.body\) \|\| \(mk2 && passage\(mk2\.plain\(src\.body\)\)\)\)/.test(sim),
+    'shim: the join writes the marker, the seed posts as Moderator tagged about, and a quote is a verified copy {n, by, text} of the post stored or as read');
   ok(!/joinedAt/.test(sim), 'shim: and the marker carries no stamp, the way the function writes it');
   ok(/hidden: true, title: '', excerpt: ''/.test(sim) && /Math\.max\(0, \(Number\(cs\[t\]\) \|\| 0\) - 1\)/.test(sim),
     'shim: a thread that goes leaves no words and gives its tags back, as forumDelete does');

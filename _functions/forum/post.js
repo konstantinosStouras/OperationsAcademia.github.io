@@ -41,6 +41,7 @@ const { FieldValue } = require('firebase-admin/firestore');
 const M = require('../forum-model.js');
 const P = require('./member.js');
 const guard = require('../forum-guard.js');
+const markup = require('../forum-markup.js');
 
 /** The tags as sent, each through slug(), duplicates dropped, then judged.
 
@@ -227,8 +228,15 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
          which is untrue and unanswerable, since the reader did select it.
          So both sides are whitespace-normalised for the TEST, and the copy
          that is stored is still the reader's own words. It is the same
-         normalisation excerptOf already uses. */
-      if (!src || src.hidden || P.flatten(String(src.body)).indexOf(P.flatten(text)) === -1) P.refuse('invalid-argument', 'quote');
+         normalisation excerptOf already uses.
+         AND A POST IS RENDERED (2026-09-08, with the formatting toolbar):
+         a reader selecting the words of a bold sentence gets the words and
+         not the asterisks around them, so the passage is looked for in the
+         body as it is STORED and in the body as it is READ (markup.plain,
+         the one reading the page draws by). Either is a passage of the
+         post; a passage of neither is not. */
+      const passage = (hay) => P.flatten(hay).indexOf(P.flatten(text)) !== -1;
+      if (!src || src.hidden || !(passage(String(src.body)) || passage(markup.plain(String(src.body))))) P.refuse('invalid-argument', 'quote');
       /* AND THE GUARD RUNS ON IT, like every other text a member sends.
          "It is a passage of a post that already passed the guard" was the
          argument for not doing so, and the FLATTENING above is what makes it
