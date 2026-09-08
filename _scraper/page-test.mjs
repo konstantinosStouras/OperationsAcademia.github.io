@@ -6449,7 +6449,7 @@ for (const w of [320, 360, 390, 430]) {
        markup in a name (it is rendered on the maintainer's screen) and a
        leading '=' (it reaches a spreadsheet through Download CSV) */
     { path: 'userDirectory/u-msg-1', data: { name: '=cmd|calc<img src=x onerror=window.__xssU=1>',
-        email: 'avery@example.edu', first: 1000, seen: 3000,
+        email: 'avery@hostile.example', first: 1000, seen: 3000,
         affiliation: '<b>Nowhere</b> & Co' } },
     { path: 'userDirectory/u-msg-2', data: { name: 'Bea Baker',
         email: 'bea@example.edu', first: 2000, seen: 2000,
@@ -6461,9 +6461,28 @@ for (const w of [320, 360, 390, 430]) {
        (2026-09-08) was of names and addresses cut mid-word to fit the table
        beside its action column; the check is that this row reads whole. */
     { path: 'userDirectory/u-msg-4', data: { name: 'Wilhelmina Featherstonehaugh-Cholmondeley',
-        email: 'wilhelmina.featherstonehaugh-cholmondeley@graduate-school-of-management.example.edu',
+        email: 'wilhelmina.featherstonehaugh-cholmondeley@graduate-school-of-management.example.org',
         first: 4000, seen: 500,
         affiliation: 'Department of Decision Sciences and Operations Management, Example Graduate School of Management' } },
+    /* …and two ORDINARY rows, the shape a real roster is made of, for the
+       check that such a roster fits its panel with every column on screen
+       (the owner's second report of the day) */
+    { path: 'userDirectory/u-msg-5', data: { name: 'Dana Delgado',
+        email: 'dana.delgado@business.example.edu', first: 5000, seen: 4000,
+        affiliation: 'Kelley School of Business, Indiana University' } },
+    { path: 'userDirectory/u-msg-6', data: { name: 'Eli Evans',
+        email: 'eli@example.edu', first: 6000, seen: 6000 } },
+    { path: 'messages/u-msg-5', data: { uid: 'u-msg-5', lastAt: 4500, lastFrom: 'admin',
+        needsAdmin: false, userUnread: 0 } },
+
+    /* the JM Candidate mark: Bea holds a profile for the season under way,
+       Cy's is LAST season's and Avery WITHDREW hers, so Bea alone is marked */
+    { path: 'candidateSubmissions/c-msg-bea', data: { uid: 'u-msg-2', year: marketYear(),
+        status: 'published', first: 'Bea', last: 'Baker' } },
+    { path: 'candidateSubmissions/c-msg-cy', data: { uid: 'u-msg-3', year: marketYear() - 1,
+        status: 'published', first: 'Cy', last: 'Carter' } },
+    { path: 'candidateSubmissions/c-msg-avery', data: { uid: 'u-msg-1', year: marketYear(),
+        status: 'withdrawn', first: 'A', last: 'B' } },
 
     /* Bea has replied and is waiting — the one thing here that is a QUEUE */
     { path: 'messages/u-msg-2', data: { uid: 'u-msg-2', lastAt: 5000, lastFrom: 'user',
@@ -6509,10 +6528,83 @@ for (const w of [320, 360, 390, 430]) {
     ok((await q.textContent('#oa-aa-users')).indexOf('<img src=x') !== -1,
       '…and is shown as the characters the account really typed');
 
-    /* the thread column is the queue: Bea is waiting, the others are not */
+    /* the thread column is the queue: Bea is waiting, the others are not —
+       said in two words on the chip, with the long wording as its tooltip
+       (the long one set the column's width and pushed the buttons off) */
     const bea = q.locator('#oa-aa-users tr', { hasText: 'bea@example.edu' });
-    ok((await bea.textContent()).indexOf('Replied — awaiting you') !== -1,
+    const beaChip = bea.locator('td.oa-u-c-thread .oa-fb-status');
+    eq((await beaChip.textContent()).trim(), 'Awaiting you',
       'roster: a person who has replied is shown as waiting for the maintainer');
+    eq(await beaChip.getAttribute('title'), 'Replied — awaiting you',
+      'roster: …with the long wording as the chip\'s tooltip');
+    ok((await q.textContent('#oa-aa-users thead')).indexOf('Registered on') !== -1
+       && (await q.textContent('#oa-aa-users thead')).indexOf('First seen') === -1,
+      'roster: the joined-date column reads "Registered on"');
+
+    /* JM CANDIDATE (owner, 2026-09-08): the account holding a candidate
+       profile for the season under way, and nobody else */
+    eq(await bea.locator('.oa-u-cand').count(), 1,
+      'roster: JM Candidate is drawn on the account with a profile for the season under way');
+    eq((await bea.locator('.oa-u-cand').textContent()).trim(), 'JM Candidate', 'roster: …in those words');
+    eq(await q.locator('#oa-aa-users tr:has-text("cy@example.edu") .oa-u-cand').count(), 0,
+      'roster: not on an account whose profile is LAST season\'s');
+    eq(await q.locator('#oa-aa-users tr:has-text("avery@hostile.example") .oa-u-cand').count(), 0,
+      'roster: nor on one that withdrew its profile');
+    ok((await q.textContent('#oa-aa-users .oa-u-count')).indexOf('1 JM candidate') !== -1,
+      'roster: the count line says how many candidates the roster holds');
+    await q.fill('#oa-u-filter', 'candidate');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 1, null, { timeout: 10000 });
+    ok((await q.textContent('#oa-aa-users tbody')).indexOf('bea@example.edu') !== -1,
+      'roster: typing "candidate" into Find lists the candidates alone, so select-all under it messages them all');
+    await q.fill('#oa-u-filter', '');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length > 1, null, { timeout: 10000 });
+
+    /* THE WHOLE ROW FITS ON ONE SCREEN (owner, 2026-09-08, second report:
+       the dates, the status and both buttons had gone off the right edge).
+       Measured over the ORDINARY rows — the hostile name and the
+       deliberately over-wide row are filtered out, since they are the
+       cases the previous check exists for — at a laptop's 1100px as well
+       as at 1280px: nothing to scroll inside the table, the last heading
+       and the Delete button inside the panel, and an affiliation of a
+       sentence no taller than two lines. */
+    const fitAt = async (width) => {
+      await q.setViewportSize({ width, height: 1000 });
+      await q.fill('#oa-u-filter', 'example.edu');
+      await q.waitForFunction(() =>
+        document.querySelectorAll('#oa-aa-users tbody tr').length === 4, null, { timeout: 10000 });
+      const m = await q.evaluate(() => {
+        const wrap = document.querySelector('#oa-aa-users .oa-u-wrap');
+        const ths = Array.from(wrap.querySelectorAll('thead th'));
+        const wr = wrap.getBoundingClientRect();
+        const del = Array.from(wrap.querySelectorAll('tbody .oa-u-kill')).pop();
+        const aff = Array.from(wrap.querySelectorAll('tbody .oa-u-aff'))
+          .sort((a, b) => b.textContent.length - a.textContent.length)[0];
+        const lh = parseFloat(getComputedStyle(aff).lineHeight) ||
+          parseFloat(getComputedStyle(aff).fontSize) * 1.6;
+        return {
+          over: wrap.scrollWidth - wrap.clientWidth,
+          cols: ths.length,
+          lastHeadIn: ths[ths.length - 1].getBoundingClientRect().right <= wr.right + 1,
+          delIn: !!del && del.getBoundingClientRect().right <= wr.right + 1,
+          affLines: Math.round(aff.getBoundingClientRect().height / lh),
+          affTitle: aff.getAttribute('title'), affText: aff.textContent,
+          pageOver: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      });
+      ok(m.over <= 1 && m.pageOver <= 1,
+        `roster at ${width}px: an ordinary roster FITS its panel, nothing scrolled off (${m.over}px over)`);
+      ok(m.cols === 8 && m.lastHeadIn && m.delIn,
+        `roster at ${width}px: every column on screen, Delete included (${m.cols} columns)`);
+      ok(m.affLines <= 2 && m.affTitle === m.affText,
+        `roster at ${width}px: an affiliation runs to two lines at most (${m.affLines}), the whole text in its tooltip`);
+      await q.fill('#oa-u-filter', '');
+      await q.waitForFunction(() =>
+        document.querySelectorAll('#oa-aa-users tbody tr').length > 4, null, { timeout: 10000 });
+    };
+    await fitAt(1100);
+    await fitAt(1280);
 
     /* THE AFFILIATION, AS GIVEN ON THE PROFILE (owner, 2026-09-08: "show their
        affiliation in that list") — a column of its own, a dash where there is
@@ -6525,7 +6617,7 @@ for (const w of [320, 360, 390, 430]) {
     eq((await q.locator('#oa-aa-users tr', { hasText: 'cy@example.edu' })
       .locator('td.oa-u-c-affiliation').textContent()).trim(), '—',
       'roster: …and a dash for an account that gave none');
-    ok((await q.locator('#oa-aa-users tr', { hasText: 'avery@example.edu' })
+    ok((await q.locator('#oa-aa-users tr', { hasText: 'avery@hostile.example' })
       .locator('td.oa-u-c-affiliation').textContent()).indexOf('<b>Nowhere</b> & Co') !== -1
        && (await q.locator('#oa-aa-users td.oa-u-c-affiliation b').count()) === 0,
       'roster: markup in an affiliation is text, never an element');
@@ -6550,7 +6642,7 @@ for (const w of [320, 360, 390, 430]) {
       const aff = tr.querySelector('td.oa-u-c-affiliation .oa-u-aff');
       const wrap = document.querySelector('.oa-u-wrap');
       return {
-        nameLines: lines(tr.querySelector('td.oa-u-c-name')),
+        nameLines: lines(tr.querySelector('td.oa-u-c-name .oa-u-name')),
         mailLines: lines(tr.querySelector('td.oa-u-c-email a')),
         chipLines: lines(tr.querySelector('td.oa-u-c-thread .oa-fb-status')),
         affText: aff.textContent, affWidth: aff.getBoundingClientRect().width,
@@ -6568,7 +6660,7 @@ for (const w of [320, 360, 390, 430]) {
       `roster: and the status chip (${wide && wide.chipLines}) — "NO MESSAG / ES" was the same fault`);
     ok(wide && wide.affText === 'Department of Decision Sciences and Operations Management, Example Graduate School of Management',
       'roster: the affiliation is printed whole…');
-    ok(wide && wide.affWidth >= 160 && wide.affWidth <= wide.affMax + 1,
+    ok(wide && wide.affWidth >= 140 && wide.affWidth <= wide.affMax + 1,
       `roster: …wrapping at its spaces inside its bounds (${wide && Math.round(wide.affWidth)}px)`);
     ok(wide && wide.tableWider && wide.pageOver <= 1,
       `roster: the table is wider than its panel and scrolls INSIDE it (page overflow ${wide && wide.pageOver}px)`);
@@ -6857,7 +6949,7 @@ for (const w of [320, 360, 390, 430]) {
         return r.getClientRects().length;
       };
       const wrap = document.querySelector('.oa-u-wrap');
-      return { nameLines: lines(tr.querySelector('td.oa-u-c-name')),
+      return { nameLines: lines(tr.querySelector('td.oa-u-c-name .oa-u-name')),
         mailLines: lines(tr.querySelector('td.oa-u-c-email a')),
         scrolls: wrap.scrollWidth > wrap.clientWidth + 1 };
     });
