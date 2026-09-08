@@ -3647,7 +3647,7 @@ for (const [pageName, listSel] of [
     ok(pop.links.some((h) => h.startsWith(want)),
       `universities: the popup links into ${what} pre-filtered`);
   }
-  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+\.html\?|\.\/\?)/.test(h)),
+  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+(\.html)?\?|\.\/\?)/.test(h)),
     'universities: every popup link is a page of this site or a real URL');
 
   /* NOTHING ON THE POPUP IS GREY, IN EITHER THEME.
@@ -4282,7 +4282,7 @@ for (const [url, marker] of [
 
 /* -- the preview stubs, and the addresses the one-pager absorbed --------- */
 for (const [from, to] of [
-  ['v3/', '/'], ['v3/jobs.html', '/jobs.html'], ['v3/post-a-job.html', '/post-a-job.html'],
+  ['v3/', '/'], ['v3/jobs.html', '/jobs'], ['v3/post-a-job.html', '/post-a-job'],
 ]) {
   const q = await browser.newPage();
   await q.goto(BASE + from, { waitUntil: 'domcontentloaded' });
@@ -4854,7 +4854,7 @@ for (const [from, hash] of [
     });
     eq(idRow.label, 'OA posting ID', `${pageName}: the last row is the posting's ID`);
     eq(idRow.text, idRow.id, `${pageName}: …showing the id the card itself carries`);
-    eq(idRow.href, `${pageName}?job=${encodeURIComponent(idRow.id)}`,
+    eq(idRow.href, `${pageName.replace(/\.html$/, '')}?job=${encodeURIComponent(idRow.id)}`,
       `${pageName}: …as a link to this one posting on this page`);
     eq(idRow.cell, idRow.id,
       `${pageName}: …and the cell holds that one identifier and nothing beside it`);
@@ -9641,7 +9641,7 @@ for (const w of [320, 360, 390, 430]) {
       'verify page: …and the keyboard lands on its heading, so a screen reader hears the outcome');
     eq(done.url, '', 'verify page: the one-time code is off the address bar');
     ok(/ready to use/.test(done.note), 'verify page: the card\'s own note stands for a confirmed account');
-    ok(done.contShown && done.contHref === 'account.html' && !done.signinShown,
+    ok(done.contShown && done.contHref === 'account' && !done.signinShown,
       'verify page: …with Continue to your account for the signed-in reader');
     ok(done.applied && done.applied.path === 'AbC123xyz',
       'verify page: the code on the address is the one applied');
