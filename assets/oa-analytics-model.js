@@ -52,6 +52,15 @@
    always should have: this section is an ARCHIVE of a closed period rather
    than the current record — and the two are never merged, because they count
    different decades under different rules.
+
+   AND THE UNIVERSITIES ARE SERVED PER PERIOD (owner, 2026-09-08): the reader
+   may ask the figure for the last 30 days, the last 90, the last 12 months or
+   everything on record. The counters are one document per day, so the
+   builder tallies each period here (`visitWindows`) from the SAME rows and
+   publishes the four tallies side by side, under the SAME four ids the page's
+   range control offers (`RANGES`, one definition for both ends). Per period,
+   never per day: a day-by-day count of one visit from one university is more
+   than the figure needs and more than the served file should say.
    --------------------------------------------------------------------------- */
 
 (function (root, factory) {
@@ -209,7 +218,7 @@
       pagesWindow: { source: '', from: '', to: '', views: 0 },
       breakdowns: {},
       engagement: null,
-      universities: { frozen: true, from: '', to: '', all: [], recent: [] },
+      universities: { frozen: true, from: '', to: '', all: [], recent: [], windows: {} },
       totals: { visitors: 0, sessions: 0, pageviews: 0, days: 0, universities: 0 },
     };
   }
@@ -664,6 +673,82 @@
     return new Date(Date.UTC(+q[0], +q[1] - 1, +q[2] + n)).toISOString().slice(0, 10);
   }
 
+  /* THE FOUR PERIODS A READER MAY ASK FOR, in the owner's own words
+     (2026-09-08: "Last 30 days, Last 90 days, Last 12 months, Everything").
+     ONE definition: the page draws its range control from it and the builder
+     tallies the university counters under the same ids, so a period the page
+     offers is always one the served file carries. `days: 0` is everything on
+     record. `prose` is the period as a sentence says it ("in the last 30
+     days"); empty for everything, where the caption names the span instead. */
+  const RANGES = [
+    { id: '30', label: 'Last 30 days', days: 30, prose: 'the last 30 days' },
+    { id: '90', label: 'Last 90 days', days: 90, prose: 'the last 90 days' },
+    { id: '365', label: 'Last 12 months', days: 365, prose: 'the last 12 months' },
+    { id: 'all', label: 'Everything', days: 0, prose: '' },
+  ];
+
+  /** The university counters tallied per period.
+
+      `records` are the day documents as `recordVisit` writes them, one per
+      UTC day: { day, seen, resolved, academic, unis: { name: n } }. For every
+      range in `ranges` the answer is
+        { days, from, to, seen, resolved, academic, placed, all }
+      where `days` is the period's length (0 for everything), `from`/`to` are
+      the first and last day WITH A RECORD inside it (so a record shorter than
+      the period says so through its own dates, and a period with no record at
+      all carries empty strings), the three counts are summed over those days,
+      `placed` is the sum of every university's visits, and `all` is the
+      ranking, most visits first and by name on a tie.
+
+      A period of N days is the N calendar days ending TODAY, `now` being the
+      build's own UTC clock (or a yyyy-mm-dd, for a deterministic call), which
+      is the reading `rowsInRange` on the page gives the day rows: a window
+      measured back from today drains honestly when the resolver stops, where
+      one anchored on the record's last day would go on showing thirty days of
+      old counts for ever. A day dated after today is clock skew and is left
+      out of every finite period; everything-on-record keeps it, since that
+      period claims no dates.
+
+      Pure and deterministic: no clock is read when `now` is given, and a junk
+      day, a negative count or an empty name is refused rather than summed. */
+  function visitWindows(records, { now = Date.now(), ranges = RANGES } = {}) {
+    const today = isDay(now) ? String(now) : new Date(now).toISOString().slice(0, 10);
+    const count = (v) => Math.max(0, Math.round(Number(v) || 0));
+    const rows = (Array.isArray(records) ? records : [])
+      .filter((r) => r && isDay(r.day))
+      .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
+    const rank = (m) => Array.from(m.entries())
+      .map(([name, visits]) => ({ name, visits }))
+      .sort((a, b) => b.visits - a.visits || (a.name < b.name ? -1 : 1));
+    const out = {};
+    for (const r of (Array.isArray(ranges) ? ranges : [])) {
+      if (!r || !r.id) continue;
+      const days = Math.max(0, Math.floor(Number(r.days)) || 0);
+      const cutoff = days ? dayPlus(today, -(days - 1)) : '';
+      const unis = new Map();
+      let seen = 0, resolved = 0, academic = 0, from = '', to = '';
+      for (const rec of rows) {
+        if (cutoff && (rec.day < cutoff || rec.day > today)) continue;
+        if (!from || rec.day < from) from = rec.day;
+        if (!to || rec.day > to) to = rec.day;
+        seen += count(rec.seen);
+        resolved += count(rec.resolved);
+        academic += count(rec.academic);
+        const tally = rec.unis && typeof rec.unis === 'object' ? rec.unis : {};
+        for (const key of Object.keys(tally)) {
+          const n = count(tally[key]);
+          const name = String(key || '').trim();
+          if (!name || !n) continue;
+          unis.set(name, (unis.get(name) || 0) + n);
+        }
+      }
+      let placed = 0;
+      for (const n of unis.values()) placed += n;
+      out[String(r.id)] = { days, from, to, seen, resolved, academic, placed, all: rank(unis) };
+    }
+    return out;
+  }
+
   function growthProjection(days, { window = 90, ahead = 7, today = '' } = {}) {
     const pts = (Array.isArray(days) ? days : [])
       .filter((p) => Array.isArray(p) && isDay(p[0]) && Number.isFinite(Number(p[1])))
@@ -716,5 +801,6 @@
     cleanLabel, prettyLabel, breakdown, mergeBreakdown, hourBuckets, withShare,
     engagement,
     growthProjection,
+    RANGES, visitWindows,
   };
 }));

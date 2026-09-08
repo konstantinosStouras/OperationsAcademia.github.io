@@ -566,6 +566,15 @@ async function fromGa4({ since, windowFrom, windowTo }) {
  *  has to be able to say how large a one. Without the denominator a thin
  *  chart reads as "no universities visit", which is exactly the misreading
  *  this page was rebuilt to prevent.
+ *
+ *  AND IT IS TALLIED PER PERIOD (owner, 2026-09-08): the reader chooses the
+ *  last 30 days, the last 90, the last 12 months or everything, so the same
+ *  day documents are summed once per period through `A.visitWindows` — the
+ *  model's one definition, under the ids the page's range control offers —
+ *  and every period carries its own coverage counts, because the share the
+ *  caption prints has to be the share OF THAT PERIOD. The whole-record
+ *  figures the file always carried are the `all` period's, read from the
+ *  same tally so the two cannot disagree.
  */
 async function fromVisits(db, { now = Date.now(), recentDays = RECENT_DAYS } = {}) {
   if (!db) return null;
@@ -577,47 +586,45 @@ async function fromVisits(db, { now = Date.now(), recentDays = RECENT_DAYS } = {
      and the page says nothing at all rather than drawing an empty chart. */
   if (snap.empty) return null;
 
-  const all = new Map();
-  const recent = new Map();
-  let seen = 0, resolved = 0, academic = 0, from = '', to = '';
-  const cutoff = iso(new Date(now - Math.max(1, recentDays) * 86400000));
-
+  const records = [];
   snap.forEach((doc) => {
     const d = doc.data() || {};
     const day = String(d.day || doc.id);
     if (!A.isDay(day)) return;
-    if (!from || day < from) from = day;
-    if (!to || day > to) to = day;
-    seen += Math.max(0, Number(d.seen) || 0);
-    resolved += Math.max(0, Number(d.resolved) || 0);
-    academic += Math.max(0, Number(d.academic) || 0);
-    for (const [name, raw] of Object.entries(d.unis || {})) {
-      const n = Math.max(0, Math.round(Number(raw) || 0));
-      const label = String(name || '').trim();
-      if (!label || !n) continue;
-      all.set(label, (all.get(label) || 0) + n);
-      if (day >= cutoff) recent.set(label, (recent.get(label) || 0) + n);
-    }
+    records.push({ day, seen: d.seen, resolved: d.resolved, academic: d.academic, unis: d.unis || {} });
   });
-
-  const rank = (m) => Array.from(m.entries())
-    .map(([name, visits]) => ({ name, visits }))
-    .sort((a, b) => b.visits - a.visits || (a.name < b.name ? -1 : 1));
 
   /* THE TRUE PLACED TOTAL, published rather than left to be re-derived. The
      served list is CUT at TOP_UNIS, so a page that summed the rows it was
      given would understate the share it prints the moment the tail is longer
      than the cut — a number quietly a little too low, which is the shape of
-     wrong this whole page exists to avoid. */
-  let placed = 0;
-  for (const n of all.values()) placed += n;
+     wrong this whole page exists to avoid. visitWindows sums it per period. */
+  const windows = A.visitWindows(records, { now });
+  const whole = windows.all;
+  const recent = A.visitWindows(records,
+    { now, ranges: [{ id: 'recent', days: Math.max(1, recentDays) }] }).recent;
 
   return {
-    all: rank(all),
-    recent: rank(recent),
-    seen, resolved, academic, placed, from, to,
+    all: whole.all,
+    recent: recent.all,
+    seen: whole.seen, resolved: whole.resolved, academic: whole.academic, placed: whole.placed,
+    from: whole.from, to: whole.to,
     recentDays,
+    windows,
   };
+}
+
+/** Every period's list cut at TOP_UNIS, the way the whole-record list is: the
+    page prints each period's own `placed` for the share, so a cut list costs
+    nothing but the tail. A block with no periods answers an empty map, which
+    the page reads as "draw no period control". */
+function cutWindows(windows) {
+  const out = {};
+  for (const [id, win] of Object.entries(windows && typeof windows === 'object' ? windows : {})) {
+    if (!win || typeof win !== 'object') continue;
+    out[id] = { ...win, all: (win.all || []).slice(0, TOP_UNIS) };
+  }
+  return out;
 }
 
 /* ---------------------------------------------------------------------- main */
@@ -758,6 +765,13 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
       to: visits.to || '',
       all: visits.all.slice(0, TOP_UNIS),
       recent: visits.recent.slice(0, TOP_UNIS),
+      /* the same counters per period, under the page's own range ids — the
+         reader's choice on the figure (owner, 2026-09-08). HERE, before the
+         counts, because the carry path spreads the empty block first and a
+         key in another position makes a credential-less run rewrite the file
+         it read in a different order — the flip-flop the carry check below
+         exists to refuse. */
+      windows: cutWindows(visits.windows),
       recentDays: visits.recentDays || RECENT_DAYS,
       /* the coverage the chart is a sample of — see fromVisits */
       seen: visits.seen,
@@ -772,6 +786,9 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
       to: hist.to || '',
       all: archivedRows.slice(0, TOP_UNIS),
       recent: [],
+      /* a closed period has no "last 30 days": the page draws no period
+         control over an archive */
+      windows: {},
     };
   } else if (carriedU && ((carriedU.all || []).length || carriedU.seen)) {
     data.universities = {
@@ -779,6 +796,7 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
       ...carriedU,
       all: (carriedU.all || []).slice(0, TOP_UNIS),
       recent: (carriedU.recent || []).slice(0, TOP_UNIS),
+      windows: cutWindows(carriedU.windows),
     };
   } else {
     data.universities = A.emptyDataset().universities;
@@ -1015,6 +1033,22 @@ function selftest() {
     recent: [{ name: 'University of Oxford', visits: 2 }],
     seen: 100, resolved: 40, academic: 25, from: '2026-08-01', to: '2026-08-29',
     recentDays: 7,
+    /* the per-period tallies, as fromVisits hands them over (owner,
+       2026-09-08): the same rows under the page's four range ids, one of
+       them longer than the served cut so the cut is measured */
+    windows: {
+      '30': { days: 30, from: '2026-08-20', to: '2026-08-29', seen: 30, resolved: 10, academic: 5,
+        placed: 4, all: [{ name: 'Boston University', visits: 3 }, { name: 'University of Oxford', visits: 1 }] },
+      '90': { days: 90, from: '2026-08-01', to: '2026-08-29', seen: 100, resolved: 40, academic: 25,
+        placed: 15, all: [{ name: 'University of Oxford', visits: 12 }, { name: 'Boston University', visits: 3 }] },
+      '365': { days: 365, from: '2026-08-01', to: '2026-08-29', seen: 100, resolved: 40, academic: 25,
+        placed: 15, all: [{ name: 'University of Oxford', visits: 12 }, { name: 'Boston University', visits: 3 }] },
+      all: { days: 0, from: '2026-08-01', to: '2026-08-29', seen: 100, resolved: 40, academic: 25,
+        placed: 15 + TOP_UNIS + 1,
+        all: Array.from({ length: TOP_UNIS + 1 }, (_, i) => ({ name: `University ${i}`, visits: 1 }))
+          .concat([{ name: 'University of Oxford', visits: 12 }, { name: 'Boston University', visits: 3 }])
+          .sort((a, b) => b.visits - a.visits || (a.name < b.name ? -1 : 1)) },
+    },
   };
   const v = assemble(
     [{ source: 'history', days: {}, pages: [],
@@ -1029,10 +1063,29 @@ function selftest() {
     'the coverage the chart is a sample of travels with it');
   ok(v.totals.universities === 2, 'the tile counts the live names');
 
+  /* --- the periods the reader may choose (owner, 2026-09-08) ------------- */
+  ok(Object.keys(v.universities.windows).join() === A.RANGES.map((r) => r.id).join(),
+    'the live section carries one tally per range the page offers, under the same ids');
+  ok(v.universities.windows['30'].placed === 4 && v.universities.windows['30'].seen === 30 &&
+    v.universities.windows['30'].all[0].name === 'Boston University',
+    'each period keeps its own ranking and its own coverage counts, not the whole record\'s');
+  ok(v.universities.windows.all.all.length === TOP_UNIS,
+    `a period's list is cut at TOP_UNIS (${TOP_UNIS}) like the whole-record list`);
+  ok(v.universities.windows.all.placed === 15 + TOP_UNIS + 1,
+    '…while its placed total is the TRUE one, so the share the page prints survives the cut');
+  ok(Object.keys(a.universities.windows).length === 0,
+    'an ARCHIVE carries no periods — a closed decade has no "last 30 days"');
+
   /* an unreachable Firestore must cost a day of freshness, not the section */
   const carriedLive = assemble([], { carry: { universities: { ...liveUnis, frozen: false } } });
   ok(carriedLive.universities.frozen === false && carriedLive.universities.all.length === 2,
     'a run that could not read the visits republishes the section it was served');
+  ok(Object.keys(carriedLive.universities.windows).join() === A.RANGES.map((r) => r.id).join(),
+    '…periods included, so the figure keeps its control through a failed read');
+  const carriedOld = assemble([], { carry: { universities: {
+    frozen: false, from: '2026-08-01', to: '2026-08-29', all: liveUnis.all, recent: [], seen: 100 } } });
+  ok(carriedOld.universities.windows && Object.keys(carriedOld.universities.windows).length === 0,
+    'a served block from before the periods existed carries an EMPTY map, never a guess');
   ok(a.range.from === '2015-01-01' && a.range.to === '2026-08-03', 'the range spans every source');
   ok(a.sources.map((s) => s.source).join(',') === 'usage,ga4,history',
     'the sources are listed in precedence order');

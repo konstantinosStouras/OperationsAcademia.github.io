@@ -8095,6 +8095,21 @@ for (const w of [320, 360, 390, 430]) {
       all: [{ name: 'Duke University', visits: 2100 }, { name: 'INSEAD', visits: 1355 }],
       recent: [{ name: 'Duke University', visits: 40 }],
       recentDays: 7, seen: 12000, resolved: 4900, academic: 900, placed: 3455,
+      /* THE PERIODS (owner, 2026-09-08): the same counters tallied per
+         range, under the range control's ids. The 90-day one — the page's
+         default — is the whole record, so every caption check above holds
+         as written; the 30-day one differs in every number, so a press has
+         to change the ranking AND the share the caption prints. */
+      windows: {
+        '30': { days: 30, from: '2026-08-10', to: '2026-08-28', seen: 3000, resolved: 1200, academic: 200,
+          placed: 900, all: [{ name: 'INSEAD', visits: 700 }, { name: 'Duke University', visits: 200 }] },
+        '90': { days: 90, from: '2026-08-01', to: '2026-08-28', seen: 12000, resolved: 4900, academic: 900,
+          placed: 3455, all: [{ name: 'Duke University', visits: 2100 }, { name: 'INSEAD', visits: 1355 }] },
+        '365': { days: 365, from: '2026-08-01', to: '2026-08-28', seen: 12000, resolved: 4900, academic: 900,
+          placed: 3455, all: [{ name: 'Duke University', visits: 2100 }, { name: 'INSEAD', visits: 1355 }] },
+        all: { days: 0, from: '2026-08-01', to: '2026-08-28', seen: 12000, resolved: 4900, academic: 900,
+          placed: 3455, all: [{ name: 'Duke University', visits: 2100 }, { name: 'INSEAD', visits: 1355 }] },
+      },
     },
     totals: { visitors: 1, sessions: 1, pageviews: 1, days: Object.keys(demoDays).length, universities: 2 },
     range: { from: '2024-01-01', to: '2026-08-28' },
@@ -8394,9 +8409,10 @@ for (const w of [320, 360, 390, 430]) {
     /* the range control drives every figure at once */
     const before = await q.evaluate(() =>
       document.querySelector('.oa-tile-value').textContent);
-    /* SCOPED PAST THE METRIC SWITCH. The daily chart's Visitors/Visits/Pageviews
-       control is the same shape deliberately — one control idiom on the page —
-       so a bare `.oa-range button` now reaches seven buttons, not four. */
+    /* SCOPED PAST THE METRIC SWITCH — and past the universities figure's own
+       period row, which is the same compact shape. Both are `.oa-switch`
+       deliberately (one control idiom on the page), so a bare `.oa-range
+       button` now reaches ten buttons, not four. */
     await q.evaluate(() =>
       document.querySelectorAll('.oa-range:not(.oa-switch) button')[0].click());
     await q.waitForTimeout(250);
@@ -8443,6 +8459,135 @@ for (const w of [320, 360, 390, 430]) {
       'analytics: an archived universities section is still labelled as one, with its range');
     ok(/is not being added to/.test(arch.sub),
       'analytics: …and says it is closed, rather than claiming nothing could ever replace it');
+    eq(await q.evaluate(() => document.querySelectorAll('.oa-unirange').length), 0,
+      'analytics: …and offers no period over an archive — a closed decade has no "last 30 days"');
+    await ctx.close();
+  }
+
+  /* --- the universities figure carries the page's periods ---------------
+
+     Owner, 2026-09-08: "Last 30 days, Last 90 days, Last 12 months,
+     Everything" on the figure itself. The served block carries one tally per
+     period under the range control's own ids, and the row on the figure IS
+     that control, placed where the reader is looking: pressing it moves the
+     whole page, pressing the one at the top moves the figure. Measured: the
+     row and its order, the default agreeing with the top, the caption and the
+     bars following a press with the period's OWN coverage counts, the top
+     control following, the reader kept on the figure with the keyboard on the
+     button they pressed (draw() rebuilds the page and a chart forces a layout
+     while it is short, which clamps the scroll back to the tiles), a record
+     shorter than the period saying so, the two kinds of empty period, and a
+     served file from before the periods existed drawing no row at all. */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1000 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics periods: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, demo);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-unirange', { timeout: 15000 });
+    const readUni = (pg) => pg.evaluate(() => {
+      const fig = [...document.querySelectorAll('.oa-figure')]
+        .find((s) => /Which universities/.test((s.querySelector('h2') || {}).textContent || ''));
+      const bar = fig && fig.querySelector('.oa-unirange');
+      const sub = fig && fig.querySelector('.oa-figure-sub');
+      const h2 = fig && fig.querySelector('h2');
+      return {
+        labels: bar ? [...bar.querySelectorAll('button')].map((b) => b.textContent) : [],
+        pressed: bar ? [...bar.querySelectorAll('button')].map((b) => b.getAttribute('aria-pressed')) : [],
+        top: [...document.querySelectorAll('.oa-pagerange button')].map((b) => b.getAttribute('aria-pressed')),
+        rowFirst: !!(bar && sub && (bar.compareDocumentPosition(sub) & Node.DOCUMENT_POSITION_FOLLOWING)),
+        sub: sub ? sub.textContent : '',
+        rows: fig ? [...fig.querySelectorAll('.oa-bar-row')].map((r) =>
+          r.querySelector('.oa-bar-name').textContent + ' ' + r.querySelector('.oa-bar-val').textContent) : [],
+        y: window.pageYOffset,
+        headTop: h2 ? Math.round(h2.getBoundingClientRect().top) : -9999,
+        active: document.activeElement ? document.activeElement.textContent : '',
+        tile: (document.querySelector('.oa-tile-value') || {}).textContent || '',
+      };
+    });
+    const first = await readUni(q);
+    eq(first.labels, ['Last 30 days', 'Last 90 days', 'Last 12 months', 'Everything'],
+      'analytics periods: the universities figure offers the four periods, in the owner\'s words and order');
+    eq(first.pressed, ['false', 'true', 'false', 'false'],
+      'analytics periods: it opens on the page\'s own default, the last 90 days');
+    eq(first.top, first.pressed, 'analytics periods: …agreeing with the control at the top of the page');
+    ok(first.rowFirst, 'analytics periods: the row sits under the heading, above the caption it rewrites');
+    ok(/2 universities in the last 90 days, 1 Aug 2026 to 28 Aug 2026, which is as far back as the record goes\./.test(first.sub),
+      'analytics periods: a period the record does not fill says so through its own dates');
+    eq(first.rows, ['Duke University 2,100 visits', 'INSEAD 1,355 visits'],
+      'analytics periods: …over the 90-day ranking');
+
+    await q.evaluate(() => [...document.querySelectorAll('.oa-figure')]
+      .find((s) => /Which universities/.test(s.querySelector('h2').textContent)).scrollIntoView());
+    const y0 = await q.evaluate(() => window.pageYOffset);
+    ok(y0 > 500, `analytics periods: the figure is far down the page (${y0}px), or the place-keeping check is vacuous`);
+    await q.click('.oa-unirange button[data-id="30"]');
+    await q.waitForTimeout(250);
+    const after = await readUni(q);
+    eq(after.pressed, ['true', 'false', 'false', 'false'], 'analytics periods: pressing a period marks it chosen');
+    ok(/2 universities in the last 30 days, 10 Aug 2026 to 28 Aug 2026\. It is a sample rather than a count: of 3,000 visits, 900 \(30%\) were placed at a university listed here, and 200 more/.test(after.sub),
+      'analytics periods: the caption prints the chosen period\'s OWN coverage counts — the share of that ' +
+      'period, never the whole record\'s over a month\'s bars');
+    ok(!/as far back as the record goes/.test(after.sub),
+      'analytics periods: …and drops the short-record note where the record fills the period');
+    eq(after.rows, ['INSEAD 700 visits', 'Duke University 200 visits'],
+      'analytics periods: the bars are the period\'s own ranking');
+    eq(after.top, ['true', 'false', 'false', 'false'],
+      'analytics periods: the control at the top of the page follows — one range for the whole page');
+    ok(after.tile !== first.tile, 'analytics periods: …and so do the headline figures');
+    /* the document may end a line shorter (the caption lost its note), and
+       the figure is the last thing on the page, so the offset may clamp by
+       that line; what must hold is that the reader is still looking at the
+       figure they pressed rather than at the tiles */
+    ok(Math.abs(after.y - y0) < 60 && after.headTop > -40 && after.headTop < 400,
+      `analytics periods: the reader is kept on the figure they pressed (scrolled ${y0} before, ` +
+      `${after.y} after, heading at ${after.headTop}px)`);
+    eq(after.active, 'Last 30 days', 'analytics periods: …with the keyboard on the button they pressed');
+
+    await q.click('.oa-pagerange button[data-id="all"]');
+    await q.waitForTimeout(250);
+    const whole = await readUni(q);
+    eq(whole.pressed, ['false', 'false', 'false', 'true'],
+      'analytics periods: pressing the control at the top moves the figure too');
+    ok(/2 universities, 1 Aug 2026 to 28 Aug 2026\. It is a sample rather than a count: of 12,000 visits/.test(whole.sub) &&
+        !/in the last/.test(whole.sub),
+      'analytics periods: …whose caption then names the whole record\'s span and no period');
+
+    /* the two kinds of empty period: nothing recorded, and nothing placed */
+    const e = await ctx.newPage();
+    e.on('pageerror', (err) => jsErrors.push('analytics periods empty: ' + err.message));
+    await e.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(e, { ...demo, universities: { ...demo.universities, windows: {
+      ...demo.universities.windows,
+      '30': { days: 30, from: '2026-08-10', to: '2026-08-28', seen: 40, resolved: 3, academic: 2, placed: 0, all: [] },
+      '90': { days: 90, from: '', to: '', seen: 0, resolved: 0, academic: 0, placed: 0, all: [] },
+    } } });
+    await e.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await e.waitForSelector('.oa-unirange', { timeout: 15000 });
+    const none = await readUni(e);
+    ok(/Nothing was recorded in the last 90 days\. Choose a longer period/.test(none.sub) && none.rows.length === 0,
+      'analytics periods: a period with no record says so and draws no bar — never an empty axis');
+    eq(none.labels.length, 4, 'analytics periods: …and still offers the other periods');
+    await e.click('.oa-unirange button[data-id="30"]');
+    await e.waitForTimeout(250);
+    const unplaced = await readUni(e);
+    ok(/Of 40 visits in the last 30 days, none was placed at a university listed here, though 2 came from a university this site has no department page for\. Choose a longer period/.test(unplaced.sub) &&
+        unplaced.rows.length === 0,
+      'analytics periods: a period with visits but nobody placed says THAT, which is a different fact');
+
+    /* a served file from before the periods existed: the whole record, no row */
+    const o = await ctx.newPage();
+    o.on('pageerror', (err) => jsErrors.push('analytics periods old: ' + err.message));
+    await o.route('**/firebasejs/**', (r) => r.abort());
+    const oldBlock = { ...demo.universities };
+    delete oldBlock.windows;
+    await serveDemo(o, { ...demo, universities: oldBlock });
+    await o.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await o.waitForSelector('.oa-figure', { timeout: 15000 });
+    const old = await readUni(o);
+    ok(old.labels.length === 0 && /2 universities, 1 Aug 2026 to 28 Aug 2026\. It is a sample rather than a count: of 12,000 visits/.test(old.sub),
+      'analytics periods: a file carrying no periods draws the whole record and no row — a control that changes nothing is not drawn');
     await ctx.close();
   }
 
@@ -8591,7 +8736,10 @@ for (const w of [320, 360, 390, 430]) {
     const heading0 = await q.evaluate(() =>
       document.querySelector('.oa-figure > h2').textContent);
     await q.evaluate(() => {
-      const b = [...document.querySelectorAll('.oa-switch button')]
+      /* the METRIC switch by its own class: the universities figure's period
+         row is `.oa-switch` too (one compact control shape), so a bare
+         `.oa-switch button` reaches six buttons, not two */
+      const b = [...document.querySelectorAll('.oa-metric button')]
         .find((x) => x.textContent === 'Pageviews');
       b.click();
     });
@@ -8599,7 +8747,7 @@ for (const w of [320, 360, 390, 430]) {
     const switched = await q.evaluate(() => ({
       heading: [...document.querySelectorAll('.oa-figure > h2')]
         .find((h) => /day by day/.test(h.textContent)).textContent,
-      pressed: [...document.querySelectorAll('.oa-switch button')]
+      pressed: [...document.querySelectorAll('.oa-metric button')]
         .map((b) => b.getAttribute('aria-pressed')),
     }));
     ok(/^Visitors, day by day/.test(heading0),

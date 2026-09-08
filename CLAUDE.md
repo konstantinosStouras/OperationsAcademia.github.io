@@ -6117,6 +6117,51 @@ those universities. Two very different fixes, and nothing else on the page
 separates them. Academic networks it could not name are counted apart for the
 same kind of reason — that is a different fact from "not a university".
 
+**AND THE FIGURE TAKES THE PAGE'S OWN RANGE** (owner, 2026-09-08, of a
+screenshot of it: *"allow the user to see data if they select between: Last 30
+days, Last 90 days, Last 12 months, Everything"*). The counters are one
+document per day, so the builder tallies them once per period —
+`visitWindows` in `assets/oa-analytics-model.js`, pure, under the SAME ids the
+page's range control has always used (`RANGES`, now in the model, one
+definition for both ends) — and publishes the four tallies side by side as
+`universities.windows`, each with its OWN coverage counts and its own `from`/
+`to`, the first and last day with a record inside the period. Per period and
+never per day: a day-by-day count of one visit from one university is more
+than the figure needs and more than a served file should say. The figure
+draws the four periods as a **period row** of its own (`.oa-unirange`, the
+compact `.oa-switch` shape the metric switch uses) under its heading and above
+the caption, and **pressing it sets the page's range**: it is the control at
+the top of the page placed where the reader is looking, one notion of "how
+much of the record" for the whole page, and the two rows always agree. The
+caption prints the chosen period's share OF THAT PERIOD, never the whole
+record's over a month's bars; a record shorter than the period says so through
+its dates (*"which is as far back as the record goes"*, or a reader pressing
+"Last 12 months" over a record ten days old takes the dates for the control
+being broken); a period with no record and a period with visits but nobody
+placed each say which they are, and draw no bar. No row over an archive (a
+closed decade has no "last 30 days") and none over a served file from before
+the periods existed, which is drawn from the whole record as before; the
+committed file gains the periods on the first daily run after this shipped,
+and the served-file pin waits until it does. **A press keeps the reader's
+place**: `draw()` rebuilds the page and the first chart forces a layout while
+the page is still short, which clamps the scroll offset back to the tiles — a
+control near the top never showed it, a row at the foot of the page did — so
+`redraw` restores the offset and puts the keyboard back on the button that was
+pressed, for the top control and the metric switch too. Tests: the periods
+block of `testUniversityVisits` (the four periods, the page reading them from
+the model, the tally over a fixture that separates every period and refuses
+the junk a read can hand over, the builder tallying through the model and
+carrying the periods through a failed read, the archive given none, the page's
+reading of the chosen period, the row through the same chooser, the redraw,
+the stylesheet, the change log and this section), the builder's own selftest
+(published, cut at `TOP_UNIS`, carried, and a served block from before the
+periods carrying an empty map), and the periods block of `page-test.mjs`
+(the row, the default agreeing with the top, a press changing the caption's
+counts and the bars with the top following and the reader kept on the figure
+with the keyboard on the button, the top control moving the figure, both
+kinds of empty period, no row over an archive or an old file, and the 42px
+targets at 390px through the existing sweep).
+
 **`frozen` still means something, and it is not "unrecoverable".** It means an
 ARCHIVE of a closed period, measured under another rule — which is what the
 2014-2023 figures would be if they ever turned up. The builder **never merges**

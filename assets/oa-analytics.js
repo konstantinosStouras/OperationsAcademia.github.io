@@ -34,7 +34,12 @@
                               reverse DNS answers for perhaps a third of
                               visits, so a chart without its denominator would
                               read as "hardly any universities" instead of as
-                              the sample it is. An ARCHIVED copy of the figure,
+                              the sample it is. It takes the page's RANGE too
+                              (owner, 2026-09-08): the builder tallies the
+                              counters once per period, the figure carries
+                              the four periods as a row of its own under its
+                              heading, and the caption says what the chosen
+                              one covers. An ARCHIVED copy of the figure,
                               were one ever to exist, is labelled frozen with
                               its own date range and never mixed with the live
                               one — two rules, one ranking, no meaning.
@@ -54,13 +59,11 @@
   if (!root || !A || !C) return;
 
   /* The ranges the reader can ask for. `days: 0` means everything there is —
-     the "since the site was created" chart the old page had, kept. */
-  var RANGES = [
-    { id: '30', label: 'Last 30 days', days: 30 },
-    { id: '90', label: 'Last 90 days', days: 90 },
-    { id: '365', label: 'Last 12 months', days: 365 },
-    { id: 'all', label: 'Everything', days: 0 },
-  ];
+     the "since the site was created" chart the old page had, kept. ONE
+     definition, in the model: the builder tallies the university counters
+     under these same ids, so a period this control offers is always one the
+     served file carries (see visitWindows). */
+  var RANGES = A.RANGES;
 
   /* WHICH NUMBER THE DAILY CHART PLOTS, and the reason it is a control rather
      than charts stacked: the two answer different questions — how many PEOPLE
@@ -340,12 +343,33 @@
       var b = document.createElement('button');
       b.type = 'button';
       b.textContent = o.label;
+      b.setAttribute('data-id', o.id);
       b.setAttribute('aria-pressed', opts.value === o.id ? 'true' : 'false');
       b.addEventListener('click', function () { opts.onPick(o.id); });
       bar.appendChild(b);
     });
     host.appendChild(bar);
     return bar;
+  }
+
+  /** Draw the page again after a control was pressed, WITHOUT moving the
+      reader. draw() empties the page and rebuilds it, and the first chart
+      forces a layout while the page is still short, at which point the
+      browser clamps the scroll offset: a control near the top never showed
+      it, the period row on the universities figure at the FOOT of the page
+      did (the press landed the reader back on the tiles). The page is
+      rebuilt to the same height, so the offset it had is the offset it
+      keeps; and the button the reader pressed, rebuilt with the rest, gets
+      the keyboard back, found by the class its row carries and the id it
+      was pressed for. */
+  function redraw(cls, id) {
+    var y = window.pageYOffset || 0;
+    draw();
+    window.scrollTo(0, y);
+    var b = root.querySelector('.' + cls + ' button[data-id="' + id + '"]');
+    if (b) {
+      try { b.focus({ preventScroll: true }); } catch (e) { b.focus(); }
+    }
   }
 
   /* ------------------------------------------------------------------- draw */
@@ -396,9 +420,10 @@
     root.appendChild(ranges);
     chooser(ranges, {
       label: 'How much of the record to show',
+      className: 'oa-pagerange',
       options: RANGES,
       value: state.range,
-      onPick: function (id) { state.range = id; draw(); },
+      onPick: function (id) { state.range = id; redraw('oa-pagerange', id); },
     });
 
     /* 1 — the daily series, in whichever of the three numbers the reader
@@ -427,10 +452,10 @@
     }
     chooser(f1.body, {
       label: 'Which number to plot',
-      className: 'oa-switch',
+      className: 'oa-switch oa-metric',
       options: METRICS,
       value: state.metric,
-      onPick: function (id) { state.metric = id; draw(); },
+      onPick: function (id) { state.metric = id; redraw('oa-metric', id); },
     });
     var plot1 = document.createElement('div');
     f1.body.appendChild(plot1);
@@ -736,15 +761,51 @@
    *  which is a claim this measurement cannot make, and the reason the rest
    *  of this page exists is that a figure nobody can check goes wrong quietly.
    *
+   *  IT TAKES THE PAGE'S RANGE (owner, 2026-09-08: the last 30 days, the
+   *  last 90, the last 12 months or everything). The served block carries
+   *  the counters tallied once per period under the range control's own
+   *  ids (`windows`, see visitWindows in the model), so the figure reads the
+   *  chosen period's ranking AND its coverage counts — the share it prints
+   *  is the share of that period, never the whole record's over a month's
+   *  bars. The four periods are drawn as a row of the figure's own, under
+   *  the heading and above the caption the choice rewrites: it is the SAME
+   *  range as the control at the top of the page, one notion of "how much of
+   *  the record" for the whole page, placed where the reader is looking. A
+   *  period the record is shorter than says so through its own dates ("as
+   *  far back as the record goes"); a period with nothing placed in it says
+   *  that and points at a longer one, rather than drawing an empty axis. A
+   *  served block from before the periods existed carries none, and the
+   *  figure is then drawn from the whole record with no row to press.
+   *
    *  A frozen ARCHIVE — a closed, differently-measured period — is drawn the
-   *  same way but labelled, and the builder never merges the two. */
+   *  same way but labelled, carries no periods (a closed decade has no "last
+   *  30 days"), and the builder never merges the two. */
   function renderUniversities() {
     var u = (state.data && state.data.universities) || {};
     if (!u.all || !u.all.length) return;
 
+    var hasWindows = !u.frozen && !!u.windows && RANGES.some(function (r) {
+      return u.windows[r.id] && Array.isArray(u.windows[r.id].all);
+    });
+    var pick = RANGES.filter(function (x) { return x.id === state.range; })[0] || RANGES[1];
+    /* the chosen period; a served file predating a range the page has since
+       gained falls back to everything on record rather than to a guess */
+    var win = null;
+    var period = null;
+    if (hasWindows) {
+      if (u.windows[pick.id] && Array.isArray(u.windows[pick.id].all)) {
+        win = u.windows[pick.id];
+        period = pick;
+      } else if (u.windows.all && Array.isArray(u.windows.all.all)) {
+        win = u.windows.all;
+        period = RANGES[RANGES.length - 1];
+      }
+    }
+    var w = win || u;
+
     /* `range`, never `span`: this file now has a span() FUNCTION for the
        dimension records, and a local of that name would shadow it. */
-    var range = u.from && u.to ? pretty(u.from) + ' to ' + pretty(u.to) : '';
+    var range = w.from && w.to ? pretty(w.from) + ' to ' + pretty(w.to) : '';
     var sub;
     var opts = null;
 
@@ -760,43 +821,76 @@
          dividing by it would print "29% came from a university" over a figure
          that counts BT Broadband. What is placed AT a university is the sum of
          the bars themselves — one visit increments exactly one of them. */
-      var seen = Number(u.seen) || 0;
+      var seen = Number(w.seen) || 0;
       /* the builder publishes the true total; summing the ROWS is the
          fallback, and would be a little low whenever the list is longer than
          the cut the served file makes */
-      var placed = Number(u.placed) ||
-        u.all.reduce(function (n, x) { return n + (Number(x.visits) || 0); }, 0);
-      var acad = Number(u.academic) || 0;
+      var placed = Number(w.placed) ||
+        w.all.reduce(function (n, x) { return n + (Number(x.visits) || 0); }, 0);
+      var acad = Number(w.academic) || 0;
       var share = seen ? Math.round((placed / seen) * 100) : 0;
+      var prose = period && period.prose ? period.prose : '';
       sub = 'Visits by university, worked out from the visitor\'s own network. ' +
-        'Nobody is identified and no address is kept. ' +
+        'Nobody is identified and no address is kept. ';
+      if (win && !w.from) {
+        /* the record has no day inside this period at all: the resolver has
+           stopped, or the period is shorter than the gap since it did */
+        sub += 'Nothing was recorded in ' + prose + '. ' +
+          'Choose a longer period to see what the record holds.';
+      } else if (win && !w.all.length) {
+        sub += 'Of ' + C.full(seen) + (seen === 1 ? ' visit' : ' visits') +
+          ' in ' + prose + ', none was placed at a university listed here' +
+          (acad ? ', though ' + C.full(acad) + ' came from a university this site has ' +
+            'no department page for' : '') +
+          '. Choose a longer period to see more of the record.';
+      } else {
         /* THE COUNT LIVES HERE, not in a tile. It is a fact about this one
            figure rather than a headline about the corpus, and the tiles cap at
            five: a sixth orphans onto a row of its own at every width the page
            is read at (measured 1400/1180/1024px), which is why the length and
            the depth of a visit share one tile. */
-        C.full(u.all.length) + (u.all.length === 1 ? ' university' : ' universities') +
-        (range ? ', ' + range : '') + '. ';
-      if (seen) {
-        sub += 'It is a sample rather than a count: of ' + C.full(seen) + ' visits, ' +
-          C.full(placed) + ' (' + share + '%) were placed at a university listed here' +
-          (acad ? ', and ' + C.full(acad) + ' more came from a university this site ' +
-            'has no department page for' : '') +
-          '. The rest were on commercial or home connections, which are not ' +
-          'recorded at all. Read the shape rather than the totals.';
+        sub += C.full(w.all.length) + (w.all.length === 1 ? ' university' : ' universities') +
+          (prose ? ' in ' + prose : '') +
+          (range ? ', ' + range : '') +
+          /* a period the record does not fill says so through its dates: a
+             reader who pressed "Last 12 months" over a record ten days old
+             would otherwise take the dates for the control being broken */
+          (prose && u.from && w.from === u.from ? ', which is as far back as the record goes' : '') +
+          '. ';
+        if (seen) {
+          sub += 'It is a sample rather than a count: of ' + C.full(seen) + ' visits, ' +
+            C.full(placed) + ' (' + share + '%) were placed at a university listed here' +
+            (acad ? ', and ' + C.full(acad) + ' more came from a university this site ' +
+              'has no department page for' : '') +
+            '. The rest were on commercial or home connections, which are not ' +
+            'recorded at all. Read the shape rather than the totals.';
+        }
       }
     }
 
     var f = figure('Which universities visited', sub, opts);
     root.appendChild(f.section);
+    if (hasWindows) {
+      /* the page's own range, as a row under the heading: pressing it is
+         pressing the control at the top, and the whole page follows */
+      var bar = chooser(f.section, {
+        label: 'How much of the record to show for the universities',
+        className: 'oa-switch oa-unirange',
+        options: RANGES,
+        value: pick.id,
+        onPick: function (id) { state.range = id; redraw('oa-unirange', id); },
+      });
+      f.section.insertBefore(bar, f.section.querySelector('.oa-figure-sub'));
+    }
+    if (!w.all.length) return;
     C.bars(f.body, { unit: 'visits', limit: 25, xTitle: 'University',
       /* the live figure's shares are of PLACED visits — the builder's true
-         total, the same number the sentence above quotes — never of the 25
-         rows that fitted (bars() offers no share without a stated whole).
-         The frozen archive states no whole, so its rows carry no share
-         rather than a made-up one. */
-      total: (!u.frozen && Number(u.placed)) || 0,
-      items: u.all.map(function (x) {
+         total for the chosen period, the same number the sentence above
+         quotes — never of the 25 rows that fitted (bars() offers no share
+         without a stated whole). The frozen archive states no whole, so its
+         rows carry no share rather than a made-up one. */
+      total: (!u.frozen && Number(w.placed)) || 0,
+      items: w.all.map(function (x) {
         return { label: x.name, value: x.visits };
       }) });
   }
