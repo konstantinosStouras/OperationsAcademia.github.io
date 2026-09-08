@@ -17882,12 +17882,19 @@ async function testForum() {
     ok(/id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags" hidden>/.test(ask) && /aria-expanded="false"/.test(ask),
       'forum ask: the tag menu is born SHUT, never drawn open on arrival');
     ok(/var open = suggWanted && !input\.disabled && sugg\.children\.length > 0;/.test(ask)
-       && /input\.addEventListener\('focus', function \(\) \{ suggWanted = true; drawSugg\(\); \}\);/.test(ask)
+       && /input\.addEventListener\('input', function \(\) \{ tagHint\(''\); openSugg\(\); \}\);/.test(ask)
+       && /input\.addEventListener\('click', openSugg\);/.test(ask)
+       && !/input\.addEventListener\('focus'/.test(ask)
        && /input\.addEventListener\('blur', function \(e\) \{ if \(inMenu\(e\.relatedTarget\)\) return; suggWanted = false; drawSugg\(\); \}\);/.test(ask)
        && /sugg\.addEventListener\('mousedown', function \(e\) \{ e\.preventDefault\(\); \}\);/.test(ask),
-      'forum ask: …opens while the box or a row has the keyboard, shuts when it leaves, and a press on a row keeps the box\'s focus');
-    ok(/e\.key === 'Escape'/.test(ask) && /e\.key === 'ArrowDown'/.test(ask) && /e\.key === 'ArrowUp'/.test(ask),
-      'forum ask: the menu is walked with the arrows and shut with Escape');
+      'forum ask: …opened by typing or a press on the box (never by focus alone), shut when the keyboard leaves, and a press on a row keeps the box\'s focus');
+    /* AN OPEN MENU COVERS THE GUIDE BOX AND THE BUTTONS, so it shuts the
+       moment a tag is chosen: the first browser run of this form timed out
+       on the guide tick box, with a suggestion row intercepting the press */
+    ok(/tags\.push\(s\);\s*input\.value = '';\s*suggWanted = false;\s*drawChips\(\);\s*drawSugg\(\);/.test(ask),
+      'forum ask: …and shuts the moment a tag is chosen, or the next press lands on a row');
+    ok(/e\.key === 'Escape'/.test(ask) && /if \(sugg\.hidden\) \{ openSugg\(\); return; \}/.test(ask) && /e\.key === 'ArrowUp'/.test(ask),
+      'forum ask: the down arrow opens the menu and walks it with the up arrow, and Escape shuts it');
     ok(/Posting in the <strong>' \+ roomName \+ '<\/strong>/.test(ask) && !/oa-forum-flabel">Where/.test(ask),
       'forum ask: the room is said once, at the card\'s head, and the "Where" block is gone');
     ok(/show\(me, !\(S\.ask && !S\.archive\)\);/.test(pageJs) && /hideViews\(\);\n    show\(\$\('oa-forum-me'\), true\);/.test(pageJs),
@@ -17974,7 +17981,8 @@ async function testForum() {
     for (const needle of ['the page\\\'s room banner stands down while the form is open', 'each field reads label, then advice, then the box',
       'Post your question sits under the card at its left', 'the tag menu is shut, no similar list shows',
       'a title sharing words with the seeded thread lists that thread under the box', 'no second read of the room',
-      'the tag menu opens while its box has the keyboard', 'a row pressed with the pointer becomes a chip',
+      'the tag menu opens as the box is typed into', 'shuts once a tag is chosen', 'a row pressed with the pointer becomes a chip',
+      'the down arrow opens the menu from the keyboard', 'Escape shuts it',
       'the menu shuts when the keyboard leaves the box', 'the room banner is back once the thread is on the page',
       'the card keeps a 14px inset and its boxes sit inside it', 'Post your question and Cancel stack full width under the card',
       'its rows are 42px targets']) {

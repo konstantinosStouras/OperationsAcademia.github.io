@@ -11051,9 +11051,10 @@ for (const w of [320, 360, 390, 430]) {
     ok(true, 'forum (candidate): a title that shares nothing with any thread lists none');
     await q.fill('#oa-forum-ask-body', 'Two offers on the table, both silent on teaching release. Is it normal to ask, and how?');
     await q.fill('#oa-forum-tag-in', 'offers');
-    /* THE TAG MENU IS A MENU: open while its box has the keyboard, shut when
-       the keyboard leaves, and a press on one of its rows keeps the box's
-       focus so several tags can be picked in a row */
+    /* THE TAG MENU IS A MENU: opened by typing into the box, shut after a
+       pick and when the keyboard leaves the box (drawn over the page, an open
+       menu covers the guide box and the buttons below it), and a press on one
+       of its rows keeps the box's focus so the next keystroke opens it again */
     const menuOpen = await q.evaluate(() => ({
       shown: !document.getElementById('oa-forum-tagsugg').hidden,
       expanded: document.getElementById('oa-forum-tag-in').getAttribute('aria-expanded'),
@@ -11066,9 +11067,11 @@ for (const w of [320, 360, 390, 430]) {
       })(),
     }));
     ok(menuOpen.shown && menuOpen.expanded === 'true' && menuOpen.rows >= 1,
-      'forum (candidate): the tag menu opens while its box has the keyboard, and the box says so');
+      'forum (candidate): the tag menu opens as the box is typed into, and the box says so');
     ok(menuOpen.over, 'forum (candidate): …OVER the page, the width of its box, rather than pushing the buttons down');
     await q.press('#oa-forum-tag-in', 'Enter');
+    ok(await q.evaluate(() => document.getElementById('oa-forum-tagsugg').hidden && document.activeElement.id === 'oa-forum-tag-in'),
+      'forum (candidate): …and shuts once a tag is chosen, with the box keeping the keyboard, so nothing below it is covered');
     await q.fill('#oa-forum-tag-in', 'Teaching Release');
     await q.press('#oa-forum-tag-in', 'Enter');
     /* NUDGE NOBODY, REFUSE NOBODY (owner, 2026-09-05). The curated list no
@@ -11096,9 +11099,11 @@ for (const w of [320, 360, 390, 430]) {
     await q.click('#oa-forum-tagchips .oa-chip[data-tag="rumour"]');
     eq(await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag'))),
       ['offers', 'teaching-release'], 'forum (candidate): and it comes off again like any other chip');
-    /* a row picked by the pointer: the tag lands as a chip, the box keeps
-       the keyboard and the menu stays open for the next one */
-    await q.focus('#oa-forum-tag-in');
+    /* a row picked by the pointer: a press on the box opens the menu, the
+       tag lands as a chip, the box keeps the keyboard and the menu shuts
+       until the next keystroke */
+    await q.click('#oa-forum-tag-in');
+    ok(await q.evaluate(() => !document.getElementById('oa-forum-tagsugg').hidden), 'forum (candidate): a press on the box opens the menu');
     await q.click('#oa-forum-tagsugg button[data-tag="europe"]');
     const picked = await q.evaluate(() => ({
       chips: [...document.querySelectorAll('#oa-forum-tagchips .oa-chip')].map((n) => n.getAttribute('data-tag')),
@@ -11106,8 +11111,14 @@ for (const w of [320, 360, 390, 430]) {
       shown: !document.getElementById('oa-forum-tagsugg').hidden,
     }));
     eq(picked.chips, ['offers', 'teaching-release', 'europe'], 'forum (candidate): a row pressed with the pointer becomes a chip');
-    ok(picked.focused === 'oa-forum-tag-in' && picked.shown, 'forum (candidate): …and the box keeps the keyboard with the menu still open');
+    ok(picked.focused === 'oa-forum-tag-in' && !picked.shown, 'forum (candidate): …and the box keeps the keyboard with the menu shut until the next keystroke');
     await q.click('#oa-forum-tagchips .oa-chip[data-tag="europe"]');
+    await q.press('#oa-forum-tag-in', 'ArrowDown');
+    ok(await q.evaluate(() => !document.getElementById('oa-forum-tagsugg').hidden), 'forum (candidate): the down arrow opens the menu from the keyboard');
+    await q.press('#oa-forum-tag-in', 'Escape');
+    ok(await q.evaluate(() => document.getElementById('oa-forum-tagsugg').hidden && document.activeElement.id === 'oa-forum-tag-in'),
+      'forum (candidate): …and Escape shuts it, the box keeping the keyboard');
+    await q.press('#oa-forum-tag-in', 'ArrowDown');
     await q.focus('#oa-forum-ask-body');
     const menuShut = await q.evaluate(() => ({
       shown: !document.getElementById('oa-forum-tagsugg').hidden,
@@ -11770,7 +11781,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(askM.stacked && askM.onScreen, 'forum mobile (ask): Post your question and Cancel stack full width under the card, on screen');
     /* THE TAG MENU ON A PHONE holds to rules 6 and 10: open under its box,
        no wider than the screen, half of it at most, its rows 42px targets */
-    await m.focus('#oa-forum-tag-in');
+    await m.click('#oa-forum-tag-in');
     await m.waitForTimeout(150);
     const menuM = await m.evaluate(() => {
       const menu = document.getElementById('oa-forum-tagsugg');

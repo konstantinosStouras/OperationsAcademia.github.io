@@ -4280,12 +4280,16 @@ page's room banner (`#oa-forum-me`) stands down while the form is open
 the thread (`openLocalThread`) or the list (`draw`). The "Where" block is
 gone.
 
-**The tag suggestions are a MENU, not a list.** They open while the box or
-one of the rows has the keyboard, shut when it leaves, and are never drawn
-open on arrival; a press on a row stops its `mousedown`, so the box keeps
-the keyboard and several tags can be picked in a row; the arrows walk the
-rows and Escape shuts it; the box is a `combobox` whose `aria-expanded`
-follows. It is drawn OVER the page (`position: absolute` under
+**The tag suggestions are a MENU, not a list.** It opens on typing, on a
+press on the box and on the down arrow, never on focus alone and never on
+arrival; it shuts the moment a tag is chosen, on Escape, and when the
+keyboard leaves the box. Shutting on a pick is load-bearing: drawn over the
+page, an open menu covers the guide tick box and the buttons under it, and
+the first browser run of this form timed out on exactly that, a suggestion
+row intercepting the press on the tick box. A press on a row stops its
+`mousedown`, so the box keeps the keyboard and the next keystroke opens the
+menu again with the chosen tag gone; the arrows walk the rows; the box is a
+`combobox` whose `aria-expanded` follows. It is drawn OVER the page (`position: absolute` under
 `.oa-forum-tagwrap`) rather than in the flow, where it moved the guide box
 and the buttons down and back with every keystroke, and it holds to rules 6
 and 10 of `_MOBILE-STANDARDS.md`: the width of its box, half the screen at
@@ -4330,9 +4334,10 @@ own messages), and the forum block of `_scraper/page-test.mjs` (the shape as
 GEOMETRY: banner down, head, star count, label-advice-box order, one card
 with Post under it at its left, the menu shut on arrival with the title
 focused; the similar list for the seeded thread, inert, in a new tab, with
-no second read, gone for a title sharing nothing; the menu open with the
-keyboard and over the page, a row picked by the pointer keeping the focus,
-shut when the keyboard leaves; the banner back with the thread; and at
+no second read, gone for a title sharing nothing; the menu opened by typing
+and over the page, shut on a pick with the box keeping the keyboard, opened
+by a press on the box and by the down arrow, shut by Escape and when the
+keyboard leaves; the banner back with the thread; and at
 390px the inset, the stacked buttons, and the menu's width, height and
 rows).
 

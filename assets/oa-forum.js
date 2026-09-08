@@ -2515,13 +2515,18 @@
       tagHint('');
       tags.push(s);
       input.value = '';
+      suggWanted = false;
       drawChips();
       drawSugg();
     }
-    /* THE SUGGESTIONS ARE A MENU: open while the box or one of the rows has
-       the keyboard, shut otherwise, and never drawn open on arrival. A press
-       on a row keeps the box's focus (the mousedown is stopped, so no blur
-       fires), which is what lets several tags be picked in a row. */
+    /* THE SUGGESTIONS ARE A MENU: opened by typing, by a press on the box or
+       by the down arrow; shut after a pick, on Escape and when the keyboard
+       leaves the box; never drawn open on arrival. Drawn OVER the page, an
+       open menu covers the guide box and the buttons below it, so it has to
+       shut the moment a tag is chosen (the site the owner named does the
+       same) or the next thing the reader presses lands on a row instead. A
+       press on a row keeps the box's focus (its mousedown is stopped, so no
+       blur fires), so the next keystroke opens it again with the tag gone. */
     var suggWanted = false;
     function drawSugg() {
       var q = M.slug(input.value);
@@ -2551,15 +2556,21 @@
       input.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
     function inMenu(node) { return !!(node && (node === input || sugg.contains(node))); }
-    input.addEventListener('input', function () { tagHint(''); drawSugg(); });
-    input.addEventListener('focus', function () { suggWanted = true; drawSugg(); });
+    function openSugg() { suggWanted = true; drawSugg(); }
+    input.addEventListener('input', function () { tagHint(''); openSugg(); });
+    input.addEventListener('click', openSugg);
     input.addEventListener('blur', function (e) { if (inMenu(e.relatedTarget)) return; suggWanted = false; drawSugg(); });
     sugg.addEventListener('focusout', function (e) { if (inMenu(e.relatedTarget)) return; suggWanted = false; drawSugg(); });
     sugg.addEventListener('mousedown', function (e) { e.preventDefault(); });
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(input.value); }
       else if (e.key === 'Backspace' && !input.value && tags.length) { tags.pop(); drawChips(); drawSugg(); }
-      else if (e.key === 'ArrowDown' && !sugg.hidden) { e.preventDefault(); var first = sugg.querySelector('button'); if (first) first.focus(); }
+      else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (sugg.hidden) { openSugg(); return; }
+        var first = sugg.querySelector('button');
+        if (first) first.focus();
+      }
       else if (e.key === 'Escape' && !sugg.hidden) { e.preventDefault(); suggWanted = false; drawSugg(); }
     });
     sugg.addEventListener('keydown', function (e) {
@@ -2569,7 +2580,7 @@
       else if (e.key === 'ArrowUp') { e.preventDefault(); if (at > 0) rows[at - 1].focus(); else input.focus(); }
       else if (e.key === 'Escape') { e.preventDefault(); suggWanted = false; drawSugg(); input.focus(); }
     });
-    $('oa-forum-tagsin').addEventListener('click', function (e) { if (e.target === e.currentTarget) input.focus(); });
+    $('oa-forum-tagsin').addEventListener('click', function (e) { if (e.target === e.currentTarget) { input.focus(); openSugg(); } });
 
     $('oa-forum-askform').addEventListener('submit', function (e) {
       e.preventDefault();
