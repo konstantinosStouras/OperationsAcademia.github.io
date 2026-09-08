@@ -494,6 +494,17 @@
     return blocksText(parse(text));
   }
 
+  /** What a guard refuses in the text AS TYPED or AS READ: the first reason
+      `check` gives for either. A contact detail split by a mark passes the
+      guard on the bytes and reads whole on the page (jane**@**mit.edu is
+      jane@mit.edu once drawn, and once excerpted), so every text a member
+      sends is checked both ways, here, by the functions, the page and the
+      shim alike. */
+  function checkRead(text, check) {
+    var s = String(text === null || text === undefined ? '' : text);
+    return check(s) || check(plain(s));
+  }
+
   /** Does the text carry any of the markup at all? What the page uses to
       decide whether a preview would show anything the box does not. */
   function hasMarkup(text) {
@@ -518,6 +529,7 @@
     html: html,
     plain: plain,
     hasMarkup: hasMarkup,
+    checkRead: checkRead,
     esc: esc
   };
 }));

@@ -17755,14 +17755,14 @@ async function testForum() {
     ok(flat(body).indexOf(flat('617 253 1000')) !== -1,
       '…and the flattened test would have accepted it, which is the hole');
   }
-  ok(/const hit = guard\.check\(text\);\s*\n\s*if \(hit\) P\.refuse\('invalid-argument', hit\);/.test(forumSrc['post.js']),
-    'forum: so forumPost guards the quote it is about to store');
-  ok(forumSrc['post.js'].indexOf('const hit = guard.check(text);') >
+  ok(/const hit = markup\.checkRead\(text, guard\.check\);\s*\n\s*if \(hit\) P\.refuse\('invalid-argument', hit\);/.test(forumSrc['post.js']),
+    'forum: so forumPost guards the quote it is about to store, as typed and as read');
+  ok(forumSrc['post.js'].indexOf('const hit = markup.checkRead(text, guard.check);') >
      forumSrc['post.js'].indexOf('passage(String(src.body))'),
     '…after the passage test, so a quote of nothing is still refused as a quote');
   {
     const fjs = await readFile(path.join(HERE, '..', 'assets', 'oa-forum.js'), 'utf8');
-    ok(/var badQuote = G\.check\(text\);/.test(fjs) && /'That cannot be quoted\.'/.test(fjs),
+    ok(/var badQuote = guardOf\(text\);/.test(fjs) && /'That cannot be quoted\.'/.test(fjs),
       '…and the page says so on the press, where the reader can still do something about it');
   }
 
@@ -18409,6 +18409,30 @@ async function testForum() {
       'forum markup: plain() keeps text that merely looks like markup, so the quote fallback still starts where the body does');
     ok(MKM.hasMarkup('**a**') && MKM.hasMarkup('- a') && MKM.hasMarkup('see https://x.org') && !MKM.hasMarkup('plain\n\nwords') && !MKM.hasMarkup(''),
       'forum markup: hasMarkup() says whether a preview would show anything the box does not');
+    /* THE GUARD READS THE POST TOO. A contact detail split by a mark passes
+       the guard on the bytes and is whole once drawn and once excerpted, so
+       the toolbar would have been a way to publish exactly what the guard
+       refuses. checkRead() is the one definition: the text as typed OR as
+       read, and every text a member sends goes through it. */
+    {
+      const G3 = require(path.join(HERE, '..', 'assets', 'oa-forum-guard.js'));
+      for (const [split, why] of [['jane**@**mit.edu', 'email'], ['jane`@`mit.edu', 'email'], ['jane@mit.**edu**', 'email'],
+        ['617-253-**1000**', 'phone'], ['[617](https://x.org)-253-1000', 'phone'], ['0000-0001-**2345**-6789', 'orcid']]) {
+        eq(G3.check(split), '', `forum guard: ${split} passes the guard as typed, which is the hole`);
+        eq(MKM.checkRead(split, G3.check), why, `forum guard: …and is refused as ${why} once read`);
+      }
+      eq(MKM.checkRead('Write to the **department**, not to a person.', G3.check), '', 'forum guard: a post with marks and no contact detail still passes');
+      ok(/const hit = markup\.checkRead\(s, guard\.check\);/.test(forumSrc['member.js']) && !/guard\.check\(s\)/.test(forumSrc['member.js']),
+        'forum guard: textField checks both ways, and no bare check is left in it');
+      ok(/function guardOf\(text\) \{\s*\n\s*return MK\.checkRead\(text, G\.check\);/.test(pageJs) && /var why = guardOf\(ta\.value\);/.test(pageJs)
+         && /if \(guardOf\(title\)\)/.test(pageJs) && !/REASONS\[G\.check\(/.test(pageJs) && !/G\.WHY\[G\.check\(/.test(pageJs),
+        'forum guard: the page checks every text it sends the same two ways, the title and the quote included');
+      ok(/return mkg && mkg\.checkRead \? mkg\.checkRead\(String\(text \|\| ''\), guard\.check\) : guard\.check\(String\(text \|\| ''\)\);/.test(await read('_scraper', '_fake-firebase.js')),
+        'forum guard: the shim\'s simulator refuses the same texts');
+      ok(/jane\*\*@\*\*mit\.edu/.test(await read('_functions', 'test', 'forum-emulator.mjs')), 'forum guard: the emulator test sends a split address to the real function');
+    }
+    ok(/if \(!M \|\| !G \|\| !GUIDE \|\| !MK \|\| !NAV \|\| !window\.OAList\) \{/.test(pageJs),
+      'forum markup: the page refuses to boot without the module, with its own message, rather than throwing on the first post');
     ok(/^\(function \(root, factory\) \{\s*\n\s*if \(typeof module === 'object' && module\.exports\) \{\s*\n\s*module\.exports = factory\(\);\s*\n\s*\} else \{\s*\n\s*root\.OAForumMarkup = factory\(\);/m.test(mkSrc),
       'forum markup: dual-mode, the oa-forum-model.js shape');
     ok(!/=>|\bconst |\blet |`\$\{/.test(mkSrc.replace(/\/\*[\s\S]*?\*\//g, '')), 'forum markup: written in ES5, like every module the functions vendor');
@@ -18455,13 +18479,22 @@ async function testForum() {
     ok(/tb\.addEventListener\('mousedown', function \(e\) \{ if \(btnOf\(e\.target\)\) e\.preventDefault\(\); \}\);/.test(tbSrc),
       'forum toolbar: a press keeps the keyboard in the box, so the selection it acts on is still there');
     ok(/document\.execCommand\('insertText', false, text\)/.test(tbSrc) && /ta\.setRangeText\(text, start, end, 'end'\);\s*\n\s*ta\.dispatchEvent\(new Event\('input', \{ bubbles: true \}\)\);/.test(tbSrc)
-       && /if \(!done \|\| ta\.value\.slice\(start, start \+ text\.length\) !== text\) \{/.test(tbSrc),
+       && /if \(!done \|\| ta\.value === before\) \{/.test(tbSrc),
       'forum toolbar: a button writes through the browser\'s own insertText, so its undo takes the change back, with setRangeText and a hand-made input event as the fallback');
     ok(/if \(cmd === 'undo' \|\| cmd === 'redo'\) \{/.test(tbSrc) && /document\.execCommand\(cmd, false\)/.test(tbSrc), 'forum toolbar: Undo and Redo are the browser\'s own');
     ok(/wrapSel\(ta, '\*\*', 'bold text'\)/.test(tbSrc) && /wrapSel\(ta, '\*', 'italic text'\)/.test(tbSrc) && /wrapSel\(ta, '`', 'code'\)/.test(tbSrc)
        && /if \(sel\.length >= 2 \* m && sel\.slice\(0, m\) === mark && sel\.slice\(-m\) === mark\) \{/.test(tbSrc)
-       && /var bolder = mark === '\*' && v\.charAt\(s - 2\) === '\*' && v\.charAt\(e \+ 1\) === '\*';/.test(tbSrc),
-      'forum toolbar: bold, italic and code wrap the selection or a placeholder, a second press unwraps, and italic on a bold word does not break the bold');
+       && /var on = mark === '`' \? rb === 1 && ra === 1\s*\n\s*: mark === '\*\*' \? rb >= 2 && ra >= 2\s*\n\s*: rb % 2 === 1 && ra % 2 === 1;/.test(tbSrc)
+       && /else \{ s = e; sel = ''; \}/.test(tbSrc),
+      'forum toolbar: bold, italic and code wrap the selection or a placeholder, a second press unwraps by the runs of marks around the words (so italic comes off bold italic and does not break bold), and a selection of spaces is no selection');
+    ok(/if \(!done \|\| ta\.value === before\) \{/.test(tbSrc) && !/ta\.value\.slice\(start, start \+ text\.length\) !== text/.test(tbSrc),
+      'forum toolbar: the hand-written fallback runs only when the browser wrote nothing, so a text cut at the box\'s maxlength is not written twice');
+    ok(/if \(sel\) \{ s \+= raw\.indexOf\(sel\); e = s \+ sel\.length; \} else \{ s = e; \}/.test(tbSrc),
+      'forum toolbar: the link button leaves the spaces at either end of the selection where they are');
+    ok(/document\.querySelectorAll\('\.oa-forum-editor \.oa-forum-fmt'\)/.test(tbSrc) && /document\.querySelectorAll\('\.oa-forum-tbtips'\)/.test(tbSrc),
+      'forum toolbar: the tips switch moves every box on the page together, as the one stored choice says');
+    ok(/ta\.value = text;\s*\n[\s\S]{0,200}ta\.dispatchEvent\(new Event\('input', \{ bubbles: true \}\)\);\s*\n\s*\}\s*\n\s*\}/.test(pageJs.slice(pageJs.indexOf('  function reopenEdit('), pageJs.indexOf('  function reopenEdit(') + 900)),
+      'forum toolbar: an edit box reopened across a repaint announces the words put back, so its preview and guard line follow them');
     ok(/prefixLines\(ta, function \(l, i, blank\) \{ return blank \? '>' : '> '; \}, \/\^ \{0,3\}> \?\/\)/.test(tbSrc)
        && /return blank \? '' : \(i \+ 1\) \+ '\. ';/.test(tbSrc) && /return blank \? '' : '- ';/.test(tbSrc) && /return blank \? '' : '## ';/.test(tbSrc)
        && /if \(marked && marked === lines\.filter\(function \(l\) \{ return \/\\S\/\.test\(l\); \}\)\.length\) \{/.test(tbSrc),
@@ -18474,7 +18507,7 @@ async function testForum() {
        && /'<p class="oa-forum-fmt" id="' \+ id \+ '"' \+ \(tipsHidden\(\) \? ' hidden' : ''\) \+ '>'/.test(tbSrc)
        && /A blank line starts a new paragraph<\/span><span>A web address becomes a link<\/span><\/p>/.test(tbSrc),
       'forum toolbar: the tips row says what each mark writes, in the toolbar\'s order, and how a paragraph and an address read');
-    ok(/var TIPS_KEY = 'oa-forum-tips';/.test(tbSrc) && /'Hide' : 'Show'|'Show' : 'Hide'/.test(tbSrc) && /btn\.setAttribute\('aria-expanded', off \? 'false' : 'true'\);/.test(tbSrc),
+    ok(/var TIPS_KEY = 'oa-forum-tips';/.test(tbSrc) && /'Hide' : 'Show'|'Show' : 'Hide'/.test(tbSrc) && /b\.setAttribute\('aria-expanded', off \? 'false' : 'true'\);/.test(tbSrc),
       'forum toolbar: the tips are put away by a switch that says which way it is, remembered on the device');
     ok(/var on = !!v\.trim\(\) && MK\.hasMarkup\(v\);/.test(tbSrc) && /\.innerHTML = on \? MK\.html\(v\) : '';/.test(tbSrc) && /<p class="oa-forum-preview-h">Preview<\/p><div class="oa-forum-text"><\/div>/.test(tbSrc),
       'forum toolbar: the preview is the thread\'s own rendering, shown once the words carry a mark');

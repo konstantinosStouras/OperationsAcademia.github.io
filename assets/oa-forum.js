@@ -135,7 +135,7 @@
   var GUIDE = window.OAForumGuide;
   var MK = window.OAForumMarkup;
   var NAV = window.OAJobNav;
-  if (!M || !G || !GUIDE || !NAV || !window.OAList) {
+  if (!M || !G || !GUIDE || !MK || !NAV || !window.OAList) {
     if (window.console) console.error('oa-forum: a module this page depends on did not load');
     return;
   }
@@ -2151,7 +2151,12 @@
     if (!li || !p || p.hidden || S.readOnly || p.by !== S.me.handle) return;
     editPost(li, p);
     var ta = li.querySelector('.oa-forum-editing textarea');
-    if (ta) ta.value = text;
+    if (ta) {
+      ta.value = text;
+      /* said as an input, so the preview and the guard line drawn from
+         the stored body repaint for the words actually in the box */
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   }
 
   /** New facts about the thread on screen (a post just made, an edit, a
@@ -2610,15 +2615,20 @@
   function replaceRange(ta, start, end, text, selStart, selEnd) {
     ta.focus();
     ta.setSelectionRange(start, end);
+    var before = ta.value;
     var done = false;
     try {
       done = !!document.execCommand && (text ? document.execCommand('insertText', false, text) : document.execCommand('delete', false));
     } catch (e) { done = false; }
-    if (!done || ta.value.slice(start, start + text.length) !== text) {
+    /* the fallback only when the browser did NOTHING: a browser that wrote
+       less than asked cut the text at the box's maxlength, which is right,
+       and writing it again by hand would put the text in twice */
+    if (!done || ta.value === before) {
       ta.setRangeText(text, start, end, 'end');
       ta.dispatchEvent(new Event('input', { bubbles: true }));
     }
-    ta.setSelectionRange(selStart, selEnd);
+    var max = ta.value.length;
+    ta.setSelectionRange(Math.min(selStart, max), Math.min(selEnd, max));
   }
 
   /** Wrap the selection in `mark` (or the placeholder, selected, when
@@ -2631,19 +2641,31 @@
     var lead = (sel.match(/^\s*/) || [''])[0];
     var tail = (sel.match(/\s*$/) || [''])[0];
     var core = sel.trim();
+    /* the spaces at either end stay outside the marks; a selection that is
+       only spaces is no selection, and gets the placeholder after it */
     if (core) { s += lead.length; e -= tail.length; sel = core; }
+    else { s = e; sel = ''; }
     var m = mark.length;
     if (sel.length >= 2 * m && sel.slice(0, m) === mark && sel.slice(-m) === mark) {
       var inner = sel.slice(m, -m);
       replaceRange(ta, s, e, inner, s, s + inner.length);
       return;
     }
-    /* the marks just outside the selection: bold on a bold word takes it
-       off. Italic on a BOLD word is the one it must not read that way, or
-       one star of each pair would go and the word would be left broken. */
-    var around = v.slice(s - m, s) === mark && v.slice(e, e + m) === mark;
-    var bolder = mark === '*' && v.charAt(s - 2) === '*' && v.charAt(e + 1) === '*';
-    if (sel && around && !bolder) {
+    /* THE MARKS JUST OUTSIDE THE SELECTION, counted as runs: bold is on
+       when two or more stars sit on each side, italic when an odd number
+       does (one, or the three of bold italic). So bold on a bold word and
+       italic on an italic or a bold-italic word take that mark off, while
+       italic on a merely BOLD word wraps it, since taking one star of each
+       pair would leave the word broken. A backtick has no runs to read. */
+    var ch = mark.charAt(0);
+    var rb = 0;
+    var ra = 0;
+    while (s - rb - 1 >= 0 && v.charAt(s - rb - 1) === ch) rb++;
+    while (e + ra < v.length && v.charAt(e + ra) === ch) ra++;
+    var on = mark === '`' ? rb === 1 && ra === 1
+      : mark === '**' ? rb >= 2 && ra >= 2
+        : rb % 2 === 1 && ra % 2 === 1;
+    if (sel && on) {
       replaceRange(ta, s - m, e + m, sel, s - m, s - m + sel.length);
       return;
     }
@@ -2710,7 +2732,10 @@
     var v = ta.value;
     var s = ta.selectionStart;
     var e = ta.selectionEnd;
-    var sel = v.slice(s, e).trim();
+    var raw = v.slice(s, e);
+    var sel = raw.trim();
+    /* the spaces at either end of the selection stay where they are */
+    if (sel) { s += raw.indexOf(sel); e = s + sel.length; } else { s = e; }
     var label;
     var url;
     var text;
@@ -2748,13 +2773,17 @@
     else if (cmd === 'hr') insertRule(ta);
   }
 
+  /** One choice for the page: every box on it (an answer box and an open
+      edit box can stand together) follows the switch that was pressed. */
   function toggleTips(btn, tips) {
     if (!tips) return;
     var off = !tips.hidden;
-    tips.hidden = off;
-    btn.setAttribute('aria-expanded', off ? 'false' : 'true');
-    btn.textContent = (off ? 'Show' : 'Hide') + ' formatting tips';
     try { localStorage.setItem(TIPS_KEY, off ? 'off' : 'on'); } catch (e) { /* a preference, nothing more */ }
+    Array.prototype.forEach.call(document.querySelectorAll('.oa-forum-editor .oa-forum-fmt'), function (row) { row.hidden = off; });
+    Array.prototype.forEach.call(document.querySelectorAll('.oa-forum-tbtips'), function (b) {
+      b.setAttribute('aria-expanded', off ? 'false' : 'true');
+      b.textContent = (off ? 'Show' : 'Hide') + ' formatting tips';
+    });
   }
 
   /** The toolbar, the shortcuts and the preview on one box. `box` is the
@@ -2855,8 +2884,14 @@
     return wrap;
   }
 
+  /** The guard's reason for a text as typed or as read (a split contact
+      detail is whole once drawn), the one way every text here is checked. */
+  function guardOf(text) {
+    return MK.checkRead(text, G.check);
+  }
+
   function liveGuard(ta, msgEl) {
-    var why = G.check(ta.value);
+    var why = guardOf(ta.value);
     msgEl.textContent = why ? G.WHY[why] : '';
     return !why;
   }
@@ -2903,7 +2938,7 @@
        joined by at most ONE separator each) is handed over single-spaced,
        which the guard refuses. Saying so on the press beats a refusal after
        the answer has been written. */
-    var badQuote = G.check(text);
+    var badQuote = guardOf(text);
     if (badQuote) { say(REASONS[badQuote] || 'That cannot be quoted.', true); return; }
     S.quote = { n: Number(p.n) || 0, by: p.by, text: text };
     var box = $('oa-forum-quotebox');
@@ -2925,7 +2960,7 @@
     var btn = wrap.querySelector('#oa-forum-send');
     var accept = wrap.querySelector('#oa-forum-accept');
     if (!body) { say('Write something first.', true); return; }
-    if (!liveGuard(ta, wrap.querySelector('#oa-forum-guardmsg'))) { say(REASONS[G.check(body)] || 'That cannot be posted.', true); return; }
+    if (!liveGuard(ta, wrap.querySelector('#oa-forum-guardmsg'))) { say(REASONS[guardOf(body)] || 'That cannot be posted.', true); return; }
     if (accept && !accept.checked) { say(REASONS.guide, true); accept.focus(); return; }
     btn.disabled = true;
     say('Posting…');
@@ -3397,9 +3432,9 @@
       var send = $('oa-forum-ask-send');
       if (input.value.trim()) add(input.value);
       if (!title) { say('Give the question a title.', true); titleEl.focus(); return; }
-      if (G.check(title)) { say(G.WHY[G.check(title)], true); titleEl.focus(); return; }
+      if (guardOf(title)) { say(G.WHY[guardOf(title)], true); titleEl.focus(); return; }
       if (!text) { say('Write the body of the question.', true); body.focus(); return; }
-      if (!liveGuard(body, guard)) { say(G.WHY[G.check(text)], true); body.focus(); return; }
+      if (!liveGuard(body, guard)) { say(G.WHY[guardOf(text)], true); body.focus(); return; }
       if (!M.tagsOk(tags)) { say(REASONS.tags, true); input.focus(); return; }
       if (accept && !accept.checked) { say(REASONS.guide, true); accept.focus(); return; }
       send.disabled = true;

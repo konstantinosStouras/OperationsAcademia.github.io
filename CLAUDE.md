@@ -4551,6 +4551,19 @@ rule dropped). Three things read `plain()` and had to, each pinned:
   fixture list, tag-stripped against plain, so a mark the renderer learns
   and the stripper does not fails the build.
 
+**THE GUARD READS THE POST TOO**, and the review that shipped this found the
+hole before a member did: `jane**@**mit.edu` passes `guard.check` on the
+bytes (the marks break the address) and is `jane@mit.edu` once drawn, and
+once excerpted onto the card everyone sees, so the toolbar would have been
+a way to publish exactly what rule 7 refuses. `checkRead(text, check)` in
+the markup module is the one definition, the text as typed OR as read, and
+every text a member sends goes through it: `textField` in `member.js` (the
+title and the body of a question, an answer, an edit), the quote in
+`post.js`, `guardOf` on the page (the live check under the box, the title,
+the quote on the press) and the shim. Pinned on six split forms, a phone
+and an ORCID iD among them, and driven against the real function in the
+emulator test.
+
 A link is `http`, `https` or `www` and nothing else, in brackets as well as
 bare: `[x](javascript:…)` is the text it is. The headings a post carries
 step down from the page's own: `#` and `##` are both an h3, the largest a

@@ -545,7 +545,12 @@
     }
     var threads = simThreads(Y, room);
     var guard = window.OAForumGuard;
-    function bad(text) { return guard && guard.check ? guard.check(String(text || '')) : ''; }
+    /* as typed and as read (member.js textField through markup.checkRead) */
+    function bad(text) {
+      if (!guard || !guard.check) return '';
+      var mkg = window.OAForumMarkup;
+      return mkg && mkg.checkRead ? mkg.checkRead(String(text || ''), guard.check) : guard.check(String(text || ''));
+    }
 
     /* THE WARM-UP the page sends when a reader starts writing or reaches for
        a vote button ({ room, warm: true }, _functions/forum/post.js and

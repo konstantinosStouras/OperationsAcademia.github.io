@@ -248,7 +248,7 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
          what the browser hands over, because a DOM selection has already
          collapsed the spaces. Two ordinary presses of the site's own Quote
          button, and a telephone number the guard refuses is published. */
-      const hit = guard.check(text);
+      const hit = markup.checkRead(text, guard.check);
       if (hit) P.refuse('invalid-argument', hit);
       /* @doc quote */
       quote = {

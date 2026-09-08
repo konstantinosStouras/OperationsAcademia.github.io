@@ -296,6 +296,13 @@ async function main() {
   await admin.collection('forumHandles').get().then((s) => Promise.all(s.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
   const qn = await call('forumPost', tokens.cand, { room: 'candidates', tid: fmt.result.tid, body: 'x', quote: { n: 1, text: 'bold sentence' } });
   ok(reason(qn) === 'quote', 'while words the post holds in neither form are refused');
+  /* THE GUARD READS THE POST TOO: a contact detail split by a mark passes
+     the guard on the bytes and is whole once drawn, so it is refused */
+  await admin.collection('forumHandles').get().then((s) => Promise.all(s.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const split = await call('forumPost', tokens.cand, { room: 'candidates', tid: fmt.result.tid, body: 'Write to jane**@**mit.edu about it.' });
+  ok(status(split) === 'INVALID_ARGUMENT' && reason(split) === 'email', 'an address split by a mark is refused as an address, since it reads whole');
+  const splitQ = await call('forumPost', tokens.cand, { room: 'candidates', tid: fmt.result.tid, body: 'Quoting.', quote: { n: 1, text: '`617` 253 1000' } });
+  ok(reason(splitQ) === 'quote' || reason(splitQ) === 'phone', 'and a quote is checked the same two ways');
 
   /* ------------------------------------------------------------- edit */
   console.log('\nforumEdit');

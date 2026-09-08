@@ -11387,6 +11387,15 @@ for (const w of [320, 360, 390, 430]) {
     eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), '**Two offers**', 'forum (candidate): Ctrl+B does the same from the keyboard');
     await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="undo"]');
     eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), 'Two offers', 'forum (candidate): Undo takes it back, since the button wrote through the browser\'s own insertText');
+    /* the marks around the words are counted as runs: italic on a
+       bold-italic word takes the italic off, italic on a bold word wraps it */
+    await q.fill('#oa-forum-ask-body', 'see ***both*** and **bold** here');
+    await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(7, 11); });
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="italic"]');
+    eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), 'see **both** and **bold** here', 'forum (candidate): italic on a bold-italic word takes the italic off and leaves the bold');
+    await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(19, 23); });
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="italic"]');
+    eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), 'see **both** and ***bold*** here', 'forum (candidate): …and italic on a bold word wraps it rather than breaking the bold');
     await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(0, 10); });
     await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="link"]');
     const linked = await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); return { v: t.value, sel: t.value.slice(t.selectionStart, t.selectionEnd) }; });
@@ -11398,6 +11407,11 @@ for (const w of [320, 360, 390, 430]) {
     ok(/^- \[Two offers\]/.test(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value)), 'forum (candidate): the list button prefixes the line the caret is on');
     await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="ul"]');
     ok(/^\[Two offers\]/.test(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value)), 'forum (candidate): …and a second press takes the prefix off');
+    /* THE GUARD READS THE POST TOO: an address split by a mark is refused
+       under the box as an address, since it is whole once drawn */
+    await q.fill('#oa-forum-ask-body', 'Write to jane**@**mit.edu about it.');
+    ok(/e-mail address/.test(await q.evaluate(() => document.getElementById('oa-forum-ask-guardmsg').textContent)),
+      'forum (candidate): an address split by a mark is refused under the box as an address, since it reads whole');
     /* the tips switch */
     await q.click('#oa-forum-askform .oa-forum-tbtips');
     const tipsOff = await q.evaluate(() => ({

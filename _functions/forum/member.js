@@ -207,11 +207,14 @@ function checkGap(c, now) {
   if (c.lastPostAt && now - c.lastPostAt < M.RATE.gapMs) refuse('resource-exhausted', 'gap');
 }
 
-/** A text field, bounded and guarded. `required` refuses an empty value. */
+/** A text field, bounded and guarded. `required` refuses an empty value.
+    The guard runs on the text as typed AND as read (markup.checkRead): a
+    contact detail split by a mark, jane**@**mit.edu, is whole once the
+    page draws it and once the excerpt is cut from it. */
 function textField(v, max, required) {
   const s = typeof v === 'string' ? v.trim() : '';
   if ((required && !s) || s.length > max) refuse('invalid-argument', 'bounds');
-  const hit = guard.check(s);
+  const hit = markup.checkRead(s, guard.check);
   if (hit) refuse('invalid-argument', hit);
   return s;
 }
