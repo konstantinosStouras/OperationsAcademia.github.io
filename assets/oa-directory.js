@@ -443,11 +443,11 @@
     var q = encodeURIComponent(card.institution);
     var foot = [];
     if (card.n) {
-      foot.push('<a href="jobs.html?institution=' + q + '">Current postings</a>');
-      foot.push('<a href="previous-markets.html?university=' + q + '">Past postings</a>');
+      foot.push('<a href="jobs?institution=' + q + '">Current postings</a>');
+      foot.push('<a href="previous-markets?university=' + q + '">Past postings</a>');
     }
-    foot.push('<a href="recent-faculty.html?placement=' + q + '">Recent hires</a>');
-    foot.push('<a href="recent-faculty.html?alma=' + q + '">PhD alumni</a>');
+    foot.push('<a href="recent-faculty?placement=' + q + '">Recent hires</a>');
+    foot.push('<a href="recent-faculty?alma=' + q + '">PhD alumni</a>');
     foot.push('<a href="./?c_affiliation=' + q + '#candidates">Candidates on the market</a>');
     if (state.user) {
       foot.push('<button type="button" class="oa-jobbtn oa-jobbtn-edit" data-dir-add="' +

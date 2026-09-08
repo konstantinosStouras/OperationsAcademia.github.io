@@ -572,16 +572,16 @@
              for). Every other visitor's menu is unchanged. */
           (adminish(u) ?
             '<div class="oa-acct-group">' +
-              '<a role="menuitem" href="admin-area.html">' +
+              '<a role="menuitem" href="admin-area">' +
                 '<span class="oa-mi" aria-hidden="true">' + ICON.admin + '</span>Admin area' +
                 '<span class="oa-acct-n" data-count="admin" hidden></span></a>' +
             '</div>' : '') +
           '<div class="oa-acct-group">' +
-            '<a role="menuitem" class="oa-acct-primary" href="account.html">' +
+            '<a role="menuitem" class="oa-acct-primary" href="account">' +
               '<span class="oa-mi" aria-hidden="true">&#128100;</span>My personal area</a>' +
           '</div>' +
           '<div class="oa-acct-group">' +
-            '<a role="menuitem" href="post-a-job.html">' +
+            '<a role="menuitem" href="post-a-job">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.post + '</span>Post a job</a>' +
             /* The two rows an account may not HOLD anything for (owner,
                2026-09-04: "my job postings should appear in the account menu
@@ -594,23 +594,23 @@
                row that may be wrong; the once-per-session refresh lands
                within a second, and the cache paints the final form before
                that on every later page. */
-            '<a role="menuitem" href="my-postings.html" data-held="postings" hidden>' +
+            '<a role="menuitem" href="my-postings" data-held="postings" hidden>' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.mine + '</span>My postings' +
               '<span class="oa-acct-n" data-count="postings" hidden></span></a>' +
             /* post-a-candidate.html sends an owner straight to their own
                profile (redirectToOwnProfile in oa-candidateform.js), so the
                row needs no document id — which the count() aggregate could
                not give it anyway. */
-            '<a role="menuitem" href="post-a-candidate.html" data-held="cands" hidden>' +
+            '<a role="menuitem" href="post-a-candidate" data-held="cands" hidden>' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.cand + '</span>My candidate profile' +
               '<span class="oa-acct-n" data-count="cands" hidden></span></a>' +
-            '<a role="menuitem" href="alerts.html">' +
+            '<a role="menuitem" href="alerts">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.alerts + '</span>E-mail alerts' +
               '<span class="oa-acct-n" data-count="alerts" hidden></span></a>' +
             /* The one badge here that does NOT count the cards its page
                lists: it counts what is UNREAD, because a conversation you
                have read is not an empty one. messages.html says so. */
-            '<a role="menuitem" href="messages.html">' +
+            '<a role="menuitem" href="messages">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.messages + '</span>Messages' +
               '<span class="oa-acct-n" data-count="messages" hidden></span></a>' +
             /* The forum. An ordinary row like Messages, drawn for every
@@ -621,13 +621,13 @@
                and stays so in step 1; step 3 (private messages) fills it
                under the same rule as every other badge here. */
             (FORUM_ANNOUNCED
-              ? '<a role="menuitem" href="forum.html">' +
+              ? '<a role="menuitem" href="forum">' +
                   '<span class="oa-mi" aria-hidden="true">' + ICON.forum + '</span>Forum' +
                   '<span class="oa-acct-n" data-count="forum" hidden></span></a>'
               : '') +
             '<button role="menuitem" type="button" id="oa-editprofile">' +
               '<span class="oa-mi" aria-hidden="true">&#9998;</span>Edit profile</button>' +
-            '<a role="menuitem" href="feedback.html">' +
+            '<a role="menuitem" href="feedback">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.feedback + '</span>Send feedback</a>' +
           '</div>' +
           '<button class="oa-acct-out" role="menuitem" type="button" id="oa-signout">' +
@@ -737,14 +737,14 @@
         esc(u.email || '') + '</span>' +
       // the maintainer's Admin area leads here too, above the personal area
       // (owner, 2026-08-24) — the same order the header menu draws
-      (adminish(u) ? '<a class="link depth-0" href="admin-area.html">Admin area</a>' : '') +
-      '<a class="link depth-0" href="account.html">My personal area</a>' +
+      (adminish(u) ? '<a class="link depth-0" href="admin-area">Admin area</a>' : '') +
+      '<a class="link depth-0" href="account">My personal area</a>' +
       // the same two held rows as the header menu, under the same rule —
       // hidden until paintCounts knows the account holds one (see paint())
-      '<a class="link depth-0" href="my-postings.html" data-held="postings" hidden>My postings</a>' +
-      '<a class="link depth-0" href="post-a-candidate.html" data-held="cands" hidden>My candidate profile</a>' +
-      '<a class="link depth-0" href="messages.html">Messages</a>' +
-      (FORUM_ANNOUNCED ? '<a class="link depth-0" href="forum.html">Forum</a>' : '') +
+      '<a class="link depth-0" href="my-postings" data-held="postings" hidden>My postings</a>' +
+      '<a class="link depth-0" href="post-a-candidate" data-held="cands" hidden>My candidate profile</a>' +
+      '<a class="link depth-0" href="messages">Messages</a>' +
+      (FORUM_ANNOUNCED ? '<a class="link depth-0" href="forum">Forum</a>' : '') +
       '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
       '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
     $('#oa-np-profile').addEventListener('click', function (e) {
@@ -1749,7 +1749,7 @@
     function firstRunDestination() {
       var here = location.pathname;
       if (/post-a-|alerts|feedback|my-postings/.test(here)) return '';
-      return 'account.html?welcome=1';
+      return 'account?welcome=1';
     }
 
     var wrap = document.createElement('div');
@@ -1815,8 +1815,8 @@
                 '<input type="text" name="orcid" maxlength="25" autocomplete="off" ' +
                   'placeholder="0000-0002-1825-0097"></label>' +
               '<label class="oa-terms-row"><input type="checkbox" name="terms">' +
-                '<span>I agree to the <a href="/terms-and-conditions.html" target="_blank" ' +
-                  'rel="noopener">Terms of Use</a> and <a href="/privacy-policy.html" ' +
+                '<span>I agree to the <a href="/terms-and-conditions" target="_blank" ' +
+                  'rel="noopener">Terms of Use</a> and <a href="/privacy-policy" ' +
                   'target="_blank" rel="noopener">Privacy Policy</a>.</span></label>'
             : '') +
           '<div class="oa-auth-actions">' +
@@ -1847,8 +1847,8 @@
               // scoped to labels, which this <p> is not
               ? '<p class="oa-auth-fine">' +
                   'By continuing with Google or ORCID you agree to the ' +
-                  '<a href="/terms-and-conditions.html" target="_blank" rel="noopener">Terms of Use</a> ' +
-                  'and <a href="/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.</p>'
+                  '<a href="/terms-and-conditions" target="_blank" rel="noopener">Terms of Use</a> ' +
+                  'and <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</p>'
               : '')
           : '') +
 
@@ -2214,7 +2214,7 @@
     if (!u || !window.OAFB || !OAFB.enabled) return Promise.reject(new Error('not-signed-in'));
 
     function fallback() {
-      return u.sendEmailVerification({ url: SITE + '/verify-email.html' })
+      return u.sendEmailVerification({ url: SITE + '/verify-email' })
         .then(function () { return { via: 'fallback' }; });
     }
 

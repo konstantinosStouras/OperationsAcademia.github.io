@@ -247,7 +247,7 @@
   ];
 
   var SITE = 'https://www.operationsacademia.org/';
-  var JOBS_PAGE = SITE + 'jobs.html';
+  var JOBS_PAGE = SITE + 'jobs';
 
   /* The one sentence this whole feature is answerable for, in the file
      itself — the reader is entitled to know what a download of "the job
@@ -352,8 +352,8 @@
       'date. Only the final one closes a search, and a posting with no final date ' +
       'is open until filled.']);
     aboutRows.push(['Not in this file', PRIVACY_NOTE]);
-    aboutRows.push(['Corrections', 'Spotted something misplaced? ' + SITE + 'feedback.html']);
-    aboutRows.push(['Terms', SITE + 'terms-and-conditions.html']);
+    aboutRows.push(['Corrections', 'Spotted something misplaced? ' + SITE + 'feedback']);
+    aboutRows.push(['Terms', SITE + 'terms-and-conditions']);
 
     return [
       {

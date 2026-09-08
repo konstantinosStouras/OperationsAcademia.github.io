@@ -39,6 +39,8 @@ function serve() {
       let file = path.join(ROOT, rel);
       if (!file.startsWith(ROOT)) { res.writeHead(403).end(); return; }
       if (existsSync(file) && statSync(file).isDirectory()) file = path.join(file, 'index.html');
+      /* Pages serves /jobs for jobs.html, and the site links that form */
+      if (!existsSync(file) && !path.extname(file) && existsSync(file + '.html')) file += '.html';
       if (!existsSync(file)) { res.writeHead(404).end('not found'); return; }
       res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' });
       createReadStream(file).pipe(res);
@@ -1636,7 +1638,7 @@ for (const [name, expect] of [
       createdAt: '2026-08-10T00:00:00.000Z',
     } }],
   };
-  const edited = await onSite('post-a-job.html?edit=j9', editSeed, async (q) => {
+  const edited = await onSite('post-a-job?edit=j9', editSeed, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
     await q.waitForFunction(() => document.getElementById('f-institution').value !== '',
       null, { timeout: 8000 });
@@ -1742,7 +1744,7 @@ for (const [name, expect] of [
     createdAt: '2026-08-20T00:00:00.000Z',
   } }] };
   const one = await onSite('post-a-candidate.html', oneSeed, async (q) => {
-    await q.waitForURL(/post-a-candidate\.html\?edit=c9/, { timeout: 10000 });
+    await q.waitForURL(/post-a-candidate\?edit=c9/, { timeout: 10000 });
     await q.waitForFunction(() => document.getElementById('f-first').value !== '',
       null, { timeout: 8000 });
     return q.evaluate(() => ({
@@ -1796,7 +1798,7 @@ for (const [name, expect] of [
   ok(new RegExp('You have a profile from the ' + (ly - 1) + '\u2013' + ly + ' job market: open it, ' +
      'or file one for the ' + (marketYear() - 1) + '\u2013' + marketYear() + ' market below\\.').test(last.msg),
     'last season: …and the older profile is named above it, with its market year');
-  eq(last.link, 'post-a-candidate.html?edit=c8',
+  eq(last.link, 'post-a-candidate?edit=c8',
     'last season: the message links straight to that profile');
 
   /* -- the candidate's PRIVATE view statistics (owner, 2026-09-04) ---------
@@ -1839,7 +1841,7 @@ for (const [name, expect] of [
     days: { [longAgo]: [10, 2], [today]: [2, 1] },
   } };
 
-  const heldPanel = await onSiteRouted('post-a-candidate.html?edit=c9', oneSeed,
+  const heldPanel = await onSiteRouted('post-a-candidate?edit=c9', oneSeed,
     { revealAt: '2099-01-01' }, readPanel);
   /* THE DAY AS THE SITE WRITES IT, asked of the module rather than typed: the
      panel used to compare a UTC calendar day against the date (the reading
@@ -1857,7 +1859,7 @@ for (const [name, expect] of [
     'as the site writes a day, never as a raw ISO string');
   ok(!/Opened \d/.test(heldPanel.text), 'and shows no count that would read as "nobody is interested"');
 
-  const shownPanel = await onSiteRouted('post-a-candidate.html?edit=c9',
+  const shownPanel = await onSiteRouted('post-a-candidate?edit=c9',
     { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: statsDoc }] },
     { revealAt: '2000-01-01' }, readPanel);
   ok(/Opened 12 times this season, 2 times in the last 7 days/.test(shownPanel.text),
@@ -1869,7 +1871,7 @@ for (const [name, expect] of [
     'and says the figures are private — naming the maintainer, who sees them on the ' +
     'Admin area inbox card, as the Privacy Policy does');
 
-  const hostilePanel = await onSiteRouted('post-a-candidate.html?edit=c9',
+  const hostilePanel = await onSiteRouted('post-a-candidate?edit=c9',
     { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: { ...statsDoc, stats: {
       opens: '<img src=x onerror=alert(1)>', cvClicks: -4, updatedAt: '<b>x</b>', days: 'nope',
     } } }] },
@@ -2806,7 +2808,7 @@ for (const [name, expect] of [
   // Edit leaves for the form carrying the document id, and does NOT expand
   const before = await j.$eval('#job-' + firstId + ' .oa-card-body', (n) => n.hidden);
   await j.click('.oa-jobbtn-edit');
-  await j.waitForURL(/post-a-job\.html\?edit=/, { timeout: 5000 });
+  await j.waitForURL(/post-a-job\?edit=/, { timeout: 5000 });
   ok(j.url().includes('edit=' + encodeURIComponent(firstId)),
     'jobs: Edit opens the form for that posting');
   ok(before, 'jobs: the card was closed before Edit was pressed');
@@ -3208,7 +3210,7 @@ for (const [pageName, pick] of [
   const someSchool = rf.find((r) => r.placement) || { placement: 'University' };
   const viaE = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   viaE.on('pageerror', (e) => jsErrors.push('recent-faculty filterE: ' + e.message));
-  await viaE.goto(BASE + 'recent-faculty.html?filterE=' +
+  await viaE.goto(BASE + 'recent-faculty?filterE=' +
     encodeURIComponent(someSchool.placement), { waitUntil: 'domcontentloaded' });
   await viaE.waitForSelector('.oa-card', { timeout: 15000 });
   const eCount = Number(((await viaE.$eval('.oa-count', (n) => n.textContent)).match(/\/\s*(\d+)/) || [])[1]);
@@ -3272,7 +3274,7 @@ for (const [pageName, pick] of [
     /* narrowed by university as well, because the list PAGINATES: a season
        holds far more than one page of postings, and "not on page 1" is not
        "not listed" */
-    await alsoUnder.goto(BASE + 'previous-markets.html?year=' + other +
+    await alsoUnder.goto(BASE + 'previous-markets?year=' + other +
       '&university=' + encodeURIComponent(one.institution),
       { waitUntil: 'domcontentloaded' });
     await alsoUnder.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
@@ -3288,7 +3290,7 @@ for (const [pageName, pick] of [
   const someInst = past[past.length - 1].institution.split(' ')[0];
   const viaD = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   viaD.on('pageerror', (e) => jsErrors.push('previous-markets filterD: ' + e.message));
-  await viaD.goto(BASE + 'previous-markets.html?filterD=' + encodeURIComponent(someInst),
+  await viaD.goto(BASE + 'previous-markets?filterD=' + encodeURIComponent(someInst),
     { waitUntil: 'domcontentloaded' });
   await viaD.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
   const dCount = Number(((await viaD.$eval('.oa-count', (n) => n.textContent)).match(/\/\s*(\d+)/) || [])[1]);
@@ -3318,7 +3320,7 @@ for (const [pageName, pick] of [
    default view is all postings folded in from data/jobs.json, which belong to
    the job editor and which this one refuses to touch. */
 for (const [pageName, dataset, patch] of [
-  ['previous-markets.html?year=2015', 'past-postings', { institution: 'Corrected Institution Name' }],
+  ['previous-markets?year=2015', 'past-postings', { institution: 'Corrected Institution Name' }],
   ['recent-faculty.html', 'recent-faculty', { name: 'Corrected Person Name' }],
 ]) {
   const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
@@ -3636,16 +3638,16 @@ for (const [pageName, listSel] of [
      the namespaced key that mount reads, rather than candidates.html, which
      redirects there and would drop the query on the way. */
   for (const [want, what] of [
-    ['recent-faculty.html?placement=', 'recent hires'],
-    ['recent-faculty.html?alma=', 'PhD alumni'],
+    ['recent-faculty?placement=', 'recent hires'],
+    ['recent-faculty?alma=', 'PhD alumni'],
     ['./?c_affiliation=', 'candidates'],
-    ['jobs.html?institution=', 'current openings'],
-    ['previous-markets.html?university=', 'past postings'],
+    ['jobs?institution=', 'current openings'],
+    ['previous-markets?university=', 'past postings'],
   ]) {
     ok(pop.links.some((h) => h.startsWith(want)),
       `universities: the popup links into ${what} pre-filtered`);
   }
-  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+\.html\?|\.\/\?)/.test(h)),
+  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+(\.html)?\?|\.\/\?)/.test(h)),
     'universities: every popup link is a page of this site or a real URL');
 
   /* NOTHING ON THE POPUP IS GREY, IN EITHER THEME.
@@ -3714,7 +3716,7 @@ for (const [pageName, listSel] of [
      the university's whole card, not a pin to hunt for. */
   const viaA = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   viaA.on('pageerror', (e) => jsErrors.push('universities filterA: ' + e.message));
-  await viaA.goto(BASE + 'universities.html?filterA=INSEAD', { waitUntil: 'domcontentloaded' });
+  await viaA.goto(BASE + 'universities?filterA=INSEAD', { waitUntil: 'domcontentloaded' });
   await viaA.waitForSelector('#oa-dir .oa-card, #oa-dir .oa-empty', { timeout: 15000 });
   eq(await viaA.$eval('#oa-dir .oa-chip .oa-chip-label', (n) => n.textContent), 'INSEAD',
     'universities: ?filterA lands on the cards as a chip, as it landed in the vendor filter');
@@ -3815,7 +3817,7 @@ for (const [pageName, listSel] of [
      the archive covers brings them onto the first page. */
   const p2 = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
   p2.on('pageerror', (e) => jsErrors.push('overrides/own2: ' + e.message));
-  await p2.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p2.goto(BASE + 'previous-markets?year=2015', { waitUntil: 'domcontentloaded' });
   await p2.waitForSelector('.oa-card');
   await p2.waitForTimeout(600);
   await p2.evaluate(() => window.OARowEdit.__setForTest('past-postings',
@@ -3869,7 +3871,7 @@ for (const [pageName, listSel] of [
   /* A season only the ARCHIVE covers, so every card is a row this editor owns
      — the folded-in postings from data/jobs.json are another editor's, and it
      refuses to touch them (the block above). */
-  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p.goto(BASE + 'previous-markets?year=2015', { waitUntil: 'domcontentloaded' });
   await p.waitForSelector('.oa-card');
   await p.waitForTimeout(600);
 
@@ -3964,7 +3966,7 @@ for (const [pageName, sel, least, mapBtn] of [
      signed-out visitor never sees a body to smuggle anything into. */
   const { ctx: xCtx, page: p, errors: xErrs } = await signedInPage(
     // an archive season, so the row is one this editor owns (see above)
-    'previous-markets.html?year=2015');
+    'previous-markets?year=2015');
   await p.waitForTimeout(400);
 
   const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
@@ -4280,7 +4282,7 @@ for (const [url, marker] of [
 
 /* -- the preview stubs, and the addresses the one-pager absorbed --------- */
 for (const [from, to] of [
-  ['v3/', '/'], ['v3/jobs.html', '/jobs.html'], ['v3/post-a-job.html', '/post-a-job.html'],
+  ['v3/', '/'], ['v3/jobs.html', '/jobs'], ['v3/post-a-job.html', '/post-a-job'],
 ]) {
   const q = await browser.newPage();
   await q.goto(BASE + from, { waitUntil: 'domcontentloaded' });
@@ -4327,9 +4329,9 @@ for (const [from, hash] of [
     const menu = document.createElement('div');
     menu.className = 'oa-acct-menu';
     menu.innerHTML =
-      '<a href="my-postings.html"><span class="oa-mi">x</span>My postings' +
+      '<a href="my-postings"><span class="oa-mi">x</span>My postings' +
         '<span class="oa-acct-n" data-count="postings" hidden></span></a>' +
-      '<a href="alerts.html"><span class="oa-mi">x</span>E-mail alerts' +
+      '<a href="alerts"><span class="oa-mi">x</span>E-mail alerts' +
         '<span class="oa-acct-n" data-count="alerts" hidden></span></a>';
     document.body.appendChild(menu);
     const paint = (counts) => {
@@ -4408,13 +4410,13 @@ for (const [from, hash] of [
         badge: badge ? (badge.hidden ? '' : badge.textContent) : null };
     };
     return {
-      menuPostings: row('#oa-menu', 'my-postings.html'),
-      menuCand: row('#oa-menu', 'post-a-candidate.html'),
-      sheetPostings: row('#oa-np', 'my-postings.html'),
-      sheetCand: row('#oa-np', 'post-a-candidate.html'),
-      alerts: row('#oa-menu', 'alerts.html'),
-      messages: row('#oa-menu', 'messages.html'),
-      area: row('#oa-menu', 'account.html'),
+      menuPostings: row('#oa-menu', 'my-postings'),
+      menuCand: row('#oa-menu', 'post-a-candidate'),
+      sheetPostings: row('#oa-np', 'my-postings'),
+      sheetCand: row('#oa-np', 'post-a-candidate'),
+      alerts: row('#oa-menu', 'alerts'),
+      messages: row('#oa-menu', 'messages'),
+      area: row('#oa-menu', 'account'),
     };
   });
   async function heldRows(name, docs) {
@@ -4427,8 +4429,8 @@ for (const [from, hash] of [
     await q.click('#oa-chip');
     const rows = await readRows(q);
     const shown = {
-      postings: await q.locator('#oa-menu a[href="my-postings.html"]').isVisible(),
-      cand: await q.locator('#oa-menu a[href="post-a-candidate.html"]').isVisible(),
+      postings: await q.locator('#oa-menu a[href="my-postings"]').isVisible(),
+      cand: await q.locator('#oa-menu a[href="post-a-candidate"]').isVisible(),
     };
     eq(errors, [], `held rows (${name}): no uncaught script error`);
     return { ctx, q, rows, shown };
@@ -4490,9 +4492,9 @@ for (const [from, hash] of [
       'held rows: a WITHDRAWN profile still counts — it exists and is its owner\'s to restore');
     ok(!rows.sheetCand.hidden && rows.sheetPostings.hidden,
       'held rows: the phone sheet draws My candidate profile and not My postings');
-    eq(await q.locator('#oa-menu a[href="post-a-candidate.html"]').getAttribute('href'),
-      'post-a-candidate.html',
-      'held rows: the row opens post-a-candidate.html, which sends an owner to their own profile');
+    eq(await q.locator('#oa-menu a[href="post-a-candidate"]').getAttribute('href'),
+      'post-a-candidate',
+      'held rows: the row opens post-a-candidate, which sends an owner to their own profile');
     await ctx.close();
   }
 
@@ -4507,7 +4509,7 @@ for (const [from, hash] of [
       const el = document.getElementById('pa-cand-card');
       return { href: el.getAttribute('href'), h3: el.querySelector('h3').textContent.trim() };
     });
-    eq(card.href, 'post-a-candidate.html?edit=held-c1',
+    eq(card.href, 'post-a-candidate?edit=held-c1',
       'personal area: the candidate card links straight to the profile the account holds');
     ok(/Your candidate profile/.test(card.h3), 'personal area: …and reads "Your candidate profile"');
     /* and, holding the real lists, it corrected the menu's cache for free */
@@ -4527,7 +4529,7 @@ for (const [from, hash] of [
       const el = document.getElementById('pa-cand-card');
       return { href: el.getAttribute('href'), h3: el.querySelector('h3').textContent.trim() };
     });
-    eq(card.href, 'post-a-candidate.html',
+    eq(card.href, 'post-a-candidate',
       'personal area: with no profile the card still offers the form');
     ok(/^Candidate profile$/.test(card.h3.replace(/^\S+\s*/, '')) || /Candidate profile/.test(card.h3),
       'personal area: …and reads "Candidate profile", not "Your"');
@@ -4852,7 +4854,7 @@ for (const [from, hash] of [
     });
     eq(idRow.label, 'OA posting ID', `${pageName}: the last row is the posting's ID`);
     eq(idRow.text, idRow.id, `${pageName}: …showing the id the card itself carries`);
-    eq(idRow.href, `${pageName}?job=${encodeURIComponent(idRow.id)}`,
+    eq(idRow.href, `${pageName.replace(/\.html$/, '')}?job=${encodeURIComponent(idRow.id)}`,
       `${pageName}: …as a link to this one posting on this page`);
     eq(idRow.cell, idRow.id,
       `${pageName}: …and the cell holds that one identifier and nothing beside it`);
@@ -5677,9 +5679,9 @@ for (const w of [320, 360, 390, 430]) {
     const expected = 3 + 2 + metaHeld + 2 + newsPending + 1;
     const { ctx, q, errors } = await adminAreaPage(ADMIN, 'index.html');
     await q.waitForSelector('#oa-chip', { timeout: 10000 });
-    eq(await q.locator('#oa-menu a[href="admin-area.html"]').count(), 1,
+    eq(await q.locator('#oa-menu a[href="admin-area"]').count(), 1,
       'admin area: the resolved admin session draws the menu row');
-    eq(await q.locator('#oa-np a[href="admin-area.html"]').count(), 1,
+    eq(await q.locator('#oa-np a[href="admin-area"]').count(), 1,
       'admin area: and the mobile sheet panel carries it too');
     await q.waitForFunction((want) => {
       const el = document.querySelector('#oa-menu .oa-acct-n[data-count="admin"]');
@@ -5872,11 +5874,11 @@ for (const w of [320, 360, 390, 430]) {
        is how this was reported. */
     ok(await q.locator('#oa-review-years').isVisible(),
       'admin area: the market-year filter is on screen for the user tab');
-    eq(await q.locator('#oa-review-list a[href="post-a-job.html?edit=u1"]').count(), 1,
+    eq(await q.locator('#oa-review-list a[href="post-a-job?edit=u1"]').count(), 1,
       'admin area: a user-added card opens the poster’s own form to correct it');
 
     // ticking one off writes the one stamp, and the tab count follows live
-    await q.click('article:has(a[href="post-a-job.html?edit=u1"]) button[data-act="reviewed"]');
+    await q.click('article:has(a[href="post-a-job?edit=u1"]) button[data-act="reviewed"]');
     await q.waitForFunction(() => {
       const d = window.__fb.docs['jobSubmissions/u1'];
       return d && typeof d.reviewedAt === 'string' && d.reviewedAt.length > 0;
@@ -6022,10 +6024,10 @@ for (const w of [320, 360, 390, 430]) {
       eq(await q.locator(`#oa-aa-yc-list a[href="${want}"]`).count(), 1,
         `admin area: ${p.institution.slice(0, 24)} is opened at ${want}`);
     }
-    eq(await q.locator('#oa-aa-yc-list a[href^="jobs.html#job-"]').count(), 0,
+    eq(await q.locator('#oa-aa-yc-list a[href^="jobs#job-"], #oa-aa-yc-list a[href^="jobs.html#job-"]').count(), 0,
       'admin area: and no card still links a fragment, which nothing ever acted on');
     eq(await q.locator(
-      '#oa-aa-yc-list a[href="previous-markets.html?job=2025-rolled-university-20240901"]')
+      '#oa-aa-yc-list a[href="previous-markets?job=2025-rolled-university-20240901"]')
       .count(), 1,
       'admin area: a posting whose season has closed is opened on Previous ' +
       'markets — the owner’s own case, which the jobs page could not show');
@@ -6403,7 +6405,7 @@ for (const w of [320, 360, 390, 430]) {
   {
     const { ctx, q } = await adminAreaPage(NOBODY, 'index.html');
     await q.waitForSelector('#oa-chip', { timeout: 10000 });
-    eq(await q.locator('#oa-menu a[href="admin-area.html"]').count(), 0,
+    eq(await q.locator('#oa-menu a[href="admin-area"]').count(), 0,
       'admin area: a resolved non-admin session gets no menu row');
     await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
     await q.waitForTimeout(600);
@@ -7234,7 +7236,7 @@ for (const w of [320, 360, 390, 430]) {
   {
     /* edit mode: the loaded profile is drawn, and typing previews the
        updated-on line SAVING would earn */
-    const { ctx, page: q, errors } = await signedInPage('post-a-candidate.html?edit=cand-me',
+    const { ctx, page: q, errors } = await signedInPage('post-a-candidate?edit=cand-me',
       { docs: [{ path: mine.path, data: { ...mine.data, updatedAt: undefined } }],
         selector: '#oa-cand-preview .oa-card-title' });
     const before = await q.evaluate(() => ({
@@ -7334,7 +7336,7 @@ for (const w of [320, 360, 390, 430]) {
   /* -- a phone --------------------------------------------------------- */
   for (const [url, selector, docs] of [
     ['account.html', '#pa-cand-preview:not([hidden]) .oa-card', [mine]],
-    ['post-a-candidate.html?edit=cand-me', '#oa-cand-preview .oa-card-title', [mine]],
+    ['post-a-candidate?edit=cand-me', '#oa-cand-preview .oa-card-title', [mine]],
   ]) {
     const { ctx, page: q } = await signedInPage(url, { docs, selector,
       viewport: { width: 390, height: 844 } });
@@ -7860,14 +7862,14 @@ for (const w of [320, 360, 390, 430]) {
 
     /* a link from the single-choice days names ONE value, and still selects it;
        the older "a|b" join, which links in the wild still carry, selects both */
-    await q.goto(BASE + 'jobs.html?level=' + encodeURIComponent(L[0]) +
+    await q.goto(BASE + 'jobs?level=' + encodeURIComponent(L[0]) +
       '&chars=' + encodeURIComponent(c0), { waitUntil: 'load' });
     await q.waitForSelector('.oa-card, .oa-empty');
     await q.waitForTimeout(400);
     eq(await shown(), allOf(anyOf(rows, [L[0]]), [c0]).length,
       'multi: a one-value link from the radio days still selects what it names');
     eq(await chips(), [L[0], c0], 'multi: …as one chip each');
-    await q.goto(BASE + 'jobs.html?chars=' + encodeURIComponent(C.join('|')), { waitUntil: 'load' });
+    await q.goto(BASE + 'jobs?chars=' + encodeURIComponent(C.join('|')), { waitUntil: 'load' });
     await q.waitForSelector('.oa-card, .oa-empty');
     await q.waitForTimeout(400);
     eq(await shown(), allOf(rows, C).length,
@@ -7903,7 +7905,7 @@ for (const w of [320, 360, 390, 430]) {
       [opts[1].v], 'one: a second choice REPLACES the first');
     eq(new URL(p.url()).searchParams.getAll('level'), [opts[1].v],
       'one: …and the address names one value');
-    await p.goto(BASE + 'previous-markets.html?level=' + encodeURIComponent(opts[0].v) +
+    await p.goto(BASE + 'previous-markets?level=' + encodeURIComponent(opts[0].v) +
       '&level=' + encodeURIComponent(opts[1].v), { waitUntil: 'load' });
     await p.waitForSelector('.oa-card, .oa-empty');
     await p.waitForTimeout(400);
@@ -9135,7 +9137,7 @@ for (const w of [320, 360, 390, 430]) {
   const LEVEL = pick.levels[0], CHAR = pick.characteristics[0], COUNTRY = pick.country;
   const TERM = pick.institution.slice(0, 6);
   const enc = encodeURIComponent;
-  const SEARCH = `jobs.html?institution=${enc(TERM)}&level=${enc(LEVEL)}` +
+  const SEARCH = `jobs?institution=${enc(TERM)}&level=${enc(LEVEL)}` +
     `&country=${enc(COUNTRY)}&chars=${enc(CHAR)}`;
 
   /* -- signed OUT: the sign-in box, and no navigation --------------------- */
@@ -9153,7 +9155,7 @@ for (const w of [320, 360, 390, 430]) {
        nudge, and what is under test is the module's own gate */
     await q.evaluate(() => document.querySelector('.oa-alert-save').click());
     await q.waitForTimeout(1000);
-    ok(/jobs\.html$/.test(new URL(q.url()).pathname),
+    ok(/\/jobs$/.test(new URL(q.url()).pathname),
       'save-search: pressing it signed out goes NOWHERE');
     ok(await q.evaluate(() => !!document.querySelector('.oa-modal')),
       'save-search: …it offers the sign-in box instead');
@@ -9206,7 +9208,7 @@ for (const w of [320, 360, 390, 430]) {
     eq(row.rows, 2, `save-search: the bar is still two rows deep (${row.rows})`);
 
     await q.click('.oa-alert-save');
-    await q.waitForURL(/alerts\.html/, { timeout: 15000 });
+    await q.waitForURL(/\/alerts(\?|$)/, { timeout: 15000 });
     await q.waitForSelector('#oa-prefill-note:not([hidden])', { timeout: 15000 });
     await q.waitForTimeout(250);
     const landed = await q.evaluate(([level, country]) => {
@@ -9261,7 +9263,7 @@ for (const w of [320, 360, 390, 430]) {
   /* -- arriving signed OUT on the alerts page keeps the prefill ------------ */
   {
     const { ctx, page: q, errors } = await signedOutPage(
-      `alerts.html?prefill=1&level=${enc(LEVEL)}&dropped=chars`, { wait: false });
+      `alerts?prefill=1&level=${enc(LEVEL)}&dropped=chars`, { wait: false });
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
     await q.waitForSelector('#oa-needauth:not([hidden])', { timeout: 15000 });
@@ -9434,7 +9436,7 @@ for (const w of [320, 360, 390, 430]) {
     }, UNVERIFIED.uid);
     ok(fb.callable >= 0 && fb.fallback > fb.callable,
       'verify: with the function not deployed, the card tries it and then FALLS BACK to sendEmailVerification');
-    eq(fb.url, 'https://www.operationsacademia.org/verify-email.html',
+    eq(fb.url, 'https://www.operationsacademia.org/verify-email',
       'verify: …landing Firebase\'s own link on the site\'s verify page');
     ok(/firebaseapp\.com/.test(fb.from) && /Sent to/.test(fb.msg),
       'verify: …and the sender line then names Firebase\'s address, so the reader knows what to look for');
@@ -9604,8 +9606,8 @@ for (const w of [320, 360, 390, 430]) {
   }
 
   /* -- verify-email.html: where the link lands ------------------------------ */
-  const LINK = 'verify-email.html?mode=verifyEmail&oobCode=AbC123xyz&continueUrl=' +
-    encodeURIComponent('https://www.operationsacademia.org/account.html');
+  const LINK = 'verify-email?mode=verifyEmail&oobCode=AbC123xyz&continueUrl=' +
+    encodeURIComponent('https://www.operationsacademia.org/account');
 
   {
     // the signed-in pending reader, whose link works. The registration form
@@ -9639,7 +9641,7 @@ for (const w of [320, 360, 390, 430]) {
       'verify page: …and the keyboard lands on its heading, so a screen reader hears the outcome');
     eq(done.url, '', 'verify page: the one-time code is off the address bar');
     ok(/ready to use/.test(done.note), 'verify page: the card\'s own note stands for a confirmed account');
-    ok(done.contShown && done.contHref === 'account.html' && !done.signinShown,
+    ok(done.contShown && done.contHref === 'account' && !done.signinShown,
       'verify page: …with Continue to your account for the signed-in reader');
     ok(done.applied && done.applied.path === 'AbC123xyz',
       'verify page: the code on the address is the one applied');
@@ -9679,7 +9681,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(box.countShown && /Taking you to your account in [1-5] seconds?\./.test(box.count),
       'verify page: …saying it will move on in a few seconds');
     eq(errors, [], 'verify page: no uncaught script error while the box counts down');
-    await q.waitForURL(/account\.html$/, { timeout: 9000 });
+    await q.waitForURL(/\/account$/, { timeout: 9000 });
     ok(true, 'verify page: after five seconds the reader is on the account page without pressing anything');
     await ctx.close();
   }
@@ -9697,7 +9699,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForFunction(() => /Press Continue when you are ready/.test(document.getElementById('ve-count').textContent), null, { timeout: 8000 });
     await q.waitForTimeout(6000);
     const held = await q.evaluate(() => ({
-      here: /verify-email\.html/.test(location.pathname),
+      here: /\/verify-email$/.test(location.pathname),
       modal: !!document.querySelector('#oa-profile [aria-modal="true"]'),
       cont: !document.getElementById('ve-continue').hidden,
     }));
@@ -10208,7 +10210,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(cal.events.every((e) => ticked.some((id) => e.UID.value.includes(id))), 'calendar: every entry is one of the ticked postings');
     ok(cal.events.every((e) => e.DTSTART.params.VALUE === 'DATE' && e.TRANSP.value === 'TRANSPARENT'),
       'calendar: every entry is an all-day, transparent reminder');
-    ok(cal.events.every((e) => /jobs\.html\?job=/.test(e.URL.value)), 'calendar: each links its permalink on the jobs page');
+    ok(cal.events.every((e) => /\/jobs\?job=/.test(e.URL.value)), 'calendar: each links its permalink on the jobs page');
     ok(noAddress(text), 'calendar: no contact address reaches the reader\'s machine');
     eq(cal.props.VERSION, '2.0', 'calendar: …and it is a calendar');
     const yr = await q.evaluate(() => OAJobNav.marketYear(new Date()));
@@ -10648,7 +10650,7 @@ for (const w of [320, 360, 390, 430]) {
       if (!c) return null;
       return { tag: c.tagName, href: c.getAttribute('href') || '', inButton: !!c.closest('.oa-card-head') };
     });
-    ok(chip && chip.tag === 'A' && /^forum\.html\?/.test(chip.href) && !chip.inButton,
+    ok(chip && chip.tag === 'A' && /^forum\?/.test(chip.href) && !chip.inButton,
       `forum (candidate): a card's tag chip is a link beside the head button, not a span inside it (${JSON.stringify(chip)})`);
     eq(geom.answers, 1, 'forum (candidate): and the answer count is printed once, in the tally');
     eq(geom.replies, 0, 'forum (candidate): the card says answers, never replies');
@@ -11447,7 +11449,7 @@ for (const w of [320, 360, 390, 430]) {
       { path: `${T}/seed-t3/posts/seed-t3-p2`, data: { season: FY, room: 'candidates', tid: 'seed-t3', n: 2, by: 'patient owl 7',
         body: 'An answer that must stay reachable by its own author.', t: OLD, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
     ];
-    const { ctx, page: q, errors } = await signedInPage('forum.html?room=candidates&t=seed-t3',
+    const { ctx, page: q, errors } = await signedInPage('forum?room=candidates&t=seed-t3',
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...HEADLESS], selector: '#oa-forum' });
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
     const asker = await q.evaluate(() => {
@@ -11465,7 +11467,7 @@ for (const w of [320, 360, 390, 430]) {
     /* the maintainer, as the block below defines them (that constant is its own) */
     const MAINTAINER = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
       emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
-    const m = await signedInPage('forum.html?room=candidates&t=seed-t3',
+    const m = await signedInPage('forum?room=candidates&t=seed-t3',
       { user: MAINTAINER, docs: [CAND_PROFILE, ...SEEDED, ...HEADLESS], selector: '#oa-forum' });
     await m.page.waitForSelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]:not([disabled])', { timeout: 15000 });
     let closeDialog = '';
@@ -11492,7 +11494,7 @@ for (const w of [320, 360, 390, 430]) {
       { path: `${PT}/old-t1/posts/old-p1`, data: { season: PY, room: 'candidates', tid: 'old-t1', n: 1, by: 'brisk marten 3',
         body: 'Weeks, in my case. Three to five after the flyout.', t: OLD, up: 5, down: 1, quote: null, hidden: false, hiddenBy: '' } },
     ];
-    const { ctx, page: q, errors } = await signedInPage(`forum.html?room=candidates&season=${PY}`,
+    const { ctx, page: q, errors } = await signedInPage(`forum?room=candidates&season=${PY}`,
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...archive], selector: '#oa-forum' });
     await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
     const arc = await q.evaluate(() => ({

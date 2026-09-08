@@ -215,7 +215,7 @@ async function main() {
     let generated = '';
     try {
       generated = await fb.auth.generateEmailVerificationLink(email, {
-        url: SITE + '/account.html',
+        url: SITE + '/account',
       });
     } catch (e) {
       failed++;
@@ -327,8 +327,8 @@ async function selftest() {
 
   /* --- the message, worded for a member ------------------------------------ */
   const site = 'https://www.operationsacademia.org';
-  const link = `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC123xyz` +
-    `&continueUrl=${encodeURIComponent(site + '/account.html')}`;
+  const link = `${site}/verify-email?mode=verifyEmail&oobCode=AbC123xyz` +
+    `&continueUrl=${encodeURIComponent(site + '/account')}`;
   const fresh = V.renderVerifyEmail({ firstName: 'Ada', email: 'ada@example.edu', link });
   const member = V.renderVerifyEmail({ firstName: 'Ada', email: 'ada@example.edu', link,
     existing: { since: '2025-03-05T10:00:00Z' } });
@@ -372,11 +372,11 @@ async function selftest() {
   const minted = 'https://operations-academia.firebaseapp.com/__/auth/action?mode=verifyEmail' +
     '&oobCode=AbC%2F123&continueUrl=https%3A%2F%2Fwww.operationsacademia.org%2Faccount.html&lang=en';
   eq(V.siteVerifyLink(minted, site),
-    `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC%2F123&continueUrl=${encodeURIComponent(site + '/account.html')}`,
+    `${site}/verify-email?mode=verifyEmail&oobCode=AbC%2F123&continueUrl=${encodeURIComponent(site + '/account')}`,
     'siteVerifyLink moves the code onto the site\'s own page with the account page as continueUrl');
   eq(V.siteVerifyLink('https://x.test/?mode=verifyEmail', site), '', 'and answers nothing when there is no code');
   eq(V.siteVerifyLink('not a url', site), '', 'or no address at all, rather than throwing');
-  ok(V.siteVerifyLink(minted, site + '/').indexOf(site + '/verify-email.html') === 0,
+  ok(V.siteVerifyLink(minted, site + '/').indexOf(site + '/verify-email') === 0,
     'a trailing slash on the site root is folded');
 
   /* --- the file's own source: the guards that keep the log clean ------------ */
@@ -410,9 +410,9 @@ async function selftest() {
     'the --scan and --dry-run branches return BEFORE any code is minted');
   ok(noTx > 0 && noTx < body.indexOf('listUsers('),
     'and a run with no SMTP returns before the account list is read, so nothing is minted for a message that cannot go');
-  ok(/url: SITE \+ '\/account\.html'/.test(body), 'the link is minted with the account page as its continue URL');
+  ok(/url: SITE \+ '\/account'/.test(body), 'the link is minted with the account page as its continue URL');
   ok(/V\.siteVerifyLink\(generated, SITE\)/.test(body), 'and rewritten by the shared helper, never inline');
-  ok(!/oobCode/.test(body) && !/verify-email\.html/.test(body),
+  ok(!/oobCode/.test(body) && !/verify-email/.test(body),
     'no inline copy of the rewrite exists here');
   ok(/existing: \{ since: stamp\(user\.metadata && user\.metadata\.creationTime\) \|\| null \}/.test(body),
     'the message is rendered for a member, dated from Auth\'s creationTime');

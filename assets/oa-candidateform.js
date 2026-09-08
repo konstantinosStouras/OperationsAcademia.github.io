@@ -1067,11 +1067,11 @@
     if (intro) {
       intro.innerHTML = '<p><strong>You are editing your profile.</strong> You can change ' +
         'anything, at any time. Once this season\'s profiles have been revealed, a change ' +
-        'you save reaches the <a href="candidates.html">candidates page</a> within a few ' +
+        'you save reaches the <a href="candidates">candidates page</a> within a few ' +
         'minutes and the card then says when you last updated it; until the reveal your ' +
         'profile stays private and goes public with everyone else\'s at 14:00 UTC on the ' +
         'reveal date, changes included. The card below shows how it will appear, and so ' +
-        'does your <a href="account.html">account page</a>. The posting date does not change.</p>';
+        'does your <a href="account">account page</a>. The posting date does not change.</p>';
     }
 
     /* The three file verbs, said where the reader is looking: the same widget
@@ -1181,12 +1181,12 @@
           var done = $('oa-done');
           done.innerHTML =
             '<h3>Your profile has been taken down.</h3>' +
-            '<p>It disappears from the <a href="candidates.html">candidates page</a> ' +
+            '<p>It disappears from the <a href="candidates">candidates page</a> ' +
             'within a few minutes, or is left out of the reveal if that is still to come. ' +
             'Nothing is deleted: to put it back, sign in and edit it again, and saving ' +
             're-publishes it.</p>' +
             '<p class="oa-done-actions">' +
-            '<a class="button blue" href="candidates.html">Back to the candidates</a></p>';
+            '<a class="button blue" href="candidates">Back to the candidates</a></p>';
           show($('oa-cand-form'), false);
           show($('oa-cand-preview'), false);
           show($('oa-intro'), false);
@@ -1353,7 +1353,7 @@
               (olderYear ? 'the ' + (olderYear - 1) + '\u2013' + olderYear + ' job market' :
                 'a previous job market') + ': '));
             var a = document.createElement('a');
-            a.href = 'post-a-candidate.html?edit=' + encodeURIComponent(older);
+            a.href = 'post-a-candidate?edit=' + encodeURIComponent(older);
             a.textContent = 'open it';
             msg.appendChild(a);
             msg.appendChild(document.createTextNode(', or file one for the ' + (season - 1) +
@@ -1364,7 +1364,7 @@
         }
         say('You already have a profile for the ' + (season - 1) + '–' + season +
             ' job market — opening it for editing. One profile per market year.');
-        location.replace('post-a-candidate.html?edit=' + encodeURIComponent(found));
+        location.replace('post-a-candidate?edit=' + encodeURIComponent(found));
       }).catch(function (err) {
         if (window.console) console.warn('one-profile check:', err);
       });
@@ -1470,13 +1470,13 @@
             done.innerHTML =
               '<h3>Your changes have been saved.</h3>' +
               '<p>After the reveal, a change reaches the ' +
-              '<a href="candidates.html">candidates page</a> within a few minutes and ' +
+              '<a href="candidates">candidates page</a> within a few minutes and ' +
               'the card says when you last updated it; before it, your profile stays ' +
               'private and goes live with everyone else\'s at 14:00 UTC on the reveal ' +
               'date, changes included. You can see it as it will appear on your ' +
-              '<a href="account.html">account page</a>, and edit it again at any time.</p>' +
+              '<a href="account">account page</a>, and edit it again at any time.</p>' +
               '<p class="oa-done-actions">' +
-              '<a class="button blue" href="candidates.html">Back to the candidates</a></p>';
+              '<a class="button blue" href="candidates">Back to the candidates</a></p>';
           } else {
             $('oa-ref').textContent = ref || '—';
           }

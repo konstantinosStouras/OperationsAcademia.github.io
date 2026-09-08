@@ -971,11 +971,11 @@ async function testMyPostingsPage() {
     'the page reads ONLY the signed-in poster\'s own documents');
   ok(/status:\s*'withdrawn'/.test(js) && !/\.delete\(/.test(js),
     'taking down is a status change, never a document delete');
-  ok(/post-a-job\.html\?edit=/.test(js),
+  ok(/post-a-job\?edit=/.test(js),
     'Edit goes through the same editor as the public list');
 
   const acct = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
-  ok((acct.match(/my-postings\.html/g) || []).length >= 2,
+  ok((acct.match(/href="my-postings"/g) || []).length >= 2,
     'both account menus (header and phone panel) link My postings');
 }
 
@@ -1618,21 +1618,21 @@ async function testJobNavModule() {
     posted: '2025-09-24', applyByDate: '2026-07-28', year: 2026 };
   const MCGILL = { id: '2026-mcgill-university-20260728',
     posted: '2026-07-28', applyByDate: '', year: 2026 };
-  eq(NAV.pageFor(NANYANG, NOW), 'previous-markets.html',
+  eq(NAV.pageFor(NANYANG, NOW), 'previous-markets',
     'a posting whose season has closed is opened on Previous markets');
-  eq(NAV.pageFor(MCGILL, NOW), 'jobs.html',
+  eq(NAV.pageFor(MCGILL, NOW), 'jobs',
     'and one still in the season under way on the jobs page');
   eq(NAV.hrefFor(NANYANG, NOW),
-    'previous-markets.html?job=2026-nanyang-technological-university-20250924',
+    'previous-markets?job=2026-nanyang-technological-university-20250924',
     'the link names the page AND the one posting — never a bare list');
   ok(!NAV.hrefFor(NANYANG, NOW).includes('#'),
     'and never a fragment: a card only exists while it is on the page being ' +
     'shown, one of ten, in a list built after the browser has looked for it');
   eq(NAV.pageLabelFor(NANYANG, NOW), 'Previous markets',
     'and the card can say where it is sending the maintainer');
-  eq(NAV.otherPage('/previous-markets.html'), 'jobs.html',
+  eq(NAV.otherPage('/previous-markets'), 'jobs',
     'each page can name the other for the "not here" message');
-  eq(NAV.otherPage('/jobs.html'), 'previous-markets.html', 'both ways');
+  eq(NAV.otherPage('/jobs'), 'previous-markets', 'both ways');
 
   // an id is a query VALUE, so it is encoded — a row id is built from a name
   ok(NAV.hrefFor({ id: 'a b&c', posted: '2026-08-01', year: 2026 }, NOW)
@@ -1717,8 +1717,8 @@ async function testJobNavModule() {
     'and the "not on this page" way out carries the id, so the recovery path ' +
     'is not the bare list this whole mode exists to stop landing people on');
   for (const [rel, other] of [
-    ['jobs.html', 'previous-markets.html'],
-    ['previous-markets.html', 'jobs.html'],
+    ['jobs.html', 'previous-markets'],
+    ['previous-markets.html', 'jobs'],
   ]) {
     const html = await readFile(path.join(HERE, '..', rel), 'utf8');
     ok(/focusParam: NAV\.FOCUS_PARAM/.test(html),
@@ -1761,7 +1761,7 @@ async function testJobNavModule() {
   /* read with the comments stripped: the panel still EXPLAINS the fragment it
      no longer emits, and a guard that could not tell the explanation from the
      link would have to be satisfied by deleting the explanation */
-  ok(!/jobs\.html#job-/.test(panel.replace(/\/\*[\s\S]*?\*\//g, '')),
+  ok(!/jobs(\.html)?#job-/.test(panel.replace(/\/\*[\s\S]*?\*\//g, '')),
     'and no longer links a fragment on a page half these postings are not on');
   const admin = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   ok(admin.includes('assets/oa-jobnav.js'), 'admin-area.html loads the module');
@@ -3315,7 +3315,7 @@ async function testAccountCounts() {
     ok((acct.match(new RegExp(`data-held="${what}" hidden`, 'g')) || []).length >= 2,
       `both menus (header and phone sheet) carry the ${what} row, born hidden`);
   }
-  ok(/href="post-a-candidate\.html" data-held="cands"/.test(acct) &&
+  ok(/href="post-a-candidate" data-held="cands"/.test(acct) &&
      /My candidate profile/.test(acct),
     'the candidate row is "My candidate profile" and opens post-a-candidate.html, ' +
     'which sends an owner straight to their own profile');
@@ -3341,7 +3341,7 @@ async function testAccountCounts() {
     'because the profile still exists');
   const paHtml = await readFile(path.join(HERE, '..', 'account.html'), 'utf8');
   ok(/id="pa-cand-card"/.test(paHtml) &&
-     /candCard\.href = 'post-a-candidate\.html\?edit=' \+ encodeURIComponent\(shown\.id\)/.test(paHtml),
+     /candCard\.href = 'post-a-candidate\?edit=' \+ encodeURIComponent\(shown\.id\)/.test(paHtml),
     'the personal area\'s candidate card links straight to the profile it found');
   for (const what of ['postings', 'alerts', 'cands']) {
     ok(new RegExp(`OAAccounts\\.setCount\\('${what}', `).test(paHtml),
@@ -6209,7 +6209,7 @@ async function testAccountDeletion() {
   ok(pAt > 0, 'the Privacy Policy has a section on deleting an account');
   const pSec = privacy.slice(pAt, privacy.indexOf('<h2>', pAt + 10));
   ok(pSec.length > 800 && pSec.length < 4000, '…and it was really sliced');
-  ok(/account\.html/.test(pSec) && /Delete my account/.test(pSec),
+  ok(/href="account"/.test(pSec) && /Delete my account/.test(pSec),
     '…saying where the control is');
   ok(/feedback/i.test(pSec) && /Universities directory/.test(pSec),
     '…and what is NOT deleted with it, because a policy that claims more than ' +
@@ -6537,7 +6537,7 @@ async function testUsersAndMessages() {
     'exact-where-the-data-is-loaded rule my-postings and alerts follow');
   ok(/data-count="messages"/.test(accts),
     'the account menu carries the Messages badge');
-  ok(/href="messages\.html">Messages<\/a>/.test(accts),
+  ok(/href="messages">Messages<\/a>/.test(accts),
     'and the mobile sheet does too — a menu change missed there hides the ' +
     'feature entirely on a phone');
   ok(/col\.userDirectory\)[\s\S]{0,80}\.doc\(dupUid\)\.delete\(\)/.test(accts)
@@ -11090,7 +11090,7 @@ async function testAdminArea() {
     'depends on, so two merged profiles count as one person');
 
   /* the menu row goes where the page is */
-  ok(/href="admin-area\.html"/.test(acct),
+  ok(/href="admin-area"/.test(acct),
     'the account menu links the Admin area');
 
   /* the reads this page depends on are already allowed — no rules change
@@ -11665,7 +11665,7 @@ async function testCandidateProfilePolicy() {
   ok(/redirectToOwnProfile/.test(form) &&
      /where\('uid', '==', user\.uid\)/.test(form),
     'oa-candidateform: an existing profile is looked up by the OWNER, not by name');
-  ok(/location\.replace\('post-a-candidate\.html\?edit='/.test(form),
+  ok(/location\.replace\('post-a-candidate\?edit='/.test(form),
     'and found, the form reopens it for editing instead of creating a second');
   /* A LAST-SEASON PROFILE IS NAMED, NOT REDIRECTED TO OR PASSED OVER: the
      account menu's "My candidate profile" count has no year filter, so an
@@ -12317,7 +12317,7 @@ async function testCandidateReveal() {
     ok(/allow read: if isOwner\(resource\.data\.uid\) \|\| isAdmin\(\);/.test(candBlock),
       'rules: the owner may read their own candidateSubmissions document');
   }
-  ok(/'post-a-candidate\.html\?edit=' \+ encodeURIComponent\(mine\.id\)/.test(acctHtml),
+  ok(/'post-a-candidate\?edit=' \+ encodeURIComponent\(mine\.id\)/.test(acctHtml),
     'account.html: Edit opens the candidate’s own document on the form');
   {
     /* both markers taken FORWARD from the function: the end marker also
@@ -12399,7 +12399,7 @@ async function testCandidateReveal() {
          && (formJs.match(/if \(slot\.onChange\) slot\.onChange\(\);/g) || []).length === 2,
         'oa-candidateform: the CV slot reports a chosen, un-chosen or removed file as a change (Remove is a button, not a field)');
     }
-    ok(/14:00 UTC/.test(editMode) && /account\.html/.test(editMode), 'oa-candidateform: the edit intro names the time and the account page');
+    ok(/14:00 UTC/.test(editMode) && /href="account"/.test(editMode), 'oa-candidateform: the edit intro names the time and the account page');
   }
   {
     const listCss = await read('assets', 'oa-list.css');
@@ -12863,7 +12863,7 @@ async function testMultiSelectFilters() {
   /* announced, and recorded */
   const log = JSON.parse(await read('changelog.json'));
   const entry = (log.updates || []).find((u) => u.id === 'levels-and-characteristics-multi-select');
-  ok(entry && entry.date === '2026-09-04' && entry.url === '/jobs.html',
+  ok(entry && entry.date === '2026-09-04' && entry.url === '/jobs',
     'multi: changelog.json announces it, dated, linking the jobs page');
   ok(entry && /only the departments that have both/.test(entry.summary) &&
      !/—/.test(entry.title + entry.summary),
@@ -12936,7 +12936,7 @@ async function testReaderGate() {
      IN to the posting rather than the posting: it carries the reader to the
      full list with that posting open. No padlock, no blur — nothing is
      locked for them. */
-  const full = GATE.cardOpen({ full: (r) => 'jobs.html?job=' + r.id })(rows[0]);
+  const full = GATE.cardOpen({ full: (r) => 'jobs?job=' + r.id })(rows[0]);
   ok(full && full.blur === false,
     'gate: the signed-in teaser card is gated but NOT locked — nothing is blurred');
   eq(full.note, GATE.NOTE_FULL, 'gate: …and it says where the click goes');
@@ -13585,7 +13585,7 @@ async function testSaveSearchAsAlert() {
 
   /* --- the round trip ---------------------------------------------------- */
   const u = S.url(c);
-  ok(u.startsWith('alerts.html?prefill=1&'),
+  ok(u.startsWith('alerts?prefill=1&'),
     'save-search: the hand-over is a URL on alerts.html carrying the flag');
   eq((u.match(/(^|&)level=/g) || []).length, 2,
     'save-search: one key per value, like the jobs page\'s own links');
@@ -13731,13 +13731,13 @@ async function testSaveSearchAsAlert() {
   /* --- keep-in-sync: the change log, the FAQ, the record ------------------ */
   const log = JSON.parse(await read('changelog.json'));
   const entry = (log.updates || []).find((x) => x.id === 'save-search-as-email-alert');
-  ok(!!entry && entry.date === '2026-09-04' && entry.url === '/jobs.html',
+  ok(!!entry && entry.date === '2026-09-04' && entry.url === '/jobs',
     'save-search: changelog.json announces it, dated, linking the jobs page');
   ok(!!entry && !/—/.test(entry.title + entry.summary) && /Save as e-mail alert/.test(entry.summary),
     'save-search: …naming the button, with no em dash');
   const home = await read('index.html');
   const faq = home.slice(home.indexOf('Can I get e-mail alerts?'), home.indexOf('Do all Operations job postings'));
-  ok(faq.length > 200 && faq.length < 2500 && /Save as e-mail\s+alert/.test(faq) && /jobs\.html/.test(faq),
+  ok(faq.length > 200 && faq.length < 2500 && /Save as e-mail\s+alert/.test(faq) && /href="jobs"/.test(faq),
     'save-search: the FAQ answer on e-mail alerts names the button and links the jobs page');
   ok(!/—|&mdash;/.test(faq.slice(faq.indexOf('Quicker still'))),
     'save-search: …in a sentence with no em dash');
@@ -13923,7 +13923,7 @@ async function testClosingSoonDigest() {
   /* KEEP-IN-SYNC: the change log, the FAQ, the record of the decision. */
   const log = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
   const entry = (log.updates || []).find((u) => u.id === 'closing-this-week-alerts');
-  ok(!!entry && entry.date === '2026-09-04' && /alerts\.html/.test(entry.url || ''),
+  ok(!!entry && entry.date === '2026-09-04' && /\/alerts$/.test(entry.url || ''),
     'closing: changelog.json announces the topic, dated, linking the alerts page');
   const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
   const faq = home.slice(home.indexOf('Can I get e-mail alerts?'), home.indexOf('Do all Operations job postings'));
@@ -14125,7 +14125,7 @@ async function testCalendars() {
     'jobcal: each entry is all-day and named for what it is, in the owner\'s words (2026-09-06)');
   eq(evs[0].url, 'https://www.operationsacademia.org/' + NAV.hrefFor(both, NOW),
     'jobcal: the entry links the posting\'s own permalink, on the page that carries it (OAJobNav.hrefFor)');
-  ok(/jobs\.html\?job=2027-somewhere-university-20260901$/.test(evs[0].url), 'jobcal: …which is the jobs page today');
+  ok(/\/jobs\?job=2027-somewhere-university-20260901$/.test(evs[0].url), 'jobcal: …which is the jobs page today');
   const sug = evs[0], fin = evs[1];
   const heads = (e) => e.description.split('\n').map((l) => l.split(':')[0]);
   eq(heads(fin), ['Suggested deadline', 'Final deadline', 'Final deadline as listed', 'Entry level',
@@ -14142,7 +14142,7 @@ async function testCalendars() {
      /\nLink to job ad: https:\/\/ads\.example\.edu\/1\n/.test(fin.description) &&
      /\nPosted online at: https:\/\/jobs\.example\.edu\/1\n/.test(fin.description) &&
      /\nOA posting ID: 2027-somewhere-university-20260901\n/.test(fin.description) &&
-     /\nPosting on Operations Academia: https:\/\/www\.operationsacademia\.org\/jobs\.html\?job=2027-somewhere-university-20260901$/.test(fin.description),
+     /\nPosting on Operations Academia: https:\/\/www\.operationsacademia\.org\/jobs\?job=2027-somewhere-university-20260901$/.test(fin.description),
     'jobcal: …and each line says what the card says');
   eq(NAV.REF_LABEL, 'OA posting ID', 'jobcal: the ID\'s label is the card\'s own (OAJobNav.REF_LABEL)');
   const reviewOnly = J.eventsFor([row({ id: 'r', reviewDate: '2026-10-01' })], { now: NOW, today: TODAY })[0];
@@ -14604,7 +14604,7 @@ async function testAnalytics() {
   eq(A.normPath('/index.html'), '/', 'the home page is one row, not two');
   eq(A.normPath('/jobs'), '/jobs.html',
     'the canonical form is the one the pages own canonical tags name');
-  eq(A.normPath('/post-a-job.html?ref=abc123'), '/post-a-job.html',
+  eq(A.normPath('/post-a-job?ref=abc123'), '/post-a-job.html',
     'a query string never survives — it can carry a posting id and this file is public');
 
   for (const bad of ['/admin-area', '/admin-area.html', '/admin-area/', '/ADMIN-AREA',
@@ -15725,7 +15725,7 @@ async function testCandidateStats() {
   const entry = log.updates.find((u) => u.id === 'candidate-profile-view-statistics');
   ok(!!entry && /only you and the site maintainer can see them/.test(entry.summary),
     'the change-log entry says the same about who sees them');
-  ok(entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && entry.url === '/post-a-candidate.html',
+  ok(entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && entry.url === '/post-a-candidate',
     'changelog.json announces it, dated, linking the profile page');
   ok(entry && !/—/.test(entry.title + entry.summary), 'with no em dash in the announcement');
 }
@@ -15784,8 +15784,8 @@ async function testEmailVerification() {
   /* --- the message ------------------------------------------------------- */
 
   const V = require(path.join(root, '_functions', 'verify-email.js'));
-  const link = `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC123xyz` +
-    `&continueUrl=${encodeURIComponent(site + '/account.html')}`;
+  const link = `${site}/verify-email?mode=verifyEmail&oobCode=AbC123xyz` +
+    `&continueUrl=${encodeURIComponent(site + '/account')}`;
   const r = V.renderVerifyEmail({ firstName: 'Ada', email: 'ada@example.edu', link });
   const count = (hay, needle) => String(hay).split(needle).length - 1;
   const escLink = V.esc(link);
@@ -15884,9 +15884,9 @@ async function testEmailVerification() {
 
   /* --- siteVerifyLink: the ONE rewrite of the minted address (2026-09-05) --- */
   const minted = 'https://operations-academia.firebaseapp.com/__/auth/action?mode=verifyEmail' +
-    '&oobCode=AbC%2F123&continueUrl=https%3A%2F%2Fwww.operationsacademia.org%2Faccount.html&lang=en';
+    '&oobCode=AbC%2F123&continueUrl=https%3A%2F%2Fwww.operationsacademia.org%2Faccount&lang=en';
   eq(V.siteVerifyLink(minted, site),
-    `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC%2F123&continueUrl=${encodeURIComponent(site + '/account.html')}`,
+    `${site}/verify-email?mode=verifyEmail&oobCode=AbC%2F123&continueUrl=${encodeURIComponent(site + '/account')}`,
     'verify: siteVerifyLink puts the minted code on the site\'s own page with the account page as continueUrl, the code encoded');
   eq(V.siteVerifyLink('https://x.test/?mode=verifyEmail', site), '', 'verify: no code, no link');
   eq(V.siteVerifyLink('not a url', site), '', 'verify: an unparsable address answers nothing rather than throwing');
@@ -15915,8 +15915,8 @@ async function testEmailVerification() {
     'verify: the renderer depends on NOTHING, since firebase deploy ships only _functions');
   ok(!/Date\.now\(/.test(rendererSrc) && !/new Date\(\)/.test(rendererSrc),
     'verify: the renderer reads no clock, so a message is the same whenever it is rendered');
-  ok(/searchParams\.get\('oobCode'\)/.test(rendererSrc) && /verify-email\.html\?mode=verifyEmail/.test(rendererSrc)
-     && /encodeURIComponent\(S \+ '\/account\.html'\)/.test(rendererSrc),
+  ok(/searchParams\.get\('oobCode'\)/.test(rendererSrc) && /verify-email\?mode=verifyEmail/.test(rendererSrc)
+     && /encodeURIComponent\(S \+ '\/account'\)/.test(rendererSrc),
     'verify: the rewrite lives in the renderer (siteVerifyLink) and nowhere else');
   ok(noDash(rendererSrc), 'verify: no em dash in the renderer');
 
@@ -16006,10 +16006,10 @@ async function testEmailVerification() {
   ok(/require\('firebase-admin\/auth'\)/.test(fn) && /require\('nodemailer'\)/.test(fn)
      && /const \{ renderVerifyEmail, siteVerifyLink \} = require\('\.\/verify-email\.js'\);/.test(fn),
     'function: the Admin Auth API, nodemailer, the renderer and the shared link helper are required');
-  ok(/getAuth\(\)\.generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(handler),
+  ok(/getAuth\(\)\.generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account',?\s*\}\)/.test(handler),
     'function: the link is generated by the Admin SDK with the account page as its continue URL');
   ok(/const link = siteVerifyLink\(generated, SITE\);/.test(handler)
-     && !/searchParams\.get\('oobCode'\)/.test(handler) && !/verify-email\.html\?mode=verifyEmail/.test(handler),
+     && !/searchParams\.get\('oobCode'\)/.test(handler) && !/verify-email(\.html)?\?mode=verifyEmail/.test(handler),
     'function: the code is put on the SITE\'s own page by siteVerifyLink, the one helper the campaign mailer shares, never inline');
   ok(/if \(!link\) \{[\s\S]{0,200}await releaseSlot\(\);/.test(handler),
     'function: a minted address that carried no code still gives the slot back');
@@ -16162,7 +16162,7 @@ async function testEmailVerification() {
   ok(/'functions\/resource-exhausted'/.test(acct) && /throttled: true/.test(acct)
      && /sent a moment ago/.test(acct),
     'accounts: a throttled send is reported as such, never re-sent through Firebase');
-  ok(/u\.sendEmailVerification\(\{ url: SITE \+ '\/verify-email\.html' \}\)/.test(acct)
+  ok(/u\.sendEmailVerification\(\{ url: SITE \+ '\/verify-email' \}\)/.test(acct)
      && /var SITE = 'https:\/\/www\.operationsacademia\.org';/.test(acct),
     'accounts: the fallback is Firebase\'s own message, landing on the site\'s verify page (an authorised domain, never location.origin)');
   ok(acct.indexOf("httpsCallable('sendVerificationEmail')") < acct.indexOf('return fallback();'),
@@ -16298,7 +16298,7 @@ async function testEmailVerification() {
   ok(/Your e-mail address is verified/.test(vpage) && /Continue to your account/.test(vpage)
      && /Send me a new link/.test(vpage) && /That link did not work/.test(vpage),
     'verify page: the four states carry the owner\'s wording');
-  ok(/id="ve-continue" href="account\.html"/.test(vpage), 'verify page: Continue goes to the account page');
+  ok(/id="ve-continue" href="account"/.test(vpage), 'verify page: Continue goes to the account page');
   ok(noDash(vpage), 'verify page: no em dash');
   ok(!/&mdash;/.test(vpage), 'verify page: …not as an entity either');
 
@@ -16374,7 +16374,7 @@ async function testEmailVerification() {
   ok(/file: 'verify-email\.html', card: false,\s*why: '[^']{40,}'/.test(sc),
     'share-check lists verify-email.html card: false, with a reason');
   const sitemap = await readFile(path.join(root, 'sitemap.xml'), 'utf8');
-  ok(!/verify-email\.html/.test(sitemap),
+  ok(!/verify-email/.test(sitemap),
     'the sitemap does not list it, like the other sign-in-only shells');
 
   /* --- the copy, the changelog, the shim ----------------------------------- */
@@ -16410,7 +16410,7 @@ async function testEmailVerification() {
   const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
   ok(/e-mail verification on registration/.test(pt) && /callableFails: 'functions\/not-found'/.test(pt)
      && /applyActionCodeFails: 'auth\/expired-action-code'/.test(pt) && /reloadVerifies: true/.test(pt)
-     && /'Verify your e-mail'/.test(pt) && /verify-email\.html\?mode=verifyEmail&oobCode=/.test(pt),
+     && /'Verify your e-mail'/.test(pt) && /verify-email\?mode=verifyEmail&oobCode=/.test(pt),
     'page-test.mjs drives the pending session, the fallback, the lift and the verify page in a real browser');
   ok(/callableFails: 'functions\/resource-exhausted'/.test(pt) && /callableMessage:/.test(pt)
      && /callableFails: 'functions\/deadline-exceeded'/.test(pt) && /callableFails: 'functions\/permission-denied'/.test(pt)
@@ -16805,10 +16805,10 @@ async function testVerifyExistingUsers() {
   ok(/V\.siteVerifyLink\(generated, SITE\)/.test(mailer) && /siteVerifyLink\(generated, SITE\)/.test(fn),
     'the mailer and the callable both call siteVerifyLink, so the two senders cannot build the link differently');
   const mailerMain = mailer.slice(mailer.indexOf('async function main()'), mailer.indexOf('async function selftest()'));
-  ok(mailerMain.length > 1500 && !/oobCode/.test(mailerMain) && !/verify-email\.html/.test(mailerMain),
+  ok(mailerMain.length > 1500 && !/oobCode/.test(mailerMain) && !/verify-email/.test(mailerMain),
     'the mailer carries no copy of the rewrite (its own selftest may name the page it lands on)');
   ok(/existing: \{ since: stamp\(/.test(mailer), 'and renders the member variant, dated from Auth');
-  ok(/generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(mailer),
+  ok(/generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account',?\s*\}\)/.test(mailer),
     'the link is minted exactly as the callable mints it');
   ok(/from '\.\/_main\.mjs'/.test(mailer) && /isMain\(import\.meta\.url\)/.test(mailer), 'importing the mailer sends nothing');
   const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
@@ -16917,6 +16917,85 @@ async function testVerifyExistingUsers() {
     defect is put back (every one was verified that way); the behavioural
     halves sit in the suites that own the fixtures: the two advert applies,
     the edit echo, uniinfo, and the export. */
+/* ---------------------------------------------------------------------------
+   A PAGE'S ADDRESS CARRIES NO .html (owner, 2026-09-08). Pages serves /forum
+   and /forum.html alike; the extension the owner saw was written by the site
+   itself: every internal link, the forum's own pushState address, the
+   canonical, og:url and sitemap, and the e-mails. Every writer of an address
+   is held to the extensionless form here, and every live page to the head
+   line that turns an old .html arrival into it. CLAUDE.md, "A page's address
+   carries no .html".
+   --------------------------------------------------------------------------- */
+async function testExtensionlessAddresses() {
+  const root = path.join(HERE, '..');
+  const pages = readdirSync(root).filter((n) => n.endsWith('.html'));
+  const NAME = pages.map((n) => n.replace(/\.html$/, '').replace(/[.-]/g, '\\$&')).join('|');
+  /* an internal link to a root page, relative or root-absolute, WITH the
+     extension: in markup, and in the markup the scripts write as strings */
+  const linked = new RegExp('(href|src|action)=\\\\?["\']/?(' + NAME + ')\\.html(?=["\'?#\\\\])');
+  /* an address a script builds: 'jobs.html?job=', "/account.html" */
+  const quoted = new RegExp('[\'"`]/?(' + NAME + ')\\.html(?=[\'"`?#])');
+  const site = new RegExp('operationsacademia\\.org/(' + NAME + ')\\.html');
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`])\/\/[^\n]*/g, '$1');
+  const NORMALISER = "history.replaceState(null, '', p.replace(/\\/index\\.html$/, '/').replace(/\\.html$/, '') + location.search + location.hash);";
+
+  let live = 0;
+  for (const nm of pages) {
+    const html = await readFile(path.join(root, nm), 'utf8');
+    ok(!linked.test(html) && !site.test(html), `${nm}: every link to a root page, and every address of its own, is extensionless`);
+    const canon = /<link rel="canonical" href="([^"]+)"/.exec(html);
+    ok(canon && !/\.html(?:[#?]|$)/.test(canon[1]), `${nm}: the canonical address carries no .html`);
+    if (/http-equiv="refresh"/.test(html)) continue;   // the six section stubs
+    live++;
+    ok(html.includes(NORMALISER),
+      `${nm}: the head turns an old .html arrival into the extensionless address, keeping the search and the fragment`);
+    ok(html.indexOf('THE ADDRESS IS THE EXTENSIONLESS ONE') > 0
+       && html.indexOf('THE ADDRESS IS THE EXTENSIONLESS ONE') < html.indexOf("localStorage.getItem('oaAuthHint')"),
+      `${nm}: …before the hint is read, ahead of everything that paints or reads the address`);
+  }
+  ok(live >= 20, `the head normaliser was measured on ${live} live pages, so the loop above measured something`);
+
+  for (const nm of readdirSync(path.join(root, 'assets')).filter((n) => n.endsWith('.js'))) {
+    const js = strip(await readFile(path.join(root, 'assets', nm), 'utf8'));
+    ok(!linked.test(js) && !quoted.test(js) && !site.test(js), `assets/${nm}: builds no address to a root page with .html`);
+  }
+  for (const f of ['_scraper/submissions-mailer.mjs', '_scraper/submissions-review.mjs', '_scraper/verify-existing-users.mjs',
+    '_scraper/alerts-mailer.mjs', '_scraper/jobreview-mailer.mjs', '_functions/index.js', '_functions/verify-email.js']) {
+    const src = strip(await readFile(path.join(root, f), 'utf8'));
+    ok(!linked.test(src) && !quoted.test(src) && !site.test(src), `${f}: builds no address to a root page with .html`);
+  }
+
+  /* the forum was the reported case: its own address, pushed on every move */
+  const forum = await readFile(path.join(root, 'assets', 'oa-forum.js'), 'utf8');
+  ok(/return 'forum\?' \+ p\.toString\(\)/.test(forum),
+    'oa-forum.js: the page\'s own address is forum?…, so a reader who typed /forum keeps it through every pushState');
+  ok(/closest\('a\[href\^="forum\?"\]'\)/.test(forum), 'oa-forum.js: …and its own links are recognised in that form');
+
+  const NAV = require(path.join(root, 'assets', 'oa-jobnav.js'));
+  const nav = await readFile(path.join(root, 'assets', 'oa-jobnav.js'), 'utf8');
+  ok(/var JOBS_PAGE = 'jobs';/.test(nav) && /var PAST_PAGE = 'previous-markets';/.test(nav),
+    'oa-jobnav.js: the two page names carry no extension, so every permalink and e-mail link is extensionless');
+  eq(NAV.otherPage('/previous-markets'), 'jobs', 'oa-jobnav.js: the other page is named from the new address');
+  eq(NAV.otherPage('/previous-markets.html'), 'jobs', 'oa-jobnav.js: …and from the old one, which an archive link can still carry');
+
+  const sitemap = await readFile(path.join(root, 'sitemap.xml'), 'utf8');
+  ok(!/<loc>[^<]*\.html/.test(sitemap), 'sitemap.xml lists every page by its extensionless address');
+  const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8'));
+  ok((log.updates || []).every((u) => !/\.html(?:[#?]|$)/.test(u.url || '')),
+    'changelog.json: every entry links its page without .html');
+  for (const nm of readdirSync(path.join(root, 'v3')).filter((n) => n.endsWith('.html'))) {
+    const stub = await readFile(path.join(root, 'v3', nm), 'utf8');
+    ok(!/url=\/[a-z-]+\.html"/.test(stub), `v3/${nm}: the preview stub redirects to the extensionless address`);
+  }
+
+  const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+  ok(/if \(!existsSync\(file\) && !path\.extname\(file\) && existsSync\(file \+ '\.html'\)\) file \+= '\.html';/.test(pt),
+    'page-test.mjs: its server resolves /jobs to jobs.html the way Pages does, or every link on the site would 404 under test');
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  ok(/## A page's address carries no `\.html`/.test(claude), 'CLAUDE.md records the decision');
+}
+
+
 async function testSweep20260906() {
   const rd = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
   const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
@@ -17906,9 +17985,9 @@ async function testForum() {
   /* The row is WRITTEN either way — the switch decides whether it is drawn —
      so both menus are pinned to carry it behind the flag, and the flag is
      pinned to be the only thing between them and the page. */
-  ok(/\(FORUM_ANNOUNCED\s*\n?\s*\? '<a role="menuitem" href="forum\.html">'/.test(acct) && /data-count="forum" hidden/.test(acct),
+  ok(/\(FORUM_ANNOUNCED\s*\n?\s*\? '<a role="menuitem" href="forum">'/.test(acct) && /data-count="forum" hidden/.test(acct),
     'oa-accounts.js: the Forum row with its badge born hidden, behind the announce switch');
-  ok(/\(FORUM_ANNOUNCED \? '<a class="link depth-0" href="forum\.html">Forum<\/a>' : ''\)/.test(acct),
+  ok(/\(FORUM_ANNOUNCED \? '<a class="link depth-0" href="forum">Forum<\/a>' : ''\)/.test(acct),
     'oa-accounts.js: the phone sheet has the row too, behind the same switch');
   ok(!/data-held="forum"/.test(acct), 'oa-accounts.js: the row is drawn for every signed-in account, not held on a count');
   const signOutSrc = acct.slice(acct.indexOf('  function signOut() {'), acct.indexOf('OAFB.ready()', acct.indexOf('  function signOut() {')));
@@ -18444,13 +18523,13 @@ async function testForum() {
   /* the home page, the standard, the stylesheet */
   const home = await read('index.html');
   if (announced) {
-    ok(/<a class="v3-btn ghost" href="forum\.html">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');
+    ok(/<a class="v3-btn ghost" href="forum">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');
     const faq = home.slice(home.indexOf('Is there somewhere to talk to other candidates'), home.indexOf('Is my personal information published?'));
-    ok(faq.length > 300 && faq.length < 2500 && /forum\.html/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
+    ok(faq.length > 300 && faq.length < 2500 && /href="forum"/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
       'index.html: the FAQ names both rooms and where the forum is reached');
     ok(noDash(faq.replace(/&mdash;/g, '\u2014')), 'index.html: the FAQ answer carries no em dash');
   } else {
-    ok(!/href="forum\.html"/.test(home) && !/Is there somewhere to talk to other candidates/.test(home),
+    ok(!/href="forum(\.html)?"/.test(home) && !/Is there somewhere to talk to other candidates/.test(home),
       'index.html (not announced): no button and no FAQ answer');
     ok(/FORUM_ANNOUNCED in assets\/oa-accounts\.js/.test(home), 'index.html: the comment says where the button comes back from');
     /* the sweep the switch is actually FOR: not one served page, anywhere,
@@ -18459,7 +18538,7 @@ async function testForum() {
     for (const nm of readdirSync(path.join(HERE, '..'))) {
       if (!nm.endsWith('.html') || nm === 'forum.html') continue;
       const src = await read(nm);
-      ok(!/(href|src)="forum\.html/.test(src), `${nm} (not announced): does not point at the forum`);
+      ok(!/(href|src)="forum(\.html)?["?#]/.test(src), `${nm} (not announced): does not point at the forum`);
     }
     /* …and the words it will need are kept, so announcing is a restore
        rather than a rewrite */
@@ -18621,10 +18700,10 @@ async function testRegisteredUsersFigure() {
     'v3.css: both phone breakpoints switch back to row flow with their own templates');
 
   /* the FAQ says the count is public and who they are is not */
-  const faq = html.slice(html.indexOf('Is my personal information published?'), html.indexOf('terms-and-conditions.html', html.indexOf('Is my personal information published?')));
+  const faq = html.slice(html.indexOf('Is my personal information published?'), html.indexOf('href="terms-and-conditions"', html.indexOf('Is my personal information published?')));
   ok(faq.length > 300 && faq.length < 2000, 'index.html: the FAQ answer slice is bounded both ends');
   ok(/The one thing about registered accounts that is public is how many\s+there are/.test(faq)
-     && /analytics\.html">analytics\s+page<\/a> shows how it has grown, and neither says who they are/.test(faq),
+     && /analytics">analytics\s+page<\/a> shows how it has grown, and neither says who they are/.test(faq),
     'index.html: the privacy FAQ names the count and the growth chart as the one public fact about accounts');
   ok(!/—/.test(faq.replace(/&mdash;/g, '—').slice(faq.indexOf('The one thing'))), 'index.html: …with no em dash in the new sentence');
 
@@ -18943,6 +19022,7 @@ if (isMain(import.meta.url)) {
   await testRegisteredUsersFigure();
   await testForum();
   await testSweep20260906();
+  await testExtensionlessAddresses();
   await testForumSeasonRoll();
   await testForumSeed();
   await testForumThreadRemoval();

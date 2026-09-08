@@ -433,7 +433,7 @@ exports.sendVerificationEmail = onCall(
     let generated = '';
     try {
       generated = await getAuth().generateEmailVerificationLink(email, {
-        url: SITE + '/account.html',
+        url: SITE + '/account',
       });
     } catch (e) {
       logger.error('verification token not minted', { uid, error: e.code });

@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>Previous job markets — Operations Academia</title>
     <meta name="description" content="Past academic job postings in Operations, season by season, back through the site’s archive — what was advertised, and by whom.">
-    <link rel="canonical" href="https://www.operationsacademia.org/previous-markets.html">
+    <link rel="canonical" href="https://www.operationsacademia.org/previous-markets">
 
     <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
          og:* is read by Facebook, Messenger, WhatsApp, LinkedIn, Telegram,
@@ -23,7 +23,7 @@
     <meta property="og:locale" content="en_GB">
     <meta property="og:title" content="Previous job markets">
     <meta property="og:description" content="Past academic job postings in Operations, season by season, back through the site’s archive — what was advertised, and by whom.">
-    <meta property="og:url" content="https://www.operationsacademia.org/previous-markets.html">
+    <meta property="og:url" content="https://www.operationsacademia.org/previous-markets">
     <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:type" content="image/jpeg">
@@ -57,6 +57,17 @@
          62px, the theme toggle by 185px). Reserve the space it will take, from
          the same localStorage hint the chip is painted from, before the browser
          draws anything. */
+      /* THE ADDRESS IS THE EXTENSIONLESS ONE. GitHub Pages serves /jobs and
+         /jobs.html alike, and the site links, canonicalises and shares the
+         first; so a reader who arrives on the second, through an old link or
+         a bookmark, is shown the address everyone else sees, before anything
+         paints or reads it. The search and the fragment travel with it. */
+      try {
+        var p = location.pathname;
+        if (/\.html$/.test(p) && history.replaceState) {
+          history.replaceState(null, '', p.replace(/\/index\.html$/, '/').replace(/\.html$/, '') + location.search + location.hash);
+        }
+      } catch (e) { /* the address is a convenience */ }
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
@@ -103,7 +114,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="jobs.html">Jobs</a>
+          <a href="jobs">Jobs</a>
           <a href="./#candidates">Candidates</a>
           <a href="./#placements">Placements</a>
           <a href="./#survey">Survey</a>
@@ -131,7 +142,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="jobs.html">Jobs</a>
+        <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -154,12 +165,12 @@
         <div class="v3-container">
           <span class="v3-kicker">Previous job markets</span>
           <h1 class="v3-h1" id="oa-past-heading">Past job postings</h1>
-          <p class="v3-lede" style="margin-top:14px">Every academic opening posted here in seasons gone by, newest market first. A market year runs from 1 July to 30 June and is numbered by the year it ends, so the 2016&ndash;2017 season is &ldquo;2017&rdquo;. Postings for the season under way are on the <a href="jobs.html">job postings</a> page and join this archive when the season rolls.</p>
+          <p class="v3-lede" style="margin-top:14px">Every academic opening posted here in seasons gone by, newest market first. A market year runs from 1 July to 30 June and is numbered by the year it ends, so the 2016&ndash;2017 season is &ldquo;2017&rdquo;. Postings for the season under way are on the <a href="jobs">job postings</a> page and join this archive when the season rolls.</p>
           <div class="v3-cta-row" style="margin-top:24px">
-            <a class="v3-btn primary" href="jobs.html">This season&rsquo;s postings</a>
+            <a class="v3-btn primary" href="jobs">This season&rsquo;s postings</a>
             <a class="v3-btn ghost" href="./#resources">&larr; Back to the overview</a>
           </div>
-          <p class="v3-mut" style="font-size:14px;margin-top:18px">Recent PhD graduates who accepted an academic placement are on the <a href="recent-faculty.html">recent faculty</a> page. If you were on the market in a past year, please <a href="survey.html">fill in the annual survey</a> &mdash; it is what makes these seasons legible.</p>
+          <p class="v3-mut" style="font-size:14px;margin-top:18px">Recent PhD graduates who accepted an academic placement are on the <a href="recent-faculty">recent faculty</a> page. If you were on the market in a past year, please <a href="survey">fill in the annual survey</a> &mdash; it is what makes these seasons legible.</p>
         </div>
       </section>
 
@@ -177,7 +188,7 @@
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
-            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            <p>Trusted by <a href="previous-markets">over 200 universities around the
             world</a>.<br>
             Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
             Sponsored by the
@@ -192,17 +203,17 @@
               <li><a href="./#placements">Placements</a></li>
               <li><a href="./#survey">Survey</a></li>
               <li><a href="./#resources">Resources</a></li>
-              <li><a href="analytics.html">Analytics</a></li>
+              <li><a href="analytics">Analytics</a></li>
             </ul>
           </div>
           <div>
             <h4>Participate</h4>
             <ul>
-              <li><a href="post-a-job.html">Post a job</a></li>
-              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
-              <li><a href="post-a-placement.html">Report a placement</a></li>
-              <li><a href="alerts.html">E-mail alerts</a></li>
-              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="post-a-job">Post a job</a></li>
+              <li><a href="post-a-candidate">Post your candidacy</a></li>
+              <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="alerts">E-mail alerts</a></li>
+              <li><a href="feedback">Feedback</a></li>
               <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
@@ -211,8 +222,8 @@
           <span>&copy; 2014-<span class="js-current-year"></span>
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
-            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a>
+            <a href="terms-and-conditions">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy">Privacy</a>
           </span>
         </div>
       </div>
@@ -415,7 +426,7 @@
                 'one that has been taken down is on neither.'
             },
             /* The way out CARRIES THE POSTING — see the jobs page. */
-            focusOther: { href: 'jobs.html', label: 'Job postings' },
+            focusOther: { href: 'jobs', label: 'Job postings' },
             prepare: function (rows) {
               /* THE ARCHIVE'S OWN ROWS, named before the postings from
                  data/jobs.json are folded in beside them. Those are real

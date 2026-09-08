@@ -61,6 +61,17 @@
          62px, the theme toggle by 185px). Reserve the space it will take, from
          the same localStorage hint the chip is painted from, before the browser
          draws anything. */
+      /* THE ADDRESS IS THE EXTENSIONLESS ONE. GitHub Pages serves /jobs and
+         /jobs.html alike, and the site links, canonicalises and shares the
+         first; so a reader who arrives on the second, through an old link or
+         a bookmark, is shown the address everyone else sees, before anything
+         paints or reads it. The search and the fragment travel with it. */
+      try {
+        var p = location.pathname;
+        if (/\.html$/.test(p) && history.replaceState) {
+          history.replaceState(null, '', p.replace(/\/index\.html$/, '/').replace(/\.html$/, '') + location.search + location.hash);
+        }
+      } catch (e) { /* the address is a convenience */ }
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
@@ -174,9 +185,9 @@
           Research and Analytics &mdash; posted by the community itself, free, since 2014.</p>
 
           <div class="v3-cta-row">
-            <a class="v3-btn primary" href="post-a-job.html">Post a job</a>
+            <a class="v3-btn primary" href="post-a-job">Post a job</a>
             <a class="v3-btn ghost" href="#candidates">Browse the candidates</a>
-            <a class="v3-btn soft" href="survey.html">Take the survey</a>
+            <a class="v3-btn soft" href="survey">Take the survey</a>
           </div>
 
           <!-- The four figures the site can stand behind (owner, 2026-08-17):
@@ -253,12 +264,12 @@
                 </div>
                 <div class="v3-launcher-actions">
                   <button type="submit" class="v3-btn primary" id="jl-go">&#128269; Explore all postings</button>
-                  <a class="v3-btn ghost" href="post-a-job.html">Post a job</a>
+                  <a class="v3-btn ghost" href="post-a-job">Post a job</a>
                 </div>
                 <p class="v3-mut" style="font-size:13.5px;margin:12px 0 0">More filters &mdash;
                 deadline, characteristics, date posted &mdash; are on the
-                <a href="jobs.html">full list</a>. Posting is free, and you can
-                <a href="alerts.html">get new postings by e-mail</a>.</p>
+                <a href="jobs">full list</a>. Posting is free, and you can
+                <a href="alerts">get new postings by e-mail</a>.</p>
               </form>
             </div>
 
@@ -266,12 +277,12 @@
               <div class="v3-panel">
                 <div class="v3-panel-head">
                   <h3>&#10022; The ten most recent postings</h3>
-                  <a href="jobs.html">Full list &rarr;</a>
+                  <a href="jobs">Full list &rarr;</a>
                 </div>
                 <div id="oa-jobs-recent"></div>
                 <div class="v3-panel-foot">
                   <span class="v3-mut">Updated automatically as postings arrive</span>
-                  <a href="jobs.html" id="v3-jobs-all">Explore all postings &rarr;</a>
+                  <a href="jobs" id="v3-jobs-all">Explore all postings &rarr;</a>
                 </div>
               </div>
             </div>
@@ -292,7 +303,7 @@
             talks as a calendar file. Contact a candidate directly
             to arrange an interview.</p>
             <div class="v3-section-cta">
-              <a class="v3-btn primary" href="post-a-candidate.html">Create your candidate profile</a>
+              <a class="v3-btn primary" href="post-a-candidate">Create your candidate profile</a>
               <a class="v3-btn ghost" href="#resources">Resources for candidates</a>
               <!-- The forum's button belongs here and is NOT drawn yet (owner,
                    2026-09-05: nothing on the site mentions the forum until it
@@ -320,7 +331,7 @@
             <span id="oa-reveal-day">the reveal date</span></strong><span id="oa-reveal-cities"></span><span id="oa-reveal-local"></span>.
             <span id="oa-reveal-count"></span>
             Post yours now: it stays private until then, you can see how it will look on
-            your <a href="account.html">account page</a>, and it appears with everyone
+            your <a href="account">account page</a>, and it appears with everyone
             else&rsquo;s at that moment.</p>
           </div>
 
@@ -338,7 +349,7 @@
             PhD program, joining which institution as what &mdash; the record the whole community
             learns from, season after season.</p>
             <div class="v3-section-cta">
-              <a class="v3-btn primary" href="post-a-placement.html">Report a placement</a>
+              <a class="v3-btn primary" href="post-a-placement">Report a placement</a>
             </div>
           </div>
           <div id="oa-placements"></div>
@@ -357,8 +368,8 @@
             and informs PhD candidates, junior faculty, hiring committees and prospective PhD
             students about the dynamics of our field.</p>
             <div class="v3-section-cta">
-              <a class="v3-btn primary" href="survey.html">Take the survey</a>
-              <a class="v3-btn ghost" href="survey-faqs.html">Survey FAQs</a>
+              <a class="v3-btn primary" href="survey">Take the survey</a>
+              <a class="v3-btn ghost" href="survey-faqs">Survey FAQs</a>
               <a class="v3-btn ghost" href="https://docs.google.com/presentation/d/1D5JdUEeCJnivhtjIIriEjeioUzPMP2pHSMKXYxsPl8s/edit?usp=sharing" target="_blank" rel="noopener">See past results</a>
             </div>
           </div>
@@ -376,19 +387,19 @@
           </div>
 
           <div class="v3-grid v3-reveal" style="margin-bottom:44px">
-            <a class="v3-card" href="universities.html">
+            <a class="v3-card" href="universities">
               <h3 class="v3-h3"><span class="v3-ico" aria-hidden="true">&#128506;</span> Universities</h3>
               <p>An interactive map of the 200+ universities and schools with Operations
               departments that have used the platform.</p>
               <span class="v3-card-go">Open the map &rarr;</span>
             </a>
-            <a class="v3-card" href="recent-faculty.html">
+            <a class="v3-card" href="recent-faculty">
               <h3 class="v3-h3"><span class="v3-ico" aria-hidden="true">&#127891;</span> Recent faculty</h3>
               <p>Recently hired junior faculty in Operations, broadly defined &mdash; see where
               the field&rsquo;s newest colleagues landed.</p>
               <span class="v3-card-go">Browse recent hires &rarr;</span>
             </a>
-            <a class="v3-card" href="previous-markets.html">
+            <a class="v3-card" href="previous-markets">
               <h3 class="v3-h3"><span class="v3-ico" aria-hidden="true">&#128452;</span> Previous job markets</h3>
               <p>Past job postings, season by season, back through the site&rsquo;s archive
               &mdash; useful for spotting hiring patterns.</p>
@@ -454,7 +465,7 @@
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
                 <p>Sign in (with Google, ORCID, or an e-mail address and password), open
-                <a href="post-a-job.html">Post a job</a> and fill in the form. Your posting
+                <a href="post-a-job">Post a job</a> and fill in the form. Your posting
                 appears on the site automatically, normally within a few minutes, and stays up for
                 the rest of the job-market year. Posting is free.</p>
                 <p>If you register with an e-mail address and a password, we first e-mail you a
@@ -463,7 +474,7 @@
                 Google has already confirmed the address.</p>
                 <p>Because the posting is tied to your account, you can come back at any time to
                 correct it, extend the deadline, or withdraw it &mdash; from
-                <a href="my-postings.html">My postings</a> in your personal area. Only the
+                <a href="my-postings">My postings</a> in your personal area. Only the
                 fields marked <em>shown publicly</em> ever appear on the site; your e-mail
                 address is never published.</p>
               </div></div></div>
@@ -473,7 +484,7 @@
               <button type="button" class="v3-faq-q">Can I put the deadlines in my calendar?
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
-                <p>Yes. On the <a href="jobs.html">job postings</a> page, signed in, every
+                <p>Yes. On the <a href="jobs">job postings</a> page, signed in, every
                 posting with an apply-by date still to come carries an <em>Add to calendar</em>
                 tick box. Tick the ones you are interested in and press <em>Download calendar</em>
                 in the strip above the list: you get a calendar file (.ics) that any calendar
@@ -489,7 +500,7 @@
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
                 <p>If you are applying to academic jobs in Operations this season, sign in and
-                <a href="post-a-candidate.html">create your job-market profile</a> &mdash; with
+                <a href="post-a-candidate">create your job-market profile</a> &mdash; with
                 your CV attached, your research areas, and the day(s) you
                 present at INFORMS, so hiring committees can find your talk and attend it.
                 For each day you can add the session&rsquo;s start time, its code, the room and
@@ -513,7 +524,7 @@
               <button type="button" class="v3-faq-q">Can I see my profile before the reveal?
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
-                <p>Yes, on your <a href="account.html">account page</a>, and only you and the
+                <p>Yes, on your <a href="account">account page</a>, and only you and the
                 site&rsquo;s maintainer can see it. It is drawn exactly as it will appear on
                 the candidates page once every profile is revealed, and the form shows the
                 same preview while you type.</p>
@@ -527,7 +538,7 @@
                 <p>Yes, at any time; the card then shows when it was last updated. Before the
                 reveal your changes stay private and go public with everyone else&rsquo;s at
                 14:00 UTC on the reveal date; after it they reach the candidates page within a
-                few minutes of saving. Open <a href="post-a-candidate.html">Post your
+                few minutes of saving. Open <a href="post-a-candidate">Post your
                 candidacy</a> while signed in and it reopens your profile.</p>
               </div></div></div>
             </div>
@@ -537,7 +548,7 @@
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
                 <p>Once a candidate has accepted a position, anyone with an account can
-                <a href="post-a-placement.html">report the placement</a>: who, from which PhD
+                <a href="post-a-placement">report the placement</a>: who, from which PhD
                 program, joining which institution and as what. It appears in the
                 <a href="#placements">Confirmed placements</a> list at the next update, and the
                 person who reported it can correct or withdraw it later.</p>
@@ -559,7 +570,7 @@
                 1 July to 30 June and is numbered by the year it ends &mdash; so the
                 <span id="oa-faq-season">current</span> market began on
                 <span id="oa-faq-season-start">1 July</span>. Previous seasons stay in the
-                <a href="previous-markets.html">archive</a>.</p>
+                <a href="previous-markets">archive</a>.</p>
               </div></div></div>
             </div>
 
@@ -567,7 +578,7 @@
               <button type="button" class="v3-faq-q">Can I get e-mail alerts?
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
-                <p>Yes. Sign in and open <a href="alerts.html">E-mail alerts</a>: you can be
+                <p>Yes. Sign in and open <a href="alerts">E-mail alerts</a>: you can be
                 told about every new job posting, or only those matching filters you choose
                 (institution, type, entry level, location&hellip;), reminded of the postings
                 matching those filters that are closing in the seven days after each digest
@@ -575,7 +586,7 @@
                 about changes to the site itself and, if you like, about this season&rsquo;s
                 candidate profiles once they are revealed. You pick the frequency, and every
                 message carries an unsubscribe link. Quicker still: narrow the list on the
-                <a href="jobs.html">job postings</a> page and press <strong>Save as e-mail
+                <a href="jobs">job postings</a> page and press <strong>Save as e-mail
                 alert</strong>, beside the Excel download, and the alerts page opens with those
                 filters already filled in.</p>
               </div></div></div>
@@ -588,7 +599,7 @@
                 <p>The site carries what the community posts, and after a decade that is most of
                 the widely advertised academic openings in the field. But coverage ultimately
                 depends on schools posting &mdash; so if your department&rsquo;s opening is
-                missing, <a href="post-a-job.html">post it</a> (it takes a few minutes and is
+                missing, <a href="post-a-job">post it</a> (it takes a few minutes and is
                 free), or send the link to the search committee chair.</p>
               </div></div></div>
             </div>
@@ -602,10 +613,10 @@
                 candidate&rsquo;s contact address is shown only if they opt in. Accounts exist
                 so that we know where a posting comes from and can reach its author, nothing
                 more. The one thing about registered accounts that is public is how many
-                there are: the front page shows the count and the <a href="analytics.html">analytics
+                there are: the front page shows the count and the <a href="analytics">analytics
                 page</a> shows how it has grown, and neither says who they are.</p>
-                <p>The details are in the <a href="privacy-policy.html">Privacy Policy</a> and
-                the <a href="terms-and-conditions.html">Terms and Conditions</a>, which you
+                <p>The details are in the <a href="privacy-policy">Privacy Policy</a> and
+                the <a href="terms-and-conditions">Terms and Conditions</a>, which you
                 accept by using the site.</p>
               </div></div></div>
             </div>
@@ -614,7 +625,7 @@
               <button type="button" class="v3-faq-q">How do I delete my account?
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
-                <p>Sign in, open <a href="account.html">your personal area</a>, and use
+                <p>Sign in, open <a href="account">your personal area</a>, and use
                 <strong>Delete my account</strong> at the foot of the page. You are shown
                 what the account holds first, and you have to type the word DELETE,
                 because it cannot be undone.</p>
@@ -622,7 +633,7 @@
                 your details and your messages are removed, and your sign-in is deleted.
                 Most of it happens straight away and the rest within a few minutes, once
                 the pages your postings were on have been rebuilt. The
-                <a href="privacy-policy.html">Privacy Policy</a> says exactly what goes
+                <a href="privacy-policy">Privacy Policy</a> says exactly what goes
                 and what stays.</p>
               </div></div></div>
             </div>
@@ -634,8 +645,8 @@
                 <p>Share the site with your colleagues and students &mdash; the more of the
                 community that posts, the better the market works for everyone. Post your
                 department&rsquo;s openings, your candidacy, and the placements you know of;
-                <a href="survey.html">fill in the annual survey</a>; and tell us
-                <a href="feedback.html">what to improve</a> or
+                <a href="survey">fill in the annual survey</a>; and tell us
+                <a href="feedback">what to improve</a> or
                 <a href="https://operationsacademia.uservoice.com/" target="_blank" rel="noopener">vote
                 on suggested features</a>.</p>
                 <p>Everything here is free. If you want to say thanks, you can
@@ -652,7 +663,7 @@
                 <p>This website is managed by Operations researchers in their free time, so
                 please check whether your question is answered above first. Otherwise, write to
                 <a href="mailto:konstantinos.stouras@ucd.ie">konstantinos.stouras@ucd.ie</a> or
-                use the <a href="feedback.html">feedback page</a> (you can attach screenshots
+                use the <a href="feedback">feedback page</a> (you can attach screenshots
                 there) &mdash; we will get back to you as soon as we can.</p>
               </div></div></div>
             </div>
@@ -728,7 +739,7 @@
           <ul class="v3-news v3-reveal" id="v3-news">
             <li><p class="v3-mut">Loading the update log&hellip;</p></li>
           </ul>
-          <p class="v3-reveal" style="margin:4px 0 0"><a href="whats-new.html">See the full update log &rarr;</a></p>
+          <p class="v3-reveal" style="margin:4px 0 0"><a href="whats-new">See the full update log &rarr;</a></p>
 
           <details class="v3-ack v3-reveal" style="margin-top:36px">
             <summary>Acknowledgements</summary>
@@ -763,7 +774,7 @@
             be answered there.</p>
             <div class="v3-cta-row" style="justify-content:center">
               <a class="v3-btn primary" href="mailto:konstantinos.stouras@ucd.ie">konstantinos.stouras@ucd.ie</a>
-              <a class="v3-btn ghost" href="feedback.html">Send feedback</a>
+              <a class="v3-btn ghost" href="feedback">Send feedback</a>
             </div>
           </div>
         </div>
@@ -781,7 +792,7 @@
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
-            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            <p>Trusted by <a href="previous-markets">over 200 universities around the
             world</a>.<br>
             Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
             Sponsored by the
@@ -796,17 +807,17 @@
               <li><a href="#placements">Placements</a></li>
               <li><a href="#survey">Survey</a></li>
               <li><a href="#resources">Resources</a></li>
-              <li><a href="analytics.html">Analytics</a></li>
+              <li><a href="analytics">Analytics</a></li>
             </ul>
           </div>
           <div>
             <h4>Participate</h4>
             <ul>
-              <li><a href="post-a-job.html">Post a job</a></li>
-              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
-              <li><a href="post-a-placement.html">Report a placement</a></li>
-              <li><a href="alerts.html">E-mail alerts</a></li>
-              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="post-a-job">Post a job</a></li>
+              <li><a href="post-a-candidate">Post your candidacy</a></li>
+              <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="alerts">E-mail alerts</a></li>
+              <li><a href="feedback">Feedback</a></li>
               <li><a href="https://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
@@ -815,8 +826,8 @@
           <span>&copy; 2014-<span class="js-current-year"></span>
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
-            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a>
+            <a href="terms-and-conditions">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy">Privacy</a>
           </span>
         </div>
       </div>
@@ -946,7 +957,7 @@
         }
         if (!name) return null;
         var a = document.createElement('a');
-        a.href = 'universities.html?filterA=' + encodeURIComponent(name);
+        a.href = 'universities?filterA=' + encodeURIComponent(name);
         a.textContent = name;
         return a.outerHTML;
       }
@@ -1019,7 +1030,7 @@
             if (v) p.append(k, v);
           });
           var qs = p.toString();
-          location.href = 'jobs.html' + (qs ? '?' + qs : '');
+          location.href = 'jobs' + (qs ? '?' + qs : '');
         });
       })();
       /* The placements DATASET restarted empty at the 2026 cutover — the

@@ -370,7 +370,7 @@
     }
     if (!name) return null;
     var a = document.createElement('a');
-    a.href = 'universities.html?filterA=' + encodeURIComponent(name);
+    a.href = 'universities?filterA=' + encodeURIComponent(name);
     a.textContent = name;
     return a.outerHTML;
   }
