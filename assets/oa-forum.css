@@ -849,6 +849,62 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 .oa-forum-text p { margin: 0 0 12px; }
 .oa-forum-text p:last-child { margin-bottom: 0; }
 
+/* WHAT THE MARKUP DRAWS (2026-09-08, with the formatting toolbar): a
+   heading inside a post steps down from the page's own (an h3 at most),
+   lists keep their indent, a quoted passage takes a rail in the muted ink,
+   code sits on the panel's third ground in a monospace face, and a rule is
+   a hairline. Tokens throughout, so both themes are covered. */
+.oa-forum-text h3, .oa-forum-text h4, .oa-forum-text h5, .oa-forum-text h6 {
+  margin: 18px 0 8px;
+  color: var(--ink);
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.oa-forum-text h3 { font-size: 19px; }
+.oa-forum-text h4 { font-size: 17px; }
+.oa-forum-text h5 { font-size: 15.5px; }
+.oa-forum-text h6 { font-size: 15px; color: var(--ink-2); }
+.oa-forum-text > :first-child { margin-top: 0; }
+.oa-forum-text > :last-child { margin-bottom: 0; }
+.oa-forum-text ul, .oa-forum-text ol { margin: 0 0 12px; padding-left: 26px; }
+.oa-forum-text li + li { margin-top: 4px; }
+.oa-forum-text li > p { margin-bottom: 6px; }
+.oa-forum-text li > ul, .oa-forum-text li > ol { margin: 4px 0 0; }
+
+.oa-forum-text blockquote {
+  margin: 0 0 12px;
+  padding: 4px 14px;
+  border-left: 3px solid var(--line);
+  color: var(--ink-2);
+}
+
+.oa-forum-text blockquote > :last-child { margin-bottom: 0; }
+
+.oa-forum-text code {
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--bg-3);
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.oa-forum-text pre {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg-3);
+  color: var(--ink);
+  overflow: auto;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.oa-forum-text pre code { padding: 0; border-radius: 0; background: transparent; font-size: inherit; }
+.oa-forum-text hr { margin: 14px 0; border: 0; border-top: 1px solid var(--line); }
+
 .oa-forum-removed {
   color: var(--mut);
   font-style: italic;
@@ -1039,6 +1095,89 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
    on a white input measures 1.19:1 against a 3:1 floor: a keyboard reader had
    no way to tell the box was focused. --brand is 10.16:1 on the same ground. */
 .oa-forum-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand); }
+
+/* THE FORMATTING TOOLBAR (owner, 2026-09-08: "add that standard editing
+   menu when someone composes a new question", with the Stack Exchange
+   toolbar beside it): a row of icon buttons over every box a member writes
+   in, in four groups with a hairline between, and at its right end the
+   switch for the tips row under it. The icons are inline SVGs drawn in
+   currentColor, so they take the theme's ink; every colour here is a token.
+   On a phone the buttons grow to 42px targets and wrap to a second row
+   (rule 13 in _MOBILE-STANDARDS.md). */
+.oa-forum-tb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--bg-3);
+  color: var(--ink-2);
+}
+
+.oa-forum-tbgroup {
+  display: inline-flex;
+  gap: 2px;
+  padding-right: 8px;
+  border-right: 1px solid var(--line-soft);
+}
+
+.oa-forum-tbgroup:last-of-type { padding-right: 0; border-right: 0; }
+
+.oa-forum-tbbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.oa-forum-tbbtn svg { width: 18px; height: 18px; }
+.oa-forum-tbbtn:hover { background-color: var(--bg-2); border-color: var(--line); color: var(--ink); }
+.oa-forum-tbbtn:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+.oa-forum-tbtips {
+  margin-left: auto;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--brand);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.oa-forum-tbtips:hover { background-color: var(--bg-2); border-color: var(--line); }
+.oa-forum-tbtips:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+/* the preview under the box: the words as the thread will draw them, shown
+   once they carry a mark and put away while they do not */
+.oa-forum-preview {
+  padding: 12px 16px 14px;
+  border-top: 1px dashed var(--line);
+  background: var(--bg-2);
+  color: var(--ink);
+}
+
+.oa-forum-preview-h {
+  margin: 0 0 8px;
+  color: var(--mut);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
 
 /* The compose bar under a textarea. It used to carry the "how do you know"
    radios on the left with the send button on the right; the radios are gone
@@ -1242,20 +1381,30 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 
 .oa-forum-f input[type='text']:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 
-/* the line under the body box saying how the words will read: plain
-   text, paragraphs on a blank line, an address drawn as a link. It stands
-   where a formatting toolbar would, and says instead of pretending. */
+/* the tips row under the toolbar, saying what each mark writes: the marks
+   in code, then how a paragraph and a bare address read. Put away by the
+   toolbar's own switch (the `hidden` attribute, which the site's reset
+   makes win over display: flex). */
 .oa-forum-fmt {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 16px;
+  gap: 4px 14px;
   margin: 0;
-  padding: 8px 14px;
-  border-top: 1px solid var(--line-soft);
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line-soft);
   background: var(--bg-3);
   color: var(--mut);
   font-size: 12.5px;
   line-height: 1.4;
+}
+
+.oa-forum-fmt code {
+  padding: 0 4px;
+  border-radius: 5px;
+  background: var(--bg-2);
+  color: var(--ink-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
 }
 
 /* similar questions, under the title as it is typed */
@@ -1651,6 +1800,11 @@ body.v3 .oa-forum-tagchip:hover {
   .oa-forum-pacts .oa-forum-act { min-height: 42px; }
   .oa-forum-send, .oa-forum-cancel, .oa-forum-askbtn { width: 100%; }
   .oa-forum-bar { align-items: stretch; }
+  /* the formatting toolbar's buttons are controls (rule 13): 42px targets,
+     wrapping to a second row, and the tips switch a row of its own */
+  .oa-forum-tb { padding: 4px 6px; gap: 2px 6px; }
+  .oa-forum-tbbtn { width: 42px; height: 42px; }
+  .oa-forum-tbtips { width: 100%; min-height: 42px; margin-left: 0; text-align: left; }
   /* the ask form on a phone: the card and the note keep a 14px inset, the
      head's two lines stack, and nothing below the card is wider than it */
   .oa-forum-askcard { padding: 16px 14px; }

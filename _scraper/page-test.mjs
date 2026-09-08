@@ -172,7 +172,13 @@ const FORUM_INK = ['.oa-label-pinned', '.oa-label-locked', '.oa-label-new', '.oa
      page, each of which paints ink on a ground of its own. */
   '.oa-forum-navlink', '.oa-forum-sortpill', '.oa-forum-homelede', '.oa-forum-doorname',
   '.oa-forum-doorwho', '.oa-forum-doorgo', '.oa-forum-tagsintro', '.oa-forum-tagcard-n',
-  '.oa-forum-tagcard-when'];
+  '.oa-forum-tagcard-when',
+  /* THE FORMATTING TOOLBAR (2026-09-08): the tips switch, the marks in the
+     tips row, the preview's heading, and what the markup draws inside a post
+     (a heading, a quoted passage, code on its own ground). The eleven icon
+     buttons are out of it for the reason the bell and the bookmark are. */
+  '.oa-forum-tbtips', '.oa-forum-fmt code', '.oa-forum-preview-h', '.oa-forum-text code',
+  '.oa-forum-text blockquote', '.oa-forum-text h3'];
 /* .oa-forum-watch and .oa-forum-save are NOT in it, and that is a limit of
    this audit rather than an oversight: it measures INK against its ground and
    skips an element with no text, and those two are icon buttons. They are
@@ -11414,6 +11420,121 @@ for (const w of [320, 360, 390, 430]) {
       'forum (candidate): the note stands above one card holding the three boxes, and Post your question sits under the card at its left');
     ok(askShape.menu && askShape.expanded === 'false' && askShape.focused === 'oa-forum-ask-title' && askShape.similar && !askShape.where,
       'forum (candidate): on arrival the title has the keyboard, the tag menu is shut, no similar list shows, and no "Where" block is drawn');
+    /* THE FORMATTING TOOLBAR (owner, 2026-09-08: "add that standard editing
+       menu when someone composes a new question"): over the body box, eleven
+       named icon buttons in four groups and no image button, one Tab stop,
+       the tips row under it, the preview hidden until the words carry a mark. */
+    const tbShape = await q.evaluate(() => {
+      const tb = document.querySelector('#oa-forum-askform .oa-forum-tb');
+      const ta = document.getElementById('oa-forum-ask-body');
+      const tips = document.getElementById('oa-forum-ask-fmt');
+      const btns = [...tb.querySelectorAll('.oa-forum-tbbtn')];
+      return {
+        role: tb.getAttribute('role'), controls: tb.getAttribute('aria-controls'),
+        above: tb.getBoundingClientRect().bottom <= ta.getBoundingClientRect().top,
+        tipsBetween: tips.getBoundingClientRect().top >= tb.getBoundingClientRect().bottom - 1 && tips.getBoundingClientRect().bottom <= ta.getBoundingClientRect().top + 1,
+        names: btns.map((b) => b.getAttribute('aria-label')),
+        titles: btns.every((b) => b.getAttribute('title') === b.getAttribute('aria-label')),
+        groups: tb.querySelectorAll('.oa-forum-tbgroup').length,
+        image: btns.filter((b) => /image/i.test(b.getAttribute('aria-label'))).length,
+        tabStops: [...tb.querySelectorAll('[data-fmt]')].filter((b) => b.getAttribute('tabindex') === '0').length,
+        oneRow: new Set(btns.map((b) => Math.round(b.getBoundingClientRect().top))).size,
+        size: Math.min(...btns.map((b) => Math.min(b.getBoundingClientRect().width, b.getBoundingClientRect().height))),
+        tipsShown: !tips.hidden, tipsCodes: [...tips.querySelectorAll('code')].map((c) => c.textContent),
+        toggle: tb.querySelector('.oa-forum-tbtips').textContent, expanded: tb.querySelector('.oa-forum-tbtips').getAttribute('aria-expanded'),
+        preview: document.getElementById('oa-forum-ask-preview').hidden,
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    ok(tbShape.role === 'toolbar' && tbShape.controls === 'oa-forum-ask-body' && tbShape.above && tbShape.tipsBetween,
+      'forum (candidate): the toolbar stands over the body box, with the tips row between them');
+    eq(tbShape.names.map((n) => n.replace(/ \((Ctrl|Cmd)\+[A-Z]\)$/, '')),
+      ['Bold', 'Italic', 'Link', 'Blockquote', 'Code', 'Numbered list', 'Bulleted list', 'Heading', 'Horizontal rule', 'Undo', 'Redo'],
+      'forum (candidate): eleven buttons in four groups, each named, and no image button');
+    ok(tbShape.groups === 4 && tbShape.image === 0 && tbShape.titles && tbShape.oneRow === 1 && tbShape.size >= 32 && tbShape.overflowX === 0,
+      `forum (candidate): …in four groups on one row at 1280px, each at least 32px, the page not scrolling sideways (${JSON.stringify({ groups: tbShape.groups, rows: tbShape.oneRow, size: tbShape.size })})`);
+    eq(tbShape.tabStops, 1, 'forum (candidate): the toolbar is one Tab stop');
+    ok(tbShape.tipsShown && tbShape.tipsCodes[0] === '**bold**' && tbShape.tipsCodes.length === 9 && tbShape.toggle === 'Hide formatting tips' && tbShape.expanded === 'true' && tbShape.preview,
+      `forum (candidate): the tips row shows the nine marks under a switch that says Hide, and the preview waits (${tbShape.tipsCodes.join(' ')})`);
+    /* the keyboard: focus the first button, the arrows walk the row, Tab leaves it */
+    await q.focus('#oa-forum-askform .oa-forum-tbbtn[data-fmt="bold"]');
+    await q.keyboard.press('ArrowRight');
+    await q.keyboard.press('ArrowRight');
+    const walkedTb = await q.evaluate(() => document.activeElement.getAttribute('data-fmt'));
+    eq(walkedTb, 'link', 'forum (candidate): the arrows move along the toolbar');
+    await q.keyboard.press('Tab');
+    ok(await q.evaluate(() => !document.activeElement.classList.contains('oa-forum-tbbtn') && document.activeElement.id !== 'oa-forum-ask-body' || document.activeElement.id === 'oa-forum-ask-body'),
+      'forum (candidate): …and Tab leaves it in one press');
+    /* the buttons write: Bold wraps the selection, Undo takes it back, Ctrl+B
+       does the same from the keyboard, the link button writes the syntax
+       with the address selected so it is the next thing typed */
+    await q.fill('#oa-forum-ask-body', 'Two offers');
+    await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(0, 10); });
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="bold"]');
+    const bolded = await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); return { v: t.value, sel: t.value.slice(t.selectionStart, t.selectionEnd), focused: document.activeElement.id }; });
+    ok(bolded.v === '**Two offers**' && bolded.sel === 'Two offers' && bolded.focused === 'oa-forum-ask-body',
+      `forum (candidate): Bold wraps the selection, keeps the words selected and the keyboard in the box (${JSON.stringify(bolded)})`);
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="bold"]');
+    eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), 'Two offers', 'forum (candidate): a second press takes the bold off again');
+    await q.keyboard.press('Control+b');
+    eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), '**Two offers**', 'forum (candidate): Ctrl+B does the same from the keyboard');
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="undo"]');
+    eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), 'Two offers', 'forum (candidate): Undo takes it back, since the button wrote through the browser\'s own insertText');
+    /* the marks around the words are counted as runs: italic on a
+       bold-italic word takes the italic off, italic on a bold word wraps it */
+    await q.fill('#oa-forum-ask-body', 'see ***both*** and **bold** here');
+    await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(7, 11); });
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="italic"]');
+    eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), 'see **both** and **bold** here', 'forum (candidate): italic on a bold-italic word takes the italic off and leaves the bold');
+    await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(19, 23); });
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="italic"]');
+    eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), 'see **both** and ***bold*** here', 'forum (candidate): …and italic on a bold word wraps it rather than breaking the bold');
+    /* the link and list checks below act on the two words again */
+    await q.fill('#oa-forum-ask-body', 'Two offers');
+    await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(0, 10); });
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="link"]');
+    const linked = await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); return { v: t.value, sel: t.value.slice(t.selectionStart, t.selectionEnd) }; });
+    ok(linked.v === '[Two offers](https://)' && linked.sel === 'https://', `forum (candidate): the link button writes the link syntax with the address selected (${JSON.stringify(linked)})`);
+    await q.keyboard.type('https://example.org/guide');
+    eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), '[Two offers](https://example.org/guide)', 'forum (candidate): …so the address is the next thing typed');
+    await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(t.value.length, t.value.length); });
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="ul"]');
+    ok(/^- \[Two offers\]/.test(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value)), 'forum (candidate): the list button prefixes the line the caret is on');
+    await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="ul"]');
+    ok(/^\[Two offers\]/.test(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value)), 'forum (candidate): …and a second press takes the prefix off');
+    /* THE GUARD READS THE POST TOO: an address split by a mark is refused
+       under the box as an address, since it is whole once drawn */
+    await q.fill('#oa-forum-ask-body', 'Write to jane**@**mit.edu about it.');
+    ok(/e-mail address/.test(await q.evaluate(() => document.getElementById('oa-forum-ask-guardmsg').textContent)),
+      'forum (candidate): an address split by a mark is refused under the box as an address, since it reads whole');
+    /* the tips switch */
+    await q.click('#oa-forum-askform .oa-forum-tbtips');
+    const tipsOff = await q.evaluate(() => ({
+      hidden: document.getElementById('oa-forum-ask-fmt').hidden, text: document.querySelector('#oa-forum-askform .oa-forum-tbtips').textContent,
+      expanded: document.querySelector('#oa-forum-askform .oa-forum-tbtips').getAttribute('aria-expanded'), stored: localStorage.getItem('oa-forum-tips') }));
+    ok(tipsOff.hidden && tipsOff.text === 'Show formatting tips' && tipsOff.expanded === 'false' && tipsOff.stored === 'off',
+      `forum (candidate): the tips row is put away by its switch, which then says Show, and the choice is remembered on the device (${JSON.stringify(tipsOff)})`);
+    await q.click('#oa-forum-askform .oa-forum-tbtips');
+    ok(await q.evaluate(() => !document.getElementById('oa-forum-ask-fmt').hidden && localStorage.getItem('oa-forum-tips') === 'on'),
+      'forum (candidate): …and brought back by a second press');
+    /* THE TABLET: at 820px the toolbar still fits its box on one row with
+       the switch beside it, and nothing scrolls sideways */
+    await q.setViewportSize({ width: 820, height: 1000 });
+    await q.waitForTimeout(150);
+    const tbTablet = await q.evaluate(() => {
+      const tb = document.querySelector('#oa-forum-askform .oa-forum-tb');
+      const btns = [...tb.querySelectorAll('.oa-forum-tbbtn')];
+      const box = document.querySelector('#oa-forum-askform .oa-forum-editor').getBoundingClientRect();
+      return { rows: new Set(btns.map((b) => Math.round(b.getBoundingClientRect().top))).size,
+        inBox: btns.every((b) => b.getBoundingClientRect().right <= box.right + 1),
+        size: Math.min(...btns.map((b) => Math.min(b.getBoundingClientRect().width, b.getBoundingClientRect().height))),
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    ok(tbTablet.rows === 1 && tbTablet.inBox && tbTablet.size >= 32 && tbTablet.overflowX === 0,
+      `forum (candidate): the toolbar fits the tablet on one row inside its box (${JSON.stringify(tbTablet)})`);
+    await q.setViewportSize({ width: 1280, height: 1000 });
+    await q.waitForTimeout(150);
+    await q.fill('#oa-forum-ask-body', '');
     /* SIMILAR QUESTIONS under the title as it is typed, from the rows the
        list read on the way here (no second read): a title sharing words with
        the seeded thread lists it, as a link that opens in a new tab so the
@@ -11448,7 +11569,21 @@ for (const w of [320, 360, 390, 430]) {
     await q.fill('#oa-forum-ask-title', 'Is a second-year teaching release normal to ask for?');
     await q.waitForFunction(() => document.getElementById('oa-forum-similar').hidden, null, { timeout: 5000 });
     ok(true, 'forum (candidate): a title that shares nothing with any thread lists none');
-    await q.fill('#oa-forum-ask-body', 'Two offers on the table, both silent on teaching release. Is it normal to ask, and how?');
+    const ASK_BODY = '## What I am weighing\n\nTwo offers on the table, both **silent on teaching release**. Is it *normal* to ask, and how?\n\n'
+      + '> The chair said the load is standard.\n\n- one school counts a seminar\n- the other does not\n\n'
+      + 'See https://ec26.sigecom.org/ and [the guide](https://example.org/guide), `inline code`, and [not a link](javascript:alert(1)) <img src=x onerror="window.__pwned=3">.';
+    await q.fill('#oa-forum-ask-body', ASK_BODY);
+    await q.waitForFunction(() => !document.getElementById('oa-forum-ask-preview').hidden, null, { timeout: 5000 });
+    const previewed = await q.evaluate(() => {
+      const t = document.querySelector('#oa-forum-ask-preview .oa-forum-text');
+      return { h3: (t.querySelector('h3') || {}).textContent, strong: (t.querySelector('strong') || {}).textContent, li: t.querySelectorAll('ul li').length,
+        links: [...t.querySelectorAll('a')].map((a) => a.getAttribute('href')), js: t.querySelectorAll('a[href^="javascript"]').length,
+        img: t.querySelectorAll('img').length, pwned: window.__pwned, heading: document.querySelector('#oa-forum-ask-preview .oa-forum-preview-h').textContent };
+    });
+    ok(previewed.heading === 'Preview' && previewed.h3 === 'What I am weighing' && previewed.strong === 'silent on teaching release' && previewed.li === 2,
+      `forum (candidate): the preview shows the words as the thread will draw them (${JSON.stringify(previewed)})`);
+    eq(previewed.links, ['https://ec26.sigecom.org/', 'https://example.org/guide'], 'forum (candidate): …with the bare address and the bracketed link as links');
+    ok(previewed.js === 0 && previewed.img === 0 && previewed.pwned === undefined, 'forum (candidate): …and never a javascript: link, never an image, the hostile text inert');
     /* page positions (the viewport scrolls as boxes are filled), so a move
        here is the layout's and never the scroll's */
     const shutGeometry = await q.evaluate(() => ({
@@ -11627,6 +11762,44 @@ for (const w of [320, 360, 390, 430]) {
     eq(asked.own, 2, 'forum (candidate): one cannot vote on one\'s own question');
     ok(await q.evaluate(() => !document.getElementById('oa-forum-me').hidden),
       'forum (candidate): the room banner is back once the thread is on the page');
+    const drawn = await q.evaluate((t) => {
+      const el = document.querySelector('#oa-forum-thread .oa-forum-post.is-first .oa-forum-text');
+      const tid = new URLSearchParams(location.search).get('t');
+      const doc = window.__fb.docs[t + '/' + tid];
+      return { h3: (el.querySelector('h3') || {}).textContent, strong: !!el.querySelector('strong'), em: !!el.querySelector('em'), quote: !!el.querySelector('blockquote'),
+        li: el.querySelectorAll('ul li').length, code: (el.querySelector('code') || {}).textContent,
+        links: [...el.querySelectorAll('a')].map((a) => [a.getAttribute('href'), a.getAttribute('target'), a.getAttribute('rel')]),
+        js: el.querySelectorAll('a[href^="javascript"]').length, img: el.querySelectorAll('img').length, pwned: window.__pwned,
+        text: el.textContent, excerpt: doc && doc.excerpt };
+    }, T);
+    ok(drawn.h3 === 'What I am weighing' && drawn.strong && drawn.em && drawn.quote && drawn.li === 2 && drawn.code === 'inline code',
+      `forum (candidate): the question is drawn with its marks read: a heading, bold, italic, a quote, a list and code (${JSON.stringify({ h3: drawn.h3, li: drawn.li, code: drawn.code })})`);
+    eq(drawn.links, [['https://ec26.sigecom.org/', '_blank', 'noopener noreferrer nofollow'], ['https://example.org/guide', '_blank', 'noopener noreferrer nofollow']],
+      'forum (candidate): …its two links opened away with no referrer and no rank');
+    ok(drawn.js === 0 && drawn.img === 0 && drawn.pwned === undefined && /\[not a link\]\(javascript:alert\(1\)\) <img src=x/.test(drawn.text),
+      'forum (candidate): …never a javascript: link, never an image, the hostile text drawn as text');
+    ok(typeof drawn.excerpt === 'string' && /^What I am weighing Two offers on the table, both silent on teaching release\./.test(drawn.excerpt) && !/[*#>`\[]/.test(drawn.excerpt),
+      `forum (candidate): the stored excerpt is cut from the words as read, none of the marks in it (${JSON.stringify(drawn.excerpt)})`);
+    /* the card in the list says the same words */
+    await q.click('.oa-forum-crumbs a');
+    await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    const cardEx = await q.evaluate(() => {
+      const card = [...document.querySelectorAll('#oa-forum-list .oa-card')].find((c) => /second-year teaching release/.test(c.querySelector('.oa-card-title').textContent));
+      return card ? (card.querySelector('.oa-forum-ex') || {}).textContent : null;
+    });
+    ok(typeof cardEx === 'string' && /^What I am weighing Two offers/.test(cardEx) && !/[*#>`\[]/.test(cardEx),
+      `forum (candidate): the excerpt on the card carries the words and none of the marks (${JSON.stringify(cardEx)})`);
+    await q.click('#oa-forum-list .oa-card:has-text("second-year teaching release") .oa-card-head');
+    await q.waitForSelector('#oa-forum-body', { timeout: 15000 });
+    /* Quote on a formatted question falls back to the words as read */
+    await q.click('.oa-forum-post.is-first .oa-forum-act[data-act="quote"]');
+    await q.waitForSelector('#oa-forum-quotebox:not([hidden])', { timeout: 8000 });
+    const fmtQuote = await q.evaluate(() => document.querySelector('#oa-forum-quotebox p').textContent);
+    ok(/^What I am weighing/.test(fmtQuote) && /silent on teaching release/.test(fmtQuote) && !/\*\*|##|`|^> /m.test(fmtQuote),
+      `forum (candidate): a quote of the whole formatted question is the words as read, none of the marks (${JSON.stringify(fmtQuote.slice(0, 60))})`);
+    await q.click('#oa-forum-unquote');
+    await q.waitForFunction(() => document.getElementById('oa-forum-quotebox').hidden, null, { timeout: 5000 });
+    await q.fill('#oa-forum-body', '');
     const leak2 = await leakCheck(q);
     eq(leak2.main, [], 'forum (candidate): LEAK CHECK after posting: nothing of the account in #main');
     eq(leak2.whole, [], 'forum (candidate): …and the uid and the profile id are nowhere in the document');
@@ -11809,6 +11982,23 @@ for (const w of [320, 360, 390, 430]) {
     ok(true, 'forum (candidate): the arrow keys move between the rooms');
     eq(await q.evaluate(() => document.activeElement.getAttribute('data-room')), 'open',
       'forum (candidate): and focus follows the room that opened');
+
+    /* A QUOTE OF THE RENDERED WORDS IS A PASSAGE OF THE POST. The simulator
+       mirrors post.js: a formatted question opened through the callable, then
+       a reply quoting the words a reader would select on it (no asterisks),
+       one quoting the stored form, and one quoting words it does not hold. */
+    const passages = await q.evaluate(async (room) => {
+      const fn = (name) => firebase.functions().httpsCallable(name);
+      const opened = await fn('forumPost')({ room, title: 'A formatted question', tags: ['waiting'], body: 'Some **bold words** in a *sentence*.', acceptGuide: true });
+      const tid = opened.data.tid;
+      const tryQuote = async (text) => {
+        try { const r = await fn('forumPost')({ room, tid, body: 'Quoting.', quote: { n: 1, text } }); return 'ok:' + r.data.n; }
+        catch (e) { return 'refused:' + ((e.details || {}).reason || e.code); }
+      };
+      return { rendered: await tryQuote('bold words in a sentence'), stored: await tryQuote('**bold words**'), neither: await tryQuote('words it never held') };
+    }, 'candidates');
+    ok(/^ok:/.test(passages.rendered) && /^ok:/.test(passages.stored) && passages.neither === 'refused:quote',
+      `forum (candidate): a quote of the rendered words is a passage of the post, so is one of the stored form, and words the post never held are refused (${JSON.stringify(passages)})`);
 
     /* SIGNING OUT FORGETS THE READER. popstate repaints whenever S.me is set,
        and S.me used to survive a sign-out along with the handle and the room,
@@ -12459,6 +12649,21 @@ for (const w of [320, 360, 390, 430]) {
     ok(askM.send >= 42 && askM.cancel >= 42, `forum mobile (ask): Post your question and Cancel are 42px targets (got ${askM.send}/${askM.cancel})`);
     ok(askM.inset >= 14 && askM.boxIn, `forum mobile (ask): the card keeps a 14px inset and its boxes sit inside it (inset ${askM.inset})`);
     ok(askM.stacked && askM.onScreen, 'forum mobile (ask): Post your question and Cancel stack full width under the card, on screen');
+    const tbM = await m.evaluate(() => {
+      const tb = document.querySelector('#oa-forum-askform .oa-forum-tb');
+      const btns = [...tb.querySelectorAll('.oa-forum-tbbtn')];
+      const box = document.querySelector('#oa-forum-askform .oa-forum-editor').getBoundingClientRect();
+      const sw = document.querySelector('#oa-forum-askform .oa-forum-tbtips').getBoundingClientRect();
+      return { sizes: btns.map((b) => Math.round(Math.min(b.getBoundingClientRect().width, b.getBoundingClientRect().height))),
+        rows: new Set(btns.map((b) => Math.round(b.getBoundingClientRect().top))).size,
+        inBox: btns.every((b) => b.getBoundingClientRect().right <= box.right + 1 && b.getBoundingClientRect().left >= box.left - 1),
+        switchH: Math.round(sw.height), switchW: Math.round(sw.width), boxW: Math.round(box.width),
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    ok(tbM.sizes.every((x) => x >= 42) && tbM.inBox && tbM.overflowX === 0,
+      `forum mobile (ask): the toolbar's buttons are 42px targets inside their box, with no sideways scroll (got ${tbM.sizes.join(',')})`);
+    ok(tbM.rows >= 2 && tbM.switchH >= 42 && tbM.switchW >= tbM.boxW - 16,
+      `forum mobile (ask): …the row wraps to a second row rather than shrinking, and the tips switch is a full-width 42px row of its own (${JSON.stringify({ rows: tbM.rows, switchH: tbM.switchH, switchW: tbM.switchW, boxW: tbM.boxW })})`);
     /* THE TAG MENU ON A PHONE holds to rules 6 and 10: open under its box
        while the room is there, no wider than the screen, half of it at most,
        its rows 42px targets. The box is put near the top of the screen

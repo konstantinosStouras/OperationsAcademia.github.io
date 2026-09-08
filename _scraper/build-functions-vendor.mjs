@@ -6,13 +6,14 @@
        node _scraper/build-functions-vendor.mjs [--dry-run] [--check] [--selftest]
 
    `firebase deploy` ships only the _functions directory: a function cannot
-   require ../assets after deploy. Four dual-mode modules are read on both
+   require ../assets after deploy. Five dual-mode modules are read on both
    sides of the forum, and each has ONE definition under assets/:
 
      assets/oa-jobnav.js        -> _functions/jobnav.js        the season (marketYear)
      assets/oa-forum-model.js   -> _functions/forum-model.js  rooms, keys, bounds, tags
      assets/oa-forum-guard.js   -> _functions/forum-guard.js  what a post may not contain
      assets/oa-forum-guide.js   -> _functions/forum-guide.js  the guide the seed op posts
+     assets/oa-forum-markup.js  -> _functions/forum-markup.js how a post's words are read
 
    The copies are GENERATED, never edited: this builder writes them, the
    selftest pins each pair byte-for-byte (a drifted copy would have the
@@ -40,6 +41,7 @@ export const PAIRS = [
   ['assets/oa-forum-model.js', '_functions/forum-model.js'],
   ['assets/oa-forum-guard.js', '_functions/forum-guard.js'],
   ['assets/oa-forum-guide.js', '_functions/forum-guide.js'],
+  ['assets/oa-forum-markup.js', '_functions/forum-markup.js'],
 ];
 
 const argv = new Set(process.argv.slice(2));
@@ -93,7 +95,7 @@ function selftest() {
   let pass = 0;
   const fails = [];
   const ok = (c, m) => { if (c) pass++; else fails.push(m); };
-  ok(PAIRS.length === 4, 'four pairs');
+  ok(PAIRS.length === 5, 'five pairs');
   ok(PAIRS.every(([s, v]) => s.startsWith('assets/oa-') && v.startsWith('_functions/') && !v.includes('/forum/')),
     'every pair copies an assets module to the top of _functions/, never into the forum directory the functions own');
   ok(new Set(PAIRS.map((p) => p[1])).size === PAIRS.length, 'no two sources land on one copy');

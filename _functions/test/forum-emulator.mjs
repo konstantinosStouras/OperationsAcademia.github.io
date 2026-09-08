@@ -279,6 +279,30 @@ async function main() {
   ok(status(q2) === 'INVALID_ARGUMENT' && reason(q2) === 'quote', 'a quote that is not a passage of post n is refused');
   const q3 = await call('forumPost', tokens.adm, { room: 'candidates', tid: t1.result.tid, body: 'x', quote: { n: 99, text: 'a' } });
   ok(reason(q3) === 'quote', 'a quote of a post that does not exist is refused the same way');
+  /* A FORMATTED POST (2026-09-08, with the formatting toolbar): what a
+     reader selects on it is the rendered words, without the marks, and that
+     is a passage of the post; so is the stored form; the excerpt on the
+     thread head is cut from the rendered words too. */
+  await admin.collection('forumHandles').get().then((s) => Promise.all(s.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const fmt = await call('forumPost', tokens.adm, { room: 'candidates', title: 'A formatted question', tags: ['waiting'], body: '## Heading\n\nSome **bold words** in a *sentence*, and [a link](https://example.org/x).', acceptGuide: true });
+  ok(!fmt.error && fmt.result.tid, 'a formatted question opens', JSON.stringify(fmt));
+  const fmtHead = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${fmt.result.tid}`).get();
+  ok(fmtHead.data().excerpt === 'Heading Some bold words in a sentence, and a link.', 'its excerpt is cut from the words as read, none of the marks in it: ' + JSON.stringify(fmtHead.data().excerpt));
+  const qr = await call('forumPost', tokens.cand, { room: 'candidates', tid: fmt.result.tid, body: 'Quoting the words of a bold sentence.', quote: { n: 1, text: 'bold words in a sentence' } });
+  ok(!qr.error && qr.result.n === 2, 'a quote of the rendered words is a passage of the post', JSON.stringify(qr));
+  await admin.collection('forumHandles').get().then((s) => Promise.all(s.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const qs = await call('forumPost', tokens.cand, { room: 'candidates', tid: fmt.result.tid, body: 'Quoting the stored form.', quote: { n: 1, text: '**bold words**' } });
+  ok(!qs.error && qs.result.n === 3, 'and so is a quote of the stored form', JSON.stringify(qs));
+  await admin.collection('forumHandles').get().then((s) => Promise.all(s.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const qn = await call('forumPost', tokens.cand, { room: 'candidates', tid: fmt.result.tid, body: 'x', quote: { n: 1, text: 'bold sentence' } });
+  ok(reason(qn) === 'quote', 'while words the post holds in neither form are refused');
+  /* THE GUARD READS THE POST TOO: a contact detail split by a mark passes
+     the guard on the bytes and is whole once drawn, so it is refused */
+  await admin.collection('forumHandles').get().then((s) => Promise.all(s.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const split = await call('forumPost', tokens.cand, { room: 'candidates', tid: fmt.result.tid, body: 'Write to jane**@**mit.edu about it.' });
+  ok(status(split) === 'INVALID_ARGUMENT' && reason(split) === 'email', 'an address split by a mark is refused as an address, since it reads whole');
+  const splitT = await call('forumPost', tokens.adm, { room: 'candidates', title: 'Call **617**-253-1000', tags: ['waiting'], body: 'A title that reads as a number.', acceptGuide: true });
+  ok(status(splitT) === 'INVALID_ARGUMENT' && reason(splitT) === 'phone', 'and a title split by a mark is refused as a number, the same way');
 
   /* ------------------------------------------------------------- edit */
   console.log('\nforumEdit');

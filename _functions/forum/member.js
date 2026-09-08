@@ -33,6 +33,7 @@ const { getFirestore } = require('firebase-admin/firestore');
 const NAV = require('../jobnav.js');
 const M = require('../forum-model.js');
 const guard = require('../forum-guard.js');
+const markup = require('../forum-markup.js');
 const identity = require('./identity.js');
 
 /** The maintainer's address. Keep in sync with isAdmin() in _firestore.rules. */
@@ -206,11 +207,14 @@ function checkGap(c, now) {
   if (c.lastPostAt && now - c.lastPostAt < M.RATE.gapMs) refuse('resource-exhausted', 'gap');
 }
 
-/** A text field, bounded and guarded. `required` refuses an empty value. */
+/** A text field, bounded and guarded. `required` refuses an empty value.
+    The guard runs on the text as typed AND as read (markup.checkRead): a
+    contact detail split by a mark, jane**@**mit.edu, is whole once the
+    page draws it and once the excerpt is cut from it. */
 function textField(v, max, required) {
   const s = typeof v === 'string' ? v.trim() : '';
   if ((required && !s) || s.length > max) refuse('invalid-argument', 'bounds');
-  const hit = guard.check(s);
+  const hit = markup.checkRead(s, guard.check);
   if (hit) refuse('invalid-argument', hit);
   return s;
 }
@@ -223,9 +227,12 @@ function flatten(v) {
   return String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
 }
 
-/** The first BOUNDS.excerpt characters of a body, cut at a word. */
+/** The first BOUNDS.excerpt characters of a body, cut at a word: of the
+    WORDS a reader sees, never the markers around them, since the card the
+    excerpt is drawn on renders none (a `**` or a `#` on a card is the
+    toolbar leaking into the list). */
 function excerptOf(body) {
-  const s = flatten(body);
+  const s = flatten(markup.plain(body));
   if (s.length <= M.BOUNDS.excerpt) return s;
   const cut = s.slice(0, M.BOUNDS.excerpt);
   const at = cut.lastIndexOf(' ');

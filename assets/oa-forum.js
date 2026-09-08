@@ -133,8 +133,9 @@
   var M = window.OAForumModel;
   var G = window.OAForumGuard;
   var GUIDE = window.OAForumGuide;
+  var MK = window.OAForumMarkup;
   var NAV = window.OAJobNav;
-  if (!M || !G || !GUIDE || !NAV || !window.OAList) {
+  if (!M || !G || !GUIDE || !MK || !NAV || !window.OAList) {
     if (window.console) console.error('oa-forum: a module this page depends on did not load');
     return;
   }
@@ -1934,9 +1935,11 @@
 
   /** The first BOUNDS.excerpt characters of a body, cut at a word: the
       thread's excerpt as forumPost derives it (P.excerptOf in member.js),
-      so a thread the page draws before reading it back lists the same way. */
+      so a thread the page draws before reading it back lists the same way.
+      Of the words as they are READ (OAForumMarkup.plain), never the marks
+      around them, which the card renders none of. */
   function excerptOf(body) {
-    var t = String(body || '').replace(/\s+/g, ' ').trim();
+    var t = MK.plain(String(body || '')).replace(/\s+/g, ' ').trim();
     if (t.length <= M.BOUNDS.excerpt) return t;
     var cut = t.slice(0, M.BOUNDS.excerpt);
     var at = cut.lastIndexOf(' ');
@@ -1979,60 +1982,18 @@
     refreshThread();
   }
 
-  /* A web address in a post is drawn as a link (owner, 2026-09-05). It runs
-     over text esc() has ALREADY escaped, which is what makes it safe: `&`,
-     `<` and `"` are entities by then, so nothing here can close an attribute
-     or open a tag, and the pattern itself admits only http, https and www,
-     never a `javascript:` href. `noopener noreferrer` keeps the forum's
-     address out of the other site's referrer, and `nofollow` means a forum
-     nobody can crawl cannot be used to pass rank. Trailing sentence
-     punctuation is not part of the address; a closing bracket only counts as
-     punctuation when the address does not open one of its own. */
-  /* The lead admits the two ENTITIES esc() has already made of a quote and an
-     apostrophe: a URL between quotation marks ("see https://x.org/y") was
-     preceded by a `;` by the time this ran and so was never linked at all.
-     Case-insensitive because a phone capitalises the first letter of a
-     sentence, and `Www.example.org` is the same address. */
-  var LINK_RX = /(^|[\s(]|&quot;|&#39;)((?:https?:\/\/|www\.)[^\s<]+)/gi;
-  var TRAIL_ENTITIES = ['&quot;', '&#39;', '&gt;', '&amp;'];
-
-  function linkify(escaped) {
-    return escaped.replace(LINK_RX, function (all, lead, raw) {
-      var url = raw;
-      var trail = '';
-      while (url) {
-        /* an entity the escaper made of the punctuation AFTER the address:
-           the closing quotation mark of "see https://x.org/y" is five
-           characters by now, and taking one at a time would leave `&quot` */
-        var ent = '';
-        for (var ei = 0; ei < TRAIL_ENTITIES.length; ei++) {
-          var e2 = TRAIL_ENTITIES[ei];
-          if (url.length > e2.length && url.slice(-e2.length) === e2) { ent = e2; break; }
-        }
-        if (ent) { trail = ent + trail; url = url.slice(0, -ent.length); continue; }
-        var last = url.charAt(url.length - 1);
-        /* A CLOSING BRACKET THE ADDRESS OPENED IS PART OF IT. Wikipedia's
-           own titles end that way, and the test read the wrong way round:
-           with one of each it stripped the bracket and linked
-           `..._(discipline`, which 404s. Keep it while the address closes no
-           more brackets than it opens; strip it when it closes more, which
-           is the "(see https://x.org/y)" case. */
-        if (last === ')' && url.split(')').length <= url.split('(').length) break;
-        if ('.,!?)'.indexOf(last) === -1) break;
-        trail = last + trail;
-        url = url.slice(0, -1);
-      }
-      if (!url || url === 'www.') return all;
-      var href = url.charAt(0) === 'w' || url.charAt(0) === 'W' ? 'https://' + url : url;
-      return lead + '<a href="' + href + '" target="_blank" rel="noopener noreferrer nofollow">' +
-        url + '</a>' + trail;
-    });
-  }
-
+  /* A POST IS READ BY ONE MODULE, oa-forum-markup.js (2026-09-08, with the
+     formatting toolbar): paragraphs, bold and italic, links and bare web
+     addresses (owner, 2026-09-05: "I want users to be able to post links in
+     their posts or replies"), quotes, headings, lists, code and a rule. Every
+     character of the reader's own words is escaped at emission there, a
+     link is http, https or www and nothing else, and it opens away with
+     `noopener noreferrer nofollow`. The excerpt on a card and the words a
+     quote falls back to come from the same module's plain(), so what a
+     reader selects on a rendered post is what the function accepts as a
+     passage of it. */
   function bodyHTML(text) {
-    return String(text || '').split(/\n{2,}/).map(function (para) {
-      return '<p>' + linkify(esc(para)).replace(/\n/g, '<br>') + '</p>';
-    }).join('');
+    return MK.html(text);
   }
 
   /** Is the reader the maintainer? Asked of the one definition, so the page
@@ -2190,7 +2151,12 @@
     if (!li || !p || p.hidden || S.readOnly || p.by !== S.me.handle) return;
     editPost(li, p);
     var ta = li.querySelector('.oa-forum-editing textarea');
-    if (ta) ta.value = text;
+    if (ta) {
+      ta.value = text;
+      /* said as an input, so the preview and the guard line drawn from
+         the stored body repaint for the words actually in the box */
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   }
 
   /** New facts about the thread on screen (a post just made, an edit, a
@@ -2544,13 +2510,364 @@
       '<span>I have read <a href="#oa-forum-guide">the forum guide</a>: no names, no contact details, no rumours.</span></label>';
   }
 
+  /* ------------------------------------------- the formatting toolbar
+
+     Owner, 2026-09-08, with Stack Exchange's editor beside the ask form:
+     "add that standard editing menu when someone composes a new question".
+     The same row over every box a member writes in (a question, an answer,
+     an edit): bold and italic; a link, a quote and code; a numbered list, a
+     bulleted list, a heading and a rule; undo and redo; and at the right
+     end a switch for the tips row under the toolbar, which says what each
+     mark writes. What the buttons write is the Markdown subset that
+     oa-forum-markup.js reads, the one module on both sides of a post, so a
+     mark the toolbar can make is a mark the page draws and the function's
+     excerpt reads past.
+
+     NOT COPIED: the image button. Rule 6 of the guide forbids screenshots
+     and pasted correspondence, and an image is a fetch from somebody else's
+     host by every reader's browser, which would tell that host who read the
+     thread and when, on a page that loads no analytics on purpose.
+
+     HOW A BUTTON WRITES. Through execCommand('insertText') where the
+     browser has it, so the browser's own undo stack holds the insertion
+     and Ctrl+Z, or the Undo button, takes it back; setRangeText is the
+     fallback, with an input event dispatched by hand so the guard and the
+     preview see the change. A press on a button does not take the keyboard
+     from the box (mousedown is prevented), so the selection the button
+     acts on is still there; the toolbar is one Tab stop (a roving
+     tabindex, arrows between the buttons), and B, I and K with Ctrl or Cmd
+     do what the first three buttons do. A second press on a mark takes it
+     off again: bold on bold text unwraps it, a quoted block un-quotes.
+
+     THE PREVIEW is drawn from the same html() the thread draws by, under
+     the box, only once the words carry a mark: for a plain paragraph it
+     would say what the box already says. */
+
+  var TIPS_KEY = 'oa-forum-tips';
+  var MOD_KEY = /Mac|iPhone|iPad|iPod/.test(String((navigator && navigator.platform) || '')) ? 'Cmd' : 'Ctrl';
+
+  var ICON_BOLD = icon('<path d="M7 4h6.5a3.5 3.5 0 0 1 0 7H7z"/><path d="M7 11h7.5a3.5 3.5 0 0 1 0 7H7z"/>');
+  var ICON_ITALIC = icon('<path d="M10 4h8"/><path d="M6 20h8"/><path d="M14 4 10 20"/>');
+  var ICON_LINK = icon('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5"/>');
+  var ICON_QUOTE = icon('<path d="M9 7H5.5A1.5 1.5 0 0 0 4 8.5V12h5v5H6"/><path d="M20 7h-3.5A1.5 1.5 0 0 0 15 8.5V12h5v5h-3"/>');
+  var ICON_CODE = icon('<path d="m8 7-5 5 5 5"/><path d="m16 7 5 5-5 5"/><path d="m14 4-4 16"/>');
+  var ICON_OL = icon('<path d="M10 6h10"/><path d="M10 12h10"/><path d="M10 18h10"/><path d="M4 4.5h1.5v4"/><path d="M4 8.5h3"/><path d="M4 14h3l-3 3.5h3"/>');
+  var ICON_UL = icon('<path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="M4.5 6h.01"/><path d="M4.5 12h.01"/><path d="M4.5 18h.01"/>');
+  var ICON_HEADING = icon('<path d="M5 5v14"/><path d="M13 5v14"/><path d="M5 12h8"/><path d="M19 11v8"/><path d="M17 12.5 19 11"/>');
+  var ICON_HR = icon('<path d="M4 12h16"/><path d="M6 6h12"/><path d="M6 18h12"/>');
+  var ICON_UNDO = icon('<path d="M9 14 4 9l5-5"/><path d="M4 9h9a6 6 0 0 1 0 12h-3"/>');
+  var ICON_REDO = icon('<path d="m15 14 5-5-5-5"/><path d="M20 9h-9a6 6 0 0 0 0 12h3"/>');
+
+  /* the buttons, in their groups; `key` is the letter that does the same
+     with Ctrl or Cmd held */
+  var TOOLS = [
+    [{ cmd: 'bold', label: 'Bold', key: 'B', icon: ICON_BOLD },
+     { cmd: 'italic', label: 'Italic', key: 'I', icon: ICON_ITALIC }],
+    [{ cmd: 'link', label: 'Link', key: 'K', icon: ICON_LINK },
+     { cmd: 'quote', label: 'Blockquote', icon: ICON_QUOTE },
+     { cmd: 'code', label: 'Code', icon: ICON_CODE }],
+    [{ cmd: 'ol', label: 'Numbered list', icon: ICON_OL },
+     { cmd: 'ul', label: 'Bulleted list', icon: ICON_UL },
+     { cmd: 'heading', label: 'Heading', icon: ICON_HEADING },
+     { cmd: 'hr', label: 'Horizontal rule', icon: ICON_HR }],
+    [{ cmd: 'undo', label: 'Undo', icon: ICON_UNDO },
+     { cmd: 'redo', label: 'Redo', icon: ICON_REDO }]
+  ];
+
+  /* the tips row: what each mark writes, in the toolbar's own order */
+  var TIPS = ['**bold**', '*italic*', '[link](https://…)', '> quote', '`code`', '1. list', '- list', '## heading', '---'];
+
+  function tipsHidden() {
+    try { return localStorage.getItem(TIPS_KEY) === 'off'; } catch (e) { return false; }
+  }
+
+  function toolbarHTML(taId, tipsId) {
+    var out = '<div class="oa-forum-tb" role="toolbar" aria-label="Formatting" aria-controls="' + taId + '">';
+    TOOLS.forEach(function (group, gi) {
+      out += '<span class="oa-forum-tbgroup">';
+      group.forEach(function (t, ti) {
+        var name = t.label + (t.key ? ' (' + MOD_KEY + '+' + t.key + ')' : '');
+        out += '<button type="button" class="oa-forum-tbbtn" data-fmt="' + t.cmd + '" title="' + name + '" aria-label="' + name + '" ' +
+          'tabindex="' + (gi === 0 && ti === 0 ? '0' : '-1') + '">' + t.icon + '</button>';
+      });
+      out += '</span>';
+    });
+    var off = tipsHidden();
+    out += '<button type="button" class="oa-forum-tbtips" data-fmt="tips" tabindex="-1" aria-expanded="' + (off ? 'false' : 'true') + '" ' +
+      'aria-controls="' + tipsId + '">' + (off ? 'Show' : 'Hide') + ' formatting tips</button>';
+    return out + '</div>';
+  }
+
+  function tipsHTML(id) {
+    var out = '<p class="oa-forum-fmt" id="' + id + '"' + (tipsHidden() ? ' hidden' : '') + '>';
+    TIPS.forEach(function (t) { out += '<span><code>' + esc(t) + '</code></span>'; });
+    return out + '<span>A blank line starts a new paragraph</span><span>A web address becomes a link</span></p>';
+  }
+
+  function previewHTML(id) {
+    return '<div class="oa-forum-preview" id="' + id + '" hidden><p class="oa-forum-preview-h">Preview</p><div class="oa-forum-text"></div></div>';
+  }
+
+  /** Replace [start, end) of the box with `text` and leave [selStart,
+      selEnd) selected: through the browser's own insertText, so its undo
+      stack holds the change, else by hand with the input event the guard
+      and the preview listen for. */
+  function replaceRange(ta, start, end, text, selStart, selEnd) {
+    ta.focus();
+    ta.setSelectionRange(start, end);
+    var before = ta.value;
+    var done = false;
+    try {
+      done = !!document.execCommand && (text ? document.execCommand('insertText', false, text) : document.execCommand('delete', false));
+    } catch (e) { done = false; }
+    /* the fallback only when the browser did NOTHING: a browser that wrote
+       less than asked cut the text at the box's maxlength, which is right,
+       and writing it again by hand would put the text in twice */
+    if (!done || ta.value === before) {
+      ta.setRangeText(text, start, end, 'end');
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    var max = ta.value.length;
+    ta.setSelectionRange(Math.min(selStart, max), Math.min(selEnd, max));
+  }
+
+  /** Wrap the selection in `mark` (or the placeholder, selected, when
+      nothing is), and take the mark off again when it is already there. */
+  function wrapSel(ta, mark, placeholder) {
+    var v = ta.value;
+    var s = ta.selectionStart;
+    var e = ta.selectionEnd;
+    var sel = v.slice(s, e);
+    var lead = (sel.match(/^\s*/) || [''])[0];
+    var tail = (sel.match(/\s*$/) || [''])[0];
+    var core = sel.trim();
+    /* the spaces at either end stay outside the marks; a selection that is
+       only spaces is no selection, and gets the placeholder after it */
+    if (core) { s += lead.length; e -= tail.length; sel = core; }
+    else { s = e; sel = ''; }
+    var m = mark.length;
+    if (sel.length >= 2 * m && sel.slice(0, m) === mark && sel.slice(-m) === mark) {
+      var inner = sel.slice(m, -m);
+      replaceRange(ta, s, e, inner, s, s + inner.length);
+      return;
+    }
+    /* THE MARKS JUST OUTSIDE THE SELECTION, counted as runs: bold is on
+       when two or more stars sit on each side, italic when an odd number
+       does (one, or the three of bold italic). So bold on a bold word and
+       italic on an italic or a bold-italic word take that mark off, while
+       italic on a merely BOLD word wraps it, since taking one star of each
+       pair would leave the word broken. A backtick has no runs to read. */
+    var ch = mark.charAt(0);
+    var rb = 0;
+    var ra = 0;
+    while (s - rb - 1 >= 0 && v.charAt(s - rb - 1) === ch) rb++;
+    while (e + ra < v.length && v.charAt(e + ra) === ch) ra++;
+    var on = mark === '`' ? rb === 1 && ra === 1
+      : mark === '**' ? rb >= 2 && ra >= 2
+        : rb % 2 === 1 && ra % 2 === 1;
+    if (sel && on) {
+      replaceRange(ta, s - m, e + m, sel, s - m, s - m + sel.length);
+      return;
+    }
+    var text = sel || placeholder;
+    replaceRange(ta, s, e, mark + text + mark, s + m, s + m + text.length);
+  }
+
+  /** The whole lines the selection touches, as [start, end) of the box. A
+      selection ending just after a line break does not reach the next line. */
+  function lineSpan(ta) {
+    var v = ta.value;
+    var s = ta.selectionStart;
+    var e = ta.selectionEnd;
+    if (e > s && v.charAt(e - 1) === '\n') e--;
+    var ls = v.lastIndexOf('\n', s - 1) + 1;
+    var le = v.indexOf('\n', e);
+    if (le === -1) le = v.length;
+    return { start: ls, end: le, caret: s === e };
+  }
+
+  /** Put `prefix` on every line the selection touches (a quote, a list, a
+      heading), and take it off every line when every line carries one. */
+  function prefixLines(ta, prefix, offRx) {
+    var span = lineSpan(ta);
+    var lines = ta.value.slice(span.start, span.end).split('\n');
+    var marked = lines.filter(function (l) { return offRx.test(l); }).length;
+    var out;
+    if (marked && marked === lines.filter(function (l) { return /\S/.test(l); }).length) {
+      out = lines.map(function (l) { return l.replace(offRx, ''); });
+    } else {
+      var n = 0;
+      out = lines.map(function (l) {
+        if (!/\S/.test(l) && lines.length > 1) return prefix(l, n, true);
+        return prefix(l, n++, false) + l;
+      });
+    }
+    var text = out.join('\n');
+    var end = span.start + text.length;
+    replaceRange(ta, span.start, span.end, text, span.caret ? end : span.start, end);
+  }
+
+  function fenceLines(ta) {
+    var span = lineSpan(ta);
+    var block = ta.value.slice(span.start, span.end);
+    var lines = block.split('\n');
+    var fenced = lines.length >= 2 && /^```/.test(lines[0]) && /^```/.test(lines[lines.length - 1]);
+    var text = fenced ? lines.slice(1, -1).join('\n') : '```\n' + block + '\n```';
+    replaceRange(ta, span.start, span.end, text, span.start, span.start + text.length);
+  }
+
+  function insertRule(ta) {
+    var v = ta.value;
+    var s = ta.selectionStart;
+    var e = ta.selectionEnd;
+    var before = v.slice(0, s);
+    var after = v.slice(e);
+    var lead = !before ? '' : /\n\n$/.test(before) ? '' : /\n$/.test(before) ? '\n' : '\n\n';
+    var tail = /^\n\n/.test(after) ? '' : /^\n/.test(after) ? '\n' : '\n\n';
+    var text = lead + '---' + tail;
+    replaceRange(ta, s, e, text, s + text.length, s + text.length);
+  }
+
+  function insertLink(ta) {
+    var v = ta.value;
+    var s = ta.selectionStart;
+    var e = ta.selectionEnd;
+    var raw = v.slice(s, e);
+    var sel = raw.trim();
+    /* the spaces at either end of the selection stay where they are */
+    if (sel) { s += raw.indexOf(sel); e = s + sel.length; } else { s = e; }
+    var label;
+    var url;
+    var text;
+    if (/^(https?:\/\/|www\.)\S+$/i.test(sel)) {
+      /* an address selected: the label is what is left to write */
+      label = 'link text';
+      url = sel;
+      text = '[' + label + '](' + url + ')';
+      replaceRange(ta, s, e, text, s + 1, s + 1 + label.length);
+      return;
+    }
+    label = sel || 'link text';
+    url = 'https://';
+    text = '[' + label + '](' + url + ')';
+    var at = s + label.length + 3;
+    replaceRange(ta, s, e, text, at, at + url.length);
+  }
+
+  function applyTool(ta, cmd) {
+    if (cmd === 'undo' || cmd === 'redo') {
+      ta.focus();
+      try { document.execCommand(cmd, false); } catch (e) { /* the keyboard's own undo still works */ }
+      return;
+    }
+    if (cmd === 'bold') wrapSel(ta, '**', 'bold text');
+    else if (cmd === 'italic') wrapSel(ta, '*', 'italic text');
+    else if (cmd === 'code') {
+      if (ta.value.slice(ta.selectionStart, ta.selectionEnd).indexOf('\n') !== -1) fenceLines(ta);
+      else wrapSel(ta, '`', 'code');
+    } else if (cmd === 'link') insertLink(ta);
+    else if (cmd === 'quote') prefixLines(ta, function (l, i, blank) { return blank ? '>' : '> '; }, /^ {0,3}> ?/);
+    else if (cmd === 'ul') prefixLines(ta, function (l, i, blank) { return blank ? '' : '- '; }, /^ {0,3}[-*+] /);
+    else if (cmd === 'ol') prefixLines(ta, function (l, i, blank) { return blank ? '' : (i + 1) + '. '; }, /^ {0,3}\d{1,9}[.)] /);
+    else if (cmd === 'heading') prefixLines(ta, function (l, i, blank) { return blank ? '' : '## '; }, /^ {0,3}#{1,6} /);
+    else if (cmd === 'hr') insertRule(ta);
+  }
+
+  /** One choice for the page: every box on it (an answer box and an open
+      edit box can stand together) follows the switch that was pressed. */
+  function toggleTips(btn, tips) {
+    if (!tips) return;
+    var off = !tips.hidden;
+    try { localStorage.setItem(TIPS_KEY, off ? 'off' : 'on'); } catch (e) { /* a preference, nothing more */ }
+    Array.prototype.forEach.call(document.querySelectorAll('.oa-forum-editor .oa-forum-fmt'), function (row) { row.hidden = off; });
+    Array.prototype.forEach.call(document.querySelectorAll('.oa-forum-tbtips'), function (b) {
+      b.setAttribute('aria-expanded', off ? 'false' : 'true');
+      b.textContent = (off ? 'Show' : 'Hide') + ' formatting tips';
+    });
+  }
+
+  /** The toolbar, the shortcuts and the preview on one box. `box` is the
+      .oa-forum-editor holding all of them. */
+  function wireEditor(box, ta) {
+    if (!box || !ta) return;
+    var tb = box.querySelector('.oa-forum-tb');
+    var tips = box.querySelector('.oa-forum-fmt');
+    var prev = box.querySelector('.oa-forum-preview');
+    function btnOf(node) {
+      while (node && node !== tb) {
+        if (node.nodeType === 1 && node.hasAttribute('data-fmt')) return node;
+        node = node.parentNode;
+      }
+      return null;
+    }
+    if (tb) {
+      /* a press does not take the keyboard from the box, so the selection
+         the button acts on is still there when it acts */
+      tb.addEventListener('mousedown', function (e) { if (btnOf(e.target)) e.preventDefault(); });
+      tb.addEventListener('click', function (e) {
+        var b = btnOf(e.target);
+        if (!b) return;
+        e.preventDefault();
+        var cmd = b.getAttribute('data-fmt');
+        if (cmd === 'tips') toggleTips(b, tips);
+        else applyTool(ta, cmd);
+      });
+      /* one Tab stop: the arrows move between the buttons */
+      var stops = function () { return Array.prototype.slice.call(tb.querySelectorAll('[data-fmt]')); };
+      tb.addEventListener('focusin', function (e) {
+        var b = btnOf(e.target);
+        if (!b) return;
+        stops().forEach(function (x) { x.setAttribute('tabindex', x === b ? '0' : '-1'); });
+      });
+      tb.addEventListener('keydown', function (e) {
+        var list = stops();
+        var at = list.indexOf(btnOf(e.target));
+        if (at === -1) return;
+        var to = -1;
+        if (e.key === 'ArrowRight') to = (at + 1) % list.length;
+        else if (e.key === 'ArrowLeft') to = (at + list.length - 1) % list.length;
+        else if (e.key === 'Home') to = 0;
+        else if (e.key === 'End') to = list.length - 1;
+        if (to === -1) return;
+        e.preventDefault();
+        list[to].focus();
+      });
+    }
+    ta.addEventListener('keydown', function (e) {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+      var k = String(e.key || '').toLowerCase();
+      var cmd = k === 'b' ? 'bold' : k === 'i' ? 'italic' : k === 'k' ? 'link' : '';
+      if (!cmd) return;
+      e.preventDefault();
+      applyTool(ta, cmd);
+    });
+    if (prev) {
+      var timer = 0;
+      var paint = function () {
+        timer = 0;
+        var v = String(ta.value || '');
+        var on = !!v.trim() && MK.hasMarkup(v);
+        prev.hidden = !on;
+        prev.querySelector('.oa-forum-text').innerHTML = on ? MK.html(v) : '';
+      };
+      ta.addEventListener('input', function () {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(paint, 120);
+      });
+      paint();
+    }
+  }
+
   function replyBox(thread, first) {
     var wrap = el('div', { class: 'oa-forum-compose', id: 'oa-forum-reply' });
     wrap.innerHTML =
       '<h2>Your answer <span class="oa-forum-as">as <span class="oa-forum-handle is-me">' + esc(S.me.handle) + '</span></span></h2>' +
       '<div class="oa-forum-quotebox" id="oa-forum-quotebox" hidden></div>' +
       '<div class="oa-forum-editor">' +
-        '<textarea id="oa-forum-body" rows="6" maxlength="' + M.BOUNDS.body + '" placeholder="Answer the question. Plain text, a few paragraphs at most." aria-label="Your answer"></textarea>' +
+        toolbarHTML('oa-forum-body', 'oa-forum-fmt') +
+        tipsHTML('oa-forum-fmt') +
+        '<textarea id="oa-forum-body" rows="6" maxlength="' + M.BOUNDS.body + '" placeholder="Answer the question. A few paragraphs at most." aria-label="Your answer" aria-describedby="oa-forum-fmt"></textarea>' +
+        previewHTML('oa-forum-preview') +
         '<div class="oa-forum-bar">' +
           '<button type="button" class="oa-forum-send" id="oa-forum-send">Post your answer</button>' +
         '</div>' +
@@ -2560,14 +2877,21 @@
       '<p class="oa-forum-msg" id="oa-forum-msg" aria-live="polite"></p>';
     var ta = wrap.querySelector('#oa-forum-body');
     var guard = wrap.querySelector('#oa-forum-guardmsg');
+    wireEditor(wrap.querySelector('.oa-forum-editor'), ta);
     ta.addEventListener('input', function () { liveGuard(ta, guard); });
     ta.addEventListener('focus', function () { warmUp('forumPost'); });
     wrap.querySelector('#oa-forum-send').addEventListener('click', function () { sendReply(wrap, ta); });
     return wrap;
   }
 
+  /** The guard's reason for a text as typed or as read (a split contact
+      detail is whole once drawn), the one way every text here is checked. */
+  function guardOf(text) {
+    return MK.checkRead(text, G.check);
+  }
+
   function liveGuard(ta, msgEl) {
-    var why = G.check(ta.value);
+    var why = guardOf(ta.value);
     msgEl.textContent = why ? G.WHY[why] : '';
     return !why;
   }
@@ -2597,7 +2921,9 @@
         li.querySelector('.oa-forum-text').contains(sel.anchorNode)) {
       text = String(sel.toString() || '').trim();
     }
-    if (!text) text = String(p.body || '').trim();
+    /* the whole body as it is READ: a quote of a bold sentence is the
+       sentence, and forumPost checks it against the same reading */
+    if (!text) text = MK.plain(String(p.body || '')).trim();
     if (text.length > M.BOUNDS.quote) {
       var cut = text.slice(0, M.BOUNDS.quote);
       var sp = cut.lastIndexOf(' ');
@@ -2612,7 +2938,7 @@
        joined by at most ONE separator each) is handed over single-spaced,
        which the guard refuses. Saying so on the press beats a refusal after
        the answer has been written. */
-    var badQuote = G.check(text);
+    var badQuote = guardOf(text);
     if (badQuote) { say(REASONS[badQuote] || 'That cannot be quoted.', true); return; }
     S.quote = { n: Number(p.n) || 0, by: p.by, text: text };
     var box = $('oa-forum-quotebox');
@@ -2634,7 +2960,7 @@
     var btn = wrap.querySelector('#oa-forum-send');
     var accept = wrap.querySelector('#oa-forum-accept');
     if (!body) { say('Write something first.', true); return; }
-    if (!liveGuard(ta, wrap.querySelector('#oa-forum-guardmsg'))) { say(REASONS[G.check(body)] || 'That cannot be posted.', true); return; }
+    if (!liveGuard(ta, wrap.querySelector('#oa-forum-guardmsg'))) { say(REASONS[guardOf(body)] || 'That cannot be posted.', true); return; }
     if (accept && !accept.checked) { say(REASONS.guide, true); accept.focus(); return; }
     btn.disabled = true;
     say('Posting…');
@@ -2676,8 +3002,12 @@
     var text = li.querySelector('.oa-forum-text');
     if (!text || li.querySelector('.oa-forum-editing')) return;
     var box = el('div', { class: 'oa-forum-editor oa-forum-editing' });
+    var editId = 'oa-forum-edit-' + String(p.id).replace(/[^A-Za-z0-9_-]/g, '');
     box.innerHTML =
-      '<textarea rows="6" maxlength="' + M.BOUNDS.body + '" aria-label="Edit your post">' + esc(p.body) + '</textarea>' +
+      toolbarHTML(editId, editId + '-fmt') +
+      tipsHTML(editId + '-fmt') +
+      '<textarea id="' + editId + '" rows="6" maxlength="' + M.BOUNDS.body + '" aria-label="Edit your post" aria-describedby="' + editId + '-fmt">' + esc(p.body) + '</textarea>' +
+      previewHTML(editId + '-preview') +
       '<div class="oa-forum-bar">' +
         '<span class="oa-forum-actions"><button type="button" class="oa-forum-cancel" data-edit="cancel">Cancel</button>' +
         '<button type="button" class="oa-forum-send" data-edit="save">Save</button></span></div>' +
@@ -2687,6 +3017,7 @@
     text.insertAdjacentElement('afterend', box);
     var ta = box.querySelector('textarea');
     var guard = box.querySelector('.oa-forum-guardmsg');
+    wireEditor(box, ta);
     ta.addEventListener('input', function () { liveGuard(ta, guard); });
     box.querySelector('[data-edit="cancel"]').addEventListener('click', function () {
       /* the body is found from the box's OWN parent rather than held from
@@ -2737,11 +3068,18 @@
      is what the owner's screenshot showed: eight rows of tags under a form
      nobody had typed into; "Similar questions" under the title as it is
      typed, from the rows the list has already read; and the Post button
-     under the card, at its left. What is NOT copied: the brand, the review
-     step, and the formatting toolbar, because a post here is plain text and
-     a toolbar over a box that renders none would be a lie. The room is said
-     ONCE, at the card's head, and the page's own room banner stands down
-     while the form is open (drawBanner). */
+     under the card, at its left. THE FORMATTING TOOLBAR IS COPIED TOO
+     (owner, 2026-09-08: "add that standard editing menu when someone
+     composes a new question"): the same row of buttons over the body box,
+     writing the same marks, which oa-forum-markup.js reads back on every
+     post; the tips row under it says what each mark writes, and a preview
+     under the box shows the words as they will read once they carry a
+     mark. See "the formatting toolbar" above. What is NOT copied: the
+     brand, the review step, and the image button (rule 6 forbids pasted
+     screenshots, and an image is a fetch from somebody else's host by
+     every reader's browser). The room is said ONCE, at the card's head,
+     and the page's own room banner stands down while the form is open
+     (drawBanner). */
 
   /* words that carry no meaning of their own when two titles are compared */
   var STOPWORDS = ('the and for are but not you all any can had her was one our out has his how man new now old see two way who ' +
@@ -2823,10 +3161,11 @@
             '<p class="oa-forum-fhint" id="oa-forum-ask-bodyhint">Include everything someone would need to answer it: the situation, ' +
               'what you already know, what you are trying to decide. Nothing that says who you are.</p>' +
             '<div class="oa-forum-editor">' +
-              '<textarea id="oa-forum-ask-body" rows="10" maxlength="' + M.BOUNDS.body + '" placeholder="Plain text, a few paragraphs at most." ' +
+              toolbarHTML('oa-forum-ask-body', 'oa-forum-ask-fmt') +
+              tipsHTML('oa-forum-ask-fmt') +
+              '<textarea id="oa-forum-ask-body" rows="10" maxlength="' + M.BOUNDS.body + '" placeholder="A few paragraphs at most." ' +
                 'aria-required="true" aria-describedby="oa-forum-ask-bodyhint oa-forum-ask-fmt"></textarea>' +
-              '<p class="oa-forum-fmt" id="oa-forum-ask-fmt"><span>Plain text</span><span>A blank line starts a new paragraph</span>' +
-                '<span>A web address becomes a link</span></p>' +
+              previewHTML('oa-forum-ask-preview') +
             '</div>' +
             '<p class="oa-forum-guardmsg" id="oa-forum-ask-guardmsg" aria-live="polite"></p>' +
           '</div>' +
@@ -2860,6 +3199,7 @@
     var titleEl = $('oa-forum-ask-title');
     var body = $('oa-forum-ask-body');
     var guard = $('oa-forum-ask-guardmsg');
+    wireEditor(body.parentNode, body);
     body.addEventListener('input', function () { liveGuard(body, guard); });
     /* the form takes focus the moment it opens (below), which is when the
        posting function is woken: by the time the question is written it is up */
@@ -3092,9 +3432,9 @@
       var send = $('oa-forum-ask-send');
       if (input.value.trim()) add(input.value);
       if (!title) { say('Give the question a title.', true); titleEl.focus(); return; }
-      if (G.check(title)) { say(G.WHY[G.check(title)], true); titleEl.focus(); return; }
+      if (guardOf(title)) { say(G.WHY[guardOf(title)], true); titleEl.focus(); return; }
       if (!text) { say('Write the body of the question.', true); body.focus(); return; }
-      if (!liveGuard(body, guard)) { say(G.WHY[G.check(text)], true); body.focus(); return; }
+      if (!liveGuard(body, guard)) { say(G.WHY[guardOf(text)], true); body.focus(); return; }
       if (!M.tagsOk(tags)) { say(REASONS.tags, true); input.focus(); return; }
       if (accept && !accept.checked) { say(REASONS.guide, true); accept.focus(); return; }
       send.disabled = true;

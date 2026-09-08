@@ -545,7 +545,12 @@
     }
     var threads = simThreads(Y, room);
     var guard = window.OAForumGuard;
-    function bad(text) { return guard && guard.check ? guard.check(String(text || '')) : ''; }
+    /* as typed and as read (member.js textField through markup.checkRead) */
+    function bad(text) {
+      if (!guard || !guard.check) return '';
+      var mkg = window.OAForumMarkup;
+      return mkg && mkg.checkRead ? mkg.checkRead(String(text || ''), guard.check) : guard.check(String(text || ''));
+    }
 
     /* THE WARM-UP the page sends when a reader starts writing or reaches for
        a vote button ({ room, warm: true }, _functions/forum/post.js and
@@ -607,7 +612,10 @@
          does too, or the page's accept box would be decoration here */
       if (!seed.guideAt && !simAccepted && data.acceptGuide !== true) return simRefuse('failed-precondition', 'guide');
       if (data.acceptGuide === true) simAccepted = true;
-      var excerpt = body.replace(/\s+/g, ' ').slice(0, 200);
+      /* the excerpt is cut from the words a reader sees, as member.js cuts
+         it, through the same module the page renders by when it is loaded */
+      var mk = window.OAForumMarkup;
+      var excerpt = (mk ? mk.plain(body) : body).replace(/\s+/g, ' ').slice(0, 200);
       if (!data.tid) {
         var title = String(data.title || '').trim();
         if (!title || title.length > 120) return simRefuse('invalid-argument', 'bounds');
@@ -658,7 +666,11 @@
            whitespace already collapsed, so a byte-exact test refuses an
            ordinary selection spanning a paragraph break. */
         var flat = function (t) { return String(t == null ? '' : t).replace(/\s+/g, ' ').trim(); };
-        if (!src || src.hidden || !qtext || qtext.length > 600 || flat(src.body).indexOf(flat(qtext)) === -1) {
+        /* …and in the body as it is READ as well as stored, since a selection
+           of a bold sentence carries no asterisks (post.js, the same two) */
+        var mk2 = window.OAForumMarkup;
+        var passage = function (hay) { return flat(hay).indexOf(flat(qtext)) !== -1; };
+        if (!src || src.hidden || !qtext || qtext.length > 600 || !(passage(src.body) || (mk2 && passage(mk2.plain(src.body))))) {
           return simRefuse('invalid-argument', 'quote');
         }
         quote = { n: qn, by: src.by, text: qtext };
