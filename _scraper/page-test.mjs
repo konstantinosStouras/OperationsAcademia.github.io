@@ -11396,6 +11396,8 @@ for (const w of [320, 360, 390, 430]) {
     await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(19, 23); });
     await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="italic"]');
     eq(await q.evaluate(() => document.getElementById('oa-forum-ask-body').value), 'see **both** and ***bold*** here', 'forum (candidate): …and italic on a bold word wraps it rather than breaking the bold');
+    /* the link and list checks below act on the two words again */
+    await q.fill('#oa-forum-ask-body', 'Two offers');
     await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); t.focus(); t.setSelectionRange(0, 10); });
     await q.click('#oa-forum-askform .oa-forum-tbbtn[data-fmt="link"]');
     const linked = await q.evaluate(() => { const t = document.getElementById('oa-forum-ask-body'); return { v: t.value, sel: t.value.slice(t.selectionStart, t.selectionEnd) }; });
