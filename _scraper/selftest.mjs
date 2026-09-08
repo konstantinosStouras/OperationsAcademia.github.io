@@ -5490,6 +5490,8 @@ async function testUserDirectorySync() {
     'the roster sync\'s own selftest is green:\n' + syncOut.slice(0, 1500));
   const mod = await import('./sync-user-directory.mjs');
   const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+  const fbjs = await readFile(path.join(root, 'assets', 'oa-firebase.js'), 'utf8');
+  const fbjsHas = (needle) => fbjs.includes(needle);
 
   /* The rules' own list for a roster row, read out of the file rather than
      copied — the both-ways discipline every other pairing here follows. */
@@ -5499,19 +5501,30 @@ async function testUserDirectorySync() {
   const allowed = (hasOnly ? hasOnly[1] : '')
     .split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean);
   eq(mod.ROW_KEYS.slice().sort(), allowed.slice().sort(),
-    'the sync writes EXACTLY the keys the rules allow — a fifth would freeze the ' +
-    'row against its own owner');
+    'the sync writes EXACTLY the keys the rules allow — a key the rules do not ' +
+    'name would freeze the row against its own owner');
 
-  /* And what it actually writes obeys that, not just what it declares. */
-  const row = mod.rowFromAuthUser({
+  /* And what it actually writes obeys that, not just what it declares. The
+     fifth key is the PROFILE's affiliation, so a row built beside a profile
+     carries every allowed key, and one built beside none carries a subset. */
+  const authUser = {
     uid: 'u', email: 'a@b.edu', displayName: 'A B',
     metadata: { creationTime: 'Mon, 01 Jan 2026 00:00:00 GMT',
       lastSignInTime: 'Mon, 01 Jun 2026 00:00:00 GMT' },
-  }, null);
+  };
+  const row = mod.rowFromAuthUser(authUser, null, { affiliation: 'A School' });
   eq(Object.keys(row).sort(), allowed.slice().sort(),
     'and a row it builds carries those keys and no others');
   ok(typeof row.first === 'number' && typeof row.seen === 'number',
     'with the two dates as NUMBERS, which is what the rules demand');
+  eq(row.affiliation, 'A School', 'and the affiliation the profile gave');
+  const bare = mod.rowFromAuthUser(authUser, null, null);
+  ok(Object.keys(bare).every((k) => allowed.includes(k)) && !('affiliation' in bare),
+    'a row built beside no profile carries no affiliation key at all — never an ' +
+    'empty string, the rule the address already follows');
+  eq(mod.PROFILES, 'profiles', 'the affiliation is read from the profiles collection…');
+  ok(fbjsHas(`profiles: '${mod.PROFILES}'`),
+    '…which is the one the browser writes (oa-firebase.js)');
 
   /* Dates only ever correct backwards / forwards in the safe direction. */
   eq(mod.rowFromAuthUser({ uid: 'u', email: 'a@b.edu', metadata: {} },
@@ -5519,8 +5532,7 @@ async function testUserDirectorySync() {
   'an account already current costs no write, so a daily fire commits nothing');
 
   /* The collection name is the one the panel reads. */
-  const fbjs = await readFile(path.join(root, 'assets', 'oa-firebase.js'), 'utf8');
-  ok(fbjs.includes(`userDirectory: '${mod.DIRECTORY}'`),
+  ok(fbjsHas(`userDirectory: '${mod.DIRECTORY}'`),
     'the sync writes the collection the Admin area actually reads');
 
   const wf = await readFile(
@@ -6294,7 +6306,7 @@ async function testUsersAndMessages() {
     ok(dirKeys.has(k), `oa-users.js reads userDirectory."${k}", and the rules allow writing it`);
   }
   eq([...dirKeys].sort(), [...U.ROW_KEYS].sort(),
-    'the userDirectory rule allows exactly the roster’s four fields — a key with ' +
+    'the userDirectory rule allows exactly the roster’s five fields — a key with ' +
     'no rule is a permission-denied nobody can debug, a rule with no writer is dead');
 
   /* …and what the WRITER actually writes, read out of its own source. Pinning
@@ -6308,6 +6320,72 @@ async function testUsersAndMessages() {
     ok(new RegExp('(^|[{;\\s])' + k + ':|row\\.' + k + '\\s*=').test(syncSrc),
       `syncDirectoryRow really writes "${k}" — not merely declares it`);
   }
+
+  /* ---------------- the roster reads whole, and says where each person is
+     (owner, 2026-09-08: "I can't read the names of the registered users very
+     well. Show them fully. Same with their email. Also, show their
+     affiliation in that list.") */
+
+  ok(U.ROW_KEYS.includes('affiliation'), 'the roster row carries the affiliation');
+  const affBound = /str\('affiliation', (\d+)\)/.exec(dir);
+  ok(affBound, 'the rules bound the affiliation like every other text field');
+  eq(U.MAXLEN.affiliation, affBound ? Number(affBound[1]) : -1,
+    'to the same length the panel declares — and the profile\'s own field is bounded to');
+  ok(/str\('affiliation', 300\)/.test(rules.slice(rules.indexOf('match /profiles/'))),
+    '…which is the bound on profiles.affiliation, so a value the profile accepts the row accepts');
+
+  /* the panel: a column, the CSV, the Find box, and a class per cell */
+  ok(/key: 'affiliation', label: 'Affiliation'/.test(users),
+    'oa-users.js draws an Affiliation column');
+  ok(/oa-u-aff/.test(users) && /esc\(r\.affiliation\)/.test(users),
+    '…escaped, inside the span the stylesheet bounds');
+  ok(/'Name', 'E-mail', 'Affiliation', 'First seen'/.test(users) && /r\.affiliation \|\| ''/.test(users),
+    'the CSV carries it beside the address');
+  ok(/fold\(r\.affiliation\)\.indexOf\(q\)/.test(users),
+    'and the Find box searches it');
+  ok(/<td class="oa-u-c-' \+ esc\(c\.key\)/.test(users),
+    'every cell is classed by its column, which is what the one-line rule below hangs on');
+
+  /* the identity columns never wrap; the affiliation wraps at its spaces */
+  const uiCss = await readFile(path.join(HERE, '..', 'assets', 'oa-ui.css'), 'utf8');
+  const oneLine = /\.oa-u-table td\.oa-u-c-name,\s*\.oa-u-table td\.oa-u-c-email,\s*\.oa-u-table td\.oa-u-c-thread \{ white-space: nowrap; \}/;
+  ok(oneLine.test(uiCss),
+    'the name, the address and the status chip are held to ONE LINE (white-space: nowrap) — ' +
+    'the cells carried overflow-wrap: anywhere, which is what cut a name into "Xiaoda / n Shao"');
+  const affCss = uiCss.slice(uiCss.indexOf('.oa-u-aff {'), uiCss.indexOf('}', uiCss.indexOf('.oa-u-aff {')));
+  ok(affCss.length > 40 && /white-space: normal/.test(affCss) && /max-width: \d+px/.test(affCss)
+     && /min-width: \d+px/.test(affCss) && /overflow-wrap: break-word/.test(affCss),
+    'while the affiliation wraps at its spaces inside a span bounded on both sides');
+  const v3css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  ok(!/\.oa-u-table|\.oa-u-aff|oa-u-c-/.test(v3css),
+    'and v3.css restates none of it, so the engine\'s rule is the one that reaches the site');
+  ok(/\.oa-u-wrap \{ overflow-x: auto; \}/.test(uiCss),
+    'the table still scrolls inside its own container, which a one-line column now needs');
+
+  /* the browser writer: the profile\'s affiliation, on sign-in and on a save */
+  ok(/function syncDirectoryRow\(u, again\)/.test(syncSrc) && /if \(!again\) \{/.test(syncSrc),
+    'syncDirectoryRow takes an `again` that skips the once-a-session latch');
+  ok(/\(state\.profile \|\| \{\}\)\.affiliation/.test(syncSrc)
+     && /if \(affiliation\) row\.affiliation = affiliation\.slice\(0, 300\)/.test(syncSrc),
+    'and writes the PROFILE\'s affiliation, only when there is one, bounded to the rule');
+  const saveAt = accts.indexOf("msg.textContent = 'Saving…';");
+  const saveSrc = accts.slice(saveAt, accts.indexOf('We could not save your profile just now', saveAt));
+  ok(saveSrc.length > 200 && saveSrc.length < 2000 && /syncDirectoryRow\(state\.user, true\)/.test(saveSrc)
+     && saveSrc.indexOf('state.profile = Object.assign') < saveSrc.indexOf('syncDirectoryRow(state.user, true)'),
+    'a profile SAVE re-syncs the row past the latch, after state.profile carries the new value');
+  ok(accts.indexOf('syncDirectoryRow(state.user);') > accts.indexOf('state.profile = (snap && snap.exists'),
+    'and the sign-in sync runs after loadProfile has settled the profile, so it has an affiliation to read');
+
+  /* what the copy says */
+  const areaHtml = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(/their affiliation/.test(areaHtml.slice(areaHtml.indexOf('id="oa-aa-users"'), areaHtml.indexOf('id="oa-aa-users-list"'))),
+    'the panel\'s own copy names the affiliation among what the roster shows');
+  const setup = await readFile(path.join(HERE, '..', '_SETUP-FIREBASE.md'), 'utf8');
+  ok(/`userDirectory\/\{uid\}`[^\n]*affiliation/.test(setup),
+    'and so does the collection table in _SETUP-FIREBASE.md');
+  const cm = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
+  ok(cm.includes('### The roster reads whole, and says where each person is'),
+    'CLAUDE.md records the decision');
 
   /* ---------------------------------------------------------- the threads */
 
@@ -6553,9 +6631,9 @@ async function testUsersAndMessages() {
   /* Disclosed, like usageSessions before it: this is identity the maintainer
      can read, and a privacy policy that does not say so is wrong. */
   const priv = await readFile(path.join(HERE, '..', 'privacy-policy.html'), 'utf8');
-  ok(/sign\s+in\s+with,\s+and\s+when\s+your\s+account\s+was\s+first\s+and\s+last\s+seen/
+  ok(/sign\s+in\s+with,\s+the\s+affiliation\s+you\s+gave\s+on\s+your\s+profile,\s+and\s+when\s+your\s+account\s+was\s+first\s+and\s+last\s+seen/
     .test(priv),
-    'the Privacy Policy discloses the roster');
+    'the Privacy Policy discloses the roster, the affiliation included');
   ok(/Messages/.test(priv), '…and the messages');
 }
 
@@ -17701,8 +17779,8 @@ async function testForum() {
     const fcss = await readFile(path.join(HERE, '..', 'assets', 'oa-forum.css'), 'utf8');
     ok(/textarea:focus \{ outline: none; box-shadow: inset 0 0 0 2px var\(--brand\); \}/.test(fcss),
       'forum css: the compose box\'s focus ring is the brand, never the wash');
-    ok(/\.oa-forum-tagsugg button:focus-visible \{ outline: 2px solid var\(--brand\); outline-offset: -2px; \}/.test(fcss),
-      'forum css: a tag suggestion keeps a real focus ring, separately from its hover wash');
+    ok(/\.oa-forum-tagsugg \[role='option'\]\.is-active \{ outline: 2px solid var\(--brand\); outline-offset: -2px; \}/.test(fcss),
+      'forum css: the highlighted tag option is ringed, separately from the hover wash');
     ok(/\.oa-forum-tagchip i \{[^}]*color: var\(--brand\)/.test(fcss)
        && !/\.oa-forum-tagchip i \{[^}]*var\(--mut\)/.test(fcss),
       'forum css: the count inside a chip is quieter by weight, not by an ink that fails');
@@ -17726,7 +17804,7 @@ async function testForum() {
   {
     const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
     const ink = pt.slice(pt.indexOf('const FORUM_INK'), pt.indexOf('async function forumContrast'));
-    for (const sel of ['.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg button',
+    for (const sel of ['.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg [role="option"]',
       '.oa-forum-tagsugg i']) {
       ok(ink.includes(`'${sel}'`), `forum css: the contrast audit measures ${sel}`);
     }
@@ -17738,8 +17816,8 @@ async function testForum() {
       'forum css: the audit reads its own named list, and there is only one of it');
     ok(/const unseen = FORUM_INK\.filter\(\(s\) => !FORUM_INK_SEEN\.has\(s\)\);/.test(pt),
       'forum css: and a selector that was never on screen fails, rather than passing unmeasured');
-    eq((pt.match(/await forumContrast\(q, /g) || []).length, 7,
-      'forum css: seven views are audited — the two lists, a busy thread, the guide thread, the ask form, Home and the Tags page');
+    eq((pt.match(/await forumContrast\(q, /g) || []).length, 8,
+      'forum css: eight views are audited: the two lists, a busy thread, the guide thread, the ask form twice (with its similar list open and with its tag menu open), Home and the Tags page');
   }
   ok(/quote = \{\s*n: qn,\s*by: src\.by,\s*text,\s*\}/.test(forumSrc['post.js']), 'forum: and is stored as a copy {n, by, text}');
   ok(/const body = guide\.text\(\);/.test(forumSrc['moderate.js']) && !/d\.body/.test(forumSrc['moderate.js']),
@@ -18072,7 +18150,195 @@ async function testForum() {
     'oa-forum.js: the posting function is woken when a box takes focus and the voting one when a vote column is reached, once each per page');
   ok(!/min left/.test(pageJs) && /data-act="edit">Edit<\/button>/.test(pageJs) && !/EDIT_WINDOW/.test(pageJs),
     'oa-forum.js: Edit carries no countdown and reads no window (owner, 2026-09-06)');
-  ok(/Yours to edit or delete afterwards\./.test(pageJs) && !/fifteen minutes/.test(pageJs), 'oa-forum.js: the ask form says the post stays editable');
+  ok(/Yours to edit afterwards, and to delete until it has an answer\./.test(pageJs) && !/fifteen minutes/.test(pageJs) && !/edit or delete afterwards/.test(pageJs),
+    'oa-forum.js: the ask form says the post stays editable, and says when it can be deleted (a question with a live answer cannot be)');
+
+  /* THE ASK FORM IS LAID OUT THE WAY STACK EXCHANGE LAYS ONE OUT (owner,
+     2026-09-08, with Mathematics Stack Exchange's ask page beside this one):
+     a "writing a good question" note, then ONE bordered card holding the
+     three fields, each a bold label with its advice UNDER the label and the
+     box under the advice, every field starred and "Required fields" said
+     once at the card's head; the tag suggestions a MENU that opens while the
+     box has the keyboard and never on arrival; similar questions under the
+     title from the rows the list already read; the room said once, with the
+     page's own banner standing down; the Post button under the card. */
+  {
+    const ask = pageJs.slice(pageJs.indexOf('  function drawAsk() {'), pageJs.indexOf('  /* ------------------------------------------------------------- go */'));
+    ok(ask.length > 5000 && ask.length < 20000, 'forum ask: drawAsk was sliced');
+    ok(/<div class="oa-forum-askcard">/.test(ask) && /<div class="oa-forum-askhead">/.test(ask)
+       && (ask.match(/Required fields <span class="oa-forum-req" aria-hidden="true">\*<\/span>/g) || []).length === 1,
+      'forum ask: one bordered card, with "Required fields" said once at its head');
+    for (const id of ['oa-forum-ask-title', 'oa-forum-ask-body', 'oa-forum-tag-in']) {
+      const at = ask.indexOf('for="' + id + '"');
+      const hint = ask.indexOf('class="oa-forum-fhint"', at);
+      const box = ask.indexOf('id="' + id + '"', at);
+      ok(at > 0 && hint > at && box > hint, `forum ask: ${id} reads label, then advice, then the box`);
+      ok(ask.slice(at, box).includes('<span class="oa-forum-req" aria-hidden="true">*</span></label>'), `forum ask: …and the label of ${id} is starred`);
+    }
+    ok((ask.match(/aria-required="true"/g) || []).length === 3 && /role="combobox"/.test(ask) && /aria-controls="oa-forum-tagsugg"/.test(ask),
+      'forum ask: the three boxes are marked required, and the tag box is a combobox over its menu');
+    /* THE COMBOBOX CONTRACT: the keyboard stays in the box, the options are
+       highlighted and named through aria-activedescendant, never focused */
+    ok(/role: 'option', id: 'oa-forum-tagopt-' \+ n, 'data-tag': tag, 'aria-selected': 'false', 'aria-label': name,/.test(ask)
+       && !/el\('button', \{ type: 'button', 'data-tag'/.test(ask)
+       && /input\.setAttribute\('aria-activedescendant', opts\[active\]\.id\);/.test(ask)
+       && /input\.removeAttribute\('aria-activedescendant'\);/.test(ask),
+      'forum ask: an option is a named li, never a button, and the box names the highlighted one');
+    ok(/var pick = !sugg\.hidden && active >= 0 \? options\(\)\[active\] : null;/.test(ask) && /else highlight\(active \+ 1\);/.test(ask) && /highlight\(active - 1\);/.test(ask),
+      'forum ask: the arrows move the highlight and Enter picks it, else adds what was typed');
+    ok(/'aria-label': name,/.test(ask) && /p\[0\] \+ ', ' \+ note/.test(ask), 'forum ask: an option is named as its tag, a comma, its count');
+    /* RULE 10: where the menu opens is measured, from the visual viewport */
+    ok(/function placeSugg\(\)/.test(ask) && /window\.visualViewport/.test(ask) && /var up = below < 200 && above > below;/.test(ask)
+       && /sugg\.classList\.toggle\('is-up', up\);/.test(ask) && /Math\.min\(vH \* 0\.5, up \? above : below\)/.test(ask)
+       && /\.oa-forum-tagsugg\.is-up \{ top: auto; bottom: calc\(100% \+ 4px\); \}/.test(pageCss),
+      'forum ask: the menu measures the room below and above its box, opens on the roomier side and is capped to it and to half the screen');
+    ok(/askCleanup = function \(\) \{\s*window\.removeEventListener\('resize', placeSugg\);/.test(ask) && /clearTimeout\(similarTimer\);\s*\};/.test(ask)
+       && /function hideViews\(\) \{[\s\S]{0,200}if \(askCleanup\) \{ askCleanup\(\); askCleanup = null; \}/.test(pageJs)
+       && /if \(!document\.contains\(sugg\)\) \{/.test(ask),
+      'forum ask: …and the listeners and the title timer are let go the moment the view changes, not on some later resize');
+    ok(/id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags" hidden>/.test(ask) && /aria-expanded="false"/.test(ask),
+      'forum ask: the tag menu is born SHUT, never drawn open on arrival');
+    ok(/var open = suggWanted && !input\.disabled && q\.length > 0 && sugg\.children\.length > 0;/.test(ask)
+       && /input\.addEventListener\('input', function \(\) \{ tagHint\(''\); openSugg\(\); \}\);/.test(ask)
+       && /input\.addEventListener\('click', openSugg\);/.test(ask)
+       && !/input\.addEventListener\('focus'/.test(ask)
+       && /input\.addEventListener\('blur', shutSugg\);/.test(ask)
+       && /sugg\.addEventListener\('mousedown', function \(e\) \{ e\.preventDefault\(\); \}\);/.test(ask),
+      'forum ask: …opened by typing, and by a press on the box only while it holds text (never by focus alone, never with an empty box: owner, 2026-09-08, "tags should appear once a user is typing a new tag, not beforehand"), shut when the keyboard leaves, and a press on a row keeps the box\'s focus');
+    ok(/<label for="oa-forum-ask-body">Body <span class="oa-forum-req" aria-hidden="true">\*<\/span><\/label>/.test(ask) && !/>Details </.test(ask),
+      'forum ask: the second field is called Body, the word the site the owner named uses (owner, 2026-09-08)');
+    /* AN OPEN MENU COVERS THE GUIDE BOX AND THE BUTTONS, so it shuts the
+       moment a tag is chosen OR REFUSED: the first browser run of this form
+       timed out on the guide tick box, with a suggestion row intercepting
+       the press, and a refusal was written into a line the menu covered */
+    ok(/function add\(raw\) \{\s*var s = M\.slug\(raw\);[\s\S]{0,400}suggWanted = false;\s*if \(!s \|\| !M\.tagOk\(s\)/.test(ask),
+      'forum ask: …and shuts whatever comes of a tag, chosen or refused, so nothing it says is covered');
+    ok(/e\.key === 'Escape' && !sugg\.hidden\) \{ e\.preventDefault\(\); shutSugg\(\); \}/.test(ask) && /if \(sugg\.hidden\) openSugg\(\);/.test(ask),
+      'forum ask: the down arrow opens the menu and Escape shuts it');
+    ok(/<p class="oa-forum-tagmsg" id="oa-forum-taghint" aria-live="polite"><\/p>/.test(ask)
+       && /\.oa-forum-tagmsg \{ margin: 8px 0 0; color: var\(--err\); font-size: 13\.5px; \}/.test(pageCss)
+       && /\.oa-forum-tagmsg:empty \{ margin: 0; \}/.test(pageCss) && !/\.oa-forum-tagmsg:empty \{ display: none/.test(pageCss),
+      'forum ask: the refusal line under the tag box is always rendered, so a refusal is announced');
+    ok(/Posting in the <strong>' \+ roomName \+ '<\/strong>/.test(ask) && !/oa-forum-flabel">Where/.test(ask),
+      'forum ask: the room is said once, at the card\'s head, and the "Where" block is gone');
+    ok(/show\(me, !\(S\.ask && !S\.archive\)\);/.test(pageJs) && /hideViews\(\);\n    show\(\$\('oa-forum-me'\), true\);/.test(pageJs),
+      'forum ask: the page\'s own room banner stands down while the form is open and comes back with the thread');
+    ok(/<p class="oa-forum-fmt" id="oa-forum-ask-fmt">/.test(ask) && /A web address becomes a link/.test(ask) && !/toolbar/.test(bare(ask)),
+      'forum ask: a line under the body says how plain text reads, and no formatting toolbar is drawn');
+    ok(/id="oa-forum-ask-msg" aria-live="polite"><\/p>' \+\s*'<\/div>' \+\s*'<div class="oa-forum-actions oa-forum-askactions">/.test(ask)
+       && /id="oa-forum-ask-send">Post your question</.test(ask),
+      'forum ask: the card closes on its message line and the Post button\'s row opens after it, under the card and not inside it');
+    ok(/'<div class="oa-forum-askintro">'/.test(ask) && /<p class="oa-forum-lede"><strong>Writing a good question\.<\/strong>/.test(ask)
+       && ask.indexOf('oa-forum-askintro') < ask.indexOf('oa-forum-askcard'),
+      'forum ask: a "writing a good question" note stands above the card');
+    ok(/function tagHint\(msg\) \{\s*var n = \$\('oa-forum-taghint'\);\s*if \(n\) n\.textContent = msg \|\| '';/.test(ask)
+       && /<p class="oa-forum-fhint" id="oa-forum-taghelp">' \+ TAG_HINT \+ '<\/p>/.test(ask)
+       && /class="oa-forum-tagmsg" id="oa-forum-taghint" aria-live="polite"><\/p>/.test(ask),
+      'forum ask: the tag advice is said once above the box, and the line under it carries a refusal and nothing else');
+    ok(/^Add up to five tags to say what the question is about, pressing Enter after each\./.test(pageJs.match(/var TAG_HINT = '([^']*)'/)[1])
+       && /placeholder="e\.g\. teaching-release, then Enter"/.test(ask) && !/offers teaching-release flyouts/.test(ask),
+      'forum ask: the advice opens with the count and says Enter adds each tag, and the placeholder shows ONE tag (a space makes one tag here, not two)');
+    ok(/what you already know, what you are trying to decide/.test(ask) && !/what you have tried/.test(ask),
+      'forum ask: the advice is a job-market forum\'s, not a programming site\'s');
+    ok(/this season’s candidates and the site’s maintainer/.test(ask), 'forum ask: the note says who reads a candidates\' room question, the maintainer included');
+    ok(/a\.getAttribute\('target'\) === '_blank'\) return;/.test(pageJs),
+      'forum ask: a link the page draws to open in a new tab is left to the browser, so the question being written stays');
+    ok(/S\.rowsKey = S\.room \+ '\|' \+ S\.season;/.test(pageJs) && /S\.rowsKey = '';/.test(pageJs),
+      'forum ask: the rows the list read are stamped with their room and season, and forgotten with the reader');
+    ok(/var drawnView = viewKey\(\);/.test(ask) && /if \(drawnView !== viewKey\(\) \|\| !\$\('oa-forum-similar'\)\) return;/.test(ask)
+       && /if \(drawnView !== viewKey\(\)\) return;\s*S\.rows = rows;\s*S\.rowsKey = rowsKey;/.test(ask),
+      'forum ask: a title timer that fires after the reader has left the form reads nothing, and a read is stamped only for the form it was for');
+    ok(noDash(ask), 'forum ask: no em dash in anything the form draws');
+
+    /* SIMILAR QUESTIONS: the pure rule, driven from a slice of the source.
+       The words worth matching are the title's lower-cased words of three
+       letters or more with the stopwords out and a hyphen read as a space;
+       a thread is similar when it shares two of them (one, when the title
+       has fewer than three), the closest first, the newest breaking a tie,
+       five at most, a hidden thread never, and a tag counting as a word. */
+    const simSrc = pageJs.slice(pageJs.indexOf('  var STOPWORDS = '), pageJs.indexOf('  function drawAsk() {'));
+    ok(simSrc.length > 800 && simSrc.length < 5000, 'forum ask: the similar-questions rule was sliced');
+    const sim = new Function(simSrc + '; return { titleWords: titleWords, similarThreads: similarThreads, STOPWORDS: STOPWORDS };')();
+    eq(sim.titleWords('Is a second-year teaching release normal to ask for?'), ['second', 'year', 'teaching', 'release'],
+      'forum ask: a title\'s words worth matching, stopwords out and a hyphen read as a space');
+    eq(sim.titleWords('Teaching, teaching, TEACHING!'), ['teaching'], 'forum ask: …lower-cased, punctuation dropped, no repeats');
+    ok(['ask', 'question', 'questions', 'the', 'normal'].every((w) => sim.STOPWORDS.includes(w)),
+      'forum ask: "ask", "question" and "normal" carry no meaning of their own here, or every title would match every other');
+    const rows = [
+      { id: 'a', title: 'Flyout tips for Europe', tags: ['flyouts', 'europe'], lastAt: 10, n: 1 },
+      { id: 'b', title: 'Second-year release: normal to ask?', tags: ['offers'], lastAt: 20, n: 3 },
+      { id: 'c', title: 'Teaching load at a business school', tags: ['teaching'], lastAt: 30, n: 2 },
+      { id: 'd', title: 'Teaching release in year two', tags: [], lastAt: 40, n: 1, hidden: true },
+      { id: 'e', title: 'Release', tags: ['teaching-release'], lastAt: 5, n: 1 },
+    ];
+    eq(sim.similarThreads('Is a second-year teaching release normal to ask for?', rows).map((r) => r.id), ['b', 'e'],
+      'forum ask: the threads sharing two or more words, the closest first, a hidden one never, a tag counting as a word');
+    eq(sim.similarThreads('Any tips for a flyout in Europe?', rows).map((r) => r.id), ['a'], 'forum ask: the browser check\'s own case finds the seeded thread');
+    eq(sim.similarThreads('Teaching', rows).map((r) => r.id), ['c', 'e'], 'forum ask: a one-word title needs one shared word, the newest first on a tie');
+    eq(sim.similarThreads('Is it normal to ask?', rows), [], 'forum ask: a title of stopwords matches nothing');
+    eq(sim.similarThreads('', rows), [], 'forum ask: …and neither does an empty one');
+    eq(sim.similarThreads('teaching', null), [], 'forum ask: …or one with no rows to read');
+    const many = Array.from({ length: 8 }, (_, i) => ({ id: 'm' + i, title: 'Teaching release ' + i, tags: [], lastAt: i, n: 1 }));
+    eq(sim.similarThreads('teaching release', many).map((r) => r.id), ['m7', 'm6', 'm5', 'm4', 'm3'], 'forum ask: five at most, the newest first');
+
+    /* the stylesheet: the card and the note paint their ground and name
+       their ink, the menu is OVER the page and holds to rules 6 and 10, the
+       details box opens taller than an answer's, and the phone keeps its inset */
+    ok(/\.oa-forum-tagwrap \{ position: relative; \}/.test(pageCss)
+       && /\.oa-forum-tagsugg \{[^}]*position: absolute;[^}]*max-height: 50vh;[^}]*overflow: auto;/.test(pageCss),
+      'forum ask css: the tag menu is over the page, half the screen at most and scrolling inside itself');
+    ok(!/\.oa-forum-tagsugg \{ max-width: none; \}/.test(pageCss), 'forum ask css: the phone-only width rule went with the in-flow list');
+    ok(/\.oa-forum-askcard \{[^}]*border: 1px solid var\(--line\);[^}]*background: var\(--bg-2\);[^}]*color: var\(--ink\);/.test(pageCss),
+      'forum ask css: the card paints its ground and names its ink');
+    ok(/\.oa-forum-askintro \{[^}]*background: var\(--brand-soft\);[^}]*color: var\(--ink-2\);/.test(pageCss), 'forum ask css: so does the note');
+    ok(/\.oa-forum-fmt \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--mut\);/.test(pageCss)
+       && /\.oa-forum-similar \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--ink-2\);/.test(pageCss),
+      'forum ask css: …and the format line and the similar list');
+    ok(/\.oa-forum-fhint \{[^}]*color: var\(--mut\)/.test(pageCss) && /\.oa-forum-req \{ color: var\(--err\)/.test(pageCss),
+      'forum ask css: the advice is muted and the star is the error red');
+    ok(/id="oa-forum-ask-body" rows="10"/.test(ask) && /id="oa-forum-body" rows="6"/.test(pageJs) && !/is-ask/.test(pageJs) && !/is-ask/.test(pageCss),
+      'forum ask: the body box opens taller than an answer\'s, by its rows, with no min-height pretending to');
+    /* the card's last FIELD ends it: the message line after it is the true
+       last child, display:none while empty, so :last-child matched nothing
+       and the card carried a 22px margin under its own padding */
+    ok(/\.oa-forum-askcard > \.oa-forum-f:last-of-type \{ margin-bottom: 0; \}/.test(pageCss) && !/\.oa-forum-f:last-child/.test(pageCss),
+      'forum ask css: the last field ends the card, matched by type since the message line is the last child');
+    ok(/@media \(max-width: 640px\)[\s\S]*\.oa-forum-askcard \{ padding: 16px 14px; \}/.test(pageCss)
+       && /@media \(max-width: 640px\)[\s\S]*\.oa-forum-askreq \{ white-space: normal; \}/.test(pageCss),
+      'forum ask css: on a phone the card keeps a 14px inset and the head\'s note may wrap');
+    /* the ask form's section, bounded at BOTH ends and its length asserted:
+       'side cards' is named in the file's header too, and a slice whose end
+       falls before its start is an empty string that satisfies any negative */
+    const askCssAt = pageCss.indexOf('/* ------------------------------------------------------------ the ask form');
+    const askCss = pageCss.slice(askCssAt, pageCss.indexOf('/* ------------------------------------------------------------ side cards */', askCssAt));
+    ok(askCssAt > 0 && askCss.length > 3000 && askCss.length < 12000, 'forum ask css: the section was sliced');
+    ok(!/#[0-9a-f]{3,8}\b/i.test(askCss) && !/\brgba?\(/.test(askCss), 'forum ask css: no raw colour in the ask form\'s rules');
+
+    /* the browser suite drives it, and the audit names the new surfaces */
+    const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+    const ink = pt.slice(pt.indexOf('const FORUM_INK'), pt.indexOf('async function forumContrast'));
+    for (const sel of ['.oa-forum-fhint', '.oa-forum-fmt', '.oa-forum-askwhere', '.oa-forum-askreq', '.oa-forum-req',
+      '.oa-forum-askintro li', '.oa-forum-similar p', '.oa-forum-similar a', '.oa-forum-similar i']) {
+      ok(ink.includes(`'${sel}'`), `forum ask: the contrast audit measures ${sel}`);
+    }
+    for (const needle of ['the page\\\'s room banner stands down while the form is open', 'each field reads label, then advice, then the box',
+      'Post your question sits under the card at its left', 'the tag menu is shut, no similar list shows',
+      'a title sharing words with the seeded thread lists that thread under the box', 'no second read of the room',
+      'the tag menu opens as the box is typed into', 'shuts once a tag is chosen', 'a row pressed with the pointer becomes a chip',
+      'nothing typed, no menu',
+      'the buttons below did not move', 'the card ends a padding under its last box', 'the ask form, with similar questions',
+      'the down arrow opens the menu from the keyboard', 'Escape shuts it', 'two presses highlight the second option',
+      'no option is a focus stop of its own', 'Enter picks the highlighted option', 'refused under the box, the menu shut',
+      'the next keystroke clears the line, which stays rendered', 'the menu opens above it, inside the room there',
+      'the menu shuts when the keyboard leaves the box', 'the room banner is back once the thread is on the page',
+      'the card keeps a 14px inset and its boxes sit inside it', 'Post your question and Cancel stack full width under the card',
+      'its rows are 42px targets']) {
+      ok(pt.includes(needle), `forum ask: the browser suite measures "${needle}"`);
+    }
+    ok(/### The ask form is laid out the way Stack Exchange lays one out/.test(await read('CLAUDE.md')), 'forum ask: CLAUDE.md records the decisions');
+    ok(/the forum's Ask-a-question form[^.]*tag menu/.test(await read('_MOBILE-STANDARDS.md')) || /Ask-a-question form[\s\S]{0,600}rules 6 and 10/.test(await read('_MOBILE-STANDARDS.md')),
+      'forum ask: rule 13 in _MOBILE-STANDARDS.md names the tag menu');
+  }
   ok(/yours to edit and to delete at any time/.test(await read('assets', 'oa-forum-guide.js')), 'forum guide: rule 13 says a post is editable at any time');
   ok(page.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
     'forum page: the head snippet, the exact line every live page carries');

@@ -10,6 +10,13 @@
       "url": "/analytics"
     },
     {
+      "id": "roster-affiliation-2026-09",
+      "date": "2026-09-08",
+      "title": "The maintainer’s list of registered users now shows affiliations",
+      "summary": "The roster the site’s maintainer keeps of registered accounts now shows the affiliation each person gave on their profile, beside their name and e-mail address, and shows names and addresses in full. It is readable by the maintainer alone, as before: nothing about who has registered is published on the site or shared with anyone, and the Privacy Policy says exactly what the roster holds.",
+      "url": "/privacy-policy"
+    },
+    {
       "id": "extensionless-addresses-2026-09",
       "date": "2026-09-08",
       "title": "Cleaner web addresses",

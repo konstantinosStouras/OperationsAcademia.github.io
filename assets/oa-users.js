@@ -13,8 +13,29 @@
 
      1. THE ROSTER — every account that has signed in since the roster
         shipped, with the name it shows itself under, the address it signs in
-        with, when it was first and last seen, and where its thread stands.
-        Sortable by every column, filterable, and exportable as CSV.
+        with, the affiliation on its profile, when it was first and last seen,
+        and where its thread stands. Sortable by every column, filterable, and
+        exportable as CSV.
+
+        A NAME AND AN ADDRESS ARE SHOWN WHOLE, ON ONE LINE (owner, 2026-09-08:
+        "I can't read the names of the registered users very well. Show them
+        fully. Same with their email."). The cells carried `overflow-wrap:
+        anywhere`, which lets the browser break a word at any character to fit
+        the table into its panel — so beside the wide action column a name
+        read "Xiaoda / n Shao" and an address was cut three ways. Those cells
+        (and the status chip) are `white-space: nowrap` now, in oa-ui.css: the
+        table grows to what its words need and scrolls inside `.oa-u-wrap`,
+        which is what that container was always for. The affiliation, which
+        can be a sentence, wraps at its SPACES inside a bounded span instead.
+
+        THE AFFILIATION IS THE PROFILE'S, mirrored onto the roster row as a
+        fifth key (`affiliation`, bounded by the rules like the profile's own
+        field): the browser writes it beside the name when a session opens and
+        again when the profile card is saved (oa-accounts.js, syncDirectoryRow),
+        and the daily sync copies it from `profiles/{uid}` with the Admin SDK
+        (_scraper/sync-user-directory.mjs), which is also what clears it once a
+        person blanks theirs. The maintainer reads it here and nowhere else;
+        it is never published, exactly as the profile card promises.
      2. MESSAGING — tick the people to reach, write once, send. It opens (or
         continues) one thread per person, which they read and reply to in
         their own personal area.
@@ -62,8 +83,9 @@
 
   /** Every key the browser writes to `userDirectory/{uid}` — pinned against
       that rule's hasOnly() by selftest.mjs, both ways. Written by
-      oa-accounts.js (syncDirectoryRow), read here. */
-  var ROW_KEYS = ['name', 'email', 'first', 'seen'];
+      oa-accounts.js (syncDirectoryRow), read here. `affiliation` is the
+      profile's, carried here so the roster can say where each person is. */
+  var ROW_KEYS = ['name', 'email', 'first', 'seen', 'affiliation'];
 
   /** Every key on a thread head — pinned against the messages rule. */
   var THREAD_KEYS = ['uid', 'lastAt', 'lastFrom', 'needsAdmin', 'userUnread'];
@@ -79,7 +101,7 @@
       owner branch by selftest.mjs, both ways. */
   var ITEM_OWNER_KEYS = ['hiddenForUser'];
 
-  var MAXLEN = { name: 200, email: 200, body: 5000 };
+  var MAXLEN = { name: 200, email: 200, affiliation: 300, body: 5000 };
 
   /* ------------------------------------------------------------ pure parts */
 
@@ -185,7 +207,9 @@
 
   /* The columns. ONE spec owns a column's heading, its cell AND its sort key,
      so a sorted table can never order itself by something other than what it
-     shows. */
+     shows. Each cell carries a class named after its key (`oa-u-c-<key>`),
+     which is how oa-ui.css keeps the name, the address and the status chip on
+     one line each while the affiliation wraps at its spaces. */
   var COLS = [
     {
       key: 'name', label: 'Name',
@@ -202,6 +226,18 @@
         return '<a href="mailto:' + esc(r.email) + '">' + esc(r.email) + '</a>';
       },
       sort: function (r) { return fold(r.email); }
+    },
+    {
+      key: 'affiliation', label: 'Affiliation',
+      cell: function (r) {
+        /* The profile's own words about where the person is — a university,
+           a company, sometimes a department too — so it may run to a
+           sentence. The span is what lets it wrap at its spaces inside a
+           bounded width while the cells beside it never wrap at all. */
+        if (!r.affiliation) return '—';
+        return '<span class="oa-u-aff">' + esc(r.affiliation) + '</span>';
+      },
+      sort: function (r) { return fold(r.affiliation); }
     },
     {
       key: 'first', label: 'First seen',
@@ -244,7 +280,8 @@
   function visible() {
     var q = fold(state.filter);
     var rows = !q ? state.rows : state.rows.filter(function (r) {
-      return fold(r.name).indexOf(q) >= 0 || fold(r.email).indexOf(q) >= 0;
+      return fold(r.name).indexOf(q) >= 0 || fold(r.email).indexOf(q) >= 0 ||
+        fold(r.affiliation).indexOf(q) >= 0;
     });
     var col = COLS.filter(function (c) { return c.key === state.sortKey; })[0] || COLS[3];
     return sortRows(rows, col.sort, state.sortDir);
@@ -375,7 +412,9 @@
     head += '<th></th></tr>';
 
     var body = rows.map(function (r) {
-      var tds = COLS.map(function (c) { return '<td>' + c.cell(r) + '</td>'; }).join('');
+      var tds = COLS.map(function (c) {
+        return '<td class="oa-u-c-' + esc(c.key) + '">' + c.cell(r) + '</td>';
+      }).join('');
       return '<tr data-uid="' + esc(r.uid) + '">' +
         '<td class="oa-u-tick"><input type="checkbox" class="oa-u-pick" ' +
           'data-uid="' + esc(r.uid) + '"' + (state.picked[r.uid] ? ' checked' : '') +
@@ -407,7 +446,7 @@
     host.innerHTML =
       '<div class="oa-u-bar">' +
         '<label class="oa-u-find"><span>Find</span>' +
-          '<input type="search" id="oa-u-filter" placeholder="name or e-mail" ' +
+          '<input type="search" id="oa-u-filter" placeholder="name, e-mail or affiliation" ' +
             'value="' + esc(state.filter) + '"></label>' +
         '<span class="oa-u-count">' + rows.length + ' of ' + state.rows.length +
           ' shown' + (picked ? ' · ' + picked + ' selected' : '') + '</span>' +
@@ -438,7 +477,10 @@
       b.addEventListener('click', function () {
         var k = b.getAttribute('data-sort');
         if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
-        else { state.sortKey = k; state.sortDir = k === 'name' || k === 'email' ? 'asc' : 'desc'; }
+        else {
+          state.sortKey = k;
+          state.sortDir = k === 'name' || k === 'email' || k === 'affiliation' ? 'asc' : 'desc';
+        }
         renderTable();
       });
     });
@@ -503,9 +545,9 @@
   }
 
   function downloadCsv() {
-    var headings = ['Name', 'E-mail', 'First seen', 'Last seen', 'Messages', 'uid'];
+    var headings = ['Name', 'E-mail', 'Affiliation', 'First seen', 'Last seen', 'Messages', 'uid'];
     var rows = visible().map(function (r) {
-      return [r.name || '', r.email || '', day(r.first), day(r.seen),
+      return [r.name || '', r.email || '', r.affiliation || '', day(r.first), day(r.seen),
         threadLabel(r.thread), r.uid];
     });
     /* THE BYTE ORDER MARK IS FOR EXCEL. It opens a .csv as the machine's own

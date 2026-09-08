@@ -2071,12 +2071,14 @@ date, Auth's `creationTime`, in place of "first seen by this site".
 
 Three properties, and the first is the one that could have gone badly wrong:
 
-* **Four keys and no more.** `rowOk()` pins a row to
-  `hasOnly(['name','email','first','seen'])`. The Admin SDK bypasses the rules,
-  so a fifth key would be written happily — and would then freeze that row
-  against **its own owner** for ever, because the browser's merge produces a
-  document `hasOnly` refuses. The selftest reads the allowed list out of the
-  rules and pins it against `ROW_KEYS` both ways.
+* **Five keys and no more.** `rowOk()` pins a row to
+  `hasOnly(['name','email','first','seen','affiliation'])`. The Admin SDK
+  bypasses the rules, so a key the rules do not name would be written happily
+  — and would then freeze that row against **its own owner** for ever,
+  because the browser's merge produces a document `hasOnly` refuses. The
+  selftest reads the allowed list out of the rules and pins it against
+  `ROW_KEYS` both ways. (The fifth arrived on 2026-09-08 with its rule, in one
+  change — the next section.)
 * **Dates only move in the safe direction.** `first` takes the earliest known
   (Auth's real joined date corrects a later "first seen"), `seen` the latest, so
   a sync can never contradict what the site itself watched happen.
@@ -2138,6 +2140,70 @@ never rebased). The growth file gains a point every day by construction, so
 the job commits daily, like `data/analytics.json`. The sync's Admin SDK handle
 is `firebaseAdmin()` from `_mail.mjs`, shared with the mailers, so there is
 one definition of "the credential is missing or malformed".
+
+### The roster reads whole, and says where each person is
+
+Owner, 2026-09-08, from a screenshot of the roster in the dark theme: *"I
+can't read the names of the registered users very well. Show them fully.
+Same with their email. Also, show their affiliation in that list."* The
+screenshot showed "Xiaoda / n Shao", an address cut three ways and a status
+chip reading "NO MESSAG / ES", beside an action column with room to spare.
+
+**The squeeze was one CSS property, and it was defeating the container built
+to prevent it.** `.oa-u-wrap` has scrolled sideways since the roster shipped,
+on the stated reasoning that an e-mail address has no spaces and sets the
+table's minimum width. But every cell also carried `overflow-wrap: anywhere`,
+and unlike `break-word` that value COUNTS its break opportunities when the
+table is measured: the browser was told a name could be broken at any
+character, so it did exactly that to fit the table into its panel beside a
+`white-space: nowrap` action column, and the table never needed to scroll at
+all. The name, the e-mail and the status cells are `white-space: nowrap` now
+(`td.oa-u-c-<key>`, one class per column from the `COLS` spec) and the table
+is as wide as its words; the affiliation, which can be a sentence, wraps at
+its SPACES inside a `.oa-u-aff` span bounded on both sides, so it is never a
+word a line and never pushes the dates off the screen. The rules live in
+`oa-ui.css` alone, which `v3.css` does not restate, so the engine's rule is
+the one that reaches the site.
+
+**The affiliation is the PROFILE's, mirrored as a fifth roster key.**
+`profiles/{uid}` is owner-only with no admin clause, so the roster cannot
+read it; the row carries a copy instead, exactly as it carries the name.
+Three writers keep it true, and each has its reason:
+
+* **the browser, on sign-in** — `syncDirectoryRow` runs after `loadProfile`
+  has settled `state.profile`, so it reads the affiliation off it and writes
+  the key when there is one (the field is optional on the profile card for
+  every account that predates the compulsory box, and an absent value is no
+  key at all, the address's own rule);
+* **the browser, on a profile SAVE** — the same function called again with
+  `again` set, past the once-a-session latch, so a corrected affiliation
+  reaches the roster at once rather than at the next session;
+* **the daily sync** — `sync-user-directory.mjs` reads `profiles` once with
+  the Admin SDK and hands each row its own document; because the sync
+  REPLACES the row, this is also what takes an affiliation OFF a row once
+  its owner blanks the field, which a browser merge can never do. A profiles
+  read that FAILS hands `rowFromAuthUser` `undefined` rather than `null`, and
+  the row keeps what it holds: unknown is not none, and a failed read must
+  not strip a hundred affiliations until the next morning.
+
+**The key and its rule arrived in one change**, which is the only safe way a
+key ever joins this row (the sync-user-directory trap: a key the rules do not
+name freezes the row against its own owner). `str('affiliation', 300)` is the
+bound the profile's own field carries, so a value the profile accepts the row
+accepts. The Find box searches it, the CSV carries it beside the address, and
+it is readable by the maintainer alone: the Privacy Policy names it beside
+the name and the address, and the profile card's "never published" stays
+true, because the roster is not the public.
+
+Tests: the one-line rule, the bounded span, the column, the CSV, the Find box,
+both browser writers and the sync's unknown-versus-none in
+`testUsersAndMessages` and `testUserDirectorySync` (`_scraper/selftest.mjs`)
+and the sync's own `--selftest`; and in `page-test.mjs` a row seeded to be
+wider than its panel, measured as geometry at 1280px and 390px — the name,
+the address and the chip each in ONE line box, the affiliation whole and
+within its bounds, the table wider than the panel and scrolling inside it
+with the page not scrolling sideways, a hostile affiliation rendered as text,
+and Find narrowing by affiliation.
 
 ### The front page's fifth key figure is BORN HIDDEN
 
@@ -4281,7 +4347,9 @@ The note is deleted from the page with its stylesheet rule, never hidden;
 `EDIT_WINDOW_MS` is gone from the model (pinned as an absence, so no writer
 can measure against it); `forumEdit` refuses no `window` and `member.js` has
 no such reason; the Edit button is a plain "Edit" on the author's own live
-post; the ask form says "Yours to edit or delete afterwards"; rule 13 of the
+post; the ask form says "Yours to edit afterwards, and to delete until it has
+an answer" (since 2026-09-08; it said "edit or delete afterwards", which
+over-claimed for an answered question); rule 13 of the
 guide says so (press Update the guide in both rooms); and the emulator test
 edits a post sixteen minutes on and expects it to save. The second sentence
 of the instruction was already the rule (`forumDelete`, "A post is its
@@ -4306,6 +4374,131 @@ why; the warm-up sent once on the first focus and once on the first reach for
 a vote, with the room and nothing else; an answer on the page with no second
 votes call and the box drawn again empty; Edit with no countdown).
 
+### The ask form is laid out the way Stack Exchange lays one out
+
+Owner, 2026-09-08, with a screenshot of Mathematics Stack Exchange's ask page
+beside one of this form in the dark theme: *"improve the new question to be
+posted so that it looks like stackexchange … Make sure the experience is
+smooth from mobile devices too."* The screenshot of ours showed what was
+wrong with it before a word was read: eight rows of tag suggestions drawn
+open under a form nobody had typed into, the room said twice (the page's own
+banner and a "Where" block a screen lower), the advice for each box UNDER the
+box rather than where a reader looks before typing, and the three boxes loose
+on the page rather than in the one card the reader's eye expects.
+
+**What is copied is the LAYOUT, and the layout is the part that is a good
+idea.** A short "writing a good question" note; then ONE bordered card
+(`.oa-forum-askcard`) holding the three fields, Title, **Body** (the word
+that site uses; it said "Details" until the owner asked, 2026-09-08) and
+Tags, each a bold label with its
+advice under the label (`.oa-forum-fhint`) and the box under the advice,
+every label starred (`.oa-forum-req`, the error red, `aria-hidden` since the
+boxes carry `aria-required`) and "Required fields" said once at the card's
+head; and the Post button under the card, at its left. Not copied: the
+brand (every colour is a token, the buttons keep the site's pills, and the
+selftest refuses a raw colour in the form's rules), the review step, and the
+formatting toolbar. **A post here is plain text**, and a toolbar over a box
+that renders none would be a lie, so where the toolbar would stand there is
+a line (`.oa-forum-fmt`) saying how the words will read: plain text, a blank
+line starts a paragraph, a web address becomes a link, which is exactly what
+`bodyHTML` and `linkify` do.
+
+**The room is said ONCE, at the card's head**, in the form's own words
+("Posting in the Candidates’ room · 2026-2027 as steady river 90"), and the
+page's room banner (`#oa-forum-me`) stands down while the form is open
+(`drawBanner`, keyed on `S.ask`) and comes back when the form hands over to
+the thread (`openLocalThread`) or the list (`draw`). The "Where" block is
+gone.
+
+**The tag suggestions are a MENU, and the box is a COMBOBOX over it.** The
+keyboard never leaves the box: the options are `li[role=option]`, named
+"tag, count" through `aria-label`, highlighted rather than focused (the box
+names the highlighted one through `aria-activedescendant`, and the highlight
+is ringed as well as washed, since the wash alone is 1.19:1 on the panel),
+the arrows move the highlight, Enter picks it or adds what was typed, and
+Escape shuts the menu. **It opens only while something is typed in the
+box** (owner, 2026-09-08, of the first cut, which opened it on a press on
+the empty box: *"tags should appear once a user is typing a new tag, not
+beforehand"*): typing opens it, a press on the box or the down arrow opens
+it again only while the box holds text, an empty box shows nothing, never
+on focus and never on arrival; it shuts the moment a tag is chosen OR
+REFUSED, on Escape, and when the keyboard leaves the box.
+Shutting on a pick is load-bearing: drawn over the page, an open menu
+covers the guide tick box and the buttons under it, and the first browser
+run of this form timed out on exactly that, a suggestion row intercepting
+the press on the tick box; shutting on a refusal is what lets the refusal
+be seen, written into a line the menu would otherwise cover. That line is
+always rendered, never `display: none` while empty, because a live region
+that appears with its first words is one many screen readers never
+announce. A press on a row stops its `mousedown`, so the box keeps the
+keyboard. **Where the menu opens is measured** (`placeSugg`, rule 10 of the
+mobile standards): from the visual viewport, which is what a phone's
+keyboard shrinks, under the box while at least 200px of room is there (a
+few rows; a menu that preferred the roomier side would flip above a box in
+the lower half of any screen), else on the roomier side (`.is-up`), capped
+to that room and to half the screen, re-measured as the viewport changes,
+and the listener lets go once the form is torn down. The copy is this
+forum's, not a programming site's: the advice asks for the situation, what
+the writer already knows and what they are trying to decide, the tag
+placeholder shows ONE tag with Enter after it (a space makes one tag here,
+never two), and the hint beside Post says a question can be deleted until
+it has an answer, which is rule 13's own rule. It is drawn OVER the page (`position: absolute` under
+`.oa-forum-tagwrap`) rather than in the flow, where it moved the guide box
+and the buttons down and back with every keystroke, and it holds to rules 6
+and 10 of `_MOBILE-STANDARDS.md`: the width of its box, half the screen at
+most, scrolling inside itself. The line under the box carries a refusal and
+nothing else now; the advice (`TAG_HINT`) is said once, above the box.
+
+**Similar questions, under the title as it is typed.** `similarThreads` in
+`oa-forum.js` is pure: the title's words worth matching (`titleWords`: three
+letters or more, lower-cased, a hyphen read as a space, `STOPWORDS` out, so
+"ask", "question" and "normal" match nothing), a thread listed when it
+shares two of them, or one when the title has fewer than three, the closest
+first and the newest on a tie, five at most, a hidden thread never, a tag
+counting as a word. It reads `S.rows`, the rows the list read on the way
+here, stamped with their room and season (`S.rowsKey`) so another room's
+rows are never matched; a reader who arrived at the form by its address has
+none, and they are read once, the first time the title is worth matching,
+painted only if the form is still the view on screen (`viewKey`). The links
+open in a NEW tab (`target="_blank"`), and the page's own link handler now
+leaves such a link to the browser, so the question being written stays. The
+selftest drives the rule from a slice of the source, and the browser suite
+types a title sharing words with the seeded thread and reads the list back:
+one link, the hostile title rendered as text, no second read of the room.
+
+**The phone** (rule 13, and now rules 6, 10 and 11): the card keeps a 14px
+inset, the boxes 16px, the two buttons stack full width under the card, the
+"Required fields" note may wrap under the room line, and the menu is
+measured open at 390px: under its box, as wide as it, no taller than half
+the screen, its rows 42px, and above the box once the box is scrolled to
+the foot of the screen.
+
+Tests: the ask block of `testForum` in `_scraper/selftest.mjs` (the card
+and its head, label then advice then box for each field with its star, the
+required marks and the combobox, the menu born shut with its focus and
+mousedown rules, the arrows and Escape, the room said once and the banner
+standing down and coming back, the format line and no toolbar, the button
+under the card, the note above it, the tag advice said once with a refusal
+alone below on a line always rendered, the combobox contract (named li
+options, never buttons, the highlight named by the box, Enter picking it),
+the measured placement and its let-go, the new-tab link left to the
+browser, the rows stamped by room and a late timer reading nothing,
+no em dash, the similarity rule over fixtures including the hidden thread,
+the tag as a word, the one-word title, the stopword title and the cap of
+five, the stylesheet's grounds and inks, the menu's position and cap, the
+phone inset, no raw colour, the audit's new surfaces and the browser suite's
+own messages), and the forum block of `_scraper/page-test.mjs` (the shape as
+GEOMETRY: banner down, head, star count, label-advice-box order, one card
+with Post under it at its left, the menu shut on arrival with the title
+focused; the similar list for the seeded thread, inert, in a new tab, with
+no second read, gone for a title sharing nothing; the menu opened by typing
+and over the page, shut on a pick with the box keeping the keyboard, opened
+by a press on the box and by the down arrow, the highlight walked and named
+with the keyboard staying in the box and Enter picking it, a refused ORCID
+iD said under the box with the menu shut, shut by Escape and when the
+keyboard leaves; the banner back with the thread; and at
+390px the inset, the stacked buttons, the menu's width, height and rows, and
+the menu opening above a box at the foot of the screen).
 ### Home, Questions, Unanswered and Tags, and the views a question counts
 
 Owner, 2026-09-08, with four screenshots of the site the forum was asked to

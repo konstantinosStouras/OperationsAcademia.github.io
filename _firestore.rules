@@ -546,8 +546,14 @@ service cloud.firestore {
       // sibling /lit/ rules hoist isFeedbackAdmin(): a rule calling a function
       // declared after it is not something to leave to chance.
       function rowOk() {
-        return request.resource.data.keys().hasOnly(['name', 'email', 'first', 'seen'])
+        return request.resource.data.keys().hasOnly(['name', 'email', 'first', 'seen', 'affiliation'])
           && str('name', 200) && str('email', 200)
+          // The affiliation the account gave on its profile (owner, 2026-09-08:
+          // "show their affiliation in that list"), bounded like the profile's
+          // own field. Optional, because a profile written before the field
+          // was compulsory may have none, and never pinned to anything: it is
+          // the person's own word about where they are.
+          && str('affiliation', 300)
           // THE ADDRESS CANNOT BE FORGED — but it may be ABSENT. A provider
           // sign-in need not carry an e-mail claim at all (ORCID's does not),
           // and demanding one would silently leave exactly those accounts off
