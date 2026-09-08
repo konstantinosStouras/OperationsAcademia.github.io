@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-08T08:57:09.403Z",
+ "generated": "2026-09-08T12:21:55.216Z",
  "sources": [
   {
    "source": "usage",
@@ -17,6 +17,6 @@
  "days": 100,
  "from": "2026-06-01",
  "to": "2026-09-08",
- "visitors": 3012,
- "pageviews": 7923
+ "visitors": 3023,
+ "pageviews": 7950
 }
