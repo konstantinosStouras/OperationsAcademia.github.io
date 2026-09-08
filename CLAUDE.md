@@ -2989,7 +2989,7 @@ them:
     _functions/forum/identity.js the ONE HMAC, the handle draw, the season's secret version
     _functions/forum/member.js   the shared preamble: who, which room, limits, ERRORS
     _functions/forum/{join,post,edit,delete,vote,moderate}.js   the seven callables
-    _scraper/build-functions-vendor.mjs   copies the four modules into _functions/ (in BUILDERS)
+    _scraper/build-functions-vendor.mjs   copies the five modules into _functions/ (in BUILDERS)
     _functions/test/forum-emulator.mjs    the functions and the rules against the real emulator
 
 **The uid never sits beside a handle, anywhere, in any form.** The only link
@@ -4608,10 +4608,13 @@ the quiet re-read. Said here so a `##` on a card after the merge is read as
 a deploy still owed rather than as a bug in the module.
 
 **EVERY SCREEN, measured rather than assumed.** At 1280px and on a tablet
-(820px) the eleven buttons sit on one row inside their box with the switch
-beside them; on a phone (390px) each is a 42px target, the row WRAPS to a
-second row rather than shrinking them, and the switch is a full-width 42px
-row of its own (rule 13 in `_MOBILE-STANDARDS.md`, which names it). Every
+(820px) the eleven buttons sit on one row inside their box; the switch sits
+beside them where the box is wide enough and drops under them, right-aligned,
+where it is not (the ask card's box is about 490px wide at 1280px beside the
+section nav and the side column, so there it drops). On a phone (390px)
+each button is a 42px target, the row WRAPS to a second row rather than
+shrinking them, and the switch is a full-width 42px row of its own (rule 13
+in `_MOBILE-STANDARDS.md`, which names it). Every
 colour is a token, so both themes are covered, and the contrast audit
 measures the switch, the marks in the tips row, the preview's heading, and
 what the markup draws inside a post.

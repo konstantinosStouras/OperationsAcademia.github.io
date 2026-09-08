@@ -18381,10 +18381,16 @@ async function testForum() {
     eq(MKM.html('# Heading\n## Two\n#hashtag\n### three ###\n#### four\n###### six'), '<h3>Heading</h3><h3>Two</h3><p>#hashtag</p><h4>three</h4><h5>four</h5><h6>six</h6>',
       'forum markup: a heading is an h3 at most (# and ## alike, since the toolbar writes ##), the deeper levels step down, and #hashtag is not one');
     eq(MKM.html('- a\n- b\n  - nested\n- c\n\n1. one\n2. two\n\n2019. was a year\nnot a list'),
-      '<ul><li>a</li><li><p>b</p><ul><li>nested</li></ul></li><li>c</li></ul><ol><li><p>one</p></li><li><p>two</p></li><li><p>was a year<br>not a list</p></li></ol>',
-      'forum markup: bulleted and numbered lists, nested by indent, tight unless a blank line parts their items (which makes the numbered one loose)');
+      '<ul><li>a</li><li><p>b</p><ul><li>nested</li></ul></li><li>c</li></ul><ol><li>one</li><li>two</li></ol><p>2019. was a year<br>not a list</p>',
+      'forum markup: bulleted and numbered lists, nested by indent, tight, and a year after them is a paragraph and not a third item');
+    eq(MKM.html('- a\n\n- b'), '<ul><li><p>a</p></li><li><p>b</p></li></ul>', 'forum markup: a blank line between two items makes the list loose');
     eq(MKM.html('1. one\n2. two'), '<ol><li>one</li><li>two</li></ol>', 'forum markup: …and tight when nothing does');
     eq(MKM.html('text\n2019. was a year'), '<p>text<br>2019. was a year</p>', 'forum markup: a year at the start of a line does not cut a paragraph into a list');
+    eq(MKM.html('2019. was a good year'), '<p>2019. was a good year</p>', 'forum markup: …nor is it one at the start of a post, where it would drop out of the excerpt');
+    eq(MKM.html('3. three\n4. four'), '<ol start="3"><li>three</li><li>four</li></ol>', 'forum markup: while a list may start at a small number');
+    eq(MKM.plain('2019. was a good year'), '2019. was a good year', 'forum markup: …so the year stays in the words as read');
+    ok(/MK\.checkRead\(p\.body, GUARD\.check\)/.test(await read('_scraper', 'seed-forum.mjs')) && !/GUARD\.check\(p\.body\)/.test(await read('_scraper', 'seed-forum.mjs')),
+      'forum guard: the seeder, the one writer outside the functions, checks both ways too');
     eq(MKM.html('```\ncode **not bold**\n\n<b>\n```\nafter'), '<pre><code>code **not bold**\n\n&lt;b&gt;</code></pre><p>after</p>',
       'forum markup: a fenced block keeps its blank lines and its characters, escaped');
     eq(MKM.html('    indented\n    code\ntext'), '<pre><code>indented\ncode</code></pre><p>text</p>', 'forum markup: four spaces of indent is code');

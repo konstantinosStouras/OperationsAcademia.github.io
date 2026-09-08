@@ -301,8 +301,8 @@ async function main() {
   await admin.collection('forumHandles').get().then((s) => Promise.all(s.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
   const split = await call('forumPost', tokens.cand, { room: 'candidates', tid: fmt.result.tid, body: 'Write to jane**@**mit.edu about it.' });
   ok(status(split) === 'INVALID_ARGUMENT' && reason(split) === 'email', 'an address split by a mark is refused as an address, since it reads whole');
-  const splitQ = await call('forumPost', tokens.cand, { room: 'candidates', tid: fmt.result.tid, body: 'Quoting.', quote: { n: 1, text: '`617` 253 1000' } });
-  ok(reason(splitQ) === 'quote' || reason(splitQ) === 'phone', 'and a quote is checked the same two ways');
+  const splitT = await call('forumPost', tokens.adm, { room: 'candidates', title: 'Call **617**-253-1000', tags: ['waiting'], body: 'A title that reads as a number.', acceptGuide: true });
+  ok(status(splitT) === 'INVALID_ARGUMENT' && reason(splitT) === 'phone', 'and a title split by a mark is refused as a number, the same way');
 
   /* ------------------------------------------------------------- edit */
   console.log('\nforumEdit');

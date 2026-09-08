@@ -149,7 +149,7 @@ export function planFrom(seed, opts) {
     if (!Array.isArray(t.posts) || !t.posts.length) { problems.push(`${tid}: no posts`); continue; }
     if (!t.title || t.title.length > M.BOUNDS.title) problems.push(`${tid}: the title is empty or past ${M.BOUNDS.title} characters`);
     if (!M.tagsOk(t.tags)) problems.push(`${tid}: tags must be ${M.TAG_MIN} to ${M.TAG_MAX} slugs`);
-    const bad = GUARD.check(t.title);
+    const bad = MK.checkRead(t.title, GUARD.check);
     if (bad) problems.push(`${tid}: the forum guard refuses the title (${bad})`);
     /* THE TAGS TOO. A tag is text a reader sees, it is stored in the room's
        own tally, and `forumPost` runs the guard over every one of them — so a
@@ -168,7 +168,7 @@ export function planFrom(seed, opts) {
       if (!p.body || p.body.length > M.BOUNDS.body) problems.push(`${pid}: the body is empty or past ${M.BOUNDS.body} characters`);
       if (!p.by || p.by.length > M.BOUNDS.handle) problems.push(`${pid}: no handle, or one past ${M.BOUNDS.handle} characters`);
       if (M.slug(p.by) === M.slug(M.MODERATOR)) problems.push(`${pid}: ${M.MODERATOR} is reserved for the guide thread`);
-      const hit = GUARD.check(p.body);
+      const hit = MK.checkRead(p.body, GUARD.check);
       if (hit) problems.push(`${pid}: the forum guard refuses the body (${hit})`);
       const up = Number(p.up || 0);
       if (!Number.isInteger(up) || up < 0) problems.push(`${pid}: up must be a count, not ${JSON.stringify(p.up)}`);

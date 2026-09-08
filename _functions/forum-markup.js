@@ -236,20 +236,27 @@
 
   /** Does this line START a block of its own, so a paragraph before it
       ends here? A numbered item interrupts a paragraph only from 1, so a
-      year at the start of a line is not a list. */
+      number at the start of a line inside a paragraph is not a list (and
+      a year is not one anywhere: itemOf). */
   function startsBlock(line) {
     if (FENCE_RX.test(line) || HEADING_RX.test(line) || HR_RX.test(line) || QUOTE_RX.test(line)) return true;
-    var m = ITEM_RX.exec(line);
-    if (!m) return false;
-    if (/^\d/.test(m[2])) return /^1[.)]$/.test(m[2]);
+    var it = itemOf(line);
+    if (!it) return false;
+    if (it.ordered) return it.start === 1;
     return true;
   }
+
+  /** A numbered list may start at any number up to three digits: "3." is
+      a list carried on from somewhere, "2019." at the start of a line is a
+      year, and reading it as a list would drop it from the excerpt. */
+  var ITEM_START_MAX = 999;
 
   function itemOf(line) {
     if (HR_RX.test(line)) return null;
     var m = ITEM_RX.exec(line);
     if (!m) return null;
     var marker = m[2];
+    if (/^\d/.test(marker) && parseInt(marker, 10) > ITEM_START_MAX) return null;
     var spaces = m[3] === undefined ? 1 : m[3].length;
     /* five or more spaces after the marker is one space and an indented
        code block (CommonMark), which is more than a post needs; read it as
