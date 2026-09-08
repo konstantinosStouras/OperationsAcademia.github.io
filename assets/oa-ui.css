@@ -1930,7 +1930,13 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 
 /* An e-mail address has no spaces, so it sets a table's minimum width: the
    table scrolls inside its OWN container rather than making the page scroll
-   sideways at 390px. */
+   sideways at 390px. That was the design from the first day and the cells
+   below defeated it: `overflow-wrap: anywhere` lets a browser break a word at
+   ANY character when measuring a table, so beside the wide action column the
+   name and the address were squeezed to a few characters a line ("Xiaoda / n
+   Shao", an address cut three ways) and the table never needed to scroll at
+   all. The identity columns are held to ONE LINE now (owner, 2026-09-08:
+   "Show them fully") and the table is allowed to be as wide as its words. */
 .oa-u-wrap { overflow-x: auto; }
 
 .oa-u-table {
@@ -1961,6 +1967,23 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-u-tick { width: 34px; }
 /* A tick box is a touch target before it is a control. */
 .oa-u-tick input { width: 18px; height: 18px; }
+/* The name, the address and the status chip are never broken across lines:
+   a name is two or three words and an address is one, and the whole point of
+   the column is to read them. The affiliation is the exception — it can be a
+   sentence ("Department of …, School of …, University of …") — so it wraps
+   at its SPACES inside a span bounded on both sides: never squeezed to a word
+   a line, never so wide that the dates fall off the screen. */
+.oa-u-table td.oa-u-c-name,
+.oa-u-table td.oa-u-c-email,
+.oa-u-table td.oa-u-c-thread { white-space: nowrap; }
+.oa-u-aff {
+  display: inline-block;
+  min-width: 160px;
+  max-width: 320px;
+  white-space: normal;
+  overflow-wrap: break-word;
+  vertical-align: top;
+}
 
 .oa-u-sort {
   background: none;

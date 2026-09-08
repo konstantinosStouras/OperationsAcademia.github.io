@@ -5490,6 +5490,8 @@ async function testUserDirectorySync() {
     'the roster sync\'s own selftest is green:\n' + syncOut.slice(0, 1500));
   const mod = await import('./sync-user-directory.mjs');
   const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+  const fbjs = await readFile(path.join(root, 'assets', 'oa-firebase.js'), 'utf8');
+  const fbjsHas = (needle) => fbjs.includes(needle);
 
   /* The rules' own list for a roster row, read out of the file rather than
      copied — the both-ways discipline every other pairing here follows. */
@@ -5499,19 +5501,30 @@ async function testUserDirectorySync() {
   const allowed = (hasOnly ? hasOnly[1] : '')
     .split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean);
   eq(mod.ROW_KEYS.slice().sort(), allowed.slice().sort(),
-    'the sync writes EXACTLY the keys the rules allow — a fifth would freeze the ' +
-    'row against its own owner');
+    'the sync writes EXACTLY the keys the rules allow — a key the rules do not ' +
+    'name would freeze the row against its own owner');
 
-  /* And what it actually writes obeys that, not just what it declares. */
-  const row = mod.rowFromAuthUser({
+  /* And what it actually writes obeys that, not just what it declares. The
+     fifth key is the PROFILE's affiliation, so a row built beside a profile
+     carries every allowed key, and one built beside none carries a subset. */
+  const authUser = {
     uid: 'u', email: 'a@b.edu', displayName: 'A B',
     metadata: { creationTime: 'Mon, 01 Jan 2026 00:00:00 GMT',
       lastSignInTime: 'Mon, 01 Jun 2026 00:00:00 GMT' },
-  }, null);
+  };
+  const row = mod.rowFromAuthUser(authUser, null, { affiliation: 'A School' });
   eq(Object.keys(row).sort(), allowed.slice().sort(),
     'and a row it builds carries those keys and no others');
   ok(typeof row.first === 'number' && typeof row.seen === 'number',
     'with the two dates as NUMBERS, which is what the rules demand');
+  eq(row.affiliation, 'A School', 'and the affiliation the profile gave');
+  const bare = mod.rowFromAuthUser(authUser, null, null);
+  ok(Object.keys(bare).every((k) => allowed.includes(k)) && !('affiliation' in bare),
+    'a row built beside no profile carries no affiliation key at all — never an ' +
+    'empty string, the rule the address already follows');
+  eq(mod.PROFILES, 'profiles', 'the affiliation is read from the profiles collection…');
+  ok(fbjsHas(`profiles: '${mod.PROFILES}'`),
+    '…which is the one the browser writes (oa-firebase.js)');
 
   /* Dates only ever correct backwards / forwards in the safe direction. */
   eq(mod.rowFromAuthUser({ uid: 'u', email: 'a@b.edu', metadata: {} },
@@ -5519,8 +5532,7 @@ async function testUserDirectorySync() {
   'an account already current costs no write, so a daily fire commits nothing');
 
   /* The collection name is the one the panel reads. */
-  const fbjs = await readFile(path.join(root, 'assets', 'oa-firebase.js'), 'utf8');
-  ok(fbjs.includes(`userDirectory: '${mod.DIRECTORY}'`),
+  ok(fbjsHas(`userDirectory: '${mod.DIRECTORY}'`),
     'the sync writes the collection the Admin area actually reads');
 
   const wf = await readFile(
@@ -6294,7 +6306,7 @@ async function testUsersAndMessages() {
     ok(dirKeys.has(k), `oa-users.js reads userDirectory."${k}", and the rules allow writing it`);
   }
   eq([...dirKeys].sort(), [...U.ROW_KEYS].sort(),
-    'the userDirectory rule allows exactly the roster’s four fields — a key with ' +
+    'the userDirectory rule allows exactly the roster’s five fields — a key with ' +
     'no rule is a permission-denied nobody can debug, a rule with no writer is dead');
 
   /* …and what the WRITER actually writes, read out of its own source. Pinning
@@ -6308,6 +6320,72 @@ async function testUsersAndMessages() {
     ok(new RegExp('(^|[{;\\s])' + k + ':|row\\.' + k + '\\s*=').test(syncSrc),
       `syncDirectoryRow really writes "${k}" — not merely declares it`);
   }
+
+  /* ---------------- the roster reads whole, and says where each person is
+     (owner, 2026-09-08: "I can't read the names of the registered users very
+     well. Show them fully. Same with their email. Also, show their
+     affiliation in that list.") */
+
+  ok(U.ROW_KEYS.includes('affiliation'), 'the roster row carries the affiliation');
+  const affBound = /str\('affiliation', (\d+)\)/.exec(dir);
+  ok(affBound, 'the rules bound the affiliation like every other text field');
+  eq(U.MAXLEN.affiliation, affBound ? Number(affBound[1]) : -1,
+    'to the same length the panel declares — and the profile\'s own field is bounded to');
+  ok(/str\('affiliation', 300\)/.test(rules.slice(rules.indexOf('match /profiles/'))),
+    '…which is the bound on profiles.affiliation, so a value the profile accepts the row accepts');
+
+  /* the panel: a column, the CSV, the Find box, and a class per cell */
+  ok(/key: 'affiliation', label: 'Affiliation'/.test(users),
+    'oa-users.js draws an Affiliation column');
+  ok(/oa-u-aff/.test(users) && /esc\(r\.affiliation\)/.test(users),
+    '…escaped, inside the span the stylesheet bounds');
+  ok(/'Name', 'E-mail', 'Affiliation', 'First seen'/.test(users) && /r\.affiliation \|\| ''/.test(users),
+    'the CSV carries it beside the address');
+  ok(/fold\(r\.affiliation\)\.indexOf\(q\)/.test(users),
+    'and the Find box searches it');
+  ok(/<td class="oa-u-c-' \+ esc\(c\.key\)/.test(users),
+    'every cell is classed by its column, which is what the one-line rule below hangs on');
+
+  /* the identity columns never wrap; the affiliation wraps at its spaces */
+  const uiCss = await readFile(path.join(HERE, '..', 'assets', 'oa-ui.css'), 'utf8');
+  const oneLine = /\.oa-u-table td\.oa-u-c-name,\s*\.oa-u-table td\.oa-u-c-email,\s*\.oa-u-table td\.oa-u-c-thread \{ white-space: nowrap; \}/;
+  ok(oneLine.test(uiCss),
+    'the name, the address and the status chip are held to ONE LINE (white-space: nowrap) — ' +
+    'the cells carried overflow-wrap: anywhere, which is what cut a name into "Xiaoda / n Shao"');
+  const affCss = uiCss.slice(uiCss.indexOf('.oa-u-aff {'), uiCss.indexOf('}', uiCss.indexOf('.oa-u-aff {')));
+  ok(affCss.length > 40 && /white-space: normal/.test(affCss) && /max-width: \d+px/.test(affCss)
+     && /min-width: \d+px/.test(affCss) && /overflow-wrap: break-word/.test(affCss),
+    'while the affiliation wraps at its spaces inside a span bounded on both sides');
+  const v3css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  ok(!/\.oa-u-table|\.oa-u-aff|oa-u-c-/.test(v3css),
+    'and v3.css restates none of it, so the engine\'s rule is the one that reaches the site');
+  ok(/\.oa-u-wrap \{ overflow-x: auto; \}/.test(uiCss),
+    'the table still scrolls inside its own container, which a one-line column now needs');
+
+  /* the browser writer: the profile\'s affiliation, on sign-in and on a save */
+  ok(/function syncDirectoryRow\(u, again\)/.test(syncSrc) && /if \(!again\) \{/.test(syncSrc),
+    'syncDirectoryRow takes an `again` that skips the once-a-session latch');
+  ok(/\(state\.profile \|\| \{\}\)\.affiliation/.test(syncSrc)
+     && /if \(affiliation\) row\.affiliation = affiliation\.slice\(0, 300\)/.test(syncSrc),
+    'and writes the PROFILE\'s affiliation, only when there is one, bounded to the rule');
+  const saveAt = accts.indexOf("msg.textContent = 'Saving…';");
+  const saveSrc = accts.slice(saveAt, accts.indexOf('We could not save your profile just now', saveAt));
+  ok(saveSrc.length > 200 && saveSrc.length < 2000 && /syncDirectoryRow\(state\.user, true\)/.test(saveSrc)
+     && saveSrc.indexOf('state.profile = Object.assign') < saveSrc.indexOf('syncDirectoryRow(state.user, true)'),
+    'a profile SAVE re-syncs the row past the latch, after state.profile carries the new value');
+  ok(accts.indexOf('syncDirectoryRow(state.user);') > accts.indexOf('state.profile = (snap && snap.exists'),
+    'and the sign-in sync runs after loadProfile has settled the profile, so it has an affiliation to read');
+
+  /* what the copy says */
+  const areaHtml = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(/their affiliation/.test(areaHtml.slice(areaHtml.indexOf('id="oa-aa-users"'), areaHtml.indexOf('id="oa-aa-users-list"'))),
+    'the panel\'s own copy names the affiliation among what the roster shows');
+  const setup = await readFile(path.join(HERE, '..', '_SETUP-FIREBASE.md'), 'utf8');
+  ok(/`userDirectory\/\{uid\}`[^\n]*affiliation/.test(setup),
+    'and so does the collection table in _SETUP-FIREBASE.md');
+  const cm = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
+  ok(cm.includes('### The roster reads whole, and says where each person is'),
+    'CLAUDE.md records the decision');
 
   /* ---------------------------------------------------------- the threads */
 
@@ -6553,9 +6631,9 @@ async function testUsersAndMessages() {
   /* Disclosed, like usageSessions before it: this is identity the maintainer
      can read, and a privacy policy that does not say so is wrong. */
   const priv = await readFile(path.join(HERE, '..', 'privacy-policy.html'), 'utf8');
-  ok(/sign\s+in\s+with,\s+and\s+when\s+your\s+account\s+was\s+first\s+and\s+last\s+seen/
+  ok(/sign\s+in\s+with,\s+the\s+affiliation\s+you\s+gave\s+on\s+your\s+profile,\s+and\s+when\s+your\s+account\s+was\s+first\s+and\s+last\s+seen/
     .test(priv),
-    'the Privacy Policy discloses the roster');
+    'the Privacy Policy discloses the roster, the affiliation included');
   ok(/Messages/.test(priv), '…and the messages');
 }
 
