@@ -179,11 +179,12 @@
   /* ------------------------------------------------------------- the shell */
 
   /** Every chart lives in a positioned wrapper so one absolutely-positioned
-      tooltip can follow the pointer, and every chart ships a <table> of the
-      same numbers — visually hidden, reachable by a screen reader and by the
-      "Show the numbers" toggle. A chart nobody can read is not accessible
-      because it validated; it is accessible because the values are also
-      available as text. */
+      tooltip can follow the pointer. NO CHART DRAWS A "SHOW THE NUMBERS"
+      TABLE ANY MORE (owner, 2026-09-08: "No need to have the part 'Show the
+      numbers' for any of the plots"). Every chart used to append a <details>
+      holding a <table> of the same values; what stays as the text reading is
+      the tooltip (role=status) on every focus stop, the accessible name each
+      bar row and each share part carries, and the axis labels. */
   function shell(host, { title, desc }) {
     host.textContent = '';
     host.classList.add('oa-chart');
@@ -247,41 +248,10 @@
     tip.style.top = Math.max(4, y) + 'px';
   }
 
-  /** A visually-hidden table of the same numbers, plus the toggle that shows
-      it. Built from the same array the marks were, so it cannot disagree. */
-  function table(host, cols, rows, { open = false } = {}) {
-    const details = document.createElement('details');
-    details.className = 'oa-chart-table';
-    if (open) details.open = true;
-    const sum = document.createElement('summary');
-    sum.textContent = 'Show the numbers';
-    details.appendChild(sum);
-    const t = document.createElement('table');
-    const thead = document.createElement('thead');
-    const htr = document.createElement('tr');
-    cols.forEach((c) => {
-      const th = document.createElement('th');
-      th.scope = 'col';
-      th.textContent = c;
-      htr.appendChild(th);
-    });
-    thead.appendChild(htr);
-    t.appendChild(thead);
-    const tb = document.createElement('tbody');
-    rows.forEach((r) => {
-      const tr = document.createElement('tr');
-      r.forEach((cell, i) => {
-        const td = document.createElement(i ? 'td' : 'th');
-        if (!i) td.scope = 'row';
-        td.textContent = cell;
-        tr.appendChild(td);
-      });
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb);
-    details.appendChild(t);
-    host.appendChild(details);
-  }
+  /* There is deliberately no table() helper here any more: the "Show the
+     numbers" block under every chart was removed at the owner's word on
+     2026-09-08, and a helper left behind with no caller is one edit from
+     drawing it again. */
 
   /* ---------------------------------------------------------------- a line */
 
@@ -485,20 +455,6 @@
         leave();
       });
     }
-    /* THE TABLE MAY BE COARSER THAN THE PLOT. By default it lists every point,
-       which is right for a chart over a range the reader chose. A chart over
-       a whole record that grows by a day for ever would print a thousand rows
-       under itself, so a caller may hand in its own `{ cols, rows }` (the
-       growth chart lists one row per month). The override is still built by
-       the caller from the same series the marks were drawn from, which is the
-       only property the table exists for. */
-    if (opts.table && Array.isArray(opts.table.cols) && Array.isArray(opts.table.rows)) {
-      table(host, opts.table.cols, opts.table.rows);
-      return;
-    }
-    table(host,
-      [opts.xTitle || 'Day'].concat(series.map((s) => s.name)),
-      pts.map((p, i) => [p.label2].concat(series.map((s) => s.values[i] == null ? '—' : full(s.values[i])))));
   }
 
   /** A legend is the dependable identity channel and is always present for
@@ -642,11 +598,6 @@
       hit.addEventListener('pointerleave', hide);
       hit.addEventListener('blur', hide);
     });
-
-    table(host, [opts.xTitle || '', opts.unit || 'Value'],
-      /* an em dash, never a 0: the table must not say the thing the bar was
-         redrawn to stop saying */
-      items.map((i) => [i.label, i.empty ? '—' : fmt(i.value)]));
   }
 
   /* ------------------------------------------------------------------ bars */
@@ -759,13 +710,11 @@
       list.appendChild(li);
     });
     wrap.appendChild(list);
-
-    table(host,
-      [opts.xTitle || '', opts.unit || 'Value'].concat(total ? ['Share'] : [])
-        .concat(opts.subTitle ? [opts.subTitle] : []),
-      items.map((i) => [i.label, show(i.value)]
-        .concat(total ? [pct(total ? i.value / total : 0)] : [])
-        .concat(opts.subTitle ? [i.sub || '—'] : [])));
+    /* No numbers table under the list (owner, 2026-09-08, of the universities
+       figure and the pages figure with their "Show the numbers" block
+       circled, then of every plot on the page). A bar list is its own
+       numbers: every row prints its name and its value, and the share is in
+       the row's accessible name and its tooltip. */
   }
 
   /* ------------------------------------------------------------ a share bar
@@ -861,8 +810,6 @@
     });
 
     host.appendChild(legendBox);
-    table(host, [opts.xTitle || '', opts.unit || 'Value', 'Share'],
-      parts.map((i) => [i.label, full(i.value), pct(i.value / total)]));
   }
 
   return { line, columns, bars, share, compact, full, duration, durationLong, pct,

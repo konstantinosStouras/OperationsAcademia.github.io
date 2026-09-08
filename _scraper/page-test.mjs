@@ -8257,13 +8257,6 @@ for (const w of [320, 360, 390, 430]) {
     const to = new Date(); to.setUTCHours(0, 0, 0, 0); to.setUTCDate(to.getUTCDate() + AHEAD);
     return Math.round((to.getTime() - Date.parse(growthDays[growthDays.length - 1][0])) / 86400000);
   })();
-  const monthsExpected = (() => {
-    const to = new Date(); to.setUTCDate(to.getUTCDate() + AHEAD);
-    const a = growthDays[0][0].slice(0, 7).split('-').map(Number);
-    const b = to.toISOString().slice(0, 7).split('-').map(Number);
-    return (b[0] - a[0]) * 12 + (b[1] - a[1]) + 1;
-  })();
-
   /* --- with data, in BOTH themes ---------------------------------------- */
 
   for (const theme of ['light', 'dark']) {
@@ -8282,7 +8275,9 @@ for (const w of [320, 360, 390, 430]) {
     const seen = await q.evaluate(() => ({
       figures: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
       svgs: document.querySelectorAll('.oa-chart-svg').length,
-      tables: document.querySelectorAll('.oa-chart-table').length,
+      tables: document.querySelectorAll('.oa-chart-table, .oa-chart details, .oa-chart table').length,
+      numbers: [...document.querySelectorAll('summary, button, a, p, span, div')]
+        .filter((e) => e.children.length === 0 && /Show the numbers/i.test(e.textContent)).length,
       charts: document.querySelectorAll('.oa-chart').length,
       tiles: document.querySelectorAll('.oa-tile').length,
       frozen: [...document.querySelectorAll('.oa-figure-frozen')].map((e) => e.textContent.trim()),
@@ -8312,16 +8307,19 @@ for (const w of [320, 360, 390, 430]) {
       `analytics (${theme}): …and none of them carries an em dash`);
     ok(seen.svgs >= 3, `analytics (${theme}): the charts are drawn as inline SVG`);
     ok(seen.tiles >= 4, `analytics (${theme}): the headline figures are shown`);
-    /* THE RULE IS PER CHART, NOT PER SVG, and it had been the weaker one: the
-       bar lists drew no table at all and the check passed because it compared
-       tables against the SVGs, which the bar lists do not have either. Counting
-       `.oa-chart` hosts is what the promise actually says. */
-    eq(seen.tables, seen.charts,
-      `analytics (${theme}): every chart also gives its numbers as a table — a chart ` +
-      'is accessible because the values are available as text, not because it validated');
+    /* NO "SHOW THE NUMBERS" UNDER ANY PLOT (owner, 2026-09-08). Every chart
+       used to end in a <details> holding a table of its values; the owner had
+       it taken off every figure on the page. Measured as the rendered page,
+       not as a class list: no details or table inside a chart, and no element
+       anywhere reading "Show the numbers". */
+    ok(seen.charts >= 6, `analytics (${theme}): the charts are drawn (or the next two checks are vacuous)`);
+    eq(seen.tables, 0,
+      `analytics (${theme}): no chart draws a numbers table under itself any more`);
+    eq(seen.numbers, 0,
+      `analytics (${theme}): …and nothing on the page reads "Show the numbers"`);
     ok(seen.charts > seen.svgs,
-      `analytics (${theme}): …including the ones drawn as HTML rather than SVG, which ` +
-      'is where that promise used to be quietly unmet');
+      `analytics (${theme}): the bar lists and the share bar are charts drawn as HTML, ` +
+      'so the chart count exceeds the SVG count');
     /* THE CORRECTION (owner, 2026-08-29). This figure used to be an archive
        labelled "no analytics product still offers this". A browser cannot see
        its own reverse-DNS; a Cloud Function can, and this site has them, so
@@ -8404,10 +8402,6 @@ for (const w of [320, 360, 390, 430]) {
         accentD: accent ? accent.getAttribute('d') : '',
         sub: (fig.querySelector('.oa-figure-sub') || {}).textContent || '',
         legend: [...fig.querySelectorAll('.oa-chart-legend-on button')].map((b) => b.textContent.trim()),
-        tableCols: [...fig.querySelectorAll('.oa-chart-table thead th')].map((t) => t.textContent),
-        tableRows: fig.querySelectorAll('.oa-chart-table tbody tr').length,
-        firstRow: [...(fig.querySelector('.oa-chart-table tbody tr') || { children: [] }).children].map((c) => c.textContent),
-        lastRow: [...([...fig.querySelectorAll('.oa-chart-table tbody tr')].pop() || { children: [] }).children].map((c) => c.textContent),
       };
     });
     ok(growth, `analytics (${theme}): the growth figure is drawn from its routed file`);
@@ -8447,14 +8441,6 @@ for (const w of [320, 360, 390, 430]) {
       ok(!/—/.test(growth.sub), `analytics (${theme}): …without an em dash`);
       eq(growth.legend, ['Registered users', 'Expected growth'],
         `analytics (${theme}): the legend is the page's click-to-hide control, naming both series`);
-      eq(growth.tableCols, ['Month', 'Registered users', 'Expected growth'],
-        `analytics (${theme}): the numbers table is one row per MONTH, not per day`);
-      eq(growth.tableRows, monthsExpected,
-        `analytics (${theme}): …one for every month from the first registration to the end of the projection`);
-      ok(/^[A-Z][a-z]{2} \d{4}$/.test(growth.firstRow[0]) && growth.firstRow[2] === '—',
-        `analytics (${theme}): the first month carries a real count and no projection`);
-      ok(growth.lastRow[1] === '—' && /^\d[\d,]*$/.test(growth.lastRow[2]),
-        `analytics (${theme}): …and the last month a projection and no real count`);
     }
     const trend = await q.evaluate(() => {
       const fig = [...document.querySelectorAll('.oa-figure')]
@@ -8826,6 +8812,11 @@ for (const w of [320, 360, 390, 430]) {
     }));
     ok(times.subs.some((t) => /32m 32s/.test(t)),
       'analytics: an average time on a page reads "32m 32s", not "1952 seconds"');
+    /* NAMED FOR WHAT IT IS (owner, 2026-09-08): the line under a bar says
+       what the duration measures, in the words the numbers table used to
+       head its column with before that table went. */
+    ok(times.subs.some((t) => /^Average time on the page: 32m 32s$/.test(t.trim())),
+      'analytics: …and the line under the bar reads "Average time on the page: 32m 32s"');
     ok(!/1,?952 seconds/.test(times.body),
       'analytics: …and the raw seconds are nowhere on the page');
     ok(times.tiles.some((t) => /Time on a page/.test(t) && /5m 22s/.test(t)),

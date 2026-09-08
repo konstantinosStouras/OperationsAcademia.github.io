@@ -6790,6 +6790,25 @@ hosts now, and asserts there are more of those than SVGs. And a bare
 shape on purpose, so the range assertions are scoped to
 `.oa-range:not(.oa-switch)`.
 
+**No "Show the numbers" under any plot** (owner, 2026-09-08: first of the
+universities figure and the pages figure with the block circled, then "no
+need to have the part 'Show the numbers' for any of the plots"). Every chart
+used to end in a `<details>` holding a table of the values it drew, and the
+growth chart handed `line()` a monthly one of its own; the bar lists had
+gained theirs in the tightening one paragraph up. All of it is gone: the
+helper, every call to it, the `opts.table` override, the stylesheet's rules
+and the lede's promise, deleted rather than hidden, since a helper with no
+caller is one edit from drawing the block again. What remains as the text
+reading of a chart is the tooltip on every focus stop, the accessible name
+each bar row and each share part carries, and the axis labels; the cost, said
+rather than hidden, is that a screen reader has no table to walk. The one
+thing the table said that its figure did not was the pages list's column
+heading, "Average time on the page", so that phrase moved onto the row under
+each bar ("Average time on the page: 8m 58s") in the same change. Pinned as
+absences in `testAnalytics`, comments stripped, and measured on the rendered
+page in `page-test.mjs`: no details block or table inside a chart, nothing
+reading "Show the numbers", and the named time line.
+
 Tests: the dimension block in `testAnalytics` (the one-source-per-dimension
 rule both ways, the pre-cut share, the clock order, the label rules including
 that an address-shaped label is dropped WHOLE and takes its count with it, the

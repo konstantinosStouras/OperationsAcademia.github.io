@@ -184,7 +184,7 @@
 .oa-area.oa-accent { fill: var(--oa-chart-accent); }
 
 /* A LONE DAY BETWEEN TWO GAPS. Its run holds one point, so the line's path is
-   a bare moveto and paints nothing: the value was in the numbers table and
+   a bare moveto and paints nothing: the value was in the file and
    invisible on the chart. Drawn in the series' own colour, at the line's own
    weight, so it reads as part of the same series. */
 .oa-lone { stroke: none; }
@@ -259,37 +259,9 @@
   font-size: 13px;
 }
 
-/* ------------------------------------------------------ the numbers, as text */
-
-.oa-chart-table { margin-top: 14px; }
-.oa-chart-table > summary {
-  cursor: pointer;
-  color: var(--mut);
-  font-size: 13px;
-}
-.oa-chart-table > summary:hover { color: var(--ink-2); }
-.oa-chart-table table {
-  width: 100%;
-  margin-top: 10px;
-  border-collapse: collapse;
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-  display: block;
-  max-height: 340px;
-  overflow: auto;
-}
-.oa-chart-table th, .oa-chart-table td {
-  padding: 5px 10px 5px 0;
-  text-align: right;
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--ink-2);
-  white-space: nowrap;
-}
-.oa-chart-table thead th { color: var(--mut); font-weight: 600; }
-.oa-chart-table tbody th, .oa-chart-table th:first-child, .oa-chart-table td:first-child {
-  text-align: left;
-  font-weight: 500;
-}
+/* There are no "numbers, as text" rules any more: the "Show the numbers"
+   table under every chart went at the owner's word on 2026-09-08, and its
+   rules went with it rather than staying to style nothing. */
 
 /* ---------------------------------------------------------- horizontal bars */
 
