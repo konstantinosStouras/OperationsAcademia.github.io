@@ -482,8 +482,9 @@ body.v3 .oa-forum-q {
      of a screenshot with the tally circled: "Add more space from e.g. 0 and
      'about'. Have a vertical column of space between the votes/answers/views
      and the question so that it reads nicer."). The numbers are right-aligned
-     in their column and the head carries 6px of its own inset, so they stood
-     8px from the title. The gap is on the GRID rather than on the head, so
+     in their column, 2px in from its edge, and the head carries 6px of its
+     own inset, so they stood 8px from the title. The gap is on the GRID
+     rather than on the head, so
      the head, the footer and the "Open the thread" strip move together and
      the question keeps one left edge. Inert on a phone, where the card is one
      column and the tally lies above the title. */
