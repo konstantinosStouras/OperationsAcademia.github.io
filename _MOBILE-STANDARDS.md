@@ -136,8 +136,17 @@ marked global.
     phone, measured. A vote
     column that stands beside the post on a desktop lies ABOVE it on a phone,
     a row of two round buttons and the net between them, so nothing is
-    squeezed into a 56px gutter. `page-test.mjs` measures the forum's list,
-    one thread and the open compose at 390px in its own forum block: the page
+    squeezed into a 56px gutter. The Ask-a-question form's tag picker opens
+    a MENU under its box (2026-09-08), and a menu is a panel that opens over
+    the page, so it holds rules 6 and 10: as wide as its box and never wider
+    than the screen, half the screen at most and scrolling inside itself,
+    its rows 42px targets, and it MEASURES after opening, from the visual
+    viewport (what a phone's keyboard shrinks): under the box while at
+    least 200px of room is there, else on the side with more room, growing
+    no further than that side allows; the form's card keeps a 14px inset and its two
+    buttons stack full width under it (rule 11). `page-test.mjs` measures the forum's list,
+    one thread, the open compose and the ask form with its menu open at 390px
+    in its own forum block: the page
     cannot join `MOBILE_PAGES`, because signed out it shows a sign-in card and
     mounts no list, and the loop waits for a rendered list and a visible bar.
 

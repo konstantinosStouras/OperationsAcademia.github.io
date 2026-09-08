@@ -4281,7 +4281,9 @@ The note is deleted from the page with its stylesheet rule, never hidden;
 `EDIT_WINDOW_MS` is gone from the model (pinned as an absence, so no writer
 can measure against it); `forumEdit` refuses no `window` and `member.js` has
 no such reason; the Edit button is a plain "Edit" on the author's own live
-post; the ask form says "Yours to edit or delete afterwards"; rule 13 of the
+post; the ask form says "Yours to edit afterwards, and to delete until it has
+an answer" (since 2026-09-08; it said "edit or delete afterwards", which
+over-claimed for an answered question); rule 13 of the
 guide says so (press Update the guide in both rooms); and the emulator test
 edits a post sixteen minutes on and expects it to save. The second sentence
 of the instruction was already the rule (`forumDelete`, "A post is its
@@ -4306,6 +4308,131 @@ why; the warm-up sent once on the first focus and once on the first reach for
 a vote, with the room and nothing else; an answer on the page with no second
 votes call and the box drawn again empty; Edit with no countdown).
 
+### The ask form is laid out the way Stack Exchange lays one out
+
+Owner, 2026-09-08, with a screenshot of Mathematics Stack Exchange's ask page
+beside one of this form in the dark theme: *"improve the new question to be
+posted so that it looks like stackexchange … Make sure the experience is
+smooth from mobile devices too."* The screenshot of ours showed what was
+wrong with it before a word was read: eight rows of tag suggestions drawn
+open under a form nobody had typed into, the room said twice (the page's own
+banner and a "Where" block a screen lower), the advice for each box UNDER the
+box rather than where a reader looks before typing, and the three boxes loose
+on the page rather than in the one card the reader's eye expects.
+
+**What is copied is the LAYOUT, and the layout is the part that is a good
+idea.** A short "writing a good question" note; then ONE bordered card
+(`.oa-forum-askcard`) holding the three fields, Title, **Body** (the word
+that site uses; it said "Details" until the owner asked, 2026-09-08) and
+Tags, each a bold label with its
+advice under the label (`.oa-forum-fhint`) and the box under the advice,
+every label starred (`.oa-forum-req`, the error red, `aria-hidden` since the
+boxes carry `aria-required`) and "Required fields" said once at the card's
+head; and the Post button under the card, at its left. Not copied: the
+brand (every colour is a token, the buttons keep the site's pills, and the
+selftest refuses a raw colour in the form's rules), the review step, and the
+formatting toolbar. **A post here is plain text**, and a toolbar over a box
+that renders none would be a lie, so where the toolbar would stand there is
+a line (`.oa-forum-fmt`) saying how the words will read: plain text, a blank
+line starts a paragraph, a web address becomes a link, which is exactly what
+`bodyHTML` and `linkify` do.
+
+**The room is said ONCE, at the card's head**, in the form's own words
+("Posting in the Candidates’ room · 2026-2027 as steady river 90"), and the
+page's room banner (`#oa-forum-me`) stands down while the form is open
+(`drawBanner`, keyed on `S.ask`) and comes back when the form hands over to
+the thread (`openLocalThread`) or the list (`draw`). The "Where" block is
+gone.
+
+**The tag suggestions are a MENU, and the box is a COMBOBOX over it.** The
+keyboard never leaves the box: the options are `li[role=option]`, named
+"tag, count" through `aria-label`, highlighted rather than focused (the box
+names the highlighted one through `aria-activedescendant`, and the highlight
+is ringed as well as washed, since the wash alone is 1.19:1 on the panel),
+the arrows move the highlight, Enter picks it or adds what was typed, and
+Escape shuts the menu. **It opens only while something is typed in the
+box** (owner, 2026-09-08, of the first cut, which opened it on a press on
+the empty box: *"tags should appear once a user is typing a new tag, not
+beforehand"*): typing opens it, a press on the box or the down arrow opens
+it again only while the box holds text, an empty box shows nothing, never
+on focus and never on arrival; it shuts the moment a tag is chosen OR
+REFUSED, on Escape, and when the keyboard leaves the box.
+Shutting on a pick is load-bearing: drawn over the page, an open menu
+covers the guide tick box and the buttons under it, and the first browser
+run of this form timed out on exactly that, a suggestion row intercepting
+the press on the tick box; shutting on a refusal is what lets the refusal
+be seen, written into a line the menu would otherwise cover. That line is
+always rendered, never `display: none` while empty, because a live region
+that appears with its first words is one many screen readers never
+announce. A press on a row stops its `mousedown`, so the box keeps the
+keyboard. **Where the menu opens is measured** (`placeSugg`, rule 10 of the
+mobile standards): from the visual viewport, which is what a phone's
+keyboard shrinks, under the box while at least 200px of room is there (a
+few rows; a menu that preferred the roomier side would flip above a box in
+the lower half of any screen), else on the roomier side (`.is-up`), capped
+to that room and to half the screen, re-measured as the viewport changes,
+and the listener lets go once the form is torn down. The copy is this
+forum's, not a programming site's: the advice asks for the situation, what
+the writer already knows and what they are trying to decide, the tag
+placeholder shows ONE tag with Enter after it (a space makes one tag here,
+never two), and the hint beside Post says a question can be deleted until
+it has an answer, which is rule 13's own rule. It is drawn OVER the page (`position: absolute` under
+`.oa-forum-tagwrap`) rather than in the flow, where it moved the guide box
+and the buttons down and back with every keystroke, and it holds to rules 6
+and 10 of `_MOBILE-STANDARDS.md`: the width of its box, half the screen at
+most, scrolling inside itself. The line under the box carries a refusal and
+nothing else now; the advice (`TAG_HINT`) is said once, above the box.
+
+**Similar questions, under the title as it is typed.** `similarThreads` in
+`oa-forum.js` is pure: the title's words worth matching (`titleWords`: three
+letters or more, lower-cased, a hyphen read as a space, `STOPWORDS` out, so
+"ask", "question" and "normal" match nothing), a thread listed when it
+shares two of them, or one when the title has fewer than three, the closest
+first and the newest on a tie, five at most, a hidden thread never, a tag
+counting as a word. It reads `S.rows`, the rows the list read on the way
+here, stamped with their room and season (`S.rowsKey`) so another room's
+rows are never matched; a reader who arrived at the form by its address has
+none, and they are read once, the first time the title is worth matching,
+painted only if the form is still the view on screen (`viewKey`). The links
+open in a NEW tab (`target="_blank"`), and the page's own link handler now
+leaves such a link to the browser, so the question being written stays. The
+selftest drives the rule from a slice of the source, and the browser suite
+types a title sharing words with the seeded thread and reads the list back:
+one link, the hostile title rendered as text, no second read of the room.
+
+**The phone** (rule 13, and now rules 6, 10 and 11): the card keeps a 14px
+inset, the boxes 16px, the two buttons stack full width under the card, the
+"Required fields" note may wrap under the room line, and the menu is
+measured open at 390px: under its box, as wide as it, no taller than half
+the screen, its rows 42px, and above the box once the box is scrolled to
+the foot of the screen.
+
+Tests: the ask block of `testForum` in `_scraper/selftest.mjs` (the card
+and its head, label then advice then box for each field with its star, the
+required marks and the combobox, the menu born shut with its focus and
+mousedown rules, the arrows and Escape, the room said once and the banner
+standing down and coming back, the format line and no toolbar, the button
+under the card, the note above it, the tag advice said once with a refusal
+alone below on a line always rendered, the combobox contract (named li
+options, never buttons, the highlight named by the box, Enter picking it),
+the measured placement and its let-go, the new-tab link left to the
+browser, the rows stamped by room and a late timer reading nothing,
+no em dash, the similarity rule over fixtures including the hidden thread,
+the tag as a word, the one-word title, the stopword title and the cap of
+five, the stylesheet's grounds and inks, the menu's position and cap, the
+phone inset, no raw colour, the audit's new surfaces and the browser suite's
+own messages), and the forum block of `_scraper/page-test.mjs` (the shape as
+GEOMETRY: banner down, head, star count, label-advice-box order, one card
+with Post under it at its left, the menu shut on arrival with the title
+focused; the similar list for the seeded thread, inert, in a new tab, with
+no second read, gone for a title sharing nothing; the menu opened by typing
+and over the page, shut on a pick with the box keeping the keyboard, opened
+by a press on the box and by the down arrow, the highlight walked and named
+with the keyboard staying in the box and Enter picking it, a refused ORCID
+iD said under the box with the menu shut, shut by Escape and when the
+keyboard leaves; the banner back with the thread; and at
+390px the inset, the stacked buttons, the menu's width, height and rows, and
+the menu opening above a box at the foot of the screen).
 ### Home, Questions, Unanswered and Tags, and the views a question counts
 
 Owner, 2026-09-08, with four screenshots of the site the forum was asked to
