@@ -3521,6 +3521,65 @@ box's row and the title's size off the rendered page. **A phone rule that
 changes a grid must place every child it relies on**, or the desktop's
 placements go on shaping a grid that no longer has those columns.
 
+### …and a voted arrow is not painted in the colour of its own ground
+
+Owner, 2026-09-08: *"upvoting a forum answer from mobile on dark theme makes
+the vote button turn completely white. if I refresh the page, the voting
+button shows the correct count."* Both halves of that sentence are the same
+CSS rule, and nothing in the pipeline was wrong: the count was in the DOM
+from the moment the function answered.
+
+**THE INK CAME FROM ONE RULE AND THE GROUND FROM ANOTHER.**
+`.oa-forum-v:hover:not([disabled])` is (0,3,0) and
+`.oa-forum-v[aria-pressed='true']` is (0,2,0), so on a button that is BOTH,
+the hover rule's `color: var(--brand)` beat the pressed rule's
+`var(--on-brand)` — over the pressed rule's own `var(--brand)` ground. The
+glyph was painted in the colour of the block it sits on: measured
+`rgb(198, 204, 212)` on `rgb(198, 204, 212)`, **1:1**, a blank 42px square.
+`--brand` is LIGHT in the dark theme (`#c6ccd4`) and dark in the light one,
+so the same defect reads as a white block in dark and a charcoal one in
+light, which is why it was reported from a phone in dark.
+
+**A PHONE IS WHY IT LOOKED PERMANENT.** A tap applies `:hover` to what it
+tapped and holds it until something else is tapped, so the state a desktop
+reader sees only while the pointer rests there is the state a phone reader is
+left in — and reloading is what clears it, which is exactly what the report
+says. Rule 9 of `_MOBILE-STANDARDS.md` has said since the day that file was
+written that a hover effect is gated on `(hover: hover) and (pointer: fine)`
+"so a tap does not leave a stuck hover state"; it had been read as a rule
+about `.oa-card`, and the forum's own controls carried plain `:hover` rules.
+
+**So the fix is TWO things, and they are separate on purpose.** The preview
+stands down on a control that is already on (`:not([aria-pressed='true'])`),
+which is what the rule MEANS and makes the on-state win on SPECIFICITY rather
+than on load order — this file's own rule, that a rule which can be beaten by
+a rule of equal weight further down the file is not a rule. And the hover
+rules sit behind the site's own `(hover: hover)` guard, so a tap leaves no
+hover state to be stuck in at all. A pressed arrow still answers the pointer:
+one step firmer in the same colour (`--brand-2`, the Post button's idiom), and
+never a colour the glyph on it is also painted in.
+
+**FIVE CONTROLS, ONE RULE, and only two of them were broken.** The arrows
+were the reported one. The accepted-answer TICK had it one notch milder —
+`button.oa-forum-acc:hover` is (0,2,1) against the pressed rule's (0,2,0), so
+a ticked answer lost its green to `--ink-2` under the pointer. The bookmark,
+the tag bell and the order pills were right ONLY because their pressed rules
+are written lower in the file, which is the fragility rather than the fix;
+all three keep exactly the look they have today, drawn now from a selector
+that says it.
+
+**THE THEME AUDIT COULD NEVER HAVE CAUGHT IT**, and that is worth knowing
+before trusting it: `FORUM_INK` measures a page AT REST, and this pair of
+colours only ever meets under a pointer. So the guard is a source audit plus
+a browser measurement. `selftest.mjs` reads `oa-forum.css` **with its comments
+stripped** — the paragraphs beside these rules quote the selectors they
+replaced — and, over every control that has an on-state rather than a list
+somebody remembered, requires each `:hover` rule to name that state and to
+sit inside the hover guard; it is pinned BOTH WAYS against the rule exactly
+as it stood until today. `page-test.mjs` votes on an answer and measures the
+arrow the pointer is still on, in both themes: reverting either half of the
+fix reports `1:1` and names the two identical colours.
+
 **Timestamps are whole minutes (R7).** Every `t`, `lastAt`, `joinedAt`,
 `editedAt`, `createdAt` comes from `minute()`; `serverTimestamp()` and
 `Date.now()` appear in no forum function (pinned), and the emulator walk

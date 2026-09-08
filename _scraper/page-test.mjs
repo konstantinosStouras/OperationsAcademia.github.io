@@ -11167,6 +11167,35 @@ for (const w of [320, 360, 390, 430]) {
     }));
     eq(v1.score, '+1', 'forum (candidate): a like shows +1');
     eq(v1.pressed, 'true', 'forum (candidate): the caller\'s own vote is highlighted');
+
+    /* THE PRESSED ARROW UNDER THE POINTER, in BOTH themes (owner, 2026-09-08:
+       voting from a phone in the dark theme "makes the vote button turn
+       completely white", and a refresh puts the count back). The click above
+       left the pointer ON the button, which is exactly the state a phone
+       leaves a reader in -- a tap applies :hover to what it tapped and holds
+       it until something else is tapped -- so this needs no touch context to
+       reproduce. Before the fix the hover rule outweighed the pressed one and
+       painted the glyph in `--brand`, the very colour the pressed rule paints
+       the ground: measured rgb(198, 204, 212) on rgb(198, 204, 212), a blank
+       near-white 42px block. The theme audit could never see it, because it
+       measures a page at rest. */
+    const VOTE_UP = '.oa-forum-post.is-first .oa-forum-v.up';
+    for (const theme of ['light', 'dark']) {
+      await q.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+      await q.hover(VOTE_UP);
+      const paint = await q.evaluate((sel) => {
+        const el = document.querySelector(sel);
+        const g = getComputedStyle(el);
+        return { hovered: el.matches(':hover'), ink: g.color, ground: g.backgroundColor };
+      }, VOTE_UP);
+      const r = await contrastOf(q, VOTE_UP);
+      ok(paint.hovered, `forum (candidate, ${theme}): the arrow just voted with is under the pointer, the state a tap leaves a phone in`);
+      ok(paint.ink !== paint.ground,
+        `forum (candidate, ${theme}): a pressed arrow is never drawn in the colour of its own ground (ink ${paint.ink}, ground ${paint.ground})`);
+      ok(r >= 4.5, `forum (candidate, ${theme}): the pressed arrow under the pointer stays readable (got ${r}:1)`);
+    }
+    await q.evaluate(() => document.documentElement.removeAttribute('data-theme'));
+
     await q.click('.oa-forum-post.is-first .oa-forum-v.down');
     await q.waitForFunction(() => document.querySelector('.oa-forum-updown').textContent === '0 / 1', null, { timeout: 8000 });
     eq(await q.$eval('.oa-forum-score', (n) => n.textContent), '-1', 'forum (candidate): moving the vote to dislike shows -1, the like withdrawn');
@@ -11844,6 +11873,27 @@ for (const w of [320, 360, 390, 430]) {
     eq(ticked.first, ticked.pid, 'forum (accept): and the ticked answer is drawn first in the band');
     eq(ticked.pressed, 'true', 'forum (accept): the control says it is on');
     eq(ticked.sentKeys, ['pid', 'room', 'tid'], 'forum (accept): forumAccept was sent the room, the thread and the post, and nothing else');
+    /* THE SAME DEFECT THE ARROWS HAD, one notch milder: `button.oa-forum-acc:hover`
+       outweighed the pressed rule, so the tick lost its green to `--ink-2`
+       under the pointer -- and, on a phone, for as long as the reader stayed
+       on the thread. The tick has to be hovered again rather than left under
+       the pointer the way the arrow is: ticking MOVES the answer to the top
+       of the band, so the node the pointer was over is not the node that is
+       there afterwards. */
+    await q.hover('#oa-forum-answers [data-act="accept"]');
+    const green = await q.evaluate(() => {
+      const el = document.querySelector('#oa-forum-answers [data-act="accept"]');
+      /* --ok is RESOLVED through the page rather than typed as a hex a later
+         palette change would silently falsify (the Excel button's lesson) */
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--ok)';
+      document.body.appendChild(probe);
+      const want = getComputedStyle(probe).color;
+      probe.remove();
+      return { hovered: el.matches(':hover'), ink: getComputedStyle(el).color, want: want };
+    });
+    ok(green.hovered, 'forum (accept): the tick just pressed is under the pointer');
+    eq(green.ink, green.want, 'forum (accept): and keeps its green there rather than falling back to the ordinary ink');
     await q.click('#oa-forum-answers [data-act="accept"]');
     await q.waitForFunction(() => !document.querySelector('#oa-forum-answers .oa-forum-post.is-accepted'), null, { timeout: 15000 });
     eq(await q.evaluate((t) => window.__fb.docs[t + '/' + new URLSearchParams(location.search).get('t')].accepted, T), '',

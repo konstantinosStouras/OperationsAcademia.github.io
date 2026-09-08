@@ -215,7 +215,9 @@ body.v3 .oa-forum-door.is-cand:hover { border-left-color: var(--ok); }
 
 .oa-forum-sortpill:last-child { border-right: 0; }
 
-.oa-forum-sortpill:hover { background-color: var(--bg-3); color: var(--ink); }
+@media (hover: hover) and (pointer: fine) {
+  .oa-forum-sortpill:hover:not([aria-pressed='true']) { background-color: var(--bg-3); color: var(--ink); }
+}
 
 .oa-forum-sortpill[aria-pressed='true'] {
   background-color: var(--bg-3);
@@ -792,10 +794,50 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
   cursor: pointer;
 }
 
-.oa-forum-v:hover:not([disabled]) { border-color: var(--brand); color: var(--brand); }
-.oa-forum-v[aria-pressed='true'] { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.oa-forum-v[aria-pressed='true'] { background-color: var(--brand); border-color: var(--brand); color: var(--on-brand); }
 .oa-forum-v[disabled] { opacity: 0.45; cursor: default; }
 .oa-forum-v:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* A HOVER PREVIEW IS FOR A BUTTON THAT IS OFF, and saying so in the SELECTOR
+   is the whole fix (owner, 2026-09-08, of an answer voted up from a phone in
+   the dark theme: it "makes the vote button turn completely white", and a
+   refresh puts the count back).
+
+   `.oa-forum-v:hover:not([disabled])` is (0,3,0) and
+   `.oa-forum-v[aria-pressed='true']` is (0,2,0), so on a button that is BOTH
+   the hover rule's `color: var(--brand)` beat the pressed rule's
+   `var(--on-brand)` -- over the pressed rule's own `var(--brand)` ground. The
+   glyph was painted in the colour of the block it sits on. `--brand` is LIGHT
+   in the dark theme (#c6ccd4), so what was left was a solid near-white 42px
+   square with nothing in it; in the light theme the same bug reads as a dark
+   square, which is why it was reported from a phone in dark. It is the trap
+   this repository has recorded twice already -- ink taken from one rule and
+   ground from another, and a rule beaten by another of higher weight.
+
+   A PHONE IS WHY IT LOOKED PERMANENT. A tap leaves :hover on the thing it
+   tapped until something else is tapped, so the state a desktop reader sees
+   only while the pointer rests there is the state a phone reader is left in;
+   reloading the page is what clears it, which is exactly what was reported.
+
+   Hence the two halves, and they are separate on purpose: the preview stands
+   down on a pressed button, so the pressed colours win on SPECIFICITY rather
+   than on load order (this file's own rule: a rule that can be beaten by a
+   rule of equal weight further down the file is not a rule); and the hover
+   rules sit behind the site's own (hover: hover) guard, so a tap leaves no
+   hover state to be stuck in at all. */
+@media (hover: hover) and (pointer: fine) {
+  .oa-forum-v:hover:not([disabled]):not([aria-pressed='true']) {
+    border-color: var(--brand);
+    color: var(--brand);
+  }
+  /* a button already on still answers the pointer: one step firmer in the
+     same colour, which is the Post button's own idiom, and never a colour
+     the glyph on it is also painted in */
+  .oa-forum-v[aria-pressed='true']:hover:not([disabled]) {
+    background-color: var(--brand-2);
+    border-color: var(--brand-2);
+  }
+}
 
 /* the score between the two arrows is the largest thing in the column, the
    way it is on the site the owner asked this to resemble */
@@ -827,13 +869,24 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
   cursor: pointer;
 }
 
-button.oa-forum-acc:hover, .oa-forum-save:hover { border-color: var(--line); color: var(--ink-2); }
 .oa-forum-acc:focus-visible, .oa-forum-save:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 .oa-forum-acc[aria-pressed='true'], .oa-forum-acc.is-on { color: var(--ok); }
-button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 .oa-forum-acc.is-on { cursor: default; }
 .oa-forum-save[aria-pressed='true'] { color: var(--gold); }
+
+/* THE ARROWS' RULE AGAIN, and the tick had the same defect one notch milder:
+   `button.oa-forum-acc:hover` is (0,2,1) and the pressed rule (0,2,0), so a
+   ticked answer lost its green to `--ink-2` under the pointer -- and, on a
+   phone, for as long as the reader stayed on the thread. The bookmark was
+   right only by load order, which is the fragility rather than the fix; both
+   keep exactly the look they have today, drawn from a selector that says it. */
+@media (hover: hover) and (pointer: fine) {
+  button.oa-forum-acc:hover:not([aria-pressed='true']),
+  .oa-forum-save:hover:not([aria-pressed='true']) { border-color: var(--line); color: var(--ink-2); }
+  button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
+  .oa-forum-save[aria-pressed='true']:hover { border-color: var(--line); }
+}
 
 .oa-forum-updown { letter-spacing: 0.02em; }
 
@@ -1606,13 +1659,21 @@ body.v3 .oa-forum-tagchip:hover {
   padding: 0;
 }
 
-.oa-forum-watch:hover { border-color: var(--brand); color: var(--brand); }
 .oa-forum-watch:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 .oa-forum-watch[aria-pressed='true'] {
   border-color: var(--ok);
   background-color: var(--ok-soft);
   color: var(--ok);
+}
+
+/* the arrows' rule a third time: the bell's preview is for a tag nobody is
+   watching, and its pressed colours won today only because they are written
+   LOWER in the file. It looks exactly as it did; what changed is that it
+   cannot stop looking that way if these two rules are ever reordered, and
+   that a tap on a phone leaves no preview behind. */
+@media (hover: hover) and (pointer: fine) {
+  .oa-forum-watch:hover:not([aria-pressed='true']) { border-color: var(--brand); color: var(--brand); }
 }
 
 /* the saved list, and the note under both cards */

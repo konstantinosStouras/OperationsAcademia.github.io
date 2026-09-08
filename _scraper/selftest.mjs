@@ -19315,8 +19315,70 @@ async function testForum() {
   ok(!/#[0-9a-fA-F]{3,8}\b/.test(cssBare), 'oa-forum.css: no raw colour, every colour is a token defined in both themes');
   ok(/font-size: 16px/.test(cssBare) && /min-height: 42px/.test(cssBare) && /@media \(max-width: 640px\)/.test(cssBare), 'oa-forum.css: the phone rules rule 13 measures');
   ok(/\.oa-forum-tab\[aria-selected='true'\]/.test(cssBare) && /\.oa-forum-quote/.test(cssBare) && /\.oa-forum-v\b/.test(cssBare), 'oa-forum.css: the tabs, the quote block and the vote buttons are styled');
+
+  /* THE HOVER PREVIEW STANDS DOWN ON A CONTROL THAT IS ALREADY ON, and this
+     is a RULE rather than the five fixes it started as (owner, 2026-09-08:
+     voting from a phone in the dark theme "makes the vote button turn
+     completely white"). `.oa-forum-v:hover:not([disabled])` is (0,3,0) and
+     `.oa-forum-v[aria-pressed='true']` is (0,2,0), so the hover rule's ink
+     beat the pressed rule's over the pressed rule's own ground: the glyph was
+     painted in the colour of the block it sits on, and `--brand` is near-white
+     in the dark theme. A phone is why it looked permanent -- a tap leaves
+     :hover on what it tapped -- and a reload is what cleared it.
+
+     So the audit demands two things of every :hover rule naming a control that
+     has an on-state, and reads the file with its COMMENTS STRIPPED, because
+     the paragraphs above and beside these rules quote the selectors they
+     replaced: it must SAY what it does about the on-state, so the two rules
+     are disjoint and nothing turns on load order (this repository's own rule:
+     a rule that can be beaten by a rule of equal weight further down the file
+     is not a rule); and it must sit behind the site's own (hover: hover)
+     guard, so a tap leaves no hover state to be stuck in. Both are checked
+     BOTH WAYS -- the fixture below is the rule exactly as it was written until
+     today, and the audit has to catch it. */
+  const hoverAudit = (css) => {
+    const bare = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    const ON = /\.([a-z0-9-]+)\[aria-(?:pressed|selected)='true'\]/g;
+    const on = [...new Set([...bare.matchAll(ON)].map((m) => m[1]))];
+    const names = (sel) => on.some((b) => new RegExp('\\.' + b + '(?![a-z0-9-])').test(sel));
+    const out = { on, loose: [], unguarded: [] };
+    let depth = 0, guard = -1, m;
+    const rx = /([^{}]*)([{}])/g;
+    while ((m = rx.exec(bare))) {
+      const head = m[1].trim();
+      if (m[2] === '}') { depth -= 1; if (guard >= 0 && depth === guard) guard = -1; continue; }
+      if (/^@/.test(head)) {
+        if (/^@media/.test(head) && /hover:\s*hover/.test(head) && guard < 0) guard = depth;
+      } else {
+        for (const one of head.split(',')) {
+          const sel = one.trim();
+          if (!sel.includes(':hover') || !names(sel)) continue;
+          if (!/\[aria-(?:pressed|selected)='true'\]/.test(sel)) out.loose.push(sel);
+          if (guard < 0) out.unguarded.push(sel);
+        }
+      }
+      depth += 1;
+    }
+    return out;
+  };
+  const hv = hoverAudit(pageCss);
+  for (const b of ['oa-forum-v', 'oa-forum-acc', 'oa-forum-save', 'oa-forum-watch', 'oa-forum-sortpill', 'oa-forum-tab'])
+    ok(hv.on.includes(b), `oa-forum.css: .${b} has an on-state its hover rule has to be measured against`);
+  eq(hv.loose, [], 'oa-forum.css: every :hover rule for a control with an on-state says so in its selector, so the on-state wins on SPECIFICITY and never on load order');
+  eq(hv.unguarded, [], 'oa-forum.css: and each sits behind (hover: hover), so a tap on a phone leaves no hover state to be stuck in');
+  const bitten = hoverAudit(".oa-forum-v:hover:not([disabled]) { color: var(--brand); }\n" +
+    ".oa-forum-v[aria-pressed='true'] { background-color: var(--brand); }");
+  eq(bitten.loose, ['.oa-forum-v:hover:not([disabled])'], 'oa-forum.css: and the audit bites -- the rule exactly as it stood until today is caught');
+  eq(bitten.unguarded, ['.oa-forum-v:hover:not([disabled])'], 'oa-forum.css: and so is one written outside the hover guard');
+  ok(/\.oa-forum-v\[aria-pressed='true'\]:hover:not\(\[disabled\]\) \{[^}]*--brand-2/.test(cssBare),
+    'oa-forum.css: a pressed arrow still answers the pointer, one step firmer in the same colour rather than in the colour of its own glyph');
   for (const [f, src] of [['forum.html', page], ['oa-forum.js', pageJs], ['oa-forum.css', pageCss]]) ok(noDash(src), `forum page: no em dash in ${f}`);
   ok(/cfg\.source/.test(cf) && /QUIET_PAGES/.test(cf) && /oa-forum-me/.test(cf) && /pushState/.test(cf), 'forum: CLAUDE.md records the page half');
+  ok(/a voted arrow is not painted in the colour of its own ground/.test(cf)
+     && /A PHONE IS WHY IT LOOKED PERMANENT/.test(cf) && /THE THEME AUDIT COULD NEVER HAVE CAUGHT IT/.test(cf),
+    'forum: CLAUDE.md records the vote button, why a phone held the state and why the theme audit could not see it');
+  ok(/Rule 9's hover guard is about EVERY control/.test(std) && /aria-pressed='true'/.test(std),
+    '_MOBILE-STANDARDS.md: rule 15, a hover rule is a desktop rule and says what it does about an on-state');
 
   /* --- the sections, and the views a question counts (owner, 2026-09-08) ----
 
