@@ -1231,7 +1231,7 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 
 .oa-forum-f input[type='text']:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 
-/* the line under the details box saying how the words will read: plain
+/* the line under the body box saying how the words will read: plain
    text, paragraphs on a blank line, an address drawn as a link. It stands
    where a formatting toolbar would, and says instead of pretending. */
 .oa-forum-fmt {

@@ -11173,11 +11173,16 @@ for (const w of [320, 360, 390, 430]) {
     await q.click('#oa-forum-tagchips .oa-chip[data-tag="rumour"]');
     eq(await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag'))),
       ['offers', 'teaching-release'], 'forum (candidate): and it comes off again like any other chip');
-    /* a row picked by the pointer: a press on the box opens the menu, the
-       tag lands as a chip, the box keeps the keyboard and the menu shuts
-       until the next keystroke */
+    /* NOTHING TYPED, NO MENU (owner, 2026-09-08: "tags should appear once
+       a user is typing a new tag, not beforehand"): a press on the empty
+       box opens nothing; a letter typed does. Then a row picked by the
+       pointer: the tag lands as a chip, the box keeps the keyboard and the
+       menu shuts until the next keystroke. */
     await q.click('#oa-forum-tag-in');
-    ok(await q.evaluate(() => !document.getElementById('oa-forum-tagsugg').hidden), 'forum (candidate): a press on the box opens the menu');
+    ok(await q.evaluate(() => document.getElementById('oa-forum-tagsugg').hidden && document.activeElement.id === 'oa-forum-tag-in'),
+      'forum (candidate): nothing typed, no menu: a press on the empty box opens nothing');
+    await q.fill('#oa-forum-tag-in', 'eu');
+    ok(await q.evaluate(() => !document.getElementById('oa-forum-tagsugg').hidden), 'forum (candidate): …and the first letters typed open it');
     await q.click('#oa-forum-tagsugg [role="option"][data-tag="europe"]');
     const picked = await q.evaluate(() => ({
       chips: [...document.querySelectorAll('#oa-forum-tagchips .oa-chip')].map((n) => n.getAttribute('data-tag')),
@@ -11192,8 +11197,12 @@ for (const w of [320, 360, 390, 430]) {
        names through aria-activedescendant; Enter picks the highlighted one;
        Escape shuts the menu. */
     await q.press('#oa-forum-tag-in', 'ArrowDown');
+    ok(await q.evaluate(() => document.getElementById('oa-forum-tagsugg').hidden), 'forum (candidate): the down arrow on an empty box opens nothing either');
+    await q.fill('#oa-forum-tag-in', 'e');
+    await q.press('#oa-forum-tag-in', 'Escape');
+    await q.press('#oa-forum-tag-in', 'ArrowDown');
     ok(await q.evaluate(() => !document.getElementById('oa-forum-tagsugg').hidden && document.activeElement.id === 'oa-forum-tag-in'),
-      'forum (candidate): the down arrow opens the menu from the keyboard');
+      'forum (candidate): the down arrow opens the menu from the keyboard once the box holds text');
     await q.press('#oa-forum-tag-in', 'ArrowDown');
     await q.press('#oa-forum-tag-in', 'ArrowDown');
     const walked = await q.evaluate(() => {
@@ -11223,7 +11232,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(entered.chips.length === 3 && entered.chips[2] === walked.tag && !entered.shown,
       `forum (candidate): Enter picks the highlighted option as a chip and shuts the menu (${entered.chips.join(',')})`);
     await q.click('#oa-forum-tagchips .oa-chip[data-tag="' + walked.tag + '"]');
-    await q.press('#oa-forum-tag-in', 'ArrowDown');
+    await q.fill('#oa-forum-tag-in', 'e');
     await q.press('#oa-forum-tag-in', 'Escape');
     ok(await q.evaluate(() => document.getElementById('oa-forum-tagsugg').hidden && document.activeElement.id === 'oa-forum-tag-in'),
       'forum (candidate): …and Escape shuts it, the box keeping the keyboard');
@@ -12116,7 +12125,7 @@ for (const w of [320, 360, 390, 430]) {
        first, so the room is below it. */
     await m.evaluate(() => window.scrollTo(0, window.scrollY + document.getElementById('oa-forum-tagsin').getBoundingClientRect().top - 90));
     await m.waitForTimeout(100);
-    await m.click('#oa-forum-tag-in');
+    await m.fill('#oa-forum-tag-in', 'e');
     await m.waitForTimeout(150);
     const menuM = await m.evaluate(() => {
       const menu = document.getElementById('oa-forum-tagsugg');
@@ -12138,13 +12147,14 @@ for (const w of [320, 360, 390, 430]) {
     /* RULE 10: THE ROOM IS MEASURED. With the box near the foot of the
        screen (where a phone's keyboard leaves it) the menu opens ABOVE the
        box, no taller than the room there. */
+    await m.fill('#oa-forum-tag-in', '');
     await m.focus('#oa-forum-ask-body');
     await m.evaluate(() => {
       const r = document.getElementById('oa-forum-tagsin').getBoundingClientRect();
       window.scrollTo(0, window.scrollY + r.bottom - window.innerHeight + 70);
     });
     await m.waitForTimeout(100);
-    await m.click('#oa-forum-tag-in');
+    await m.fill('#oa-forum-tag-in', 'eu');
     await m.waitForTimeout(150);
     const flipped = await m.evaluate(() => {
       const menu = document.getElementById('oa-forum-tagsugg');

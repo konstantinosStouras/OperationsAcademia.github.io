@@ -17981,13 +17981,15 @@ async function testForum() {
       'forum ask: …and the listeners and the title timer are let go the moment the view changes, not on some later resize');
     ok(/id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags" hidden>/.test(ask) && /aria-expanded="false"/.test(ask),
       'forum ask: the tag menu is born SHUT, never drawn open on arrival');
-    ok(/var open = suggWanted && !input\.disabled && sugg\.children\.length > 0;/.test(ask)
+    ok(/var open = suggWanted && !input\.disabled && q\.length > 0 && sugg\.children\.length > 0;/.test(ask)
        && /input\.addEventListener\('input', function \(\) \{ tagHint\(''\); openSugg\(\); \}\);/.test(ask)
        && /input\.addEventListener\('click', openSugg\);/.test(ask)
        && !/input\.addEventListener\('focus'/.test(ask)
        && /input\.addEventListener\('blur', shutSugg\);/.test(ask)
        && /sugg\.addEventListener\('mousedown', function \(e\) \{ e\.preventDefault\(\); \}\);/.test(ask),
-      'forum ask: …opened by typing or a press on the box (never by focus alone), shut when the keyboard leaves, and a press on a row keeps the box\'s focus');
+      'forum ask: …opened by typing, and by a press on the box only while it holds text (never by focus alone, never with an empty box: owner, 2026-09-08, "tags should appear once a user is typing a new tag, not beforehand"), shut when the keyboard leaves, and a press on a row keeps the box\'s focus');
+    ok(/<label for="oa-forum-ask-body">Body <span class="oa-forum-req" aria-hidden="true">\*<\/span><\/label>/.test(ask) && !/>Details </.test(ask),
+      'forum ask: the second field is called Body, the word the site the owner named uses (owner, 2026-09-08)');
     /* AN OPEN MENU COVERS THE GUIDE BOX AND THE BUTTONS, so it shuts the
        moment a tag is chosen OR REFUSED: the first browser run of this form
        timed out on the guide tick box, with a suggestion row intercepting
@@ -18005,7 +18007,7 @@ async function testForum() {
     ok(/show\(me, !\(S\.ask && !S\.archive\)\);/.test(pageJs) && /hideViews\(\);\n    show\(\$\('oa-forum-me'\), true\);/.test(pageJs),
       'forum ask: the page\'s own room banner stands down while the form is open and comes back with the thread');
     ok(/<p class="oa-forum-fmt" id="oa-forum-ask-fmt">/.test(ask) && /A web address becomes a link/.test(ask) && !/toolbar/.test(bare(ask)),
-      'forum ask: a line under the details says how plain text reads, and no formatting toolbar is drawn');
+      'forum ask: a line under the body says how plain text reads, and no formatting toolbar is drawn');
     ok(/id="oa-forum-ask-msg" aria-live="polite"><\/p>' \+\s*'<\/div>' \+\s*'<div class="oa-forum-actions oa-forum-askactions">/.test(ask)
        && /id="oa-forum-ask-send">Post your question</.test(ask),
       'forum ask: the card closes on its message line and the Post button\'s row opens after it, under the card and not inside it');
@@ -18078,7 +18080,7 @@ async function testForum() {
     ok(/\.oa-forum-fhint \{[^}]*color: var\(--mut\)/.test(pageCss) && /\.oa-forum-req \{ color: var\(--err\)/.test(pageCss),
       'forum ask css: the advice is muted and the star is the error red');
     ok(/id="oa-forum-ask-body" rows="10"/.test(ask) && /id="oa-forum-body" rows="6"/.test(pageJs) && !/is-ask/.test(pageJs) && !/is-ask/.test(pageCss),
-      'forum ask: the details box opens taller than an answer\'s, by its rows, with no min-height pretending to');
+      'forum ask: the body box opens taller than an answer\'s, by its rows, with no min-height pretending to');
     /* the card's last FIELD ends it: the message line after it is the true
        last child, display:none while empty, so :last-child matched nothing
        and the card carried a 22px margin under its own padding */
@@ -18106,6 +18108,7 @@ async function testForum() {
       'Post your question sits under the card at its left', 'the tag menu is shut, no similar list shows',
       'a title sharing words with the seeded thread lists that thread under the box', 'no second read of the room',
       'the tag menu opens as the box is typed into', 'shuts once a tag is chosen', 'a row pressed with the pointer becomes a chip',
+      'nothing typed, no menu',
       'the buttons below did not move', 'the card ends a padding under its last box', 'the ask form, with similar questions',
       'the down arrow opens the menu from the keyboard', 'Escape shuts it', 'two presses highlight the second option',
       'no option is a focus stop of its own', 'Enter picks the highlighted option', 'refused under the box, the menu shut',

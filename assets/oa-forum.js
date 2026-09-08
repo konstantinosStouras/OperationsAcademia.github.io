@@ -2796,7 +2796,7 @@
           (cand ? 'this season’s candidates and the site’s maintainer' : 'every member of the Open forum') + '.</p>' +
         '<ol>' +
           '<li>Sum the question up in a one-line title.</li>' +
-          '<li>Give the details: the situation, what you already know, what you are trying to decide.</li>' +
+          '<li>Describe it in the body: the situation, what you already know, what you are trying to decide.</li>' +
           '<li>Add up to five tags, so the people who can answer find it.</li>' +
           '<li>Check it over, then post.</li>' +
         '</ol>' +
@@ -2819,7 +2819,7 @@
             '<div class="oa-forum-similar" id="oa-forum-similar" hidden></div>' +
           '</div>' +
           '<div class="oa-forum-f">' +
-            '<label for="oa-forum-ask-body">Details <span class="oa-forum-req" aria-hidden="true">*</span></label>' +
+            '<label for="oa-forum-ask-body">Body <span class="oa-forum-req" aria-hidden="true">*</span></label>' +
             '<p class="oa-forum-fhint" id="oa-forum-ask-bodyhint">Include everything someone would need to answer it: the situation, ' +
               'what you already know, what you are trying to decide. Nothing that says who you are.</p>' +
             '<div class="oa-forum-editor">' +
@@ -2966,8 +2966,11 @@
        keyboard never leaves the box. The options are highlighted, not
        focused (aria-activedescendant names the highlighted one), the arrows
        move the highlight, Enter picks it or adds what was typed, Escape
-       shuts the menu. It opens on typing, on a press on the box and on the
-       down arrow, never on focus alone and never on arrival; it shuts the
+       shuts the menu. IT OPENS ONLY WHILE SOMETHING IS TYPED IN THE BOX
+       (owner, 2026-09-08: "tags should appear once a user is typing a new
+       tag, not beforehand"): typing opens it, a press on the box or the
+       down arrow opens it again only if the box holds text, and an empty
+       box shows nothing, never on focus and never on arrival; it shuts the
        moment a tag is chosen or refused and when the keyboard leaves the
        box. Drawn OVER the page, an open menu covers the guide box and the
        buttons below it, so shutting on a pick is what keeps the next press
@@ -3052,7 +3055,7 @@
           sugg.appendChild(option(q, 'Create the tag “' + q + '”', 'press Enter', 'Create the tag ' + q));
         }
       }
-      var open = suggWanted && !input.disabled && sugg.children.length > 0;
+      var open = suggWanted && !input.disabled && q.length > 0 && sugg.children.length > 0;
       show(sugg, open);
       input.setAttribute('aria-expanded', open ? 'true' : 'false');
       highlight(-1);
@@ -3090,7 +3093,7 @@
       if (input.value.trim()) add(input.value);
       if (!title) { say('Give the question a title.', true); titleEl.focus(); return; }
       if (G.check(title)) { say(G.WHY[G.check(title)], true); titleEl.focus(); return; }
-      if (!text) { say('Write the details.', true); body.focus(); return; }
+      if (!text) { say('Write the body of the question.', true); body.focus(); return; }
       if (!liveGuard(body, guard)) { say(G.WHY[G.check(text)], true); body.focus(); return; }
       if (!M.tagsOk(tags)) { say(REASONS.tags, true); input.focus(); return; }
       if (accept && !accept.checked) { say(REASONS.guide, true); accept.focus(); return; }

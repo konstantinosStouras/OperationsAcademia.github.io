@@ -4322,7 +4322,9 @@ on the page rather than in the one card the reader's eye expects.
 
 **What is copied is the LAYOUT, and the layout is the part that is a good
 idea.** A short "writing a good question" note; then ONE bordered card
-(`.oa-forum-askcard`) holding the three fields, each a bold label with its
+(`.oa-forum-askcard`) holding the three fields, Title, **Body** (the word
+that site uses; it said "Details" until the owner asked, 2026-09-08) and
+Tags, each a bold label with its
 advice under the label (`.oa-forum-fhint`) and the box under the advice,
 every label starred (`.oa-forum-req`, the error red, `aria-hidden` since the
 boxes carry `aria-required`) and "Required fields" said once at the card's
@@ -4348,9 +4350,13 @@ keyboard never leaves the box: the options are `li[role=option]`, named
 names the highlighted one through `aria-activedescendant`, and the highlight
 is ringed as well as washed, since the wash alone is 1.19:1 on the panel),
 the arrows move the highlight, Enter picks it or adds what was typed, and
-Escape shuts the menu. It opens on typing, on a press on the box and on the
-down arrow, never on focus alone and never on arrival; it shuts the moment a
-tag is chosen OR REFUSED, on Escape, and when the keyboard leaves the box.
+Escape shuts the menu. **It opens only while something is typed in the
+box** (owner, 2026-09-08, of the first cut, which opened it on a press on
+the empty box: *"tags should appear once a user is typing a new tag, not
+beforehand"*): typing opens it, a press on the box or the down arrow opens
+it again only while the box holds text, an empty box shows nothing, never
+on focus and never on arrival; it shuts the moment a tag is chosen OR
+REFUSED, on Escape, and when the keyboard leaves the box.
 Shutting on a pick is load-bearing: drawn over the page, an open menu
 covers the guide tick box and the buttons under it, and the first browser
 run of this form timed out on exactly that, a suggestion row intercepting
