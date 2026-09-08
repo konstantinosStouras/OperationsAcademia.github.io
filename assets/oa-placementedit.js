@@ -63,7 +63,7 @@
 
       bar.appendChild(button('Edit', 'oa-jobbtn-edit',
         'Correct this placement', function () {
-          location.href = 'post-a-placement.html?edit=' + encodeURIComponent(id);
+          location.href = 'post-a-placement?edit=' + encodeURIComponent(id);
         }));
 
       bar.appendChild(button('Take down', 'oa-jobbtn-del',

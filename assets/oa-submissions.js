@@ -49,7 +49,7 @@
       collection: 'candidateSubmissions',
       one: 'candidate profile',
       many: 'candidate profiles',
-      editPath: 'post-a-candidate.html?edit=',
+      editPath: 'post-a-candidate?edit=',
       title: function (d) {
         return [[d.first, d.last].filter(Boolean).join(' '), d.affiliation]
           .filter(Boolean).join(' — ') || 'a profile';

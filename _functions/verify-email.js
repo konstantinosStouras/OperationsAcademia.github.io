@@ -148,9 +148,9 @@ function siteVerifyLink(generated, site) {
     code = '';
   }
   if (!code) return '';
-  return `${S}/verify-email.html?mode=verifyEmail` +
+  return `${S}/verify-email?mode=verifyEmail` +
     `&oobCode=${encodeURIComponent(code)}` +
-    `&continueUrl=${encodeURIComponent(S + '/account.html')}`;
+    `&continueUrl=${encodeURIComponent(S + '/account')}`;
 }
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',

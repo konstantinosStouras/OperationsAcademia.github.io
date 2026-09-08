@@ -62,7 +62,7 @@
      wrapper's own parameter (the oa-jobexport.js lesson). Null under Node. */
   var G = (typeof window !== 'undefined') ? window : null;
 
-  var PAGE = 'alerts.html';
+  var PAGE = 'alerts';
   var FLAG = 'prefill';                    // ?prefill=1 says "read the rest"
   var LIST_KEYS = ['type', 'level', 'country'];
   var DROP_KEY = 'dropped';

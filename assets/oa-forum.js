@@ -279,7 +279,7 @@
     /* the engine's own URL key, one parameter per value, so a link that
        carries every tag a reader watches selects them all */
     if (o && o.tags) [].concat(o.tags).forEach(function (t) { if (t) p.append('tags', t); });
-    return 'forum.html?' + p.toString() + ((o && o.hash) ? '#' + o.hash : '');
+    return 'forum?' + p.toString() + ((o && o.hash) ? '#' + o.hash : '');
   }
   /** Move between the page's views IN PLACE: push the new address, re-read
       the state from it and draw again. The list, the thread and the ask form
@@ -316,7 +316,7 @@
         return;
       }
     }
-    var a = e.target && e.target.closest ? e.target.closest('a[href^="forum.html?"]') : null;
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="forum?"]') : null;
     if (!a || !S.me) return;
     var app = $('oa-forum');
     if (!app || !app.contains(a)) return;
@@ -799,7 +799,7 @@
     if (note) {
       if (!rooms.candidates) {
         note.innerHTML = 'The Candidates’ room opens to accounts holding a ' +
-          '<a href="post-a-candidate.html">candidate profile</a> for the ' + esc(label(Y)) + ' job market.';
+          '<a href="post-a-candidate">candidate profile</a> for the ' + esc(label(Y)) + ' job market.';
         show(note, true);
       } else {
         show(note, false);
@@ -845,7 +845,7 @@
     if (S.me.banned) {
       var box = $('oa-forum-error');
       if (box) {
-        box.innerHTML = '<p><strong>This handle is banned for the season.</strong> You can read, but nothing you send will be accepted. To appeal, use <a href="feedback.html">Send feedback</a> and quote your handle.</p>';
+        box.innerHTML = '<p><strong>This handle is banned for the season.</strong> You can read, but nothing you send will be accepted. To appeal, use <a href="feedback">Send feedback</a> and quote your handle.</p>';
         show(box, true);
       }
     }

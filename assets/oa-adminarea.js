@@ -426,7 +426,7 @@
         /* the SAME form the candidate used — oa-candidateform.js's ?edit=
            mode loads the document and saves it back, and the rules let the
            admin do both on any profile */
-        location.href = 'post-a-candidate.html?edit=' + encodeURIComponent(id);
+        location.href = 'post-a-candidate?edit=' + encodeURIComponent(id);
         return;
       }
 
@@ -719,7 +719,7 @@
       id: p.id, posted: p.posted, applyByDate: p.applyByDate, year: p.stored
     };
     var NAV = window.OAJobNav;
-    if (!NAV) return { href: 'jobs.html', page: 'Job postings', current: true };
+    if (!NAV) return { href: 'jobs', page: 'Job postings', current: true };
     return {
       href: NAV.hrefFor(row),
       page: NAV.pageLabelFor(row),
