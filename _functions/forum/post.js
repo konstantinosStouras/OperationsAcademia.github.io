@@ -145,6 +145,7 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
         pinned: false,
         locked: false,
         hidden: false,
+        views: 0,
       };
       /* @end */
       /* @doc post */

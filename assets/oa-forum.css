@@ -24,11 +24,280 @@
 
 .oa-forum-wrap { padding-bottom: 80px; }
 
+/* THREE COLUMNS (owner, 2026-09-08): the sections down the left, the
+   questions in the middle, the room's cards on the right, the arrangement of
+   the site the forum was asked to resemble. */
 .oa-forum-cols {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: 164px minmax(0, 1fr) 300px;
   gap: 28px;
   align-items: start;
+}
+
+/* ---------------------------------------------------------- the sections */
+
+/* Home, Questions, Unanswered, Tags: a column of links with an icon each,
+   the one the reader is in marked by a rail and a firmer ground. `body.v3`
+   on the hover rule is load-bearing: a row is an <a>, and `body.v3 a:hover`
+   in v3.css is (0,2,2), so without the prefix this (0,2,0) rule lost and the
+   row hovered in the link colour with an underline. */
+.oa-forum-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: calc(var(--header-h) + 16px);
+  padding: 6px 0 0;
+}
+
+.oa-forum-navlink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 8px 12px 8px 11px;
+  border-left: 3px solid transparent;
+  border-radius: 0 10px 10px 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.oa-forum-navlink svg { flex: none; }
+
+body.v3 .oa-forum-navlink:hover {
+  background-color: var(--bg-3);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.oa-forum-navlink.is-on,
+body.v3 .oa-forum-navlink.is-on:hover {
+  border-left-color: var(--brand);
+  background-color: var(--bg-3);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.oa-forum-navlink:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- home */
+
+/* The doors: one per room this account may enter, each a card that is a
+   link. The rail is the room's own colour, the one the tab dot and the room
+   banner already use, so the three agree about which room is which. */
+.oa-forum-homehead h2 {
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+
+.oa-forum-homelede {
+  margin: 0 0 20px;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.oa-forum-doors {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 0 0 18px;
+}
+
+.oa-forum-door {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 42px;
+  padding: 20px 22px 18px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--gold);
+  border-radius: var(--radius);
+  background-color: var(--bg-2);
+  color: var(--ink-2);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  transition: box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.oa-forum-door.is-cand { border-left-color: var(--ok); }
+
+body.v3 .oa-forum-door:hover {
+  border-color: var(--brand);
+  border-left-color: var(--gold);
+  color: var(--ink-2);
+  text-decoration: none;
+}
+
+body.v3 .oa-forum-door.is-cand:hover { border-left-color: var(--ok); }
+
+.oa-forum-door:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.oa-forum-doorname {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.oa-forum-doorname .oa-forum-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--gold);
+}
+
+.oa-forum-door.is-cand .oa-forum-doorname .oa-forum-dot { background: var(--ok); }
+
+.oa-forum-doorwho {
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.oa-forum-doorgo {
+  margin-top: 6px;
+  color: var(--brand);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* -------------------------------------------------------- the order bar */
+
+/* Under the heading of a list: the count on the left, the orders on the
+   right as one segmented control, the one in force pressed. The Tags page
+   draws the same control for its own three orders. */
+.oa-forum-listbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+}
+
+.oa-forum-listbar .oa-forum-n { margin: 0; }
+
+.oa-forum-sorts {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background-color: var(--bg-2);
+  color: var(--ink-2);
+  overflow: hidden;
+}
+
+.oa-forum-sortpill {
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background-color: var(--bg-2);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.oa-forum-sortpill:last-child { border-right: 0; }
+
+.oa-forum-sortpill:hover { background-color: var(--bg-3); color: var(--ink); }
+
+.oa-forum-sortpill[aria-pressed='true'] {
+  background-color: var(--bg-3);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.oa-forum-sortpill:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+
+/* --------------------------------------------------------- the tags page */
+
+.oa-forum-tagsintro {
+  margin: 6px 0 16px;
+  max-width: 64ch;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.oa-forum-tagsbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+}
+
+.oa-forum-tagfilter {
+  width: 260px;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background-color: var(--bg-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14.5px;
+  box-sizing: border-box;
+}
+
+.oa-forum-tagfilter:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.oa-forum-tagspage .oa-forum-n { margin: 0 0 12px; }
+
+.oa-forum-taggrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.oa-forum-tagcard {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background-color: var(--bg-2);
+  color: var(--ink-2);
+}
+
+.oa-forum-tagcard-head { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.oa-forum-tagcard-n {
+  margin: 10px 0 0;
+  color: var(--ink-2);
+  font-size: 13.5px;
+}
+
+/* --ink-2, not --mut: the card paints its own ground (--bg-2), and --mut
+   was tuned against the page's grounds rather than measured here */
+.oa-forum-tagcard-when {
+  margin: 4px 0 0;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  line-height: 1.45;
 }
 
 .oa-forum-side {
@@ -256,9 +525,12 @@ body.v3 .oa-forum-q .oa-card-title {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
   padding: 20px 2px 0 14px;
 }
+
+/* the views are the quietest of the three: a number, no box, smaller */
+.oa-forum-stat.is-views b { font-size: 13px; font-weight: 500; }
 
 /* The number over its word, right against the question. Both lines are one
    nowrap block, which is what stops "0" and "votes" being squeezed onto one
@@ -1146,6 +1418,28 @@ body.v3 .oa-forum-tagchip:hover {
 @media (max-width: 900px) {
   .oa-forum-cols { grid-template-columns: minmax(0, 1fr); }
   .oa-forum-side { position: static; }
+  /* THE SECTIONS BECOME A ROW above the questions: four links sharing the
+     width, the one in force marked underneath rather than down its left.
+     Each is a 42px target (rule 13). */
+  .oa-forum-nav {
+    position: static;
+    flex-direction: row;
+    gap: 4px;
+    padding: 0;
+    margin: 0 0 8px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .oa-forum-navlink {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    padding: 8px 6px;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+    border-radius: 10px 10px 0 0;
+  }
+  .oa-forum-navlink.is-on,
+  body.v3 .oa-forum-navlink.is-on:hover { border-left: 0; border-bottom-color: var(--brand); }
 }
 
 @media (max-width: 640px) {
@@ -1198,6 +1492,17 @@ body.v3 .oa-forum-tagchip:hover {
   .oa-forum-accept input { width: 20px; height: 20px; margin: 0; }
   .oa-forum-tabs { width: 100%; }
   .oa-forum-tab { flex: 1 1 0; justify-content: center; }
+  /* the four sections in one row at 320px: the icon over the word */
+  .oa-forum-navlink { flex-direction: column; gap: 3px; padding: 6px 4px; font-size: 12.5px; }
+  /* the order bar and the tag filter are controls (rule 13): 42px targets,
+     the pills sharing the width, a 16px box so iOS does not zoom */
+  .oa-forum-sorts { width: 100%; }
+  .oa-forum-sortpill { flex: 1 1 0; min-height: 42px; }
+  .oa-forum-tagfilter { width: 100%; min-height: 42px; font-size: 16px; }
+  .oa-forum-homehead h2 { font-size: 22px; }
+  .oa-forum-doors { grid-template-columns: minmax(0, 1fr); }
+  .oa-forum-door { padding: 16px 16px 14px; }
+  .oa-forum-taggrid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   .oa-forum-post { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 22px 0; }
   .oa-forum-post.is-accepted { padding-left: 10px; padding-right: 8px; }
   .oa-forum-vote { flex-direction: row; justify-content: flex-start; align-items: center; gap: 10px; }
