@@ -1582,10 +1582,10 @@
     host.className = 'oa-forum-homeview';
     host.innerHTML =
       '<div class="oa-forum-homehead"><h2 id="oa-forum-hometitle">' +
-        (S.archive ? esc(label(S.season)) + ' archive' : 'Choose a room') + '</h2>' +
+        (S.archive ? esc(label(S.season)) + ' archive' : 'Choose a forum') + '</h2>' +
       '<p class="oa-forum-homelede">' + (S.archive
-        ? 'Read-only: pick a room to read what was said that season.'
-        : 'Two rooms, one handle. You are posting as <span class="oa-forum-handle is-me" id="oa-forum-myhandle">' +
+        ? 'Read-only: pick a forum to read what was said that season.'
+        : 'Two separate forums, one handle. You are posting as <span class="oa-forum-handle is-me" id="oa-forum-myhandle">' +
           esc(S.me.handle) + '</span> in both, for the ' + esc(label(S.season)) + ' season.') +
       '</p></div>' +
       '<div class="oa-forum-doors" id="oa-forum-doors">' + doors + '</div>' +
