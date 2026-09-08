@@ -107,6 +107,7 @@ exports.forumModerate = onCall(P.OPTS, async (req) => {
         pinned: true,
         locked: true,
         hidden: false,
+        views: 0,
       };
       /* @end */
       /* @doc post */

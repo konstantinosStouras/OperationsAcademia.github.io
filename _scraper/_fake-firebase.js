@@ -444,7 +444,7 @@
      above), and otherwise answered with a canned receipt. With `noFunctions`
      the namespace has no functions() at all, which is the load-failure branch.
 
-     THE FORUM'S SEVEN CALLABLES are simulated over `docs` (forumSim below), so
+     THE FORUM'S NINE CALLABLES are simulated over `docs` (forumSim below), so
      the forum block in page-test.mjs can drive the page through a whole
      conversation without a Cloud Function: join, a question, a reply with a
      quote, an edit, a vote and the guide seed all land as documents the page
@@ -458,7 +458,7 @@
      ({ forumPost: { code: 'resource-exhausted', reason: 'posts' } }) makes
      one callable refuse, for the refusal-wording checks. */
   var FORUM_NAMES = ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept',
-    'forumVote', 'forumThreadVotes', 'forumModerate'];
+    'forumVote', 'forumThreadVotes', 'forumView', 'forumModerate'];
   var SIM_HASH = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
   var simN = 0;
 
@@ -576,7 +576,7 @@
         simWrite(threads + '/' + gtid, {
           season: Y, room: room, title: 'About this forum', tags: ['about'], by: 'Moderator', t: now, lastAt: now,
           lastBy: 'Moderator', n: 1, excerpt: 'How this room works, in thirteen rules.', score: 0,
-          accepted: '', pinned: true, locked: true, hidden: false
+          accepted: '', pinned: true, locked: true, hidden: false, views: 0
         });
         simWrite(threads + '/' + gtid + '/posts/' + gtid + '-p1', {
           season: Y, room: room, tid: gtid, n: 1, by: 'Moderator', body: simGuideText(), t: now,
@@ -626,7 +626,7 @@
         var pid1 = 'sim-p' + (++simN);
         simWrite(threads + '/' + tid, {
           season: Y, room: room, title: title, tags: tags, by: handle, t: now, lastAt: now, lastBy: handle,
-          n: 1, excerpt: excerpt, score: 0, accepted: '', pinned: false, locked: false, hidden: false
+          n: 1, excerpt: excerpt, score: 0, accepted: '', pinned: false, locked: false, hidden: false, views: 0
         });
         simWrite(threads + '/' + tid + '/posts/' + pid1, {
           season: Y, room: room, tid: tid, n: 1, by: handle, body: body, t: now,
@@ -699,6 +699,16 @@
         if (vd) votes[pp.split('/').pop()] = vd.v;
       });
       return Promise.resolve({ data: { votes: votes } });
+    }
+
+    /* one more opening of the thread: the counter on the head moves by one
+       and nothing else is written, no document under the thread and no key
+       on the handle (_functions/forum/view.js) */
+    if (name === 'forumView') {
+      if (th.hidden) return simRefuse('failed-precondition', 'locked');
+      var opened = (Number(th.views) || 0) + 1;
+      simWrite(tpath2, Object.assign({}, th, { views: opened }));
+      return Promise.resolve({ data: { views: opened } });
     }
 
     var ppath = tpath2 + '/posts/' + String(data.pid || '');
