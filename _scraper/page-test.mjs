@@ -10914,7 +10914,6 @@ for (const w of [320, 360, 390, 430]) {
       }
       const chipStyle = getComputedStyle(card.querySelector('.oa-badges .oa-label'));
       const nums = [...card.querySelectorAll('.oa-forum-stat b')].map(box);
-      const foot = box(card.querySelector('.oa-forum-qfoot'));
       return {
         chips: chips.length, clash,
         tallyLeft: stats.r <= title.l + 0.5 && stats.t <= title.t + 40,

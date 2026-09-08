@@ -18689,9 +18689,14 @@ async function testForum() {
      the gutter off the rendered card. */
   ok(/body\.v3 \.oa-forum-q \{[^}]*column-gap: 24px;/.test(pageCss),
     'forum card: and a column of air between the tally and the question, on the grid rather than on the head (owner, 2026-09-08)');
-  ok(!/body\.v3 \.oa-forum-q \.oa-card-head \{[^}]*margin-left/.test(pageCss)
-     && !/body\.v3 \.oa-forum-q \.oa-forum-qfoot \{[^}]*margin-left/.test(pageCss),
-    'forum card: neither the head nor the footer is nudged on its own, or the two would take different left edges');
+  /* the head and the footer keep ONE left edge: the same 6px inset in each
+     desktop rule and no margin of their own (a shorthand or a logical
+     property included); the browser suite measures the shared edge */
+  const qHead = (pageCss.match(/body\.v3 \.oa-forum-q\s*>?\s*\.oa-card-head \{[^}]*\}/) || [''])[0];
+  const qFoot = (pageCss.match(/body\.v3 \.oa-forum-q\s*>?\s*\.oa-forum-qfoot \{[^}]*\}/) || [''])[0];
+  ok(/padding: [^;]* 6px;/.test(qHead) && /padding: [^;]* 6px;/.test(qFoot)
+     && !/margin(-left|-inline-start)?:/.test(qHead) && !/margin(-left|-inline-start)?:/.test(qFoot),
+    'forum card: the head and the footer carry the same 6px inset and no margin of their own, so the gap moves both and the two keep one left edge');
   ok(/oa-forum-stats'/.test(pageJs) && /is-answers/.test(pageJs) && /is-answers/.test(pageCss),
     'forum card: the tally column carries the votes and the replies, the answered ones marked');
   ok(/subtitle: function \(r\) \{ return r\.by; \}/.test(pageJs),
