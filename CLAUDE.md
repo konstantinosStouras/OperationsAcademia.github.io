@@ -4221,7 +4221,9 @@ The note is deleted from the page with its stylesheet rule, never hidden;
 `EDIT_WINDOW_MS` is gone from the model (pinned as an absence, so no writer
 can measure against it); `forumEdit` refuses no `window` and `member.js` has
 no such reason; the Edit button is a plain "Edit" on the author's own live
-post; the ask form says "Yours to edit or delete afterwards"; rule 13 of the
+post; the ask form says "Yours to edit afterwards, and to delete until it has
+an answer" (since 2026-09-08; it said "edit or delete afterwards", which
+over-claimed for an answered question); rule 13 of the
 guide says so (press Update the guide in both rooms); and the emulator test
 edits a post sixteen minutes on and expects it to save. The second sentence
 of the instruction was already the rule (`forumDelete`, "A post is its
@@ -4271,7 +4273,7 @@ formatting toolbar. **A post here is plain text**, and a toolbar over a box
 that renders none would be a lie, so where the toolbar would stand there is
 a line (`.oa-forum-fmt`) saying how the words will read: plain text, a blank
 line starts a paragraph, a web address becomes a link, which is exactly what
-`paragraphs()` and `linkify` do.
+`bodyHTML` and `linkify` do.
 
 **The room is said ONCE, at the card's head**, in the form's own words
 ("Posting in the Candidates’ room · 2026-2027 as steady river 90"), and the
@@ -4280,16 +4282,35 @@ page's room banner (`#oa-forum-me`) stands down while the form is open
 the thread (`openLocalThread`) or the list (`draw`). The "Where" block is
 gone.
 
-**The tag suggestions are a MENU, not a list.** It opens on typing, on a
-press on the box and on the down arrow, never on focus alone and never on
-arrival; it shuts the moment a tag is chosen, on Escape, and when the
-keyboard leaves the box. Shutting on a pick is load-bearing: drawn over the
-page, an open menu covers the guide tick box and the buttons under it, and
-the first browser run of this form timed out on exactly that, a suggestion
-row intercepting the press on the tick box. A press on a row stops its
-`mousedown`, so the box keeps the keyboard and the next keystroke opens the
-menu again with the chosen tag gone; the arrows walk the rows; the box is a
-`combobox` whose `aria-expanded` follows. It is drawn OVER the page (`position: absolute` under
+**The tag suggestions are a MENU, and the box is a COMBOBOX over it.** The
+keyboard never leaves the box: the options are `li[role=option]`, named
+"tag, count" through `aria-label`, highlighted rather than focused (the box
+names the highlighted one through `aria-activedescendant`, and the highlight
+is ringed as well as washed, since the wash alone is 1.19:1 on the panel),
+the arrows move the highlight, Enter picks it or adds what was typed, and
+Escape shuts the menu. It opens on typing, on a press on the box and on the
+down arrow, never on focus alone and never on arrival; it shuts the moment a
+tag is chosen OR REFUSED, on Escape, and when the keyboard leaves the box.
+Shutting on a pick is load-bearing: drawn over the page, an open menu
+covers the guide tick box and the buttons under it, and the first browser
+run of this form timed out on exactly that, a suggestion row intercepting
+the press on the tick box; shutting on a refusal is what lets the refusal
+be seen, written into a line the menu would otherwise cover. That line is
+always rendered, never `display: none` while empty, because a live region
+that appears with its first words is one many screen readers never
+announce. A press on a row stops its `mousedown`, so the box keeps the
+keyboard. **Where the menu opens is measured** (`placeSugg`, rule 10 of the
+mobile standards): from the visual viewport, which is what a phone's
+keyboard shrinks, under the box while at least 200px of room is there (a
+few rows; a menu that preferred the roomier side would flip above a box in
+the lower half of any screen), else on the roomier side (`.is-up`), capped
+to that room and to half the screen, re-measured as the viewport changes,
+and the listener lets go once the form is torn down. The copy is this
+forum's, not a programming site's: the advice asks for the situation, what
+the writer already knows and what they are trying to decide, the tag
+placeholder shows ONE tag with Enter after it (a space makes one tag here,
+never two), and the hint beside Post says a question can be deleted until
+it has an answer, which is rule 13's own rule. It is drawn OVER the page (`position: absolute` under
 `.oa-forum-tagwrap`) rather than in the flow, where it moved the guide box
 and the buttons down and back with every keystroke, and it holds to rules 6
 and 10 of `_MOBILE-STANDARDS.md`: the width of its box, half the screen at
@@ -4317,7 +4338,8 @@ one link, the hostile title rendered as text, no second read of the room.
 inset, the boxes 16px, the two buttons stack full width under the card, the
 "Required fields" note may wrap under the room line, and the menu is
 measured open at 390px: under its box, as wide as it, no taller than half
-the screen, its rows 42px.
+the screen, its rows 42px, and above the box once the box is scrolled to
+the foot of the screen.
 
 Tests: the ask block of `testForum` in `_scraper/selftest.mjs` (the card
 and its head, label then advice then box for each field with its star, the
@@ -4325,7 +4347,10 @@ required marks and the combobox, the menu born shut with its focus and
 mousedown rules, the arrows and Escape, the room said once and the banner
 standing down and coming back, the format line and no toolbar, the button
 under the card, the note above it, the tag advice said once with a refusal
-alone below, the new-tab link left to the browser, the rows stamped by room,
+alone below on a line always rendered, the combobox contract (named li
+options, never buttons, the highlight named by the box, Enter picking it),
+the measured placement and its let-go, the new-tab link left to the
+browser, the rows stamped by room and a late timer reading nothing,
 no em dash, the similarity rule over fixtures including the hidden thread,
 the tag as a word, the one-word title, the stopword title and the cap of
 five, the stylesheet's grounds and inks, the menu's position and cap, the
@@ -4336,10 +4361,12 @@ with Post under it at its left, the menu shut on arrival with the title
 focused; the similar list for the seeded thread, inert, in a new tab, with
 no second read, gone for a title sharing nothing; the menu opened by typing
 and over the page, shut on a pick with the box keeping the keyboard, opened
-by a press on the box and by the down arrow, shut by Escape and when the
+by a press on the box and by the down arrow, the highlight walked and named
+with the keyboard staying in the box and Enter picking it, a refused ORCID
+iD said under the box with the menu shut, shut by Escape and when the
 keyboard leaves; the banner back with the thread; and at
-390px the inset, the stacked buttons, and the menu's width, height and
-rows).
+390px the inset, the stacked buttons, the menu's width, height and rows, and
+the menu opening above a box at the foot of the screen).
 
 ## What "immediate" costs, and where the waiting used to be
 

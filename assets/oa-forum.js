@@ -156,7 +156,7 @@
 
   /* ------------------------------------------------------------- the copy */
 
-  var TAG_HINT = 'Add up to five tags to say what the question is about. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.';
+  var TAG_HINT = 'Add up to five tags to say what the question is about, pressing Enter after each. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.';
 
   var REASONS = {
     auth: 'Sign in first.',
@@ -2362,10 +2362,10 @@
       '<h1>Ask a question</h1>' +
       '<div class="oa-forum-askintro">' +
         '<p class="oa-forum-lede"><strong>Writing a good question.</strong> It goes out under your handle, never your name, to ' +
-          (cand ? 'this season’s candidates' : 'every member of the Open forum') + '.</p>' +
+          (cand ? 'this season’s candidates and the site’s maintainer' : 'every member of the Open forum') + '.</p>' +
         '<ol>' +
           '<li>Sum the question up in a one-line title.</li>' +
-          '<li>Give the details: what happened, what you have tried, what you expected.</li>' +
+          '<li>Give the details: the situation, what you already know, what you are trying to decide.</li>' +
           '<li>Add up to five tags, so the people who can answer find it.</li>' +
           '<li>Check it over, then post.</li>' +
         '</ol>' +
@@ -2389,9 +2389,9 @@
           '</div>' +
           '<div class="oa-forum-f">' +
             '<label for="oa-forum-ask-body">Details <span class="oa-forum-req" aria-hidden="true">*</span></label>' +
-            '<p class="oa-forum-fhint" id="oa-forum-ask-bodyhint">Include everything someone would need to answer it: what happened, ' +
-              'what you have tried, what you expected. Nothing that says who you are.</p>' +
-            '<div class="oa-forum-editor is-ask">' +
+            '<p class="oa-forum-fhint" id="oa-forum-ask-bodyhint">Include everything someone would need to answer it: the situation, ' +
+              'what you already know, what you are trying to decide. Nothing that says who you are.</p>' +
+            '<div class="oa-forum-editor">' +
               '<textarea id="oa-forum-ask-body" rows="10" maxlength="' + M.BOUNDS.body + '" placeholder="Plain text, a few paragraphs at most." ' +
                 'aria-required="true" aria-describedby="oa-forum-ask-bodyhint oa-forum-ask-fmt"></textarea>' +
               '<p class="oa-forum-fmt" id="oa-forum-ask-fmt"><span>Plain text</span><span>A blank line starts a new paragraph</span>' +
@@ -2404,12 +2404,12 @@
             '<p class="oa-forum-fhint" id="oa-forum-taghelp">' + TAG_HINT + '</p>' +
             '<div class="oa-forum-tagwrap">' +
               '<div class="oa-forum-tagsin" id="oa-forum-tagsin"><span id="oa-forum-tagchips"></span>' +
-                '<input type="text" id="oa-forum-tag-in" autocomplete="off" placeholder="e.g. offers teaching-release flyouts" ' +
-                  'role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="oa-forum-tagsugg" ' +
+                '<input type="text" id="oa-forum-tag-in" autocomplete="off" placeholder="e.g. teaching-release, then Enter" ' +
+                  'role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="oa-forum-tagsugg" aria-required="true" ' +
                   'aria-describedby="oa-forum-taghelp oa-forum-taghint"></div>' +
               '<ul class="oa-forum-tagsugg" id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags" hidden></ul>' +
             '</div>' +
-            '<p class="oa-forum-guardmsg" id="oa-forum-taghint" aria-live="polite"></p>' +
+            '<p class="oa-forum-tagmsg" id="oa-forum-taghint" aria-live="polite"></p>' +
           '</div>' +
           acceptBox('oa-forum-ask-accept') +
           '<p class="oa-forum-msg" id="oa-forum-ask-msg" aria-live="polite"></p>' +
@@ -2417,7 +2417,7 @@
         '<div class="oa-forum-actions oa-forum-askactions">' +
           '<button type="submit" class="oa-forum-send" id="oa-forum-ask-send">Post your question</button>' +
           '<a class="oa-forum-cancel" href="' + esc(href({ room: S.room, season: S.season })) + '">Cancel</a>' +
-          '<span class="oa-forum-hint">Yours to edit or delete afterwards.</span>' +
+          '<span class="oa-forum-hint">Yours to edit afterwards, and to delete until it has an answer.</span>' +
         '</div>' +
       '</form>';
     show(host, true);
@@ -2440,6 +2440,7 @@
        address has none, so they are read once, the first time the title is
        worth matching, and only painted if this is still the view on screen. */
     var rowsKey = S.room + '|' + S.season;
+    var drawnView = viewKey();
     var rowsAsked = false;
     var similarTimer = 0;
     function paintSimilar() {
@@ -2463,9 +2464,11 @@
     function ensureRows() {
       if (S.rowsKey === rowsKey || rowsAsked) return;
       rowsAsked = true;
-      var forView = viewKey();
       readThreads().then(function (rows) {
-        if (forView !== viewKey()) return;
+        /* the read was of the room and season on screen when it started,
+           which is this form's, since the timer below asks only while the
+           form is still the view; stamped as such, and painted only then */
+        if (drawnView !== viewKey()) return;
         S.rows = rows;
         S.rowsKey = rowsKey;
         paintSimilar();
@@ -2474,6 +2477,10 @@
     titleEl.addEventListener('input', function () {
       clearTimeout(similarTimer);
       similarTimer = setTimeout(function () {
+        /* a timer that fires after the reader has left the form reads and
+           paints nothing: the box is gone with the view, and a read of
+           another room must not be stamped as this one's */
+        if (drawnView !== viewKey() || !$('oa-forum-similar')) return;
         if (titleWords(titleEl.value).length) ensureRows();
         paintSimilar();
       }, 250);
@@ -2489,16 +2496,22 @@
         chips.appendChild(chip);
       });
       input.disabled = tags.length >= M.TAG_MAX;
-      input.placeholder = tags.length >= M.TAG_MAX ? 'Five is the most' : (tags.length ? 'Another tag' : 'e.g. offers teaching-release flyouts');
+      input.placeholder = tags.length >= M.TAG_MAX ? 'Five is the most' : (tags.length ? 'Another tag, then Enter' : 'e.g. teaching-release, then Enter');
     }
     /* the line under the box carries a refusal and nothing else; the advice
-       is said once, above the box, where a reader looks before typing */
+       is said once, above the box, where a reader looks before typing. It
+       is always rendered (never display:none while empty), so a refusal
+       written into it is announced: a live region that appears with its
+       first words is one many readers never hear. */
     function tagHint(msg) {
       var n = $('oa-forum-taghint');
       if (n) n.textContent = msg || '';
     }
     function add(raw) {
       var s = M.slug(raw);
+      /* whatever comes of it, the menu shuts: over the page it would cover
+         the line a refusal is written into, and the box it is written under */
+      suggWanted = false;
       if (!s || !M.tagOk(s) || tags.indexOf(s) !== -1 || tags.length >= M.TAG_MAX) { input.value = ''; drawSugg(); return; }
       /* THE GUARD RUNS HERE TOO. A tag is [a-z0-9-]{2,24}, which is exactly
          the shape a telephone number and an ORCID iD survive, so forumPost
@@ -2515,19 +2528,63 @@
       tagHint('');
       tags.push(s);
       input.value = '';
-      suggWanted = false;
       drawChips();
       drawSugg();
     }
-    /* THE SUGGESTIONS ARE A MENU: opened by typing, by a press on the box or
-       by the down arrow; shut after a pick, on Escape and when the keyboard
-       leaves the box; never drawn open on arrival. Drawn OVER the page, an
-       open menu covers the guide box and the buttons below it, so it has to
-       shut the moment a tag is chosen (the site the owner named does the
-       same) or the next thing the reader presses lands on a row instead. A
-       press on a row keeps the box's focus (its mousedown is stopped, so no
-       blur fires), so the next keystroke opens it again with the tag gone. */
+    /* THE SUGGESTIONS ARE A MENU, and the box is a COMBOBOX over it: the
+       keyboard never leaves the box. The options are highlighted, not
+       focused (aria-activedescendant names the highlighted one), the arrows
+       move the highlight, Enter picks it or adds what was typed, Escape
+       shuts the menu. It opens on typing, on a press on the box and on the
+       down arrow, never on focus alone and never on arrival; it shuts the
+       moment a tag is chosen or refused and when the keyboard leaves the
+       box. Drawn OVER the page, an open menu covers the guide box and the
+       buttons below it, so shutting on a pick is what keeps the next press
+       from landing on a row (the site the owner named does the same). A
+       press on a row keeps the box's focus, since its mousedown is stopped
+       and no blur fires. */
     var suggWanted = false;
+    var active = -1;
+    var tagsin = $('oa-forum-tagsin');
+    function options() { return Array.prototype.slice.call(sugg.querySelectorAll('[role="option"]')); }
+    function highlight(i) {
+      var opts = options();
+      active = opts.length && !sugg.hidden ? Math.max(-1, Math.min(i, opts.length - 1)) : -1;
+      opts.forEach(function (o, k) {
+        o.classList.toggle('is-active', k === active);
+        o.setAttribute('aria-selected', k === active ? 'true' : 'false');
+      });
+      if (active >= 0) {
+        input.setAttribute('aria-activedescendant', opts[active].id);
+        if (opts[active].scrollIntoView) opts[active].scrollIntoView({ block: 'nearest' });
+      } else {
+        input.removeAttribute('aria-activedescendant');
+      }
+    }
+    /* WHERE THE MENU OPENS is measured, not assumed (rule 10 of the mobile
+       standards): under the box while there is room, above it when there is
+       more room there, and no taller than that room or half the screen,
+       scrolling inside itself. The visual viewport, where the browser has
+       one, is what shrinks when a phone's keyboard comes up. */
+    function placeSugg() {
+      if (!document.contains(sugg)) {
+        window.removeEventListener('resize', placeSugg);
+        if (window.visualViewport) window.visualViewport.removeEventListener('resize', placeSugg);
+        return;
+      }
+      if (sugg.hidden) return;
+      var vv = window.visualViewport;
+      var vTop = vv ? vv.offsetTop : 0;
+      var vH = vv ? vv.height : window.innerHeight;
+      var r = tagsin.getBoundingClientRect();
+      var below = vTop + vH - r.bottom - 8;
+      var above = r.top - vTop - 8;
+      var up = below < 200 && above > below;
+      sugg.classList.toggle('is-up', up);
+      sugg.style.maxHeight = Math.round(Math.max(120, Math.min(vH * 0.5, up ? above : below))) + 'px';
+    }
+    window.addEventListener('resize', placeSugg);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', placeSugg);
     function drawSugg() {
       var q = M.slug(input.value);
       sugg.innerHTML = '';
@@ -2540,47 +2597,50 @@
           .sort(function (a, b) { return b[1] - a[1] || (a[0] < b[0] ? -1 : 1); });
         if (!q) pool = pool.slice(0, 8);
         else pool = pool.slice(0, 6);
+        var n = 0;
+        function option(tag, labelText, noteText, name) {
+          n++;
+          return el('li', {
+            role: 'option', id: 'oa-forum-tagopt-' + n, 'data-tag': tag, 'aria-selected': 'false', 'aria-label': name,
+            onclick: function () { add(tag); input.focus(); }
+          }, [el('span', { text: labelText }), el('i', { text: noteText })]);
+        }
         pool.forEach(function (p) {
-          var li = el('li', { role: 'option' }, [el('button', { type: 'button', 'data-tag': p[0], onclick: function () { add(p[0]); input.focus(); } }, [
-            el('span', { text: p[0] }), el('i', { text: p[1] ? plural(p[1], 'question', 'questions') : 'suggested' })])]);
-          sugg.appendChild(li);
+          var note = p[1] ? plural(p[1], 'question', 'questions') : 'suggested';
+          sugg.appendChild(option(p[0], p[0], note, p[0] + ', ' + note));
         });
         if (q && !seen[q] && M.TAGS.indexOf(q) === -1 && M.tagOk(q)) {
-          var li2 = el('li', { role: 'option' }, [el('button', { type: 'button', 'data-tag': q, onclick: function () { add(q); input.focus(); } }, [
-            el('span', { text: 'Create the tag “' + q + '”' }), el('i', { text: 'press Enter' })])]);
-          sugg.appendChild(li2);
+          sugg.appendChild(option(q, 'Create the tag “' + q + '”', 'press Enter', 'Create the tag ' + q));
         }
       }
       var open = suggWanted && !input.disabled && sugg.children.length > 0;
       show(sugg, open);
       input.setAttribute('aria-expanded', open ? 'true' : 'false');
+      highlight(-1);
+      placeSugg();
     }
-    function inMenu(node) { return !!(node && (node === input || sugg.contains(node))); }
     function openSugg() { suggWanted = true; drawSugg(); }
+    function shutSugg() { suggWanted = false; drawSugg(); }
     input.addEventListener('input', function () { tagHint(''); openSugg(); });
     input.addEventListener('click', openSugg);
-    input.addEventListener('blur', function (e) { if (inMenu(e.relatedTarget)) return; suggWanted = false; drawSugg(); });
-    sugg.addEventListener('focusout', function (e) { if (inMenu(e.relatedTarget)) return; suggWanted = false; drawSugg(); });
+    input.addEventListener('blur', shutSugg);
     sugg.addEventListener('mousedown', function (e) { e.preventDefault(); });
     input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(input.value); }
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        var pick = !sugg.hidden && active >= 0 ? options()[active] : null;
+        add(pick ? pick.getAttribute('data-tag') : input.value);
+      }
       else if (e.key === 'Backspace' && !input.value && tags.length) { tags.pop(); drawChips(); drawSugg(); }
       else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        if (sugg.hidden) { openSugg(); return; }
-        var first = sugg.querySelector('button');
-        if (first) first.focus();
+        if (sugg.hidden) openSugg();
+        else highlight(active + 1);
       }
-      else if (e.key === 'Escape' && !sugg.hidden) { e.preventDefault(); suggWanted = false; drawSugg(); }
+      else if (e.key === 'ArrowUp' && !sugg.hidden) { e.preventDefault(); highlight(active - 1); }
+      else if (e.key === 'Escape' && !sugg.hidden) { e.preventDefault(); shutSugg(); }
     });
-    sugg.addEventListener('keydown', function (e) {
-      var rows = Array.prototype.slice.call(sugg.querySelectorAll('button'));
-      var at = rows.indexOf(document.activeElement);
-      if (e.key === 'ArrowDown' && at < rows.length - 1) { e.preventDefault(); rows[at + 1].focus(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); if (at > 0) rows[at - 1].focus(); else input.focus(); }
-      else if (e.key === 'Escape') { e.preventDefault(); suggWanted = false; drawSugg(); input.focus(); }
-    });
-    $('oa-forum-tagsin').addEventListener('click', function (e) { if (e.target === e.currentTarget) { input.focus(); openSugg(); } });
+    tagsin.addEventListener('click', function (e) { if (e.target === e.currentTarget) { input.focus(); openSugg(); } });
 
     $('oa-forum-askform').addEventListener('submit', function (e) {
       e.preventDefault();

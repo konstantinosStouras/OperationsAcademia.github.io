@@ -158,7 +158,7 @@ const FORUM_INK = ['.oa-label-pinned', '.oa-label-locked', '.oa-label-new', '.oa
      4.44:1 on its own ground. This is a LIST, and a list only ever measures
      what somebody remembered: anything that paints ink on a ground of its own
      belongs in it, and a chip paints two of them. */
-  '.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg button',
+  '.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg [role="option"]',
   '.oa-forum-tagsugg i',
   /* THE ASK FORM'S OWN SURFACES (2026-09-08): the advice under each label,
      the line under the details box, the card's head, the star, the note
@@ -11043,32 +11043,50 @@ for (const w of [320, 360, 390, 430]) {
       'forum (candidate): …its title rendered as text, markup and all');
     ok(/[?&]t=seed-t1/.test(similar.href) && similar.target === '_blank' && /noopener/.test(similar.rel),
       'forum (candidate): …as a link to the thread that opens in a new tab, so the question being written stays');
-    ok(/^Similar questions/.test(similar.heading) && similar.answers === 'no answers yet',
-      'forum (candidate): …headed as similar questions, with its answer count beside it');
+    ok(/^Similar questions/.test(similar.heading) && /^(no answers yet|\d+ answers?)$/.test(similar.answers),
+      `forum (candidate): …headed as similar questions, with its answer count beside it (${similar.answers})`);
     eq(similar.reads, readsBefore, 'forum (candidate): …from the rows the list already read: no second read of the room');
+    /* THE LIST'S OWN SURFACES are drawn in no other view, so the audit runs
+       here too, while it is open (the tag menu's turn comes below) */
+    await forumContrast(q, 'the ask form, with similar questions');
     await q.fill('#oa-forum-ask-title', 'Is a second-year teaching release normal to ask for?');
     await q.waitForFunction(() => document.getElementById('oa-forum-similar').hidden, null, { timeout: 5000 });
     ok(true, 'forum (candidate): a title that shares nothing with any thread lists none');
     await q.fill('#oa-forum-ask-body', 'Two offers on the table, both silent on teaching release. Is it normal to ask, and how?');
+    /* page positions (the viewport scrolls as boxes are filled), so a move
+       here is the layout's and never the scroll's */
+    const shutGeometry = await q.evaluate(() => ({
+      actionsTop: Math.round(document.querySelector('.oa-forum-askactions').getBoundingClientRect().top + window.scrollY),
+      cardBottom: Math.round(document.querySelector('.oa-forum-askcard').getBoundingClientRect().bottom),
+      boxBottom: Math.round(document.getElementById('oa-forum-tagsin').getBoundingClientRect().bottom),
+    }));
+    ok(shutGeometry.cardBottom - shutGeometry.boxBottom <= 24,
+      `forum (candidate): the card ends a padding under its last box, not a field's margin as well (${shutGeometry.cardBottom - shutGeometry.boxBottom}px)`);
+    /* the box near the TOP of the screen, so the room is below it: left to
+       itself Playwright scrolls a box to the bottom edge before typing, and
+       the menu then rightly opens above it, which the phone block measures */
+    await q.evaluate(() => window.scrollTo(0, window.scrollY + document.getElementById('oa-forum-tagsin').getBoundingClientRect().top - 120));
     await q.fill('#oa-forum-tag-in', 'offers');
     /* THE TAG MENU IS A MENU: opened by typing into the box, shut after a
        pick and when the keyboard leaves the box (drawn over the page, an open
        menu covers the guide box and the buttons below it), and a press on one
        of its rows keeps the box's focus so the next keystroke opens it again */
-    const menuOpen = await q.evaluate(() => ({
-      shown: !document.getElementById('oa-forum-tagsugg').hidden,
-      expanded: document.getElementById('oa-forum-tag-in').getAttribute('aria-expanded'),
-      rows: document.querySelectorAll('#oa-forum-tagsugg button').length,
-      over: (() => {
-        const m = document.getElementById('oa-forum-tagsugg').getBoundingClientRect();
-        const box = document.getElementById('oa-forum-tagsin').getBoundingClientRect();
-        const below = document.querySelector('.oa-forum-askactions').getBoundingClientRect();
-        return m.top >= box.bottom && Math.abs(m.left - box.left) <= 1 && Math.abs(m.right - box.right) <= 1 && below.top < m.bottom;
-      })(),
-    }));
+    const menuOpen = await q.evaluate((was) => {
+      const m = document.getElementById('oa-forum-tagsugg').getBoundingClientRect();
+      const box = document.getElementById('oa-forum-tagsin').getBoundingClientRect();
+      return {
+        shown: !document.getElementById('oa-forum-tagsugg').hidden,
+        expanded: document.getElementById('oa-forum-tag-in').getAttribute('aria-expanded'),
+        rows: document.querySelectorAll('#oa-forum-tagsugg [role="option"]').length,
+        under: m.top >= box.bottom, left: Math.round(m.left - box.left), right: Math.round(m.right - box.right),
+        /* OVER the page: the buttons under the card are where they were */
+        moved: Math.round(document.querySelector('.oa-forum-askactions').getBoundingClientRect().top + window.scrollY) - was.actionsTop,
+      };
+    }, shutGeometry);
     ok(menuOpen.shown && menuOpen.expanded === 'true' && menuOpen.rows >= 1,
       'forum (candidate): the tag menu opens as the box is typed into, and the box says so');
-    ok(menuOpen.over, 'forum (candidate): …OVER the page, the width of its box, rather than pushing the buttons down');
+    ok(menuOpen.under && Math.abs(menuOpen.left) <= 1 && Math.abs(menuOpen.right) <= 1 && menuOpen.moved === 0,
+      `forum (candidate): …OVER the page, under its box and as wide as it, and the buttons below did not move (${JSON.stringify(menuOpen)})`);
     await q.press('#oa-forum-tag-in', 'Enter');
     ok(await q.evaluate(() => document.getElementById('oa-forum-tagsugg').hidden && document.activeElement.id === 'oa-forum-tag-in'),
       'forum (candidate): …and shuts once a tag is chosen, with the box keeping the keyboard, so nothing below it is covered');
@@ -11104,7 +11122,7 @@ for (const w of [320, 360, 390, 430]) {
        until the next keystroke */
     await q.click('#oa-forum-tag-in');
     ok(await q.evaluate(() => !document.getElementById('oa-forum-tagsugg').hidden), 'forum (candidate): a press on the box opens the menu');
-    await q.click('#oa-forum-tagsugg button[data-tag="europe"]');
+    await q.click('#oa-forum-tagsugg [role="option"][data-tag="europe"]');
     const picked = await q.evaluate(() => ({
       chips: [...document.querySelectorAll('#oa-forum-tagchips .oa-chip')].map((n) => n.getAttribute('data-tag')),
       focused: document.activeElement && document.activeElement.id,
@@ -11113,11 +11131,62 @@ for (const w of [320, 360, 390, 430]) {
     eq(picked.chips, ['offers', 'teaching-release', 'europe'], 'forum (candidate): a row pressed with the pointer becomes a chip');
     ok(picked.focused === 'oa-forum-tag-in' && !picked.shown, 'forum (candidate): …and the box keeps the keyboard with the menu shut until the next keystroke');
     await q.click('#oa-forum-tagchips .oa-chip[data-tag="europe"]');
+    /* THE BOX IS A COMBOBOX: the keyboard never leaves it. The down arrow
+       opens the menu, then moves a HIGHLIGHT down the options, which the box
+       names through aria-activedescendant; Enter picks the highlighted one;
+       Escape shuts the menu. */
     await q.press('#oa-forum-tag-in', 'ArrowDown');
-    ok(await q.evaluate(() => !document.getElementById('oa-forum-tagsugg').hidden), 'forum (candidate): the down arrow opens the menu from the keyboard');
+    ok(await q.evaluate(() => !document.getElementById('oa-forum-tagsugg').hidden && document.activeElement.id === 'oa-forum-tag-in'),
+      'forum (candidate): the down arrow opens the menu from the keyboard');
+    await q.press('#oa-forum-tag-in', 'ArrowDown');
+    await q.press('#oa-forum-tag-in', 'ArrowDown');
+    const walked = await q.evaluate(() => {
+      const input = document.getElementById('oa-forum-tag-in');
+      const opts = [...document.querySelectorAll('#oa-forum-tagsugg [role="option"]')];
+      const active = opts.filter((o) => o.classList.contains('is-active'));
+      return {
+        focused: document.activeElement.id,
+        n: active.length, at: opts.indexOf(active[0]),
+        named: active[0] && input.getAttribute('aria-activedescendant') === active[0].id && active[0].getAttribute('aria-selected') === 'true',
+        tag: active[0] && active[0].getAttribute('data-tag'),
+        ringed: active[0] && getComputedStyle(active[0]).outlineStyle !== 'none' && parseFloat(getComputedStyle(active[0]).outlineWidth) >= 2,
+        focusable: opts.some((o) => o.querySelector('button, a, [tabindex]')),
+        names: opts.map((o) => o.getAttribute('aria-label')),
+      };
+    });
+    ok(walked.focused === 'oa-forum-tag-in' && walked.n === 1 && walked.at === 1 && walked.named,
+      `forum (candidate): two presses highlight the second option, named by the box, with the keyboard still in the box (${JSON.stringify(walked)})`);
+    ok(walked.ringed && !walked.focusable, 'forum (candidate): the highlight is ringed, and no option is a focus stop of its own');
+    ok(walked.names.every((nm) => /^[a-z0-9-]+, (\d+ questions?|suggested)$/.test(nm)),
+      `forum (candidate): every option is named as its tag and its count, with a comma between (${walked.names.join(' | ')})`);
+    await q.press('#oa-forum-tag-in', 'Enter');
+    const entered = await q.evaluate(() => ({
+      chips: [...document.querySelectorAll('#oa-forum-tagchips .oa-chip')].map((n) => n.getAttribute('data-tag')),
+      shown: !document.getElementById('oa-forum-tagsugg').hidden,
+    }));
+    ok(entered.chips.length === 3 && entered.chips[2] === walked.tag && !entered.shown,
+      `forum (candidate): Enter picks the highlighted option as a chip and shuts the menu (${entered.chips.join(',')})`);
+    await q.click('#oa-forum-tagchips .oa-chip[data-tag="' + walked.tag + '"]');
+    await q.press('#oa-forum-tag-in', 'ArrowDown');
     await q.press('#oa-forum-tag-in', 'Escape');
     ok(await q.evaluate(() => document.getElementById('oa-forum-tagsugg').hidden && document.activeElement.id === 'oa-forum-tag-in'),
       'forum (candidate): …and Escape shuts it, the box keeping the keyboard');
+    /* A REFUSED TAG IS SAID WHERE IT CAN BE SEEN: the menu shuts so the line
+       under the box, always rendered for the screen reader's sake, shows */
+    await q.fill('#oa-forum-tag-in', '0000-0002-1825-0097');
+    await q.press('#oa-forum-tag-in', 'Enter');
+    const refused = await q.evaluate(() => ({
+      msg: document.getElementById('oa-forum-taghint').textContent,
+      shown: !document.getElementById('oa-forum-tagsugg').hidden,
+      rendered: getComputedStyle(document.getElementById('oa-forum-taghint')).display !== 'none',
+      chips: document.querySelectorAll('#oa-forum-tagchips .oa-chip').length,
+    }));
+    ok(/ORCID/i.test(refused.msg) && !refused.shown && refused.rendered && refused.chips === 2,
+      `forum (candidate): an ORCID iD typed as a tag is refused under the box, the menu shut so the reason is seen (${refused.msg})`);
+    await q.fill('#oa-forum-tag-in', 'x');
+    ok(await q.evaluate(() => document.getElementById('oa-forum-taghint').textContent === '' && getComputedStyle(document.getElementById('oa-forum-taghint')).display !== 'none'),
+      'forum (candidate): …and the next keystroke clears the line, which stays rendered');
+    await q.fill('#oa-forum-tag-in', '');
     await q.press('#oa-forum-tag-in', 'ArrowDown');
     await q.focus('#oa-forum-ask-body');
     const menuShut = await q.evaluate(() => ({
@@ -11779,8 +11848,12 @@ for (const w of [320, 360, 390, 430]) {
     ok(askM.send >= 42 && askM.cancel >= 42, `forum mobile (ask): Post your question and Cancel are 42px targets (got ${askM.send}/${askM.cancel})`);
     ok(askM.inset >= 14 && askM.boxIn, `forum mobile (ask): the card keeps a 14px inset and its boxes sit inside it (inset ${askM.inset})`);
     ok(askM.stacked && askM.onScreen, 'forum mobile (ask): Post your question and Cancel stack full width under the card, on screen');
-    /* THE TAG MENU ON A PHONE holds to rules 6 and 10: open under its box,
-       no wider than the screen, half of it at most, its rows 42px targets */
+    /* THE TAG MENU ON A PHONE holds to rules 6 and 10: open under its box
+       while the room is there, no wider than the screen, half of it at most,
+       its rows 42px targets. The box is put near the top of the screen
+       first, so the room is below it. */
+    await m.evaluate(() => window.scrollTo(0, window.scrollY + document.getElementById('oa-forum-tagsin').getBoundingClientRect().top - 90));
+    await m.waitForTimeout(100);
     await m.click('#oa-forum-tag-in');
     await m.waitForTimeout(150);
     const menuM = await m.evaluate(() => {
@@ -11792,7 +11865,7 @@ for (const w of [320, 360, 390, 430]) {
         left: Math.round(r.left), right: Math.round(window.innerWidth - r.right), width: Math.round(r.width), boxW: Math.round(box.width),
         tall: r.height <= window.innerHeight / 2 + 1,
         under: r.top >= box.bottom,
-        rows: [...menu.querySelectorAll('button')].map((b) => Math.round(b.getBoundingClientRect().height)),
+        rows: [...menu.querySelectorAll('[role="option"]')].map((b) => Math.round(b.getBoundingClientRect().height)),
         overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };
     });
@@ -11800,6 +11873,26 @@ for (const w of [320, 360, 390, 430]) {
       `forum mobile (ask): the tag menu opens under its box, as wide as the box and on screen (${JSON.stringify(menuM)})`);
     ok(menuM.tall && menuM.overflowX === 0, 'forum mobile (ask): …no taller than half the screen, and the page still does not scroll sideways');
     ok(menuM.rows.length >= 1 && menuM.rows.every((x) => x >= 42), `forum mobile (ask): its rows are 42px targets (got ${menuM.rows})`);
+    /* RULE 10: THE ROOM IS MEASURED. With the box near the foot of the
+       screen (where a phone's keyboard leaves it) the menu opens ABOVE the
+       box, no taller than the room there. */
+    await m.focus('#oa-forum-ask-body');
+    await m.evaluate(() => {
+      const r = document.getElementById('oa-forum-tagsin').getBoundingClientRect();
+      window.scrollTo(0, window.scrollY + r.bottom - window.innerHeight + 70);
+    });
+    await m.waitForTimeout(100);
+    await m.click('#oa-forum-tag-in');
+    await m.waitForTimeout(150);
+    const flipped = await m.evaluate(() => {
+      const menu = document.getElementById('oa-forum-tagsugg');
+      const r = menu.getBoundingClientRect();
+      const box = document.getElementById('oa-forum-tagsin').getBoundingClientRect();
+      return { shown: !menu.hidden, up: menu.classList.contains('is-up'), above: r.bottom <= box.top, top: Math.round(r.top),
+        fits: r.top >= 0 && r.height <= window.innerHeight / 2 + 1, boxBottom: Math.round(box.bottom), h: Math.round(window.innerHeight) };
+    });
+    ok(flipped.shown && flipped.up && flipped.above && flipped.fits,
+      `forum mobile (ask): with the box near the foot of the screen the menu opens above it, inside the room there (${JSON.stringify(flipped)})`);
     eq(errors, [], 'forum mobile: no uncaught script error');
     await ctx.close();
   }

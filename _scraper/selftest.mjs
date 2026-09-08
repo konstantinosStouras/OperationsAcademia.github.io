@@ -17482,8 +17482,8 @@ async function testForum() {
     const fcss = await readFile(path.join(HERE, '..', 'assets', 'oa-forum.css'), 'utf8');
     ok(/textarea:focus \{ outline: none; box-shadow: inset 0 0 0 2px var\(--brand\); \}/.test(fcss),
       'forum css: the compose box\'s focus ring is the brand, never the wash');
-    ok(/\.oa-forum-tagsugg button:focus-visible \{ outline: 2px solid var\(--brand\); outline-offset: -2px; \}/.test(fcss),
-      'forum css: a tag suggestion keeps a real focus ring, separately from its hover wash');
+    ok(/\.oa-forum-tagsugg \[role='option'\]\.is-active \{ outline: 2px solid var\(--brand\); outline-offset: -2px; \}/.test(fcss),
+      'forum css: the highlighted tag option is ringed, separately from the hover wash');
     ok(/\.oa-forum-tagchip i \{[^}]*color: var\(--brand\)/.test(fcss)
        && !/\.oa-forum-tagchip i \{[^}]*var\(--mut\)/.test(fcss),
       'forum css: the count inside a chip is quieter by weight, not by an ink that fails');
@@ -17507,7 +17507,7 @@ async function testForum() {
   {
     const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
     const ink = pt.slice(pt.indexOf('const FORUM_INK'), pt.indexOf('async function forumContrast'));
-    for (const sel of ['.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg button',
+    for (const sel of ['.oa-forum-tagchip', '.oa-forum-tagchip i', '.oa-forum-tagsugg [role="option"]',
       '.oa-forum-tagsugg i']) {
       ok(ink.includes(`'${sel}'`), `forum css: the contrast audit measures ${sel}`);
     }
@@ -17519,8 +17519,8 @@ async function testForum() {
       'forum css: the audit reads its own named list, and there is only one of it');
     ok(/const unseen = FORUM_INK\.filter\(\(s\) => !FORUM_INK_SEEN\.has\(s\)\);/.test(pt),
       'forum css: and a selector that was never on screen fails, rather than passing unmeasured');
-    eq((pt.match(/await forumContrast\(q, /g) || []).length, 5,
-      'forum css: five views are audited — the two lists, a busy thread, the guide thread and the ask form');
+    eq((pt.match(/await forumContrast\(q, /g) || []).length, 6,
+      'forum css: six views are audited: the two lists, a busy thread, the guide thread, and the ask form twice, with its similar list open and with its tag menu open');
   }
   ok(/quote = \{\s*n: qn,\s*by: src\.by,\s*text,\s*\}/.test(forumSrc['post.js']), 'forum: and is stored as a copy {n, by, text}');
   ok(/const body = guide\.text\(\);/.test(forumSrc['moderate.js']) && !/d\.body/.test(forumSrc['moderate.js']),
@@ -17853,7 +17853,8 @@ async function testForum() {
     'oa-forum.js: the posting function is woken when a box takes focus and the voting one when a vote column is reached, once each per page');
   ok(!/min left/.test(pageJs) && /data-act="edit">Edit<\/button>/.test(pageJs) && !/EDIT_WINDOW/.test(pageJs),
     'oa-forum.js: Edit carries no countdown and reads no window (owner, 2026-09-06)');
-  ok(/Yours to edit or delete afterwards\./.test(pageJs) && !/fifteen minutes/.test(pageJs), 'oa-forum.js: the ask form says the post stays editable');
+  ok(/Yours to edit afterwards, and to delete until it has an answer\./.test(pageJs) && !/fifteen minutes/.test(pageJs) && !/edit or delete afterwards/.test(pageJs),
+    'oa-forum.js: the ask form says the post stays editable, and says when it can be deleted (a question with a live answer cannot be)');
 
   /* THE ASK FORM IS LAID OUT THE WAY STACK EXCHANGE LAYS ONE OUT (owner,
      2026-09-08, with Mathematics Stack Exchange's ask page beside this one):
@@ -17877,24 +17878,46 @@ async function testForum() {
       ok(at > 0 && hint > at && box > hint, `forum ask: ${id} reads label, then advice, then the box`);
       ok(ask.slice(at, box).includes('<span class="oa-forum-req" aria-hidden="true">*</span></label>'), `forum ask: …and the label of ${id} is starred`);
     }
-    ok((ask.match(/aria-required="true"/g) || []).length === 2 && /role="combobox"/.test(ask) && /aria-controls="oa-forum-tagsugg"/.test(ask),
-      'forum ask: the title and the details are marked required, and the tag box is a combobox over its menu');
+    ok((ask.match(/aria-required="true"/g) || []).length === 3 && /role="combobox"/.test(ask) && /aria-controls="oa-forum-tagsugg"/.test(ask),
+      'forum ask: the three boxes are marked required, and the tag box is a combobox over its menu');
+    /* THE COMBOBOX CONTRACT: the keyboard stays in the box, the options are
+       highlighted and named through aria-activedescendant, never focused */
+    ok(/role: 'option', id: 'oa-forum-tagopt-' \+ n, 'data-tag': tag, 'aria-selected': 'false', 'aria-label': name,/.test(ask)
+       && !/el\('button', \{ type: 'button', 'data-tag'/.test(ask)
+       && /input\.setAttribute\('aria-activedescendant', opts\[active\]\.id\);/.test(ask)
+       && /input\.removeAttribute\('aria-activedescendant'\);/.test(ask),
+      'forum ask: an option is a named li, never a button, and the box names the highlighted one');
+    ok(/var pick = !sugg\.hidden && active >= 0 \? options\(\)\[active\] : null;/.test(ask) && /else highlight\(active \+ 1\);/.test(ask) && /highlight\(active - 1\);/.test(ask),
+      'forum ask: the arrows move the highlight and Enter picks it, else adds what was typed');
+    ok(/'aria-label': name,/.test(ask) && /p\[0\] \+ ', ' \+ note/.test(ask), 'forum ask: an option is named as its tag, a comma, its count');
+    /* RULE 10: where the menu opens is measured, from the visual viewport */
+    ok(/function placeSugg\(\)/.test(ask) && /window\.visualViewport/.test(ask) && /var up = below < 200 && above > below;/.test(ask)
+       && /sugg\.classList\.toggle\('is-up', up\);/.test(ask) && /Math\.min\(vH \* 0\.5, up \? above : below\)/.test(ask)
+       && /\.oa-forum-tagsugg\.is-up \{ top: auto; bottom: calc\(100% \+ 4px\); \}/.test(pageCss),
+      'forum ask: the menu measures the room below and above its box, opens on the roomier side and is capped to it and to half the screen');
+    ok(/window\.removeEventListener\('resize', placeSugg\);/.test(ask) && /if \(!document\.contains\(sugg\)\) \{/.test(ask),
+      'forum ask: …and the listener lets go of a form that has been torn down');
     ok(/id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags" hidden>/.test(ask) && /aria-expanded="false"/.test(ask),
       'forum ask: the tag menu is born SHUT, never drawn open on arrival');
     ok(/var open = suggWanted && !input\.disabled && sugg\.children\.length > 0;/.test(ask)
        && /input\.addEventListener\('input', function \(\) \{ tagHint\(''\); openSugg\(\); \}\);/.test(ask)
        && /input\.addEventListener\('click', openSugg\);/.test(ask)
        && !/input\.addEventListener\('focus'/.test(ask)
-       && /input\.addEventListener\('blur', function \(e\) \{ if \(inMenu\(e\.relatedTarget\)\) return; suggWanted = false; drawSugg\(\); \}\);/.test(ask)
+       && /input\.addEventListener\('blur', shutSugg\);/.test(ask)
        && /sugg\.addEventListener\('mousedown', function \(e\) \{ e\.preventDefault\(\); \}\);/.test(ask),
       'forum ask: …opened by typing or a press on the box (never by focus alone), shut when the keyboard leaves, and a press on a row keeps the box\'s focus');
     /* AN OPEN MENU COVERS THE GUIDE BOX AND THE BUTTONS, so it shuts the
-       moment a tag is chosen: the first browser run of this form timed out
-       on the guide tick box, with a suggestion row intercepting the press */
-    ok(/tags\.push\(s\);\s*input\.value = '';\s*suggWanted = false;\s*drawChips\(\);\s*drawSugg\(\);/.test(ask),
-      'forum ask: …and shuts the moment a tag is chosen, or the next press lands on a row');
-    ok(/e\.key === 'Escape'/.test(ask) && /if \(sugg\.hidden\) \{ openSugg\(\); return; \}/.test(ask) && /e\.key === 'ArrowUp'/.test(ask),
-      'forum ask: the down arrow opens the menu and walks it with the up arrow, and Escape shuts it');
+       moment a tag is chosen OR REFUSED: the first browser run of this form
+       timed out on the guide tick box, with a suggestion row intercepting
+       the press, and a refusal was written into a line the menu covered */
+    ok(/function add\(raw\) \{\s*var s = M\.slug\(raw\);[\s\S]{0,400}suggWanted = false;\s*if \(!s \|\| !M\.tagOk\(s\)/.test(ask),
+      'forum ask: …and shuts whatever comes of a tag, chosen or refused, so nothing it says is covered');
+    ok(/e\.key === 'Escape' && !sugg\.hidden\) \{ e\.preventDefault\(\); shutSugg\(\); \}/.test(ask) && /if \(sugg\.hidden\) openSugg\(\);/.test(ask),
+      'forum ask: the down arrow opens the menu and Escape shuts it');
+    ok(/<p class="oa-forum-tagmsg" id="oa-forum-taghint" aria-live="polite"><\/p>/.test(ask)
+       && /\.oa-forum-tagmsg \{ margin: 8px 0 0; color: var\(--err\); font-size: 13\.5px; \}/.test(pageCss)
+       && /\.oa-forum-tagmsg:empty \{ margin: 0; \}/.test(pageCss) && !/\.oa-forum-tagmsg:empty \{ display: none/.test(pageCss),
+      'forum ask: the refusal line under the tag box is always rendered, so a refusal is announced');
     ok(/Posting in the <strong>' \+ roomName \+ '<\/strong>/.test(ask) && !/oa-forum-flabel">Where/.test(ask),
       'forum ask: the room is said once, at the card\'s head, and the "Where" block is gone');
     ok(/show\(me, !\(S\.ask && !S\.archive\)\);/.test(pageJs) && /hideViews\(\);\n    show\(\$\('oa-forum-me'\), true\);/.test(pageJs),
@@ -17908,14 +17931,21 @@ async function testForum() {
       'forum ask: a "writing a good question" note stands above the card');
     ok(/function tagHint\(msg\) \{\s*var n = \$\('oa-forum-taghint'\);\s*if \(n\) n\.textContent = msg \|\| '';/.test(ask)
        && /<p class="oa-forum-fhint" id="oa-forum-taghelp">' \+ TAG_HINT \+ '<\/p>/.test(ask)
-       && /class="oa-forum-guardmsg" id="oa-forum-taghint" aria-live="polite"><\/p>/.test(ask),
+       && /class="oa-forum-tagmsg" id="oa-forum-taghint" aria-live="polite"><\/p>/.test(ask),
       'forum ask: the tag advice is said once above the box, and the line under it carries a refusal and nothing else');
-    ok(/^Add up to five tags to say what the question is about\./.test(pageJs.match(/var TAG_HINT = '([^']*)'/)[1]),
-      'forum ask: the advice opens with the count');
+    ok(/^Add up to five tags to say what the question is about, pressing Enter after each\./.test(pageJs.match(/var TAG_HINT = '([^']*)'/)[1])
+       && /placeholder="e\.g\. teaching-release, then Enter"/.test(ask) && !/offers teaching-release flyouts/.test(ask),
+      'forum ask: the advice opens with the count and says Enter adds each tag, and the placeholder shows ONE tag (a space makes one tag here, not two)');
+    ok(/what you already know, what you are trying to decide/.test(ask) && !/what you have tried/.test(ask),
+      'forum ask: the advice is a job-market forum\'s, not a programming site\'s');
+    ok(/this season’s candidates and the site’s maintainer/.test(ask), 'forum ask: the note says who reads a candidates\' room question, the maintainer included');
     ok(/a\.getAttribute\('target'\) === '_blank'\) return;/.test(pageJs),
       'forum ask: a link the page draws to open in a new tab is left to the browser, so the question being written stays');
     ok(/S\.rowsKey = S\.room \+ '\|' \+ S\.season;/.test(pageJs) && /S\.rowsKey = '';/.test(pageJs),
       'forum ask: the rows the list read are stamped with their room and season, and forgotten with the reader');
+    ok(/var drawnView = viewKey\(\);/.test(ask) && /if \(drawnView !== viewKey\(\) \|\| !\$\('oa-forum-similar'\)\) return;/.test(ask)
+       && /if \(drawnView !== viewKey\(\)\) return;\s*S\.rows = rows;\s*S\.rowsKey = rowsKey;/.test(ask),
+      'forum ask: a title timer that fires after the reader has left the form reads nothing, and a read is stamped only for the form it was for');
     ok(noDash(ask), 'forum ask: no em dash in anything the form draws');
 
     /* SIMILAR QUESTIONS: the pure rule, driven from a slice of the source.
@@ -17964,7 +17994,13 @@ async function testForum() {
       'forum ask css: …and the format line and the similar list');
     ok(/\.oa-forum-fhint \{[^}]*color: var\(--mut\)/.test(pageCss) && /\.oa-forum-req \{ color: var\(--err\)/.test(pageCss),
       'forum ask css: the advice is muted and the star is the error red');
-    ok(/\.oa-forum-editor\.is-ask textarea \{ min-height: 220px; \}/.test(pageCss), 'forum ask css: the details box opens taller than an answer\'s');
+    ok(/id="oa-forum-ask-body" rows="10"/.test(ask) && /id="oa-forum-body" rows="6"/.test(pageJs) && !/is-ask/.test(pageJs) && !/is-ask/.test(pageCss),
+      'forum ask: the details box opens taller than an answer\'s, by its rows, with no min-height pretending to');
+    /* the card's last FIELD ends it: the message line after it is the true
+       last child, display:none while empty, so :last-child matched nothing
+       and the card carried a 22px margin under its own padding */
+    ok(/\.oa-forum-askcard > \.oa-forum-f:last-of-type \{ margin-bottom: 0; \}/.test(pageCss) && !/\.oa-forum-f:last-child/.test(pageCss),
+      'forum ask css: the last field ends the card, matched by type since the message line is the last child');
     ok(/@media \(max-width: 640px\)[\s\S]*\.oa-forum-askcard \{ padding: 16px 14px; \}/.test(pageCss)
        && /@media \(max-width: 640px\)[\s\S]*\.oa-forum-askreq \{ white-space: normal; \}/.test(pageCss),
       'forum ask css: on a phone the card keeps a 14px inset and the head\'s note may wrap');
@@ -17982,7 +18018,10 @@ async function testForum() {
       'Post your question sits under the card at its left', 'the tag menu is shut, no similar list shows',
       'a title sharing words with the seeded thread lists that thread under the box', 'no second read of the room',
       'the tag menu opens as the box is typed into', 'shuts once a tag is chosen', 'a row pressed with the pointer becomes a chip',
-      'the down arrow opens the menu from the keyboard', 'Escape shuts it',
+      'the buttons below did not move', 'the card ends a padding under its last box', 'the ask form, with similar questions',
+      'the down arrow opens the menu from the keyboard', 'Escape shuts it', 'two presses highlight the second option',
+      'no option is a focus stop of its own', 'Enter picks the highlighted option', 'refused under the box, the menu shut',
+      'the next keystroke clears the line, which stays rendered', 'the menu opens above it, inside the room there',
       'the menu shuts when the keyboard leaves the box', 'the room banner is back once the thread is on the page',
       'the card keeps a 14px inset and its boxes sit inside it', 'Post your question and Cancel stack full width under the card',
       'its rows are 42px targets']) {

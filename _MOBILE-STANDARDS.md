@@ -138,7 +138,10 @@ marked global.
     a MENU under its box (2026-09-08), and a menu is a panel that opens over
     the page, so it holds rules 6 and 10: as wide as its box and never wider
     than the screen, half the screen at most and scrolling inside itself,
-    its rows 42px targets; the form's card keeps a 14px inset and its two
+    its rows 42px targets, and it MEASURES after opening, from the visual
+    viewport (what a phone's keyboard shrinks): under the box while at
+    least 200px of room is there, else on the side with more room, growing
+    no further than that side allows; the form's card keeps a 14px inset and its two
     buttons stack full width under it (rule 11). `page-test.mjs` measures the forum's list,
     one thread, the open compose and the ask form with its menu open at 390px
     in its own forum block: the page
