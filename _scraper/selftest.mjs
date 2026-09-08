@@ -6339,7 +6339,7 @@ async function testUsersAndMessages() {
     'oa-users.js draws an Affiliation column');
   ok(/oa-u-aff/.test(users) && /esc\(r\.affiliation\)/.test(users),
     '…escaped, inside the span the stylesheet bounds');
-  ok(/'Name', 'E-mail', 'Affiliation', 'First seen'/.test(users) && /r\.affiliation \|\| ''/.test(users),
+  ok(/'Name', 'E-mail', 'Affiliation', 'JM candidate', 'Registered on'/.test(users) && /r\.affiliation \|\| ''/.test(users),
     'the CSV carries it beside the address');
   ok(/fold\(r\.affiliation\)\.indexOf\(q\)/.test(users),
     'and the Find box searches it');
@@ -6348,7 +6348,7 @@ async function testUsersAndMessages() {
 
   /* the identity columns never wrap; the affiliation wraps at its spaces */
   const uiCss = await readFile(path.join(HERE, '..', 'assets', 'oa-ui.css'), 'utf8');
-  const oneLine = /\.oa-u-table td\.oa-u-c-name,\s*\.oa-u-table td\.oa-u-c-email,\s*\.oa-u-table td\.oa-u-c-thread \{ white-space: nowrap; \}/;
+  const oneLine = /\.oa-u-table td\.oa-u-c-name,\s*\.oa-u-table td\.oa-u-c-email,\s*\.oa-u-table td\.oa-u-c-thread,[\s\S]{0,600}?\.oa-u-table td\.oa-u-c-seen \{ white-space: nowrap; \}/;
   ok(oneLine.test(uiCss),
     'the name, the address and the status chip are held to ONE LINE (white-space: nowrap) — ' +
     'the cells carried overflow-wrap: anywhere, which is what cut a name into "Xiaoda / n Shao"');
@@ -6386,6 +6386,89 @@ async function testUsersAndMessages() {
   const cm = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
   ok(cm.includes('### The roster reads whole, and says where each person is'),
     'CLAUDE.md records the decision');
+
+  /* ------------- …and the whole row fits on one screen, with the mark
+     (owner, 2026-09-08, second screenshot: "show Registered on, Last seen,
+     messages, message, delete but keep the columns tighter so that I can
+     quickly use that information. Also, show 'JM Candidate' to those
+     registered users that have posted a Candidate profile for this job
+     market year.") */
+
+  ok(/key: 'first', label: 'Registered on'/.test(users),
+    'the joined-date column reads "Registered on" — since the sync fills `first` from Auth\'s creationTime it is the day the account was made');
+  ok(!/'First seen'/.test(users), 'and "First seen" is gone from the panel and the CSV');
+  ok(/'Name', 'E-mail', 'Affiliation', 'JM candidate', 'Registered on',\s*'Last seen', 'Messages', 'uid'/.test(users)
+     && /r\.candidate \? 'Yes' : ''/.test(users),
+    'the CSV carries the JM candidate mark as a column');
+
+  /* the chip: a short word on screen, the long wording as its tooltip */
+  eq([U.threadShort(null), U.threadShort({ needsAdmin: true }), U.threadShort({ userUnread: 2 }), U.threadShort({})],
+    ['None', 'Awaiting you', 'Unread', 'Read'],
+    'threadShort names the four states in one or two words');
+  eq(new Set([null, { needsAdmin: true }, { userUnread: 2 }, {}].map(U.threadShort)).size, 4,
+    '…and every state gets its own word');
+  ok(/title="' \+ esc\(threadLabel\(t\)\) \+ '">' \+\s*esc\(threadShort\(t\)\)/.test(users),
+    'the chip prints the short word and carries the long label as its title');
+  ok(/threadLabel\(r\.thread\), r\.uid\]/.test(users), 'the CSV keeps the long wording');
+
+  /* the JM Candidate mark: the season through the one definition, the
+     statuses the build publishes, unknown marks nobody */
+  const fbjsU = await readFile(path.join(HERE, '..', 'assets', 'oa-firebase.js'), 'utf8');
+  ok(fbjsU.includes(`candidateSubmissions: '${U.CANDIDATES}'`),
+    'the mark is read from the collection the candidate form writes');
+  const candBuild = await readFile(path.join(HERE, '..', '_scraper', 'build-candidates.mjs'), 'utf8');
+  const liveIn = /where\('status', 'in', \[([^\]]*)\]\)/.exec(candBuild);
+  ok(liveIn, 'build-candidates.mjs names the statuses it publishes');
+  eq(U.CANDIDATE_LIVE.slice().sort(),
+    (liveIn ? liveIn[1] : '').split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean).sort(),
+    'CANDIDATE_LIVE is exactly the statuses the build publishes: a withdrawn or hidden profile is not a candidate on the site');
+  const loadCand = users.slice(users.indexOf('function loadCandidates('), users.indexOf('function load()'));
+  ok(loadCand.length > 200 && /NAV\.marketYear\(new Date\(\)\)/.test(loadCand),
+    'the season is OAJobNav.marketYear, the one definition, read at load time');
+  ok(/if \(!NAV \|\| typeof NAV\.marketYear !== 'function'\) return Promise\.resolve\(null\)/.test(loadCand),
+    'and without the module the answer is NULL (unknown), never a private guess at the season');
+  ok(/Number\(c\.year\) === year && CANDIDATE_LIVE\.indexOf\(c\.status\) >= 0/.test(loadCand),
+    'a profile counts for the season under way and a status the build publishes');
+  ok(/function \(\) \{ return null; \}\)/.test(loadCand),
+    'a read that fails resolves null: unknown marks nobody, never everybody');
+  ok(/r\.candidate = !!\(state\.candidates && state\.candidates\[doc\.id\]\)/.test(users),
+    'and a row is marked only when the read answered and named its uid');
+  ok(/class="oa-u-cand"[^>]*>JM Candidate</.test(users), 'the mark reads "JM Candidate", in those words');
+  ok(/!!r\.candidate && q\.length >= 3 && 'jm candidate'\.indexOf\(q\) >= 0/.test(users),
+    'and typing "candidate" into Find narrows the roster to them, so select-all under it messages every candidate');
+  const adminH = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(adminH.includes('assets/oa-jobnav.js'), 'admin-area.html loads the market rule the mark depends on');
+  ok(/JM Candidate/.test(adminH.slice(adminH.indexOf('id="oa-aa-users"'), adminH.indexOf('id="oa-aa-users-list"'))),
+    'the panel\'s copy names the mark and how to list only them');
+
+  /* the tighter table: measured in the browser suite, pinned here */
+  const tbl = uiCss.slice(uiCss.indexOf('.oa-u-table {'), uiCss.indexOf('.oa-u-sort {'));
+  ok(/font-size: 13px/.test(tbl) && /padding: 6px 7px/.test(tbl), 'the roster is 13px with 6px/7px cells');
+  ok(/\.oa-u-table thead th \{[^}]*white-space: normal/.test(tbl), 'a heading may wrap where its cells cannot');
+  ok(/\.oa-u-table \.oa-fb-status \{[^}]*text-transform: none/.test(tbl), 'the status chip is not uppercase in the roster');
+  const affCss2 = tbl.slice(tbl.indexOf('.oa-u-aff {'), tbl.indexOf('}', tbl.indexOf('.oa-u-aff {')));
+  ok(/-webkit-line-clamp: 2/.test(affCss2) && /overflow: hidden/.test(affCss2) && /max-width: 200px/.test(affCss2),
+    'the affiliation is clamped to two lines inside 200px');
+  ok(/title="' \+ esc\(r\.affiliation\) \+ '">/.test(users), '…with the whole text as its tooltip');
+  const candCss = tbl.slice(tbl.indexOf('.oa-u-cand {'), tbl.indexOf('}', tbl.indexOf('.oa-u-cand {')));
+  ok(/color: var\(--ok/.test(candCss) && /background-color: var\(--ok-soft/.test(candCss),
+    'the mark names its own ink AND its ground, in both themes\' tokens');
+  ok(/\.oa-u-table td\.oa-u-actions \.button\.oa-btn-ghost \{[^}]*font-size: 12\.5px/.test(tbl),
+    'the two buttons are small, at a specificity that beats v3.css\'s button rules');
+  ok(/\.oa-u-table td\.oa-u-c-first,\s*\.oa-u-table td\.oa-u-c-seen \{ white-space: nowrap; \}/.test(tbl),
+    'the two date cells never wrap: a date is one word, and overflow-wrap: anywhere was cutting it in two');
+  /* the panel breaks out of the 900px reading column on a desktop: measured
+     at 844px for four ordinary rows against a 722px column, so the column
+     was never going to hold eight columns at a readable size */
+  const bleed = uiCss.slice(uiCss.indexOf('#oa-aa-users {', uiCss.indexOf('@media (min-width: 1000px)')),
+    uiCss.indexOf('}', uiCss.indexOf('#oa-aa-users {', uiCss.indexOf('@media (min-width: 1000px)'))));
+  ok(/@media \(min-width: 1000px\) \{\s*#oa-aa-users \{/.test(uiCss),
+    'the roster panel breaks out of the reading column on a desktop only');
+  ok(/--oa-u-bleed: min\(1236px, 100vw - 44px\)/.test(bleed) && /width: var\(--oa-u-bleed\)/.test(bleed)
+     && /margin-left: calc\(50% - var\(--oa-u-bleed\) \/ 2\)/.test(bleed),
+    '…to the viewport\'s width inside the page\'s own gutter, capped at the header\'s width and centred on the column');
+  ok(!/#oa-aa-users/.test(v3css), 'and v3.css does not restate the panel\'s width, so the engine\'s rule is the one that reaches the site');
+  ok(cm.includes('JM Candidate'), 'CLAUDE.md records the mark');
 
   /* ---------------------------------------------------------- the threads */
 

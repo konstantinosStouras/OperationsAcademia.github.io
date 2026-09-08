@@ -1939,23 +1939,52 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
    "Show them fully") and the table is allowed to be as wide as its words. */
 .oa-u-wrap { overflow-x: auto; }
 
+/* THE ROSTER BREAKS OUT OF THE READING COLUMN ON A DESKTOP. The Admin area
+   is a `.v3-page`, a 900px column written for its panels of text and cards,
+   and eight columns of names, addresses, dates and buttons do not fit 722px
+   at any size that can still be read (measured: 844px for four ordinary
+   rows at 13px). So this one panel takes the viewport's width, up to the
+   header's own 1280px, centred on the column it sits in; below 1000px it
+   keeps the column and the table scrolls inside .oa-u-wrap as before. The
+   44px is the page's own gutter and is wider than any scrollbar, so 100vw
+   never makes the page scroll sideways. */
+@media (min-width: 1000px) {
+  #oa-aa-users {
+    --oa-u-bleed: min(1236px, 100vw - 44px);
+    width: var(--oa-u-bleed);
+    margin-left: calc(50% - var(--oa-u-bleed) / 2);
+  }
+}
+
+/* 13px and 6px/8px cells: the roster is read at a glance, eight columns
+   across, and at 14px with 8px/10px cells the dates, the status and both
+   buttons were off the right edge (owner, 2026-09-08: "keep the columns
+   tighter so that I can quickly use that information"). */
 .oa-u-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ink, #23272e);
 }
 .oa-u-table th,
 .oa-u-table td {
   text-align: left;
-  padding: 8px 10px;
+  padding: 6px 7px;
   border-bottom: 1px solid var(--line-soft, #ececec);
   overflow-wrap: anywhere;
 }
+/* A heading may WRAP ("Registered / on") where its cells are narrower than
+   it: the cells under it never wrap, so the heading is the one thing in
+   that column that can give, and a heading two lines tall costs nothing. */
 .oa-u-table thead th {
   border-bottom: 2px solid var(--line, #dcdfe4);
-  white-space: nowrap;
+  white-space: normal;
+  vertical-align: bottom;
 }
+/* The status chip in its own case, not uppercase: "REPLIED — AWAITING YOU"
+   set the column's width, and the short form in ordinary case is narrower
+   still. The long wording is the chip's tooltip. */
+.oa-u-table .oa-fb-status { text-transform: none; font-size: 12px; padding: 2px 7px; }
 /* --bg-3, not --bg-2: the panel this table sits in IS --bg-2
    (body.v3 .oa-panel), so hovering a row painted it its own colour and nothing
    moved — measured identical in both themes before this. */
@@ -1964,25 +1993,64 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
    exist here: it fell back to a hardcoded blue, theme-blind, which is exactly
    what this block's header says not to do. */
 .oa-u-table a { color: var(--brand, #3a424d); }
-.oa-u-tick { width: 34px; }
+.oa-u-tick { width: 28px; }
 /* A tick box is a touch target before it is a control. */
 .oa-u-tick input { width: 18px; height: 18px; }
 /* The name, the address and the status chip are never broken across lines:
    a name is two or three words and an address is one, and the whole point of
    the column is to read them. The affiliation is the exception — it can be a
    sentence ("Department of …, School of …, University of …") — so it wraps
-   at its SPACES inside a span bounded on both sides: never squeezed to a word
-   a line, never so wide that the dates fall off the screen. */
+   at its SPACES inside a span bounded on both sides and CLAMPED TO TWO LINES
+   (a five-line affiliation made the row as tall as four others and pushed
+   everything to its right off the screen); the whole text is the span's
+   tooltip and is in the CSV. */
 .oa-u-table td.oa-u-c-name,
 .oa-u-table td.oa-u-c-email,
-.oa-u-table td.oa-u-c-thread { white-space: nowrap; }
+.oa-u-table td.oa-u-c-thread,
+/* …and the two dates, which `overflow-wrap: anywhere` above was breaking
+   into "2026-0 / 9-08" the moment the row was short of room — measured at
+   23px wide, under a heading of "Registered on" that had wrapped letter by
+   letter. A date is one word. */
+.oa-u-table td.oa-u-c-first,
+.oa-u-table td.oa-u-c-seen { white-space: nowrap; }
 .oa-u-aff {
-  display: inline-block;
-  min-width: 160px;
-  max-width: 320px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-width: 140px;
+  max-width: 200px;
   white-space: normal;
   overflow-wrap: break-word;
-  vertical-align: top;
+}
+/* The name on its own line, and under it the JM Candidate mark: a pill that
+   names its own ink AND its ground (the dark-theme rule), in the green the
+   site uses for "yes", so it reads at a glance without a column of its own. */
+.oa-u-name { display: inline-block; }
+.oa-u-cand {
+  display: block;
+  width: max-content;
+  margin-top: 3px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--ok, #2e7d5b);
+  background-color: var(--ok-soft, #edf7f1);
+  border: 1px solid var(--ok, #2e7d5b);
+}
+/* The two buttons at the end of a row are SMALL: they are pressed once in a
+   while and read a hundred times, and at the site's button size they were
+   what pushed the row past the panel. Specific enough to beat v3.css's own
+   button rules. */
+.oa-u-table td.oa-u-actions .button.oa-btn-ghost {
+  padding: 4px 9px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  min-height: 0;
 }
 
 .oa-u-sort {

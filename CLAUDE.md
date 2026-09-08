@@ -1911,9 +1911,12 @@ there would be world-readable. The two sites are kept in the same SHAPE, so
 neither puts identity in the tally.
 
 **`registeredUsers.t` is not a joined date.** It is `set()` once per session, so
-it is *last seen*; the roster says "First seen" and "Last seen" and never
-"Joined". The true joined date is Auth's own `creationTime`, which only the Admin
-SDK can read.
+it is *last seen*. The roster's `first` was "first seen by this site" until the
+daily sync began filling it from Auth's own `creationTime`, which only the Admin
+SDK can read (see "The roster is seeded from Auth"); since 2026-09-08 the column
+reads **"Registered on"**, which is what that value is, with a brand-new
+account showing the day the site first saw it until the next run corrects it
+backwards.
 
 **The threads are TOP-LEVEL, and that is load-bearing.** Firestore ORs every
 matching rule, so under the blanket `match /users/{uid}/{document=**} { allow
@@ -2204,6 +2207,77 @@ the address and the chip each in ONE line box, the affiliation whole and
 within its bounds, the table wider than the panel and scrolling inside it
 with the page not scrolling sideways, a hostile affiliation rendered as text,
 and Find narrowing by affiliation.
+
+### …and fits on one screen, with the JM Candidate mark
+
+Owner, the same day, from a second screenshot: *"show 'Registered on', 'Last
+seen', messages, message, delete but keep the columns tighter so that I can
+quickly use that information. Also, show 'JM Candidate' to those registered
+users that have posted a Candidate profile for this job market year."* The
+one-line rule above had done its job and the cost was the other half of the
+table: an affiliation five lines tall, and the dates, the status and both
+buttons off the right edge behind it.
+
+**The row is tightened where the width went, not by wrapping the names
+again.** The table is 13px with 6px/7px cells; the affiliation is CLAMPED to
+two lines inside a 200px span with the whole text as its tooltip (and in the
+CSV); the status chip says one or two words in ordinary case ("Awaiting
+you") and carries the long wording as its tooltip, because "REPLIED —
+AWAITING YOU" in uppercase was setting the whole column's width; a heading
+may wrap where its cells cannot, since the cells under it never do; the two
+date cells are `nowrap` too (they never were, and `overflow-wrap: anywhere`
+was cutting "2026-09-08" in two the moment the row was short of room,
+measured at 23px wide); and the two buttons are small, at a specificity that
+beats `v3.css`'s own button rules (the Excel button's lesson).
+
+**And the panel breaks out of the reading column, because no tightening
+could have fitted it.** The Admin area is a `.v3-page`, a 900px column
+written for its panels of text and cards, which leaves the roster 722px at
+every desktop width; four ORDINARY rows at 13px measure 844px, so the eight
+columns the owner asked to see were never going to fit that column at a size
+anyone can read. On a desktop (`min-width: 1000px`) `#oa-aa-users` alone
+takes the viewport's width inside the page's own 44px gutter, capped at the
+header's 1280px and centred on the column it sits in (`margin-left: calc(50%
+- width / 2)`); the gutter is wider than any scrollbar, so `100vw` never
+makes the page scroll sideways, which the browser check measures. Below
+1000px the panel keeps the column and the table scrolls inside `.oa-u-wrap`
+as before. Measured in `page-test.mjs` over ORDINARY rows at 1100px and
+1280px: nothing to scroll inside the table, all eight columns and the Delete
+button inside the panel, an affiliation of a sentence no taller than two
+lines, the page not scrolling sideways. The deliberately over-wide row of the
+check above still scrolls, since a 44-character name is not something to
+squeeze.
+
+**"Registered on" is what `first` now is.** The daily sync fills it from
+Auth's `creationTime` (earliest wins), so it is the day the account was made;
+an account made since the last run shows the day the site first saw it until
+the next run corrects it backwards. The CSV heading follows.
+
+**"JM Candidate" is read LIVE, beside the roster, and marks nobody it cannot
+be sure of.** `loadCandidates` in `oa-users.js` reads `candidateSubmissions`
+(the maintainer may read the whole collection; no rules change), keeps the
+documents whose `year` is `OAJobNav.marketYear(now)` — the one definition of
+the season under way, loaded on the page already for the market-year panel —
+and whose status is one the build publishes (`CANDIDATE_LIVE`, pinned against
+`build-candidates.mjs`'s own query: queued or published, so a withdrawn or
+hidden profile is not a candidate on the site), and marks the roster rows
+their `uid`s name. The module absent or the read refused answers NULL, and
+null marks nobody: unknown draws nothing, the account menu's rule. The mark
+is a pill under the name rather than a column, in the site's "yes" green with
+its own ink and ground; the count line says how many; typing "candidate"
+into Find lists them alone, so select-all under it is how every candidate is
+messaged at once; and the CSV carries the mark as a column. The season is
+never stored on the roster row: a mark that was stored would be true on the
+day it was written and wrong from the July roll.
+
+Tests: the second block of `testUsersAndMessages` (the heading, the CSV
+column, the four short words and the tooltip, the collection and the
+statuses pinned against the build, the season through the module and NULL
+without it, the failed read, the Find rule, the copy, and the stylesheet's
+clamp, chip case, heading wrap and button size) and the roster block of
+`page-test.mjs` (Bea marked, last season's Cy and withdrawn Avery not, the
+count line, Find narrowing to candidates, the chip's word and tooltip, the
+heading, and the fit at both widths).
 
 ### The front page's fifth key figure is BORN HIDDEN
 

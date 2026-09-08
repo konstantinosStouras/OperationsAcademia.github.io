@@ -36,6 +36,32 @@
         (_scraper/sync-user-directory.mjs), which is also what clears it once a
         person blanks theirs. The maintainer reads it here and nowhere else;
         it is never published, exactly as the profile card promises.
+
+        …AND THE WHOLE ROW FITS ON ONE SCREEN (owner, 2026-09-08, second
+        screenshot: the dates, the status and both buttons had gone off the
+        right edge behind an affiliation five lines tall: "show Registered on,
+        Last seen, messages, message, delete but keep the columns tighter so
+        that I can quickly use that information"). The table is 13px with
+        6px/8px cells, the affiliation is clamped to TWO lines in a narrower
+        span with the whole text as its tooltip, the status chip carries a
+        short word ("Awaiting you") with the long wording as its tooltip, and
+        the two buttons are small. "First seen" reads "Registered on": since
+        the daily sync fills `first` from Auth's own creationTime it IS the
+        day the account was made (for an account made since the last sync it
+        is the day the site first saw it, corrected backwards by the next
+        run).
+
+        "JM CANDIDATE" MARKS AN ACCOUNT HOLDING A CANDIDATE PROFILE FOR THE
+        SEASON UNDER WAY (owner, the same message). The roster reads
+        `candidateSubmissions` beside the roster (the maintainer may read the
+        whole collection), keeps the documents whose `year` is
+        OAJobNav.marketYear(now) — the one definition of the season — and
+        whose status is one the build publishes (queued or published; a
+        withdrawn or hidden profile is not a candidate on the site), and marks
+        the roster rows their `uid`s name. A read that fails marks nobody,
+        never everybody. Typing "candidate" into Find narrows the roster to
+        them, so select-all under it is how every candidate is messaged at
+        once, and the CSV carries the mark as a column.
      2. MESSAGING — tick the people to reach, write once, send. It opens (or
         continues) one thread per person, which they read and reply to in
         their own personal area.
@@ -80,6 +106,13 @@
   var DIRECTORY = 'userDirectory';
   var THREADS = 'messages';
   var ITEMS = 'items';
+  /** The candidate profiles, read for the JM Candidate mark; pinned against
+      OAFB.col by selftest.mjs like the two above. */
+  var CANDIDATES = 'candidateSubmissions';
+  /** The statuses of a profile that IS on the site (or held for the reveal):
+      exactly what _scraper/build-candidates.mjs publishes, pinned by the
+      selftest. A withdrawn or hidden profile is not a candidate here. */
+  var CANDIDATE_LIVE = ['queued', 'published'];
 
   /** Every key the browser writes to `userDirectory/{uid}` — pinned against
       that rule's hasOnly() by selftest.mjs, both ways. Written by
@@ -139,6 +172,17 @@
     return 'Read';
   }
 
+  /** The same four states as ONE OR TWO WORDS, for the chip in the roster:
+      the long label set the whole column's width ("REPLIED — AWAITING YOU"
+      in uppercase) and pushed the buttons off the screen. The long label
+      stays as the chip's tooltip, in the CSV and on the orphaned threads. */
+  function threadShort(t) {
+    if (!t) return 'None';
+    if (t.needsAdmin) return 'Awaiting you';
+    if (t.userUnread > 0) return 'Unread';
+    return 'Read';
+  }
+
   /** Fold a name for sorting so accents and case do not scatter the list.
       The same instinct as OASchools' name folding, kept local and tiny. */
   function fold(s) {
@@ -174,6 +218,8 @@
     DIRECTORY: DIRECTORY,
     THREADS: THREADS,
     ITEMS: ITEMS,
+    CANDIDATES: CANDIDATES,
+    CANDIDATE_LIVE: CANDIDATE_LIVE,
     ROW_KEYS: ROW_KEYS,
     THREAD_KEYS: THREAD_KEYS,
     ITEM_KEYS: ITEM_KEYS,
@@ -183,6 +229,7 @@
     csvOf: csvOf,
     threadRank: threadRank,
     threadLabel: threadLabel,
+    threadShort: threadShort,
     fold: fold,
     sortRows: sortRows
   };
@@ -213,7 +260,17 @@
   var COLS = [
     {
       key: 'name', label: 'Name',
-      cell: function (r) { return esc(r.name || '—'); },
+      cell: function (r) {
+        /* The name in its own span (the one-line rule and the browser check
+           both hang on it), and under it the JM Candidate mark for an
+           account holding a candidate profile for the season under way. */
+        var html = '<span class="oa-u-name">' + esc(r.name || '—') + '</span>';
+        if (r.candidate) {
+          html += '<span class="oa-u-cand" title="Has a candidate profile for the ' +
+            esc(state.seasonLabel || 'current') + ' job market">JM Candidate</span>';
+        }
+        return html;
+      },
       sort: function (r) { return fold(r.name); }
     },
     {
@@ -235,12 +292,18 @@
            sentence. The span is what lets it wrap at its spaces inside a
            bounded width while the cells beside it never wrap at all. */
         if (!r.affiliation) return '—';
-        return '<span class="oa-u-aff">' + esc(r.affiliation) + '</span>';
+        // Clamped to two lines by the stylesheet; the whole text is the tooltip.
+        return '<span class="oa-u-aff" title="' + esc(r.affiliation) + '">' +
+          esc(r.affiliation) + '</span>';
       },
       sort: function (r) { return fold(r.affiliation); }
     },
     {
-      key: 'first', label: 'First seen',
+      /* "Registered on" (owner, 2026-09-08): since the daily sync fills
+         `first` from Auth's creationTime this is the day the account was
+         made; a brand-new account shows the day the site first saw it until
+         the next run corrects it backwards. */
+      key: 'first', label: 'Registered on',
       cell: function (r) { return esc(day(r.first) || '—'); },
       sort: function (r) { return typeof r.first === 'number' ? r.first : null; }
     },
@@ -254,7 +317,8 @@
       cell: function (r) {
         var t = r.thread;
         var cls = t && t.needsAdmin ? 'is-open' : 'is-closed';
-        return '<span class="oa-fb-status ' + cls + '">' + esc(threadLabel(t)) + '</span>';
+        return '<span class="oa-fb-status ' + cls + '" title="' + esc(threadLabel(t)) + '">' +
+          esc(threadShort(t)) + '</span>';
       },
       sort: function (r) { return threadRank(r.thread); }
     }
@@ -268,6 +332,11 @@
        empty map: an empty map would draw every row as though nothing were
        queued, and the control it draws deletes somebody. */
     deletions: null,
+    /* Which accounts hold a candidate profile for the season under way,
+       uid -> true, or NULL when the read failed or the market rule is
+       absent: unknown marks nobody, never everybody. */
+    candidates: null,
+    seasonLabel: '',
     sortKey: 'seen',
     sortDir: 'desc',
     filter: '',
@@ -281,10 +350,17 @@
     var q = fold(state.filter);
     var rows = !q ? state.rows : state.rows.filter(function (r) {
       return fold(r.name).indexOf(q) >= 0 || fold(r.email).indexOf(q) >= 0 ||
-        fold(r.affiliation).indexOf(q) >= 0;
+        fold(r.affiliation).indexOf(q) >= 0 ||
+        /* "candidate" (three letters or more of it) narrows to the JM
+           candidates, so select-all under it is how they are all messaged. */
+        (!!r.candidate && q.length >= 3 && 'jm candidate'.indexOf(q) >= 0);
     });
     var col = COLS.filter(function (c) { return c.key === state.sortKey; })[0] || COLS[3];
     return sortRows(rows, col.sort, state.sortDir);
+  }
+
+  function candidateCount() {
+    return state.rows.filter(function (r) { return !!r.candidate; }).length;
   }
 
   function pickedUids() {
@@ -449,7 +525,9 @@
           '<input type="search" id="oa-u-filter" placeholder="name, e-mail or affiliation" ' +
             'value="' + esc(state.filter) + '"></label>' +
         '<span class="oa-u-count">' + rows.length + ' of ' + state.rows.length +
-          ' shown' + (picked ? ' · ' + picked + ' selected' : '') + '</span>' +
+          ' shown' + (picked ? ' · ' + picked + ' selected' : '') +
+          (candidateCount() ? ' · ' + candidateCount() + ' JM candidate' +
+            (candidateCount() === 1 ? '' : 's') : '') + '</span>' +
         '<button type="button" class="button oa-btn-ghost" id="oa-u-csv">' +
           'Download CSV</button>' +
       '</div>' +
@@ -545,10 +623,11 @@
   }
 
   function downloadCsv() {
-    var headings = ['Name', 'E-mail', 'Affiliation', 'First seen', 'Last seen', 'Messages', 'uid'];
+    var headings = ['Name', 'E-mail', 'Affiliation', 'JM candidate', 'Registered on',
+      'Last seen', 'Messages', 'uid'];
     var rows = visible().map(function (r) {
-      return [r.name || '', r.email || '', r.affiliation || '', day(r.first), day(r.seen),
-        threadLabel(r.thread), r.uid];
+      return [r.name || '', r.email || '', r.affiliation || '', r.candidate ? 'Yes' : '',
+        day(r.first), day(r.seen), threadLabel(r.thread), r.uid];
     });
     /* THE BYTE ORDER MARK IS FOR EXCEL. It opens a .csv as the machine's own
        legacy code page unless the file announces UTF-8, so "École
@@ -758,6 +837,29 @@
 
   /* --------------------------------------------------------------- loading */
 
+  /** The uids holding a candidate profile for the season under way, or
+      NULL when it cannot be known. The season is OAJobNav.marketYear, the
+      ONE definition of which market is on; the statuses are the build's
+      own. Resolves rather than throws, like the deletions read beside it:
+      one refused collection must not empty the roster. */
+  function loadCandidates(d) {
+    var NAV = root.OAJobNav;
+    if (!NAV || typeof NAV.marketYear !== 'function') return Promise.resolve(null);
+    var year = NAV.marketYear(new Date());
+    state.seasonLabel = typeof NAV.marketLabel === 'function'
+      ? NAV.marketLabel(year) : String(year - 1) + '-' + String(year);
+    return d.collection(CANDIDATES).get().then(function (snap) {
+      var uids = {};
+      snap.forEach(function (doc) {
+        var c = doc.data() || {};
+        if (c.uid && Number(c.year) === year && CANDIDATE_LIVE.indexOf(c.status) >= 0) {
+          uids[c.uid] = true;
+        }
+      });
+      return uids;
+    }, function () { return null; });
+  }
+
   function load() {
     var host = $('oa-aa-users-list');
     return db().then(function (d) {
@@ -767,9 +869,11 @@
         /* …and which accounts are on their way out. Its own read, resolving
            null rather than throwing: the roster is what this panel is for,
            and one refused collection must not empty it. */
-        root.OAAccountDelete ? root.OAAccountDelete.loadRequests() : Promise.resolve(null)
+        root.OAAccountDelete ? root.OAAccountDelete.loadRequests() : Promise.resolve(null),
+        loadCandidates(d)
       ]).then(function (both) {
         state.deletions = both[2];
+        state.candidates = both[3];
         var threads = {};
         both[1].forEach(function (doc) {
           var t = doc.data() || {};
@@ -781,6 +885,7 @@
           var r = doc.data() || {};
           r.uid = doc.id;
           r.thread = threads[doc.id] || null;
+          r.candidate = !!(state.candidates && state.candidates[doc.id]);
           delete threads[doc.id];
           rows.push(r);
         });
