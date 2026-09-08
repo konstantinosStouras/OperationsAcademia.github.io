@@ -3377,6 +3377,21 @@ because every other list's badges are measured where they are. On a phone the
 tally lies ABOVE the question as a row, the same move the vote column makes in
 a thread (rule 13).
 
+**…and a column of air stands between the tally and the question** (owner,
+2026-09-08, of a screenshot with the tally circled: *"Add more space from
+e.g. 0 and 'about'. Have a vertical column of space between the
+votes/answers/views and the question so that it reads nicer."*). The numbers
+are right-aligned in their 104px column and the head carries 6px of its own
+inset, so they stood 8px from the title. The card's grid carries a
+`column-gap` now, ON THE GRID rather than on the head: the head, the footer
+and the "Open the thread" strip move together, so the title and the tag row
+under the excerpt keep one left edge. The phone block is untouched, since a
+one-column grid has no gap to widen and the tally lies above the title
+there. The selftest pins the gap where it is set and that nothing nudges the
+head or the footer on its own; `page-test.mjs` measures the gutter from the
+numbers' own right edge to the title off the rendered card, and that the tag
+row still shares the title's edge.
+
 The thread already had the shape: crumbs, a heading, a meta bar, a vote column
 per post, an answers band. What changed is the reading: square arrows rather
 than pills, the score the largest thing in its column, the who-block on the

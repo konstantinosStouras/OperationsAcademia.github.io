@@ -18682,6 +18682,16 @@ async function testForum() {
 
   ok(/grid-template-columns: 104px minmax\(0, 1fr\)/.test(pageCss),
     'forum card: a tally column on the left and the question beside it, the shape the owner asked for');
+  /* A COLUMN OF AIR BETWEEN THE TWO (owner, 2026-09-08: "Have a vertical
+     column of space between the votes/answers/views and the question so that
+     it reads nicer"). On the GRID, so the head, the footer and the strip move
+     together and the question keeps one left edge; the browser suite measures
+     the gutter off the rendered card. */
+  ok(/body\.v3 \.oa-forum-q \{[^}]*column-gap: 24px;/.test(pageCss),
+    'forum card: and a column of air between the tally and the question, on the grid rather than on the head (owner, 2026-09-08)');
+  ok(!/body\.v3 \.oa-forum-q \.oa-card-head \{[^}]*margin-left/.test(pageCss)
+     && !/body\.v3 \.oa-forum-q \.oa-forum-qfoot \{[^}]*margin-left/.test(pageCss),
+    'forum card: neither the head nor the footer is nudged on its own, or the two would take different left edges');
   ok(/oa-forum-stats'/.test(pageJs) && /is-answers/.test(pageJs) && /is-answers/.test(pageCss),
     'forum card: the tally column carries the votes and the replies, the answered ones marked');
   ok(/subtitle: function \(r\) \{ return r\.by; \}/.test(pageJs),

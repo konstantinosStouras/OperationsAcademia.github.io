@@ -10913,9 +10913,13 @@ for (const w of [320, 360, 390, 430]) {
         if (stats.l < chips[i].r && chips[i].l < stats.r && stats.t < chips[i].b && chips[i].t < stats.b) clash++;
       }
       const chipStyle = getComputedStyle(card.querySelector('.oa-badges .oa-label'));
+      const nums = [...card.querySelectorAll('.oa-forum-stat b')].map(box);
+      const foot = box(card.querySelector('.oa-forum-qfoot'));
       return {
         chips: chips.length, clash,
         tallyLeft: stats.r <= title.l + 0.5 && stats.t <= title.t + 40,
+        gutter: Math.round(title.l - Math.max(...nums.map((n) => n.r))),
+        oneEdge: Math.abs(chips[0].l - title.l) < 1,
         footRow: Math.abs(sub.b - chips[chips.length - 1].b) < 40 && sub.l > chips[0].l,
         answers: (card.textContent.match(/answers?/g) || []).length,
         replies: (card.textContent.match(/repl(y|ies)/g) || []).length,
@@ -10927,6 +10931,13 @@ for (const w of [320, 360, 390, 430]) {
     ok(geom.chips >= 2, `forum (candidate): the card carries a tag row of more than one chip, which is what could collide (${geom.chips})`);
     eq(geom.clash, 0, 'forum (candidate): no two chips overlap, none reaches up into the excerpt, and none runs into the tally column');
     ok(geom.tallyLeft, 'forum (candidate): the tally column sits to the LEFT of the title, the arrangement the owner asked for');
+    /* A COLUMN OF AIR BETWEEN THE TWO (owner, 2026-09-08, of a screenshot
+       with the tally circled: "Add more space from e.g. 0 and 'about'").
+       Measured from the numbers' own right edge to the title, off the
+       rendered card, and the tags under the excerpt keep the title's left
+       edge, so the gap moved the whole question and not the head alone. */
+    ok(geom.gutter >= 28, `forum (candidate): a clear column of space between the tally's numbers and the title (${geom.gutter}px)`);
+    ok(geom.oneEdge, 'forum (candidate): and the tag row under the excerpt keeps the title\'s own left edge');
     ok(geom.footRow, 'forum (candidate): the tags and who asked share the footer, tags left and asker right');
     /* AND THE CHIPS IN IT ARE REAL LINKS, not spans inside the head <button>:
        a control inside a button is not markup a browser will make focusable,
