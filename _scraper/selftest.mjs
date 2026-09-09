@@ -5610,13 +5610,38 @@ async function testUserDirectorySync() {
   ok(/collection\(TALLY\)\.get\(\)/.test(src) && /usersMeta\(accounts, now, marks\)/.test(src)
      && /usersGrowth\(accounts, now, marks\)/.test(src),
     'and main() reads it and hands it to both writers');
-  ok(/if \(!marks\) \{/.test(src) && src.indexOf('if (!marks) {') < src.indexOf('writeFile(path.join(DATA, USERS_META)'),
+  ok(/if \(!marks\) \{/.test(src) && src.indexOf('if (!marks) {') < src.indexOf('writeServed(USERS_META'),
     'a tally that could not be read, or reads as empty, leaves both served files as they are');
-  ok(/writeFile\(path\.join\(DATA, USERS_META\)/.test(src) && /writeFile\(path\.join\(DATA, USERS_GROWTH\)/.test(src),
-    'the sync writes both files');
-  ok(src.indexOf('if (!SCAN && !DRY) {') < src.indexOf('writeFile(path.join(DATA, USERS_META)')
+  ok(/writeServed\(USERS_META/.test(src) && /writeServed\(USERS_GROWTH/.test(src)
+     && !/writeFile\(path\.join\(DATA, USERS_/.test(src),
+    'the sync writes both files, and both through writeServed rather than unconditionally');
+  ok(src.indexOf('if (!SCAN && !DRY) {') < src.indexOf('writeServed(USERS_META')
      && /import \{ firebaseAdmin, redact \} from '\.\/_mail\.mjs'/.test(src) && !/async function firestoreAndAuth/.test(src),
     'never on a scan or a dry run, and the Admin SDK comes from _mail.mjs, the one definition');
+  /* the hourly cron is the whole point of the change: pinned so nobody quietly
+     puts it back to once a day and leaves the front page a decade behind */
+  ok(/- cron: '41 0-3,5-23 \* \* \*'/.test(wf),
+    'the served FIGURES are refreshed every hour, never once a day: at ten accounts a day and a '
+    + 'figure rounded down to the nearest ten, a daily run leaves the front page most of a decade behind');
+  ok(/- cron: '41 4 \* \* \*'/.test(wf) && !/- cron: '41 \* \* \* \*'/.test(wf),
+    'and the ROSTER keeps its daily fire on an hour the other cron leaves out, so exactly one fires at a time');
+  ok(/MODE='--figures-only'/.test(wf) && /github\.event\.schedule \}\}" = '41 0-3,5-23 \* \* \*'/.test(wf)
+     && /echo "SYNC_MODE=\$MODE" >> "\$GITHUB_ENV"/.test(wf)
+     && /sync-user-directory\.mjs \$SYNC_MODE/.test(wf),
+    'the hourly fire takes --figures-only, a dispatch takes the whole roster, and the retry rebuild takes the same mode');
+  ok(/const FIGURES = argv\.has\('--figures-only'\);/.test(src) && /if \(FIGURES\) continue;/.test(src)
+     && src.indexOf("if (FIGURES) {") < src.indexOf('collection(PROFILES).get()'),
+    'and --figures-only really skips the roster: neither of its two collection reads, and no row computed');
+  ok(/the roster was not read or written on this run/.test(src),
+    'a figures-only run says the roster was untouched rather than reporting rows it did not write');
+  /* the roster half stays DAILY, which three other files tell the maintainer it
+     is; an hourly roster would have quietly made every one of them false */
+  for (const [file, needle] of [['admin-area.html', /seeded daily from/],
+                                ['assets/oa-users.js', /the daily sync fills `first` from Auth/],
+                                ['_SETUP-FIREBASE.md', /filled by the daily sync/]]) {
+    ok(needle.test(await readFile(path.join(root, file), 'utf8')),
+      `${file} still says the roster is filled daily, which the --figures-only split keeps true`);
+  }
   /* the scan and dry-run lines print into a PUBLIC Actions log (the workflow's
      scan button runs them): the id and a redacted address, never the name */
   const syncMain = src.slice(src.indexOf('async function main()'), src.indexOf('/* ---------------------------------------------------------------- selftest */'));
@@ -5627,8 +5652,25 @@ async function testUserDirectorySync() {
   ok(syncLogs.every((l) => !/row\.name/.test(l) && !/user\.(email|displayName)/.test(l)
       && !/row\.email/.test(l.replace(/redact\(row\.email\)/g, ''))),
     'no log line in the sync names a person: an address through redact() only, and never the name (the _mail.mjs redact rule)');
-  ok(!/changes only when the count/.test(src) && !/changes only when the count/.test(wf),
-    'neither the sync nor its workflow claims the meta file changes only with the count: `generated` is the run instant, so both files change every run');
+  /* THE OPPOSITE OF WHAT THIS PINNED UNTIL 2026-09-09. It used to require that
+     neither file claimed to change "only when the count" does, because
+     `generated` was the run instant and every run therefore committed -- which
+     was affordable at one run a day and is not at twenty-four. The sync runs
+     hourly now (owner: the front page said 130+ over a tile reading 142), so
+     the stamp alone must NOT be a commit: writeServed keeps the committed
+     bytes whenever figuresMoved says a reader would see no difference. */
+  eq(mod.figuresMoved({ generated: 'a', count: 7 }, { generated: 'b', count: 7 }), false,
+    'figuresMoved: the stamp alone is not a difference a reader sees, so that run writes nothing');
+  eq(mod.figuresMoved({ generated: 'a', count: 7 }, { generated: 'a', count: 8 }), true,
+    'figuresMoved: one more registered user is');
+  eq(mod.figuresMoved(null, { generated: 'a', count: 7 }), true,
+    'figuresMoved: a file that is missing or unreadable is always written, since unknown is never "unchanged"');
+  ok(/async function writeServed\(/.test(src) && /if \(!figuresMoved\(before, doc\)\) return false;/.test(src),
+    'and writeServed is what applies it, the writeIfChanged discipline build-netmap.mjs already uses');
+  ok(/data\/\$\{USERS_META\} and data\/\$\{USERS_GROWTH\} already say/.test(src),
+    'the run says so when it wrote nothing, rather than leaving a silent no-op to read as a failure');
+  ok(!/commits daily/.test(wf) && /runs every hour/i.test(wf) && /ORDINARY outcome/.test(wf),
+    'and the workflow no longer claims it commits daily: "nothing changed" is the ordinary outcome now');
   ok(/const accounts = \[\];/.test(src)
      && /accounts\.push\(\{ uid: user\.uid, disabled: !!user\.disabled, metadata: \{ creationTime: \(user\.metadata \|\| \{\}\)\.creationTime \} \}\);/.test(src),
     'and what the files are built from holds the uid (the join key), the flags and the creation time only, never a name or an address');
@@ -5641,7 +5683,7 @@ async function testUserDirectorySync() {
   ok(/permissions:\s*\n\s*contents: write/.test(wf), 'the sync workflow may commit');
   ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wf), 'it checks out the branch TIP, never github.sha');
   ok(!/pull --rebase/.test(wfCode) && /git reset --hard FETCH_HEAD/.test(wfCode)
-     && /node _scraper\/sync-user-directory\.mjs\s*\n/.test(wfCode.slice(wfCode.indexOf('git reset --hard'))),
+     && /node _scraper\/sync-user-directory\.mjs( \$SYNC_MODE)?\s*\n/.test(wfCode.slice(wfCode.indexOf('git reset --hard'))),
     'a rejected push is answered by re-running the sync on the new tip, never by a rebase');
   ok((wf.match(/node _scraper\/selftest\.mjs --publishing/g) || []).length >= 3,
     'it runs the selftest in the publishing role before, after, and inside the retry');

@@ -18,24 +18,63 @@ name: OA — sync the registered-users roster
 # holds (owner, 2026-09-05: the front page said 130+ over a tile saying 106).
 # A tally that cannot be read leaves both files as they are.
 # Counts and dates only, nothing under data/ may carry a name or an address.
-# Both files change on every run (the growth file gains a point by
-# construction and the meta file's `generated` is the run instant), so this job
-# commits daily, like data/analytics.json, and the Commit step's "nothing
-# changed" branch is the guard for a scan or an empty checkout rather than a
-# routine outcome. The commit step is the rebuild-never-rebase retry every other data
+#
+# IT RUNS EVERY HOUR, and it used to run once a day (owner, 2026-09-09: the
+# front page said "130+" over an Admin area tile reading 142). Twenty-three of
+# those twenty-four fires refresh the two SERVED FIGURES only; the roster
+# itself is still rebuilt once a day, for the reasons under the crons below.
+# Once a day was never enough for the figure this feeds. The front page rounds the count DOWN
+# to the nearest ten and this market gains about ten accounts a day, so a
+# decade is crossed roughly once a day at an hour nobody can predict: the run
+# that wrote 137 at 09:11 left the page a whole decade behind for the rest of
+# the day. Hourly puts it at most one or two accounts behind, which the
+# rounding then hides entirely.
+#
+# THE EXTRA RUNS ARE NEARLY FREE, and that is what makes hourly affordable
+# rather than merely desirable. Two things buy it, and both were needed:
+#
+#   * the sync WRITES NOTHING when the figure has not moved (writeServed /
+#     figuresMoved in the script, the writeIfChanged discipline
+#     build-netmap.mjs already uses), because `generated` is the run instant
+#     and nothing anywhere reads it. So the Commit step's "nothing changed"
+#     branch is the ORDINARY outcome now rather than the guard for a scan it
+#     used to be, and only the runs where the count really moved, about ten a
+#     day, reach master and run the check suite;
+#   * the hourly run READS ONE COLLECTION instead of three. A full sync reads
+#     userDirectory, profiles and registeredUsers, about 450 documents at 150
+#     accounts and rising with the membership; the figures need registeredUsers
+#     and Auth alone. So the hourly fire passes --figures-only and the daily one
+#     does not, which is roughly 3,700 reads a day rather than 10,600.
+#
+# Hourly is a REQUEST, not a promise: GitHub delays scheduled workflows on a
+# busy repository, and this job's own 04:41 daily cron has been landing nearer
+# 09:00. What the change buys is that a delayed fire costs an hour or two
+# rather than a day, which is well inside the ten accounts the rounding hides.
+#
+# The commit step is the rebuild-never-rebase retry every other data
 # writer here uses: data/ is a build output, and a rejected push is answered
 # by taking the other writer's tip and running the sync again on top of it.
 #
-# The roster half is CHEAP and IDEMPOTENT: an account whose row is already
-# current costs no write. Daily is plenty (the browser keeps rows fresh as
-# people visit); the dispatch is for right after a rules deploy, which is
-# exactly the case that created the gap.
+# The roster half is CHEAP and IDEMPOTENT when it does run: an account whose
+# row is already current costs no write, and the browser keeps rows fresh as
+# people visit, so daily is plenty for it. The dispatch is for right after a
+# rules deploy, which is exactly the case that created the gap, and it takes
+# the whole roster rather than the figures alone.
 #
 # A no-op, saying so, until FIREBASE_SERVICE_ACCOUNT is set.
 
 on:
   schedule:
-    # once a day, off the hour so it does not queue behind every other :00 job
+    # EVERY HOUR BUT ONE, the two served figures only: the tally and Auth, which
+    # is the one collection the count is made of. Off the hour so it does not
+    # queue behind every other :00 job.
+    - cron: '41 0-3,5-23 * * *'
+    # AND ONCE A DAY the whole roster with them. The hours do not overlap, so
+    # exactly one of these fires at a time and `github.event.schedule` below
+    # says which. Keeping the roster daily is not thrift alone: the Admin area,
+    # assets/oa-users.js and _SETUP-FIREBASE.md all tell the maintainer that
+    # "Registered on" and the affiliation are filled DAILY from Auth, and an
+    # hourly roster would have quietly made all three false.
     - cron: '41 4 * * *'
   workflow_dispatch:
     inputs:
@@ -88,10 +127,21 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
+          # The hourly fire takes the figures alone; the daily one, and every
+          # dispatch (which is what a rules deploy presses), takes the roster
+          # too. github.event.schedule is empty on a dispatch, so the full run
+          # is the default and a new trigger can only ever be too thorough.
+          # Each step is its own shell, so the Commit step's rebuild reads this
+          # back from the environment rather than working the mode out again.
+          MODE=''
+          if [ "${{ github.event.schedule }}" = '41 0-3,5-23 * * *' ]; then
+            MODE='--figures-only'
+          fi
+          echo "SYNC_MODE=$MODE" >> "$GITHUB_ENV"
           if [ "${{ inputs.scan }}" = "true" ]; then
             node _scraper/sync-user-directory.mjs --scan
           else
-            node _scraper/sync-user-directory.mjs
+            node _scraper/sync-user-directory.mjs $MODE
           fi
 
       - name: Re-check the files we are about to commit
@@ -129,7 +179,7 @@ jobs:
             sleep $((i * 3))
             git fetch origin "$REF"
             git reset --hard FETCH_HEAD
-            node _scraper/sync-user-directory.mjs
+            node _scraper/sync-user-directory.mjs $SYNC_MODE
             if ! node _scraper/selftest.mjs --publishing; then
               echo "::error::the files rebuilt on the new tip failed the selftest, so nothing was committed."
               exit 1

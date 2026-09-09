@@ -106,7 +106,7 @@ import { isMain } from './_main.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { firebaseAdmin, redact } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -118,6 +118,14 @@ export const USERS_GROWTH = 'users-growth.json';
 const argv = new Set(process.argv.slice(2));
 const SCAN = argv.has('--scan');
 const DRY = argv.has('--dry-run');
+/* THE TWO SERVED FIGURES ALONE, WITHOUT THE ROSTER. The figures are read every
+   hour and the roster once a day, because they cost very different things: the
+   figures need the tally and Auth, while the roster needs `userDirectory` and
+   `profiles` too, which is three whole collections rather than one. It is also
+   what keeps the roster's own cadence honest: the Admin area, oa-users.js and
+   _SETUP-FIREBASE.md all say `first` and the affiliation are filled DAILY from
+   Auth, and they still are. */
+const FIGURES = argv.has('--figures-only');
 
 const log = (...a) => console.log(...a);
 const warn = (...a) => console.log('::warning::' + a.join(' '));
@@ -264,6 +272,23 @@ export function usersMeta(users, now, marks) {
 }
 
 /**
+ * Whether a READER would see any difference between the document already
+ * committed and the one this run built. `generated` is the run instant, so it
+ * moves on every run and means nothing to anybody: the front page reads
+ * `count`, the growth chart reads `days`, and nothing anywhere reads the
+ * stamp. Leaving it out of the comparison is what lets a sync that runs every
+ * hour write nothing -- and therefore commit nothing -- on the runs where the
+ * figure has not moved. Key order is not part of the answer, since one side
+ * has been through JSON.parse and the other has not.
+ */
+export function figuresMoved(before, after) {
+  if (!before || typeof before !== 'object' || Array.isArray(before)) return true;
+  const strip = (d) => JSON.stringify(Object.keys(d).filter((k) => k !== 'generated')
+    .sort().map((k) => [k, d[k]]));
+  return strip(before) !== strip(after);
+}
+
+/**
  * data/users-growth.json: the cumulative count, one point per UTC day from
  * the first account's creation day to the generated day. `n` for a day is
  * how many member accounts had been created by the end of it, so the
@@ -311,6 +336,19 @@ export function usersGrowth(users, now, marks) {
    null" (credential parsing, the missing-package warning); it returns the
    Firestore AND the Auth handle, and this job needs both. */
 
+/** Write a served file only when `figuresMoved` says a reader would see the
+    difference, and answer whether it wrote. Otherwise the committed bytes are
+    left exactly as they are, the stamp included, so `git status` is clean and
+    the run commits nothing. */
+async function writeServed(name, doc, body) {
+  const file = path.join(DATA, name);
+  let before = null;
+  try { before = JSON.parse(await readFile(file, 'utf8')); } catch { before = null; }
+  if (!figuresMoved(before, doc)) return false;
+  await writeFile(file, body);
+  return true;
+}
+
 async function main() {
   const fb = await firebaseAdmin();
   if (!fb) {
@@ -321,23 +359,31 @@ async function main() {
 
   const col = fb.db.collection(DIRECTORY);
 
-  /* What the roster already holds, read once: the merge needs the stored row
-     to preserve a site-derived name and to leave an unchanged account alone. */
+  /* THE ROSTER'S OWN TWO READS, SKIPPED ON A FIGURES-ONLY RUN. Neither says
+     anything about how many people have registered, so the hourly run pays for
+     neither: `existing` and `profiles` exist for `rowFromAuthUser` and nothing
+     else, and with no rows written there is nothing for them to merge into. */
   const existing = {};
-  (await col.get()).forEach((d) => { existing[d.id] = d.data() || {}; });
-  log(`roster holds ${Object.keys(existing).length} row(s) before this run`);
-
-  /* Every profile, read once, for the affiliation each row carries. NULL when
-     the read fails: rowFromAuthUser then keeps whatever affiliation a row
-     already holds rather than reading "could not be read" as "has none". */
   let profiles = null;
-  try {
-    profiles = {};
-    (await fb.db.collection(PROFILES).get()).forEach((d) => { profiles[d.id] = d.data() || {}; });
-    log(`${PROFILES} holds ${Object.keys(profiles).length} document(s)`);
-  } catch (e) {
-    profiles = null;
-    warn(`${PROFILES} could not be read: every row keeps the affiliation it already holds`);
+  if (FIGURES) {
+    log('--figures-only: the two served files, from the tally and Auth alone; the roster is left as it is.');
+  } else {
+    /* What the roster already holds, read once: the merge needs the stored row
+       to preserve a site-derived name and to leave an unchanged account alone. */
+    (await col.get()).forEach((d) => { existing[d.id] = d.data() || {}; });
+    log(`roster holds ${Object.keys(existing).length} row(s) before this run`);
+
+    /* Every profile, read once, for the affiliation each row carries. NULL when
+       the read fails: rowFromAuthUser then keeps whatever affiliation a row
+       already holds rather than reading "could not be read" as "has none". */
+    try {
+      profiles = {};
+      (await fb.db.collection(PROFILES).get()).forEach((d) => { profiles[d.id] = d.data() || {}; });
+      log(`${PROFILES} holds ${Object.keys(profiles).length} document(s)`);
+    } catch (e) {
+      profiles = null;
+      warn(`${PROFILES} could not be read: every row keeps the affiliation it already holds`);
+    }
   }
   const profileOf = (uid) => (profiles ? (profiles[uid] || null) : undefined);
 
@@ -363,7 +409,7 @@ async function main() {
   const accounts = [];
 
   const flush = async () => {
-    if (!pending.length || SCAN || DRY) { pending = []; return; }
+    if (!pending.length || SCAN || DRY || FIGURES) { pending = []; return; }
     const batch = fb.db.batch();
     /* A REPLACE, NOT A MERGE, and that is what lets the key GO. `row` is the
        whole document — the rules bound it to exactly these five keys — so a
@@ -383,6 +429,13 @@ async function main() {
     for (const user of page.users) {
       seen++;
       accounts.push({ uid: user.uid, disabled: !!user.disabled, metadata: { creationTime: (user.metadata || {}).creationTime } });
+      /* A FIGURES-ONLY RUN TOUCHES NO ROW AT ALL, and stops here rather than
+         relying on `flush` to throw the work away: `existing` and `profiles`
+         were never read, so every account would look new, and the summary
+         below would then report a hundred and fifty rows written on a run that
+         wrote none. The two served files need the flags and the creation time,
+         which are already on `accounts`. */
+      if (FIGURES) continue;
       const row = rowFromAuthUser(user, existing[user.uid], profileOf(user.uid));
       if (!row) { skipped++; continue; }
       written++;
@@ -401,13 +454,25 @@ async function main() {
 
   await flush();
 
-  log(summarise({ seen, written, skipped }));
+  log(FIGURES
+    ? `${seen} account(s) in Auth; the roster was not read or written on this run.`
+    : summarise({ seen, written, skipped }));
 
-  /* The two served files, from the same read. Written whole, every run, and
-     both CHANGE every run: the growth file gains a day's point by
-     construction and the meta file's `generated` is the run instant. So the
-     job commits daily, and the workflow's "nothing changed" branch is the
-     guard for a scan or an empty checkout, never a routine outcome. */
+  /* THE TWO SERVED FILES, FROM THE SAME READ, AND WRITTEN ONLY WHEN THE
+     FIGURE HAS MOVED. This job used to run once a day and write both files
+     whole on every run, since `generated` is the run instant -- so every run
+     was a commit, and that was affordable exactly because there was one run.
+     It runs every hour now (owner, 2026-09-09: the front page said 130+ while
+     the maintainer's own tile said 142, because the number is rounded down to
+     the nearest ten and a day of this market's growth is most of a decade), and
+     twenty-four commits a day for a number that moves about ten times would
+     run the whole check suite twenty-four times for nothing. So `writeServed`
+     keeps the committed stamp whenever the rest of the document is identical
+     and leaves the file byte for byte as it was: the workflow's "nothing
+     changed" branch is the ORDINARY outcome now rather than the guard for a
+     scan it used to be, and what `generated` records is the run that last
+     MOVED the figure. Nothing reads it -- the front page reads `count`, the
+     growth chart reads `days` -- so that is a change of meaning nobody sees. */
   const now = new Date();
   if (!marks) {
     log(`the tally was not read: data/${USERS_META} and data/${USERS_GROWTH} not written.`);
@@ -417,11 +482,28 @@ async function main() {
     const unmarked = accounts.filter((a) => !a.disabled && !marks.has(a.uid)).length;
     log(`${meta.count} registered users: ${accounts.length} account(s) in Auth, ` +
         `${unmarked} of them never signed in usably and ${accounts.length - unmarked - meta.count} disabled.`);
+    /* WHY THE ADMIN AREA'S TILE CAN READ HIGHER, said in the log rather than
+       left to be guessed at: the tile counts the TALLY, so a mark whose account
+       is disabled or has since been deleted in the Firebase console is still
+       one of its number, while the served count is the live Auth accounts
+       behind those marks. Counts only, as everywhere in this run's log. */
+    const live = new Set(accounts.filter((a) => !a.disabled).map((a) => a.uid));
+    const orphans = [...marks].filter((uid) => !live.has(uid)).length;
+    if (orphans) {
+      log(`${orphans} mark(s) in ${TALLY} have no live account behind them, so the ` +
+          `Admin area's tile reads ${marks.size} where the front page reads ${meta.count}.`);
+    }
     if (!SCAN && !DRY) {
-      await writeFile(path.join(DATA, USERS_META), JSON.stringify(meta, null, 2) + '\n');
-      await writeFile(path.join(DATA, USERS_GROWTH), JSON.stringify(growth) + '\n');
-      log(`wrote data/${USERS_META} (${meta.count} registered users) and ` +
-          `data/${USERS_GROWTH} (${growth.days.length} day(s) from ${growth.first || 'nothing'}).`);
+      const wrote = [];
+      if (await writeServed(USERS_META, meta, JSON.stringify(meta, null, 2) + '\n')) {
+        wrote.push(`data/${USERS_META} (${meta.count} registered users)`);
+      }
+      if (await writeServed(USERS_GROWTH, growth, JSON.stringify(growth) + '\n')) {
+        wrote.push(`data/${USERS_GROWTH} (${growth.days.length} day(s) from ${growth.first || 'nothing'})`);
+      }
+      log(wrote.length
+        ? `wrote ${wrote.join(' and ')}.`
+        : `data/${USERS_META} and data/${USERS_GROWTH} already say ${meta.count}: nothing to commit.`);
     } else {
       log(`would write data/${USERS_META} with count ${meta.count} and ` +
           `data/${USERS_GROWTH} with ${growth.days.length} day(s).`);
@@ -567,13 +649,54 @@ function selftest() {
   ok(!/@|Somebody|"uid"/.test(JSON.stringify(meta) + JSON.stringify(growth)),
     'neither file carries an address, a name or a uid, whatever the records held');
 
+  /* --- written only when a reader would see the difference (2026-09-09) ----
+     The job runs hourly now, so the stamp alone must not be a commit. */
+  ok(!figuresMoved({ generated: 'ages ago', count: 3 }, { generated: NOW.toISOString(), count: 3 }),
+    'a run that found the same count moves nothing: `generated` alone is not a difference a reader sees');
+  ok(figuresMoved({ generated: 'ages ago', count: 3 }, { generated: 'ages ago', count: 4 }),
+    'one more registered user IS a difference');
+  ok(!figuresMoved({ count: 3, generated: 'ages ago' }, { generated: NOW.toISOString(), count: 3 }),
+    'and key order is not part of the answer, since one side has been through JSON.parse');
+  ok(figuresMoved({ generated: '', first: '2026-09-02', days: [['2026-09-02', 3]] },
+                  { generated: '', first: '2026-09-02', days: [['2026-09-02', 3], ['2026-09-03', 3]] }),
+    'the growth file gaining a day is a difference even where the count stands still, so the chart keeps its point a day');
+  ok(figuresMoved(null, meta) && figuresMoved('not an object', meta) && figuresMoved([], meta),
+    'a file that is missing, empty or not an object is always written: unknown is never "unchanged"');
+  ok(!figuresMoved(JSON.parse(JSON.stringify(growth)), growth),
+    'and a growth document really does compare equal to itself through JSON');
+
+  /* THE ONE WAY THIS COULD STOP THE SITE PUBLISHING, pinned rather than
+     reasoned about. The two files are written independently now, so a run can
+     write one and not the other -- and selftest.mjs asserts over the COMMITTED
+     pair that the growth file's last point equals the meta file's count. The
+     case that does it is a UTC day turning over with nobody new: the count has
+     not moved, so users-meta is left alone, while users-growth gains a point.
+     It holds because that new point IS the count. */
+  const two = [acc('Tue, 08 Sep 2026 10:00:00 GMT', false, 'p'),
+               acc('Tue, 08 Sep 2026 11:00:00 GMT', false, 'q')];
+  const twoMarks = new Set(['p', 'q']);
+  const late = new Date('2026-09-09T23:41:00Z');
+  const over = new Date('2026-09-10T00:41:00Z');
+  const metaLate = usersMeta(two, late, twoMarks);
+  const growthOver = usersGrowth(two, over, twoMarks);
+  ok(!figuresMoved(metaLate, usersMeta(two, over, twoMarks)),
+    'a day turning over with nobody new leaves users-meta alone');
+  ok(figuresMoved(usersGrowth(two, late, twoMarks), growthOver),
+    'while users-growth gains that day\'s point');
+  eq(growthOver.days[growthOver.days.length - 1][1], metaLate.count,
+    'and the committed pair still agrees about the count, which is the guard that would '
+    + 'otherwise stop every data writer committing anything');
+
   /* the run writes nothing when the tally could not be read or is empty: the
      committed files stand, as with every unreachable source here */
   const runSrc = readFileSync(fileURLToPath(import.meta.url), 'utf8');
   const run = runSrc.slice(runSrc.indexOf('async function main()'), runSrc.indexOf('/* ---------------------------------------------------------------- selftest */'));
   ok(/if \(ids\.size\) marks = ids;/.test(run) && /if \(!marks\) \{/.test(run)
-     && run.indexOf('if (!marks) {') < run.indexOf('writeFile(path.join(DATA, USERS_META)'),
+     && run.indexOf('if (!marks) {') < run.indexOf('writeServed(USERS_META'),
     'an empty or unreadable tally leaves both served files as they are');
+  ok(/writeServed\(USERS_META/.test(run) && /writeServed\(USERS_GROWTH/.test(run)
+     && !/writeFile\(path\.join\(DATA, USERS_/.test(run),
+    'both served files go through writeServed, so a run that moves nothing writes nothing');
   ok(/collection\(TALLY\)\.get\(\)/.test(run) && /usersMeta\(accounts, now, marks\)/.test(run) && /usersGrowth\(accounts, now, marks\)/.test(run),
     'and the files are built from the tally the Admin area counts');
   ok(/collection\(PROFILES\)\.get\(\)/.test(run) && /rowFromAuthUser\(user, existing\[user\.uid\], profileOf\(user\.uid\)\)/.test(run),
