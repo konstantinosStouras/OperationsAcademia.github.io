@@ -6483,6 +6483,9 @@ async function testUsersAndMessages() {
     '…counted over the whole roster, so the numbers do not move as the maintainer types into Find');
   ok(/marked \+ ' JM candidate' \+ \(marked === 1 \? '' : 's'\) \+\s*\(seasonName\(markYear\(\)\) \? ' for ' \+ esc\(seasonName\(markYear\(\)\)\) : ''\)/.test(users),
     'and the count line NAMES its season, or a number that moves with the chooser says nothing about which market it counts');
+  ok(/if \(state\.candYear && candSeasons\(\)\.indexOf\(state\.candYear\) < 0\) state\.candYear = 0;/.test(users)
+     && users.indexOf('state.candYear = 0;') < users.indexOf('var rows = visible();'),
+    'a season the roster no longer holds drops back to All accounts BEFORE the rows are chosen — otherwise a refused read, or a withdrawn last profile, leaves the control saying "All accounts" over a list narrowed to a season nobody is in');
   const wireU = users.slice(users.indexOf("var y = $('oa-u-candyear');"), users.indexOf("var y = $('oa-u-candyear');") + 600);
   ok(/state\.candYear = Math\.trunc\(Number\(y\.value\)\) \|\| 0/.test(wireU)
      && /var again = \$\('oa-u-candyear'\);\s*if \(again\) again\.focus\(\)/.test(wireU),

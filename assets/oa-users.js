@@ -569,6 +569,17 @@
   function renderTable() {
     var host = $('oa-aa-users-list');
     if (!host) return;
+    /* A SEASON THE ROSTER NO LONGER HOLDS CANNOT STAY CHOSEN. `load()` runs
+       again on every auth change and after every write, and a chosen season
+       survives it — so if the candidate read then fails, or that season's
+       last profile is withdrawn, the <select> has no option to match and
+       falls back to showing "All accounts" while the list beneath it goes on
+       being narrowed to a season nobody is in. The control and the list
+       saying different things is the one thing this chooser is built not to
+       do; and a refused read must not empty the roster, which is the rule
+       the whole panel is held to. It only ever drops back to All accounts,
+       never to some other season the maintainer did not ask for. */
+    if (state.candYear && candSeasons().indexOf(state.candYear) < 0) state.candYear = 0;
     var rows = visible();
     var picked = pickedUids().length;
 
