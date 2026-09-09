@@ -17587,7 +17587,19 @@ async function testTopMenu() {
   const root = path.join(HERE, '..');
   const pages = readdirSync(root).filter((n) => n.endsWith('.html'));
 
-  const TOP = ['Jobs', 'Candidates', 'Forum', 'Survey'];
+  /* THE FORUM'S PLACE IN THE ROW FOLLOWS THE ANNOUNCE SWITCH, and that is not
+     defensiveness — it is the lesson from the guard this change had to fix.
+     The not-announced branch of testForum sweeps every root page and fails on
+     any href="forum"; demanding Forum in the nav unconditionally would make
+     the two mutually unsatisfiable the moment anyone flipped the switch back,
+     which is exactly the dead branch (`/forum.html` against the extensionless
+     rule) that had been sitting unnoticed in this file. Un-announcing stays a
+     coherent operation: take Forum out of the nav and flip the switch. */
+  const announced = /var FORUM_ANNOUNCED = true;/.test(
+    await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8'));
+  const TOP = announced
+    ? ['Jobs', 'Candidates', 'Forum', 'Survey']
+    : ['Jobs', 'Candidates', 'Survey'];
   const MARKET = ['Placements', 'Previous markets', 'Universities', 'Recent faculty', 'Analytics'];
   const SITE = ['Resources', 'FAQ', 'About', 'Contact', 'What&rsquo;s new'];
 
