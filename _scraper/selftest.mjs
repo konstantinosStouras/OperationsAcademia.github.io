@@ -6398,8 +6398,26 @@ async function testUsersAndMessages() {
     'the joined-date column reads "Registered on" — since the sync fills `first` from Auth\'s creationTime it is the day the account was made');
   ok(!/'First seen'/.test(users), 'and "First seen" is gone from the panel and the CSV');
   ok(/'Name', 'E-mail', 'Affiliation', 'JM candidate', 'Registered on',\s*'Last seen', 'Messages', 'uid'/.test(users)
-     && /\(r\.candYears \|\| \[\]\)\.map\(seasonName\)\.join\('; '\)/.test(users),
+     && /r\.candYears \? r\.candYears\.map\(seasonName\)\.join\('; '\) : CANDIDATES_UNKNOWN/.test(users),
     'the CSV carries the JM candidate mark as a column, naming the SEASONS rather than saying "Yes" — under the chooser set to All accounts it is the only place the year survives the download');
+
+  /* …AND NULL IS NOT AN EMPTY CELL. Every other surface says nothing at all
+     when the candidate read could not answer — no pill, no count, no chooser
+     — and the download is the one that has to write SOMETHING in every row.
+     An empty column there would read as "none of these people is a
+     candidate", which is the one claim this panel never makes. */
+  eq(U.CANDIDATES_UNKNOWN, 'not known',
+    'the CSV says a candidate read that could not answer is NOT KNOWN, rather than leaving a cell that reads as "not a candidate" for everybody in the file');
+  ok(!/^[=+\-@\t\r]/.test(U.CANDIDATES_UNKNOWN)
+     && U.csvCell(U.CANDIDATES_UNKNOWN) === '"' + U.CANDIDATES_UNKNOWN + '"',
+    '…in a form no spreadsheet reads as a formula');
+  /* said ONCE, as a constant, never a literal typed into the row builder —
+     read with the comments stripped, since the paragraph beside it explains
+     the wording in prose and a scan over the whole file would count that */
+  const usersBare = users.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  ok(/var CANDIDATES_UNKNOWN = '[^']+';/.test(usersBare)
+     && (usersBare.match(new RegExp("'" + U.CANDIDATES_UNKNOWN + "'", 'g')) || []).length === 1,
+    '…said once as a constant, never a literal typed into the row builder');
 
   /* the chip: a short word on screen, the long wording as its tooltip */
   eq([U.threadShort(null), U.threadShort({ needsAdmin: true }), U.threadShort({ userUnread: 2 }), U.threadShort({})],

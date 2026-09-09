@@ -6929,6 +6929,24 @@ for (const w of [320, 360, 390, 430]) {
       .indexOf('1 JM candidate for ' + seasonName(thisSeason)) !== -1,
       'roster: and All accounts narrows nothing, with the mark back on the season under way');
 
+    /* THE DOWNLOAD, with the read ANSWERING: the positive control for the
+       refused-read block below, which asserts the same column says the
+       state is not known. Between them the cell is pinned on both branches —
+       a ternary written the wrong way round passes neither. */
+    const okCsvWait = q.waitForEvent('download', { timeout: 30000 });
+    await q.click('#oa-u-csv');
+    const okCsv = (await readFile(await (await okCsvWait).path(), 'utf8'))
+      .replace(/^\uFEFF/, '').trim().split('\r\n');
+    const beaRow = okCsv.filter((r) => r.indexOf('bea@example.edu') !== -1)[0] || '';
+    const cyRow = okCsv.filter((r) => r.indexOf('cy@example.edu') !== -1)[0] || '';
+    const averyRow = okCsv.filter((r) => r.indexOf('avery@hostile.example') !== -1)[0] || '';
+    ok(beaRow.indexOf('"' + seasonName(thisSeason) + '"') !== -1
+       && cyRow.indexOf('"' + seasonName(lastSeason) + '"') !== -1,
+      'roster CSV: the JM candidate column names the SEASON each account is a candidate for, this one and last');
+    ok(averyRow.indexOf('""') !== -1 && averyRow.indexOf(seasonName(thisSeason)) === -1
+       && averyRow.indexOf('not known') === -1,
+      'roster CSV: …and an account that WITHDREW its profile gets an empty cell — no seasons is "no", where an unreadable list is "not known"');
+
     /* THE BAR STILL ENDS FLUSH. A fourth control makes the bar wrap at widths
        it did not before — measured, the download dropped onto a line of its
        own flush LEFT between 1000px and 1065px, which is where a laptop
@@ -7355,6 +7373,38 @@ for (const w of [320, 360, 390, 430]) {
       'roster: …with no candidate count claimed over a read that did not answer');
     eq(await q.locator('#oa-aa-users .oa-u-cand').count(), 0,
       'roster: …and nobody marked: unknown marks nobody, never everybody');
+
+    /* …AND THE DOWNLOAD SAYS SO. It is the one surface that has to write
+       SOMETHING in every row, so an empty JM candidate column here would
+       state in writing the one thing the panel on screen is careful never to
+       say: that none of these people is a candidate. */
+    const csvWait = q.waitForEvent('download', { timeout: 30000 });
+    await q.click('#oa-u-csv');
+    const csvDl = await csvWait;
+    const csv = await readFile(await csvDl.path(), 'utf8');
+    /* a real field split: every cell is quoted and an affiliation carries
+       commas of its own ("Kelley School of Business, Indiana University"),
+       so splitting on the character reads the wrong column */
+    const csvFields = (line) => {
+      const out = []; let cur = ''; let inQ = false;
+      for (let i = 0; i < line.length; i += 1) {
+        const ch = line[i];
+        if (inQ && ch === '"' && line[i + 1] === '"') { cur += '"'; i += 1; }
+        else if (ch === '"') inQ = !inQ;
+        else if (ch === ',' && !inQ) { out.push(cur); cur = ''; }
+        else cur += ch;
+      }
+      out.push(cur);
+      return out;
+    };
+    const csvRows = csv.replace(/^\uFEFF/, '').trim().split('\r\n').map(csvFields);
+    const candCol = csvRows[0].indexOf('JM candidate');
+    ok(candCol > 0, 'roster CSV: the JM candidate column is there');
+    const candCells = csvRows.slice(1).map((r) => r[candCol]);
+    ok(candCells.length > 2 && candCells.every((c) => c === 'not known'),
+      `roster CSV: every row says the candidate read is NOT KNOWN rather than leaving a cell ` +
+      `that reads as "not a candidate" for everybody in the file ` +
+      `(${JSON.stringify(candCells.slice(0, 3))})`);
     await ctx.close();
   }
 

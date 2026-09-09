@@ -166,6 +166,14 @@
 
   var MAXLEN = { name: 200, email: 200, affiliation: 300, body: 5000 };
 
+  /** What the CSV's JM candidate column says when the candidate read could
+      not answer. An EMPTY cell there is a claim — "not a candidate" — about
+      every person in the file, and it is the one claim this panel is
+      otherwise careful never to make: unknown draws no pill, no count and no
+      chooser. The download is the only surface that has to write SOMETHING in
+      every row, so it writes the state it is in. */
+  var CANDIDATES_UNKNOWN = 'not known';
+
   /* ------------------------------------------------------------ pure parts */
 
   /** A CSV cell that a spreadsheet cannot be tricked into EXECUTING. Excel and
@@ -283,6 +291,7 @@
     ITEM_KEYS: ITEM_KEYS,
     ITEM_OWNER_KEYS: ITEM_OWNER_KEYS,
     MAXLEN: MAXLEN,
+    CANDIDATES_UNKNOWN: CANDIDATES_UNKNOWN,
     csvCell: csvCell,
     csvOf: csvOf,
     threadRank: threadRank,
@@ -801,9 +810,16 @@
       /* The SEASONS rather than "Yes": one column, saying the mark and which
          market it is for. Under the chooser set to All accounts this is the
          only place the year survives the download, and a spreadsheet can sort
-         and filter on it — which is what a CSV of a roster is for. */
+         and filter on it — which is what a CSV of a roster is for.
+
+         …AND NULL IS NOT AN EMPTY CELL. `candYears` is null on every row when
+         the candidate read could not answer, and an empty column then reads
+         as "none of these people is a candidate" — an answer, where the panel
+         on screen is saying nothing at all (no pill, no count, no chooser).
+         So the cell says it is not known, on every row, and the column reads
+         as the state it is in rather than as a fact about anybody. */
       return [r.name || '', r.email || '', r.affiliation || '',
-        (r.candYears || []).map(seasonName).join('; '),
+        r.candYears ? r.candYears.map(seasonName).join('; ') : CANDIDATES_UNKNOWN,
         day(r.first), day(r.seen), threadLabel(r.thread), r.uid];
     });
     /* THE BYTE ORDER MARK IS FOR EXCEL. It opens a .csv as the machine's own

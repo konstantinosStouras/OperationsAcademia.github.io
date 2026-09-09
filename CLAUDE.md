@@ -2452,6 +2452,19 @@ the year survives the download, and a spreadsheet can sort and filter on it.
 Two columns saying overlapping things is what this file forbids everywhere
 else.
 
+**…and NULL is not an empty cell there.** Every other surface says NOTHING when
+the candidate read could not answer — no pill, no count, no chooser, the
+unknown-draws-nothing rule — and the download is the one that has to write
+something in every row. An empty column would therefore state in writing the
+single claim this panel is otherwise careful never to make: that none of these
+people is a candidate. It says **`not known`** instead (`CANDIDATES_UNKNOWN`,
+one constant, so the row builder types no literal), on every row, so the
+column reads as the state it is in rather than as a fact about anybody. An
+account with no live profile still gets an EMPTY cell: no seasons is "no",
+where an unreadable list is "not known", and the browser suite pins the two
+apart on the same column — the withdrawn profile empty on a read that
+answered, every row `not known` on one that did not.
+
 **AND IT HAD TO BE HANDED BACK ITS ARROW.** The roster panel sits inside
 `<div class="oa-form" id="oa-aa">`, so an ordinary `<select>` dropped into this
 bar is caught by `.oa-form select` — `appearance: none` plus a hand-drawn
@@ -2493,7 +2506,9 @@ the mark and the tooltip following, the count line naming it, the keyboard
 left on the control, select-all under a chosen season, the withdrawn profile
 never listed, All accounts putting the mark back on the season under way, the
 arrow measured as the property (there is one, the browser's or a drawn one),
-and the 42px target at 390px.
+the 42px target at 390px, and the CSV downloaded on BOTH branches — the
+seasons named where the read answered with the withdrawn profile's cell empty,
+and every row reading `not known` where it did not.
 
 ### The front page's fifth key figure is BORN HIDDEN
 
