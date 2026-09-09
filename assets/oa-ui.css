@@ -1964,6 +1964,17 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   padding-right: 10px;
 }
 .oa-u-count { font-size: 13px; color: var(--mut, #646c78); margin-right: auto; }
+/* …AND THE DOWNLOAD HOLDS THE BAR'S RIGHT EDGE ON WHATEVER LINE IT LANDS ON.
+   `.oa-u-count { margin-right: auto }` above reaches the button only while
+   the two share a line: once the bar wraps, the button starts a NEW flex line
+   that the count's margin cannot reach, and a lone control sits flush LEFT
+   under the bar — the stray-line look. Measured on the tree before the season
+   chooser at 560px, 641px and 700px, and with it in the 1000–1065px band the
+   chooser's own width opens up. Its own auto margin follows it onto whichever
+   line it lands on; where the two share a line the two autos split one gap
+   and the button ends exactly where it did, which is what keeps this from
+   moving anything that was already right. */
+#oa-u-csv { margin-left: auto; }
 
 /* An e-mail address has no spaces, so it sets a table's minimum width: the
    table scrolls inside its OWN container rather than making the page scroll
@@ -2190,8 +2201,15 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   /* The action column never wraps its button; everything else may. */
   .oa-u-bar { gap: 8px; }
   .oa-u-count { margin-right: 0; width: 100%; }
-  /* Rule 13 of _MOBILE-STANDARDS.md: a control a finger presses is 42px. */
-  .oa-u-year select { min-height: 42px; }
+  /* The bar stacks here and the download keeps the left edge it has always
+     had on a phone, under a count that takes the whole line. */
+  #oa-u-csv { margin-left: 0; }
+  /* NO min-height for the season chooser: rule 13's 42px is already met, and
+     exceeded, by `body.v3 .oa-form select { min-height: 44px }` — this panel
+     sits inside a `.oa-form`, and that rule is (0,2,2) where anything written
+     here on the class alone is (0,1,1) and would be inert. A rule that cannot
+     win is not a rule; the browser suite measures the rendered height at
+     390px, which is the guarantee that actually holds. */
   .oa-u-table { font-size: 13px; }
   .oa-u-table th, .oa-u-table td { padding: 7px 8px; }
   /* Remove / Restore is a text button, and a text button on a phone is a tap

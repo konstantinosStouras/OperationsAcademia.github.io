@@ -6929,6 +6929,27 @@ for (const w of [320, 360, 390, 430]) {
       .indexOf('1 JM candidate for ' + seasonName(thisSeason)) !== -1,
       'roster: and All accounts narrows nothing, with the mark back on the season under way');
 
+    /* THE BAR STILL ENDS FLUSH. A fourth control makes the bar wrap at widths
+       it did not before — measured, the download dropped onto a line of its
+       own flush LEFT between 1000px and 1065px, which is where a laptop
+       window commonly sits. The button carries its own `margin-left: auto`
+       now, so it holds the right edge on whichever line it lands on.
+       Measured as GEOMETRY across the band, not as a class. */
+    for (const w of [1280, 1066, 1024, 1000, 900, 700]) {
+      await q.setViewportSize({ width: w, height: 1000 });
+      const edge = await q.evaluate(() => {
+        const bar = document.querySelector('#oa-aa-users .oa-u-bar');
+        const btn = document.getElementById('oa-u-csv');
+        return { bar: Math.round(bar.getBoundingClientRect().right),
+          btn: Math.round(btn.getBoundingClientRect().right),
+          over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      ok(Math.abs(edge.bar - edge.btn) <= 1 && edge.over <= 1,
+        `roster at ${w}px: the download holds the bar's right edge rather than orphaning ` +
+        `flush left on a line of its own (bar ${edge.bar}, button ${edge.btn}, page overflow ${edge.over})`);
+    }
+    await q.setViewportSize({ width: 1280, height: 1000 });
+
     /* THE WHOLE ROW FITS ON ONE SCREEN (owner, 2026-09-08, second report:
        the dates, the status and both buttons had gone off the right edge).
        Measured over the ORDINARY rows — the hostile name and the
@@ -7285,6 +7306,55 @@ for (const w of [320, 360, 390, 430]) {
       'for a person the maintainer has never written to');
 
     eq(errors, [], 'messages: reader run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- ONE REFUSED COLLECTION MUST NOT EMPTY THE ROSTER ---------------------
+
+     `load()` runs again on every auth change and after every write, and the
+     chosen season survives it. If the candidate read then fails, every row's
+     `candYears` is null and a chosen season would filter every account off
+     the panel — with the chooser withheld exactly then, so nothing is left
+     on the page to undo it. Driven for real: a season chosen, the collection
+     refused, and a reload forced by an action the panel already performs. */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const q = await ctx.newPage();
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user: ADMIN, docs: seed })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
+    /* THE SEASON UNDER WAY, deliberately: `candSeasons()` seeds it
+       unconditionally, so asking only whether the chosen season is still
+       OFFERED never drops this one — which is the whole reason the guard has
+       to ask whether the read answered at all. Choosing a PAST season here
+       would pass with that half of the guard missing. */
+    await q.selectOption('#oa-u-candyear', String(marketYear()));
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 1, null, { timeout: 10000 });
+
+    /* the collection stops answering, and the panel reloads — the ghost
+       delete below is one of the writes that calls load() */
+    await q.evaluate(() => { window.__FAKE_FB.refuseReads = ['candidateSubmissions']; });
+    q.once('dialog', (d) => d.accept());
+    await q.click('#oa-aa-users .oa-u-del[data-uid="u-gone-9"]');
+    await q.waitForFunction(() => !document.getElementById('oa-u-candyear'),
+      null, { timeout: 10000 });
+    ok(true, 'roster: a candidate read that cannot answer draws no season chooser — unknown draws nothing');
+    /* the PROPERTY, not a row count: three accounts no single season could
+       show together — this season's candidate, last season's, and one who
+       withdrew — so the narrowing is provably gone rather than merely
+       loosened. (A count would race the admin's own roster row, which
+       `syncDirectoryRow` writes on sign-in.) */
+    const back = await q.textContent('#oa-aa-users tbody');
+    ok(back.indexOf('bea@example.edu') !== -1 && back.indexOf('cy@example.edu') !== -1
+       && back.indexOf('avery@hostile.example') !== -1,
+      'roster: …and the season chosen before it failed does NOT empty the roster — one refused collection must not, and there would be no control left to undo it');
+    ok((await q.textContent('#oa-aa-users .oa-u-count')).indexOf('JM candidate') === -1,
+      'roster: …with no candidate count claimed over a read that did not answer');
+    eq(await q.locator('#oa-aa-users .oa-u-cand').count(), 0,
+      'roster: …and nobody marked: unknown marks nobody, never everybody');
     await ctx.close();
   }
 

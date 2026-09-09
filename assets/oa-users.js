@@ -219,7 +219,15 @@
       can drive it. A profile with no uid, no year, or a status the build does
       not publish (withdrawn, hidden, removed) is not a candidacy at all. */
   function candidateYearsOf(docs) {
-    var by = {};
+    /* A PROTOTYPE-FREE MAP, because the keys are uids read out of documents.
+       `var by = {}` reads `by['constructor']` back as a FUNCTION, which is
+       truthy, so the accumulator below took it for its own list and threw on
+       `list.indexOf` — and a throw here rejects the read that promises to
+       resolve, which takes the whole roster down to "Could not load". The
+       rules pin a profile's `uid` to its writer's own auth uid, so no signed-in
+       reader can post one of these names; the Admin SDK is not bound by them,
+       and one line removes the class. */
+    var by = Object.create(null);
     (docs || []).forEach(function (c) {
       if (!c || !c.uid || CANDIDATE_LIVE.indexOf(c.status) < 0) return;
       var y = Math.trunc(Number(c.year));
@@ -569,17 +577,29 @@
   function renderTable() {
     var host = $('oa-aa-users-list');
     if (!host) return;
-    /* A SEASON THE ROSTER NO LONGER HOLDS CANNOT STAY CHOSEN. `load()` runs
+    /* A NARROWING THE PANEL CANNOT EVALUATE IS NO NARROWING. `load()` runs
        again on every auth change and after every write, and a chosen season
-       survives it — so if the candidate read then fails, or that season's
-       last profile is withdrawn, the <select> has no option to match and
-       falls back to showing "All accounts" while the list beneath it goes on
-       being narrowed to a season nobody is in. The control and the list
-       saying different things is the one thing this chooser is built not to
-       do; and a refused read must not empty the roster, which is the rule
-       the whole panel is held to. It only ever drops back to All accounts,
-       never to some other season the maintainer did not ask for. */
-    if (state.candYear && candSeasons().indexOf(state.candYear) < 0) state.candYear = 0;
+       survives it — so a candidate read that then FAILS leaves every row's
+       `candYears` null, `isCandIn` answers false for all of them, and the
+       chosen season empties the roster ENTIRELY. There is no way back
+       either: the chooser is withheld exactly when that read failed, so the
+       one control that could undo it is no longer on the page. ONE REFUSED
+       COLLECTION MUST NOT EMPTY THE ROSTER — the rule the whole panel is
+       held to, and the reason the read resolves null rather than throwing.
+       (Asking only whether the season is still OFFERED does not catch it:
+       `candSeasons()` seeds the season under way unconditionally, so a
+       maintainer who had chosen THIS season kept a narrowing nothing could
+       satisfy.)
+
+       The same drop catches a season whose last live profile has since been
+       withdrawn, where the <select> would otherwise have no option to match
+       and fall back to showing "All accounts" over a list narrowed to a
+       season nobody is in — the control and the list saying different
+       things, which is the one thing this chooser is built not to do. It
+       only ever drops back to All accounts, never to some other season the
+       maintainer did not ask for. */
+    if (state.candYear && (!state.candidates ||
+        candSeasons().indexOf(state.candYear) < 0)) state.candYear = 0;
     var rows = visible();
     var picked = pickedUids().length;
 
@@ -1008,11 +1028,15 @@
     var NAV = root.OAJobNav;
     if (!NAV || typeof NAV.marketYear !== 'function') return Promise.resolve(null);
     state.year = NAV.marketYear(new Date());
+    /* `.then(fn).catch(...)`, never `.then(fn, onError)`: the two-argument
+       form catches the READ failing and not the mapping throwing, so the
+       promise this function says resolves could still reject and empty the
+       whole roster. One catch after the work covers both. */
     return d.collection(CANDIDATES).get().then(function (snap) {
       var docs = [];
       snap.forEach(function (doc) { docs.push(doc.data() || {}); });
       return candidateYearsOf(docs);
-    }, function () { return null; });
+    })['catch'](function () { return null; });
   }
 
   function load() {

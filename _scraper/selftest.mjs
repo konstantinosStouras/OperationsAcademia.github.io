@@ -6429,7 +6429,7 @@ async function testUsersAndMessages() {
     'and without the module the answer is NULL (unknown), never a private guess at the season');
   ok(/return candidateYearsOf\(docs\)/.test(loadCand) && !/=== year/.test(loadCand),
     'the read keeps EVERY season, through the one pure rule — narrowing it to the season under way is what made a past market unreachable from this panel');
-  ok(/function \(\) \{ return null; \}\)/.test(loadCand),
+  ok(/\['catch'\]\(function \(\) \{ return null; \}\)/.test(loadCand),
     'a read that fails resolves null: unknown marks nobody, never everybody');
   ok(/r\.candYears = state\.candidates \? \(state\.candidates\[doc\.id\] \|\| \[\]\) : null/.test(users),
     'and a row carries the seasons only when the read answered — NULL, never an empty list, when it could not: the two mean different things and only one of them is "no"');
@@ -6483,9 +6483,27 @@ async function testUsersAndMessages() {
     '…counted over the whole roster, so the numbers do not move as the maintainer types into Find');
   ok(/marked \+ ' JM candidate' \+ \(marked === 1 \? '' : 's'\) \+\s*\(seasonName\(markYear\(\)\) \? ' for ' \+ esc\(seasonName\(markYear\(\)\)\) : ''\)/.test(users),
     'and the count line NAMES its season, or a number that moves with the chooser says nothing about which market it counts');
-  ok(/if \(state\.candYear && candSeasons\(\)\.indexOf\(state\.candYear\) < 0\) state\.candYear = 0;/.test(users)
+  ok(/if \(state\.candYear && \(!state\.candidates \|\|\s*candSeasons\(\)\.indexOf\(state\.candYear\) < 0\)\) state\.candYear = 0;/.test(users)
      && users.indexOf('state.candYear = 0;') < users.indexOf('var rows = visible();'),
-    'a season the roster no longer holds drops back to All accounts BEFORE the rows are chosen — otherwise a refused read, or a withdrawn last profile, leaves the control saying "All accounts" over a list narrowed to a season nobody is in');
+    'a narrowing the panel cannot evaluate is NO narrowing, dropped BEFORE the rows are chosen: a refused candidate read leaves every row\'s seasons null, so a chosen season would empty the roster entirely — and the chooser, withheld exactly then, is no longer there to undo it');
+  ok(/!state\.candidates \|\|/.test(users.slice(users.indexOf('function renderTable()'), users.indexOf('var rows = visible();'))),
+    '…and the read-did-not-answer half is what catches the season UNDER WAY, which candSeasons() offers unconditionally and season membership alone therefore never drops');
+
+  /* A PROTOTYPE KEY MUST NOT TAKE THE ROSTER DOWN. The keys are uids read out
+     of documents; `var by = {}` reads `by['constructor']` back as a truthy
+     FUNCTION and the accumulator threw on `list.indexOf` — and a throw there
+     rejects a read that promises to resolve. */
+  for (const hostile of ['constructor', '__proto__', 'toString', 'valueOf']) {
+    let answered = null;
+    try { answered = U.candidateYearsOf([{ uid: hostile, year: 2027, status: 'published' }]); } catch (e) { answered = null; }
+    eq(answered && answered[hostile], [2027],
+      `candidateYearsOf survives a uid naming Object.prototype's "${hostile}" and files it like any other`);
+  }
+  ok(/var by = Object\.create\(null\);/.test(users),
+    '…because the accumulator is prototype-free, which is the one line that removes the class');
+  ok(/\}\)\['catch'\]\(function \(\) \{ return null; \}\);/.test(loadCand)
+     && !/\}, function \(\) \{ return null; \}\)/.test(loadCand),
+    'and the read catches AFTER the mapping, never as `.then(fn, onError)`, whose second argument covers the read failing and not the mapping throwing — the promise this function says resolves could otherwise reject and empty the whole roster');
   const wireU = users.slice(users.indexOf("var y = $('oa-u-candyear');"), users.indexOf("var y = $('oa-u-candyear');") + 600);
   ok(/state\.candYear = Math\.trunc\(Number\(y\.value\)\) \|\| 0/.test(wireU)
      && /var again = \$\('oa-u-candyear'\);\s*if \(again\) again\.focus\(\)/.test(wireU),
@@ -6493,8 +6511,13 @@ async function testUsersAndMessages() {
   const yearCss = uiCss.slice(uiCss.indexOf('.oa-u-find, .oa-u-year {'), uiCss.indexOf('.oa-u-count {'));
   ok(/\.oa-u-find input, \.oa-u-year select \{ font-size: 16px; \}/.test(yearCss),
     'the chooser is 16px like the Find box: anything smaller and iOS zooms the page when it takes focus');
-  ok(/\.oa-u-year select \{ min-height: 42px; \}/.test(uiCss.slice(uiCss.indexOf('@media (max-width: 480px)'))),
-    '…and 42px on a phone, rule 13 of _MOBILE-STANDARDS.md');
+  const phoneBar = uiCss.slice(uiCss.indexOf('@media (max-width: 480px)'));
+  ok(!/\.oa-u-year select \{[^}]*min-height/.test(phoneBar),
+    'and the chooser writes NO phone min-height of its own: rule 13\'s 42px is already met by `body.v3 .oa-form select { min-height: 44px }` — the panel is inside a `.oa-form`, and that rule is (0,2,2) where anything on the class alone is (0,1,1) and would be inert. A rule that cannot win is not a rule; page-test.mjs measures the rendered height at 390px, which is the guarantee that holds');
+  ok(/body\.v3 \.oa-form input, body\.v3 \.oa-form select \{\s*font-size: 16px; min-height: 44px;/.test(v3css),
+    '…and that is the rule it leans on, pinned so a change to it cannot silently drop this control under the standard');
+  ok(/#oa-u-csv \{ margin-left: auto; \}/.test(uiCss) && /#oa-u-csv \{ margin-left: 0; \}/.test(phoneBar),
+    'the download holds the bar\'s right edge on whatever line it lands on — once the bar wraps, the count\'s `margin-right: auto` cannot reach a button on the next line and it sits flush LEFT — with the phone keeping the left edge it has always had');
   /* THE ARROW. The panel is inside `<div class="oa-form" id="oa-aa">`, so a
      bare select here is stripped of the native arrow by `.oa-form select` and
      then has the hand-drawn chevron blanked by v3.css's `background`
