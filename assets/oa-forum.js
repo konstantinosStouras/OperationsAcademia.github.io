@@ -1305,9 +1305,14 @@
       list has already read and the seen-marks it already keeps, so watching a
       tag costs no read, no document and nothing the site could later be asked
       to hand over. It is the in-app half of "tell me when a question carries
-      this tag"; the e-mail half waits for the forum to be announced, since a
-      digest naming a thread in the Candidates' room would announce the forum
-      to whoever opens the message. */
+      this tag". The e-mail half is STILL NOT BUILT: it waited on the forum
+      being announced, which happened on 2026-09-09, so what is left is the
+      work itself. The shape is a fifth topic on the existing alerts, with the
+      room checked per subscriber at send time, since a digest naming a thread
+      in the Candidates' room must not reach an account that room refuses.
+      Said plainly here because "waits for the forum to be announced" now
+      reads as done, and a deferral that has quietly become a false claim is
+      the failure this repository keeps writing down. */
   function paintWatchNew(rows, seen) {
     var box = $('oa-forum-watchnew');
     if (!box) return;

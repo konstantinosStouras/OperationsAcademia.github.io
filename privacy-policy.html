@@ -115,12 +115,29 @@
         <nav class="v3-nav" aria-label="Site sections">
           <a href="jobs">Jobs</a>
           <a href="./#candidates">Candidates</a>
-          <a href="./#placements">Placements</a>
+          <a href="forum">Forum</a>
           <a href="./#survey">Survey</a>
-          <a href="./#resources">Resources</a>
-          <a href="./#faq">FAQ</a>
-          <a href="./#about">About</a>
-          <a href="./#contact">Contact</a>
+          <div class="v3-nav-more">
+            <button type="button" class="v3-more-btn" aria-expanded="false" aria-controls="v3-more">More<svg class="v3-more-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="v3-more-panel" id="v3-more" hidden>
+              <div class="v3-more-group" role="group" aria-labelledby="v3-more-market">
+                <span class="v3-more-h" id="v3-more-market">The market</span>
+                <a href="./#placements">Placements</a>
+                <a href="previous-markets">Previous markets</a>
+                <a href="universities">Universities</a>
+                <a href="recent-faculty">Recent faculty</a>
+                <a href="analytics">Analytics</a>
+              </div>
+              <div class="v3-more-group" role="group" aria-labelledby="v3-more-site">
+                <span class="v3-more-h" id="v3-more-site">The site</span>
+                <a href="./#resources">Resources</a>
+                <a href="./#faq">FAQ</a>
+                <a href="./#about">About</a>
+                <a href="./#contact">Contact</a>
+                <a href="whats-new">What&rsquo;s new</a>
+              </div>
+            </div>
+          </div>
         </nav>
         <div class="v3-header-actions">
           <button type="button" class="v3-theme" aria-label="Switch theme">
@@ -143,12 +160,24 @@
       <nav aria-label="Site sections">
         <a href="jobs">Jobs</a>
         <a href="./#candidates">Candidates</a>
-        <a href="./#placements">Placements</a>
+        <a href="forum">Forum</a>
         <a href="./#survey">Survey</a>
-        <a href="./#resources">Resources</a>
-        <a href="./#faq">FAQ</a>
-        <a href="./#about">About</a>
-        <a href="./#contact">Contact</a>
+        <div class="v3-sheet-group" role="group" aria-labelledby="v3-sheet-market">
+          <span class="v3-sheet-h" id="v3-sheet-market">The market</span>
+          <a href="./#placements">Placements</a>
+          <a href="previous-markets">Previous markets</a>
+          <a href="universities">Universities</a>
+          <a href="recent-faculty">Recent faculty</a>
+          <a href="analytics">Analytics</a>
+        </div>
+        <div class="v3-sheet-group" role="group" aria-labelledby="v3-sheet-site">
+          <span class="v3-sheet-h" id="v3-sheet-site">The site</span>
+          <a href="./#resources">Resources</a>
+          <a href="./#faq">FAQ</a>
+          <a href="./#about">About</a>
+          <a href="./#contact">Contact</a>
+          <a href="whats-new">What&rsquo;s new</a>
+        </div>
       </nav>
       <div class="v3-sheet-foot">
         <div id="oa-np"></div>
@@ -294,14 +323,6 @@
           that neither side can rewrite what was said. You can request a copy or the
           deletion of any of this at any time by contacting us.</p>
 
-          <!-- THE FORUM'S PARAGRAPH BELONGS HERE, and goes back in the SAME
-               change that announces the forum (owner, 2026-09-05: nothing on the
-               site mentions it until it has been pre-populated). Nothing is
-               undisclosed meanwhile: no reader can reach the forum, so no
-               reader's data passes through it. The wording is kept verbatim in
-               CLAUDE.md under "The forum", and testForum refuses
-               FORUM_ANNOUNCED = true while this paragraph is missing. -->
-
           <h2>Deleting your account</h2>
           <p>You can delete your Operations Academia account yourself, at any time and
           without asking anyone: sign in, open <a href="account">your personal
@@ -336,6 +357,25 @@
           the same things. It takes a little longer to start: your own deletion begins
           the moment you press the button, while one the maintainer asks for is carried
           out by the site&rsquo;s next update, normally within a few minutes.</p>
+
+          <h2>The forum</h2>
+          <p>The Site has an anonymous forum in two rooms: a Candidates&rsquo; room for the
+          accounts holding a candidate profile for the season under way, and an Open forum for
+          every registered account whose e-mail address is confirmed. You post there under a
+          handle, and the handle is random: two words and a number drawn by chance when you
+          first join in a season, the same in both rooms, and changed at the July roll. The Site
+          links a handle to an account only through a keyed one-way hash computed inside its
+          server functions, whose key is destroyed a month after the season ends; after that
+          nobody, the maintainer included, can tell which account held which handle in that
+          season. The forum does not read the address your browser connects from, stores no
+          record of it and does not load the analytics and visit measurements the rest of the
+          Site carries. Google&rsquo;s own request logs for the server functions record the
+          connecting address and the minute of each call for their standard retention; only the
+          maintainer&rsquo;s project login can read them, and the forum writes nothing of its
+          own to them. Every time a post or a vote is stored is rounded down to the minute. The
+          maintainer can read and post in both rooms as an ordinary member under a handle like
+          anyone else&rsquo;s, and moderates them; linking a current-season handle to a person
+          would take a deliberate step with the key and never happens by accident.</p>
 
           <h2>Security</h2>
           <p>We employ security measures to protect your information from access by unauthorised
@@ -383,9 +423,13 @@
               <li><a href="./#jobs">Job postings</a></li>
               <li><a href="./#candidates">Candidates</a></li>
               <li><a href="./#placements">Placements</a></li>
+              <li><a href="previous-markets">Previous markets</a></li>
+              <li><a href="universities">Universities</a></li>
+              <li><a href="recent-faculty">Recent faculty</a></li>
               <li><a href="./#survey">Survey</a></li>
               <li><a href="./#resources">Resources</a></li>
               <li><a href="analytics">Analytics</a></li>
+              <li><a href="whats-new">What&rsquo;s new</a></li>
             </ul>
           </div>
           <div>
@@ -394,6 +438,7 @@
               <li><a href="post-a-job">Post a job</a></li>
               <li><a href="post-a-candidate">Post your candidacy</a></li>
               <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="forum">Forum</a></li>
               <li><a href="alerts">E-mail alerts</a></li>
               <li><a href="feedback">Feedback</a></li>
               <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>

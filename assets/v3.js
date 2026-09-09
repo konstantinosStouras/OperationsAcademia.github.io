@@ -214,6 +214,14 @@
       if (sections.indexOf(el) === -1) sections.push(el);
     });
 
+    /* "More" shows the state of whatever is current UNDER it — five of the
+       home page's eight sections are in the panel, and without this the nav
+       says nothing while the reader is in any of them. A CLASS only: the
+       trigger is not a link and takes no aria-current, and the link inside
+       the panel already carries it. */
+    var moreBtn = $('.v3-more-btn');
+    var morePanel = $('.v3-more-panel');
+
     var ticking = false;
     function update() {
       ticking = false;
@@ -230,6 +238,10 @@
       links.forEach(function (a) { a.classList.remove('is-active'); a.removeAttribute('aria-current'); });
       if (active && byId[active]) {
         byId[active].forEach(function (a) { a.classList.add('is-active'); a.setAttribute('aria-current', 'true'); });
+      }
+      if (moreBtn) {
+        moreBtn.classList.toggle('is-active',
+          !!(morePanel && morePanel.querySelector('a.is-active')));
       }
     }
     window.addEventListener('scroll', function () {
@@ -278,6 +290,165 @@
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
       else if (!sheet.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
     });
+  }
+
+  /* ---------------------------------------------------------- more dropdown */
+  /** The header's "More" panel (owner, 2026-09-09: the eight flat nav items
+      become five — Jobs · Candidates · Forum · Survey · More — with the rest
+      under More in two labelled blocks).
+
+      IT IS A DISCLOSURE, NOT A MENU, and that is a decision rather than a
+      shortcut. role="menu"/role="menuitem" is the contract for a list of
+      COMMANDS: it stops the children being announced as LINKS, it takes away
+      the cue that middle-click and "copy link address" work — on a site whose
+      permalinks are load-bearing — it makes Tab leave the whole widget instead
+      of walking it, and it forbids the plain text between the groups, which is
+      the reason the panel has two blocks rather than being one flat list. What
+      is in here is nine ordinary navigation links, so it is a button with
+      aria-expanded over a hidden div of <a>s, every one an ordinary tab stop,
+      and the arrow keys are a convenience laid on top of Tab rather than the
+      only way through.
+
+      The account menu next door DOES say role="menu" — it is mostly commands —
+      and what this copies from it is the OPEN/CLOSE mechanics: the `hidden`
+      attribute, aria-expanded on the trigger, a CAPTURE-phase mousedown on
+      document, and Escape. What it deliberately does not copy is the ROLE:
+      that menu implements no arrow-key roving either, and a contract kept by
+      half is worse than one never made.
+
+      THE MARKUP SHIPS THE TRIGGER, ITS aria-expanded AND THE PANEL'S `hidden`;
+      this file only ever toggles them. That is the header's own rule — the
+      header must paint its final form on the first frame, and page-test
+      samples `.v3-nav a`'s left edge every frame through a load and allows
+      exactly ONE value, while `.v3-nav` is `margin: 0 auto`: a button injected
+      here would widen the nav and move the first link. The panel is absolutely
+      positioned for the same reason, so opening it moves nothing. */
+  function wireMore() {
+    var wrap = $('.v3-nav-more');
+    if (!wrap) return;                        /* a header without the dropdown */
+    var trigger = $('.v3-more-btn', wrap);
+    var panel = $('.v3-more-panel', wrap);
+    if (!trigger || !panel) return;
+
+    function items() { return $$('a[href]', panel); }
+
+    function open(where) {
+      panel.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+      var it = items();
+      if (where && it.length) it[where === 'last' ? it.length - 1 : 0].focus();
+    }
+
+    /* Shut already? Do nothing — which is what keeps the Escape handler below
+       from fighting the sheet's, and makes every close path idempotent. */
+    function close(returnFocus) {
+      if (panel.hidden) return;
+      panel.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      /* Only Escape and a breakpoint change come back to the trigger. A press
+         on a LINK must not: wireSmoothScroll moves the keyboard to the section
+         it has just travelled to, and taking it back to the header would undo
+         the one thing that fix was for. */
+      if (returnFocus) trigger.focus();
+    }
+
+    trigger.addEventListener('click', function (e) {
+      /* Enter and Space on a <button> fire a click whose detail is 0; a
+         pointer press fires one whose detail is at least 1. Opened from the
+         keyboard the panel takes the keyboard; opened with the pointer it
+         leaves it where it is, which is what a reader reaching for a link with
+         the mouse expects. ArrowDown below is the deterministic path, so
+         nothing rests on `detail` alone. */
+      if (panel.hidden) open(e.detail === 0 ? 'first' : null);
+      else close(false);
+    });
+
+    trigger.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); open('first'); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); open('last'); }
+    });
+
+    panel.addEventListener('keydown', function (e) {
+      var it = items();
+      var i = it.indexOf(document.activeElement);
+      if (i === -1) return;
+      /* preventDefault only where the keyboard is already inside the panel, or
+         ArrowDown and Home would scroll the page under it. TAB IS UNTOUCHED —
+         this is a disclosure, so the keyboard walks the links and then leaves,
+         and the focusout below shuts the panel behind it. */
+      if (e.key === 'ArrowDown') { e.preventDefault(); it[(i + 1) % it.length].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); it[(i - 1 + it.length) % it.length].focus(); }
+      else if (e.key === 'Home') { e.preventDefault(); it[0].focus(); }
+      else if (e.key === 'End') { e.preventDefault(); it[it.length - 1].focus(); }
+    });
+
+    panel.addEventListener('click', function (e) {
+      var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+      if (!a || !panel.contains(a)) return;
+      /* …but not on a modified press: the reader is opening it in a new tab,
+         and the panel they are reading from should still be there. */
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      /* NOT OPTIONAL. wireSmoothScroll closes the mobile SHEET on a same-page
+         anchor and knows nothing about this panel, so without it pressing
+         "Placements" on the home page scrolls the page and leaves the panel
+         hanging open over the content. */
+      close(false);
+    });
+
+    /* CAPTURE, like the account menu's, and for that one's reason: a
+       bubble-phase listener on document can be silenced by any handler between
+       the target and here that stops propagation, and this site has several
+       mousedown handlers that swallow the event to keep the keyboard in a box
+       (the forum's tag picker among them).
+
+       POINTERDOWN, not mousedown, and that is not a tidy-up. This panel is
+       served to TOUCH devices: a large phone in landscape is 932px wide, above
+       the 921px burger breakpoint, so it gets the desktop nav with no hover at
+       all — and iOS Safari does not reliably deliver a document-level MOUSE
+       event for a tap on a non-interactive element, which would leave the
+       panel stuck open with no way to shut it. pointerdown covers mouse, touch
+       and pen in one. */
+    document.addEventListener('pointerdown', function (e) {
+      if (!panel.hidden && !wrap.contains(e.target)) close(false);
+    }, true);
+
+    /* A no-op while shut, which is the whole of why the two document-level
+       Escape handlers on this page do not fight: the sheet's moves no focus
+       while the sheet is shut. They can never both be open anyway — below
+       921px `.v3-nav` is display:none so this trigger cannot be pressed, and
+       above 920px the sheet is. Escape is deliberately not stopped from
+       propagating: swallowing it would take it from whatever else listens. */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') close(true);
+    });
+
+    wrap.addEventListener('focusout', function () {
+      /* focusout fires BEFORE the new element takes focus, so activeElement is
+         <body> at this instant, and relatedTarget is null for several of the
+         ways focus can leave — the deferred read is the one that covers both.
+         This is what shuts the panel when Tab walks out of its last link. No
+         focus is moved: the reader has just moved it themselves. */
+      setTimeout(function () {
+        if (!panel.hidden && !wrap.contains(document.activeElement)) close(false);
+      }, 0);
+    });
+
+    var pending = false;
+    window.addEventListener('resize', function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        /* Below the burger's breakpoint the nav is display:none and the
+           trigger goes with it: an open panel would be invisible and
+           unclosable, and would come back OPEN on the way up. ASK THE LAYOUT
+           rather than copying 920 out of the stylesheet (the measureChip
+           lesson: a computed answer cannot drift from the stylesheet the way a
+           number can), and getClientRects() rather than offsetParent, which
+           answers a different question and is null for a fixed header. */
+        if (!panel.hidden && !trigger.getClientRects().length) close(false);
+      });
+    }, { passive: true });
   }
 
   /* -------------------------------------------------------------------- FAQ */
@@ -462,9 +633,9 @@
     });
   }
 
-  /* Two things are done at PARSE time — this file sits at the end of the body,
-     after all the content — and both for the same reason: what the reader sees
-     first must not depend on the seven scripts that follow this one.
+  /* Three things are done at PARSE time — this file sits at the end of the
+     body, after all the content — and all for the same reason: what the reader
+     sees first must not depend on the seven scripts that follow this one.
 
      The reveal-on-scroll blocks are hidden by the stylesheet until this file
      claims them, and it used to claim them in boot(), on DOMContentLoaded —
@@ -475,10 +646,20 @@
      acts on exists, and nothing that happens later can prevent it.
 
      The counters are taken over here for the same kind of reason: so they
-     never paint their final value and then rewind. Everything else waits for
-     the document. */
+     never paint their final value and then rewind.
+
+     The "More" dropdown is here because it is a HEADER control, and the header
+     is the first thing a reader reaches for: a nav button painted on the first
+     frame that does nothing until the whole deferred chain has run is the same
+     shape as the reveals that used to sit blank. It draws nothing and moves
+     nothing — the trigger and the hidden panel are in the markup — so wiring
+     it early costs no paint; what it buys is that it works when pressed, and
+     that a throw in one of boot()'s other wirings cannot take it down.
+
+     Everything else waits for the document. */
   wireReveals();
   wireCounts();
+  wireMore();
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

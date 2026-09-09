@@ -5452,6 +5452,292 @@ for (const w of [320, 360, 390, 430]) {
   await m.close();
 }
 
+/* ------------------------------------- the "More" dropdown, in a browser
+
+   Owner, 2026-09-09: the top menu was too complicated and the forum had
+   nowhere to go. Eight flat items became five, with the rest under "More".
+
+   What is measured here is the BEHAVIOUR the source pins cannot see: that the
+   panel really is out of the tab order while shut, that opening it moves
+   nothing in the header, that the keyboard can reach it and Escape comes back,
+   that a press outside and a press on a link both shut it, and that it is
+   readable in BOTH themes on the ground it actually paints. */
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await p.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForFunction(() => !!document.querySelector('.v3-more-btn'), null, { timeout: 8000 });
+
+  /* SHUT ON ARRIVAL, and out of the tab order with it. `hidden` is what does
+     that, and `[hidden] { display: none !important }` is what makes the
+     attribute authoritative — the mistake the sheet was fixed for was a panel
+     moved off-screen by a transform, whose eleven links stayed tabbable. */
+  const shut = await p.evaluate(() => {
+    const b = document.querySelector('.v3-more-btn');
+    const panel = document.querySelector('.v3-more-panel');
+    return {
+      expanded: b.getAttribute('aria-expanded'),
+      hidden: panel.hidden,
+      painted: getComputedStyle(panel).display,
+      links: panel.querySelectorAll('a[href]').length,
+      isButton: b.tagName,
+      role: b.getAttribute('role'),
+      haspopup: b.getAttribute('aria-haspopup'),
+    };
+  });
+  eq(shut.expanded, 'false', 'more: the trigger ships aria-expanded="false"');
+  eq(shut.hidden, true, 'more: and the panel ships hidden');
+  eq(shut.painted, 'none', 'more: so nothing paints and nothing is tabbable');
+  eq(shut.links, 10, 'more: the panel carries the ten links the menu moved into it');
+  eq(shut.isButton, 'BUTTON', 'more: the trigger is a button, so Enter and Space work natively');
+  eq([shut.role, shut.haspopup], [null, null],
+    'more: it claims no menu role — a disclosure over ordinary links, which stay links to a screen reader');
+
+  /* OPENING MOVES NOTHING. The panel is absolutely positioned for exactly
+     this: the header is fixed and its row is measured every frame by the
+     no-shake check above. */
+  const before = await p.evaluate(() => {
+    const r = (s) => { const b = document.querySelector(s).getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top)]; };
+    return { nav: r('.v3-nav a'), theme: r('.v3-theme'), btn: r('.v3-more-btn') };
+  });
+  await p.click('.v3-more-btn');
+  await p.waitForFunction(() => !document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  const after = await p.evaluate(() => {
+    const r = (s) => { const b = document.querySelector(s).getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top)]; };
+    const pb = document.querySelector('.v3-more-panel').getBoundingClientRect();
+    return { nav: r('.v3-nav a'), theme: r('.v3-theme'), btn: r('.v3-more-btn'),
+      panel: { top: Math.round(pb.top), left: Math.round(pb.left), right: Math.round(pb.right) },
+      vw: window.innerWidth, overflowX: document.documentElement.scrollWidth > window.innerWidth + 1,
+      expanded: document.querySelector('.v3-more-btn').getAttribute('aria-expanded') };
+  });
+  eq(after.nav, before.nav, 'more: opening it does not move the first nav link');
+  eq(after.theme, before.theme, 'more: nor the theme toggle');
+  eq(after.btn, before.btn, 'more: nor the trigger itself');
+  eq(after.expanded, 'true', 'more: the trigger says it is open');
+  ok(after.panel.left >= 0 && after.panel.right <= after.vw,
+    `more: the panel stays inside the viewport (${after.panel.left}..${after.panel.right} of ${after.vw})`);
+  ok(!after.overflowX, 'more: and the page does not scroll sideways');
+
+  /* THE TWO BLOCKS SIT SIDE BY SIDE AND DO NOT OVERLAP. Measured rather than
+     assumed, because the first build got this wrong in a way every other check
+     here sailed through: the panel is position:absolute, so its width is
+     shrink-to-fit, and `grid-template-columns: 1fr 1fr` inside a box whose
+     width is being derived FROM its content collapsed both tracks onto the
+     same x — "The market" and "The site" painted one on top of the other, with
+     every link overlapping its opposite number. The panel was still inside the
+     viewport, still contrast-passing, still the right height, and still held
+     ten links. Only geometry says it was broken. */
+  const cols = await p.evaluate(() => {
+    const g = [...document.querySelectorAll('.v3-more-group')].map((el) => {
+      const b = el.getBoundingClientRect();
+      return { left: Math.round(b.left), right: Math.round(b.right), width: Math.round(b.width) };
+    });
+    const links = [...document.querySelectorAll('.v3-more-panel a[href]')].map((a) => {
+      const b = a.getBoundingClientRect();
+      return { text: a.textContent.trim(), w: Math.round(b.width), clipped: a.scrollWidth > a.clientWidth + 1 };
+    });
+    return { g, links };
+  });
+  eq(cols.g.length, 2, 'more: the panel draws its two blocks');
+  ok(cols.g[0].width > 40 && cols.g[1].width > 40,
+    `more: each block has a real width (${cols.g[0].width}px, ${cols.g[1].width}px)`);
+  ok(cols.g[0].right <= cols.g[1].left,
+    `more: …and they sit side by side rather than on top of each other `
+    + `(${cols.g[0].left}..${cols.g[0].right} then ${cols.g[1].left}..${cols.g[1].right})`);
+  eq(cols.links.filter((l) => l.clipped).map((l) => l.text), [],
+    'more: and no link is clipped by the panel it sits in');
+
+  /* A PRESS OUTSIDE SHUTS IT. The listener is capture-phase, so nothing
+     downstream can swallow the press first. */
+  await p.mouse.click(20, 400);
+  await p.waitForFunction(() => document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  ok(true, 'more: a press outside shuts it');
+
+  /* THE KEYBOARD. ArrowDown opens and takes the keyboard to the first link;
+     Escape shuts it and brings the keyboard back to the trigger — the one
+     path that must return focus, since the reader never moved it themselves. */
+  await p.focus('.v3-more-btn');
+  await p.keyboard.press('ArrowDown');
+  await p.waitForFunction(() => !document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  const onFirst = await p.evaluate(() => {
+    const first = document.querySelector('.v3-more-panel a[href]');
+    return { focused: document.activeElement === first, text: document.activeElement.textContent.trim() };
+  });
+  ok(onFirst.focused, `more: ArrowDown opens it and lands on the first link (${onFirst.text})`);
+  await p.keyboard.press('ArrowDown');
+  const onSecond = await p.evaluate(() => document.activeElement.textContent.trim());
+  ok(onSecond !== onFirst.text, `more: ArrowDown walks the links (${onFirst.text} -> ${onSecond})`);
+  await p.keyboard.press('Escape');
+  const back = await p.evaluate(() => ({
+    hidden: document.querySelector('.v3-more-panel').hidden,
+    onTrigger: document.activeElement === document.querySelector('.v3-more-btn'),
+  }));
+  eq(back.hidden, true, 'more: Escape shuts it');
+  ok(back.onTrigger, 'more: …and gives the keyboard back to the trigger');
+
+  /* TAB STILL WALKS THE LINKS — the whole reason this is a disclosure and not
+     a menu. From the trigger, one Tab reaches the panel's first link. */
+  await p.click('.v3-more-btn');
+  await p.waitForFunction(() => !document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  await p.focus('.v3-more-btn');
+  await p.keyboard.press('Tab');
+  const tabbed = await p.evaluate(() => {
+    const a = document.activeElement;
+    return { inPanel: !!a.closest('.v3-more-panel'), tag: a.tagName, text: a.textContent.trim() };
+  });
+  ok(tabbed.inPanel && tabbed.tag === 'A',
+    `more: Tab walks into the panel and its items are LINKS (${tabbed.text})`);
+
+  /* A PRESS ON A LINK SHUTS IT. Without this, wireSmoothScroll scrolls the
+     home page and leaves the panel hanging open over the content. */
+  await p.goto(BASE, { waitUntil: 'domcontentloaded' });
+  await p.waitForFunction(() => !!document.querySelector('.v3-more-btn'), null, { timeout: 8000 });
+  await p.click('.v3-more-btn');
+  await p.waitForFunction(() => !document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  await p.click('.v3-more-panel a[href="#placements"]');
+  await p.waitForFunction(() => document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  ok(true, 'more: pressing a link inside it shuts it, so it never hangs over the page it scrolled to');
+
+  /* IT IS READABLE IN BOTH THEMES, on the ground it really paints. */
+  for (const theme of ['light', 'dark']) {
+    await p.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+    await p.click('.v3-more-btn');
+    await p.waitForFunction(() => !document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+    const ink = await p.evaluate(() => {
+      const lum = (c) => {
+        const [r, g, b] = c.match(/[\d.]+/g).slice(0, 3).map(Number).map((v) => {
+          v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      };
+      const ground = (el) => {
+        for (let n = el; n; n = n.parentElement) {
+          const bg = getComputedStyle(n).backgroundColor;
+          const a = bg.match(/[\d.]+/g);
+          if (a && (a.length < 4 || Number(a[3]) > 0.95)) return bg;
+        }
+        return getComputedStyle(document.body).backgroundColor;
+      };
+      const ratio = (el) => {
+        const a = lum(getComputedStyle(el).color), b = lum(ground(el));
+        return Math.round(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)) * 100) / 100;
+      };
+      const link = document.querySelector('.v3-more-panel a[href]');
+      const head = document.querySelector('.v3-more-h');
+      return { link: ratio(link), head: ratio(head) };
+    });
+    ok(ink.link >= 4.5, `more (${theme}): a panel link reads at ${ink.link}:1`);
+    ok(ink.head >= 4.5, `more (${theme}): its block heading reads at ${ink.head}:1`);
+    await p.keyboard.press('Escape');
+  }
+  await p.evaluate(() => document.documentElement.removeAttribute('data-theme'));
+
+  /* AND THE FORUM IS IN THE MENU, on the page and not merely in the source. */
+  const forumLink = await p.evaluate(() => {
+    const a = [...document.querySelectorAll('.v3-nav > a')].find((x) => x.textContent.trim() === 'Forum');
+    if (!a) return null;
+    const b = a.getBoundingClientRect();
+    return { href: a.getAttribute('href'), visible: b.width > 0 && b.height > 0 };
+  });
+  ok(forumLink && forumLink.href === 'forum' && forumLink.visible,
+    'more: the Forum sits at the top level of the menu, visible, on every page');
+  await p.close();
+}
+
+/* RULE 16, both halves, measured.
+
+   A SHORT WINDOW. The panel is position:absolute, so nothing in the flow stops
+   it growing past the bottom of the screen: unbounded it overran a 950x320
+   viewport by 24px with no way to reach its last link. And 950x320 is not a
+   contrived size — it is a laptop with a short window, and it is a large phone
+   in LANDSCAPE, which at 932px is ABOVE the 921px burger breakpoint and so
+   gets the desktop nav rather than the sheet.
+
+   A TOUCH DEVICE. That same reader has no hover at all and sends pointer
+   events rather than mouse ones, which is why the outside-press listener is
+   pointerdown: on iOS Safari a tap on a non-interactive element does not
+   reliably deliver a document-level mouse event, and the panel would be left
+   stuck open with nothing able to shut it. */
+{
+  const short = await browser.newPage({ viewport: { width: 950, height: 320 } });
+  await short.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await short.waitForFunction(() => !!document.querySelector('.v3-more-btn'), null, { timeout: 8000 });
+  await short.click('.v3-more-btn');
+  await short.waitForFunction(() => !document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  const fit = await short.evaluate(() => {
+    const el = document.querySelector('.v3-more-panel');
+    const b = el.getBoundingClientRect();
+    const last = [...el.querySelectorAll('a[href]')].pop();
+    el.scrollTop = el.scrollHeight;
+    const lb = last.getBoundingClientRect();
+    return {
+      bottom: Math.round(b.bottom), vh: window.innerHeight,
+      scrolls: el.scrollHeight > el.clientHeight + 1,
+      lastReachable: lb.top >= b.top - 1 && lb.bottom <= b.bottom + 1,
+      lastText: last.textContent.trim(),
+    };
+  });
+  ok(fit.bottom <= fit.vh,
+    `950x320: the panel is bounded by the screen (bottom ${fit.bottom} of ${fit.vh})`);
+  ok(fit.scrolls, '950x320: …and scrolls inside itself, since it no longer fits');
+  ok(fit.lastReachable,
+    `950x320: so its last link is reachable after all (${fit.lastText})`);
+  await short.close();
+
+  /* the same widths, as a TOUCH device: the panel opens and a tap outside it
+     shuts it, which is what pointerdown buys and mousedown would not */
+  const land = await browser.newPage({
+    viewport: { width: 932, height: 430 }, isMobile: true, hasTouch: true });
+  await land.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await land.waitForFunction(() => !!document.querySelector('.v3-more-btn'), null, { timeout: 8000 });
+  const desktopNav = await land.evaluate(() =>
+    getComputedStyle(document.querySelector('.v3-nav')).display !== 'none');
+  ok(desktopNav,
+    '932x430: a large phone in landscape gets the DESKTOP nav, which is why the two rules above exist');
+  await land.tap('.v3-more-btn');
+  await land.waitForFunction(() => !document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  const bounded = await land.evaluate(() => {
+    const b = document.querySelector('.v3-more-panel').getBoundingClientRect();
+    return { bottom: Math.round(b.bottom), vh: window.innerHeight, right: Math.round(b.right), vw: window.innerWidth };
+  });
+  ok(bounded.bottom <= bounded.vh && bounded.right <= bounded.vw,
+    `932x430: the panel stays on the screen (${bounded.bottom}/${bounded.vh}, ${bounded.right}/${bounded.vw})`);
+  await land.tap('body', { position: { x: 40, y: 400 } });
+  await land.waitForFunction(() => document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  ok(true, '932x430: a TAP outside shuts it — pointerdown, where mousedown could leave it stuck open');
+  await land.close();
+}
+
+/* the sheet says the same thing on a phone, as headings rather than a
+   dropdown — and its targets are still 42px (rule 13/14) */
+{
+  const m = await browser.newPage({ viewport: { width: 390, height: 800 }, isMobile: true, hasTouch: true });
+  await m.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await m.click('.v3-burger');
+  await m.waitForFunction(() => document.body.classList.contains('v3-sheet-open')
+    && Math.abs(document.querySelector('.v3-sheet').getBoundingClientRect().left) < 0.5, null, { timeout: 5000 });
+  const s = await m.evaluate(() => {
+    const nav = document.querySelector('.v3-sheet nav');
+    const groups = [...nav.querySelectorAll('.v3-sheet-group')];
+    const links = [...nav.querySelectorAll('a[href]')];
+    const noPanel = !nav.querySelector('.v3-more-panel, .v3-more-btn');
+    return {
+      groups: groups.map((g) => g.querySelector('.v3-sheet-h').textContent.trim()),
+      links: links.length,
+      forum: links.some((a) => a.getAttribute('href') === 'forum'),
+      small: links.filter((a) => a.getBoundingClientRect().height < 42).length,
+      noPanel,
+      overflowX: document.documentElement.scrollWidth > window.innerWidth + 1,
+    };
+  });
+  eq(s.groups, ['The market', 'The site'], '390px: the sheet carries the two blocks as headings');
+  ok(s.noPanel, '390px: …and no dropdown, because a sheet already scrolls');
+  eq(s.links, 14, '390px: the sheet lists all fourteen destinations');
+  ok(s.forum, '390px: the Forum among them');
+  eq(s.small, 0, '390px: every one of them is a 42px target');
+  ok(!s.overflowX, '390px: and the page does not scroll sideways');
+  await m.close();
+}
+
 /* ------------------------------ the legal texts fill their own column
 
    Owner, 2026-08-18, of privacy-policy.html and terms-and-conditions.html:

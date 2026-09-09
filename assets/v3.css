@@ -359,7 +359,11 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   .v3-logo .v3-mark { width: 32px; height: 44px; }
 }
 
-/* the keyword row — the whole point: flat, no dropdowns */
+/* the keyword row. It was eight flat items and seven of them were anchors on
+   the home page; it is five now — Jobs · Candidates · Forum · Survey · More —
+   with the rest under "More" in two labelled blocks (owner, 2026-09-09: the
+   menu was too complicated and the forum had nowhere to go). The one dropdown
+   is a DISCLOSURE, and the rules for it are below .v3-nav a.is-active. */
 .v3-nav {
   display: flex;
   align-items: center;
@@ -378,6 +382,90 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
 }
 .v3-nav a:hover { color: var(--ink); background: var(--bg-3); }
 .v3-nav a.is-active { color: var(--brand); background: var(--brand-soft); }
+
+/* THE "MORE" PANEL. A disclosure — a <button> with aria-expanded over a hidden
+   div of ordinary links — never role="menu": what is in it is nine links to
+   pages and sections, a reader must be able to middle-click or copy one, and
+   the menu role would drop the two headings the panel exists for. v3.js's
+   wireMore() only ever toggles `hidden` and `aria-expanded`; both ship in the
+   markup in their final state, because page-test samples .v3-nav a's left edge
+   every frame through a load and allows exactly one value, and .v3-nav is
+   `margin: 0 auto` — a trigger injected later would move the first link.
+
+   EVERY RULE HERE WINS ON SPECIFICITY, never on sitting later in the file:
+   `.v3-nav a` (0,1,1) reaches the panel's links too, and a bare
+   `.v3-more-panel a` would merely tie with it — the trap this repo records for
+   the Leaflet attribution and the sponsor rail. */
+.v3-nav-more { position: relative; display: inline-flex; }
+.v3-more-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  font: inherit; font-size: 15px; font-weight: 600;
+  color: var(--ink-2);
+  border: 0; background-color: transparent; cursor: pointer;
+  padding: 9px 13px; border-radius: 999px;
+  white-space: nowrap;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+/* gated, so a tap leaves no stuck hover (_MOBILE-STANDARDS rule 9), and it
+   stands down on a trigger already open or already current — a preview must
+   never beat the state it is previewing (the forum's voted-arrow lesson). */
+@media (hover: hover) and (pointer: fine) {
+  .v3-more-btn:hover:not(.is-active):not([aria-expanded='true']) {
+    color: var(--ink); background-color: var(--bg-3);
+  }
+}
+.v3-more-btn.is-active,
+.v3-more-btn[aria-expanded='true'] { color: var(--brand); background-color: var(--brand-soft); }
+.v3-more-chev { width: 15px; height: 15px; transition: transform 0.15s ease; }
+.v3-more-btn[aria-expanded='true'] .v3-more-chev { transform: rotate(180deg); }
+
+/* it paints its own ground, so it names its own ink */
+.v3-more-panel {
+  position: absolute; z-index: 60;
+  top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  /* max-content, NEVER 1fr: the panel is position:absolute, so its width is
+     shrink-to-fit, and `1fr` inside a box whose width is being derived FROM
+     its content collapses both tracks onto each other — measured, the two
+     blocks painted one on top of the other. Sizing the columns to their own
+     content lets the box size itself, with no magic pixel width to drift. */
+  display: grid; grid-template-columns: max-content max-content; gap: 0 18px;
+  width: max-content;
+  padding: 12px 14px 14px;
+  background-color: var(--bg-2);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  text-align: left;
+  /* bounded by the SCREEN and scrolling inside itself. Measured at 950x320 —
+     a laptop with a short window, and a large phone in landscape, which is
+     above the 921px burger breakpoint and therefore gets this panel — the
+     unbounded panel overran the viewport by 24px with no way to reach its
+     last link. The header's own height is taken off, and 16px of air below. */
+  max-height: calc(100vh - var(--header-h) - 24px);
+  overflow-y: auto; overscroll-behavior: contain;
+}
+/* NO `min-width: 0` here. It zeroes the track's automatic minimum, which is
+   the floor that would otherwise save a panel whose width went wrong; the
+   collapse this file records above got past exactly that. */
+.v3-more-group { display: flex; flex-direction: column; }
+.v3-more-h {
+  display: block;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ink-2);
+  padding: 6px 10px 4px;
+}
+.v3-nav .v3-more-panel a {          /* (0,2,1), so it beats .v3-nav a (0,1,1) */
+  display: block;
+  font-size: 14.5px; font-weight: 600;
+  color: var(--ink);
+  padding: 8px 10px; border-radius: 8px;
+  white-space: nowrap;
+}
+@media (hover: hover) and (pointer: fine) {
+  .v3-nav .v3-more-panel a:hover:not(.is-active) { color: var(--brand); background-color: var(--bg-3); }
+}
+.v3-nav .v3-more-panel a.is-active { color: var(--brand); background-color: var(--brand-soft); }
 
 .v3-header-actions {
   display: flex;
@@ -480,6 +568,20 @@ body.v3-sheet-open { overflow: hidden; }
   padding: 13px 10px; border-radius: 10px;
 }
 .v3-sheet nav a:hover, .v3-sheet nav a.is-active { background: var(--brand-soft); color: var(--brand); }
+/* the sheet takes the same two blocks as the panel, as HEADINGS rather than a
+   dropdown: a sheet already scrolls, and a disclosure inside it would hide
+   links from the reader while leaving them in its Tab trap. `.v3-sheet nav a`
+   (0,2,1) already reaches the links inside a group, so they need no rule. */
+.v3-sheet-group { display: flex; flex-direction: column; }
+.v3-sheet-h {
+  display: block;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ink-2);
+  padding: 16px 10px 4px;
+}
+.v3-sheet-group + .v3-sheet-group .v3-sheet-h {
+  margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--line-soft);
+}
 .v3-sheet-foot { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line-soft);
   display: flex; flex-direction: column; gap: 12px; }
 
@@ -2132,12 +2234,16 @@ body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor);
 
 @media (max-width: 1080px) {
   .v3-nav a { padding: 9px 9px; font-size: 14.5px; }
+  .v3-more-btn { padding: 9px 9px; font-size: 14.5px; }
 }
 
-/* Between the burger's breakpoint and ~1180px the row — logo, eight nav
-   links, theme toggle and a chip carrying a full name — is wider than the
-   viewport, and a fixed header hides the overflow: the chip, its menu and
-   "Sign in" sat off-screen. The name is the one part that can go. */
+/* Between the burger's breakpoint and ~1180px the row — logo, the nav (five
+   items since 2026-09-09, four links and the More trigger), theme toggle and a
+   chip carrying a full name — is wider than the viewport, and a fixed header
+   hides the overflow: the chip, its menu and "Sign in" sat off-screen. The
+   name is the one part that can go. The shorter row can only help, so the
+   breakpoint stays where it was measured rather than being relaxed on a
+   guess. */
 @media (max-width: 1180px) {
   body.v3 .oa-acct-name { display: none; }
   body.v3 .oa-acct-chip { padding: 4px; }
