@@ -6853,6 +6853,103 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForFunction(() =>
       document.querySelectorAll('#oa-aa-users tbody tr').length > 1, null, { timeout: 10000 });
 
+    /* THE JOB MARKET YEAR CHOOSER (owner, 2026-09-09: "add a filter here so
+       that the admin can immediately see all job market candidates of the
+       given job market year"). Cy's profile is LAST season's — the case that
+       could not be reached from this panel at all before, since the mark and
+       the Find needle both spoke only about the season under way. */
+    const thisSeason = String(marketYear());
+    const lastSeason = String(marketYear() - 1);
+    const seasonName = (y) => (Number(y) - 1) + '-' + y;
+    const opts = await q.evaluate(() => Array.from(
+      document.querySelectorAll('#oa-u-candyear option'),
+      (o) => ({ value: o.value, label: o.textContent, on: o.selected })));
+    eq(opts[0], { value: '', label: 'All accounts', on: true },
+      'roster: the season chooser opens on All accounts, so the panel is unchanged until a season is chosen');
+    eq(opts.slice(1).map((o) => o.value), [thisSeason, lastSeason],
+      'roster: …and offers the seasons the roster holds a candidate for, newest first');
+    eq(opts.slice(1).map((o) => o.label),
+      [seasonName(thisSeason) + ' (1)', seasonName(lastSeason) + ' (1)'],
+      'roster: …each named and counted, so the answer is known before the press');
+
+    /* IT LOOKS LIKE A DROPDOWN. The panel is inside `<div class="oa-form">`,
+       so `.oa-form select` strips the native arrow and v3.css's `background`
+       shorthand then blanks the chevron drawn to replace it — which left this
+       control a plain bordered box reading "All accounts", beside a Find box
+       that is a plain bordered box for real. Measured as the PROPERTY (there
+       is an arrow, the browser's or a drawn one), not as a selector. */
+    const arrow = await q.evaluate(() => {
+      const cs = getComputedStyle(document.getElementById('oa-u-candyear'));
+      return { appearance: cs.appearance, image: cs.backgroundImage };
+    });
+    ok(arrow.appearance !== 'none' || arrow.image !== 'none',
+      `roster: the season chooser shows that it opens a list (appearance ${arrow.appearance}, ` +
+      `image ${arrow.image}) — the browser paints the arrow in the reader's own ink in both themes`);
+
+    await q.selectOption('#oa-u-candyear', lastSeason);
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 1, null, { timeout: 10000 });
+    ok((await q.textContent('#oa-aa-users tbody')).indexOf('cy@example.edu') !== -1,
+      'roster: choosing a PAST season lists that season\'s candidates — the people this panel could not reach at all before');
+    eq(await q.locator('#oa-aa-users tr:has-text("cy@example.edu") .oa-u-cand').count(), 1,
+      'roster: …and the mark follows the chosen season rather than staying on the one under way');
+    eq(await q.getAttribute('#oa-aa-users tr:has-text("cy@example.edu") .oa-u-cand', 'title'),
+      'Has a candidate profile for the ' + seasonName(lastSeason) + ' job market',
+      'roster: …with the season it means named in its own tooltip');
+    ok((await q.textContent('#oa-aa-users .oa-u-count'))
+      .indexOf('1 JM candidate for ' + seasonName(lastSeason)) !== -1,
+      'roster: …and the count line names the season it is counting');
+    eq(await q.evaluate(() => document.activeElement && document.activeElement.id), 'oa-u-candyear',
+      'roster: choosing a season leaves the keyboard on the control, which the re-render replaces under the reader\'s hand');
+    eq(await q.inputValue('#oa-u-candyear'), lastSeason,
+      'roster: …and the control still shows the season it is set to');
+
+    /* Select-all under a chosen season is the whole point: it is how a
+       market's candidates are written to together. */
+    await q.click('#oa-u-all');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-u-send') || {}).textContent.indexOf('1 person') !== -1,
+      null, { timeout: 10000 });
+    ok(true, 'roster: select-all under a chosen season picks that season\'s candidates, which is how they are messaged together');
+    await q.click('#oa-u-all');
+    await q.waitForFunction(() => !document.querySelector('#oa-aa-users .oa-u-pick:checked'),
+      null, { timeout: 10000 });
+
+    await q.selectOption('#oa-u-candyear', thisSeason);
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 1, null, { timeout: 10000 });
+    ok((await q.textContent('#oa-aa-users tbody')).indexOf('bea@example.edu') !== -1
+       && (await q.textContent('#oa-aa-users tbody')).indexOf('avery@hostile.example') === -1,
+      'roster: the season under way lists its own candidates, and never one who WITHDREW a profile in it');
+
+    await q.selectOption('#oa-u-candyear', '');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length > 2, null, { timeout: 10000 });
+    ok((await q.textContent('#oa-aa-users .oa-u-count'))
+      .indexOf('1 JM candidate for ' + seasonName(thisSeason)) !== -1,
+      'roster: and All accounts narrows nothing, with the mark back on the season under way');
+
+    /* THE BAR STILL ENDS FLUSH. A fourth control makes the bar wrap at widths
+       it did not before — measured, the download dropped onto a line of its
+       own flush LEFT between 1000px and 1065px, which is where a laptop
+       window commonly sits. The button carries its own `margin-left: auto`
+       now, so it holds the right edge on whichever line it lands on.
+       Measured as GEOMETRY across the band, not as a class. */
+    for (const w of [1280, 1066, 1024, 1000, 900, 700]) {
+      await q.setViewportSize({ width: w, height: 1000 });
+      const edge = await q.evaluate(() => {
+        const bar = document.querySelector('#oa-aa-users .oa-u-bar');
+        const btn = document.getElementById('oa-u-csv');
+        return { bar: Math.round(bar.getBoundingClientRect().right),
+          btn: Math.round(btn.getBoundingClientRect().right),
+          over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      ok(Math.abs(edge.bar - edge.btn) <= 1 && edge.over <= 1,
+        `roster at ${w}px: the download holds the bar's right edge rather than orphaning ` +
+        `flush left on a line of its own (bar ${edge.bar}, button ${edge.btn}, page overflow ${edge.over})`);
+    }
+    await q.setViewportSize({ width: 1280, height: 1000 });
+
     /* THE WHOLE ROW FITS ON ONE SCREEN (owner, 2026-09-08, second report:
        the dates, the status and both buttons had gone off the right edge).
        Measured over the ORDINARY rows — the hostile name and the
@@ -7212,6 +7309,55 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* -- ONE REFUSED COLLECTION MUST NOT EMPTY THE ROSTER ---------------------
+
+     `load()` runs again on every auth change and after every write, and the
+     chosen season survives it. If the candidate read then fails, every row's
+     `candYears` is null and a chosen season would filter every account off
+     the panel — with the chooser withheld exactly then, so nothing is left
+     on the page to undo it. Driven for real: a season chosen, the collection
+     refused, and a reload forced by an action the panel already performs. */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const q = await ctx.newPage();
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user: ADMIN, docs: seed })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
+    /* THE SEASON UNDER WAY, deliberately: `candSeasons()` seeds it
+       unconditionally, so asking only whether the chosen season is still
+       OFFERED never drops this one — which is the whole reason the guard has
+       to ask whether the read answered at all. Choosing a PAST season here
+       would pass with that half of the guard missing. */
+    await q.selectOption('#oa-u-candyear', String(marketYear()));
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 1, null, { timeout: 10000 });
+
+    /* the collection stops answering, and the panel reloads — the ghost
+       delete below is one of the writes that calls load() */
+    await q.evaluate(() => { window.__FAKE_FB.refuseReads = ['candidateSubmissions']; });
+    q.once('dialog', (d) => d.accept());
+    await q.click('#oa-aa-users .oa-u-del[data-uid="u-gone-9"]');
+    await q.waitForFunction(() => !document.getElementById('oa-u-candyear'),
+      null, { timeout: 10000 });
+    ok(true, 'roster: a candidate read that cannot answer draws no season chooser — unknown draws nothing');
+    /* the PROPERTY, not a row count: three accounts no single season could
+       show together — this season's candidate, last season's, and one who
+       withdrew — so the narrowing is provably gone rather than merely
+       loosened. (A count would race the admin's own roster row, which
+       `syncDirectoryRow` writes on sign-in.) */
+    const back = await q.textContent('#oa-aa-users tbody');
+    ok(back.indexOf('bea@example.edu') !== -1 && back.indexOf('cy@example.edu') !== -1
+       && back.indexOf('avery@hostile.example') !== -1,
+      'roster: …and the season chosen before it failed does NOT empty the roster — one refused collection must not, and there would be no control left to undo it');
+    ok((await q.textContent('#oa-aa-users .oa-u-count')).indexOf('JM candidate') === -1,
+      'roster: …with no candidate count claimed over a read that did not answer');
+    eq(await q.locator('#oa-aa-users .oa-u-cand').count(), 0,
+      'roster: …and nobody marked: unknown marks nobody, never everybody');
+    await ctx.close();
+  }
+
   /* -- a phone, because an e-mail address has no spaces --------------------- */
   {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 850 } });
@@ -7249,6 +7395,15 @@ for (const w of [320, 360, 390, 430]) {
       `roster at 390px: a long name and address still read on one line each ` +
       `(${phone && phone.nameLines}/${phone && phone.mailLines})`);
     ok(phone && phone.scrolls, 'roster at 390px: and the table scrolls inside its container');
+    const pick = await q.evaluate(() => {
+      const el = document.getElementById('oa-u-candyear');
+      if (!el) return null;
+      const cs = getComputedStyle(el);
+      return { h: Math.round(el.getBoundingClientRect().height), font: parseFloat(cs.fontSize) };
+    });
+    ok(pick && pick.h >= 42 && pick.font >= 16,
+      `roster at 390px: the season chooser is a 42px target at 16px (${pick && pick.h}px/${pick && pick.font}px) — ` +
+      'rule 13, and anything under 16px zooms the page on iOS when it takes focus');
     await ctx.close();
   }
 }

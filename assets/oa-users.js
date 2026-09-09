@@ -62,6 +62,36 @@
         never everybody. Typing "candidate" into Find narrows the roster to
         them, so select-all under it is how every candidate is messaged at
         once, and the CSV carries the mark as a column.
+
+        …AND THE SEASON IS CHOSEN (owner, 2026-09-09: "add a filter here so
+        that the admin can immediately see all job market candidates of the
+        given job market year"). The mark and the Find needle could only ever
+        speak about the season UNDER WAY, so last season's candidates — the
+        people the maintainer most often wants to write to once a market has
+        rolled — were unreachable from this panel: nothing on it could name
+        them and nothing could list them. The bar carries a chooser now, and
+        the whole panel follows it. Three decisions hold it together:
+
+          * IT IS ONE SEASON, NOT TWO. `markYear()` is the season the roster
+            is TALKING ABOUT — the chosen one, or the one under way when none
+            is chosen — and the pill, its tooltip, the count line and the Find
+            needle all read it. So the list and the mark can never mean
+            different seasons, which is the one way a year filter goes wrong.
+          * THE SEASONS OFFERED ARE THE ONES THE ROSTER HOLDS, newest first,
+            with the season under way always among them even at nought: a
+            filter with one value is still drawn (the review panel's own
+            rule), and "0" is a true answer where a missing option is not.
+            Each carries its count, so the number is known before the press.
+          * UNKNOWN DRAWS NOTHING. A candidate read that failed leaves
+            `state.candidates` null, and then there is no chooser at all —
+            never one whose every option would list nobody. The same rule the
+            Delete control follows one function below.
+
+        A row therefore stores the SEASONS it holds a live profile for
+        (`candYears`, ascending) rather than one boolean, `candidateYearsOf`
+        is the pure rule that reads them out of the documents, and the CSV
+        column names the seasons instead of saying "Yes" — under a chooser
+        set to All accounts that column is the only place the year survives.
      2. MESSAGING — tick the people to reach, write once, send. It opens (or
         continues) one thread per person, which they read and reply to in
         their own personal area.
@@ -183,6 +213,34 @@
     return 'Read';
   }
 
+  /** Which market years each account holds a LIVE candidate profile for:
+      uid -> [year, ...] ascending, deduped, from the raw documents. The READ
+      is the browser's; the RULE is not, so it lives here where the selftest
+      can drive it. A profile with no uid, no year, or a status the build does
+      not publish (withdrawn, hidden, removed) is not a candidacy at all. */
+  function candidateYearsOf(docs) {
+    /* A PROTOTYPE-FREE MAP, because the keys are uids read out of documents.
+       `var by = {}` reads `by['constructor']` back as a FUNCTION, which is
+       truthy, so the accumulator below took it for its own list and threw on
+       `list.indexOf` — and a throw here rejects the read that promises to
+       resolve, which takes the whole roster down to "Could not load". The
+       rules pin a profile's `uid` to its writer's own auth uid, so no signed-in
+       reader can post one of these names; the Admin SDK is not bound by them,
+       and one line removes the class. */
+    var by = Object.create(null);
+    (docs || []).forEach(function (c) {
+      if (!c || !c.uid || CANDIDATE_LIVE.indexOf(c.status) < 0) return;
+      var y = Math.trunc(Number(c.year));
+      if (!y) return;
+      var list = by[c.uid] || (by[c.uid] = []);
+      if (list.indexOf(y) < 0) list.push(y);
+    });
+    Object.keys(by).forEach(function (u) {
+      by[u].sort(function (a, b) { return a - b; });
+    });
+    return by;
+  }
+
   /** Fold a name for sorting so accents and case do not scatter the list.
       The same instinct as OASchools' name folding, kept local and tiny. */
   function fold(s) {
@@ -230,6 +288,7 @@
     threadRank: threadRank,
     threadLabel: threadLabel,
     threadShort: threadShort,
+    candidateYearsOf: candidateYearsOf,
     fold: fold,
     sortRows: sortRows
   };
@@ -262,12 +321,14 @@
       key: 'name', label: 'Name',
       cell: function (r) {
         /* The name in its own span (the one-line rule and the browser check
-           both hang on it), and under it the JM Candidate mark for an
-           account holding a candidate profile for the season under way. */
+           both hang on it), and under it the JM Candidate mark. */
         var html = '<span class="oa-u-name">' + esc(r.name || '—') + '</span>';
-        if (r.candidate) {
+        /* …for the season the panel is TALKING ABOUT — the one the chooser
+           names, or the one under way when it names none — so the pill and
+           the list beneath it can never mean two different seasons. */
+        if (isCandIn(r, markYear())) {
           html += '<span class="oa-u-cand" title="Has a candidate profile for the ' +
-            esc(state.seasonLabel || 'current') + ' job market">JM Candidate</span>';
+            esc(seasonName(markYear()) || 'current') + ' job market">JM Candidate</span>';
         }
         return html;
       },
@@ -332,11 +393,16 @@
        empty map: an empty map would draw every row as though nothing were
        queued, and the control it draws deletes somebody. */
     deletions: null,
-    /* Which accounts hold a candidate profile for the season under way,
-       uid -> true, or NULL when the read failed or the market rule is
-       absent: unknown marks nobody, never everybody. */
+    /* Which seasons each account holds a live candidate profile for,
+       uid -> [year, ...], or NULL when the read failed or the market rule is
+       absent: unknown marks nobody, never everybody — and draws no chooser.
+       Every season is kept, not just the one under way, because choosing a
+       past one is the whole point of the control below. */
     candidates: null,
-    seasonLabel: '',
+    /* The season under way (OAJobNav.marketYear), and the one the CHOOSER
+       names — 0 for "All accounts", which is where it opens. */
+    year: 0,
+    candYear: 0,
     sortKey: 'seen',
     sortDir: 'desc',
     filter: '',
@@ -346,21 +412,70 @@
 
   function db() { return root.OAFB.ready().then(function (fb) { return fb.firestore(); }); }
 
+  /** The season the roster is talking about: the one the chooser names, or
+      the one under way when it names none. ONE definition, read by the mark,
+      its tooltip, the count line and the Find needle alike. */
+  function markYear() { return state.candYear || state.year; }
+
+  /** A season's name, through OAJobNav.marketLabel — the site's one way of
+      spelling a market year — with the same arithmetic as a fallback, since
+      this panel already stands down entirely when that module is absent. */
+  function seasonName(year) {
+    var NAV = root.OAJobNav;
+    var y = Math.trunc(Number(year) || 0);
+    if (!y) return '';
+    return NAV && typeof NAV.marketLabel === 'function' ? NAV.marketLabel(y) : (y - 1) + '-' + y;
+  }
+
+  /** Does this account hold a live candidate profile for that season? A row
+      whose years are NULL is one the read could not answer for, and unknown
+      is never a mark. */
+  function isCandIn(r, year) {
+    return !!(year && r.candYears && r.candYears.indexOf(year) >= 0);
+  }
+
   function visible() {
     var q = fold(state.filter);
-    var rows = !q ? state.rows : state.rows.filter(function (r) {
+    var rows = state.rows.filter(function (r) {
+      /* THE CHOOSER NARROWS FIRST, and on the season it names rather than on
+         `markYear()` — the two are the same whenever one is chosen, and this
+         way "All accounts" narrows nothing at all. */
+      if (state.candYear && !isCandIn(r, state.candYear)) return false;
+      if (!q) return true;
       return fold(r.name).indexOf(q) >= 0 || fold(r.email).indexOf(q) >= 0 ||
         fold(r.affiliation).indexOf(q) >= 0 ||
         /* "candidate" (three letters or more of it) narrows to the JM
-           candidates, so select-all under it is how they are all messaged. */
-        (!!r.candidate && q.length >= 3 && 'jm candidate'.indexOf(q) >= 0);
+           candidates, so select-all under it is how they are all messaged.
+           Kept beside the chooser rather than replaced by it: it is what the
+           panel's own copy has told the maintainer to type since the mark
+           shipped, and it now follows whichever season is chosen. */
+        (isCandIn(r, markYear()) && q.length >= 3 && 'jm candidate'.indexOf(q) >= 0);
     });
     var col = COLS.filter(function (c) { return c.key === state.sortKey; })[0] || COLS[3];
     return sortRows(rows, col.sort, state.sortDir);
   }
 
   function candidateCount() {
-    return state.rows.filter(function (r) { return !!r.candidate; }).length;
+    return candCountIn(markYear());
+  }
+
+  function candCountIn(year) {
+    return state.rows.filter(function (r) { return isCandIn(r, year); }).length;
+  }
+
+  /** Every season the roster holds a candidate for, NEWEST FIRST — with the
+      season under way always among them, even at nought. A filter with one
+      value is still drawn (the review panel's own rule): an option reading
+      "(0)" is a true answer, where a missing option reads as a control that
+      is broken. Counted over the whole roster rather than the rows on screen,
+      so the numbers do not move as the maintainer types into Find. */
+  function candSeasons() {
+    var seen = {};
+    if (state.year) seen[state.year] = true;
+    state.rows.forEach(function (r) {
+      (r.candYears || []).forEach(function (y) { seen[y] = true; });
+    });
+    return Object.keys(seen).map(Number).sort(function (a, b) { return b - a; });
   }
 
   function pickedUids() {
@@ -462,6 +577,29 @@
   function renderTable() {
     var host = $('oa-aa-users-list');
     if (!host) return;
+    /* A NARROWING THE PANEL CANNOT EVALUATE IS NO NARROWING. `load()` runs
+       again on every auth change and after every write, and a chosen season
+       survives it — so a candidate read that then FAILS leaves every row's
+       `candYears` null, `isCandIn` answers false for all of them, and the
+       chosen season empties the roster ENTIRELY. There is no way back
+       either: the chooser is withheld exactly when that read failed, so the
+       one control that could undo it is no longer on the page. ONE REFUSED
+       COLLECTION MUST NOT EMPTY THE ROSTER — the rule the whole panel is
+       held to, and the reason the read resolves null rather than throwing.
+       (Asking only whether the season is still OFFERED does not catch it:
+       `candSeasons()` seeds the season under way unconditionally, so a
+       maintainer who had chosen THIS season kept a narrowing nothing could
+       satisfy.)
+
+       The same drop catches a season whose last live profile has since been
+       withdrawn, where the <select> would otherwise have no option to match
+       and fall back to showing "All accounts" over a list narrowed to a
+       season nobody is in — the control and the list saying different
+       things, which is the one thing this chooser is built not to do. It
+       only ever drops back to All accounts, never to some other season the
+       maintainer did not ask for. */
+    if (state.candYear && (!state.candidates ||
+        candSeasons().indexOf(state.candYear) < 0)) state.candYear = 0;
     var rows = visible();
     var picked = pickedUids().length;
 
@@ -519,15 +657,37 @@
         }).join('') + '</ul>';
     }
 
+    /* THE JOB MARKET YEAR CHOOSER (owner, 2026-09-09). Drawn only where the
+       candidate read ANSWERED and the market rule is loaded: unknown draws
+       nothing, never a chooser whose every option would list nobody. The
+       count rides on each option, so the maintainer knows the answer before
+       pressing — which is what "immediately see" asks for. */
+    var chooser = '';
+    if (state.candidates && state.year) {
+      chooser = '<label class="oa-u-year"><span>JM candidates</span>' +
+        '<select id="oa-u-candyear" ' +
+          'aria-label="Show only the job market candidates of one season">' +
+        '<option value=""' + (state.candYear ? '' : ' selected') + '>All accounts</option>' +
+        candSeasons().map(function (y) {
+          return '<option value="' + y + '"' + (state.candYear === y ? ' selected' : '') +
+            '>' + esc(seasonName(y)) + ' (' + candCountIn(y) + ')</option>';
+        }).join('') + '</select></label>';
+    }
+    var marked = candidateCount();
+
     host.innerHTML =
       '<div class="oa-u-bar">' +
         '<label class="oa-u-find"><span>Find</span>' +
           '<input type="search" id="oa-u-filter" placeholder="name, e-mail or affiliation" ' +
             'value="' + esc(state.filter) + '"></label>' +
+        chooser +
         '<span class="oa-u-count">' + rows.length + ' of ' + state.rows.length +
           ' shown' + (picked ? ' · ' + picked + ' selected' : '') +
-          (candidateCount() ? ' · ' + candidateCount() + ' JM candidate' +
-            (candidateCount() === 1 ? '' : 's') : '') + '</span>' +
+          /* …and the count NAMES its season, or a number that moves with the
+             chooser above it says nothing about which market it counts. */
+          (marked ? ' · ' + marked + ' JM candidate' + (marked === 1 ? '' : 's') +
+            (seasonName(markYear()) ? ' for ' + esc(seasonName(markYear())) : '') : '') +
+          '</span>' +
         '<button type="button" class="button oa-btn-ghost" id="oa-u-csv">' +
           'Download CSV</button>' +
       '</div>' +
@@ -549,6 +709,18 @@
         var at = f.selectionStart;
         var again = $('oa-u-filter');
         if (again) { again.focus(); try { again.setSelectionRange(at, at); } catch (e) {} }
+      });
+    }
+    var y = $('oa-u-candyear');
+    if (y) {
+      y.addEventListener('change', function () {
+        state.candYear = Math.trunc(Number(y.value)) || 0;
+        renderTable();
+        /* The control is replaced under the reader's own hand — the whole
+           strip is re-rendered — so the keyboard goes back to it, exactly as
+           it does for the Find box above. */
+        var again = $('oa-u-candyear');
+        if (again) again.focus();
       });
     }
     Array.prototype.forEach.call(document.querySelectorAll('.oa-u-sort'), function (b) {
@@ -626,7 +798,12 @@
     var headings = ['Name', 'E-mail', 'Affiliation', 'JM candidate', 'Registered on',
       'Last seen', 'Messages', 'uid'];
     var rows = visible().map(function (r) {
-      return [r.name || '', r.email || '', r.affiliation || '', r.candidate ? 'Yes' : '',
+      /* The SEASONS rather than "Yes": one column, saying the mark and which
+         market it is for. Under the chooser set to All accounts this is the
+         only place the year survives the download, and a spreadsheet can sort
+         and filter on it — which is what a CSV of a roster is for. */
+      return [r.name || '', r.email || '', r.affiliation || '',
+        (r.candYears || []).map(seasonName).join('; '),
         day(r.first), day(r.seen), threadLabel(r.thread), r.uid];
     });
     /* THE BYTE ORDER MARK IS FOR EXCEL. It opens a .csv as the machine's own
@@ -837,27 +1014,29 @@
 
   /* --------------------------------------------------------------- loading */
 
-  /** The uids holding a candidate profile for the season under way, or
-      NULL when it cannot be known. The season is OAJobNav.marketYear, the
-      ONE definition of which market is on; the statuses are the build's
-      own. Resolves rather than throws, like the deletions read beside it:
-      one refused collection must not empty the roster. */
+  /** Which seasons each account holds a live candidate profile for, or NULL
+      when it cannot be known. The season UNDER WAY is OAJobNav.marketYear,
+      the ONE definition of which market is on — it is what the mark and the
+      chooser open on — and without that module there is no answer at all
+      rather than a private guess. EVERY season is kept, not only the one
+      under way: choosing a past one is what the chooser is for, and the read
+      is the same single read either way. The statuses are the build's own,
+      applied by `candidateYearsOf`. Resolves rather than throws, like the
+      deletions read beside it: one refused collection must not empty the
+      roster. */
   function loadCandidates(d) {
     var NAV = root.OAJobNav;
     if (!NAV || typeof NAV.marketYear !== 'function') return Promise.resolve(null);
-    var year = NAV.marketYear(new Date());
-    state.seasonLabel = typeof NAV.marketLabel === 'function'
-      ? NAV.marketLabel(year) : String(year - 1) + '-' + String(year);
+    state.year = NAV.marketYear(new Date());
+    /* `.then(fn).catch(...)`, never `.then(fn, onError)`: the two-argument
+       form catches the READ failing and not the mapping throwing, so the
+       promise this function says resolves could still reject and empty the
+       whole roster. One catch after the work covers both. */
     return d.collection(CANDIDATES).get().then(function (snap) {
-      var uids = {};
-      snap.forEach(function (doc) {
-        var c = doc.data() || {};
-        if (c.uid && Number(c.year) === year && CANDIDATE_LIVE.indexOf(c.status) >= 0) {
-          uids[c.uid] = true;
-        }
-      });
-      return uids;
-    }, function () { return null; });
+      var docs = [];
+      snap.forEach(function (doc) { docs.push(doc.data() || {}); });
+      return candidateYearsOf(docs);
+    })['catch'](function () { return null; });
   }
 
   function load() {
@@ -885,7 +1064,9 @@
           var r = doc.data() || {};
           r.uid = doc.id;
           r.thread = threads[doc.id] || null;
-          r.candidate = !!(state.candidates && state.candidates[doc.id]);
+          /* NULL, never an empty list, when the read could not answer: the
+             two mean different things and only one of them is "no". */
+          r.candYears = state.candidates ? (state.candidates[doc.id] || []) : null;
           delete threads[doc.id];
           rows.push(r);
         });

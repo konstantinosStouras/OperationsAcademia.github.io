@@ -6398,8 +6398,8 @@ async function testUsersAndMessages() {
     'the joined-date column reads "Registered on" — since the sync fills `first` from Auth\'s creationTime it is the day the account was made');
   ok(!/'First seen'/.test(users), 'and "First seen" is gone from the panel and the CSV');
   ok(/'Name', 'E-mail', 'Affiliation', 'JM candidate', 'Registered on',\s*'Last seen', 'Messages', 'uid'/.test(users)
-     && /r\.candidate \? 'Yes' : ''/.test(users),
-    'the CSV carries the JM candidate mark as a column');
+     && /\(r\.candYears \|\| \[\]\)\.map\(seasonName\)\.join\('; '\)/.test(users),
+    'the CSV carries the JM candidate mark as a column, naming the SEASONS rather than saying "Yes" — under the chooser set to All accounts it is the only place the year survives the download');
 
   /* the chip: a short word on screen, the long wording as its tooltip */
   eq([U.threadShort(null), U.threadShort({ needsAdmin: true }), U.threadShort({ userUnread: 2 }), U.threadShort({})],
@@ -6423,23 +6423,123 @@ async function testUsersAndMessages() {
     (liveIn ? liveIn[1] : '').split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean).sort(),
     'CANDIDATE_LIVE is exactly the statuses the build publishes: a withdrawn or hidden profile is not a candidate on the site');
   const loadCand = users.slice(users.indexOf('function loadCandidates('), users.indexOf('function load()'));
-  ok(loadCand.length > 200 && /NAV\.marketYear\(new Date\(\)\)/.test(loadCand),
+  ok(loadCand.length > 200 && /state\.year = NAV\.marketYear\(new Date\(\)\)/.test(loadCand),
     'the season is OAJobNav.marketYear, the one definition, read at load time');
   ok(/if \(!NAV \|\| typeof NAV\.marketYear !== 'function'\) return Promise\.resolve\(null\)/.test(loadCand),
     'and without the module the answer is NULL (unknown), never a private guess at the season');
-  ok(/Number\(c\.year\) === year && CANDIDATE_LIVE\.indexOf\(c\.status\) >= 0/.test(loadCand),
-    'a profile counts for the season under way and a status the build publishes');
-  ok(/function \(\) \{ return null; \}\)/.test(loadCand),
+  ok(/return candidateYearsOf\(docs\)/.test(loadCand) && !/=== year/.test(loadCand),
+    'the read keeps EVERY season, through the one pure rule — narrowing it to the season under way is what made a past market unreachable from this panel');
+  ok(/\['catch'\]\(function \(\) \{ return null; \}\)/.test(loadCand),
     'a read that fails resolves null: unknown marks nobody, never everybody');
-  ok(/r\.candidate = !!\(state\.candidates && state\.candidates\[doc\.id\]\)/.test(users),
-    'and a row is marked only when the read answered and named its uid');
+  ok(/r\.candYears = state\.candidates \? \(state\.candidates\[doc\.id\] \|\| \[\]\) : null/.test(users),
+    'and a row carries the seasons only when the read answered — NULL, never an empty list, when it could not: the two mean different things and only one of them is "no"');
   ok(/class="oa-u-cand"[^>]*>JM Candidate</.test(users), 'the mark reads "JM Candidate", in those words');
-  ok(/!!r\.candidate && q\.length >= 3 && 'jm candidate'\.indexOf\(q\) >= 0/.test(users),
+  ok(/isCandIn\(r, markYear\(\)\) && q\.length >= 3 && 'jm candidate'\.indexOf\(q\) >= 0/.test(users),
     'and typing "candidate" into Find narrows the roster to them, so select-all under it messages every candidate');
+
+  /* THE PURE RULE: which seasons an account holds a LIVE profile for. The read
+     is the browser's, the rule is not, so it is driven here. */
+  eq(U.candidateYearsOf([
+    { uid: 'a', year: 2027, status: 'published' },
+    { uid: 'a', year: 2026, status: 'queued' },
+    { uid: 'a', year: '2027', status: 'published' },
+    { uid: 'b', year: 2027, status: 'withdrawn' },
+    { uid: 'b', year: 2027, status: 'hidden' },
+    { uid: 'c', year: 2026, status: 'published' },
+    { uid: 'd', status: 'published' },
+    { year: 2027, status: 'published' },
+  ]), { a: [2026, 2027], c: [2026] },
+    'candidateYearsOf keeps every season an account is live in, ascending and deduped, and nothing a withdrawn, hidden, uid-less or year-less document says');
+  eq(U.candidateYearsOf([]), {}, '…and an empty read is an empty answer');
+  eq(U.candidateYearsOf(), {}, '…as is no read at all');
+
+  /* ------------- THE JOB MARKET YEAR CHOOSER (owner, 2026-09-09: "add a
+     filter here so that the admin can immediately see all job market
+     candidates of the given job market year"). The mark and the Find needle
+     could only ever speak about the season UNDER WAY, so last season's
+     candidates could not be listed from this panel at all. */
+
+  ok(/function markYear\(\) \{ return state\.candYear \|\| state\.year; \}/.test(users),
+    'markYear is the ONE season the panel talks about: the one chosen, or the one under way');
+  ok(/if \(isCandIn\(r, markYear\(\)\)\) \{\s*html \+= '<span class="oa-u-cand"/.test(users)
+     && /esc\(seasonName\(markYear\(\)\) \|\| 'current'\) \+ ' job market"/.test(users),
+    'so the pill and its tooltip follow the chosen season — the list and the mark can never mean two different seasons');
+  ok(/if \(state\.candYear && !isCandIn\(r, state\.candYear\)\) return false/.test(users),
+    'the chooser narrows on the season it NAMES, so "All accounts" narrows nothing at all');
+  ok(/NAV\.marketLabel\(y\) : \(y - 1\) \+ '-' \+ y/.test(users),
+    'a season is spelt through OAJobNav.marketLabel, the site\'s one way of spelling a market year');
+  ok(/if \(state\.candidates && state\.year\) \{\s*chooser =/.test(users),
+    'the chooser is drawn only where the candidate read ANSWERED and the market rule is loaded: unknown draws nothing, the Delete control\'s own rule');
+  ok(/<option value=""' \+ \(state\.candYear \? '' : ' selected'\) \+ '>All accounts</.test(users),
+    '…it opens on All accounts, so the panel a maintainer already knows is unchanged until they choose');
+  const seasons = users.slice(users.indexOf('function candSeasons('), users.indexOf('function candSeasons(') + 700);
+  ok(/if \(state\.year\) seen\[state\.year\] = true/.test(seasons),
+    'the season under way is always offered, even at nought: a filter with one value is still drawn');
+  ok(/sort\(function \(a, b\) \{ return b - a; \}\)/.test(seasons), '…and the seasons read newest first');
+  ok(/esc\(seasonName\(y\)\) \+ ' \(' \+ candCountIn\(y\) \+ '\)<\/option>'/.test(users),
+    'every option carries its count, so the answer is known before the press — which is what "immediately see" asks for');
+  ok(/function candCountIn\(year\) \{\s*return state\.rows\.filter/.test(users)
+     && !/candCountIn\(year\) \{\s*return visible\(\)/.test(users),
+    '…counted over the whole roster, so the numbers do not move as the maintainer types into Find');
+  ok(/marked \+ ' JM candidate' \+ \(marked === 1 \? '' : 's'\) \+\s*\(seasonName\(markYear\(\)\) \? ' for ' \+ esc\(seasonName\(markYear\(\)\)\) : ''\)/.test(users),
+    'and the count line NAMES its season, or a number that moves with the chooser says nothing about which market it counts');
+  ok(/if \(state\.candYear && \(!state\.candidates \|\|\s*candSeasons\(\)\.indexOf\(state\.candYear\) < 0\)\) state\.candYear = 0;/.test(users)
+     && users.indexOf('state.candYear = 0;') < users.indexOf('var rows = visible();'),
+    'a narrowing the panel cannot evaluate is NO narrowing, dropped BEFORE the rows are chosen: a refused candidate read leaves every row\'s seasons null, so a chosen season would empty the roster entirely — and the chooser, withheld exactly then, is no longer there to undo it');
+  ok(/!state\.candidates \|\|/.test(users.slice(users.indexOf('function renderTable()'), users.indexOf('var rows = visible();'))),
+    '…and the read-did-not-answer half is what catches the season UNDER WAY, which candSeasons() offers unconditionally and season membership alone therefore never drops');
+
+  /* A PROTOTYPE KEY MUST NOT TAKE THE ROSTER DOWN. The keys are uids read out
+     of documents; `var by = {}` reads `by['constructor']` back as a truthy
+     FUNCTION and the accumulator threw on `list.indexOf` — and a throw there
+     rejects a read that promises to resolve. */
+  for (const hostile of ['constructor', '__proto__', 'toString', 'valueOf']) {
+    let answered = null;
+    try { answered = U.candidateYearsOf([{ uid: hostile, year: 2027, status: 'published' }]); } catch (e) { answered = null; }
+    eq(answered && answered[hostile], [2027],
+      `candidateYearsOf survives a uid naming Object.prototype's "${hostile}" and files it like any other`);
+  }
+  ok(/var by = Object\.create\(null\);/.test(users),
+    '…because the accumulator is prototype-free, which is the one line that removes the class');
+  ok(/\}\)\['catch'\]\(function \(\) \{ return null; \}\);/.test(loadCand)
+     && !/\}, function \(\) \{ return null; \}\)/.test(loadCand),
+    'and the read catches AFTER the mapping, never as `.then(fn, onError)`, whose second argument covers the read failing and not the mapping throwing — the promise this function says resolves could otherwise reject and empty the whole roster');
+  const wireU = users.slice(users.indexOf("var y = $('oa-u-candyear');"), users.indexOf("var y = $('oa-u-candyear');") + 600);
+  ok(/state\.candYear = Math\.trunc\(Number\(y\.value\)\) \|\| 0/.test(wireU)
+     && /var again = \$\('oa-u-candyear'\);\s*if \(again\) again\.focus\(\)/.test(wireU),
+    'choosing a season re-renders the strip and gives the keyboard back to the control, exactly as the Find box does');
+  const yearCss = uiCss.slice(uiCss.indexOf('.oa-u-find, .oa-u-year {'), uiCss.indexOf('.oa-u-count {'));
+  ok(/\.oa-u-find input, \.oa-u-year select \{ font-size: 16px; \}/.test(yearCss),
+    'the chooser is 16px like the Find box: anything smaller and iOS zooms the page when it takes focus');
+  const phoneBar = uiCss.slice(uiCss.indexOf('@media (max-width: 480px)'));
+  ok(!/\.oa-u-year select \{[^}]*min-height/.test(phoneBar),
+    'and the chooser writes NO phone min-height of its own: rule 13\'s 42px is already met by `body.v3 .oa-form select { min-height: 44px }` — the panel is inside a `.oa-form`, and that rule is (0,2,2) where anything on the class alone is (0,1,1) and would be inert. A rule that cannot win is not a rule; page-test.mjs measures the rendered height at 390px, which is the guarantee that holds');
+  ok(/body\.v3 \.oa-form input, body\.v3 \.oa-form select \{\s*font-size: 16px; min-height: 44px;/.test(v3css),
+    '…and that is the rule it leans on, pinned so a change to it cannot silently drop this control under the standard');
+  ok(/#oa-u-csv \{ margin-left: auto; \}/.test(uiCss) && /#oa-u-csv \{ margin-left: 0; \}/.test(phoneBar),
+    'the download holds the bar\'s right edge on whatever line it lands on — once the bar wraps, the count\'s `margin-right: auto` cannot reach a button on the next line and it sits flush LEFT — with the phone keeping the left edge it has always had');
+  /* THE ARROW. The panel is inside `<div class="oa-form" id="oa-aa">`, so a
+     bare select here is stripped of the native arrow by `.oa-form select` and
+     then has the hand-drawn chevron blanked by v3.css's `background`
+     SHORTHAND — measured as `appearance: none` with `background-image: none`,
+     a box with nothing on it to say it opens a list. Handed back to the
+     browser, which paints it in the reader's own ink in both themes. */
+  const yearSel = uiCss.slice(uiCss.indexOf('#oa-aa-users .oa-u-year select {'),
+    uiCss.indexOf('}', uiCss.indexOf('#oa-aa-users .oa-u-year select {')));
+  ok(yearSel.length > 40 && /\bappearance: auto/.test(yearSel) && /width: auto/.test(yearSel),
+    'the chooser keeps the browser\'s own dropdown arrow, and its width, back from `.oa-form select`');
+  ok(/#oa-aa-users \.oa-u-year select \{/.test(uiCss)
+     && !/\.oa-u-bar \.oa-u-year select \{|body\.v3 .{0,40}\.oa-u-year select \{/.test(uiCss),
+    '…won on SPECIFICITY through the panel\'s own id, never on load order: oa-ui.css is linked BEFORE v3.css, so a class-weight rule here would lose on file position');
+  ok(!/\.oa-u-year|\.oa-u-bar|\.oa-u-find/.test(v3css),
+    'and v3.css does not restate the bar, so the engine\'s rules are the ones that reach the site');
   const adminH = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   ok(adminH.includes('assets/oa-jobnav.js'), 'admin-area.html loads the market rule the mark depends on');
-  ok(/JM Candidate/.test(adminH.slice(adminH.indexOf('id="oa-aa-users"'), adminH.indexOf('id="oa-aa-users-list"'))),
+  const usersCopy = adminH.slice(adminH.indexOf('id="oa-aa-users"'), adminH.indexOf('id="oa-aa-users-list"'));
+  ok(/JM Candidate/.test(usersCopy),
     'the panel\'s copy names the mark and how to list only them');
+  ok(/<strong>JM candidates<\/strong> beside Find lists the candidates of any job market year/.test(usersCopy),
+    '…and the chooser, which is the one control on this panel that is not self-explanatory');
 
   /* the tighter table: measured in the browser suite, pinned here */
   const tbl = uiCss.slice(uiCss.indexOf('.oa-u-table {'), uiCss.indexOf('.oa-u-sort {'));

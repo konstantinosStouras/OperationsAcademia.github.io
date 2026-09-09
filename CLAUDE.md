@@ -2399,6 +2399,102 @@ clamp, chip case, heading wrap and button size) and the roster block of
 count line, Find narrowing to candidates, the chip's word and tooltip, the
 heading, and the fit at both widths).
 
+### …and the season is CHOSEN, so a past market's candidates can be reached
+
+Owner, 2026-09-09: *"add a filter here so that the admin can immediately see
+all job market candidates of the given job market year."* The mark and the
+Find needle above could only ever speak about the season UNDER WAY — the read
+kept the uids whose `year` was `OAJobNav.marketYear(now)` and threw the rest
+away — so the moment a market rolled, **last season's candidates became
+unreachable from this panel**: nothing on it could mark them, list them or
+select them, and they are exactly the people a maintainer writes to once a
+season is over. The bar carries a chooser now (`JM candidates`, beside Find),
+and the mark, the count line, the Find needle and the download all follow it.
+
+**IT IS ONE SEASON, NOT TWO.** `markYear()` is the season the panel is TALKING
+ABOUT — the chosen one, or the one under way when none is chosen — and the
+pill, its tooltip, the count line and the Find needle all read it. A chooser
+that narrowed the list by one season while the pill went on marking another
+is the one way this goes wrong, and there is no second reading to drift.
+The NARROWING is the only thing keyed on `state.candYear` rather than on
+`markYear()`, because the two are equal whenever a season is chosen and
+"All accounts" must narrow nothing at all.
+
+**THE ROW STORES THE SEASONS, NOT A BOOLEAN.** `candYears` is ascending,
+deduped, and `candidateYearsOf` — pure, exported, driven by the selftest — is
+the one rule that reads it out of the documents: a profile with no uid, no
+year, or a status the build does not publish is not a candidacy. One profile
+per market year is enforced only per (account, season), so an account really
+can hold several across seasons and the row really is a list. `null` and `[]`
+are kept apart: null is a read that could not answer, `[]` is an account with
+no profile, and only the second is "no".
+
+**THE SEASONS OFFERED ARE THE ONES THE ROSTER HOLDS**, newest first, each with
+its own count so the answer is known before the press — counted over the whole
+roster rather than the rows on screen, or the numbers would move as the
+maintainer types into Find. The season under way is always among them, even at
+nought: **a filter with one value is still drawn** (the review panel's own
+rule, recorded above), and an option reading "(0)" is a true answer where a
+missing option reads as a control that is broken. It opens on **All accounts**,
+which is the opposite of the review panel's own default and deliberate: this is
+a ROSTER of every registered account first and a candidate list second, so the
+panel a maintainer already knows is unchanged until they choose.
+
+**UNKNOWN DRAWS NOTHING.** A candidate read that failed, or a missing
+`OAJobNav`, leaves `state.candidates` null and there is then no chooser at all
+— never one whose every option would list nobody. The Delete control's own
+rule, and the account menu's.
+
+**THE CSV COLUMN NAMES THE SEASONS** instead of saying "Yes". One column, still
+`JM candidate`, carrying every season the row is live in (`2025-2026;
+2026-2027`): under the chooser set to All accounts that cell is the only place
+the year survives the download, and a spreadsheet can sort and filter on it.
+Two columns saying overlapping things is what this file forbids everywhere
+else.
+
+**AND IT HAD TO BE HANDED BACK ITS ARROW.** The roster panel sits inside
+`<div class="oa-form" id="oa-aa">`, so an ordinary `<select>` dropped into this
+bar is caught by `.oa-form select` — `appearance: none` plus a hand-drawn
+`#555` chevron — and then by `body.v3 .oa-form select`, whose `background`
+SHORTHAND blanks that chevron at (0,2,2). Measured on the rendered page:
+`appearance: none`, `background-image: none`, a plain bordered box reading
+"All accounts" with nothing on it to say it opens a list — beside a Find box
+that is a plain bordered box for real, since `input[type='search']` is not in
+the `.oa-form` list and is therefore native. That is the site-wide condition
+this file already records ("no select on the v3 site draws that chevron"),
+met here by the one control that could not afford it. `appearance: auto` with
+`width: auto` hands it back to the browser, which paints the arrow in the
+reader's own ink in BOTH themes because `v3.css` sets `color-scheme` — where a
+data-URI chevron carries one fixed colour and goes stale with the palette. It
+wins on **specificity through the panel's own id** (`#oa-aa-users .oa-u-year
+select`), never on load order: `oa-ui.css` is linked BEFORE `v3.css`, so a
+class-weight rule here would lose on file position — the trap already recorded
+for the Leaflet attribution box and the sponsor rail. The rule lives in
+`oa-ui.css` alone, which `v3.css` does not restate.
+
+**No rules change and no deploy.** The mark's own read is unchanged —
+`candidateSubmissions` is admin-read already — the season is derived at read
+time, and nothing is stored on the roster row (`ROW_KEYS` is still the five
+the rules name, pinned both ways).
+
+Tests: the chooser block of `testUsersAndMessages` (`candidateYearsOf` driven
+over a fixture whose withdrawn, hidden, uid-less and year-less documents must
+all be dropped and whose duplicate season must fold; `markYear` as one
+definition; the pill and its tooltip through it; the narrowing keyed on
+`candYear`; the season spelt through `OAJobNav.marketLabel`; the chooser
+withheld where the read did not answer; opening on All accounts; the season
+under way always offered and the seasons newest first; the count on every
+option and counted over the whole roster; the count line naming its season;
+the keyboard handed back on a change; and the stylesheet's 16px, its 42px
+phone target, its restored arrow and its specificity) and the roster block of
+`page-test.mjs`, which drives it in a browser: the options and their counts
+read off the rendered control, a PAST season listing its own candidate with
+the mark and the tooltip following, the count line naming it, the keyboard
+left on the control, select-all under a chosen season, the withdrawn profile
+never listed, All accounts putting the mark back on the season under way, the
+arrow measured as the property (there is one, the browser's or a drawn one),
+and the 42px target at 390px.
+
 ### The front page's fifth key figure is BORN HIDDEN
 
 The hero strip (`#v3-stats` in `index.html`) held four figures, three of them

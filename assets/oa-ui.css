@@ -1922,11 +1922,59 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   align-items: center;
   margin: 0 0 12px;
 }
-.oa-u-find { display: flex; align-items: center; gap: 8px; }
-.oa-u-find > span { font-size: 13px; font-weight: 600; color: var(--mut, #646c78); }
+.oa-u-find, .oa-u-year { display: flex; align-items: center; gap: 8px; }
+.oa-u-find > span, .oa-u-year > span {
+  font-size: 13px; font-weight: 600; color: var(--mut, #646c78); white-space: nowrap;
+}
 /* 16px or iOS zooms the whole page when the field takes focus. */
-.oa-u-find input { font-size: 16px; }
+.oa-u-find input, .oa-u-year select { font-size: 16px; }
+
+/* THE SEASON CHOOSER KEEPS THE BROWSER'S OWN DROPDOWN ARROW, and it takes an
+   ID to say so.
+
+   The roster panel sits inside `<div class="oa-form" id="oa-aa">`, so an
+   ordinary <select> dropped into this bar is caught by `.oa-form select`
+   above — which strips the native arrow (`appearance: none`) and draws a
+   fixed #555 chevron of its own — and then by `body.v3 .oa-form select` in
+   v3.css, whose `background` SHORTHAND blanks that chevron at (0,2,2). That
+   is the site-wide condition CLAUDE.md records, and MEASURED here it left
+   this control at `appearance: none` with `background-image: none`: a plain
+   bordered box reading "All accounts" with nothing on it to say it opens a
+   list, sitting beside a Find box that is a plain bordered box for real (a
+   `search` input is not in the `.oa-form` list above, so it is native).
+
+   Handing the control back to the browser is the whole fix and needs no
+   image: v3.css sets `color-scheme` per theme, so the UA paints the arrow in
+   the reader's own ink in BOTH themes — measured light and dark — where a
+   data-URI chevron would carry one fixed colour and go stale with the
+   palette. `width: auto` goes with it, or the inherited `width: 100%` fights
+   the flex row it sits in.
+
+   SPECIFICITY, NEVER LOAD ORDER: oa-ui.css is linked BEFORE v3.css, so a
+   rule of equal weight here loses on file position — the trap this file
+   already records for the Leaflet attribution box and the sponsor rail.
+   `#oa-aa-users` is the panel's own hook, already used by the desktop
+   break-out rule below, and no class-based rule can reach it. */
+#oa-aa-users .oa-u-year select {
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+  appearance: auto;
+  width: auto;
+  background-image: none;
+  padding-right: 10px;
+}
 .oa-u-count { font-size: 13px; color: var(--mut, #646c78); margin-right: auto; }
+/* …AND THE DOWNLOAD HOLDS THE BAR'S RIGHT EDGE ON WHATEVER LINE IT LANDS ON.
+   `.oa-u-count { margin-right: auto }` above reaches the button only while
+   the two share a line: once the bar wraps, the button starts a NEW flex line
+   that the count's margin cannot reach, and a lone control sits flush LEFT
+   under the bar — the stray-line look. Measured on the tree before the season
+   chooser at 560px, 641px and 700px, and with it in the 1000–1065px band the
+   chooser's own width opens up. Its own auto margin follows it onto whichever
+   line it lands on; where the two share a line the two autos split one gap
+   and the button ends exactly where it did, which is what keeps this from
+   moving anything that was already right. */
+#oa-u-csv { margin-left: auto; }
 
 /* An e-mail address has no spaces, so it sets a table's minimum width: the
    table scrolls inside its OWN container rather than making the page scroll
@@ -2153,6 +2201,15 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   /* The action column never wraps its button; everything else may. */
   .oa-u-bar { gap: 8px; }
   .oa-u-count { margin-right: 0; width: 100%; }
+  /* The bar stacks here and the download keeps the left edge it has always
+     had on a phone, under a count that takes the whole line. */
+  #oa-u-csv { margin-left: 0; }
+  /* NO min-height for the season chooser: rule 13's 42px is already met, and
+     exceeded, by `body.v3 .oa-form select { min-height: 44px }` — this panel
+     sits inside a `.oa-form`, and that rule is (0,2,2) where anything written
+     here on the class alone is (0,1,1) and would be inert. A rule that cannot
+     win is not a rule; the browser suite measures the rendered height at
+     390px, which is the guarantee that actually holds. */
   .oa-u-table { font-size: 13px; }
   .oa-u-table th, .oa-u-table td { padding: 7px 8px; }
   /* Remove / Restore is a text button, and a text button on a phone is a tap
