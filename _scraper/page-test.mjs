@@ -10909,6 +10909,9 @@ for (const w of [320, 360, 390, 430]) {
   const upcomingDates = (r) => ['applyByDate', 'reviewDate']
     .map((k) => String(r[k] || '').slice(0, 10))
     .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= TODAY);
+  /* an all-day entry ends the day AFTER, in the file and in Google's own
+     address alike, which is what makes the two comparable here */
+  const nextIsoDay = (d) => new Date(Date.parse(d + 'T00:00:00Z') + 86400000).toISOString().slice(0, 10);
   const datedIds = new Set(served.filter((r) => upcomingDates(r).length).map((r) => r.id));
   ok(datedIds.size >= 2, `calendar: the served file holds current postings with an upcoming date (${datedIds.size})`);
   ok(served.some((r) => !upcomingDates(r).length), 'calendar: …and at least one without (open until filled, or passed)');
@@ -10938,9 +10941,14 @@ for (const w of [320, 360, 390, 430]) {
         id: li.id.replace(/^job-/, ''), box: !!li.querySelector('.oa-cal-box'),
         when: (li.querySelector('.oa-cal-when') || { textContent: '' }).textContent }));
       const tray = document.querySelector('.oa-cal-tray');
+      const panel = tray.querySelector('.oa-cal-panel');
       return { cards, hidden: tray.hidden, msg: tray.querySelector('.oa-cal-msg').textContent,
         go: tray.querySelector('.oa-cal-go').disabled, none: tray.querySelector('.oa-cal-none').hidden,
         all: tray.querySelector('.oa-cal-all').disabled,
+        goLabel: tray.querySelector('.oa-cal-go').textContent,
+        panel: { hidden: panel.hidden, expanded: tray.querySelector('.oa-cal-go').getAttribute('aria-expanded'),
+          opts: [...panel.querySelectorAll('.oa-cal-opt')].map((b) => b.getAttribute('data-cal')) },
+        allLeft: Math.round(tray.querySelector('.oa-cal-all').getBoundingClientRect().left),
         above: tray.getBoundingClientRect().bottom <= document.querySelector('.oa-resultbar').getBoundingClientRect().top + 1,
         /* the strip's room (owner, 2026-09-06: "add a bit more space here"):
            a gap from the filter bar above and the result bar below, and its
@@ -10960,13 +10968,66 @@ for (const w of [320, 360, 390, 430]) {
     ok(first.inset >= 18, `calendar: …and its sentence set in from the dashed edge (got ${first.inset})`);
     ok(/^Tick a posting/.test(first.msg) && first.msg.includes(String(datedIds.size)),
       `calendar: it says what to do and how many listed postings carry a date (${datedIds.size})`);
-    ok(first.go && first.none && !first.all, 'calendar: the download waits for a tick, Untick all is hidden, Tick all is live');
+    /* THE 2026-09-09 BUG. It was `ui.go.disabled = !n`, so with nothing
+       ticked the primary action sat at 0.45 opacity reading dead, which is
+       exactly what the owner reported after a download, an untick and a
+       reload. A tick NARROWS now: with none, a press sends every listed
+       posting that has a date still to come, and the button says so. */
+    ok(!first.go && first.none && !first.all,
+      'calendar: with nothing ticked the send is LIVE, Untick all is hidden, Tick all is live');
+    ok(new RegExp('Add all ' + datedIds.size + ' to your calendar').test(first.goLabel),
+      `calendar: ...and the button says what it would send (${first.goLabel})`);
+    eq(first.panel, { hidden: true, expanded: 'false', opts: ['google', 'apple', 'ics'] },
+      'calendar: the chooser ships SHUT, carrying the owner\'s three ways in order');
 
+    /* a disclosure whose panel is absolute: opening it moves nothing */
+    await q.click('.oa-cal-go');
+    await q.waitForTimeout(120);
+    const opened = await q.evaluate((left) => {
+      const p = document.querySelector('.oa-cal-panel').getBoundingClientRect();
+      return { hidden: document.querySelector('.oa-cal-panel').hidden,
+        expanded: document.querySelector('.oa-cal-go').getAttribute('aria-expanded'),
+        moved: Math.abs(document.querySelector('.oa-cal-all').getBoundingClientRect().left - left) > 0.5,
+        inside: p.left >= 0 && p.right <= innerWidth,
+        over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    }, first.allLeft);
+    eq({ hidden: opened.hidden, expanded: opened.expanded, moved: opened.moved, inside: opened.inside, over: opened.over },
+      { hidden: false, expanded: 'true', moved: false, inside: true, over: 0 },
+      'calendar: opening the chooser moves nothing beside it, stays inside the viewport and scrolls nothing sideways');
+    await q.keyboard.press('Escape');
+    await q.waitForTimeout(80);
+    eq(await q.evaluate(() => ({ hidden: document.querySelector('.oa-cal-panel').hidden,
+      focus: document.activeElement.classList.contains('oa-cal-go') })), { hidden: true, focus: true },
+      'calendar: Escape shuts it and gives the keyboard back to the trigger');
+    await q.click('.oa-cal-go');
+    await q.waitForTimeout(80);
+    await q.click('.oa-cal-msg');
+    await q.waitForTimeout(80);
+    eq(await q.evaluate(() => document.querySelector('.oa-cal-panel').hidden), true,
+      'calendar: a press outside shuts it too');
+
+    /* THE BOX IS TUCKED 12px INTO `.oa-card-head`, which is itself a BUTTON
+       (oa-list.css's negative margin moves the label's box, it does not
+       extend it), so part of the tick box overlaps another interactive
+       element. Which one wins is a paint-order question, and nothing here
+       measured it: assert the box itself answers at its own top edge, and
+       press it with a REAL pointer rather than element.click(), which does
+       not do a hit test at all. */
+    eq(await q.evaluate(() => {
+      const b = document.querySelector('.oa-cal-box').getBoundingClientRect();
+      const at = (y) => (document.elementFromPoint(b.left + b.width / 2, y) || {}).className;
+      return [at(b.top + 1), at(b.top + b.height / 2)];
+    }), ['oa-cal-box', 'oa-cal-box'],
+      'calendar: the tick box wins the hit test over the card head it is tucked into, at its top edge as well as its middle');
+    await q.click('.oa-cal-box');
+    await q.waitForTimeout(120);
     const ticked = await q.evaluate(() => {
       const boxes = [...document.querySelectorAll('.oa-cal-box')].slice(0, 2);
-      boxes.forEach((b) => b.click());
-      return boxes.map((b) => b.closest('.oa-card').id.replace(/^job-/, ''));
+      boxes[1].click();
+      return boxes.map((b) => b.getAttribute('data-cal-id'));
     });
+    eq(await q.evaluate(() => document.querySelectorAll('.oa-card.is-open').length), 0,
+      'calendar: ...and pressing it does not open the card underneath');
     ok(ticked.length >= 1, `calendar: page one offers boxes to tick (${ticked.length})`);
     await q.waitForTimeout(150);
     const after = await q.evaluate(() => {
@@ -10983,12 +11044,15 @@ for (const w of [320, 360, 390, 430]) {
     await q.click('.oa-pager button[aria-label="Previous page"]');
     await q.waitForTimeout(200);
     eq(await q.evaluate(() => [...document.querySelectorAll('.oa-cal-box:checked')]
-      .map((b) => b.closest('.oa-card').id.replace(/^job-/, ''))), ticked,
+      .map((b) => b.getAttribute('data-cal-id'))), ticked,
       'calendar: the ticks survive a repaint of the list');
 
     const dl = q.waitForEvent('download', { timeout: 30000 });
     await q.click('.oa-cal-go');
+    await q.click('.oa-cal-opt[data-cal="ics"]');
     const d = await dl;
+    eq(await q.evaluate(() => document.querySelector('.oa-cal-panel').hidden), true,
+      'calendar: choosing shuts the chooser, so it never hangs over the page the reader comes back to');
     ok(/^operations-academia-job-deadlines-\d{4}-\d{4}-\d{4}-\d{2}-\d{2}\.ics$/.test(d.suggestedFilename()),
       `calendar: it downloads a named .ics (${d.suggestedFilename()})`);
     const text = await readFile(await d.path(), 'utf8');
@@ -11007,11 +11071,30 @@ for (const w of [320, 360, 390, 430]) {
     ok(cal.events.every((e) => /^Suggested deadline: .*\nFinal deadline: /.test(e.DESCRIPTION.value) && /\nOA posting ID: /.test(e.DESCRIPTION.value)),
       'calendar: every entry opens with the two deadlines and carries the OA posting ID');
 
+    /* THE REPORTED SEQUENCE, end to end: ticked, downloaded, unticked. The
+       button must still be live and must say what it would send now. Revert
+       either half of the fix and this is where it goes red. */
     await q.click('.oa-cal-none');
     await q.waitForTimeout(150);
-    eq(await q.evaluate(() => ({ checked: document.querySelectorAll('.oa-cal-box:checked').length,
-      go: document.querySelector('.oa-cal-go').disabled })), { checked: 0, go: true },
-      'calendar: Untick all clears every box and disables the download again');
+    const unticked = await q.evaluate(() => ({ checked: document.querySelectorAll('.oa-cal-box:checked').length,
+      go: document.querySelector('.oa-cal-go').disabled, label: document.querySelector('.oa-cal-go').textContent }));
+    eq({ checked: unticked.checked, go: unticked.go }, { checked: 0, go: false },
+      'calendar: Untick all clears every box and the send STAYS LIVE (owner, 2026-09-09)');
+    ok(new RegExp('Add all ' + datedIds.size + ' to your calendar').test(unticked.label),
+      `calendar: ...saying it would send every listed posting with a date (${unticked.label})`);
+
+    /* and it really does send them: the file with nothing ticked carries
+       every listed posting that has a date still to come */
+    const dlAll = q.waitForEvent('download', { timeout: 30000 });
+    await q.click('.oa-cal-go');
+    await q.click('.oa-cal-opt[data-cal="ics"]');
+    const dAll = await dlAll;
+    const allText = await readFile(await dAll.path(), 'utf8');
+    const wantAll = served.filter((r) => datedIds.has(r.id)).reduce((n, r) => n + upcomingDates(r).length, 0);
+    eq(parseIcs(allText).events.length, wantAll,
+      'calendar: ...and with nothing ticked the file carries every listed posting with an upcoming date');
+    ok(/deadlines? downloaded/.test(await q.evaluate(() => document.querySelector('.oa-cal-note').textContent)),
+      'calendar: the strip says what has just happened, in its own live line rather than an alert');
     await q.click('.oa-cal-all');
     await q.waitForTimeout(150);
     const everything = await q.evaluate(() => ({
@@ -11022,6 +11105,117 @@ for (const w of [320, 360, 390, 430]) {
     eq(everything.checked, everything.boxes, 'calendar: Tick all listed ticks every box on the page');
     ok(new RegExp('^' + datedIds.size + ' postings ticked').test(everything.msg) && everything.allBtn,
       `calendar: …and every dated posting on every other page too (${datedIds.size}), after which it has nothing left to tick`);
+
+    /* GOOGLE (owner, 2026-09-09). Its own event address carries ONE event, so
+       several go over as the FILE with Google's Import screen beside it, and
+       exactly one goes over as the address itself. The host is stubbed, or
+       the popup would land on a network error and the address could not be
+       read back off it. */
+    await ctx.route('https://calendar.google.com/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: '<title>google</title>' }));
+    {
+      const pop = ctx.waitForEvent('page', { timeout: 20000 });
+      const dlG = q.waitForEvent('download', { timeout: 30000 });
+      await q.click('.oa-cal-go');
+      await q.click('.oa-cal-opt[data-cal="google"]');
+      const tab = await pop;
+      const file = await dlG;
+      ok(/^https:\/\/calendar\.google\.com\/.*settings/.test(tab.url()),
+        `calendar: several deadlines open Google's own Import screen (${tab.url()})`);
+      ok(/\.ics$/.test(file.suggestedFilename()), 'calendar: ...beside the file it is to import');
+      ok(/Import/.test(await q.evaluate(() => document.querySelector('.oa-cal-note').textContent)),
+        'calendar: ...and the strip says what to do there');
+      await tab.close();
+    }
+    /* APPLE, on a device with no share sheet (this browser): the same bytes
+       as the plain download, with the sentence that is true here. The sheet
+       itself is an iPhone path and cannot be driven from Chromium. */
+    {
+      const dlA = q.waitForEvent('download', { timeout: 30000 });
+      await q.click('.oa-cal-go');
+      await q.click('.oa-cal-opt[data-cal="apple"]');
+      const appleFile = await dlA;
+      ok(/\.ics$/.test(appleFile.suggestedFilename()),
+        'calendar: Apple Calendar hands over the same .ics on a device with no share sheet');
+      const said = await q.evaluate(() => document.querySelector('.oa-cal-note').textContent);
+      ok(/calendar file/.test(said) && !/adds them to your calendar/.test(said),
+        'calendar: ...and says what this device will do with it, never that it has added anything');
+    }
+
+    await q.click('.oa-cal-none');
+    await q.waitForTimeout(150);
+    const one = await q.evaluate(() => {
+      const b = document.querySelector('.oa-cal-box');
+      b.click();
+      return b.closest('.oa-card').id.replace(/^job-/, '');
+    });
+    await q.waitForTimeout(150);
+    {
+      const pop = ctx.waitForEvent('page', { timeout: 20000 });
+      await q.click('.oa-cal-go');
+      await q.click('.oa-cal-opt[data-cal="google"]');
+      const tab = await pop;
+      const u = new URL(tab.url());
+      const row = served.find((r) => r.id === one);
+      eq({ host: u.host, action: u.searchParams.get('action'), crm: u.searchParams.get('crm') },
+        { host: 'calendar.google.com', action: 'TEMPLATE', crm: 'AVAILABLE' },
+        'calendar: ONE deadline opens Google Calendar with the entry filled in, and leaves the day free');
+      const dates = u.searchParams.get('dates');
+      eq(dates.split('/')[0], upcomingDates(row)[0].replace(/-/g, ''),
+        'calendar: ...on the posting\'s own date');
+      eq(dates.split('/')[1], nextIsoDay(upcomingDates(row)[0]).replace(/-/g, ''),
+        'calendar: ...ending the day after, the way an all-day entry does');
+      ok(u.searchParams.get('text').includes(row.institution),
+        'calendar: ...named for the posting');
+      ok(!EMAILISH.test(tab.url()), 'calendar: ...and no contact address goes to Google either');
+      await tab.close();
+    }
+
+    /* THE STRIP ONLY EVER TALKS ABOUT WHAT IS ON SCREEN. `picked` is not
+       narrowed by a filter, so a tick made under one search used to go on
+       counting under the next: Tick all listed, then narrow, and it claimed
+       "32 postings ticked" over a page where no box was ticked at all, with
+       a file to match. */
+    await q.click('.oa-cal-all');
+    await q.waitForTimeout(150);
+    const searchBox = '#oa-jobs .oa-filters input[type="text"], #oa-jobs .oa-filters input[type="search"]';
+    const narrowTo = await q.evaluate((sel) => {
+      const one = document.querySelector('.oa-cal-box').closest('.oa-card');
+      const name = one.querySelector('.oa-card-title').textContent.trim();
+      const box = document.querySelector(sel);
+      box.value = name;
+      box.dispatchEvent(new Event('input', { bubbles: true }));
+      return name;
+    }, searchBox);
+    await q.waitForTimeout(600);
+    const scoped = await q.evaluate(() => ({
+      onScreen: document.querySelectorAll('.oa-cal-box').length,
+      ids: [...document.querySelectorAll('.oa-cal-box:checked')].map((b) => b.getAttribute('data-cal-id')),
+      msg: document.querySelector('.oa-cal-msg').textContent }));
+    ok(scoped.onScreen > 0 && scoped.ids.length > 0 &&
+       new RegExp('^' + scoped.ids.length + ' postings? ticked').test(scoped.msg),
+      `calendar: after narrowing to "${narrowTo}" the strip counts only the ticks a reader can SEE (${scoped.ids.length} of ${scoped.onScreen} listed, of ${datedIds.size} ticked before)`);
+    const dlNarrow = q.waitForEvent('download', { timeout: 30000 });
+    await q.click('.oa-cal-go');
+    await q.click('.oa-cal-opt[data-cal="ics"]');
+    const narrowFile = parseIcs(await readFile(await (await dlNarrow).path(), 'utf8'));
+    const wantNarrow = served.filter((r) => scoped.ids.includes(r.id))
+      .reduce((n, r) => n + upcomingDates(r).length, 0);
+    eq(narrowFile.events.length, wantNarrow,
+      'calendar: ...and the FILE is those postings and no others, never the ones ticked out of sight');
+
+    /* a search that matches NOTHING leaves no posting with a date to add, so
+       a strip whose every control is dead stands down instead */
+    await q.evaluate((sel) => {
+      const box = document.querySelector(sel);
+      box.value = 'zzzznotauniversity';
+      box.dispatchEvent(new Event('input', { bubbles: true }));
+    }, searchBox);
+    await q.waitForTimeout(600);
+    eq(await q.evaluate(() => ({ cards: document.querySelectorAll('.oa-card').length,
+      hidden: document.querySelector('.oa-cal-tray').hidden })), { cards: 0, hidden: true },
+      'calendar: a search with no dated posting in it stands the strip down rather than showing dead controls');
+
     eq(errors, [], 'calendar: signed-in run, no uncaught script error');
     await ctx.close();
   }
@@ -11046,6 +11240,21 @@ for (const w of [320, 360, 390, 430]) {
     ok(m.boxW >= 20, `calendar mobile: the box itself is 20px (got ${m.boxW})`);
     ok(m.btnH.length === 3 && m.btnH.every((h) => h >= 42), `calendar mobile: the three buttons are 42px targets (got ${m.btnH})`);
     ok(m.btnW.every((w) => w >= m.trayW - 40), 'calendar mobile: …stacked full width');
+    /* rule 10: the chooser is a panel, so it is a list too */
+    await q.click('.oa-cal-go');
+    await q.waitForTimeout(150);
+    const pnl = await q.evaluate(() => {
+      const p = document.querySelector('.oa-cal-panel').getBoundingClientRect();
+      const tray = document.querySelector('.oa-cal-tray').getBoundingClientRect();
+      return { w: Math.round(p.width), trayW: Math.round(tray.width), h: Math.round(p.height),
+        cap: Math.round(innerHeight * 0.5), inside: p.left >= 0 && p.right <= innerWidth,
+        rows: [...document.querySelectorAll('.oa-cal-opt')].map((b) => Math.round(b.getBoundingClientRect().height)),
+        over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    ok(pnl.inside && pnl.w >= pnl.trayW - 44 && pnl.over === 0,
+      `calendar mobile: the chooser takes the strip's width, inside the screen, scrolling nothing sideways (got ${pnl.w} of ${pnl.trayW})`);
+    ok(pnl.h <= pnl.cap, `calendar mobile: …capped at half the screen (got ${pnl.h} of ${pnl.cap})`);
+    ok(pnl.rows.length === 3 && pnl.rows.every((h) => h >= 42), `calendar mobile: …with 42px rows (got ${pnl.rows})`);
     ok(m.gapAbove >= 12 && m.inset >= 14, `calendar mobile: the strip keeps its room on a phone (got ${m.gapAbove}/${m.inset})`);
     eq(m.over, 0, 'calendar mobile: no sideways scroll');
     eq(errors, [], 'calendar mobile: no uncaught script error');

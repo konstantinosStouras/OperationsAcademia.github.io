@@ -592,12 +592,17 @@
 
       if (window.OAJobEdit) OAJobEdit.attach(jobs);
       /* THE DEADLINES TO A CALENDAR (owner, 2026-09-06): tick postings, then
-         download an .ics of their apply-by dates. The strip sits above the
-         result bar and is drawn for a signed-in reader only; a posting that
-         is open until filled has no date to add and gets no tick box. */
+         send their apply-by dates to Google Calendar, to Apple Calendar or to
+         a file (owner, 2026-09-09). The strip sits above the result bar and
+         is drawn for a signed-in reader only; a posting that is open until
+         filled has no date to add and gets no tick box. A TICK NARROWS: with
+         nothing ticked the strip sends every posting listed that has a date
+         still to come, which is what keeps its button from ever reading as a
+         dead control. */
       if (window.OAJobCal) {
         /* the file is named for the market under way ("Ops JM '27"), which
-           the module reads from OAJobNav itself */
+           the module reads from OAJobNav itself; the strip's own button
+           offers the three ways out (owner, 2026-09-09) */
         OAJobCal.attach(jobs, document.getElementById('oa-jobs'));
       }
       /* The gate is painted from the auth HINT so a signed-in reader never

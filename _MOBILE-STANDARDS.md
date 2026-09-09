@@ -159,11 +159,22 @@ marked global.
 14. **A tick box on a card is a control.** The jobs page's "Add to calendar"
     strip under a dated posting's head (`assets/oa-jobcal.js`) is a 42px
     target on a phone, following the head's 16px gutter, with a 20px box;
-    and the strip above the list that downloads the file stacks its three
-    buttons full width at 42px, like the filter bar's own pair (rule 11).
+    and the strip above the list that sends them stacks its buttons full
+    width at 42px, like the filter bar's own pair (rule 11).
     Both are drawn for a signed-in reader only, so the `MOBILE_PAGES` loop
     (signed out) never sees them; the calendar block of `page-test.mjs`
     measures them at 390px itself, the way the forum block does.
+
+    Since 2026-09-09 the strip's own button opens a **chooser** (Google
+    Calendar, Apple Calendar, the file), and a chooser is a panel, so
+    **rule 10 applies to it**: on a phone it takes the width of the strip
+    rather than a fixed 264px, caps at `50vh`, scrolls inside itself and
+    gives each of its three items a 42px row. The button that opens it is
+    inside a wrapper of its own (the panel is positioned against it), so it
+    is the WRAPPER the strip stacks full width. A phone rule that stacked
+    `.oa-cal-btn` alone would leave the trigger at its content width inside a
+    wrapper that never grew, which is the same "place every child you rely
+    on" trap rule 13 records for the forum card's grid.
 
 15. **Rule 9's hover guard is about EVERY control, not only a card — and a
     control with an ON-STATE needs a second thing beside it.** Rule 9 has said

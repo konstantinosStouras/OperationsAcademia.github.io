@@ -14466,6 +14466,117 @@ async function testCalendars() {
   ok(/OAJobNav\.REF_LABEL \+ ': '/.test(jsrc) && /OAJobNav\.marketYear\(now\)/.test(jsrc) && /name: calName\(year\)/.test(jsrc),
     'jobcal: the ID line takes the card\'s own label, and the name the season under way, from OAJobNav');
 
+  /* ---- WHERE THE DEADLINES GO: the three ways out (owner, 2026-09-09) ----
+
+     "allow 3 standard options for calendar from a drop down menu: (1) Google
+     calendar, (2) apple calendar, (3) .ics download option." Google's own
+     event address carries exactly ONE event, which is why a single deadline
+     goes over as an address and several go over as the file beside Google's
+     Import screen; Apple and the plain download are the SAME file, and the
+     module says so rather than dressing one of them up. */
+  eq(J.CHOICES.map((c) => c.key), ['google', 'apple', 'ics'],
+    'jobcal: three ways out, in the owner\'s own order');
+  ok(J.CHOICES.every((c) => c.name && c.note), 'jobcal: …each named, each with the sentence a reader chooses by');
+  ok(/same file/.test(J.CHOICES[2].note),
+    'jobcal: …and the third says plainly that it is the same file as the second, which it is');
+
+  const gEv = J.eventsFor([row({ applyByDate: '2026-11-14' })], { now: NOW })[0];
+  const gUrl = J.googleUrl(gEv);
+  ok(gUrl.indexOf(J.GOOGLE_TEMPLATE + '?action=TEMPLATE&') === 0, 'jobcal: the Google address is its own event window');
+  ok(/[?&]dates=20261114\/20261115(&|$)/.test(gUrl),
+    'jobcal: …with the all-day dates YYYYMMDD/YYYYMMDD, the end EXCLUSIVE, the same rule DTEND follows');
+  eq(new URL(gUrl).searchParams.get('dates').split('/')[1],
+    I.nextDay('2026-11-14').replace(/-/g, ''),
+    'jobcal: …and BOTH readings come from OAIcs.nextDay, so the file and the address cannot part company');
+  eq(new URL(gUrl).searchParams.get('text'), gEv.summary, 'jobcal: the title is the entry\'s own');
+  eq(new URL(gUrl).searchParams.get('location'), gEv.location, 'jobcal: the location too');
+  eq(new URL(gUrl).searchParams.get('details'), gEv.description,
+    'jobcal: …and the description, whole while it fits');
+  eq(new URL(gUrl).searchParams.get('crm'), 'AVAILABLE',
+    'jobcal: the day is left FREE, which is what TRANSP:TRANSPARENT says in the file: a deadline is a reminder');
+  eq(new URL(gUrl).searchParams.get('trp'), null,
+    'jobcal: …said with crm and never with trp, which Google\'s current client does not read, so a deadline sent with it lands Busy while the file says free');
+  ok(noAddress(gUrl), 'jobcal: no e-mail address reaches Google either');
+  const longEv = { day: '2026-11-14', summary: 'x', description: 'word '.repeat(1000), location: '' };
+  const longDetails = new URL(J.googleUrl(longEv)).searchParams.get('details');
+  ok(longDetails.length < 1000 && /…$/.test(longDetails),
+    `jobcal: a description too long for an ADDRESS is clipped and says so (${longDetails.length} chars); the file carries the whole of it`);
+  eq(J.googleUrl({ day: 'soon', summary: 'x' }), '', 'jobcal: an entry Google could not be given is no address');
+  eq(J.googleUrl({ day: '2026-11-14', summary: '' }), '', 'jobcal: …nor is one with nothing to call it');
+  ok(/^https:\/\/calendar\.google\.com\//.test(J.GOOGLE_IMPORT) && /settings/.test(J.GOOGLE_IMPORT),
+    'jobcal: several entries go to Google\'s own Import screen, beside the file');
+
+  /* THE BUG THIS ANSWERS (owner, 2026-09-09): "de-selected the postings and
+     even refreshed the page. However, the calendar button stays deactivated."
+     A tick NARROWS now; it is not a precondition. */
+  ok(/function targetRows/.test(jsrc) && /rows: on\.length \? on : dated/.test(jsrc),
+    'jobcal: a press acts on the ticks where there are any, and on every listed dated posting where there are none');
+  const jbody = jsrc.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(/ui\.go\.disabled = !target;/.test(jbody) && !/ui\.go\.disabled = !n;/.test(jbody),
+    'jobcal: so the primary control is dead in ONE state only: nothing listed has a date to add');
+  ok(jbody.indexOf('ui.tray.hidden = !show') < jbody.indexOf('ui.go.disabled'),
+    'jobcal: the strip stands down FIRST and every control is settled after it, so neither half can be skipped by the other');
+  ok(/rows\.length > 0 && dated\.length > 0/.test(jbody),
+    'jobcal: …and it stands down on a view with no dated posting too: a strip whose every control is dead is a control panel for nothing');
+
+  /* THE STRIP ONLY EVER TALKS ABOUT WHAT IS ON SCREEN. `picked` is not
+     narrowed by a filter, so a tick made under one search went on counting
+     under the next: Tick all listed, then narrow, and it claimed "32 postings
+     ticked" over a page where no box was ticked, with a file to match. */
+  ok(/function chosen\(dated\)/.test(jbody) && /dated\.filter\(function \(r\) \{ return isPicked\(r\.id\); \}\)/.test(jbody),
+    'jobcal: the ticks are intersected with the listed set, so the number and the file are the postings a reader can see');
+  ok(/return chosen\(listedDated\(list\)\)\.rows;/.test(jbody) && /var target = sel\.rows\.length;/.test(jbody),
+    'jobcal: …and the same intersection decides what a press sends and what the button says');
+
+  /* the box carries the key pick() wrote, rather than a second derivation of
+     it out of the card's element id through Element.closest */
+  ok(/'data-cal-id': String\(row\.id\)/.test(jbody) && /box\.getAttribute\('data-cal-id'\)/.test(jbody),
+    'jobcal: a tick box carries its own posting id, which is the key the memory is written under');
+  ok(/if \(!row \|\| !row\.id\) return;/.test(jbody),
+    'jobcal: a row with no id gets no tick box: a control whose press cannot be recorded is worse than none');
+  ok(/function clearPicks\(\) \{\s*picked = \{\};\s*repaintBoxes\(\);/.test(jbody),
+    'jobcal: emptying the memory repaints the boxes, so the two can never disagree (a sign-out used to leave them ticked)');
+  ok(/text: '📅 Add to your calendar'/.test(jbody),
+    'jobcal: the trigger SHIPS with a label; refresh refines it, and refresh is also the one thing that can fail');
+  ok(!/G\.alert|window\.alert/.test(jbody),
+    'jobcal: what happened is SAID in the strip\'s own live line, never alerted');
+  ok(!/line\.hidden|ui\.note\.hidden/.test(jbody),
+    'jobcal: …and that line is ALWAYS rendered, never created hidden and never hidden again: a live region that ' +
+    'arrives with its first words in it is one many screen readers never announce');
+  ok(/G\.open\(url, '_blank'\)/.test(jbody) && !/'_blank', 'noopener'/.test(jbody),
+    'jobcal: the Google tab is opened WITHOUT noopener, which returns null whether or not the tab opened, ' +
+    'and the handle is what tells a blocked pop-up from an opened tab');
+  ok(/w\.opener = null/.test(jbody), 'jobcal: …and the opener is severed by hand for the browsers that do not');
+  ok(/A\.whenSignedIn\(function \(\) \{[\s\S]{0,120}?SENDERS\[how\]/.test(jbody),
+    'jobcal: every hand-over goes through the gate, and runs inside the reader\'s own press');
+  ok(/closePanel\(true\);[\s\S]{0,80}?var A = G\.OAAccounts;/.test(jbody),
+    'jobcal: the panel shuts before the hand-over, so it never hangs over the page the reader comes back to');
+  /* the NEGATIVE half is read off the comment-stripped body: the module
+     EXPLAINS the role it does not claim, and a guard that could not tell the
+     explanation from the thing would have to be satisfied by deleting the
+     explanation (this file's own recorded trap, walked into once here) */
+  ok(/'aria-expanded': 'false'/.test(jsrc) && /'aria-controls': 'oa-cal-panel'/.test(jsrc) &&
+     !/\brole\b\s*[:=]\s*['"]menu/.test(jbody),
+    'jobcal: the chooser is a DISCLOSURE, never a menu role the site implements no roving tabindex for');
+
+  /* APPLE. The file is the answer everywhere, and on a HANDHELD Apple device
+     the share sheet hands it to Calendar without the reader meeting the
+     Downloads arrow at all. Feature-detected end to end, and a cancelled
+     share is the reader closing the sheet rather than a failure. */
+  ok(/navigator/.test(jsrc) && /n\.canShare\(\{ files: \[f\] \}\)/.test(jbody) &&
+     /n\.share\(\{ files: \[f\], title: file\.name \}\)\.catch\(/.test(jbody),
+    'jobcal: on an iPhone or iPad the file goes through the share sheet, and a cancelled share is not an error');
+  ok(/if \(!n \|\| !n\.share \|\| !n\.canShare \|\| typeof File === 'undefined'\) return false;/.test(jbody),
+    'jobcal: …feature-detected end to end, so a device without it falls through to the file');
+  ok(/maxTouchPoints \|\| 0\) > 1/.test(jbody),
+    'jobcal: …and iPadOS, which reports as a Mac, is told apart by its touch screen');
+  ok(/onHandheldApple\(\) && shareFile\(file\)/.test(jbody) && !/shareFile/.test(jbody.split('function sendFile')[1].split('function sendApple')[0]),
+    'jobcal: the sheet is the APPLE item\'s alone: the plain download is the plain download');
+  const icssrc = await read('assets', 'oa-ics.js');
+  ok(/setTimeout\(function \(\) \{ URL\.revokeObjectURL\(url\); \}, 5000\)/.test(icssrc),
+    'ics: the object URL is revoked LATE, not on the next tick: a browser that has not begun reading the blob ' +
+    'saves nothing and says nothing, and iOS Safari is the one that meets that window');
+
   /* ---- the talk details on the profile ---------------------------------- */
   eq(TALK_KEYS, ['at', 'session', 'room', 'title'], 'talks: the four keys');
   eq(C.TALK_KEYS, TALK_KEYS, 'talks: the card twin knows the same four');
@@ -14649,6 +14760,49 @@ async function testCalendarsWiring() {
      /max-width:\s*640px[\s\S]{0,1800}?\.oa-cal-btn\s*\{[^}]*height:\s*42px/.test(listCss),
     'calendar: on a phone the tick strip and the buttons are 42px targets');
   ok(/@media print \{ \.oa-cal-pick, \.oa-cal-tray \{ display: none; \} \}/.test(listCss), 'calendar: neither prints');
+
+  /* --- the chooser (owner, 2026-09-09) ----------------------------------- */
+  for (const sel of ['.oa-cal-panel', '.oa-cal-opt', '.oa-cal-note']) {
+    ok(new RegExp(sel.replace('.', '\\.') + '\\s*\\{').test(listCss), `calendar: oa-list.css styles ${sel}`);
+    ok(v3css.includes('body.v3 ' + sel), `calendar: v3.css restates ${sel} in the live design's tokens`);
+  }
+  ok(/\.oa-cal-menu \{ position: relative; \}/.test(listCss) && /\.oa-cal-panel \{[^}]*position: absolute;/.test(listCss),
+    'calendar: the panel is positioned against its trigger, so opening it moves nothing on the page');
+  /* rule 15: the trigger has an ON-state now, so its hover rule says so in
+     its own selector AND sits behind the hover guard, or a tap leaves it
+     painted in the colour it paints its own ink */
+  for (const [name, css, p] of [['oa-list.css', listCss, ''], ['v3.css', v3css, 'body\\.v3 ']]) {
+    ok(new RegExp(p + '\\.oa-cal-go\\[aria-expanded=\'true\'\\]').test(css),
+      `calendar: ${name} gives the trigger an open state of its own`);
+    ok(new RegExp('@media \\(hover: hover\\) and \\(pointer: fine\\) \\{[\\s\\S]{0,400}?' + p +
+      '\\.oa-cal-go:hover:not\\(\\[disabled\\]\\):not\\(\\[aria-expanded=\'true\'\\]\\)').test(css),
+      `calendar: ${name} gates that button's hover and stands it down while the panel is open`);
+    ok(new RegExp('@media \\(hover: hover\\) and \\(pointer: fine\\) \\{[\\s\\S]{0,200}?' + p + '\\.oa-cal-opt:hover').test(css),
+      `calendar: ${name} gates the items' hover too`);
+  }
+  /* rule 10: a panel that opens over the page is a list too */
+  ok(/max-width:\s*640px[\s\S]{0,2600}?\.oa-cal-panel\s*\{[^}]*max-height:\s*50vh;[^}]*overflow-y:\s*auto/.test(listCss) &&
+     /max-width:\s*640px[\s\S]{0,2600}?\.oa-cal-opt\s*\{[^}]*min-height:\s*42px/.test(listCss),
+    'calendar: on a phone the panel caps at half the screen, scrolls inside itself and gives each item a 42px row');
+  ok(/max-width:\s*640px[\s\S]{0,2600}?\.oa-cal-menu\s*\{[^}]*flex:\s*0 0 100%/.test(listCss),
+    'calendar: …and the trigger\'s WRAPPER is what stacks full width, since the panel is positioned against it');
+  ok(/putting the\s+deadlines you choose in your calendar/.test(jobs),
+    'calendar: the sign-in card still names it as a reason to register');
+  ok(/A TICK NARROWS/.test(jobs), 'calendar: jobs.html records why the button never waits for one');
+  ok(/three ways[\s\S]{0,200}?Google Calendar[\s\S]{0,200}?Apple Calendar[\s\S]{0,200}?\.ics/.test(index),
+    'calendar: the FAQ names the three ways');
+  ok(/one entry at a\s+time/.test(index),
+    'calendar: …and says why Google takes several as a file rather than a link');
+  const chooserAt = log.updates.findIndex((u) => u.id === 'calendar-chooser-2026-09');
+  ok(chooserAt >= 0 && /Google Calendar/.test(log.updates[chooserAt].summary) &&
+     /Apple Calendar/.test(log.updates[chooserAt].summary) &&
+     log.updates[chooserAt].url === '/jobs' &&
+     log.updates.slice(0, chooserAt).every((u) => u.date >= log.updates[chooserAt].date),
+    'calendar: the chooser is announced in the change log, at an extensionless address');
+  ok(/^### Where the deadlines GO, and the button that read as dead$/m.test(claude),
+    'calendar: CLAUDE.md records the bug and the three ways');
+  ok(/Since 2026-09-09 the strip's own button opens a \*\*chooser\*\*/.test(mobile),
+    'calendar: rule 14 of the mobile standard covers the panel');
   /* the strip's room (owner, 2026-09-06, of it sitting flush under the
      filter bar: "add a bit more space here so that it looks better") */
   ok(/\.oa-cal-tray\s*\{[^}]*margin:\s*20px 0 18px;[^}]*padding:\s*16px 20px;/.test(listCss),

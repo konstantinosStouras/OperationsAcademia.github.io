@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "calendar-chooser-2026-09",
+      "date": "2026-09-09",
+      "title": "Deadlines to Google Calendar, Apple Calendar or a file",
+      "summary": "The job postings page now asks WHERE the deadlines should go. The button above the list opens a short menu: Google Calendar, Apple Calendar, or the .ics file for Outlook, Thunderbird and anything else. Sending one deadline to Google opens Google Calendar with it filled in and one Save to press; sending several opens Google's own Import screen beside the file that has just downloaded, because a Google Calendar link carries one entry at a time. Apple Calendar is that same file, which an iPhone, iPad or Mac opens in Calendar and offers to add all at once. And the button no longer waits for a tick: with nothing ticked it sends every posting listed that has a deadline still to come, and says so on its face, so it is never a control that looks broken. Ticking postings narrows it to those.",
+      "url": "/jobs"
+    },
+    {
       "id": "forum-2026-09",
       "date": "2026-09-09",
       "title": "An anonymous forum, in two rooms",
