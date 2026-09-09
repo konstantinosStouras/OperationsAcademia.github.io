@@ -2032,7 +2032,7 @@ neither puts identity in the tally.
 
 **`registeredUsers.t` is not a joined date.** It is `set()` once per session, so
 it is *last seen*. The roster's `first` was "first seen by this site" until the
-daily sync began filling it from Auth's own `creationTime`, which only the Admin
+roster sync began filling it from Auth's own `creationTime`, which only the Admin
 SDK can read (see "The roster is seeded from Auth"); since 2026-09-08 the column
 reads **"Registered on"**, which is what that value is, with a brand-new
 account showing the day the site first saw it until the next run corrects it
@@ -2259,10 +2259,99 @@ shape pin is never vacuous. `oa-user-directory.yml` is a data WRITER now: it
 joined `WRITERS` in the selftest, runs `selftest.mjs --publishing` before and
 after the sync, checks out `github.ref_name`, and commits the two files with
 the rebuild-never-rebase retry (the sync is re-run on the other writer's tip,
-never rebased). The growth file gains a point every day by construction, so
-the job commits daily, like `data/analytics.json`. The sync's Admin SDK handle
+never rebased). The sync's Admin SDK handle
 is `firebaseAdmin()` from `_mail.mjs`, shared with the mailers, so there is
 one definition of "the credential is missing or malformed".
+
+#### …and it runs EVERY HOUR, writing only when the figure has moved
+
+Owner, 2026-09-09, from two screenshots side by side: the Admin area's tile
+reading **142** and the front page reading **130+**, with *"the sync shouldn't
+run once a day, the front page should simply count the registered users
+rounded down to the nearest 10."*
+
+**Nothing was broken, which is why it read as a bug.** The pipeline had
+committed on schedule every morning (109, 116, 128, 137 on the four days to
+2026-09-09) and the page had printed exactly what the served file said:
+`Math.floor(137 / 10) * 10` is 130. The fault is the CADENCE against the
+ROUNDING. This market gains about ten accounts a day, so the figure crosses a
+multiple of ten roughly once a day at an hour nobody can predict, and a file
+written once a day is then a whole decade behind for most of every day. A
+figure that is wrong by a decade for twenty hours out of twenty-four is not a
+stale figure, it is the wrong figure.
+
+So the figures are refreshed **every hour** rather than once a day, which puts
+the page at most an account or two behind, inside what the rounding hides. The
+selftest pins the hourly cron, because putting it back is a one-character edit
+whose only symptom is the screenshot above.
+
+**THE ROSTER IS STILL DAILY, AND THAT IS NOT THRIFT ALONE.** A full sync reads
+THREE whole collections: `userDirectory` and `profiles` for the roster rows, and
+`registeredUsers` for the count, about 450 documents at 150 accounts and rising
+with the membership. The two served figures need `registeredUsers` and Auth's
+own `listUsers` and nothing else, so `--figures-only` skips the other two reads
+and writes no row: roughly 3,700 reads a day rather than 10,600, and the gap
+widens as the site grows. It stops at `if (FIGURES) continue;` inside the
+account loop rather than letting `flush` throw the work away, because
+`rowFromAuthUser` over an `existing` nobody read makes every account look new
+and the run's summary would then report 150 rows written on a run that wrote
+none. **And three other files tell the maintainer the roster is filled DAILY**:
+`admin-area.html`'s roster hint, three comments in `assets/oa-users.js` and the
+`userDirectory` row of `_SETUP-FIREBASE.md`, so an hourly roster would have
+quietly made every one of them false. The split keeps them true, and the
+selftest pins that it does, which is cheaper than four rewordings that would
+have to be found first.
+
+The two crons take **hours that do not overlap** (`41 0-3,5-23 * * *` and
+`41 4 * * *`), so exactly one fires at a time and `github.event.schedule` says
+which. `github.event.schedule` is EMPTY on a `workflow_dispatch`, so the full
+run is the default: a new trigger, or the dispatch a rules deploy presses, can
+only ever be too thorough, never too thin. The Commit step is its own shell, so
+the mode is handed to the rebuild through `$GITHUB_ENV` rather than worked out
+twice.
+
+**THE EXTRA RUNS ARE NEARLY FREE, and that is the half that had to be built.**
+`generated` is the run instant, so both files used to change on EVERY run and
+every run was therefore a commit: affordable at one run a day, and twenty-four
+runs of the whole check suite a day for a number that moves about ten times.
+`figuresMoved(before, after)` (pure, exported) answers whether a READER would
+see a difference: it compares the two documents with the stamp left out and
+key order folded away, since one side has been through `JSON.parse`.
+`writeServed` applies it, so a run that found the same count leaves the file
+byte for byte as it was, the `writeIfChanged` discipline `build-netmap.mjs`
+already uses. The workflow's **"nothing changed" branch is the ORDINARY
+outcome now** rather than the guard for a scan it used to be, and only the ten
+or so runs a day where the count really moved reach master.
+
+**`generated` therefore means something new: the run that last MOVED the
+figure, not the last run.** That is safe only because nothing reads it (the
+front page reads `count`, the growth chart reads `days`), which was measured
+rather than assumed. It is also why a freshness FLOOR (skip the run if the
+stamp is young) cannot be laid on top of this: the two readings of one field
+contradict, and the one that survives is the one that saves the commits.
+
+**Hourly is a REQUEST, not a promise.** GitHub delays scheduled workflows on a
+busy repository, and this job's own daily 04:41 cron had been landing nearer
+09:00, so what the change buys is that a delayed fire costs an hour or two
+instead of a day. Chaining it to the jobs build's completion the way
+`oa-alerts-mail.yml` is chained would make it firmer still, and was refused
+here: the build fires about seventy times a day, and seventy runs of a job
+that installs the Admin SDK and runs the publishing selftest twice would queue
+against the pipeline that actually publishes postings, to gain minutes on a
+figure printed to the nearest ten.
+
+**AND THE TILE MAY LEGITIMATELY READ HIGHER THAN THE PAGE.** They answer
+different questions and always have: the tile is a live `count()` over
+`registeredUsers`, so a mark whose account is disabled or has since been
+deleted in the Firebase console is still one of its number, while the served
+count is `members()`, the live Auth accounts BEHIND those marks. The gap can
+never run the other way (the page reads at or below the tile), so it is not a
+correctness bug; it was simply invisible. The run now names it in its log
+(`N mark(s) in registeredUsers have no live account behind them, so the Admin
+area's tile reads X where the front page reads Y`), counts only, so a
+maintainer comparing the two numbers is not left guessing which is wrong.
+Nothing on a public page changes: the front page goes on printing the smaller,
+truer figure.
 
 ### The roster reads whole, and says where each person is
 
@@ -2301,7 +2390,7 @@ Three writers keep it true, and each has its reason:
 * **the browser, on a profile SAVE** — the same function called again with
   `again` set, past the once-a-session latch, so a corrected affiliation
   reaches the roster at once rather than at the next session;
-* **the daily sync** — `sync-user-directory.mjs` reads `profiles` once with
+* **the roster sync** — `sync-user-directory.mjs` reads `profiles` once with
   the Admin SDK and hands each row its own document; because the sync
   REPLACES the row, this is also what takes an affiliation OFF a row once
   its owner blanks the field, which a browser merge can never do. A profiles
@@ -2368,7 +2457,7 @@ lines, the page not scrolling sideways. The deliberately over-wide row of the
 check above still scrolls, since a 44-character name is not something to
 squeeze.
 
-**"Registered on" is what `first` now is.** The daily sync fills it from
+**"Registered on" is what `first` now is.** The roster sync fills it from
 Auth's `creationTime` (earliest wins), so it is the day the account was made;
 an account made since the last run shows the day the site first saw it until
 the next run corrects it backwards. The CSV heading follows.
@@ -7174,7 +7263,7 @@ last 90 days and carried N days forward; an expectation from past growth,
 not a target") and gives the count on the last day and the count the trend
 reaches.
 N is the days between the last real point and the horizon, read off the
-projection: 7 on the fresh copy the daily sync writes, and more on a stale
+projection: 7 on the fresh copy the roster sync writes, and more on a stale
 one, because the model carries the line to seven days after TODAY and a fixed
 "7" would then understate the line drawn above it (the page-test fixture,
 whose last day is fixed, is exactly that stale copy, and it asserts the number

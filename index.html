@@ -219,7 +219,8 @@
             <a class="v3-btn soft" href="survey">Take the survey</a>
           </div>
 
-          <!-- The four figures the site can stand behind (owner, 2026-08-17):
+          <!-- The figures the site can stand behind (owner, 2026-08-17). Four
+               of them until 2026-09-05, when registered users made five:
                reach, then the two things the community itself files, then the
                years. This market's OPEN-POSTING count was dropped — it reads
                as a small number early in the season, when the page is trying
@@ -1103,8 +1104,11 @@
         }).catch(function () {});
 
       /* --------------------------------- registered users (owner, 2026-09-05)
-         The fifth tile. Its file is written daily by the roster sync from
-         Firebase Auth (a count and a date, nothing else), so the tile has no
+         The fifth tile. Its file is written every hour by the roster sync from
+         Firebase Auth (a count and a date, nothing else) -- hourly since
+         2026-09-09, because this market gains about ten accounts a day and a
+         figure rounded down to the nearest ten is then a whole decade behind
+         for most of a day if it is written once. The tile has no
          seed number and is born hidden: nothing here can be written without
          the credential, and a "0+" would be a lie about a community of some
          dozens. It is REVEALED before the count-up runs, because the count-up
