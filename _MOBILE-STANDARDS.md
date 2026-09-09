@@ -190,6 +190,35 @@ marked global.
     `page-test.mjs` measures a pressed arrow under the pointer in both themes.
     A theme audit can never catch this: it measures a page at rest.
 
+16. **A panel that opens OVER the page is bounded by the screen and scrolls
+    inside itself — and the desktop nav is served to phones.** The header's
+    "More" dropdown (2026-09-09) is `position: absolute`, so nothing in the
+    flow stops it growing past the viewport: measured at 950x320 — a laptop
+    with a short window, and equally a large phone in LANDSCAPE — the
+    unbounded panel overran the bottom by 24px and its last link could not be
+    reached by any means. It carries
+    `max-height: calc(100vh - var(--header-h) - 24px)` with `overflow-y: auto`,
+    which is rule 6 applied to a panel rather than to a picker.
+
+    **The second half is the one that is easy to miss.** The burger
+    breakpoint is 921px and a large phone in landscape is 932px, so such a
+    reader gets the DESKTOP nav: no hover at all, a short viewport, and touch
+    events rather than mouse ones. Two consequences, both of which the panel
+    now carries. A close-on-outside-press listener must be `pointerdown`, not
+    `mousedown` — iOS Safari does not reliably deliver a document-level mouse
+    event for a tap on a non-interactive element, and the panel would be left
+    stuck open with nothing able to shut it. And the hover rules stay behind
+    rule 9's guard even though this is "a desktop control", because on those
+    widths it is not one.
+
+    **And a `hidden` panel is invisible to a page audit** — the same blind
+    spot rule 15 records for hover. The contrast pass and the theme audit
+    measure a page AT REST, where this panel is `display: none`, so it must be
+    OPENED and measured explicitly; `page-test.mjs` does, in both themes, and
+    it measures the two blocks' GEOMETRY as well, because the first build
+    collapsed both grid tracks onto one x and every check that was not
+    geometric passed over a panel printing one column on top of the other.
+
 ## The test gate
 
 `_scraper/page-test.mjs` runs every list page at a 390px viewport and

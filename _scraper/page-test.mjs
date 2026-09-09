@@ -5643,6 +5643,70 @@ for (const w of [320, 360, 390, 430]) {
   await p.close();
 }
 
+/* RULE 16, both halves, measured.
+
+   A SHORT WINDOW. The panel is position:absolute, so nothing in the flow stops
+   it growing past the bottom of the screen: unbounded it overran a 950x320
+   viewport by 24px with no way to reach its last link. And 950x320 is not a
+   contrived size — it is a laptop with a short window, and it is a large phone
+   in LANDSCAPE, which at 932px is ABOVE the 921px burger breakpoint and so
+   gets the desktop nav rather than the sheet.
+
+   A TOUCH DEVICE. That same reader has no hover at all and sends pointer
+   events rather than mouse ones, which is why the outside-press listener is
+   pointerdown: on iOS Safari a tap on a non-interactive element does not
+   reliably deliver a document-level mouse event, and the panel would be left
+   stuck open with nothing able to shut it. */
+{
+  const short = await browser.newPage({ viewport: { width: 950, height: 320 } });
+  await short.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await short.waitForFunction(() => !!document.querySelector('.v3-more-btn'), null, { timeout: 8000 });
+  await short.click('.v3-more-btn');
+  await short.waitForFunction(() => !document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  const fit = await short.evaluate(() => {
+    const el = document.querySelector('.v3-more-panel');
+    const b = el.getBoundingClientRect();
+    const last = [...el.querySelectorAll('a[href]')].pop();
+    el.scrollTop = el.scrollHeight;
+    const lb = last.getBoundingClientRect();
+    return {
+      bottom: Math.round(b.bottom), vh: window.innerHeight,
+      scrolls: el.scrollHeight > el.clientHeight + 1,
+      lastReachable: lb.top >= b.top - 1 && lb.bottom <= b.bottom + 1,
+      lastText: last.textContent.trim(),
+    };
+  });
+  ok(fit.bottom <= fit.vh,
+    `950x320: the panel is bounded by the screen (bottom ${fit.bottom} of ${fit.vh})`);
+  ok(fit.scrolls, '950x320: …and scrolls inside itself, since it no longer fits');
+  ok(fit.lastReachable,
+    `950x320: so its last link is reachable after all (${fit.lastText})`);
+  await short.close();
+
+  /* the same widths, as a TOUCH device: the panel opens and a tap outside it
+     shuts it, which is what pointerdown buys and mousedown would not */
+  const land = await browser.newPage({
+    viewport: { width: 932, height: 430 }, isMobile: true, hasTouch: true });
+  await land.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await land.waitForFunction(() => !!document.querySelector('.v3-more-btn'), null, { timeout: 8000 });
+  const desktopNav = await land.evaluate(() =>
+    getComputedStyle(document.querySelector('.v3-nav')).display !== 'none');
+  ok(desktopNav,
+    '932x430: a large phone in landscape gets the DESKTOP nav, which is why the two rules above exist');
+  await land.tap('.v3-more-btn');
+  await land.waitForFunction(() => !document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  const bounded = await land.evaluate(() => {
+    const b = document.querySelector('.v3-more-panel').getBoundingClientRect();
+    return { bottom: Math.round(b.bottom), vh: window.innerHeight, right: Math.round(b.right), vw: window.innerWidth };
+  });
+  ok(bounded.bottom <= bounded.vh && bounded.right <= bounded.vw,
+    `932x430: the panel stays on the screen (${bounded.bottom}/${bounded.vh}, ${bounded.right}/${bounded.vw})`);
+  await land.tap('body', { position: { x: 40, y: 400 } });
+  await land.waitForFunction(() => document.querySelector('.v3-more-panel').hidden, null, { timeout: 4000 });
+  ok(true, '932x430: a TAP outside shuts it — pointerdown, where mousedown could leave it stuck open');
+  await land.close();
+}
+
 /* the sheet says the same thing on a phone, as headings rather than a
    dropdown — and its targets are still 42px (rule 13/14) */
 {

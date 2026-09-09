@@ -437,8 +437,18 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   border-radius: 14px;
   box-shadow: var(--shadow-lg);
   text-align: left;
+  /* bounded by the SCREEN and scrolling inside itself. Measured at 950x320 —
+     a laptop with a short window, and a large phone in landscape, which is
+     above the 921px burger breakpoint and therefore gets this panel — the
+     unbounded panel overran the viewport by 24px with no way to reach its
+     last link. The header's own height is taken off, and 16px of air below. */
+  max-height: calc(100vh - var(--header-h) - 24px);
+  overflow-y: auto; overscroll-behavior: contain;
 }
-.v3-more-group { display: flex; flex-direction: column; min-width: 0; }
+/* NO `min-width: 0` here. It zeroes the track's automatic minimum, which is
+   the floor that would otherwise save a panel whose width went wrong; the
+   collapse this file records above got past exactly that. */
+.v3-more-group { display: flex; flex-direction: column; }
 .v3-more-h {
   display: block;
   font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;

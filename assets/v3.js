@@ -399,8 +399,16 @@
        bubble-phase listener on document can be silenced by any handler between
        the target and here that stops propagation, and this site has several
        mousedown handlers that swallow the event to keep the keyboard in a box
-       (the forum's tag picker among them). */
-    document.addEventListener('mousedown', function (e) {
+       (the forum's tag picker among them).
+
+       POINTERDOWN, not mousedown, and that is not a tidy-up. This panel is
+       served to TOUCH devices: a large phone in landscape is 932px wide, above
+       the 921px burger breakpoint, so it gets the desktop nav with no hover at
+       all — and iOS Safari does not reliably deliver a document-level MOUSE
+       event for a tap on a non-interactive element, which would leave the
+       panel stuck open with no way to shut it. pointerdown covers mouse, touch
+       and pen in one. */
+    document.addEventListener('pointerdown', function (e) {
       if (!panel.hidden && !wrap.contains(e.target)) close(false);
     }, true);
 

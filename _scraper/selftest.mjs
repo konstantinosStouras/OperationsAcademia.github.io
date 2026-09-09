@@ -17693,6 +17693,22 @@ async function testTopMenu() {
     'v3.css: …and stands down on a trigger already open or already current');
   ok(/\.v3-more-panel \{[^}]*background-color: var\(--bg-2\)[^}]*color: var\(--ink\)/s.test(css),
     'v3.css: the panel paints its own ground, so it names its own ink');
+  /* RULE 16. A panel that opens OVER the page is bounded by the screen and
+     scrolls inside itself, or its last link is unreachable — measured at
+     950x320, which is a short laptop window AND a large phone in landscape,
+     which is above the 921px burger breakpoint and therefore gets this panel. */
+  ok(/max-height: calc\(100vh - var\(--header-h\) - 24px\)/.test(css)
+     && /\.v3-more-panel \{[\s\S]*?overflow-y: auto/.test(css),
+    'v3.css: the panel is bounded by the screen and scrolls inside itself');
+  /* and NOT `min-width: 0` on the group: it zeroes the grid track's automatic
+     minimum, which is the floor that would otherwise catch a width gone wrong */
+  ok(!/\.v3-more-group \{[^}]*min-width: 0/.test(css),
+    'v3.css: the group keeps its min-content floor');
+  const std = await readFile(path.join(root, '_MOBILE-STANDARDS.md'), 'utf8');
+  const r16 = std.slice(std.indexOf('16. **A panel that opens OVER the page'), std.indexOf('\n## The test gate'));
+  ok(r16.length > 800 && /pointerdown/.test(r16) && /landscape/.test(r16) && /max-height/.test(r16),
+    '_MOBILE-STANDARDS.md: rule 16, the panel over the page and the phone that gets the desktop nav');
+
   const navCss = css.slice(css.indexOf('.v3-nav-more {'), css.indexOf('.v3-sheet-foot'));
   ok(!/#[0-9a-fA-F]{3,8}\b/.test(navCss.replace(/\/\*[\s\S]*?\*\//g, '')),
     'v3.css: the new nav rules use tokens alone, so both themes are covered');
@@ -17712,8 +17728,14 @@ async function testTopMenu() {
   ok(/panel\.hidden = false;/.test(wm) && /panel\.hidden = true;/.test(wm)
      && /setAttribute\('aria-expanded'/.test(wm),
     'v3.js: it toggles hidden and mirrors aria-expanded, and only those');
-  ok(/document\.addEventListener\('mousedown'[\s\S]*?\}, true\);/.test(wm),
+  ok(/document\.addEventListener\('pointerdown'[\s\S]*?\}, true\);/.test(wm),
     'v3.js: the outside-press listener is CAPTURE, like the account menu\'s — a bubble listener can be silenced by any stopPropagation on the way up');
+  /* POINTERDOWN, not mousedown: above 921px a large phone in LANDSCAPE gets
+     this panel, and iOS Safari does not reliably deliver a document-level
+     mouse event for a tap on a non-interactive element — the panel would be
+     stuck open with nothing able to shut it. */
+  ok(!/addEventListener\('mousedown'/.test(wm),
+    'v3.js: …and pointerdown, so a tap on the phone that gets this nav shuts it');
   ok(/if \(panel\.hidden\) return;/.test(wm),
     'v3.js: close() is a no-op while shut, which is why the two document-level Escape handlers do not fight');
   ok(/getClientRects\(\)\.length/.test(wm),
