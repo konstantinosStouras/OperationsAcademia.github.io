@@ -6196,6 +6196,175 @@ with its zone and TZID, narrowing by name narrowing the file, signed out the
 sign-in box; and the form's block appearing with the day, feeding the
 preview, and the document carrying the map).
 
+### Where the deadlines GO, and the button that read as dead
+
+Owner, 2026-09-09, of the strip on `/jobs`: *"a user has selected a few job
+postings, then downloaded the .ics file. Then, de-selected the postings and
+even refreshed the page. However, the calendar button stays deactivated."*
+And, in the same message: *"allow 3 standard options for calendar from a drop
+down menu: (1) Google calendar, (2) apple calendar, (3) .ics download
+option ... upon clicking on e.g. Google calendar, I want the selected jobs
+dates and meta-data to immediately be saved to the user's google calendar."*
+
+**THE BUTTON WAS NEVER BROKEN, WHICH IS WHY IT LOOKED IT.** `ui.go.disabled =
+!n` was the rule: no tick, no download. So every state in that report was the
+control working exactly as written. De-selecting empties `picked`; a reload
+empties it too, because the selection is deliberately page memory and nothing
+else (the paragraph above says so, and the selftest pins that nothing is
+stored). What was left on screen was a primary action at 0.45 opacity with
+nothing anywhere saying it was WAITING rather than dead. This repository has
+already recorded that exact failure once, one section over, when the Excel
+download shipped as muted ink on no ground: *a contrast audit cannot see an
+affordance failure*, and neither can a test that asserts the button is
+disabled because nothing is ticked.
+
+**SO A TICK NARROWS; IT IS NOT A PRECONDITION.** `targetRows` is the whole
+change: with something ticked a press acts on those postings, and with
+NOTHING ticked it acts on every posting the list is showing that has a
+deadline still to come. The button says which, on its face ("Add all 33 to
+your calendar", "Add 2 postings to your calendar"), so nothing is a surprise,
+and where nothing listed has a date to add the whole strip stands down
+rather than offering a panel of dead controls. The reported dead end is
+unreachable now rather than better explained.
+
+**AND NOTHING IN `refresh()` RETURNS EARLY ANY MORE.** It returned the moment
+the strip was not to be shown, so each button kept whatever state it last
+had: signed out, with the strip hidden, the download sat there reading
+ENABLED. Nothing could see it and the next paint corrected it, which is
+precisely the shape of a stale state that becomes visible the day something
+else changes. The strip is hidden FIRST and every control settled after it,
+which is both halves rather than a choice between them: a throw below can
+leave a stale button, and can never leave the strip standing in front of
+somebody it is not for.
+
+**THE THREE WAYS OUT ARE WHAT THE PLATFORMS ACTUALLY OFFER A STATIC SITE**,
+and the menu is worded so that none of them promises more than it does:
+
+* **Google Calendar.** `action=TEMPLATE` carries **exactly one event per
+  address**. There is no multi-event Google link, and inventing one would be
+  a claim Google does not honour, so ONE deadline opens Google Calendar with
+  the entry filled in and a single Save to press, which is the owner's
+  "immediately saved" in the case where it is achievable; SEVERAL open
+  Google's own Import screen beside the file that has just downloaded, and
+  the strip says exactly what to do there. The dates are
+  `YYYYMMDD/YYYYMMDD` with the end EXCLUSIVE, taken from `OAIcs.nextDay` so
+  the address and the file's `DTEND` cannot part company, and `crm=AVAILABLE`
+  keeps the day free, which is what `TRANSP:TRANSPARENT` says in the file.
+  **Not `trp=false`**, which is the parameter that used to say this and which
+  Google's current web client does not read at all: sending it leaves every
+  deadline marked Busy while the file beside it says free.
+* **Apple Calendar.** The FILE, and on an iPhone or iPad the SHARE SHEET,
+  which is the one thing on this site that really does hand a file to
+  another app: `navigator.share` with a `text/calendar` file offers Calendar
+  in the sheet, so the reader never meets the Downloads arrow. Feature-
+  detected end to end and called inside the reader's own press, since iOS
+  allows it nowhere else; a device without it falls through to the file, and
+  a CANCELLED share is the reader closing the sheet rather than a failure, so
+  nothing is downloaded behind their back. iPadOS reports as a Mac, so the
+  touch screen is what tells the two apart. On a Mac it is the file, which
+  Calendar opens on a double click. The option exists because a reader
+  looking for "Apple Calendar" will not guess that the file is the answer,
+  and the platform is read for the WORDING and for the sheet alone, never to
+  decide which bytes leave.
+* **The .ics file**, for Outlook, Thunderbird and everything else.
+
+**Apple and the plain download are the SAME BYTES**, and the menu says so
+(*"the same file, for Outlook, Thunderbird or anything else"*) rather than
+dressing one of them up as a different integration. What the Apple item adds
+is the sheet on a handheld and the right sentence everywhere else, which is
+the useful half; on a Mac the two items really are one press, and neither
+promises more than that.
+
+**And `OAIcs.download` revokes its object URL after five seconds rather than
+on the next tick.** A browser that has not begun reading the blob when it is
+revoked saves nothing and says nothing, and iOS Safari is the one that meets
+that window: it hands the file to its own downloads UI a moment after the
+press. A few seconds of one held blob is the cheaper side of that trade, and
+it is the talks calendar's download too.
+
+**WHAT WAS CONSIDERED AND REFUSED.** Writing to Google Calendar through its
+API with an OAuth token from the browser would be the literal reading of
+"immediately saved" for several events at once. It needs the `calendar.events`
+scope, which Google treats as sensitive: an unverified app shows every reader
+a "Google hasn't verified this app" screen and is capped at a hundred of them,
+so the site would have to go through Google's verification to use it, and the
+warning screen in the meantime is worse for a job market site than two
+presses. A `cid=` subscription would carry many entries in one click and
+auto-update, but Google fetches that address server-side, so it cannot carry a
+per-reader selection on a static host; a feed of EVERY upcoming deadline at a
+fixed address would work and is a different feature, not this one.
+
+**THE CHOOSER IS A DISCLOSURE**, the header's More panel verbatim in
+mechanics: a `<button>` with `aria-expanded` and `aria-controls`, a
+`<div hidden>` of ordinary `<button>` tab stops, arrow keys laid on top of Tab
+rather than replacing it, a CAPTURE-phase `pointerdown` on document, Escape,
+and a deferred `focusout`. No `role="menu"`, for the reason recorded there:
+the site implements no roving tabindex anywhere, so the role would be a
+promise it does not keep. The panel is `position: absolute`, so opening it
+moves nothing; it SHUTS BEFORE the hand-over, or it would hang over the page
+the reader comes back to; and the trigger's open state wins on SPECIFICITY
+over its own hover rule, which is gated on `(hover: hover)`: rule 15 of
+`_MOBILE-STANDARDS.md`, whose recorded defect is a stuck tap-hover painting a
+control's ink in the colour of its own ground.
+
+**THREE MORE THINGS THE SWEEP FOUND, each a lie the strip was telling.**
+
+* **A tick made under one search went on counting under the next.** `picked`
+  is not narrowed by a filter, so pressing *Tick all listed* and then
+  narrowing to one university left the strip saying "32 postings ticked" over
+  a page where no box was ticked at all, with a file of 36 entries to match:
+  a number the reader could neither see nor untick, since the boxes that
+  would clear it were not rendered. The ticks are INTERSECTED with the listed
+  set now (`chosen`), so the count, the button's label and the file are the
+  postings on screen. The map keeps the rest, so widening the search brings
+  them back, and nothing else reads it.
+* **A view with no dated posting left a strip whose every control was dead.**
+  The strip stood down on the reader and on an empty dataset, never on the
+  filtered view, so a search matching only open-ended postings drew a panel
+  offering nothing, with no tick box on any card to explain it. `dated.length
+  > 0` joined the test. The strip is hidden FIRST and the controls settled
+  after it, which is both halves of the stale-state fix rather than a choice
+  between them.
+* **A sign-out emptied the memory without repainting the boxes.** The boxes
+  stayed ticked while `count()` said nothing was, which under the new rule
+  would make a press act on postings the reader can SEE are not ticked.
+  `clearPicks` repaints. Beside it, the box now carries its own posting id
+  (`data-cal-id`) rather than having it re-derived from the card's element id
+  through `Element.closest`: two readings of one key, where the absent-
+  `closest` branch silently unchecked every box on the page.
+
+**And the tick box overlaps the card head by 12px**, which is a button, so
+which of the two wins a press is a paint-order question that nothing here had
+measured. It does win, at its top edge as well as its middle, and the browser
+check asserts that with `elementFromPoint` and presses it with a REAL pointer
+rather than `element.click()`, which does no hit test at all.
+
+**One bug of its own, found in a browser rather than reasoned about:**
+`window.open(url, '_blank', 'noopener')` returns **null whether or not the tab
+opened**, by the specification. The first draft tested that return value for a
+blocked pop-up, so the "we could not open it" branch fired every single time
+and the file was never handed over beside it. Plain `_blank` gives back the
+handle, which is the only way to tell the two apart; the opener is severed by
+hand for the browsers that do not already do it.
+
+Tests: the three-ways block of `testCalendars` (the order and the wording of
+the three, the Google address against `OAIcs.nextDay` both ways, its clipped
+description, the two entries it refuses, `trp=false`, no address in it; and
+off the module's own comment-stripped source: `targetRows`, the one disabled
+state, the controls settled before `hidden`, no `alert`, the `_blank` handle,
+the gate inside the press, the panel shutting first and the disclosure
+attributes with no menu role), `testCalendarsWiring` (both stylesheets for the
+panel, the items and the live line, the gated hover and the on-state winning
+on specificity, the phone rules, and the copy on the page, the FAQ, the change
+log and the mobile standard), and the calendar block of `page-test.mjs`, which
+drives all of it in a real browser: the button live with nothing ticked and
+naming what it would send, opening the panel moving nothing on the page, the
+file with every listed dated posting in it, a tick narrowing it, Untick all
+leaving the button LIVE (the reported bug, which comes back as a timeout if
+either half is reverted), Escape and a press outside shutting it, Google
+opening its own event window for one and its Import screen beside the file for
+several, and at 390px the panel within the screen with 42px rows.
+
 ## A department that SPONSORED the site, and what that may change
 
 CUHK Business School's Department of Decisions, Operations and Technology

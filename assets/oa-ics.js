@@ -289,10 +289,13 @@
     a.download = filename;
     document.body.appendChild(a);
     a.click();
-    setTimeout(function () {
-      if (a.parentNode) a.parentNode.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 0);
+    if (a.parentNode) a.parentNode.removeChild(a);
+    /* THE OBJECT URL IS REVOKED LATE, not on the next tick. A browser that
+       has not begun reading the blob when it is revoked saves nothing and
+       says nothing, and iOS Safari is the one that meets that window: it
+       hands the file to its own downloads UI a moment after the press. A
+       few seconds of one held blob is the cheaper side of that trade. */
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
     return text.length;
   }
 

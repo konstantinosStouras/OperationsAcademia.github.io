@@ -1001,8 +1001,59 @@
   color: var(--brand, #3a424d);
   background: var(--brand-soft, #eef0f3);
 }
-.oa-cal-go:hover:not([disabled]) { background: var(--brand, #3a424d); color: var(--on-brand, #fff); }
+/* THE TRIGGER HAS AN ON-STATE NOW (it opens the chooser), so its hover rule
+   says so in its own selector and sits behind the hover guard: rule 15 in
+   _MOBILE-STANDARDS.md, whose recorded defect is a hover rule of higher
+   specificity painting a control's ink in the colour of its own ground, and
+   a tap leaving that state stuck on a phone. */
+.oa-cal-go[aria-expanded='true'] { background: var(--brand, #3a424d); color: var(--on-brand, #fff); }
+@media (hover: hover) and (pointer: fine) {
+  .oa-cal-go:hover:not([disabled]):not([aria-expanded='true']) { background: var(--brand, #3a424d); color: var(--on-brand, #fff); }
+}
 .oa-cal-btn:focus-visible { outline: 2px solid var(--brand, #3a424d); outline-offset: 1px; }
+
+/* THE CHOOSER (owner, 2026-09-09: Google Calendar, Apple Calendar, .ics).
+   A disclosure whose panel is position: absolute, so opening it moves
+   nothing on the page the way the header's More panel moves nothing. */
+.oa-cal-menu { position: relative; }
+.oa-cal-panel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 264px;
+  max-width: 360px;
+  padding: 6px;
+  border: 1px solid var(--line, #d3d9df);
+  border-radius: 8px;
+  background: var(--bg-2, #fff);
+  box-shadow: 0 10px 28px rgba(16, 20, 26, 0.18);
+}
+.oa-cal-opt {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--ink-2, #3a424d);
+  cursor: pointer;
+}
+.oa-cal-opt b { display: block; font-weight: 700; color: var(--ink, #1d222a); }
+.oa-cal-opt-note { display: block; color: var(--mut, #646c78); }
+.oa-cal-opt:focus-visible { outline: 2px solid var(--brand, #3a424d); outline-offset: -2px; }
+@media (hover: hover) and (pointer: fine) {
+  .oa-cal-opt:hover { background: var(--brand-soft, #eef0f3); }
+}
+/* what has just happened, said rather than alerted. ALWAYS in the document,
+   empty to begin with: a live region that appears with its first words is
+   one many screen readers never announce. */
+.oa-cal-note { margin: 0; flex: 1 1 100%; color: var(--mut, #646c78); }
+.oa-cal-note-bad { color: var(--err, #b3261e); }
 
 @media screen and (max-width: 640px) {
   /* a tick box strip is a control: a 42px target, following the head's
@@ -1013,6 +1064,14 @@
   .oa-cal-tray { margin: 16px 0; padding: 16px; gap: 12px; }
   .oa-cal-msg { flex-basis: 100%; }
   .oa-cal-btn { flex: 0 0 100%; width: 100%; height: 42px; font-size: 15px; }
+  /* the trigger is inside its own wrapper, so the wrapper is what the strip
+     stacks and the button fills it */
+  .oa-cal-menu { flex: 0 0 100%; width: 100%; }
+  /* rule 10: a panel that opens over the page is a list too — it takes the
+     width of the screen less its gutter, caps at half the screen and scrolls
+     inside itself, with 42px rows */
+  .oa-cal-panel { left: 0; right: 0; min-width: 0; max-width: none; max-height: 50vh; overflow-y: auto; }
+  .oa-cal-opt { min-height: 42px; font-size: 14px; }
 }
 
 @media print { .oa-cal-pick, .oa-cal-tray { display: none; } }
