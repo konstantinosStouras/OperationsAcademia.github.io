@@ -17553,6 +17553,177 @@ async function testForumSeasonRoll() {
     'CLAUDE.md records why the records go');
 }
 
+/* ------------------------------------------------------------ the top menu
+
+   Owner, 2026-09-09: "I feel I have a too complicated top menu about the Job
+   Market. Suggest how to simplify it or create some nest structure. I should
+   fit the forum there too."
+
+   It was EIGHT flat items and seven of them were anchors on the home page, so
+   the row looked like a site map and mostly just scrolled. Worse, three real
+   job-market pages — Previous markets, Universities, Recent faculty — were in
+   NO header at all, reachable only as cards partway down the home page; and
+   three of those pages marked "Resources" as the current section, which they
+   are not. It is five items now — Jobs · Candidates · Forum · Survey · More —
+   with the rest under "More" in two labelled blocks, "The market" and "The
+   site", and every one of those orphans has a home.
+
+   THE PANEL IS A DISCLOSURE, NEVER A MENU, and that is the decision this block
+   exists to keep. `role="menu"` is the contract for a list of COMMANDS: it
+   stops the children being announced as LINKS, takes away the cue that
+   middle-click and "copy link address" work — on a site whose permalinks are
+   load-bearing — makes Tab leave the widget instead of walking it, and forbids
+   the plain text between the groups, which is the reason there are two blocks
+   rather than one flat list. The account chip next door DOES say role="menu"
+   and implements no arrow-key roving; copying its role would copy a promise
+   the site does not keep.
+
+   And the markup SHIPS the trigger, its aria-expanded and the panel's hidden.
+   That is the header's own rule — page-test samples `.v3-nav a`'s left edge
+   every frame through a load and allows exactly one value, while `.v3-nav` is
+   `margin: 0 auto` — so a trigger injected by script would move the first
+   link and turn every page's header check red. */
+async function testTopMenu() {
+  const root = path.join(HERE, '..');
+  const pages = readdirSync(root).filter((n) => n.endsWith('.html'));
+
+  const TOP = ['Jobs', 'Candidates', 'Forum', 'Survey'];
+  const MARKET = ['Placements', 'Previous markets', 'Universities', 'Recent faculty', 'Analytics'];
+  const SITE = ['Resources', 'FAQ', 'About', 'Contact', 'What&rsquo;s new'];
+
+  let withNav = 0;
+  for (const nm of pages) {
+    const src = await readFile(path.join(root, nm), 'utf8');
+    const head = /<nav class="v3-nav" aria-label="Site sections">[\s\S]*?<\/nav>/.exec(src);
+    if (!head) continue;                       /* the six redirect stubs */
+    withNav++;
+    const nav = head[0];
+    const home = nm === 'index.html';
+
+    /* the five top-level items, in order, and NOTHING else at the top level */
+    const top = [...nav.matchAll(/^ {10}<a [^>]*>([^<]+)<\/a>/gm)].map((m) => m[1]);
+    eq(top, TOP, `${nm}: the header nav's top level is the four links plus More`);
+    ok(/<div class="v3-nav-more">/.test(nav), `${nm}: …and the More wrapper`);
+
+    /* the trigger: a disclosure, and provably not a menu */
+    const btn = /<button type="button" class="v3-more-btn( is-active)?" aria-expanded="false" aria-controls="v3-more">/.exec(nav);
+    ok(btn, `${nm}: the More trigger is a button shipping aria-expanded="false"`);
+    ok(!/aria-haspopup|role="menu"|role="menuitem"/.test(nav),
+      `${nm}: the nav claims no menu role — it is a disclosure over ordinary links`);
+
+    /* the panel ships hidden, and INSIDE .v3-nav, which is what puts its
+       fragment links in wireSpy's reach and takes them out of the phone's tab
+       order for free (`.v3-nav { display: none }` below 921px) */
+    ok(/<div class="v3-more-panel" id="v3-more" hidden>/.test(nav),
+      `${nm}: the panel ships hidden, inside the nav`);
+
+    for (const [gid, labels, label] of [['market', MARKET, 'The market'], ['site', SITE, 'The site']]) {
+      const g = new RegExp(`<div class="v3-more-group" role="group" aria-labelledby="v3-more-${gid}">([\\s\\S]*?)</div>`).exec(nav);
+      ok(g, `${nm}: the "${label}" block is a labelled group`);
+      ok(g && new RegExp(`<span class="v3-more-h" id="v3-more-${gid}">${label}</span>`).test(g[1]),
+        `${nm}: …labelled by a span, never a heading — it sits in the fixed header ahead of the page's own h1`);
+      const got = g ? [...g[1].matchAll(/<a [^>]*>([^<]+)<\/a>/g)].map((m) => m[1]) : [];
+      eq(got, labels, `${nm}: …holding exactly its own links, in order`);
+    }
+
+    /* the sheet says the same thing, as headings rather than a dropdown */
+    const sheet = /<nav aria-label="Site sections">[\s\S]*?<\/nav>/.exec(src.slice(src.indexOf('<aside class="v3-sheet"')));
+    ok(sheet, `${nm}: the sheet has its own nav`);
+    const stop = [...sheet[0].matchAll(/^ {8}<a [^>]*>([^<]+)<\/a>/gm)].map((m) => m[1]);
+    eq(stop, TOP, `${nm}: the sheet's top level matches the header's`);
+    for (const [gid, label] of [['market', 'The market'], ['site', 'The site']]) {
+      ok(new RegExp(`<div class="v3-sheet-group" role="group" aria-labelledby="v3-sheet-${gid}">`).test(sheet[0]),
+        `${nm}: the sheet's "${label}" block`);
+      /* the ids differ from the header's ON PURPOSE: both navs live in ONE
+         document, and a reused id makes aria-labelledby resolve to whichever
+         came first, silently */
+      ok(new RegExp(`id="v3-sheet-${gid}"`).test(sheet[0]) && !new RegExp(`id="v3-more-${gid}"`).test(sheet[0]),
+        `${nm}: …under an id of its own, so it cannot collide with the header's`);
+    }
+
+    /* THE ACTIVE MARKER. The page's own item carries it wherever it lives; a
+       trigger over a current link carries the CLASS only, never aria-current —
+       two elements claiming "page" is a lie, and a button is not a page. */
+    const curs = [...nav.matchAll(/aria-current="page"/g)].length;
+    const sheetCurs = [...sheet[0].matchAll(/aria-current="page"/g)].length;
+    if (home) {
+      /* wireSpy owns index.html's markers and clears every one it collected on
+         each scroll frame, so a static marker there is wiped on the first
+         scroll and would only ever be briefly wrong */
+      eq(curs, 0, 'index.html: the header nav carries no static marker — wireSpy owns them');
+      eq(sheetCurs, 0, 'index.html: nor does the sheet');
+    } else {
+      ok(curs <= 1 && sheetCurs <= 1, `${nm}: at most one item claims to be the current page`);
+      eq(curs, sheetCurs, `${nm}: the header and the sheet agree about it`);
+      const inPanel = /<div class="v3-more-panel"[\s\S]*?aria-current="page"[\s\S]*?<\/div>\s*<\/div>/.test(nav);
+      const triggerOn = !!(btn && btn[1]);
+      eq(triggerOn, inPanel,
+        `${nm}: the More trigger is marked current exactly when the current page is inside it`);
+      ok(!/<button[^>]*v3-more-btn[^>]*aria-current/.test(nav),
+        `${nm}: …and never with aria-current, which would announce a button as a page`);
+    }
+
+    /* the footer reaches what the menu reaches (owner, the same day: check the
+       links elsewhere on the site point at the updated pages) */
+    if (/<h4>Discover<\/h4>/.test(src)) {
+      for (const t of ['previous-markets', 'universities', 'recent-faculty', 'whats-new', 'forum']) {
+        ok(new RegExp(`<li><a href="${t}"`).test(src), `${nm}: the footer links ${t}`);
+      }
+    }
+  }
+  eq(withNav, 23, 'every root page but the six redirect stubs carries the nav');
+
+  /* ------------------------------------------------------------ the styles */
+  const css = await readFile(path.join(root, 'assets', 'v3.css'), 'utf8');
+  ok(!/flat, no dropdowns/.test(css),
+    'v3.css: the comment calling the row "flat, no dropdowns" is gone — it stopped being true');
+  ok(!/logo, eight nav\s*\n?\s*links/.test(css),
+    'v3.css: …and so is the one that counted eight of them');
+  /* SPECIFICITY, NOT LOAD ORDER: `.v3-nav a` (0,1,1) reaches the panel's links
+     too, so a bare `.v3-more-panel a` would merely TIE with it and be decided
+     by file position — the trap recorded for the Leaflet attribution and the
+     sponsor rail. */
+  ok(/\.v3-nav \.v3-more-panel a \{/.test(css),
+    'v3.css: the panel\'s links out-specify .v3-nav a rather than merely following it');
+  ok(!/^\.v3-more-panel a \{/m.test(css),
+    'v3.css: …and never tie with it');
+  ok(/@media \(hover: hover\) and \(pointer: fine\) \{\s*\n\s*\.v3-more-btn:hover/.test(css),
+    'v3.css: the trigger\'s hover is gated, so a tap leaves no stuck hover');
+  ok(/\.v3-more-btn:hover:not\(\.is-active\):not\(\[aria-expanded='true'\]\)/.test(css),
+    'v3.css: …and stands down on a trigger already open or already current');
+  ok(/\.v3-more-panel \{[^}]*background-color: var\(--bg-2\)[^}]*color: var\(--ink\)/s.test(css),
+    'v3.css: the panel paints its own ground, so it names its own ink');
+  const navCss = css.slice(css.indexOf('.v3-nav-more {'), css.indexOf('.v3-sheet-foot'));
+  ok(!/#[0-9a-fA-F]{3,8}\b/.test(navCss.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'v3.css: the new nav rules use tokens alone, so both themes are covered');
+
+  /* -------------------------------------------------------- the behaviour */
+  const js = await readFile(path.join(root, 'assets', 'v3.js'), 'utf8');
+  const bare = js.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(/function wireMore\(\)/.test(bare), 'v3.js: wireMore()');
+  /* PARSE TIME, beside the reveals: it is a header control, and a nav button
+     painted on the first frame that does nothing until the deferred chain has
+     run is the same shape as the reveals that used to sit blank. */
+  ok(/wireReveals\(\);\s*\n\s*wireCounts\(\);\s*\n\s*wireMore\(\);/.test(bare),
+    'v3.js: …called at parse time, not from boot()');
+  ok(!/role="menu"|menuitem|roving/.test(bare.slice(bare.indexOf('function wireMore'), bare.indexOf('function wireFaq'))),
+    'v3.js: wireMore claims no menu role');
+  const wm = bare.slice(bare.indexOf('function wireMore'), bare.indexOf('function wireFaq'));
+  ok(/panel\.hidden = false;/.test(wm) && /panel\.hidden = true;/.test(wm)
+     && /setAttribute\('aria-expanded'/.test(wm),
+    'v3.js: it toggles hidden and mirrors aria-expanded, and only those');
+  ok(/document\.addEventListener\('mousedown'[\s\S]*?\}, true\);/.test(wm),
+    'v3.js: the outside-press listener is CAPTURE, like the account menu\'s — a bubble listener can be silenced by any stopPropagation on the way up');
+  ok(/if \(panel\.hidden\) return;/.test(wm),
+    'v3.js: close() is a no-op while shut, which is why the two document-level Escape handlers do not fight');
+  ok(/getClientRects\(\)\.length/.test(wm),
+    'v3.js: an open panel is shut by asking the LAYOUT at the burger breakpoint, never by copying 920 out of the stylesheet');
+  ok(/moreBtn\.classList\.toggle\('is-active'/.test(bare),
+    'v3.js: wireSpy makes "More" show whatever is current under it');
+  ok(!/moreBtn\.setAttribute\('aria-current'/.test(bare),
+    'v3.js: …as a class, never aria-current on a button');
+}
+
 async function testForum() {
   const root = path.join(HERE, '..');
   const read = (...p) => readFile(path.join(root, ...p), 'utf8');
@@ -18168,7 +18339,7 @@ async function testForum() {
     ok(/maintainer can read and post in both rooms as an ordinary member/.test(pp), 'forum: the policy says the maintainer reads and posts in both rooms');
     const ppForum = pp.slice(pp.indexOf('The Site has an anonymous forum'), pp.indexOf('<h2>Security</h2>'));
     ok(ppForum.length > 800 && ppForum.length < 3000 && noDash(ppForum.replace(/&mdash;/g, '—')), 'forum: the policy paragraph is bounded and carries no em dash');
-    ok(entry && entry.url === '/forum.html' && /two rooms/i.test(entry.title + entry.summary) && noDash(entry.title + entry.summary),
+    ok(entry && entry.url === '/forum' && /two rooms/i.test(entry.title + entry.summary) && noDash(entry.title + entry.summary),
       'forum: the change log entry, linking the page, no em dash');
   } else {
     ok(!/anonymous forum/.test(pp), 'forum (not announced): the policy paragraph is held back with the rest');
@@ -19947,6 +20118,7 @@ if (isMain(import.meta.url)) {
   await testEmailVerification();
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
+  await testTopMenu();
   await testForum();
   await testSweep20260906();
   await testExtensionlessAddresses();

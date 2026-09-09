@@ -48,6 +48,126 @@ tree, then rebuild every page the new design was borrowing from the old one —
 a card on the front page that opens a page in the previous design is the
 failure mode, not a missing file.
 
+## The top menu is five items, and one of them nests
+
+Owner, 2026-09-09: *"I feel I have a too complicated top menu about the Job
+Market. Suggest how to simplify it or create some nest structure. I should fit
+the forum there too."*
+
+It was EIGHT flat items, and **seven of them were anchors on the home page** —
+so a row that looked like a site map mostly just scrolled, and `jobs.html` was
+the only real page in it. Worse, three job-market pages were in **no header at
+all**: Previous markets, Universities and Recent faculty were reachable only as
+cards partway down the home page, and all three marked **Resources** as the
+current section, which none of them is. The forum had nowhere at all.
+
+**It is five now:** `Jobs · Candidates · Forum · Survey · More`, with the rest
+under **More** in two labelled blocks — *The market* (Placements, Previous
+markets, Universities, Recent faculty, Analytics) and *The site* (Resources,
+FAQ, About, Contact, What's new). Survey stays top-level at the owner's word.
+Every orphan now has a home, and the three pages that claimed Resources mark
+their own item instead.
+
+**Jobs stays `#jobs` on the home page and `jobs` everywhere else**, which is
+what it already did. Re-targeting it was considered and refused: on the home
+page the link scrolls to the teaser whose own button opens the jobs page, and
+pointing it away would leave the scrollspy with nothing to light while a reader
+reads that section.
+
+### The panel is a DISCLOSURE, and that is the decision to keep
+
+`role="menu"` is the contract for a list of COMMANDS. This is nine ordinary
+navigation links, so the menu role would be three separate lies: it stops the
+children being announced as LINKS and takes away the cue that middle-click and
+*copy link address* work — on a site whose permalinks are load-bearing; it
+makes Tab LEAVE the widget rather than walk it, which needs a roving tabindex
+to be usable at all; and it forbids the plain text between the groups, which is
+the whole reason there are two blocks rather than one flat list of ten.
+
+So the trigger is a `<button>` with `aria-expanded` and `aria-controls`, the
+panel is a `<div hidden>` of `<a>`s, every one an ordinary tab stop, and the
+arrow keys are a convenience laid on top of Tab rather than the only way
+through. **The account chip next door DOES say `role="menu"` and implements no
+arrow-key roving either** — copying its role would have copied a promise the
+site does not keep. What IS copied from it is the open/close mechanics: the
+`hidden` attribute, `aria-expanded` on the trigger, a CAPTURE-phase `mousedown`
+on document, and Escape.
+
+The two blocks are labelled with `role="group"` + `aria-labelledby` on a
+`<span>`, **never `<h2>`/`<h3>`**: the header is on all 23 pages, ahead of each
+page's own `<h1>`, and a heading there corrupts every page's outline. The
+header's ids and the sheet's differ (`v3-more-market` against
+`v3-sheet-market`) because both navs are in ONE document and a reused id makes
+`aria-labelledby` resolve to whichever came first, silently.
+
+### Three things the markup must go on doing
+
+* **The trigger and the hidden panel SHIP IN THE PAGE.** `page-test` samples
+  `.v3-nav a`'s left edge every animation frame through a load and allows
+  exactly ONE value, and `.v3-nav` is `margin: 0 auto` — so a trigger injected
+  by script would widen the nav and move the first link, turning every page's
+  header check red. `v3.js` only ever TOGGLES `hidden` and `aria-expanded`.
+  The panel is `position: absolute` for the same reason: opening it moves
+  nothing.
+* **The panel lives INSIDE `.v3-nav`**, and three separate things rest on it:
+  `wireSpy`'s `.v3-nav a[href*="#"]` reaches the five fragment links that moved
+  into it with no change; `.v3-nav { display: none }` below 921px takes the
+  panel's links out of the phone's tab order for free — the defect this file
+  records for `.v3-sheet`, whose eleven off-screen links stayed tabbable behind
+  a transform; and that same breakpoint pair is what keeps the sheet and the
+  panel mutually exclusive, which is why the two document-level Escape handlers
+  cannot fight.
+* **Every panel rule wins on SPECIFICITY, never on load order.** `.v3-nav a`
+  (0,1,1) reaches the panel's links too, so a bare `.v3-more-panel a` would
+  merely TIE with it and be settled by file position — the trap already
+  recorded for the Leaflet attribution and the sponsor rail. It is
+  `.v3-nav .v3-more-panel a` (0,2,1), and the selftest refuses the tie.
+
+**The active marker is split on purpose.** The page's own item takes
+`class="is-active" aria-current="page"` wherever it now lives; when that item
+is inside the panel the TRIGGER additionally takes the CLASS, never
+`aria-current` — two elements claiming "page" is a lie, and a button announced
+as the current page is a button that is not a page. `index.html` carries no
+static marker at all: `wireSpy` owns them there and clears every one it
+collected on each scroll frame, so a static one would be wiped on the first
+scroll. `wireSpy` gained four lines that mark the trigger when something under
+it is current, or the nav would say nothing while a reader is in five of the
+home page's eight sections.
+
+**The sheet takes the same two blocks as HEADINGS, not a dropdown.** A sheet
+already scrolls, and a disclosure inside it would hide links from the reader
+while leaving them in its Tab trap.
+
+### …and the footer was swept in the same change
+
+Owner, the same day: *"check that links anywhere on the website now point to
+the updated pages/menu, e.g. links at the bottom or in other parts of the
+website."* No URL moved, so nothing could break — but the footer is the site's
+other index and it could not reach what the menu now reaches. **Discover**
+gained Previous markets, Universities, Recent faculty and What's new;
+**Participate** gained Forum. Nothing was removed, and the two-column grid
+(`2fr 1fr 1fr`) needed no change. The selftest holds every page's footer to
+carrying those five.
+
+Tests: `testTopMenu` in `_scraper/selftest.mjs` (over EVERY page carrying a
+nav: the five top-level items in order and nothing else at that level, the
+trigger's disclosure attributes and the absence of any menu role, the panel
+shipping `hidden` inside the nav, both labelled groups with their own ids and
+exactly their own links in order, the header and the sheet agreeing about the
+current page, the trigger marked current exactly when the panel holds it and
+never with `aria-current`, the footer's five, both retired stylesheet comments
+gone, the specificity rule both ways, the gated hover, the panel naming its own
+ink, tokens alone, and `wireMore` called at parse time toggling only those two
+attributes) and the dropdown block of `_scraper/page-test.mjs`, which drives it
+in a real browser: shut and unpaintable on arrival, opening moving neither the
+first nav link nor the theme toggle nor the trigger, the panel inside the
+viewport with no sideways scroll, a press outside shutting it, ArrowDown
+opening onto the first link and walking, Escape shutting it and giving the
+keyboard back, Tab walking into the panel onto something that is still a LINK,
+a press on a link shutting it so it never hangs over the section it scrolled
+to, both themes measured at 4.5:1 on the ground the panel really paints, and at
+390px the sheet's two blocks as headings with all fourteen destinations at 42px.
+
 ## A page's address carries no `.html`
 
 Owner, 2026-09-08: *"Why some pages when they open they show the '.html' in
@@ -3915,15 +4035,42 @@ loop runs, factored out of the loop so the standard is applied one way
 13's own numbers: the vote column above the post, the 16px textarea, the
 42px tabs, votes, actions and Post.
 
-### It is BUILT and NOT ANNOUNCED, and everything it would say is held together
+### It was BUILT and WITHHELD, and on 2026-09-09 it was announced
 
 Owner, 2026-09-05: *"do not add it on the top bar yet and don't mention it
 anywhere on the website yet. I want to pre-populate it with certain topics I
-will tell you."* So `forum.html` ships, is served and is reachable by typing
-its address — which is how the maintainer signs in, presses the seed button
-for each room and posts the first threads — and **nothing on the site points
-at it**: not the home page, not the account menus, not the change log, not
-the sitemap, not the privacy policy.
+will tell you."* So for four days `forum.html` shipped, was served and was
+reachable by typing its address — which is how the maintainer signed in,
+pressed the seed button for each room and posted the first threads — while
+**nothing on the site pointed at it**: not the home page, not the account
+menus, not the change log, not the sitemap, not the privacy policy.
+
+**Owner, 2026-09-09: *"Reveal the forum to all now."*** `FORUM_ANNOUNCED` is
+`true`, all five withheld surfaces are back, and **the forum is a top-level
+item in the menu** (see "The top menu is five items" above) as well as a row
+in both account menus and a link in the footer. What follows is kept in the
+past tense as the RECORD of how it was withheld — the machinery is unchanged
+and is what a future withholding would use again. **The sitemap did not
+change**: the forum is `noindex` and stays out of it, and being linkable from
+every page does not make a members-only page indexable.
+
+Two things moved from what was kept here, and both deliberately. The FAQ
+answer and the change log summary said the forum is reached *"from your
+account menu"*, which stopped being the whole truth the moment it was in the
+header, so both now name the top menu first and the account menu second (the
+`/account menu/` pin still matches). And the change log entry is dated the day
+it was ANNOUNCED, 2026-09-09, not the 2026-09-05 kept below: the alerts mailer
+windows by date, so a back-dated entry precedes every subscriber's window and
+would have been e-mailed to nobody — which is the opposite of revealing it to
+all. It lands PENDING like every entry after `REVIEW_FROM`, so it reaches
+readers when the maintainer presses Publish on `/whats-new`.
+
+**And one guard had to move, because two of them contradicted.** The announced
+branch demanded the entry's url be `/forum.html` while
+`testExtensionlessAddresses` demands no change log url carry `.html` at all.
+Neither fired while the switch was false, so the announced branch was dead
+code that could never have gone green; the pin is `/forum` now, which is what
+the kept entry below already said.
 
 **One switch, and it is `FORUM_ANNOUNCED` in `assets/oa-accounts.js`.** That
 file is the only one that DRAWS a link (both menus), so the flag lives beside
@@ -4381,12 +4528,16 @@ and no other.
   offers to show them — computed from the rows the list has already read and
   the seen-marks it already keeps, so watching a tag costs no read, no
   document and nothing anyone could later be asked to hand over. A digest
-  cannot ship yet for a reason that has nothing to do with the plumbing: the
-  forum is deliberately NOT ANNOUNCED (`FORUM_ANNOUNCED`), and an e-mail
-  naming a thread in the Candidates' room would announce it to whoever opens
-  the message. When the switch is flipped, the honest shape is a fifth topic
-  on the existing alerts (`assets/oa-alert-match.js` + `alerts-mailer.mjs`)
-  with the room checked per subscriber at send time.
+  could not ship while the forum was NOT ANNOUNCED, because an e-mail naming a
+  thread in the Candidates' room would have announced the forum to whoever
+  opened the message. **That reason expired on 2026-09-09** when the switch
+  was flipped, and the digest STILL DOES NOT EXIST: what is left is the work,
+  not the wait. The honest shape is unchanged — a fifth topic on the existing
+  alerts (`assets/oa-alert-match.js` + `alerts-mailer.mjs`) with the room
+  checked per subscriber at send time, so a digest never names a thread in a
+  room that subscriber would be refused. Recorded this way round deliberately:
+  a deferral whose stated condition has been met reads as a thing that shipped,
+  which is the shape of every other failure in this file.
 
 Tests: the accept and marks blocks of `testForum` (a callable of its own with
 the asker check, the question and the tombstone refused, the archive refused

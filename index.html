@@ -126,12 +126,29 @@
         <nav class="v3-nav" aria-label="Site sections">
           <a href="#jobs">Jobs</a>
           <a href="#candidates">Candidates</a>
-          <a href="#placements">Placements</a>
+          <a href="forum">Forum</a>
           <a href="#survey">Survey</a>
-          <a href="#resources">Resources</a>
-          <a href="#faq">FAQ</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
+          <div class="v3-nav-more">
+            <button type="button" class="v3-more-btn" aria-expanded="false" aria-controls="v3-more">More<svg class="v3-more-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="v3-more-panel" id="v3-more" hidden>
+              <div class="v3-more-group" role="group" aria-labelledby="v3-more-market">
+                <span class="v3-more-h" id="v3-more-market">The market</span>
+                <a href="#placements">Placements</a>
+                <a href="previous-markets">Previous markets</a>
+                <a href="universities">Universities</a>
+                <a href="recent-faculty">Recent faculty</a>
+                <a href="analytics">Analytics</a>
+              </div>
+              <div class="v3-more-group" role="group" aria-labelledby="v3-more-site">
+                <span class="v3-more-h" id="v3-more-site">The site</span>
+                <a href="#resources">Resources</a>
+                <a href="#faq">FAQ</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+                <a href="whats-new">What&rsquo;s new</a>
+              </div>
+            </div>
+          </div>
         </nav>
 
         <div class="v3-header-actions">
@@ -156,12 +173,24 @@
       <nav aria-label="Site sections">
         <a href="#jobs">Jobs</a>
         <a href="#candidates">Candidates</a>
-        <a href="#placements">Placements</a>
+        <a href="forum">Forum</a>
         <a href="#survey">Survey</a>
-        <a href="#resources">Resources</a>
-        <a href="#faq">FAQ</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+        <div class="v3-sheet-group" role="group" aria-labelledby="v3-sheet-market">
+          <span class="v3-sheet-h" id="v3-sheet-market">The market</span>
+          <a href="#placements">Placements</a>
+          <a href="previous-markets">Previous markets</a>
+          <a href="universities">Universities</a>
+          <a href="recent-faculty">Recent faculty</a>
+          <a href="analytics">Analytics</a>
+        </div>
+        <div class="v3-sheet-group" role="group" aria-labelledby="v3-sheet-site">
+          <span class="v3-sheet-h" id="v3-sheet-site">The site</span>
+          <a href="#resources">Resources</a>
+          <a href="#faq">FAQ</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+          <a href="whats-new">What&rsquo;s new</a>
+        </div>
       </nav>
       <div class="v3-sheet-foot">
         <div id="oa-np"></div>
@@ -305,11 +334,7 @@
             <div class="v3-section-cta">
               <a class="v3-btn primary" href="post-a-candidate">Create your candidate profile</a>
               <a class="v3-btn ghost" href="#resources">Resources for candidates</a>
-              <!-- The forum's button belongs here and is NOT drawn yet (owner,
-                   2026-09-05: nothing on the site mentions the forum until it
-                   has been pre-populated). The announce step is one place:
-                   FORUM_ANNOUNCED in assets/oa-accounts.js, plus this button
-                   and the FAQ answer below, per CLAUDE.md. -->
+              <a class="v3-btn ghost" href="forum">Candidates&rsquo; forum</a>
             </div>
           </div>
 
@@ -605,6 +630,22 @@
             </div>
 
             <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">Is there somewhere to talk to other candidates and to faculty?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Yes. The site has an anonymous <a href="forum">forum</a> in two rooms. The
+                <strong>Candidates&rsquo; room</strong> is for the accounts holding a candidate
+                profile for the season under way; the <strong>Open forum</strong> is for every
+                registered account with a confirmed e-mail address, faculty included. You post
+                under a random handle drawn for the season, the same in both rooms and never
+                your name; threads carry tags, replies can quote a passage of an earlier post,
+                and a post can be liked or disliked. Sign in and open <strong>Forum</strong> in
+                the menu at the top of any page, or from your account menu. The forum guide is
+                pinned at the top of each room; read it once before your first post.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
               <button type="button" class="v3-faq-q">Is my personal information published?
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
@@ -805,9 +846,13 @@
               <li><a href="#jobs">Job postings</a></li>
               <li><a href="#candidates">Candidates</a></li>
               <li><a href="#placements">Placements</a></li>
+              <li><a href="previous-markets">Previous markets</a></li>
+              <li><a href="universities">Universities</a></li>
+              <li><a href="recent-faculty">Recent faculty</a></li>
               <li><a href="#survey">Survey</a></li>
               <li><a href="#resources">Resources</a></li>
               <li><a href="analytics">Analytics</a></li>
+              <li><a href="whats-new">What&rsquo;s new</a></li>
             </ul>
           </div>
           <div>
@@ -816,6 +861,7 @@
               <li><a href="post-a-job">Post a job</a></li>
               <li><a href="post-a-candidate">Post your candidacy</a></li>
               <li><a href="post-a-placement">Report a placement</a></li>
+              <li><a href="forum">Forum</a></li>
               <li><a href="alerts">E-mail alerts</a></li>
               <li><a href="feedback">Feedback</a></li>
               <li><a href="https://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>

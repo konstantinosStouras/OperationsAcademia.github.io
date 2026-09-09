@@ -468,7 +468,7 @@
      button and its FAQ answer back in the same change. A hidden row is NOT
      the answer here: this site's own rule is that nothing merely hidden
      counts as withheld, so the markup is not written at all. */
-  var FORUM_ANNOUNCED = false;
+  var FORUM_ANNOUNCED = true;
 
   /* Whether to DRAW the maintainer's menu entry. From the resolved session
      it is OAAccounts.isAdmin()'s exact test, verified address included; while
