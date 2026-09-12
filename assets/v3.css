@@ -1937,16 +1937,26 @@ body.v3 .oa-verified { color: var(--ok); }
    and the alignment that keep it from reading as the form's submit, at a
    specificity (0,3,2) that beats `body.v3 .oa-auth-provider` (0,2,1) rather
    than relying on being later in the file. */
-body.v3 .oa-orcid-field .oa-auth-provider.oa-orcid-connect {
+body.v3 .oa-orcid-field .oa-auth-provider.oa-orcid-connect,
+body.v3 .oa-auth-provider.oa-connect-btn {
   width: auto; min-height: 42px; padding: 8px 14px; margin: 2px 0 0;
 }
 /* armed — see the note beside the same rule in oa-ui.css. (0,4,2), so it
    wins on specificity over `body.v3 .oa-auth-provider:hover` rather than on
    being later in the file. */
-body.v3 .oa-orcid-field .oa-auth-provider.oa-orcid-connect[aria-pressed='true'] {
+body.v3 .oa-orcid-field .oa-auth-provider.oa-orcid-connect[aria-pressed='true'],
+body.v3 .oa-auth-provider.oa-connect-btn[aria-pressed='true'] {
   border-color: var(--brand); background: var(--brand-soft);
   color: var(--ink); font-weight: 600;
 }
+/* the connect field and the block on the card after it, in the live design's
+   own tokens — see the note beside the same rules in oa-ui.css */
+body.v3 .oa-connect-field > .oa-opt.oa-fine,
+body.v3 .oa-verify-connect > .oa-opt.oa-fine,
+body.v3 .oa-connect-row > .oa-opt.oa-fine { color: var(--mut); }
+body.v3 .oa-connect-h { color: var(--ink); }
+body.v3 .oa-connect-row.is-done { color: var(--ink-2); }
+body.v3 .oa-connect-tick { color: var(--ok); }
 body.v3 .oa-orcid-type { color: var(--ink-2); }
 body.v3 .oa-orcid-field > .oa-opt.oa-fine { color: var(--mut); }
 /* `body.v3 .oa-opt:hover` (0,3,1) outranks the card-wide reset in oa-ui.css

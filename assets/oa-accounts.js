@@ -1791,25 +1791,40 @@
     if (!hasProvider('google.com', u)) {
       rows += '<p class="oa-acct-linkrow">' +
         '<button type="button" class="oa-auth-provider" id="oa-link-google">' +
-          PROVIDER.google.icon + '<span>Connect Google</span></button>' +
-        '<span class="oa-opt oa-fine">Sign in with Google and land here, rather than in a ' +
-          'new account.</span></p>';
+          PROVIDER.google.icon + '<span>Connect Gmail</span></button>' +
+        '<span class="oa-opt oa-fine">Then signing in with Google brings you straight ' +
+          'here, instead of typing your e-mail and password \u2014 or starting a second ' +
+          'account by mistake.</span></p>';
     }
     if (!hasProvider('oidc.orcid', u)) {
       rows += '<p class="oa-acct-linkrow">' +
         '<button type="button" class="oa-auth-provider" id="oa-link-orcid">' +
           PROVIDER.orcid.icon + '<span>Connect ORCID</span></button>' +
         '<span class="oa-opt oa-fine">' + (p.orcid
-          ? 'Then the ORCID button on the sign-in screen brings you straight here, ' +
-            'instead of starting a second account.'
-          : 'Connecting records your verified iD on your profile, and the ORCID ' +
-            'button on the sign-in screen then brings you straight here.') + '</span></p>';
+          ? 'Then signing in with ORCID brings you straight here, instead of typing your ' +
+            'e-mail and password \u2014 or starting a second account by mistake.'
+          : 'We take your iD straight from ORCID, verified, so you never have to look the ' +
+            'number up \u2014 and signing in with ORCID then brings you straight here.') +
+        '</span></p>';
     }
 
+    /* THE HEADING LEADS WITH WHAT CONNECTING BUYS (owner, 2026-09-12: "Allow
+       users that have already registered to OA to connect their ORCID and/or
+       the Gmail to facilitate faster/alternative ways to login"). The rows
+       themselves have been here since the connect buttons shipped, so nothing
+       had to be built for an existing member \u2014 what was missing is that the
+       section called itself "Your other accounts" and explained itself as a
+       way to avoid duplicate accounts, which is the maintainer's reason for
+       it rather than the member's. */
     return '<div class="oa-acct-other">' +
-      '<h4>Your other accounts</h4>' +
-      '<p class="oa-opt oa-fine oa-acct-signedin">You sign in to this account with ' +
-        esc(providerSummary(u)) + '.</p>' +
+      (rows
+        ? '<h4>Sign in faster next time</h4>' +
+          '<p class="oa-opt oa-fine oa-acct-signedin">You sign in to this account with ' +
+            esc(providerSummary(u)) + '. Connect another and you can use either, whichever ' +
+            'is to hand.</p>'
+        : '<h4>Your other accounts</h4>' +
+          '<p class="oa-opt oa-fine oa-acct-signedin">You sign in to this account with ' +
+            esc(providerSummary(u)) + '.</p>') +
       rows +
       '<p class="oa-acct-mergelede">Signed up more than once — with Google and again with ' +
         'ORCID, or with two different e-mail addresses? They are separate accounts, each ' +
@@ -2135,38 +2150,51 @@
               'autocomplete="' + (registering ? 'new-password' : 'current-password') + '" ' +
               'placeholder="' + (registering ? 'At least 6 characters' : 'Your password') + '"></label>' +
           (registering
-            ? '<div class="oa-orcid-field">' +
-                '<span class="oa-flabel">ORCID iD ' +
-                  '<span class="oa-opt">(highly recommended but optional)</span></span>' +
-                /* THE CARD NO LONGER ASKS FOR THE NUMBER (owner, 2026-09-12, of
-                   the note this replaces: "this would encourage people to
-                   register by just clicking the ORCID button. What I was
-                   thinking instead is keep it as is, and when asking to add the
-                   ORCID, you don't ask and instead have the ORCID connect
-                   button, so that the user connect also their ORCID during
-                   their (regular) registration").
+            ? '<div class="oa-connect-field">' +
+                '<span class="oa-flabel">Connect your other sign-ins ' +
+                  '<span class="oa-opt">(optional)</span></span>' +
+                /* WHY THE SIGN-UP PILLS ARE NOT ON THIS CARD, and these are.
+                   Owner, 2026-09-12: "a new user registers the 'regular' way
+                   filling up all those fields including name, affiliation,
+                   email, password, website as it is now. Then, the user is
+                   asked to (optionally but highly recommended) connect his
+                   ORCID and also to optionally connect his Gmail too …
+                   upon registering and verifying their email, such a user can
+                   login to OA either by their gmail, ORCID, or email/password
+                   given earlier", with the card's own "or continue with"
+                   block struck through.
 
-                   Both halves of that are the point. A box wanting sixteen
-                   digits is a question most readers cannot answer from memory,
-                   so they skip it. And the note that stood here pointed at the
-                   ORCID SIGN-IN pill below, which creates an ORCID-backed
-                   account — one that shares no e-mail address at all, which is
-                   the very gap the three compulsory fields above were added to
-                   close. Steering an ordinary registration into it to collect
-                   an iD is the wrong trade.
+                   Registering is therefore ALWAYS the full form. That is the
+                   completion of the previous ruling rather than a new one: a
+                   provider sign-up answers none of the three questions above,
+                   and an ORCID one carries no e-mail address at all, so a
+                   pill offering to skip the form was the site steering people
+                   into exactly the account shape those fields exist to close.
+                   The SIGN IN card keeps all three pills, which is what makes
+                   "log in by Gmail, ORCID or e-mail and password" true.
 
-                   So this is an ARMING toggle, not a sign-in. The account does
-                   not exist while the card is on screen and `linkWithPopup`
-                   needs a user, so nothing can open here; what a press does is
-                   say yes, and the link is opened the instant
-                   `createUserWithEmailAndPassword` returns. The words say that
-                   rather than implying a window is about to appear. */
-                '<button type="button" class="oa-auth-provider oa-orcid-connect" ' +
+                   These two ARM. Nothing can be linked to an account that
+                   does not exist, and the owner's own word is "THEN" — so the
+                   connecting happens on the card that follows, where each
+                   press is a real press and a browser can never block the
+                   window. What a press here buys is that the next card opens
+                   with the answer already given. */
+                '<span class="oa-opt oa-fine">You can sign in with these instead of your ' +
+                  'e-mail and password. We will set them up as soon as your account is ' +
+                  'made \u2014 one press each, on the next screen.</span>' +
+                '<button type="button" class="oa-auth-provider oa-connect-btn" ' +
                   'id="oa-reg-orcid" aria-pressed="false">' + PROVIDER.orcid.icon +
                   '<span id="oa-reg-orcid-label">Connect my ORCID</span></button>' +
                 '<span class="oa-opt oa-fine" id="oa-reg-orcid-note" aria-live="polite">' +
-                  'We will open orcid.org as soon as your account is made, and fill your iD ' +
-                  'in verified. You do not need to know the number.</span>' +
+                  'Highly recommended. We take your iD straight from ORCID, verified, so ' +
+                  'you never have to look the number up \u2014 and you can then sign in ' +
+                  'with ORCID as well.</span>' +
+                '<button type="button" class="oa-auth-provider oa-connect-btn" ' +
+                  'id="oa-reg-google" aria-pressed="false">' + PROVIDER.google.icon +
+                  '<span id="oa-reg-google-label">Connect my Gmail</span></button>' +
+                '<span class="oa-opt oa-fine" id="oa-reg-google-note" aria-live="polite">' +
+                  'We link your Google account to this one, so signing in with Gmail is a ' +
+                  'faster alternative to typing your e-mail and password.</span>' +
               '</div>' +
               '<label class="oa-terms-row"><input type="checkbox" name="terms">' +
                 '<span>I agree to the <a href="/terms-and-conditions" target="_blank" ' +
@@ -2192,18 +2220,14 @@
               '<button type="button" id="oa-reset">Forgot password?</button>') +
         '</div>' +
 
-        (third
+        /* SIGNING IN ONLY. On the register card these pills were a way to make
+           an account without answering a single one of the questions above,
+           which is what the owner struck through; here they are the whole
+           point, since connecting either during registration is what makes
+           them work (see the connect field above). */
+        (third && !registering
           ? '<div class="oa-or">or continue with</div>' +
-            '<div class="oa-auth-providers">' + third + '</div>' +
-            (registering
-              // its own class — `oa-opt` is also a jobs-filter dropdown row in
-              // oa-list.css (padded, gray), and the un-padding reset there is
-              // scoped to labels, which this <p> is not
-              ? '<p class="oa-auth-fine">' +
-                  'By continuing with Google or ORCID you agree to the ' +
-                  '<a href="/terms-and-conditions" target="_blank" rel="noopener">Terms of Use</a> ' +
-                  'and <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</p>'
-              : '')
+            '<div class="oa-auth-providers">' + third + '</div>'
           : '') +
 
         '<p class="oa-auth-msg" id="oa-auth-msg" role="alert"></p>' +
@@ -2221,22 +2245,38 @@
     $('#oa-auth-form', wrap).email.focus();
 
     /* ARMED OR NOT, for this card only: switching mode rebuilds the whole card,
-       so the answer can never outlive the form it was given on. */
-    var wantOrcid = false;
-    var regOrcid = $('#oa-reg-orcid', wrap);
-    if (regOrcid) regOrcid.addEventListener('click', function () {
-      wantOrcid = !wantOrcid;
-      regOrcid.setAttribute('aria-pressed', wantOrcid ? 'true' : 'false');
-      var lab = $('#oa-reg-orcid-label', wrap);
-      var note = $('#oa-reg-orcid-note', wrap);
-      if (lab) lab.textContent = wantOrcid ? 'ORCID will open next' : 'Connect my ORCID';
-      if (note) {
-        note.textContent = wantOrcid
-          ? 'Ready. We will open orcid.org as soon as your account is made. Press again ' +
-            'if you would rather not.'
-          : 'We will open orcid.org as soon as your account is made, and fill your iD in ' +
-            'verified. You do not need to know the number.';
-      }
+       so the answer can never outlive the form it was given on. One table for
+       the two, because a second copy of "toggle, relabel, reword" is the drift
+       every shared definition here exists to prevent \u2014 and the two buttons
+       ask one question. */
+    var want = { 'oidc.orcid': false, 'google.com': false };
+    var ARM = [
+      { id: 'oa-reg-orcid', provider: 'oidc.orcid', off: 'Connect my ORCID',
+        on: 'ORCID \u2014 yes, connect it',
+        offNote: 'Highly recommended. We take your iD straight from ORCID, verified, so ' +
+          'you never have to look the number up \u2014 and you can then sign in with ORCID ' +
+          'as well.',
+        onNote: 'Ready. We will set ORCID up as soon as your account is made. Press again ' +
+          'if you would rather not.' },
+      { id: 'oa-reg-google', provider: 'google.com', off: 'Connect my Gmail',
+        on: 'Gmail \u2014 yes, connect it',
+        offNote: 'We link your Google account to this one, so signing in with Gmail is a ' +
+          'faster alternative to typing your e-mail and password.',
+        onNote: 'Ready. We will set Gmail up as soon as your account is made. Press again ' +
+          'if you would rather not.' }
+    ];
+    ARM.forEach(function (a) {
+      var btn = $('#' + a.id, wrap);
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var on = !want[a.provider];
+        want[a.provider] = on;
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        var lab = $('#' + a.id + '-label', wrap);
+        var note = $('#' + a.id + '-note', wrap);
+        if (lab) lab.textContent = on ? a.on : a.off;
+        if (note) note.textContent = on ? a.onNote : a.offNote;
+      });
     });
 
     // mode switches rebuild the card, so no stale heading, fields or errors
@@ -2340,7 +2380,6 @@
           website: website.slice(0, 300)
         };
         var created = null;
-        var orcidAsked = wantOrcid;
         OAFB.ready()
           .then(function (fb) {
             return fb.auth().createUserWithEmailAndPassword(f.email.value, f.password.value)
@@ -2361,17 +2400,26 @@
                 // SDK contradicted it.
                 try { localStorage.setItem('oaProfileAsked:' + u.uid, '1'); } catch (e2) { /* private mode */ }
                 state.profile = prof;
-                /* THE ORCID WINDOW OPENS HERE, and as early as here for one
-                   reason: a browser only lets a popup through while the press
-                   that asked for it is still counted as activating the page,
-                   and that press was the Create account button a moment ago.
-                   So the link goes out beside the profile write rather than
-                   behind it — it is not waited on (the registration must not
-                   hang on an OAuth window a reader may never finish) and it
-                   cannot fail the registration, which is what
-                   `orcidOutcome` is: the promise the verify card reads to say
-                   how it went, never a link in this chain. */
-                if (orcidAsked) orcidOutcome = linkTo(fb, u, 'oidc.orcid');
+                /* WHAT WAS ARMED IS HANDED TO THE NEXT CARD, which is where
+                   the connecting happens: one press each, and a press is the
+                   only thing a browser reliably lets open an OAuth window.
+
+                   The FIRST of them is also tried here, and as early as here
+                   for one reason: a browser lets a popup through while the
+                   press that asked for it still counts as activating the
+                   page, and that press was Create account a moment ago. So
+                   when it works the reader is saved a press. It is not
+                   awaited — a registration must not hang on a window somebody
+                   may never finish — and it cannot fail one: whatever does
+                   not land is simply a button the next card still offers.
+                   Only the first, because two popups at once is one popup and
+                   one refusal. */
+                connectWanted = ARM.filter(function (a) { return want[a.provider]; })
+                  .map(function (a) { return a.provider; });
+                if (connectWanted.length) {
+                  connectTried = connectWanted[0];
+                  connectOutcome = linkTo(fb, u, connectTried);
+                }
                 return profileDoc(fb, u.uid).set(prof, { merge: true })
                   .catch(function () { /* rules not deployed / offline — see above */ });
               });
@@ -2380,7 +2428,9 @@
             if (!created || !needsVerification(created)) {
               // no verify card will open, so nothing here can report an armed
               // link; drop it rather than leave it for a later card to claim
-              orcidOutcome = null;
+              connectWanted = [];
+              connectTried = '';
+              connectOutcome = null;
               finish(true);
               return;
             }
@@ -2467,42 +2517,143 @@
   /* The control that opened the card, for the keyboard to go back to. */
   var VERIFY_BACK = '#oa-verify-chip, #oa-np-verify';
 
-  /* HOW THE ARMED ORCID LINK WENT, or null when nobody armed one. Set by the
-     registration path the moment the account exists and read by the verify
-     card, which is the very next thing that reader sees. It is deliberately
-     not a link in the registration chain: the account is already made and
-     nothing here may take it away again. And it is REPORTED either way,
-     because a popup a browser blocked is silent, and a reader left believing
-     a press had done something is the failure shape this repository names
-     everywhere else. */
-  var orcidOutcome = null;
+  /* WHERE THE CONNECTING ACTUALLY HAPPENS (owner, 2026-09-12: "Then, the user
+     is asked to (optionally but highly recommended) connect his ORCID and also
+     to optionally connect his Gmail too"). The register card takes the ANSWER;
+     this card takes the PRESS, and that split is not a nicety: an OAuth window
+     opens reliably only from a real press, so a card of live buttons connects
+     every time where an armed link can be blocked by the browser and silently
+     do nothing.
 
-  function verifyOrcid() {
-    var line = $('#oa-verify-orcid');
-    var pending = orcidOutcome;
-    if (!line || !pending) return;
-    orcidOutcome = null;               // one registration, one report
-    line.hidden = false;
-    line.textContent = 'Opening orcid.org…';
+     `connectWanted` is what was armed, `connectTried` the one the registration
+     already attempted inside its own activation window, and `connectOutcome`
+     that attempt's promise. All three are read exactly once, by the card that
+     opens next. */
+  var connectWanted = [];
+  var connectTried = '';
+  var connectOutcome = null;
+
+  var CONNECT = [
+    { provider: 'oidc.orcid', key: 'orcid', name: 'ORCID',
+      why: 'Takes your iD from ORCID, verified, and lets you sign in with ORCID.' },
+    { provider: 'google.com', key: 'google', name: 'Gmail',
+      why: 'Lets you sign in with Google instead of your e-mail and password.' }
+  ];
+
+  /** The block itself: a row per sign-in this account does not already have. */
+  function connectRowsHTML(u) {
+    var rows = '';
+    CONNECT.forEach(function (c) {
+      if (hasProvider(c.provider, u)) {
+        rows += '<p class="oa-connect-row is-done" data-connect-done="' + c.key + '">' +
+          '<span class="oa-connect-tick">&#10003;</span> ' + esc(c.name) +
+          ' is connected. You can sign in with it.</p>';
+        return;
+      }
+      rows += '<p class="oa-connect-row">' +
+        '<button type="button" class="oa-auth-provider oa-connect-btn" ' +
+          'id="oa-connect-' + c.key + '" data-connect="' + c.provider + '">' +
+          PROVIDER[c.key].icon + '<span>Connect ' + esc(c.name) + '</span></button>' +
+        '<span class="oa-opt oa-fine">' + esc(c.why) + '</span></p>';
+    });
+    return rows;
+  }
+
+  /** Redraw the block against the account as it now stands, and re-wire it. */
+  function paintConnect(u) {
+    var host = $('#oa-verify-connect');
+    if (!host) return;
+    var rows = connectRowsHTML(u);
+    if (!rows) {                       // both connected: say so and stop offering
+      host.innerHTML = '<p class="oa-connect-row is-done">' +
+        '<span class="oa-connect-tick">&#10003;</span> ' +
+        'ORCID and Gmail are both connected. You can sign in with either.</p>';
+      return;
+    }
+    host.innerHTML =
+      '<h4 class="oa-connect-h">Connect your other sign-ins <span class="oa-opt">(optional)</span></h4>' +
+      '<p class="oa-opt oa-fine">One press each. Afterwards you can sign in with any of ' +
+      'them, or with the e-mail address and password you have just chosen \u2014 and you can ' +
+      'do this later from Edit account instead.</p>' + rows +
+      '<p class="oa-auth-msg" id="oa-connect-msg" role="alert"></p>';
+    Array.prototype.forEach.call(host.querySelectorAll('[data-connect]'), function (b) {
+      b.addEventListener('click', function () {
+        var id = b.dataset.connect;
+        var msg = $('#oa-connect-msg');
+        b.disabled = true;
+        if (msg) { msg.className = 'oa-auth-msg'; msg.textContent = 'Opening the sign-in window\u2026'; }
+        OAFB.ready()
+          /* `u` FIRST: this card is opened by the registration path with the
+             account it has just created, and the auth event may not have fired
+             yet, so `state.user` can still be null at this instant. */
+          .then(function (fb) { return linkTo(fb, u || state.user, id); })
+          .then(function (r) {
+            if (msg) { msg.className = 'oa-auth-msg is-ok'; msg.textContent = connectedSays(id, r); }
+            paintConnect((r && r.user) || u || state.user);
+          })
+          .catch(function (err) {
+            b.disabled = false;
+            if (msg) { msg.className = 'oa-auth-msg is-err'; msg.textContent = connectFailedSays(err); }
+          });
+      });
+    });
+  }
+
+  function connectedSays(id, r) {
+    return id === 'oidc.orcid'
+      ? 'Connected' + ((r && r.orcid) ? ' \u2014 ORCID iD ' + r.orcid + ', verified' : '') +
+        '. You can sign in with ORCID.'
+      : 'Connected. You can sign in with Gmail.';
+  }
+
+  function connectFailedSays(err) {
+    var c = (err && err.code) || '';
+    if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') {
+      return 'That window was closed, so nothing was connected. Press again when you are ready.';
+    }
+    if (c === 'auth/popup-blocked') {
+      return 'Your browser blocked the window. Allow pop-ups for this site and press again.';
+    }
+    if (c === 'auth/credential-already-in-use' || c === 'auth/account-exists-with-different-credential') {
+      return 'That sign-in already belongs to another Operations Academia account, so it was ' +
+        'not attached to this one. Your personal area can merge the two.';
+    }
+    if (c === 'auth/provider-already-linked') return 'That sign-in is already attached to this account.';
+    if (c === 'auth/operation-not-allowed') return 'That sign-in is not switched on for this site yet.';
+    return 'We could not connect that just now.' + (c ? ' (' + c + ')' : '');
+  }
+
+  /** Draw the block, and report the one attempt the registration already made. */
+  function verifyConnect(u) {
+    var host = $('#oa-verify-connect');
+    if (!host) return;
+    if (!connectWanted.length && !hasProvider('oidc.orcid', u) && !hasProvider('google.com', u)) {
+      /* Nobody armed anything. The block is still drawn \u2014 this is the one
+         moment the offer is in front of a new account, and the owner asked for
+         it to be made \u2014 but nothing is claimed about a window. */
+      paintConnect(u);
+      return;
+    }
+    var pending = connectOutcome;
+    var tried = connectTried;
+    connectWanted = [];
+    connectTried = '';
+    connectOutcome = null;             // one registration, one report
+    paintConnect(u);
+    if (!pending) return;
+    var msg = $('#oa-connect-msg');
+    var btn = $('[data-connect="' + tried + '"]');
+    if (btn) btn.disabled = true;
+    if (msg) { msg.className = 'oa-auth-msg'; msg.textContent = 'Opening the sign-in window\u2026'; }
     pending.then(function (r) {
-      line.textContent = (r && r.orcid)
-        ? 'Connected. ORCID iD ' + r.orcid + ' is on your profile, and we can vouch for it.'
-        : 'ORCID is connected to this account. Your iD will be on your profile next time ' +
-          'you sign in.';
-    }).catch(function (err) {
-      var c = (err && err.code) || '';
-      var why =
-        c === 'auth/popup-blocked' ? 'Your browser blocked the ORCID window.'
-        : (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request')
-          ? 'The ORCID window was closed, so nothing was connected.'
-        : (c === 'auth/credential-already-in-use' || c === 'auth/account-exists-with-different-credential')
-          ? 'That ORCID sign-in already belongs to another Operations Academia account, ' +
-            'so it was not attached to this one.'
-        : c === 'auth/operation-not-allowed'
-          ? 'ORCID sign-in is not switched on for this site yet.'
-          : 'We could not connect ORCID just now.' + (c ? ' (' + c + ')' : '');
-      line.textContent = why + ' You can connect it any time from Edit account, ' +
-        'once your address is confirmed.';
+      var m = $('#oa-connect-msg');
+      if (m) { m.className = 'oa-auth-msg is-ok'; m.textContent = connectedSays(tried, r); }
+      paintConnect((r && r.user) || u || state.user);
+    }).catch(function () {
+      /* The armed attempt is a BONUS, so its failure is not an error: the row
+         is simply live again, which is the state every reader who armed
+         nothing is already in. */
+      paintConnect(u || state.user);
     });
   }
 
@@ -2594,7 +2745,7 @@
           '<button type="button" class="button oa-btn-ghost" id="oa-verify-check">I have verified it</button>' +
         '</div>' +
         '<p class="oa-auth-msg" id="oa-verify-msg" role="alert"></p>' +
-        '<p class="oa-auth-fine" id="oa-verify-orcid" role="status" hidden></p>' +
+        '<div class="oa-verify-connect" id="oa-verify-connect"></div>' +
         '<p class="oa-auth-fine" id="oa-verify-from">Look in spam too. The message comes from ' +
           VERIFY_SENDER + '.</p>' +
         '<div class="oa-auth-back">' +
@@ -2627,7 +2778,7 @@
     });
     $('#oa-verify-out', wrap).addEventListener('click', function () { signOut(); });
     $('#oa-verify-send', wrap).focus();
-    verifyOrcid();
+    verifyConnect(u);
   }
 
   /** Send the verification message. Resolves with where it went:

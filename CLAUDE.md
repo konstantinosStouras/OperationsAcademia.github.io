@@ -8243,74 +8243,114 @@ into exactly the shape the three compulsory fields beside it exist to close, to
 collect one optional field. That trade is the wrong way round.
 
 **So the registration card asks for no number at all.** The box and the pointer
-are both DELETED — not hidden, by this file's own rule — and the row is the
-heading, the connect button and one line. The reader fills the form the way they
-always did and presses Create account; the ORCID press is an *also*, never a
-second way to register, which is what "keep it as is" asks for.
+are both DELETED — not hidden, by this file's own rule — and the row is a
+heading, the connect buttons and a line each. The reader fills the form the way
+they always did and presses Create account; a connect press is an *also*, never
+a second way to register.
 
-**It is an ARMING TOGGLE, and the words say so.** Nothing can be linked while
-the account does not exist, so the press records the answer (`aria-pressed`, a
-plain local of the card, so a mode switch that rebuilds the card forgets it) and
-the note reads *"We will open orcid.org as soon as your account is made"*. A
-button that implied a window was about to appear and then did nothing would be
-the affordance failure this repository already records for the Excel download,
-in reverse.
+### …and it offers GMAIL beside ORCID, while the sign-up pills leave the card
 
-**The link goes out the INSTANT the account exists, and that timing is the
-whole reason it sits where it does.** A browser only lets a popup through while
-the press that asked for it still counts as activating the page, and that press
-was Create account a moment earlier — so `linkTo` is called beside the profile
-write rather than behind it. It is **not a link in that chain**: an OAuth window
-a reader may never finish must not hang a registration, and nothing there may
-fail one. The account is made either way.
+Owner, 2026-09-12, with the card's own "or continue with" block struck through
+in a screenshot: *"a new user registers the 'regular' way (attached) filling up
+all those fields including name, affiliation, email, password, website as it is
+now. Then, the user is asked to (optionally but highly recommended) connect his
+ORCID and also to optionally connect his Gmail too. There should be buttons that
+would properly connect the new account with the Gmail account and with the
+existing ORCID account. Then, upon registering and verifying their email, such a
+user can login to OA either by their gmail, ORCID, or email/password given
+earlier."*
 
-**The press must ARM and never sign anybody in, and ONE selector is what keeps
-that true.** The button wears `.oa-auth-provider` deliberately, so the two cards
+**REGISTERING IS ALWAYS THE FULL FORM NOW**, which is the completion of the
+ruling above rather than a new one. A provider sign-up answers none of the three
+compulsory questions, and an ORCID one carries no address at all, so a pill
+offering to skip the form was the site steering people into precisely the
+account shape those fields exist to close — the same argument, one layer up.
+`(third && !registering)` is the whole of it, and the line that existed only to
+cover those pills on this card went with them.
+
+**THE SIGN IN CARD KEEPS ALL THREE, and that is what makes the owner's last
+sentence true.** "Login by their gmail, ORCID, or email/password" is exactly
+what connecting during registration buys: the pills are no longer a way to
+make an account without answering anything, they are the way a member who
+connected one gets back in. The two cards now say different things because they
+are asked different questions, which is the point.
+
+**THE TWO BUTTONS ARM; THE CARD THAT FOLLOWS CONNECTS.** That split is the
+owner's own word — "**Then**, the user is asked to" — and it is also the only
+shape that works. An OAuth window opens reliably only from a real press, so a
+card of live buttons connects every time, where an armed link can be blocked by
+the browser and then silently do nothing. So the registration card takes the
+ANSWER (`aria-pressed`, plain locals of the card, so a mode switch that rebuilds
+it forgets them) and the "Check your inbox" card takes the PRESS.
+
+**The FIRST armed one is still opened by the registration**, beside the profile
+write, because a browser lets a popup through while the press that asked for it
+still counts as activating the page and that press was Create account a moment
+earlier. It is a bonus, not the mechanism: not awaited (a registration must not
+hang on a window somebody may never finish), unable to fail one, and whatever
+does not land is simply a button the next card still offers. **Only the first**,
+because two popups at once is one popup and one refusal.
+
+**ONE TABLE DRIVES BOTH BUTTONS** (`ARM` in `openAuth`, `CONNECT` for the card
+after it). A second copy of "toggle, relabel, reword" is the drift every shared
+definition here exists to prevent, and the two buttons ask one question.
+
+**A PRESS MUST ARM AND NEVER SIGN ANYBODY IN, AND ONE SELECTOR KEEPS THAT
+TRUE.** The arming buttons wear `.oa-auth-provider` deliberately, so the cards
 offer one recognisable control — and the card's own sweep wiring the sign-in
 pills was `wrap.querySelectorAll('.oa-auth-provider')`, which would have caught
-it and called `signInWithPopup`: a press in the middle of a half-filled form
-would abandon everything typed for a brand new ORCID account with no address.
-The sweep is scoped to the pill CONTAINER (`.oa-auth-providers .oa-auth-provider`)
-and both the narrow form and the absence of the wide one are pinned, inside
-`openAuth` alone — the merge card has a sweep of its own that legitimately signs
-people in.
+them and called `signInWithPopup`: a press in the middle of a half-filled form
+would abandon everything typed for a brand new account answering none of the
+questions above it. The sweep is scoped to the pill CONTAINER
+(`.oa-auth-providers .oa-auth-provider`) and both the narrow form and the
+absence of the wide one are pinned, inside `openAuth` alone — the merge card
+has a sweep of its own that legitimately signs people in. It matters more now,
+not less: the pills are no longer on the register card at all, so the only
+`.oa-auth-provider` elements there are the two that must never sign anybody in.
 
-**AND HOW IT WENT IS REPORTED, on the verify card.** A popup a browser blocks is
-completely silent, so an armed press that failed would look exactly like one that
-worked. `orcidOutcome` is the promise the registration path leaves behind and
-`verifyOrcid()` reads it once on the "Check your inbox" card, which is the very
-next thing that reader sees: the iD by name when it connected, and otherwise
-which of the four things happened (blocked, closed, already claimed by another
-account, ORCID sign-in switched off) with Edit account named as the way to
-finish. It is cleared on the one path where no verify card opens, so a later
-card can never claim a stale outcome.
+**The block after registration draws a row per sign-in the account does NOT
+already have**, and redraws itself as each lands — so it never offers what it
+cannot honour, and a reader who armed nothing still meets the offer once, which
+is what the owner asked for. Every refusal is worded (`connectFailedSays`):
+blocked, closed, already claimed by another account, not switched on.
+
+**AND AN EXISTING MEMBER WAS ALREADY ABLE TO DO THIS** (owner, the same day:
+*"Allow users that have already registered to OA to connect their ORCID and/or
+the Gmail to facilitate faster/alternative ways to login"*). `otherAccountsHTML`
+has drawn Connect Google and Connect ORCID rows since the connect buttons
+shipped, so nothing had to be built — what was missing is that the section
+called itself *"Your other accounts"* and explained itself as a way to avoid
+duplicate accounts, which is the maintainer's reason for it rather than the
+member's. It reads **"Sign in faster next time"** now, and each row says the
+member's half: signing in that way brings you straight here instead of typing
+your e-mail and password. The heading reverts to the old one once both are
+connected, since there is then nothing to offer.
 
 **The armed button's ground is a token pair and its hover stands down on it.**
 `[aria-pressed='true']` names its own ink over its own ground in both
 stylesheets — `--brand` is light in the dark theme, so a ground alone would
 leave the label painted in nearly its own colour — and the generic
 `.oa-auth-provider:hover` is narrowed with `:not([aria-pressed='true'])`, so a
-tap that arms the button does not leave a stuck hover repainting the on-state in
+tap that arms a button does not leave a stuck hover repainting the on-state in
 the off-state's wash. That is rule 15 of `_MOBILE-STANDARDS.md`, and the defect
 it records verbatim.
 
-Tests: the ORCID block of `testRegistrationFields` in `_scraper/selftest.mjs`
-(the button in the profile FIELD with the pill's mark, withheld from an ORCID
-account, the box surviving THERE, the field told which account it is drawing,
-the one `linkProvider` call, the repaint replacing the reopen, `linkTo` as the
-one definition, and both stylesheets; then the registration card's own: no box
-and no pointer, asserted as ABSENCES because either coming back is a regression
-nothing else would report, the arming button with its unpressed state and its
-"as soon as your account is made" wording, the announced note, the
-container-scoped sweep read inside `openAuth`, the local that a rebuild forgets,
-the link fired at creation and NOT awaited in that chain, and the outcome
-reported) and the registration block of `_scraper/page-test.mjs`, which drives it
-in a real browser: the rendered row with no box, the press arming it with nobody
-signed in and nothing linked and the half-filled form still there, then a
-complete registration whose armed press really connects ORCID — the iD on the
-profile, verified, linked exactly once — and the verify card naming it; plus a
-second reader whose popup the browser BLOCKED, who still gets the account, the
-profile and a card that says what happened and where to finish it.
+Tests: the ORCID and connect blocks of `testRegistrationFields` in
+`_scraper/selftest.mjs` (the profile field's button, withheld from an account
+that already signs in that way, the box surviving THERE, `linkTo` as the one
+definition; then the registration card's own: no box, no pointer and no pills,
+all three as ABSENCES because each coming back is a regression nothing else
+would report, the two arming buttons with their unpressed state and their
+rewritten lines, the container-scoped sweep read inside `openAuth`, the one
+`ARM` table, the locals a rebuild forgets, the first armed link fired at
+creation and NOT awaited in that chain, only the first, and the card after it
+drawing a row per unconnected sign-in) and the registration block of
+`_scraper/page-test.mjs`, which drives the whole of it in a real browser: the
+rendered card with no box and no pills, both presses arming with nobody signed
+in and nothing linked and the half-filled form still there, then a complete
+registration where ORCID connects itself and Gmail is a live button one press
+away, that press connecting it, and a second reader whose popup the browser
+BLOCKED, who still gets the account and a card that leaves both sign-ins live.
 
 ## The 2026-09-12 review sweep: the candidates page, and the jobs page
 
