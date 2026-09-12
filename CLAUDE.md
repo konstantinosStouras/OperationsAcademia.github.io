@@ -6466,6 +6466,64 @@ would be half a screen — where the mobile rules give both the full width and a
 the two buttons' shared baseline at desktop width, and the full-width targets
 at 390px.
 
+### …and the span is ONE TRACK PER BUTTON, which is a rule rather than a number
+
+Owner, 2026-09-12, of a screenshot of the CANDIDATES list as it will look
+after the reveal, with the two buttons ringed in red: *"I would like the the
+two buttons in the red circle to appear in the same line, nicely separated
+with the right space between them. (Why not using that white area on the left
+of those buttons?)"*
+
+**The white area was a grid track the cell was not allowed to reach.** The
+jobs bar had been given `span 3 / -1` when its own pair was put on one line
+and the candidates bar had been left on the shared `grid-column: auto / -1`,
+which spans exactly ONE track — the trap recorded two paragraphs up, an auto
+start with a definite end. So at 1280px the bar is five tracks, row two holds
+Research area, INFORMS day and Date posted in tracks 1 to 3, **track 4 stands
+empty**, and the cell sits in track 5 alone at 192px with Clear and the talks
+download stacked inside it. The owner's question answers itself: nothing was
+using that column because nothing could.
+
+**It is `span 2 / -1` for that bar, and the number is not a preference.** The
+cell holds Clear plus whatever `actions` the mount declared, so it needs a
+track for each of them: the jobs page declares two (the Excel download and
+Save as e-mail alert) and takes three, the candidates list declares one (the
+talks calendar) and takes two, and a list declaring none — the home page's
+placements, and its jobs teaser, which draws no bar at all — has ONE button
+and keeps `auto / -1`, the same reading at n = 1 rather than an exception. `selftest.mjs`
+reads the action count out of each mount and pins the span against it **both
+ways**, so a third action added to either bar fails the build instead of
+quietly putting that bar back to stacked buttons.
+
+**And it fixed something nobody had reported.** The talks download is 198px
+of label, so inside a single track it hung PAST the card's own edge — 29px at
+820px, and past it at seven of the nine widths swept from 641px to 1440px. A
+cell wide enough for both buttons is a cell the wider of them fits inside.
+Measured after the change the pair share a line at every one of those widths,
+with a 10px gutter between them and the download flush to the card's inner
+edge, and **the bar is no deeper than it was at any width** — which was
+measured by rendering each width twice, once with the rule and once with it
+overridden back, rather than reasoned about.
+
+**The phone is untouched, and that is the point of the breakpoint.** Below
+641px the cell is `1 / -1` and the two stack full width at 46px, which is the
+standard's own answer: side by side each would be half a screen. Swept at 320,
+360, 390, 414, 430 and 640px the candidates section scrolls nothing sideways,
+nothing in it runs past the container, the three section buttons and both
+filter-bar buttons clear 42px, and the pager chevrons sit at the 40px floor
+rule 3 of `_MOBILE-STANDARDS.md` sets for them.
+
+Tests: the actions-cell block of `testJobExportWiring` in `_scraper/selftest.mjs`
+(each mount's declared action count read out of its own page and the span
+pinned to it, a mount with no action pinned to have no rule at all, the shared
+`auto / -1` still there, and both spans behind the desktop breakpoint) and the
+talks-calendar block of `_scraper/page-test.mjs`, which measures it in a
+browser: on one line with Clear at the same height, a real gap between them,
+the download holding the bar's right edge rather than hanging over it, the bar
+two rows deep — and at 390px AND 320px both buttons stacked, full width, 42px,
+inside the card, with nothing in the section past the container and no
+sideways scroll.
+
 ### …and a search can be saved as an e-mail alert
 
 Owner, 2026-09-04: a signed-in reader who has narrowed the jobs list can

@@ -1111,8 +1111,34 @@ body.v3 .oa-action:hover:not([disabled]) {
    cell takes a line of its own and is still flush right with both buttons
    abreast — measured at 1000px and 900px. Only a phone stacks them, where
    side by side each would be half a screen wide. */
+/* ONE TRACK PER BUTTON, which is what both of these spans are. The cell holds
+   Clear plus whatever `actions` the mount declared, and it needs a track for
+   each of them to seat them on one line and still end flush: the jobs bar has
+   three buttons (Clear, the Excel download, Save as e-mail alert) and the
+   candidates bar two (Clear and the talks calendar). A bar that declares no
+   action at all has ONE button and keeps the `auto / -1` above, which is the
+   same rule at n = 1 — so these are the exceptions the reading already
+   predicts rather than two numbers somebody chose.
+
+   THE CANDIDATES BAR WAS MEASURED THE DAY THE OWNER ASKED FOR IT (2026-09-12,
+   of a screenshot taken against the list as it will look after the reveal:
+   "I would like the the two buttons in the red circle to appear in the same
+   line ... Why not using that white area on the left of those buttons?"). The
+   white area was track 4 of five, standing empty because `auto / -1` seats
+   the cell in the LAST track alone; the two buttons then stacked inside a
+   192px column. Swept from 641px to 1440px the bar is three, four or five
+   tracks with nought, two or three filters sharing the actions row, and two
+   tracks is free in every one of them — so the cell lands beside them and
+   never on a row of its own that it did not already have.
+
+   And it fixes something nobody had reported: the talks download is 198px of
+   label, and one track is 192px at 1280px and narrower below that — so it
+   hung 29px PAST the card's own edge at 820px, and past it at seven of the
+   nine widths swept. A cell wide enough for both buttons is a cell the wider
+   button fits inside. */
 @media (min-width: 641px) {
   body.v3 #oa-jobs .oa-filter-actions { grid-column: span 3 / -1; }
+  body.v3 #oa-candidates .oa-filter-actions { grid-column: span 2 / -1; }
 }
 @media (max-width: 640px) {
   /* the mobile standard, in grid form: pickers two per row, every text

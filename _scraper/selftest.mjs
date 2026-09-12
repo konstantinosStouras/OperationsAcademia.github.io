@@ -13185,6 +13185,66 @@ async function testJobExportWiring() {
     eq(v3css.split(tok + ':').length - 1, 2,
       `palette: ${tok} is defined in the light theme and the dark one`);
   }
+
+  /* THE ACTIONS CELL TAKES ONE TRACK PER BUTTON, and the RULE is what is
+     pinned rather than the two numbers that satisfy it today.
+
+     `grid-column: auto / -1` spans exactly ONE track — an auto start with a
+     definite end — which is the trap this file already records for the jobs
+     bar. That is the right answer for a list declaring no action at all,
+     where Clear is the only button; it is wrong the moment a page adds one,
+     because the buttons then stack inside that single column and the wider
+     of them hangs past the card's own edge.
+
+     So a bar that declares actions names its own span, and the span is Clear
+     plus what the mount declared: jobs.html declares two (the Excel download
+     and Save as e-mail alert) and takes three tracks, the candidates list on
+     the home page declares one (the talks calendar) and takes two. The count
+     is READ OUT OF THE PAGE, so adding a third action to either mount
+     without widening its span fails here rather than putting that bar back
+     to stacked buttons hanging over the edge — which is exactly how the
+     candidates one was reported (owner, 2026-09-12, of the list as it will
+     look after the reveal: "I would like the the two buttons in the red
+     circle to appear in the same line ... Why not using that white area on
+     the left of those buttons?" — the white area being the empty track the
+     cell was not allowed to reach).
+
+     And it is pinned BOTH WAYS: a mount declaring no action must have no
+     rule of its own, or the n = 1 case would stop being the `auto / -1`
+     above and become a number somebody has to maintain. */
+  const index = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+  const declared = (html, id) => {
+    const at = html.indexOf(`mount: '#${id}'`);
+    if (at < 0) return null;
+    const opens = html.indexOf('actions: [', at);
+    /* the next mount, if any, bounds the search: a page carries several */
+    const next = html.indexOf("mount: '#", at + 10);
+    if (opens < 0 || (next > 0 && opens > next)) return 0;
+    return (html.slice(opens, html.indexOf('],', opens)).match(/\.action\(/g) || []).length;
+  };
+  for (const [id, html, where] of [['oa-jobs', jobs, 'jobs.html'],
+                                   ['oa-candidates', index, 'index.html'],
+                                   ['oa-jobs-recent', index, 'index.html'],
+                                   ['oa-placements', index, 'index.html']]) {
+    const n = declared(html, id);
+    ok(n !== null, `filter bar: ${where} mounts #${id}`);
+    const rule = new RegExp(
+      'body\\.v3 #' + id + ' \\.oa-filter-actions \\{ grid-column: span (\\d+) / -1; \\}');
+    const m = v3css.match(rule);
+    if (n === 0) {
+      ok(!m, `filter bar: #${id} declares no action, so its cell keeps the shared auto / -1 (one button, one track)`);
+      continue;
+    }
+    ok(m && Number(m[1]) === n + 1,
+      `filter bar: #${id} declares ${n} action(s), so its cell takes ${n + 1} tracks — ` +
+      `one per button, Clear included (rule says ${m ? m[1] : 'none'})`);
+  }
+  /* the shared rule the n = 1 case falls through to, and the breakpoint the
+     per-bar spans live behind: below it a phone stacks them full width */
+  ok(/body\.v3 \.oa-filter-actions \{[\s\S]{0,200}?grid-column: auto \/ -1;/.test(v3css),
+    'filter bar: a bar with no action still spans its one last track');
+  ok(/@media \(min-width: 641px\) \{\s*\n\s*body\.v3 #oa-jobs [\s\S]{0,400}?body\.v3 #oa-candidates [^\n]*\n\s*\}/.test(v3css),
+    'filter bar: both spans are behind the desktop breakpoint, so the phone still stacks them');
 }
 
 /* ------------------------------------------------- WHO SPONSORED THE SITE
