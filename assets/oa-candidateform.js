@@ -557,7 +557,7 @@
     if (!FILE_TYPES[f.type] && !named) {
       return 'Please attach a PDF or Word file (.pdf, .doc or .docx).';
     }
-    if (f.size > FILE_MAX_BYTES) {
+    if (f.size >= FILE_MAX_BYTES) { /* >=, not >: _storage.rules refuses `size < 15*1024*1024`, so a file of exactly that many bytes passed here, uploaded in full and was refused with an opaque error — the case this mirror exists to prevent. */
       return 'That file is ' + (f.size / 1048576).toFixed(1) +
         ' MB; the limit is 15 MB. A ' + what + ' rarely needs more than one or two.';
     }

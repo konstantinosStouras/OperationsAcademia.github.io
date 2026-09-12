@@ -272,7 +272,10 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   color: var(--err);
   border-color: var(--err);
 }
-.v3-btn.danger:hover { background-color: var(--err); color: #fff; border-color: var(--err); }
+/* --on-brand, not #fff: --err is a LIGHT salmon in the dark theme, so the
+   literal read 2.58:1. Every sibling rule in these files already does this;
+   this one was the outlier. */
+.v3-btn.danger:hover { background-color: var(--err); color: var(--on-brand); border-color: var(--err); }
 
 @media (hover: hover) and (pointer: fine) {
   .v3-btn:hover, body.v3 .button:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
@@ -1499,7 +1502,20 @@ body.v3 .oa-cal-btn {
   background: var(--bg-2);
   color: var(--ink-2);
 }
-body.v3 .oa-cal-btn:hover:not([disabled]) { border-color: var(--brand); color: var(--brand); }
+/* THE GENERIC RULE IS DISJOINT FROM THE ON-STATE, AND GUARDED. The trigger
+   carries BOTH classes (oa-cal-btn oa-cal-go), so this rule also matched it —
+   ungated, and not standing down while the chooser was open, at a specificity
+   one class above the on-state. It therefore won `color` over the on-state's
+   own ground and painted the label var(--brand) on var(--brand): measured
+   1.00:1 in both themes, a blank button. On a desktop that is the state the
+   pointer is in the instant after the press; on a phone the tap leaves it
+   stuck. Rule 15 in _MOBILE-STANDARDS.md, the same shape as the forum's vote
+   arrows. */
+@media (hover: hover) and (pointer: fine) {
+  body.v3 .oa-cal-btn:hover:not([disabled]):not([aria-expanded='true']) {
+    border-color: var(--brand); color: var(--brand);
+  }
+}
 body.v3 .oa-cal-go {
   border-color: var(--brand);
   color: var(--brand);
@@ -1520,7 +1536,7 @@ body.v3 .oa-cal-panel {
 }
 body.v3 .oa-cal-opt { border-radius: var(--radius); color: var(--ink-2); }
 body.v3 .oa-cal-opt b { color: var(--ink); }
-body.v3 .oa-cal-opt-note { color: var(--mut); }
+body.v3 .oa-cal-opt-note { color: var(--ink-2); }   /* see oa-list.css: --mut is under the floor on the hover wash */
 @media (hover: hover) and (pointer: fine) {
   body.v3 .oa-cal-opt:hover { background: var(--brand-soft); }
 }
@@ -1914,6 +1930,16 @@ body.v3 .oa-acct-out:hover { background: rgba(179, 65, 61, 0.09); }
 /* profile / merge cards inherit the modal card retint above */
 body.v3 .oa-orcid-chip { background: var(--bg-3); color: var(--ink); border-radius: 8px; }
 body.v3 .oa-verified { color: var(--ok); }
+/* the ORCID connect button, in the live design's own tokens. `.oa-auth-provider`
+   is already retinted above for the sign-in card; what this adds is the size
+   and the alignment that keep it from reading as the form's submit, at a
+   specificity (0,3,2) that beats `body.v3 .oa-auth-provider` (0,2,1) rather
+   than relying on being later in the file. */
+body.v3 .oa-orcid-field .oa-auth-provider.oa-orcid-connect {
+  width: auto; min-height: 42px; padding: 8px 14px; margin: 2px 0 0;
+}
+body.v3 .oa-orcid-type { color: var(--ink-2); }
+body.v3 .oa-orcid-field > .oa-opt.oa-fine { color: var(--mut); }
 body.v3 .oa-acct-other { border-top: 1px solid var(--line-soft); }
 body.v3 .oa-acct-other h4 { color: var(--ink); }
 body.v3 .oa-mergebtn {

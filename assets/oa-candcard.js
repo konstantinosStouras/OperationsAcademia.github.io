@@ -302,12 +302,21 @@
 
   /* ---------------------------------------- the talks, as the card says them
 
-     One row per day that carries details, after "Presenting at INFORMS":
-     "Talk on Monday 2 November 2026" where assets/oa-informs.js knows the
-     season's meeting (loaded on every page that draws a card; absent, the
-     bare day name), and the details in reading order: the time, the session
-     code, the room, the title. The calendar (assets/oa-talkcal.js) reads the
-     same fields; this is what a committee reads on the page. */
+     One row per day that carries details, after "Presenting at INFORMS",
+     under the STATIC label "INFORMS talk". The value leads with the day —
+     "Monday 2 November 2026" where assets/oa-informs.js knows the season's
+     meeting (loaded on every page that draws a card; absent, the bare day
+     name) — then the details in reading order: the time, the session code,
+     the room, the title. The calendar (assets/oa-talkcal.js) reads the same
+     fields; this is what a committee reads on the page.
+
+     THE LABEL IS STATIC BECAUSE THE STRIP IS MADE OF LABELS. `lockPreview`
+     in oa-list.js previews a locked card by blurring the row LABELS it would
+     have shown, on the stated contract that a label is the page's own wording
+     and never anything the row says. This was the one label on the site built
+     from row data, so a signed-out reader's card carried "Talk on Monday 2
+     November 2026" as text in the document — the candidate's INFORMS days,
+     which are one of the three things the gate withholds. */
   function talkRows(r) {
     var talks = r && r.talks;
     if (!talks || typeof talks !== 'object') return [];
@@ -322,7 +331,14 @@
       if (t.room) parts.push(t.room);
       if (t.title) parts.push('“' + t.title + '”');
       var when = meeting && root.OAInforms.dayLabel ? root.OAInforms.dayLabel(meeting, d) : d;
-      return { label: 'Talk on ' + when, value: parts.join(' · ') };
+      /* A STATIC LABEL, with the day in the VALUE. `lockPreview` blurs the
+         row LABELS a card would have shown, on the contract that a label is
+         the page's own static wording and never anything the row says — and
+         this was the one label on the site built from row data, so a locked
+         card's strip read "Talk on Monday 2 November 2026" and disclosed the
+         presenting days the row above it is withholding. The open card still
+         reads the same facts in the same order. */
+      return { label: 'INFORMS talk', value: [when].concat(parts).join(' · ') };
     });
   }
 
