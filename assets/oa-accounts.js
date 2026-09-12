@@ -2540,9 +2540,14 @@
       why: 'Lets you sign in with Google instead of your e-mail and password.' }
   ];
 
-  /** The block itself: a row per sign-in this account does not already have. */
-  function connectRowsHTML(u) {
+  /** The block's rows, and HOW MANY OF THEM ARE OFFERS \u2014 which is not the same
+      as how many rows there are, and conflating the two made the "nothing left
+      to connect" state unreachable: a connected sign-in draws a row too, so
+      `rows` is never empty once anything has landed. `offers` is what decides
+      whether this block is still asking for something. */
+  function connectRowsHTML(u, out) {
     var rows = '';
+    if (out) out.offers = 0;
     CONNECT.forEach(function (c) {
       if (hasProvider(c.provider, u)) {
         /* THE ROW STATES IT, never a message beside it. `paintConnect` replaces
@@ -2559,6 +2564,7 @@
           '. You can sign in with it.</p>';
         return;
       }
+      if (out) out.offers++;
       rows += '<p class="oa-connect-row">' +
         '<button type="button" class="oa-auth-provider oa-connect-btn" ' +
           'id="oa-connect-' + c.key + '" data-connect="' + c.provider + '">' +
@@ -2572,19 +2578,19 @@
   function paintConnect(u) {
     var host = $('#oa-verify-connect');
     if (!host) return;
-    var rows = connectRowsHTML(u);
-    if (!rows) {                       // both connected: say so and stop offering
-      host.innerHTML = '<p class="oa-connect-row is-done">' +
-        '<span class="oa-connect-tick">&#10003;</span> ' +
-        'ORCID and Gmail are both connected. You can sign in with either.</p>';
-      return;
-    }
-    host.innerHTML =
-      '<h4 class="oa-connect-h">Connect your other sign-ins <span class="oa-opt">(optional)</span></h4>' +
-      '<p class="oa-opt oa-fine">One press each. Afterwards you can sign in with any of ' +
-      'them, or with the e-mail address and password you have just chosen \u2014 and you can ' +
-      'do this later from Edit account instead.</p>' + rows +
-      '<p class="oa-auth-msg" id="oa-connect-msg" role="alert"></p>';
+    var count = {};
+    var rows = connectRowsHTML(u, count);
+    host.innerHTML = count.offers
+      ? '<h4 class="oa-connect-h">Connect your other sign-ins <span class="oa-opt">(optional)</span></h4>' +
+        '<p class="oa-opt oa-fine">One press each. Afterwards you can sign in with any of ' +
+        'them, or with the e-mail address and password you have just chosen \u2014 and you can ' +
+        'do this later from Edit account instead.</p>' + rows +
+        '<p class="oa-auth-msg" id="oa-connect-msg" role="alert"></p>'
+      /* nothing left to ask for: the rows stop being an offer and become the
+         answer, so the heading and the lede go with the offer */
+      : '<h4 class="oa-connect-h">Your sign-ins</h4>' + rows +
+        '<p class="oa-opt oa-fine">All connected. You can sign in with any of them, or with ' +
+        'the e-mail address and password you have just chosen.</p>';
     Array.prototype.forEach.call(host.querySelectorAll('[data-connect]'), function (b) {
       b.addEventListener('click', function () {
         var id = b.dataset.connect;

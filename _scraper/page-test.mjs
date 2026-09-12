@@ -11027,8 +11027,9 @@ for (const w of [320, 360, 390, 430]) {
     googleBtn: !!document.querySelector('#oa-connect-google'),
     ops: window.__fb.ops('link'),
   }));
-  ok(!both.googleBtn && /both connected/i.test(both.text),
-    `connect: pressing it connects Gmail too, and the block says so (got "${both.text.trim().slice(0, 160)}")`);
+  ok(!both.googleBtn && /All connected/i.test(both.text)
+     && /Gmail is connected/.test(both.text) && /ORCID is connected/.test(both.text),
+    `connect: pressing it connects Gmail too, and the block stops asking and says so (got "${both.text.trim().slice(0, 260)}")`);
   eq(both.ops.length, 2, 'connect: …two links in all, one per sign-in, never a repeat');
   eq(errors, [], 'registration card: no uncaught script error');
   await ctx.close();
