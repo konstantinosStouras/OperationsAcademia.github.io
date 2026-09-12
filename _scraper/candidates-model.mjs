@@ -27,7 +27,7 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, day, slug, pickList, ownerTag, keyOf, uniqueIds,
-  marketYear, isoDay, isoStamp, canonColumns,
+  marketYear, isoDay, isoStamp, canonColumns, stripEmails,
 } from './jobs-model.mjs';
 
 /* WHEN the profiles go public is decided in ONE place, assets/oa-reveal.js,
@@ -273,7 +273,60 @@ export function rowFromCandidateSubmission(doc, { now = new Date() } = {}) {
   };
   row.talks = talksFrom(doc.talks, row.informsDays);
   row.id = candidateId(row);
-  return row;
+  return stripCandidateEmails(row);
+}
+
+/**
+ * A candidate row with every address removed from its FREE TEXT — and the
+ * `email` field, where an address is the whole point, left alone.
+ *
+ * build-jobs.mjs has run `stripRowEmails` over its whole merged set since
+ * 2026-08-24, when one posting arrived carrying a contact address and every
+ * build from 03:14 committed nothing. The candidates pipeline never gained
+ * the same pass, and it needs it twice over: everything under `data/` is
+ * served by Pages to anyone who asks, and here the address can belong to a
+ * candidate who deliberately did NOT tick "show my e-mail address" — so an
+ * address typed into a position, a research area or a talk title publishes
+ * the very thing the opt-in exists to let people withhold. It would also
+ * trip the served-file guard and stop the whole site publishing, which is
+ * the failure this repository records four times.
+ *
+ * The `email` field is the one exemption, and it is by NAME rather than by
+ * shape: it is there because the candidate asked for it to be there.
+ * Applied LAST, so the exempt field is the one the opt-in put on the row,
+ * and the strip cannot be undone by a later assignment. Pure and
+ * idempotent — the marker carries no '@', so a second pass changes nothing.
+ */
+export function stripCandidateEmails(row) {
+  if (!row || typeof row !== 'object') return row;
+  const out = { ...row };
+  for (const [k, v] of Object.entries(out)) {
+    if (k === 'email' || /Url$/.test(k)) continue;
+    if (typeof v === 'string') {
+      if (v.includes('@')) out[k] = stripEmails(v);
+      continue;
+    }
+    /* researchAreas is a LIST of free text, so the scalar sweep alone would
+       walk straight past the field a candidate is likeliest to type a
+       "write to me at…" into */
+    if (Array.isArray(v) && v.some((x) => typeof x === 'string' && x.includes('@'))) {
+      out[k] = v.map((x) => (typeof x === 'string' && x.includes('@') ? stripEmails(x) : x));
+    }
+  }
+  /* the talks map is the one nested value a candidate types into */
+  if (out.talks && typeof out.talks === 'object') {
+    const talks = {};
+    for (const [d, t] of Object.entries(out.talks)) {
+      if (!t || typeof t !== 'object') { talks[d] = t; continue; }
+      const one = {};
+      for (const [k, v] of Object.entries(t)) {
+        one[k] = (typeof v === 'string' && v.includes('@')) ? stripEmails(v) : v;
+      }
+      talks[d] = one;
+    }
+    out.talks = talks;
+  }
+  return out;
 }
 
 /**

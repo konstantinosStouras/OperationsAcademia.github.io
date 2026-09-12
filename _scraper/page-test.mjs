@@ -993,8 +993,18 @@ for (const [name, expect] of [
     }
   }
 
-  /* The card the reader actually meets. Rendered from the two pure builders,
-     so every branch can be read without a Firebase session behind it. */
+  /* The card the reader actually meets, read from the LIVE module.
+
+     `page` is still on a /v2/ page from the filter checks far above, and each
+     archive keeps its OWN frozen assets by the rule the three trees are held
+     to — so evaluating there reads a copy of this file from before whatever is
+     under test. The merge half above never noticed, because that region is
+     pinned byte-identical across the two copies; the card is not, and until
+     2026-09-12 every assertion here was quietly answered by the archive. The
+     block therefore names its own page, and asserts which one it got. */
+  await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.pure));
+
   const CARD = await page.evaluate(() => {
     const p = window.OAAccounts.pure;
     const host = document.createElement('div');
@@ -1010,6 +1020,7 @@ for (const [name, expect] of [
         input: !!host.querySelector('input[name="orcid"]'),
         value: (host.querySelector('input[name="orcid"]') || {}).value,
         linkOrcid: !!host.querySelector('#oa-link-orcid'),
+        connect: !!host.querySelector('#oa-orcid-connect'),
         linkGoogle: !!host.querySelector('#oa-link-google'),
         merge: !!host.querySelector('#oa-merge-open'),
         text: host.textContent.replace(/\s+/g, ' ').trim(),
@@ -1025,13 +1036,22 @@ for (const [name, expect] of [
       typedField: read(p.orcidFieldHTML({ orcid: iD })),
       emptyField: read(p.orcidFieldHTML({})),
       escaped: read(p.orcidFieldHTML({ orcid: '"><img src=x onerror=alert(1)>' })),
+      /* the field drawn for each account shape: a password account can connect,
+         an account already signing in with ORCID cannot (linkWithPopup would
+         only answer provider-already-linked) */
+      fieldGoogle: read(p.orcidFieldHTML({}, google)),
+      fieldOrcid: read(p.orcidFieldHTML({ orcid: iD }, orcidOnly)),
       googleNoOrcid: read(p.otherAccountsHTML({}, google)),
       googleWithOrcid: read(p.otherAccountsHTML({ orcid: iD }, google)),
       orcidOnly: read(p.otherAccountsHTML({ orcid: iD, orcidVerified: true }, orcidOnly)),
       bothLinked: read(p.otherAccountsHTML({ orcid: iD }, {
         providerData: [{ providerId: 'google.com' }, { providerId: 'oidc.orcid' }] })),
+      where: location.pathname,
     };
   });
+
+  ok(!/\/v[12]\//.test(CARD.where),
+    'the card under test is the live one, never an archive\u2019s frozen copy of this module');
 
   ok(CARD.verifiedField.chip && CARD.verifiedField.verified && !CARD.verifiedField.input,
     'an iD ORCID vouched for is shown as a verified chip, not an editable field');
@@ -1039,14 +1059,26 @@ for (const [name, expect] of [
     'an iD the reader typed stays editable, so it can be corrected or cleared');
   ok(CARD.emptyField.input && !CARD.emptyField.value,
     'and an account without one is offered an empty field');
+  /* Owner, 2026-09-12: "here users dont know their ORCID. Instead, have a
+     button to connect it for sure and directly." Sixteen digits is a question
+     most readers cannot answer from memory, so the field leads with the press
+     that answers it for them — and the box stays, because a typed iD is still
+     a real route and the only way to correct or clear one. */
+  ok(CARD.fieldGoogle.connect && CARD.fieldGoogle.input,
+    'the ORCID field offers a connect button beside the box, not a box alone');
+  ok(!CARD.fieldOrcid.connect,
+    '…and withholds it from an account that already signs in with ORCID, where the link would only be refused');
+  ok(!CARD.verifiedField.connect,
+    '…and from a verified iD, which is a chip rather than a question');
   ok(!/onerror=/.test(CARD.escaped.html) || /&quot;|&lt;/.test(CARD.escaped.html),
     'a stored value is escaped into the field, never interpolated as markup');
   ok(!CARD.escaped.html.includes('<img'), 'markup in a stored iD cannot reach the page');
 
   // the whole point of the linking rows: offer only what is still missing
   ok(!CARD.googleNoOrcid.linkGoogle, 'a Google account is not offered Google again');
-  ok(!CARD.googleNoOrcid.linkOrcid,
-    'nor ORCID sign-in while we have no iD to attach it to');
+  ok(CARD.googleNoOrcid.linkOrcid,
+    'and IS offered ORCID even with no iD on file — connecting is how the verified iD gets onto the profile, ' +
+    'which is the whole point of the button (this read the other way round until 2026-09-12, and could not pass)');
   ok(CARD.googleWithOrcid.linkOrcid,
     'once an iD is on file, attaching ORCID sign-in is offered — that is what stops a duplicate');
   ok(CARD.orcidOnly.linkGoogle && !CARD.orcidOnly.linkOrcid,
@@ -10799,8 +10831,18 @@ for (const w of [320, 360, 390, 430]) {
     'registration card: the website is still optional and still says so, so the card distinguishes the two kinds');
   ok(card.orcidReq === false,
     'registration card: the ORCID iD is still genuinely optional; the wording is a recommendation, not a rule');
-  eq(card.orcidLabel, 'ORCID iD (highly recommended but optional)',
-    'registration card: …and it says it is highly recommended');
+  ok((card.orcidLabel || '').startsWith('ORCID iD (highly recommended but optional)'),
+    `registration card: …and it says it is highly recommended (got "${card.orcidLabel}")`);
+  /* THE CARD THAT CANNOT LINK SAYS WHERE THE BUTTON IS. Owner, 2026-09-12:
+     "here users dont know their ORCID. Instead, have a button to connect it
+     for sure and directly." On this card the account does not exist yet, so
+     linkWithPopup has nothing to attach to and a sign-in popup here would
+     make an ORCID ACCOUNT rather than fill the box in — so it points at the
+     ORCID pill below, which creates the account with the iD already verified,
+     and at Edit account, which carries the real button. */
+  ok(/Do not know it\?/.test(card.orcidLabel || '')
+     && /ORCID button below/.test(card.orcidLabel || ''),
+    'registration card: …and tells a reader who does not know their iD where the button is');
 
   /* a box holding only spaces: the browser lets it through, the guard does not */
   await q.fill('#oa-auth-form [name="firstName"]', 'Ada');
@@ -11375,11 +11417,20 @@ for (const w of [320, 360, 390, 430]) {
       await q.waitForTimeout(250);
       const rows = await q.$$eval('#oa-candidates #job-tc-ada .oa-kv tr', (trs) =>
         trs.map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent]));
-      const talk = rows.find((r) => /^Talk on Monday/.test(r[0]));
-      eq(talk && talk[0], 'Talk on Monday 2 November 2026', 'talks calendar: the card names the talk\'s day with its date');
-      eq(talk && talk[1], '10:45 · session MB12 · Moscone Center, Room 2004 · “Queues and prices”',
-        'talks calendar: …and its time, session, room and title');
-      eq(rows.findIndex((r) => /^Talk on/.test(r[0])), rows.findIndex((r) => r[0] === 'Presenting at INFORMS') + 1,
+      /* A STATIC LABEL WITH THE DAY IN THE VALUE. `lockPreview` builds a
+         locked card's blurred strip out of row LABELS, on the contract that a
+         label is the page's own wording — so 'Talk on <day>' was the one label
+         on the site made from row data, and it disclosed the presenting days
+         the gate withholds. The open card reads the same facts in the same
+         order, which is what these three lines measure. */
+      const talk = rows.find((r) => r[0] === 'INFORMS talk');
+      eq(talk && talk[0], 'INFORMS talk', 'talks calendar: the card draws a talk row');
+      eq(talk && talk[1],
+        'Monday 2 November 2026 · 10:45 · session MB12 · Moscone Center, Room 2004 · “Queues and prices”',
+        'talks calendar: …naming the day with its date, then the time, session, room and title');
+      ok(!rows.some((r) => /Monday|Tuesday|Sunday|Wednesday/.test(r[0])),
+        'talks calendar: …and no row LABEL names a day, so a locked card’s strip of labels cannot disclose one');
+      eq(rows.findIndex((r) => r[0] === 'INFORMS talk'), rows.findIndex((r) => r[0] === 'Presenting at INFORMS') + 1,
         'talks calendar: right after the days row');
 
       const dl = q.waitForEvent('download', { timeout: 30000 });
@@ -11458,19 +11509,23 @@ for (const w of [320, 360, 390, 430]) {
     await q.fill('#f-talk-monday-session', 'MB12');
     await q.fill('#f-talk-monday-room', 'Room 2004');
     await q.fill('#f-talk-monday-title', 'Queues and prices');
-    await q.waitForFunction(() => [...document.querySelectorAll('#oa-cand-preview .oa-kv th')]
-      .some((th) => /^Talk on Monday/.test(th.textContent)), null, { timeout: 8000 });
+    /* the row's LABEL is static and the DAY is in the value — the blurred
+       strip of a locked card is made of labels, so a label built from the row
+       disclosed the candidate's INFORMS days */
+    await q.waitForFunction(() => [...document.querySelectorAll('#oa-cand-preview .oa-kv tr')]
+      .some((tr) => tr.querySelector('th').textContent === 'INFORMS talk'
+        && /^Monday/.test(tr.querySelector('td').textContent)), null, { timeout: 8000 });
     const previewed = await q.$$eval('#oa-cand-preview .oa-kv tr', (trs) => trs
       .map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent])
-      .find((r) => /^Talk on Monday/.test(r[0])));
-    eq(previewed[1], '10:45 · session MB12 · Room 2004 · “Queues and prices”',
+      .find((r) => r[0] === 'INFORMS talk'));
+    eq(previewed[1], 'Monday 2 November 2026 · 10:45 · session MB12 · Room 2004 · “Queues and prices”',
       'talk form: the live preview draws the talk row as the list will');
     await q.uncheck('input[name="informsDays"][value="Monday"]');
     await q.waitForTimeout(250);
     const closed = await q.evaluate(() => ({
       hidden: document.getElementById('f-talk-monday').hidden,
       kept: document.getElementById('f-talk-monday-session').value,
-      row: [...document.querySelectorAll('#oa-cand-preview .oa-kv th')].some((th) => /^Talk on/.test(th.textContent)) }));
+      row: [...document.querySelectorAll('#oa-cand-preview .oa-kv th')].some((th) => th.textContent === 'INFORMS talk') }));
     eq([closed.hidden, closed.kept, closed.row], [true, 'MB12', false],
       'talk form: unticking the day hides its block and takes the talk out of the preview, keeping what was typed');
     await q.check('input[name="informsDays"][value="Monday"]');
