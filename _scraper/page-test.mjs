@@ -10793,7 +10793,18 @@ for (const w of [320, 360, 390, 430]) {
       })(),
       siteLabel: lab('website'), siteReq: req('website'),
       firstReq: req('firstName'), lastReq: req('lastName'),
-      orcidLabel: lab('orcid'), orcidReq: req('orcid'),
+      /* THE ORCID ROW IS NO LONGER A LABEL AROUND A BOX (owner, 2026-09-12:
+         nobody knows their own iD). It is a `.oa-orcid-connect` block whose
+         label sits on a `.oa-flabel` span over a Connect button, so the
+         wording is read off the row rather than off a `<label>`, and what
+         "still optional" means is that there is no box to compel and no
+         `required` anywhere in the row. */
+      orcidRow: (() => {
+        const r = document.querySelector('#oa-auth-form .oa-orcid-connect');
+        return r ? r.querySelector('.oa-flabel').textContent.trim() : null;
+      })(),
+      orcidBox: !!document.querySelector('#oa-auth-form [name="orcid"]'),
+      orcidReq: !!document.querySelector('#oa-auth-form .oa-orcid-connect [required]'),
     };
   });
   ok(card.affReq === true, 'registration card: the affiliation box is required');
@@ -10805,10 +10816,11 @@ for (const w of [320, 360, 390, 430]) {
     'registration card: the two name boxes are required too, so the affiliation joins an existing rule');
   ok(card.siteReq === false && /\(optional\)/.test(card.siteLabel || ''),
     'registration card: the website is still optional and still says so, so the card distinguishes the two kinds');
-  ok(card.orcidReq === false,
-    'registration card: the ORCID iD is still genuinely optional; the wording is a recommendation, not a rule');
-  eq(card.orcidLabel, 'ORCID iD (highly recommended but optional)',
-    'registration card: …and it says it is highly recommended');
+  ok(card.orcidReq === false && card.orcidBox === false,
+    'registration card: the ORCID iD is still genuinely optional — the wording is a recommendation, ' +
+    'not a rule — and there is no sixteen-digit box to fill in at all');
+  eq(card.orcidRow, 'ORCID iD (highly recommended but optional)',
+    'registration card: …and the row still says it is highly recommended');
 
   /* a box holding only spaces: the browser lets it through, the guard does not */
   await q.fill('#oa-auth-form [name="firstName"]', 'Ada');
