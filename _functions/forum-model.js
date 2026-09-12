@@ -211,7 +211,14 @@
       slug() before asking; the function asks about what it was actually sent. */
   function tagsOk(tags) {
     if (!Array.isArray(tags) || tags.length < TAG_MIN || tags.length > TAG_MAX) return false;
-    var seen = {};
+    /* A BARE OBJECT INHERITS Object.prototype, so `seen[t]` answers for a
+       tag nobody has written yet: `constructor` is a perfectly good slug
+       ([a-z0-9-]{2,24}, which tagOk accepts) and read as ALREADY SEEN, so
+       a question tagged with it was refused with "Choose one to five tags
+       of letters, digits and hyphens" -- a message about its shape, which
+       was fine. A null-prototype object has no inherited names to collide
+       with. */
+    var seen = Object.create(null);
     for (var i = 0; i < tags.length; i++) {
       if (!tagOk(tags[i]) || seen[tags[i]]) return false;
       seen[tags[i]] = true;

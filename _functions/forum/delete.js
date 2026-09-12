@@ -226,6 +226,14 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
         hidden: true,
         title: '',
         excerpt: '',
+        /* AND THE TICK GOES WITH THE ANSWERS IT NAMED. The sweep below
+           turns every answer into a tombstone, so a thread left with
+           `accepted` still naming one is a document saying an answer that
+           no longer has any words is the accepted answer. Deleting the
+           ACCEPTED answer on its own already unticks (see the untick
+           below); a question going and taking the whole thread with it did
+           not, because that path never touches the field. */
+        accepted: '',
       };
       /* @end */
       tx.update(threadRef, gonePatch);

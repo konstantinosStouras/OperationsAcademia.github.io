@@ -91,7 +91,13 @@
       url = url.slice(0, -1);
       trail++;
     }
-    if (!url || /^www\.$/i.test(url) || /^https?:\/\/$/i.test(url)) return null;
+    /* `www` with nothing after it is not an address, and it used to become
+       a RELATIVE one. The trailing-punctuation loop above strips the dot
+       too (it is itself in TRAIL), so "visit www.!" left `www`, which this
+       guard -- testing for the exact string "www." -- let through; the
+       /^www\./ test below then failed as well, so no scheme was added and
+       the page drew <a href="www">, a link to /www on this very site. */
+    if (!url || /^www\.?$/i.test(url) || /^https?:\/\/$/i.test(url)) return null;
     return { text: url, href: /^www\./i.test(url) ? 'https://' + url : url, end: i + url.length };
   }
 
@@ -111,7 +117,27 @@
     var label = s.slice(i + 1, j);
     if (!label.replace(/\s+/g, '')) return null;
     var k = j + 2;
-    var close = s.indexOf(')', k);
+    /* THE ADDRESS MAY CONTAIN A BALANCED PAIR OF BRACKETS, and ending it at
+       the FIRST ')' truncated every one that does. Wikipedia disambiguates
+       with them, and they are ordinary in DOIs and in conference pages:
+       `[the paper](https://en.wikipedia.org/wiki/Newsvendor_model_(economics))`
+       published as a link to `..._model_(economics` -- which 404s -- with a
+       stray ')' left beside it as text. The BARE form of the same address
+       was already handled (urlAt counts its brackets); only the bracketed
+       form was not. Counting depth here is that same rule, in the place
+       that needed it. A blank line still ends the search, so an unclosed
+       '(' cannot run away to the end of a long body. */
+    var close = -1;
+    var par = 0;
+    for (var p = k; p < s.length; p++) {
+      var ch = s.charAt(p);
+      if (ch === '\n' && s.charAt(p + 1) === '\n') break;
+      if (ch === '(') par++;
+      else if (ch === ')') {
+        if (par === 0) { close = p; break; }
+        par--;
+      }
+    }
     if (close === -1) return null;
     var url = s.slice(k, close).trim();
     if (!url || /\s/.test(url) || !/^(https?:\/\/|www\.)\S+$/i.test(url)) return null;
@@ -297,9 +323,32 @@
     return col;
   }
 
+  /** How deep a quote or a list may nest before the marker is read as
+      ordinary text.
+
+      A BLOCKQUOTE LEVEL COSTS ONE CHARACTER AND ONE STACK FRAME, which is
+      the whole of the bug this cap exists for: blocks() recurses once per
+      '>' with nothing bounding it, so a body of '>' characters at
+      BOUNDS.body (4000, exactly what the compose box's own maxlength
+      allows) threw `RangeError: Maximum call stack size exceeded` out of
+      parse() -- and therefore out of plain(), html(), hasMarkup() AND
+      checkRead(), none of which any caller wraps. On the page that is an
+      exception out of the live guard on every keystroke; in the Cloud
+      Functions it is an uncaught throw out of textField(), which is
+      reached before the transaction, so forumPost answers `internal`
+      rather than a worded refusal. In a browser, where the stack is
+      already deep at the input handler, it gives out well below 4000.
+
+      Nothing real nests this far: twenty-four levels of quoting is an
+      e-mail chain forwarded two dozen times. Past the cap the marker is
+      simply text, so the words are still shown and nothing is lost. */
+  var NEST_MAX = 24;
+
   /** The block tree of a text: paragraphs, headings, quotes, lists, code
-      blocks and rules, in the order they are written. */
-  function blocks(lines) {
+      blocks and rules, in the order they are written. `depth` is how many
+      quotes and list items this call already sits inside. */
+  function blocks(lines, depth) {
+    var d = depth || 0;
     var out = [];
     var i = 0;
     var n = lines.length;
@@ -344,7 +393,7 @@
         i++;
         continue;
       }
-      if (QUOTE_RX.test(line)) {
+      if (QUOTE_RX.test(line) && d < NEST_MAX) {
         var inner = [];
         var lazy = false;
         while (i < n) {
@@ -355,10 +404,10 @@
           if (lazy && !isBlank(lines[i]) && !startsBlock(lines[i])) { inner.push(lines[i]); i++; continue; }
           break;
         }
-        out.push({ t: 'quote', b: blocks(inner) });
+        out.push({ t: 'quote', b: blocks(inner, d + 1) });
         continue;
       }
-      var item = itemOf(line);
+      var item = d < NEST_MAX ? itemOf(line) : null;
       if (item) {
         var list = { t: item.ordered ? 'ol' : 'ul', start: item.start, items: [], loose: false };
         var kind = item.kind;
@@ -393,7 +442,7 @@
             if (!isBlank(itemLines[itemLines.length - 1])) { itemLines.push(l2.replace(/^\s+/, '')); i++; continue; }
             break;
           }
-          list.items.push(blocks(itemLines));
+          list.items.push(blocks(itemLines, d + 1));
           if (sawBlank && (i >= n || !itemOf(lines[i]))) break;
         }
         out.push(list);
@@ -501,15 +550,36 @@
     return blocksText(parse(text));
   }
 
-  /** What a guard refuses in the text AS TYPED or AS READ: the first reason
-      `check` gives for either. A contact detail split by a mark passes the
-      guard on the bytes and reads whole on the page (jane**@**mit.edu is
-      jane@mit.edu once drawn, and once excerpted), so every text a member
-      sends is checked both ways, here, by the functions, the page and the
-      shim alike. */
+  /** What a guard refuses in the text AS TYPED, AS READ, or AS PUBLISHED:
+      the first reason `check` gives for any of the three. A contact detail
+      split by a mark passes the guard on the bytes and reads whole on the
+      page (jane**@**mit.edu is jane@mit.edu once drawn, and once
+      excerpted), so every text a member sends is checked every way, here,
+      by the functions, the page and the shim alike.
+
+      THE THIRD READING IS THE WHITESPACE-COLLAPSED ONE, and leaving it out
+      was a hole of exactly the shape the other two close. `excerptOf` in
+      member.js stores `flatten(plain(body))` on the thread head, and a
+      browser renders a run of whitespace as one space -- so a detail split
+      by TWO SPACES, a tab or a line break was whole the moment it was
+      drawn, while passing here on the bytes and on plain(). Measured:
+      "jane  @  mit.edu" was clean to the guard as typed and as read, and
+      published as "jane @ mit.edu" in the excerpt on the question card, in
+      both rooms, to every admitted member.
+
+      post.js already flattens BOTH SIDES for the quote passage test and
+      its comment records why ("a DOM selection has already collapsed the
+      spaces"); the same collapse on the way OUT had no guard behind it.
+      One helper, so the page warns while the words are being typed rather
+      than the function refusing them at Post. */
+  function flattenRead(v) {
+    return String(v === null || v === undefined ? '' : v).replace(/\s+/g, ' ').trim();
+  }
+
   function checkRead(text, check) {
     var s = String(text === null || text === undefined ? '' : text);
-    return check(s) || check(plain(s));
+    var read = plain(s);
+    return check(s) || check(read) || check(flattenRead(s)) || check(flattenRead(read));
   }
 
   /** Does the text carry any of the markup at all? What the page uses to
