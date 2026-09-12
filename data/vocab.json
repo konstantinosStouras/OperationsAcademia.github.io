@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-04T21:04:08.649Z",
+ "generated": "2026-09-12T13:35:43.110Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -3702,7 +3702,7 @@
    "n": 1
   },
   {
-   "v": "Management Science/ Department. Management and Technology",
+   "v": "Management Science/ Department Management and Technology",
    "n": 1
   },
   {
@@ -3906,7 +3906,7 @@
    "n": 1
   },
   {
-   "v": "Platform Operations. and Data-Driven Market Design",
+   "v": "Platform Operations and Data-Driven Market Design",
    "n": 1
   },
   {
@@ -5014,11 +5014,11 @@
   "Bocconi": {
    "schools": [],
    "units": [
-    "Management Science/ Department. Management and Technology"
+    "Management Science/ Department Management and Technology"
    ],
    "bySchool": {
     "": [
-     "Management Science/ Department. Management and Technology"
+     "Management Science/ Department Management and Technology"
     ]
    }
   },
@@ -5726,12 +5726,12 @@
    "schools": [],
    "units": [
     "OR/OM/CS/DS/ML/AI",
-    "Platform Operations. and Data-Driven Market Design"
+    "Platform Operations and Data-Driven Market Design"
    ],
    "bySchool": {
     "": [
      "OR/OM/CS/DS/ML/AI",
-     "Platform Operations. and Data-Driven Market Design"
+     "Platform Operations and Data-Driven Market Design"
     ]
    }
   },

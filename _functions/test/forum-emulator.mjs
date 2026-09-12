@@ -545,24 +545,37 @@ async function main() {
   const lh2Answer = lh2Posts.docs.find((d) => Number(d.data().n) !== 1);
   ok(lh2Answer && lh2Answer.data().hiddenBy === 'admin', 'saying the maintainer removed it');
 
-  /* A QUOTE IS A TEXT A MEMBER SENDS, so the guard runs on it. "It is a
-     passage of a post that already passed the guard" was the argument for
-     not doing so, and the flattening the passage test uses is what makes it
-     false: a body with DOUBLE spaces between the groups of a telephone
-     number passes the guard (nine digits joined by at most one separator
-     each) and the single-spaced quote of it does not, while flattened they
-     are the same passage. Single-spaced is exactly what a browser hands
-     over, because a DOM selection has already collapsed the spaces. */
+  /* A BODY IS GUARDED AS TYPED, AS READ, AND AS PUBLISHED. This block used
+     to POST a body carrying "617  253  1000" with doubled spaces and assert
+     it went through, because the guard's phone rule wants nine digits joined
+     by at most ONE separator each and two spaces break the run. That was the
+     hole rather than the rule: excerptOf stores flatten(plain(body)) on the
+     thread head, and a browser renders a run of whitespace as one space, so
+     the card in the list published "617 253 1000" -- which the guard itself
+     refuses -- to every admitted member of the room. checkRead now reads the
+     flattened form too, so the body is refused where it is typed. */
   await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
   const spaced = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A question with a spaced number in it', tags: ['waiting'], body: 'You can reach the department on  617  253  1000  during office hours.' });
-  ok(!spaced.error, 'a body the guard lets through, with doubled spaces', JSON.stringify(spaced));
+  ok(status(spaced) === 'INVALID_ARGUMENT' && reason(spaced) === 'phone',
+    'a number spaced out to slip past the guard is refused, since the excerpt would publish it whole',
+    JSON.stringify(spaced));
+
+  /* A QUOTE IS A TEXT A MEMBER SENDS, so the guard runs on it too, and the
+     passage test is not an argument for skipping it: a PASSAGE of a clean
+     body can be dirty on its own. A DOI is the case that shows it -- the
+     whole identifier is an identifier and passes, while the bare digit run
+     out of its tail is nine digits split twice, which is a telephone
+     number by the same rule. */
   await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
-  const smuggle = await call('forumPost', tokens.adm, { room: 'candidates', tid: spaced.result.tid, body: 'Thank you, that is what I needed.', quote: { n: 1, text: '617 253 1000' } });
+  const cited = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A question citing a paper by its DOI', tags: ['waiting'], body: 'The proof is in 10.1016/j.ejor.2016.07.045, see Proposition 3.' });
+  ok(!cited.error, 'a body citing a DOI posts, since a DOI is not a number to dial', JSON.stringify(cited));
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
+  const smuggle = await call('forumPost', tokens.adm, { room: 'candidates', tid: cited.result.tid, body: 'Thank you, that is what I needed.', quote: { n: 1, text: '2016.07.045' } });
   ok(status(smuggle) === 'INVALID_ARGUMENT' && reason(smuggle) === 'phone',
-    'the single-spaced quote of it is refused, as the guard refuses the same words in a body',
+    'a passage of it that is a bare digit run is refused, as the guard refuses the same words in a body',
     JSON.stringify(smuggle));
   await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0, dayThreads: 0, dayPosts: 0 }, { merge: true }))));
-  const plainQuote = await call('forumPost', tokens.adm, { room: 'candidates', tid: spaced.result.tid, body: 'Noted, thank you.', quote: { n: 1, text: 'during office hours' } });
+  const plainQuote = await call('forumPost', tokens.adm, { room: 'candidates', tid: cited.result.tid, body: 'Noted, thank you.', quote: { n: 1, text: 'see Proposition 3' } });
   ok(!plainQuote.error, 'while an ordinary passage of the same post still quotes', JSON.stringify(plainQuote));
 
   /* THE MAINTAINER REMOVING A QUESTION TAKES THE ANSWERS' WORDS WITH IT.
