@@ -6200,13 +6200,97 @@ to key on matches an earlier block): the served-file guard must name
 one-word edit turns the pin red instead of the site silent, which is the whole
 point — verified by putting the defect back.
 
-**What is NOT fixed here, deliberately.** The fused names themselves are the
-maintainer's call: an alias merging `Naveen Jindal School of Management/
-Healthcare Management Area` into the school it names is a judgement about a
-real school's name, and the two San Diego rows cannot even be read from this
-environment (they are `jobSubmissions` documents). They are named in the run
-log now rather than stopping the site, which is the state this whole section
-exists to reach.
+**What was NOT fixed in that change** was the three fused names themselves,
+on the reading that they were a judgement about what a real school is called
+and that the rows could not be read from this environment anyway. Both halves
+expired the moment the build ran: the rows published, so they can be read, and
+the site's own vocabulary already answers both. They are settled in the next
+section.
+
+### …and the alias that settles it cannot be pushed on its own
+
+The build published eight days of held-back postings in one go on 2026-09-12,
+and three of them carry a school field that names two things:
+
+    2026-the-university-of-texas-at-dallas-20251021
+      school: "Naveen Jindal School of Management/Healthcare Management Area"
+    2026-university-of-san-diego-20251017   school: "Knauss School of Business
+    2026-university-of-san-diego-20250918            at the University of San Diego"
+
+Neither is a judgement in the end, because the site had already made both:
+`data/vocab.json` carries **Healthcare Management** as a department of the
+Jindal school, and **Knauss School of Business** is in `SCHOOL_LIST` under its
+own name. So the Dallas value is a join (`FUSED_SCHOOLS`, which keeps the
+department rather than throwing it away, unlike the slash pair beside Purdue's
+in `SCOPED_SCHOOL_ALIASES`, whose two halves are one school renamed) and the
+San Diego value is the campus note its own table's rule already names
+(`SCOPED_SCHOOL_ALIASES`). The near-duplicate sweep and the fused-name sweep
+both go quiet, and `data/directory.json` loses a duplicate row (869 to 868)
+while gaining a real department (798 to 799).
+
+**PUSHING THE ALIAS ALONE WOULD HAVE STOPPED THE SITE PUBLISHING**, which is
+the trap worth keeping, because the remedy this file prescribes everywhere —
+*add an alias, never hand-edit `data/`* — reads as though the alias were the
+whole of it. It is not, and the reason is the ORDER the build runs in:
+
+    - name: Offline checks          node _scraper/selftest.mjs --publishing
+    - name: Publish everything…     node _scraper/build-all.mjs
+
+The gate runs against the **committed** tree, before the build has healed
+anything. An alias makes the committed rows non-canonical by definition, so
+that first step goes red, the build stops, and nothing publishes at all —
+the outage this whole section is about, recreated by the tidy-up after it.
+Measured rather than reasoned: the aliases alone fail the publishing role in
+four places.
+
+**So `build-jobs.mjs` gained the `--heal-names` its two siblings already had**,
+and for the reason their own comments give. `sync-jobmarket-sheet.mjs` has one
+for `data/jobmarket.json` and `import-legacy-tables.mjs` for the three archive
+files, each re-applying the canon offline so the alias and the healed rows land
+in ONE commit. `jobs.json` was the file without one, on the reading that a
+twenty-minute build makes a heal unnecessary — it makes it unnecessary one step
+too late.
+
+It applies the build's own `healPlace` (never a private rule), then
+`withMarketYears`, then `displayOrder` — the legacy importer's three steps in
+its order; the sort matters only for an alias that renames a UNIVERSITY, since
+that is the key it ties on, but a healed file must be byte-what-the-build-would-write.
+
+**It changes SPELLINGS and not the key set**, which is the one place the three
+steps are not enough. `healPlace` DELETES an empty `school` or `unit`, and it
+is applied to the rows the build CARRIES; most rows are not carried, they are
+rebuilt from their document by `rowFromSubmission`, which writes `unit: ''`,
+and `publicRow` keeps an empty string while dropping an undefined one. Let the
+delete through and the heal takes a key off two served rows that the very next
+build puts straight back, reporting two innocent postings as edited in the
+maintainer's change e-mail — the phantom-edit mistake recorded twice already in
+this file. `keepShape` puts the key back, so the committed diff is seven lines,
+all of them names. It rebuilds `data/vocab.json` from the healed rows through the build's
+own `buildVocab` call, or the pickers would go on offering a spelling the
+postings no longer use. And it **carries the meta's `generated` rather than
+re-stamping it**: that field means "when the build last read the sources", this
+mode reads none of them, and two things believe it — the edit echo's stand-down
+(`oa-fresh.js`) and gate 1 of the account purge, which takes it as proof a build
+has run since a withdrawal. A rename is not that evidence.
+
+`data/directory.json` is the other half, merged from these rows by its own
+offline builder, so the run's last line says what to run next rather than
+leaving a second trap:
+
+    node _scraper/build-jobs.mjs --heal-names
+    node _scraper/build-directory.mjs && node _scraper/build-netmap.mjs
+
+Tests: five pins at the end of `testEveryDatasetNamesPlacesTheSameWay` — the
+mode exists, it is dispatched before any database is opened, it heals with
+`healPlace`, it carries `generated`, and the build's gate really does run
+before the build, which is the fact that makes the mode necessary and would
+otherwise be a paragraph nobody could check. Every one verified by putting the
+defect back.
+
+**What is still open, and is the maintainer's.** The University of San Diego is
+listed under both `Knauss School of Business` and `School of Business`; merging
+them is a claim that the school was renamed, which is a fact about the world
+rather than about this data, so it is left. Nothing fails on it.
 
 ## The job postings, as an Excel file
 
