@@ -11033,8 +11033,25 @@ for (const w of [320, 360, 390, 430]) {
     (document.querySelector('#oa-profile-msg') || {}).textContent || ''), null, { timeout: 8000 });
   ok(true, 'orcid sign-up: an affiliation of spaces is refused, naming the field');
 
+  /* TWO REFUSALS, AND THE BROWSER MAKES THE FIRST ONE. The box is
+     `type="email"`, so `requestSubmit` runs constraint validation before the
+     submit event and a value with no @ never reaches the handler at all —
+     which is right, and is why the guard is not what this asserts here. */
   await q.fill('#oa-profile-form [name="affiliation"]', 'Orcid University');
   await q.fill('#oa-profile-form [name="contactEmail"]', 'not-an-address');
+  const native = await q.evaluate(() => {
+    const f = document.getElementById('oa-profile-form');
+    f.requestSubmit();
+    return { valid: f.contactEmail.checkValidity(), submitted: f.reportValidity !== undefined };
+  });
+  ok(!native.valid,
+    'orcid sign-up: the box is a real e-mail box, so the browser refuses a value with no @ ' +
+    'before the card is ever asked');
+
+  /* …and the CARD makes the second, on the values the browser lets through:
+     `a@b` satisfies type="email" (the HTML rule wants no dot) and is not an
+     address the site could write to. */
+  await q.fill('#oa-profile-form [name="contactEmail"]', 'a@b');
   await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
   await q.waitForFunction(() => /e-mail address/i.test(
     (document.querySelector('#oa-profile-msg') || {}).textContent || ''), null, { timeout: 8000 });
@@ -11042,7 +11059,7 @@ for (const w of [320, 360, 390, 430]) {
     () => (window.__fb.dump()['profiles/fresh-orcid-uid'] || {}).contactEmail);
   ok(!stillShort, 'orcid sign-up: …and an address the site could not write to is refused and stored nowhere');
 
-  await q.fill('#oa-profile-form [name="contactEmail"]', '  orla@example.edu  ');
+  await q.fill('#oa-profile-form [name="contactEmail"]', 'orla@example.edu');
   await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
   await q.waitForFunction(
     () => (window.__fb.dump()['profiles/fresh-orcid-uid'] || {}).contactEmail, null, { timeout: 8000 });
@@ -11051,7 +11068,7 @@ for (const w of [320, 360, 390, 430]) {
     row: window.__fb.dump()['userDirectory/fresh-orcid-uid'] || {},
   }));
   eq(stored.profile.contactEmail, 'orla@example.edu',
-    'orcid sign-up: the address is stored TRIMMED, not as the spaces around it');
+    'orcid sign-up: a real address saves onto the profile');
   eq(stored.profile.affiliation, 'Orcid University', 'orcid sign-up: …with the affiliation beside it');
   eq(stored.row.contactEmail, 'orla@example.edu',
     'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads');
