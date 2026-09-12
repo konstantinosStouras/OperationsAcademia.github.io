@@ -147,8 +147,11 @@
   /** Every key the browser writes to `userDirectory/{uid}` — pinned against
       that rule's hasOnly() by selftest.mjs, both ways. Written by
       oa-accounts.js (syncDirectoryRow), read here. `affiliation` is the
-      profile's, carried here so the roster can say where each person is. */
-  var ROW_KEYS = ['name', 'email', 'first', 'seen', 'affiliation'];
+      profile's, carried here so the roster can say where each person is, and
+      `contactEmail` is the address the person GAVE — asked for only where
+      their sign-in shares none, and never folded into `email`, which the
+      rules pin to the account's own auth token. */
+  var ROW_KEYS = ['name', 'email', 'first', 'seen', 'affiliation', 'contactEmail'];
 
   /** Every key on a thread head — pinned against the messages rule. */
   var THREAD_KEYS = ['uid', 'lastAt', 'lastFrom', 'needsAdmin', 'userUnread'];
@@ -175,6 +178,31 @@
   var CANDIDATES_UNKNOWN = 'not known';
 
   /* ------------------------------------------------------------ pure parts */
+
+  /** THE ADDRESS THIS ROW CAN BE REACHED AT, or ''. The sign-in address
+      first, because that one the rules pin to the account's own auth token;
+      then the one the person gave, which is all an ORCID account can ever
+      have. The one definition — the column, the sort, Find and the download
+      all read it, so none of them can disagree about who is reachable. */
+  function addressOf(r) {
+    return String((r && r.email) || '').trim() ||
+      String((r && r.contactEmail) || '').trim();
+  }
+
+  /** What this row is still short of, in the order the profile card asks for
+      it. The BROWSER's twin of profileGaps in oa-accounts.js, over a roster
+      row rather than a profile — the roster has no first name of its own, so
+      it reads the name the account shows itself under, which is derived from
+      one. It exists so the count line can say how much of the roster is still
+      incomplete: the maintainer is the person who has to know whether asking
+      is working. */
+  function gapsOf(r) {
+    var out = [];
+    if (!String((r && r.name) || '').trim()) out.push('name');
+    if (!String((r && r.affiliation) || '').trim()) out.push('affiliation');
+    if (!addressOf(r)) out.push('e-mail');
+    return out;
+  }
 
   /** A CSV cell that a spreadsheet cannot be tricked into EXECUTING. Excel and
       Sheets treat a leading =, +, - or @ as a formula, and these values are
@@ -346,13 +374,26 @@
     {
       key: 'email', label: 'E-mail',
       cell: function (r) {
-        if (!r.email) return '—';
-        // The address is pinned by the rules to the account's own auth token,
-        // so it is a real address rather than something typed; it is still
-        // escaped into the href and the text.
-        return '<a href="mailto:' + esc(r.email) + '">' + esc(r.email) + '</a>';
+        var a = addressOf(r);
+        if (!a) return '—';
+        /* ONE COLUMN, TWO KINDS OF ADDRESS, AND IT SAYS WHICH. `email` is
+           pinned by the rules to the account's own auth token, so it is what
+           the account really signs in as; `contactEmail` is what the person
+           TYPED, on a card shown only where their sign-in shares no address
+           of its own (ORCID's does not). Both are a way to reach them and the
+           column would be lying by omission if it showed only the first — it
+           read "—" for every ORCID account until 2026-09-12 — and lying the
+           other way if it presented the second as a sign-in address. So: one
+           column, and the typed one carries a mark saying it is the person's
+           own word. Two columns saying overlapping things is what this file
+           avoids everywhere else. Escaped into the href and the text alike. */
+        return '<a href="mailto:' + esc(a) + '">' + esc(a) + '</a>' +
+          (r.email ? '' : '<span class="oa-u-given" title="The address this ' +
+            'person gave us. They sign in with a provider that shares none, ' +
+            'so it is their own word rather than what the account signs in ' +
+            'as.">given</span>');
       },
-      sort: function (r) { return fold(r.email); }
+      sort: function (r) { return fold(addressOf(r)); }
     },
     {
       key: 'affiliation', label: 'Affiliation',
@@ -451,8 +492,12 @@
          way "All accounts" narrows nothing at all. */
       if (state.candYear && !isCandIn(r, state.candYear)) return false;
       if (!q) return true;
-      return fold(r.name).indexOf(q) >= 0 || fold(r.email).indexOf(q) >= 0 ||
+      return fold(r.name).indexOf(q) >= 0 || fold(addressOf(r)).indexOf(q) >= 0 ||
         fold(r.affiliation).indexOf(q) >= 0 ||
+        /* "incomplete" (three letters or more) lists the accounts that still
+           owe something, so select-all under it is how they are written to
+           together — the same shape as the "candidate" needle beside it. */
+        (gapsOf(r).length && q.length >= 3 && 'incomplete'.indexOf(q) >= 0) ||
         /* "candidate" (three letters or more of it) narrows to the JM
            candidates, so select-all under it is how they are all messaged.
            Kept beside the chooser rather than replaced by it: it is what the
@@ -551,7 +596,10 @@
     var r = rowFor(uid);
     var typed = root.prompt(
       'Delete this account and everything they posted?\n\n' +
-      (r.name || '(no name)') + '\n' + (r.email || '(no address)') + '\n\n' +
+      /* The address the roster SHOWS, so the confirmation names the same
+         person the row does — an ORCID account read "(no address)" here while
+         its row printed the address it gave. */
+      (r.name || '(no name)') + '\n' + (addressOf(r) || '(no address)') + '\n\n' +
       'Their job postings, candidate profile and placement reports come off the ' +
       'site, their e-mail alerts stop, their messages and details are removed, ' +
       'and their sign-in is deleted. You can call it off while it is still ' +
@@ -641,7 +689,7 @@
       return '<tr data-uid="' + esc(r.uid) + '">' +
         '<td class="oa-u-tick"><input type="checkbox" class="oa-u-pick" ' +
           'data-uid="' + esc(r.uid) + '"' + (state.picked[r.uid] ? ' checked' : '') +
-          ' aria-label="Select ' + esc(r.name || r.email || r.uid) + '"></td>' +
+          ' aria-label="Select ' + esc(r.name || addressOf(r) || r.uid) + '"></td>' +
         tds +
         '<td class="oa-u-actions">' + actionsFor(r) + '</td>' +
         '</tr>';
@@ -683,6 +731,12 @@
         }).join('') + '</select></label>';
     }
     var marked = candidateCount();
+    /* HOW MANY ROWS STILL OWE SOMETHING, counted over the WHOLE roster rather
+       than the rows on screen, so the number does not move as the maintainer
+       types into Find — the rule the candidate counts beside it already
+       follow. It is the one number that says whether the asking is working,
+       and "incomplete" in Find lists exactly these. */
+    var short = state.rows.filter(function (r) { return gapsOf(r).length; }).length;
 
     host.innerHTML =
       '<div class="oa-u-bar">' +
@@ -696,6 +750,11 @@
              chooser above it says nothing about which market it counts. */
           (marked ? ' · ' + marked + ' JM candidate' + (marked === 1 ? '' : 's') +
             (seasonName(markYear()) ? ' for ' + esc(seasonName(markYear())) : '') : '') +
+          (short ? ' · <span class="oa-u-short" title="Accounts still missing a ' +
+            'name, an affiliation or an e-mail address. Each is asked for the ' +
+            'first time it opens the site in a browsing session; type ' +
+            'incomplete into Find to list them.">' + short +
+            ' incomplete</span>' : '') +
           '</span>' +
         '<button type="button" class="button oa-btn-ghost" id="oa-u-csv">' +
           'Download CSV</button>' +
@@ -818,7 +877,11 @@
          on screen is saying nothing at all (no pill, no count, no chooser).
          So the cell says it is not known, on every row, and the column reads
          as the state it is in rather than as a fact about anybody. */
-      return [r.name || '', r.email || '', r.affiliation || '',
+      /* The address the maintainer can actually write to, which for an ORCID
+         account is the one they gave. Raw, so a mail merge can use the
+         column; which kind it is is a fact about the account rather than
+         about the address, and the screen is where it is marked. */
+      return [r.name || '', addressOf(r), r.affiliation || '',
         r.candYears ? r.candYears.map(seasonName).join('; ') : CANDIDATES_UNKNOWN,
         day(r.first), day(r.seen), threadLabel(r.thread), r.uid];
     });
@@ -981,7 +1044,7 @@
           var items = [];
           snap.forEach(function (doc) { items.push(doc.data() || {}); });
           var row = state.rows.filter(function (r) { return r.uid === uid; })[0];
-          var who = row ? (row.name || row.email || uid) : uid;
+          var who = row ? (row.name || addressOf(row) || uid) : uid;
           host.innerHTML =
             '<h4 class="oa-aa-group-h">Conversation with ' + esc(who) + '</h4>' +
             '<ul class="oa-u-thread">' + items.map(function (m) {

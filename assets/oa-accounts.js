@@ -1070,14 +1070,95 @@
     });
   }
 
-  var PROFILE_FIELDS = ['firstName', 'lastName', 'affiliation', 'website'];
-  /* Every key this file ever writes to profiles/{uid}: the four the form
+  /* The text fields the profile form edits. `contactEmail` is drawn only
+     where the sign-in shares no address of its own, so the loop that reads
+     them back SKIPS a field the card did not render — a missing key leaves
+     the stored value alone, which is what a merge write means. */
+  var PROFILE_FIELDS = ['firstName', 'lastName', 'affiliation', 'website',
+    'contactEmail'];
+  /* Every key this file ever writes to profiles/{uid}: the five the form
      edits, the ORCID trio, and the picture with its seeded flag. The rules
      (profileKeys() in _firestore.rules) allow exactly these and no more,
      pinned both ways by the selftest, because the profile is the one write
      an account may make before its address is verified. */
   var PROFILE_DOC_KEYS = ['firstName', 'lastName', 'affiliation', 'website',
-    'orcid', 'orcidVerified', 'orcidSeeded', 'photo', 'photoSeeded'];
+    'contactEmail', 'orcid', 'orcidVerified', 'orcidSeeded', 'photo',
+    'photoSeeded'];
+
+  /* ---------------------------------------------------------------------
+     WHAT AN ACCOUNT STILL OWES — ONE DEFINITION, AND EVERYTHING READS IT.
+
+     Owner, 2026-09-12, over a screenshot of the roster showing a row with no
+     e-mail and a row with no affiliation: "during registration, no matter the
+     registration way chosen, always ask for name, affiliation and an email.
+     there are users without full data. update and merge."
+
+     Three roads reach an account and only ONE of them asked all three
+     questions. The password form asks for the name, the affiliation and the
+     address, and has since 2026-09-05. A Google or ORCID sign-up answers
+     nothing at all — the account is made by a popup with no fields — and was
+     asked on the welcome card ONCE, with the mark spent whether or not the
+     card was answered, so closing it left the gap open for ever. And ORCID's
+     OIDC carries no e-mail claim, so the site never had an address for those
+     accounts and nothing anywhere asked for one: the card SAID the provider
+     shares no address and left it at that.
+
+     So the ask is keyed on WHAT IS MISSING rather than on how the account was
+     made, which also answers the "update" half — every account already
+     registered is asked for whatever it never gave.
+
+     `name` is the FIRST name alone. The password form goes on requiring a
+     last name too, because that is a create-time rule and it can; this is the
+     test that decides whether to ask AGAIN, and a person who goes by one name
+     must not be asked for a second one every session for ever. Nagging is
+     what makes a profile prompt hated, so the rule that repeats is the
+     narrower one.
+
+     `email` is the address the site can actually reach the person at: the
+     sign-in address where there is one, else the one they typed. Never both
+     — a card with two e-mail boxes is a card asking a question it has already
+     answered. --------------------------------------------------------- */
+
+  /** The address the site can reach this account at, or '' — the sign-in
+      address first, because that one is Firebase's own word and the roster
+      rule pins it; then the one the person typed, which is all an ORCID
+      account can ever have. */
+  function contactAddress(u, p) {
+    return String((u && u.email) || '').trim() ||
+      String((p || {}).contactEmail || '').trim();
+  }
+
+  /** What is still missing, in the order the card asks for it: any of
+      'name', 'affiliation', 'email'. Empty means the account is complete. */
+  function profileGaps(u, p) {
+    p = p || {};
+    var gaps = [];
+    if (!String(p.firstName || '').trim()) gaps.push('name');
+    if (!String(p.affiliation || '').trim()) gaps.push('affiliation');
+    if (!contactAddress(u, p)) gaps.push('email');
+    return gaps;
+  }
+
+  /** How each gap is named to the reader, and joined into one sentence. */
+  var ASK_WORD = { name: 'your name', affiliation: 'your affiliation',
+    email: 'an e-mail address' };
+
+  function listWords(words) {
+    words = words.filter(Boolean);
+    if (words.length < 2) return words[0] || '';
+    return words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1];
+  }
+
+  /* A LOOSE, DELIBERATELY UNCLEVER ADDRESS TEST. It is asked of a box the
+     reader typed into, on a field nothing authorises on, so the cost of
+     refusing a legitimate address is far higher than the cost of accepting an
+     odd one: something, an @, something, a dot, something, and no spaces. The
+     browser's own type="email" check runs in front of it; this is what stops
+     a box holding only spaces, which `required` accepts — the pair the
+     affiliation and the two name fields already carry. */
+  function looksLikeEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
+  }
 
   function profileDoc(fb, uid) {
     return fb.firestore().collection(OAFB.col.profiles).doc(uid);
@@ -1122,6 +1203,12 @@
     }
     var email = String(u.email || '');
     var affiliation = String((state.profile || {}).affiliation || '').trim();
+    /* …and the address the person GAVE, where the sign-in shares none. It
+       rides beside `email` rather than in it: the rules pin `email` to
+       request.auth.token.email precisely so a roster row cannot lie about
+       what an account signs in as, and an ORCID account has no such claim to
+       pin. So the roster carries both and marks which is which. */
+    var contactEmail = String((state.profile || {}).contactEmail || '').trim();
     try { sessionStorage.setItem(latch, '1'); } catch (e) { /* private mode */ }
 
     OAFB.ready().then(function (fb) {
@@ -1142,6 +1229,7 @@
            a name and their dates, and the roster shows "—". */
         if (email) row.email = email.slice(0, 200);
         if (affiliation) row.affiliation = affiliation.slice(0, 300);
+        if (contactEmail) row.contactEmail = contactEmail.slice(0, 200);
         return ref.set(row, { merge: true });
       });
     }).catch(function () {
@@ -1199,12 +1287,25 @@
           // by the left-hand half of its e-mail address for ever.
           try {
             /* Taken FIRST and unconditionally, so the mark is spent whether or
-               not the card ends up opening: it means "this account has been
-               asked", and a second page load must not ask again. */
-            var askAff = !leaving && takeAskAffiliation(uid);
-            if (!leaving && (askAff || (!state.profile && !localStorage.getItem('oaProfileAsked:' + uid)))) {
+               not the card ends up opening. It no longer DECIDES the ask —
+               what is missing does (profileGaps above) — and what is left of
+               its job is real: it is the credential's own word that this
+               sign-in CREATED the account, which is what makes the card say
+               "Welcome" rather than reopening as "My profile". */
+            var fresh = !leaving && takeAskAffiliation(uid);
+            var greeted = !!localStorage.getItem('oaProfileAsked:' + uid);
+            var gaps = profileGaps(state.user, state.profile);
+            /* ONCE A SESSION WHILE ANYTHING IS MISSING — not once per account,
+               and not once per page. Once per ACCOUNT is what let a dismissed
+               welcome card leave a gap open for ever, which is the defect this
+               replaces; once per PAGE would be a modal on every navigation of
+               a flat multi-page site, which is the nag the old rule was
+               written to avoid. A session is the middle, and the card still
+               closes on its X, on Escape and on the backdrop: the reader is
+               asked again next time rather than trapped now. */
+            if (!leaving && gaps.length && takeSessionAsk(uid)) {
               localStorage.setItem('oaProfileAsked:' + uid, '1');
-              openProfile(true, { requireAffiliation: askAff && !(state.profile || {}).affiliation });
+              openProfile(fresh || !greeted, { require: gaps });
             }
           } catch (e) { /* private mode */ }
           return seedOrcidFromProvider();
@@ -1302,8 +1403,32 @@
     } catch (e) { return false; }
   }
 
+  /* THE REPEAT, and its bound. `sessionStorage` is per tab-session, so an
+     account that still owes something is asked when it arrives and then left
+     alone for the rest of the visit however many pages it reads. Private
+     mode throws on both calls; answering FALSE there is the safe direction —
+     a browser that cannot remember being asked would otherwise be asked on
+     every single page. */
+  var ASK_SESSION = 'oaAskProfile:';
+
+  function takeSessionAsk(uid) {
+    try {
+      if (sessionStorage.getItem(ASK_SESSION + uid)) return false;
+      sessionStorage.setItem(ASK_SESSION + uid, '1');
+      return true;
+    } catch (e) { return false; }
+  }
+
   function openProfile(firstRun, opts) {
-    var mustAff = !!(opts && opts.requireAffiliation);
+    /* WHAT THIS CARD IS COMPELLING, and nothing else compels it: `require` is
+       the caller's list (profileGaps' own answer), so every ORDINARY edit —
+       the account page's Edit profile, the header chip — passes none and the
+       card keeps its optional chips exactly as it always has. An account that
+       predates a rule must stay able to correct its name or its photograph
+       without answering a question it was never asked. */
+    var req = (opts && opts.require) || [];
+    function must(k) { return req.indexOf(k) >= 0; }
+    var mustName = must('name'), mustAff = must('affiliation'), mustMail = must('email');
     var u = state.user;
     // an unconfirmed address has nothing to edit yet: the card that opens is
     // the one that gets it confirmed
@@ -1342,11 +1467,30 @@
             '<h3 id="oa-profile-h">' + (firstRun ? 'Welcome' : 'My profile') + '</h3>' +
             '<p class="oa-modal-lede">Your name is how you appear in the header and on ' +
               'anything you post. Your affiliation is never published.</p>' +
+            /* SAID WHERE THE READER IS ANSWERING, and only when something is
+               really being asked for. A card that reopens with boxes newly
+               marked required and no word about why reads as a fault; this
+               names the gap and says who sees the answer, which is the same
+               claim the registration card and the Privacy Policy make. */
+            (req.length
+              ? '<p class="oa-modal-lede oa-profile-ask">We are missing ' +
+                  esc(listWords(req.map(function (k) { return ASK_WORD[k]; }))) +
+                  '. Please add ' + (req.length > 1 ? 'them' : 'it') +
+                  ' so the site knows who has registered &mdash; only you and the ' +
+                  'site&rsquo;s maintainer ever see ' +
+                  (mustMail ? 'your affiliation and your e-mail address' : 'it') +
+                  '.</p>'
+              : '') +
           '</div>' +
         '</div>' +
         '<form id="oa-profile-form">' +
           '<div class="oa-prow">' +
+            /* Only the FIRST name is ever compelled here, for the reason
+               profileGaps gives: this card can reopen, and a person who goes
+               by one name must not meet a box they cannot satisfy. The
+               password registration form still asks for both. */
             '<label>First name<input name="firstName" maxlength="80" autocomplete="given-name" ' +
+              (mustName ? 'required ' : '') +
               'value="' + esc(p.firstName || '') + '"></label>' +
             '<label>Last name<input name="lastName" maxlength="80" autocomplete="family-name" ' +
               'value="' + esc(p.lastName || '') + '"></label>' +
@@ -1366,17 +1510,39 @@
           '<label>Website <span class="oa-opt">(optional)</span>' +
             '<input name="website" maxlength="300" placeholder="https://…" type="url" ' +
               'value="' + esc(p.website || '') + '"></label>' +
-          '<label>E-mail' +
-            '<input value="' + esc(u.email || '') + '" disabled>' +
-            '<span class="oa-opt oa-fine">' + (u.email
-              ? 'This is the address you sign in with.'
-              : 'You sign in with ' + esc(providerSummary(u)) +
-                ', which does not share an e-mail address with us.') +
-            '</span></label>' +
+          /* ONE e-mail row, and which one depends on whether the site
+             already has an address. A sign-in address is Firebase's own word
+             and is shown as the fact it is; where the provider shares none —
+             ORCID's OIDC does not — the row becomes a BOX, because until
+             2026-09-12 those accounts were simply unreachable and the card
+             said so without ever asking. Never both: a second box beside an
+             address the site already holds is a question already answered. */
+          (u.email
+            ? '<label>E-mail' +
+                '<input value="' + esc(u.email) + '" disabled>' +
+                '<span class="oa-opt oa-fine">This is the address you sign in with.' +
+                '</span></label>'
+            : '<label>E-mail address' +
+                '<input type="email" name="contactEmail" maxlength="160" ' +
+                  (mustMail ? 'required ' : '') +
+                  'autocomplete="email" placeholder="you@university.edu" ' +
+                  'value="' + esc(p.contactEmail || '') + '">' +
+                '<span class="oa-opt oa-fine">You sign in with ' +
+                  esc(providerSummary(u)) + ', which does not share an address ' +
+                  'with us. This is how the site reaches you; it is never ' +
+                  'published, and it is not a way to sign in.</span></label>') +
+          /* …and the ORCID row is MASTER's (#173, the same owner message the
+             day before): it points at the card's own Continue-with-ORCID
+             pill, which creates the account WITH the iD, rather than arming a
+             link against an account that does not exist yet. */
           orcidFieldHTML(p, u) +
           '<div class="oa-auth-actions">' +
             '<button type="submit" class="button blue">Save profile</button>' +
-            (firstRun && !mustAff
+            /* Withheld while anything is required — answering is what the
+               card is for. The X, Escape and the backdrop still close it: a
+               modal a reader cannot leave is not a thing this site has, and
+               the once-a-session ask is what makes postponing safe. */
+            (firstRun && !req.length
               ? '<button type="button" class="oa-linkbtn" id="oa-profile-later">Not now</button>' : '') +
           '</div>' +
         '</form>' +
@@ -1392,6 +1558,7 @@
     var later = $('#oa-profile-later', wrap);
     if (later) later.addEventListener('click', close);
     wireOtherAccounts(wrap, close);
+
     var first = $('#oa-profile-form input', wrap);
     if (first) first.focus();
 
@@ -1454,18 +1621,57 @@
       e.preventDefault();
       var f = e.target, out = {};
       var msg = $('#oa-profile-msg', wrap);
-      PROFILE_FIELDS.forEach(function (k) { out[k] = String(f[k].value || '').trim().slice(0, 300); });
+      /* A field the card did not RENDER is skipped rather than read as an
+         empty string: `contactEmail` is drawn only where the sign-in shares
+         no address, and writing '' for it would blank an address the person
+         gave on a card that never showed it to them. */
+      PROFILE_FIELDS.forEach(function (k) {
+        if (!f[k]) return;
+        out[k] = String(f[k].value || '').trim().slice(0, 300);
+      });
 
       // The card's own lede says the profile is how you appear "on anything
       // you post", i.e. this field exists to be rendered as a link one day.
       // type="url" happily accepts `javascript:alert(1)` as a valid absolute
       // URL, so refuse anything we would not be willing to put in an href
       // rather than storing a stored-XSS seed for the first renderer.
+      /* THE GUARDS FOR THE THREE COMPELLED BOXES, in the order the card asks
+         them, each the pair the registration form already carries: `required`
+         refuses an EMPTY box in the browser and is perfectly satisfied by one
+         holding three spaces, which is exactly the value that would store an
+         empty answer on a field the card has just insisted on. */
+      if (mustName && !out.firstName) {
+        msg.className = 'oa-auth-msg is-err';
+        msg.textContent = 'Please give your name, so the site knows who you are.';
+        f.firstName.focus();
+        return;
+      }
+
       if (mustAff && !out.affiliation) {
         msg.className = 'oa-auth-msg is-err';
         msg.textContent = 'Please give your affiliation, the university or company you are at.';
         f.affiliation.focus();
         return;
+      }
+
+      /* Checked whenever the box holds anything, required or not — a typed
+         address the site cannot use is worse than none, because the roster
+         then lists one and writing to it bounces. */
+      if (f.contactEmail) {
+        if (mustMail && !out.contactEmail) {
+          msg.className = 'oa-auth-msg is-err';
+          msg.textContent = 'Please give an e-mail address, so the site can reach you. ' +
+            'You sign in with ' + providerSummary(u) + ', which does not share one with us.';
+          f.contactEmail.focus();
+          return;
+        }
+        if (out.contactEmail && !looksLikeEmail(out.contactEmail)) {
+          msg.className = 'oa-auth-msg is-err';
+          msg.textContent = 'That does not look like an e-mail address. ' +
+            'It reads like you@university.edu.';
+          f.contactEmail.focus();
+          return;
+        }
       }
 
       if (out.website && !/^https?:\/\//i.test(out.website)) {
@@ -1489,6 +1695,17 @@
             return;
           }
           out.orcid = iD;
+        } else if ((state.profile || {}).orcidVerified) {
+          /* AN EMPTY BOX MUST NOT WIPE A VERIFIED iD, and the welcome card is
+             where that really happens: the card is drawn before
+             seedOrcidFromProvider has landed (the ask fires between the two),
+             so an ORCID sign-up meets a typed box, its iD arrives from the
+             provider a beat later, and saving the card would then blank the
+             one thing that sign-in proved. A verified iD is shown as a chip
+             with no box at all, so the only way to reach this is that race,
+             and the answer is to leave the field alone rather than to send an
+             empty string for it. */
+          delete out.orcid;
         } else {
           out.orcid = '';
         }
@@ -1536,8 +1753,7 @@
      already signs in with ORCID: linkWithPopup would answer
      `provider-already-linked`, and seedOrcidFromProvider has filled the iD in
      already. */
-  function orcidFieldHTML(p, u) {
-    if (p.orcid && p.orcidVerified) {
+  function orcidFieldHTML(p, u) {    if (p.orcid && p.orcidVerified) {
       return '<div class="oa-field-static">' +
         '<span class="oa-flabel">ORCID iD</span>' +
         '<span class="oa-orcid-chip">' + esc(p.orcid) + '</span>' +
@@ -1562,8 +1778,7 @@
           'placeholder="0000-0002-1825-0097" value="' + esc(p.orcid || '') + '">' +
         '<span class="oa-opt oa-fine">Recording it lets us recognise you if you ever sign in ' +
           'with ORCID instead, rather than starting you a second account.</span></label>' +
-      '</div>';
-  }
+      '</div>';  }
 
   /* The account's OTHER ways in, and the way out of having two of them.
      The connect rows use the SAME provider pills as the sign-in screen
@@ -1651,8 +1866,7 @@
   /* Attach a second sign-in method to THIS account. This is the PREVENTION half
      of the duplicate problem: an account reachable by both buttons can never
      have a second one created for it. */
-  function linkProvider(id, wrap, closeProfile) {
-    var msg = $('#oa-profile-msg', wrap);
+  function linkProvider(id, wrap, closeProfile) {    var msg = $('#oa-profile-msg', wrap);
     var linked = null;
     msg.className = 'oa-auth-msg';
     msg.textContent = 'Opening the sign-in window…';
@@ -1673,8 +1887,7 @@
             state.profile = Object.assign({}, state.profile || {}, patch);
           })
           .catch(function () { /* best effort — the link itself succeeded */ });
-      });
-    }).then(function () {
+      });    }).then(function () {
       msg.className = 'oa-auth-msg is-ok';
       msg.textContent = id === 'oidc.orcid' && (state.profile || {}).orcid
         ? 'Connected — your ORCID iD is on your profile, and we can vouch for it.'
@@ -3387,7 +3600,14 @@
       orcidFieldHTML: orcidFieldHTML,
       otherAccountsHTML: otherAccountsHTML,
       ALERT_FIELDS: ALERT_FIELDS,
-      PROFILE_FIELDS: PROFILE_FIELDS
+      PROFILE_FIELDS: PROFILE_FIELDS,
+      /* WHAT AN ACCOUNT STILL OWES (owner, 2026-09-12). Pure functions of
+         (user, profile), so the browser suite can drive the rule that decides
+         whether the card opens and which boxes it compels, rather than
+         inferring it from a card it had to open first. */
+      profileGaps: profileGaps,
+      contactAddress: contactAddress,
+      looksLikeEmail: looksLikeEmail
     }
   };
 })();

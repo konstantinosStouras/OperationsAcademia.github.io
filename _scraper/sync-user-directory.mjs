@@ -145,7 +145,14 @@ export const TALLY = 'registeredUsers';
     do not name would freeze the row against its own owner — see the header.
     `affiliation` joined on 2026-09-08 (owner: "show their affiliation in
     that list"), in the same change as the rule. */
-export const ROW_KEYS = ['name', 'email', 'first', 'seen', 'affiliation'];
+export const ROW_KEYS = ['name', 'email', 'first', 'seen', 'affiliation',
+  /* The address the person GAVE, where their sign-in shares none — ORCID's
+     OIDC carries no e-mail claim, so `email` above can never hold one for
+     those accounts and the roster had no way at all to reach them (owner,
+     2026-09-12). Sixth key, with its rule, in one change: a key the rules do
+     not name is written happily by the Admin SDK and then freezes the row
+     against its own OWNER for ever, which is this file's own header trap. */
+  'contactEmail'];
 
 /** The collection the affiliation is read from. The profile is the person's
     own word about where they are and the browser mirrors it onto the roster
@@ -187,6 +194,8 @@ export function stamp(v) {
  *          key goes; unreadable means nothing is known, and what the row
  *          holds is kept — a failed read must not strip a hundred
  *          affiliations off the roster until the next morning.
+ *   contactEmail  the PROFILE's too, read the same three ways, for an account
+ *          whose sign-in shares no address of its own.
  */
 export function rowFromAuthUser(user, existing, profile) {
   const had = existing || {};
@@ -214,6 +223,15 @@ export function rowFromAuthUser(user, existing, profile) {
   const affiliation = profile === undefined
     ? String(had.affiliation || '').trim().slice(0, 300)
     : String((profile && profile.affiliation) || '').trim().slice(0, 300);
+  /* …and the contact address, by the same three-state rule: the profile's
+     word, gone when the profile has none, and KEPT when the profiles
+     collection could not be read. It is never folded into `email` above — the
+     client rule pins that one to the caller's own auth token precisely so a
+     roster row cannot lie about what an account signs in as, and this one is
+     self-reported like the name and the affiliation beside it. */
+  const contactEmail = profile === undefined
+    ? String(had.contactEmail || '').trim().slice(0, 200)
+    : String((profile && profile.contactEmail) || '').trim().slice(0, 200);
   const row = {
     name: String(had.name || user.displayName || '').slice(0, 200),
     ...(email ? { email } : {}),
@@ -223,6 +241,7 @@ export function rowFromAuthUser(user, existing, profile) {
     // never backwards
     seen: Math.max(authSeen, hadSeen),
     ...(affiliation ? { affiliation } : {}),
+    ...(contactEmail ? { contactEmail } : {}),
   };
 
   /* An account with NO address and NO name is still a person and still gets a
@@ -534,9 +553,10 @@ function selftest() {
   eq(stamp('not a date'), 0, 'and so is an unreadable one — the rules demand a number');
 
   /* --- the row ----------------------------------------------------------- */
-  const fresh = rowFromAuthUser(user(), null, { affiliation: 'MIT Sloan' });
+  const fresh = rowFromAuthUser(user(), null,
+    { affiliation: 'MIT Sloan', contactEmail: 'ada@orcid.example' });
   eq(Object.keys(fresh).sort(), ROW_KEYS.slice().sort(),
-    'a row carries EXACTLY the five keys the rules allow — one the rules do not ' +
+    'a row carries EXACTLY the keys the rules allow — one the rules do not ' +
     'name would freeze the row against its own owner');
   eq(fresh.email, 'a@b.edu', 'the address comes from Auth, which is authoritative');
   eq(fresh.first, Date.parse(JAN), 'first is the TRUE joined date, not "first seen"');
@@ -554,6 +574,21 @@ function selftest() {
     'the profile wins over what the row holds: a corrected affiliation reaches the roster');
   eq(rowFromAuthUser(user(), { ...fresh }, null), { name: fresh.name, email: fresh.email, first: fresh.first, seen: fresh.seen },
     'and a profile that has BLANKED its affiliation takes it off the row — the replace is what lets the key go');
+
+  /* --- the contact address: the same three states, and never the pinned one */
+  eq(fresh.contactEmail, 'ada@orcid.example',
+    'the contact address is the PROFILE\'s, for an account whose sign-in shares none');
+  ok(!('contactEmail' in rowFromAuthUser(user(), null, { affiliation: 'MIT Sloan' })),
+    'a profile that gave no contact address gives a row with NO such key, never an empty string');
+  ok(!('contactEmail' in rowFromAuthUser(user(), null, { contactEmail: '  ' })),
+    'and blank space is no contact address');
+  eq(rowFromAuthUser(user(), { ...fresh }, undefined), null,
+    'a profiles read that FAILED keeps the contact address the row holds and writes nothing');
+  const orcidish = rowFromAuthUser(
+    user({ email: '' }), null, { contactEmail: 'ada@orcid.example' });
+  ok(orcidish && !('email' in orcidish) && orcidish.contactEmail === 'ada@orcid.example',
+    'an ORCID account — no e-mail claim at all — gets the address it GAVE and still no `email` key: ' +
+    'the two are never folded together, because the client rule pins `email` to the auth token');
   eq(rowFromAuthUser(user(), { ...fresh }, undefined), null,
     'while a profiles read that FAILED (undefined, not null) keeps the affiliation the row holds and writes nothing');
   eq(rowFromAuthUser(user(), { ...noAff }, undefined), null,
@@ -593,7 +628,8 @@ function selftest() {
     'while an account that really has an address keeps it');
 
   /* --- the no-op, which is what makes a schedule cheap -------------------- */
-  eq(rowFromAuthUser(user(), fresh, { affiliation: 'MIT Sloan' }), null,
+  eq(rowFromAuthUser(user(), fresh,
+    { affiliation: 'MIT Sloan', contactEmail: 'ada@orcid.example' }), null,
     'an account already current costs no write');
   ok(rowFromAuthUser(user({ email: 'new@b.edu' }), fresh, { affiliation: 'MIT Sloan' }) !== null,
     'a changed address does');

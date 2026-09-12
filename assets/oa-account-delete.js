@@ -694,7 +694,7 @@
   function forgetThisDevice(uid) {
     var LOCAL = ['oa:jobdraft:v1', 'oaFreshJobs', 'oaAuthPending',
       'oaProfileAsked:' + uid];
-    var SESSION = ['oaDir:' + uid, 'oaTally:' + uid];
+    var SESSION = ['oaDir:' + uid, 'oaTally:' + uid, 'oaAskProfile:' + uid];
     LOCAL.forEach(function (k) {
       try { localStorage.removeItem(k); } catch (e) { /* private mode */ }
     });

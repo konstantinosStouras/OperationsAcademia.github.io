@@ -2119,6 +2119,33 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   background-color: var(--ok-soft, #edf7f1);
   border: 1px solid var(--ok, #2e7d5b);
 }
+/* THE ADDRESS THE PERSON GAVE, marked as theirs. An account that signs in
+   with ORCID shares no address at all, so the roster asks for one and shows
+   it here — and it must not read as the address the account signs in with,
+   which is what every other cell in this column is. Muted rather than
+   coloured: it qualifies the address beside it rather than flagging it, and
+   the ink is the token this file already holds to 4.5:1 on every surface it
+   is used on. Inline, so it sits at the end of the address on the one line
+   the cell is held to. */
+.oa-u-given,
+.oa-u-short {
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid var(--line, #dfe3e8);
+  border-radius: 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--mut, #646c78);
+  background-color: var(--bg-3, #f4f5f7);
+}
+/* …and the same mark in the count line, where it says how much of the roster
+   still owes something. No margin there: it is a word in a sentence of
+   counts, separated by the line's own middle dots. */
+.oa-u-short {
+  margin-left: 0;
+}
 /* The two buttons at the end of a row are SMALL: they are pressed once in a
    while and read a hundred times, and at the site's button size they were
    what pushed the row past the panel. Specific enough to beat v3.css's own

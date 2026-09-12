@@ -61,6 +61,34 @@
 
   (seed.docs || []).forEach(function (d) { docs[d.path] = Object.assign({}, d.data); });
 
+  /* THE PROFILE CARD ASKS FOR WHAT IS MISSING, ONCE A SESSION (owner,
+     2026-09-12), and a fresh browser context is a fresh session. The shim
+     seeds no profile for most accounts, so without this EVERY block that
+     signs somebody in would meet a modal over the thing it is measuring, and
+     a click on the page behind it is refused rather than failing with a
+     useful message. The latch says "already asked this session", which is a
+     fixture choice and not a change of rule: a block that wants the ask
+     passes `askProfile: true`, and the completeness block in page-test.mjs is
+     what measures the rule itself.
+
+     It lives HERE rather than in page-test's own helper because a dozen
+     blocks stand the shim up directly, and a default only one helper applied
+     is a default most of the suite does not have. Every account the seed
+     names is covered — the one the page opens as, the one a block is about to
+     sign in as, and the pair a merge block carries — by taking any seeded
+     value that is an object with a uid, so a new fixture needs no new name
+     here. */
+  if (!seed.askProfile) {
+    try {
+      Object.keys(seed).forEach(function (k) {
+        var v = seed[k];
+        if (v && typeof v === 'object' && typeof v.uid === 'string' && v.uid) {
+          sessionStorage.setItem('oaAskProfile:' + v.uid, '1');
+        }
+      });
+    } catch (e) { /* private mode, or no storage at all */ }
+  }
+
   /* ------------------------------------------------------------- firestore */
 
   /* `data()` answers a COPY, as the SDK does: a page that decorates what it
@@ -348,8 +376,27 @@
       app.__fire();
       return Promise.resolve();
     };
-    u.linkWithPopup = function () {
-      record('link', u.uid);
+    /* LINKING A PROVIDER, faithfully enough for the ORCID connect button
+       (owner, 2026-09-12: the iD is connected rather than typed). The real
+       SDK answers with a user whose providerData has gained the provider, and
+       an ORCID entry's `uid` IS the iD — which is the whole thing
+       `connectOrcid` reads — so a shim that merely resolved made every
+       connect look like an ORCID that sent no iD back. The provider is
+       RECORDED, so a check can say which one was asked for, and `linkFails`
+       drives the refusal branches (auth/credential-already-in-use, a popup
+       the reader closed). */
+    u.linkWithPopup = function (p) {
+      var id = (p && p.providerId) || '';
+      record('link', u.uid + (id ? ':' + id : ''));
+      if (seed.linkFails) return Promise.reject({ code: seed.linkFails });
+      if (id) {
+        u.providerData = (u.providerData || []).slice();
+        var had = u.providerData.some(function (e) { return e && e.providerId === id; });
+        if (!had) {
+          u.providerData.push({ providerId: id,
+            uid: id === 'oidc.orcid' ? (seed.orcidId || '0000-0002-1825-0097') : u.uid });
+        }
+      }
       return Promise.resolve({ user: u });
     };
     u.reauthenticateWithPopup = function () {
