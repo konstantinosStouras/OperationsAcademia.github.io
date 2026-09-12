@@ -28,7 +28,9 @@
    refused on a locked or hidden thread, on a thread whose QUESTION has been
    deleted (which is closed, however the thread head reads), and on any season
    but the one under way. Rate limits: 3 threads and 40 posts per handle per
-   UTC day, 20 s between posts.
+   UTC day, and not twice in the same UTC minute (RATE.gapMs is 60000, and
+   both stamps it is measured between are minute-truncated by R7, so the gap
+   is a whole clock minute; this line said 20 s while sixty were enforced).
 
    // step 2: ring('oa-forum-posted', {}) after a successful write, for the
    // follow digests; the payload stays empty by design.

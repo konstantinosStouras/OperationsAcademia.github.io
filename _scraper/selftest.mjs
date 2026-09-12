@@ -5486,7 +5486,7 @@ async function testUserDirectorySync() {
   } catch (e) {
     syncOut = String((e.stdout || '') + (e.stderr || ''));
   }
-  ok(/sync-user-directory selftest: \d+ checks passed/.test(syncOut),
+  ok(/sync-user-directory selftest: \d+ checks passed/.test(syncOut) && !/\bFAIL\b/.test(syncOut),
     'the roster sync\'s own selftest is green:\n' + syncOut.slice(0, 1500));
   const mod = await import('./sync-user-directory.mjs');
   const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
@@ -5875,7 +5875,7 @@ async function testAccountDeletion() {
   } catch (e) {
     purgeOut = String((e.stdout || '') + (e.stderr || ''));
   }
-  ok(/purge-accounts selftest: \d+ checks passed/.test(purgeOut),
+  ok(/purge-accounts selftest: \d+ checks passed/.test(purgeOut) && !/\bFAIL\b/.test(purgeOut),
     'the account purge\'s own selftest is green:\n' + purgeOut.slice(0, 1500));
 
   /* READ WITH THE COMMENTS STRIPPED. Both of these files explain the defects
@@ -17089,7 +17089,7 @@ async function testForumSeed() {
   } catch (e) {
     out = String((e.stdout || '') + (e.stderr || ''));
   }
-  ok(/seed-forum selftest: \d+ checks passed/.test(out),
+  ok(/seed-forum selftest: \d+ checks passed/.test(out) && !/\bFAIL\b/.test(out),
     'the forum seeder\'s own selftest is green:\n' + out.slice(0, 1500));
 
   const FM = require(path.join(root, 'assets', 'oa-forum-model.js'));
@@ -17303,7 +17303,7 @@ async function testForumThreadRemoval() {
   } catch (e) {
     out = String((e.stdout || '') + (e.stderr || ''));
   }
-  ok(/remove-forum-thread selftest: \d+ checks passed/.test(out),
+  ok(/remove-forum-thread selftest: \d+ checks passed/.test(out) && !/\bFAIL\b/.test(out),
     "the thread remover's own selftest is green:\n" + out.slice(0, 1500));
 
   const FM = require(path.join(root, 'assets', 'oa-forum-model.js'));
@@ -17432,7 +17432,7 @@ async function testVerifyExistingUsers() {
   } catch (e) {
     out = String((e.stdout || '') + (e.stderr || ''));
   }
-  ok(/verify-existing-users selftest: \d+ checks passed/.test(out),
+  ok(/verify-existing-users selftest: \d+ checks passed/.test(out) && !/\bFAIL\b/.test(out),
     'the campaign mailer\'s own selftest is green:\n' + out.slice(0, 1500));
 
   const M = await import('./verify-existing-users.mjs');
@@ -17830,7 +17830,7 @@ async function testForumSeasonRoll() {
   } catch (e) {
     out = String((e.stdout || '') + (e.stderr || ''));
   }
-  ok(/roll-forum-season selftest: \d+ checks passed/.test(out), "the season roll's own selftest is green:\n" + out.slice(0, 1500));
+  ok(/roll-forum-season selftest: \d+ checks passed/.test(out) && !/\bFAIL\b/.test(out), "the season roll's own selftest is green:\n" + out.slice(0, 1500));
 
   const FM = require(path.join(root, 'assets', 'oa-forum-model.js'));
   const R = await import('./roll-forum-season.mjs');
@@ -18124,6 +18124,14 @@ async function testForum() {
   ok(!FM.tagsOk(['a']) && !FM.tagsOk(['Offers']) && !FM.tagsOk(['two body']) && !FM.tagsOk(['offers', 'offers']),
     'forum: one character, a capital, a space and a repeat are all refused');
   ok(FM.TAGS.every(FM.tagOk) && FM.tagsOk(FM.TAGS.slice(0, 5)), 'forum: every curated tag passes its own rule');
+  /* THE DUPLICATE SET MUST NOT INHERIT Object.prototype. `seen[t]` answered
+     for a tag nobody had written yet, so `constructor` -- a perfectly good
+     slug, which tagOk accepts -- read as already-seen and the whole question
+     was refused with a message about the SHAPE of its tags, which was fine.
+     Object.create(null) has no inherited names to collide with. */
+  ok(FM.tagOk('constructor') && FM.tagsOk(['constructor']) && FM.tagsOk(['offers', 'constructor']),
+    'forum: a tag named after an Object.prototype property is not read as a repeat');
+  ok(!FM.tagsOk(['constructor', 'constructor']), 'forum: …and a real repeat of it is still refused');
   ok(FM.TAGS.includes('about') && FM.TAGS.length >= 30, 'forum: the curated list carries about and is about thirty long');
   ok(!FM.TAGS.includes('rumour') && !FM.TAGS.includes('gossip'),
     'forum: and the curated list, which is what the picker SUGGESTS, nudges nobody towards one');
@@ -18555,7 +18563,30 @@ async function testForum() {
   for (const s of ['arXiv:2401.12345', 'https://arxiv.org/abs/2401.12345', 'see arXiv 2401.12345 for the proof', '$123456789']) {
     eq(FG.check(s), '', `forum guard: allows "${s}"`);
   }
-  ok(/separatorGroups\(run\) !== 1/.test(await read('assets', 'oa-forum-guard.js'))
+  /* THE ONE-GROUP EXEMPTION IS BOUNDED BY THE DIGIT COUNT. It was written
+     for the arXiv id above -- nine digits split once -- but exempting every
+     run with one separator group let through the commonest way a telephone
+     number is written: the country or area code split off and the rest run
+     together. Each of these passed the guard on the page AND in the
+     function, so a member could publish a number to be reached on by typing
+     one space. An arXiv id cannot grow past nine digits. */
+  for (const s of ['+1 6172531000', 'ping me on +1 6172531000', '+44 7700900123', '+33 612345678', '617 2531000']) {
+    eq(FG.check(s), 'phone', `forum guard: refuses "${s}" as phone`);
+  }
+  /* AND A DOI IS AN IDENTIFIER, NOT A NUMBER TO DIAL. The module's header
+     used to say "a DOI's digits are broken by its slash"; the slash breaks
+     the RUN, but what follows it is a run of its own, so an ordinary
+     citation was refused with "That looks like a telephone number" on a
+     forum whose members are academics. The suffix must carry a letter, so a
+     number dressed as a DOI is still refused. */
+  for (const s of ['10.1016/j.ejor.2016.07.045', 'See 10.1007/s10479-021-04015-1 for the proof',
+    '10.1287/mnsc.2022.4567', 'doi.org/10.1016/j.ejor.2016.07.045']) {
+    eq(FG.check(s), '', `forum guard: allows the DOI in "${s}"`);
+  }
+  for (const s of ['10.1016/617-253-1000', '10.1016/j.ejor.2016.07.045 and call 617-253-1000']) {
+    eq(FG.check(s), 'phone', `forum guard: a number is still refused beside a DOI: "${s}"`);
+  }
+  ok(/separatorGroups\(run\) === 1 && digits === PHONE_MIN_DIGITS/.test(await read('assets', 'oa-forum-guard.js'))
      && /PHONE_RX\.lastIndex = priced \|\| run\.length === 0 \? m\.index \+ 1 : PHONE_RX\.lastIndex;/.test(await read('assets', 'oa-forum-guard.js')),
     'forum guard: both rules are in the module, not only in its fixtures');
   eq(FG.check(''), '', 'forum guard: nothing is fine');
@@ -18998,6 +19029,44 @@ async function testForum() {
       'forum markup: a bracketed link, a bare address with its trailing stop dropped, a www address, and a bracket the address opened kept');
     eq(MKM.html('"see https://x.org/y" and https://x.org/z'), '<p>&quot;see <a href="https://x.org/y" target="_blank" rel="noopener noreferrer nofollow">https://x.org/y</a>&quot; and <a href="https://x.org/z" target="_blank" rel="noopener noreferrer nofollow">https://x.org/z</a></p>',
       'forum markup: an address between quotation marks is still one, and the closing mark is not part of it');
+    /* A BRACKETED link's address may hold a balanced pair too. The BARE form
+       above was already counted (urlAt weighs its brackets); linkAt ended the
+       address at the FIRST ')', so every Wikipedia disambiguation published
+       truncated -- a link that 404s -- with a stray ')' beside it as text. */
+    eq(MKM.html('[the paper](https://en.wikipedia.org/wiki/Newsvendor_model_(economics))'),
+      '<p><a href="https://en.wikipedia.org/wiki/Newsvendor_model_(economics)" target="_blank" rel="noopener noreferrer nofollow">the paper</a></p>',
+      'forum markup: a bracketed link keeps a balanced pair of brackets in its address');
+    eq(MKM.html('[x](https://a.org/b) then (aside)'),
+      '<p><a href="https://a.org/b" target="_blank" rel="noopener noreferrer nofollow">x</a> then (aside)</p>',
+      'forum markup: …and an ordinary bracketed link still ends at its own bracket');
+    /* A BARE "www." STRIPPED OF ITS DOT IS NOT AN ADDRESS. The trailing
+       punctuation loop takes the dot too, leaving `www`, which the /^www\./
+       test then failed, so no scheme was added and the page drew
+       <a href="www"> -- a RELATIVE link, to /www on this very site. */
+    for (const s of ['visit www.!', 'go to www.', 'see www. ']) {
+      ok(!/<a /.test(MKM.html(s)) && !/href="www"/.test(MKM.html(s)),
+        `forum markup: a bare "www." is text, never a relative link: ${JSON.stringify(s)}`);
+    }
+    eq(MKM.html('visit www.mit.edu'),
+      '<p>visit <a href="https://www.mit.edu" target="_blank" rel="noopener noreferrer nofollow">www.mit.edu</a></p>',
+      'forum markup: …while a real www address still links');
+    /* A BLOCKQUOTE LEVEL COSTS ONE CHARACTER AND ONE STACK FRAME. blocks()
+       recursed once per '>' with nothing bounding it, so a body of '>' at
+       BOUNDS.body -- exactly what the compose box's maxlength allows --
+       threw RangeError out of parse(), and so out of plain(), html(),
+       hasMarkup() AND checkRead(), which no caller wraps: on the page an
+       exception out of the live guard on every keystroke, in the function an
+       uncaught throw out of textField() before the transaction, so forumPost
+       answered `internal` rather than a worded refusal. */
+    const MKMmodel = require(path.join(HERE, '..', 'assets', 'oa-forum-model.js'));
+    const MKMguard = require(path.join(HERE, '..', 'assets', 'oa-forum-guard.js'));
+    for (const [what, body] of [['quotes', '>'.repeat(MKMmodel.BOUNDS.body)], ['list items', '- '.repeat(MKMmodel.BOUNDS.body / 2)]]) {
+      let threw = '';
+      try { MKM.plain(body); MKM.html(body); MKM.hasMarkup(body); MKM.checkRead(body, MKMguard.check); } catch (e) { threw = String(e && e.message); }
+      ok(threw === '', `forum markup: ${MKMmodel.BOUNDS.body} characters of ${what} does not throw (${threw})`);
+    }
+    eq((MKM.html('> > > deep').match(/<blockquote>/g) || []).length, 3,
+      'forum markup: …while quoting at an ordinary depth is unchanged');
     for (const bad of ['[x](javascript:alert(1))', '[x](mailto:a@b.org)', '[x](data:text/html,hi)', '[x](/local)', '[x](ftp://x.org)']) {
       eq(MKM.html(bad), '<p>' + MKM.esc(bad) + '</p>', `forum markup: ${bad} is the text it is, never a link`);
     }
@@ -19060,6 +19129,24 @@ async function testForum() {
         eq(MKM.checkRead(split, G3.check), why, `forum guard: …and is refused as ${why} once read`);
       }
       eq(MKM.checkRead('Write to the **department**, not to a person.', G3.check), '', 'forum guard: a post with marks and no contact detail still passes');
+      /* AND THE THIRD READING IS THE ONE THAT IS PUBLISHED. excerptOf stores
+         flatten(plain(body)) on the thread head and a browser renders a run
+         of whitespace as one space, so a detail split by TWO spaces, a tab
+         or a line break was whole the moment the card drew it while passing
+         the guard on the bytes and on plain(). Measured before the fix:
+         "reach me on  617  253  1000" was clean to the guard as typed and as
+         read, and the excerpt published "reach me on 617 253 1000", which
+         the guard itself calls a phone number -- on the question card, in
+         both rooms, to every admitted member. post.js already flattens BOTH
+         SIDES for the quote passage test; the same collapse on the way OUT
+         had no guard behind it. */
+      const flat = (v) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
+      for (const split of ['reach me on  617  253  1000', 'call  617  253  1000 any time', '617\t253\t1000', '617\n253\n1000']) {
+        eq(G3.check(split), '', `forum guard: ${JSON.stringify(split)} passes on the bytes, which is the hole`);
+        eq(G3.check(flat(MKM.plain(split))), 'phone', 'forum guard: …and the excerpt that would be published is a telephone number');
+        eq(MKM.checkRead(split, G3.check), 'phone', 'forum guard: …so checkRead refuses it, as typed, before it is sent');
+      }
+      eq(MKM.checkRead('a  b   c with odd   spacing', G3.check), '', 'forum guard: …while odd spacing on its own still passes');
       ok(/const hit = markup\.checkRead\(s, guard\.check\);/.test(forumSrc['member.js']) && !/guard\.check\(s\)/.test(forumSrc['member.js']),
         'forum guard: textField checks both ways, and no bare check is left in it');
       ok(/function guardOf\(text\) \{\s*\n\s*return MK\.checkRead\(text, G\.check\);/.test(pageJs) && /var why = guardOf\(ta\.value\);/.test(pageJs)
@@ -19436,6 +19523,14 @@ async function testForum() {
     'forum accept: the tick is a thread key and never a post one, so the two cannot disagree');
   ok(/String\(tv\.accepted \|\| ''\) === postRef\.id/.test(delSrc) && /accepted: '',/.test(delSrc),
     'forum accept: deleting the ticked answer takes the tick with it, or the thread points at a tombstone');
+  /* AND A CLOSING THREAD CLEARS IT TOO. The sweep turns every answer into a
+     tombstone, so a thread left with `accepted` still naming one is a
+     document saying an answer with no words is the accepted answer. The
+     untick above fires only when the post being deleted IS the ticked one;
+     a question going and taking the whole thread with it never touched the
+     field. */
+  ok(/const gonePatch = \{[\s\S]{0,900}?accepted: '',[\s\S]{0,80}?\};/.test(delSrc),
+    'forum accept: a thread that closes clears the tick with its answers');
   ok(/data-act="accept"/.test(pageJs) && /call\('forumAccept'/.test(pageJs) && /function acceptAnswer\(/.test(pageJs),
     'forum accept: the page draws the control and calls the callable');
   ok(/thread\.by === S\.me\.handle/.test(pageJs), 'forum accept: and draws it for the asker alone');
@@ -19464,6 +19559,17 @@ async function testForum() {
     'forum marks: signing out forgets it, like the handle and the seen-marks');
   ok(!/forumBookmark|forumWatch|forumSaved/.test(allForum) && !/collection\((?:C\.)?(?:'|")?forum(?:Saved|Watch)/.test(pageJs),
     'forum marks: no collection, no document and no callable, which is the whole decision');
+  /* EACH PRESS IS ITS OWN READ-MODIFY-WRITE. writeSaved() puts the whole
+     object back and S.saved was read once at boot, so two forum tabs open
+     together overwrote one another: bookmark a question in one, watch a tag
+     in the other, and the second tab's write -- built on the snapshot it
+     read before the bookmark existed -- silently dropped it. Nothing about
+     these marks is in Firestore by design, so what is lost is lost.
+     markSeen() beside them has always re-read first; these two had not. */
+  ok(/function freshSaved\(\)/.test(pageJs)
+     && /function toggleSaved\([^)]*\) \{\s*\n\s*freshSaved\(\);/.test(pageJs)
+     && /function toggleWatch\([^)]*\) \{[\s\S]{0,120}?freshSaved\(\);/.test(pageJs),
+    'forum marks: a bookmark and a watched tag are re-read before they are changed, so a second tab cannot wipe them');
   ok(/data-act="save"/.test(pageJs) && /function savePost\(/.test(pageJs) && /function toggleSaved\(/.test(pageJs),
     'forum marks: the bookmark is drawn on a post and written locally');
   ok(/data-watch=/.test(pageJs) && /function toggleWatch\(/.test(pageJs) && /function paintWatchNew\(/.test(pageJs),
@@ -19743,6 +19849,22 @@ async function testForum() {
     'oa-forum.js: the view a paint is for is the whole address, in one function, the section and the order included');
   ok(/var forView = viewKey\(\);[\s\S]{0,900}if \(mine !== listSeq \|\| forView !== viewKey\(\)\) return rows;/.test(pageJs),
     '…the list mount stops writing the shared state once the reader has moved');
+  /* AND A POST'S OWN COMPLETION IS HELD TO IT TOO. forumPost is a cold Cloud
+     Run service, so the wait is seconds and the room switch is on screen for
+     every view but Home: both senders read S.room and S.season at COMPLETION
+     rather than at the press. An answer took the reader to its thread id
+     under whatever room they had moved to -- "the thread could not be
+     loaded", for an answer that had just succeeded -- and a question opened
+     under the wrong room with that room's tally bumped for its tags. The
+     function had filed both correctly; only the page was wrong. */
+  ok((pageJs.match(/var sentAt = viewKey\(\);/g) || []).length === 2
+     && (pageJs.match(/if \(viewKey\(\) !== sentAt\) return;/g) || []).length === 2,
+    'oa-forum.js: both senders capture the view at the press and stand down if the reader has moved');
+  ok(/go\(\{ room: data\.room, season: sentSeason, t: \(r && r\.tid\) \|\| data\.tid, hash: 'p' \+ \(\(r && r\.n\) \|\| ''\) \}\);/.test(pageJs)
+     && /go\(\{ room: data\.room, season: sentSeason, t: \(r && r\.tid\) \|\| '' \}\); return; \}/.test(pageJs),
+    '…and address the post by the room it was SENT to, never the live one');
+  ok(/id: String\(r\.tid\), season: sentSeason, room: data\.room,/.test(pageJs),
+    '…so the thread painted from the receipt names the room it was filed under');
   ok(!/forRoom|forSeason/.test(pageJs),
     '…and the narrower room-and-season guard it replaced is gone, not left beside it');
   /* the thread's paint is master's shape since the 2026-09-06 merge (the
@@ -19956,6 +20078,17 @@ async function testForum() {
   ok(/var ORDERS = \[\['newest', 'Newest'\], \['active', 'Active'\], \['score', 'Score'\]\];/.test(pageJs)
      && /function orderFn\(order\)/.test(pageJs) && /if \(a\.pinned !== b\.pinned\) return a\.pinned \? -1 : 1;/.test(pageJs),
     'oa-forum.js: three orders for a list, pinned threads leading whichever');
+  /* AND AN ORDER PRESSED UNDER A SEARCH KEEPS EVERY TERM OF IT. The engine
+     banks each term as a chip and writes one parameter per term, so a
+     two-term search is ?q=a&q=b; currentFilters() read it with get() and
+     href() wrote it back with set(), so pressing an order pill kept the
+     first term, dropped the rest, and the list silently widened under the
+     reader. The tags key beside it was already read and written one per
+     value, which is what the text key now matches. */
+  ok(/q: now\.getAll\('q'\)\.filter\(Boolean\)/.test(pageJs)
+     && /\[\]\.concat\(o\.q\)\.forEach\(function \(t\) \{ if \(t\) p\.append\('q', t\); \}\);/.test(pageJs)
+     && !/p\.set\('q',/.test(pageJs),
+    'oa-forum.js: a multi-term search survives an order press, one parameter per term both ways');
   ok(/function listed\(r\)/.test(pageJs) && /return r\.n <= 1 && !r\.locked;/.test(pageJs),
     'oa-forum.js: Unanswered keeps the questions with no answer and leaves out a locked thread nobody can answer');
   ok(/'Unanswered Questions'/.test(pageJs) && /'Newest Questions'/.test(pageJs) && /' with no answers'/.test(pageJs),

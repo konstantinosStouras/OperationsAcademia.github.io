@@ -353,7 +353,15 @@
     /* the engine's own URL keys, one parameter per value, so a link that
        carries every tag a reader watches selects them all */
     if (o && o.tags) [].concat(o.tags).forEach(function (t) { if (t) p.append('tags', t); });
-    if (o && o.q) p.set('q', o.q);
+    /* THE TEXT SEARCH IS MULTI-VALUED TOO. The engine banks each term the
+       reader enters as a chip and writes one parameter per term
+       (oa-list.js: `sel[f.key].forEach(v => p.append(prefix + f.key, v))`),
+       so a two-term search is ?q=a&q=b. Writing it back with set() kept the
+       first and dropped the rest, which is what pressing an order pill under
+       a two-term search did: the extra terms came off the address and the
+       list widened under the reader. A string still works, so the callers
+       that pass one are unchanged. */
+    if (o && o.q) [].concat(o.q).forEach(function (t) { if (t) p.append('q', t); });
     var qs = p.toString();
     /* the extensionless address, the one every page of the site writes
        (CLAUDE.md, "A page's address carries no .html"); Home is bare `forum` */
@@ -504,6 +512,24 @@
   function writeSaved() {
     try { localStorage.setItem(SAVED_KEY, JSON.stringify(S.saved)); } catch (e) { /* ignore */ }
   }
+  /** The store as it stands NOW, not as it stood when this tab booted.
+
+      writeSaved() puts the WHOLE object back, and S.saved was read once at
+      boot, so two forum tabs open at the same time overwrote one another:
+      bookmark a question in the first tab, watch a tag in the second, and
+      the second tab's write -- built on the snapshot it read before the
+      bookmark existed -- silently dropped it. Both marks are this browser's
+      only copy (nothing about them is in Firestore, by design), so what is
+      lost is lost.
+
+      markSeen() beside it has always done this correctly, reading the
+      seen-marks fresh before changing them; these two were the pair that
+      did not. Re-reading here makes each press its own read-modify-write,
+      which is what the shared store needs. */
+  function freshSaved() {
+    if (S.saved && S.saved.uid) S.saved = readSaved(S.saved.uid);
+    return S.saved;
+  }
   /** A saved mark names the room, the season, the thread and, for an answer,
       the post: saving an answer and saving its question are two marks. */
   function savedKey(tid, pid) {
@@ -511,6 +537,7 @@
   }
   function isSaved(tid, pid) { return !!S.saved.items[savedKey(tid, pid)]; }
   function toggleSaved(tid, pid, title, n) {
+    freshSaved();
     var k = savedKey(tid, pid);
     if (S.saved.items[k]) delete S.saved.items[k];
     else {
@@ -524,6 +551,7 @@
   function watching(tag) { return S.saved.tags.indexOf(tag) !== -1; }
   function toggleWatch(tag) {
     if (!M.tagOk(tag)) return false;
+    freshSaved();
     var at = S.saved.tags.indexOf(tag);
     if (at === -1) S.saved.tags.push(tag);
     else S.saved.tags.splice(at, 1);
@@ -1354,7 +1382,7 @@
       text, exactly as the engine writes them. */
   function currentFilters() {
     var now = new URLSearchParams(location.search);
-    return { tags: now.getAll('tags').filter(Boolean), q: String(now.get('q') || '') };
+    return { tags: now.getAll('tags').filter(Boolean), q: now.getAll('q').filter(Boolean) };
   }
 
   /** The bar under the heading: Newest, Active, Score, the one in force
@@ -2972,12 +3000,24 @@
     var data = { room: S.room, tid: S.tid, body: body };
     if (S.quote) data.quote = { n: S.quote.n, text: S.quote.text };
     if (accept && accept.checked) data.acceptGuide = true;
+    /* WHERE THE ANSWER WAS SENT, not where the reader is when it lands. A
+       callable here is a Cloud Run service that goes cold, so the wait is
+       seconds and the reader can leave in it; the fallback below then named
+       S.room as it stood AT COMPLETION and navigated to this thread id under
+       whatever room they had moved to, telling them the thread could not be
+       loaded, for an answer that had just succeeded. */
+    var sentAt = viewKey();
+    var sentSeason = S.season;
     call('forumPost', data).then(function (r) {
       if (accept) { S.me.guideAt = Date.now(); writeMe(S.me); }
+      /* the reader has moved on: the answer is stored, and dragging them
+         back to a view they left is the one thing not to do (the rule this
+         page already follows for every read that lands late) */
+      if (viewKey() !== sentAt) return;
       /* the answer ON THE PAGE from the function's receipt and the words just
          sent, the box drawn again empty, then the thread read back quietly */
-      if (!r || !r.pid || !r.n || !S.thread || String(r.tid || S.tid) !== S.tid) {
-        go({ room: S.room, season: S.season, t: (r && r.tid) || S.tid, hash: 'p' + ((r && r.n) || '') });
+      if (!r || !r.pid || !r.n || !S.thread || String(r.tid || data.tid) !== data.tid) {
+        go({ room: data.room, season: sentSeason, t: (r && r.tid) || data.tid, hash: 'p' + ((r && r.n) || '') });
         return;
       }
       var post = localPost(r, body, S.quote);
@@ -3446,14 +3486,26 @@
       say('Posting…');
       var data = { room: S.room, title: title, tags: tags.slice(), body: text };
       if (accept && accept.checked) data.acceptGuide = true;
+      /* WHERE THE QUESTION WAS SENT, not where the reader is when it lands.
+         The room switch is on screen for every view but Home, and the wait on
+         a cold callable is seconds: building the address and the local thread
+         from S.room at COMPLETION opened the new question under whichever
+         room the reader had moved to, and bumped THAT room's tally for its
+         tags. The function had already filed it correctly; only the page was
+         wrong, until the next read. */
+      var sentAt = viewKey();
+      var sentSeason = S.season;
       call('forumPost', data).then(function (r) {
         if (accept) { S.me.guideAt = Date.now(); writeMe(S.me); }
-        if (!r || !r.tid || !r.pid) { go({ room: S.room, season: S.season, t: (r && r.tid) || '' }); return; }
+        /* the reader has moved on: the question is stored, and opening it
+           over the view they went to is not what they asked for */
+        if (viewKey() !== sentAt) return;
+        if (!r || !r.tid || !r.pid) { go({ room: data.room, season: sentSeason, t: (r && r.tid) || '' }); return; }
         /* the thread ON THE PAGE from the receipt and the words just sent,
            the room's tally moved for its tags, then read back quietly */
         var now = M.minute();
         var thread = {
-          id: String(r.tid), season: S.season, room: S.room, title: title, tags: data.tags.slice(), by: S.me.handle,
+          id: String(r.tid), season: sentSeason, room: data.room, title: title, tags: data.tags.slice(), by: S.me.handle,
           t: now, lastAt: now, lastBy: S.me.handle, n: 1, excerpt: excerptOf(text), score: 0, accepted: '',
           pinned: false, locked: false, hidden: false
         };

@@ -26,7 +26,9 @@
              space, dot, hyphen or bracket each. NOT eight: "2026-2027" and
              "2026-09-04" are dates people write all the time; a comma or a
              currency sign breaks the run, so "$120,000-150,000" is a salary
-             range; a DOI's digits are broken by its slash.
+             range; an arXiv id is nine digits split once, and a DOI is
+             blanked before the scan (its slash breaks the RUN, but the
+             digits AFTER the slash are a run of their own -- see DOI_RX).
 
    A WEB ADDRESS IS ALLOWED (owner, 2026-09-05: "I want users to be able to
    post links in their posts or replies"). It was refused at first, on the
@@ -63,6 +65,34 @@
   var PHONE_MIN_DIGITS = 9;
   var CURRENCY = '$€£';
 
+  /* A DOI, which is an identifier and not a number to dial. The header above
+     used to claim "a DOI's digits are broken by its slash", and the slash
+     does break the RUN -- but what is left after it is a digit run of its
+     own: `10.1016/j.ejor.2016.07.045` matches on `2016.07.045` (nine digits,
+     two separator groups) and `10.1007/s10479-021-04015-1` on
+     `10479-021-04015-1` (fourteen digits, three), so BOTH were refused with
+     "That looks like a telephone number" over an ordinary citation. On a
+     forum whose two rooms are academics discussing the job market, citing a
+     paper by its DOI is not an edge case.
+
+     The suffix must carry a LETTER, which is what keeps this from being a
+     way round the rule: every real DOI suffix names something
+     (`j.ejor.2016.07.045`, `s10479-021-04015-1`, `mnsc.2022.4567`), while
+     `10.1016/617-253-1000` -- a telephone number dressed as a DOI -- does
+     not, and is still refused. A purely numeric suffix is always short
+     enough that no nine-digit run forms in it anyway. */
+  var DOI_RX = /\b10\.\d{4,9}\/[-._;()\/:A-Za-z0-9]*[A-Za-z][-._;()\/:A-Za-z0-9]*/g;
+
+  /** The text with every DOI blanked to spaces of the SAME LENGTH, so the
+      phone scan cannot see its digits while every other index -- and so the
+      character before a run, which is what the currency test reads -- stays
+      where it was. Blanking can only ever remove a match: a space is a
+      separator and PHONE_RX allows at most one between digits, so two runs
+      either side of a blanked DOI cannot be joined into one. */
+  function withoutDois(s) {
+    return s.replace(DOI_RX, function (m) { return m.replace(/\S/g, ' '); });
+  }
+
   function hasEmail(s) {
     EMAIL_RX.lastIndex = 0;
     return EMAIL_RX.test(s);
@@ -81,7 +111,8 @@
     return run.replace(/^[+(]+/, '').split(/\d+/).filter(Boolean).length;
   }
 
-  function hasPhone(s) {
+  function hasPhone(s0) {
+    var s = withoutDois(s0);
     PHONE_RX.lastIndex = 0;
     var m;
     while ((m = PHONE_RX.exec(s)) !== null) {
@@ -96,7 +127,20 @@
          inside be found on its own, while "$123456789" still passes,
          having only eight digits left once the first is stepped over. */
       var priced = before !== '' && CURRENCY.indexOf(before) !== -1;
-      if (!priced && digits >= PHONE_MIN_DIGITS && separatorGroups(run) !== 1) return true;
+      /* THE ONE-GROUP EXEMPTION IS THE arXiv SHAPE, AND NOTHING LONGER. It
+         was written for `2401.12345` -- an arXiv id, which is exactly nine
+         digits split once -- but exempting EVERY run with one separator
+         group let through the commonest way a telephone number is written
+         at all: the international form, where the country code is split off
+         and the rest runs together. Measured: `+1 6172531000` (eleven
+         digits, one group), `+44 7700900123` (twelve) and `617 2531000`
+         (ten) all passed the guard, on the page and in the function, so a
+         member could publish a number to be reached on by typing one space.
+         An arXiv id cannot grow past nine digits; a telephone number cannot
+         shrink below ten once its country or area code is written out. So
+         the exemption is held to the length it was written for. */
+      var oneGroupId = separatorGroups(run) === 1 && digits === PHONE_MIN_DIGITS;
+      if (!priced && digits >= PHONE_MIN_DIGITS && !oneGroupId) return true;
       PHONE_RX.lastIndex = priced || run.length === 0 ? m.index + 1 : PHONE_RX.lastIndex;
     }
     return false;

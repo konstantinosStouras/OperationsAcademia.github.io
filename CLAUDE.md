@@ -7899,6 +7899,104 @@ scan cannot see it, and `updateTime` moves while `createTime` never does. See
 "The July roll takes the closed season's markers and handles with it" under
 the forum.
 
+## The 2026-09-12 forum sweep: the guard was wrong in both directions
+
+A fan-out over the two rooms, verified against the offline suite, the real
+emulator and a browser, found fourteen defects. The ones worth keeping the
+reasoning for mostly sit in the modules the page and the functions SHARE,
+which is why each was wrong in both places at once.
+
+**A NUMBER SPACED OUT WAS PUBLISHED, AND A CITATION WAS REFUSED.** The phone
+rule's one-separator-group exemption was written for an arXiv id — nine digits
+split once — and exempted every run with one group, however long. That is the
+commonest way a telephone number is written at all: `+1 6172531000`,
+`+44 7700900123` and `617 2531000` all passed the guard, on the page and in the
+function, so a member could publish a number to be reached on by typing one
+space. It is bounded by the digit count now: an arXiv id cannot grow past nine
+digits, and a number cannot shrink below ten once its country or area code is
+written out. And the same rule refused what it was never meant to: the module's
+header said "a DOI's digits are broken by its slash", and the slash breaks the
+RUN while what follows it is a run of its own, so `10.1016/j.ejor.2016.07.045`
+and `10.1007/s10479-021-04015-1` were both refused with "That looks like a
+telephone number" — on a forum whose two rooms are academics discussing the job
+market. `DOI_RX` blanks a DOI to spaces of the SAME LENGTH before the scan, so
+every other index, and so the character the currency test reads, stays where it
+was. **The suffix must carry a LETTER**, which is what keeps it from being a way
+round the rule: every real DOI suffix names something, and `10.1016/617-253-1000`
+does not and is still refused.
+
+**AND THE THIRD READING OF A BODY IS THE ONE THAT IS PUBLISHED.**
+`checkRead` read the text as typed and as read, and `excerptOf` stores
+`flatten(plain(body))` on the thread head — a browser renders a run of
+whitespace as one space. So a detail split by TWO spaces, a tab or a line break
+was whole the moment the card drew it while passing the guard both ways:
+measured, `617  253  1000` was clean to the guard and the excerpt published
+`617 253 1000`, which the guard itself refuses, on the question card in both
+rooms. `post.js` already flattens BOTH SIDES for the quote passage test and its
+comment records why; the same collapse on the way OUT had no guard behind it.
+The fix is in `checkRead`, not in `textField`, so the page warns while the words
+are being typed rather than the function refusing them at Post.
+
+**A BLOCKQUOTE LEVEL COSTS ONE CHARACTER AND ONE STACK FRAME.** `blocks()`
+recursed once per `>` with nothing bounding it, so a body of `>` at
+`BOUNDS.body` — exactly what the compose box's own `maxlength` allows — threw
+`RangeError` out of `parse()`, and so out of `plain()`, `html()`, `hasMarkup()`
+AND `checkRead()`, none of which any caller wraps: on the page an exception out
+of the live guard on every keystroke, in the function an uncaught throw out of
+`textField()` before the transaction, so `forumPost` answered `internal` rather
+than a worded refusal. `NEST_MAX` (24) bounds it; past the cap the marker is
+ordinary text, so the words are still shown and nothing is lost.
+
+**THE THREE FORUM SCRIPTS' "SELFTEST IS GREEN" PINS PASSED ON A FAILING RUN.**
+`ok()` in those scripts sets `process.exitCode` and does NOT throw, so the
+summary line prints after a failure too; the pin caught the non-zero exit into
+`out` and then matched only that line. 826 checks unenforced. The clause
+`testModuleSuites` already used (`&& !/\bFAIL\b/`) is on all six spawned-selftest
+pins now — the roster sync and the account purge had the same hole. Verified by
+injecting a failure and watching the pin go red.
+
+**AND A POST'S OWN COMPLETION WAS NOT HELD TO THE VIEW IT WAS SENT FROM.**
+"A paint that lands after the reader has moved" is a rule this page already
+records for its reads, and both SENDERS were outside it: `forumPost` is a cold
+Cloud Run service, so the wait is seconds, and the room switch is on screen for
+every view but Home. An answer read `S.room` at COMPLETION and navigated to its
+thread id under whatever room the reader had moved to, telling them the thread
+could not be loaded, for an answer that had just succeeded; a question opened
+under the wrong room and bumped THAT room's tally for its tags. The function had
+filed both correctly on the room in the request; only the page was wrong, until
+the next read. Both capture `viewKey()` at the press and stand down when it has
+moved, and both address the post by `data.room` rather than the live one. The
+guide acceptance is still stamped either way, since the server took it.
+
+Also fixed: a bracketed link's address was cut at the first `)`, so every
+Wikipedia disambiguation published truncated (the BARE form already counted its
+brackets; only `[label](…)` did not); a bare `www.` stripped of its dot became
+`<a href="www">`, a RELATIVE link to `/www` on this very site; `tagsOk` used a
+bare object as its duplicate set, so the perfectly good slug `constructor` read
+as already-seen and refused the whole question; a closing thread left `accepted`
+naming an answer the sweep had just turned into a tombstone; `toggleSaved` and
+`toggleWatch` wrote the whole local store back from the snapshot read at boot,
+so two forum tabs wiped one another's bookmarks and watched tags (`markSeen`
+beside them had always re-read first; they now do too); and `currentFilters`
+read the multi-valued `q` with `get()` while `href()` wrote it with `set()`, so
+pressing an order pill under a two-term search dropped every term but the first.
+
+**The emulator's own fixture encoded the hole.** It posted a doubled-space body
+and asserted it went through, to set up the quote-guard case. Rewritten to
+assert the refusal, with the quote guard now shown by a DOI — the whole
+identifier passes and the bare digit run out of its tail does not, which is a
+passage of a clean body that is dirty on its own.
+
+Tests: the guard's new fixtures both ways and the source pin on the bounded
+exemption, the markup pins for the balanced-paren link, the bare `www.`, the
+nesting cap at `BOUNDS.body` and quoting at ordinary depth, the flattened-form
+pins measuring the excerpt that WOULD be published, the `constructor` tag, the
+closing thread's tick, the re-read before each mark is changed and the
+one-parameter-per-term search — all in `_scraper/selftest.mjs`; and in
+`_functions/test/forum-emulator.mjs` the spaced number refused, the DOI posted,
+its bare digit run refused as a quote, and an ordinary passage still quoting,
+against the real functions.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
