@@ -2334,14 +2334,46 @@ async function testSchools() {
 
   /* THE DATA. Both served datasets carry canonical names only, and the
      published `department` line is the two parts joined — the shape the card
-     and the filters read. */
+     and the filters read.
+
+     IT ASKS `canonColumns`, THE RULE THE WRITERS APPLY, and that is the whole
+     point rather than a detail. Every ingest here puts three names already in
+     three columns through `canonColumns`, which deliberately does NOT do the
+     separator guesswork — the section "Three names already in three columns"
+     records the measurement: over every name in the data that guesswork fires
+     three times and is wrong twice, publishing UCLA under "University of
+     California". `canonPlace` DOES split, because it exists for the archive's
+     single fused column.
+
+     So asserting `canonPlace` over a served file asked every row to satisfy a
+     repair no writer performs — and one poster typing "Naveen Jindal School of
+     Management/Healthcare Management Area" into the School box then stopped the
+     WHOLE SITE publishing, with nothing able to make it green again: the next
+     build reads the same document and writes the same row. `data/jobs.json` sat
+     at its 4 September rows for eight days that way, while the workbook half of
+     the pipeline went on committing perfectly. This file's own error text names
+     the rule it broke — "a guard that fires on a legitimate NEW posting is the
+     guard's bug, not the posting's" — and it is the fifth time that shape has
+     stopped this site. */
   for (const file of ['jobs.json', 'past-postings.json']) {
     const rows = JSON.parse(await readFile(path.join(HERE, '..', 'data', file), 'utf8'));
     const bad = rows.filter((r) => {
-      const p = S.canonPlace(r);
+      const p = S.canonColumns(r);
       return p.institution !== r.institution || p.school !== (r.school || '') || p.unit !== (r.unit || '');
     }).map((r) => r.id);
     eq(bad, [], `data/${file}: every posting names its university, school and department the one way`);
+
+    /* …and a name that still packs two of the three together is REPORTED,
+       never a stop. It is a real thing to fix — it lists one school twice in
+       the directory — and the fix is an alias, which is a person's judgement
+       about a school's name, so it fails the PR check where somebody reads it
+       and warns the data writer, which must go on publishing meanwhile. The
+       two near-duplicate sweeps already work this way, for this reason. */
+    const fused = rows.filter((r) => {
+      const p = S.canonPlace(r);
+      return p.institution !== r.institution || p.school !== (r.school || '') || p.unit !== (r.unit || '');
+    }).map((r) => r.id);
+    tidy(fused, `data/${file}: a posting whose name packs two of the three together`);
 
     const line = rows.filter((r) => r.department !== joinDepartment(r.school, r.unit)).map((r) => r.id);
     eq(line, [], `data/${file}: and the line the card shows is those two, joined`);
@@ -11246,6 +11278,29 @@ async function testReviewWiring() {
   eq(namingSweeps.filter((s) => s.fn !== 'tidy').map((s) => s.list + ': ' + s.what), [],
     'and each reports in the publishing role rather than stopping the site — a naming ' +
     'duplicate is settled by an alias, never by holding real postings back');
+
+  /* …AND THE SERVED-FILE NAME GUARD ASKS THE RULE THE WRITERS APPLY.
+
+     It asked `canonPlace`, which splits a fused value, while every ingest
+     writes three columns through `canonColumns`, which deliberately does not.
+     So the file was held to a repair no writer performs: one poster typing a
+     school and a department fused with a slash stopped the whole site, and no
+     build could clear it, because the next one reads the same document and
+     writes the same row. Eight days of `data/jobs.json` frozen. Flipping this
+     back is a one-word edit whose only symptom is that the site quietly stops
+     publishing, so it is pinned here rather than remembered. */
+  {
+    const open = selfSrc.indexOf("for (const file of ['jobs.json', 'past-postings.json']) {");
+    const block = selfSrc.slice(open,
+      selfSrc.indexOf('and the line the card shows is those two, joined', open));
+    ok(block.length > 400 && block.length < 4000,
+      'the served-file name guard is where this pin thinks it is');
+    ok(/const bad = rows\.filter\(\(r\) => \{\s*const p = S\.canonColumns\(r\);/.test(block),
+      'the served-file name guard asks canonColumns — the rule every writer applies — ' +
+      'so a name no writer would repair can never stop the site publishing');
+    ok(/tidy\(fused,/.test(block),
+      '…and a name canonPlace would still take apart is reported rather than fatal');
+  }
 
   const wf = await readFile(
     path.join(HERE, '..', '.github', 'workflows', 'oa-jobreview-mail.yml'), 'utf8');
