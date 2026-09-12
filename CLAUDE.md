@@ -3362,6 +3362,213 @@ cursor put back and NO account created and no profile stored, the card left
 open on what was typed, and the same form with a real affiliation still
 registering with the value stored trimmed.
 
+### …and every road in collects all three
+
+Owner, 2026-09-12, over a screenshot of the roster: *"during registration, no
+matter the registration way chosen, always ask for name, affiliation and an
+email. there are users without full data. update and merge."* The screenshot
+showed a row with a dash where the e-mail should be and a row with a dash where
+the affiliation should be, both registered the day before, after the compulsory
+affiliation rule above had shipped.
+
+**Nothing was broken, and that is why it kept happening.** The section above
+put the affiliation on all three roads in, and both of those rows are what it
+does not reach:
+
+* **the welcome card can be CLOSED**, and the mark was spent either way. It is
+  taken "FIRST and unconditionally, so the mark is spent whether or not the
+  card ends up opening", which is right for a card that will be shown again and
+  wrong for one that will not. A Google sign-up that pressed the X was never
+  asked anything again, ever, and its account then read exactly like an account
+  that had answered;
+* **an ORCID sign-in shares no e-mail address at all**, and the card SAID so
+  and stopped there: *"You sign in with ORCID, which does not share an e-mail
+  address with us."* True, and it is not an answer. The site had no address for
+  those accounts, could not write to them, and nothing anywhere asked for one.
+
+**SO THE ASK IS KEYED ON WHAT IS MISSING, NOT ON HOW THE ACCOUNT WAS MADE.**
+`profileGaps(user, profile)` in `assets/oa-accounts.js` is the one definition
+(`name`, `affiliation`, `email`, in the order the card asks them) and
+everything reads it: whether the card opens at all, which boxes it compels, and
+which submit guard runs. That also answers the **"update"** half in one move,
+since an account that registered before any of these rules is asked for
+whatever it never gave, with nothing to backfill and no list to maintain.
+
+**It is a CHANGE OF POSITION, and the paragraph it changes is the one above.**
+That section refused to key the ask on "has no affiliation" because it "would
+have asked half the existing membership on their next visit, which is the trap
+this section is otherwise entirely about". The trap is real and the owner has
+now asked for exactly that, which makes the question not *whether* to ask but
+*how often*. So the bound moved rather than disappearing: the card opens
+**once a session** while anything is missing (`oaAskProfile:<uid>` in
+`sessionStorage`), not once per account and not once per page. Once per account
+is the defect being replaced; once per page is a modal on every navigation of a
+flat multi-page site, which is the nag the old rule was written to avoid. A
+private window that throws on the accessor answers FALSE, because a browser
+that cannot remember being asked would otherwise be asked on every page it
+opens.
+
+**The card is never a trap.** The X, Escape and the backdrop all still close
+it, and *Not now* is withheld only while something is required, because
+answering is what the card is for and asking again next session is what makes
+postponing safe rather than final. A modal a reader cannot leave is still not a
+thing this site has.
+
+**`name` IS THE FIRST NAME ALONE, and that asymmetry is deliberate.** The
+password form goes on asking for a last name too: that is a create-time rule,
+and a create-time rule can afford to be strict because nobody is held to it
+twice. This is the test that decides whether to ask AGAIN, and a person who
+goes by one name must not meet the same card every session for ever. The rule
+that repeats is the narrower one.
+
+### The address a person TYPES is a field of its own, never the pinned one
+
+`userDirectory.email` is pinned by the rules to `request.auth.token.email`,
+the trick that makes a roster row say what the account really signs in as
+rather than whatever its owner typed, and an ORCID account has no such claim to
+pin. So the typed address could not go there, and putting it there by relaxing
+the pin would trade a real guarantee for a convenience.
+
+**`contactEmail` sits BESIDE it**, on `profiles/{uid}` and on the roster row,
+self-reported like the `name` and the `affiliation` already there. Nothing
+authorises on it: `isOwner()` goes on reading the token, and it is not a way to
+sign in, which the card says in as many words, because a box labelled E-mail on
+an account page will otherwise be read as one.
+
+**The key arrived WITH its rule, in one change**, which is the only safe way
+one ever joins this row: an Admin-SDK key the rules do not name is written
+happily and then freezes the row against its own OWNER for ever, the
+`sync-user-directory` trap. `ROW_KEYS` in both
+`_scraper/sync-user-directory.mjs` and `assets/oa-users.js` is pinned against
+the rules' `hasOnly` both ways, and `PROFILE_DOC_KEYS` against `profileKeys()`.
+
+**ONE e-mail row on the card, never two.** Where the sign-in carries an address
+the card shows it as the fact it is, disabled, as it always has; where it
+carries none, the row becomes a BOX. Both at once would be a card asking a
+question it has already answered.
+
+**Updating a Firebase account's own e-mail was considered and refused.**
+`updateEmail` would make `request.auth.token.email` real, and the pin would
+then cover an ORCID account too. It also re-opens the account's identity: the
+address may already belong to another account here
+(`auth/email-already-in-use`, on the one road in that exists to prevent
+duplicate accounts), it needs a verification round of its own, and it would let
+a typed string decide who the account IS. A field the maintainer reads is worth
+far less than that.
+
+**The sync reads it the same three ways as the affiliation**: the profile's
+word; gone when the profile has none; and KEPT when the profiles collection
+could not be read at all, because unknown is not none and a failed read must
+not strip a hundred addresses off the roster until the next morning.
+
+### Nobody knows their own ORCID iD, so the row is a BUTTON
+
+Owner, 2026-09-12, of the registration card's ORCID row: *"during registration
+step here users dont know their ORCID. Instead, have a button to connect it for
+sure and directly."*
+
+It was a free-text box wanting sixteen digits. So the only way to answer a
+question the card itself calls *highly recommended* was to open another tab,
+sign in to orcid.org, find the record and copy the number back, in the middle
+of registering, which is how a recommended field becomes an empty one. Worse,
+what came back was a string somebody had retyped: unverified, and wrong often
+enough that `normOrcid` exists to refuse the misreadings.
+
+**The box is gone and the row is a button on both cards it appears on.**
+Pressing it opens ORCID, and the iD comes back from ORCID rather than from
+anyone's memory of it, which is also what makes it `orcidVerified` and what
+lets the duplicate check recognise the same person across two accounts.
+
+**ON THE REGISTRATION CARD IT ARMS, IT DOES NOT OPEN.** At that moment the
+account does not exist: there is nothing to link a provider TO, and signing in
+to ORCID instead would create an ORCID account and abandon the half-filled
+form, which is the duplicate the connect buttons exist to prevent. So the
+button is a toggle that says what will happen, and the popup opens the instant
+`createUserWithEmailAndPassword` returns. It is best effort in every direction:
+a blocked popup, a window the reader closed, an ORCID that already belongs to
+another account here, none of them may cost somebody the account they have just
+made.
+
+**AND THE WELCOME CARD CARRIES THE SAME BUTTON, which is what makes a blocked
+popup a second press rather than a lost iD.** That card withholds "Your other
+accounts", where every other card's Connect ORCID row lives, so until now a
+brand-new account had no way to connect at all and met the very box the
+registration card had just stopped showing. It is also the first chance a
+GOOGLE sign-up ever gets. The typed box stays underneath it, quieter, for the
+people who do know their iD and are here to correct it.
+
+**`connectOrcid(user)` is the one definition**, and three callers read it: the
+registration card's armed button, the welcome card's button, and
+`linkProvider`, which used to carry its own copy. What "connected" means has to
+be one thing, or the three roads to a connected ORCID mean three different
+things, which is the drift every shared module in this repository exists to
+prevent. It takes the USER rather than reading `state.user`, because at
+registration the account is seconds old and the auth event may not have fired;
+and it writes the profile only while that account is still the one on screen,
+so a link landing after a sign-out paints nothing onto whoever is here now.
+
+Tests: the ORCID block of `testRegistrationFields` (the sixteen-digit box gone
+from the registration card rather than hidden, the button and its pressed
+state, the popup fired the instant the account exists and never able to fail
+the registration, no typed iD reaching the profile from that card, the one
+definition and its three callers, the welcome card drawing the row only on the
+first-run card, both stylesheet rules, and the already-in-use answer said in
+words) and the registration block of `_scraper/page-test.mjs`, which presses it
+in a real browser: armed and disarmed, the account created with the iD ORCID
+returned and stored verified, a blocked popup leaving the account made and the
+welcome card offering the button, and a Google sign-up connecting from that
+card.
+
+### The roster says which address it is holding, and how many rows are short
+
+The E-mail column read a dash for every ORCID account. It shows the address the
+row can be reached at now (`addressOf`, the sign-in one first) and where that
+is the typed one it carries a small **given** mark whose tooltip says so. One
+column, because two columns saying overlapping things is what this file forbids
+everywhere else; and marked, because presenting a typed address as what the
+account signs in with is the one thing the pin exists to prevent. The column's
+sort, the Find box and the CSV all read the same function, so none of them can
+disagree about who is reachable, and the delete confirmation names the same
+address the row shows rather than "(no address)".
+
+**And the count line says how many accounts still owe something** (`N
+incomplete`, counted over the WHOLE roster rather than the rows on screen, so
+the number does not move as the maintainer types into Find, which is the rule
+the candidate counts beside it already follow). It is the one number that says
+whether the asking is working, it comes down on its own as people answer, and
+typing **incomplete** into Find lists exactly those rows, so select-all under it
+writes to them together. It is deliberately NOT in `pendingCounts()`: it clears
+itself, and a figure the maintainer cannot clear by acting would inflate the
+account-menu badge for ever (the Registered-users rule).
+
+**It needs a rules deploy**, unlike the affiliation rule above, which changed
+no rule at all; this one adds a key to two `hasOnly` lists. Inert until then:
+the profile save reports permission-denied and the roster shows what it already
+holds. The rules publish themselves behind a green check on master (see "…and
+the FIRESTORE rules publish themselves"), so this is the hand path: `firebase
+deploy --only firestore:rules --project operations-academia`.
+
+Tests: the completeness block of `testRegistrationFields` in
+`_scraper/selftest.mjs` (the three functions DRIVEN as a program over the two
+rows the owner circled and their inverses, the last-name exemption, the trim,
+the sign-in address winning, the loose address test refusing a box of spaces;
+the card's one e-mail row both ways, the three submit guards, the withheld
+*Not now*, the unrendered field skipped rather than blanked; the session latch
+and its private-mode answer, the ask keyed on the gaps, the deletion forgetting
+it; the roster's one address definition read by the column, the sort, Find and
+the download, the given mark, the incomplete count and its needle, both marks
+styled in `oa-ui.css` alone; the key against the rules both ways with the
+forge-proof pin asserted UNTOUCHED; and the policy, the change log and this
+section), `node _scraper/sync-user-directory.mjs --selftest` (the sixth key,
+its three states, and an ORCID account getting the address it gave while still
+carrying no `email` key at all), and the completeness block of
+`_scraper/page-test.mjs`, which drives all three roads in a real browser: a
+brand-new ORCID sign-up asked for an affiliation AND an address with no *Not
+now* to press, a box of spaces refused for each, the profile and the roster row
+read back, a Google account that CLOSED the card asked again in a fresh session
+and not again in the same one, a complete account asked nothing at all, and the
+roster showing the given mark, the incomplete count and the Find needle.
+
 ## The forum
 
 Owner, 2026-09-04 and 05: an anonymous forum for the candidates of the

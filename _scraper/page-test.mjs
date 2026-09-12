@@ -305,8 +305,12 @@ async function signedInPage(url, opts = {}) {
   const who = ('user' in opts) ? opts.user : A_READER;   // null = signed out
   /* `seed` carries the shim's own switches (reloadVerifies, callableFails,
      applyActionCodeFails …) for the checks that drive a failure branch */
+  /* `askProfile` rides in the SEED, because the shim is where the
+     once-a-session profile ask is stood down for the whole suite (see
+     _fake-firebase.js). A block that wants the card passes it true. */
   await p.addInitScript(
-    `window.__FAKE_FB = ${JSON.stringify({ user: who, docs: opts.docs || [], ...(opts.seed || {}) })};`);
+    `window.__FAKE_FB = ${JSON.stringify({ user: who, docs: opts.docs || [],
+      askProfile: !!opts.askProfile, ...(opts.seed || {}) })};`);
   /* `init` is extra script run before the page's own (a localStorage seed, an
      observer on the first paint), for the checks that measure the head */
   if (opts.init) await p.addInitScript(opts.init);
@@ -10529,9 +10533,13 @@ for (const w of [320, 360, 390, 430]) {
        dialog for an account with no profile yet, asking for a name and a
        photo; the page used to replace itself under it four seconds later and
        throw the half-typed profile away. This is the fixture above WITHOUT
-       the oaProfileAsked mark that kept the dialog shut. */
+       the oaProfileAsked mark that kept the dialog shut, and with
+       `askProfile` so the shim's own once-a-session latch does not keep it
+       shut either (owner, 2026-09-12: the card asks for what is missing, so
+       every other block stands it down and this one wants it). */
     const { ctx, page: q, errors } = await signedInPage(LINK,
-      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main' });
+      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main',
+        askProfile: true });
     await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
     await q.waitForSelector('#oa-profile [aria-modal="true"]', { timeout: 15000 });
     await q.waitForFunction(() => /Press Continue when you are ready/.test(document.getElementById('ve-count').textContent), null, { timeout: 8000 });
@@ -10860,7 +10868,7 @@ for (const w of [320, 360, 390, 430]) {
      away from (firstRunDestination stands down on the posting form), so the
      card opens in place and can be measured */
   const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
-    { seed: { signInUser: NEWBIE, newUser: true }, selector: '#main' });
+    { seed: { signInUser: NEWBIE, newUser: true }, selector: '#main', askProfile: true });
   await q.evaluate(() => window.OAAccounts.openAuth('register'));
   await q.waitForSelector('.oa-auth-provider[data-provider="google"]', { timeout: 8000 });
   await q.click('.oa-auth-provider[data-provider="google"]');
@@ -10919,8 +10927,12 @@ for (const w of [320, 360, 390, 430]) {
   /* the same reader signing in AGAIN is asked nothing: not a new account */
   const RETURNING = { uid: 'returning-uid', email: 'back@example.edu', emailVerified: true,
     displayName: 'Back Again', providerData: [{ providerId: 'google.com' }] };
+  /* Complete, and its latch deliberately NOT set: what leaves this account
+     alone is that it owes nothing, not that it has been asked already. */
   const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
-    { seed: { signInUser: RETURNING }, selector: '#main' });
+    { seed: { signInUser: RETURNING }, selector: '#main', askProfile: true,
+      docs: [{ path: 'profiles/returning-uid',
+        data: { firstName: 'Back', lastName: 'Again', affiliation: 'Back University' } }] });
   await q.evaluate(() => window.OAAccounts.openAuth());
   await q.waitForSelector('.oa-auth-provider[data-provider="google"]', { timeout: 8000 });
   await q.click('.oa-auth-provider[data-provider="google"]');
@@ -10933,6 +10945,256 @@ for (const w of [320, 360, 390, 430]) {
   ok(!after.card, 'returning sign-in: no welcome card, because the account is not new');
   eq(after.marked, null, 'returning sign-in: …and nothing was marked');
   eq(errors, [], 'returning sign-in: no uncaught script error');
+  await ctx.close();
+}
+
+/* ------------------ EVERY ROAD IN COLLECTS ALL THREE (owner, 2026-09-12)
+
+   "during registration, no matter the registration way chosen, always ask for
+   name, affiliation and an email. there are users without full data. update
+   and merge."  selftest.mjs drives the rule itself and pins every surface;
+   this is what only a browser can show: which card really opens, for whom,
+   what it compels, and what reaches Firestore afterwards.                   */
+{
+  /* --- the rule, as the browser really evaluates it ---------------------- */
+  const { ctx, page: q, errors } = await signedInPage('account.html', { selector: '#main' });
+  const rule = await q.evaluate(() => {
+    const P = window.OAAccounts.pure;
+    return {
+      complete: P.profileGaps({ email: 'a@b.edu' }, { firstName: 'A', affiliation: 'B' }),
+      nothing: P.profileGaps({}, {}),
+      google: P.profileGaps({ email: 'a@b.edu' }, { firstName: 'A' }),
+      orcid: P.profileGaps({}, { firstName: 'A', affiliation: 'B' }),
+      answered: P.profileGaps({}, { firstName: 'A', affiliation: 'B', contactEmail: 'a@c.edu' }),
+      signin: P.contactAddress({ email: 's@b.edu' }, { contactEmail: 't@c.edu' }),
+      typed: P.contactAddress({}, { contactEmail: 't@c.edu' }),
+      good: P.looksLikeEmail('ada@university.edu'),
+      spaces: P.looksLikeEmail('   '),
+    };
+  });
+  eq(rule.complete, [], 'gaps (browser): an account that has answered all three owes nothing');
+  eq(rule.nothing, ['name', 'affiliation', 'email'],
+    'gaps (browser): …and one that has answered nothing owes all three, in the card\'s own order');
+  eq(rule.google, ['affiliation'],
+    'gaps (browser): a Google sign-up that closed the welcome card still owes its affiliation');
+  eq(rule.orcid, ['email'],
+    'gaps (browser): an ORCID sign-up owes an ADDRESS, because its sign-in shares none');
+  eq(rule.answered, [], 'gaps (browser): …and once given, it owes nothing and is never asked again');
+  eq(rule.signin, 's@b.edu', 'gaps (browser): the sign-in address wins over the typed one');
+  eq(rule.typed, 't@c.edu', 'gaps (browser): …and the typed one is what an ORCID account has instead');
+  ok(rule.good && !rule.spaces,
+    'gaps (browser): the address test refuses a box of spaces, which `required` accepts');
+  eq(errors, [], 'gaps (browser): no uncaught script error');
+  await ctx.close();
+}
+
+{
+  /* --- an ORCID sign-up is asked for BOTH, and neither can be spaces ------
+     No e-mail claim at all, which is the row the owner circled: the card used
+     to say the provider shares no address and stop there. */
+  const ORCIDER = { uid: 'fresh-orcid-uid', email: '', emailVerified: false,
+    displayName: 'Orla Orcid', providerData: [{ providerId: 'oidc.orcid', uid: '0000-0002-1825-0097' }] };
+  const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
+    { seed: { signInUser: ORCIDER, newUser: true }, selector: '#main', askProfile: true });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('.oa-auth-provider[data-provider="orcid"]', { timeout: 8000 });
+  await q.click('.oa-auth-provider[data-provider="orcid"]');
+  await q.waitForSelector('#oa-profile-form [name="contactEmail"]', { timeout: 8000 });
+
+  const card = await q.evaluate(() => {
+    const aff = document.querySelector('#oa-profile-form [name="affiliation"]');
+    const mail = document.querySelector('#oa-profile-form [name="contactEmail"]');
+    return {
+      affRequired: aff.required,
+      mailRequired: mail.required,
+      mailType: mail.type,
+      /* the sign-in address is NOT also offered: one e-mail row, never two */
+      disabled: document.querySelectorAll('#oa-profile-form input[disabled]').length,
+      later: !!document.querySelector('#oa-profile-later'),
+      heading: (document.querySelector('#oa-profile-h') || {}).textContent,
+      ask: (document.querySelector('.oa-profile-ask') || {}).textContent || '',
+    };
+  });
+  ok(card.affRequired && card.mailRequired,
+    'orcid sign-up: the welcome card asks for the affiliation AND an address, and requires both');
+  eq(card.mailType, 'email', 'orcid sign-up: …as a real e-mail box');
+  eq(card.disabled, 0,
+    'orcid sign-up: …and there is no second, disabled address row beside it — one e-mail row, never two');
+  ok(!card.later, 'orcid sign-up: no Not now, since answering is the point of the card');
+  eq(card.heading, 'Welcome', 'orcid sign-up: it is the welcome card');
+  ok(/affiliation/i.test(card.ask) && /e-mail/i.test(card.ask),
+    `orcid sign-up: …and it names what is missing (got "${card.ask}")`);
+
+  /* spaces are refused for each, in the card's own order */
+  await q.fill('#oa-profile-form [name="affiliation"]', '   ');
+  await q.fill('#oa-profile-form [name="contactEmail"]', 'orla@example.edu');
+  await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => /affiliation/i.test(
+    (document.querySelector('#oa-profile-msg') || {}).textContent || ''), null, { timeout: 8000 });
+  ok(true, 'orcid sign-up: an affiliation of spaces is refused, naming the field');
+
+  await q.fill('#oa-profile-form [name="affiliation"]', 'Orcid University');
+  await q.fill('#oa-profile-form [name="contactEmail"]', 'not-an-address');
+  await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => /e-mail address/i.test(
+    (document.querySelector('#oa-profile-msg') || {}).textContent || ''), null, { timeout: 8000 });
+  const stillShort = await q.evaluate(
+    () => (window.__fb.dump()['profiles/fresh-orcid-uid'] || {}).contactEmail);
+  ok(!stillShort, 'orcid sign-up: …and an address the site could not write to is refused and stored nowhere');
+
+  await q.fill('#oa-profile-form [name="contactEmail"]', '  orla@example.edu  ');
+  await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await q.waitForFunction(
+    () => (window.__fb.dump()['profiles/fresh-orcid-uid'] || {}).contactEmail, null, { timeout: 8000 });
+  const stored = await q.evaluate(() => ({
+    profile: window.__fb.dump()['profiles/fresh-orcid-uid'],
+    row: window.__fb.dump()['userDirectory/fresh-orcid-uid'] || {},
+  }));
+  eq(stored.profile.contactEmail, 'orla@example.edu',
+    'orcid sign-up: the address is stored TRIMMED, not as the spaces around it');
+  eq(stored.profile.affiliation, 'Orcid University', 'orcid sign-up: …with the affiliation beside it');
+  eq(stored.row.contactEmail, 'orla@example.edu',
+    'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads');
+  /* The welcome card is drawn BEFORE the provider's iD lands, so it carries a
+     typed box while seedOrcidFromProvider is still in flight. Saving it must
+     not blank the one thing this sign-in proved. */
+  eq(stored.profile.orcid, '0000-0002-1825-0097',
+    'orcid sign-up: …and saving the card leaves the iD the sign-in proved exactly where it was');
+  eq(stored.profile.orcidVerified, true, 'orcid sign-up: …still verified');
+  ok(!('email' in stored.row),
+    'orcid sign-up: …while the roster row still carries NO `email` key, because the rules pin that ' +
+    'one to the auth token and this account has no such claim');
+  eq(errors, [], 'orcid sign-up: no uncaught script error');
+  await ctx.close();
+}
+
+{
+  /* --- THE REPEAT, which is the "update" half: an account that closed the
+     card is asked again NEXT session, and not again in this one. -------- */
+  const LAPSED = { uid: 'lapsed-uid', email: 'lapsed@example.edu', emailVerified: true,
+    displayName: 'Lapsed Reader', providerData: [{ providerId: 'google.com' }] };
+  const fixture = { user: LAPSED, selector: '#main', askProfile: true,
+    docs: [{ path: 'profiles/lapsed-uid', data: { firstName: 'Lapsed', lastName: 'Reader' } }] };
+
+  const { ctx, page: q, errors } = await signedInPage('account.html', fixture);
+  await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
+  ok(true, 'the repeat: an account that owes an affiliation is asked on arrival, however it registered');
+  /* closed rather than answered, which is what the old once-per-account mark
+     could never recover from */
+  await q.click('#oa-profile .oa-modal-x');
+  const latch = await q.evaluate(() => sessionStorage.getItem('oaAskProfile:lapsed-uid'));
+  eq(latch, '1', 'the repeat: …and the session latch is spent, so the rest of the visit is left alone');
+
+  /* the SAME session, a second page: nothing opens */
+  await q.goto(BASE + 'jobs.html', { waitUntil: 'load' });
+  await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+    null, { timeout: 15000 });
+  await q.waitForTimeout(600);
+  eq(await q.evaluate(() => !!document.querySelector('#oa-profile-form')), false,
+    'the repeat: a second page in the same session is not a second modal');
+  eq(errors, [], 'the repeat: no uncaught script error');
+  await ctx.close();
+
+  /* a NEW context is a new browsing session: asked again */
+  const again = await signedInPage('account.html', fixture);
+  await again.page.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
+  ok(true, 'the repeat: …and a new session asks again, which is what reaches the accounts that ' +
+    'registered before the rule');
+  await again.ctx.close();
+
+  /* and an account that owes NOTHING is asked nothing at all */
+  const done = await signedInPage('account.html',
+    { user: LAPSED, selector: '#main', askProfile: true,
+      docs: [{ path: 'profiles/lapsed-uid',
+        data: { firstName: 'Lapsed', lastName: 'Reader', affiliation: 'Lapsed University' } }] });
+  await done.page.waitForTimeout(800);
+  eq(await done.page.evaluate(() => !!document.querySelector('#oa-profile-form')), false,
+    'the repeat: a complete account meets no card, so answering really does end the asking');
+  await done.ctx.close();
+}
+
+{
+  /* --- NOBODY KNOWS THEIR OWN iD, so the row is a button (owner, 2026-09-12)
+     On the registration card it ARMS: there is no account to link to yet, so
+     the popup opens the instant one exists. */
+  const NEWPW = { uid: 'orcid-arm-uid', email: 'arm@example.edu', emailVerified: true,
+    displayName: '', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
+    { seed: { signInUser: NEWPW }, selector: '#main' });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('#oa-reg-orcid', { timeout: 8000 });
+  eq(await q.evaluate(() => !!document.querySelector('#oa-auth-form [name="orcid"]')), false,
+    'registration card: no sixteen-digit box to fill in, because nobody knows their own iD');
+  const armed = await q.evaluate(() => {
+    const b = document.getElementById('oa-reg-orcid');
+    const was = b.getAttribute('aria-pressed');
+    b.click();
+    const on = { pressed: b.getAttribute('aria-pressed'), text: b.textContent.trim() };
+    b.click();
+    return { was, on, off: b.getAttribute('aria-pressed') };
+  });
+  eq(armed.was, 'false', 'registration card: the connect button starts off');
+  eq(armed.on.pressed, 'true', 'registration card: …a press arms it');
+  ok(/will be connected/i.test(armed.on.text),
+    `registration card: …and it says so (got "${armed.on.text}")`);
+  eq(armed.off, 'false', 'registration card: …and a second press disarms, so a slip costs no window');
+
+  await q.click('#oa-reg-orcid');                        // armed for the real run
+  await q.fill('#oa-auth-form [name="firstName"]', 'Arm');
+  await q.fill('#oa-auth-form [name="lastName"]', 'Reader');
+  await q.fill('#oa-auth-form [name="affiliation"]', 'Arm University');
+  await q.fill('#oa-auth-form [name="email"]', NEWPW.email);
+  await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+  await q.check('#oa-auth-form [name="terms"]');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+  await q.waitForFunction(
+    () => (window.__fb.dump()['profiles/orcid-arm-uid'] || {}).orcid, null, { timeout: 8000 });
+  const linked = await q.evaluate(() => ({
+    profile: window.__fb.dump()['profiles/orcid-arm-uid'],
+    asked: window.__fb.ops('link'),
+  }));
+  eq(linked.profile.orcid, '0000-0002-1825-0097',
+    'registration card: the armed connection opens ORCID the instant the account exists, and the ' +
+    'iD comes back from ORCID rather than from anyone typing it');
+  eq(linked.profile.orcidVerified, true,
+    'registration card: …stored VERIFIED, which is what connecting buys over typing');
+  ok(linked.asked.some((x) => /oidc\.orcid/.test(x)),
+    'registration card: …and it is ORCID that was asked for');
+  eq(errors, [], 'registration card: no uncaught script error connecting ORCID');
+  await ctx.close();
+}
+
+{
+  /* …and when the popup cannot be opened, the account is still MADE and the
+     welcome card offers the same button, which is the second press. */
+  const BLOCKED = { uid: 'orcid-blocked-uid', email: 'blocked@example.edu', emailVerified: true,
+    displayName: '', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
+    { seed: { signInUser: BLOCKED, linkFails: 'auth/popup-blocked' }, selector: '#main',
+      askProfile: true });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('#oa-reg-orcid', { timeout: 8000 });
+  await q.click('#oa-reg-orcid');
+  await q.fill('#oa-auth-form [name="firstName"]', 'Blocked');
+  await q.fill('#oa-auth-form [name="lastName"]', 'Reader');
+  await q.fill('#oa-auth-form [name="affiliation"]', 'Blocked University');
+  await q.fill('#oa-auth-form [name="email"]', BLOCKED.email);
+  await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+  await q.check('#oa-auth-form [name="terms"]');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => !!(window.OAAccounts.user()), null, { timeout: 8000 });
+  const made = await q.evaluate(() => ({
+    profile: window.__fb.dump()['profiles/orcid-blocked-uid'] || {},
+    signedIn: !!window.OAAccounts.user(),
+  }));
+  ok(made.signedIn && made.profile.affiliation === 'Blocked University',
+    'blocked popup: the account is still made and its profile still stored');
+  ok(!made.profile.orcid,
+    'blocked popup: …with no iD, since ORCID never answered');
+  await q.evaluate(() => window.OAAccounts.openProfile(true, { require: [] }));
+  await q.waitForSelector('#oa-profile-orcid', { timeout: 8000 });
+  ok(true, 'blocked popup: …and the welcome card offers the same button, so the iD is one press away');
+  eq(errors, [], 'blocked popup: no uncaught script error');
   await ctx.close();
 }
 

@@ -5505,14 +5505,16 @@ async function testUserDirectorySync() {
     'name would freeze the row against its own owner');
 
   /* And what it actually writes obeys that, not just what it declares. The
-     fifth key is the PROFILE's affiliation, so a row built beside a profile
-     carries every allowed key, and one built beside none carries a subset. */
+     fifth and sixth keys are the PROFILE's affiliation and the contact
+     address, so a row built beside a profile holding both carries every
+     allowed key, and one built beside none carries a subset. */
   const authUser = {
     uid: 'u', email: 'a@b.edu', displayName: 'A B',
     metadata: { creationTime: 'Mon, 01 Jan 2026 00:00:00 GMT',
       lastSignInTime: 'Mon, 01 Jun 2026 00:00:00 GMT' },
   };
-  const row = mod.rowFromAuthUser(authUser, null, { affiliation: 'A School' });
+  const row = mod.rowFromAuthUser(authUser, null,
+    { affiliation: 'A School', contactEmail: 'a@orcid.example' });
   eq(Object.keys(row).sort(), allowed.slice().sort(),
     'and a row it builds carries those keys and no others');
   ok(typeof row.first === 'number' && typeof row.seen === 'number',
@@ -6348,7 +6350,7 @@ async function testUsersAndMessages() {
     ok(dirKeys.has(k), `oa-users.js reads userDirectory."${k}", and the rules allow writing it`);
   }
   eq([...dirKeys].sort(), [...U.ROW_KEYS].sort(),
-    'the userDirectory rule allows exactly the roster’s five fields — a key with ' +
+    'the userDirectory rule allows exactly the roster’s six fields — a key with ' +
     'no rule is a permission-denied nobody can debug, a rule with no writer is dead');
 
   /* …and what the WRITER actually writes, read out of its own source. Pinning
@@ -20253,10 +20255,11 @@ async function testRegistrationFields() {
 
   /* --- the ORCID wording, on BOTH cards --------------------------------- */
   const CHIP = '<span class="oa-opt">(highly recommended but optional)</span>';
-  eq((acct.match(/\(highly recommended but optional\)/g) || []).length, 2,
-    'ORCID: the new wording appears exactly twice — the registration card and the profile card, the two places the iD is asked for');
-  ok(card.includes('\'<label>ORCID iD ' + CHIP + '\''),
-    'registration: the ORCID chip reads "highly recommended but optional"');
+  eq((acct.match(/\(highly recommended but optional\)/g) || []).length, 3,
+    'ORCID: the new wording appears exactly three times — the registration card, the welcome card\'s ' +
+    'connect row and the profile card, which are the three places the iD is asked for');
+  ok(card.includes("'<span class=\"oa-flabel\">ORCID iD ' +\n                  '" + CHIP + "</span>'"),
+    'registration: the ORCID row keeps the chip, on the label above the connect button');
   const orcidAt = acct.indexOf('function orcidFieldHTML(');
   const orcidFn = acct.slice(orcidAt, acct.indexOf('\n  }', orcidAt));
   ok(orcidAt > 0 && orcidFn.includes('<label>ORCID iD ' + CHIP),
@@ -20277,8 +20280,10 @@ async function testRegistrationFields() {
      explicit option can reach it. Pin that rather than the absence of the word. */
   ok(/\(mustAff\s*[\s\S]{0,400}\? '<label>Affiliation' \+/.test(prof),
     'profile card: the compulsory box is behind mustAff, never the default');
-  ok(/var mustAff = !!\(opts && opts\.requireAffiliation\);/.test(acct),
-    'profile card: …and mustAff is nothing but a caller-passed option, so openProfile() alone is never compulsory');
+  ok(/var req = \(opts && opts\.require\) \|\| \[\];/.test(acct)
+    && /var mustName = must\('name'\), mustAff = must\('affiliation'\), mustMail = must\('email'\);/.test(acct),
+    'profile card: …and every compelled box is behind the caller\'s own `require` list, so openProfile() ' +
+    'alone is never compulsory');
   ok(/if \(mustAff && !out\.affiliation\) \{/.test(acct),
     'profile card: the save guard is conditioned on it too, so an ordinary edit can still clear the box');
 
@@ -20326,15 +20331,42 @@ async function testRegistrationFields() {
   const link = linkAt > 0 ? acct.slice(linkAt, acct.indexOf('\n  }', linkAt)) : '';
   ok(linkAt > 0 && !/markAskAffiliation/.test(link),
     'provider sign-up: LINKING a provider to an existing account marks nothing — that account is not new');
-  ok(/localStorage\.removeItem\(ASK_AFF \+ uid\);/.test(acct) && /var askAff = !leaving && takeAskAffiliation\(uid\);/.test(acct),
-    'provider sign-up: the mark is taken exactly once, so a second page load does not ask again');
+  ok(/localStorage\.removeItem\(ASK_AFF \+ uid\);/.test(acct) && /var fresh = !leaving && takeAskAffiliation\(uid\);/.test(acct),
+    'provider sign-up: the mark is taken exactly once, and what is left of its job is the WELCOME wording — ' +
+    'what is missing is what decides the ask (2026-09-12)');
   ok(/if \(dest\) \{ leaving = true; location\.href = dest; \}/.test(acct),
     'provider sign-up: a sign-up that navigates opens no card on the page it is leaving, or the mark is spent for nothing');
-  ok(/requireAffiliation: askAff && !\(state\.profile \|\| \{\}\)\.affiliation/.test(acct),
-    'provider sign-up: …and an account that somehow already has an affiliation is not asked for one');
-  ok(/additionalUserInfo: \{ isNewUser: !!seed\.newUser \}/.test(
-       await readFile(path.join(HERE, '..', '_scraper', '_fake-firebase.js'), 'utf8')),
+  ok(/openProfile\(fresh \|\| !greeted, \{ require: gaps \}\);/.test(acct),
+    'provider sign-up: …and the card is asked for exactly the gaps, so an account that somehow already ' +
+    'has an affiliation is not asked for one');
+  const shimSrc = await readFile(path.join(HERE, '..', '_scraper', '_fake-firebase.js'), 'utf8');
+  ok(/additionalUserInfo: \{ isNewUser: !!seed\.newUser \}/.test(shimSrc),
     'shim: a sign-in answers isNewUser, opt-in per seed, so the browser suite can drive a real sign-up');
+  ok(/u\.providerData\.push\(\{ providerId: id,/.test(shimSrc)
+     && /seed\.orcidId \|\| '0000-0002-1825-0097'/.test(shimSrc)
+     && /if \(seed\.linkFails\) return Promise\.reject/.test(shimSrc),
+    'shim: linkWithPopup really ATTACHES the provider, and an ORCID entry\'s uid IS the iD — a shim ' +
+    'that merely resolved made every connect look like an ORCID that sent nothing back');
+
+  /* --- and the browser suite really drives all of it ---------------------- */
+  const pt = await readFile(path.join(HERE, '..', '_scraper', 'page-test.mjs'), 'utf8');
+  for (const needle of [
+    'gaps (browser): an account that has answered all three owes nothing',
+    'orcid sign-up: the welcome card asks for the affiliation AND an address, and requires both',
+    'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads',
+    'the repeat: …and a new session asks again',
+    'the repeat: a complete account meets no card',
+    'registration card: no sixteen-digit box to fill in, because nobody knows their own iD',
+    'registration card: …a press arms it',
+    'blocked popup: …and the welcome card offers the same button',
+  ]) {
+    ok(pt.includes(needle), `page-test drives it: ${needle.slice(0, 60)}…`);
+  }
+  ok(/if \(!seed\.askProfile\) \{/.test(shimSrc) && /sessionStorage\.setItem\('oaAskProfile:' \+ v\.uid, '1'\)/.test(shimSrc),
+    'shim: a fresh context is a fresh SESSION, so the fixture says who has already been asked — in ' +
+    'the SHIM, because a dozen blocks stand it up without page-test\'s own helper');
+  ok(/askProfile: !!opts\.askProfile/.test(pt),
+    'page-test: …and a block that wants the card asks for it by name');
 
   /* --- and it is announced, and written down ---------------------------- */
   const changelog = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
@@ -20351,6 +20383,215 @@ async function testRegistrationFields() {
   ok(sec.length > 1500 && /2026-09-05/.test(sec) && /required/.test(sec)
      && /spaces/.test(sec) && /NO RULES CHANGE/.test(sec) && /EDIT surface/.test(sec),
     'CLAUDE.md: the section records the owner ruling, the two guards, the profile card exemption and that no rules deploy is needed');
+
+  /* ====================================================================
+     EVERY ROAD IN COLLECTS ALL THREE (owner, 2026-09-12)
+
+     "during registration, no matter the registration way chosen, always ask
+     for name, affiliation and an email. there are users without full data.
+     update and merge."
+     ==================================================================== */
+
+  /* --- the rule, DRIVEN rather than spelled ----------------------------- */
+  const gapSrc = acct.slice(acct.indexOf('function contactAddress('),
+    acct.indexOf('\n  }', acct.indexOf('function looksLikeEmail(')) + 4);
+  ok(/function profileGaps\(/.test(gapSrc) && /function looksLikeEmail\(/.test(gapSrc),
+    'gaps: the three functions were found as one slice');
+  const G = new Function(gapSrc +
+    '; return { gaps: profileGaps, address: contactAddress, email: looksLikeEmail };')();
+
+  eq(G.gaps({ email: 'a@b.edu' }, { firstName: 'Ada', affiliation: 'MIT' }), [],
+    'gaps: an account that has answered all three owes nothing, so nothing opens');
+  eq(G.gaps({}, {}), ['name', 'affiliation', 'email'],
+    'gaps: an account that has answered nothing owes all three, in the order the card asks them');
+  eq(G.gaps({ email: 'a@b.edu' }, { firstName: 'Ada' }), ['affiliation'],
+    'gaps: a GOOGLE sign-up that closed the welcome card owes its affiliation — the row the ' +
+    'owner circled, and the one the once-per-account mark could never ask again');
+  eq(G.gaps({}, { firstName: 'Ada', affiliation: 'MIT' }), ['email'],
+    'gaps: an ORCID sign-up owes an ADDRESS — its OIDC carries no e-mail claim, so the site ' +
+    'had none and nothing anywhere asked for one');
+  eq(G.gaps({}, { firstName: 'Ada', affiliation: 'MIT', contactEmail: 'a@orcid.example' }), [],
+    'gaps: …and once it has given one it owes nothing, so it is never asked again');
+  eq(G.gaps({ email: 'a@b.edu' }, { firstName: '   ', affiliation: '  ' }),
+    ['name', 'affiliation'],
+    'gaps: three spaces is no answer — the same trim the submit guards apply');
+  eq(G.gaps({ email: 'a@b.edu' }, { firstName: 'Ada', lastName: '', affiliation: 'MIT' }), [],
+    'gaps: a LAST name is never what the repeat asks for — a person who goes by one name must ' +
+    'not meet the same card every session for ever');
+
+  eq(G.address({ email: 'signin@b.edu' }, { contactEmail: 'typed@c.edu' }), 'signin@b.edu',
+    'address: the SIGN-IN address wins — it is Firebase\'s own word, and the roster rule pins it');
+  eq(G.address({}, { contactEmail: 'typed@c.edu' }), 'typed@c.edu',
+    'address: …and the one the person gave is what an ORCID account can have instead');
+  eq(G.address({}, {}), '', 'address: and nothing at all is the empty string, never undefined');
+
+  ok(G.email('ada@university.edu') && !G.email('   ') && !G.email('ada@b') && !G.email('a b@c.edu'),
+    'address: the box refuses a value the site could not write to, and a box of spaces, which ' +
+    '`required` accepts');
+
+  /* --- the card asks for exactly those, and compels nothing else --------- */
+  ok(/'<label>E-mail address' \+/.test(prof) && /name="contactEmail"/.test(prof),
+    'profile card: where the sign-in shares no address the e-mail row is a BOX, not a sentence ' +
+    'saying the provider shares none');
+  ok(/\(u\.email\s*\r?\n?\s*\? '<label>E-mail' \+/.test(prof),
+    'profile card: …and where it does share one, that address is shown as the fact it is — never ' +
+    'both, which would ask a question already answered');
+  ok(/\(mustName \? 'required ' : ''\)/.test(prof) && /\(mustMail \? 'required ' : ''\)/.test(prof),
+    'profile card: the name and the address boxes are compelled only by the caller\'s list');
+  ok(/if \(mustName && !out\.firstName\)/.test(acct)
+     && /if \(mustAff && !out\.affiliation\)/.test(acct)
+     && /if \(mustMail && !out\.contactEmail\)/.test(acct),
+    'profile card: each compelled box carries its own submit guard, because `required` is ' +
+    'satisfied by a box holding only spaces');
+  ok(/if \(out\.contactEmail && !looksLikeEmail\(out\.contactEmail\)\)/.test(acct),
+    'profile card: a typed address is checked whether or not it was compelled — a roster listing ' +
+    'an address that bounces is worse than one listing none');
+  ok(/\(firstRun && !req\.length/.test(acct),
+    'profile card: "Not now" is withheld while anything is required, and the X, Escape and the ' +
+    'backdrop still close it — the card asks again next session rather than trapping anybody');
+  ok(/if \(!f\[k\]\) return;/.test(acct),
+    'profile card: a field the card did not RENDER is skipped rather than saved as an empty ' +
+    'string, so an address given once is never blanked by a later edit that never showed it');
+
+  /* --- the ask repeats, once a session, while anything is missing -------- */
+  ok(/var ASK_SESSION = 'oaAskProfile:';/.test(acct)
+     && /sessionStorage\.getItem\(ASK_SESSION \+ uid\)/.test(acct)
+     && /sessionStorage\.setItem\(ASK_SESSION \+ uid, '1'\)/.test(acct),
+    'the ask: the repeat is bounded by a per-account SESSION latch — once per account left the ' +
+    'gap open for ever, once per page would be a modal on every navigation');
+  ok(/if \(!leaving && gaps\.length && takeSessionAsk\(uid\)\)/.test(acct),
+    'the ask: …and it is keyed on WHAT IS MISSING, which is what reaches the accounts that ' +
+    'registered before the rule (the "update" half of the owner\'s message)');
+  ok(/} catch \(e\) \{ return false; }/.test(
+       acct.slice(acct.indexOf('function takeSessionAsk('), acct.indexOf('function openProfile('))),
+    'the ask: a browser that cannot remember being asked answers FALSE, or private mode would ' +
+    'be asked on every single page');
+  ok(/'oaAskProfile:' \+ uid/.test(
+       await readFile(path.join(HERE, '..', 'assets', 'oa-account-delete.js'), 'utf8')),
+    'the ask: deleting an account forgets its latch with the rest of this device\'s memory');
+
+  /* --- it reaches the ROSTER, and says which address is which ------------ */
+  const usersSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-users.js'), 'utf8');
+  ok(/function addressOf\(r\) \{[\s\S]{0,200}r\.email[\s\S]{0,120}r\.contactEmail/.test(usersSrc),
+    'roster: one definition of the address a row can be reached at, sign-in first');
+  ok(/sort: function \(r\) \{ return fold\(addressOf\(r\)\); \}/.test(usersSrc)
+     && /return \[r\.name \|\| '', addressOf\(r\)/.test(usersSrc)
+     && /fold\(addressOf\(r\)\)\.indexOf\(q\)/.test(usersSrc),
+    'roster: …and the column, the sort, Find and the download all read it, so none can disagree ' +
+    'about who is reachable');
+  ok(/class="oa-u-given"/.test(usersSrc),
+    'roster: an address the person GAVE is marked as theirs — the column would otherwise present ' +
+    'it as what the account signs in with, which is the one thing the rules pin');
+  ok(/var short = state\.rows\.filter\(function \(r\) \{ return gapsOf\(r\)\.length; \}\)\.length;/.test(usersSrc)
+     && /' incomplete<\/span>'/.test(usersSrc),
+    'roster: the count line says how many accounts still owe something, counted over the WHOLE ' +
+    'roster so it does not move as the maintainer types into Find');
+  ok(/'incomplete'\.indexOf\(q\) >= 0/.test(usersSrc),
+    'roster: …and typing "incomplete" into Find lists exactly those, so select-all under it ' +
+    'writes to them together');
+  const uiCss = await readFile(path.join(HERE, '..', 'assets', 'oa-ui.css'), 'utf8');
+  ok(/\.oa-u-given,\s*\r?\n\.oa-u-short \{/.test(uiCss) && /var\(--mut, #646c78\)/.test(
+       uiCss.slice(uiCss.indexOf('.oa-u-given,'), uiCss.indexOf('.oa-u-given,') + 600)),
+    'roster: both marks are styled in oa-ui.css alone (v3.css does not restate the roster) and ' +
+    'name their own ink');
+
+  /* --- the key arrived WITH its rule, both ways -------------------------- */
+  ok(/'contactEmail'\];/.test(rules.slice(rules.indexOf('function profileKeys()'),
+       rules.indexOf('function flag('))),
+    'rules: profileKeys() names contactEmail — the profile is the one write an unverified ' +
+    'account may make, so a key with no rule is a save that is refused');
+  ok(/str\('contactEmail', 300\)/.test(rules) && /str\('contactEmail', 200\)/.test(rules),
+    'rules: …and it is bounded on the profile and on the roster row alike');
+  ok(/contactEmail/.test(await readFile(path.join(HERE, '..', '_SETUP-FIREBASE.md'), 'utf8')),
+    'setup: the guide\'s userDirectory row names the sixth key, or the page that tells the ' +
+    'maintainer what the roster holds is quietly out of date');
+  ok(/hasOnly\(\['name', 'email', 'first', 'seen', 'affiliation', 'contactEmail'\]\)/.test(rules),
+    'rules: the roster row names it too — an Admin-SDK key the rules do not name freezes the ' +
+    'row against its own owner, which is the sync-user-directory trap');
+  ok(/request\.resource\.data\.email == request\.auth\.token\.email/.test(rules),
+    'rules: …and the forge-proof pin on `email` is UNTOUCHED: the address a person types is a ' +
+    'field beside it, never that one');
+  for (const k of ['contactEmail']) {
+    ok(new RegExp(`'${k}'`).test(acct) && new RegExp(`'${k}'`).test(usersSrc),
+      `both browser halves name ${k}`);
+  }
+
+  /* --- NOBODY KNOWS THEIR OWN iD, so the row is a BUTTON ---------------- */
+  ok(!/name="orcid" maxlength="25"/.test(acct),
+    'registration: the sixteen-digit box is GONE, not merely hidden — it asked for a number ' +
+    'the reader would have to go and look up mid-registration');
+  ok(/id="oa-reg-orcid"/.test(card) && /Connect your ORCID/.test(card),
+    'registration: …and in its place is a Connect your ORCID button');
+  ok(/aria-pressed="false"/.test(card) && /orcidBtn\.setAttribute\('aria-pressed', orcidWanted \? 'true' : 'false'\);/.test(acct),
+    'registration: the button is a toggle that says which way it is, so an accidental press is ' +
+    'a second press rather than a window nobody wanted');
+  ok(/if \(!created \|\| !orcidWanted\) return;\s*\r?\n\s*return connectOrcid\(created\)\['catch'\]\(function \(\) \{\}\);/.test(acct),
+    'registration: the popup opens the INSTANT the account exists — there is nothing to link a ' +
+    'provider to before that — and it can never cost somebody the account they just made');
+  ok(!/if \(orcid\) prof\.orcid = orcid;/.test(acct),
+    'registration: no typed iD reaches the profile from this card any more, so the iD it ends ' +
+    'up with is the one ORCID vouched for');
+  ok(/\} else if \(\(state\.profile \|\| \{\}\)\.orcidVerified\) \{[\s\S]{0,900}delete out\.orcid;/.test(acct),
+    'welcome card: an EMPTY iD box never blanks a VERIFIED one — the card is drawn before ' +
+    'seedOrcidFromProvider lands, so an ORCID sign-up meets a box while its own iD is in flight');
+
+  /* --- one definition of what connecting an ORCID IS --------------------- */
+  const conAt = acct.indexOf('function connectOrcid(');
+  const con = conAt > 0 ? acct.slice(conAt, acct.indexOf('\n  function linkProvider(', conAt)) : '';
+  ok(conAt > 0 && /linkWithPopup\(new fb\.auth\.OAuthProvider\('oidc\.orcid'\)\)/.test(con)
+     && /orcid: iD, orcidVerified: true, orcidSeeded: true/.test(con),
+    'connectOrcid: the link is what PROVES the iD, so it is stored verified and the reader types nothing');
+  ok(/function connectOrcid\(u\) \{/.test(con) && /state\.user && state\.user\.uid === u\.uid/.test(con),
+    'connectOrcid: it takes the USER rather than reading state.user — at registration the account ' +
+    'is seconds old and the auth event may not have fired — and a link landing after a sign-out ' +
+    'paints nothing onto whoever is here now');
+  const lpAt = acct.indexOf('function linkProvider(');
+  const lp = lpAt > 0 ? acct.slice(lpAt, acct.indexOf('\n  function ', lpAt + 10)) : '';
+  ok(/if \(id === 'oidc\.orcid'\) return connectOrcid\(state\.user\);/.test(lp),
+    'connectOrcid: "Your other accounts" reads the same definition, so the three roads to a ' +
+    'connected ORCID cannot mean three different things');
+  ok(/connectOrcid\(state\.user\)/.test(acct.slice(acct.indexOf("$('#oa-profile-orcid'"),
+       acct.indexOf("$('#oa-profile-orcid'") + 900)),
+    'welcome card: …and so does its own button');
+
+  /* --- the welcome card is where the SECOND press lives ------------------ */
+  ok(/orcidFieldHTML\(p, firstRun\)/.test(acct),
+    'welcome card: the connect row is drawn on the FIRST-RUN card, which is exactly the card that ' +
+    'withholds "Your other accounts" and so had no way to connect at all');
+  ok(/id="oa-profile-orcid"/.test(orcidFn) && /class="oa-orcid-typed"/.test(orcidFn),
+    'welcome card: the button leads and the typed box stays beneath it for the people who know their iD');
+  ok(/\.oa-orcid-connect \{/.test(uiCss) && /\.oa-orcid-typed \{/.test(uiCss),
+    'welcome card: both are styled in oa-ui.css, which is where the modal cards are dressed');
+  ok(/\.oa-orcid-connect \.button \{[\s\S]{0,140}min-height: 42px;/.test(uiCss),
+    'welcome card: …and the button is a 42px thumb target on a phone (rule 3 of _MOBILE-STANDARDS.md)');
+  ok(/auth\/credential-already-in-use/.test(acct.slice(acct.indexOf("$('#oa-profile-orcid'"))),
+    'welcome card: an ORCID that already belongs to another account here is SAID, and pointed at ' +
+    'the merge tool, rather than reaching the reader as a code');
+
+  /* --- disclosed, announced and written down ---------------------------- */
+  const policy = await readFile(path.join(HERE, '..', 'privacy-policy.html'), 'utf8');
+  ok(/shares no\s+e-mail address with us/.test(policy) && /not a way to sign in/.test(policy)
+     && /first time you open it in a browsing session/.test(policy),
+    'privacy policy: the roster paragraph names the address the Site asks for, says it is not a ' +
+    'sign-in, and says when the asking happens');
+  const askEntry = (changelog.updates || []).find((u) => u.id === 'registration-complete-2026-09');
+  ok(askEntry && askEntry.date === '2026-09-12' && askEntry.url
+     && !/—/.test(askEntry.title + askEntry.summary),
+    'changelog.json announces it, dated, with a link and no em dash');
+  ok(/Connect your ORCID button/.test(askEntry ? askEntry.summary : ''),
+    'changelog: …and says the iD is connected with a button rather than typed');
+  const compAt = claude.indexOf('### …and every road in collects all three');
+  const comp = compAt > 0 ? claude.slice(compAt, claude.indexOf('\n## ', compAt)) : '';
+  const idAt = claude.indexOf('### Nobody knows their own ORCID iD, so the row is a BUTTON');
+  const idSec = idAt > 0 ? claude.slice(idAt, claude.indexOf('\n### ', idAt + 10)) : '';
+  ok(idSec.length > 1200 && /connectOrcid\(user\)/.test(idSec) && /ARMS/.test(idSec)
+     && /welcome card/i.test(idSec),
+    'CLAUDE.md: the ORCID section records why the registration card arms rather than opens, and ' +
+    'that one definition serves all three callers');
+  ok(comp.length > 1500 && /2026-09-12/.test(comp) && /ORCID/.test(comp)
+     && /once a session/.test(comp) && /forge/.test(comp),
+    'CLAUDE.md: the section records the owner ruling, the ORCID gap, the repeat and why the ' +
+    'typed address is a field of its own');
 }
 
 if (isMain(import.meta.url)) {

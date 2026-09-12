@@ -106,7 +106,15 @@ service cloud.firestore {
        copy at 96 KB), so its bound is the one field here that is not 300. */
     function profileKeys() {
       return ['firstName', 'lastName', 'affiliation', 'website', 'orcid',
-              'orcidVerified', 'orcidSeeded', 'photo', 'photoSeeded'];
+              'orcidVerified', 'orcidSeeded', 'photo', 'photoSeeded',
+              // A CONTACT ADDRESS THE PERSON TYPED, and only ever asked for
+              // where the sign-in shares none (ORCID's OIDC does not). It is
+              // NOT the address they sign in with and is never treated as
+              // one: nothing authorises on it, isOwner() goes on reading the
+              // token, and the roster keeps its own forge-proof `email`
+              // beside it. Owner, 2026-09-12: every road in must collect a
+              // name, an affiliation and an e-mail.
+              'contactEmail'];
     }
 
     /* A flag is a bool or absent (null reads as cleared, like str()). The
@@ -123,6 +131,7 @@ service cloud.firestore {
       return str('firstName', 300) && str('lastName', 300)
         && str('affiliation', 300) && str('website', 300)
         && str('orcid', 40) && str('photo', 120000)
+        && str('contactEmail', 300)
         && flag('orcidVerified') && flag('orcidSeeded') && flag('photoSeeded');
     }
 
@@ -546,8 +555,15 @@ service cloud.firestore {
       // sibling /lit/ rules hoist isFeedbackAdmin(): a rule calling a function
       // declared after it is not something to leave to chance.
       function rowOk() {
-        return request.resource.data.keys().hasOnly(['name', 'email', 'first', 'seen', 'affiliation'])
+        return request.resource.data.keys().hasOnly(['name', 'email', 'first', 'seen', 'affiliation', 'contactEmail'])
           && str('name', 200) && str('email', 200)
+          // THE ADDRESS THE PERSON GAVE, where the sign-in shares none. It is
+          // self-reported like `name` and `affiliation` beside it and is NEVER
+          // the pinned `email` below: an ORCID account carries no e-mail claim
+          // at all, so before this the roster simply had no way to reach a
+          // sixth of the people on it (owner, 2026-09-12). Nothing authorises
+          // on it, and the roster marks it as the person's own word.
+          && str('contactEmail', 200)
           // The affiliation the account gave on its profile (owner, 2026-09-08:
           // "show their affiliation in that list"), bounded like the profile's
           // own field. Optional, because a profile written before the field

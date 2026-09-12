@@ -230,6 +230,27 @@
   color: var(--ink, #313a45);
 }
 
+/* THE CONNECT-ORCID ROW, on the registration card and on the welcome card.
+   Owner, 2026-09-12: nobody knows their own iD, so the row leads with a
+   button rather than a box wanting sixteen digits. Laid out like a field:
+   label, control, note, each on its own line, so it reads as one of the
+   questions around it rather than as an action bolted on. The button keeps
+   the site's own ghost pill; only the block around it is new, which is what
+   stops this being a fourth way to draw a button. */
+.oa-orcid-connect { margin: 0 0 14px; }
+
+/* The note under it is a line of its own, exactly as under a real field:
+   .oa-opt.oa-fine's block rule is scoped to labels, and this is not one. */
+.oa-orcid-connect .oa-opt.oa-fine { display: block; margin: 6px 0 0; }
+
+/* …and the box for the people who DO know it, kept under the button on the
+   welcome card and deliberately quieter than it: it is the fallback, and a
+   reader who has to be told what an ORCID iD is should meet the button
+   first. The 42px target belongs to the button above, which is the control
+   this row is for. */
+.oa-orcid-typed { margin-top: -4px; }
+.oa-orcid-typed .oa-opt.oa-fine { margin-bottom: 4px; }
+
 .oa-orcid-chip {
   display: inline-block;
   padding: 2px 8px;
@@ -1675,6 +1696,16 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   .oa-combo-group,
   .oa-combo-more,
   .oa-combo-empty { font-size: 13px; }
+
+  /* Rule 3 of _MOBILE-STANDARDS.md for the Connect your ORCID button, which
+     is the one control on either card that is neither a text box nor the
+     submit: a thumb target, and full width, because its label is a sentence
+     and a pill that wraps mid-phrase reads as two buttons. */
+  .oa-orcid-connect .button {
+    display: block;
+    width: 100%;
+    min-height: 42px;
+  }
 }
 
 /* the read-back of what the two name fields will be published as */
@@ -2089,6 +2120,33 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   color: var(--ok, #2e7d5b);
   background-color: var(--ok-soft, #edf7f1);
   border: 1px solid var(--ok, #2e7d5b);
+}
+/* THE ADDRESS THE PERSON GAVE, marked as theirs. An account that signs in
+   with ORCID shares no address at all, so the roster asks for one and shows
+   it here — and it must not read as the address the account signs in with,
+   which is what every other cell in this column is. Muted rather than
+   coloured: it qualifies the address beside it rather than flagging it, and
+   the ink is the token this file already holds to 4.5:1 on every surface it
+   is used on. Inline, so it sits at the end of the address on the one line
+   the cell is held to. */
+.oa-u-given,
+.oa-u-short {
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid var(--line, #dfe3e8);
+  border-radius: 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--mut, #646c78);
+  background-color: var(--bg-3, #f4f5f7);
+}
+/* …and the same mark in the count line, where it says how much of the roster
+   still owes something. No margin there: it is a word in a sentence of
+   counts, separated by the line's own middle dots. */
+.oa-u-short {
+  margin-left: 0;
 }
 /* The two buttons at the end of a row are SMALL: they are pressed once in a
    while and read a hundred times, and at the site's button size they were
