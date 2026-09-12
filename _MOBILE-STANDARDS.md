@@ -113,6 +113,16 @@ marked global.
     colour and ground stay the ones it has everywhere else. `page-test.mjs`
     measures the gap and the matching shape at 390px.
 
+    Above the breakpoint the cell takes **one grid track per button** — the
+    shared `grid-column: auto / -1` spans exactly one, so a bar that declares
+    an action names its own span (`span 3 / -1` on the jobs page, `span 2 /
+    -1` on the home page's candidates list). That is a DESKTOP rule and this
+    one is what undoes it: a phone rule that forgot to put the cell back to
+    `1 / -1` would seat two half-screen buttons side by side. The candidates
+    pair is measured stacked, full width and 42px at 390px AND at 320px in
+    the talks-calendar block; the jobs bar's is measured at 390px by the
+    `MOBILE_PAGES` loop, which walks that page signed out.
+
 12. **Controls that share a row share a line.** The two-per-row pickers'
     cells align to the row's END on phones (`align-self: end` in `v3.css`,
     `flex-end` in the engine's flex bar), so a label that wraps to two lines

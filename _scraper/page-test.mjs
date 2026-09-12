@@ -11740,6 +11740,50 @@ for (const w of [320, 360, 390, 430]) {
       });
       ok(/download talks calendar/i.test(b.text) && !b.disabled && /2 candidates/.test(b.title) && /1 of 3 presenting days/.test(b.title),
         `talks calendar: the button says what it would write (${JSON.stringify(b.title)})`);
+
+      /* BESIDE CLEAR, NOT UNDER IT (owner, 2026-09-12, of the list as it will
+         look after the reveal: "I would like the the two buttons in the red
+         circle to appear in the same line, nicely separated with the right
+         space between them. Why not using that white area on the left of
+         those buttons?").
+
+         The white area was a grid track standing empty: the actions cell took
+         `grid-column: auto / -1`, which spans exactly ONE track, so the two
+         buttons stacked inside a 192px column while the track beside them
+         held nothing. It is `span 2 / -1` for this bar now — one track per
+         button — and what that has to buy is measured here rather than read
+         off the stylesheet: same line, same height, a real gap between them,
+         the download holding the bar's right edge, and the bar no deeper than
+         it was.
+
+         The gap and the edge are the second half of the report. The talks
+         download is 198px of label, so in one 169px track it hung PAST the
+         card's own edge at most desktop widths — a cell wide enough for both
+         buttons is a cell the wider of them fits inside. */
+      const bar = await q.evaluate(() => {
+        const g = (s) => document.querySelector(s).getBoundingClientRect();
+        const t = g('#oa-candidates .oa-talkcal'), c = g('#oa-candidates .oa-clear');
+        const filters = document.querySelector('#oa-candidates .oa-filters');
+        const cell = filters.querySelector('.oa-filter-actions').getBoundingClientRect();
+        const pad = parseFloat(getComputedStyle(filters).paddingRight);
+        const tops = new Set([...filters.children].map((n) => Math.round(n.getBoundingClientRect().top)));
+        return { top: Math.round(t.top), h: Math.round(t.height), w: Math.round(t.width),
+          x: Math.round(t.x), right: Math.round(t.right),
+          clearTop: Math.round(c.top), clearH: Math.round(c.height),
+          clearW: Math.round(c.width), clearRight: Math.round(c.right),
+          cellRight: Math.round(cell.right), barRight: Math.round(filters.getBoundingClientRect().right - pad),
+          rows: tops.size };
+      });
+      ok(Math.abs(bar.top - bar.clearTop) <= 2 && bar.h === bar.clearH,
+        `talks calendar: on ONE line with Clear filters, same height ` +
+        `(${bar.h} vs ${bar.clearH}, tops ${bar.top}/${bar.clearTop})`);
+      ok(bar.x > bar.clearRight && bar.x - bar.clearRight >= 8 && bar.x - bar.clearRight <= 24,
+        `talks calendar: …to its right with a real gap between them (${bar.x - bar.clearRight}px)`);
+      ok(bar.right <= bar.barRight + 1.5 && Math.abs(bar.cellRight - bar.right) <= 1.5,
+        `talks calendar: …and it holds the bar's right edge rather than hanging over it ` +
+        `(right ${bar.right}, card edge ${bar.barRight})`);
+      eq(bar.rows, 2, `talks calendar: the bar is still two rows deep (${bar.rows})`);
+
       const adaHead = await q.$('#oa-candidates #job-tc-ada .oa-card-head');
       await adaHead.click();
       await q.waitForTimeout(250);
@@ -11799,11 +11843,44 @@ for (const w of [320, 360, 390, 430]) {
       await ctx.close();
     }
 
-    /* the phone: the button is a target like every other action */
-    {
-      const { ctx, page: q } = await open({ viewport: { width: 390, height: 844 } });
-      const h = await q.$eval('#oa-candidates .oa-talkcal', (b) => Math.round(b.getBoundingClientRect().height));
-      ok(h >= 42, `talks calendar mobile: the button is a 42px target (got ${h})`);
+    /* THE PHONE: the desktop span must not reach it. Below 641px the actions
+       cell is `1 / -1` and the two buttons STACK full width, which is the
+       recorded standard — side by side each would be half a screen — so what
+       is measured here is that they are still stacked, still full width and
+       still 42px targets, and that nothing in the section runs past the card
+       or scrolls the page sideways. Swept at 320px too: the phone rules are
+       one block and the narrow end is where a full-width pair gives first. */
+    for (const width of [390, 320]) {
+      const { ctx, page: q } = await open({ viewport: { width, height: 844 } });
+      const m = await q.evaluate(() => {
+        const g = (s) => document.querySelector(s).getBoundingClientRect();
+        const t = g('#oa-candidates .oa-talkcal'), c = g('#oa-candidates .oa-clear');
+        const filters = document.querySelector('#oa-candidates .oa-filters');
+        const fr = filters.getBoundingClientRect();
+        const cs = getComputedStyle(filters);
+        const inner = { left: fr.left + parseFloat(cs.paddingLeft), right: fr.right - parseFloat(cs.paddingRight) };
+        const cont = document.querySelector('#candidates .v3-container').getBoundingClientRect();
+        let over = 0;
+        for (const el of document.querySelectorAll('#candidates *')) {
+          const r = el.getBoundingClientRect();
+          if (!r.width || !r.height || getComputedStyle(el).position === 'fixed') continue;
+          if (r.right > cont.right + 1.5 || r.left < cont.left - 1.5) over += 1;
+        }
+        return { th: Math.round(t.height), ch: Math.round(c.height),
+          tw: Math.round(t.width), cw: Math.round(c.width),
+          innerW: Math.round(inner.right - inner.left),
+          stacked: Math.round(t.top) > Math.round(c.top),
+          fits: t.right <= inner.right + 1.5 && t.left >= inner.left - 1.5,
+          over, sideways: document.documentElement.scrollWidth > document.documentElement.clientWidth };
+      });
+      ok(m.th >= 42 && m.ch >= 42,
+        `talks calendar mobile ${width}px: both buttons are 42px targets (${m.ch} and ${m.th})`);
+      ok(m.stacked, `talks calendar mobile ${width}px: they STACK, the desktop span does not reach here`);
+      ok(m.tw === m.cw && Math.abs(m.tw - m.innerW) <= 2,
+        `talks calendar mobile ${width}px: each takes the bar's full width (${m.tw} of ${m.innerW})`);
+      ok(m.fits, `talks calendar mobile ${width}px: …inside the card, not over its edge`);
+      eq(m.over, 0, `talks calendar mobile ${width}px: nothing in the candidates section runs past the container`);
+      ok(!m.sideways, `talks calendar mobile ${width}px: and the page does not scroll sideways`);
       await ctx.close();
     }
   }
