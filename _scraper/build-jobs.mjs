@@ -21,6 +21,8 @@
      --dry-run    do everything, write nothing, print the diff
      --scan       report what is queued and exit
      --selftest   offline checks, no network, no credentials
+     --heal-names re-apply the name canon to the committed data/jobs.json,
+                  offline — run it in the same change as a new alias
    --------------------------------------------------------------------------- */
 
 import { readFile, writeFile } from 'node:fs/promises';
@@ -383,7 +385,126 @@ export async function syncSheetMirrors(col, sheetRows, mirrorDocs, claimed, { no
   return { created, refreshed, deleted, skipped };
 }
 
+/* ---------------------------------------------------------- --heal-names
+
+   THE ALIAS AND THE HEAL HAVE TO LAND TOGETHER, and until this mode existed
+   they could not. data/jobs.json is rebuilt here every twenty minutes, so the
+   rule everywhere else in this repository — add an alias to oa-schools.js,
+   never hand-edit data/ — reads as though the alias alone were enough. It is
+   not, and the gap is the ORDER the workflow runs in: `Offline checks` runs
+   selftest --publishing against the COMMITTED file, before this build has
+   healed anything. Add an alias on its own and that step goes red, the build
+   stops, and NOTHING publishes — which is precisely the outage of 2026-09-12,
+   recreated by the change meant to tidy up after it.
+
+   Its two siblings have had this mode for exactly this reason for months —
+   sync-jobmarket-sheet.mjs for data/jobmarket.json, whose own comment spells
+   the trap out, and import-legacy-tables.mjs for the three archive files.
+   jobs.json was the one file without one, because a twenty-minute build looks
+   like it makes a heal unnecessary. It makes it unnecessary one step too late.
+
+   So this re-applies the very same pure, idempotent healPlace the build
+   applies to its carried rows, over the committed file, with no Firestore and
+   no network: the same answer the next build will produce, just early enough
+   to be committed beside the alias that caused it.                          */
+/* THIS MODE CHANGES SPELLINGS AND NOTHING ELSE, including the shape of a row.
+
+   `healPlace` DELETES an empty `school` or `unit` (its own comment says why:
+   a row whose school was lifted out of the university's box must not lose it
+   again on the way back), and it is applied to the rows the build CARRIES.
+   Most rows are not carried — they are rebuilt from their document by
+   `rowFromSubmission`, which writes `unit: ''`, and `publicRow` keeps an empty
+   string while dropping an undefined one. So healing a rebuilt row with
+   `healPlace` alone would take a key off the served file that the very next
+   build puts back, reporting two innocent postings as edited in the
+   maintainer's change e-mail — the phantom-edit mistake this repository has
+   already made twice. The key set is the build's business; only the names are
+   this mode's. */
+function keepShape(was, now) {
+  const out = { ...now };
+  let changed = false;
+  for (const k of ['school', 'unit']) {
+    if (k in was && !(k in out)) { out[k] = ''; changed = true; }
+  }
+  return changed ? out : now;
+}
+
+async function healNames() {
+  const rows = await readJson(JOBS, null);
+  if (!Array.isArray(rows)) {
+    console.error(`::error::${JOBS} is missing or unreadable — nothing to heal`);
+    return false;
+  }
+
+  /* The APPROVED name corrections, from the committed file alone. The build
+     prefers a fresh Firestore read and falls back to this; here there is no
+     database by design, and the committed overlay is the one every offline
+     reader of the site already applies. */
+  const committedFixes = await readJson(FIXES, null);
+  const fixes = SCHOOLS.normalizeFixes((committedFixes && committedFixes.fixes) || []);
+
+  /* healPlace, then the span, then the build's own order — the same three
+     steps and the same order as the legacy importer's mode of this name. The
+     sort matters even though today's rename moves nothing: displayOrder ties
+     on the INSTITUTION, so an alias that renames a university really can move
+     a row, and a healed file must be byte-what-the-build-would-write. */
+  const healed = rows.map((r) => keepShape(r, healPlace(r, fixes)))
+    .map(withMarketYears)
+    .sort(displayOrder);
+
+  const before = serialise(rows);
+  const after = serialise(healed);
+  if (before === after) {
+    log('data/jobs.json: every posting already names its place the one way');
+    return true;
+  }
+
+  const moved = healed.filter((r) => {
+    const was = rows.find((o) => o.id === r.id);
+    return was && serialise([r]) !== serialise([was]);
+  });
+  for (const r of moved.slice(0, 10)) {
+    log(`  ${r.id}: ` + [r.institution, r.school, r.unit].filter(Boolean).join(' — '));
+  }
+  if (DRY) { log(`--dry-run: ${moved.length} posting(s) would be corrected`); return true; }
+
+  await writeFile(JOBS, after);
+
+  /* THE META'S `generated` IS CARRIED, NOT RE-STAMPED. It means "when the
+     build last read the sources", and this mode reads none of them: the edit
+     echo stands down against it (oa-fresh.js) and the account purge treats it
+     as proof a build has run since a withdrawal (purge-accounts.mjs, gate 1).
+     A rename is not that evidence, and claiming it would be the one dishonest
+     byte in an otherwise pure heal. The tallies it holds are of year, type,
+     level, country and characteristics — none of which a name heal touches —
+     so in practice this file does not move at all. */
+  const meta = await readJson(META, {});
+  const metaText = JSON.stringify(
+    buildMeta(healed, { generated: meta.generated || '' }), null, 1) + '\n';
+  if (metaText !== JSON.stringify(meta, null, 1) + '\n') await writeFile(META, metaText);
+
+  /* The form's option lists are DERIVED from these rows, so a heal that left
+     them alone would have the pickers offering the spelling the postings no
+     longer use. Same inputs as the build's own call, `generated` carried for
+     the reason above. */
+  const dir = await readJson(DIRECTORY, null);
+  const seeded = [...(Array.isArray(dir) ? dir : []), ...institutionSeed()];
+  const vocabBefore = await readJson(VOCAB, null);
+  const vocab = buildVocab(healed, {
+    generated: (vocabBefore && vocabBefore.generated) || '', directory: seeded, fixes,
+  });
+  if (!sameVocab(vocab, vocabBefore)) await writeFile(VOCAB, serialiseVocab(vocab));
+
+  log(`data/jobs.json: corrected ${moved.length} posting(s)`);
+  /* data/directory.json is merged from these rows by its own builder, which is
+     offline too — so it is the other half of the same change, and saying so
+     here is cheaper than a second trap. */
+  log('now run: node _scraper/build-directory.mjs && node _scraper/build-netmap.mjs');
+  return true;
+}
+
 async function main() {
+  if (argv.has('--heal-names')) process.exit(await healNames() ? 0 : 1);
   if (argv.has('--selftest')) {
     /* The WHOLE suite, not runSelftest()'s three-suite subset — running this
        flag used to skip the merge/served-file/migration checks while printing

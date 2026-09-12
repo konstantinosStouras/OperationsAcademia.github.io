@@ -136,7 +136,17 @@
        so the value names both, which is what this table is for. */
     'Bauer Human-Centered AI Institute':
       { school: 'C. T. Bauer College of Business',
-        unit: 'Department of Decision and Information Sciences' }
+        unit: 'Department of Decision and Information Sciences' },
+    /* A SLASH, and both halves are names the site already publishes: the
+       vocabulary carries Healthcare Management as a department of the Jindal
+       school, so this is a join rather than a judgement about what anything
+       is called. It goes here rather than in SCOPED_SCHOOL_ALIASES beside
+       Purdue's slash pair because Purdue's two halves are one school under
+       its old name and its new one, where this one names a school AND a
+       department — collapsing it to the school alone would throw the
+       department away, and the row that carries it gave no other. */
+    'Naveen Jindal School of Management/Healthcare Management Area':
+      { school: 'Naveen Jindal School of Management', unit: 'Healthcare Management' }
   };
 
   /* A value that names the UNIVERSITY AND A SCHOOL in the university's own
@@ -330,6 +340,12 @@
     'University of Nebraska - Lincoln': { 'College of Business Administration': 'College of Business' },
     'University of New South Wales': { 'Business School': 'UNSW Business School' },
     'University of Oregon': { 'Lundquist College of Business': 'Charles H. Lundquist College of Business' },
+    /* The school's own name with its university appended, which is the campus
+       note the rule above names: the short form is already in SCHOOL_LIST, so
+       the long one was a second spelling of a school the site already lists.
+       Two postings arrived under it. */
+    'University of San Diego': {
+      'Knauss School of Business at the University of San Diego': 'Knauss School of Business' },
     'University of Southern California': { 'Marshall School of Business (incl. Leventhal)': 'Marshall School of Business' },
     'University of Toronto': { 'Rotman School of Management': 'Joseph L. Rotman School of Management' },
     'University of Illinois at Chicago': { 'College of Business Administration': 'College of Business' },

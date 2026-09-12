@@ -8002,9 +8002,10 @@
   "lng": -97.7375539
  },
  {
-  "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management-healthcare-management-are",
+  "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__healthcare-management",
   "institution": "The University of Texas at Dallas",
-  "school": "Naveen Jindal School of Management/Healthcare Management Area",
+  "school": "Naveen Jindal School of Management",
+  "department": "Healthcare Management",
   "type": "Business School",
   "country": "United States",
   "characteristics": [
@@ -10953,28 +10954,12 @@
   "type": "Business School",
   "country": "United States",
   "characteristics": [
-   "Masters",
    "MBA"
   ],
   "sources": [
    "postings"
   ],
-  "n": 2,
-  "lastPosted": "2025-08-14"
- },
- {
-  "id": "university-of-san-diego__knauss-school-of-business-at-the-university-of-san-diego",
-  "institution": "University of San Diego",
-  "school": "Knauss School of Business at the University of San Diego",
-  "type": "Business School",
-  "country": "United States",
-  "characteristics": [
-   "MBA"
-  ],
-  "sources": [
-   "postings"
-  ],
-  "n": 2,
+  "n": 4,
   "lastPosted": "2025-10-17"
  },
  {

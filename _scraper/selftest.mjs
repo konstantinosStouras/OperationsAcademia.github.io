@@ -3514,6 +3514,47 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
     return p.institution !== r.institution || p.school !== (r.school || '') || p.unit !== (r.unit || '');
   }).map((r) => r.id);
   eq(badSheet, [], 'data/jobmarket.json: and so do the tracking sheet\'s postings');
+
+  /* ...AND jobs.json GETS THE HEAL MODE ITS TWO SIBLINGS ALREADY HAD.
+
+     The rule this whole function enforces is "add an alias, never hand-edit
+     data/", and for the two files above it is complete: each has a
+     --heal-names that re-applies the canon offline, so the alias and the
+     healed rows land in ONE commit. data/jobs.json had none, on the reading
+     that a twenty-minute build makes a heal unnecessary.
+
+     It makes it unnecessary one step too late. The build runs
+     `selftest --publishing` against the COMMITTED tree before it rebuilds
+     anything, so an alias pushed on its own turns that step red and the build
+     stops with NOTHING published — the 2026-09-12 outage, recreated by the
+     tidy-up after it. The step order below is pinned for that reason: it is
+     what makes the mode necessary, and moving it would quietly make this
+     whole paragraph wrong. */
+  const bj = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/if \(argv\.has\('--heal-names'\)\) process\.exit\(await healNames\(\) \? 0 : 1\);/.test(bj),
+    'build-jobs.mjs answers --heal-names');
+  ok(bj.indexOf("argv.has('--heal-names')") < bj.indexOf('const db = await firestore();'),
+    '...before it opens a database, so the mode really is offline');
+  ok(/const healed = rows\.map\(\(r\) => keepShape\(r, healPlace\(r, fixes\)\)\)/.test(bj),
+    '...and heals with healPlace, the same function the build applies to its carried rows');
+  /* SPELLINGS, AND NOT THE KEY SET. healPlace deletes an empty school or unit;
+     a row rebuilt from its document by rowFromSubmission carries `unit: ''`,
+     and publicRow keeps an empty string while dropping an undefined one. So a
+     heal that let the delete through would take a key off the served file that
+     the next build puts straight back, naming innocent postings as edited in
+     the change e-mail. */
+  ok(/for \(const k of \['school', 'unit'\]\) \{\s*if \(k in was && !\(k in out\)\)/.test(bj),
+    '...restoring a key healPlace drops, so the diff is names and nothing else');
+  ok(/buildMeta\(healed, \{ generated: meta\.generated \|\| '' \}\)/.test(bj),
+    '...carrying the meta\'s `generated` rather than claiming a build has run');
+
+  const buildYml = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-jobs-build.yml'), 'utf8');
+  /* the RUN LINES, not a mention: the step comments name build-all.mjs too,
+     and a pin that matched one of those would go red on a reworded comment */
+  ok(buildYml.indexOf('run: node _scraper/selftest.mjs --publishing')
+     < buildYml.indexOf('node _scraper/build-all.mjs'),
+    'and the build checks the committed tree BEFORE it rebuilds it, which is why the mode exists');
 }
 
 /* -------------------------------------------- the seed of the world's schools
