@@ -1339,7 +1339,13 @@
           if (!v) return;
           // a value this filter used to publish under another name, so a link
           // someone bookmarked or shared still selects what they meant
-          if (f.legacyValues && f.legacyValues[v]) v = f.legacyValues[v];
+          /* an OWN-property lookup: `legacyValues` is the countries ALIASES
+         object literal, so it inherits Object.prototype and
+         `?country=constructor` resolved truthy and was adopted as the filter's
+         value — a chip reading "function Object() { [native code] }", written
+         back into the address bar by syncUrl. The same guard oa-countries.js
+         uses on its own tables. */
+      if (f.legacyValues && Object.prototype.hasOwnProperty.call(f.legacyValues, v)) v = f.legacyValues[v];
           sel[f.key].add(v);
         };
         if (all.length > 1) {
@@ -1352,7 +1358,15 @@
           // older "a|b" join that links already in the wild still use. The data
           // settles it: readUrl runs after the rows land, so a string the facet
           // really holds is taken whole.
-          all[0].split('|').forEach(add);
+          /* …and a `type: 'one'` filter still takes ONE value, the rule its
+             sibling branch above already applies. Left out here, the archive's
+             single-select Entry level read two values from a legacy pipe link
+             while drawing one radio, and syncUrl then wrote the two-parameter
+             form — which readUrl reads under the guarded rule, so RELOADING
+             the address the engine itself had just written dropped the list
+             from 521 postings to 31 with the reader having touched nothing. */
+          var parts = all[0].split('|');
+          if (f.type === 'one') add(parts[parts.length - 1]); else parts.forEach(add);
         }
       });
       var pg = parseInt(p.get(prefix + 'page'), 10);

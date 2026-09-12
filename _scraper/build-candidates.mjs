@@ -465,7 +465,11 @@ async function main() {
     log('the dataset is already up to date — writing nothing.');
   } else {
     log(`candidates.json: +${added} new, ${updated} updated, ${removed} removed  (${projected.length} served)`);
-    for (const f of fresh) log(`  + ${f.row.ref || f.row.id}`);
+    /* the FIRESTORE id as the fallback, never the row id: a candidate row's id
+     is `${year}-${slug(last)}-${slug(first)}`, i.e. the person's name, and this
+     log is the Actions log of a public repository. Every sibling line in this
+     file already falls back to `d.id` for exactly that reason. */
+  for (const f of fresh) log(`  + ${f.row.ref || f.id}`);
     if (DRY) {
       log('--dry-run: not writing.');
     } else {

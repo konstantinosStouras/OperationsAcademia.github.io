@@ -445,10 +445,37 @@ async function testServedFile() {
      cache a sentence captured from an employer's page, and "apply to
      hr@example.edu by 15 October 2026" is an ordinary thing for one to say.
      They strip it where they store it now; this is the belt to that braces. */
+  const EMAILISH = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/;
   const dataDir = path.join(HERE, '..', 'data');
   for (const f of readdirSync(dataDir).filter((n) => n.endsWith('.json')).sort()) {
     const raw = readFileSync(path.join(dataDir, f), 'utf8');
-    ok(!/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/.test(raw),
+    /* CANDIDATES ARE THE ONE EXEMPTION, AND IT IS ONE FIELD BY NAME.
+       post-a-candidate offers "Show my e-mail address on my public profile,
+       so hiring committees can contact me directly"; the build honours it and
+       `email` is in CANDIDATE_PUBLIC_FIELDS. So the blanket sweep and that
+       opt-in contradict each other outright, and the contradiction is ARMED:
+       the file is `[]` only because the reveal gate holds it, and the first
+       build after 14:00 UTC on the reveal day writes those rows. A red
+       re-check skips the Commit step, so NOTHING would commit — not jobs, not
+       placements, not the directory — which is the "publishing has stopped"
+       outage this file records four times.
+
+       The guard is narrowed rather than the feature, and narrowed as far as
+       it can be: every OTHER field of every row is still swept, so an address
+       that reached a position, a research area or a talk title (which
+       `stripCandidateEmails` now removes at ingest) still fails the build. */
+    if (f === 'candidates.json') {
+      const rows = JSON.parse(raw);
+      ok(Array.isArray(rows), 'data/candidates.json is a list');
+      for (const r of rows) {
+        const rest = { ...r };
+        delete rest.email;
+        ok(!EMAILISH.test(JSON.stringify(rest)),
+          `data/candidates.json row ${r.id}: no address outside the opted-in \`email\` field`);
+      }
+      continue;
+    }
+    ok(!EMAILISH.test(raw),
       `data/${f} carries no e-mail address — everything here is served to anyone`);
   }
 
@@ -12539,11 +12566,20 @@ async function testCandidateReveal() {
       Sunday: { at: '08:00', session: 'SA10', room: 'Room 1', title: 'Second' },
       Monday: { at: '10:45', session: 'MB12', room: 'Moscone Center, Room 2004', title: 'First' } } }, inject);
     const trows = cfg.rows(talky);
+    /* THE LABEL IS STATIC AND THE DAY IS IN THE VALUE. It read
+       'Talk on <day>' — the one row label on the site built from the row
+       rather than from the page's own wording — and `lockPreview` makes a
+       locked card's blurred strip out of LABELS, so a signed-out reader's
+       card disclosed the candidate's INFORMS days, which is one of the three
+       things the gate withholds. The open card still reads the same facts in
+       the same order. */
     eq(trows.map((r) => r.label).slice(0, 4),
-      ['Research area(s)', 'Presenting at INFORMS', 'Talk on Monday', 'Talk on Sunday'],
-      'candcard: one "Talk on <day>" row per day with details, in the order the days were given');
-    eq(trows[2].value, '10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
-      'candcard: the talk row reads time, session, room, title');
+      ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk', 'INFORMS talk'],
+      'candcard: one talk row per day with details, in the order the days were given');
+    eq(trows[2].value, 'Monday · 10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
+      'candcard: the talk row names its day, then time, session, room, title');
+    ok(!trows.some((r) => /Monday|Tuesday|Sunday|Wednesday/.test(r.label || '')),
+      'candcard: …and no row LABEL names a day, so the locked card’s strip of labels cannot disclose one');
     eq(trows.length, rows.length + 2, 'candcard: …and nothing else moved');
   }
   eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' }, R.formatDay),
@@ -20259,10 +20295,50 @@ async function testRegistrationFields() {
     'registration: the ORCID chip reads "highly recommended but optional"');
   const orcidAt = acct.indexOf('function orcidFieldHTML(');
   const orcidFn = acct.slice(orcidAt, acct.indexOf('\n  }', orcidAt));
-  ok(orcidAt > 0 && orcidFn.includes('<label>ORCID iD ' + CHIP),
+  ok(orcidAt > 0 && orcidFn.includes('ORCID iD \' +\n        \'' + CHIP),
     'profile card: orcidFieldHTML says the same thing, so the two cards cannot tell a reader different things');
   ok(!/ORCID iD <span class="oa-opt">\(optional\)<\/span>/.test(acct),
     'ORCID: no card still calls the iD plainly optional');
+
+  /* --- the button, because nobody knows their own iD ---------------------
+     Owner, 2026-09-12: "here users dont know their ORCID. Instead, have a
+     button to connect it for sure and directly." A box asking for sixteen
+     digits is a question most readers cannot answer, so the field leads with
+     the press that answers it FOR them and keeps the box underneath. What has
+     to stay true: the button is in the FIELD (not only in the other-accounts
+     section, which the WELCOME card does not draw at all); it runs the one
+     link call rather than a second copy of it; it is withheld from an account
+     that already signs in with ORCID; and the box survives, since a typed iD
+     is still a real route and the only way to correct or clear one. */
+  ok(orcidFn.includes('id="oa-orcid-connect"') && orcidFn.includes('PROVIDER.orcid.icon'),
+    'ORCID: the field itself carries a connect button, wearing the same mark as the sign-in pill');
+  ok(/var canConnect = !hasProvider\('oidc\.orcid', u\);/.test(orcidFn),
+    'ORCID: …withheld from an account already signing in with ORCID, which linkWithPopup would only refuse');
+  ok(orcidFn.includes('<input name="orcid"'),
+    'ORCID: …and the box stays, for the reader who knows the number and for clearing one');
+  ok(/function orcidFieldHTML\(p, u\)/.test(acct) && /orcidFieldHTML\(p, u\) \+/.test(acct),
+    'ORCID: the field is told which account it is drawing, so it can answer that question at all');
+  ok(/\$\('#oa-orcid-connect', wrap\);[\s\S]{0,160}linkProvider\('oidc\.orcid', wrap, closeProfile\)/.test(acct),
+    'ORCID: the button runs linkProvider — the one definition — never a second copy of the link flow');
+  ok(!/setTimeout\(function \(\) \{ openProfile\(\); \}, 900\)/.test(acct)
+     && /function repaintAfterLink\(wrap, u, closeProfile\)/.test(acct)
+     && /repaintAfterLink\(wrap, linked \|\| state\.user, closeProfile\)/.test(acct),
+    'ORCID: a link repaints the field and the rows IN PLACE — reopening the card threw away unsaved ' +
+    'typing, and redrew a WELCOME card as an ordinary one, which is a press the reader now makes inside the form');
+  {
+    const reg = card.slice(card.indexOf('<label>ORCID iD'), card.indexOf('oa-terms-row'));
+    ok(/Do not know it\?/.test(reg) && /data-provider="orcid"/.test(reg),
+      'registration: the card that CANNOT link says where the button is instead — the account does not exist yet, ' +
+      'so linkWithPopup has nothing to attach to and a sign-in popup here would make an ORCID account instead');
+    ok(!/id="oa-orcid-connect"/.test(reg),
+      'registration: …and does not grow a connect button it could not honour');
+  }
+  for (const f of ['oa-ui.css', 'v3.css']) {
+    const css = await readFile(path.join(HERE, '..', 'assets', f), 'utf8');
+    ok(/oa-orcid-connect/.test(css) && /\.oa-orcid-type/.test(css),
+      f + ': the ORCID field is styled here too — a rule in one stylesheet alone is invisible on the ' +
+      'live site or lost on the next page');
+  }
 
   /* --- the profile card is deliberately NOT held to the new rule -------- */
   const profAt = acct.indexOf('\'<form id="oa-profile-form">\'');

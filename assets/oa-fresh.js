@@ -228,12 +228,7 @@
       out.furtherInfoUrl = universitiesLink(out.institution);
     }
 
-    /* stripRowEmails: every own string field except the URLs. */
-    for (k in out) {
-      if (!Object.prototype.hasOwnProperty.call(out, k)) continue;
-      if (typeof out[k] !== 'string' || /Url$/.test(k)) continue;
-      if (out[k].indexOf('@') >= 0) out[k] = out[k].replace(EMAIL_RX, '[e-mail removed]');
-    }
+    stripEchoEmails(out);
 
     /* DATED FROM ITS APPROVAL, because that is the day it reached the site and
        the day the e-mail alerts window on. A grandfathered document — whose
@@ -322,6 +317,24 @@
    * carrying a fresh FILE upload echoes no advert link, because the build
    * replaces it with the Drive link and until then the posting has none.
    */
+  /* stripRowEmails, for a map this file is about to echo: every own string
+     field except the URLs. BOTH echo producers call it — `approvedRow` always
+     did, `echoFields` did not, and the omission was not merely cosmetic. The
+     build strips an address out of `comments` and the apply-by note at ingest,
+     so an echoed raw value can NEVER equal the served one — which makes the
+     `landed` stand-down unreachable and leaves the card painting the address
+     back OVER the value the build published. That is the same reasoning the
+     country fix already carries a few lines up, applied to the fields that
+     sweep missed. */
+  function stripEchoEmails(map) {
+    for (var k in map) {
+      if (!Object.prototype.hasOwnProperty.call(map, k)) continue;
+      if (typeof map[k] !== 'string' || /Url$/.test(k)) continue;
+      if (map[k].indexOf('@') >= 0) map[k] = map[k].replace(EMAIL_RX, '[e-mail removed]');
+    }
+    return map;
+  }
+
   function echoFields(doc, opts) {
     var o = opts || {};
     /* INJECTED, like approvedRow's: this file keeps no dependency, and the
@@ -359,7 +372,9 @@
     if (f.applyByDate && OPEN_ENDED.test(f.applyBy)) f.applyByDate = '';
     if (f.reviewDate && f.applyByDate && f.reviewDate >= f.applyByDate) delete f.reviewDate;
     if (!doc.adUploadPath) f.adUrl = doc.adUrl || '';
-    return f;
+    /* last, over the whole map, so the two rules above run on what the poster
+       typed and the echo carries what the build will publish */
+    return stripEchoEmails(f);
   }
 
   /* --------------------------------------------------------------- overlay */

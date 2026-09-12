@@ -297,7 +297,15 @@
   function profilePhoto(u, allowHint) {
     var own = u && state.user && u.uid === state.user.uid;
     var p = own ? state.profile : null;
-    if (p && p.photo) return p.photo;
+    /* A LOADED PROFILE IS THE WHOLE ANSWER, which is what this function's own
+       docstring says and what `photoSeeded` was added to make true. Falling
+       through to the provider's picture meant Remove wrote `photo: ''` and
+       every surface went on painting `u.photoURL` — and the Remove button,
+       drawn only when `p.photo` is set, vanished with it, leaving the account
+       showing a picture it had no control to take down. seedProfileFromUser
+       still restores a provider picture for a profile that was never seeded,
+       so nothing legitimate is lost. */
+    if (p) return p.photo || '';
     if (u && u.photoURL) return u.photoURL;
     /* Nothing known yet — the restore window, and the ONLY place the
        remembered picture may speak. Three conditions, each load-bearing:
@@ -1365,7 +1373,7 @@
               : 'You sign in with ' + esc(providerSummary(u)) +
                 ', which does not share an e-mail address with us.') +
             '</span></label>' +
-          orcidFieldHTML(p) +
+          orcidFieldHTML(p, u) +
           '<div class="oa-auth-actions">' +
             '<button type="submit" class="button blue">Save profile</button>' +
             (firstRun && !mustAff
@@ -1508,10 +1516,27 @@
     });
   }
 
-  /* ORCID iD: a chip when an ORCID sign-in vouched for it, an input otherwise.
-     It is optional, and the note says what recording it buys — an account is
-     otherwise invisible to the duplicate check until the day it is merged. */
-  function orcidFieldHTML(p) {
+  /* ORCID iD: a chip when an ORCID sign-in vouched for it; otherwise the
+     CONNECT BUTTON FIRST and the box under it.
+
+     Owner, 2026-09-12: "here users dont know their ORCID. Instead, have a
+     button to connect it for sure and directly." A bare box asking for sixteen
+     digits is a question most readers cannot answer from memory, so they skip
+     it — and the iD is the one identifier that lets this site recognise the
+     same person across two registrations. One press signs them in at orcid.org
+     and fills the iD in VERIFIED, which is the answer the site actually wants;
+     the machinery was already here (linkProvider), it was simply sitting in
+     the "Your other accounts" section below the form, framed as a second way
+     in rather than as the way to answer this question, and drawn nowhere at
+     all on the WELCOME card, which is the first card a new account meets.
+
+     The box stays. A typed iD is still a real route — `accountKeys/orcid:<iD>`
+     is claimed from `profiles.orcid` whatever put it there — and it is the
+     only way to CORRECT or CLEAR one. The button is withheld where the account
+     already signs in with ORCID: linkWithPopup would answer
+     `provider-already-linked`, and seedOrcidFromProvider has filled the iD in
+     already. */
+  function orcidFieldHTML(p, u) {
     if (p.orcid && p.orcidVerified) {
       return '<div class="oa-field-static">' +
         '<span class="oa-flabel">ORCID iD</span>' +
@@ -1520,11 +1545,24 @@
         '<span class="oa-opt oa-fine">You signed in with ORCID, so we know this iD is yours.</span>' +
         '</div>';
     }
-    return '<label>ORCID iD <span class="oa-opt">(highly recommended but optional)</span>' +
-      '<input name="orcid" maxlength="40" placeholder="0000-0002-1825-0097" ' +
-        'value="' + esc(p.orcid || '') + '">' +
-      '<span class="oa-opt oa-fine">Recording it lets us recognise you if you ever sign in ' +
-        'with ORCID instead, rather than starting you a second account.</span></label>';
+    var canConnect = !hasProvider('oidc.orcid', u);
+    return '<div class="oa-orcid-field">' +
+      '<span class="oa-flabel">ORCID iD ' +
+        '<span class="oa-opt">(highly recommended but optional)</span></span>' +
+      (canConnect
+        ? '<button type="button" class="oa-auth-provider oa-orcid-connect" ' +
+            'id="oa-orcid-connect">' + PROVIDER.orcid.icon +
+            '<span>Connect my ORCID</span></button>' +
+          '<span class="oa-opt oa-fine">One press, a sign-in at orcid.org, and we fill your ' +
+            'iD in and mark it verified. You do not need to know the number.</span>'
+        : '') +
+      '<label class="oa-orcid-type">' +
+        (canConnect ? 'Or type it, if you know it' : 'Your iD') +
+        '<input name="orcid" maxlength="40" autocomplete="off" ' +
+          'placeholder="0000-0002-1825-0097" value="' + esc(p.orcid || '') + '">' +
+        '<span class="oa-opt oa-fine">Recording it lets us recognise you if you ever sign in ' +
+          'with ORCID instead, rather than starting you a second account.</span></label>' +
+      '</div>';
   }
 
   /* The account's OTHER ways in, and the way out of having two of them.
@@ -1573,22 +1611,56 @@
     if (open) open.addEventListener('click', function () { closeProfile(); openMerge(); });
 
     var lo = $('#oa-link-orcid', wrap);
-    if (lo) lo.addEventListener('click', function () { linkProvider('oidc.orcid', wrap); });
+    if (lo) lo.addEventListener('click', function () { linkProvider('oidc.orcid', wrap, closeProfile); });
     var lg = $('#oa-link-google', wrap);
-    if (lg) lg.addEventListener('click', function () { linkProvider('google.com', wrap); });
+    if (lg) lg.addEventListener('click', function () { linkProvider('google.com', wrap, closeProfile); });
+
+    /* The ORCID button that sits IN the form, beside the iD box, runs the SAME
+       call as the row below it. Two copies of one link flow is the drift every
+       shared definition in this repository exists to prevent — and the two
+       would be answering one question, which is worse. */
+    var fc = $('#oa-orcid-connect', wrap);
+    if (fc) fc.addEventListener('click', function () { linkProvider('oidc.orcid', wrap, closeProfile); });
+  }
+
+  /* What a successful link made stale on an OPEN profile card: the ORCID field
+     (an iD we have just been given is a verified chip, not a box to type in)
+     and the connect rows below it (providerData has changed). Repainted IN
+     PLACE, and nothing else touched.
+
+     Reopening the whole card was the old answer and is no longer safe. The form
+     may hold unsaved typing — a name half corrected — and now holds a link
+     button of its own, so the press that reopens it is a press the reader made
+     INSIDE the form; and `openProfile()` with no arguments redraws a WELCOME
+     card as an ordinary one, losing the compulsory-affiliation branch a brand
+     new provider account is there to answer. */
+  function repaintAfterLink(wrap, u, closeProfile) {
+    var p = state.profile || {};
+    function swap(sel, html) {
+      var old = $(sel, wrap);
+      if (!old || !old.parentNode) return;
+      var box = document.createElement('div');
+      box.innerHTML = html;
+      if (box.firstChild) old.parentNode.replaceChild(box.firstChild, old);
+    }
+    swap('.oa-orcid-field', orcidFieldHTML(p, u));
+    swap('.oa-acct-other', otherAccountsHTML(p, u));
+    wireOtherAccounts(wrap, closeProfile || function () {});
   }
 
   /* Attach a second sign-in method to THIS account. This is the PREVENTION half
      of the duplicate problem: an account reachable by both buttons can never
      have a second one created for it. */
-  function linkProvider(id, wrap) {
+  function linkProvider(id, wrap, closeProfile) {
     var msg = $('#oa-profile-msg', wrap);
+    var linked = null;
     msg.className = 'oa-auth-msg';
     msg.textContent = 'Opening the sign-in window…';
     OAFB.ready().then(function (fb) {
       var p = id === 'google.com' ? new fb.auth.GoogleAuthProvider()
                                   : new fb.auth.OAuthProvider(id);
       return state.user.linkWithPopup(p).then(function (cred) {
+        linked = (cred && cred.user) || state.user;
         // A fresh ORCID link just PROVED the iD, so record it verified on the
         // profile (upgrading any hand-typed, unverified one) — this is what
         // "connect" adds beyond a second way in, and what lets the duplicate
@@ -1604,9 +1676,11 @@
       });
     }).then(function () {
       msg.className = 'oa-auth-msg is-ok';
-      msg.textContent = 'Done — that button now signs in to this account.';
-      // providerData changed, so the rows above it are stale.
-      setTimeout(function () { openProfile(); }, 900);
+      msg.textContent = id === 'oidc.orcid' && (state.profile || {}).orcid
+        ? 'Connected — your ORCID iD is on your profile, and we can vouch for it.'
+        : 'Done — that button now signs in to this account.';
+      // providerData changed, and so may the iD, so both go stale together.
+      repaintAfterLink(wrap, linked || state.user, closeProfile);
     }).catch(function (err) {
       var c = (err && err.code) || '';
       if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') {
@@ -1832,7 +1906,23 @@
           (registering
             ? '<label>ORCID iD <span class="oa-opt">(highly recommended but optional)</span>' +
                 '<input type="text" name="orcid" maxlength="25" autocomplete="off" ' +
-                  'placeholder="0000-0002-1825-0097"></label>' +
+                  'placeholder="0000-0002-1825-0097">' +
+                /* The account does not exist yet, so there is nothing here to
+                   attach ORCID to — `linkWithPopup` needs a signed-in user, and
+                   a sign-in popup on this card would create an ORCID ACCOUNT
+                   rather than fill this box in. So the registration card says
+                   where the button is instead of growing one it cannot honour:
+                   the ORCID pill below creates the account WITH the iD already
+                   verified, and Edit account carries the connect button for
+                   everybody else. Drawn only where that pill really is on the
+                   card, or it would point at nothing. */
+                (third.indexOf('data-provider="orcid"') !== -1
+                  ? '<span class="oa-opt oa-fine">Do not know it? Use the ORCID button below ' +
+                      'to create your account and we fill the iD in for you, verified. You ' +
+                      'can also connect ORCID later from Edit account.</span>'
+                  : '<span class="oa-opt oa-fine">Do not know it? Leave it — you can connect ' +
+                      'ORCID later from Edit account, which fills it in for you.</span>') +
+                '</label>' +
               '<label class="oa-terms-row"><input type="checkbox" name="terms">' +
                 '<span>I agree to the <a href="/terms-and-conditions" target="_blank" ' +
                   'rel="noopener">Terms of Use</a> and <a href="/privacy-policy" ' +

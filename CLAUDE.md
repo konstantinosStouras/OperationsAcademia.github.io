@@ -7899,6 +7899,177 @@ scan cannot see it, and `updateTime` moves while `createTime` never does. See
 "The July roll takes the closed season's markers and handles with it" under
 the forum.
 
+## Connecting ORCID is a BUTTON, because nobody knows their own iD
+
+Owner, 2026-09-12, of the "ORCID iD (highly recommended but optional)" box:
+*"here users dont know their ORCID. Instead, have a button to connect it for
+sure and directly."*
+
+The machinery was already here and in the wrong place. `linkProvider('oidc.orcid')`
+has written `{ orcid, orcidVerified, orcidSeeded }` since the connect rows
+shipped — but it sat in the **"Your other accounts"** section BELOW the form,
+framed as a second way IN rather than as the way to answer the question the box
+above was asking, and `otherAccountsHTML` is not drawn on the WELCOME card at
+all, which is the first card a new account ever meets. So the one control that
+could fill the field in was invisible on the card where the field is first put.
+
+**The field leads with the press and keeps the box.** `orcidFieldHTML(p, u)`
+draws the heading, then the connect button wearing the sign-in pill's own ORCID
+mark, then "Or type it, if you know it" over the input. The box stays because a
+typed iD is still a real route — `accountKeys/orcid:<iD>` is claimed from
+`profiles.orcid` whatever put it there — and because it is the only way to
+CORRECT or CLEAR one. The button is withheld where the account already signs in
+with ORCID: `linkWithPopup` would answer `provider-already-linked`, and
+`seedOrcidFromProvider` has filled the iD in already.
+
+**ONE definition of the link flow.** The button in the field runs the same
+`linkProvider` as the row below it; a second copy of that call is the drift every
+shared definition here exists to prevent, and the two would be answering one
+question.
+
+**A LINK REPAINTS IN PLACE, and that is a fix rather than a detail.** The success
+path used to `setTimeout(openProfile, 900)`. That was survivable while the only
+link buttons sat below the form; with one inside it, the press that reopens the
+card is a press the reader made INSIDE the form, so the reopen threw away
+whatever they had half-typed — and `openProfile()` with no arguments redraws a
+WELCOME card as an ordinary one, losing the compulsory-affiliation branch a brand
+new provider account is there to answer. `repaintAfterLink` swaps the ORCID field
+and the connect rows and touches nothing else.
+
+**The REGISTRATION card cannot link, and says where the button is instead.** The
+account does not exist yet, so `linkWithPopup` has nothing to attach to, and a
+sign-in popup on that card would create an ORCID ACCOUNT rather than fill the box
+in. So it points at the ORCID pill already on the card — which creates the
+account with the iD verified — and at Edit account for everybody else. The
+pointer is drawn only where that pill really is on the card (`OAFB.providers`
+decides), or it would name a control that is not there.
+
+Tests: the ORCID block of `testRegistrationFields` in `_scraper/selftest.mjs`
+(the button in the FIELD with the pill's mark, withheld from an ORCID account,
+the box surviving, the field told which account it is drawing, the one
+`linkProvider` call, the repaint replacing the reopen, the registration card
+pointing rather than growing a button it could not honour, and both stylesheets)
+and the card block of `_scraper/page-test.mjs`, which reads the field back for a
+password account, an ORCID account and a verified iD.
+
+## The 2026-09-12 review sweep: the candidates page, and the jobs page
+
+A hundred-agent fan-out over the candidates section and the job postings page,
+each finding verified by running rather than by reading. What was fixed, and why
+each one is the shape it is:
+
+**THE REVEAL DAY WOULD HAVE STOPPED THE WHOLE SITE PUBLISHING.**
+`post-a-candidate` offers *"Show my e-mail address on my public profile"*, the
+build honours it, `email` is in `CANDIDATE_PUBLIC_FIELDS` — and `selftest.mjs`
+sweeps every file under `data/` for an address and fails hard. The two
+contradict outright, and the contradiction was ARMED: `data/candidates.json` is
+`[]` only because the reveal gate holds it, `heldCount` is 7, and the first
+build after 14:00 UTC on 2026-10-11 writes those rows. A red re-check skips the
+Commit step, so NOTHING commits — not jobs, not placements, not the directory.
+The GUARD is narrowed, not the feature, and narrowed as far as it can be: every
+other field of every row is still swept, so the one exemption is one field by
+name. It is pinned with a fixture in both directions.
+
+**AND THE CANDIDATES PIPELINE HAD NO E-MAIL STRIP AT ALL.** `build-jobs.mjs` has
+run `stripRowEmails` over its whole merged set since the 2026-08-24 outage; the
+candidates build never gained it, so an address typed into a position, a research
+area or a talk title published verbatim — for a candidate who did NOT tick the
+box. `stripCandidateEmails` in `candidates-model.mjs` is the pass, applied last
+and exempting `email` BY NAME, sweeping the scalars, the `researchAreas` list and
+the nested `talks` map. It is what makes the narrowed guard above safe.
+
+**THE ADMIN "WHAT CHANGED" E-MAIL HAD NEVER SENT.** `build-jobs.mjs:1178` uses
+`ownerTag` and never imported it; the ReferenceError was swallowed by the block's
+own catch into a log warning. It throws on the first live document carrying a
+`ref`, and the served file holds seventeen. The guard that should have caught it
+pins the block by regex over the SOURCE TEXT, so it was green and had never
+executed the code — `eslint --rule no-undef` reports exactly one problem in that
+file, and it was this.
+
+**A WITHDRAWN CANDIDATE PROFILE CAME BACK AS "HELD FOR THE REVEAL".**
+`candGroupOf` decided withdrawn/hidden by a BLACKLIST of two words, and
+`build-candidates.mjs` rewrites every `withdrawn` document to `removed` on its
+next run — so a withdrawal read correctly for at most one build cycle and from
+then on sat under "Held until the reveal", with a Take down button, and the
+restore guard that exists to stop the maintainer putting back somebody else's
+withdrawal never fired: Take down wrote `hidden`, the card then offered Put it
+back, and the next build republished a profile a person had asked to be taken
+down. It is a WHITELIST now, matching the build's own query. `account.html`
+already recorded and fixed this exact lesson for the candidate's own card; it was
+never brought here.
+
+**OPENING A POSTING TO FIX A TYPO RENAMED THE UNIVERSITY AND MOVED THE ID.**
+`fill()` dispatched `change` on `#f-institution`, the place picker's `snapPlace`
+is bound to it, and a Save with the name untouched re-spelled it to whichever
+form `data/vocab.json` currently prefers — a tie-break, not a policy. Measured: 7
+of 8 real postings had their id moved, which is a row `mergeRows` can no longer
+match, so the posting publishes twice with the card anchor, the Edit join key and
+every `rowOverrides` document pointing at the copy nobody sees. The comment three
+lines below the loop already forbade exactly this; the institution was in the
+loop anyway. It is timing-dependent, which is why no test saw it: the fake shim
+resolves a document read synchronously, so the picker has not mounted when
+`fill()` fires.
+
+**A STALE PERMISSION QUERY DREW EDIT ON ANOTHER ACCOUNT'S POSTINGS.**
+`oa-jobedit.js`'s `load(user)` built a fresh map and let the Firestore then/catch
+write into the MODULE-LEVEL `perm`, so a query still in flight when the session
+changed emptied its document ids into the next reader's map — and the session
+changes without a page load, because `signOut()` calls `notify(null)`
+synchronously and the sign-in box is an in-page modal. Each request owns its map
+now and commits only while `perm === mine`; `perm.uid` had been captured for this
+and never read.
+
+**THE EDIT ECHO COULD NEVER STAND DOWN.** `echoFields` had no e-mail strip while
+`approvedRow` in the same file did, so an address typed into the comments was
+echoed raw while the build published it stripped — the echoed value could
+therefore never equal the served one, the `landed` stand-down was unreachable,
+and the card painted the address back OVER the published value. One
+`stripEchoEmails`, called by both producers.
+
+**A LOCKED CANDIDATE CARD DISCLOSED THE CANDIDATE'S INFORMS DAYS.**
+`lockPreview` makes the blurred strip out of row LABELS, on the stated contract
+that a label is the page's own static wording; `talkRows` built `'Talk on ' +
+<the day>`, the one label on the site made from row data. The label is static and
+the day is in the value now — one of the three things the gate withholds, back
+behind it.
+
+**THE CALENDAR CHOOSER PAINTED ITS LABEL IN THE COLOUR OF ITS OWN GROUND.** The
+trigger carries both `oa-cal-btn` and `oa-cal-go`; the generic `.oa-cal-btn:hover`
+rule was ungated, did not stand down while the panel was open, and outranked the
+on-state by one class — so it won `color` over the on-state's own ground and
+measured **1.00:1 in both themes**, a blank button. On a desktop that is the
+state the pointer is in the instant after the press; on a phone the tap leaves it
+stuck. Rule 15 of `_MOBILE-STANDARDS.md`, reproduced exactly. The selftest pinned
+only the `.oa-cal-go:hover` rule, so the guard passed vacuously.
+
+**Three more colours that named a literal where the ground flips**: the card's
+"Saved."/"Taken down." note (`#2e6b4f`, 2.82:1 in dark, while its own `.is-bad`
+sibling was already a token), the danger button's `#fff` on `var(--err)` (2.58:1
+in dark — the `--on-brand` rule this file already records for the checkbox tick),
+and the chooser's option note (`--mut` on `--brand-soft`, 4.44/4.37:1, the pair
+`oa-forum.css` had already measured and moved off).
+
+**And the smaller ones, each a rule the code was one character from keeping**:
+the CV and advert size caps refused `>` where the Storage rule refuses `>=`, so a
+file of exactly 15 MB uploaded in full and was refused with an opaque error;
+`xmlEsc` stripped C0 and DEL but not U+FFFE/U+FFFF, which are also outside XML
+1.0's `Char` and make the workbook unopenable; the Excel download revoked its
+blob on the next tick, which saves nothing and says nothing on iOS Safari (the
+`.ics` downloader already carried the five-second fix and the enumeration of the
+other two had been left behind); a card title's hover underline sat outside the
+hover guard while both card rules beside it were inside it, so a tap left it
+underlined for ever; a legacy alias lookup read `Object.prototype`, so
+`?country=constructor` filtered by a function and wrote it into the address bar;
+a `type: 'one'` filter took TWO values from a legacy pipe link and then
+contradicted itself on reload, 521 postings to 31 with the reader having touched
+nothing; the candidate build's "+ new" log line fell back to the ROW id, which is
+the person's name, in the Actions log of a public repository; `transferUploads`'
+`drive-folders.json` read was the one line in a pass that promises three times to
+be non-fatal that could reject `main()` and commit nothing; and Remove photo did
+nothing for a Google or ORCID account while deleting the only control that could
+undo it, because `profilePhoto` fell through a loaded profile's empty `photo` to
+the provider's picture.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,

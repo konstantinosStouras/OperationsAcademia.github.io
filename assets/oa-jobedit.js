@@ -152,11 +152,23 @@
   /* ------------------------------------------------------------ permissions */
 
   function load(user) {
-    perm = { ready: false, admin: false, byId: {}, byRef: {}, uid: user && user.uid };
+    /* EACH REQUEST OWNS ITS OWN MAP, and commits only while it is still the
+       current one. The then/catch used to write into the module-level `perm`,
+       so a query still in flight when the session changed emptied its document
+       ids into the NEXT reader's map — and the session can change without a
+       page load: signOut() calls notify(null) synchronously and the sign-in
+       box is an in-page modal. The result was Edit and Take down drawn on
+       somebody else's postings, and on a signed-out reader's locked cards; the
+       rules refuse the write, but a control that is drawn and pressed against
+       another person's posting is the defect. `perm.uid` was captured for this
+       and never read; identity (`perm !== mine`) is the stronger test, since
+       it also covers a same-uid double fire. */
+    var mine = { ready: false, admin: false, byId: {}, byRef: {}, uid: (user && user.uid) || null };
+    perm = mine;
 
-    if (!user || !window.OAFB || !OAFB.enabled) { perm.ready = true; redraw(); return; }
+    if (!user || !window.OAFB || !OAFB.enabled) { mine.ready = true; redraw(); return; }
 
-    perm.admin = isAdmin(user);
+    mine.admin = isAdmin(user);
 
     OAFB.ready().then(function (fb) {
       /* The maintainer reads the collection; everyone else reads only their
@@ -165,16 +177,18 @@
       var c = fb.firestore().collection(col());
       return (perm.admin ? c : c.where('uid', '==', user.uid)).get();
     }).then(function (snap) {
+      if (perm !== mine) return;          // a later auth event owns the page now
       snap.forEach(function (d) {
         var v = d.data() || {};
-        perm.byId[d.id] = d.id;
-        if (v.ref) perm.byRef[v.ref] = d.id;
+        mine.byId[d.id] = d.id;
+        if (v.ref) mine.byRef[v.ref] = d.id;
       });
-      perm.ready = true;
+      mine.ready = true;
       redraw();
     }).catch(function (err) {
+      if (perm !== mine) return;
       // Not fatal: the page keeps working, just without the controls.
-      perm.ready = true;
+      mine.ready = true;
       redraw();
       if (window.console) console.warn('job permissions:', err);
     });

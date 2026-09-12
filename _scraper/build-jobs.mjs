@@ -34,6 +34,7 @@ import {
   stripRowEmails, withMarketYears,
   healReviewDate,
   marketYear, marketYearReview, inCurrentMarket, collectChanges, renderChangesHtml, postedBy,
+  ownerTag,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
   specMatches,
 } from './jobs-model.mjs';
@@ -208,10 +209,23 @@ async function transferUploads(db, live, { now }) {
   const bucket = await storageBucket();
   if (!bucket) {
     warn('advert uploads: no Storage bucket available — left for the next run');
-    return;
+    /* `patched`, like every other path out of this function. A bare `return`
+       here is defended only by the caller's `|| new Map()`; a second caller,
+       or dropping that guard, turns it into a TypeError on `filed.get(...)`. */
+    return patched;
   }
 
-  const config = JSON.parse(await readFile(path.join(DATA, 'drive-folders.json'), 'utf8'));
+  /* through the file's own readJson, because the block above this function
+     says three times over that it is WHOLLY NON-FATAL — and an unguarded
+     JSON.parse here rejects main() and commits nothing at all, which is the
+     one thing the promise forbids. A conflict marker left by a rebase or a
+     truncated write is exactly the corruption data/jobmarket.json is already
+     read defensively for. */
+  const config = await readJson(path.join(DATA, 'drive-folders.json'), null);
+  if (!config) {
+    warn('advert uploads: drive-folders.json could not be read — left for the next run');
+    return patched;
+  }
   const year = marketYear(now);
 
   let token;

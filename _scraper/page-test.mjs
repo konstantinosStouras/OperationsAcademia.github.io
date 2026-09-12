@@ -1010,6 +1010,7 @@ for (const [name, expect] of [
         input: !!host.querySelector('input[name="orcid"]'),
         value: (host.querySelector('input[name="orcid"]') || {}).value,
         linkOrcid: !!host.querySelector('#oa-link-orcid'),
+        connect: !!host.querySelector('#oa-orcid-connect'),
         linkGoogle: !!host.querySelector('#oa-link-google'),
         merge: !!host.querySelector('#oa-merge-open'),
         text: host.textContent.replace(/\s+/g, ' ').trim(),
@@ -1025,6 +1026,11 @@ for (const [name, expect] of [
       typedField: read(p.orcidFieldHTML({ orcid: iD })),
       emptyField: read(p.orcidFieldHTML({})),
       escaped: read(p.orcidFieldHTML({ orcid: '"><img src=x onerror=alert(1)>' })),
+      /* the field drawn for each account shape: a password account can connect,
+         an account already signing in with ORCID cannot (linkWithPopup would
+         only answer provider-already-linked) */
+      fieldGoogle: read(p.orcidFieldHTML({}, google)),
+      fieldOrcid: read(p.orcidFieldHTML({ orcid: iD }, orcidOnly)),
       googleNoOrcid: read(p.otherAccountsHTML({}, google)),
       googleWithOrcid: read(p.otherAccountsHTML({ orcid: iD }, google)),
       orcidOnly: read(p.otherAccountsHTML({ orcid: iD, orcidVerified: true }, orcidOnly)),
@@ -1039,14 +1045,26 @@ for (const [name, expect] of [
     'an iD the reader typed stays editable, so it can be corrected or cleared');
   ok(CARD.emptyField.input && !CARD.emptyField.value,
     'and an account without one is offered an empty field');
+  /* Owner, 2026-09-12: "here users dont know their ORCID. Instead, have a
+     button to connect it for sure and directly." Sixteen digits is a question
+     most readers cannot answer from memory, so the field leads with the press
+     that answers it for them — and the box stays, because a typed iD is still
+     a real route and the only way to correct or clear one. */
+  ok(CARD.fieldGoogle.connect && CARD.fieldGoogle.input,
+    'the ORCID field offers a connect button beside the box, not a box alone');
+  ok(!CARD.fieldOrcid.connect,
+    '…and withholds it from an account that already signs in with ORCID, where the link would only be refused');
+  ok(!CARD.verifiedField.connect,
+    '…and from a verified iD, which is a chip rather than a question');
   ok(!/onerror=/.test(CARD.escaped.html) || /&quot;|&lt;/.test(CARD.escaped.html),
     'a stored value is escaped into the field, never interpolated as markup');
   ok(!CARD.escaped.html.includes('<img'), 'markup in a stored iD cannot reach the page');
 
   // the whole point of the linking rows: offer only what is still missing
   ok(!CARD.googleNoOrcid.linkGoogle, 'a Google account is not offered Google again');
-  ok(!CARD.googleNoOrcid.linkOrcid,
-    'nor ORCID sign-in while we have no iD to attach it to');
+  ok(CARD.googleNoOrcid.linkOrcid,
+    'and IS offered ORCID even with no iD on file — connecting is how the verified iD gets onto the profile, ' +
+    'which is the whole point of the button (this read the other way round until 2026-09-12, and could not pass)');
   ok(CARD.googleWithOrcid.linkOrcid,
     'once an iD is on file, attaching ORCID sign-in is offered — that is what stops a duplicate');
   ok(CARD.orcidOnly.linkGoogle && !CARD.orcidOnly.linkOrcid,
@@ -10799,8 +10817,18 @@ for (const w of [320, 360, 390, 430]) {
     'registration card: the website is still optional and still says so, so the card distinguishes the two kinds');
   ok(card.orcidReq === false,
     'registration card: the ORCID iD is still genuinely optional; the wording is a recommendation, not a rule');
-  eq(card.orcidLabel, 'ORCID iD (highly recommended but optional)',
-    'registration card: …and it says it is highly recommended');
+  ok((card.orcidLabel || '').startsWith('ORCID iD (highly recommended but optional)'),
+    `registration card: …and it says it is highly recommended (got "${card.orcidLabel}")`);
+  /* THE CARD THAT CANNOT LINK SAYS WHERE THE BUTTON IS. Owner, 2026-09-12:
+     "here users dont know their ORCID. Instead, have a button to connect it
+     for sure and directly." On this card the account does not exist yet, so
+     linkWithPopup has nothing to attach to and a sign-in popup here would
+     make an ORCID ACCOUNT rather than fill the box in — so it points at the
+     ORCID pill below, which creates the account with the iD already verified,
+     and at Edit account, which carries the real button. */
+  ok(/Do not know it\?/.test(card.orcidLabel || '')
+     && /ORCID button below/.test(card.orcidLabel || ''),
+    'registration card: …and tells a reader who does not know their iD where the button is');
 
   /* a box holding only spaces: the browser lets it through, the guard does not */
   await q.fill('#oa-auth-form [name="firstName"]', 'Ada');

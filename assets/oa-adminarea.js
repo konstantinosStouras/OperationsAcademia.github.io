@@ -284,8 +284,19 @@
       publishes a constant []), and from that instant queued means live. */
   function candGroupOf(doc, revealAt, now) {
     var s = String((doc && doc.status) || 'queued');
-    if (s === 'withdrawn') return 'withdrawn';
     if (s === 'hidden') return 'hidden';
+    /* A WHITELIST, matching the build's own query — anything that is not
+       queued or published is taken down, and `removed` joins `withdrawn`.
+       As a blacklist of two words this missed the one state a candidate's own
+       take-down actually SETTLES in: build-candidates.mjs rewrites every
+       `withdrawn` document to `removed` on its next run, so the withdrawal was
+       shown correctly for at most one build cycle and from then on sat under
+       "Held for the reveal" with a Take down button — and the restore guard
+       that exists to stop the maintainer putting back somebody else's
+       withdrawal never fired, so Take down → Put it back republished it.
+       account.html:641 already records and fixes this exact lesson for the
+       candidate's own card; it was never brought here. */
+    if (s !== 'queued' && s !== 'published') return 'withdrawn';
     /* the build's own gate (revealGate in candidates-model.mjs, a caller of
        assets/oa-reveal.js): NO announced date means everything is HELD, the
        build publishes nothing until the admin sets one, and from 14:00 UTC on

@@ -322,7 +322,14 @@
       if (t.room) parts.push(t.room);
       if (t.title) parts.push('“' + t.title + '”');
       var when = meeting && root.OAInforms.dayLabel ? root.OAInforms.dayLabel(meeting, d) : d;
-      return { label: 'Talk on ' + when, value: parts.join(' · ') };
+      /* A STATIC LABEL, with the day in the VALUE. `lockPreview` blurs the
+         row LABELS a card would have shown, on the contract that a label is
+         the page's own static wording and never anything the row says — and
+         this was the one label on the site built from row data, so a locked
+         card's strip read "Talk on Monday 2 November 2026" and disclosed the
+         presenting days the row above it is withholding. The open card still
+         reads the same facts in the same order. */
+      return { label: 'INFORMS talk', value: [when].concat(parts).join(' · ') };
     });
   }
 

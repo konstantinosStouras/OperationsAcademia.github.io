@@ -635,7 +635,7 @@
     if (!AD_TYPES[f.type] && !named) {
       return 'Please attach a PDF or Word file (.pdf, .doc or .docx).';
     }
-    if (f.size > AD_MAX_BYTES) {
+    if (f.size >= AD_MAX_BYTES) { /* >=, not >: _storage.rules refuses `size < 15*1024*1024`, so a file of exactly that many bytes passed here, uploaded in full and was refused with an opaque error — the case this mirror exists to prevent. */
       return 'That file is ' + (f.size / 1048576).toFixed(1) +
         ' MB; the limit is 15 MB. A job advert rarely needs more than one or two.';
     }
@@ -811,7 +811,18 @@
        it off, just because they opened the edit form. */
     /* `change`, not `input`: the combo picker reads an `input` event as
        typing and opened all three dropdowns on top of the edit form. */
-    ['f-institution', 'f-school', 'f-unit'].forEach(function (id) {
+    /* THE INSTITUTION IS NOT IN THIS LIST, and the paragraph below says why.
+       It was, and the place picker's `snapPlace` is bound to `change` — so
+       opening a posting to fix a typo and pressing Save with the name
+       UNTOUCHED re-spelled it to whichever form data/vocab.json currently
+       prefers (a tie-break, not a policy), and the id moved with it: measured,
+       7 of 8 real postings tried. A moved id is a row mergeRows can no longer
+       match, so the posting publishes twice with the card anchor, the Edit
+       join key and every rowOverrides/yearChecks document pointing at the row
+       nobody sees. Nothing is lost by leaving it out: wireVocab's `sync` and
+       OAUniInfo both read the institution themselves off the school/unit
+       change. */
+    ['f-school', 'f-unit'].forEach(function (id) {
       var el = $(id);
       if (el) el.dispatchEvent(new Event('change', { bubbles: true }));
     });
