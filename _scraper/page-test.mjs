@@ -11012,8 +11012,16 @@ for (const w of [320, 360, 390, 430]) {
       typed: P.contactAddress({}, { contactEmail: 't@c.edu' }),
       good: P.looksLikeEmail('ada@university.edu'),
       spaces: P.looksLikeEmail('   '),
+      where: location.pathname,
     };
   });
+  /* the module this reads is the LIVE one. Each archive keeps its own frozen
+     assets/oa-*.js, which carry none of this, so a block that drifted onto a
+     /v1/ or /v2/ address would be measuring a copy from before the rule (the
+     account card's own checks spent months doing exactly that). */
+  ok(!/\/v[12]\//.test(rule.where),
+    'gaps (browser): the module under test is the live one, never an archive\u2019s frozen copy');
+
   eq(rule.complete, [], 'gaps (browser): an account that has answered all three owes nothing');
   eq(rule.nothing, ['name', 'affiliation', 'email'],
     'gaps (browser): …and one that has answered nothing owes all three, in the card\'s own order');

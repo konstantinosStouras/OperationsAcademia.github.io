@@ -20427,6 +20427,7 @@ async function testRegistrationFields() {
   const pt = await readFile(path.join(HERE, '..', '_scraper', 'page-test.mjs'), 'utf8');
   for (const needle of [
     'gaps (browser): an account that has answered all three owes nothing',
+    'gaps (browser): the module under test is the live one',
     'orcid sign-up: the welcome card asks for the affiliation AND an address, and requires both',
     'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads',
     'the repeat: …and a new session asks again',
