@@ -230,27 +230,6 @@
   color: var(--ink, #313a45);
 }
 
-/* THE CONNECT-ORCID ROW, on the registration card and on the welcome card.
-   Owner, 2026-09-12: nobody knows their own iD, so the row leads with a
-   button rather than a box wanting sixteen digits. Laid out like a field:
-   label, control, note, each on its own line, so it reads as one of the
-   questions around it rather than as an action bolted on. The button keeps
-   the site's own ghost pill; only the block around it is new, which is what
-   stops this being a fourth way to draw a button. */
-.oa-orcid-connect { margin: 0 0 14px; }
-
-/* The note under it is a line of its own, exactly as under a real field:
-   .oa-opt.oa-fine's block rule is scoped to labels, and this is not one. */
-.oa-orcid-connect .oa-opt.oa-fine { display: block; margin: 6px 0 0; }
-
-/* …and the box for the people who DO know it, kept under the button on the
-   welcome card and deliberately quieter than it: it is the fallback, and a
-   reader who has to be told what an ORCID iD is should meet the button
-   first. The 42px target belongs to the button above, which is the control
-   this row is for. */
-.oa-orcid-typed { margin-top: -4px; }
-.oa-orcid-typed .oa-opt.oa-fine { margin-bottom: 4px; }
-
 .oa-orcid-chip {
   display: inline-block;
   padding: 2px 8px;
@@ -266,6 +245,35 @@
   font-size: 12.5px;
   font-weight: 600;
   color: var(--ok, #1c6b45);
+}
+
+/* The ORCID field when we do NOT yet have a verified iD: the connect button
+   first, the box under it. Owner, 2026-09-12 — a reader who does not know
+   their iD needs a press, not a placeholder. The button is the sign-in pill
+   the auth card uses, so the two cards offer one recognisable control; it is
+   left-aligned and only as wide as its words, because a full-width pill in the
+   middle of a column of text boxes reads as the form's submit. */
+.oa-orcid-field { margin: 0 0 14px; }
+
+.oa-orcid-field > .oa-opt.oa-fine { display: block; margin: 6px 0 0; }
+
+.oa-orcid-field .oa-auth-provider.oa-orcid-connect {
+  display: inline-flex;
+  width: auto;
+  min-height: 42px;
+  padding: 8px 14px;
+  margin: 2px 0 0;
+}
+
+/* "Or type it, if you know it" is the secondary route, so it is quieter than
+   the field heading above the button — and it names its own ink, since it sits
+   on whatever ground the card paints. */
+.oa-orcid-type {
+  display: block;
+  margin: 12px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2, #555);
 }
 
 /* ------------------------------------------------- other accounts / merging */
@@ -1696,16 +1704,6 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   .oa-combo-group,
   .oa-combo-more,
   .oa-combo-empty { font-size: 13px; }
-
-  /* Rule 3 of _MOBILE-STANDARDS.md for the Connect your ORCID button, which
-     is the one control on either card that is neither a text box nor the
-     submit: a thumb target, and full width, because its label is a sentence
-     and a pill that wraps mid-phrase reads as two buttons. */
-  .oa-orcid-connect .button {
-    display: block;
-    width: 100%;
-    min-height: 42px;
-  }
 }
 
 /* the read-back of what the two name fields will be published as */

@@ -445,10 +445,37 @@ async function testServedFile() {
      cache a sentence captured from an employer's page, and "apply to
      hr@example.edu by 15 October 2026" is an ordinary thing for one to say.
      They strip it where they store it now; this is the belt to that braces. */
+  const EMAILISH = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/;
   const dataDir = path.join(HERE, '..', 'data');
   for (const f of readdirSync(dataDir).filter((n) => n.endsWith('.json')).sort()) {
     const raw = readFileSync(path.join(dataDir, f), 'utf8');
-    ok(!/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/.test(raw),
+    /* CANDIDATES ARE THE ONE EXEMPTION, AND IT IS ONE FIELD BY NAME.
+       post-a-candidate offers "Show my e-mail address on my public profile,
+       so hiring committees can contact me directly"; the build honours it and
+       `email` is in CANDIDATE_PUBLIC_FIELDS. So the blanket sweep and that
+       opt-in contradict each other outright, and the contradiction is ARMED:
+       the file is `[]` only because the reveal gate holds it, and the first
+       build after 14:00 UTC on the reveal day writes those rows. A red
+       re-check skips the Commit step, so NOTHING would commit — not jobs, not
+       placements, not the directory — which is the "publishing has stopped"
+       outage this file records four times.
+
+       The guard is narrowed rather than the feature, and narrowed as far as
+       it can be: every OTHER field of every row is still swept, so an address
+       that reached a position, a research area or a talk title (which
+       `stripCandidateEmails` now removes at ingest) still fails the build. */
+    if (f === 'candidates.json') {
+      const rows = JSON.parse(raw);
+      ok(Array.isArray(rows), 'data/candidates.json is a list');
+      for (const r of rows) {
+        const rest = { ...r };
+        delete rest.email;
+        ok(!EMAILISH.test(JSON.stringify(rest)),
+          `data/candidates.json row ${r.id}: no address outside the opted-in \`email\` field`);
+      }
+      continue;
+    }
+    ok(!EMAILISH.test(raw),
       `data/${f} carries no e-mail address — everything here is served to anyone`);
   }
 
@@ -12541,11 +12568,20 @@ async function testCandidateReveal() {
       Sunday: { at: '08:00', session: 'SA10', room: 'Room 1', title: 'Second' },
       Monday: { at: '10:45', session: 'MB12', room: 'Moscone Center, Room 2004', title: 'First' } } }, inject);
     const trows = cfg.rows(talky);
+    /* THE LABEL IS STATIC AND THE DAY IS IN THE VALUE. It read
+       'Talk on <day>' — the one row label on the site built from the row
+       rather than from the page's own wording — and `lockPreview` makes a
+       locked card's blurred strip out of LABELS, so a signed-out reader's
+       card disclosed the candidate's INFORMS days, which is one of the three
+       things the gate withholds. The open card still reads the same facts in
+       the same order. */
     eq(trows.map((r) => r.label).slice(0, 4),
-      ['Research area(s)', 'Presenting at INFORMS', 'Talk on Monday', 'Talk on Sunday'],
-      'candcard: one "Talk on <day>" row per day with details, in the order the days were given');
-    eq(trows[2].value, '10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
-      'candcard: the talk row reads time, session, room, title');
+      ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk', 'INFORMS talk'],
+      'candcard: one talk row per day with details, in the order the days were given');
+    eq(trows[2].value, 'Monday · 10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
+      'candcard: the talk row names its day, then time, session, room, title');
+    ok(!trows.some((r) => /Monday|Tuesday|Sunday|Wednesday/.test(r.label || '')),
+      'candcard: …and no row LABEL names a day, so the locked card’s strip of labels cannot disclose one');
     eq(trows.length, rows.length + 2, 'candcard: …and nothing else moved');
   }
   eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' }, R.formatDay),
@@ -20255,17 +20291,56 @@ async function testRegistrationFields() {
 
   /* --- the ORCID wording, on BOTH cards --------------------------------- */
   const CHIP = '<span class="oa-opt">(highly recommended but optional)</span>';
-  eq((acct.match(/\(highly recommended but optional\)/g) || []).length, 3,
-    'ORCID: the new wording appears exactly three times — the registration card, the welcome card\'s ' +
-    'connect row and the profile card, which are the three places the iD is asked for');
-  ok(card.includes("'<span class=\"oa-flabel\">ORCID iD ' +\n                  '" + CHIP + "</span>'"),
-    'registration: the ORCID row keeps the chip, on the label above the connect button');
+  eq((acct.match(/\(highly recommended but optional\)/g) || []).length, 2,
+    'ORCID: the new wording appears exactly twice — the registration card and the profile card, the two places the iD is asked for');
+  ok(card.includes('\'<label>ORCID iD ' + CHIP + '\''),
+    'registration: the ORCID chip reads "highly recommended but optional"');
   const orcidAt = acct.indexOf('function orcidFieldHTML(');
   const orcidFn = acct.slice(orcidAt, acct.indexOf('\n  }', orcidAt));
-  ok(orcidAt > 0 && orcidFn.includes('<label>ORCID iD ' + CHIP),
+  ok(orcidAt > 0 && orcidFn.includes('ORCID iD \' +\n        \'' + CHIP),
     'profile card: orcidFieldHTML says the same thing, so the two cards cannot tell a reader different things');
   ok(!/ORCID iD <span class="oa-opt">\(optional\)<\/span>/.test(acct),
     'ORCID: no card still calls the iD plainly optional');
+
+  /* --- the button, because nobody knows their own iD ---------------------
+     Owner, 2026-09-12: "here users dont know their ORCID. Instead, have a
+     button to connect it for sure and directly." A box asking for sixteen
+     digits is a question most readers cannot answer, so the field leads with
+     the press that answers it FOR them and keeps the box underneath. What has
+     to stay true: the button is in the FIELD (not only in the other-accounts
+     section, which the WELCOME card does not draw at all); it runs the one
+     link call rather than a second copy of it; it is withheld from an account
+     that already signs in with ORCID; and the box survives, since a typed iD
+     is still a real route and the only way to correct or clear one. */
+  ok(orcidFn.includes('id="oa-orcid-connect"') && orcidFn.includes('PROVIDER.orcid.icon'),
+    'ORCID: the field itself carries a connect button, wearing the same mark as the sign-in pill');
+  ok(/var canConnect = !hasProvider\('oidc\.orcid', u\);/.test(orcidFn),
+    'ORCID: …withheld from an account already signing in with ORCID, which linkWithPopup would only refuse');
+  ok(orcidFn.includes('<input name="orcid"'),
+    'ORCID: …and the box stays, for the reader who knows the number and for clearing one');
+  ok(/function orcidFieldHTML\(p, u\)/.test(acct) && /orcidFieldHTML\(p, u\) \+/.test(acct),
+    'ORCID: the field is told which account it is drawing, so it can answer that question at all');
+  ok(/\$\('#oa-orcid-connect', wrap\);[\s\S]{0,160}linkProvider\('oidc\.orcid', wrap, closeProfile\)/.test(acct),
+    'ORCID: the button runs linkProvider — the one definition — never a second copy of the link flow');
+  ok(!/setTimeout\(function \(\) \{ openProfile\(\); \}, 900\)/.test(acct)
+     && /function repaintAfterLink\(wrap, u, closeProfile\)/.test(acct)
+     && /repaintAfterLink\(wrap, linked \|\| state\.user, closeProfile\)/.test(acct),
+    'ORCID: a link repaints the field and the rows IN PLACE — reopening the card threw away unsaved ' +
+    'typing, and redrew a WELCOME card as an ordinary one, which is a press the reader now makes inside the form');
+  {
+    const reg = card.slice(card.indexOf('<label>ORCID iD'), card.indexOf('oa-terms-row'));
+    ok(/Do not know it\?/.test(reg) && /data-provider="orcid"/.test(reg),
+      'registration: the card that CANNOT link says where the button is instead — the account does not exist yet, ' +
+      'so linkWithPopup has nothing to attach to and a sign-in popup here would make an ORCID account instead');
+    ok(!/id="oa-orcid-connect"/.test(reg),
+      'registration: …and does not grow a connect button it could not honour');
+  }
+  for (const f of ['oa-ui.css', 'v3.css']) {
+    const css = await readFile(path.join(HERE, '..', 'assets', f), 'utf8');
+    ok(/oa-orcid-connect/.test(css) && /\.oa-orcid-type/.test(css),
+      f + ': the ORCID field is styled here too — a rule in one stylesheet alone is invisible on the ' +
+      'live site or lost on the next page');
+  }
 
   /* --- the profile card is deliberately NOT held to the new rule -------- */
   const profAt = acct.indexOf('\'<form id="oa-profile-form">\'');
@@ -20356,9 +20431,6 @@ async function testRegistrationFields() {
     'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads',
     'the repeat: …and a new session asks again',
     'the repeat: a complete account meets no card',
-    'registration card: no sixteen-digit box to fill in, because nobody knows their own iD',
-    'registration card: …a press arms it',
-    'blocked popup: …and the welcome card offers the same button',
   ]) {
     ok(pt.includes(needle), `page-test drives it: ${needle.slice(0, 60)}…`);
   }
@@ -20516,58 +20588,6 @@ async function testRegistrationFields() {
       `both browser halves name ${k}`);
   }
 
-  /* --- NOBODY KNOWS THEIR OWN iD, so the row is a BUTTON ---------------- */
-  ok(!/name="orcid" maxlength="25"/.test(acct),
-    'registration: the sixteen-digit box is GONE, not merely hidden — it asked for a number ' +
-    'the reader would have to go and look up mid-registration');
-  ok(/id="oa-reg-orcid"/.test(card) && /Connect your ORCID/.test(card),
-    'registration: …and in its place is a Connect your ORCID button');
-  ok(/aria-pressed="false"/.test(card) && /orcidBtn\.setAttribute\('aria-pressed', orcidWanted \? 'true' : 'false'\);/.test(acct),
-    'registration: the button is a toggle that says which way it is, so an accidental press is ' +
-    'a second press rather than a window nobody wanted');
-  ok(/if \(!created \|\| !orcidWanted\) return;\s*\r?\n\s*return connectOrcid\(created\)\['catch'\]\(function \(\) \{\}\);/.test(acct),
-    'registration: the popup opens the INSTANT the account exists — there is nothing to link a ' +
-    'provider to before that — and it can never cost somebody the account they just made');
-  ok(!/if \(orcid\) prof\.orcid = orcid;/.test(acct),
-    'registration: no typed iD reaches the profile from this card any more, so the iD it ends ' +
-    'up with is the one ORCID vouched for');
-  ok(/\} else if \(\(state\.profile \|\| \{\}\)\.orcidVerified\) \{[\s\S]{0,900}delete out\.orcid;/.test(acct),
-    'welcome card: an EMPTY iD box never blanks a VERIFIED one — the card is drawn before ' +
-    'seedOrcidFromProvider lands, so an ORCID sign-up meets a box while its own iD is in flight');
-
-  /* --- one definition of what connecting an ORCID IS --------------------- */
-  const conAt = acct.indexOf('function connectOrcid(');
-  const con = conAt > 0 ? acct.slice(conAt, acct.indexOf('\n  function linkProvider(', conAt)) : '';
-  ok(conAt > 0 && /linkWithPopup\(new fb\.auth\.OAuthProvider\('oidc\.orcid'\)\)/.test(con)
-     && /orcid: iD, orcidVerified: true, orcidSeeded: true/.test(con),
-    'connectOrcid: the link is what PROVES the iD, so it is stored verified and the reader types nothing');
-  ok(/function connectOrcid\(u\) \{/.test(con) && /state\.user && state\.user\.uid === u\.uid/.test(con),
-    'connectOrcid: it takes the USER rather than reading state.user — at registration the account ' +
-    'is seconds old and the auth event may not have fired — and a link landing after a sign-out ' +
-    'paints nothing onto whoever is here now');
-  const lpAt = acct.indexOf('function linkProvider(');
-  const lp = lpAt > 0 ? acct.slice(lpAt, acct.indexOf('\n  function ', lpAt + 10)) : '';
-  ok(/if \(id === 'oidc\.orcid'\) return connectOrcid\(state\.user\);/.test(lp),
-    'connectOrcid: "Your other accounts" reads the same definition, so the three roads to a ' +
-    'connected ORCID cannot mean three different things');
-  ok(/connectOrcid\(state\.user\)/.test(acct.slice(acct.indexOf("$('#oa-profile-orcid'"),
-       acct.indexOf("$('#oa-profile-orcid'") + 900)),
-    'welcome card: …and so does its own button');
-
-  /* --- the welcome card is where the SECOND press lives ------------------ */
-  ok(/orcidFieldHTML\(p, firstRun\)/.test(acct),
-    'welcome card: the connect row is drawn on the FIRST-RUN card, which is exactly the card that ' +
-    'withholds "Your other accounts" and so had no way to connect at all');
-  ok(/id="oa-profile-orcid"/.test(orcidFn) && /class="oa-orcid-typed"/.test(orcidFn),
-    'welcome card: the button leads and the typed box stays beneath it for the people who know their iD');
-  ok(/\.oa-orcid-connect \{/.test(uiCss) && /\.oa-orcid-typed \{/.test(uiCss),
-    'welcome card: both are styled in oa-ui.css, which is where the modal cards are dressed');
-  ok(/\.oa-orcid-connect \.button \{[\s\S]{0,140}min-height: 42px;/.test(uiCss),
-    'welcome card: …and the button is a 42px thumb target on a phone (rule 3 of _MOBILE-STANDARDS.md)');
-  ok(/auth\/credential-already-in-use/.test(acct.slice(acct.indexOf("$('#oa-profile-orcid'"))),
-    'welcome card: an ORCID that already belongs to another account here is SAID, and pointed at ' +
-    'the merge tool, rather than reaching the reader as a code');
-
   /* --- disclosed, announced and written down ---------------------------- */
   const policy = await readFile(path.join(HERE, '..', 'privacy-policy.html'), 'utf8');
   ok(/shares no\s+e-mail address with us/.test(policy) && /not a way to sign in/.test(policy)
@@ -20578,16 +20598,8 @@ async function testRegistrationFields() {
   ok(askEntry && askEntry.date === '2026-09-12' && askEntry.url
      && !/—/.test(askEntry.title + askEntry.summary),
     'changelog.json announces it, dated, with a link and no em dash');
-  ok(/Connect your ORCID button/.test(askEntry ? askEntry.summary : ''),
-    'changelog: …and says the iD is connected with a button rather than typed');
   const compAt = claude.indexOf('### …and every road in collects all three');
   const comp = compAt > 0 ? claude.slice(compAt, claude.indexOf('\n## ', compAt)) : '';
-  const idAt = claude.indexOf('### Nobody knows their own ORCID iD, so the row is a BUTTON');
-  const idSec = idAt > 0 ? claude.slice(idAt, claude.indexOf('\n### ', idAt + 10)) : '';
-  ok(idSec.length > 1200 && /connectOrcid\(user\)/.test(idSec) && /ARMS/.test(idSec)
-     && /welcome card/i.test(idSec),
-    'CLAUDE.md: the ORCID section records why the registration card arms rather than opens, and ' +
-    'that one definition serves all three callers');
   ok(comp.length > 1500 && /2026-09-12/.test(comp) && /ORCID/.test(comp)
      && /once a session/.test(comp) && /forge/.test(comp),
     'CLAUDE.md: the section records the owner ruling, the ORCID gap, the repeat and why the ' +

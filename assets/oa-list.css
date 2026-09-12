@@ -453,7 +453,13 @@
   cursor: pointer;
 }
 
-.oa-card-head:hover .oa-card-title { text-decoration: underline; }
+/* GUARDED, like the two card rules above it: this is a hover PREVIEW of a
+   press, and on a phone a tap leaves it stuck — rule 9 in
+   _MOBILE-STANDARDS.md, which is why `.oa-card:hover` is already behind the
+   guard in both stylesheets. */
+@media (hover: hover) and (pointer: fine) {
+  .oa-card-head:hover .oa-card-title { text-decoration: underline; }
+}
 
 /* Keyboard focus, and keyboard focus only — this is the card's "you are here",
    which is why the hover lift above does not double as one. Rounded with the
@@ -888,7 +894,7 @@
   padding: 8px 22px 14px;
   font-size: 13px;
   line-height: 1.5;
-  color: #2e6b4f;
+  color: var(--ok, #2e6b4f);   /* a token, not a literal: this sits on --bg-2, which FLIPS, and the literal read 2.82:1 in dark. Its own `.is-bad` sibling was already var(--err). */
 }
 
 .oa-card-note.is-bad { color: var(--err, #a3364a); }
@@ -991,7 +997,20 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.oa-cal-btn:hover:not([disabled]) { border-color: var(--brand, #3a424d); color: var(--brand, #3a424d); }
+/* THE GENERIC RULE IS DISJOINT FROM THE ON-STATE, AND GUARDED. The trigger
+   carries BOTH classes (oa-cal-btn oa-cal-go), so this rule also matched it —
+   ungated, and not standing down while the chooser was open, at a specificity
+   one class above the on-state. It therefore won `color` over the on-state's
+   own ground and painted the label var(--brand) on var(--brand): measured
+   1.00:1 in both themes, a blank button. On a desktop that is the state the
+   pointer is in the instant after the press; on a phone the tap leaves it
+   stuck. Rule 15 in _MOBILE-STANDARDS.md, the same shape as the forum's vote
+   arrows. */
+@media (hover: hover) and (pointer: fine) {
+  .oa-cal-btn:hover:not([disabled]):not([aria-expanded='true']) {
+    border-color: var(--brand, #3a424d); color: var(--brand, #3a424d);
+  }
+}
 .oa-cal-btn[disabled] { opacity: 0.45; cursor: default; }
 /* the download is the one that DOES something with the ticks, so it wears the
    brand: border, ink and a pale ground, filling on hover the way the Excel
@@ -1044,7 +1063,15 @@
   cursor: pointer;
 }
 .oa-cal-opt b { display: block; font-weight: 700; color: var(--ink, #1d222a); }
-.oa-cal-opt-note { display: block; color: var(--mut, #646c78); }
+.oa-cal-opt-note {
+  display: block;
+  /* --ink-2, not --mut: this note sits on the option's HOVER ground
+     (--brand-soft), where --mut measures 4.44:1 light and 4.37:1 dark — under
+     the floor in both. oa-forum.css records the same pair and the same
+     remedy: the token was chosen as "the smallest change that clears 4.5:1
+     everywhere", and everywhere did not include a wash. */
+  color: var(--ink-2, #3a424d);
+}
 .oa-cal-opt:focus-visible { outline: 2px solid var(--brand, #3a424d); outline-offset: -2px; }
 @media (hover: hover) and (pointer: fine) {
   .oa-cal-opt:hover { background: var(--brand-soft, #eef0f3); }
@@ -1113,7 +1140,7 @@
 
 .oa-my-meta { color: var(--ink-2, #5a6673); font-size: 13px; margin: 6px 0 0; line-height: 1.55; }
 .oa-my-meta a { color: var(--brand-2); }
-.oa-my-note { margin: 8px 0 0; font-size: 13px; color: #2e6b4f; }
+.oa-my-note { margin: 8px 0 0; font-size: 13px; color: var(--ok, #2e6b4f);   /* a token, not a literal: this sits on --bg-2, which FLIPS, and the literal read 2.82:1 in dark. Its own `.is-bad` sibling was already var(--err). */ }
 .oa-my-note.is-bad { color: var(--err, #a3364a); }
 
 @media screen and (max-width: 640px) {

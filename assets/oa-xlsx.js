@@ -168,7 +168,7 @@
   function xmlEsc(v) {
     return String(v)
       // Excel refuses a file carrying a raw control character
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\uFFFE\uFFFF]/g, '')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
   }
@@ -422,10 +422,15 @@
     a.download = filename;
     document.body.appendChild(a);
     a.click();
-    setTimeout(function () {
-      if (a.parentNode) a.parentNode.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 0);
+    if (a.parentNode) a.parentNode.removeChild(a);
+    /* THE OBJECT URL IS REVOKED LATE, not on the next tick. A browser that has
+       not begun reading the blob when it is revoked saves nothing and says
+       nothing, and iOS Safari is the one that meets that window: it hands the
+       file to its own downloads UI a moment after the press. A few seconds of
+       one held blob is the cheaper side of that trade — the same line, and the
+       same reason, as assets/oa-ics.js, which got this fix and left the
+       enumeration of the other two downloaders behind. */
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
     return bytes.length;
   }
 

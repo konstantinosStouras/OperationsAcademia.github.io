@@ -108,7 +108,15 @@
         /* the venue is added after the room unless the room already names
            it ("Moscone Center, Room 2004"), or the location reads it twice */
         var place = [];
-        if (at && room) place.push(room);
+        /* THE ROOM IS NOT GATED ON THE TIME. It used to be `at && room`, while
+           the venue line below was not — so an ungated room went on
+           SUPPRESSING the venue it was never allowed to replace, and a profile
+           that named a room but had no start time yet wrote a location of
+           nothing but the city, while the description four lines down printed
+           "Room: …". Room-known-time-not-yet is the ordinary mid-season state:
+           the form's four talk boxes are independent and optional, and
+           `talksFrom` drops `at` silently whenever it is not a strict HH:MM. */
+        if (room) place.push(room);
         if (!room || room.toLowerCase().indexOf(String(meeting.venue).toLowerCase()) === -1) place.push(meeting.venue);
         place.push(meeting.city);
         var lines = [];
@@ -120,7 +128,11 @@
           lines.push('Session starts at ' + at + ' (' + meeting.tz.id.replace(/_/g, ' ') +
             ', the meeting’s local time); INFORMS sessions run ' + meeting.sessionMinutes + ' minutes.');
         } else {
-          lines.push('The time and room are not on the profile yet; check the programme, or the profile nearer the day.');
+          /* name what is really missing — with a room on the profile, "the
+             time and room are not on the profile yet" contradicts the Room
+             line printed immediately above it */
+          lines.push('The ' + (room ? 'time is' : 'time and room are') +
+            ' not on the profile yet; check the programme, or the profile nearer the day.');
         }
         var aff = [txt(row.affiliation), txt(row.position)].filter(Boolean).join(', ');
         if (aff) lines.push('Affiliation: ' + aff);
