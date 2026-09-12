@@ -8070,6 +8070,25 @@ nothing for a Google or ORCID account while deleting the only control that could
 undo it, because `profilePhoto` fell through a loaded profile's empty `photo` to
 the provider's picture.
 
+**AND THE ACCOUNT CARD'S OWN CHECKS WERE ANSWERED BY THE ARCHIVE.** The block in
+`page-test.mjs` that reads every branch of the profile card out of
+`OAAccounts.pure` never named a page of its own, so it ran on whatever `page`
+was last pointed at — a `/v2/` address, left over from the filter checks eight
+hundred lines above. Each archive keeps its OWN frozen `assets/oa-*.js` beside
+it, so for months those assertions were measuring a copy of the accounts module
+from before whatever was under test. The merge half above it never noticed,
+and had a reason not to: that region is pinned byte-identical across the two
+copies, so the archive's answers are the live ones. The CARD is not pinned that
+way and cannot be, since the whole point of an archive is that the live site is
+free to move on.
+
+It surfaced the day the ORCID connect button shipped — the two assertions about
+it failed against a module that has no such button — and it would have gone on
+being green for anything the archive happened to agree about. So the block names
+its own page now, and **asserts which one it got**: it reports `location.pathname`
+and fails if that is under `/v1/` or `/v2/`. A check that reads a module from an
+archive page is not testing the site; adding one means saying where it runs.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,

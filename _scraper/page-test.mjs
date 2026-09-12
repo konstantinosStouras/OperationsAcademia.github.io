@@ -993,8 +993,18 @@ for (const [name, expect] of [
     }
   }
 
-  /* The card the reader actually meets. Rendered from the two pure builders,
-     so every branch can be read without a Firebase session behind it. */
+  /* The card the reader actually meets, read from the LIVE module.
+
+     `page` is still on a /v2/ page from the filter checks far above, and each
+     archive keeps its OWN frozen assets by the rule the three trees are held
+     to — so evaluating there reads a copy of this file from before whatever is
+     under test. The merge half above never noticed, because that region is
+     pinned byte-identical across the two copies; the card is not, and until
+     2026-09-12 every assertion here was quietly answered by the archive. The
+     block therefore names its own page, and asserts which one it got. */
+  await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.pure));
+
   const CARD = await page.evaluate(() => {
     const p = window.OAAccounts.pure;
     const host = document.createElement('div');
@@ -1036,8 +1046,12 @@ for (const [name, expect] of [
       orcidOnly: read(p.otherAccountsHTML({ orcid: iD, orcidVerified: true }, orcidOnly)),
       bothLinked: read(p.otherAccountsHTML({ orcid: iD }, {
         providerData: [{ providerId: 'google.com' }, { providerId: 'oidc.orcid' }] })),
+      where: location.pathname,
     };
   });
+
+  ok(!/\/v[12]\//.test(CARD.where),
+    'the card under test is the live one, never an archive\u2019s frozen copy of this module');
 
   ok(CARD.verifiedField.chip && CARD.verifiedField.verified && !CARD.verifiedField.input,
     'an iD ORCID vouched for is shown as a verified chip, not an editable field');
@@ -11403,11 +11417,20 @@ for (const w of [320, 360, 390, 430]) {
       await q.waitForTimeout(250);
       const rows = await q.$$eval('#oa-candidates #job-tc-ada .oa-kv tr', (trs) =>
         trs.map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent]));
-      const talk = rows.find((r) => /^Talk on Monday/.test(r[0]));
-      eq(talk && talk[0], 'Talk on Monday 2 November 2026', 'talks calendar: the card names the talk\'s day with its date');
-      eq(talk && talk[1], '10:45 · session MB12 · Moscone Center, Room 2004 · “Queues and prices”',
-        'talks calendar: …and its time, session, room and title');
-      eq(rows.findIndex((r) => /^Talk on/.test(r[0])), rows.findIndex((r) => r[0] === 'Presenting at INFORMS') + 1,
+      /* A STATIC LABEL WITH THE DAY IN THE VALUE. `lockPreview` builds a
+         locked card's blurred strip out of row LABELS, on the contract that a
+         label is the page's own wording — so 'Talk on <day>' was the one label
+         on the site made from row data, and it disclosed the presenting days
+         the gate withholds. The open card reads the same facts in the same
+         order, which is what these three lines measure. */
+      const talk = rows.find((r) => r[0] === 'INFORMS talk');
+      eq(talk && talk[0], 'INFORMS talk', 'talks calendar: the card draws a talk row');
+      eq(talk && talk[1],
+        'Monday 2 November 2026 · 10:45 · session MB12 · Moscone Center, Room 2004 · “Queues and prices”',
+        'talks calendar: …naming the day with its date, then the time, session, room and title');
+      ok(!rows.some((r) => /Monday|Tuesday|Sunday|Wednesday/.test(r[0])),
+        'talks calendar: …and no row LABEL names a day, so a locked card’s strip of labels cannot disclose one');
+      eq(rows.findIndex((r) => r[0] === 'INFORMS talk'), rows.findIndex((r) => r[0] === 'Presenting at INFORMS') + 1,
         'talks calendar: right after the days row');
 
       const dl = q.waitForEvent('download', { timeout: 30000 });
@@ -11486,19 +11509,23 @@ for (const w of [320, 360, 390, 430]) {
     await q.fill('#f-talk-monday-session', 'MB12');
     await q.fill('#f-talk-monday-room', 'Room 2004');
     await q.fill('#f-talk-monday-title', 'Queues and prices');
-    await q.waitForFunction(() => [...document.querySelectorAll('#oa-cand-preview .oa-kv th')]
-      .some((th) => /^Talk on Monday/.test(th.textContent)), null, { timeout: 8000 });
+    /* the row's LABEL is static and the DAY is in the value — the blurred
+       strip of a locked card is made of labels, so a label built from the row
+       disclosed the candidate's INFORMS days */
+    await q.waitForFunction(() => [...document.querySelectorAll('#oa-cand-preview .oa-kv tr')]
+      .some((tr) => tr.querySelector('th').textContent === 'INFORMS talk'
+        && /^Monday/.test(tr.querySelector('td').textContent)), null, { timeout: 8000 });
     const previewed = await q.$$eval('#oa-cand-preview .oa-kv tr', (trs) => trs
       .map((tr) => [tr.querySelector('th').textContent, tr.querySelector('td').textContent])
-      .find((r) => /^Talk on Monday/.test(r[0])));
-    eq(previewed[1], '10:45 · session MB12 · Room 2004 · “Queues and prices”',
+      .find((r) => r[0] === 'INFORMS talk'));
+    eq(previewed[1], 'Monday 2 November 2026 · 10:45 · session MB12 · Room 2004 · “Queues and prices”',
       'talk form: the live preview draws the talk row as the list will');
     await q.uncheck('input[name="informsDays"][value="Monday"]');
     await q.waitForTimeout(250);
     const closed = await q.evaluate(() => ({
       hidden: document.getElementById('f-talk-monday').hidden,
       kept: document.getElementById('f-talk-monday-session').value,
-      row: [...document.querySelectorAll('#oa-cand-preview .oa-kv th')].some((th) => /^Talk on/.test(th.textContent)) }));
+      row: [...document.querySelectorAll('#oa-cand-preview .oa-kv th')].some((th) => th.textContent === 'INFORMS talk') }));
     eq([closed.hidden, closed.kept, closed.row], [true, 'MB12', false],
       'talk form: unticking the day hides its block and takes the talk out of the preview, keeping what was typed');
     await q.check('input[name="informsDays"][value="Monday"]');
