@@ -2545,9 +2545,18 @@
     var rows = '';
     CONNECT.forEach(function (c) {
       if (hasProvider(c.provider, u)) {
+        /* THE ROW STATES IT, never a message beside it. `paintConnect` replaces
+           this block's markup every time something lands, so anything written
+           into a transient line \u2014 the iD above all \u2014 is wiped by the very
+           repaint that records the success. What a reader needs to keep has to
+           be part of the drawn state. */
+        var iD = c.provider === 'oidc.orcid'
+          ? (orcidFromProvider(u) || (state.profile || {}).orcid || '')
+          : '';
         rows += '<p class="oa-connect-row is-done" data-connect-done="' + c.key + '">' +
           '<span class="oa-connect-tick">&#10003;</span> ' + esc(c.name) +
-          ' is connected. You can sign in with it.</p>';
+          ' is connected' + (iD ? ', iD ' + esc(iD) + ', verified' : '') +
+          '. You can sign in with it.</p>';
         return;
       }
       rows += '<p class="oa-connect-row">' +
@@ -2588,7 +2597,6 @@
              yet, so `state.user` can still be null at this instant. */
           .then(function (fb) { return linkTo(fb, u || state.user, id); })
           .then(function (r) {
-            if (msg) { msg.className = 'oa-auth-msg is-ok'; msg.textContent = connectedSays(id, r); }
             paintConnect((r && r.user) || u || state.user);
           })
           .catch(function (err) {
@@ -2597,13 +2605,6 @@
           });
       });
     });
-  }
-
-  function connectedSays(id, r) {
-    return id === 'oidc.orcid'
-      ? 'Connected' + ((r && r.orcid) ? ' \u2014 ORCID iD ' + r.orcid + ', verified' : '') +
-        '. You can sign in with ORCID.'
-      : 'Connected. You can sign in with Gmail.';
   }
 
   function connectFailedSays(err) {
@@ -2646,8 +2647,6 @@
     if (btn) btn.disabled = true;
     if (msg) { msg.className = 'oa-auth-msg'; msg.textContent = 'Opening the sign-in window\u2026'; }
     pending.then(function (r) {
-      var m = $('#oa-connect-msg');
-      if (m) { m.className = 'oa-auth-msg is-ok'; m.textContent = connectedSays(tried, r); }
       paintConnect((r && r.user) || u || state.user);
     }).catch(function () {
       /* The armed attempt is a BONUS, so its failure is not an error: the row

@@ -10998,8 +10998,7 @@ for (const w of [320, 360, 390, 430]) {
      button here — which is also the state every reader who armed nothing is
      in, and the whole reason the block is drawn at all. */
   await q.waitForSelector('#oa-verify-connect', { timeout: 8000 });
-  await q.waitForFunction(
-    () => /connected/i.test((document.querySelector('#oa-verify-connect') || {}).textContent || ''),
+  await q.waitForFunction(() => !!document.querySelector('[data-connect-done="orcid"]'),
     null, { timeout: 8000 });
   const after = await q.evaluate(() => ({
     text: document.querySelector('#oa-verify-connect').textContent,
@@ -11017,7 +11016,12 @@ for (const w of [320, 360, 390, 430]) {
   /* the press itself: a real click, which is the only thing that opens an
      OAuth window reliably — the reason the connecting lives on this card */
   await q.click('#oa-connect-google');
-  await q.waitForFunction(() => window.__fb.at('link', 'google.com') !== -1, null, { timeout: 8000 });
+  /* WAIT ON THE DOM, not on the op log: the shim records a link when the call
+     is MADE, which is before its promise resolves and therefore before the
+     block has redrawn — so waiting on the log reads the page in the state it
+     was in before the press. */
+  await q.waitForFunction(() => !document.querySelector('#oa-connect-google'),
+    null, { timeout: 8000 });
   const both = await q.evaluate(() => ({
     text: document.querySelector('#oa-verify-connect').textContent,
     googleBtn: !!document.querySelector('#oa-connect-google'),
