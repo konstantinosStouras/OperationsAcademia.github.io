@@ -20520,10 +20520,12 @@ async function testRegistrationFields() {
 
   /* --- the ORCID wording, on BOTH cards --------------------------------- */
   const CHIP = '<span class="oa-opt">(highly recommended but optional)</span>';
-  eq((acct.match(/\(highly recommended but optional\)/g) || []).length, 2,
-    'ORCID: the new wording appears exactly twice — the registration card and the profile card, the two places the iD is asked for');
-  ok(card.includes("'<span class=\"oa-flabel\">ORCID iD ' +\n                  '" + CHIP + "</span>'"),
-    'registration: the ORCID chip reads "highly recommended but optional"');
+  /* ONE card asks for the iD now. The registration card stopped asking for the
+     number at all (2026-09-12, below), so the chip belongs to the profile card
+     alone — which is the EDIT surface, and the only place a typed iD is still
+     a route. */
+  eq((acct.match(/\(highly recommended but optional\)/g) || []).length, 1,
+    'ORCID: the wording appears exactly once — the profile card, the one place the iD is still asked for');
   const orcidAt = acct.indexOf('function orcidFieldHTML(');
   const orcidFn = acct.slice(orcidAt, acct.indexOf('\n  }', orcidAt));
   ok(orcidAt > 0 && orcidFn.includes('ORCID iD \' +\n        \'' + CHIP),
@@ -20556,75 +20558,127 @@ async function testRegistrationFields() {
      && /repaintAfterLink\(wrap, linked \|\| state\.user, closeProfile\)/.test(acct),
     'ORCID: a link repaints the field and the rows IN PLACE — reopening the card threw away unsaved ' +
     'typing, and redrew a WELCOME card as an ordinary one, which is a press the reader now makes inside the form');
-  /* --- and the REGISTRATION card asks for no number at all ---------------
-     Owner, 2026-09-12, of the note this replaced: "this would encourage people
-     to register by just clicking the ORCID button. What I was thinking instead
-     is keep it as is, and when asking to add the ORCID, you don't ask and
-     instead have the ORCID connect button, so that the user connect also their
-     ORCID during their (regular) registration."
+  /* --- the REGISTRATION card asks for no number, and offers TWO sign-ins ---
+     Owner, 2026-09-12, twice. First: "this would encourage people to register
+     by just clicking the ORCID button. What I was thinking instead is keep it
+     as is, and when asking to add the ORCID, you don't ask and instead have
+     the ORCID connect button, so that the user connect also their ORCID
+     during their (regular) registration." Then, with the card's own "or
+     continue with" block struck through in a screenshot: "a new user
+     registers the 'regular' way filling up all those fields including name,
+     affiliation, email, password, website as it is now. Then, the user is
+     asked to (optionally but highly recommended) connect his ORCID and also
+     to optionally connect his Gmail too … upon registering and verifying
+     their email, such a user can login to OA either by their gmail, ORCID, or
+     email/password given earlier."
 
-     Both halves are pinned as ABSENCES as well as presences, because either
-     one coming back is a regression nothing else would report: the box (a
-     question most readers cannot answer) and the pointer at the ORCID SIGN-IN
-     pill, which creates an account carrying no e-mail address at all, which is
-     the very gap the three compulsory fields above exist to close. */
+     Four things have to stay true, and three of them are ABSENCES, because
+     each is a regression nothing else would report: no box asking for the
+     number, no note pointing at the sign-up pills, and no sign-up pills on
+     this card at all. The fourth is that the SIGN IN card keeps them, since
+     that is the whole of "can login by their gmail, ORCID, or
+     email/password". */
   {
-    const reg = card.slice(card.indexOf('<span class="oa-flabel">ORCID iD'),
+    const reg = card.slice(card.indexOf('<span class="oa-flabel">Connect your other sign-ins'),
                            card.indexOf('oa-terms-row'));
-    ok(reg.length > 400 && reg.length < 3000, 'registration: the ORCID row slice is the right size');
+    ok(reg.length > 800 && reg.length < 5000, 'registration: the connect field slice is the right size');
     ok(!/<input[^>]*name="orcid"/.test(reg),
       'registration: the card does not ASK for the iD — no box, since a reader who knew the number ' +
       'would not need the button');
     ok(!/Do not know it\?/.test(reg) && !/ORCID button below/.test(reg),
-      'registration: …and no note pointing at the sign-in pill, which would steer an ordinary ' +
-      'registration into an ORCID account that shares no e-mail address');
-    ok(/id="oa-reg-orcid"/.test(reg) && /PROVIDER\.orcid\.icon/.test(reg),
-      'registration: it carries the connect button instead, wearing the same mark as the sign-in pill');
-    ok(/aria-pressed="false"/.test(reg),
-      'registration: …as a toggle that ARMS, because nothing can be linked until the account exists');
-    ok(/as soon as your account is made/.test(reg),
-      'registration: …and the words say when the window opens, rather than implying one is about to');
-    ok(/id="oa-reg-orcid-note"[^>]*aria-live="polite"/.test(reg),
-      'registration: …and the line that changes with the toggle is announced, since the button\'s own ' +
-      'label is the only other thing that moves');
+      'registration: …and no note pointing at a sign-up pill, which would steer an ordinary ' +
+      'registration into an account that answers none of the questions above it');
+    for (const [id, icon, word] of [['oa-reg-orcid', 'PROVIDER.orcid.icon', 'ORCID'],
+                                    ['oa-reg-google', 'PROVIDER.google.icon', 'Gmail']]) {
+      ok(reg.includes('id="' + id + '"') && reg.includes(icon),
+        `registration: it carries a ${word} connect button instead, wearing the same mark as the sign-in pill`);
+      ok(new RegExp('id="' + id + '"[\\s\\S]{0,160}aria-pressed="false"').test(reg),
+        `registration: …the ${word} one unarmed on arrival, so the reader chooses it`);
+      ok(new RegExp('id="' + id + '-note"[^>]*aria-live="polite"').test(reg),
+        `registration: …and the ${word} line that changes with the toggle is announced`);
+    }
+    /* The words the owner asked to be rewritten: what connecting BUYS, rather
+       than a promise about a window that is about to open. */
+    /* needles that do not cross a string-concatenation break: the card
+       builds these lines out of several quoted pieces, so a phrase spanning
+       two of them is absent from the SOURCE however it reads on screen. */
+    ok(/You can sign in with these instead of your/.test(reg)
+       && /one press each, on the next screen/.test(reg),
+      'registration: the field says what connecting is FOR and when it happens');
+    ok(/take your iD straight from ORCID, verified/.test(reg)
+       && /with ORCID as well/.test(reg),
+      'registration: …the ORCID line promises the iD and the sign-in, not a window');
+    ok(/link your Google account to this one/.test(reg)
+       && /faster alternative to typing your e-mail and password/.test(reg),
+      'registration: …and the Gmail line says it is a faster alternative way in, which is what it was asked to say');
+    ok(!/as soon as your account is made, and fill your iD in/.test(acct),
+      'registration: …and the wording the owner asked to be improved is GONE, not merely moved');
+  }
+  /* THE SIGN-UP PILLS LEFT THIS CARD, and stayed on the other one. */
+  ok(/\(third && !registering/.test(acct),
+    'registration: the "or continue with" pills are drawn only when SIGNING IN — registering is always the full form');
+  ok(!/By continuing with Google or ORCID you agree to the/.test(acct),
+    'registration: …and the line that existed only to cover those pills on this card went with them');
+  {
+    const signIn = acct.slice(acct.indexOf("'<div class=\"oa-or\">or continue with</div>'"));
+    ok(signIn.indexOf("'<div class=\"oa-auth-providers\">' + third") > 0
+       && signIn.indexOf("'<div class=\"oa-auth-providers\">' + third") < 200,
+      'sign in: …where they are the way a member who connected one gets in, which is the point of connecting');
   }
   /* The press must ARM, never sign anybody in. The card's provider sweep is
-     what decides that: the arming button wears `.oa-auth-provider` on purpose,
-     so a bare sweep of that class would wire it to signInWithPopup and a press
-     in the middle of the form would abandon everything typed for a brand new
-     ORCID account. The container is what tells the two apart. */
+     what decides that: the arming buttons wear `.oa-auth-provider` on purpose,
+     so a bare sweep of that class would wire them to signInWithPopup and a
+     press in the middle of the form would abandon everything typed. The
+     container is what tells the two apart. */
   {
-    /* read inside openAuth alone: the MERGE card has a sweep of its own, over
-       a card that carries no arming button and legitimately signs people in */
     const authAt = acct.indexOf('function openAuth(');
     const authFn = acct.slice(authAt, acct.indexOf('\n  /* ======', authAt));
     ok(authAt > 0 && authFn.length > 2000 && authFn.indexOf('id="oa-reg-orcid"') > 0,
       'registration: the auth card function was found');
     ok(/wrap\.querySelectorAll\(\s*'\.oa-auth-providers \.oa-auth-provider'\)/.test(authFn)
        && !/querySelectorAll\('\.oa-auth-provider'\)/.test(authFn),
-      'registration: the sign-in sweep is scoped to the pill CONTAINER, so the arming button is never wired to signInWithPopup');
+      'registration: the sign-in sweep is scoped to the pill CONTAINER, so an arming button is never wired to signInWithPopup');
   }
-  ok(/var wantOrcid = false;/.test(acct) && /wantOrcid = !wantOrcid;/.test(acct),
-    'registration: the answer is a plain local of the card, so rebuilding the card (a mode switch) forgets it');
-  ok(/var orcidAsked = wantOrcid;/.test(acct)
-     && /if \(orcidAsked\) orcidOutcome = linkTo\(fb, u, 'oidc\.orcid'\);/.test(acct),
-    'registration: the link is opened the instant the account exists, while the press that asked for it still counts as activating the page');
+  ok(/var want = \{ 'oidc\.orcid': false, 'google\.com': false \};/.test(acct)
+     && /want\[a\.provider\] = on;/.test(acct),
+    'registration: the answers are plain locals of the card, so rebuilding it (a mode switch) forgets them');
+  ok(/var ARM = \[/.test(acct) && (acct.match(/ARM\.forEach\(/g) || []).length === 1,
+    'registration: …and ONE table drives both buttons, since a second copy of toggle-relabel-reword would drift');
+
+  /* --- and the CONNECTING happens on the card that follows ---------------
+     The owner's own word is "Then". It is also the only shape that works: an
+     OAuth window opens reliably from a real press, so a card of live buttons
+     connects every time where an armed link can be blocked and silently do
+     nothing. The registration takes the ANSWER and tries the FIRST of them
+     inside its own activation window as a bonus; the card takes the PRESS. */
+  ok(/var connectWanted = \[\];/.test(acct) && /var connectTried = '';/.test(acct)
+     && /var connectOutcome = null;/.test(acct),
+    'connect: what was armed is handed to the next card, with which one the registration already tried');
+  ok(/connectWanted = ARM\.filter\(function \(a\) \{ return want\[a\.provider\]; \}\)/.test(acct)
+     && /connectTried = connectWanted\[0\];/.test(acct)
+     && /connectOutcome = linkTo\(fb, u, connectTried\);/.test(acct),
+    'connect: the FIRST armed one is opened the instant the account exists, while the press that asked for it still counts');
   {
     const chain = acct.slice(acct.indexOf('createUserWithEmailAndPassword(f.email.value'),
                              acct.indexOf('signInWithEmailAndPassword(f.email.value'));
     ok(!/return[^;\n]*linkTo\(/.test(chain) && !/\.then\([^)]*linkTo/.test(chain),
-      'registration: …and it is NOT a link in that chain: the account is made, and an OAuth window ' +
-      'a reader never finishes must not hang or fail the registration');
+      'connect: …and it is NOT a link in that chain: an OAuth window a reader never finishes must ' +
+      'not hang or fail a registration');
+    ok(/connectWanted\[0\]/.test(chain) && !/connectWanted\[1\]/.test(chain),
+      'connect: …only the first, because two popups at once is one popup and one refusal');
   }
-  ok(/function linkTo\(fb, u, id\)/.test(acct)
-     && /return linkTo\(fb, state\.user, id\);/.test(acct),
-    'ORCID: "link, then store the verified iD" is ONE definition, shared by the profile card and the registration card');
-  ok(/var orcidOutcome = null;/.test(acct) && /function verifyOrcid\(\)/.test(acct)
-     && /verifyOrcid\(\);/.test(acct)
-     && /id="oa-verify-orcid"/.test(acct),
-    'registration: how the armed link went is REPORTED on the verify card, the next thing that reader sees');
+  ok(/id="oa-verify-connect"/.test(acct) && /function verifyConnect\(u\)/.test(acct)
+     && /verifyConnect\(u\);/.test(acct) && /function paintConnect\(u\)/.test(acct),
+    'connect: the card that follows draws the block and reports the attempt');
+  ok(/var CONNECT = \[/.test(acct) && /provider: 'oidc\.orcid'/.test(acct)
+     && /provider: 'google\.com'/.test(acct),
+    'connect: …offering BOTH sign-ins, which is what the owner asked for beside the ORCID one');
+  ok(/if \(hasProvider\(c\.provider, u\)\) \{/.test(acct),
+    'connect: …a row per sign-in the account does not already have, never an offer it cannot honour');
+  ok(/\.then\(function \(fb\) \{ return linkTo\(fb, u \|\| state\.user, id\); \}\)/.test(acct),
+    'connect: a press runs the ONE link definition, on the account the card was opened with');
   ok(/'auth\/popup-blocked'/.test(acct),
-    'registration: …including a popup the browser blocked, which is otherwise completely silent');
+    'connect: …and a popup the browser blocked is named, which is otherwise completely silent');
   for (const f of ['oa-ui.css', 'v3.css']) {
     const css = await readFile(path.join(HERE, '..', 'assets', f), 'utf8');
     ok(/oa-orcid-connect/.test(css) && /\.oa-orcid-type/.test(css),
@@ -20732,9 +20786,12 @@ async function testRegistrationFields() {
     'the repeat: …and a new session asks again',
     'the repeat: a complete account meets no card',
     'registration card: there is no ORCID box to fill in',
+    'registration card: and NO sign-up pills',
     'registration card: …and NOBODY was signed in',
     'registration card: the armed press connected ORCID as the account was made',
-    'blocked popup: the verify card says the window was blocked',
+    'connect: the card says ORCID is connected and stops offering it',
+    'connect: pressing it connects Gmail too',
+    'blocked popup: the armed link was refused, so the card leaves ORCID LIVE',
     'blocked popup: …and the account was still made',
   ]) {
     ok(pt.includes(needle), `page-test drives it: ${needle.slice(0, 60)}…`);
@@ -20766,12 +20823,22 @@ async function testRegistrationFields() {
        outcome, or the next reader re-introduces the pointer as an improvement */
     const oAt = claude.indexOf('### …and the REGISTRATION card stopped asking');
     const osec = oAt > 0 ? claude.slice(oAt, claude.indexOf('\n## ', oAt)) : '';
-    ok(osec.length > 2000 && /encourage people to register by just clicking the ORCID button/.test(osec)
-       && /no e-mail claim at all/.test(osec) && /ARMING TOGGLE/.test(osec)
+    ok(osec.length > 4000 && /encourage people to register by just clicking the ORCID button/.test(osec)
+       && /no e-mail claim at all/.test(osec)
        && /activating the page/.test(osec) && /oa-auth-providers \.oa-auth-provider/.test(osec)
-       && /orcidOutcome/.test(osec) && /aria-pressed/.test(osec),
+       && /aria-pressed/.test(osec),
       'CLAUDE.md: …and the registration card\'s own section records the reversal, why the pointer was ' +
-      'worse than the box, the arming toggle, the popup timing, the scoped sweep and the report');
+      'worse than the box, the popup timing, the scoped sweep and the arming');
+    /* the SECOND ruling of the same day, which moved the sign-up pills off this
+       card and put Gmail beside ORCID: the record has to carry why registering
+       is always the full form, and why the sign in card keeps all three */
+    ok(/THE SIGN IN CARD KEEPS ALL THREE/.test(osec)
+       && /REGISTERING IS ALWAYS THE FULL FORM NOW/.test(osec)
+       && /THE TWO BUTTONS ARM; THE CARD THAT FOLLOWS CONNECTS/.test(osec)
+       && /Only the first/.test(osec)
+       && /Sign in faster next time/.test(osec),
+      'CLAUDE.md: …and the Gmail ruling: the full form, the pills kept on the sign in card, the arm/press ' +
+      'split, why only the first fires, and the existing member\'s own route');
     ok(!/The REGISTRATION card cannot link, and says where the button is instead/.test(claude),
       'CLAUDE.md: …and the paragraph the owner overturned is gone, not left standing beside its replacement');
   }

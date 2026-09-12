@@ -10825,17 +10825,27 @@ for (const w of [320, 360, 390, 430]) {
       })(),
       siteLabel: lab('website'), siteReq: req('website'),
       firstReq: req('firstName'), lastReq: req('lastName'),
-      /* THE ORCID ROW IS A BUTTON, NOT A QUESTION, so it is read off the row
-         rather than off a label: there is no `[name="orcid"]` here to hang one
-         on, which is itself half of what is under test. */
+      /* THE SIGN-IN ROWS ARE BUTTONS, NOT QUESTIONS, so they are read off the
+         rows rather than off labels: there is no `[name="orcid"]` here to hang
+         one on, which is itself part of what is under test. */
       orcidBox: !!document.querySelector('#oa-auth-form [name="orcid"]'),
-      orcidHead: (document.querySelector('#oa-auth-form .oa-orcid-field .oa-flabel') || {}).textContent || '',
+      connectHead: (document.querySelector('#oa-auth-form .oa-connect-field .oa-flabel') || {}).textContent || '',
+      connectLede: (document.querySelector('#oa-auth-form .oa-connect-field > .oa-opt.oa-fine') || {}).textContent || '',
       orcidBtn: (() => {
         const b = document.querySelector('#oa-reg-orcid');
         return b && { label: b.textContent.trim(), pressed: b.getAttribute('aria-pressed'),
                       mark: !!b.querySelector('svg') };
       })(),
+      googleBtn: (() => {
+        const b = document.querySelector('#oa-reg-google');
+        return b && { label: b.textContent.trim(), pressed: b.getAttribute('aria-pressed'),
+                      mark: !!b.querySelector('svg') };
+      })(),
       orcidNote: (document.querySelector('#oa-reg-orcid-note') || {}).textContent || '',
+      googleNote: (document.querySelector('#oa-reg-google-note') || {}).textContent || '',
+      /* the pills the owner struck through: gone from THIS card */
+      pills: document.querySelectorAll('#oa-auth .oa-auth-providers .oa-auth-provider').length,
+      orRow: !!document.querySelector('#oa-auth .oa-or'),
     };
   });
   ok(card.affReq === true, 'registration card: the affiliation box is required');
@@ -10847,53 +10857,81 @@ for (const w of [320, 360, 390, 430]) {
     'registration card: the two name boxes are required too, so the affiliation joins an existing rule');
   ok(card.siteReq === false && /\(optional\)/.test(card.siteLabel || ''),
     'registration card: the website is still optional and still says so, so the card distinguishes the two kinds');
-  /* THE CARD DOES NOT ASK FOR THE NUMBER; IT OFFERS THE PRESS. Owner,
-     2026-09-12, of the note this replaced: "this would encourage people to
-     register by just clicking the ORCID button. What I was thinking instead is
-     keep it as is, and when asking to add the ORCID, you don't ask and instead
-     have the ORCID connect button, so that the user connect also their ORCID
-     during their (regular) registration." */
+  /* THE CARD ASKS FOR NO NUMBER AND OFFERS TWO SIGN-INS. Owner, 2026-09-12:
+     "a new user registers the 'regular' way filling up all those fields …
+     Then, the user is asked to (optionally but highly recommended) connect his
+     ORCID and also to optionally connect his Gmail too", with the card's own
+     "or continue with" block struck through in the screenshot beside it. */
   ok(card.orcidBox === false,
     'registration card: there is no ORCID box to fill in — a reader who knew the number would not need the button');
-  ok(/^ORCID iD \(highly recommended but optional\)/.test(card.orcidHead.trim()),
-    `registration card: …the row still says it is highly recommended (got "${card.orcidHead.trim()}")`);
-  ok(card.orcidBtn && card.orcidBtn.label === 'Connect my ORCID' && card.orcidBtn.mark,
-    `registration card: …and carries the connect button, wearing the ORCID mark (got ${JSON.stringify(card.orcidBtn)})`);
-  eq(card.orcidBtn && card.orcidBtn.pressed, 'false',
-    'registration card: …unarmed on arrival, so the reader chooses it rather than opting out of it');
-  ok(/as soon as your account is made/.test(card.orcidNote),
-    `registration card: …and the note says WHEN the window opens, since nothing can open while the account does not exist (got "${card.orcidNote}")`);
+  eq(card.pills, 0,
+    'registration card: and NO sign-up pills — registering is always the full form, which is what the owner struck through');
+  ok(card.orRow === false, 'registration card: …so there is no "or continue with" row either');
+  ok(/^Connect your other sign-ins \(optional\)/.test(card.connectHead.trim()),
+    `registration card: the field offers the other sign-ins, optionally (got "${card.connectHead.trim()}")`);
+  ok(/sign in with these instead of your e-mail and password/.test(card.connectLede)
+     && /one press each, on the next screen/.test(card.connectLede),
+    `registration card: …and says what they are FOR and when they happen (got "${card.connectLede}")`);
+  for (const [who, btn, note, word] of [
+    ['ORCID', card.orcidBtn, card.orcidNote, 'Connect my ORCID'],
+    ['Gmail', card.googleBtn, card.googleNote, 'Connect my Gmail'],
+  ]) {
+    ok(btn && btn.label === word && btn.mark,
+      `registration card: …a ${who} button wearing its own mark (got ${JSON.stringify(btn)})`);
+    eq(btn && btn.pressed, 'false',
+      `registration card: …${who} unarmed on arrival, so the reader chooses it rather than opting out`);
+    ok(note.length > 40,
+      `registration card: …and ${who} carries a line of its own (got "${note}")`);
+  }
+  /* the two rewritten notes, measured on the RENDERED card rather than in the
+     source, because what is under test is what the reader is told */
+  ok(/verified/.test(card.orcidNote) && /with ORCID as well/.test(card.orcidNote),
+    `registration card: the ORCID line promises the verified iD and the sign-in (got "${card.orcidNote}")`);
+  ok(/link your Google account to this one/.test(card.googleNote)
+     && /faster alternative/.test(card.googleNote),
+    `registration card: the Gmail line says it is a faster alternative way in (got "${card.googleNote}")`);
+  ok(!/as soon as your account is made, and fill your iD in/.test(card.orcidNote),
+    'registration card: …and the wording the owner asked to be improved is gone');
 
-  /* THE PRESS ARMS, AND MUST NOT SIGN ANYBODY IN. The button wears the same
-     `.oa-auth-provider` pill as the sign-in buttons below it, so the card's
-     provider sweep is one selector away from wiring it to signInWithPopup —
-     which would abandon the half-filled form for a brand new ORCID account
-     with no e-mail address, which is the exact road this change removed. */
+  /* A PRESS ARMS, AND MUST NOT SIGN ANYBODY IN. The buttons wear the same
+     `.oa-auth-provider` pill as the sign-in ones, so the card's provider sweep
+     is one selector away from wiring them to signInWithPopup — which would
+     abandon the half-filled form for a brand new account answering none of its
+     questions, the exact road this change removes. */
   await q.click('#oa-reg-orcid');
+  await q.click('#oa-reg-google');
   /* READ NULL-SAFELY, because the defect this block exists to catch DESTROYS
      the card: a press wired to signInWithPopup signs the reader in, finish()
-     closes the box, and `#oa-reg-orcid` is gone. Reading it blind threw a
+     closes the box, and the buttons are gone. Reading them blind threw a
      TypeError out of the evaluate and took the whole suite down with a stack
      trace, which is a weaker report than the named assertions below — the
      rule this repository already records for a guard that cannot say what it
      found. */
   const armed = await q.evaluate(() => {
-    const b = document.querySelector('#oa-reg-orcid');
-    const n = document.querySelector('#oa-reg-orcid-note');
+    const read = (id) => {
+      const b = document.querySelector('#' + id);
+      const n = document.querySelector('#' + id + '-note');
+      return { pressed: b ? b.getAttribute('aria-pressed') : '(the button is gone)',
+               label: b ? b.textContent.trim() : '(the button is gone)',
+               note: n ? n.textContent : '' };
+    };
     return {
-      pressed: b ? b.getAttribute('aria-pressed') : '(the button is gone)',
-      label: b ? b.textContent.trim() : '(the button is gone)',
-      note: n ? n.textContent : '',
+      orcid: read('oa-reg-orcid'),
+      google: read('oa-reg-google'),
       signedIn: window.__fb.at('signIn', ''),
       linked: window.__fb.at('link', ''),
       stillOpen: !!document.querySelector('#oa-auth-form'),
     };
   });
-  eq(armed.pressed, 'true', 'registration card: pressing the button arms it');
-  eq(armed.label, 'ORCID will open next', 'registration card: …and the label says what will happen');
-  ok(/Press again/.test(armed.note), 'registration card: …and the note says how to change your mind');
+  for (const [who, got] of [['ORCID', armed.orcid], ['Gmail', armed.google]]) {
+    eq(got.pressed, 'true', `registration card: pressing the ${who} button arms it`);
+    ok(/yes, connect it/.test(got.label),
+      `registration card: …and its label says the answer was taken (got "${got.label}")`);
+    ok(/Press again/.test(got.note),
+      `registration card: …and the ${who} note says how to change your mind`);
+  }
   eq(armed.signedIn, -1,
-    'registration card: …and NOBODY was signed in — the press arms, it is not the ORCID sign-in pill');
+    'registration card: …and NOBODY was signed in — a press arms, it is not the sign-in pill');
   eq(armed.linked, -1, 'registration card: …and nothing was linked either, since there is no account yet');
   ok(armed.stillOpen, 'registration card: …and the form the reader was filling in is still there');
 
@@ -10937,10 +10975,10 @@ for (const w of [320, 360, 390, 430]) {
   eq(made.docs[profDoc].affiliation, 'Test University',
     'registration card: …and the affiliation is stored TRIMMED, not as the spaces around it');
 
-  /* …AND THE ARMED LINK FIRED, which is the whole of what the toggle promised.
-     The shim's linkWithPopup answers the way the SDK does, with an ORCID
-     providerData entry whose uid IS the iD, so what is measured is the iD
-     reaching the profile rather than merely a call being made. */
+  /* …AND THE FIRST ARMED LINK FIRED, which is what arming buys. The shim's
+     linkWithPopup answers the way the SDK does, with an ORCID providerData
+     entry whose uid IS the iD, so what is measured is the iD reaching the
+     profile rather than merely a call being made. */
   await q.waitForFunction(() => window.__fb.at('link', 'oidc.orcid') !== -1,
     null, { timeout: 8000 });
   const linked = await q.evaluate(() => {
@@ -10953,22 +10991,46 @@ for (const w of [320, 360, 390, 430]) {
   eq(linked.doc.orcidVerified, true,
     'registration card: …recorded verified, since an ORCID sign-in is what proved it');
   eq(linked.ops.length, 1,
-    `registration card: …once, not once per promise in the chain (got ${JSON.stringify(linked.ops)})`);
+    `connect: …and ONLY the first armed one, since two popups at once is one popup and one refusal (got ${JSON.stringify(linked.ops)})`);
 
-  /* and it is REPORTED, on the card the reader is looking at a moment later.
-     A popup a browser blocks is completely silent, so the outcome has to be
-     said either way or an armed press that failed looks exactly like one that
-     worked. */
-  await q.waitForSelector('#oa-verify-orcid', { timeout: 8000 });
-  await q.waitForFunction(
-    () => /Connected/.test((document.querySelector('#oa-verify-orcid') || {}).textContent || ''),
+  /* THE CARD THAT FOLLOWS IS WHERE THE REST IS CONNECTED, one press each.
+     Gmail was armed too and deliberately not opened, so it has to be a LIVE
+     button here — which is also the state every reader who armed nothing is
+     in, and the whole reason the block is drawn at all. */
+  await q.waitForSelector('#oa-verify-connect', { timeout: 8000 });
+  await q.waitForFunction(() => !!document.querySelector('[data-connect-done="orcid"]'),
     null, { timeout: 8000 });
-  const said = await q.evaluate(() => {
-    const l = document.querySelector('#oa-verify-orcid');
-    return { text: l.textContent.trim(), hidden: l.hidden };
-  });
-  ok(said.hidden === false && /0000-0002-1825-0097/.test(said.text),
-    `registration card: …and the verify card names the iD it connected (got "${said.text}")`);
+  const after = await q.evaluate(() => ({
+    text: document.querySelector('#oa-verify-connect').textContent,
+    orcidDone: !!document.querySelector('[data-connect-done="orcid"]'),
+    googleBtn: !!document.querySelector('#oa-connect-google'),
+    orcidBtn: !!document.querySelector('#oa-connect-orcid'),
+  }));
+  ok(after.orcidDone && !after.orcidBtn,
+    'connect: the card says ORCID is connected and stops offering it');
+  ok(/0000-0002-1825-0097/.test(after.text),
+    `connect: …naming the iD it took (got "${after.text.trim().slice(0, 160)}")`);
+  ok(after.googleBtn,
+    'connect: …and Gmail, which was armed but not opened, is a live button one press away');
+
+  /* the press itself: a real click, which is the only thing that opens an
+     OAuth window reliably — the reason the connecting lives on this card */
+  await q.click('#oa-connect-google');
+  /* WAIT ON THE DOM, not on the op log: the shim records a link when the call
+     is MADE, which is before its promise resolves and therefore before the
+     block has redrawn — so waiting on the log reads the page in the state it
+     was in before the press. */
+  await q.waitForFunction(() => !document.querySelector('#oa-connect-google'),
+    null, { timeout: 8000 });
+  const both = await q.evaluate(() => ({
+    text: document.querySelector('#oa-verify-connect').textContent,
+    googleBtn: !!document.querySelector('#oa-connect-google'),
+    ops: window.__fb.ops('link'),
+  }));
+  ok(!both.googleBtn && /All connected/i.test(both.text)
+     && /Gmail is connected/.test(both.text) && /ORCID is connected/.test(both.text),
+    `connect: pressing it connects Gmail too, and the block stops asking and says so (got "${both.text.trim().slice(0, 260)}")`);
+  eq(both.ops.length, 2, 'connect: …two links in all, one per sign-in, never a repeat');
   eq(errors, [], 'registration card: no uncaught script error');
   await ctx.close();
 }
@@ -10976,9 +11038,10 @@ for (const w of [320, 360, 390, 430]) {
 /* -------------------- an ARMED press whose window the browser BLOCKED
 
    The half that is otherwise silent. The account is made either way — nothing
-   about an OAuth window a reader never finished may take a registration away
-   — and the verify card has to SAY the iD was not connected and where to
-   connect it, or a press that did nothing reads exactly like one that worked. */
+   about an OAuth window a reader never finished may take a registration away —
+   and the card that follows has to leave the sign-in LIVE, one press from
+   working, rather than reporting a dead end. That is the whole reason the
+   connecting lives there and not in the registration chain.                  */
 {
   const UNVERIFIED = { uid: 'blocked-uid-0000', email: 'blocked@example.edu',
     emailVerified: false, displayName: '', providerData: [{ providerId: 'password' }] };
@@ -10995,24 +11058,24 @@ for (const w of [320, 360, 390, 430]) {
   await q.check('#oa-auth-form [name="terms"]');
   await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
 
-  await q.waitForSelector('#oa-verify-orcid', { timeout: 8000 });
-  await q.waitForFunction(
-    () => /Edit account/.test((document.querySelector('#oa-verify-orcid') || {}).textContent || ''),
-    null, { timeout: 8000 });
+  await q.waitForSelector('#oa-connect-orcid', { timeout: 8000 });
   const after = await q.evaluate(() => {
     const docs = window.__fb.dump();
     const k = Object.keys(docs).filter((x) => x.indexOf('profiles/') === 0)[0];
     return {
-      said: document.querySelector('#oa-verify-orcid').textContent.trim(),
+      orcidBtn: !!document.querySelector('#oa-connect-orcid'),
+      orcidLive: !document.querySelector('#oa-connect-orcid').disabled,
+      googleBtn: !!document.querySelector('#oa-connect-google'),
+      done: !!document.querySelector('[data-connect-done]'),
       card: !!document.querySelector('#oa-verify'),
       signedIn: window.__fb.at('signIn', '') !== -1,
       prof: k ? docs[k] : null,
     };
   });
-  ok(/blocked the ORCID window/i.test(after.said),
-    `blocked popup: the verify card says the window was blocked (got "${after.said}")`);
-  ok(/Edit account/.test(after.said),
-    'blocked popup: …and where to connect it instead, so the press is not simply lost');
+  ok(after.orcidBtn && after.orcidLive,
+    'blocked popup: the armed link was refused, so the card leaves ORCID LIVE — one press, which is what a browser does let through');
+  ok(after.googleBtn && !after.done,
+    'blocked popup: …with Gmail beside it, and nothing claimed as connected');
   ok(after.card && after.signedIn,
     'blocked popup: …and the account was still made — a link that failed never costs a registration');
   ok(after.prof && after.prof.affiliation === 'Test University' && !after.prof.orcid,
@@ -11037,7 +11100,11 @@ for (const w of [320, 360, 390, 430]) {
      card opens in place and can be measured */
   const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
     { seed: { signInUser: NEWBIE, newUser: true }, selector: '#main', askProfile: true });
-  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  /* THE SIGN IN CARD, because the pills left the register one (2026-09-12):
+     registering is always the full form now, and a provider sign-up that has
+     answered none of its questions arrives this way instead — which is
+     exactly the reader the welcome card below exists for. */
+  await q.evaluate(() => window.OAAccounts.openAuth());
   await q.waitForSelector('.oa-auth-provider[data-provider="google"]', { timeout: 8000 });
   await q.click('.oa-auth-provider[data-provider="google"]');
   await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
@@ -11172,7 +11239,11 @@ for (const w of [320, 360, 390, 430]) {
     displayName: 'Orla Orcid', providerData: [{ providerId: 'oidc.orcid', uid: '0000-0002-1825-0097' }] };
   const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
     { seed: { signInUser: ORCIDER, newUser: true }, selector: '#main', askProfile: true });
-  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  /* THE SIGN IN CARD, because the pills left the register one (2026-09-12):
+     registering is always the full form now, and a provider sign-up that has
+     answered none of its questions arrives this way instead — which is
+     exactly the reader the welcome card below exists for. */
+  await q.evaluate(() => window.OAAccounts.openAuth());
   await q.waitForSelector('.oa-auth-provider[data-provider="orcid"]', { timeout: 8000 });
   await q.click('.oa-auth-provider[data-provider="orcid"]');
   await q.waitForSelector('#oa-profile-form [name="contactEmail"]', { timeout: 8000 });

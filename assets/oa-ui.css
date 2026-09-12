@@ -280,7 +280,8 @@
 
 .oa-orcid-field > .oa-opt.oa-fine { display: block; margin: 6px 0 0; }
 
-.oa-orcid-field .oa-auth-provider.oa-orcid-connect {
+.oa-orcid-field .oa-auth-provider.oa-orcid-connect,
+.oa-auth-provider.oa-connect-btn {
   display: inline-flex;
   width: auto;
   min-height: 42px;
@@ -294,12 +295,38 @@
    ground alone would leave the label painted in its own colour — and the
    hover rule above stands down on it, or the pointer resting where the reader
    just pressed would repaint the on-state in the off-state's wash. */
-.oa-orcid-field .oa-auth-provider.oa-orcid-connect[aria-pressed='true'] {
+.oa-orcid-field .oa-auth-provider.oa-orcid-connect[aria-pressed='true'],
+.oa-auth-provider.oa-connect-btn[aria-pressed='true'] {
   background: var(--brand-soft, #eef1f5);
   border-color: var(--brand, #2b2f36);
   color: var(--ink, #1c1f24);
   font-weight: 600;
 }
+
+/* THE REGISTRATION CARD'S CONNECT FIELD, and the same block on the card that
+   follows it. Two pills stacked in a column of text boxes, each with its own
+   line under it: left-aligned and only as wide as their words, for the reason
+   the ORCID field above gives — a full-width pill in the middle of a form
+   reads as the form's submit. */
+.oa-connect-field { margin: 0 0 14px; }
+.oa-connect-field > .oa-opt.oa-fine { display: block; margin: 6px 0 10px; }
+.oa-connect-field .oa-auth-provider + .oa-opt.oa-fine { margin: 6px 0 14px; }
+.oa-auth-card .oa-connect-field .oa-flabel { font-size: 14px; }
+
+.oa-verify-connect { margin: 18px 0 0; text-align: left; }
+.oa-connect-h {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink, #313a45);
+}
+.oa-verify-connect > .oa-opt.oa-fine { display: block; margin: 0 0 12px; }
+.oa-connect-row { margin: 0 0 12px; }
+.oa-connect-row > .oa-opt.oa-fine { display: block; margin: 6px 0 0; }
+/* a connected row is a statement rather than a control, so it names its own
+   ink: the site's "yes" green, which is a token in both themes */
+.oa-connect-row.is-done { font-size: 13px; color: var(--ink-2, #555); }
+.oa-connect-tick { color: var(--ok, #2e6b4f); font-weight: 700; }
 
 /* "Or type it, if you know it" is the secondary route, so it is quieter than
    the field heading above the button — and it names its own ink, since it sits
