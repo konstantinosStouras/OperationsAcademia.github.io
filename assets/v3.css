@@ -1789,7 +1789,9 @@ body.v3 .oa-auth-provider {
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
-body.v3 .oa-auth-provider:hover { border-color: var(--brand); background: var(--brand-soft); }
+body.v3 .oa-auth-provider:hover:not([aria-pressed='true']) {
+  border-color: var(--brand); background: var(--brand-soft);
+}
 body.v3 .oa-or {
   display: flex; align-items: center; gap: 14px;
   color: var(--mut); font-size: 13px; margin: 14px 0;
@@ -1938,8 +1940,20 @@ body.v3 .oa-verified { color: var(--ok); }
 body.v3 .oa-orcid-field .oa-auth-provider.oa-orcid-connect {
   width: auto; min-height: 42px; padding: 8px 14px; margin: 2px 0 0;
 }
+/* armed — see the note beside the same rule in oa-ui.css. (0,4,2), so it
+   wins on specificity over `body.v3 .oa-auth-provider:hover` rather than on
+   being later in the file. */
+body.v3 .oa-orcid-field .oa-auth-provider.oa-orcid-connect[aria-pressed='true'] {
+  border-color: var(--brand); background: var(--brand-soft);
+  color: var(--ink); font-weight: 600;
+}
 body.v3 .oa-orcid-type { color: var(--ink-2); }
 body.v3 .oa-orcid-field > .oa-opt.oa-fine { color: var(--mut); }
+/* `body.v3 .oa-opt:hover` (0,3,1) outranks the card-wide reset in oa-ui.css
+   (0,2,0), so the stand-down has to be restated here at (0,4,1) rather than
+   left to load order: the ORCID chip and note are spans outside a label, and
+   without this they light up blue under the pointer inside the form. */
+body.v3 .oa-modal-card .oa-opt:hover { background: none; }
 body.v3 .oa-acct-other { border-top: 1px solid var(--line-soft); }
 body.v3 .oa-acct-other h4 { color: var(--ink); }
 body.v3 .oa-mergebtn {

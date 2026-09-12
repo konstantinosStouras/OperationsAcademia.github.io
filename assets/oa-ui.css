@@ -211,6 +211,29 @@
   margin: 4px 0 0;
 }
 
+/* …AND THE SAME RESET FOR AN `.oa-opt` THAT IS NOT INSIDE A LABEL. The rule
+   above is scoped to `label`, and the ORCID field's chip and its note are
+   spans in a `<div>` — on the profile card and, since 2026-09-12, on the
+   registration card, which every new account meets. On any page that loads
+   oa-list.css (jobs.html opens both cards) they therefore met the jobs-filter
+   dropdown's own styling instead: padded, pointer-cursored and highlighting
+   blue under the mouse, in the middle of a form. A modal card never contains a
+   filter dropdown, so the reset is safe for the whole card. `display` is left
+   alone here, because the notes WANT the block the dropdown gives them and
+   only the inline chip does not (next rule). */
+.oa-modal-card .oa-opt { padding: 0; background: none; cursor: inherit; }
+.oa-modal-card .oa-opt:hover { background: none; }
+
+/* the chip rides on the field heading's own line, so it is the one `.oa-opt`
+   in a card that must not take the dropdown row's block-level flex */
+.oa-orcid-field .oa-flabel .oa-opt { display: inline; }
+
+/* On the REGISTRATION card the ORCID row is the only one that is not a
+   question, so its heading is a `<span class="oa-flabel">` (13px) beside six
+   real `<label>`s (14px). Matched, or the row reads a size smaller than every
+   row around it for no reason a reader could name. */
+.oa-auth-card .oa-orcid-field .oa-flabel { font-size: 14px; }
+
 #oa-profile-form input[disabled] { background: var(--bg-3, #f6f6f6); color: var(--mut, #777); }
 
 /* A value we were GIVEN rather than one that is typed — an ORCID iD that came
@@ -263,6 +286,19 @@
   min-height: 42px;
   padding: 8px 14px;
   margin: 2px 0 0;
+}
+
+/* ARMED, on the registration card: the press cannot open anything yet (the
+   account is not made), so the button has to SHOW that it took the answer.
+   Named ink over a named ground — `--brand` is light in the dark theme, so a
+   ground alone would leave the label painted in its own colour — and the
+   hover rule above stands down on it, or the pointer resting where the reader
+   just pressed would repaint the on-state in the off-state's wash. */
+.oa-orcid-field .oa-auth-provider.oa-orcid-connect[aria-pressed='true'] {
+  background: var(--brand-soft, #eef1f5);
+  border-color: var(--brand, #2b2f36);
+  color: var(--ink, #1c1f24);
+  font-weight: 600;
 }
 
 /* "Or type it, if you know it" is the secondary route, so it is quieter than
@@ -433,7 +469,7 @@
   cursor: pointer;
 }
 
-.oa-auth-provider:hover { background: var(--brand-soft); }
+.oa-auth-provider:hover:not([aria-pressed='true']) { background: var(--brand-soft); }
 
 .oa-or {
   margin: 14px 0;

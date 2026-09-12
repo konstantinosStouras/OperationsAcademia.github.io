@@ -1863,6 +1863,38 @@
     wireOtherAccounts(wrap, closeProfile || function () {});
   }
 
+  /* Attach a sign-in to ONE NAMED ACCOUNT and, for ORCID, record the iD it has
+     just proved. The ONE definition, because two callers need it from very
+     different places: the profile card's connect rows, which have a card to
+     repaint and a line to write into, and the REGISTRATION card, where the
+     account is a second old, `state.user` may not have been set by the auth
+     event yet and there is no card at all. Two copies of "link, then store the
+     verified iD" would drift, and the half that drifted would be the one
+     nobody is looking at.
+
+     A fresh ORCID link PROVES the iD, so it is recorded verified on the
+     profile (upgrading any hand-typed, unverified one) — that is what
+     "connect" adds beyond a second way in, and what lets the duplicate check
+     recognise this person across accounts. The profile write is best effort:
+     the link itself has already succeeded, and `seedOrcidFromProvider` will
+     fill the iD in on the next sign-in if this write did not land. */
+  function linkTo(fb, u, id) {
+    var p = id === 'google.com' ? new fb.auth.GoogleAuthProvider()
+                                : new fb.auth.OAuthProvider(id);
+    return u.linkWithPopup(p).then(function (cred) {
+      var linked = (cred && cred.user) || u;
+      var iD = id === 'oidc.orcid' ? orcidFromProvider(linked) : '';
+      if (!iD) return { user: linked, orcid: '' };
+      var patch = { orcid: iD, orcidVerified: true, orcidSeeded: true };
+      return profileDoc(fb, u.uid).set(patch, { merge: true })
+        .then(function () {
+          state.profile = Object.assign({}, state.profile || {}, patch);
+        })
+        .catch(function () { /* best effort — the link itself succeeded */ })
+        .then(function () { return { user: linked, orcid: iD }; });
+    });
+  }
+
   /* Attach a second sign-in method to THIS account. This is the PREVENTION half
      of the duplicate problem: an account reachable by both buttons can never
      have a second one created for it. */
@@ -1871,23 +1903,9 @@
     msg.className = 'oa-auth-msg';
     msg.textContent = 'Opening the sign-in window…';
     OAFB.ready().then(function (fb) {
-      var p = id === 'google.com' ? new fb.auth.GoogleAuthProvider()
-                                  : new fb.auth.OAuthProvider(id);
-      return state.user.linkWithPopup(p).then(function (cred) {
-        linked = (cred && cred.user) || state.user;
-        // A fresh ORCID link just PROVED the iD, so record it verified on the
-        // profile (upgrading any hand-typed, unverified one) — this is what
-        // "connect" adds beyond a second way in, and what lets the duplicate
-        // check recognise this person across accounts.
-        var iD = id === 'oidc.orcid' && orcidFromProvider((cred && cred.user) || state.user);
-        if (!iD) return;
-        var patch = { orcid: iD, orcidVerified: true, orcidSeeded: true };
-        return profileDoc(fb, state.user.uid).set(patch, { merge: true })
-          .then(function () {
-            state.profile = Object.assign({}, state.profile || {}, patch);
-          })
-          .catch(function () { /* best effort — the link itself succeeded */ });
-      });    }).then(function () {
+      return linkTo(fb, state.user, id);
+    }).then(function (r) {
+      linked = (r && r.user) || state.user;
       msg.className = 'oa-auth-msg is-ok';
       msg.textContent = id === 'oidc.orcid' && (state.profile || {}).orcid
         ? 'Connected — your ORCID iD is on your profile, and we can vouch for it.'
@@ -2117,25 +2135,39 @@
               'autocomplete="' + (registering ? 'new-password' : 'current-password') + '" ' +
               'placeholder="' + (registering ? 'At least 6 characters' : 'Your password') + '"></label>' +
           (registering
-            ? '<label>ORCID iD <span class="oa-opt">(highly recommended but optional)</span>' +
-                '<input type="text" name="orcid" maxlength="25" autocomplete="off" ' +
-                  'placeholder="0000-0002-1825-0097">' +
-                /* The account does not exist yet, so there is nothing here to
-                   attach ORCID to — `linkWithPopup` needs a signed-in user, and
-                   a sign-in popup on this card would create an ORCID ACCOUNT
-                   rather than fill this box in. So the registration card says
-                   where the button is instead of growing one it cannot honour:
-                   the ORCID pill below creates the account WITH the iD already
-                   verified, and Edit account carries the connect button for
-                   everybody else. Drawn only where that pill really is on the
-                   card, or it would point at nothing. */
-                (third.indexOf('data-provider="orcid"') !== -1
-                  ? '<span class="oa-opt oa-fine">Do not know it? Use the ORCID button below ' +
-                      'to create your account and we fill the iD in for you, verified. You ' +
-                      'can also connect ORCID later from Edit account.</span>'
-                  : '<span class="oa-opt oa-fine">Do not know it? Leave it — you can connect ' +
-                      'ORCID later from Edit account, which fills it in for you.</span>') +
-                '</label>' +
+            ? '<div class="oa-orcid-field">' +
+                '<span class="oa-flabel">ORCID iD ' +
+                  '<span class="oa-opt">(highly recommended but optional)</span></span>' +
+                /* THE CARD NO LONGER ASKS FOR THE NUMBER (owner, 2026-09-12, of
+                   the note this replaces: "this would encourage people to
+                   register by just clicking the ORCID button. What I was
+                   thinking instead is keep it as is, and when asking to add the
+                   ORCID, you don't ask and instead have the ORCID connect
+                   button, so that the user connect also their ORCID during
+                   their (regular) registration").
+
+                   Both halves of that are the point. A box wanting sixteen
+                   digits is a question most readers cannot answer from memory,
+                   so they skip it. And the note that stood here pointed at the
+                   ORCID SIGN-IN pill below, which creates an ORCID-backed
+                   account — one that shares no e-mail address at all, which is
+                   the very gap the three compulsory fields above were added to
+                   close. Steering an ordinary registration into it to collect
+                   an iD is the wrong trade.
+
+                   So this is an ARMING toggle, not a sign-in. The account does
+                   not exist while the card is on screen and `linkWithPopup`
+                   needs a user, so nothing can open here; what a press does is
+                   say yes, and the link is opened the instant
+                   `createUserWithEmailAndPassword` returns. The words say that
+                   rather than implying a window is about to appear. */
+                '<button type="button" class="oa-auth-provider oa-orcid-connect" ' +
+                  'id="oa-reg-orcid" aria-pressed="false">' + PROVIDER.orcid.icon +
+                  '<span id="oa-reg-orcid-label">Connect my ORCID</span></button>' +
+                '<span class="oa-opt oa-fine" id="oa-reg-orcid-note" aria-live="polite">' +
+                  'We will open orcid.org as soon as your account is made, and fill your iD ' +
+                  'in verified. You do not need to know the number.</span>' +
+              '</div>' +
               '<label class="oa-terms-row"><input type="checkbox" name="terms">' +
                 '<span>I agree to the <a href="/terms-and-conditions" target="_blank" ' +
                   'rel="noopener">Terms of Use</a> and <a href="/privacy-policy" ' +
@@ -2188,6 +2220,25 @@
     wireModalKeys(wrap, close);
     $('#oa-auth-form', wrap).email.focus();
 
+    /* ARMED OR NOT, for this card only: switching mode rebuilds the whole card,
+       so the answer can never outlive the form it was given on. */
+    var wantOrcid = false;
+    var regOrcid = $('#oa-reg-orcid', wrap);
+    if (regOrcid) regOrcid.addEventListener('click', function () {
+      wantOrcid = !wantOrcid;
+      regOrcid.setAttribute('aria-pressed', wantOrcid ? 'true' : 'false');
+      var lab = $('#oa-reg-orcid-label', wrap);
+      var note = $('#oa-reg-orcid-note', wrap);
+      if (lab) lab.textContent = wantOrcid ? 'ORCID will open next' : 'Connect my ORCID';
+      if (note) {
+        note.textContent = wantOrcid
+          ? 'Ready. We will open orcid.org as soon as your account is made. Press again ' +
+            'if you would rather not.'
+          : 'We will open orcid.org as soon as your account is made, and fill your iD in ' +
+            'verified. You do not need to know the number.';
+      }
+    });
+
     // mode switches rebuild the card, so no stale heading, fields or errors
     var toReg = $('#oa-mode-register', wrap);
     if (toReg) toReg.addEventListener('click', function () { openAuth('register'); });
@@ -2215,7 +2266,16 @@
       if (dest) { leaving = true; location.href = dest; }
     }
 
-    Array.prototype.forEach.call(wrap.querySelectorAll('.oa-auth-provider'), function (b) {
+    /* THE SIGN-IN PILLS ONLY, and the container is what says so. The ORCID
+       ARMING button one field up wears the same `.oa-auth-provider` pill —
+       deliberately, so the two cards offer one recognisable control — and a
+       bare `.oa-auth-provider` sweep would wire it to `signInWithPopup`, so
+       pressing "Connect my ORCID" in the middle of filling the registration
+       form would sign the reader in as a brand new ORCID account with no
+       e-mail address, abandoning everything they had typed. That is precisely
+       the road this change was made to stop steering people down. */
+    Array.prototype.forEach.call(
+      wrap.querySelectorAll('.oa-auth-providers .oa-auth-provider'), function (b) {
       b.addEventListener('click', function () {
         say('');
         OAFB.ready().then(function (fb) {
@@ -2269,17 +2329,6 @@
           f.website.focus();
           return;
         }
-        var orcid = '';
-        var typedOrcid = String(f.orcid.value || '').trim();
-        if (typedOrcid) {
-          orcid = normOrcid(typedOrcid);
-          if (!orcid) {
-            say('That does not look like an ORCID iD. It has 16 digits, ' +
-              'like 0000-0002-1825-0097 — copy it from your ORCID record.');
-            f.orcid.focus();
-            return;
-          }
-        }
         if (!f.terms.checked) {
           say('Please agree to the Terms of Use and Privacy Policy first.');
           return;
@@ -2290,8 +2339,8 @@
           affiliation: affiliation.slice(0, 300),
           website: website.slice(0, 300)
         };
-        if (orcid) prof.orcid = orcid;
         var created = null;
+        var orcidAsked = wantOrcid;
         OAFB.ready()
           .then(function (fb) {
             return fb.auth().createUserWithEmailAndPassword(f.email.value, f.password.value)
@@ -2312,12 +2361,29 @@
                 // SDK contradicted it.
                 try { localStorage.setItem('oaProfileAsked:' + u.uid, '1'); } catch (e2) { /* private mode */ }
                 state.profile = prof;
+                /* THE ORCID WINDOW OPENS HERE, and as early as here for one
+                   reason: a browser only lets a popup through while the press
+                   that asked for it is still counted as activating the page,
+                   and that press was the Create account button a moment ago.
+                   So the link goes out beside the profile write rather than
+                   behind it — it is not waited on (the registration must not
+                   hang on an OAuth window a reader may never finish) and it
+                   cannot fail the registration, which is what
+                   `orcidOutcome` is: the promise the verify card reads to say
+                   how it went, never a link in this chain. */
+                if (orcidAsked) orcidOutcome = linkTo(fb, u, 'oidc.orcid');
                 return profileDoc(fb, u.uid).set(prof, { merge: true })
                   .catch(function () { /* rules not deployed / offline — see above */ });
               });
           })
           .then(function () {
-            if (!created || !needsVerification(created)) { finish(true); return; }
+            if (!created || !needsVerification(created)) {
+              // no verify card will open, so nothing here can report an armed
+              // link; drop it rather than leave it for a later card to claim
+              orcidOutcome = null;
+              finish(true);
+              return;
+            }
             /* The account exists and is not usable yet. Close this box, open
                the "Check your inbox" card, and send the message. The auth
                event may or may not have fired by now, which is why the user
@@ -2400,6 +2466,45 @@
 
   /* The control that opened the card, for the keyboard to go back to. */
   var VERIFY_BACK = '#oa-verify-chip, #oa-np-verify';
+
+  /* HOW THE ARMED ORCID LINK WENT, or null when nobody armed one. Set by the
+     registration path the moment the account exists and read by the verify
+     card, which is the very next thing that reader sees. It is deliberately
+     not a link in the registration chain: the account is already made and
+     nothing here may take it away again. And it is REPORTED either way,
+     because a popup a browser blocked is silent, and a reader left believing
+     a press had done something is the failure shape this repository names
+     everywhere else. */
+  var orcidOutcome = null;
+
+  function verifyOrcid() {
+    var line = $('#oa-verify-orcid');
+    var pending = orcidOutcome;
+    if (!line || !pending) return;
+    orcidOutcome = null;               // one registration, one report
+    line.hidden = false;
+    line.textContent = 'Opening orcid.org…';
+    pending.then(function (r) {
+      line.textContent = (r && r.orcid)
+        ? 'Connected. ORCID iD ' + r.orcid + ' is on your profile, and we can vouch for it.'
+        : 'ORCID is connected to this account. Your iD will be on your profile next time ' +
+          'you sign in.';
+    }).catch(function (err) {
+      var c = (err && err.code) || '';
+      var why =
+        c === 'auth/popup-blocked' ? 'Your browser blocked the ORCID window.'
+        : (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request')
+          ? 'The ORCID window was closed, so nothing was connected.'
+        : (c === 'auth/credential-already-in-use' || c === 'auth/account-exists-with-different-credential')
+          ? 'That ORCID sign-in already belongs to another Operations Academia account, ' +
+            'so it was not attached to this one.'
+        : c === 'auth/operation-not-allowed'
+          ? 'ORCID sign-in is not switched on for this site yet.'
+          : 'We could not connect ORCID just now.' + (c ? ' (' + c + ')' : '');
+      line.textContent = why + ' You can connect it any time from Edit account, ' +
+        'once your address is confirmed.';
+    });
+  }
 
   function closeVerifyPanel() {
     var old = $('#oa-verify');
@@ -2489,6 +2594,7 @@
           '<button type="button" class="button oa-btn-ghost" id="oa-verify-check">I have verified it</button>' +
         '</div>' +
         '<p class="oa-auth-msg" id="oa-verify-msg" role="alert"></p>' +
+        '<p class="oa-auth-fine" id="oa-verify-orcid" role="status" hidden></p>' +
         '<p class="oa-auth-fine" id="oa-verify-from">Look in spam too. The message comes from ' +
           VERIFY_SENDER + '.</p>' +
         '<div class="oa-auth-back">' +
@@ -2521,6 +2627,7 @@
     });
     $('#oa-verify-out', wrap).addEventListener('click', function () { signOut(); });
     $('#oa-verify-send', wrap).focus();
+    verifyOrcid();
   }
 
   /** Send the verification message. Resolves with where it went:
