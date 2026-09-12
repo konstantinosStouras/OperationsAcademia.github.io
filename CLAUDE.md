@@ -6012,6 +6012,53 @@ annotates a department the same record already carries as its own, and one
 alias reaches both hand-compiled sources, survives a regeneration of either,
 and canonicalises a posting typed with the annotation too.
 
+### …and a FIFTH time, over a guard asserting a repair no writer performs
+
+Found on 2026-09-12, from the Actions history rather than from a report:
+**`data/jobs.json` had not moved since 4 September.** Every one of the last
+fifteen builds went red on one guard, the workbook half of the pipeline went on
+committing `data/jobmarket.json` perfectly every half hour, and from outside
+the two are indistinguishable — the jobs page simply showed an eight-day-old
+list. The run's own log printed the alarm each time and nobody was reading it.
+
+**The guard asked `canonPlace` over a SERVED FILE.** Every ingest here puts
+three names already in three columns through `canonColumns`, which deliberately
+does NOT do the separator guesswork — the measurement is recorded under "Three
+names already in three columns": across every name in the data that guesswork
+fires three times and is wrong twice, and it is what published UCLA under
+"University of California". `canonPlace` DOES split, because it exists for the
+archive's single fused column.
+
+So the file was held to a repair no writer performs, and **no build could ever
+clear it**: the next run reads the same document and writes the same row. One
+poster typing `Naveen Jindal School of Management/Healthcare Management Area`
+into the School box was the whole of it, and two University of San Diego rows
+beside it. The workflow's own error text states the rule it broke — *"a guard
+that fires on a legitimate NEW posting is the guard's bug, not the posting's"*.
+
+**The guard asks `canonColumns` now, and the difference is REPORTED.** A name
+that `canonPlace` would still take apart is a real thing to fix — it lists one
+school twice in the directory — so it goes through `tidy` beside the two
+near-duplicate sweeps: it fails the PR check, where a person reads it and adds
+an alias, and warns the data writer, which must go on publishing meanwhile.
+That is the same two-role split, for the same reason, and this is the fourth
+sweep to need it.
+
+**And the flip is pinned rather than remembered** (`testReviewWiring`, reading
+this file's own source, bounded on the loop header because the phrase it used
+to key on matches an earlier block): the served-file guard must name
+`canonColumns`, and the `tidy` beside it must be there. Reverting either
+one-word edit turns the pin red instead of the site silent, which is the whole
+point — verified by putting the defect back.
+
+**What is NOT fixed here, deliberately.** The fused names themselves are the
+maintainer's call: an alias merging `Naveen Jindal School of Management/
+Healthcare Management Area` into the school it names is a judgement about a
+real school's name, and the two San Diego rows cannot even be read from this
+environment (they are `jobSubmissions` documents). They are named in the run
+log now rather than stopping the site, which is the state this whole section
+exists to reach.
+
 ## The job postings, as an Excel file
 
 A registered reader can take the list away: a small **"↓ Download Excel"**
