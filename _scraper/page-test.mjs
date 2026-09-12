@@ -10870,14 +10870,25 @@ for (const w of [320, 360, 390, 430]) {
      which would abandon the half-filled form for a brand new ORCID account
      with no e-mail address, which is the exact road this change removed. */
   await q.click('#oa-reg-orcid');
-  const armed = await q.evaluate(() => ({
-    pressed: document.querySelector('#oa-reg-orcid').getAttribute('aria-pressed'),
-    label: document.querySelector('#oa-reg-orcid').textContent.trim(),
-    note: document.querySelector('#oa-reg-orcid-note').textContent,
-    signedIn: window.__fb.at('signIn', ''),
-    linked: window.__fb.at('link', ''),
-    stillOpen: !!document.querySelector('#oa-auth-form'),
-  }));
+  /* READ NULL-SAFELY, because the defect this block exists to catch DESTROYS
+     the card: a press wired to signInWithPopup signs the reader in, finish()
+     closes the box, and `#oa-reg-orcid` is gone. Reading it blind threw a
+     TypeError out of the evaluate and took the whole suite down with a stack
+     trace, which is a weaker report than the named assertions below — the
+     rule this repository already records for a guard that cannot say what it
+     found. */
+  const armed = await q.evaluate(() => {
+    const b = document.querySelector('#oa-reg-orcid');
+    const n = document.querySelector('#oa-reg-orcid-note');
+    return {
+      pressed: b ? b.getAttribute('aria-pressed') : '(the button is gone)',
+      label: b ? b.textContent.trim() : '(the button is gone)',
+      note: n ? n.textContent : '',
+      signedIn: window.__fb.at('signIn', ''),
+      linked: window.__fb.at('link', ''),
+      stillOpen: !!document.querySelector('#oa-auth-form'),
+    };
+  });
   eq(armed.pressed, 'true', 'registration card: pressing the button arms it');
   eq(armed.label, 'ORCID will open next', 'registration card: …and the label says what will happen');
   ok(/Press again/.test(armed.note), 'registration card: …and the note says how to change your mind');
