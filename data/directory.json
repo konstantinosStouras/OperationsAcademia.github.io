@@ -206,7 +206,7 @@
   "id": "american-university-in-the-emirates____business-intelligence-da",
   "institution": "American University in the Emirates",
   "department": "Business Intelligence /DA",
-  "type": "University",
+  "type": "Business School",
   "country": "United Arab Emirates",
   "sources": [
    "postings"
@@ -491,7 +491,7 @@
   "id": "augustana-university____business",
   "institution": "Augustana University",
   "department": "Business",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -699,7 +699,7 @@
  {
   "id": "bocconi____management-science-department-management-and-technology",
   "institution": "Bocconi",
-  "department": "Management Science/ Department. Management and Technology",
+  "department": "Management Science/ Department Management and Technology",
   "country": "Italy",
   "sources": [
    "postings"
@@ -895,7 +895,7 @@
   "institution": "Bucknell University",
   "school": "Freeman College of Management",
   "department": "Accounting and Financial Management Area, Business Analytics",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "address": "701 Moore Ave, Lewisburg, PA 17837, USA",
   "facultyUrl": "https://www.bucknell.edu/academics/management-freeman-college-of/accounting-and-financial-management/faculty.html",
@@ -1053,7 +1053,7 @@
   "id": "campbellsville-university____business-it",
   "institution": "Campbellsville University",
   "department": "Business IT",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -1918,7 +1918,7 @@
  {
   "id": "cuhk-shenzhen____platform-operations-and-data-driven-market-design",
   "institution": "CUHK Shenzhen",
-  "department": "Platform Operations. and Data-Driven Market Design",
+  "department": "Platform Operations and Data-Driven Market Design",
   "country": "China",
   "sources": [
    "postings"
@@ -2250,7 +2250,7 @@
   "id": "endicott-college____business",
   "institution": "Endicott College",
   "department": "Business",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -3192,7 +3192,7 @@
   "institution": "Hong Kong Polytechnic University",
   "school": "Faculty of Business",
   "department": "Fashion and Textiles",
-  "type": "University",
+  "type": "Business School",
   "sources": [
    "omlist",
    "seed"
@@ -3203,7 +3203,7 @@
   "institution": "Hong Kong Polytechnic University",
   "school": "Faculty of Business",
   "department": "Logistics and Maritime Studies",
-  "type": "University",
+  "type": "Business School",
   "country": "Hong Kong",
   "facultyUrl": "http://www.lms.polyu.edu.hk/en/staff/academic-staff/",
   "deptUrl": "https://www.polyu.edu.hk/lms/people/academic-staff/",
@@ -3265,7 +3265,7 @@
   "id": "houston-christian-university____business-data-analytics",
   "institution": "Houston Christian University",
   "department": "Business Data Analytics",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -3388,7 +3388,7 @@
   "id": "ie-university____business",
   "institution": "IE University",
   "department": "Business",
-  "type": "University",
+  "type": "Business School",
   "country": "Spain",
   "address": "Calle Cardenal Zúñiga, 12, 40003 Segovia, Spain",
   "facultyUrl": "https://www.ie.edu/university/about/faculty/search/business/",
@@ -4084,7 +4084,7 @@
   "id": "ku-leuven____economics-and-business",
   "institution": "KU Leuven",
   "department": "Economics and Business",
-  "type": "University",
+  "type": "Business School",
   "country": "Belgium",
   "characteristics": [
    "Research seminars",
@@ -4102,7 +4102,7 @@
   "id": "ku-leuven__faculty-of-economics-and-business",
   "institution": "KU Leuven",
   "school": "Faculty of Economics and Business",
-  "type": "University",
+  "type": "Business School",
   "country": "Belgium",
   "characteristics": [
    "Research seminars",
@@ -4121,6 +4121,7 @@
   "institution": "KU Leuven",
   "school": "Faculty of Economics and Business (FEB)",
   "department": "Research Center for Operations Management",
+  "type": "Business School",
   "country": "Belgium",
   "address": "Oude Markt 13, 3000 Leuven, Belgium",
   "mapUrl": "https://goo.gl/maps/PJoaI",
@@ -4144,7 +4145,7 @@
   "id": "kuhne-logistics-university____om-and-business-analytics",
   "institution": "Kühne Logistics University",
   "department": "OM and Business Analytics",
-  "type": "University",
+  "type": "Business School",
   "country": "Germany",
   "sources": [
    "postings"
@@ -4279,7 +4280,7 @@
   "institution": "Lingnan University",
   "school": "Faculty of Business",
   "department": "Computing and Decision Sciences",
-  "type": "University",
+  "type": "Business School",
   "country": "Hong Kong",
   "address": "8 Castle Peak Rd, Tuen Mun, Hong Kong",
   "facultyUrl": "http://cptra.ln.edu.hk/people.html",
@@ -4329,7 +4330,7 @@
   "id": "lone-star-college-system____business",
   "institution": "Lone Star College System",
   "department": "Business",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -4435,7 +4436,7 @@
   "id": "marian-university____business-statistics",
   "institution": "Marian University",
   "department": "Business Statistics",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -4626,7 +4627,7 @@
   "id": "miami-university____emerging-technology-in-business-and-design",
   "institution": "Miami University",
   "department": "Emerging Technology in Business and Design",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -4827,7 +4828,7 @@
   "id": "montclair-state-university____business-statistics",
   "institution": "Montclair State University",
   "department": "Business Statistics",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -5139,7 +5140,7 @@
   "institution": "NC State University",
   "school": "Poole College of Management",
   "department": "Business Management/Operations and Supply Chain",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "address": "2801 Founders Dr, Raleigh, NC 27695, USA",
   "facultyUrl": "https://poole.ncsu.edu/business-management/supply-chain-group/",
@@ -5254,7 +5255,7 @@
   "id": "new-york-university-shanghai____business-area-statistics-operations-management",
   "institution": "New York University Shanghai",
   "department": "Business Area, Statistics/Operations Management",
-  "type": "University",
+  "type": "Business School",
   "country": "China",
   "address": "1555 Century Ave, Pudong, Shanghai, China, 200122",
   "facultyUrl": "https://shanghai.nyu.edu/academics/faculty-directory",
@@ -5292,7 +5293,7 @@
   "id": "north-carolina-a-t-state-university____business-is-and-analytics",
   "institution": "North Carolina A&T State University",
   "department": "Business IS and Analytics",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -5377,7 +5378,7 @@
   "id": "north-idaho-college____business",
   "institution": "North Idaho College",
   "department": "Business",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -5575,7 +5576,7 @@
   "id": "nyu-shanghai____business-information-systems-technology",
   "institution": "NYU Shanghai",
   "department": "Business, Information Systems/Technology",
-  "type": "University",
+  "type": "Business School",
   "country": "China",
   "characteristics": [
    "Research seminars",
@@ -5592,7 +5593,7 @@
   "id": "nyu-shanghai____business-operations-and-business-analytics",
   "institution": "NYU Shanghai",
   "department": "Business, Operations and Business Analytics",
-  "type": "University",
+  "type": "Business School",
   "country": "China",
   "characteristics": [
    "Research seminars",
@@ -5671,7 +5672,7 @@
   "id": "oregon-state-university____business-analytics",
   "institution": "Oregon State University",
   "department": "Business Analytics",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -5683,7 +5684,7 @@
   "id": "oregon-state-university____business-is",
   "institution": "Oregon State University",
   "department": "Business IS",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -5713,7 +5714,7 @@
   "institution": "Özyeğin University",
   "school": "Faculty of Business",
   "department": "Operations Management",
-  "type": "University",
+  "type": "Business School",
   "country": "Turkey",
   "characteristics": [
    "Research seminars",
@@ -5835,7 +5836,7 @@
   "id": "pompeu-fabra-university____economics-and-business",
   "institution": "Pompeu Fabra University",
   "department": "Economics and Business",
-  "type": "University",
+  "type": "Business School",
   "country": "Spain",
   "address": "Plaça de la Mercè, 10, 08002 Barcelona, Spain",
   "mapUrl": "https://goo.gl/maps/ZUFz8",
@@ -6127,7 +6128,7 @@
   "id": "rockhurst-university____business-intelligence-and-analytics",
   "institution": "Rockhurst University",
   "department": "Business Intelligence and Analytics",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -6341,7 +6342,7 @@
   "id": "san-bernardino-community-college-district____business-math",
   "institution": "San Bernardino Community College District",
   "department": "Business Math",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -6439,7 +6440,7 @@
   "id": "savannah-college-of-art-and-design____creative-business-leadership",
   "institution": "Savannah College of Art and Design",
   "department": "Creative Business Leadership",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -6451,7 +6452,7 @@
   "id": "savannah-state-university____general-business",
   "institution": "Savannah State University",
   "department": "General Business",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -6596,7 +6597,7 @@
   "id": "shorter-university____general-business",
   "institution": "Shorter University",
   "department": "General Business",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -6832,7 +6833,7 @@
   "id": "southwest-minnesota-state-university____business-technology",
   "institution": "Southwest Minnesota State University",
   "department": "Business Technology",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -6844,7 +6845,7 @@
   "id": "spartanburg-methodist-college____business-stat-da-scm-om",
   "institution": "Spartanburg Methodist College",
   "department": "Business Stat/DA/SCM/OM",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -6909,7 +6910,7 @@
   "id": "st-john-fisher-university____business-analytics-operations-management-project-management",
   "institution": "St John Fisher University",
   "department": "Business Analytics, Operations Management, Project Management",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -7403,7 +7404,7 @@
   "id": "texas-christian-university____analytics-business-is",
   "institution": "Texas Christian University",
   "department": "Analytics/Business IS",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -7545,7 +7546,7 @@
   "id": "catholic-university-of-america____business",
   "institution": "The Catholic University of America",
   "department": "Business",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -7889,7 +7890,7 @@
   "institution": "The University of Hong Kong (HKU)",
   "school": "Faculty of Business and Economics",
   "department": "Information and Innovation Management",
-  "type": "University",
+  "type": "Business School",
   "country": "Hong Kong",
   "address": "Pok Fu Lam, Hong Kong",
   "mapUrl": "https://goo.gl/maps/2rRYo",
@@ -7945,7 +7946,7 @@
   "id": "university-of-sydney____business-analytics",
   "institution": "The University of Sydney",
   "department": "Business Analytics",
-  "type": "University",
+  "type": "Business School",
   "country": "Australia",
   "characteristics": [
    "Research seminars",
@@ -8001,10 +8002,9 @@
   "lng": -97.7375539
  },
  {
-  "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__healthcare-management",
+  "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management-healthcare-management-are",
   "institution": "The University of Texas at Dallas",
-  "school": "Naveen Jindal School of Management",
-  "department": "Healthcare Management",
+  "school": "Naveen Jindal School of Management/Healthcare Management Area",
   "type": "Business School",
   "country": "United States",
   "characteristics": [
@@ -9338,7 +9338,7 @@
   "institution": "University of Cyprus",
   "school": "School Economics and Management",
   "department": "Business and Public Administration",
-  "type": "University",
+  "type": "Business School",
   "country": "Cyprus",
   "address": "University of Cyprus University House \"Anastasios G. Leventis\" 1 Panepistimiou Avenue 2109 Aglantzia, Nicosia P.O. Box 20537, 1678 Nicosia, Cyprus",
   "facultyUrl": "https://www.ucy.ac.cy/bpa/people/academic-staff/?lang=en",
@@ -9920,7 +9920,7 @@
   "id": "university-of-maine-at-augusta____business-management",
   "institution": "University of Maine at Augusta",
   "department": "Business Management",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -10953,12 +10953,28 @@
   "type": "Business School",
   "country": "United States",
   "characteristics": [
+   "Masters",
    "MBA"
   ],
   "sources": [
    "postings"
   ],
-  "n": 4,
+  "n": 2,
+  "lastPosted": "2025-08-14"
+ },
+ {
+  "id": "university-of-san-diego__knauss-school-of-business-at-the-university-of-san-diego",
+  "institution": "University of San Diego",
+  "school": "Knauss School of Business at the University of San Diego",
+  "type": "Business School",
+  "country": "United States",
+  "characteristics": [
+   "MBA"
+  ],
+  "sources": [
+   "postings"
+  ],
+  "n": 2,
   "lastPosted": "2025-10-17"
  },
  {
@@ -11247,7 +11263,7 @@
   "id": "university-of-texas-at-arlington____business-statistics",
   "institution": "University of Texas at Arlington",
   "department": "Business Statistics",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -11975,7 +11991,7 @@
   "id": "vienna-university-of-economics-and-business____transport-and-logistics-management",
   "institution": "Vienna University of Economics and Business",
   "department": "Transport and Logistics Management",
-  "type": "University",
+  "type": "Business School",
   "country": "Austria",
   "sources": [
    "postings"
@@ -12160,7 +12176,7 @@
   "id": "wake-forest-university____business-analytics",
   "institution": "Wake Forest University",
   "department": "Business Analytics",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -12517,7 +12533,7 @@
   "id": "wingate-university____da-ba-business-stat",
   "institution": "Wingate University",
   "department": "DA/BA./Business Stat",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
@@ -12542,6 +12558,7 @@
   "institution": "WU Vienna",
   "school": "Vienna University of Economics and Business",
   "department": "Information Systems and Operations",
+  "type": "Business School",
   "address": "https://www.google.com/maps/place/Department+of+Information+Systems+und+Operations/@48.21278,16.4064353,17z/data=!3m1!4b1!4m5!3m4!1s0x476d0717cb8462ad:0xc58fadf9ebdd396d!8m2!3d48.21278!4d16.408624",
   "facultyUrl": "https://www.wu.ac.at/imc/staff/",
   "sources": [
