@@ -16925,7 +16925,7 @@ async function testEmailVerification() {
   const regEnd = acct.indexOf('signInWithEmailAndPassword(f.email.value', regAt);
   ok(regAt > 0 && regEnd > regAt, 'accounts: the registration path was found');
   const reg = acct.slice(regAt, regEnd);
-  ok(reg.length > 500 && reg.length < 3000, 'accounts: the registration slice is the right size');
+  ok(reg.length > 500 && reg.length < 4500, 'accounts: the registration slice is the right size');
   ok(!/writeHint\(u, first/.test(reg), 'accounts: registering with a password no longer writes the signed-in hint');
   ok(/openVerifyPanel\('sent', created\)/.test(reg) && /sendVerification\(created\)/.test(reg),
     'accounts: …it opens the card and sends the message instead of finishing the sign-in');
@@ -20488,7 +20488,7 @@ async function testRegistrationFields() {
   const regEnd = acct.indexOf('\'<div class="oa-auth-links">\'', regAt);
   ok(regAt > 0 && regEnd > regAt, 'registration: the card markup was found');
   const card = acct.slice(regAt, regEnd);
-  ok(card.length > 1500 && card.length < 6000, 'registration: the card slice is the right size');
+  ok(card.length > 1500 && card.length < 8000, 'registration: the card slice is the right size');
 
   ok(/'<label>Affiliation' \+/.test(card),
     'registration: Affiliation is a BARE label — no "(optional)" chip, which is how this card says a field is required');
@@ -20522,7 +20522,7 @@ async function testRegistrationFields() {
   const CHIP = '<span class="oa-opt">(highly recommended but optional)</span>';
   eq((acct.match(/\(highly recommended but optional\)/g) || []).length, 2,
     'ORCID: the new wording appears exactly twice — the registration card and the profile card, the two places the iD is asked for');
-  ok(card.includes('\'<label>ORCID iD ' + CHIP + '\''),
+  ok(card.includes("'<span class=\"oa-flabel\">ORCID iD ' +\n                  '" + CHIP + "</span>'"),
     'registration: the ORCID chip reads "highly recommended but optional"');
   const orcidAt = acct.indexOf('function orcidFieldHTML(');
   const orcidFn = acct.slice(orcidAt, acct.indexOf('\n  }', orcidAt));
@@ -20556,19 +20556,89 @@ async function testRegistrationFields() {
      && /repaintAfterLink\(wrap, linked \|\| state\.user, closeProfile\)/.test(acct),
     'ORCID: a link repaints the field and the rows IN PLACE — reopening the card threw away unsaved ' +
     'typing, and redrew a WELCOME card as an ordinary one, which is a press the reader now makes inside the form');
+  /* --- and the REGISTRATION card asks for no number at all ---------------
+     Owner, 2026-09-12, of the note this replaced: "this would encourage people
+     to register by just clicking the ORCID button. What I was thinking instead
+     is keep it as is, and when asking to add the ORCID, you don't ask and
+     instead have the ORCID connect button, so that the user connect also their
+     ORCID during their (regular) registration."
+
+     Both halves are pinned as ABSENCES as well as presences, because either
+     one coming back is a regression nothing else would report: the box (a
+     question most readers cannot answer) and the pointer at the ORCID SIGN-IN
+     pill, which creates an account carrying no e-mail address at all, which is
+     the very gap the three compulsory fields above exist to close. */
   {
-    const reg = card.slice(card.indexOf('<label>ORCID iD'), card.indexOf('oa-terms-row'));
-    ok(/Do not know it\?/.test(reg) && /data-provider="orcid"/.test(reg),
-      'registration: the card that CANNOT link says where the button is instead — the account does not exist yet, ' +
-      'so linkWithPopup has nothing to attach to and a sign-in popup here would make an ORCID account instead');
-    ok(!/id="oa-orcid-connect"/.test(reg),
-      'registration: …and does not grow a connect button it could not honour');
+    const reg = card.slice(card.indexOf('<span class="oa-flabel">ORCID iD'),
+                           card.indexOf('oa-terms-row'));
+    ok(reg.length > 400 && reg.length < 3000, 'registration: the ORCID row slice is the right size');
+    ok(!/<input[^>]*name="orcid"/.test(reg),
+      'registration: the card does not ASK for the iD — no box, since a reader who knew the number ' +
+      'would not need the button');
+    ok(!/Do not know it\?/.test(reg) && !/ORCID button below/.test(reg),
+      'registration: …and no note pointing at the sign-in pill, which would steer an ordinary ' +
+      'registration into an ORCID account that shares no e-mail address');
+    ok(/id="oa-reg-orcid"/.test(reg) && /PROVIDER\.orcid\.icon/.test(reg),
+      'registration: it carries the connect button instead, wearing the same mark as the sign-in pill');
+    ok(/aria-pressed="false"/.test(reg),
+      'registration: …as a toggle that ARMS, because nothing can be linked until the account exists');
+    ok(/as soon as your account is made/.test(reg),
+      'registration: …and the words say when the window opens, rather than implying one is about to');
+    ok(/id="oa-reg-orcid-note"[^>]*aria-live="polite"/.test(reg),
+      'registration: …and the line that changes with the toggle is announced, since the button\'s own ' +
+      'label is the only other thing that moves');
   }
+  /* The press must ARM, never sign anybody in. The card's provider sweep is
+     what decides that: the arming button wears `.oa-auth-provider` on purpose,
+     so a bare sweep of that class would wire it to signInWithPopup and a press
+     in the middle of the form would abandon everything typed for a brand new
+     ORCID account. The container is what tells the two apart. */
+  {
+    /* read inside openAuth alone: the MERGE card has a sweep of its own, over
+       a card that carries no arming button and legitimately signs people in */
+    const authAt = acct.indexOf('function openAuth(');
+    const authFn = acct.slice(authAt, acct.indexOf('\n  /* ======', authAt));
+    ok(authAt > 0 && authFn.length > 2000 && authFn.indexOf('id="oa-reg-orcid"') > 0,
+      'registration: the auth card function was found');
+    ok(/wrap\.querySelectorAll\(\s*'\.oa-auth-providers \.oa-auth-provider'\)/.test(authFn)
+       && !/querySelectorAll\('\.oa-auth-provider'\)/.test(authFn),
+      'registration: the sign-in sweep is scoped to the pill CONTAINER, so the arming button is never wired to signInWithPopup');
+  }
+  ok(/var wantOrcid = false;/.test(acct) && /wantOrcid = !wantOrcid;/.test(acct),
+    'registration: the answer is a plain local of the card, so rebuilding the card (a mode switch) forgets it');
+  ok(/var orcidAsked = wantOrcid;/.test(acct)
+     && /if \(orcidAsked\) orcidOutcome = linkTo\(fb, u, 'oidc\.orcid'\);/.test(acct),
+    'registration: the link is opened the instant the account exists, while the press that asked for it still counts as activating the page');
+  {
+    const chain = acct.slice(acct.indexOf('createUserWithEmailAndPassword(f.email.value'),
+                             acct.indexOf('signInWithEmailAndPassword(f.email.value'));
+    ok(!/return[^;\n]*linkTo\(/.test(chain) && !/\.then\([^)]*linkTo/.test(chain),
+      'registration: …and it is NOT a link in that chain: the account is made, and an OAuth window ' +
+      'a reader never finishes must not hang or fail the registration');
+  }
+  ok(/function linkTo\(fb, u, id\)/.test(acct)
+     && /return linkTo\(fb, state\.user, id\);/.test(acct),
+    'ORCID: "link, then store the verified iD" is ONE definition, shared by the profile card and the registration card');
+  ok(/var orcidOutcome = null;/.test(acct) && /function verifyOrcid\(\)/.test(acct)
+     && /verifyOrcid\(\);/.test(acct)
+     && /id="oa-verify-orcid"/.test(acct),
+    'registration: how the armed link went is REPORTED on the verify card, the next thing that reader sees');
+  ok(/'auth\/popup-blocked'/.test(acct),
+    'registration: …including a popup the browser blocked, which is otherwise completely silent');
   for (const f of ['oa-ui.css', 'v3.css']) {
     const css = await readFile(path.join(HERE, '..', 'assets', f), 'utf8');
     ok(/oa-orcid-connect/.test(css) && /\.oa-orcid-type/.test(css),
       f + ': the ORCID field is styled here too — a rule in one stylesheet alone is invisible on the ' +
       'live site or lost on the next page');
+    ok(/\[aria-pressed='true'\]/.test(css),
+      f + ': …including the ARMED button, which has to name its own ink over its own ground: `--brand` ' +
+      'is light in the dark theme, so a ground alone leaves the label painted nearly in its own colour');
+    ok(/:hover:not\(\[aria-pressed='true'\]\)/.test(css),
+      f + ': …and the pill\'s hover stands down on the on-state, or a tap that arms the button leaves a ' +
+      'stuck hover repainting it in the off-state\'s wash (rule 15 of _MOBILE-STANDARDS.md)');
+    ok(/\.oa-modal-card \.oa-opt/.test(css),
+      f + ': …and `.oa-opt` is neutralised for the whole card: it is ALSO a jobs-filter dropdown row in ' +
+      'oa-list.css, and the ORCID chip and note are spans outside a label, so the label-scoped reset misses them');
   }
 
   /* --- the profile card is deliberately NOT held to the new rule -------- */
@@ -20661,6 +20731,11 @@ async function testRegistrationFields() {
     'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads',
     'the repeat: …and a new session asks again',
     'the repeat: a complete account meets no card',
+    'registration card: there is no ORCID box to fill in',
+    'registration card: …and NOBODY was signed in',
+    'registration card: the armed press connected ORCID as the account was made',
+    'blocked popup: the verify card says the window was blocked',
+    'blocked popup: …and the account was still made',
   ]) {
     ok(pt.includes(needle), `page-test drives it: ${needle.slice(0, 60)}…`);
   }
@@ -20685,6 +20760,21 @@ async function testRegistrationFields() {
   ok(sec.length > 1500 && /2026-09-05/.test(sec) && /required/.test(sec)
      && /spaces/.test(sec) && /NO RULES CHANGE/.test(sec) && /EDIT surface/.test(sec),
     'CLAUDE.md: the section records the owner ruling, the two guards, the profile card exemption and that no rules deploy is needed');
+  {
+    /* the registration card's ORCID row: the owner REVERSED the first build of
+       it the same day, so the record has to carry the reversal and not just the
+       outcome, or the next reader re-introduces the pointer as an improvement */
+    const oAt = claude.indexOf('### …and the REGISTRATION card stopped asking');
+    const osec = oAt > 0 ? claude.slice(oAt, claude.indexOf('\n## ', oAt)) : '';
+    ok(osec.length > 2000 && /encourage people to register by just clicking the ORCID button/.test(osec)
+       && /no e-mail claim at all/.test(osec) && /ARMING TOGGLE/.test(osec)
+       && /activating the page/.test(osec) && /oa-auth-providers \.oa-auth-provider/.test(osec)
+       && /orcidOutcome/.test(osec) && /aria-pressed/.test(osec),
+      'CLAUDE.md: …and the registration card\'s own section records the reversal, why the pointer was ' +
+      'worse than the box, the arming toggle, the popup timing, the scoped sweep and the report');
+    ok(!/The REGISTRATION card cannot link, and says where the button is instead/.test(claude),
+      'CLAUDE.md: …and the paragraph the owner overturned is gone, not left standing beside its replacement');
+  }
 
   /* ====================================================================
      EVERY ROAD IN COLLECTS ALL THREE (owner, 2026-09-12)

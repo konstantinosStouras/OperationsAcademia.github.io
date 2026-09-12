@@ -8205,7 +8205,12 @@ with ORCID: `linkWithPopup` would answer `provider-already-linked`, and
 **ONE definition of the link flow.** The button in the field runs the same
 `linkProvider` as the row below it; a second copy of that call is the drift every
 shared definition here exists to prevent, and the two would be answering one
-question.
+question. Since the registration card gained a button of its own (below), the
+shared half is one notch lower: **`linkTo(fb, u, id)`** attaches a sign-in to ONE
+NAMED account and stores the iD it proved, and `linkProvider` is the profile
+card's wrapper round it, adding the line it writes into and the repaint. The
+named account is what the registration card needs and `state.user` is what it
+cannot use — the auth event may not have fired when the link goes out.
 
 **A LINK REPAINTS IN PLACE, and that is a fix rather than a detail.** The success
 path used to `setTimeout(openProfile, 900)`. That was survivable while the only
@@ -8216,21 +8221,96 @@ WELCOME card as an ordinary one, losing the compulsory-affiliation branch a bran
 new provider account is there to answer. `repaintAfterLink` swaps the ORCID field
 and the connect rows and touches nothing else.
 
-**The REGISTRATION card cannot link, and says where the button is instead.** The
-account does not exist yet, so `linkWithPopup` has nothing to attach to, and a
-sign-in popup on that card would create an ORCID ACCOUNT rather than fill the box
-in. So it points at the ORCID pill already on the card — which creates the
-account with the iD verified — and at Edit account for everybody else. The
-pointer is drawn only where that pill really is on the card (`OAFB.providers`
-decides), or it would name a control that is not there.
+### …and the REGISTRATION card stopped asking, and started offering the press
+
+The first build of this gave the registration card a POINTER instead of a
+button — *"Do not know it? Use the ORCID button below to create your account and
+we fill the iD in for you, verified"* — on the reasoning that the account does
+not exist while that card is on screen, so `linkWithPopup` has nothing to attach
+to and the only ORCID control the card could honestly carry was the sign-in pill
+already on it. The owner read it and reversed it the same day: *"this would
+encourage people to register by just clicking the ORCID button. What I was
+thinking instead is keep it as is, and when asking to add the ORCID, you don't
+ask and instead have the ORCID connect button, so that the user connect also
+their ORCID during their (regular) registration."*
+
+**The pointer was worse than the box it was explaining.** An ORCID-backed
+account carries **no e-mail claim at all** — that is the whole subject of the
+section above this one, and the reason those accounts are now asked for a
+`contactEmail` of their own. So a card that answers "I do not know my iD" by
+sending the reader to the ORCID pill is a card steering an ordinary registration
+into exactly the shape the three compulsory fields beside it exist to close, to
+collect one optional field. That trade is the wrong way round.
+
+**So the registration card asks for no number at all.** The box and the pointer
+are both DELETED — not hidden, by this file's own rule — and the row is the
+heading, the connect button and one line. The reader fills the form the way they
+always did and presses Create account; the ORCID press is an *also*, never a
+second way to register, which is what "keep it as is" asks for.
+
+**It is an ARMING TOGGLE, and the words say so.** Nothing can be linked while
+the account does not exist, so the press records the answer (`aria-pressed`, a
+plain local of the card, so a mode switch that rebuilds the card forgets it) and
+the note reads *"We will open orcid.org as soon as your account is made"*. A
+button that implied a window was about to appear and then did nothing would be
+the affordance failure this repository already records for the Excel download,
+in reverse.
+
+**The link goes out the INSTANT the account exists, and that timing is the
+whole reason it sits where it does.** A browser only lets a popup through while
+the press that asked for it still counts as activating the page, and that press
+was Create account a moment earlier — so `linkTo` is called beside the profile
+write rather than behind it. It is **not a link in that chain**: an OAuth window
+a reader may never finish must not hang a registration, and nothing there may
+fail one. The account is made either way.
+
+**The press must ARM and never sign anybody in, and ONE selector is what keeps
+that true.** The button wears `.oa-auth-provider` deliberately, so the two cards
+offer one recognisable control — and the card's own sweep wiring the sign-in
+pills was `wrap.querySelectorAll('.oa-auth-provider')`, which would have caught
+it and called `signInWithPopup`: a press in the middle of a half-filled form
+would abandon everything typed for a brand new ORCID account with no address.
+The sweep is scoped to the pill CONTAINER (`.oa-auth-providers .oa-auth-provider`)
+and both the narrow form and the absence of the wide one are pinned, inside
+`openAuth` alone — the merge card has a sweep of its own that legitimately signs
+people in.
+
+**AND HOW IT WENT IS REPORTED, on the verify card.** A popup a browser blocks is
+completely silent, so an armed press that failed would look exactly like one that
+worked. `orcidOutcome` is the promise the registration path leaves behind and
+`verifyOrcid()` reads it once on the "Check your inbox" card, which is the very
+next thing that reader sees: the iD by name when it connected, and otherwise
+which of the four things happened (blocked, closed, already claimed by another
+account, ORCID sign-in switched off) with Edit account named as the way to
+finish. It is cleared on the one path where no verify card opens, so a later
+card can never claim a stale outcome.
+
+**The armed button's ground is a token pair and its hover stands down on it.**
+`[aria-pressed='true']` names its own ink over its own ground in both
+stylesheets — `--brand` is light in the dark theme, so a ground alone would
+leave the label painted in nearly its own colour — and the generic
+`.oa-auth-provider:hover` is narrowed with `:not([aria-pressed='true'])`, so a
+tap that arms the button does not leave a stuck hover repainting the on-state in
+the off-state's wash. That is rule 15 of `_MOBILE-STANDARDS.md`, and the defect
+it records verbatim.
 
 Tests: the ORCID block of `testRegistrationFields` in `_scraper/selftest.mjs`
-(the button in the FIELD with the pill's mark, withheld from an ORCID account,
-the box surviving, the field told which account it is drawing, the one
-`linkProvider` call, the repaint replacing the reopen, the registration card
-pointing rather than growing a button it could not honour, and both stylesheets)
-and the card block of `_scraper/page-test.mjs`, which reads the field back for a
-password account, an ORCID account and a verified iD.
+(the button in the profile FIELD with the pill's mark, withheld from an ORCID
+account, the box surviving THERE, the field told which account it is drawing,
+the one `linkProvider` call, the repaint replacing the reopen, `linkTo` as the
+one definition, and both stylesheets; then the registration card's own: no box
+and no pointer, asserted as ABSENCES because either coming back is a regression
+nothing else would report, the arming button with its unpressed state and its
+"as soon as your account is made" wording, the announced note, the
+container-scoped sweep read inside `openAuth`, the local that a rebuild forgets,
+the link fired at creation and NOT awaited in that chain, and the outcome
+reported) and the registration block of `_scraper/page-test.mjs`, which drives it
+in a real browser: the rendered row with no box, the press arming it with nobody
+signed in and nothing linked and the half-filled form still there, then a
+complete registration whose armed press really connects ORCID — the iD on the
+profile, verified, linked exactly once — and the verify card naming it; plus a
+second reader whose popup the browser BLOCKED, who still gets the account, the
+profile and a card that says what happened and where to finish it.
 
 ## The 2026-09-12 review sweep: the candidates page, and the jobs page
 

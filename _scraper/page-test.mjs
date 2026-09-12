@@ -10825,7 +10825,17 @@ for (const w of [320, 360, 390, 430]) {
       })(),
       siteLabel: lab('website'), siteReq: req('website'),
       firstReq: req('firstName'), lastReq: req('lastName'),
-      orcidLabel: lab('orcid'), orcidReq: req('orcid'),
+      /* THE ORCID ROW IS A BUTTON, NOT A QUESTION, so it is read off the row
+         rather than off a label: there is no `[name="orcid"]` here to hang one
+         on, which is itself half of what is under test. */
+      orcidBox: !!document.querySelector('#oa-auth-form [name="orcid"]'),
+      orcidHead: (document.querySelector('#oa-auth-form .oa-orcid-field .oa-flabel') || {}).textContent || '',
+      orcidBtn: (() => {
+        const b = document.querySelector('#oa-reg-orcid');
+        return b && { label: b.textContent.trim(), pressed: b.getAttribute('aria-pressed'),
+                      mark: !!b.querySelector('svg') };
+      })(),
+      orcidNote: (document.querySelector('#oa-reg-orcid-note') || {}).textContent || '',
     };
   });
   ok(card.affReq === true, 'registration card: the affiliation box is required');
@@ -10837,20 +10847,44 @@ for (const w of [320, 360, 390, 430]) {
     'registration card: the two name boxes are required too, so the affiliation joins an existing rule');
   ok(card.siteReq === false && /\(optional\)/.test(card.siteLabel || ''),
     'registration card: the website is still optional and still says so, so the card distinguishes the two kinds');
-  ok(card.orcidReq === false,
-    'registration card: the ORCID iD is still genuinely optional; the wording is a recommendation, not a rule');
-  ok((card.orcidLabel || '').startsWith('ORCID iD (highly recommended but optional)'),
-    `registration card: …and it says it is highly recommended (got "${card.orcidLabel}")`);
-  /* THE CARD THAT CANNOT LINK SAYS WHERE THE BUTTON IS. Owner, 2026-09-12:
-     "here users dont know their ORCID. Instead, have a button to connect it
-     for sure and directly." On this card the account does not exist yet, so
-     linkWithPopup has nothing to attach to and a sign-in popup here would
-     make an ORCID ACCOUNT rather than fill the box in — so it points at the
-     ORCID pill below, which creates the account with the iD already verified,
-     and at Edit account, which carries the real button. */
-  ok(/Do not know it\?/.test(card.orcidLabel || '')
-     && /ORCID button below/.test(card.orcidLabel || ''),
-    'registration card: …and tells a reader who does not know their iD where the button is');
+  /* THE CARD DOES NOT ASK FOR THE NUMBER; IT OFFERS THE PRESS. Owner,
+     2026-09-12, of the note this replaced: "this would encourage people to
+     register by just clicking the ORCID button. What I was thinking instead is
+     keep it as is, and when asking to add the ORCID, you don't ask and instead
+     have the ORCID connect button, so that the user connect also their ORCID
+     during their (regular) registration." */
+  ok(card.orcidBox === false,
+    'registration card: there is no ORCID box to fill in — a reader who knew the number would not need the button');
+  ok(/^ORCID iD \(highly recommended but optional\)/.test(card.orcidHead.trim()),
+    `registration card: …the row still says it is highly recommended (got "${card.orcidHead.trim()}")`);
+  ok(card.orcidBtn && card.orcidBtn.label === 'Connect my ORCID' && card.orcidBtn.mark,
+    `registration card: …and carries the connect button, wearing the ORCID mark (got ${JSON.stringify(card.orcidBtn)})`);
+  eq(card.orcidBtn && card.orcidBtn.pressed, 'false',
+    'registration card: …unarmed on arrival, so the reader chooses it rather than opting out of it');
+  ok(/as soon as your account is made/.test(card.orcidNote),
+    `registration card: …and the note says WHEN the window opens, since nothing can open while the account does not exist (got "${card.orcidNote}")`);
+
+  /* THE PRESS ARMS, AND MUST NOT SIGN ANYBODY IN. The button wears the same
+     `.oa-auth-provider` pill as the sign-in buttons below it, so the card's
+     provider sweep is one selector away from wiring it to signInWithPopup —
+     which would abandon the half-filled form for a brand new ORCID account
+     with no e-mail address, which is the exact road this change removed. */
+  await q.click('#oa-reg-orcid');
+  const armed = await q.evaluate(() => ({
+    pressed: document.querySelector('#oa-reg-orcid').getAttribute('aria-pressed'),
+    label: document.querySelector('#oa-reg-orcid').textContent.trim(),
+    note: document.querySelector('#oa-reg-orcid-note').textContent,
+    signedIn: window.__fb.at('signIn', ''),
+    linked: window.__fb.at('link', ''),
+    stillOpen: !!document.querySelector('#oa-auth-form'),
+  }));
+  eq(armed.pressed, 'true', 'registration card: pressing the button arms it');
+  eq(armed.label, 'ORCID will open next', 'registration card: …and the label says what will happen');
+  ok(/Press again/.test(armed.note), 'registration card: …and the note says how to change your mind');
+  eq(armed.signedIn, -1,
+    'registration card: …and NOBODY was signed in — the press arms, it is not the ORCID sign-in pill');
+  eq(armed.linked, -1, 'registration card: …and nothing was linked either, since there is no account yet');
+  ok(armed.stillOpen, 'registration card: …and the form the reader was filling in is still there');
 
   /* a box holding only spaces: the browser lets it through, the guard does not */
   await q.fill('#oa-auth-form [name="firstName"]', 'Ada');
@@ -10891,7 +10925,88 @@ for (const w of [320, 360, 390, 430]) {
   const profDoc = Object.keys(made.docs).filter((k) => k.indexOf('profiles/') === 0)[0];
   eq(made.docs[profDoc].affiliation, 'Test University',
     'registration card: …and the affiliation is stored TRIMMED, not as the spaces around it');
+
+  /* …AND THE ARMED LINK FIRED, which is the whole of what the toggle promised.
+     The shim's linkWithPopup answers the way the SDK does, with an ORCID
+     providerData entry whose uid IS the iD, so what is measured is the iD
+     reaching the profile rather than merely a call being made. */
+  await q.waitForFunction(() => window.__fb.at('link', 'oidc.orcid') !== -1,
+    null, { timeout: 8000 });
+  const linked = await q.evaluate(() => {
+    const docs = window.__fb.dump();
+    const k = Object.keys(docs).filter((x) => x.indexOf('profiles/') === 0)[0];
+    return { doc: docs[k], ops: window.__fb.ops('link') };
+  });
+  eq(linked.doc.orcid, '0000-0002-1825-0097',
+    'registration card: the armed press connected ORCID as the account was made, and the iD is on the profile');
+  eq(linked.doc.orcidVerified, true,
+    'registration card: …recorded verified, since an ORCID sign-in is what proved it');
+  eq(linked.ops.length, 1,
+    `registration card: …once, not once per promise in the chain (got ${JSON.stringify(linked.ops)})`);
+
+  /* and it is REPORTED, on the card the reader is looking at a moment later.
+     A popup a browser blocks is completely silent, so the outcome has to be
+     said either way or an armed press that failed looks exactly like one that
+     worked. */
+  await q.waitForSelector('#oa-verify-orcid', { timeout: 8000 });
+  await q.waitForFunction(
+    () => /Connected/.test((document.querySelector('#oa-verify-orcid') || {}).textContent || ''),
+    null, { timeout: 8000 });
+  const said = await q.evaluate(() => {
+    const l = document.querySelector('#oa-verify-orcid');
+    return { text: l.textContent.trim(), hidden: l.hidden };
+  });
+  ok(said.hidden === false && /0000-0002-1825-0097/.test(said.text),
+    `registration card: …and the verify card names the iD it connected (got "${said.text}")`);
   eq(errors, [], 'registration card: no uncaught script error');
+  await ctx.close();
+}
+
+/* -------------------- an ARMED press whose window the browser BLOCKED
+
+   The half that is otherwise silent. The account is made either way — nothing
+   about an OAuth window a reader never finished may take a registration away
+   — and the verify card has to SAY the iD was not connected and where to
+   connect it, or a press that did nothing reads exactly like one that worked. */
+{
+  const UNVERIFIED = { uid: 'blocked-uid-0000', email: 'blocked@example.edu',
+    emailVerified: false, displayName: '', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedOutPage('jobs.html',
+    { seed: { signInUser: UNVERIFIED, linkFails: 'auth/popup-blocked' } });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('#oa-auth-form [name="affiliation"]', { timeout: 8000 });
+  await q.click('#oa-reg-orcid');
+  await q.fill('#oa-auth-form [name="firstName"]', 'Ada');
+  await q.fill('#oa-auth-form [name="lastName"]', 'Lovelace');
+  await q.fill('#oa-auth-form [name="affiliation"]', 'Test University');
+  await q.fill('#oa-auth-form [name="email"]', 'blocked@example.edu');
+  await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+  await q.check('#oa-auth-form [name="terms"]');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+
+  await q.waitForSelector('#oa-verify-orcid', { timeout: 8000 });
+  await q.waitForFunction(
+    () => /Edit account/.test((document.querySelector('#oa-verify-orcid') || {}).textContent || ''),
+    null, { timeout: 8000 });
+  const after = await q.evaluate(() => {
+    const docs = window.__fb.dump();
+    const k = Object.keys(docs).filter((x) => x.indexOf('profiles/') === 0)[0];
+    return {
+      said: document.querySelector('#oa-verify-orcid').textContent.trim(),
+      card: !!document.querySelector('#oa-verify'),
+      signedIn: window.__fb.at('signIn', '') !== -1,
+      prof: k ? docs[k] : null,
+    };
+  });
+  ok(/blocked the ORCID window/i.test(after.said),
+    `blocked popup: the verify card says the window was blocked (got "${after.said}")`);
+  ok(/Edit account/.test(after.said),
+    'blocked popup: …and where to connect it instead, so the press is not simply lost');
+  ok(after.card && after.signedIn,
+    'blocked popup: …and the account was still made — a link that failed never costs a registration');
+  ok(after.prof && after.prof.affiliation === 'Test University' && !after.prof.orcid,
+    'blocked popup: …with the profile stored and no iD claimed that nothing proved');
+  eq(errors, [], 'blocked popup: no uncaught script error');
   await ctx.close();
 }
 
