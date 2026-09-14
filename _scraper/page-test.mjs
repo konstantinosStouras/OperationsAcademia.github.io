@@ -4771,6 +4771,88 @@ for (const [from, hash] of [
   eq(shown, newestTen,
     'sponsors: …and the teaser still SHOWS the ten most recent — only their order changed');
   await hp.close();
+
+  /* …AND THE OWNER'S CASE IS MEASURED WHATEVER THE CORPUS HOLDS. The branch
+     above measures the sponsor leading the teaser only while its posting is
+     among the ten newest, which on 2026-09-14 it had stopped being and, in a
+     market that posts every day, mostly will not be: the one screenshot the
+     owner sent would then go unmeasured for the rest of the sponsorship, and
+     a check that is green because it has nothing to look at is the shape
+     this suite is written against. So the served file is ROUTED once more
+     with the sponsor's posting re-dated to the newest day the season has
+     seen (today, or a later day the file already carries) and put ahead of
+     every row, so prepare's ten hold it by construction and nothing else in
+     the file is touched. The module is asked whether the re-dated row is
+     still sponsored: on the day the sponsorship lapses no row can be, there
+     is nothing to route, and the branch stands down rather than going red. */
+  const fixture = await sp.evaluate(async () => {
+    const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
+    const today = new Date().toISOString().slice(0, 10);
+    const newest = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
+      .map((r) => String(r.posted || '')).sort().pop() || today;
+    const when = newest > today ? newest : today;
+    const base = rows.find((r) => window.OASponsors.isSponsored(Object.assign({}, r, { posted: when })));
+    if (!base) return null;
+    const lead = Object.assign({}, base, { posted: when });
+    return { lead: lead.institution, rows: [lead].concat(rows.filter((r) => r !== base)) };
+  });
+  if (fixture) {
+    const rp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    await rp.route('**/data/jobs.json*', (r) => r.fulfill({ status: 200,
+      contentType: 'application/json', body: JSON.stringify(fixture.rows) }));
+    await rp.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
+    await rp.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
+    /* The teaser's own rule over the routed file, asked of the page so the
+       modules answering are the ones the cards were drawn from. */
+    const want = await rp.evaluate(async () => {
+      const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
+      const ten = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
+        .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
+        .slice(0, 10);
+      const ordered = ten.slice().sort((a, b) => window.OASponsors.compare(a, b));
+      return {
+        first: ordered.length ? ordered[0].institution : '',
+        sponsored: ten.filter((r) => window.OASponsors.isSponsored(r)).length,
+        shown: ten.map((r) => r.institution).sort(),
+      };
+    });
+    const routed = await rp.evaluate(() => {
+      const cards = [...document.querySelectorAll('#oa-jobs-recent .oa-card')];
+      const c = document.querySelector('#oa-jobs-recent .oa-card.oa-sponsored');
+      const cs = c && getComputedStyle(c);
+      return {
+        first: cards.length ? cards[0].querySelector('.oa-card-title').textContent.trim() : '',
+        firstRailed: !!(cards.length && cards[0].classList.contains('oa-sponsored')),
+        marked: document.querySelectorAll('#oa-jobs-recent .oa-label-sponsor').length,
+        rails: document.querySelectorAll('#oa-jobs-recent .oa-card.oa-sponsored').length,
+        rail: cs ? { w: cs.borderLeftWidth, other: cs.borderTopWidth } : null,
+        shown: cards.map((x) => x.querySelector('.oa-card-title').textContent.trim()).sort(),
+      };
+    });
+    /* The fixture did what it was built to, or everything below would pass
+       for a teaser with no sponsor in it. */
+    ok(want.sponsored > 0 && want.first === fixture.lead,
+      'sponsors (routed file): the re-dated sponsor posting is among the ten and the rule puts it first');
+    eq(routed.first, want.first,
+      'sponsors (routed file): the sponsor LEADS the home teaser (owner, from a screenshot)');
+    eq(routed.firstRailed, true,
+      'sponsors (routed file): …and its card carries the rail INSIDE the panel, which resets every border');
+    eq(routed.marked, want.sponsored,
+      'sponsors (routed file): the teaser marks exactly the sponsored postings among its ten');
+    eq(routed.rails, want.sponsored, 'sponsors (routed file): …and rails exactly those');
+    ok(routed.rail, 'sponsors (routed file): the teaser marks the sponsored card');
+    if (routed.rail) {
+      eq(routed.rail.w, '3px',
+        'sponsors (routed file): the teaser rail is a real 3px edge, not blanked by the panel reset');
+      ok(routed.rail.w !== routed.rail.other, 'sponsors (routed file): …and still only on the left');
+    }
+    eq(routed.shown, want.shown,
+      'sponsors (routed file): …and the teaser still SHOWS the ten most recent of the routed file');
+    await rp.close();
+  } else {
+    ok(!expected.any,
+      'sponsors: no row in the file can be sponsored today, so the live jobs page found nothing sponsored either');
+  }
   await sp.close();
 }
 

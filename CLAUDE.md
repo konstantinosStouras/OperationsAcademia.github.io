@@ -7078,6 +7078,21 @@ marked while it is not. The "still shows the ten most recent" assertion moved
 out of the branch, since it is the heading's promise rather than the
 sponsor's.
 
+**…and the owner's own case is measured on a ROUTED copy, whatever the corpus
+holds** (2026-09-14, the same day). Asserting both states on the live file is
+right and leaves one thing unmeasured for most of the sponsorship: the sponsor
+leading the teaser with its rail inside the panel, which is the one screenshot
+the owner sent, is only ever looked at while the posting is among the ten
+newest, and in a market that posts every day it mostly is not. A check that is
+green because it has nothing to look at is the shape this file is written
+against. So the block routes the served file once more with the sponsor's
+posting re-dated to the newest day the season has seen and put ahead of every
+row, which puts it among prepare's ten by construction and touches nothing
+else, and measures the lead, the mark, the 3px rail and the ten shown on that
+copy. The module is asked whether the re-dated row is still sponsored: on the
+day the sponsorship lapses no row can be, there is nothing to route, and the
+branch stands down.
+
 ## What a reader who has not REGISTERED may read
 
 Owner, 2026-08-29, from two screenshots of the site signed out: *"they should
