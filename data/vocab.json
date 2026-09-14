@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:47:06.170Z",
+ "generated": "2026-09-14T06:53:24.671Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -22,15 +22,15 @@
    "n": 6
   },
   {
+   "v": "University of California, Berkeley",
+   "n": 6
+  },
+  {
    "v": "University of Virginia",
    "n": 6
   },
   {
    "v": "Arizona State University",
-   "n": 5
-  },
-  {
-   "v": "University of California, Berkeley",
    "n": 5
   },
   {
@@ -2176,6 +2176,10 @@
    "n": 2
   },
   {
+   "v": "Walter A. Haas School of Business",
+   "n": 2
+  },
+  {
    "v": "Wharton School",
    "n": 2
   },
@@ -2437,10 +2441,6 @@
   },
   {
    "v": "Villanova School of Business",
-   "n": 1
-  },
-  {
-   "v": "Walter A. Haas School of Business",
    "n": 1
   },
   {
@@ -3359,6 +3359,10 @@
   },
   {
    "v": "Business and Public Administration",
+   "n": 1
+  },
+  {
+   "v": "Business and Public Policy",
    "n": 1
   },
   {
@@ -9562,6 +9566,7 @@
     "Walter A. Haas School of Business"
    ],
    "units": [
+    "Business and Public Policy",
     "IEOR",
     "IEOR, decision analytics",
     "Industrial Engineering and Operations Research",
@@ -9574,6 +9579,7 @@
      "Industrial Engineering and Operations Research"
     ],
     "Walter A. Haas School of Business": [
+     "Business and Public Policy",
      "Operations and Information Technology Management"
     ]
    }
@@ -12294,6 +12300,7 @@
    "Supply Chain Management"
   ],
   "Walter A. Haas School of Business": [
+   "Business and Public Policy",
    "Operations and Information Technology Management"
   ],
   "Warrington College of Business": [
