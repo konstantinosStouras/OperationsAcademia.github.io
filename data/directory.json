@@ -10763,14 +10763,18 @@
   "school": "UNSW Business School",
   "department": "Information Systems and Technology Management",
   "type": "Business School",
+  "country": "Australia",
   "address": "https://www.google.com/maps/place/UNSW+Australia+Business+School/@-33.9167956,151.2295532,15z/data=!4m2!3m1!1s0x0:0x7daebd61dc4a1974?sa=X&ved=0ahUKEwi1rrKh7YzQAhVN4WMKHSmLARkQ_BIIdTAK",
   "facultyUrl": "https://www.business.unsw.edu.au/about/schools/information-systems/faculty-people#1478185290487",
   "deptUrl": "https://www.unsw.edu.au/business/our-people#search=&filters=f.School%257CstaffSchool%3ASchool%2Bof%2BInformation%2BSystems%2Band%2BTechnology%2BManagement&sort=metastaffLastName&startRank=1&numRanks=12&componentId=be58b4d3-9485-4512-9a39-a6e366a1968f",
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-14",
   "lat": -33.917347,
   "lng": 151.2312675
  },

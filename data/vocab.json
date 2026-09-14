@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:51:01.413Z",
+ "generated": "2026-09-14T20:40:12.256Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1398,6 +1398,10 @@
    "n": 1
   },
   {
+   "v": "University of New South Wales",
+   "n": 1
+  },
+  {
    "v": "University of North Carolina at Chapel Hill",
    "n": 1
   },
@@ -1986,10 +1990,6 @@
    "n": 0
   },
   {
-   "v": "University of New South Wales",
-   "n": 0
-  },
-  {
    "v": "University of North Carolina (UNC) Chapel Hill",
    "n": 0
   },
@@ -2481,6 +2481,10 @@
   },
   {
    "v": "UCL School of Management",
+   "n": 1
+  },
+  {
+   "v": "UNSW Business School",
    "n": 1
   },
   {
@@ -3001,10 +3005,6 @@
   },
   {
    "v": "TUM School of Management",
-   "n": 0
-  },
-  {
-   "v": "UNSW Business School",
    "n": 0
   },
   {
@@ -3639,6 +3639,10 @@
   },
   {
    "v": "Information Systems and Technology",
+   "n": 1
+  },
+  {
+   "v": "Information Systems and Technology Management",
    "n": 1
   },
   {
@@ -4335,10 +4339,6 @@
   },
   {
    "v": "Information Systems and Supply Chain Management",
-   "n": 0
-  },
-  {
-   "v": "Information Systems and Technology Management",
    "n": 0
   },
   {
