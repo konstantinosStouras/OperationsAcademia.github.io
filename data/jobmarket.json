@@ -1773,6 +1773,37 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-bristol-20260805",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-05",
+  "institution": "University of Bristol",
+  "department": "Bristol Business School, Artificial Intelligence and Business Analytics",
+  "school": "Bristol Business School",
+  "unit": "Artificial Intelligence and Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "August 11, 2026",
+  "applyByDate": "2026-08-11",
+  "comments": "",
+  "country": "United Kingdom",
+  "adUrl": "https://www.jobs.ac.uk/job/DSK473/lecturer-senior-lecturer-in-artificial-intelligence-and-business-analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Bristol",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-14T07:44:56Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-california-davis-20260805",
   "year": 2027,
   "years": [
