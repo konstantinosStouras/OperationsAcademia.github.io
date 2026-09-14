@@ -8993,6 +8993,19 @@
   "lng": -122.2592805
  },
  {
+  "id": "university-of-california-berkeley__haas-school-of-business__business-and-public-policy",
+  "institution": "University of California, Berkeley",
+  "school": "Haas School of Business",
+  "department": "Business and Public Policy",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
+ },
+ {
   "id": "university-of-california-berkeley__haas-school-of-business__operations-and-information-technology-management",
   "institution": "University of California, Berkeley",
   "school": "Haas School of Business",
@@ -9910,8 +9923,11 @@
   "address": "550 S Limestone, Lexington, KY 40506, USA",
   "facultyUrl": "http://gatton.uky.edu/faculty-research/departments/marketing-supply-chain/directory",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-05",
   "lat": 38.0378977,
   "lng": -84.5066279
  },

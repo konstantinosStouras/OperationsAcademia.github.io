@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:47:06.170Z",
+ "generated": "2026-09-14T06:55:07.574Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -22,15 +22,15 @@
    "n": 6
   },
   {
+   "v": "University of California, Berkeley",
+   "n": 6
+  },
+  {
    "v": "University of Virginia",
    "n": 6
   },
   {
    "v": "Arizona State University",
-   "n": 5
-  },
-  {
-   "v": "University of California, Berkeley",
    "n": 5
   },
   {
@@ -423,6 +423,10 @@
   },
   {
    "v": "University of Illinois at Urbana-Champaign",
+   "n": 2
+  },
+  {
+   "v": "University of Kentucky",
    "n": 2
   },
   {
@@ -1318,10 +1322,6 @@
    "n": 1
   },
   {
-   "v": "University of Kentucky",
-   "n": 1
-  },
-  {
    "v": "University of Leeds, UK",
    "n": 1
   },
@@ -2136,6 +2136,10 @@
    "n": 2
   },
   {
+   "v": "Haas School of Business",
+   "n": 2
+  },
+  {
    "v": "Haslam College of Business",
    "n": 2
   },
@@ -2264,6 +2268,10 @@
    "n": 1
   },
   {
+   "v": "Gatton College of Business and Economics",
+   "n": 1
+  },
+  {
    "v": "Gies College of Business",
    "n": 1
   },
@@ -2273,10 +2281,6 @@
   },
   {
    "v": "Graduate School of Management",
-   "n": 1
-  },
-  {
-   "v": "Haas School of Business",
    "n": 1
   },
   {
@@ -2609,10 +2613,6 @@
   },
   {
    "v": "G. Brint Ryan College of Business",
-   "n": 0
-  },
-  {
-   "v": "Gatton College of Business and Economics",
    "n": 0
   },
   {
@@ -3362,6 +3362,10 @@
    "n": 1
   },
   {
+   "v": "Business and Public Policy",
+   "n": 1
+  },
+  {
    "v": "Business Data Analytics",
    "n": 1
   },
@@ -3739,6 +3743,10 @@
   },
   {
    "v": "Marketing and SCM",
+   "n": 1
+  },
+  {
+   "v": "Marketing and Supply Chain",
    "n": 1
   },
   {
@@ -4403,10 +4411,6 @@
   },
   {
    "v": "Marketing and Logistics",
-   "n": 0
-  },
-  {
-   "v": "Marketing and Supply Chain",
    "n": 0
   },
   {
@@ -9562,6 +9566,7 @@
     "Haas School of Business"
    ],
    "units": [
+    "Business and Public Policy",
     "IEOR",
     "IEOR, decision analytics",
     "Industrial Engineering and Operations Research",
@@ -9574,6 +9579,7 @@
      "Industrial Engineering and Operations Research"
     ],
     "Haas School of Business": [
+     "Business and Public Policy",
      "Operations and Information Technology Management"
     ]
    }
@@ -11853,6 +11859,7 @@
    "Management Science and Information System"
   ],
   "Haas School of Business": [
+   "Business and Public Policy",
    "Operations and Information Technology Management"
   ],
   "Harbert College of Business": [
