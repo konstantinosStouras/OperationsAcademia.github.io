@@ -5626,6 +5626,18 @@
   "lng": -9.1393366
  },
  {
+  "id": "nova-school-of-business-and-economics____information-systems",
+  "institution": "NOVA School of Business and Economics",
+  "department": "Information Systems",
+  "type": "Business School",
+  "country": "Portugal",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-01"
+ },
+ {
   "id": "nova-school-of-business-and-economics____operations-management",
   "institution": "Nova School of Business and Economics",
   "department": "Operations Management",

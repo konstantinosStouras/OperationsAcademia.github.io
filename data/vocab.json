@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:48:33.421Z",
+ "generated": "2026-09-14T07:51:01.413Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -994,6 +994,10 @@
    "n": 1
   },
   {
+   "v": "NOVA School of Business and Economics",
+   "n": 1
+  },
+  {
    "v": "NTU",
    "n": 1
   },
@@ -1779,10 +1783,6 @@
   },
   {
    "v": "Northern Illinois University",
-   "n": 0
-  },
-  {
-   "v": "NOVA School of Business and Economics",
    "n": 0
   },
   {
@@ -3138,6 +3138,10 @@
    "n": 3
   },
   {
+   "v": "Information Systems",
+   "n": 3
+  },
+  {
    "v": "IS and Analytics",
    "n": 3
   },
@@ -3215,10 +3219,6 @@
   },
   {
    "v": "Industrial Engineering and Operations Research",
-   "n": 2
-  },
-  {
-   "v": "Information Systems",
    "n": 2
   },
   {
@@ -7782,10 +7782,12 @@
   "NOVA School of Business and Economics": {
    "schools": [],
    "units": [
+    "Information Systems",
     "Operations, Technology and Innovation Management"
    ],
    "bySchool": {
     "": [
+     "Information Systems",
      "Operations, Technology and Innovation Management"
     ]
    }
