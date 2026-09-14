@@ -11589,7 +11589,7 @@ async function testAdminArea() {
     'would overwrite a cached badge that was honest (the menu-count rule)');
   ok(js.includes("'/data/candidates-meta.json'"),
     'the held-profiles number is read from the SAME file the front page ' +
-    'announces "N profiles have already been filed" from, so the two agree');
+    'announces "So far, N Candidate profiles have already been filed" from, so the two agree');
 
   /* the Registered-users card (owner, 2026-08-23): a statistic beside the
      queues, and NEVER in the badge — the badge counts what is waiting, and a
@@ -12816,6 +12816,25 @@ async function testCandidateReveal() {
     'index.html: the old month-first date line and its MONTHS table are gone');
   ok(/OAReveal\.describeReveal\(at\)/.test(index) && /when\.local\.time/.test(index),
     'index.html: the day, the cities and the reader’s clock come from describeReveal');
+  /* the two filled sentences (owner, 2026-09-14): the clock with its place and
+     the count of profiles, each ONE bold run built from text nodes; neither
+     retired wording survives, and the note never reaches for innerHTML */
+  {
+    const at = index.indexOf('function sayBold(');
+    const script = index.slice(at, index.indexOf("'oa-reveal-note').hidden = false", at));
+    ok(at > 0 && script.length > 200 && script.length < 2000, 'index.html: the reveal script slice is bounded both ends');
+    ok(/document\.createElement\('strong'\)/.test(script) && /createTextNode/.test(script) && !/innerHTML/.test(script),
+      'index.html: the bold run is a <strong> of text nodes, never innerHTML');
+    ok(/' in your current location'/.test(script) && !/where you are/.test(script),
+      'index.html: the reader’s clock reads "in your current location", not "where you are"');
+    ok(/sayBold\(document\.getElementById\('oa-reveal-local'\), ', which is ',/.test(script),
+      'index.html: ..."which is" stays outside the bold run');
+    ok(/sayBold\(document\.getElementById\('oa-reveal-count'\), 'So far, ',/.test(script)
+       && /' Candidate profile' : ' Candidate profiles'/.test(script)
+       && /\(n === 1 \? ' has' : ' have'\) \+ ' already been filed\. '/.test(script),
+      'index.html: the count reads "So far, N Candidate profiles have already been filed.", the count alone in bold');
+    ok(!/' profile has' : ' profiles have'/.test(index), 'index.html: the old count sentence is gone');
+  }
   ok(/emptyDataHint: '[^']*14:00 UTC/.test(index), 'index.html: the empty list’s hint names the time');
   ok(/Can I see my profile before the reveal\?/.test(index) && /Can I change my profile\?/.test(index),
     'index.html: the FAQ gains the two questions');
@@ -12914,8 +12933,8 @@ async function testCandidateReveal() {
     ok(/var posted = !!EDIT_ID;/.test(formJs) && /once you post it/.test(formJs),
       'oa-candidateform: in create mode the note says "once you post it", never "as everyone sees it" over a blank form');
     for (const [f, src] of [['account.html', acctHtml], ['assets/oa-candidateform.js', formJs]]) {
-      ok(!/when\.local\.timeZone/.test(src) && /' where you are'/.test(src),
-        `${f}: the reader’s clock carries no zone id (the front page says "where you are" and stops)`);
+      ok(!/when\.local\.timeZone/.test(src) && /' in your current location'/.test(src) && !/where you are'/.test(src),
+        `${f}: the reader’s clock carries no zone id (the front page says "in your current location" and stops)`);
       ok(/Only you and the site\\'s maintainer/.test(src),
         `${f}: the only-you line names the maintainer, who can read every profile`);
     }

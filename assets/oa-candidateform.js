@@ -1028,11 +1028,12 @@
         'reveal date announced on the candidates page. You can edit it at any time.';
       return;
     }
-    /* the reader's own clock, with no zone id beside it: "where you are" is
-       what the front page says, and "America/Los_Angeles" is not a place */
+    /* the reader's own clock, with no zone id beside it: "in your current
+       location" is what the front page says, and "America/Los_Angeles" is
+       not a place */
     var local = when.local && when.local.time
       ? ', which is ' + when.local.time + (when.local.sameDay ? '' : ' the next day') +
-        ' where you are'
+        ' in your current location'
       : '';
     note.textContent = who + 'every profile goes public at once on ' + when.dayLong +
       ' at ' + when.utc + local + '. You can edit it at any time, before or after.';
