@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:06:07.586Z",
+ "generated": "2026-09-14T07:08:54.092Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -123,6 +123,10 @@
   },
   {
    "v": "Lehigh University",
+   "n": 3
+  },
+  {
+   "v": "Miami University",
    "n": 3
   },
   {
@@ -311,10 +315,6 @@
   },
   {
    "v": "MacEwan University",
-   "n": 2
-  },
-  {
-   "v": "Miami University",
    "n": 2
   },
   {
@@ -3206,6 +3206,10 @@
    "n": 2
   },
   {
+   "v": "Information Systems and Analytics",
+   "n": 2
+  },
+  {
    "v": "IS/BA",
    "n": 2
   },
@@ -3591,10 +3595,6 @@
   },
   {
    "v": "Information Science and Systems",
-   "n": 1
-  },
-  {
-   "v": "Information Systems and Analytics",
    "n": 1
   },
   {
@@ -7249,11 +7249,13 @@
    "schools": [],
    "units": [
     "Emerging Technology in Business and Design",
+    "Information Systems and Analytics",
     "Information Systems and Technology"
    ],
    "bySchool": {
     "": [
      "Emerging Technology in Business and Design",
+     "Information Systems and Analytics",
      "Information Systems and Technology"
     ]
    }

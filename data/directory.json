@@ -4673,6 +4673,18 @@
   "lastPosted": "2026-08-21"
  },
  {
+  "id": "miami-university____information-systems-and-analytics",
+  "institution": "Miami University",
+  "department": "Information Systems and Analytics",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-13"
+ },
+ {
   "id": "miami-university____information-systems-and-technology",
   "institution": "Miami University",
   "department": "Information Systems and Technology",
