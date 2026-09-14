@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:58:59.369Z",
+ "generated": "2026-09-14T06:59:51.240Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -135,6 +135,10 @@
   },
   {
    "v": "Prince Mohammad Bin Fahd University",
+   "n": 3
+  },
+  {
+   "v": "Shanghai Jiao Tong University",
    "n": 3
   },
   {
@@ -351,10 +355,6 @@
   },
   {
    "v": "Seton Hall University",
-   "n": 2
-  },
-  {
-   "v": "Shanghai Jiao Tong University",
    "n": 2
   },
   {
@@ -2128,6 +2128,10 @@
    "n": 3
   },
   {
+   "v": "Antai College of Economics and Management",
+   "n": 2
+  },
+  {
    "v": "Curtis L. Carlson School of Management",
    "n": 2
   },
@@ -2189,10 +2193,6 @@
   },
   {
    "v": "Anderson School of Management",
-   "n": 1
-  },
-  {
-   "v": "Antai College of Economics and Management",
    "n": 1
   },
   {
@@ -3451,6 +3451,10 @@
   },
   {
    "v": "data analytics and AI",
+   "n": 1
+  },
+  {
+   "v": "Data and Business Intelligence",
    "n": 1
   },
   {
@@ -8340,6 +8344,7 @@
    ],
    "units": [
     "BA/OM/OR/Stochastic models/Data-driven/AI",
+    "Data and Business Intelligence",
     "Management Science"
    ],
    "bySchool": {
@@ -8347,6 +8352,7 @@
      "BA/OM/OR/Stochastic models/Data-driven/AI"
     ],
     "Antai College of Economics and Management": [
+     "Data and Business Intelligence",
      "Management Science"
     ]
    }
@@ -11636,6 +11642,7 @@
    "Decisions, Operations and Technology Management"
   ],
   "Antai College of Economics and Management": [
+   "Data and Business Intelligence",
    "Management Science"
   ],
   "Bayes Business School": [
