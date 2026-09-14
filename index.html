@@ -351,7 +351,10 @@
                whenever one zone failed to answer. The note stays hidden until
                the script has a day to name: the list it explains is drawn by
                script too, so without script there is no empty list to explain
-               and, after the reveal, no stale note beside a full one. -->
+               and, after the reveal, no stale note beside a full one. The
+               reader's clock ("15:00 in your current location") and the count
+               ("7 Candidate profiles") are in BOLD, at the owner's word
+               (2026-09-14); the script builds each from text nodes. -->
           <div class="oa-note" id="oa-reveal-note" hidden>
             <p><strong>Candidate profiles are revealed all at once, at 14:00 UTC on
             <span id="oa-reveal-day">the reveal date</span></strong><span id="oa-reveal-cities"></span><span id="oa-reveal-local"></span>.
@@ -1164,16 +1167,32 @@
             known.length === when.cities.length
               ? ' (' + known.map(function (c) { return c.time + ' ' + c.name; }).join(', ') + ')'
               : '';
+          /* the two filled sentences each carry ONE bold run (owner,
+             2026-09-14): the reader's clock with its place, and the count of
+             profiles. Built from text nodes and a <strong>, never innerHTML,
+             so the note stays textContent everywhere a value lands; an empty
+             bold part draws nothing at all. */
+          function sayBold(el, before, bold, after) {
+            el.textContent = '';
+            if (!bold) return;
+            el.appendChild(document.createTextNode(before));
+            var b = document.createElement('strong');
+            b.textContent = bold;
+            el.appendChild(b);
+            el.appendChild(document.createTextNode(after));
+          }
           /* the reader's own clock, and honestly the NEXT day where it is one
              (Auckland reads three in the morning of the day after) */
-          document.getElementById('oa-reveal-local').textContent = when.local.time
-            ? ', which is ' + when.local.time +
-              (when.local.sameDay ? '' : ' the next day') + ' where you are'
-            : '';
+          sayBold(document.getElementById('oa-reveal-local'), ', which is ',
+            when.local.time
+              ? when.local.time + (when.local.sameDay ? '' : ' the next day') +
+                ' in your current location'
+              : '',
+            '');
           var n = Number(meta.heldCount) || 0;
-          document.getElementById('oa-reveal-count').textContent = n
-            ? n + (n === 1 ? ' profile has' : ' profiles have') + ' already been filed. '
-            : '';
+          sayBold(document.getElementById('oa-reveal-count'), 'So far, ',
+            n ? n + (n === 1 ? ' Candidate profile' : ' Candidate profiles') : '',
+            (n === 1 ? ' has' : ' have') + ' already been filed. ');
           document.getElementById('oa-reveal-note').hidden = false;
         })
         .catch(function () { /* no meta — nothing to announce */ });

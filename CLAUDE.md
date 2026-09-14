@@ -1848,6 +1848,22 @@ preview with a second, foreign document that must never appear, the form's
 preview following a keystroke, the updated-on line on exactly the served row
 that earned it, the reveal note's local clock, and both pages at 390px.
 
+**The note's two filled sentences carry one bold run each** (owner,
+2026-09-14, from a screenshot of the front page's note): the reader's clock
+reads "which is **15:00 in your current location**" rather than "which is
+15:00 where you are", and the count reads "So far, **7 Candidate profiles**
+have already been filed." rather than "7 profiles have already been filed."
+The bold is the clock WITH its place and the count WITH its noun, and "which
+is", "So far," and the verb stay outside it. The script builds each from text
+nodes and a `<strong>` (`sayBold` in `index.html`), never `innerHTML`, so a
+value still lands as text; an empty part draws nothing, as before. The
+account page's own-card note and the form's preview note say "in your current
+location" too, since both copy the front page's phrase by their own comment,
+and stay plain text (no bold was asked of them and neither carries any).
+Pinned in `testCandidateReveal` (the bounded script slice, the wording, the
+retired wording gone, the bold outside "which is") and in the reveal block of
+`page-test.mjs`, which reads the two `<strong>` runs off the rendered note.
+
 Tests: `testCandidateReveal` in `_scraper/selftest.mjs` (the module to the
 second, with and without Intl; the gate's parity; the meta's instant; every
 consumer through the module and the old comparison out of each; the doorbell's

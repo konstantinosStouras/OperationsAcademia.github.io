@@ -8020,7 +8020,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(!/\(\w+\/\w+\)/.test(a.note), 'own card: ...with no zone id after the reader’s clock');
     ok(a.note.includes(R.describeReveal(future).dayLong) && /14:00 UTC/.test(a.note),
       'own card: ...naming the reveal day and 14:00 UTC');
-    ok(/\d{2}:\d{2}[^.]*where you are/.test(a.note), 'own card: ...and the reader’s own clock');
+    ok(/\d{2}:\d{2}[^.]*in your current location/.test(a.note), 'own card: ...and the reader’s own clock');
     ok(a.labels.includes('CV') && a.labels.includes('Contact'),
       'own card: the profile’s rows are drawn open (a CV, a way to contact them)');
     eq(a.updated, 'Profile updated on 25 August 2026',
@@ -8173,19 +8173,34 @@ for (const w of [320, 360, 390, 430]) {
     await routeMeta(q);
     await q.goto(BASE + 'index.html', { waitUntil: 'load' });
     await q.waitForSelector('#oa-reveal-note:not([hidden])', { timeout: 15000 });
-    const n = await q.evaluate(() => ({
-      day: document.getElementById('oa-reveal-day').textContent,
-      cities: document.getElementById('oa-reveal-cities').textContent,
-      local: document.getElementById('oa-reveal-local').textContent,
-      count: document.getElementById('oa-reveal-count').textContent,
-      text: document.getElementById('oa-reveal-note').textContent.replace(/\s+/g, ' '),
-    }));
+    const n = await q.evaluate(() => {
+      const bold = (id) => Array.from(document.getElementById(id).querySelectorAll('strong'))
+        .map((b) => b.textContent);
+      return {
+        day: document.getElementById('oa-reveal-day').textContent,
+        cities: document.getElementById('oa-reveal-cities').textContent,
+        local: document.getElementById('oa-reveal-local').textContent,
+        localBold: bold('oa-reveal-local'),
+        count: document.getElementById('oa-reveal-count').textContent,
+        countBold: bold('oa-reveal-count'),
+        text: document.getElementById('oa-reveal-note').textContent.replace(/\s+/g, ' '),
+      };
+    });
     eq(n.day, R.describeReveal(future).dayLong, 'reveal note: the day, with its weekday, from the module');
     ok(/^ \(\d{2}:\d{2} Los Angeles, \d{2}:\d{2} New York, \d{2}:\d{2} London, 22:00 Shanghai\)$/.test(n.cities),
       'reveal note: the four cities, filled by the script (the markup carries no clock)');
-    ok(/^, which is \d{2}:\d{2}.* where you are$/.test(n.local), 'reveal note: the reader’s own clock');
+    ok(/^, which is \d{2}:\d{2}.* in your current location$/.test(n.local), 'reveal note: the reader’s own clock');
+    /* the clock and its place are ONE bold run, and "which is" is outside it
+       (owner, 2026-09-14) */
+    ok(n.localBold.length === 1 && /^\d{2}:\d{2}.* in your current location$/.test(n.localBold[0]),
+      'reveal note: ...the clock and "in your current location" in bold, "which is" not');
     ok(/at 14:00 UTC on/.test(n.text), 'reveal note: ...beside the UTC time the static sentence names');
-    ok(/2 profiles have already been filed/.test(n.count), 'reveal note: the held count');
+    eq(n.count, 'So far, 2 Candidate profiles have already been filed. ', 'reveal note: the held count');
+    eq(n.countBold, ['2 Candidate profiles'], 'reveal note: ...with "2 Candidate profiles" in bold and nothing else');
+    /* the old count sentence had the digit straight before "profiles"; the
+       new one puts "Candidate" between them, so that is the needle */
+    ok(!/where you are|\d profiles have already been filed/.test(n.text),
+      'reveal note: neither retired wording survives in the rendered sentence');
     await ctx.close();
   }
 

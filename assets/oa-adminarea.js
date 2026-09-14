@@ -105,8 +105,9 @@
   /* --------------------------------------------------- the four queue sizes */
 
   /** Profiles filed and still waiting for the reveal. Read from the SAME file
-      the front page announces "N profiles have already been filed" from
-      (data/candidates-meta.json), so the badge and that banner agree; the
+      the front page announces "So far, N Candidate profiles have already been
+      filed" from (data/candidates-meta.json), so the badge and that banner
+      agree; the
       build writes heldCount 0 once revealed, and the date guard covers the
       window between the reveal day and the next build. */
   function heldCandidates() {

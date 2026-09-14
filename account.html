@@ -709,11 +709,11 @@
           return;
         }
         /* the reader's own clock, and no zone id beside it: the front page
-           says "where you are" and leaves it there, and "America/Los_Angeles"
-           is a machine name, not a place */
+           says "in your current location" and leaves it there, and
+           "America/Los_Angeles" is a machine name, not a place */
         var local = when.local && when.local.time
           ? ', which is ' + when.local.time + (when.local.sameDay ? '' : ' the next day') +
-            ' where you are'
+            ' in your current location'
           : '';
         note.textContent = 'Only you and the site\'s maintainer can see this until the ' +
           'reveal: every profile goes public at once on ' + when.dayLong + ' at ' +
