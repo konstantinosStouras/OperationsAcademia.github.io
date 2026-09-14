@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:39:37.488Z",
+ "generated": "2026-09-14T06:41:15.849Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -735,6 +735,10 @@
   },
   {
    "v": "Franklin and Marshall College",
+   "n": 1
+  },
+  {
+   "v": "Fudan University",
    "n": 1
   },
   {
@@ -1662,10 +1666,6 @@
    "n": 0
   },
   {
-   "v": "Fudan University",
-   "n": 0
-  },
-  {
    "v": "George Washington University",
    "n": 0
   },
@@ -2156,6 +2156,10 @@
    "n": 2
   },
   {
+   "v": "School of Management",
+   "n": 2
+  },
+  {
    "v": "School of Management and Economics",
    "n": 2
   },
@@ -2401,10 +2405,6 @@
   },
   {
    "v": "School of Engineering and Applied Science",
-   "n": 1
-  },
-  {
-   "v": "School of Management",
    "n": 1
   },
   {
@@ -3043,7 +3043,7 @@
   },
   {
    "v": "Management Science",
-   "n": 10
+   "n": 11
   },
   {
    "v": "Data Analytics",
