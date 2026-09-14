@@ -225,8 +225,14 @@
 .oa-modal-card .oa-opt:hover { background: none; }
 
 /* the chip rides on the field heading's own line, so it is the one `.oa-opt`
-   in a card that must not take the dropdown row's block-level flex */
-.oa-orcid-field .oa-flabel .oa-opt { display: inline; }
+   in a card that must not take the dropdown row's block-level flex. THREE
+   headings carry one: the ORCID field's, the register card's connect field's
+   and the verify card's connect block's. The first alone was named here, so
+   on any page that loads oa-list.css the other two chips dropped onto a line
+   of their own, drawn as a filter row. */
+.oa-orcid-field .oa-flabel .oa-opt,
+.oa-connect-field .oa-flabel .oa-opt,
+.oa-connect-h .oa-opt { display: inline; }
 
 /* On the REGISTRATION card the ORCID row is the only one that is not a
    question, so its heading is a `<span class="oa-flabel">` (13px) beside six
@@ -496,7 +502,20 @@
   cursor: pointer;
 }
 
-.oa-auth-provider:hover:not([aria-pressed='true']) { background: var(--brand-soft); }
+/* RULE 15 OF _MOBILE-STANDARDS.md, both halves. The hover is gated on a
+   device that has one, or a tap that DISARMS a connect button leaves the
+   stuck tap-hover painting it in the wash the armed state also uses; and it
+   stands down on a pressed button and on a disabled one, so a control that
+   is on, or waiting, never lights up as if it were an offer. */
+@media (hover: hover) and (pointer: fine) {
+  .oa-auth-provider:hover:not([aria-pressed='true']):not([disabled]) { background: var(--brand-soft); }
+}
+.oa-auth-provider[disabled] { cursor: default; opacity: 0.6; }
+
+/* the tick an ARMED connect button carries beside its label: the label itself
+   never changes (it is the toggle's name), so the tick and the pressed style
+   are what say the answer was taken. Hidden from the assistive tree. */
+.oa-connect-armedmark { margin-left: 6px; color: var(--ok, #2e6b4f); font-weight: 700; }
 
 .oa-or {
   margin: 14px 0;

@@ -1080,15 +1080,17 @@ for (const [name, expect] of [
 
   // the whole point of the linking rows: offer only what is still missing
   ok(!CARD.googleNoOrcid.linkGoogle, 'a Google account is not offered Google again');
-  ok(CARD.googleNoOrcid.linkOrcid,
-    'and IS offered ORCID even with no iD on file — connecting is how the verified iD gets onto the profile, ' +
-    'which is the whole point of the button (this read the other way round until 2026-09-12, and could not pass)');
-  ok(CARD.googleWithOrcid.linkOrcid,
-    'once an iD is on file, attaching ORCID sign-in is offered — that is what stops a duplicate');
+  /* THE ORCID OFFER IS THE FIELD'S (2026-09-14). Until then the rows drew a
+     second Connect ORCID under a field that already carried one on the same
+     card: two buttons doing one thing, read as a choice where there is none. */
+  ok(!CARD.googleNoOrcid.linkOrcid && !CARD.googleWithOrcid.linkOrcid && CARD.fieldGoogle.connect,
+    'the rows never repeat the ORCID button the iD field above already carries, with or without an iD on file');
   ok(CARD.orcidOnly.linkGoogle && !CARD.orcidOnly.linkOrcid,
     'an ORCID-only account is offered Google, and not the sign-in it already has');
   ok(!CARD.bothLinked.linkGoogle && !CARD.bothLinked.linkOrcid,
     'an account reachable both ways is offered nothing');
+  ok(/as well as with ORCID/.test(CARD.orcidOnly.text) && !/typing your e-mail and password/.test(CARD.orcidOnly.text),
+    'the Gmail row promises an escape from typing a password only to an account that has one');
 
   ok(CARD.googleNoOrcid.merge && CARD.orcidOnly.merge && CARD.bothLinked.merge,
     'every account can start a merge — two Gmail addresses are two accounts too');
@@ -10855,16 +10857,24 @@ for (const w of [320, 360, 390, 430]) {
       orcidBox: !!document.querySelector('#oa-auth-form [name="orcid"]'),
       connectHead: (document.querySelector('#oa-auth-form .oa-connect-field .oa-flabel') || {}).textContent || '',
       connectLede: (document.querySelector('#oa-auth-form .oa-connect-field > .oa-opt.oa-fine') || {}).textContent || '',
+      /* the NAME: the label span alone. The tick beside it is aria-hidden and
+         hidden until armed, and is not part of what a screen reader hears. */
       orcidBtn: (() => {
         const b = document.querySelector('#oa-reg-orcid');
-        return b && { label: b.textContent.trim(), pressed: b.getAttribute('aria-pressed'),
-                      mark: !!b.querySelector('svg') };
+        return b && { label: b.querySelector('span:not(.oa-connect-armedmark)').textContent.trim(),
+                      pressed: b.getAttribute('aria-pressed'), mark: !!b.querySelector('svg'),
+                      tick: !b.querySelector('.oa-connect-armedmark').hidden };
       })(),
       googleBtn: (() => {
         const b = document.querySelector('#oa-reg-google');
-        return b && { label: b.textContent.trim(), pressed: b.getAttribute('aria-pressed'),
-                      mark: !!b.querySelector('svg') };
+        return b && { label: b.querySelector('span:not(.oa-connect-armedmark)').textContent.trim(),
+                      pressed: b.getAttribute('aria-pressed'), mark: !!b.querySelector('svg'),
+                      tick: !b.querySelector('.oa-connect-armedmark').hidden };
       })(),
+      /* the keyboard on arrival, and the chip's display on a page that loads
+         oa-list.css (this one), where a bare .oa-opt is a filter row */
+      focused: document.activeElement && document.activeElement.name,
+      chipDisplay: getComputedStyle(document.querySelector('#oa-auth-form .oa-connect-field .oa-flabel .oa-opt')).display,
       orcidNote: (document.querySelector('#oa-reg-orcid-note') || {}).textContent || '',
       googleNote: (document.querySelector('#oa-reg-google-note') || {}).textContent || '',
       /* the pills the owner struck through: gone from THIS card */
@@ -10906,7 +10916,12 @@ for (const w of [320, 360, 390, 430]) {
       `registration card: …${who} unarmed on arrival, so the reader chooses it rather than opting out`);
     ok(note.length > 40,
       `registration card: …and ${who} carries a line of its own (got "${note}")`);
+    ok(btn && btn.tick === false, `registration card: …and no tick beside ${who} before it is armed`);
   }
+  eq(card.focused, 'firstName',
+    'registration card: the keyboard lands on the FIRST box, not on the e-mail five fields down');
+  eq(card.chipDisplay, 'inline',
+    'registration card: the "(optional)" chip rides on its heading\'s line on a page that loads oa-list.css, rather than dropping onto a line of its own as a filter row');
   /* the two rewritten notes, measured on the RENDERED card rather than in the
      source, because what is under test is what the reader is told */
   ok(/verified/.test(card.orcidNote) && /with ORCID as well/.test(card.orcidNote),
@@ -10936,7 +10951,8 @@ for (const w of [320, 360, 390, 430]) {
       const b = document.querySelector('#' + id);
       const n = document.querySelector('#' + id + '-note');
       return { pressed: b ? b.getAttribute('aria-pressed') : '(the button is gone)',
-               label: b ? b.textContent.trim() : '(the button is gone)',
+               label: b ? b.querySelector('span:not(.oa-connect-armedmark)').textContent.trim() : '(the button is gone)',
+               tick: b ? !b.querySelector('.oa-connect-armedmark').hidden : false,
                note: n ? n.textContent : '' };
     };
     return {
@@ -10949,8 +10965,12 @@ for (const w of [320, 360, 390, 430]) {
   });
   for (const [who, got] of [['ORCID', armed.orcid], ['Gmail', armed.google]]) {
     eq(got.pressed, 'true', `registration card: pressing the ${who} button arms it`);
-    ok(/yes, connect it/.test(got.label),
-      `registration card: …and its label says the answer was taken (got "${got.label}")`);
+    /* A TOGGLE KEEPS ITS NAME. The first build rewrote the label to
+       "ORCID, yes, connect it" on a press, so a screen reader heard the name
+       move and the state said twice; the name is what the button does. */
+    eq(got.label, 'Connect my ' + who,
+      `registration card: …and its NAME does not change with the state (got "${got.label}")`);
+    ok(got.tick, `registration card: …the tick beside ${who} is what shows the answer was taken`);
     ok(/Press again/.test(got.note),
       `registration card: …and the ${who} note says how to change your mind`);
   }
@@ -11050,11 +11070,22 @@ for (const w of [320, 360, 390, 430]) {
     text: document.querySelector('#oa-verify-connect').textContent,
     googleBtn: !!document.querySelector('#oa-connect-google'),
     ops: window.__fb.ops('link'),
+    said: (document.querySelector('#oa-connect-msg') || {}).textContent || '',
+    saidOk: (document.querySelector('#oa-connect-msg') || {}).className || '',
+    focused: document.activeElement && document.activeElement.id,
+    headDisplay: getComputedStyle(document.querySelector('.oa-connect-h .oa-opt') || document.body).display,
+    cardStill: !!document.querySelector('#oa-verify'),
   }));
   ok(!both.googleBtn && /All connected/i.test(both.text)
      && /Gmail is connected/.test(both.text) && /ORCID is connected/.test(both.text),
     `connect: pressing it connects Gmail too, and the block stops asking and says so (got "${both.text.trim().slice(0, 260)}")`);
   eq(both.ops.length, 2, 'connect: …two links in all, one per sign-in, never a repeat');
+  ok(/Gmail is connected/.test(both.said) && /is-ok/.test(both.saidOk),
+    `connect: …and the success is ANNOUNCED on the block\'s own live line, not only drawn (got "${both.said}")`);
+  eq(both.focused, 'oa-verify-check',
+    'connect: …with the keyboard put on "I have verified it", the next thing to do, rather than dropped on <body> with the button that was pressed');
+  ok(both.cardStill,
+    'connect: a Gmail address that differs from the account\'s confirms nothing, so the card stands');
   eq(errors, [], 'registration card: no uncaught script error');
   await ctx.close();
 }
@@ -11069,8 +11100,19 @@ for (const w of [320, 360, 390, 430]) {
 {
   const UNVERIFIED = { uid: 'blocked-uid-0000', email: 'blocked@example.edu',
     emailVerified: false, displayName: '', providerData: [{ providerId: 'password' }] };
+  /* THE WRITE TAKES TIME, so the gap between creating the account and
+     drawing the card that follows is OPEN, as it is on a real connection.
+     Two defects lived in that gap and a same-tick shim could not reach
+     either: the armed link's rejection sat without a handler until the
+     write returned (an unhandled rejection in the console), and the auth
+     listener drew the "nothing was sent" card with a live Send button over
+     the still-open form. */
   const { ctx, page: q, errors } = await signedOutPage('jobs.html',
-    { seed: { signInUser: UNVERIFIED, linkFails: 'auth/popup-blocked' } });
+    { seed: { signInUser: UNVERIFIED, linkFails: 'auth/popup-blocked', setDelayMs: 600 } });
+  const rejections = [];
+  await q.exposeFunction('__oaRejected', (r) => rejections.push(r));
+  await q.evaluate(() => window.addEventListener('unhandledrejection', (e) =>
+    window.__oaRejected(String((e.reason && (e.reason.code || e.reason.message)) || e.reason))));
   await q.evaluate(() => window.OAAccounts.openAuth('register'));
   await q.waitForSelector('#oa-auth-form [name="affiliation"]', { timeout: 8000 });
   await q.click('#oa-reg-orcid');
@@ -11082,7 +11124,33 @@ for (const w of [320, 360, 390, 430]) {
   await q.check('#oa-auth-form [name="terms"]');
   await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
 
+  /* WHAT IS ON SCREEN WHILE THE WRITE IS OUT: the register form, its button
+     disabled, and NO verify card, sampled through the gap. The right card
+     arrives once, when the chain opens it. */
+  const gap = await q.evaluate(() => new Promise((done) => {
+    const seen = { verifyLedes: new Set(), formGone: false, submitDisabled: null, samples: 0 };
+    const t0 = performance.now();
+    const tick = () => {
+      seen.samples++;
+      const v = document.querySelector('#oa-verify .oa-modal-lede');
+      if (v) seen.verifyLedes.add(v.textContent.trim().slice(0, 60));
+      const f = document.querySelector('#oa-auth-form');
+      if (!f) seen.formGone = true;
+      else if (seen.submitDisabled === null) seen.submitDisabled = f.querySelector('button[type="submit"]').disabled;
+      if (performance.now() - t0 > 450) { seen.verifyLedes = [...seen.verifyLedes]; done(seen); return; }
+      requestAnimationFrame(tick);
+    };
+    tick();
+  }));
+  ok(gap.samples > 5 && gap.submitDisabled === true,
+    `blocked popup: while the write is out the form stands with Create account disabled (${gap.samples} frames sampled)`);
+  ok(!gap.verifyLedes.some((l) => /not been confirmed yet/.test(l)),
+    `blocked popup: …and the auth listener\'s "nothing was sent" card is never drawn over it (ledes seen: ${JSON.stringify(gap.verifyLedes)})`);
+  ok(!gap.formGone || gap.verifyLedes.length,
+    'blocked popup: …the form leaves only when the registration\'s own card takes its place');
+
   await q.waitForSelector('#oa-connect-orcid', { timeout: 8000 });
+  await q.waitForFunction(() => !document.querySelector('#oa-connect-orcid').disabled, null, { timeout: 8000 });
   const after = await q.evaluate(() => {
     const docs = window.__fb.dump();
     const k = Object.keys(docs).filter((x) => x.indexOf('profiles/') === 0)[0];
@@ -11092,19 +11160,189 @@ for (const w of [320, 360, 390, 430]) {
       googleBtn: !!document.querySelector('#oa-connect-google'),
       done: !!document.querySelector('[data-connect-done]'),
       card: !!document.querySelector('#oa-verify'),
+      lede: (document.querySelector('#oa-verify .oa-modal-lede') || {}).textContent || '',
+      said: (document.querySelector('#oa-connect-msg') || {}).textContent || '',
+      form: !!document.querySelector('#oa-auth-form'),
       signedIn: window.__fb.at('signIn', '') !== -1,
       prof: k ? docs[k] : null,
     };
   });
   ok(after.orcidBtn && after.orcidLive,
     'blocked popup: the armed link was refused, so the card leaves ORCID LIVE — one press, which is what a browser does let through');
+  ok(/could not open the ORCID window on its own/.test(after.said) && /Press the button/.test(after.said),
+    `blocked popup: …and SAYS so, pointing at the button, rather than reverting the row in silence (got "${after.said}")`);
   ok(after.googleBtn && !after.done,
     'blocked popup: …with Gmail beside it, and nothing claimed as connected');
-  ok(after.card && after.signedIn,
+  ok(after.card && after.signedIn && !after.form,
     'blocked popup: …and the account was still made — a link that failed never costs a registration');
+  ok(/A message from Operations Academia is on its way/.test(after.lede),
+    `blocked popup: …on the registration\'s OWN card, whose lede says the message is on its way (got "${after.lede.slice(0, 80)}")`);
   ok(after.prof && after.prof.affiliation === 'Test University' && !after.prof.orcid,
     'blocked popup: …with the profile stored and no iD claimed that nothing proved');
   eq(errors, [], 'blocked popup: no uncaught script error');
+  eq(rejections, [],
+    'blocked popup: …and NO unhandled rejection: the refusal landed before the write returned, and was caught');
+  await ctx.close();
+}
+
+/* -------------------- a same-address GMAIL link confirms the address
+
+   Google vouches for the address it hands over, and Firebase marks a
+   password account whose address matches as verified the moment the link
+   lands. The card used to go on demanding the e-mail link. Driven with the
+   shim's linkVerifies, which is that behaviour; the card must close and the
+   session must open, with the token re-minted (the rules read the token). */
+{
+  const UNVERIFIED = { uid: 'gmail-uid-0000', email: 'ada@gmail.example',
+    emailVerified: false, displayName: '', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedOutPage('jobs.html',
+    { seed: { signInUser: UNVERIFIED, linkVerifies: true, setDelayMs: 200 } });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('#oa-auth-form [name="affiliation"]', { timeout: 8000 });
+  await q.fill('#oa-auth-form [name="firstName"]', 'Ada');
+  await q.fill('#oa-auth-form [name="lastName"]', 'Lovelace');
+  await q.fill('#oa-auth-form [name="affiliation"]', 'Test University');
+  await q.fill('#oa-auth-form [name="email"]', 'ada@gmail.example');
+  await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+  await q.check('#oa-auth-form [name="terms"]');
+  /* TWO PRESSES, ONE ACCOUNT: the second submit arrives while the first is
+     in flight and must be refused rather than answered "already an account" */
+  await q.evaluate(() => { const f = document.getElementById('oa-auth-form'); f.requestSubmit(); f.requestSubmit(); });
+  await q.waitForSelector('#oa-connect-google', { timeout: 8000 });
+  const before = await q.evaluate(() => ({
+    signIns: window.__fb.ops('signIn').length,
+    lede: (document.querySelector('#oa-verify .oa-modal-lede') || {}).textContent || '',
+    pending: window.OAAccounts.user() === null,
+    freshLede: /you have just chosen/.test(document.querySelector('#oa-verify-connect').textContent),
+  }));
+  eq(before.signIns, 1, 'double press: two submits while the first is in flight make ONE account');
+  ok(before.pending && /on its way/.test(before.lede),
+    'gmail confirms: the reader is pending, on the registration\'s own card');
+  ok(before.freshLede,
+    'gmail confirms: …whose connect lede says "you have just chosen", since this IS the registration');
+  await q.click('#oa-connect-google');
+  await q.waitForFunction(() => !document.querySelector('#oa-verify'), null, { timeout: 8000 });
+  const lifted = await q.evaluate(() => ({
+    user: !!window.OAAccounts.user(),
+    hint: window.OAAccounts.hint(),
+    forced: window.__fb.at('getIdToken', ':force') !== -1,
+    reloaded: window.__fb.at('reload', '') !== -1,
+    linkedAt: window.__fb.at('link', 'google.com'),
+    forcedAt: window.__fb.at('getIdToken', ':force'),
+  }));
+  ok(lifted.user && lifted.hint === 'in',
+    'gmail confirms: a same-address Gmail link lifts the gate: the card is gone and the session is open');
+  ok(lifted.reloaded && lifted.forced && lifted.forcedAt > lifted.linkedAt,
+    'gmail confirms: …after a reload and a FORCED token refresh, since the rules read the token (and it came after the link)');
+  eq(errors, [], 'gmail confirms: no uncaught script error');
+  await ctx.close();
+}
+
+/* -------------------- a pending session VISITING later reads a true lede */
+{
+  const PENDING = { uid: 'later-uid-0000', email: 'later@example.edu',
+    emailVerified: false, displayName: '', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedInPage('jobs.html',
+    { user: PENDING, selector: '#oa-verify-connect' });
+  const later = await q.evaluate(() => ({
+    lede: (document.querySelector('#oa-verify .oa-modal-lede') || {}).textContent || '',
+    connect: document.querySelector('#oa-verify-connect').textContent,
+    chip: getComputedStyle(document.querySelector('.oa-connect-h .oa-opt')).display,
+  }));
+  ok(/not been confirmed yet/.test(later.lede),
+    'pending later: a page load in a pending session opens the card with the "nothing was sent" lede');
+  ok(/your e-mail address and password/.test(later.connect) && !/you have just chosen/.test(later.connect),
+    `pending later: …and its connect block says "your e-mail address and password", never "you have just chosen" (got "${later.connect.trim().slice(0, 200)}")`);
+  eq(later.chip, 'inline', 'pending later: the block\'s "(optional)" chip rides on its heading\'s line on jobs.html');
+  eq(errors, [], 'pending later: no uncaught script error');
+  await ctx.close();
+}
+
+/* -------------------- an EXISTING MEMBER connects from the profile card
+
+   The route the owner asked for on 2026-09-12 ("Allow users that have
+   already registered to OA to connect their ORCID and/or the Gmail"), driven
+   in a browser for the first time: the field's own button links ORCID and the
+   field becomes a chip in place; a Gmail link on an ORCID-only account gives
+   it the address it now signs in with and the box asking for one gives way;
+   and an iD half typed survives the Gmail link's repaint.                    */
+{
+  const MEMBER = { uid: 'member-uid-0000', email: 'member@example.edu', emailVerified: true,
+    displayName: 'Mem Ber', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedInPage('jobs.html',
+    { user: MEMBER, seed: { linkDelayMs: 150 },
+      docs: [{ path: 'profiles/member-uid-0000', data: { firstName: 'Mem', lastName: 'Ber', affiliation: 'Uni' } }] });
+  await q.evaluate(() => window.OAAccounts.openProfile());
+  await q.waitForSelector('#oa-orcid-connect', { timeout: 8000 });
+  const shape = await q.evaluate(() => ({
+    orcidRows: document.querySelectorAll('#oa-profile #oa-link-orcid').length,
+    fieldBtn: !!document.querySelector('#oa-profile #oa-orcid-connect'),
+    googleRow: (document.querySelector('#oa-profile .oa-acct-linkrow') || {}).textContent || '',
+    heading: (document.querySelector('#oa-profile .oa-acct-other h4') || {}).textContent || '',
+  }));
+  eq(shape.orcidRows, 0, 'member connect: ONE Connect ORCID on the card, the field\'s, never a second row below it');
+  ok(shape.fieldBtn && /instead of typing your e-mail and password/.test(shape.googleRow)
+     && shape.heading === 'Sign in faster next time',
+    `member connect: …and the Gmail row promises the escape from a password to an account that has one (got "${shape.googleRow.trim().slice(0, 120)}")`);
+  /* an iD half typed, then a Gmail link: the typing survives the repaint */
+  await q.fill('#oa-profile-form [name="orcid"]', '0000-0002-2398-9566');
+  await q.click('#oa-profile #oa-link-google');
+  await q.waitForFunction(() => !document.querySelector('#oa-profile #oa-link-google'), null, { timeout: 8000 });
+  const afterGoogle = await q.evaluate(() => ({
+    typed: (document.querySelector('#oa-profile-form [name="orcid"]') || {}).value,
+    msg: (document.querySelector('#oa-profile-msg') || {}).textContent || '',
+    heading: (document.querySelector('#oa-profile .oa-acct-other h4') || {}).textContent || '',
+  }));
+  eq(afterGoogle.typed, '0000-0002-2398-9566',
+    'member connect: an iD half typed survives the repaint a Gmail link causes');
+  ok(/^Done\./.test(afterGoogle.msg) && !/—/.test(afterGoogle.msg),
+    `member connect: …the link is reported in plain words with no dash (got "${afterGoogle.msg}")`);
+  /* the field's own button links ORCID and the field becomes a chip in place */
+  await q.click('#oa-profile #oa-orcid-connect');
+  await q.waitForSelector('#oa-profile .oa-orcid-chip', { timeout: 8000 });
+  const afterOrcid = await q.evaluate(() => ({
+    chip: (document.querySelector('#oa-profile .oa-orcid-chip') || {}).textContent || '',
+    box: !!document.querySelector('#oa-profile-form [name="orcid"]'),
+    msg: (document.querySelector('#oa-profile-msg') || {}).textContent || '',
+    form: !!document.querySelector('#oa-profile-form'),
+    docs: window.__fb.dump(),
+  }));
+  eq(afterOrcid.chip, '0000-0002-1825-0097',
+    'member connect: the field\'s button links ORCID and the field becomes the proved iD as a chip, in place');
+  ok(!afterOrcid.box && afterOrcid.form && /^Connected\./.test(afterOrcid.msg),
+    `member connect: …the box gives way to the chip, the card stays open, and the message has no dash (got "${afterOrcid.msg}")`);
+  eq(afterOrcid.docs['profiles/member-uid-0000'].orcidVerified, true,
+    'member connect: …and the profile carries the iD verified');
+  eq(errors, [], 'member connect: no uncaught script error');
+  await ctx.close();
+}
+{
+  /* an ORCID-only account: the e-mail BOX gives way once Gmail hands over an address */
+  const ORCIDER = { uid: 'orcid-member-0000', email: '', emailVerified: false, displayName: 'Orla',
+    providerData: [{ providerId: 'oidc.orcid', uid: '0000-0002-1825-0097' }] };
+  const { ctx, page: q, errors } = await signedInPage('jobs.html',
+    { user: ORCIDER, seed: { linkEmail: 'orla@gmail.example' },
+      docs: [{ path: 'profiles/orcid-member-0000', data: { firstName: 'Orla', affiliation: 'Uni',
+        orcid: '0000-0002-1825-0097', orcidVerified: true, orcidSeeded: true } }] });
+  await q.evaluate(() => window.OAAccounts.openProfile());
+  await q.waitForSelector('#oa-profile-form [name="contactEmail"]', { timeout: 8000 });
+  const pre = await q.evaluate(() => ({
+    row: (document.querySelector('#oa-profile .oa-acct-linkrow') || {}).textContent || '',
+    chip: !!document.querySelector('#oa-profile .oa-orcid-chip'),
+  }));
+  ok(/as well as with ORCID/.test(pre.row) && !/typing your e-mail and password/.test(pre.row),
+    `orcid member: the Gmail row promises no escape from a password this account does not have (got "${pre.row.trim().slice(0, 120)}")`);
+  ok(pre.chip, 'orcid member: the proved iD is a chip');
+  await q.click('#oa-profile #oa-link-google');
+  await q.waitForFunction(() => !document.querySelector('#oa-profile-form [name="contactEmail"]'), null, { timeout: 8000 });
+  const post = await q.evaluate(() => ({
+    shown: (document.querySelector('#oa-profile .oa-email-row input') || {}).value,
+    disabled: !!(document.querySelector('#oa-profile .oa-email-row input') || {}).disabled,
+    note: (document.querySelector('#oa-profile .oa-email-row .oa-fine') || {}).textContent || '',
+  }));
+  ok(post.shown === 'orla@gmail.example' && post.disabled && /address you sign in with/.test(post.note),
+    'orcid member: after the Gmail link the box asking for an address gives way to the address the account now signs in with');
+  eq(errors, [], 'orcid member: no uncaught script error');
   await ctx.close();
 }
 

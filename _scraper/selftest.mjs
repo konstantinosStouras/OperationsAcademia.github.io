@@ -16603,7 +16603,11 @@ async function testCandidateStats() {
 async function testEmailVerification() {
   const root = path.join(HERE, '..');
   const site = 'https://www.operationsacademia.org';
-  const noDash = (s) => !/—/.test(String(s));
+  /* THE ESCAPE COUNTS. The register card's connect copy spelled nine em
+     dashes as \u2014, the string escape, and every noDash pin in this file
+     stayed green over them: the test read the SOURCE, and in the source the
+     character is six other characters. A reader sees the dash either way. */
+  const noDash = (s) => !/—|\\u2014/.test(String(s));
 
   /* --- the Admin app is found by NAME, never by count --------------------
      The functions library holds a named app of its own to verify a callable's
@@ -17007,7 +17011,7 @@ async function testEmailVerification() {
   const regEnd = acct.indexOf('signInWithEmailAndPassword(f.email.value', regAt);
   ok(regAt > 0 && regEnd > regAt, 'accounts: the registration path was found');
   const reg = acct.slice(regAt, regEnd);
-  ok(reg.length > 500 && reg.length < 4500, 'accounts: the registration slice is the right size');
+  ok(reg.length > 500 && reg.length < 8000, 'accounts: the registration slice is the right size');
   ok(!/writeHint\(u, first/.test(reg), 'accounts: registering with a password no longer writes the signed-in hint');
   ok(/openVerifyPanel\('sent', created\)/.test(reg) && /sendVerification\(created\)/.test(reg),
     'accounts: …it opens the card and sends the message instead of finishing the sign-in');
@@ -20629,6 +20633,29 @@ async function testRegistrationFields() {
     'ORCID: the field itself carries a connect button, wearing the same mark as the sign-in pill');
   ok(/var canConnect = !hasProvider\('oidc\.orcid', u\);/.test(orcidFn),
     'ORCID: …withheld from an account already signing in with ORCID, which linkWithPopup would only refuse');
+  /* THE PROVED iD IS A CHIP BEFORE THE PROFILE HAS CAUGHT UP: the welcome card
+     is drawn before seedOrcidFromProvider lands, and an ORCID sign-up met
+     "Your iD" over an empty box, which a save then wrote over the proved iD */
+  ok(/var proved = \(p\.orcid && p\.orcidVerified\) \? p\.orcid\s*: \(hasProvider\('oidc\.orcid', u\) \? orcidFromProvider\(u\) : ''\);/.test(orcidFn)
+     && /if \(proved\) \{/.test(orcidFn) && /esc\(proved\)/.test(orcidFn),
+    'ORCID: the chip is drawn from the iD the provider itself carries, so an ORCID account never meets an empty box for a number its sign-in has just proved');
+  ok(/You do not need to know the number, and you can ' \+\s*'then sign in with ORCID as well\./.test(orcidFn),
+    'ORCID: the field\'s own line says the sign-in half, since the row below no longer repeats the button');
+  /* ONE ORCID BUTTON PER CARD: the field's, never a second row below it */
+  ok(!/oa-link-orcid/.test(acct),
+    'ORCID: the other-accounts section no longer draws a second Connect ORCID under the field that already has one');
+  ok(/hasProvider\('password', u\)\s*\? 'instead of typing your e-mail and password'\s*: 'as well as with ' \+ esc\(providerSummary\(u\)\)/.test(acct),
+    'ORCID: the Gmail row promises an escape from typing a password only to an account that has one');
+  /* the photo is repainted in place */
+  {
+    const spAt = acct.indexOf('function savePhoto(data)');
+    const sp = acct.slice(spAt, acct.indexOf('function wirePhoto()', spAt));
+    ok(spAt > 0 && !/openProfile\(\);/.test(sp) && /side\.innerHTML = photoSideHTML\(\); wirePhoto\(\);/.test(sp),
+      'profile card: saving a photo repaints the photo side in place, never reopening the card (which redrew a WELCOME card as an ordinary one and lost the typing)');
+  }
+  /* an iD half typed survives a Gmail link */
+  ok(/if \(newBox && typed && typed !== String\(p\.orcid \|\| ''\)\) newBox\.value = typed;/.test(acct),
+    'ORCID: a typed iD is carried across the repaint a Gmail link causes');
   ok(orcidFn.includes('<input name="orcid"'),
     'ORCID: …and the box stays, for the reader who knows the number and for clearing one');
   ok(/function orcidFieldHTML\(p, u\)/.test(acct) && /orcidFieldHTML\(p, u\) \+/.test(acct),
@@ -20738,8 +20765,60 @@ async function testRegistrationFields() {
     'connect: what was armed is handed to the next card, with which one the registration already tried');
   ok(/connectWanted = ARM\.filter\(function \(a\) \{ return want\[a\.provider\]; \}\)/.test(acct)
      && /connectTried = connectWanted\[0\];/.test(acct)
-     && /connectOutcome = linkTo\(fb, u, connectTried\);/.test(acct),
+     && /connectOutcome = linkTo\(fb, u, connectTried\)\.then\(/.test(acct),
     'connect: the FIRST armed one is opened the instant the account exists, while the press that asked for it still counts');
+  /* SETTLED INTO A VALUE, never left to reject (review, 2026-09-14). Nothing
+     reads connectOutcome until the card that follows is drawn, after the
+     profile write; a blocked or closed window rejects long before that, so
+     the promise sat without a handler and the browser reported an unhandled
+     rejection on the commonest way the bonus fails. The shim's same-tick
+     write hid it from the browser suite, which now delays the write. */
+  ok(/connectOutcome = linkTo\(fb, u, connectTried\)\.then\(\s*function \(r\) \{ return \{ ok: true, r: r \}; \},\s*function \(err\) \{ return \{ ok: false, err: err \}; \}\);/.test(acct),
+    'connect: …and its outcome is folded into {ok, r} or {ok, err} on the spot, so no rejection is ever left waiting for a handler');
+  ok(/if \(res && res\.ok\) \{\s*connectLanded\(/.test(acct)
+     && /connectSay\(armedFailedSays\(tried, res && res\.err\)\);/.test(acct),
+    'connect: …and the card reads the value, landing the link or WORDING the refusal, never reverting the row in silence');
+  ok(/function armedFailedSays\(id, err\)/.test(acct)
+     && /We could not open the ' \+ connectName\(id\) \+ ' window on its own\. ' \+\s*'Press the button to connect it\.'/.test(acct)
+     && /return connectFailedSays\(err\);/.test(acct),
+    'connect: a blocked or closed bonus window points at the button in the plain voice, and any other refusal is worded by the same function a press\'s is');
+  /* THE PROFILE WRITE IS WAITED FOR, BUT NOT FOR EVER: a Firestore write with
+     the channel down neither resolves nor rejects, and the card and the
+     e-mail both waited on it */
+  ok(/return Promise\.race\(\[stored, pause\(PROFILE_WRITE_WAIT_MS\)\]\);/.test(acct)
+     && /var PROFILE_WRITE_WAIT_MS = 4000;/.test(acct)
+     && /function pause\(ms\) \{ return new Promise\(function \(r\) \{ setTimeout\(r, ms\); \}\); \}/.test(acct),
+    'registration: the profile write is given a few seconds and the chain goes on without it, so an unreachable database cannot hold the card and the message for ever');
+  /* THE AUTH LISTENER DEFERS TO A REGISTRATION IN FLIGHT. The SDK tells its
+     listeners about the new account before createUser resolves, and the
+     listener's answer to a pending account was to open the card with the
+     "nothing was sent" lede and a live Send button, OVER the register form,
+     for the length of the profile write. */
+  ok(/var regBusy = false;/.test(acct) && /busy\(true\);\s*regBusy = true;/.test(acct)
+     && /if \(!\$\('#oa-verify'\) && !regBusy\) openVerifyPanel\(null, null, true\);/.test(acct)
+     && (acct.match(/regBusy = false;/g) || []).length >= 3,
+    'registration: the auth listener opens no card while a registration is in flight, and the flag is cleared on every way out of the chain');
+  ok(/if \(created && needsVerification\(created\) && !\$\('#oa-verify'\)\) \{\s*close\(\);\s*openVerifyPanel\(null, created\);/.test(acct),
+    'registration: …and a chain that fails AFTER the account was made still opens the card the listener was told not to');
+  /* ONE ATTEMPT AT A TIME */
+  ok(/var submitBtn = \$\('button\[type="submit"\]', f\);\s*if \(submitBtn && submitBtn\.disabled\) return;/.test(acct)
+     && (acct.match(/\bbusy\(true\);/g) || []).length === 2
+     && /\.catch\(function \(err\) \{ busy\(false\); say\(friendly\(err\)\); \}\);/.test(acct),
+    'registration: Create account and Sign in are disabled while the request is in flight, and a submit that arrives anyway is refused, so a second press cannot paint "already an account" over a registration that is succeeding');
+  /* the 'sent' lede is taken back when the send fails */
+  ok(/function verifyUnsent\(\)/.test(acct)
+     && /\.catch\(function \(err\) \{ verifyUnsent\(\); verifySay\(friendly\(err\)\); \}\);/.test(acct)
+     && /we could not send the confirmation ' \+\s*'message yet/.test(acct),
+    'registration: a message that failed to go is un-promised where the promise was made, and the button stops saying "again"');
+  /* the keyboard lands on the first box */
+  ok(/var firstBox = \$\('#oa-auth-form input', wrap\);\s*if \(firstBox\) firstBox\.focus\(\);/.test(acct)
+     && !/\.email\.focus\(\);/.test(acct),
+    'registration: the card opens with the keyboard on its FIRST box, not on the e-mail five fields down');
+  /* the toggle keeps its name */
+  ok(!/yes, connect it'/.test(acct) && !/oa-reg-orcid-label/.test(acct) && !/oa-reg-google-label/.test(acct)
+     && (acct.match(/<span class="oa-connect-armedmark" aria-hidden="true" hidden>&#10003;<\/span>/g) || []).length === 2
+     && /if \(mark\) mark\.hidden = !on;/.test(acct),
+    'registration: an arming button keeps its NAME as it toggles (a toggle is named for what it does), and says the state with aria-pressed, a hidden-from-AT tick and the line under it');
   {
     const chain = acct.slice(acct.indexOf('createUserWithEmailAndPassword(f.email.value'),
                              acct.indexOf('signInWithEmailAndPassword(f.email.value'));
@@ -20750,8 +20829,39 @@ async function testRegistrationFields() {
       'connect: …only the first, because two popups at once is one popup and one refusal');
   }
   ok(/id="oa-verify-connect"/.test(acct) && /function verifyConnect\(u\)/.test(acct)
-     && /verifyConnect\(u\);/.test(acct) && /function paintConnect\(u\)/.test(acct),
+     && /verifyConnect\(u\);/.test(acct) && /function paintConnect\(u, opts\)/.test(acct),
     'connect: the card that follows draws the block and reports the attempt');
+  /* A LINK THAT LANDS IS SAID, KEEPS THE KEYBOARD, AND ASKS WHETHER IT
+     CONFIRMED THE ADDRESS. A same-address Gmail link is verified by Google
+     and Firebase marks the account confirmed as it lands; until 2026-09-14
+     the card went on demanding the e-mail link. */
+  ok(/function connectLanded\(u, id\)/.test(acct)
+     && /paintConnect\(user, \{ focus: true \}\);/.test(acct)
+     && /connectSay\(connectName\(id\) \+ ' is connected\. You can sign in with it\.', true\);/.test(acct)
+     && /if \(state\.pending \|\| needsVerification\(user\)\) \{\s*confirmVerified\(user\)/.test(acct),
+    'connect: a landed link is announced on the block\'s own live line, puts the keyboard back on the block, and asks confirmVerified, the one function that lifts the gate');
+  ok(/var next = \$\('\[data-connect="' \+ opts\.focus \+ '"\]'\) \|\| \$\('#oa-verify-connect \[data-connect\]'\)\s*\|\| \$\('#oa-verify-check'\);/.test(acct),
+    'connect: …the keyboard goes to the next offer, or to "I have verified it" when nothing is left to offer, never to <body>');
+  /* A PRESS IN FLIGHT SURVIVES A REPAINT */
+  ok(/var connectBusy = \{\};/.test(acct) && /\(connectBusy\[c\.provider\] \? ' disabled' : ''\)/.test(acct)
+     && /if \(connectBusyAny\(\)\) connectSay\('Opening the sign-in window\\u2026'\);/.test(acct)
+     && /out\.disabled = connectBusyAny\(\);/.test(acct)
+     && /connectBusy = \{\};/.test(acct.slice(acct.indexOf('function signOut'))),
+    'connect: a press whose window is open stays disabled through any repaint, "Use a different account" waits for it, and sign-out forgets it');
+  /* the lede is true on a later visit too */
+  ok(/var connectFresh = false;/.test(acct) && /connectFresh = status === 'sent';/.test(acct)
+     && /var chosen = connectFresh\s*\? 'the e-mail address and password you have just chosen'\s*: 'your e-mail address and password';/.test(acct),
+    'connect: "the password you have just chosen" is said only on the registration path; a pending session visiting later reads "your e-mail address and password"');
+  /* the refusal a pending reader can act on, and the code nobody worded */
+  ok(/var LINK_TAKEN = \['auth\/credential-already-in-use',\s*'auth\/account-exists-with-different-credential', 'auth\/email-already-in-use'\];/.test(acct)
+     && (acct.match(/LINK_TAKEN\.indexOf\(c\) !== -1/g) || []).length === 2,
+    'connect: email-already-in-use, a documented linkWithPopup refusal, is worded on both roads, through one list');
+  ok(/If that account is yours, sign in to it instead; once this ' \+\s*'address is confirmed, Edit account can merge the two\./.test(acct)
+     && !/Your personal area can merge the two/.test(acct),
+    'connect: …and a pending reader is pointed at the other account, never at a personal area a pending account cannot open');
+  ok(/msg\.textContent = connectFailedSays\(err\);/.test(acct.slice(acct.indexOf('function linkProvider('))),
+    'ORCID: the profile card\'s own connect wording is connectFailedSays too, so a blocked window is named there rather than printed as a code');
+  ok(!/\\u2014/.test(acct), 'accounts: no em dash spelled as an escape anywhere in the module');
   ok(/var CONNECT = \[/.test(acct) && /provider: 'oidc\.orcid'/.test(acct)
      && /provider: 'google\.com'/.test(acct),
     'connect: …offering BOTH sign-ins, which is what the owner asked for beside the ORCID one');
@@ -20769,12 +20879,22 @@ async function testRegistrationFields() {
     ok(/\[aria-pressed='true'\]/.test(css),
       f + ': …including the ARMED button, which has to name its own ink over its own ground: `--brand` ' +
       'is light in the dark theme, so a ground alone leaves the label painted nearly in its own colour');
-    ok(/:hover:not\(\[aria-pressed='true'\]\)/.test(css),
-      f + ': …and the pill\'s hover stands down on the on-state, or a tap that arms the button leaves a ' +
-      'stuck hover repainting it in the off-state\'s wash (rule 15 of _MOBILE-STANDARDS.md)');
+    ok(/:hover:not\(\[aria-pressed='true'\]\):not\(\[disabled\]\)/.test(css),
+      f + ': …and the pill\'s hover stands down on the on-state and the disabled one, or a tap that arms the ' +
+      'button leaves a stuck hover repainting it in the off-state\'s wash (rule 15 of _MOBILE-STANDARDS.md)');
+    ok(/@media \(hover: hover\) and \(pointer: fine\) \{\s*[^}]*\.oa-auth-provider:hover:not\(\[aria-pressed='true'\]\):not\(\[disabled\]\)/.test(css),
+      f + ': …and the hover is gated on a device that has one, or a tap that DISARMS the button leaves the stuck ' +
+      'tap-hover painting it in the wash the armed state uses (the first half of rule 15)');
+    ok(/\.oa-auth-provider\[disabled\] \{ cursor: default;/.test(css) && /oa-connect-armedmark/.test(css),
+      f + ': a disabled pill drops the pointer cursor, and the armed tick is styled here');
     ok(/\.oa-modal-card \.oa-opt/.test(css),
       f + ': …and `.oa-opt` is neutralised for the whole card: it is ALSO a jobs-filter dropdown row in ' +
       'oa-list.css, and the ORCID chip and note are spans outside a label, so the label-scoped reset misses them');
+  }
+  {
+    const ui = await readFile(path.join(HERE, '..', 'assets', 'oa-ui.css'), 'utf8');
+    ok(/\.oa-orcid-field \.oa-flabel \.oa-opt,\s*\.oa-connect-field \.oa-flabel \.oa-opt,\s*\.oa-connect-h \.oa-opt \{ display: inline; \}/.test(ui),
+      'oa-ui.css: all THREE headings\' "(optional)" chips ride on their heading\'s line, so on a page that loads oa-list.css none drops onto a line of its own as a filter row');
   }
 
   /* --- the profile card is deliberately NOT held to the new rule -------- */
@@ -20854,9 +20974,14 @@ async function testRegistrationFields() {
     'shim: a sign-in answers isNewUser, opt-in per seed, so the browser suite can drive a real sign-up');
   ok(/u\.providerData\.push\(\{ providerId: id,/.test(shimSrc)
      && /seed\.orcidId \|\| '0000-0002-1825-0097'/.test(shimSrc)
-     && /if \(seed\.linkFails\) return Promise\.reject/.test(shimSrc),
+     && /if \(seed\.linkFails\) \{/.test(shimSrc) && /Promise\.reject\(err\)/.test(shimSrc),
     'shim: linkWithPopup really ATTACHES the provider, and an ORCID entry\'s uid IS the iD — a shim ' +
     'that merely resolved made every connect look like an ORCID that sent nothing back');
+  ok(/if \(seed\.setDelayMs\) return later\(seed\.setDelayMs\);/.test(shimSrc)
+     && /var wait = seed\.linkDelayMs \|\| 0;/.test(shimSrc)
+     && /if \(seed\.linkVerifies\) u\.emailVerified = true;/.test(shimSrc)
+     && /if \(!u\.email\) u\.email = seed\.linkEmail \|\| 'linked@example\.edu';/.test(shimSrc),
+    'shim: a write and a link can be made to take TIME, a Google link can confirm the address and can give an ORCID account one, so the browser suite reaches the states a same-tick shim hid');
 
   /* --- and the browser suite really drives all of it ---------------------- */
   const pt = await readFile(path.join(HERE, '..', '_scraper', 'page-test.mjs'), 'utf8');
@@ -20971,14 +21096,21 @@ async function testRegistrationFields() {
     '`required` accepts');
 
   /* --- the card asks for exactly those, and compels nothing else --------- */
-  ok(/'<label>E-mail address' \+/.test(prof) && /name="contactEmail"/.test(prof),
+  const mailRowAt = acct.indexOf('function emailRowHTML(u, p, mustMail)');
+  const mailRow = mailRowAt > 0 ? acct.slice(mailRowAt, acct.indexOf('\n  }', mailRowAt)) : '';
+  ok(/emailRowHTML\(u, p, mustMail\) \+/.test(prof) && mailRow.length > 400,
+    'profile card: the e-mail row is ONE function, drawn into the form and redrawn after a link (a Gmail ' +
+    'link gives an ORCID account the address it now signs in with)');
+  ok(/'<label class="oa-email-row">E-mail address' \+/.test(mailRow) && /name="contactEmail"/.test(mailRow),
     'profile card: where the sign-in shares no address the e-mail row is a BOX, not a sentence ' +
     'saying the provider shares none');
-  ok(/\(u\.email\s*\r?\n?\s*\? '<label>E-mail' \+/.test(prof),
+  ok(/if \(u && u\.email\) \{\s*return '<label class="oa-email-row">E-mail' \+/.test(mailRow),
     'profile card: …and where it does share one, that address is shown as the fact it is — never ' +
     'both, which would ask a question already answered');
-  ok(/\(mustName \? 'required ' : ''\)/.test(prof) && /\(mustMail \? 'required ' : ''\)/.test(prof),
+  ok(/\(mustName \? 'required ' : ''\)/.test(prof) && /\(mustMail \? 'required ' : ''\)/.test(mailRow),
     'profile card: the name and the address boxes are compelled only by the caller\'s list');
+  ok(/if \(oldMail\) swap\('\.oa-email-row', emailRowHTML\(u, p, !!oldMail\.querySelector\('input\[required\]'\)\)\);/.test(acct),
+    'profile card: …and the repaint after a link redraws that row, keeping the compulsion it found on the one it replaces');
   ok(/if \(mustName && !out\.firstName\)/.test(acct)
      && /if \(mustAff && !out\.affiliation\)/.test(acct)
      && /if \(mustMail && !out\.contactEmail\)/.test(acct),

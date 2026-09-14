@@ -8365,8 +8365,13 @@ does not land is simply a button the next card still offers. **Only the first**,
 because two popups at once is one popup and one refusal.
 
 **ONE TABLE DRIVES BOTH BUTTONS** (`ARM` in `openAuth`, `CONNECT` for the card
-after it). A second copy of "toggle, relabel, reword" is the drift every shared
-definition here exists to prevent, and the two buttons ask one question.
+after it). A second copy of "toggle, reword" is the drift every shared
+definition here exists to prevent, and the two buttons ask one question. **The
+label never changes** (since the 2026-09-14 review): an `aria-pressed` toggle
+is named for what it does, and a label rewritten to "ORCID, yes, connect it"
+moved the name and said the state twice to a screen reader. The pressed style,
+a tick the assistive tree does not read and the line under the button carry the
+state.
 
 **A PRESS MUST ARM AND NEVER SIGN ANYBODY IN, AND ONE SELECTOR KEEPS THAT
 TRUE.** The arming buttons wear `.oa-auth-provider` deliberately, so the cards
@@ -8384,8 +8389,10 @@ not less: the pills are no longer on the register card at all, so the only
 **The block after registration draws a row per sign-in the account does NOT
 already have**, and redraws itself as each lands — so it never offers what it
 cannot honour, and a reader who armed nothing still meets the offer once, which
-is what the owner asked for. Every refusal is worded (`connectFailedSays`):
-blocked, closed, already claimed by another account, not switched on.
+is what the owner asked for. Every refusal is worded (`connectFailedSays`,
+and `armedFailedSays` for the bonus attempt nobody pressed for): blocked,
+closed, already claimed by another account (`LINK_TAKEN`, the plain
+`email-already-in-use` included), not switched on.
 
 **AND AN EXISTING MEMBER WAS ALREADY ABLE TO DO THIS** (owner, the same day:
 *"Allow users that have already registered to OA to connect their ORCID and/or
@@ -8394,10 +8401,14 @@ has drawn Connect Google and Connect ORCID rows since the connect buttons
 shipped, so nothing had to be built — what was missing is that the section
 called itself *"Your other accounts"* and explained itself as a way to avoid
 duplicate accounts, which is the maintainer's reason for it rather than the
-member's. It reads **"Sign in faster next time"** now, and each row says the
+member's. It reads **"Sign in faster next time"** now, and the row says the
 member's half: signing in that way brings you straight here instead of typing
-your e-mail and password. The heading reverts to the old one once both are
-connected, since there is then nothing to offer.
+your e-mail and password (worded that way only for an account that HAS a
+password; an ORCID-only account reads "as well as with ORCID"). **The ORCID row
+left the section on 2026-09-14**: the iD field above it carries the connect
+button on the same card, so the row was a second button doing one thing, and
+the field's own line now says the sign-in half. The heading reverts to the old
+one once Gmail is connected, since there is then nothing left to offer there.
 
 **The armed button's ground is a token pair and its hover stands down on it.**
 `[aria-pressed='true']` names its own ink over its own ground in both
@@ -8424,6 +8435,113 @@ in and nothing linked and the half-filled form still there, then a complete
 registration where ORCID connects itself and Gmail is a live button one press
 away, that press connecting it, and a second reader whose popup the browser
 BLOCKED, who still gets the account and a card that leaves both sign-ins live.
+
+### …and the 2026-09-14 review of it: what a same-tick shim hid
+
+Owner, 2026-09-14: *"Check again the above implementation of registration, fix
+any bugs, update and merge."* A find-and-refute fan-out over the flow, with
+every finding then read against the code by hand because the refuters ran out
+of session. What was real, and the one fact behind most of it: **the browser
+suite's shim answered a Firestore write in the same microtask as the call**, so
+the gap between creating the account and drawing the card that follows was
+never open under test, and two defects lived in exactly that gap.
+
+* **The armed link's rejection was unhandled.** `connectOutcome` was the raw
+  `linkTo` promise, and nothing attached a handler to it until the card that
+  follows was drawn, after the profile write returned. A blocked or closed
+  window rejects long before that: an unhandled rejection in the console on the
+  commonest way the bonus fails. It is SETTLED INTO A VALUE at the call
+  (`{ok, r}` or `{ok, err}`) and the card reads the value.
+* **The auth listener drew the wrong card over the form.** The SDK tells its
+  listeners about the new account BEFORE `createUserWithEmailAndPassword`
+  resolves, and the listener's answer to a pending account is the "Check your
+  inbox" card with the lede that says nothing was sent and a live Send button.
+  So for the length of the profile write that card sat over the still-open
+  register form, and was replaced by the right one after it: a flash on a fast
+  connection, the wrong card for good on a slow one. `regBusy` is set by the
+  register card's submit and cleared on every way out of its chain; the
+  listener opens nothing while it is set.
+* **The profile write held everything behind it.** A Firestore write with the
+  channel down neither resolves nor rejects, and the card and the verification
+  e-mail both waited on it. It is raced against `PROFILE_WRITE_WAIT_MS` (four
+  seconds); a write that lands lands, and the chain goes on without one that
+  does not.
+* **A same-address Gmail link confirms the address, and the card went on
+  demanding the e-mail link.** Google vouches for the address it hands over and
+  Firebase marks a matching password account verified as the link lands; every
+  landed link on the card now asks `confirmVerified`, the one function that
+  lifts the gate, and the card closes when the answer is yes. An ORCID link or
+  a different Gmail address confirms nothing and the card stands.
+* **The bonus attempt's failure was silent**, the row simply live again, which
+  read as the window never having been tried. It is said in the plain voice and
+  points at the button; a refusal a press could not fix is worded by the same
+  function a press's refusal is.
+* **A press in flight did not survive a repaint.** The block is redrawn whole
+  whenever anything lands, and a redraw put a pressed button back LIVE under
+  its own open window. `connectBusy` is state the redraw reads: the button
+  stays disabled, the line keeps saying the window is open, and "Use a
+  different account" waits, or a link could land on an account the reader had
+  just walked away from. Sign-out forgets it.
+* **Create account could be pressed twice**, the second answering "There is
+  already an account with that e-mail" over a registration that was
+  succeeding. Both submit buttons are disabled for the length of the request
+  and the handler refuses a submit that arrives anyway.
+* **Copy that was untrue somewhere.** "The e-mail address and password you have
+  just chosen" was said on every later visit of a pending session too
+  (`connectFresh`, set only on the registration path). "Your personal area can
+  merge the two" was said only to a pending reader, who cannot open one; it
+  names the other account now. The 'sent' lede promised a message that then
+  failed to go (`verifyUnsent` takes the promise back where it was made). Nine
+  reader-facing sentences carried em dashes spelled as `\u2014`, which every
+  `noDash` pin read as six other characters; the pins refuse the escape now and
+  the module carries none. And the change log's "Registering is now always the
+  form itself" over-claimed, since the sign-in card's pills still create an
+  account: it names the Create account card.
+* **The profile card.** An ORCID sign-up's welcome card asked "Your iD" over an
+  EMPTY box, because it is drawn before `seedOrcidFromProvider` lands; the chip
+  is drawn from the iD the provider record itself carries. Add or Remove photo
+  reopened the card with `openProfile()` and no arguments, redrawing a WELCOME
+  card as an ordinary one with the compulsion gone and the session ask spent;
+  the photo side is repainted in place. A Gmail link on an ORCID-only account
+  left the box asking for an address it had just been given (`emailRowHTML` is
+  one function, redrawn after a link), and wiped an iD half typed (carried
+  across). The Gmail row promised an escape from "typing your e-mail and
+  password" to members with no password. The register card opened with the
+  keyboard on the e-mail box, five fields down.
+* **The stylesheets.** The pill's hover was not gated on `(hover: hover)`, so
+  a tap that DISARMED a connect button left the stuck tap-hover painting it in
+  the wash the armed state also uses (rule 15, first half); a disabled pill kept
+  a pointer cursor and lit up under the pointer; and only the ORCID field's
+  "(optional)" chip was told to stay inline, so the register card's and the
+  verify card's chips dropped onto a line of their own as a filter row on every
+  page that loads oa-list.css.
+
+**Reported to the owner, deliberately not changed here.** The verify card lets
+a PENDING account link a sign-in, and `verified()` in the rules passes any
+sign-in whose provider is not `password`, so a scripted client could write as
+owner with an address nobody has proved. That is a rules-level gap that
+predates the card (`linkWithPopup` needed no button), the site's own UI keeps
+the account gated until the address is confirmed, and tightening the rule
+risks refusing ORCID accounts whose token carries an unconfirmed address. The
+owner's call.
+
+Tests: the review pins in `testRegistrationFields` (the settled outcome, the
+flag and its three exits, the bounded wait, `connectLanded` asking
+`confirmVerified`, the keyboard's landing, `connectBusy` through the repaint
+and the sign-out, `connectFresh`, `LINK_TAKEN` on both roads, no personal area
+for a pending reader, the stable name, `verifyUnsent`, the double-submit guard,
+the proved iD as a chip, no second ORCID row, the photo repaint, the typed iD
+carried, the e-mail row as one function, the gated hover and the three inline
+chips in both stylesheets, and no `\u2014` anywhere in the module) and, in the
+browser: the blocked-popup block with the write delayed (the form standing with
+its button disabled while the write is out, the "nothing was sent" card never
+drawn over it, the refusal SAID on the registration's own card, no unhandled
+rejection), a same-address Gmail link lifting the gate after a forced token
+refresh, two presses making one account, a pending session visiting later
+reading the true lede, and an existing member connecting from the profile card
+(one ORCID button, a typed iD surviving the Gmail repaint, the field becoming a
+chip in place, and an ORCID-only account's address box giving way to the
+address Gmail handed over).
 
 ## The 2026-09-12 review sweep: the candidates page, and the jobs page
 
