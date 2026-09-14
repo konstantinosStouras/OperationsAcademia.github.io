@@ -1,11 +1,11 @@
 {
- "generated": "2026-09-14T07:47:48.901Z",
- "count": 514,
+ "generated": "2026-09-14T07:49:26.635Z",
+ "count": 515,
  "newestPosted": "2026-09-11",
  "oldestPosted": "2025-01-03",
  "years": {
   "2026": 426,
-  "2027": 88
+  "2027": 89
  },
  "countries": {
   "United States": 385,
@@ -29,6 +29,7 @@
   "Ireland": 2,
   "Lebanon": 2,
   "Oman": 2,
+  "Portugal": 2,
   "Chile": 1,
   "Denmark": 1,
   "Iraq": 1,
@@ -38,13 +39,12 @@
   "Mexico": 1,
   "Netherlands": 1,
   "New Zealand": 1,
-  "Portugal": 1,
   "Sweden": 1,
   "Switzerland": 1
  },
  "levels": {
-  "Assistant Professor": 60,
-  "Other Ranks": 38,
+  "Assistant Professor": 61,
+  "Other Ranks": 39,
   "Non-tenure track (teaching) position": 26,
   "Visiting Faculty (various levels)": 4,
   "Post-Doc": 2
