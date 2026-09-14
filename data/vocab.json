@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-12T13:35:43.110Z",
+ "generated": "2026-09-14T06:25:07.081Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -155,6 +155,10 @@
   },
   {
    "v": "University College Dublin",
+   "n": 3
+  },
+  {
+   "v": "University of Minnesota",
    "n": 3
   },
   {
@@ -407,10 +411,6 @@
   },
   {
    "v": "University of Maryland",
-   "n": 2
-  },
-  {
-   "v": "University of Minnesota",
    "n": 2
   },
   {
@@ -2116,6 +2116,10 @@
    "n": 3
   },
   {
+   "v": "Curtis L. Carlson School of Management",
+   "n": 2
+  },
+  {
    "v": "Edwin L. Cox School of Business",
    "n": 2
   },
@@ -2209,10 +2213,6 @@
   },
   {
    "v": "CUHK Business School",
-   "n": 1
-  },
-  {
-   "v": "Curtis L. Carlson School of Management",
    "n": 1
   },
   {
@@ -3174,6 +3174,10 @@
    "n": 2
   },
   {
+   "v": "Information Systems",
+   "n": 2
+  },
+  {
    "v": "IS/BA",
    "n": 2
   },
@@ -3543,10 +3547,6 @@
   },
   {
    "v": "Information Science and Systems",
-   "n": 1
-  },
-  {
-   "v": "Information Systems",
    "n": 1
   },
   {
@@ -10180,6 +10180,7 @@
    ],
    "units": [
     "Industrial and Systems Engineering (ISyE)",
+    "Information Systems",
     "OM/SCM",
     "Supply Chain and Operations"
    ],
@@ -10188,6 +10189,7 @@
      "OM/SCM"
     ],
     "Curtis L. Carlson School of Management": [
+     "Information Systems",
      "Supply Chain and Operations"
     ],
     "School of Science and Engineering": [
@@ -11670,6 +11672,7 @@
    "Information Systems, Statistics, and Management Science"
   ],
   "Curtis L. Carlson School of Management": [
+   "Information Systems",
    "Supply Chain and Operations"
   ],
   "D'Amore-McKim School of Business": [
