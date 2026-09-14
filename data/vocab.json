@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:37:17.819Z",
+ "generated": "2026-09-14T07:39:08.099Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -315,6 +315,10 @@
   },
   {
    "v": "MacEwan University",
+   "n": 2
+  },
+  {
+   "v": "McGill University",
    "n": 2
   },
   {
@@ -899,10 +903,6 @@
   },
   {
    "v": "Massachusetts Institute of Technology (MIT)",
-   "n": 1
-  },
-  {
-   "v": "McGill University",
    "n": 1
   },
   {
@@ -2140,6 +2140,10 @@
    "n": 2
   },
   {
+   "v": "Desautels Faculty of Management",
+   "n": 2
+  },
+  {
    "v": "Edwin L. Cox School of Business",
    "n": 2
   },
@@ -2253,10 +2257,6 @@
   },
   {
    "v": "David Eccles School of Business",
-   "n": 1
-  },
-  {
-   "v": "Desautels Faculty of Management",
    "n": 1
   },
   {
@@ -3066,11 +3066,11 @@
    "n": 12
   },
   {
-   "v": "Data Analytics",
-   "n": 8
+   "v": "Operations Management",
+   "n": 9
   },
   {
-   "v": "Operations Management",
+   "v": "Data Analytics",
    "n": 8
   },
   {
