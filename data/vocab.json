@@ -2276,6 +2276,10 @@
    "n": 1
   },
   {
+   "v": "Haas School of Business",
+   "n": 1
+  },
+  {
    "v": "Harvard Business School",
    "n": 1
   },
@@ -2437,10 +2441,6 @@
   },
   {
    "v": "Villanova School of Business",
-   "n": 1
-  },
-  {
-   "v": "Walter A. Haas School of Business",
    "n": 1
   },
   {
@@ -9559,7 +9559,7 @@
   },
   "University of California, Berkeley": {
    "schools": [
-    "Walter A. Haas School of Business"
+    "Haas School of Business"
    ],
    "units": [
     "IEOR",
@@ -9573,7 +9573,7 @@
      "IEOR, decision analytics",
      "Industrial Engineering and Operations Research"
     ],
-    "Walter A. Haas School of Business": [
+    "Haas School of Business": [
      "Operations and Information Technology Management"
     ]
    }
@@ -11852,6 +11852,9 @@
   "Guanghua School of Management": [
    "Management Science and Information System"
   ],
+  "Haas School of Business": [
+   "Operations and Information Technology Management"
+  ],
   "Harbert College of Business": [
    "Supply Chain Management"
   ],
@@ -12292,9 +12295,6 @@
   ],
   "W. P. Carey School of Business": [
    "Supply Chain Management"
-  ],
-  "Walter A. Haas School of Business": [
-   "Operations and Information Technology Management"
   ],
   "Warrington College of Business": [
    "Information Systems and Operations Management"

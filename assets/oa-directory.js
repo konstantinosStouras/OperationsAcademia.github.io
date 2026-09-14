@@ -40,7 +40,7 @@
      two together BOTH WAYS, exactly as it does for oa-rowedit.js. */
   var FIELDS = [
     { key: 'institution', label: 'University (the full official name — renaming a row to another university moves it to that card)', max: 220 },
-    { key: 'school', label: 'School (e.g. "Walter A. Haas School of Business"; leave empty when the department reports to the university itself)', max: 200 },
+    { key: 'school', label: 'School (e.g. "Haas School of Business"; leave empty when the department reports to the university itself)', max: 200 },
     { key: 'department', label: 'Department (the bare field name, e.g. "Operations Management")', max: 260 },
     { key: 'type', label: 'Type — "Business School" or "University" (a non-business school: engineering, IEOR, information…)', max: 40 },
     { key: 'country', label: 'Country (the full name, e.g. "United States")', max: 80 },
