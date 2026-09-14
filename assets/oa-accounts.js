@@ -86,6 +86,17 @@
      a modal on the page being left behind (see finish() in openAuth). */
   var leaving = false;
 
+  /* A REGISTRATION IN FLIGHT. The SDK tells its auth listeners about a new
+     account BEFORE createUserWithEmailAndPassword resolves, and the listener's
+     own answer to a pending account is to open the "Check your inbox" card
+     with the lede that says nothing was sent and a live "Send the e-mail"
+     button. So for the length of the profile write that card was drawn OVER
+     the still-open register form and then replaced by the right one, a flash
+     on a fast connection and the wrong card for good on a slow one. The
+     register card opens its own; while this is set the listener opens none.
+     Cleared on every path out of the chain, the refusal included. */
+  var regBusy = false;
+
   /* ------------------------------------------------------------------ utils */
 
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -1446,6 +1457,19 @@
     if (old) old.parentNode.removeChild(old);
 
     var p = state.profile || {};
+    /* The picture and its two buttons, drawn from the profile AS IT STANDS,
+       so a saved photo can be repainted in place (savePhoto below) rather
+       than by reopening the whole card. */
+    function photoSideHTML() {
+      var pp = state.profile || {};
+      return avatarHTML(u, true) +
+        '<div class="oa-photo-row">' +
+          '<button type="button" id="oa-photo-set">' +
+            (profilePhoto(u) ? 'Change photo' : 'Add a photo') + '</button>' +
+          (pp.photo ? '<button type="button" id="oa-photo-del">Remove</button>' : '') +
+          '<input type="file" id="oa-photo-file" accept="image/*" hidden>' +
+        '</div>';
+    }
     var wrap = document.createElement('div');
     wrap.className = 'oa-modal';
     wrap.id = 'oa-profile';
@@ -1454,15 +1478,7 @@
         'aria-labelledby="oa-profile-h">' +
         '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
         '<div class="oa-profile-head">' +
-          '<div class="oa-photo-side">' +
-            avatarHTML(u, true) +
-            '<div class="oa-photo-row">' +
-              '<button type="button" id="oa-photo-set">' +
-                (profilePhoto(u) ? 'Change photo' : 'Add a photo') + '</button>' +
-              (p.photo ? '<button type="button" id="oa-photo-del">Remove</button>' : '') +
-              '<input type="file" id="oa-photo-file" accept="image/*" hidden>' +
-            '</div>' +
-          '</div>' +
+          '<div class="oa-photo-side">' + photoSideHTML() + '</div>' +
           '<div>' +
             '<h3 id="oa-profile-h">' + (firstRun ? 'Welcome' : 'My profile') + '</h3>' +
             '<p class="oa-modal-lede">Your name is how you appear in the header and on ' +
@@ -1517,20 +1533,7 @@
              2026-09-12 those accounts were simply unreachable and the card
              said so without ever asking. Never both: a second box beside an
              address the site already holds is a question already answered. */
-          (u.email
-            ? '<label>E-mail' +
-                '<input value="' + esc(u.email) + '" disabled>' +
-                '<span class="oa-opt oa-fine">This is the address you sign in with.' +
-                '</span></label>'
-            : '<label>E-mail address' +
-                '<input type="email" name="contactEmail" maxlength="160" ' +
-                  (mustMail ? 'required ' : '') +
-                  'autocomplete="email" placeholder="you@university.edu" ' +
-                  'value="' + esc(p.contactEmail || '') + '">' +
-                '<span class="oa-opt oa-fine">You sign in with ' +
-                  esc(providerSummary(u)) + ', which does not share an address ' +
-                  'with us. This is how the site reaches you; it is never ' +
-                  'published, and it is not a way to sign in.</span></label>') +
+          emailRowHTML(u, p, mustMail) +
           /* …and the ORCID row is MASTER's (#173, the same owner message the
              day before): it points at the card's own Continue-with-ORCID
              pill, which creates the account WITH the iD, rather than arming a
@@ -1583,7 +1586,17 @@
              initials for the same window. */
           writeHint(state.user, displayName(state.user));
           paint();
-          openProfile();          // repaint the card with the new picture
+          /* THE PICTURE IS REPAINTED IN PLACE. This used to call openProfile()
+             with no arguments, which redrew the card from scratch: unsaved
+             typing in the form went with it, and a WELCOME card compelling an
+             affiliation came back as an ordinary card with the compulsion
+             gone and the once-a-session ask already spent. Only the photo
+             side changed, so only the photo side is redrawn. */
+          var side = $('.oa-photo-side', wrap);
+          if (side) { side.innerHTML = photoSideHTML(); wirePhoto(); }
+          if (msg) { msg.className = 'oa-auth-msg is-ok'; msg.textContent = data ? 'Photo saved.' : 'Photo removed.'; }
+          var set = $('#oa-photo-set', wrap);
+          if (set) set.focus();
         })
         .catch(function () {
           if (msg) {
@@ -1592,6 +1605,7 @@
           }
         });
     }
+    function wirePhoto() {
     var photoFile = $('#oa-photo-file', wrap);
     var photoSet = $('#oa-photo-set', wrap);
     if (photoSet) photoSet.addEventListener('click', function () { photoFile.click(); });
@@ -1616,6 +1630,8 @@
     });
     var photoDel = $('#oa-photo-del', wrap);
     if (photoDel) photoDel.addEventListener('click', function () { savePhoto(''); });
+    }
+    wirePhoto();
 
     $('#oa-profile-form', wrap).addEventListener('submit', function (e) {
       e.preventDefault();
@@ -1733,6 +1749,30 @@
     });
   }
 
+  /* The profile card's ONE e-mail row (see the note where it is drawn). A
+     function because a link can change the answer while the card is open: an
+     ORCID account that connects Gmail gains an address from Google, and the
+     box asking for one must then give way to the address the account now
+     signs in with. `mustMail` is the card's own compulsion, kept across the
+     repaint by reading it off the row being replaced. */
+  function emailRowHTML(u, p, mustMail) {
+    if (u && u.email) {
+      return '<label class="oa-email-row">E-mail' +
+        '<input value="' + esc(u.email) + '" disabled>' +
+        '<span class="oa-opt oa-fine">This is the address you sign in with.' +
+        '</span></label>';
+    }
+    return '<label class="oa-email-row">E-mail address' +
+      '<input type="email" name="contactEmail" maxlength="160" ' +
+        (mustMail ? 'required ' : '') +
+        'autocomplete="email" placeholder="you@university.edu" ' +
+        'value="' + esc((p || {}).contactEmail || '') + '">' +
+      '<span class="oa-opt oa-fine">You sign in with ' +
+        esc(providerSummary(u)) + ', which does not share an address ' +
+        'with us. This is how the site reaches you; it is never ' +
+        'published, and it is not a way to sign in.</span></label>';
+  }
+
   /* ORCID iD: a chip when an ORCID sign-in vouched for it; otherwise the
      CONNECT BUTTON FIRST and the box under it.
 
@@ -1753,10 +1793,19 @@
      already signs in with ORCID: linkWithPopup would answer
      `provider-already-linked`, and seedOrcidFromProvider has filled the iD in
      already. */
-  function orcidFieldHTML(p, u) {    if (p.orcid && p.orcidVerified) {
+  function orcidFieldHTML(p, u) {
+    /* THE iD AN ORCID SIGN-IN PROVED IS A CHIP WHETHER OR NOT THE PROFILE HAS
+       CAUGHT UP. The welcome card is drawn before seedOrcidFromProvider has
+       written the iD, so an ORCID sign-up used to meet "Your iD" over an EMPTY
+       box, and a save then wrote whatever was typed over the one thing that
+       sign-in had proved. The provider record carries the iD itself, and it
+       is what the seed writes a beat later, so it is read directly. */
+    var proved = (p.orcid && p.orcidVerified) ? p.orcid
+      : (hasProvider('oidc.orcid', u) ? orcidFromProvider(u) : '');
+    if (proved) {
       return '<div class="oa-field-static">' +
         '<span class="oa-flabel">ORCID iD</span>' +
-        '<span class="oa-orcid-chip">' + esc(p.orcid) + '</span>' +
+        '<span class="oa-orcid-chip">' + esc(proved) + '</span>' +
         '<span class="oa-verified">&#10003; verified</span>' +
         '<span class="oa-opt oa-fine">You signed in with ORCID, so we know this iD is yours.</span>' +
         '</div>';
@@ -1770,7 +1819,8 @@
             'id="oa-orcid-connect">' + PROVIDER.orcid.icon +
             '<span>Connect my ORCID</span></button>' +
           '<span class="oa-opt oa-fine">One press, a sign-in at orcid.org, and we fill your ' +
-            'iD in and mark it verified. You do not need to know the number.</span>'
+            'iD in and mark it verified. You do not need to know the number, and you can ' +
+            'then sign in with ORCID as well.</span>'
         : '') +
       '<label class="oa-orcid-type">' +
         (canConnect ? 'Or type it, if you know it' : 'Your iD') +
@@ -1788,31 +1838,30 @@
   function otherAccountsHTML(p, u) {
     var rows = '';
 
+    /* GMAIL ONLY, HERE. The ORCID connect button lives in the iD field above
+       (orcidFieldHTML), on the card this section is drawn on, and it ran the
+       same call as the row this section used to carry beside it: two buttons
+       doing one thing on one card, which reads as a choice where there is
+       none. The field's own line says the sign-in half. What the row says is
+       the MEMBER's reason for connecting, and it is worded for the sign-ins
+       the account really has: "instead of typing your e-mail and password"
+       is a promise to an account that has a password. */
     if (!hasProvider('google.com', u)) {
       rows += '<p class="oa-acct-linkrow">' +
         '<button type="button" class="oa-auth-provider" id="oa-link-google">' +
           PROVIDER.google.icon + '<span>Connect Gmail</span></button>' +
         '<span class="oa-opt oa-fine">Then signing in with Google brings you straight ' +
-          'here, instead of typing your e-mail and password \u2014 or starting a second ' +
-          'account by mistake.</span></p>';
-    }
-    if (!hasProvider('oidc.orcid', u)) {
-      rows += '<p class="oa-acct-linkrow">' +
-        '<button type="button" class="oa-auth-provider" id="oa-link-orcid">' +
-          PROVIDER.orcid.icon + '<span>Connect ORCID</span></button>' +
-        '<span class="oa-opt oa-fine">' + (p.orcid
-          ? 'Then signing in with ORCID brings you straight here, instead of typing your ' +
-            'e-mail and password \u2014 or starting a second account by mistake.'
-          : 'We take your iD straight from ORCID, verified, so you never have to look the ' +
-            'number up \u2014 and signing in with ORCID then brings you straight here.') +
-        '</span></p>';
+          'here, ' + (hasProvider('password', u)
+            ? 'instead of typing your e-mail and password'
+            : 'as well as with ' + esc(providerSummary(u))) +
+          ', and it can never start you a second account by mistake.</span></p>';
     }
 
     /* THE HEADING LEADS WITH WHAT CONNECTING BUYS (owner, 2026-09-12: "Allow
        users that have already registered to OA to connect their ORCID and/or
        the Gmail to facilitate faster/alternative ways to login"). The rows
        themselves have been here since the connect buttons shipped, so nothing
-       had to be built for an existing member \u2014 what was missing is that the
+       had to be built for an existing member. What was missing is that the
        section called itself "Your other accounts" and explained itself as a
        way to avoid duplicate accounts, which is the maintainer's reason for
        it rather than the member's. */
@@ -1840,8 +1889,6 @@
     var open = $('#oa-merge-open', wrap);
     if (open) open.addEventListener('click', function () { closeProfile(); openMerge(); });
 
-    var lo = $('#oa-link-orcid', wrap);
-    if (lo) lo.addEventListener('click', function () { linkProvider('oidc.orcid', wrap, closeProfile); });
     var lg = $('#oa-link-google', wrap);
     if (lg) lg.addEventListener('click', function () { linkProvider('google.com', wrap, closeProfile); });
 
@@ -1873,7 +1920,21 @@
       box.innerHTML = html;
       if (box.firstChild) old.parentNode.replaceChild(box.firstChild, old);
     }
+    /* AN iD HALF TYPED SURVIVES A GMAIL LINK. The field is redrawn from the
+       profile, which does not hold what is in the box, so a Google link
+       landing while the reader was typing an iD wiped it. Carried across
+       where the redrawn field still has a box; where it has become a chip,
+       an ORCID sign-in has just proved the iD and the typed one gives way. */
+    var typedBox = $('input[name="orcid"]', wrap);
+    var typed = typedBox ? String(typedBox.value || '').trim() : '';
     swap('.oa-orcid-field', orcidFieldHTML(p, u));
+    var newBox = $('input[name="orcid"]', wrap);
+    if (newBox && typed && typed !== String(p.orcid || '')) newBox.value = typed;
+    /* the address row too: a Gmail link gives an ORCID account the address
+       it signs in with, and the box asking for one is then a question the
+       account has answered */
+    var oldMail = $('.oa-email-row', wrap);
+    if (oldMail) swap('.oa-email-row', emailRowHTML(u, p, !!oldMail.querySelector('input[required]')));
     swap('.oa-acct-other', otherAccountsHTML(p, u));
     wireOtherAccounts(wrap, closeProfile || function () {});
   }
@@ -1923,36 +1984,41 @@
       linked = (r && r.user) || state.user;
       msg.className = 'oa-auth-msg is-ok';
       msg.textContent = id === 'oidc.orcid' && (state.profile || {}).orcid
-        ? 'Connected — your ORCID iD is on your profile, and we can vouch for it.'
-        : 'Done — that button now signs in to this account.';
+        ? 'Connected. Your ORCID iD is on your profile, and we can vouch for it.'
+        : 'Done. That button now signs in to this account.';
       // providerData changed, and so may the iD, so both go stale together.
       repaintAfterLink(wrap, linked || state.user, closeProfile);
     }).catch(function (err) {
       var c = (err && err.code) || '';
-      if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') {
-        msg.textContent = '';
-        return;
-      }
-      msg.className = 'oa-auth-msg is-err';
-      if (c === 'auth/credential-already-in-use' || c === 'auth/account-exists-with-different-credential') {
-        // The duplicate the connect buttons exist to prevent already exists —
+      if (LINK_TAKEN.indexOf(c) !== -1) {
+        // The duplicate the connect buttons exist to prevent already exists:
         // hand straight over to the merge flow instead of describing it.
+        msg.className = 'oa-auth-msg is-err';
         msg.textContent = 'That sign-in already belongs to another Operations Academia ' +
-          'account — opening the merge tool so you can fold the two together.';
+          'account. Opening the merge tool so you can fold the two together.';
         setTimeout(function () {
           var card = $('#oa-profile');
           if (card && card.parentNode) card.parentNode.removeChild(card);
           openMerge();
         }, 1600);
-      } else if (c === 'auth/provider-already-linked') {
-        msg.textContent = 'That sign-in is already attached to this account.';
-      } else if (c === 'auth/operation-not-allowed') {
-        msg.textContent = 'That sign-in method is not switched on for this site yet.';
-      } else {
-        msg.textContent = 'We could not attach that sign-in.' + (c ? ' (' + c + ')' : '');
+        return;
       }
+      /* Every other refusal is worded by the ONE function the verify card's
+         connect block reads (connectFailedSays), so a blocked window is named
+         here too rather than printed as a bare code. A window the reader
+         closed is not an error, so it is said in the plain voice. */
+      var closed = c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request';
+      msg.className = 'oa-auth-msg' + (closed ? '' : ' is-err');
+      msg.textContent = connectFailedSays(err);
     });
   }
+
+  /** The codes that mean "that sign-in is somebody else's account already":
+      the credential itself, an account under a different provider with the
+      same address, and, documented for linkWithPopup and handled by nothing
+      here until 2026-09-14, the plain e-mail-already-in-use. */
+  var LINK_TAKEN = ['auth/credential-already-in-use',
+    'auth/account-exists-with-different-credential', 'auth/email-already-in-use'];
 
   /* -------------------------------------------------------------- auth modal */
 
@@ -2180,18 +2246,27 @@
                    window. What a press here buys is that the next card opens
                    with the answer already given. */
                 '<span class="oa-opt oa-fine">You can sign in with these instead of your ' +
-                  'e-mail and password. We will set them up as soon as your account is ' +
-                  'made \u2014 one press each, on the next screen.</span>' +
+                  'e-mail and password. Choose them here, and you connect them once your ' +
+                  'account is made: one press each, on the next screen.</span>' +
+                /* THE LABEL NEVER CHANGES. These are aria-pressed toggles, and a
+                   toggle's name is what it does, not which way it is set: a
+                   screen reader announces "Connect my ORCID, pressed", where a
+                   label rewritten to say "yes, connect it" both moves the name
+                   and says the state twice. The pressed style, a tick the
+                   assistive tree does not read, and the line under the button
+                   carry the state. */
                 '<button type="button" class="oa-auth-provider oa-connect-btn" ' +
                   'id="oa-reg-orcid" aria-pressed="false">' + PROVIDER.orcid.icon +
-                  '<span id="oa-reg-orcid-label">Connect my ORCID</span></button>' +
+                  '<span>Connect my ORCID</span>' +
+                  '<span class="oa-connect-armedmark" aria-hidden="true" hidden>&#10003;</span></button>' +
                 '<span class="oa-opt oa-fine" id="oa-reg-orcid-note" aria-live="polite">' +
                   'Highly recommended. We take your iD straight from ORCID, verified, so ' +
-                  'you never have to look the number up \u2014 and you can then sign in ' +
+                  'you never have to look the number up, and you can then sign in ' +
                   'with ORCID as well.</span>' +
                 '<button type="button" class="oa-auth-provider oa-connect-btn" ' +
                   'id="oa-reg-google" aria-pressed="false">' + PROVIDER.google.icon +
-                  '<span id="oa-reg-google-label">Connect my Gmail</span></button>' +
+                  '<span>Connect my Gmail</span>' +
+                  '<span class="oa-connect-armedmark" aria-hidden="true" hidden>&#10003;</span></button>' +
                 '<span class="oa-opt oa-fine" id="oa-reg-google-note" aria-live="polite">' +
                   'We link your Google account to this one, so signing in with Gmail is a ' +
                   'faster alternative to typing your e-mail and password.</span>' +
@@ -2242,24 +2317,25 @@
     $('.oa-modal-x', wrap).addEventListener('click', close);
     $('#oa-auth-close', wrap).addEventListener('click', close);
     wireModalKeys(wrap, close);
-    $('#oa-auth-form', wrap).email.focus();
+    /* the keyboard lands on the FIRST box: on the register card that is the
+       first name, not the e-mail five fields down */
+    var firstBox = $('#oa-auth-form input', wrap);
+    if (firstBox) firstBox.focus();
 
     /* ARMED OR NOT, for this card only: switching mode rebuilds the whole card,
        so the answer can never outlive the form it was given on. One table for
-       the two, because a second copy of "toggle, relabel, reword" is the drift
-       every shared definition here exists to prevent \u2014 and the two buttons
-       ask one question. */
+       the two, because a second copy of "toggle, reword" is the drift every
+       shared definition here exists to prevent, and the two buttons ask one
+       question. The label is left alone (see the markup). */
     var want = { 'oidc.orcid': false, 'google.com': false };
     var ARM = [
-      { id: 'oa-reg-orcid', provider: 'oidc.orcid', off: 'Connect my ORCID',
-        on: 'ORCID \u2014 yes, connect it',
+      { id: 'oa-reg-orcid', provider: 'oidc.orcid',
         offNote: 'Highly recommended. We take your iD straight from ORCID, verified, so ' +
-          'you never have to look the number up \u2014 and you can then sign in with ORCID ' +
+          'you never have to look the number up, and you can then sign in with ORCID ' +
           'as well.',
         onNote: 'Ready. We will set ORCID up as soon as your account is made. Press again ' +
           'if you would rather not.' },
-      { id: 'oa-reg-google', provider: 'google.com', off: 'Connect my Gmail',
-        on: 'Gmail \u2014 yes, connect it',
+      { id: 'oa-reg-google', provider: 'google.com',
         offNote: 'We link your Google account to this one, so signing in with Gmail is a ' +
           'faster alternative to typing your e-mail and password.',
         onNote: 'Ready. We will set Gmail up as soon as your account is made. Press again ' +
@@ -2272,9 +2348,9 @@
         var on = !want[a.provider];
         want[a.provider] = on;
         btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-        var lab = $('#' + a.id + '-label', wrap);
+        var mark = $('.oa-connect-armedmark', btn);
         var note = $('#' + a.id + '-note', wrap);
-        if (lab) lab.textContent = on ? a.on : a.off;
+        if (mark) mark.hidden = !on;
         if (note) note.textContent = on ? a.onNote : a.offNote;
       });
     });
@@ -2337,6 +2413,15 @@
     $('#oa-auth-form').addEventListener('submit', function (e) {
       e.preventDefault();
       var f = e.target;
+      /* ONE ATTEMPT AT A TIME. Create account could be pressed again while
+         the first request was in flight, and the second answered
+         "There is already an account with that e-mail" over a registration
+         that was succeeding. The button is disabled for the length of the
+         request, and the handler refuses a submit that arrives anyway
+         (requestSubmit, or Enter in a box). */
+      var submitBtn = $('button[type="submit"]', f);
+      if (submitBtn && submitBtn.disabled) return;
+      function busy(on) { if (submitBtn) submitBtn.disabled = !!on; }
       say('');
 
       if (registering) {
@@ -2380,6 +2465,8 @@
           website: website.slice(0, 300)
         };
         var created = null;
+        busy(true);
+        regBusy = true;
         OAFB.ready()
           .then(function (fb) {
             return fb.auth().createUserWithEmailAndPassword(f.email.value, f.password.value)
@@ -2418,10 +2505,30 @@
                   .map(function (a) { return a.provider; });
                 if (connectWanted.length) {
                   connectTried = connectWanted[0];
-                  connectOutcome = linkTo(fb, u, connectTried);
+                  /* SETTLED, NEVER LEFT TO REJECT. Nothing reads this promise
+                     until the card that follows is drawn, which is after the
+                     profile write below has returned, and a blocked or closed
+                     window rejects long before that: an unhandled rejection
+                     in the console on the commonest way the bonus fails. So
+                     the outcome is folded into a value here, and the card
+                     reads {ok, r} or {ok, err} rather than attaching a
+                     handler to a promise that has already given up waiting
+                     for one. */
+                  connectOutcome = linkTo(fb, u, connectTried).then(
+                    function (r) { return { ok: true, r: r }; },
+                    function (err) { return { ok: false, err: err }; });
                 }
-                return profileDoc(fb, u.uid).set(prof, { merge: true })
-                  .catch(function () { /* rules not deployed / offline — see above */ });
+                /* WAITED FOR, BUT NOT FOR EVER. A Firestore write with the
+                   channel down neither resolves nor rejects, and everything
+                   after this waited on it: no card, no message, the register
+                   form sitting on "Create account" for good. The write is
+                   given a few seconds to land, since a fast one should be on
+                   the document before the next page reads it, and the chain
+                   goes on without it after that. Edit account re-enters a
+                   profile that did not land. */
+                var stored = profileDoc(fb, u.uid).set(prof, { merge: true })
+                  .catch(function () { /* rules not deployed / offline, see above */ });
+                return Promise.race([stored, pause(PROFILE_WRITE_WAIT_MS)]);
               });
           })
           .then(function () {
@@ -2431,6 +2538,7 @@
               connectWanted = [];
               connectTried = '';
               connectOutcome = null;
+              regBusy = false;
               finish(true);
               return;
             }
@@ -2440,20 +2548,33 @@
                is handed over rather than read off state. */
             close();
             openVerifyPanel('sent', created);
+            regBusy = false;
             return sendVerification(created)
               .then(function (r) { verifySent(r, created); })
-              .catch(function (err) { verifySay(friendly(err)); });
+              .catch(function (err) { verifyUnsent(); verifySay(friendly(err)); });
           })
-          .catch(function (err) { say(friendly(err)); });
+          .catch(function (err) {
+            regBusy = false;
+            busy(false);
+            /* a card the auth listener was told not to open, on an account
+               that now exists and is pending, would otherwise open nowhere */
+            if (created && needsVerification(created) && !$('#oa-verify')) {
+              close();
+              openVerifyPanel(null, created);
+              return;
+            }
+            say(friendly(err));
+          });
         return;
       }
 
+      busy(true);
       OAFB.ready()
         .then(function (fb) {
           return fb.auth().signInWithEmailAndPassword(f.email.value, f.password.value);
         })
         .then(close)
-        .catch(function (err) { say(friendly(err)); });
+        .catch(function (err) { busy(false); say(friendly(err)); });
     });
 
     var reset = $('#oa-reset', wrap);
@@ -2540,7 +2661,30 @@
       why: 'Lets you sign in with Google instead of your e-mail and password.' }
   ];
 
-  /** The block's rows, and HOW MANY OF THEM ARE OFFERS \u2014 which is not the same
+  /* A PRESS IN FLIGHT, per provider. The block is redrawn whole whenever
+     anything lands, and a redraw that did not know about a window still open
+     put the pressed button back LIVE under it: a second press then answered
+     cancelled-popup-request, and the first window's outcome landed on a block
+     that had forgotten it was asked. So what is in flight is state the redraw
+     reads: the button stays disabled, the line keeps saying the window is
+     open, and "Use a different account" waits, or a link could land on an
+     account the reader had just walked away from. Reset on sign-out. */
+  var connectBusy = {};
+  function connectBusyAny() {
+    return Object.keys(connectBusy).some(function (k) { return connectBusy[k]; });
+  }
+
+  /* Whether the card was opened by the REGISTRATION (the address and password
+     were chosen a moment ago) or on a later visit of a pending session, where
+     "you have just chosen" is untrue and reads as the site having lost track. */
+  var connectFresh = false;
+
+  function connectName(id) {
+    var c = CONNECT.filter(function (x) { return x.provider === id; })[0];
+    return c ? c.name : 'that sign-in';
+  }
+
+  /** The block's rows, and HOW MANY OF THEM ARE OFFERS, which is not the same
       as how many rows there are, and conflating the two made the "nothing left
       to connect" state unreachable: a connected sign-in draws a row too, so
       `rows` is never empty once anything has landed. `offers` is what decides
@@ -2552,7 +2696,7 @@
       if (hasProvider(c.provider, u)) {
         /* THE ROW STATES IT, never a message beside it. `paintConnect` replaces
            this block's markup every time something lands, so anything written
-           into a transient line \u2014 the iD above all \u2014 is wiped by the very
+           into a transient line, the iD above all, is wiped by the very
            repaint that records the success. What a reader needs to keep has to
            be part of the drawn state. */
         var iD = c.provider === 'oidc.orcid'
@@ -2567,50 +2711,103 @@
       if (out) out.offers++;
       rows += '<p class="oa-connect-row">' +
         '<button type="button" class="oa-auth-provider oa-connect-btn" ' +
-          'id="oa-connect-' + c.key + '" data-connect="' + c.provider + '">' +
+          'id="oa-connect-' + c.key + '" data-connect="' + c.provider + '"' +
+          (connectBusy[c.provider] ? ' disabled' : '') + '>' +
           PROVIDER[c.key].icon + '<span>Connect ' + esc(c.name) + '</span></button>' +
         '<span class="oa-opt oa-fine">' + esc(c.why) + '</span></p>';
     });
     return rows;
   }
 
-  /** Redraw the block against the account as it now stands, and re-wire it. */
-  function paintConnect(u) {
+  /** The block's own line: a refusal, a window still open, or a success said
+      so a screen reader hears it (the row above states it, the line announces
+      it; role=alert is what makes the announcement). */
+  function connectSay(text, ok) {
+    var m = $('#oa-connect-msg');
+    if (!m) return;
+    m.textContent = text || '';
+    m.className = 'oa-auth-msg' + (ok ? ' is-ok' : text ? ' is-err' : '');
+  }
+
+  /** Redraw the block against the account as it now stands, and re-wire it.
+      `opts.focus` puts the keyboard back on the block after a press has
+      replaced the button it was on: the next offer, or the card's own
+      "I have verified it" when nothing is left to offer. */
+  function paintConnect(u, opts) {
     var host = $('#oa-verify-connect');
     if (!host) return;
     var count = {};
     var rows = connectRowsHTML(u, count);
+    var chosen = connectFresh
+      ? 'the e-mail address and password you have just chosen'
+      : 'your e-mail address and password';
     host.innerHTML = count.offers
       ? '<h4 class="oa-connect-h">Connect your other sign-ins <span class="oa-opt">(optional)</span></h4>' +
         '<p class="oa-opt oa-fine">One press each. Afterwards you can sign in with any of ' +
-        'them, or with the e-mail address and password you have just chosen \u2014 and you can ' +
-        'do this later from Edit account instead.</p>' + rows +
+        'them, or with ' + chosen + '. You can also do this later, from Edit account.</p>' + rows +
         '<p class="oa-auth-msg" id="oa-connect-msg" role="alert"></p>'
       /* nothing left to ask for: the rows stop being an offer and become the
          answer, so the heading and the lede go with the offer */
       : '<h4 class="oa-connect-h">Your sign-ins</h4>' + rows +
         '<p class="oa-opt oa-fine">All connected. You can sign in with any of them, or with ' +
-        'the e-mail address and password you have just chosen.</p>';
+        chosen + '.</p>' +
+        '<p class="oa-auth-msg" id="oa-connect-msg" role="alert"></p>';
+    if (connectBusyAny()) connectSay('Opening the sign-in window\u2026');
+    var out = $('#oa-verify-out');
+    if (out) {
+      out.disabled = connectBusyAny();
+      out.title = out.disabled ? 'Finish or close the sign-in window first.' : '';
+    }
     Array.prototype.forEach.call(host.querySelectorAll('[data-connect]'), function (b) {
       b.addEventListener('click', function () {
         var id = b.dataset.connect;
-        var msg = $('#oa-connect-msg');
+        connectBusy[id] = true;
         b.disabled = true;
-        if (msg) { msg.className = 'oa-auth-msg'; msg.textContent = 'Opening the sign-in window\u2026'; }
+        connectSay('Opening the sign-in window\u2026');
+        var outBtn = $('#oa-verify-out');
+        if (outBtn) { outBtn.disabled = true; outBtn.title = 'Finish or close the sign-in window first.'; }
         OAFB.ready()
           /* `u` FIRST: this card is opened by the registration path with the
              account it has just created, and the auth event may not have fired
              yet, so `state.user` can still be null at this instant. */
           .then(function (fb) { return linkTo(fb, u || state.user, id); })
           .then(function (r) {
-            paintConnect((r && r.user) || u || state.user);
+            connectBusy[id] = false;
+            connectLanded((r && r.user) || u || state.user, id);
           })
           .catch(function (err) {
-            b.disabled = false;
-            if (msg) { msg.className = 'oa-auth-msg is-err'; msg.textContent = connectFailedSays(err); }
+            connectBusy[id] = false;
+            paintConnect(u || state.user, { focus: id });
+            connectSay(connectFailedSays(err));
           });
       });
     });
+    if (opts && opts.focus) {
+      var next = $('[data-connect="' + opts.focus + '"]') || $('#oa-verify-connect [data-connect]')
+        || $('#oa-verify-check');
+      if (next && typeof next.focus === 'function') next.focus();
+    }
+  }
+
+  /** A link landed on the verify card: redraw, say so, and ask Firebase
+      whether it confirmed the address as it did so. */
+  function connectLanded(u, id) {
+    var user = u || state.user;
+    paintConnect(user, { focus: true });
+    connectSay(connectName(id) + ' is connected. You can sign in with it.', true);
+    /* A GMAIL LINK WITH THE SAME ADDRESS CONFIRMS IT. Google vouches for the
+       address it hands over, and Firebase marks an account whose address
+       matches as verified the moment the link lands. Until 2026-09-14 the
+       card went on telling that reader to press a link in an e-mail that no
+       longer had anything to prove, and nothing lifted the gate until they
+       pressed "I have verified it" themselves. So every landed link asks,
+       through the one function that lifts the gate: a reload, a fresh token
+       (the rules read the token), and the card closes if the address is
+       confirmed. An ORCID link, or a Gmail address that differs, confirms
+       nothing, the check answers false, and the card stands. */
+    if (state.pending || needsVerification(user)) {
+      confirmVerified(user)['catch'](function () { /* the card stands, one press from checking again */ });
+    }
   }
 
   function connectFailedSays(err) {
@@ -2621,50 +2818,86 @@
     if (c === 'auth/popup-blocked') {
       return 'Your browser blocked the window. Allow pop-ups for this site and press again.';
     }
-    if (c === 'auth/credential-already-in-use' || c === 'auth/account-exists-with-different-credential') {
+    if (LINK_TAKEN.indexOf(c) !== -1) {
+      /* Said to a reader who may be PENDING, and a pending account can open
+         nothing but this card: so the way out named is the other account
+         itself, never a personal area this account cannot reach. */
       return 'That sign-in already belongs to another Operations Academia account, so it was ' +
-        'not attached to this one. Your personal area can merge the two.';
+        'not attached to this one. If that account is yours, sign in to it instead; once this ' +
+        'address is confirmed, Edit account can merge the two.';
     }
     if (c === 'auth/provider-already-linked') return 'That sign-in is already attached to this account.';
     if (c === 'auth/operation-not-allowed') return 'That sign-in is not switched on for this site yet.';
     return 'We could not connect that just now.' + (c ? ' (' + c + ')' : '');
   }
 
+  /** The armed attempt is a BONUS the reader did not press for, so a window
+      the browser blocked or the reader closed is said in the plain voice and
+      points at the button; a refusal that a press could not fix is worded by
+      the same function a press's refusal is. Nothing about it is silent:
+      the first build reverted the row without a word, which read as the
+      window never having been tried. */
+  function armedFailedSays(id, err) {
+    var c = (err && err.code) || '';
+    if (c === 'auth/popup-blocked' || c === 'auth/popup-closed-by-user'
+        || c === 'auth/cancelled-popup-request') {
+      return 'We could not open the ' + connectName(id) + ' window on its own. ' +
+        'Press the button to connect it.';
+    }
+    return connectFailedSays(err);
+  }
+
   /** Draw the block, and report the one attempt the registration already made. */
   function verifyConnect(u) {
     var host = $('#oa-verify-connect');
     if (!host) return;
-    if (!connectWanted.length && !hasProvider('oidc.orcid', u) && !hasProvider('google.com', u)) {
-      /* Nobody armed anything. The block is still drawn \u2014 this is the one
-         moment the offer is in front of a new account, and the owner asked for
-         it to be made \u2014 but nothing is claimed about a window. */
-      paintConnect(u);
-      return;
-    }
     var pending = connectOutcome;
     var tried = connectTried;
     connectWanted = [];
     connectTried = '';
     connectOutcome = null;             // one registration, one report
+    if (pending && tried) connectBusy[tried] = true;
     paintConnect(u);
     if (!pending) return;
-    var msg = $('#oa-connect-msg');
-    var btn = $('[data-connect="' + tried + '"]');
-    if (btn) btn.disabled = true;
-    if (msg) { msg.className = 'oa-auth-msg'; msg.textContent = 'Opening the sign-in window\u2026'; }
-    pending.then(function (r) {
-      paintConnect((r && r.user) || u || state.user);
-    }).catch(function () {
-      /* The armed attempt is a BONUS, so its failure is not an error: the row
-         is simply live again, which is the state every reader who armed
-         nothing is already in. */
+    /* `pending` is the SETTLED shape the registration builds ({ok, r} or
+       {ok, err}); the catch is belt and braces for a raw promise. */
+    Promise.resolve(pending).then(function (res) {
+      connectBusy[tried] = false;
+      if (res && res.ok) {
+        connectLanded((res.r && res.r.user) || u || state.user, tried);
+        return;
+      }
       paintConnect(u || state.user);
+      connectSay(armedFailedSays(tried, res && res.err));
+    })['catch'](function (err) {
+      connectBusy[tried] = false;
+      paintConnect(u || state.user);
+      connectSay(armedFailedSays(tried, err));
     });
   }
 
   function closeVerifyPanel() {
     var old = $('#oa-verify');
     if (old) removeModal(old, VERIFY_BACK);
+  }
+
+  /** A promise that resolves after `ms`, for bounding a wait on a write that
+      may never come back. */
+  function pause(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  var PROFILE_WRITE_WAIT_MS = 4000;
+
+  /** The 'sent' lede promised a message that then failed to go: the promise is
+      taken back where it was made, not only in the line under the buttons,
+      and the button stops saying "again" about a message that never went. */
+  function verifyUnsent() {
+    var lede = $('#oa-verify .oa-modal-lede');
+    if (lede) {
+      lede.textContent = 'Your account is created, but we could not send the confirmation ' +
+        'message yet. Press the button below to send it. Until the address is confirmed ' +
+        'nothing on the site works for this account.';
+    }
+    var send = $('#oa-verify-send');
+    if (send) send.textContent = 'Send the e-mail';
   }
 
   function verifySay(msg, ok) {
@@ -2722,6 +2955,7 @@
     if (!u) return;
     if (auto && document.querySelector('[data-oa-verify-page]')) return;
     closeVerifyPanel();
+    connectFresh = status === 'sent';
 
     var wrap = document.createElement('div');
     wrap.className = 'oa-modal';
@@ -3550,6 +3784,7 @@
     state.profile = null;
     state.pending = false;
     closeVerifyPanel();       // "Use a different account" lands here
+    connectBusy = {};
     queue.length = 0;
     /* the counts belong to the account that is leaving; a shared machine must
        not show the next person how many postings the last one had */
@@ -3678,7 +3913,9 @@
           markPending(u.uid, true);      // and a hint /v2/ writes for it is ignored
           paint();
           queue.length = 0;
-          if (!$('#oa-verify')) openVerifyPanel(null, null, true);
+          /* the register card opens its own, with the 'sent' lede, once the
+             account is made: not this one over it (see regBusy) */
+          if (!$('#oa-verify') && !regBusy) openVerifyPanel(null, null, true);
           notify(null);
           return;
         }

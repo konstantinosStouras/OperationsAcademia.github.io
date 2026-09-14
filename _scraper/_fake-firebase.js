@@ -137,8 +137,17 @@
     } else {
       docs[this.path] = Object.assign({}, data);
     }
+    /* `setDelayMs` holds the WRITE'S ANSWER back while the document is already
+       stored, which is what a real write looks like from the page: the value
+       is on its way and the promise is not yet back. A page that does
+       something in the gap (the register card, between creating the account
+       and opening the card that follows) can only be measured with the gap
+       open; the same-tick resolve hid an unhandled rejection and a wrong card
+       for as long as this shim answered instantly. */
+    if (seed.setDelayMs) return later(seed.setDelayMs);
     return Promise.resolve();
   };
+  function later(ms, value) { return new Promise(function (r) { setTimeout(function () { r(value); }, ms); }); }
   DocRef.prototype.update = function (patch) {
     record('update', this.path, patch);
     if (!docs[this.path]) return Promise.reject(new Error('not-found: ' + this.path));
@@ -388,7 +397,13 @@
     u.linkWithPopup = function (p) {
       var id = (p && p.providerId) || '';
       record('link', u.uid + (id ? ':' + id : ''));
-      if (seed.linkFails) return Promise.reject({ code: seed.linkFails });
+      /* `linkDelayMs` settles the link after a wait, the way an OAuth window
+         does; `linkFails` refuses it (after the same wait). */
+      var wait = seed.linkDelayMs || 0;
+      if (seed.linkFails) {
+        var err = { code: seed.linkFails };
+        return wait ? later(wait).then(function () { throw err; }) : Promise.reject(err);
+      }
       if (id) {
         u.providerData = (u.providerData || []).slice();
         var had = u.providerData.some(function (e) { return e && e.providerId === id; });
@@ -396,8 +411,16 @@
           u.providerData.push({ providerId: id,
             uid: id === 'oidc.orcid' ? (seed.orcidId || '0000-0002-1825-0097') : u.uid });
         }
+        /* What the real SDK does with a Google link: the account gains the
+           address Google hands over where it had none (an ORCID account),
+           and `linkVerifies` marks the address confirmed, which is what
+           Firebase does when the Google address matches the account's own. */
+        if (id === 'google.com') {
+          if (!u.email) u.email = seed.linkEmail || 'linked@example.edu';
+          if (seed.linkVerifies) u.emailVerified = true;
+        }
       }
-      return Promise.resolve({ user: u });
+      return wait ? later(wait, { user: u }) : Promise.resolve({ user: u });
     };
     u.reauthenticateWithPopup = function () {
       record('reauth', u.uid);
