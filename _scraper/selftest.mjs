@@ -6380,6 +6380,60 @@ async function testAccountDeletion() {
   ok(!/git (commit|push)/.test(wf),
     'it writes nothing to data/, so there is no commit and no push race');
 
+  /* THE DOORBELL (owner, 2026-09-14: "deleting a user should be very fast.
+     Why do I see 'in queue' here? how long will it stay there?"). The
+     maintainer's order withdraws nothing itself, so nothing rang the build
+     for it and the sweep waited for the next scheduled build, up to twenty
+     minutes, while the roster said "Deletion queued". purgeOnRequest rings
+     the sweep's own dispatch the moment an order is filed; the build chain
+     and the daily cron stay as the safety net. Read with the comments
+     stripped, since the function explains the loop it must not create in
+     the same words the guards look for. */
+  const fnSrc = await readFile(path.join(root, '_functions', 'index.js'), 'utf8');
+  const fnCode = stripJs(fnSrc);
+  ok(/const PURGE_EVENT_TYPE = 'oa-account-deletion';/.test(fnCode),
+    'the doorbell names its event type once');
+  ok(/exports\.purgeOnRequest = onDocumentWritten\(/.test(fnCode),
+    'purgeOnRequest is a Firestore trigger, the shape of the four beside it');
+  const bell = fnCode.slice(fnCode.indexOf('exports.purgeOnRequest'),
+    fnCode.indexOf('exports.sendVerificationEmail'));
+  ok(bell.length > 400 && bell.length < 2500, 'the doorbell was really sliced, at both ends');
+  ok(/document: 'accountDeletions\/\{uid\}'/.test(bell), 'it watches the work orders');
+  ok(/secrets: \[GH_DISPATCH_TOKEN\]/.test(bell) && /retry: false/.test(bell),
+    'with the dispatch token and no retry, like the others');
+  ok(/if \(!after\) return;/.test(bell) && /after\.status !== 'requested'/.test(bell),
+    'it rings on a NEW order only: a cancel is a delete, and the sweep\'s own clearing/done ' +
+    'writes must not ring the sweep from inside the sweep');
+  ok(/before && before\.status === 'requested'/.test(bell), '…and never twice for one order');
+  ok(/await ring\(PURGE_EVENT_TYPE, \{ uid: event\.params\.uid \}/.test(bell),
+    'it rings the shared helper with the uid and nothing else: the order carries a name and an address');
+  ok(/repository_dispatch:\s*\n\s*types:\s*\[oa-account-deletion\]/.test(wf),
+    'and the purge workflow answers that event');
+  ok(/^\s*schedule:/m.test(wf) && /workflow_run:/.test(wf),
+    '…while the build chain and the daily cron stay as the safety net');
+  ok(/SIXTEEN functions/.test(fnSrc.slice(0, 2000)) && /purgeOnRequest/.test(fnSrc.slice(0, 2000)),
+    'the header counts it, so a deploy read back at fifteen is a stale checkout');
+
+  /* …and the roster watches, so the row goes on its own. The ORDER documents
+     alone, never the roster, bounded, and a reload only once an order has
+     moved on. Reverting the call in load() leaves the chip until a reload,
+     which is the half of the report about how long it "stays there". */
+  ok(/function watchQueued\(\)/.test(users) && /watchQueued\(\);/.test(users.slice(users.indexOf('function load()'))),
+    'the roster starts a watch after every read');
+  ok(/st\.queued && st\.cancellable/.test(users),
+    '…over the rows whose order is filed and not yet started, by the chip\'s own rule');
+  ok(/\.doc\(uid\)\.get\(\)/.test(users.slice(users.indexOf('function watchQueued'), users.indexOf('function cancelDelete')))
+     && !/collection\(DIRECTORY\)/.test(users.slice(users.indexOf('function watchQueued'), users.indexOf('function cancelDelete'))),
+    '…reading the order documents alone, never the roster');
+  ok(/WATCH_TICKS/.test(users) && /st !== null && st !== 'requested'/.test(users),
+    '…bounded, and reloading only once an order has moved on; a failed read keeps waiting');
+  ok(/Starts within a couple of minutes/.test(users), 'the chip says how long');
+  ok(/It starts within a couple of\s+minutes \(at the site&rsquo;s next update at the latest\)/.test(adminPage)
+     && !/normally within a few minutes, and you can call it off/.test(adminPage),
+    'the hint says the deployed cadence and keeps the safety net\'s, true on both sides of the deploy');
+  ok(!/twenty minutes/.test(await readFile(path.join(root, 'assets', 'oa-account-delete.js'), 'utf8')),
+    'and the account page no longer promises the sign-in goes "within about twenty minutes"');
+
   /* ------------------------------------------------------------- the copy */
 
   const privacy = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
@@ -12480,7 +12534,8 @@ async function testCandidateReveal() {
     'doorbell: rings the SAME helper with the SAME event type the other doorbells use');
   ok(/revealAt !== today/.test(bell) && /'reveal: not today'/.test(bell),
     'doorbell: on every other day it logs why it did not ring');
-  ok(/FOUR doorbells/.test(fnSrc) && !/THREE doorbells/.test(fnSrc), 'doorbell: the header counts four');
+  ok(/FIVE doorbells/.test(fnSrc) && !/FOUR doorbells/.test(fnSrc) && !/THREE doorbells/.test(fnSrc),
+    'doorbell: the header counts five');
   /* THE ORDINAL IS COMPUTED, NEVER TYPED. It was typed, it went stale the
      moment revealCandidates was inserted above recordVisit, and the two
      stale readings ("fourth" and "fifth") then met in a merge and left an
@@ -12543,8 +12598,8 @@ async function testCandidateReveal() {
     }
   }
   const setup = await read('_SETUP-INSTANT-PUBLISH.md');
-  ok(/`revealCandidates`/.test(setup) && /which is fifteen/.test(setup) && /read back\s+fifteen/.test(setup),
-    'setup guide: names revealCandidates and counts fifteen functions');
+  ok(/`revealCandidates`/.test(setup) && /which is sixteen/.test(setup) && /read back\s+sixteen/.test(setup),
+    'setup guide: names revealCandidates and counts sixteen functions');
   ok(/functions:revealCandidates/.test(setup), 'setup guide: the explicit --only list carries it');
   ok(/Cloud Scheduler/.test(setup), 'setup guide: says the deploy creates the Cloud Scheduler job');
   ok(!/THESE THREE ARE LIVE/.test(setup), 'setup guide: no longer counts three live doorbells as the whole set');
@@ -16924,10 +16979,10 @@ async function testEmailVerification() {
   const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
   ok(blockAt > 0 && blockEnd > blockAt && noDash(fn.slice(blockAt, blockEnd)),
     'function: no em dash in the verification block');
-  ok(/FIFTEEN functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
-    'function: the file header counts fifteen and names the mailer');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 15,
-    'function: the file exports exactly fifteen functions, the count a deploy must read back');
+  ok(/SIXTEEN functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
+    'function: the file header counts sixteen and names the mailer');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 16,
+    'function: the file exports exactly sixteen functions, the count a deploy must read back');
 
   const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
   ok(pkg.dependencies && pkg.dependencies.nodemailer,
@@ -16946,8 +17001,8 @@ async function testEmailVerification() {
   ok(/npm install --prefix _functions/.test(setup)
      && /firebase deploy --only functions --project operations-academia/.test(setup),
     'setup: install, then deploy, naming the project');
-  ok(/\bfifteen\b/i.test(setup) && /functions:list/.test(setup),
-    'setup: read the deployed list back and count FIFTEEN');
+  ok(/\bsixteen\b/i.test(setup) && /functions:list/.test(setup),
+    'setup: read the deployed list back and count SIXTEEN');
   ok(/fall(s|ing)? back/i.test(setup) && /sendEmailVerification/.test(setup)
      && /firebaseapp\.com/.test(setup),
     'setup: says what the browser does while the function is absent');
@@ -17678,8 +17733,8 @@ async function testVerifyExistingUsers() {
   const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
   ok(!/function siteVerifyLink\b/.test(fn) && /function siteVerifyLink\(generated, site\)/.test(rendererSrc),
     'siteVerifyLink is defined in verify-email.js and nowhere else, so index.js cannot carry a second copy');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 15,
-    'the helper lives in verify-email.js, so index.js still exports exactly fifteen functions');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 16,
+    'the helper lives in verify-email.js, so index.js still exports exactly sixteen functions');
 
   /* the shared Admin SDK handle */
   const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
@@ -18952,7 +19007,7 @@ async function testForum() {
   for (const w of [/season \+ ':' \+\s+uid/, /randomInt/, /secretVersion/, /both rooms/, /quote/, /tags/, /`up`/, /Moderator/, /R1\b/, /R10/, /@doc/]) {
     ok(w.test(cf), `forum: CLAUDE.md records ${w}`);
   }
-  ok(/FIFTEEN/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads fifteen');
+  ok(/SIXTEEN/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads sixteen');
   for (const [f, src] of [...Object.entries(forumSrc), ['build-functions-vendor.mjs', await read('_scraper', 'build-functions-vendor.mjs')],
     ['oa-forum-model.js', await read('assets', 'oa-forum-model.js')], ['oa-forum-guard.js', await read('assets', 'oa-forum-guard.js')],
     ['oa-forum-guide.js', await read('assets', 'oa-forum-guide.js')], ['forum-emulator.mjs', em]]) {

@@ -17,8 +17,15 @@ name: OA accounts — carry out the deletions that were asked for
 # a person's own deletion is usually complete about two minutes after they
 # press the button.
 #
-# The daily cron is the safety net for an order filed when nothing else was
-# happening (the maintainer's, most often, which withdraws nothing itself).
+# AND THE ORDER ITSELF RINGS IT (owner, 2026-09-14: "deleting a user should be
+# very fast. Why do I see 'in queue' here? how long will it stay there?"). The
+# maintainer's order withdraws nothing itself, so nothing rang the build for
+# it and the roster said "Deletion queued" until the next scheduled build:
+# up to twenty minutes, and longer when GitHub delays the schedule. So
+# purgeOnRequest in _functions/index.js dispatches oa-account-deletion the
+# moment a work order is filed, and the sweep starts within a couple of
+# minutes of the press. The build chain and the daily cron below are the
+# safety net, exactly as the 20-minute schedule is for a posting.
 #
 # Nothing here writes data/, so there is no commit and no push race. It DOES
 # READ data/, which is why the checkout names the branch tip: on a
@@ -30,6 +37,9 @@ name: OA accounts — carry out the deletions that were asked for
 # A no-op, saying so, until FIREBASE_SERVICE_ACCOUNT is set.
 
 on:
+  # the doorbell: a work order filed in the browser, rung by purgeOnRequest
+  repository_dispatch:
+    types: [oa-account-deletion]
   workflow_run:
     workflows: ["OA data — publish queued postings, candidates and placements"]
     types: [completed]
