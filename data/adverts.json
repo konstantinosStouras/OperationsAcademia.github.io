@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-13T12:51:40Z",
+ "generated": "2026-09-14T14:25:42Z",
  "ads": {
   "american.wd1.myworkdayjobs.com/AU/job/Main-Campus-Washington-DC/Professorial-Lecturer_R4814": {
    "url": "https://american.wd1.myworkdayjobs.com/AU/job/Main-Campus-Washington-DC/Professorial-Lecturer_R4814",
@@ -625,6 +625,22 @@
    "employmentType": "",
    "checkedAt": "2026-09-10T12:23:17Z"
   },
+  "apply.interfolio.com/191584": {
+   "url": "https://apply.interfolio.com/191584",
+   "status": "unreadable",
+   "via": "page",
+   "title": "",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-09-14T14:25:42Z"
+  },
   "apply.interfolio.com/191598": {
    "url": "https://apply.interfolio.com/191598",
    "status": "unreadable",
@@ -656,6 +672,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-09-09T12:29:42Z"
+  },
+  "apply.interfolio.com/192663": {
+   "url": "https://apply.interfolio.com/192663",
+   "status": "unreadable",
+   "via": "page",
+   "title": "",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-09-14T14:25:42Z"
   },
   "aprecruit.berkeley.edu/JPF05132": {
    "url": "https://aprecruit.berkeley.edu/JPF05132",
@@ -945,6 +977,38 @@
    "employmentType": "",
    "checkedAt": "2026-09-11T12:21:55Z"
   },
+  "careercenter.informs.org/job/assistant-associate-full-professor-hefei-anhui-5513": {
+   "url": "https://careercenter.informs.org/job/assistant-associate-full-professor-hefei-anhui-5513",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant/ Associate/ Full Professor",
+   "institution": "University of Science and Technology of China",
+   "school": "",
+   "department": "",
+   "location": "Hefei, Anhui, China",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-09-14T14:25:42Z"
+  },
+  "careercenter.informs.org/job/assistant-or-associate-professor-business-operations-camarillo-california-5512": {
+   "url": "https://careercenter.informs.org/job/assistant-or-associate-professor-business-operations-camarillo-california-5512",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant or Associate Professor – Business (Operations)",
+   "institution": "California State University Channel Islands",
+   "school": "",
+   "department": "",
+   "location": "Camarillo, California, United States",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "OTHER",
+   "checkedAt": "2026-09-14T14:25:42Z"
+  },
   "careercenter.informs.org/job/assistant-professor-in-operations-management-evanston-illinois-5481": {
    "url": "https://careercenter.informs.org/job/assistant-professor-in-operations-management-evanston-illinois-5481",
    "status": "ok",
@@ -1025,6 +1089,22 @@
    "employmentType": "",
    "checkedAt": "2026-08-24T05:15:29Z"
   },
+  "careercenter.informs.org/job/faculty-positions-in-management-science-school-of-management-fudan-university-shanghai-shanghai-5514": {
+   "url": "https://careercenter.informs.org/job/faculty-positions-in-management-science-school-of-management-fudan-university-shanghai-shanghai-5514",
+   "status": "ok",
+   "via": "page",
+   "title": "Faculty Positions in Management Science, School of Management, Fudan University",
+   "institution": "School of Management, Fudan University",
+   "school": "",
+   "department": "",
+   "location": "Shanghai, Shanghai, China",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "OTHER",
+   "checkedAt": "2026-09-14T14:25:42Z"
+  },
   "careercenter.informs.org/job/faculty-positions-in-operations-information-and-technology-stanford-california-5458": {
    "url": "https://careercenter.informs.org/job/faculty-positions-in-operations-information-and-technology-stanford-california-5458",
    "status": "ok",
@@ -1057,6 +1137,22 @@
    "employmentType": "",
    "checkedAt": "2026-08-24T08:28:50Z"
   },
+  "careercenter.informs.org/job/full-time-faculty-position-in-business-analytics-information-systems-sabanci-business-school-sabanci-university-istanbul-istanbul-5505": {
+   "url": "https://careercenter.informs.org/job/full-time-faculty-position-in-business-analytics-information-systems-sabanci-business-school-sabanci-university-istanbul-istanbul-5505",
+   "status": "ok",
+   "via": "page",
+   "title": "Full-Time Faculty Position in Business Analytics & Information Systems, Sabanci Business School, Sabanci University",
+   "institution": "Sabancı Business School",
+   "school": "",
+   "department": "",
+   "location": "Istanbul, Istanbul, Turkey",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-09-14T14:25:42Z"
+  },
   "careercenter.informs.org/job/indian-school-of-business-positions-in-operations-management-area-academic-year-2026-27-hyderabad-telangana-4840": {
    "url": "https://careercenter.informs.org/job/indian-school-of-business-positions-in-operations-management-area-academic-year-2026-27-hyderabad-telangana-4840?utm_source=wj_newsletter&utm_medium=cpc&utm_campaign=xml",
    "status": "gone",
@@ -1072,6 +1168,38 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-08-25T08:23:41Z"
+  },
+  "careercenter.informs.org/job/join-the-research-faculty-of-tongji-shanghai-shanghai-5502": {
+   "url": "https://careercenter.informs.org/job/join-the-research-faculty-of-tongji-shanghai-shanghai-5502",
+   "status": "ok",
+   "via": "page",
+   "title": "Join the Research Faculty of Tongji",
+   "institution": "TONGJI UNIVERSITY",
+   "school": "",
+   "department": "",
+   "location": "Shanghai, Shanghai, China",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "OTHER",
+   "checkedAt": "2026-09-14T14:25:42Z"
+  },
+  "careercenter.informs.org/job/management-of-information-systems-professor-open-rank-at-novasbe-carcavelos-lisbon-5500": {
+   "url": "https://careercenter.informs.org/job/management-of-information-systems-professor-open-rank-at-novasbe-carcavelos-lisbon-5500",
+   "status": "ok",
+   "via": "page",
+   "title": "Management of Information Systems Professor (open rank) at NovaSBE",
+   "institution": "Nova School of Business and Economics",
+   "school": "",
+   "department": "",
+   "location": "Carcavelos, Lisbon, Portugal",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "OTHER",
+   "checkedAt": "2026-09-14T14:25:42Z"
   },
   "careercenter.informs.org/job/mit-sloan-operations-research-and-statistics-tenure-track-assistant-professor-cambridge-massachusetts-4904": {
    "url": "https://careercenter.informs.org/job/mit-sloan-operations-research-and-statistics-tenure-track-assistant-professor-cambridge-massachusetts-4904/?utm_medium=jbemail&utm_source=job_agent&utm_keyword=",
@@ -1168,6 +1296,22 @@
    "listedUntil": "",
    "employmentType": "FULL_TIME",
    "checkedAt": "2026-09-09T12:29:42Z"
+  },
+  "careercenter.informs.org/job/tenure-track-assistant-professor-in-information-systems-minneapolis-minnesota-5518": {
+   "url": "https://careercenter.informs.org/job/tenure-track-assistant-professor-in-information-systems-minneapolis-minnesota-5518",
+   "status": "ok",
+   "via": "page",
+   "title": "Tenure-Track Assistant Professor in Information Systems",
+   "institution": "University of Minnesota - Carlson School of Management",
+   "school": "",
+   "department": "",
+   "location": "Minneapolis, Minnesota, United States",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "OTHER",
+   "checkedAt": "2026-09-14T14:25:42Z"
   },
   "careercenter.informs.org/job/tenure-track-associate-professor-assistant-professor-in-the-department-of-data-and-systems-engineering-hong-kong-4903": {
    "url": "https://careercenter.informs.org/job/tenure-track-associate-professor-assistant-professor-in-the-department-of-data-and-systems-engineering-hong-kong-4903/?utm_medium=jbemail&utm_source=job_agent&utm_keyword=",
@@ -1920,6 +2064,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-08-24T05:15:29Z"
+  },
+  "connect.informs.org/msom/discussion/faculty-position-in-transportation-operations-at-ubc-sauder-school-of-business-1": {
+   "url": "https://connect.informs.org/msom/discussion/faculty-position-in-transportation-operations-at-ubc-sauder-school-of-business-1#bm90362ac9-1ac6-45ce-80a8-70df842f5c30",
+   "status": "unreadable",
+   "via": "page",
+   "title": "",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-09-14T14:25:42Z"
   },
   "connect.informs.org/msom/discussion/open-rank-position-in-operations-management-hec-paris-2": {
    "url": "https://connect.informs.org/msom/discussion/open-rank-position-in-operations-management-hec-paris-2",
