@@ -4895,8 +4895,11 @@
   "address": "1 Normal Ave, Montclair, NJ 07043",
   "facultyUrl": "https://business.montclair.edu/faculty-research/departments/information-management-business-analytics/department-directory",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-05",
   "lat": 40.858346,
   "lng": -74.2003358
  },

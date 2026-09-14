@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:43:36.941Z",
+ "generated": "2026-09-14T06:47:06.170Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -327,6 +327,10 @@
   },
   {
    "v": "MIT Sloan",
+   "n": 2
+  },
+  {
+   "v": "Montclair State University",
    "n": 2
   },
   {
@@ -907,10 +911,6 @@
   },
   {
    "v": "Monash University",
-   "n": 1
-  },
-  {
-   "v": "Montclair State University",
    "n": 1
   },
   {
@@ -2256,6 +2256,10 @@
    "n": 1
   },
   {
+   "v": "Feliciano School of Business",
+   "n": 1
+  },
+  {
    "v": "Frank G. Zarb School of Business",
    "n": 1
   },
@@ -2589,10 +2593,6 @@
   },
   {
    "v": "Faculty of Engineering and Natural Sciences (FENS)",
-   "n": 0
-  },
-  {
-   "v": "Feliciano School of Business",
    "n": 0
   },
   {
@@ -3566,6 +3566,10 @@
    "n": 1
   },
   {
+   "v": "Information Management and Business Analytics",
+   "n": 1
+  },
+  {
    "v": "Information Science and Systems",
    "n": 1
   },
@@ -4259,10 +4263,6 @@
   },
   {
    "v": "Information and Service Economy",
-   "n": 0
-  },
-  {
-   "v": "Information Management and Business Analytics",
    "n": 0
   },
   {
