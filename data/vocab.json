@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:59:51.240Z",
+ "generated": "2026-09-14T07:04:03.578Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -271,10 +271,6 @@
   },
   {
    "v": "Grand Valley State University",
-   "n": 2
-  },
-  {
-   "v": "Hong Kong University of Science and Technology (Guangzhou)",
    "n": 2
   },
   {
@@ -791,6 +787,10 @@
   },
   {
    "v": "HKUST(GZ)",
+   "n": 1
+  },
+  {
+   "v": "Hong Kong University of Science and Technology (Guangzhou)",
    "n": 1
   },
   {
@@ -3463,10 +3463,6 @@
   },
   {
    "v": "Data Science",
-   "n": 1
-  },
-  {
-   "v": "Data Science and Analytics (DSA) Thrust",
    "n": 1
   },
   {
@@ -6502,12 +6498,10 @@
   "Hong Kong University of Science and Technology (Guangzhou)": {
    "schools": [],
    "units": [
-    "Data Science and Analytics (DSA) Thrust",
     "DS and Analytics"
    ],
    "bySchool": {
     "": [
-     "Data Science and Analytics (DSA) Thrust",
      "DS and Analytics"
     ]
    }
