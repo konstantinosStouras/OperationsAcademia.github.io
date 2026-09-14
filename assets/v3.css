@@ -1654,6 +1654,12 @@ body.v3 .oa-modal-card input[type='password']:focus {
 body.v3 .oa-form input[disabled], body.v3 .oa-modal-card input[disabled] {
   background: var(--bg-3); color: var(--mut);
 }
+/* the profile card's compelled box and its "needed" mark (oa-ui.css
+   .oa-missing / .oa-need), at (0,3,1) so the modal-input rule above (0,2,1)
+   cannot take the outline back, and in the live palette's own tokens */
+body.v3 .oa-profile-card .oa-missing input { border: 2px solid var(--brand); }
+body.v3 .oa-profile-card .oa-missing input:focus { border-color: var(--brand); }
+body.v3 .oa-profile-card .oa-need { color: var(--on-brand); background: var(--brand); }
 body.v3 .oa-check span { color: var(--ink-2); }
 /* the candidate form's per-day talk blocks (oa-ui.css .oa-talk), in the live
    design's tokens: a panel that paints its own ground names its own ink */

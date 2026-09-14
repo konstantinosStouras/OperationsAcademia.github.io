@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "provider-gate-2026-09",
+      "date": "2026-09-14",
+      "title": "A Google or ORCID account finishes registering before it can sign in",
+      "summary": "Signing up with Google or ORCID used to create a usable account before it had said who it was, and the card that asked afterwards could be closed. Now such an account cannot be used until it has given its name and affiliation (and an e-mail address, where the sign-in shares none with the site): one short card asks for exactly what is missing, with the box outlined and marked, and the site opens the moment it is saved. Nothing else on the card, and no other way past it than signing out. Accounts that registered with an e-mail address and a password are not held; if one of them is short of an affiliation it is asked once a session, on the same short card, and can close it.",
+      "url": "/account"
+    },
+    {
       "id": "registration-complete-2026-09",
       "date": "2026-09-12",
       "title": "Every account gives a name, an affiliation and an e-mail, and can connect ORCID and Gmail",

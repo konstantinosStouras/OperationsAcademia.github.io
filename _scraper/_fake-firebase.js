@@ -354,15 +354,22 @@
 
   /* ------------------------------------------------------------------ auth */
 
-  /* A user is VERIFIED unless the seed says otherwise: every existing check
-     models a reader whose address is confirmed (a Google sign-in, say), and
-     since the e-mail verification gate (2026-09-04) an unverified password
-     account is signed out for everything but the "Check your inbox" card. To
-     drive that gate, seed { emailVerified: false, providerData: [{ providerId:
-     'password' }] }; `reloadVerifies` makes user.reload() confirm the address,
-     which is what a real reload does once the link has been pressed. */
+  /* A user is a VERIFIED PASSWORD ACCOUNT unless the seed says otherwise:
+     every existing check models an ordinary reader, and that is the one kind
+     of account neither gate holds. Since the e-mail verification gate
+     (2026-09-04) an unverified password account is signed out for everything
+     but the "Check your inbox" card: to drive it, seed { emailVerified: false,
+     providerData: [{ providerId: 'password' }] }; `reloadVerifies` makes
+     user.reload() confirm the address, which is what a real reload does once
+     the link has been pressed. And since the completeness gate (2026-09-14) a
+     Google or ORCID account (providerData naming 'google.com' or
+     'oidc.orcid' and no 'password') is signed out for everything but its
+     profile card until its profile carries a first name, an affiliation and
+     an address: seed such a provider and a profile that answers all three, or
+     none, to drive whichever side of that gate a check is about. The default
+     used to be a Google sign-in, which that gate would hold on every page. */
   function makeUser(spec, appName) {
-    var u = Object.assign({ emailVerified: true, providerData: [{ providerId: 'google.com' }] }, spec);
+    var u = Object.assign({ emailVerified: true, providerData: [{ providerId: 'password' }] }, spec);
     u.reload = function () {
       record('reload', u.uid);
       if (seed.reloadVerifies) u.emailVerified = true;
