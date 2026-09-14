@@ -61,6 +61,37 @@
   "owner": ""
  },
  {
+  "id": "2027-fudan-university-20260909",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-09",
+  "institution": "Fudan University",
+  "department": "School of Management, Management Science",
+  "school": "School of Management",
+  "unit": "Management Science",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 12, 2026",
+  "applyByDate": "2026-10-12",
+  "comments": "",
+  "country": "China",
+  "adUrl": "https://careercenter.informs.org/job/faculty-positions-in-management-science-school-of-management-fudan-university-shanghai-shanghai-5514",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Fudan%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-14T06:39:46Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-science-and-technology-of-china-20260909",
   "year": 2027,
   "years": [
