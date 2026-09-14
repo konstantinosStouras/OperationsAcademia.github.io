@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:16:25.702Z",
+ "generated": "2026-09-14T07:19:30.969Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1198,6 +1198,10 @@
    "n": 1
   },
   {
+   "v": "Trinity University",
+   "n": 1
+  },
+  {
    "v": "Tsinghua University",
    "n": 1
   },
@@ -2388,6 +2392,10 @@
    "n": 1
   },
   {
+   "v": "Neidorff School of Business",
+   "n": 1
+  },
+  {
    "v": "Parker College of Business",
    "n": 1
   },
@@ -3531,6 +3539,10 @@
   },
   {
    "v": "Engineering Systems and Design",
+   "n": 1
+  },
+  {
+   "v": "Finance and Business Analytics",
    "n": 1
   },
   {
@@ -9131,6 +9143,19 @@
     ]
    }
   },
+  "Trinity University": {
+   "schools": [
+    "Neidorff School of Business"
+   ],
+   "units": [
+    "Finance and Business Analytics"
+   ],
+   "bySchool": {
+    "Neidorff School of Business": [
+     "Finance and Business Analytics"
+    ]
+   }
+  },
   "Tsinghua University": {
    "schools": [
     "School of Economics and Management"
@@ -12118,6 +12143,9 @@
   ],
   "Neeley School of Business": [
    "Information Systems and Supply Chain Management"
+  ],
+  "Neidorff School of Business": [
+   "Finance and Business Analytics"
   ],
   "NUS Business School": [
    "Analytics and Operations"

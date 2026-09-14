@@ -8209,6 +8209,19 @@
   "lastPosted": "2026-09-01"
  },
  {
+  "id": "trinity-university__neidorff-school-of-business__finance-and-business-analytics",
+  "institution": "Trinity University",
+  "school": "Neidorff School of Business",
+  "department": "Finance and Business Analytics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-23"
+ },
+ {
   "id": "tsinghua-university____om-is",
   "institution": "Tsinghua University",
   "department": "OM/IS",
