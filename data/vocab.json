@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:41:15.849Z",
+ "generated": "2026-09-14T06:43:36.941Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -270,6 +270,10 @@
    "n": 2
   },
   {
+   "v": "Hong Kong University of Science and Technology (Guangzhou)",
+   "n": 2
+  },
+  {
    "v": "Houston Christian University",
    "n": 2
   },
@@ -327,6 +331,10 @@
   },
   {
    "v": "Morgan State University",
+   "n": 2
+  },
+  {
+   "v": "Northern State University",
    "n": 2
   },
   {
@@ -778,10 +786,6 @@
    "n": 1
   },
   {
-   "v": "Hong Kong University of Science and Technology (Guangzhou)",
-   "n": 1
-  },
-  {
    "v": "Hood College",
    "n": 1
   },
@@ -963,10 +967,6 @@
   },
   {
    "v": "Northeastern University",
-   "n": 1
-  },
-  {
-   "v": "Northern State University",
    "n": 1
   },
   {
@@ -2156,6 +2156,10 @@
    "n": 2
   },
   {
+   "v": "School of Business",
+   "n": 2
+  },
+  {
    "v": "School of Management",
    "n": 2
   },
@@ -2381,10 +2385,6 @@
   },
   {
    "v": "School Economics and Management",
-   "n": 1
-  },
-  {
-   "v": "School of Business",
    "n": 1
   },
   {
@@ -3150,6 +3150,10 @@
    "n": 2
   },
   {
+   "v": "Business Analytics and Information Systems",
+   "n": 2
+  },
+  {
    "v": "Business Analytics and Statistics",
    "n": 2
   },
@@ -3350,10 +3354,6 @@
    "n": 1
   },
   {
-   "v": "Business Analytics and Information Systems",
-   "n": 1
-  },
-  {
    "v": "Business Analytics, Operations Management, Project Management",
    "n": 1
   },
@@ -3447,6 +3447,10 @@
   },
   {
    "v": "Data Science",
+   "n": 1
+  },
+  {
+   "v": "Data Science and Analytics (DSA) Thrust",
    "n": 1
   },
   {
@@ -6482,10 +6486,12 @@
   "Hong Kong University of Science and Technology (Guangzhou)": {
    "schools": [],
    "units": [
+    "Data Science and Analytics (DSA) Thrust",
     "DS and Analytics"
    ],
    "bySchool": {
     "": [
+     "Data Science and Analytics (DSA) Thrust",
      "DS and Analytics"
     ]
    }
@@ -7670,13 +7676,19 @@
    }
   },
   "Northern State University": {
-   "schools": [],
+   "schools": [
+    "School of Business"
+   ],
    "units": [
+    "Business Analytics and Information Systems",
     "quantitative analytics"
    ],
    "bySchool": {
     "": [
      "quantitative analytics"
+    ],
+    "School of Business": [
+     "Business Analytics and Information Systems"
     ]
    }
   },
@@ -12134,6 +12146,7 @@
    "Analytics, Information and Operations Management",
    "Analytics, Information, Operations",
    "Analytics, Information, Operations research",
+   "Business Analytics and Information Systems",
    "Decision Sciences",
    "Finance",
    "Information and Service Economy",

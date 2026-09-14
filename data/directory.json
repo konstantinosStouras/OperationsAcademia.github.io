@@ -3275,6 +3275,18 @@
   "lastPosted": "2014-09-04"
  },
  {
+  "id": "hong-kong-university-of-science-and-technology-guangzhou____data-science-and-analytics-dsa-thrust",
+  "institution": "Hong Kong University of Science and Technology (Guangzhou)",
+  "department": "Data Science and Analytics (DSA) Thrust",
+  "type": "University",
+  "country": "China",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
+ },
+ {
   "id": "hong-kong-university-of-science-and-technology-guangzhou____ds-and-analytics",
   "institution": "Hong Kong University of Science and Technology (Guangzhou)",
   "department": "DS and Analytics",
@@ -5486,6 +5498,19 @@
   ],
   "n": 1,
   "lastPosted": "2025-08-04"
+ },
+ {
+  "id": "northern-state-university__school-of-business__business-analytics-and-information-systems",
+  "institution": "Northern State University",
+  "school": "School of Business",
+  "department": "Business Analytics and Information Systems",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-13"
  },
  {
   "id": "northwestern____science-and-innovation",
