@@ -720,6 +720,18 @@
   ]
  },
  {
+  "id": "boston-college____business",
+  "institution": "Boston College",
+  "department": "Business",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
+ },
+ {
   "id": "boston-college__carroll-school-of-management__business-analytics",
   "institution": "Boston College",
   "school": "Carroll School of Management",
@@ -987,6 +999,19 @@
   "lastPosted": "2026-01-19"
  },
  {
+  "id": "california-state-university-channel-islands__martin-v-smith-school-of-business-and-economics__operations-management",
+  "institution": "California State University, Channel Islands",
+  "school": "Martin V. Smith School of Business and Economics",
+  "department": "Operations Management",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-09"
+ },
+ {
   "id": "california-state-university-east-bay__college-of-business-and-economics__management",
   "institution": "California State University, East Bay",
   "school": "College of Business and Economics",
@@ -1128,6 +1153,19 @@
   ],
   "n": 1,
   "lastPosted": "2014-04-28"
+ },
+ {
+  "id": "carnegie-mellon-university__tepper-school-of-business__business-technologies",
+  "institution": "Carnegie Mellon University",
+  "school": "Tepper School of Business",
+  "department": "Business Technologies",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-22"
  },
  {
   "id": "carnegie-mellon-university__tepper-school-of-business__heinz-college",
@@ -2659,6 +2697,18 @@
   "lastPosted": "2024-08-23"
  },
  {
+  "id": "franklin-and-marshall-college____business-organizations-and-society",
+  "institution": "Franklin and Marshall College",
+  "department": "Business, Organizations and Society",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-06"
+ },
+ {
   "id": "fudan-university__school-of-management__management-science",
   "institution": "Fudan University",
   "school": "School of Management",
@@ -2675,8 +2725,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2014-10-09",
+  "n": 2,
+  "lastPosted": "2026-09-09",
   "lat": 31.2967376,
   "lng": 121.506265
  },
@@ -4636,6 +4686,18 @@
   "lastPosted": "2026-08-21"
  },
  {
+  "id": "miami-university____information-systems-and-analytics",
+  "institution": "Miami University",
+  "department": "Information Systems and Analytics",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-13"
+ },
+ {
   "id": "miami-university____information-systems-and-technology",
   "institution": "Miami University",
   "department": "Information Systems and Technology",
@@ -4846,8 +4908,11 @@
   "address": "1 Normal Ave, Montclair, NJ 07043",
   "facultyUrl": "https://business.montclair.edu/faculty-research/departments/information-management-business-analytics/department-directory",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-05",
   "lat": 40.858346,
   "lng": -74.2003358
  },
@@ -6287,6 +6352,19 @@
   "lng": 29.3807805
  },
  {
+  "id": "sabanci-university__sabanci-business-school__business-analytics-and-information-systems",
+  "institution": "Sabanci University",
+  "school": "Sabanci Business School",
+  "department": "Business Analytics and Information Systems",
+  "type": "Business School",
+  "country": "Turkey",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-04"
+ },
+ {
   "id": "saint-louis-university____om-and-it",
   "institution": "Saint Louis University",
   "department": "OM and IT",
@@ -6509,16 +6587,33 @@
   "lastPosted": "2025-09-12"
  },
  {
+  "id": "shanghai-jiao-tong-university__antai-college-of-economics-and-management__data-and-business-intelligence",
+  "institution": "Shanghai Jiao Tong University",
+  "school": "Antai College of Economics and Management",
+  "department": "Data and Business Intelligence",
+  "type": "Business School",
+  "country": "China",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-01"
+ },
+ {
   "id": "shanghai-jiao-tong-university__antai-college-of-economics-and-management__management-science",
   "institution": "Shanghai Jiao Tong University",
   "school": "Antai College of Economics and Management",
   "department": "Management Science",
   "type": "University",
+  "country": "China",
   "deptUrl": "https://www.acem.sjtu.edu.cn/acem2021/en/faculty/team.html",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-01"
  },
  {
   "id": "shanghai-university-of-finance-and-economics__college-of-business",
@@ -7225,6 +7320,18 @@
   ]
  },
  {
+  "id": "technical-university-of-munich____technology-management",
+  "institution": "Technical University of Munich (TUM)",
+  "department": "Technology Management",
+  "type": "University",
+  "country": "Germany",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-14"
+ },
+ {
   "id": "technion-israel-institute-of-technology__faculty-of-data-and-decision-sciences__operations-management",
   "institution": "Technion – Israel Institute of Technology",
   "school": "Faculty of Data and Decision Sciences",
@@ -7737,8 +7844,11 @@
   "mapUrl": "https://goo.gl/maps/IJ4b1",
   "facultyUrl": "http://www.bm.ust.hk/isom/faculty-and-staff/directory",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-06",
   "lat": 22.3334901,
   "lng": 114.2647245
  },
@@ -8084,6 +8194,32 @@
   ],
   "lat": 39.9213097,
   "lng": 32.7988233
+ },
+ {
+  "id": "tongji-university__school-of-economics-and-management__operations-management",
+  "institution": "Tongji University",
+  "school": "School of Economics and Management",
+  "department": "Operations Management",
+  "type": "University",
+  "country": "China",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-01"
+ },
+ {
+  "id": "trinity-university__neidorff-school-of-business__finance-and-business-analytics",
+  "institution": "Trinity University",
+  "school": "Neidorff School of Business",
+  "department": "Finance and Business Analytics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-23"
  },
  {
   "id": "tsinghua-university____om-is",
@@ -8857,6 +8993,19 @@
   "lng": -123.2536411
  },
  {
+  "id": "university-of-british-columbia__sauder-school-of-business__transportation-operations",
+  "institution": "University of British Columbia",
+  "school": "Sauder School of Business",
+  "department": "Transportation Operations",
+  "type": "Business School",
+  "country": "Canada",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-08"
+ },
+ {
   "id": "university-of-calgary__haskayne-school-of-business__operations-and-supply-chain-management",
   "institution": "University of Calgary",
   "school": "Haskayne School of Business",
@@ -8912,9 +9061,22 @@
   "lng": -122.2592805
  },
  {
-  "id": "university-of-california-berkeley__walter-a-haas-school-of-business__operations-and-information-technology-management",
+  "id": "university-of-california-berkeley__haas-school-of-business__business-and-public-policy",
   "institution": "University of California, Berkeley",
-  "school": "Walter A. Haas School of Business",
+  "school": "Haas School of Business",
+  "department": "Business and Public Policy",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
+ },
+ {
+  "id": "university-of-california-berkeley__haas-school-of-business__operations-and-information-technology-management",
+  "institution": "University of California, Berkeley",
+  "school": "Haas School of Business",
   "department": "Operations and Information Technology Management",
   "type": "Business School",
   "country": "United States",
@@ -9489,6 +9651,19 @@
   "lastPosted": "2025-08-14"
  },
  {
+  "id": "university-of-hong-kong__hku-business-school__business-analytics-statistics-operations-management-and-info",
+  "institution": "University of Hong Kong",
+  "school": "HKU Business School",
+  "department": "Business Analytics/Statistics, Operations Management, and Information Systems",
+  "type": "Business School",
+  "country": "Hong Kong",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-04-23"
+ },
+ {
   "id": "university-of-houston____decision-and-iis",
   "institution": "University of Houston",
   "department": "Decision and IIS",
@@ -9829,8 +10004,11 @@
   "address": "550 S Limestone, Lexington, KY 40506, USA",
   "facultyUrl": "http://gatton.uky.edu/faculty-research/departments/marketing-supply-chain/directory",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-05",
   "lat": 38.0378977,
   "lng": -84.5066279
  },
@@ -10325,6 +10503,19 @@
   ],
   "n": 1,
   "lastPosted": "2025-09-09"
+ },
+ {
+  "id": "university-of-minnesota__curtis-l-carlson-school-of-management__information-systems",
+  "institution": "University of Minnesota",
+  "school": "Curtis L. Carlson School of Management",
+  "department": "Information Systems",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-11"
  },
  {
   "id": "university-of-minnesota__curtis-l-carlson-school-of-management__supply-chain-and-operations",
@@ -10983,11 +11174,15 @@
   "school": "School of Management",
   "department": "Management Science",
   "type": "Business School",
+  "country": "China",
   "deptUrl": "https://bs.ustc.edu.cn/english/teachers-2.html",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-09"
  },
  {
   "id": "university-of-south-carolina____it",

@@ -7063,20 +7063,20 @@ the module what to expect rather than naming CUHK**, so it stays green on the
 day the sponsorship lapses — a guard about a corpus must not move with the
 corpus.
 
-**And the TEASER is held to its own rule, not to the file** (2026-09-14). The
-home teaser selects the ten newest postings of the season by date and only
-then puts the sponsor first, so the sponsor leads it only while its posting is
-among the ten newest, and a market that posts ten newer ones pushes it out
-with nothing wrong anywhere. The browser check expected the sponsor first
-whenever the FILE held a sponsored posting in the season, and it went red the
-morning the corpus moved: the pull_request run, which tests the merge with
-master's data, met a master whose newest ten no longer held the CUHK posting,
-while the push run of the same commit stayed green. The expectation is now the
-teaser's own selection mirrored (prepare's ten newest, then the comparator),
-and the case the owner asked for, the sponsor leading the teaser with its rail
-inside the panel, is measured on a ROUTED copy of the file with the sponsor's
-posting dated among the ten, so it is measured whatever the corpus holds today
-and stands down on the day the module says nothing can be sponsored.
+**…and the teaser half asks the TEASER's rule, not the jobs page's** (found
+2026-09-14, on the day this branch's check ran over master's data). The home
+block took "the sponsor has a live posting" as its cue and then demanded the
+sponsor LEAD the teaser, but the teaser is the ten most recent postings of the
+market under way and the sponsor only reorders those ten. Ten newer postings
+had arrived since the sponsor's 2026-08-27 advertisement, its card had rightly
+left the teaser, and the block went red for a card missing from a list it had
+no claim on: three failures on every pull-request run that day, including one
+on a branch that had changed nothing near it. It computes the ten itself now,
+against the served file, and asserts BOTH states: the sponsor leads and wears
+the rail while its posting is among the ten, and nothing on the teaser is
+marked while it is not. The "still shows the ten most recent" assertion moved
+out of the branch, since it is the heading's promise rather than the
+sponsor's.
 
 ## What a reader who has not REGISTERED may read
 
@@ -8985,6 +8985,57 @@ Pennsylvania State University.
 `data/past-postings.json` has no daily build to heal it, so it gets a mode of its
 own: **`node _scraper/import-legacy-tables.mjs --heal-names`** (offline, no sheets)
 — run it after adding an alias; it covers all three files the importer writes.
+
+### …and Berkeley's school is "Haas School of Business", at the owner's word
+
+Owner, 2026-09-14, with three screenshots of a crawled Berkeley posting's review
+card: *"I would like to edit it and keep it 'Haas School of Business' but the
+system doesn't let me. Also, I would like 'Haas School of Business' to be the
+correct business school name associated with 'University of California,
+Berkeley'."*
+
+The card was doing exactly what the scoped alias table told it to. The entry
+read `'Haas School of Business': 'Walter A. Haas School of Business'`, under the
+rule that the full official name wins, so the picker offered the long form as
+the only match for what was typed (a typed name that folds onto a listed one
+is on the list, so the "use this name" row is withheld) and the settle-on-blur
+put the long form back into the box. Nothing lets a maintainer keep an alias's
+own source spelling, and nothing should: one spelling per place is the whole
+point of the table. What the owner asked for is the other half, so **the entry
+is flipped**: `'Walter A. Haas School of Business': 'Haas School of Business'`,
+the short name is the canonical one, and the long form is what the workbook,
+the archive and an old link may still carry. The rule's comment now names it as
+the third kind of exception, beside the parenthetical note and the renamed
+school.
+
+**The seeds say what the site publishes.** `oa-institutions.js` and
+`oa-omlist.js` both name the school the short way now. The alias would fold
+the long form either way, and the PolyU pair above was settled by the alias
+alone; here both modules moved with it because the owner named the spelling,
+and a seed that offers a name the canon then rewrites is one edit from being
+read as the canon's mistake. The selftest pins both seeds free of the retired
+form (comments stripped, since the OM list's header records the change).
+
+**Every served file was healed in the same commit**, by the tools this file
+prescribes and never by hand: `build-jobs.mjs --heal-names` (one posting, and
+`vocab.json` rebuilt), `sync-jobmarket-sheet.mjs --heal-names` (the same
+posting on the sheet side), `import-legacy-tables.mjs --heal-names` (one
+archived posting and the map's Berkeley row, whose `id` did not move), then
+`build-directory.mjs` and `build-netmap.mjs`. No posting's `id` moved, since a
+job id is built from the institution alone. **One key did move**: the
+directory row's id is derived from its three names (`directoryRowKey`), so
+the Berkeley card is `…__haas-school-of-business__…` now, and a
+`directoryEdits` correction filed against the old id, if one exists, would
+have to be made again on the new card. That is inherent in renaming a school
+and not special to this one.
+
+Tests: the Haas block in `testSchools` (`_scraper/selftest.mjs`): the long
+form folded onto the short one at two spellings of the university, the short
+one its own canonical form, the three-column canon agreeing, and both seed
+modules free of the retired spelling; and the existing `businessSchoolOf`,
+`advertPlace`, `businessCheck` and `applyEdits` pins, which now expect the
+short name, with the `applyEdits` respelling case typing the retired long
+form to show it still lands on the published one.
 
 **A heal mode is not enough on its own, because `data/` is rewritten from the
 sheets.** The importer must canonicalise ON WRITE as well, and originally it

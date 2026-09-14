@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-12T13:35:43.110Z",
+ "generated": "2026-09-14T07:19:30.969Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -22,6 +22,10 @@
    "n": 6
   },
   {
+   "v": "University of California, Berkeley",
+   "n": 6
+  },
+  {
    "v": "University of Virginia",
    "n": 6
   },
@@ -30,7 +34,7 @@
    "n": 5
   },
   {
-   "v": "University of California, Berkeley",
+   "v": "University of Hong Kong",
    "n": 5
   },
   {
@@ -58,10 +62,6 @@
    "n": 4
   },
   {
-   "v": "University of Hong Kong",
-   "n": 4
-  },
-  {
    "v": "University of Michigan",
    "n": 4
   },
@@ -84,6 +84,10 @@
   {
    "v": "University of Utah",
    "n": 4
+  },
+  {
+   "v": "Carnegie Mellon University",
+   "n": 3
   },
   {
    "v": "Chicago Booth",
@@ -126,6 +130,10 @@
    "n": 3
   },
   {
+   "v": "Miami University",
+   "n": 3
+  },
+  {
    "v": "North Central College",
    "n": 3
   },
@@ -135,6 +143,10 @@
   },
   {
    "v": "Prince Mohammad Bin Fahd University",
+   "n": 3
+  },
+  {
+   "v": "Shanghai Jiao Tong University",
    "n": 3
   },
   {
@@ -155,6 +167,10 @@
   },
   {
    "v": "University College Dublin",
+   "n": 3
+  },
+  {
+   "v": "University of Minnesota",
    "n": 3
   },
   {
@@ -206,7 +222,7 @@
    "n": 2
   },
   {
-   "v": "Carnegie Mellon University",
+   "v": "Boston College",
    "n": 2
   },
   {
@@ -302,10 +318,6 @@
    "n": 2
   },
   {
-   "v": "Miami University",
-   "n": 2
-  },
-  {
    "v": "Michigan State University",
    "n": 2
   },
@@ -315,6 +327,10 @@
   },
   {
    "v": "MIT Sloan",
+   "n": 2
+  },
+  {
+   "v": "Montclair State University",
    "n": 2
   },
   {
@@ -358,6 +374,10 @@
    "n": 2
   },
   {
+   "v": "Technical University of Munich",
+   "n": 2
+  },
+  {
    "v": "Temple University",
    "n": 2
   },
@@ -375,6 +395,10 @@
   },
   {
    "v": "The Chinese University of Hong Kong",
+   "n": 2
+  },
+  {
+   "v": "The Hong Kong University of Science and Technology",
    "n": 2
   },
   {
@@ -402,15 +426,15 @@
    "n": 2
   },
   {
+   "v": "University of Kentucky",
+   "n": 2
+  },
+  {
    "v": "University of Mannheim",
    "n": 2
   },
   {
    "v": "University of Maryland",
-   "n": 2
-  },
-  {
-   "v": "University of Minnesota",
    "n": 2
   },
   {
@@ -550,10 +574,6 @@
    "n": 1
   },
   {
-   "v": "Boston College",
-   "n": 1
-  },
-  {
    "v": "Bowling Green State University",
    "n": 1
   },
@@ -579,6 +599,10 @@
   },
   {
    "v": "California State University, Bakersfield",
+   "n": 1
+  },
+  {
+   "v": "California State University, Channel Islands",
    "n": 1
   },
   {
@@ -723,6 +747,14 @@
   },
   {
    "v": "Frankfurt School of Finance and Management",
+   "n": 1
+  },
+  {
+   "v": "Franklin and Marshall College",
+   "n": 1
+  },
+  {
+   "v": "Fudan University",
    "n": 1
   },
   {
@@ -890,10 +922,6 @@
    "n": 1
   },
   {
-   "v": "Montclair State University",
-   "n": 1
-  },
-  {
    "v": "Morningside University",
    "n": 1
   },
@@ -1026,6 +1054,10 @@
    "n": 1
   },
   {
+   "v": "Sabanci University",
+   "n": 1
+  },
+  {
    "v": "Saint Louis University",
    "n": 1
   },
@@ -1059,10 +1091,6 @@
   },
   {
    "v": "Savannah State University",
-   "n": 1
-  },
-  {
-   "v": "Shanghai Jiao Tong University",
    "n": 1
   },
   {
@@ -1138,10 +1166,6 @@
    "n": 1
   },
   {
-   "v": "Technical University of Munich",
-   "n": 1
-  },
-  {
    "v": "Tennessee State University",
    "n": 1
   },
@@ -1166,11 +1190,15 @@
    "n": 1
   },
   {
-   "v": "The Hong Kong University of Science and Technology",
+   "v": "The University of Memphis",
    "n": 1
   },
   {
-   "v": "The University of Memphis",
+   "v": "Tongji University",
+   "n": 1
+  },
+  {
+   "v": "Trinity University",
    "n": 1
   },
   {
@@ -1254,6 +1282,10 @@
    "n": 1
   },
   {
+   "v": "University of British Columbia",
+   "n": 1
+  },
+  {
    "v": "University of California Riverside",
    "n": 1
   },
@@ -1299,10 +1331,6 @@
   },
   {
    "v": "University of Kansas",
-   "n": 1
-  },
-  {
-   "v": "University of Kentucky",
    "n": 1
   },
   {
@@ -1375,6 +1403,10 @@
   },
   {
    "v": "University of Pittsburgh",
+   "n": 1
+  },
+  {
+   "v": "University of Science and Technology of China",
    "n": 1
   },
   {
@@ -1646,10 +1678,6 @@
    "n": 0
   },
   {
-   "v": "Fudan University",
-   "n": 0
-  },
-  {
    "v": "George Washington University",
    "n": 0
   },
@@ -1790,10 +1818,6 @@
    "n": 0
   },
   {
-   "v": "Sabanci University",
-   "n": 0
-  },
-  {
    "v": "San Francisco State University (SFSU)",
    "n": 0
   },
@@ -1871,10 +1895,6 @@
   },
   {
    "v": "University of Arkansas at Fayetteville",
-   "n": 0
-  },
-  {
-   "v": "University of British Columbia",
    "n": 0
   },
   {
@@ -1987,10 +2007,6 @@
   },
   {
    "v": "University of Rochester",
-   "n": 0
-  },
-  {
-   "v": "University of Science and Technology of China",
    "n": 0
   },
   {
@@ -2116,11 +2132,23 @@
    "n": 3
   },
   {
+   "v": "Antai College of Economics and Management",
+   "n": 2
+  },
+  {
+   "v": "Curtis L. Carlson School of Management",
+   "n": 2
+  },
+  {
    "v": "Edwin L. Cox School of Business",
    "n": 2
   },
   {
    "v": "Fox School of Business",
+   "n": 2
+  },
+  {
+   "v": "Haas School of Business",
    "n": 2
   },
   {
@@ -2141,6 +2169,10 @@
   },
   {
    "v": "NUS Business School",
+   "n": 2
+  },
+  {
+   "v": "School of Management",
    "n": 2
   },
   {
@@ -2212,10 +2244,6 @@
    "n": 1
   },
   {
-   "v": "Curtis L. Carlson School of Management",
-   "n": 1
-  },
-  {
    "v": "David D. Reh School of Business",
    "n": 1
   },
@@ -2240,7 +2268,15 @@
    "n": 1
   },
   {
+   "v": "Feliciano School of Business",
+   "n": 1
+  },
+  {
    "v": "Frank G. Zarb School of Business",
+   "n": 1
+  },
+  {
+   "v": "Gatton College of Business and Economics",
    "n": 1
   },
   {
@@ -2261,6 +2297,14 @@
   },
   {
    "v": "Heinz College of Information Systems and Public Policy",
+   "n": 1
+  },
+  {
+   "v": "HKU Business School",
+   "n": 1
+  },
+  {
+   "v": "HKUST School of Business and Management",
    "n": 1
   },
   {
@@ -2304,6 +2348,10 @@
    "n": 1
   },
   {
+   "v": "Martin V. Smith School of Business and Economics",
+   "n": 1
+  },
+  {
    "v": "Mays Business School",
    "n": 1
   },
@@ -2344,6 +2392,10 @@
    "n": 1
   },
   {
+   "v": "Neidorff School of Business",
+   "n": 1
+  },
+  {
    "v": "Parker College of Business",
    "n": 1
   },
@@ -2353,6 +2405,14 @@
   },
   {
    "v": "Rosen School of Business",
+   "n": 1
+  },
+  {
+   "v": "Sabanci Business School",
+   "n": 1
+  },
+  {
+   "v": "Sauder School of Business",
    "n": 1
   },
   {
@@ -2376,6 +2436,10 @@
    "n": 1
   },
   {
+   "v": "School of Economics and Management",
+   "n": 1
+  },
+  {
    "v": "School of Engineering",
    "n": 1
   },
@@ -2396,6 +2460,10 @@
    "n": 1
   },
   {
+   "v": "Tepper School of Business",
+   "n": 1
+  },
+  {
    "v": "Tilburg School of Economics and Management",
    "n": 1
   },
@@ -2409,10 +2477,6 @@
   },
   {
    "v": "Villanova School of Business",
-   "n": 1
-  },
-  {
-   "v": "Walter A. Haas School of Business",
    "n": 1
   },
   {
@@ -2433,10 +2497,6 @@
   },
   {
    "v": "Amsterdam Business School, Amsterdam School of Economics",
-   "n": 0
-  },
-  {
-   "v": "Antai College of Economics and Management",
    "n": 0
   },
   {
@@ -2568,10 +2628,6 @@
    "n": 0
   },
   {
-   "v": "Feliciano School of Business",
-   "n": 0
-  },
-  {
    "v": "Freeman College of Management",
    "n": 0
   },
@@ -2585,10 +2641,6 @@
   },
   {
    "v": "G. Brint Ryan College of Business",
-   "n": 0
-  },
-  {
-   "v": "Gatton College of Business and Economics",
    "n": 0
   },
   {
@@ -2621,10 +2673,6 @@
   },
   {
    "v": "Heller School for Social Policy and Management",
-   "n": 0
-  },
-  {
-   "v": "HKUST School of Business and Management",
    "n": 0
   },
   {
@@ -2836,10 +2884,6 @@
    "n": 0
   },
   {
-   "v": "Sauder School of Business",
-   "n": 0
-  },
-  {
    "v": "Scheller College of Business",
    "n": 0
   },
@@ -2868,10 +2912,6 @@
    "n": 0
   },
   {
-   "v": "School of Economics and Management",
-   "n": 0
-  },
-  {
    "v": "School of Industrial Engineering",
    "n": 0
   },
@@ -2893,10 +2933,6 @@
   },
   {
    "v": "School of International Business Administration",
-   "n": 0
-  },
-  {
-   "v": "School of Management",
    "n": 0
   },
   {
@@ -2941,10 +2977,6 @@
   },
   {
    "v": "Suliman S. Olayan School of Business",
-   "n": 0
-  },
-  {
-   "v": "Tepper School of Business",
    "n": 0
   },
   {
@@ -3031,7 +3063,7 @@
   },
   {
    "v": "Management Science",
-   "n": 9
+   "n": 12
   },
   {
    "v": "Data Analytics",
@@ -3040,6 +3072,14 @@
   {
    "v": "Business Analytics",
    "n": 7
+  },
+  {
+   "v": "Operations Management",
+   "n": 7
+  },
+  {
+   "v": "Business",
+   "n": 6
   },
   {
    "v": "Information Systems and Operations Management",
@@ -3058,10 +3098,6 @@
    "n": 5
   },
   {
-   "v": "Business",
-   "n": 5
-  },
-  {
    "v": "Business Administration",
    "n": 5
   },
@@ -3071,10 +3107,6 @@
   },
   {
    "v": "Operations and Supply Chain Management",
-   "n": 5
-  },
-  {
-   "v": "Operations Management",
    "n": 5
   },
   {
@@ -3138,6 +3170,10 @@
    "n": 2
   },
   {
+   "v": "Business Analytics and Information Systems",
+   "n": 2
+  },
+  {
    "v": "Business Analytics and Statistics",
    "n": 2
   },
@@ -3171,6 +3207,14 @@
   },
   {
    "v": "Industrial Engineering and Operations Research",
+   "n": 2
+  },
+  {
+   "v": "Information Systems",
+   "n": 2
+  },
+  {
+   "v": "Information Systems and Analytics",
    "n": 2
   },
   {
@@ -3247,6 +3291,10 @@
   },
   {
    "v": "Sustainable Management",
+   "n": 2
+  },
+  {
+   "v": "Technology Management",
    "n": 2
   },
   {
@@ -3334,15 +3382,19 @@
    "n": 1
   },
   {
-   "v": "Business Analytics and Information Systems",
-   "n": 1
-  },
-  {
    "v": "Business Analytics, Operations Management, Project Management",
    "n": 1
   },
   {
+   "v": "Business Analytics/Statistics, Operations Management, and Information Systems",
+   "n": 1
+  },
+  {
    "v": "Business and Public Administration",
+   "n": 1
+  },
+  {
+   "v": "Business and Public Policy",
    "n": 1
   },
   {
@@ -3382,7 +3434,15 @@
    "n": 1
   },
   {
+   "v": "Business Technologies",
+   "n": 1
+  },
+  {
    "v": "Business Technology",
+   "n": 1
+  },
+  {
+   "v": "Business, Organizations and Society",
    "n": 1
   },
   {
@@ -3419,6 +3479,10 @@
   },
   {
    "v": "data analytics and AI",
+   "n": 1
+  },
+  {
+   "v": "Data and Business Intelligence",
    "n": 1
   },
   {
@@ -3475,6 +3539,10 @@
   },
   {
    "v": "Engineering Systems and Design",
+   "n": 1
+  },
+  {
+   "v": "Finance and Business Analytics",
    "n": 1
   },
   {
@@ -3542,15 +3610,11 @@
    "n": 1
   },
   {
+   "v": "Information Management and Business Analytics",
+   "n": 1
+  },
+  {
    "v": "Information Science and Systems",
-   "n": 1
-  },
-  {
-   "v": "Information Systems",
-   "n": 1
-  },
-  {
-   "v": "Information Systems and Analytics",
    "n": 1
   },
   {
@@ -3559,6 +3623,10 @@
   },
   {
    "v": "Information Systems and Technology",
+   "n": 1
+  },
+  {
+   "v": "Information Systems, Business Statistics and Operations Management",
    "n": 1
   },
   {
@@ -3711,6 +3779,10 @@
   },
   {
    "v": "Marketing and SCM",
+   "n": 1
+  },
+  {
+   "v": "Marketing and Supply Chain",
    "n": 1
   },
   {
@@ -4054,15 +4126,15 @@
    "n": 1
   },
   {
-   "v": "Technology Management",
-   "n": 1
-  },
-  {
    "v": "The research group of Prof. Yiming Zhang",
    "n": 1
   },
   {
    "v": "Transport and Logistics Management",
+   "n": 1
+  },
+  {
+   "v": "Transportation Operations",
    "n": 1
   },
   {
@@ -4234,10 +4306,6 @@
    "n": 0
   },
   {
-   "v": "Information Management and Business Analytics",
-   "n": 0
-  },
-  {
    "v": "Information Systems & Operations Management",
    "n": 0
   },
@@ -4251,10 +4319,6 @@
   },
   {
    "v": "Information Systems and Technology Management",
-   "n": 0
-  },
-  {
-   "v": "Information Systems, Business Statistics and Operations Management",
    "n": 0
   },
   {
@@ -4379,10 +4443,6 @@
   },
   {
    "v": "Marketing and Logistics",
-   "n": 0
-  },
-  {
-   "v": "Marketing and Supply Chain",
    "n": 0
   },
   {
@@ -5041,11 +5101,13 @@
    ],
    "units": [
     "BA",
+    "Business",
     "Business Analytics"
    ],
    "bySchool": {
     "": [
-     "BA"
+     "BA",
+     "Business"
     ],
     "Carroll School of Management": [
      "Business Analytics"
@@ -5175,6 +5237,19 @@
     ]
    }
   },
+  "California State University, Channel Islands": {
+   "schools": [
+    "Martin V. Smith School of Business and Economics"
+   ],
+   "units": [
+    "Operations Management"
+   ],
+   "bySchool": {
+    "Martin V. Smith School of Business and Economics": [
+     "Operations Management"
+    ]
+   }
+  },
   "California State University, East Bay": {
    "schools": [
     "College of Business and Economics"
@@ -5273,6 +5348,7 @@
     "Tepper School of Business"
    ],
    "units": [
+    "Business Technologies",
     "Contextualized Evaluation of AI for Healthcare",
     "Heinz College",
     "Operations Management"
@@ -5282,6 +5358,7 @@
      "Contextualized Evaluation of AI for Healthcare"
     ],
     "Tepper School of Business": [
+     "Business Technologies",
      "Heinz College",
      "Operations Management"
     ]
@@ -6168,6 +6245,17 @@
     "": [
      "BA/OM",
      "Management"
+    ]
+   }
+  },
+  "Franklin and Marshall College": {
+   "schools": [],
+   "units": [
+    "Business, Organizations and Society"
+   ],
+   "bySchool": {
+    "": [
+     "Business, Organizations and Society"
     ]
    }
   },
@@ -7179,11 +7267,13 @@
    "schools": [],
    "units": [
     "Emerging Technology in Business and Design",
+    "Information Systems and Analytics",
     "Information Systems and Technology"
    ],
    "bySchool": {
     "": [
      "Emerging Technology in Business and Design",
+     "Information Systems and Analytics",
      "Information Systems and Technology"
     ]
    }
@@ -8104,10 +8194,17 @@
   },
   "Sabanci University": {
    "schools": [
-    "Faculty of Engineering and Natural Sciences (FENS)"
+    "Faculty of Engineering and Natural Sciences (FENS)",
+    "Sabanci Business School"
    ],
-   "units": [],
-   "bySchool": {}
+   "units": [
+    "Business Analytics and Information Systems"
+   ],
+   "bySchool": {
+    "Sabanci Business School": [
+     "Business Analytics and Information Systems"
+    ]
+   }
   },
   "Saint Louis University": {
    "schools": [],
@@ -8269,6 +8366,7 @@
    ],
    "units": [
     "BA/OM/OR/Stochastic models/Data-driven/AI",
+    "Data and Business Intelligence",
     "Management Science"
    ],
    "bySchool": {
@@ -8276,6 +8374,7 @@
      "BA/OM/OR/Stochastic models/Data-driven/AI"
     ],
     "Antai College of Economics and Management": [
+     "Data and Business Intelligence",
      "Management Science"
     ]
    }
@@ -8663,11 +8762,13 @@
    "units": [
     "Operations and Supply Chain Management",
     "Operations and Technology",
-    "Operations Research and AI"
+    "Operations Research and AI",
+    "Technology Management"
    ],
    "bySchool": {
     "": [
-     "Operations Research and AI"
+     "Operations Research and AI",
+     "Technology Management"
     ],
     "TUM School of Management": [
      "Operations and Supply Chain Management",
@@ -9026,6 +9127,32 @@
    "bySchool": {
     "": [
      "Business Administration"
+    ]
+   }
+  },
+  "Tongji University": {
+   "schools": [
+    "School of Economics and Management"
+   ],
+   "units": [
+    "Operations Management"
+   ],
+   "bySchool": {
+    "School of Economics and Management": [
+     "Operations Management"
+    ]
+   }
+  },
+  "Trinity University": {
+   "schools": [
+    "Neidorff School of Business"
+   ],
+   "units": [
+    "Finance and Business Analytics"
+   ],
+   "bySchool": {
+    "Neidorff School of Business": [
+     "Finance and Business Analytics"
     ]
    }
   },
@@ -9446,11 +9573,13 @@
     "Sauder School of Business"
    ],
    "units": [
-    "Operations and Logistics"
+    "Operations and Logistics",
+    "Transportation Operations"
    ],
    "bySchool": {
     "Sauder School of Business": [
-     "Operations and Logistics"
+     "Operations and Logistics",
+     "Transportation Operations"
     ]
    }
   },
@@ -9499,9 +9628,10 @@
   },
   "University of California, Berkeley": {
    "schools": [
-    "Walter A. Haas School of Business"
+    "Haas School of Business"
    ],
    "units": [
+    "Business and Public Policy",
     "IEOR",
     "IEOR, decision analytics",
     "Industrial Engineering and Operations Research",
@@ -9513,7 +9643,8 @@
      "IEOR, decision analytics",
      "Industrial Engineering and Operations Research"
     ],
-    "Walter A. Haas School of Business": [
+    "Haas School of Business": [
+     "Business and Public Policy",
      "Operations and Information Technology Management"
     ]
    }
@@ -9758,10 +9889,12 @@
   },
   "University of Hong Kong": {
    "schools": [
-    "Faculty of Business and Economics"
+    "Faculty of Business and Economics",
+    "HKU Business School"
    ],
    "units": [
     "BA",
+    "Business Analytics/Statistics, Operations Management, and Information Systems",
     "Data and Systems Engineering",
     "Information and Innovation Management"
    ],
@@ -9772,6 +9905,9 @@
     ],
     "Faculty of Business and Economics": [
      "Information and Innovation Management"
+    ],
+    "HKU Business School": [
+     "Business Analytics/Statistics, Operations Management, and Information Systems"
     ]
    }
   },
@@ -10180,6 +10316,7 @@
    ],
    "units": [
     "Industrial and Systems Engineering (ISyE)",
+    "Information Systems",
     "OM/SCM",
     "Supply Chain and Operations"
    ],
@@ -10188,6 +10325,7 @@
      "OM/SCM"
     ],
     "Curtis L. Carlson School of Management": [
+     "Information Systems",
      "Supply Chain and Operations"
     ],
     "School of Science and Engineering": [
@@ -11546,6 +11684,7 @@
    "Decisions, Operations and Technology Management"
   ],
   "Antai College of Economics and Management": [
+   "Data and Business Intelligence",
    "Management Science"
   ],
   "Bayes Business School": [
@@ -11670,6 +11809,7 @@
    "Information Systems, Statistics, and Management Science"
   ],
   "Curtis L. Carlson School of Management": [
+   "Information Systems",
    "Supply Chain and Operations"
   ],
   "D'Amore-McKim School of Business": [
@@ -11789,6 +11929,10 @@
   "Guanghua School of Management": [
    "Management Science and Information System"
   ],
+  "Haas School of Business": [
+   "Business and Public Policy",
+   "Operations and Information Technology Management"
+  ],
   "Harbert College of Business": [
    "Supply Chain Management"
   ],
@@ -11805,6 +11949,9 @@
   ],
   "Hebrew University Business School": [
    "Operations Research"
+  ],
+  "HKU Business School": [
+   "Business Analytics/Statistics, Operations Management, and Information Systems"
   ],
   "HKUST School of Business and Management": [
    "Information Systems, Business Statistics and Operations Management"
@@ -11924,6 +12071,9 @@
   "Marshall School of Business": [
    "Data Sciences and Operations"
   ],
+  "Martin V. Smith School of Business and Economics": [
+   "Operations Management"
+  ],
   "Max M. Fisher College of Business": [
    "Management Science",
    "Marketing and Logistics",
@@ -11994,6 +12144,9 @@
   "Neeley School of Business": [
    "Information Systems and Supply Chain Management"
   ],
+  "Neidorff School of Business": [
+   "Finance and Business Analytics"
+  ],
   "NUS Business School": [
    "Analytics and Operations"
   ],
@@ -12058,6 +12211,9 @@
   "Rutgers Business School": [
    "Supply Chain Management"
   ],
+  "Sabanci Business School": [
+   "Business Analytics and Information Systems"
+  ],
   "Saïd Business School": [
    "Management Science",
    "Technology and Operations Management"
@@ -12066,7 +12222,8 @@
    "Supply Chain Management"
   ],
   "Sauder School of Business": [
-   "Operations and Logistics"
+   "Operations and Logistics",
+   "Transportation Operations"
   ],
   "Scheller College of Business": [
    "Operations Management"
@@ -12117,7 +12274,8 @@
    "Operations and Quantitative Methods"
   ],
   "School of Economics and Management": [
-   "Management Science and Engineering"
+   "Management Science and Engineering",
+   "Operations Management"
   ],
   "School of Engineering": [
    "Industrial and Systems Engineering",
@@ -12184,6 +12342,7 @@
    "Business Information and Decision Systems"
   ],
   "Tepper School of Business": [
+   "Business Technologies",
    "Heinz College",
    "Operations Management"
   ],
@@ -12224,9 +12383,6 @@
   ],
   "W. P. Carey School of Business": [
    "Supply Chain Management"
-  ],
-  "Walter A. Haas School of Business": [
-   "Operations and Information Technology Management"
   ],
   "Warrington College of Business": [
    "Information Systems and Operations Management"

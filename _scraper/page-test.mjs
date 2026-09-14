@@ -4695,118 +4695,82 @@ for (const [from, hash] of [
     eq(firstCard.rails, 0, 'sponsors: …and no card carries a rail');
   }
 
-  /* THE HOME PAGE selects the ten newest postings of the season by DATE and
-     then orders them, sponsor first (owner, 2026-08-29, from a screenshot of
-     the mark on the SECOND card). So the sponsor leads the teaser only while
-     its posting is AMONG the ten newest, and a market that posts ten newer
-     ones pushes it out with nothing wrong anywhere. This check used to expect
-     the sponsor first whenever the FILE held a sponsored posting in the
-     season, and it went red on 2026-09-14 for exactly that: the pull_request
-     run, which tests the merge with master's data, met a master whose newest
-     ten no longer held the CUHK posting, while the push run of the same
-     commit stayed green. A guard about a corpus must not move with the
-     corpus, so the expectation is now the teaser's OWN rule mirrored over
-     the served file (prepare's ten newest, then the module's comparator), and
-     the property the owner asked for is measured on a ROUTED copy of the
-     file in which the sponsor's posting is dated among the ten, whatever the
-     live file holds today. */
-  const readTeaser = (pg) => pg.evaluate(() => {
+  /* THE HOME PAGE badges but does NOT reorder — its teaser promises the ten
+     most recent postings, and a lead row would make that heading false. */
+  const hp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await hp.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
+  await hp.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
+  const home = await hp.evaluate(() => {
     const cards = [...document.querySelectorAll('#oa-jobs-recent .oa-card')];
-    const railed = document.querySelector('#oa-jobs-recent .oa-card.oa-sponsored');
-    const cs = railed && getComputedStyle(railed);
     return {
       dates: cards.length,
       first: cards.length ? cards[0].querySelector('.oa-card-title').textContent.trim() : '',
-      firstRailed: !!(cards.length && cards[0].classList.contains('oa-sponsored')),
+      railed: !!(cards.length && cards[0].classList.contains('oa-sponsored')),
       marked: document.querySelectorAll('#oa-jobs-recent .oa-label-sponsor').length,
-      rails: document.querySelectorAll('#oa-jobs-recent .oa-card.oa-sponsored').length,
-      shown: cards.map((c) => c.querySelector('.oa-card-title').textContent.trim()).sort(),
-      rail: cs ? { w: cs.borderLeftWidth, other: cs.borderTopWidth } : null,
     };
   });
-  /* The teaser's own rule, mirrored: what index.html's prepare selects and
-     what OASponsors.compare then puts first, over whatever rows the page is
-     reading. Asked of the PAGE, so the modules answering are the ones the
-     cards were drawn from. */
-  const expectTeaser = (pg) => pg.evaluate(async () => {
+  ok(home.dates > 0, 'sponsors: the home page teaser still renders');
+
+  /* THE TEASER'S OWN RULE, asked of the data rather than assumed. The teaser
+     is the ten most recent postings of the market under way (prepare in
+     index.html) and the sponsor only REORDERS them, so the sponsor's posting
+     leads the teaser exactly while it is one of those ten. Measured against
+     the live file, the way `expected` is: on 2026-09-14 ten newer postings
+     had arrived since the sponsor's, its card had rightly left the teaser,
+     and this block went red for the sponsor being missing from a list it
+     had no claim on. A guard about a corpus must not move with the corpus,
+     and a sponsor outside the ten is the true state on both sides of the
+     roll, so both branches are asserted. */
+  const teaser = await hp.evaluate(async () => {
     const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
     const ten = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
       .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
       .slice(0, 10);
-    const ordered = ten.slice().sort((a, b) => window.OASponsors.compare(a, b));
-    return {
-      first: ordered.length ? ordered[0].institution : '',
-      sponsored: ten.filter((r) => window.OASponsors.isSponsored(r)).length,
-      shown: ten.map((r) => r.institution).sort(),
-    };
+    const marked = ten.filter((r) => window.OASponsors.isSponsored(r));
+    return { any: marked.length > 0, first: marked.length ? marked[0].institution : '' };
   });
-  const checkTeaser = (home, want, tag) => {
-    ok(home.dates > 0, `sponsors (${tag}): the home page teaser renders`);
-    eq(home.first, want.first,
-      `sponsors (${tag}): the teaser opens on what its own rule puts first: the sponsor while its posting is among the ten newest, else the newest posting`);
-    eq(home.marked, want.sponsored,
-      `sponsors (${tag}): the teaser marks exactly the sponsored postings among its ten`);
-    eq(home.rails, want.sponsored, `sponsors (${tag}): …and rails exactly those`);
-    eq(home.shown, want.shown,
-      `sponsors (${tag}): …and the teaser still SHOWS the ten most recent, only their order changed`);
-    if (want.sponsored) {
-      eq(home.firstRailed, true,
-        `sponsors (${tag}): the sponsor LEADS the home teaser too (owner, from a screenshot), rail INSIDE the panel`);
-      /* THE BUG THIS MISSED THE FIRST TIME. The rail was measured on
-         jobs.html and nowhere else, so `body.v3 .v3-panel .oa-card { border: 0 }`,
-         same specificity, ~600 lines later, blanked it on this page while
-         every check stayed green. Measure the painted width HERE, on the card
-         the screenshot was taken of. */
-      ok(home.rail, `sponsors (${tag}): the teaser marks the sponsored card`);
-      if (home.rail) {
-        eq(home.rail.w, '3px',
-          `sponsors (${tag}): the teaser rail is a real 3px edge, not blanked by the panel reset`);
-        ok(home.rail.w !== home.rail.other, `sponsors (${tag}): …and still only on the left`);
-      }
-    }
-  };
-
-  const hp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-  await hp.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
-  await hp.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
-  checkTeaser(await readTeaser(hp), await expectTeaser(hp), 'live file');
-  await hp.close();
-
-  /* …AND THE OWNER'S CASE, WHATEVER THE CORPUS HOLDS. The sponsor's posting
-     is re-dated to the newest day the season has seen (today, or a later day
-     the file already carries) and put AHEAD of every row, so prepare's ten
-     hold it by construction and nothing else in the file is touched. The
-     module is asked whether the re-dated row is still sponsored: on the day
-     the sponsorship lapses no row can be, there is nothing to route, and the
-     branch stands down rather than going red. */
-  const fixture = await sp.evaluate(async () => {
-    const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
-    const today = new Date().toISOString().slice(0, 10);
-    const newest = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
-      .map((r) => String(r.posted || '')).sort().pop() || today;
-    const when = newest > today ? newest : today;
-    const base = rows.find((r) => window.OASponsors.isSponsored(Object.assign({}, r, { posted: when })));
-    if (!base) return null;
-    const lead = Object.assign({}, base, { posted: when });
-    return { lead: lead.institution, rows: [lead].concat(rows.filter((r) => r !== base)) };
-  });
-  if (fixture) {
-    const rp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-    await rp.route('**/data/jobs.json*', (r) => r.fulfill({ status: 200,
-      contentType: 'application/json', body: JSON.stringify(fixture.rows) }));
-    await rp.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
-    await rp.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
-    const want = await expectTeaser(rp);
-    /* The fixture did what it was built to, or the branch below would pass
-       for a teaser with no sponsor in it. */
-    ok(want.sponsored > 0 && want.first === fixture.lead,
-      'sponsors (routed file): the re-dated sponsor posting is among the ten and the rule puts it first');
-    checkTeaser(await readTeaser(rp), want, 'routed file');
-    await rp.close();
-  } else {
-    ok(!expected.any,
-      'sponsors: no row in the file can be sponsored today, so the live jobs page found nothing sponsored either');
+  if (expected.any && !teaser.any) {
+    eq(home.marked, 0,
+      'sponsors: a sponsored posting outside the ten newest is not on the teaser, so nothing there is marked');
+    eq(home.railed, false, 'sponsors: …and no teaser card carries the rail');
   }
+  if (teaser.any) {
+    eq(home.first, teaser.first,
+      'sponsors: the sponsor LEADS the home teaser too (owner, from a screenshot)');
+    eq(home.railed, true,
+      'sponsors: …and its card carries the rail INSIDE the panel, which resets every border');
+
+    /* THE BUG THIS MISSED THE FIRST TIME. The rail was measured on jobs.html
+       and nowhere else, so `body.v3 .v3-panel .oa-card { border: 0 }` — same
+       specificity, ~600 lines later — blanked it on this page while every
+       check stayed green. Measure the painted width HERE, on the card the
+       screenshot was taken of. */
+    const rail = await hp.evaluate(() => {
+      const c = document.querySelector('#oa-jobs-recent .oa-card.oa-sponsored');
+      if (!c) return null;
+      const cs = getComputedStyle(c);
+      return { w: cs.borderLeftWidth, other: cs.borderTopWidth };
+    });
+    ok(rail, 'sponsors: the teaser marks the sponsored card');
+    if (rail) {
+      eq(rail.w, '3px', 'sponsors: the teaser rail is a real 3px edge, not blanked by the panel reset');
+      ok(rail.w !== rail.other, 'sponsors: …and still only on the left');
+    }
+  }
+  /* The SELECTION is still the ten newest — the heading says which ten, and
+     reordering them must not change which ten. Asserted whether or not the
+     sponsor is among them: it is the heading's promise, not the sponsor's. */
+  const newestTen = await hp.evaluate(async () => {
+    const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
+    return rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
+      .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
+      .slice(0, 10).map((r) => r.institution).sort();
+  });
+  const shown = await hp.evaluate(() => [...document.querySelectorAll('#oa-jobs-recent .oa-card')]
+    .map((c) => c.querySelector('.oa-card-title').textContent.trim()).sort());
+  eq(shown, newestTen,
+    'sponsors: …and the teaser still SHOWS the ten most recent — only their order changed');
+  await hp.close();
   await sp.close();
 }
 

@@ -34,7 +34,10 @@
    department row it also arrives as), and ISB's generic "School of Business"
    -> "Indian School of Business", the group the site already carries (the OM
    list labels a standalone school's card that way — INSEAD's says the same —
-   and at ISB the site's own group is named after the school itself). A FUTURE
+   and at ISB the site's own group is named after the school itself). A ninth
+   arrived on 2026-09-14: the OM list's "Walter A. Haas School of Business" is
+   "Haas School of Business" here, the owner's own name for it (the scoped
+   alias in oa-schools.js folds the long form either way). A FUTURE
    regeneration must keep these or re-rule them — the selftest's wiring block
    fails on a near-duplicate school group the moment one is dropped.
 
@@ -297,7 +300,7 @@
       d: [{ n: 'Operations and Supply Chain Management', url: 'https://haskayne.ucalgary.ca/research-and-faculty/academic-areas/operations-and-supply-chain-management' }] },
     { u: 'University of California San Diego', s: 'Rady School of Management',
       d: [{ n: 'Innovation, Technology and Operations', url: 'https://rady.ucsd.edu/faculty-research/faculty-directory/index.html' }] },
-    { u: 'University of California, Berkeley', s: 'Walter A. Haas School of Business',
+    { u: 'University of California, Berkeley', s: 'Haas School of Business',
       d: [{ n: 'Operations and Information Technology Management', url: 'https://haas.berkeley.edu/oitm/faculty/' }] },
     { u: 'University of California, Davis', s: 'Graduate School of Management',
       d: [{ n: 'Operations Management', url: 'https://gsm.ucdavis.edu/faculty-and-research/faculty-directory?glossary_filter=All&search=&field_content_group_target_id=70' },
