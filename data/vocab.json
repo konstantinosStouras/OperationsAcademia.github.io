@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:35:30.394Z",
+ "generated": "2026-09-14T06:37:57.368Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -379,6 +379,10 @@
   },
   {
    "v": "The Chinese University of Hong Kong",
+   "n": 2
+  },
+  {
+   "v": "The Hong Kong University of Science and Technology",
    "n": 2
   },
   {
@@ -1171,10 +1175,6 @@
   },
   {
    "v": "The College of New Jersey",
-   "n": 1
-  },
-  {
-   "v": "The Hong Kong University of Science and Technology",
    "n": 1
   },
   {
@@ -2272,6 +2272,10 @@
    "n": 1
   },
   {
+   "v": "HKUST School of Business and Management",
+   "n": 1
+  },
+  {
    "v": "Imperial College Business School",
    "n": 1
   },
@@ -2641,10 +2645,6 @@
   },
   {
    "v": "Heller School for Social Policy and Management",
-   "n": 0
-  },
-  {
-   "v": "HKUST School of Business and Management",
    "n": 0
   },
   {
@@ -3578,6 +3578,10 @@
    "n": 1
   },
   {
+   "v": "Information Systems, Business Statistics and Operations Management",
+   "n": 1
+  },
+  {
    "v": "Information Technology",
    "n": 1
   },
@@ -4271,10 +4275,6 @@
   },
   {
    "v": "Information Systems and Technology Management",
-   "n": 0
-  },
-  {
-   "v": "Information Systems, Business Statistics and Operations Management",
    "n": 0
   },
   {

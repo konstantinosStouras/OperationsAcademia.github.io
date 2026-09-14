@@ -7762,8 +7762,11 @@
   "mapUrl": "https://goo.gl/maps/IJ4b1",
   "facultyUrl": "http://www.bm.ust.hk/isom/faculty-and-staff/directory",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-06",
   "lat": 22.3334901,
   "lng": 114.2647245
  },
