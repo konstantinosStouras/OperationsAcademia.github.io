@@ -7764,7 +7764,9 @@ for (const w of [320, 360, 390, 430]) {
       'sign-in deletion here, and the sweep removes it instead');
     ok(seq.some((l) => l.indexOf('delete userDirectory/') === 0),
       'delete: everything the browser CAN reach still went');
-    ok((await q.textContent('#pa-delete-panel')).indexOf('twenty minutes') !== -1,
+    /* "within a couple of minutes" since 2026-09-14: the order rings the
+       sweep (purgeOnRequest), so the sign-in no longer waits for a build */
+    ok((await q.textContent('#pa-delete-panel')).indexOf('within a couple of minutes') !== -1,
       'delete: …and the card says when the sign-in itself goes, rather than ' +
       'claiming it has');
     eq(errors, [], 'delete: no page errors');

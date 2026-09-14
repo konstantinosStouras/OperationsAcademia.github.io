@@ -1781,8 +1781,8 @@ lost ring lands the reveal at 14:07 at worst. **Do NOT add a GitHub cron at 14:0
 as well**: two producers for one event is the duplicate-doorbell outage under
 "One event, one build", and the selftest refuses a workflow cron on that hour.
 Like every function here it is inert until deployed; the deploy also creates
-the Cloud Scheduler job, and `firebase functions:list` must read back FIFTEEN
-(the four doorbells, `recordVisit`, `sendVerificationEmail` and the nine forum
+the Cloud Scheduler job, and `firebase functions:list` must read back SIXTEEN
+(the five doorbells, `recordVisit`, `sendVerificationEmail` and the nine forum
 callables).
 
 **The alerts' reveal note is keyed on the instant, and its mark is lifted to
@@ -3009,6 +3009,75 @@ its copy have no business in `oa-accounts.js`, which every page downloads; what
 it takes from there is two exports, `survey()` and `deleteSignIn()`, which are
 the merge's own machinery rather than a second copy of it.
 
+### "Deletion queued" for twenty minutes, over a press that should take seconds
+
+Owner, 2026-09-14, of the roster with a row reading **Deletion queued** beside
+Cancel: *"deleting a user should be very fast. Why do I see 'in queue' here?
+how long will it stay there? make it much faster"*.
+
+**Nothing was slow inside the sweep; nothing was ringing it.** The purge
+workflow runs on the jobs build's completion and once a day at 05:17 UTC, and
+that was the whole of what started it. A person's own deletion withdraws
+their postings in the browser, which rings the build through
+`publishOnChange`, so the sweep followed within a couple of minutes and the
+copy on the account page was true. **The maintainer's order withdraws nothing
+itself**, so it rang nothing: it sat as `requested` until the next build
+happened to finish, up to twenty minutes on the :07/:27/:47 schedule, longer
+when GitHub delays the schedule, and overnight until the daily cron on a
+quiet night. The roster hint said "at the site's next update, normally within
+a few minutes", which was the cadence of a posting borrowed for a queue that
+no posting rings, the copy-versus-cadence gap this file already records
+twice. And the chip stayed on the row until the maintainer reloaded, whatever
+had happened behind it.
+
+**So the order rings the sweep: `purgeOnRequest`, the fifth doorbell.** A
+Firestore trigger on `accountDeletions/{uid}` that dispatches
+`oa-account-deletion`, which the purge workflow now answers beside its
+`workflow_run` chain and its cron. The same shape as the four beside it, and
+held to the same rules: it rings on a NEW order only (a browser only ever
+creates one, status `requested`; the sweep's own `clearing` and `done` writes
+must not ring the sweep from inside the sweep, the `CLIENT_STATES` loop one
+collection over), never twice for one order, with the uid and nothing else in
+the payload, since the order carries a name and an address. Cancel is a
+delete and rings nothing.
+
+**It is NOT the callable this section rejected, and the distinction is the
+whole point.** The sweep stays a workflow with the Admin SDK, live on merge;
+the doorbell only makes it prompt, exactly as `publishOnChange` does for a
+posting. Inert until the functions are deployed, and while it is inert nothing
+is lost: the build chain and the daily cron carry a deletion on the old
+cadence. **The deploy count is SIXTEEN** for it, moved in the header, both
+setup pages and every count sentence in this file, so a deploy read back at
+fifteen is a stale checkout. `git pull && npm install --prefix _functions &&
+firebase deploy --only functions --project operations-academia`, and read
+sixteen back.
+
+**And the roster watches, so the row goes on its own.** While a row on screen
+carries a `requested` order, `watchQueued` in `oa-users.js` reads that ORDER
+document every fifteen seconds, for ten minutes at most, and reloads the
+roster once when the status has moved on (`clearing`, `done`, or the order
+gone because it was called off in another tab): the sweep's clearing pass
+deletes the roster row, so the reload is what drops it. The order documents
+alone, never the roster, one small read per queued row per tick, so a
+doorbell that is down costs a few dozen reads and nothing else; a read that
+fails is unknown and keeps waiting rather than reloading over an order that
+may not have moved. The chip's tooltip and the hint say the cadence; the hint
+keeps "at the site's next update at the latest" because that is true on both
+sides of the deploy, and the self-deletion card says the sign-in goes "within
+a couple of minutes" rather than the "twenty" it said, for the same reason a
+person's own order now rings too.
+
+**What is deliberately unchanged**: the second stage's four gates. The hour
+after the sign-in goes is a token's lifetime and the build grace is what
+keeps a document from going under a row still served, and neither is visible
+on the roster, whose row is gone from the clearing pass.
+
+Tests: the doorbell block of `testAccountDeletion` (the function, its
+document, the request-only guard both ways, the shared ring with the uid
+alone, the workflow answering the event with its chain and cron kept, the
+roster's watch and the copy on the hint, the policy and the card), and the
+count pins that read sixteen.
+
 Tests: `testAccountDeletion` in `_scraper/selftest.mjs` (the rules against
 `REQUEST_KEYS` both ways, the `by` pin, the no-update argument and the disjoint
 key sets, the cancel window, the pure halves including that a finished order
@@ -3177,8 +3246,9 @@ live site's from `assets/v3.css`, the button is a coloured table cell with a
 VML fallback for Outlook, and the link is written out in full as text as well
 as behind the button.
 
-**The deploy count is FIFTEEN now.** Four doorbells (`revealCandidates` among
-them), `recordVisit`, `sendVerificationEmail`, and the nine forum callables
+**The deploy count is SIXTEEN now.** Five doorbells (`revealCandidates` and
+`purgeOnRequest` among them), `recordVisit`, `sendVerificationEmail`, and the
+nine forum callables
 (see "The forum"). Read the list back after every deploy; fewer means a stale
 checkout. `npm install --prefix _functions` first, since the CLI loads
 `index.js` and this function requires `nodemailer`.
@@ -4159,24 +4229,26 @@ deliberately NOT named in any workflow: the "every builder has a caller,
 never both" guard refuses a builder both in `BUILDERS` and in a workflow, and
 the byte pin already catches drift, so the `--check` mode is for a hand run.
 
-**The deploy count is FIFTEEN.** `_functions/index.js` re-exports the nine
+**The deploy count is SIXTEEN.** `_functions/index.js` re-exports the nine
 callables one per line (`exports.forumX = forum.forumX;`) so a deploy's
 per-function lines and the selftest's count of them agree; the header, both
 setup pages and the count sentences in this file moved from six together,
 again from twelve when `forumDelete` arrived, from thirteen when
-`forumAccept` did, and from fourteen when `forumView` did.
+`forumAccept` did, from fourteen when `forumView` did, and from fifteen when
+the account-deletion doorbell `purgeOnRequest` did (2026-09-14).
 `npm install --prefix _functions` first, as always: `@google-cloud/secret-
 manager` arrived with the forum and the CLI's own load of `index.js` dies on
 a `require` it cannot resolve. Owner, by hand, once: `firebase
 functions:secrets:set FORUM_SECRET --project operations-academia`, then
 `git pull && npm install --prefix _functions && firebase deploy --only
-functions --project operations-academia`, read fifteen back, and press the
+functions --project operations-academia`, read sixteen back, and press the
 seed for each room. The rules publish themselves behind the green check.
 
 **And `revealCandidates` is not the only count that moves**: `forumView`
-(2026-09-08) is the ninth forum callable, so every sentence above that names
-the count reads fifteen, and the selftest holds the header, both setup pages
-and this file to it.
+(2026-09-08) is the ninth forum callable, and `purgeOnRequest` (2026-09-14)
+is the fifth doorbell, so every sentence above that names the count reads
+sixteen, and the selftest holds the header, both setup pages and this file
+to it.
 
 **The emulator test is the ground truth, and it skips honestly.**
 `_functions/test/forum-emulator.mjs` runs under `firebase emulators:exec
@@ -4509,7 +4581,7 @@ and it ends for a season when that season's version is destroyed.
 Tests: `testForum` in `_scraper/selftest.mjs` (the model, the writers against
 the model both ways through the `@doc` blocks, R1 to R8 as source scans, the
 rules block clause by clause with the rooms pinned against the model both
-ways, the guard's literal and fixtures, the guide, the fifteen exports, the
+ways, the guard's literal and fixtures, the guide, the sixteen exports, the
 package and lockfile, the emulator test's shape and the workflow job, no
 forum cron, the runbook, the policy paragraph (R9), the change log entry and
 this section; then the page half: noindex and no preview block, charset
@@ -5250,8 +5322,9 @@ page renders, previews, excerpts and quotes by the module from the merge.
 The live `forumPost` goes on cutting the excerpt from the stored bytes and
 refusing a quote of the rendered words until the functions are redeployed:
 `git pull && npm install --prefix _functions && firebase deploy --only
-functions --project operations-academia`, and read FIFTEEN back (no
-function was added; the vendored module rides inside the ones that were).
+functions --project operations-academia`, and read SIXTEEN back (no
+function was added by the toolbar; the vendored module rides inside the ones
+that were).
 Until then a question written with a heading carries a `##` in its excerpt
 on the card, and the page's own excerpt, which is right, is overwritten by
 the quiet re-read. Said here so a `##` on a card after the merge is read as
@@ -5399,7 +5472,7 @@ outrank `body.v3 a:hover`, the trap the tag chips already record.
 Until the functions are redeployed `forumView` is refused as not found and
 the page ignores it, so the counts stay at nought and everything else here
 works; `firebase deploy --only functions --project operations-academia`
-from a pulled checkout, and read FIFTEEN back.
+from a pulled checkout, and read SIXTEEN back.
 
 Tests: the sections block of `testForum` (the key on the thread and not on
 a post, the callable's shape and what it never touches, the nought both

@@ -2,17 +2,17 @@
    Operations Academia: instant publish, the visit resolver, and the
    verification mailer.
 
-   FIFTEEN functions live in this file: four doorbells (publishOnChange,
-   publishOnCandidateChange, publishOnReview, and the clock, revealCandidates),
-   the university-visit resolver (recordVisit), the e-mail verification
-   mailer (sendVerificationEmail, set up in _SETUP-EMAIL-VERIFICATION.md), and
-   the nine forum callables re-exported from ./forum (forumJoin, forumPost,
-   forumEdit, forumDelete, forumAccept, forumVote, forumThreadVotes, forumView,
-   forumModerate; the FORUM_SECRET runbook is in _SETUP-INSTANT-PUBLISH.md). A
-   deploy lists all fifteen, and reading that count back is how a deploy from
-   a stale checkout is caught.
+   SIXTEEN functions live in this file: five doorbells (publishOnChange,
+   publishOnCandidateChange, publishOnReview, purgeOnRequest, and the clock,
+   revealCandidates), the university-visit resolver (recordVisit), the e-mail
+   verification mailer (sendVerificationEmail, set up in
+   _SETUP-EMAIL-VERIFICATION.md), and the nine forum callables re-exported
+   from ./forum (forumJoin, forumPost, forumEdit, forumDelete, forumAccept,
+   forumVote, forumThreadVotes, forumView, forumModerate; the FORUM_SECRET
+   runbook is in _SETUP-INSTANT-PUBLISH.md). A deploy lists all sixteen, and
+   reading that count back is how a deploy from a stale checkout is caught.
 
-   FOUR doorbells, one job each. When a job posting changes in Firestore,
+   FIVE doorbells, one job each. When a job posting changes in Firestore,
    start the GitHub build that publishes it, so a new posting or an edit
    reaches the site in about a minute instead of waiting for the 20-minute
    schedule; when a CANDIDATE PROFILE changes, start the same build — it runs
@@ -33,7 +33,11 @@
    scheduled tick. The build's :07/:27/:47 schedule stays the safety net: if
    this ring is lost the reveal lands at 14:07 at worst. It is deliberately
    NOT a GitHub cron at 14:00 as well: two producers for one event is the
-   duplicate-doorbell outage CLAUDE.md records (One event, one build).
+   duplicate-doorbell outage CLAUDE.md records (One event, one build); and
+   when an ACCOUNT DELETION is asked for (`purgeOnRequest`), start the sweep
+   that carries it out, which otherwise waited for the next scheduled build
+   and left the maintainer's roster saying "Deletion queued" for up to twenty
+   minutes over a press that should take seconds.
 
    It deliberately does NOT build, e-mail, or touch Drive — the scheduled
    build owns all of that and is already idempotent. This is a doorbell, not a
@@ -117,7 +121,7 @@ const REVIEW_EVENT_TYPE = 'oa-jobreview-decided';
 const CLIENT_STATES = ['queued', 'withdrawn', 'hidden'];
 
 /** One repository_dispatch POST — the whole of what every doorbell does once
-    it has decided to ring. Shared so the four cannot drift. */
+    it has decided to ring. Shared so the five cannot drift. */
 async function ring(eventType, payload, okLine) {
   const res = await fetch(`https://api.github.com/repos/${REPO}/dispatches`, {
     method: 'POST',
@@ -303,6 +307,62 @@ exports.publishOnReview = onDocumentWritten(
 
     await ring(REVIEW_EVENT_TYPE, { id: event.params.id, status: after.status },
       'sheet read dispatched');
+  });
+
+/* --------------------------------------------------------------- deletions
+
+   THE FIFTH DOORBELL: an account deletion starts the sweep that carries it
+   out. A deletion is a WORK ORDER, accountDeletions/{uid}, written by the
+   account page or by the maintainer's roster (assets/oa-account-delete.js is
+   the one definition of its shape) and carried out by
+   _scraper/purge-accounts.mjs with the Admin SDK, which needs a runner. That
+   workflow runs on the jobs build's completion and once a day, and NOTHING
+   ELSE rang it. A person's own deletion withdraws their postings, which rings
+   the build through publishOnChange, so the sweep followed within a couple
+   of minutes; the maintainer's order withdraws nothing itself, so it sat on
+   the roster as "Deletion queued" until the next scheduled build, up to
+   twenty minutes and longer when GitHub delays the schedule (owner,
+   2026-09-14: "deleting a user should be very fast. Why do I see 'in queue'
+   here? how long will it stay there?"). So a work order rings the sweep's
+   own doorbell the moment it is filed, and the build chain and the daily
+   cron are the safety net, exactly as the 20-minute schedule is for a
+   posting.
+
+   ONLY A NEW ORDER RINGS. A browser only ever CREATES an order (status
+   'requested') or deletes one it has not carried out yet (a cancel, which
+   is a delete and rings nothing); the sweep's own writes move it to
+   'clearing' and 'done', and ringing on those would fire the sweep from
+   inside the sweep, the loop CLIENT_STATES guards against one collection
+   over. The payload is the uid and nothing else: the order carries a name
+   and an address, and a dispatch payload is not the place for either. */
+
+const PURGE_EVENT_TYPE = 'oa-account-deletion';
+
+exports.purgeOnRequest = onDocumentWritten(
+  {
+    document: 'accountDeletions/{uid}',
+    secrets: [GH_DISPATCH_TOKEN],
+    region: 'us-central1',
+    // a lost ring is caught by the build chain and the daily cron
+    retry: false,
+  },
+  async (event) => {
+    const after = event.data && event.data.after && event.data.after.exists
+      ? event.data.after.data() : null;
+    if (!after) return;
+
+    if (after.status !== 'requested') {
+      logger.debug('skip: sweep bookkeeping', { status: after.status });
+      return;
+    }
+    const before = event.data && event.data.before && event.data.before.exists
+      ? event.data.before.data() : null;
+    if (before && before.status === 'requested') {
+      logger.debug('skip: already queued');
+      return;
+    }
+
+    await ring(PURGE_EVENT_TYPE, { uid: event.params.uid }, 'account purge dispatched');
   });
 
 /* ===========================================================================
@@ -498,10 +558,11 @@ exports.sendVerificationEmail = onCall(
   });
 
 /* ===========================================================================
-   WHICH UNIVERSITY A VISITOR CAME FROM: the sixth function in this file, and
-   one of the two here that are not doorbells (the other is the verification
-   mailer above; the four doorbells are publishOnChange,
-   publishOnCandidateChange, revealCandidates and publishOnReview).
+   WHICH UNIVERSITY A VISITOR CAME FROM: the seventh function in this file,
+   and one of the two here that are not doorbells (the other is the
+   verification mailer above; the five doorbells are publishOnChange,
+   publishOnCandidateChange, revealCandidates, publishOnReview and
+   purgeOnRequest).
 
    THE CHART THIS RESTORES, AND THE CLAIM IT CORRECTS. analytics.html used to
    show "which universities visited", measured from Universal Analytics'
@@ -676,7 +737,7 @@ exports.recordVisit = onRequest(
    HMAC over `season + ':' + uid` under the season's own Secret Manager
    version, a handle drawn at random, and every write inside a transaction.
    Re-exported one per line so a deploy's per-function lines, and the
-   selftest's count of them, read FIFTEEN. */
+   selftest's count of them, read SIXTEEN. */
 exports.forumJoin = forum.forumJoin;
 exports.forumPost = forum.forumPost;
 exports.forumEdit = forum.forumEdit;

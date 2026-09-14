@@ -8,7 +8,9 @@ site in about a minute too (before it, the build's reveal gate still writes
 nothing, so the early ring costs nothing and leaks nothing). And the reveal
 itself has a bell: at 14:00 UTC on the day named in `data/candidates-reveal.json`
 the profiles go public, so a scheduled function rings the build at that hour
-every day and does nothing on every day but that one. Four small Cloud
+every day and does nothing on every day but that one. And an account
+deletion asked for on the site starts the sweep that carries it out within a
+couple of minutes, rather than at the next scheduled build. Five small Cloud
 Functions in `_functions/index.js` ring a GitHub workflow's doorbell
 (`repository_dispatch`):
 
@@ -18,6 +20,7 @@ Functions in `_functions/index.js` ring a GitHub workflow's doorbell
 | `publishOnCandidateChange` | `candidateSubmissions` | the same build (`oa-jobs-changed`) — it runs `build-candidates.mjs` too |
 | `publishOnReview` | `jobReviews` | **OA jobs — read the job market tracking sheet** (`oa-jobreview-decided`), which the build then follows automatically |
 | `revealCandidates` | the clock: 14:00 UTC daily (Cloud Scheduler), reading `data/candidates-reveal.json` | the same build (`oa-jobs-changed`), on the reveal day only |
+| `purgeOnRequest` | `accountDeletions` | **OA accounts — carry out the deletions that were asked for** (`oa-account-deletion`), which otherwise waits for the build's completion or its daily cron |
 
 The reveal function is deliberately the ONLY thing that rings at 14:00. There
 is no GitHub cron at that hour, and one must not be added: the build's own
@@ -36,8 +39,10 @@ minutes again, and an approval up to half an hour.
 **THE FIRST THREE ARE LIVE.** They were deployed on 2026-08-27 and have dispatched
 on every decision since. `revealCandidates` (2026-09-04) rides along with the
 next `firebase deploy --only functions --project operations-academia` and is
-inert until that deploy has run; read the count back (FIFTEEN, see "Deploying"
-below) rather than trusting the deploy log. To check rather than trust: filter this repository's
+inert until that deploy has run; read the count back (SIXTEEN, see "Deploying"
+below) rather than trusting the deploy log. `purgeOnRequest` (2026-09-14) is the
+same: until it is deployed the maintainer's deletion waits for the next build,
+and the roster says "Deletion queued" for up to twenty minutes. To check rather than trust: filter this repository's
 Actions by `event:repository_dispatch` and read the ACTOR — the function
 carries the PAT from step 1 and shows as a person, where the two verify
 workflows' own curls carry `GITHUB_TOKEN` and show as `github-actions[bot]`.
@@ -92,7 +97,7 @@ The **Runtime** column must say what `_functions/package.json` says. Where it
 does not, name each function explicitly — the supported bypass, not a trick:
 
 ```
-firebase deploy --only functions:publishOnChange,functions:publishOnCandidateChange,functions:publishOnReview,functions:revealCandidates,functions:recordVisit,functions:sendVerificationEmail --project operations-academia
+firebase deploy --only functions:publishOnChange,functions:publishOnCandidateChange,functions:publishOnReview,functions:revealCandidates,functions:purgeOnRequest,functions:recordVisit,functions:sendVerificationEmail --project operations-academia
 ```
 
 `--only functions` parses to an EMPTY filter list, which leaves every endpoint
@@ -140,7 +145,7 @@ npm install --prefix _functions
 firebase deploy --only functions --project operations-academia
 ```
 
-This deploys EVERY function in `_functions/`, which is fifteen: the four
+This deploys EVERY function in `_functions/`, which is sixteen: the five
 doorbells above; **`recordVisit`**, the university-visit resolver behind
 the Analytics page's "which universities visited" chart, which needs no secret
 and is inert until this command has been run (`_SETUP-ANALYTICS.md`, source 4);
@@ -150,7 +155,7 @@ first (`_SETUP-EMAIL-VERIFICATION.md`); and the nine forum callables
 (**`forumJoin`, `forumPost`, `forumEdit`, `forumDelete`, `forumAccept`,
 `forumVote`, `forumThreadVotes`, `forumView`, `forumModerate`**), which need
 `FORUM_SECRET` set first (the next section).
-`firebase functions:list` must read back fifteen; fewer means the checkout
+`firebase functions:list` must read back sixteen; fewer means the checkout
 predates one of them.
 
 `revealCandidates` is a SCHEDULED function, so its first deploy also creates a

@@ -43,6 +43,16 @@
    out in about the time a posting takes to publish. Live on merge, nothing to
    remember.
 
+   AND THE ORDER RINGS THE SWEEP (2026-09-14). A person's own deletion
+   withdraws their postings, which rings the build, so the sweep followed
+   within a couple of minutes; the maintainer's order withdraws nothing, so
+   it sat as "Deletion queued" until the next scheduled build, up to twenty
+   minutes. `purgeOnRequest` in _functions/index.js is a DOORBELL, not the
+   callable rejected above: the sweep stays a workflow, live on merge, and
+   the doorbell only makes it prompt, exactly as publishOnChange does for a
+   posting. Inert until the functions are deployed, when the build chain and
+   the daily cron carry a deletion on the old cadence.
+
    EVERYTHING THE PERSON POSTED COMES OFF THE SITE, and it is said plainly
    before the button is pressed. The alternative was considered and rejected:
    leaving a job posting up means either keeping the document that carries the
@@ -638,8 +648,8 @@
         signInGone = true;
         stepLine(log, 'Removed your sign-in.');
       })['catch'](function () {
-        stepLine(log, 'Your sign-in is removed for you shortly, within about ' +
-          'twenty minutes.');
+        stepLine(log, 'Your sign-in is removed for you shortly, within a ' +
+          'couple of minutes.');
       });
     }).then(function () {
       /* `finished` before `busy` goes: the sign-in has already gone, so the
@@ -657,7 +667,7 @@
         (signInGone
           ? ''
           : '<p>You are signed out now, and the sign-in itself is removed for you ' +
-            'within about twenty minutes. There is nothing more for you to do.</p>') +
+            'within a couple of minutes. There is nothing more for you to do.</p>') +
         '<p class="v3-cta-row"><a class="v3-btn primary" href="./">Back to the site</a></p>';
       /* Sign out whatever happened above: the local memory of this account —
          the header hint with its picture, the menu counts — belongs to an

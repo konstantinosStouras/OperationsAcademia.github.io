@@ -457,7 +457,10 @@
     sortDir: 'desc',
     filter: '',
     picked: {},          // uid -> true
-    open: null           // uid of the thread being read, if any
+    open: null,          // uid of the thread being read, if any
+    /* The watch over a queued deletion (below): the timer and its tick
+       count, or null while nothing on the page is waiting for the sweep. */
+    watch: null
   };
 
   function db() { return root.OAFB.ready().then(function (fb) { return fb.firestore(); }); }
@@ -572,7 +575,9 @@
       return open + ' <button type="button" class="button oa-btn-ghost oa-u-kill" ' +
         'data-uid="' + esc(r.uid) + '">Delete</button>';
     }
-    return open + ' <span class="oa-u-going">' + esc(st.label) + '</span>' +
+    return open + ' <span class="oa-u-going" title="' + esc(st.cancellable
+        ? 'Starts within a couple of minutes; the row goes on its own once it has.'
+        : 'Being carried out now.') + '">' + esc(st.label) + '</span>' +
       (st.cancellable
         ? ' <button type="button" class="button oa-btn-ghost oa-u-unkill" data-uid="' +
           esc(r.uid) + '">Cancel</button>'
@@ -586,10 +591,12 @@
   /** File a deletion, once the maintainer has typed the word. It is a WORK
       ORDER and not the deletion itself: the browser cannot delete another
       account's alerts, its details, its tally mark or its Auth record, so
-      _scraper/purge-accounts.mjs does all of it with the Admin SDK, on the
-      jobs build's own completion. A confirm() is what this panel uses to
-      delete an orphaned conversation; this asks for a word, because an
-      account is not something an accidental press should be able to take. */
+      _scraper/purge-accounts.mjs does all of it with the Admin SDK, rung
+      the moment the order lands (purgeOnRequest in _functions/index.js) and
+      on the jobs build's own completion as the safety net. A confirm() is
+      what this panel uses to delete an orphaned conversation; this asks for
+      a word, because an account is not something an accidental press should
+      be able to take. */
   function askDelete(uid) {
     var D = root.OAAccountDelete;
     if (!D) return;
@@ -607,6 +614,69 @@
       'Type ' + D.CONFIRM_WORD + ' to confirm:');
     if (!D.matchesConfirmation(typed)) return;
     D.requestFor(r).then(load)['catch'](function (err) { sayRosterError(err); });
+  }
+
+  /* ------------------------------------------- watching a queued deletion */
+
+  /** How often the roster asks whether a queued deletion has started, and
+      for how long. The sweep is rung the moment an order is filed
+      (purgeOnRequest in _functions/index.js), so it starts within a couple of
+      minutes and the row is gone from the roster once it has; without this
+      the chip said "Deletion queued" until the maintainer reloaded, which
+      read as the deletion sitting there (owner, 2026-09-14: "Why do I see
+      'in queue' here? how long will it stay there?"). The watch reads the
+      ORDER documents alone, one small read per queued row per tick, never
+      the roster, and stops when nothing on the page is queued any more or
+      after the bound, so a doorbell that is down costs a few dozen reads and
+      nothing else. One reload of the roster when an order has moved on, and
+      that is the read that drops the row. */
+  var WATCH_EVERY_MS = 15 * 1000;
+  var WATCH_TICKS = 40;
+
+  /** The rows whose order is filed and not yet started: `requested` is the
+      one state a Cancel is offered in, so the chip's own rule decides it. */
+  function queuedUids() {
+    var D = root.OAAccountDelete;
+    if (!D || !state.deletions) return [];
+    return state.rows.filter(function (r) {
+      var st = D.stateOf(state.deletions[r.uid]);
+      return st.queued && st.cancellable;
+    }).map(function (r) { return r.uid; });
+  }
+
+  function watchQueued() {
+    if (state.watch) { clearTimeout(state.watch.timer); state.watch = null; }
+    var uids = queuedUids();
+    if (!uids.length) return;
+    var w = { timer: 0, ticks: 0 };
+    state.watch = w;
+    function tick() {
+      if (state.watch !== w) return;
+      w.ticks++;
+      db().then(function (d) {
+        return Promise.all(uids.map(function (uid) {
+          return d.collection(root.OAAccountDelete.COLLECTION).doc(uid).get()
+            .then(function (snap) { return snap.exists ? String((snap.data() || {}).status || '') : ''; })
+            /* a read that failed is UNKNOWN: keep waiting rather than reload
+               a roster over an order that may not have moved */
+            ['catch'](function () { return null; });
+        }));
+      }).then(function (statuses) {
+        if (state.watch !== w) return;
+        /* moved on: the sweep has started (`clearing`), finished (`done`), or
+           the order was called off in another tab (gone). Any of them is a
+           row that no longer reads as queued, so the roster is read again. */
+        var moved = statuses.some(function (st) { return st !== null && st !== 'requested'; });
+        if (moved) { state.watch = null; load(); return; }
+        if (w.ticks < WATCH_TICKS) w.timer = setTimeout(tick, WATCH_EVERY_MS);
+        else state.watch = null;
+      })['catch'](function () {
+        /* the database itself could not be reached: stand down rather than
+           leave a watch that can never tick again */
+        if (state.watch === w) state.watch = null;
+      });
+    }
+    w.timer = setTimeout(tick, WATCH_EVERY_MS);
   }
 
   /** Call one off while the sweep has not started. The rules refuse it
@@ -1154,6 +1224,7 @@
         state.ghosts = Object.keys(threads).map(function (k) { return threads[k]; });
         renderTable();
         renderCompose();
+        watchQueued();
         if (root.OAAdminArea && typeof root.OAAdminArea.refresh === 'function') {
           root.OAAdminArea.refresh();
         }
