@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:43:59.200Z",
+ "generated": "2026-09-14T07:46:19.211Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1290,6 +1290,10 @@
    "n": 1
   },
   {
+   "v": "University of Bristol",
+   "n": 1
+  },
+  {
    "v": "University of British Columbia",
    "n": 1
   },
@@ -2221,6 +2225,10 @@
   },
   {
    "v": "Booth School of Business",
+   "n": 1
+  },
+  {
+   "v": "Bristol Business School",
    "n": 1
   },
   {
@@ -3335,6 +3343,10 @@
   },
   {
    "v": "Applied Statistics and BA",
+   "n": 1
+  },
+  {
+   "v": "Artificial Intelligence and Business Analytics",
    "n": 1
   },
   {
@@ -9582,6 +9594,19 @@
     ]
    }
   },
+  "University of Bristol": {
+   "schools": [
+    "Bristol Business School"
+   ],
+   "units": [
+    "Artificial Intelligence and Business Analytics"
+   ],
+   "bySchool": {
+    "Bristol Business School": [
+     "Artificial Intelligence and Business Analytics"
+    ]
+   }
+  },
   "University of British Columbia": {
    "schools": [
     "Sauder School of Business"
@@ -11709,6 +11734,9 @@
   ],
   "Booth School of Business": [
    "Operations Management"
+  ],
+  "Bristol Business School": [
+   "Artificial Intelligence and Business Analytics"
   ],
   "Business School": [
    "Chair of Production Management",

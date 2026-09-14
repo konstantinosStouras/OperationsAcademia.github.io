@@ -9005,6 +9005,19 @@
   ]
  },
  {
+  "id": "university-of-bristol__bristol-business-school__artificial-intelligence-and-business-analytics",
+  "institution": "University of Bristol",
+  "school": "Bristol Business School",
+  "department": "Artificial Intelligence and Business Analytics",
+  "type": "Business School",
+  "country": "United Kingdom",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-05"
+ },
+ {
   "id": "university-of-british-columbia__sauder-school-of-business__operations-and-logistics",
   "institution": "University of British Columbia",
   "school": "Sauder School of Business",
