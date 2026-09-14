@@ -17041,8 +17041,9 @@ async function testEmailVerification() {
   }
   ok(/user: function \(\) \{ return state\.pending \? null : state\.user; \}/.test(acct),
     'accounts: user() answers null while the address is unconfirmed, so every page treats the account as signed out');
-  ok(/pendingUser: function \(\) \{ return state\.pending \? state\.user : null; \}/.test(acct),
-    'accounts: pendingUser() is the one export that can see the unconfirmed account');
+  ok(/pendingUser: function \(\) \{ return state\.pending && state\.pending !== 'profile' \? state\.user : null; \}/.test(acct),
+    'accounts: pendingUser() is the one export that can see the unconfirmed account (and never a ' +
+    'profile-gated one, which is the other pending kind since 2026-09-14)');
   ok(/return state\.user && !state\.pending \? 'in' : 'out';/.test(acct),
     'accounts: hint() answers out while pending, so the gate locks from the first paint');
   ok(/if \(state\.resolved\) fn\(state\.pending \? null : state\.user\);/.test(acct),
@@ -17058,9 +17059,10 @@ async function testEmailVerification() {
     'accounts: while pending the hint is CLEARED and the session is never entered (no profile read, no roster row, no tally)');
   ok(/openVerifyPanel\(null, null, true\)/.test(pendBranch),
     'accounts: …and the "Check your inbox" card opens instead');
-  ok(/function enterSession\(u, fb\)/.test(acct) && /enterSession\(u, fb\);/.test(acct)
-     && (acct.match(/enterSession\(u, fb\)/g) || []).length >= 3,
-    'accounts: everything a usable session does on arrival is ONE function, shared by the auth handler and the lift');
+  ok(/function enterSession\(u, fb, preloaded\)/.test(acct) && /enterSession\(u, fb\);/.test(acct)
+     && (acct.match(/enterSession\(u, fb/g) || []).length >= 5,
+    'accounts: everything a usable session does on arrival is ONE function, shared by the auth handler, ' +
+    'both lifts and the provider admission');
   /* the registration path no longer seeds the hint */
   const regAt = acct.indexOf('createUserWithEmailAndPassword(f.email.value');
   const regEnd = acct.indexOf('signInWithEmailAndPassword(f.email.value', regAt);
@@ -17109,14 +17111,16 @@ async function testEmailVerification() {
     'accounts: the card is not drawn over the verify page ON ITS OWN (the page confirms the address itself), but a press still opens it there');
   ok(/openVerifyPanel\(null, null, true\);/.test(pendBranch),
     'accounts: …and the auth handler is the one caller that says auto');
-  ok((acct.match(/openVerifyPanel\(\);/g) || []).length >= 4,
-    'accounts: the chip, the sheet link, openAuth, whenSignedIn and openProfile all press it explicitly');
-  ok(/if \(state\.pending\) \{ openVerifyPanel\(\); return; \}/.test(acct)
-     && (acct.match(/if \(state\.pending\) \{ openVerifyPanel\(\); return; \}/g) || []).length >= 3,
+  ok((acct.match(/openPendingCard\(\);/g) || []).length >= 5
+     && /else openVerifyPanel\(null, null, auto\);/.test(acct),
+    'accounts: the chip, the sheet link, openAuth, whenSignedIn and openProfile all press it explicitly, ' +
+    'through openPendingCard, which opens THIS card for an unconfirmed address');
+  ok((acct.match(/if \(state\.pending\) \{ openPendingCard\(\); return; \}/g) || []).length >= 2
+     && /if \(state\.pending && !\(opts && opts\.gate\)\) \{ openPendingCard\(\); return; \}/.test(acct),
     'accounts: openAuth, whenSignedIn and openProfile all open the card for a pending account');
-  ok(/class="oa-acct-btn oa-acct-pending" id="oa-verify-chip"[^>]*>Verify your e-mail</.test(acct)
-     && /id="oa-np-verify" href="#">Verify your e-mail</.test(acct),
-    'accounts: the header chip and the phone sheet both read "Verify your e-mail" while pending');
+  ok(/class="oa-acct-btn oa-acct-pending" id="oa-verify-chip" ' \+\s*'title="' \+ esc\(pendingTitle\(\)\) \+ '">' \+\s*\(state\.pending === 'profile' \? 'Finish registering' : 'Verify your e-mail'\)/.test(acct)
+     && /id="oa-np-verify" href="#">' \+\s*\(state\.pending === 'profile' \? 'Finish registering' : 'Verify your e-mail'\)/.test(acct),
+    'accounts: the header chip and the phone sheet both read "Verify your e-mail" while the address is unconfirmed');
   ok(/state\.pending = false;\s*closeVerifyPanel\(\);/.test(acct.slice(acct.indexOf('function signOut'))),
     'accounts: signing out (Use a different account) clears the pending state and the card');
   ok(/'auth\/expired-action-code'/.test(acct) && /'auth\/invalid-action-code'/.test(acct)
@@ -17319,8 +17323,9 @@ async function testEmailVerification() {
     '…and tells an account registered before the gate what it has to do once');
 
   const shim = await readFile(path.join(HERE, '_fake-firebase.js'), 'utf8');
-  ok(/Object\.assign\(\{ emailVerified: true, providerData: \[\{ providerId: 'google\.com' \}\] \}, spec\)/.test(shim),
-    'the fake Firebase user is VERIFIED by default, so every existing browser check keeps a verified reader');
+  ok(/Object\.assign\(\{ emailVerified: true, providerData: \[\{ providerId: 'password' \}\] \}, spec\)/.test(shim),
+    'the fake Firebase user is a VERIFIED PASSWORD account by default, so every existing browser check ' +
+    'keeps a reader neither gate holds');
   for (const fn of ['reload', 'getIdToken', 'sendEmailVerification', 'applyActionCode', 'httpsCallable']) {
     ok(new RegExp(`\\b${fn}\\b`).test(shim), `…and the shim records ${fn}`);
   }
@@ -20650,7 +20655,7 @@ async function testRegistrationFields() {
     'registration: the affiliation box says where the field goes, under it');
   ok(/Your affiliation is never published\./.test(acct),
     'registration: …in the phrase the profile card already uses, so the two agree');
-  const welcomeAt = acct.indexOf("? '<label>Affiliation' +");
+  const welcomeAt = acct.indexOf("? '<label class=\"oa-missing\">Affiliation' + needMark() +");
   const welcome = welcomeAt > 0 ? acct.slice(welcomeAt, welcomeAt + 400) : '';
   ok(welcomeAt > 0 && !/Never published/.test(welcome),
     'welcome card: …and is NOT given it twice, since its own lede already says it');
@@ -20713,7 +20718,7 @@ async function testRegistrationFields() {
     'ORCID: a typed iD is carried across the repaint a Gmail link causes');
   ok(orcidFn.includes('<input name="orcid"'),
     'ORCID: …and the box stays, for the reader who knows the number and for clearing one');
-  ok(/function orcidFieldHTML\(p, u\)/.test(acct) && /orcidFieldHTML\(p, u\) \+/.test(acct),
+  ok(/function orcidFieldHTML\(p, u\)/.test(acct) && /\(asking \? '' : orcidFieldHTML\(p, u\)\) \+/.test(acct),
     'ORCID: the field is told which account it is drawing, so it can answer that question at all');
   ok(/\$\('#oa-orcid-connect', wrap\);[\s\S]{0,160}linkProvider\('oidc\.orcid', wrap, closeProfile\)/.test(acct),
     'ORCID: the button runs linkProvider — the one definition — never a second copy of the link flow');
@@ -20953,7 +20958,9 @@ async function testRegistrationFields() {
   }
 
   /* --- the profile card is deliberately NOT held to the new rule -------- */
-  const profAt = acct.indexOf('\'<form id="oa-profile-form">\'');
+  /* from the function's head, since the rows are built as variables before
+     the form markup that places them (the compact ask card, 2026-09-14) */
+  const profAt = acct.indexOf('function openProfile(firstRun, opts) {');
   const profEnd = acct.indexOf('\'<div class="oa-auth-actions">\'', profAt);
   ok(profAt > 0 && profEnd > profAt, 'profile card: the form markup was found');
   const prof = acct.slice(profAt, profEnd);
@@ -20963,7 +20970,7 @@ async function testRegistrationFields() {
   /* The card has a second branch since the provider ask (below): the compulsory
      box exists, and what keeps the edit surface safe is that NOTHING but an
      explicit option can reach it. Pin that rather than the absence of the word. */
-  ok(/\(mustAff\s*[\s\S]{0,400}\? '<label>Affiliation' \+/.test(prof),
+  ok(/var affRow = mustAff\s*\? '<label class="oa-missing">Affiliation' \+ needMark\(\)/.test(prof),
     'profile card: the compulsory box is behind mustAff, never the default');
   ok(/var req = \(opts && opts\.require\) \|\| \[\];/.test(acct)
     && /var mustName = must\('name'\), mustAff = must\('affiliation'\), mustMail = must\('email'\);/.test(acct),
@@ -21045,8 +21052,8 @@ async function testRegistrationFields() {
     'gaps (browser): the module under test is the live one',
     'orcid sign-up: the welcome card asks for the affiliation AND an address, and requires both',
     'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads',
-    'the repeat: …and a new session asks again',
-    'the repeat: a complete account meets no card',
+    'the soft ask: …and a new session asks again',
+    'the gate: a complete Google account meets no card',
     'registration card: there is no ORCID box to fill in',
     'registration card: and NO sign-up pills',
     'registration card: …and NOBODY was signed in',
@@ -21153,7 +21160,7 @@ async function testRegistrationFields() {
   /* --- the card asks for exactly those, and compels nothing else --------- */
   const mailRowAt = acct.indexOf('function emailRowHTML(u, p, mustMail)');
   const mailRow = mailRowAt > 0 ? acct.slice(mailRowAt, acct.indexOf('\n  }', mailRowAt)) : '';
-  ok(/emailRowHTML\(u, p, mustMail\) \+/.test(prof) && mailRow.length > 400,
+  ok(/\? emailRowHTML\(u, p, mustMail\) : '';/.test(prof) && mailRow.length > 400,
     'profile card: the e-mail row is ONE function, drawn into the form and redrawn after a link (a Gmail ' +
     'link gives an ORCID account the address it now signs in with)');
   ok(/'<label class="oa-email-row">E-mail address' \+/.test(mailRow) && /name="contactEmail"/.test(mailRow),
@@ -21175,11 +21182,141 @@ async function testRegistrationFields() {
     'profile card: a typed address is checked whether or not it was compelled — a roster listing ' +
     'an address that bounces is worse than one listing none');
   ok(/\(firstRun && !req\.length/.test(acct),
-    'profile card: "Not now" is withheld while anything is required, and the X, Escape and the ' +
-    'backdrop still close it — the card asks again next session rather than trapping anybody');
+    'profile card: "Not now" is withheld while anything is required; on the soft ask (a password ' +
+    'account that registered before the rules) the X, Escape and the backdrop still close it, and ' +
+    'the card asks again next session; under the gate below there is no X at all');
   ok(/if \(!f\[k\]\) return;/.test(acct),
     'profile card: a field the card did not RENDER is skipped rather than saved as an empty ' +
     'string, so an address given once is never blanked by a later edit that never showed it');
+
+  /* --- THE GATE (owner, 2026-09-14): a Google or ORCID account is not signed
+     in until it has answered ---------------------------------------------- */
+  ok(/function providerOnly\(u\) \{\s*return !!u && providerIds\(u\)\.length > 0 && !hasProvider\('password', u\);/.test(acct)
+     && /function needsProfile\(u, p\) \{\s*return providerOnly\(u\) && profileGaps\(u, p\)\.length > 0;/.test(acct),
+    'the gate: ONE definition of who is held (a provider-only account) and of what holds it ' +
+    '(profileGaps, the ask\'s own list), so the gate and the card cannot disagree about what is owed');
+  const verifyAt = acct.indexOf('state.pending = needsVerification(u);');
+  const provAt = acct.indexOf('if (u && providerOnly(u)) {');
+  ok(verifyAt > 0 && provAt > verifyAt
+     && /if \(u && providerOnly\(u\)\) \{\s*state\.resolved = false;\s*settleProvider\(u, fb\);\s*return;\s*\}\s*writeHint\(u\);/.test(acct),
+    'the gate: the auth handler decides a provider account by its profile AFTER the verification ' +
+    'branch and BEFORE the hint is written, the session unresolved for the length of that one read');
+  const settle = acct.slice(acct.indexOf('function settleProvider('), acct.indexOf('function admit('));
+  ok(/function \(\) \{ return undefined; \}/.test(settle)
+     && /if \(p !== undefined && needsProfile\(u, state\.profile\)\) enterGate\(u, profileGaps\(u, state\.profile\)\);/.test(settle)
+     && /else admit\(u, fb, p === undefined \? undefined : \(state\.profile \|\| null\)\);/.test(settle)
+     && /\.catch\(function \(\) \{ if \(ours\(\)\) admit\(u, fb\); \}\)/.test(settle),
+    'the gate: a profile read that FAILS admits the account: the gate is a completeness measure, ' +
+    'and locking a complete member out on a network blip is the worse error');
+  ok(settle.indexOf('seedProfileFromUser()') > 0
+     && settle.indexOf('seedProfileFromUser()') < settle.indexOf('needsProfile(u, state.profile)')
+     && /seedOrcidFromProvider\(\)/.test(settle),
+    'the gate: the provider\'s own name, picture and iD are seeded BEFORE the gaps are read, so a ' +
+    'Google account is not asked for a name Google has just handed over');
+  const gateFn = acct.slice(acct.indexOf('function enterGate('), acct.indexOf('function openGateCard('));
+  for (const line of ["state.pending = 'profile';", 'writeHint(null);', 'markPending(u.uid, true);',
+                      'queue.length = 0;', 'notify(null);', 'if (!leaving) openGateCard(gaps);']) {
+    ok(gateFn.includes(line), `the gate: enterGate does what the verification gate does: ${line}`);
+  }
+  const lift = acct.slice(acct.indexOf('function liftGate('), acct.indexOf('function openPendingCard('));
+  ok(/state\.pending = false;/.test(lift) && /markPending\(u\.uid, false\);/.test(lift)
+     && /writeHint\(u, displayName\(u\)\);/.test(lift)
+     && /enterSession\(u, fb, state\.profile \|\| null\)/.test(lift) && /notify\(u\);/.test(lift),
+    'the gate: liftGate enters the account exactly as the auth event would have, the profile just ' +
+    'saved handed on so nothing is read twice');
+  ok(/if \(gated && state\.pending === 'profile' && !profileGaps\(state\.user, state\.profile\)\.length\) \{\s*gated = false;\s*liftGate\(state\.user\);/.test(acct),
+    'the gate: the save lifts it, and only a save with nothing left owing');
+  ok(/if \(state\.pending && !\(opts && opts\.gate\)\) \{ openPendingCard\(\); return; \}/.test(acct)
+     && acct.split('if (state.pending) { openPendingCard(); return; }').length - 1 >= 2,
+    'the gate: openProfile, openAuth and whenSignedIn all route a pending account to the card ' +
+    'that lifts ITS gate');
+  ok(/function openPendingCard\(auto\) \{\s*if \(state\.pending === 'profile'\) openGateCard\(\);\s*else openVerifyPanel\(null, null, auto\);/.test(acct),
+    'the gate: …the profile card under this gate, the inbox card under the other');
+  ok(/pendingUser: function \(\) \{ return state\.pending && state\.pending !== 'profile' \? state\.user : null; \}/.test(acct)
+     && /if \(state\.pending === 'profile'\) return Promise\.resolve\(false\);/.test(acct),
+    'the gate: the verification card and confirmVerified are never handed a profile-gated account');
+  ok(acct.split("(state.pending === 'profile' ? 'Finish registering' : 'Verify your e-mail')").length - 1 === 2,
+    'the gate: the header chip and the phone sheet say "Finish registering" for it, one expression each');
+  ok(/var gateCard = \$\('#oa-profile'\);[^\n]*\n\s*if \(gateCard && gateCard\.parentNode\) gateCard\.parentNode\.removeChild\(gateCard\);/.test(acct),
+    'the gate: signing out removes the card that refuses to close, since leaving is how it goes');
+  ok(/providerOnly: providerOnly,/.test(acct) && /needsProfile: needsProfile,/.test(acct),
+    'the gate: both definitions are exported for the browser suite');
+  ok(/var user = state\.user;\s*if \(!u\) return;\s*openProfile\(takeAskAffiliation\(u\.uid\), \{ require: gaps \|\| profileGaps\(u, state\.profile\), gate: true \}\);/
+       .test(acct.replace(/var u = state\.user;\s*if \(!u\) return;\s*openProfile\(takeAskAffiliation/, 'var user = state.user;\n    if (!u) return;\n    openProfile(takeAskAffiliation')),
+    'the gate: the gated card is the profile card with the gate option, and the sign-up\'s own ' +
+    'mark still decides the welcome wording');
+
+  /* --- and the card that asks is COMPACT (owner, 2026-09-14, of the full
+     profile card: "it\'s not clear to me that I would have to fill up a certain
+     field here so that I don\'t see this popup again") -------------------- */
+  ok(/var gated = !!\(opts && opts\.gate\);/.test(acct) && /var asking = req\.length > 0;/.test(acct),
+    'ask card: the card knows whether it is asking, and whether the ask is a gate');
+  ok(/\(gated \? '' : '<button type="button" class="oa-modal-x" aria-label="Close">&times;<\/button>'\)/.test(acct)
+     && /function close\(\) \{ if \(gated\) return; wrap\.hidden = true; \}/.test(acct),
+    'ask card: under the gate there is no X and close() refuses, so Escape and the backdrop are ' +
+    'refused rather than unwired (wireModalKeys still keeps Tab inside)');
+  ok(/id="oa-profile-signout">Sign out instead<\/button>/.test(acct)
+     && /if \(leave\) leave\.addEventListener\('click', function \(\) \{ signOut\(\); \}\);/.test(acct),
+    'ask card: Sign out instead is the one other way out, and it signs out');
+  ok(/'Welcome! One more step' : 'One more step before you continue'/.test(acct) && /'One thing we are missing'/.test(acct),
+    'ask card: the heading names the step, worded for a welcome, a return and the soft ask');
+  ok(/To finish registering, please give ' \+ esc\(owed\)/.test(acct)
+     && /esc\(providerSummary\(u\)\) \+ ' sign-in as soon as '/.test(acct)
+     && /never published; only you and the site&rsquo;s maintainer ever see it/.test(acct),
+    'ask card: the lede says what is owed, which sign-in it unlocks, and who sees the answer');
+  ok(/class="oa-need" aria-hidden="true">needed<\/span>/.test(acct)
+     && /'<div class="oa-prow' \+ \(mustName \? ' oa-missing' : ''\) \+ '">'/.test(acct)
+     && /'<label class="oa-missing">Affiliation' \+ needMark\(\)/.test(acct)
+     && /mailRow\.replace\('class="oa-email-row"', 'class="oa-email-row oa-missing"'\)/.test(acct),
+    'ask card: every compelled row is marked .oa-missing and carries the "needed" mark');
+  ok(/var nameRow = \(!asking \|\| mustName\)/.test(acct)
+     && /: \(asking \? '' :\s*'<label>Affiliation <span class="oa-opt">\(optional\)/.test(acct)
+     && /var websiteRow = asking \? '' :/.test(acct)
+     && /var mailRow = \(!asking \|\| mustMail\) \? emailRowHTML\(u, p, mustMail\) : '';/.test(acct)
+     && /\(asking \? '' : '<div class="oa-photo-side">'/.test(acct)
+     && /\(asking \? '' : orcidFieldHTML\(p, u\)\)/.test(acct)
+     && /\(\(firstRun \|\| asking\) \? '' : otherAccountsHTML\(p, u\)\)/.test(acct),
+    'ask card: while asking, the card draws the missing rows and NOTHING else: no photograph, no ' +
+    'website, no ORCID field, no connect rows');
+  ok(/\(asking \? 'Save and continue' : 'Save profile'\)/.test(acct),
+    'ask card: the button says what pressing it ends');
+  ok(/var first = \$\('#oa-profile-form \.oa-missing input:not\(\[disabled\]\)', wrap\) \|\|/.test(acct),
+    'ask card: the keyboard lands in the first missing box');
+  const gateUi = await readFile(path.join(HERE, '..', 'assets', 'oa-ui.css'), 'utf8');
+  const gateV3 = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  ok(/\.oa-profile-card \.oa-missing input \{ border: 2px solid var\(--brand, #1f2a37\); \}/.test(gateUi)
+     && /\.oa-profile-card \.oa-need \{[^}]*color: var\(--on-brand, #fff\);[^}]*background: var\(--brand, #1f2a37\);/.test(gateUi),
+    'ask card: oa-ui.css outlines the missing box and gives the mark its own ink over its own ground');
+  ok(/body\.v3 \.oa-profile-card \.oa-missing input \{ border: 2px solid var\(--brand\); \}/.test(gateV3)
+     && /body\.v3 \.oa-profile-card \.oa-need \{ color: var\(--on-brand\); background: var\(--brand\); \}/.test(gateV3),
+    'ask card: …and v3.css restates both at (0,3,1), since its own modal-input rule (0,2,1) would ' +
+    'win the border back');
+  ok(/providerData: \[\{ providerId: 'password' \}\] \}, spec\)/.test(shimSrc),
+    'shim: the default seeded reader is a verified PASSWORD account, the one kind neither gate ' +
+    'holds; a Google default would gate every check in the suite');
+  for (const needle of [
+    'the gate: the session latch is SET (the shim stood the soft ask down) and the card opened anyway',
+    'the gate: neither Escape nor the backdrop closes it',
+    'the gate: Sign out instead signs the account out and takes the card with it',
+    'the gate: a new browsing session meets the same card, still signed out',
+    'the gate: the answer lifts it',
+    'the soft ask: …and the account IS signed in meanwhile: not a gate',
+    'google sign-up: the card draws the ONE box that is missing and nothing else',
+    'orcid sign-up: THE GATE: no X, not signed in, and the header says what is left to do',
+  ]) {
+    ok(pt.includes(needle), `page-test drives the gate: ${needle.slice(0, 70)}…`);
+  }
+  const gateEntry = (changelog.updates || []).find((u) => u.id === 'provider-gate-2026-09');
+  ok(gateEntry && gateEntry.date === '2026-09-14' && gateEntry.url === '/account'
+     && /Google or ORCID/.test(gateEntry.summary) && /cannot be used until/.test(gateEntry.summary)
+     && !/—|\\u2014/.test(gateEntry.title + gateEntry.summary),
+    'changelog.json announces the gate, dated, with a link and no em dash');
+  const gateAt = claude.indexOf('### …and a Google or ORCID account is not signed in until it has answered');
+  const gateDoc = gateAt > 0 ? claude.slice(gateAt, claude.indexOf('\n## ', gateAt)) : '';
+  ok(gateDoc.length > 2500 && /2026-09-14/.test(gateDoc) && /needsProfile/.test(gateDoc)
+     && /Finish registering/.test(gateDoc) && /PENDING_KEY/.test(gateDoc) && /password account/.test(gateDoc),
+    'CLAUDE.md: the section records both owner messages, the one definition, the marker it reuses, ' +
+    'the compact card and what stays soft');
 
   /* --- the ask repeats, once a session, while anything is missing -------- */
   ok(/var ASK_SESSION = 'oaAskProfile:';/.test(acct)
@@ -21250,6 +21387,8 @@ async function testRegistrationFields() {
      && /first time you open it in a browsing session/.test(policy),
     'privacy policy: the roster paragraph names the address the Site asks for, says it is not a ' +
     'sign-in, and says when the asking happens');
+  ok(/signs in with Google or ORCID alone is asked\s+before it can use the Site/.test(policy),
+    'privacy policy: …and, since 2026-09-14, that a Google or ORCID account is asked before it can use the Site');
   const askEntry = (changelog.updates || []).find((u) => u.id === 'registration-complete-2026-09');
   ok(askEntry && askEntry.date === '2026-09-12' && askEntry.url
      && !/—/.test(askEntry.title + askEntry.summary),

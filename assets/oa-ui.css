@@ -189,6 +189,29 @@
 .oa-prow { display: flex; gap: 12px; }
 .oa-prow > label { flex: 1 1 0; min-width: 0; }
 
+/* THE BOX BEING ASKED FOR IS THE ONE THING ON THE CARD THAT STANDS OUT (owner,
+   2026-09-14: "it's not clear to me that I would have to fill up a certain
+   field here so that I don't see this popup again"). A compelled row carries
+   .oa-missing: its box takes a brand outline, and its label a small "needed"
+   mark that names its own ink over its own ground (--on-brand, never #fff:
+   --brand is light in the dark theme). v3.css restates both at a higher
+   specificity, since its own modal-input rule (0,2,1) would otherwise win the
+   border back. */
+.oa-profile-card .oa-missing input { border: 2px solid var(--brand, #1f2a37); }
+.oa-profile-card .oa-need {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  color: var(--on-brand, #fff);
+  background: var(--brand, #1f2a37);
+}
+
 /* "(optional)" rides on the label's own line; the note under the e-mail is a
    line of its own */
 .oa-modal-card label .oa-opt {

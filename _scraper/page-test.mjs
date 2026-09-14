@@ -1137,8 +1137,11 @@ for (const [name, expect] of [
     keptUser: { uid: KEPT, email: 'ada@example.edu', displayName: 'Ada Lovelace',
                 providerData: [{ providerId: 'google.com' }] },
     docs: [
+      /* complete, contactEmail included: an ORCID account that still owes
+         something is gated behind its profile card (2026-09-14) and the merge
+         is offered only to an account that has entered */
       { path: `profiles/${DUP}`, data: { firstName: 'Ada', lastName: 'Lovelace',
-                                         affiliation: 'Somewhere' } },
+                                         affiliation: 'Somewhere', contactEmail: 'ada@example.edu' } },
       { path: `profiles/${KEPT}`, data: { firstName: 'A.' } },
       { path: `users/${DUP}/alerts/a1`, data: {
           name: 'OM jobs', email: 'ada@example.edu', frequency: 'weekly', enabled: true,
@@ -1265,7 +1268,8 @@ for (const [name, expect] of [
     user: seed.user,
     keptUser: seed.keptUser,
     docs: [
-      { path: `profiles/${DUP}`, data: { orcid: ORCID, orcidVerified: true } },
+      { path: `profiles/${DUP}`, data: { orcid: ORCID, orcidVerified: true,
+                                         affiliation: 'Somewhere', contactEmail: 'ada@example.edu' } },
       { path: 'accountKeys/orcid:' + ORCID, data: { uid: 'somebody-elses-uid-9', t: 1 } },
     ],
   }, async (q) => {
@@ -1301,6 +1305,9 @@ for (const [name, expect] of [
                     providerData: [{ providerId: 'password' }] };
   const keptUser = { uid: KEPT, email: 'ada@example.edu', displayName: 'Ada Lovelace',
                      providerData: [{ providerId: 'google.com' }] };
+  /* a Google account is held at its profile card until the profile is complete
+     (2026-09-14), so every page the kept account opens seeds one */
+  const KEPT_PROFILE = { path: `profiles/${KEPT}`, data: { firstName: 'Ada', affiliation: 'Kept College' } };
 
   async function onSite(url, seed, drive, { dialogs } = {}) {
     const q = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
@@ -1323,7 +1330,9 @@ for (const [name, expect] of [
     user: dupUser, keptUser,
     docs: [
       { path: `profiles/${DUP}`, data: { firstName: 'Ada', lastName: 'Dup' } },
-      { path: `profiles/${KEPT}`, data: { firstName: 'Ada' } },
+      /* the kept account signs in below as a GOOGLE account, which the gate
+         (2026-09-14) holds until its profile is complete */
+      { path: `profiles/${KEPT}`, data: { firstName: 'Ada', affiliation: 'Kept College' } },
       { path: `users/${DUP}/alerts/a1`, data: {
           name: 'OM jobs', email: 'a@x.edu', frequency: 'weekly', enabled: true,
           criteria: { topics: ['jobs'] }, lastSentAt: '2026-08-10T00:00:00.000Z' } },
@@ -1401,7 +1410,7 @@ for (const [name, expect] of [
 
   /* -- post a job on /v3/ -------------------------------------------------- */
 
-  const posted = await onSite('post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
+  const posted = await onSite('post-a-job.html', { user: keptUser, docs: [KEPT_PROFILE] }, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-institution', 'Test University');
     await q.selectOption('#f-type', 'University');
@@ -1480,7 +1489,7 @@ for (const [name, expect] of [
      said once. A made-up university, so no curated record can fill a school
      in behind the poster's back. */
 
-  const repeated = await onSite('post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
+  const repeated = await onSite('post-a-job.html', { user: keptUser, docs: [KEPT_PROFILE] }, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-institution', 'Repeat Institute of Technology');
     await q.fill('#f-school', 'Repeat Institute of Technology');
@@ -1537,7 +1546,7 @@ for (const [name, expect] of [
   const DS_ROW = 'insead__school-of-business__decision-sciences';
   const prefilled = await onSite('post-a-job.html', {
     user: keptUser,
-    docs: [{ path: 'directoryEdits/' + DS_ROW, data: {
+    docs: [KEPT_PROFILE, { path: 'directoryEdits/' + DS_ROW, data: {
       rowId: DS_ROW, by: 'someone-else', name: 'A. User', t: 5,
       deptUrl: 'https://edited.example/ds',
     } }],
@@ -1647,7 +1656,7 @@ for (const [name, expect] of [
     ok(true, 'v3 post-a-job: no single-department university in the vocabulary \u2014 ' +
       'the pre-fill race check has nothing definite to drive, and is skipped');
   } else {
-  const race = await onSite('post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
+  const race = await onSite('post-a-job.html', { user: keptUser, docs: [KEPT_PROFILE] }, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-institution', soloUni.uni);
     await q.waitForFunction((want) =>
@@ -1682,7 +1691,7 @@ for (const [name, expect] of [
 
   const editSeed = {
     user: keptUser,
-    docs: [{ path: 'jobSubmissions/j9', data: {
+    docs: [KEPT_PROFILE, { path: 'jobSubmissions/j9', data: {
       uid: KEPT, status: 'published', ref: 'OA-JOB-260810-EEEE', institution: 'Edit U',
       school: 'School X', unit: 'Unit Y', department: 'School X, Unit Y', country: 'USA',
       type: 'University', levels: ['Post-Doc'], applyByDate: '2026-12-01', untilFilled: false,
@@ -1735,7 +1744,7 @@ for (const [name, expect] of [
 
   /* -- post a candidacy on /v3/ -------------------------------------------- */
 
-  const cand = await onSite('post-a-candidate.html', { user: keptUser, docs: [] }, async (q) => {
+  const cand = await onSite('post-a-candidate.html', { user: keptUser, docs: [KEPT_PROFILE] }, async (q) => {
     await q.waitForSelector('#oa-cand-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-first', 'Grace');
     await q.fill('#f-last', 'Hopper');
@@ -1791,13 +1800,15 @@ for (const [name, expect] of [
 
   /* -- one profile per account per market year (owner, 2026-08-24) --------- */
 
+  /* the candidate document is docs[0], which statsDoc below spreads; the kept
+     account's profile rides behind it */
   const oneSeed = { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: {
     uid: KEPT, status: 'queued', ref: 'OA-CAND-260820-ZZZZ',
     first: 'Grace', last: 'Hopper', affiliation: 'Test University',
     position: 'PhD Candidate', year: marketYear(),
     researchAreas: ['Supply Chain Management', 'Queueing Theory'],
     createdAt: '2026-08-20T00:00:00.000Z',
-  } }] };
+  } }, KEPT_PROFILE] };
   const one = await onSite('post-a-candidate.html', oneSeed, async (q) => {
     await q.waitForURL(/post-a-candidate\?edit=c9/, { timeout: 10000 });
     await q.waitForFunction(() => document.getElementById('f-first').value !== '',
@@ -1827,7 +1838,7 @@ for (const [name, expect] of [
      whose only profile is last spring's is promised one; the form is the right
      page for THIS season (one profile per market year), but a blank form that
      mentioned nothing would read as the row lying. */
-  const lastSeed = { user: keptUser, docs: [{ path: 'candidateSubmissions/c8', data: {
+  const lastSeed = { user: keptUser, docs: [KEPT_PROFILE, { path: 'candidateSubmissions/c8', data: {
     uid: KEPT, status: 'queued', ref: 'OA-CAND-260220-YYYY',
     first: 'Ada', last: 'Lovelace', affiliation: 'Test University',
     position: 'PhD Candidate', year: marketYear() - 1,
@@ -1915,7 +1926,7 @@ for (const [name, expect] of [
   ok(!/Opened \d/.test(heldPanel.text), 'and shows no count that would read as "nobody is interested"');
 
   const shownPanel = await onSiteRouted('post-a-candidate?edit=c9',
-    { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: statsDoc }] },
+    { user: keptUser, docs: [KEPT_PROFILE, { path: 'candidateSubmissions/c9', data: statsDoc }] },
     { revealAt: '2000-01-01' }, readPanel);
   ok(/Opened 12 times this season, 2 times in the last 7 days/.test(shownPanel.text),
     'after the reveal it shows the season opens and the last 7 days (the 40-day-old day is out)');
@@ -1927,7 +1938,7 @@ for (const [name, expect] of [
     'Admin area inbox card, as the Privacy Policy does');
 
   const hostilePanel = await onSiteRouted('post-a-candidate?edit=c9',
-    { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: { ...statsDoc, stats: {
+    { user: keptUser, docs: [KEPT_PROFILE, { path: 'candidateSubmissions/c9', data: { ...statsDoc, stats: {
       opens: '<img src=x onerror=alert(1)>', cvClicks: -4, updatedAt: '<b>x</b>', days: 'nope',
     } } }] },
     { revealAt: '2000-01-01' }, readPanel);
@@ -1938,7 +1949,7 @@ for (const [name, expect] of [
 
   /* \u2026and the personal area's candidate card carries the season totals */
   const areaCard = await onSiteRouted('account.html',
-    { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: statsDoc }] },
+    { user: keptUser, docs: [KEPT_PROFILE, { path: 'candidateSubmissions/c9', data: statsDoc }] },
     { revealAt: '2000-01-01' }, async (q) => {
       await q.waitForFunction(() =>
         /its CV/.test((document.getElementById('pa-cand-card') || {}).textContent || ''),
@@ -1950,7 +1961,7 @@ for (const [name, expect] of [
 
   /* -- report a placement on /v3/ ------------------------------------------ */
 
-  const plac = await onSite('post-a-placement.html', { user: keptUser, docs: [] }, async (q) => {
+  const plac = await onSite('post-a-placement.html', { user: keptUser, docs: [KEPT_PROFILE] }, async (q) => {
     await q.waitForSelector('#oa-placement-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-first', 'New');
     await q.fill('#f-last', 'Professor');
@@ -11407,6 +11418,7 @@ for (const w of [320, 360, 390, 430]) {
   const { ctx, page: q, errors } = await signedInPage('jobs.html',
     { user: ORCIDER, seed: { linkEmail: 'orla@gmail.example' },
       docs: [{ path: 'profiles/orcid-member-0000', data: { firstName: 'Orla', affiliation: 'Uni',
+        contactEmail: 'orla@example.edu',   // complete, so the gate (2026-09-14) lets the member in
         orcid: '0000-0002-1825-0097', orcidVerified: true, orcidSeeded: true } }] });
   await q.evaluate(() => window.OAAccounts.openProfile());
   await q.waitForSelector('#oa-profile-form [name="contactEmail"]', { timeout: 8000 });
@@ -11457,6 +11469,8 @@ for (const w of [320, 360, 390, 430]) {
 
   const card = await q.evaluate(() => {
     const i = document.querySelector('#oa-profile-form [name="affiliation"]');
+    const need = document.querySelector('#oa-profile .oa-missing .oa-need');
+    const ns = need ? getComputedStyle(need) : {};
     return {
       required: i.required,
       label: i.closest('label').textContent.trim(),
@@ -11464,16 +11478,59 @@ for (const w of [320, 360, 390, 430]) {
       heading: (document.querySelector('#oa-profile-h') || {}).textContent,
       lede: (document.querySelector('.oa-modal-lede') || {}).textContent || '',
       marked: localStorage.getItem('oaAskAffiliation:fresh-google-uid'),
+      /* THE GATE (2026-09-14): the account is not signed in until it answers,
+         and the card is the one thing it can use */
+      x: !!document.querySelector('#oa-profile .oa-modal-x'),
+      signout: !!document.querySelector('#oa-profile-signout'),
+      rows: [...document.querySelectorAll('#oa-profile-form input')].map((el) => el.name),
+      needed: need ? need.textContent : '',
+      needInk: ns.color, needGround: ns.backgroundColor,
+      border: getComputedStyle(i).borderTopWidth,
+      focused: (document.activeElement || {}).name,
+      photo: !!document.querySelector('#oa-profile .oa-photo-side'),
+      orcid: !!document.querySelector('#oa-profile .oa-orcid-field, #oa-profile #oa-link-orcid, #oa-profile .oa-acct-linkrow'),
+      button: (document.querySelector('#oa-profile-form button[type="submit"]') || {}).textContent,
+      user: !!window.OAAccounts.user(),
+      hint: window.OAAccounts.hint(),
+      pending: localStorage.getItem('oaAuthPending'),
+      chip: (document.querySelector('#oa-verify-chip') || {}).textContent || '',
+      chipTitle: (document.querySelector('#oa-verify-chip') || {}).title || '',
     };
   });
   ok(card.required === true, 'google sign-up: the welcome card asks for the affiliation and requires it');
   ok(!/optional/i.test(card.label),
     `google sign-up: …with no optional chip (got "${card.label}")`);
   ok(!card.later, 'google sign-up: …and no Not now, since answering is the point of the card');
-  eq(card.heading, 'Welcome', 'google sign-up: it is the welcome card, not the ordinary profile card');
-  ok(/never published/i.test(card.lede),
-    'google sign-up: …and the card still says where the affiliation goes, which is why it may be asked for');
+  eq(card.heading, 'Welcome! One more step',
+    'google sign-up: it is the welcome card, and it says a step is still owed');
+  ok(/never published/i.test(card.lede) && /affiliation/.test(card.lede) && /Google/.test(card.lede),
+    `google sign-up: …and the lede names what is owed, the sign-in it unlocks and where the answer goes (got "${card.lede.slice(0, 160)}")`);
   eq(card.marked, null, 'google sign-up: the mark is spent, so a second page load does not ask again');
+  /* the compact card: only the missing box, outlined, marked and holding the keyboard */
+  eq(card.rows, ['affiliation'],
+    'google sign-up: the card draws the ONE box that is missing and nothing else (the name Google gave is not asked again, the address Google shares is not asked at all)');
+  eq(card.needed, 'needed', 'google sign-up: …the box is marked as needed');
+  ok(card.needInk && card.needGround && card.needInk !== card.needGround && card.needGround !== 'rgba(0, 0, 0, 0)',
+    `google sign-up: …the mark names its own ink over its own ground (${card.needInk} on ${card.needGround})`);
+  eq(card.border, '2px', 'google sign-up: …and the box is outlined, so the eye lands on it');
+  eq(card.focused, 'affiliation', 'google sign-up: …and so does the keyboard');
+  ok(!card.photo && !card.orcid,
+    'google sign-up: the photograph, the ORCID field and the connect rows wait for Edit account');
+  eq(card.button, 'Save and continue', 'google sign-up: the button says what pressing it ends');
+  /* the gate itself */
+  ok(!card.x && card.signout,
+    'google sign-up: the card has no X; answering or signing out is the way through');
+  ok(!card.user && card.hint === 'out',
+    'google sign-up: …and the account is NOT signed in yet: user() is null and the hint reads out');
+  eq(card.pending, 'fresh-google-uid',
+    'google sign-up: …with the pending marker set, so the next page paints it signed out too');
+  eq(card.chip, 'Finish registering', 'google sign-up: the header chip says what the account still has to do');
+  ok(/affiliation/.test(card.chipTitle), `google sign-up: …and its tooltip names it (got "${card.chipTitle}")`);
+  await q.keyboard.press('Escape');
+  await q.evaluate(() => document.getElementById('oa-profile').click());   // the backdrop
+  await q.waitForTimeout(150);
+  ok(await q.evaluate(() => { const w = document.getElementById('oa-profile'); return !!w && !w.hidden; }),
+    'google sign-up: neither Escape nor a press on the backdrop closes it');
 
   /* Saving without one is refused, exactly as the registration form refuses it.
      Counted rather than asserted absent: seedProfileFromUser has legitimately
@@ -11496,10 +11553,26 @@ for (const w of [320, 360, 390, 430]) {
 
   await q.fill('#oa-profile-form [name="affiliation"]', 'Fresh University');
   await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
-  await q.waitForFunction(() => window.__fb.at('set', 'profiles/fresh-google-uid') !== -1,
+  await q.waitForFunction(() =>
+    (window.__fb.dump()['profiles/fresh-google-uid'] || {}).affiliation === 'Fresh University'
+    && !!window.OAAccounts.user()
+    && (window.__fb.dump()['userDirectory/fresh-google-uid'] || {}).affiliation === 'Fresh University',
     null, { timeout: 8000 });
-  const saved = await q.evaluate(() => window.__fb.dump()['profiles/fresh-google-uid']);
-  eq(saved.affiliation, 'Fresh University', 'google sign-up: …and a real one saves');
+  const saved = await q.evaluate(() => ({
+    profile: window.__fb.dump()['profiles/fresh-google-uid'],
+    row: window.__fb.dump()['userDirectory/fresh-google-uid'],
+    card: (() => { const w = document.getElementById('oa-profile'); return !!w && !w.hidden; })(),
+    hint: window.OAAccounts.hint(),
+    pending: localStorage.getItem('oaAuthPending'),
+    stored: (JSON.parse(localStorage.getItem('oaAuthHint') || 'null') || {}).uid,
+    chip: !!document.querySelector('#oa-verify-chip'),
+  }));
+  eq(saved.profile.affiliation, 'Fresh University', 'google sign-up: …and a real one saves');
+  ok(!saved.card, 'google sign-up: …the card goes');
+  ok(saved.hint === 'in' && saved.pending === null && saved.stored === 'fresh-google-uid' && !saved.chip,
+    'google sign-up: …and the account ENTERS: the hint says in and names it, the marker is cleared, the chip is the name');
+  eq(saved.row.affiliation, 'Fresh University',
+    'google sign-up: …and the roster row carries the affiliation, so the maintainer\'s list shows no dash');
   eq(errors, [], 'google sign-up: no uncaught script error');
   await ctx.close();
 }
@@ -11606,6 +11679,12 @@ for (const w of [320, 360, 390, 430]) {
       later: !!document.querySelector('#oa-profile-later'),
       heading: (document.querySelector('#oa-profile-h') || {}).textContent,
       ask: (document.querySelector('.oa-profile-ask') || {}).textContent || '',
+      x: !!document.querySelector('#oa-profile .oa-modal-x'),
+      rows: [...document.querySelectorAll('#oa-profile-form input')].map((el) => el.name),
+      missing: document.querySelectorAll('#oa-profile-form .oa-missing').length,
+      user: !!window.OAAccounts.user(),
+      chip: (document.querySelector('#oa-verify-chip') || {}).textContent || '',
+      orcid: (window.__fb.dump()['profiles/fresh-orcid-uid'] || {}).orcid,
     };
   });
   ok(card.affRequired && card.mailRequired,
@@ -11614,9 +11693,16 @@ for (const w of [320, 360, 390, 430]) {
   eq(card.disabled, 0,
     'orcid sign-up: …and there is no second, disabled address row beside it — one e-mail row, never two');
   ok(!card.later, 'orcid sign-up: no Not now, since answering is the point of the card');
-  eq(card.heading, 'Welcome', 'orcid sign-up: it is the welcome card');
-  ok(/affiliation/i.test(card.ask) && /e-mail/i.test(card.ask),
-    `orcid sign-up: …and it names what is missing (got "${card.ask}")`);
+  eq(card.heading, 'Welcome! One more step', 'orcid sign-up: it is the welcome card, and a step is owed');
+  ok(/affiliation/i.test(card.ask) && /e-mail/i.test(card.ask) && /ORCID/.test(card.ask),
+    `orcid sign-up: …and it names what is missing and the sign-in it unlocks (got "${card.ask}")`);
+  eq(card.rows, ['affiliation', 'contactEmail'],
+    'orcid sign-up: the two missing boxes and nothing else (the name ORCID gave is not asked again)');
+  eq(card.missing, 2, 'orcid sign-up: …both marked as missing');
+  ok(!card.x && !card.user && card.chip === 'Finish registering',
+    'orcid sign-up: THE GATE: no X, not signed in, and the header says what is left to do');
+  eq(card.orcid, '0000-0002-1825-0097',
+    'orcid sign-up: the iD the sign-in proved is on the profile before the card is even answered');
 
   /* spaces are refused for each, in the card's own order */
   await q.fill('#oa-profile-form [name="affiliation"]', '   ');
@@ -11655,19 +11741,25 @@ for (const w of [320, 360, 390, 430]) {
   await q.fill('#oa-profile-form [name="contactEmail"]', 'orla@example.edu');
   await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
   await q.waitForFunction(
-    () => (window.__fb.dump()['profiles/fresh-orcid-uid'] || {}).contactEmail, null, { timeout: 8000 });
+    () => (window.__fb.dump()['profiles/fresh-orcid-uid'] || {}).contactEmail
+      && (window.__fb.dump()['userDirectory/fresh-orcid-uid'] || {}).contactEmail
+      && !!window.OAAccounts.user(), null, { timeout: 8000 });
   const stored = await q.evaluate(() => ({
     profile: window.__fb.dump()['profiles/fresh-orcid-uid'],
     row: window.__fb.dump()['userDirectory/fresh-orcid-uid'] || {},
+    card: (() => { const w = document.getElementById('oa-profile'); return !!w && !w.hidden; })(),
+    pending: localStorage.getItem('oaAuthPending'),
   }));
+  ok(!stored.card && stored.pending === null,
+    'orcid sign-up: answering both lifts the gate: the card goes, the marker is cleared, the account is signed in');
   eq(stored.profile.contactEmail, 'orla@example.edu',
     'orcid sign-up: a real address saves onto the profile');
   eq(stored.profile.affiliation, 'Orcid University', 'orcid sign-up: …with the affiliation beside it');
   eq(stored.row.contactEmail, 'orla@example.edu',
     'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads');
-  /* The welcome card is drawn BEFORE the provider's iD lands, so it carries a
-     typed box while seedOrcidFromProvider is still in flight. Saving it must
-     not blank the one thing this sign-in proved. */
+  /* The iD is seeded from the provider before the card is drawn (settleProvider),
+     and the card draws no ORCID box while it is asking. Saving it must leave the
+     one thing this sign-in proved exactly where it was. */
   eq(stored.profile.orcid, '0000-0002-1825-0097',
     'orcid sign-up: …and saving the card leaves the iD the sign-in proved exactly where it was');
   eq(stored.profile.orcidVerified, true, 'orcid sign-up: …still verified');
@@ -11679,21 +11771,170 @@ for (const w of [320, 360, 390, 430]) {
 }
 
 {
-  /* --- THE REPEAT, which is the "update" half: an account that closed the
-     card is asked again NEXT session, and not again in this one. -------- */
+  /* --- THE GATE, for an account that registered before it ----------------
+     Owner, 2026-09-14: "A registered new user should be able to log in with
+     gmail or with their ORCID only after they have provided name and
+     affiliation." A Google account holding a profile with no affiliation is
+     not signed in: every page paints it signed out, the one card it can use
+     opens on every page, that card has no X and refuses Escape and the
+     backdrop, and the way through is the answer or Sign out. The card is
+     compact and says what is missing (the same day, of the full profile card:
+     "it's not clear to me that I would have to fill up a certain field here
+     so that I don't see this popup again"). No askProfile here, deliberately:
+     the shim's once-a-session latch is SET for this account and the gate
+     ignores it, which is what tells the gate apart from the soft ask below. */
   const LAPSED = { uid: 'lapsed-uid', email: 'lapsed@example.edu', emailVerified: true,
     displayName: 'Lapsed Reader', providerData: [{ providerId: 'google.com' }] };
-  const fixture = { user: LAPSED, selector: '#main', askProfile: true,
+  const fixture = { user: LAPSED, selector: '#main',
     docs: [{ path: 'profiles/lapsed-uid', data: { firstName: 'Lapsed', lastName: 'Reader' } }] };
 
   const { ctx, page: q, errors } = await signedInPage('account.html', fixture);
   await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
-  ok(true, 'the repeat: an account that owes an affiliation is asked on arrival, however it registered');
-  /* closed rather than answered, which is what the old once-per-account mark
-     could never recover from */
+  const gate = await q.evaluate(() => {
+    const i = document.querySelector('#oa-profile-form [name="affiliation"]');
+    return {
+      latch: sessionStorage.getItem('oaAskProfile:lapsed-uid'),
+      heading: (document.querySelector('#oa-profile-h') || {}).textContent,
+      lede: (document.querySelector('.oa-profile-ask') || {}).textContent || '',
+      rows: [...document.querySelectorAll('#oa-profile-form input')].map((el) => el.name),
+      x: !!document.querySelector('#oa-profile .oa-modal-x'),
+      later: !!document.querySelector('#oa-profile-later'),
+      signout: (document.querySelector('#oa-profile-signout') || {}).textContent,
+      needed: (document.querySelector('#oa-profile .oa-missing .oa-need') || {}).textContent,
+      border: getComputedStyle(i).borderTopWidth,
+      focused: (document.activeElement || {}).name,
+      button: (document.querySelector('#oa-profile-form button[type="submit"]') || {}).textContent,
+      user: !!window.OAAccounts.user(),
+      hint: window.OAAccounts.hint(),
+      pending: localStorage.getItem('oaAuthPending'),
+      storedHint: localStorage.getItem('oaAuthHint'),
+      chip: (document.querySelector('#oa-verify-chip') || {}).textContent || '',
+      pageSignedOut: !document.getElementById('pa-signedout').hidden,
+    };
+  });
+  eq(gate.latch, '1', 'the gate: the session latch is SET (the shim stood the soft ask down) and the card opened anyway');
+  eq(gate.heading, 'One more step before you continue',
+    'the gate: an account that owes an affiliation meets the card on arrival, worded for a return rather than a welcome');
+  ok(/your affiliation/.test(gate.lede) && /Google sign-in/.test(gate.lede),
+    `the gate: …and the lede says what is owed and what it unlocks (got "${gate.lede.slice(0, 140)}")`);
+  eq(gate.rows, ['affiliation'], 'the gate: the card is the one missing box and nothing else');
+  ok(!gate.x && !gate.later && gate.signout === 'Sign out instead',
+    'the gate: no X, no Not now, and Sign out instead as the only other way out');
+  ok(gate.needed === 'needed' && gate.border === '2px' && gate.focused === 'affiliation',
+    'the gate: the box is marked, outlined and holds the keyboard');
+  eq(gate.button, 'Save and continue', 'the gate: the button says what pressing it ends');
+  ok(!gate.user && gate.hint === 'out' && gate.storedHint === null && gate.pending === 'lapsed-uid',
+    'the gate: the account is NOT signed in: user() null, hint out, no stored hint, the pending marker set');
+  eq(gate.chip, 'Finish registering', 'the gate: the header chip says what is left to do');
+  ok(gate.pageSignedOut, 'the gate: …and the personal area behind the card shows its signed-out state');
+
+  await q.keyboard.press('Escape');
+  await q.evaluate(() => document.getElementById('oa-profile').click());
+  await q.waitForTimeout(150);
+  ok(await q.evaluate(() => { const w = document.getElementById('oa-profile'); return !!w && !w.hidden; }),
+    'the gate: neither Escape nor the backdrop closes it');
+
+  /* the SAME session, a second page: the card again, over locked cards */
+  await q.goto(BASE + 'jobs.html', { waitUntil: 'load' });
+  await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+    null, { timeout: 15000 });
+  await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
+  await q.waitForSelector('.oa-card', { timeout: 15000 });
+  const second = await q.evaluate(() => ({
+    user: !!window.OAAccounts.user(),
+    locked: document.querySelectorAll('.oa-card.oa-card-locked').length,
+    cards: document.querySelectorAll('.oa-card').length,
+  }));
+  ok(!second.user && second.locked > 0 && second.locked === second.cards,
+    `the gate: a second page in the same session is gated too, and reads as signed out (${second.locked}/${second.cards} cards locked)`);
+  /* the chip brings the card forward and puts the keyboard back in the box */
+  await q.evaluate(() => { document.activeElement.blur(); document.getElementById('oa-verify-chip').click(); });
+  eq(await q.evaluate(() => (document.activeElement || {}).name), 'affiliation',
+    'the gate: pressing the header chip puts the keyboard back in the missing box');
+
+  /* Sign out instead: the card goes with the session */
+  await q.click('#oa-profile-signout');
+  await q.waitForFunction(() => !document.getElementById('oa-profile'), null, { timeout: 8000 });
+  const out = await q.evaluate(() => ({
+    user: !!window.OAAccounts.user(), hint: window.OAAccounts.hint(),
+    chip: !!document.querySelector('#oa-verify-chip'),
+  }));
+  ok(!out.user && out.hint === 'out' && !out.chip, 'the gate: Sign out instead signs the account out and takes the card with it');
+  eq(errors, [], 'the gate: no uncaught script error');
+  await ctx.close();
+
+  /* a NEW context is not a way past it */
+  const again = await signedInPage('account.html', fixture);
+  await again.page.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
+  eq(await again.page.evaluate(() => !!window.OAAccounts.user()), false,
+    'the gate: a new browsing session meets the same card, still signed out');
+  /* …and answering is */
+  await again.page.fill('#oa-profile-form [name="affiliation"]', 'Lapsed University');
+  await again.page.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await again.page.waitForFunction(() => !!window.OAAccounts.user()
+    && (window.__fb.dump()['userDirectory/lapsed-uid'] || {}).affiliation === 'Lapsed University',
+    null, { timeout: 8000 });
+  const lifted = await again.page.evaluate(() => ({
+    card: (() => { const w = document.getElementById('oa-profile'); return !!w && !w.hidden; })(),
+    hint: window.OAAccounts.hint(),
+    pending: localStorage.getItem('oaAuthPending'),
+    stored: (JSON.parse(localStorage.getItem('oaAuthHint') || 'null') || {}).uid,
+    chip: !!document.querySelector('#oa-verify-chip'),
+    pageSignedOut: !document.getElementById('pa-signedout').hidden,
+  }));
+  ok(!lifted.card && lifted.hint === 'in' && lifted.pending === null && lifted.stored === 'lapsed-uid'
+     && !lifted.chip && !lifted.pageSignedOut,
+    'the gate: the answer lifts it: the card goes, the account is signed in, the marker is cleared, the hint names it, and the personal area opens');
+  eq(again.errors, [], 'the gate: no uncaught script error after the lift');
+  await again.ctx.close();
+
+  /* and an account that owes NOTHING is not held at all */
+  const done = await signedInPage('account.html',
+    { user: LAPSED, selector: '#main',
+      docs: [{ path: 'profiles/lapsed-uid',
+        data: { firstName: 'Lapsed', lastName: 'Reader', affiliation: 'Lapsed University' } }] });
+  await done.page.waitForTimeout(800);
+  const complete = await done.page.evaluate(() => ({
+    card: !!document.querySelector('#oa-profile-form'),
+    user: !!window.OAAccounts.user(),
+    chip: !!document.querySelector('#oa-verify-chip'),
+  }));
+  ok(!complete.card && complete.user && !complete.chip,
+    'the gate: a complete Google account meets no card and is signed in at once, so answering really does end it');
+  await done.ctx.close();
+}
+
+{
+  /* --- THE SOFT ASK STAYS for a PASSWORD account: it answered a form at
+     creation, so an old record short of an affiliation is asked once a
+     session on the same compact card, with an X, and is signed in meanwhile
+     (the "update" half of 2026-09-12, unchanged by the gate). ------------ */
+  const SOFT = { uid: 'soft-uid', email: 'soft@example.edu', emailVerified: true, displayName: '',
+    providerData: [{ providerId: 'password' }] };
+  const fixture = { user: SOFT, selector: '#main', askProfile: true,
+    docs: [{ path: 'profiles/soft-uid', data: { firstName: 'Soft', lastName: 'Reader' } }] };
+
+  const { ctx, page: q, errors } = await signedInPage('account.html', fixture);
+  await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
+  const soft = await q.evaluate(() => ({
+    heading: (document.querySelector('#oa-profile-h') || {}).textContent,
+    rows: [...document.querySelectorAll('#oa-profile-form input')].map((el) => el.name),
+    x: !!document.querySelector('#oa-profile .oa-modal-x'),
+    later: !!document.querySelector('#oa-profile-later'),
+    signout: !!document.querySelector('#oa-profile-signout'),
+    needed: (document.querySelector('#oa-profile .oa-missing .oa-need') || {}).textContent,
+    button: (document.querySelector('#oa-profile-form button[type="submit"]') || {}).textContent,
+    user: !!window.OAAccounts.user(),
+    chip: !!document.querySelector('#oa-verify-chip'),
+  }));
+  eq(soft.heading, 'One thing we are missing', 'the soft ask: a password account short of an affiliation is asked, on the compact card');
+  eq(soft.rows, ['affiliation'], 'the soft ask: …which draws the one missing box');
+  ok(soft.x && !soft.later && !soft.signout && soft.needed === 'needed' && soft.button === 'Save and continue',
+    'the soft ask: with an X to close it, no Not now, no Sign out instead, the mark and the same button');
+  ok(soft.user && !soft.chip, 'the soft ask: …and the account IS signed in meanwhile: not a gate');
   await q.click('#oa-profile .oa-modal-x');
-  const latch = await q.evaluate(() => sessionStorage.getItem('oaAskProfile:lapsed-uid'));
-  eq(latch, '1', 'the repeat: …and the session latch is spent, so the rest of the visit is left alone');
+  const latch = await q.evaluate(() => sessionStorage.getItem('oaAskProfile:soft-uid'));
+  eq(latch, '1', 'the soft ask: closing it spends the session latch, so the rest of the visit is left alone');
 
   /* the SAME session, a second page: nothing opens */
   await q.goto(BASE + 'jobs.html', { waitUntil: 'load' });
@@ -11701,26 +11942,16 @@ for (const w of [320, 360, 390, 430]) {
     null, { timeout: 15000 });
   await q.waitForTimeout(600);
   eq(await q.evaluate(() => !!document.querySelector('#oa-profile-form')), false,
-    'the repeat: a second page in the same session is not a second modal');
-  eq(errors, [], 'the repeat: no uncaught script error');
+    'the soft ask: a second page in the same session is not a second modal');
+  eq(errors, [], 'the soft ask: no uncaught script error');
   await ctx.close();
 
   /* a NEW context is a new browsing session: asked again */
   const again = await signedInPage('account.html', fixture);
   await again.page.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
-  ok(true, 'the repeat: …and a new session asks again, which is what reaches the accounts that ' +
+  ok(true, 'the soft ask: …and a new session asks again, which is what reaches the accounts that ' +
     'registered before the rule');
   await again.ctx.close();
-
-  /* and an account that owes NOTHING is asked nothing at all */
-  const done = await signedInPage('account.html',
-    { user: LAPSED, selector: '#main', askProfile: true,
-      docs: [{ path: 'profiles/lapsed-uid',
-        data: { firstName: 'Lapsed', lastName: 'Reader', affiliation: 'Lapsed University' } }] });
-  await done.page.waitForTimeout(800);
-  eq(await done.page.evaluate(() => !!document.querySelector('#oa-profile-form')), false,
-    'the repeat: a complete account meets no card, so answering really does end the asking');
-  await done.ctx.close();
 }
 
 /* --------------------------------------- the two calendar files, measured

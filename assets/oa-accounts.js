@@ -390,6 +390,29 @@
     return !!(u && u.emailVerified === false && hasProvider('password', u));
   }
 
+  /** A GOOGLE OR ORCID ACCOUNT THAT HAS NOT SAID WHO IT IS (owner, 2026-09-14:
+      "A registered new user should be able to log in with gmail or with their
+      ORCID only after they have provided name and affiliation"). The password
+      form asks for everything at creation and nothing gets through it short of
+      an answer; a provider sign-up answers nothing, so the answers are
+      collected on the card that follows, and until they are given the account
+      is signed out for everything but that card, the shape the e-mail
+      verification gate already has. Keyed on the same profileGaps the ask is
+      keyed on, so the gate and the card cannot disagree about what is owed:
+      the name and the affiliation for everybody, and an address where the
+      sign-in shares none (ORCID's does not), which is the 2026-09-12 rule. A
+      password account with a gap, one that registered before the rules, keeps
+      the once-a-session ask instead: it answered a form at creation, and
+      holding an old record to a new create-time rule is what this file refuses
+      everywhere. An account with no provider record at all is not gated,
+      since there is nothing to say how it signs in. */
+  function providerOnly(u) {
+    return !!u && providerIds(u).length > 0 && !hasProvider('password', u);
+  }
+  function needsProfile(u, p) {
+    return providerOnly(u) && profileGaps(u, p).length > 0;
+  }
+
   /** How the account is described to its owner: "Google", "ORCID", "Google
       and e-mail and password". Never a raw provider id. */
   function providerSummary(u) {
@@ -548,8 +571,9 @@
       stampAuthState(false);
       host.innerHTML =
         '<button type="button" class="oa-acct-btn oa-acct-pending" id="oa-verify-chip" ' +
-          'title="Your e-mail address has not been confirmed yet">Verify your e-mail</button>';
-      $('#oa-verify-chip').addEventListener('click', function () { openVerifyPanel(); });
+          'title="' + esc(pendingTitle()) + '">' +
+          (state.pending === 'profile' ? 'Finish registering' : 'Verify your e-mail') + '</button>';
+      $('#oa-verify-chip').addEventListener('click', function () { openPendingCard(); });
       return;
     }
 
@@ -733,10 +757,11 @@
 
     // the pending control, mirrored into the sheet (same rule as the header)
     if (state.pending && state.user) {
-      box.innerHTML = '<a class="link depth-0" id="oa-np-verify" href="#">Verify your e-mail</a>';
+      box.innerHTML = '<a class="link depth-0" id="oa-np-verify" href="#">' +
+        (state.pending === 'profile' ? 'Finish registering' : 'Verify your e-mail') + '</a>';
       $('#oa-np-verify').addEventListener('click', function (e) {
         e.preventDefault();
-        openVerifyPanel();
+        openPendingCard();
       });
       return;
     }
@@ -1250,7 +1275,7 @@
     });
   }
 
-  function loadProfile(u) {
+  function loadProfile(u, preloaded) {
     state.profile = null;                // never carry the previous account's
     if (!u) return;
     var uid = u.uid;
@@ -1261,8 +1286,12 @@
         of the page's life. */
     function stillOurs() { return !!(state.user && state.user.uid === uid); }
 
-    OAFB.ready()
-      .then(function (fb) { return profileDoc(fb, uid).get(); })
+    /* settleProvider has usually read the document already, to decide whether
+       the account may enter at all, and hands it over here rather than paying
+       the read twice on every page a Google or ORCID member opens. */
+    (preloaded !== undefined
+      ? Promise.resolve({ exists: !!preloaded, data: function () { return preloaded; } })
+      : OAFB.ready().then(function (fb) { return profileDoc(fb, uid).get(); }))
       .then(function (snap) {
         if (!stillOurs()) return;
         /* An EMPTY snapshot keeps whatever this session already holds for the
@@ -1441,9 +1470,9 @@
     function must(k) { return req.indexOf(k) >= 0; }
     var mustName = must('name'), mustAff = must('affiliation'), mustMail = must('email');
     var u = state.user;
-    // an unconfirmed address has nothing to edit yet: the card that opens is
-    // the one that gets it confirmed
-    if (state.pending) { openVerifyPanel(); return; }
+    // a pending account has nothing to edit yet: the card that opens is the
+    // one that lifts its gate, which under the profile gate is this card
+    if (state.pending && !(opts && opts.gate)) { openPendingCard(); return; }
     if (!u) {
       // Belt and braces for invariant 1: mid-restore we do not yet know who
       // this is, so queue rather than bounce a signed-in reader to a sign-in
@@ -1470,99 +1499,135 @@
           '<input type="file" id="oa-photo-file" accept="image/*" hidden>' +
         '</div>';
     }
+    var gated = !!(opts && opts.gate);
+    /* THE ASK IS THE WHOLE CARD (owner, 2026-09-14, of a screenshot of the full
+       profile card opening over the home page: "it's not clear to me that I
+       would have to fill up a certain field here so that I don't see this
+       popup again"). While something is being asked for, the card draws THAT
+       and nothing else: the heading names it, the lede says why and who sees
+       it, the missing box is outlined and holds the keyboard, and the button
+       says what pressing it ends. The photograph, the website, the ORCID field
+       and the connect rows wait for Edit account, where they belong. */
+    var asking = req.length > 0;
+    var owed = listWords(req.map(function (k) { return ASK_WORD[k]; }));
+    var heading = asking
+      ? (gated ? (firstRun ? 'Welcome! One more step' : 'One more step before you continue')
+               : 'One thing we are missing')
+      : (firstRun ? 'Welcome' : 'My profile');
+    var lede = asking
+      ? '<p class="oa-modal-lede oa-profile-ask">' +
+          (gated
+            ? 'To finish registering, please give ' + esc(owed) + '. You can use the site with your ' +
+              esc(providerSummary(u)) + ' sign-in as soon as ' + (req.length > 1 ? 'they are' : 'it is') +
+              ' saved. '
+            : 'Please add ' + esc(owed) + ' below, so the site knows who has registered. ') +
+          'What you give here is never published; only you and the site&rsquo;s maintainer ever see it.</p>'
+      : '<p class="oa-modal-lede">Your name is how you appear in the header and on ' +
+          'anything you post. Your affiliation is never published.</p>';
+    function needMark() { return '<span class="oa-need" aria-hidden="true">needed</span>'; }
+    /* Only the FIRST name is ever compelled here, for the reason profileGaps
+       gives: this card can reopen, and a person who goes by one name must not
+       meet a box they cannot satisfy. The password registration form still
+       asks for both. */
+    var nameRow = (!asking || mustName)
+      ? '<div class="oa-prow' + (mustName ? ' oa-missing' : '') + '">' +
+          '<label>First name' + (mustName ? needMark() : '') +
+            '<input name="firstName" maxlength="80" autocomplete="given-name" ' +
+            (mustName ? 'required ' : '') +
+            'value="' + esc(p.firstName || '') + '"></label>' +
+          '<label>Last name<input name="lastName" maxlength="80" autocomplete="family-name" ' +
+            'value="' + esc(p.lastName || '') + '"></label>' +
+        '</div>'
+      : '';
+    /* The affiliation is compulsory here only when the card is ASKING for it
+       (a provider account that has not given one, the registration form's
+       question put to the accounts that never saw the form). Every ordinary
+       edit keeps the chip and keeps the box optional. */
+    var affRow = mustAff
+      ? '<label class="oa-missing">Affiliation' + needMark() +
+          '<input name="affiliation" maxlength="160" required ' +
+            'placeholder="University or company" autocomplete="organization" ' +
+            'value="' + esc(p.affiliation || '') + '"></label>'
+      : (asking ? '' :
+        '<label>Affiliation <span class="oa-opt">(optional)</span>' +
+          '<input name="affiliation" maxlength="160" placeholder="University or company" ' +
+            'autocomplete="organization" value="' + esc(p.affiliation || '') + '"></label>');
+    var websiteRow = asking ? '' :
+      '<label>Website <span class="oa-opt">(optional)</span>' +
+        '<input name="website" maxlength="300" placeholder="https://…" type="url" ' +
+          'value="' + esc(p.website || '') + '"></label>';
+    /* ONE e-mail row, and which one depends on whether the site already has
+       an address. A sign-in address is Firebase's own word and is shown as
+       the fact it is; where the provider shares none (ORCID's OIDC does not)
+       the row becomes a BOX, because until 2026-09-12 those accounts were
+       simply unreachable and the card said so without ever asking. Never
+       both: a second box beside an address the site already holds is a
+       question already answered. Under an ask the row is drawn only when it
+       is the thing being asked for. */
+    var mailRow = (!asking || mustMail) ? emailRowHTML(u, p, mustMail) : '';
+    if (mustMail) mailRow = mailRow.replace('class="oa-email-row"', 'class="oa-email-row oa-missing"');
+
     var wrap = document.createElement('div');
     wrap.className = 'oa-modal';
     wrap.id = 'oa-profile';
     wrap.innerHTML =
-      '<div class="oa-modal-card oa-profile-card" role="dialog" aria-modal="true" ' +
-        'aria-labelledby="oa-profile-h">' +
-        '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
+      '<div class="oa-modal-card oa-profile-card' + (asking ? ' oa-profile-asking' : '') + '" ' +
+        'role="dialog" aria-modal="true" aria-labelledby="oa-profile-h">' +
+        /* Under the gate the card is the one thing this account can use, so
+           it has no X: answering, or signing out, is how it goes. */
+        (gated ? '' : '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>') +
         '<div class="oa-profile-head">' +
-          '<div class="oa-photo-side">' + photoSideHTML() + '</div>' +
+          (asking ? '' : '<div class="oa-photo-side">' + photoSideHTML() + '</div>') +
           '<div>' +
-            '<h3 id="oa-profile-h">' + (firstRun ? 'Welcome' : 'My profile') + '</h3>' +
-            '<p class="oa-modal-lede">Your name is how you appear in the header and on ' +
-              'anything you post. Your affiliation is never published.</p>' +
-            /* SAID WHERE THE READER IS ANSWERING, and only when something is
-               really being asked for. A card that reopens with boxes newly
-               marked required and no word about why reads as a fault; this
-               names the gap and says who sees the answer, which is the same
-               claim the registration card and the Privacy Policy make. */
-            (req.length
-              ? '<p class="oa-modal-lede oa-profile-ask">We are missing ' +
-                  esc(listWords(req.map(function (k) { return ASK_WORD[k]; }))) +
-                  '. Please add ' + (req.length > 1 ? 'them' : 'it') +
-                  ' so the site knows who has registered &mdash; only you and the ' +
-                  'site&rsquo;s maintainer ever see ' +
-                  (mustMail ? 'your affiliation and your e-mail address' : 'it') +
-                  '.</p>'
-              : '') +
+            '<h3 id="oa-profile-h">' + heading + '</h3>' +
+            lede +
           '</div>' +
         '</div>' +
         '<form id="oa-profile-form">' +
-          '<div class="oa-prow">' +
-            /* Only the FIRST name is ever compelled here, for the reason
-               profileGaps gives: this card can reopen, and a person who goes
-               by one name must not meet a box they cannot satisfy. The
-               password registration form still asks for both. */
-            '<label>First name<input name="firstName" maxlength="80" autocomplete="given-name" ' +
-              (mustName ? 'required ' : '') +
-              'value="' + esc(p.firstName || '') + '"></label>' +
-            '<label>Last name<input name="lastName" maxlength="80" autocomplete="family-name" ' +
-              'value="' + esc(p.lastName || '') + '"></label>' +
-          '</div>' +
-          (mustAff
-            /* The ONE case where this card's affiliation is compulsory: a brand
-               new provider account being asked the question the registration
-               form asks everybody else. Every ordinary edit keeps the chip and
-               keeps the box optional. */
-            ? '<label>Affiliation' +
-                '<input name="affiliation" maxlength="160" required ' +
-                  'placeholder="University or company" autocomplete="organization" ' +
-                  'value="' + esc(p.affiliation || '') + '"></label>'
-            : '<label>Affiliation <span class="oa-opt">(optional)</span>' +
-                '<input name="affiliation" maxlength="160" placeholder="University or company" ' +
-                  'autocomplete="organization" value="' + esc(p.affiliation || '') + '"></label>') +
-          '<label>Website <span class="oa-opt">(optional)</span>' +
-            '<input name="website" maxlength="300" placeholder="https://…" type="url" ' +
-              'value="' + esc(p.website || '') + '"></label>' +
-          /* ONE e-mail row, and which one depends on whether the site
-             already has an address. A sign-in address is Firebase's own word
-             and is shown as the fact it is; where the provider shares none —
-             ORCID's OIDC does not — the row becomes a BOX, because until
-             2026-09-12 those accounts were simply unreachable and the card
-             said so without ever asking. Never both: a second box beside an
-             address the site already holds is a question already answered. */
-          emailRowHTML(u, p, mustMail) +
+          nameRow + affRow + websiteRow + mailRow +
           /* …and the ORCID row is MASTER's (#173, the same owner message the
              day before): it points at the card's own Continue-with-ORCID
              pill, which creates the account WITH the iD, rather than arming a
              link against an account that does not exist yet. */
-          orcidFieldHTML(p, u) +
+          (asking ? '' : orcidFieldHTML(p, u)) +
           '<div class="oa-auth-actions">' +
-            '<button type="submit" class="button blue">Save profile</button>' +
-            /* Withheld while anything is required — answering is what the
-               card is for. The X, Escape and the backdrop still close it: a
-               modal a reader cannot leave is not a thing this site has, and
-               the once-a-session ask is what makes postponing safe. */
-            (firstRun && !req.length
-              ? '<button type="button" class="oa-linkbtn" id="oa-profile-later">Not now</button>' : '') +
+            '<button type="submit" class="button blue">' +
+              (asking ? 'Save and continue' : 'Save profile') + '</button>' +
+            /* Withheld while anything is required, since answering is what the
+               card is for. Under the gate the only other way out is signing
+               out, and the card says so; on the soft ask (a password account
+               that registered before the rules) the X, Escape and the backdrop
+               still close it, and the once-a-session ask is what makes
+               postponing safe. */
+            (gated
+              ? '<button type="button" class="oa-linkbtn" id="oa-profile-signout">Sign out instead</button>'
+              : (firstRun && !req.length
+                  ? '<button type="button" class="oa-linkbtn" id="oa-profile-later">Not now</button>' : '')) +
           '</div>' +
         '</form>' +
-        (firstRun ? '' : otherAccountsHTML(p, u)) +
+        ((firstRun || asking) ? '' : otherAccountsHTML(p, u)) +
         '<p class="oa-auth-msg" id="oa-profile-msg" role="alert"></p>' +
       '</div>';
     document.body.appendChild(wrap);
 
-    function close() { wrap.hidden = true; }
+    /* Under the gate nothing but answering (or signing out) closes the card:
+       the backdrop and Escape are refused rather than unwired, because
+       wireModalKeys still has to keep Tab inside it. `gated` is cleared by
+       the save that lifts the gate, so the close that follows it goes through. */
+    function close() { if (gated) return; wrap.hidden = true; }
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
-    $('.oa-modal-x', wrap).addEventListener('click', close);
+    var xBtn = $('.oa-modal-x', wrap);
+    if (xBtn) xBtn.addEventListener('click', close);
     wireModalKeys(wrap, close);
     var later = $('#oa-profile-later', wrap);
     if (later) later.addEventListener('click', close);
+    var leave = $('#oa-profile-signout', wrap);
+    if (leave) leave.addEventListener('click', function () { signOut(); });
     wireOtherAccounts(wrap, close);
 
-    var first = $('#oa-profile-form input', wrap);
+    /* the keyboard lands in the first box that is being asked for */
+    var first = $('#oa-profile-form .oa-missing input:not([disabled])', wrap) ||
+      $('#oa-profile-form input', wrap);
     if (first) first.focus();
 
     /* ---- the profile picture: pick a file, crop square client-side, store a
@@ -1733,6 +1798,13 @@
         .then(function (fb) { return profileDoc(fb, state.user.uid).set(out, { merge: true }); })
         .then(function () {
           state.profile = Object.assign({}, state.profile || {}, out);
+          /* THE GATE LIFTS HERE, and only here: an answer with nothing left
+             owing is what "provided name and affiliation" means, and the
+             account enters exactly as the auth event would have entered it. */
+          if (gated && state.pending === 'profile' && !profileGaps(state.user, state.profile).length) {
+            gated = false;
+            liftGate(state.user);
+          }
           paint();
           writeHint(state.user, displayName(state.user));   // the next page starts with the new name
           // …and the roster row follows the profile: the name it shows and
@@ -2118,9 +2190,9 @@
       register and turns out to have an account must not have to close the box
       and find another button. */
   function openAuth(mode) {
-    // an unconfirmed account IS signed in as far as this box is concerned;
-    // what it needs is the card that gets the address confirmed
-    if (state.pending) { openVerifyPanel(); return; }
+    // a pending account IS signed in as far as this box is concerned; what it
+    // needs is the card that lifts its gate
+    if (state.pending) { openPendingCard(); return; }
     if (state.user) return;                      // invariant 1
     if (!window.OAFB || !OAFB.enabled) {
       openNotice('Sign-in is not switched on for this site yet. ' +
@@ -3059,6 +3131,7 @@
     var u = state.user || who;
     if (!u) return Promise.resolve(false);
     if (!state.pending && state.user) return Promise.resolve(true);
+    if (state.pending === 'profile') return Promise.resolve(false);   // a different gate: the card lifts it
     return Promise.resolve(typeof u.reload === 'function' ? u.reload() : null)
       .then(function () { return typeof u.getIdToken === 'function' ? u.getIdToken(true) : null; })
       .then(function () {
@@ -3784,6 +3857,8 @@
     state.profile = null;
     state.pending = false;
     closeVerifyPanel();       // "Use a different account" lands here
+    var gateCard = $('#oa-profile');   // the gated profile card refuses to close; leaving is how it goes
+    if (gateCard && gateCard.parentNode) gateCard.parentNode.removeChild(gateCard);
     connectBusy = {};
     queue.length = 0;
     /* the counts belong to the account that is leaving; a shared machine must
@@ -3820,9 +3895,9 @@
   /** Run fn once a user is known. Queues while auth is still resolving; opens
       the sign-in modal only if we end up genuinely signed out. */
   function whenSignedIn(fn) {
-    // an unconfirmed account cannot run anything yet; what it can do is
-    // confirm the address, so that is the card a click reaches
-    if (state.pending) { openVerifyPanel(); return; }
+    // a pending account cannot run anything yet; what it can do is lift its
+    // gate, so that is the card a click reaches
+    if (state.pending) { openPendingCard(); return; }
     if (state.user) { fn(state.user); return; }
     if (!state.resolved) { queue.push(fn); return; }
     openAuth();
@@ -3841,8 +3916,8 @@
       the auth handler because the e-mail verification lift has to do the
       same things later, once the address is confirmed, and two copies of
       this list would drift. */
-  function enterSession(u, fb) {
-    loadProfile(u);
+  function enterSession(u, fb, preloaded) {
+    loadProfile(u, preloaded);
     loadCounts(u);
     // Contentless tally so the Admin area can count registered users
     // without anyone being able to read the user list. Same shape as
@@ -3866,6 +3941,110 @@
 
     var q = queue.splice(0, queue.length);
     q.forEach(function (fn) { try { fn(u); } catch (e) { if (window.console) console.error(e); } });
+  }
+
+  /** Read the profile of a Google or ORCID account and decide: a complete one
+      enters like anybody else, an incomplete one is gated behind its card. The
+      provider's own name and picture are seeded FIRST, fill-empty, so a Google
+      account is not asked for a name Google has just handed over. A read that
+      FAILS admits the account as it always did: the gate is a completeness
+      measure and not a security boundary (a scripted client writes what it
+      likes either way), and locking a complete member out on a network blip
+      is the worse error. */
+  function settleProvider(u, fb) {
+    var uid = u.uid;
+    function ours() { return !!(state.user && state.user.uid === uid); }
+    profileDoc(fb, uid).get()
+      .then(function (snap) { return (snap && snap.exists ? snap.data() : null) || null; },
+            function () { return undefined; })          // unreadable is unknown, not empty
+      .then(function (p) {
+        if (!ours()) return;
+        if (p !== undefined) state.profile = p;
+        /* …and the iD an ORCID sign-in proved, for the same reason: it is the
+           provider's own word, and a gated account that gives up should still
+           carry it. Both are no-ops on a profile that has them. */
+        return seedProfileFromUser()
+          .then(function () { return ours() ? seedOrcidFromProvider() : null; })
+          .then(function () {
+            if (!ours()) return;
+            if (p !== undefined && needsProfile(u, state.profile)) enterGate(u, profileGaps(u, state.profile));
+            else admit(u, fb, p === undefined ? undefined : (state.profile || null));
+          });
+      })
+      .catch(function () { if (ours()) admit(u, fb); });
+  }
+
+  /** The ordinary signed-in arrival, once the account is known to be usable. */
+  function admit(u, fb, preloaded) {
+    state.pending = false;
+    state.resolved = true;
+    writeHint(u);
+    paint();
+    enterSession(u, fb, preloaded);
+    notify(u);
+  }
+
+  /* THE GATE. Everything the verification branch of the auth handler does for
+     an unconfirmed password account, for a Google or ORCID account that has not
+     said who it is: no hint (the next page would paint it signed in), no
+     roster row, no tally, no counts, the listeners hear null so every page
+     locks, and the one card this account can use opens on every page until it
+     is answered. The marker is the verification gate's own (PENDING_KEY), so
+     every page's head snippet already reads it and the archive's hint is
+     ignored for it in the same way. */
+  function enterGate(u, gaps) {
+    state.pending = 'profile';
+    state.resolved = true;
+    writeHint(null);
+    markPending(u.uid, true);
+    paint();
+    queue.length = 0;
+    if (!leaving) openGateCard(gaps);
+    notify(null);
+  }
+
+  /** The gated card: the welcome wording on the visit that made the account
+      (the sign-up's own mark), the finish-registering wording after that.
+      Brought to the front rather than redrawn when it is already open, so a
+      press on the header chip does not throw away what has been typed. */
+  function openGateCard(gaps) {
+    var open = $('#oa-profile');
+    if (open && !open.hidden) {
+      var box = $('#oa-profile-form .oa-missing input:not([disabled])', open);
+      if (box) box.focus();
+      return;
+    }
+    var u = state.user;
+    if (!u) return;
+    openProfile(takeAskAffiliation(u.uid), { require: gaps || profileGaps(u, state.profile), gate: true });
+  }
+
+  /** Saved with nothing left owing: the account enters, with everything the
+      auth event would have done for it (liftVerification's shape). The
+      profile just saved is handed to enterSession, so nothing is read again. */
+  function liftGate(u) {
+    state.pending = false;
+    markPending(u.uid, false);
+    writeHint(u, displayName(u));
+    paint();
+    if (window.OAFB && OAFB.enabled) {
+      OAFB.ready().then(function (fb) { enterSession(u, fb, state.profile || null); })
+        .catch(function () { /* said elsewhere */ });
+    }
+    notify(u);
+  }
+
+  /** Which card a pending account is sent to: the one that lifts ITS gate. */
+  function openPendingCard(auto) {
+    if (state.pending === 'profile') openGateCard();
+    else openVerifyPanel(null, null, auto);
+  }
+
+  /** The pending chip's tooltip, naming what is still owed. */
+  function pendingTitle() {
+    if (state.pending !== 'profile') return 'Your e-mail address has not been confirmed yet';
+    var owed = listWords(profileGaps(state.user, state.profile).map(function (k) { return ASK_WORD[k]; }));
+    return 'The site still needs ' + (owed || 'a few details') + ' before you can use it';
   }
 
   function boot() {
@@ -3917,6 +4096,20 @@
              account is made: not this one over it (see regBusy) */
           if (!$('#oa-verify') && !regBusy) openVerifyPanel(null, null, true);
           notify(null);
+          return;
+        }
+
+        /* A GOOGLE OR ORCID ACCOUNT IS ADMITTED BY ITS PROFILE (needsProfile,
+           and the owner's rule beside it). The decision needs the document, so
+           the session stays unresolved for the length of that one read: the
+           header goes on painting from the hint (a complete account's says
+           signed in, a gated one's is absent, so neither flashes), whenSignedIn
+           queues, and the listeners hear nothing until the answer is known.
+           The read is handed on to enterSession so the ordinary path does not
+           pay it twice. */
+        if (u && providerOnly(u)) {
+          state.resolved = false;
+          settleProvider(u, fb);
           return;
         }
 
@@ -4046,7 +4239,7 @@
     /* --- e-mail verification (see the block above the merge) ------------- */
     /** The unconfirmed account itself, for the verify page and the card;
         null when there is none. The one export that can see it. */
-    pendingUser: function () { return state.pending ? state.user : null; },
+    pendingUser: function () { return state.pending && state.pending !== 'profile' ? state.user : null; },
     needsVerification: function (u) { return needsVerification(u || state.user); },
     sendVerification: function () { return sendVerification(); },
     confirmVerified: function () { return confirmVerified(); },
@@ -4089,6 +4282,9 @@
        v2/_scraper/page-test.mjs. */
     pure: {
       normOrcid: normOrcid,
+      /* the gate's own rule (owner, 2026-09-14), pure in (user, profile) */
+      providerOnly: providerOnly,
+      needsProfile: needsProfile,
       profilePatch: profilePatch,
       alertSig: alertSig,
       initialsFrom: initialsFrom,

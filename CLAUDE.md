@@ -3478,11 +3478,14 @@ private window that throws on the accessor answers FALSE, because a browser
 that cannot remember being asked would otherwise be asked on every page it
 opens.
 
-**The card is never a trap.** The X, Escape and the backdrop all still close
-it, and *Not now* is withheld only while something is required, because
-answering is what the card is for and asking again next session is what makes
-postponing safe rather than final. A modal a reader cannot leave is still not a
-thing this site has.
+**The card is never a trap, FOR A PASSWORD ACCOUNT.** There the X, Escape and
+the backdrop all still close it, and *Not now* is withheld only while something
+is required, because answering is what the card is for and asking again next
+session is what makes postponing safe rather than final. For a Google or ORCID
+account this stopped being the rule on 2026-09-14, at the owner's word: see
+"…and a Google or ORCID account is not signed in until it has answered" below,
+where the card is the one thing such an account can use until it answers, and
+Sign out is the other way out.
 
 **`name` IS THE FIRST NAME ALONE, and that asymmetry is deliberate.** The
 password form goes on asking for a last name too: that is a create-time rule,
@@ -3580,6 +3583,143 @@ now* to press, a box of spaces refused for each, the profile and the roster row
 read back, a Google account that CLOSED the card asked again in a fresh session
 and not again in the same one, a complete account asked nothing at all, and the
 roster showing the given mark, the incomplete count and the Find needle.
+
+### …and a Google or ORCID account is not signed in until it has answered
+
+Owner, 2026-09-14, over the roster still showing dashes for accounts registered
+the day before: *"A registered new user should be able to log in with gmail or
+with their ORCID only after they have provided name and affiliation."* And the
+same day, over a screenshot of the full profile card opening on the home page
+of their own account, which has no affiliation: *"it's not clear to me that I
+would have to fill up a certain field here so that I don't see this popup
+again. Improve the user experience, or make it more apparent to the user what
+they need to do."*
+
+**The once-a-session ask above could not deliver the first sentence, and the
+dashes are the proof.** A Google or ORCID sign-up creates a usable account
+with no fields at all; the card that asked afterwards could be closed, and an
+account that closed it was a registered member with a dash on the roster until
+the next session happened to catch it. The password form has never had that
+gap: nothing gets through it short of an answer. So the provider roads are
+held to the same standard now, at the one point where it can be held.
+
+**THE GATE IS THE VERIFICATION GATE'S SHAPE, WITH A DIFFERENT KEY.**
+`needsProfile(u, p)` in `assets/oa-accounts.js` is the one definition:
+`providerOnly(u)` (a provider record and no `password` among them) AND
+`profileGaps(u, p)` non-empty. Keyed on the same `profileGaps` the ask is
+keyed on, so the gate and the card cannot disagree about what is owed: the
+first name and the affiliation for everybody, and an address where the
+sign-in shares none, which is what the 2026-09-12 rule already asked ORCID
+accounts for and is what makes "no dashes" true of the e-mail column too. The
+owner's sentence names the name and the affiliation; the address is included
+because a roster row with a dash in the e-mail column is the same failure
+the sentence describes, and an ORCID account is the only kind that has one.
+
+The auth handler, after the verification branch and before it writes the
+hint, sends a provider account to `settleProvider`: ONE profile read, the
+provider's own name, picture and iD seeded first (fill-empty, as always, so a
+Google account is not asked for a name Google has just handed over), then
+`enterGate` or `admit`. `enterGate` does exactly what the verification
+branch does for an unconfirmed password account: `state.pending = 'profile'`,
+no hint, `PENDING_KEY` marked (every page's head snippet already reads that
+marker, so the next page paints signed out before any script runs and the
+archive's hint for the account is ignored), the queue emptied, the listeners
+told null so every page locks, and the card opened. `user()` answers null,
+`hint()` answers `'out'`, `whenSignedIn`, `openAuth` and `openProfile`
+all route to the card that lifts THIS gate, and the header chip reads
+**Finish registering** with a tooltip naming what is owed. `pendingUser()`
+and `confirmVerified()` know the difference between the two pending kinds,
+so the inbox card is never drawn for a profile-gated account. The session
+stays UNRESOLVED for the length of the read (`state.resolved = false`), so
+nothing paints a signed-in state that may be taken back a beat later: a
+complete account's hint says signed in, a gated one's is absent, and neither
+flashes.
+
+**A read that FAILS admits the account.** The gate is a completeness measure
+and not a security boundary (a scripted client writes what it likes either
+way, and the rules-level point recorded under the 2026-09-14 review stands),
+and locking a complete member out on a network blip is the worse error. The
+read is handed on to `enterSession` so the ordinary path does not pay it
+twice.
+
+**The save lifts it, and only a save with nothing left owing.** `liftGate`
+is `liftVerification`'s shape: the marker cleared, the hint written with the
+name the site shows, the header repainted, `enterSession` with the profile
+just saved, and the listeners told the user. From that press the account is a
+member like any other, its roster row written with the affiliation and the
+address on it, so the dash never appears.
+
+**A PASSWORD ACCOUNT KEEPS THE SOFT ASK.** It answered a form at creation, so
+an old record short of an affiliation (every account made before 2026-09-05)
+is asked once a session on the same compact card, with an X, and is signed in
+meanwhile; holding an old record to a new create-time rule is what this file
+refuses everywhere. An account with no provider record at all (the browser
+suite's `A_READER`) is not gated either, since nothing says how it signs in.
+And a Google account that later CONNECTS a password is a password account.
+
+### …and the card that asks is the ask, and nothing else
+
+The screenshot answered the second message before a line was read: the card
+that opened was the whole profile card, photograph, website, ORCID connect,
+"Your other accounts" and a merge button, with an empty Affiliation box in the
+middle of it and nothing anywhere saying that box was why the card had opened.
+
+So while the card is ASKING (`req.length > 0`) it draws that and nothing else:
+the heading names the step ("Welcome! One more step" on the visit that made
+the account, by the sign-up's own mark; "One more step before you continue"
+on a return; "One thing we are missing" for the soft ask), the lede says what
+is owed, which sign-in it unlocks ("You can use the site with your Google
+sign-in as soon as it is saved") and who sees the answer, only the MISSING
+rows are drawn (a Google account with a name and an address meets one box),
+each compelled row carries `.oa-missing` and a small **needed** mark, the box
+takes a brand outline and holds the keyboard, and the button reads **Save and
+continue**. The photograph, the website, the ORCID field and the connect rows
+wait for Edit account, where they belong.
+
+**Under the gate the card has no X**, `close()` refuses (Escape and the
+backdrop are refused rather than unwired, because `wireModalKeys` still has
+to keep Tab inside), and the one other way out is **Sign out instead**, drawn
+where *Not now* would be; `signOut()` removes the card with the session. The
+header chip brings the card forward rather than redrawing it, so a press there
+does not throw away what has been typed. The outline and the mark live in both
+stylesheets: `oa-ui.css` sets them with fallbacks, `v3.css` restates them at
+(0,3,1) because its own modal-input rule at (0,2,1) would otherwise win the
+border back, and the mark names its own ink (`--on-brand`, never `#fff`:
+`--brand` is light in the dark theme).
+
+**Three things this changes that are worth knowing.** The owner's own Google
+account, which has no affiliation, meets the gate on its next visit until the
+affiliation is typed once. An abandoned provider sign-up still appears on the
+roster with dashes, because the roster is seeded from Auth by the daily sync;
+it cannot use the site, and the "incomplete" count is how many of those there
+are. And the merge of two accounts is offered only to an account that has
+entered, so a gated ORCID account answers its card first and is offered the
+merge a moment later, which is one extra step and not a lost one.
+
+**The browser suite's default reader changed with it.** `_fake-firebase.js`
+seeded every user as a Google sign-in unless told otherwise, and under this
+gate a Google account with no profile is held on every page; the default is a
+verified password account now, the one kind neither gate holds, and the blocks
+about the gate seed their provider by name. The merge fixtures and the ORCID
+member fixture carry complete profiles for the same reason.
+
+Tests: the gate block of `testRegistrationFields` in `_scraper/selftest.mjs`
+(the two definitions, the handler's branch after the verification branch and
+before the hint, the seed before the gaps, a failed read admitting, every step
+of `enterGate` and `liftGate`, the save's lift, the three routes, the
+two pending kinds kept apart, the chip's word in one expression, the sign-out
+removing the card, the compact card's markup and the rows it withholds, both
+stylesheets, the shim default, the change log and this section) and the gate
+blocks of `_scraper/page-test.mjs`, which drive it in a real browser: a
+brand-new Google sign-up meeting ONE outlined box and nothing else, signed out
+with the marker set and the chip reading Finish registering, Escape and the
+backdrop refused, the save lifting it with the roster row written; the ORCID
+sign-up's two boxes and its iD seeded before the card; an existing Google
+account gated on arrival with the shim's latch SET, gated again on the next
+page over locked cards, the chip putting the keyboard back in the box, Sign out
+instead, a new session gated too and the answer lifting it; a complete account
+not held; and a password account short of an affiliation asked on the same
+compact card with an X, signed in meanwhile, once a session.
 
 ## The forum
 
