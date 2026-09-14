@@ -1923,6 +1923,36 @@
   "owner": ""
  },
  {
+  "id": "2027-imperial-college-london-20260723",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-23",
+  "institution": "Imperial College London",
+  "department": "Imperial College Business School, Operations Management",
+  "school": "Imperial College Business School",
+  "unit": "Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "September 3, 2026",
+  "applyByDate": "2026-09-03",
+  "comments": "",
+  "country": "United Kingdom",
+  "adUrl": "https://careercenter.informs.org/job/professor-full-london-england-5432",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Imperial%20College%20London",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-14T07:32:35Z",
+  "owner": ""
+ },
+ {
   "id": "2027-trinity-university-20260723",
   "year": 2027,
   "years": [
