@@ -3559,18 +3559,6 @@
   "lastPosted": "2026-01-26"
  },
  {
-  "id": "imperial-college-london____om",
-  "institution": "Imperial College London",
-  "department": "OM",
-  "type": "University",
-  "country": "United Kingdom",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2025-08-29"
- },
- {
   "id": "imperial-college-london__imperial-college-business-school__analytics-and-operations",
   "institution": "Imperial College London",
   "school": "Imperial College Business School",
@@ -3599,6 +3587,19 @@
   "lastPosted": "2025-08-30",
   "lat": 51.49933,
   "lng": -0.174786
+ },
+ {
+  "id": "imperial-college-london__imperial-college-business-school__operations-management",
+  "institution": "Imperial College London",
+  "school": "Imperial College Business School",
+  "department": "Operations Management",
+  "type": "Business School",
+  "country": "United Kingdom",
+  "sources": [
+   "postings"
+  ],
+  "n": 2,
+  "lastPosted": "2026-07-23"
  },
  {
   "id": "indian-institute-of-technology-iit-bombay____industrial-engineering-and-operations-research",

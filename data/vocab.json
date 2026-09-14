@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:19:30.969Z",
+ "generated": "2026-09-14T07:33:41.734Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -115,6 +115,10 @@
   },
   {
    "v": "IESE Business School",
+   "n": 3
+  },
+  {
+   "v": "Imperial College London",
    "n": 3
   },
   {
@@ -283,10 +287,6 @@
   },
   {
    "v": "Howard University",
-   "n": 2
-  },
-  {
-   "v": "Imperial College London",
    "n": 2
   },
   {
@@ -2156,6 +2156,10 @@
    "n": 2
   },
   {
+   "v": "Imperial College Business School",
+   "n": 2
+  },
+  {
    "v": "Ivey Business School",
    "n": 2
   },
@@ -2305,10 +2309,6 @@
   },
   {
    "v": "HKUST School of Business and Management",
-   "n": 1
-  },
-  {
-   "v": "Imperial College Business School",
    "n": 1
   },
   {
@@ -3070,11 +3070,11 @@
    "n": 8
   },
   {
-   "v": "Business Analytics",
-   "n": 7
+   "v": "Operations Management",
+   "n": 8
   },
   {
-   "v": "Operations Management",
+   "v": "Business Analytics",
    "n": 7
   },
   {
@@ -6651,14 +6651,16 @@
    ],
    "units": [
     "Analytics and Operations",
-    "OM"
+    "OM",
+    "Operations Management"
    ],
    "bySchool": {
     "": [
      "OM"
     ],
     "Imperial College Business School": [
-     "Analytics and Operations"
+     "Analytics and Operations",
+     "Operations Management"
     ]
    }
   },
@@ -11963,7 +11965,8 @@
    "Operations, Information and Technology"
   ],
   "Imperial College Business School": [
-   "Analytics and Operations"
+   "Analytics and Operations",
+   "Operations Management"
   ],
   "Institut Mines-Télécom Business School": [
    "Management, Marketing and Strategy"
