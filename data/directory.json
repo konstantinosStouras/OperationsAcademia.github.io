@@ -2345,6 +2345,18 @@
   "lng": 4.52566
  },
  {
+  "id": "esmt-berlin____innovation-and-entrepreneurship",
+  "institution": "ESMT Berlin",
+  "department": "Innovation and Entrepreneurship",
+  "type": "Business School",
+  "country": "Germany",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-23"
+ },
+ {
   "id": "esmt-berlin____management-science",
   "institution": "ESMT Berlin",
   "department": "Management Science",

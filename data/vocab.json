@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:33:41.734Z",
+ "generated": "2026-09-14T07:37:17.819Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -715,6 +715,10 @@
   },
   {
    "v": "Endicott College",
+   "n": 1
+  },
+  {
+   "v": "ESMT Berlin",
    "n": 1
   },
   {
@@ -1659,10 +1663,6 @@
   },
   {
    "v": "Erasmus University Rotterdam",
-   "n": 0
-  },
-  {
-   "v": "ESMT Berlin",
    "n": 0
   },
   {
@@ -3643,6 +3643,10 @@
   },
   {
    "v": "Information, Operations and Management Sciences",
+   "n": 1
+  },
+  {
+   "v": "Innovation and Entrepreneurship",
    "n": 1
   },
   {
@@ -6060,10 +6064,12 @@
   "ESMT Berlin": {
    "schools": [],
    "units": [
+    "Innovation and Entrepreneurship",
     "Management Science"
    ],
    "bySchool": {
     "": [
+     "Innovation and Entrepreneurship",
      "Management Science"
     ]
    }
