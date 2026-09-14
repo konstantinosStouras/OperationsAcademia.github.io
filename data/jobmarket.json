@@ -398,6 +398,68 @@
   "owner": ""
  },
  {
+  "id": "2027-shanghai-jiao-tong-university-20260901-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-01",
+  "institution": "Shanghai Jiao Tong University",
+  "department": "Antai College of Economics and Management, Data and Business Intelligence",
+  "school": "Antai College of Economics and Management",
+  "unit": "Data and Business Intelligence",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "",
+  "country": "China",
+  "adUrl": "https://www.acem.sjtu.edu.cn/acem/hr/97770.html",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Shanghai%20Jiao%20Tong%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-14T06:59:10Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-tongji-university-20260901",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-01",
+  "institution": "Tongji University",
+  "department": "School of Economics and Management, Operations Management",
+  "school": "School of Economics and Management",
+  "unit": "Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "We welcome applicants with expertise in Logistics & Supply Chain Management, Service Management, Industrial Engineering, Operations Research & Intelligent Decision, Business Analytics, Transportation Operations Management, Quality & Reliability Management and related field.",
+  "country": "China",
+  "adUrl": "https://careercenter.informs.org/job/join-the-research-faculty-of-tongji-shanghai-shanghai-5502",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Tongji%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-14T06:58:49Z",
+  "owner": ""
+ },
+ {
   "id": "2027-alma-college-20260826",
   "year": 2027,
   "years": [
