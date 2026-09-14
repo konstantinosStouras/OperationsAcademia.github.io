@@ -2563,36 +2563,6 @@
   "owner": ""
  },
  {
-  "id": "2027-duke-university-20260804-2",
-  "year": 2027,
-  "years": [
-   2027
-  ],
-  "posted": "2026-08-04",
-  "institution": "Duke University",
-  "department": "Fuqua School of Business, Operations Management",
-  "school": "Fuqua School of Business",
-  "unit": "Operations Management",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "October 15, 2026",
-  "applyByDate": "2026-10-15",
-  "comments": "",
-  "country": "United States",
-  "adUrl": "https://academicjobsonline.org/ajo/jobs/32106",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Duke%20University",
-  "characteristics": [],
-  "featured": false,
-  "source": "jobmarket-sheet",
-  "addedAt": "2026-09-14T07:39:53Z",
-  "owner": ""
- },
- {
   "id": "2027-duke-university-20260804",
   "year": 2027,
   "years": [
@@ -2620,6 +2590,36 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T07:40:47Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-duke-university-20260804-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-04",
+  "institution": "Duke University",
+  "department": "Fuqua School of Business, Operations Management",
+  "school": "Fuqua School of Business",
+  "unit": "Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 15, 2026",
+  "applyByDate": "2026-10-15",
+  "comments": "",
+  "country": "United States",
+  "adUrl": "https://academicjobsonline.org/ajo/jobs/32106",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Duke%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-14T07:39:53Z",
   "owner": ""
  },
  {
