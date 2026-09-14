@@ -5503,19 +5503,6 @@
   "lastPosted": "2025-08-04"
  },
  {
-  "id": "northern-state-university__school-of-business__business-analytics-and-information-systems",
-  "institution": "Northern State University",
-  "school": "School of Business",
-  "department": "Business Analytics and Information Systems",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2026-09-13"
- },
- {
   "id": "northwestern____science-and-innovation",
   "institution": "Northwestern",
   "department": "Science and Innovation",
@@ -6352,6 +6339,19 @@
   "lng": 29.3807805
  },
  {
+  "id": "sabanci-university__sabanci-business-school__business-analytics-and-information-systems",
+  "institution": "Sabanci University",
+  "school": "Sabanci Business School",
+  "department": "Business Analytics and Information Systems",
+  "type": "Business School",
+  "country": "Turkey",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-04"
+ },
+ {
   "id": "saint-louis-university____om-and-it",
   "institution": "Saint Louis University",
   "department": "OM and IT",
@@ -6579,11 +6579,15 @@
   "school": "Antai College of Economics and Management",
   "department": "Management Science",
   "type": "University",
+  "country": "China",
   "deptUrl": "https://www.acem.sjtu.edu.cn/acem2021/en/faculty/team.html",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-01"
  },
  {
   "id": "shanghai-university-of-finance-and-economics__college-of-business",

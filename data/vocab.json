@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:55:07.574Z",
+ "generated": "2026-09-14T06:58:19.642Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -338,10 +338,6 @@
    "n": 2
   },
   {
-   "v": "Northern State University",
-   "n": 2
-  },
-  {
    "v": "Northwestern University",
    "n": 2
   },
@@ -355,6 +351,10 @@
   },
   {
    "v": "Seton Hall University",
+   "n": 2
+  },
+  {
+   "v": "Shanghai Jiao Tong University",
    "n": 2
   },
   {
@@ -974,6 +974,10 @@
    "n": 1
   },
   {
+   "v": "Northern State University",
+   "n": 1
+  },
+  {
    "v": "Northwestern",
    "n": 1
   },
@@ -1046,6 +1050,10 @@
    "n": 1
   },
   {
+   "v": "Sabanci University",
+   "n": 1
+  },
+  {
    "v": "Saint Louis University",
    "n": 1
   },
@@ -1079,10 +1087,6 @@
   },
   {
    "v": "Savannah State University",
-   "n": 1
-  },
-  {
-   "v": "Shanghai Jiao Tong University",
    "n": 1
   },
   {
@@ -1806,10 +1810,6 @@
    "n": 0
   },
   {
-   "v": "Sabanci University",
-   "n": 0
-  },
-  {
    "v": "San Francisco State University (SFSU)",
    "n": 0
   },
@@ -2156,10 +2156,6 @@
    "n": 2
   },
   {
-   "v": "School of Business",
-   "n": 2
-  },
-  {
    "v": "School of Management",
    "n": 2
   },
@@ -2189,6 +2185,10 @@
   },
   {
    "v": "Anderson School of Management",
+   "n": 1
+  },
+  {
+   "v": "Antai College of Economics and Management",
    "n": 1
   },
   {
@@ -2392,11 +2392,19 @@
    "n": 1
   },
   {
+   "v": "Sabanci Business School",
+   "n": 1
+  },
+  {
    "v": "Sauder School of Business",
    "n": 1
   },
   {
    "v": "School Economics and Management",
+   "n": 1
+  },
+  {
+   "v": "School of Business",
    "n": 1
   },
   {
@@ -2465,10 +2473,6 @@
   },
   {
    "v": "Amsterdam Business School, Amsterdam School of Economics",
-   "n": 0
-  },
-  {
-   "v": "Antai College of Economics and Management",
    "n": 0
   },
   {
@@ -3043,7 +3047,7 @@
   },
   {
    "v": "Management Science",
-   "n": 11
+   "n": 12
   },
   {
    "v": "Data Analytics",
@@ -7680,19 +7684,13 @@
    }
   },
   "Northern State University": {
-   "schools": [
-    "School of Business"
-   ],
+   "schools": [],
    "units": [
-    "Business Analytics and Information Systems",
     "quantitative analytics"
    ],
    "bySchool": {
     "": [
      "quantitative analytics"
-    ],
-    "School of Business": [
-     "Business Analytics and Information Systems"
     ]
    }
   },
@@ -8166,10 +8164,17 @@
   },
   "Sabanci University": {
    "schools": [
-    "Faculty of Engineering and Natural Sciences (FENS)"
+    "Faculty of Engineering and Natural Sciences (FENS)",
+    "Sabanci Business School"
    ],
-   "units": [],
-   "bySchool": {}
+   "units": [
+    "Business Analytics and Information Systems"
+   ],
+   "bySchool": {
+    "Sabanci Business School": [
+     "Business Analytics and Information Systems"
+    ]
+   }
   },
   "Saint Louis University": {
    "schools": [],
@@ -12130,6 +12135,9 @@
   "Rutgers Business School": [
    "Supply Chain Management"
   ],
+  "Sabanci Business School": [
+   "Business Analytics and Information Systems"
+  ],
   "Saïd Business School": [
    "Management Science",
    "Technology and Operations Management"
@@ -12152,7 +12160,6 @@
    "Analytics, Information and Operations Management",
    "Analytics, Information, Operations",
    "Analytics, Information, Operations research",
-   "Business Analytics and Information Systems",
    "Decision Sciences",
    "Finance",
    "Information and Service Economy",
