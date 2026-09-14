@@ -7063,6 +7063,21 @@ the module what to expect rather than naming CUHK**, so it stays green on the
 day the sponsorship lapses — a guard about a corpus must not move with the
 corpus.
 
+**And the TEASER is held to its own rule, not to the file** (2026-09-14). The
+home teaser selects the ten newest postings of the season by date and only
+then puts the sponsor first, so the sponsor leads it only while its posting is
+among the ten newest, and a market that posts ten newer ones pushes it out
+with nothing wrong anywhere. The browser check expected the sponsor first
+whenever the FILE held a sponsored posting in the season, and it went red the
+morning the corpus moved: the pull_request run, which tests the merge with
+master's data, met a master whose newest ten no longer held the CUHK posting,
+while the push run of the same commit stayed green. The expectation is now the
+teaser's own selection mirrored (prepare's ten newest, then the comparator),
+and the case the owner asked for, the sponsor leading the teaser with its rail
+inside the panel, is measured on a ROUTED copy of the file with the sponsor's
+posting dated among the ten, so it is measured whatever the corpus holds today
+and stands down on the day the module says nothing can be sponsored.
+
 ## What a reader who has not REGISTERED may read
 
 Owner, 2026-08-29, from two screenshots of the site signed out: *"they should
