@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:08:54.092Z",
+ "generated": "2026-09-14T07:13:08.520Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -371,6 +371,10 @@
   },
   {
    "v": "TBS Education",
+   "n": 2
+  },
+  {
+   "v": "Technical University of Munich",
    "n": 2
   },
   {
@@ -1159,10 +1163,6 @@
   },
   {
    "v": "Syracuse University",
-   "n": 1
-  },
-  {
-   "v": "Technical University of Munich",
    "n": 1
   },
   {
@@ -3286,6 +3286,10 @@
    "n": 2
   },
   {
+   "v": "Technology Management",
+   "n": 2
+  },
+  {
    "v": "Accounting, Economics, Finance, and Information Systems",
    "n": 1
   },
@@ -4103,10 +4107,6 @@
   },
   {
    "v": "Technology",
-   "n": 1
-  },
-  {
-   "v": "Technology Management",
    "n": 1
   },
   {
@@ -8744,11 +8744,13 @@
    "units": [
     "Operations and Supply Chain Management",
     "Operations and Technology",
-    "Operations Research and AI"
+    "Operations Research and AI",
+    "Technology Management"
    ],
    "bySchool": {
     "": [
-     "Operations Research and AI"
+     "Operations Research and AI",
+     "Technology Management"
     ],
     "TUM School of Management": [
      "Operations and Supply Chain Management",
