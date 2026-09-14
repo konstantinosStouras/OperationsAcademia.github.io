@@ -720,6 +720,18 @@
   ]
  },
  {
+  "id": "boston-college____business",
+  "institution": "Boston College",
+  "department": "Business",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
+ },
+ {
   "id": "boston-college__carroll-school-of-management__business-analytics",
   "institution": "Boston College",
   "school": "Carroll School of Management",

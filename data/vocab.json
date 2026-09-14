@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:37:57.368Z",
+ "generated": "2026-09-14T06:39:37.488Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -207,6 +207,10 @@
   },
   {
    "v": "Ball State University",
+   "n": 2
+  },
+  {
+   "v": "Boston College",
    "n": 2
   },
   {
@@ -551,10 +555,6 @@
   },
   {
    "v": "Bocconi",
-   "n": 1
-  },
-  {
-   "v": "Boston College",
    "n": 1
   },
   {
@@ -3054,6 +3054,10 @@
    "n": 7
   },
   {
+   "v": "Business",
+   "n": 6
+  },
+  {
    "v": "Information Systems and Operations Management",
    "n": 6
   },
@@ -3071,10 +3075,6 @@
   },
   {
    "v": "AI",
-   "n": 5
-  },
-  {
-   "v": "Business",
    "n": 5
   },
   {
@@ -5061,11 +5061,13 @@
    ],
    "units": [
     "BA",
+    "Business",
     "Business Analytics"
    ],
    "bySchool": {
     "": [
-     "BA"
+     "BA",
+     "Business"
     ],
     "Carroll School of Management": [
      "Business Analytics"
