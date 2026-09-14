@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:58:19.642Z",
+ "generated": "2026-09-14T06:58:59.369Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1191,6 +1191,10 @@
   },
   {
    "v": "The University of Memphis",
+   "n": 1
+  },
+  {
+   "v": "Tongji University",
    "n": 1
   },
   {
@@ -2420,6 +2424,10 @@
    "n": 1
   },
   {
+   "v": "School of Economics and Management",
+   "n": 1
+  },
+  {
    "v": "School of Engineering",
    "n": 1
   },
@@ -2888,10 +2896,6 @@
    "n": 0
   },
   {
-   "v": "School of Economics and Management",
-   "n": 0
-  },
-  {
    "v": "School of Industrial Engineering",
    "n": 0
   },
@@ -3058,6 +3062,10 @@
    "n": 7
   },
   {
+   "v": "Operations Management",
+   "n": 7
+  },
+  {
    "v": "Business",
    "n": 6
   },
@@ -3071,10 +3079,6 @@
   },
   {
    "v": "OM/IS",
-   "n": 6
-  },
-  {
-   "v": "Operations Management",
    "n": 6
   },
   {
@@ -9096,6 +9100,19 @@
     ]
    }
   },
+  "Tongji University": {
+   "schools": [
+    "School of Economics and Management"
+   ],
+   "units": [
+    "Operations Management"
+   ],
+   "bySchool": {
+    "School of Economics and Management": [
+     "Operations Management"
+    ]
+   }
+  },
   "Tsinghua University": {
    "schools": [
     "School of Economics and Management"
@@ -12198,7 +12215,8 @@
    "Operations and Quantitative Methods"
   ],
   "School of Economics and Management": [
-   "Management Science and Engineering"
+   "Management Science and Engineering",
+   "Operations Management"
   ],
   "School of Engineering": [
    "Industrial and Systems Engineering",

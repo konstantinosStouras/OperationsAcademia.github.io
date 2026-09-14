@@ -8158,6 +8158,19 @@
   "lng": 32.7988233
  },
  {
+  "id": "tongji-university__school-of-economics-and-management__operations-management",
+  "institution": "Tongji University",
+  "school": "School of Economics and Management",
+  "department": "Operations Management",
+  "type": "University",
+  "country": "China",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-01"
+ },
+ {
   "id": "tsinghua-university____om-is",
   "institution": "Tsinghua University",
   "department": "OM/IS",
