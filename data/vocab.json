@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:13:08.520Z",
+ "generated": "2026-09-14T07:16:25.702Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -84,6 +84,10 @@
   {
    "v": "University of Utah",
    "n": 4
+  },
+  {
+   "v": "Carnegie Mellon University",
+   "n": 3
   },
   {
    "v": "Chicago Booth",
@@ -219,10 +223,6 @@
   },
   {
    "v": "Boston College",
-   "n": 2
-  },
-  {
-   "v": "Carnegie Mellon University",
    "n": 2
   },
   {
@@ -2452,6 +2452,10 @@
    "n": 1
   },
   {
+   "v": "Tepper School of Business",
+   "n": 1
+  },
+  {
    "v": "Tilburg School of Economics and Management",
    "n": 1
   },
@@ -2968,10 +2972,6 @@
    "n": 0
   },
   {
-   "v": "Tepper School of Business",
-   "n": 0
-  },
-  {
    "v": "Thayer School of Engineering",
    "n": 0
   },
@@ -3423,6 +3423,10 @@
   },
   {
    "v": "Business Stat/DA/SCM/OM",
+   "n": 1
+  },
+  {
+   "v": "Business Technologies",
    "n": 1
   },
   {
@@ -5332,6 +5336,7 @@
     "Tepper School of Business"
    ],
    "units": [
+    "Business Technologies",
     "Contextualized Evaluation of AI for Healthcare",
     "Heinz College",
     "Operations Management"
@@ -5341,6 +5346,7 @@
      "Contextualized Evaluation of AI for Healthcare"
     ],
     "Tepper School of Business": [
+     "Business Technologies",
      "Heinz College",
      "Operations Management"
     ]
@@ -12308,6 +12314,7 @@
    "Business Information and Decision Systems"
   ],
   "Tepper School of Business": [
+   "Business Technologies",
    "Heinz College",
    "Operations Management"
   ],
