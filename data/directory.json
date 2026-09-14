@@ -2103,11 +2103,15 @@
   "school": "Fuqua School of Business",
   "department": "Decision Sciences",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://areas.fuqua.duke.edu/decision-sciences/",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-04"
  },
  {
   "id": "duke-university__fuqua-school-of-business__operations-management",
@@ -2134,8 +2138,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2024-08-07",
+  "n": 2,
+  "lastPosted": "2026-08-04",
   "lat": 35.9990792,
   "lng": -78.9473769
  },
