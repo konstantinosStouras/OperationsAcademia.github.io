@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:53:24.671Z",
+ "generated": "2026-09-14T06:55:07.574Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -423,6 +423,10 @@
   },
   {
    "v": "University of Illinois at Urbana-Champaign",
+   "n": 2
+  },
+  {
+   "v": "University of Kentucky",
    "n": 2
   },
   {
@@ -1315,10 +1319,6 @@
   },
   {
    "v": "University of Kansas",
-   "n": 1
-  },
-  {
-   "v": "University of Kentucky",
    "n": 1
   },
   {
@@ -2268,6 +2268,10 @@
    "n": 1
   },
   {
+   "v": "Gatton College of Business and Economics",
+   "n": 1
+  },
+  {
    "v": "Gies College of Business",
    "n": 1
   },
@@ -2609,10 +2613,6 @@
   },
   {
    "v": "G. Brint Ryan College of Business",
-   "n": 0
-  },
-  {
-   "v": "Gatton College of Business and Economics",
    "n": 0
   },
   {
@@ -3746,6 +3746,10 @@
    "n": 1
   },
   {
+   "v": "Marketing and Supply Chain",
+   "n": 1
+  },
+  {
    "v": "Marketing and Supply Chain Management",
    "n": 1
   },
@@ -4407,10 +4411,6 @@
   },
   {
    "v": "Marketing and Logistics",
-   "n": 0
-  },
-  {
-   "v": "Marketing and Supply Chain",
    "n": 0
   },
   {

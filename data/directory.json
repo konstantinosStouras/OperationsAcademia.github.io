@@ -9923,8 +9923,11 @@
   "address": "550 S Limestone, Lexington, KY 40506, USA",
   "facultyUrl": "http://gatton.uky.edu/faculty-research/departments/marketing-supply-chain/directory",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-05",
   "lat": 38.0378977,
   "lng": -84.5066279
  },
