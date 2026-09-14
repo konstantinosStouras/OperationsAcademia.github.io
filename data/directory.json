@@ -2672,6 +2672,18 @@
   "lastPosted": "2024-08-23"
  },
  {
+  "id": "franklin-and-marshall-college____business-organizations-and-society",
+  "institution": "Franklin and Marshall College",
+  "department": "Business, Organizations and Society",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-06"
+ },
+ {
   "id": "fudan-university__school-of-management__management-science",
   "institution": "Fudan University",
   "school": "School of Management",
@@ -8870,6 +8882,19 @@
   "lng": -123.2536411
  },
  {
+  "id": "university-of-british-columbia__sauder-school-of-business__transportation-operations",
+  "institution": "University of British Columbia",
+  "school": "Sauder School of Business",
+  "department": "Transportation Operations",
+  "type": "Business School",
+  "country": "Canada",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-08"
+ },
+ {
   "id": "university-of-calgary__haskayne-school-of-business__operations-and-supply-chain-management",
   "institution": "University of Calgary",
   "school": "Haskayne School of Business",
@@ -11009,11 +11034,15 @@
   "school": "School of Management",
   "department": "Management Science",
   "type": "Business School",
+  "country": "China",
   "deptUrl": "https://bs.ustc.edu.cn/english/teachers-2.html",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-09"
  },
  {
   "id": "university-of-south-carolina____it",

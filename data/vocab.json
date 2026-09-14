@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:26:48.999Z",
+ "generated": "2026-09-14T06:35:30.394Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -730,6 +730,10 @@
    "n": 1
   },
   {
+   "v": "Franklin and Marshall College",
+   "n": 1
+  },
+  {
    "v": "George Mason University",
    "n": 1
   },
@@ -1258,6 +1262,10 @@
    "n": 1
   },
   {
+   "v": "University of British Columbia",
+   "n": 1
+  },
+  {
    "v": "University of California Riverside",
    "n": 1
   },
@@ -1379,6 +1387,10 @@
   },
   {
    "v": "University of Pittsburgh",
+   "n": 1
+  },
+  {
+   "v": "University of Science and Technology of China",
    "n": 1
   },
   {
@@ -1878,10 +1890,6 @@
    "n": 0
   },
   {
-   "v": "University of British Columbia",
-   "n": 0
-  },
-  {
    "v": "University of Calgary",
    "n": 0
   },
@@ -1991,10 +1999,6 @@
   },
   {
    "v": "University of Rochester",
-   "n": 0
-  },
-  {
-   "v": "University of Science and Technology of China",
    "n": 0
   },
   {
@@ -2364,6 +2368,10 @@
    "n": 1
   },
   {
+   "v": "Sauder School of Business",
+   "n": 1
+  },
+  {
    "v": "School Economics and Management",
    "n": 1
   },
@@ -2389,6 +2397,10 @@
   },
   {
    "v": "School of Engineering and Applied Science",
+   "n": 1
+  },
+  {
+   "v": "School of Management",
    "n": 1
   },
   {
@@ -2844,10 +2856,6 @@
    "n": 0
   },
   {
-   "v": "Sauder School of Business",
-   "n": 0
-  },
-  {
    "v": "Scheller College of Business",
    "n": 0
   },
@@ -2901,10 +2909,6 @@
   },
   {
    "v": "School of International Business Administration",
-   "n": 0
-  },
-  {
-   "v": "School of Management",
    "n": 0
   },
   {
@@ -3039,7 +3043,7 @@
   },
   {
    "v": "Management Science",
-   "n": 9
+   "n": 10
   },
   {
    "v": "Data Analytics",
@@ -3395,6 +3399,10 @@
   },
   {
    "v": "Business Technology",
+   "n": 1
+  },
+  {
+   "v": "Business, Organizations and Society",
    "n": 1
   },
   {
@@ -4071,6 +4079,10 @@
   },
   {
    "v": "Transport and Logistics Management",
+   "n": 1
+  },
+  {
+   "v": "Transportation Operations",
    "n": 1
   },
   {
@@ -6189,6 +6201,17 @@
     "": [
      "BA/OM",
      "Management"
+    ]
+   }
+  },
+  "Franklin and Marshall College": {
+   "schools": [],
+   "units": [
+    "Business, Organizations and Society"
+   ],
+   "bySchool": {
+    "": [
+     "Business, Organizations and Society"
     ]
    }
   },
@@ -9467,11 +9490,13 @@
     "Sauder School of Business"
    ],
    "units": [
-    "Operations and Logistics"
+    "Operations and Logistics",
+    "Transportation Operations"
    ],
    "bySchool": {
     "Sauder School of Business": [
-     "Operations and Logistics"
+     "Operations and Logistics",
+     "Transportation Operations"
     ]
    }
   },
@@ -12093,7 +12118,8 @@
    "Supply Chain Management"
   ],
   "Sauder School of Business": [
-   "Operations and Logistics"
+   "Operations and Logistics",
+   "Transportation Operations"
   ],
   "Scheller College of Business": [
    "Operations Management"
