@@ -7063,6 +7063,21 @@ the module what to expect rather than naming CUHK**, so it stays green on the
 day the sponsorship lapses — a guard about a corpus must not move with the
 corpus.
 
+**…and the teaser half asks the TEASER's rule, not the jobs page's** (found
+2026-09-14, on the day this branch's check ran over master's data). The home
+block took "the sponsor has a live posting" as its cue and then demanded the
+sponsor LEAD the teaser, but the teaser is the ten most recent postings of the
+market under way and the sponsor only reorders those ten. Ten newer postings
+had arrived since the sponsor's 2026-08-27 advertisement, its card had rightly
+left the teaser, and the block went red for a card missing from a list it had
+no claim on: three failures on every pull-request run that day, including one
+on a branch that had changed nothing near it. It computes the ten itself now,
+against the served file, and asserts BOTH states: the sponsor leads and wears
+the rail while its posting is among the ten, and nothing on the teaser is
+marked while it is not. The "still shows the ten most recent" assertion moved
+out of the branch, since it is the heading's promise rather than the
+sponsor's.
+
 ## What a reader who has not REGISTERED may read
 
 Owner, 2026-08-29, from two screenshots of the site signed out: *"they should

@@ -4708,8 +4708,32 @@ for (const [from, hash] of [
     };
   });
   ok(home.dates > 0, 'sponsors: the home page teaser still renders');
-  if (expected.any) {
-    eq(home.first, expected.first,
+
+  /* THE TEASER'S OWN RULE, asked of the data rather than assumed. The teaser
+     is the ten most recent postings of the market under way (prepare in
+     index.html) and the sponsor only REORDERS them, so the sponsor's posting
+     leads the teaser exactly while it is one of those ten. Measured against
+     the live file, the way `expected` is: on 2026-09-14 ten newer postings
+     had arrived since the sponsor's, its card had rightly left the teaser,
+     and this block went red for the sponsor being missing from a list it
+     had no claim on. A guard about a corpus must not move with the corpus,
+     and a sponsor outside the ten is the true state on both sides of the
+     roll, so both branches are asserted. */
+  const teaser = await hp.evaluate(async () => {
+    const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
+    const ten = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
+      .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
+      .slice(0, 10);
+    const marked = ten.filter((r) => window.OASponsors.isSponsored(r));
+    return { any: marked.length > 0, first: marked.length ? marked[0].institution : '' };
+  });
+  if (expected.any && !teaser.any) {
+    eq(home.marked, 0,
+      'sponsors: a sponsored posting outside the ten newest is not on the teaser, so nothing there is marked');
+    eq(home.railed, false, 'sponsors: …and no teaser card carries the rail');
+  }
+  if (teaser.any) {
+    eq(home.first, teaser.first,
       'sponsors: the sponsor LEADS the home teaser too (owner, from a screenshot)');
     eq(home.railed, true,
       'sponsors: …and its card carries the rail INSIDE the panel, which resets every border');
@@ -4730,20 +4754,20 @@ for (const [from, hash] of [
       eq(rail.w, '3px', 'sponsors: the teaser rail is a real 3px edge, not blanked by the panel reset');
       ok(rail.w !== rail.other, 'sponsors: …and still only on the left');
     }
-
-    /* The SELECTION is still the ten newest — the heading says which ten, and
-       reordering them must not change which ten. */
-    const newestTen = await hp.evaluate(async () => {
-      const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
-      return rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
-        .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
-        .slice(0, 10).map((r) => r.institution).sort();
-    });
-    const shown = await hp.evaluate(() => [...document.querySelectorAll('#oa-jobs-recent .oa-card')]
-      .map((c) => c.querySelector('.oa-card-title').textContent.trim()).sort());
-    eq(shown, newestTen,
-      'sponsors: …and the teaser still SHOWS the ten most recent — only their order changed');
   }
+  /* The SELECTION is still the ten newest — the heading says which ten, and
+     reordering them must not change which ten. Asserted whether or not the
+     sponsor is among them: it is the heading's promise, not the sponsor's. */
+  const newestTen = await hp.evaluate(async () => {
+    const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
+    return rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
+      .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
+      .slice(0, 10).map((r) => r.institution).sort();
+  });
+  const shown = await hp.evaluate(() => [...document.querySelectorAll('#oa-jobs-recent .oa-card')]
+    .map((c) => c.querySelector('.oa-card-title').textContent.trim()).sort());
+  eq(shown, newestTen,
+    'sponsors: …and the teaser still SHOWS the ten most recent — only their order changed');
   await hp.close();
   await sp.close();
 }
