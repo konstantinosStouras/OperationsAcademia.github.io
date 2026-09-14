@@ -9601,6 +9601,19 @@
   "lastPosted": "2025-08-14"
  },
  {
+  "id": "university-of-hong-kong__hku-business-school__business-analytics-statistics-operations-management-and-info",
+  "institution": "University of Hong Kong",
+  "school": "HKU Business School",
+  "department": "Business Analytics/Statistics, Operations Management, and Information Systems",
+  "type": "Business School",
+  "country": "Hong Kong",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-04-23"
+ },
+ {
   "id": "university-of-houston____decision-and-iis",
   "institution": "University of Houston",
   "department": "Decision and IIS",
