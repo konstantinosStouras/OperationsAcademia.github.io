@@ -1827,6 +1827,19 @@
   "lng": -76.4833009
  },
  {
+  "id": "cornell-university__cornell-sc-johnson-college-of-business__services-management",
+  "institution": "Cornell University",
+  "school": "Cornell SC Johnson College of Business",
+  "department": "Services Management",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-04"
+ },
+ {
   "id": "cornell-university__cornell-tech__operations-research-and-information-engineering",
   "institution": "Cornell University",
   "school": "Cornell Tech",

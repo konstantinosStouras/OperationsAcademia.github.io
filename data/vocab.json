@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T07:41:06.496Z",
+ "generated": "2026-09-14T07:43:59.200Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -99,6 +99,10 @@
   },
   {
    "v": "Clarkson University",
+   "n": 3
+  },
+  {
+   "v": "Cornell University",
    "n": 3
   },
   {
@@ -239,10 +243,6 @@
   },
   {
    "v": "Coastal Carolina University",
-   "n": 2
-  },
-  {
-   "v": "Cornell University",
    "n": 2
   },
   {
@@ -2136,6 +2136,10 @@
    "n": 2
   },
   {
+   "v": "Cornell SC Johnson College of Business",
+   "n": 2
+  },
+  {
    "v": "Curtis L. Carlson School of Management",
    "n": 2
   },
@@ -2241,10 +2245,6 @@
   },
   {
    "v": "College of Business and Economics",
-   "n": 1
-  },
-  {
-   "v": "Cornell SC Johnson College of Business",
    "n": 1
   },
   {
@@ -4074,6 +4074,10 @@
    "n": 1
   },
   {
+   "v": "Services Management",
+   "n": 1
+  },
+  {
    "v": "simulation, sustainability, AI + X",
    "n": 1
   },
@@ -5725,14 +5729,16 @@
    "units": [
     "Applied Economics and Management",
     "Operations Research and Information Engineering",
-    "Operations, Technology, and Information Management Area"
+    "Operations, Technology, and Information Management Area",
+    "Services Management"
    ],
    "bySchool": {
     "": [
      "Applied Economics and Management"
     ],
     "Cornell SC Johnson College of Business": [
-     "Operations, Technology, and Information Management Area"
+     "Operations, Technology, and Information Management Area",
+     "Services Management"
     ],
     "Cornell Tech": [
      "Operations Research and Information Engineering"
@@ -11797,7 +11803,8 @@
    "Decision, Risk, and Operations"
   ],
   "Cornell SC Johnson College of Business": [
-   "Operations, Technology, and Information Management Area"
+   "Operations, Technology, and Information Management Area",
+   "Services Management"
   ],
   "Cornell Tech": [
    "Operations Research and Information Engineering"
