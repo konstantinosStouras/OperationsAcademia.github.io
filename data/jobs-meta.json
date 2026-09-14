@@ -1,24 +1,24 @@
 {
- "generated": "2026-09-14T06:25:07.081Z",
- "count": 578,
+ "generated": "2026-09-14T06:26:48.999Z",
+ "count": 579,
  "years": {
   "2026": 495,
-  "2027": 82,
+  "2027": 83,
   "2028": 1
  },
  "types": {
   "University": 358,
-  "Business School": 184
+  "Business School": 185
  },
  "levels": {
-  "Assistant Professor": 107,
-  "Other Ranks": 62,
+  "Assistant Professor": 108,
+  "Other Ranks": 63,
   "Non-tenure track (teaching) position": 28,
   "Post-Doc": 9,
   "Visiting Faculty (various levels)": 8
  },
  "countries": {
-  "United States": 417,
+  "United States": 418,
   "United Kingdom": 27,
   "Hong Kong": 17,
   "China": 16,
