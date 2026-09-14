@@ -196,7 +196,7 @@
     { u: 'University of British Columbia', s: 'Sauder School of Business', d: ['Operations & Logistics'] },
     { u: 'University of Calgary', s: 'Haskayne School of Business', d: ['Operations and Supply Chain Management'] },
     { u: 'University of California San Diego', s: 'Rady School of Management', d: ['Innovation, Technology and Operations'] },
-    { u: 'University of California, Berkeley', s: 'Walter A. Haas School of Business', d: ['Operations and Information Technology Management'] },
+    { u: 'University of California, Berkeley', s: 'Haas School of Business', d: ['Operations and Information Technology Management'] },
     { u: 'University of California, Davis', s: 'Graduate School of Management', d: ['Operations Management'] },
     { u: 'University of California, Irvine', s: 'Paul Merage School of Business', d: ['Operations and Decision Technologies'] },
     { u: 'University of California, Los Angeles', s: 'Anderson School of Management', d: ['Decisions, Operations and Technology Management'] },

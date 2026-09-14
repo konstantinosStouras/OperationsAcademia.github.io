@@ -284,7 +284,11 @@
        where a school has been renamed, the CURRENT name wins (Purdue's
        Krannert became the Mitchell E. Daniels, Jr. School of Business in
        2023; Miami's School of Business Administration became Miami Herbert
-       in 2019).
+       in 2019); and where the OWNER has ruled that the school's own short
+       name is the one the site uses (Berkeley's Haas, 2026-09-14: the
+       maintainer tried to keep "Haas School of Business" on a review card
+       and the canon put "Walter A. Haas" back every time, so the short name
+       is the canonical one and the long one is its alias).
 
        They are SCOPED because most of these short forms are generic — a
        global "College of Business" alias would rename every university's. */
@@ -327,7 +331,7 @@
       '(TiSEM) School of Economics and Management (incl. Econometrics and Operations Research depts.)':
         'Tilburg School of Economics and Management'
     },
-    'University of California, Berkeley': { 'Haas School of Business': 'Walter A. Haas School of Business' },
+    'University of California, Berkeley': { 'Walter A. Haas School of Business': 'Haas School of Business' },
     'University of California, Riverside': {
       'School of Business Administration, A. Gary Anderson Graduate School of Management': 'School of Business'
     },

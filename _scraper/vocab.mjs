@@ -579,8 +579,8 @@ export function healCountry(row, byUni, schools = SCHOOLS) {
    (data/vocab.json, fed by oa-institutions.js and universities.json) says so.
 
    ANSWERED FROM THE NAMES, never from a guess: a school IS the business
-   school when its own name says business — "Walter A. Haas School of
-   Business", "C. T. Bauer College of Business", "Kellogg School of
+   school when its own name says business — "Haas School of Business",
+   "C. T. Bauer College of Business", "Kellogg School of
    Management" — and a university offering two such names is an ambiguity the
    maintainer settles, exactly as schoolForUnit treats two schools carrying
    one department. A school the pattern cannot read ("The Wharton School")

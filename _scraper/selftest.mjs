@@ -2287,6 +2287,28 @@ async function testSchools() {
   eq(S.canonPlace({ school: 'Bayes Business School, Faculty of Management' }).school,
     'Bayes Business School, Faculty of Management', 'nor is a comma between two school names');
 
+  /* THE OWNER'S OWN NAME FOR A SCHOOL WINS OVER THE FULLER ONE (owner,
+     2026-09-14): "Haas School of Business" is the name Berkeley's school is
+     published under, and "Walter A. Haas School of Business" is its alias,
+     the other way round from the rule the scoped table follows elsewhere.
+     Pinned here because the review card is where it was reported: the
+     maintainer typed the short name and the canon put the long one back. */
+  for (const uni of ['University of California, Berkeley', 'UC Berkeley']) {
+    eq(S.canonSchool('Walter A. Haas School of Business', uni), 'Haas School of Business',
+      `the long form is folded onto the short one at "${uni}"`);
+    eq(S.canonSchool('Haas School of Business', uni), 'Haas School of Business',
+      `and the short one is its own canonical form at "${uni}"`);
+  }
+  eq(S.canonColumns({ institution: 'UC Berkeley', school: 'Walter A. Haas School of Business', unit: 'OITM' }).school,
+    'Haas School of Business', 'through the three-column canon every ingest uses');
+  for (const seed of ['oa-institutions.js', 'oa-omlist.js']) {
+    /* comments stripped: oa-omlist.js's header names the retired spelling */
+    const src = readFileSync(path.join(HERE, '..', 'assets', seed), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+    ok(!/Walter A\. Haas/.test(src) && /'Haas School of Business'/.test(src),
+      `${seed} seeds Berkeley's school under the name the site publishes, not the retired one`);
+  }
+
   // …and it NEVER invents one
   eq(S.canonSchool('School of Wizardry'), 'School of Wizardry',
     'a school it does not know is left exactly as given');
@@ -2753,7 +2775,7 @@ function testVocab() {
      schoolForUnit discipline: none, or two, is no answer at all. */
   const biz = buildVocab([], { directory: [
     { institution: 'University of California, Berkeley',
-      school: 'Walter A. Haas School of Business',
+      school: 'Haas School of Business',
       department: 'Operations and Information Technology Management' },
     { institution: 'University of California, Berkeley',
       school: 'College of Engineering',
@@ -2765,9 +2787,9 @@ function testVocab() {
       school: 'Faculty of Business and Economics', department: 'Economics' },
   ] });
   eq(businessSchoolOf(biz, 'University of California, Berkeley'),
-    'Walter A. Haas School of Business',
+    'Haas School of Business',
     'the university\'s business school is named from its own name, past its other schools');
-  eq(businessSchoolOf(biz, 'UC Berkeley'), 'Walter A. Haas School of Business',
+  eq(businessSchoolOf(biz, 'UC Berkeley'), 'Haas School of Business',
     'however the university is spelled — the lookup goes through institutionKey');
   eq(businessSchoolOf(biz, 'Northwestern University'), 'Kellogg School of Management',
     'a school of management counts as one, though it never says the word');
@@ -9105,7 +9127,7 @@ function testAdvertsPlace() {
   const haas = advertPlace({ institution: 'Haas School of Business' }, VOCAB);
   eq(haas.institution, 'University of California, Berkeley',
     'a hiring organisation that is a school is filed under its university');
-  eq(haas.school, 'Walter A. Haas School of Business',
+  eq(haas.school, 'Haas School of Business',
     'with itself as the school, in the site\'s own canonical spelling');
 
   /* A school name TWO universities use identifies neither. */
@@ -10296,13 +10318,13 @@ function testReviewBusiness() {
      nothing publishes until they approve. */
   const vocab = buildVocab([], { directory: [
     { institution: 'University of California, Berkeley',
-      school: 'Walter A. Haas School of Business',
+      school: 'Haas School of Business',
       department: 'Operations and Information Technology Management' },
   ] });
   const bizRow = { ...RV_ROW, type: 'Business School', school: '', unit: 'Operations',
     institution: 'University of California, Berkeley' };
 
-  eq(businessCheck(bizRow, vocab), { school: 'Walter A. Haas School of Business' },
+  eq(businessCheck(bizRow, vocab), { school: 'Haas School of Business' },
     'a business-typed posting is given the school the directory knows');
   eq(businessCheck(RV_ROW, vocab), null,
     'a posting whose text never said business raises no flag');
@@ -10323,7 +10345,7 @@ function testReviewBusiness() {
   /* the sync computes it and writes it; the panel only draws it */
   const withBiz = queueDoc(bizRow, { now: '2026-08-23T00:00:00Z',
     biz: businessCheck(bizRow, vocab) });
-  eq(withBiz.biz, { school: 'Walter A. Haas School of Business' },
+  eq(withBiz.biz, { school: 'Haas School of Business' },
     'a fresh queue document carries the flag');
   for (const k of Object.keys(withBiz)) {
     ok(DOC_KEYS.includes(k), `business-flagged queue document key "${k}" is one the rules allow`);
@@ -10780,9 +10802,9 @@ async function testReviewWiring() {
       unit: 'Operations and Information Technology Management',
       department: 'Operations and Information Technology Management',
     };
-    const fixed = applyEdits(row, { school: 'Walter A. Haas School of Business' });
+    const fixed = applyEdits(row, { school: 'Haas School of Business' });
     eq(fixed.department,
-      'Walter A. Haas School of Business, Operations and Information Technology Management',
+      'Haas School of Business, Operations and Information Technology Management',
       'correcting the school rebuilds the line the card shows');
     eq(applyEdits(row, {}).department, row.department,
       'and an untouched posting keeps exactly the line it arrived with');
@@ -10805,17 +10827,17 @@ async function testReviewWiring() {
        site already knows under another form.) */
     const spelt = applyEdits(row, {
       institution: 'UC Berkeley',
-      school: 'Haas School of Business',
+      school: 'Walter A. Haas School of Business',
       unit: 'Operations and Information Technology Management Department',
     });
     eq(spelt.institution, 'University of California, Berkeley',
       'an edited university is put into the spelling the site publishes');
-    eq(spelt.school, 'Walter A. Haas School of Business',
-      'and so is the school');
+    eq(spelt.school, 'Haas School of Business',
+      'and so is the school (the retired long form lands on the owner\'s own name for it)');
     eq(spelt.unit, 'Operations and Information Technology Management',
       'and the department keeps its bare field name');
     eq(spelt.department,
-      'Walter A. Haas School of Business, Operations and Information Technology Management',
+      'Haas School of Business, Operations and Information Technology Management',
       'with the line rebuilt from the two of them');
   }
 
