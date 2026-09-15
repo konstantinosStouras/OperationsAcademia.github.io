@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T20:40:12.256Z",
+ "generated": "2026-09-15T10:30:56.973Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -111,6 +111,10 @@
   },
   {
    "v": "Fayetteville State University",
+   "n": 3
+  },
+  {
+   "v": "Georgetown University",
    "n": 3
   },
   {
@@ -271,10 +275,6 @@
   },
   {
    "v": "FLAME University",
-   "n": 2
-  },
-  {
-   "v": "Georgetown University",
    "n": 2
   },
   {
@@ -2188,6 +2188,10 @@
    "n": 2
   },
   {
+   "v": "McDonough School of Business",
+   "n": 2
+  },
+  {
    "v": "NUS Business School",
    "n": 2
   },
@@ -2369,10 +2373,6 @@
   },
   {
    "v": "McCormick School of Engineering",
-   "n": 1
-  },
-  {
-   "v": "McDonough School of Business",
    "n": 1
   },
   {
@@ -3898,6 +3898,10 @@
    "n": 1
   },
   {
+   "v": "Operations and Analytics",
+   "n": 1
+  },
+  {
    "v": "Operations and Analytics Department",
    "n": 1
   },
@@ -4487,10 +4491,6 @@
   },
   {
    "v": "Operational Strategy",
-   "n": 0
-  },
-  {
-   "v": "Operations and Analytics",
    "n": 0
   },
   {
