@@ -9900,8 +9900,11 @@
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-13",
   "lat": 41.8737629,
   "lng": -87.6509962
  },
