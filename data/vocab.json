@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-15T10:30:56.973Z",
+ "generated": "2026-09-15T10:32:17.720Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1182,6 +1182,10 @@
    "n": 1
   },
   {
+   "v": "Tennessee Wesleyan University",
+   "n": 1
+  },
+  {
    "v": "Texas A&M International University",
    "n": 1
   },
@@ -2304,6 +2308,10 @@
    "n": 1
   },
   {
+   "v": "Goodfriend College of Business and Professional Studies",
+   "n": 1
+  },
+  {
    "v": "Graduate School of Engineering and Management",
    "n": 1
   },
@@ -3090,6 +3098,10 @@
    "n": 6
   },
   {
+   "v": "Business Administration",
+   "n": 6
+  },
+  {
    "v": "Information Systems and Operations Management",
    "n": 6
   },
@@ -3103,10 +3115,6 @@
   },
   {
    "v": "AI",
-   "n": 5
-  },
-  {
-   "v": "Business Administration",
    "n": 5
   },
   {
@@ -8874,6 +8882,19 @@
     ]
    }
   },
+  "Tennessee Wesleyan University": {
+   "schools": [
+    "Goodfriend College of Business and Professional Studies"
+   ],
+   "units": [
+    "Business Administration"
+   ],
+   "bySchool": {
+    "Goodfriend College of Business and Professional Studies": [
+     "Business Administration"
+    ]
+   }
+  },
   "Texas A&M International University": {
    "schools": [],
    "units": [
@@ -11959,6 +11980,9 @@
   ],
   "Goizueta Business School": [
    "Information Systems & Operations Management"
+  ],
+  "Goodfriend College of Business and Professional Studies": [
+   "Business Administration"
   ],
   "Graduate School of Business": [
    "Operations Management and Information Systems"
