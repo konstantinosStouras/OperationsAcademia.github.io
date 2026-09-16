@@ -2550,12 +2550,47 @@ which `openProfile` sends to the verify card instead, so its gap can never be
 asked about at all. Both sentences now say which accounts they mean, on the
 hint and on the count chip, in the same words.
 
-**Reported and NOT changed here, because it is a behaviour decision rather
-than a defect**: a new account is invisible on the roster until the daily run
-(the hourly fires are `--figures-only` and write no row), so an account made
-just after 04:41 UTC is not on the maintainer's list that day. Closing that
-would mean writing a roster row for an account that has not confirmed its
-address or finished registering, which is a change to what both gates mean.
+* **An unknown date read as 1 January 1970.** `stamp()` in the sync answers 0
+  for a time it could not parse, and an Auth account that has NEVER SIGNED IN
+  carries no `lastSignInTime` at all, which is exactly the population this
+  roster exists to surface (an abandoned provider sign-up, an account made in
+  the console). `day()` turned that 0 into a date, so Registered on and Last
+  seen printed 1970-01-01 and the `|| '—'` beside each cell could never fire,
+  because that string is truthy. It is a dash now, and BOTH date sorts answer
+  `null` rather than 0, so `sortRows` sinks such a row whichever way the table
+  is sorted instead of ranking it as a real 1970 date above every account the
+  site does know about. Last seen is the roster's default sort, so that row
+  led the table.
+* **And the browser check that a second press REVERSES the order had never met
+  a null.** `sortRows` says in its own comment that nulls stay last whichever
+  way it sorts, which is the right rule (a reader pressing a heading wants the
+  column's order, not a screen of blanks), so a strict reversal was only ever
+  true of a fixture where every row had an address. The row with neither a name
+  nor an address is the first one that has not, so the check now compares the
+  rows the column can ORDER and pins the nulls-last rule beside it, in both
+  directions.
+
+**Reported and NOT changed here.** Two are behaviour decisions rather than
+defects and one is the owner's to settle:
+
+* **`gapsOf` and `profileGaps` still disagree for one account shape.** The
+  roster's name may come from the PROVIDER (`u.displayName`, a real name
+  Google handed over) while `profileGaps` reads `p.firstName`, so a Google
+  account that clears both name boxes keeps Google's name on its row and is
+  counted complete while the card asks it for a name every session. Closing it
+  means either a seventh roster key — which needs a rules change and is the
+  `sync-user-directory` trap this file warns about — or deciding that the
+  count means "has been asked" rather than "the site knows a name". That is a
+  decision about what the figure counts, so it is the owner's.
+* **A DISABLED Auth account still gets a roster row**, unmarked, while
+  `members()` leaves it out of the public count. The gap is the documented one
+  above ("the tile may legitimately read higher than the page"), seen from the
+  row rather than from the total.
+* **A new account is invisible on the roster until the daily run** (the hourly
+  fires are `--figures-only` and write no row), so an account made just after
+  04:41 UTC is not on the maintainer's list that day. Closing that would mean
+  writing a roster row for an account that has not confirmed its address or
+  finished registering, which is a change to what both gates mean.
 
 Tests: the name block of the sync's own `--selftest` (the join over one field,
 both fields, neither, and a profile that could not be read; a pending password

@@ -5733,6 +5733,23 @@ async function testUserDirectorySync() {
     'roster: the delete confirmation falls through to the UID, so the one control that cannot be ' +
     'called off never asks the maintainer to type DELETE against a row it has not named');
 
+  /* AN UNKNOWN DATE IS A DASH, NEVER 1970. `stamp()` in the sync answers 0 for
+     a time it could not read, and an Auth account that has never signed in
+     carries no `lastSignInTime` at all — so `new Date(0)` printed 1 January
+     1970 in two columns, and the `|| '—'` beside each cell could not fire
+     because that string is truthy. */
+  const dayFn = /function day\(ms\) \{[\s\S]*?\n  \}/.exec(usersSrc);
+  ok(dayFn && /ms <= 0/.test(dayFn[0]),
+    'roster: a stamp of 0 is a date the sync could not read, so it prints nothing and the cell ' +
+    'falls through to its dash');
+  const dayRun = new Function(`${dayFn[0]}; return day;`)();
+  eq(dayRun(0), '', '…driven: nought is no date at all');
+  eq(dayRun(1757980800000), '2025-09-16', '…while a real stamp still reads as its day');
+  ok(/typeof r\.first === 'number' && r\.first > 0 \? r\.first : null/.test(usersSrc)
+     && /typeof r\.seen === 'number' && r\.seen > 0 \? r\.seen : null/.test(usersSrc),
+    'roster: …and both date sorts answer NULL for it, so `sortRows` sinks it whichever way the ' +
+    'table is sorted rather than ranking it as a real 1970 date above every account it knows');
+
   /* AND THE PANEL'S OWN COPY SAYS WHAT IS TRUE OF BOTH GATES. Neither a
      pending password account nor a provider account still finishing
      registration reaches `enterSession`, so neither writes a row on sign-in

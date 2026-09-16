@@ -6934,6 +6934,11 @@ for (const w of [320, 360, 390, 430]) {
        stopped at "(no name) / (no address)" and so asked the maintainer to
        type DELETE against a row it had never named. */
     { path: 'userDirectory/u-msg-8', data: { first: 7500, seen: 7500 } },
+    /* …and one whose dates the sync could not read: an Auth account that has
+       never signed in carries no lastSignInTime, so `stamp()` answers 0 and
+       the row reached the roster reading "1970-01-01" in both date columns. */
+    { path: 'userDirectory/u-msg-9', data: {
+        name: 'Never Signedin', email: 'never@example.edu', first: 0, seen: 0 } },
     { path: 'messages/u-msg-5', data: { uid: 'u-msg-5', lastAt: 4500, lastFrom: 'admin',
         needsAdmin: false, userUnread: 0 } },
 
@@ -6989,6 +6994,12 @@ for (const w of [320, 360, 390, 430]) {
       'roster: markup in a name is rendered as text, never executed');
     ok((await q.textContent('#oa-aa-users')).indexOf('<img src=x') !== -1,
       '…and is shown as the characters the account really typed');
+    const never = q.locator('#oa-aa-users tbody tr', { hasText: 'never@example.edu' });
+    eq((await never.locator('td.oa-u-c-first').textContent()).trim(), '—',
+      'roster: a registered-on date the sync could not read is a dash, never 1 January 1970');
+    eq((await never.locator('td.oa-u-c-seen').textContent()).trim(), '—',
+      'roster: …and so is a last-seen it could not read');
+
     const nameless = q.locator('#oa-aa-users tbody tr', { hasText: 'yu.shi.1@warwick.ac.uk' });
     eq((await nameless.locator('td.oa-u-c-name .oa-u-name').textContent()).trim(), '—',
       'roster: a row with NO name reads as a dash the SITE draws — the owner asked on ' +
@@ -7297,16 +7308,34 @@ for (const w of [320, 360, 390, 430]) {
       'exactly that, rather than vanishing with the row');
 
     /* sorting is by what is DISPLAYED — one spec owns heading, cell and key */
-    const namesNow = () => q.$$eval('#oa-aa-users tbody tr td:nth-child(2)',
-      (tds) => tds.map((t) => t.textContent.trim()));
+    const sortedNow = () => q.$$eval('#oa-aa-users tbody tr',
+      (trs) => trs.map((tr) => ({
+        name: tr.children[1].textContent.trim(),
+        email: tr.children[2].textContent.trim(),
+      })));
+    /* NULLS STAY LAST WHICHEVER WAY WE SORT — `sortRows` says so in as many
+       words, and it is the right rule: a reader pressing a heading wants the
+       column's own order, not a screenful of blanks at the top. So the CLEAN
+       REVERSAL is a promise about the rows the column can actually order, and
+       the rows it cannot are pinned separately below. This check passed for
+       months only because no seeded row was missing an address; the row with
+       neither a name nor an address, added on 2026-09-16 for the delete
+       confirmation, is the first one that is. */
+    const named = (rows) => rows.filter((r) => r.email !== '—').map((r) => r.name);
     await q.click('#oa-aa-users .oa-u-sort[data-sort="email"]');
-    const byEmail = await namesNow();
-    ok(byEmail.length >= 3 && byEmail.join('|').indexOf('Bea Baker') < byEmail.join('|').indexOf('Cy Carter'),
+    const byEmail = await sortedNow();
+    const asc = named(byEmail);
+    ok(asc.length >= 3 && asc.join('|').indexOf('Bea Baker') < asc.join('|').indexOf('Cy Carter'),
       'roster: clicking a heading sorts by that column, ascending first');
     await q.click('#oa-aa-users .oa-u-sort[data-sort="email"]');
-    const rev = await namesNow();
-    eq(rev.slice().reverse().join(','), byEmail.join(','),
+    const rev = await sortedNow();
+    eq(named(rev).slice().reverse().join(','), asc.join(','),
       'roster: and a second click is a clean reversal, not a reshuffle');
+    eq(byEmail[byEmail.length - 1].email, '—',
+      'roster: a row the column cannot order is LAST ascending');
+    eq(rev[rev.length - 1].email, '—',
+      'roster: …and last descending too, so reversing the order never opens the ' +
+      'table on a screen of blanks');
 
     /* the Find box doubles as the recipient picker: select-all takes what is
        SHOWN, so a filtered roster is how a subset is addressed */

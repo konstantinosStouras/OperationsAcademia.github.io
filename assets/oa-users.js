@@ -208,8 +208,8 @@
       Select-all then ticks those strangers and the compose box writes to
       them, and its confirmation says only how many. Three letters at least,
       as before, matched against the phrase or any word in it, so "incomplete"
-      still answers to "inc" and "jm candidate" to "jm", to "cand" and to its
-      whole self. */
+      still answers to "inc" and "jm candidate" to "cand" and to its whole
+      self. */
   function needle(phrase, q) {
     if (q.length < 3) return false;
     if (phrase.indexOf(q) === 0) return true;
@@ -223,10 +223,13 @@
   /** What this row is still short of, in the order the profile card asks for
       it. The BROWSER's twin of profileGaps in oa-accounts.js, over a roster
       row rather than a profile — the roster has no first name of its own, so
-      it reads the name the account shows itself under, which is derived from
-      one. It exists so the count line can say how much of the roster is still
-      incomplete: the maintainer is the person who has to know whether asking
-      is working. */
+      it reads the row's own `name`, which BOTH writers set from the profile
+      the account typed, falling back only to the name its provider handed
+      over. Never the chip's `displayName`, whose last rungs are the sign-in
+      hint and the e-mail's local part: fed one of those, a row read as
+      answered for ever and dropped out of the figure below. It exists so the
+      count line can say how much of the roster is still incomplete: the
+      maintainer is the person who has to know whether asking is working. */
   function gapsOf(r) {
     var out = [];
     if (!nameOf(r)) out.push('name');
@@ -374,8 +377,15 @@
     });
   }
 
+  /** A stamp as yyyy-mm-dd, and NOTHING for a stamp the sync could not read.
+      Zero is the sync's own "not known": `stamp()` answers 0 for an absent or
+      unparseable time, and an Auth account that has never signed in carries no
+      `lastSignInTime` at all — the population this roster exists to surface.
+      Reading it as a date printed **1 January 1970** in Registered on and Last
+      seen, which is not a stale figure but a false one, and the `|| '—'` beside
+      each cell could never fire because that string is truthy. */
   function day(ms) {
-    if (typeof ms !== 'number' || !isFinite(ms)) return '';
+    if (typeof ms !== 'number' || !isFinite(ms) || ms <= 0) return '';
     try { return new Date(ms).toISOString().slice(0, 10); } catch (e) { return ''; }
   }
 
@@ -447,12 +457,15 @@
          the next run corrects it backwards. */
       key: 'first', label: 'Registered on',
       cell: function (r) { return esc(day(r.first) || '—'); },
-      sort: function (r) { return typeof r.first === 'number' ? r.first : null; }
+      /* NULL for an unknown date, never 0: `sortRows` sinks a null whichever
+         way the table is sorted, and 0 would rank as a real 1970 date above
+         every account the site does know about. */
+      sort: function (r) { return typeof r.first === 'number' && r.first > 0 ? r.first : null; }
     },
     {
       key: 'seen', label: 'Last seen',
       cell: function (r) { return esc(day(r.seen) || '—'); },
-      sort: function (r) { return typeof r.seen === 'number' ? r.seen : null; }
+      sort: function (r) { return typeof r.seen === 'number' && r.seen > 0 ? r.seen : null; }
     },
     {
       key: 'thread', label: 'Messages',
