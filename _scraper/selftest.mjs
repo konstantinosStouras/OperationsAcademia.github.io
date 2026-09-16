@@ -5891,9 +5891,23 @@ async function testUserDirectorySync() {
   const syncLogs = syncMain.match(/\b(log|warn)\(([\s\S]*?)\);\n/g) || [];
   ok(syncLogs.length >= 5 && syncLogs.some((l) => /redact\(row\.email\)/.test(l)),
     'the sync\'s log lines were found and the redact exemption is exercised');
-  ok(syncLogs.every((l) => !/row\.name/.test(l) && !/user\.(email|displayName)/.test(l)
-      && !/row\.email/.test(l.replace(/redact\(row\.email\)/g, ''))),
+  /* THROUGH THE SYNC'S OWN EXPORTED RULE, never a second copy of it. This
+     check used to carry its own needle list and it had drifted: it had never
+     gained the affiliation, the profiles read or the SMTP error text the
+     sync's own copy names, so the PR check — the road a person reads — was
+     the weaker of the two. One definition now, and the pin below refuses a
+     private list here ever again. */
+  ok(syncLogs.every((l) => !mod.logLeaks(l)),
     'no log line in the sync names a person: an address through redact() only, and never the name (the _mail.mjs redact rule)');
+  ok(mod.logLeaks('log(`${profileName(p)}`);') && mod.logLeaks('log(`${row.name}`);')
+     && !mod.logLeaks('log(`${user.uid} ${redact(row.email)}`);'),
+    '…and that rule is the working one: it refuses the profile-derived name and passes a redacted address');
+  const sweepAt = syncSrc.indexOf('export function logLeaks');
+  ok(sweepAt > 0 && /profileName\\\(/.test(syncSrc.slice(sweepAt, sweepAt + 900)),
+    'the sync\'s rule names `profileName(`, the source the 2026-09-16 change added');
+  const selfSrc = await readFile(path.join(HERE, 'selftest.mjs'), 'utf8');
+  ok(!/syncLogs\.every\(\(l\) => !\//.test(selfSrc),
+    '…and this file keeps no needle list of its own, so the two cannot drift apart again');
   /* THE OPPOSITE OF WHAT THIS PINNED UNTIL 2026-09-09. It used to require that
      neither file claimed to change "only when the count" does, because
      `generated` was the run instant and every run therefore committed -- which

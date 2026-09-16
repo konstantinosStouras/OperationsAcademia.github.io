@@ -308,6 +308,40 @@ export function rowFromAuthUser(user, existing, profile) {
 
 /** What a run did, in one sentence — so a scheduled fire that changed nothing
     says so rather than printing nothing at all. */
+/** WOULD THIS LOG LINE NAME A PERSON? `--scan` and `--dry-run` print into the
+    Actions log of a PUBLIC repository — the workflow has a button that runs
+    exactly those modes — so a line may carry the document id, counts, and an
+    address through `redact()`, and nothing else.
+
+    IT IS EXPORTED BECAUSE THERE WERE TWO COPIES OF IT AND THEY HAD DRIFTED.
+    `selftest.mjs` sweeps the same lines from the PR check, which is where a
+    person reads the failure, and its copy had never gained the affiliation,
+    the profiles read or the SMTP error text this one names — so the weaker
+    guard was the one on the road that reports to a human. One definition, the
+    drift `oa-countries.js`, `oa-jobnav.js` and `oa-news.js` all exist to
+    prevent.
+
+    `profileName(` joined the list on 2026-09-16, with the change that made it
+    a source at all: the row's name used to be Auth's `displayName` or a string
+    the browser had written, and it is now the name a person typed into the
+    registration form, so this guard is more load-bearing than it was. Nothing
+    leaks today — the one per-account line prints the uid and a redacted
+    address — and the guard is what keeps that true of the next edit.
+
+    A BARE `row` is deliberately NOT a needle. It would catch `log('row', row)`,
+    which really would print the name, and it would also catch the run's own
+    summary line, which says "N row(s) written" and names nobody; a guard that
+    fires on an honest line is the crying-wolf cost this repository has paid
+    once already. */
+export function logLeaks(line) {
+  const l = String(line || '').replace(/redact\(row\.email\)/g, '');
+  return /row\.name/.test(l)
+    || /user\.(email|displayName)/.test(l)
+    || /\.affiliation|profiles\[|profileOf\(|profileName\(/.test(l)
+    || /row\.email/.test(l)
+    || /e\.message/.test(l);
+}
+
 export function summarise({ seen, written, skipped }) {
   return `${seen} account(s) in Auth: ${written} row(s) written, ` +
     `${skipped} already current.`;
@@ -841,10 +875,18 @@ function selftest() {
   ok(body.length > 1500, 'and is the right size, or the checks below are vacuous');
   const calls = body.match(/\b(log|warn)\(([\s\S]*?)\);\n/g) || [];
   ok(calls.length >= 5, 'the log lines were really found');
-  ok(calls.every((l) => !/row\.name/.test(l) && !/user\.(email|displayName)/.test(l)
-      && !/\.affiliation|profiles\[|profileOf\(/.test(l)
-      && !/row\.email/.test(l.replace(/redact\(row\.email\)/g, '')) && !/e\.message/.test(l)),
+  ok(calls.every((l) => !logLeaks(l)),
     'no log line names a person: an address reaches it through redact() only, and a name or an affiliation never');
+  /* …and the rule itself, driven over the shapes a future edit would reach
+     for, so the needle list is not merely present but WORKING. */
+  ok(logLeaks('log(`  ${user.uid}  ${profileName(p)}`);'),
+    'the guard refuses a line printing the profile-derived name');
+  ok(logLeaks('log(`${row.name}`);') && logLeaks('log(`${user.displayName}`);')
+     && logLeaks('log(`${row.affiliation}`);') && logLeaks('log(`${e.message}`);'),
+    '…and the name, Auth\'s own, the affiliation and an SMTP error text');
+  ok(!logLeaks('log(`  ${user.uid}  ${redact(row.email)}`);')
+     && !logLeaks('log(summarise({ seen, written, skipped }));'),
+    '…while the id with a redacted address, and the run\'s own summary, pass');
   ok(calls.some((l) => /redact\(row\.email\)/.test(l)), 'and the redact exemption is exercised, so the check is not vacuous');
 
   console.log(fails.length
