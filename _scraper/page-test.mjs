@@ -6936,9 +6936,12 @@ for (const w of [320, 360, 390, 430]) {
     { path: 'userDirectory/u-msg-8', data: { first: 7500, seen: 7500 } },
     /* …and one whose dates the sync could not read: an Auth account that has
        never signed in carries no lastSignInTime, so `stamp()` answers 0 and
-       the row reached the roster reading "1970-01-01" in both date columns. */
+       the row reached the roster reading "1970-01-01" in both date columns.
+       Its address is deliberately OUTSIDE `example.edu`: that is the needle the
+       fit check below filters on to measure the four ORDINARY rows, and this
+       row is not one of them. */
     { path: 'userDirectory/u-msg-9', data: {
-        name: 'Never Signedin', email: 'never@example.edu', first: 0, seen: 0 } },
+        name: 'Never Signedin', email: 'never@quiet.example.org', first: 0, seen: 0 } },
     { path: 'messages/u-msg-5', data: { uid: 'u-msg-5', lastAt: 4500, lastFrom: 'admin',
         needsAdmin: false, userUnread: 0 } },
 
@@ -6994,7 +6997,7 @@ for (const w of [320, 360, 390, 430]) {
       'roster: markup in a name is rendered as text, never executed');
     ok((await q.textContent('#oa-aa-users')).indexOf('<img src=x') !== -1,
       '…and is shown as the characters the account really typed');
-    const never = q.locator('#oa-aa-users tbody tr', { hasText: 'never@example.edu' });
+    const never = q.locator('#oa-aa-users tbody tr', { hasText: 'never@quiet.example.org' });
     eq((await never.locator('td.oa-u-c-first').textContent()).trim(), '—',
       'roster: a registered-on date the sync could not read is a dash, never 1 January 1970');
     eq((await never.locator('td.oa-u-c-seen').textContent()).trim(), '—',
