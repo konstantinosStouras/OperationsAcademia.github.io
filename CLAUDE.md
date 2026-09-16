@@ -2232,6 +2232,24 @@ An account already current costs no write, so a daily fire commits nothing to
 the roster. The dispatch exists for the case that created the gap: right after
 a rules deploy.
 
+**…and the guard that keeps it that way is ONE rule, exported.** `logLeaks`
+in `_scraper/sync-user-directory.mjs` answers whether a log line would name a
+person, and both sweeps read it: the sync's own `--selftest` and
+`testUserDirectorySync`, which is the PR check and therefore the road a human
+reads a failure on. There were TWO copies and they had drifted — the
+selftest's had never gained the affiliation, the profiles read or the SMTP
+error text the sync's own names, so the weaker list was the one on the road
+that reports to a person, which is the wrong way round. The selftest is now
+pinned to keep no needle list of its own, so they cannot part again.
+**`profileName(` is in that list**, added with the change that made it a
+source: the row's name used to be Auth's `displayName` or a string the
+browser wrote, and is now the name somebody typed into the registration form,
+so this guard is more load-bearing than it was. A bare `row` is deliberately
+NOT a needle, although `log('row', row)` really would print the name: it
+would also fire on the run's own summary, which says "N row(s) written" and
+names nobody, and a guard that fires on an honest line is the crying-wolf
+cost this file has already paid once.
+
 **Its scan prints the document, never the person.** The `--scan` and
 `--dry-run` lines used to print each changed account's full address and name,
 and the workflow's `scan` button runs exactly that mode into the Actions log of
