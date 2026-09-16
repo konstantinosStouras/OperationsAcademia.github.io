@@ -172,17 +172,47 @@ export function stamp(v) {
   return Number.isFinite(t) ? t : 0;
 }
 
+/** THE ACCOUNT'S REAL NAME, out of the profile it is derived from. Character
+    for character the join `rosterName()` makes in assets/oa-accounts.js — the
+    browser's own definition of a name for this same row, and the short half of
+    the chip's `displayName()`, which runs on past the profile to the e-mail's
+    local part and must never reach a roster. That is a browser file and cannot
+    be imported from here — the EMAIL_RX idiom — so `testUserDirectorySync`
+    reads the join out of `rosterName`'s own body, with the comments stripped
+    from both sides, and holds this one to it. A profile that is missing,
+    absent or nameless answers '' rather than throwing: the caller falls back
+    on it, and never blanks a name on the strength of it. */
+export function profileName(profile) {
+  const p = profile || {};
+  return [p.firstName, p.lastName].filter(Boolean).join(' ').trim();
+}
+
 /**
  * One Auth record + whatever the browser has already written -> the row to
  * store, or NULL when nothing would change (so an unchanged account costs no
  * write, and a re-run of this job commits nothing).
  *
  * The merge rules, each for its own reason:
- *   name   Auth's displayName, but never OVER a name the site already holds —
- *          the browser writes the name the account shows itself under, which
- *          is derived from the profile and is the better one where they differ.
- *   email  Auth's address is authoritative: it is the one the account really
- *          signs in with, which is exactly what the client rule pins.
+ *   name   the PROFILE's own first and last name; failing that a name the
+ *          site already holds; failing that Auth's displayName — never the
+ *          other way round. The profile is the very thing the browser
+ *          derives the shown name FROM, so asking Auth first was asking the
+ *          weaker source, and for one whole kind of account it was asking
+ *          the only source that has nothing: Firebase leaves displayName
+ *          null for an account made with an e-mail address and a password,
+ *          and such an account is PENDING until it confirms that address, so
+ *          it writes no roster row of its own — the name it typed into the
+ *          registration form reached its profile and never the roster, which
+ *          drew a dash for it (owner, 2026-09-16).
+ *          It FILLS and never BLANKS, which is where it parts company with
+ *          the affiliation below: the browser's own fallback runs on past the
+ *          profile to the e-mail's local part, so a row can hold a name no
+ *          profile could ever give back, and a nameless profile must leave it
+ *          alone rather than read as "this person has no name".
+ *   email  Auth's address ALONE, with no fallback to the row: it is the one
+ *          the account really signs in with, which is exactly what the
+ *          client rule pins, so a row that keeps an address Auth no longer
+ *          has is a row its own owner can never write again.
  *   first  the TRUE joined date — Auth's creationTime — in place of "first
  *          seen by this site". Earliest wins, so it can only ever correct a
  *          later guess backwards to the real one.
@@ -215,8 +245,22 @@ export function rowFromAuthUser(user, existing, profile) {
      owner's own next write sends: permission-denied, for ever, on the row
      they are supposed to keep current. That is the sync-user-directory trap
      this file's own header describes, sprung by a VALUE rather than by a
-     fifth key. */
-  const email = String(user.email || had.email || '').slice(0, 200);
+     fifth key.
+
+     …AND A STALE ONE SPRINGS IT JUST THE SAME, which is why Auth's answer is
+     taken ALONE. This read `user.email || had.email`, and the row therefore
+     won whenever Auth said nothing — so an account whose address was later
+     cleared (a console edit, or its password provider unlinked from an
+     account that also signs in with ORCID) kept the old address on its row,
+     the owner's own merge sent `old@b.edu` back against a token carrying no
+     address at all, and every write they made from then on was refused. The
+     fallback protected nothing: `user` is the Auth record and Auth's address
+     is never half-read — a `listUsers` page that fails fails the whole run —
+     so unlike the affiliation and the contact address beside it, there is no
+     "could not read" state here for an `undefined` branch to defend. Taking
+     Auth alone also HEALS a row already in that state, because `flush`
+     REPLACES the document: the key is simply not written the next time. */
+  const email = String(user.email || '').slice(0, 200);
   /* The same rule as the address: an EMPTY affiliation is no key at all, so
      the roster reads "—" for it and the owner's own merge never has to send
      an empty string back. */
@@ -232,8 +276,13 @@ export function rowFromAuthUser(user, existing, profile) {
   const contactEmail = profile === undefined
     ? String(had.contactEmail || '').trim().slice(0, 200)
     : String((profile && profile.contactEmail) || '').trim().slice(0, 200);
+  /* The profile's word first (see the merge rules above). `profileName`
+     answers '' for a profile that is absent AND for one that could not be
+     read, and the fallback is the same either way — so unlike the two fields
+     above, this one needs no `undefined` branch: it never blanks, so there is
+     nothing for "unknown" to protect. */
   const row = {
-    name: String(had.name || user.displayName || '').slice(0, 200),
+    name: String(profileName(profile) || had.name || user.displayName || '').slice(0, 200),
     ...(email ? { email } : {}),
     // earliest non-zero, so a row opened by the browser is corrected to the
     // real joined date rather than kept at the day the site first saw them
@@ -596,6 +645,39 @@ function selftest() {
   eq(rowFromAuthUser(user(), null, { affiliation: 'x'.repeat(400) }).affiliation.length, 300,
     'bounded to the 300 characters the rules allow the profile\'s own field');
 
+  /* --- the name: the PROFILE's first, and it FILLS rather than blanks ----- */
+  eq(profileName({ firstName: 'Yu', lastName: 'Shi' }), 'Yu Shi',
+    'the shown name is the profile\'s two fields joined — the same join the browser makes');
+  eq(profileName({ firstName: 'Ada' }), 'Ada', 'one of them alone is still a name');
+  eq(profileName({ lastName: 'Lovelace' }), 'Lovelace', '…either one');
+  eq(profileName(null), '', 'no profile is no name');
+  eq(profileName(undefined), '', '…and neither is a profiles read that failed: the caller falls ' +
+    'back the same way for both, which is why this field needs no unknown-is-not-none branch');
+  const pending = rowFromAuthUser(user({ displayName: '' }), null,
+    { firstName: 'Yu', lastName: 'Shi', affiliation: 'Warwick Business School' });
+  eq(pending.name, 'Yu Shi',
+    'AN ACCOUNT MADE WITH AN E-MAIL ADDRESS AND A PASSWORD REACHES THE ROSTER BY NAME: ' +
+    'Firebase leaves displayName null for one, and it is pending until it confirms that ' +
+    'address so it writes no row of its own — the name it typed into the registration form ' +
+    'is in its profile and nowhere else, and the roster drew a dash for it (owner, 2026-09-16)');
+  eq(rowFromAuthUser(user(), null, { firstName: 'Ada', lastName: 'Lovelace-King' }).name,
+    'Ada Lovelace-King',
+    'and the profile wins over Auth\'s displayName, which is the weaker source of the same name');
+  eq(rowFromAuthUser(user({ displayName: '' }), { name: 'u2056070', first: 1, seen: 1 },
+    { affiliation: 'Warwick Business School' }).name, 'u2056070',
+    'a NAMELESS profile leaves the name the row holds exactly as it is — the browser\'s own ' +
+    'fallback runs on past the profile to the e-mail\'s local part, so a row can hold a name ' +
+    'no profile could give back, and this fills rather than blanking');
+  ok(rowFromAuthUser(user({ displayName: '' }),
+    { name: '', email: 'a@b.edu', first: Date.parse(JAN), seen: Date.parse(JUN) },
+    { firstName: 'Yu', lastName: 'Shi' }),
+    '…and a row that has been READING AS A DASH is written on the next run rather than ' +
+    'counted as already current by the no-change short-circuit');
+  eq(rowFromAuthUser(user(), null,
+    { firstName: 'x'.repeat(400), lastName: 'y'.repeat(400) }).name.length, 200,
+    'bounded to the 200 characters the rules allow the row, since the profile\'s own two ' +
+    'fields are 300 each');
+
   /* --- merging with what the browser wrote -------------------------------- */
   const siteName = rowFromAuthUser(user(), { name: 'K. Stouras', first: 1, seen: 1 });
   eq(siteName.name, 'K. Stouras',
@@ -626,6 +708,15 @@ function selftest() {
     'a row already holding the poisoned empty string is HEALED rather than read as current');
   ok(/@/.test(rowFromAuthUser(user(), null).email || ''),
     'while an account that really has an address keeps it');
+  /* …and a STALE one springs the same trap, which is why Auth is asked alone.
+     The row used to win whenever Auth said nothing, so an account whose
+     address was later cleared kept the old one and sent it back against a
+     token that carries none — refused, for ever. */
+  const stale = rowFromAuthUser(user({ email: undefined }), { ...noMail, email: 'old@b.edu' });
+  ok(stale && !('email' in stale),
+    'an address Auth no longer has is DROPPED, never carried forward off the row');
+  eq(rowFromAuthUser(user({ email: 'real@b.edu' }), { ...noMail, email: 'old@b.edu' }).email,
+    'real@b.edu', '…and where Auth has one it is the one written');
 
   /* --- the no-op, which is what makes a schedule cheap -------------------- */
   eq(rowFromAuthUser(user(), fresh,

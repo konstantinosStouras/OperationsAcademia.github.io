@@ -5650,6 +5650,107 @@ async function testUserDirectorySync() {
   ok(fbjsHas(`profiles: '${mod.PROFILES}'`),
     '…which is the one the browser writes (oa-firebase.js)');
 
+  /* --- THE NAME IS THE PROFILE'S TOO, and the join is the browser's own ----
+     Owner, 2026-09-16, of three accounts registered the day before showing "—"
+     in the roster's Name column beside a real affiliation and a real address:
+     "Did these users enter '---' as name or the system is shown a --- there?"
+     Neither — the site drew the dash because the ROW had no name, and the row
+     had none because this sync asked Auth for it. Firebase leaves displayName
+     null for an account made with an e-mail address and a password, and such
+     an account is pending until it confirms that address, so it writes no
+     roster row of its own: the name it typed into the registration form was
+     in its profile and nowhere else, beside the affiliation this same sync
+     was already reading out of that very document. */
+  const usersSrc = await readFile(path.join(root, 'assets', 'oa-users.js'), 'utf8');
+  ok(/esc\(nameOf\(r\) \|\| '—'\)/.test(usersSrc),
+    'the roster draws the dash ITSELF for a row whose name is empty — nobody types one');
+  /* BOTH SIDES ARE READ WITH THEIR COMMENTS STRIPPED, and the join is taken
+     out of the FUNCTION that owns it rather than from anywhere in the file:
+     a pin that scans a whole source is satisfied by the paragraph explaining
+     it, which is the trap this file records for the analytics page's "no
+     iframes" check and for the build's rebase. */
+  const decomment = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const acctSrc = await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8');
+  const acctCode = decomment(acctSrc);
+  const rosterBody = /function rosterName\(u\) \{[\s\S]*?\n  \}/.exec(acctCode);
+  ok(rosterBody, 'the browser derives a real name in ONE place (rosterName in oa-accounts.js)');
+  const join = rosterBody && /\[p\.firstName, p\.lastName\][^\n;]*/.exec(rosterBody[0]);
+  ok(join, '…as a single join of the profile\'s own two fields');
+  const syncSrc = await readFile(path.join(HERE, 'sync-user-directory.mjs'), 'utf8');
+  const syncCode = decomment(syncSrc);
+  ok(join && syncCode.includes(join[0]),
+    'and `profileName` in the roster sync makes that join CHARACTER FOR CHARACTER — a browser ' +
+    'file cannot be imported from Node, so the two are held together here (the EMAIL_RX idiom); ' +
+    `got ${join ? join[0] : '(none)'}`);
+  eq(mod.rowFromAuthUser({ uid: 'u2', email: 'yu.shi.1@warwick.ac.uk', metadata: {} }, null,
+    { firstName: 'Yu', lastName: 'Shi', affiliation: 'Warwick Business School' }).name, 'Yu Shi',
+    'so an account that has not confirmed its address yet reaches the maintainer\'s roster by ' +
+    'name rather than as a dash');
+  eq(mod.rowFromAuthUser(authUser, { name: 'a.b', first: 1, seen: 1 }, { affiliation: 'A School' }).name,
+    'a.b',
+    '…while a profile with no name leaves the row\'s own alone: this one fills and never blanks, ' +
+    'which is exactly where it parts company with the affiliation beside it');
+
+  /* THE BROWSER WRITES A REAL NAME OR NONE, and the chip's own fallbacks are
+     not names. `displayName` must always answer something — it labels the
+     header chip — and its last two rungs are the sign-in hint and the
+     left-hand half of an e-mail address, so a roster fed from it could read
+     'Account' or 'jane.doe' and be COMPLETE to `gapsOf` for ever, while
+     `profileGaps` went on asking that same account every session. */
+  const rosterFn = rosterBody;
+  ok(rosterFn && !/@|split|Account|readHint|hinted/.test(rosterFn[0]),
+    '…and it stops at the provider\'s own name: never the e-mail\'s local part, never the hint, ' +
+    'never the literal "Account", which are the CHIP\'s fallbacks and are not names');
+  ok(/name: String\(rosterName\(u\) \|\| ''\)/.test(acctSrc),
+    'accounts: the roster row is written from rosterName, never from displayName');
+  const chipFn = /function displayName\(u\) \{[\s\S]*?\n  \}/.exec(acctCode);
+  ok(chipFn && /rosterName\(u\)/.test(chipFn[0]) && /'Account'/.test(chipFn[0]),
+    '…while the chip still starts from it and still ends on "Account", so nothing on screen ' +
+    'loses its name for the length of a profile read');
+
+  /* Auth's address ALONE. A row that keeps an address Auth no longer has
+     sends it back in the owner's own merge, against a token carrying none,
+     and the rules refuse every write they make from then on. */
+  const emailLine = /const email = String\(user\.email[^\n]*/.exec(syncCode);
+  ok(emailLine && !/had\.email/.test(emailLine[0]),
+    'the sync takes Auth\'s address alone, with no fallback to the row; ' +
+    `got ${emailLine ? emailLine[0].trim() : '(none)'}`);
+
+  /* --- the panel that shows it: one definition, anchored needles, a named row */
+  ok(/function nameOf\(r\) \{/.test(usersSrc),
+    'roster: nameOf is the ONE definition of the name a row holds');
+  const rawName = (usersSrc.replace(/\/\*[\s\S]*?\*\//g, '')
+    .match(/\b(?:r|row)\.name\b/g) || []).length;
+  eq(rawName, 1,
+    '…and it is the ONLY place the stored field is read: the column, the sort, Find, the ' +
+    'checkbox, the confirmation and the download all go through it, so none of them can ' +
+    'disagree about whether this row has a name');
+  ok(/needle\('incomplete', q\)/.test(usersSrc) && /needle\('jm candidate', q\)/.test(usersSrc) &&
+    !/'incomplete'\.indexOf\(q\) >= 0/.test(usersSrc) && !/'jm candidate'\.indexOf\(q\) >= 0/.test(usersSrc),
+    'roster: the two magic Find needles match the START of the word they name — inside it, "com" ' +
+    'listed every incomplete row and "and" every candidate, and select-all then ticked strangers');
+  ok(/\[nameOf\(r\), addressOf\(r\)\]\.filter\(Boolean\)\.join\('\\n'\) \|\| r\.uid/.test(usersSrc),
+    'roster: the delete confirmation falls through to the UID, so the one control that cannot be ' +
+    'called off never asks the maintainer to type DELETE against a row it has not named');
+
+  /* AND THE PANEL'S OWN COPY SAYS WHAT IS TRUE OF BOTH GATES. Neither a
+     pending password account nor a provider account still finishing
+     registration reaches `enterSession`, so neither writes a row on sign-in
+     and neither is ever asked the profile card's question — one is sent to
+     the verify card instead. The panel promised both. */
+  const adminSrc = await readFile(path.join(root, 'admin-area.html'), 'utf8');
+  ok(/daily run alone/.test(adminSrc) && !/kept current by each sign-in:/.test(adminSrc),
+    'roster: the panel says a sign-in keeps the row current only once the account is USABLE, and ' +
+    'that an unconfirmed or unfinished one is on the list from the daily run alone');
+  ok(!/Each of them is asked for what is missing/.test(adminSrc) &&
+     !/Each is asked for the/.test(usersSrc),
+    'roster: …and neither the hint nor the count chip still promises that EVERY incomplete ' +
+    'account is asked each session — the one that never confirmed its address is asked to do ' +
+    'that first and for nothing else until it has');
+  ok(/never confirmed its e-mail address/.test(adminSrc.replace(/\s+/g, ' ')) &&
+     /never confirmed its e-mail address/.test(usersSrc),
+    'roster: …and both surfaces say so in the same words');
+
   /* Dates only ever correct backwards / forwards in the safe direction. */
   eq(mod.rowFromAuthUser({ uid: 'u', email: 'a@b.edu', metadata: {} },
     { name: '', email: 'a@b.edu', first: 5, seen: 9 }), null,
@@ -6672,7 +6773,7 @@ async function testUsersAndMessages() {
   ok(/r\.candYears = state\.candidates \? \(state\.candidates\[doc\.id\] \|\| \[\]\) : null/.test(users),
     'and a row carries the seasons only when the read answered — NULL, never an empty list, when it could not: the two mean different things and only one of them is "no"');
   ok(/class="oa-u-cand"[^>]*>JM Candidate</.test(users), 'the mark reads "JM Candidate", in those words');
-  ok(/isCandIn\(r, markYear\(\)\) && q\.length >= 3 && 'jm candidate'\.indexOf\(q\) >= 0/.test(users),
+  ok(/isCandIn\(r, markYear\(\)\) && needle\('jm candidate', q\)/.test(users),
     'and typing "candidate" into Find narrows the roster to them, so select-all under it messages every candidate');
 
   /* THE PURE RULE: which seasons an account holds a LIVE profile for. The read
@@ -21359,7 +21460,7 @@ async function testRegistrationFields() {
   ok(/function addressOf\(r\) \{[\s\S]{0,200}r\.email[\s\S]{0,120}r\.contactEmail/.test(usersSrc),
     'roster: one definition of the address a row can be reached at, sign-in first');
   ok(/sort: function \(r\) \{ return fold\(addressOf\(r\)\); \}/.test(usersSrc)
-     && /return \[r\.name \|\| '', addressOf\(r\)/.test(usersSrc)
+     && /return \[nameOf\(r\), addressOf\(r\)/.test(usersSrc)
      && /fold\(addressOf\(r\)\)\.indexOf\(q\)/.test(usersSrc),
     'roster: …and the column, the sort, Find and the download all read it, so none can disagree ' +
     'about who is reachable');
@@ -21370,7 +21471,7 @@ async function testRegistrationFields() {
      && /' incomplete<\/span>'/.test(usersSrc),
     'roster: the count line says how many accounts still owe something, counted over the WHOLE ' +
     'roster so it does not move as the maintainer types into Find');
-  ok(/'incomplete'\.indexOf\(q\) >= 0/.test(usersSrc),
+  ok(/gapsOf\(r\)\.length && needle\('incomplete', q\)/.test(usersSrc),
     'roster: …and typing "incomplete" into Find lists exactly those, so select-all under it ' +
     'writes to them together');
   const uiCss = await readFile(path.join(HERE, '..', 'assets', 'oa-ui.css'), 'utf8');

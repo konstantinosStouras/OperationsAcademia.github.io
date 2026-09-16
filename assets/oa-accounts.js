@@ -255,18 +255,35 @@
     } catch (e) { /* private mode */ }
   }
 
-  function displayName(u) {
+  /** THE ACCOUNT'S REAL NAME, or nothing. The profile's own two fields first,
+      then the name the PROVIDER handed over (Google's is a real name; ORCID
+      need not send one at all) — and there the chain stops. It is deliberately
+      the short half of `displayName` below: that one must always answer
+      something, because it names the header chip, while this one is what goes
+      on the maintainer's roster, where a guess is worse than a dash.
+      The roster asked the chip for the name until 2026-09-16 and so could be
+      told 'Account' or the left-hand half of an e-mail address, which then
+      read as a complete row for ever — `gapsOf` in oa-users.js counts a row
+      with a name as one that has answered, and the "N incomplete" figure
+      beside it is the one number saying whether the asking is working. */
+  function rosterName(u) {
     if (!u) return '';
     var p = state.profile;
     var full = p && [p.firstName, p.lastName].filter(Boolean).join(' ').trim();
-    if (full) return full;
+    return full || u.name || u.displayName || '';
+  }
+
+  function displayName(u) {
+    if (!u) return '';
+    var real = rosterName(u);
+    if (real) return real;
     // Auth has resolved but the profile read has not. A password account
     // carries no displayName, so without the hint the chip would drop from
     // "Jane Doe" to "jane.doe" for the length of one Firestore round trip, on
     // every single page load.
-    var h = !p && readHint();
+    var h = !state.profile && readHint();
     var hinted = (h && h.uid === u.uid && h.name) || '';
-    return u.name || u.displayName || hinted || (u.email || '').split('@')[0] || 'Account';
+    return hinted || (u.email || '').split('@')[0] || 'Account';
   }
 
   /** Two letters for the avatar: the initials of the name we show, falling
@@ -1253,7 +1270,11 @@
       return ref.get().then(function (snap) {
         var had = snap && snap.exists ? (snap.data() || {}) : null;
         var row = {
-          name: String(displayName(u) || '').slice(0, 200),
+          /* `rosterName`, never `displayName`: the chip's last two rungs are
+             the hint and the e-mail's local part, and a roster that prints
+             "jane.doe" as a name says that account has answered when it has
+             not. A row with no name reads as a dash, which is true. */
+          name: String(rosterName(u) || '').slice(0, 200),
           seen: now,
           // write-once: send back what is stored, or open the row at now
           first: had && typeof had.first === 'number' ? had.first : now

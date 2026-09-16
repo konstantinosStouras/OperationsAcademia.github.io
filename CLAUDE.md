@@ -2221,9 +2221,12 @@ Three properties, and the first is the one that could have gone badly wrong:
 * **Dates only move in the safe direction.** `first` takes the earliest known
   (Auth's real joined date corrects a later "first seen"), `seen` the latest, so
   a sync can never contradict what the site itself watched happen.
-* **A name the site holds is never overwritten** by Auth's `displayName`: the
-  browser writes the name the account shows itself under, which is derived from
-  the profile and is the better one where they differ.
+* **The name is the PROFILE's**, then a name the row already holds, then Auth's
+  `displayName` — never the other way round, which is a correction made on
+  2026-09-16 and argued in the next section but one. The profile is the very
+  thing the browser derives the shown name from, so asking Auth first was
+  asking the weaker source; and it FILLS rather than blanking, which is where
+  it parts company with the affiliation above it.
 
 An account already current costs no write, so a daily fire commits nothing to
 the roster. The dispatch exists for the case that created the gap: right after
@@ -2368,6 +2371,210 @@ area's tile reads X where the front page reads Y`), counts only, so a
 maintainer comparing the two numbers is not left guessing which is wrong.
 Nothing on a public page changes: the front page goes on printing the smaller,
 truer figure.
+
+### A dash in the Name column is the SITE's, and it meant a row nobody had signed in for
+
+Owner, 2026-09-16, of three accounts registered the day before, each with a
+real address and a real affiliation and `—` where the name should be:
+*"Did these users enter '---' as name or the system is shown a --- there?"*
+
+**Neither. They typed their names, the site stored them, and the roster never
+asked for them.** The Name cell is `esc(r.name || '—')` in `assets/oa-users.js`
+— the dash is the site's own placeholder for a row whose name is EMPTY, the
+same one the address and the affiliation columns draw — so nothing anybody
+typed reaches it. (The key is there: `name` is written unconditionally, unlike
+the three conditional spreads beside it, so these rows hold `name: ''`. That is
+what makes the repair cheap — the row differs from the one the sync now builds
+by VALUE, so the no-change short-circuit heals it on the next run, with none of
+the key-presence care `email` needs.) And the BROWSER can never write a row
+without a name:
+`syncDirectoryRow` writes `displayName(u)`, whose fallback chain runs through
+the profile's two name fields, Auth's own, the remembered hint, the e-mail's
+local part and finally the literal `Account`, so it always carries something.
+Only the Admin-SDK sync could produce such a row, and it did:
+
+    name: String(had.name || user.displayName || '').slice(0, 200)
+
+The stored row, then **Auth** — never the `profile` argument the very next
+lines read the affiliation and the contact address out of.
+
+**IT IS THE PASSWORD ACCOUNTS, AND THE REASON IS THE VERIFICATION GATE.**
+Firebase leaves `displayName` null for an account made with
+`createUserWithEmailAndPassword` — the registration form writes the name to
+`profiles/{uid}` and never to the Auth record — and such an account is PENDING
+until it confirms its address, so the auth handler's pending branch returns
+before `enterSession` and no browser roster row is ever written. The daily sync
+then builds the only row there will be: the address from Auth, the dates from
+Auth, the affiliation and the contact address from the profile, and the name
+from the one source that has none. The registration form compels both name
+boxes and trims them, so the profile always has the name; the roster simply
+never looked.
+
+**So the dash marked something real, and worth knowing before reading the
+column again**: it is an account that has been created and has never come back
+and signed in with a confirmed address. A verified sign-in heals the row by
+itself — `confirmVerified` → `liftVerification` → `enterSession` →
+`loadProfile` → `syncDirectoryRow` — which is why two of the three Warwick rows
+read as a dash and the third, the same person's other account, showed its name.
+
+**The fix reads the profile, and the precedence is a real choice.** It is
+`profileName(profile) || had.name || user.displayName`, the profile FIRST:
+the browser derives `had.name` from that same profile, so the two can differ
+only when the row is stale, and then the profile is the one that is right —
+the argument the affiliation beside it has always made. It can never blank,
+which is the half that is not the affiliation's rule: `displayName` falls back
+past the profile to the e-mail's local part, so a row can legitimately hold a
+name no profile could give back, and a nameless profile must leave it alone
+rather than read as *this person has no name*.
+
+**There is no `name` field on a profile to copy.** `profileKeys()` in the rules
+is `firstName, lastName, affiliation, website, orcid, …`, so the sync has to
+COMPOSE the name — and composing it its own way would put two readings of one
+name in the two writers of one field, the drift this file forbids everywhere.
+`profileName` in `_scraper/sync-user-directory.mjs` makes the join
+`displayName()` makes in `assets/oa-accounts.js`, and because that is a browser
+file Node cannot import, `testUserDirectorySync` reads the join out of its
+source and holds the two together character for character — the `EMAIL_RX`
+idiom.
+
+**No rules change and no new key.** `name` is in `ROW_KEYS` already and
+`str('name', 200)` accepts an empty string — so unlike `email` there is no
+poisoned-value trap here, and the 300-character profile fields are cut to the
+200 the row allows. An account whose name was already right costs no write, as
+before.
+
+**And a profile really can hold an affiliation and no name**, which is the
+other half of why this fills rather than blanking: the profile card's name box
+is compelled only while the card is ASKING for it, so an ordinary Edit account
+save can clear it. That road never produced this dash — the same handler calls
+`syncDirectoryRow` a line later and `displayName` falls through to the e-mail's
+local part, so the roster reads `scl864234` rather than `—` — but a sync that
+took a nameless profile as the answer would have blanked those rows on the next
+morning's run. The site already asks such an account for its name: `profileGaps`
+counts an empty first name as a gap and the once-a-session card asks for it, so
+this needed no new prompt.
+
+**The second browser writer is worth knowing about**, because a future edit is
+where this would come back: `syncDirectoryRow(state.user, true)` runs after
+every profile save and carries no pending check of its own. It is closed off
+twice over — `openProfile` sends a pending account to its own card instead, and
+for a gated provider account `liftGate` has already cleared `state.pending` in
+the same `.then` — and the card's own `mustName` guard refuses a save with the
+first-name box empty. Anyone re-deriving "a pending account writes no row" from
+the auth handler alone will miss that call site.
+
+#### …and the OTHER way the column lied: a name that is not one
+
+The sweep that went looking for more of this found the mirror image, and it is
+the reason the *N incomplete* figure had never warned anybody. The browser
+wrote the CHIP's name onto the roster — `displayName(u)`, whose last two rungs
+are the remembered sign-in hint and **the left-hand half of the e-mail
+address**, ending on the literal `Account`. Those are right for a chip, which
+has to say something on every page; they are not names. A row fed one is
+COMPLETE to `gapsOf` for ever, so the account drops out of the count, out of
+the *incomplete* Find needle and out of the select-all under it, while
+`profileGaps` goes on asking that same person every session. An ORCID sign-up
+whose token carries neither a name nor an address was listed as **Account**;
+an account that predates the compulsory name box was listed by its e-mail's
+local part.
+
+**`rosterName(u)` is the roster's own definition and the short half of
+`displayName`**: the profile's two fields, then the name the PROVIDER handed
+over (Google's is a real name), and there it stops. `displayName` now starts
+from it and keeps its own two rungs after it, so nothing on screen loses its
+name for the length of a profile read, and the two can never disagree about
+the part they share. The roster row is written from `rosterName`, so it holds
+a real name or none, and none reads as the dash it is.
+
+**A row already carrying `Account` heals when its owner answers**, and not
+before: both writers put the profile first, so the moment that account gives
+its name the next sign-in and the next sync both correct the row. Until then
+it is counted as incomplete, which is true.
+
+#### An address Auth no longer has is DROPPED, not carried
+
+`const email = String(user.email || had.email || '')` was the one non-monotone
+rule in the row, and its own comment three lines above describes exactly the
+trap it springs. The rules pin the address to `request.auth.token.email`, so a
+row that keeps an address Auth has since lost sends that address back inside
+the owner's own merge, against a token carrying none: permission-denied, on
+every write they make from then on, silently, with `syncDirectoryRow` swallowing
+the refusal and their `seen` simply ceasing to advance. It is the
+`sync-user-directory` trap sprung by a stale VALUE rather than by an empty
+string — the same shape the paragraph above it already warns about for `email:
+''`.
+
+**The fallback protected nothing.** `user` is the Auth record, and Auth's
+address is never half-read: a `listUsers` page that fails fails the whole run.
+So unlike the affiliation and the contact address beside it there is no "could
+not read" state here for an `undefined` branch to defend, and `user.email`
+alone is the whole rule. Because `flush` REPLACES the document, it also HEALS a
+row already in that state: the key is simply not written the next time.
+
+#### …and three things on the panel that shows it
+
+The same sweep, the same screen, all three measured before they were changed:
+
+* **`nameOf(r)` is the one definition of the name a row holds**, trimmed, read
+  by the column, the sort, Find, the checkbox, the delete confirmation and the
+  download. `gapsOf` had always trimmed and the cell had not, so a row of
+  spaces read as a blank cell beside a count that called it incomplete. The
+  selftest pins that the stored field is read in exactly ONE place.
+* **A magic Find needle matches the START of the word it names.** The three
+  real legs ask whether the ROW contains what was typed; these two asked the
+  opposite — whether what was typed is anywhere inside a fixed word — so
+  `'incomplete'.indexOf(q) >= 0` answered to **"com"**, and a maintainer
+  searching for a .com address or for Comillas silently listed every
+  incomplete row, with "and" doing the same through `jm candidate` for anyone
+  searching Anderson. Select-all then ticks those strangers and the compose box
+  writes to them, and its confirmation says only how many. `needle(phrase, q)`
+  keeps the three-letter floor and matches the phrase or any word in it, so
+  *incomplete* still answers to "inc" and *jm candidate* to "cand".
+* **The delete confirmation falls through to the UID.** Every other place the
+  panel has to name a row ends there — the checkbox label and the message
+  thread's heading both do — and the prompt stopped one rung short on both
+  halves, so a row with neither a name nor an address asked the maintainer to
+  type DELETE against *"(no name) / (no address)"*. That row is not
+  hypothetical: it is the population this panel exists to surface, the uid is
+  the only identifier it has, and it is what the work order is keyed on. This
+  is the one control here that cannot be called off once the sweep starts.
+
+**And the panel's own copy said two things that are false of both gates.** It
+promised the roster is "kept current by each sign-in" — a pending or gated
+account's sign-in keeps nothing current, because both branches return before
+`enterSession`, and the daily run is the whole of it — and it promised that
+EVERY incomplete account "is asked for what is missing the first time they open
+the site in a browsing session, so the number comes down on its own". That is
+true of a gated provider account and false of an unconfirmed password account,
+which `openProfile` sends to the verify card instead, so its gap can never be
+asked about at all. Both sentences now say which accounts they mean, on the
+hint and on the count chip, in the same words.
+
+**Reported and NOT changed here, because it is a behaviour decision rather
+than a defect**: a new account is invisible on the roster until the daily run
+(the hourly fires are `--figures-only` and write no row), so an account made
+just after 04:41 UTC is not on the maintainer's list that day. Closing that
+would mean writing a roster row for an account that has not confirmed its
+address or finished registering, which is a change to what both gates mean.
+
+Tests: the name block of the sync's own `--selftest` (the join over one field,
+both fields, neither, and a profile that could not be read; a pending password
+account reaching the roster by name; the profile winning over Auth's
+`displayName`; a nameless profile leaving the row's own name alone; a
+dash-reading row written rather than skipped; the 200-character bound; and an
+address Auth no longer has dropped rather than carried, with Auth's own winning
+where it has one) and the name block of `testUserDirectorySync` in
+`_scraper/selftest.mjs` (the dash drawn by `oa-users.js` itself, the join read
+out of `oa-accounts.js` and required of the sync character for character, the
+two behaviours through the imported module, `rosterName` holding no chip
+fallback and the roster row written from it while the chip still ends on
+"Account", the address line free of any fallback to the row, `nameOf` as the
+only reader of the stored field, both needles anchored, the confirmation's uid,
+and the corrected copy on both surfaces) — every one of them verified by
+putting the defect back. In `_scraper/page-test.mjs`: a seeded row with no name
+reading as a dash the site draws, "com" in Find listing nobody while "inc"
+still lists the accounts that owe something, and the delete confirmation naming
+a row that has nothing but a uid, dismissed so it files no order.
 
 ### The roster reads whole, and says where each person is
 

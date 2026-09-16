@@ -189,6 +189,37 @@
       String((r && r.contactEmail) || '').trim();
   }
 
+  /** THE NAME THE ROW REALLY HOLDS, trimmed — the one definition, read by the
+      column, the sort, Find, the checkbox, the delete confirmation and the
+      download, so none of them can disagree about whether this row has a
+      name. It trims because `gapsOf` below always has, and a cell that did
+      not left a row of spaces reading as a blank where the count beside it
+      called that row incomplete. */
+  function nameOf(r) {
+    return String((r && r.name) || '').trim();
+  }
+
+  /** A MAGIC FIND NEEDLE MATCHES THE START OF THE WORD IT NAMES, never the
+      middle of it. The three real legs below ask whether the ROW contains
+      what was typed; these two asked the opposite — whether what was typed
+      is anywhere inside a fixed word — so "com" (a search for a .com address,
+      or for Comillas) listed every incomplete row and "and" (a search for
+      Anderson) listed every candidate, rows the query appears nowhere in.
+      Select-all then ticks those strangers and the compose box writes to
+      them, and its confirmation says only how many. Three letters at least,
+      as before, matched against the phrase or any word in it, so "incomplete"
+      still answers to "inc" and "jm candidate" to "jm", to "cand" and to its
+      whole self. */
+  function needle(phrase, q) {
+    if (q.length < 3) return false;
+    if (phrase.indexOf(q) === 0) return true;
+    var words = phrase.split(' ');
+    for (var i = 0; i < words.length; i++) {
+      if (words[i].indexOf(q) === 0) return true;
+    }
+    return false;
+  }
+
   /** What this row is still short of, in the order the profile card asks for
       it. The BROWSER's twin of profileGaps in oa-accounts.js, over a roster
       row rather than a profile — the roster has no first name of its own, so
@@ -198,7 +229,7 @@
       is working. */
   function gapsOf(r) {
     var out = [];
-    if (!String((r && r.name) || '').trim()) out.push('name');
+    if (!nameOf(r)) out.push('name');
     if (!String((r && r.affiliation) || '').trim()) out.push('affiliation');
     if (!addressOf(r)) out.push('e-mail');
     return out;
@@ -359,7 +390,7 @@
       cell: function (r) {
         /* The name in its own span (the one-line rule and the browser check
            both hang on it), and under it the JM Candidate mark. */
-        var html = '<span class="oa-u-name">' + esc(r.name || '—') + '</span>';
+        var html = '<span class="oa-u-name">' + esc(nameOf(r) || '—') + '</span>';
         /* …for the season the panel is TALKING ABOUT — the one the chooser
            names, or the one under way when it names none — so the pill and
            the list beneath it can never mean two different seasons. */
@@ -369,7 +400,7 @@
         }
         return html;
       },
-      sort: function (r) { return fold(r.name); }
+      sort: function (r) { return fold(nameOf(r)); }
     },
     {
       key: 'email', label: 'E-mail',
@@ -495,18 +526,18 @@
          way "All accounts" narrows nothing at all. */
       if (state.candYear && !isCandIn(r, state.candYear)) return false;
       if (!q) return true;
-      return fold(r.name).indexOf(q) >= 0 || fold(addressOf(r)).indexOf(q) >= 0 ||
+      return fold(nameOf(r)).indexOf(q) >= 0 || fold(addressOf(r)).indexOf(q) >= 0 ||
         fold(r.affiliation).indexOf(q) >= 0 ||
         /* "incomplete" (three letters or more) lists the accounts that still
            owe something, so select-all under it is how they are written to
            together — the same shape as the "candidate" needle beside it. */
-        (gapsOf(r).length && q.length >= 3 && 'incomplete'.indexOf(q) >= 0) ||
+        (gapsOf(r).length && needle('incomplete', q)) ||
         /* "candidate" (three letters or more of it) narrows to the JM
            candidates, so select-all under it is how they are all messaged.
            Kept beside the chooser rather than replaced by it: it is what the
            panel's own copy has told the maintainer to type since the mark
            shipped, and it now follows whichever season is chosen. */
-        (isCandIn(r, markYear()) && q.length >= 3 && 'jm candidate'.indexOf(q) >= 0);
+        (isCandIn(r, markYear()) && needle('jm candidate', q));
     });
     var col = COLS.filter(function (c) { return c.key === state.sortKey; })[0] || COLS[3];
     return sortRows(rows, col.sort, state.sortDir);
@@ -603,10 +634,18 @@
     var r = rowFor(uid);
     var typed = root.prompt(
       'Delete this account and everything they posted?\n\n' +
-      /* The address the roster SHOWS, so the confirmation names the same
-         person the row does — an ORCID account read "(no address)" here while
-         its row printed the address it gave. */
-      (r.name || '(no name)') + '\n' + (addressOf(r) || '(no address)') + '\n\n' +
+      /* The name and the address the roster SHOWS, so the confirmation names
+         the same person the row does — an ORCID account read "(no address)"
+         here while its row printed the address it gave — and the UID where it
+         shows neither, which is the cascade the row's own checkbox label and
+         the message thread's heading already end on. A row with no name and
+         no address is not hypothetical: it is the population this panel was
+         built to surface, the uid is the only identifier it has, and it is
+         what the work order is keyed on. Stopping at "(no name) / (no
+         address)" asked the maintainer to type DELETE against a row the
+         dialog had never named, on the one control here that cannot be
+         called off once the sweep starts. */
+      ([nameOf(r), addressOf(r)].filter(Boolean).join('\n') || r.uid) + '\n\n' +
       'Their job postings, candidate profile and placement reports come off the ' +
       'site, their e-mail alerts stop, their messages and details are removed, ' +
       'and their sign-in is deleted. You can call it off while it is still ' +
@@ -759,7 +798,7 @@
       return '<tr data-uid="' + esc(r.uid) + '">' +
         '<td class="oa-u-tick"><input type="checkbox" class="oa-u-pick" ' +
           'data-uid="' + esc(r.uid) + '"' + (state.picked[r.uid] ? ' checked' : '') +
-          ' aria-label="Select ' + esc(r.name || addressOf(r) || r.uid) + '"></td>' +
+          ' aria-label="Select ' + esc(nameOf(r) || addressOf(r) || r.uid) + '"></td>' +
         tds +
         '<td class="oa-u-actions">' + actionsFor(r) + '</td>' +
         '</tr>';
@@ -821,8 +860,9 @@
           (marked ? ' · ' + marked + ' JM candidate' + (marked === 1 ? '' : 's') +
             (seasonName(markYear()) ? ' for ' + esc(seasonName(markYear())) : '') : '') +
           (short ? ' · <span class="oa-u-short" title="Accounts still missing a ' +
-            'name, an affiliation or an e-mail address. Each is asked for the ' +
-            'first time it opens the site in a browsing session; type ' +
+            'name, an affiliation or an e-mail address. Most are asked for the ' +
+            'first time they open the site in a browsing session; one that has ' +
+            'never confirmed its e-mail address is asked to do that first. Type ' +
             'incomplete into Find to list them.">' + short +
             ' incomplete</span>' : '') +
           '</span>' +
@@ -951,7 +991,7 @@
          account is the one they gave. Raw, so a mail merge can use the
          column; which kind it is is a fact about the account rather than
          about the address, and the screen is where it is marked. */
-      return [r.name || '', addressOf(r), r.affiliation || '',
+      return [nameOf(r), addressOf(r), r.affiliation || '',
         r.candYears ? r.candYears.map(seasonName).join('; ') : CANDIDATES_UNKNOWN,
         day(r.first), day(r.seen), threadLabel(r.thread), r.uid];
     });
@@ -1114,7 +1154,7 @@
           var items = [];
           snap.forEach(function (doc) { items.push(doc.data() || {}); });
           var row = state.rows.filter(function (r) { return r.uid === uid; })[0];
-          var who = row ? (row.name || addressOf(row) || uid) : uid;
+          var who = row ? (nameOf(row) || addressOf(row) || uid) : uid;
           host.innerHTML =
             '<h4 class="oa-aa-group-h">Conversation with ' + esc(who) + '</h4>' +
             '<ul class="oa-u-thread">' + items.map(function (m) {
