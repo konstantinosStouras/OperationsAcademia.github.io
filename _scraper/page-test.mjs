@@ -6919,6 +6919,29 @@ for (const w of [320, 360, 390, 430]) {
         affiliation: 'Kelley School of Business, Indiana University' } },
     { path: 'userDirectory/u-msg-6', data: { name: 'Eli Evans',
         email: 'eli@example.edu', first: 6000, seen: 6000 } },
+    /* …and one row with NO NAME AT ALL, which is what the maintainer was
+       looking at on 2026-09-16: an account made with an e-mail address and a
+       password that has never come back and confirmed it, so it wrote no
+       roster row of its own and the daily sync built the only one there is.
+       The check is that the DASH is the site's own placeholder — nobody typed
+       it — which is the half of that report only a browser can answer. */
+    { path: 'userDirectory/u-msg-7', data: {
+        email: 'yu.shi.1@warwick.ac.uk', first: 7000, seen: 7000,
+        affiliation: 'Warwick Business School' } },
+    /* …and one with NEITHER a name NOR an address — an abandoned provider
+       sign-up, which the daily sync seeds from Auth and the roster keeps as
+       long as it has dates. It is here for the delete confirmation, which
+       stopped at "(no name) / (no address)" and so asked the maintainer to
+       type DELETE against a row it had never named. */
+    { path: 'userDirectory/u-msg-8', data: { first: 7500, seen: 7500 } },
+    /* …and one whose dates the sync could not read: an Auth account that has
+       never signed in carries no lastSignInTime, so `stamp()` answers 0 and
+       the row reached the roster reading "1970-01-01" in both date columns.
+       Its address is deliberately OUTSIDE `example.edu`: that is the needle the
+       fit check below filters on to measure the four ORDINARY rows, and this
+       row is not one of them. */
+    { path: 'userDirectory/u-msg-9', data: {
+        name: 'Never Signedin', email: 'never@quiet.example.org', first: 0, seen: 0 } },
     { path: 'messages/u-msg-5', data: { uid: 'u-msg-5', lastAt: 4500, lastFrom: 'admin',
         needsAdmin: false, userUnread: 0 } },
 
@@ -6974,6 +6997,19 @@ for (const w of [320, 360, 390, 430]) {
       'roster: markup in a name is rendered as text, never executed');
     ok((await q.textContent('#oa-aa-users')).indexOf('<img src=x') !== -1,
       '…and is shown as the characters the account really typed');
+    const never = q.locator('#oa-aa-users tbody tr', { hasText: 'never@quiet.example.org' });
+    eq((await never.locator('td.oa-u-c-first').textContent()).trim(), '—',
+      'roster: a registered-on date the sync could not read is a dash, never 1 January 1970');
+    eq((await never.locator('td.oa-u-c-seen').textContent()).trim(), '—',
+      'roster: …and so is a last-seen it could not read');
+
+    const nameless = q.locator('#oa-aa-users tbody tr', { hasText: 'yu.shi.1@warwick.ac.uk' });
+    eq((await nameless.locator('td.oa-u-c-name .oa-u-name').textContent()).trim(), '—',
+      'roster: a row with NO name reads as a dash the SITE draws — the owner asked on ' +
+      '2026-09-16 whether those people had typed one, and nobody had');
+    ok((await nameless.locator('td.oa-u-c-affiliation').textContent()).indexOf('Warwick') !== -1,
+      '…beside the affiliation and the address the very same sync read out of the profile, ' +
+      'which is what made the empty name a defect rather than a person with no name');
 
     /* the thread column is the queue: Bea is waiting, the others are not —
        said in two words on the chip, with the long wording as its tooltip
@@ -7004,9 +7040,41 @@ for (const w of [320, 360, 390, 430]) {
       document.querySelectorAll('#oa-aa-users tbody tr').length === 1, null, { timeout: 10000 });
     ok((await q.textContent('#oa-aa-users tbody')).indexOf('bea@example.edu') !== -1,
       'roster: typing "candidate" into Find lists the candidates alone, so select-all under it messages them all');
+
+    /* …AND A NEEDLE MATCHES THE START OF THE WORD IT NAMES. `'incomplete'
+       .indexOf(q) >= 0` answered to "com" as well, so an ordinary search for
+       a .com address quietly listed every incomplete row — rows the query
+       appears nowhere in — and select-all under it ticked those strangers for
+       the compose box, whose confirmation says only how many. No seeded row
+       holds "com" anywhere, so the honest answer here is none at all. */
+    await q.fill('#oa-u-filter', 'com');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 0, null, { timeout: 10000 });
+    ok(true, 'roster: a Find needle inside a magic word ("com" in "incomplete") lists nobody');
+    await q.fill('#oa-u-filter', 'inc');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length > 0, null, { timeout: 10000 });
+    ok((await q.textContent('#oa-aa-users tbody')).indexOf('yu.shi.1@warwick.ac.uk') !== -1,
+      'roster: …while "inc" still lists the accounts that owe something, which is what the ' +
+      'count line beside it tells the maintainer to type');
     await q.fill('#oa-u-filter', '');
     await q.waitForFunction(() =>
       document.querySelectorAll('#oa-aa-users tbody tr').length > 1, null, { timeout: 10000 });
+
+    /* THE CONFIRMATION NAMES THE ROW, and for one with neither a name nor an
+       address the only identifier is its uid — which is also what the work
+       order is keyed on. Dismissed, so nothing is queued and the panel is
+       left exactly as the rest of this block found it. */
+    let killAsk = '';
+    q.once('dialog', (d) => { killAsk = d.message(); d.dismiss(); });
+    await q.click('#oa-aa-users tr[data-uid="u-msg-8"] .oa-u-kill');
+    for (let i = 0; i < 50 && !killAsk; i++) await q.waitForTimeout(100);
+    ok(killAsk.indexOf('u-msg-8') !== -1 && killAsk.indexOf('(no name)') === -1,
+      'roster: the delete confirmation falls through to the UID for a row that has nothing ' +
+      `else, rather than asking about "(no name) / (no address)"; got ${JSON.stringify(killAsk)}`);
+    eq(await q.evaluate(() => Object.keys(window.__fb.dump())
+      .filter((k) => k.indexOf('accountDeletions/') === 0).length), 0,
+      'roster: …and dismissing it files no work order');
 
     /* THE JOB MARKET YEAR CHOOSER (owner, 2026-09-09: "add a filter here so
        that the admin can immediately see all job market candidates of the
@@ -7243,16 +7311,34 @@ for (const w of [320, 360, 390, 430]) {
       'exactly that, rather than vanishing with the row');
 
     /* sorting is by what is DISPLAYED — one spec owns heading, cell and key */
-    const namesNow = () => q.$$eval('#oa-aa-users tbody tr td:nth-child(2)',
-      (tds) => tds.map((t) => t.textContent.trim()));
+    const sortedNow = () => q.$$eval('#oa-aa-users tbody tr',
+      (trs) => trs.map((tr) => ({
+        name: tr.children[1].textContent.trim(),
+        email: tr.children[2].textContent.trim(),
+      })));
+    /* NULLS STAY LAST WHICHEVER WAY WE SORT — `sortRows` says so in as many
+       words, and it is the right rule: a reader pressing a heading wants the
+       column's own order, not a screenful of blanks at the top. So the CLEAN
+       REVERSAL is a promise about the rows the column can actually order, and
+       the rows it cannot are pinned separately below. This check passed for
+       months only because no seeded row was missing an address; the row with
+       neither a name nor an address, added on 2026-09-16 for the delete
+       confirmation, is the first one that is. */
+    const named = (rows) => rows.filter((r) => r.email !== '—').map((r) => r.name);
     await q.click('#oa-aa-users .oa-u-sort[data-sort="email"]');
-    const byEmail = await namesNow();
-    ok(byEmail.length >= 3 && byEmail.join('|').indexOf('Bea Baker') < byEmail.join('|').indexOf('Cy Carter'),
+    const byEmail = await sortedNow();
+    const asc = named(byEmail);
+    ok(asc.length >= 3 && asc.join('|').indexOf('Bea Baker') < asc.join('|').indexOf('Cy Carter'),
       'roster: clicking a heading sorts by that column, ascending first');
     await q.click('#oa-aa-users .oa-u-sort[data-sort="email"]');
-    const rev = await namesNow();
-    eq(rev.slice().reverse().join(','), byEmail.join(','),
+    const rev = await sortedNow();
+    eq(named(rev).slice().reverse().join(','), asc.join(','),
       'roster: and a second click is a clean reversal, not a reshuffle');
+    eq(byEmail[byEmail.length - 1].email, '—',
+      'roster: a row the column cannot order is LAST ascending');
+    eq(rev[rev.length - 1].email, '—',
+      'roster: …and last descending too, so reversing the order never opens the ' +
+      'table on a screen of blanks');
 
     /* the Find box doubles as the recipient picker: select-all takes what is
        SHOWN, so a filtered roster is how a subset is addressed */
