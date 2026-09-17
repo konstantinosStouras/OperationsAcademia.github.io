@@ -3886,6 +3886,20 @@ async function testVocabFile() {
        like the field tacked onto the department's own name. */
     "St. John's University|Business Analytics|Business Analytics and Information Systems",
     'University of Kansas|Analytics, Information, Operations|Analytics, Information, Operations research',
+    /* …and one that arrived on its own (2026-09-17, owner's call to list it
+       rather than rule on it yet). It is NOT two postings: the seed carries
+       OU's real division, Marketing and Supply Chain Management, under Price
+       College of Business (oa-institutions.js, and oa-omlist.js with the
+       university's own #mscm page), while the workbook's hiring-unit column
+       says the FIELD, "Supply Chain Management". Every earlier Oklahoma
+       posting left the school EMPTY, so the field name sat outside the Price
+       College scope and the two never met; the posting published that morning
+       is the first to name the school, and this sweep groups by
+       (university, school). So nothing was mis-ingested and no posting is
+       wrong — which is why listing it renames nothing. Ruling on it means one
+       line in SCOPED_UNIT_ALIASES, and that rewrites the published department
+       line on OU's postings, so it waits for the owner. */
+    'University of Oklahoma|Marketing and Supply Chain Management|Supply Chain Management',
   ]);
   /* KEYED BY THE UNIVERSITY'S IDENTITY, not by the spelling the vocabulary
      files it under today — that is `pickForm`'s tie-break and it moves with
