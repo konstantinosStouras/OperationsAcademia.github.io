@@ -286,16 +286,45 @@ service cloud.firestore {
        be worse than a bounded one. */
     match /candidateSubmissions/{id} {
 
+      /* A PROFILE IS BOUNDED IN GROUPS, NOT FIELD BY FIELD (owner, 2026-09-17).
+         Firestore evaluates at most 1000 expressions per request and answers a
+         request it cannot finish with permission-denied, so a profile of thirty
+         keys plus the talks map could not be validated one field at a time: no
+         candidate could file one at all, in any browser, and the site read it
+         as a rule saying no. Cheapening `str()` fixed a job posting and was not
+         enough here; measured in the emulator, nothing short of grouping was.
+
+         WHAT IS GIVEN UP, said plainly: a group is bounded by the TOTAL of the
+         bounds it replaces, so a candidate could put 1200 characters in `first`
+         if the other six names were empty. What is kept is that nothing is
+         unbounded, the key set stays closed, and no group can carry more text
+         than it could before. Per-field lengths are still applied where they
+         were always applied in practice: the form's own MAX table, and the
+         build that publishes the row.
+
+         _functions/test/rules-budget.mjs holds the whole ruleset to the budget
+         over the LARGEST document each form can send, so the next field that
+         would cross the ceiling fails a check instead of the site. */
+      function candNamesOk() {
+        let d = request.resource.data;
+        // 1240 = 100 + 100 + 220 + 160 + 220 + 220 + 220, the bounds it replaces.
+        // A non-string makes the concatenation error, which denies the write
+        // exactly as a type check would.
+        return (d.get('first', '') + d.get('last', '') + d.get('affiliation', '')
+                + d.get('position', '') + d.get('institution', '')
+                + d.get('school', '') + d.get('unit', '')).size() <= 1240;
+      }
+      function candLinksOk() {
+        let d = request.resource.data;
+        // 2200 = 600 + 600 + 600 + 200 + 200
+        return (d.get('cvUrl', '') + d.get('rsUrl', '') + d.get('webUrl', '')
+                + d.get('email', '') + d.get('personalEmail', '')).size() <= 2200;
+      }
+
       function candShapeOk() {
-        return str('first', 100)      && str('last', 100)
-            && str('affiliation', 220) && str('position', 160)
-            // the affiliation's three parts (owner, 2026-08-24): university,
-            // school, department — the form derives `affiliation` from them
-            && str('institution', 220) && str('school', 220)
-            && str('unit', 220)
-            && str('cvUrl', 600)       && str('rsUrl', 600)
-            && str('webUrl', 600)      && str('email', 200)
-            && str('personalEmail', 200)
+        // the affiliation's three parts (owner, 2026-08-24): university,
+        // school, department — the form derives `affiliation` from them
+        return candNamesOk() && candLinksOk()
             && str('note', 1500)       && str('source', 40)
             && str('authEmail', 200)   && str('ref', 60)
             // the day the candidate last edited the profile (owner,
@@ -304,10 +333,15 @@ service cloud.firestore {
             // Bounded like every other string; never in the merge clause
             // below, which names only the hand-over keys
             && str('updatedAt', 40)
-            && str('cvUploadPath', 400) && str('cvUploadName', 200)
-            && str('cvUploadType', 100)
-            && str('rsUploadPath', 400) && str('rsUploadName', 200)
-            && str('rsUploadType', 100)
+            // each upload slot behind ONE presence test: a profile with no
+            // upload, which is most of them, pays two expressions here
+            // instead of six calls. The bounds themselves are unchanged.
+            && (!('cvUploadPath' in request.resource.data)
+                || (str('cvUploadPath', 400) && str('cvUploadName', 200)
+                    && str('cvUploadType', 100)))
+            && (!('rsUploadPath' in request.resource.data)
+                || (str('rsUploadPath', 400) && str('rsUploadName', 200)
+                    && str('rsUploadType', 100)))
             && list('researchAreas', 10) && list('informsDays', 10)
             && talksOk()
             && (!('emailPublic' in request.resource.data)
@@ -327,17 +361,24 @@ service cloud.firestore {
          against these lists both ways by selftest.mjs). The rules language
          cannot loop over a map, so the four days are named one by one — the
          same four the profile's own informsDays vocabulary allows. */
-      function talkStr(d, k, maxLen) {
-        return !(k in request.resource.data.talks[d])
-            || (request.resource.data.talks[d][k] is string
-                && request.resource.data.talks[d][k].size() <= maxLen);
+      /* A DAY'S TALK, BOUNDED AS A GROUP, for the reason candNamesOk gives:
+         four per-key checks on a four-level path, over four days, was the
+         single most expensive thing in these rules and on its own put a
+         profile past the ceiling. The day is still a map, still carries only
+         the four known keys, and its text is still bounded -- by the total,
+         365 = 5 + 40 + 120 + 200. TALK_MAXLEN in _scraper/candidates-model.mjs
+         still bounds each one where it is written and where it is published. */
+      function talkShape(t) {
+        return t is map
+            && t.keys().hasOnly(['at', 'session', 'room', 'title'])
+            && (t.get('at', '') + t.get('session', '')
+                + t.get('room', '') + t.get('title', '')).size() <= 365;
       }
       function talkOk(d) {
-        return !(d in request.resource.data.talks)
-            || (request.resource.data.talks[d] is map
-                && request.resource.data.talks[d].keys().hasOnly(['at', 'session', 'room', 'title'])
-                && talkStr(d, 'at', 5) && talkStr(d, 'session', 40)
-                && talkStr(d, 'room', 120) && talkStr(d, 'title', 200));
+        // the early-out matters: a day the candidate does not present on
+        // costs one expression, not a whole shape check
+        let m = request.resource.data.talks;
+        return !(d in m) || talkShape(m[d]);
       }
       function talksOk() {
         return !('talks' in request.resource.data)

@@ -15096,17 +15096,33 @@ async function testCalendars() {
     'talks: published right after the days it hangs off');
   const rules = await read('_firestore.rules');
   const cand = rules.slice(rules.indexOf('match /candidateSubmissions/{id}'), rules.indexOf('match /placementSubmissions/'));
-  ok(/&& talksOk\(\)/.test(cand.slice(cand.indexOf('function candShapeOk'), cand.indexOf('function talkStr'))),
+  ok(/&& talksOk\(\)/.test(cand.slice(cand.indexOf('function candShapeOk'), cand.indexOf('function talkShape'))),
     'rules: candShapeOk requires talksOk()');
-  const keyList = /function talkOk[\s\S]*?keys\(\)\.hasOnly\(\[([^\]]*)\]\)/.exec(cand);
+  const keyList = /function talkShape[\s\S]*?keys\(\)\.hasOnly\(\[([^\]]*)\]\)/.exec(cand);
   eq(keyList && keyList[1].split(',').map((s) => s.trim().replace(/'/g, '')), TALK_KEYS,
     'rules: a day\'s talk may carry exactly TALK_KEYS (both ways, by equality)');
   const dayList = /function talksOk[\s\S]*?hasOnly\(\[([^\]]*)\]\)/.exec(cand);
   eq(dayList && dayList[1].split(',').map((s) => s.trim().replace(/'/g, '')), INFORMS_DAYS,
     'rules: the days a talk may hang off are the profile\'s own four');
-  for (const k of TALK_KEYS) {
-    const b = new RegExp(`talkStr\\(d, '${k}', (\\d+)\\)`).exec(cand);
-    ok(b && Number(b[1]) === TALK_MAXLEN[k], `rules: ${k} is bounded at ${TALK_MAXLEN[k]}, as the model bounds it`);
+  /* THE BOUNDS ARE ONE TOTAL NOW, and the model is still what sets it.
+     Firestore evaluates at most 1000 expressions per request, and four
+     per-key checks on a four-level path over four days was the single most
+     expensive thing in these rules: it put every candidate profile past the
+     ceiling, so none could be filed at all (owner, 2026-09-17, who chose the
+     grouped bound). The link to the model is unchanged in the way that
+     matters -- the rule's total must be the SUM of TALK_MAXLEN, so raising
+     any one of them without touching the rules fails here, exactly as before
+     -- and each key is still bounded on its own by talksFrom, in the browser
+     and in the build. */
+  {
+    const total = TALK_KEYS.reduce((n, k) => n + TALK_MAXLEN[k], 0);
+    const b = /function talkShape[\s\S]*?\.size\(\) <= (\d+)/.exec(cand);
+    ok(b && Number(b[1]) === total,
+      `rules: a day's talk is bounded at ${total}, the sum of TALK_MAXLEN`);
+    for (const k of TALK_KEYS) {
+      ok(new RegExp(`get\\('${k}', ''\\)`).test(cand),
+        `rules: …over ${k}, so every key the model knows is inside that total`);
+    }
   }
   eq((cand.match(/talkOk\('(\w+)'\)/g) || []).map((s) => /'(\w+)'/.exec(s)[1]), INFORMS_DAYS,
     'rules: every day is checked, in order');
