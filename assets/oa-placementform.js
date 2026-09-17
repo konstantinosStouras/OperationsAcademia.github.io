@@ -35,6 +35,47 @@
 
   function show(el, on) { if (el) el.hidden = !on; }
 
+  /** The ID token the rules read, re-minted before this form writes
+      anything — OAAccounts.freshClaims is the one definition and says why.
+      Guarded because a browser holding an older cached copy of
+      oa-accounts.js has no such export, and a placement must not fail for
+      want of a refresh: there the write goes out exactly as it did before. */
+  function freshClaims(user) {
+    return OAAccounts.freshClaims
+      ? OAAccounts.freshClaims(user)
+      : Promise.resolve();
+  }
+
+  /** A REFUSED PLACEMENT NAMES NO CAUSE THIS PAGE CANNOT KNOW.
+
+      It used to answer every permission-denied with "the site is not
+      accepting placements yet — its database rules have not been published",
+      which is one of several possible causes and, on the job form where this
+      was reported (owner, 2026-09-17), was not the one that happened: the
+      rules were published and current, and the refusal was a stale
+      `email_verified` claim. The copy sent the sender away to wait for a
+      deploy that was never coming.
+
+      So the page ASKS rather than asserting — see the same function in
+      assets/oa-jobform.js, which this deliberately matches word for word
+      where the wording is not about a placement. */
+  function sayRefused() {
+    say('The site could not accept your placement — checking why…');
+    freshClaims().then(function () {
+      if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
+        say('Your e-mail address has not been confirmed yet, so the site could not ' +
+            'accept your placement. Press the link in the message from Operations ' +
+            'Academia — or ask for a new one on the card that has just opened — and ' +
+            'then press Send again. Nothing you have typed has been lost.', 'err');
+        if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
+        return;
+      }
+      say('The site could not accept your placement just now. Please press Send once ' +
+          'more — nothing you have typed has been lost. If it is refused again, ' +
+          'tell us through the Feedback page and we will file it for you.', 'err');
+    });
+  }
+
   function say(msg, kind) {
     var m = $('oa-msg');
     if (!m) return;
@@ -415,7 +456,15 @@
       say(EDIT_ID ? 'Saving…' : 'Sending…');
 
       OAAccounts.whenSignedIn(function (user) {
-        OAFB.ready().then(function (fb) {
+        /* THE TOKEN THE RULES READ, FIRST OF ALL. The rule on the report is
+           gated on `verified()`, which reads `email_verified` off the ID
+           TOKEN — cached for up to an hour, so a session this page rightly
+           treats as confirmed can still hold a token minted before it was,
+           and the write bounces as permission-denied. See
+           OAAccounts.freshClaims. */
+        freshClaims(user).then(function () {
+          return OAFB.ready();
+        }).then(function (fb) {
           var col = fb.firestore().collection(colName());
 
           /* EDITING an existing report. `uid` and `createdAt` are deliberately
@@ -462,10 +511,8 @@
           btn.disabled = false;
           var code = (err && err.code) || '';
           if (code === 'permission-denied') {
-            say(EDIT_ID
-              ? 'You are not allowed to change this placement.'
-              : 'The site is not accepting placements yet — its database rules have ' +
-                'not been published. Please try again later, or contact us.', 'err');
+            if (EDIT_ID) say('You are not allowed to change this placement.', 'err');
+            else sayRefused();
           } else {
             say('We could not send your placement. Please try again in a moment.' +
                 (code ? ' (' + code + ')' : ''), 'err');

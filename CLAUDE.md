@@ -3997,6 +3997,87 @@ instead, a new session gated too and the answer lifting it; a complete account
 not held; and a password account short of an affiliation asked on the same
 compact card with an X, signed in meanwhile, once a session.
 
+## A submission is never refused for a STALE TOKEN
+
+Owner, 2026-09-17, relaying a job posting that had been refused (feedback
+ticket OA-260917-T5XZ): *"The site is not accepting postings yet, its
+database rules have not been published."* The poster could not tell whether
+"the site" meant Operations Academia or the advertisement he was linking to.
+
+**The rules were published and current**, which is the first thing to know
+before reading any of this again: `oa-deploy-rules.yml` had run green twice
+that week, and `_firestore.rules` had not changed in weeks. So was the SHAPE:
+`testSubmissionKeyCeilings` pins the forms' key counts against the create
+rules' ceilings, and the whole suite was green. **The sentence was the FORM
+GUESSING** at a `permission-denied` it had no way to explain, and it guessed
+the one cause only the maintainer could act on, so it sent the poster away to
+wait for a deploy that was never coming and the maintainer looking for one
+that had already happened. Meanwhile no posting made through the form had
+published since 2026-09-03, the day before the verification gate shipped.
+
+**WHAT REFUSES A SUBMISSION IS THE TOKEN.** Every submission create is gated
+on `verified()`, which reads `email_verified` off the **ID TOKEN**, and the
+SDK caches that for up to an hour. So a session the page rightly treats as
+confirmed can still present a token minted *before* the address was
+confirmed, and then every write bounces. `whenSignedIn` cannot help: it cards
+a PENDING account, and this account is not pending. `state.pending` is false,
+the cards are unlocked, the form is filled in, and only Firestore disagrees.
+
+This file had already written the fact down twice. `confirmVerified`'s own
+comment says `reload()` updates the object while *"the rules read the ID
+TOKEN, which is cached for up to an hour, and without a fresh one … all
+bounce with permission-denied that looks exactly like undeployed rules"*, and
+`freshClaims` had existed since 2026-09-05, when a newly registered account
+could not be deleted for this exact reason. **It was wired to the deletion
+survey and to nothing else.** The three submission forms, which are the paths
+this site exists for, never re-minted anything.
+
+**THE FIX IS THE ONE THIS FILE ALREADY CHOSE, APPLIED WHERE IT WAS MISSING.**
+`OAAccounts.freshClaims` is exported (the one definition: `reload()` then
+`getIdToken(true)`, best effort, so a refresh that fails changes nothing) and
+`oa-jobform.js`, `oa-candidateform.js` and `oa-placementform.js` each call it
+as the FIRST thing their submit does. Before the upload as well as the write,
+because the Storage rules gate the advert and the CV on the same `verified()`,
+so a stale token refuses the file too. All three rather than the one that was
+reported, because it is one defect and a second ticket from the candidate
+form would have been the same morning's work.
+
+**AND A REFUSAL NOW NAMES NO CAUSE THE PAGE CANNOT KNOW**, which is the rule
+the account-deletion panel was already held to ("the copy no longer names a
+cause it cannot know"). `sayRefused` in each form re-mints the claims, so
+`reload()` has run and `needsVerification()` is Firebase's own answer rather
+than a cached one, and then it says which it is: an unconfirmed address is
+named, with the card that CONFIRMS it opened beside the words, since that is
+the control that fixes the problem rather than a description of it; anything
+else is reported as the transient it usually is, with a fresh token already in
+hand, so "press Send once more" is a real remedy. Both branches say **nothing
+you have typed has been lost**, which is true, the form being still on screen
+with every value in it, and which is what stops a poster starting again
+somewhere else. **The database rules are deliberately not mentioned at all**:
+it is not a cause a reader can act on, and naming it is what turned this into
+a support ticket. The console still carries the code for whoever reads the log.
+
+**What is NOT changed, and is the owner's to weigh.** A stale token is one
+hour wide, and the 2026-09-04 gate silenced the form for fourteen days, so the
+rest of that silence is most likely the OTHER half of the gate: every password
+account that existed before it was gated, and such an account meets the "Check
+your inbox" card rather than an error. The campaign that writes to them ran
+once, on 2026-09-05 (`oa-verify-existing.yml`, dispatch only); an account
+registered since and never confirmed is still held, correctly, and nothing
+here changes that. Whether to re-run that campaign is a decision about writing
+to the membership, not a code change.
+
+Tests: `testSubmissionTokenRefresh` in `_scraper/selftest.mjs`, over ALL THREE
+forms rather than the one that was reported: the export and the order of its
+two calls, each form calling the shared function and holding no `getIdToken`
+or `reload` of its own, the refresh before every write and every upload, both
+retired wordings gone, the new-posting branch asking rather than asserting,
+and `sayRefused` reloading, asking Firebase, opening the card and promising
+the values are still there. Every read strips comments first, because the
+paragraphs recording this quote the retired sentence, which is the trap this
+file already records for the analytics page's "no iframes" check. Both halves
+verified by putting the defect back.
+
 ## The forum
 
 Owner, 2026-09-04 and 05: an anonymous forum for the candidates of the

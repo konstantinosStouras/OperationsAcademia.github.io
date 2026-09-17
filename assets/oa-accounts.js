@@ -4264,6 +4264,23 @@
     needsVerification: function (u) { return needsVerification(u || state.user); },
     sendVerification: function () { return sendVerification(); },
     confirmVerified: function () { return confirmVerified(); },
+    /** THE TOKEN THE RULES READ, RE-MINTED — the one definition, above.
+
+        Exported because every form that WRITES is gated on `verified()`, and
+        that reads `email_verified` off the ID TOKEN, which the SDK caches for
+        up to an hour. A session the site rightly believes is confirmed can
+        therefore still present a token minted before it was, and Firestore
+        refuses the write as permission-denied — which the three submission
+        forms reported as "its database rules have not been published",
+        sending the poster and the maintainer after a deploy that was fine.
+        (Owner, 2026-09-17, a job posting refused that way.)
+
+        The deletion survey has re-minted first since 2026-09-05 for exactly
+        this reason; the forms are the same defect on the path that matters
+        most, so they call the same function rather than a second copy of it.
+        Best effort, as there: a refresh that fails changes nothing and the
+        write behind it reports for itself. */
+    freshClaims: function (u) { return freshClaims(u || state.user); },
     openVerifyPanel: function () { openVerifyPanel(); },
     /** A sign-in or link error in the reader's own words, for the verify
         page, so its wording and the box's cannot drift. */
