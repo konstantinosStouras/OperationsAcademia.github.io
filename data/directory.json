@@ -10906,6 +10906,13 @@
   "mapUrl": "https://goo.gl/maps/2MtIX",
   "facultyUrl": "https://mendoza.nd.edu/research-and-faculty/units/information-technology-analytics-and-operations/",
   "deptUrl": "https://mendoza.nd.edu/mendoza-directory/?department=IT%2C+Analytics%2C+and+Operations&employeetype=Faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
