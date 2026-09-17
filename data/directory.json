@@ -1852,8 +1852,11 @@
   "address": "2 W Loop Rd, New York, NY 10044, United States",
   "facultyUrl": "https://tech.cornell.edu/people/faculty/",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-17",
   "lat": 40.7557727,
   "lng": -73.9562112
  },

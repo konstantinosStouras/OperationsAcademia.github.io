@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-17T20:28:17.940Z",
+ "generated": "2026-09-17T20:32:20.714Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -43,6 +43,10 @@
   },
   {
    "v": "Auburn University",
+   "n": 4
+  },
+  {
+   "v": "Cornell University",
    "n": 4
   },
   {
@@ -103,10 +107,6 @@
   },
   {
    "v": "Clarkson University",
-   "n": 3
-  },
-  {
-   "v": "Cornell University",
    "n": 3
   },
   {
@@ -2272,6 +2272,10 @@
    "n": 1
   },
   {
+   "v": "Cornell Tech",
+   "n": 1
+  },
+  {
    "v": "Costello College of Business",
    "n": 1
   },
@@ -2589,10 +2593,6 @@
   },
   {
    "v": "Coller School of Management",
-   "n": 0
-  },
-  {
-   "v": "Cornell Tech",
    "n": 0
   },
   {
@@ -3970,6 +3970,10 @@
    "n": 1
   },
   {
+   "v": "Operations Research and Information Engineering",
+   "n": 1
+  },
+  {
    "v": "Operations Strategy and Management Science",
    "n": 1
   },
@@ -4567,10 +4571,6 @@
   },
   {
    "v": "Operations Research and Industrial Engineering",
-   "n": 0
-  },
-  {
-   "v": "Operations Research and Information Engineering",
    "n": 0
   },
   {
