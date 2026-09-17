@@ -3886,6 +3886,16 @@ async function testVocabFile() {
        like the field tacked onto the department's own name. */
     "St. John's University|Business Analytics|Business Analytics and Information Systems",
     'University of Kansas|Analytics, Information, Operations|Analytics, Information, Operations research',
+    /* And one more the same way (2026-09-17): a posting published that
+       morning ("OA data: publish queued submissions") filed Price College's
+       hiring unit as "Supply Chain Management", where the site's own
+       directory lists the school's division as "Marketing and Supply Chain
+       Management". It left MASTER's own selftest red, which is the state
+       every branch then inherits. Whether Oklahoma runs one Marketing-and-SCM
+       division or an SCM department beside Marketing is a fact about the
+       world, so it is the owner's to rule on like the fifteen above; the
+       answer goes in SCOPED_UNIT_ALIASES and this line comes out. */
+    'University of Oklahoma|Marketing and Supply Chain Management|Supply Chain Management',
   ]);
   /* KEYED BY THE UNIVERSITY'S IDENTITY, not by the spelling the vocabulary
      files it under today — that is `pickForm`'s tie-break and it moves with
