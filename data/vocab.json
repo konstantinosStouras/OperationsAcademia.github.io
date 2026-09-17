@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-17T20:25:01.968Z",
+ "generated": "2026-09-17T20:26:18.581Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -251,6 +251,10 @@
   },
   {
    "v": "Coastal Carolina University",
+   "n": 2
+  },
+  {
+   "v": "Columbia University",
    "n": 2
   },
   {
@@ -675,10 +679,6 @@
   },
   {
    "v": "Columbia Business School",
-   "n": 1
-  },
-  {
-   "v": "Columbia University",
    "n": 1
   },
   {
@@ -2268,6 +2268,10 @@
    "n": 1
   },
   {
+   "v": "Columbia Business School",
+   "n": 1
+  },
+  {
    "v": "Costello College of Business",
    "n": 1
   },
@@ -2581,10 +2585,6 @@
   },
   {
    "v": "Coller School of Management",
-   "n": 0
-  },
-  {
-   "v": "Columbia Business School",
    "n": 0
   },
   {
@@ -3530,6 +3530,10 @@
    "n": 1
   },
   {
+   "v": "Decision, Risk and Operations",
+   "n": 1
+  },
+  {
    "v": "Department of Decision and Information Sciences",
    "n": 1
   },
@@ -4267,10 +4271,6 @@
   },
   {
    "v": "Decision, Operations and Information Technologies",
-   "n": 0
-  },
-  {
-   "v": "Decision, Risk, and Operations",
    "n": 0
   },
   {
@@ -5675,7 +5675,7 @@
     "Fu Foundation School of Engineering and Applied Science"
    ],
    "units": [
-    "Decision, Risk, and Operations",
+    "Decision, Risk and Operations",
     "IEOR",
     "Industrial Engineering and Operations Research"
    ],
@@ -5684,7 +5684,7 @@
      "IEOR"
     ],
     "Columbia Business School": [
-     "Decision, Risk, and Operations"
+     "Decision, Risk and Operations"
     ],
     "Fu Foundation School of Engineering and Applied Science": [
      "Industrial Engineering and Operations Research"
@@ -11854,7 +11854,7 @@
    "Operational Strategy"
   ],
   "Columbia Business School": [
-   "Decision, Risk, and Operations"
+   "Decision, Risk and Operations"
   ],
   "Cornell SC Johnson College of Business": [
    "Operations, Technology, and Information Management Area",

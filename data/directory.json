@@ -1694,8 +1694,11 @@
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-15",
   "lat": 40.8089292,
   "lng": -73.9613646
  },
