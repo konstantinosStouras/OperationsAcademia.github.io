@@ -20,6 +20,24 @@
    Inside each tab the market-year tabs still filter, and every list ranks the
    NEXT market's postings first.
 
+   ONE OF THE TWO IS A GATE AND THE OTHER IS NOT, AND EVERYTHING AROUND THEM
+   NOW SAYS SO (owner, 2026-09-17, of a posting made through the form minutes
+   earlier: "their posting becomes live immediately. It is also flagged to me
+   to approve it later on"). Both halves of that sentence were true, and the
+   second read as a contradiction of the first — because the FRAME called the
+   user-added tab a review queue even though the tab never did. The panel was
+   headed "Job postings to review", the summary tile said the same, and the
+   "Admin area N" badge counted these live postings beside the ones genuinely
+   held back, so the site told the maintainer something was waiting on them
+   when nothing was. The cards were already honest: a LIVE pill, no Approve
+   button anywhere on this tab (pinned), and a Mark-reviewed stamp that writes
+   one date and changes nothing else. So what moved is the wording and the
+   count — the panel is headed "Job postings", each tab is named for what it
+   is, and waitingJobs in assets/oa-adminarea.js counts the gate alone.
+   NOTHING ABOUT WHEN A POSTING GOES LIVE CHANGED, and nothing here may start
+   holding one back: the form promises "within a few minutes", the build keeps
+   it, and the poster is e-mailed to say the posting is public.
+
    AUTHORISATION IS THE RULES, never this file. `jobReviews` is admin-read AND
    admin-write in _firestore.rules — unlike `rowOverrides`, which is public-read,
    because a queued posting is by definition not yet public. Everything here
@@ -1210,9 +1228,9 @@
         ? (state.userError
           ? '<p class="oa-form-msg is-err">Could not load the postings made ' +
             'through the site &mdash; reload to try again.</p>'
-          : '<p class="oa-hint">Nothing waiting. Job postings made through the ' +
-            'site&rsquo;s own form appear here until you mark them reviewed ' +
-            '&mdash; they are already live.</p>')
+          : '<p class="oa-hint">Nothing to correct. Job postings made through ' +
+            'the site&rsquo;s own form are live from the moment they are made, ' +
+            'and are listed here until you mark them reviewed.</p>')
         : '<p class="oa-hint">Nothing waiting. Postings crawled from ' +
           'the tracking sheet appear here before they go on the site.</p>';
       return;

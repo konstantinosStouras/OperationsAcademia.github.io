@@ -193,17 +193,26 @@
                  is approved, so it is the thing most worth doing first. Filled by
                  assets/oa-jobreview.js, exactly as it was when this panel lived
                  on the feedback page. -->
+            <!-- ONLY ONE OF THE TWO TABS IS WAITING ON ANYBODY, and the heading
+                 said otherwise until 2026-09-17: "Job postings to review" over a
+                 tab of postings that are already on the site read as an approval
+                 the maintainer still owed (owner, of one made minutes earlier:
+                 "their posting becomes live immediately. It is also flagged to
+                 me to approve it later on"). The gate is named as a gate, the
+                 list is named as a list, and the tile above counts the gate
+                 alone (waitingJobs in assets/oa-adminarea.js). -->
             <section class="oa-panel" id="oa-review" hidden>
-              <h3 class="oa-panel-h">&#128203; Job postings to review</h3>
-              <p class="oa-hint">Every job posting waiting for your look &mdash;
-                <span id="oa-review-count">nothing</span> shown.
+              <h3 class="oa-panel-h">&#128203; Job postings</h3>
+              <p class="oa-hint">Two lists, and only one of them is waiting on
+                you: <span id="oa-review-count">nothing</span> shown.
                 <strong>Auto-crawled</strong> postings come from the job market
                 tracking sheet and are held back until you approve them; correct
-                anything that is wrong first &mdash; your edits are kept and
+                anything that is wrong first, and your edits are kept and
                 re-applied every time the sheet is re-read.
                 <strong>User-added</strong> postings were made through the
-                site&rsquo;s own form and are already live; open one to correct
-                it, or mark it reviewed to take it off the list.</p>
+                site&rsquo;s own form and are already live. Nothing there is
+                held back and nothing is waiting for your approval; the list is
+                there so you can correct one, and Mark reviewed takes it off.</p>
               <!-- Two sources, one panel (owner, 2026-08-23): the postings
                    crawled from the tracking sheet (a GATE — nothing publishes
                    until approved) and the ones people posted through the site's
@@ -265,9 +274,8 @@
                 site, newest first &mdash; <span id="oa-subs-count">nothing</span>
                 to look at. A profile is held until the reveal date, so this is
                 the one place to read a new one; job postings made through the
-                site are reviewed under &ldquo;Job postings to review&rdquo;
-                above. Open one to correct it, or mark it reviewed to take it
-                off the list.</p>
+                site are listed under &ldquo;Job postings&rdquo; above. Open one
+                to correct it, or mark it reviewed to take it off the list.</p>
               <div id="oa-subs-list"></div>
             </section>
 
