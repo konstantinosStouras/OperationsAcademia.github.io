@@ -1,19 +1,6 @@
 {
- "generated": "2026-09-15T10:30:56.973Z",
+ "generated": "2026-09-17T20:34:40.152Z",
  "postings": [
-  {
-   "id": "2027-georgetown-university-20260914",
-   "ref": "",
-   "institution": "Georgetown University",
-   "department": "McDonough School of Business, Operations and Analytics",
-   "posted": "2026-09-14",
-   "applyByDate": "2027-08-01",
-   "reviewDate": "2026-10-10",
-   "stored": 2027,
-   "should": 2028,
-   "from": "final",
-   "current": true
-  },
   {
    "id": "2026-mcgill-university-20260728",
    "ref": "",
