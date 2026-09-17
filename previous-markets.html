@@ -99,6 +99,7 @@
          oa-firebase.js asks for it. -->
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/oa-list.css" rel="stylesheet">
+    <link href="assets/oa-editor.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
   </head>
 
@@ -275,6 +276,7 @@
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-jobnav.js"></script>
+    <script defer src="assets/oa-forum-markup.js"></script>
     <script defer src="assets/oa-gate.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <!-- oa-schools.js BEFORE the engine: the University search tries the
@@ -530,7 +532,9 @@
                      rows carry none, and an empty row is skipped */
                   { label: 'Suggested apply by', value: OAList.longDate(r.reviewDate) },
                   { label: 'Final apply by',     value: r.applyBy },
-                  { label: 'Comments on Job Posting', value: r.comments },
+                  /* the poster's own prose, read by the site's one markup module
+                     (owner, 2026-09-17) -- one definition for all three lists */
+                  OAJobNav.commentsRow(r),
                   { label: 'File link',
                     html: link(r.adUrl, r.adLabel || 'link to Job ad') },
                   { label: 'Posted online at',

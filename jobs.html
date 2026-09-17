@@ -99,6 +99,7 @@
          oa-firebase.js asks for it. -->
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
+    <link href="assets/oa-editor.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
   </head>
 
@@ -307,6 +308,7 @@
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-jobnav.js"></script>
+    <script defer src="assets/oa-forum-markup.js"></script>
     <!-- oa-schools.js FIRST: oa-sponsors.js asks it whether two spellings
          are one university, and a factory handed no OASchools cannot
          answer. Deferred like every other script here, and the same file
@@ -576,7 +578,9 @@
                  names one — an empty row is skipped by the engine */
               { label: 'Suggested apply by', value: OAList.longDate(r.reviewDate) },
               { label: 'Final apply by',     value: r.applyBy },
-              { label: 'Comments on Job Posting', value: r.comments },
+              /* the poster's own prose, read by the site's one markup module
+                 (owner, 2026-09-17) -- one definition for all three lists */
+              OAJobNav.commentsRow(r),
               { label: 'File link',
                 html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad')
                   : (r.adPending ? '<em>soon to be available</em>' : null) },

@@ -10071,6 +10071,186 @@ by `testUniInfo` in selftest.mjs; who actually SEES the fills — INSEAD's
 school and type in, its department and country left, the overlaid link, the
 filed correction — is measured in page-test.mjs.
 
+## A posting's COMMENTS are prose, and the toolbar that writes them is the site's
+
+Owner, 2026-09-17, with a screenshot of a crawled Notre Dame posting whose
+Comments cell ran to fourteen unbroken lines of a table cell, beside the
+forum's own ask form: *"the 'comments' part of a job posting looks very bad.
+We should allow users to use boldface, italics, links and whatever. Build a
+menu for that part within the job posting step, similar to the new question's
+'body' we have in the OA forum."*
+
+    assets/oa-editor.js      the toolbar, the shortcuts, the tips row, the preview
+    assets/oa-editor.css     its chrome, and `.oa-prose`, the ONE look of member prose
+    assets/oa-forum-markup.js   unchanged: the ONE reading of what the toolbar writes
+
+**SIMILAR TO, so THE SAME.** The toolbar was written inside
+`assets/oa-forum.js` on 2026-09-08, bound to that page's own classes. Copying
+it beside the posting form would have been two editors writing two dialects of
+one Markdown subset, disagreeing with the card the day either was touched,
+which is the drift `oa-countries.js`, `oa-schools.js`, `oa-news.js` and
+`oa-jobnav.js` all exist to prevent. So it moved out whole:
+`oa-forum.js` keeps four one-line wrappers over `OAEditor` and **no `TOOLS`,
+no `wrapSel`, no `prefixLines`, no `execCommand` of its own** (pinned as
+absences, comments stripped, because the page still EXPLAINS what it no longer
+carries). Every box a member writes prose into mounts this module: a question,
+an answer and an edit on the forum, the Comments on `post-a-job.html`, and the
+Comments on the review card.
+
+**WHAT DELIBERATELY DID NOT TRAVEL IS THE GUARD.** `oa-forum-guard.js`'s
+`check()` refuses an e-mail address, a telephone number and an ORCID iD, which
+is a rule about an ANONYMOUS room; on a job advertisement that names the
+department's own page and its chair's search it would be nonsense. The forum
+wires its guard beside the editor and the job form does not, and the module
+names neither it nor `OAForumModel` (pinned both ways). What keeps an address
+out of a published posting is what always did: `stripRowEmails` at ingest.
+
+**THE CHROME IS NEVER WRITTEN OUT BY HAND.** A page ships a plain labelled
+`<textarea>` and calls `OAEditor.attach(ta)`, which wraps it in the toolbar,
+the tips row and the preview from the one definition. Hand-copying eleven
+inline SVGs into `post-a-job.html` and `admin-area.html` would have been two
+more places to remember the day a button is added, which is the whole reason
+the module exists; the selftest refuses a `data-fmt` or an `oa-editor-tb` in
+either page. The cost, stated: a page whose scripts never run shows the plain
+box, which is the right way round, and these forms need their scripts to send
+anything at all. **A box a SCRIPT fills asks for its preview**
+(`OAEditor.refresh`) rather than faking an `input` event, which would wake the
+job form's own draft saver and store a draft of a posting somebody has only
+opened; both roads that fill it, an edit and an unsent draft, call it.
+
+### The card draws it, and that is ONE row for three lists
+
+`OAJobNav.commentsRow(row)` is the definition, beside `refRow` and for its
+reason: `jobs.html`, the one-pager's teaser and `previous-markets.html` each
+wrote `{ label: 'Comments on Job Posting', value: r.comments }`, and a fourth
+reading was about to be needed. The row is `html` now,
+`<div class="oa-prose">` + `OAForumMarkup.html(text)`.
+
+**IT IS SAFE BY CONSTRUCTION, which is the whole argument for `html` at all.**
+That module parses the words into a tree and escapes every character at
+EMISSION: nothing it emits can close an attribute or open a tag, a link is
+`http`, `https` or `www` and nothing else (so no `javascript:` href can be
+made), and it draws no image. The browser suite types `<script>`, an
+`onerror` image and a bracketed `javascript:` link into a posting and reads
+the rendered cell back.
+
+**WITHOUT THE MODULE the words are drawn as WORDS** (`value`, which the engine
+sets as text), which is exactly what the card did before. That is NOT the
+guessing fallback `oa-sponsors.js` was corrected for: there a private fold
+answered a question it could not answer and was silently wrong about three
+spellings, where this is the same words in a plainer shape and nothing about
+it can be wrong. The load order is pinned on all three pages regardless.
+
+**THE HOME PAGE CALLS IT AND LOADS NEITHER THE READER NOR ITS STYLESHEET**,
+and that is a pair of facts rather than an omission. Its jobs teaser always
+hands `cardOpen` a `full`, so the gate always answers a descriptor and **no
+card there ever renders a details table**: the only thing that reads the row is
+`lockPreview`, which takes the LABEL. Downloading 20 KB of prose reader and a
+render-blocking stylesheet for a cell that is never drawn is the cost that
+page's own performance rules are about ("nothing on screen waits", "one request
+per file per page"). Without it the row is the
+words as text, so a teaser that ever stopped gating would read plainly rather
+than wrongly — and the selftest pins the pair BOTH ways, so dropping the `full`
+or adding either file back fails here rather than quietly costing every
+visitor the download or drawing marks on the front page.
+
+**THE LABEL DOES NOT MOVE**, and that is load-bearing rather than tidy: a
+locked card's blurred strip is built by `lockPreview` from the row LABELS
+alone, so a reader who has not registered sees the strip they always saw and
+not one word of what the poster wrote. Pinned in a browser, signed out.
+
+**NOTHING UNDER `data/` MOVES.** The stored text is the poster's own and the
+reading happens where it is shown, so there is no migration, no rebuild and no
+field to add; 543 postings of plain prose read as they always did, and the
+addresses in them become links on their own, which is the one thing the card
+gained for postings nobody will ever edit.
+
+### The plain surfaces stay plain, and the prose takes the cell's own size
+
+* **The Excel download** reads `plain()` (`plainProse` in `oa-jobexport.js`,
+  the module injected through the UMD factory so the checks can drive it in
+  Node). A cell reading `**Interviewing at INFORMS**` is noise in a
+  spreadsheet somebody is about to sort, and `plain()` and `html()` walk the
+  same tree, so the cell holds the words the card shows.
+* **The review e-mail** does the same (`markup.plain`). Rendering the marks as
+  HTML there was considered and refused: an e-mail client is not a browser,
+  `line()` escapes its value on purpose, and the maintainer is about to read
+  the same text in the card's own box.
+* **`.oa-kv .oa-prose`** in `oa-list.css` takes the detail cell's own size,
+  ink and rhythm and keeps only the SHAPE. `.oa-prose` is sized for the box it
+  is typed in (15.5px in `--ink`), and beside a 14px cell in `--ink-2` it
+  would make the one cell that happens to hold prose the loudest thing on the
+  card; a 19px `h3` inside a 14px table is a heading of the CARD, which it is
+  not. At (0,2,0) it beats `.oa-prose` (0,1,0) on SPECIFICITY, so it does not
+  matter which stylesheet a page links last.
+* **A LINK INSIDE RUNNING PROSE HAS TO LOOK LIKE ONE**, which was measured on
+  the first rendered cell rather than reasoned about: two web addresses drawn
+  in the ink of the words around them, indistinguishable from the sentence
+  they sat in. `body.v3 a` (0,1,2) draws every link with no underline and
+  reveals it on hover, which reads well where the link IS the row (File link,
+  Posted online at, the posting id: a cell whose label says what it is) and
+  not at all mid-paragraph. `.oa-prose a[href]` carries the underline past it
+  at (0,2,1), on SPECIFICITY rather than on which stylesheet a page links
+  last, and every link this prose can hold has an address because the markup
+  module emits no other kind. It reaches a forum post's links too, for the
+  same reason and to its benefit.
+* **And inside a form the box is the EDITOR's, not the form's.**
+  `body.v3 .oa-form textarea` (0,2,2) and its `:focus` (0,3,2) are above
+  anything `oa-editor.css` can write, so on `post-a-job.html` and the review
+  card they put a second border inside the wrapper and handed the box the
+  `--brand-soft` ring the editor's own comment measures at **1.19:1**. v3.css
+  restates it at (0,3,2) and (0,4,2) — decided on specificity, never on which
+  stylesheet is linked last, the trap already recorded for the Leaflet
+  attribution box and the sponsor rail.
+
+**The review card is where this matters most**, which is why it has the
+toolbar too: the screenshot the owner sent is a posting from the tracking
+workbook, whose Comments are an advertisement's own description arriving as
+one block, and `/admin-area` is the only place that can be tidied. Its Comments
+field is rendered as a `<div>` rather than a `<p>` for it, since the editor
+puts a `<div>` beside the box and a div inside a p ends the paragraph. It is
+also out of the card's "every control is one font size" check and measured on
+its own: the box is 16px because that is the size below which a phone zooms on
+focus, which is why the forum's box is 16px too.
+
+**WHAT WAS LEFT ALONE, and it is a decision rather than an oversight.**
+`assets/oa-rowedit.js` lets the maintainer correct an ARCHIVE posting's
+Comments on Previous markets, and its field is a one-line `<input>` like every
+other field that module draws for its three datasets. Those rows are drawn as
+prose now like any other, so a correction typed there reads correctly; what it
+does not get is the toolbar, because giving it one means teaching that generic
+overlay editor about a box that is not one line, for frozen legacy rows nobody
+posts to. The same goes for the deadline note (`applyByNote`), which is one
+line by design, and for the private note to the maintainer, which is never
+drawn as anything.
+
+**The renamed classes, and the one preference that reset.** The chrome carried
+`oa-forum-*` names and now carries `oa-editor-*`, with the rendered-prose class
+`.oa-forum-text` becoming **`.oa-prose`** — a stylesheet the jobs page links
+must not be full of another page's name. The tips row's stored choice moved
+with it (`oa-forum-tips` to `oa-editor-tips`), so every reader's preference
+reset once to its default of shown, which is the whole cost.
+
+Tests: `testJobComments` in `_scraper/selftest.mjs` (the module's exports and
+its dual-mode wrapper; eleven needles asserting the forum kept no copy; the
+guard's names absent from it; `attach` and `refresh`; neither page writing
+toolbar markup; the form's plain box, its hint, its load order and its two
+repaints; `commentsRow` DRIVEN as a program with the markup module present and
+absent, over the owner's own case and over hostile prose; all three lists
+through it and none of them writing the row; the home page's missing script
+pinned beside the teaser's `full` that makes it right; the cell's rule, the
+underlined prose link and v3's specificity restatement; the Excel cell and the
+review e-mail through `plain()`; the review card's mount and its block element; and that nothing was
+written into `data/`), the repointed forum toolbar pins in `testForum` (which
+now read `assets/oa-editor.js` and `assets/oa-editor.css`), and in
+`_scraper/page-test.mjs` a block of its own: the toolbar's shape as GEOMETRY
+over the Comments box, Bold and a list button pressed the way a reader presses
+them (mousedown first), the preview, the borderless box with its inset ring,
+the 42px targets wrapping at 390px, and then the CARD — the paragraphs, the
+list, the bold, the italics, the link with its `rel`, the hostile text inert,
+the cell measured at the size and ink of every other detail and at 4.5:1 in
+BOTH themes, and a locked card previewing the label and nothing else.
+
 ## The account menu counts what it links to
 
 "My postings" and "E-mail alerts" read the same whether you had none or a

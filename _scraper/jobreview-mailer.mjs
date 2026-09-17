@@ -40,6 +40,7 @@
    --------------------------------------------------------------------------- */
 
 import { isMain } from './_main.mjs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -51,6 +52,20 @@ import {
   shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
   safeError,
 } from './_mail.mjs';
+
+const require = createRequire(import.meta.url);
+
+/* THE WORDS, NEVER THE MARKS. Since 2026-09-17 the Comments of a posting are
+   written with a formatting toolbar and read by assets/oa-forum-markup.js,
+   the site's one reading of member-written prose, so the stored text carries
+   that Markdown subset. This message is a table of short lines the maintainer
+   reads in an inbox, not the card, so it prints the words the card SHOWS
+   rather than the marks around them -- plain() and html() walk the same tree,
+   so the two cannot disagree about what they say. Rendering the marks as HTML
+   here instead was considered and refused: an e-mail client is not a browser,
+   `line()` escapes its value on purpose, and the maintainer is about to read
+   the same text in the review card's own box. */
+const markup = require('../assets/oa-forum-markup.js');
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -208,7 +223,7 @@ export function renderReviewEmail(doc, { site = SITE, sheetUrl = '' } = {}) {
       line('Market year', r.year ? String(r.year) : '') +
       line('Suggested apply by', r.reviewDate ? longDate(r.reviewDate) : '') +
       line('Final apply by', r.applyBy) +
-      line('Comments', r.comments) +
+      line('Comments', markup.plain(String(r.comments || ''))) +
     '</table>' +
     (ad ? '<p><a href="' + esc(ad) + '">Open the advertisement</a></p>' : '') +
     '<p><a href="' + esc(reviewUrl) + '" style="display:inline-block;background:#426394;' +

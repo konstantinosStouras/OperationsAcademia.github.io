@@ -58,11 +58,11 @@
    --------------------------------------------------------------------------- */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./oa-xlsx.js'), require('./oa-sponsors.js'));
+    module.exports = factory(require('./oa-xlsx.js'), require('./oa-sponsors.js'), require('./oa-forum-markup.js'));
   } else {
-    root.OAJobExport = factory(root.OAXlsx, root.OASponsors);
+    root.OAJobExport = factory(root.OAXlsx, root.OASponsors, root.OAForumMarkup);
   }
-}(typeof self !== 'undefined' ? self : this, function (OAXlsx, OASponsors) {
+}(typeof self !== 'undefined' ? self : this, function (OAXlsx, OASponsors, OAMarkup) {
   'use strict';
 
   /* The window, named INSIDE the factory. The UMD wrapper's `root` is a
@@ -84,6 +84,13 @@
 
   function txt(v) {
     return String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
+  }
+
+  /** Prose as a reader sees it: the marks read away where the markup module
+      is here, the text itself where it is not. */
+  function plainProse(v) {
+    var t = String(v == null ? '' : v);
+    return (OAMarkup && t) ? OAMarkup.plain(t) : t;
   }
 
   function list(v) {
@@ -189,10 +196,19 @@
         'Undergrad, Exec Ed — separated by "; ".',
       cell: function (r) { return list(r.characteristics); } },
 
+    /* THE WORDS, NEVER THE MARKS. Since 2026-09-17 a poster writes the
+       comments with a formatting toolbar and the card draws them by
+       assets/oa-forum-markup.js, so the stored text carries the Markdown
+       subset that module reads. A cell reading "**Interviewing at INFORMS**"
+       is noise in a spreadsheet somebody is about to sort and filter, so it
+       is read the way the card reads it and flattened to one line -- plain()
+       and html() walk the same tree, so the cell holds the words the card
+       shows. Without the module the text is written as it is stored, which is
+       what this column held before. */
     { header: 'Comments', from: ['comments'], type: 'Text', w: 52,
-      note: 'What the posting says about itself. Anything the poster wrote to the ' +
-        'maintainer instead is private and is not published.',
-      cell: function (r) { return txt(r.comments); } },
+      note: 'What the posting says about itself, as the card reads it. Anything the ' +
+        'poster wrote to the maintainer instead is private and is not published.',
+      cell: function (r) { return txt(plainProse(r.comments)); } },
 
     { header: 'Job advert', from: ['adUrl', 'adPending'], type: 'Link', w: 42,
       note: 'The advertisement itself, clickable. "Soon to be available" means the ' +

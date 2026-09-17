@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "job-comments-prose-2026-09",
+      "date": "2026-09-17",
+      "title": "A job posting's comments can be written, and now read, as prose",
+      "summary": "The Comments on a posting were one unbroken run of text on the card: every blank line the poster had typed collapsed, a list ran together, and a web address they had written out sat there as dead characters. The posting form's Comments box now carries the same formatting toolbar the forum's questions have: bold, italics, a link, a quoted passage, code, numbered and bulleted lists, a heading and a rule, with undo and redo and a preview under the box showing exactly how the card will draw it. On the jobs page, the front page and Previous markets the comments are drawn the way they were written: paragraphs where you left a blank line, lists as lists, and a web address as a link. Nothing you have already posted has to be changed. Plain prose reads as it always did, and the addresses in it become links on their own. The site's maintainer gets the same toolbar on the review card, where a crawled advertisement's description arrives as one block. The Excel download and the e-mails go on carrying the words rather than the marks.",
+      "url": "/post-a-job"
+    },
+    {
       "id": "chair-kept-on-edit",
       "date": "2026-09-17",
       "title": "Correcting a posting no longer lets its chair be removed",

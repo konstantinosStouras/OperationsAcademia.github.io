@@ -1286,7 +1286,20 @@
                    names one — an empty row is skipped by the engine */
                 { label: 'Suggested apply by', value: OAList.longDate(r.reviewDate) },
                 { label: 'Final apply by',     value: r.applyBy },
-                { label: 'Comments on Job Posting', value: r.comments },
+                /* The poster's own prose, through the one definition all three
+                   lists draw this row by (owner, 2026-09-17). THIS page is the
+                   one that does not load assets/oa-forum-markup.js with it,
+                   and deliberately: the teaser's cardOpen always answers a
+                   descriptor (`full` is always given), so no card here ever
+                   renders a details table -- the only thing that reads this
+                   row is lockPreview, which takes the LABEL and nothing else.
+                   Downloading the prose reader, or the stylesheet that draws
+                   what it emits, for a cell that is never drawn is the cost
+                   this page's own performance rules are about.
+                   Without the module the row is the words as text, so if the
+                   teaser ever stopped gating it would read plainly rather
+                   than wrongly; the selftest pins the pair both ways. */
+                OAJobNav.commentsRow(r),
                 { label: 'File link',
                   html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad', true)
                     : (r.adPending ? '<em>soon to be available</em>' : null) },

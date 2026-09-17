@@ -99,6 +99,7 @@
          oa-firebase.js asks for it. -->
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
+    <link href="assets/oa-editor.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
   </head>
 
@@ -362,10 +363,13 @@
 
                       <div class="oa-field">
                         <label for="f-comments">Comments on the posting</label>
-                        <p class="oa-hint">Shown publicly. This is where most schools mention
-                        whether they will be interviewing at INFORMS, and by when they would like
-                        a packet.</p>
-                        <textarea id="f-comments" name="comments" maxlength="1200"></textarea>
+                        <p class="oa-hint" id="f-comments-hint">Shown publicly. This is where most
+                        schools mention whether they will be interviewing at INFORMS, and by when
+                        they would like a packet. Use the buttons above the box for bold, italics,
+                        a link, a list or a heading; a blank line starts a new paragraph, and a web
+                        address becomes a link on the card.</p>
+                        <textarea id="f-comments" name="comments" maxlength="1200" rows="8"
+                                  aria-describedby="f-comments-hint"></textarea>
                       </div>
 
                       <div class="oa-field">
@@ -662,6 +666,8 @@
     <script defer src="assets/oa-place-picker.js"></script>
     <script defer src="assets/oa-uniinfo.js"></script>
     <script defer src="assets/oa-countries.js"></script>
+    <script defer src="assets/oa-forum-markup.js"></script>
+    <script defer src="assets/oa-editor.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-jobform.js"></script>
     <script defer src="assets/oa-namefix.js"></script>
