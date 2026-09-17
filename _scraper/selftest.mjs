@@ -3886,15 +3886,14 @@ async function testVocabFile() {
        like the field tacked onto the department's own name. */
     "St. John's University|Business Analytics|Business Analytics and Information Systems",
     'University of Kansas|Analytics, Information, Operations|Analytics, Information, Operations research',
-    /* And one more the same way (2026-09-17): a posting published that
-       morning ("OA data: publish queued submissions") filed Price College's
-       hiring unit as "Supply Chain Management", where the site's own
-       directory lists the school's division as "Marketing and Supply Chain
-       Management". It left MASTER's own selftest red, which is the state
-       every branch then inherits. Whether Oklahoma runs one Marketing-and-SCM
-       division or an SCM department beside Marketing is a fact about the
-       world, so it is the owner's to rule on like the fifteen above; the
-       answer goes in SCOPED_UNIT_ALIASES and this line comes out. */
+    /* And one more, arrived on master with a posting published on 2026-09-17
+       and red on the base branch before this change touched it. Oklahoma's
+       Price College names a Division of Marketing and Supply Chain
+       Management, so the short form is probably the same division said
+       briefly rather than a second department -- but "probably" is what this
+       list is for, and merging two departments that are really two is the
+       error that cannot be undone from the data. The owner's to rule on; the
+       answer goes in SCOPED_UNIT_ALIASES. */
     'University of Oklahoma|Marketing and Supply Chain Management|Supply Chain Management',
   ]);
   /* KEYED BY THE UNIVERSITY'S IDENTITY, not by the spelling the vocabulary
@@ -7597,6 +7596,48 @@ async function testMandatoryPostingFields() {
      editMode.includes("'f-school', 'f-unit'"),
     '…and the required attributes with them, the two name fields included, ' +
     'so the document never claims a requirement collect() does not enforce there');
+
+  /* …AND AN EDIT MAY NOT ERASE THE CHAIR PAIR (owner, 2026-09-17). The
+     exemption above is for a posting nobody ever gave a chair — every crawled
+     sheet mirror among them, which is what keeps the maintainer's hand-over
+     saveable — and deleting one the posting already names is a different act.
+     So the requirement is keyed on the STORED document, never on the boxes,
+     which are exactly what the poster may have just cleared.
+     EVERY needle below is read with the COMMENTS STRIPPED: the paragraphs
+     beside this code name `EDIT_HAD`, `remark()` and the mark's own class in
+     order to explain them, and a guard that could not tell the explanation
+     from the thing would have to be satisfied by deleting the explanation. */
+  const bareJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const bareForm = bareJs(form);
+  const bareCollect = bareJs(collect);
+  ok(/!EDIT_ID \|\| EDIT_HAD\.chairName/.test(bareCollect),
+    'collect(): the chair NAME is required of an edit whose posting already names one');
+  ok(/!EDIT_ID \|\| EDIT_HAD\.chairEmail/.test(bareCollect),
+    'collect(): and so is their E-MAIL');
+  const fillBody = bareJs(form.slice(form.indexOf('function fill('),
+    form.indexOf('function enterEditMode(')));
+  ok(/EDIT_HAD\.chairName = !!String\(v\.chairName \|\| ''\)\.trim\(\)/.test(fillBody) &&
+     /EDIT_HAD\.chairEmail = !!String\(v\.chairEmail \|\| ''\)\.trim\(\)/.test(fillBody),
+    'fill() reads it off the STORED posting — the box is what may have been cleared');
+  ok(/remark\('f-chairName'\)/.test(fillBody) && /remark\('f-chairEmail'\)/.test(fillBody),
+    'fill() puts the * mark and the required attribute BACK on a field an edit ' +
+    'may not empty — the converse of enterEditMode()\u2019s own rule, that the ' +
+    'marks and what collect() enforces say one thing');
+  const had = /var EDIT_HAD = \{([^}]*)\}/.exec(bareForm);
+  ok(!!had, 'the form records what the stored posting had');
+  eq((had[1].match(/(\w+):/g) || []).map((m) => m.slice(0, -1)), ['chairName', 'chairEmail'],
+    'and ONLY for the chair pair: the department page is the directory\u2019s rather ' +
+    'than the posting\u2019s and a characteristic is a fact about the school, so ' +
+    'neither carries the "you may not delete it" argument and both stay exempt');
+  const remark = bareForm.slice(bareForm.indexOf('function remark('),
+    bareForm.indexOf('function fill('));
+  ok(/setAttribute\('required'/.test(remark) &&
+     /oa-req oa-req-new/.test(remark) &&
+     /aria-hidden/.test(remark),
+    'remark() restores the attribute and a mark of the class enterEditMode() lifts, ' +
+    'aria-hidden like the six in the page — `required` is what a reader is TOLD');
+  ok(/querySelector\('\.oa-req'\)/.test(remark),
+    '…and stands down where the mark is still there, so a new posting never doubles one');
 
   /* the repeated school, judged by the shared rule */
   const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
@@ -15097,17 +15138,33 @@ async function testCalendars() {
     'talks: published right after the days it hangs off');
   const rules = await read('_firestore.rules');
   const cand = rules.slice(rules.indexOf('match /candidateSubmissions/{id}'), rules.indexOf('match /placementSubmissions/'));
-  ok(/&& talksOk\(\)/.test(cand.slice(cand.indexOf('function candShapeOk'), cand.indexOf('function talkStr'))),
+  ok(/&& talksOk\(\)/.test(cand.slice(cand.indexOf('function candShapeOk'), cand.indexOf('function talkShape'))),
     'rules: candShapeOk requires talksOk()');
-  const keyList = /function talkOk[\s\S]*?keys\(\)\.hasOnly\(\[([^\]]*)\]\)/.exec(cand);
+  const keyList = /function talkShape[\s\S]*?keys\(\)\.hasOnly\(\[([^\]]*)\]\)/.exec(cand);
   eq(keyList && keyList[1].split(',').map((s) => s.trim().replace(/'/g, '')), TALK_KEYS,
     'rules: a day\'s talk may carry exactly TALK_KEYS (both ways, by equality)');
   const dayList = /function talksOk[\s\S]*?hasOnly\(\[([^\]]*)\]\)/.exec(cand);
   eq(dayList && dayList[1].split(',').map((s) => s.trim().replace(/'/g, '')), INFORMS_DAYS,
     'rules: the days a talk may hang off are the profile\'s own four');
-  for (const k of TALK_KEYS) {
-    const b = new RegExp(`talkStr\\(d, '${k}', (\\d+)\\)`).exec(cand);
-    ok(b && Number(b[1]) === TALK_MAXLEN[k], `rules: ${k} is bounded at ${TALK_MAXLEN[k]}, as the model bounds it`);
+  /* THE BOUNDS ARE ONE TOTAL NOW, and the model is still what sets it.
+     Firestore evaluates at most 1000 expressions per request, and four
+     per-key checks on a four-level path over four days was the single most
+     expensive thing in these rules: it put every candidate profile past the
+     ceiling, so none could be filed at all (owner, 2026-09-17, who chose the
+     grouped bound). The link to the model is unchanged in the way that
+     matters -- the rule's total must be the SUM of TALK_MAXLEN, so raising
+     any one of them without touching the rules fails here, exactly as before
+     -- and each key is still bounded on its own by talksFrom, in the browser
+     and in the build. */
+  {
+    const total = TALK_KEYS.reduce((n, k) => n + TALK_MAXLEN[k], 0);
+    const b = /function talkShape[\s\S]*?\.size\(\) <= (\d+)/.exec(cand);
+    ok(b && Number(b[1]) === total,
+      `rules: a day's talk is bounded at ${total}, the sum of TALK_MAXLEN`);
+    for (const k of TALK_KEYS) {
+      ok(new RegExp(`get\\('${k}', ''\\)`).test(cand),
+        `rules: …over ${k}, so every key the model knows is inside that total`);
+    }
   }
   eq((cand.match(/talkOk\('(\w+)'\)/g) || []).map((s) => /'(\w+)'/.exec(s)[1]), INFORMS_DAYS,
     'rules: every day is checked, in order');
@@ -17114,12 +17171,13 @@ async function testSubmissionTokenRefresh() {
     'and it reloads the account and then forces a fresh token, in that order');
 
   const FORMS = [
-    ['oa-jobform.js', 'posting', 'postings'],
-    ['oa-candidateform.js', 'profile', 'profiles'],
-    ['oa-placementform.js', 'placement', 'placements'],
+    ['oa-jobform.js', 'posting', 'postings', 'jobSubmissions'],
+    ['oa-candidateform.js', 'profile', 'profiles', 'candidateSubmissions'],
+    ['oa-placementform.js', 'placement', 'placements', 'placementSubmissions'],
   ];
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
 
-  for (const [file, thing, plural] of FORMS) {
+  for (const [file, thing, plural, collection] of FORMS) {
     const src = strip(await readFile(path.join(root, 'assets', file), 'utf8'));
     const where = `${file}:`;
 
@@ -17158,6 +17216,77 @@ async function testSubmissionTokenRefresh() {
       `${where} and opens the card that confirms the address, not just words`);
     ok(asks && /Nothing you have typed has been lost/.test(asks[0]),
       `${where} and says the ${thing} is still on screen`);
+    /* A TERMINAL auth failure is the one refusal no retry clears: freshClaims
+       is best effort, so an account whose Auth record has gone (a carried-out
+       deletion, the duplicate side of a merge) arrives here with no session,
+       and "press Send once more" would be an instruction to press for ever.
+       Asked FIRST, because an account that is gone has no address to confirm. */
+    ok(asks && /no longer signed in/.test(asks[0]) && /openAuth\(\)/.test(asks[0]),
+      `${where} and names a session that has ended, offering the sign-in`);
+    ok(asks && asks[0].indexOf('no longer signed in') < asks[0].indexOf('has not been confirmed'),
+      `${where} asking that before the address, which a gone account does not have`);
+
+    /* --- THE EDIT LOAD IS A READ, AND THE READ IS GATED THE SAME WAY -----
+
+       `allow read: if isOwner(resource.data.uid)` goes through verified(),
+       so a stale claim refuses the OWNER their own row. Before 2026-09-17
+       that branch said "You are not allowed to edit this ${thing}" and hid
+       the form: the site telling the person who filed it that it is not
+       theirs, with nothing left to press. Found by the review of the submit
+       fix, which had covered the write and left the read that must succeed
+       before any edit can be saved. */
+    const editAt = src.indexOf('freshClaims(user).then');
+    const readAt = src.indexOf('.doc(EDIT_ID).get()');
+    ok(editAt !== -1 && readAt !== -1 && editAt < readAt,
+      `${where} re-mints the token before the edit-load READ too`);
+    const refused = /function sayEditRefused\(\) \{[\s\S]*?\n  \}/.exec(src);
+    ok(refused, `${where} and answers a refused edit load by asking why`);
+    ok(refused && /needsVerification\(\)/.test(refused[0])
+              && /openVerifyPanel\(\)/.test(refused[0]),
+      `${where} naming an unconfirmed address and opening the card that fixes it`);
+    ok(refused && /belongs to a different account/.test(refused[0]),
+      `${where} and saying whose it is only when that is what it is`);
+    ok(!/not allowed to edit this/.test(src),
+      `${where} and never tells an owner their own ${thing} is not theirs`);
+
+    /* --- every field the form WRITES is sliced under its rule bound ------
+
+       `authEmail` was the one create-path field handed straight from the Auth
+       record against str('authEmail', 200): a longer address is refused for
+       ever, and no retry could clear it. It is in MAX now, so the bound is
+       stated where every other field states it. */
+    const maxTable = /var MAX = \{([\s\S]*?)\}/.exec(src);
+    const maxAuth = maxTable && /authEmail:\s*(\d+)/.exec(maxTable[1]);
+    ok(maxAuth, `${where} MAX states a bound for authEmail`);
+    const ruleBlock = new RegExp(`match /${collection}/\\{id\\} \\{[\\s\\S]*?\\n    \\}`)
+      .exec(rules);
+    const ruleAuth = ruleBlock && /str\('authEmail',\s*(\d+)\)/.exec(ruleBlock[0]);
+    ok(ruleAuth, `${collection}: the rules bound authEmail`);
+    ok(maxAuth && ruleAuth && Number(maxAuth[1]) <= Number(ruleAuth[1]),
+      `${where} and the form's bound (${maxAuth ? maxAuth[1] : '?'}) is within the rule's (${ruleAuth ? ruleAuth[1] : '?'})`);
+    ok(/doc\.authEmail = String\(user\.email \|\| ''\)\.slice\(0, MAX\.authEmail\)/.test(src),
+      `${where} and writes it through that bound, never unsliced`);
+
+    /* --- AND THE UPLOAD IS REFUSED FIRST, so it asks too -----------------
+
+       The Storage rules gate an upload on the same verified(), so a stale or
+       unconfirmed claim refuses the FILE one branch above the row's own. That
+       branch used to answer with the file's type, its size and the storage
+       rules: three things to check when the file is fine. Found by the review
+       of the submit fix, which had left the branch it sits above. */
+    if (src.indexOf("storage/unauthorized") !== -1) {
+      ok(/'storage\/unauthorized'\) \{\s*sayFileRefused\(\);/.test(src),
+        `${where} a refused upload asks why rather than blaming the file`);
+      const fileAsks = /function sayFileRefused\(\) \{[\s\S]*?\n  \}/.exec(src);
+      ok(fileAsks && /freshClaims\(\)/.test(fileAsks[0])
+                  && /needsVerification\(\)/.test(fileAsks[0])
+                  && /openVerifyPanel\(\)/.test(fileAsks[0]),
+        `${where} through the same reload, question and card as a refused ${thing}`);
+      ok(fileAsks && /under 15 MB/.test(fileAsks[0]),
+        `${where} keeping the file's real constraints for the branch they answer`);
+      ok(!/storage rules must be published/.test(src),
+        `${where} and no longer blames the storage rules either`);
+    }
   }
 }
 
@@ -18549,8 +18678,16 @@ async function testSweep20260906() {
     ok(formAt > 0 && html.indexOf('id="oa-msg"') > formAt && html.indexOf('id="oa-msg"') < formEnd
        && html.indexOf('id="oa-msg-out"') > formEnd,
       'sweep: ' + page + ' carries a message host OUTSIDE the form, beside the one inside it');
+    /* The permission-denied branch became sayEditRefused() on 2026-09-17:
+       reading a row is isOwner() -> verified(), so a STALE TOKEN refuses the
+       owner their own row, and this branch answered that by telling them it
+       was not theirs and hiding the form. The PROPERTY this pin protects is
+       unchanged and is what it now asserts: both failures speak from OUTSIDE
+       the form, never into the #oa-msg the form takes with it when it goes. */
+    const refusedFn = /function sayEditRefused\(\) \{[\s\S]*?\n  \}/.exec(src);
     ok(/function sayOutside\(msg\)/.test(src) && src.includes("sayOutside('" + gone + "')")
-       && /sayOutside\(err && err\.code === 'permission-denied'/.test(src),
+       && /if \(err && err\.code === 'permission-denied'\) \{\s*sayEditRefused\(\);/.test(src)
+       && refusedFn && refusedFn[0].includes('sayOutside(') && !refusedFn[0].includes("say('"),
       'sweep: ' + js + ': both edit-load failures speak through it before the form goes');
   }
 
@@ -20699,9 +20836,13 @@ async function testForum() {
     'the form\'s own message really is inside the form — which is the trap');
   ok(candPage.indexOf('id="oa-msg-out"') > formEnd,
     'and there is a message OUTSIDE it, for what is said once the form has gone');
+  /* the 2026-09-17 shape: see the same pin in the sweep block above */
+  const candRefused = /function sayEditRefused\(\) \{[\s\S]*?\n  \}/.exec(candForm);
   ok(/function sayOutside\(msg\)/.test(candForm)
      && /sayOutside\('That profile no longer exists\.'\)/.test(candForm)
-     && /sayOutside\(err && err\.code === 'permission-denied'/.test(candForm),
+     && /if \(err && err\.code === 'permission-denied'\) \{\s*sayEditRefused\(\);/.test(candForm)
+     && candRefused && candRefused[0].includes('sayOutside(')
+     && !candRefused[0].includes("say('"),
     'oa-candidateform.js: both edit-load failures speak through it');
 
   /* AND REMOVE MUST NOT DESTROY THE CV IT WAS NEVER ASKED ABOUT. fill() puts
@@ -21515,7 +21656,14 @@ async function testRegistrationFields() {
 
   /* --- and NOTHING here needs a rules deploy ---------------------------- */
   const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
-  ok(/function str\(field, maxLen\) \{\s*return !\(field in request\.resource\.data\)/.test(rules),
+  /* Re-expressed on 2026-09-17, when str() became ONE map lookup instead of
+     four to get the ruleset back under Firestore's 1000-expression budget.
+     The property is unchanged and is what is asserted: the lookup carries a
+     DEFAULT, so an absent field passes and a box the browser compels still
+     needs no rule of its own. */
+  const strFn = /function str\(field, maxLen\) \{[\s\S]*?\n    \}/.exec(rules);
+  ok(strFn && /request\.resource\.data\.get\(field, ''\)/.test(strFn[0])
+           && !/field in request\.resource\.data/.test(strFn[0]),
     'rules: str() makes a field optional BY PRESENCE, so a browser-side requirement needs no rule');
   ok(/str\('affiliation', 300\)/.test(rules),
     'rules: the affiliation is still bounded and still optional in profileShape — a profile written before the rule ' +

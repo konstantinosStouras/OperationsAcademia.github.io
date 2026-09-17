@@ -35,7 +35,11 @@
   var MAX = {
     institution: 160, department: 220, school: 160, unit: 160, country: 60, applyByNote: 300,
     comments: 1200, postedAtUrl: 500, adUrl: 500,
-    firstName: 80, lastName: 80, email: 160, chairName: 120, chairEmail: 160, note: 1200
+    firstName: 80, lastName: 80, email: 160, chairName: 120, chairEmail: 160, note: 1200,
+    /* the signed-in account's own address, which the form does not ask for
+       but does WRITE: str('authEmail', 200) in the rules refuses a longer
+       one, and it is the one create field that used to go out unsliced. */
+    authEmail: 160
   };
 
   function $(id) { return document.getElementById(id); }
@@ -51,6 +55,57 @@
     return OAAccounts.freshClaims
       ? OAAccounts.freshClaims(user)
       : Promise.resolve();
+  }
+
+  /** A REFUSED UPLOAD NAMES NO CAUSE THIS PAGE CANNOT KNOW EITHER.
+
+      The Storage rules gate an upload on the same `verified()` the posting
+      itself is gated on, so a stale or unconfirmed claim refuses the FILE
+      first, one branch above the posting's own. This used to answer that
+      with the file's type, its size and the storage rules: three things to
+      check when the file is perfectly fine, and not one of them the reason.
+      So it asks, exactly as sayRefused does, and keeps the file's real
+      constraints for the branch where they are the likely answer. */
+  function sayFileRefused() {
+    say('The file was refused — checking why…');
+    freshClaims().then(function () {
+      if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
+        say('Your e-mail address has not been confirmed yet, so the site could not ' +
+            'accept the file. Press the link in the message from Operations Academia ' +
+            '— or ask for a new one on the card that has just opened — and then press ' +
+            'Send again. Nothing you have typed has been lost.', 'err');
+        if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
+        return;
+      }
+      say('The file was refused. It must be a PDF or Word file under 15 MB. If it is, remove it and send the posting with a link to the advert instead, ' +
+          'or tell us through the Feedback page and we will attach it for you. ' +
+          'Nothing you have typed has been lost.', 'err');
+    });
+  }
+
+  /** A REFUSED EDIT LOAD NAMES NO CAUSE THIS PAGE CANNOT KNOW EITHER.
+
+      `allow read` on a posting is isOwner(), which is verified(), which
+      reads `email_verified` off the ID TOKEN — the same cached claim the
+      submit path above guards against. So a stale token refuses the OWNER
+      their own posting, and this branch used to answer that by telling them
+      "You are not allowed to edit this posting" and taking the form away:
+      the site telling the person who filed it that it is not theirs, with
+      nothing left on the page to press. The token has been re-minted before
+      the read by the time we reach here, so needsVerification() is
+      Firebase's own answer and the two real cases can be told apart. */
+  function sayEditRefused() {
+    if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
+      sayOutside('Your e-mail address has not been confirmed yet, so the site could not ' +
+                 'open your posting. Press the link in the message from Operations ' +
+                 'Academia — or ask for a new one on the card that has just opened — ' +
+                 'and then reload this page.');
+      if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
+    } else {
+      sayOutside('This posting belongs to a different account. If it is yours, sign in ' +
+                 'with the account you filed it from and open it again from My postings.');
+    }
+    show($('oa-job-form'), false);
   }
 
   /** A REFUSED POSTING NAMES NO CAUSE THIS PAGE CANNOT KNOW.
@@ -78,6 +133,21 @@
   function sayRefused() {
     say('The site could not accept the posting — checking why…');
     freshClaims().then(function () {
+      /* A TERMINAL auth failure is the one refusal no retry can clear.
+         freshClaims is best effort and swallows its own errors, so an account
+         whose Auth record has gone — a deletion that has been carried out, or
+         the duplicate side of a merge — reaches here with no session at all,
+         and "press Send once more" would be an instruction to keep pressing
+         for ever. Asked before the address, because an account that is gone
+         has no address to confirm. */
+      if (OAAccounts.user && !OAAccounts.user()
+          && !(OAAccounts.needsVerification && OAAccounts.needsVerification())) {
+        say('You are no longer signed in, so the site could not accept the posting. ' +
+            'Sign in again and press Send once more — nothing you have typed has ' +
+            'been lost.', 'err');
+        if (OAAccounts.openAuth) OAAccounts.openAuth();
+        return;
+      }
       if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
         say('Your e-mail address has not been confirmed yet, so the site could not ' +
             'accept the posting. Press the link in the message from Operations ' +
@@ -494,7 +564,14 @@
        characteristics and the chair pair below. Never under EDIT_ID: a
        posting that predates the requirement — every crawled mirror among
        them — must stay correctable without inventing a chair or a link its
-       poster never gave. enterEditMode() lifts the * marks to match. */
+       poster never gave. enterEditMode() lifts the * marks to match.
+
+       The CHAIR PAIR is one step firmer than this link and the
+       characteristics: an edit that already names a chair is still held to
+       it (EDIT_HAD), because not inventing one is a different thing from
+       deleting one. The link is the directory's rather than the posting's
+       and a characteristic is a fact about the school, so neither carries
+       the same argument. */
     var deptUrlEl = $('f-deptUrl');
     if (deptUrlEl) {
       var du = httpUrl(deptUrlEl.value);
@@ -516,9 +593,12 @@
       if (!out.characteristics.length && !firstBad) firstBad = $('f-chars');
     }
 
+    /* …and the pair is ALSO required of an edit that already names one
+       (EDIT_HAD, set by fill() from the stored document): the exemption is
+       for a posting nobody gave a chair, never a licence to delete one. */
     var chairNameEl = $('f-chairName');
     var chairName = String(chairNameEl.value || '').trim();
-    if (!EDIT_ID) {
+    if (!EDIT_ID || EDIT_HAD.chairName) {
       setError(chairNameEl, chairName
         ? '' : 'Please name the area coordinator or department chair.');
       if (!chairName && !firstBad) firstBad = chairNameEl;
@@ -528,7 +608,7 @@
     if (chairEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(chairEmail)) {
       setError($('f-chairEmail'), 'That does not look like an e-mail address.');
       if (!firstBad) firstBad = $('f-chairEmail');
-    } else if (!chairEmail && !EDIT_ID) {
+    } else if (!chairEmail && (!EDIT_ID || EDIT_HAD.chairEmail)) {
       setError($('f-chairEmail'), "Please give their e-mail address. It is never published.");
       if (!firstBad) firstBad = $('f-chairEmail');
     } else {
@@ -803,6 +883,31 @@
   })();
   var EDIT_REF = '';
 
+  /* What the STORED posting already named. An edit may not ERASE the chair
+     pair (owner, 2026-09-17); the new-posting rule below is keyed on these
+     rather than on the boxes, which are exactly what the poster may have
+     just cleared. Recorded by fill(), so before the document has loaded
+     nothing is claimed either way. */
+  var EDIT_HAD = { chairName: false, chairEmail: false };
+
+  /** Put back the `required` attribute and the * mark enterEditMode() lifted,
+      for one field an edit turns out not to be allowed to empty after all.
+      A no-op where the mark is still there, so it cannot double one up on a
+      new posting. */
+  function remark(id) {
+    var el = $(id);
+    if (!el) return;
+    el.setAttribute('required', 'required');
+    var lab = document.querySelector('label[for="' + id + '"]');
+    if (!lab || lab.querySelector('.oa-req')) return;
+    var star = document.createElement('span');
+    star.className = 'oa-req oa-req-new';
+    star.setAttribute('aria-hidden', 'true');   // `required` is what a screen
+    star.textContent = '*';                     // reader is told; this is ink
+    if (!/\s$/.test(lab.textContent)) lab.appendChild(document.createTextNode(' '));
+    lab.appendChild(star);
+  }
+
   /** Put a loaded document back into the form. The inverse of collect(). */
   function fill(v) {
     function set(id, value) { var el = $(id); if (el) el.value = value == null ? '' : value; }
@@ -853,6 +958,25 @@
     paintYearNote();                 // the posting's own season, never today's
 
     EDIT_REF = v.ref || '';
+
+    /* AN EDIT MAY NOT ERASE THE CHAIR PAIR (owner, 2026-09-17). The pair is
+       mandatory on a new posting and enterEditMode() lifts the rule so that a
+       posting which never named one — every crawled sheet mirror among them,
+       which is what keeps the maintainer's hand-over saveable — stays
+       correctable. That reason covers a chair NOBODY GAVE and not one the
+       poster is deleting, so the requirement follows the STORED value: a
+       posting that names a chair goes on naming one.
+
+       The mark follows the requirement, because enterEditMode() removed all
+       six on the reasoning that "a * beside a field an edit may leave empty is
+       a statement in the document that is not true" — and the converse is the
+       same rule: a field an edit may NOT leave empty has to carry one. It is
+       put back HERE, with the value it guards, rather than in enterEditMode(),
+       which runs before the document has been read and could only guess. */
+    EDIT_HAD.chairName = !!String(v.chairName || '').trim();
+    EDIT_HAD.chairEmail = !!String(v.chairEmail || '').trim();
+    if (EDIT_HAD.chairName) remark('f-chairName');
+    if (EDIT_HAD.chairEmail) remark('f-chairEmail');
 
     /* Keep the derived department line and its preview in step, and let the
        name fields settle into the spelling the SITE publishes — the same
@@ -913,7 +1037,12 @@
        mandatory for a NEW posting only — collect() already skips the rule
        under EDIT_ID, and the marks must say the same thing: a * beside a
        field an edit may leave empty is a statement in the document that is
-       not true. */
+       not true.
+
+       All six come off HERE, before the posting has been read, because that
+       is the only honest answer while nothing is known about it. fill() puts
+       the chair pair's back if the stored posting names one — an edit may not
+       ERASE that (remark(), and EDIT_HAD in collect()). */
     Array.prototype.forEach.call(document.querySelectorAll('.oa-req-new'),
       function (n) { n.parentNode.removeChild(n); });
     ['f-school', 'f-unit', 'f-deptUrl', 'f-chairName', 'f-chairEmail'].forEach(function (id) {
@@ -929,8 +1058,12 @@
         'posting date does not change.</p>';
     }
 
-    OAAccounts.whenSignedIn(function () {
-      OAFB.ready().then(function (fb) {
+    OAAccounts.whenSignedIn(function (user) {
+      /* THE TOKEN THE RULES READ, FIRST OF ALL — see sayEditRefused below:
+         reading a posting is isOwner(), so a stale claim refuses its own owner. */
+      freshClaims(user).then(function () {
+        return OAFB.ready();
+      }).then(function (fb) {
         return fb.firestore().collection(OAFB.col.jobSubmissions).doc(EDIT_ID).get();
       }).then(function (snap) {
         if (!snap.exists) {
@@ -940,10 +1073,12 @@
         }
         fill(snap.data() || {});
       }).catch(function (err) {
-        sayOutside(err && err.code === 'permission-denied'
-          ? 'You are not allowed to edit this posting.'
-          : 'We could not load that posting. Please try again.');
-        show($('oa-job-form'), false);
+        if (err && err.code === 'permission-denied') {
+          sayEditRefused();
+        } else {
+          sayOutside('We could not load that posting. Please try again.');
+          show($('oa-job-form'), false);
+        }
         if (window.console) console.error('edit:', err);
       });
     });
@@ -1153,7 +1288,10 @@
 
           doc.ref = makeRef();
           doc.uid = user.uid;
-          doc.authEmail = user.email || '';
+          /* SLICED like every other field: str('authEmail', 200) in the rules
+             refuses a longer one, and an unsliced value is the one create-path
+             field whose refusal no retry could ever clear. */
+          doc.authEmail = String(user.email || '').slice(0, MAX.authEmail);
           doc.status = 'queued';       // the rules pin this; the build publishes it
           doc.source = 'oa-form';
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
@@ -1234,8 +1372,7 @@
                 'firebasestorage.googleapis.com. Your posting was NOT sent — remove the ' +
                 'file to post with a link instead, or try again once storage is up.', 'err');
           } else if (code === 'storage/unauthorized') {
-            say('The file was refused — it must be a PDF or Word file under 15 MB, ' +
-                'and the site\u2019s storage rules must be published.', 'err');
+            sayFileRefused();
           } else if (code === 'permission-denied') {
             if (EDIT_ID) say('You are not allowed to change this posting.', 'err');
             else sayRefused();

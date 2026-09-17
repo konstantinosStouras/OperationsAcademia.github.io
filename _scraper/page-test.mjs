@@ -1453,8 +1453,29 @@ for (const [name, expect] of [
       const k = Object.keys(d).find((p) => p.startsWith('jobSubmissions/'));
       return d[k];
     });
-    return { ref, doc, noYearField, yearNote, refused };
+    /* THE TOKEN THE RULES READ IS RE-MINTED BEFORE THE WRITE. Source regexes
+       cannot tell the fix from a rewrite that keeps the words and loses the
+       behaviour, so the order is measured here, off the shim's own operation
+       log, the way the account-deletion block measures the same thing. */
+    const order = await q.evaluate(() => {
+      const seq = window.__fb.log.map((e) => e.op + ' ' + e.path);
+      return {
+        token: seq.findIndex((l) => l.indexOf('getIdToken') === 0 && l.indexOf(':force') !== -1),
+        reload: seq.findIndex((l) => l.indexOf('reload') === 0),
+        write: seq.findIndex((l) => l.indexOf('set jobSubmissions/') === 0),
+      };
+    });
+    return { ref, doc, noYearField, yearNote, refused, order };
   });
+  ok(posted.order.token >= 0,
+    'v3 post-a-job: the submit forces a fresh ID token (the claim the rules read)');
+  ok(posted.order.write >= 0 && posted.order.token < posted.order.write,
+    'v3 post-a-job: …BEFORE the posting is written, which is the whole of the ' +
+    'stale-token fix: reverting it leaves the write going out under whatever ' +
+    'claim the SDK had cached');
+  ok(posted.order.reload >= 0 && posted.order.reload < posted.order.token,
+    'v3 post-a-job: …and reloads the account first, so needsVerification() ' +
+    'answers from the server if the write is refused anyway');
   eq(posted.refused.done, true,
     'v3 post-a-job: a NEW posting without the mandatory school, department, ' +
     'department page, characteristic and chair pair is refused');
@@ -1730,6 +1751,66 @@ for (const [name, expect] of [
   eq(edited.doc.status, 'queued', 'and the build re-publishes it');
   eq(edited.doc.year, 2026,
     'correcting a posting KEEPS its own market year — a typo fix must not move it to this season');
+
+  /* -- …and an edit may not ERASE a chair the posting already names --------
+     (owner, 2026-09-17). j9 above is the posting that never had one and still
+     saves; j8 is the one that has one, and for it the requirement — and the *
+     mark that has to agree with it — come back. */
+
+  const chairSeed = {
+    user: keptUser,
+    docs: [KEPT_PROFILE, { path: 'jobSubmissions/j8', data: {
+      uid: KEPT, status: 'published', ref: 'OA-JOB-260810-FFFF', institution: 'Chair U',
+      school: 'School X', unit: 'Unit Y', department: 'School X, Unit Y', country: 'USA',
+      type: 'University', levels: ['Post-Doc'], applyByDate: '2026-12-01', untilFilled: false,
+      firstName: 'A', lastName: 'B', email: 'a@b.edu',
+      chairName: 'Dora Chair', chairEmail: 'dora@chair.edu',
+      year: 2026, createdAt: '2026-08-10T00:00:00.000Z',
+    } }],
+  };
+  const keptChair = await onSite('post-a-job?edit=j8', chairSeed, async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.waitForFunction(() => document.getElementById('f-chairName').value !== '',
+      null, { timeout: 8000 });
+    const marked = await q.evaluate(() => ({
+      marks: document.querySelectorAll('.oa-req-new').length,
+      nameReq: document.getElementById('f-chairName').required,
+      mailReq: document.getElementById('f-chairEmail').required,
+      // the mark is drawn where the six ship it, inside the label
+      inLabel: !!document.querySelector('label[for="f-chairName"] .oa-req-new'),
+    }));
+    // clear it and try to save
+    await q.fill('#f-chairName', '');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.click('#oa-submit');
+    const refused = await q.evaluate(() => ({
+      done: document.getElementById('oa-done').hidden,
+      err: (document.querySelector('#f-chairName')
+        .closest('.oa-field').querySelector('.oa-err') || {}).textContent || '',
+      stored: (window.__fb.dump()['jobSubmissions/j8'] || {}).chairName,
+    }));
+    // put it back and the correction saves
+    await q.fill('#f-chairName', 'Dora Chair-Smith');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    return { marked, refused,
+      doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/j8']) };
+  });
+  eq(keptChair.marked, { marks: 2, nameReq: true, mailReq: true, inLabel: true },
+    'v3 edit: a posting that NAMES a chair gets the two marks and the two required ' +
+    'attributes back — exactly the pair, never the department page or the ' +
+    'characteristics, which stay exempt');
+  eq(keptChair.refused.done, true,
+    'v3 edit: clearing the chair name is refused — the exemption is for a posting ' +
+    'nobody gave a chair, not a licence to delete one');
+  ok(/area coordinator or department chair/i.test(keptChair.refused.err),
+    'v3 edit: …with the error drawn on the field');
+  eq(keptChair.refused.stored, 'Dora Chair',
+    'v3 edit: …and nothing is written — the stored chair is untouched by the refusal');
+  eq(keptChair.doc.chairName, 'Dora Chair-Smith',
+    'v3 edit: correcting the chair still saves');
+  eq(keptChair.doc.chairEmail, 'dora@chair.edu', 'and their e-mail rides along');
 
   /* -- take one down from My postings -------------------------------------- */
 
