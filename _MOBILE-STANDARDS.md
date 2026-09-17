@@ -160,6 +160,11 @@ marked global.
     each button is a 42px target, the row WRAPS to a second row rather than
     shrinking them, and the switch for the tips row under it is a full-width
     42px row of its own; on a tablet the row still fits its box on one line.
+    THAT ROW IS THE SITE'S, not the forum's, since 2026-09-17: it lives in
+    `assets/oa-editor.js` + `assets/oa-editor.css` and stands over the job
+    posting's Comments box and the review card's too, so the same three
+    numbers hold wherever it is mounted and are measured on the posting form
+    at 390px as well.
     `page-test.mjs` measures the forum's list,
     one thread, the open compose and the ask form with its menu open at 390px
     in its own forum block: the page

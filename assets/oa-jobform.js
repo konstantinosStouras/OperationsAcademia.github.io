@@ -633,6 +633,9 @@
       if (school) school.dispatchEvent(new Event('change', { bubbles: true }));
       var uf = $('f-untilFilled');
       if (uf && uf.checked) uf.dispatchEvent(new Event('change', { bubbles: true }));
+      /* an unsent draft's Comments are set the same way an edit's are, so the
+         preview is asked for rather than left blank over marked-up words */
+      if (window.OAEditor) OAEditor.refresh($('f-comments'));
     } catch (e) { /* a corrupt draft is discarded by the next save */ }
   }
 
@@ -883,6 +886,12 @@
        spelling, and it settles like any other. */
     var schoolEl = $('f-school');
     if (schoolEl) schoolEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+    /* the Comments preview, which is painted from an `input` event and has
+       had none: `set` above assigns the value. Asked of the module rather
+       than faked with an event, which would also wake the draft saver and
+       store a draft of a posting the poster has only opened. */
+    if (window.OAEditor) OAEditor.refresh($('f-comments'));
   }
 
   function enterEditMode() {
@@ -940,6 +949,31 @@
     });
   }
 
+  /* -------------------------------------- the Comments box, with a toolbar
+
+     Owner, 2026-09-17, of a posting's Comments cell on the jobs page: "the
+     'comments' part of a job posting looks very bad. We should allow users to
+     use boldface, italics, links and whatever. Build a menu for that part
+     within the job posting step, similar to the new question's 'body' we have
+     in the OA forum."
+
+     SIMILAR TO, so THE SAME: assets/oa-editor.js is the forum's own editor,
+     lifted out of assets/oa-forum.js in that change, and what its buttons
+     write is the Markdown subset assets/oa-forum-markup.js reads -- which is
+     what the card draws the cell by (OAJobNav.commentsRow). A second toolbar
+     here would be a second dialect, disagreeing with the card the day either
+     is touched.
+
+     WITHOUT THE MODULE the box is the plain textarea the page ships and the
+     posting still sends: the marks are text either way, so a poster whose
+     scripts failed loses the buttons and nothing else. This is the only field
+     on the form that takes prose -- the deadline note is one line, and the
+     private note to the maintainer is never drawn as anything. */
+  function wireComments() {
+    var ta = $('f-comments');
+    if (ta && window.OAEditor) OAEditor.attach(ta);
+  }
+
   function boot() {
     /* FIRST PAINT, before Firebase exists. Everything on this page used to
        stay hidden until the SDK had downloaded from gstatic AND the session
@@ -957,6 +991,7 @@
     show($('oa-needauth'), hinted !== 'in');
 
     wireVocab();
+    wireComments();
     wireAdFile();
     wireDraft();
     enterEditMode();

@@ -1,0 +1,248 @@
+/* ---------------------------------------------------------------------------
+   Operations Academia: the formatting toolbar and the prose it writes.
+
+   The chrome of assets/oa-editor.js, and the ONE look of member-written
+   prose on this site (`.oa-prose`, what assets/oa-forum-markup.js draws a
+   text as). It was inside assets/oa-forum.css, named for that page; the job
+   posting's Comments cell reads by the same module now (owner, 2026-09-17),
+   so a second copy of these rules beside the jobs page would be two looks
+   for one thing, drifting the day either is touched.
+
+   Loaded by forum.html, post-a-job.html, admin-area.html, jobs.html,
+   index.html and previous-markets.html, BEFORE each page's own stylesheet,
+   so a page that has something of its own to say about the prose inside its
+   cards says it at a higher specificity rather than on load order (the trap
+   this repository already records for the Leaflet attribution box and the
+   sponsor rail). Every colour is a token, so both themes are covered.
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------- what the markup draws
+
+   A heading inside a text steps down from the page's own (an h3 at most),
+   lists keep their indent, a quoted passage takes a rail in the muted ink,
+   code sits on the third ground in a monospace face, and a rule is a
+   hairline. `overflow-wrap: anywhere` because an unbroken address has no
+   whitespace to wrap at and would take the page sideways (rule 12 of
+   _MOBILE-STANDARDS.md). */
+.oa-prose {
+  color: var(--ink);
+  font-size: 15.5px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.oa-prose p { margin: 0 0 12px; }
+.oa-prose p:last-child { margin-bottom: 0; }
+
+.oa-prose h3, .oa-prose h4, .oa-prose h5, .oa-prose h6 {
+  margin: 18px 0 8px;
+  color: var(--ink);
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.oa-prose h3 { font-size: 19px; }
+.oa-prose h4 { font-size: 17px; }
+.oa-prose h5 { font-size: 15.5px; }
+.oa-prose h6 { font-size: 15px; color: var(--ink-2); }
+.oa-prose > :first-child { margin-top: 0; }
+.oa-prose > :last-child { margin-bottom: 0; }
+.oa-prose ul, .oa-prose ol { margin: 0 0 12px; padding-left: 26px; }
+.oa-prose li + li { margin-top: 4px; }
+.oa-prose li > p { margin-bottom: 6px; }
+.oa-prose li > ul, .oa-prose li > ol { margin: 4px 0 0; }
+
+.oa-prose blockquote {
+  margin: 0 0 12px;
+  padding: 4px 14px;
+  border-left: 3px solid var(--line);
+  color: var(--ink-2);
+}
+
+.oa-prose blockquote > :last-child { margin-bottom: 0; }
+
+.oa-prose code {
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--bg-3);
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.oa-prose pre {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg-3);
+  color: var(--ink);
+  overflow: auto;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.oa-prose pre code { padding: 0; border-radius: 0; background: transparent; font-size: inherit; }
+.oa-prose hr { margin: 14px 0; border: 0; border-top: 1px solid var(--line); }
+
+/* A LINK INSIDE RUNNING PROSE HAS TO LOOK LIKE ONE (2026-09-17, measured on
+   a posting's Comments cell: two web addresses drawn in the ink of the words
+   around them, indistinguishable from the sentence they sat in). The site
+   draws a link with no underline and reveals it on hover (`body.v3 a`),
+   which reads well where the link IS the row -- a card's File link, its
+   Posted online at, its posting id, all of them a cell whose label says what
+   it is -- and not at all in the middle of a paragraph. `[href]` is what
+   carries the rule past that one on SPECIFICITY ((0,2,1) against (0,1,2))
+   rather than on which stylesheet a page links last, and every link this
+   prose can hold has an address: the markup module emits no other kind. */
+.oa-prose a[href] { text-decoration: underline; }
+
+/* ------------------------------------------------------------- the editor */
+
+.oa-editor {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.oa-editor textarea {
+  display: block;
+  width: 100%;
+  min-height: 140px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+/* THE RING IS THE BRAND, NEVER THE WASH. `outline: none` takes the site-wide
+   focus ring away, so whatever replaces it IS the indicator, and --brand-soft
+   on a white input measures 1.19:1 against a 3:1 floor: a keyboard reader had
+   no way to tell the box was focused. --brand is 10.16:1 on the same ground. */
+.oa-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand); }
+
+/* THE FORMATTING TOOLBAR (owner, 2026-09-08: "add that standard editing
+   menu when someone composes a new question", with the Stack Exchange
+   toolbar beside it): a row of icon buttons over every box a member writes
+   prose in, in four groups with a hairline between, and at its right end the
+   switch for the tips row under it. The icons are inline SVGs drawn in
+   currentColor, so they take the theme's ink; every colour here is a token.
+   On a phone the buttons grow to 42px targets and wrap to a second row
+   (rule 13 in _MOBILE-STANDARDS.md). */
+.oa-editor-tb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--bg-3);
+  color: var(--ink-2);
+}
+
+.oa-editor-group {
+  display: inline-flex;
+  gap: 2px;
+  padding-right: 8px;
+  border-right: 1px solid var(--line-soft);
+}
+
+.oa-editor-group:last-of-type { padding-right: 0; border-right: 0; }
+
+.oa-editor-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.oa-editor-btn svg { width: 18px; height: 18px; }
+.oa-editor-btn:hover { background-color: var(--bg-2); border-color: var(--line); color: var(--ink); }
+.oa-editor-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+.oa-editor-tipsbtn {
+  margin-left: auto;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--brand);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.oa-editor-tipsbtn:hover { background-color: var(--bg-2); border-color: var(--line); }
+.oa-editor-tipsbtn:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+/* the tips row under the toolbar, saying what each mark writes: the marks
+   in code, then how a paragraph and a bare address read. Put away by the
+   toolbar's own switch (the `hidden` attribute, which the site's reset
+   makes win over display: flex). */
+.oa-editor-tips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--bg-3);
+  color: var(--mut);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.oa-editor-tips code {
+  padding: 0 4px;
+  border-radius: 5px;
+  background: var(--bg-2);
+  color: var(--ink-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+/* the preview under the box: the words as the page will draw them, shown
+   once they carry a mark and put away while they do not */
+.oa-editor-preview {
+  padding: 12px 16px 14px;
+  border-top: 1px dashed var(--line);
+  background: var(--bg-2);
+  color: var(--ink);
+}
+
+.oa-editor-preview-h {
+  margin: 0 0 8px;
+  color: var(--mut);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  /* the formatting toolbar's buttons are controls (rule 13): 42px targets,
+     wrapping to a second row, and the tips switch a row of its own */
+  .oa-editor-tb { padding: 4px 6px; gap: 2px 6px; }
+  .oa-editor-btn { width: 42px; height: 42px; }
+  .oa-editor-tipsbtn { width: 100%; min-height: 42px; margin-left: 0; text-align: left; }
+}

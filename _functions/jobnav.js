@@ -195,6 +195,51 @@
     };
   }
 
+  /* --------------------------------------- the COMMENTS row, on the card
+
+     Owner, 2026-09-17, of a Notre Dame posting whose Comments cell ran to
+     fourteen unbroken lines of a table cell: "the 'comments' part of a job
+     posting looks very bad. We should allow users to use boldface, italics,
+     links and whatever."
+
+     The words are the poster's own prose -- the one field on a posting that
+     is a paragraph rather than a name or a date -- and until now the card
+     drew them as ONE run of text: every blank line the poster typed
+     collapsed, every list ran together, and a web address they had written
+     out sat there as dead characters. They are read by
+     assets/oa-forum-markup.js now, the site's one reading of member-written
+     prose, which is also what assets/oa-editor.js's toolbar WRITES in the
+     posting form -- so the two cannot part company about what a mark means.
+
+     IT IS SAFE BY CONSTRUCTION, which is why this may be `html` at all. That
+     module parses the words into a tree and escapes every character at
+     EMISSION: nothing it emits can close an attribute or open a tag, an
+     address is http, https or www and nothing else (so no `javascript:` href
+     can be made), and it draws no image. A comment is prose somebody typed,
+     so that property is the whole argument.
+
+     WITHOUT THE MODULE the words are drawn as WORDS -- `value`, which the
+     engine sets as text -- which is exactly what the card did before today.
+     That is not the guessing fallback assets/oa-sponsors.js was corrected
+     for: there a private fold answered a question it could not answer and was
+     silently wrong about three spellings, where this is the same words in a
+     plainer shape, and nothing about it can be wrong. The load order is
+     pinned on all three pages regardless.
+
+     THE LABEL DOES NOT MOVE. "Comments on Job Posting" is what the three
+     lists have always said, and it is what a locked card's blurred strip
+     previews (OAList's lockPreview reads the labels alone), so a reader who
+     has not registered sees the same strip as before. */
+  var COMMENTS_LABEL = 'Comments on Job Posting';
+
+  function commentsRow(row) {
+    var text = String((row && row.comments) || '');
+    if (!text.trim()) return null;
+    var mk = (typeof window !== 'undefined' && window.OAForumMarkup) || null;
+    if (!mk) return { label: COMMENTS_LABEL, value: text };
+    return { label: COMMENTS_LABEL, html: '<div class="oa-prose">' + mk.html(text) + '</div>' };
+  }
+
   return {
     MARKET_ROLL_MONTH: MARKET_ROLL_MONTH,
     FOCUS_PARAM: FOCUS_PARAM,
@@ -210,6 +255,8 @@
     hrefFor: hrefFor,
     otherPage: otherPage,
     REF_LABEL: REF_LABEL,
-    refRow: refRow
+    refRow: refRow,
+    COMMENTS_LABEL: COMMENTS_LABEL,
+    commentsRow: commentsRow
   };
 }));

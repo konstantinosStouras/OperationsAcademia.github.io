@@ -657,6 +657,27 @@
 .oa-kv td { color: var(--ink, #333); }
 .oa-kv a { color: var(--brand); text-decoration: underline; }
 
+/* PROSE INSIDE A CARD'S DETAILS (2026-09-17, with the job posting's Comments
+   cell). assets/oa-editor.css is the ONE look of member-written prose and is
+   sized for the box it is typed in -- 15.5px in the site's own ink, which
+   beside a 14px detail cell in --ink-2 would make the one cell that happens
+   to hold prose the loudest thing on the card. Here it takes the cell's own
+   size, ink and rhythm and keeps only its SHAPE: the paragraphs, the lists,
+   the quoted passages, the headings and the rule.
+
+   At (0,2,0) it beats `.oa-prose` (0,1,0) on SPECIFICITY, so it does not
+   matter which of the two stylesheets a page links last -- the trap this
+   repository records for the Leaflet attribution box and the sponsor rail.
+   A heading inside a cell steps down to the cell's own weight for the same
+   reason: 19px in a 14px table is a heading of the CARD, which it is not. */
+.oa-kv .oa-prose { color: inherit; font-size: inherit; line-height: inherit; }
+.oa-kv .oa-prose h3 { font-size: 16px; }
+.oa-kv .oa-prose h4 { font-size: 15px; }
+.oa-kv .oa-prose h5, .oa-kv .oa-prose h6 { font-size: inherit; }
+.oa-kv .oa-prose h3, .oa-kv .oa-prose h4,
+.oa-kv .oa-prose h5, .oa-kv .oa-prose h6 { margin: 14px 0 6px; }
+.oa-kv .oa-prose pre { font-size: 13px; }
+
 .oa-empty {
   padding: 42px 10px;
   text-align: center;

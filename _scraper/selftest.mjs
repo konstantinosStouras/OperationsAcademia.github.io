@@ -16829,6 +16829,262 @@ async function testCandidateStats() {
    one definition and never a private copy of it, and no form still names a
    cause it cannot know. Every read here strips comments first, because the
    paragraphs that record this quote the retired sentence. */
+/* ===========================================================================
+   A JOB POSTING'S COMMENTS ARE PROSE, AND ARE WRITTEN AND READ AS PROSE
+
+   Owner, 2026-09-17, of a crawled Notre Dame posting whose Comments cell ran
+   to fourteen unbroken lines: "the 'comments' part of a job posting looks
+   very bad. We should allow users to use boldface, italics, links and
+   whatever. Build a menu for that part within the job posting step, similar
+   to the new question's 'body' we have in the OA forum."
+
+   SIMILAR TO, so THE SAME. The forum's toolbar moved out of oa-forum.js into
+   assets/oa-editor.js and its chrome into assets/oa-editor.css; the marks it
+   writes are read by assets/oa-forum-markup.js, which is what the card now
+   draws the cell by. What this suite exists to refuse is a SECOND editor or a
+   SECOND reading: either one would be a dialect that disagrees with the card
+   the day it is touched, which is the drift oa-countries.js, oa-schools.js,
+   oa-news.js and oa-jobnav.js were all written to prevent.
+   =========================================================================== */
+async function testJobComments() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  /* every pin that reads a source strips its comments first: the module and
+     the forum both EXPLAIN what they no longer carry, and a scan that could
+     not tell the explanation from the thing would be satisfied by deleting
+     the explanation (the analytics page's "no iframes" trap) */
+  const bare = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  const noDash = (s) => !/—|\\u2014/.test(String(s));
+
+  const ed = await read('assets', 'oa-editor.js');
+  const edBare = bare(ed);
+  const edCssJob = await read('assets', 'oa-editor.css');
+  const forumJs = bare(await read('assets', 'oa-forum.js'));
+  const nav = await read('assets', 'oa-jobnav.js');
+  const form = await read('assets', 'oa-jobform.js');
+  const formBare = bare(form);
+  const pageForm = await read('post-a-job.html');
+  const listCss = await read('assets', 'oa-list.css');
+
+  /* ------------------------------------------------ one editor, one module */
+
+  ok(/root\.OAEditor = factory\(\);/.test(ed) && /module\.exports = factory\(\);/.test(ed),
+    'job comments: the editor is a dual-mode module of its own');
+  const E = require(path.join(HERE, '..', 'assets', 'oa-editor.js'));
+  eq(Object.keys(E).sort(), ['MOD_KEY', 'TIPS', 'TIPS_KEY', 'TOOLS', 'applyTool', 'attach', 'previewHTML',
+    'refresh', 'tipsHTML', 'tipsHidden', 'toolbarHTML', 'wire'].sort(),
+    'job comments: what the module offers');
+
+  /* THE FORUM KEEPS NO COPY. Reverting this is what the whole change is
+     against: the two would then write two dialects of one subset. */
+  for (const needle of ['var TOOLS = [', 'function wrapSel(', 'function prefixLines(', 'function fenceLines(',
+    'function insertLink(', 'function insertRule(', 'function applyTool(', "execCommand('insertText'",
+    'var ICON_BOLD', 'var TIPS_KEY', 'var MOD_KEY']) {
+    ok(!forumJs.includes(needle), `job comments: the forum page carries no "${needle}" of its own`);
+  }
+  ok(/var ED = window\.OAEditor;/.test(forumJs)
+     && /function toolbarHTML\(taId, tipsId\) \{ return ED\.toolbarHTML\(taId, tipsId\); \}/.test(forumJs)
+     && /function tipsHTML\(id\) \{ return ED\.tipsHTML\(id\); \}/.test(forumJs)
+     && /function previewHTML\(id\) \{ return ED\.previewHTML\(id\); \}/.test(forumJs)
+     && /function wireEditor\(box, ta\) \{ return ED\.wire\(box, ta\); \}/.test(forumJs),
+    'job comments: the forum asks the module for all four');
+
+  /* AND THE MODULE KNOWS NOTHING OF THE FORUM'S GUARD. check() refuses an
+     e-mail address, a telephone number and an ORCID iD, which is a rule about
+     an ANONYMOUS room; on a job advertisement that names the department's own
+     page it would be nonsense. The forum wires its guard beside the editor. */
+  for (const needle of ['OAForumGuard', 'OAForumModel', 'guardOf', 'liveGuard', 'BOUNDS']) {
+    ok(!edBare.includes(needle), `job comments: the editor names no ${needle}`);
+  }
+  ok(/var TIPS_KEY = 'oa-editor-tips';/.test(ed),
+    'job comments: the tips row is one preference for the site, not the forum\'s');
+  ok(noDash(ed) && noDash(edCssJob), 'job comments: no em dash in the module or its stylesheet');
+
+  /* ---------------------------------------- the chrome is never hand-copied */
+
+  ok(/function attach\(ta\) \{/.test(ed) && /ta\.getAttribute\('data-oa-editor'\) === 'on'/.test(ed)
+     && /box\.insertAdjacentHTML\('afterbegin', toolbarHTML\(id, tipsId\) \+ tipsHTML\(tipsId\)\);/.test(ed)
+     && /box\.appendChild\(ta\);/.test(ed),
+    'job comments: attach wraps a box the page already ships, once');
+  for (const p of ['post-a-job.html', 'admin-area.html']) {
+    const html = await read(p);
+    ok(!/oa-editor-tb|data-fmt=/.test(html),
+      `job comments: ${p} writes no toolbar markup of its own`);
+  }
+  ok(/function refresh\(ta\) \{/.test(ed) && /paintPreview\(prev, ta\)/.test(ed),
+    'job comments: a box a SCRIPT filled can ask for its preview rather than faking an input event');
+
+  /* ------------------------------------------------------- the posting form */
+
+  ok(/<textarea id="f-comments" name="comments" maxlength="1200" rows="8"\s*\n\s*aria-describedby="f-comments-hint">/.test(pageForm)
+     && /<p class="oa-hint" id="f-comments-hint">/.test(pageForm),
+    'job comments: the box ships plain in the page, described by its own hint');
+  ok(/Use the buttons above the box for bold, italics,\s*\n\s*a link, a list or a heading/.test(pageForm)
+     && /a web\s*\n\s*address becomes a link on the card/.test(pageForm),
+    'job comments: the hint says what the buttons do and what an address becomes');
+  ok(/<link href="assets\/oa-editor\.css" rel="stylesheet">\s*\n\s*<link href="assets\/v3\.css" rel="stylesheet">/.test(pageForm),
+    'job comments: the form links the shared stylesheet before the live design\'s');
+  const formTag = (f) => pageForm.indexOf('<script defer src="assets/' + f + '"></script>');
+  ok(formTag('oa-forum-markup.js') > 0
+     && formTag('oa-forum-markup.js') < formTag('oa-editor.js')
+     && formTag('oa-editor.js') < formTag('oa-jobform.js'),
+    'job comments: the markup module, then the editor, then the form that mounts it');
+  ok(/function wireComments\(\) \{\s*\n\s*var ta = \$\('f-comments'\);\s*\n\s*if \(ta && window\.OAEditor\) OAEditor\.attach\(ta\);/.test(form),
+    'job comments: the form mounts the editor on that one box, and stands down without the module');
+  ok(/wireVocab\(\);\s*\n\s*wireComments\(\);\s*\n\s*wireAdFile\(\);\s*\n\s*wireDraft\(\);\s*\n\s*enterEditMode\(\);/.test(formBare),
+    'job comments: mounted before anything fills the box');
+  eq((formBare.match(/OAEditor\.refresh\(\$\('f-comments'\)\)/g) || []).length, 2,
+    'job comments: the preview is repainted on both roads that fill the box by script -- an edit, and an unsent draft');
+
+  /* --------------------------------------------------- the card reads it */
+
+  ok(/var COMMENTS_LABEL = 'Comments on Job Posting';/.test(nav) && /function commentsRow\(row\) \{/.test(nav)
+     && /commentsRow: commentsRow/.test(nav),
+    'job comments: OAJobNav owns the row, beside refRow');
+  const N = require(path.join(HERE, '..', 'assets', 'oa-jobnav.js'));
+  const MK = require(path.join(HERE, '..', 'assets', 'oa-forum-markup.js'));
+  eq(N.COMMENTS_LABEL, 'Comments on Job Posting',
+    'job comments: the label did not move, so a locked card\'s blurred strip reads as it did');
+  eq(N.commentsRow({ comments: '   ' }), null, 'job comments: an empty comment draws no row');
+  eq(N.commentsRow({}), null, 'job comments: and neither does a posting without one');
+
+  /* WITHOUT THE MODULE the words are drawn as WORDS, which is what the card
+     did before today -- never a guess, so unlike oa-sponsors.js's own lesson
+     there is nothing here that can be wrong. */
+  eq(N.commentsRow({ comments: 'Hello **there**' }),
+    { label: 'Comments on Job Posting', value: 'Hello **there**' },
+    'job comments: no markup module, so the words are shown as text');
+
+  /* WITH IT, through the one reading the toolbar writes for. */
+  const g = global;
+  const had = Object.prototype.hasOwnProperty.call(g, 'window');
+  const before = g.window;
+  g.window = { OAForumMarkup: MK };
+  try {
+    const rich = N.commentsRow({ comments: 'Interviewing at **INFORMS**.\n\nSee https://example.org/jobs' });
+    ok(rich.html === '<div class="oa-prose">' + MK.html('Interviewing at **INFORMS**.\n\nSee https://example.org/jobs') + '</div>'
+       && rich.value === undefined,
+      'job comments: with it, the row is html from that one module, wrapped in the site\'s prose class');
+    ok(/<strong>INFORMS<\/strong>/.test(rich.html) && /<a href="https:\/\/example\.org\/jobs"/.test(rich.html)
+       && /rel="noopener noreferrer nofollow"/.test(rich.html) && (rich.html.match(/<p>/g) || []).length === 2,
+      'job comments: bold is bold, a bare address is a link that leaks no referrer, and a blank line is a paragraph');
+
+    /* HOSTILE PROSE IS INERT, which is the whole argument for `html` here:
+       the module escapes at emission and knows three schemes. */
+    const nasty = N.commentsRow({
+      comments: '<script>window.__pwned=1</script> <img src=x onerror=alert(1)> ' +
+        '[click](javascript:alert(1)) <a href="#" onclick="x">a</a>',
+    });
+    ok(!/<(?:script|img|iframe|a)\b(?![^>]*href="https?:)/i.test(nasty.html)
+       && !/<[a-z]+[^>]*\son\w+\s*=/i.test(nasty.html)
+       && !/href\s*=\s*["']?javascript:/i.test(nasty.html)
+       && /&lt;script&gt;/.test(nasty.html) && /&lt;img src=x onerror=alert\(1\)&gt;/.test(nasty.html),
+      'job comments: markup somebody typed is drawn as the characters it is');
+  } finally {
+    if (had) g.window = before; else delete g.window;
+  }
+
+  /* the three lists ask for it, and none of them still writes the row itself */
+  for (const p of ['jobs.html', 'index.html', 'previous-markets.html']) {
+    const html = await read(p);
+    ok(/OAJobNav\.commentsRow\(r\),/.test(html), `job comments: ${p} draws the row through the module`);
+    ok(!/label: 'Comments on Job Posting', value: r\.comments/.test(html),
+      `job comments: ${p} writes no row of its own any more`);
+  }
+  for (const p of ['jobs.html', 'previous-markets.html']) {
+    const html = await read(p);
+    const tag = (f) => html.indexOf('<script defer src="assets/' + f + '"></script>');
+    ok(tag('oa-jobnav.js') > 0 && tag('oa-forum-markup.js') > tag('oa-jobnav.js'),
+      `job comments: ${p} loads the markup module, after the module that reads it`);
+    ok(/<link href="assets\/oa-editor\.css" rel="stylesheet">/.test(html),
+      `job comments: ${p} links the shared prose stylesheet`);
+  }
+  /* AND THE HOME PAGE DOES NOT, which is a pair of facts rather than one: its
+     jobs teaser ALWAYS hands cardOpen a `full`, so the gate always answers a
+     descriptor and no card there ever renders a details table -- the only
+     thing that reads the row is lockPreview, which takes the LABEL. Loading
+     the prose reader for a cell that is never drawn is the cost this page's
+     own performance rules are about. Pinned BOTH ways: a teaser that stopped
+     gating, or a script added back, fails here rather than quietly costing
+     every visitor 20 KB or drawing marks on the front page. */
+  {
+    const home = await read('index.html');
+    ok(!home.includes('<script defer src="assets/oa-forum-markup.js"></script>')
+       && !home.includes('assets/oa-editor.css'),
+      'job comments: the home page downloads neither the prose reader nor the stylesheet that draws what it emits');
+    const teaser = home.slice(home.indexOf('cardOpen: OAGate.cardOpen({'));
+    ok(/full: function \(r\) \{ return NAV\.hrefFor\(r\); \}/.test(teaser.slice(0, 400)),
+      'job comments: …because its jobs teaser always sends a reader to the full list, so it draws no card body');
+  }
+
+  /* the cell's own rule, and it wins on SPECIFICITY rather than load order */
+  ok(/\.oa-kv \.oa-prose \{ color: inherit; font-size: inherit; line-height: inherit; \}/.test(listCss)
+     && /\.oa-kv \.oa-prose h3 \{ font-size: 16px; \}/.test(listCss),
+    'job comments: prose inside a card takes the cell\'s own size and ink, and its headings step down');
+  /* MEASURED: two addresses inside the cell drawn in the ink of the words
+     around them. `body.v3 a` (0,1,2) draws every link with no underline, which
+     reads well where the link IS the row and not at all mid-paragraph; the
+     attribute is what carries this past it on specificity (0,2,1). */
+  ok(/\.oa-prose a\[href\] \{ text-decoration: underline; \}/.test(edCssJob),
+    'job comments: a link inside running prose is underlined, won on specificity rather than load order');
+  ok(!/\.oa-prose/.test(await read('assets', 'v3.css')),
+    'job comments: v3.css restates nothing about the prose, so the engine\'s rule is the one that reaches the site');
+  ok(/body\.v3 \.oa-form \.oa-editor textarea \{/.test(await read('assets', 'v3.css'))
+     && /body\.v3 \.oa-form \.oa-editor textarea:focus \{[^}]*box-shadow: inset 0 0 0 2px var\(--brand\);/.test(await read('assets', 'v3.css')),
+    'job comments: inside a form the live design hands the box back to the editor, at (0,3,2) and (0,4,2)');
+
+  /* ------------------------------------- and every plain surface stays plain */
+
+  const xp = await read('assets', 'oa-jobexport.js');
+  ok(/root\.OAJobExport = factory\(root\.OAXlsx, root\.OASponsors, root\.OAForumMarkup\);/.test(xp)
+     && /return \(OAMarkup && t\) \? OAMarkup\.plain\(t\) : t;/.test(xp)
+     && /cell: function \(r\) \{ return txt\(plainProse\(r\.comments\)\); \}/.test(xp),
+    'job comments: the Excel cell holds the words the card shows, never the marks');
+  const X = require(path.join(HERE, '..', 'assets', 'oa-jobexport.js'));
+  const col = X.COLUMNS.filter((c) => c.header === 'Comments')[0];
+  eq(col.from, ['comments'], 'job comments: and it still names the field it reads');
+  eq(col.cell({ comments: 'Interviewing at **INFORMS**.\n\n- one\n- two' }), 'Interviewing at INFORMS. one two',
+    'job comments: read as one line of words');
+
+  const mailer = await read('_scraper', 'jobreview-mailer.mjs');
+  ok(/const markup = require\('\.\.\/assets\/oa-forum-markup\.js'\);/.test(mailer)
+     && /line\('Comments', markup\.plain\(String\(r\.comments \|\| ''\)\)\) \+/.test(mailer),
+    'job comments: the review e-mail prints the words, through the same module');
+
+  /* ----------------------------------------- the review card writes them too */
+
+  const rv = await read('assets', 'oa-jobreview.js');
+  ok(/function wireComments\(card\) \{[\s\S]{0,200}card\.querySelector\('textarea\[data-key="comments"\]'\);[\s\S]{0,120}OAEditor\.attach\(ta\);/.test(rv)
+     && /wirePlace\(card\);\s*\n\s*wireDeadline\(card\);\s*\n\s*wireComments\(card\);/.test(rv),
+    'job comments: the review card mounts the same editor, after the card is in the document');
+  ok(/var tag = f\.area \? 'div' : 'p';/.test(rv) && /'<' \+ tag \+ ' class="oa-rv-field'/.test(rv),
+    'job comments: a field that takes prose is a block, since the editor puts a div beside the box');
+  const admin = await read('admin-area.html');
+  const adminTag = (f) => admin.indexOf('<script defer src="assets/' + f + '"></script>');
+  ok(adminTag('oa-forum-markup.js') > 0
+     && adminTag('oa-forum-markup.js') < adminTag('oa-editor.js')
+     && adminTag('oa-editor.js') < adminTag('oa-jobreview.js')
+     && /<link href="assets\/oa-editor\.css" rel="stylesheet">/.test(admin),
+    'job comments: the Admin area loads the pair in order, and the stylesheet');
+
+  /* --------------------------------- what is DELIBERATELY unchanged, pinned */
+
+  /* Nothing under data/ moves: the stored text is the poster's own, and the
+     reading happens in the browser. A migration would be a second answer to
+     "what did they write", and there is no build to run. */
+  const jobs = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'jobs.json'), 'utf8'));
+  ok(Array.isArray(jobs) && jobs.length > 0, 'job comments: the served file was read');
+  ok(!/oa-prose|oa-editor/.test(JSON.stringify(jobs).slice(0, 400000)),
+    'job comments: nothing was written into the served postings');
+
+  /* the browser suite drives it */
+  const pt = await read('_scraper', 'page-test.mjs');
+  for (const needle of ['the toolbar stands over the Comments box', 'comments are drawn as prose',
+    'markup somebody typed is drawn as text', 'the Comments toolbar is 42px on a phone',
+    'the cell reads at', 'a locked card still previews the label alone']) {
+    ok(pt.includes(needle), `job comments: the browser suite measures "${needle}"`);
+  }
+}
+
 async function testSubmissionTokenRefresh() {
   const root = path.join(HERE, '..');
   const strip = (src) => src
@@ -18938,7 +19194,8 @@ async function testForum() {
      Leaflet attribution and the sponsor rail. */
   {
     const fcss = await readFile(path.join(HERE, '..', 'assets', 'oa-forum.css'), 'utf8');
-    ok(/textarea:focus \{ outline: none; box-shadow: inset 0 0 0 2px var\(--brand\); \}/.test(fcss),
+    const edcss0 = await readFile(path.join(HERE, '..', 'assets', 'oa-editor.css'), 'utf8');
+    ok(/textarea:focus \{ outline: none; box-shadow: inset 0 0 0 2px var\(--brand\); \}/.test(edcss0),
       'forum css: the compose box\'s focus ring is the brand, never the wash');
     ok(/\.oa-forum-tagsugg \[role='option'\]\.is-active \{ outline: 2px solid var\(--brand\); outline-offset: -2px; \}/.test(fcss),
       'forum css: the highlighted tag option is ringed, separately from the hover wash');
@@ -19273,6 +19530,11 @@ async function testForum() {
   const page = await read('forum.html');
   const pageJs = await read('assets', 'oa-forum.js');
   const pageCss = await read('assets', 'oa-forum.css');
+  /* the editor and the prose it writes are SHARED since 2026-09-17 (the job
+     posting's Comments box asked for the same toolbar), so the pins below
+     read assets/oa-editor.js and assets/oa-editor.css rather than this
+     page's own -- and testJobComments pins that the forum still loads them */
+  const edCss = await read('assets', 'oa-editor.css');
   ok(/<meta name="robots" content="noindex,nofollow">/.test(page), 'forum page: noindex, nofollow');
   ok(!/property="og:|name="twitter:|rel="image_src"|itemprop="image"/.test(page), 'forum page: no preview block, since nobody can share into it');
   const firstTag = /<head[^>]*>\s*(<[^>]+>)/i.exec(page);
@@ -19476,7 +19738,7 @@ async function testForum() {
     ok(/\.oa-forum-askcard \{[^}]*border: 1px solid var\(--line\);[^}]*background: var\(--bg-2\);[^}]*color: var\(--ink\);/.test(pageCss),
       'forum ask css: the card paints its ground and names its ink');
     ok(/\.oa-forum-askintro \{[^}]*background: var\(--brand-soft\);[^}]*color: var\(--ink-2\);/.test(pageCss), 'forum ask css: so does the note');
-    ok(/\.oa-forum-fmt \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--mut\);/.test(pageCss)
+    ok(/\.oa-editor-tips \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--mut\);/.test(edCss)
        && /\.oa-forum-similar \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--ink-2\);/.test(pageCss),
       'forum ask css: …and the format line and the similar list');
     ok(/\.oa-forum-fhint \{[^}]*color: var\(--mut\)/.test(pageCss) && /\.oa-forum-req \{ color: var\(--err\)/.test(pageCss),
@@ -19502,7 +19764,7 @@ async function testForum() {
     /* the browser suite drives it, and the audit names the new surfaces */
     const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
     const ink = pt.slice(pt.indexOf('const FORUM_INK'), pt.indexOf('async function forumContrast'));
-    for (const sel of ['.oa-forum-fhint', '.oa-forum-fmt', '.oa-forum-askwhere', '.oa-forum-askreq', '.oa-forum-req',
+    for (const sel of ['.oa-forum-fhint', '.oa-editor-tips', '.oa-forum-askwhere', '.oa-forum-askreq', '.oa-forum-req',
       '.oa-forum-askintro li', '.oa-forum-similar p', '.oa-forum-similar a', '.oa-forum-similar i']) {
       ok(ink.includes(`'${sel}'`), `forum ask: the contrast audit measures ${sel}`);
     }
@@ -19702,14 +19964,14 @@ async function testForum() {
     /* THE TOOLBAR: the buttons in their groups, what each writes, the
        shortcuts, one Tab stop, the insertion the browser's undo can take
        back, and the three boxes it stands over */
-    const tbSrc = pageJs.slice(pageJs.indexOf('  /* ------------------------------------------- the formatting toolbar'), pageJs.indexOf('  function replyBox(thread, first) {'));
-    ok(tbSrc.length > 6000 && tbSrc.length < 20000, 'forum toolbar: the section was sliced');
+    const tbSrc = await read('assets', 'oa-editor.js');
+    ok(tbSrc.length > 6000 && tbSrc.length < 30000, 'forum toolbar: the module was read');
     const toolCmds = [...tbSrc.matchAll(/\{ cmd: '([a-z]+)', label: '([^']+)'/g)].map((m) => [m[1], m[2]]);
     eq(toolCmds, [['bold', 'Bold'], ['italic', 'Italic'], ['link', 'Link'], ['quote', 'Blockquote'], ['code', 'Code'],
       ['ol', 'Numbered list'], ['ul', 'Bulleted list'], ['heading', 'Heading'], ['hr', 'Horizontal rule'], ['undo', 'Undo'], ['redo', 'Redo']],
       'forum toolbar: the eleven buttons, in the order and the groups of the site the owner named');
-    ok(!/cmd: 'image'/.test(tbSrc) && /NOT COPIED: the image button\. Rule 6 of the guide forbids screenshots/.test(tbSrc),
-      'forum toolbar: no image button, and the section says why');
+    ok(!/cmd: 'image'/.test(tbSrc) && /It is not an image button either: rule 6 of the forum guide forbids/.test(tbSrc),
+      'forum toolbar: no image button, and the module says why');
     ok(/key: 'B'/.test(tbSrc) && /key: 'I'/.test(tbSrc) && /key: 'K'/.test(tbSrc)
        && /var cmd = k === 'b' \? 'bold' : k === 'i' \? 'italic' : k === 'k' \? 'link' : '';/.test(tbSrc)
        && /if \(!\(e\.ctrlKey \|\| e\.metaKey\) \|\| e\.altKey \|\| e\.shiftKey\) return;/.test(tbSrc),
@@ -19736,7 +19998,7 @@ async function testForum() {
       'forum toolbar: the hand-written fallback runs only when the browser wrote nothing, so a text cut at the box\'s maxlength is not written twice');
     ok(/if \(sel\) \{ s \+= raw\.indexOf\(sel\); e = s \+ sel\.length; \} else \{ s = e; \}/.test(tbSrc),
       'forum toolbar: the link button leaves the spaces at either end of the selection where they are');
-    ok(/document\.querySelectorAll\('\.oa-forum-editor \.oa-forum-fmt'\)/.test(tbSrc) && /document\.querySelectorAll\('\.oa-forum-tbtips'\)/.test(tbSrc),
+    ok(/document\.querySelectorAll\('\.oa-editor \.oa-editor-tips'\)/.test(tbSrc) && /document\.querySelectorAll\('\.oa-editor-tipsbtn'\)/.test(tbSrc),
       'forum toolbar: the tips switch moves every box on the page together, as the one stored choice says');
     ok(/ta\.value = text;\s*\n[\s\S]{0,200}ta\.dispatchEvent\(new Event\('input', \{ bubbles: true \}\)\);\s*\n\s*\}\s*\n\s*\}/.test(pageJs.slice(pageJs.indexOf('  function reopenEdit('), pageJs.indexOf('  function reopenEdit(') + 900)),
       'forum toolbar: an edit box reopened across a repaint announces the words put back, so its preview and guard line follow them');
@@ -19749,45 +20011,45 @@ async function testForum() {
     ok(/function insertLink\(ta\)/.test(tbSrc) && /if \(\/\^\(https\?:\\\/\\\/\|www\\\.\)\\S\+\$\/i\.test\(sel\)\) \{/.test(tbSrc) && /url = 'https:\/\/';/.test(tbSrc),
       'forum toolbar: the link button wraps a selected address as the target, else offers the address to type');
     ok(/var TIPS = \['\*\*bold\*\*', '\*italic\*', '\[link\]\(https:\/\/…\)', '> quote', '`code`', '1\. list', '- list', '## heading', '---'\];/.test(tbSrc)
-       && /'<p class="oa-forum-fmt" id="' \+ id \+ '"' \+ \(tipsHidden\(\) \? ' hidden' : ''\) \+ '>'/.test(tbSrc)
+       && /'<p class="oa-editor-tips" id="' \+ id \+ '"' \+ \(tipsHidden\(\) \? ' hidden' : ''\) \+ '>'/.test(tbSrc)
        && /A blank line starts a new paragraph<\/span><span>A web address becomes a link<\/span><\/p>/.test(tbSrc),
       'forum toolbar: the tips row says what each mark writes, in the toolbar\'s order, and how a paragraph and an address read');
-    ok(/var TIPS_KEY = 'oa-forum-tips';/.test(tbSrc) && /'Hide' : 'Show'|'Show' : 'Hide'/.test(tbSrc) && /b\.setAttribute\('aria-expanded', off \? 'false' : 'true'\);/.test(tbSrc),
+    ok(/var TIPS_KEY = 'oa-editor-tips';/.test(tbSrc) && /'Hide' : 'Show'|'Show' : 'Hide'/.test(tbSrc) && /b\.setAttribute\('aria-expanded', off \? 'false' : 'true'\);/.test(tbSrc),
       'forum toolbar: the tips are put away by a switch that says which way it is, remembered on the device');
-    ok(/var on = !!v\.trim\(\) && MK\.hasMarkup\(v\);/.test(tbSrc) && /\.innerHTML = on \? MK\.html\(v\) : '';/.test(tbSrc) && /<p class="oa-forum-preview-h">Preview<\/p><div class="oa-forum-text"><\/div>/.test(tbSrc),
-      'forum toolbar: the preview is the thread\'s own rendering, shown once the words carry a mark');
+    ok(/var on = !!v\.trim\(\) && !!mk && mk\.hasMarkup\(v\);/.test(tbSrc) && /\.innerHTML = on \? mk\.html\(v\) : '';/.test(tbSrc) && /<p class="oa-editor-preview-h">Preview<\/p><div class="oa-prose"><\/div>/.test(tbSrc),
+      'forum toolbar: the preview is the page\'s own rendering, shown once the words carry a mark');
     ok(noDash(tbSrc), 'forum toolbar: no em dash in the section');
     /* the three boxes */
-    ok(/toolbarHTML\('oa-forum-body', 'oa-forum-fmt'\) \+\s*\n\s*tipsHTML\('oa-forum-fmt'\) \+\s*\n\s*'<textarea id="oa-forum-body"/.test(pageJs)
-       && /previewHTML\('oa-forum-preview'\)/.test(pageJs) && /wireEditor\(wrap\.querySelector\('\.oa-forum-editor'\), ta\);/.test(pageJs),
+    ok(/toolbarHTML\('oa-forum-body', 'oa-editor-tips'\) \+\s*\n\s*tipsHTML\('oa-editor-tips'\) \+\s*\n\s*'<textarea id="oa-forum-body"/.test(pageJs)
+       && /previewHTML\('oa-editor-preview'\)/.test(pageJs) && /wireEditor\(wrap\.querySelector\('\.oa-editor'\), ta\);/.test(pageJs),
       'forum toolbar: the answer box carries it');
     ok(/toolbarHTML\(editId, editId \+ '-fmt'\) \+\s*\n\s*tipsHTML\(editId \+ '-fmt'\)/.test(pageJs) && /previewHTML\(editId \+ '-preview'\)/.test(pageJs) && /wireEditor\(box, ta\);/.test(pageJs),
       'forum toolbar: so does the edit box, under ids of its own');
     ok(!/Plain text, a few paragraphs/.test(pageJs) && !/plain text and\s*\n\s*a toolbar over a box that renders none/.test(pageJs),
       'forum toolbar: no copy on the page still calls a post plain text');
     /* the stylesheet: tokens only, the buttons 42px targets on a phone */
-    const tbCss = pageCss.slice(pageCss.indexOf('/* THE FORMATTING TOOLBAR'), pageCss.indexOf('/* The compose bar under a textarea.'));
+    const tbCss = edCss.slice(edCss.indexOf('/* THE FORMATTING TOOLBAR'), edCss.indexOf('@media (max-width: 640px)'));
     ok(tbCss.length > 1500 && tbCss.length < 6000, 'forum toolbar css: the section was sliced');
-    ok(/\.oa-forum-tb \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--ink-2\);/.test(tbCss) && /\.oa-forum-tbbtn \{[^}]*color: var\(--ink-2\);/.test(tbCss)
-       && /\.oa-forum-tbtips \{[^}]*color: var\(--brand\);/.test(tbCss) && /\.oa-forum-preview \{[^}]*background: var\(--bg-2\);[^}]*color: var\(--ink\);/.test(tbCss),
+    ok(/\.oa-editor-tb \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--ink-2\);/.test(tbCss) && /\.oa-editor-btn \{[^}]*color: var\(--ink-2\);/.test(tbCss)
+       && /\.oa-editor-tipsbtn \{[^}]*color: var\(--brand\);/.test(tbCss) && /\.oa-editor-preview \{[^}]*background: var\(--bg-2\);[^}]*color: var\(--ink\);/.test(tbCss),
       'forum toolbar css: the bar, its buttons, the switch and the preview paint their ground and name their ink');
     ok(!/#[0-9a-f]{3,8}\b/i.test(tbCss) && !/\brgba?\(/.test(tbCss), 'forum toolbar css: no raw colour');
-    ok(/\.oa-forum-tbbtn:focus-visible \{ outline: 2px solid var\(--brand\)/.test(tbCss) && /\.oa-forum-tbtips:focus-visible \{ outline: 2px solid var\(--brand\)/.test(tbCss),
+    ok(/\.oa-editor-btn:focus-visible \{ outline: 2px solid var\(--brand\)/.test(tbCss) && /\.oa-editor-tipsbtn:focus-visible \{ outline: 2px solid var\(--brand\)/.test(tbCss),
       'forum toolbar css: the keyboard ring is the brand');
-    ok(/@media \(max-width: 640px\)[\s\S]*\.oa-forum-tbbtn \{ width: 42px; height: 42px; \}/.test(pageCss)
-       && /@media \(max-width: 640px\)[\s\S]*\.oa-forum-tbtips \{ width: 100%; min-height: 42px;/.test(pageCss),
+    ok(/@media \(max-width: 640px\)[\s\S]*\.oa-editor-btn \{ width: 42px; height: 42px; \}/.test(edCss)
+       && /@media \(max-width: 640px\)[\s\S]*\.oa-editor-tipsbtn \{ width: 100%; min-height: 42px;/.test(edCss),
       'forum toolbar css: on a phone the buttons are 42px targets and the switch a row of its own (rule 13)');
-    ok(/\.oa-forum-fmt \{[^}]*border-bottom: 1px solid var\(--line-soft\);/.test(pageCss) && /\.oa-forum-fmt code \{[^}]*color: var\(--ink-2\);/.test(pageCss),
+    ok(/\.oa-editor-tips \{[^}]*border-bottom: 1px solid var\(--line-soft\);/.test(edCss) && /\.oa-editor-tips code \{[^}]*color: var\(--ink-2\);/.test(edCss),
       'forum toolbar css: the tips row sits under the toolbar and its marks are code in the second ink');
-    const textCss = pageCss.slice(pageCss.indexOf('/* WHAT THE MARKUP DRAWS'), pageCss.indexOf('.oa-forum-removed {'));
-    ok(textCss.length > 1000 && /\.oa-forum-text h3 \{ font-size: 19px; \}/.test(textCss) && /\.oa-forum-text blockquote \{[^}]*border-left: 3px solid var\(--line\);[^}]*color: var\(--ink-2\);/.test(textCss)
-       && /\.oa-forum-text code \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--ink\);/.test(textCss) && /\.oa-forum-text pre \{[^}]*overflow: auto;/.test(textCss)
-       && /\.oa-forum-text hr \{/.test(textCss) && !/#[0-9a-f]{3,8}\b/i.test(textCss) && !/\brgba?\(/.test(textCss),
-      'forum markup css: headings, quotes, code, blocks and rules inside a post, tokens throughout, a code block scrolling inside itself');
+    const textCss = edCss.slice(edCss.indexOf('/* ---------------------------------------------------- what the markup draws'), edCss.indexOf('/* ------------------------------------------------------------- the editor'));
+    ok(textCss.length > 1000 && /\.oa-prose h3 \{ font-size: 19px; \}/.test(textCss) && /\.oa-prose blockquote \{[^}]*border-left: 3px solid var\(--line\);[^}]*color: var\(--ink-2\);/.test(textCss)
+       && /\.oa-prose code \{[^}]*background: var\(--bg-3\);[^}]*color: var\(--ink\);/.test(textCss) && /\.oa-prose pre \{[^}]*overflow: auto;/.test(textCss)
+       && /\.oa-prose hr \{/.test(textCss) && !/#[0-9a-f]{3,8}\b/i.test(textCss) && !/\brgba?\(/.test(textCss),
+      'forum markup css: headings, quotes, code, blocks and rules inside a text, tokens throughout, a code block scrolling inside itself');
     /* the browser suite and the audit */
     const pt2 = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
     const ink2 = pt2.slice(pt2.indexOf('const FORUM_INK'), pt2.indexOf('async function forumContrast'));
-    for (const sel of ['.oa-forum-tbtips', '.oa-forum-fmt code', '.oa-forum-preview-h', '.oa-forum-text code', '.oa-forum-text blockquote', '.oa-forum-text h3']) {
+    for (const sel of ['.oa-editor-tipsbtn', '.oa-editor-tips code', '.oa-editor-preview-h', '.oa-prose code', '.oa-prose blockquote', '.oa-prose h3']) {
       ok(ink2.includes(`'${sel}'`), `forum toolbar: the contrast audit measures ${sel}`);
     }
     for (const needle of ['the toolbar stands over the body box', 'eleven buttons in four groups, each named, and no image button', 'one Tab stop',
@@ -19806,13 +20068,13 @@ async function testForum() {
   ok(/yours to edit and to delete at any time/.test(await read('assets', 'oa-forum-guide.js')), 'forum guide: rule 13 says a post is editable at any time');
   ok(page.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
     'forum page: the head snippet, the exact line every live page carries');
-  const LOAD = ['v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-forum-markup.js', 'oa-list.js', 'oa-forum.js'];
+  const LOAD = ['v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-forum-markup.js', 'oa-editor.js', 'oa-list.js', 'oa-forum.js'];
   const tagAt = (f) => page.indexOf('<script defer src="assets/' + f + '"></script>');
   ok(LOAD.every((f, i) => tagAt(f) > 0 && (i === 0 || tagAt(f) > tagAt(LOAD[i - 1]))),
-    'forum page: the ten scripts load in dependency order, each deferred');
+    'forum page: the eleven scripts load in dependency order, each deferred');
   eq((page.match(/<script[^>]*\ssrc=/g) || []).length, LOAD.length, 'forum page: and no other external script');
   for (const f of ['oa-ga4.js', 'oa-usage.js', 'oa-visit.js']) ok(!page.includes('assets/' + f), `forum page: quiet by design, no ${f}`);
-  for (const f of ['oa-list.css', 'oa-ui.css', 'v3.css', 'oa-forum.css']) ok(page.includes('assets/' + f), `forum page: loads ${f}`);
+  for (const f of ['oa-list.css', 'oa-ui.css', 'oa-editor.css', 'v3.css', 'oa-forum.css']) ok(page.includes('assets/' + f), `forum page: loads ${f}`);
   for (const id of ['oa-offline', 'oa-needauth', 'oa-needauth-btn', 'oa-forum-verify', 'oa-forum-verify-btn', 'oa-forum-loading',
     'oa-forum-error', 'oa-forum', 'oa-forum-rooms', 'oa-forum-roomnote', 'oa-forum-archive', 'oa-forum-me', 'oa-forum-listview',
     'oa-forum-listtitle', 'oa-forum-listcount', 'oa-forum-list', 'oa-forum-thread', 'oa-forum-compose', 'oa-forum-roomcard',
@@ -21753,6 +22015,7 @@ if (isMain(import.meta.url)) {
   await testCandidateStats();
   await testEmailVerification();
   await testSubmissionTokenRefresh();
+  await testJobComments();
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
   await testTopMenu();

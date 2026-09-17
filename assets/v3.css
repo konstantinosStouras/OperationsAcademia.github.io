@@ -1654,6 +1654,28 @@ body.v3 .oa-modal-card input[type='password']:focus {
 body.v3 .oa-form input[disabled], body.v3 .oa-modal-card input[disabled] {
   background: var(--bg-3); color: var(--mut);
 }
+
+/* THE BOX INSIDE THE FORMATTING EDITOR IS THE EDITOR'S, NOT THE FORM'S
+   (2026-09-17, with the job posting's Comments box). assets/oa-editor.css
+   draws the border and the radius on the `.oa-editor` WRAPPER and leaves the
+   textarea inside it flush and borderless, which is what makes the toolbar,
+   the box and the preview read as one control. Inside a form the two rules
+   above reach that textarea as well -- `body.v3 .oa-form textarea` (0,2,2)
+   and its :focus (0,3,2), both above anything oa-editor.css can write -- so
+   they would put a second border inside the wrapper and hand the box the
+   --brand-soft ring the editor's own comment measures at 1.19:1. Restated
+   here at (0,3,2) and (0,4,2) so it is decided on SPECIFICITY and never on
+   which stylesheet the page happens to link last. */
+body.v3 .oa-form .oa-editor textarea {
+  border: 0;
+  border-radius: 0;
+  background: var(--bg-2);
+}
+body.v3 .oa-form .oa-editor textarea:focus {
+  border: 0;
+  background-color: var(--bg-2);
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
 /* the profile card's compelled box and its "needed" mark (oa-ui.css
    .oa-missing / .oa-need), at (0,3,1) so the modal-input rule above (0,2,1)
    cannot take the outline back, and in the live palette's own tokens */

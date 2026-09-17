@@ -393,7 +393,12 @@
       '<div class="oa-rv-grid">' +
         FIELDS.map(function (f, n) {
           var id = idp + '-' + n;
-          return '<p class="oa-rv-field' + (f.area || f.list ? ' is-wide' : '') + '">' +
+          /* a DIV where the box takes prose: wireComments wraps that box in
+             the editor's own <div>, and a div inside a <p> ends the paragraph
+             as the browser parses it. Styled by `.oa-rv-field`, a class, so
+             the element makes no difference to how it draws. */
+          var tag = f.area ? 'div' : 'p';
+          return '<' + tag + ' class="oa-rv-field' + (f.area || f.list ? ' is-wide' : '') + '">' +
             '<label for="' + id + '">' + esc(f.label) + '</label>' +
             inputFor(f, fieldValue(doc, f.key), id) +
             /* What the boxes above will actually PUBLISH. Two lines on a
@@ -406,7 +411,7 @@
               ? '<span class="oa-hint oa-rv-derived" aria-live="polite" data-derived="'
                 + (f.key === 'applyByDate' ? 'deadline' : 'place') + '"></span>'
               : '') +
-            '</p>';
+            '</' + tag + '>';
         }).join('') +
       '</div>' +
       '<p class="oa-rv-actions">' +
@@ -967,6 +972,28 @@
     preview();
   }
 
+  /**
+   * The Comments box, with the site's formatting toolbar over it.
+   *
+   * The SAME module the posting form mounts (assets/oa-editor.js), for the
+   * same reason the three name boxes share a picker: the maintainer tidying a
+   * crawled posting and the poster writing a new one are filling in one
+   * field, and the card draws its own preview by the very module the jobs
+   * page draws the cell by (assets/oa-forum-markup.js). This is the surface
+   * that needs it most — a workbook row's Comments arrive as one unbroken
+   * paragraph of an advertisement's own description, which is the screen the
+   * owner sent on 2026-09-17.
+   *
+   * Entirely optional, like the picker: without the module the box is the
+   * ordinary textarea the card already wrote, and the marks are text either
+   * way. Nothing to give back at unmount — every listener it adds is on the
+   * toolbar or the box itself, so a redrawn card takes them with it.
+   */
+  function wireComments(card) {
+    var ta = card.querySelector('textarea[data-key="comments"]');
+    if (ta && window.OAEditor) OAEditor.attach(ta);
+  }
+
   /** "2026-10-05" as the card writes it. The browser twin of `longDate` in
       _scraper/jobs-model.mjs — same month names, same shape, and built from
       the date's own parts so a timezone can never move it a day. */
@@ -1341,6 +1368,7 @@
          and measures where its list will fit. */
       wirePlace(card);
       wireDeadline(card);
+      wireComments(card);
     });
 
     var all = $('oa-review-all');
