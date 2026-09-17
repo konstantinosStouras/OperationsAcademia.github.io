@@ -233,7 +233,7 @@
     { u: 'University of North Carolina at Chapel Hill', s: 'Kenan-Flagler Business School', d: ['Operations'] },
     { u: 'University of North Texas', s: 'G. Brint Ryan College of Business', d: ['Supply Chain Management'] },
     { u: 'University of Notre Dame', s: 'Mendoza College of Business', d: ['Information Technology, Analytics and Operations'] },
-    { u: 'University of Oklahoma', s: 'Price College of Business', d: ['Marketing and Supply Chain Management'] },
+    { u: 'University of Oklahoma', s: 'Price College of Business', d: ['Supply Chain Management'] },
     { u: 'University of Oregon', s: 'Lundquist College of Business', d: ['Operations and Business Analytics'] },
     { u: 'University of Oxford', s: 'Saïd Business School', d: ['Technology and Operations Management'] },
     { u: 'University of Pennsylvania', s: 'The Wharton School', d: ['Operations, Information and Decisions'] },

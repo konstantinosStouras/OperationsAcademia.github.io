@@ -454,10 +454,6 @@ async function healNames() {
 
   const before = serialise(rows);
   const after = serialise(healed);
-  if (before === after) {
-    log('data/jobs.json: every posting already names its place the one way');
-    return true;
-  }
 
   const moved = healed.filter((r) => {
     const was = rows.find((o) => o.id === r.id);
@@ -468,7 +464,7 @@ async function healNames() {
   }
   if (DRY) { log(`--dry-run: ${moved.length} posting(s) would be corrected`); return true; }
 
-  await writeFile(JOBS, after);
+  if (before !== after) await writeFile(JOBS, after);
 
   /* THE META'S `generated` IS CARRIED, NOT RE-STAMPED. It means "when the
      build last read the sources", and this mode reads none of them: the edit
@@ -486,7 +482,22 @@ async function healNames() {
   /* The form's option lists are DERIVED from these rows, so a heal that left
      them alone would have the pickers offering the spelling the postings no
      longer use. Same inputs as the build's own call, `generated` carried for
-     the reason above. */
+     the reason above.
+
+     AND THE VOCABULARY HAS THREE INPUTS, NOT ONE, which is why this no longer
+     sits behind a "nothing moved, stop" return on the postings alone. It is
+     built from the healed rows, from data/directory.json AND from the
+     oa-institutions.js seed, so an alias that renames a department NO POSTING
+     in jobs.json spells the long way still moves it — the archive or the seed
+     carries that spelling instead. The mode then reported "every posting
+     already names its place the one way", wrote nothing, and left the
+     selftest red on `vocab.json is exactly what the postings and the two
+     directories rebuild`, with no tool anywhere that would fix it: the guard
+     firing on a legitimate change with no green road out, which is the
+     failure this file records four times over. Found by Oklahoma's ruling
+     (2026-09-17), whose long form is in the seed and the archive and in no
+     served posting. Both writes are conditional on their own file, so a run
+     with nothing to do still writes nothing. */
   const dir = await readJson(DIRECTORY, null);
   const seeded = [...(Array.isArray(dir) ? dir : []), ...institutionSeed()];
   const vocabBefore = await readJson(VOCAB, null);
@@ -495,7 +506,9 @@ async function healNames() {
   });
   if (!sameVocab(vocab, vocabBefore)) await writeFile(VOCAB, serialiseVocab(vocab));
 
-  log(`data/jobs.json: corrected ${moved.length} posting(s)`);
+  log(moved.length
+    ? `data/jobs.json: corrected ${moved.length} posting(s)`
+    : 'data/jobs.json: every posting already names its place the one way');
   /* data/directory.json is merged from these rows by its own builder, which is
      offline too — so it is the other half of the same change, and saying so
      here is cheaper than a second trap. */

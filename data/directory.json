@@ -10960,30 +10960,6 @@
   "lastPosted": "2014-10-22"
  },
  {
-  "id": "university-of-oklahoma__michael-f-price-college-of-business__marketing-and-supply-chain-management",
-  "institution": "University of Oklahoma",
-  "school": "Michael F. Price College of Business",
-  "department": "Marketing and Supply Chain Management",
-  "type": "Business School",
-  "country": "United States",
-  "deptUrl": "https://www.ou.edu/price/directory/areas#mscm",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "sources": [
-   "omlist",
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2024-10-02"
- },
- {
   "id": "university-of-oklahoma__michael-f-price-college-of-business__marketing-supply-chain-management-and-healthcare",
   "institution": "University of Oklahoma",
   "school": "Michael F. Price College of Business",
@@ -11011,10 +10987,21 @@
   "department": "Supply Chain Management",
   "type": "Business School",
   "country": "United States",
-  "sources": [
-   "postings"
+  "deptUrl": "https://www.ou.edu/price/directory/areas#mscm",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
   ],
-  "n": 3,
+  "sources": [
+   "omlist",
+   "postings",
+   "seed"
+  ],
+  "n": 4,
   "lastPosted": "2026-09-17"
  },
  {
