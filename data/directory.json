@@ -10951,18 +10951,6 @@
   "lastPosted": "2014-10-22"
  },
  {
-  "id": "university-of-oklahoma____supply-chain-management",
-  "institution": "University of Oklahoma",
-  "department": "Supply Chain Management",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 2,
-  "lastPosted": "2026-03-18"
- },
- {
   "id": "university-of-oklahoma__michael-f-price-college-of-business__marketing-and-supply-chain-management",
   "institution": "University of Oklahoma",
   "school": "Michael F. Price College of Business",
@@ -11006,6 +10994,19 @@
   ],
   "n": 1,
   "lastPosted": "2024-10-17"
+ },
+ {
+  "id": "university-of-oklahoma__michael-f-price-college-of-business__supply-chain-management",
+  "institution": "University of Oklahoma",
+  "school": "Michael F. Price College of Business",
+  "department": "Supply Chain Management",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 3,
+  "lastPosted": "2026-09-17"
  },
  {
   "id": "university-of-oregon__charles-h-lundquist-college-of-business__operations-and-business-analytics",

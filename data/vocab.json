@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-17T20:02:43.109Z",
+ "generated": "2026-09-17T20:23:10.844Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -183,6 +183,10 @@
   },
   {
    "v": "University of Minnesota",
+   "n": 3
+  },
+  {
+   "v": "University of Oklahoma",
    "n": 3
   },
   {
@@ -451,10 +455,6 @@
   },
   {
    "v": "University of Notre Dame",
-   "n": 2
-  },
-  {
-   "v": "University of Oklahoma",
    "n": 2
   },
   {
@@ -2392,6 +2392,10 @@
    "n": 1
   },
   {
+   "v": "Michael F. Price College of Business",
+   "n": 1
+  },
+  {
    "v": "Michael G. Foster School of Business",
    "n": 1
   },
@@ -2808,10 +2812,6 @@
    "n": 0
   },
   {
-   "v": "Michael F. Price College of Business",
-   "n": 0
-  },
-  {
    "v": "Mike Ilitch School of Business",
    "n": 0
   },
@@ -3059,7 +3059,7 @@
   },
   {
    "v": "Supply Chain Management",
-   "n": 45
+   "n": 46
   },
   {
    "v": "BA",
@@ -10623,7 +10623,8 @@
      "Supply Chain Management"
     ],
     "Michael F. Price College of Business": [
-     "Marketing and Supply Chain Management"
+     "Marketing and Supply Chain Management",
+     "Supply Chain Management"
     ]
    }
   },
@@ -12180,7 +12181,8 @@
    "Management Area"
   ],
   "Michael F. Price College of Business": [
-   "Marketing and Supply Chain Management"
+   "Marketing and Supply Chain Management",
+   "Supply Chain Management"
   ],
   "Michael G. Foster School of Business": [
    "Information Systems and Operations Management",
