@@ -35,7 +35,11 @@
   var MAX = {
     institution: 160, department: 220, school: 160, unit: 160, country: 60, applyByNote: 300,
     comments: 1200, postedAtUrl: 500, adUrl: 500,
-    firstName: 80, lastName: 80, email: 160, chairName: 120, chairEmail: 160, note: 1200
+    firstName: 80, lastName: 80, email: 160, chairName: 120, chairEmail: 160, note: 1200,
+    /* the signed-in account's own address, which the form does not ask for
+       but does WRITE: str('authEmail', 200) in the rules refuses a longer
+       one, and it is the one create field that used to go out unsliced. */
+    authEmail: 160
   };
 
   function $(id) { return document.getElementById(id); }
@@ -51,6 +55,57 @@
     return OAAccounts.freshClaims
       ? OAAccounts.freshClaims(user)
       : Promise.resolve();
+  }
+
+  /** A REFUSED UPLOAD NAMES NO CAUSE THIS PAGE CANNOT KNOW EITHER.
+
+      The Storage rules gate an upload on the same `verified()` the posting
+      itself is gated on, so a stale or unconfirmed claim refuses the FILE
+      first, one branch above the posting's own. This used to answer that
+      with the file's type, its size and the storage rules: three things to
+      check when the file is perfectly fine, and not one of them the reason.
+      So it asks, exactly as sayRefused does, and keeps the file's real
+      constraints for the branch where they are the likely answer. */
+  function sayFileRefused() {
+    say('The file was refused — checking why…');
+    freshClaims().then(function () {
+      if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
+        say('Your e-mail address has not been confirmed yet, so the site could not ' +
+            'accept the file. Press the link in the message from Operations Academia ' +
+            '— or ask for a new one on the card that has just opened — and then press ' +
+            'Send again. Nothing you have typed has been lost.', 'err');
+        if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
+        return;
+      }
+      say('The file was refused. It must be a PDF or Word file under 15 MB. If it is, remove it and send the posting with a link to the advert instead, ' +
+          'or tell us through the Feedback page and we will attach it for you. ' +
+          'Nothing you have typed has been lost.', 'err');
+    });
+  }
+
+  /** A REFUSED EDIT LOAD NAMES NO CAUSE THIS PAGE CANNOT KNOW EITHER.
+
+      `allow read` on a posting is isOwner(), which is verified(), which
+      reads `email_verified` off the ID TOKEN — the same cached claim the
+      submit path above guards against. So a stale token refuses the OWNER
+      their own posting, and this branch used to answer that by telling them
+      "You are not allowed to edit this posting" and taking the form away:
+      the site telling the person who filed it that it is not theirs, with
+      nothing left on the page to press. The token has been re-minted before
+      the read by the time we reach here, so needsVerification() is
+      Firebase's own answer and the two real cases can be told apart. */
+  function sayEditRefused() {
+    if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
+      sayOutside('Your e-mail address has not been confirmed yet, so the site could not ' +
+                 'open your posting. Press the link in the message from Operations ' +
+                 'Academia — or ask for a new one on the card that has just opened — ' +
+                 'and then reload this page.');
+      if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
+    } else {
+      sayOutside('This posting belongs to a different account. If it is yours, sign in ' +
+                 'with the account you filed it from and open it again from My postings.');
+    }
+    show($('oa-job-form'), false);
   }
 
   /** A REFUSED POSTING NAMES NO CAUSE THIS PAGE CANNOT KNOW.
@@ -920,8 +975,12 @@
         'posting date does not change.</p>';
     }
 
-    OAAccounts.whenSignedIn(function () {
-      OAFB.ready().then(function (fb) {
+    OAAccounts.whenSignedIn(function (user) {
+      /* THE TOKEN THE RULES READ, FIRST OF ALL — see sayEditRefused below:
+         reading a posting is isOwner(), so a stale claim refuses its own owner. */
+      freshClaims(user).then(function () {
+        return OAFB.ready();
+      }).then(function (fb) {
         return fb.firestore().collection(OAFB.col.jobSubmissions).doc(EDIT_ID).get();
       }).then(function (snap) {
         if (!snap.exists) {
@@ -931,10 +990,12 @@
         }
         fill(snap.data() || {});
       }).catch(function (err) {
-        sayOutside(err && err.code === 'permission-denied'
-          ? 'You are not allowed to edit this posting.'
-          : 'We could not load that posting. Please try again.');
-        show($('oa-job-form'), false);
+        if (err && err.code === 'permission-denied') {
+          sayEditRefused();
+        } else {
+          sayOutside('We could not load that posting. Please try again.');
+          show($('oa-job-form'), false);
+        }
         if (window.console) console.error('edit:', err);
       });
     });
@@ -1118,7 +1179,10 @@
 
           doc.ref = makeRef();
           doc.uid = user.uid;
-          doc.authEmail = user.email || '';
+          /* SLICED like every other field: str('authEmail', 200) in the rules
+             refuses a longer one, and an unsliced value is the one create-path
+             field whose refusal no retry could ever clear. */
+          doc.authEmail = String(user.email || '').slice(0, MAX.authEmail);
           doc.status = 'queued';       // the rules pin this; the build publishes it
           doc.source = 'oa-form';
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
@@ -1199,8 +1263,7 @@
                 'firebasestorage.googleapis.com. Your posting was NOT sent — remove the ' +
                 'file to post with a link instead, or try again once storage is up.', 'err');
           } else if (code === 'storage/unauthorized') {
-            say('The file was refused — it must be a PDF or Word file under 15 MB, ' +
-                'and the site\u2019s storage rules must be published.', 'err');
+            sayFileRefused();
           } else if (code === 'permission-denied') {
             if (EDIT_ID) say('You are not allowed to change this posting.', 'err');
             else sayRefused();

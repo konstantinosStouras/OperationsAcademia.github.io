@@ -16848,12 +16848,13 @@ async function testSubmissionTokenRefresh() {
     'and it reloads the account and then forces a fresh token, in that order');
 
   const FORMS = [
-    ['oa-jobform.js', 'posting', 'postings'],
-    ['oa-candidateform.js', 'profile', 'profiles'],
-    ['oa-placementform.js', 'placement', 'placements'],
+    ['oa-jobform.js', 'posting', 'postings', 'jobSubmissions'],
+    ['oa-candidateform.js', 'profile', 'profiles', 'candidateSubmissions'],
+    ['oa-placementform.js', 'placement', 'placements', 'placementSubmissions'],
   ];
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
 
-  for (const [file, thing, plural] of FORMS) {
+  for (const [file, thing, plural, collection] of FORMS) {
     const src = strip(await readFile(path.join(root, 'assets', file), 'utf8'));
     const where = `${file}:`;
 
@@ -16892,6 +16893,68 @@ async function testSubmissionTokenRefresh() {
       `${where} and opens the card that confirms the address, not just words`);
     ok(asks && /Nothing you have typed has been lost/.test(asks[0]),
       `${where} and says the ${thing} is still on screen`);
+
+    /* --- THE EDIT LOAD IS A READ, AND THE READ IS GATED THE SAME WAY -----
+
+       `allow read: if isOwner(resource.data.uid)` goes through verified(),
+       so a stale claim refuses the OWNER their own row. Before 2026-09-17
+       that branch said "You are not allowed to edit this ${thing}" and hid
+       the form: the site telling the person who filed it that it is not
+       theirs, with nothing left to press. Found by the review of the submit
+       fix, which had covered the write and left the read that must succeed
+       before any edit can be saved. */
+    const editAt = src.indexOf('freshClaims(user).then');
+    const readAt = src.indexOf('.doc(EDIT_ID).get()');
+    ok(editAt !== -1 && readAt !== -1 && editAt < readAt,
+      `${where} re-mints the token before the edit-load READ too`);
+    const refused = /function sayEditRefused\(\) \{[\s\S]*?\n  \}/.exec(src);
+    ok(refused, `${where} and answers a refused edit load by asking why`);
+    ok(refused && /needsVerification\(\)/.test(refused[0])
+              && /openVerifyPanel\(\)/.test(refused[0]),
+      `${where} naming an unconfirmed address and opening the card that fixes it`);
+    ok(refused && /belongs to a different account/.test(refused[0]),
+      `${where} and saying whose it is only when that is what it is`);
+    ok(!/not allowed to edit this/.test(src),
+      `${where} and never tells an owner their own ${thing} is not theirs`);
+
+    /* --- every field the form WRITES is sliced under its rule bound ------
+
+       `authEmail` was the one create-path field handed straight from the Auth
+       record against str('authEmail', 200): a longer address is refused for
+       ever, and no retry could clear it. It is in MAX now, so the bound is
+       stated where every other field states it. */
+    const maxTable = /var MAX = \{([\s\S]*?)\}/.exec(src);
+    const maxAuth = maxTable && /authEmail:\s*(\d+)/.exec(maxTable[1]);
+    ok(maxAuth, `${where} MAX states a bound for authEmail`);
+    const ruleBlock = new RegExp(`match /${collection}/\\{id\\} \\{[\\s\\S]*?\\n    \\}`)
+      .exec(rules);
+    const ruleAuth = ruleBlock && /str\('authEmail',\s*(\d+)\)/.exec(ruleBlock[0]);
+    ok(ruleAuth, `${collection}: the rules bound authEmail`);
+    ok(maxAuth && ruleAuth && Number(maxAuth[1]) <= Number(ruleAuth[1]),
+      `${where} and the form's bound (${maxAuth ? maxAuth[1] : '?'}) is within the rule's (${ruleAuth ? ruleAuth[1] : '?'})`);
+    ok(/doc\.authEmail = String\(user\.email \|\| ''\)\.slice\(0, MAX\.authEmail\)/.test(src),
+      `${where} and writes it through that bound, never unsliced`);
+
+    /* --- AND THE UPLOAD IS REFUSED FIRST, so it asks too -----------------
+
+       The Storage rules gate an upload on the same verified(), so a stale or
+       unconfirmed claim refuses the FILE one branch above the row's own. That
+       branch used to answer with the file's type, its size and the storage
+       rules: three things to check when the file is fine. Found by the review
+       of the submit fix, which had left the branch it sits above. */
+    if (src.indexOf("storage/unauthorized") !== -1) {
+      ok(/'storage\/unauthorized'\) \{\s*sayFileRefused\(\);/.test(src),
+        `${where} a refused upload asks why rather than blaming the file`);
+      const fileAsks = /function sayFileRefused\(\) \{[\s\S]*?\n  \}/.exec(src);
+      ok(fileAsks && /freshClaims\(\)/.test(fileAsks[0])
+                  && /needsVerification\(\)/.test(fileAsks[0])
+                  && /openVerifyPanel\(\)/.test(fileAsks[0]),
+        `${where} through the same reload, question and card as a refused ${thing}`);
+      ok(fileAsks && /under 15 MB/.test(fileAsks[0]),
+        `${where} keeping the file's real constraints for the branch they answer`);
+      ok(!/storage rules must be published/.test(src),
+        `${where} and no longer blames the storage rules either`);
+    }
   }
 }
 
@@ -18283,8 +18346,16 @@ async function testSweep20260906() {
     ok(formAt > 0 && html.indexOf('id="oa-msg"') > formAt && html.indexOf('id="oa-msg"') < formEnd
        && html.indexOf('id="oa-msg-out"') > formEnd,
       'sweep: ' + page + ' carries a message host OUTSIDE the form, beside the one inside it');
+    /* The permission-denied branch became sayEditRefused() on 2026-09-17:
+       reading a row is isOwner() -> verified(), so a STALE TOKEN refuses the
+       owner their own row, and this branch answered that by telling them it
+       was not theirs and hiding the form. The PROPERTY this pin protects is
+       unchanged and is what it now asserts: both failures speak from OUTSIDE
+       the form, never into the #oa-msg the form takes with it when it goes. */
+    const refusedFn = /function sayEditRefused\(\) \{[\s\S]*?\n  \}/.exec(src);
     ok(/function sayOutside\(msg\)/.test(src) && src.includes("sayOutside('" + gone + "')")
-       && /sayOutside\(err && err\.code === 'permission-denied'/.test(src),
+       && /if \(err && err\.code === 'permission-denied'\) \{\s*sayEditRefused\(\);/.test(src)
+       && refusedFn && refusedFn[0].includes('sayOutside(') && !refusedFn[0].includes("say('"),
       'sweep: ' + js + ': both edit-load failures speak through it before the form goes');
   }
 
@@ -20427,9 +20498,13 @@ async function testForum() {
     'the form\'s own message really is inside the form — which is the trap');
   ok(candPage.indexOf('id="oa-msg-out"') > formEnd,
     'and there is a message OUTSIDE it, for what is said once the form has gone');
+  /* the 2026-09-17 shape: see the same pin in the sweep block above */
+  const candRefused = /function sayEditRefused\(\) \{[\s\S]*?\n  \}/.exec(candForm);
   ok(/function sayOutside\(msg\)/.test(candForm)
      && /sayOutside\('That profile no longer exists\.'\)/.test(candForm)
-     && /sayOutside\(err && err\.code === 'permission-denied'/.test(candForm),
+     && /if \(err && err\.code === 'permission-denied'\) \{\s*sayEditRefused\(\);/.test(candForm)
+     && candRefused && candRefused[0].includes('sayOutside(')
+     && !candRefused[0].includes("say('"),
     'oa-candidateform.js: both edit-load failures speak through it');
 
   /* AND REMOVE MUST NOT DESTROY THE CV IT WAS NEVER ASKED ABOUT. fill() puts

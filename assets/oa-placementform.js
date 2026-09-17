@@ -28,7 +28,10 @@
     first: 100, last: 100,
     phdInstitution: 220, undergradInstitution: 220,
     joiningInstitution: 220, joiningPosition: 160,
-    webUrl: 500, email: 160, note: 1200
+    webUrl: 500, email: 160, note: 1200,
+    /* the signed-in account's own address: written, never asked for, and
+       bounded by str('authEmail', 200) in the rules. */
+    authEmail: 160
   };
 
   function $(id) { return document.getElementById(id); }
@@ -44,6 +47,31 @@
     return OAAccounts.freshClaims
       ? OAAccounts.freshClaims(user)
       : Promise.resolve();
+  }
+
+  /** A REFUSED EDIT LOAD NAMES NO CAUSE THIS PAGE CANNOT KNOW EITHER.
+
+      `allow read` on a placement is isOwner(), which is verified(), which
+      reads `email_verified` off the ID TOKEN — the same cached claim the
+      submit path above guards against. So a stale token refuses the OWNER
+      their own placement, and this branch used to answer that by telling them
+      "You are not allowed to edit this placement" and taking the form away:
+      the site telling the person who filed it that it is not theirs, with
+      nothing left on the page to press. The token has been re-minted before
+      the read by the time we reach here, so needsVerification() is
+      Firebase's own answer and the two real cases can be told apart. */
+  function sayEditRefused() {
+    if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
+      sayOutside('Your e-mail address has not been confirmed yet, so the site could not ' +
+                 'open your placement. Press the link in the message from Operations ' +
+                 'Academia — or ask for a new one on the card that has just opened — ' +
+                 'and then reload this page.');
+      if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
+    } else {
+      sayOutside('This placement belongs to a different account. If it is yours, sign in ' +
+                 'with the account you filed it from and open it again from your personal area.');
+    }
+    show($('oa-placement-form'), false);
   }
 
   /** A REFUSED PLACEMENT NAMES NO CAUSE THIS PAGE CANNOT KNOW.
@@ -295,8 +323,12 @@
     // nothing to withdraw yet.
     show($('oa-withdraw'), true);
 
-    OAAccounts.whenSignedIn(function () {
-      OAFB.ready().then(function (fb) {
+    OAAccounts.whenSignedIn(function (user) {
+      /* THE TOKEN THE RULES READ, FIRST OF ALL — see sayEditRefused below:
+         reading a placement is isOwner(), so a stale claim refuses its own owner. */
+      freshClaims(user).then(function () {
+        return OAFB.ready();
+      }).then(function (fb) {
         return fb.firestore().collection(colName()).doc(EDIT_ID).get();
       }).then(function (snap) {
         if (!snap.exists) {
@@ -306,10 +338,12 @@
         }
         fill(snap.data() || {});
       }).catch(function (err) {
-        sayOutside(err && err.code === 'permission-denied'
-          ? 'You are not allowed to edit this placement.'
-          : 'We could not load that placement. Please try again.');
-        show($('oa-placement-form'), false);
+        if (err && err.code === 'permission-denied') {
+          sayEditRefused();
+        } else {
+          sayOutside('We could not load that placement. Please try again.');
+          show($('oa-placement-form'), false);
+        }
         if (window.console) console.error('edit:', err);
       });
     });
@@ -481,7 +515,10 @@
 
           doc.ref = makeRef();
           doc.uid = user.uid;
-          doc.authEmail = user.email || '';
+          /* SLICED like every other field: str('authEmail', 200) in the rules
+             refuses a longer one, and an unsliced value is the one create-path
+             field whose refusal no retry could ever clear. */
+          doc.authEmail = String(user.email || '').slice(0, MAX.authEmail);
           doc.status = 'queued';       // the rules pin this; the build publishes it
           doc.source = 'oa-form';
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
