@@ -21327,7 +21327,14 @@ async function testRegistrationFields() {
 
   /* --- and NOTHING here needs a rules deploy ---------------------------- */
   const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
-  ok(/function str\(field, maxLen\) \{\s*return !\(field in request\.resource\.data\)/.test(rules),
+  /* Re-expressed on 2026-09-17, when str() became ONE map lookup instead of
+     four to get the ruleset back under Firestore's 1000-expression budget.
+     The property is unchanged and is what is asserted: the lookup carries a
+     DEFAULT, so an absent field passes and a box the browser compels still
+     needs no rule of its own. */
+  const strFn = /function str\(field, maxLen\) \{[\s\S]*?\n    \}/.exec(rules);
+  ok(strFn && /request\.resource\.data\.get\(field, ''\)/.test(strFn[0])
+           && !/field in request\.resource\.data/.test(strFn[0]),
     'rules: str() makes a field optional BY PRESENCE, so a browser-side requirement needs no rule');
   ok(/str\('affiliation', 300\)/.test(rules),
     'rules: the affiliation is still bounded and still optional in profileShape — a profile written before the rule ' +
