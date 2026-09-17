@@ -362,8 +362,8 @@
   "sources": [
    "postings"
   ],
-  "n": 3,
-  "lastPosted": "2025-10-21"
+  "n": 4,
+  "lastPosted": "2026-09-15"
  },
  {
   "id": "arizona-state-university__w-p-carey-school-of-business__supply-chain-management",
@@ -1694,8 +1694,11 @@
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-15",
   "lat": 40.8089292,
   "lng": -73.9613646
  },
@@ -1849,8 +1852,11 @@
   "address": "2 W Loop Rd, New York, NY 10044, United States",
   "facultyUrl": "https://tech.cornell.edu/people/faculty/",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-17",
   "lat": 40.7557727,
   "lng": -73.9562112
  },
@@ -2936,8 +2942,11 @@
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-15",
   "lat": 33.7763465,
   "lng": -84.384841
  },
@@ -10906,11 +10915,21 @@
   "mapUrl": "https://goo.gl/maps/2MtIX",
   "facultyUrl": "https://mendoza.nd.edu/research-and-faculty/units/information-technology-analytics-and-operations/",
   "deptUrl": "https://mendoza.nd.edu/mendoza-directory/?department=IT%2C+Analytics%2C+and+Operations&employeetype=Faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-16",
   "lat": 41.6971267,
   "lng": -86.2361411
  },
@@ -10939,18 +10958,6 @@
   ],
   "n": 1,
   "lastPosted": "2014-10-22"
- },
- {
-  "id": "university-of-oklahoma____supply-chain-management",
-  "institution": "University of Oklahoma",
-  "department": "Supply Chain Management",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 2,
-  "lastPosted": "2026-03-18"
  },
  {
   "id": "university-of-oklahoma__michael-f-price-college-of-business__marketing-and-supply-chain-management",
@@ -10996,6 +11003,19 @@
   ],
   "n": 1,
   "lastPosted": "2024-10-17"
+ },
+ {
+  "id": "university-of-oklahoma__michael-f-price-college-of-business__supply-chain-management",
+  "institution": "University of Oklahoma",
+  "school": "Michael F. Price College of Business",
+  "department": "Supply Chain Management",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 3,
+  "lastPosted": "2026-09-17"
  },
  {
   "id": "university-of-oregon__charles-h-lundquist-college-of-business__operations-and-business-analytics",
