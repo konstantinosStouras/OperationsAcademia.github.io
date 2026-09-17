@@ -7023,6 +7023,18 @@ for (const w of [320, 360, 390, 430]) {
        row is not one of them. */
     { path: 'userDirectory/u-msg-9', data: {
         name: 'Never Signedin', email: 'never@quiet.example.org', first: 0, seen: 0 } },
+    /* …and one that signs in with ORCID, which shares no e-mail address at
+       all: the row carries NO `email` key and the address is the one the site
+       asked this person for. It is the only row here the E-mail column marks,
+       and until 2026-09-17 no browser check had ever rendered that mark —
+       the owner asked what the word on it meant, which is a question a source
+       regex cannot answer. Deliberately clear of `example.edu`, `com`, `inc`
+       and `candidate`: those four are the needles the Find checks above and
+       the fit check below count rows on, and a seed row is not a place to
+       move somebody else's arithmetic. */
+    { path: 'userDirectory/u-msg-10', data: { name: 'Orla Kelly',
+        contactEmail: 'orla@orcid.example.org', first: 7800, seen: 7800,
+        affiliation: 'Trinity College Dublin' } },
     { path: 'messages/u-msg-5', data: { uid: 'u-msg-5', lastAt: 4500, lastFrom: 'admin',
         needsAdmin: false, userUnread: 0 } },
 
@@ -7091,6 +7103,48 @@ for (const w of [320, 360, 390, 430]) {
     ok((await nameless.locator('td.oa-u-c-affiliation').textContent()).indexOf('Warwick') !== -1,
       '…beside the affiliation and the address the very same sync read out of the profile, ' +
       'which is what made the empty name a defect rather than a person with no name');
+
+    /* THE ADDRESS THE PERSON TYPED, AND THE MARK THAT SAYS SO (owner,
+       2026-09-17, of the roster: "why some users say Given here?"). An ORCID
+       sign-in shares no address, so this is the one row whose E-mail cell is
+       not what the account signs in with — and the mark has to say that
+       without a hover, which is the half only a browser can measure. */
+    const typed = q.locator('#oa-aa-users tbody tr', { hasText: 'orla@orcid.example.org' });
+    eq(await typed.locator('td.oa-u-c-email a').getAttribute('href'),
+      'mailto:orla@orcid.example.org',
+      'roster: an ORCID account is shown by the address it GAVE — the column read a dash for ' +
+      'every one of them until 2026-09-12');
+    eq((await typed.locator('.oa-u-given').textContent()).trim(), 'not a sign-in',
+      'roster: …and the mark says what it MEANS. `given` named no difference from the name and ' +
+      'the affiliation in the same row, both of which were given too, so it could only be read ' +
+      'by hovering it');
+    ok(/^Not a sign-in address\./.test(await typed.locator('.oa-u-given').getAttribute('title'))
+       && /ORCID does not/.test(await typed.locator('.oa-u-given').getAttribute('title')),
+      'roster: …with the WHY in the tooltip, naming the sign-in that shares no address — the ' +
+      'thread chip\'s own idiom two columns over, short words on the chip because the long ' +
+      'wording sets the column\'s width');
+    /* ON THE SAME LINE, measured as an OVERLAP rather than as matching
+       midpoints: the mark is a bordered box with its own padding, so its
+       middle legitimately sits a little below the address's, and a tight
+       threshold would be a guard on the padding rather than on the line the
+       column is held to. */
+    const markLine = await typed.locator('td.oa-u-c-email').evaluate((td) => {
+      const a = td.querySelector('a').getBoundingClientRect();
+      const m = td.querySelector('.oa-u-given').getBoundingClientRect();
+      return { after: Math.round(m.left - a.right),
+        sameLine: m.top < a.bottom && a.top < m.bottom,
+        caps: getComputedStyle(td.querySelector('.oa-u-given')).textTransform };
+    });
+    ok(markLine.after >= 0 && markLine.sameLine,
+      `roster: …sitting at the END of the address on its one line (${markLine.after}px after it, ` +
+      `overlapping it vertically: ${markLine.sameLine}), so the cell stays the one line the ` +
+      'column holds every other row to');
+    eq(markLine.caps, 'none',
+      'roster: …in sentence case, where the count line\'s single word stays capitals: three ' +
+      'words set in spaced capitals are read letter by letter');
+    eq(await q.locator('#oa-aa-users tbody .oa-u-given').count(), 1,
+      'roster: …and it is the MINORITY case that is marked. Every other row here is a real ' +
+      'sign-in address, and a mark on all of them would be noise rather than an answer');
 
     /* the thread column is the queue: Bea is waiting, the others are not —
        said in two words on the chip, with the long wording as its tooltip
@@ -7250,6 +7304,15 @@ for (const w of [320, 360, 390, 430]) {
     ok(averyRow.indexOf('""') !== -1 && averyRow.indexOf(seasonName(thisSeason)) === -1
        && averyRow.indexOf('not known') === -1,
       'roster CSV: …and an account that WITHDREW its profile gets an empty cell — no seasons is "no", where an unreadable list is "not known"');
+    /* …AND THE TYPED ADDRESS TRAVELS RAW. Which kind of address it is is a
+       fact about the ACCOUNT rather than about the address, and this column
+       is what a mail merge reads, so the mark belongs on the screen and
+       nowhere else. Recorded in the row builder's own comment and measured
+       here for the first time on 2026-09-17, when the mark was reworded. */
+    const orlaRow = okCsv.filter((r) => r.indexOf('orla@orcid.example.org') !== -1)[0] || '';
+    ok(orlaRow && orlaRow.indexOf('not a sign-in') === -1 && orlaRow.indexOf('given') === -1,
+      'roster CSV: the address an ORCID account GAVE is written raw, with no mark on it — a mail ' +
+      'merge reads this column, and which kind of address it is is a fact about the account');
 
     /* THE BAR STILL ENDS FLUSH. A fourth control makes the bar wrap at widths
        it did not before — measured, the download dropped onto a line of its

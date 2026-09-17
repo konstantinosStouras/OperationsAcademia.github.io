@@ -2224,13 +2224,13 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   background-color: var(--ok-soft, #edf7f1);
   border: 1px solid var(--ok, #2e7d5b);
 }
-/* THE ADDRESS THE PERSON GAVE, marked as theirs. An account that signs in
-   with ORCID shares no address at all, so the roster asks for one and shows
-   it here — and it must not read as the address the account signs in with,
-   which is what every other cell in this column is. Muted rather than
-   coloured: it qualifies the address beside it rather than flagging it, and
-   the ink is the token this file already holds to 4.5:1 on every surface it
-   is used on. Inline, so it sits at the end of the address on the one line
+/* THE ADDRESS THE PERSON TYPED, marked as not a sign-in. An account that
+   signs in with ORCID shares no address at all, so the roster asks for one
+   and shows it here — and it must not read as the address the account signs
+   in with, which is what every other cell in this column is. Muted rather
+   than coloured: it qualifies the address beside it rather than flagging it,
+   and the ink is the token this file already holds to 4.5:1 on every surface
+   it is used on. Inline, so it sits at the end of the address on the one line
    the cell is held to. */
 .oa-u-given,
 .oa-u-short {
@@ -2250,6 +2250,21 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
    counts, separated by the line's own middle dots. */
 .oa-u-short {
   margin-left: 0;
+}
+/* …and the e-mail mark is SENTENCE CASE, where the count line's is a single
+   word and stays capitals. It became a phrase on 2026-09-17, when the owner
+   asked what the old one-word `given` meant, and three words set in spaced
+   capitals are read letter by letter — the opposite of the at-a-glance
+   reading the rewording was for. A HAIR LARGER with it, because lowercase at
+   10.5px has a smaller x-height than capitals do and the mark would otherwise
+   read QUIETER than the word it replaced, which is the wrong direction for a
+   change made to be noticed. The weight, the ink, the ground and the border
+   are the shared rule's, so the two marks stay one family. */
+.oa-u-given {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  white-space: nowrap;
 }
 /* The two buttons at the end of a row are SMALL: they are pressed once in a
    while and read a hundred times, and at the site's button size they were
