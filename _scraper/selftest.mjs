@@ -7597,6 +7597,48 @@ async function testMandatoryPostingFields() {
     '…and the required attributes with them, the two name fields included, ' +
     'so the document never claims a requirement collect() does not enforce there');
 
+  /* …AND AN EDIT MAY NOT ERASE THE CHAIR PAIR (owner, 2026-09-17). The
+     exemption above is for a posting nobody ever gave a chair — every crawled
+     sheet mirror among them, which is what keeps the maintainer's hand-over
+     saveable — and deleting one the posting already names is a different act.
+     So the requirement is keyed on the STORED document, never on the boxes,
+     which are exactly what the poster may have just cleared.
+     EVERY needle below is read with the COMMENTS STRIPPED: the paragraphs
+     beside this code name `EDIT_HAD`, `remark()` and the mark's own class in
+     order to explain them, and a guard that could not tell the explanation
+     from the thing would have to be satisfied by deleting the explanation. */
+  const bareJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const bareForm = bareJs(form);
+  const bareCollect = bareJs(collect);
+  ok(/!EDIT_ID \|\| EDIT_HAD\.chairName/.test(bareCollect),
+    'collect(): the chair NAME is required of an edit whose posting already names one');
+  ok(/!EDIT_ID \|\| EDIT_HAD\.chairEmail/.test(bareCollect),
+    'collect(): and so is their E-MAIL');
+  const fillBody = bareJs(form.slice(form.indexOf('function fill('),
+    form.indexOf('function enterEditMode(')));
+  ok(/EDIT_HAD\.chairName = !!String\(v\.chairName \|\| ''\)\.trim\(\)/.test(fillBody) &&
+     /EDIT_HAD\.chairEmail = !!String\(v\.chairEmail \|\| ''\)\.trim\(\)/.test(fillBody),
+    'fill() reads it off the STORED posting — the box is what may have been cleared');
+  ok(/remark\('f-chairName'\)/.test(fillBody) && /remark\('f-chairEmail'\)/.test(fillBody),
+    'fill() puts the * mark and the required attribute BACK on a field an edit ' +
+    'may not empty — the converse of enterEditMode()\u2019s own rule, that the ' +
+    'marks and what collect() enforces say one thing');
+  const had = /var EDIT_HAD = \{([^}]*)\}/.exec(bareForm);
+  ok(!!had, 'the form records what the stored posting had');
+  eq((had[1].match(/(\w+):/g) || []).map((m) => m.slice(0, -1)), ['chairName', 'chairEmail'],
+    'and ONLY for the chair pair: the department page is the directory\u2019s rather ' +
+    'than the posting\u2019s and a characteristic is a fact about the school, so ' +
+    'neither carries the "you may not delete it" argument and both stay exempt');
+  const remark = bareForm.slice(bareForm.indexOf('function remark('),
+    bareForm.indexOf('function fill('));
+  ok(/setAttribute\('required'/.test(remark) &&
+     /oa-req oa-req-new/.test(remark) &&
+     /aria-hidden/.test(remark),
+    'remark() restores the attribute and a mark of the class enterEditMode() lifts, ' +
+    'aria-hidden like the six in the page — `required` is what a reader is TOLD');
+  ok(/querySelector\('\.oa-req'\)/.test(remark),
+    '…and stands down where the mark is still there, so a new posting never doubles one');
+
   /* the repeated school, judged by the shared rule */
   const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
   ok(S.schoolRepeatsInstitution('INSEAD', 'INSEAD'), 'INSEAD said twice is a repeat');
