@@ -375,7 +375,7 @@
     { u: 'University of Notre Dame', s: 'Mendoza College of Business',
       d: [{ n: 'Information Technology, Analytics and Operations', url: 'https://mendoza.nd.edu/mendoza-directory/?department=IT%2C+Analytics%2C+and+Operations&employeetype=Faculty' }] },
     { u: 'University of Oklahoma', s: 'Price College of Business',
-      d: [{ n: 'Marketing and Supply Chain Management', url: 'https://www.ou.edu/price/directory/areas#mscm' }] },
+      d: [{ n: 'Supply Chain Management', url: 'https://www.ou.edu/price/directory/areas#mscm' }] },
     { u: 'University of Oregon', s: 'Lundquist College of Business',
       d: [{ n: 'Operations and Business Analytics', url: 'https://business.uoregon.edu/directory/operations-business-analytics' }] },
     { u: 'University of Oxford', s: 'Saïd Business School',

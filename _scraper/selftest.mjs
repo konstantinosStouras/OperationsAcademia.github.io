@@ -2309,6 +2309,36 @@ async function testSchools() {
       `${seed} seeds Berkeley's school under the name the site publishes, not the retired one`);
   }
 
+  /* THE SAME RULING ONE LEVEL DOWN, ON A DEPARTMENT (owner, 2026-09-17:
+     "Oklahoma: just have Supply Chain Management"). Price College's own
+     directory heads the area "Marketing and Supply Chain Management", so
+     like Haas the SHORTER name is the one the site publishes and the longer
+     one is the alias. Scoped, so a genuine combined Marketing-and-SCM
+     department at some other school is untouched. */
+  for (const uni of ['University of Oklahoma', 'The University of Oklahoma']) {
+    eq(S.canonUnit('Marketing and Supply Chain Management', uni), 'Supply Chain Management',
+      `Oklahoma's longer form is folded onto the short one at "${uni}"`);
+    eq(S.canonUnit('Supply Chain Management', uni), 'Supply Chain Management',
+      `and the short one is its own canonical form at "${uni}"`);
+  }
+  eq(S.canonUnit('Marketing and Supply Chain Management', 'Maastricht University'),
+    'Marketing and Supply Chain Management',
+    'and the same name at another university is left exactly as it is');
+  eq(S.canonColumns({
+    institution: 'University of Oklahoma',
+    school: 'Michael F. Price College of Business',
+    unit: 'Marketing and Supply Chain Management',
+  }).unit, 'Supply Chain Management', 'through the three-column canon every ingest uses');
+  for (const seed of ['oa-institutions.js', 'oa-omlist.js']) {
+    /* comments stripped, the Haas pin's own reason: a header may name the
+       retired spelling while recording why it was retired */
+    const src = readFileSync(path.join(HERE, '..', 'assets', seed), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+    const ok2 = src.split(/\n/).filter((l) => /Oklahoma/.test(l));
+    ok(ok2.length > 0 && !ok2.some((l) => /Marketing and Supply Chain Management/.test(l)),
+      `${seed} seeds Oklahoma's department under the name the site publishes, not the retired one`);
+  }
+
   // …and it NEVER invents one
   eq(S.canonSchool('School of Wizardry'), 'School of Wizardry',
     'a school it does not know is left exactly as given');
@@ -3570,6 +3600,31 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
   ok(/buildMeta\(healed, \{ generated: meta\.generated \|\| '' \}\)/.test(bj),
     '...carrying the meta\'s `generated` rather than claiming a build has run');
 
+  /* THE VOCABULARY HAS THREE INPUTS, SO ITS REBUILD IS NOT BEHIND THE
+     POSTINGS' OWN "nothing moved" RETURN (2026-09-17). buildVocab reads the
+     healed rows, data/directory.json AND the oa-institutions.js seed, so an
+     alias that renames a department no SERVED posting spells the long way
+     still moves it: Oklahoma's long form lives in the seed and in one
+     archived posting and in no row of jobs.json. With the rebuild behind an
+     early return the mode said "every posting already names its place the
+     one way", wrote nothing, and left `vocab.json is exactly what the
+     postings and the two directories rebuild` red with no tool anywhere that
+     would turn it green — the guard-with-no-road-out shape this file records
+     four times. Pinned as an ORDER, both ways: the rebuild must come after
+     no such return, and each write must be conditional on its own file so a
+     run with nothing to do still writes nothing. */
+  const healBody = bj.slice(bj.indexOf('async function healNames()'),
+    bj.indexOf('async function main()'));
+  ok(healBody.length > 500, 'the heal mode is read as one whole function');
+  ok(!/if \(before === after\) \{[\s\S]{0,200}?return true;/.test(healBody),
+    '...and it does not stop on the postings alone before rebuilding the vocabulary');
+  ok(/if \(before !== after\) await writeFile\(JOBS, after\);/.test(healBody),
+    '...writing jobs.json only when a posting really moved');
+  ok(/if \(!sameVocab\(vocab, vocabBefore\)\) await writeFile\(VOCAB/.test(healBody),
+    '...and vocab.json only when the vocabulary really moved');
+  ok(healBody.indexOf('buildVocab(healed') > healBody.indexOf('const moved = healed.filter'),
+    '...with the vocabulary rebuilt on every run, whatever the postings did');
+
   const buildYml = await readFile(
     path.join(HERE, '..', '.github', 'workflows', 'oa-jobs-build.yml'), 'utf8');
   /* the RUN LINES, not a mention: the step comments name build-all.mjs too,
@@ -3886,15 +3941,6 @@ async function testVocabFile() {
        like the field tacked onto the department's own name. */
     "St. John's University|Business Analytics|Business Analytics and Information Systems",
     'University of Kansas|Analytics, Information, Operations|Analytics, Information, Operations research',
-    /* And one more, arrived on master with a posting published on 2026-09-17
-       and red on the base branch before this change touched it. Oklahoma's
-       Price College names a Division of Marketing and Supply Chain
-       Management, so the short form is probably the same division said
-       briefly rather than a second department -- but "probably" is what this
-       list is for, and merging two departments that are really two is the
-       error that cannot be undone from the data. The owner's to rule on; the
-       answer goes in SCOPED_UNIT_ALIASES. */
-    'University of Oklahoma|Marketing and Supply Chain Management|Supply Chain Management',
   ]);
   /* KEYED BY THE UNIVERSITY'S IDENTITY, not by the spelling the vocabulary
      files it under today — that is `pickForm`'s tie-break and it moves with

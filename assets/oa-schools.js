@@ -500,6 +500,16 @@
     'UT San Antonio': {                /* Carlos Alvarez College of Business */
       'Operations and Analytics': 'Operations and Analytics Department'
     },
+    'University of Oklahoma': {        /* Michael F. Price College of Business */
+      /* Owner, 2026-09-17, of the pair the selftest had been reporting since
+         a posting that morning: "Oklahoma: just have Supply Chain Management".
+         Price College's own directory heads the area "Marketing and Supply
+         Chain Management" (its page anchor is still #mscm), so this is the
+         Haas case rather than the Yale one: the site names the group the
+         shorter way because the owner says so, and the longer form is what
+         the workbook and the archive may still carry. */
+      'Marketing and Supply Chain Management': 'Supply Chain Management'
+    },
     'Yale University': {               /* School of Management */
       'Operations': 'Operations Department',
       'Operations Management': 'Operations Department'

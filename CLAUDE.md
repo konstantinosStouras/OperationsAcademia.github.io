@@ -9670,6 +9670,45 @@ modules free of the retired spelling; and the existing `businessSchoolOf`,
 short name, with the `applyEdits` respelling case typing the retired long
 form to show it still lands on the published one.
 
+### …and Oklahoma's department is Supply Chain Management, at the owner's word
+
+Owner, 2026-09-17, of the pair `selftest.mjs` had been reporting since a
+posting published that morning: *"Oklahoma: just have Supply Chain
+Management."* Price College's own directory heads the area **Marketing and
+Supply Chain Management** (its page anchor is still `#mscm`), so this is the
+Haas case rather than the Yale one: the site names the group the shorter way
+because the owner says so, and the longer form is what the archive and the
+seeds may still carry. The entry goes in `SCOPED_UNIT_ALIASES`, both seeds
+move with it (`oa-institutions.js` and `oa-omlist.js`, so a seed never offers
+a name the canon then rewrites), and the `AWAITING_OWNER` line comes out.
+
+**AND IT FOUND THE HEAL MODE'S OWN HOLE, which is the half worth keeping.**
+`build-jobs.mjs --heal-names` rebuilds `data/vocab.json` beside `jobs.json`,
+for the reason its own comment gives: the pickers must not go on offering the
+spelling the postings no longer use. That rebuild sat BEHIND the "every
+posting already names its place the one way" return, and the vocabulary has
+**three inputs, not one**: the healed rows, `data/directory.json` and the
+`oa-institutions.js` seed. Oklahoma's long form is in the seed and in one
+archived posting and in **no served posting at all**, so the mode reported
+nothing to do, wrote nothing, and left the selftest red on *"vocab.json is
+exactly what the postings and the two directories rebuild"* with no tool
+anywhere that would fix it: a guard firing on a legitimate change with no
+green road out, which is the outage shape this file already records four
+times. The rebuild is unconditional now and each of the three writes is
+conditional on its OWN file, so a run with nothing to do still writes
+nothing, and the closing line says which of the two it was.
+
+What moved: one archived posting (`import-legacy-tables.mjs --heal-names`),
+the vocabulary, and one directory row folded into another (887 rows to 886,
+818 department rows to 817). `data/jobs.json` did not move, since its three
+Oklahoma postings already said the short name. The directory row id is
+derived from the three names, so a `directoryEdits` correction filed against
+the old id would have to be made again on the merged card, exactly as with
+Haas. The third spelling the archive carries, *"Marketing, Supply Chain
+Management, and Healthcare"*, is a 2024 posting and is deliberately left
+alone: it is not in the vocabulary, nothing flags it, and folding a name
+nobody has ruled on is the guess this file refuses everywhere.
+
 **A heal mode is not enough on its own, because `data/` is rewritten from the
 sheets.** The importer must canonicalise ON WRITE as well, and originally it
 canonicalised nothing at all. Healing only `past-postings.json` there was
