@@ -3814,13 +3814,52 @@ not strip a hundred addresses off the roster until the next morning.
 
 The E-mail column read a dash for every ORCID account. It shows the address the
 row can be reached at now (`addressOf`, the sign-in one first) and where that
-is the typed one it carries a small **given** mark whose tooltip says so. One
+is the typed one it carries a small mark. One
 column, because two columns saying overlapping things is what this file forbids
 everywhere else; and marked, because presenting a typed address as what the
 account signs in with is the one thing the pin exists to prevent. The column's
 sort, the Find box and the CSV all read the same function, so none of them can
 disagree about who is reachable, and the delete confirmation names the same
 address the row shows rather than "(no address)".
+
+#### The mark says what it MEANS, not where the address came from
+
+Owner, 2026-09-17, of the roster: *"why some users say 'Given' here?"* The
+mark read **given**, and the question is the answer: **the word named no
+difference from anything**. The NAME and the AFFILIATION in the same row were
+given too. Every column on this roster but one is what the person said about
+themselves, so a reader had to HOVER to learn that the e-mail is the single
+field the rules normally pin to the account's own auth token, which is the one
+fact the mark exists to qualify.
+
+It reads **not a sign-in** now, which names the DIFFERENCE. Beside a mailto
+link it is the whole answer in one glance: you can write to them here, and it
+is not how the account gets in. The WHY (a provider that shares no address,
+ORCID being the one) stays in the `title`, which is the thread chip's own
+idiom two columns over: short words on the chip, because the long wording is
+what sets the column's width (the 2026-09-08 fit report), and the long wording
+in the tooltip for whoever wants it.
+
+**`unverified` was considered and refused**, and the reason is worth keeping:
+on this site that word already means an account that has never confirmed its
+address, a different state with a different remedy, which the count line beside
+it and the hint above it both talk about. One word for two states would have
+been a worse failure than the vague word it replaced.
+
+**And it is SENTENCE CASE**, alone among the roster's marks. The shared rule in
+`oa-ui.css` sets spaced capitals, which is right for the count line's single
+`INCOMPLETE` and wrong for three words: capitals at 10.5px with letter-spacing
+are read letter by letter, which is the opposite of the at-a-glance reading the
+rewording was for. `.oa-u-given` turns off the transform and the spacing and
+takes everything else from the shared rule, so the two marks stay one family.
+
+**What is deliberately NOT marked is every other row.** A `sign-in` chip on the
+200 rows that have one would be noise rather than an answer; the minority case
+is the one that needs saying, and the absence of a mark is what says the rest
+are the address the account really signs in as. The CSV is unchanged for the
+reason its own comment gives: it writes the raw address so a mail merge can use
+the column, and which kind it is is a fact about the account rather than about
+the address, so the screen is where it is marked.
 
 **And the count line says how many accounts still owe something** (`N
 incomplete`, counted over the WHOLE roster rather than the rows on screen, so
@@ -3847,7 +3886,10 @@ the card's one e-mail row both ways, the three submit guards, the withheld
 *Not now*, the unrendered field skipped rather than blanked; the session latch
 and its private-mode answer, the ask keyed on the gaps, the deletion forgetting
 it; the roster's one address definition read by the column, the sort, Find and
-the download, the given mark, the incomplete count and its needle, both marks
+the download, the mark's wording with both retired ones banned, its tooltip
+read through joined string literals so the pin is not really a pin on where the
+line was wrapped, the panel's hint naming what the mark says, the sentence
+case, the incomplete count and its needle, both marks
 styled in `oa-ui.css` alone; the key against the rules both ways with the
 forge-proof pin asserted UNTOUCHED; and the policy, the change log and this
 section), `node _scraper/sync-user-directory.mjs --selftest` (the sixth key,
@@ -3858,7 +3900,13 @@ brand-new ORCID sign-up asked for an affiliation AND an address with no *Not
 now* to press, a box of spaces refused for each, the profile and the roster row
 read back, a Google account that CLOSED the card asked again in a fresh session
 and not again in the same one, a complete account asked nothing at all, and the
-roster showing the given mark, the incomplete count and the Find needle.
+roster showing the incomplete count and the Find needle. The MARK itself is
+measured in the roster block, over a seeded ORCID-shaped row (no `email` key,
+an address the person gave) that no fixture carried until 2026-09-17, so the
+one thing a source regex cannot answer, what the mark says on screen, had never
+been rendered under test: its words, its tooltip, its sentence case, its place
+at the end of the address on the cell's one line, and that it is the only row
+of the roster wearing one.
 
 ### …and a Google or ORCID account is not signed in until it has answered
 

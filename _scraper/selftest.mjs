@@ -21587,6 +21587,35 @@ async function testRegistrationFields() {
   ok(/class="oa-u-given"/.test(usersSrc),
     'roster: an address the person GAVE is marked as theirs — the column would otherwise present ' +
     'it as what the account signs in with, which is the one thing the rules pin');
+  /* …AND THE MARK SAYS WHAT IT MEANS WITHOUT A HOVER. It read `given` until
+     2026-09-17, when the owner asked what the word meant: it named no
+     difference from anything, since the name and the affiliation in the same
+     row were given too. The mark names the DIFFERENCE instead — this is not a
+     sign-in address — and the why stays in the tooltip, the thread chip's own
+     idiom two columns over. Both halves are pinned, and the retired word is
+     banned with the comments stripped, since the paragraph beside it quotes
+     the word it replaced (the trap this file records for the analytics
+     page's "no iframes" check). */
+  const bareUsers = usersSrc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  ok(/>not a sign-in<\/span>/.test(bareUsers),
+    'roster: …and the mark says what it MEANS rather than where the address came from, so it ' +
+    'reads at a glance beside the mailto link and needs no hover');
+  ok(!/>given<\/span>/.test(bareUsers) && !/>unverified<\/span>/i.test(bareUsers),
+    'roster: …and neither retired wording is back — `given` named no difference from the name ' +
+    'and the affiliation beside it, and `unverified` is this site\'s word for an account that ' +
+    'has never confirmed its address, which is a different state with a different remedy');
+  /* The tooltip is a run of concatenated literals, so the pin JOINS adjacent
+     ones before reading it — otherwise the guard is really a guard on where
+     the author happened to wrap the line, and reflowing the sentence would
+     turn it red for no reason. */
+  const joinedUsers = usersSrc.replace(/'\s*\+\s*'/g, '');
+  ok(/title="Not a sign-in address\. [^"]*ORCID does not[^"]*">not a sign-in</.test(joinedUsers),
+    'roster: …with the long wording as the mark\'s TITLE, naming the sign-in that shares no ' +
+    'address — the short words set the column\'s width, so the explanation goes in the tooltip');
+  const rosterHint = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(/marked <em>not a sign-in<\/em>/.test(rosterHint) && !/marked <em>given<\/em>/.test(rosterHint),
+    'roster: …and the panel\'s own hint calls the mark what the mark now says, or the one ' +
+    'paragraph that explains the column names something the column does not draw');
   ok(/var short = state\.rows\.filter\(function \(r\) \{ return gapsOf\(r\)\.length; \}\)\.length;/.test(usersSrc)
      && /' incomplete<\/span>'/.test(usersSrc),
     'roster: the count line says how many accounts still owe something, counted over the WHOLE ' +
@@ -21599,6 +21628,10 @@ async function testRegistrationFields() {
        uiCss.slice(uiCss.indexOf('.oa-u-given,'), uiCss.indexOf('.oa-u-given,') + 600)),
     'roster: both marks are styled in oa-ui.css alone (v3.css does not restate the roster) and ' +
     'name their own ink');
+  ok(/\.oa-u-given \{[^}]*text-transform: none/.test(uiCss),
+    'roster: …and the e-mail mark is SENTENCE CASE, where the count line\'s single word stays ' +
+    'capitals: three words set in spaced capitals are read letter by letter, which is the ' +
+    'opposite of the at-a-glance reading the 2026-09-17 rewording was for');
 
   /* --- the key arrived WITH its rule, both ways -------------------------- */
   ok(/'contactEmail'\];/.test(rules.slice(rules.indexOf('function profileKeys()'),

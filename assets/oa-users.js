@@ -425,14 +425,32 @@
            column would be lying by omission if it showed only the first — it
            read "—" for every ORCID account until 2026-09-12 — and lying the
            other way if it presented the second as a sign-in address. So: one
-           column, and the typed one carries a mark saying it is the person's
-           own word. Two columns saying overlapping things is what this file
-           avoids everywhere else. Escaped into the href and the text alike. */
+           column, and the typed one carries a mark. Two columns saying
+           overlapping things is what this file avoids everywhere else.
+           Escaped into the href and the text alike.
+
+           THE MARK SAYS WHAT IT MEANS, WITHOUT A HOVER. It read `given` until
+           2026-09-17, and the owner asked what it meant — fairly, since the
+           word names no difference from anything: the NAME and the
+           AFFILIATION in the same row were given too, and every other reader
+           of this column would have to hover to learn that the e-mail is the
+           one field on the row the rules normally pin. So the mark names the
+           difference rather than the source: this address is not a sign-in.
+           A maintainer reading it beside a mailto link has the whole answer —
+           you can write to them here, and it is not how the account gets in.
+           `unverified` was refused for saying something else on this site:
+           an account that has never confirmed its address is a different
+           state, with its own remedy, and one word for two would be worse
+           than the word that was there. The WHY stays in the tooltip, which
+           is the thread chip's own idiom two columns over — short words on
+           the chip, the long wording as its title, because the long one sets
+           the column's width. */
         return '<a href="mailto:' + esc(a) + '">' + esc(a) + '</a>' +
-          (r.email ? '' : '<span class="oa-u-given" title="The address this ' +
-            'person gave us. They sign in with a provider that shares none, ' +
-            'so it is their own word rather than what the account signs in ' +
-            'as.">given</span>');
+          (r.email ? '' : '<span class="oa-u-given" title="Not a sign-in ' +
+            'address. This person signs in with a provider that shares no ' +
+            'e-mail address (ORCID does not), so the site asked them for one ' +
+            'and this is what they typed. It reaches them; it is not what ' +
+            'the account signs in with.">not a sign-in</span>');
       },
       sort: function (r) { return fold(addressOf(r)); }
     },
