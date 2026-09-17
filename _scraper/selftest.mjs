@@ -17360,6 +17360,29 @@ async function testRulesBudgetGuard() {
   ok(/ok\(!err,/.test(guard),
     'rules-budget: …and the positive assertion is that the largest document is ACCEPTED');
 
+  /* THE OWNER'S UPDATE IS THE PATH THAT BINDS, so a guard that drove creates
+     alone would report headroom the site does not have. Measured on
+     2026-09-17: a job posting has 8 spare bounded fields on its create and 6
+     on its update, so a ruleset can pass the create check while every EDIT and
+     every TAKEDOWN is refused -- the original outage with a green board. */
+  ok(/\.doc\(SEED\)\.update\(/.test(guard),
+    'rules-budget: the guard drives the owner\'s UPDATE too, which is dearer than the create');
+  ok(/withSecurityRulesDisabled/.test(guard),
+    'rules-budget: …seeding the stored document with the rules off, since the owner\'s write is what is under test');
+  ok(/its OWNER may EDIT it, the dearer path/.test(guard)
+      && /may not edit it either/.test(guard),
+    'rules-budget: …with the accepted edit AND the unverified refusal asserted on that path as well');
+  /* the candidate edit grows dearer with the document's AGE: statsUntouched()
+     compares the whole map and the nightly pass appends a day, up to DAY_CAP.
+     The create rule forbids the key, so the update pass is the only thing that
+     can reach that shape at all, and it must reach the WORST of it. */
+  ok(/out\.stats = \{/.test(guard) && /i < 120;/.test(guard),
+    'rules-budget: …and seeds a FULL year of stats, the worst case of the candidate edit path');
+  const cap = (await read('_scraper', 'build-candidate-stats.mjs'))
+    .match(/DAY_CAP\s*=\s*(\d+)/);
+  ok(cap && new RegExp('i < ' + cap[1] + ';').test(guard),
+    `rules-budget: …as many days as DAY_CAP (${cap ? cap[1] : '?'}) allows, read from the builder rather than typed twice`);
+
   /* --- 3. THE FIXTURE IS THE REAL WORST CASE ---------------------------
      A field added to a form and not to maximal() means the guard measures a
      cheaper document than a poster can send, so it reports headroom that is

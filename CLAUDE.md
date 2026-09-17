@@ -4220,11 +4220,34 @@ concludes SUCCESS, and a workflow with a failed job does not conclude success.
 So a ruleset over the ceiling cannot reach the live site: the guard going red
 is also the deploy not firing.
 
-**HOW MUCH HEADROOM THERE IS, MEASURED rather than estimated.** Adding bounded
-string fields to each shape check until the engine refused, against the
-committed rules on 2026-09-17: a job posting accepts **8** more, a candidate
-profile **7**, a placement **22**. So the next few fields are free and the
-tenth is not, which is worth knowing before adding one.
+**HOW MUCH HEADROOM THERE IS, MEASURED rather than estimated -- AND THE PATH
+THAT BINDS IS THE EDIT, NOT THE POST.** Adding bounded string fields to each
+shape check until the engine refused, against the committed rules on
+2026-09-17:
+
+| | create | the owner's update | update, a year of `stats` |
+|---|---|---|---|
+| `jobSubmissions` | 8 | **6** | -- |
+| `candidateSubmissions` | 7 | **5** | **4** |
+| `placementSubmissions` | 22 | **20** | -- |
+
+The update column is the one to read. An owner's update runs the same shape
+check PLUS the two-sided `*Unchanged` helpers and `isOwner(resource.data.uid)`,
+so it is dearer than the create beside it and crosses the ceiling two fields
+sooner. **A guard that drove creates alone would therefore report headroom the
+site does not have**: measured by putting it back, a ruleset with seven extra
+bounded fields on the job rule passes the create check and REFUSES every edit,
+which is the original outage again with a green board -- a poster who cannot
+correct a posting is told the same invented cause. So the guard drives both,
+and the demonstration is in the pins.
+
+**And the candidate edit gets dearer with the document's AGE, on no commit at
+all.** `statsUntouched()` compares the whole stored `stats` map, and
+`build-candidate-stats.mjs` appends a day a night up to `DAY_CAP` (120). So a
+profile that has been on the site a year costs more to edit than one filed
+today: 4 spare fields against 5. The CREATE rule forbids the key outright
+(`!('stats' in request.resource.data)`), which is why only the update pass can
+see this at all, and why it seeds a full year of it.
 
 ### Three ways it could come back, each now pinned
 
@@ -4246,12 +4269,32 @@ The fix is real and nothing about it was self-protecting, which is the reason
    of the bounds it replaced.
 
 **What the guard cannot see, said rather than left to be discovered.** It
-drives the three forms' CREATE path. An UPDATE evaluates against the merged
-document, `_storage.rules` is a separate ruleset with a budget of its own, and
-every other client-written collection (`profiles`, `directoryEdits`,
-`nameFixes`, `messages`, `usageSessions`) is measured by nothing. None of them
-is near the ceiling today, and none of them was measured before this outage
-either.
+drives the three forms' create AND owner-update paths, and nothing else.
+
+* **`rowOverrides` is tied for the tightest write in the file** and is measured
+  by nothing: 22 `str()` calls behind a 28-name `hasOnly`, with 8 spare fields,
+  the same as a job posting's create. It is also the only write path to the
+  three frozen archives, so a ruleset that crossed there would leave
+  `previous-markets`, `recent-faculty` and the universities map uncorrectable
+  with no other road to them.
+* `_storage.rules` is a separate ruleset with a budget of its own, read here
+  only as text. Measured against the storage emulator, its one client-writable
+  path takes **93** more conjuncts, so the gap is real and the exposure is not.
+* Every other client-written collection (`profiles`, which is the one write an
+  unverified account may make, `directoryEdits`, `nameFixes`, `messages`,
+  `usageSessions`, `feedback`) is measured by nothing. None is near the ceiling
+  today, and none was measured before this outage either.
+
+**AND TWO DEPLOY ROADS DO NOT PASS THE GUARD AT ALL.** It gates the automatic
+road only: `oa-deploy-rules.yml` publishes on "OA - checks" concluding success,
+and a workflow with a failed job does not conclude success. But a
+`workflow_dispatch` of that same workflow short-circuits the green-check
+condition by design, and the hand deploy this file prescribes
+(`firebase deploy --only firestore:rules --project operations-academia`) runs
+`check-project.mjs` as its only predeploy, which compares the project id and
+nothing else. So a ruleset published either way meets no budget check. Run the
+guard before either: `firebase emulators:exec --project demo-oa-rules --only
+firestore "node _functions/test/rules-budget.mjs"`.
 
 Tests: `testRulesBudgetGuard` in `_scraper/selftest.mjs` (the three ways back,
 each verified by putting the defect back) and
