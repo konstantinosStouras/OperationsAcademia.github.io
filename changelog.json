@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "chair-kept-on-edit",
+      "date": "2026-09-17",
+      "title": "Correcting a posting no longer lets its chair be removed",
+      "summary": "A new job posting has named the area coordinator or department chair, with their e-mail, since the 2nd of September. Correcting a posting afterwards could still clear both boxes and save. Now it cannot: a posting that names a chair goes on naming one, and the two boxes are marked as required while you edit it. A posting that never gave a chair, which includes every posting the site crawled from the job market sheet, is still corrected exactly as before and is never asked to invent one. The names are never published; they are stored only so the maintainer can reach the right person about the posting.",
+      "url": "/post-a-job"
+    },
+    {
       "id": "provider-gate-2026-09",
       "date": "2026-09-14",
       "title": "A Google or ORCID account finishes registering before it can sign in",

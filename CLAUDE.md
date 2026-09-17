@@ -9913,6 +9913,70 @@ browser half, the refusal with an error on each of the six, the preview naming
 the fold, the box keeping the repeat on blur, and the stored `school` empty
 with the line said once, is in `page-test.mjs`.
 
+### …and an edit may not ERASE the chair pair
+
+Owner, 2026-09-17, of the Area coordinator / Their e-mail boxes: *"make this
+information compulsory when a user is posting on OA."*
+
+**On a new posting it already was**, and had been since 2026-09-02 — the pair
+is two of the six above, both boxes carry `required` and a red `*`,
+`collect()` refuses with a message each, `testMandatoryPostingFields` pins all
+six both ways and `page-test.mjs` drives the refusal in a browser. Rendered in
+Chromium the two labels really do read *"Area coordinator or department chair
+\*"*. **Two screens show them unstarred and neither is a new posting**: the
+form under `?edit=`, where `enterEditMode()` lifts all six marks, and the
+frozen `/v2/post-a-job.html`, whose copy of the pair never had them and never
+will, by the rule the three trees are held to.
+
+**What was NOT compulsory is keeping one.** The exemption is scoped to
+`!EDIT_ID`, so a poster could open their own posting, delete the chair name
+and the address, and save — the one road by which a posting that named a chair
+ends up naming none. The change log's own promise for the 2026-09-02 rule is
+the argument for closing it: *"an edit is not asked to invent them."*
+**Inventing a chair and deleting one are different acts**, and only the first
+is what the exemption is for — every crawled sheet mirror carries no chair, and
+that is what keeps the maintainer's hand-over saveable.
+
+**So the requirement follows the STORED posting, never the boxes**, which are
+exactly what the poster may have just cleared: `EDIT_HAD` in
+`assets/oa-jobform.js`, set by `fill()` from the document it has just read, and
+`collect()` asks `!EDIT_ID || EDIT_HAD.chairName`. A posting with no chair
+saves exactly as before; one that names a chair goes on naming one.
+
+**And the MARK follows the requirement**, because `enterEditMode()` removes all
+six on the stated reasoning that *"a \* beside a field an edit may leave empty
+is a statement in the document that is not true"* — the converse is the same
+rule, so a field an edit may NOT leave empty has to carry one. `remark()` puts
+the attribute and a mark of the class `enterEditMode()` lifts back, and it runs
+in `fill()` rather than in `enterEditMode()`: that runs before the posting has
+been read and could only guess, while the form is visibly empty, so the mark
+arrives with the value it guards and nothing is claimed in between.
+
+**ONLY the chair pair, and the other two are left exempt on purpose.** The
+department-page link is the **directory's** record rather than the posting's
+(it is never even written into the submission document), and a characteristic
+is a fact about the school that may stop being true; neither carries the "you
+may not delete it" argument. `EDIT_HAD` therefore has exactly two keys, which
+the selftest pins, so widening it is a decision somebody has to make on
+purpose.
+
+**No rules change, and that is deliberate.** `chairName` is optional in
+`jobSubmissions`' `shapeOk` and must stay so: a presence clause would refuse
+every sheet mirror and — because `request.resource.data` is the MERGED document
+on an update — freeze every posting made before 2026-09-02 against its own
+owner, which is the `sync-user-directory` trap this file records. The form is
+where the six already live, and it is where this lives.
+
+Tests: the no-erase block of `testMandatoryPostingFields` (both legs of
+`collect()`, `EDIT_HAD` read off the stored document rather than the box, the
+two `remark()` calls, `EDIT_HAD`'s key list pinned to exactly the pair, and
+`remark()` restoring the attribute, the class and the `aria-hidden` while
+standing down where a mark is already there — every one verified by putting the
+defect back) and the edit block of `page-test.mjs`, which drives it in a real
+browser beside the posting that never had a chair: the two marks and the two
+attributes back, clearing the name refused with the error on the field and
+**nothing written**, and the corrected chair still saving.
+
 ## The posting form pre-fills from the site's records — and keeps them honest
 
 Beside the cascade, `post-a-job.html` mounts **`assets/oa-uniinfo.js`** (owner,

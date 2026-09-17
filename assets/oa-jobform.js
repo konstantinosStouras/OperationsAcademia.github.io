@@ -494,7 +494,14 @@
        characteristics and the chair pair below. Never under EDIT_ID: a
        posting that predates the requirement — every crawled mirror among
        them — must stay correctable without inventing a chair or a link its
-       poster never gave. enterEditMode() lifts the * marks to match. */
+       poster never gave. enterEditMode() lifts the * marks to match.
+
+       The CHAIR PAIR is one step firmer than this link and the
+       characteristics: an edit that already names a chair is still held to
+       it (EDIT_HAD), because not inventing one is a different thing from
+       deleting one. The link is the directory's rather than the posting's
+       and a characteristic is a fact about the school, so neither carries
+       the same argument. */
     var deptUrlEl = $('f-deptUrl');
     if (deptUrlEl) {
       var du = httpUrl(deptUrlEl.value);
@@ -516,9 +523,12 @@
       if (!out.characteristics.length && !firstBad) firstBad = $('f-chars');
     }
 
+    /* …and the pair is ALSO required of an edit that already names one
+       (EDIT_HAD, set by fill() from the stored document): the exemption is
+       for a posting nobody gave a chair, never a licence to delete one. */
     var chairNameEl = $('f-chairName');
     var chairName = String(chairNameEl.value || '').trim();
-    if (!EDIT_ID) {
+    if (!EDIT_ID || EDIT_HAD.chairName) {
       setError(chairNameEl, chairName
         ? '' : 'Please name the area coordinator or department chair.');
       if (!chairName && !firstBad) firstBad = chairNameEl;
@@ -528,7 +538,7 @@
     if (chairEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(chairEmail)) {
       setError($('f-chairEmail'), 'That does not look like an e-mail address.');
       if (!firstBad) firstBad = $('f-chairEmail');
-    } else if (!chairEmail && !EDIT_ID) {
+    } else if (!chairEmail && (!EDIT_ID || EDIT_HAD.chairEmail)) {
       setError($('f-chairEmail'), "Please give their e-mail address. It is never published.");
       if (!firstBad) firstBad = $('f-chairEmail');
     } else {
@@ -800,6 +810,31 @@
   })();
   var EDIT_REF = '';
 
+  /* What the STORED posting already named. An edit may not ERASE the chair
+     pair (owner, 2026-09-17); the new-posting rule below is keyed on these
+     rather than on the boxes, which are exactly what the poster may have
+     just cleared. Recorded by fill(), so before the document has loaded
+     nothing is claimed either way. */
+  var EDIT_HAD = { chairName: false, chairEmail: false };
+
+  /** Put back the `required` attribute and the * mark enterEditMode() lifted,
+      for one field an edit turns out not to be allowed to empty after all.
+      A no-op where the mark is still there, so it cannot double one up on a
+      new posting. */
+  function remark(id) {
+    var el = $(id);
+    if (!el) return;
+    el.setAttribute('required', 'required');
+    var lab = document.querySelector('label[for="' + id + '"]');
+    if (!lab || lab.querySelector('.oa-req')) return;
+    var star = document.createElement('span');
+    star.className = 'oa-req oa-req-new';
+    star.setAttribute('aria-hidden', 'true');   // `required` is what a screen
+    star.textContent = '*';                     // reader is told; this is ink
+    if (!/\s$/.test(lab.textContent)) lab.appendChild(document.createTextNode(' '));
+    lab.appendChild(star);
+  }
+
   /** Put a loaded document back into the form. The inverse of collect(). */
   function fill(v) {
     function set(id, value) { var el = $(id); if (el) el.value = value == null ? '' : value; }
@@ -850,6 +885,25 @@
     paintYearNote();                 // the posting's own season, never today's
 
     EDIT_REF = v.ref || '';
+
+    /* AN EDIT MAY NOT ERASE THE CHAIR PAIR (owner, 2026-09-17). The pair is
+       mandatory on a new posting and enterEditMode() lifts the rule so that a
+       posting which never named one — every crawled sheet mirror among them,
+       which is what keeps the maintainer's hand-over saveable — stays
+       correctable. That reason covers a chair NOBODY GAVE and not one the
+       poster is deleting, so the requirement follows the STORED value: a
+       posting that names a chair goes on naming one.
+
+       The mark follows the requirement, because enterEditMode() removed all
+       six on the reasoning that "a * beside a field an edit may leave empty is
+       a statement in the document that is not true" — and the converse is the
+       same rule: a field an edit may NOT leave empty has to carry one. It is
+       put back HERE, with the value it guards, rather than in enterEditMode(),
+       which runs before the document has been read and could only guess. */
+    EDIT_HAD.chairName = !!String(v.chairName || '').trim();
+    EDIT_HAD.chairEmail = !!String(v.chairEmail || '').trim();
+    if (EDIT_HAD.chairName) remark('f-chairName');
+    if (EDIT_HAD.chairEmail) remark('f-chairEmail');
 
     /* Keep the derived department line and its preview in step, and let the
        name fields settle into the spelling the SITE publishes — the same
@@ -904,7 +958,12 @@
        mandatory for a NEW posting only — collect() already skips the rule
        under EDIT_ID, and the marks must say the same thing: a * beside a
        field an edit may leave empty is a statement in the document that is
-       not true. */
+       not true.
+
+       All six come off HERE, before the posting has been read, because that
+       is the only honest answer while nothing is known about it. fill() puts
+       the chair pair's back if the stored posting names one — an edit may not
+       ERASE that (remark(), and EDIT_HAD in collect()). */
     Array.prototype.forEach.call(document.querySelectorAll('.oa-req-new'),
       function (n) { n.parentNode.removeChild(n); });
     ['f-school', 'f-unit', 'f-deptUrl', 'f-chairName', 'f-chairEmail'].forEach(function (id) {
