@@ -6141,6 +6141,13 @@ for (const w of [320, 360, 390, 430]) {
         createdAt: '2026-08-17T09:00:00.000Z' } },
     { path: 'jobSubmissions/u5', data: { status: 'sheet', year: 2026, institution: 'Mirror University',
         createdAt: '2026-08-16T09:00:00.000Z' } },
+    /* …and one the MAINTAINER has already taken down, so the drawer under
+       that tab is measurable on arrival rather than only after a press. It is
+       also marked reviewed, which is the case the drawer's own read must not
+       filter on: a posting ticked off and then taken down would otherwise be
+       hidden from the one control that can put it back. */
+    { path: 'jobSubmissions/u6', data: { status: 'hidden', year: 2026, institution: 'Hidden University',
+        reviewedAt: '2026-08-23T10:00:00.000Z', createdAt: '2026-08-15T09:00:00.000Z' } },
     { path: 'feedback/f1', data: { ticket: 'OA-260820-AAAA', status: 'open', forwarded: false,
         message: 'First open ticket', createdAt: '2026-08-20T10:00:00.000Z' } },
     { path: 'feedback/f2', data: { ticket: 'OA-260821-BBBB', status: 'open', forwarded: false,
@@ -6450,6 +6457,94 @@ for (const w of [320, 360, 390, 430]) {
       'admin area: the market-year filter is on screen for the user tab');
     eq(await q.locator('#oa-review-list a[href="post-a-job?edit=u1"]').count(), 1,
       'admin area: a user-added card opens the poster’s own form to correct it');
+
+    /* -- REMOVING A POSTING FROM THE QUEUE (owner, 2026-09-17: "allow the
+          admin to delete a job in the queue for review. Currently, we can
+          remove only jobs that are live listed"). The tab offered Open &
+          correct and Mark reviewed and nothing that took a posting off the
+          site, so the only removal the site had was the Take-down control on
+          the live listings. Every assertion below was verified by putting the
+          defect back. -- */
+    eq(await q.locator('article:has(a[href="post-a-job?edit=u1"]) button[data-act="takedown"]')
+      .count(), 1, 'admin area: a user-added card offers Take down');
+    /* The drawer is drawn from the seeded hidden posting, before anything is
+       pressed, and it is NOT in the list above — that list reads the live
+       statuses, which is exactly why the drawer has to exist. */
+    ok(await q.locator('#oa-review-list details.oa-rv-down').count() === 1
+       && /Taken down by you \(1\)/.test(
+         await q.textContent('#oa-review-list details.oa-rv-down summary')),
+      'admin area: and the ones already taken down sit in a drawer below, counted');
+    ok((await q.textContent('#oa-review-list .oa-rv-down')).indexOf('Hidden University') !== -1,
+      'admin area: the drawer names a posting the live list cannot carry');
+    ok((await q.textContent('#oa-review-count')) === '2 postings',
+      'admin area: and a taken-down posting is not one of the postings waiting');
+    /* THE DRAWER IGNORES THE SEASON TABS. It is not a queue; it is where one
+       posting somebody remembers has gone, and a season filter is what would
+       hide it. u6 is a 2026 posting, so selecting 2027 alone proves it. */
+    await q.click('#oa-review-years button[data-year="2027"]');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-review-count') || {}).textContent === '1 posting',
+      null, { timeout: 10000 });
+    ok((await q.textContent('#oa-review-list .oa-rv-down')).indexOf('Hidden University') !== -1,
+      'admin area: the drawer is not filtered by season — a 2026 take-down is still there under 2027');
+    await q.click('#oa-review-years button[data-year="*"]');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-review-count') || {}).textContent === '2 postings',
+      null, { timeout: 10000 });
+
+    /* Taking one down: a status change and never a delete, the echo stashed
+       for this browser's own jobs page, the card gone from the list, the
+       drawer grown, and the All tab still the tab that was chosen. */
+    q.once('dialog', (d) => d.accept());
+    await q.click('article:has(a[href="post-a-job?edit=u2"]) button[data-act="takedown"]');
+    await q.waitForFunction(() => {
+      const d = window.__fb.docs['jobSubmissions/u2'];
+      return d && d.status === 'hidden' && typeof d.updatedAt === 'string';
+    }, null, { timeout: 10000 });
+    ok(true, 'admin area: Take down writes status hidden — the maintainer’s own word, never a delete');
+    ok(await q.evaluate(() => {
+      try {
+        const m = JSON.parse(localStorage.getItem('oaFreshJobs') || '{}');
+        return !!(m.u2 && m.u2.removed === true);
+      } catch (e) { return false; }
+    }), 'admin area: and echoes the removal, so this browser’s own jobs page is already without it');
+    await q.waitForFunction(() =>
+      /Taken down by you \(2\)/.test(
+        (document.querySelector('#oa-review-list details.oa-rv-down summary') || {}).textContent || ''),
+      null, { timeout: 10000 });
+    ok(true, 'admin area: the posting moves into the drawer, with the count following');
+    ok((await q.textContent('#oa-review-count')) === '1 posting'
+       && await q.locator('#oa-review-list > article.oa-rv-card').count() === 1,
+      'admin area: and off the list above, which is down to the one still waiting');
+    ok(await q.locator('#oa-review-years button[data-year="*"].is-on').count() === 1,
+      'admin area: the All tab the maintainer chose is still the tab they are on');
+    ok(await q.locator('#oa-review-list details.oa-rv-down[open]').count() === 1,
+      'admin area: the drawer is opened, so the posting is seen arriving rather than vanishing');
+
+    /* …and back, because hiding is never a one-way door here. The card is
+       addressed by its DOCUMENT rather than by its place in the drawer, which
+       now holds two. */
+    await q.click('#oa-review-list .oa-rv-down article[data-id="u2"] button[data-act="restore"]');
+    await q.waitForFunction(() => {
+      const d = window.__fb.docs['jobSubmissions/u2'];
+      return d && d.status === 'queued';
+    }, null, { timeout: 10000 });
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-review-count') || {}).textContent === '2 postings'
+      && /Taken down by you \(1\)/.test(
+        (document.querySelector('#oa-review-list details.oa-rv-down summary') || {})
+          .textContent || ''),
+      null, { timeout: 10000 });
+    ok(true, 'admin area: Put it back returns it to the list — the removal is never a one-way door');
+    ok(await q.evaluate(() => {
+      try {
+        const m = JSON.parse(localStorage.getItem('oaFreshJobs') || '{}');
+        return !!m.u2 && m.u2.removed === false;
+      } catch (e) { return false; }
+    }), 'admin area: and cancels the removal echo, or this browser would go on hiding what was just put back');
+    eq(await q.evaluate(() => Object.keys(window.__fb.docs)
+      .filter((k) => k.indexOf('jobSubmissions/') === 0).length), 6,
+      'admin area: and nothing was ever deleted — all six documents are still there');
 
     // ticking one off writes the one stamp, and the tab count follows live
     await q.click('article:has(a[href="post-a-job?edit=u1"]) button[data-act="reviewed"]');

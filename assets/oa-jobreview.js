@@ -71,6 +71,21 @@
      withdrawn, hidden or removed one is not waiting for anything, and `sheet`
      is a tracking-sheet mirror, whose row is the crawled tab's own. */
   var LIVE = ['queued', 'published'];
+  /* A POSTING IS TAKEN DOWN, NEVER DELETED (owner, 2026-09-17: "allow the
+     admin to delete a job in the queue for review. Currently, we can remove
+     only jobs that are live listed"). The removal the site already had is the
+     Take-down control on the live listings (assets/oa-jobedit.js), and it is
+     a STATUS CHANGE for the reason build-jobs.mjs states in as many words:
+     deleting the document would leave the published row ORPHANED, carried on
+     by every build with nothing on the site able to correct or remove it, the
+     maintainer included. So this tab writes the same two words that file
+     writes, and the word says WHO did it — `hidden` is the maintainer's own
+     take-down, `withdrawn` the poster withdrawing their own. */
+  var HIDDEN = 'hidden';
+  /* …and putting one back is the status the form itself saves: post-a-job
+     writes `queued` on every edit it stores, and the build publishes `queued`
+     and `published`. */
+  var RESTORED = 'queued';
 
   /* The fields offered, in the order they are shown — THE POSTING FORM'S OWN
      QUESTIONS, in the posting form's own words, because they are the same
@@ -805,7 +820,15 @@
   /* What load() fetched, split by source, and which tab and season are on
      screen — kept so a decision can refresh the tab counts without re-reading
      anything. */
-  var state = { crawled: [], user: [], userError: false, source: 'crawled', year: '*' };
+  var state = {
+    crawled: [], user: [], userError: false, source: 'crawled', year: '*',
+    /* What the MAINTAINER has taken down on the user tab, and whether that
+       read answered. Deliberately NOT a third source tab: it is not a queue,
+       nothing is waiting on it, and a tab reading (3) beside the two that
+       count work to do would say the maintainer owes something they have
+       already dealt with. It is the door back, and it is drawn as one. */
+    hidden: [], hiddenError: false,
+  };
 
   /** THE NEXT MARKET LEADS (owner, 2026-08-23): 2028's postings before 2027's
       before 2026's, and within a market the newest advertisement first — the
@@ -1062,9 +1085,78 @@
       '<p class="oa-rv-actions">' +
         '<a class="button blue" href="' + EDIT_PATH + encodeURIComponent(it.id) +
           '">Open &amp; correct</a> ' +
-        '<button type="button" class="button" data-act="reviewed">Mark reviewed</button>' +
+        '<button type="button" class="button" data-act="reviewed">Mark reviewed</button> ' +
+        /* THE REMOVAL THIS TAB DID NOT HAVE. It is the same verb and the same
+           write as the Take-down control on the live listings, put where the
+           maintainer is already reading the posting; `oa-btn-ghost` is the
+           candidates panel's own class for the one destructive-sounding
+           button on a card, so the two surfaces look the same. */
+        '<button type="button" class="button oa-btn-ghost" data-act="takedown">' +
+          'Take down</button>' +
         '<span class="oa-form-msg" data-msg role="status"></span>' +
       '</p>';
+  }
+
+  /**
+   * A posting the maintainer has taken down, in the drawer below the list.
+   *
+   * ONE BUTTON, and Open & correct is deliberately not beside it: post-a-job
+   * writes `queued` on every save, so opening the form on a hidden posting
+   * and saving it would put the posting back as a side effect of correcting
+   * it. Two buttons that both un-hide a posting, one of them silently, is
+   * not what a drawer whose only job is the way back should offer. Put it
+   * back first, then correct it on the card above.
+   */
+  function downCardHtml(it) {
+    var d = it.data || {};
+    var line = joinDepartment(d.school, d.unit, d.institution) || d.department || '';
+    return '<header>' +
+        '<strong>' + esc(d.institution || 'Untitled posting') + '</strong>' +
+        (line ? ' <span class="oa-hint" style="display:inline">&mdash; ' +
+          esc(line) + '</span>' : '') +
+        '<span class="oa-fb-status is-closed">taken down</span>' +
+        '<p class="oa-hint">Posted ' + esc(fmtDate(d.createdAt) || '?') +
+          ' &middot; market ' + esc(marketLabel(String(d.year || '?'))) +
+          (d.ref ? ' &middot; ' + esc(d.ref) : '') +
+        '</p>' +
+      '</header>' +
+      '<p class="oa-rv-actions">' +
+        '<button type="button" class="button oa-btn-ghost" data-act="restore">' +
+          'Put it back</button>' +
+        '<span class="oa-form-msg" data-msg role="status"></span>' +
+      '</p>';
+  }
+
+  /**
+   * TAKING A POSTING DOWN, AND PUTTING IT BACK: one write, and the status is
+   * the whole of it.
+   *
+   * THE ECHO IS THE OTHER HALF, and admin-area.html loads oa-fresh.js for it.
+   * The build runs every twenty minutes, so for up to a cycle the row this
+   * panel has just taken down is still in the served data/jobs.json — and
+   * /jobs is exactly the page the maintainer opens next to check. So the
+   * take-down is echoed the way oa-jobedit.js echoes its own (`removed`,
+   * which filters the row out of what THIS browser renders), and the restore
+   * is echoed as an edit of NO FIELDS, which CANCELS it: an echo whose every
+   * echoed value already matches the served row has landed by definition, so
+   * the next overlay spends it and deletes it, leaving the served row exactly
+   * as the build publishes it. Nothing else can clear a removal echo, and an
+   * uncleared one would go on hiding, for the rest of its hour, the posting
+   * the maintainer had just put back.
+   */
+  function setStatus(db, it, status) {
+    return db.collection(SUBS_COL).doc(it.id).update({
+      status: status,
+      updatedAt: new Date().toISOString(),
+    }).then(function () {
+      if (!window.OAFresh) return;
+      var ref = (it.data || {}).ref || '';
+      if (status === HIDDEN) {
+        OAFresh.stash({ docId: it.id, ref: ref, removed: true });
+      } else {
+        OAFresh.stash({ docId: it.id, ref: ref, fields: {} });
+      }
+    });
   }
 
   /**
@@ -1144,9 +1236,46 @@
       card.innerHTML = userCardHtml(it);
 
       card.addEventListener('click', function (e) {
-        var b = e.target.closest('button[data-act="reviewed"]');
+        var b = e.target.closest('button[data-act]');
         if (!b) return;
+        var act = b.getAttribute('data-act');
         var msg = card.querySelector('[data-msg]');
+        var fail = function (err) {
+          msg.className = 'oa-form-msg is-err';
+          msg.textContent = 'Could not save (' +
+            esc((err && (err.code || err.message)) || 'error') + ').';
+          b.disabled = false;
+        };
+
+        if (act === 'takedown') {
+          var what = (it.data || {}).institution || it.id;
+          var line = joinDepartment((it.data || {}).school, (it.data || {}).unit,
+            (it.data || {}).institution) || (it.data || {}).department || '';
+          if (!window.confirm('Take this posting down?\n\n' +
+              what + (line ? '\n' + line : '') + '\n\n' +
+              'It stops appearing on the site within a few minutes. ' +
+              'Nothing is deleted: it moves to "Taken down by you" below, ' +
+              'one press from being put back.')) return;
+          b.disabled = true;
+          msg.className = 'oa-form-msg';
+          msg.textContent = 'Taking it down…';
+          setStatus(db, it, HIDDEN)
+            .then(function () {
+              /* Open the drawer BEFORE the repaint that follows, so the
+                 maintainer watches the posting arrive where it has gone
+                 rather than simply vanish. That is also the whole of the
+                 feedback here, and better than a line of text: the repaint
+                 takes the card with it, so a message written into the card
+                 would have nowhere to be. On the write that FAILED nothing
+                 moved, so nothing is opened either. */
+              downOpen = true;
+              return reloadUser(db);
+            })
+            ['catch'](fail);
+          return;
+        }
+
+        if (act !== 'reviewed') return;
         b.disabled = true;
         msg.className = 'oa-form-msg';
         msg.textContent = 'Saving…';
@@ -1160,15 +1289,103 @@
               'only takes it off the list.</p>';
             retire(db, 'user', it);
           })
-          .catch(function (err) {
-            msg.className = 'oa-form-msg is-err';
-            msg.textContent = 'Could not save (' + esc(err.code || err.message) + ').';
-            b.disabled = false;
-          });
+          ['catch'](fail);
       });
 
       list.appendChild(card);
     });
+  }
+
+  /* Whether the drawer below the user tab is open, remembered across a
+     repaint. render() rebuilds the element, so without this every re-read
+     snapped it shut — and a take-down repaints, which would fold the drawer
+     up at the one moment the maintainer is looking for it. The oa-news.js
+     removed-updates panel keeps its own state for the same reason. */
+  var downOpen = false;
+
+  /**
+   * THE WAY BACK. A posting the maintainer takes down leaves the list above
+   * — that list reads the LIVE statuses, so a hidden one cannot be in it —
+   * and would then be beyond every control on the site: /jobs does not carry
+   * it either, so there would be nothing anywhere left to press. Hiding is
+   * never a one-way door here (newsOverrides, rowOverrides, directoryEdits, a
+   * reader's own messages, a settled market year all have this shape), so the
+   * ones taken down sit in a collapsed panel below the list, one press from
+   * Put it back.
+   *
+   * IT IS NOT FILTERED BY SEASON. The tabs above narrow a queue; this is a
+   * drawer somebody opens looking for one posting they remember, and a season
+   * filter is exactly what would hide it.
+   *
+   * A POSTER'S OWN WITHDRAWAL IS NOT IN IT, which is the candidates panel's
+   * own rule — putting that back is theirs to do. It would also be an
+   * unbounded list with nothing to press: build-jobs.mjs rewrites every
+   * `withdrawn` document to `removed` on its next run, so the pile
+   * accumulates every posting ever withdrawn, in every season, for ever.
+   *
+   * A READ THAT FAILED SAYS SO. Drawing nothing would tell a maintainer who
+   * has just taken a posting down that it was deleted after all.
+   */
+  function renderTakenDown(db, list) {
+    if (state.hiddenError) {
+      var p = document.createElement('p');
+      p.className = 'oa-form-msg is-err';
+      p.textContent = 'Could not read the postings you have taken down — ' +
+        'reload to try again. Nothing has been deleted.';
+      list.appendChild(p);
+      return;
+    }
+    if (!state.hidden.length) return;
+
+    var d = document.createElement('details');
+    d.className = 'oa-rv-down';
+    d.open = downOpen;
+    d.addEventListener('toggle', function () { downOpen = d.open; });
+    var sum = document.createElement('summary');
+    sum.textContent = 'Taken down by you (' + state.hidden.length + ')';
+    d.appendChild(sum);
+
+    var body = document.createElement('div');
+    body.className = 'oa-rv-down-body';
+    var note = document.createElement('p');
+    note.className = 'oa-hint';
+    /* No em dash: the panel this copies (oa-news.js's removed updates) has
+       one, and the rule the site's own copy is held to elsewhere is that it
+       has none. */
+    note.textContent = 'Off the site. Nobody else sees these. Nothing is ' +
+      'deleted, and every season is listed here, not just the one the tabs ' +
+      'above are showing.';
+    body.appendChild(note);
+
+    state.hidden.forEach(function (it) {
+      var card = document.createElement('article');
+      card.className = 'oa-fb-card oa-rv-card';
+      /* named by its document, the candidates panel's own shape: the drawer
+         is where somebody comes looking for ONE posting, so the row has to
+         be addressable rather than positional */
+      card.setAttribute('data-id', it.id);
+      card.innerHTML = downCardHtml(it);
+      card.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-act="restore"]');
+        if (!b) return;
+        var msg = card.querySelector('[data-msg]');
+        b.disabled = true;
+        msg.className = 'oa-form-msg';
+        msg.textContent = 'Putting it back…';
+        setStatus(db, it, RESTORED)
+          .then(function () { return reloadUser(db); })
+          ['catch'](function (err) {
+            msg.className = 'oa-form-msg is-err';
+            msg.textContent = 'Could not put it back (' +
+              esc((err && (err.code || err.message)) || 'error') + ').';
+            b.disabled = false;
+          });
+      });
+      body.appendChild(card);
+    });
+
+    d.appendChild(body);
+    list.appendChild(d);
   }
 
   function render(db, docs, source) {
@@ -1233,11 +1450,18 @@
             'and are listed here until you mark them reviewed.</p>')
         : '<p class="oa-hint">Nothing waiting. Postings crawled from ' +
           'the tracking sheet appear here before they go on the site.</p>';
+      /* Even with nothing waiting: taking the LAST posting down empties this
+         list, and the drawer is where it went. */
+      if (source === 'user') renderTakenDown(db, list);
       return;
     }
 
     list.innerHTML = '';
-    if (source === 'user') { renderUserCards(db, docs); return; }
+    if (source === 'user') {
+      renderUserCards(db, docs);
+      renderTakenDown(db, list);
+      return;
+    }
     var cards = [];
     docs.forEach(function (doc, i) {
       var card = document.createElement('article');
@@ -1395,6 +1619,85 @@
     }
   }
 
+  /**
+   * The user tab's own read: the postings still WAITING, and the ones the
+   * maintainer has TAKEN DOWN.
+   *
+   * Three equality reads rather than one `in` query: the smallest query
+   * shape, and nothing here needs a composite index. Each half degrades on
+   * its own — a refused read of the live pair leaves an error on this tab and
+   * can never take the gate down with it, and a refused read of the hidden
+   * ones costs the drawer alone rather than the list it sits under.
+   */
+  function readUser(db) {
+    /* Live and not yet ticked off — the same rule as
+       _scraper/submissions-review.mjs's isWaiting. */
+    var waiting = Promise.all(LIVE.map(function (status) {
+      return db.collection(SUBS_COL).where('status', '==', status).get();
+    })).then(function (snaps) {
+      var items = [];
+      snaps.forEach(function (snap) {
+        snap.docs.forEach(function (d) {
+          var v = d.data() || {};
+          if (!v[REVIEWED_AT]) items.push({ id: d.id, data: v });
+        });
+      });
+      return items;
+    })['catch'](function () { return null; });
+
+    /* …and the drawer's own. Deliberately NOT filtered by `reviewedAt`: this
+       is everything the maintainer has taken down, and a posting they had
+       also ticked off would otherwise be hidden from the one control that can
+       put it back. */
+    var taken = db.collection(SUBS_COL).where('status', '==', HIDDEN).get()
+      .then(function (snap) {
+        return snap.docs.map(function (d) {
+          return { id: d.id, data: d.data() || {} };
+        });
+      })['catch'](function () { return null; });
+
+    return Promise.all([waiting, taken]).then(function (r) {
+      return { items: r[0], hidden: r[1] };
+    });
+  }
+
+  /** What readUser found, in the tab's state. `null` is a read that did not
+      answer — unknown, never an empty list, so a refusal can never read as
+      "you have taken nothing down". */
+  function setUser(r) {
+    state.userError = r.items === null;
+    state.user = (r.items || []).sort(rankBy(SOURCES.user));
+    state.hiddenError = r.hidden === null;
+    state.hidden = (r.hidden || []).sort(rankBy(SOURCES.user));
+  }
+
+  /**
+   * After a take-down or a restore, RE-READ the tab rather than moving the
+   * item between two local lists. That is the candidates panel's own answer
+   * (renderCandidates after every status change) and for the same reason: the
+   * list, the season tabs, the two tab counts and the drawer below all have
+   * to agree, and one read of a small collection the maintainer touches a few
+   * times a season is cheaper and safer than four places kept in step by
+   * hand — a restored posting rejoins the list above only if it is still
+   * waiting, which is a question only the documents can answer.
+   *
+   * It repaints on a season that still EXISTS: taking the last posting of a
+   * market down would otherwise leave the tab on a year whose postings have
+   * all gone (approveAll's own lesson, a few hundred lines up).
+   */
+  function reloadUser(db) {
+    return readUser(db).then(function (r) {
+      setUser(r);
+      /* '*' is the All tab, which is not a season and is therefore not in
+         yearsOf's answer: without this a take-down pressed while All was
+         selected dropped the maintainer back into one season, which is the
+         opposite of what they had chosen. */
+      var left = yearsOf(state.user, SOURCES.user);
+      var keep = state.year === '*' || left.indexOf(state.year) >= 0;
+      paint(db, 'user', keep ? state.year : null);
+    });
+  }
+
   function load(db) {
     var list = $('oa-review-list');
     list.innerHTML = '<p class="oa-hint">Loading…</p>';
@@ -1406,33 +1709,13 @@
           .filter(function (d) { return d && d.rowId; });
       });
 
-    /* The user-added postings: live and not yet ticked off — the same rule as
-       _scraper/submissions-review.mjs's isWaiting. Two equality reads rather
-       than one `in` query, one per LIVE status: the smallest query shape, and
-       nothing here needs a composite index. A refused read degrades to an
-       error state on ITS tab alone, so it can never take the gate down with
-       it. */
-    var user = Promise.all(LIVE.map(function (status) {
-      return db.collection(SUBS_COL).where('status', '==', status).get();
-    })).then(function (snaps) {
-      var items = [];
-      snaps.forEach(function (snap) {
-        snap.docs.forEach(function (d) {
-          var v = d.data() || {};
-          if (!v[REVIEWED_AT]) items.push({ id: d.id, data: v });
-        });
-      });
-      return items;
-    }).catch(function () { return null; });
-
-    Promise.all([crawled, user])
+    Promise.all([crawled, readUser(db)])
       .then(function (r) {
         /* Sorted here rather than in the query so no composite index is
            needed for collections this small; the comparator is rankBy's
            next-market-first, newest-advertisement-within-it. */
         state.crawled = r[0].sort(rankBy(SOURCES.crawled));
-        state.userError = r[1] === null;
-        state.user = (r[1] || []).sort(rankBy(SOURCES.user));
+        setUser(r[1]);
         paint(db, 'crawled', null);
       })
       .catch(function (err) {

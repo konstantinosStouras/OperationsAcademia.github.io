@@ -1519,6 +1519,132 @@ live pair is left out, with the tab measured beside the tile. Every one
 verified by putting the defect back; reverting `waitingJobs` alone turns the
 badge check red.
 
+### …and a posting can be taken off the site from the queue itself
+
+Owner, 2026-09-17: *"Also allow the admin to delete a job in the queue for
+review. Currently, we can remove only jobs that are live listed."*
+
+The **user-added** tab offered *Open & correct* and *Mark reviewed* and nothing
+that took a posting off the site. The crawled tab beside it has had **Reject**
+since the gate shipped, so the gap was one tab wide: the only removal the site
+had for a posting somebody had made through the form was the **Take down**
+control the live listings draw (`assets/oa-jobedit.js`) — which means the
+maintainer reading a posting in their own queue had to go and find the same
+posting on `/jobs` to be rid of it.
+
+**IT IS A STATUS CHANGE, NEVER A DELETE**, and `build-jobs.mjs` says why in as
+many words: *"taking a posting down is a STATUS CHANGE (withdrawn/hidden),
+never deleting its document. Deleting the document would leave the row orphaned
+and therefore preserved."* A deleted `jobSubmissions` document leaves the
+published row carried on by every build for ever, with nothing on the site able
+to correct or remove it, the maintainer included. So the card writes the two
+words the live listing already writes, and **the word says WHO**: `hidden` is
+the maintainer's own take-down, `withdrawn` is the poster withdrawing their own
+(`perm.admin ? 'hidden' : 'withdrawn'` in `oa-jobedit.js`, which is the one
+reason that ternary exists). Putting one back writes `queued`, which is what
+`post-a-job.html` saves on every edit and what the build publishes.
+
+The rules DO let the maintainer delete a submission outright (`allow delete: if
+isAdmin();`), and that is not the control this is: the one thing that uses it is
+the account-deletion sweep, which deletes a document only after it has measured
+that **no served file still names the account** (gate 2 of four). A button on a
+card can make no such measurement, so from a card the answer is always the
+status.
+
+**THE WAY BACK IS A DRAWER, because the list above cannot hold it.** That tab
+reads the LIVE statuses, so a hidden posting is not in it, and `/jobs` does not
+carry it either: without somewhere to press, taking a posting down from here
+would be the one-way door this repository refuses everywhere else
+(`newsOverrides`, `rowOverrides`, `directoryEdits`, a reader's own messages, a
+settled market year). So **Taken down by you (N)** is a collapsed panel below
+the list, one press from *Put it back*, and a take-down opens it — the posting
+is seen arriving where it has gone rather than simply vanishing, which is also
+the whole of the feedback, and better than a line of text the repaint would
+take with it.
+
+**AND IT IS THE WAY BACK FROM `/jobs` TOO**, which nothing had. The Take-down
+control on the live listings writes the same `hidden`, and it draws no restore
+of its own — a posting taken down there leaves `data/jobs.json` at the next
+build, so the card that carried the button is gone. The drawer lists the
+maintainer's take-downs wherever they were made, so it is now the MAINTAINER's
+only route back from either of them. (The poster has one of their own and
+always did: the rules let an owner write `queued`, so re-saving the posting in
+the form puts it back. That is not a hole the drawer opens, it is what makes a
+withdrawal reversible by the person who made it.)
+
+Four things the drawer does deliberately:
+
+* **it reads `hidden` and nothing else.** A poster's own withdrawal is not in
+  it, which is the candidates panel's own rule — putting that back is theirs to
+  do — and it would be an unbounded list with nothing to press: the build
+  rewrites every `withdrawn` document to `removed` on its next run, so the pile
+  accumulates every posting ever withdrawn, in every season, for ever;
+* **its read is NOT filtered by `reviewedAt`.** A posting ticked off and then
+  taken down would otherwise be invisible to the one control that can put it
+  back;
+* **it is not a third source tab.** Nothing is waiting on it, and a tab reading
+  (3) beside the two that count work to do would say the maintainer owes
+  something they have already dealt with;
+* **it is not filtered by season.** The tabs above narrow a queue; this is a
+  drawer somebody opens looking for one posting they remember, and a season
+  filter is exactly what would hide it. (The tabs themselves are unchanged, and
+  a repaint after a decision keeps the season — or the **All** tab — the
+  maintainer had chosen, which `'*'` needed a line of its own for, since it is
+  not a season and so is never in `yearsOf`'s answer.)
+
+**THE ECHO IS THE OTHER HALF, and the restore's echo is the half worth
+remembering.** `admin-area.html` loads `oa-fresh.js`, the build runs every
+twenty minutes, and `/jobs` is the page the maintainer opens next — so for up
+to a cycle the row just taken down is still in the served `data/jobs.json`. The
+take-down therefore echoes the removal exactly as `oa-jobedit.js` does
+(`removed: true`, which filters the row out of what THIS browser renders), and
+the restore echoes **an edit of NO FIELDS**, which CANCELS it: an echo whose
+every echoed value already matches the served row has landed by definition, so
+the next `overlay` spends it and deletes it. Nothing else can clear a removal
+echo, and an uncleared one would go on hiding, for the rest of its hour, the
+posting that had just been put back.
+
+**A decision RE-READS the tab** rather than moving the item between two local
+lists — the candidates panel's own answer, for the same reason: the list, the
+season tabs, the two tab counts and the drawer all have to agree, and whether a
+restored posting rejoins the list above depends on whether it is still waiting,
+which only the documents can answer. One read of a small collection the
+maintainer touches a few times a season is cheaper than four places kept in
+step by hand.
+
+**NO RULES CHANGE AND NO DEPLOY.** `jobSubmissions` is already `allow write: if
+isAdmin();` and that rule's own comment says *"The maintainer can hide a
+posting"*; a poster may write only `queued` or `withdrawn`, so `hidden` really
+is the maintainer's word. **And the badge needs nothing**, which the section
+above made even more true: `waitingJobs` is one `count()` over pending
+`jobReviews`, so a user-added posting was never in the "Admin area N" badge and
+taking one down cannot move it. The tab's own count IS the panel's word on
+itself, and the repaint recomputes it.
+
+**What is NOT changed, and is the owner's call.** A posting the crawled tab
+**rejects** leaves that queue for good: the panel lists `status == 'pending'`
+only, so there is no drawer and no way back from a Reject short of the Firestore
+console. That is the documented decision for a crawled posting (*"rejecting
+keeps it off for good"*) rather than an oversight, and a drawer for it is a
+second feature rather than this one.
+
+Tests: `testQueueTakedown` in `_scraper/selftest.mjs` (the status words against
+the live listing's own ternary, that no submission document is ever deleted, the
+build's `withdrawn` → `removed` rewrite as the reason the drawer reads `hidden`
+alone, the two statuses it must never query, the read unfiltered by the reviewed
+stamp, the two source tabs still two, both echoes with `oa-fresh.js`'s own
+`landed` short-circuit as the reason the second one cancels the first, the load
+order on the Admin area, the rules both ways, the badge's own query, the drawer
+styled in `oa-ui.css` alone with its own ink and a 42px handle, a refused read
+saying so, the kept **All** tab, and the copy) and the review block of
+`_scraper/page-test.mjs`, which drives it in a real browser against a seeded
+posting the maintainer had already taken down — the drawer counted on arrival,
+its posting absent from the list above and present under a season it does not
+belong to, then a take-down writing `hidden` with its echo stashed, the card
+moving into an opened drawer with both counts following, the **All** tab still
+the tab on screen, *Put it back* returning it with its echo cancelled, and all
+six documents still there at the end.
+
 ### A season is not six postings
 
 The queue's unit of work is a market, not a posting: the "2026 Jobs" tab alone
