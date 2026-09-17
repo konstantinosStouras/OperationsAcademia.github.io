@@ -42,6 +42,56 @@
 
   function show(el, on) { if (el) el.hidden = !on; }
 
+  /** The ID token the rules read, re-minted before this form writes
+      anything — OAAccounts.freshClaims is the one definition and says why.
+      Guarded because a browser holding an older cached copy of
+      oa-accounts.js has no such export, and a posting must not fail for
+      want of a refresh: there the write goes out exactly as it did before. */
+  function freshClaims(user) {
+    return OAAccounts.freshClaims
+      ? OAAccounts.freshClaims(user)
+      : Promise.resolve();
+  }
+
+  /** A REFUSED POSTING NAMES NO CAUSE THIS PAGE CANNOT KNOW.
+
+      It used to answer every permission-denied with "the site is not
+      accepting postings yet — its database rules have not been published",
+      which is one of several possible causes and was not the one that
+      happened: the rules were published and current, and the refusal was a
+      stale `email_verified` claim (owner, 2026-09-17, a real posting lost
+      that way). The copy sent the poster away to wait for a deploy that was
+      never coming, and the maintainer looking for one that had already run.
+
+      So the page ASKS rather than asserting. `freshClaims` reloads the
+      account from Firebase, so `needsVerification` is then the server's own
+      answer: an unconfirmed address is named, with the card that fixes it
+      opened beside the words; anything else is reported as the transient it
+      usually is, with the fresh token already in hand, so pressing Send
+      again is a real remedy rather than a hope. Nothing typed is lost either
+      way — the form is still on screen with every value in it, and saying so
+      is what stops a poster starting over somewhere else.
+
+      The rules are deliberately not mentioned: it is not a cause a reader
+      could act on, and naming it is what turned this into a support ticket.
+      The console still carries the code for whoever reads the log. */
+  function sayRefused() {
+    say('The site could not accept the posting — checking why…');
+    freshClaims().then(function () {
+      if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
+        say('Your e-mail address has not been confirmed yet, so the site could not ' +
+            'accept the posting. Press the link in the message from Operations ' +
+            'Academia — or ask for a new one on the card that has just opened — and ' +
+            'then press Send again. Nothing you have typed has been lost.', 'err');
+        if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
+        return;
+      }
+      say('The site could not accept the posting just now. Please press Send once ' +
+          'more — nothing you have typed has been lost. If it is refused again, ' +
+          'tell us through the Feedback page and we will post it for you.', 'err');
+    });
+  }
+
   function say(msg, kind) {
     var m = $('oa-msg');
     if (!m) return;
@@ -1018,10 +1068,18 @@
       say(EDIT_ID ? 'Saving…' : 'Sending…');
 
       OAAccounts.whenSignedIn(function (user) {
-        /* The file first, then the document that references it — the reverse
-           order could publish a posting pointing at an upload that failed. */
-        uploadAdvert(user, function (pct) {
-          say((EDIT_ID ? 'Saving… ' : 'Sending… ') + 'uploading the advert (' + pct + '%)');
+        /* THE TOKEN THE RULES READ, FIRST OF ALL. Both the Storage rule on the
+           advert and the Firestore rule on the posting are gated on
+           `verified()`, which reads `email_verified` off the ID TOKEN — cached
+           for up to an hour, so a session this page rightly treats as
+           confirmed can still hold a token minted before it was, and every
+           write bounces as permission-denied. See OAAccounts.freshClaims. */
+        freshClaims(user).then(function () {
+          /* The file first, then the document that references it — the reverse
+             order could publish a posting pointing at an upload that failed. */
+          return uploadAdvert(user, function (pct) {
+            say((EDIT_ID ? 'Saving… ' : 'Sending… ') + 'uploading the advert (' + pct + '%)');
+          });
         }).then(function (uploaded) {
           if (uploaded) {
             doc.adUploadPath = uploaded.adUploadPath;
@@ -1144,10 +1202,8 @@
             say('The file was refused — it must be a PDF or Word file under 15 MB, ' +
                 'and the site\u2019s storage rules must be published.', 'err');
           } else if (code === 'permission-denied') {
-            say(EDIT_ID
-              ? 'You are not allowed to change this posting.'
-              : 'The site is not accepting postings yet — its database rules have not been ' +
-                'published. Please try again later, or contact us.', 'err');
+            if (EDIT_ID) say('You are not allowed to change this posting.', 'err');
+            else sayRefused();
           } else {
             say('We could not send your posting. Please try again in a moment.' +
                 (code ? ' (' + code + ')' : ''), 'err');

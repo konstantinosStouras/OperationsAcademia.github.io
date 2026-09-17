@@ -16806,6 +16806,95 @@ async function testCandidateStats() {
    `email_verified` off the token through verified() on every user write with
    the one exception the registration form needs. The browser half is pinned
    further down, at the anchor marked FRONTEND PINS. */
+/* ------------------- a submission is never refused for a STALE TOKEN
+
+   Owner, 2026-09-17, relaying a job posting that had been refused: "The site
+   is not accepting postings yet \u2014 its database rules have not been
+   published." The rules were published and current \u2014 the deploy had run
+   twice that week \u2014 and the sentence was the FORM GUESSING at a
+   permission-denied it had no way to explain, which sent the poster away to
+   wait for a deploy that was never coming and the maintainer looking for one
+   that had already happened.
+
+   What refuses a submission is `verified()`, which reads `email_verified`
+   off the ID TOKEN, and the SDK caches that for up to an hour: a session the
+   page rightly treats as confirmed can still present a token minted before
+   it was, and then every write bounces. oa-accounts.js has recorded that
+   fact since the verification gate shipped, and the deletion survey has
+   re-minted the token before it reads since 2026-09-05 \u2014 the three
+   submission forms, the paths this site exists for, never did.
+
+   Both halves are pinned, over every form rather than the one that was
+   reported: the token is re-minted BEFORE anything is written, through the
+   one definition and never a private copy of it, and no form still names a
+   cause it cannot know. Every read here strips comments first, because the
+   paragraphs that record this quote the retired sentence. */
+async function testSubmissionTokenRefresh() {
+  const root = path.join(HERE, '..');
+  const strip = (src) => src
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
+  /* --- the one definition, exported ----------------------------------- */
+  const accounts = await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8');
+  ok(/freshClaims:\s*function\s*\(u\)\s*\{\s*return freshClaims\(u \|\| state\.user\)/
+      .test(strip(accounts)),
+    'oa-accounts.js: exports freshClaims, defaulting to the current session');
+  /* reload() THEN getIdToken(true): the first is what the page reads, the
+     second is what the rules read, and this file already calls the second
+     call "not optional" */
+  const def = /function freshClaims\(u\) \{[\s\S]*?\n  \}/.exec(strip(accounts));
+  ok(def && def[0].indexOf('reload') !== -1
+         && def[0].indexOf('getIdToken(true)') > def[0].indexOf('reload'),
+    'and it reloads the account and then forces a fresh token, in that order');
+
+  const FORMS = [
+    ['oa-jobform.js', 'posting', 'postings'],
+    ['oa-candidateform.js', 'profile', 'profiles'],
+    ['oa-placementform.js', 'placement', 'placements'],
+  ];
+
+  for (const [file, thing, plural] of FORMS) {
+    const src = strip(await readFile(path.join(root, 'assets', file), 'utf8'));
+    const where = `${file}:`;
+
+    /* --- the refresh runs first, and is the shared one ---------------- */
+    ok(/function freshClaims\(user\) \{\s*return OAAccounts\.freshClaims/.test(src),
+      `${where} calls the shared freshClaims and keeps no copy of its own`);
+    ok(src.indexOf('getIdToken') === -1 && src.indexOf('.reload(') === -1,
+      `${where} and re-mints the token nowhere itself, so the two cannot drift`);
+
+    /* The submit handler, from the LAST signed-in gate in the file (the
+       earlier ones load a posting for editing) to the end. */
+    const submit = src.slice(src.lastIndexOf('OAAccounts.whenSignedIn'));
+    const refresh = submit.indexOf('freshClaims(user)');
+    ok(refresh !== -1, `${where} re-mints the token inside the submit's signed-in gate`);
+
+    /* BEFORE every write, and before an upload: the Storage rule on the
+       advert and the CV is gated on the same verified(). */
+    for (const write of ['.set(', '.add(', '.update(', '.upload(', 'uploadAdvert(']) {
+      const at = submit.indexOf(write);
+      if (at === -1) continue;
+      ok(refresh < at, `${where} and does it before ${write.replace(/[.(]/g, '')}`);
+    }
+
+    /* --- and names no cause it cannot know --------------------------- */
+    ok(src.indexOf('database rules have not been') === -1,
+      `${where} no longer blames the database rules for a refused ${thing}`);
+    ok(src.indexOf(`not accepting ${plural} yet`) === -1,
+      `${where} nor claims the site is not accepting ${plural} yet`);
+    ok(/else sayRefused\(\);/.test(submit),
+      `${where} answers a refused NEW ${thing} by asking why`);
+    const asks = /function sayRefused\(\) \{[\s\S]*?\n  \}/.exec(src);
+    ok(asks && /freshClaims\(\)/.test(asks[0])
+            && /needsVerification\(\)/.test(asks[0]),
+      `${where} sayRefused reloads the account and then asks Firebase itself`);
+    ok(asks && /openVerifyPanel\(\)/.test(asks[0]),
+      `${where} and opens the card that confirms the address, not just words`);
+    ok(asks && /Nothing you have typed has been lost/.test(asks[0]),
+      `${where} and says the ${thing} is still on screen`);
+  }
+}
+
 async function testEmailVerification() {
   const root = path.join(HERE, '..');
   const site = 'https://www.operationsacademia.org';
@@ -21663,6 +21752,7 @@ if (isMain(import.meta.url)) {
   await testUniversityVisits();
   await testCandidateStats();
   await testEmailVerification();
+  await testSubmissionTokenRefresh();
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
   await testTopMenu();
