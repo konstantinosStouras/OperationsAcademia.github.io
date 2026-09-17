@@ -4105,15 +4105,24 @@ somewhere else. **The database rules are deliberately not mentioned at all**:
 it is not a cause a reader can act on, and naming it is what turned this into
 a support ticket. The console still carries the code for whoever reads the log.
 
-**What is NOT changed, and is the owner's to weigh.** A stale token is one
-hour wide, and the 2026-09-04 gate silenced the form for fourteen days, so the
-rest of that silence is most likely the OTHER half of the gate: every password
-account that existed before it was gated, and such an account meets the "Check
-your inbox" card rather than an error. The campaign that writes to them ran
-once, on 2026-09-05 (`oa-verify-existing.yml`, dispatch only); an account
-registered since and never confirmed is still held, correctly, and nothing
-here changes that. Whether to re-run that campaign is a decision about writing
-to the membership, not a code change.
+**AND IT IS NOT WHAT SILENCED THE FORM, which the next section records.** A
+stale token is one hour wide and the form had published nothing for fourteen
+days, so this was only ever part of an answer. The paragraph that stood here
+guessed at the rest, and guessed wrong: it read the remaining silence as the
+other half of the verification gate, every password account that existed
+before it was gated meeting the "Check your inbox" card rather than an error.
+The real cause was measured two hours later and is the section below, the
+ruleset past Firestore's evaluation budget. The guess is kept here because it
+is the shape of the mistake worth remembering: a plausible cause that explains
+part of a failure will be taken for the whole of it, and the only thing that
+settled this one was asking the real engine.
+
+The gate's own half is still true and still the owner's to weigh: the campaign
+that writes to those accounts ran once, on 2026-09-05
+(`oa-verify-existing.yml`, dispatch only); an account registered since and
+never confirmed is still held, correctly, and nothing here changes that.
+Whether to re-run that campaign is a decision about writing to the membership,
+not a code change.
 
 Tests: `testSubmissionTokenRefresh` in `_scraper/selftest.mjs`, over ALL THREE
 forms rather than the one that was reported: the export and the order of its
@@ -4125,6 +4134,172 @@ the values are still there. Every read strips comments first, because the
 paragraphs recording this quote the retired sentence, which is the trap this
 file already records for the analytics page's "no iframes" check. Both halves
 verified by putting the defect back.
+
+## The RULESET has an evaluation budget, and it had been spent
+
+THIS is why nothing could be posted. Owner, 2026-09-17, after the stale-token
+fix above had shipped and the poster had tried again: *"I still get an issue.
+The error message is different this time (I tried on Safari and Chrome)."*
+Deterministic, and the same in two browsers, which is what settled it: a
+session-shaped cause cannot be either.
+
+**Firestore evaluates at most 1000 expressions per request, and a request it
+cannot finish evaluating is answered with `permission-denied`** -- the same
+answer a rule that refuses the write gives. So a ruleset that grows past that
+ceiling does not fail loudly anywhere. Every affected write simply starts
+bouncing, and from the site it is indistinguishable from a rule saying no.
+
+`str()` was the whole of it. It resolved `request.resource.data[field]` FOUR
+times:
+
+    return !(field in request.resource.data)
+      || request.resource.data[field] == null
+      || (request.resource.data[field] is string
+          && request.resource.data[field].size() <= maxLen);
+
+and it is called two dozen times per write, so by 2026-09-17 a job posting cost
+more than a thousand expressions and every posting made through the form was
+refused, for two weeks, in every browser, whoever was signed in. A candidate
+profile was over the same ceiling. **Nothing in the repository could see it:
+the offline suite reads the rules as TEXT, and text cannot tell you what an
+expression costs.**
+
+Reproduced against the real engine, which names it outright:
+
+    Unable to evaluate the expression as the maximum of 1000 expressions
+    to evaluate has been reached. for 'create' @ L206
+
+and the signature is unmistakable once you know to look for it: **removing ANY
+ONE field makes the same document pass**, because each field removed buys back
+its own cost. An unverified account got a clean `false` instead, since
+`verified()` fails fast and never reaches the expensive part, which is why a
+VERIFIED poster was the one who hit it.
+
+**THE FIX IS CHEAPER EXPRESSIONS, NOT A SHORTER FILE.** The file is longer than
+it was, because this section's reasoning is written beside the rules; what came
+down is the cost of evaluating one request. `str()` and `list()` take ONE map
+lookup each now, bound to a local:
+
+    let v = request.resource.data.get(field, '');
+    return v == null || (v is string && v.size() <= maxLen);
+
+The READING is unchanged, which is what makes it safe: `get(field, '')` is `''`
+for an absent field, so an absent field still passes; a stored `null` is still
+allowed, which the builds depend on when they clear an upload's landing strip;
+and anything that is not a string, or is over its bound, is still refused.
+
+**A candidate profile needed more, and that is a change of guarantee rather
+than a refactor** (the owner chose it, 2026-09-17, from the options measured in
+the emulator). Thirty keys plus the talks map on four days stayed over the
+ceiling, so its bounds are grouped: the seven names by their total (1240, the
+sum of the seven bounds it replaces), the five links by theirs (2200), and a
+day's talk by its own (365, the sum of `TALK_MAXLEN`), with each upload slot
+behind ONE presence test so a profile with no upload pays two expressions
+rather than six calls. A non-string makes the concatenation error, which denies
+the write exactly as a type check would.
+
+**What is given up, in the rules' own comment as well as here**: a group is
+bounded by the TOTAL of the bounds it replaces, so a candidate could put 1200
+characters in `first` if the other six names were empty. Nothing is unbounded,
+the key set stays closed, and no group can carry more text than it could
+before. Per-field lengths are still applied where they always were in practice:
+each form's `MAX` table, and the build that publishes the row.
+
+### The guard that was missing, and what it measures
+
+`_functions/test/rules-budget.mjs`, in the `emulator` job of `oa-checks.yml`.
+It builds the LARGEST document each of the three forms can send -- every
+optional field present, both lists at their caps, every upload slot filled, the
+talks map on all four days -- and requires the create to be **accepted**, with
+the unverified refusal asserted beside it so the guard cannot be satisfied by
+making the rules permissive.
+
+**It is in that job deliberately, because that is the job that gates the
+deploy.** `oa-deploy-rules.yml` publishes the ruleset when "OA - checks"
+concludes SUCCESS, and a workflow with a failed job does not conclude success.
+So a ruleset over the ceiling cannot reach the live site: the guard going red
+is also the deploy not firing.
+
+**HOW MUCH HEADROOM THERE IS, MEASURED rather than estimated -- AND THE PATH
+THAT BINDS IS THE EDIT, NOT THE POST.** Adding bounded string fields to each
+shape check until the engine refused, against the committed rules on
+2026-09-17:
+
+| | create | the owner's update | update, a year of `stats` |
+|---|---|---|---|
+| `jobSubmissions` | 8 | **6** | -- |
+| `candidateSubmissions` | 7 | **5** | **4** |
+| `placementSubmissions` | 22 | **20** | -- |
+
+The update column is the one to read. An owner's update runs the same shape
+check PLUS the two-sided `*Unchanged` helpers and `isOwner(resource.data.uid)`,
+so it is dearer than the create beside it and crosses the ceiling two fields
+sooner. **A guard that drove creates alone would therefore report headroom the
+site does not have**: measured by putting it back, a ruleset with seven extra
+bounded fields on the job rule passes the create check and REFUSES every edit,
+which is the original outage again with a green board -- a poster who cannot
+correct a posting is told the same invented cause. So the guard drives both,
+and the demonstration is in the pins.
+
+**And the candidate edit gets dearer with the document's AGE, on no commit at
+all.** `statsUntouched()` compares the whole stored `stats` map, and
+`build-candidate-stats.mjs` appends a day a night up to `DAY_CAP` (120). So a
+profile that has been on the site a year costs more to edit than one filed
+today: 4 spare fields against 5. The CREATE rule forbids the key outright
+(`!('stats' in request.resource.data)`), which is why only the update pass can
+see this at all, and why it seeds a full year of it.
+
+### Three ways it could come back, each now pinned
+
+The fix is real and nothing about it was self-protecting, which is the reason
+`testRulesBudgetGuard` exists:
+
+1. **The step is deleted and nothing runs the guard** -- the "a builder nobody
+   calls silently stops running" shape this file already guards for elsewhere.
+   The selftest pins the exec line, its `demo-` project, its `CI: 'true'`, and
+   that the job carries no `continue-on-error`.
+2. **A field is added to a form and not to the guard's fixture**, so the guard
+   measures a cheaper document than a poster can send and reports headroom the
+   site does not have. The pin reads each form's own `MAX` table and requires
+   every field it bounds to be in that collection's fixture, so the drift fails
+   the build rather than the next posting.
+3. **`str()` is rewritten back**, or a grouped total is quietly widened. The
+   pin counts the resolutions of `request.resource.data` inside `str()` and
+   `list()` and requires exactly one, and holds each grouped bound to the sum
+   of the bounds it replaced.
+
+**What the guard cannot see, said rather than left to be discovered.** It
+drives the three forms' create AND owner-update paths, and nothing else.
+
+* **`rowOverrides` is tied for the tightest write in the file** and is measured
+  by nothing: 22 `str()` calls behind a 28-name `hasOnly`, with 8 spare fields,
+  the same as a job posting's create. It is also the only write path to the
+  three frozen archives, so a ruleset that crossed there would leave
+  `previous-markets`, `recent-faculty` and the universities map uncorrectable
+  with no other road to them.
+* `_storage.rules` is a separate ruleset with a budget of its own, read here
+  only as text. Measured against the storage emulator, its one client-writable
+  path takes **93** more conjuncts, so the gap is real and the exposure is not.
+* Every other client-written collection (`profiles`, which is the one write an
+  unverified account may make, `directoryEdits`, `nameFixes`, `messages`,
+  `usageSessions`, `feedback`) is measured by nothing. None is near the ceiling
+  today, and none was measured before this outage either.
+
+**AND TWO DEPLOY ROADS DO NOT PASS THE GUARD AT ALL.** It gates the automatic
+road only: `oa-deploy-rules.yml` publishes on "OA - checks" concluding success,
+and a workflow with a failed job does not conclude success. But a
+`workflow_dispatch` of that same workflow short-circuits the green-check
+condition by design, and the hand deploy this file prescribes
+(`firebase deploy --only firestore:rules --project operations-academia`) runs
+`check-project.mjs` as its only predeploy, which compares the project id and
+nothing else. So a ruleset published either way meets no budget check. Run the
+guard before either: `firebase emulators:exec --project demo-oa-rules --only
+firestore "node _functions/test/rules-budget.mjs"`.
+
+Tests: `testRulesBudgetGuard` in `_scraper/selftest.mjs` (the three ways back,
+each verified by putting the defect back) and
+`node _functions/test/rules-budget.mjs` under `firebase emulators:exec`, which
+is the only thing here that can see the cliff at all.
 
 ## The forum
 

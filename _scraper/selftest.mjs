@@ -17336,6 +17336,189 @@ async function testSubmissionTokenRefresh() {
   }
 }
 
+/**
+ * THE EVALUATION-BUDGET GUARD IS ARMED, AND CANNOT BE DISARMED QUIETLY.
+ *
+ * Firestore evaluates at most 1000 expressions per request and answers one it
+ * cannot finish with permission-denied -- the same answer a rule that refuses
+ * the write gives. In September 2026 the ruleset crossed that ceiling and every
+ * posting and every profile made through the forms was refused for two weeks,
+ * in every browser, while the form reported a cause of its own invention.
+ *
+ * _functions/test/rules-budget.mjs is the guard that ended it: it drives the
+ * largest document each form can send against the REAL engine, because the
+ * offline suite reads the rules as TEXT and text cannot tell you what an
+ * expression costs. This suite pins the guard IN PLACE. Three separate ways it
+ * could stop protecting the site, each of which leaves every check green:
+ *
+ *   1. the workflow step is deleted, so nothing runs it (the "a builder nobody
+ *      calls silently stops running" shape this file already guards for);
+ *   2. a field is added to a form and not to the guard's fixture, so the guard
+ *      measures a document smaller than the real worst case and reports
+ *      headroom the site does not have;
+ *   3. str()/list() are rewritten back to resolving the map four times, which
+ *      is the defect itself.
+ *
+ * Measured on the committed rules the day this shipped, by adding bounded
+ * fields until the engine refused: a job posting has 8 spare fields, a
+ * candidate profile 7, a placement 22. That is the margin these pins protect.
+ */
+async function testRulesBudgetGuard() {
+  const root = path.join(HERE, '..');
+  const read = (...p) => readFile(path.join(root, ...p), 'utf8');
+  const strip = (s) => String(s)
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
+  const guard = await read('_functions', 'test', 'rules-budget.mjs');
+  const checks = await read('.github', 'workflows', 'oa-checks.yml');
+  const rules = await read('_firestore.rules');
+
+  /* --- 1. THE STEP EXISTS, IN THE JOB WHOSE FAILURE GATES THE DEPLOY ----
+     oa-deploy-rules.yml publishes the ruleset on "OA - checks" concluding
+     SUCCESS, and a workflow with a failed job does not. So the guard only
+     protects the live rules while it is a step of that workflow. */
+  const emJob = checks.slice(checks.indexOf('\n  emulator:\n'));
+  ok(emJob.length > 800, 'oa-checks.yml: the emulator job was sliced');
+  ok(/firebase emulators:exec --project demo-oa-rules --only firestore "node _functions\/test\/rules-budget\.mjs"/
+      .test(emJob),
+    'oa-checks.yml: the emulator job runs the evaluation-budget guard, on a demo- project');
+  ok(/CI: 'true'/.test(emJob.slice(emJob.indexOf('The rules fit the evaluation budget'))),
+    'oa-checks.yml: …with CI set, so the guard\'s own skip is a failure rather than a pass');
+  ok(!/continue-on-error/.test(emJob),
+    'oa-checks.yml: and the job never continue-on-error, or a red guard would not gate the rules deploy');
+
+  /* --- 2. IT CANNOT REPORT GREEN HAVING RUN NOTHING --------------------
+     page-test.mjs's rule, and the trap the 2026-09-12 sweep found in three
+     spawned-selftest pins: a suite that prints its summary after a failure
+     reads exactly like a suite that passed. */
+  const skips = guard.match(/if \(process\.env\.CI\) \{[\s\S]*?process\.exit\(1\);/g) || [];
+  eq(skips.length, 2,
+    'rules-budget: BOTH skip paths (no emulator, missing deps) exit 1 under CI');
+  ok(/if \(fails\) process\.exitCode = 1;/.test(guard),
+    'rules-budget: a failed check sets a non-zero exit, which is what the workflow step reads');
+
+  /* the negative control, per collection: without it the whole guard could be
+     satisfied by making the rules permissive, which is the opposite of the
+     point */
+  ok(/and an UNVERIFIED password account still may not/.test(guard)
+      && /for \(const \[coll, doc\] of Object\.entries\(docs\)\) \{[\s\S]*?ok\(!!err/.test(guard),
+    'rules-budget: every collection is also asserted REFUSED for an unverified account');
+  ok(/ok\(!err,/.test(guard),
+    'rules-budget: …and the positive assertion is that the largest document is ACCEPTED');
+
+  /* THE OWNER'S UPDATE IS THE PATH THAT BINDS, so a guard that drove creates
+     alone would report headroom the site does not have. Measured on
+     2026-09-17: a job posting has 8 spare bounded fields on its create and 6
+     on its update, so a ruleset can pass the create check while every EDIT and
+     every TAKEDOWN is refused -- the original outage with a green board. */
+  ok(/\.doc\(SEED\)\.update\(/.test(guard),
+    'rules-budget: the guard drives the owner\'s UPDATE too, which is dearer than the create');
+  ok(/withSecurityRulesDisabled/.test(guard),
+    'rules-budget: …seeding the stored document with the rules off, since the owner\'s write is what is under test');
+  ok(/its OWNER may EDIT it, the dearer path/.test(guard)
+      && /may not edit it either/.test(guard),
+    'rules-budget: …with the accepted edit AND the unverified refusal asserted on that path as well');
+  /* the candidate edit grows dearer with the document's AGE: statsUntouched()
+     compares the whole map and the nightly pass appends a day, up to DAY_CAP.
+     The create rule forbids the key, so the update pass is the only thing that
+     can reach that shape at all, and it must reach the WORST of it. */
+  ok(/out\.stats = \{/.test(guard) && /i < 120;/.test(guard),
+    'rules-budget: …and seeds a FULL year of stats, the worst case of the candidate edit path');
+  const cap = (await read('_scraper', 'build-candidate-stats.mjs'))
+    .match(/DAY_CAP\s*=\s*(\d+)/);
+  ok(cap && new RegExp('i < ' + cap[1] + ';').test(guard),
+    `rules-budget: …as many days as DAY_CAP (${cap ? cap[1] : '?'}) allows, read from the builder rather than typed twice`);
+
+  /* --- 3. THE FIXTURE IS THE REAL WORST CASE ---------------------------
+     A field added to a form and not to maximal() means the guard measures a
+     cheaper document than a poster can send, so it reports headroom that is
+     not there. Computed from each form's own MAX table rather than a list
+     somebody remembered, so drift fails the build. */
+  const topKeys = (coll) => {
+    const i = guard.indexOf(coll + ': {');
+    ok(i > 0, `rules-budget: the fixture declares ${coll}`);
+    const body = guard.slice(guard.indexOf('{', i) + 1, guard.indexOf('\n    },', i));
+    let flat = '', depth = 0;
+    for (const ch of body) {
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
+      else if (!depth) flat += ch;
+    }
+    return new Set([...flat.matchAll(/(?:^|[\s,])([A-Za-z_][A-Za-z0-9_]*)\s*:/g)].map((m) => m[1]));
+  };
+  const maxKeys = (src) => {
+    const i = src.indexOf('MAX = {');
+    let depth = 0, j = src.indexOf('{', i);
+    const start = j;
+    for (; j < src.length; j++) {
+      if (src[j] === '{') depth++;
+      else if (src[j] === '}') { depth--; if (!depth) break; }
+    }
+    return [...strip(src.slice(start + 1, j))
+      .matchAll(/(?:^|[\s,{])([A-Za-z_][A-Za-z0-9_]*)\s*:/g)].map((m) => m[1]);
+  };
+  for (const [coll, form] of [['jobSubmissions', 'oa-jobform'],
+                              ['candidateSubmissions', 'oa-candidateform'],
+                              ['placementSubmissions', 'oa-placementform']]) {
+    const fixture = topKeys(coll);
+    const bounded = maxKeys(await read('assets', form + '.js'));
+    ok(bounded.length >= 10, `${form}: its MAX table was read (${bounded.length} fields)`);
+    const missing = bounded.filter((k) => !fixture.has(k));
+    eq(missing.join(' '), '',
+      `rules-budget: every field ${form} bounds is in the ${coll} fixture, so the guard measures the worst case`);
+  }
+  /* …and the dear BRANCHES: an upload slot and a talk day are behind a
+     presence test, so a fixture without them measures the cheap path */
+  ok(/adUploadPath:/.test(guard) && /cvUploadPath:/.test(guard) && /rsUploadPath:/.test(guard),
+    'rules-budget: the fixture fills every upload slot, which is the dearer branch of each rule');
+  for (const day of ['Sunday', 'Monday', 'Tuesday', 'Wednesday']) {
+    ok(new RegExp(day + ':\\s*\\{ at:').test(guard),
+      `rules-budget: …and the talks map on ${day}, since each day has its own early-out`);
+  }
+
+  /* --- 4. THE FIX ITSELF: ONE MAP LOOKUP, NOT FOUR --------------------- */
+  const fn = (name) => {
+    const m = new RegExp('function ' + name + '\\([\\s\\S]*?\\n    \\}').exec(rules);
+    ok(m, `_firestore.rules: ${name}() was found`);
+    return m ? strip(m[0]) : '';
+  };
+  for (const name of ['str', 'list']) {
+    const body = fn(name);
+    eq((body.match(/request\.resource\.data/g) || []).length, 1,
+      `_firestore.rules: ${name}() resolves request.resource.data ONCE — four times is the outage`);
+    ok(/\.get\(field, /.test(body),
+      `_firestore.rules: …through get(field, default), so an absent field still passes`);
+  }
+  ok(/v == null \|\| \(v is string/.test(fn('str')),
+    '_firestore.rules: str() still reads a stored null as "cleared" and still refuses a non-string');
+
+  /* --- 5. A GROUPED BOUND IS THE SUM OF THE BOUNDS IT REPLACED ---------
+     The grouping is what got a candidate profile under the ceiling, and its
+     cost is stated in the rules: a candidate could put 1200 characters in
+     `first` if the other six names were empty. What must not happen quietly
+     is the TOTAL being widened, since nothing else bounds these in the rules.
+     The addends are the per-field bounds candShapeOk carried before the
+     grouping; the sum is pinned so raising it has to be deliberate. */
+  const NAMES = [100, 100, 220, 160, 220, 220, 220];   // first last affiliation position institution school unit
+  const LINKS = [600, 600, 600, 200, 200];             // cvUrl rsUrl webUrl email personalEmail
+  const total = (a) => a.reduce((n, v) => n + v, 0);
+  ok(new RegExp('\\.size\\(\\) <= ' + total(NAMES) + ';').test(fn('candNamesOk')),
+    `_firestore.rules: candNamesOk bounds the seven names by ${total(NAMES)}, the sum of the bounds it replaced`);
+  ok(new RegExp('\\.size\\(\\) <= ' + total(LINKS) + ';').test(fn('candLinksOk')),
+    `_firestore.rules: candLinksOk bounds the five links by ${total(LINKS)}, likewise`);
+  /* the key set stays closed either way, which is what keeps a group from
+     becoming a way to add fields */
+  for (const n of [34, 35, 25]) {
+    ok(new RegExp('keys\\(\\)\\.size\\(\\) <= ' + n + '\\b').test(rules),
+      `_firestore.rules: the create key ceiling of ${n} is still there`);
+  }
+
+  /* --- 6. AND THE DOCUMENTATION SAYS WHAT THE GUARD DOES --------------- */
+  const md = await read('CLAUDE.md');
+  ok(/1000/.test(md) && /rules-budget\.mjs/.test(md),
+    'CLAUDE.md: the ceiling and the guard that measures it are both recorded');
+}
+
 async function testEmailVerification() {
   const root = path.join(HERE, '..');
   const site = 'https://www.operationsacademia.org';
@@ -22252,6 +22435,7 @@ if (isMain(import.meta.url)) {
   await testCandidateStats();
   await testEmailVerification();
   await testSubmissionTokenRefresh();
+  await testRulesBudgetGuard();
   await testJobComments();
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
