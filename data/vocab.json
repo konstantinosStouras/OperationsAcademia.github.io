@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-15T10:33:49.934Z",
+ "generated": "2026-09-17T20:32:20.714Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -18,6 +18,10 @@
    "n": 7
   },
   {
+   "v": "Arizona State University",
+   "n": 6
+  },
+  {
    "v": "The Hong Kong Polytechnic University",
    "n": 6
   },
@@ -30,10 +34,6 @@
    "n": 6
   },
   {
-   "v": "Arizona State University",
-   "n": 5
-  },
-  {
    "v": "University of Hong Kong",
    "n": 5
   },
@@ -43,6 +43,10 @@
   },
   {
    "v": "Auburn University",
+   "n": 4
+  },
+  {
+   "v": "Cornell University",
    "n": 4
   },
   {
@@ -103,10 +107,6 @@
   },
   {
    "v": "Clarkson University",
-   "n": 3
-  },
-  {
-   "v": "Cornell University",
    "n": 3
   },
   {
@@ -186,6 +186,10 @@
    "n": 3
   },
   {
+   "v": "University of Oklahoma",
+   "n": 3
+  },
+  {
    "v": "University of Pennsylvania",
    "n": 3
   },
@@ -247,6 +251,10 @@
   },
   {
    "v": "Coastal Carolina University",
+   "n": 2
+  },
+  {
+   "v": "Columbia University",
    "n": 2
   },
   {
@@ -450,7 +458,7 @@
    "n": 2
   },
   {
-   "v": "University of Oklahoma",
+   "v": "University of Notre Dame",
    "n": 2
   },
   {
@@ -674,10 +682,6 @@
    "n": 1
   },
   {
-   "v": "Columbia University",
-   "n": 1
-  },
-  {
    "v": "Concordia University Chicago",
    "n": 1
   },
@@ -775,6 +779,10 @@
   },
   {
    "v": "Georgia Gwinnett College",
+   "n": 1
+  },
+  {
+   "v": "Georgia Institute of Technology",
    "n": 1
   },
   {
@@ -1426,10 +1434,6 @@
    "n": 1
   },
   {
-   "v": "University of Notre Dame",
-   "n": 1
-  },
-  {
    "v": "University of Pittsburgh",
    "n": 1
   },
@@ -1699,10 +1703,6 @@
   },
   {
    "v": "George Washington University",
-   "n": 0
-  },
-  {
-   "v": "Georgia Institute of Technology",
    "n": 0
   },
   {
@@ -2144,6 +2144,10 @@
    "n": 3
   },
   {
+   "v": "W. P. Carey School of Business",
+   "n": 3
+  },
+  {
    "v": "Antai College of Economics and Management",
    "n": 2
   },
@@ -2196,6 +2200,10 @@
    "n": 2
   },
   {
+   "v": "Mendoza College of Business",
+   "n": 2
+  },
+  {
    "v": "NUS Business School",
    "n": 2
   },
@@ -2209,10 +2217,6 @@
   },
   {
    "v": "Tippie College of Business",
-   "n": 2
-  },
-  {
-   "v": "W. P. Carey School of Business",
    "n": 2
   },
   {
@@ -2261,6 +2265,14 @@
   },
   {
    "v": "College of Business and Economics",
+   "n": 1
+  },
+  {
+   "v": "Columbia Business School",
+   "n": 1
+  },
+  {
+   "v": "Cornell Tech",
    "n": 1
   },
   {
@@ -2384,11 +2396,11 @@
    "n": 1
   },
   {
-   "v": "Mendoza College of Business",
+   "v": "Miami Herbert Business School",
    "n": 1
   },
   {
-   "v": "Miami Herbert Business School",
+   "v": "Michael F. Price College of Business",
    "n": 1
   },
   {
@@ -2433,6 +2445,10 @@
   },
   {
    "v": "Sauder School of Business",
+   "n": 1
+  },
+  {
+   "v": "Scheller College of Business",
    "n": 1
   },
   {
@@ -2577,14 +2593,6 @@
   },
   {
    "v": "Coller School of Management",
-   "n": 0
-  },
-  {
-   "v": "Columbia Business School",
-   "n": 0
-  },
-  {
-   "v": "Cornell Tech",
    "n": 0
   },
   {
@@ -2808,10 +2816,6 @@
    "n": 0
   },
   {
-   "v": "Michael F. Price College of Business",
-   "n": 0
-  },
-  {
    "v": "Mike Ilitch School of Business",
    "n": 0
   },
@@ -2901,10 +2905,6 @@
   },
   {
    "v": "Samuel Curtis Johnson Graduate School of Management",
-   "n": 0
-  },
-  {
-   "v": "Scheller College of Business",
    "n": 0
   },
   {
@@ -3059,7 +3059,7 @@
   },
   {
    "v": "Supply Chain Management",
-   "n": 45
+   "n": 46
   },
   {
    "v": "BA",
@@ -3083,7 +3083,7 @@
   },
   {
    "v": "Operations Management",
-   "n": 10
+   "n": 11
   },
   {
    "v": "Data Analytics",
@@ -3130,6 +3130,10 @@
    "n": 4
   },
   {
+   "v": "Information Systems",
+   "n": 4
+  },
+  {
    "v": "SCM/Logistics",
    "n": 4
   },
@@ -3143,10 +3147,6 @@
   },
   {
    "v": "Data Analytics and Decision Sciences",
-   "n": 3
-  },
-  {
-   "v": "Information Systems",
    "n": 3
   },
   {
@@ -3530,6 +3530,10 @@
    "n": 1
   },
   {
+   "v": "Decision, Risk and Operations",
+   "n": 1
+  },
+  {
    "v": "Department of Decision and Information Sciences",
    "n": 1
   },
@@ -3663,6 +3667,10 @@
   },
   {
    "v": "Information Technology",
+   "n": 1
+  },
+  {
+   "v": "Information Technology, Analytics, and Operations",
    "n": 1
   },
   {
@@ -3959,6 +3967,10 @@
   },
   {
    "v": "Operations Research and Financial Engineering",
+   "n": 1
+  },
+  {
+   "v": "Operations Research and Information Engineering",
    "n": 1
   },
   {
@@ -4266,10 +4278,6 @@
    "n": 0
   },
   {
-   "v": "Decision, Risk, and Operations",
-   "n": 0
-  },
-  {
    "v": "Decisions, Operations and Technology Management",
    "n": 0
   },
@@ -4363,10 +4371,6 @@
   },
   {
    "v": "Information Systems, Statistics, and Management Science",
-   "n": 0
-  },
-  {
-   "v": "Information Technology, Analytics and Operations",
    "n": 0
   },
   {
@@ -4567,10 +4571,6 @@
   },
   {
    "v": "Operations Research and Industrial Engineering",
-   "n": 0
-  },
-  {
-   "v": "Operations Research and Information Engineering",
    "n": 0
   },
   {
@@ -4870,6 +4870,7 @@
     "W. P. Carey School of Business"
    ],
    "units": [
+    "Information Systems",
     "IS",
     "Learning, Optimization, and Decision Analytics",
     "Supply Chain Management"
@@ -4880,6 +4881,7 @@
      "Learning, Optimization, and Decision Analytics"
     ],
     "W. P. Carey School of Business": [
+     "Information Systems",
      "Supply Chain Management"
     ]
    }
@@ -5673,7 +5675,7 @@
     "Fu Foundation School of Engineering and Applied Science"
    ],
    "units": [
-    "Decision, Risk, and Operations",
+    "Decision, Risk and Operations",
     "IEOR",
     "Industrial Engineering and Operations Research"
    ],
@@ -5682,7 +5684,7 @@
      "IEOR"
     ],
     "Columbia Business School": [
-     "Decision, Risk, and Operations"
+     "Decision, Risk and Operations"
     ],
     "Fu Foundation School of Engineering and Applied Science": [
      "Industrial Engineering and Operations Research"
@@ -10600,12 +10602,12 @@
     "Mendoza College of Business"
    ],
    "units": [
-    "Information Technology, Analytics and Operations",
+    "Information Technology, Analytics, and Operations",
     "IT, Analytics, and Operations"
    ],
    "bySchool": {
     "Mendoza College of Business": [
-     "Information Technology, Analytics and Operations",
+     "Information Technology, Analytics, and Operations",
      "IT, Analytics, and Operations"
     ]
    }
@@ -10623,7 +10625,8 @@
      "Supply Chain Management"
     ],
     "Michael F. Price College of Business": [
-     "Marketing and Supply Chain Management"
+     "Marketing and Supply Chain Management",
+     "Supply Chain Management"
     ]
    }
   },
@@ -11851,7 +11854,7 @@
    "Operational Strategy"
   ],
   "Columbia Business School": [
-   "Decision, Risk, and Operations"
+   "Decision, Risk and Operations"
   ],
   "Cornell SC Johnson College of Business": [
    "Operations, Technology, and Information Management Area",
@@ -12172,7 +12175,7 @@
    "Operations"
   ],
   "Mendoza College of Business": [
-   "Information Technology, Analytics and Operations",
+   "Information Technology, Analytics, and Operations",
    "IT, Analytics, and Operations"
   ],
   "Miami Herbert Business School": [
@@ -12180,7 +12183,8 @@
    "Management Area"
   ],
   "Michael F. Price College of Business": [
-   "Marketing and Supply Chain Management"
+   "Marketing and Supply Chain Management",
+   "Supply Chain Management"
   ],
   "Michael G. Foster School of Business": [
    "Information Systems and Operations Management",
@@ -12244,7 +12248,7 @@
   ],
   "Poole College of Management": [
    "Business Management/Operations and Supply Chain",
-   "Information Technology, Analytics and Operations"
+   "Information Technology, Analytics, and Operations"
   ],
   "Questrom School of Business": [
    "Information Systems",
@@ -12452,6 +12456,7 @@
    "Operations Management"
   ],
   "W. P. Carey School of Business": [
+   "Information Systems",
    "Supply Chain Management"
   ],
   "Warrington College of Business": [
