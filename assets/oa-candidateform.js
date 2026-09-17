@@ -179,6 +179,21 @@
   function sayRefused() {
     say('The site could not accept your profile — checking why…');
     freshClaims().then(function () {
+      /* A TERMINAL auth failure is the one refusal no retry can clear.
+         freshClaims is best effort and swallows its own errors, so an account
+         whose Auth record has gone — a deletion that has been carried out, or
+         the duplicate side of a merge — reaches here with no session at all,
+         and "press Send once more" would be an instruction to keep pressing
+         for ever. Asked before the address, because an account that is gone
+         has no address to confirm. */
+      if (OAAccounts.user && !OAAccounts.user()
+          && !(OAAccounts.needsVerification && OAAccounts.needsVerification())) {
+        say('You are no longer signed in, so the site could not accept your profile. ' +
+            'Sign in again and press Send once more — nothing you have typed has ' +
+            'been lost.', 'err');
+        if (OAAccounts.openAuth) OAAccounts.openAuth();
+        return;
+      }
       if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
         say('Your e-mail address has not been confirmed yet, so the site could not ' +
             'accept your profile. Press the link in the message from Operations ' +

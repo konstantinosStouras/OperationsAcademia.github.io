@@ -16893,6 +16893,15 @@ async function testSubmissionTokenRefresh() {
       `${where} and opens the card that confirms the address, not just words`);
     ok(asks && /Nothing you have typed has been lost/.test(asks[0]),
       `${where} and says the ${thing} is still on screen`);
+    /* A TERMINAL auth failure is the one refusal no retry clears: freshClaims
+       is best effort, so an account whose Auth record has gone (a carried-out
+       deletion, the duplicate side of a merge) arrives here with no session,
+       and "press Send once more" would be an instruction to press for ever.
+       Asked FIRST, because an account that is gone has no address to confirm. */
+    ok(asks && /no longer signed in/.test(asks[0]) && /openAuth\(\)/.test(asks[0]),
+      `${where} and names a session that has ended, offering the sign-in`);
+    ok(asks && asks[0].indexOf('no longer signed in') < asks[0].indexOf('has not been confirmed'),
+      `${where} asking that before the address, which a gone account does not have`);
 
     /* --- THE EDIT LOAD IS A READ, AND THE READ IS GATED THE SAME WAY -----
 
