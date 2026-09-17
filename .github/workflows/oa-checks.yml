@@ -248,3 +248,17 @@ jobs:
       - name: The forum, in the emulator
         timeout-minutes: 8
         run: firebase emulators:exec --project demo-oa-forum --only auth,firestore,functions "node _functions/test/forum-emulator.mjs"
+
+      # THE RULES FIT FIRESTORE'S 1000-EXPRESSION BUDGET. A request the engine
+      # cannot finish evaluating is refused as permission-denied, so a ruleset
+      # that grows past that ceiling takes every posting and every profile off
+      # the site while looking exactly like a rule saying no -- which is what
+      # it did, for two weeks, in September 2026. The offline suite reads the
+      # rules as TEXT and text cannot tell you what an expression costs, so
+      # only the real engine can see this: it drives the LARGEST document each
+      # form can send.
+      - name: The rules fit the evaluation budget
+        timeout-minutes: 5
+        env:
+          CI: 'true'
+        run: firebase emulators:exec --project demo-oa-rules --only firestore "node _functions/test/rules-budget.mjs"
