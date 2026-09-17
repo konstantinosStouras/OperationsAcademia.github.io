@@ -3886,6 +3886,15 @@ async function testVocabFile() {
        like the field tacked onto the department's own name. */
     "St. John's University|Business Analytics|Business Analytics and Information Systems",
     'University of Kansas|Analytics, Information, Operations|Analytics, Information, Operations research',
+    /* And one more, arrived on master with a posting published on 2026-09-17
+       and red on the base branch before this change touched it. Oklahoma's
+       Price College names a Division of Marketing and Supply Chain
+       Management, so the short form is probably the same division said
+       briefly rather than a second department -- but "probably" is what this
+       list is for, and merging two departments that are really two is the
+       error that cannot be undone from the data. The owner's to rule on; the
+       answer goes in SCOPED_UNIT_ALIASES. */
+    'University of Oklahoma|Marketing and Supply Chain Management|Supply Chain Management',
   ]);
   /* KEYED BY THE UNIVERSITY'S IDENTITY, not by the spelling the vocabulary
      files it under today — that is `pickForm`'s tie-break and it moves with
