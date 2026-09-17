@@ -6,10 +6,12 @@
    FOUR QUEUES, one page (owner, 2026-08-21: "include there any items to be
    reviewed: job postings, candidate profiles, feedback received"):
 
-     1. job postings to review (Firestore, drawn by assets/oa-jobreview.js in
-        two tabs): the ones crawled from the tracking sheet and held for
-        approval (`jobReviews`), and the user-added ones made through the
-        site's own form (`jobSubmissions`), live but not yet marked reviewed;
+     1. JOB POSTINGS (Firestore, drawn by assets/oa-jobreview.js in two tabs):
+        the ones crawled from the tracking sheet and held for approval
+        (`jobReviews`), and the user-added ones made through the site's own
+        form (`jobSubmissions`), which are already live and are listed to be
+        CORRECTED rather than approved. Only the first is counted — a live
+        posting is waiting on nobody; see waitingJobs below;
      2. CANDIDATE PROFILES — the gap this page was made to close: the front
         page said "2 profiles have already been filed" while the maintainer
         had no way to SEE them, because profiles are held out of
@@ -138,33 +140,30 @@
     return newsMemo;
   }
 
-  /** Job postings waiting in the review panel: the crawled queue's pending
-      documents PLUS the user-added postings not yet marked reviewed — the
-      panel's own two tabs, so the tile and the badge count what it shows. An
-      aggregate cannot ask "reviewedAt absent", so the submissions are read
-      and filtered, exactly as the panel reads them (two equality queries, one
-      per live status): the collection is small and this runs once per
-      session. Each half that cannot be read is unknown; the leg is null only
-      when NEITHER half answered, the same partial-answer rule as below. */
+  /** Job postings HELD BACK: the crawled queue's pending documents, and
+      nothing else.
+
+      IT COUNTED THE USER-ADDED TAB TOO until 2026-09-17, on the reasoning that
+      the tile and the badge should count what the panel shows. That made the
+      number untrue about itself, and the owner read it exactly as it was
+      written, of a posting made through the form minutes earlier: "their
+      posting becomes live immediately. It is also flagged to me to approve it
+      later on." A posting made through the site's own form IS ALREADY ON THE
+      SITE — the form promises it, the build publishes it within a minute or
+      two, and the poster is e-mailed to say so — so nothing about it is held
+      back and nobody is waiting on the maintainer. Counting it said something
+      was, in the account menu, on every page of the site, until they went and
+      ticked it off. The panel still lists those postings and its own tab still
+      says how many; what they are not is a queue.
+
+      So this leg now means one thing only: postings this maintainer is holding
+      up. That also makes it ONE read rather than three — the two
+      `jobSubmissions` queries it used to make ran on every session's badge
+      refresh, on every page, for a figure only the Admin area could act on,
+      which is the read budget the Registered-users rule below is about.
+      Null is unknown, never zero; the caller catches for that. */
   function waitingJobs(db) {
-    var nul = function () { return null; };
-    return Promise.all([
-      countOf(db.collection('jobReviews').where('status', '==', 'pending'))['catch'](nul),
-      Promise.all(['queued', 'published'].map(function (s) {
-        return db.collection(OAFB.col.jobSubmissions).where('status', '==', s).get();
-      })).then(function (snaps) {
-        var n = 0;
-        snaps.forEach(function (snap) {
-          snap.forEach(function (d) {
-            if (!(d.data() || {}).reviewedAt) n++;
-          });
-        });
-        return n;
-      })['catch'](nul)
-    ]).then(function (r) {
-      if (typeof r[0] !== 'number' && typeof r[1] !== 'number') return null;
-      return (r[0] || 0) + (r[1] || 0);
-    });
+    return countOf(db.collection('jobReviews').where('status', '==', 'pending'));
   }
 
   /**
@@ -225,7 +224,7 @@
   /* ------------------------------------------------------- the summary strip */
 
   var TILES = [
-    { key: 'jobs', label: 'Job postings to review', to: '#oa-review' },
+    { key: 'jobs', label: 'Job postings to approve', to: '#oa-review' },
     { key: 'candidates', label: 'Candidate profiles held', to: '#oa-aa-cands' },
     { key: 'feedback', label: 'Open feedback tickets', to: '#oa-inbox' },
     { key: 'news', label: 'Updates awaiting publication', to: '#oa-aa-news' },

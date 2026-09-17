@@ -1455,10 +1455,69 @@ differ (owner, 2026-08-23), so `oa-jobreview.js` draws the panel as two tabs:
 The market-year tabs are kept INSIDE each source tab, and every list ranks
 the NEXT market's postings first — 2028's before 2027's before 2026's, the
 newest advertisement breaking ties within a market — because the market a
-posting is FOR is the one its review is urgent for. The "Job postings to
-review" tile and the account-menu badge count both tabs (`waitingJobs` in
-`oa-adminarea.js`), so the tile and the panel beneath it cannot disagree.
+posting is FOR is the one its review is urgent for. The **"Job postings to
+approve" tile and the account-menu badge count the CRAWLED tab alone**
+(`waitingJobs` in `oa-adminarea.js`) — counting both was the defect, and the
+next section is why.
 `page-test.mjs` measures all of it against the seeded queue.
+
+#### …and only the GATE is counted, because only the gate is waiting
+
+Owner, 2026-09-17, of a posting made through the site's own form minutes
+earlier: *"when registered users post a job posting, their posting becomes
+live immediately. It is also flagged to me to approve it later on."*
+
+**Both halves of that were true, and the second was the site's own doing.**
+Nothing gated the posting: `jobReviews` is written by the sheet sync and by
+nothing else, so a posting made through the form never enters the queue at
+all, and the card it draws on the user tab already carried a LIVE pill,
+offered no Approve button (pinned since the tab shipped) and answered *Mark
+reviewed* with one `reviewedAt` stamp that changes nothing else. **The cards
+were honest and the FRAME was not**: the panel was headed "Job postings to
+review", the summary tile said the same, and `waitingJobs` added these live
+postings to the "Admin area N" badge — which is drawn on EVERY page of the
+site — so the account menu claimed something was waiting for the maintainer
+when nothing was, until they went and ticked it off. A number that means
+"you are holding this up" cannot also count what nobody is holding up.
+
+So the wording and the count moved, and **nothing about when a posting goes
+live did**. The panel is headed **Job postings**; its opening line says only
+one of its two tabs is waiting on anybody; the tile is **Job postings to
+approve** and `waitingJobs` is one `count()` over pending `jobReviews`; and
+the empty user tab says *Nothing to correct* where it said *Nothing waiting*
+— the crawled tab keeps that sentence, because there an empty queue really is
+the good news.
+
+**The tile and the tab now show DIFFERENT numbers, and that is the point
+rather than the disagreement the 2026-08-23 rule was avoiding.** They answer
+different questions: the tile says what is held up, the tab says what is
+listed, and the tab's own count is still the panel's word on itself. What
+that rule forbids is a tile contradicting the panel about ONE quantity.
+
+**A user-added posting is not thereby invisible.** Its tab is drawn with its
+count beside it, `submissions-mailer.mjs` e-mails the maintainer about every
+one, and the poster is e-mailed when it goes live. What it no longer does is
+claim to be a queue.
+
+**It also costs less, which is the Registered-users rule applied one function
+over.** `waitingJobs` used to read the whole `jobSubmissions` collection twice
+— one equality query per live status, because an aggregate cannot ask
+"`reviewedAt` absent" — on every session's badge refresh, on every page, for a
+figure only the Admin area could act on. It is one aggregate now.
+
+Tests: the "only the gate is counted" block of `testAdminArea` in
+`_scraper/selftest.mjs` (`waitingJobs` read with its COMMENTS STRIPPED, since
+its own header explains the `jobSubmissions` read it no longer makes, and
+sliced at both ends with its length asserted so a pin on a moved marker
+cannot pass by vacuity; the tile's label with the retired one banned; the
+panel's heading, its opening line, and both retired wordings; the crawled
+half still saying it is held back) and the empty-state pins in
+`testReviewWiring`; and in `_scraper/page-test.mjs` the badge and the tile
+strip over a seed that deliberately carries BOTH kinds — three crawled
+pending and two user-added waiting — so the numbers are right only if the
+live pair is left out, with the tab measured beside the tile. Every one
+verified by putting the defect back; reverting `waitingJobs` alone turns the
+badge check red.
 
 ### A season is not six postings
 
@@ -1943,9 +2002,9 @@ is measured in `page-test.mjs`. **Inert until the rules are redeployed**:
 ## The Admin area — one page for everything waiting on the maintainer
 
 `admin-area.html` (owner, 2026-08-23) gathers every review queue in one place:
-the job postings to review (drawn by `oa-jobreview.js` in two source tabs —
-the `jobReviews` queue held for approval and the user-added `jobSubmissions`,
-live but not yet marked reviewed),
+the job postings (drawn by `oa-jobreview.js` in two source tabs — the
+`jobReviews` queue held for approval, which is the half the tile counts, and
+the user-added `jobSubmissions`, already live and listed to be corrected),
 **candidate profiles including the ones held for the reveal** — the gap the
 page was made to close: the front page said "2 profiles have already been
 filed" while the maintainer had no way to SEE them, because held profiles are

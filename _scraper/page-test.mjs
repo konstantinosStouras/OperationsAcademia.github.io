@@ -6212,10 +6212,14 @@ for (const w of [320, 360, 390, 430]) {
 
   /* -- the badge, on a page that is NOT the admin area ---------------------- */
   {
-    /* the jobs leg counts BOTH of the review panel's tabs (3 crawled pending
-       + 2 user-added postings not yet marked reviewed), and the fifth queue
-       adds its pending name fix */
-    const expected = 3 + 2 + metaHeld + 2 + newsPending + 1;
+    /* THE JOBS LEG COUNTS THE GATE ALONE: the 3 crawled postings held for
+       approval, and NOT the 2 user-added ones the panel also lists (owner,
+       2026-09-17). Those are on the site already, so a badge that counted them
+       told the maintainer, on every page, that something was waiting when
+       nothing was. The seed deliberately carries both kinds, so this number is
+       only right if the user-added pair is left out. The fifth queue adds its
+       pending name fix. */
+    const expected = 3 + metaHeld + 2 + newsPending + 1;
     const { ctx, q, errors } = await adminAreaPage(ADMIN, 'index.html');
     await q.waitForSelector('#oa-chip', { timeout: 10000 });
     eq(await q.locator('#oa-menu a[href="admin-area"]').count(), 1,
@@ -6227,8 +6231,9 @@ for (const w of [320, 360, 390, 430]) {
       return el && el.textContent === String(want);
     }, expected, { timeout: 15000 });
     ok(true, `admin area: the badge lands on ${expected} — 3 pending reviews + ` +
-      `2 user-added postings + ${metaHeld} held profiles + 2 open tickets + ` +
-      `${newsPending} unpublished updates + 1 name correction`);
+      `${metaHeld} held profiles + 2 open tickets + ${newsPending} unpublished ` +
+      `updates + 1 name correction, with the 2 already-live user-added ` +
+      `postings counted by nothing`);
     ok(await q.evaluate(() =>
       document.querySelectorAll('script[src="assets/oa-news.js"]').length <= 1 &&
       document.querySelectorAll('script[src="assets/oa-adminarea.js"]').length <= 1),
@@ -6528,19 +6533,29 @@ for (const w of [320, 360, 390, 430]) {
     ok(true, 'admin area: and the decided card re-renders one click from re-opening');
 
     /* the tiles and the badge, corrected from the documents on screen — the
-       jobs tile counts BOTH of the review panel's tabs (3 crawled + 2
-       user-added as seeded; those counts were read at load, before one was
-       ticked off above, and nothing recounts them mid-session), the approved
-       name fix no longer counts as waiting, and the strip ends on the
-       Registered-users statistic (owner, 2026-08-23) */
+       jobs tile counts the GATE alone (the 3 crawled postings held for
+       approval, read at load), never the 2 user-added ones listed in the tab
+       beside them, which are already on the site and waiting on nobody (owner,
+       2026-09-17). The approved name fix no longer counts as waiting, and the
+       strip ends on the Registered-users statistic (owner, 2026-08-23). */
     await q.waitForFunction((want) => {
       const els = document.querySelectorAll('#oa-aa-tiles .oa-aa-tile-n');
       return els.length === 8 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
-    }, ['5', seededHeld, '2', newsPending, 0, 0, YEARCHECK.length, seededUsers].join(','),
+    }, ['3', seededHeld, '2', newsPending, 0, 0, YEARCHECK.length, seededUsers].join(','),
       { timeout: 10000 });
     ok(true, 'admin area: the eight tiles agree with the data beneath them — the ' +
+      'jobs tile counts the 3 held for approval and not the 2 already live, the ' +
       'approved fix no longer counts as waiting, nobody is waiting on a message ' +
       'reply, the market-year report is on screen and so is the registered-user tally');
+    /* The number the tile shows and the number the tab shows are DIFFERENT
+       numbers now, and that is the point rather than a disagreement: the tile
+       says what is held up, the tab says what is listed. Measured together so
+       neither can drift into the other. */
+    ok(/^User-added jobs \(\d+\)$/.test(await q.$eval(
+         '#oa-review-sources button[data-source="user"]', (el) => el.textContent))
+       && await q.$eval('#oa-aa-tiles .oa-aa-tile-n', (el) => el.textContent) === '3',
+      'admin area: the tab still lists the user-added postings while the tile ' +
+      'counts none of them');
     /* The Registered-users card became a LINK on 2026-08-24, when the roster
        panel gave it somewhere to go — it was a span precisely because it
        opened nothing. What still makes it a statistic is the class, which
@@ -6552,9 +6567,10 @@ for (const w of [320, 360, 390, 430]) {
       'statistic — never marked due, and out of every total');
     eq(await q.evaluate(() =>
       (JSON.parse(localStorage.getItem('oa-acct-counts') || '{}').n || {}).admin),
-      5 + seededHeld + 2 + newsPending,
+      3 + seededHeld + 2 + newsPending,
       'admin area: and the cached menu badge is corrected from the same numbers — ' +
-      'neither the registered-user count nor the market-year report is in any of them');
+      'neither the registered-user count nor the market-year report is in any of ' +
+      'them, and nor is an already-live user-added posting');
 
     /* -- the market-year report (owner, 2026-08-26) -------------------------
        A posting is filed by its apply-by date now. What is already published

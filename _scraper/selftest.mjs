@@ -11768,6 +11768,20 @@ async function testReviewWiring() {
   ok((panel.match(/data-act="approve"|data-act="reject"/g) || []).length > 0
      && !/userCardHtml[\s\S]*?data-act="approve"/.test(panel.slice(panel.indexOf('function userCardHtml'), panel.indexOf('function render(') )),
     'a user-added card offers no Approve — the posting is already live, there is nothing to gate');
+
+  /* ONLY THE GATE IS A QUEUE (owner, 2026-09-17: "their posting becomes live
+     immediately. It is also flagged to me to approve it later on"). The cards
+     were always honest — the pin above is the proof — and the words around
+     them were not: an empty user tab read "Nothing waiting", which is the
+     sentence a queue uses. Nothing there waits; there is simply nothing to
+     correct. The crawled tab keeps "Nothing waiting", because that one is a
+     queue and its emptiness really is the good news. */
+  ok(panel.includes('Nothing to correct.'),
+    'the user-added tab, empty, says there is nothing to CORRECT');
+  ok(!/Nothing waiting\. Job postings made through the/.test(panel),
+    'never that nothing is waiting — a live posting was never waiting on anybody');
+  ok(/Nothing waiting\. Postings crawled from/.test(panel),
+    'while the crawled tab, which IS a queue, still says nothing is waiting');
 }
 
 /* --------------------------------------------------------- the Admin area
@@ -11802,6 +11816,51 @@ async function testAdminArea() {
   for (const src of ['oa-news.js', 'oa-jobreview.js', 'oa-feedback.js', 'oa-adminarea.js']) {
     ok(page.includes(`assets/${src}`), `and loads ${src}`);
   }
+
+  /* ------------------------------------------- only the gate is counted
+
+     Owner, 2026-09-17, of a posting made through the site's own form minutes
+     earlier: "their posting becomes live immediately. It is also flagged to me
+     to approve it later on." Both halves were true. A posting made through the
+     form is on the site within a minute or two, nobody is holding it up, and
+     the review panel's own cards said so — a LIVE pill, no Approve button.
+     What said otherwise was everything AROUND them: the panel was headed "Job
+     postings to review", the tile said the same, and waitingJobs added these
+     live postings to the "Admin area N" badge, so the account menu claimed on
+     every page of the site that something was waiting when nothing was.
+
+     THE SOURCE IS READ WITH ITS COMMENTS STRIPPED, because waitingJobs's own
+     header explains the `jobSubmissions` read it no longer makes — a scan that
+     could not tell the explanation from the code would have to be satisfied by
+     deleting the explanation (the analytics page's "no iframes" trap). The
+     slice is bounded at BOTH ends and its length asserted: a slice taken on a
+     marker that has moved passes every negative check by vacuity. */
+  const bareAa = js.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const waitingSrc = bareAa.slice(bareAa.indexOf('function waitingJobs'),
+    bareAa.indexOf('function pendingCounts'));
+  ok(waitingSrc.length > 40 && waitingSrc.length < 600,
+    'the waitingJobs slice is bounded — a pin on a moved marker proves nothing');
+  ok(/jobReviews/.test(waitingSrc) && /'pending'/.test(waitingSrc),
+    'waitingJobs counts the crawled postings held for approval');
+  ok(!/jobSubmissions/.test(waitingSrc) && !/reviewedAt/.test(waitingSrc),
+    'and counts no user-added posting — it is already live, so it waits on nobody');
+  ok(js.includes("label: 'Job postings to approve'")
+     && !js.includes("label: 'Job postings to review'"),
+    'the tile is named for the one thing it counts: postings still to approve');
+
+  /* …and the panel it links to no longer calls both of its tabs a queue. */
+  const flatPage = page.replace(/\s+/g, ' ');
+  ok(/<h3 class="oa-panel-h">&#128203; Job postings<\/h3>/.test(page),
+    'the panel is headed "Job postings" — one heading over a gate and a list');
+  ok(!/Job postings to review<\/h3>/.test(page)
+     && !flatPage.includes('Every job posting waiting for your look'),
+    'and neither retired wording survives on the page');
+  ok(flatPage.includes('Two lists, and only one of them is waiting on you'),
+    'the intro opens by saying which of the two tabs is a queue');
+  ok(flatPage.includes('Nothing there is held back and nothing is waiting for your approval'),
+    'and says in as many words that a user-added posting is waiting for nothing');
+  ok(flatPage.includes('are held back until you approve them'),
+    'while the crawled half still says it is held back until approved');
 
   /* the module: drawn for the admin alone, counting news THROUGH the module */
   ok(js.includes('OAAccounts.isAdmin()'),
