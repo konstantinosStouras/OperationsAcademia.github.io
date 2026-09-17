@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-15T10:33:49.934Z",
+ "generated": "2026-09-17T20:02:43.109Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -447,6 +447,10 @@
   },
   {
    "v": "University of Nevada, Las Vegas",
+   "n": 2
+  },
+  {
+   "v": "University of Notre Dame",
    "n": 2
   },
   {
@@ -1426,10 +1430,6 @@
    "n": 1
   },
   {
-   "v": "University of Notre Dame",
-   "n": 1
-  },
-  {
    "v": "University of Pittsburgh",
    "n": 1
   },
@@ -2196,6 +2196,10 @@
    "n": 2
   },
   {
+   "v": "Mendoza College of Business",
+   "n": 2
+  },
+  {
    "v": "NUS Business School",
    "n": 2
   },
@@ -2381,10 +2385,6 @@
   },
   {
    "v": "McCormick School of Engineering",
-   "n": 1
-  },
-  {
-   "v": "Mendoza College of Business",
    "n": 1
   },
   {
@@ -3666,6 +3666,10 @@
    "n": 1
   },
   {
+   "v": "Information Technology, Analytics, and Operations",
+   "n": 1
+  },
+  {
    "v": "Information technology, business analytics, AI",
    "n": 1
   },
@@ -4363,10 +4367,6 @@
   },
   {
    "v": "Information Systems, Statistics, and Management Science",
-   "n": 0
-  },
-  {
-   "v": "Information Technology, Analytics and Operations",
    "n": 0
   },
   {
@@ -10600,12 +10600,12 @@
     "Mendoza College of Business"
    ],
    "units": [
-    "Information Technology, Analytics and Operations",
+    "Information Technology, Analytics, and Operations",
     "IT, Analytics, and Operations"
    ],
    "bySchool": {
     "Mendoza College of Business": [
-     "Information Technology, Analytics and Operations",
+     "Information Technology, Analytics, and Operations",
      "IT, Analytics, and Operations"
     ]
    }
@@ -12172,7 +12172,7 @@
    "Operations"
   ],
   "Mendoza College of Business": [
-   "Information Technology, Analytics and Operations",
+   "Information Technology, Analytics, and Operations",
    "IT, Analytics, and Operations"
   ],
   "Miami Herbert Business School": [
@@ -12244,7 +12244,7 @@
   ],
   "Poole College of Management": [
    "Business Management/Operations and Supply Chain",
-   "Information Technology, Analytics and Operations"
+   "Information Technology, Analytics, and Operations"
   ],
   "Questrom School of Business": [
    "Information Systems",
