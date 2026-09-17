@@ -1,0 +1,90 @@
+name: "OA: correct a mistyped sign-in address"
+
+# PRESSED, NEVER SCHEDULED, and it prints the plan unless `write` is ticked.
+#
+# An address is typed by a person at registration, and nothing on the way in
+# can tell a typo from a real domain: `yh3660@columbia.edi` was accepted and
+# only announced itself when the verification campaign's message bounced
+# (owner, 2026-09-17). Such an account is stuck and cannot get itself out,
+# because the address IS its identity: the person cannot change it from the
+# site, every write they make is refused while `email_verified` can never
+# become true, and the campaign has already stamped verifyMail/{uid} so it
+# will never write to them again.
+#
+# WHAT IT DOES: corrects the Auth address, sets emailVerified false, and
+# clears verifyMail/{uid} so the next press of oa-verify-existing.yml asks
+# that account to confirm the corrected address. It sends nothing itself.
+#
+# THE GUARDS (in _scraper/fix-account-email.mjs, and it refuses rather than
+# guessing): the stored address must equal `from`, the new address must not
+# belong to another account, and the LOCAL PART must be unchanged unless
+# allow_local_change is ticked, because a different mailbox is a different
+# person. Without FIREBASE_SERVICE_ACCOUNT nothing is read.
+#
+# The log carries the uid and redacted addresses only: a dispatched run
+# prints into the Actions log of a PUBLIC repository.
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: 'The address as it is now (the mistyped one)'
+        required: true
+        type: string
+      to:
+        description: 'The corrected address'
+        required: true
+        type: string
+      write:
+        description: 'Apply it (unticked = print the plan only)'
+        type: boolean
+        default: false
+      allow_local_change:
+        description: 'Allow the part before the @ to change as well (a different mailbox)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-fix-account-email
+  cancel-in-progress: false
+
+jobs:
+  correct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credential is present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: no account will be read."
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
+
+      - name: The guards hold
+        run: node _scraper/fix-account-email.mjs --selftest
+
+      # The two addresses are FREE TEXT, so they reach the shell through env:
+      # and are read as quoted variables. Pasted into the run: block by
+      # expression they would be somebody else's shell command.
+      - name: Plan, or apply
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          IN_FROM: ${{ inputs.from }}
+          IN_TO: ${{ inputs.to }}
+          IN_WRITE: ${{ inputs.write }}
+          IN_ALLOW_LOCAL: ${{ inputs.allow_local_change }}
+        run: |
+          args=( "--from=$IN_FROM" "--to=$IN_TO" )
+          if [ "$IN_WRITE" = "true" ]; then args+=( --write ); fi
+          if [ "$IN_ALLOW_LOCAL" = "true" ]; then args+=( --allow-local-change ); fi
+          node _scraper/fix-account-email.mjs "${args[@]}"

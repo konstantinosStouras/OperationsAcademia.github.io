@@ -1453,8 +1453,29 @@ for (const [name, expect] of [
       const k = Object.keys(d).find((p) => p.startsWith('jobSubmissions/'));
       return d[k];
     });
-    return { ref, doc, noYearField, yearNote, refused };
+    /* THE TOKEN THE RULES READ IS RE-MINTED BEFORE THE WRITE. Source regexes
+       cannot tell the fix from a rewrite that keeps the words and loses the
+       behaviour, so the order is measured here, off the shim's own operation
+       log, the way the account-deletion block measures the same thing. */
+    const order = await q.evaluate(() => {
+      const seq = window.__fb.log.map((e) => e.op + ' ' + e.path);
+      return {
+        token: seq.findIndex((l) => l.indexOf('getIdToken') === 0 && l.indexOf(':force') !== -1),
+        reload: seq.findIndex((l) => l.indexOf('reload') === 0),
+        write: seq.findIndex((l) => l.indexOf('set jobSubmissions/') === 0),
+      };
+    });
+    return { ref, doc, noYearField, yearNote, refused, order };
   });
+  ok(posted.order.token >= 0,
+    'v3 post-a-job: the submit forces a fresh ID token (the claim the rules read)');
+  ok(posted.order.write >= 0 && posted.order.token < posted.order.write,
+    'v3 post-a-job: …BEFORE the posting is written, which is the whole of the ' +
+    'stale-token fix: reverting it leaves the write going out under whatever ' +
+    'claim the SDK had cached');
+  ok(posted.order.reload >= 0 && posted.order.reload < posted.order.token,
+    'v3 post-a-job: …and reloads the account first, so needsVerification() ' +
+    'answers from the server if the write is refused anyway');
   eq(posted.refused.done, true,
     'v3 post-a-job: a NEW posting without the mandatory school, department, ' +
     'department page, characteristic and chair pair is refused');

@@ -44,7 +44,10 @@
   var MAX = {
     first: 100, last: 100, affiliation: 220, position: 160,
     institution: 160, school: 160, unit: 160,
-    cvUrl: 500, webUrl: 500, email: 160, personalEmail: 160, note: 1200
+    cvUrl: 500, webUrl: 500, email: 160, personalEmail: 160, note: 1200,
+    /* the signed-in account's own address: written, never asked for, and
+       bounded by str('authEmail', 200) in the rules. */
+    authEmail: 160
   };
 
   // list('researchAreas', 10) in the rules: an eleventh area would be refused
@@ -109,6 +112,57 @@
       : Promise.resolve();
   }
 
+  /** A REFUSED UPLOAD NAMES NO CAUSE THIS PAGE CANNOT KNOW EITHER.
+
+      The Storage rules gate an upload on the same `verified()` the profile
+      itself is gated on, so a stale or unconfirmed claim refuses the FILE
+      first, one branch above the profile's own. This used to answer that
+      with the file's type, its size and the storage rules: three things to
+      check when the file is perfectly fine, and not one of them the reason.
+      So it asks, exactly as sayRefused does, and keeps the file's real
+      constraints for the branch where they are the likely answer. */
+  function sayFileRefused() {
+    say('The file was refused — checking why…');
+    freshClaims().then(function () {
+      if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
+        say('Your e-mail address has not been confirmed yet, so the site could not ' +
+            'accept the file. Press the link in the message from Operations Academia ' +
+            '— or ask for a new one on the card that has just opened — and then press ' +
+            'Send again. Nothing you have typed has been lost.', 'err');
+        if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
+        return;
+      }
+      say('The file was refused. It must be a PDF or Word file under 15 MB. If it is, remove it and send your profile with a link to your CV instead, ' +
+          'or tell us through the Feedback page and we will attach it for you. ' +
+          'Nothing you have typed has been lost.', 'err');
+    });
+  }
+
+  /** A REFUSED EDIT LOAD NAMES NO CAUSE THIS PAGE CANNOT KNOW EITHER.
+
+      `allow read` on a profile is isOwner(), which is verified(), which
+      reads `email_verified` off the ID TOKEN — the same cached claim the
+      submit path above guards against. So a stale token refuses the OWNER
+      their own profile, and this branch used to answer that by telling them
+      "You are not allowed to edit this profile" and taking the form away:
+      the site telling the person who filed it that it is not theirs, with
+      nothing left on the page to press. The token has been re-minted before
+      the read by the time we reach here, so needsVerification() is
+      Firebase's own answer and the two real cases can be told apart. */
+  function sayEditRefused() {
+    if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
+      sayOutside('Your e-mail address has not been confirmed yet, so the site could not ' +
+                 'open your profile. Press the link in the message from Operations ' +
+                 'Academia — or ask for a new one on the card that has just opened — ' +
+                 'and then reload this page.');
+      if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
+    } else {
+      sayOutside('This profile belongs to a different account. If it is yours, sign in ' +
+                 'with the account you filed it from and open it again from your personal area.');
+    }
+    show($('oa-cand-form'), false);
+  }
+
   /** A REFUSED PROFILE NAMES NO CAUSE THIS PAGE CANNOT KNOW.
 
       It used to answer every permission-denied with "the site is not
@@ -125,6 +179,21 @@
   function sayRefused() {
     say('The site could not accept your profile — checking why…');
     freshClaims().then(function () {
+      /* A TERMINAL auth failure is the one refusal no retry can clear.
+         freshClaims is best effort and swallows its own errors, so an account
+         whose Auth record has gone — a deletion that has been carried out, or
+         the duplicate side of a merge — reaches here with no session at all,
+         and "press Send once more" would be an instruction to keep pressing
+         for ever. Asked before the address, because an account that is gone
+         has no address to confirm. */
+      if (OAAccounts.user && !OAAccounts.user()
+          && !(OAAccounts.needsVerification && OAAccounts.needsVerification())) {
+        say('You are no longer signed in, so the site could not accept your profile. ' +
+            'Sign in again and press Send once more — nothing you have typed has ' +
+            'been lost.', 'err');
+        if (OAAccounts.openAuth) OAAccounts.openAuth();
+        return;
+      }
       if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
         say('Your e-mail address has not been confirmed yet, so the site could not ' +
             'accept your profile. Press the link in the message from Operations ' +
@@ -1130,8 +1199,12 @@
 
     show($('oa-takedown'), true);
 
-    OAAccounts.whenSignedIn(function () {
-      OAFB.ready().then(function (fb) {
+    OAAccounts.whenSignedIn(function (user) {
+      /* THE TOKEN THE RULES READ, FIRST OF ALL — see sayEditRefused below:
+         reading a profile is isOwner(), so a stale claim refuses its own owner. */
+      freshClaims(user).then(function () {
+        return OAFB.ready();
+      }).then(function (fb) {
         return fb.firestore().collection(col()).doc(EDIT_ID).get();
       }).then(function (snap) {
         if (!snap.exists) {
@@ -1141,10 +1214,12 @@
         }
         fill(snap.data() || {});
       }).catch(function (err) {
-        sayOutside(err && err.code === 'permission-denied'
-          ? 'You are not allowed to edit this profile.'
-          : 'We could not load that profile. Please try again.');
-        show($('oa-cand-form'), false);
+        if (err && err.code === 'permission-denied') {
+          sayEditRefused();
+        } else {
+          sayOutside('We could not load that profile. Please try again.');
+          show($('oa-cand-form'), false);
+        }
         if (window.console) console.error('edit:', err);
       });
     });
@@ -1497,7 +1572,10 @@
 
           doc.ref = makeRef();
           doc.uid = user.uid;
-          doc.authEmail = user.email || '';
+          /* SLICED like every other field: str('authEmail', 200) in the rules
+             refuses a longer one, and an unsliced value is the one create-path
+             field whose refusal no retry could ever clear. */
+          doc.authEmail = String(user.email || '').slice(0, MAX.authEmail);
           doc.status = 'queued';       // the rules pin this; the build publishes it
           doc.source = 'oa-form';
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
@@ -1539,8 +1617,7 @@
           btn.disabled = false;
           var code = (err && err.code) || '';
           if (code === 'storage/unauthorized') {
-            say('The file was refused — it must be a PDF or Word file under 15 MB, ' +
-                'and the site’s storage rules must be published.', 'err');
+            sayFileRefused();
           } else if (code === 'permission-denied') {
             if (EDIT_ID) say('You are not allowed to change this profile.', 'err');
             else sayRefused();
