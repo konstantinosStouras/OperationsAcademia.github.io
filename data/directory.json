@@ -3785,11 +3785,21 @@
   "school": "School of Business",
   "department": "Decision Sciences",
   "type": "Business School",
+  "country": "France",
   "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences#group-faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-18"
  },
  {
   "id": "insead__school-of-business__technology-and-operations-management",

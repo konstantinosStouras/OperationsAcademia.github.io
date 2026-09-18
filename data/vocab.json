@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-18T07:14:05.375Z",
+ "generated": "2026-09-18T19:38:12.521Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -831,6 +831,10 @@
   },
   {
    "v": "Indiana University (Kelley)",
+   "n": 1
+  },
+  {
+   "v": "INSEAD",
    "n": 1
   },
   {
@@ -1731,10 +1735,6 @@
   },
   {
    "v": "Indiana University Bloomington",
-   "n": 0
-  },
-  {
-   "v": "INSEAD",
    "n": 0
   },
   {
@@ -3118,16 +3118,16 @@
    "n": 5
   },
   {
+   "v": "Decision Sciences",
+   "n": 5
+  },
+  {
    "v": "Logistics and Maritime Studies",
    "n": 5
   },
   {
    "v": "Operations and Supply Chain Management",
    "n": 5
-  },
-  {
-   "v": "Decision Sciences",
-   "n": 4
   },
   {
    "v": "Information Systems",
@@ -6791,6 +6791,7 @@
    ],
    "bySchool": {
     "": [
+     "Decision Sciences",
      "Technology and Operations Management"
     ],
     "School of Business": [
