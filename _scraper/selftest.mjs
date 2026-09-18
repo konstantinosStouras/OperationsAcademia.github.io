@@ -1767,6 +1767,19 @@ async function testMultiCountryPostings() {
   const budget = await read('_functions', 'test', 'rules-budget.mjs');
   ok(/countries: \['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'\]/.test(budget),
     'the budget guard sends the list AT its cap, which is the case that goes over first');
+  /* AND WHAT THE CEILING ACTUALLY BINDS, pinned because the obvious reading is
+     wrong and the rules and CLAUDE.md now both say so. Only the CREATE carries
+     one; the owner's UPDATE is bounded by shapeOk alone, which is what keeps a
+     posting stored before today correctable once its edit starts sending
+     `countries` too. */
+  const jobsBlock = rules.slice(rules.indexOf('match /jobSubmissions/{id}'),
+                                rules.indexOf('match /candidateSubmissions/{id}'));
+  ok(jobsBlock.length > 2000,
+    'the jobSubmissions rules block is bounded for the two pins below');
+  eq((jobsBlock.match(/keys\(\)\.size\(\) <= /g) || []).length, 1,
+    '_firestore.rules: jobSubmissions carries exactly ONE key ceiling');
+  ok(/allow create: if verified\(\)[\s\S]{0,900}?keys\(\)\.size\(\) <= 35;/.test(jobsBlock),
+    '…and it is on the CREATE, so an edit is never refused for the key it gained');
 
   /* --- 10. AND EVERY CONSUMER READS THE LIST ---------------------------- */
   for (const [file, re, what] of [

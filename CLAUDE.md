@@ -899,11 +899,19 @@ is in" cannot read as a claim about a set it never looked at.
 ### The rules gained a LIST, and the budget was measured rather than reasoned about
 
 `list('countries', 8)` joins `shapeOk`, and the create key ceiling moved
-**34 → 35**. It had to move whichever way the field was sent:
-`request.resource.data` is the MERGED document on an update, so a posting
-stored before today carries its `country` into every correction its owner makes
-and would meet the ceiling one key over — a posting frozen against the person
-who posted it, the `sync-user-directory` trap.
+**34 → 35**. **It is the SELFTEST that binds, not a create that got bigger** —
+worth stating plainly, because the obvious reading is wrong. A create writes 33
+keys at the very most (the budget guard's maximal document), so it had two to
+spare. What reached 35 is `testSubmissionKeyCeilings`, which counts the keys
+the form's SOURCE can write and cannot tell that `createdAt` and `updatedAt`
+are mutually exclusive or that `applyByText` is written only on the edit path.
+That over-count is the safe direction for a guard and is kept as it is: it
+bounds the create by an upper bound on what the form can produce, so a field
+added to the form fails the build rather than the poster.
+
+**The owner's UPDATE carries no key ceiling at all** — only `shapeOk` — which
+is what keeps a posting stored before today correctable by its own owner once
+its edit starts sending `countries` as well.
 
 **MEASURED AGAINST THE REAL ENGINE, because text cannot tell you what an
 expression costs.** `_functions/test/rules-budget.mjs` sends the list AT its

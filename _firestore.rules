@@ -232,12 +232,21 @@ service cloud.firestore {
       // posting sailed through. selftest.mjs pins this arithmetic against
       // the form source, so a new field fails the build, not the poster.
       //
-      // 34 -> 35 with `countries` (2026-09-18). It had to move whichever way
-      // the field was sent: `request.resource.data` is the MERGED document on
-      // an update, so a posting stored before today carries its `country` into
-      // every correction its owner makes and would meet the ceiling one key
-      // over — the sync-user-directory trap, a posting frozen against the
-      // person who posted it.
+      // 34 -> 35 with `countries` (2026-09-18), and it is the SELFTEST that
+      // binds rather than a create that got bigger. A create writes 33 keys at
+      // the very most (measured by the budget guard's maximal document), so it
+      // had two to spare; what reached 35 is `testSubmissionKeyCeilings`, which
+      // counts the keys this form's SOURCE can write and cannot tell that
+      // `createdAt` and `updatedAt` are mutually exclusive or that
+      // `applyByText` is written only on the edit path. That over-count is the
+      // safe direction for a guard and is kept: it bounds the create by an
+      // upper bound on what the form can produce, so a field added to the form
+      // fails the build rather than the poster.
+      //
+      // The owner's UPDATE carries no key ceiling at all (only shapeOk), so
+      // the merged document an edit sends — the stored keys plus `countries`,
+      // `updatedAt` and `applyByText` — is not bounded here. That is what
+      // keeps a posting stored before today correctable by its own owner.
       allow create: if verified()
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.status == 'queued'
