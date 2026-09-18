@@ -12114,6 +12114,211 @@ async function testDispatchInputs() {
   ok(free >= 4, 'and there really are free-text dispatch inputs to check');
 }
 
+/* ------------------------------------ REMOVING A POSTING FROM THE REVIEW QUEUE
+
+   Owner, 2026-09-17: "Also allow the admin to delete a job in the queue for
+   review. Currently, we can remove only jobs that are live listed."
+
+   The review panel's user-added tab offered Open & correct and Mark reviewed
+   and nothing that took a posting off the site, so the only removal the site
+   had was the Take-down control the live listings draw (oa-jobedit.js) — and
+   the crawled tab beside it has had Reject since the gate shipped. Every pin
+   below was verified by putting the defect back. */
+async function testQueueTakedown() {
+  const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
+  /* THE SCANS READ THE PANEL WITH ITS COMMENTS STRIPPED. The paragraphs beside
+     these lines say the words "delete", "withdrawn" and "removed" in order to
+     explain why none of them is written, and a guard that could not tell the
+     explanation from the thing would have to be satisfied by deleting the
+     explanation — the trap this repository already records for the analytics
+     page's "no iframes" check. */
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const raw = await read('assets/oa-jobreview.js');
+  const panel = strip(raw);
+  const live = await read('assets/oa-jobedit.js');
+  const build = await read('_scraper/build-jobs.mjs');
+  const fresh = await read('assets/oa-fresh.js');
+  const css = await read('assets/oa-ui.css');
+  const v3 = await read('assets/v3.css');
+
+  /* 1. IT IS A STATUS CHANGE, NEVER A DELETE — the rule build-jobs.mjs states
+        in as many words. Deleting the document would leave the published row
+        ORPHANED: the build carries a row whose document has gone, so nothing
+        on the site could then correct or remove it, the maintainer included. */
+  ok(panel.includes("var HIDDEN = 'hidden';") && panel.includes("var RESTORED = 'queued';"),
+    'the review panel names the two words a removal is written with');
+  /* The whole panel, not a shape somebody remembered: it calls `.delete()` on
+     NOTHING, which is the strongest form this pin can take and is why it is
+     written as an absence over the file rather than over one spelling of one
+     call. */
+  ok(!/\.delete\(/.test(panel),
+    'and never deletes any document — a deleted submission orphans its published row for ever');
+  ok(/status:\s*status,/.test(panel) && /setStatus\(db, it, HIDDEN\)/.test(panel)
+     && /setStatus\(db, it, RESTORED\)/.test(panel),
+    'the take-down and the restore are the same one write, with the status as the whole of it');
+
+  /* 2. THE SAME TWO WORDS THE LIVE LISTING WRITES, and the word says WHO: the
+        only removal the site had until now is oa-jobedit.js's, which picks
+        between them on exactly that. */
+  ok(/status:\s*perm\.admin \? 'hidden' : 'withdrawn'/.test(live),
+    'the live listings write `hidden` for the maintainer and `withdrawn` for the poster');
+  ok(panel.includes("var LIVE = ['queued', 'published'];")
+     && panel.includes("var RESTORED = 'queued';"),
+    'and putting one back is the status the form itself saves, which the build publishes');
+
+  /* 3. THE DRAWER READS `hidden` AND NOTHING ELSE, and the build is why. A
+        `withdrawn` document is rewritten to `removed` on the next run while a
+        `hidden` one is left alone — so a drawer that read the poster's own
+        statuses would accumulate every posting ever withdrawn, in every
+        season, with nothing to press: putting that back is theirs to do, the
+        candidates panel's own rule. */
+  ok(/if \(d\.data\(\)\.status !== 'withdrawn'\) continue;/.test(build)
+     && /status: 'removed'/.test(build),
+    'build-jobs.mjs rewrites a poster’s withdrawal to `removed` and leaves a take-down alone');
+  ok(/where\('status', '==', HIDDEN\)/.test(panel),
+    'so the drawer reads the maintainer’s own take-downs');
+  for (const other of ['withdrawn', 'removed']) {
+    ok(!new RegExp("where\\('status', '==', '" + other + "'\\)").test(panel),
+      `and never queries '${other}' — an unbounded list with nothing to press`);
+  }
+
+  /* 4. AND IT IS NOT FILTERED BY `reviewedAt`. A posting ticked off and then
+        taken down would otherwise be invisible to the one control that can
+        put it back. */
+  const takenAt = panel.indexOf("where('status', '==', HIDDEN)");
+  const endAt = panel.indexOf('function setUser', takenAt);
+  ok(takenAt > 0 && endAt > takenAt + 80,
+    'the drawer’s read is where this pin looks for it, so the check below is not vacuous');
+  ok(!panel.slice(takenAt, endAt).includes('REVIEWED_AT'),
+    'and it does not filter on the reviewed stamp — a posting ticked off and then ' +
+    'taken down must stay reachable by the one control that can put it back');
+
+  /* 5. IT IS NOT A THIRD SOURCE TAB. Nothing is waiting on it, and a tab
+        reading (3) beside the two that count work to do would say the
+        maintainer owes something they have already dealt with. */
+  const sources = panel.slice(panel.indexOf('var SOURCES = {'));
+  const keys = [...sources.slice(0, sources.indexOf('var state = {'))
+    .matchAll(/^\s{4}(\w+): \{$/gm)].map((m) => m[1]);
+  eq(keys, ['crawled', 'user'], 'the panel still has exactly two source tabs');
+  ok(/hidden: \[\], hiddenError: false,/.test(panel),
+    'and what was taken down is state of its own, drawn as the way back rather than as a queue');
+
+  /* 6. THE ECHO, BOTH WAYS. admin-area.html loads oa-fresh.js, the build runs
+        every twenty minutes, and /jobs is the page the maintainer opens next —
+        so for up to a cycle the row just taken down is still served. The
+        take-down echoes the removal the way the live listing does; the RESTORE
+        echoes an edit of NO FIELDS, which CANCELS it, because an echo whose
+        every echoed value already matches the served row has landed by
+        definition and the next overlay spends it. Nothing else can clear a
+        removal echo, and an uncleared one would go on hiding, for the rest of
+        its hour, the posting that was just put back. */
+  ok(/OAFresh\.stash\(\{ docId: it\.id, ref: ref, removed: true \}\)/.test(panel),
+    'a take-down echoes the removal, so this browser’s own jobs page is already without it');
+  ok(/OAFresh\.stash\(\{ docId: it\.id, ref: ref, fields: \{\} \}\)/.test(panel),
+    'and a restore echoes no fields at all, which is what cancels it');
+  ok(/var landed = Object\.keys\(e\.f \|\| \{\}\)\.every\(/.test(fresh)
+     && /if \(landed\) \{ spent\.push\(docId\); return; \}/.test(fresh),
+    'oa-fresh.js is what makes that true: an echo of no fields has landed, so it is spent and deleted');
+  const adminHtml = await read('admin-area.html');
+  ok(adminHtml.indexOf('src="assets/oa-fresh.js"')
+     < adminHtml.indexOf('src="assets/oa-jobreview.js"'),
+    'and the Admin area loads the echo before the panel that stashes into it');
+
+  /* 7. NO RULES CHANGE, AND THEREFORE NO DEPLOY — which is pinned rather than
+        remembered, because a feature that needs one looks installed and is
+        inert. `hidden` is deliberately NOT a status the OWNER may write, so
+        the word really does mean the maintainer. */
+  const rules = await read('_firestore.rules');
+  const block = rules.slice(rules.indexOf('match /jobSubmissions/'),
+    rules.indexOf('match /candidateSubmissions/'));
+  ok(/allow write: if isAdmin\(\);/.test(block),
+    'the maintainer may already write a submission, so the take-down needs no new rule');
+  ok(/request\.resource\.data\.status in \['queued', 'withdrawn'\]/.test(block),
+    'and a poster may only ever write `queued` or `withdrawn` — `hidden` is the maintainer’s word');
+
+  /* 8. THE BADGE NEEDS NOTHING, and since 2026-09-17 it needs even less: it is
+        one count() over pending `jobReviews`, so a user-added posting was
+        never in it and taking one down cannot move it. The "Job postings" tab
+        count IS the panel's own word on itself, recomputed by the repaint. */
+  const area = strip(await read('assets/oa-adminarea.js'));
+  const waitAt = area.indexOf('function waitingJobs(');
+  const waiting = area.slice(waitAt, waitAt + 400);
+  ok(/collection\('jobReviews'\)\.where\('status', '==', 'pending'\)/.test(waiting),
+    'the account-menu badge counts the gate alone, so a take-down on the user tab ' +
+    'cannot move it');
+  ok(!/jobSubmissions/.test(waiting),
+    'and reads no submission at all, which is why this change needed no second rule for it');
+
+  /* 9. ONE STYLESHEET REACHES THE SITE. oa-ui.css is linked BEFORE v3.css, so
+        a class v3.css restates would win on file position; it restates neither
+        of these, which is what makes the engine's rule the one the site
+        paints. The drawer names its OWN INK beside the ground it paints — the
+        defect oa-ui.css's own header records — and its handle is a touch
+        target like every other control on the page. */
+  ok(/\.oa-rv-down \{/.test(css) && /\.oa-rv-down > summary \{/.test(css),
+    'the drawer is styled in oa-ui.css');
+  for (const cls of ['.oa-rv-down', '.oa-rv-down-body']) {
+    ok(!v3.includes(cls), `and v3.css restates ${cls} nowhere, so the engine’s rule is what paints`);
+  }
+  const down = css.slice(css.indexOf('.oa-rv-down {'), css.indexOf('.oa-rv-down-body {'));
+  ok(/background: var\(--bg-3/.test(down) && /color: var\(--ink/.test(down),
+    'it names its own ink beside its own ground');
+  const handle = css.slice(css.indexOf('.oa-rv-down > summary {'),
+    css.indexOf('.oa-rv-down-body {'));
+  ok(/min-height: 42px;/.test(handle) && /padding: 12px 0;/.test(handle),
+    'and its handle clears the 42px touch target, on padding');
+  /* comments stripped: the paragraph inside the rule NAMES the property it
+     must not set, in order to say why, and a guard that could not tell the
+     two apart would have to be satisfied by deleting the explanation. */
+  ok(!/display:/.test(handle.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'and sets no display on the summary, which is how one loses the browser’s own ' +
+    'disclosure triangle — the mark that says it opens');
+
+  /* 10. A READ THAT FAILED SAYS SO. Drawing nothing would tell a maintainer
+         who has just taken a posting down that it was deleted after all. */
+  ok(/if \(state\.hiddenError\) \{/.test(panel)
+     && /Could not read the postings you have taken down/.test(raw),
+    'a refused read of the drawer says so, rather than reading as "you have taken nothing down"');
+  ok(/Nothing has been deleted\./.test(raw),
+    'and says the one thing the maintainer needs to know while it cannot be read');
+
+  /* 11. THE SEASON THE MAINTAINER CHOSE SURVIVES THE REPAINT. '*' is the All
+         tab, which is not a season and is therefore not in yearsOf's answer:
+         without this a take-down pressed under All dropped them back into one
+         season, the opposite of what they had chosen. */
+  ok(/var keep = state\.year === '\*' \|\| left\.indexOf\(state\.year\) >= 0;/.test(panel),
+    'a repaint after a decision keeps the All tab, and any season that still has postings');
+
+  /* 12. THE COPY SAYS WHAT IS TRUE OF THIS CONTROL, both halves: it is not a
+         delete, and there is somewhere to press to undo it. */
+  ok(/Nothing is deleted: it moves to "Taken down by you" below, /.test(raw),
+    'the confirmation says nothing is deleted and names where the posting goes');
+  ok(/Off the site\. Nobody else sees these\./.test(raw)
+     && /every season is listed here/.test(raw),
+    'and the drawer says who can see them and that it is not filtered by season');
+  /* NO EM DASH in either sentence this control shows. The drawer's note is
+     copied from oa-news.js's removed-updates panel, which has one; the rule
+     the site's own copy is held to elsewhere is that it has none, so the
+     copy is the thing that moved rather than the rule. */
+  const ask = raw.slice(raw.indexOf("'Take this posting down?"));
+  ok(!/—/.test(ask.slice(0, ask.indexOf("')) return;"))),
+    'and no em dash in the confirmation');
+  const noteAt = raw.indexOf("note.textContent = 'Off the site");
+  ok(noteAt > 0 && !/—/.test(raw.slice(noteAt, raw.indexOf("';", noteAt))),
+    'nor in the drawer’s own note');
+
+  /* 13. AND THE DECISION IS WRITTEN DOWN, including the one thing this change
+         did NOT do: a crawled posting the gate REJECTS still leaves that queue
+         for good, which is that queue's documented decision rather than an
+         oversight, and a drawer for it would be a second feature. */
+  const doc = await read('CLAUDE.md');
+  ok(doc.includes('### …and a posting can be taken off the site from the queue itself'),
+    'CLAUDE.md records the removal, its two words and its drawer');
+  ok(/rejecting\s*\n?keeps it off for good/.test(doc)
+     || doc.includes('there is no drawer and no way back from a Reject'),
+    'and says plainly that a Reject on the crawled tab is still one-way');
+}
+
 async function testSubmissionNotices() {
   const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
   const model = await read('_scraper/submissions-review.mjs');
@@ -22476,6 +22681,7 @@ if (isMain(import.meta.url)) {
   await testMailerEnv();
   await testDispatchInputs();
   await testSubmissionNotices();
+  await testQueueTakedown();
   await testPostedByAndLiveEmail();
   await testCandidateProfilePolicy();
   await testCandidateReveal();
