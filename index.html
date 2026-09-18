@@ -1069,7 +1069,13 @@
           }
           var types = counts(function (r) { return [r.type]; });
           var levels = counts(function (r) { return r.levels; });
-          var countries = counts(function (r) { return [r.country]; });
+          /* EVERY country a posting covers, so the launcher offers one a
+             posting is listed under but not filed under first (owner,
+             2026-09-18). A posting naming one counts once, as it always did,
+             and a row that predates the field answers its own. */
+          var countries = counts(function (r) {
+            return (r.countries && r.countries.length) ? r.countries : [r.country];
+          });
           fill('jl-type', Object.keys(types).sort());
           fill('jl-level', Object.keys(levels).sort());
           fill('jl-country', Object.keys(countries).sort(function (a, b) {
@@ -1301,6 +1307,11 @@
                    teaser ever stopped gating it would read plainly rather
                    than wrongly; the selftest pins the pair both ways. */
                 OAJobNav.commentsRow(r),
+                /* EVERY campus country, and ONLY where the posting covers more
+                   than one (owner, 2026-09-18) — one definition for all three
+                   lists, assets/oa-jobnav.js. A single-country card is
+                   unchanged, which is every card the site drew before today. */
+                OAJobNav.countriesRow(r),
                 { label: 'File link',
                   html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad', true)
                     : (r.adPending ? '<em>soon to be available</em>' : null) },

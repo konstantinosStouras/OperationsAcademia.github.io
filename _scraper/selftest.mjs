@@ -28,6 +28,7 @@ import {
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
   marketYearOf, marketYearAtLeast, marketYearReview, MARKET_YEAR_SOURCE,
   marketYearsOf, withMarketYears, MARKET_SPAN_MAX,
+  countriesOf, withCountries, countriesText, COUNTRY_MAX,
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
   diffRows, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, unclaimedSheetRows, sheetHandover,
@@ -723,7 +724,11 @@ async function testFleetPins() {
     'jobs.html filters the list to the current market year, through the shared rule');
   ok(!jobsHtml.includes("'-07-01'"),
     'and writes the roll day down nowhere of its own');
-  ok(/prepare:\s*function \(rows\) \{ return rows\.filter\(inCurrentMarket\); \}/.test(jobsHtml),
+  /* `prepare` also fills each row's campus-country list in (owner,
+     2026-09-18), so this pins the FILTER rather than the whole one-liner it
+     used to be: what must not change is that the list is narrowed by the
+     shared rule and by nothing of this page's own. */
+  ok(/prepare:\s*function \(rows\) \{[\s\S]{0,900}?return rows\.filter\(inCurrentMarket\);/.test(jobsHtml),
     'and the filter is wired into the list as its prepare step');
   // the model's own predicate, all three legs
   const NOWM = new Date('2026-08-16T12:00:00Z');
@@ -1529,6 +1534,315 @@ async function testMarketYearCascade() {
    cascade before the form SENDS `year`, and a stored year then wins in the
    pipeline — so if the two disagreed, the pipeline could never correct it.
    Pinned over one fixture list, the way typeGuess/typeFromNames are. */
+/* ===========================================================================
+   A POSTING COVERS SEVERAL COUNTRIES
+
+   Owner, 2026-09-18, of the posting form's "Country of the campus" box: "Some
+   schools may have openings for multiple country locations. So, I want to be
+   able to select multiple countries here."
+
+   The shape is `year`/`years`, deliberately and to the last rule: `country`
+   stays ONE country, the first the poster named, so every consumer that reads
+   it goes on reading it; `countries` is the whole list, and it is what the
+   Location filter reads. Every pin below was verified by putting the defect
+   back.
+   =========================================================================== */
+async function testMultiCountryPostings() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+
+  /* --- 1. the one definition ------------------------------------------- */
+  eq(countriesOf({ country: 'USA' }), ['United States'],
+    'a row that names one country answers a list of one, canonicalised');
+  eq(countriesOf({ country: 'France', countries: ['France', 'Singapore'] }),
+    ['France', 'Singapore'], 'and one that names several answers all of them, in order');
+  eq(countriesOf({ countries: ['USA', 'usa', 'United States'] }), ['United States'],
+    'one country spelled three ways is one country');
+  eq(countriesOf({}), [], 'a row that names none answers none — never a guess');
+  eq(countriesOf({ country: 'Ruritania' }), ['Ruritania'],
+    'a country the table does not know is kept exactly as given, as canon does');
+  eq(countriesOf({ countries: Array.from({ length: 20 }, (_, i) => `C${i}`) }).length,
+    COUNTRY_MAX, `the cap is ${COUNTRY_MAX}, and it is the rules' own`);
+  /* THE LIST WINS OVER THE SCALAR, which is what makes `country` derived
+     rather than a second answer: a row whose two halves disagree is one the
+     build is about to correct, and reading the scalar first would publish the
+     stale one. */
+  eq(countriesOf({ country: 'Greece', countries: ['France'] })[0], 'France',
+    'where both are given the LIST is the statement and `country` follows it');
+
+  /* --- 2. the writer, and the three properties every writer here has ---- */
+  const one = withCountries({ id: 'x', country: 'UK', institution: 'Y' });
+  eq(one.countries, ['United Kingdom'], 'withCountries writes the list');
+  eq(one.country, 'United Kingdom', '…and makes `country` its first entry');
+  eq(Object.keys(one), ['id', 'country', 'countries', 'institution'],
+    '…straight after `country`, never appended — a diff read twice is the cost');
+  eq(withCountries(one), one, 'it is IDEMPOTENT: a row already right comes back identical');
+  const bare = { id: 'y', institution: 'Z' };
+  eq(withCountries(bare), bare, 'and a row that names no country is left exactly alone');
+  ok(withCountries({ country: 'France' }) !== null, 'it never returns null');
+  eq(countriesText({ countries: ['France', 'Singapore', 'Abu Dhabi'] }),
+    'France, Singapore and Abu Dhabi', 'and one wording for how several are said');
+  eq(countriesText({ country: 'France' }), 'France', '…which is the bare name for one');
+
+  /* --- 3. `countries` is PUBLISHED, on every row -------------------------- */
+  ok(PUBLIC_FIELDS.includes('countries'), 'the field is published');
+  eq(PUBLIC_FIELDS.indexOf('countries'), PUBLIC_FIELDS.indexOf('country') + 1,
+    '…immediately after `country`, which it is derived from');
+  /* on EVERY row, like `years` and for its reason: the Location filter reads
+     it as a multi-valued field, so a row that omitted it would answer no
+     country at all rather than its own */
+  eq(publicRow({ id: 'a', country: 'France', countries: ['France'] }).countries, ['France'],
+    'publicRow writes it even where it is the row\'s one country said twice');
+
+  /* --- 4. THE FORM SENDS IT, and the browser is the only thing that decides */
+  const formSrc = await read('assets', 'oa-jobform.js');
+  /* BOUNDED AT BOTH ENDS and its length asserted: this file's own paragraphs
+     name these functions, and a slice taken on a moved marker would pass every
+     check below by vacuity. It starts at the form's OWN cap, so the twin is
+     driven under the number the form really uses. */
+  const twin = formSrc.slice(formSrc.indexOf('  var COUNTRY_MAX ='),
+                             formSrc.indexOf('function setError'));
+  ok(twin.includes('function postingCountries') && twin.includes('var COUNTRY_MAX')
+     && twin.length > 600 && twin.length < 6000,
+    'the fixture runs the FORM\'s own source, not a copy of it');
+  eq(Number(/var COUNTRY_MAX = (\d+)/.exec(twin)[1]), COUNTRY_MAX,
+    'and the form caps the list at the same number the model and the rules do');
+  const postingCountries = new Function('window', 'MAX',
+    twin + '\nreturn postingCountries;')(
+    { OACountries: require(path.join(HERE, '..', 'assets', 'oa-countries.js')) },
+    { country: 60 });
+  /* PINNED AGAINST countriesOf over one fixture list — the market-year twin's
+     own discipline, and for its reason: the form SENDS the list, so for a
+     posting made through it the browser is the only thing that decides, and
+     two readings of one answer drift silently. */
+  for (const list of [
+    ['USA'], ['France', 'Singapore'], ['usa', 'United States'], [],
+    ['Ruritania'], ['  France  ', 'Singapore'], ['France', 'France'],
+    Array.from({ length: 20 }, (_, i) => `C${i}`),
+  ]) {
+    eq(postingCountries(list), countriesOf({ countries: list }),
+      `the form and the build read ${JSON.stringify(list).slice(0, 40)} the same way`);
+  }
+
+  /* the box's own text counts as one of them, pressed or not — the rule
+     assets/oa-list.js's text filters already follow, and what keeps the
+     ordinary one-country answer, the datalist and oa-uniinfo's autofill
+     working untouched */
+  ok(/function countriesNow\(\)[\s\S]{0,320}extraCountries\.concat\(\[box \? box\.value : ''\]\)/
+       .test(formSrc),
+    'the form counts what is typed in the box beside what has been banked');
+  /* the pair, never the box alone: with a country banked the box is
+     legitimately empty and `need` would refuse a form that is complete */
+  ok(/out\.countries = countriesNow\(\);\s*\n\s*out\.country = out\.countries\[0\] \|\| '';/
+       .test(formSrc),
+    'collect() sends the list and makes `country` its first entry');
+  ok(!/need\('f-country'/.test(formSrc),
+    '…and the box alone is no longer what the form requires');
+  const page = await read('post-a-job.html');
+  ok(/id="f-country"[^>]*>/.test(page) && !/id="f-country"[\s\S]{0,200}?\srequired/.test(page),
+    'the markup carries no `required` either, or the browser would refuse a complete form');
+  ok(page.includes('id="f-country-chips"') && page.includes('oa-chips oa-field-chips'),
+    'the chips are the site\'s own, from assets/oa-list.css');
+  ok(/list="oa-countries"/.test(page) && /autocomplete="off"/.test(page),
+    'the datalist and the autofill guard both stay — the box is still the field');
+
+  /* the banked ones are not an <input>, so the draft saves them explicitly —
+     the same reason `__checks` exists for the tick boxes */
+  ok(/data\.__countries = extraCountries\.slice\(\)/.test(formSrc)
+     && /id === '__checks' \|\| id === '__countries'/.test(formSrc)
+     && /extraCountries = postingCountries\(data\.__countries\)/.test(formSrc),
+    'an unsent draft keeps the countries that were banked, not only the box');
+  ok(/setCountries\(\(v\.countries && v\.countries\.length \? v\.countries : \[v\.country\]\)\)/
+       .test(formSrc),
+    'and an EDIT is filled from the list, a document predating it from its own country');
+
+  /* AN EMPTY BOX IS NOT AN OPEN QUESTION once a country is banked, and
+     assets/oa-uniinfo.js fills an EMPTY box from the site's own directory —
+     so a poster who banked France and then corrected the institution would
+     have found the directory's own country filled in beside it, which is a
+     campus they never named. One mark, set in one place and read in one. */
+  ok(/if \(extraCountries\.length\) box\.setAttribute\('data-oa-answered', '1'\);\s*\n\s*else box\.removeAttribute\('data-oa-answered'\);/
+       .test(formSrc),
+    'the form marks the country box answered exactly while it holds chips');
+  ok(/if \(el\.getAttribute\('data-oa-answered'\) === '1'\) return false;/
+       .test(await read('assets', 'oa-uniinfo.js')),
+    '…and the directory pre-fill stands down on it, before every test that reads the box');
+
+  /* --- 5. THE HEAL AND THE GUARDS STAND DOWN ON THE SAME ROW ------------- */
+  const byUni = new Map([['k', 'France']]);
+  const schools = { institutionKey: () => 'k' };
+  eq(healCountry({ institution: 'X', country: 'Greece' }, byUni, schools).country, 'France',
+    'a posting naming ONE country is still corrected against the directory');
+  const multi = { institution: 'X', country: 'Greece', countries: ['Greece', 'Italy'] };
+  eq(healCountry(multi, byUni, schools), multi,
+    'and one naming several is the poster\'s statement, left exactly alone');
+  const right = { institution: 'X', country: 'France', countries: ['France'] };
+  ok(healCountry(right, byUni, schools) === right,
+    'a row already right costs no write — by identity, so no run reports it healed');
+
+  /* THE THREE MUST AGREE, or a guard fires on a row no commit could repair
+     and the site stops publishing — the failure this file records five times.
+     Read from each source, because the heal and the two guards are three
+     files and a rule kept in step by hand is a rule that drifts. */
+  const selftestSrc = await read('_scraper', 'selftest.mjs');
+  const vocabSrc = await read('_scraper', 'vocab.mjs');
+  const auditSrc = await read('_scraper', 'country-audit.mjs');
+  ok(/countries\.length > 1\) return row;/.test(vocabSrc),
+    'healCountry stands down on a posting naming several countries');
+  ok(/\.filter\(\(r\) => !\(Array\.isArray\(r\.countries\) && r\.countries\.length > 1\)\)/
+       .test(selftestSrc),
+    '…the served-file guard exempts exactly that row');
+  ok(/named\.length > 1\) \{ multi\+\+; continue; \}/.test(auditSrc),
+    '…and so does the archive audit, which says how many it passed over');
+  ok(/poster's own statement/.test(auditSrc),
+    'and the audit says so rather than letting the run read as a clean sweep');
+
+  /* what the heal no longer catches is NAMED instead — reported, never
+     repaired, the backdatedDeadlines discipline */
+  const buildSrc = await read('_scraper', 'build-jobs.mjs');
+  ok(/const strayCountries = rows\.filter/.test(buildSrc)
+     && /none of them the one `/.test(buildSrc),
+    'the build names a multi-country posting whose list omits its university\'s own country');
+
+  /* --- 6. THE DERIVED FIELD DOES NOT MAIL 617 PHANTOM EDITS -------------- */
+  eq(diffRows({ country: 'France' }, { country: 'France', countries: ['France'] }), [],
+    'the run that first writes the field reports NO edit — both sides read through countriesOf');
+  eq(diffRows({ country: 'France', countries: ['France'] },
+              { country: 'France', countries: ['France', 'Singapore'] }),
+     [{ field: 'countries', before: 'France', after: 'France, Singapore' }],
+    '…and a poster adding a campus country IS the edit it looks like');
+  /* it is deliberately NOT skipped the way `years` is: `country` does not move
+     when a second is added, so skipping it would make exactly that edit
+     invisible in the daily e-mail */
+  ok(!/k === 'years'\s*\|\|\s*k === 'countries'/.test(await read('_scraper', 'jobs-model.mjs')),
+    'and it is not in the skip list, where the edit would go unreported');
+
+  /* --- 7. EVERY WRITER APPLIES IT ---------------------------------------- */
+  ok(/healedRows\.map\(withMarketYears\)\.map\(withCountries\)/.test(buildSrc),
+    'build-jobs writes it over the MERGED set, which is where a carried orphan gains it');
+  /* the BUILD's own chain, not the --heal-names one earlier in the file,
+     which legitimately maps it before anything is counted */
+  ok(buildSrc.indexOf('const recountried')
+     < buildSrc.indexOf('healedRows.map(withMarketYears).map(withCountries)'),
+    '…AFTER the heal count, or the first run would name 617 innocent postings');
+  for (const [file, re, what] of [
+    ['jobmarket-sheet.mjs', /withCountries\(withMarketYears\(healReviewDate\(row\)\)\)/,
+      'the workbook ingest'],
+    ['jobmarket-sheet.mjs', /return withCountries\(withMarketYears\(\{ \.\.\.r, \.\.\.take \}\)\)/,
+      'the carry over a header-less read'],
+    ['sync-jobmarket-sheet.mjs', /\.map\(withMarketYears\)\s*\n\s*\.map\(withCountries\)/,
+      'the sheet sync\'s --heal-names'],
+    ['import-legacy-tables.mjs', /withCountries\(withMarketYears\(healPlace\(r\)\)\)/,
+      'the legacy importer, which has no daily build'],
+  ]) {
+    ok(re.test(await read('_scraper', file)), `${file}: ${what} writes the list too`);
+  }
+  ok(/\.map\(withMarketYears\)\s*\n\s*\.map\(withCountries\)\s*\n\s*\.sort\(displayOrder\)/
+       .test(buildSrc),
+    'and build-jobs --heal-names, which is how the committed file gained it');
+
+  /* --- 8. AND ALL THREE SERVED FILES STATE IT --------------------------- */
+  for (const file of ['jobs.json', 'jobmarket.json', 'past-postings.json']) {
+    const rows = JSON.parse(await read('data', file));
+    const missing = rows.filter((r) => r.country && !Array.isArray(r.countries)).map((r) => r.id);
+    eq(missing, [], `data/${file}: every posting that names a country states its list`);
+    const disagree = rows
+      .filter((r) => Array.isArray(r.countries) && r.countries.length)
+      .filter((r) => r.countries[0] !== r.country).map((r) => r.id);
+    eq(disagree, [], `data/${file}: and \`country\` is the first of them`);
+    const junk = rows.filter((r) => Array.isArray(r.countries)
+      && (!r.countries.length || r.countries.length > COUNTRY_MAX
+          || r.countries.some((c) => !c || typeof c !== 'string'))).map((r) => r.id);
+    eq(junk, [], `data/${file}: no empty, over-long or non-string list`);
+  }
+
+  /* --- 9. THE RULES, BOTH WAYS ------------------------------------------ */
+  const rules = await read('_firestore.rules');
+  ok(new RegExp(`list\\('countries', ${COUNTRY_MAX}\\)`).test(rules),
+    `_firestore.rules bounds the list at ${COUNTRY_MAX}, the model's own cap`);
+  ok(/&& str\('country', 80\)/.test(rules),
+    '…and `country` keeps its own bound, since the build still publishes it');
+  /* the key ceiling had to move whichever way the field was sent:
+     request.resource.data is the MERGED document on an update, so a posting
+     stored before today carries its `country` into every correction */
+  const budget = await read('_functions', 'test', 'rules-budget.mjs');
+  ok(/countries: \['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'\]/.test(budget),
+    'the budget guard sends the list AT its cap, which is the case that goes over first');
+  /* AND WHAT THE CEILING ACTUALLY BINDS, pinned because the obvious reading is
+     wrong and the rules and CLAUDE.md now both say so. Only the CREATE carries
+     one; the owner's UPDATE is bounded by shapeOk alone, which is what keeps a
+     posting stored before today correctable once its edit starts sending
+     `countries` too. */
+  const jobsBlock = rules.slice(rules.indexOf('match /jobSubmissions/{id}'),
+                                rules.indexOf('match /candidateSubmissions/{id}'));
+  ok(jobsBlock.length > 2000,
+    'the jobSubmissions rules block is bounded for the two pins below');
+  eq((jobsBlock.match(/keys\(\)\.size\(\) <= /g) || []).length, 1,
+    '_firestore.rules: jobSubmissions carries exactly ONE key ceiling');
+  ok(/allow create: if verified\(\)[\s\S]{0,900}?keys\(\)\.size\(\) <= 35;/.test(jobsBlock),
+    '…and it is on the CREATE, so an edit is never refused for the key it gained');
+
+  /* --- 10. AND EVERY CONSUMER READS THE LIST ---------------------------- */
+  for (const [file, re, what] of [
+    ['jobs.html', /\{ key: 'country',\s+label: 'Location',\s+field: 'countries'/,
+      'the jobs page\'s Location filter'],
+    ['previous-markets.html', /\{ key: 'country', label: 'Location',\s+field: 'countries'/,
+      'the archive\'s Location filter'],
+    ['jobs.html', /if \(!r\.countries \|\| !r\.countries\.length\) r\.countries = r\.country \? \[r\.country\] : \[\];/,
+      'the jobs page fills the fallback in, or a row predating the field drops out'],
+    ['previous-markets.html', /r\.countries = OAJobNav\.countriesOf\(r\)/,
+      'the archive fills it in through the shared rule, over BOTH its files'],
+    ['index.html', /\(r\.countries && r\.countries\.length\) \? r\.countries : \[r\.country\]/,
+      'the home page\'s launcher offers every country'],
+  ]) {
+    ok(re.test(await read(file)), `${file}: ${what}`);
+  }
+  for (const [file, re, what] of [
+    ['oa-alert-match.js', /arr\(row\.countries\)\.length[\s\S]{0,140}canonCountry/,
+      'an alert matches on every country the posting covers'],
+    ['oa-alerts.js', /\(r\.countries && r\.countries\.length\) \? r\.countries : r\.country/,
+      'the alerts page offers every country to tick'],
+    ['oa-jobexport.js', /from: \['country', 'countries'\]/,
+      'the Excel column names both published fields it reads'],
+    ['oa-fresh.js', /'countries',/, 'the edit echo carries the list'],
+    ['oa-jobnav.js', /function countriesRow\(row\)/, 'one row definition for all three lists'],
+  ]) {
+    ok(re.test(await read('assets', file)), `assets/${file}: ${what}`);
+  }
+  /* the row is drawn ONLY where it says something the card does not already,
+     so every single-country card in the site is byte-identical */
+  const NAV = createRequire(import.meta.url)('../assets/oa-jobnav.js');
+  eq(NAV.countriesRow({ country: 'France', countries: ['France'] }), null,
+    'a single-country posting draws no country row, as no card ever did');
+  eq(NAV.countriesRow({ country: 'France', countries: ['France', 'Singapore'] }).value,
+    'France, Singapore', '…and one covering several names them');
+  eq(NAV.countriesOf({ country: 'France' }), ['France'],
+    'the browser\'s own fallback answers a row that predates the field');
+  for (const file of ['jobs.html', 'index.html', 'previous-markets.html']) {
+    ok((await read(file)).includes('OAJobNav.countriesRow(r)'),
+      `${file}: draws the row through the shared module`);
+  }
+
+  /* --- 11. AND A REVIEW EDIT KEEPS THE PAIR IN STEP --------------------- */
+  const reviewed = applyEdits(
+    { institution: 'X', department: 'D', country: 'France', countries: ['France'],
+      type: 'University', levels: ['Assistant Professor'] },
+    { country: 'USA' });
+  eq(reviewed.countries, ['United States'],
+    'an edited country REPLACES the list — the card offers one box, and it is the statement');
+  eq(reviewed.country, 'United States', '…with `country` following it');
+  const untouched = applyEdits(
+    { institution: 'X', department: 'D', country: 'France',
+      countries: ['France', 'Singapore'], type: 'University', levels: ['a'] },
+    { comments: 'hello' });
+  eq(untouched.countries, ['France', 'Singapore'],
+    'and an edit that does not touch the country leaves every one of them');
+
+  /* --- 12. THE SECTION IS WRITTEN DOWN ---------------------------------- */
+  const md = await read('CLAUDE.md');
+  ok(/multiple country locations/.test(md) && /withCountries/.test(md),
+    'CLAUDE.md records the owner\'s ask and the one writer');
+}
+
 async function testFormMarketYearParity() {
   const now = new Date('2026-08-26T12:00:00Z');
   const js = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
@@ -2265,6 +2579,17 @@ async function testCountries() {
     const rows = JSON.parse(await readFile(path.join(HERE, '..', 'data', file), 'utf8'));
     const wrongCountry = rows
       .filter((r) => byUni.has(SCHOOLS.institutionKey(r.institution || '')))
+      /* A POSTING COVERING SEVERAL COUNTRIES IS EXEMPT, and the test is
+         `healCountry`'s own (owner, 2026-09-18). This guard asserts only what
+         the publisher GUARANTEES — the whole reason it is over data/jobs.json
+         rather than over the archive — so the moment the heal stands down on
+         a row, so must this: a guard that fires on a posting no commit could
+         repair stops the site publishing and stays red for ever, which is the
+         failure this file records five times. The heal stands down because
+         the fault it exists for is an autofilled BOX and a poster who banked
+         two campus countries has plainly acted; build-jobs.mjs names such a
+         row in its run log instead. */
+      .filter((r) => !(Array.isArray(r.countries) && r.countries.length > 1))
       .filter((r) => r.country !== byUni.get(SCHOOLS.institutionKey(r.institution)))
       .map((r) => `${r.id}: ${r.institution} says ${r.country || '(none)'}`);
     eq(wrongCountry, [], `data/${file}: every posting names the country its university is in`);
@@ -3598,11 +3923,12 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
   for (const [call, what] of [
     [/await write\('universities\.json', uni,/, 'the map'],
     [/await write\('recent-faculty\.json', placements,/, 'the faculty list'],
-    /* …and the archive's rows carry their SPAN out of the same call — it has
-       no daily build to heal it, so a --fetch that wrote the names without
-       `years` would take the year filter's answer away for every row it
-       rewrote. */
-    [/await write\('past-postings\.json', rows\.map\(\(r\) => withMarketYears\(healPlace\(r\)\)\),/,
+    /* …and the archive's rows carry their SPAN and their campus COUNTRIES out
+       of the same call — it has no daily build to heal it, so a --fetch that
+       wrote the names without `years` would take the year filter's answer
+       away for every row it rewrote, and one without `countries` would do the
+       same to the Location filter. */
+    [/await write\('past-postings\.json', rows\.map\(\(r\) => withCountries\(withMarketYears\(healPlace\(r\)\)\)\),/,
       'the postings archive'],
   ]) {
     ok(call.test(importer), `import-legacy-tables.mjs canonicalises ${what} as it writes it`);
@@ -8876,6 +9202,11 @@ async function testSheetMirrors() {
   for (const f of SUBMISSION_NEEDS) {
     const less = { ...whole };
     if (f === 'department') { less.school = ''; less.unit = ''; less.department = ''; }
+    /* the same shape, for the same reason: `country` is the FIRST of
+       `countries` and rowFromSubmission reads the list, so clearing one and
+       leaving the other is not a row that names no country — it is a row that
+       names one in the other field */
+    else if (f === 'country') { less.country = ''; less.countries = []; }
     else less[f] = Array.isArray(whole[f]) ? [] : '';
     ok(!rowFromSubmission(less, { now }),
       `and without a ${f} it does not — which is what the exemption is keyed on`);
@@ -17419,7 +17750,16 @@ async function testJobComments() {
     'job comments: the markup module, then the editor, then the form that mounts it');
   ok(/function wireComments\(\) \{\s*\n\s*var ta = \$\('f-comments'\);\s*\n\s*if \(ta && window\.OAEditor\) OAEditor\.attach\(ta\);/.test(form),
     'job comments: the form mounts the editor on that one box, and stands down without the module');
-  ok(/wireVocab\(\);\s*\n\s*wireComments\(\);\s*\n\s*wireAdFile\(\);\s*\n\s*wireDraft\(\);\s*\n\s*enterEditMode\(\);/.test(formBare),
+  /* THE ORDER, not the literal run. What has to hold is that the editor is
+     mounted before either of the two things that FILL the box — the unsent
+     draft and an edit's stored document — since a box filled before its
+     preview exists shows marked-up words as marks. Pinned as the ordering it
+     is, so a wiring call added between them (wireCountries, 2026-09-18) fails
+     only when it really does break it. */
+  const bootAt = (fn) => formBare.indexOf(fn + '();', formBare.indexOf('function boot()'));
+  ok(bootAt('wireComments') > 0
+     && bootAt('wireComments') < bootAt('wireDraft')
+     && bootAt('wireDraft') < bootAt('enterEditMode'),
     'job comments: mounted before anything fills the box');
   eq((formBare.match(/OAEditor\.refresh\(\$\('f-comments'\)\)/g) || []).length, 2,
     'job comments: the preview is repainted on both roads that fill the box by script -- an edit, and an unsent draft');
@@ -18205,7 +18545,7 @@ async function testRulesBudgetGuard() {
     `_firestore.rules: candLinksOk bounds the five links by ${total(LINKS)}, likewise`);
   /* the key set stays closed either way, which is what keeps a group from
      becoming a way to add fields */
-  for (const n of [34, 35, 25]) {
+  for (const n of [35, 35, 25]) {   // jobs, candidates, placements
     ok(new RegExp('keys\\(\\)\\.size\\(\\) <= ' + n + '\\b').test(rules),
       `_firestore.rules: the create key ceiling of ${n} is still there`);
   }
@@ -23176,6 +23516,7 @@ if (isMain(import.meta.url)) {
   await testDirectoryModel();
   await testDirectoryWiring();
   await testUniInfo();
+  await testMultiCountryPostings();
   await testMandatoryPostingFields();
   await testPostingFormRecovery();
   await testRowOverrides();

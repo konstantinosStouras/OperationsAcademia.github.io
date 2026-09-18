@@ -269,7 +269,12 @@
         sample.forEach(function (r) {
           parts.push('<li><strong>' + esc(r.institution) + '</strong> &mdash; ' +
             esc(r.department) + '<br><span class="oa-hint" style="display:inline">' +
-            esc((r.levels || []).join(', ')) + ' &middot; ' + esc(r.country) +
+            esc((r.levels || []).join(', ')) + ' &middot; ' +
+            /* every campus country, as the card names them — a posting the
+               subscriber matched on its second country must say so here, or
+               the sample reads as though the alert matched the wrong row */
+            esc(((r.countries && r.countries.length) ? r.countries : [r.country])
+                  .filter(Boolean).join(', ')) +
             (r.reviewDate ? ' &middot; suggested apply by ' +
               esc(longDate(r.reviewDate)) : '') +
             ' &middot; final apply by ' + esc(r.applyBy || 'until filled') + '</span></li>');
@@ -661,7 +666,14 @@
       loadNewsDecisions();
       fillChecks('a-type', vocab(function (r) { return r.type; }), 'type');
       fillChecks('a-level', vocab(function (r) { return r.levels; }), 'level');
-      fillChecks('a-country', vocab(function (r) { return r.country; }), 'country');
+      /* EVERY country a posting covers, so a subscriber can watch one a
+         posting is listed under but not filed under first (owner,
+         2026-09-18). `vocab` already flattens a list — it is what the levels
+         line above it hands over — and a row that predates the field answers
+         its own single country. */
+      fillChecks('a-country', vocab(function (r) {
+        return (r.countries && r.countries.length) ? r.countries : r.country;
+      }), 'country');
       show($('a-filters-note'), jobsState === 'failed');
     });
 

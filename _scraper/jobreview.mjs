@@ -32,7 +32,7 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
-  ownUniversitiesLink, universitiesLink, stripRowEmails, OPEN_ENDED_RX,
+  ownUniversitiesLink, universitiesLink, stripRowEmails, OPEN_ENDED_RX, withCountries,
 } from './jobs-model.mjs';
 import { joinDepartment, businessSchoolOf, BUSINESS_SCHOOL_NAME_RX } from './vocab.mjs';
 
@@ -276,7 +276,19 @@ export function applyEdits(row, edits) {
      — or carried in from the workbook's notes — stopped every build from
      committing on 2026-08-24 (the served-file guard, doing its job on the
      wrong target). Stripped here, at the ingest, like rowFromSubmission. */
-  return stripRowEmails(settlePlace(settleDeadline(out), row));
+  /* THE COUNTRY AND ITS LIST MOVE TOGETHER — `country` is the FIRST of
+     `countries`, and a card that edits one and leaves the other publishes a
+     posting whose Location filter disagrees with what the maintainer typed.
+
+     A tracking-sheet row names ONE country and the card offers one box, so an
+     edited `country` REPLACES the list rather than joining it: countriesOf
+     reads the list first, and left alone the stale one would win and the
+     correction would read as a second campus the maintainer never named. It
+     is the shape of the `applyBy` rule above — the box the maintainer moved
+     is the fact being stated — and `withCountries` is still the one place
+     either field is decided. */
+  if ('country' in clean && !('countries' in clean)) out.countries = [];
+  return withCountries(stripRowEmails(settlePlace(settleDeadline(out), row)));
 }
 
 /** A line that says the search has no closing date rather than naming one —

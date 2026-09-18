@@ -1074,7 +1074,12 @@
       '</header>' +
       '<table class="oa-sub-lines">' +
         [['Entry level', (d.levels || []).join(', ')],
-         ['Country', d.country],
+         /* every campus country the poster named (owner, 2026-09-18) — the
+            card that lists a user-added posting reads the document, and a
+            document made before the field carries its single `country` */
+         [(d.countries && d.countries.length > 1) ? 'Countries' : 'Country',
+          ((d.countries && d.countries.length) ? d.countries : [d.country])
+            .filter(Boolean).join(', ')],
          ['Suggested apply by', d.reviewDate],
          ['Final apply by', d.applyByDate || d.applyByNote]]
           .filter(function (l) { return l[1]; })

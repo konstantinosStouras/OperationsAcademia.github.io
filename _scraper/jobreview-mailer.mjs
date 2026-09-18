@@ -46,7 +46,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 import { COLLECTION, needMail, applyEdits } from './jobreview.mjs';
-import { longDate, postedBy } from './jobs-model.mjs';
+import { longDate, postedBy, countriesOf, countriesText } from './jobs-model.mjs';
 import { sheetEditUrl, SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import {
   shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
@@ -218,7 +218,9 @@ export function renderReviewEmail(doc, { site = SITE, sheetUrl = '' } = {}) {
       line('School / dept', r.department) +
       line('Type', r.type) +
       line('Entry level', (r.levels || []).join(', ')) +
-      line('Country', r.country) +
+      /* every campus country the search covers — one posting, one line,
+         the way Entry level already carries every rank */
+      line(countriesOf(r).length > 1 ? 'Countries' : 'Country', countriesText(r)) +
       line('Advertised', r.posted) +
       line('Market year', r.year ? String(r.year) : '') +
       line('Suggested apply by', r.reviewDate ? longDate(r.reviewDate) : '') +
@@ -265,7 +267,10 @@ export function renderDigestEmail(docs, { site = SITE, sheetUrl = '' } = {}) {
       '<td style="padding:3px 12px 3px 0;vertical-align:top;white-space:nowrap;' +
         'color:#5a5f6b">' + esc(r.posted || '') + '</td>' +
       '<td style="padding:3px 0;vertical-align:top">' + esc(title || r.id || 'untitled') +
-        (r.country ? ' <span style="color:#5a5f6b">(' + esc(r.country) + ')</span>' : '') +
+        /* every campus country, so a burst list names a multi-country search
+           as one — countriesOf's own fallback answers a row that names one */
+        (countriesOf(r).length ? ' <span style="color:#5a5f6b">('
+          + esc(countriesOf(r).join(', ')) + ')</span>' : '') +
         (dup ? ' <span style="color:#8a6d1a">&#9888; possible duplicate</span>' : '') +
       '</td></tr>';
   }).join('');

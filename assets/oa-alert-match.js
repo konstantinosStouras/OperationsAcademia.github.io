@@ -215,7 +215,20 @@
       if (!hit) return false;
     }
     if (n.type.length && n.type.indexOf(row.type) === -1) return false;
-    if (n.country.length && n.country.indexOf(canonCountry(row.country)) === -1) return false;
+    /* EVERY COUNTRY THE POSTING COVERS, not just the one it is filed under
+       (owner, 2026-09-18). A search across a school's campuses in France and
+       Singapore is a search a subscriber watching Singapore asked to hear
+       about — matching `country` alone would tell them about it only if
+       Singapore happened to be the one the poster typed first.
+
+       The fallback is countriesOf's, in the browser: a row that predates the
+       field answers its own single country, which is exactly the test this
+       was. Both sides still go through `canonCountry`, so an alert saved when
+       the site said "USA" goes on matching a posting published under "United
+       States" — the rule this file's own header records. */
+    if (n.country.length && !overlaps(arr(row.countries).length
+          ? arr(row.countries).map(canonCountry)
+          : [canonCountry(row.country)], n.country)) return false;
     if (n.level.length && !overlaps(arr(row.levels), n.level)) return false;
     if (n.characteristics.length && !overlaps(arr(row.characteristics), n.characteristics)) {
       return false;

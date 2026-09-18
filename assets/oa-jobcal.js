@@ -183,12 +183,22 @@
         if (fin && listed && listed !== longDate(fin)) lines.push('Final deadline as listed: ' + listed);
         var levels = (row.levels || []).map(txt).filter(Boolean).join(', ');
         if (levels) lines.push('Entry level: ' + levels);
+        /* only where it says something the location line does not — a search
+           across a school's campuses (owner, 2026-09-18). The card follows
+           the same rule, so a single-country entry is unchanged. */
+        var countries = (row.countries || []).map(txt).filter(Boolean);
+        if (countries.length > 1) lines.push('Campus countries: ' + countries.join(', '));
         lines = lines.concat(linkLines(row, now));
         out.push({
           uid: 'oa-job-' + row.id + '-' + d.kind.key,
           day: d.day,
           summary: d.kind.label + ': ' + where,
           description: lines.join('\n'),
+          /* A CALENDAR ENTRY HAS ONE LOCATION, so this stays the posting's
+             own — the country it is filed under. Where the search covers
+             several the rest are in the description above (`Campus
+             countries`), which is where a reader of the entry looks for what
+             the one line cannot hold. */
           location: [txt(row.institution), txt(row.country)].filter(Boolean).join(', '),
           url: permalink(row, now),
           categories: ['Operations Academia', 'Job deadline']
