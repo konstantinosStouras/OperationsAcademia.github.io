@@ -1,17 +1,17 @@
 {
- "generated": "2026-09-18T07:11:33.592Z",
- "count": 618,
+ "generated": "2026-09-18T07:14:05.375Z",
+ "count": 617,
  "years": {
-  "2026": 496,
+  "2026": 495,
   "2027": 121,
   "2028": 1
  },
  "types": {
   "University": 364,
-  "Business School": 218
+  "Business School": 217
  },
  "levels": {
-  "Assistant Professor": 139,
+  "Assistant Professor": 138,
   "Other Ranks": 84,
   "Non-tenure track (teaching) position": 32,
   "Post-Doc": 9,
@@ -45,7 +45,6 @@
   "Chile": 1,
   "Cyprus": 1,
   "Denmark": 1,
-  "Greece": 1,
   "Iraq": 1,
   "Italy": 1,
   "Kazakhstan": 1,
@@ -57,8 +56,8 @@
  },
  "characteristics": {
   "MBA": 84,
-  "Research seminars": 81,
   "Masters": 80,
+  "Research seminars": 80,
   "Undergrad": 79,
   "Exec Ed": 68,
   "PhD": 66

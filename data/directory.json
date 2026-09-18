@@ -7507,22 +7507,6 @@
   "lastPosted": "2026-09-13"
  },
  {
-  "id": "test__booth-school-of-business__operations-management",
-  "institution": "test",
-  "school": "Booth School of Business",
-  "department": "Operations Management",
-  "type": "Business School",
-  "country": "Greece",
-  "characteristics": [
-   "Research seminars"
-  ],
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2026-09-17"
- },
- {
   "id": "texas-a-m-international-university____transportation-logistics",
   "institution": "Texas A&M International University",
   "department": "Transportation/Logistics",

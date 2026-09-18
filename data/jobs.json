@@ -107,40 +107,6 @@
   "owner": ""
  },
  {
-  "id": "2026-test-20260917",
-  "year": 2026,
-  "years": [
-   2026,
-   2027
-  ],
-  "posted": "2026-09-17",
-  "institution": "test",
-  "department": "Booth School of Business, Operations Management",
-  "school": "Booth School of Business",
-  "unit": "Operations Management",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "January 1, 2026",
-  "applyByDate": "2026-01-01",
-  "comments": "**Flying** is the best thing it can happen. Second paragraph is even better.",
-  "country": "Greece",
-  "adUrl": "",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=test",
-  "characteristics": [
-   "Research seminars"
-  ],
-  "featured": false,
-  "source": "oa-form",
-  "addedAt": "2026-09-17T21:15:41Z",
-  "ref": "OA-JOB-260917-5HH2",
-  "owner": "1550123426237226"
- },
- {
   "id": "2027-university-of-oklahoma-20260917",
   "year": 2027,
   "years": [

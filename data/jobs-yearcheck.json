@@ -1,19 +1,6 @@
 {
- "generated": "2026-09-18T07:11:33.592Z",
+ "generated": "2026-09-18T07:14:05.375Z",
  "postings": [
-  {
-   "id": "2026-test-20260917",
-   "ref": "OA-JOB-260917-5HH2",
-   "institution": "test",
-   "department": "Booth School of Business, Operations Management",
-   "posted": "2026-09-17",
-   "applyByDate": "2026-01-01",
-   "reviewDate": "",
-   "stored": 2026,
-   "should": 2027,
-   "from": "posted",
-   "current": true
-  },
   {
    "id": "2026-mcgill-university-20260728",
    "ref": "",
