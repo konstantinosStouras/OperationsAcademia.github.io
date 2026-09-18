@@ -385,14 +385,89 @@ is Until filled" and "if that field is empty" are one test and the cascade
 needs no separate look at the prose.
 
 **It only ever moves a posting FORWARD**, and that is what makes it safe to
-apply over a season already imported: a deadline is on or after the day the
-advertisement went up and `marketYear` rises with the date, so the answer is
-never EARLIER than the posting date's own. The tracking sheet's tab cycle
-stays a floor on top of it (`marketYearAtLeast`, applied in `rowsFromTab`),
-and the two hardly ever argue — measured over the 543 served postings,
-**fourteen of the seventeen** rows whose deadline outruns their posting date
-already carry the year the cascade gives them. The tab had been standing in
-for a deadline nobody was reading.
+apply over a season already imported. The tracking sheet's tab cycle stays a
+floor on top of it (`marketYearAtLeast`, applied in `rowsFromTab`), and the
+two hardly ever argue — measured over the 543 served postings, **fourteen of
+the seventeen** rows whose deadline outruns their posting date already carry
+the year the cascade gives them. The tab had been standing in for a deadline
+nobody was reading.
+
+#### …and since 2026-09-18 that is TRUE BY CONSTRUCTION, because the assumption behind it was never enforced
+
+The paragraph above used to argue the property from the data: *a deadline is
+on or after the day the advertisement went up, `marketYear` rises with the
+date, so the answer is never EARLIER than the posting date's own.* That holds
+only where something refuses a closing date before its own posting date, and
+**exactly one of the three ingests does**. `deadlineDay` refuses it for the
+workbook. **The posting form refuses nothing**, and neither does a review-card
+edit nor either advertisement cache — which is the rule `backdatedDeadlines`
+already reports rather than repairs, one section down.
+
+So a posting advertised today with a closing date in the PAST filed under the
+season that date falls in, and where that date sat the far side of the July
+roll, under a season that **had already closed**: the one page it is of no use
+on, which is the exact defect this cascade was written to prevent.
+
+**AND IT STOPPED THE WHOLE SITE PUBLISHING, which is how it was found.**
+Owner, 2026-09-18, of a London Business School posting made that morning:
+*"I don't see it public now."* `2026-test-20260917` — posted 2026-09-17,
+closing before that July — was the first row whose backwards dates crossed the
+roll; the served-file guard asserting this very property went red on it, and a
+red re-check means the build commits **nothing**. Every run from 21:15 the
+previous evening failed — schedule, doorbell and chain alike — so a posting
+made through the form, correctly produced by the build (`+2 new` in its own
+log), was published by nobody for ten hours **because of another posting's bad
+date**. Nothing was wrong with the form, the rules, the doorbell or the
+deploy: the site was simply not committing.
+
+`marketYearOf` **floors its answer at the season the posting date itself
+names**. The posting date is the one signal here that cannot be wrong — it is
+stamped when the submission is stored — and `from` reads `'posted'` where the
+floor wins, so the /admin-area report still names the date that decided. A row
+with no posting date has no floor, which is the `marketYearOf({})` case the
+report and the form twin both rely on.
+
+**`postingYear()` in `assets/oa-jobform.js` carries the same floor**, and has
+to: the form SENDS `year` and a stored year wins outright in the pipeline, so
+for every posting made through the form **the browser is the only thing that
+ever decides**. `yearNoteWhy()` moved with it — it names the date that
+DECIDED, so over an answer the floor gave it says today's date *"because the
+apply-by date you gave has already passed"*, rather than crediting a date the
+form did not follow.
+
+**MEASURED BEFORE IT WAS CHANGED, over the whole corpus**: across
+`data/jobs.json` (616 rows), `data/jobmarket.json` (515) and
+`data/past-postings.json` (159) the floor moves **not one** cascade answer, and
+`data/jobs-yearcheck.json` recomputes byte-identical. Five rows carry a
+backdated date today and none of them crosses the roll, which is why this
+survived until now — and is what makes the floor safe to apply to a corpus
+rather than only to new postings. Nothing already published is re-filed.
+
+**THE GUARD WAS THE OTHER HALF OF THE BUG, and it is the fifth time.** The
+forward-only property was asserted over EVERY SERVED POSTING — one check per
+row, over data. The only way it can fail is a row whose own dates run
+backwards; the remedy is a date in a document or a crowdsourced workbook that
+no commit can change; and red in that role commits nothing at all. That is the
+shape this file already records four times, and its own rule for exactly this
+case is written beside `backdatedDeadlines`: **reported, never repaired, and
+never a guard over `data/`.** So the property is kept by the function, pinned
+over FIXTURES (both ways — a floor that also swallowed a later date would be
+the cascade deleted rather than guarded), and the backdated rows are **named in
+the build's own run log** (`backdatedDeadlines` over the merged set in
+`build-jobs.mjs`, imported rather than copied), beside the season
+disagreements it already prints.
+
+Tests: the forward-only block of `testMarketYearCascade` (the floor on a
+closing date and on a suggested one, a date ahead of the posting date still
+deciding, the owner's own May-for-September case untouched, a row with no
+posting date, the exact row that stopped the site, and the build's report
+wired) and `testFormMarketYearParity`, whose fixture was rebuilt around it:
+both halves are now asked about ONE day — handed to the form as its current
+season and to the pipeline as `posted` — because the form's last leg and its
+floor are the same quantity, so the old `current: 2099` sentinel would have
+floored every case at 2099. Every pin verified by putting the defect back:
+removing the floor turns five checks red, removing it from the form alone
+turns two red (the parity), and deleting the build's report turns one red.
 
 ### Nothing already published is re-filed — it is REPORTED
 
