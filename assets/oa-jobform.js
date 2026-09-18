@@ -1060,6 +1060,12 @@
     var submit = $('oa-submit');
     if (submit) submit.textContent = 'Save changes';
 
+    /* …and the way OUT, beside it. It ships hidden and is revealed HERE: a
+       posting has to exist before there is anything to take down, and a Take
+       down button on a blank new-posting form would be a control that could
+       only ever fail. */
+    show($('oa-takedown'), true);
+
     /* The chair pair, the department page and the characteristics are
        mandatory for a NEW posting only — collect() already skips the rule
        under EDIT_ID, and the marks must say the same thing: a * beside a
@@ -1136,6 +1142,85 @@
     if (ta && window.OAEditor) OAEditor.attach(ta);
   }
 
+  /* --------------------------------------------- take this posting down
+
+     Owner, 2026-09-18, of a test posting of their own: "add a button here at
+     the bottom to 'delete' a job posting once opened for edit. I have posted
+     a test posting and can't delete it now..."
+
+     WHY THEY COULD NOT. Nothing was missing from the rules — a poster may
+     withdraw their own posting and the maintainer may hide any of them — and
+     Take down was already on every card list. What it was not on is the two
+     screens they were actually looking at: this form, which is where "Open &
+     correct" on /admin-area lands, and the Admin area's own user-added card.
+     And the posting in question was filed under a season that has ROLLED, so
+     its card is on Previous markets rather than /jobs: the one control that
+     could have taken it down was on neither page in front of them.
+
+     WHAT IT IS lives in assets/oa-takedown.js — the status, the stamp, the
+     echo and the words, shared with the card lists so four surfaces cannot
+     part company over them. This function is the surface: reveal, confirm,
+     press, and say what happened. Shaped on wireTakeDown() in
+     oa-candidateform.js, which has answered the same question on the sibling
+     form since its edit mode shipped.
+
+     IT REPLACES THE FORM WITH THE DONE PANEL rather than leaving a form open
+     over a posting that is no longer on the site — the candidate form's own
+     answer, and what stops the reader pressing Save changes a moment later
+     and quietly putting it back up without meaning to. */
+  function wireTakeDown() {
+    var btn = $('oa-takedown');
+    if (!btn || !EDIT_ID) return;
+
+    btn.addEventListener('click', function () {
+      /* The row as the FORM now reads it, so the confirmation names the
+         posting the reader is looking at rather than whatever was stored
+         before they started correcting it. `ref` is the stored one: it is
+         issued by the form and is not a field anybody edits. */
+      var row = {
+        institution: ($('f-institution') || {}).value || '',
+        school: ($('f-school') || {}).value || '',
+        unit: ($('f-unit') || {}).value || '',
+        ref: EDIT_REF,
+      };
+      if (!OATakedown.confirm(row)) return;
+
+      btn.disabled = true;
+      say('Taking the posting down…');
+
+      OATakedown.run({ id: EDIT_ID, row: row }).then(function () {
+        /* THE WAY BACK IS THIS PAGE, and it is offered rather than
+           described. "Hiding is never a one-way door" is the rule every
+           overlay on this site is held to, and for a posting the door is one
+           press of Save changes on the form that has just closed — so the
+           panel links the SAME editor by id. It is the only road that works
+           for the maintainer as well as the poster: My postings lists your
+           own postings, and a maintainer who has taken down somebody else's
+           would find nothing there. */
+        var back = 'post-a-job?edit=' + encodeURIComponent(EDIT_ID);
+        var done = $('oa-done');
+        done.innerHTML =
+          '<h3>The posting has been taken down.</h3>' +
+          '<p>It disappears from the <a href="jobs">job postings page</a> ' +
+          OATakedown.WHEN + '. Nothing is deleted: <a href="' + back + '">open ' +
+          'it again</a> and press Save changes to put it back up.</p>' +
+          '<p class="oa-done-actions">' +
+          '<a class="button blue" href="jobs">Back to the job postings</a> ' +
+          '<a class="button oa-btn-ghost" href="' + back + '">Open it again</a></p>';
+        /* the same three the save path hides, and no more: the name-fix
+           section below stays offered, exactly as it does after a save */
+        show($('oa-job-form'), false);
+        show($('oa-intro'), false);
+        show(done, true);
+        done.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }).catch(function (err) {
+        btn.disabled = false;
+        say(OATakedown.failure(err), 'err');
+        if (window.console) console.error('take down:', err);
+      });
+    });
+  }
+
   function boot() {
     /* FIRST PAINT, before Firebase exists. Everything on this page used to
        stay hidden until the SDK had downloaded from gstatic AND the session
@@ -1157,6 +1242,7 @@
     wireAdFile();
     wireDraft();
     enterEditMode();
+    wireTakeDown();
     fillStaticOptions();
 
     var sent = false;                 // latched once a posting has been written

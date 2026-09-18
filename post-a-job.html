@@ -503,6 +503,23 @@
 
                     <div class="oa-actions">
                       <button type="submit" class="button blue" id="oa-submit">Post this job</button>
+                      <!-- TAKE THIS POSTING DOWN, drawn in EDIT MODE ONLY and
+                           shipped hidden (owner, 2026-09-18: "add a button
+                           here at the bottom to 'delete' a job posting once
+                           opened for edit. I have posted a test posting and
+                           can't delete it now"). It is the shape
+                           post-a-candidate.html has carried since its own edit
+                           mode shipped, in the same place and with the same
+                           ghost styling, because it answers the same question
+                           one form over; oa-jobform.js reveals it from
+                           enterEditMode() and oa-takedown.js does the write.
+
+                           It is a STATUS CHANGE and never a document delete —
+                           see the header of assets/oa-takedown.js, where the
+                           orphan carry in build-jobs.mjs is why a hard delete
+                           would leave the row on the site for ever. -->
+                      <button type="button" class="button oa-btn-ghost" id="oa-takedown" hidden>
+                        Take this posting down</button>
                       <p class="oa-form-msg" id="oa-msg" role="alert"></p>
                     </div>
                   </form>
@@ -669,6 +686,7 @@
     <script defer src="assets/oa-forum-markup.js"></script>
     <script defer src="assets/oa-editor.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
+    <script defer src="assets/oa-takedown.js"></script>
     <script defer src="assets/oa-jobform.js"></script>
     <script defer src="assets/oa-namefix.js"></script>
   </body>

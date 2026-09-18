@@ -996,8 +996,12 @@ async function testMyPostingsPage() {
   const js = await readFile(path.join(HERE, '..', 'assets', 'oa-myjobs.js'), 'utf8');
   ok(/where\('uid',\s*'==',\s*user\.uid\)/.test(js),
     'the page reads ONLY the signed-in poster\'s own documents');
-  ok(/status:\s*'withdrawn'/.test(js) && !/\.delete\(/.test(js),
-    'taking down is a status change, never a document delete');
+  /* COMMENTS STRIPPED: this page's header now RECORDS the private copy it no
+     longer carries, and a guard that cannot tell the record from the code
+     would have to be satisfied by deleting the record. */
+  ok(/OATakedown\.run\(/.test(js) && !/status:\s*'(withdrawn|hidden)'/.test(
+       js.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')),
+    'taking down goes through the one definition, and this page writes no status of its own');
   ok(/post-a-job\?edit=/.test(js),
     'Edit goes through the same editor as the public list');
 
@@ -2164,9 +2168,17 @@ async function testCountries() {
     [path.join('v2', 'jobs.html'), 'oa-list.js'],
     [path.join('v2', 'previous-markets.html'), 'oa-list.js'],
   ]) {
+    /* THE SCRIPT TAGS, not the first mention of the filename anywhere in the
+       document. It read `indexOf('oa-jobform.js')`, and post-a-job.html's own
+       comment beside the Take down button names that file several hundred
+       lines ABOVE the script block — so a paragraph of prose put this pin
+       red while the load order was untouched. The same trap this file already
+       records for the analytics page's "no iframes" check, one layer over:
+       a guard that cannot tell an explanation from the thing it explains. */
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
-    const at = html.indexOf('oa-countries.js');
-    ok(at !== -1 && at < html.indexOf(consumer),
+    const at = html.indexOf('src="assets/oa-countries.js"');
+    const to = html.indexOf(`src="assets/${consumer}"`);
+    ok(at !== -1 && to !== -1 && at < to,
       `${page}: loads the countries module before ${consumer}`);
   }
 
@@ -10102,8 +10114,15 @@ async function testFreshEcho() {
     'the edit form stashes what it just saved');
   ok(/already shows your\s+.?edit on this device/.test(form.replace(/['+]/g, '')),
     'and its confirmation claims exactly what the echo delivers — this device, now');
-  const editBtns = await readFile(path.join(HERE, '..', 'assets', 'oa-jobedit.js'), 'utf8');
-  ok(editBtns.includes('removed: true'), 'a takedown echoes as a removal');
+  /* A TAKEDOWN ECHOES AS A REMOVAL — pinned where the stash now IS. It used
+     to be read out of oa-jobedit.js, which was one of two copies of the
+     takedown, and the other (oa-myjobs.js) had no echo at all: the guard
+     was satisfied by the copy that happened to have one. Both are callers of
+     assets/oa-takedown.js now, so there is one place to read and every
+     surface gets the echo. */
+  const takedown = await readFile(path.join(HERE, '..', 'assets', 'oa-takedown.js'), 'utf8');
+  ok(/OAFresh\.stash\(\{ docId: id, ref: row\.ref \|\| '', removed: true \}\)/.test(takedown),
+    'a takedown echoes as a removal');
   for (const page of ['jobs.html', 'index.html', 'previous-markets.html', 'post-a-job.html']) {
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
     ok(html.includes('assets/oa-fresh.js'), `${page} loads the echo module`);
@@ -12216,7 +12235,12 @@ async function testQueueTakedown() {
   const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   const raw = await read('assets/oa-jobreview.js');
   const panel = strip(raw);
-  const live = await read('assets/oa-jobedit.js');
+  /* THE ONE DEFINITION of what a take-down writes, which is where the live
+     listings' own ternary moved to (assets/oa-takedown.js, 2026-09-18): this
+     pin used to read it out of oa-jobedit.js, one COPY against another, which
+     is the shape that let the two live copies drift over the echo and the
+     cadence in the first place. */
+  const live = strip(await read('assets/oa-takedown.js'));
   const build = await read('_scraper/build-jobs.mjs');
   const fresh = await read('assets/oa-fresh.js');
   const css = await read('assets/oa-ui.css');
@@ -12238,11 +12262,18 @@ async function testQueueTakedown() {
      && /setStatus\(db, it, RESTORED\)/.test(panel),
     'the take-down and the restore are the same one write, with the status as the whole of it');
 
-  /* 2. THE SAME TWO WORDS THE LIVE LISTING WRITES, and the word says WHO: the
-        only removal the site had until now is oa-jobedit.js's, which picks
-        between them on exactly that. */
-  ok(/status:\s*perm\.admin \? 'hidden' : 'withdrawn'/.test(live),
+  /* 2. THE SAME TWO WORDS THE LIVE LISTING WRITES, and the word says WHO. The
+        live listings, My postings and the posting form all write through
+        oa-takedown.js, which picks between them on exactly that — so this
+        panel's own two literals are pinned against the DEFINITION rather than
+        against another copy of it. The panel does not call the module: it is
+        admin-only and always writes `hidden`, so it needs no `statusFor` —
+        what has to agree is the WORDS, which is what this pins. */
+  ok(/function statusFor\(isAdmin\) \{ return isAdmin \? HIDDEN : WITHDRAWN; \}/.test(live),
     'the live listings write `hidden` for the maintainer and `withdrawn` for the poster');
+  ok(live.includes("var HIDDEN = 'hidden';") && live.includes("var WITHDRAWN = 'withdrawn';")
+     && live.includes("var RESTORED = 'queued';"),
+    '...and the module names all three, so the panel\'s literals have something to agree with');
   ok(panel.includes("var LIVE = ['queued', 'published'];")
      && panel.includes("var RESTORED = 'queued';"),
     'and putting one back is the status the form itself saves, which the build publishes');
@@ -17543,6 +17574,327 @@ async function testJobComments() {
   }
 }
 
+/* --------------------------------------------------------------------------
+ * TAKING A JOB POSTING DOWN, from wherever the maintainer is standing.
+ *
+ * Owner, 2026-09-18, of a test posting of their own: "add a button here at the
+ * bottom to 'delete' a job posting once opened for edit. I have posted a test
+ * posting and can't delete it now... Add also a delete button next to the
+ * button 'Mark reviewed'."
+ *
+ * Nothing was missing from the rules. What was missing is a control on the two
+ * screens the maintainer lands on -- the edit form, which is where the Admin
+ * area's "Open & correct" goes, and the Admin area's own user-added card --
+ * and the posting in question was filed under a ROLLED season, so its card was
+ * on Previous markets rather than /jobs: the one Take down that existed was on
+ * neither page in front of them.
+ *
+ * WHAT THIS SUITE IS FOR is the shape of the answer rather than the buttons.
+ * There were already TWO copies of the takedown write and they had drifted (one
+ * echoed, one did not; one promised minutes, the other an hour), so two more
+ * buttons would have been four copies. These pins hold the four surfaces to the
+ * ONE definition -- and hold that definition to the rule the orphan carry in
+ * build-jobs.mjs imposes: a status change, never a document delete.
+ */
+async function testJobTakedown() {
+  const root = path.join(HERE, '..');
+  const read = (...p) => readFile(path.join(root, ...p), 'utf8');
+  /* EVERY SOURCE READ HERE IS COMMENT-STRIPPED. Each of these files now
+     RECORDS the private copy it no longer carries -- oa-myjobs.js quotes the
+     "within an hour" it used to promise, and post-a-job.html names
+     oa-jobform.js in prose -- so a guard that could not tell the record from
+     the code would have to be satisfied by deleting the record. That is the
+     trap this file already records for the analytics page's "no iframes"
+     check and for the forum's retired wordings. */
+  const strip = (s) => String(s)
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
+  /* ---- 1. the one definition ---------------------------------------- */
+  const mod = await read('assets', 'oa-takedown.js');
+  const bare = strip(mod);
+  ok(/window\.OATakedown = \{/.test(bare), 'takedown: the module publishes OATakedown');
+  for (const key of ['LABEL', 'WHEN', 'statusFor', 'describe', 'message',
+    'confirm', 'run', 'failure']) {
+    ok(new RegExp(`\\b${key}:`).test(bare), `takedown: ...carrying ${key}`);
+  }
+
+  /* WHO took it down IS the status, and the build reads the difference: a
+     withdrawal is stamped `removed` once applied, while `hidden` stays hidden
+     and is re-applied on every run. Recorded the wrong way round, the
+     maintainer's takedown is undone by the poster's next edit. */
+  ok(/var HIDDEN = 'hidden';/.test(bare) && /var WITHDRAWN = 'withdrawn';/.test(bare)
+     && /var RESTORED = 'queued';/.test(bare)
+     && /function statusFor\(isAdmin\) \{ return isAdmin \? HIDDEN : WITHDRAWN; \}/.test(bare),
+    'takedown: the maintainer hides, the poster withdraws, and the words are named once');
+  const build = strip(await read('_scraper', 'build-jobs.mjs'));
+  ok(/\['withdrawn', 'hidden'\]/.test(build),
+    '...and both are the pair the build pulls');
+  ok(/if \(d\.data\(\)\.status !== 'withdrawn'\) continue;/.test(build),
+    '...and only the withdrawal is retired, which is why the distinction is stored');
+
+  /* ABSENCE MEANS THE NARROWER STATUS. With oa-accounts.js missing the answer
+     is `withdrawn`, which still takes the row off the site and is the one an
+     ordinary owner may write -- never `hidden`, which the rules give the
+     maintainer alone. */
+  ok(/OAAccounts && OAAccounts\.isAdmin && OAAccounts\.isAdmin\(\)/.test(bare),
+    'takedown: the maintainer is OAAccounts.isAdmin(), the site’s one definition');
+  ok(/function amAdmin\(\) \{\s*return !!\(/.test(bare),
+    '...and it is a boolean, so the module absent answers withdrawn');
+
+  /* A STATUS CHANGE, NEVER A DELETE. The rules allow the maintainer a
+     document delete and it is the one thing that must not be pressed here:
+     build-jobs.mjs CARRIES a row no document accounts for, so the row would
+     stay on the site for ever with nothing able to reach it. */
+  /* ANY spelling of it, with or without an argument: `['delete']` is how this
+     codebase writes the reserved word, and the first draft of this pin
+     demanded an empty argument list and so let `['delete']({...})` past. */
+  ok(!/\.delete\s*\(|\[\s*'delete'\s*\]\s*\(|\[\s*"delete"\s*\]\s*\(/.test(bare),
+    'takedown: the module deletes nothing');
+  ok(/\.doc\(id\)\.update\(\{/.test(bare) && !/\.doc\(id\)\.set\(/.test(bare),
+    'takedown: ...and it updates rather than sets, so the pinned createdAt costs no legitimate write');
+  ok(/orphan/i.test(mod) && /allow delete/.test(mod),
+    'takedown: the header says WHY a delete is wrong — the orphan carry, and the rule that mirrors it');
+
+  /* THE ECHO GOES WITH THE TAKEDOWN. This is the half the two old copies
+     disagreed about: oa-jobedit.js stashed and oa-myjobs.js did not, so a
+     poster who withdrew from My postings went back to /jobs and found it
+     still there. */
+  ok(/if \(window\.OAFresh\) OAFresh\.stash\(/.test(bare),
+    'takedown: the echo is the module’s, so every surface gets it');
+
+  /* ---- 2. three callers, and none with a copy ------------------------
+
+     THE ADMIN AREA'S USER CARD IS DELIBERATELY NOT ONE, and the reason is
+     worth writing down rather than reading as an omission. It got its own
+     take-down on master the same day (PR #197), with a "Taken down by you"
+     drawer and a Put it back the module has no notion of; its panel is
+     admin-only, so it always writes `hidden` and needs no statusFor(), and
+     its restore writes a third word this module does not do. So it keeps its
+     own twelve-line setStatus and what has to AGREE is pinned instead, in
+     part 5 below: the words, the cadence and the no-delete rule. */
+  const CALLERS = [
+    ['assets/oa-jobedit.js', 'the public card lists'],
+    ['assets/oa-myjobs.js', 'My postings'],
+    ['assets/oa-jobform.js', 'the edit form'],
+  ];
+  for (const [file, what] of CALLERS) {
+    const src = strip(await read(...file.split('/')));
+    ok(/OATakedown\.run\(\{ id: /.test(src),
+      `takedown: ${what} writes through the module`);
+    ok(!/status:\s*'(withdrawn|hidden)'/.test(src),
+      `takedown: ...and ${what} names no status of its own`);
+    ok(/OATakedown\.confirm\(/.test(src),
+      `takedown: ...and asks through the module, so the words are one definition`);
+    ok(/OATakedown\.failure\(/.test(src),
+      `takedown: ...and explains a refusal through the module`);
+    /* THE LABEL IS THE THREE LISTS', not the form's. A card's control sits in
+       a row of other cards' controls and has to read the same two words on
+       every one of them; the FORM's sits beside "Save changes" and says which
+       thing it would take down, exactly as post-a-candidate.html's says "Take
+       my profile down". So the form is exempt BY NAME rather than by
+       omission, and its own wording is pinned against the sibling form's
+       below. */
+    if (file === 'assets/oa-jobform.js') continue;
+    ok(/OATakedown\.LABEL/.test(src),
+      `takedown: ...and ${what} calls the control what the other lists call it`);
+  }
+
+  /* THE CADENCE IS THE MODULE'S, and the hour one copy promised is gone.
+     `publishOnChange` rings the build the moment a posting changes, so the
+     copy that promised "at the next update, normally within an hour" was
+     false -- the copy-versus-cadence gap this file records three times. */
+  const OATAKEDOWN_WHEN = (/var WHEN = '([^']+)';/.exec(bare) || [])[1] || '';
+  ok(OATAKEDOWN_WHEN === 'within a few minutes',
+    'takedown: one cadence, in the module');
+  for (const [file] of CALLERS) {
+    const src = strip(await read(...file.split('/')));
+    /* THE TAKEDOWN'S OWN SLICE, bounded, and not the whole file: these pages
+       legitimately say "at the next update" about other things — when a
+       QUEUED posting goes live, and when an uploaded advert is filed into
+       Drive — and a guard that could not tell those from the takedown's own
+       promise would have to be satisfied by rewording them. */
+    const at = Math.max(src.indexOf('function takeDown'),
+      src.indexOf('function wireTakeDown'), src.indexOf("act === 'takedown'"));
+    ok(at >= 0, `takedown: ${file} has a takedown path to read`);
+    const slice = src.slice(at, at + 2600);
+    ok(!/within an hour|at the next update/.test(slice),
+      `takedown: ${file} promises no hour of its own`);
+    ok(/OATakedown\.WHEN/.test(slice) || !/minute|hour/.test(slice),
+      `takedown: ${file} takes its cadence from the module, or names none`);
+  }
+
+  /* EVERY PAGE THAT PRESSES ONE LOADS THE DEFINITION, and the echo it stashes
+     into. A page short of either is a control that throws, or one that
+     silently loses the echo -- the shape the two old copies were in. */
+  const CONSUMERS = ['oa-jobedit.js', 'oa-myjobs.js', 'oa-jobform.js'];
+  const PAGES = ['index.html', 'jobs.html', 'previous-markets.html',
+    'my-postings.html', 'post-a-job.html'];
+  for (const page of PAGES) {
+    const html = await read(page);
+    ok(html.includes('src="assets/oa-takedown.js"'),
+      `takedown: ${page} loads the module`);
+    ok(html.includes('src="assets/oa-fresh.js"'),
+      `takedown: ...and the echo it stashes into`);
+    for (const c of CONSUMERS) {
+      const at = html.indexOf(`src="assets/${c}"`);
+      if (at === -1) continue;
+      ok(html.indexOf('src="assets/oa-takedown.js"') < at,
+        `takedown: ...before ${c}, which calls it`);
+    }
+  }
+  /* …AND NOWHERE ELSE, which is the other half of the same rule. The Admin
+     area keeps its own drawer and calls nothing here, so it must not download
+     4KB it never runs — the "one request per file per page" discipline, and
+     the reason a page list is pinned BOTH ways rather than just one. */
+  for (const page of (await readdir(path.join(root)))
+      .filter((f) => f.endsWith('.html'))) {
+    const html = await read(page);
+    const loads = html.includes('src="assets/oa-takedown.js"');
+    const needs = CONSUMERS.some((c) => html.includes(`src="assets/${c}"`));
+    ok(loads === needs,
+      `takedown: ${page} loads the module exactly when something on it calls it`);
+  }
+
+  /* ---- 3. the edit form's own control -------------------------------- */
+  const formHtml = await read('post-a-job.html');
+  ok(/<button type="button" class="button oa-btn-ghost" id="oa-takedown" hidden>/
+      .test(formHtml),
+    'takedown: post-a-job.html ships the button HIDDEN, in the candidate form’s own shape');
+  /* the SIBLING FORM's arrangement, because it is the same question one page
+     over: same id, same classes, same place in the action row */
+  const candHtml = await read('post-a-candidate.html');
+  ok(/class="button oa-btn-ghost" id="oa-takedown" hidden/.test(candHtml),
+    'takedown: ...which is what post-a-candidate.html has always carried');
+  const acts = formHtml.slice(formHtml.indexOf('<div class="oa-actions">'),
+    formHtml.indexOf('</form>'));
+  ok(acts.length > 200 && acts.length < 3000,
+    'takedown: the action row slice is bounded both ends');
+  ok(acts.indexOf('id="oa-submit"') < acts.indexOf('id="oa-takedown"')
+     && acts.indexOf('id="oa-takedown"') < acts.indexOf('id="oa-msg"'),
+    'takedown: ...at the bottom of the form, after Save changes and before its message line');
+  /* ITS OWN WORDING, and the exemption above is why: beside "Save changes" a
+     bare "Take down" does not say WHAT, where in a row of cards it can say
+     nothing else. The sibling form's is "Take my profile down". */
+  ok(/id="oa-takedown" hidden>\s*Take this posting down<\/button>/.test(formHtml),
+    'takedown: ...and says which thing it takes down, as the sibling form does');
+  ok(/Take my profile down/.test(candHtml),
+    'takedown: ...which is the shape it is copied from');
+
+  const formJs = strip(await read('assets', 'oa-jobform.js'));
+  /* REVEALED IN EDIT MODE ONLY. A new posting has nothing to take down, so a
+     button there could only ever fail. */
+  const editMode = formJs.slice(formJs.indexOf('function enterEditMode'),
+    formJs.indexOf('function wireComments'));
+  ok(editMode.length > 500 && editMode.length < 8000,
+    'takedown: the enterEditMode slice is bounded both ends');
+  ok(/show\(\$\('oa-takedown'\), true\);/.test(editMode),
+    'takedown: enterEditMode reveals it — the same place Save changes is renamed');
+  const wire = formJs.slice(formJs.indexOf('function wireTakeDown'),
+    formJs.indexOf('function boot'));
+  ok(wire.length > 500 && wire.length < 5000,
+    'takedown: the wireTakeDown slice is bounded both ends');
+  ok(/if \(!btn \|\| !EDIT_ID\) return;/.test(wire),
+    'takedown: ...and the handler stands down on a new posting');
+  /* THE ROW THE FORM NOW READS, so the confirmation names the posting on
+     screen rather than what was stored before the correction was typed. */
+  ok(/institution: \(\$\('f-institution'\) \|\| \{\}\)\.value/.test(wire)
+     && /ref: EDIT_REF/.test(wire),
+    'takedown: the confirmation names the posting as the FORM reads it, with the stored ref');
+  /* THE FORM IS REPLACED, or the reader presses Save changes a moment later
+     and puts the posting back up without meaning to. */
+  ok(/show\(\$\('oa-job-form'\), false\);/.test(wire)
+     && /show\(done, true\);/.test(wire),
+    'takedown: ...and the form gives way to the done panel rather than staying open over it');
+  ok(/Nothing is deleted/.test(wire),
+    'takedown: ...whose words say nothing was deleted');
+  /* AND OFFER THE WAY BACK, which is the rule every overlay on this site is
+     held to ("hiding is never a one-way door"): for a posting the door is one
+     Save changes on the form that has just closed, so the panel LINKS that
+     editor by id rather than describing it. My postings would not do: it
+     lists your own postings, and a maintainer who has taken down somebody
+     else's would find nothing there. */
+  ok(/var back = 'post-a-job\?edit=' \+ encodeURIComponent\(EDIT_ID\);/.test(wire)
+     && /href="' \+ back \+ '"/.test(wire),
+    'takedown: ...and offers the way back — the same editor, by id');
+  ok(formJs.includes('enterEditMode();\n    wireTakeDown();'),
+    'takedown: and boot() wires it');
+
+  /* ---- 4. the Admin area's user-added card, which is NOT a caller ------
+
+     It shipped its own take-down on master the same day (PR #197): a drawer
+     headed "Taken down by you" below the list, one press from Put it back,
+     with the restore writing `queued` and cancelling the removal echo. That
+     is a better answer for that surface than this module's, and it is
+     already merged — so it is kept as it is and what has to AGREE is pinned
+     here instead. Three things, and no more: the module cannot own the
+     drawer, and the panel must not own the words. */
+  const rv = strip(await read('assets', 'oa-jobreview.js'));
+
+  /* THE WORDS. The panel is admin-only and always writes `hidden`, so it has
+     no use for statusFor() — but the literal it writes has to be the one the
+     module names, or the two surfaces would take a posting down under two
+     different words and only one of them would survive the build's
+     withdrawn-to-removed rewrite. testQueueTakedown pins the panel's own
+     side; this pins that the module still names all three. */
+  for (const [name, word] of [['HIDDEN', 'hidden'], ['RESTORED', 'queued']]) {
+    ok(rv.includes(`var ${name} = '${word}';`),
+      `takedown: the panel names ${name} as '${word}', which the module names too`);
+    ok(bare.includes(`var ${name} = '${word}';`),
+      `takedown: ...and the module is where that word is defined`);
+  }
+
+  /* THE CADENCE. Its confirmation says how long the site takes, and if it
+     ever disagreed with the module one of the two would be lying to the same
+     maintainer on two screens about one posting. */
+  ok(rv.includes(OATAKEDOWN_WHEN),
+    `takedown: the panel's confirmation says "${OATAKEDOWN_WHEN}", the module's own cadence`);
+  ok(!/within an hour|at the next update/.test(rv),
+    'takedown: ...and promises no hour of its own');
+
+  /* AND NO DELETE, over the whole file rather than one spelling of one call:
+     the same rule this module is held to, for the same orphan reason. */
+  ok(!/\.delete\s*\(|\[\s*'delete'\s*\]\s*\(/.test(rv),
+    'takedown: ...and the panel deletes no document either');
+
+  /* ---- 5. what it does NOT touch ------------------------------------- */
+  /* The tile and the account-menu badge count the GATE alone (waitingJobs,
+     one aggregate over pending jobReviews), so nothing here moves either. */
+  const aa = strip(await read('assets', 'oa-adminarea.js'));
+  ok(!/OATakedown|jobSubmissions/.test(
+       aa.slice(aa.indexOf('function waitingJobs'), aa.indexOf('function waitingJobs') + 900)),
+    'takedown: the badge still counts the gate alone — a live posting was never waiting on anybody');
+  /* NO RULES CHANGE, and that is pinned rather than remembered: a poster may
+     already set `withdrawn` and the maintainer may write anything. */
+  const rules = await read('_firestore.rules');
+  ok(/allow update: if isOwner\(resource\.data\.uid\)[\s\S]{0,200}?status in \['queued', 'withdrawn'\]/
+      .test(rules),
+    'takedown: the rules already let a poster withdraw their own posting — no deploy waits on this');
+  ok(/allow delete: if isAdmin\(\);\n\n      \/\/ The maintainer can hide a posting/.test(rules),
+    'takedown: ...and the delete the rules do allow is the maintainer’s, which nothing here presses');
+
+  /* ---- 6. the record, and the browser suite -------------------------- */
+  const claude = await read('CLAUDE.md');
+  ok(/## Taking a posting down, from wherever the maintainer is standing/.test(claude),
+    'takedown: CLAUDE.md records the decision');
+  const log = JSON.parse(await read('changelog.json'));
+  ok(log.updates.some((e) => e.id === 'job-takedown-2026-09'
+       && /tak\w* .*\bdown\b/i.test(e.title) && /Nothing is deleted/.test(e.summary)),
+    'takedown: and the change log announces it, saying nothing is deleted');
+  const pt = await read('_scraper', 'page-test.mjs');
+  for (const needle of [
+    'the edit form offers Take down',
+    'a new posting is offered no Take down',
+    'the edit form takes the posting down',
+    'a cancelled confirmation writes nothing',
+  ]) {
+    ok(pt.includes(needle), `takedown: the browser suite measures "${needle}"`);
+  }
+  /* …and the panel's own half is measured by the block that shipped with it */
+  ok(/Taken down by you/.test(pt),
+    'takedown: and the review panel\'s drawer is measured by its own block');
+}
+
 async function testSubmissionTokenRefresh() {
   const root = path.join(HERE, '..');
   const strip = (src) => src
@@ -22783,6 +23135,7 @@ if (isMain(import.meta.url)) {
   await testSubmissionTokenRefresh();
   await testRulesBudgetGuard();
   await testJobComments();
+  await testJobTakedown();
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
   await testTopMenu();
