@@ -19378,6 +19378,103 @@ async function testVerifyExistingUsers() {
     'the Privacy Policy says the count is public and the record is not');
 }
 
+/* CORRECTING A MISTYPED SIGN-IN ADDRESS ------------------------------------
+   The script renames a person's whole identity at Auth, and until now its
+   nineteen guards ran ONLY when the owner pressed the button: the suite was
+   not spawned here, so the one script that can move an account to somebody
+   else's address was unenforced on every pull request. That is the shape this
+   file already records for the three forum scripts ("826 checks unenforced"),
+   and it matters more here.
+
+   And the run that prompted this: the owner pressed it for
+   `yh3660@columbia.edi` with `write` unticked, got the true answer that
+   another account already holds the corrected address, and got a RED run for
+   it. A plan is a question; an answer is not a failure. */
+async function testFixAccountEmail() {
+  const root = path.join(HERE, '..');
+  const noDash = (s) => !/—/.test(String(s));
+
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'fix-account-email.mjs'), '--selftest'],
+      { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/fix-account-email selftest: \d+ passed, 0 failed/.test(out) && !/\bFAIL\b/.test(out),
+    'the address correction\'s own selftest is green:\n' + out.slice(0, 1500));
+
+  const M = await import('./fix-account-email.mjs');
+  const acc = { uid: 'u1', email: 'yh3660@columbia.edi' };
+
+  /* the four guards, through the module rather than through its own suite, so
+     a guard deleted there fails here too */
+  ok(M.check({ account: acc, from: 'yh3660@columbia.edi', to: 'yh3660@columbia.edu', holder: null }).ok,
+    'a mistyped domain is a correction');
+  eq(M.check({ account: acc, from: 'yh3660@columbia.edi', to: 'yh3660@columbia.edu', holder: { uid: 'u2' } }).code,
+    'held', 'an address another account holds is refused, with its own code');
+  eq(M.check({ account: acc, from: 'yh3660@columbia.edi', to: 'someone@columbia.edu', holder: null }).code,
+    'local', 'and a different mailbox is refused by default');
+  eq(M.check({ account: { uid: 'u1', email: 'moved@on.edu' }, from: 'yh3660@columbia.edi', to: 'yh3660@columbia.edu', holder: null }).code,
+    'stale', 'and a stale instruction is refused');
+
+  /* A PLAN THAT SAYS NO IS AN ANSWER. Read from the refusal branch alone,
+     bounded at both ends with its length asserted: the file EXPLAINS the exit
+     it no longer takes, so a scan over the whole of it would be satisfied by
+     deleting the explanation. */
+  const src = await readFile(path.join(HERE, 'fix-account-email.mjs'), 'utf8');
+  const at = src.indexOf('if (!verdict.ok) {');
+  const end = src.indexOf('\n  }\n', at);
+  ok(at > 0 && end > at, 'the refusal branch is where it was');
+  const branch = src.slice(at, end);
+  ok(branch.length > 200 && branch.length < 1800, 'and the slice is the branch (' + branch.length + ' chars)');
+  ok(/if \(write\) process\.exitCode = 1;/.test(branch) && !/^\s*process\.exitCode = 1;/m.test(branch),
+    'a refusal fails the run only with --write, never unconditionally');
+  ok(/write \? '::error::' : '::warning::'/.test(branch),
+    'and a plan-only refusal is a ::warning::, so the Actions tab is not red over a true answer');
+  ok(/nextStep\(verdict\.code/.test(branch), 'and every refusal says what to do next');
+  ok(typeof M.nextStep === 'function', 'nextStep is the one definition of that wording');
+  const held = M.nextStep('held', { account: acc, holder: { uid: 'u2' }, from: 'yh3660@columbia.edi', to: 'yh3660@columbia.edu' });
+  ok(held.indexOf('u1') !== -1 && held.indexOf('u2') !== -1 && held.indexOf('/admin-area') !== -1,
+    'and the reported refusal names both accounts and the roster');
+  ok(['held', 'missing', 'stale', 'local', 'same', 'from', 'to']
+    .every((c) => noDash(M.nextStep(c, { account: acc, holder: { uid: 'u2' }, from: 'a@b.edi', to: 'a@b.edu' }))),
+    'and no answer it gives carries an em dash');
+
+  /* the script still sends nothing and still writes nothing on import */
+  /* COMMENTS STRIPPED: the file's own header EXPLAINS that the verification
+     message has one sender and names `renderVerifyEmail` in doing so, and a
+     guard that could not tell the explanation from the thing would have to be
+     satisfied by deleting the explanation. */
+  const bare = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  ok(!/nodemailer|renderVerifyEmail|transport\(/.test(bare),
+    'the script sends no e-mail of its own: the verification message has one sender');
+  ok(/isMain\(import\.meta\.url\)/.test(src), 'and importing it neither reads nor writes an account');
+
+  /* the workflow: pressed, never scheduled, plan by default, and the two free-text
+     addresses reach the shell through env: rather than pasted in by expression */
+  const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-fix-account-email.yml'), 'utf8');
+  ok(/on:\s*\n\s*workflow_dispatch:/.test(wf) && !/schedule:/.test(wf),
+    'oa-fix-account-email.yml is dispatch-only and on no schedule');
+  const write = wf.slice(wf.indexOf('      write:'));
+  ok(/default: false/.test(write.slice(0, 200)), 'and `write` defaults to false, so the button prints the plan');
+  ok(/IN_FROM: \$\{\{ inputs\.from \}\}/.test(wf) && /IN_TO: \$\{\{ inputs\.to \}\}/.test(wf)
+     && /"--from=\$IN_FROM" "--to=\$IN_TO"/.test(wf),
+    'and both addresses reach the shell as quoted env variables, never pasted in by expression');
+  ok(/node _scraper\/fix-account-email\.mjs --selftest/.test(wf), 'the guards are checked before the run');
+
+  /* CLAUDE.md records it */
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  const secAt = claude.indexOf('### A mistyped sign-in address is corrected once, by hand');
+  ok(secAt > 0, 'CLAUDE.md records the address correction');
+  const section = claude.slice(secAt, claude.indexOf('\n## ', secAt + 10));
+  ok(/fix-account-email/.test(section) && /a PLAN that says no is an ANSWER/i.test(section)
+     && /nextStep/.test(section) && /registered twice/.test(section),
+    'and records the plan-versus-write rule, the next step, and the reported case');
+  ok(noDash(section), 'CLAUDE.md: no em dash in the section');
+}
+
+
 /* ------------------------------- the registered-users figure (owner, 2026-09-05)
 
    The front page's fifth key figure, and the page half of the two served
@@ -23137,6 +23234,7 @@ if (isMain(import.meta.url)) {
   await testJobComments();
   await testJobTakedown();
   await testVerifyExistingUsers();
+  await testFixAccountEmail();
   await testRegisteredUsersFigure();
   await testTopMenu();
   await testForum();

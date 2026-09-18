@@ -30,6 +30,14 @@
  *      different mailbox is a different person, and that is the line;
  *   4. nothing is written without `--write`. The default prints the plan.
  *
+ * AND A PLAN THAT SAYS NO IS AN ANSWER. A refusal here is nearly always a fact
+ * about the world rather than a mistake in the instruction, so without
+ * `--write` it is a `::warning::` and the run is GREEN: the owner pressed a
+ * button to ask a question and got a true reply. With `--write` it stays an
+ * error, because there the owner asked for a change that did not happen.
+ * `nextStep` says what to do about each refusal, since “refused” on its own is
+ * a red run and a dead end — which is exactly how the reported case read.
+ *
  * WHAT IT WRITES. `email` and `emailVerified: false` on the Auth record, and
  * then it DELETES `verifyMail/{uid}` so the campaign's once-only mark and its
  * rate limit are clear and the next press of
@@ -77,26 +85,71 @@ export function parts(address) {
  */
 export function check({ account, from, to, holder, allowLocalChange = false }) {
   const f = parts(from), t = parts(to);
-  if (!f) return { ok: false, why: '--from is not an e-mail address' };
-  if (!t) return { ok: false, why: '--to is not an e-mail address' };
+  if (!f) return { ok: false, code: 'from', why: '--from is not an e-mail address' };
+  if (!t) return { ok: false, code: 'to', why: '--to is not an e-mail address' };
   if (f.local === t.local && f.domain === t.domain) {
-    return { ok: false, why: 'the two addresses are the same' };
+    return { ok: false, code: 'same', why: 'the two addresses are the same' };
   }
-  if (!account) return { ok: false, why: 'no account holds that address' };
+  if (!account) return { ok: false, code: 'missing', why: 'no account holds that address' };
   if (String(account.email || '').toLowerCase() !== String(from).trim().toLowerCase()) {
-    return { ok: false, why: 'that account’s address is not the one given, so the instruction is stale' };
+    return { ok: false, code: 'stale', why: 'that account’s address is not the one given, so the instruction is stale' };
   }
   if (holder && holder.uid !== account.uid) {
-    return { ok: false, why: 'another account already holds the new address' };
+    return { ok: false, code: 'held', why: 'another account already holds the new address' };
   }
   if (f.local !== t.local && !allowLocalChange) {
     return {
       ok: false,
+      code: 'local',
       why: 'the local part would change, which is a different mailbox rather than ' +
            'a mistyped domain; pass --allow-local-change if that is really meant',
     };
   }
-  return { ok: true, why: '' };
+  return { ok: true, code: '', why: '' };
+}
+
+/**
+ * What to do about a refusal, in the reader's own terms.
+ *
+ * A refusal here is usually a fact about the world rather than a mistake in
+ * the instruction, and the one that was reported — `held` — is the clearest
+ * case: both addresses belong to accounts, so the person registered twice and
+ * there is nothing here to correct. Saying only “refused” leaves the owner
+ * with a red run, a true answer they cannot read, and no next step. Pure, so
+ * the wording is pinned rather than remembered.
+ */
+export function nextStep(code, { account, holder, from, to } = {}) {
+  const f = parts(from), t = parts(to);
+  const mine = account && account.uid ? account.uid : 'that account';
+  switch (code) {
+    case 'held':
+      return 'Both addresses belong to accounts, so nothing here can be corrected: ' +
+        `${mine} holds the mistyped one and ${holder && holder.uid ? holder.uid : 'another account'} ` +
+        'holds the corrected one' +
+        (f && t && f.local === t.local ? ', under the same mailbox name, so it is one person who registered twice' : '') +
+        '. Keep the account on the corrected address and delete the stuck one from the ' +
+        'roster on /admin-area. An unverified password account can do nothing itself, ' +
+        'which is why the roster is where it goes.';
+    case 'missing':
+      return 'Nobody holds the address given, so either it has already been corrected ' +
+        '(check the roster on /admin-area) or the address to look for is not the one typed. ' +
+        'Press this again with --uid if the roster names the account.';
+    case 'stale':
+      return 'The account was found but its stored address is something else now, so this ' +
+        'instruction is out of date. Read the address off the roster on /admin-area and press again.';
+    case 'local':
+      return 'A different mailbox is a different person, which is the line this script keeps. ' +
+        'Tick allow_local_change only if the new mailbox really is the same person’s.';
+    case 'same':
+      return 'There is nothing to do: the two addresses are one address.';
+    case 'from':
+      return 'The address to look for is not an e-mail address. Read it off the roster ' +
+        'on /admin-area, or press this again with --uid instead.';
+    case 'to':
+      return 'The corrected address is not an e-mail address. Check what was typed and press again.';
+    default:
+      return 'Check the two addresses and press again.';
+  }
 }
 
 /* ------------------------------------------------------------------ the run */
@@ -148,8 +201,22 @@ async function main() {
   });
 
   if (!verdict.ok) {
-    console.log(`::error::refused: ${verdict.why}`);
-    process.exitCode = 1;
+    /* A PLAN THAT SAYS NO IS AN ANSWER, NOT A FAILED RUN. Without --write this
+       button is a question — can this address be corrected? — and “no, because
+       another account already holds it” answers it completely. Exiting 1 there
+       turned the Actions tab red over a true answer, with nothing a commit
+       could ever make green: the crying-wolf cost this repository has paid
+       before, and it read as the tool being broken rather than as the reply it
+       was (owner, 2026-09-17, pressing it for `yh3660@columbia.edi`).
+
+       With --write it stays an error, and that asymmetry is the whole rule: the
+       owner asked for a change, the change did not happen, and a green run
+       there would read as “done”. */
+    const how = write ? '::error::' : '::warning::';
+    console.log(`${how}refused: ${verdict.why}`);
+    console.log(nextStep(verdict.code, { account, holder, from: from || (account && account.email) || '', to }));
+    if (write) process.exitCode = 1;
+    else console.log('plan only: nothing was written, and nothing is wrong with this run.');
     return;
   }
 
@@ -218,6 +285,40 @@ function selftest() {
   refuses({ account: acc, from: 'yh3660@columbia.edi', to: 'not an address', holder: null },
     '--to', 'a junk target is refused');
 
+  /* EVERY REFUSAL CARRIES A CODE, and `nextStep` answers every one of them.
+     Pinned BOTH WAYS off the codes `check` can really return, so a refusal
+     added without a next step, or a next step for a code nobody returns,
+     fails here rather than reaching the owner as a dead end. */
+  const CODES = ['from', 'to', 'same', 'missing', 'stale', 'held', 'local'];
+  const seen = [
+    check({ account: acc, from: 'nope', to: 'a@b.edu', holder: null }),
+    check({ account: acc, from: 'a@b.edi', to: 'nope', holder: null }),
+    check({ account: acc, from: 'yh3660@columbia.edi', to: 'yh3660@columbia.edi', holder: null }),
+    check({ account: null, from: 'a@b.edi', to: 'a@b.edu', holder: null }),
+    check({ account: { uid: 'u1', email: 'someone@else.edu' }, from: 'a@b.edi', to: 'a@b.edu', holder: null }),
+    check({ account: acc, from: 'yh3660@columbia.edi', to: 'yh3660@columbia.edu', holder: { uid: 'u2' } }),
+    check({ account: acc, from: 'yh3660@columbia.edi', to: 'other@columbia.edu', holder: null }),
+  ].map((v) => v.code);
+  ok(seen.join(',') === CODES.join(','), 'every refusal carries its own code (got: ' + seen.join(',') + ')');
+  ok(check({ account: acc, from: 'yh3660@columbia.edi', to: 'yh3660@columbia.edu', holder: null }).code === '',
+    'and an allowed correction carries none');
+  const generic = nextStep('something-nobody-returns');
+  ok(CODES.every((c) => nextStep(c, { account: acc, holder: { uid: 'u2' }, from: 'a@b.edi', to: 'a@b.edu' }) !== generic),
+    'nextStep answers every code with something of its own');
+
+  /* The owner's own refusal: it must name both accounts and where to go. */
+  const held = nextStep('held', {
+    account: acc, holder: { uid: 'u2' },
+    from: 'yh3660@columbia.edi', to: 'yh3660@columbia.edu',
+  });
+  ok(held.indexOf('u1') !== -1 && held.indexOf('u2') !== -1, 'the held refusal names both accounts');
+  ok(held.indexOf('/admin-area') !== -1, 'and sends the owner to the roster');
+  ok(held.indexOf('registered twice') !== -1, 'and says it is one person, the local parts being equal');
+  ok(nextStep('held', {
+    account: acc, holder: { uid: 'u2' },
+    from: 'yh3660@columbia.edi', to: 'someone.else@columbia.edu',
+  }).indexOf('registered twice') === -1, 'and does NOT say so when the mailbox differs');
+
   /* THE LOG IS PUBLIC: no line may carry a whole address or a name. Read this
      file's own source, the way the roster sync's suite does. */
   const src = readOwnSource();
@@ -231,6 +332,22 @@ function selftest() {
   ok(!/--write/.test(src.slice(src.indexOf('await auth.updateUser')))
      || src.indexOf('if (!write)') < src.indexOf('await auth.updateUser'),
     'the plan-only return comes BEFORE the write');
+
+  /* A PLAN THAT SAYS NO EXITS 0, and only --write makes a refusal an error.
+     Read from the refusal branch alone, bounded at both ends and its length
+     asserted — this file EXPLAINS the exit it no longer takes, so a scan over
+     the whole of it would be satisfied by deleting the explanation. */
+  const refuseAt = src.indexOf('if (!verdict.ok) {');
+  const refuseEnd = src.indexOf('\n  }\n', refuseAt);
+  ok(refuseAt > 0 && refuseEnd > refuseAt, 'the refusal branch is where it was');
+  const branch = src.slice(refuseAt, refuseEnd);
+  ok(branch.length > 200 && branch.length < 1800, 'and the slice is the branch (' + branch.length + ' chars)');
+  ok(/if \(write\) process\.exitCode = 1;/.test(branch),
+    'a refusal fails the run only when --write was passed');
+  ok(!/^\s*process\.exitCode = 1;/m.test(branch), 'and never unconditionally');
+  ok(/write \? '::error::' : '::warning::'/.test(branch),
+    'and it is an ::error:: only with --write, a ::warning:: otherwise');
+  ok(/nextStep\(verdict\.code/.test(branch), 'and every refusal prints its next step');
 
   console.log(`fix-account-email selftest: ${pass} passed, ${fail} failed`);
   if (fail) process.exitCode = 1;
