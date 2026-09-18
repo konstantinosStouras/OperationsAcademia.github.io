@@ -1174,12 +1174,69 @@ async function testMarketYearCascade() {
     { year: 2027, from: 'final' },
     'advertised in May, closing in September: a 2026-2027 posting');
 
-  // 2. forward only — the whole safety argument for applying it at ingest
-  for (const r of served) {
-    const posted = String(r.posted || '');
-    if (!posted) continue;
-    ok(marketYearOf(r, { now }).year >= marketYear(new Date(posted + 'T12:00:00Z')),
-      `${r.id}: the cascade never files a posting EARLIER than its posting date`);
+  /* 2. FORWARD ONLY — and since 2026-09-18 a property of the FUNCTION rather
+     than an assumption about its input.
+
+     This used to be asserted over every served posting, and that is the shape
+     of guard this repository has now been bitten by five times: the only way
+     it could fail is a row whose own dates run BACKWARDS, the remedy is a date
+     in a document or a crowdsourced workbook no commit can change, and red
+     here means the build commits NOTHING. It duly fired — on
+     `2026-test-20260917`, a posting made through the form with a closing date
+     the far side of the July roll — and every build from 2026-09-17 21:15
+     failed, so a London Business School posting made the next morning was
+     produced correctly by the build and published by nobody (owner: "I don't
+     see it public now").
+
+     So the property is kept by `marketYearOf` itself, which is where a
+     promise a function makes belongs, and it is pinned HERE over fixtures —
+     both ways, because a floor that also swallowed a later date would be the
+     cascade deleted rather than guarded. A backdated row is REPORTED instead:
+     `backdatedDeadlines` already does that for the sheet, by the rule its own
+     comment states — reported, never repaired, and never a guard over
+     `data/`. */
+  eq(marketYearOf({ applyByDate: '2026-06-01', posted: '2026-09-17' }, { now }),
+    { year: 2027, from: 'posted' },
+    'a closing date in a season already closed is floored at the posting date\'s own');
+  eq(marketYearOf({ applyByDate: '', reviewDate: '2025-09-08', posted: '2026-09-17' }, { now }),
+    { year: 2027, from: 'posted' },
+    'and so is a suggested date behind the day the posting went up');
+  eq(marketYearOf({ applyByDate: '2027-10-15', posted: '2026-09-17' }, { now }),
+    { year: 2028, from: 'final' },
+    'a date AHEAD of it still decides — the floor is a floor, not a replacement');
+  eq(marketYearOf({ applyByDate: '2026-09-08', posted: '2026-05-04' }, { now }),
+    { year: 2027, from: 'final' },
+    'and the owner\'s own May-for-September case is untouched by it');
+  eq(marketYearOf({ applyByDate: '2026-06-01' }, { now }),
+    { year: 2026, from: 'final' },
+    'a row with no posting date has no floor to apply');
+
+  /* THE EXACT ROW THAT STOPPED THE SITE, end to end: it is filed under the
+     season it is being advertised in, which is the one page it is of use on. */
+  ok(marketYearOf({ applyByDate: '2026-06-01', posted: '2026-09-17' }, { now }).year
+     >= marketYear(new Date('2026-09-17T12:00:00Z')),
+    'so the row whose backwards dates crossed the roll files forward, not back');
+
+  /* …and the served files are SWEPT rather than asserted over: a backdated
+     date is the maintainer's to correct and never a reason to hold every
+     other posting back. The build's own log names them (build-jobs.mjs). */
+  {
+    const back = backdatedDeadlines(served);
+    if (back.length) {
+      console.log('  (postings whose own dates run backwards, reported not repaired: ' +
+        back.map((b) => `${b.id} ${b.field} ${b.date} < posted ${b.posted}`).join('; ') + ')');
+    }
+    /* and the BUILD names them, which is where the maintainer is looking. A
+       report nobody prints is the same as no report, and this one is what is
+       left once the guard that used to stop the site is gone. */
+    const bj = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+    ok(/backdatedDeadlines\s*\}?\s*from '\.\/jobmarket-sheet\.mjs'/.test(bj)
+      || /backdatedDeadlines,?\s*\n?/.test(bj.slice(0, bj.indexOf('const HERE'))),
+    'build-jobs imports the sheet\'s own backdated rule rather than writing a second copy');
+    ok(/const backwards = backdatedDeadlines\(rows\);/.test(bj),
+      'and runs it over the MERGED set, which is the only place every road meets');
+    ok(/reported, never repaired/.test(bj),
+      'saying which it is, so nobody turns it back into a guard over data/');
   }
   eq(marketYearAtLeast({ applyByDate: '2026-09-08' }, 2028).year, 2028,
     'a floor above the cascade wins — the tracking sheet tab keeps its say');
@@ -1476,56 +1533,80 @@ async function testFormMarketYearParity() {
     'the fixture runs the FORM\'s own source, not a copy of it');
 
   const fields = {};
-  const build = (editId, editYear, editPosted = '', pick = 'postingYear') => new Function(
+  /* BOTH HALVES ARE BUILT AGAINST ONE DAY, and since the floor arrived that is
+     not a convenience but the whole comparison. The form's last leg and its
+     FLOOR are the same quantity — the season being typed in — so a stub
+     answering a season no real date could reach (`current: 2099`, which this
+     fixture used to pass) would now swallow every case by flooring it there.
+     The day the poster is typing is handed to the form as `current` and to
+     the pipeline as `posted`, which is what each of them really reads. */
+  const build = (editId, editYear, editPosted = '', pick = 'postingYear',
+                 today = '2026-05-04') => new Function(
     '$', 'EDIT_ID', 'EDIT_YEAR', 'EDIT_POSTED', 'jobMarketYears',
     src + `\nreturn ${pick};`)(
     (id) => (id in fields ? { value: fields[id], checked: fields[id] === true } : null),
-    editId, editYear, editPosted, () => ({ current: 2099 }));
-  const postingYear = build('', 0);
+    editId, editYear, editPosted,
+    () => ({ current: marketYear(new Date(`${today}T12:00:00Z`)) }));
 
   /* EVERY CASE MUST SEPARATE THE STEP THAT ANSWERS IT FROM THE ONES THAT DO
-     NOT — a fixture whose three answers coincide passes a form that reads the
-     wrong date, which is exactly what the first draft of this test did. So
-     the final date, the suggested date and the fallback name three DIFFERENT
-     seasons wherever the case is about which of them wins, and "today" is
-     pinned somewhere no real date could reach. */
-  const FALLBACK = 2099;
+     NOT — a fixture whose answers coincide passes a form that reads the wrong
+     date, which is exactly what the first draft of this test did. So the final
+     date, the suggested date and the typing day name DIFFERENT seasons
+     wherever the case is about which of them wins.
+
+     ONE PAIR IS ALLOWED TO COINCIDE WITH THE FLOOR, and it has to: a date in
+     the same season as the typing day answers that season whether the date or
+     the floor decided. The roll is pinned by the PAIR either side of it — the
+     30 June case shares its answer with the floor, the 1 July case does not,
+     and together they put the boundary exactly where `marketYear` puts it. */
   const CASES = [
-    // the final date wins over a suggested date naming another season
-    { applyByDate: '2026-10-15', reviewDate: '2025-10-15', want: 2027 },
-    // ... and over one naming a LATER season, so it is not merely "the max"
-    { applyByDate: '2026-10-15', reviewDate: '2027-10-15', want: 2027 },
-    // no final date: the suggested one, not the fallback
-    { applyByDate: '', reviewDate: '2026-09-08', want: 2027 },
-    { applyByDate: '', reviewDate: '2025-09-08', want: 2026 },
-    // neither: the fallback, and nothing else
-    { applyByDate: '', reviewDate: '', want: FALLBACK },
+    // typing in the spring: a later date decides, over the floor and over the
+    // other date, whichever season that other date names
+    { today: '2026-05-04', applyByDate: '2026-10-15', reviewDate: '2025-10-15', want: 2027 },
+    // …and over one naming a LATER season, so it is not merely "the max"
+    { today: '2026-05-04', applyByDate: '2026-10-15', reviewDate: '2027-10-15', want: 2027 },
+    // no final date: the suggested one
+    { today: '2026-05-04', applyByDate: '', reviewDate: '2026-09-08', want: 2027 },
+    // neither: the season being typed in, and nothing else
+    { today: '2026-05-04', applyByDate: '', reviewDate: '', want: 2026 },
     // the roll itself, on both sides of 1 July
-    { applyByDate: '2026-06-30', reviewDate: '', want: 2026 },
-    { applyByDate: '2026-07-01', reviewDate: '', want: 2027 },
+    { today: '2026-05-04', applyByDate: '2026-06-30', reviewDate: '', want: 2026 },
+    { today: '2026-05-04', applyByDate: '2026-07-01', reviewDate: '', want: 2027 },
+
+    /* THE FLOOR, on both halves at once — the defect that stopped the site.
+       Typing in September, a closing date the far side of the previous July
+       names a season that has already closed, and the posting is filed in the
+       one it is being advertised in instead. */
+    { today: '2026-09-17', applyByDate: '2026-06-01', reviewDate: '', want: 2027 },
+    { today: '2026-09-17', applyByDate: '', reviewDate: '2025-09-08', want: 2027 },
+    // …and a date ahead of the typing day still decides, so the floor is a
+    // floor rather than "always the season you are typing in"
+    { today: '2026-09-17', applyByDate: '2027-10-15', reviewDate: '', want: 2028 },
   ];
   for (const c of CASES) {
     fields['f-applyByDate'] = c.applyByDate;
     fields['f-reviewDate'] = c.reviewDate;
     fields['f-untilFilled'] = !c.applyByDate;
-    const label = JSON.stringify({ final: c.applyByDate, review: c.reviewDate });
-    eq(postingYear(), c.want, `the form files ${label} under ${c.want}`);
-    /* AND THE PIPELINE AGREES. The form has no posting date to read — a new
-       posting is stamped with the moment it is stored — so the pipeline is
-       asked the same question with `now` standing in for step 3. */
-    if (c.want !== FALLBACK) {
-      eq(marketYearOf({ applyByDate: c.applyByDate, reviewDate: c.reviewDate },
-        { now }).year, c.want, `and _scraper/jobs-model.mjs says the same for ${label}`);
-    }
+    const label = JSON.stringify({ final: c.applyByDate, review: c.reviewDate, on: c.today });
+    eq(build('', 0, '', 'postingYear', c.today)(), c.want,
+      `the form files ${label} under ${c.want}`);
+    /* AND THE PIPELINE AGREES, asked about the same day: a new posting is
+       stamped `posted` with the moment it is stored, which is the day the
+       poster is typing. */
+    eq(marketYearOf({ applyByDate: c.applyByDate, reviewDate: c.reviewDate,
+      posted: c.today }, { now }).year, c.want,
+    `and _scraper/jobs-model.mjs says the same for ${label}`);
   }
+
+  const postingYear = build('', 0);
 
   /* A TICKED "until filled" IS THE ABSENCE OF A CLOSING DATE, even when the
      box beside it still holds one — the form disables it rather than clearing
      it on every path, and the pipeline reads `untilFilled` the same way. */
   fields['f-applyByDate'] = '2026-10-15';
-  fields['f-reviewDate'] = '2025-09-08';
+  fields['f-reviewDate'] = '2026-09-08';
   fields['f-untilFilled'] = true;
-  eq(postingYear(), 2026,
+  eq(postingYear(), 2027,
     'a ticked "until filled" drops to the suggested date, whatever the date box holds');
 
   // an EDIT is the one case the form must never re-derive

@@ -272,9 +272,24 @@
     if (EDIT_ID && EDIT_YEAR) return EDIT_YEAR;
     var uf = $('f-untilFilled');
     var final = (uf && uf.checked) ? '' : val('f-applyByDate');
-    return marketYearOfDay(final)
-      || marketYearOfDay(val('f-reviewDate'))
+    /* THE FLOOR IS `marketYearOf`'s OWN (_scraper/jobs-model.mjs), and it has
+       to be here as well because THIS is what files a posting made through
+       this form: the form SENDS `year`, and a stored year wins outright in
+       the pipeline, so the browser is the only thing that ever decides.
+
+       Without it a closing date in the PAST — a typo, or one copied from last
+       season — filed the posting under the season that date falls in, and
+       once that was the far side of the July roll the posting went straight
+       to a season that had already closed: the one page it is of no use on,
+       which is the exact defect this cascade was written to prevent. The
+       floor is the season the posting is being ADVERTISED in, which is today
+       for a new posting (the pipeline stamps `posted` when the submission is
+       stored) and the posting's own date for an edit — the same leg
+       `postingYears` below reads for the span. */
+    var floor = (EDIT_ID ? marketYearOfDay(EDIT_POSTED) : 0)
       || jobMarketYears().current;
+    var named = marketYearOfDay(final) || marketYearOfDay(val('f-reviewDate'));
+    return named > floor ? named : floor;
   }
 
   function val(id) { var el = $(id); return el ? String(el.value || '').trim() : ''; }
@@ -321,10 +336,22 @@
   function yearNoteWhy() {
     if (EDIT_ID && EDIT_YEAR) return 'the season it was filed in';
     var uf = $('f-untilFilled');
-    if (!(uf && uf.checked) && marketYearOfDay(val('f-applyByDate'))) {
-      return 'your final apply-by date';
+    var final = (uf && uf.checked) ? '' : val('f-applyByDate');
+    /* NAME THE DATE THAT DECIDED, and since the floor arrived that means
+       asking which one actually did. A date naming a season that has already
+       closed does NOT decide — the floor does — so saying "worked out from
+       your final apply-by date" over an answer the floor gave would be the
+       form describing a rule it is not following. Where a date was given and
+       the floor won anyway, the note says which, because a closing date in
+       the past is the poster's to notice. */
+    var answer = postingYear();
+    var byFinal = marketYearOfDay(final);
+    var byReview = marketYearOfDay(val('f-reviewDate'));
+    if (byFinal && byFinal === answer) return 'your final apply-by date';
+    if (byReview && byReview === answer) return 'your suggested apply-by date';
+    if (byFinal || byReview) {
+      return 'today\u2019s date, because the apply-by date you gave has already passed';
     }
-    if (marketYearOfDay(val('f-reviewDate'))) return 'your suggested apply-by date';
     return 'today\u2019s date, until you give an apply-by date';
   }
 
