@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-17T20:32:20.714Z",
+ "generated": "2026-09-18T07:11:33.592Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -323,6 +323,10 @@
   },
   {
    "v": "KAIST",
+   "n": 2
+  },
+  {
+   "v": "London Business School",
    "n": 2
   },
   {
@@ -890,10 +894,6 @@
    "n": 1
   },
   {
-   "v": "London Business School",
-   "n": 1
-  },
-  {
    "v": "Lone Star College System",
    "n": 1
   },
@@ -1191,6 +1191,10 @@
   },
   {
    "v": "Tennessee Wesleyan University",
+   "n": 1
+  },
+  {
+   "v": "test",
    "n": 1
   },
   {
@@ -2152,6 +2156,10 @@
    "n": 2
   },
   {
+   "v": "Booth School of Business",
+   "n": 2
+  },
+  {
    "v": "Cornell SC Johnson College of Business",
    "n": 2
   },
@@ -2233,10 +2241,6 @@
   },
   {
    "v": "Bayes Business School",
-   "n": 1
-  },
-  {
-   "v": "Booth School of Business",
    "n": 1
   },
   {
@@ -3083,7 +3087,7 @@
   },
   {
    "v": "Operations Management",
-   "n": 11
+   "n": 12
   },
   {
    "v": "Data Analytics",
@@ -3810,6 +3814,10 @@
    "n": 1
   },
   {
+   "v": "Management Science and Operations",
+   "n": 1
+  },
+  {
    "v": "Management Science/ Department Management and Technology",
    "n": 1
   },
@@ -4435,10 +4443,6 @@
   },
   {
    "v": "Management Science and Information System",
-   "n": 0
-  },
-  {
-   "v": "Management Science and Operations",
    "n": 0
   },
   {
@@ -8894,6 +8898,19 @@
    "bySchool": {
     "Goodfriend College of Business and Professional Studies": [
      "Business Administration"
+    ]
+   }
+  },
+  "test": {
+   "schools": [
+    "Booth School of Business"
+   ],
+   "units": [
+    "Operations Management"
+   ],
+   "bySchool": {
+    "Booth School of Business": [
+     "Operations Management"
     ]
    }
   },
