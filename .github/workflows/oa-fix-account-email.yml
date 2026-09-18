@@ -21,6 +21,15 @@ name: "OA: correct a mistyped sign-in address"
 # allow_local_change is ticked, because a different mailbox is a different
 # person. Without FIREBASE_SERVICE_ACCOUNT nothing is read.
 #
+# A PLAN THAT SAYS NO IS AN ANSWER: with `write` unticked a refusal is a
+# warning and the run is GREEN, because pressing this to ask whether an
+# address can be corrected and being told no is a true reply rather than a
+# broken run. With `write` ticked a refusal fails the run, since there a
+# change the owner asked for did not happen. Either way the log says what to
+# do next, which is usually not this button: two accounts holding the two
+# addresses is one person who registered twice, and the stuck one is deleted
+# from the roster on /admin-area.
+#
 # The log carries the uid and redacted addresses only: a dispatched run
 # prints into the Actions log of a PUBLIC repository.
 

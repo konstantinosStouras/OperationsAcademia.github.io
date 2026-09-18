@@ -4305,6 +4305,62 @@ instead, a new session gated too and the answer lifting it; a complete account
 not held; and a password account short of an affiliation asked on the same
 compact card with an X, signed in meanwhile, once a session.
 
+### A mistyped sign-in address is corrected once, by hand
+
+`_scraper/fix-account-email.mjs`, pressed through
+`.github/workflows/oa-fix-account-email.yml`, is the one road out for an
+account whose address is a typo. It exists because such an account is STUCK
+and cannot get itself out: the address IS its identity, so the person cannot
+change it from the site, every write they make is refused while
+`email_verified` can never become true, and the verification campaign has
+already stamped `verifyMail/{uid}` so it will never write to them again. Four
+guards make it a CORRECTION rather than a transfer, and the local-part rule is
+the line: a different mailbox is a different person.
+
+**A PLAN THAT SAYS NO IS AN ANSWER, NOT A FAILED RUN.** Owner, 2026-09-17,
+pressing it for `yh3660@columbia.edi` with `write` unticked: the run refused,
+correctly, because another account already held `yh3660@columbia.edu`. It then
+exited 1, so the Actions tab went red over a true reply to a question the
+owner had asked, with nothing a commit could ever make green. That is the
+crying-wolf cost this file already records for the two near-duplicate name
+sweeps and for the served-file guard, and from outside it read as the tool
+being broken rather than as the answer it was. Without `--write` a refusal is
+a `::warning::` and the run is green; with `--write` it stays an error,
+because there the owner asked for a change that did not happen and a green run
+would read as "done".
+
+**AND A REFUSAL NAMES THE NEXT STEP**, because "refused" on its own is a dead
+end. `check()` returns a `code` beside its prose and `nextStep(code, ...)` is
+the one definition of what to do about each, pinned both ways against the
+codes `check` can really return: a refusal added with no next step, or a next
+step for a code nobody returns, fails the build rather than reaching the owner
+as a red run with nothing in it. The reported one is the clearest case, and it
+is not a fix at all: **both addresses belong to accounts, so it is one person
+who registered twice**, under the same mailbox name. There is nothing here to
+correct. The account on the corrected address is the one to keep, and the
+stuck one is deleted from the roster on `/admin-area`, which is what this file
+already prescribes for an unverified password account ("that account is
+deleted from the Admin area") because such an account can do nothing itself.
+
+**Its own suite runs on every pull request now.** The nineteen guards on the
+one script here that renames a person's whole identity at Auth were checked
+only when the owner pressed the button, because nothing spawned the suite:
+`selftest.mjs` was the road a person reads a failure on and the script was not
+on it. `testFixAccountEmail` spawns it the way the roster sync's and the
+campaign mailer's are spawned, with the `!/\bFAIL\b/` clause beside the
+summary line, since these suites print their summary after a failure too.
+
+Tests: `testFixAccountEmail` in `_scraper/selftest.mjs` (the spawned suite,
+the four guards through the module, the refusal branch read with its length
+asserted so the paragraph explaining the exit it no longer takes cannot
+satisfy the scan, the plan-versus-write asymmetry both ways, `nextStep` over
+every code with no em dash in any answer, the script sending nothing and
+writing nothing on import, the workflow dispatch-only with `write` false by
+default and both addresses reaching the shell as quoted env variables rather
+than pasted in by expression, and this section) and the script's own
+`node _scraper/fix-account-email.mjs --selftest`. Every pin verified by
+putting the defect back.
+
 ## A submission is never refused for a STALE TOKEN
 
 Owner, 2026-09-17, relaying a job posting that had been refused (feedback
