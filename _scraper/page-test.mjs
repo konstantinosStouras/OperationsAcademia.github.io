@@ -1410,6 +1410,16 @@ for (const [name, expect] of [
 
   /* -- post a job on /v3/ -------------------------------------------------- */
 
+  /* BOTH DAYS ARE COMPUTED, NEVER TYPED. A check that names a date moves with
+     the clock: a "future" 2027-01-05 is a PAST date from January 2027 on, at
+     which point the form rightly refuses it, #oa-done never appears and the
+     whole suite times out on a posting that is fine. The same rule the
+     market-year fixture's "rolled" row is dated by. */
+  const ONE_DAY = 86400000;
+  const isoDayOfMs = (ms) => new Date(ms).toISOString().slice(0, 10);
+  const DATE_TODAY = isoDayOfMs(Date.now());
+  const DATE_LONG_PAST = isoDayOfMs(Date.now() - 250 * ONE_DAY);
+
   const posted = await onSite('post-a-job.html', { user: keptUser, docs: [KEPT_PROFILE] }, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-institution', 'Test University');
@@ -1445,6 +1455,35 @@ for (const [name, expect] of [
     await q.check('input[name="characteristics"][value="PhD"]');
     await q.fill('#f-chairName', 'Chair Person');
     await q.fill('#f-chairEmail', 'chair@example.edu');
+
+    /* A CLOSING DATE IN THE PAST IS REFUSED AT THE DOOR (owner, 2026-09-18).
+       The form is otherwise complete by this line, so this measures the date
+       rule and nothing else: untick "until filled", type the shape of the test
+       posting that stopped ten builds — a deadline nine months back — and
+       nothing is stored. A source regex cannot tell this fix from a rewrite
+       that keeps the sentence and loses the branch. */
+    await q.uncheck('#f-untilFilled');
+    await q.fill('#f-applyByDate', DATE_LONG_PAST);
+    await q.click('#oa-submit');
+    const backdated = await q.evaluate(() => {
+      const box = document.getElementById('f-applyByDate');
+      const holder = box.closest('.oa-field') || box.parentNode;
+      const err = holder.querySelector('.oa-err');
+      return {
+        done: document.getElementById('oa-done').hidden,
+        invalid: box.getAttribute('aria-invalid'),
+        err: err ? err.textContent : '',
+        stored: Object.keys(window.__fb.dump())
+          .filter((k) => k.indexOf('jobSubmissions/') === 0).length,
+      };
+    });
+
+    /* …and TODAY is taken, so the rule is one-sided and its boundary is
+       inclusive: only a strictly earlier day is refused. Today is also the one
+       future date that cannot move with the clock — it is always inside the
+       season marketYear() names, so the year assertion below holds whenever
+       this runs. */
+    await q.fill('#f-applyByDate', DATE_TODAY);
     await q.click('#oa-submit');
     await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
     const ref = await q.textContent('#oa-ref');
@@ -1465,8 +1504,24 @@ for (const [name, expect] of [
         write: seq.findIndex((l) => l.indexOf('set jobSubmissions/') === 0),
       };
     });
-    return { ref, doc, noYearField, yearNote, refused, order };
+    return { ref, doc, noYearField, yearNote, refused, order, backdated };
   });
+  eq(posted.backdated.done, true,
+    `v3 post-a-job: a closing date in the PAST (${DATE_LONG_PAST}) is refused — ` +
+    'the shape of the test posting that stopped ten builds and held the London ' +
+    'Business School posting back with it');
+  eq(posted.backdated.stored, 0,
+    'v3 post-a-job: …and nothing is stored, which is what keeps the served ' +
+    'file free of a row the cascade would read backwards');
+  eq(posted.backdated.invalid, 'true',
+    'v3 post-a-job: …with the date box marked invalid');
+  ok(/cannot be in the past/.test(posted.backdated.err),
+    'v3 post-a-job: …and the error says so plainly, on the field itself');
+  ok(!/\u2014/.test(posted.backdated.err),
+    'v3 post-a-job: …without an em dash');
+  eq(posted.doc.applyByDate, DATE_TODAY,
+    'v3 post-a-job: …while TODAY is accepted, so the boundary is inclusive and ' +
+    'the rule refuses only a strictly earlier day');
   ok(posted.order.token >= 0,
     'v3 post-a-job: the submit forces a fresh ID token (the claim the rules read)');
   ok(posted.order.write >= 0 && posted.order.token < posted.order.write,

@@ -141,6 +141,25 @@ function tidy(list, what) {
   console.log(`::warning::${what} — ${list.length} to settle: ${list.join('; ')}`);
 }
 
+/** A finding about STORED DATA that no commit can turn green — a Firestore
+    document, or a cell in a crowdsourced workbook this repository cannot edit.
+    Named in both roles and fatal in neither.
+
+    That is one step weaker than `tidy` above, deliberately. A tidiness finding
+    is fixed by an alias, so failing the PR check is where somebody fixes it;
+    this kind has no such edit. Failing the build's re-check holds the whole
+    site's data back over one row, which is the outage recorded five times in
+    CLAUDE.md, and failing the PR check instead holds every pull request red
+    until a person edits a document somewhere else — the crying-wolf cost this
+    repository has already paid once. The remedy is the run log naming the row,
+    which is what `backdatedDeadlines` has always done for the workbook. */
+function stored(list, what) {
+  pass++;
+  if (list.length) {
+    console.log(`::warning::${what} — ${list.length}: ${list.join('; ')}`);
+  }
+}
+
 /* ------------------------------------------------------------- sanitisers */
 
 function testSanitisers() {
@@ -1174,13 +1193,60 @@ async function testMarketYearCascade() {
     { year: 2027, from: 'final' },
     'advertised in May, closing in September: a 2026-2027 posting');
 
-  // 2. forward only — the whole safety argument for applying it at ingest
+  /* 2. forward only — the whole safety argument for applying it at ingest.
+
+     THE PROPERTY RESTS ON A PREMISE, AND THE PREMISE IS ABOUT THE DATA: a
+     deadline falls on or after the day the advertisement went up, so the date
+     the cascade reads can never name a season earlier than the posting date's
+     own. Every ingest that PARSES a date keeps it (`deadlineDay` refuses a
+     closing date before its posting date) and the posting form now refuses one
+     at the door. A stored row that breaks it anyway is a row whose dates run
+     backwards — not a cascade that moves postings backwards — so it is NAMED
+     and the property is asserted over every row whose premise holds.
+
+     ASSERTING IT OVER THEM INSTEAD IS THE OUTAGE THIS FILE RECORDS FIVE TIMES,
+     and it happened again on 2026-09-17: one test posting saved with a closing
+     date nine months in the past failed this guard, so the build committed
+     nothing for ten consecutive runs, and the London Business School posting
+     it was holding back had nothing whatever wrong with it. There is no commit
+     that could have turned it green — the row is a Firestore document — which
+     is exactly the case `stored()` exists for, and the same reading
+     `backdatedDeadlines` has always been given for the workbook: reported,
+     never repaired, and never a guard over `data/`.
+
+     The exemption is as narrow as the premise: it is the date the cascade
+     actually READ that has to be forward, so a row backdated only in a field
+     `from` did not name is still asserted. */
+  const backwards = [];
   for (const r of served) {
     const posted = String(r.posted || '');
     if (!posted) continue;
-    ok(marketYearOf(r, { now }).year >= marketYear(new Date(posted + 'T12:00:00Z')),
+    const { year, from } = marketYearOf(r, { now });
+    const read = from === 'final' ? String(r.applyByDate || '')
+      : from === 'review' ? String(r.reviewDate || '')
+      : posted;
+    if (read && read < posted) {
+      backwards.push(`${r.id} (${from} apply-by ${read} before its posting date ${posted})`);
+      continue;
+    }
+    ok(year >= marketYear(new Date(posted + 'T12:00:00Z')),
       `${r.id}: the cascade never files a posting EARLIER than its posting date`);
   }
+  stored(backwards,
+    'posting(s) whose own dates run backwards, so the cascade reads a season that had closed');
+
+  /* …and the exemption is MEASURED rather than assumed: a row shaped like the
+     one that stopped publishing really does send the cascade backwards, and
+     `backdatedDeadlines` really does name it. Both halves, or the skip above
+     would be a hole nothing describes. */
+  const backdated = { id: 'x', posted: '2026-09-17', applyByDate: '2026-01-05' };
+  eq(marketYearOf(backdated, { now }), { year: 2026, from: 'final' },
+    'a closing date before the posting date files the posting in a closed season');
+  ok(marketYearOf(backdated, { now }).year
+    < marketYear(new Date('2026-09-17T12:00:00Z')),
+    'which is the one way the cascade can read EARLIER than the posting date');
+  eq(backdatedDeadlines([backdated]).length, 1,
+    'and that is the row backdatedDeadlines names, in the run log, for a person');
   eq(marketYearAtLeast({ applyByDate: '2026-09-08' }, 2028).year, 2028,
     'a floor above the cascade wins — the tracking sheet tab keeps its say');
   eq(marketYearAtLeast({ applyByDate: '2026-09-08' }, 2028).from, 'floor',
@@ -8915,7 +8981,165 @@ async function testBackdatedDeadlines() {
     '…after the advertisement caches, so it names no date they were about to fill');
   ok(/falls BEFORE the day it was advertised/.test(sync) && /correct the row in the workbook/.test(sync),
     '…and says where the fix is, which is not in this repository');
-}
+
+  /* ……AND THE SAME ROW MADE THROUGH THE SITE'S OWN FORM (owner, 2026-09-18:
+     "I don't see a job posting public from London Business School posted a few
+     hours ago").
+
+     NOTHING WAS WRONG WITH THAT POSTING. The build made it every twenty
+     minutes ("+ OA-JOB-260918-3LKN  London Business School") and committed
+     nothing, because the run's own re-check failed on a DIFFERENT row: a test
+     posting saved the evening before with a closing date nine months past.
+     Ten consecutive builds, about nine hours, and from outside it looks
+     exactly like a site that is simply slow.
+
+     The guard it failed is the cascade's forward-only property, which rests on
+     a premise about the DATA rather than about the code: a deadline falls on
+     or after the day the advertisement went up. `deadlineDay` above keeps that
+     premise on every cell it parses out of the workbook. The posting form kept
+     nothing of the kind, so the one road that could store a row breaking it
+     was the site's own form — and the report above, being the SYNC's, could
+     never have named it.
+
+     Three answers, separate on purpose: the FORM refuses one at the door, the
+     SERVED-FILE guard names such a row instead of failing on it, and the
+     BUILD reports it over the merged set. */
+
+  const bareJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
+  const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
+  const bareForm = bareJs(form);
+  const collect = bareJs(form.slice(form.indexOf('function collect('),
+    form.indexOf('function makeRef(')));
+  ok(collect.length > 2000, 'the collect() slice is bounded at both ends and non-empty');
+
+  /* THE DAY IT IS TESTED AGAINST. Today for a new posting, because the
+     pipeline stamps `posted` from the moment the document is stored; the
+     STORED day for an edit, because that posting went up when it went up. */
+  ok(/var wentUp = EDIT_ID \? EDIT_WENT_UP : todayUTC\(\);/.test(collect),
+    'collect(): a new posting is tested against today, an edit against the day it went up');
+  ok(/function todayUTC\(\)[^\n]*toISOString\(\)\.slice\(0, 10\)/.test(bareForm),
+    'and today is UTC, the clock jobs-model stamps `posted` with through isoDay()');
+
+  // the two refusals, one per date the cascade reads
+  ok(/} else if \(wentUp && day < wentUp\) \{/.test(collect),
+    'collect() refuses a FINAL apply-by date that falls before the posting went up');
+  ok(/} else if \(wentUp && review < wentUp\) \{/.test(collect),
+    '…and a SUGGESTED one, which is step 2 of the same cascade');
+  eq((collect.match(/wentUp && /g) || []).length, 2,
+    'both, and nothing else, so neither date can be stored running backwards');
+
+  /* AN UNKNOWN DAY REFUSES NOTHING. On an edit the form may be unable to read
+     when the posting went up, and refusing a correction over a day it cannot
+     tell is the worse error — the "unknown draws nothing" rule. The `wentUp &&`
+     conjunct above IS that rule, so it is pinned as a conjunct rather than as
+     a comment. */
+  ok(!/\bday < wentUp\b/.test(collect.replace(/wentUp && day < wentUp/g, '')),
+    'the final-date test is never made without the day being known');
+  ok(!/\breview < wentUp\b/.test(collect.replace(/wentUp && review < wentUp/g, '')),
+    'nor the suggested-date test');
+
+  // …and a refused date is not quietly stored anyway
+  for (const field of ['applyByDate', 'reviewDate']) {
+    const at = collect.indexOf(`wentUp && ${field === 'applyByDate' ? 'day' : 'review'} < wentUp`);
+    ok(new RegExp(`out\\.${field} = '';`).test(collect.slice(at, at + 700)),
+      `a refused ${field} is cleared rather than sent`);
+  }
+
+  /* THE STORED DAY IS THE MODEL'S OWN READING, not a second one: `postedOn`
+     honoured only while it is no later than the day the document was stored,
+     which is exactly what rowFromSubmission does before it writes `posted`. */
+  ok(/function wentUpDay\(v\) \{/.test(bareForm), 'the form reads the stored posting day');
+  ok(/asked && stamped && asked <= stamped \? asked : stamped/.test(bareForm),
+    '…by the same rule rowFromSubmission applies: postedOn only when it is no ' +
+    'later than the stamp, else the stamp');
+  const fillBody = bareJs(form.slice(form.indexOf('function fill('),
+    form.indexOf('function enterEditMode(')));
+  ok(/EDIT_WENT_UP = wentUpDay\(v\);/.test(fillBody),
+    'and fill() records it from the document it has just read');
+
+  /* IT IS SEPARATE FROM EDIT_POSTED ON PURPOSE. That one feeds the SPAN, whose
+     own reasoning turns on a form posting carrying no `postedOn`, and
+     testFormMarketYearParity pins it against marketYearsOf — so folding the
+     two together would move which seasons the note promises, which is a
+     different question from whether a date runs backwards. */
+  ok(/EDIT_POSTED = String\(v\.postedOn \|\| ''\);/.test(fillBody),
+    'EDIT_POSTED still carries postedOn alone, so the span is unchanged');
+  ok(!/EDIT_POSTED = wentUpDay/.test(bareForm),
+    '…and is never quietly given the stamp instead');
+
+  // plain words, and the owner's preference against em dashes
+  for (const msg of [
+    'The closing date cannot be in the past.',
+    'The suggested date cannot be in the past.',
+    'so its closing date cannot fall ',
+    'so its suggested date cannot fall ',
+  ]) {
+    ok(collect.includes(msg), `collect() says it plainly: "${msg.trim()}"`);
+  }
+  for (const msg of [
+    'The closing date cannot be in the past. Please give a later date, or tick ',
+    'The suggested date cannot be in the past.',
+  ]) {
+    ok(!/—/.test(msg) && collect.includes(msg),
+      `no em dash in: "${msg.trim()}"`);
+  }
+
+  /* THE BUILD NAMES A ROW ALREADY STORED, which the form can never reach. */
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  const bareBuild = bareJs(build);
+  ok(/import \{ SOURCE as SHEET_SOURCE, backdatedDeadlines \}/.test(bareBuild),
+    'build-jobs imports the ONE definition rather than carrying a second copy');
+  ok(/for \(const b of backdatedDeadlines\(rows\)\) \{/.test(bareBuild),
+    'and reports over `rows`, the MERGED set — the only place a carried orphan is seen');
+  ok(bareBuild.indexOf('backdatedDeadlines(rows)')
+     > bareBuild.indexOf('const rows = healedRows.map(withMarketYears)'),
+    '…after the heals, so it cannot name a date healReviewDate was about to settle');
+  const reportAt = bareBuild.indexOf('for (const b of backdatedDeadlines(rows))');
+  const report = bareBuild.slice(reportAt, bareBuild.indexOf('\n  }\n', reportAt) + 4);
+  ok(report.length > 80 && report.length < 700,
+    'the report slice is the loop and nothing else');
+  ok(/warn\(/.test(report), 'the build NAMES a backwards row in its run log');
+  ok(!/throw|process\.exit|\.filter\(/.test(report),
+    'REPORTED, never repaired and never fatal: a maintainer’s typed date is theirs, ' +
+    'so a row is never dropped, refused or blanked over it');
+
+  /* …AND THE GUARD IS FATAL IN NEITHER ROLE. `tidy` still fails the PR check,
+     which is right for a finding an alias fixes; this one has no commit-shaped
+     remedy at all, so holding every pull request red over one stored document
+     would be the same outage one layer up. */
+  const selfSrc = await readFile(path.join(HERE, 'selftest.mjs'), 'utf8');
+  const storedFn = selfSrc.slice(selfSrc.indexOf('function stored(list, what) {'),
+    selfSrc.indexOf('/* ------------------------------------------------------------- sanitisers'));
+  ok(storedFn.length > 60 && storedFn.length < 400, 'the stored() slice is bounded');
+  ok(!/\beq\(|\bok\(/.test(storedFn),
+    'stored() asserts nothing, in either role — it names the rows and passes');
+  ok(/::warning::/.test(storedFn), '…and says so in the run log, where a person reads it');
+  ok(/stored\(backwards,/.test(bareJs(selfSrc)),
+    'and the forward-only sweep reports a backwards row through it');
+
+  /* THE BROWSER CHECK MUST NOT MOVE WITH THE CLOCK. It types a date into the
+     real form, and a date typed as a literal stops meaning what it meant: a
+     "future" 2027-01-05 is a PAST day from January 2027 on, the form then
+     rightly refuses it, #oa-done never appears and the whole suite times out
+     over a posting that is fine. The market-year fixture's own "rolled" row is
+     dated for the same reason. */
+  const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+  const jobBlock = pt.slice(pt.indexOf('const DATE_TODAY'),
+    pt.indexOf('v3 post-a-job: …while TODAY is accepted'));
+  ok(jobBlock.length > 500 && jobBlock.length < 6000,
+    'the posting-form date block is bounded at both ends');
+  ok(/DATE_TODAY = isoDayOfMs\(Date\.now\(\)\)/.test(jobBlock)
+     && /DATE_LONG_PAST = isoDayOfMs\(Date\.now\(\) - 250 \* ONE_DAY\)/.test(jobBlock),
+    'page-test COMPUTES the two days it types into the form');
+  ok(!/f-applyByDate', '\d{4}-\d{2}-\d{2}'/.test(jobBlock),
+    '…and types no literal date, which would stop meaning what it means');
+
+  const claude = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
+  ok(/London Business School/.test(claude),
+    'CLAUDE.md records the outage this came from');
+  ok(/refuses one at the door/.test(claude),
+    '…and that the form is what stops the next one');}
 
 async function testJobMarketSheetWiring() {
   /* The pipeline is three files that have to agree: the sync writes the

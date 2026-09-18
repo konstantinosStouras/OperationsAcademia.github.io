@@ -40,7 +40,7 @@ import {
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
   specMatches,
 } from './jobs-model.mjs';
-import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
+import { SOURCE as SHEET_SOURCE, backdatedDeadlines } from './jobmarket-sheet.mjs';
 import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
 import { buildVocab, serialiseVocab, SCHOOLS, campusCountries, healCountry } from './vocab.mjs';
 import { adminUids } from './_mail.mjs';
@@ -1105,6 +1105,28 @@ async function main() {
      the mistake the comment above this one records. The admin change e-mail
      is clear of it for the same reason, in `diffRows`. */
   const rows = healedRows.map(withMarketYears);
+
+  /* A ROW WHOSE OWN DATES RUN BACKWARDS IS REPORTED HERE TOO, over the merged
+     set. `backdatedDeadlines` has named them in the SHEET SYNC's log since the
+     day it was written, which covers the workbook and nothing else — so a
+     posting made through the site's own form, whose closing date falls before
+     the day it went up, was reported nowhere at all. It was still measured:
+     the served-file guard read it, failed, and stopped the build committing
+     anything, which is the one way this could surface and the worst of them
+     (2026-09-17: ten runs committed nothing over one test posting, and the
+     London Business School posting behind it was the casualty).
+
+     REPORTED, NEVER REPAIRED, and never a guard over `data/` — the sheet's own
+     rule, and for a stronger reason here: the row is a Firestore document, so
+     no commit could turn a failing check green, while a run that silently
+     blanked the date would throw away something a person typed. The form
+     refuses one at the door now; this names the ones already stored, for a
+     person to edit or take down. */
+  for (const b of backdatedDeadlines(rows)) {
+    warn(`${b.id}: its ${b.field === 'reviewDate' ? 'suggested' : 'final'} apply-by date ` +
+         `(${b.date}) falls before the day the posting went up (${b.posted}), so it is ` +
+         'filed under a season that had already closed');
+  }
 
   /* ------------------------------------- the form's option lists
 

@@ -256,6 +256,32 @@
      and the span is read off the other two dates. */
   var EDIT_POSTED = '';
 
+  /* The day a stored posting WENT UP, which is what collect() tests a deadline
+     against on an edit. It is the reading rowFromSubmission makes: `postedOn`
+     when it is no later than the day the document was stored, else that day.
+
+     Deliberately NOT folded into EDIT_POSTED above. That one feeds the SPAN,
+     whose own comment turns on a form posting carrying no `postedOn` at all,
+     and testFormMarketYearParity pins it against marketYearsOf; widening it
+     would move which seasons the note promises, which is a different question
+     from whether a date runs backwards. */
+  var EDIT_WENT_UP = '';
+
+  /** Today, UTC. `posted` is stamped from `createdAt` through isoDay() in
+      jobs-model.mjs, so this is the same clock the row will carry. */
+  function todayUTC() { return new Date().toISOString().slice(0, 10); }
+
+  /** The day a stored submission went up, or '' when it cannot be told. */
+  function wentUpDay(v) {
+    var ts = v && v.createdAt;
+    var ms = 0;
+    if (ts && typeof ts.toMillis === 'function') ms = ts.toMillis();   // Timestamp
+    else if (ts) { var t = +new Date(ts); if (!isNaN(t)) ms = t; }
+    var stamped = ms ? new Date(ms).toISOString().slice(0, 10) : '';
+    var asked = isoDay(v && v.postedOn);
+    return asked && stamped && asked <= stamped ? asked : stamped;
+  }
+
   /** The market year an ISO day falls in — the roll is 1 July, and a season is
       numbered by the year it ends (MARKET_ROLL_MONTH in jobs-model.mjs). */
   function marketYearOfDay(iso) {
@@ -496,6 +522,26 @@
     setError($('f-levels'), out.levels.length ? '' : 'Please tick at least one entry level.');
     if (!out.levels.length && !firstBad) firstBad = $('f-levels');
 
+    /* NEITHER DATE MAY FALL BEFORE THE DAY THE POSTING GOES UP, and the whole
+       market-year cascade rests on it. `marketYearOf` reads the final date
+       first and the suggested one second, so a date in a season that has
+       already closed files the posting THERE, and the forward-only property
+       every ingest is held to stops being true of the row. `deadlineDay`
+       keeps exactly this rule on the workbook's cells; this is the same rule
+       said at the door, where there is a person who can fix it.
+
+       Owner, 2026-09-17: a test posting was saved with a closing date nine
+       months past, the served-file guard failed on it, and because that guard
+       runs as the BUILD'S re-check the build then committed nothing for ten
+       consecutive runs, holding back a London Business School posting that had
+       nothing wrong with it. The guard no longer fails on such a row, it names
+       it; this is what keeps one from being stored in the first place.
+
+       An unknown day refuses nothing: on an edit the form may not be able to
+       read when the posting went up, and refusing a correction over a day it
+       cannot tell is the worse error. */
+    var wentUp = EDIT_ID ? EDIT_WENT_UP : todayUTC();
+
     var untilFilled = $('f-untilFilled').checked;
     var day = String($('f-applyByDate').value || '').trim();
     if (untilFilled) {
@@ -507,6 +553,14 @@
     } else if (!isoDay(day)) {
       setError($('f-applyByDate'),
         'Please check that date — the year should be a four-digit one, like 2026.');
+      if (!firstBad) firstBad = $('f-applyByDate');
+      out.applyByDate = '';
+    } else if (wentUp && day < wentUp) {
+      setError($('f-applyByDate'), EDIT_ID
+        ? 'This posting went up on ' + wentUp + ', so its closing date cannot fall '
+          + 'before that. Please give a later date, or tick that there is no fixed one.'
+        : 'The closing date cannot be in the past. Please give a later date, or tick '
+          + 'that there is no fixed one.');
       if (!firstBad) firstBad = $('f-applyByDate');
       out.applyByDate = '';
     } else {
@@ -532,6 +586,16 @@
     } else if (out.applyByDate && review >= out.applyByDate) {
       setError($('f-reviewDate'),
         'The suggested date should fall before the final closing date — leave it empty if they are the same.');
+      if (!firstBad) firstBad = $('f-reviewDate');
+      out.reviewDate = '';
+    } else if (wentUp && review < wentUp) {
+      /* Step 2 of the same cascade, so the same rule: a search with no fixed
+         closing date is filed by THIS date, and applications cannot begin
+         being reviewed before the post is advertised. */
+      setError($('f-reviewDate'), EDIT_ID
+        ? 'This posting went up on ' + wentUp + ', so its suggested date cannot fall '
+          + 'before that.'
+        : 'The suggested date cannot be in the past.');
       if (!firstBad) firstBad = $('f-reviewDate');
       out.reviewDate = '';
     } else {
@@ -955,6 +1019,7 @@
 
     EDIT_YEAR = Number(v.year) || 0;
     EDIT_POSTED = String(v.postedOn || '');
+    EDIT_WENT_UP = wentUpDay(v);
     paintYearNote();                 // the posting's own season, never today's
 
     EDIT_REF = v.ref || '';

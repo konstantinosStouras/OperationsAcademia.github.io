@@ -1373,6 +1373,93 @@ so a check no commit could turn green is the crying-wolf cost already paid
 here once, and a run that silently blanked the date would be worse: a
 maintainer's typed date is theirs.
 
+#### …and the same row made through the FORM stopped the site publishing
+
+Owner, 2026-09-18: *"I don't see a job posting public from London Business
+School posted a few hours ago."*
+
+**Nothing was wrong with that posting.** The build made it on every run
+(`+ OA-JOB-260918-3LKN  London Business School`) and then committed nothing,
+because its own re-check failed on a DIFFERENT row: a test posting saved the
+evening before with a closing date nine months in the past.
+
+    FAIL  2026-test-20260917: the cascade never files a posting
+          EARLIER than its posting date
+
+Ten consecutive builds, about nine hours, and from outside it is
+indistinguishable from a site that is simply slow. The workflow printed its own
+"Publishing has STOPPED" alarm every time and nobody was reading it.
+
+**THE GUARD RESTS ON A PREMISE, AND THE PREMISE IS ABOUT THE DATA.** The
+forward-only property — the whole safety argument for applying the apply-by
+cascade at ingest — holds *because* a deadline falls on or after the day the
+advertisement went up, which is what makes the cascade's answer never earlier
+than the posting date's own. `deadlineDay` keeps that premise on every cell it
+parses out of the workbook. **The posting form kept nothing of the kind**: it
+checked that each date was a real four-digit day and that the suggested one
+fell before the final one, and never that either was in the future. So the one
+road that could store a row breaking the premise was the site's own form — and
+`backdatedDeadlines`, which had named exactly this shape since the day it was
+written, could never see it, because it runs in the SHEET SYNC and a form
+posting never passes through one. It was measured in only one place: the
+served-file guard, which read it, failed, and stopped the build committing
+anything. The worst of the ways it could have surfaced.
+
+Three answers, and they are separate on purpose:
+
+1. **The form refuses one at the door**, on BOTH dates the cascade reads, where
+   there is a person who can fix it. `wentUp` is today for a new posting — the
+   pipeline stamps `posted` from the moment the document is stored, so UTC is
+   the right clock — and the STORED day for an edit, read by `wentUpDay` with
+   the same rule `rowFromSubmission` applies (`postedOn` only while it is no
+   later than the stamp). **An unknown day refuses nothing**: on an edit the
+   form may be unable to tell when the posting went up, and refusing a
+   correction over a day it cannot read is the worse error, so the test is a
+   conjunct rather than a fallback. It is deliberately NOT folded into
+   `EDIT_POSTED`, which feeds the SPAN and whose own reasoning turns on a form
+   posting carrying no `postedOn`; `testFormMarketYearParity` pins that one.
+2. **The served-file guard NAMES such a row instead of failing on it**, through
+   `stored()` — one step weaker than `tidy`, and the weakness is the point.
+   A tidiness finding is fixed by an alias, so failing the PR check is where
+   somebody fixes it; **this kind has no commit-shaped remedy at all**, the row
+   being a Firestore document, so failing the build's re-check holds the whole
+   site's data back over one row and failing the PR check instead holds every
+   pull request red until a person edits something elsewhere. Both are the
+   crying-wolf cost this file already records, and the first is the outage it
+   records five times. The exemption is as narrow as the premise: it is the date
+   the cascade actually READ (`from`) that has to be forward, so a row backdated
+   only in a field the cascade did not read is still asserted — and the
+   exemption is measured, not assumed, by a fixture shaped like the row that
+   stopped publishing.
+3. **The build reports it**, over the merged set, after the heals so it cannot
+   name a date `healReviewDate` was about to settle. Same words as the sync's
+   report and the same rule: **reported, never repaired, never a guard over
+   `data/`** — a run that silently blanked the date would be worse, because a
+   maintainer's typed date is theirs.
+
+**Three rows in the committed data already break the premise** (Morgan State,
+Rollins, Penn State) and all three pass the property anyway, because their two
+dates fall inside one season. They were never a failure and they are now named
+in the log rather than sitting silently in the file, which is what "reported"
+was always supposed to mean.
+
+**What is NOT changed.** The test posting itself is the owner's own document,
+so nothing here edits or deletes it: it publishes with the rest, and the
+maintainer's own controls take it off the site (the queue's take-down drawer,
+or Take down on `/jobs`). And nothing about the cascade moved. A stored season
+is still honoured outright, for the `jobId` reason above.
+
+Tests: the second half of `testBackdatedDeadlines` in `_scraper/selftest.mjs`
+(the form's two refusals with their unknown-day conjunct pinned as a conjunct,
+`wentUp`'s two readings, `todayUTC` in UTC, `wentUpDay` matching
+`rowFromSubmission`, `EDIT_POSTED` asserted UNCHANGED so the span is untouched,
+a refused date cleared rather than sent, the build's import of the one
+definition and its report over `rows` after the heals and fatal in nothing, and
+`stored()` asserting nothing in either role) and the posting-form block of
+`_scraper/page-test.mjs`, which types a closing date in the past into the real
+form and reads the refusal back with nothing stored. Every pin verified by
+putting the defect back.
+
 **A deadline the pipeline is unsure of publishes as "Until filled."** (owner,
 2026-08-23). `sheetDay` guesses US order on an ambiguous all-numeric cell —
 right for a date Google itself wrote, wrong for a contributor typing
