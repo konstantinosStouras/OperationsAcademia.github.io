@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-18T19:38:12.521Z",
+ "generated": "2026-09-18T19:43:42.333Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -2208,6 +2208,10 @@
    "n": 2
   },
   {
+   "v": "School of Business",
+   "n": 2
+  },
+  {
    "v": "School of Management",
    "n": 2
   },
@@ -2453,10 +2457,6 @@
   },
   {
    "v": "School Economics and Management",
-   "n": 1
-  },
-  {
-   "v": "School of Business",
    "n": 1
   },
   {
@@ -6791,7 +6791,6 @@
    ],
    "bySchool": {
     "": [
-     "Decision Sciences",
      "Technology and Operations Management"
     ],
     "School of Business": [
