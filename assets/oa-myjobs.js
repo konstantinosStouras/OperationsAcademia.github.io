@@ -13,8 +13,13 @@
      hidden      Taken down by the site's maintainers
 
    Edit goes through post-a-job.html?edit=<document id>, exactly like the Edit
-   button on the public list; Take down is the same status change
-   oa-jobedit.js makes (never a delete — see that file's header).
+   button on the public list; Take down is `assets/oa-takedown.js`, the ONE
+   definition of what a takedown is (never a delete — see that file's header).
+   It used to be written out again here, and the two copies had drifted: this
+   one wrote no echo, so a posting taken down here was still on the jobs page
+   when the poster went back to it, and it promised "at the next update,
+   normally within an hour" where the other said minutes. Both are the shared
+   module's answer now, which is also why this page loads `oa-fresh.js`.
 
    Sorting is client-side (newest first): `where uid ==` plus `orderBy` would
    demand a composite Firestore index for a list that is almost always a
@@ -116,7 +121,7 @@
       location.href = 'post-a-job?edit=' + encodeURIComponent(id);
     }));
     if (v.status === 'queued' || v.status === 'published') {
-      bar.appendChild(jobbtn('Take down', 'oa-jobbtn-del',
+      bar.appendChild(jobbtn(OATakedown.LABEL, 'oa-jobbtn-del',
         'Remove this posting from the site', function (btn) {
           takeDown(id, v, btn, wrap);
         }));
@@ -127,21 +132,12 @@
   }
 
   function takeDown(id, v, btn, wrap) {
-    var what = (v.institution || '') + (v.department ? ' — ' + v.department : '');
-    if (!window.confirm(
-      'Take this posting down?\n\n' + what + '\n\n' +
-      'It stops appearing on the site at the next update, normally within an ' +
-      'hour. Nothing is deleted — edit it later to put it back up.')) return;
+    if (!OATakedown.confirm(v)) return;
 
     btn.disabled = true;
     btn.textContent = 'Taking down…';
 
-    OAFB.ready().then(function (fb) {
-      return fb.firestore().collection(col()).doc(id).update({
-        status: 'withdrawn',
-        updatedAt: new Date().toISOString(),
-      });
-    }).then(function () {
+    OATakedown.run({ id: id, row: v }).then(function () {
       btn.remove();
       var chip = wrap.querySelector('.oa-my-status');
       chip.className = 'oa-my-status is-down';
@@ -149,16 +145,14 @@
       var note = wrap.querySelector('.oa-my-note') || wrap.insertBefore(
         el('p', 'oa-my-note'), wrap.querySelector('.oa-card-actions'));
       note.className = 'oa-my-note';
-      note.textContent = 'Taken down. It disappears from the site at the next ' +
-        'update — edit it and save to put it back up.';
+      note.textContent = 'Taken down. It disappears from the site ' +
+        OATakedown.WHEN + ' — edit it and save to put it back up.';
     }).catch(function (err) {
       btn.disabled = false;
-      btn.textContent = 'Take down';
+      btn.textContent = OATakedown.LABEL;
       var note = wrap.querySelector('.oa-my-note') || wrap.appendChild(el('p', 'oa-my-note'));
       note.className = 'oa-my-note is-bad';
-      note.textContent = err && err.code === 'permission-denied'
-        ? 'You are not allowed to change this posting.'
-        : 'We could not take it down. Please try again.';
+      note.textContent = OATakedown.failure(err);
       if (window.console) console.error('take down:', err);
     });
   }

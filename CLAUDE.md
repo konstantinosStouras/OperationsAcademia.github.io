@@ -10524,6 +10524,184 @@ list, the bold, the italics, the link with its `rel`, the hostile text inert,
 the cell measured at the size and ink of every other detail and at 4.5:1 in
 BOTH themes, and a locked card previewing the label and nothing else.
 
+## Taking a posting down, from wherever the maintainer is standing
+
+Owner, 2026-09-18, of a test posting of their own: *"add a button here at the
+bottom to 'delete' a job posting once opened for edit. I have posted a test
+posting and can't delete it now... Add also a delete button next to the button
+'Mark reviewed'."*
+
+**NOTHING WAS MISSING FROM THE RULES**, which is the first thing to know before
+reading this again: a poster has been able to withdraw their own posting and
+the maintainer to hide any of them since the day those clauses were written,
+and `oa-jobedit.js` has drawn Take down on every card the reader may touch for
+just as long. What was missing is a CONTROL ON THE TWO SCREENS THE MAINTAINER
+LANDS ON. Take down was on the card LISTS alone, and neither of the screens in
+front of the owner is one: the edit form (`post-a-job?edit=`), which is exactly
+where *Open & correct* on `/admin-area` goes, and the user-added card on
+`/admin-area` itself. Worse, the posting in question is filed under a season
+that has **rolled**, so by `OAJobNav.hrefFor`'s own rule its card is on
+Previous markets rather than `/jobs` — the one Take down that existed was on
+neither page they were looking at, and the form they did reach offered Save
+changes and nothing else.
+
+**IT IS A STATUS CHANGE AND NEVER A DOCUMENT DELETE**, and the owner's quotes
+around "delete" are doing the right work. `build-jobs.mjs` CARRIES a row that
+no live document accounts for — its orphan pass, so that the served file only
+ever shrinks because a posting was taken down and never because a document is
+missing — so deleting the document would leave the posting on the site **for
+ever**, with no Edit, no Take down and no correction able to reach it. The
+rules say the same thing from their end (`allow delete` is the maintainer's,
+and it is the one thing none of these buttons presses), and `build-jobs.mjs`
+says it in as many words. `hidden` and `withdrawn` both take the row off at the
+next build, which is a couple of minutes away because `publishOnChange` rings
+it.
+
+### …and the answer is ONE definition, because there were already two
+
+The expensive half of this was not the buttons. **The eight-line write was
+already in two places and they had DRIFTED** — the failure
+`oa-countries.js`, `oa-schools.js`, `oa-news.js` and `oa-jobnav.js` all exist
+to prevent, and one nothing here compared, because each copy was only ever
+read against itself:
+
+* `oa-jobedit.js` stashed the takedown into `OAFresh` and **`oa-myjobs.js` did
+  not**, so a poster who withdrew a posting from My postings went back to
+  `/jobs` and found it still listed — the exact confusion the echo exists to
+  end, on the one page whose whole subject is the poster's own postings;
+* one promised "within a few minutes" and the other **"at the next update,
+  normally within an hour"**, which the instant-publish doorbell has made false
+  since 2026-08-27: the copy-versus-cadence gap this file already records
+  three times;
+* and the selftest's own guard, *"taking down is a status change, never a
+  document delete"*, read the string out of `oa-myjobs.js` — pinning one copy
+  against itself, so it was **satisfied by the copy that happened to be
+  right**, exactly as the four copies of `OPEN_ENDED_RX` were.
+
+Adding the owner's two buttons as two more copies would have made four. So
+**`assets/oa-takedown.js` owns the whole of what a takedown IS** — the status,
+the stamp, the echo, the label, the cadence, the confirmation and the wording
+of a refusal — and the four surfaces are callers:
+
+    assets/oa-jobedit.js    the card lists (jobs, the one-pager, Previous markets)
+    assets/oa-myjobs.js     My postings
+    assets/oa-jobform.js    the edit form            ← new
+    assets/oa-jobreview.js  the Admin area's user card ← new
+
+Four things the module decides and no caller may:
+
+* **WHO took it down is the status.** `hidden` is the maintainer, `withdrawn`
+  the poster, and the build reads the difference: a withdrawal is stamped
+  `removed` once it has taken effect, while `hidden` STAYS hidden and is
+  re-applied on every run. Recorded the wrong way round, a maintainer's
+  takedown is undone by the poster's next edit. It is asked of
+  `OAAccounts.isAdmin()`, the site's one definition of the maintainer, and
+  **with that module absent the answer is `withdrawn`** — the narrower status,
+  which still takes the row off the site and is the one the rules let an
+  ordinary owner write, so absence degrades in the safe direction.
+* **The echo goes with the takedown**, so no surface can be the one that
+  forgets it.
+* **`update()`, never `set()`** — the rules pin `createdAt` two-sidedly, and a
+  `set()` would carry the posting date back as a fresh value.
+* **One cadence and one label**, so four screens cannot disagree about what the
+  control is called or how long the site takes. `WHEN` is the one place to
+  change if it ever does.
+
+### The edit form's control is the sibling form's, in the same place
+
+`post-a-candidate.html` has carried `#oa-takedown` — *"Take my profile down"*,
+`class="button oa-btn-ghost"`, last in the action row, shipped `hidden` and
+revealed by `enterEditMode()` — since its own edit mode shipped. It is the same
+question one form over, so the job form is given the same id, the same classes,
+the same place and the same handler shape (`wireTakeDown`) rather than a new
+idiom. **Revealed in edit mode only**: a new posting has nothing to take down,
+so a button there could only ever fail, and `wireTakeDown` stands down without
+an `EDIT_ID` as well, or a page can be got round.
+
+Two decisions worth keeping:
+
+* **The confirmation names the posting as the FORM now reads it**, not as it
+  was stored — a maintainer who has just corrected the university should be
+  asked about the posting on their screen. `ref` is the exception and is taken
+  from the stored document: it is issued by the form and is not a field anybody
+  edits.
+* **The form gives way to the done panel**, rather than staying open over a
+  posting that is no longer on the site. Left open, the obvious next press is
+  Save changes — which sets `status: 'queued'` and would put the posting back
+  up without the reader meaning to. It hides the same two blocks a successful
+  save hides and no more, so the name-fix section below stays offered exactly
+  as it does after a save.
+
+### …and both confirmations OFFER the way back, rather than describing it
+
+**"Hiding is never a one-way door"** is the rule `newsOverrides`,
+`rowOverrides`, `directoryEdits` and the message removal are all held to, and
+for a posting the door is one press of **Save changes** on the editor. So
+neither confirmation merely says so: both LINK that editor by its id
+(`post-a-job?edit=<id>`), which is the same page the card's own *Open &
+correct* opens.
+
+It has to be in the message, on both surfaces, because **that is where the
+door was shut**. Once the posting is `hidden` the user tab's `LIVE` query no
+longer lists it and the form has just closed over it, so without the link the
+only road back is the Firebase console. **`my-postings` would not do**: it
+lists your OWN postings, so a maintainer who has taken down somebody else's
+would find nothing there — which is why the form's panel links the editor by
+id rather than the page the first draft pointed at.
+
+### The review card's is a plain button, like Reject beside Approve
+
+On the user-added tab the two verbs are deliberately unalike and the card has
+to keep them so: **Mark reviewed says the maintainer has READ this and changes
+nothing about the posting**, while Take down takes it off the site. So:
+
+* it **asks before the button moves**. A confirmation behind a disabled button
+  and a "Taking it down…" line says a posting has gone that is still there if
+  the maintainer says no — and only for the verb that changes the site: Mark
+  reviewed writes one stamp and asks nothing, as it always did.
+* it **writes the status and never the reviewed stamp beside it**. A posting
+  taken off the site is not one the maintainer has read and approved of, and
+  the tab's `LIVE` query (`queued`/`published`) is what keeps it off the list
+  from the next load on, so writing both would make "reviewed" mean two
+  things. `retire()` takes the row off the tab at once and its count follows
+  without a reload, exactly as Mark reviewed's does.
+* it is a **plain `class="button"`**, which is what Reject already is beside
+  Approve on the crawled tab. This panel paints no danger colour anywhere, and
+  one here would be the only one — so no new class, no second stylesheet rule
+  and no new surface for the theme audit.
+
+**The tile and the account-menu badge do not move**, and that is the
+2026-09-17 rule one function over: `waitingJobs` is one aggregate over pending
+`jobReviews`, so a live posting was never counted as waiting on anybody and
+taking one down cannot change a number that never included it.
+
+**No rules change and no deploy**, which is pinned rather than remembered: the
+poster's clause already permits `withdrawn` and the maintainer's `allow write`
+permits anything, so both new buttons work the moment they merge.
+
+Tests: `testJobTakedown` in `_scraper/selftest.mjs` (the module's exports; the
+two statuses against the pair the build pulls and against the one it retires;
+absence answering `withdrawn`; no delete and no `set()`; the echo as the
+module's; all four callers driven for the run, the confirm, the failure wording
+and the label, with each asserted to name NO status, hour or cadence of its
+own; every page that presses one loading the module and the echo, and loading
+them before the caller; the form's hidden button in the sibling form's own
+shape and place, revealed by `enterEditMode` and standing down without an
+`EDIT_ID`, the confirmation read off the form with the stored `ref`, and the
+form giving way to the done panel; the card's button next to Mark reviewed in
+that order, as a plain button, asking before it disables anything and writing
+no stamp; **both confirmations linking the editor by id**, so neither is a
+one-way door; the badge still counting the gate alone; and the rules claim
+both ways) — **every source read with its comments stripped**, because each of these
+files now RECORDS the copy it no longer carries and a guard that could not tell
+the record from the code would have to be satisfied by deleting the record.
+Each pin was verified by putting its defect back. In `_scraper/page-test.mjs`:
+the edit form offering Take down under `?edit=` and offering none on a new
+posting, a real press writing the status and never deleting the document with
+the done panel replacing the form, the review card's press writing the status
+with the row leaving the tab, and a CANCELLED confirmation writing nothing at
+all on both surfaces.
+
 ## The account menu counts what it links to
 
 "My postings" and "E-mail alerts" read the same whether you had none or a

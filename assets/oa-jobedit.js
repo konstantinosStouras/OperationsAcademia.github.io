@@ -24,6 +24,14 @@
    which build-jobs.mjs deliberately PRESERVES, so a hard delete would look like
    it had worked and change nothing. `withdrawn` (poster) and `hidden`
    (maintainer) both take the row out at the next build.
+
+   ...AND THE WHOLE OF IT LIVES IN assets/oa-takedown.js, which this file is
+   now one of four callers of. It was written out here and again in
+   oa-myjobs.js, and the two had already parted company over the echo and over
+   how long the site takes; the owner's two new buttons (the edit form and the
+   Admin area's user-added card, 2026-09-18) would have made four copies of an
+   eight-line write. What is left here is the half that is genuinely this
+   file's: WHICH CARDS get controls at all.
    --------------------------------------------------------------------------- */
 
 (function () {
@@ -85,7 +93,7 @@
         location.href = 'post-a-job?edit=' + encodeURIComponent(id);
       }));
 
-    bar.appendChild(button('Take down', 'oa-jobbtn-del',
+    bar.appendChild(button(OATakedown.LABEL, 'oa-jobbtn-del',
       'Remove this posting from the site', function (btn) {
         takeDown(id, row, btn);
       }));
@@ -95,45 +103,27 @@
   }
 
   function takeDown(id, row, btn) {
-    var what = row.institution + (row.department ? ' — ' + row.department : '');
-    if (!window.confirm(
-      'Take this posting down?\n\n' + what + '\n\n' +
-      'It stops appearing on the site within a few minutes. ' +
-      'Nothing is deleted — tell us and it can be put back.')) return;
+    if (!OATakedown.confirm(row)) return;
 
     btn.disabled = true;
     btn.textContent = 'Taking down…';
 
-    OAFB.ready().then(function (fb) {
-      return fb.firestore().collection(col()).doc(id).update({
-      // 'hidden' is the maintainer taking something down; 'withdrawn' is the
-      // poster withdrawing their own. Both take the row out at the next build;
-      // keeping them distinct says WHO did it without a second field.
-        status: perm.admin ? 'hidden' : 'withdrawn',
-        updatedAt: new Date().toISOString(),
-      });
-    }).then(function () {
-      /* The echo (assets/oa-fresh.js): the next time THIS browser loads the
-         list, the row is already gone, while the build takes it down for
-         everyone else. */
-      if (window.OAFresh) OAFresh.stash({ docId: id, ref: row.ref || '', removed: true });
+    OATakedown.run({ id: id, row: row }).then(function () {
       btn.textContent = 'Taken down';
       var li = btn.closest('.oa-card');
       if (li) li.classList.add('oa-card-gone');
       note(li, 'This posting has been taken down. It is already gone from the ' +
-               'list on this device; for everyone else it disappears within a ' +
-               'few minutes.');
+               'list on this device; for everyone else it disappears ' +
+               OATakedown.WHEN + '.');
     }).catch(function (err) {
-      fail(btn, err && err.code === 'permission-denied'
-        ? 'You are not allowed to change this posting.'
-        : 'We could not take it down. Please try again.');
+      fail(btn, OATakedown.failure(err));
       if (window.console) console.error('take down:', err);
     });
   }
 
   function fail(btn, message) {
     btn.disabled = false;
-    btn.textContent = 'Take down';
+    btn.textContent = OATakedown.LABEL;
     note(btn.closest('.oa-card'), message, true);
   }
 

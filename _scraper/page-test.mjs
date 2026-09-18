@@ -1823,6 +1823,121 @@ for (const [name, expect] of [
   }, { dialogs: true });
   eq(down, 'withdrawn', 'v3 my-postings: Take down withdraws, never deletes');
 
+  /* -- …and take one down from the EDIT FORM itself -----------------------
+
+     Owner, 2026-09-18: "add a button here at the bottom to 'delete' a job
+     posting once opened for edit. I have posted a test posting and can't
+     delete it now..." Take down was on the card LISTS alone, and a posting
+     whose season has rolled has no card on /jobs at all — so the form the
+     maintainer reaches from the Admin area's "Open & correct" offered Save
+     changes and no way out.
+
+     Driven as the POSTER (keptUser is not the admin address), so this is the
+     `withdrawn` branch; the review card below drives `hidden`. */
+
+  const tdSeed = (id) => ({
+    user: keptUser,
+    docs: [KEPT_PROFILE, { path: `jobSubmissions/${id}`, data: {
+      uid: KEPT, status: 'published', ref: 'OA-JOB-260810-DDDD',
+      institution: 'Takedown University', school: 'School X', unit: 'Unit Y',
+      department: 'School X, Unit Y', country: 'USA', type: 'University',
+      levels: ['Post-Doc'], applyByDate: '2026-12-01', untilFilled: false,
+      firstName: 'A', lastName: 'B', email: 'a@b.edu',
+      year: 2026, createdAt: '2026-08-10T00:00:00.000Z',
+    } }],
+  });
+
+  /* A NEW posting has nothing to take down, so the button must not be there:
+     a control that could only ever fail is worse than none. */
+  const freshForm = await onSite('post-a-job.html', tdSeed('j7'), async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    return q.evaluate(() => ({
+      exists: !!document.getElementById('oa-takedown'),
+      shown: !(document.getElementById('oa-takedown') || {}).hidden,
+      submit: (document.getElementById('oa-submit') || {}).textContent,
+    }));
+  });
+  eq(freshForm.exists, true,
+    'v3 post-a-job: a new posting is offered no Take down — the button SHIPS in the page…');
+  eq(freshForm.shown, false, '…and stays hidden, because there is nothing to take down yet');
+  eq(freshForm.submit, 'Post this job', 'and the form is still posting rather than editing');
+
+  /* CANCELLING WRITES NOTHING. Playwright dismisses a dialog when nothing is
+     listening, so this is the maintainer pressing the button and saying no. */
+  const tdCancel = await onSite('post-a-job?edit=j7', tdSeed('j7'), async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.waitForFunction(() => document.getElementById('f-institution').value !== '',
+      null, { timeout: 8000 });
+    const offered = await q.evaluate(() => {
+      const b = document.getElementById('oa-takedown');
+      const r = b.getBoundingClientRect();
+      return {
+        shown: !b.hidden, label: b.textContent.trim(),
+        // it is in the page, at the bottom of the form, and pressable
+        w: Math.round(r.width), h: Math.round(r.height),
+        afterSubmit: b.compareDocumentPosition(document.getElementById('oa-submit'))
+          === Node.DOCUMENT_POSITION_PRECEDING,
+        inForm: !!b.closest('#oa-job-form'),
+      };
+    });
+    await q.click('#oa-takedown');
+    await q.waitForTimeout(400);
+    return { offered, doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/j7']),
+      still: await q.evaluate(() => ({
+        form: !document.getElementById('oa-job-form').hidden,
+        done: !document.getElementById('oa-done').hidden,
+        btn: document.getElementById('oa-takedown').disabled,
+      })) };
+  });
+  ok(tdCancel.offered.shown && /take this posting down/i.test(tdCancel.offered.label),
+    'v3 edit: the edit form offers Take down, in words that say what it does');
+  ok(tdCancel.offered.afterSubmit && tdCancel.offered.inForm,
+    'v3 edit: …at the bottom of the form, after Save changes');
+  ok(tdCancel.offered.w > 60 && tdCancel.offered.h >= 30,
+    'v3 edit: …and it is a real, pressable control rather than a collapsed one');
+  eq(tdCancel.doc.status, 'published',
+    'v3 edit: a cancelled confirmation writes nothing — the posting is still published');
+  eq(tdCancel.still, { form: true, done: false, btn: false },
+    'v3 edit: …and the form is left exactly as it was, with the button live again');
+
+  /* …and pressing it through takes the posting down: a STATUS CHANGE, the
+     document still there (a delete would leave the row on the site for ever,
+     carried as an orphan), the echo stashed, and the form replaced so the
+     next press cannot be Save changes putting it back up. */
+  const tdDone = await onSite('post-a-job?edit=j7', tdSeed('j7'), async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.waitForFunction(() => document.getElementById('f-institution').value !== '',
+      null, { timeout: 8000 });
+    await q.click('#oa-takedown');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    return q.evaluate(() => ({
+      doc: window.__fb.dump()['jobSubmissions/j7'],
+      exists: !!window.__fb.dump()['jobSubmissions/j7'],
+      form: document.getElementById('oa-job-form').hidden,
+      intro: document.getElementById('oa-intro').hidden,
+      done: document.getElementById('oa-done').textContent,
+      echo: (function () {
+        try { return JSON.parse(localStorage.getItem('oaFreshJobs') || '{}'); }
+        catch (e) { return {}; }
+      })(),
+    }));
+  }, { dialogs: true });
+  eq(tdDone.exists, true,
+    'v3 edit: the edit form takes the posting down and the DOCUMENT survives — ' +
+    'a delete would leave the row carried as an orphan for ever');
+  eq(tdDone.doc.status, 'withdrawn',
+    'v3 edit: …as a status change, and the poster’s own narrower one');
+  ok(typeof tdDone.doc.updatedAt === 'string' && tdDone.doc.updatedAt.length > 10,
+    'v3 edit: …stamped');
+  eq(tdDone.doc.institution, 'Takedown University',
+    'v3 edit: …and nothing else on the posting is touched');
+  ok(tdDone.form === true && tdDone.intro === true,
+    'v3 edit: the form gives way rather than staying open over a posting that has gone');
+  ok(/taken down/i.test(tdDone.done) && /Nothing is deleted/i.test(tdDone.done),
+    'v3 edit: …and the panel says what happened, and that nothing was deleted');
+  ok(Object.keys(tdDone.echo).some((k) => k === 'j7' && tdDone.echo[k].removed === true),
+    'v3 edit: …with the echo stashed, so this browser’s next jobs page is already without it');
+
   /* -- post a candidacy on /v3/ -------------------------------------------- */
 
   const cand = await onSite('post-a-candidate.html', { user: keptUser, docs: [KEPT_PROFILE] }, async (q) => {
@@ -6462,6 +6577,53 @@ for (const w of [320, 360, 390, 430]) {
       (document.querySelector('#oa-review-sources button[data-source="user"]') || {})
         .textContent === 'User-added jobs (1)', null, { timeout: 10000 });
     ok(true, 'admin area: and the tab count follows without a reload');
+
+    /* -- …and TAKE ONE DOWN, beside it (owner, 2026-09-18) ------------------
+       "Add also a delete button next to the button 'Mark reviewed'." The two
+       verbs must stay apart: Mark reviewed says the maintainer has READ this
+       and changes nothing about the posting, while Take down takes it off the
+       site. Driven as the ADMIN, so this is the `hidden` branch — the edit
+       form's own check above drives the poster's `withdrawn`. */
+    const CARD2 = 'article:has(a[href="post-a-job?edit=u2"])';
+    await q.waitForSelector(CARD2, { timeout: 10000 });
+    const rvActs = await q.$eval(`${CARD2} .oa-rv-actions`, (p) =>
+      Array.prototype.map.call(p.querySelectorAll('a,button'),
+        (n) => n.textContent.trim()));
+    eq(rvActs, ['Open & correct', 'Mark reviewed', 'Take down'],
+      'admin area: the review card takes a posting down — the control is there, ' +
+      'next to Mark reviewed, in that order');
+    ok(!/danger|is-err/.test(await q.$eval(`${CARD2} button[data-act="takedown"]`,
+      (b) => b.className)),
+      'admin area: …as a plain button, the shape Reject already has on the crawled tab');
+
+    /* SAYING NO WRITES NOTHING, and leaves the card exactly as it was.
+       Playwright dismisses a dialog when nothing is listening. */
+    await q.click(`${CARD2} button[data-act="takedown"]`);
+    await q.waitForTimeout(400);
+    eq(await q.evaluate(() => window.__fb.docs['jobSubmissions/u2'].status), 'queued',
+      'admin area: a cancelled confirmation writes nothing');
+    eq(await q.$eval(`${CARD2} button[data-act="takedown"]`, (b) => b.disabled), false,
+      'admin area: …and the card is left alone, with the button still live');
+    eq(await q.$eval(`${CARD2} [data-msg]`, (n) => n.textContent), '',
+      'admin area: …and nothing claimed a posting had gone that is still there');
+
+    // …and pressing it through writes the status and NOTHING else
+    q.once('dialog', (d) => d.accept());
+    await q.click(`${CARD2} button[data-act="takedown"]`);
+    await q.waitForFunction(() =>
+      window.__fb.docs['jobSubmissions/u2'].status === 'hidden', null, { timeout: 10000 });
+    ok(true, 'admin area: Take down writes status hidden — a status change, never a delete');
+    eq(await q.evaluate(() => {
+      const d = window.__fb.docs['jobSubmissions/u2'];
+      return { exists: !!d, reviewed: d.reviewedAt || null,
+        institution: d.institution, stamped: typeof d.updatedAt === 'string' };
+    }), { exists: true, reviewed: null, institution: 'Poster University Two', stamped: true },
+      'admin area: …the document survives, is stamped, and carries NO reviewed stamp — ' +
+      'a posting taken off the site is not one the maintainer has approved of');
+    await q.waitForFunction(() =>
+      (document.querySelector('#oa-review-sources button[data-source="user"]') || {})
+        .textContent === 'User-added jobs (0)', null, { timeout: 10000 });
+    ok(true, 'admin area: …and the row leaves the tab, with its count following');
 
     // the gate is untouched by any of that
     await q.click('#oa-review-sources button[data-source="crawled"]');

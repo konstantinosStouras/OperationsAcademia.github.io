@@ -1032,6 +1032,20 @@
    * item, not a gate: Open & correct opens the poster's own form (the rules
    * let the admin save any document), and Mark reviewed writes the one stamp
    * that takes it off the list and changes nothing else.
+   *
+   * ...AND TAKE DOWN, beside it (owner, 2026-09-18: "add also a delete button
+   * next to the button 'Mark reviewed'"). The two verbs are deliberately
+   * unalike and the card has to keep them so: Mark reviewed says the
+   * maintainer has READ this and changes nothing about the posting, while
+   * Take down takes it off the site. It is the crawled tab's own arrangement
+   * one tab over — Reject is a plain button beside Approve there — so it is a
+   * plain button here too rather than a colour this panel uses nowhere else.
+   *
+   * What it WRITES is assets/oa-takedown.js, the one definition shared with
+   * the card lists and the edit form, so nothing here decides the status, the
+   * stamp, the echo or the words. A STATUS CHANGE and never a document
+   * delete: build-jobs.mjs carries a row no document accounts for, so a hard
+   * delete would leave the posting on the site with nothing able to reach it.
    */
   function userCardHtml(it) {
     var d = it.data || {};
@@ -1062,7 +1076,9 @@
       '<p class="oa-rv-actions">' +
         '<a class="button blue" href="' + EDIT_PATH + encodeURIComponent(it.id) +
           '">Open &amp; correct</a> ' +
-        '<button type="button" class="button" data-act="reviewed">Mark reviewed</button>' +
+        '<button type="button" class="button" data-act="reviewed">Mark reviewed</button> ' +
+        '<button type="button" class="button" data-act="takedown">' +
+          esc(OATakedown.LABEL) + '</button>' +
         '<span class="oa-form-msg" data-msg role="status"></span>' +
       '</p>';
   }
@@ -1144,25 +1160,62 @@
       card.innerHTML = userCardHtml(it);
 
       card.addEventListener('click', function (e) {
-        var b = e.target.closest('button[data-act="reviewed"]');
+        var b = e.target.closest('button[data-act]');
         if (!b) return;
+        var act = b.getAttribute('data-act');
+        if (act !== 'reviewed' && act !== 'takedown') return;
+
         var msg = card.querySelector('[data-msg]');
+        var name = esc((it.data || {}).institution || it.id);
+
+        /* ASK BEFORE THE BUTTON MOVES, and only for the one that changes the
+           site: a confirmation behind a disabled button and a "Saving…" line
+           says a posting has gone that is still there if the maintainer says
+           no. Mark reviewed needs none — it writes one stamp and takes a row
+           off a list. */
+        if (act === 'takedown' && !OATakedown.confirm(it.data || {})) return;
+
         b.disabled = true;
         msg.className = 'oa-form-msg';
-        msg.textContent = 'Saving…';
+        msg.textContent = act === 'takedown' ? 'Taking it down…' : 'Saving…';
 
-        var patch = {};
-        patch[REVIEWED_AT] = new Date().toISOString();
-        db.collection(SUBS_COL).doc(it.id).set(patch, { merge: true })
+        /* Take down writes the status and NOTHING else — never the reviewed
+           stamp beside it. A posting taken off the site is not a posting the
+           maintainer has read and approved of, and the LIVE query is what
+           keeps it off this list from the next load on; writing both would
+           make "reviewed" mean two things. */
+        var write;
+        if (act === 'takedown') {
+          write = OATakedown.run({ id: it.id, row: it.data || {} });
+        } else {
+          var patch = {};
+          patch[REVIEWED_AT] = new Date().toISOString();
+          write = db.collection(SUBS_COL).doc(it.id).set(patch, { merge: true });
+        }
+
+        write
           .then(function () {
-            card.innerHTML = '<p class="oa-form-msg is-ok">Marked reviewed &mdash; ' +
-              esc((it.data || {}).institution || it.id) + '. It stays live; this ' +
-              'only takes it off the list.</p>';
+            /* THE WAY BACK IS IN THE MESSAGE, because this card is where
+               the door was shut. Once the posting is `hidden` the tab's LIVE
+               query no longer lists it, so without the link here the only
+               road back would be the Firebase console — and "hiding is never
+               a one-way door" is the rule every other overlay on this site
+               is held to. It is the SAME editor the card's own Open & correct
+               opens, and saving there re-queues the posting. */
+            card.innerHTML = act === 'takedown'
+              ? '<p class="oa-form-msg is-ok">Taken down &mdash; ' + name +
+                '. It leaves the site ' + esc(OATakedown.WHEN) + '. Nothing is ' +
+                'deleted: <a href="' + EDIT_PATH + encodeURIComponent(it.id) +
+                '">open it again</a> and press Save changes to put it back up.</p>'
+              : '<p class="oa-form-msg is-ok">Marked reviewed &mdash; ' + name +
+                '. It stays live; this only takes it off the list.</p>';
             retire(db, 'user', it);
           })
           .catch(function (err) {
             msg.className = 'oa-form-msg is-err';
-            msg.textContent = 'Could not save (' + esc(err.code || err.message) + ').';
+            msg.textContent = act === 'takedown'
+              ? OATakedown.failure(err)
+              : 'Could not save (' + esc(err.code || err.message) + ').';
             b.disabled = false;
           });
       });
