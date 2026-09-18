@@ -507,15 +507,46 @@ export function marketStart(now = new Date()) {
    field is Until filled" and "if that field is empty" are one test, and the
    cascade needs no separate look at the prose.
 
-   IT ONLY EVER MOVES A POSTING FORWARD, which is what makes it safe to apply
-   over a season that has already been imported: a deadline is on or after
-   the day the advertisement went up, `marketYear` rises with the date, so
-   the answer is never EARLIER than the posting date's own. The tracking
-   sheet's tab cycle stays a floor on top of it for the same reason it always
-   was (jobmarket-sheet.mjs) — and measured over the 543 served postings the
-   two AGREE on fourteen of the seventeen rows whose deadline outruns their
+   IT ONLY EVER MOVES A POSTING FORWARD, and since 2026-09-18 that is TRUE BY
+   CONSTRUCTION rather than assumed from the data: the answer is floored at
+   the season the posting date itself names. The tracking sheet's tab cycle
+   stays a floor on top of that for the same reason it always was
+   (jobmarket-sheet.mjs) — and measured over the 543 served postings the two
+   AGREE on fourteen of the seventeen rows whose deadline outruns their
    posting date, so the deadline generalises the floor rather than fighting
    it.
+
+   THE FLOOR IS HERE BECAUSE THE PRECONDITION IT USED TO REST ON IS ENFORCED
+   BY EXACTLY ONE OF THE THREE INGESTS. This paragraph used to argue the
+   property from the data — "a deadline is on or after the day the
+   advertisement went up, `marketYear` rises with the date, so the answer is
+   never EARLIER than the posting date's own" — and that holds only where
+   something refuses a closing date before its own posting date.
+   `deadlineDay` does, for the workbook. THE POSTING FORM REFUSES NOTHING,
+   and neither does a review-card edit nor either advertisement cache; the
+   rule is the one `backdatedDeadlines` already reports rather than repairs.
+   So a posting advertised today with a closing date in the past filed under
+   the season that date falls in — and when that date sat the far side of the
+   July roll, under a season that had ALREADY CLOSED: the one page it is of
+   no use on, which is the exact defect this cascade was written to prevent.
+
+   IT ALSO STOPPED THE WHOLE SITE PUBLISHING, which is how it was found
+   (owner, 2026-09-18, of a London Business School posting made that morning:
+   "I don't see it public now"). `2026-test-20260917` — posted 2026-09-17,
+   closing before that July — was the first row whose backwards dates crossed
+   the roll, the served-file guard asserting this very property went red on
+   it, and a red re-check means the build commits NOTHING: every run from
+   21:15 the previous evening failed, so a posting made through the form and
+   correctly produced by the build sat unpublished behind another posting's
+   bad date. A guard that fires on one row must never hold back the rest, and
+   a promise a function makes is the function's to keep.
+
+   MEASURED BEFORE IT WAS CHANGED: over `data/jobs.json` (616 rows),
+   `data/jobmarket.json` (515) and `data/past-postings.json` (159), the floor
+   moves NOT ONE cascade answer. Five rows carry a backdated date today and
+   none of them crosses the roll, so nothing already published is re-filed —
+   which is what makes this safe to apply to a corpus rather than only to new
+   postings.
 
    AND A POSTING CAN BE IN TWO SEASONS AT ONCE, BECAUSE THE SEASONS OVERLAP
    (owner, 2026-08-27). Reading the deadline decides which season a posting is
@@ -569,11 +600,26 @@ export function marketYearOf(row, { now = new Date() } = {}) {
     const d = day(v);
     return d ? marketYear(new Date(`${d}T12:00:00Z`)) : 0;
   };
-  const final = at(row && row.applyByDate);
-  if (final) return { year: final, from: 'final' };
-  const review = at(row && row.reviewDate);
-  if (review) return { year: review, from: 'review' };
   const posted = at(row && row.posted);
+  /* THE FLOOR, and it is what makes "forward only" a property of this
+     function rather than a hope about its input. A posting cannot be FOR a
+     season that had already closed on the day it was advertised; where a
+     date says otherwise the date is wrong, and the posting date is the one
+     signal here that cannot be (it is stamped when the submission is
+     stored). A row with no posting date has no floor, which is the
+     `marketYearOf({})` case the report and the form twin both rely on.
+
+     `from` names the date that DECIDED, so where the floor wins it is
+     'posted' — the /admin-area report prints it, and "its own posting date"
+     is the honest answer there. */
+  const forward = (year, source) => (posted && posted > year
+    ? { year: posted, from: 'posted' }
+    : { year, from: source });
+
+  const final = at(row && row.applyByDate);
+  if (final) return forward(final, 'final');
+  const review = at(row && row.reviewDate);
+  if (review) return forward(review, 'review');
   if (posted) return { year: posted, from: 'posted' };
   return { year: marketYear(now), from: 'posted' };
 }

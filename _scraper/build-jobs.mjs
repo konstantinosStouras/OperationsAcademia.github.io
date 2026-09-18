@@ -40,7 +40,7 @@ import {
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
   specMatches,
 } from './jobs-model.mjs';
-import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
+import { SOURCE as SHEET_SOURCE, backdatedDeadlines } from './jobmarket-sheet.mjs';
 import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
 import { buildVocab, serialiseVocab, SCHOOLS, campusCountries, healCountry } from './vocab.mjs';
 import { adminUids } from './_mail.mjs';
@@ -1243,6 +1243,33 @@ async function main() {
       log(`  ? ${p.id}  ${p.stored} -> ${p.should} (${p.from})`);
     }
   }
+  /* …AND THE ROWS WHOSE OWN DATES RUN BACKWARDS, which is a different report
+     and has to be made HERE rather than left to a guard.
+
+     A closing or first-review date before the day the advertisement went up
+     is the one thing that can make the cascade's answer look wrong, and it
+     reaches this file by roads the sheet's own `deadlineDay` never sees: the
+     posting form refuses no date, a review-card edit types one, and either
+     advertisement cache can fill one. `marketYearOf` now FLOORS such a row at
+     the season it was advertised in, so it is filed where it is of use — but
+     the date itself is still wrong, and only a person can correct it.
+
+     Reported, never repaired, and never a guard over data/: that is the rule
+     `backdatedDeadlines` was written under for the workbook, and the reason
+     is the same one this build's own error message gives. A guard here fires
+     on a date no commit can change, and a red re-check commits NOTHING — not
+     the offending row, every posting. That is exactly what happened on
+     2026-09-17, when one posting's backdated closing date crossed the July
+     roll and held the whole site's data for the next ten hours. */
+  const backwards = backdatedDeadlines(rows);
+  if (backwards.length) {
+    log(`${backwards.length} posting(s) carry a date BEFORE their own posting ` +
+        'date — reported, never repaired; correct the date on the posting:');
+    for (const b of backwards.slice(0, 8)) {
+      log(`  ! ${b.id}  ${b.field} ${b.date} is before posted ${b.posted}`);
+    }
+  }
+
   if (bareCheck(await readJson(YEARCHECK, null)) === bareCheck(yearCheckDoc)) {
     // unchanged — say nothing, and above all write nothing
   } else if (DRY) {

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-17T20:32:20.714Z",
+ "generated": "2026-09-18T07:14:05.375Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -323,6 +323,10 @@
   },
   {
    "v": "KAIST",
+   "n": 2
+  },
+  {
+   "v": "London Business School",
    "n": 2
   },
   {
@@ -887,10 +891,6 @@
   },
   {
    "v": "Lincoln Memorial University",
-   "n": 1
-  },
-  {
-   "v": "London Business School",
    "n": 1
   },
   {
@@ -3810,6 +3810,10 @@
    "n": 1
   },
   {
+   "v": "Management Science and Operations",
+   "n": 1
+  },
+  {
    "v": "Management Science/ Department Management and Technology",
    "n": 1
   },
@@ -4435,10 +4439,6 @@
   },
   {
    "v": "Management Science and Information System",
-   "n": 0
-  },
-  {
-   "v": "Management Science and Operations",
    "n": 0
   },
   {

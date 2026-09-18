@@ -1178,12 +1178,69 @@ async function testMarketYearCascade() {
     { year: 2027, from: 'final' },
     'advertised in May, closing in September: a 2026-2027 posting');
 
-  // 2. forward only — the whole safety argument for applying it at ingest
-  for (const r of served) {
-    const posted = String(r.posted || '');
-    if (!posted) continue;
-    ok(marketYearOf(r, { now }).year >= marketYear(new Date(posted + 'T12:00:00Z')),
-      `${r.id}: the cascade never files a posting EARLIER than its posting date`);
+  /* 2. FORWARD ONLY — and since 2026-09-18 a property of the FUNCTION rather
+     than an assumption about its input.
+
+     This used to be asserted over every served posting, and that is the shape
+     of guard this repository has now been bitten by five times: the only way
+     it could fail is a row whose own dates run BACKWARDS, the remedy is a date
+     in a document or a crowdsourced workbook no commit can change, and red
+     here means the build commits NOTHING. It duly fired — on
+     `2026-test-20260917`, a posting made through the form with a closing date
+     the far side of the July roll — and every build from 2026-09-17 21:15
+     failed, so a London Business School posting made the next morning was
+     produced correctly by the build and published by nobody (owner: "I don't
+     see it public now").
+
+     So the property is kept by `marketYearOf` itself, which is where a
+     promise a function makes belongs, and it is pinned HERE over fixtures —
+     both ways, because a floor that also swallowed a later date would be the
+     cascade deleted rather than guarded. A backdated row is REPORTED instead:
+     `backdatedDeadlines` already does that for the sheet, by the rule its own
+     comment states — reported, never repaired, and never a guard over
+     `data/`. */
+  eq(marketYearOf({ applyByDate: '2026-06-01', posted: '2026-09-17' }, { now }),
+    { year: 2027, from: 'posted' },
+    'a closing date in a season already closed is floored at the posting date\'s own');
+  eq(marketYearOf({ applyByDate: '', reviewDate: '2025-09-08', posted: '2026-09-17' }, { now }),
+    { year: 2027, from: 'posted' },
+    'and so is a suggested date behind the day the posting went up');
+  eq(marketYearOf({ applyByDate: '2027-10-15', posted: '2026-09-17' }, { now }),
+    { year: 2028, from: 'final' },
+    'a date AHEAD of it still decides — the floor is a floor, not a replacement');
+  eq(marketYearOf({ applyByDate: '2026-09-08', posted: '2026-05-04' }, { now }),
+    { year: 2027, from: 'final' },
+    'and the owner\'s own May-for-September case is untouched by it');
+  eq(marketYearOf({ applyByDate: '2026-06-01' }, { now }),
+    { year: 2026, from: 'final' },
+    'a row with no posting date has no floor to apply');
+
+  /* THE EXACT ROW THAT STOPPED THE SITE, end to end: it is filed under the
+     season it is being advertised in, which is the one page it is of use on. */
+  ok(marketYearOf({ applyByDate: '2026-06-01', posted: '2026-09-17' }, { now }).year
+     >= marketYear(new Date('2026-09-17T12:00:00Z')),
+    'so the row whose backwards dates crossed the roll files forward, not back');
+
+  /* …and the served files are SWEPT rather than asserted over: a backdated
+     date is the maintainer's to correct and never a reason to hold every
+     other posting back. The build's own log names them (build-jobs.mjs). */
+  {
+    const back = backdatedDeadlines(served);
+    if (back.length) {
+      console.log('  (postings whose own dates run backwards, reported not repaired: ' +
+        back.map((b) => `${b.id} ${b.field} ${b.date} < posted ${b.posted}`).join('; ') + ')');
+    }
+    /* and the BUILD names them, which is where the maintainer is looking. A
+       report nobody prints is the same as no report, and this one is what is
+       left once the guard that used to stop the site is gone. */
+    const bj = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+    ok(/backdatedDeadlines\s*\}?\s*from '\.\/jobmarket-sheet\.mjs'/.test(bj)
+      || /backdatedDeadlines,?\s*\n?/.test(bj.slice(0, bj.indexOf('const HERE'))),
+    'build-jobs imports the sheet\'s own backdated rule rather than writing a second copy');
+    ok(/const backwards = backdatedDeadlines\(rows\);/.test(bj),
+      'and runs it over the MERGED set, which is the only place every road meets');
+    ok(/reported, never repaired/.test(bj),
+      'saying which it is, so nobody turns it back into a guard over data/');
   }
   eq(marketYearAtLeast({ applyByDate: '2026-09-08' }, 2028).year, 2028,
     'a floor above the cascade wins — the tracking sheet tab keeps its say');
@@ -1480,56 +1537,80 @@ async function testFormMarketYearParity() {
     'the fixture runs the FORM\'s own source, not a copy of it');
 
   const fields = {};
-  const build = (editId, editYear, editPosted = '', pick = 'postingYear') => new Function(
+  /* BOTH HALVES ARE BUILT AGAINST ONE DAY, and since the floor arrived that is
+     not a convenience but the whole comparison. The form's last leg and its
+     FLOOR are the same quantity — the season being typed in — so a stub
+     answering a season no real date could reach (`current: 2099`, which this
+     fixture used to pass) would now swallow every case by flooring it there.
+     The day the poster is typing is handed to the form as `current` and to
+     the pipeline as `posted`, which is what each of them really reads. */
+  const build = (editId, editYear, editPosted = '', pick = 'postingYear',
+                 today = '2026-05-04') => new Function(
     '$', 'EDIT_ID', 'EDIT_YEAR', 'EDIT_POSTED', 'jobMarketYears',
     src + `\nreturn ${pick};`)(
     (id) => (id in fields ? { value: fields[id], checked: fields[id] === true } : null),
-    editId, editYear, editPosted, () => ({ current: 2099 }));
-  const postingYear = build('', 0);
+    editId, editYear, editPosted,
+    () => ({ current: marketYear(new Date(`${today}T12:00:00Z`)) }));
 
   /* EVERY CASE MUST SEPARATE THE STEP THAT ANSWERS IT FROM THE ONES THAT DO
-     NOT — a fixture whose three answers coincide passes a form that reads the
-     wrong date, which is exactly what the first draft of this test did. So
-     the final date, the suggested date and the fallback name three DIFFERENT
-     seasons wherever the case is about which of them wins, and "today" is
-     pinned somewhere no real date could reach. */
-  const FALLBACK = 2099;
+     NOT — a fixture whose answers coincide passes a form that reads the wrong
+     date, which is exactly what the first draft of this test did. So the final
+     date, the suggested date and the typing day name DIFFERENT seasons
+     wherever the case is about which of them wins.
+
+     ONE PAIR IS ALLOWED TO COINCIDE WITH THE FLOOR, and it has to: a date in
+     the same season as the typing day answers that season whether the date or
+     the floor decided. The roll is pinned by the PAIR either side of it — the
+     30 June case shares its answer with the floor, the 1 July case does not,
+     and together they put the boundary exactly where `marketYear` puts it. */
   const CASES = [
-    // the final date wins over a suggested date naming another season
-    { applyByDate: '2026-10-15', reviewDate: '2025-10-15', want: 2027 },
-    // ... and over one naming a LATER season, so it is not merely "the max"
-    { applyByDate: '2026-10-15', reviewDate: '2027-10-15', want: 2027 },
-    // no final date: the suggested one, not the fallback
-    { applyByDate: '', reviewDate: '2026-09-08', want: 2027 },
-    { applyByDate: '', reviewDate: '2025-09-08', want: 2026 },
-    // neither: the fallback, and nothing else
-    { applyByDate: '', reviewDate: '', want: FALLBACK },
+    // typing in the spring: a later date decides, over the floor and over the
+    // other date, whichever season that other date names
+    { today: '2026-05-04', applyByDate: '2026-10-15', reviewDate: '2025-10-15', want: 2027 },
+    // …and over one naming a LATER season, so it is not merely "the max"
+    { today: '2026-05-04', applyByDate: '2026-10-15', reviewDate: '2027-10-15', want: 2027 },
+    // no final date: the suggested one
+    { today: '2026-05-04', applyByDate: '', reviewDate: '2026-09-08', want: 2027 },
+    // neither: the season being typed in, and nothing else
+    { today: '2026-05-04', applyByDate: '', reviewDate: '', want: 2026 },
     // the roll itself, on both sides of 1 July
-    { applyByDate: '2026-06-30', reviewDate: '', want: 2026 },
-    { applyByDate: '2026-07-01', reviewDate: '', want: 2027 },
+    { today: '2026-05-04', applyByDate: '2026-06-30', reviewDate: '', want: 2026 },
+    { today: '2026-05-04', applyByDate: '2026-07-01', reviewDate: '', want: 2027 },
+
+    /* THE FLOOR, on both halves at once — the defect that stopped the site.
+       Typing in September, a closing date the far side of the previous July
+       names a season that has already closed, and the posting is filed in the
+       one it is being advertised in instead. */
+    { today: '2026-09-17', applyByDate: '2026-06-01', reviewDate: '', want: 2027 },
+    { today: '2026-09-17', applyByDate: '', reviewDate: '2025-09-08', want: 2027 },
+    // …and a date ahead of the typing day still decides, so the floor is a
+    // floor rather than "always the season you are typing in"
+    { today: '2026-09-17', applyByDate: '2027-10-15', reviewDate: '', want: 2028 },
   ];
   for (const c of CASES) {
     fields['f-applyByDate'] = c.applyByDate;
     fields['f-reviewDate'] = c.reviewDate;
     fields['f-untilFilled'] = !c.applyByDate;
-    const label = JSON.stringify({ final: c.applyByDate, review: c.reviewDate });
-    eq(postingYear(), c.want, `the form files ${label} under ${c.want}`);
-    /* AND THE PIPELINE AGREES. The form has no posting date to read — a new
-       posting is stamped with the moment it is stored — so the pipeline is
-       asked the same question with `now` standing in for step 3. */
-    if (c.want !== FALLBACK) {
-      eq(marketYearOf({ applyByDate: c.applyByDate, reviewDate: c.reviewDate },
-        { now }).year, c.want, `and _scraper/jobs-model.mjs says the same for ${label}`);
-    }
+    const label = JSON.stringify({ final: c.applyByDate, review: c.reviewDate, on: c.today });
+    eq(build('', 0, '', 'postingYear', c.today)(), c.want,
+      `the form files ${label} under ${c.want}`);
+    /* AND THE PIPELINE AGREES, asked about the same day: a new posting is
+       stamped `posted` with the moment it is stored, which is the day the
+       poster is typing. */
+    eq(marketYearOf({ applyByDate: c.applyByDate, reviewDate: c.reviewDate,
+      posted: c.today }, { now }).year, c.want,
+    `and _scraper/jobs-model.mjs says the same for ${label}`);
   }
+
+  const postingYear = build('', 0);
 
   /* A TICKED "until filled" IS THE ABSENCE OF A CLOSING DATE, even when the
      box beside it still holds one — the form disables it rather than clearing
      it on every path, and the pipeline reads `untilFilled` the same way. */
   fields['f-applyByDate'] = '2026-10-15';
-  fields['f-reviewDate'] = '2025-09-08';
+  fields['f-reviewDate'] = '2026-09-08';
   fields['f-untilFilled'] = true;
-  eq(postingYear(), 2026,
+  eq(postingYear(), 2027,
     'a ticked "until filled" drops to the suggested date, whatever the date box holds');
 
   // an EDIT is the one case the form must never re-derive
@@ -12133,6 +12214,223 @@ async function testDispatchInputs() {
   ok(free >= 4, 'and there really are free-text dispatch inputs to check');
 }
 
+/* ------------------------------------ REMOVING A POSTING FROM THE REVIEW QUEUE
+
+   Owner, 2026-09-17: "Also allow the admin to delete a job in the queue for
+   review. Currently, we can remove only jobs that are live listed."
+
+   The review panel's user-added tab offered Open & correct and Mark reviewed
+   and nothing that took a posting off the site, so the only removal the site
+   had was the Take-down control the live listings draw (oa-jobedit.js) — and
+   the crawled tab beside it has had Reject since the gate shipped. Every pin
+   below was verified by putting the defect back. */
+async function testQueueTakedown() {
+  const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
+  /* THE SCANS READ THE PANEL WITH ITS COMMENTS STRIPPED. The paragraphs beside
+     these lines say the words "delete", "withdrawn" and "removed" in order to
+     explain why none of them is written, and a guard that could not tell the
+     explanation from the thing would have to be satisfied by deleting the
+     explanation — the trap this repository already records for the analytics
+     page's "no iframes" check. */
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const raw = await read('assets/oa-jobreview.js');
+  const panel = strip(raw);
+  /* THE ONE DEFINITION of what a take-down writes, which is where the live
+     listings' own ternary moved to (assets/oa-takedown.js, 2026-09-18): this
+     pin used to read it out of oa-jobedit.js, one COPY against another, which
+     is the shape that let the two live copies drift over the echo and the
+     cadence in the first place. */
+  const live = strip(await read('assets/oa-takedown.js'));
+  const build = await read('_scraper/build-jobs.mjs');
+  const fresh = await read('assets/oa-fresh.js');
+  const css = await read('assets/oa-ui.css');
+  const v3 = await read('assets/v3.css');
+
+  /* 1. IT IS A STATUS CHANGE, NEVER A DELETE — the rule build-jobs.mjs states
+        in as many words. Deleting the document would leave the published row
+        ORPHANED: the build carries a row whose document has gone, so nothing
+        on the site could then correct or remove it, the maintainer included. */
+  ok(panel.includes("var HIDDEN = 'hidden';") && panel.includes("var RESTORED = 'queued';"),
+    'the review panel names the two words a removal is written with');
+  /* The whole panel, not a shape somebody remembered: it calls `.delete()` on
+     NOTHING, which is the strongest form this pin can take and is why it is
+     written as an absence over the file rather than over one spelling of one
+     call. */
+  ok(!/\.delete\(/.test(panel),
+    'and never deletes any document — a deleted submission orphans its published row for ever');
+  ok(/status:\s*status,/.test(panel) && /setStatus\(db, it, HIDDEN\)/.test(panel)
+     && /setStatus\(db, it, RESTORED\)/.test(panel),
+    'the take-down and the restore are the same one write, with the status as the whole of it');
+
+  /* 2. THE SAME TWO WORDS THE LIVE LISTING WRITES, and the word says WHO. The
+        live listings, My postings and the posting form all write through
+        oa-takedown.js, which picks between them on exactly that — so this
+        panel's own two literals are pinned against the DEFINITION rather than
+        against another copy of it. The panel does not call the module: it is
+        admin-only and always writes `hidden`, so it needs no `statusFor` —
+        what has to agree is the WORDS, which is what this pins. */
+  ok(/function statusFor\(isAdmin\) \{ return isAdmin \? HIDDEN : WITHDRAWN; \}/.test(live),
+    'the live listings write `hidden` for the maintainer and `withdrawn` for the poster');
+  ok(live.includes("var HIDDEN = 'hidden';") && live.includes("var WITHDRAWN = 'withdrawn';")
+     && live.includes("var RESTORED = 'queued';"),
+    '...and the module names all three, so the panel\'s literals have something to agree with');
+  ok(panel.includes("var LIVE = ['queued', 'published'];")
+     && panel.includes("var RESTORED = 'queued';"),
+    'and putting one back is the status the form itself saves, which the build publishes');
+
+  /* 3. THE DRAWER READS `hidden` AND NOTHING ELSE, and the build is why. A
+        `withdrawn` document is rewritten to `removed` on the next run while a
+        `hidden` one is left alone — so a drawer that read the poster's own
+        statuses would accumulate every posting ever withdrawn, in every
+        season, with nothing to press: putting that back is theirs to do, the
+        candidates panel's own rule. */
+  ok(/if \(d\.data\(\)\.status !== 'withdrawn'\) continue;/.test(build)
+     && /status: 'removed'/.test(build),
+    'build-jobs.mjs rewrites a poster’s withdrawal to `removed` and leaves a take-down alone');
+  ok(/where\('status', '==', HIDDEN\)/.test(panel),
+    'so the drawer reads the maintainer’s own take-downs');
+  for (const other of ['withdrawn', 'removed']) {
+    ok(!new RegExp("where\\('status', '==', '" + other + "'\\)").test(panel),
+      `and never queries '${other}' — an unbounded list with nothing to press`);
+  }
+
+  /* 4. AND IT IS NOT FILTERED BY `reviewedAt`. A posting ticked off and then
+        taken down would otherwise be invisible to the one control that can
+        put it back. */
+  const takenAt = panel.indexOf("where('status', '==', HIDDEN)");
+  const endAt = panel.indexOf('function setUser', takenAt);
+  ok(takenAt > 0 && endAt > takenAt + 80,
+    'the drawer’s read is where this pin looks for it, so the check below is not vacuous');
+  ok(!panel.slice(takenAt, endAt).includes('REVIEWED_AT'),
+    'and it does not filter on the reviewed stamp — a posting ticked off and then ' +
+    'taken down must stay reachable by the one control that can put it back');
+
+  /* 5. IT IS NOT A THIRD SOURCE TAB. Nothing is waiting on it, and a tab
+        reading (3) beside the two that count work to do would say the
+        maintainer owes something they have already dealt with. */
+  const sources = panel.slice(panel.indexOf('var SOURCES = {'));
+  const keys = [...sources.slice(0, sources.indexOf('var state = {'))
+    .matchAll(/^\s{4}(\w+): \{$/gm)].map((m) => m[1]);
+  eq(keys, ['crawled', 'user'], 'the panel still has exactly two source tabs');
+  ok(/hidden: \[\], hiddenError: false,/.test(panel),
+    'and what was taken down is state of its own, drawn as the way back rather than as a queue');
+
+  /* 6. THE ECHO, BOTH WAYS. admin-area.html loads oa-fresh.js, the build runs
+        every twenty minutes, and /jobs is the page the maintainer opens next —
+        so for up to a cycle the row just taken down is still served. The
+        take-down echoes the removal the way the live listing does; the RESTORE
+        echoes an edit of NO FIELDS, which CANCELS it, because an echo whose
+        every echoed value already matches the served row has landed by
+        definition and the next overlay spends it. Nothing else can clear a
+        removal echo, and an uncleared one would go on hiding, for the rest of
+        its hour, the posting that was just put back. */
+  ok(/OAFresh\.stash\(\{ docId: it\.id, ref: ref, removed: true \}\)/.test(panel),
+    'a take-down echoes the removal, so this browser’s own jobs page is already without it');
+  ok(/OAFresh\.stash\(\{ docId: it\.id, ref: ref, fields: \{\} \}\)/.test(panel),
+    'and a restore echoes no fields at all, which is what cancels it');
+  ok(/var landed = Object\.keys\(e\.f \|\| \{\}\)\.every\(/.test(fresh)
+     && /if \(landed\) \{ spent\.push\(docId\); return; \}/.test(fresh),
+    'oa-fresh.js is what makes that true: an echo of no fields has landed, so it is spent and deleted');
+  const adminHtml = await read('admin-area.html');
+  ok(adminHtml.indexOf('src="assets/oa-fresh.js"')
+     < adminHtml.indexOf('src="assets/oa-jobreview.js"'),
+    'and the Admin area loads the echo before the panel that stashes into it');
+
+  /* 7. NO RULES CHANGE, AND THEREFORE NO DEPLOY — which is pinned rather than
+        remembered, because a feature that needs one looks installed and is
+        inert. `hidden` is deliberately NOT a status the OWNER may write, so
+        the word really does mean the maintainer. */
+  const rules = await read('_firestore.rules');
+  const block = rules.slice(rules.indexOf('match /jobSubmissions/'),
+    rules.indexOf('match /candidateSubmissions/'));
+  ok(/allow write: if isAdmin\(\);/.test(block),
+    'the maintainer may already write a submission, so the take-down needs no new rule');
+  ok(/request\.resource\.data\.status in \['queued', 'withdrawn'\]/.test(block),
+    'and a poster may only ever write `queued` or `withdrawn` — `hidden` is the maintainer’s word');
+
+  /* 8. THE BADGE NEEDS NOTHING, and since 2026-09-17 it needs even less: it is
+        one count() over pending `jobReviews`, so a user-added posting was
+        never in it and taking one down cannot move it. The "Job postings" tab
+        count IS the panel's own word on itself, recomputed by the repaint. */
+  const area = strip(await read('assets/oa-adminarea.js'));
+  const waitAt = area.indexOf('function waitingJobs(');
+  const waiting = area.slice(waitAt, waitAt + 400);
+  ok(/collection\('jobReviews'\)\.where\('status', '==', 'pending'\)/.test(waiting),
+    'the account-menu badge counts the gate alone, so a take-down on the user tab ' +
+    'cannot move it');
+  ok(!/jobSubmissions/.test(waiting),
+    'and reads no submission at all, which is why this change needed no second rule for it');
+
+  /* 9. ONE STYLESHEET REACHES THE SITE. oa-ui.css is linked BEFORE v3.css, so
+        a class v3.css restates would win on file position; it restates neither
+        of these, which is what makes the engine's rule the one the site
+        paints. The drawer names its OWN INK beside the ground it paints — the
+        defect oa-ui.css's own header records — and its handle is a touch
+        target like every other control on the page. */
+  ok(/\.oa-rv-down \{/.test(css) && /\.oa-rv-down > summary \{/.test(css),
+    'the drawer is styled in oa-ui.css');
+  for (const cls of ['.oa-rv-down', '.oa-rv-down-body']) {
+    ok(!v3.includes(cls), `and v3.css restates ${cls} nowhere, so the engine’s rule is what paints`);
+  }
+  const down = css.slice(css.indexOf('.oa-rv-down {'), css.indexOf('.oa-rv-down-body {'));
+  ok(/background: var\(--bg-3/.test(down) && /color: var\(--ink/.test(down),
+    'it names its own ink beside its own ground');
+  const handle = css.slice(css.indexOf('.oa-rv-down > summary {'),
+    css.indexOf('.oa-rv-down-body {'));
+  ok(/min-height: 42px;/.test(handle) && /padding: 12px 0;/.test(handle),
+    'and its handle clears the 42px touch target, on padding');
+  /* comments stripped: the paragraph inside the rule NAMES the property it
+     must not set, in order to say why, and a guard that could not tell the
+     two apart would have to be satisfied by deleting the explanation. */
+  ok(!/display:/.test(handle.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'and sets no display on the summary, which is how one loses the browser’s own ' +
+    'disclosure triangle — the mark that says it opens');
+
+  /* 10. A READ THAT FAILED SAYS SO. Drawing nothing would tell a maintainer
+         who has just taken a posting down that it was deleted after all. */
+  ok(/if \(state\.hiddenError\) \{/.test(panel)
+     && /Could not read the postings you have taken down/.test(raw),
+    'a refused read of the drawer says so, rather than reading as "you have taken nothing down"');
+  ok(/Nothing has been deleted\./.test(raw),
+    'and says the one thing the maintainer needs to know while it cannot be read');
+
+  /* 11. THE SEASON THE MAINTAINER CHOSE SURVIVES THE REPAINT. '*' is the All
+         tab, which is not a season and is therefore not in yearsOf's answer:
+         without this a take-down pressed under All dropped them back into one
+         season, the opposite of what they had chosen. */
+  ok(/var keep = state\.year === '\*' \|\| left\.indexOf\(state\.year\) >= 0;/.test(panel),
+    'a repaint after a decision keeps the All tab, and any season that still has postings');
+
+  /* 12. THE COPY SAYS WHAT IS TRUE OF THIS CONTROL, both halves: it is not a
+         delete, and there is somewhere to press to undo it. */
+  ok(/Nothing is deleted: it moves to "Taken down by you" below, /.test(raw),
+    'the confirmation says nothing is deleted and names where the posting goes');
+  ok(/Off the site\. Nobody else sees these\./.test(raw)
+     && /every season is listed here/.test(raw),
+    'and the drawer says who can see them and that it is not filtered by season');
+  /* NO EM DASH in either sentence this control shows. The drawer's note is
+     copied from oa-news.js's removed-updates panel, which has one; the rule
+     the site's own copy is held to elsewhere is that it has none, so the
+     copy is the thing that moved rather than the rule. */
+  const ask = raw.slice(raw.indexOf("'Take this posting down?"));
+  ok(!/—/.test(ask.slice(0, ask.indexOf("')) return;"))),
+    'and no em dash in the confirmation');
+  const noteAt = raw.indexOf("note.textContent = 'Off the site");
+  ok(noteAt > 0 && !/—/.test(raw.slice(noteAt, raw.indexOf("';", noteAt))),
+    'nor in the drawer’s own note');
+
+  /* 13. AND THE DECISION IS WRITTEN DOWN, including the one thing this change
+         did NOT do: a crawled posting the gate REJECTS still leaves that queue
+         for good, which is that queue's documented decision rather than an
+         oversight, and a drawer for it would be a second feature. */
+  const doc = await read('CLAUDE.md');
+  ok(doc.includes('### …and a posting can be taken off the site from the queue itself'),
+    'CLAUDE.md records the removal, its two words and its drawer');
+  ok(/rejecting\s*\n?keeps it off for good/.test(doc)
+     || doc.includes('there is no drawer and no way back from a Reject'),
+    'and says plainly that a Reject on the crawled tab is still one-way');
+}
+
 async function testSubmissionNotices() {
   const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
   const model = await read('_scraper/submissions-review.mjs');
@@ -17325,8 +17623,10 @@ async function testJobTakedown() {
      withdrawal is stamped `removed` once applied, while `hidden` stays hidden
      and is re-applied on every run. Recorded the wrong way round, the
      maintainer's takedown is undone by the poster's next edit. */
-  ok(/function statusFor\(isAdmin\) \{ return isAdmin \? 'hidden' : 'withdrawn'; \}/.test(bare),
-    'takedown: the maintainer hides, the poster withdraws');
+  ok(/var HIDDEN = 'hidden';/.test(bare) && /var WITHDRAWN = 'withdrawn';/.test(bare)
+     && /var RESTORED = 'queued';/.test(bare)
+     && /function statusFor\(isAdmin\) \{ return isAdmin \? HIDDEN : WITHDRAWN; \}/.test(bare),
+    'takedown: the maintainer hides, the poster withdraws, and the words are named once');
   const build = strip(await read('_scraper', 'build-jobs.mjs'));
   ok(/\['withdrawn', 'hidden'\]/.test(build),
     '...and both are the pair the build pulls');
@@ -17363,12 +17663,20 @@ async function testJobTakedown() {
   ok(/if \(window\.OAFresh\) OAFresh\.stash\(/.test(bare),
     'takedown: the echo is the module’s, so every surface gets it');
 
-  /* ---- 2. four callers, and none with a copy ------------------------ */
+  /* ---- 2. three callers, and none with a copy ------------------------
+
+     THE ADMIN AREA'S USER CARD IS DELIBERATELY NOT ONE, and the reason is
+     worth writing down rather than reading as an omission. It got its own
+     take-down on master the same day (PR #197), with a "Taken down by you"
+     drawer and a Put it back the module has no notion of; its panel is
+     admin-only, so it always writes `hidden` and needs no statusFor(), and
+     its restore writes a third word this module does not do. So it keeps its
+     own twelve-line setStatus and what has to AGREE is pinned instead, in
+     part 5 below: the words, the cadence and the no-delete rule. */
   const CALLERS = [
     ['assets/oa-jobedit.js', 'the public card lists'],
     ['assets/oa-myjobs.js', 'My postings'],
     ['assets/oa-jobform.js', 'the edit form'],
-    ['assets/oa-jobreview.js', 'the Admin area’s user-added card'],
   ];
   for (const [file, what] of CALLERS) {
     const src = strip(await read(...file.split('/')));
@@ -17396,7 +17704,8 @@ async function testJobTakedown() {
      `publishOnChange` rings the build the moment a posting changes, so the
      copy that promised "at the next update, normally within an hour" was
      false -- the copy-versus-cadence gap this file records three times. */
-  ok(/var WHEN = 'within a few minutes';/.test(bare),
+  const OATAKEDOWN_WHEN = (/var WHEN = '([^']+)';/.exec(bare) || [])[1] || '';
+  ok(OATAKEDOWN_WHEN === 'within a few minutes',
     'takedown: one cadence, in the module');
   for (const [file] of CALLERS) {
     const src = strip(await read(...file.split('/')));
@@ -17418,21 +17727,33 @@ async function testJobTakedown() {
   /* EVERY PAGE THAT PRESSES ONE LOADS THE DEFINITION, and the echo it stashes
      into. A page short of either is a control that throws, or one that
      silently loses the echo -- the shape the two old copies were in. */
+  const CONSUMERS = ['oa-jobedit.js', 'oa-myjobs.js', 'oa-jobform.js'];
   const PAGES = ['index.html', 'jobs.html', 'previous-markets.html',
-    'admin-area.html', 'my-postings.html', 'post-a-job.html'];
+    'my-postings.html', 'post-a-job.html'];
   for (const page of PAGES) {
     const html = await read(page);
     ok(html.includes('src="assets/oa-takedown.js"'),
       `takedown: ${page} loads the module`);
     ok(html.includes('src="assets/oa-fresh.js"'),
       `takedown: ...and the echo it stashes into`);
-    const CONSUMERS = ['oa-jobedit.js', 'oa-myjobs.js', 'oa-jobform.js', 'oa-jobreview.js'];
     for (const c of CONSUMERS) {
       const at = html.indexOf(`src="assets/${c}"`);
       if (at === -1) continue;
       ok(html.indexOf('src="assets/oa-takedown.js"') < at,
         `takedown: ...before ${c}, which calls it`);
     }
+  }
+  /* …AND NOWHERE ELSE, which is the other half of the same rule. The Admin
+     area keeps its own drawer and calls nothing here, so it must not download
+     4KB it never runs — the "one request per file per page" discipline, and
+     the reason a page list is pinned BOTH ways rather than just one. */
+  for (const page of (await readdir(path.join(root)))
+      .filter((f) => f.endsWith('.html'))) {
+    const html = await read(page);
+    const loads = html.includes('src="assets/oa-takedown.js"');
+    const needs = CONSUMERS.some((c) => html.includes(`src="assets/${c}"`));
+    ok(loads === needs,
+      `takedown: ${page} loads the module exactly when something on it calls it`);
   }
 
   /* ---- 3. the edit form's own control -------------------------------- */
@@ -17499,54 +17820,42 @@ async function testJobTakedown() {
   ok(formJs.includes('enterEditMode();\n    wireTakeDown();'),
     'takedown: and boot() wires it');
 
-  /* ---- 4. the Admin area's user-added card --------------------------- */
-  const rv = strip(await read('assets', 'oa-jobreview.js'));
-  const card = rv.slice(rv.indexOf('function userCardHtml'),
-    rv.indexOf('function markAllReviewed'));
-  ok(card.length > 800 && card.length < 6000,
-    'takedown: the user card slice is bounded both ends');
-  ok(/data-act="reviewed">Mark reviewed<\/button>/.test(card)
-     && /data-act="takedown"/.test(card)
-     && card.indexOf('data-act="reviewed"') < card.indexOf('data-act="takedown"'),
-    'takedown: the card offers it NEXT TO Mark reviewed, in that order');
-  /* A PLAIN BUTTON, like Reject on the crawled tab beside Approve: this panel
-     paints no danger colour anywhere, and one here would be the only one. */
-  ok(/data-act="takedown">'\s*\+\s*\n?\s*esc\(OATakedown\.LABEL\)/.test(card)
-     || /esc\(OATakedown\.LABEL\)/.test(card),
-    'takedown: ...labelled from the module');
-  ok(/'<button type="button" class="button" data-act="takedown">'/.test(card),
-    'takedown: ...as a plain button, the shape Reject already has on the crawled tab');
-  ok(/class="button" data-act="reject">Reject<\/button>/.test(rv),
-    'takedown: ...which is what that tab really does carry');
+  /* ---- 4. the Admin area's user-added card, which is NOT a caller ------
 
-  const handler = rv.slice(rv.indexOf('function renderUserCards'),
-    rv.indexOf('function render(db, docs, source)'));
-  ok(handler.length > 800 && handler.length < 6000,
-    'takedown: the user-card handler slice is bounded both ends');
-  /* ASKED BEFORE THE BUTTON MOVES: a confirmation behind a disabled button
-     and a "Taking it down" line says a posting has gone that is still there
-     if the maintainer says no. */
-  ok(handler.indexOf('OATakedown.confirm(') < handler.indexOf('b.disabled = true;'),
-    'takedown: the card asks before it disables anything');
-  ok(/act === 'takedown' && !OATakedown\.confirm\(/.test(handler),
-    'takedown: ...and only for the verb that changes the site — Mark reviewed asks nothing');
-  /* THE TWO VERBS STAY APART. A posting taken off the site is not one the
-     maintainer has read and approved of, and the LIVE query keeps it off this
-     list from the next load; writing both would make "reviewed" mean two
-     things. */
-  ok(!/takedown[\s\S]{0,400}?patch\[REVIEWED_AT\]/.test(handler)
-     || /write = OATakedown\.run/.test(handler),
-    'takedown: it writes the status and never the reviewed stamp beside it');
-  ok(/retire\(db, 'user', it\);/.test(handler),
-    'takedown: ...and the row leaves the tab, so its count follows without a reload');
-  /* ...which is exactly why the way back has to be IN the message: once the
-     posting is hidden the tab's LIVE query no longer lists it, so a card
-     without the link would leave the Firebase console as the only road. */
-  ok(/<a href="' \+ EDIT_PATH \+ encodeURIComponent\(it\.id\)/.test(handler)
-     && /open it again<\/a> and press Save changes/.test(handler),
-    'takedown: ...and the card offers the way back, the same editor its own Open & correct opens');
-  ok(/var LIVE = \['queued', 'published'\];/.test(rv),
-    'takedown: ...and stays off it, because the tab lists the LIVE statuses alone');
+     It shipped its own take-down on master the same day (PR #197): a drawer
+     headed "Taken down by you" below the list, one press from Put it back,
+     with the restore writing `queued` and cancelling the removal echo. That
+     is a better answer for that surface than this module's, and it is
+     already merged — so it is kept as it is and what has to AGREE is pinned
+     here instead. Three things, and no more: the module cannot own the
+     drawer, and the panel must not own the words. */
+  const rv = strip(await read('assets', 'oa-jobreview.js'));
+
+  /* THE WORDS. The panel is admin-only and always writes `hidden`, so it has
+     no use for statusFor() — but the literal it writes has to be the one the
+     module names, or the two surfaces would take a posting down under two
+     different words and only one of them would survive the build's
+     withdrawn-to-removed rewrite. testQueueTakedown pins the panel's own
+     side; this pins that the module still names all three. */
+  for (const [name, word] of [['HIDDEN', 'hidden'], ['RESTORED', 'queued']]) {
+    ok(rv.includes(`var ${name} = '${word}';`),
+      `takedown: the panel names ${name} as '${word}', which the module names too`);
+    ok(bare.includes(`var ${name} = '${word}';`),
+      `takedown: ...and the module is where that word is defined`);
+  }
+
+  /* THE CADENCE. Its confirmation says how long the site takes, and if it
+     ever disagreed with the module one of the two would be lying to the same
+     maintainer on two screens about one posting. */
+  ok(rv.includes(OATAKEDOWN_WHEN),
+    `takedown: the panel's confirmation says "${OATAKEDOWN_WHEN}", the module's own cadence`);
+  ok(!/within an hour|at the next update/.test(rv),
+    'takedown: ...and promises no hour of its own');
+
+  /* AND NO DELETE, over the whole file rather than one spelling of one call:
+     the same rule this module is held to, for the same orphan reason. */
+  ok(!/\.delete\s*\(|\[\s*'delete'\s*\]\s*\(/.test(rv),
+    'takedown: ...and the panel deletes no document either');
 
   /* ---- 5. what it does NOT touch ------------------------------------- */
   /* The tile and the account-menu badge count the GATE alone (waitingJobs,
@@ -17577,11 +17886,13 @@ async function testJobTakedown() {
     'the edit form offers Take down',
     'a new posting is offered no Take down',
     'the edit form takes the posting down',
-    'the review card takes a posting down',
     'a cancelled confirmation writes nothing',
   ]) {
     ok(pt.includes(needle), `takedown: the browser suite measures "${needle}"`);
   }
+  /* …and the panel's own half is measured by the block that shipped with it */
+  ok(/Taken down by you/.test(pt),
+    'takedown: and the review panel\'s drawer is measured by its own block');
 }
 
 async function testSubmissionTokenRefresh() {
@@ -22803,6 +23114,7 @@ if (isMain(import.meta.url)) {
   await testMailerEnv();
   await testDispatchInputs();
   await testSubmissionNotices();
+  await testQueueTakedown();
   await testPostedByAndLiveEmail();
   await testCandidateProfilePolicy();
   await testCandidateReveal();

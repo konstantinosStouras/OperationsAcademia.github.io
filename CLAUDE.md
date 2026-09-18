@@ -385,14 +385,89 @@ is Until filled" and "if that field is empty" are one test and the cascade
 needs no separate look at the prose.
 
 **It only ever moves a posting FORWARD**, and that is what makes it safe to
-apply over a season already imported: a deadline is on or after the day the
-advertisement went up and `marketYear` rises with the date, so the answer is
-never EARLIER than the posting date's own. The tracking sheet's tab cycle
-stays a floor on top of it (`marketYearAtLeast`, applied in `rowsFromTab`),
-and the two hardly ever argue — measured over the 543 served postings,
-**fourteen of the seventeen** rows whose deadline outruns their posting date
-already carry the year the cascade gives them. The tab had been standing in
-for a deadline nobody was reading.
+apply over a season already imported. The tracking sheet's tab cycle stays a
+floor on top of it (`marketYearAtLeast`, applied in `rowsFromTab`), and the
+two hardly ever argue — measured over the 543 served postings, **fourteen of
+the seventeen** rows whose deadline outruns their posting date already carry
+the year the cascade gives them. The tab had been standing in for a deadline
+nobody was reading.
+
+#### …and since 2026-09-18 that is TRUE BY CONSTRUCTION, because the assumption behind it was never enforced
+
+The paragraph above used to argue the property from the data: *a deadline is
+on or after the day the advertisement went up, `marketYear` rises with the
+date, so the answer is never EARLIER than the posting date's own.* That holds
+only where something refuses a closing date before its own posting date, and
+**exactly one of the three ingests does**. `deadlineDay` refuses it for the
+workbook. **The posting form refuses nothing**, and neither does a review-card
+edit nor either advertisement cache — which is the rule `backdatedDeadlines`
+already reports rather than repairs, one section down.
+
+So a posting advertised today with a closing date in the PAST filed under the
+season that date falls in, and where that date sat the far side of the July
+roll, under a season that **had already closed**: the one page it is of no use
+on, which is the exact defect this cascade was written to prevent.
+
+**AND IT STOPPED THE WHOLE SITE PUBLISHING, which is how it was found.**
+Owner, 2026-09-18, of a London Business School posting made that morning:
+*"I don't see it public now."* `2026-test-20260917` — posted 2026-09-17,
+closing before that July — was the first row whose backwards dates crossed the
+roll; the served-file guard asserting this very property went red on it, and a
+red re-check means the build commits **nothing**. Every run from 21:15 the
+previous evening failed — schedule, doorbell and chain alike — so a posting
+made through the form, correctly produced by the build (`+2 new` in its own
+log), was published by nobody for ten hours **because of another posting's bad
+date**. Nothing was wrong with the form, the rules, the doorbell or the
+deploy: the site was simply not committing.
+
+`marketYearOf` **floors its answer at the season the posting date itself
+names**. The posting date is the one signal here that cannot be wrong — it is
+stamped when the submission is stored — and `from` reads `'posted'` where the
+floor wins, so the /admin-area report still names the date that decided. A row
+with no posting date has no floor, which is the `marketYearOf({})` case the
+report and the form twin both rely on.
+
+**`postingYear()` in `assets/oa-jobform.js` carries the same floor**, and has
+to: the form SENDS `year` and a stored year wins outright in the pipeline, so
+for every posting made through the form **the browser is the only thing that
+ever decides**. `yearNoteWhy()` moved with it — it names the date that
+DECIDED, so over an answer the floor gave it says today's date *"because the
+apply-by date you gave has already passed"*, rather than crediting a date the
+form did not follow.
+
+**MEASURED BEFORE IT WAS CHANGED, over the whole corpus**: across
+`data/jobs.json` (616 rows), `data/jobmarket.json` (515) and
+`data/past-postings.json` (159) the floor moves **not one** cascade answer, and
+`data/jobs-yearcheck.json` recomputes byte-identical. Five rows carry a
+backdated date today and none of them crosses the roll, which is why this
+survived until now — and is what makes the floor safe to apply to a corpus
+rather than only to new postings. Nothing already published is re-filed.
+
+**THE GUARD WAS THE OTHER HALF OF THE BUG, and it is the fifth time.** The
+forward-only property was asserted over EVERY SERVED POSTING — one check per
+row, over data. The only way it can fail is a row whose own dates run
+backwards; the remedy is a date in a document or a crowdsourced workbook that
+no commit can change; and red in that role commits nothing at all. That is the
+shape this file already records four times, and its own rule for exactly this
+case is written beside `backdatedDeadlines`: **reported, never repaired, and
+never a guard over `data/`.** So the property is kept by the function, pinned
+over FIXTURES (both ways — a floor that also swallowed a later date would be
+the cascade deleted rather than guarded), and the backdated rows are **named in
+the build's own run log** (`backdatedDeadlines` over the merged set in
+`build-jobs.mjs`, imported rather than copied), beside the season
+disagreements it already prints.
+
+Tests: the forward-only block of `testMarketYearCascade` (the floor on a
+closing date and on a suggested one, a date ahead of the posting date still
+deciding, the owner's own May-for-September case untouched, a row with no
+posting date, the exact row that stopped the site, and the build's report
+wired) and `testFormMarketYearParity`, whose fixture was rebuilt around it:
+both halves are now asked about ONE day — handed to the form as its current
+season and to the pipeline as `posted` — because the form's last leg and its
+floor are the same quantity, so the old `current: 2099` sentinel would have
+floored every case at 2099. Every pin verified by putting the defect back:
+removing the floor turns five checks red, removing it from the form alone
+turns two red (the parity), and deleting the build's report turns one red.
 
 ### Nothing already published is re-filed — it is REPORTED
 
@@ -1518,6 +1593,132 @@ pending and two user-added waiting — so the numbers are right only if the
 live pair is left out, with the tab measured beside the tile. Every one
 verified by putting the defect back; reverting `waitingJobs` alone turns the
 badge check red.
+
+### …and a posting can be taken off the site from the queue itself
+
+Owner, 2026-09-17: *"Also allow the admin to delete a job in the queue for
+review. Currently, we can remove only jobs that are live listed."*
+
+The **user-added** tab offered *Open & correct* and *Mark reviewed* and nothing
+that took a posting off the site. The crawled tab beside it has had **Reject**
+since the gate shipped, so the gap was one tab wide: the only removal the site
+had for a posting somebody had made through the form was the **Take down**
+control the live listings draw (`assets/oa-jobedit.js`) — which means the
+maintainer reading a posting in their own queue had to go and find the same
+posting on `/jobs` to be rid of it.
+
+**IT IS A STATUS CHANGE, NEVER A DELETE**, and `build-jobs.mjs` says why in as
+many words: *"taking a posting down is a STATUS CHANGE (withdrawn/hidden),
+never deleting its document. Deleting the document would leave the row orphaned
+and therefore preserved."* A deleted `jobSubmissions` document leaves the
+published row carried on by every build for ever, with nothing on the site able
+to correct or remove it, the maintainer included. So the card writes the two
+words the live listing already writes, and **the word says WHO**: `hidden` is
+the maintainer's own take-down, `withdrawn` is the poster withdrawing their own
+(`perm.admin ? 'hidden' : 'withdrawn'` in `oa-jobedit.js`, which is the one
+reason that ternary exists). Putting one back writes `queued`, which is what
+`post-a-job.html` saves on every edit and what the build publishes.
+
+The rules DO let the maintainer delete a submission outright (`allow delete: if
+isAdmin();`), and that is not the control this is: the one thing that uses it is
+the account-deletion sweep, which deletes a document only after it has measured
+that **no served file still names the account** (gate 2 of four). A button on a
+card can make no such measurement, so from a card the answer is always the
+status.
+
+**THE WAY BACK IS A DRAWER, because the list above cannot hold it.** That tab
+reads the LIVE statuses, so a hidden posting is not in it, and `/jobs` does not
+carry it either: without somewhere to press, taking a posting down from here
+would be the one-way door this repository refuses everywhere else
+(`newsOverrides`, `rowOverrides`, `directoryEdits`, a reader's own messages, a
+settled market year). So **Taken down by you (N)** is a collapsed panel below
+the list, one press from *Put it back*, and a take-down opens it — the posting
+is seen arriving where it has gone rather than simply vanishing, which is also
+the whole of the feedback, and better than a line of text the repaint would
+take with it.
+
+**AND IT IS THE WAY BACK FROM `/jobs` TOO**, which nothing had. The Take-down
+control on the live listings writes the same `hidden`, and it draws no restore
+of its own — a posting taken down there leaves `data/jobs.json` at the next
+build, so the card that carried the button is gone. The drawer lists the
+maintainer's take-downs wherever they were made, so it is now the MAINTAINER's
+only route back from either of them. (The poster has one of their own and
+always did: the rules let an owner write `queued`, so re-saving the posting in
+the form puts it back. That is not a hole the drawer opens, it is what makes a
+withdrawal reversible by the person who made it.)
+
+Four things the drawer does deliberately:
+
+* **it reads `hidden` and nothing else.** A poster's own withdrawal is not in
+  it, which is the candidates panel's own rule — putting that back is theirs to
+  do — and it would be an unbounded list with nothing to press: the build
+  rewrites every `withdrawn` document to `removed` on its next run, so the pile
+  accumulates every posting ever withdrawn, in every season, for ever;
+* **its read is NOT filtered by `reviewedAt`.** A posting ticked off and then
+  taken down would otherwise be invisible to the one control that can put it
+  back;
+* **it is not a third source tab.** Nothing is waiting on it, and a tab reading
+  (3) beside the two that count work to do would say the maintainer owes
+  something they have already dealt with;
+* **it is not filtered by season.** The tabs above narrow a queue; this is a
+  drawer somebody opens looking for one posting they remember, and a season
+  filter is exactly what would hide it. (The tabs themselves are unchanged, and
+  a repaint after a decision keeps the season — or the **All** tab — the
+  maintainer had chosen, which `'*'` needed a line of its own for, since it is
+  not a season and so is never in `yearsOf`'s answer.)
+
+**THE ECHO IS THE OTHER HALF, and the restore's echo is the half worth
+remembering.** `admin-area.html` loads `oa-fresh.js`, the build runs every
+twenty minutes, and `/jobs` is the page the maintainer opens next — so for up
+to a cycle the row just taken down is still in the served `data/jobs.json`. The
+take-down therefore echoes the removal exactly as `oa-jobedit.js` does
+(`removed: true`, which filters the row out of what THIS browser renders), and
+the restore echoes **an edit of NO FIELDS**, which CANCELS it: an echo whose
+every echoed value already matches the served row has landed by definition, so
+the next `overlay` spends it and deletes it. Nothing else can clear a removal
+echo, and an uncleared one would go on hiding, for the rest of its hour, the
+posting that had just been put back.
+
+**A decision RE-READS the tab** rather than moving the item between two local
+lists — the candidates panel's own answer, for the same reason: the list, the
+season tabs, the two tab counts and the drawer all have to agree, and whether a
+restored posting rejoins the list above depends on whether it is still waiting,
+which only the documents can answer. One read of a small collection the
+maintainer touches a few times a season is cheaper than four places kept in
+step by hand.
+
+**NO RULES CHANGE AND NO DEPLOY.** `jobSubmissions` is already `allow write: if
+isAdmin();` and that rule's own comment says *"The maintainer can hide a
+posting"*; a poster may write only `queued` or `withdrawn`, so `hidden` really
+is the maintainer's word. **And the badge needs nothing**, which the section
+above made even more true: `waitingJobs` is one `count()` over pending
+`jobReviews`, so a user-added posting was never in the "Admin area N" badge and
+taking one down cannot move it. The tab's own count IS the panel's word on
+itself, and the repaint recomputes it.
+
+**What is NOT changed, and is the owner's call.** A posting the crawled tab
+**rejects** leaves that queue for good: the panel lists `status == 'pending'`
+only, so there is no drawer and no way back from a Reject short of the Firestore
+console. That is the documented decision for a crawled posting (*"rejecting
+keeps it off for good"*) rather than an oversight, and a drawer for it is a
+second feature rather than this one.
+
+Tests: `testQueueTakedown` in `_scraper/selftest.mjs` (the status words against
+the live listing's own ternary, that no submission document is ever deleted, the
+build's `withdrawn` → `removed` rewrite as the reason the drawer reads `hidden`
+alone, the two statuses it must never query, the read unfiltered by the reviewed
+stamp, the two source tabs still two, both echoes with `oa-fresh.js`'s own
+`landed` short-circuit as the reason the second one cancels the first, the load
+order on the Admin area, the rules both ways, the badge's own query, the drawer
+styled in `oa-ui.css` alone with its own ink and a 42px handle, a refused read
+saying so, the kept **All** tab, and the copy) and the review block of
+`_scraper/page-test.mjs`, which drives it in a real browser against a seeded
+posting the maintainer had already taken down — the drawer counted on arrival,
+its posting absent from the list above and present under a season it does not
+belong to, then a take-down writing `hidden` with its echo stashed, the card
+moving into an opened drawer with both counts following, the **All** tab still
+the tab on screen, *Put it back* returning it with its echo cancelled, and all
+six documents still there at the end.
 
 ### A season is not six postings
 
@@ -10531,19 +10732,23 @@ bottom to 'delete' a job posting once opened for edit. I have posted a test
 posting and can't delete it now... Add also a delete button next to the button
 'Mark reviewed'."*
 
+**THE SECOND HALF SHIPPED SEPARATELY, the same day**, and is the section
+"…and a posting can be taken off the site from the queue itself" under the
+review queue: the user-added card's own Take down, with a *Taken down by you*
+drawer and a Put it back the module below has no notion of. **It is kept as it
+is.** What follows is the FIRST half, and the shape both halves share.
+
 **NOTHING WAS MISSING FROM THE RULES**, which is the first thing to know before
 reading this again: a poster has been able to withdraw their own posting and
 the maintainer to hide any of them since the day those clauses were written,
 and `oa-jobedit.js` has drawn Take down on every card the reader may touch for
-just as long. What was missing is a CONTROL ON THE TWO SCREENS THE MAINTAINER
-LANDS ON. Take down was on the card LISTS alone, and neither of the screens in
-front of the owner is one: the edit form (`post-a-job?edit=`), which is exactly
-where *Open & correct* on `/admin-area` goes, and the user-added card on
-`/admin-area` itself. Worse, the posting in question is filed under a season
-that has **rolled**, so by `OAJobNav.hrefFor`'s own rule its card is on
-Previous markets rather than `/jobs` — the one Take down that existed was on
-neither page they were looking at, and the form they did reach offered Save
-changes and nothing else.
+just as long. What was missing is a CONTROL ON THE SCREENS THE MAINTAINER
+LANDS ON — and the edit form (`post-a-job?edit=`) is one of them, being where
+*Open & correct* on `/admin-area` goes. Worse, the posting in question is filed
+under a season that has **rolled**, so by `OAJobNav.hrefFor`'s own rule its
+card is on Previous markets rather than `/jobs`: the one Take down that existed
+was on neither page they were looking at, and the form they did reach offered
+Save changes and nothing else.
 
 **IT IS A STATUS CHANGE AND NEVER A DOCUMENT DELETE**, and the owner's quotes
 around "delete" are doing the right work. `build-jobs.mjs` CARRIES a row that
@@ -10552,18 +10757,16 @@ ever shrinks because a posting was taken down and never because a document is
 missing — so deleting the document would leave the posting on the site **for
 ever**, with no Edit, no Take down and no correction able to reach it. The
 rules say the same thing from their end (`allow delete` is the maintainer's,
-and it is the one thing none of these buttons presses), and `build-jobs.mjs`
-says it in as many words. `hidden` and `withdrawn` both take the row off at the
-next build, which is a couple of minutes away because `publishOnChange` rings
-it.
+and it is the one thing none of these controls presses). `hidden` and
+`withdrawn` both take the row off at the next build, which is a couple of
+minutes away because `publishOnChange` rings it.
 
 ### …and the answer is ONE definition, because there were already two
 
-The expensive half of this was not the buttons. **The eight-line write was
-already in two places and they had DRIFTED** — the failure
-`oa-countries.js`, `oa-schools.js`, `oa-news.js` and `oa-jobnav.js` all exist
-to prevent, and one nothing here compared, because each copy was only ever
-read against itself:
+The expensive half of this was not the button. **The eight-line write was
+already in two places and they had DRIFTED** — the failure `oa-countries.js`,
+`oa-schools.js`, `oa-news.js` and `oa-jobnav.js` all exist to prevent, and one
+nothing here compared, because each copy was only ever read against itself:
 
 * `oa-jobedit.js` stashed the takedown into `OAFresh` and **`oa-myjobs.js` did
   not**, so a poster who withdrew a posting from My postings went back to
@@ -10576,17 +10779,17 @@ read against itself:
 * and the selftest's own guard, *"taking down is a status change, never a
   document delete"*, read the string out of `oa-myjobs.js` — pinning one copy
   against itself, so it was **satisfied by the copy that happened to be
-  right**, exactly as the four copies of `OPEN_ENDED_RX` were.
+  right**, exactly as the four copies of `OPEN_ENDED_RX` were. The queue
+  drawer's own guard had the same shape one layer over: it pinned the two
+  status words against `oa-jobedit.js`'s ternary, another copy.
 
-Adding the owner's two buttons as two more copies would have made four. So
-**`assets/oa-takedown.js` owns the whole of what a takedown IS** — the status,
-the stamp, the echo, the label, the cadence, the confirmation and the wording
-of a refusal — and the four surfaces are callers:
+So **`assets/oa-takedown.js` owns the whole of what a takedown IS** — the
+status, the stamp, the echo, the label, the cadence, the confirmation and the
+wording of a refusal — and the surfaces are callers:
 
     assets/oa-jobedit.js    the card lists (jobs, the one-pager, Previous markets)
     assets/oa-myjobs.js     My postings
     assets/oa-jobform.js    the edit form            ← new
-    assets/oa-jobreview.js  the Admin area's user card ← new
 
 Four things the module decides and no caller may:
 
@@ -10603,9 +10806,20 @@ Four things the module decides and no caller may:
   forgets it.
 * **`update()`, never `set()`** — the rules pin `createdAt` two-sidedly, and a
   `set()` would carry the posting date back as a fresh value.
-* **One cadence and one label**, so four screens cannot disagree about what the
+* **One cadence and one label**, so the screens cannot disagree about what the
   control is called or how long the site takes. `WHEN` is the one place to
-  change if it ever does.
+  change if it ever does, and the three status WORDS are named there too
+  (`HIDDEN`, `WITHDRAWN`, `RESTORED`).
+
+**THE QUEUE DRAWER IS DELIBERATELY NOT A CALLER**, and that is a decision
+rather than an omission. Its panel is admin-only, so it always writes `hidden`
+and has no use for `statusFor()`; its restore writes a third word this module
+does not do; and the drawer it opens is its own. So it keeps its twelve-line
+`setStatus`, and what has to AGREE is pinned instead: the two words against
+the module's own (**both ways**), the cadence in its confirmation, and the
+no-delete rule over the whole file. `admin-area.html` therefore does NOT load
+this module — a page must not download four kilobytes it never runs, and the
+page list is pinned both ways so neither half can drift.
 
 ### The edit form's control is the sibling form's, in the same place
 
@@ -10618,7 +10832,7 @@ idiom. **Revealed in edit mode only**: a new posting has nothing to take down,
 so a button there could only ever fail, and `wireTakeDown` stands down without
 an `EDIT_ID` as well, or a page can be got round.
 
-Two decisions worth keeping:
+Three decisions worth keeping:
 
 * **The confirmation names the posting as the FORM now reads it**, not as it
   was stored — a maintainer who has just corrected the university should be
@@ -10631,44 +10845,15 @@ Two decisions worth keeping:
   up without the reader meaning to. It hides the same two blocks a successful
   save hides and no more, so the name-fix section below stays offered exactly
   as it does after a save.
-
-### …and both confirmations OFFER the way back, rather than describing it
-
-**"Hiding is never a one-way door"** is the rule `newsOverrides`,
-`rowOverrides`, `directoryEdits` and the message removal are all held to, and
-for a posting the door is one press of **Save changes** on the editor. So
-neither confirmation merely says so: both LINK that editor by its id
-(`post-a-job?edit=<id>`), which is the same page the card's own *Open &
-correct* opens.
-
-It has to be in the message, on both surfaces, because **that is where the
-door was shut**. Once the posting is `hidden` the user tab's `LIVE` query no
-longer lists it and the form has just closed over it, so without the link the
-only road back is the Firebase console. **`my-postings` would not do**: it
-lists your OWN postings, so a maintainer who has taken down somebody else's
-would find nothing there — which is why the form's panel links the editor by
-id rather than the page the first draft pointed at.
-
-### The review card's is a plain button, like Reject beside Approve
-
-On the user-added tab the two verbs are deliberately unalike and the card has
-to keep them so: **Mark reviewed says the maintainer has READ this and changes
-nothing about the posting**, while Take down takes it off the site. So:
-
-* it **asks before the button moves**. A confirmation behind a disabled button
-  and a "Taking it down…" line says a posting has gone that is still there if
-  the maintainer says no — and only for the verb that changes the site: Mark
-  reviewed writes one stamp and asks nothing, as it always did.
-* it **writes the status and never the reviewed stamp beside it**. A posting
-  taken off the site is not one the maintainer has read and approved of, and
-  the tab's `LIVE` query (`queued`/`published`) is what keeps it off the list
-  from the next load on, so writing both would make "reviewed" mean two
-  things. `retire()` takes the row off the tab at once and its count follows
-  without a reload, exactly as Mark reviewed's does.
-* it is a **plain `class="button"`**, which is what Reject already is beside
-  Approve on the crawled tab. This panel paints no danger colour anywhere, and
-  one here would be the only one — so no new class, no second stylesheet rule
-  and no new surface for the theme audit.
+* **And the panel OFFERS the way back rather than describing it.** "Hiding is
+  never a one-way door" is the rule `newsOverrides`, `rowOverrides`,
+  `directoryEdits` and the message removal are all held to, and for a posting
+  the door is one press of Save changes on the editor — so the panel LINKS
+  that editor by its id. It has to, because that is where the door was shut:
+  the form has just closed over the posting. **`my-postings` would not do**: it
+  lists your OWN postings, so a maintainer who has taken down somebody else's
+  would find nothing there, which is why the panel links the editor by id
+  rather than the page the first draft pointed at.
 
 **The tile and the account-menu badge do not move**, and that is the
 2026-09-17 rule one function over: `waitingJobs` is one aggregate over pending
@@ -10677,30 +10862,31 @@ taking one down cannot change a number that never included it.
 
 **No rules change and no deploy**, which is pinned rather than remembered: the
 poster's clause already permits `withdrawn` and the maintainer's `allow write`
-permits anything, so both new buttons work the moment they merge.
+permits anything, so the control works the moment it merges.
 
 Tests: `testJobTakedown` in `_scraper/selftest.mjs` (the module's exports; the
-two statuses against the pair the build pulls and against the one it retires;
-absence answering `withdrawn`; no delete and no `set()`; the echo as the
-module's; all four callers driven for the run, the confirm, the failure wording
-and the label, with each asserted to name NO status, hour or cadence of its
-own; every page that presses one loading the module and the echo, and loading
-them before the caller; the form's hidden button in the sibling form's own
+three words named once with `statusFor` reading them; the two statuses against
+the pair the build pulls and against the one it retires; absence answering
+`withdrawn`; no delete and no `set()`; the echo as the module's; all three
+callers driven for the run, the confirm, the failure wording and the label,
+with each asserted to name NO status, hour or cadence of its own; the page list
+BOTH ways, so a page loads the module exactly when something on it calls it,
+and before that caller; the form's hidden button in the sibling form's own
 shape and place, revealed by `enterEditMode` and standing down without an
-`EDIT_ID`, the confirmation read off the form with the stored `ref`, and the
-form giving way to the done panel; the card's button next to Mark reviewed in
-that order, as a plain button, asking before it disables anything and writing
-no stamp; **both confirmations linking the editor by id**, so neither is a
-one-way door; the badge still counting the gate alone; and the rules claim
-both ways) — **every source read with its comments stripped**, because each of these
-files now RECORDS the copy it no longer carries and a guard that could not tell
-the record from the code would have to be satisfied by deleting the record.
-Each pin was verified by putting its defect back. In `_scraper/page-test.mjs`:
-the edit form offering Take down under `?edit=` and offering none on a new
-posting, a real press writing the status and never deleting the document with
-the done panel replacing the form, the review card's press writing the status
-with the row leaving the tab, and a CANCELLED confirmation writing nothing at
-all on both surfaces.
+`EDIT_ID`, the confirmation read off the form with the stored `ref`, the form
+giving way to the done panel and the panel linking the editor by id; the queue
+drawer's own words, cadence and no-delete rule pinned into agreement without
+its being a caller; the badge still counting the gate alone; and the rules
+claim both ways) — **every source read with its comments stripped**, because
+each of these files now RECORDS the copy it no longer carries and a guard that
+could not tell the record from the code would have to be satisfied by deleting
+the record. Four existing pins were repointed at the definition rather than at
+a copy, the drawer's own among them. Each pin was verified by putting its
+defect back. In `_scraper/page-test.mjs`: the edit form offering Take down
+under `?edit=` and offering none on a new posting, a real press writing the
+status and never deleting the document with the done panel replacing the form,
+and a CANCELLED confirmation writing nothing at all.
+
 
 ## The account menu counts what it links to
 

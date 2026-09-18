@@ -73,7 +73,18 @@
     return !!(window.OAAccounts && OAAccounts.isAdmin && OAAccounts.isAdmin());
   }
 
-  function statusFor(isAdmin) { return isAdmin ? 'hidden' : 'withdrawn'; }
+  /* THE THREE WORDS, named once. `hidden` and `withdrawn` are the two a
+     take-down writes; `queued` is what putting one back writes, which is what
+     the posting form itself saves and what the build publishes. The review
+     panel's drawer (assets/oa-jobreview.js) spells its own two out because it
+     is admin-only and always writes `hidden` — it needs no statusFor() — and
+     the selftest pins its literals against THESE rather than against another
+     copy of them, which is the shape that let the two live copies drift. */
+  var HIDDEN = 'hidden';
+  var WITHDRAWN = 'withdrawn';
+  var RESTORED = 'queued';
+
+  function statusFor(isAdmin) { return isAdmin ? HIDDEN : WITHDRAWN; }
 
   /** Which posting, in the words the card and the form both show: the
       institution, and the line under it where the row has one. A row from the
@@ -149,6 +160,9 @@
   window.OATakedown = {
     LABEL: LABEL,
     WHEN: WHEN,
+    HIDDEN: HIDDEN,
+    WITHDRAWN: WITHDRAWN,
+    RESTORED: RESTORED,
     statusFor: statusFor,
     describe: describe,
     message: message,
