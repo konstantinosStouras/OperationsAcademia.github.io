@@ -310,11 +310,35 @@
 
                       <div class="oa-row">
                         <div class="oa-field">
-                          <label for="f-country">Country of the campus <span class="oa-req" aria-hidden="true">*</span></label>
-                          <p class="oa-hint">Shown publicly. Used by the <em>Location</em> filter.</p>
+                          <label for="f-country">Countries of the campus <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint" id="f-country-hint">Shown publicly. Used by the <em>Location</em>
+                          filter. One is the usual answer &mdash; if the search covers campuses in
+                          more than one country, press Enter after each and add the next.</p>
+                          <!-- The BOX IS STILL THE FIELD, and that is what keeps the ordinary
+                               answer unchanged: type one country, tab away, done. What is typed
+                               in it counts as one of the countries whether or not Enter is
+                               pressed — the same rule the jobs page's own text filters follow,
+                               where "the half-typed word in the box counts as one more term".
+                               So the datalist, the browser's own suggestions and oa-uniinfo's
+                               auto-fill all go on working exactly as they did, and the chips are
+                               what a poster adds on top.
+
+                               `required` is deliberately NOT here: with a country already banked
+                               as a chip the box is legitimately empty, and the browser would
+                               refuse a form that is complete. oa-jobform.js validates the pair
+                               (chips OR box) and marks the field itself. -->
                           <input type="text" id="f-country" name="country" list="oa-countries" maxlength="60"
-                                 autocomplete="off" required>
+                                 autocomplete="off" aria-describedby="f-country-hint f-country-added">
                           <datalist id="oa-countries"></datalist>
+                          <!-- THE SITE'S OWN CHIP, and the filter bar's own order: the
+                               control, then what has been chosen under it. `.oa-chips`,
+                               `.oa-chip` and its two spans are assets/oa-list.css's, which
+                               this page already links and v3.css already restates as a
+                               pill — so a banked country looks like every other chosen
+                               value on the site, and there is one chip to keep in step
+                               rather than two. -->
+                          <div class="oa-chips oa-field-chips" id="f-country-chips"></div>
+                          <p class="oa-hint oa-derived" id="f-country-added" aria-live="polite"></p>
                         </div>
                         <div class="oa-field">
                           <span class="oa-label-text">Job market</span>

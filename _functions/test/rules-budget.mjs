@@ -108,6 +108,9 @@ function maximal(FV) {
     jobSubmissions: {
       institution: pad(160), school: pad(160), unit: pad(160), department: pad(220),
       country: pad(60), type: 'Business School',
+      /* every campus country the form lets a poster bank, at the cap the rules
+         bound the list at — the worst case is the one that goes over first */
+      countries: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
       levels: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
       characteristics: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'],
       applyByDate: '2026-11-15', untilFilled: false, reviewDate: '2026-10-01',

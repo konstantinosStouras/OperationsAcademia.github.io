@@ -33,7 +33,7 @@ import { createRequire } from 'node:module';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds, healPlace,
-  stripRowEmails, withMarketYears,
+  stripRowEmails, withMarketYears, withCountries,
   healReviewDate,
   marketYear, marketYearReview, inCurrentMarket, collectChanges, renderChangesHtml, postedBy,
   ownerTag,
@@ -450,6 +450,7 @@ async function healNames() {
      a row, and a healed file must be byte-what-the-build-would-write. */
   const healed = rows.map((r) => keepShape(r, healPlace(r, fixes)))
     .map(withMarketYears)
+    .map(withCountries)
     .sort(displayOrder);
 
   const before = serialise(rows);
@@ -1104,7 +1105,37 @@ async function main() {
      and counting that as a heal would name 569 innocent postings in the log —
      the mistake the comment above this one records. The admin change e-mail
      is clear of it for the same reason, in `diffRows`. */
-  const rows = healedRows.map(withMarketYears);
+  /* …AND EVERY COUNTRY EACH POSTING COVERS — `countries` (owner, 2026-09-18).
+     A school advertising across its campuses names several, and `country`
+     still names the one it is filed under and is the first of them.
+
+     Over the MERGED SET for the same reason as the span above: a carried
+     ORPHAN never goes back through an ingest, so this is the only place it
+     can gain its list. AFTER the heal count, also for that reason — the field
+     is derived from one the row already carries, so the run that first writes
+     it touches every posting once, and counting that as a heal would name 617
+     innocent postings in the log. The admin change e-mail is clear of it a
+     different way: `diffRows` reads BOTH SIDES through `countriesOf`, so a
+     row that predates the field answers its own single country and the first
+     run reports nothing, while a poster genuinely adding a campus does. */
+  const rows = healedRows.map(withMarketYears).map(withCountries);
+
+  /* A MULTI-COUNTRY POSTING IS EXEMPT FROM THE COUNTRY HEAL, so the one thing
+     that heal would have caught is NAMED instead — reported, never repaired,
+     the `backdatedDeadlines` discipline. A row naming several countries none
+     of which is where its university is is either a search the directory has
+     not heard of or the autofill fault at scale, and only a person can tell
+     them apart. */
+  const strayCountries = rows.filter((r) => {
+    if (!Array.isArray(r.countries) || r.countries.length < 2) return false;
+    const want = byCountry.get(SCHOOLS.institutionKey(r.institution || ''));
+    return want && !r.countries.includes(want);
+  });
+  if (strayCountries.length) {
+    log(`${strayCountries.length} posting(s) name several countries, none of them the one `
+      + 'their university is in — check them: '
+      + strayCountries.slice(0, 8).map((r) => `${r.id} (${r.countries.join(', ')})`).join(', '));
+  }
 
   /* ------------------------------------- the form's option lists
 

@@ -479,6 +479,13 @@
                  sure every row states its seasons — the year filter reads
                  `years`, and a row without one would answer no year at all */
               rows.forEach(function (r) { r.years = marketYears(r); });
+              /* …and every campus country it is listed under, for the same
+                 reason and in the same one place: the Location filter reads
+                 `countries`, and a row from EITHER of these two files that
+                 predates the field would answer no country at all and drop
+                 out of it rather than being found under the one it names.
+                 assets/oa-jobnav.js's countriesOf is the one rule. */
+              rows.forEach(function (r) { r.countries = OAJobNav.countriesOf(r); });
               /* Keep BOTH: the file as served (so a correction can be undone
                  without another fetch) and the array the engine holds (so a
                  late override can rewrite it in place). */
@@ -515,7 +522,14 @@
                 placeholder: 'All types', legacyParam: 'filterC' },
               { key: 'level',   label: 'Entry level',     field: 'levels', type: 'one',
                 placeholder: 'All levels', legacyParam: 'filterF' },
-              { key: 'country', label: 'Location',        field: 'country', sort: 'count',
+              /* `countries`, not `country`: a search across a school's
+                 campuses is found under each of them (owner, 2026-09-18).
+                 The values are the same country names either way, so
+                 ?country=France and the legacy ?filterI= link both select
+                 exactly what they selected — and the fill-in above is what
+                 keeps a row from either of this page's two files, both of
+                 which predate the field, from answering no country at all. */
+              { key: 'country', label: 'Location',        field: 'countries', sort: 'count',
                 placeholder: 'All locations',
                 // as on the jobs page: an old "USA" link still works
                 legacyValues: (window.OACountries || {}).ALIASES,
@@ -536,6 +550,9 @@
                   /* the poster's own prose, read by the site's one markup module
                      (owner, 2026-09-17) -- one definition for all three lists */
                   OAJobNav.commentsRow(r),
+                  /* every campus country, and only where the posting covers
+                     more than one — one definition for all three lists */
+                  OAJobNav.countriesRow(r),
                   { label: 'File link',
                     html: link(r.adUrl, r.adLabel || 'link to Job ad') },
                   { label: 'Posted online at',

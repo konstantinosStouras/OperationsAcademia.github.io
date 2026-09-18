@@ -168,6 +168,18 @@ service cloud.firestore {
             // every posting made before the split carries.
             && str('school', 200)      && str('unit', 200)
             && str('country', 80)      && str('type', 40)
+            // EVERY country the search covers (owner, 2026-09-18) — a school
+            // advertising across its campuses names several, and `country`
+            // is still the one it is filed under and the first of them. A
+            // LIST costs one map lookup where a bound string costs one too,
+            // so it spends about a field of the evaluation budget the section
+            // headed "The RULESET has an evaluation budget" measures: a job
+            // posting had 8 spare bounded fields on its create and 6 on the
+            // owner's UPDATE, which is the path that binds. The budget guard
+            // (_functions/test/rules-budget.mjs) drives both with this field
+            // at its cap, so a ruleset that crosses the ceiling is a red
+            // check rather than a silent outage.
+            && list('countries', 8)
             // the FINAL apply-by and the SUGGESTED (first-review) apply-by —
             // the form's two date questions since 2026-08
             && str('applyByDate', 20)  && str('reviewDate', 20)
@@ -212,13 +224,20 @@ service cloud.firestore {
       // which rightly stays put): the build treats it as trustworthy (it
       // becomes addedAt, the e-mail alerts' cursor), so a bogus 1e16 or a
       // back-dated value must not exist at all.
-      // The key ceiling must clear what the form actually writes: 28 keys
+      // The key ceiling must clear what the form actually writes: 29 keys
       // always (collect() + ref/uid/authEmail/status/source/createdAt) and 4
       // more when the advert is UPLOADED rather than linked (adUploadPath/
-      // Name/Type/Size) — 32 in all. At the old ceiling of 30 exactly the
+      // Name/Type/Size) — 33 in all. At the old ceiling of 30 exactly the
       // upload case was refused as permission-denied while a link-only
       // posting sailed through. selftest.mjs pins this arithmetic against
       // the form source, so a new field fails the build, not the poster.
+      //
+      // 34 -> 35 with `countries` (2026-09-18). It had to move whichever way
+      // the field was sent: `request.resource.data` is the MERGED document on
+      // an update, so a posting stored before today carries its `country` into
+      // every correction its owner makes and would meet the ceiling one key
+      // over — the sync-user-directory trap, a posting frozen against the
+      // person who posted it.
       allow create: if verified()
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.status == 'queued'
@@ -227,7 +246,7 @@ service cloud.firestore {
                     && !('featured' in request.resource.data)
                     // the account merge writes this; a new posting never does
                     && !('mergedFrom' in request.resource.data)
-                    && request.resource.data.keys().size() <= 34;
+                    && request.resource.data.keys().size() <= 35;
 
       // A poster may read, correct and withdraw their own posting.
       allow read: if isOwner(resource.data.uid) || isAdmin();

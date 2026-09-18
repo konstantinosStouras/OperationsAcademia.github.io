@@ -428,7 +428,21 @@
         data: '/data/jobs.json',
         perPage: 10,
         urlPrefix: '',            // owns the legacy ?filterA= deep links
-        prepare: function (rows) { return rows.filter(inCurrentMarket); },
+        prepare: function (rows) {
+          /* EVERY COUNTRY A POSTING COVERS (`countries`, written by the build
+             — countriesOf in _scraper/jobs-model.mjs). A search across a
+             school's campuses is listed under each of them, so the Location
+             filter offers it under each.
+
+             The fallback is not decoration: a row that predates the field
+             would answer NO country at all and drop out of the filter
+             entirely, rather than being found under the one it names — the
+             same reason previous-markets.html fills its `years` span in. */
+          rows.forEach(function (r) {
+            if (!r.countries || !r.countries.length) r.countries = r.country ? [r.country] : [];
+          });
+          return rows.filter(inCurrentMarket);
+        },
 
         /* ?job=<id> shows ONE posting on its own, with its Edit and Take down
            controls on it. /admin-area's market-year report links here that
@@ -523,9 +537,16 @@
              question that has several answers. */
           { key: 'level',       label: 'Entry level',     field: 'levels',
             placeholder: 'All levels' },
-          // a link shared or bookmarked when the site said "USA" still selects
-          // the country it now publishes as "United States"
-          { key: 'country',     label: 'Location',        field: 'country', sort: 'count',
+          /* a link shared or bookmarked when the site said "USA" still selects
+             the country it now publishes as "United States"
+
+             `countries`, not `country`: a posting covering campuses in France
+             and Singapore is found under either (owner, 2026-09-18). The
+             values are the same country names either way, so ?country=France
+             goes on selecting exactly what it selected, and a posting that
+             names one is offered once — the engine reads an array field
+             through the same `valuesOf` a single value goes through. */
+          { key: 'country',     label: 'Location',        field: 'countries', sort: 'count',
             legacyValues: (window.OACountries || {}).ALIASES,
             placeholder: 'All locations' },
           { key: 'chars',       label: 'Characteristics', field: 'characteristics',
@@ -582,6 +603,11 @@
               /* the poster's own prose, read by the site's one markup module
                  (owner, 2026-09-17) -- one definition for all three lists */
               OAJobNav.commentsRow(r),
+              /* EVERY campus country, and ONLY where the posting covers more
+                 than one (owner, 2026-09-18) — one definition for all three
+                 lists, assets/oa-jobnav.js. A single-country card is
+                 unchanged, which is every card the site drew before today. */
+              OAJobNav.countriesRow(r),
               { label: 'File link',
                 html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad')
                   : (r.adPending ? '<em>soon to be available</em>' : null) },

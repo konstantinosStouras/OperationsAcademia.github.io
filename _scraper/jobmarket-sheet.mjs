@@ -49,6 +49,7 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, jobId, canonCountry, canonPlace, longDate, marketYearAtLeast, withMarketYears,
+  withCountries,
   universitiesLink,
   displayOrder, collapseSameDay, isoStamp, publicRow, OPEN_ENDED_RX,
   extractReviewDate, extractFinalDate, healReviewDate,
@@ -1118,7 +1119,7 @@ export function rowsFromTab(csv, {
        which is read off the dates as they finally stand: data/jobmarket.json
        is served in its own right, so it states every season a posting is
        listed under exactly as data/jobs.json does. */
-    rows.push(withMarketYears(healReviewDate(row)));
+    rows.push(withCountries(withMarketYears(healReviewDate(row))));
   }
 
   return { rows, skipped, unmapped: head.unmapped || [], missing: [], unlinked,
@@ -1222,7 +1223,7 @@ export function carryUnreadColumns(rows, known = [], tabs = []) {
     if (!Object.keys(take).length) return r;
     carried.push({ id: r.id, tab: r._tab || '', fields: Object.keys(take).sort() });
     // the span is read off the dates as they finally stand, like every writer
-    return withMarketYears({ ...r, ...take });
+    return withCountries(withMarketYears({ ...r, ...take }));
   });
 
   return { rows: out, carried };

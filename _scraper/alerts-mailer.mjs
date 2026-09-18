@@ -49,7 +49,7 @@ import {
   shell, esc, safeUrl, headerSafe, send, transport, firestore, unsubHeaders, SITE, toPlain,
   safeError,
 } from './_mail.mjs';
-import { longDate } from './jobs-model.mjs';
+import { longDate, countriesOf } from './jobs-model.mjs';
 /* WHICH PAGE a posting is on, and the link that opens THAT one — the same
    `livePostingUrl` the poster's own "your posting is live" e-mail uses, which
    asks assets/oa-jobnav.js. A posting whose season has rolled lives on
@@ -137,7 +137,10 @@ function jobHtml(r, now) {
   // markup in this string. (Escaping the joined result would eat the &middot;.)
   const meta = [
     (r.levels || []).join(', '),
-    r.country,
+    /* every campus country, as the alerts page's own preview names them: a
+       posting this subscriber matched on its SECOND country has to say so, or
+       the digest reads as though the alert had matched the wrong posting */
+    countriesOf(r).join(', '),
     // the suggested (first-review) date, where the posting names one — keep
     // the wording in step with the alerts page's preview (oa-alerts.js)
     r.reviewDate ? `suggested apply by ${longDate(r.reviewDate)}` : '',

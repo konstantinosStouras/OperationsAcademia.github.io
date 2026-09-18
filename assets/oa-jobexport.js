@@ -135,9 +135,18 @@
       note: 'Business School or University.',
       cell: function (r) { return txt(r.type); } },
 
-    { header: 'Country', from: ['country'], type: 'Text', w: 18,
-      note: 'One spelling per country, as the site publishes it.',
-      cell: function (r) { return txt(r.country); } },
+    /* EVERY campus country the search covers, the way Entry level carries
+       every rank: one spelling each, separated by "; ", so a spreadsheet can
+       be filtered on the column. A posting naming one reads exactly as it
+       did. `from` names BOTH published fields, which is what the selftest
+       pins each column against PUBLIC_FIELDS with — a column that reads a
+       field with no rule fails the build rather than the reader's privacy. */
+    { header: 'Country', from: ['country', 'countries'], type: 'Text', w: 22,
+      note: 'Every campus country the search covers, separated by "; ". '
+        + 'One spelling per country, as the site publishes it.',
+      cell: function (r) {
+        return list((r.countries && r.countries.length) ? r.countries : [r.country]);
+      } },
 
     { header: 'Entry level', from: ['levels'], type: 'Text', w: 34,
       note: 'Every rank the search is advertised at, separated by "; ". ' +

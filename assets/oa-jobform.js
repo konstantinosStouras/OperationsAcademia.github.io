@@ -384,6 +384,189 @@
       .map(function (n) { return n.value; });
   }
 
+  /* ---------------------------------------- the countries a posting covers
+
+     ONE COUNTRY IS STILL THE ORDINARY ANSWER, and it is the answer the field
+     gives with nothing new learnt: type it and tab away. What is added is a
+     search that covers campuses in more than one country (owner, 2026-09-18:
+     "some schools may have openings for multiple country locations"), which
+     the site could not say at all — the posting was filed under one country
+     and was not findable under the others, which its own advertisement names.
+
+     THE BOX'S OWN TEXT COUNTS AS ONE OF THEM, pressed or not. That is the
+     rule assets/oa-list.js's text filters already follow ("the half-typed
+     word in the box counts as one more term"), and it is what keeps three
+     things working untouched: the datalist, the browser's own suggestions,
+     and oa-uniinfo.js's `autoFill(els.country, …)`, which fills the BOX from
+     the site's own directory and knows nothing about chips.
+
+     `postingCountries` is the BROWSER TWIN of `countriesOf` in
+     _scraper/jobs-model.mjs and is pinned against it over one fixture list
+     (testMultiCountryPostings), for the reason postingYear's twin exists: the
+     form SENDS the list, so for a posting made here the browser is the only
+     thing that decides, and two readings of one answer drift silently. */
+
+  /* the same cap as the model's COUNTRY_MAX and the rules' list('countries', 8)
+     — pinned to both in selftest.mjs, so the three cannot part */
+  var COUNTRY_MAX = 8;
+
+  function canonCountry(v) {
+    var c = window.OACountries;
+    return c && c.canon ? c.canon(v) : String(v == null ? '' : v).trim();
+  }
+
+  /** Canonical, deduped, capped, in the order they were named — countriesOf's
+      twin. Takes anything: the banked chips, the box, a stored document. */
+  function postingCountries(values) {
+    var out = [];
+    (values || []).forEach(function (v) {
+      if (out.length >= COUNTRY_MAX) return;
+      var c = canonCountry(String(v == null ? '' : v).trim().slice(0, MAX.country));
+      if (c && out.indexOf(c) === -1) out.push(c);
+    });
+    return out;
+  }
+
+  /* The banked ones. Page state, like the place picker's: the box is the
+     field, and these are what a poster added beside it. */
+  var extraCountries = [];
+
+  function countryChipsBox() { return $('f-country-chips'); }
+
+  /** What the posting will be filed under: the chips, then the box. */
+  function countriesNow() {
+    var box = $('f-country');
+    return postingCountries(extraCountries.concat([box ? box.value : '']));
+  }
+
+  function drawCountryChips() {
+    var host = countryChipsBox();
+    if (!host) return;
+    /* THE FIELD IS ANSWERED BY ITS CHIPS, and the box being empty is not the
+       same as the question being open. assets/oa-uniinfo.js fills an EMPTY
+       box from the site's own directory, so without this mark a poster who
+       banked France and then corrected the institution would find the
+       directory's own country filled in beside it, which is a campus they
+       never named. Set in this one place, read in that one place. */
+    var box = $('f-country');
+    if (box) {
+      if (extraCountries.length) box.setAttribute('data-oa-answered', '1');
+      else box.removeAttribute('data-oa-answered');
+    }
+    while (host.firstChild) host.removeChild(host.firstChild);
+    extraCountries.forEach(function (name, i) {
+      /* ONE BUTTON, and the whole chip is it — assets/oa-list.js's own rule:
+         the chip is what reads as the thing to press, and a button inside a
+         button is invalid markup. */
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'oa-chip';
+      b.setAttribute('aria-label', 'Remove ' + name);
+      b.title = 'Remove ' + name;
+      var label = document.createElement('span');
+      label.className = 'oa-chip-label';
+      label.textContent = name;
+      var x = document.createElement('span');
+      x.className = 'oa-chip-x';
+      x.setAttribute('aria-hidden', 'true');
+      x.textContent = '×';
+      b.appendChild(label);
+      b.appendChild(x);
+      b.addEventListener('click', function () {
+        extraCountries.splice(i, 1);
+        drawCountryChips();
+        sayCountries();
+        /* the keyboard goes back to the box rather than to <body>: removing a
+           chip is something a reader does mid-answer */
+        var box = $('f-country');
+        if (box) box.focus();
+        draftSave();
+      });
+      host.appendChild(b);
+    });
+  }
+
+  /** The line under the field, which is the only place the whole answer is
+      said once the box holds the last of several. Silent for the ordinary
+      one-country answer, where the box already says it. */
+  function sayCountries() {
+    var note = $('f-country-added');
+    if (!note) return;
+    var cs = countriesNow();
+    note.textContent = cs.length > 1
+      ? 'Listed under ' + cs.slice(0, -1).join(', ') + ' and ' + cs[cs.length - 1] + '.'
+      : '';
+  }
+
+  /** Bank what is in the box, so the next one can be typed straight away —
+      assets/oa-list.js's Enter rule, and its reasons: nothing is lost by NOT
+      pressing it, since the box counts either way. */
+  function bankCountry() {
+    var box = $('f-country');
+    if (!box) return false;
+    var typed = postingCountries([box.value]);
+    if (!typed.length) return false;
+    if (extraCountries.length >= COUNTRY_MAX
+        || extraCountries.indexOf(typed[0]) !== -1) {
+      /* already banked, or the cap — the box is cleared either way, or the
+         reader is left with a value that looks unaccepted while the answer
+         already carries it */
+      box.value = '';
+      sayCountries();
+      return false;
+    }
+    extraCountries.push(typed[0]);
+    box.value = '';
+    /* the auto-fill's mark goes with the value: a country banked as a chip is
+       an answer the poster gave, and oa-uniinfo must not treat the now-empty
+       box as its own earlier fill and write over it */
+    box.removeAttribute('data-oa-auto-country');
+    setError(box, '');
+    drawCountryChips();
+    sayCountries();
+    draftSave();
+    return true;
+  }
+
+  function setCountries(list) {
+    var cs = postingCountries(list || []);
+    extraCountries = cs.slice(0, -1);
+    var box = $('f-country');
+    if (box) box.value = cs.length ? cs[cs.length - 1] : '';
+    drawCountryChips();
+    sayCountries();
+  }
+
+  function wireCountries() {
+    var box = $('f-country');
+    if (!box) return;
+    box.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ',') return;
+      /* Enter in a single-input form submits it. Here it banks the country,
+         which is what a reader collecting several means by it; the Post
+         button is still the only way to send. */
+      e.preventDefault();
+      bankCountry();
+      box.focus();
+    });
+    /* a pasted "France, Singapore" is two countries, not one name with a
+       comma in it — no canonical country name carries one */
+    box.addEventListener('input', function () {
+      if (box.value.indexOf(',') !== -1) {
+        var parts = box.value.split(',');
+        var last = parts.pop();
+        parts.forEach(function (part) {
+          box.value = part;
+          bankCountry();
+        });
+        box.value = last.replace(/^\s+/, '');
+      }
+      sayCountries();
+    });
+    box.addEventListener('blur', sayCountries);
+    drawCountryChips();
+  }
+
   function setError(el, msg) {
     if (!el) return;
     el.setAttribute('aria-invalid', msg ? 'true' : 'false');
@@ -503,7 +686,18 @@
       setError(unitEl, out.department ? '' : 'Please give a school, department, area or group.');
       if (!out.department && !firstBad) firstBad = schoolEl;
     }
-    need('f-country', 'country', 'the country of the campus');
+    /* THE PAIR, never the box alone. A poster who has banked France and
+       Singapore as chips has answered the question with an empty box, and
+       `need` would refuse the form as incomplete — which is why the markup
+       carries no `required` either. The box is cleared of its error the
+       moment a chip is banked (bankCountry), so the message cannot sit under
+       a field that has since been answered. */
+    var countryBox = $('f-country');
+    out.countries = countriesNow();
+    out.country = out.countries[0] || '';
+    setError(countryBox, out.countries.length
+      ? '' : 'Please give the country of the campus.');
+    if (!out.countries.length && !firstBad) firstBad = countryBox;
     need('f-firstName', 'firstName', 'your first name');
     need('f-lastName', 'lastName', 'your last name');
 
@@ -707,6 +901,11 @@
         form.querySelectorAll('input[type="checkbox"]:checked'),
         function (cb) { ticked.push(cb.name + '=' + cb.value); });
       if (ticked.length) data.__checks = ticked;
+      /* THE BANKED COUNTRIES ARE NOT AN INPUT, so the sweep above cannot see
+         them — the same reason `__checks` exists for the tick boxes. Without
+         this a poster who banked two countries and came back to an unsent
+         draft would find one of them (the box's) and not the other. */
+      if (extraCountries.length) data.__countries = extraCountries.slice();
       localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
     } catch (e) { /* private mode / quota — a draft is best-effort */ }
   }
@@ -718,7 +917,7 @@
       if (!raw) return;
       var data = JSON.parse(raw);
       Object.keys(data).forEach(function (id) {
-        if (id === '__checks') return;
+        if (id === '__checks' || id === '__countries') return;
         var el = $(id);
         if (el && !el.value) el.value = data[id];
       });
@@ -734,6 +933,13 @@
         }
         if (box) box.checked = true;
       });
+      /* after the box, so the chips sit BEFORE what is still being typed —
+         the order they were banked in, which is the order they publish in */
+      if (data.__countries && data.__countries.length) {
+        extraCountries = postingCountries(data.__countries);
+        drawCountryChips();
+        sayCountries();
+      }
       // keep the derived department line and the until-filled state in step —
       // `change`, not `input`: the picker reads `input` as typing and opens
       var school = $('f-school');
@@ -956,7 +1162,9 @@
     set('f-school', v.school || '');
     set('f-unit', v.unit || (v.school ? '' : v.department) || '');
 
-    set('f-country', v.country);
+    /* the whole list, and a document that predates the field answers its own
+       single country — `countriesOf`'s fallback, in the browser */
+    setCountries((v.countries && v.countries.length ? v.countries : [v.country]));
     set('f-applyByDate', v.applyByDate);
     set('f-reviewDate', v.reviewDate);
     set('f-applyByNote', v.applyByNote);
@@ -1238,6 +1446,7 @@
     show($('oa-needauth'), hinted !== 'in');
 
     wireVocab();
+    wireCountries();
     wireComments();
     wireAdFile();
     wireDraft();

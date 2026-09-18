@@ -771,6 +771,207 @@ in `page-test.mjs`, which opens a card signed in on both pages and reads the
 last row against the card's own element id, the whole cell asserted to hold
 that one identifier and nothing beside it.
 
+## A posting covers SEVERAL countries, and `country` is the first of them
+
+Owner, 2026-09-18, of the posting form's country box: *"Some schools may have
+openings for multiple country locations. So, I want to be able to select
+multiple countries here."*
+
+The site could not say it. A search a school runs across its campuses was
+filed under ONE country — whichever the poster typed — so it was not findable
+under the others, which are the ones its own advertisement names: a reader
+narrowing the Location filter to Singapore never saw the France-and-Singapore
+posting, and a subscriber watching Singapore was never e-mailed about it.
+
+**THE SHAPE IS `year`/`years`, DELIBERATELY, DOWN TO THE LAST RULE.** `country`
+stays exactly what it was — ONE country, a string, the FIRST the poster named —
+so every consumer that reads it goes on reading it unchanged: the alert
+criteria, the calendar entry's one location line, the archive's own rows, the
+`?country=France` links people have already saved, and the frozen `/v1/` and
+`/v2/` trees, which never load any of this. **`countries` is the whole list**,
+and it is what the Location filter reads, so the posting is found under each.
+
+    countriesOf(row)     every country it covers — canonical, deduped, capped
+    withCountries(row)   the ONE writer of `countries`, and of `country`'s agreement
+    countriesText(row)   the ONE wording for how several are said
+
+`countriesOf` answers a row that predates the field with its OWN single
+country, which is what makes it safe to read anywhere: the archive has no daily
+build, `data/past-postings.json` is served as it stands, and a row answering NO
+country would drop out of the Location filter entirely rather than being found
+under the one it names — the fallback `previous-markets.html`'s `marketYears`
+already exists for, and both pages fill it in the same one place for the same
+reason.
+
+**It is DERIVED, on every build, from a field the row already publishes.**
+`withCountries` is pure, idempotent and by-value — the `withMarketYears` /
+`healCountry` discipline — and is applied wherever a row is made or carried:
+`rowFromSubmission`; `rowsFromTab` and `carryUnreadColumns` in the workbook
+ingest; `build-jobs.mjs` over the **merged set**, which is the only place a
+carried ORPHAN can gain one; `import-legacy-tables.mjs` on write and in
+`--heal-names`, because the archive has no daily build; and
+`sync-jobmarket-sheet.mjs --heal-names`. **AFTER the heal count in build-jobs,
+deliberately**: the run that first writes it touches every row once, and
+counting that as a heal would have named 617 innocent postings in the log —
+the mistake this file already records twice, one paragraph apart.
+
+**BUT IT IS NOT SKIPPED IN `diffRows`, AND THAT IS WHERE IT PARTS COMPANY WITH
+`years`.** `years` is skipped because it is derived from other fields that are
+themselves diffed, so each reports its own edit. `countries` is the poster's
+own statement and `country` is derived from IT — adding a second campus country
+moves the list and leaves `country` where it was — so skipping it would make
+exactly that edit invisible in the maintainer's daily e-mail. What it must not
+do is mail 617 phantom edits on the run that first writes the field, so **both
+sides are read through `countriesOf`**: "France" against `["France"]` is one
+posting said twice and is silent, while `["France"]` against
+`["France","Singapore"]` is the edit it looks like. Measured before it was
+committed: the heal run reported nothing.
+
+### The form still asks one question, and the box is still the field
+
+Type a country, tab away, done — the ordinary answer is unchanged, and that is
+what the field is built around. **The box's own text counts as one of the
+countries**, pressed or not, which is the rule `assets/oa-list.js`'s text
+filters already follow ("the half-typed word in the box counts as one more
+term"). Three things go on working untouched because of it: the datalist, the
+browser's own suggestions, and `oa-uniinfo.js`'s `autoFill(els.country, …)`,
+which fills the BOX from the site's own directory and knows nothing about
+chips. Enter (or a comma, or a pasted "France, Singapore") banks what is typed
+and empties the box so the next one can be typed — `oa-list.js`'s own Enter
+rule, and its reason: nothing is lost by NOT pressing it.
+
+**The chips are the site's own.** `.oa-chips` / `.oa-chip` are the filter bar's,
+already themed in `oa-list.css` and restated as a pill in `v3.css`, so a banked
+country looks like every other chosen value on the site and there is ONE chip
+to keep in step rather than two. The only rule this added is the spacing that
+puts them under the box, in `oa-ui.css` alone — which `v3.css` does not restate,
+so the engine's rule is the one that reaches the site (the trap recorded for the
+roster's restored chevron). A phone gets a 42px Remove target, scoped to the
+form: the filter bar's chips are chosen with a mouse, this one is pressed
+mid-answer by somebody filling a form in on a phone (rule 3 of
+`_MOBILE-STANDARDS.md`).
+
+**`required` is deliberately NOT on the box, and `need()` no longer validates
+it.** With a country already banked as a chip the box is legitimately empty,
+and the browser would refuse a form that is complete. `collect()` validates the
+PAIR and marks the field itself; banking a chip clears the error, so a message
+cannot sit under a field that has since been answered.
+
+**The draft saves the banked ones explicitly** (`__countries`, beside
+`__checks`): they are not an `<input>`, so the generic sweep cannot see them,
+which is the same reason `__checks` exists for the tick boxes.
+
+**`postingCountries` in `assets/oa-jobform.js` is the BROWSER TWIN**, pinned
+against `countriesOf` over one fixture list, for the reason `postingYear`'s
+twin exists: the form SENDS the list, so for a posting made through the form
+the browser is the only thing that ever decides, and two readings of one answer
+drift silently. The fixture runs the form's own source, bounded at both ends
+with its length asserted, and starts at the form's own cap so the two numbers
+are compared rather than assumed.
+
+### The heal and the two guards stand down on the SAME row
+
+`healCountry` corrects a posting whose country disagrees with the directory's
+address for its university — the fault being a BROWSER filling the country box
+from the editor's own address profile, which published nine postings under
+Greece. **A posting naming SEVERAL countries is left alone**, and the
+served-file guard in `selftest.mjs` and the archive sweep in `country-audit.mjs`
+are keyed on that same test, so neither can start reporting what the other
+would not repair.
+
+That pairing is the whole safety argument, and it is the rule this repository
+has learnt five times: **a guard that fires on a row no commit could repair
+stops the site publishing and stays red for ever.** The guard asserts only what
+the publisher GUARANTEES, so the moment the heal stands down on a row, so must
+the guard.
+
+**It costs the heal nothing it had.** `campusCountries` already abstains for a
+university whose campuses disagree — INSEAD has no answer here at all — so what
+is left is a single-campus university, where a deliberate second country is
+precisely what must not be overwritten. And autofill writes ONE value into ONE
+box; a poster who has banked two chips has plainly acted. What the heal no
+longer catches is **named in the build's own run log** (`strayCountries`: a
+multi-country posting none of whose countries is where its university is) —
+reported, never repaired, the `backdatedDeadlines` discipline — and the audit
+says how many postings it passed over, so "every posting names the country it
+is in" cannot read as a claim about a set it never looked at.
+
+### The rules gained a LIST, and the budget was measured rather than reasoned about
+
+`list('countries', 8)` joins `shapeOk`, and the create key ceiling moved
+**34 → 35**. It had to move whichever way the field was sent:
+`request.resource.data` is the MERGED document on an update, so a posting
+stored before today carries its `country` into every correction its owner makes
+and would meet the ceiling one key over — a posting frozen against the person
+who posted it, the `sync-user-directory` trap.
+
+**MEASURED AGAINST THE REAL ENGINE, because text cannot tell you what an
+expression costs.** `_functions/test/rules-budget.mjs` sends the list AT its
+cap and drives the create AND the owner's UPDATE, which is the path that binds.
+Measured on 2026-09-18 by adding bounded fields until the emulator refused, the
+list cost exactly one field:
+
+| | before | with `countries` |
+|---|---|---|
+| `jobSubmissions` create | 8 spare | **7** |
+| the owner's update | 6 spare | **5** |
+
+Run it before any hand deploy of the rules, which meets no budget check:
+`firebase emulators:exec --project demo-oa-rules --only firestore "node
+_functions/test/rules-budget.mjs"`.
+
+### What every consumer does with it
+
+* **The Location filter reads `countries`** on `jobs.html` and
+  `previous-markets.html`. The values are the same country names either way, so
+  `?country=France` and the archive's legacy `?filterI=` select exactly what
+  they selected, and a posting naming one is offered once — `valuesOf` reads an
+  array field through the same path a single value goes through. Both pages
+  fill the fallback in first.
+* **`OAJobNav.countriesRow`** draws the campus countries on a card **only where
+  the posting covers more than one**, so every single-country card in the site
+  is byte-identical — the "Also listed under" discipline. It exists because a
+  reader who narrowed to Singapore and opened the card would otherwise find
+  nothing on it that mentions Singapore. One definition for all three lists,
+  beside `refRow` and `commentsRow` and for their reason.
+* **An e-mail alert matches on every country the posting covers**, both sides
+  still through `canonCountry`, so an alert saved when the site said "USA" goes
+  on matching. The alerts page offers every country to tick and its preview
+  names them all, and the digest's sample line does too — a posting matched on
+  its SECOND country has to say so, or the digest reads as though the alert had
+  matched the wrong posting.
+* **The Excel column names them all**, separated by "; ", the way Entry level
+  already carries every rank. Its `from` names both published fields, which is
+  what the selftest pins every column against `PUBLIC_FIELDS` with.
+* **The calendar entry keeps ONE location** — a calendar entry has one — and
+  names the rest in its description, where a reader looks for what the one line
+  cannot hold.
+* **The edit echo carries the list**, so the editor's own Location filter does
+  not go on hiding the posting they have just corrected; the pair moves
+  together, or a copy whose two halves disagree could never equal the served
+  row and the echo could never spend itself.
+* **A review-card edit REPLACES the list.** A tracking-sheet row names one
+  country and the card offers one box, so the box the maintainer moved is the
+  fact being stated — the `applyBy` rule beside it. Left alone, the stale list
+  would win and the correction would read as a second campus nobody named.
+
+Tests: `testMultiCountryPostings` in `_scraper/selftest.mjs` (the one
+definition and the list winning over the scalar; the writer's three properties;
+the field published on every row; the form's twin driven as a program over a
+fixture list with the box counting beside the chips, the pair validated, the
+`required` gone from both the markup and `need`, the draft's own key and the
+edit's fill; the heal and BOTH guards read from their three sources and pinned
+to one test; the build naming what it no longer repairs; the first run
+reporting no edit and a real one reporting the edit; every writer; all three
+served files stating it with `country` its first entry; the rules and the
+budget fixture; every consumer; the row drawn only where it says something; and
+a review edit replacing rather than joining) and the multi-country block of
+`_scraper/page-test.mjs`, which drives it in a real browser: the box typed and
+banked and the chips read back, a chip removed, the pair refused when both are
+empty, a posting stored with its list, and the Location filter finding one
+posting under either of its two countries. Every pin verified by putting the
+defect back.
+
 ## The HigherEdJobs postings are checked against their own ads
 
 The tracking sheet has no deadline column for most rows, so they reach the site
