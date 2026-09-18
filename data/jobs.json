@@ -174,6 +174,38 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-southern-california-20260917",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-17",
+  "institution": "University of Southern California",
+  "department": "Viterbi School of Engineering, Industrial and Systems Engineering",
+  "school": "Viterbi School of Engineering",
+  "unit": "Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-10",
+  "comments": "The appointment can be made at the Assistant Professor, Associate Professor, or Professor rank. Candidates at the senior ranks must have demonstrated research excellence and sustained commitment to the discipline and are expected to have a vibrant research program with external funding. Exceptional senior candidates may be considered for a chaired professorship. We invite applications from outstanding candidates with demonstrated excellence and commitment in Industrial and Systems Engineering (ISE). Accomplished candidates with expertise in the core ISE methodological areas (e.g., computational science, optimization, probability, simulation, statistics, and systems lifecycle analysis) and interest in solving important societal problems (including but not limited to supply chain, transportation and logistics, healthcare, finance) are encouraged to apply. Applications from candidates with expertise in data science, machine learning, and related areas are also encouraged.",
+  "country": "United States",
+  "adUrl": "https://usccareers.usc.edu/job/los-angeles/assistant-professor-associate-professor-and-full-professor-of-industrial-and-systems-engineering/1209/100736016464",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Southern%20California",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-18T20:06:24Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-notre-dame-20260916",
   "year": 2027,
   "years": [

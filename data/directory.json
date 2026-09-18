@@ -11357,16 +11357,17 @@
   "lastPosted": "2026-02-19"
  },
  {
-  "id": "university-of-southern-california____ise",
+  "id": "university-of-southern-california__viterbi-school-of-engineering__industrial-and-systems-engineering",
   "institution": "University of Southern California",
-  "department": "ISE",
+  "school": "Viterbi School of Engineering",
+  "department": "Industrial and Systems Engineering",
   "type": "University",
   "country": "United States",
   "sources": [
    "postings"
   ],
-  "n": 1,
-  "lastPosted": "2025-10-07"
+  "n": 2,
+  "lastPosted": "2026-09-17"
  },
  {
   "id": "university-of-southern-california__marshall-school-of-business__data-sciences-and-operations",

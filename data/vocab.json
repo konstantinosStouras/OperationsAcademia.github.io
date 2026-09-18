@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-18T19:44:21.656Z",
+ "generated": "2026-09-18T20:07:42.164Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -463,6 +463,10 @@
   },
   {
    "v": "University of Notre Dame",
+   "n": 2
+  },
+  {
+   "v": "University of Southern California",
    "n": 2
   },
   {
@@ -1443,10 +1447,6 @@
   },
   {
    "v": "University of Science and Technology of China",
-   "n": 1
-  },
-  {
-   "v": "University of Southern California",
    "n": 1
   },
   {
@@ -2520,6 +2520,10 @@
    "n": 1
   },
   {
+   "v": "Viterbi School of Engineering",
+   "n": 1
+  },
+  {
    "v": "Whitman School of Management",
    "n": 1
   },
@@ -3226,6 +3230,10 @@
    "n": 2
   },
   {
+   "v": "Industrial and Systems Engineering",
+   "n": 2
+  },
+  {
    "v": "Industrial Engineering and Operations Research",
    "n": 2
   },
@@ -3607,10 +3615,6 @@
   },
   {
    "v": "IEOR, decision analytics",
-   "n": 1
-  },
-  {
-   "v": "Industrial and Systems Engineering",
    "n": 1
   },
   {
@@ -10801,10 +10805,12 @@
   },
   "University of Southern California": {
    "schools": [
-    "Marshall School of Business"
+    "Marshall School of Business",
+    "Viterbi School of Engineering"
    ],
    "units": [
     "Data Sciences and Operations",
+    "Industrial and Systems Engineering",
     "ISE"
    ],
    "bySchool": {
@@ -10813,6 +10819,9 @@
     ],
     "Marshall School of Business": [
      "Data Sciences and Operations"
+    ],
+    "Viterbi School of Engineering": [
+     "Industrial and Systems Engineering"
     ]
    }
   },
@@ -12446,6 +12455,9 @@
   ],
   "Villanova School of Business": [
    "Management and Operations"
+  ],
+  "Viterbi School of Engineering": [
+   "Industrial and Systems Engineering"
   ],
   "Volgenau School of Engineering": [
    "Systems Engineering and Operations Research"
