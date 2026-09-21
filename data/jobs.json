@@ -83,6 +83,47 @@
   "owner": "9c3de5fb0a5fda8e"
  },
  {
+  "id": "2027-university-of-california-los-angeles-ucla-20260921",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-21",
+  "institution": "University of California, Los Angeles (UCLA)",
+  "department": "Anderson School of Management, Decision, Operations and Technology Management",
+  "school": "Anderson School of Management",
+  "unit": "Decision, Operations and Technology Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 5, 2026. Apply by October 5, 2026, to ensure full consideration by the committee.",
+  "applyByDate": "2026-11-05",
+  "reviewDate": "2026-10-05",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://drive.google.com/file/d/1ft0BUR1pfaEPjiDc6IHx3s-v4msZmfbE/view?usp=drivesdk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://recruit.apo.ucla.edu/JPF11233",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20California%2C%20Los%20Angeles%20(UCLA)",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-09-21T18:49:16Z",
+  "ref": "OA-JOB-260921-TR7T",
+  "owner": "f9cd16828d317403"
+ },
+ {
   "id": "2027-insead-20260918",
   "year": 2027,
   "years": [
