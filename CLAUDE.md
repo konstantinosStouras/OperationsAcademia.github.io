@@ -4658,6 +4658,65 @@ dated 4 to 17 September with no profile behind it is a candidate who was
 turned away, named in the filename. That is the maintainer's list to write
 to, and personal data to clear.
 
+### The stranded CVs are read by a button, and the names go to the maintainer's inbox
+
+Owner, 2026-09-21: *"help me find the stranded CVs in Storage and show me the
+names and emails of those candidates who were turned down"*, and *"Can we
+rebuild their candidate profiles?"*
+
+**Nothing here can rebuild a refused profile.** A refused write stored
+nothing: the position, the research areas, the INFORMS days and the talk
+details were never anywhere but the candidate's browser, and the form kept no
+draft until the change above. The CV is the only thing that survived, and
+what it carries is the ACCOUNT: `uploads/<uid>/candidates/<ms>-<file>`. So the
+rebuild is the list of people plus an invitation to post once more, which now
+takes a few minutes and is kept as a draft while they type.
+
+    _scraper/stranded-cvs.mjs                 the strip, the orphans, who they are, the invite
+    .github/workflows/oa-stranded-cvs.yml     pressed, never scheduled; a scan unless told otherwise
+
+**The log is public, so the modes are what they are.** The default (`--scan`)
+prints counts and one line per orphan: the uid, the kind, the REDACTED
+address, the day, whether it fell in the outage window, and what happens next.
+Never a name and never a filename, because a filename carries the person's
+name. `--report` e-mails the maintainer the whole table (name, affiliation,
+address, account, file, day, next step), through `_mail.mjs` like every other
+maintainer-only message; that is the one place the names go. `--print` puts
+the table on stdout for a run on the maintainer's own machine and is REFUSED
+on a runner before anything is read. `--invite` writes once to each
+turned-away candidate whose account has no profile for the season under way
+and has not been written to, stamping `strandedInvites/{uid}.invitedAt` after
+a successful send (a collection the rules' catch-all already closes to every
+client, so no rules change); a failed send stamps nothing and goes out on the
+next press. `--clean` deletes an outage orphan only once its account has been
+invited or has posted a profile of its own accord: the file has done its one
+job, naming the person, and is personal data nothing else clears, but an
+orphan whose owner has not been invited is never destroyed, so the list is
+never thrown away before it is used.
+
+**An orphan is an object no document points at**, across every
+`*UploadPath` on every submission document whatever its status, so a pending
+upload the build has not filed yet is not one; and a CV orphaned outside the
+window (an edit that replaced a file, which `slot.applyTo` deliberately
+leaves for the maintainer's read/delete rule) and a job advert from the same
+fortnight are REPORTED and left alone. "Has since posted" is a live profile
+(`queued` or `published`) for `marketYear(now)` under the same uid, which is
+the "no duplicates" the owner asked for: such an account is not invited and
+its orphan may be cleaned.
+
+Tests: `node _scraper/stranded-cvs.mjs --selftest` (the path, the stamp, the
+window at both edges, the orphan filter, every branch of `nextStep` and
+`cleanable`, the tally, the report carrying the names escaped, the invite
+carrying no address but the contact one and typing no reveal date, and the
+source scans: `--print` refused first, the table through `printTable()`
+alone, no log line naming a person, a file or a path, `invitedAt` after the
+send inside `if (ok)`, exactly two sends and one delete behind `cleanable()`)
+and `testStrandedCvs` in `_scraper/selftest.mjs` (the suite spawned, the
+bucket pinned against `purge-accounts.mjs`, the outage end pinned to the
+deploy stamp, the mark's collection absent from the rules so the catch-all
+closes it, the workflow dispatch-only with its three inputs defaulting to
+false, and this section).
+
 ### What the sweep of the path found, and the shape of each fix
 
 A hundred-agent audit of the candidate posting path, each finding refuted by

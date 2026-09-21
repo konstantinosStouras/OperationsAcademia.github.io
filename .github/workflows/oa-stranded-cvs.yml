@@ -1,0 +1,102 @@
+name: "OA: the CVs stranded on the Storage landing strip"
+
+# PRESSED, NEVER SCHEDULED. From 2026-09-04 to 20:58 UTC on 2026-09-17 every
+# candidate profile posted through the site was refused by a ruleset past
+# Firestore's evaluation budget (CLAUDE.md, "Candidates were turned away for
+# two weeks"), while the CV each candidate attached had already been uploaded.
+# Those files are the only record of who was turned away. This button finds
+# them, says who they belong to, and, when told to, writes to each of those
+# people once asking them to post again.
+#
+# THE LOG IS PUBLIC. With every input unticked the run is a SCAN: counts and
+# one line per orphan carrying the uid, the kind, the REDACTED address, the
+# day and what happens next. Never a name and never a filename, because a
+# filename carries the person's name.
+#
+#   report   e-mail the maintainer the whole table (name, affiliation,
+#            address, account, file, day, next step). The one place the
+#            names go.
+#   invite   write once to each turned-away candidate whose account has no
+#            profile for the season under way and has not been written to;
+#            the mark is strandedInvites/{uid}.invitedAt, stamped after a
+#            successful send, so pressing it again reaches only the accounts
+#            a previous press did not.
+#   clean    delete an outage orphan whose account has been invited or has
+#            since posted a profile. An orphan whose owner has not been
+#            invited stays, so the list is never destroyed before it is used.
+#
+# Without FIREBASE_SERVICE_ACCOUNT nothing is read; without SMTP_* nothing is
+# sent, and an invite that could not go out stamps nothing. Both warn and
+# exit 0. A run on the maintainer's own machine may add --print to see the
+# table on stdout; that flag is refused on a runner.
+
+on:
+  workflow_dispatch:
+    inputs:
+      report:
+        description: 'E-mail the maintainer the table of who was turned away (names and addresses)'
+        type: boolean
+        default: false
+      invite:
+        description: 'Write once to each turned-away candidate who has not posted again'
+        type: boolean
+        default: false
+      clean:
+        description: 'Delete the outage orphans whose owner was invited or has posted again'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-stranded-cvs
+  cancel-in-progress: false
+
+jobs:
+  stranded:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credentials are present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: nothing will be read."
+          fi
+          if [ -z "$SMTP_HOST" ] || [ -z "$SMTP_USER" ] || [ -z "$SMTP_PASS" ]; then
+            echo "::warning::SMTP_HOST, SMTP_USER or SMTP_PASS is not set: no report and no invite can be sent."
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
+
+      # The offline checks over the orphan rule, the two messages and the
+      # log guards before anything is read.
+      - run: node _scraper/stranded-cvs.mjs --selftest
+
+      - name: Scan, report, invite or clean
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          # The From: line, the address the footer shows and the site the
+          # posting link points at, as every other mailer here has them.
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          FLAGS="--scan"
+          if [ "${{ inputs.report }}" = "true" ]; then FLAGS="$FLAGS --report"; fi
+          if [ "${{ inputs.invite }}" = "true" ]; then FLAGS="$FLAGS --invite"; fi
+          if [ "${{ inputs.clean }}" = "true" ]; then FLAGS="$FLAGS --clean"; fi
+          node _scraper/stranded-cvs.mjs $FLAGS
