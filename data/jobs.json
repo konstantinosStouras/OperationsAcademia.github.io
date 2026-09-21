@@ -62,6 +62,9 @@
   "reviewDate": "2026-10-18",
   "comments": "We will be interviewing at the INFORMS Annual Meeting. If you plan to go to INFORMS Annual Meeting this year at San Francisco and would like to consider an interview at INFORMS, please submit your application material before Oct 18th.",
   "country": "China",
+  "countries": [
+   "China"
+  ],
   "adUrl": "https://drive.google.com/file/d/1goAuzBdfa-mC6k8EyFBSrja4U52v5bL4/view?usp=drivesdk",
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://sds.cuhk.edu.cn/en/recruitment/2245",
@@ -98,6 +101,9 @@
   "applyByDate": "2026-10-25",
   "comments": "The [Decision Sciences (DSC) Area](https://www.insead.edu/faculty-research/academic-areas/decision-sciences) at [INSEAD](http://www.insead.edu/), a global business school with campuses in France, Abu Dhabi, and Singapore, invites applicants for a full-time tenure-track faculty position. The anticipated start date is **September 1, 2027**. The DSC Area focuses on questions broadly related to individual, group, and organizational decision making, both from behavioral and quantitative perspectives, and with prescriptive, descriptive, and normative approaches. Our research spans decision sciences, judgment and decision making, statistics and machine learning, artificial intelligence and computer science, psychology, economics, operations research, optimization, neuroscience, finance, marketing, organizational behavior, social innovation, and entrepreneurship. We have a collegial environment that encourages interdisciplinary and practically relevant, impactful research.",
   "country": "France",
+  "countries": [
+   "France"
+  ],
   "adUrl": "",
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://apply.interfolio.com/193805",
@@ -245,6 +251,9 @@
   "reviewDate": "2026-10-10",
   "comments": "The appointment can be made at the Assistant Professor, Associate Professor, or Professor rank. Candidates at the senior ranks must have demonstrated research excellence and sustained commitment to the discipline and are expected to have a vibrant research program with external funding. Exceptional senior candidates may be considered for a chaired professorship. We invite applications from outstanding candidates with demonstrated excellence and commitment in Industrial and Systems Engineering (ISE). Accomplished candidates with expertise in the core ISE methodological areas (e.g., computational science, optimization, probability, simulation, statistics, and systems lifecycle analysis) and interest in solving important societal problems (including but not limited to supply chain, transportation and logistics, healthcare, finance) are encouraged to apply. Applications from candidates with expertise in data science, machine learning, and related areas are also encouraged.",
   "country": "United States",
+  "countries": [
+   "United States"
+  ],
   "adUrl": "https://usccareers.usc.edu/job/los-angeles/assistant-professor-associate-professor-and-full-professor-of-industrial-and-systems-engineering/1209/100736016464",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
