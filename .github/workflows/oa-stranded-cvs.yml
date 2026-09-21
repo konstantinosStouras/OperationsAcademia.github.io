@@ -25,6 +25,9 @@ name: "OA: the CVs stranded on the Storage landing strip"
 #   clean    delete an outage orphan whose account has been invited or has
 #            since posted a profile. An orphan whose owner has not been
 #            invited stays, so the list is never destroyed before it is used.
+#   stamp    record the accounts the run would invite as already invited,
+#            without sending: for an invite sent by hand, or by a run whose
+#            mark failed (the first press mailed two and stamped neither).
 #
 # Without FIREBASE_SERVICE_ACCOUNT nothing is read; without SMTP_* nothing is
 # sent, and an invite that could not go out stamps nothing. Both warn and
@@ -44,6 +47,10 @@ on:
         default: false
       clean:
         description: 'Delete the outage orphans whose owner was invited or has posted again'
+        type: boolean
+        default: false
+      stamp:
+        description: 'Record the accounts the run would invite as already invited, sending nothing'
         type: boolean
         default: false
 
@@ -100,4 +107,5 @@ jobs:
           if [ "${{ inputs.report }}" = "true" ]; then FLAGS="$FLAGS --report"; fi
           if [ "${{ inputs.invite }}" = "true" ]; then FLAGS="$FLAGS --invite"; fi
           if [ "${{ inputs.clean }}" = "true" ]; then FLAGS="$FLAGS --clean"; fi
+          if [ "${{ inputs.stamp }}" = "true" ]; then FLAGS="$FLAGS --stamp"; fi
           node _scraper/stranded-cvs.mjs $FLAGS

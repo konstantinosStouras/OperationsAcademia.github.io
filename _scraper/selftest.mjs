@@ -19951,6 +19951,9 @@ async function testStrandedCvs() {
     M.nextStep({ kind: 'visit', uid: 'a', pressed: '', email: 'a@b.edu' }, ctx),
     M.nextStep({ kind: 'visit', uid: 'a', pressed: 'save', email: 'a@b.edu' }, ctx)],
   ['invite', 'opened-only', 'edit-refused'], 'a visitor is invited only for a Post press');
+  const mark = M.inviteMark({ kind: 'visit', pressed: 'post', at: '2026-09-05T10:00:00.000Z' });
+  ok(Object.values(mark).every((v) => v !== undefined) && !('path' in mark) && typeof mark.invitedAt === 'string',
+    'the once-only mark for a visit carries no undefined value: the Admin SDK refuses one, which is how the first invite went out unstamped');
   ok(/allow read, delete: if isAdmin\(\);/.test(rules.slice(rules.indexOf('match /usageSessions/{id}'), rules.indexOf('match /usageSessions/{id}') + 700)),
     'usageSessions is admin-read, so the Admin SDK lists it and no browser can');
   ok(/You pressed Post my profile, the site refused it/.test(M.renderInvite({ cv: false }).html)
@@ -19985,13 +19988,13 @@ async function testStrandedCvs() {
   ok(!/^\s*schedule:/m.test(wfCode) && !/^\s*workflow_run:/m.test(wfCode) && !/^\s*repository_dispatch:/m.test(wfCode)
      && !/^\s*push:/m.test(wfCode),
     'and on NOTHING else: it is pressed, never scheduled or chained');
-  for (const inp of ['report', 'invite', 'clean']) {
+  for (const inp of ['report', 'invite', 'clean', 'stamp']) {
     ok(new RegExp(`${inp}:\\s*\\n\\s*description:[^\\n]*\\n\\s*type: boolean\\s*\\n\\s*default: false`).test(wfCode),
       `its \`${inp}\` input is a boolean defaulting to false`);
     ok(new RegExp(`if \\[ "\\$\\{\\{ inputs\\.${inp} \\}\\}" = "true" \\]; then FLAGS="\\$FLAGS --${inp}"; fi`).test(wfCode),
       `…and ticked it adds --${inp}`);
   }
-  eq((wfCode.match(/type: boolean/g) || []).length, 3, 'three inputs and no more');
+  eq((wfCode.match(/type: boolean/g) || []).length, 4, 'four inputs and no more');
   ok(/FLAGS="--scan"/.test(wfCode) && /node _scraper\/stranded-cvs\.mjs \$FLAGS/.test(wfCode),
     'with every input unticked the run is a scan');
   ok(!/--print/.test(wfCode), 'the workflow never passes --print, which the script refuses on a runner anyway');
@@ -20016,8 +20019,9 @@ async function testStrandedCvs() {
   ok(secAt > 0, 'CLAUDE.md records the tool');
   const section = claude.slice(secAt, claude.indexOf('\n### ', secAt + 10));
   ok(/stranded-cvs\.mjs/.test(section) && /oa-stranded-cvs\.yml/.test(section) && /strandedInvites/.test(section)
-     && /--report/.test(section) && /--invite/.test(section) && /--clean/.test(section) && /--print/.test(section),
-    'and names the script, the workflow, the mark and the four modes');
+     && /--report/.test(section) && /--invite/.test(section) && /--clean/.test(section) && /--print/.test(section)
+     && /--stamp/.test(section) && /inviteMark/.test(section) && /WENT OUT UNSTAMPED/.test(section),
+    'and names the script, the workflow, the mark, the five modes and the unstamped first press');
   ok(/usageSessions/.test(section) && /visitorsOf/.test(section) && /FOUND NO CV AT ALL/.test(section),
     'and records that the strip held no CV from the window, and that the usage record is read for that reason');
   ok(/Nothing here can rebuild a refused profile/.test(section), 'and says plainly what cannot be rebuilt');

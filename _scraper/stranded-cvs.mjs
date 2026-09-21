@@ -38,6 +38,11 @@
                  job, naming the person, and is personal data that nothing
                  else clears. An orphan whose owner has not been invited
                  stays, so the list is never destroyed before it is used.
+     --stamp     record the accounts --invite would write to as ALREADY
+                 invited, sending nothing: for an invite sent by hand, or by
+                 a run whose mark failed (the first press, 2026-09-21, mailed
+                 two candidates and stamped neither, because the mark carried
+                 an undefined value the Admin SDK refuses).
      --print     the whole table to stdout, for a run on the maintainer's own
                  machine with the credential. REFUSED on a runner.
      --selftest  offline checks, no network, no credentials
@@ -75,6 +80,10 @@ const has = (f) => argv.includes(f);
 const REPORT = has('--report');
 const INVITE = has('--invite');
 const CLEAN = has('--clean');
+/* --stamp records the accounts the run would invite as ALREADY invited and
+   sends nothing: for an invite sent by hand, or by a run whose mark failed
+   (the first press, 2026-09-21, mailed two candidates and stamped neither). */
+const STAMP = has('--stamp');
 const PRINT = has('--print');
 const DRY = has('--dry-run');
 
@@ -171,6 +180,19 @@ export function nextStep(row, ctx) {
 export function cleanable(row, ctx) {
   return row.kind === 'candidates' && row.inOutage
     && (ctx.profiled.has(row.uid) || ctx.invited.has(row.uid));
+}
+
+/** The once-only mark, built with no undefined value in it: the Admin SDK
+    refuses `undefined` as a field value, and that is how the first invite
+    went out unstamped (a visit row has no upload path). A CV's mark carries
+    its path; a visit's carries the press. Both carry the day. */
+export function inviteMark(row, now = new Date()) {
+  const r = row || {};
+  const m = { [INVITED_AT]: now.toISOString(), kind: String(r.kind || '') };
+  if (r.path) m.path = String(r.path);
+  else m.pressed = String(r.pressed || '');
+  if (r.at) m.at = String(r.at);
+  return m;
 }
 
 /** Is this usage session an opening of the candidate form? */
@@ -475,41 +497,53 @@ async function main() {
     log(`report ${ok ? 'sent' : 'not sent'} to ${redact(ADMIN)}: ${rows.length} upload row(s), ${visits.length} visit row(s)`);
   }
 
-  if (INVITE) {
+  if (INVITE || STAMP) {
     const seen = new Set();
     const queue = all.filter((r) => r.step === 'invite' && !seen.has(r.uid) && seen.add(r.uid));
+    const verb = STAMP ? 'stamp as already invited' : 'invite';
+    if (INVITE && STAMP) log('--stamp: nothing is sent this run; --invite is ignored beside it');
     if (DRY) {
-      for (const r of queue) log(`  would invite: ${r.uid}  ${redact(r.email)}  (${r.kind === 'visit' ? 'pressed Post on' : 'CV of'} ${day(r.at)})`);
-      log(`--dry-run: ${queue.length} invite(s) would go out. Nothing sent, nothing written.`);
+      for (const r of queue) log(`  would ${verb}: ${r.uid}  ${redact(r.email)}  (${r.kind === 'visit' ? 'pressed Post on' : 'CV of'} ${day(r.at)})`);
+      log(`--dry-run: ${queue.length} account(s) to ${verb}. Nothing sent, nothing written.`);
     } else {
       let sent = 0, failed = 0, unstamped = 0;
       for (const r of queue) {
         const msg = renderInvite({ firstName: r.first, cv: r.kind === 'candidates' });
         let ok = false;
-        try {
-          ok = await send(tx, { to: r.email, subject: msg.subject, html: msg.html });
-        } catch (e) {
-          failed++;
-          warn(`${r.uid}: not sent to ${redact(r.email)} (${e.code || e.responseCode || 'error'})`);
+        if (STAMP) {
+          /* recorded, never sent: the message went by hand, or by a run whose
+             mark failed (the first press, 2026-09-21, mailed two candidates
+             and stamped neither) */
+          ok = true;
+        } else {
+          try {
+            ok = await send(tx, { to: r.email, subject: msg.subject, html: msg.html });
+          } catch (e) {
+            failed++;
+            warn(`${r.uid}: not sent to ${redact(r.email)} (${e.code || e.responseCode || 'error'})`);
+          }
         }
         if (ok) {
           /* stamped ONLY after the transport took the message; a stamp that
-             fails is warned about by id and the queue carries on */
+             fails is warned about by id and the queue carries on. The mark
+             is built by inviteMark(), never inline: an inline object carried
+             an undefined once, and the Admin SDK refuses one */
           sent++;
           try {
-            await fb.db.collection(INVITES).doc(r.uid)
-              .set({ [INVITED_AT]: new Date().toISOString(), path: r.path }, { merge: true });
+            await fb.db.collection(INVITES).doc(r.uid).set(inviteMark(r), { merge: true });
             invited.add(r.uid);
-            log(`  invited: ${r.uid}  ${redact(r.email)}`);
+            log(`  ${STAMP ? 'stamped as already invited' : 'invited'}: ${r.uid}  ${redact(r.email)}`);
           } catch (e) {
             unstamped++;
-            warn(`${r.uid}: invited, but the once-only mark could not be written (${e.code || 'error'}); ` +
-                 'this account may be written to again on the next press');
+            warn(`${r.uid}: ${STAMP ? 'not stamped' : 'invited, but the once-only mark could not be written'} ` +
+                 `(${e.code || 'error'}); this account may be written to again on the next press`);
           }
         }
         await sleep(PACE_MS);
       }
-      log(`${sent} invite(s) sent (${sent - unstamped} stamped, ${unstamped} sent but NOT stamped), ${failed} failed.`);
+      log(STAMP
+        ? `${sent - unstamped} account(s) stamped as already invited, ${unstamped} not stamped. Nothing sent.`
+        : `${sent} invite(s) sent (${sent - unstamped} stamped, ${unstamped} sent but NOT stamped), ${failed} failed.`);
     }
   }
 
@@ -590,6 +624,18 @@ async function selftest() {
   eq(nextStep(row({ email: '' }), ctx), 'no-address', 'nor one with no address to write to');
   eq(nextStep(row({ inOutage: false }), ctx), 'outside-window', 'a CV orphaned outside the window is only reported');
   eq(nextStep(row({ kind: 'jobs' }), ctx), 'job-advert', 'and so is a job advert');
+  /* the once-only mark: no undefined value, whatever the row's shape */
+  const mk = inviteMark({ uid: 'v1', kind: 'visit', pressed: 'post', at: '2026-09-05T10:00:00.000Z', email: 'x@y.edu' },
+    new Date('2026-09-21T10:00:00Z'));
+  eq(mk, { invitedAt: '2026-09-21T10:00:00.000Z', kind: 'visit', pressed: 'post', at: '2026-09-05T10:00:00.000Z' },
+    'a visit\'s mark carries the press and the day, and no path');
+  ok(Object.values(mk).every((v) => v !== undefined) && !('path' in mk),
+    'and not one undefined value, which the Admin SDK refuses (the first invite went out unstamped on exactly that)');
+  const mc = inviteMark({ uid: 'u1', kind: 'candidates', path: 'uploads/u1/candidates/1-a.pdf', at: '2026-09-06T00:00:00.000Z' });
+  ok(mc.path === 'uploads/u1/candidates/1-a.pdf' && !('pressed' in mc) && Object.values(mc).every((v) => v !== undefined),
+    'a CV\'s mark carries its path');
+  ok(Object.values(inviteMark({})).every((v) => v !== undefined) && Object.values(inviteMark()).every((v) => v !== undefined),
+    'and a bare row, or none, still yields no undefined');
   ok(cleanable(row({ uid: 'u2' }), ctx) && cleanable(row({ uid: 'u6' }), ctx),
     'an orphan is cleanable once its account has posted or been invited');
   ok(!cleanable(row({}), ctx) && !cleanable(row({ uid: 'u2', inOutage: false }), ctx) && !cleanable(row({ uid: 'u2', kind: 'jobs' }), ctx),
@@ -722,14 +768,21 @@ async function selftest() {
   ok(calls.some((l) => /redact\(r\.email\)/.test(l)) && calls.some((l) => /redact\(ADMIN\)/.test(l)),
     'and the redact exemption is exercised, so the check is not vacuous');
   const sendAt = body.indexOf('ok = await send(tx, { to: r.email');
-  const stampAt = body.indexOf('.set({ [INVITED_AT]:');
+  const stampAt = body.indexOf('.set(inviteMark(r), { merge: true })');
   const ifOk = body.indexOf('if (ok) {', sendAt);
   ok(sendAt > 0 && stampAt > sendAt && ifOk > sendAt && ifOk < stampAt,
     'invitedAt is written AFTER send() and only inside the branch where it returned true');
   ok((body.match(/await send\(tx/g) || []).length === 2
      && body.indexOf('if (REPORT) {') < body.indexOf('await send(tx, { to: ADMIN')
-     && body.indexOf('if (INVITE) {') < sendAt,
+     && body.indexOf('if (INVITE || STAMP) {') < sendAt,
     'exactly two sends, one under --report and one under --invite; a bare scan sends nothing');
+  const inviteAt = body.indexOf('if (INVITE || STAMP) {');
+  const stampBranch = body.indexOf('if (STAMP) {', inviteAt);
+  ok(stampBranch > inviteAt && stampBranch < sendAt && stampBranch < ifOk
+     && /^\s*if \(STAMP\) \{[^}]*\bok = true;/m.test(body.slice(stampBranch, stampBranch + 400)),
+    '--stamp takes the same queue, answers ok without send(), and reaches the same mark');
+  ok(!/\.set\(\{/.test(body.slice(inviteAt, body.indexOf('if (CLEAN) {'))),
+    'and the mark is built by inviteMark() alone, never an inline object that could carry an undefined');
   ok(/if \(!cleanable\(r, ctx\)\) \{ kept\+\+; continue; \}/.test(body) && (body.match(/\.delete\(\)/g) || []).length === 1,
     'the one delete is behind cleanable(), so an orphan whose owner has not been invited is never destroyed');
   ok(/r\.step === 'invite'/.test(body), 'the invite queue is exactly the rows nextStep() said to invite');

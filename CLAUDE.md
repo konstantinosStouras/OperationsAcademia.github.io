@@ -5028,7 +5028,9 @@ turned-away candidate whose account has no profile for the season under way
 and has not been written to, stamping `strandedInvites/{uid}.invitedAt` after
 a successful send (a collection the rules' catch-all already closes to every
 client, so no rules change); a failed send stamps nothing and goes out on the
-next press. `--clean` deletes an outage orphan only once its account has been
+next press. `--stamp` records the accounts the run would invite as already
+invited and sends nothing, for an invite sent by hand or by a run whose mark
+failed. `--clean` deletes an outage orphan only once its account has been
 invited or has posted a profile of its own accord: the file has done its one
 job, naming the person, and is personal data nothing else clears, but an
 orphan whose owner has not been invited is never destroyed, so the list is
@@ -5070,6 +5072,21 @@ the record that fails costs that half of the list and never the other, and
 `usageSessions` is admin-read in the rules, so only the Admin SDK can list
 it.
 
+**AND THE FIRST INVITE WENT OUT UNSTAMPED, which is how a second press
+would have written to the same two people again.** The press of 2026-09-21
+mailed both candidates the usage record had named and then failed to write
+either mark: the mark was built inline as `{ invitedAt, path: r.path }`, a
+visit row has no upload path, and the Admin SDK refuses `undefined` as a
+field value, with an error that carries no `code` and so reached the log as
+a bare `error`. Sent first and stamped after is the right order, and it is
+also what makes this failure expensive: the message is out and nothing
+records it. So the mark is built by `inviteMark`, pure, with no undefined
+value whatever the row's shape (a CV's carries its path, a visit's the
+press, both the day), and the workflow gained a `stamp` input (`--stamp`)
+that takes the same queue the invite takes and writes the mark WITHOUT
+sending, for an invite sent by hand or by a run whose mark failed. It was
+pressed once, the same day, for those two accounts.
+
 Tests: `node _scraper/stranded-cvs.mjs --selftest` (the path, the stamp, the
 window at both edges, the orphan filter, every branch of `nextStep` and
 `cleanable`, the tally, the report carrying the names escaped, the invite
@@ -5080,13 +5097,16 @@ per step, the report's second table, the invite's two wordings, and the
 source scans: `--print` refused first, the table through `printTable()`
 alone, no log line naming a person, a file or a path, `invitedAt` after the
 send inside `if (ok)`, exactly two sends and one delete behind `cleanable()`,
-the usage read bounded at both ends inside a try) and `testStrandedCvs` in
+the usage read bounded at both ends inside a try, the mark built by
+`inviteMark` alone with no undefined value for a visit, a CV or a bare row,
+and `--stamp` taking the invite's own queue and reaching the same mark
+without a send) and `testStrandedCvs` in
 `_scraper/selftest.mjs` (the suite spawned, the bucket pinned against
 `purge-accounts.mjs`, the outage end pinned to the deploy stamp, the mark's
 collection absent from the rules so the catch-all closes it, the form's page
 and its two button labels pinned against the page and the form, the usage
-collection admin-read, the workflow dispatch-only with its three inputs
-defaulting to false, and this section).
+collection admin-read, the workflow dispatch-only with its four inputs
+defaulting to false, the visit mark through the module, and this section).
 
 ### What the sweep of the path found, and the shape of each fix
 
