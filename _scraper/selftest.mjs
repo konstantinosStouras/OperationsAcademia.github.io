@@ -19860,6 +19860,140 @@ async function testCandidateFormHardening() {
   ok(!/the queue emptied, the listeners/.test(doc), '…and no longer says enterGate empties the queue');
 }
 
+/* THE STRANDED CVs (2026-09-21). During the budget outage the candidate form
+   uploaded the CV first and had the profile refused second, so the Storage
+   landing strip holds a file for every candidate who was turned away and the
+   database holds nothing. _scraper/stranded-cvs.mjs finds them, says who they
+   are (to the maintainer's inbox, never the public log), invites them once,
+   and cleans up behind the invite. CLAUDE.md: "The stranded CVs are read by
+   a button". */
+async function testStrandedCvs() {
+  const root = path.join(HERE, '..');
+  const noDash = (s) => !/—/.test(String(s));
+  const stripYml = (s) => s.replace(/#.*$/gm, '');
+  const stripJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
+  /* the script's own suite: the path, the window, the orphan rule, both
+     messages and the log guards read from its source */
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'stranded-cvs.mjs'), '--selftest'], { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/stranded-cvs selftest: \d+ checks passed/.test(out) && !/\bFAIL\b/.test(out),
+    'the stranded-CV script\'s own selftest is green:\n' + out.slice(0, 1500));
+
+  /* the module: the constants that tie it to the rest of the site */
+  const M = await import('./stranded-cvs.mjs');
+  const purge = await readFile(path.join(HERE, 'purge-accounts.mjs'), 'utf8');
+  const purgeBucket = (/export const BUCKET = '([^']+)';/.exec(purge) || [])[1];
+  eq(M.BUCKET, purgeBucket, 'it lists the bucket purge-accounts.mjs clears, and no other');
+  eq(M.OUTAGE, { from: '2026-09-04T00:00:00.000Z', to: '2026-09-17T20:58:35.000Z' },
+    'the window is the day the ruleset crossed the budget to the deploy log\'s own stamp of the fix');
+  eq([M.INVITES, M.INVITED_AT, M.PACE_MS, M.LIVE], ['strandedInvites', 'invitedAt', 1000, ['queued', 'published']],
+    'the invite mark, the pace, and the two statuses that mean a live profile');
+  const buildC = await readFile(path.join(HERE, 'build-candidates.mjs'), 'utf8');
+  ok(/where\('status', 'in', \['queued', 'published'\]\)/.test(buildC),
+    '…which are the two statuses the candidates build publishes, so "has since posted" means what the site means');
+  eq(M.KINDS.candidates, { collection: 'candidateSubmissions', paths: ['cvUploadPath', 'rsUploadPath'] },
+    'a candidate document points at its uploads through cvUploadPath and rsUploadPath');
+  ok(/path: 'cvUploadPath'/.test(buildC) && /path: 'rsUploadPath'/.test(buildC),
+    '…the two fields the candidates build files from');
+  eq(M.KINDS.jobs, { collection: 'jobSubmissions', paths: ['adUploadPath'] }, 'and a job document through adUploadPath');
+  const buildJ = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/v\.adUploadPath && !v\.adUrl/.test(buildJ), '…the field the jobs build files from');
+  /* the pure halves, driven */
+  eq(M.parseUploadPath('uploads/u1/candidates/1757500000000-Jane Smith CV.pdf'),
+    { uid: 'u1', kind: 'candidates', stamp: 1757500000000, name: 'Jane Smith CV.pdf' },
+    'the path is read as both forms write it');
+  eq(M.parseUploadPath('uploads/u1/photos/1-x.png'), null, 'and any other shape is not an upload');
+  const files = [
+    { name: 'uploads/u1/candidates/1757500000000-a.pdf', metadata: { timeCreated: '2026-09-10T10:00:00.000Z' } },
+    { name: 'uploads/u2/candidates/1757500000000-b.pdf', metadata: { timeCreated: '2026-09-10T10:00:00.000Z' } },
+    { name: 'uploads/u3/candidates/1756000000000-c.pdf', metadata: {} },
+    { name: 'uploads/u4/jobs/1757500000000-ad.pdf', metadata: { timeCreated: '2026-09-10T10:00:00.000Z' } },
+  ];
+  const orph = M.orphans(files, new Set(['uploads/u2/candidates/1757500000000-b.pdf']));
+  eq(orph.map((r) => r.uid), ['u3', 'u1', 'u4'], 'a referenced upload is not an orphan; the rest are listed oldest first');
+  eq(orph.map((r) => r.inOutage), [false, true, true], 'and each says whether it fell in the window');
+  const ctx = { profiled: new Set(['u5']), invited: new Set(['u6']) };
+  const row = (o) => Object.assign({ kind: 'candidates', inOutage: true, email: 'a@b.edu', uid: 'u1' }, o);
+  eq([M.nextStep(row({}), ctx), M.nextStep(row({ uid: 'u5' }), ctx), M.nextStep(row({ uid: 'u6' }), ctx),
+    M.nextStep(row({ email: ' ' }), ctx), M.nextStep(row({ inOutage: false }), ctx), M.nextStep(row({ kind: 'jobs' }), ctx)],
+    ['invite', 'came-back', 'invited', 'no-address', 'outside-window', 'job-advert'],
+    'the next step: invite only a candidate from the window with an address, no profile this season and no invite yet');
+  eq([M.cleanable(row({}), ctx), M.cleanable(row({ uid: 'u5' }), ctx), M.cleanable(row({ uid: 'u6' }), ctx),
+    M.cleanable(row({ uid: 'u6', inOutage: false }), ctx), M.cleanable(row({ uid: 'u6', kind: 'jobs' }), ctx)],
+    [false, true, true, false, false],
+    'and an orphan is cleanable only once its owner was invited or came back, and only from the window');
+
+  /* the script: imported it sends nothing; the mail goes through _mail.mjs */
+  const src = await readFile(path.join(HERE, 'stranded-cvs.mjs'), 'utf8');
+  ok(/from '\.\/_main\.mjs'/.test(src) && /isMain\(import\.meta\.url\)/.test(src), 'importing the script runs nothing');
+  ok(/import \{ send, transport, firebaseAdmin, redact, esc, shell, SITE, CONTACT \} from '\.\/_mail\.mjs'/.test(src),
+    'the send, the transport, the Admin SDK handle, the redaction and the shell are _mail.mjs\'s');
+  ok(/import \{ marketYear \} from '\.\/jobs-model\.mjs'/.test(src) && /marketYear\(new Date\(\)\)/.test(src),
+    'and the season under way is the pipeline\'s own definition');
+  ok(/app\.storage\(\)\.bucket\(BUCKET\)/.test(src), 'the bucket is opened the way purge-accounts.mjs opens it');
+  ok(/process\.env\.ADMIN_NOTIFY \|\| 'kstouras@gmail\.com'/.test(src) && /process\.env\.ADMIN_NOTIFY \|\| 'kstouras@gmail\.com'/.test(buildJ),
+    'the report goes where the build\'s change e-mail goes');
+  const bare = stripJs(src);
+  ok(!/\.delete\(\)/.test(bare.replace(/bucket\.file\(r\.path\)\.delete\(\)/g, '')),
+    'the one delete is of a Storage object; no document is ever deleted');
+  ok(!/\.set\(\{[^}]*\}\)/.test(bare.replace(/\.set\(\{ \[INVITED_AT\]: [^}]*\}, \{ merge: true \}\)/g, '')),
+    'and the one document write is the invite mark, merged');
+
+  /* the mark needs no rules change: the collection is closed by the catch-all */
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+  ok(!/strandedInvites/.test(rules), 'strandedInvites is not named in the rules…');
+  ok(/match \/\{document=\*\*\} \{\s*allow read, write: if false;\s*\}/.test(rules),
+    '…so the catch-all closes it to every client, and only the Admin SDK writes it');
+
+  /* the workflow: pressed, never scheduled; a scan unless told otherwise */
+  const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-stranded-cvs.yml'), 'utf8');
+  const wfCode = stripYml(wf);
+  ok(/^on:\s*\n\s*workflow_dispatch:/m.test(wfCode), 'the workflow runs on workflow_dispatch');
+  ok(!/^\s*schedule:/m.test(wfCode) && !/^\s*workflow_run:/m.test(wfCode) && !/^\s*repository_dispatch:/m.test(wfCode)
+     && !/^\s*push:/m.test(wfCode),
+    'and on NOTHING else: it is pressed, never scheduled or chained');
+  for (const inp of ['report', 'invite', 'clean']) {
+    ok(new RegExp(`${inp}:\\s*\\n\\s*description:[^\\n]*\\n\\s*type: boolean\\s*\\n\\s*default: false`).test(wfCode),
+      `its \`${inp}\` input is a boolean defaulting to false`);
+    ok(new RegExp(`if \\[ "\\$\\{\\{ inputs\\.${inp} \\}\\}" = "true" \\]; then FLAGS="\\$FLAGS --${inp}"; fi`).test(wfCode),
+      `…and ticked it adds --${inp}`);
+  }
+  eq((wfCode.match(/type: boolean/g) || []).length, 3, 'three inputs and no more');
+  ok(/FLAGS="--scan"/.test(wfCode) && /node _scraper\/stranded-cvs\.mjs \$FLAGS/.test(wfCode),
+    'with every input unticked the run is a scan');
+  ok(!/--print/.test(wfCode), 'the workflow never passes --print, which the script refuses on a runner anyway');
+  for (const n of ['FIREBASE_SERVICE_ACCOUNT', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']) {
+    ok(new RegExp(`${n}: \\$\\{\\{ secrets\\.${n} \\}\\}`).test(wf), `the run step carries ${n}`);
+  }
+  for (const v of ['MAIL_FROM', 'CONTACT_EMAIL', 'SITE_URL']) {
+    ok(new RegExp(`${v}: \\$\\{\\{ vars\\.${v} \\}\\}`).test(wf), `and ${v}, as every other mailer here has it`);
+  }
+  ok(/concurrency:\s*\n\s*group: oa-stranded-cvs/.test(wfCode), 'it has a concurrency group of its own');
+  ok(/permissions:\s*\n\s*contents: read/.test(wfCode), 'and commits nothing');
+  ok(/npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6/.test(wfCode),
+    'it installs the pinned Admin SDK and nodemailer');
+  ok(/node _scraper\/stranded-cvs\.mjs --selftest/.test(wfCode), 'and proves the rules before anything is read');
+  ok(/::warning::FIREBASE_SERVICE_ACCOUNT is not set/.test(wf) && /::warning::SMTP_HOST, SMTP_USER or SMTP_PASS is not set/.test(wf),
+    'without the secrets it warns');
+  ok(noDash(wf) && noDash(src), 'no em dash in the workflow or the script');
+
+  /* this section of CLAUDE.md */
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  const secAt = claude.indexOf('### The stranded CVs are read by a button');
+  ok(secAt > 0, 'CLAUDE.md records the tool');
+  const section = claude.slice(secAt, claude.indexOf('\n### ', secAt + 10));
+  ok(/stranded-cvs\.mjs/.test(section) && /oa-stranded-cvs\.yml/.test(section) && /strandedInvites/.test(section)
+     && /--report/.test(section) && /--invite/.test(section) && /--clean/.test(section) && /--print/.test(section),
+    'and names the script, the workflow, the mark and the four modes');
+  ok(/Nothing here can rebuild a refused profile/.test(section), 'and says plainly what cannot be rebuilt');
+  ok(/testStrandedCvs/.test(section) && noDash(section), 'and names this test, with no em dash');
+}
+
 async function testVerifyExistingUsers() {
   const root = path.join(HERE, '..');
   const noDash = (s) => !/—/.test(String(s));
@@ -23843,6 +23977,7 @@ if (isMain(import.meta.url)) {
   await testJobComments();
   await testJobTakedown();
   await testCandidateFormHardening();
+  await testStrandedCvs();
   await testVerifyExistingUsers();
   await testFixAccountEmail();
   await testRegisteredUsersFigure();
