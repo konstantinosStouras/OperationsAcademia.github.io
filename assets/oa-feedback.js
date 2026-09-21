@@ -401,7 +401,7 @@
         standDown('<strong>We cannot reach the feedback service right now.</strong> ' +
           'If you use an ad blocker, allow <code>gstatic.com</code> and reload. ' +
           'Otherwise please write to ' +
-          '<a href="mailto:operationsacademia@gmail.com">operationsacademia@gmail.com</a>.');
+          '<a href="mailto:operations.academia@gmail.com">operations.academia@gmail.com</a>.');
       }
     });
 

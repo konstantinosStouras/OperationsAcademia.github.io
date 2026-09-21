@@ -92,7 +92,7 @@ const SMTP_USER = defineSecret('SMTP_USER');
 const SMTP_PASS = defineSecret('SMTP_PASS');
 
 const SITE = 'https://www.operationsacademia.org';
-const CONTACT = 'operationsacademia@gmail.com';
+const CONTACT = 'operations.academia@gmail.com';
 
 /** The Admin app, initialised once whichever function touches it first.
 

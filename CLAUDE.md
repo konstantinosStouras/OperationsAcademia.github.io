@@ -3629,6 +3629,64 @@ deleted, the alerts before the sign-in, the sign-in last, the local memory
 cleared, the signed-out reader offered nothing, the phone target, and the
 maintainer's row queuing an order and nothing else.
 
+## The address the site tells people to write to
+
+Owner, 2026-09-18, of the footer of an alert e-mail: *"the stated email at the
+bottom here is wrong. It is missing a '.'"*
+
+It was, in thirteen places. Every mailer footer, every form's "we cannot reach
+the service, write to us instead" fallback, the Privacy Policy's account of the
+verification message and the verify card's "look in spam, it comes from…" all
+named the mailbox with the dot left out of `operations.academia@gmail.com`,
+while the messages themselves go out from the address WITH it — so the one line
+on the page whose whole job is to be copied and written to named a form of the
+address the site never sends from.
+
+**Nothing was lost, and that is why it survived.** Gmail ignores dots when it
+delivers, so both forms reach the same mailbox and no reply ever bounced. What
+was wrong is what the site SAYS: a reader comparing the From: line against the
+footer sees two addresses, and the Privacy Policy made a claim about the sender
+that the sender did not match.
+
+**THERE IS NO ONE DEFINITION, AND THERE CANNOT BE.** The address is a literal in
+three worlds that cannot import from one another: the browser assets, the Node
+mailers under `_scraper/`, and `_functions/`, which `firebase deploy` ships
+alone. So it is held together the way `EMAIL_RX` and `OPEN_ENDED_RX` are — by a
+sweep rather than by an import. `testContactAddress` in `_scraper/selftest.mjs`
+pins the four definitions (`CONTACT` in `_mail.mjs`, `CONTACT` in
+`_functions/index.js`, `CONTACT_DEFAULT` in `_functions/verify-email.js` and
+`VERIFY_SENDER` in `assets/oa-accounts.js`) to one string, and then walks the
+whole live tree and fails on any file that spells it the other way. **Its needle
+is COMPOSED from the right address with its dot removed**, never written out,
+for the reason the delegate scan already records: a guard that spells out what
+it forbids puts that text into the very tree it is sweeping and can then never
+pass.
+
+**And the walk is made to prove it looked.** A sweep that reaches nothing passes
+for the wrong reason, so the four definition files must be among the files it
+read and the count of files naming this mailbox is asserted — the defect this
+file records for the `FORUM_INK` audit, which reported green over nineteen
+surfaces it had never seen.
+
+**`/v1/` and `/v2/` keep the old spelling and are skipped**, by the rule the
+three trees are held to: each archive carries its own frozen assets and pages,
+and correcting one would be an edit to a historical record for a difference that
+changes no delivery. `_backup/` is not served at all (Jekyll's underscore rule),
+and `data/` is swept for ANY address by the served-file guard, which is stricter
+than this one.
+
+**The default is not the whole story, which is worth knowing before reading a
+footer again.** `_mail.mjs` reads `CONTACT_EMAIL` first and falls back to the
+literal, and every mailer workflow passes `vars.CONTACT_EMAIL` through. The
+footer in the report showed the fallback, so that variable is either unset or
+set to the old spelling; if a future footer still reads without its dot, the
+repository variable is where to look, since nothing here can see it.
+
+Tests: `testContactAddress` in `_scraper/selftest.mjs` (the four definitions,
+the tree sweep, and both vacuity pins), each verified by putting the defect
+back — a page reverted turns the sweep red, one definition moved to another
+address turns its own pin red, and a blinded walk turns both vacuity pins red.
+
 ## Registration is verified by e-mail
 
 Owner, 2026-09-04: a person who registers with an e-mail address and a

@@ -18216,6 +18216,81 @@ async function testRulesBudgetGuard() {
     'CLAUDE.md: the ceiling and the guard that measures it are both recorded');
 }
 
+/* ------------------------------------------- the address the site says to write to
+
+   Owner, 2026-09-18, of the footer of an alert e-mail: "the stated email at
+   the bottom here is wrong. It is missing a '.'".
+
+   It was. Every footer, every form's fallback and the Privacy Policy named
+   the mailbox WITHOUT the dot, while the messages themselves went out from
+   the address WITH it — so a reader who wrote to the address the site gave
+   them was writing to a name the site never sends from. (Gmail ignores dots
+   when it delivers, so nothing was lost; what was wrong is what the site
+   SAYS, on the one line whose whole job is to be copied and written to.)
+
+   THERE IS NO ONE DEFINITION, AND THERE CANNOT BE. The address is a literal
+   in thirteen places across three worlds that cannot import from one another:
+   the browser assets, the Node mailers under _scraper/, and _functions/,
+   which `firebase deploy` ships alone. So it is held together the way
+   EMAIL_RX is — by a sweep rather than by an import: the four definitions are
+   pinned to the same string, and no live file may spell it the other way.
+
+   THE ARCHIVES ARE OUT OF SCOPE, deliberately. /v1/ and /v2/ keep their own
+   frozen copies by the rule the three trees are held to, so the walk skips
+   them rather than reporting a defect nobody may fix. _backup/ is not served
+   at all (Jekyll's underscore rule) and data/ is swept for ANY address by the
+   served-file guard already, which is stricter than this one.            */
+
+async function testContactAddress() {
+  const root = path.join(HERE, '..');
+
+  /* The needle is COMPOSED, for the reason the delegate scan gives: a guard
+     that spells out the spelling it forbids puts that spelling into the very
+     tree it is sweeping, and can then never pass. */
+  const RIGHT = 'operations.academia@gmail.com';
+  const WRONG = RIGHT.replace('.', '');          // the same address, dot dropped
+
+  /* --- 1. the four definitions name ONE address ----------------------- */
+  const DEFS = [
+    ['_scraper/_mail.mjs',         /export const CONTACT = process\.env\.CONTACT_EMAIL \|\| '([^']+)'/],
+    ['_functions/index.js',        /^const CONTACT = '([^']+)'/m],
+    ['_functions/verify-email.js', /^const CONTACT_DEFAULT = '([^']+)'/m],
+    ['assets/oa-accounts.js',      /var VERIFY_SENDER = '([^']+)'/],
+  ];
+  for (const [file, rx] of DEFS) {
+    const m = rx.exec(await readFile(path.join(root, file), 'utf8'));
+    eq(m && m[1], RIGHT, `${file}: names the site's own contact address`);
+  }
+
+  /* --- 2. and no live file spells it the other way -------------------- */
+  const EXT = /\.(html|js|mjs|json|md|ya?ml|rules|css|txt)$/;
+  const SKIP = new Set(['node_modules', 'v1', 'v2', '_backup', 'data']);
+  const swept = [], bad = [];
+  const walk = async (dir, rel) => {
+    for (const e of await readdir(dir, { withFileTypes: true })) {
+      if (e.name.startsWith('.') && e.name !== '.github') continue;
+      if (SKIP.has(e.name)) continue;
+      const p = path.join(dir, e.name);
+      const r = rel ? `${rel}/${e.name}` : e.name;
+      if (e.isDirectory()) { await walk(p, r); continue; }
+      if (!EXT.test(e.name)) continue;
+      const src = await readFile(p, 'utf8');
+      if (!src.includes('academia@gmail')) continue;   // the mailbox, either spelling
+      swept.push(r);
+      if (src.includes(WRONG)) bad.push(r);
+    }
+  };
+  await walk(root, '');
+  eq(bad, [], 'the contact address is never spelled without its dot on the live site');
+
+  /* A sweep that reached nothing passes for the wrong reason, so the walk is
+     made to prove it found the files that define the address. */
+  eq(DEFS.map(([f]) => f).filter((f) => !swept.includes(f)), [],
+    '…and the sweep really reached the files that define it');
+  ok(swept.length >= 12,
+    `…over every live file that names this mailbox (${swept.length} of them)`);
+}
+
 async function testEmailVerification() {
   const root = path.join(HERE, '..');
   const site = 'https://www.operationsacademia.org';
@@ -18331,9 +18406,9 @@ async function testEmailVerification() {
     'verify: the card radius, the pill button and the 600px table');
   ok(/Georgia/.test(r.html) && /Inter, Helvetica, Arial/.test(r.html),
     'verify: Georgia for the heading, Inter with Helvetica and Arial behind it for the body');
-  ok(/questions to <a href="mailto:operationsacademia@gmail\.com"/.test(r.html)
+  ok(/questions to <a href="mailto:operations\.academia@gmail\.com"/.test(r.html)
      && /<a href="https:\/\/www\.operationsacademia\.org"[^>]*>operationsacademia\.org<\/a>/.test(r.html)
-     && /questions to operationsacademia@gmail\.com/.test(r.text),
+     && /questions to operations\.academia@gmail\.com/.test(r.text),
     'verify: the footer names the site and the contact address, with links');
   const hostile = V.renderVerifyEmail({ firstName: 'Ada <x>', link }).html;
   ok(hostile.includes('Hello Ada &lt;x&gt;,') && !hostile.includes('<x>'),
@@ -18383,7 +18458,7 @@ async function testEmailVerification() {
     'verify: with existing:{since} the heading and the first paragraph read for a member who registered on a named day');
   ok(count(member.html, 'Verify my e-mail address') === count(r.html, 'Verify my e-mail address')
      && count(member.html, escLink) === count(r.html, escLink) && count(member.text, link) === 1
-     && /questions to operationsacademia@gmail\.com/.test(member.text),
+     && /questions to operations\.academia@gmail\.com/.test(member.text),
     'verify: the same button, the same printed link and the same footer as the newcomer\'s');
   ok(!/Please confirm your e-mail address/.test(r.html) && !/You registered with/.test(r.html),
     'verify: and without existing the newcomer\'s message is unchanged in shape');
@@ -18665,7 +18740,7 @@ async function testEmailVerification() {
      && /id="oa-verify-check">I have verified it</.test(acct)
      && /id="oa-verify-out">Use a different account</.test(acct)
      && /Look in spam too\. The message comes from ' \+\s*VERIFY_SENDER/.test(acct)
-     && /VERIFY_SENDER = 'operationsacademia@gmail\.com'/.test(acct),
+     && /VERIFY_SENDER = 'operations\.academia@gmail\.com'/.test(acct),
     'accounts: the card carries its heading, its three controls and the spam line naming the sender');
   ok(/if \(auto && document\.querySelector\('\[data-oa-verify-page\]'\)\) return;/.test(acct)
      && /function openVerifyPanel\(status, who, auto\)/.test(acct),
@@ -18868,7 +18943,7 @@ async function testEmailVerification() {
     'the FAQ says a password registration is confirmed by a link first, and that nothing works until it is clicked');
   ok(/Signing in with Google needs no extra step/.test(home), '…and that Google needs no extra step');
   const policy = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
-  ok(/If you register with an e-mail address and a password, we send that address\s+<strong>one<\/strong> message, from operationsacademia@gmail\.com/.test(policy)
+  ok(/If you register with an e-mail address and a password, we send that address\s+<strong>one<\/strong> message, from operations\.academia@gmail\.com/.test(policy)
      && /The account cannot be used until the link is clicked/.test(policy),
     'the Privacy Policy records the verification message: one, from the site\'s address, and what it gates');
 
@@ -23228,6 +23303,7 @@ if (isMain(import.meta.url)) {
   await testGa4Tag();
   await testUniversityVisits();
   await testCandidateStats();
+  await testContactAddress();
   await testEmailVerification();
   await testSubmissionTokenRefresh();
   await testRulesBudgetGuard();
