@@ -348,8 +348,8 @@ async function selftest() {
     'the same button');
   ok(count(member.html, V.esc(link)) === count(fresh.html, V.esc(link)) && count(member.text, link) === 1,
     'the same printed link, the same number of times');
-  ok(/questions to <a href="mailto:operationsacademia@gmail\.com"/.test(member.html)
-     && /questions to operationsacademia@gmail\.com/.test(member.text),
+  ok(/questions to <a href="mailto:operations\.academia@gmail\.com"/.test(member.html)
+     && /questions to operations\.academia@gmail\.com/.test(member.text),
     'the same footer');
   ok(/Hello Ada,/.test(member.html) && /^Hello Ada,$/m.test(member.text), 'the same greeting');
   ok(!/If you did not register/.test(member.html) && /If you no longer use your account/.test(member.html),

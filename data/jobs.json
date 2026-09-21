@@ -41,6 +41,81 @@
   "owner": ""
  },
  {
+  "id": "2027-the-chinese-university-of-hong-kong-shenzhen-20260921",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-21",
+  "institution": "The Chinese University of Hong Kong, Shenzhen",
+  "department": "School of Data Science, Operations Research",
+  "school": "School of Data Science",
+  "unit": "Operations Research",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled. Early submissions are encouraged.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-18",
+  "comments": "We will be interviewing at the INFORMS Annual Meeting. If you plan to go to INFORMS Annual Meeting this year at San Francisco and would like to consider an interview at INFORMS, please submit your application material before Oct 18th.",
+  "country": "China",
+  "adUrl": "https://drive.google.com/file/d/1goAuzBdfa-mC6k8EyFBSrja4U52v5bL4/view?usp=drivesdk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://sds.cuhk.edu.cn/en/recruitment/2245",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Chinese%20University%20of%20Hong%20Kong%2C%20Shenzhen",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-09-21T02:04:36Z",
+  "ref": "OA-JOB-260921-ZMEB",
+  "owner": "9c3de5fb0a5fda8e"
+ },
+ {
+  "id": "2027-insead-20260918",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-18",
+  "institution": "INSEAD",
+  "department": "Decision Sciences",
+  "school": "",
+  "unit": "Decision Sciences",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 25, 2026",
+  "applyByDate": "2026-10-25",
+  "comments": "The [Decision Sciences (DSC) Area](https://www.insead.edu/faculty-research/academic-areas/decision-sciences) at [INSEAD](http://www.insead.edu/), a global business school with campuses in France, Abu Dhabi, and Singapore, invites applicants for a full-time tenure-track faculty position. The anticipated start date is **September 1, 2027**. The DSC Area focuses on questions broadly related to individual, group, and organizational decision making, both from behavioral and quantitative perspectives, and with prescriptive, descriptive, and normative approaches. Our research spans decision sciences, judgment and decision making, statistics and machine learning, artificial intelligence and computer science, psychology, economics, operations research, optimization, neuroscience, finance, marketing, organizational behavior, social innovation, and entrepreneurship. We have a collegial environment that encourages interdisciplinary and practically relevant, impactful research.",
+  "country": "France",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/193805",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=INSEAD",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-09-18T19:37:46Z",
+  "ref": "OA-JOB-260918-QRQU",
+  "owner": "b634c4738dcb2337"
+ },
+ {
   "id": "2027-london-business-school-20260918",
   "year": 2027,
   "years": [
@@ -147,6 +222,38 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-17T20:21:53Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-southern-california-20260917",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-17",
+  "institution": "University of Southern California",
+  "department": "Viterbi School of Engineering, Industrial and Systems Engineering",
+  "school": "Viterbi School of Engineering",
+  "unit": "Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-10",
+  "comments": "The appointment can be made at the Assistant Professor, Associate Professor, or Professor rank. Candidates at the senior ranks must have demonstrated research excellence and sustained commitment to the discipline and are expected to have a vibrant research program with external funding. Exceptional senior candidates may be considered for a chaired professorship. We invite applications from outstanding candidates with demonstrated excellence and commitment in Industrial and Systems Engineering (ISE). Accomplished candidates with expertise in the core ISE methodological areas (e.g., computational science, optimization, probability, simulation, statistics, and systems lifecycle analysis) and interest in solving important societal problems (including but not limited to supply chain, transportation and logistics, healthcare, finance) are encouraged to apply. Applications from candidates with expertise in data science, machine learning, and related areas are also encouraged.",
+  "country": "United States",
+  "adUrl": "https://usccareers.usc.edu/job/los-angeles/assistant-professor-associate-professor-and-full-professor-of-industrial-and-systems-engineering/1209/100736016464",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Southern%20California",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-18T20:06:24Z",
   "owner": ""
  },
  {

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-18T07:14:05.375Z",
+ "generated": "2026-09-21T02:05:40.154Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -67,6 +67,10 @@
   },
   {
    "v": "Texas State University",
+   "n": 4
+  },
+  {
+   "v": "The Chinese University of Hong Kong, Shenzhen",
    "n": 4
   },
   {
@@ -163,10 +167,6 @@
   },
   {
    "v": "Shanghai Jiao Tong University",
-   "n": 3
-  },
-  {
-   "v": "The Chinese University of Hong Kong, Shenzhen",
    "n": 3
   },
   {
@@ -463,6 +463,10 @@
   },
   {
    "v": "University of Notre Dame",
+   "n": 2
+  },
+  {
+   "v": "University of Southern California",
    "n": 2
   },
   {
@@ -831,6 +835,10 @@
   },
   {
    "v": "Indiana University (Kelley)",
+   "n": 1
+  },
+  {
+   "v": "INSEAD",
    "n": 1
   },
   {
@@ -1442,10 +1450,6 @@
    "n": 1
   },
   {
-   "v": "University of Southern California",
-   "n": 1
-  },
-  {
    "v": "University of Southern Indiana",
    "n": 1
   },
@@ -1731,10 +1735,6 @@
   },
   {
    "v": "Indiana University Bloomington",
-   "n": 0
-  },
-  {
-   "v": "INSEAD",
    "n": 0
   },
   {
@@ -2472,6 +2472,10 @@
    "n": 1
   },
   {
+   "v": "School of Data Science",
+   "n": 1
+  },
+  {
    "v": "School of Economics and Management",
    "n": 1
   },
@@ -2517,6 +2521,10 @@
   },
   {
    "v": "Villanova School of Business",
+   "n": 1
+  },
+  {
+   "v": "Viterbi School of Engineering",
    "n": 1
   },
   {
@@ -3118,16 +3126,16 @@
    "n": 5
   },
   {
+   "v": "Decision Sciences",
+   "n": 5
+  },
+  {
    "v": "Logistics and Maritime Studies",
    "n": 5
   },
   {
    "v": "Operations and Supply Chain Management",
    "n": 5
-  },
-  {
-   "v": "Decision Sciences",
-   "n": 4
   },
   {
    "v": "Information Systems",
@@ -3223,6 +3231,10 @@
   },
   {
    "v": "IEOR",
+   "n": 2
+  },
+  {
+   "v": "Industrial and Systems Engineering",
    "n": 2
   },
   {
@@ -3610,10 +3622,6 @@
    "n": 1
   },
   {
-   "v": "Industrial and Systems Engineering",
-   "n": 1
-  },
-  {
    "v": "Industrial Engineering",
    "n": 1
   },
@@ -3963,6 +3971,10 @@
   },
   {
    "v": "Operations Management and Business Analytics",
+   "n": 1
+  },
+  {
+   "v": "Operations Research",
    "n": 1
   },
   {
@@ -4563,10 +4575,6 @@
   },
   {
    "v": "Operations Management Area",
-   "n": 0
-  },
-  {
-   "v": "Operations Research",
    "n": 0
   },
   {
@@ -6791,6 +6799,7 @@
    ],
    "bySchool": {
     "": [
+     "Decision Sciences",
      "Technology and Operations Management"
     ],
     "School of Business": [
@@ -9034,16 +9043,21 @@
   },
   "The Chinese University of Hong Kong, Shenzhen": {
    "schools": [
+    "School of Data Science",
     "School of Management and Economics"
    ],
    "units": [
     "Information Systems and Operations Management",
     "Management and Economics",
+    "Operations Research",
     "The research group of Prof. Yiming Zhang"
    ],
    "bySchool": {
     "": [
      "Information Systems and Operations Management"
+    ],
+    "School of Data Science": [
+     "Operations Research"
     ],
     "School of Management and Economics": [
      "Information Systems and Operations Management",
@@ -10800,10 +10814,12 @@
   },
   "University of Southern California": {
    "schools": [
-    "Marshall School of Business"
+    "Marshall School of Business",
+    "Viterbi School of Engineering"
    ],
    "units": [
     "Data Sciences and Operations",
+    "Industrial and Systems Engineering",
     "ISE"
    ],
    "bySchool": {
@@ -10812,6 +10828,9 @@
     ],
     "Marshall School of Business": [
      "Data Sciences and Operations"
+    ],
+    "Viterbi School of Engineering": [
+     "Industrial and Systems Engineering"
     ]
    }
   },
@@ -12341,6 +12360,9 @@
   "School of Computing": [
    "Information Systems and Analytics"
   ],
+  "School of Data Science": [
+   "Operations Research"
+  ],
   "School of Economics and Business Administration": [
    "Operations and Quantitative Methods"
   ],
@@ -12445,6 +12467,9 @@
   ],
   "Villanova School of Business": [
    "Management and Operations"
+  ],
+  "Viterbi School of Engineering": [
+   "Industrial and Systems Engineering"
   ],
   "Volgenau School of Engineering": [
    "Systems Engineering and Operations Research"

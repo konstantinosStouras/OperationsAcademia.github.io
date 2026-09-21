@@ -50,7 +50,7 @@ firebase functions:secrets:set SMTP_PASS --project operations-academia
 
 Paste each value when prompted. The message is sent as
 `Operations Academia <SMTP_USER>`, and the footer names
-`operationsacademia@gmail.com` as the address for questions.
+`operations.academia@gmail.com` as the address for questions.
 
 ## 2. Deploy the function
 
