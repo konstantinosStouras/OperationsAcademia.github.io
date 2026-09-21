@@ -5044,18 +5044,49 @@ fortnight are REPORTED and left alone. "Has since posted" is a live profile
 the "no duplicates" the owner asked for: such an account is not invited and
 its orphan may be cleaned.
 
+**AND THE FIRST PRESS FOUND NO CV AT ALL, which is why the usage record is
+read too.** The run of 2026-09-21 listed five orphans: one CV from 16 August,
+before the fault, and four job adverts, three of them one advertisement
+uploaded three times on promotion day and one from 5 September, a JOB posting
+the same outage refused (the build deletes an advert from the strip once it
+has filed it into Drive, so a file still there is a posting that never got
+its document). Not one candidate CV from the window: the CV is optional on
+the form and most candidates paste a link, so a refused profile left nothing
+in Storage, and a list built from the strip alone would have said nobody was
+turned away. What every signed-in visit DOES leave is a `usageSessions`
+document (`assets/oa-usage.js`): the page, when, which buttons were pressed
+and which fields were touched, never what was typed. So the same run reads
+the sessions whose `start` falls in the window (`visitorsOf`, pure: one row
+per signed-in account on the candidate form, anonymous sessions dropped, the
+first and last instant, the sessions, the distinct fields touched, and which
+button was pressed, read off the click record's own words) and lists them
+beside the CVs as `visit` rows. An account that pressed **Post my profile**
+and holds no profile for the season is a candidate the site refused and is
+invited like a CV's owner, with the sentence about the CV replaced by one
+about the press; an account that pressed **Save changes** had a profile
+already (`edit-refused`), and one that pressed nothing (`opened-only`), are
+reported for the maintainer's own judgement and never written to. A read of
+the record that fails costs that half of the list and never the other, and
+`usageSessions` is admin-read in the rules, so only the Admin SDK can list
+it.
+
 Tests: `node _scraper/stranded-cvs.mjs --selftest` (the path, the stamp, the
 window at both edges, the orphan filter, every branch of `nextStep` and
 `cleanable`, the tally, the report carrying the names escaped, the invite
-carrying no address but the contact one and typing no reveal date, and the
+carrying no address but the contact one and typing no reveal date, the usage
+record folded into visit rows with both edges, anonymous sessions and other
+pages out and the press read off the button's words, a person counted once
+per step, the report's second table, the invite's two wordings, and the
 source scans: `--print` refused first, the table through `printTable()`
 alone, no log line naming a person, a file or a path, `invitedAt` after the
-send inside `if (ok)`, exactly two sends and one delete behind `cleanable()`)
-and `testStrandedCvs` in `_scraper/selftest.mjs` (the suite spawned, the
-bucket pinned against `purge-accounts.mjs`, the outage end pinned to the
-deploy stamp, the mark's collection absent from the rules so the catch-all
-closes it, the workflow dispatch-only with its three inputs defaulting to
-false, and this section).
+send inside `if (ok)`, exactly two sends and one delete behind `cleanable()`,
+the usage read bounded at both ends inside a try) and `testStrandedCvs` in
+`_scraper/selftest.mjs` (the suite spawned, the bucket pinned against
+`purge-accounts.mjs`, the outage end pinned to the deploy stamp, the mark's
+collection absent from the rules so the catch-all closes it, the form's page
+and its two button labels pinned against the page and the form, the usage
+collection admin-read, the workflow dispatch-only with its three inputs
+defaulting to false, and this section).
 
 ### What the sweep of the path found, and the shape of each fix
 
