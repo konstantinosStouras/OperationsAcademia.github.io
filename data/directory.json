@@ -362,8 +362,8 @@
   "sources": [
    "postings"
   ],
-  "n": 4,
-  "lastPosted": "2026-09-15"
+  "n": 3,
+  "lastPosted": "2025-10-21"
  },
  {
   "id": "arizona-state-university__w-p-carey-school-of-business__supply-chain-management",
@@ -1694,11 +1694,8 @@
   "sources": [
    "directory",
    "omlist",
-   "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-15",
   "lat": 40.8089292,
   "lng": -73.9613646
  },
@@ -1852,11 +1849,8 @@
   "address": "2 W Loop Rd, New York, NY 10044, United States",
   "facultyUrl": "https://tech.cornell.edu/people/faculty/",
   "sources": [
-   "directory",
-   "postings"
+   "directory"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-17",
   "lat": 40.7557727,
   "lng": -73.9562112
  },
@@ -2899,8 +2893,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2026-09-14"
+  "n": 1,
+  "lastPosted": "2024-09-18"
  },
  {
   "id": "georgia-gwinnett-college____supply-chain-management",
@@ -2942,11 +2936,8 @@
   "sources": [
    "directory",
    "omlist",
-   "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-15",
   "lat": 33.7763465,
   "lng": -84.384841
  },
@@ -7504,19 +7495,6 @@
   "lastPosted": "2026-01-30"
  },
  {
-  "id": "tennessee-wesleyan-university__goodfriend-college-of-business-and-professional-studies__business-administration",
-  "institution": "Tennessee Wesleyan University",
-  "school": "Goodfriend College of Business and Professional Studies",
-  "department": "Business Administration",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2026-09-13"
- },
- {
   "id": "texas-a-m-international-university____transportation-logistics",
   "institution": "Texas A&M International University",
   "department": "Transportation/Logistics",
@@ -9939,11 +9917,8 @@
   "sources": [
    "directory",
    "omlist",
-   "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-13",
   "lat": 41.8737629,
   "lng": -87.6509962
  },
@@ -10818,18 +10793,14 @@
   "school": "UNSW Business School",
   "department": "Information Systems and Technology Management",
   "type": "Business School",
-  "country": "Australia",
   "address": "https://www.google.com/maps/place/UNSW+Australia+Business+School/@-33.9167956,151.2295532,15z/data=!4m2!3m1!1s0x0:0x7daebd61dc4a1974?sa=X&ved=0ahUKEwi1rrKh7YzQAhVN4WMKHSmLARkQ_BIIdTAK",
   "facultyUrl": "https://www.business.unsw.edu.au/about/schools/information-systems/faculty-people#1478185290487",
   "deptUrl": "https://www.unsw.edu.au/business/our-people#search=&filters=f.School%257CstaffSchool%3ASchool%2Bof%2BInformation%2BSystems%2Band%2BTechnology%2BManagement&sort=metastaffLastName&startRank=1&numRanks=12&componentId=be58b4d3-9485-4512-9a39-a6e366a1968f",
   "sources": [
    "directory",
    "omlist",
-   "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-14",
   "lat": -33.917347,
   "lng": 151.2312675
  },
@@ -10945,21 +10916,11 @@
   "mapUrl": "https://goo.gl/maps/2MtIX",
   "facultyUrl": "https://mendoza.nd.edu/research-and-faculty/units/information-technology-analytics-and-operations/",
   "deptUrl": "https://mendoza.nd.edu/mendoza-directory/?department=IT%2C+Analytics%2C+and+Operations&employeetype=Faculty",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Exec Ed"
-  ],
   "sources": [
    "directory",
    "omlist",
-   "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-16",
   "lat": 41.6971267,
   "lng": -86.2361411
  },
@@ -11031,8 +10992,8 @@
    "postings",
    "seed"
   ],
-  "n": 4,
-  "lastPosted": "2026-09-17"
+  "n": 3,
+  "lastPosted": "2026-03-18"
  },
  {
   "id": "university-of-oregon__charles-h-lundquist-college-of-business__operations-and-business-analytics",
