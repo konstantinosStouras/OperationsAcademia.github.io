@@ -279,7 +279,9 @@
 
   var EDIT_ID = (function () {
     var m = /[?&]edit=([^&]+)/.exec(location.search);
-    return m ? decodeURIComponent(m[1]) : '';
+    if (!m) return '';
+    // a malformed escape must not throw the form away (see oa-candidateform.js)
+    try { return decodeURIComponent(m[1]); } catch (e) { return m[1]; }
   })();
   var EDIT_REF = '';
 

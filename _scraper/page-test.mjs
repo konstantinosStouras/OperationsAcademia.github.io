@@ -8596,6 +8596,101 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* -- post-a-candidate?edit=: a GATED owner's own edit link --------------
+     (2026-09-21) Both gates used to EMPTY the whenSignedIn queue, and the
+     edit load was in it: an owner behind either gate who arrived on their
+     own ?edit= link answered the card and met "Edit your profile" with every
+     box blank, and a Save then wrote the blanks over the stored document.
+     The queue is held now and the lift runs it. A Google account short of an
+     affiliation (the profile gate), arriving straight on the link. */
+  {
+    const GATED = { uid: 'gated-cand-uid', email: 'gated@example.edu', emailVerified: true,
+      displayName: 'Rosa Fields', providerData: [{ providerId: 'google.com' }] };
+    const theirs = { path: 'candidateSubmissions/cand-gated', data: { ...mine.data, uid: GATED.uid,
+      first: 'Rosa', last: 'Fields', ref: 'OA-CAND-260901-GATE' } };
+    const { ctx, page: q, errors } = await signedInPage('post-a-candidate?edit=cand-gated',
+      { user: GATED, wait: false,
+        docs: [{ path: 'profiles/gated-cand-uid', data: { firstName: 'Rosa', lastName: 'Fields' } }, theirs] });
+    await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 10000 });
+    const held = await q.evaluate(() => ({
+      user: !!window.OAAccounts.user(),
+      heldFlag: !!(window.OAAccounts.held && window.OAAccounts.held()),
+      form: !document.getElementById('oa-cand-form').hidden,
+      gate: !document.getElementById('oa-needauth').hidden,
+      heading: document.getElementById('oa-needauth-h').textContent.trim(),
+      button: document.getElementById('oa-needauth-btn').textContent.trim(),
+      makeShown: !document.getElementById('oa-needauth-new').hidden,
+      first: document.getElementById('f-first').value,
+    }));
+    ok(!held.user && held.heldFlag, 'gated edit: the account is held, and held() says so');
+    ok(!held.form && held.gate, 'gated edit: the form is not on screen; the gate is');
+    eq([held.heading, held.button, held.makeShown],
+      ['Finish setting up your account to post your candidacy', 'Finish setting up', false],
+      'gated edit: the gate tells a signed-in account to finish setting up, not to sign in or create an account');
+    eq(held.first, '', 'gated edit: nothing has been loaded yet');
+    /* answer the card: the lift */
+    await q.fill('#oa-profile-form [name="affiliation"]', 'Northwestern University');
+    await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+    await q.waitForFunction(() => !!window.OAAccounts.user(), null, { timeout: 8000 });
+    await q.waitForFunction(() => document.getElementById('f-first').value === 'Rosa', null, { timeout: 8000 });
+    const lifted = await q.evaluate(() => ({
+      form: !document.getElementById('oa-cand-form').hidden,
+      inst: document.getElementById('f-institution').value,
+      cv: document.getElementById('f-cvUrl').value,
+      submit: document.getElementById('oa-submit').textContent.trim(),
+      writes: window.__fb.log.filter((e) => e.op === 'update' && /candidateSubmissions/.test(e.path)).length,
+    }));
+    ok(lifted.form && lifted.inst === 'Somewhere University' && lifted.cv === 'https://example.edu/ada-cv.pdf',
+      'gated edit: …and the lift runs the held edit load: the form is FILLED from the stored profile');
+    eq(lifted.submit, 'Save changes', 'gated edit: …in edit mode');
+    eq(lifted.writes, 0, 'gated edit: …with nothing written to the profile');
+    eq(errors, [], 'gated edit: no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- post-a-candidate.html: the unsent draft ----------------------------
+     (2026-09-21) The job form's own, which this form never had: typed,
+     reloaded, restored (a ticked day's talk box included), sent, cleared. */
+  {
+    const { ctx, page: q, errors } = await signedInPage('post-a-candidate.html',
+      { docs: [], selector: '#oa-cand-form:not([hidden])' });
+    await q.fill('#f-first', 'Draft');
+    await q.fill('#f-last', 'Keeper');
+    await q.fill('#f-institution', 'Somewhere University');
+    await q.selectOption('#f-position', 'PhD Candidate');
+    await q.check('input[name="researchAreas"][value="Supply Chain Management"]');
+    await q.check('input[name="informsDays"][value="Monday"]');
+    await q.waitForSelector('.oa-talk[data-day="Monday"]:not([hidden])', { timeout: 8000 });
+    await q.fill('.oa-talk[data-day="Monday"] [data-key="title"]', 'Queueing in Practice');
+    await q.waitForFunction(() => /Queueing in Practice/.test(localStorage.getItem('oa:canddraft:v1') || ''),
+      null, { timeout: 8000 });
+    const saved = JSON.parse(await q.evaluate(() => localStorage.getItem('oa:canddraft:v1')));
+    ok(saved['f-first'] === 'Draft' && saved.__checks.indexOf('informsDays=Monday') !== -1
+       && saved.__talks && saved.__talks['Monday|title'] === 'Queueing in Practice',
+      'draft: every keystroke is kept in this browser, the ticks and the talk box included');
+    await q.reload({ waitUntil: 'load' });
+    await q.waitForSelector('#oa-cand-form:not([hidden])', { timeout: 15000 });
+    await q.waitForFunction(() => document.getElementById('f-first').value === 'Draft', null, { timeout: 8000 });
+    const back = await q.evaluate(() => ({
+      inst: document.getElementById('f-institution').value,
+      monday: document.querySelector('input[name="informsDays"][value="Monday"]').checked,
+      block: !document.querySelector('.oa-talk[data-day="Monday"]').hidden,
+      title: document.querySelector('.oa-talk[data-day="Monday"] [data-key="title"]').value,
+      preview: (document.querySelector('#oa-cand-preview .oa-card-title') || {}).textContent || '',
+    }));
+    ok(back.inst === 'Somewhere University' && back.monday && back.block && back.title === 'Queueing in Practice',
+      'draft: …and a reload restores it, the talk block shown for its restored day');
+    ok(/Draft Keeper/.test(back.preview), 'draft: …with the preview repainted from it');
+    await q.fill('#f-email', 'draft@example.edu');
+    await q.fill('#f-personalEmail', 'draft.keeper@gmail.example');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    eq(await q.evaluate(() => localStorage.getItem('oa:canddraft:v1')), null,
+      'draft: a successful send clears it');
+    eq(errors, [], 'draft: no uncaught script error');
+    await ctx.close();
+  }
+
   /* -- the updated-on line on the SERVED rows ----------------------------- */
   {
     const today = new Date().toISOString().slice(0, 10);

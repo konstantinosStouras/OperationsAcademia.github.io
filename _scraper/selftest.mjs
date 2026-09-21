@@ -6469,6 +6469,9 @@ async function testAccountDeletion() {
     '…the unsent job-form draft above all, which holds the poster\'s own name ' +
     'and address, the chair\'s, and the private note, and is otherwise cleared ' +
     'only by a successful send');
+  ok(/'oa:canddraft:v1'/.test(mod),
+    '…and the candidate form\'s draft beside it (2026-09-21), which holds the ' +
+    'candidate\'s own name and both addresses');
 
   /* NEITHER STEP MAY BE ATTEMPTED TWICE, AND NEITHER MAY ASK FOR A PASSWORD
      (owner, 2026-09-05, reporting an account they could no longer delete: the
@@ -17951,7 +17954,7 @@ async function testSubmissionTokenRefresh() {
       `${where} nor claims the site is not accepting ${plural} yet`);
     ok(/else sayRefused\(\);/.test(submit),
       `${where} answers a refused NEW ${thing} by asking why`);
-    const asks = /function sayRefused\(\) \{[\s\S]*?\n  \}/.exec(src);
+    const asks = /function sayRefused\([^)]*\) \{[\s\S]*?\n  \}/.exec(src);
     ok(asks && /freshClaims\(\)/.test(asks[0])
             && /needsVerification\(\)/.test(asks[0]),
       `${where} sayRefused reloads the account and then asks Firebase itself`);
@@ -19334,6 +19337,139 @@ async function testForumThreadRemoval() {
    helper the callable uses. Pinned here: both senders through siteVerifyLink,
    the mailer's own offline suite, the dispatch-only workflow with its
    scan-by-default input, and the documentation. */
+/* ======================================================================= *
+ *  CANDIDATES WERE TURNED AWAY FOR TWO WEEKS, AND WHAT CHECKING THAT PATH   *
+ *  FOUND (2026-09-21). The outage itself is the ruleset budget, pinned by   *
+ *  testRulesBudgetGuard; this pins what the sweep of the candidate posting  *
+ *  path found beside it. See the CLAUDE.md section of the same name.        *
+ * ======================================================================= */
+async function testCandidateFormHardening() {
+  const root = path.join(HERE, '..');
+  const strip = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const read = (rel) => readFile(path.join(root, rel), 'utf8');
+  const acct = strip(await read('assets/oa-accounts.js'));
+  const candS = strip(await read('assets/oa-candidateform.js'));
+  const jobS = strip(await read('assets/oa-jobform.js'));
+  const placS = strip(await read('assets/oa-placementform.js'));
+
+  /* --- 1. THE whenSignedIn QUEUE IS HELD THROUGH A GATE ------------------
+
+     The three edit forms queue the READ of the document they edit at boot,
+     before the session has resolved. Both gate branches emptied that queue,
+     and the lift then ran an empty one, so a gated owner arriving on ?edit=
+     met a form headed "Edit your profile" with every box blank, and a Save
+     wrote the blanks over the stored document under "Your changes have been
+     saved". Reproduced in a real browser for both gates against the shim,
+     with an ungated control loading correctly. */
+  const gateFn = acct.slice(acct.indexOf('function enterGate('), acct.indexOf('function openGateCard('));
+  ok(gateFn.length > 100 && !/queue\.length = 0/.test(gateFn),
+    'the queue is held: enterGate no longer empties what whenSignedIn queued while the session restored');
+  const verify = acct.slice(acct.indexOf('state.pending = needsVerification(u);'), acct.indexOf('if (u && providerOnly(u)) {'));
+  ok(verify.length > 100 && !/queue\.length = 0/.test(verify),
+    '…and neither does the verification branch: liftVerification runs it through enterSession');
+  const leaving = acct.slice(acct.indexOf('function signOut('), acct.indexOf('function signOut(') + 1200);
+  ok(leaving.length > 100 && /queue\.length = 0;/.test(leaving),
+    '…while a sign-out still drops it, since the account it was queued for is leaving');
+  const enter = acct.slice(acct.indexOf('function enterSession('), acct.indexOf('function settleProvider('));
+  ok(/var q = queue\.splice\(0, queue\.length\);/.test(enter),
+    '…and enterSession, which both lifts go through, is where the held queue runs');
+  ok(/held: function \(\) \{ return !!state\.pending; \}/.test(acct),
+    'oa-accounts.js exports held(): signed in, but behind one of the two gates');
+
+  /* --- 2. THE UNSENT DRAFT, the job form\'s own -------------------------- */
+  ok(/var DRAFT_KEY = 'oa:canddraft:v1';/.test(candS),
+    'the candidate form keeps an unsent draft under its own key');
+  for (const fn of ['draftSave', 'draftRestore', 'draftClear', 'wireDraft']) {
+    ok(new RegExp(`function ${fn}\\(`).test(candS), `…${fn} is defined`);
+  }
+  const restore = /function draftRestore\(\) \{[\s\S]*?\n  \}/.exec(candS);
+  ok(restore && /if \(EDIT_ID\) return;/.test(restore[0]),
+    '…and it never restores into edit mode, where the loaded profile is the truth');
+  ok(restore && /syncTalkBlocks\(\);/.test(restore[0]) && /paintCardPreview\(\);/.test(restore[0]),
+    '…a restored day shows its talk block, and the preview repaints');
+  const save = /function draftSave\(\) \{[\s\S]*?\n  \}/.exec(candS);
+  ok(save && /\.oa-talk input\[data-day\]\[data-key\]/.test(save[0]),
+    '…the per-day talk boxes, which carry no id, are saved by day and key');
+  ok(/wirePreview\(\);\s*wireDraft\(\);/.test(candS), '…wired at boot');
+  const submitC = candS.slice(candS.lastIndexOf('OAAccounts.whenSignedIn'));
+  ok(/sent = true;\s*if \(!EDIT_ID\) draftClear\(\);/.test(submitC),
+    '…and cleared by a successful send of a NEW profile');
+  ok(/'oa:canddraft:v1'/.test(await read('assets/oa-account-delete.js')),
+    'oa-account-delete.js forgets the draft with the device\'s memory: it holds the candidate\'s own name and both addresses');
+
+  /* --- 3. THE CV UPLOAD ------------------------------------------------- */
+  const slot = candS.slice(candS.indexOf('slot.upload = function'), candS.indexOf('slot.applyTo = function'));
+  ok(/setMaxUploadRetryTime\(45000\)/.test(slot) && /setMaxOperationRetryTime\(45000\)/.test(slot),
+    'the CV upload caps the SDK\'s ten-minute silent retry at 45 seconds, as the advert upload has since it shipped');
+  ok(/function discardUpload\(path\)/.test(candS) && /\['delete'\]\(\)/.test(candS),
+    'a file the landing strip accepted for a profile the database then refused is taken back');
+  ok(/if \(uploaded && uploaded\.path && code\.indexOf\('storage\/'\) !== 0\) discardUpload\(uploaded\.path\);/.test(submitC),
+    '…from the submit\'s catch, on every refusal that is not the upload\'s own');
+  ok(/code\.indexOf\('storage\/'\) === 0\) \{/.test(submitC) && /paste a link to your CV instead/.test(submitC),
+    '…and a failed upload names the remedy: try again, or post the CV as a link');
+
+  /* --- 4. ONE DIAGNOSIS FOR THE THREE REFUSALS --------------------------- */
+  for (const [name, src, thing] of [['oa-candidateform.js', candS, 'profile'], ['oa-jobform.js', jobS, 'posting']]) {
+    ok(!new RegExp(`not allowed to change this ${thing}`).test(src),
+      `${name}: a refused SAVE no longer tells the owner their own ${thing} is not theirs`);
+    ok(/if \(EDIT_ID\) sayRefused\('save your changes'\);\s*else sayRefused\(\);/.test(src),
+      `${name}: …the edit path asks why, exactly as a new ${thing} does`);
+    ok(/function sayRefused\(what, button\)/.test(src) && /function btnLabel\(text\)/.test(src),
+      `${name}: sayRefused names what could not be done and the button to press again`);
+    ok(!/press Send/.test(src),
+      `${name}: and no message asks for a button called Send, which the page has never had`);
+  }
+  ok(/sayRefused\('take your profile down', 'Take my profile down'\)/.test(candS),
+    'oa-candidateform.js: a refused take-down gets the same diagnosis');
+  const td = candS.slice(candS.indexOf('function wireTakeDown('), candS.indexOf('function wireTakeDown(') + 4000);
+  ok(td.indexOf('freshClaims(user)') !== -1 && td.indexOf('freshClaims(user)') < td.indexOf('.update({'),
+    '…and re-mints the token before the take-down write, an owner write under verified() like the rest');
+
+  /* --- 5. THE SMALLER ONES ---------------------------------------------- */
+  for (const [name, src] of [['oa-candidateform.js', candS], ['oa-jobform.js', jobS], ['oa-placementform.js', placS]]) {
+    ok(/try \{ return decodeURIComponent\(m\[1\]\); \} catch \(e\) \{ return m\[1\]; \}/.test(src),
+      `${name}: a malformed ?edit= escape no longer throws the whole form away at module evaluation`);
+  }
+  /* the timer is armed BEFORE the submit's signed-in gate, so it is read from
+     the submit handler itself rather than from the slice behind the gate */
+  const handler = candS.slice(candS.lastIndexOf("form.addEventListener('submit'"));
+  const slow = /var slow = setTimeout\(function \(\) \{([\s\S]*?)\}, 45000\);/.exec(handler);
+  ok(slow && /still waiting for the server/.test(slow[1]),
+    'a send that never comes back says so after 45 seconds');
+  ok(slow && !/disabled = false/.test(slow[1]),
+    '…without re-enabling the button, since a second press could file the profile twice');
+  ok((submitC.match(/clearTimeout\(slow\);/g) || []).length === 2,
+    '…and the timer is cleared on the answer and on the refusal');
+  const fillFn = /function fill\(v\) \{[\s\S]*?\n  \}/.exec(candS);
+  ok(fillFn && /\^\(withdrawn\|hidden\|removed\)\$/.test(fillFn[0]) && /currently taken down/.test(fillFn[0])
+     && /show\(\$\('oa-takedown'\), false\)/.test(fillFn[0]),
+    'a taken-down profile says so on its edit page, says saving puts it back, and is not offered Take down again');
+  const page = await read('post-a-candidate.html');
+  ok(/id="oa-needauth-h"/.test(page) && /id="oa-needauth-p"/.test(page),
+    'the gate\'s heading and paragraph are addressable');
+  ok(/function paintGate\(held\)/.test(candS) && /Finish setting up your account to post your candidacy/.test(candS),
+    'a signed-in account held behind a gate is told to finish setting up, not to sign in or create an account');
+  ok(/if \(OAAccounts\.held && OAAccounts\.held\(\)\) OAAccounts\.whenSignedIn\(function \(\) \{\}\);\s*else OAAccounts\.openAuth\(\);/.test(candS),
+    '…its button opening the card that lifts the hold');
+  ok(/paintGate\(!user && !!\(OAAccounts\.held && OAAccounts\.held\(\)\)\);/.test(candS),
+    '…decided on every auth event');
+
+  /* --- 6. THE POLICY, THE FIXTURE, THE RECORD ---------------------------- */
+  const policy = await read('privacy-policy.html');
+  ok(/If you post a candidate profile, it is held privately until the reveal date/.test(policy)
+     && /only if you tick the box/.test(policy),
+    'the Privacy Policy says a candidate profile is published at the reveal, and when the address is');
+  const bc = await readFile(path.join(root, '_scraper', 'build-candidates.mjs'));
+  ok(bc.indexOf(0) === -1, 'build-candidates.mjs carries no raw NUL byte (it made grep read the whole build as binary)');
+  ok(/Queueing\\u0000 Theory/.test(bc.toString('utf8')), '…the control-character fixture is written as the escape it means');
+  const log = JSON.parse(await read('changelog.json'));
+  eq(log.updates[0].id, 'candidate-form-2026-09', 'the change log announces it at index 0');
+  eq(log.updates[0].url, '/post-a-candidate', '…at the extensionless address');
+  const doc = await read('CLAUDE.md');
+  ok(/^## Candidates were turned away for two weeks/m.test(doc), 'CLAUDE.md records it');
+  ok(!/the queue emptied, the listeners/.test(doc), '…and no longer says enterGate empties the queue');
+}
+
 async function testVerifyExistingUsers() {
   const root = path.join(HERE, '..');
   const noDash = (s) => !/—/.test(String(s));
@@ -22973,9 +23109,15 @@ async function testRegistrationFields() {
     'Google account is not asked for a name Google has just handed over');
   const gateFn = acct.slice(acct.indexOf('function enterGate('), acct.indexOf('function openGateCard('));
   for (const line of ["state.pending = 'profile';", 'writeHint(null);', 'markPending(u.uid, true);',
-                      'queue.length = 0;', 'notify(null);', 'if (!leaving) openGateCard(gaps);']) {
+                      'notify(null);', 'if (!leaving) openGateCard(gaps);']) {
     ok(gateFn.includes(line), `the gate: enterGate does what the verification gate does: ${line}`);
   }
+  /* …EXCEPT emptying the queue, which both gates did until 2026-09-21 and
+     neither does now: what whenSignedIn queued while the session restored is
+     the page's own work for this account (an edit form's read of the document
+     it edits), and the lift runs it. See testCandidateFormHardening. */
+  ok(!/queue\.length = 0;/.test(gateFn),
+    'the gate: enterGate HOLDS the whenSignedIn queue for the lift rather than emptying it');
   const lift = acct.slice(acct.indexOf('function liftGate('), acct.indexOf('function openPendingCard('));
   ok(/state\.pending = false;/.test(lift) && /markPending\(u\.uid, false\);/.test(lift)
      && /writeHint\(u, displayName\(u\)\);/.test(lift)
@@ -23309,6 +23451,7 @@ if (isMain(import.meta.url)) {
   await testRulesBudgetGuard();
   await testJobComments();
   await testJobTakedown();
+  await testCandidateFormHardening();
   await testVerifyExistingUsers();
   await testFixAccountEmail();
   await testRegisteredUsersFigure();

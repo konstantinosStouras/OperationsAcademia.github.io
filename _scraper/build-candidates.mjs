@@ -589,7 +589,7 @@ function selftest() {
   const messy = rowFromCandidateSubmission({
     ...base,
     informsDays: ['Sunday', 'Saturday', 'SB15', 'Sunday', 'Tuesday'],
-    researchAreas: ['  Queueing  Theory  ', 'Queueing Theory',
+    researchAreas: ['  Queueing\u0000 Theory  ', 'Queueing Theory',
       'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'],
   }, { now });
   eq(messy.informsDays, ['Sunday', 'Tuesday'],
