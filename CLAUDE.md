@@ -4547,8 +4547,10 @@ Google account is not asked for a name Google has just handed over), then
 branch does for an unconfirmed password account: `state.pending = 'profile'`,
 no hint, `PENDING_KEY` marked (every page's head snippet already reads that
 marker, so the next page paints signed out before any script runs and the
-archive's hint for the account is ignored), the queue emptied, the listeners
-told null so every page locks, and the card opened. `user()` answers null,
+archive's hint for the account is ignored), the `whenSignedIn` queue HELD
+for the lift (it was emptied until 2026-09-21; see "Candidates were turned
+away for two weeks" below for what that cost), the listeners told null so
+every page locks, and the card opened. `user()` answers null,
 `hint()` answers `'out'`, `whenSignedIn`, `openAuth` and `openProfile`
 all route to the card that lifts THIS gate, and the header chip reads
 **Finish registering** with a tooltip naming what is owed. `pendingUser()`
@@ -4956,6 +4958,125 @@ Tests: `testRulesBudgetGuard` in `_scraper/selftest.mjs` (the three ways back,
 each verified by putting the defect back) and
 `node _functions/test/rules-budget.mjs` under `firebase emulators:exec`, which
 is the only thing here that can see the cliff at all.
+
+## Candidates were turned away for two weeks, and what checking that path found
+
+Owner, 2026-09-18, after a job posting had been refused: *"I am worried if
+candidates wanted to post and our website turned them away. Check carefully
+that candidate profile posting is possible and works well as intended."*
+
+**They were, and by the same fault.** The ruleset that crossed Firestore's
+evaluation budget on 2026-09-04 (the section above) is one ruleset, and a
+candidate profile is the dearest document on the site, so every
+`candidateSubmissions` create AND owner edit was refused from that day until
+the fix was published at 20:58 UTC on 2026-09-17. Reproduced against the real
+engine with the pre-fix ruleset: both fail with "maximum of 1000 expressions".
+And the form told them *"The site is not accepting profiles yet, its database
+rules have not been published"*, which reads as "come back later", so nobody
+wrote in: the feedback folder holds one ticket for the fortnight, about a job.
+
+**How many, measured rather than guessed.** `data/analytics.json` is committed
+daily with a page window that always STARTS on 2026-08-17, so subtracting the
+2026-09-05 snapshot from the 2026-09-18 one isolates the outage: **23
+openings** of the candidate form while every save was refused (1.77 a day
+against 1.96 before, so the appetite did not fall), at a mean dwell of **14.3
+minutes against 8.2** (the mean of the window's total seconds, subtracted the
+same way), and **zero profiles filed**: `data/candidates-meta.json` is written
+only when its content changes and its `heldCount` stood at 7 from 2026-09-05
+until the first post-fix profile landed at 13:31 UTC on 2026-09-18. Profiles
+had been arriving at 0.54 a day (3 to 7 between 2026-08-26 and 2026-09-03), so
+somewhere between four and eight candidates were probably lost.
+
+**AND THE ONE RECORD OF WHO IS IN STORAGE.** The form uploads the CV FIRST and
+writes the document second (the order is deliberate, so a profile never points
+at an upload that failed), and `_storage.rules` is a separate ruleset that was
+never near its own budget. So a candidate who attached a CV during the outage
+had it uploaded and only then had the profile refused, and nothing collects
+such a file: the build files only what a document points at, and the deletion
+sweep cannot list orphans. Every object under `uploads/<uid>/candidates/`
+dated 4 to 17 September with no profile behind it is a candidate who was
+turned away, named in the filename. That is the maintainer's list to write
+to, and personal data to clear.
+
+### What the sweep of the path found, and the shape of each fix
+
+A hundred-agent audit of the candidate posting path, each finding refuted by
+three independent verifiers and the survivors reproduced by hand, on top of
+the outage above. Posting a NEW profile was sound (the real form's document
+replayed against the real rules; the CV upload against the real Storage
+rules, boundary included; the reveal exact to the millisecond; the maintainer
+mailed; the copy true). What was not:
+
+* **A gated owner's edit form opened BLANK, and a Save erased the profile.**
+  The three edit forms queue the READ of the document they edit through
+  `whenSignedIn` at boot, before the session has resolved; `enterGate` and
+  the verification branch then ran `queue.length = 0`, and the lift's
+  `enterSession` spliced an empty queue. An owner behind either gate who
+  arrived directly on `?edit=` (a bookmark, history, a pasted link; the
+  account-menu route is a fresh load after the lift and was safe) answered
+  the card and met "Edit your profile" with every box empty; retyping the
+  compelled fields and saving wrote `''` and `[]` over the CV link, the site,
+  the research areas, the INFORMS days, the talks, the department and the
+  e-mail choice, under "Your changes have been saved". **The queue is HELD
+  through both gates now and the lift runs it**; only a sign-out drops it,
+  since the account it was queued for is leaving. The comment that argued for
+  emptying it ("the only thing this account can do is confirm its address")
+  conflated *cannot run now* with *should never run*. Shared module, so all
+  three forms are mended by the one change.
+* **The candidate form had no unsent draft, and no upload retry cap**: two
+  protections the job form has had since its file slot shipped, never carried
+  across. Fourteen minutes of typing was lost to a reload, a closed tab or a
+  send that never came back; and an unreachable Storage service left "0%"
+  with the button dead for the SDK's default ten minutes, then failed with
+  `storage/retry-limit-exceeded` and lost the whole profile with no remedy
+  named. The draft (`oa:canddraft:v1`, the job form's own mechanism with the
+  per-day talk boxes saved by day and key, never restored into edit mode,
+  cleared by a successful send, forgotten by the account-deletion sweep with
+  the rest of the device's memory) and the 45-second cap are both there now,
+  and a failed upload names the one remedy a reader can apply: post the CV
+  as a link.
+* **A file the strip accepted for a profile the database then refused was
+  stranded for ever** (the outage's own evidence, above). The submit's catch
+  now deletes the just-uploaded file, best effort, on every refusal that is
+  not the upload's own.
+* **A refused SAVE said "You are not allowed to change this profile"**, on
+  both forms: the owner told their own profile was not theirs, with nothing
+  to press. An edit is refused for the reason a new profile is, a stale
+  token, so `sayRefused(what, button)` gives all three writes (new, edit,
+  take-down) the one diagnosis, naming what could not be done and QUOTING THE
+  BUTTON to press again; "press Send" named a button neither page has ever
+  had. The take-down re-mints the token first, as the submit does.
+* **The rest**: a signed-in account held behind a gate was told to sign in or
+  create an account, both of which it had done (the gate now says finish
+  setting up, and its button opens the card that lifts the hold, through
+  `OAAccounts.held()`); the edit page never said a profile was currently
+  taken down and offered to take it down again (it says so, says saving puts
+  it back, and hides the control); a malformed percent-escape in `?edit=`
+  threw at module evaluation and left no form, no gate and no message (a
+  try/catch, on all three forms); a send that never comes back said
+  "Sending…" for ever (after 45 seconds the status line says so and, for a
+  new profile, that the draft is kept; the button stays disabled, since a
+  second press could file it twice); the Privacy Policy never said a
+  candidate profile is published at all, nor what the e-mail opt-in does; and
+  a raw NUL byte in a `build-candidates.mjs` test fixture made grep read the
+  whole build as binary (it is the `\u0000` escape now).
+
+**Deliberately not changed here**: the research-area comma split is the
+owner's own rule (2026-08-30); the candidates build applying approved name
+corrections is a pipeline change of its own; and the publishing gate that
+freezes `heldCount` while any guard is red is the recorded design.
+
+Tests: `testCandidateFormHardening` in `_scraper/selftest.mjs` (both gates
+holding the queue and the sign-out still dropping it, `held()`, every draft
+function with its edit-mode refusal and its talk boxes, the retry cap, the
+discard and the remedy, one diagnosis on both forms with no "not allowed"
+and no "Send", the try/catch on all three, the slow-send line with the button
+left disabled, the taken-down note, the gate's words and its button, the
+policy, the fixture and this record), the moved `enterGate` pin in
+`testRegistrationFields`, and in `_scraper/page-test.mjs` a gated Google
+account arriving on its own `?edit=` link: the gate's new words, the card,
+the lift, the form FILLED from the stored profile with no write made; and the
+draft round trip, typed, reloaded, restored, sent, cleared.
 
 ## The forum
 

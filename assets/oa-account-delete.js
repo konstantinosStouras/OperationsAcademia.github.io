@@ -702,7 +702,7 @@
       to some OTHER account here is somebody else's. Each removal is wrapped,
       because a private window throws on the accessor itself. */
   function forgetThisDevice(uid) {
-    var LOCAL = ['oa:jobdraft:v1', 'oaFreshJobs', 'oaAuthPending',
+    var LOCAL = ['oa:jobdraft:v1', 'oa:canddraft:v1', 'oaFreshJobs', 'oaAuthPending',
       'oaProfileAsked:' + uid];
     var SESSION = ['oaDir:' + uid, 'oaTally:' + uid, 'oaAskProfile:' + uid];
     LOCAL.forEach(function (k) {

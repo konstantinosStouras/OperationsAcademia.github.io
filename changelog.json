@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "candidate-form-2026-09",
+      "date": "2026-09-21",
+      "title": "The candidate profile form, checked end to end and hardened",
+      "summary": "For two weeks in September every candidate profile was refused at the door, by a database rule that had grown past its evaluation budget, and the form blamed unpublished rules and told candidates to wait. That is fixed and profiles are being filed again. Checking the whole path afterwards found more to mend, now done: what you type into the form is kept as a draft in your browser until it is sent, so a reload or a lost connection no longer loses a quarter of an hour of work; a CV upload that cannot get through gives up after 45 seconds and says what to do instead of sitting at 0% for ten minutes; a profile you are editing is loaded even when the site first asks you to finish setting up your account (it used to open blank, and saving then wiped it); a refused save now says why, with something to press; the edit page says when a profile is currently taken down; and the Privacy Policy says what happens to a candidate profile.",
+      "url": "/post-a-candidate"
+    },
+    {
       "id": "job-takedown-2026-09",
       "date": "2026-09-18",
       "title": "Taking a job posting down, from wherever you are looking at it",

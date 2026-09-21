@@ -130,33 +130,49 @@
       The rules are deliberately not mentioned: it is not a cause a reader
       could act on, and naming it is what turned this into a support ticket.
       The console still carries the code for whoever reads the log. */
-  function sayRefused() {
-    say('The site could not accept the posting — checking why…');
+  /** The submit button's own words, quoted, for the messages that ask the
+      reader to press it again: "press Send" named a button this page has
+      never had (it says Post this job, or Save changes in edit mode). */
+  function btnLabel(text) {
+    var b = $('oa-submit');
+    return '“' + String(text || (b && b.textContent) || 'Post this job').trim() + '”';
+  }
+
+  /** @param what   what the site could not do: 'accept the posting' (the
+                    default, a new one) or 'save your changes' (an edit). An
+                    edit is refused for the same reason a new posting is, a
+                    stale token, so it gets the same diagnosis rather than
+                    "not allowed to change this posting".
+      @param button the control to press again, when it is not the submit. */
+  function sayRefused(what, button) {
+    what = what || 'accept the posting';
+    var press = 'press ' + btnLabel(button);
+    say('The site could not ' + what + ' — checking why…');
     freshClaims().then(function () {
       /* A TERMINAL auth failure is the one refusal no retry can clear.
          freshClaims is best effort and swallows its own errors, so an account
          whose Auth record has gone — a deletion that has been carried out, or
          the duplicate side of a merge — reaches here with no session at all,
-         and "press Send once more" would be an instruction to keep pressing
+         and "press it once more" would be an instruction to keep pressing
          for ever. Asked before the address, because an account that is gone
          has no address to confirm. */
       if (OAAccounts.user && !OAAccounts.user()
           && !(OAAccounts.needsVerification && OAAccounts.needsVerification())) {
-        say('You are no longer signed in, so the site could not accept the posting. ' +
-            'Sign in again and press Send once more — nothing you have typed has ' +
+        say('You are no longer signed in, so the site could not ' + what + '. ' +
+            'Sign in again and ' + press + ' once more — nothing you have typed has ' +
             'been lost.', 'err');
         if (OAAccounts.openAuth) OAAccounts.openAuth();
         return;
       }
       if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
         say('Your e-mail address has not been confirmed yet, so the site could not ' +
-            'accept the posting. Press the link in the message from Operations ' +
+            what + '. Press the link in the message from Operations ' +
             'Academia — or ask for a new one on the card that has just opened — and ' +
-            'then press Send again. Nothing you have typed has been lost.', 'err');
+            'then ' + press + ' again. Nothing you have typed has been lost.', 'err');
         if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
         return;
       }
-      say('The site could not accept the posting just now. Please press Send once ' +
+      say('The site could not ' + what + ' just now. Please ' + press + ' once ' +
           'more — nothing you have typed has been lost. If it is refused again, ' +
           'tell us through the Feedback page and we will post it for you.', 'err');
     });
@@ -1145,7 +1161,11 @@
 
   var EDIT_ID = (function () {
     var m = /[?&]edit=([^&]+)/.exec(location.search);
-    return m ? decodeURIComponent(m[1]) : '';
+    if (!m) return '';
+    // a malformed escape must not throw the whole form away at module
+    // evaluation (see oa-candidateform.js): the raw value is an id no
+    // document has, which the edit load answers honestly
+    try { return decodeURIComponent(m[1]); } catch (e) { return m[1]; }
   })();
   var EDIT_REF = '';
 
@@ -1729,7 +1749,7 @@
           } else if (code === 'storage/unauthorized') {
             sayFileRefused();
           } else if (code === 'permission-denied') {
-            if (EDIT_ID) say('You are not allowed to change this posting.', 'err');
+            if (EDIT_ID) sayRefused('save your changes');
             else sayRefused();
           } else {
             say('We could not send your posting. Please try again in a moment.' +
