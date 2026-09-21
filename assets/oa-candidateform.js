@@ -176,33 +176,48 @@
       So the page ASKS rather than asserting — see the same function in
       assets/oa-jobform.js, which this deliberately matches word for word
       where the wording is not about a profile. */
-  function sayRefused() {
-    say('The site could not accept your profile — checking why…');
+  /** The submit button's own words, quoted, for the messages that ask the
+      reader to press it again: "press Send" named a button this page has
+      never had (it says Post my profile, or Save changes in edit mode). */
+  function btnLabel(text) {
+    var b = $('oa-submit');
+    return '“' + String(text || (b && b.textContent) || 'Post my profile').trim() + '”';
+  }
+
+  /** @param what   what the site could not do: 'accept your profile' (the
+                    default, a new one), 'save your changes' (an edit),
+                    'take your profile down'. The three refusals are one
+                    refusal, a stale token, so they get one diagnosis.
+      @param button the control to press again, when it is not the submit. */
+  function sayRefused(what, button) {
+    what = what || 'accept your profile';
+    var press = 'press ' + btnLabel(button);
+    say('The site could not ' + what + ' — checking why…');
     freshClaims().then(function () {
       /* A TERMINAL auth failure is the one refusal no retry can clear.
          freshClaims is best effort and swallows its own errors, so an account
          whose Auth record has gone — a deletion that has been carried out, or
          the duplicate side of a merge — reaches here with no session at all,
-         and "press Send once more" would be an instruction to keep pressing
+         and "press it once more" would be an instruction to keep pressing
          for ever. Asked before the address, because an account that is gone
          has no address to confirm. */
       if (OAAccounts.user && !OAAccounts.user()
           && !(OAAccounts.needsVerification && OAAccounts.needsVerification())) {
-        say('You are no longer signed in, so the site could not accept your profile. ' +
-            'Sign in again and press Send once more — nothing you have typed has ' +
+        say('You are no longer signed in, so the site could not ' + what + '. ' +
+            'Sign in again and ' + press + ' once more — nothing you have typed has ' +
             'been lost.', 'err');
         if (OAAccounts.openAuth) OAAccounts.openAuth();
         return;
       }
       if (OAAccounts.needsVerification && OAAccounts.needsVerification()) {
         say('Your e-mail address has not been confirmed yet, so the site could not ' +
-            'accept your profile. Press the link in the message from Operations ' +
+            what + '. Press the link in the message from Operations ' +
             'Academia — or ask for a new one on the card that has just opened — and ' +
-            'then press Send again. Nothing you have typed has been lost.', 'err');
+            'then ' + press + ' again. Nothing you have typed has been lost.', 'err');
         if (OAAccounts.openVerifyPanel) OAAccounts.openVerifyPanel();
         return;
       }
-      say('The site could not accept your profile just now. Please press Send once ' +
+      say('The site could not ' + what + ' just now. Please ' + press + ' once ' +
           'more — nothing you have typed has been lost. If it is refused again, ' +
           'tell us through the Feedback page and we will file it for you.', 'err');
     });
@@ -791,6 +806,16 @@
       if (!slot.file) return Promise.resolve(null);
 
       return OAFB.readyStorage().then(function (fb) {
+        /* The SDK's default is to retry a failing upload silently for TEN
+           MINUTES before erroring, which on a blocking extension, a proxy or
+           a Storage outage reads as "0%" with the button dead. The job form
+           has capped this at 45 seconds since its file slot shipped; this
+           one never did. A real upload that is making progress is not
+           affected by the timer. */
+        try {
+          fb.storage().setMaxUploadRetryTime(45000);
+          fb.storage().setMaxOperationRetryTime(45000);
+        } catch (e) { /* older SDK: the defaults apply */ }
         var clean = String(slot.file.name || what)
           .replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120) || prefix;
         var path = 'uploads/' + user.uid + '/candidates/' + Date.now() + '-' + clean;
@@ -847,6 +872,117 @@
 
   var cvSlot;
 
+  /** Take back a file the landing strip accepted for a submission the
+      database then REFUSED. The build files only what a document points at
+      and the deletion sweep cannot list orphans, so without this the file
+      sits there for ever with the candidate's name on it; every CV attached
+      during the fortnight of 2026-09 when every profile was refused was
+      stranded exactly so. Best effort: what this misses, the maintainer's
+      read/delete rule can clear. */
+  function discardUpload(path) {
+    try {
+      OAFB.readyStorage().then(function (fb) {
+        return fb.storage().ref(path)['delete']();
+      }).catch(function () { /* left for the maintainer */ });
+    } catch (e) { /* no storage module */ }
+  }
+
+  /* ------------------------------------------------------- the unsent draft
+
+     THE JOB FORM'S OWN, WHICH THIS FORM NEVER HAD. A candidate spends a quarter
+     of an hour on this page (measured: 8 minutes before the 2026-09 outage,
+     14 during it), and a reload, a crash, a closed tab or a send that never
+     comes back threw every field away. Every keystroke is kept in this
+     browser under DRAFT_KEY, restored into a NEW profile's form on the next
+     visit, never into edit mode (the loaded profile is the truth there), and
+     cleared by a successful send. The chosen CV cannot be kept, since a File
+     handle does not survive the page; the fields are the part that hurts to
+     lose. Personal data, so oa-account-delete.js forgets it with the rest
+     of the device's memory when the account goes. */
+
+  var DRAFT_KEY = 'oa:canddraft:v1';
+  var draftTimer = null;
+
+  function draftSave() {
+    try {
+      var form = $('oa-cand-form');
+      if (!form || EDIT_ID) return;
+      var data = {};
+      Array.prototype.forEach.call(
+        form.querySelectorAll('input[id], select[id], textarea[id]'),
+        function (el) {
+          if (el.type === 'file' || el.type === 'hidden' || el.type === 'checkbox') return;
+          if (el.value) data[el.id] = el.value;
+        });
+      var ticked = [];
+      Array.prototype.forEach.call(
+        form.querySelectorAll('input[type="checkbox"]:checked'),
+        function (cb) { ticked.push(cb.name + '=' + cb.value); });
+      if (ticked.length) data.__checks = ticked;
+      // the per-day talk boxes carry no id: day and key name them
+      var talks = {};
+      Array.prototype.forEach.call(
+        form.querySelectorAll('.oa-talk input[data-day][data-key]'),
+        function (el) {
+          if (el.value) talks[el.getAttribute('data-day') + '|' + el.getAttribute('data-key')] = el.value;
+        });
+      if (Object.keys(talks).length) data.__talks = talks;
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+    } catch (e) { /* private mode / quota: a draft is best-effort */ }
+  }
+
+  function draftRestore() {
+    try {
+      if (EDIT_ID) return;
+      var raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      Object.keys(data).forEach(function (id) {
+        if (id === '__checks' || id === '__talks') return;
+        var el = $(id);
+        if (el && !el.value) el.value = data[id];
+      });
+      (data.__checks || []).forEach(function (pair) {
+        var i = pair.indexOf('=');
+        var name = pair.slice(0, i), value = pair.slice(i + 1);
+        var box = document.querySelector(
+          'input[type="checkbox"][name="' + name + '"][value="' + CSS.escape(value) + '"]');
+        /* a box with no `value` attribute saves as "on" and matches no
+           [value=…] selector: the e-mail opt-in is one */
+        if (!box && value === 'on') {
+          box = document.querySelector('input[type="checkbox"][name="' + name + '"]:not([value])');
+        }
+        if (box) box.checked = true;
+      });
+      Object.keys(data.__talks || {}).forEach(function (k) {
+        var at = k.indexOf('|');
+        var el = document.querySelector('.oa-talk input[data-day="' + k.slice(0, at) +
+          '"][data-key="' + k.slice(at + 1) + '"]');
+        if (el && !el.value) el.value = data.__talks[k];
+      });
+      syncTalkBlocks();                 // a restored day shows its talk block
+      // the cascade and the preview follow the restored names: `change`, not
+      // `input`, since the picker reads `input` as typing and opens
+      var school = $('f-school');
+      if (school) school.dispatchEvent(new Event('change', { bubbles: true }));
+      paintCardPreview();
+    } catch (e) { /* a corrupt draft is discarded by the next save */ }
+  }
+
+  function draftClear() {
+    clearTimeout(draftTimer);   // a save still pending would put it straight back
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* private mode */ }
+  }
+
+  function wireDraft() {
+    var form = $('oa-cand-form');
+    if (!form) return;
+    draftRestore();
+    var later = function () { clearTimeout(draftTimer); draftTimer = setTimeout(draftSave, 400); };
+    form.addEventListener('input', later);
+    form.addEventListener('change', later);
+  }
+
   /* ------------------------------------------------------------ edit mode
 
      `?edit=<document id>` turns this page from "post your candidacy" into
@@ -857,12 +993,34 @@
 
   var EDIT_ID = (function () {
     var m = /[?&]edit=([^&]+)/.exec(location.search);
-    return m ? decodeURIComponent(m[1]) : '';
+    if (!m) return '';
+    /* a malformed escape (`?edit=%E0%A4%A`) used to THROW here, at module
+       evaluation, and take the whole form with it: no form, no gate, no
+       message. The raw value is an id that no document has, which the edit
+       load answers honestly ("That profile no longer exists"). */
+    try { return decodeURIComponent(m[1]); } catch (e) { return m[1]; }
   })();
   var EDIT_REF = '';
 
   /** Put a loaded document back into the form. The inverse of collect(). */
   function fill(v) {
+    /* A TAKEN-DOWN PROFILE SAYS SO. The intro announces "you are editing your
+       profile" and the one extra control is "Take my profile down", which on
+       a profile that is already down offers what has already been done; and
+       nothing said that saving PUTS IT BACK, which is what the submit does
+       (status back to 'queued'). The build stamps a withdrawal 'removed'
+       once applied, so all three words are the same state to the reader. */
+    if (/^(withdrawn|hidden|removed)$/.test(String((v && v.status) || ''))) {
+      var intro = $('oa-intro');
+      if (intro) {
+        var note = document.createElement('p');
+        note.id = 'oa-edit-down';
+        note.innerHTML = '<strong>This profile is currently taken down</strong> and is ' +
+          'not shown on the site. Saving your changes puts it back up.';
+        intro.insertBefore(note, intro.firstChild);
+      }
+      show($('oa-takedown'), false);
+    }
     function set(id, value) { var el = $(id); if (el) el.value = value == null ? '' : value; }
     function ticks(name, values) {
       var want = {};
@@ -1254,7 +1412,11 @@
       say('Taking your profile down…');
 
       OAAccounts.whenSignedIn(function (user) {
-        OAFB.ready().then(function (fb) {
+        /* the same stale-token refusal the submit re-mints against: a
+           take-down is an owner write under verified() too */
+        freshClaims(user).then(function () {
+          return OAFB.ready();
+        }).then(function (fb) {
           /* The forum's membership marker (candidateMarkers/{uid}) goes with
              a withdrawal, belt and braces: the rules re-read the profile on
              every forum request and already refuse a withdrawn one, so this
@@ -1311,9 +1473,8 @@
           done.scrollIntoView({ block: 'start', behavior: 'smooth' });
         }).catch(function (err) {
           btn.disabled = false;
-          say(err && err.code === 'permission-denied'
-            ? 'You are not allowed to change this profile.'
-            : 'We could not take it down. Please try again.', 'err');
+          if (err && err.code === 'permission-denied') sayRefused('take your profile down', 'Take my profile down');
+          else say('We could not take it down. Please try again.', 'err');
           if (window.console) console.error('take down:', err);
         });
       });
@@ -1367,6 +1528,7 @@
     paintYearNote();
     wireVocab();
     wirePreview();
+    wireDraft();
 
     var sent = false;                 // latched once the profile has been written
     var form = $('oa-cand-form');
@@ -1379,7 +1541,41 @@
       return;
     }
 
-    $('oa-needauth-btn').addEventListener('click', function () { OAAccounts.openAuth(); });
+    /* the gate's words as shipped, so paintGate can put them back */
+    var GATE = { h: $('oa-needauth-h') && $('oa-needauth-h').textContent,
+                 p: $('oa-needauth-p') && $('oa-needauth-p').innerHTML,
+                 btn: $('oa-needauth-btn').textContent };
+
+    /** Who is behind the gate: a reader who has not signed in, or an account
+        that HAS and is held until it finishes registering (an unconfirmed
+        address, or a provider account short of its profile). The shipped
+        words told the second kind to sign in or create an account, both of
+        which they had done; the card that lifts the hold is what they need,
+        and OAAccounts.whenSignedIn opens it. */
+    function paintGate(held) {
+      var h = $('oa-needauth-h'), p = $('oa-needauth-p');
+      var btn = $('oa-needauth-btn'), make = $('oa-needauth-new');
+      if (!h || !p) return;
+      if (held) {
+        h.textContent = 'Finish setting up your account to post your candidacy';
+        p.textContent = 'You are signed in, but your account has one step left before it ' +
+          'can post: confirming your e-mail address, or saying who you are. Press the ' +
+          'button and the card that finishes it opens; the form is ready the moment ' +
+          'it is done.';
+        btn.textContent = 'Finish setting up';
+        show(make, false);
+      } else {
+        h.textContent = GATE.h;
+        p.innerHTML = GATE.p;
+        btn.textContent = GATE.btn;
+        show(make, true);
+      }
+    }
+
+    $('oa-needauth-btn').addEventListener('click', function () {
+      if (OAAccounts.held && OAAccounts.held()) OAAccounts.whenSignedIn(function () {});
+      else OAAccounts.openAuth();
+    });
     $('oa-needauth-new').addEventListener('click', function () { OAAccounts.openAuth('register'); });
 
     /* Clear a field's error as soon as the reader acts on it — see the note
@@ -1505,6 +1701,7 @@
 
       show(form, !!user);
       show(needauth, !user);
+      paintGate(!user && !!(OAAccounts.held && OAAccounts.held()));
       // the intro explains a form that is not on screen while signed out,
       // and so does the preview under it
       show($('oa-intro'), !!user);
@@ -1522,6 +1719,17 @@
       btn.disabled = true;
       var verb = EDIT_ID ? 'Saving… ' : 'Sending… ';
       say(EDIT_ID ? 'Saving…' : 'Sending…');
+      var uploaded = null;             // what the landing strip took, if anything
+      /* A write on a dropped connection neither resolves nor rejects, and the
+         button is disabled for the length of it, so after a while the status
+         line has to say something true. It does NOT re-enable the button: a
+         second press could file the profile twice when the connection comes
+         back. The draft is what makes "reload" cost nothing. */
+      var slow = setTimeout(function () {
+        say(verb + 'still waiting for the server. If your connection has dropped, ' +
+            (EDIT_ID ? 'reload this page and press Save changes again.'
+                     : 'reload this page: what you have typed is kept as a draft.'));
+      }, 45000);
 
       OAAccounts.whenSignedIn(function (user) {
         /* THE TOKEN THE RULES READ, FIRST OF ALL. Both the Storage rule on the
@@ -1537,6 +1745,7 @@
             say(verb + 'uploading your CV (' + pct + '%)');
           });
         }).then(function (cvUp) {
+          uploaded = cvUp;
           cvSlot.applyTo(doc, cvUp);
           return OAFB.ready();
         }).then(function (fb) {
@@ -1581,7 +1790,9 @@
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
           return c.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
+          clearTimeout(slow);
           sent = true;
+          if (!EDIT_ID) draftClear();
           /* A NEW profile is one more than the account held: the menu's
              "My candidate profile" row appears from this moment, not from
              the next session's refresh. An edit changes nothing here (the
@@ -1614,12 +1825,28 @@
           show($('oa-done'), true);
           $('oa-done').scrollIntoView({ block: 'start', behavior: 'smooth' });
         }).catch(function (err) {
+          clearTimeout(slow);
           btn.disabled = false;
           var code = (err && err.code) || '';
+          // the file first, then the document that references it: a refusal
+          // past the upload has left a file nothing else will ever collect
+          if (uploaded && uploaded.path && code.indexOf('storage/') !== 0) discardUpload(uploaded.path);
           if (code === 'storage/unauthorized') {
             sayFileRefused();
+          } else if (code.indexOf('storage/') === 0) {
+            /* the upload failed, so the profile was never written; the one
+               remedy a reader can apply themselves is to post the CV as a
+               link instead, and the message says so */
+            say('We could not upload your CV (' + code + '), so your profile was not ' +
+                'sent. Nothing you have typed has been lost: press ' + btnLabel() +
+                ' to try again, and if it keeps failing press Remove on the file and ' +
+                'paste a link to your CV instead.', 'err');
           } else if (code === 'permission-denied') {
-            if (EDIT_ID) say('You are not allowed to change this profile.', 'err');
+            /* an EDIT is refused for the same reason a new profile is, a
+               stale token, so it gets the same diagnosis: "not allowed to
+               change this profile" told the owner their own profile was not
+               theirs and offered nothing to press */
+            if (EDIT_ID) sayRefused('save your changes');
             else sayRefused();
           } else {
             say('We could not send your profile. Please try again in a moment.' +

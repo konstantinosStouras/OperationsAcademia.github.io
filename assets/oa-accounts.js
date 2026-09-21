@@ -4019,7 +4019,16 @@
     writeHint(null);
     markPending(u.uid, true);
     paint();
-    queue.length = 0;
+    /* THE QUEUE IS HELD FOR THE LIFT, NOT EMPTIED. What whenSignedIn() queued
+       while the session restored is this page's own work for the account that
+       has just turned out to be signed in: the three edit forms queue the READ
+       of the posting or profile being edited at boot, before anything has
+       resolved. Emptying it here (as this did until 2026-09-21) meant a gated
+       owner arriving on ?edit= met a form headed "Edit your profile" with
+       every box blank once they had answered the card, and a Save then wrote
+       the blanks over the stored document under "Your changes have been
+       saved". liftGate enters through enterSession, which runs the queue;
+       Sign out instead drops it, since signOut clears it. */
     if (!leaving) openGateCard(gaps);
     notify(null);
   }
@@ -4104,15 +4113,16 @@
            read, no roster row, no tally, no identity keys, no counts, and the
            listeners hear null so every page locks. The card opens unless it
            is already open, which is the registration path, where the form
-           has just drawn it with its own wording; anything queued while the
-           session restored is dropped, since the only thing this account can
-           do is confirm its address. */
+           has just drawn it with its own wording. Anything queued while the
+           session restored is HELD for the lift rather than dropped: it is
+           the page's work for this very account (an edit form's read of the
+           document it is editing), and liftVerification runs it through
+           enterSession once the address is confirmed. See enterGate. */
         state.pending = needsVerification(u);
         if (state.pending) {
           writeHint(null);
           markPending(u.uid, true);      // and a hint /v2/ writes for it is ignored
           paint();
-          queue.length = 0;
           /* the register card opens its own, with the 'sent' lede, once the
              account is made: not this one over it (see regBusy) */
           if (!$('#oa-verify') && !regBusy) openVerifyPanel(null, null, true);
@@ -4261,6 +4271,11 @@
     /** The unconfirmed account itself, for the verify page and the card;
         null when there is none. The one export that can see it. */
     pendingUser: function () { return state.pending && state.pending !== 'profile' ? state.user : null; },
+    /** True while a signed-in account is HELD behind either gate (an
+        unconfirmed address, or a provider account short of its profile), so a
+        page can say "finish setting up your account" instead of "sign in" to
+        somebody who already has. whenSignedIn() opens the card that lifts it. */
+    held: function () { return !!state.pending; },
     needsVerification: function (u) { return needsVerification(u || state.user); },
     sendVerification: function () { return sendVerification(); },
     confirmVerified: function () { return confirmVerified(); },
