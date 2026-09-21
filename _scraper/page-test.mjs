@@ -10870,7 +10870,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(/If a message from Operations Academia reached/.test(st.lede) && !/on its way/.test(st.lede)
        && st.sendLabel === 'Send the e-mail',
       'verify: on a sign-in, where nothing was sent, the card promises nothing "on its way" and the button offers to send it');
-    ok(/spam/i.test(st.text) && /operationsacademia@gmail\.com/.test(st.text),
+    ok(/spam/i.test(st.text) && /operations\.academia@gmail\.com/.test(st.text),
       'verify: …and says to look in spam, naming the sender');
     ok(st.cards > 1 && st.locked === st.cards,
       `verify: every card on the jobs page is LOCKED for the pending account (${st.locked} of ${st.cards})`);
