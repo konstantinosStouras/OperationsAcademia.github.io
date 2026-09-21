@@ -48,6 +48,19 @@
    2026-09-21. The CV is the only thing that survived. The invite is the
    whole of the rebuild: each candidate posts once more, which now takes a
    few minutes and is kept as a draft while they type.
+
+   THE USAGE RECORD IS THE BETTER LIST, and the first run proved it. On
+   2026-09-21 the strip held no candidate CV from the outage at all: the CV
+   is optional and most candidates paste a link, so a refused profile left
+   nothing in Storage. What every signed-in visit DOES leave is a document in
+   usageSessions (assets/oa-usage.js): the page, when, which buttons were
+   pressed and which fields were touched, never what was typed. A signed-in
+   account that pressed "Post my profile" on the candidate form inside the
+   window and holds no profile is a candidate the site refused, so the same
+   run reads those sessions (--scan, --report and --invite alike) and lists
+   them beside the CVs, marked `visit`. An account that opened the form and
+   pressed nothing, or pressed Save changes on a profile it already had, is
+   reported and never written to.
    --------------------------------------------------------------------------- */
 
 import { isMain } from './_main.mjs';
@@ -87,6 +100,13 @@ export const KINDS = {
   jobs: { collection: 'jobSubmissions', paths: ['adUploadPath'] },
 };
 export const LIVE = ['queued', 'published'];
+/** The candidate form's page as oa-usage.js files it (the pathname, with or
+    without .html, with or without a query), the words on the two buttons a
+    refused press was made with, and how many usage documents one read asks
+    for. */
+export const FORM_PAGE = '/post-a-candidate';
+export const PRESS = { post: /^post my profile$/i, save: /^save changes$/i };
+export const SESSION_PAGE = 5000;
 /** Where the report goes: the same address the build's change e-mail uses. */
 export const ADMIN = process.env.ADMIN_NOTIFY || 'kstouras@gmail.com';
 
@@ -133,8 +153,13 @@ export function orphans(files, referenced) {
     whose account has no profile this season and has not been invited, is
     written to; everything else is reported and left where it is. */
 export function nextStep(row, ctx) {
-  if (row.kind !== 'candidates') return 'job-advert';
-  if (!row.inOutage) return 'outside-window';
+  if (row.kind === 'visit') {
+    if (!row.pressed) return 'opened-only';
+    if (row.pressed === 'save') return 'edit-refused';
+  } else {
+    if (row.kind !== 'candidates') return 'job-advert';
+    if (!row.inOutage) return 'outside-window';
+  }
   if (ctx.profiled.has(row.uid)) return 'came-back';
   if (ctx.invited.has(row.uid)) return 'invited';
   if (!String(row.email || '').trim()) return 'no-address';
@@ -148,59 +173,146 @@ export function cleanable(row, ctx) {
     && (ctx.profiled.has(row.uid) || ctx.invited.has(row.uid));
 }
 
+/** Is this usage session an opening of the candidate form? */
+export function onCandidateForm(page) {
+  const p = String(page || '');
+  if (p === FORM_PAGE || p === FORM_PAGE + '.html') return true;
+  return p.startsWith(FORM_PAGE + '?') || p.startsWith(FORM_PAGE + '.html?');
+}
+
+/** Which of the form's buttons a session pressed, read off the button's own
+    words in the click record: 'post', 'save' or ''. Post wins over Save. */
+export function pressOf(clicks) {
+  let out = '';
+  for (const c of clicks || []) {
+    const x = String((c && c.x) || '').trim();
+    if (PRESS.post.test(x)) return 'post';
+    if (PRESS.save.test(x)) out = 'save';
+  }
+  return out;
+}
+
+/** The signed-in accounts that opened the candidate form inside the window,
+    one row per account, folded from the site's own usage record: how many
+    sessions, the first and last instant, whether a button was pressed, how
+    many distinct fields were touched, and the address the session carried.
+    Anonymous sessions are not accounts and are dropped; what was typed was
+    never recorded, so nothing here can say what the profile would have said. */
+export function visitorsOf(sessions, w = OUTAGE) {
+  const from = Date.parse(w.from), to = Date.parse(w.to);
+  const by = new Map();
+  for (const s of sessions || []) {
+    if (!s || typeof s.uid !== 'string' || !s.uid || /^anon:/.test(s.uid)) continue;
+    if (!onCandidateForm(s.page)) continue;
+    const start = Number(s.start);
+    if (!(start >= from && start <= to)) continue;
+    const v = by.get(s.uid) || { uid: s.uid, kind: 'visit', email: '', sessions: 0, at: '', last: '',
+      inOutage: true, pressed: '', presses: 0, touched: new Set(), dur: 0 };
+    v.sessions++;
+    const iso = new Date(start).toISOString();
+    if (!v.at || iso < v.at) v.at = iso;
+    const end = Number(s.last) >= start ? Number(s.last) : start;
+    const lastIso = new Date(end).toISOString();
+    if (!v.last || lastIso > v.last) v.last = lastIso;
+    v.dur += Math.max(0, Number(s.dur) || 0);
+    const p = pressOf(s.clicks);
+    if (p) v.presses++;
+    if (p === 'post' || (p && !v.pressed)) v.pressed = p;
+    for (const f of s.fields || []) if (f && f.f) v.touched.add(String(f.f));
+    if (!v.email && s.email) v.email = String(s.email).trim();
+    by.set(s.uid, v);
+  }
+  return [...by.values()].map((v) => Object.assign(v, { touched: v.touched.size }))
+    .sort((a, b) => a.at.localeCompare(b.at));
+}
+
+/** Counts over the orphans and the visits together. A person is counted once
+    per step, since one account can be both a stranded CV and a visit. */
 export function tally(rows) {
-  const c = { orphans: rows.length, candidates: 0, jobs: 0, outage: 0, invite: 0,
-    'came-back': 0, invited: 0, 'no-address': 0, 'outside-window': 0, 'job-advert': 0 };
+  const c = { orphans: 0, candidates: 0, jobs: 0, outage: 0, invite: 0,
+    'came-back': 0, invited: 0, 'no-address': 0, 'outside-window': 0, 'job-advert': 0,
+    visits: 0, pressed: 0, 'opened-only': 0, 'edit-refused': 0 };
+  const seen = new Set();
   for (const r of rows) {
-    c[r.kind === 'jobs' ? 'jobs' : 'candidates']++;
-    if (r.inOutage) c.outage++;
-    if (r.step in c) c[r.step]++;
+    if (r.kind === 'visit') {
+      c.visits++;
+      if (r.pressed === 'post') c.pressed++;
+    } else {
+      c.orphans++;
+      c[r.kind === 'jobs' ? 'jobs' : 'candidates']++;
+      if (r.inOutage) c.outage++;
+    }
+    const key = r.uid + '|' + r.step;
+    if (r.step in c && !seen.has(key)) { c[r.step]++; seen.add(key); }
   }
   return c;
 }
 
 export function summarise(c) {
-  return `${c.orphans} orphaned upload(s) on the landing strip (${c.candidates} CV(s), ${c.jobs} job advert(s)); ` +
-    `${c.outage} from the outage window. Of the candidates turned away: ${c.invite} to invite, ` +
-    `${c.invited} already invited, ${c['came-back']} posted a profile since, ${c['no-address']} with no address; ` +
-    `${c['outside-window']} CV(s) orphaned outside the window and ${c['job-advert']} job advert(s) are reported and left alone.`;
+  return `${c.orphans} orphaned upload(s) on the landing strip (${c.candidates} CV(s), ${c.jobs} job advert(s)), ` +
+    `${c.outage} from the outage window; ${c.visits} signed-in account(s) opened the candidate form during the outage ` +
+    `and ${c.pressed} of them pressed Post my profile. Of the candidates turned away, by CV or by press: ` +
+    `${c.invite} to invite, ${c.invited} already invited, ${c['came-back']} posted a profile since, ` +
+    `${c['no-address']} with no address. Reported and left alone: ${c['opened-only']} opened the form without pressing, ` +
+    `${c['edit-refused']} pressed Save changes on a profile they already had, ` +
+    `${c['outside-window']} CV(s) orphaned outside the window, ${c['job-advert']} job advert(s).`;
 }
 
 const day = (iso) => (iso ? iso.slice(0, 10) : 'day unknown');
 
 /** The maintainer's table: the ONE place the names and addresses go. */
-export function renderReport({ rows, counts, site = SITE }) {
+export function renderReport({ rows, visits = [], counts, site = SITE }) {
   const cell = (v) => `<td style="padding:6px 8px;border-bottom:1px solid #eee;vertical-align:top;font-size:13px;">${esc(v || '')}</td>`;
+  const th = (h) => `<th align="left" style="padding:6px 8px;border-bottom:2px solid #ddd;font-size:13px;">${esc(h)}</th>`;
+  const table = (head, trs) =>
+    `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">` +
+    `<tr>${head.map(th).join('')}</tr>\n${trs}</table>`;
   const head = ['Who', 'Affiliation', 'Address', 'Account', 'File', 'Uploaded', 'Kind', 'Next'];
   const trs = rows.map((r) =>
     `<tr>${cell(r.name || '(no name on the account)')}${cell(r.affiliation)}${cell(r.email || '(no address)')}` +
     `${cell(r.uid)}${cell(r.file)}${cell(day(r.at) + (r.inOutage ? ' (outage)' : ''))}${cell(r.kind)}${cell(r.step)}</tr>`).join('\n');
+  const vhead = ['Who', 'Affiliation', 'Address', 'Account', 'Sessions', 'First', 'Last', 'Pressed', 'Fields touched', 'Next'];
+  const pressed = (v) => (v.pressed === 'post' ? 'Post my profile' : v.pressed === 'save' ? 'Save changes' : 'nothing');
+  const vtrs = visits.map((v) =>
+    `<tr>${cell(v.name || '(no name on the account)')}${cell(v.affiliation)}${cell(v.email || '(no address)')}` +
+    `${cell(v.uid)}${cell(String(v.sessions))}${cell(day(v.at))}${cell(day(v.last))}${cell(pressed(v))}` +
+    `${cell(String(v.touched))}${cell(v.step)}</tr>`).join('\n');
   const bodyHtml =
-    `<p>These uploads sit on the Storage landing strip with no submission behind them. ` +
-    `A candidate's CV from the outage window (4 September to 17 September 2026, 20:58 UTC) ` +
-    `is a candidate whose profile was refused after the file had gone up.</p>` +
     `<p>${esc(summarise(counts))}</p>` +
-    `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">` +
-    `<tr>${head.map((h) => `<th align="left" style="padding:6px 8px;border-bottom:2px solid #ddd;font-size:13px;">${esc(h)}</th>`).join('')}</tr>\n${trs}</table>` +
+    `<h3 style="font-size:15px;margin:18px 0 6px;">Accounts that opened the candidate form during the outage</h3>` +
+    `<p>From the site's own usage record: which page a signed-in account opened, when, which buttons it pressed and ` +
+    `how many form fields it touched. What was typed was never recorded. An account that pressed Post my profile ` +
+    `between 4 September and 17 September 2026, 20:58 UTC, and holds no profile for this season is a candidate ` +
+    `the site refused.</p>` +
+    (visits.length ? table(vhead, vtrs)
+      : `<p>None: no signed-in account opened the form in the window.</p>`) +
+    `<h3 style="font-size:15px;margin:18px 0 6px;">Uploads with no submission behind them</h3>` +
+    `<p>These files sit on the Storage landing strip with no submission pointing at them. ` +
+    `A candidate's CV from the outage window is a candidate whose profile was refused after the file had gone up.</p>` +
+    (rows.length ? table(head, trs) : `<p>None.</p>`) +
     `<p style="font-size:13px;color:#666;">"invite" means the button's invite mode would write to them once; ` +
-    `"came-back" means the account has posted a profile for this season since; "invited" means it already has been. ` +
-    `Nothing here can rebuild a refused profile: the refused write stored nothing, and the CV is all that survived.</p>`;
+    `"came-back" means the account has posted a profile for this season since; "invited" means it already has been; ` +
+    `"opened-only" and "edit-refused" are listed for your own judgement and are never written to. ` +
+    `Nothing here can rebuild a refused profile: the refused write stored nothing.</p>`;
   const subject = `[OA] ${counts.invite + counts.invited + counts['came-back'] + counts['no-address']} candidate(s) turned away in September, ` +
-    `${counts.orphans} stranded upload(s)`;
+    `${counts.visits} form visit(s), ${counts.orphans} stranded upload(s)`;
   const html = shell({ title: subject, bodyHtml, manageUrl: null });
   return { subject, html };
 }
 
 /** The invite: to the candidate, about their own submission and nothing
     else. No link to anything of theirs, no other person's data. */
-export function renderInvite({ firstName = '', site = SITE, contact = CONTACT } = {}) {
+export function renderInvite({ firstName = '', site = SITE, contact = CONTACT, cv = true } = {}) {
   const hello = firstName ? `Hello ${esc(firstName)},` : 'Hello,';
   const link = `${site.replace(/\/+$/, '')}/post-a-candidate`;
+  const what = cv
+    ? 'Your CV reached us, but the profile that goes with it did not, and nothing you typed was kept.'
+    : 'You pressed Post my profile, the site refused it, and nothing you typed was kept.';
   const bodyHtml =
     `<p>${hello}</p>` +
     `<p>Between 4 and 17 September a fault on Operations Academia refused every candidate profile ` +
-    `that was posted, and the page wrongly said the site was not accepting profiles yet. Your CV ` +
-    `reached us, but the profile that goes with it did not, and nothing you typed was kept. We are sorry.</p>` +
+    `that was posted, and the page wrongly said the site was not accepting profiles yet. ` +
+    `${what} We are sorry.</p>` +
     `<p>The fault is fixed. Could you post your profile once more? It takes a few minutes, the form ` +
     `now keeps a draft in your browser while you type, and a profile posted before the reveal date ` +
     `shown on the candidates page appears with everyone else's on that day.</p>` +
@@ -216,11 +328,15 @@ export function renderInvite({ firstName = '', site = SITE, contact = CONTACT } 
 
 /** The full table on stdout, for a LOCAL run only (see main). Kept out of
     log() so the selftest's rule over every log line stays honest. */
-export function printTable(rows) {
+export function printTable(rows, visits = []) {
   const line = (r) => [r.uid, r.kind, day(r.at) + (r.inOutage ? '*' : ' '), r.step,
     r.name || '(no name)', r.affiliation || '', r.email || '(no address)', r.file].join('  |  ');
   process.stdout.write('uid | kind | day (*=outage) | next | name | affiliation | address | file\n');
   for (const r of rows) process.stdout.write(line(r) + '\n');
+  const vline = (v) => [v.uid, 'visit', day(v.at) + '..' + day(v.last), v.step, v.name || '(no name)',
+    v.affiliation || '', v.email || '(no address)', `${v.pressed || 'no press'}, ${v.sessions} session(s), ${v.touched} field(s)`].join('  |  ');
+  process.stdout.write('uid | visit | first..last | next | name | affiliation | address | what they did\n');
+  for (const v of visits) process.stdout.write(vline(v) + '\n');
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -274,11 +390,37 @@ async function main() {
   }
   const rows = orphans(files, referenced);
 
-  /* 3. who each orphan belongs to: the profile's name first, then the roster
-     row, then Auth's; the sign-in address first, then the typed one */
+  /* 2b. the usage record: the signed-in accounts that opened the candidate
+     form inside the window (the header says why this is the better list).
+     A read that fails costs this half of the list and never the other. */
+  let visits = [];
+  const sessionAddress = new Map();
+  try {
+    const from = Date.parse(OUTAGE.from), to = Date.parse(OUTAGE.to);
+    const sessions = [];
+    let after = null;
+    for (;;) {
+      let q = fb.db.collection('usageSessions').where('start', '>=', from).where('start', '<=', to)
+        .orderBy('start').limit(SESSION_PAGE);
+      if (after) q = q.startAfter(after);
+      const snap = await q.get();
+      snap.forEach((d) => sessions.push(d.data() || {}));
+      if (snap.size < SESSION_PAGE) break;
+      after = snap.docs[snap.docs.length - 1];
+    }
+    visits = visitorsOf(sessions);
+    for (const v of visits) if (v.email) sessionAddress.set(v.uid, v.email);
+    log(`${sessions.length} usage session(s) in the window, ${visits.length} signed-in account(s) on the candidate form`);
+  } catch (e) {
+    warn(`the usage record could not be read (${e.code || 'error'}); the form's visitors are not listed this run`);
+  }
+
+  /* 3. who each orphan and each visitor is: the profile's name first, then
+     the roster row, then Auth's; the sign-in address first, then the typed
+     one, then the address the session itself carried */
   const invited = new Set();
   const people = new Map();
-  for (const uid of new Set(rows.map((r) => r.uid))) {
+  for (const uid of new Set([...rows.map((r) => r.uid), ...visits.map((v) => v.uid)])) {
     const who = { name: '', first: '', affiliation: '', email: '' };
     try {
       const u = await fb.auth.getUser(uid);
@@ -299,6 +441,7 @@ async function main() {
       if (!who.affiliation && r.affiliation) who.affiliation = String(r.affiliation).trim();
       if (!who.email && r.email) who.email = String(r.email).trim();
     } catch { /* no roster row */ }
+    if (!who.email && sessionAddress.get(uid)) who.email = sessionAddress.get(uid);
     try {
       const m = (await fb.db.collection(INVITES).doc(uid).get()).data() || {};
       if (m[INVITED_AT]) invited.add(uid);
@@ -306,38 +449,42 @@ async function main() {
     people.set(uid, who);
   }
   const ctx = { profiled, invited };
-  for (const r of rows) {
+  const all = [...rows, ...visits];
+  for (const r of all) {
     Object.assign(r, people.get(r.uid));
     r.step = nextStep(r, ctx);
   }
-  const counts = tally(rows);
+  const counts = tally(all);
   log(summarise(counts));
   for (const r of rows) {
     log(`  ${r.uid}  ${r.kind}  ${redact(r.email)}  ${day(r.at)}  ${r.inOutage ? 'outage' : 'other'}  ${r.step}`);
   }
-  if (PRINT) printTable(rows);
+  for (const v of visits) {
+    log(`  ${v.uid}  visit  ${redact(v.email)}  ${day(v.at)}..${day(v.last)}  ${v.pressed || 'no press'}  ${v.sessions} session(s)  ${v.step}`);
+  }
+  if (PRINT) printTable(rows, visits);
 
   if (REPORT) {
-    const msg = renderReport({ rows, counts });
+    const msg = renderReport({ rows, visits, counts });
     let ok = false;
     try {
       ok = await send(tx, { to: ADMIN, subject: msg.subject, html: msg.html }, { dryRun: DRY });
     } catch (e) {
       warn(`the report could not be sent to ${redact(ADMIN)} (${e.code || e.responseCode || 'error'})`);
     }
-    log(`report ${ok ? 'sent' : 'not sent'} to ${redact(ADMIN)}: ${rows.length} row(s)`);
+    log(`report ${ok ? 'sent' : 'not sent'} to ${redact(ADMIN)}: ${rows.length} upload row(s), ${visits.length} visit row(s)`);
   }
 
   if (INVITE) {
     const seen = new Set();
-    const queue = rows.filter((r) => r.step === 'invite' && !seen.has(r.uid) && seen.add(r.uid));
+    const queue = all.filter((r) => r.step === 'invite' && !seen.has(r.uid) && seen.add(r.uid));
     if (DRY) {
-      for (const r of queue) log(`  would invite: ${r.uid}  ${redact(r.email)}  (CV of ${day(r.at)})`);
+      for (const r of queue) log(`  would invite: ${r.uid}  ${redact(r.email)}  (${r.kind === 'visit' ? 'pressed Post on' : 'CV of'} ${day(r.at)})`);
       log(`--dry-run: ${queue.length} invite(s) would go out. Nothing sent, nothing written.`);
     } else {
       let sent = 0, failed = 0, unstamped = 0;
       for (const r of queue) {
-        const msg = renderInvite({ firstName: r.first });
+        const msg = renderInvite({ firstName: r.first, cv: r.kind === 'candidates' });
         let ok = false;
         try {
           ok = await send(tx, { to: r.email, subject: msg.subject, html: msg.html });
@@ -480,6 +627,67 @@ async function selftest() {
     'and types no reveal date: the page states it, this message points there');
   ok(noDash(inv.subject) && noDash(inv.html), 'no em dash in the invite');
   ok(/Hello,/.test(renderInvite({}).html), 'and a missing first name is a bare hello');
+  ok(/Your CV reached us/.test(inv.html) && !/You pressed Post my profile/.test(inv.html),
+    'by default the invite is about the CV that reached us');
+  const inv2 = renderInvite({ firstName: 'J', cv: false, contact: 'help@x.test' });
+  ok(/You pressed Post my profile, the site refused it/.test(inv2.html) && !/Your CV reached us/.test(inv2.html)
+     && /post-a-candidate/.test(inv2.html) && noDash(inv2.html),
+    'and for a visitor it is about the press, with no CV claimed');
+
+  /* --- the usage record: who opened the form, and who pressed ---------------- */
+  const S = (o) => Object.assign({ uid: 'v1', email: 'v@x.edu', page: '/post-a-candidate', start: Date.parse('2026-09-10T10:00:00Z'),
+    last: Date.parse('2026-09-10T10:14:00Z'), dur: 840, clicks: [], fields: [] }, o);
+  ok(onCandidateForm('/post-a-candidate') && onCandidateForm('/post-a-candidate.html') && onCandidateForm('/post-a-candidate?edit=x')
+     && onCandidateForm('/post-a-candidate.html?edit=x') && !onCandidateForm('/post-a-job') && !onCandidateForm('/post-a-candidates')
+     && !onCandidateForm('') && !onCandidateForm(null),
+    'the form is recognised with or without .html and a query, and nothing else is');
+  eq([pressOf([{ x: 'Post my profile' }]), pressOf([{ x: 'Save changes' }]), pressOf([{ x: 'Sign in' }]), pressOf(undefined),
+    pressOf([{ x: 'Save changes' }, { x: ' post my profile ' }]), pressOf([null, {}])], ['post', 'save', '', '', 'post', ''],
+    'the press is read off the button\'s own words, and Post wins over Save');
+  const vis = visitorsOf([
+    S({ clicks: [{ x: 'Post my profile' }], fields: [{ f: 'first' }, { f: 'last' }, { f: 'first' }] }),
+    S({ start: Date.parse('2026-09-12T08:00:00Z'), last: Date.parse('2026-09-12T08:05:00Z'), dur: 300, fields: [{ f: 'cvUrl' }] }),
+    S({ uid: 'v2', email: 'w@x.edu', page: '/post-a-candidate.html', start: Date.parse('2026-09-04T00:00:00Z'),
+      last: 0, clicks: [{ x: 'Post my profile' }] }),
+    S({ uid: 'v3', email: '', page: '/post-a-candidate?edit=abc', clicks: [{ x: 'Save changes' }], start: Date.parse('2026-09-17T20:58:35Z') }),
+    S({ uid: 'anon:abc', clicks: [{ x: 'Post my profile' }] }),
+    S({ uid: 'v4', page: '/jobs', clicks: [{ x: 'Post my profile' }] }),
+    S({ uid: 'v5', start: Date.parse('2026-09-03T23:59:59Z') }),
+    S({ uid: 'v6', start: Date.parse('2026-09-17T20:58:36Z') }),
+    S({ uid: '', clicks: [{ x: 'Post my profile' }] }),
+    null,
+  ]);
+  eq(vis.map((v) => v.uid), ['v2', 'v1', 'v3'],
+    'one row per signed-in account on the form inside the window, oldest first; anonymous, other pages and both edges out');
+  const v1 = vis.find((v) => v.uid === 'v1');
+  eq([v1.sessions, v1.pressed, v1.presses, v1.touched, v1.dur, v1.at, v1.last, v1.email],
+    [2, 'post', 1, 3, 1140, '2026-09-10T10:00:00.000Z', '2026-09-12T08:05:00.000Z', 'v@x.edu'],
+    'its sessions are folded: the count, the press, the distinct fields, the dwell, the first and last instants, the address');
+  eq([vis[0].last, vis[2].pressed, vis[2].email], ['2026-09-04T00:00:00.000Z', 'save', ''],
+    'a last stamp before the start is the start; an edit press is told apart; no address is no address');
+  ok(vis.every((v) => v.kind === 'visit' && v.inOutage === true), 'and every row is a visit inside the outage');
+  const vctx = { profiled: new Set(['v2']), invited: new Set(['v9']) };
+  eq([nextStep(v1, vctx), nextStep(vis[0], vctx), nextStep(vis[2], vctx),
+    nextStep(Object.assign({}, v1, { pressed: '' }), vctx), nextStep(Object.assign({}, v1, { email: '' }), vctx),
+    nextStep(Object.assign({}, v1, { uid: 'v9' }), vctx)],
+  ['invite', 'came-back', 'edit-refused', 'opened-only', 'no-address', 'invited'],
+  'a press with no profile since is invited; a profile since is came-back; a Save press, no press and no address are reported only');
+  const both = [...vis.map((v) => Object.assign({}, v, { step: nextStep(v, vctx) })), ...tallied];
+  const vcounts = tally(both);
+  eq([vcounts.visits, vcounts.pressed, vcounts['edit-refused'], vcounts['opened-only'], vcounts.invite, vcounts['came-back'], vcounts.orphans],
+    [3, 2, 1, 0, 2, 2, 4], 'the tally counts the visits apart from the orphans');
+  eq(tally([Object.assign({}, v1, { step: 'invite' }), Object.assign({}, v1, { kind: 'candidates', step: 'invite', inOutage: true })]).invite, 1,
+    'and a person who is both a stranded CV and a visit is counted once');
+  ok(/3 signed-in account\(s\) opened the candidate form/.test(summarise(vcounts)) && /2 of them pressed Post my profile/.test(summarise(vcounts))
+     && noDash(summarise(vcounts)), 'and the sentence says so');
+  const vrep = renderReport({ rows: [], visits: [Object.assign({}, v1, { name: 'Vee <b>', affiliation: 'A U', step: 'invite' })],
+    counts: vcounts, site: 'https://x.test' });
+  ok(/Vee &lt;b&gt;/.test(vrep.html) && /v@x\.edu/.test(vrep.html) && /Post my profile/.test(vrep.html)
+     && /Accounts that opened the candidate form during the outage/.test(vrep.html) && /What was typed was never recorded/.test(vrep.html),
+    'the report carries the visitors in a table of their own, every value escaped');
+  ok(/None: no signed-in account opened the form/.test(renderReport({ rows: [], visits: [], counts: vcounts }).html),
+    'and says so when there were none');
+  ok(/3 form visit\(s\)/.test(vrep.subject) && noDash(vrep.subject) && noDash(vrep.html), 'the subject counts the visits');
 
   /* --- the file's own source: the guards that keep the log clean ------------ */
   const src = await readFile(fileURLToPath(import.meta.url), 'utf8');
@@ -491,8 +699,16 @@ async function selftest() {
   const printAt = body.indexOf("if (PRINT && (process.env.GITHUB_ACTIONS || process.env.CI))");
   ok(printAt > 0 && printAt < body.indexOf('await firebaseAdmin()'),
     '--print is refused on a runner before anything is read');
-  ok(/if \(PRINT\) printTable\(rows\);/.test(body) && (body.match(/printTable\(/g) || []).length === 1,
+  ok(/if \(PRINT\) printTable\(rows, visits\);/.test(body) && (body.match(/printTable\(/g) || []).length === 1,
     'and the table reaches stdout through printTable() alone, never through log()');
+  const readAt = body.indexOf("collection('usageSessions')");
+  const tryAt = body.lastIndexOf('try {', readAt);
+  ok(readAt > 0 && tryAt > 0 && /where\('start', '>=', from\)\.where\('start', '<=', to\)/.test(body)
+     && body.indexOf('visits = visitorsOf(sessions);') > readAt && body.indexOf('} catch (e) {', readAt) > readAt,
+    'the usage record is read bounded by the window at both ends, inside a try, and folded through visitorsOf()');
+  ok(/renderReport\(\{ rows, visits, counts \}\)/.test(body) && /cv: r\.kind === 'candidates'/.test(body)
+     && /const all = \[\.\.\.rows, \.\.\.visits\];/.test(body) && /all\.filter\(\(r\) => r\.step === 'invite'/.test(body),
+    'the report, the invite queue and the invite\'s wording all see the visits');
   /* Every log and warning line in main(): a uid, a day, a step, a count, or an
      address through redact(), and never a name, a filename, an affiliation or
      an error's message text. */

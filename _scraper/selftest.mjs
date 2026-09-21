@@ -19887,6 +19887,7 @@ async function testStrandedCvs() {
   /* the module: the constants that tie it to the rest of the site */
   const M = await import('./stranded-cvs.mjs');
   const purge = await readFile(path.join(HERE, 'purge-accounts.mjs'), 'utf8');
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
   const purgeBucket = (/export const BUCKET = '([^']+)';/.exec(purge) || [])[1];
   eq(M.BUCKET, purgeBucket, 'it lists the bucket purge-accounts.mjs clears, and no other');
   eq(M.OUTAGE, { from: '2026-09-04T00:00:00.000Z', to: '2026-09-17T20:58:35.000Z' },
@@ -19928,6 +19929,34 @@ async function testStrandedCvs() {
     [false, true, true, false, false],
     'and an orphan is cleanable only once its owner was invited or came back, and only from the window');
 
+  /* the usage record: the form's page and its two buttons, pinned against the
+     page and the form rather than remembered, since a relabelled button would
+     otherwise silently turn every refused press into "opened-only" */
+  eq(M.FORM_PAGE, '/post-a-candidate', 'the form is read under its extensionless address');
+  ok(existsSync(path.join(root, 'post-a-candidate.html')), '…which is a page that exists');
+  const candPage = await readFile(path.join(root, 'post-a-candidate.html'), 'utf8');
+  const submitText = (/id="oa-submit">([^<]+)</.exec(candPage) || [])[1];
+  ok(submitText && M.PRESS.post.test(submitText.trim()), `the Post press is the form's own submit label ("${submitText}")`);
+  const candForm = await readFile(path.join(root, 'assets', 'oa-candidateform.js'), 'utf8');
+  const saveText = (/submit\.textContent = '([^']+)';/.exec(candForm) || [])[1];
+  ok(saveText && M.PRESS.save.test(saveText), `and the Save press is the edit mode's label ("${saveText}")`);
+  eq(M.visitorsOf([
+    { uid: 'a', page: '/post-a-candidate', start: Date.parse('2026-09-04T00:00:00Z'), clicks: [{ x: 'Post my profile' }] },
+    { uid: 'anon:x', page: '/post-a-candidate', start: Date.parse('2026-09-05T00:00:00Z'), clicks: [{ x: 'Post my profile' }] },
+    { uid: 'b', page: '/jobs', start: Date.parse('2026-09-05T00:00:00Z') },
+    { uid: 'c', page: '/post-a-candidate', start: Date.parse('2026-09-17T20:58:36Z') },
+  ]).map((v) => [v.uid, v.pressed]), [['a', 'post']],
+  'the visitors are the signed-in sessions on the form inside the window, with the press read off the click');
+  eq([M.nextStep({ kind: 'visit', uid: 'a', pressed: 'post', email: 'a@b.edu' }, ctx),
+    M.nextStep({ kind: 'visit', uid: 'a', pressed: '', email: 'a@b.edu' }, ctx),
+    M.nextStep({ kind: 'visit', uid: 'a', pressed: 'save', email: 'a@b.edu' }, ctx)],
+  ['invite', 'opened-only', 'edit-refused'], 'a visitor is invited only for a Post press');
+  ok(/allow read, delete: if isAdmin\(\);/.test(rules.slice(rules.indexOf('match /usageSessions/{id}'), rules.indexOf('match /usageSessions/{id}') + 700)),
+    'usageSessions is admin-read, so the Admin SDK lists it and no browser can');
+  ok(/You pressed Post my profile, the site refused it/.test(M.renderInvite({ cv: false }).html)
+     && /Your CV reached us/.test(M.renderInvite({}).html),
+    'the invite says what happened to THIS person: the CV that reached us, or the press that was refused');
+
   /* the script: imported it sends nothing; the mail goes through _mail.mjs */
   const src = await readFile(path.join(HERE, 'stranded-cvs.mjs'), 'utf8');
   ok(/from '\.\/_main\.mjs'/.test(src) && /isMain\(import\.meta\.url\)/.test(src), 'importing the script runs nothing');
@@ -19945,7 +19974,6 @@ async function testStrandedCvs() {
     'and the one document write is the invite mark, merged');
 
   /* the mark needs no rules change: the collection is closed by the catch-all */
-  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
   ok(!/strandedInvites/.test(rules), 'strandedInvites is not named in the rules…');
   ok(/match \/\{document=\*\*\} \{\s*allow read, write: if false;\s*\}/.test(rules),
     '…so the catch-all closes it to every client, and only the Admin SDK writes it');
@@ -19990,6 +20018,8 @@ async function testStrandedCvs() {
   ok(/stranded-cvs\.mjs/.test(section) && /oa-stranded-cvs\.yml/.test(section) && /strandedInvites/.test(section)
      && /--report/.test(section) && /--invite/.test(section) && /--clean/.test(section) && /--print/.test(section),
     'and names the script, the workflow, the mark and the four modes');
+  ok(/usageSessions/.test(section) && /visitorsOf/.test(section) && /FOUND NO CV AT ALL/.test(section),
+    'and records that the strip held no CV from the window, and that the usage record is read for that reason');
   ok(/Nothing here can rebuild a refused profile/.test(section), 'and says plainly what cannot be rebuilt');
   ok(/testStrandedCvs/.test(section) && noDash(section), 'and names this test, with no em dash');
 }

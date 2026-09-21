@@ -4,9 +4,10 @@ name: "OA: the CVs stranded on the Storage landing strip"
 # candidate profile posted through the site was refused by a ruleset past
 # Firestore's evaluation budget (CLAUDE.md, "Candidates were turned away for
 # two weeks"), while the CV each candidate attached had already been uploaded.
-# Those files are the only record of who was turned away. This button finds
-# them, says who they belong to, and, when told to, writes to each of those
-# people once asking them to post again.
+# Those files, and the site's own usage record of which signed-in accounts
+# opened the form and pressed Post my profile, are the record of who was
+# turned away. This button reads both, says who they are, and, when told to,
+# writes to each of those people once asking them to post again.
 #
 # THE LOG IS PUBLIC. With every input unticked the run is a SCAN: counts and
 # one line per orphan carrying the uid, the kind, the REDACTED address, the
