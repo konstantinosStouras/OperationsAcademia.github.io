@@ -55,7 +55,7 @@ import {
 } from './import-sheet.mjs';
 import { rowsFromSheets, stampAddedAt } from './import-sheet.mjs';
 import {
-  text, url, day, slug, buildMeta, keyOf, healPlace, withMarketYears, canonColumns, canonInstitution,
+  text, url, day, slug, buildMeta, keyOf, healPlace, withMarketYears, withCountries, canonColumns, canonInstitution,
 } from './jobs-model.mjs';
 
 /* ------------------------------------------------------------- the sheets */
@@ -508,7 +508,7 @@ of the DISPLAY tabs instead.`);
     for (const r of rows) years[r.year] = (years[r.year] || 0) + 1;
     console.log(`past postings: ${rows.length} rows, markets ${JSON.stringify(years)}`);
     const meta = buildMeta(rows, { generated: newestPosted(rows) });
-    await write('past-postings.json', rows.map((r) => withMarketYears(healPlace(r))), meta);
+    await write('past-postings.json', rows.map((r) => withCountries(withMarketYears(healPlace(r)))), meta);
   }
 }
 
@@ -590,7 +590,7 @@ async function healNames(outDir) {
        previous-markets.html reads is the one place that shows it. Both heals
        are pure and idempotent, and both return the row ITSELF when they
        change nothing, which is what the change count below reads. */
-    file: 'past-postings.json', heal: (r) => withMarketYears(healPlace(r)),
+    file: 'past-postings.json', heal: (r) => withCountries(withMarketYears(healPlace(r))),
     meta: true, what: 'posting',
     sort: (a, b) => (b.year - a.year) || String(b.posted).localeCompare(String(a.posted)) ||
       a.institution.localeCompare(b.institution),

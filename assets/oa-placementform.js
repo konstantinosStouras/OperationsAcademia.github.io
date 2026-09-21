@@ -485,7 +485,7 @@
         standDown('<strong>We cannot reach the reporting service right now.</strong> ' +
           'If you use an ad blocker, allow <code>gstatic.com</code> and reload. ' +
           'Otherwise please send the details to ' +
-          '<a href="mailto:operationsacademia@gmail.com">operationsacademia@gmail.com</a> ' +
+          '<a href="mailto:operations.academia@gmail.com">operations.academia@gmail.com</a> ' +
           'and we will post the placement for you.');
         return;
       }

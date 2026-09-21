@@ -240,6 +240,47 @@
     return { label: COMMENTS_LABEL, html: '<div class="oa-prose">' + mk.html(text) + '</div>' };
   }
 
+  /* ------------------------------ the COUNTRIES row, and only where it says
+                                     something the card does not already
+
+     A posting used to name one country, so no list on this site drew it at
+     all: the Location filter is how a reader narrows by it, and a row reading
+     "United States" under a card headed "Duke University" says nothing.
+
+     A posting that covers campuses in SEVERAL countries (owner, 2026-09-18)
+     is the case that does say something, and the case that reads wrong
+     without it: a reader who narrowed to Singapore and opened the card would
+     find nothing on it that mentions Singapore. So the row is drawn for those
+     postings and for no others, which leaves every single-country card in the
+     site byte-identical — the discipline the "Also listed under" wording in
+     the Excel download already follows.
+
+     ONE DEFINITION for all three lists, beside refRow and commentsRow and for
+     the same reason: jobs.html, the one-pager's teaser and
+     previous-markets.html each draw the same card, and three copies of one
+     row disagree silently. The fallback is countriesOf's, in the browser — a
+     row that predates the field answers its own single country, and so draws
+     nothing, which is right. */
+  var COUNTRIES_LABEL = 'Campus countries';
+
+  function countriesOf(row) {
+    var raw = (row && Object.prototype.toString.call(row.countries) === '[object Array]')
+      ? row.countries : [];
+    var out = [];
+    for (var i = 0; i < raw.length; i++) {
+      var v = String(raw[i] == null ? '' : raw[i]).trim();
+      if (v && out.indexOf(v) === -1) out.push(v);
+    }
+    if (!out.length && row && row.country) out.push(String(row.country).trim());
+    return out.filter(Boolean);
+  }
+
+  function countriesRow(row) {
+    var cs = countriesOf(row);
+    if (cs.length < 2) return null;
+    return { label: COUNTRIES_LABEL, value: cs.join(', ') };
+  }
+
   return {
     MARKET_ROLL_MONTH: MARKET_ROLL_MONTH,
     FOCUS_PARAM: FOCUS_PARAM,
@@ -257,6 +298,9 @@
     REF_LABEL: REF_LABEL,
     refRow: refRow,
     COMMENTS_LABEL: COMMENTS_LABEL,
-    commentsRow: commentsRow
+    commentsRow: commentsRow,
+    COUNTRIES_LABEL: COUNTRIES_LABEL,
+    countriesOf: countriesOf,
+    countriesRow: countriesRow
   };
 }));

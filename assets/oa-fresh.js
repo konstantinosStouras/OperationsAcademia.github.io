@@ -67,11 +67,38 @@
       does not move a posting's identity, and the echo must not either. */
   var FIELDS = [
     'institution', 'school', 'unit', 'department', 'type', 'levels', 'country',
+    /* every campus country the search covers — the Location filter's own
+       field, so a correction that adds one has to reach this browser's copy
+       of the page or the editor's own filter goes on hiding the posting they
+       have just corrected */
+    'countries',
     'applyBy', 'applyByDate', 'reviewDate', 'comments', 'characteristics',
     'adUrl', 'postedAtUrl',
   ];
 
   /* ------------------------------------------------- browser twins, pinned */
+
+  /** jobs-model `countriesOf`, the browser twin — every campus country the
+      posting covers, canonical, deduped, and answering a row that predates
+      the field with its own single country. `canonCountry` is INJECTED for
+      the same reason it is injected into approvedRow: this file keeps no
+      dependency of its own, and with it absent the echo simply does not
+      re-spell, which is a spelling and never a value the build would refuse. */
+  function countriesList(row, canon) {
+    var c = canon || function (v) { return v; };
+    var raw = (row && Object.prototype.toString.call(row.countries) === '[object Array]')
+      ? row.countries : [];
+    var out = [], i, v;
+    for (i = 0; i < raw.length; i++) {
+      v = c(text(raw[i], 80)) || '';
+      if (v && out.indexOf(v) === -1) out.push(v);
+    }
+    if (row && row.country) {
+      v = c(text(row.country, 80)) || '';
+      if (v && out.indexOf(v) === -1) out.push(v);
+    }
+    return out;
+  }
 
   /** jobs-model composeApplyBy(), the browser twin — parity-pinned in
       selftest.mjs over a case table, like every vendored copy here. */
@@ -185,6 +212,26 @@
     }
     if (Object.prototype.hasOwnProperty.call(clean, 'country')) {
       out.country = canonCountry(text(clean.country, 80)) || '';
+    }
+    /* THE PAIR MOVES TOGETHER or the echo can never stand down: `country` is
+       the FIRST of `countries`, so a copy whose two halves disagree can never
+       equal the served row, and `landed` would go on hiding the correction
+       for the rest of its hour.
+
+       `withCountries`'s own rule, to the letter, because this is its twin and
+       the parity test drives both over one case table: an edited `country`
+       with no edited list REPLACES it (a review card offers one box, so the
+       box the maintainer moved is the fact being stated), and a row that
+       names NO country is left exactly alone — neither key is invented, which
+       is what keeps a fixture carrying no country identical on both sides. */
+    if (Object.prototype.hasOwnProperty.call(clean, 'country')
+        && !Object.prototype.hasOwnProperty.call(clean, 'countries')) {
+      out.countries = [];
+    }
+    var cs = countriesList(out, canonCountry);
+    if (cs.length) {
+      out.countries = cs;
+      out.country = cs[0];
     }
 
     /* A line the maintainer wrote that says the search stays open takes the
@@ -358,6 +405,15 @@
       characteristics: (doc.characteristics || []).slice(),
       postedAtUrl: doc.postedAtUrl || '',
     };
+    /* the campus countries, and ONLY where the document names any — the echo
+       compares each echoed value against the served row, and echoing an empty
+       list onto a posting the build publishes without one is a value that can
+       never match, so the echo could never spend itself */
+    var cs = countriesList(doc, canonCountry);
+    if (cs.length) {
+      f.countries = cs;
+      f.country = cs[0];
+    }
     /* THE SUGGESTED DATE IS ECHOED ONLY WHEN THE FORM STATED ONE. Where the
        box is empty the build reads a first-review date out of the apply-by
        prose or the comments (healReviewDate), and that heal has no browser

@@ -32,7 +32,7 @@
 'use strict';
 
 const SITE_DEFAULT = 'https://www.operationsacademia.org';
-const CONTACT_DEFAULT = 'operationsacademia@gmail.com';
+const CONTACT_DEFAULT = 'operations.academia@gmail.com';
 
 /* The site's own colours, named once. */
 const C = {

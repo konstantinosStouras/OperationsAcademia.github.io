@@ -54,6 +54,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   marketFloor, isoStamp, healPlace, healReviewDate, stripRowEmails, withMarketYears,
+  withCountries,
 } from './jobs-model.mjs';
 import {
   SEED_SHEET_ID, STALE_DAYS, STALE_REPEAT_DAYS,
@@ -1126,7 +1127,8 @@ async function healNames() {
        the next belongs to both). Idempotent like the rest, so this is also how
        the committed file gains the field without waiting for a workbook to
        change. */
-    .map(withMarketYears);
+    .map(withMarketYears)
+    .map(withCountries);
   const changed = healed.filter((r, i) =>
     JSON.stringify(r) !== JSON.stringify(rows[i]));
   if (!changed.length) {

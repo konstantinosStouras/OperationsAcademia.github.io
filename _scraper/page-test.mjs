@@ -316,6 +316,13 @@ async function signedInPage(url, opts = {}) {
   if (opts.init) await p.addInitScript(opts.init);
   await p.route('**/firebasejs/**', (r) =>
     r.fulfill({ status: 200, contentType: 'application/javascript', body: FAKE_FB }));
+  /* a served file answered with a fixture — for a check whose case the live
+     corpus does not carry, and which would otherwise be green for having
+     nothing to look at */
+  if (opts.route) {
+    await p.route(opts.route[0], (r) => r.fulfill({ status: 200,
+      contentType: 'application/json', body: opts.route[1] }));
+  }
   await p.goto(BASE + url, { waitUntil: opts.waitUntil || 'load' });
   if (opts.wait !== false) {
     await p.waitForSelector(opts.selector || '.oa-card', { timeout: 15000 });
@@ -1500,6 +1507,207 @@ for (const [name, expect] of [
     'and the form does not ask for it — it states what it worked out instead');
   ok(posted.yearNote.includes(`${marketYear() - 1}\u2013${marketYear()}`),
     `the form SAYS which season the posting lands in (${marketYear() - 1}-${marketYear()}), so nothing is hidden`);
+
+  /* -- A POSTING THAT COVERS SEVERAL COUNTRIES (owner, 2026-09-18) ---------
+
+     "Some schools may have openings for multiple country locations. So, I want
+     to be able to select multiple countries here."
+
+     Driven in a real browser because the half that matters is what the reader
+     does: type one, press Enter, watch it become a chip, type the next, and
+     send the form with the box still holding the last of them. A source regex
+     can say `collect()` reads the pair; only this can say the pair is what a
+     poster can actually produce. */
+
+  const many = await onSite('post-a-job.html', { user: keptUser, docs: [KEPT_PROFILE] }, async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.fill('#f-institution', 'Multi Campus University');
+    await q.fill('#f-school', 'Multi Business School');
+    await q.fill('#f-unit', 'Operations Management');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.selectOption('#f-type', 'Business School');
+
+    /* the chips row is EMPTY on arrival: one country is the ordinary answer
+       and the field must not look like a control that owes something */
+    const atFirst = await q.evaluate(() => ({
+      chips: document.querySelectorAll('#f-country-chips .oa-chip').length,
+      required: document.getElementById('f-country').hasAttribute('required'),
+      note: document.getElementById('f-country-added').textContent,
+    }));
+
+    /* THE PAIR IS WHAT IS REQUIRED. With both empty the form refuses and marks
+       the box; this is the check that the `required` attribute's removal did
+       not simply make the field optional. */
+    await q.click('#oa-submit');
+    const empty = await q.evaluate(() => ({
+      invalid: document.getElementById('f-country').getAttribute('aria-invalid'),
+      said: !!document.querySelector('#f-country')
+        .closest('.oa-field').querySelector('.oa-err'),
+    }));
+
+    // type one and press Enter: it banks as a chip and the box empties
+    await q.fill('#f-country', 'France');
+    await q.press('#f-country', 'Enter');
+    const banked = await q.evaluate(() => ({
+      chips: [...document.querySelectorAll('#f-country-chips .oa-chip-label')]
+        .map((n) => n.textContent),
+      box: document.getElementById('f-country').value,
+      focused: document.activeElement && document.activeElement.id,
+      // the error the refusal drew is cleared by the answer, not by the next submit
+      invalid: document.getElementById('f-country').getAttribute('aria-invalid'),
+    }));
+
+    // a second, left IN THE BOX, what is typed counts whether or not Enter is
+    // pressed, which is the rule that keeps the one-country answer unchanged
+    await q.fill('#f-country', 'Singapore');
+    const note = await q.evaluate(() =>
+      document.getElementById('f-country-added').textContent);
+
+    // bank the second, add a third, then REMOVE the third by pressing its chip
+    await q.press('#f-country', 'Enter');
+    const two = await q.evaluate(() =>
+      [...document.querySelectorAll('#f-country-chips .oa-chip-label')].map((n) => n.textContent));
+    await q.fill('#f-country', 'Germany');
+    await q.press('#f-country', 'Enter');
+    const three = await q.evaluate(() =>
+      [...document.querySelectorAll('#f-country-chips .oa-chip-label')].map((n) => n.textContent));
+    await q.click('#f-country-chips .oa-chip:nth-child(3)');
+    const removed = await q.evaluate(() => ({
+      chips: [...document.querySelectorAll('#f-country-chips .oa-chip-label')]
+        .map((n) => n.textContent),
+      focused: document.activeElement && document.activeElement.id,
+    }));
+
+    /* A COMMA SEPARATES ONLY WHERE EVERY PART NAMES A COUNTRY. The site's own
+       canon reads a comma list from the RIGHT as ONE place, which is the whole
+       of the "A US city is not the country it is named after" rule: St. John's
+       University is in Jamaica, New York. Splitting on the comma first banked
+       the country Jamaica and left "NY" in the box as a Location entry of its
+       own. Each probe is read back and the state put back as it was, so every
+       pin below this point measures what it meant to. */
+    const comma = [];
+    for (const typed of ['Jamaica, NY', 'Korea, Republic of', 'Japan, Brazil']) {
+      await q.fill('#f-country', typed);
+      await q.waitForTimeout(150);
+      comma.push(await q.evaluate(() => ({
+        box: document.getElementById('f-country').value,
+        chips: [...document.querySelectorAll('#f-country-chips .oa-chip-label')]
+          .map((n) => n.textContent),
+      })));
+    }
+    // the third probe really banked one, so take it off again
+    await q.click('#f-country-chips .oa-chip:nth-child(3)');
+    await q.fill('#f-country', '');
+
+    // and the canon is the build's: "USA" is banked as "United States"
+    await q.fill('#f-country', 'USA');
+    await q.press('#f-country', 'Enter');
+    const canoned = await q.evaluate(() =>
+      [...document.querySelectorAll('#f-country-chips .oa-chip-label')].map((n) => n.textContent));
+    // leave the LAST one in the box, unbanked, to prove it still counts
+    await q.fill('#f-country', 'Canada');
+
+    /* AND THE DIRECTORY DOES NOT FILL OVER A BANKED ANSWER. The box is empty
+       while the chips hold the answer, and assets/oa-uniinfo.js fills an
+       EMPTY box from the site's own records, so correcting the institution
+       used to add a campus the poster never named. Driven with a REAL
+       university the directory can place, since a made-up one gives it
+       nothing to fill with; the box is emptied first, which is the state a
+       poster who banked every country is in. */
+    await q.fill('#f-country', '');
+    await q.fill('#f-institution', 'Duke University');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.waitForTimeout(900);
+    const afterUni = await q.evaluate(() => ({
+      box: document.getElementById('f-country').value,
+      chips: [...document.querySelectorAll('#f-country-chips .oa-chip-label')]
+        .map((n) => n.textContent),
+      answered: document.getElementById('f-country').getAttribute('data-oa-answered'),
+    }));
+    /* AND THE GUARD IS LOAD-BEARING, which an empty box alone cannot show:
+       take the mark off and the very same records DO fill it, so what is
+       measured above is the guard rather than a directory with no answer. */
+    await q.evaluate(() => document.getElementById('f-country')
+      .removeAttribute('data-oa-answered'));
+    await q.fill('#f-institution', 'Duke University ');
+    await q.fill('#f-institution', 'Duke University');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.waitForTimeout(900);
+    const unguarded = await q.evaluate(() => document.getElementById('f-country').value);
+
+    // put it back, so the rest of the block posts what it meant to
+    await q.fill('#f-institution', 'Multi Campus University');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.fill('#f-country', 'Canada');
+
+    await q.check('input[name="levels"][value="Assistant Professor"]');
+    await q.check('#f-untilFilled');
+    await q.check('input[name="characteristics"][value="PhD"]');
+    await q.fill('#f-deptUrl', 'https://ops.example.edu/department');
+    await q.fill('#f-firstName', 'Kon');
+    await q.fill('#f-lastName', 'Stouras');
+    await q.fill('#f-email', 'kon@example.edu');
+    await q.fill('#f-chairName', 'Chair Person');
+    await q.fill('#f-chairEmail', 'chair@example.edu');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    const doc = await q.evaluate(() => {
+      const d = window.__fb.dump();
+      const k = Object.keys(d).find((p) => p.startsWith('jobSubmissions/'));
+      return d[k];
+    });
+    return { atFirst, empty, banked, note, two, three, removed, comma, canoned, afterUni, unguarded, doc };
+  });
+
+  eq(many.atFirst.chips, 0, 'multi-country: the field opens with no chips, one country is the usual answer');
+  eq(many.atFirst.required, false,
+    'multi-country: and the box carries no `required`, or a form answered with chips alone would be refused by the browser');
+  eq(many.atFirst.note, '', 'multi-country: and says nothing until there is something to say');
+  eq(many.empty.invalid, 'true',
+    'multi-country: with the box empty AND nothing banked the form still refuses');
+  ok(many.empty.said, 'multi-country: …and says so on the field itself');
+  eq(many.banked.chips, ['France'], 'multi-country: Enter banks what was typed as a chip');
+  eq(many.banked.box, '', 'multi-country: …and empties the box for the next one');
+  eq(many.banked.focused, 'f-country', 'multi-country: …leaving the keyboard where it was');
+  eq(many.banked.invalid, 'false', 'multi-country: …and clearing the error the refusal drew');
+  ok(/Listed under France and Singapore\./.test(many.note),
+    'multi-country: the line under the field counts the box beside the chips');
+  eq(many.two, ['France', 'Singapore'],
+    'multi-country: the one left in the box banks on Enter like the first');
+  eq(many.three, ['France', 'Singapore', 'Germany'], 'multi-country: and so does a third');
+  eq(many.removed.chips, ['France', 'Singapore'],
+    'multi-country: pressing a chip removes that country');
+  eq(many.removed.focused, 'f-country',
+    'multi-country: …and puts the keyboard back in the box, not on <body>');
+  eq(many.comma[0].box, 'Jamaica, NY',
+    'multi-country: "Jamaica, NY" is ONE place and stays whole in the box');
+  eq(many.comma[0].chips, ['France', 'Singapore'],
+    'multi-country: …banking nothing, so the posting is not filed under Jamaica');
+  eq(many.comma[1].box, 'Korea, Republic of',
+    'multi-country: and a country whose own name carries a comma stays whole too');
+  eq(many.comma[1].chips, ['France', 'Singapore'],
+    'multi-country: …which the site reads as South Korea, never as two countries');
+  eq(many.comma[2].box, 'Brazil',
+    'multi-country: "Japan, Brazil" IS two countries, so the last stays in the box');
+  eq(many.comma[2].chips, ['France', 'Singapore', 'Japan'],
+    'multi-country: …and the ones before it are banked, which is the paste this was built for');
+
+  eq(many.canoned, ['France', 'Singapore', 'United States'],
+    'multi-country: a banked country is canonicalised the way the build publishes it');
+  eq(many.doc.countries, ['France', 'Singapore', 'United States', 'Canada'],
+    'multi-country: the document carries every one, the chips AND the box\'s own text');
+  eq(many.doc.country, 'France',
+    'multi-country: and `country` is the first of them, which is what every other consumer reads');
+  eq(many.afterUni.answered, '1',
+    'multi-country: a box whose chips hold the answer is MARKED answered');
+  eq(many.afterUni.box, '',
+    'multi-country: so correcting the institution does not fill the directory\'s own '
+    + 'country over it, which would be a campus the poster never named');
+  eq(many.unguarded, 'United States',
+    'multi-country: and the guard is load-bearing, since without the mark the same '
+    + 'records DO fill that box');
+  eq(many.afterUni.chips, ['France', 'Singapore', 'United States'],
+    'multi-country: and leaves every banked country exactly where it was');
 
   /* -- a school that repeats the university is shown ONCE (owner, 2026-09-02)
 
@@ -10965,7 +11173,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(/If a message from Operations Academia reached/.test(st.lede) && !/on its way/.test(st.lede)
        && st.sendLabel === 'Send the e-mail',
       'verify: on a sign-in, where nothing was sent, the card promises nothing "on its way" and the button offers to send it');
-    ok(/spam/i.test(st.text) && /operationsacademia@gmail\.com/.test(st.text),
+    ok(/spam/i.test(st.text) && /operations\.academia@gmail\.com/.test(st.text),
       'verify: …and says to look in spam, naming the sender');
     ok(st.cards > 1 && st.locked === st.cards,
       `verify: every card on the jobs page is LOCKED for the pending account (${st.locked} of ${st.cards})`);
@@ -13192,6 +13400,121 @@ for (const w of [320, 360, 390, 430]) {
       'talk form: …and the talk, keyed by the day, with exactly the four keys');
     eq(errors, [], 'talk form: no uncaught script error');
     await ctx.close();
+  }
+}
+
+/* --- A POSTING FOUND UNDER EITHER OF ITS COUNTRIES (owner, 2026-09-18) -----
+
+   The half the form's block cannot show: the Location filter reading the LIST.
+   Over a ROUTED copy of the served file with one posting re-stated as covering
+   two countries, because the live corpus has none, and a check that waited
+   for one would be green for having nothing to look at, which is the shape
+   this file is written against. Everything else about the row is untouched, so
+   what is measured is the field and nothing else. */
+{
+  const rows = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
+  /* the posting is chosen by the page's own rule for what it shows, so this
+     cannot go red the day the corpus moves, the DEEP_UNI discipline */
+  const { createRequire: reqNav } = await import('node:module');
+  const NAV = reqNav(import.meta.url)(path.join(ROOT, 'assets', 'oa-jobnav.js'));
+  const live = rows.filter((r) => NAV.inCurrentMarket(r));
+  const pick = live.find((r) => r.country && r.country !== 'Ruritania');
+  if (!pick) {
+    ok(false, 'multi-country filter: the served file carries a live posting to re-state');
+  } else {
+    const OTHER = 'Ruritania';   // a country no real posting names, so the count is exact
+    const fixture = rows.map((r) => (r.id === pick.id
+      ? { ...r, countries: [r.country, OTHER] } : r));
+    /* SIGNED IN, because the card half of this needs a card that OPENS: a
+       reader who has not registered gets the blurred strip and no details
+       table at all (assets/oa-gate.js), so a signed-out page could measure the
+       filter and never the row. */
+    const { ctx: cctx, page: cp, errors: cerr } =
+      await signedInPage('jobs.html', {
+        route: ['**/data/jobs.json*', JSON.stringify(fixture)] });
+
+    /* both countries are read off the ROW rather than typed here, so this
+       cannot go red the day the corpus moves */
+    const under = await cp.evaluate(async (args) => {
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      const at = () => Number(document.querySelector('.oa-count')
+        .textContent.split('/')[1].trim().split(' ')[0]);
+      const narrow = async (label) => {
+        const clear = document.querySelector('.oa-clear');
+        if (clear && !clear.disabled) { clear.click(); await sleep(350); }
+        document.getElementById('oaf-country').click();
+        await sleep(80);
+        const opt = [...document.querySelectorAll('.oa-pick-menu .oa-opt')]
+          .find((o) => {
+            const c = o.querySelector('.oa-opt-n');
+            return o.textContent.replace(c ? c.textContent : '', '').trim() === label;
+          });
+        if (!opt) return { offered: false };
+        opt.click();
+        await sleep(350);
+        return {
+          offered: true,
+          count: at(),
+          ids: [...document.querySelectorAll('#oa-jobs .oa-card')]
+            .map((c) => c.id.replace(/^job-/, '')),
+        };
+      };
+      return { other: await narrow(args.other), own: await narrow(args.own) };
+    }, { other: OTHER, own: pick.country });
+
+    ok(under.other.offered,
+      `multi-country: the Location filter offers "${OTHER}", the country the posting `
+      + 'covers but is NOT filed under, reverting the filter to `country` offers it to nobody');
+    eq(under.other.count, 1,
+      `multi-country: and exactly the one posting is listed under it`);
+    eq(under.other.ids, [pick.id],
+      'multi-country: …and it is the posting that names it');
+    ok(under.own.offered && under.own.ids.includes(pick.id),
+      'multi-country: and the posting is STILL found under the country it is filed under');
+
+    /* the card says so, and only because it covers two: every single-country
+       card on the page draws no such row, which is every other card here */
+    const card = await cp.evaluate(async (id) => {
+      const head = document.querySelector('#job-' + CSS.escape(id) + ' .oa-card-head');
+      if (head) head.click();
+      await new Promise((r) => setTimeout(r, 200));
+      const labels = [...document.querySelectorAll('#job-' + CSS.escape(id) + ' .oa-kv th')]
+        .map((n) => n.textContent.trim());
+      const row = [...document.querySelectorAll('#job-' + CSS.escape(id) + ' .oa-kv tr')]
+        .find((tr) => tr.querySelector('th')
+          && tr.querySelector('th').textContent.trim() === 'Campus countries');
+      return { labels, value: row ? row.querySelector('td').textContent.trim() : null,
+               others: document.querySelectorAll('#oa-jobs .oa-card').length };
+    }, pick.id);
+    ok(card.labels.includes('Campus countries'),
+      'multi-country: the card names the campus countries');
+    eq(card.value, `${pick.country}, ${OTHER}`,
+      'multi-country: …both of them, in the order the posting names them');
+    eq(cerr, [], 'multi-country filter: no uncaught script errors');
+    await cctx.close();
+
+    /* AND THE GATE HOLDS OVER THE NEW ROW. A reader who has not registered
+       gets the row LABELS as a blurred strip and none of the values
+       (assets/oa-gate.js, lockPreview), so the label may name the field and
+       must not name the countries. Measured rather than reasoned about: the
+       strip is built from whatever cfg.card.rows returns, and a row that built
+       its label out of row DATA would leak, which is the talkRows lesson
+       CLAUDE.md records for a candidate own INFORMS days. */
+    const { ctx: lctx, page: lp, errors: lerr } =
+      await signedOutPage('jobs.html', {
+        route: ['**/data/jobs.json*', JSON.stringify(fixture)] });
+    const locked = await lp.evaluate((id) => {
+      const li = document.querySelector('#job-' + CSS.escape(id));
+      return { html: li ? li.outerHTML : '',
+               rows: li ? li.querySelectorAll('.oa-kv tr').length : -1 };
+    }, pick.id);
+    ok(locked.html.includes('Campus countries'),
+      'multi-country (signed out): the blurred strip names the field');
+    eq(locked.rows, 0, 'multi-country (signed out): and the card draws no details table');
+    ok(!locked.html.includes(OTHER),
+      'multi-country (signed out): and not one of the countries it covers');
+    eq(lerr, [], 'multi-country (signed out): no uncaught script errors');
+    await lctx.close();
   }
 }
 

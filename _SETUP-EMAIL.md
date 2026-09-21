@@ -72,7 +72,7 @@ Settings → Secrets and variables → Actions.
 |---|---|---|
 | `MAIL_FROM` | `Operations Academia <no-reply@operationsacademia.org>` | `Operations Academia <SMTP_USER>` |
 | `FEEDBACK_TO` | where feedback lands | `kstouras@gmail.com` |
-| `CONTACT_EMAIL` | the human address in every footer | `operationsacademia@gmail.com` |
+| `CONTACT_EMAIL` | the human address in every footer | `operations.academia@gmail.com` |
 | `SITE_URL` | absolute site root | `https://www.operationsacademia.org` |
 | `JOBREVIEW_ALERT_TO` | where "a posting is waiting for you to approve" goes | `CONTACT_EMAIL` |
 | `SUBMISSION_ALERT_TO` | where "somebody has posted something" goes | `JOBREVIEW_ALERT_TO`, then `CONTACT_EMAIL` |

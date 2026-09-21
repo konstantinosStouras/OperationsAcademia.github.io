@@ -286,19 +286,6 @@
   "facultyUrl": "http://internal.clarkson.edu/directories/orgchart/index.php?dept=School%20of%20Business"
  },
  {
-  "id": "clemson-university-college-of-engineering-comput",
-  "name": "Clemson University, College of Engineering, Computing and Applied Sciences",
-  "institution": "Clemson University",
-  "school": "College of Engineering, Computing and Applied Sciences",
-  "department": "Industrial Engineering",
-  "schoolDept": "College of Engineering, Computing and Applied Sciences, Industrial Engineering",
-  "address": "Riggs Hall, Clemson, SC 29634",
-  "lat": 34.6770566,
-  "lng": -82.8378523,
-  "mapUrl": "",
-  "facultyUrl": "https://www.clemson.edu/cecas/departments/ie/people/faculty/index.html"
- },
- {
   "id": "clemson-university-college-of-business",
   "name": "Clemson University, Wilbur O. and Ann Powers College of Business",
   "institution": "Clemson University",
@@ -310,6 +297,19 @@
   "lng": -82.8391552,
   "mapUrl": "https://goo.gl/maps/YN3Mk",
   "facultyUrl": "http://www.clemson.edu/business/about/directory.html#D7"
+ },
+ {
+  "id": "clemson-university-college-of-engineering-comput",
+  "name": "Clemson University, College of Engineering, Computing and Applied Sciences",
+  "institution": "Clemson University",
+  "school": "College of Engineering, Computing and Applied Sciences",
+  "department": "Industrial Engineering",
+  "schoolDept": "College of Engineering, Computing and Applied Sciences, Industrial Engineering",
+  "address": "Riggs Hall, Clemson, SC 29634",
+  "lat": 34.6770566,
+  "lng": -82.8378523,
+  "mapUrl": "",
+  "facultyUrl": "https://www.clemson.edu/cecas/departments/ie/people/faculty/index.html"
  },
  {
   "id": "college-of-william-and-mary-raymond-a-mason-scho",
@@ -377,19 +377,6 @@
   "facultyUrl": "https://www.cbs.dk/en/research/departments-and-centres/department-of-operations-management/staff"
  },
  {
-  "id": "cornell-university-samuel-curtis-johnson-graduat",
-  "name": "Cornell University, Cornell SC Johnson College of Business",
-  "institution": "Cornell University",
-  "school": "Cornell SC Johnson College of Business",
-  "department": "Operations, Technology, and Information Management Area",
-  "schoolDept": "Cornell SC Johnson College of Business, Operations, Technology, and Information Management Area",
-  "address": "Sage Hall, 106 East Ave, Ithaca, NY 14853",
-  "lat": 42.4458918,
-  "lng": -76.4833009,
-  "mapUrl": "https://goo.gl/maps/jza7i",
-  "facultyUrl": "https://www.johnson.cornell.edu/Faculty-And-Research/Faculty-by-Discipline"
- },
- {
   "id": "cornell-university-cornell-tech",
   "name": "Cornell University, Cornell Tech",
   "institution": "Cornell University",
@@ -401,6 +388,19 @@
   "lng": -73.9562112,
   "mapUrl": "",
   "facultyUrl": "https://tech.cornell.edu/people/faculty/"
+ },
+ {
+  "id": "cornell-university-samuel-curtis-johnson-graduat",
+  "name": "Cornell University, Cornell SC Johnson College of Business",
+  "institution": "Cornell University",
+  "school": "Cornell SC Johnson College of Business",
+  "department": "Operations, Technology, and Information Management Area",
+  "schoolDept": "Cornell SC Johnson College of Business, Operations, Technology, and Information Management Area",
+  "address": "Sage Hall, 106 East Ave, Ithaca, NY 14853",
+  "lat": 42.4458918,
+  "lng": -76.4833009,
+  "mapUrl": "https://goo.gl/maps/jza7i",
+  "facultyUrl": "https://www.johnson.cornell.edu/Faculty-And-Research/Faculty-by-Discipline"
  },
  {
   "id": "cornell-university-school-of-operations-research",
@@ -962,19 +962,6 @@
   "facultyUrl": "https://carey.jhu.edu/faculty/faculty-directory?discipline[171]=171&category=56"
  },
  {
-  "id": "korea-advanced-institute-of-science-and-technolo",
-  "name": "KAIST, College of Business",
-  "institution": "KAIST",
-  "school": "College of Business",
-  "department": "Operations Strategy and Management Science",
-  "schoolDept": "College of Business, Operations Strategy and Management Science",
-  "address": "South Korea, Seoul, Dongdaemun-gu, Cheongnyangri-dong, Hoegi-ro, 85",
-  "lat": 37.5933445,
-  "lng": 127.0477953,
-  "mapUrl": "",
-  "facultyUrl": "http://www.business.kaist.edu/_prog/prof/index.php?site_dvs_cd=en&menu_dvs_cd=0501&div_cd=C02009"
- },
- {
   "id": "koc-university-college-of-administrative-science",
   "name": "Koç University, College of Administrative Sciences and Economics (CASE)",
   "institution": "Koç University",
@@ -999,6 +986,19 @@
   "lng": -77.0890599,
   "mapUrl": "https://goo.gl/maps/JUMZt",
   "facultyUrl": "http://www.american.edu/kogod/faculty/index.cfm"
+ },
+ {
+  "id": "korea-advanced-institute-of-science-and-technolo",
+  "name": "KAIST, College of Business",
+  "institution": "KAIST",
+  "school": "College of Business",
+  "department": "Operations Strategy and Management Science",
+  "schoolDept": "College of Business, Operations Strategy and Management Science",
+  "address": "South Korea, Seoul, Dongdaemun-gu, Cheongnyangri-dong, Hoegi-ro, 85",
+  "lat": 37.5933445,
+  "lng": 127.0477953,
+  "mapUrl": "",
+  "facultyUrl": "http://www.business.kaist.edu/_prog/prof/index.php?site_dvs_cd=en&menu_dvs_cd=0501&div_cd=C02009"
  },
  {
   "id": "ku-leuven-faculty-of-economics-and-business-feb",
@@ -1885,19 +1885,6 @@
   "facultyUrl": "http://www.neeley.tcu.edu/directory.aspx?id=7398"
  },
  {
-  "id": "the-chinese-university-of-hong-kong-cuhk-faculty",
-  "name": "The Chinese University of Hong Kong (CUHK), Faculty of Engineering",
-  "institution": "The Chinese University of Hong Kong (CUHK)",
-  "school": "Faculty of Engineering",
-  "department": "Systems Engineering and Engineering Management",
-  "schoolDept": "Faculty of Engineering, Systems Engineering and Engineering Management",
-  "address": "Room 609, William M. W. Mong Engineering Building, The Chinese University of Hong Kong, Shatin, N.T., Hong Kong",
-  "lat": 22.4180479,
-  "lng": 114.207961,
-  "mapUrl": "",
-  "facultyUrl": "http://www.se.cuhk.edu.hk/content/academic-staff"
- },
- {
   "id": "the-chinese-university-of-hong-kong-cuhk-busines",
   "name": "The Chinese University of Hong Kong, CUHK Business School",
   "institution": "The Chinese University of Hong Kong",
@@ -1909,6 +1896,19 @@
   "lng": 114.2086826,
   "mapUrl": "https://goo.gl/maps/GWZxu",
   "facultyUrl": "http://www.bschool.cuhk.edu.hk/index.php/faculty-staff/decision-science-managerial-economics/full-time-faculty"
+ },
+ {
+  "id": "the-chinese-university-of-hong-kong-cuhk-faculty",
+  "name": "The Chinese University of Hong Kong (CUHK), Faculty of Engineering",
+  "institution": "The Chinese University of Hong Kong (CUHK)",
+  "school": "Faculty of Engineering",
+  "department": "Systems Engineering and Engineering Management",
+  "schoolDept": "Faculty of Engineering, Systems Engineering and Engineering Management",
+  "address": "Room 609, William M. W. Mong Engineering Building, The Chinese University of Hong Kong, Shatin, N.T., Hong Kong",
+  "lat": 22.4180479,
+  "lng": 114.207961,
+  "mapUrl": "",
+  "facultyUrl": "http://www.se.cuhk.edu.hk/content/academic-staff"
  },
  {
   "id": "the-chinese-university-of-hong-kong-cuhk-busines-2",
@@ -2026,6 +2026,19 @@
   "lng": 114.1290719,
   "mapUrl": "https://goo.gl/maps/2rRYo",
   "facultyUrl": "https://www.fbe.hku.hk/academic-areas/innovation-and-information-management"
+ },
+ {
+  "id": "the-university-of-melbourne",
+  "name": "University of Melbourne",
+  "institution": "University of Melbourne",
+  "school": "",
+  "department": "Faculty of Business and Economics",
+  "schoolDept": "Faculty of Business and Economics",
+  "address": "198 Berkeley St, Carlton VIC 3010, Australia",
+  "lat": -37.8015846,
+  "lng": 144.9588604,
+  "mapUrl": "https://goo.gl/maps/eulFp",
+  "facultyUrl": "http://fbe.unimelb.edu.au/managementmarketing/staff/academic-staff"
  },
  {
   "id": "the-university-of-michigan-flint-school-of-manag",
@@ -2611,19 +2624,6 @@
   "lng": -71.0527482,
   "mapUrl": "https://goo.gl/maps/yzAlR",
   "facultyUrl": "http://www.umb.edu/academics/cm/faculty_staff/faculty"
- },
- {
-  "id": "the-university-of-melbourne",
-  "name": "University of Melbourne",
-  "institution": "University of Melbourne",
-  "school": "",
-  "department": "Faculty of Business and Economics",
-  "schoolDept": "Faculty of Business and Economics",
-  "address": "198 Berkeley St, Carlton VIC 3010, Australia",
-  "lat": -37.8015846,
-  "lng": 144.9588604,
-  "mapUrl": "https://goo.gl/maps/eulFp",
-  "facultyUrl": "http://fbe.unimelb.edu.au/managementmarketing/staff/academic-staff"
  },
  {
   "id": "university-of-miami-school-of-business-administr",

@@ -2717,7 +2717,7 @@
      ========================================================================= */
 
   var SITE = 'https://www.operationsacademia.org';
-  var VERIFY_SENDER = 'operationsacademia@gmail.com';
+  var VERIFY_SENDER = 'operations.academia@gmail.com';
   var VERIFY_FALLBACK_SENDER = 'noreply@operations-academia.firebaseapp.com';
   /* The callable's answers that mean "not available", each one a reason to
      use Firebase's own message instead: never deployed, temporarily down, or

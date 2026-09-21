@@ -679,6 +679,30 @@
 
 .oa-form textarea { min-height: 92px; resize: vertical; }
 
+/* ------------------------------------------- a field that takes SEVERAL values
+
+   The countries a posting covers (post-a-job.html, owner 2026-09-18). The
+   CHIPS are assets/oa-list.css's own — one chip look on the site, already
+   themed there and restated as a pill in v3.css — so all this adds is the
+   spacing that puts them under the box they belong to rather than hard against
+   the hint below it, which is the filter bar's own arrangement.
+
+   IT LIVES HERE AND ONLY HERE. v3.css does not restate `.oa-field-chips`, so
+   this rule is the one that reaches the site — the trap already recorded for
+   the roster's restored chevron, where a class-weight rule in this file lost
+   on load order to one in v3.css that named the same thing. */
+.oa-form .oa-field-chips { margin-top: 6px; }
+.oa-form .oa-field-chips:empty { margin-top: 0; }
+
+/* A REMOVE BUTTON IS A TOUCH TARGET (rule 3 of _MOBILE-STANDARDS.md). The
+   filter bar's chips are chosen with a mouse beside a control that is already
+   42px; this one is pressed mid-answer by somebody filling a form in on a
+   phone, and 32px is what the shared rule leaves it at. Scoped to the form, so
+   every list's own chips keep the size they are measured at. */
+@media (max-width: 640px) {
+  .oa-form .oa-field-chips .oa-chip { min-height: 42px; padding: 6px 12px; font-size: 14px; }
+}
+
 .oa-form input:focus,
 .oa-form select:focus,
 .oa-form textarea:focus,
