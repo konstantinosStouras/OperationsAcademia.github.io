@@ -415,6 +415,16 @@
     return c && c.canon ? c.canon(v) : String(v == null ? '' : v).trim();
   }
 
+  /** Does this text NAME a country the site lists? Membership in
+      OACountries.LIST, never `canon(v) === v`: canon hands an unrecognised
+      value straight back, so `isCanonical('NY')` is TRUE and would make a US
+      state read as a country. Without the module nothing is a country, which
+      is the safe direction for its one caller below. */
+  function knownCountry(v) {
+    var c = window.OACountries;
+    return !!(c && c.LIST) && c.LIST.indexOf(canonCountry(v)) !== -1;
+  }
+
   /** Canonical, deduped, capped, in the order they were named — countriesOf's
       twin. Takes anything: the banked chips, the box, a stored document. */
   function postingCountries(values) {
@@ -488,14 +498,24 @@
 
   /** The line under the field, which is the only place the whole answer is
       said once the box holds the last of several. Silent for the ordinary
-      one-country answer, where the box already says it. */
+      one-country answer, where the box already says it.
+
+      A BANKED CHIP IS NEVER THE ORDINARY ANSWER, so one on its own is said
+      too. The line is `aria-live`, and banking empties the box: without this
+      a reader who cannot see the chip appear had the value vanish from under
+      them and heard nothing at all. Typing one country and tabbing away is
+      still silent, which is the case the rule above is about. */
   function sayCountries() {
     var note = $('f-country-added');
     if (!note) return;
     var cs = countriesNow();
-    note.textContent = cs.length > 1
-      ? 'Listed under ' + cs.slice(0, -1).join(', ') + ' and ' + cs[cs.length - 1] + '.'
-      : '';
+    if (!cs.length || (cs.length === 1 && !extraCountries.length)) {
+      note.textContent = '';
+      return;
+    }
+    note.textContent = 'Listed under ' + (cs.length > 1
+      ? cs.slice(0, -1).join(', ') + ' and ' + cs[cs.length - 1]
+      : cs[0]) + '.';
   }
 
   /** Bank what is in the box, so the next one can be typed straight away —
@@ -541,19 +561,32 @@
     var box = $('f-country');
     if (!box) return;
     box.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter' && e.key !== ',') return;
+      if (e.key !== 'Enter') return;
       /* Enter in a single-input form submits it. Here it banks the country,
          which is what a reader collecting several means by it; the Post
-         button is still the only way to send. */
+         button is still the only way to send. A COMMA is deliberately not
+         here: it has one reading, in the input handler below, and banking on
+         the keypress would decide it before the rest of the value is typed. */
       e.preventDefault();
       bankCountry();
       box.focus();
     });
-    /* a pasted "France, Singapore" is two countries, not one name with a
-       comma in it — no canonical country name carries one */
+    /* A COMMA IS A SEPARATOR ONLY WHERE EVERY PART NAMES A COUNTRY, because
+       the site's own canon reads a comma list from the RIGHT as ONE place:
+       "Jamaica, NY" is St. John's University in New York and canon answers
+       United States, which is the whole of the "A US city is not the country
+       it is named after" rule in CLAUDE.md. Splitting first threw that away
+       and banked the country Jamaica, leaving "NY" in the box as its own
+       Location entry. Measured, the test keeps every case that rule turns on
+       — "Athens, Georgia", "Abu Dhabi, UAE", "Cambridge, MA, USA" and
+       "Korea, Republic of" are each one place and stay whole — and still
+       splits the owner's own paste, "France, Singapore".
+
+       Anything the test leaves whole goes to canon exactly as it did before
+       the chips existed, including a trailing comma, which canon trims. */
     box.addEventListener('input', function () {
-      if (box.value.indexOf(',') !== -1) {
-        var parts = box.value.split(',');
+      var parts = box.value.indexOf(',') === -1 ? null : box.value.split(',');
+      if (parts && parts.every(knownCountry)) {
         var last = parts.pop();
         parts.forEach(function (part) {
           box.value = part;

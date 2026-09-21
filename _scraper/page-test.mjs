@@ -1578,6 +1578,27 @@ for (const [name, expect] of [
       focused: document.activeElement && document.activeElement.id,
     }));
 
+    /* A COMMA SEPARATES ONLY WHERE EVERY PART NAMES A COUNTRY. The site's own
+       canon reads a comma list from the RIGHT as ONE place, which is the whole
+       of the "A US city is not the country it is named after" rule: St. John's
+       University is in Jamaica, New York. Splitting on the comma first banked
+       the country Jamaica and left "NY" in the box as a Location entry of its
+       own. Each probe is read back and the state put back as it was, so every
+       pin below this point measures what it meant to. */
+    const comma = [];
+    for (const typed of ['Jamaica, NY', 'Korea, Republic of', 'Japan, Brazil']) {
+      await q.fill('#f-country', typed);
+      await q.waitForTimeout(150);
+      comma.push(await q.evaluate(() => ({
+        box: document.getElementById('f-country').value,
+        chips: [...document.querySelectorAll('#f-country-chips .oa-chip-label')]
+          .map((n) => n.textContent),
+      })));
+    }
+    // the third probe really banked one, so take it off again
+    await q.click('#f-country-chips .oa-chip:nth-child(3)');
+    await q.fill('#f-country', '');
+
     // and the canon is the build's: "USA" is banked as "United States"
     await q.fill('#f-country', 'USA');
     await q.press('#f-country', 'Enter');
@@ -1635,7 +1656,7 @@ for (const [name, expect] of [
       const k = Object.keys(d).find((p) => p.startsWith('jobSubmissions/'));
       return d[k];
     });
-    return { atFirst, empty, banked, note, two, three, removed, canoned, afterUni, unguarded, doc };
+    return { atFirst, empty, banked, note, two, three, removed, comma, canoned, afterUni, unguarded, doc };
   });
 
   eq(many.atFirst.chips, 0, 'multi-country: the field opens with no chips, one country is the usual answer');
@@ -1658,6 +1679,19 @@ for (const [name, expect] of [
     'multi-country: pressing a chip removes that country');
   eq(many.removed.focused, 'f-country',
     'multi-country: …and puts the keyboard back in the box, not on <body>');
+  eq(many.comma[0].box, 'Jamaica, NY',
+    'multi-country: "Jamaica, NY" is ONE place and stays whole in the box');
+  eq(many.comma[0].chips, ['France', 'Singapore'],
+    'multi-country: …banking nothing, so the posting is not filed under Jamaica');
+  eq(many.comma[1].box, 'Korea, Republic of',
+    'multi-country: and a country whose own name carries a comma stays whole too');
+  eq(many.comma[1].chips, ['France', 'Singapore'],
+    'multi-country: …which the site reads as South Korea, never as two countries');
+  eq(many.comma[2].box, 'Brazil',
+    'multi-country: "Japan, Brazil" IS two countries, so the last stays in the box');
+  eq(many.comma[2].chips, ['France', 'Singapore', 'Japan'],
+    'multi-country: …and the ones before it are banked, which is the paste this was built for');
+
   eq(many.canoned, ['France', 'Singapore', 'United States'],
     'multi-country: a banked country is canonicalised the way the build publishes it');
   eq(many.doc.countries, ['France', 'Singapore', 'United States', 'Canada'],
@@ -13363,6 +13397,29 @@ for (const w of [320, 360, 390, 430]) {
       'multi-country: …both of them, in the order the posting names them');
     eq(cerr, [], 'multi-country filter: no uncaught script errors');
     await cctx.close();
+
+    /* AND THE GATE HOLDS OVER THE NEW ROW. A reader who has not registered
+       gets the row LABELS as a blurred strip and none of the values
+       (assets/oa-gate.js, lockPreview), so the label may name the field and
+       must not name the countries. Measured rather than reasoned about: the
+       strip is built from whatever cfg.card.rows returns, and a row that built
+       its label out of row DATA would leak, which is the talkRows lesson
+       CLAUDE.md records for a candidate own INFORMS days. */
+    const { ctx: lctx, page: lp, errors: lerr } =
+      await signedOutPage('jobs.html', {
+        route: ['**/data/jobs.json*', JSON.stringify(fixture)] });
+    const locked = await lp.evaluate((id) => {
+      const li = document.querySelector('#job-' + CSS.escape(id));
+      return { html: li ? li.outerHTML : '',
+               rows: li ? li.querySelectorAll('.oa-kv tr').length : -1 };
+    }, pick.id);
+    ok(locked.html.includes('Campus countries'),
+      'multi-country (signed out): the blurred strip names the field');
+    eq(locked.rows, 0, 'multi-country (signed out): and the card draws no details table');
+    ok(!locked.html.includes(OTHER),
+      'multi-country (signed out): and not one of the countries it covers');
+    eq(lerr, [], 'multi-country (signed out): no uncaught script errors');
+    await lctx.close();
   }
 }
 

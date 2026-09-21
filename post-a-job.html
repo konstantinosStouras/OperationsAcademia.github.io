@@ -326,9 +326,16 @@
                                `required` is deliberately NOT here: with a country already banked
                                as a chip the box is legitimately empty, and the browser would
                                refuse a form that is complete. oa-jobform.js validates the pair
-                               (chips OR box) and marks the field itself. -->
+                               (chips OR box) and marks the field itself.
+
+                               `aria-required` IS here, and is the other half of that: the star
+                               beside the label is `aria-hidden`, so dropping `required` left the
+                               field with nothing anywhere saying it has to be answered. It states
+                               the requirement without the browser enforcing it, which is the same
+                               pair the forum's ask form carries. -->
                           <input type="text" id="f-country" name="country" list="oa-countries" maxlength="60"
-                                 autocomplete="off" aria-describedby="f-country-hint f-country-added">
+                                 autocomplete="off" aria-required="true"
+                                 aria-describedby="f-country-hint f-country-added">
                           <datalist id="oa-countries"></datalist>
                           <!-- THE SITE'S OWN CHIP, and the filter bar's own order: the
                                control, then what has been chosen under it. `.oa-chips`,

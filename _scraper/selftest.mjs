@@ -1595,6 +1595,9 @@ async function testMultiCountryPostings() {
 
   /* --- 4. THE FORM SENDS IT, and the browser is the only thing that decides */
   const formSrc = await read('assets', 'oa-jobform.js');
+  /* comments stripped for the needles that are ABSENCES: the paragraphs beside
+     these rules name the comma reading they replaced */
+  const bareForm = formSrc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
   /* BOUNDED AT BOTH ENDS and its length asserted: this file's own paragraphs
      name these functions, and a slice taken on a moved marker would pass every
      check below by vacuity. It starts at the form's OWN cap, so the twin is
@@ -1602,14 +1605,15 @@ async function testMultiCountryPostings() {
   const twin = formSrc.slice(formSrc.indexOf('  var COUNTRY_MAX ='),
                              formSrc.indexOf('function setError'));
   ok(twin.includes('function postingCountries') && twin.includes('var COUNTRY_MAX')
-     && twin.length > 600 && twin.length < 6000,
+     && twin.includes('function knownCountry')
+     && twin.length > 600 && twin.length < 9000,
     'the fixture runs the FORM\'s own source, not a copy of it');
   eq(Number(/var COUNTRY_MAX = (\d+)/.exec(twin)[1]), COUNTRY_MAX,
     'and the form caps the list at the same number the model and the rules do');
-  const postingCountries = new Function('window', 'MAX',
-    twin + '\nreturn postingCountries;')(
-    { OACountries: require(path.join(HERE, '..', 'assets', 'oa-countries.js')) },
-    { country: 60 });
+  const COUNTRIES = require(path.join(HERE, '..', 'assets', 'oa-countries.js'));
+  const fromTwin = (name) => new Function('window', 'MAX',
+    twin + `\nreturn ${name};`)({ OACountries: COUNTRIES }, { country: 60 });
+  const postingCountries = fromTwin('postingCountries');
   /* PINNED AGAINST countriesOf over one fixture list — the market-year twin's
      own discipline, and for its reason: the form SENDS the list, so for a
      posting made through it the browser is the only thing that decides, and
@@ -1666,6 +1670,52 @@ async function testMultiCountryPostings() {
   ok(/if \(el\.getAttribute\('data-oa-answered'\) === '1'\) return false;/
        .test(await read('assets', 'oa-uniinfo.js')),
     '…and the directory pre-fill stands down on it, before every test that reads the box');
+
+  /* --- 4b. A COMMA SEPARATES ONLY WHERE EVERY PART NAMES A COUNTRY ------ */
+  /* The site's own canon reads a comma list from the RIGHT as ONE place, which
+     is the whole of the "A US city is not the country it is named after" rule:
+     "Jamaica, NY" is St. John's University in New York. Splitting on the comma
+     first threw that away and banked the country Jamaica. */
+  const knownCountry = fromTwin('knownCountry');
+  /* NOT `canon(v) === v`: canon hands an unrecognised value straight back, so
+     isCanonical says a US state IS a country and the test would be no test. */
+  ok(COUNTRIES.isCanonical('NY') && !knownCountry('NY'),
+    'knownCountry refuses what isCanonical accepts — a state does not name a country');
+  ok(knownCountry('UAE') && knownCountry('usa') && !knownCountry('') && !knownCountry('Athens'),
+    '…and reads an alias as the country it names, an unknown word as none');
+  for (const [value, several, whole] of [
+    ['Jamaica, NY', false, 'United States'],
+    ['Athens, Georgia', false, 'Georgia'],
+    ['Abu Dhabi, UAE', false, 'United Arab Emirates'],
+    ['Cambridge, MA, USA', false, 'United States'],
+    ['Korea, Republic of', false, 'South Korea'],
+    ['Shenzhen, China', false, 'China'],
+    ['France, Singapore', true, null],
+    ['United States, United Kingdom', true, null],
+  ]) {
+    eq(value.split(',').every(knownCountry), several,
+      `"${value}" is ${several ? 'several countries' : 'one place with a comma in it'}`);
+    if (!several) {
+      eq(postingCountries([value]), [whole],
+        `…so the form files it under ${whole}, exactly as it did before the chips`);
+    }
+  }
+  /* the rule itself, in the one place it is read */
+  ok(/var parts = box\.value\.indexOf\(','\) === -1 \? null : box\.value\.split\(','\);\s*\n\s*if \(parts && parts\.every\(knownCountry\)\) \{/
+       .test(formSrc),
+    'the input handler splits on a comma only where every part names a country');
+  ok(/if \(e\.key !== 'Enter'\) return;/.test(bareForm)
+     && !/e\.key !== ','/.test(bareForm) && !/e\.key === ','/.test(bareForm),
+    '…and a comma has ONE reading, never a second one on the keypress');
+
+  /* the aria-live line says a chip that is banked ALONE too: banking empties
+     the box, so without it a reader who cannot see the chip appear had the
+     value vanish from under them and heard nothing */
+  ok(/if \(!cs\.length \|\| \(cs\.length === 1 && !extraCountries\.length\)\) \{\s*\n\s*note\.textContent = '';/
+       .test(formSrc),
+    'the line is silent only for a country TYPED in the box, never for a banked one');
+  ok(/id="f-country"[\s\S]{0,240}?aria-required="true"/.test(page),
+    'and the box states the requirement it no longer enforces, beside its own star');
 
   /* --- 5. THE HEAL AND THE GUARDS STAND DOWN ON THE SAME ROW ------------- */
   const byUni = new Map([['k', 'France']]);

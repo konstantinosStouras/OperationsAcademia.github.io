@@ -836,9 +836,52 @@ filters already follow ("the half-typed word in the box counts as one more
 term"). Three things go on working untouched because of it: the datalist, the
 browser's own suggestions, and `oa-uniinfo.js`'s `autoFill(els.country, …)`,
 which fills the BOX from the site's own directory and knows nothing about
-chips. Enter (or a comma, or a pasted "France, Singapore") banks what is typed
-and empties the box so the next one can be typed — `oa-list.js`'s own Enter
-rule, and its reason: nothing is lost by NOT pressing it.
+chips. Enter banks what is typed and empties the box so the next one can be
+typed — `oa-list.js`'s own Enter rule, and its reason: nothing is lost by NOT
+pressing it.
+
+#### A COMMA SEPARATES ONLY WHERE EVERY PART NAMES A COUNTRY
+
+The first build read a comma as a separator outright, on the reasoning that no
+canonical country name carries one. That is true of the LIST and false of the
+BOX, which is free text — and it threw away a rule this file already records in
+full, one section over: **`canon()` reads a comma list from the RIGHT as ONE
+place**, because the last part of an address is its most administrative one.
+"Jamaica, NY" is St. John's University in New York and canon answers United
+States; splitting first banked the country **Jamaica** and left "NY" in the box
+as its own Location entry, which is the exact defect "A US city is not the
+country it is named after" was written to end.
+
+So the comma is read once, and the test is whether **every part names a country
+the site lists** (`knownCountry` in `assets/oa-jobform.js`: membership in
+`OACountries.LIST`, never `canon(v) === v` — canon hands an unrecognised value
+straight back, so `isCanonical('NY')` is TRUE and a US state would read as a
+country). Measured over the cases that rule turns on, each one stays whole and
+canon answers it exactly as it did before the chips existed:
+
+| typed | every part a country? | filed under |
+|---|---|---|
+| `Jamaica, NY` | no (`NY`) | United States |
+| `Athens, Georgia` | no (`Athens`) | Georgia |
+| `Abu Dhabi, UAE` | no (`Abu Dhabi`) | United Arab Emirates |
+| `Cambridge, MA, USA` | no | United States |
+| `Korea, Republic of` | no (`Republic of`) | South Korea |
+| `France, Singapore` | **yes** | France **and** Singapore |
+
+`Korea, Republic of` is the one worth keeping in mind: a naive split files a
+posting under a country called "Republic of".
+
+**The comma left the keydown handler entirely**, which is what makes "read
+once" true: banking on the keypress decides the value before the rest of it is
+typed, so "Jamaica" + comma banked the country and the regression came back by
+the keyboard rather than by a paste. Enter still banks on the press — there is
+nothing ambiguous about it — and everything a comma does happens in the one
+`input` handler, over the whole value. The cost, stated: typing "France," and
+pressing Post sends France, because canon trims a trailing comma, and the chip
+does not appear until the second name is complete.
+
+**Without `OACountries` nothing is a country, so nothing splits**, which is the
+safe direction: the value goes to canon whole, exactly as the box did before.
 
 **The chips are the site's own.** `.oa-chips` / `.oa-chip` are the filter bar's,
 already themed in `oa-list.css` and restated as a pill in `v3.css`, so a banked
@@ -856,6 +899,19 @@ it.** With a country already banked as a chip the box is legitimately empty,
 and the browser would refuse a form that is complete. `collect()` validates the
 PAIR and marks the field itself; banking a chip clears the error, so a message
 cannot sit under a field that has since been answered.
+
+**`aria-required` IS on it, and is the other half of that.** The star beside
+the label is `aria-hidden`, so dropping `required` left the field with nothing
+anywhere saying it has to be answered: a reader on a screen reader met an
+optional-sounding box that the form then refused. It states the requirement
+without the browser enforcing it, which is the same pair the forum's ask form
+already carries.
+
+**And the line under the field says a chip banked ALONE.** It is `aria-live`,
+and banking EMPTIES the box, so while it spoke only for two countries or more
+a reader who cannot see the chip appear had the value vanish from under them
+and heard nothing at all. Typing one country and tabbing away is still silent,
+which is the ordinary answer the rule was written for.
 
 **The draft saves the banked ones explicitly** (`__countries`, beside
 `__checks`): they are not an `<input>`, so the generic sweep cannot see them,
@@ -930,6 +986,14 @@ _functions/test/rules-budget.mjs"`.
 
 ### What every consumer does with it
 
+**`countries` MEANS SOMETHING ELSE ONE FILE OVER, and the two must not be made
+to match.** `_scraper/directory-model.mjs` publishes `countries` on a
+MULTI-CAMPUS university row and deliberately gives it **no** `country` at all —
+`campusCountries` abstains rather than letting a posting-vote majority dress an
+ambiguity up as an answer, which is why INSEAD has no single country there. A
+posting's `countries` is the opposite shape on purpose: it always carries
+`country`, and `country` is the FIRST of the list. Neither is the other's bug.
+
 * **The Location filter reads `countries`** on `jobs.html` and
   `previous-markets.html`. The values are the same country names either way, so
   `?country=France` and the archive's legacy `?filterI=` select exactly what
@@ -967,8 +1031,13 @@ Tests: `testMultiCountryPostings` in `_scraper/selftest.mjs` (the one
 definition and the list winning over the scalar; the writer's three properties;
 the field published on every row; the form's twin driven as a program over a
 fixture list with the box counting beside the chips, the pair validated, the
-`required` gone from both the markup and `need`, the draft's own key and the
-edit's fill; the heal and BOTH guards read from their three sources and pinned
+`required` gone from both the markup and `need` and `aria-required` there in
+its place, the draft's own key and the edit's fill; the comma rule driven over
+the six cases above with `knownCountry` shown to refuse what `isCanonical`
+accepts, and the comma pinned OUT of the keydown handler with the source
+comment-stripped, since the paragraphs beside it name the reading they replaced;
+the line speaking for a chip banked alone; the heal and BOTH guards read from
+their three sources and pinned
 to one test; the build naming what it no longer repairs; the first run
 reporting no edit and a real one reporting the edit; every writer; all three
 served files stating it with `country` its first entry; the rules and the
@@ -976,9 +1045,13 @@ budget fixture; every consumer; the row drawn only where it says something; and
 a review edit replacing rather than joining) and the multi-country block of
 `_scraper/page-test.mjs`, which drives it in a real browser: the box typed and
 banked and the chips read back, a chip removed, the pair refused when both are
-empty, a posting stored with its list, and the Location filter finding one
-posting under either of its two countries. Every pin verified by putting the
-defect back.
+empty, a posting stored with its list, "Jamaica, NY" and "Korea, Republic of"
+each left whole in the box beside "Japan, Brazil" banking one, the Location
+filter finding one posting under either of its two countries, and a signed-out
+reader's blurred strip naming the FIELD and neither country. Every pin verified
+by putting the defect back — reverting the comma rule alone turns eleven
+checks red across the two suites, and the browser reports the reported bug
+itself: the posting banked under Jamaica.
 
 ## The HigherEdJobs postings are checked against their own ads
 
