@@ -67,6 +67,9 @@ async function main() {
   const empty = [];
   const unknown = new Map();
   let checked = 0;
+  /* postings covering campuses in several countries, which neither this
+     nor healCountry judges — counted so a run says how many it passed over */
+  let multi = 0;
 
   for (const file of FILES) {
     for (const row of await readRows(file)) {
@@ -79,6 +82,14 @@ async function main() {
         unknown.get(k).rows++;
         continue;
       }
+      /* A POSTING THAT NAMES SEVERAL COUNTRIES IS NOT AUDITED, and it is the
+         same test `healCountry` stands down on — the two are one pair, so
+         neither can start reporting what the other would not repair (owner,
+         2026-09-18). The fault here is a browser filling the country box from
+         the editor's own address profile: one value, in one box, that nobody
+         typed. A poster who banked two campus countries has plainly acted. */
+      const named = Array.isArray(row.countries) ? row.countries.filter(Boolean) : [];
+      if (named.length > 1) { multi++; continue; }
       checked++;
       if (!row.country) empty.push({ file, id: row.id, institution, want });
       else if (row.country !== want) {
@@ -88,13 +99,20 @@ async function main() {
   }
 
   if (JSON_OUT) {
-    console.log(JSON.stringify({ checked, wrong, empty,
+    console.log(JSON.stringify({ checked, multi, wrong, empty,
       unknown: [...unknown.values()] }, null, 1));
     return wrong.length ? 1 : 0;
   }
 
   console.log(`country audit: ${checked} posting(s) checked against ` +
               `${byUni.size} universities the site can place`);
+  /* SAID RATHER THAN SILENT. A run that passed over postings has to say how
+     many, or "every posting names the country it is in" below reads as a
+     claim about a set it never looked at. */
+  if (multi) {
+    console.log(`${multi} posting(s) cover campuses in several countries and are the `
+      + "poster's own statement, so neither this nor healCountry judges them.");
+  }
 
   for (const w of wrong) {
     console.log(`::error::${w.file}: ${w.institution} is in ${w.want}, but the posting ` +

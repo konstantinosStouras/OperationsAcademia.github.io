@@ -345,6 +345,15 @@
         (the Tulane did-you-mean race, caught by page-test under CI load). */
     function autoFill(el, attr, value, events) {
       if (!el || declined[attr]) return false;
+      /* A FIELD THAT TAKES SEVERAL VALUES IS ANSWERED BY ITS CHIPS, not by
+         its box (post-a-job.html's countries, owner 2026-09-18). Banking one
+         empties the box, and an empty box is what every test below reads as
+         "nothing there yet" — so without this, a poster who banked France and
+         then corrected the institution would have the directory's own country
+         filled in beside it, which is a campus they never named. The form
+         sets the mark in one place (drawCountryChips) and this reads it in
+         one place. */
+      if (el.getAttribute('data-oa-answered') === '1') return false;
       var own = el.getAttribute(attr) || '';
       var current = trim(el.value);
       if (own && !current) {                           // our fill, cleared — a decision

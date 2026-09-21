@@ -60,7 +60,7 @@ import {
   KINDS, SINCE, ANNOUNCED_AT, LIVE_SINCE, LIVE_MAILED_AT,
   partitionSubmissions, partitionLive, idsOf, servedIndex, createdDay,
 } from './submissions-review.mjs';
-import { postedBy, longDate, marketLabel, assignIds } from './jobs-model.mjs';
+import { postedBy, longDate, marketLabel, assignIds, countriesOf, countriesText } from './jobs-model.mjs';
 import {
   shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
   safeError,
@@ -318,7 +318,9 @@ export function renderLivePostingEmail(entry, { site = SITE, now = new Date() } 
       line('School / department', r.department) +
       line('Type', r.type) +
       line('Entry level', (r.levels || []).join(', ')) +
-      line('Country', r.country) +
+      /* every campus country the search covers — one posting, one line,
+         the way Entry level already carries every rank */
+      line(countriesOf(r).length > 1 ? 'Countries' : 'Country', countriesText(r)) +
       line('Advertised', /^\d{4}-\d{2}-\d{2}$/.test(String(r.posted || ''))
         ? longDate(r.posted) : r.posted) +
       line('Listed under', seasons) +

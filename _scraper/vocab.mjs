@@ -565,8 +565,28 @@ export function campusCountries(directory = [], schools = SCHOOLS) {
 export function healCountry(row, byUni, schools = SCHOOLS) {
   if (!row || !row.institution || !byUni) return row;
   const want = byUni.get(schools.institutionKey(row.institution));
-  if (!want || want === row.country) return row;
-  return { ...row, country: want };
+  if (!want) return row;
+  /* A POSTING THAT NAMES SEVERAL COUNTRIES IS LEFT ALONE, and the served-file
+     guard is keyed on the same test so the two cannot drift (selftest.mjs,
+     country-audit.mjs).
+
+     The fault this heal exists for is a BROWSER filling the country box from
+     the editor's own address profile — one autofilled value, in one box, that
+     nobody typed. A poster who has banked two country chips has plainly acted,
+     and the owner's own case (2026-09-18) is a school advertising across its
+     campuses: correcting that list back to the one country the directory
+     knows would throw away the statement the field was added to carry.
+
+     It costs the heal nothing it had. `campusCountries` already abstains for
+     a university whose campuses disagree — INSEAD has no answer here at all —
+     so what is left is a single-campus university, where a deliberate second
+     country is precisely what this must not overwrite. Such a row is NAMED in
+     the build's run log instead (build-jobs.mjs), the `backdatedDeadlines`
+     discipline: reported, never repaired. */
+  const countries = Array.isArray(row.countries) ? row.countries.filter(Boolean) : [];
+  if (countries.length > 1) return row;
+  if (want === row.country && (!countries.length || countries[0] === want)) return row;
+  return { ...row, country: want, ...(countries.length ? { countries: [want] } : {}) };
 }
 
 /* --------------------------------- which school is the BUSINESS school

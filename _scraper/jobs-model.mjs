@@ -51,7 +51,7 @@ export const { canonPlace, canonColumns, canonSchool, canonUnit, canonInstitutio
     digest went out later that day, permanently. */
 export const PUBLIC_FIELDS = [
   'id', 'year', 'years', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
-  'applyBy', 'applyByDate', 'reviewDate', 'comments', 'country',
+  'applyBy', 'applyByDate', 'reviewDate', 'comments', 'country', 'countries',
   'adUrl', 'adPending', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
   'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner',
 ];
@@ -718,6 +718,104 @@ export function withMarketYears(row) {
   return out;
 }
 
+/* ------------------------------------------ the countries a posting covers
+
+   A posting used to name ONE country, because a campus is in one place.
+   That is wrong for exactly the searches a school runs across its campuses
+   (owner, 2026-09-18): "some schools may have openings for multiple country
+   locations", and a model that can name only one of them has to be wrong
+   about the rest — so the posting is filed under one country and is not
+   findable under the others, which are the ones its own advertisement names.
+
+   THE SHAPE IS `year`/`years`, DELIBERATELY, down to the last rule.
+   `country` stays exactly what it was — ONE country, a string, the FIRST the
+   poster named — so every consumer that reads it goes on reading it: the
+   alert criteria, the Excel column, the calendar entry, the archive's own
+   rows, the `?country=France` links people have already saved, and the
+   frozen /v1/ and /v2/ trees, which never load any of this. `countries` is
+   the WHOLE list, and it is what the Location filter reads, so a search
+   covering France and Singapore is found under either.
+
+   ONE DEFINITION, and it is this file's. `assets/oa-jobform.js` carries the
+   browser twin (`postingCountries`), pinned against this over one fixture
+   list, for the reason the market-year twin exists: the form SENDS the list,
+   so the browser is the only thing that decides for a posting made through
+   it, and two readings of one answer disagree silently. */
+
+/* A posting spans campuses, not the world. The cap is a guard against junk
+   rather than a policy — no legitimate search is advertised in nine
+   countries at once — and it is the same number the rules bound the list at
+   (`list('countries', 8)` in _firestore.rules), pinned both ways. */
+export const COUNTRY_MAX = 8;
+
+/**
+ * EVERY country this posting covers, in the order the poster named them.
+ *
+ * Canonical, deduped and non-empty. A row that predates the field answers
+ * its own single country, which is what makes this safe to read anywhere:
+ * the archive has no daily build, `data/past-postings.json` is served as it
+ * stands, and a row answering NO country would drop out of the Location
+ * filter entirely rather than being found under the one it names — the
+ * fallback previous-markets.html's `marketYears` already exists for.
+ *
+ * Pure. `country` is never trusted over the list: where both are present the
+ * list is the poster's statement and `country` is its first entry.
+ */
+export function countriesOf(row) {
+  if (!row) return [];
+  const raw = Array.isArray(row.countries) ? row.countries
+    : (row.countries ? [row.countries] : []);
+  const out = [];
+  for (const v of raw.concat(row.country ? [row.country] : [])) {
+    const c = canonCountry(text(v, MAXLEN.country));
+    if (c && !out.includes(c)) out.push(c);
+    if (out.length >= COUNTRY_MAX) break;
+  }
+  return out;
+}
+
+/**
+ * The row with its countries written on it — the one place `countries` is set,
+ * and the one place `country` is made to agree with them.
+ *
+ * Pure, BY VALUE and IDEMPOTENT, so every writer can apply it and the build
+ * can apply it again over the merged set: a row already carrying the right
+ * list comes back byte-identical and the rebuild commits nothing. That is the
+ * `withMarketYears`/`healCountry` discipline, and it is what lets a carried
+ * ORPHAN — a posting with no document behind it, which never goes back
+ * through an ingest — gain its list like everything else.
+ */
+export function withCountries(row) {
+  if (!row) return row;
+  const countries = countriesOf(row);
+  if (!countries.length) return row;
+  const have = Array.isArray(row.countries) ? row.countries : null;
+  if (have && have.length === countries.length
+      && have.every((c, i) => c === countries[i])
+      && row.country === countries[0]) return row;
+  /* written straight after `country`, not appended — `withMarketYears`'s own
+     reason: publicRow reorders the served postings, but
+     data/past-postings.json is serialised as it stands, and a derived field
+     landing after the addedAt stamp makes a diff that has to be read twice. */
+  const out = {};
+  let placed = false;
+  for (const [k, v] of Object.entries(row)) {
+    if (k === 'countries') continue;
+    out[k] = k === 'country' ? countries[0] : v;
+    if (k === 'country') { out.countries = countries; placed = true; }
+  }
+  if (!placed) { out.country = countries[0]; out.countries = countries; }
+  return out;
+}
+
+/** How a card, an e-mail and a spreadsheet cell name several countries. ONE
+    wording, so the three cannot disagree. */
+export function countriesText(row) {
+  const cs = countriesOf(row);
+  if (cs.length <= 1) return cs[0] || '';
+  return cs.slice(0, -1).join(', ') + ' and ' + cs[cs.length - 1];
+}
+
 /** How the report words the date that decided. */
 export const MARKET_YEAR_SOURCE = {
   final: 'its final apply-by date',
@@ -896,7 +994,12 @@ export function healPlace(row, fixes = []) {
  * AGAIN because the client is not trusted with what reaches a served file.
  */
 export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
-  const country = canonCountry(text(doc.country, MAXLEN.country));
+  /* EVERY country the posting covers, and `country` is the first of them.
+     A document made before the form could name several — and every document
+     the /v2/ archive's own frozen form still writes — carries `country`
+     alone, which countriesOf reads as a list of one. */
+  const countries = countriesOf(doc);
+  const country = countries[0] || '';
   const levels = pickList(doc.levels, LEVELS);
   const type = TYPES.includes(text(doc.type, 40)) ? text(doc.type, 40) : '';
 
@@ -1022,6 +1125,7 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
     reviewDate: day(doc.reviewDate),
     comments: text(doc.comments, MAXLEN.comments),
     country,
+    countries,
     adUrl: url(doc.adUrl),
     /* The poster uploaded an advert that has not been filed into Drive yet
        (the build files it, normally in the same run — see transferUploads).
@@ -1107,7 +1211,9 @@ export function publicRow(row) {
     // `years` is written on EVERY row on purpose, even where it is the stored
     // year said once. The archive's "Job market year" filter reads it as a
     // multi-valued field, and a row that omitted it would answer no year at
-    // all rather than its own.
+    // all rather than its own. `countries` is written on every row for
+    // exactly that reason, and the jobs page's Location filter is the field
+    // that reads it.
     if ((k === 'ref' || k === 'adPending' || k === 'reviewDate') && !row[k]) continue;
     out[k] = row[k];
   }
@@ -1457,6 +1563,7 @@ export function submissionFromRow(row, { uid = null, status = 'published' } = {}
     type: row.type || '',
     levels: (row.levels || []).slice(),
     country: row.country || '',
+    countries: countriesOf(row),
     untilFilled,
     applyByDate: row.applyByDate || '',
     reviewDate: row.reviewDate || '',
@@ -1730,8 +1837,21 @@ export function diffRows(before, after) {
     // reports the edit properly. Diffing it would have reported all 569
     // postings as edited on the single run that first wrote the field.
     if (k === 'id' || k === 'adPending' || k === 'addedAt' || k === 'years') continue;
-    const a = before ? before[k] : undefined;
-    const b = after ? after[k] : undefined;
+    /* `countries` is NOT skipped, and that is the difference from `years`
+       above. It is the poster's own statement — adding a second campus
+       country to a live posting is a real edit, and `country` would not move,
+       since it stays the first of them — so skipping it would make exactly
+       that edit invisible in the daily e-mail.
+
+       What it must not do is mail the maintainer 617 phantom edits on the one
+       run that first writes the field, which is the mistake this list records
+       twice above. So BOTH SIDES are read through `countriesOf`, which
+       answers a row that predates the field with its own single country:
+       "France" against ["France"] is the same posting said twice and is
+       silent, while ["France"] against ["France","Singapore"] is the edit it
+       looks like. */
+    const a = k === 'countries' ? countriesOf(before) : (before ? before[k] : undefined);
+    const b = k === 'countries' ? countriesOf(after) : (after ? after[k] : undefined);
     const av = Array.isArray(a) ? a.join(', ') : (a === undefined || a === null ? '' : String(a));
     const bv = Array.isArray(b) ? b.join(', ') : (b === undefined || b === null ? '' : String(b));
     if (av !== bv) out.push({ field: k, before: av, after: bv });
@@ -2110,7 +2230,10 @@ export function buildMeta(rows, { generated }) {
     years: tally((r) => String(r.year)),
     types: tally((r) => r.type),
     levels: tally((r) => r.levels),
-    countries: tally((r) => r.country),
+    /* EVERY country a posting names, so the form's datalist and the home
+       page's launcher offer a country a posting covers but is not filed
+       under first. A single-country posting counts once, as it always did. */
+    countries: tally((r) => countriesOf(r)),
     characteristics: tally((r) => r.characteristics),
     featured: rows.filter((r) => r.featured).length,
     newestPosted: rows.reduce((m, r) => (r.posted > m ? r.posted : m), ''),
