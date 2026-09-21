@@ -7801,6 +7801,25 @@
   "lng": 114.207961
  },
  {
+  "id": "chinese-university-of-hong-kong-shenzhen__school-of-data-science__operations-research",
+  "institution": "The Chinese University of Hong Kong, Shenzhen",
+  "school": "School of Data Science",
+  "department": "Operations Research",
+  "type": "University",
+  "country": "China",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-21"
+ },
+ {
   "id": "chinese-university-of-hong-kong-shenzhen__school-of-management-and-economics__information-systems-and-operations-management",
   "institution": "The Chinese University of Hong Kong, Shenzhen",
   "school": "School of Management and Economics",

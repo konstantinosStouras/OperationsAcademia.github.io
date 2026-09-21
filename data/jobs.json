@@ -38,6 +38,45 @@
   "owner": ""
  },
  {
+  "id": "2027-the-chinese-university-of-hong-kong-shenzhen-20260921",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-21",
+  "institution": "The Chinese University of Hong Kong, Shenzhen",
+  "department": "School of Data Science, Operations Research",
+  "school": "School of Data Science",
+  "unit": "Operations Research",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled. Early submissions are encouraged.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-18",
+  "comments": "We will be interviewing at the INFORMS Annual Meeting. If you plan to go to INFORMS Annual Meeting this year at San Francisco and would like to consider an interview at INFORMS, please submit your application material before Oct 18th.",
+  "country": "China",
+  "adUrl": "https://drive.google.com/file/d/1goAuzBdfa-mC6k8EyFBSrja4U52v5bL4/view?usp=drivesdk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://sds.cuhk.edu.cn/en/recruitment/2245",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Chinese%20University%20of%20Hong%20Kong%2C%20Shenzhen",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-09-21T02:04:36Z",
+  "ref": "OA-JOB-260921-ZMEB",
+  "owner": "9c3de5fb0a5fda8e"
+ },
+ {
   "id": "2027-insead-20260918",
   "year": 2027,
   "years": [

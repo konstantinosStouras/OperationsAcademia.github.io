@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-18T20:07:42.164Z",
+ "generated": "2026-09-21T02:05:40.154Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -67,6 +67,10 @@
   },
   {
    "v": "Texas State University",
+   "n": 4
+  },
+  {
+   "v": "The Chinese University of Hong Kong, Shenzhen",
    "n": 4
   },
   {
@@ -163,10 +167,6 @@
   },
   {
    "v": "Shanghai Jiao Tong University",
-   "n": 3
-  },
-  {
-   "v": "The Chinese University of Hong Kong, Shenzhen",
    "n": 3
   },
   {
@@ -2472,6 +2472,10 @@
    "n": 1
   },
   {
+   "v": "School of Data Science",
+   "n": 1
+  },
+  {
    "v": "School of Economics and Management",
    "n": 1
   },
@@ -3970,6 +3974,10 @@
    "n": 1
   },
   {
+   "v": "Operations Research",
+   "n": 1
+  },
+  {
    "v": "Operations Research and AI",
    "n": 1
   },
@@ -4567,10 +4575,6 @@
   },
   {
    "v": "Operations Management Area",
-   "n": 0
-  },
-  {
-   "v": "Operations Research",
    "n": 0
   },
   {
@@ -9039,16 +9043,21 @@
   },
   "The Chinese University of Hong Kong, Shenzhen": {
    "schools": [
+    "School of Data Science",
     "School of Management and Economics"
    ],
    "units": [
     "Information Systems and Operations Management",
     "Management and Economics",
+    "Operations Research",
     "The research group of Prof. Yiming Zhang"
    ],
    "bySchool": {
     "": [
      "Information Systems and Operations Management"
+    ],
+    "School of Data Science": [
+     "Operations Research"
     ],
     "School of Management and Economics": [
      "Information Systems and Operations Management",
@@ -12350,6 +12359,9 @@
   ],
   "School of Computing": [
    "Information Systems and Analytics"
+  ],
+  "School of Data Science": [
+   "Operations Research"
   ],
   "School of Economics and Business Administration": [
    "Operations and Quantitative Methods"
