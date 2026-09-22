@@ -6862,6 +6862,18 @@
   "lastPosted": "2025-09-06"
  },
  {
+  "id": "skema-business-school____optimization-or-game-theory",
+  "institution": "SKEMA Business School",
+  "department": "Optimization or Game Theory",
+  "type": "Business School",
+  "country": "France",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-19"
+ },
+ {
   "id": "skolkovo-institute-of-science-and-technology-skoltech",
   "institution": "Skolkovo Institute of Science and Technology (Skoltech)",
   "type": "University",
@@ -7786,8 +7798,11 @@
   "address": "Room 609, William M. W. Mong Engineering Building, The Chinese University of Hong Kong, Shatin, N.T., Hong Kong",
   "facultyUrl": "http://www.se.cuhk.edu.hk/content/academic-staff",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-09-20",
   "lat": 22.4180479,
   "lng": 114.207961
  },

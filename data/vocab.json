@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T06:55:40.726Z",
+ "generated": "2026-09-22T06:57:45.646Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -99,6 +99,10 @@
   },
   {
    "v": "Chicago Booth",
+   "n": 3
+  },
+  {
+   "v": "Chinese University of Hong Kong",
    "n": 3
   },
   {
@@ -370,6 +374,10 @@
    "n": 2
   },
   {
+   "v": "SKEMA Business School",
+   "n": 2
+  },
+  {
    "v": "Spartanburg Methodist College",
    "n": 2
   },
@@ -403,10 +411,6 @@
   },
   {
    "v": "Texas Southern University",
-   "n": 2
-  },
-  {
-   "v": "The Chinese University of Hong Kong",
    "n": 2
   },
   {
@@ -1139,10 +1143,6 @@
   },
   {
    "v": "Singapore University of Technology and Design",
-   "n": 1
-  },
-  {
-   "v": "SKEMA Business School",
    "n": 1
   },
   {
@@ -2292,6 +2292,10 @@
    "n": 1
   },
   {
+   "v": "Faculty of Engineering",
+   "n": 1
+  },
+  {
    "v": "Feliciano School of Business",
    "n": 1
   },
@@ -2641,10 +2645,6 @@
   },
   {
    "v": "Faculty of Economics and Business (FEB)",
-   "n": 0
-  },
-  {
-   "v": "Faculty of Engineering",
    "n": 0
   },
   {
@@ -3982,6 +3982,10 @@
    "n": 1
   },
   {
+   "v": "Optimization or Game Theory",
+   "n": 1
+  },
+  {
    "v": "OR/OM",
    "n": 1
   },
@@ -4167,6 +4171,10 @@
   },
   {
    "v": "Systems Engineering",
+   "n": 1
+  },
+  {
+   "v": "Systems Engineering and Engineering Management",
    "n": 1
   },
   {
@@ -4647,10 +4655,6 @@
   },
   {
    "v": "Supply Chain, Operations Management and Business Statistics",
-   "n": 0
-  },
-  {
-   "v": "Systems Engineering and Engineering Management",
    "n": 0
   },
   {
@@ -5517,6 +5521,32 @@
    "bySchool": {
     "": [
      "OM"
+    ]
+   }
+  },
+  "Chinese University of Hong Kong": {
+   "schools": [
+    "CUHK Business School",
+    "Faculty of Engineering"
+   ],
+   "units": [
+    "Decision Sciences and Managerial Economics",
+    "Decisions, Operations and Technology",
+    "OM/IS",
+    "Operations Management",
+    "Systems Engineering and Engineering Management"
+   ],
+   "bySchool": {
+    "": [
+     "OM/IS"
+    ],
+    "CUHK Business School": [
+     "Decision Sciences and Managerial Economics",
+     "Decisions, Operations and Technology",
+     "Operations Management"
+    ],
+    "Faculty of Engineering": [
+     "Systems Engineering and Engineering Management"
     ]
    }
   },
@@ -8508,11 +8538,13 @@
   "SKEMA Business School": {
    "schools": [],
    "units": [
-    "OM"
+    "OM",
+    "Optimization or Game Theory"
    ],
    "bySchool": {
     "": [
-     "OM"
+     "OM",
+     "Optimization or Game Theory"
     ]
    }
   },
@@ -9006,32 +9038,6 @@
    "bySchool": {
     "": [
      "Business"
-    ]
-   }
-  },
-  "The Chinese University of Hong Kong": {
-   "schools": [
-    "CUHK Business School",
-    "Faculty of Engineering"
-   ],
-   "units": [
-    "Decision Sciences and Managerial Economics",
-    "Decisions, Operations and Technology",
-    "OM/IS",
-    "Operations Management",
-    "Systems Engineering and Engineering Management"
-   ],
-   "bySchool": {
-    "": [
-     "OM/IS"
-    ],
-    "CUHK Business School": [
-     "Decision Sciences and Managerial Economics",
-     "Decisions, Operations and Technology",
-     "Operations Management"
-    ],
-    "Faculty of Engineering": [
-     "Systems Engineering and Engineering Management"
     ]
    }
   },

@@ -276,6 +276,73 @@
   "owner": ""
  },
  {
+  "id": "2027-chinese-university-of-hong-kong-20260920",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-20",
+  "institution": "Chinese University of Hong Kong",
+  "department": "Faculty of Engineering, Systems Engineering and Engineering Management",
+  "school": "Faculty of Engineering",
+  "unit": "Systems Engineering and Engineering Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Hong Kong",
+  "countries": [
+   "Hong Kong"
+  ],
+  "adUrl": "https://www.se.cuhk.edu.hk/professors-associate-professors-assistant-professors-250001sc/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Chinese%20University%20of%20Hong%20Kong",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-22T06:56:33Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-skema-business-school-20260919",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-19",
+  "institution": "SKEMA Business School",
+  "department": "Optimization or Game Theory",
+  "school": "",
+  "unit": "Optimization or Game Theory",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 31, 2026",
+  "applyByDate": "2026-12-31",
+  "comments": "",
+  "country": "France",
+  "countries": [
+   "France"
+  ],
+  "adUrl": "https://recrutement.skema.edu/?page=advertisement_display&id=1620",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=SKEMA%20Business%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-09-22T06:57:41Z",
+  "owner": ""
+ },
+ {
   "id": "2027-insead-20260918",
   "year": 2027,
   "years": [
