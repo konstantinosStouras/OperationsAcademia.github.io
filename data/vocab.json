@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T06:52:58.825Z",
+ "generated": "2026-09-22T06:55:40.726Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -455,6 +455,10 @@
   },
   {
    "v": "University of Maryland",
+   "n": 2
+  },
+  {
+   "v": "University of Michigan - Flint",
    "n": 2
   },
   {
@@ -1390,10 +1394,6 @@
    "n": 1
   },
   {
-   "v": "University of Michigan - Flint",
-   "n": 1
-  },
-  {
    "v": "University of Missouri",
    "n": 1
   },
@@ -2140,6 +2140,10 @@
    "n": 3
   },
   {
+   "v": "School of Management",
+   "n": 3
+  },
+  {
    "v": "Anderson School of Management",
    "n": 2
   },
@@ -2197,10 +2201,6 @@
   },
   {
    "v": "NUS Business School",
-   "n": 2
-  },
-  {
-   "v": "School of Management",
    "n": 2
   },
   {
@@ -3059,7 +3059,7 @@
   },
   {
    "v": "Supply Chain Management",
-   "n": 45
+   "n": 46
   },
   {
    "v": "BA",
@@ -10348,14 +10348,16 @@
    ],
    "units": [
     "Management and Marketing",
-    "OM/SCM"
+    "OM/SCM",
+    "Supply Chain Management"
    ],
    "bySchool": {
     "": [
      "OM/SCM"
     ],
     "School of Management": [
-     "Management and Marketing"
+     "Management and Marketing",
+     "Supply Chain Management"
     ]
    }
   },
@@ -12389,7 +12391,8 @@
    "Operations and Data Science (Lisbon)",
    "Operations and Management Science (Porto)",
    "Operations Department",
-   "Operations Management"
+   "Operations Management",
+   "Supply Chain Management"
   ],
   "School of Management and Economics": [
    "Information Systems and Operations Management",
