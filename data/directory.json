@@ -9911,6 +9911,27 @@
   "lastPosted": "2026-01-27"
  },
  {
+  "id": "university-of-illinois-at-chicago__college-of-business__enterprise-ai-and-systems",
+  "institution": "University of Illinois at Chicago",
+  "school": "College of Business",
+  "department": "Enterprise AI and Systems",
+  "type": "Business School",
+  "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-22"
+ },
+ {
   "id": "university-of-illinois-at-chicago__college-of-business__information-and-decision-sciences",
   "institution": "University of Illinois at Chicago",
   "school": "College of Business",
