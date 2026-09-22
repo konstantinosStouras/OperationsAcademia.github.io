@@ -7211,6 +7211,18 @@
   "lng": -74.026713
  },
  {
+  "id": "stockholm-school-of-economics____entrepreneurship-innovation-and-technology",
+  "institution": "Stockholm School of Economics (SSE)",
+  "department": "Entrepreneurship, Innovation and Technology",
+  "type": "University",
+  "country": "Sweden",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-18"
+ },
+ {
   "id": "stockholm-school-of-economics____supply-chain-management",
   "institution": "Stockholm School of Economics (SSE)",
   "department": "Supply Chain Management",

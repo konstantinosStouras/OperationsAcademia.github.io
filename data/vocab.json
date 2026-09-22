@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T07:03:00.396Z",
+ "generated": "2026-09-22T07:05:25.465Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -383,6 +383,10 @@
   },
   {
    "v": "Stanford University",
+   "n": 2
+  },
+  {
+   "v": "Stockholm School of Economics (SSE)",
    "n": 2
   },
   {
@@ -1187,10 +1191,6 @@
   },
   {
    "v": "State University of New York at Geneseo",
-   "n": 1
-  },
-  {
-   "v": "Stockholm School of Economics (SSE)",
    "n": 1
   },
   {
@@ -3575,6 +3575,10 @@
   },
   {
    "v": "Enterprise AI and Systems",
+   "n": 1
+  },
+  {
+   "v": "Entrepreneurship, Innovation and Technology",
    "n": 1
   },
   {
@@ -8770,10 +8774,12 @@
   "Stockholm School of Economics (SSE)": {
    "schools": [],
    "units": [
+    "Entrepreneurship, Innovation and Technology",
     "Supply Chain Management"
    ],
    "bySchool": {
     "": [
+     "Entrepreneurship, Innovation and Technology",
      "Supply Chain Management"
     ]
    }

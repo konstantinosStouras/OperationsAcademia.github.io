@@ -1,17 +1,17 @@
 {
- "generated": "2026-09-22T07:03:00.396Z",
- "count": 618,
+ "generated": "2026-09-22T07:05:25.465Z",
+ "count": 619,
  "years": {
   "2026": 495,
-  "2027": 122,
+  "2027": 123,
   "2028": 1
  },
  "types": {
-  "University": 366,
+  "University": 367,
   "Business School": 216
  },
  "levels": {
-  "Assistant Professor": 137,
+  "Assistant Professor": 138,
   "Other Ranks": 84,
   "Non-tenure track (teaching) position": 34,
   "Post-Doc": 9,
@@ -41,6 +41,7 @@
   "Lebanon": 2,
   "Netherlands": 2,
   "Oman": 2,
+  "Sweden": 2,
   "Belgium": 1,
   "Chile": 1,
   "Cyprus": 1,
@@ -51,7 +52,6 @@
   "Kuwait": 1,
   "Mexico": 1,
   "New Zealand": 1,
-  "Sweden": 1,
   "Switzerland": 1
  },
  "characteristics": {
