@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T05:11:01.211Z",
+ "generated": "2026-09-22T06:52:58.825Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -595,6 +595,10 @@
   },
   {
    "v": "Bocconi",
+   "n": 1
+  },
+  {
+   "v": "Boston University",
    "n": 1
   },
   {
@@ -1582,10 +1586,6 @@
    "n": 0
   },
   {
-   "v": "Boston University",
-   "n": 0
-  },
-  {
    "v": "Brandeis University",
    "n": 0
   },
@@ -2260,6 +2260,10 @@
    "n": 1
   },
   {
+   "v": "College of Engineering",
+   "n": 1
+  },
+  {
    "v": "Costello College of Business",
    "n": 1
   },
@@ -2557,10 +2561,6 @@
   },
   {
    "v": "College of Business and Management",
-   "n": 0
-  },
-  {
-   "v": "College of Engineering",
    "n": 0
   },
   {
@@ -4166,6 +4166,10 @@
    "n": 1
   },
   {
+   "v": "Systems Engineering",
+   "n": 1
+  },
+  {
    "v": "Technology",
    "n": 1
   },
@@ -5152,13 +5156,18 @@
   },
   "Boston University": {
    "schools": [
+    "College of Engineering",
     "Questrom School of Business"
    ],
    "units": [
     "Information Systems",
-    "Operations and Technology Management"
+    "Operations and Technology Management",
+    "Systems Engineering"
    ],
    "bySchool": {
+    "College of Engineering": [
+     "Systems Engineering"
+    ],
     "Questrom School of Business": [
      "Information Systems",
      "Operations and Technology Management"
@@ -11844,7 +11853,8 @@
    "Supply Chain"
   ],
   "College of Engineering": [
-   "Mechanical and Industrial Engineering"
+   "Mechanical and Industrial Engineering",
+   "Systems Engineering"
   ],
   "College of Engineering, Computing and Applied Sciences": [
    "Industrial Engineering"

@@ -774,6 +774,19 @@
   "lastPosted": "2014-10-21"
  },
  {
+  "id": "boston-university__college-of-engineering__systems-engineering",
+  "institution": "Boston University",
+  "school": "College of Engineering",
+  "department": "Systems Engineering",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-21"
+ },
+ {
   "id": "boston-university__questrom-school-of-business__information-systems",
   "institution": "Boston University",
   "school": "Questrom School of Business",
