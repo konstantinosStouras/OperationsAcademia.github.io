@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T06:57:45.646Z",
+ "generated": "2026-09-22T07:03:00.396Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -423,6 +423,10 @@
   },
   {
    "v": "University of Bath",
+   "n": 2
+  },
+  {
+   "v": "University of California Riverside",
    "n": 2
   },
   {
@@ -1326,10 +1330,6 @@
    "n": 1
   },
   {
-   "v": "University of California Riverside",
-   "n": 1
-  },
-  {
    "v": "University of California, Davis",
    "n": 1
   },
@@ -2224,6 +2224,10 @@
    "n": 2
   },
   {
+   "v": "A. Gary Anderson Graduate School of Management",
+   "n": 1
+  },
+  {
    "v": "Bayes Business School",
    "n": 1
   },
@@ -3110,6 +3114,10 @@
    "n": 6
   },
   {
+   "v": "Operations and Supply Chain Management",
+   "n": 6
+  },
+  {
    "v": "AI",
    "n": 5
   },
@@ -3123,10 +3131,6 @@
   },
   {
    "v": "Logistics and Maritime Studies",
-   "n": 5
-  },
-  {
-   "v": "Operations and Supply Chain Management",
    "n": 5
   },
   {
@@ -9676,6 +9680,7 @@
   },
   "University of California Riverside": {
    "schools": [
+    "A. Gary Anderson Graduate School of Management",
     "School of Business"
    ],
    "units": [
@@ -9685,6 +9690,9 @@
    "bySchool": {
     "": [
      "IS"
+    ],
+    "A. Gary Anderson Graduate School of Management": [
+     "Operations and Supply Chain Management"
     ],
     "School of Business": [
      "Operations and Supply Chain Management"
@@ -11756,6 +11764,9 @@
   "A. B. Freeman School of Business": [
    "Information Systems",
    "Management Science"
+  ],
+  "A. Gary Anderson Graduate School of Management": [
+   "Operations and Supply Chain Management"
   ],
   "Alberta School of Business": [
    "Accounting and Business Analytics",
