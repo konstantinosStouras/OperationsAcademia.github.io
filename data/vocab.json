@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-21T18:49:42.675Z",
+ "generated": "2026-09-22T04:58:48.577Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1354,6 +1354,10 @@
    "n": 1
   },
   {
+   "v": "University of Illinois at Chicago",
+   "n": 1
+  },
+  {
    "v": "University of Kansas",
    "n": 1
   },
@@ -1934,10 +1938,6 @@
    "n": 0
   },
   {
-   "v": "University of Illinois at Chicago",
-   "n": 0
-  },
-  {
    "v": "University of Liverpool",
    "n": 0
   },
@@ -2104,11 +2104,11 @@
  ],
  "schools": [
   {
-   "v": "A. B. Freeman School of Business",
-   "n": 8
+   "v": "College of Business",
+   "n": 9
   },
   {
-   "v": "College of Business",
+   "v": "A. B. Freeman School of Business",
    "n": 8
   },
   {
@@ -3626,6 +3626,10 @@
    "n": 1
   },
   {
+   "v": "Information and Decision Sciences",
+   "n": 1
+  },
+  {
    "v": "Information and Innovation Management",
    "n": 1
   },
@@ -4331,10 +4335,6 @@
   },
   {
    "v": "Industrial Engineering and Management",
-   "n": 0
-  },
-  {
-   "v": "Information and Decision Sciences",
    "n": 0
   },
   {
