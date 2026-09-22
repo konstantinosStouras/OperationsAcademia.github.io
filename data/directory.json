@@ -9921,6 +9921,21 @@
   "mapUrl": "https://goo.gl/maps/iKbfkaWz8UD2",
   "facultyUrl": "http://business.uic.edu/uic-business-faculty",
   "deptUrl": "https://business.uic.edu/academics-research/dept/department-of-information-and-decision-sciences/information-and-decision-sciences-faculty/",
+  "sources": [
+   "directory",
+   "omlist",
+   "seed"
+  ],
+  "lat": 41.8737629,
+  "lng": -87.6509962
+ },
+ {
+  "id": "university-of-illinois-at-chicago__college-of-business__supply-chain-and-operations-management",
+  "institution": "University of Illinois at Chicago",
+  "school": "College of Business",
+  "department": "Supply Chain and Operations Management",
+  "type": "Business School",
+  "country": "United States",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -9930,15 +9945,10 @@
    "Exec Ed"
   ],
   "sources": [
-   "directory",
-   "omlist",
-   "postings",
-   "seed"
+   "postings"
   ],
   "n": 1,
-  "lastPosted": "2026-09-22",
-  "lat": 41.8737629,
-  "lng": -87.6509962
+  "lastPosted": "2026-09-22"
  },
  {
   "id": "university-of-illinois-at-urbana-champaign",

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T04:58:48.577Z",
+ "generated": "2026-09-22T05:03:55.436Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -3626,10 +3626,6 @@
    "n": 1
   },
   {
-   "v": "Information and Decision Sciences",
-   "n": 1
-  },
-  {
    "v": "Information and Innovation Management",
    "n": 1
   },
@@ -4146,6 +4142,10 @@
    "n": 1
   },
   {
+   "v": "Supply Chain and Operations Management",
+   "n": 1
+  },
+  {
    "v": "Supply Chain and Project Management",
    "n": 1
   },
@@ -4335,6 +4335,10 @@
   },
   {
    "v": "Industrial Engineering and Management",
+   "n": 0
+  },
+  {
+   "v": "Information and Decision Sciences",
    "n": 0
   },
   {
@@ -10015,11 +10019,13 @@
     "College of Business"
    ],
    "units": [
-    "Information and Decision Sciences"
+    "Information and Decision Sciences",
+    "Supply Chain and Operations Management"
    ],
    "bySchool": {
     "College of Business": [
-     "Information and Decision Sciences"
+     "Information and Decision Sciences",
+     "Supply Chain and Operations Management"
     ]
    }
   },
@@ -11811,6 +11817,7 @@
    "Operations Research and Operations Management",
    "Operations Strategy and Management Science",
    "Supply Chain and Logistics Management",
+   "Supply Chain and Operations Management",
    "Supply Chain Management",
    "Supply Chain Management and Analytics"
   ],
