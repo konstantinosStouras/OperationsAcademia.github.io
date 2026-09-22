@@ -5682,15 +5682,28 @@
   "lastPosted": "2024-08-26"
  },
  {
-  "id": "nova-school-of-business-and-economics____operations-technology-and-innovation-management",
+  "id": "nova-school-of-business-and-economics__school-of-business-and-economics__operations-technology-and-innovation-management",
   "institution": "NOVA School of Business and Economics",
+  "school": "School of Business and Economics",
   "department": "Operations, Technology and Innovation Management",
   "type": "Business School",
+  "country": "Portugal",
   "deptUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-22"
  },
  {
   "id": "ntu____om",
