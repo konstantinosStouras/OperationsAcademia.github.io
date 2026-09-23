@@ -2113,7 +2113,7 @@
   },
   {
    "v": "UCL Global Business School for Health",
-   "n": 6
+   "n": 7
   },
   {
    "v": "Darden School of Business",
@@ -2501,10 +2501,6 @@
   },
   {
    "v": "Tilburg School of Economics and Management",
-   "n": 1
-  },
-  {
-   "v": "UCL Global Business School for Health (GBSH)",
    "n": 1
   },
   {
@@ -9492,7 +9488,6 @@
   "University College London": {
    "schools": [
     "UCL Global Business School for Health",
-    "UCL Global Business School for Health (GBSH)",
     "UCL School of Management"
    ],
    "units": [
@@ -9500,7 +9495,7 @@
     "Population Health Sciences"
    ],
    "bySchool": {
-    "UCL Global Business School for Health (GBSH)": [
+    "UCL Global Business School for Health": [
      "Population Health Sciences"
     ],
     "UCL School of Management": [
@@ -12496,7 +12491,7 @@
    "Operations and Supply Chain Management",
    "Operations and Technology"
   ],
-  "UCL Global Business School for Health (GBSH)": [
+  "UCL Global Business School for Health": [
    "Population Health Sciences"
   ],
   "UCL School of Management": [

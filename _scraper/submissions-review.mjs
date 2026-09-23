@@ -106,7 +106,7 @@ export const KINDS = [
     summarise: (doc, row) => [
       ['Institution', (row && row.institution) || doc.institution || ''],
       ['School / department', (row && row.department) || doc.department || ''],
-      ['Entry level', ((row && row.levels) || doc.levels || []).join(', ')],
+      ['Position type', ((row && row.levels) || doc.levels || []).join(', ')],
       ['Country', (row && row.country) || doc.country || ''],
       ['Suggested apply by', (row && row.reviewDate) || doc.reviewDate || ''],
       ['Final apply by', (row && row.applyBy) || doc.applyBy || ''],

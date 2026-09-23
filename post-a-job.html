@@ -254,8 +254,8 @@
                                  autocomplete="off" required>
                         </div>
                         <div class="oa-field">
-                          <label for="f-type">Type of institution <span class="oa-req" aria-hidden="true">*</span></label>
-                          <p class="oa-hint">Shown publicly. Used by the <em>Type</em> filter.</p>
+                          <label for="f-type">School type <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">Shown publicly. Used by the <em>School type</em> filter.</p>
                           <select id="f-type" name="type" required>
                             <option value="">Choose…</option>
                             <option>Business School</option>
@@ -297,14 +297,20 @@
                       <input type="hidden" id="f-department" name="department" maxlength="220">
 
                       <div class="oa-field">
-                        <span class="oa-label-text" id="lbl-levels">Entry level <span class="oa-req" aria-hidden="true">*</span></span>
-                        <p class="oa-hint">Shown publicly. Tick every rank this posting covers.</p>
+                        <span class="oa-label-text" id="lbl-levels">Position type <span class="oa-req" aria-hidden="true">*</span></span>
+                        <p class="oa-hint">Shown publicly. Used by the <em>Position type</em> filter. Tick every position type this posting covers.</p>
+                        <!-- The boxes are LEVELS in _scraper/jobs-model.mjs, in its order:
+                             the two doctoral-side ones are last at the owner's word
+                             (2026-09-23), and the selftest holds this list to the
+                             model's both ways. -->
                         <div class="oa-checks" role="group" aria-labelledby="lbl-levels" id="f-levels">
                           <label class="oa-check"><input type="checkbox" name="levels" value="Assistant Professor"> Assistant Professor</label>
                           <label class="oa-check"><input type="checkbox" name="levels" value="Other Ranks"> Other Ranks (Associate, Full, Chaired)</label>
                           <label class="oa-check"><input type="checkbox" name="levels" value="Post-Doc"> Post-Doc</label>
                           <label class="oa-check"><input type="checkbox" name="levels" value="Non-tenure track (teaching) position"> Non-tenure track (teaching) position</label>
                           <label class="oa-check"><input type="checkbox" name="levels" value="Visiting Faculty (various levels)"> Visiting Faculty (various levels)</label>
+                          <label class="oa-check"><input type="checkbox" name="levels" value="RA or Pre-doc"> RA or Pre-doc</label>
+                          <label class="oa-check"><input type="checkbox" name="levels" value="PhD"> PhD</label>
                         </div>
                       </div>
 

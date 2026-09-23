@@ -131,7 +131,7 @@
       note: 'The department, area or group doing the hiring.',
       cell: function (r) { return txt(r.department); } },
 
-    { header: 'Type', from: ['type'], type: 'Text', w: 15,
+    { header: 'School type', from: ['type'], type: 'Text', w: 15,
       note: 'Business School or University.',
       cell: function (r) { return txt(r.type); } },
 
@@ -148,8 +148,8 @@
         return list((r.countries && r.countries.length) ? r.countries : [r.country]);
       } },
 
-    { header: 'Entry level', from: ['levels'], type: 'Text', w: 34,
-      note: 'Every rank the search is advertised at, separated by "; ". ' +
+    { header: 'Position type', from: ['levels'], type: 'Text', w: 34,
+      note: 'Every position type the search is advertised at, separated by "; ". ' +
         'A search advertised across ranks carries more than one.',
       cell: function (r) { return list(r.levels); } },
 
