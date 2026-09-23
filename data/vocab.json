@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T21:20:21.536Z",
+ "generated": "2026-09-23T22:59:37.176Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -179,10 +179,6 @@
   },
   {
    "v": "University College Dublin",
-   "n": 3
-  },
-  {
-   "v": "University of California Riverside",
    "n": 3
   },
   {
@@ -439,6 +435,10 @@
   },
   {
    "v": "University of Bath",
+   "n": 2
+  },
+  {
+   "v": "University of California Riverside",
    "n": 2
   },
   {
@@ -2148,10 +2148,6 @@
    "n": 3
   },
   {
-   "v": "A. Gary Anderson Graduate School of Management",
-   "n": 2
-  },
-  {
    "v": "Anderson School of Management",
    "n": 2
   },
@@ -2234,6 +2230,10 @@
   {
    "v": "Wisconsin School of Business",
    "n": 2
+  },
+  {
+   "v": "A. Gary Anderson Graduate School of Management",
+   "n": 1
   },
   {
    "v": "Bayes Business School",
@@ -3110,10 +3110,6 @@
    "n": 7
   },
   {
-   "v": "Operations and Supply Chain Management",
-   "n": 7
-  },
-  {
    "v": "Business",
    "n": 6
   },
@@ -3123,6 +3119,10 @@
   },
   {
    "v": "OM/IS",
+   "n": 6
+  },
+  {
+   "v": "Operations and Supply Chain Management",
    "n": 6
   },
   {
