@@ -121,12 +121,37 @@ export function hierarchyOf(lines) {
     if (!parts.every((p) => p.length >= 3 && p.length <= 90
         && /^[A-Za-z][A-Za-z0-9 .,'&()\/-]*$/.test(p) && !/[.!?]$/.test(p))) continue;
     if (/\b(?:is|are|will|the following|please|apply)\b/i.test(parts[0])) continue;
+    /* A "Label: value" line is NOT a hierarchy, and a PDF is full of them:
+       "Application deadline: October 15, 2026" read as a university called
+       "Application deadline" with a school called "October 15, 2026" (found
+       by the 2026-09-23 review, on the crawler's own fixture). So every part
+       must read as a NAME (never a label the reader knows, never a date, never
+       mostly digits), and the first must name an institution. */
+    if (!parts.every(looksLikeName)) continue;
+    if (!INSTITUTION_WORD_RX.test(parts[0])) continue;
     const [institution, a, b] = parts;
     return parts.length === 2
       ? { institution, school: a, unit: '' }
       : { institution, school: a, unit: b };
   }
   return null;
+}
+
+/** A word that names a university, a school or an institute, in the
+    languages the page's postings come in. The head of a hierarchy line must
+    carry one; a label never does. */
+const INSTITUTION_WORD_RX = /\b(?:universit(?:y|ies|[eä]t|[àé]|at|ad|eit)|college|school|institute|institut|polytechnic|academy|faculty|hochschule|escuela|école|ecole)\b/i;
+
+/** Does one part of a hierarchy line read as a NAME rather than as a label
+    or a value? A label the text reader knows, a date, and a run that is
+    mostly digits are all refused. */
+function looksLikeName(p) {
+  const bare = String(p || '').trim().replace(/:$/, '').toLowerCase();
+  if (!bare || LABEL_SET.has(bare)) return false;
+  if (advertDate(p)) return false;
+  const letters = (p.match(/[A-Za-z]/g) || []).length;
+  const digits = (p.match(/\d/g) || []).length;
+  return letters >= 3 && digits * 2 <= letters;
 }
 
 /* ----------------------------------------------------------------- place */
@@ -145,9 +170,17 @@ export function hierarchyOf(lines) {
 const NAME_WORD = "(?!(?:University|Universit[eä]t|Institute|Universidad)\\b)[A-Z][A-Za-z&'-]*";
 const NAME_RUN = `(?:${NAME_WORD}(?: +(?:and|&|of|for) +| +)?){1,5}`;
 const STOP = '(?=[,.;:)]|\\n|$|\\s+(?:at|in|is|are|invites|seeks|has|and|within|the)\\b)';
+/* The words in FRONT of "School of …" are the school's own name ("Michael
+   F. Price", "Scheller") and nothing else: never a possessive ("Georgia
+   Tech's"), never the capitalised word that happened to open the sentence
+   ("Join", "The", "Position Summary"), never a rank ("Assistant Professor
+   Smith School of Business"). An initial with its dot is one of them. Found
+   by the 2026-09-23 review, on prose the page really writes. */
+const PREFIX_STOP = "(?!(?:The|A|An|Join|Position|Summary|Description|Overview|About|Apply|Welcome|Visit|Contact|Title|Job|Posting|Our|At|In|For|With|Within|From|To|By|Assistant|Associate|Full|Visiting|Adjunct|Clinical|Professor|Professors|Lecturer|Lecturers|Faculty|Department|Division|Dean|Chair)\\b)";
+const PREFIX_WORD = `${PREFIX_STOP}(?!(?:University|Universit[eä]t|Institute|Universidad)\\b)[A-Z](?:[A-Za-z&-]*|\\.)`;
 
 const SCHOOL_RX = new RegExp(
-  `\\b((?:${NAME_WORD} +){0,4}(?:School|College|Faculty) +of +${NAME_RUN})${STOP}`);
+  `\\b((?:${PREFIX_WORD} +){0,4}(?:School|College|Faculty) +of +${NAME_RUN})${STOP}`);
 const UNIT_RX = new RegExp(
   `\\b(?:Department|Division|Area|Group) +of +(${NAME_RUN})${STOP}`);
 

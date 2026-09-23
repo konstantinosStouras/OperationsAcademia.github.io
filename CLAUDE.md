@@ -1222,7 +1222,9 @@ the workbook, and each is said where it bites:
   `poms-opportunities` row WITHOUT the fifteen-minute window it applies to
   workbook rows (that window exists because the sheet read carries a
   workbook row afterwards; nothing carries a POMS row). The document is the
-  record: `pomsRead` (the queue read succeeded) is what "present" means for
+  record: `pomsRead` (the queue was read AND its approved POMS rows are in
+  hand, set after the loop that gathers them, so a throw inside it leaves the
+  flag false) is what "present" means for
   these rows in the orphan carry and in the mirror sync, the `sheetPresent`
   rule keyed on the read instead of the file, so a queue that could not be
   read carries the served POMS rows rather than removing them and deletes
@@ -1328,11 +1330,61 @@ chain exactly as a workbook approval does. `queueNeedsFetch` stands down on
 a POMS document (one URL, one owner: the crawler wrote the block from the PDF
 or the rendered page, and the markup pass would record the same PDF as
 unreadable on top of it). `migratable()` refuses POMS rows as it refuses the
-workbook's. A same-day row from the workbook for the same university takes
-the POMS card over (`partition`'s `refreshQueued` replaces the row of a
-document whose id the sheet derives too), which is one posting, one card,
-and deliberate. The `jobReviews` rules gained no key: the crawler writes
+workbook's. **A SHEET ROW NEVER TAKES AN ID A CRAWLED DOCUMENT HOLDS.** A
+job id is (season, university, day), and a workbook row for the same
+university on the same day as a queued POMS posting derived the same id, so
+`partition` took the POMS document for its own: pending, the crawled row was
+overwritten by the sheet's; approved, the sheet row published through the
+other posting's approval with nobody having reviewed it, and the reviewed
+POMS posting left the site on the next build, never to be queued again
+because its link was still "known". (The first build called the pending
+half "one posting, one card, and deliberate"; the Houston lesson says one
+university and one day are routinely two searches.) `clearOfCrawledIds` in
+`jobreview.mjs` moves such a sheet row to the next free suffix before the
+sync matches anything by id, the mirror image of the crawler's own
+`uniqueId` against the sheet's ids, and the two postings are then judged by
+their advertisement link: the same link, and the later one is dropped as a
+repeat; a different one, and each card flags the other as still under
+review. The `jobReviews` rules gained no key: the crawler writes
 `queueDoc`'s keys and `ad`, all already named.
+
+**THE 2026-09-23 REVIEW OF IT, before it merged.** A find-and-refute
+fan-out over the model found six defects, each reproduced by running and each
+pinned both ways (the pin goes red with the old code put back). The two worth
+keeping the reasoning for: a labelled line ("Location: Norman, OK",
+"Application deadline: October 15, 2026") is a FIELD and never the
+"University: School: Division" hierarchy line, whose parts must each look like
+a name and whose first part must name a university, school or institute, or
+the crawler's own PDF fixture read its institution as "Application deadline";
+and a date the posting date REFUSES is refused again after `healReviewDate`,
+which reads the comments and would otherwise put the refused review date
+straight back (`fitDates`, on the row and on a later reading alike), so the
+season came from a date the crawler had just declined to believe. The rest:
+"Deadline as listed" is keyed on the date that was refused rather than the one
+believed, so a refused deadline reaches the card in words; the title's field
+stops at a comma, a semicolon or a spaced dash, so "of Operations Management,
+Tenure Track" is Operations Management and not the whole tail; a school's name
+in prose starts after a verb, a heading, a rank or a possessive ("Join …",
+"Position Summary The …", "Assistant Professor Smith School …", "Georgia
+Tech's …"), and "Michael F. Price College of Business" is read whole; and a
+protocol-relative View link takes https rather than being read as a path on
+poms.org.
+
+The same review, over the crawler and the build, found six more, fixed in
+the same change and pinned the same way: the sheet-id rule above
+(`clearOfCrawledIds`); the sheet sync measuring a fresh workbook row against
+the queue's pending POMS rows, marked, so a contributor copying a POMS
+advertisement into the workbook days later is dropped as a repeat rather
+than queued as a second unflagged card, and both flag passes seeing those
+rows too; `dupEntry` carrying the pending mark, so a POMS card naming a
+sheet posting still under review says so instead of linking a posting that
+is not on the site; the retry pass reading the link the maintainer corrected
+on the card (`effectiveLink`, read at once rather than after the TTL), which
+nothing else reads because the advert pass stands down on POMS documents;
+the `ad` block carrying `via`, which `adBlock` does not copy; and `pomsRead`
+set after the loop that gathers the approved POMS rows, so a throw inside it
+leaves the flag false and the served POMS rows are carried rather than
+removed.
 
 Tests: `testPomsCrawler` in `_scraper/selftest.mjs` (the table over a fixture
 cut from the real page, the window and every skip reason, the names, the

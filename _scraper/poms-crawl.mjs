@@ -223,22 +223,41 @@ function daysApart(a, b) {
   return (Number.isFinite(t1) && Number.isFinite(t2)) ? Math.abs(t2 - t1) / 86400000 : Infinity;
 }
 
-/** The pending POMS documents whose advertisement is still to be read: no
-    block, or one that says unreadable, and a last try older than the TTL. */
+/** The advertisement a queue document is READ FROM: the link the maintainer
+    corrected on the card where they did, else the one the page gave. The
+    same `edits.adUrl || row.adUrl` the advert pass reads for a sheet document
+    (queueNeedsFetch), which stands down on a POMS document, so nothing but
+    this crawler ever follows a corrected POMS link (the 2026-09-23 review). */
+export function effectiveLink(d) {
+  return String((d && d.edits && d.edits.adUrl) || (d && d.row && d.row.adUrl) || '');
+}
+
+/** The pending POMS documents whose advertisement is still to be read: the
+    link was corrected since the last reading (read now, whatever the block
+    says), or there is no block, or it says unreadable and the last try is
+    older than the TTL. */
 export function needReread(docs, { today = '', ttlDays = READ_TTL_DAYS } = {}) {
-  return (docs || []).filter((d) => d && d.status === PENDING && d.row && d.row.source === SOURCE
-    && d.row.adUrl && linkKind(d.row.adUrl) !== 'doc'
-    && (!d.ad || d.ad.status === 'unreadable')
-    && (!(d.ad && d.ad.checkedAt) || daysApart(d.ad.checkedAt, today) >= ttlDays));
+  return (docs || []).filter((d) => {
+    if (!(d && d.status === PENDING && d.row && d.row.source === SOURCE)) return false;
+    const link = effectiveLink(d);
+    if (!link || linkKind(link) === 'doc') return false;
+    if (d.ad && d.ad.url && d.ad.url !== link) return true;
+    if (d.ad && d.ad.status !== 'unreadable') return false;
+    return !(d.ad && d.ad.checkedAt) || daysApart(d.ad.checkedAt, today) >= ttlDays;
+  });
 }
 
 /** What the advertisement said, in the two forms the run needs: the parse
     with its classification for the row builder, and the block the document
-    carries. `null` for the row when the reading is not usable. */
-function adForRow(parsed, via, { adUrl, vocab, now, previous = null }) {
-  const entry = cacheEntry(parsed || parseAdvertText(''), { adUrl, checkedAt: isoStamp(now), previous, via: via || 'page' });
+    carries. `null` for the row when the reading is not usable. The block
+    names the road the reading came by (`via`: pdf, page or render), which
+    `adBlock` does not copy from the cache entry, so the document really says
+    what the header above promises. */
+export function adForRow(parsed, via, { adUrl, vocab, now, previous = null }) {
+  const road = via || 'page';
+  const entry = cacheEntry(parsed || parseAdvertText(''), { adUrl, checkedAt: isoStamp(now), previous, via: road });
   const place = parsed && parsed.ok && vocab ? advertPlace(entry, vocab) : null;
-  const block = adBlock(entry, { adUrl, place });
+  const block = { ...adBlock(entry, { adUrl, place }), via: road };
   const ad = parsed && parsed.ok ? { ...parsed, via, place } : null;
   return { ad, block };
 }
@@ -378,9 +397,13 @@ async function main() {
     if (budget.left <= 0 || Date.now() > budget.until) break;
     budget.left--;
     retried++;
-    const opp = { href: d.row.adUrl, kind: linkKind(d.row.adUrl), title: '', institution: d.row.institution, date: d.row.posted };
+    /* the link the maintainer corrected on the card, where they did; a
+       block read from another link carries nothing forward */
+    const link = effectiveLink(d);
+    const opp = { href: link, kind: linkKind(link), title: '', institution: d.row.institution, date: d.row.posted };
     const read = await readOpportunityAd(opp, { render });
-    const { ad, block } = adForRow(read.parsed, read.via, { adUrl: d.row.adUrl, vocab, now, previous: d.ad || null });
+    const previous = d.ad && d.ad.url === link ? d.ad : null;
+    const { ad, block } = adForRow(read.parsed, read.via, { adUrl: link, vocab, now, previous });
     const row = ad ? healCountry(refreshFromAd(d.row, ad, { vocab, now }), byCountry) : d.row;
     const patch = { ad: block };
     if (row !== d.row) patch.row = row;
@@ -502,6 +525,8 @@ async function selftest() {
     const p = parseAdvertText(t.text);
     eq(p.applyByDate, '2026-10-15', 'and the text reader finds the labelled deadline in it');
     eq(p.department, 'Supply Chain Management', 'the department the prose names');
+    eq(p.school, 'Smith School of Business', 'and the school beside it');
+    eq(p.institution, '', 'the institution is not read off a labelled line (the 2026-09-23 review: it read "Application deadline")');
     eq(p.country, 'United States', 'and the country of a US town with its state');
     ok(!looksLikePdf(Buffer.from('<html>')), 'HTML is not a PDF');
   } else {

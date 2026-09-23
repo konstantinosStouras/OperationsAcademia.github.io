@@ -113,6 +113,7 @@ export function pomsDay(v) {
 export function absoluteUrl(href) {
   const raw = text(decodeEntities(String(href || '')), 600);
   if (!raw) return '';
+  if (raw.startsWith('//')) return url('https:' + raw);   // protocol-relative: another host, not a poms.org path
   if (raw.startsWith('/')) return url(ORIGIN + raw);
   return url(raw);
 }
@@ -297,6 +298,10 @@ export function institutionName(raw, vocab = null) {
 }
 
 const RANK_WORDS = /professor|lecturer|faculty|\brank\b|track|position|tenure|chair|dean|instructor|fellow|post.?doc|clinical|practice/i;
+/* the separators a title's segments sit between, and a segment that names a
+   place rather than a field */
+const TITLE_SEG_RX = /\s*(?:,|;|\s[-\u2013\u2014]\s)\s*/;
+const PLACE_SEG_RX = /^(?:the\s+)?(?:department|division|school|college|faculty|university|institute)\b|\buniversity\b/i;
 
 function titleCase(s) {
   const small = new Set(['and', 'of', 'in', 'for', 'the', '&']);
@@ -330,13 +335,23 @@ export function fieldFromTitle(title, vocab = null) {
       && !/professor|lecturer|position|tenure|chair|dean|instructor|fellow|post.?doc|\brank\b/i.test(t)) {
     return splitDepartment(t);
   }
+  /* The field is the FIRST segment after "Professor of" / "Position in":
+     "Assistant Professor of Operations Management, Tenure Track" names
+     Operations Management, and the segments after the comma or the dash
+     ("Tenure Track", "Department of Management", "University of X") are the
+     rank and the place, never the field. A professorship OF PRACTICE names
+     its field after the next connective. Failing that, the last segment that
+     names neither a rank nor a place ("Assistant Professor, Supply Chain
+     Management, Tenure-Track"). Found by the 2026-09-23 review over the
+     titles the page really carries. */
   let field = '';
-  let m = t.match(/\b(?:professors?|professorship|lecturers?|faculty|positions?|chairs?|fellows?|instructors?)\s+(?:of|in)\s+(.+)$/i);
+  let m = t.match(/\b(?:professors?|professorship|lecturers?|faculty|positions?|chairs?|fellows?|instructors?)(?:\s+of\s+(?:the\s+)?(?:practice|teaching|instruction))?\s+(?:of|in)\s+(.+)$/i);
   if (!m) m = t.match(/\b(?:in|of)\s+([A-Z].+)$/);
-  if (m) field = m[1];
-  if (!field && t.includes(',')) {
-    const last = t.split(',').pop().trim();
-    if (!RANK_WORDS.test(last)) field = last;
+  if (m) field = m[1].split(TITLE_SEG_RX)[0];
+  if (!field) {
+    const segs = t.split(TITLE_SEG_RX).map((x) => x.trim()).filter(Boolean);
+    const named = segs.filter((x) => !RANK_WORDS.test(x) && !PLACE_SEG_RX.test(x));
+    if (segs.length > 1 && named.length) field = named[named.length - 1];
   }
   field = text(field, 120).replace(/^(?:the\s+)?(?:department|division|area|group)\s+of\s+/i, '').replace(/[.\s]+$/, '');
   if (!field || RANK_WORDS.test(field)) return { school: '', unit: '' };
@@ -374,13 +389,24 @@ export function excerptOf(description, max = 600) {
  * maintainer knows what to check. A posting whose advertisement could not
  * be read says so instead, which is the honest form of an empty box.
  */
-export function commentsFor(opp, ad = null, { now = new Date() } = {}) {
+export function commentsFor(opp, ad = null, { now = new Date(), deadline, openEnded = false } = {}) {
   const parts = [];
   const title = text(decodeEntities(opp && opp.title), 200);
   if (title) parts.push(`Advertised as: ${title.replace(/[.\s]+$/, '')}.`);
   if (ad && ad.ok) {
-    if (!ad.applyByDate && ad.applyByProse && /[A-Za-z0-9]/.test(ad.applyByProse)) {
-      parts.push(`Deadline as listed: ${text(ad.applyByProse, 200)}`);
+    /* "Deadline as listed" is keyed on the date the ROW believed, not on the
+       date the advertisement stated: a closing date the row refused (before
+       the day POMS listed the posting, or too far out) is exactly the one
+       whose words the maintainer has to see, and it used to vanish with the
+       refusal (the 2026-09-23 review). A caller that passes no `deadline`
+       is asking about the advertisement's own; an open-ended line already
+       carries the prose, so it is not said twice. */
+    const believed = deadline === undefined ? String(ad.applyByDate || '') : String(deadline || '');
+    if (!believed && !openEnded) {
+      const listed = ad.applyByProse && /[A-Za-z0-9]/.test(ad.applyByProse)
+        ? text(ad.applyByProse, 200)
+        : (ad.applyByDate ? longDate(ad.applyByDate) : '');
+      if (listed) parts.push(`Deadline as listed: ${listed}`);
     }
     const excerpt = excerptOf(ad.description, 600);
     if (excerpt) parts.push(excerpt);
@@ -449,7 +475,19 @@ export function rowFromOpportunity(opp, { ad = null, vocab = null, now = new Dat
   const openEnded = !deadline && !!(ad && OPEN_ENDED_RX.test(String(ad.applyByProse || '')));
   const review = ad && ad.reviewDate && believableDeadline(posted, ad.reviewDate)
     && (!deadline || ad.reviewDate < deadline) ? ad.reviewDate : '';
-  const year = marketYearOf({ applyByDate: deadline, reviewDate: review, posted }, { now }).year;
+  /* The shared heal reads the comments, and the comments carry the
+     advertisement's own sentences, so a suggested date the guard above
+     REFUSED comes straight back out of the excerpt; the dates are healed
+     here, before the season and the id are minted from them, and held to
+     the guard again afterwards (`fitDates`). */
+  const before = {
+    applyBy: openEnded ? text(ad.applyByProse, 400) : (deadline ? longDate(deadline) : 'Until filled.'),
+    applyByDate: deadline,
+    reviewDate: review,
+    comments: commentsFor(opp, ad, { now, deadline, openEnded }),
+  };
+  const dated = fitDates(healReviewDate(before), posted, before);
+  const year = marketYearOf({ applyByDate: dated.applyByDate, reviewDate: dated.reviewDate, posted }, { now }).year;
 
   const row = {
     id: '',
@@ -461,10 +499,10 @@ export function rowFromOpportunity(opp, { ad = null, vocab = null, now = new Dat
     unit: p.unit,
     type: '',   // judged below, once the directory has had its say about the school
     levels: levelsFromRank(opp && opp.title),
-    applyBy: openEnded ? text(ad.applyByProse, 400) : (deadline ? longDate(deadline) : 'Until filled.'),
-    applyByDate: deadline,
-    reviewDate: review,
-    comments: commentsFor(opp, ad, { now }),
+    applyBy: dated.applyBy,
+    applyByDate: dated.applyByDate,
+    reviewDate: dated.reviewDate,
+    comments: dated.comments,
     country: (ad && ad.country) || '',
     adUrl: url(opp && opp.href),
     adLabel: (opp && opp.kind) === 'pdf' ? 'job ad (PDF)' : 'link to Job ad',
@@ -487,7 +525,27 @@ export function rowFromOpportunity(opp, { ad = null, vocab = null, now = new Dat
     type: typeFromNames(inst, filled.school, filled.unit, opp && opp.title,
       ad && ad.school, ad && ad.department),
   };
-  return withCountries(withMarketYears(stripRowEmails(healReviewDate(typed))));
+  return withCountries(withMarketYears(stripRowEmails(typed)));
+}
+
+/**
+ * A healed row's dates, held to the crawler's own guard: `healReviewDate`
+ * tests a suggested date only against the final one, so a date the row had
+ * refused as BEFORE the day POMS listed the posting is read back out of the
+ * comments' excerpt and stands; a closing date the heal moved (its labelled
+ * WINDOW) is held to the same guard, and put back where it fails. Pure.
+ */
+export function fitDates(healed, posted, before = {}) {
+  const out = { ...healed };
+  if (out.applyByDate && out.applyByDate !== (before.applyByDate || '') && !believableDeadline(posted, out.applyByDate)) {
+    out.applyByDate = before.applyByDate || '';
+    out.applyBy = before.applyBy || (out.applyByDate ? longDate(out.applyByDate) : 'Until filled.');
+  }
+  if (out.reviewDate && (!believableDeadline(posted, out.reviewDate)
+      || (out.applyByDate && out.reviewDate >= out.applyByDate))) {
+    out.reviewDate = '';
+  }
+  return out;
 }
 
 /** A row id nobody holds: the base, else `-2`, `-3`… — the suffix rule
@@ -564,6 +622,7 @@ export function refreshFromAd(row, ad, { vocab = null, now = new Date() } = {}) 
   }
   if (/could not be read automatically/.test(String(out.comments || ''))) out.comments = fresh.comments;
   out.department = joinDepartment(out.school, out.unit);
-  const next = withCountries(withMarketYears(stripRowEmails(healReviewDate(out))));
+  const healed = fitDates(healReviewDate(out), row.posted, { applyBy: out.applyBy, applyByDate: out.applyByDate });
+  const next = withCountries(withMarketYears(stripRowEmails(healed)));
   return JSON.stringify(next) === JSON.stringify(row) ? row : next;
 }

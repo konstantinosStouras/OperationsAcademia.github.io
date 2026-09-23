@@ -694,7 +694,6 @@ async function main() {
   if (db) {
     try {
       const snap = await db.collection(REVIEW_COL).where('status', '==', 'approved').get();
-      pomsRead = true;
       const byId = new Map(sheetRows.map((r) => [r.id, r]));
       let added = 0;
       for (const d of snap.docs) {
@@ -747,6 +746,14 @@ async function main() {
         added++;
       }
       if (added || pomsAdded) sheetRows = Array.from(byId.values());
+      /* "PRESENT" FOR A POMS ROW MEANS ITS DOCUMENT IS IN HAND, not that the
+         query answered: set once the approved POMS rows are in `sheetRows`,
+         so a throw inside the loop above lands in the catch with the flag
+         still false and the served POMS rows are carried, their mirrors kept
+         and their hand-overs left alone, the unreachable-queue rule (the
+         2026-09-23 review: set beside the query, a throw read as "the queue
+         answered and holds no POMS rows", which removes every one). */
+      pomsRead = true;
       if (added) {
         log(`the review queue publishes ${added} newly-approved posting(s)` +
             ' ahead of the next sheet read');
