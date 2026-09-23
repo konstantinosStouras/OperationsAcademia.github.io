@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T12:29:29.760Z",
+ "generated": "2026-09-23T12:54:34.360Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -491,6 +491,10 @@
   },
   {
    "v": "University of Southern California",
+   "n": 2
+  },
+  {
+   "v": "University of Washington",
    "n": 2
   },
   {
@@ -1478,10 +1482,6 @@
    "n": 1
   },
   {
-   "v": "University of Washington",
-   "n": 1
-  },
-  {
    "v": "University of Washington-Tacoma (Milgard School of Business)",
    "n": 1
   },
@@ -2204,6 +2204,10 @@
    "n": 2
   },
   {
+   "v": "Michael G. Foster School of Business",
+   "n": 2
+  },
+  {
    "v": "NUS Business School",
    "n": 2
   },
@@ -2409,10 +2413,6 @@
   },
   {
    "v": "Miami Herbert Business School",
-   "n": 1
-  },
-  {
-   "v": "Michael G. Foster School of Business",
    "n": 1
   },
   {
@@ -3106,11 +3106,11 @@
    "n": 8
   },
   {
-   "v": "Business",
-   "n": 6
+   "v": "Information Systems and Operations Management",
+   "n": 7
   },
   {
-   "v": "Information Systems and Operations Management",
+   "v": "Business",
    "n": 6
   },
   {

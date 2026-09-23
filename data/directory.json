@@ -12138,11 +12138,15 @@
   "school": "Michael G. Foster School of Business",
   "department": "Information Systems and Operations Management",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://foster.uw.edu/faculty-research/academic-departments/information-systems-and-operations-management/faculty/",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-22"
  },
  {
   "id": "university-of-washington__michael-g-foster-school-of-business__marketing-and-international-business",
