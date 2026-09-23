@@ -2306,6 +2306,19 @@
   "lng": 5.4853079
  },
  {
+  "id": "emlv-ecole-de-commerce-et-de-management__leonard-de-vinci-business-school-paris-la-defense__management-information-systems-artificial-intelligence-and-s",
+  "institution": "EMLV (Ecole de Commerce et de Management)",
+  "school": "Leonard de Vinci Business School Paris-La Defense",
+  "department": "Management Information Systems, Artificial Intelligence and Supply Chain Management",
+  "type": "Business School",
+  "country": "France",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-22"
+ },
+ {
   "id": "emory-university__goizueta-business-school__information-systems-operations-management",
   "institution": "Emory University",
   "school": "Goizueta Business School",

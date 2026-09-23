@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T12:25:04.171Z",
+ "generated": "2026-09-23T12:29:29.760Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -759,6 +759,10 @@
   },
   {
    "v": "East Tennessee State University",
+   "n": 1
+  },
+  {
+   "v": "EMLV (Ecole de Commerce et de Management)",
    "n": 1
   },
   {
@@ -2376,6 +2380,10 @@
    "n": 1
   },
   {
+   "v": "Leonard de Vinci Business School Paris",
+   "n": 1
+  },
+  {
    "v": "Leonard N. Stern School of Business",
    "n": 1
   },
@@ -3767,6 +3775,10 @@
   },
   {
    "v": "ITOM",
+   "n": 1
+  },
+  {
+   "v": "La Defense, Management Information Systems, Artificial Intelligence and Supply Chain Management",
    "n": 1
   },
   {
@@ -6107,6 +6119,19 @@
    "bySchool": {
     "School of Industrial Engineering": [
      "Industrial Engineering and Innovation Sciences"
+    ]
+   }
+  },
+  "EMLV (Ecole de Commerce et de Management)": {
+   "schools": [
+    "Leonard de Vinci Business School Paris"
+   ],
+   "units": [
+    "La Defense, Management Information Systems, Artificial Intelligence and Supply Chain Management"
+   ],
+   "bySchool": {
+    "Leonard de Vinci Business School Paris": [
+     "La Defense, Management Information Systems, Artificial Intelligence and Supply Chain Management"
     ]
    }
   },
@@ -12172,6 +12197,9 @@
   "Leeds School of Business": [
    "Operations Group of the Division of Strategy, Entrepreneurship, and Operations",
    "Operations Management"
+  ],
+  "Leonard de Vinci Business School Paris": [
+   "La Defense, Management Information Systems, Artificial Intelligence and Supply Chain Management"
   ],
   "Leonard N. Stern School of Business": [
    "Information, Operations and Management Sciences",
