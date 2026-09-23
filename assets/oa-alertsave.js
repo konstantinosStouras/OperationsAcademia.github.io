@@ -23,7 +23,7 @@
                            joining them would hand the reader an alert that
                            never sends. The rest are reported as dropped.
      Type               -> criteria.type[]
-     Entry level        -> criteria.level[]     (any-of on both sides)
+     Position type      -> criteria.level[]     (any-of on both sides)
      Location           -> criteria.country[]   through OACountries.canon, so
                            a link carrying a legacy alias ("USA") lands as the
                            name the alerts page offers ("United States").

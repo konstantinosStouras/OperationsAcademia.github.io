@@ -763,7 +763,7 @@
     out.email = ev.slice(0, MAX.email);
 
     out.levels = checked('levels');
-    setError($('f-levels'), out.levels.length ? '' : 'Please tick at least one entry level.');
+    setError($('f-levels'), out.levels.length ? '' : 'Please tick at least one position type.');
     if (!out.levels.length && !firstBad) firstBad = $('f-levels');
 
     var untilFilled = $('f-untilFilled').checked;

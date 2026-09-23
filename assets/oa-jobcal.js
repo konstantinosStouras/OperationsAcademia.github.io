@@ -182,7 +182,7 @@
         var listed = txt(row.applyBy);
         if (fin && listed && listed !== longDate(fin)) lines.push('Final deadline as listed: ' + listed);
         var levels = (row.levels || []).map(txt).filter(Boolean).join(', ');
-        if (levels) lines.push('Entry level: ' + levels);
+        if (levels) lines.push('Position type: ' + levels);
         /* only where it says something the location line does not — a search
            across a school's campuses (owner, 2026-09-18). The card follows
            the same rule, so a single-country entry is unchanged. */

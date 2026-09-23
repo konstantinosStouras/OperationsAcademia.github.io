@@ -316,10 +316,10 @@ export function renderLivePostingEmail(entry, { site = SITE, now = new Date() } 
     '<table style="border-collapse:collapse;font-size:14px;margin:0 0 14px">' +
       line('Institution', r.institution) +
       line('School / department', r.department) +
-      line('Type', r.type) +
-      line('Entry level', (r.levels || []).join(', ')) +
+      line('School type', r.type) +
+      line('Position type', (r.levels || []).join(', ')) +
       /* every campus country the search covers — one posting, one line,
-         the way Entry level already carries every rank */
+         the way Position type already carries every rank */
       line(countriesOf(r).length > 1 ? 'Countries' : 'Country', countriesText(r)) +
       line('Advertised', /^\d{4}-\d{2}-\d{2}$/.test(String(r.posted || ''))
         ? longDate(r.posted) : r.posted) +

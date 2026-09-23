@@ -87,12 +87,20 @@ export const PUBLIC_FIELDS = [
    repository has already shipped four times. */
 export const OPEN_ENDED_RX = /until\s*filled|open\s*until|rolling(?!\s+basis)/i;
 
+/* The POSITION TYPES a posting may carry (the filter was labelled "Entry
+   level" until 2026-09-23, and the field is still `levels`: it is the data
+   key, the alerts' criteria key and the URL key of every saved link). The
+   two doctoral-side entries are LAST, at the owner's word, and every list
+   that offers these (the posting form, the review card) keeps this order.
+   The count is what the rules' `list('levels', 8)` bound must stay above. */
 export const LEVELS = [
   'Assistant Professor',
   'Other Ranks',
   'Post-Doc',
   'Non-tenure track (teaching) position',
   'Visiting Faculty (various levels)',
+  'RA or Pre-doc',
+  'PhD',
 ];
 
 export const CHARACTERISTICS = [

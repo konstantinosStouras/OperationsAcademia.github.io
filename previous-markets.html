@@ -518,10 +518,10 @@
                  so nothing here can answer no year at all. */
               { key: 'year',    label: 'Job market year', field: 'years',
                 placeholder: 'Any year', legacyParam: 'filterB' },
-              { key: 'type',    label: 'Type',            field: 'type',
+              { key: 'type',    label: 'School type',     field: 'type',
                 placeholder: 'All types', legacyParam: 'filterC' },
-              { key: 'level',   label: 'Entry level',     field: 'levels', type: 'one',
-                placeholder: 'All levels', legacyParam: 'filterF' },
+              { key: 'level',   label: 'Position type',   field: 'levels', type: 'one',
+                placeholder: 'All positions', legacyParam: 'filterF' },
               /* `countries`, not `country`: a search across a school's
                  campuses is found under each of them (owner, 2026-09-18).
                  The values are the same country names either way, so
@@ -542,7 +542,7 @@
               rows: function (r) {
                 return [
                   { label: 'Job market year', value: marketYearsText(r) },
-                  { label: 'Entry level',     value: (r.levels || []).join(', ') },
+                  { label: 'Position type',   value: (r.levels || []).join(', ') },
                   /* the suggested (first-review) date — the archive's legacy
                      rows carry none, and an empty row is skipped */
                   { label: 'Suggested apply by', value: OAList.longDate(r.reviewDate) },

@@ -280,12 +280,12 @@
                 <input type="search" id="jl-q" placeholder="Search by university or department&hellip;" autocomplete="off">
                 <div class="v3-launcher-row">
                   <div>
-                    <label class="v3-flabel" for="jl-type">Type</label>
+                    <label class="v3-flabel" for="jl-type">School type</label>
                     <select id="jl-type"><option value="">All types</option></select>
                   </div>
                   <div>
-                    <label class="v3-flabel" for="jl-level">Entry level</label>
-                    <select id="jl-level"><option value="">All levels</option></select>
+                    <label class="v3-flabel" for="jl-level">Position type</label>
+                    <select id="jl-level"><option value="">All positions</option></select>
                   </div>
                   <div>
                     <label class="v3-flabel" for="jl-country">Location</label>
@@ -619,7 +619,7 @@
               <div class="v3-faq-a"><div><div class="v3-faq-body">
                 <p>Yes. Sign in and open <a href="alerts">E-mail alerts</a>: you can be
                 told about every new job posting, or only those matching filters you choose
-                (institution, type, entry level, location&hellip;), reminded of the postings
+                (institution, school type, position type, location&hellip;), reminded of the postings
                 matching those filters that are closing in the seven days after each digest
                 (daily or weekly, to see every closing date), and told
                 about changes to the site itself and, if you like, about this season&rsquo;s
@@ -1288,7 +1288,7 @@
             },
             rows: function (r) {
               return [
-                { label: 'Entry level', value: (r.levels || []).join(', ') },
+                { label: 'Position type', value: (r.levels || []).join(', ') },
                 /* the suggested (first-review) date, only where the posting
                    names one — an empty row is skipped by the engine */
                 { label: 'Suggested apply by', value: OAList.longDate(r.reviewDate) },

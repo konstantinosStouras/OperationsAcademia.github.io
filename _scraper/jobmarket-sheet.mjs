@@ -802,17 +802,20 @@ function cell(row, index, field) {
   return i == null ? '' : String(row[i] ?? '');
 }
 
-/* ------------------------------------------------------- rank -> entry level
+/* ---------------------------------------------------- rank -> position type
 
-   The site offers five entry levels; the sheet types a job title. The first
-   four are decided by PRECEDENCE, not by collecting every token, because the
-   titles overlap: "Visiting Assistant Professor" is a visiting position, not
-   an assistant professorship with a qualifier, and an alert for "Assistant
-   Professor" that returned every visiting post would be worse than useless.
+   The site offers seven position types (LEVELS in jobs-model.mjs; the filter
+   was labelled "Entry level" until 2026-09-23); the sheet types a job title.
+   The first ones are decided by PRECEDENCE, not by collecting every token,
+   because the titles overlap: "Visiting Assistant Professor" is a visiting
+   position, not an assistant professorship with a qualifier, and an alert for
+   "Assistant Professor" that returned every visiting post would be worse than
+   useless.
 
-   The tenure-track reading, which is what is left, is the exception: a search
-   advertised across ranks names TWO of the site's levels and ticks both (see
-   below).                                                                     */
+   Two readings collect rather than race: the doctoral side ("PhD" and "RA or
+   Pre-doc", which one advertisement routinely offers together), and the
+   tenure-track reading, which is what is left, where a search advertised
+   across ranks names TWO of the site's levels and ticks both (see below).    */
 
 export function levelsFromRank(rank, kind = '') {
   const s = text(rank, 160).toLowerCase();
@@ -831,6 +834,25 @@ export function levelsFromRank(rank, kind = '') {
   if (/post.?doc|postdoctoral|\bpd\b|research fellow|research associate(?!\s+professor)/.test(s)) {
     return ['Post-Doc'];
   }
+  /* THE DOCTORAL SIDE, after the post-doc test (so "postdoctoral" is never
+     read as "doctoral") and before every faculty reading. "Research assistant"
+     is a pre-doctoral post; "Research Assistant Professor" is a research-track
+     professorship, told apart exactly as "research associate" is above. A bare
+     "RA" is the sheet's own shorthand, like its "AP". The two are COLLECTED,
+     because an advertisement for "PhD students and pre-doctoral fellows" is
+     both, which is the open-rank shape one paragraph down. */
+  const doctoral = [];
+  if (/pre.?doc|research assistant(?!\s+professor)|\bra\b/.test(s)) {
+    doctoral.push('RA or Pre-doc');
+  }
+  if (/\bph\.?\s?d\b|\bdoctoral (?:student|candidate|position|fellow|research)|\bdphil\b/.test(s)) {
+    doctoral.push('PhD');
+  }
+  /* …and NEVER beside a faculty title: "Assistant Professor (PhD required)"
+     is an assistant professorship whose PhD is a qualifier, so a doctoral
+     word next to a professorship, lectureship or instructorship is left to
+     the readings below. */
+  if (doctoral.length && !/professor|lecturer|instructor/.test(s)) return doctoral;
   if (/visiting|\bvap\b/.test(s)) return ['Visiting Faculty (various levels)'];
   /* `non.?tt` before the tenure-track test below, and deliberately not a bare
      "ttap": the sheet writes "non TTAP" for a non-tenure-track assistant

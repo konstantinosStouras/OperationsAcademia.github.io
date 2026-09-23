@@ -630,7 +630,7 @@
 
     /* The postings feed both the filter vocabulary and the preview. A failure
        is NOT the same as an empty catalogue: swallowing it into [] renders the
-       Type / Entry level / Location groups as bare headings with nothing in
+       School type / Position type / Location groups as bare headings with nothing in
        them and no explanation, so the reader cannot express a filter and is
        not told why. Remember which happened. */
     var ready = Promise.all([
