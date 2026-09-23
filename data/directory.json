@@ -12581,15 +12581,17 @@
   "lastPosted": "2026-01-14"
  },
  {
-  "id": "virginia-tech____or",
+  "id": "virginia-tech__grado-department-of-industrial-and-systems-engineering__operations-research",
   "institution": "Virginia Tech",
-  "department": "OR",
+  "school": "Grado Department of Industrial and Systems Engineering",
+  "department": "Operations Research",
+  "type": "University",
   "country": "United States",
   "sources": [
    "postings"
   ],
-  "n": 1,
-  "lastPosted": "2025-10-08"
+  "n": 2,
+  "lastPosted": "2026-09-23"
  },
  {
   "id": "virginia-tech__pamplin-college-of-business__business-information-technology",
