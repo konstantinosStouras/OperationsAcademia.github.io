@@ -22,6 +22,7 @@
 
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 
 const require = createRequire(import.meta.url);
 
@@ -99,15 +100,61 @@ export function linesFromItems(items) {
   }).filter(Boolean);
 }
 
+/** How long one PDF may take to read. pdf.js has no worker of its own in
+    Node and parses on the calling thread, where nothing can interrupt it: a
+    150 KB file whose content stream inflates to a gigabyte, shared by every
+    page, was over twenty minutes of CPU on one row and would have taken the
+    run with it (the 2026-09-23 review). So the parse runs in a worker thread
+    and is raced against this clock; a loser is terminated and the PDF is
+    reported unreadable, which is an answer the crawler already has. */
+export const PDF_TIMEOUT_MS = 60000;
+
 /**
  * The text of a PDF: `{ ok, text, pages, error }`. `ok` is false — and the
  * caller treats the advertisement as unreadable — when the engine is absent,
- * the bytes are not a PDF, or the document cannot be opened; a scanned PDF
- * (images of text, no text layer) opens fine and yields nothing, which is
- * reported as `ok: false` too, since there is nothing to read.
+ * the bytes are not a PDF, the document cannot be opened, or the read ran
+ * past `timeoutMs`; a scanned PDF (images of text, no text layer) opens fine
+ * and yields nothing, which is reported as `ok: false` too, since there is
+ * nothing to read. The parse itself is `parsePdfHere`, run in a worker
+ * thread of this same module (`inline: true` runs it here, for a caller
+ * that has its own bound).
  */
-export async function pdfText(bytes, { maxPages = 15 } = {}) {
+export async function pdfText(bytes, { maxPages = 15, timeoutMs = PDF_TIMEOUT_MS, inline = false } = {}) {
   if (!looksLikePdf(bytes)) return { ok: false, text: '', pages: 0, error: 'not a PDF' };
+  if (!pdfjsInstalled()) return { ok: false, text: '', pages: 0, error: 'pdfjs-dist is not installed' };
+  const buf = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
+  if (inline) return parsePdfHere(buf, maxPages);
+
+  const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  return new Promise((resolve) => {
+    let done = false;
+    let timer = null;
+    let worker = null;
+    const finish = (r) => {
+      if (done) return;
+      done = true;
+      if (timer) clearTimeout(timer);
+      if (worker) worker.terminate().catch(() => {});
+      resolve(r);
+    };
+    try {
+      worker = new Worker(new URL(import.meta.url), {
+        workerData: { pdfTextJob: true, bytes: ab, maxPages }, transferList: [ab],
+      });
+    } catch (e) {
+      finish({ ok: false, text: '', pages: 0, error: `the PDF worker could not start: ${e && e.message ? e.message : e}` });
+      return;
+    }
+    timer = setTimeout(() => finish({ ok: false, text: '', pages: 0,
+      error: `timed out after ${Math.round(timeoutMs / 1000)}s` }), timeoutMs);
+    worker.once('message', (r) => finish(r));
+    worker.once('error', (e) => finish({ ok: false, text: '', pages: 0, error: e && e.message ? e.message : String(e) }));
+    worker.once('exit', (code) => finish({ ok: false, text: '', pages: 0, error: `the PDF worker exited (${code}) before answering` }));
+  });
+}
+
+/** The parse, on this thread. */
+export async function parsePdfHere(bytes, maxPages = 15) {
   const lib = await pdfjs();
   if (!lib) return { ok: false, text: '', pages: 0, error: 'pdfjs-dist is not installed' };
 
@@ -137,4 +184,12 @@ export async function pdfText(bytes, { maxPages = 15 } = {}) {
   } finally {
     if (doc) await doc.destroy().catch(() => {});
   }
+}
+
+/* The worker half: this module, started by pdfText above with the bytes,
+   parses them here and posts the answer back. */
+if (!isMainThread && workerData && workerData.pdfTextJob && parentPort) {
+  parsePdfHere(Buffer.from(workerData.bytes), workerData.maxPages)
+    .then((r) => parentPort.postMessage(r),
+      (e) => parentPort.postMessage({ ok: false, text: '', pages: 0, error: e && e.message ? e.message : String(e) }));
 }

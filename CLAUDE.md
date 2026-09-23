@@ -1419,6 +1419,29 @@ last-segment fallback refuses a segment that is not a field (a start date,
 a requirement, a count, a requisition number), or "Fall 2027" reached the
 pickers as a department.
 
+And the security half of the same review, five findings on what a hostile
+advertisement could do to the runner. A body of half a gigabyte was read
+whole and then asked for as a string, which threw out of the read loop and
+ended the run on that row every morning for the rest of the window:
+`fetchBytes` reads against `MAX_BODY_BYTES` (25 MB), by the header where
+there is one and chunk by chunk where there is not, and both read loops go
+through `safeRead`, so one advertisement that breaks its reader is a posting
+queued with less. A redirect was followed anywhere, a cloud runner's
+metadata service included: every hop is held to a public http(s) host
+(`privateAddress`, `hostAllowed`, five hops at most). pdf.js parses on the
+calling thread in Node, where nothing can interrupt a 150 KB file whose
+stream inflates to a gigabyte on every page: the parse runs in a worker
+thread of `pdf-text.mjs` itself, raced against `PDF_TIMEOUT_MS`, and a loser
+is terminated and reported unreadable. `page.evaluate` takes no timeout and
+runs where the page's own definitions are in force, so a script that never
+yields or a shadowed `innerText` getter hung the render until the job's
+cap: the renderer reads through Playwright's utility world with timeouts
+and races the whole read against one clock whose loser closes the browser
+(measured against a page that never yields). And the browser inherited the
+crawl step's whole environment, the project's Admin credential included:
+it is launched with `browserEnv()`, a path, a home and a temp directory and
+nothing else, with the OS sandbox on where the runner allows it.
+
 Tests: `testPomsCrawler` in `_scraper/selftest.mjs` (the table over a fixture
 cut from the real page, the window and every skip reason, the names, the
 title's field, the row with and without an advertisement held to the served-

@@ -24393,6 +24393,51 @@ async function testPomsCrawler() {
     'the document\'s ad block names the road the reading came by, which adBlock does not copy from the cache entry');
   eq(CLI.adForRow(null, '', { adUrl: 'u', vocab: null, now }).block.via, 'page', 'and a reading that fetched nothing is filed as a page');
 
+  /* ---- one advertisement can never end the run, nor reach a private host - */
+  eq(['127.0.0.1', '10.1.2.3', '172.16.0.1', '192.168.1.1', '169.254.169.254', '100.64.0.1', '224.0.0.1', '::1', 'fe80::1', 'fd00::1', '::ffff:127.0.0.1', ''].map(CLI.privateAddress),
+    Array(12).fill(true), 'privateAddress: loopback, the private ranges, link-local (where a cloud runner\'s metadata service answers), the shared range, multicast, the v6 equivalents, a mapped v4 and nothing at all');
+  eq(['8.8.8.8', '172.32.0.1', '93.184.216.34', '2606:4700::1111'].map(CLI.privateAddress), [false, false, false, false], 'and a public address is not');
+  const pubDns = async () => [{ address: '93.184.216.34' }];
+  const mixedDns = async () => [{ address: '93.184.216.34' }, { address: '10.0.0.1' }];
+  const noDns = async () => { throw new Error('ENOTFOUND'); };
+  eq(await Promise.all([CLI.hostAllowed('localhost'), CLI.hostAllowed('a.localhost'), CLI.hostAllowed('127.0.0.1'), CLI.hostAllowed('[::1]'),
+    CLI.hostAllowed('example.edu', { lookup: pubDns }), CLI.hostAllowed('example.edu', { lookup: mixedDns }), CLI.hostAllowed('x.edu', { lookup: noDns })]),
+    [false, false, false, false, true, false, false],
+    'hostAllowed: every address a name resolves to must be public; localhost, a literal private address, a mixed answer and a name that does not resolve may not be fetched');
+  ok(/redirect: 'manual'/.test(cli) && !/redirect: 'follow'/.test(cli) && /for \(let hop = 0; hop <= MAX_REDIRECTS; hop\+\+\)/.test(cli)
+     && /if \(!\(await hostCheck\(target\.hostname\)\)\) return refuse\(/.test(cli) && /if \(!\/\^https\?:\$\/\.test\(target\.protocol\)\) return refuse\(/.test(cli),
+    'fetchBytes follows a redirect by hand, holding every hop to a public http(s) host: a View link\'s server used to be able to send the runner to its own metadata service');
+  ok(CLI.MAX_BODY_BYTES === 25 * 1024 * 1024 && /if \(len > maxBytes\) \{/.test(cli) && /const bytes = await readCapped\(res\.body, maxBytes\);/.test(cli)
+     && /for await \(const chunk of body\)/.test(cli) && /if \(total > max\) return null;/.test(cli) && !/res\.arrayBuffer\(\)/.test(cli),
+    'and reads the body against a cap, by the header where there is one and chunk by chunk where there is not, never whole into memory (a half-gigabyte body threw the run out of its loop)');
+  ok(/export async function safeRead\(opp, opts\) \{\s*try \{\s*return await readOpportunityAd\(opp, opts\);\s*\} catch \(e\) \{\s*return \{ parsed: null, via: 'page', error: /.test(cli)
+     && (cli.match(/const read = await safeRead\(opp, \{ render \}\);/g) || []).length === 2 && !/= await readOpportunityAd\(opp/.test(cli),
+    'both read loops go through safeRead, so one advertisement that breaks its reader is a posting queued with less and never a run that ends on that row every morning');
+  const pdfSrc = bareJs(await read('_scraper/pdf-text.mjs'));
+  ok(/new Worker\(new URL\(import\.meta\.url\), \{\s*workerData: \{ pdfTextJob: true, bytes: ab, maxPages \}, transferList: \[ab\],/.test(pdfSrc)
+     && /timer = setTimeout\(\(\) => finish\(\{ ok: false, text: '', pages: 0,\s*error: `timed out after/.test(pdfSrc)
+     && /if \(worker\) worker\.terminate\(\)/.test(pdfSrc) && PDF.PDF_TIMEOUT_MS === 60000
+     && /if \(!isMainThread && workerData && workerData\.pdfTextJob && parentPort\)/.test(pdfSrc),
+    'a PDF is parsed in a worker thread of the module itself, raced against a clock whose loser is terminated: pdf.js parses on the calling thread in Node, where nothing can interrupt a stream that inflates to a gigabyte');
+  if (PDF.pdfjsInstalled()) {
+    const slow = await PDF.pdfText(CLI.tinyPdf(['x']), { timeoutMs: 1 });
+    ok(!slow.ok && /timed out/.test(slow.error), 'a read past the clock is reported unreadable, an answer the crawler already has');
+    ok((await PDF.pdfText(CLI.tinyPdf(['Read me']), { inline: true })).ok, 'and the parse itself still reads on the calling thread when asked to');
+  }
+  const renderSrc = bareJs(await read('_scraper/render-page.mjs'));
+  ok(!/page\.evaluate\(/.test(renderSrc) && /page\.title\(\)\.catch/.test(renderSrc) && /page\.locator\('h1'\)\.first\(\)\.innerText\(\{ timeout: 10000 \}\)/.test(renderSrc)
+     && /page\.locator\('body'\)\.innerText\(\{ timeout: 20000 \}\)/.test(renderSrc),
+    'the renderer reads the words through the utility world with timeouts, never page.evaluate, which takes none and runs where the page\'s own definitions are in force');
+  ok(/return await Promise\.race\(\[work, clock\]\);/.test(renderSrc) && /const deadline = overallMs > 0 \? overallMs : timeoutMs \+ 45000;/.test(renderSrc)
+     && /\} finally \{\s*if \(timer\) clearTimeout\(timer\);\s*if \(browser\) await browser\.close\(\)\.catch/.test(renderSrc),
+    'and the whole read is raced against one clock whose loser closes the browser, which rejects any call still pending inside (measured: a page that never yields is cut at the clock)');
+  const R = await import('./render-page.mjs');
+  eq(Object.keys(R.browserEnv({ PATH: '/bin', HOME: '/h', FIREBASE_SERVICE_ACCOUNT: 'secret', GITHUB_TOKEN: 't', PLAYWRIGHT_BROWSERS_PATH: '/pw' })),
+    ['PATH', 'HOME', 'PLAYWRIGHT_BROWSERS_PATH'], 'the browser is launched with a minimal environment: the credential the crawl step holds never reaches a renderer');
+  ok(!R.BROWSER_ENV_KEYS.some((k) => /FIREBASE|TOKEN|SECRET|KEY|ACCOUNT/i.test(k)) && /env: browserEnv\(\)/.test(renderSrc)
+     && /chromiumSandbox: true/.test(renderSrc) && renderSrc.indexOf('chromiumSandbox: true') < renderSrc.indexOf('chromiumSandbox: false'),
+    'with the OS sandbox on where the runner allows it, and off only as the second try');
+
   /* ---- the wiring ----------------------------------------------------- */
   const build = await read('_scraper/build-jobs.mjs');
   ok(/import \{ SOURCE as POMS_SOURCE \} from '\.\/poms\.mjs';/.test(build), 'build-jobs knows the source');

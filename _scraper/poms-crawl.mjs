@@ -50,6 +50,7 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { lookup as dnsLookup } from 'node:dns/promises';
 
 import { isoStamp, marketFloor, LEVELS, TYPES, PUBLIC_FIELDS, stripRowEmails } from './jobs-model.mjs';
 import { firestore } from './_mail.mjs';
@@ -109,26 +110,117 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /* ----------------------------------------------------------------- network */
 
+/** A body larger than this is refused rather than read: an advertisement is
+    kilobytes and the largest PDF on the page a few megabytes, and a run that
+    buffered half a gigabyte and then asked for it as a string threw
+    ERR_STRING_TOO_LONG out of the read loop, ending the run on that row every
+    morning for the rest of the window (the 2026-09-23 review). */
+export const MAX_BODY_BYTES = 25 * 1024 * 1024;
+export const MAX_REDIRECTS = 5;
+
+/** An address the runner must never fetch, pure over an IP as dns.lookup
+    hands it back: loopback, link-local (where a cloud runner's metadata
+    service answers), the private and shared ranges, multicast and the
+    unspecified address. A View link's server can answer 302 to any of them,
+    and `redirect: 'follow'` used to go there (the 2026-09-23 review). */
+export function privateAddress(ip) {
+  const s = String(ip || '').trim().toLowerCase();
+  if (!s) return true;
+  const v4 = s.match(/^(?:::ffff:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (v4) {
+    const a = Number(v4[1]), b = Number(v4[2]);
+    return a === 0 || a === 10 || a === 127 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31)
+      || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224;
+  }
+  if (s === '::' || s === '::1') return true;
+  if (/^fe[89ab][0-9a-f]:/.test(s) || /^fe[89ab][0-9a-f]$/.test(s)) return true;   // fe80::/10
+  if (/^f[cd][0-9a-f]{2}:/.test(s)) return true;                                    // fc00::/7
+  return false;
+}
+
+/** May this host be fetched? Every address it resolves to has to be public;
+    a name that does not resolve, or "localhost" under any spelling, may not.
+    The lookup is injectable so the rule can be driven without a network. */
+export async function hostAllowed(hostname, { lookup = dnsLookup } = {}) {
+  const h = String(hostname || '').trim().toLowerCase().replace(/^\[|\]$/g, '');
+  if (!h || h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local')) return false;
+  if (/^[\d.]+$/.test(h) || h.includes(':')) return !privateAddress(h);
+  try {
+    const addrs = await lookup(h, { all: true });
+    return Array.isArray(addrs) && addrs.length > 0 && addrs.every((a) => !privateAddress(a && a.address));
+  } catch {
+    return false;
+  }
+}
+
+/** The body, chunk by chunk, up to `max` bytes; null once it runs past them
+    (leaving the loop cancels the stream). */
+async function readCapped(body, max) {
+  if (!body) return Buffer.alloc(0);
+  const chunks = [];
+  let total = 0;
+  for await (const chunk of body) {
+    total += chunk.byteLength;
+    if (total > max) return null;
+    chunks.push(Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
 /** One GET for BYTES, with a timeout and two retries — the sibling of
     adverts-verify's fetchOnce, which reads text and so cannot carry a PDF.
     A failure returns rather than throws: an advertisement that cannot be
-    read is a posting queued with less, never a run that stops. */
-export async function fetchBytes(u, { accept = '*/*', tries = 3, timeoutMs = 45000 } = {}) {
+    read is a posting queued with less, never a run that stops. Redirects are
+    followed BY HAND, each hop held to `hostAllowed` and to http(s), and the
+    body is read against `MAX_BODY_BYTES`; a refusal on either count is final
+    and is not retried, since it is the address and not the network. */
+/* The Accept header's "anything" is spelt with an escaped slash: the
+   selftest reads this file with its comments stripped by a regex, and the
+   literal star-slash-star opens a block comment to it that swallows the
+   whole of fetchBytes, so every pin on this function passed by vacuity. */
+export async function fetchBytes(u, { accept = '*\u002f*', tries = 3, timeoutMs = 45000, maxBytes = MAX_BODY_BYTES, hostCheck = hostAllowed } = {}) {
+  const refuse = (why, status = 0, type = '') => ({ ok: false, refused: true, bytes: Buffer.alloc(0), type, status, error: why });
   let last = '';
   for (let i = 1; i <= tries; i++) {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), timeoutMs);
     try {
-      const res = await fetch(u, {
-        redirect: 'follow', signal: ctl.signal,
-        headers: { 'user-agent': UA, accept },
-      });
-      const bytes = Buffer.from(await res.arrayBuffer());
+      let at = String(u);
+      let res = null;
+      for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+        const target = new URL(at);
+        if (!/^https?:$/.test(target.protocol)) return refuse(`refused a ${target.protocol} address`);
+        if (!(await hostCheck(target.hostname))) return refuse(`refused ${target.hostname}: not a public host`);
+        res = await fetch(at, {
+          redirect: 'manual', signal: ctl.signal,
+          headers: { 'user-agent': UA, accept },
+        });
+        if (![301, 302, 303, 307, 308].includes(res.status)) break;
+        const loc = res.headers.get('location');
+        if (!loc) break;
+        if (res.body) await res.body.cancel().catch(() => {});
+        at = new URL(loc, at).href;
+        res = null;
+      }
+      if (!res) return refuse(`more than ${MAX_REDIRECTS} redirects`);
       const type = String(res.headers.get('content-type') || '');
-      if (res.ok) return { ok: true, bytes, type, status: res.status, error: '' };
+      const len = Number(res.headers.get('content-length') || 0);
+      if (len > maxBytes) {
+        ctl.abort();
+        return refuse(`too large (${len} bytes; the limit is ${maxBytes})`, res.status, type);
+      }
+      if (res.ok) {
+        const bytes = await readCapped(res.body, maxBytes);
+        if (!bytes) {
+          ctl.abort();
+          return refuse(`too large (over ${maxBytes} bytes)`, res.status, type);
+        }
+        return { ok: true, bytes, type, status: res.status, error: '' };
+      }
+      if (res.body) await res.body.cancel().catch(() => {});
       last = `HTTP ${res.status}`;
-      if (res.status === 404 || res.status === 410) return { ok: false, gone: true, bytes, type, status: res.status, error: last };
-      if (res.status === 403 || res.status === 401) return { ok: false, bytes, type, status: res.status, error: last };
+      if (res.status === 404 || res.status === 410) return { ok: false, gone: true, bytes: Buffer.alloc(0), type, status: res.status, error: last };
+      if (res.status === 403 || res.status === 401) return { ok: false, bytes: Buffer.alloc(0), type, status: res.status, error: last };
     } catch (e) {
       last = e.name === 'AbortError' ? `timed out after ${timeoutMs}ms` : e.message;
     } finally {
@@ -137,6 +229,17 @@ export async function fetchBytes(u, { accept = '*/*', tries = 3, timeoutMs = 450
     if (i < tries) await sleep(1500 * i);
   }
   return { ok: false, bytes: Buffer.alloc(0), type: '', status: 0, error: last || 'unknown error' };
+}
+
+/** readOpportunityAd, and never a throw: one advertisement that breaks its
+    reader is a posting queued with less, not a run that ends with every row
+    after it unread and the same row first tomorrow (the 2026-09-23 review). */
+export async function safeRead(opp, opts) {
+  try {
+    return await readOpportunityAd(opp, opts);
+  } catch (e) {
+    return { parsed: null, via: 'page', error: `the reader failed: ${e && e.message ? e.message : String(e)}` };
+  }
 }
 
 /**
@@ -355,7 +458,7 @@ async function main() {
       break;
     }
     budget.left--;
-    const read = await readOpportunityAd(opp, { render });
+    const read = await safeRead(opp, { render });
     const { ad, block } = adForRow(read.parsed, read.via, { adUrl: opp.href, vocab, now });
     if (!ad) {
       unread++;
@@ -449,7 +552,7 @@ async function main() {
        block read from another link carries nothing forward */
     const link = effectiveLink(d);
     const opp = { href: link, kind: linkKind(link), title: '', institution: d.row.institution, date: d.row.posted };
-    const read = await readOpportunityAd(opp, { render });
+    const read = await safeRead(opp, { render });
     const previous = d.ad && d.ad.url === link ? d.ad : null;
     const { ad, block } = adForRow(read.parsed, read.via, { adUrl: link, vocab, now, previous });
     const row = ad ? healCountry(refreshFromAd(d.row, ad, { vocab, now }), byCountry) : d.row;
@@ -559,6 +662,10 @@ async function selftest() {
   eq(fresh.fresh.map((o) => o.institution), ['Bucknell University', 'University of Oklahoma (OU)'],
     'within the window, academic, unknown: queued; the contractor\'s vacancy and April\'s row are not');
   eq(fresh.skipped.map((s) => s.why).sort(), ['before-window', 'not-academic'], 'and each skip says why');
+  ok(privateAddress('169.254.169.254') && privateAddress('127.0.0.1') && !privateAddress('8.8.8.8'),
+    'a private or link-local address is one the runner never fetches');
+  ok(!(await hostAllowed('localhost')) && (await hostAllowed('example.edu', { lookup: async () => [{ address: '93.184.216.34' }] })),
+    'and a host is fetched only when every address it resolves to is public');
 
   /* ---- the reader, when the engine is here ------------------------- */
   const want = process.env.POMS_REQUIRE_PDF === '1';
@@ -577,6 +684,8 @@ async function selftest() {
     eq(p.institution, '', 'the institution is not read off a labelled line (the 2026-09-23 review: it read "Application deadline")');
     eq(p.country, 'United States', 'and the country of a US town with its state');
     ok(!looksLikePdf(Buffer.from('<html>')), 'HTML is not a PDF');
+    const slow = await pdfText(tinyPdf(lines), { timeoutMs: 1 });
+    ok(!slow.ok && /timed out/.test(slow.error), 'and a PDF that outruns its clock is unreadable rather than a run that never ends');
   } else {
     log('pdfjs-dist is not installed here — the PDF round trip is checked where it is (the workflow).');
   }
