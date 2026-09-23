@@ -350,6 +350,11 @@
        Two postings arrived under it. */
     'University of San Diego': {
       'Knauss School of Business at the University of San Diego': 'Knauss School of Business' },
+    /* The same shape twice over — a parenthetical acronym AND a campus note —
+       on a school SCHOOL_LIST already carries. One posting arrived under it
+       (2026-09-23) and the fused-name sweep went red on the day's data. */
+    'University College London': {
+      'UCL Global Business School for Health (GBSH) at UCL East campus': 'UCL Global Business School for Health' },
     'University of Southern California': { 'Marshall School of Business (incl. Leventhal)': 'Marshall School of Business' },
     'University of Toronto': { 'Rotman School of Management': 'Joseph L. Rotman School of Management' },
     'University of Illinois at Chicago': { 'College of Business Administration': 'College of Business' },
