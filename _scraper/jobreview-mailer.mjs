@@ -110,12 +110,22 @@ function line(label, value) {
 function dupHtml(doc) {
   const dups = Array.isArray(doc.dup) ? doc.dup : [];
   if (!dups.length) return '';
-  const items = dups.map((d) =>
-    '<li>' + esc([d.institution, d.department].filter(Boolean).join(' — ') || d.id) +
-    (d.posted ? ' <span style="color:#5a5f6b">(posted ' + esc(d.posted) + ')</span>' : '') +
-    '</li>').join('');
+  /* A posting STILL UNDER REVIEW (the POMS crawler names the queue's own
+     pending rows, marked `pending` on the entry) is in the maintainer's own
+     queue and nowhere on the site, so the e-mail says so, as the card does:
+     told it was "already on the site", they would reject a posting in favour
+     of one nobody had approved (the 2026-09-23 review). */
+  const items = dups.map((d) => {
+    const when = [d.posted ? 'posted ' + esc(d.posted) : '', d.pending ? 'still under review' : '']
+      .filter(Boolean).join(', ');
+    return '<li>' + esc([d.institution, d.department].filter(Boolean).join(' — ') || d.id) +
+      (when ? ' <span style="color:#5a5f6b">(' + when + ')</span>' : '') +
+      '</li>';
+  }).join('');
+  const anyPending = dups.some((d) => d && d.pending);
   return '<p style="background:#fff8e6;border:1px solid #e6c866;border-radius:6px;' +
-    'padding:10px 14px">&#9888; <strong>Possibly already on the site</strong> — this ' +
+    'padding:10px 14px">&#9888; <strong>Possibly already on the site' +
+    (anyPending ? ' or under review' : '') + '</strong> — this ' +
     'looks like it may duplicate:</p>' +
     '<ul style="margin:6px 0 14px;padding-left:22px">' + items + '</ul>';
 }
@@ -505,6 +515,11 @@ function selftest() {
   ok(!dmail.html.includes('<b>University</b>'), 'and its fields cannot inject markup');
   ok(!/Possibly already on the site/.test(mail.html),
     'a posting with no flag carries no warning');
+  const pendingDup = renderReviewEmail({ ...doc, dup: [{ id: 'z', source: 'jobmarket-sheet',
+    institution: 'Example University', department: 'Operations', posted: '2026-09-15', pending: true }] });
+  ok(/Possibly already on the site or under review/.test(pendingDup.html) && /posted 2026-09-15, still under review/.test(pendingDup.html),
+    'a duplicate still under review is said to be, in the heading and beside the posting, as on the card');
+  ok(!/under review/.test(dmail.html), 'and a published one is not');
 
   /* THE BUSINESS-SCHOOL FLAG IS SAID WHERE THE DECISION IS ASKED FOR, like
      the duplicate one: the sync stamps `biz` on a posting whose text says

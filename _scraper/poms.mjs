@@ -301,6 +301,14 @@ const RANK_WORDS = /professor|lecturer|faculty|\brank\b|track|position|tenure|ch
 /* the separators a title's segments sit between, and a segment that names a
    place rather than a field */
 const TITLE_SEG_RX = /\s*(?:,|;|\s[-\u2013\u2014]\s)\s*/;
+/* A segment that is not a FIELD, whatever position it holds: a start date
+   ("Fall 2027"), a requirement ("Ph.D. required"), a count ("Two Openings"),
+   a requisition number ("Job #12345"). The last-segment fallback below took
+   any of them for the department, and an Approve-all would have put "Fall
+   2027" into data/vocab.json for the pickers to offer (the 2026-09-23
+   review). A digit, a hash, a month, a season or one of these words, and the
+   title names no field. */
+const NOT_A_FIELD_RX = /\d|#|\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?|fall|spring|summer|winter|autumn|required|preferred|openings?|start(?:ing)?|positions?|searche?s?|multiple|several|track|tenured?|ph\.?d)\b/i;
 const PLACE_SEG_RX = /^(?:the\s+)?(?:department|division|school|college|faculty|university|institute)\b|\buniversity\b/i;
 
 function titleCase(s) {
@@ -354,7 +362,7 @@ export function fieldFromTitle(title, vocab = null) {
     if (segs.length > 1 && named.length) field = named[named.length - 1];
   }
   field = text(field, 120).replace(/^(?:the\s+)?(?:department|division|area|group)\s+of\s+/i, '').replace(/[.\s]+$/, '');
-  if (!field || RANK_WORDS.test(field)) return { school: '', unit: '' };
+  if (!field || RANK_WORDS.test(field) || NOT_A_FIELD_RX.test(field)) return { school: '', unit: '' };
   if (field === field.toUpperCase() && /[A-Z]/.test(field)) field = titleCase(field);
   if (/\b(?:school|college|faculty)\b/i.test(field)) return splitDepartment(field);
   const units = ((vocab && vocab.units) || []).map((u) => (u && u.v) || u).filter(Boolean);
@@ -582,7 +590,7 @@ export function nearbyPostings(row, siteRows, { days = 21, max = 3 } = {}) {
     if (gap == null || Math.abs(gap) > days) continue;
     const sl = Array.isArray(s.levels) ? s.levels : [];
     if (levels.length && sl.length && !levels.some((l) => sl.includes(l))) continue;
-    out.push(s._pending ? { ...dupEntry(s), pending: true } : dupEntry(s));
+    out.push(dupEntry(s));   // carries the pending mark itself
     if (out.length >= max) break;
   }
   return out;

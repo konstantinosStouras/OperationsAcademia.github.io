@@ -1267,12 +1267,18 @@ credentials, and cannot list other universities' positions, and the
 endpoint the shell itself fetches from is neither documented nor stable to
 build on. So the crawler reads the page the way a person does, which is
 also what serves every other JavaScript board on the page. The browser is
-the bounded, cached Playwright install `oa-checks.yml` already makes; both
-it and the PDF engine are BEST-EFFORT in the workflow, and a run without
-either still queues every new posting, carrying what the table said and
-saying in the comments that the advertisement could not be read. Such a
-posting is tried again after `READ_TTL_DAYS` (7) on its pending document, a
-merge of `row` and `ad` alone, never the decision, never the edits.
+the bounded, cached Playwright install `oa-checks.yml` already makes, and it
+is BEST-EFFORT in the workflow: a run without it still queues every new
+posting, carrying what the table said and saying in the comments that the
+advertisement could not be read. **The PDF engine is REQUIRED**: nine
+postings in ten are PDFs, so a run without it would queue a season of empty
+cards, and its install is retried and bounded rather than optional, with
+the workflow's own offline checks refusing to run without it (the first
+cut called both best-effort; the 2026-09-23 review read the workflow and
+found only the browser was). Such a posting is tried again after
+`READ_TTL_DAYS` (7) on its pending document, a merge of `row` and `ad`
+alone, never the decision, never the edits; a Word file excepted, which
+nothing here reads and which is therefore completed by hand.
 
 **CURATED, NEVER GUESSED, at every step, and each rule is a shared one:**
 
@@ -1385,6 +1391,33 @@ the `ad` block carrying `via`, which `adBlock` does not copy; and `pomsRead`
 set after the loop that gathers the approved POMS rows, so a throw inside it
 leaves the flag false and the served POMS rows are carried rather than
 removed.
+
+The workflow and the surfaces, from the same review: the Playwright step's
+root `npm install --no-save` named Playwright alone, and with no
+`package.json` at the root npm reifies each such install to exactly the
+packages it names and REMOVES the rest, so firebase-admin and pdfjs-dist
+were pruned and every scheduled run would have gone red at its own offline
+checks (reproduced with npm 10; the step names all three now, and the
+checks first prove both are still installed, since a missing client would
+have been a green run that queues nothing); the job's cap is forty minutes,
+because up to fifteen of bounded browser installs run ahead of the
+twenty-minute read window; a `--since` that is not a day and a `--limit`
+that is not a whole number above zero are said rather than silently
+replaced by the defaults; the flags on every pending POMS document are
+re-checked on every run, the sheet sync's own rule, which visits the
+workbook's documents alone; `sameDups` and `sameBiz` read a map in one key
+order, since Firestore hands a map's keys back sorted; the review e-mail's
+duplicate block says "still under review" where the card does; the card's
+lead sentence says "or in your queue" when every named posting is; and the
+card's deadline preview mirrors `settleDeadline`, keeping a stored line
+that says the search stays open, which a POMS row carries where a workbook
+row puts those words in the comments. And four things the record said
+that the code did not: the PDF engine is required, not best-effort (above);
+a Word file is never re-read; a bare "Georgia" in a Location line is
+refused as the US state, not only beside a town; and the title's
+last-segment fallback refuses a segment that is not a field (a start date,
+a requirement, a count, a requisition number), or "Fall 2027" reached the
+pickers as a department.
 
 Tests: `testPomsCrawler` in `_scraper/selftest.mjs` (the table over a fixture
 cut from the real page, the window and every skip reason, the names, the
@@ -2020,8 +2053,9 @@ queued pending, which is the whole of the gate for every posting from here on.
 The postings the maintainer reviews come from two places and their jobs
 differ (owner, 2026-08-23), so `oa-jobreview.js` draws the panel as two tabs:
 
-* **Auto-crawled jobs** — the tracking sheet's queue above: a GATE, held back
-  until approved, every field editable on the card, Approve-all included.
+* **Auto-crawled jobs** — the crawlers' queue above (the tracking sheet's
+  rows and, since 2026-09-23, the POMS page's): a GATE, held back until
+  approved, every field editable on the card, Approve-all included.
 * **User-added jobs** — postings made through the site's own form
   (`jobSubmissions`). These are LIVE within a minute — the form promises as
   much and nothing about this panel changes that — so their tab is a
@@ -2325,8 +2359,9 @@ a message whose whole point is to answer this question is worse than an honest
 one.
 
 The review mailer supplies the source as a FACT about its own collection
-(`jobReviews` holds the tracking sheet's rows and nothing else), so a document
-written before the row carried one still reads as the crawler; that is a fact,
+(`jobReviews` holds the two crawlers' rows and nothing else, and a POMS row
+has carried its source from the day it existed), so a document
+written before the row carried one still reads as the sheet crawler; that is a fact,
 not a second rule, and `postedBy` goes on answering from the data for every
 other caller. It links the workbook where `data/jobmarket-sheets.json` names the
 current one — never a hard-coded id, because "one workbook per cycle" is that

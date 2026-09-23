@@ -214,7 +214,14 @@ export function countryFromLocation(location) {
   if (!s) return '';
   const c = COUNTRIES.canon(s);
   if (!c || !COUNTRIES.LIST.includes(c)) return '';
-  if (c === 'Georgia' && /,/.test(s)) return '';
+  /* The one country that is also a US state's name is refused WHATEVER
+     stands beside it: "Statesboro, Georgia" and a bare "Georgia" (a
+     state-wide system's page prints the state alone) both name the state
+     far more often than the republic on this site, and a guess files a
+     posting under a Location filter nobody would look in (the 2026-09-23
+     review; the first cut refused it only beside a town). A labelled
+     country field still says it explicitly. */
+  if (c === 'Georgia') return '';
   return c;
 }
 

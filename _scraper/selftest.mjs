@@ -882,6 +882,13 @@ async function testFleetPins() {
   const freshRx = (/var OPEN_ENDED = (\/.*\/i);/.exec(fresh) || [])[1];
   eq(freshRx, openLiteral,
     'oa-fresh.js carries the jobs-model open-ended literal, character for character');
+  /* …and the review card's deadline preview, which mirrors settleDeadline
+     (a stored line that says the search stays open is what publishes), holds
+     the same literal the same way. */
+  const rvSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-jobreview.js'), 'utf8');
+  const rvRx = (/var OPEN_ENDED = (\/.*\/i);/.exec(rvSrc) || [])[1];
+  eq(rvRx, openLiteral,
+    'oa-jobreview.js carries the jobs-model open-ended literal, character for character');
   if (existsSync(JOBS)) {
     const rows = JSON.parse(await readFile(JOBS, 'utf8'));
     const contradicts = rows.filter((r) =>
@@ -11089,6 +11096,9 @@ function testReviewDuplicates() {
   ok(typeof entry.year === 'number' && typeof entry.applyByDate === 'string',
     'and states the season and the closing date in the shape the window rule reads');
 
+  ok(sameDups([{ a: 1, b: { c: 2, d: 3 } }], [{ b: { d: 3, c: 2 }, a: 1 }]) && !sameDups([{ a: 1 }], [{ a: 2 }])
+     && sameBiz({ school: 'x', other: null }, { other: null, school: 'x' }) && !sameBiz({ school: 'x' }, { school: 'y' }),
+    'the two "nothing moved" tests read a map in one key order at every depth: a document read back from Firestore hands its keys back sorted, and a freshly computed flag does not');
   ok(sameDups([entry], [entry]) && !sameDups([entry], []),
     'sameDups is what keeps an unchanged sync from writing at all');
 
@@ -24045,7 +24055,9 @@ async function testRegistrationFields() {
    pinned here is the reading (the table, the window, the names, the row, the
    text of a PDF or a rendered page) and the wiring on every surface a queued
    posting reaches. See "The POMS job postings page is crawled into the review
-   queue" in CLAUDE.md. Every pin was verified by putting the defect back. */
+   queue" in CLAUDE.md. The behavioural pins, and every pin the 2026-09-23
+   review added, were verified by putting the defect back; the wording and
+   wiring pins by removing what they name. */
 async function testPomsCrawler() {
   const P = await import('./poms.mjs');
   const T = await import('./advert-text.mjs');
@@ -24149,6 +24161,10 @@ async function testPomsCrawler() {
   eq(P.fieldFromTitle('TENURED/TENURE-TRACK FACULTY POSITIONS IN OPERATIONS MANAGEMENT'),
     { school: '', unit: 'Operations Management' }, 'shouting is put back into title case');
   eq(P.fieldFromTitle('Tenure-Track Positions'), { school: '', unit: '' }, 'a title naming no field names none');
+  for (const t of ['Assistant Professor, Tenure Track, Fall 2027', 'Assistant Professor, Ph.D. required', 'Tenure-Track Assistant Professor, Two Openings',
+    'Assistant Professor, Tenure Track, Job #12345', 'Assistant Professor (Tenure-Track), Fall 2027 Start', 'Assistant Professor of Operations, Fall 2027']) {
+    eq(P.fieldFromTitle(t), { school: '', unit: '' }, `a segment that is not a field is never the department: "${t}"`);
+  }
   for (const [t, unit] of [
     ['Assistant Professor of Operations Management, Tenure Track', 'Operations Management'],
     ['Assistant Professor of Supply Chain Management - Tenure Track', 'Supply Chain Management'],
@@ -24303,8 +24319,8 @@ async function testPomsCrawler() {
   ]) {
     eq(T.placeFromText(text, inst).school, school, `the school named in "${text}" is the name alone: a verb, a heading, a rank or a possessive before it is not part of it`);
   }
-  eq(['Norman, OK', 'Atlanta, Georgia', 'Stockholm, Sweden', 'Somewhere'].map(T.countryFromLocation),
-    ['United States', '', 'Sweden', ''], 'the country of a location: a US state settles it, the ambiguous state is refused, an unknown place is nothing');
+  eq(['Norman, OK', 'Atlanta, Georgia', 'Georgia', 'Stockholm, Sweden', 'Somewhere'].map(T.countryFromLocation),
+    ['United States', '', '', 'Sweden', ''], 'the country of a location: a US state settles it, the ambiguous state is refused with or without a town, an unknown place is nothing');
   const pdfParsed = T.parseAdvertText('THE UNIVERSITY\nAssistant Professor of Operations\nDepartment of Supply Chain Management, Smith School of Business\nApplication deadline: October 15, 2026. Applications received by September 30, 2026 will receive full consideration.\nContact: hr@example.edu');
   eq([pdfParsed.applyByDate, pdfParsed.reviewDate, pdfParsed.department, pdfParsed.school],
     ['2026-10-15', '2026-09-30', 'Supply Chain Management', 'Smith School of Business'], 'a PDF-shaped text: the dates and the names');
@@ -24332,7 +24348,15 @@ async function testPomsCrawler() {
   /* ---- the crawler: what it writes, read from its source --------------- */
   const cli = bareJs(await read('_scraper/poms-crawl.mjs'));
   ok(/col\.doc\(id\)\.create\(doc\)/.test(cli), 'a new posting is CREATED, never set: a decision made mid-run wins');
-  eq((cli.match(/\.set\(/g) || []).length, 1, 'one merge in the file');
+  eq((cli.match(/\.set\(/g) || []).length, 2, 'two merges in the file: the reading of a re-read document, and the flags of a pending one');
+  ok(/for \(const d of queue\.docs\.filter\(\(x\) => x && x\.status === PENDING && x\.row && x\.row\.source === SOURCE\)\)/.test(cli)
+     && /let dup = duplicatesOf\(d\.row, compared\);\s*if \(!dup\.length\) dup = nearbyPostings\(d\.row, compared\);/.test(cli)
+     && /if \(!sameDups\(dup, d\.dup\)\) flags\.dup = dup;/.test(cli) && /if \(!sameBiz\(biz, d\.biz\)\) flags\.biz = biz;/.test(cli)
+     && /\.set\(flags, \{ merge: true \}\)/.test(cli) && !/flags\.row/.test(cli) && !/flags\.status/.test(cli) && !/flags\.edits/.test(cli),
+    'the flags on every pending POMS document are re-checked on every run against the same set a fresh row is, and written only where they moved');
+  ok(/const sinceGiven = opt\('--since', ''\);/.test(cli) && /if \(sinceGiven && since !== sinceGiven\) \{\s*warn\(/.test(cli)
+     && /const LIMIT_OK = \/\^\[1-9\]\\d\*\$\/\.test\(LIMIT_RAW\);/.test(cli) && /if \(LIMIT_RAW && !LIMIT_OK\) \{\s*warn\(/.test(cli),
+    'a --since that is not a day and a --limit that is not a whole number above zero are said, never silently replaced by the defaults');
   ok(/const patch = \{ ad: block \};/.test(cli) && /patch\.row = row;/.test(cli) && !/patch\.status/.test(cli) && !/patch\.edits/.test(cli),
     'and it carries the row and the ad block of a pending document, never the decision, never the edits');
   ok(!/\.update\(/.test(cli) && !/\.delete\(/.test(cli) && !/writeFile\(/.test(cli), 'nothing else is written, and no file');
@@ -24374,10 +24398,13 @@ async function testPomsCrawler() {
   ok(/import \{ SOURCE as POMS_SOURCE \} from '\.\/poms\.mjs';/.test(build), 'build-jobs knows the source');
   const pomsBranch = build.indexOf('if (v.row.source === POMS_SOURCE) {');
   const windowTest = build.indexOf('Date.parse(v.reviewedAt) < sheetGeneratedAt');
-  ok(pomsBranch > 0 && windowTest > pomsBranch && build.indexOf('if (byId.has(v.row.id)) continue;') < pomsBranch,
+  const fileCheck = build.indexOf('if (byId.has(v.row.id)) continue;');
+  ok(pomsBranch > 0 && windowTest > pomsBranch && fileCheck > 0 && fileCheck < pomsBranch,
     'an approved POMS posting publishes from its document on every build, after the file check and BEFORE the workbook window');
-  ok(/pomsRead = true;/.test(build) && build.indexOf('pomsRead = true;') > build.indexOf('if (added || pomsAdded) sheetRows = Array.from(byId.values());')
-     && build.indexOf('pomsRead = true;') < build.indexOf('warn(`could not read the review queue')
+  const gathered = build.indexOf('if (added || pomsAdded) sheetRows = Array.from(byId.values());');
+  const queueCatch = build.indexOf('warn(`could not read the review queue');
+  const flagAt = build.indexOf('pomsRead = true;');
+  ok(gathered > 0 && queueCatch > gathered && flagAt > gathered && flagAt < queueCatch
      && (build.match(/pomsRead = true;/g) || []).length === 1,
     'and "present" for a POMS row means its approved rows are IN HAND: the flag is set once after the loop that gathers them, inside the try, never beside the query');
   ok(/!\(pomsRead && fromPoms\(r\)\) &&/.test(build) && /!\(sheetPresent && fromSheet\(r\)\) &&/.test(build),
@@ -24415,11 +24442,19 @@ async function testPomsCrawler() {
   ok(/var CRAWLED_FROM = \{[\s\S]{0,300}'poms-opportunities': 'the POMS job postings page'/.test(panel)
      && /CRAWLED_FROM\[row\.source\] \? ' &middot; from ' \+ esc\(CRAWLED_FROM\[row\.source\]\)/.test(panel),
     'and each card\'s header says which crawler it came down');
-  ok(/nav\.hrefFor && !d\.pending/.test(panel) && /still under review/.test(panel) && /already published or under review/.test(panel),
-    'a duplicate still under review is said so and linked nowhere');
+  ok(/nav\.hrefFor && !d\.pending/.test(panel) && /still under review/.test(panel) && /already published or under review/.test(panel)
+     && /Possibly already on the site' \+ \(anyPending \? ' or in your queue' : ''\)/.test(panel),
+    'a duplicate still under review is said so and linked nowhere, and the lead sentence follows the list');
+  ok(/data-line="' \+ esc\(String\(fieldValue\(doc, 'applyBy'\) \|\| ''\)\)/.test(panel)
+     && /var line = String\(derived\.getAttribute\('data-line'\) \|\| ''\)\.trim\(\);/.test(panel)
+     && /\(v \? longDate\(v\) : \(OPEN_ENDED\.test\(line\) \? line : 'Until filled\.'\)\)/.test(panel),
+    'the deadline preview mirrors settleDeadline: with the date box empty, a stored line that says the search stays open is what will publish');
   const mailer = await read('_scraper/jobreview-mailer.mjs');
   ok(/originWords\(/.test(mailer) && /open the POMS page/.test(mailer) && /crawled from the POMS job postings page/.test(mailer),
     'the review e-mail says where a POMS posting came from and links the page');
+  ok(/d\.pending \? 'still under review' : ''/.test(mailer) && /const anyPending = dups\.some\(\(d\) => d && d\.pending\);/.test(mailer)
+     && /\(anyPending \? ' or under review' : ''\)/.test(mailer),
+    'and its duplicate block says "still under review" where the card does, in the heading and beside the posting');
   const admin = await read('admin-area.html');
   ok((admin.match(/POMS job postings page/g) || []).length >= 2 && /are held back until you approve them/.test(admin.replace(/\s+/g, ' ')),
     'the admin page names the second crawler on both surfaces and still says the gate is a gate');
@@ -24436,6 +24471,11 @@ async function testPomsCrawler() {
     'the free-text inputs reach the shell through the environment');
   ok(/FIREBASE_SERVICE_ACCOUNT: \$\{\{ secrets\.FIREBASE_SERVICE_ACCOUNT \}\}/.test(wfCode), 'it carries the credential the queue is behind');
   ok(/npm install[^\n]*firebase-admin@12 pdfjs-dist@4/.test(wfCode), 'and installs the database client and the PDF engine');
+  ok(/npm install[^\n]*firebase-admin@12 pdfjs-dist@4 playwright@1/.test(wfCode) && !/npm install[^\n]* playwright@1;/.test(wfCode.replace(/firebase-admin@12 pdfjs-dist@4 playwright@1/g, '')),
+    'the Playwright step names them again: a root `npm install --no-save` with a shorter list prunes what an earlier one installed (reproduced with npm 10)');
+  ok(/for m in firebase-admin pdfjs-dist; do[\s\S]{0,240}require\('\$m\/package\.json'\)[\s\S]{0,200}::error::/.test(wfCode)
+     && wfCode.indexOf('for m in firebase-admin pdfjs-dist') < wfCode.indexOf('node _scraper/poms-crawl.mjs --selftest'),
+    'and the offline checks first prove both are still installed, out loud, since a missing client would be a green run that queues nothing');
   ok(/playwright@1/.test(wfCode) && /continue-on-error: true/.test(wfCode) && /--no-render/.test(wfCode),
     'the browser is best-effort, and a run without it says --no-render');
   ok(/POMS_REQUIRE_PDF: '1'/.test(wfCode) && /poms-crawl\.mjs --selftest/.test(wfCode),
@@ -24443,7 +24483,8 @@ async function testPomsCrawler() {
   ok(!/git commit/.test(wfCode) && !/git add/.test(wfCode) && !/oa-jobs-changed/.test(wfCode),
     'it commits nothing and rings no doorbell: an approval publishes through the existing chain');
   ok(/permissions:\s*\n\s*contents: read/.test(wfCode), 'with read-only contents, since it writes none');
-  ok(/timeout-minutes: 30/.test(wfCode) && /concurrency:\s*\n\s*group: oa-poms-crawl-/.test(wfCode), 'bounded, in a group of its own');
+  ok(/timeout-minutes: 40/.test(wfCode) && !/timeout-minutes: 30/.test(wfCode) && /concurrency:\s*\n\s*group: oa-poms-crawl-/.test(wfCode),
+    'bounded at forty minutes (up to fifteen of bounded browser installs run ahead of the twenty-minute read window), in a group of its own');
   const buildWf = await read('.github/workflows/oa-jobs-build.yml');
   ok(!/crawl the POMS job postings page/.test(buildWf), 'the build is not chained to it (one event, one build; it writes no data)');
 
@@ -24454,12 +24495,20 @@ async function testPomsCrawler() {
   const setup = await read('_SETUP-POMS-CRAWL.md');
   ok(/Interfolio/.test(setup) && /headless browser/.test(setup) && /no public API/i.test(setup) && /since/.test(setup),
     'the setup document answers the Interfolio question and names the inputs');
+  ok(/A Word file is never tried again/.test(setup) && /except a Word file, which nothing here reads/.test(setup),
+    'and says a Word file is never re-read, since needReread leaves one alone');
+  ok(/PDF engine \(pdfjs-dist\) is REQUIRED/.test(wf) && !/both best-effort/.test(wf),
+    'the workflow header says the PDF engine is required and only the browser is best-effort, which is what its steps do');
   const at = claude.indexOf('## The POMS job postings page is crawled into the review queue');
-  const sec = at > 0 ? claude.slice(at, claude.indexOf('\n## ', at)) : '';
-  ok(sec.length > 3000 && /2026-09-23/.test(sec) && /FROM ITS QUEUE DOCUMENT/.test(sec) && /ADVERTISEMENT LINK/.test(sec)
+  const secEnd = at > 0 ? claude.indexOf('\n## ', at) : -1;
+  const sec = at > 0 ? claude.slice(at, secEnd > 0 ? secEnd : claude.length) : '';
+  ok(sec.length > 3000 && sec.length < 60000 && /2026-09-23/.test(sec) && /FROM ITS QUEUE DOCUMENT/.test(sec) && /ADVERTISEMENT LINK/.test(sec)
      && /Interfolio/.test(sec) && /pomsRead/.test(sec) && /queueNeedsFetch/.test(sec)
      && /NEVER TAKES AN ID A CRAWLED DOCUMENT HOLDS/.test(sec) && /clearOfCrawledIds/.test(sec) && !/takes the POMS card over/.test(sec)
-     && /THE 2026-09-23 REVIEW OF IT/.test(sec) && /effectiveLink/.test(sec),
+     && /THE 2026-09-23 REVIEW OF IT/.test(sec) && /effectiveLink/.test(sec)
+     && /The PDF engine is REQUIRED/.test(sec) && !/both\s+it and the PDF engine are BEST-EFFORT/.test(sec)
+     && /a Word file excepted/.test(sec) && !/holds the tracking sheet's rows and nothing else/.test(claude)
+     && /the crawlers' queue above/.test(claude),
     'CLAUDE.md records the design: the same gate, publishing from the document, new by link, the Interfolio answer, the id rule (the retired takeover gone) and the review');
 }
 

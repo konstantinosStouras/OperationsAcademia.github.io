@@ -55,7 +55,7 @@ import { isoStamp, marketFloor, LEVELS, TYPES, PUBLIC_FIELDS, stripRowEmails } f
 import { firestore } from './_mail.mjs';
 import {
   COLLECTION as REVIEW_COL, PENDING, APPROVED, queueDoc, duplicatesOf, businessCheck,
-  advertRepeat,
+  advertRepeat, sameDups, sameBiz,
 } from './jobreview.mjs';
 import { parseAdvert, advertPlace, cacheEntry, adBlock, workdayApiUrl, GONE_RX } from './adverts.mjs';
 import { readAdvert } from './adverts-verify.mjs';
@@ -87,11 +87,16 @@ const opt = (f, d = '') => {
 const SCAN = has('--scan');
 const DRY = has('--dry-run');
 const NO_RENDER = has('--no-render');
-const LIMIT = Math.max(1, Number(opt('--limit', '40')) || 40);
+/* A LIMIT THAT IS NOT A WHOLE NUMBER ABOVE ZERO IS REFUSED OUT LOUD in main(),
+   not quietly read as forty: "--limit 0" meant read none, and "ten" meant
+   ten (the 2026-09-23 review). */
+const LIMIT_RAW = opt('--limit', '');
+const LIMIT_OK = /^[1-9]\d*$/.test(LIMIT_RAW);
+const LIMIT = LIMIT_OK ? Number(LIMIT_RAW) : 40;
 /* How long the fetching may run before the run stops reading and writes
    what it has — the adverts pass's own clock, for its reason: LIMIT reads,
    each paced, each with retries of a long timeout, can outrun the workflow's
-   thirty minutes, and a run killed by its cap has read for nothing. */
+   forty minutes, and a run killed by its cap has read for nothing. */
 const READ_WINDOW_MS = Math.max(60_000, Number(opt('--read-window-ms', '')) || 20 * 60_000);
 const PACE_MS = 1500;
 
@@ -265,7 +270,17 @@ export function adForRow(parsed, via, { adUrl, vocab, now, previous = null }) {
 async function main() {
   const now = new Date();
   const today = isoStamp(now).slice(0, 10);
-  const since = /^\d{4}-\d{2}-\d{2}$/.test(opt('--since', '')) ? opt('--since') : sinceDay(now, WINDOW_DAYS);
+  /* A SINCE THAT IS NOT A DAY IS SAID, not silently replaced by the default:
+     a dispatch typed "2026-7-1" read the last thirty days and the only trace
+     was the effective date in the first log line (the 2026-09-23 review). */
+  const sinceGiven = opt('--since', '');
+  const since = /^\d{4}-\d{2}-\d{2}$/.test(sinceGiven) ? sinceGiven : sinceDay(now, WINDOW_DAYS);
+  if (sinceGiven && since !== sinceGiven) {
+    warn(`--since "${sinceGiven}" is not a day written YYYY-MM-DD — reading the last ${WINDOW_DAYS} days instead`);
+  }
+  if (LIMIT_RAW && !LIMIT_OK) {
+    warn(`--limit "${LIMIT_RAW}" is not a whole number above zero — reading up to ${LIMIT} advertisements`);
+  }
   const minYear = marketFloor(now);
   const render = !NO_RENDER;
   const budget = { left: LIMIT, until: Date.now() + READ_WINDOW_MS };
@@ -389,6 +404,39 @@ async function main() {
     }
     await sleep(PACE_MS);
   }
+
+  /* ------------------------------------------ the flags on what is waiting */
+
+  /* RE-CHECKED EVERY RUN, the sheet sync's own rule for its documents ("a flag
+     appears when the duplicate is posted later and clears when it is taken
+     down"): the sync's re-flag loop visits the workbook's documents alone and
+     the second look below patches the reading and the row, so nothing ever
+     moved `dup` or `biz` on a POMS document, and a card went on saying "still
+     under review" of a posting approved a week earlier (the 2026-09-23
+     review). Judged against the same set a fresh row is judged against, and
+     written only where the flags moved: never the decision, never the edits,
+     never the row. */
+  let reflagged = 0;
+  for (const d of queue.docs.filter((x) => x && x.status === PENDING && x.row && x.row.source === SOURCE)) {
+    let dup = duplicatesOf(d.row, compared);
+    if (!dup.length) dup = nearbyPostings(d.row, compared);
+    const biz = businessCheck(d.row, vocab);
+    const flags = {};
+    if (!sameDups(dup, d.dup)) flags.dup = dup;
+    if (!sameBiz(biz, d.biz)) flags.biz = biz;
+    if (!Object.keys(flags).length) continue;
+    reflagged++;
+    if (DRY) {
+      log(`  ${d.rowId}: would re-flag (${Object.keys(flags).join(', ')})`);
+    } else if (col) {
+      try {
+        await col.doc(d.rowId).set(flags, { merge: true });
+      } catch (e) {
+        warn(`could not re-flag ${d.rowId}: ${e.message}`);
+      }
+    }
+  }
+  if (reflagged) log(`${DRY ? 'would re-flag' : 're-flagged'} ${reflagged} pending POMS posting(s) against what is listed now`);
 
   /* ----------------------------------------- a second look at what was unread */
 
@@ -557,7 +605,7 @@ async function selftest() {
     .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
   ok(/col\.doc\(id\)\.create\(doc\)/.test(src), 'a new posting is CREATED, never set — a decision made mid-run wins');
   ok(!/\.update\(/.test(src) && !/\.delete\(/.test(src), 'nothing is updated or deleted');
-  eq((src.match(/\.set\(/g) || []).length, 1, 'one merge, on a pending document\'s row and ad block');
+  eq((src.match(/\.set\(/g) || []).length, 2, 'two merges: a pending document\'s row and ad block, and its flags');
   ok(/const patch = \{ ad: block \};/.test(src) && /patch\.row = row;/.test(src) && !/patch\.status/.test(src) && !/patch\.edits/.test(src),
     '…and that merge carries the row and the ad, never the decision or the edits');
   ok(!/writeFile\(/.test(src), 'this run writes no file');

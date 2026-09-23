@@ -558,10 +558,25 @@ export function duplicatesOf(row, siteRows, { max = 3 } = {}) {
   return out;
 }
 
+/** JSON with its keys in one order at every depth, so a document read back
+    from Firestore (which hands a map's keys back sorted) compares equal to
+    the same flags freshly computed (whose keys are in insertion order): the
+    two "nothing moved" tests below would otherwise rewrite every flagged
+    document on every run. An undefined value is left out, as JSON.stringify
+    leaves it out. */
+function canonJson(v) {
+  if (Array.isArray(v)) return '[' + v.map(canonJson).join(',') + ']';
+  if (v && typeof v === 'object') {
+    return '{' + Object.keys(v).sort().filter((k) => v[k] !== undefined)
+      .map((k) => JSON.stringify(k) + ':' + canonJson(v[k])).join(',') + '}';
+  }
+  return JSON.stringify(v === undefined ? null : v);
+}
+
 /** Two duplicate lists that say the same thing — so a sync with nothing new
     to report writes nothing at all. */
 export function sameDups(a, b) {
-  return JSON.stringify(a || []) === JSON.stringify(b || []);
+  return canonJson(a || []) === canonJson(b || []);
 }
 
 /* ------------------------------------------- the same advertisement, twice */
@@ -615,7 +630,7 @@ export function businessCheck(row, vocab, schools = null) {
 /** Two flags that say the same thing — the `sameDups` rule, for `biz`, so an
     unchanged sync writes nothing. */
 export function sameBiz(a, b) {
-  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+  return canonJson(a ?? null) === canonJson(b ?? null);
 }
 
 /* --------------------------------------------------------------- deciding */

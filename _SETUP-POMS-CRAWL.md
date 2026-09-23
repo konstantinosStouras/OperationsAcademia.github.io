@@ -55,7 +55,8 @@ it, and leaves the rest for you:
 What it cannot fill: the contact person (the chair or coordinator) and their
 address, the school's characteristics, and anything the advertisement does
 not say. The card says when the advertisement could not be read at all, and
-tries again a week later.
+tries again a week later, except a Word file, which nothing here reads:
+complete such a card by hand.
 
 Each card says where it came from ("from the POMS job postings page") and
 warns when the posting looks like one the site already lists or one already
@@ -121,7 +122,8 @@ checks run anywhere:
 - **A card is empty apart from the title**: the advertisement could not be
   read (a scanned PDF, a Word file, a page that refuses automation). Open
   the link and complete it, or wait: an unreadable advertisement is tried
-  again after a week.
+  again after a week. A Word file is never tried again, since nothing here
+  reads one, so complete that card by hand.
 - **A posting was queued that is not a job at all**: the page occasionally
   lists a contractor's vacancy. Rows from something that is not a
   university, college or school, advertising no academic post, are skipped

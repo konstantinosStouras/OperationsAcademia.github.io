@@ -306,8 +306,11 @@
         '</li>';
     }).join('');
     var anyPending = dups.some(function (d) { return d.pending; });
+    /* the lead sentence follows the list under it: a posting still under
+       review is in the maintainer's own queue, not on the site */
     return '<div class="oa-note is-warn" data-dup>' +
-      '<strong>&#9888; Possibly already on the site.</strong> This crawled posting ' +
+      '<strong>&#9888; Possibly already on the site' + (anyPending ? ' or in your queue' : '') +
+      '.</strong> This crawled posting ' +
       'looks like ' + (dups.length === 1 ? 'a job that is' : dups.length + ' jobs that are') +
       (anyPending ? ' already published or under review:' : ' already published:') +
       '<ul style="margin:6px 0 4px;padding-left:20px">' + items + '</ul>' +
@@ -463,7 +466,12 @@
                shows the poster the same thing (`#f-department-preview`). */
             (f.place === 'unit' || f.key === 'applyByDate'
               ? '<span class="oa-hint oa-rv-derived" aria-live="polite" data-derived="'
-                + (f.key === 'applyByDate' ? 'deadline' : 'place') + '"></span>'
+                + (f.key === 'applyByDate' ? 'deadline' : 'place') + '"'
+                /* the stored line, for the preview to keep where the date box
+                   is empty and the line says the search stays open */
+                + (f.key === 'applyByDate'
+                  ? ' data-line="' + esc(String(fieldValue(doc, 'applyBy') || '')) + '"'
+                  : '') + '></span>'
               : '') +
             '</' + tag + '>';
         }).join('') +
@@ -1020,14 +1028,24 @@
    * for the line as well, which let one posting reach the site with a closing
    * date and no line at all and stopped the whole site publishing.
    */
+  /* The jobs-model open-ended literal, CHARACTER FOR CHARACTER (the
+     oa-fresh.js idiom, pinned the same way): settleDeadline keeps a stored
+     line that says the search stays open, and the preview has to say the
+     same, or it promised "Until filled." over a card that publishes "Open
+     until filled. Review begins October 15" (a POMS row; the workbook's
+     rows put those words in the comments). */
+  var OPEN_ENDED = /until\s*filled|open\s*until|rolling(?!\s+basis)/i;
+
   function wireDeadline(card) {
     var date = card.querySelector('[data-key="applyByDate"]');
     var derived = card.querySelector('[data-derived="deadline"]');
     if (!date || !derived) return;
+    var line = String(derived.getAttribute('data-line') || '').trim();
 
     function preview() {
       var v = String(date.value || '').trim();
-      derived.textContent = 'Published as: ' + (v ? longDate(v) : 'Until filled.');
+      derived.textContent = 'Published as: ' +
+        (v ? longDate(v) : (OPEN_ENDED.test(line) ? line : 'Until filled.'));
     }
     date.addEventListener('input', preview);
     date.addEventListener('change', preview);

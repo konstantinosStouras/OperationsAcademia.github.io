@@ -17,9 +17,12 @@ name: OA jobs — crawl the POMS job postings page
 # needs is the credential the queue is behind. Without FIREBASE_SERVICE_
 # ACCOUNT the run says so and queues nothing.
 #
-# The PDF engine (pdfjs-dist) and the browser (Playwright's Chromium) are
-# both best-effort: a run without either still queues every new posting,
-# carrying what the page itself said and saying in its comments that the
+# The PDF engine (pdfjs-dist) is REQUIRED: nine postings in ten on the page
+# are PDFs, so a run without it would queue a season of empty cards, and its
+# install is retried and bounded rather than optional (the offline checks
+# below refuse to run without it). The browser (Playwright's Chromium) is
+# best-effort: a run without it still queues every new posting, carrying
+# what the page itself said and saying in its comments that the
 # advertisement could not be read. The browser install is the bounded,
 # cached one oa-checks.yml already makes for page-test.mjs.
 
@@ -67,7 +70,11 @@ concurrency:
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Forty, not the thirty the advert passes take: up to fifteen minutes of
+    # bounded, best-effort browser installs run AHEAD of the crawl's own
+    # twenty-minute read window, and a run the cap kills has read for nothing
+    # and reads as a failure (the 2026-09-23 review).
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
 
@@ -93,6 +100,13 @@ jobs:
       # The browser, for the pages that are JavaScript shells (Interfolio and
       # the like). Best-effort: if it cannot be had, the crawl runs with
       # --no-render and those postings queue with what the POMS page said.
+      #
+      # THE TWO PACKAGES ABOVE ARE NAMED AGAIN, and that is load-bearing: with
+      # no package.json at the root, npm reifies each `--no-save` install to
+      # exactly the packages named in it and REMOVES the rest as extraneous,
+      # so a second install naming Playwright alone deleted firebase-admin and
+      # pdfjs-dist, and every run went red at the offline checks (the
+      # 2026-09-23 review, reproduced with npm 10). One list, or one install.
       - name: Playwright, and the version to key its browser cache on
         id: pw
         continue-on-error: true
@@ -100,7 +114,7 @@ jobs:
         run: |
           set -e
           for attempt in 1 2 3; do
-            if timeout 60 npm install --no-save --no-audit --no-fund playwright@1; then break; fi
+            if timeout 60 npm install --no-save --no-audit --no-fund firebase-admin@12 pdfjs-dist@4 playwright@1; then break; fi
             if [ "$attempt" = 3 ]; then exit 1; fi
             echo "::warning::npm install attempt $attempt stalled or failed — retrying"
             sleep $((attempt * 10))
@@ -136,7 +150,15 @@ jobs:
       - name: Offline checks
         env:
           POMS_REQUIRE_PDF: '1'
-        run: node _scraper/poms-crawl.mjs --selftest
+        run: |
+          # the first step's packages must still be here (see the Playwright
+          # step): a missing PDF engine fails the checks below on its own, a
+          # missing database client would be a GREEN run that queues nothing
+          for m in firebase-admin pdfjs-dist; do
+            node -e "require('$m/package.json')" ||
+              { echo "::error::$m is no longer installed: a later npm install pruned it"; exit 1; }
+          done
+          node _scraper/poms-crawl.mjs --selftest
 
       - name: Crawl the page
         env:
