@@ -88,12 +88,16 @@ derived, and it is worth knowing how:
   are exactly that. It can never push a posting back into a closed season.
   Only the current season shows on the jobs page;
   the rest is on *Previous markets*.
-- **Entry level** — from the rank you typed. "Visiting Assistant Professor" is
-  a *Visiting* post (not an assistant professorship), "Lecturer", "Instructor",
-  "Professor of Practice", "Clinical Professor" and "non TTAP" are all
-  *Non-tenure track*, "Postdoctoral …" is a *Post-Doc*. A title it cannot place
-  becomes *Other Ranks* rather than being dropped.
-- **Type of institution** — from the names. "Rutgers Business School" is a
+- **Position type** (the filter was called "Entry level" until 2026-09-23)
+  — from the rank you typed. "Visiting Assistant Professor" is a *Visiting*
+  post (not an assistant professorship), "Lecturer", "Instructor", "Professor
+  of Practice", "Clinical Professor" and "non TTAP" are all *Non-tenure
+  track*, "Postdoctoral …" is a *Post-Doc*, "PhD student" or "Doctoral
+  student" is a *PhD*, and "Pre-doc", "Research Assistant" or a bare "RA" is
+  *RA or Pre-doc* (a doctoral word beside a professorship is a qualifier, so
+  "Assistant Professor (PhD required)" stays an assistant professorship). A
+  title it cannot place becomes *Other Ranks* rather than being dropped.
+- **School type** (the "Type of institution" question) — from the names. "Rutgers Business School" is a
   business school, "Clarkson University" a university. Where neither name says
   ("INSEAD", "Penn State"), the posting simply carries no type and the Type
   filter passes over it. To fix one, name the school in the field column.

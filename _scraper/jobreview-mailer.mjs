@@ -236,10 +236,10 @@ export function renderReviewEmail(doc, { site = SITE, sheetUrl = '' } = {}) {
     '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' +
       line('Institution', r.institution) +
       line('School / dept', r.department) +
-      line('Type', r.type) +
-      line('Entry level', (r.levels || []).join(', ')) +
+      line('School type', r.type) +
+      line('Position type', (r.levels || []).join(', ')) +
       /* every campus country the search covers — one posting, one line,
-         the way Entry level already carries every rank */
+         the way Position type already carries every rank */
       line(countriesOf(r).length > 1 ? 'Countries' : 'Country', countriesText(r)) +
       line('Advertised', r.posted) +
       line('Market year', r.year ? String(r.year) : '') +

@@ -375,6 +375,10 @@ eq(total, outOfMarket.inScope,
 ok(outOfMarket.fileHasOld,
   'while data/jobs.json keeps the previous seasons (the migration\'s source)');
 
+/* THIS IS THE FROZEN /v2/ ARCHIVE, which keeps "Type" and "Entry level" by
+   the rule the three trees are held to; the live page's labels ("School
+   type", "Position type" since 2026-09-23) are read off jobs.html in the
+   export block below. */
 eq(await page.$$eval('.oa-filter > label', (ns) => ns.map((n) => n.textContent)),
   ['University/Institution', 'Deadline', 'Type', 'Entry level', 'Location',
     'Characteristics', 'Date posted'],
@@ -9157,8 +9161,15 @@ for (const w of [320, 360, 390, 430]) {
       return { count: rows.length, first: rows[0] || [], last: rows[rows.length - 1] || [] };
     });
     eq(bar.count, 2, `the jobs filter bar is two rows deep (${bar.count})`);
-    ok(bar.first.some((n) => /entry level/i.test(n)),
-      `Entry level is on the top line (${bar.first.join(' · ')})`);
+    /* the two renamed labels, read off the LIVE page (owner, 2026-09-23):
+       "School type" where it said "Type", "Position type" where it said
+       "Entry level", and neither old word anywhere in the bar */
+    const barLabels = [...bar.first, ...bar.last];
+    ok(barLabels.includes('School type') && barLabels.includes('Position type') &&
+       !barLabels.includes('Type') && !barLabels.includes('Entry level'),
+      `the live bar says School type and Position type (${barLabels.join(' · ')})`);
+    ok(bar.first.some((n) => /position type/i.test(n)),
+      `Position type (once Entry level) is on the top line (${bar.first.join(' · ')})`);
     ok(bar.last.includes('actions'),
       'and the two buttons close the second one');
 
@@ -9395,7 +9406,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForTimeout(200);
     let opts = await menu();
     ok(opts.length >= 2 && opts.every((o) => o.type === 'checkbox'),
-      'multi: Entry level offers tick boxes, not radios');
+      'multi: Position type offers tick boxes, not radios');
     eq(await q.$$eval('.oa-pick-menu:not([hidden]) .oa-pick-hint', (n) => n.length), 0,
       'multi: …and carries no note, because any-of is what every other picker means');
     const L = opts.slice().sort((a, b) => b.n - a.n).slice(0, 2).map((o) => o.v);

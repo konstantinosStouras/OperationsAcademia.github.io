@@ -46,7 +46,7 @@ it, and leaves the rest for you:
 | University | The page's University column, matched to the site's own spelling. "University of Oklahoma (OU)" becomes "University of Oklahoma". |
 | School, Department | The advertisement: an Interfolio page's "University: College: Division" line, a "Department of X" or "X School of Business" in the text, or the field the title names ("Assistant Professor **of Supply Chain Management**"). Then the site's own directory fills the school a known department sits in. |
 | Type of institution | From the names, the same rule as the tracking sheet. |
-| Entry level | From the title, the same rule as the tracking sheet. "Professional Track Faculty" reads as non-tenure-track. |
+| Position type | From the title, the same rule as the tracking sheet. "Professional Track Faculty" reads as non-tenure-track. |
 | Closing date, suggested apply-by | From the advertisement's own words ("Application deadline: October 15, 2026", "Review of applications will begin on…"). A date the crawler cannot read with confidence is not invented: the posting says "Until filled." and the advertisement's own sentence is kept in the comments. |
 | Country | From a location the advertisement states ("Norman, OK"), else from the site's Universities directory. |
 | Comments | The advertised title, the deadline as worded when no date could be read, the first sentences of the description, and a note saying it was read by the crawler and when. |

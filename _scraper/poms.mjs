@@ -49,7 +49,7 @@
    put through the same canon the posting form uses; a university is matched
    to the site's own vocabulary before its acronym is trusted; a deadline is
    believed only against the day POMS listed the posting (believableDeadline,
-   the guard both advert passes share); the entry level is read by the
+   the guard both advert passes share); the position type is read by the
    workbook's own `levelsFromRank`; the type by its `typeFromNames`; and a
    posting whose advertisement could not be read still queues, carrying what
    the table itself said and saying so in its comments, because a card the
@@ -504,7 +504,7 @@ export function uniqueId(base, taken) {
 /**
  * The postings on the site (or in the queue) that a POMS row probably
  * REPEATS without sharing a link or a department line: the same university,
- * advertised within `days` of each other, with an entry level in common.
+ * advertised within `days` of each other, with a position type in common.
  * The tracking sheet and this page draw on the same advertisements, so a
  * posting routinely arrives from both a few days apart under different
  * wording, and `duplicatesOf` (which asks for the same link or the same

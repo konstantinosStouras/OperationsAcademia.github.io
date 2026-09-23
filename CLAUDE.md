@@ -1295,7 +1295,7 @@ merge of `row` and `ad` alone, never the decision, never the edits.
   (`believableDeadline`, the guard both advert passes share), a suggested
   date must fall before it, and the market year is the cascade's
   (`marketYearOf`) with no tab floor, since the page has no tabs;
-* the entry level is `levelsFromRank` over the title, which gained
+* the position type (the filter the site called "Entry level" until 2026-09-23) is `levelsFromRank` over the title, which gained
   `professional track` and `teaching track` as non-tenure-track: "Open Rank,
   Professional Track Faculty" is a track, never the rank beside it;
 * the country is the advertisement's stated location through the site's one
@@ -1314,7 +1314,7 @@ field for it), the deadline as worded where no date could be believed, the
 first sentences of the description, and one sentence saying the crawler read
 it and when. The duplicate flag is `duplicatesOf` against the served postings
 and the queue's approved rows, and where that finds nothing, `nearbyPostings`:
-the same university advertised within 21 days with an entry level in common,
+the same university advertised within 21 days with a position type in common,
 because the two crawlers draw on the same advertisements days apart under
 different wording and the link test cannot see it. A flagged posting still
 UNDER REVIEW from the tracking sheet is marked `pending` on the entry, and
@@ -7844,6 +7844,75 @@ phone the chips under a picker hang below its control, so a row whose partner
 has none is not on one line while values are chosen; that was already true of
 Location and is not what rule 12 in `_MOBILE-STANDARDS.md` measures (nothing
 chosen).
+
+### …and they are "School type" and "Position type", with two doctoral entries at the end
+
+Owner, 2026-09-23, from two screenshots of the jobs page's filter bar: *"Rename
+'type' to 'School type' and rename 'entry level' to 'Position type'. Add two
+more possible 'Position Type' fields called 'RA or Pre-doc' and 'PhD'. They
+should be listed at the bottom of the list."*
+
+**THE LABEL MOVED; THE KEYS DID NOT.** The published field is still `levels`,
+the jobs page's URL key is still `level` (and the archive's legacy `filterF`),
+and an alert's criteria key is still `level`, so every saved link and every
+saved alert selects exactly what it selected, and no stored posting moves. What
+changed is the words on every surface that asks or shows either question: the
+filter bars on `jobs.html` and `previous-markets.html`, the launcher on the
+home page (and its FAQ line), the alerts form, the card row on all three lists,
+the posting form's two questions (with the hint under each naming the filter it
+feeds by its new name, and the refusal reading "position type"), the review
+card and its model (`EDITABLE` in `jobreview.mjs` and `FIELDS` in
+`oa-jobreview.js` are pinned to agree), the Excel download's two column
+headings, the calendar entry's line, and the three e-mails. The untouched
+control reads **"All positions"** where it read "All levels", by the rule that
+an untouched control SHOWS its value.
+
+**`LEVELS` in `_scraper/jobs-model.mjs` is seven now, and the two doctoral
+ones are LAST**, at the owner's word: `'RA or Pre-doc'`, then `'PhD'`. The
+form's tick boxes and the review card's options are held to that list BOTH
+WAYS and in its order, so a box added to one and not the other fails the
+build, and so does a list that puts the two anywhere but at the end. **No
+rules change and no deploy**: the rules bound the list at `list('levels', 8)`,
+which the seven fit, and the selftest reads the bound out of the rules rather
+than remembering it.
+
+**The sheet's rank parser reads the doctoral side too** (`levelsFromRank` in
+`jobmarket-sheet.mjs`), because a workbook row typed "PhD student" or
+"Research Assistant" would otherwise publish as *Other Ranks*. Three things
+about where the reading sits: it runs AFTER the post-doc test, so
+"postdoctoral" is never a doctoral student (and `\bdoctoral` carries its
+boundary, or "predoctoral fellow" read as a PhD as well); the two are
+COLLECTED rather than raced, because one advertisement routinely offers "PhD
+students and pre-doctoral fellows" together, which is the open-rank shape; and
+**never beside a faculty title**: "Assistant Professor (PhD required)" is an
+assistant professorship whose PhD is a qualifier, so a doctoral word next to a
+professorship, lectureship or instructorship is left to the readings below.
+"Research Assistant Professor" is a professorship, told apart from a research
+assistantship exactly as "research associate professor" already is. A bare
+"RA" is the sheet's own shorthand, like its "AP".
+
+**The alerts form and the home launcher offer a position type once a posting
+carries it**, which is the rule they already apply to School type and
+Location (their lists are built from the served postings). So "PhD" appears
+there with the first PhD posting, not before; the posting form and the review
+card offer it from today. The `/v1/` and `/v2/` archives keep "Entry level",
+by the rule the three trees are held to.
+
+**The change log's newest entry is this one**, and the pin that held the
+candidate-form entry at index 0 finds it by id now, the way the takedown
+entry's pin already did: an index-0 pin is a pin on "nothing shipped since",
+which every later change breaks.
+
+Tests: `testPositionTypes` in `_scraper/selftest.mjs` (the seven, the two
+last, the rules' bound read from the file, the form and the review card each
+holding exactly the model's list in its order, the review model's labels, the
+four pages' labels with the retired word gone from what a reader sees, the
+untouched control's value, the field and both keys unmoved, the Excel
+headings, the calendar line, the three e-mails, the sheet guide and the change
+log), the doctoral block of `testJobMarketSheetParsing` (each spelling, the
+collected pair, and the three things it must not read), and in
+`_scraper/page-test.mjs` the filter bar's seven labels, the card's row and the
+top-line check, all read off the rendered page.
 
 ## A guard that fires on a legitimate posting stops the whole site publishing
 

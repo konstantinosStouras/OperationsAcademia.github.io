@@ -110,26 +110,31 @@
        _scraper/jobreview.mjs), shown under the two boxes as a preview, and no
        longer offered;
      * it offered "Associate Professor" and "Full Professor", which are not
-       entry levels the site HAS. `LEVELS` in _scraper/jobs-model.mjs is the
-       five below, and `cleanEdit` drops anything else — so ticking either of
-       those saved a box that then silently did nothing. The site's own name
-       for that rank is "Other Ranks", and the label is the posting form's.
+       position types the site HAS. `LEVELS` in _scraper/jobs-model.mjs is the
+       list below (seven since 2026-09-23, when "RA or Pre-doc" and "PhD"
+       joined it at the end, and the question was relabelled from "Entry
+       level" to "Position type"), and `cleanEdit` drops anything else — so
+       ticking either of those saved a box that then silently did nothing.
+       The site's own name for that rank is "Other Ranks", and the label is
+       the posting form's.
 
      Keep in step with EDITABLE in _scraper/jobreview.mjs and with the key list
      in _firestore.rules; selftest.mjs pins the three together, and pins these
      option lists against LEVELS and TYPES. */
   var FIELDS = [
     { key: 'institution', label: 'University / Institution', max: 220, place: 'institution' },
-    { key: 'type', label: 'Type of institution', max: 40,
+    { key: 'type', label: 'School type', max: 40,
       options: ['', 'Business School', 'University'] },
     { key: 'school', label: 'School, faculty or college', max: 200, place: 'school' },
     { key: 'unit', label: 'Department, area or group', max: 200, place: 'unit' },
-    { key: 'levels', label: 'Entry level', list: true, options: [
+    { key: 'levels', label: 'Position type', list: true, options: [
       { v: 'Assistant Professor' },
       { v: 'Other Ranks', label: 'Other Ranks (Associate, Full, Chaired)' },
       { v: 'Post-Doc' },
       { v: 'Non-tenure track (teaching) position' },
-      { v: 'Visiting Faculty (various levels)' }] },
+      { v: 'Visiting Faculty (various levels)' },
+      { v: 'RA or Pre-doc' },
+      { v: 'PhD' }] },
     { key: 'country', label: 'Country', max: 80 },
     { key: 'applyByDate', label: 'Closing date', max: 10, type: 'date' },
     { key: 'reviewDate', label: 'Suggested apply by', max: 10, type: 'date' },
@@ -1089,7 +1094,7 @@
         '</p>' +
       '</header>' +
       '<table class="oa-sub-lines">' +
-        [['Entry level', (d.levels || []).join(', ')],
+        [['Position type', (d.levels || []).join(', ')],
          /* every campus country the poster named (owner, 2026-09-18) — the
             card that lists a user-added posting reads the document, and a
             document made before the field carries its single `country` */

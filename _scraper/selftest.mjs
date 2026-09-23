@@ -5191,7 +5191,7 @@ function testJobMarketSheetParsing() {
      conventionalTabs([2026]).includes('2026 NTT/PD'),
     'the fallback names cover both kinds of tab');
 
-  // rank -> the five entry levels the site offers
+  // rank -> the position types the site offers (seven since 2026-09-23)
   eq(levelsFromRank('Visiting Assistant Professor'), ['Visiting Faculty (various levels)'],
     'a visiting assistant professorship is a VISITING post, not an assistant professorship');
   eq(levelsFromRank('Postdoctoral Research Associate'), ['Post-Doc'], 'a post-doc');
@@ -5201,6 +5201,30 @@ function testJobMarketSheetParsing() {
   eq(levelsFromRank('Open-Rank Clinical Professor'), ['Non-tenure track (teaching) position'],
     'a clinical professorship, whatever its rank');
   eq(levelsFromRank('Assistant Professor'), ['Assistant Professor'], 'a tenure-track post');
+
+  /* THE DOCTORAL SIDE (owner, 2026-09-23: "RA or Pre-doc" and "PhD" joined
+     the position types, at the end of the list). Read after the post-doc
+     test, so "postdoctoral" is never a doctoral student; collected rather
+     than raced, because one advertisement routinely offers both; and never
+     beside a faculty title, where a doctoral word is a qualifier. */
+  eq(levelsFromRank('PhD student'), ['PhD'], 'a doctoral studentship is a PhD position');
+  eq(levelsFromRank('Ph.D. position'), ['PhD'], 'however the degree is spelled');
+  eq(levelsFromRank('Doctoral student'), ['PhD'], 'and "doctoral student" is one too');
+  eq(levelsFromRank('Pre-doc'), ['RA or Pre-doc'], 'a pre-doctoral post');
+  eq(levelsFromRank('Predoctoral fellow'), ['RA or Pre-doc'],
+    '…however it is spelled, and not ALSO a PhD ("predoctoral" is not "doctoral")');
+  eq(levelsFromRank('Research Assistant'), ['RA or Pre-doc'], 'a research assistantship');
+  eq(levelsFromRank('RA'), ['RA or Pre-doc'], 'the sheet\'s "RA" shorthand, like its "AP"');
+  eq(levelsFromRank('Pre-doctoral Research Assistant / PhD student'), ['RA or Pre-doc', 'PhD'],
+    'one advertisement offering both ticks both, the open-rank shape');
+  eq(levelsFromRank('Research Assistant Professor'), ['Assistant Professor'],
+    'a research ASSISTANT PROFESSOR is a professorship, not an assistantship');
+  eq(levelsFromRank('Postdoctoral Research Associate'), ['Post-Doc'],
+    'and "postdoctoral" is never read as "doctoral"');
+  eq(levelsFromRank('Assistant Professor (PhD required)'), ['Assistant Professor'],
+    'a PhD beside a professorship is a qualifier, not the position');
+  eq(levelsFromRank('PhD-level Lecturer'), ['Non-tenure track (teaching) position'],
+    'and beside a lectureship too');
 
   /* A SEARCH ADVERTISED ACROSS RANKS TICKS BOTH BOXES (owner, 2026-08-26),
      because it is open to both kinds of candidate — and the workbook writes
@@ -11540,14 +11564,14 @@ async function testReviewWiring() {
     'nor the deadline line beside the date it is written from');
 
   /* The option lists are the site's own vocabularies, not a second copy typed
-     into the browser. LEVELS is five; the panel used to offer seven, two of
-     which the model silently dropped. */
+     into the browser. LEVELS was five (seven since 2026-09-23); the panel used
+     to offer seven of its own, two of which the model silently dropped. */
   for (const l of LEVELS) {
     ok(new RegExp(`v: '${l.replace(/[.*+?^$()|[\]\\]/g, '\\$&')}'`).test(panel),
-      `the review panel offers the "${l}" entry level`);
+      `the review panel offers the "${l}" position type`);
   }
   ok((panel.match(/\{ v: '/g) || []).length === LEVELS.length,
-    'and offers no entry level the site does not have');
+    'and offers no position type the site does not have');
   for (const t of TYPES) {
     ok(panel.includes(`'${t}'`), `the review panel offers the "${t}" institution type`);
   }
@@ -14384,7 +14408,7 @@ async function testMultiSelectFilters() {
   /* the two filters, as the jobs page declares them */
   const level = /\{ key: 'level',[^}]*\}/.exec(jobs);
   ok(level && !/type: 'one'/.test(level[0]) && !/match:/.test(level[0]),
-    'multi: Entry level takes several values, any-of (the engine default)');
+    'multi: Position type (once Entry level) takes several values, any-of (the engine default)');
   const chars = /\{ key: 'chars',[\s\S]*?placeholder: 'All characteristics' \}/.exec(jobs);
   ok(chars && !/type: 'one'/.test(chars[0]) && /match: 'all'/.test(chars[0]),
     'multi: Characteristics takes several values, ALL-OF');
@@ -14395,7 +14419,7 @@ async function testMultiSelectFilters() {
 
   /* the 'one' type stays in use, and the engine keeps it */
   ok(/key: 'level',[^}]*type: 'one'/.test(pm),
-    "multi: the archive's Entry level (previous-markets) keeps its single choice");
+    "multi: the archive's Position type (previous-markets) keeps its single choice");
   ok(/key: 'show',[^}]*type: 'one'/.test(dir) && /key: 'edited',[^}]*type: 'one'/.test(dir),
     'multi: …as do the directory\'s Show and Last edited');
   ok(/var multi = f\.type !== 'one';/.test(list) &&
@@ -14448,7 +14472,7 @@ async function testMultiSelectFilters() {
     'export: the About sheet joins an all-of filter\'s values with "and"');
   const E = require(path.join(HERE, '..', 'assets', 'oa-jobexport.js'));
   const sheets = E.sheets([], { market: '2026-2027', total: 5, filters: [
-    { label: 'Entry level', values: ['Assistant Professor', 'Post-Doc'], match: 'any' },
+    { label: 'Position type', values: ['Assistant Professor', 'Post-Doc'], match: 'any' },
     { label: 'Characteristics', values: ['PhD', 'Research seminars'], match: 'all' },
   ] });
   const about = JSON.stringify(sheets[2].rows);
@@ -14822,6 +14846,124 @@ async function testReaderGate() {
     'gate: and the module itself says so at the top, where the next reader will look');
 }
 
+/* ---------------- "School type", "Position type", and two doctoral entries
+
+   Owner, 2026-09-23, from two screenshots of the jobs page's filter bar:
+   rename "Type" to "School type" and "Entry level" to "Position type", and
+   add "RA or Pre-doc" and "PhD" at the BOTTOM of the list. The FIELD keeps
+   its name (`levels`), the URL key its (`level`) and the alerts' criteria
+   key its (`level`): every saved link and every saved alert goes on
+   selecting what it selected, and no stored posting moves. What moved is
+   the label on every surface that shows either question, and the list in
+   the model, the form and the review card — pinned here BOTH WAYS and in
+   the model's order, so a box added to one list and not another fails the
+   build, and a list that put the two anywhere but last fails it too.     */
+
+async function testPositionTypes() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/(^|[^:'"\\])\/\/[^\n]*/g, '$1');
+
+  /* the model: seven, the two doctoral ones LAST, inside the rules' bound */
+  eq(LEVELS.length, 7, 'positions: seven position types');
+  eq(LEVELS.slice(-2), ['RA or Pre-doc', 'PhD'],
+    'positions: the two doctoral-side types are the LAST two (owner, 2026-09-23)');
+  eq(new Set(LEVELS).size, LEVELS.length, 'positions: …each listed once');
+  const rules = await read('_firestore.rules');
+  const cap = /list\('levels', (\d+)\)/.exec(rules);
+  ok(cap && Number(cap[1]) >= LEVELS.length,
+    `positions: the rules' list('levels', ${cap && cap[1]}) still holds every type, so no rules deploy`);
+
+  /* the form offers exactly LEVELS, in order, under the new names */
+  const form = await read('post-a-job.html');
+  const boxes = [...strip(form).matchAll(/name="levels" value="([^"]+)"/g)].map((m) => m[1]);
+  eq(boxes, LEVELS, 'positions: the posting form offers exactly the model\'s list, in its order');
+  ok(/id="lbl-levels">Position type </.test(form), 'positions: the form asks for the "Position type"');
+  ok(/for="f-type">School type </.test(form), 'positions: …and the "School type"');
+  ok(/Used by the <em>School type<\/em> filter/.test(form) &&
+     /Used by the <em>Position type<\/em> filter/.test(form),
+    'positions: each hint names the filter it feeds by its new name');
+  ok(/Please tick at least one position type\./.test(await read('assets', 'oa-jobform.js')),
+    'positions: the form\'s refusal uses the new word');
+
+  /* the review card offers exactly LEVELS, in order, and its model agrees */
+  const panel = await read('assets', 'oa-jobreview.js');
+  const lv = /\{ key: 'levels',[\s\S]*?\] \},/.exec(panel);
+  eq(lv ? [...lv[0].matchAll(/\{ v: '([^']+)'/g)].map((m) => m[1]) : [], LEVELS,
+    'positions: the review card offers exactly the model\'s list, in its order');
+  ok(lv && /label: 'Position type'/.test(lv[0]), 'positions: …under the new label');
+  ok(/key: 'type', label: 'School type'/.test(panel), 'positions: …beside the School type');
+  ok(EDITABLE.some((f) => f.key === 'levels' && f.label === 'Position type') &&
+     EDITABLE.some((f) => f.key === 'type' && f.label === 'School type'),
+    'positions: the review model names the two questions the same way');
+  ok(/\[\['Position type', \(d\.levels \|\| \[\]\)\.join/.test(panel),
+    'positions: …and the user-added card\'s summary line too');
+
+  /* every page that shows either question */
+  const jobs = await read('jobs.html'), pm = await read('previous-markets.html');
+  const home = await read('index.html'), alerts = await read('alerts.html');
+  ok(/key: 'type',\s+label: 'School type',\s+field: 'type'/.test(jobs) &&
+     /key: 'level',\s+label: 'Position type',\s+field: 'levels'/.test(jobs),
+    'positions: the jobs page labels the two filters School type and Position type');
+  ok(/key: 'type',\s+label: 'School type',\s+field: 'type'/.test(pm) &&
+     /key: 'level',\s+label: 'Position type',\s+field: 'levels', type: 'one'/.test(pm),
+    'positions: …so does Previous markets, keeping its single choice');
+  ok(/legacyParam: 'filterC'/.test(pm) && /legacyParam: 'filterF'/.test(pm),
+    'positions: …and its legacy link keys, so an old link still lands');
+  ok(/for="jl-type">School type</.test(home) && /for="jl-level">Position type</.test(home),
+    'positions: the home page\'s launcher says the same');
+  ok(/id="lbl-a-type">School type</.test(alerts) && /id="lbl-a-level">Position type</.test(alerts),
+    'positions: …and the alerts form');
+  for (const [name, src] of [['jobs.html', jobs], ['previous-markets.html', pm], ['index.html', home]]) {
+    ok(/\{ label: 'Position type',\s+value: \(r\.levels \|\| \[\]\)\.join/.test(src),
+      `positions: the card row on ${name} reads Position type`);
+  }
+  ok(/placeholder: 'All positions'/.test(jobs) && /placeholder: 'All positions'/.test(pm) &&
+     /<option value="">All positions<\/option>/.test(home),
+    'positions: an untouched control still SHOWS its value, "All positions"');
+  /* the retired label is gone from what a reader sees (comments stripped:
+     the pages record the name they no longer use) */
+  for (const [name, src] of [['jobs.html', jobs], ['previous-markets.html', pm],
+    ['index.html', home], ['alerts.html', alerts], ['post-a-job.html', form]]) {
+    ok(!/[>'"]Entry level[<'" ]/.test(strip(src)) && !/[>'"]Entry level$/m.test(strip(src)),
+      `positions: ${name} no longer says "Entry level" to a reader`);
+  }
+
+  /* what did NOT move: the field, the URL key, the criteria key */
+  ok(PUBLIC_FIELDS.includes('levels'), 'positions: the published field is still `levels`');
+  ok(/key: 'level',/.test(jobs) && /key: 'level',/.test(pm),
+    'positions: the URL key is still `level`, so a saved link selects what it selected');
+  ok(/level: arr\(c\.level\)/.test(await read('assets', 'oa-alert-match.js')),
+    'positions: the alert criteria key is still `level`, so a saved alert goes on matching');
+
+  /* the Excel download, the calendar entry and the e-mails */
+  const xp = await read('assets', 'oa-jobexport.js');
+  ok(/header: 'School type', from: \['type'\]/.test(xp) &&
+     /header: 'Position type', from: \['levels'\]/.test(xp),
+    'positions: the Excel columns carry the new headings over the same fields');
+  ok(/lines\.push\('Position type: ' \+ levels\)/.test(await read('assets', 'oa-jobcal.js')),
+    'positions: the calendar entry names the position type');
+  for (const f of ['jobreview-mailer.mjs', 'submissions-mailer.mjs']) {
+    const m = await read('_scraper', f);
+    ok(/line\('School type', r\.type\)/.test(m) && /line\('Position type', \(r\.levels/.test(m),
+      `positions: ${f} prints the two lines under their new names`);
+  }
+  ok(/\['Position type', \(\(row && row\.levels\)/.test(await read('_scraper', 'submissions-review.mjs')),
+    'positions: …and the submission summary');
+
+  /* the sheet's own guide and the change log */
+  const guide = await read('_SETUP-JOBMARKET-SHEET.md');
+  ok(/\*\*Position type\*\*/.test(guide) && /\*\*School type\*\*/.test(guide) &&
+     /RA or Pre-doc/.test(guide) && /\*PhD\*/.test(guide),
+    'positions: the sheet guide names both questions and the two doctoral readings');
+  const log = JSON.parse(await read('changelog.json'));
+  const entry = log.updates.find((u) => u.id === 'position-types-2026-09');
+  ok(entry && entry.date === '2026-09-23' && /Position type/.test(entry.summary) &&
+     /School type/.test(entry.summary) && /RA or Pre-doc/.test(entry.summary) && /PhD/.test(entry.summary),
+    'positions: the change log announces the rename and the two new position types');
+  ok(entry && !/—/.test(entry.title + entry.summary), 'positions: …with no em dash');
+}
+
 async function testSponsors() {
   const SP = require(path.join(HERE, '..', 'assets', 'oa-sponsors.js'));
   const served = JSON.parse(await readFile(JOBS, 'utf8'));
@@ -15154,8 +15296,8 @@ async function testSaveSearchAsAlert() {
     { key: 'institution', label: 'University search', values: ['Utah', 'Princeton'], match: 'any' },
     { key: 'review', label: 'Suggested deadline', values: ['Review ahead'], match: 'any' },
     { key: 'deadline', label: 'Final deadline', values: ['Closing soon'], match: 'any' },
-    { key: 'type', label: 'Type', values: ['Business School'], match: 'any' },
-    { key: 'level', label: 'Entry level', values: ['Assistant Professor', 'Post-Doc'], match: 'any' },
+    { key: 'type', label: 'School type', values: ['Business School'], match: 'any' },
+    { key: 'level', label: 'Position type', values: ['Assistant Professor', 'Post-Doc'], match: 'any' },
     { key: 'country', label: 'Location', values: ['USA', 'Ireland'], match: 'any' },
     { key: 'chars', label: 'Characteristics', values: ['PhD'], match: 'all' },
     { key: 'posted', label: 'Date posted', values: ['Last 7 days'], match: 'any' },
@@ -15728,7 +15870,7 @@ async function testCalendars() {
   ok(/\/jobs\?job=2027-somewhere-university-20260901$/.test(evs[0].url), 'jobcal: …which is the jobs page today');
   const sug = evs[0], fin = evs[1];
   const heads = (e) => e.description.split('\n').map((l) => l.split(':')[0]);
-  eq(heads(fin), ['Suggested deadline', 'Final deadline', 'Final deadline as listed', 'Entry level',
+  eq(heads(fin), ['Suggested deadline', 'Final deadline', 'Final deadline as listed', 'Position type',
     'Link to job ad', 'Posted online at', NAV.REF_LABEL, 'Posting on Operations Academia'],
     'jobcal: the lines of an entry, in order: both deadlines, the deadline as listed, the level, the link to the job ad, the posted-online-at link, the OA posting ID and the way back (owner, 2026-09-06)');
   eq(fin.description.split('\n').slice(0, 2),
@@ -15738,7 +15880,7 @@ async function testCalendars() {
   eq(sug.description.split('\n').slice(0, 2), fin.description.split('\n').slice(0, 2),
     'jobcal: …the same two lines on either entry, so neither hides the other date');
   ok(/\nFinal deadline as listed: November 14, 2026 \(INFORMS interviews\)\n/.test(fin.description) &&
-     /\nEntry level: Assistant Professor\n/.test(fin.description) &&
+     /\nPosition type: Assistant Professor\n/.test(fin.description) &&
      /\nLink to job ad: https:\/\/ads\.example\.edu\/1\n/.test(fin.description) &&
      /\nPosted online at: https:\/\/jobs\.example\.edu\/1\n/.test(fin.description) &&
      /\nOA posting ID: 2027-somewhere-university-20260901\n/.test(fin.description) &&
@@ -19855,9 +19997,9 @@ async function testCandidateFormHardening() {
   ok(bc.indexOf(0) === -1, 'build-candidates.mjs carries no raw NUL byte (it made grep read the whole build as binary)');
   ok(/Queueing\\u0000 Theory/.test(bc.toString('utf8')), '…the control-character fixture is written as the escape it means');
   const log = JSON.parse(await read('changelog.json'));
-  const cfEntry = log.updates.find((u) => u.id === 'candidate-form-2026-09');
-  ok(cfEntry && cfEntry.date === '2026-09-21', 'the change log announces it');
-  eq(cfEntry && cfEntry.url, '/post-a-candidate', '…at the extensionless address');
+  const cf = log.updates.find((e) => e.id === 'candidate-form-2026-09');
+  ok(cf, 'the change log announces it (it led the log until the position types arrived, 2026-09-23)');
+  eq(cf && cf.url, '/post-a-candidate', '…at the extensionless address');
   const doc = await read('CLAUDE.md');
   ok(/^## Candidates were turned away for two weeks/m.test(doc), 'CLAUDE.md records it');
   ok(!/the queue emptied, the listeners/.test(doc), '…and no longer says enterGate empties the queue');
@@ -24331,6 +24473,7 @@ if (isMain(import.meta.url)) {
   await testJobExport();
   await testJobExportWiring();
   await testMultiSelectFilters();
+  await testPositionTypes();
   await testSponsors();
   await testReaderGate();
   await testClosingSoonDigest();
