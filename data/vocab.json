@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T14:18:57.626Z",
+ "generated": "2026-09-23T18:41:27.164Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -96,10 +96,6 @@
   {
    "v": "University of Utah",
    "n": 4
-  },
-  {
-   "v": "Bucknell University",
-   "n": 3
   },
   {
    "v": "Carnegie Mellon University",
@@ -239,6 +235,10 @@
   },
   {
    "v": "Boston College",
+   "n": 2
+  },
+  {
+   "v": "Bucknell University",
    "n": 2
   },
   {
@@ -2172,10 +2172,6 @@
    "n": 2
   },
   {
-   "v": "Freeman College of Management",
-   "n": 2
-  },
-  {
    "v": "Fuqua School of Business",
    "n": 2
   },
@@ -2317,6 +2313,10 @@
   },
   {
    "v": "Frank G. Zarb School of Business",
+   "n": 1
+  },
+  {
+   "v": "Freeman College of Management",
    "n": 1
   },
   {
@@ -3098,12 +3098,12 @@
    "n": 10
   },
   {
-   "v": "Business Analytics",
+   "v": "Data Analytics",
    "n": 8
   },
   {
-   "v": "Data Analytics",
-   "n": 8
+   "v": "Business Analytics",
+   "n": 7
   },
   {
    "v": "Information Systems and Operations Management",
@@ -5259,7 +5259,6 @@
    "units": [
     "Accounting and Financial Management Area, Business Analytics",
     "Analytics and Operations Management",
-    "Business Analytics",
     "Management (Markets, Innovation, And Design)"
    ],
    "bySchool": {
@@ -5268,8 +5267,7 @@
     ],
     "Freeman College of Management": [
      "Accounting and Financial Management Area, Business Analytics",
-     "Analytics and Operations Management",
-     "Business Analytics"
+     "Analytics and Operations Management"
     ]
    }
   },
@@ -12055,8 +12053,7 @@
   ],
   "Freeman College of Management": [
    "Accounting and Financial Management Area, Business Analytics",
-   "Analytics and Operations Management",
-   "Business Analytics"
+   "Analytics and Operations Management"
   ],
   "Fu Foundation School of Engineering and Applied Science": [
    "Industrial Engineering and Operations Research"
