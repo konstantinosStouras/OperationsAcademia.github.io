@@ -33,6 +33,7 @@ import { createRequire } from 'node:module';
 import {
   text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
   ownUniversitiesLink, universitiesLink, stripRowEmails, OPEN_ENDED_RX, withCountries,
+  POMS_SOURCE,
 } from './jobs-model.mjs';
 import { joinDepartment, businessSchoolOf, BUSINESS_SCHOOL_NAME_RX } from './vocab.mjs';
 
@@ -445,7 +446,7 @@ function foldedName(v) {
 /** What a duplicate entry carries onto the queue document: enough for the
     review card to say which posting it might repeat, and nothing else — a
     document is not a place to copy whole rows into. */
-function dupEntry(r) {
+export function dupEntry(r) {
   return {
     id: String(r.id || ''),
     ref: String(r.ref || ''),
@@ -463,7 +464,58 @@ function dupEntry(r) {
        on ("Open the posting opens THE POSTING, on the page that has it"). */
     year: Number(r.year) || 0,
     applyByDate: String(r.applyByDate || ''),
+    /* A ROW STILL UNDER REVIEW SAYS SO. The crawlers hand this function the
+       queue's pending rows marked `_pending` beside the served ones, and the
+       review card keys its wording and its link on the mark: "still under
+       review" and no link, against "already published" and "see it live".
+       Dropped here, a pending sheet posting was named on a POMS card as
+       already on the site, with a link to a posting that was not (the
+       2026-09-23 review). `nearbyPostings` in poms.mjs writes the same key. */
+    ...(r._pending ? { pending: true } : {}),
   };
+}
+
+/**
+ * A SHEET ROW NEVER TAKES AN ID A CRAWLED DOCUMENT HOLDS (the 2026-09-23
+ * review). `collectRows` mints the workbook's ids against the workbook's own
+ * rows alone, and a job id is (season, university, day): a row a contributor
+ * added days after the POMS crawler had queued a posting at the same
+ * university on the same day derived the SAME id, and `partition` then took
+ * the POMS document for the sheet row's own. Pending, that replaced the
+ * crawled row with the sheet's; APPROVED, it published the sheet row through
+ * the POMS approval with nobody having reviewed it, and the reviewed POMS
+ * posting left the site on the next build, never to be queued again because
+ * its link was still "known". That is the Houston lesson (one university, one
+ * day, two searches) met from the other crawler.
+ *
+ * So the crawled documents' ids are TAKEN, and a sheet row that derives one
+ * moves to the next free suffix, exactly as the POMS crawler moves its own ids
+ * clear of the sheet's (`uniqueId` in poms.mjs). The two postings are then
+ * compared by what identifies a posting, the advertisement link, rather than
+ * joined on a day. Run BEFORE the rows are matched to what the site already
+ * knows, or the carry and the dating join the sheet row to the other
+ * crawler's posting through the same id. Pure and by value: a row that does
+ * not move is the same object, and a run with no crawled document changes
+ * nothing. Deterministic across runs while the document exists, which is the
+ * same stability `collectRows`' own suffixes have.
+ */
+export function clearOfCrawledIds(rows, docs, { source = POMS_SOURCE } = {}) {
+  const taken = new Set();
+  for (const d of docs || []) {
+    if (d && d.rowId && d.row && d.row.source === source) taken.add(String(d.rowId));
+  }
+  const moved = [];
+  if (!taken.size) return { rows: rows || [], moved };
+  const seen = new Set((rows || []).map((r) => r && r.id).filter(Boolean));
+  const out = (rows || []).map((r) => {
+    if (!r || !r.id || !taken.has(r.id)) return r;
+    let id = r.id, n = 2;
+    while (taken.has(id) || seen.has(id)) id = `${r.id}-${n++}`;
+    seen.add(id);
+    moved.push({ from: r.id, to: id });
+    return { ...r, id };
+  });
+  return { rows: out, moved };
 }
 
 /**
@@ -506,10 +558,25 @@ export function duplicatesOf(row, siteRows, { max = 3 } = {}) {
   return out;
 }
 
+/** JSON with its keys in one order at every depth, so a document read back
+    from Firestore (which hands a map's keys back sorted) compares equal to
+    the same flags freshly computed (whose keys are in insertion order): the
+    two "nothing moved" tests below would otherwise rewrite every flagged
+    document on every run. An undefined value is left out, as JSON.stringify
+    leaves it out. */
+function canonJson(v) {
+  if (Array.isArray(v)) return '[' + v.map(canonJson).join(',') + ']';
+  if (v && typeof v === 'object') {
+    return '{' + Object.keys(v).sort().filter((k) => v[k] !== undefined)
+      .map((k) => JSON.stringify(k) + ':' + canonJson(v[k])).join(',') + '}';
+  }
+  return JSON.stringify(v === undefined ? null : v);
+}
+
 /** Two duplicate lists that say the same thing — so a sync with nothing new
     to report writes nothing at all. */
 export function sameDups(a, b) {
-  return JSON.stringify(a || []) === JSON.stringify(b || []);
+  return canonJson(a || []) === canonJson(b || []);
 }
 
 /* ------------------------------------------- the same advertisement, twice */
@@ -563,7 +630,7 @@ export function businessCheck(row, vocab, schools = null) {
 /** Two flags that say the same thing — the `sameDups` rule, for `biz`, so an
     unchanged sync writes nothing. */
 export function sameBiz(a, b) {
-  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+  return canonJson(a ?? null) === canonJson(b ?? null);
 }
 
 /* --------------------------------------------------------------- deciding */

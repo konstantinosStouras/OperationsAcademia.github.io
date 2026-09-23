@@ -126,7 +126,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** One GET, with a timeout and two retries. A failure returns rather than
     throws: this whole pass is an enrichment and must never be the reason a
     scheduled run fails. */
-async function fetchOnce(u, { accept, tries = 3, timeoutMs = 30000 } = {}) {
+export async function fetchOnce(u, { accept, tries = 3, timeoutMs = 30000 } = {}) {
   let last = '';
   for (let i = 1; i <= tries; i++) {
     const ctl = new AbortController();
@@ -165,7 +165,7 @@ async function fetchOnce(u, { accept, tries = 3, timeoutMs = 30000 } = {}) {
  * (the PDFs some sheet rows link to) parses to `unreadable` and changes
  * nothing.
  */
-async function readAdvert(u) {
+export async function readAdvert(u) {
   if (isHigherEdJobsUrl(u)) {
     const code = jobCodeOf(u);
     const target = code ? detailsUrl(code) : u;

@@ -36,7 +36,7 @@ import {
   parseProseDay, extractReviewDate, extractFinalDate, healReviewDate,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
   stripEmails, stripRowEmails, patchDeadlines, canonColumns, canonCountry,
-  postedBy, contactEmail, sourceLabel, CRAWLER_SOURCES, FORM_SOURCE, OPEN_ENDED_RX,
+  postedBy, contactEmail, sourceLabel, CRAWLER_SOURCES, FORM_SOURCE, OPEN_ENDED_RX, POMS_SOURCE,
 } from './jobs-model.mjs';
 import {
   CANDIDATE_PUBLIC_FIELDS, rowFromCandidateSubmission, assignCandidateIds, publicCandidateRow,
@@ -80,7 +80,7 @@ import {
   COLLECTION as REVIEW_COL, EDITABLE, SHOWN, DOC_KEYS, PENDING, APPROVED, REJECTED,
   queueDoc, refreshQueued, cleanEdit, cleanEdits, applyEdits, partition,
   needMail, changedKeys, approvedRow, duplicatesOf, sameDups, businessCheck, sameBiz,
-  advertRepeat, findAdvertRepeats, repeatNote,
+  advertRepeat, findAdvertRepeats, repeatNote, clearOfCrawledIds,
 } from './jobreview.mjs';
 import {
   KINDS as SUB_KINDS, ANNOUNCED_AT as SUB_ANNOUNCED_AT,
@@ -872,8 +872,8 @@ async function testFleetPins() {
     if (/OPEN_ENDED_RX/.test(src)) readers.push(f);
   }
   eq(readers.join(', '),
-    'adverts.mjs, higheredjobs.mjs, import-sheet.mjs, jobmarket-sheet.mjs, jobreview.mjs',
-    'and the five writers that decide a deadline all read the one constant');
+    'adverts.mjs, higheredjobs.mjs, import-sheet.mjs, jobmarket-sheet.mjs, jobreview.mjs, poms.mjs',
+    'and the six writers that decide a deadline all read the one constant');
   /* The browser twin cannot import, so it is held to the literal CHARACTER FOR
      CHARACTER — the EMAIL_RX idiom. An echo that read the rule differently
      from the build would show the maintainer a date the published row will not
@@ -882,6 +882,13 @@ async function testFleetPins() {
   const freshRx = (/var OPEN_ENDED = (\/.*\/i);/.exec(fresh) || [])[1];
   eq(freshRx, openLiteral,
     'oa-fresh.js carries the jobs-model open-ended literal, character for character');
+  /* …and the review card's deadline preview, which mirrors settleDeadline
+     (a stored line that says the search stays open is what publishes), holds
+     the same literal the same way. */
+  const rvSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-jobreview.js'), 'utf8');
+  const rvRx = (/var OPEN_ENDED = (\/.*\/i);/.exec(rvSrc) || [])[1];
+  eq(rvRx, openLiteral,
+    'oa-jobreview.js carries the jobs-model open-ended literal, character for character');
   if (existsSync(JOBS)) {
     const rows = JSON.parse(await readFile(JOBS, 'utf8'));
     const contradicts = rows.filter((r) =>
@@ -9460,8 +9467,8 @@ async function testJobMarketSheetWiring() {
      cannot see the deadline cell or the notes column, so those are carried
      rather than published as empty (testJobMarketSheetCarry has the defect
      itself). Wiring, because the sync needs the workbook to run for real. */
-  ok(/carryUnreadColumns\(collected\.rows, known, tabReads\)/.test(sync),
-    'the sync carries the columns a degraded read could not see');
+  ok(/carryUnreadColumns\(cleared\.rows, known, tabReads\)/.test(sync),
+    'the sync carries the columns a degraded read could not see (over the rows whose ids are clear of the crawled documents\', see testPomsCrawler)');
   ok(/carriedBack\.rows/.test(sync) && !/fillSchoolFromDirectory\(r, vocab\)[\s\S]{0,120}collected\.rows\n/.test(sync),
     'and everything downstream reads the CARRIED rows — a carry nothing consumes ' +
     'is a fix that is not applied');
@@ -10927,8 +10934,8 @@ function testReviewDuplicates() {
     'build has not published it yet — the decision, not the deployment');
   ok(/findAdvertRepeats\(pendingPairs\.map\(\(p\) => p\.row\), listedNow\)/.test(syncSrc),
     'and the queue sweep measures against that set, not against the served file alone');
-  ok(/\[\.\.\.listedNow, \.\.\.swept\.keep\]/.test(syncSrc),
-    'comparing against what is listed AND what survived in the queue');
+  ok(/\[\.\.\.listedNow, \.\.\.swept\.keep, \.\.\.pomsPending\]/.test(syncSrc),
+    'comparing against what is listed AND what survived in the queue (and the other crawler\'s pending rows, see testPomsCrawler)');
   ok(/listed\.push\(doc\.row\)/.test(syncSrc),
     'and against the fresh rows it has just accepted, so one advertisement ' +
     'listed twice in the workbook is queued once');
@@ -11089,6 +11096,9 @@ function testReviewDuplicates() {
   ok(typeof entry.year === 'number' && typeof entry.applyByDate === 'string',
     'and states the season and the closing date in the shape the window rule reads');
 
+  ok(sameDups([{ a: 1, b: { c: 2, d: 3 } }], [{ b: { d: 3, c: 2 }, a: 1 }]) && !sameDups([{ a: 1 }], [{ a: 2 }])
+     && sameBiz({ school: 'x', other: null }, { other: null, school: 'x' }) && !sameBiz({ school: 'x' }, { school: 'y' }),
+    'the two "nothing moved" tests read a map in one key order at every depth: a document read back from Firestore hands its keys back sorted, and a freshly computed flag does not');
   ok(sameDups([entry], [entry]) && !sameDups([entry], []),
     'sameDups is what keeps an unchanged sync from writing at all');
 
@@ -11307,6 +11317,14 @@ function testTwoDeadlines() {
   eq(healed.reviewDate, '2026-09-08', 'a row heals from its own apply-by prose');
   eq(healed.applyBy, 'Until filled.', 'and the captured sentence leaves the line');
   eq(healReviewDate(healed), healed, 'healing is idempotent — a second pass changes nothing');
+  const backdatedProse = { id: 'x', posted: '2026-09-22', applyBy: 'Until filled.', applyByDate: '', reviewDate: '',
+    comments: 'Review of applications will begin on January 15, 2026 and continue until the position is filled.' };
+  eq(healReviewDate(backdatedProse).reviewDate, '',
+    'a review date read out of the prose is refused when it falls before the posting date (the deadlineDay discipline; the build runs this heal over every row)');
+  eq(healReviewDate({ ...backdatedProse, posted: '2025-12-01' }).reviewDate, '2026-01-15', 'and believed on or after it');
+  eq(healReviewDate({ ...backdatedProse, posted: '' }).reviewDate, '2026-01-15', 'a row with no posting date has nothing to refuse it by');
+  eq(healReviewDate({ ...backdatedProse, reviewDate: '2026-01-15' }).reviewDate, '2026-01-15',
+    'a date somebody TYPED before the posting date is left where it is: reported by backdatedDeadlines, never repaired');
 
   const fromComments = healReviewDate({
     id: 'x', applyBy: 'Until filled.', applyByDate: '',
@@ -19659,6 +19677,8 @@ const SPAWNED_SUITES = [
   'build-functions-vendor.mjs',
   'build-netmap.mjs',
   'build-placements.mjs',
+  // the POMS crawler (2026-09-23); its workflow runs the same suite with the PDF engine present
+  'poms-crawl.mjs',
 ];
 
 /* Files whose `--selftest` is a DELEGATE to this suite rather than a suite of
@@ -24121,6 +24141,521 @@ async function testRegistrationFields() {
     'typed address is a field of its own');
 }
 
+/* ------------------------------------ the POMS job postings page (2026-09-23)
+
+   Owner: "Create a crawler of this website: https://www.poms.org/opportunities
+   so that any new jobs is auto-added to my 'jobs under review'." The page's
+   rows become jobReviews documents exactly as the workbook's do; what is
+   pinned here is the reading (the table, the window, the names, the row, the
+   text of a PDF or a rendered page) and the wiring on every surface a queued
+   posting reaches. See "The POMS job postings page is crawled into the review
+   queue" in CLAUDE.md. The behavioural pins, and every pin the 2026-09-23
+   review added, were verified by putting the defect back; the wording and
+   wiring pins by removing what they name. */
+async function testPomsCrawler() {
+  const P = await import('./poms.mjs');
+  const T = await import('./advert-text.mjs');
+  const PDF = await import('./pdf-text.mjs');
+  const CLI = await import('./poms-crawl.mjs');
+  const A = await import('./adverts.mjs');
+  const now = new Date('2026-09-23T12:00:00Z');
+  const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
+  const bareJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const changelog = JSON.parse(await read('changelog.json'));
+  const claude = await read('CLAUDE.md');
+
+  /* ---- one name for the source ---------------------------------------- */
+  eq(P.SOURCE, POMS_SOURCE, 'poms.mjs stamps the source jobs-model names');
+  ok(CRAWLER_SOURCES[POMS_SOURCE] && /POMS/.test(CRAWLER_SOURCES[POMS_SOURCE]),
+    'and that source is a crawler in the map that decides what a machine posted');
+  eq(postedBy({ source: POMS_SOURCE }).kind, 'crawler', 'so postedBy calls a POMS row the crawler\'s');
+  ok(/auto-crawler from the POMS job postings page/.test(postedBy({}, { source: POMS_SOURCE }).text),
+    'naming the page in a sentence, from the row where a queue document keeps it');
+  eq(P.PAGE_URL, 'https://www.poms.org/opportunities', 'the page is the one the owner named');
+
+  /* ---- the table ------------------------------------------------------ */
+  const opps = P.parseOpportunities(CLI.FIXTURE_HTML);
+  eq(opps.length, 4, 'a fixture cut from the real page: every body row, not the header');
+  eq(opps.map((o) => o.date), ['2026-09-22', '2026-09-21', '2026-04-07', '2026-09-02'],
+    'the Date column, MM/DD/YYYY, is read as ISO days');
+  eq(opps[0].href, 'https://www.poms.org/sites/default/files/2026-09/9828288.pdf',
+    'a site-relative file becomes an absolute link on poms.org');
+  eq(opps.map((o) => o.kind), ['pdf', 'page', 'page', 'pdf'], 'and each link says what it is');
+  eq(opps[2].title, 'Faculty of Business & Management', 'a double-encoded entity is decoded');
+  ok(opps[2].href.includes('utm_campaign=x') && !/&amp;/.test(opps[2].href),
+    'a double-encoded query string is decoded, so the link points somewhere');
+  eq(P.absoluteUrl('//cdn.example.com/j.pdf'), 'https://cdn.example.com/j.pdf',
+    'a protocol-relative View link takes https, rather than being read as a path on poms.org');
+  eq(P.pomsDay('09/22/2026'), '2026-09-22', 'pomsDay reads the page\'s own order');
+  eq(P.pomsDay('not a date'), '', 'and refuses what is not a date');
+  ok(P.isPomsUrl('https://www.poms.org/sites/x.pdf') && !P.isPomsUrl('https://apply.interfolio.com/1'),
+    'isPomsUrl tells the page\'s own files apart');
+  eq(P.parseOpportunities('<html><body>nothing here</body></html>'), [], 'a page without the table yields nothing');
+
+  /* ---- what is new ---------------------------------------------------- */
+  ok(P.looksAcademic({ institution: 'VinUniversity', title: 'Faculty of Business & Management' })
+     && P.looksAcademic({ institution: 'Choctaw Global', title: 'Assistant Professor of Logistics' })
+     && !P.looksAcademic({ institution: 'Choctaw Global, Hinesville, Georgia', title: 'Quality Control Manager - Base Ops' }),
+    'looksAcademic passes on the institution OR the title, and refuses a contractor\'s vacancy');
+  eq(P.sinceDay(now, 30), '2026-08-24', 'the default window is thirty days back');
+  const fresh = P.newOpportunities(opps, { since: '2026-09-01', minYear: 2026, known: new Set(), now });
+  eq(fresh.fresh.map((o) => o.institution), ['Bucknell University', 'University of Oklahoma (OU)'],
+    'inside the window, academic and unknown: to queue');
+  eq(fresh.skipped.map((s) => s.why).sort(), ['before-window', 'not-academic'], 'every skip says why');
+  const known = P.knownLinks({
+    docs: [{ row: { adUrl: 'https://WWW.poms.org/sites/default/files/2026-09/9828288.pdf/' } },
+           { row: { adUrl: 'https://example.edu/other' }, edits: { adUrl: 'https://apply.interfolio.com/193265' } }],
+    rows: [{ adUrl: 'https://www.operationsacademia.org' }],
+  });
+  ok(known.has('poms.org/sites/default/files/2026-09/9828288.pdf') && known.has('apply.interfolio.com/193265'),
+    'known links: the queue\'s rows AND its re-linking edits, case, www and a trailing slash folded');
+  ok(!known.has('operationsacademia.org'), 'our own home page identifies nothing');
+  eq(P.newOpportunities(opps, { since: '2026-09-01', minYear: 2026, known, now }).fresh.length, 0,
+    'a link the site already knows is not queued again, whatever its date');
+  eq(P.newOpportunities(opps, { since: '2026-09-01', minYear: 2028, known: new Set(), now }).skipped
+    .filter((s) => s.why === 'closed-season').length, 3,
+    'a season the site no longer carries is skipped (judged after the window and before the academic test)');
+  eq(P.newOpportunities([opps[0], { ...opps[0], title: 'again' }], { since: '2026-09-01', known: new Set(), now })
+    .skipped.map((s) => s.why), ['repeated-on-page'], 'the page listing one file twice queues it once');
+  eq(P.newOpportunities([{ ...opps[0], href: '' }], { since: '2026-09-01', known: new Set(), now })
+    .skipped.map((s) => s.why), ['no-link'], 'a row with no View link cannot be read or compared');
+
+  /* ---- names ---------------------------------------------------------- */
+  eq(P.stripAcronym('University of Oklahoma (OU)'), 'University of Oklahoma', 'a trailing acronym is dropped');
+  eq(P.stripAcronym('California State University, Stanislaus (CSU, Stanislaus)'), 'California State University, Stanislaus',
+    'and a campus note with a comma');
+  eq(P.stripAcronym('Pennsylvania State University (University Park, PA)'), 'Pennsylvania State University', 'and a campus');
+  eq(P.stripAcronym('Institute (of things)'), 'Institute (of things)', 'a lower-case aside is not an acronym');
+  const vocabFx = { byUniversity: {
+    'University of Oklahoma': { schools: ['Michael F. Price College of Business'],
+      bySchool: { 'Michael F. Price College of Business': ['Supply Chain Management'] } },
+    'Georgia Institute of Technology': { schools: ['Scheller College of Business'],
+      bySchool: { 'Scheller College of Business': ['Operations Management'] } },
+  }, units: [{ v: 'Operations' }] };
+  eq(P.institutionName('University of Oklahoma (OU)', vocabFx), 'University of Oklahoma',
+    'the vocabulary\'s spelling wins over the page\'s acronym');
+  eq(P.institutionName('The University of Oklahoma', vocabFx), 'University of Oklahoma',
+    'through institutionKey, so a leading The reaches the entry too');
+  eq(P.institutionName('Bucknell University (BU)', null), 'Bucknell University',
+    'and with no vocabulary the bare name goes through the posting form\'s canon');
+  eq(P.fieldFromTitle('Assistant or Associate Professor of Marketing and Supply Chain Management'),
+    { school: '', unit: 'Marketing and Supply Chain Management' }, 'the field a title names, after "of"');
+  eq(P.fieldFromTitle('Tenure-Track Faculty Position (Assistant Professor level) in Operations Management'),
+    { school: '', unit: 'Operations Management' }, '…or after "in", with a parenthesis out of the way');
+  eq(P.fieldFromTitle('Open Rank, Professional Track Faculty, Business Analytics'),
+    { school: '', unit: 'Business Analytics' }, '…or the last comma part when it names no rank');
+  eq(P.fieldFromTitle('Assistant, Associate, or Full Professor (Operations)'), { school: '', unit: '' },
+    'a title whose only field is in a parenthesis names none');
+  eq(P.fieldFromTitle('Assistant or Associate Professor – Business (Operations)'), { school: '', unit: '' },
+    'and a one-word field the vocabulary does not list is refused');
+  eq(P.fieldFromTitle('Professor of Operations', vocabFx), { school: '', unit: 'Operations' },
+    'while a one-word field the vocabulary lists is taken');
+  eq(P.fieldFromTitle('Faculty of Business & Management'), { school: 'Faculty of Business & Management', unit: '' },
+    'a title that names a school is read as one');
+  eq(P.fieldFromTitle('TENURED/TENURE-TRACK FACULTY POSITIONS IN OPERATIONS MANAGEMENT'),
+    { school: '', unit: 'Operations Management' }, 'shouting is put back into title case');
+  eq(P.fieldFromTitle('Tenure-Track Positions'), { school: '', unit: '' }, 'a title naming no field names none');
+  for (const t of ['Assistant Professor, Tenure Track, Fall 2027', 'Assistant Professor, Ph.D. required', 'Tenure-Track Assistant Professor, Two Openings',
+    'Assistant Professor, Tenure Track, Job #12345', 'Assistant Professor (Tenure-Track), Fall 2027 Start', 'Assistant Professor of Operations, Fall 2027']) {
+    eq(P.fieldFromTitle(t), { school: '', unit: '' }, `a segment that is not a field is never the department: "${t}"`);
+  }
+  for (const [t, unit] of [
+    ['Assistant Professor of Operations Management, Tenure Track', 'Operations Management'],
+    ['Assistant Professor of Supply Chain Management - Tenure Track', 'Supply Chain Management'],
+    ['Assistant/Associate Professor of Operations Management and Analytics - Tenure Track', 'Operations Management and Analytics'],
+    ['Assistant Professor, Supply Chain Management, Tenure-Track', 'Supply Chain Management'],
+    ['Professor of Practice in Supply Chain Management', 'Supply Chain Management'],
+    ['Assistant Professor of Operations Management, Department of Management, University of X', 'Operations Management'],
+  ]) {
+    eq(P.fieldFromTitle(t), { school: '', unit }, `the field is read out of "${t}": the segment after the rank, never the rank or the place beside it`);
+  }
+
+  /* ---- the row, with and without an advertisement --------------------- */
+  const interfolioText = [
+    'Already have an account? Sign In',
+    'Assistant or Associate Professor of Marketing and Supply Chain Management',
+    'University of Oklahoma Norman Campus: Michael F. Price College of Business: Division of Marketing and Supply Chain Management',
+    'Location', 'Norman, OK', 'Open Date', 'Sep 17, 2026', 'Description',
+    'The Division of Marketing and Supply Chain Management (MSCM) in the Michael F. Price College of Business at the University of Oklahoma (OU) invites applications for a tenure-track position. Write to search@ou.edu with questions.',
+    'Application Instructions',
+    'Review of applications will begin on October 15, 2026 and continue until the position is filled. For full consideration, please apply by November 1, 2026.',
+    'Qualifications', 'A doctoral degree.',
+  ].join('\n');
+  const parsed = T.parseAdvertText(interfolioText, { title: 'Assistant or Associate Professor of Marketing and Supply Chain Management' });
+  const entry = A.cacheEntry(parsed, { adUrl: opps[1].href, checkedAt: '2026-09-23T00:00:00Z', via: 'render' });
+  const ad = { ...parsed, via: 'render', place: A.advertPlace(entry, vocabFx) };
+  const row = P.rowFromOpportunity(opps[1], { ad, vocab: vocabFx, now });
+  eq(row.institution, 'University of Oklahoma', 'the row: the university, the page\'s acronym gone');
+  eq(row.school, 'Michael F. Price College of Business', 'the school from the hierarchy line');
+  eq(row.unit, 'Supply Chain Management', 'the department, through the site\'s own scoped canon');
+  eq(row.department, 'Michael F. Price College of Business, Supply Chain Management', 'and the line the card shows joined from them');
+  eq(row.type, 'Business School', 'typed from the school\'s name');
+  eq(row.levels, ['Assistant Professor', 'Other Ranks'], 'an assistant-or-associate search ticks both boxes');
+  eq([row.applyByDate, row.applyBy], ['2026-11-01', 'November 1, 2026'], 'the closing date the advertisement states, believed against the posting date');
+  eq(row.reviewDate, '2026-10-15', 'and the first-review date, which falls before it');
+  eq(row.country, 'United States', 'the country of "Norman, OK"');
+  eq(row.year, 2027, 'the season from the cascade');
+  eq(row.id, '2027-university-of-oklahoma-20260921', 'the id from the season, the university and the day');
+  eq(row.source, POMS_SOURCE, 'stamped with the POMS source');
+  eq(row.postedAtUrl, P.PAGE_URL, 'posted-at is the page');
+  eq(row.adUrl, 'https://apply.interfolio.com/193265', 'the advertisement is the View link');
+  eq(row.furtherInfoUrl, universitiesLink('University of Oklahoma'), 'the site\'s own link follows the canonical name');
+  ok(/^Advertised as: Assistant or Associate Professor/.test(row.comments), 'the comments open with the advertised title');
+  ok(/invites applications/.test(row.comments) && /Read by the POMS crawler from the advertisement on 2026-09-23/.test(row.comments),
+    'carry the description and say who read it and when');
+  ok(!/@ou\.edu/.test(row.comments) && /e-mail removed/.test(row.comments), 'and carry no e-mail address');
+  ok(row.comments.length <= 1200, 'within the comments bound');
+  ok(Object.keys(row).every((k) => PUBLIC_FIELDS.includes(k)), 'nothing but published fields on the row');
+  ok(row.years.includes(row.year) && Array.isArray(row.countries) && row.countries[0] === row.country,
+    'the span and the country list are derived like every other row');
+  const bare = P.rowFromOpportunity(opps[0], { ad: null, vocab: vocabFx, now });
+  eq([bare.applyBy, bare.applyByDate, bare.reviewDate], ['Until filled.', '', ''], 'no advertisement: no date invented');
+  eq(bare.levels, ['Non-tenure track (teaching) position'], 'a professional-track post is non-tenure-track');
+  eq(bare.unit, 'Business Analytics', 'the title\'s field stands in for the department');
+  ok(/could not be read automatically/.test(bare.comments), 'and the comments say the advertisement was not read');
+  eq(bare.country, '', 'no country is guessed');
+  const gt = P.rowFromOpportunity({ title: 'Tenure-Track Faculty Position (Assistant Professor level) in Operations Management',
+    institution: 'Georgia Institute of Technology', date: '2026-09-21', href: 'https://www.poms.org/x.pdf', kind: 'pdf' },
+    { ad: null, vocab: vocabFx, now });
+  eq([gt.school, gt.type], ['Scheller College of Business', 'Business School'],
+    'the directory fills the school the department sits in, and the type is judged AFTER that fill');
+  const late = P.rowFromOpportunity(opps[1], { ad: { ...ad, applyByDate: '2026-09-01', reviewDate: '2026-08-01' }, vocab: vocabFx, now });
+  eq([late.applyByDate, late.reviewDate, late.applyBy], ['', '', 'Until filled.'],
+    'a closing date before the day POMS listed the posting is not believed, nor a review date');
+  const same = P.rowFromOpportunity(opps[1], { ad: { ...ad, reviewDate: '2026-11-01' }, vocab: vocabFx, now });
+  eq(same.reviewDate, '', 'a suggested date on the closing date is the closing date said twice, and is dropped');
+  const openEnded = P.rowFromOpportunity(opps[1], { ad: { ...ad, applyByDate: '', applyByProse: 'Open until filled' }, vocab: vocabFx, now });
+  eq([openEnded.applyByDate, openEnded.applyBy], ['', 'Open until filled'], 'prose that says the search stays open is carried as the line');
+  ok(!/Deadline as listed/.test(openEnded.comments), 'and the comments do not repeat it as a deadline that was listed');
+  const refused = P.rowFromOpportunity(opps[1], { ad: { ok: true, applyByDate: '2026-01-15', applyByProse: 'January 15, 2026', description: 'The department invites applications.' }, vocab: vocabFx, now });
+  eq([refused.applyByDate, refused.applyBy], ['', 'Until filled.'], 'a closing date the crawler could not believe publishes no date');
+  ok(/Deadline as listed: January 15, 2026/.test(refused.comments),
+    '…and the comments carry the deadline as the advertisement listed it, keyed on the date that was REFUSED, not on the one believed');
+  ok(/Deadline as listed: January 15, 2026/.test(P.rowFromOpportunity(opps[1], { ad: { ok: true, applyByDate: '2026-01-15' }, vocab: vocabFx, now }).comments),
+    'with no prose, the refused date itself is what is listed');
+  ok(!/Deadline as listed/.test(row.comments), 'a believed date is on the row and is not listed twice');
+  const healAd = { ok: true, applyByDate: '', reviewDate: '2026-01-15',
+    description: 'Review of applications will begin on January 15, 2026 and continue until the position is filled. The department invites applications.' };
+  const healed = P.rowFromOpportunity(opps[1], { ad: healAd, vocab: vocabFx, now });
+  eq([healed.reviewDate, healed.year], ['', 2027],
+    'a review date refused against the posting date is not read back out of the comments by healReviewDate, so the season comes from the posting date');
+  eq(P.refreshFromAd(bare, healAd, { vocab: vocabFx, now }).reviewDate, '', 'and a later reading is held to the same guard');
+  /* …and so is the BUILD, which takes an approved document through approvedRow and then the
+     shared heal over the merged set: the refused sentence is still in the comments, and the
+     first cut of the heal put the date back and spanned the posting into a closed season. */
+  const built = withMarketYears(stripRowEmails(healReviewDate(healCountry(approvedRow(healed, { row: healed, edits: {}, reviewedAt: '2026-09-23T12:00:00Z' }), new Map()))));
+  eq([built.reviewDate, built.years], ['', [2027]], 'the published row keeps the refusal through the build\'s own heal, and spans one season');
+  eq(P.fitDates({ applyByDate: '2026-01-15', applyBy: 'January 15, 2026', reviewDate: '2026-01-10' }, '2026-09-22', { applyByDate: '', applyBy: 'Until filled.' }),
+    { applyByDate: '', applyBy: 'Until filled.', reviewDate: '' }, 'fitDates: a healed date the posting date refuses is put back to what stood before');
+  eq(P.fitDates({ applyByDate: '2026-11-01', applyBy: 'November 1, 2026', reviewDate: '2026-10-15' }, '2026-09-22', { applyByDate: '2026-11-01', applyBy: 'November 1, 2026' }),
+    { applyByDate: '2026-11-01', applyBy: 'November 1, 2026', reviewDate: '2026-10-15' }, 'and believable dates pass through untouched');
+  for (const r of [row, bare, gt]) {
+    ok(!r.type || TYPES.includes(r.type), `${r.id}: type is known`);
+    ok(r.levels.every((l) => LEVELS.includes(l)), `${r.id}: every level is known`);
+    ok(!r.country || canonCountry(r.country) === r.country, `${r.id}: the country is canonical or empty`);
+    ok(/^\d{4}-\d{2}-\d{2}$/.test(r.posted), `${r.id}: posted is ISO`);
+  }
+  eq(P.uniqueId('x', new Set(['x', 'x-2'])), 'x-3', 'an id the queue or the site holds takes the next suffix');
+  const near = P.nearbyPostings(row, [
+    { id: 'a', institution: 'The University of Oklahoma', posted: '2026-09-12', levels: ['Assistant Professor'], department: 'Operations' },
+    { id: 'b', institution: 'University of Oklahoma', posted: '2026-06-01', levels: ['Assistant Professor'] },
+    { id: 'c', institution: 'University of Oklahoma', posted: '2026-09-20', levels: ['Post-Doc'] },
+    { id: 'd', institution: 'University of Oklahoma', posted: '2026-09-20', levels: [], _pending: true },
+  ]);
+  eq(near.map((d) => d.id), ['a', 'd'], 'nearby postings: same university within 21 days with a level in common (or none stated)');
+  ok(near[1].pending === true && near[0].pending === undefined, 'a queued row is marked pending on its entry');
+  const dupPending = duplicatesOf(row, [{ ...row, id: 'q', _pending: true }]);
+  ok(dupPending.length === 1 && dupPending[0].pending === true,
+    'a duplicate that is itself still under review carries the pending mark through dupEntry, as nearbyPostings marks its own (the card links nothing then)');
+  ok(!('pending' in duplicatesOf(row, [{ ...row, id: 'q' }])[0]), 'and a served row carries none');
+  /* a sheet row never takes an id a crawled document holds */
+  const idRows = [{ id: '2027-u-x-20260915', a: 1 }, { id: '2027-u-x-20260915-2' }, { id: '2027-u-y-20260901' }];
+  const idDocs = [{ rowId: '2027-u-x-20260915', status: REJECTED, row: { source: POMS_SOURCE } },
+    { rowId: '2027-u-y-20260901', status: PENDING, row: { source: 'jobmarket-sheet' } }];
+  const clearedIds = clearOfCrawledIds(idRows, idDocs);
+  eq(clearedIds.rows.map((r) => r.id), ['2027-u-x-20260915-3', '2027-u-x-20260915-2', '2027-u-y-20260901'],
+    'clearOfCrawledIds: a sheet row deriving a POMS document\'s id (whatever its status) takes the next suffix the sheet does not already hold; a sheet document\'s id is the row\'s own');
+  eq(clearedIds.moved, [{ from: '2027-u-x-20260915', to: '2027-u-x-20260915-3' }], 'and says which moved');
+  ok(clearedIds.rows[1] === idRows[1] && clearedIds.rows[2] === idRows[2] && idRows[0].id === '2027-u-x-20260915' && clearedIds.rows[0].a === 1,
+    'by value: a row that does not move is the same object, and the moved one is a copy with the rest of it intact');
+  ok(clearOfCrawledIds(idRows, []).rows === idRows && clearOfCrawledIds(idRows, [{ rowId: 'z', row: { source: POMS_SOURCE } }]).rows.every((r, i) => r === idRows[i]),
+    'and with no crawled document, or none in the way, nothing moves');
+  const again = P.refreshFromAd(bare, ad, { vocab: vocabFx, now });
+  ok(again !== bare && again.applyByDate === '2026-11-01' && again.unit === 'Business Analytics',
+    'a later reading fills what was empty (the unread row\'s "Until filled." is the crawler\'s default) and leaves what was there');
+  ok(!/could not be read automatically/.test(again.comments) && /invites applications/.test(again.comments),
+    '…and replaces the unread marker with the description');
+  const openRead = { ...bare, applyBy: 'Open until filled', comments: 'Advertised as: x. · (Read by the POMS crawler from the PDF on 2026-09-20; open the advert for the full text.)' };
+  eq(P.refreshFromAd(openRead, ad, { vocab: vocabFx, now }).applyByDate, '',
+    'but a line that says the search stays open on a row that WAS read is the advertisement\'s word and is kept');
+  ok(P.refreshFromAd(again, ad, { vocab: vocabFx, now }) === again, 'and is idempotent');
+  eq(P.refreshFromAd(bare, null), bare, 'an unreadable reading changes nothing');
+
+  /* ---- the text reader ------------------------------------------------ */
+  const fields = T.labelledLines(T.textLines('Application deadline: October 15, 2026\nLocation\nNorman, OK\nDescription\nThe job.'));
+  eq([fields.get('application deadline'), fields.get('location'), fields.has('description')],
+    ['October 15, 2026', 'Norman, OK', false], 'both label shapes are read, and a heading over prose is not a field');
+  eq(T.hierarchyOf(['x', 'Harvard University: Harvard Business School']), { institution: 'Harvard University', school: 'Harvard Business School', unit: '' },
+    'a two-part hierarchy is the university and its school');
+  eq(T.hierarchyOf(['Note: applicants must apply online: see below.']), null, 'a sentence with colons is not one');
+  eq(T.hierarchyOf(['x', 'Location: Norman, OK']), null, 'a labelled line ("Location: …") is a field, never a hierarchy');
+  eq(T.hierarchyOf(['Application deadline: October 15, 2026']), null, 'nor is a labelled date');
+  eq(T.hierarchyOf(['Marketing: Supply Chain Management']), null, 'a first part that names no university, school or institute is not one either');
+  const pdfLabelled = T.parseAdvertText(['Assistant Professor of Operations Management',
+    'Department of Supply Chain Management, Smith School of Business', 'Application deadline: October 15, 2026', 'Location: Norman, OK'].join('\n'));
+  eq([pdfLabelled.institution, pdfLabelled.school, pdfLabelled.department, pdfLabelled.hierarchy],
+    ['', 'Smith School of Business', 'Supply Chain Management', null],
+    'the crawler\'s own PDF shape: the labels are fields, the institution is not read off one, and the school comes from the prose');
+  const place = T.placeFromText('Georgia Institute of Technology\nScheller College of Business\nThe Scheller College of Business at Georgia Tech invites applications in the Department of Operations Management at the rank of assistant professor.');
+  eq(place, { school: 'Scheller College of Business', department: 'Operations Management' }, 'a school and a department the prose names, neither crossing a line');
+  eq(T.placeFromText('Harvard Business School', 'Harvard Business School').school, '', 'a name that is the organisation itself is dropped');
+  for (const [text, school, inst] of [
+    ["Georgia Tech's Scheller College of Business invites applications", 'Scheller College of Business', 'Georgia Institute of Technology'],
+    ['Join Scheller College of Business at Georgia Tech.', 'Scheller College of Business', 'Georgia Institute of Technology'],
+    ['Position Summary The Scheller College of Business at Georgia Tech invites', 'Scheller College of Business', 'Georgia Institute of Technology'],
+    ['Assistant Professor Smith School of Business', 'Smith School of Business', ''],
+    ['The Michael F. Price College of Business at the University of Oklahoma invites', 'Michael F. Price College of Business', 'University of Oklahoma'],
+  ]) {
+    eq(T.placeFromText(text, inst).school, school, `the school named in "${text}" is the name alone: a verb, a heading, a rank or a possessive before it is not part of it`);
+  }
+  eq(['Norman, OK', 'Atlanta, Georgia', 'Georgia', 'Stockholm, Sweden', 'Somewhere'].map(T.countryFromLocation),
+    ['United States', '', '', 'Sweden', ''], 'the country of a location: a US state settles it, the ambiguous state is refused with or without a town, an unknown place is nothing');
+  const pdfParsed = T.parseAdvertText('THE UNIVERSITY\nAssistant Professor of Operations\nDepartment of Supply Chain Management, Smith School of Business\nApplication deadline: October 15, 2026. Applications received by September 30, 2026 will receive full consideration.\nContact: hr@example.edu');
+  eq([pdfParsed.applyByDate, pdfParsed.reviewDate, pdfParsed.department, pdfParsed.school],
+    ['2026-10-15', '2026-09-30', 'Supply Chain Management', 'Smith School of Business'], 'a PDF-shaped text: the dates and the names');
+  eq(parsed.title, 'Assistant or Associate Professor of Marketing and Supply Chain Management', 'the rendered page\'s title hint wins over its chrome');
+  ok(!/Sign In/.test(T.parseAdvertText('Already have an account? Sign In\nReal Title').title), 'and a chrome line is never a title');
+  ok(!T.parseAdvertText('Just a title\nand a sentence.').ok, 'a text stating no fact about the job is not read');
+  eq(T.descriptionOf(['Title', 'Description', 'The job.', 'More.', 'Qualifications', 'A degree.']), ['The job.', 'More.'],
+    'the Description section runs to the next heading');
+
+  /* ---- the PDF reader ------------------------------------------------- */
+  eq(PDF.linesFromItems([
+    { str: 'Second', transform: [1, 0, 0, 1, 50, 700], width: 40 },
+    { str: 'First', transform: [1, 0, 0, 1, 50, 720], width: 30 },
+    { str: 'line', transform: [1, 0, 0, 1, 92, 720], width: 20 },
+    { str: 'ing', transform: [1, 0, 0, 1, 80.5, 720], width: 3 },
+  ]), ['Firsting line', 'Second'], 'glyph runs on one baseline join into a line, lines read top down');
+  ok(PDF.looksLikePdf(Buffer.from('%PDF-1.4\n')) && !PDF.looksLikePdf(Buffer.from('<html>')), 'looksLikePdf reads the magic');
+  if (PDF.pdfjsInstalled()) {
+    const t = await PDF.pdfText(CLI.tinyPdf(['Assistant Professor of Operations', 'Application deadline: October 15, 2026']));
+    ok(t.ok && /October 15, 2026/.test(t.text), 'a hand-built PDF reads end to end (the engine is installed here)');
+  } else {
+    ok((await PDF.pdfText(CLI.tinyPdf(['x']))).ok === false, 'without the engine a PDF is unreadable rather than a throw');
+  }
+
+  /* ---- the crawler: what it writes, read from its source --------------- */
+  const cli = bareJs(await read('_scraper/poms-crawl.mjs'));
+  ok(/col\.doc\(id\)\.create\(doc\)/.test(cli), 'a new posting is CREATED, never set: a decision made mid-run wins');
+  eq((cli.match(/\.set\(/g) || []).length, 2, 'two merges in the file: the reading of a re-read document, and the flags of a pending one');
+  ok(/for \(const d of queue\.docs\.filter\(\(x\) => x && x\.status === PENDING && x\.row && x\.row\.source === SOURCE\)\)/.test(cli)
+     && /let dup = duplicatesOf\(d\.row, compared\);\s*if \(!dup\.length\) dup = nearbyPostings\(d\.row, compared\);/.test(cli)
+     && /if \(!sameDups\(dup, d\.dup\)\) flags\.dup = dup;/.test(cli) && /if \(!sameBiz\(biz, d\.biz\)\) flags\.biz = biz;/.test(cli)
+     && /\.set\(flags, \{ merge: true \}\)/.test(cli) && !/flags\.row/.test(cli) && !/flags\.status/.test(cli) && !/flags\.edits/.test(cli),
+    'the flags on every pending POMS document are re-checked on every run against the same set a fresh row is, and written only where they moved');
+  ok(/const sinceGiven = opt\('--since', ''\);/.test(cli) && /if \(sinceGiven && since !== sinceGiven\) \{\s*warn\(/.test(cli)
+     && /const LIMIT_OK = \/\^\[1-9\]\\d\*\$\/\.test\(LIMIT_RAW\);/.test(cli) && /if \(LIMIT_RAW && !LIMIT_OK\) \{\s*warn\(/.test(cli),
+    'a --since that is not a day and a --limit that is not a whole number above zero are said, never silently replaced by the defaults');
+  ok(/const patch = \{ ad: block \};/.test(cli) && /patch\.row = row;/.test(cli) && !/patch\.status/.test(cli) && !/patch\.edits/.test(cli),
+    'and it carries the row and the ad block of a pending document, never the decision, never the edits');
+  ok(!/\.update\(/.test(cli) && !/\.delete\(/.test(cli) && !/writeFile\(/.test(cli), 'nothing else is written, and no file');
+  for (const m of cli.matchAll(/\bdoc\.(\w+) = /g)) ok(DOC_KEYS.includes(m[1]), `the crawler writes only a key the rules name (${m[1]})`);
+  ok(/if \(!page\.ok\) \{[\s\S]{0,400}return 1;/.test(cli) && /no posting table was found[\s\S]{0,200}return 1;/.test(cli),
+    'an unreadable page and a page without the table are errors the run reports, not quiet runs');
+  ok(/queue\.ok\)[\s\S]{0,200}warn\(/.test(cli), 'and no queue is said rather than hidden');
+  ok(/advertRepeat\(row, compared\)/.test(cli) && /duplicatesOf\(row, compared\)/.test(cli) && /nearbyPostings\(row, compared\)/.test(cli)
+     && /_pending: true/.test(cli), 'repeats, duplicates and nearby postings are judged against the site AND the queue, pending rows marked');
+  ok(/healCountry\(row, byCountry\)/.test(cli), 'the country the directory knows is filled before the card is drawn');
+  const rr = CLI.needReread([
+    { rowId: 'a', status: 'pending', row: { source: POMS_SOURCE, adUrl: 'https://www.poms.org/a.pdf' } },
+    { rowId: 'b', status: 'pending', row: { source: POMS_SOURCE, adUrl: 'https://www.poms.org/b.pdf' }, ad: { status: 'ok', checkedAt: '2026-09-01T00:00:00Z' } },
+    { rowId: 'c', status: 'pending', row: { source: POMS_SOURCE, adUrl: 'https://www.poms.org/c.pdf' }, ad: { status: 'unreadable', checkedAt: '2026-09-22T00:00:00Z' } },
+    { rowId: 'd', status: 'pending', row: { source: POMS_SOURCE, adUrl: 'https://www.poms.org/d.pdf' }, ad: { status: 'unreadable', checkedAt: '2026-09-01T00:00:00Z' } },
+    { rowId: 'e', status: 'pending', row: { source: 'jobmarket-sheet', adUrl: 'https://www.poms.org/e.pdf' } },
+    { rowId: 'f', status: 'approved', row: { source: POMS_SOURCE, adUrl: 'https://www.poms.org/f.pdf' } },
+    { rowId: 'g', status: 'pending', row: { source: POMS_SOURCE, adUrl: 'https://www.poms.org/g.docx' } },
+    { rowId: 'h', status: 'pending', row: { source: POMS_SOURCE, adUrl: 'https://www.poms.org/h.pdf' }, edits: { adUrl: 'https://example.edu/h' },
+      ad: { status: 'ok', url: 'https://www.poms.org/h.pdf', checkedAt: '2026-09-22T00:00:00Z' } },
+    { rowId: 'i', status: 'pending', row: { source: POMS_SOURCE, adUrl: 'https://www.poms.org/i.pdf' }, edits: { adUrl: 'https://example.edu/i' },
+      ad: { status: 'ok', url: 'https://example.edu/i', checkedAt: '2026-09-22T00:00:00Z' } },
+    { rowId: 'j', status: 'pending', row: { source: POMS_SOURCE, adUrl: 'https://www.poms.org/j.pdf' }, edits: { adUrl: 'https://example.edu/j.docx' } },
+  ], { today: '2026-09-23' }).map((d) => d.rowId);
+  eq(rr, ['a', 'd', 'h'], 'a pending POMS document is re-read when its advertisement was never read, was unreadable a week ago, or its link was CORRECTED on the card since the block was read (at once, whatever the block says); a corrected link already read, or one to a Word file, is not');
+  eq([CLI.effectiveLink({ row: { adUrl: 'r' }, edits: { adUrl: 'e' } }), CLI.effectiveLink({ row: { adUrl: 'r' }, edits: {} }), CLI.effectiveLink({})],
+    ['e', 'r', ''], 'effectiveLink: the maintainer\'s corrected link where there is one, else the page\'s');
+  ok(/const link = effectiveLink\(d\);/.test(cli) && /const opp = \{ href: link, kind: linkKind\(link\)/.test(cli)
+     && /adForRow\(read\.parsed, read\.via, \{ adUrl: link, vocab, now, previous \}\)/.test(cli)
+     && /const previous = d\.ad && d\.ad\.url === link \? d\.ad : null;/.test(cli) && !/adUrl: d\.row\.adUrl/.test(cli),
+    'the retry reads the link the maintainer corrected (nothing else ever will: the advert pass stands down on a POMS document), and carries nothing forward from a block read at another');
+  const forRow = CLI.adForRow(pdfParsed, 'pdf', { adUrl: 'https://www.poms.org/x.pdf', vocab: null, now });
+  eq([forRow.block.via, forRow.block.url, forRow.ad.via], ['pdf', 'https://www.poms.org/x.pdf', 'pdf'],
+    'the document\'s ad block names the road the reading came by, which adBlock does not copy from the cache entry');
+  eq(CLI.adForRow(null, '', { adUrl: 'u', vocab: null, now }).block.via, 'page', 'and a reading that fetched nothing is filed as a page');
+
+  /* ---- one advertisement can never end the run, nor reach a private host - */
+  eq(['127.0.0.1', '10.1.2.3', '172.16.0.1', '192.168.1.1', '169.254.169.254', '100.64.0.1', '224.0.0.1', '::1', 'fe80::1', 'fd00::1', '::ffff:127.0.0.1', ''].map(CLI.privateAddress),
+    Array(12).fill(true), 'privateAddress: loopback, the private ranges, link-local (where a cloud runner\'s metadata service answers), the shared range, multicast, the v6 equivalents, a mapped v4 and nothing at all');
+  eq(['8.8.8.8', '172.32.0.1', '93.184.216.34', '2606:4700::1111'].map(CLI.privateAddress), [false, false, false, false], 'and a public address is not');
+  const pubDns = async () => [{ address: '93.184.216.34' }];
+  const mixedDns = async () => [{ address: '93.184.216.34' }, { address: '10.0.0.1' }];
+  const noDns = async () => { throw new Error('ENOTFOUND'); };
+  eq(await Promise.all([CLI.hostAllowed('localhost'), CLI.hostAllowed('a.localhost'), CLI.hostAllowed('127.0.0.1'), CLI.hostAllowed('[::1]'),
+    CLI.hostAllowed('example.edu', { lookup: pubDns }), CLI.hostAllowed('example.edu', { lookup: mixedDns }), CLI.hostAllowed('x.edu', { lookup: noDns })]),
+    [false, false, false, false, true, false, false],
+    'hostAllowed: every address a name resolves to must be public; localhost, a literal private address, a mixed answer and a name that does not resolve may not be fetched');
+  ok(/redirect: 'manual'/.test(cli) && !/redirect: 'follow'/.test(cli) && /for \(let hop = 0; hop <= MAX_REDIRECTS; hop\+\+\)/.test(cli)
+     && /if \(!\(await hostCheck\(target\.hostname\)\)\) return refuse\(/.test(cli) && /if \(!\/\^https\?:\$\/\.test\(target\.protocol\)\) return refuse\(/.test(cli),
+    'fetchBytes follows a redirect by hand, holding every hop to a public http(s) host: a View link\'s server used to be able to send the runner to its own metadata service');
+  ok(CLI.MAX_BODY_BYTES === 25 * 1024 * 1024 && /if \(len > maxBytes\) \{/.test(cli) && /const bytes = await readCapped\(res\.body, maxBytes\);/.test(cli)
+     && /for await \(const chunk of body\)/.test(cli) && /if \(total > max\) return null;/.test(cli) && !/res\.arrayBuffer\(\)/.test(cli),
+    'and reads the body against a cap, by the header where there is one and chunk by chunk where there is not, never whole into memory (a half-gigabyte body threw the run out of its loop)');
+  ok(/export async function safeRead\(opp, opts\) \{\s*try \{\s*return await readOpportunityAd\(opp, opts\);\s*\} catch \(e\) \{\s*return \{ parsed: null, via: 'page', error: /.test(cli)
+     && (cli.match(/const read = await safeRead\(opp, \{ render \}\);/g) || []).length === 2 && !/= await readOpportunityAd\(opp/.test(cli),
+    'both read loops go through safeRead, so one advertisement that breaks its reader is a posting queued with less and never a run that ends on that row every morning');
+  const pdfSrc = bareJs(await read('_scraper/pdf-text.mjs'));
+  ok(/new Worker\(new URL\(import\.meta\.url\), \{\s*workerData: \{ pdfTextJob: true, bytes: ab, maxPages \}, transferList: \[ab\],/.test(pdfSrc)
+     && /timer = setTimeout\(\(\) => finish\(\{ ok: false, text: '', pages: 0,\s*error: `timed out after/.test(pdfSrc)
+     && /if \(worker\) worker\.terminate\(\)/.test(pdfSrc) && PDF.PDF_TIMEOUT_MS === 60000
+     && /if \(!isMainThread && workerData && workerData\.pdfTextJob && parentPort\)/.test(pdfSrc),
+    'a PDF is parsed in a worker thread of the module itself, raced against a clock whose loser is terminated: pdf.js parses on the calling thread in Node, where nothing can interrupt a stream that inflates to a gigabyte');
+  if (PDF.pdfjsInstalled()) {
+    const slow = await PDF.pdfText(CLI.tinyPdf(['x']), { timeoutMs: 1 });
+    ok(!slow.ok && /timed out/.test(slow.error), 'a read past the clock is reported unreadable, an answer the crawler already has');
+    ok((await PDF.pdfText(CLI.tinyPdf(['Read me']), { inline: true })).ok, 'and the parse itself still reads on the calling thread when asked to');
+  }
+  const renderSrc = bareJs(await read('_scraper/render-page.mjs'));
+  ok(!/page\.evaluate\(/.test(renderSrc) && /page\.title\(\)\.catch/.test(renderSrc) && /page\.locator\('h1'\)\.first\(\)\.innerText\(\{ timeout: 10000 \}\)/.test(renderSrc)
+     && /page\.locator\('body'\)\.innerText\(\{ timeout: 20000 \}\)/.test(renderSrc),
+    'the renderer reads the words through the utility world with timeouts, never page.evaluate, which takes none and runs where the page\'s own definitions are in force');
+  ok(/return await Promise\.race\(\[work, clock\]\);/.test(renderSrc) && /const deadline = overallMs > 0 \? overallMs : timeoutMs \+ 45000;/.test(renderSrc)
+     && /\} finally \{\s*if \(timer\) clearTimeout\(timer\);\s*if \(browser\) await browser\.close\(\)\.catch/.test(renderSrc),
+    'and the whole read is raced against one clock whose loser closes the browser, which rejects any call still pending inside (measured: a page that never yields is cut at the clock)');
+  const R = await import('./render-page.mjs');
+  eq(Object.keys(R.browserEnv({ PATH: '/bin', HOME: '/h', FIREBASE_SERVICE_ACCOUNT: 'secret', GITHUB_TOKEN: 't', PLAYWRIGHT_BROWSERS_PATH: '/pw' })),
+    ['PATH', 'HOME', 'PLAYWRIGHT_BROWSERS_PATH'], 'the browser is launched with a minimal environment: the credential the crawl step holds never reaches a renderer');
+  ok(!R.BROWSER_ENV_KEYS.some((k) => /FIREBASE|TOKEN|SECRET|KEY|ACCOUNT/i.test(k)) && /env: browserEnv\(\)/.test(renderSrc)
+     && /chromiumSandbox: true/.test(renderSrc) && renderSrc.indexOf('chromiumSandbox: true') < renderSrc.indexOf('chromiumSandbox: false'),
+    'with the OS sandbox on where the runner allows it, and off only as the second try');
+
+  /* ---- the wiring ----------------------------------------------------- */
+  const build = await read('_scraper/build-jobs.mjs');
+  ok(/import \{ SOURCE as POMS_SOURCE \} from '\.\/poms\.mjs';/.test(build), 'build-jobs knows the source');
+  const pomsBranch = build.indexOf('if (v.row.source === POMS_SOURCE) {');
+  const windowTest = build.indexOf('Date.parse(v.reviewedAt) < sheetGeneratedAt');
+  const fileCheck = build.indexOf('if (byId.has(v.row.id)) continue;');
+  ok(pomsBranch > 0 && windowTest > pomsBranch && fileCheck > 0 && fileCheck < pomsBranch,
+    'an approved POMS posting publishes from its document on every build, after the file check and BEFORE the workbook window');
+  const gathered = build.indexOf('if (added || pomsAdded) sheetRows = Array.from(byId.values());');
+  const queueCatch = build.indexOf('warn(`could not read the review queue');
+  const flagAt = build.indexOf('pomsRead = true;');
+  ok(gathered > 0 && queueCatch > gathered && flagAt > gathered && flagAt < queueCatch
+     && (build.match(/pomsRead = true;/g) || []).length === 1,
+    'and "present" for a POMS row means its approved rows are IN HAND: the flag is set once after the loop that gathers them, inside the try, never beside the query');
+  ok(/!\(pomsRead && fromPoms\(r\)\) &&/.test(build) && /!\(sheetPresent && fromSheet\(r\)\) &&/.test(build),
+    'the orphan carry drops a served POMS row only when the queue answered, beside the workbook\'s own rule');
+  ok(/mirrorSnap\.docs\.filter\(\(d\) => pomsRead \|\| !fromPoms\(d\.data\(\) \|\| \{\}\)\)/.test(build),
+    'a POMS mirror is never deleted on a run that could not read the queue');
+  ok(/if \(sid && fromPoms\(d\.data\(\) \|\| \{\}\)\) \{\s*\n\s*if \(pomsRead && !sheetIds\.has\(sid\)\)/.test(build),
+    'a taken-over POMS posting leaves the site when its document is no longer approved, judged only on a read that answered');
+  const migrate = await import('./migrate-to-firestore.mjs');
+  ok(!migrate.migratable({ source: POMS_SOURCE }) && !migrate.migratable({ source: 'jobmarket-sheet' })
+     && migrate.migratable({ source: 'oa-form' }), 'the migration refuses a POMS row as it refuses the workbook\'s');
+  eq(A.queueNeedsFetch({ rowId: 'x', status: 'pending', row: { source: POMS_SOURCE, adUrl: 'https://apply.interfolio.com/1' } }, { today: '2026-09-23' }).fetch,
+    false, 'the advert pass leaves a POMS document\'s block to the crawler that wrote it (one URL, one owner)');
+  eq(A.queueNeedsFetch({ rowId: 'x', status: 'pending', row: { source: 'jobmarket-sheet', adUrl: 'https://apply.interfolio.com/1' } }, { today: '2026-09-23' }).fetch,
+    true, 'while a workbook document is read as before');
+  const sync = bareJs(await read('_scraper/sync-jobmarket-sheet.mjs'));
+  const clearAt = sync.indexOf('const cleared = clearOfCrawledIds(collected.rows, queue.docs || []);');
+  ok(clearAt > sync.indexOf('const queue = await loadReviewQueue();') && clearAt < sync.indexOf('const known = existing.concat(')
+     && /carryUnreadColumns\(cleared\.rows, known, tabReads\)/.test(sync) && !/carryUnreadColumns\(collected\.rows/.test(sync),
+    'the sheet sync keeps its ids clear of the crawled documents\' BEFORE anything joins a row to what the site knows by id');
+  ok(/const pomsPending = \(queue\.docs \|\| \[\]\)\s*\.filter\(\(d\) => d && d\.status === PENDING && d\.row && d\.row\.source === POMS_SOURCE\)\s*\.map\(\(d\) => \(\{ \.\.\.d\.row, _pending: true \}\)\);/.test(sync)
+     && /const listed = \[\.\.\.listedNow, \.\.\.swept\.keep, \.\.\.pomsPending\]/.test(sync)
+     && /const flagAgainst = \[\.\.\.site, \.\.\.pomsPending\];/.test(sync)
+     && (sync.match(/duplicatesOf\((?:doc\.row|row), flagAgainst\)/g) || []).length === 2 && !/duplicatesOf\((?:doc\.row|row), site\)/.test(sync),
+    'and measures a fresh sheet row against the pending POMS rows too, marked, for the repeat rule and for both flag passes');
+  ok(A.advertHostsReport([{ year: 2027, adUrl: 'https://www.poms.org/sites/x.pdf' }], { years: [2027] }).hosts[0].read === 'poms pipeline (PDF text)',
+    'the hosts inventory names the pipeline that reads poms.org now');
+  eq(levelsFromRank('Open Rank, Professional Track Faculty, Business Analytics'), ['Non-tenure track (teaching) position'],
+    'a professional-track post is non-tenure-track, whatever rank stands beside it');
+  eq(levelsFromRank('Teaching Track Assistant Professor'), ['Non-tenure track (teaching) position'], 'and so is a teaching track');
+  eq(levelsFromRank('Assistant Professor'), ['Assistant Professor'], 'an assistant professorship still is one');
+
+  const panel = await read('assets/oa-jobreview.js');
+  ok(/'poms-opportunities': 'from the POMS job postings page'/.test(panel), 'the panel names the source on a duplicate entry');
+  ok(/var CRAWLED_FROM = \{[\s\S]{0,300}'poms-opportunities': 'the POMS job postings page'/.test(panel)
+     && /CRAWLED_FROM\[row\.source\] \? ' &middot; from ' \+ esc\(CRAWLED_FROM\[row\.source\]\)/.test(panel),
+    'and each card\'s header says which crawler it came down');
+  ok(/nav\.hrefFor && !d\.pending/.test(panel) && /still under review/.test(panel) && /already published or under review/.test(panel)
+     && /Possibly already on the site' \+ \(anyPending \? ' or in your queue' : ''\)/.test(panel),
+    'a duplicate still under review is said so and linked nowhere, and the lead sentence follows the list');
+  ok(/data-line="' \+ esc\(String\(fieldValue\(doc, 'applyBy'\) \|\| ''\)\)/.test(panel)
+     && /var line = String\(derived\.getAttribute\('data-line'\) \|\| ''\)\.trim\(\);/.test(panel)
+     && /\(v \? longDate\(v\) : \(OPEN_ENDED\.test\(line\) \? line : 'Until filled\.'\)\)/.test(panel),
+    'the deadline preview mirrors settleDeadline: with the date box empty, a stored line that says the search stays open is what will publish');
+  const mailer = await read('_scraper/jobreview-mailer.mjs');
+  ok(/originWords\(/.test(mailer) && /open the POMS page/.test(mailer) && /crawled from the POMS job postings page/.test(mailer),
+    'the review e-mail says where a POMS posting came from and links the page');
+  ok(/d\.pending \? 'still under review' : ''/.test(mailer) && /const anyPending = dups\.some\(\(d\) => d && d\.pending\);/.test(mailer)
+     && /\(anyPending \? ' or under review' : ''\)/.test(mailer),
+    'and its duplicate block says "still under review" where the card does, in the heading and beside the posting');
+  const admin = await read('admin-area.html');
+  ok((admin.match(/POMS job postings page/g) || []).length >= 2 && /are held back until you approve them/.test(admin.replace(/\s+/g, ' ')),
+    'the admin page names the second crawler on both surfaces and still says the gate is a gate');
+
+  /* ---- the workflow --------------------------------------------------- */
+  const wf = await read('.github/workflows/oa-poms-crawl.yml');
+  const wfCode = wf.replace(/^\s*#.*$/gm, '');
+  ok(/node _scraper\/poms-crawl\.mjs "\$@"/.test(wfCode), 'the workflow runs the crawler');
+  ok(/schedule:\s*\n\s*- cron: '35 8 \* \* \*'/.test(wfCode), 'daily, after the sheet read and both advert passes');
+  ok(/workflow_dispatch:/.test(wfCode) && ['dry_run', 'scan', 'since', 'limit', 'no_render'].every((i) => new RegExp('^      ' + i + ':', 'm').test(wfCode)),
+    'and on demand, with its five inputs');
+  ok(/IN_SINCE: \$\{\{ inputs\.since \}\}/.test(wfCode) && /IN_LIMIT: \$\{\{ inputs\.limit \}\}/.test(wfCode)
+     && /"--since" "\$IN_SINCE"/.test(wfCode) && /"--limit" "\$IN_LIMIT"/.test(wfCode),
+    'the free-text inputs reach the shell through the environment');
+  ok(/FIREBASE_SERVICE_ACCOUNT: \$\{\{ secrets\.FIREBASE_SERVICE_ACCOUNT \}\}/.test(wfCode), 'it carries the credential the queue is behind');
+  ok(/npm install[^\n]*firebase-admin@12 pdfjs-dist@4/.test(wfCode), 'and installs the database client and the PDF engine');
+  ok(/npm install[^\n]*firebase-admin@12 pdfjs-dist@4 playwright@1/.test(wfCode) && !/npm install[^\n]* playwright@1;/.test(wfCode.replace(/firebase-admin@12 pdfjs-dist@4 playwright@1/g, '')),
+    'the Playwright step names them again: a root `npm install --no-save` with a shorter list prunes what an earlier one installed (reproduced with npm 10)');
+  ok(/for m in firebase-admin pdfjs-dist; do[\s\S]{0,240}require\('\$m\/package\.json'\)[\s\S]{0,200}::error::/.test(wfCode)
+     && wfCode.indexOf('for m in firebase-admin pdfjs-dist') < wfCode.indexOf('node _scraper/poms-crawl.mjs --selftest'),
+    'and the offline checks first prove both are still installed, out loud, since a missing client would be a green run that queues nothing');
+  ok(/playwright@1/.test(wfCode) && /continue-on-error: true/.test(wfCode) && /--no-render/.test(wfCode),
+    'the browser is best-effort, and a run without it says --no-render');
+  ok(/POMS_REQUIRE_PDF: '1'/.test(wfCode) && /poms-crawl\.mjs --selftest/.test(wfCode),
+    'its own checks run with the PDF round trip required');
+  ok(!/git commit/.test(wfCode) && !/git add/.test(wfCode) && !/oa-jobs-changed/.test(wfCode),
+    'it commits nothing and rings no doorbell: an approval publishes through the existing chain');
+  ok(/permissions:\s*\n\s*contents: read/.test(wfCode), 'with read-only contents, since it writes none');
+  ok(/timeout-minutes: 40/.test(wfCode) && !/timeout-minutes: 30/.test(wfCode) && /concurrency:\s*\n\s*group: oa-poms-crawl-/.test(wfCode),
+    'bounded at forty minutes (up to fifteen of bounded browser installs run ahead of the twenty-minute read window), in a group of its own');
+  const buildWf = await read('.github/workflows/oa-jobs-build.yml');
+  ok(!/crawl the POMS job postings page/.test(buildWf), 'the build is not chained to it (one event, one build; it writes no data)');
+
+  /* ---- announced and written down -------------------------------------- */
+  const clEntry = (changelog.updates || []).find((u) => u.id === 'poms-crawler-2026-09');
+  ok(clEntry && clEntry.date === '2026-09-23' && clEntry.url === '/jobs' && /POMS/.test(clEntry.summary)
+     && !/—/.test(clEntry.title + clEntry.summary), 'changelog.json announces it, dated, linked, no em dash');
+  const setup = await read('_SETUP-POMS-CRAWL.md');
+  ok(/Interfolio/.test(setup) && /headless browser/.test(setup) && /no public API/i.test(setup) && /since/.test(setup),
+    'the setup document answers the Interfolio question and names the inputs');
+  ok(/A Word file is never tried again/.test(setup) && /except a Word file, which nothing here reads/.test(setup),
+    'and says a Word file is never re-read, since needReread leaves one alone');
+  ok(/PDF engine \(pdfjs-dist\) is REQUIRED/.test(wf) && !/both best-effort/.test(wf),
+    'the workflow header says the PDF engine is required and only the browser is best-effort, which is what its steps do');
+  const at = claude.indexOf('## The POMS job postings page is crawled into the review queue');
+  const secEnd = at > 0 ? claude.indexOf('\n## ', at) : -1;
+  const sec = at > 0 ? claude.slice(at, secEnd > 0 ? secEnd : claude.length) : '';
+  ok(sec.length > 3000 && sec.length < 60000 && /2026-09-23/.test(sec) && /FROM ITS QUEUE DOCUMENT/.test(sec) && /ADVERTISEMENT LINK/.test(sec)
+     && /Interfolio/.test(sec) && /pomsRead/.test(sec) && /queueNeedsFetch/.test(sec)
+     && /NEVER TAKES AN ID A CRAWLED DOCUMENT HOLDS/.test(sec) && /clearOfCrawledIds/.test(sec) && !/takes the POMS card over/.test(sec)
+     && /THE 2026-09-23 REVIEW OF IT/.test(sec) && /effectiveLink/.test(sec)
+     && /The PDF engine is REQUIRED/.test(sec) && !/both\s+it and the PDF engine are BEST-EFFORT/.test(sec)
+     && /a Word file excepted/.test(sec) && !/holds the tracking sheet's rows and nothing else/.test(claude)
+     && /the crawlers' queue above/.test(claude),
+    'CLAUDE.md records the design: the same gate, publishing from the document, new by link, the Interfolio answer, the id rule (the retired takeover gone) and the review');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -24242,6 +24777,7 @@ if (isMain(import.meta.url)) {
   await testJobTakedown();
   await testCandidateFormHardening();
   await testStrandedCvs();
+  await testPomsCrawler();
   await testVerifyExistingUsers();
   await testFixAccountEmail();
   await testRegisteredUsersFigure();

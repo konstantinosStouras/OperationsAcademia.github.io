@@ -1,0 +1,185 @@
+name: OA jobs — crawl the POMS job postings page
+
+# The POMS Society's job postings page (poms.org/opportunities) lists the
+# operations job market's advertisements — 381 of them on 2026-09-23, most
+# as PDFs the schools uploaded there. This reads it once a day, and every
+# posting it has not seen goes into the maintainer's review queue exactly as
+# a tracking-sheet row does: its own advertisement is read (the PDF, or the
+# page, or — for a JavaScript shell such as apply.interfolio.com — the page
+# as a browser shows it), the site's row is filled from what it says, and
+# nothing publishes until the maintainer approves it on /admin-area
+# (owner, 2026-09-23). See the headers of _scraper/poms.mjs and
+# _scraper/poms-crawl.mjs, and _SETUP-POMS-CRAWL.md.
+#
+# IT WRITES NOTHING UNDER data/, so it is not a data writer and has no
+# commit step: a pending posting must not sit in a served file, and an
+# approved one publishes from its queue document (build-jobs.mjs). All it
+# needs is the credential the queue is behind. Without FIREBASE_SERVICE_
+# ACCOUNT the run says so and queues nothing.
+#
+# The PDF engine (pdfjs-dist) is REQUIRED: nine postings in ten on the page
+# are PDFs, so a run without it would queue a season of empty cards, and its
+# install is retried and bounded rather than optional (the offline checks
+# below refuse to run without it). The browser (Playwright's Chromium) is
+# best-effort: a run without it still queues every new posting, carrying
+# what the page itself said and saying in its comments that the
+# advertisement could not be read. The browser install is the bounded,
+# cached one oa-checks.yml already makes for page-test.mjs.
+
+on:
+  schedule:
+    # 08:35 UTC — after the sheet read (06:40) and both advert passes (07:20,
+    # 07:50), so a posting the workbook's contributors copied from POMS the
+    # same morning is already in the queue when this compares links against
+    # it; and off the hour, so this repository does not queue behind every
+    # other :00 job.
+    - cron: '35 8 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Read everything, print what would be queued, write nothing'
+        type: boolean
+        default: false
+      scan:
+        description: 'List the new postings and stop — reads no advertisement'
+        type: boolean
+        default: false
+      since:
+        description: 'Queue postings dated on or after this day (YYYY-MM-DD; blank = the last 30 days)'
+        type: string
+        default: ''
+      limit:
+        description: 'Read at most this many advertisements (blank = 40)'
+        type: string
+        default: ''
+      no_render:
+        description: 'Never start a browser for a page the parser could not read'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Its own group: it writes no served file, so it never races the data
+# writers, and a second fire while one is running should wait rather than
+# read the same page twice.
+concurrency:
+  group: oa-poms-crawl-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    # Forty, not the thirty the advert passes take: up to fifteen minutes of
+    # bounded, best-effort browser installs run AHEAD of the crawl's own
+    # twenty-minute read window, and a run the cap kills has read for nothing
+    # and reads as a failure (the 2026-09-23 review).
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # firebase-admin for the queue, pdfjs-dist for the PDFs. Bounded and
+      # retried, the way oa-checks.yml installs Playwright, because a
+      # trickling registry never trips npm's own limits.
+      - name: The database client and the PDF engine
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 120 npm install --no-save --no-audit --no-fund firebase-admin@12 pdfjs-dist@4; then break; fi
+            if [ "$attempt" = 3 ]; then
+              echo "::error::firebase-admin and pdfjs-dist could not be installed after three attempts"
+              exit 1
+            fi
+            echo "::warning::npm install attempt $attempt stalled or failed — retrying"
+            sleep $((attempt * 10))
+          done
+
+      # The browser, for the pages that are JavaScript shells (Interfolio and
+      # the like). Best-effort: if it cannot be had, the crawl runs with
+      # --no-render and those postings queue with what the POMS page said.
+      #
+      # THE TWO PACKAGES ABOVE ARE NAMED AGAIN, and that is load-bearing: with
+      # no package.json at the root, npm reifies each `--no-save` install to
+      # exactly the packages named in it and REMOVES the rest as extraneous,
+      # so a second install naming Playwright alone deleted firebase-admin and
+      # pdfjs-dist, and every run went red at the offline checks (the
+      # 2026-09-23 review, reproduced with npm 10). One list, or one install.
+      - name: Playwright, and the version to key its browser cache on
+        id: pw
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          set -e
+          for attempt in 1 2 3; do
+            if timeout 60 npm install --no-save --no-audit --no-fund firebase-admin@12 pdfjs-dist@4 playwright@1; then break; fi
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            echo "::warning::npm install attempt $attempt stalled or failed — retrying"
+            sleep $((attempt * 10))
+          done
+          echo "version=$(node -p "require('./node_modules/playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "image=${ImageOS:-unknown}" >> "$GITHUB_OUTPUT"
+
+      - name: The browser build that version pins
+        if: steps.pw.outcome == 'success'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ms-playwright-${{ runner.os }}-${{ steps.pw.outputs.image }}-${{ steps.pw.outputs.version }}
+
+      - name: The browser it drives
+        id: browser
+        if: steps.pw.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          set -e
+          timeout 120 npx playwright install-deps chromium ||
+            echo "::warning::playwright install-deps did not finish — continuing; the launch is the real test"
+          for attempt in 1 2; do
+            if timeout 180 npx playwright install chromium; then break; fi
+            if [ "$attempt" = 2 ]; then exit 1; fi
+            echo "::warning::browser download attempt $attempt stalled or failed — retrying"
+            sleep 15
+          done
+
+      # Its own checks, with the PDF engine present so the PDF round trip is
+      # REQUIRED here rather than skipped as it is in the PR check.
+      - name: Offline checks
+        env:
+          POMS_REQUIRE_PDF: '1'
+        run: |
+          # the first step's packages must still be here (see the Playwright
+          # step): a missing PDF engine fails the checks below on its own, a
+          # missing database client would be a GREEN run that queues nothing
+          for m in firebase-admin pdfjs-dist; do
+            node -e "require('$m/package.json')" ||
+              { echo "::error::$m is no longer installed: a later npm install pruned it"; exit 1; }
+          done
+          node _scraper/poms-crawl.mjs --selftest
+
+      - name: Crawl the page
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # THE FREE-TEXT INPUTS GO THROUGH THE ENVIRONMENT, never interpolated
+          # into the script: ${{ }} pastes a dispatcher's own words in before
+          # the shell ever sees them, and this step holds the credential.
+          IN_SINCE: ${{ inputs.since }}
+          IN_LIMIT: ${{ inputs.limit }}
+          # the browser is used only when both of its installs succeeded
+          RENDER_OK: ${{ steps.pw.outcome == 'success' && steps.browser.outcome == 'success' }}
+        run: |
+          set -- \
+            ${{ inputs.scan && '--scan' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            ${{ inputs.no_render && '--no-render' || '' }}
+          if [ "$RENDER_OK" != "true" ]; then set -- "$@" "--no-render"; fi
+          if [ -n "$IN_SINCE" ]; then set -- "$@" "--since" "$IN_SINCE"; fi
+          if [ -n "$IN_LIMIT" ]; then set -- "$@" "--limit" "$IN_LIMIT"; fi
+          node _scraper/poms-crawl.mjs "$@"
+
+      # NO DOORBELL. Nothing here reaches data/: a posting the maintainer
+      # approves rings the build through publishOnReview (_functions/index.js)
+      # exactly as a tracking-sheet approval does.

@@ -256,7 +256,16 @@
   var DUP_SOURCE = {
     'oa-form': 'posted through the site',
     'sheet-import': 'from the legacy import',
-    'jobmarket-sheet': 'from the tracking sheet'
+    'jobmarket-sheet': 'from the tracking sheet',
+    'poms-opportunities': 'from the POMS job postings page'
+  };
+
+  /* Which crawler a queued row came down, for the card's own header line.
+     Keep in step with CRAWLER_SOURCES in _scraper/jobs-model.mjs; a source
+     this map does not know draws nothing rather than a guess. */
+  var CRAWLED_FROM = {
+    'jobmarket-sheet': 'the tracking sheet',
+    'poms-opportunities': 'the POMS job postings page'
   };
 
   /**
@@ -280,21 +289,30 @@
          now carries the season and the closing date it reads. Without the
          module the name is drawn with NO link: a link that is right most of
          the time is the worst shape for one. */
+      /* A posting still UNDER REVIEW (the POMS crawler names the queue's own
+         pending rows, since the two crawlers see one advertisement days
+         apart) is nowhere on the site to link to, so it says so and links
+         nothing. */
       var nav = window.OAJobNav;
-      var href = (nav && nav.hrefFor) ? nav.hrefFor(d) : '';
+      var href = (nav && nav.hrefFor && !d.pending) ? nav.hrefFor(d) : '';
       return '<li>' + esc(name || d.id) +
         (d.posted ? ' <span class="oa-hint" style="display:inline">(posted ' +
           esc(d.posted) + (DUP_SOURCE[d.source] ? ', ' + esc(DUP_SOURCE[d.source]) : '') +
+          (d.pending ? ', still under review' : '') +
           ')</span>' : '') +
         (href
           ? ' &middot; <a href="' + esc(href) + '" target="_blank" rel="noopener">see it live</a>'
           : '') +
         '</li>';
     }).join('');
+    var anyPending = dups.some(function (d) { return d.pending; });
+    /* the lead sentence follows the list under it: a posting still under
+       review is in the maintainer's own queue, not on the site */
     return '<div class="oa-note is-warn" data-dup>' +
-      '<strong>&#9888; Possibly already on the site.</strong> This crawled posting ' +
+      '<strong>&#9888; Possibly already on the site' + (anyPending ? ' or in your queue' : '') +
+      '.</strong> This crawled posting ' +
       'looks like ' + (dups.length === 1 ? 'a job that is' : dups.length + ' jobs that are') +
-      ' already published:' +
+      (anyPending ? ' already published or under review:' : ' already published:') +
       '<ul style="margin:6px 0 4px;padding-left:20px">' + items + '</ul>' +
       'If it is the same job, <strong>Reject</strong> keeps this copy off the site; ' +
       'if it is a different one, <strong>Approve</strong> publishes it as usual.' +
@@ -421,6 +439,7 @@
         '<p class="oa-hint">Advertised ' + esc(row.posted || '?') +
           ' &middot; market ' + esc(String(row.year || '?')) +
           ' &middot; queued ' + esc(fmtDate(doc.queuedAt) || '?') +
+          (CRAWLED_FROM[row.source] ? ' &middot; from ' + esc(CRAWLED_FROM[row.source]) : '') +
           (ad ? ' &middot; <a href="' + esc(ad) + '" target="_blank" rel="noopener">' +
             'open the advert</a>' : '') +
         '</p>' +
@@ -447,7 +466,12 @@
                shows the poster the same thing (`#f-department-preview`). */
             (f.place === 'unit' || f.key === 'applyByDate'
               ? '<span class="oa-hint oa-rv-derived" aria-live="polite" data-derived="'
-                + (f.key === 'applyByDate' ? 'deadline' : 'place') + '"></span>'
+                + (f.key === 'applyByDate' ? 'deadline' : 'place') + '"'
+                /* the stored line, for the preview to keep where the date box
+                   is empty and the line says the search stays open */
+                + (f.key === 'applyByDate'
+                  ? ' data-line="' + esc(String(fieldValue(doc, 'applyBy') || '')) + '"'
+                  : '') + '></span>'
               : '') +
             '</' + tag + '>';
         }).join('') +
@@ -1004,14 +1028,24 @@
    * for the line as well, which let one posting reach the site with a closing
    * date and no line at all and stopped the whole site publishing.
    */
+  /* The jobs-model open-ended literal, CHARACTER FOR CHARACTER (the
+     oa-fresh.js idiom, pinned the same way): settleDeadline keeps a stored
+     line that says the search stays open, and the preview has to say the
+     same, or it promised "Until filled." over a card that publishes "Open
+     until filled. Review begins October 15" (a POMS row; the workbook's
+     rows put those words in the comments). */
+  var OPEN_ENDED = /until\s*filled|open\s*until|rolling(?!\s+basis)/i;
+
   function wireDeadline(card) {
     var date = card.querySelector('[data-key="applyByDate"]');
     var derived = card.querySelector('[data-derived="deadline"]');
     if (!date || !derived) return;
+    var line = String(derived.getAttribute('data-line') || '').trim();
 
     function preview() {
       var v = String(date.value || '').trim();
-      derived.textContent = 'Published as: ' + (v ? longDate(v) : 'Until filled.');
+      derived.textContent = 'Published as: ' +
+        (v ? longDate(v) : (OPEN_ENDED.test(line) ? line : 'Until filled.'));
     }
     date.addEventListener('input', preview);
     date.addEventListener('change', preview);

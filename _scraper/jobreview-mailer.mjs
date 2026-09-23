@@ -46,8 +46,9 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 import { COLLECTION, needMail, applyEdits } from './jobreview.mjs';
-import { longDate, postedBy, countriesOf, countriesText } from './jobs-model.mjs';
+import { longDate, postedBy, countriesOf, countriesText, POMS_SOURCE } from './jobs-model.mjs';
 import { sheetEditUrl, SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
+import { PAGE_URL as POMS_PAGE } from './poms.mjs';
 import {
   shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
   safeError,
@@ -109,12 +110,22 @@ function line(label, value) {
 function dupHtml(doc) {
   const dups = Array.isArray(doc.dup) ? doc.dup : [];
   if (!dups.length) return '';
-  const items = dups.map((d) =>
-    '<li>' + esc([d.institution, d.department].filter(Boolean).join(' — ') || d.id) +
-    (d.posted ? ' <span style="color:#5a5f6b">(posted ' + esc(d.posted) + ')</span>' : '') +
-    '</li>').join('');
+  /* A posting STILL UNDER REVIEW (the POMS crawler names the queue's own
+     pending rows, marked `pending` on the entry) is in the maintainer's own
+     queue and nowhere on the site, so the e-mail says so, as the card does:
+     told it was "already on the site", they would reject a posting in favour
+     of one nobody had approved (the 2026-09-23 review). */
+  const items = dups.map((d) => {
+    const when = [d.posted ? 'posted ' + esc(d.posted) : '', d.pending ? 'still under review' : '']
+      .filter(Boolean).join(', ');
+    return '<li>' + esc([d.institution, d.department].filter(Boolean).join(' — ') || d.id) +
+      (when ? ' <span style="color:#5a5f6b">(' + when + ')</span>' : '') +
+      '</li>';
+  }).join('');
+  const anyPending = dups.some((d) => d && d.pending);
   return '<p style="background:#fff8e6;border:1px solid #e6c866;border-radius:6px;' +
-    'padding:10px 14px">&#9888; <strong>Possibly already on the site</strong> — this ' +
+    'padding:10px 14px">&#9888; <strong>Possibly already on the site' +
+    (anyPending ? ' or under review' : '') + '</strong> — this ' +
     'looks like it may duplicate:</p>' +
     '<ul style="margin:6px 0 14px;padding-left:22px">' + items + '</ul>';
 }
@@ -184,18 +195,37 @@ function advertHtml(doc) {
  * (jobs-model.mjs), so this e-mail and the submissions one cannot disagree
  * about what a source is called.
  */
-function postedByHtml(doc, sheetUrl) {
-  /* This queue holds the tracking sheet's rows and nothing else, so the source
-     is known even for a document written before the row carried one — supplied
-     here as a FACT about the collection rather than guessed at inside
-     `postedBy`, which must go on answering from the data for every other
-     caller. */
+/** Which crawler a queued row came down: the POMS page's rows say so on the
+    row (poms.mjs stamps every one); anything else in this queue is the
+    tracking sheet's, source or no source. */
+function crawlerOf(doc) {
   const row = (doc && doc.row) || {};
-  const who = postedBy({ source: row.source || SHEET_SOURCE }, row);
-  const link = safeUrl(sheetUrl);
+  return row.source === POMS_SOURCE ? POMS_SOURCE : SHEET_SOURCE;
+}
+
+/** "read from your tracking sheet", or "crawled from the POMS job postings
+    page" — the words a sentence uses for where a posting came from, and for
+    a batch that came down both roads, both. */
+function originWords(docs) {
+  const kinds = new Set((docs || []).map(crawlerOf));
+  if (kinds.size === 2) return 'read from your tracking sheet and crawled from the POMS job postings page';
+  return kinds.has(POMS_SOURCE) ? 'crawled from the POMS job postings page' : 'read from your tracking sheet';
+}
+
+function postedByHtml(doc, sheetUrl) {
+  /* This queue holds the two crawlers' rows and nothing else, so the source
+     is known even for a document written before the row carried one — the
+     tracking sheet's, supplied here as a FACT about the collection rather
+     than guessed at inside `postedBy`, which must go on answering from the
+     data for every other caller. A POMS row always names itself. */
+  const row = (doc && doc.row) || {};
+  const source = crawlerOf(doc);
+  const who = postedBy({ source }, row);
+  const poms = source === POMS_SOURCE;
+  const link = poms ? POMS_PAGE : safeUrl(sheetUrl);
   return '<p style="margin:0 0 14px;color:#5a5f6b;font-size:13px">' +
     '<strong style="color:#222">Posted by:</strong> ' + esc(who.text) +
-    (link ? ' &middot; <a href="' + esc(link) + '">open the workbook</a>' : '') +
+    (link ? ' &middot; <a href="' + esc(link) + '">' + (poms ? 'open the POMS page' : 'open the workbook') + '</a>' : '') +
     '</p>';
 }
 
@@ -207,7 +237,7 @@ export function renderReviewEmail(doc, { site = SITE, sheetUrl = '' } = {}) {
   const ad = /^https?:\/\//i.test(String(r.adUrl || '')) ? r.adUrl : '';
 
   const bodyHtml =
-    '<p>A job posting has been read from your tracking sheet and is waiting for ' +
+    '<p>A job posting has been ' + originWords([doc]) + ' and is waiting for ' +
     'you to approve it. <strong>It is not on the site yet.</strong></p>' +
     postedByHtml(doc, sheetUrl) +
     dupHtml(doc) +
@@ -278,18 +308,19 @@ export function renderDigestEmail(docs, { site = SITE, sheetUrl = '' } = {}) {
   /* The whole batch came down one road, so the line the owner asked for is
      said ONCE here rather than repeated against every row — which is the same
      reasoning that makes a burst one message in the first place. */
-  const first = docs[0] || {};
-  const who = postedBy({ source: (first.row && first.row.source) || SHEET_SOURCE },
-                       first.row || {});
-  const sheet = safeUrl(sheetUrl);
+  const kinds = [...new Set(docs.map(crawlerOf))];
+  const who = kinds.map((k) => postedBy({ source: k }, {}).text).join('; and ');
+  const sheet = kinds.includes(SHEET_SOURCE) ? safeUrl(sheetUrl) : '';
+  const poms = kinds.includes(POMS_SOURCE) ? POMS_PAGE : '';
 
   const bodyHtml =
-    '<p><strong>' + docs.length + ' job postings</strong> have been read from your ' +
-    'tracking sheet and are waiting for you to approve them. ' +
+    '<p><strong>' + docs.length + ' job postings</strong> have been ' + originWords(docs) +
+    ' and are waiting for you to approve them. ' +
     '<strong>None of them is on the site yet.</strong></p>' +
     '<p style="margin:0 0 14px;color:#5a5f6b;font-size:13px">' +
-      '<strong style="color:#222">Posted by:</strong> ' + esc(who.text) +
+      '<strong style="color:#222">Posted by:</strong> ' + esc(who) +
       (sheet ? ' &middot; <a href="' + esc(sheet) + '">open the workbook</a>' : '') +
+      (poms ? ' &middot; <a href="' + esc(poms) + '">open the POMS page</a>' : '') +
     '</p>' +
     '<p>They came in together, so they are listed here rather than sent one by one.</p>' +
     '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' + rows + '</table>' +
@@ -484,6 +515,11 @@ function selftest() {
   ok(!dmail.html.includes('<b>University</b>'), 'and its fields cannot inject markup');
   ok(!/Possibly already on the site/.test(mail.html),
     'a posting with no flag carries no warning');
+  const pendingDup = renderReviewEmail({ ...doc, dup: [{ id: 'z', source: 'jobmarket-sheet',
+    institution: 'Example University', department: 'Operations', posted: '2026-09-15', pending: true }] });
+  ok(/Possibly already on the site or under review/.test(pendingDup.html) && /posted 2026-09-15, still under review/.test(pendingDup.html),
+    'a duplicate still under review is said to be, in the heading and beside the posting, as on the card');
+  ok(!/under review/.test(dmail.html), 'and a published one is not');
 
   /* THE BUSINESS-SCHOOL FLAG IS SAID WHERE THE DECISION IS ASKED FOR, like
      the duplicate one: the sync stamps `biz` on a posting whose text says
@@ -527,6 +563,31 @@ function selftest() {
   ok(!placed.html.includes('<b>University</b>'), 'with its names escaped, never injected');
   ok(!/What the advertisement says/.test(mail.html),
     'while a posting with no ad block carries no mention');
+
+  /* THE OTHER CRAWLER (2026-09-23). A posting from the POMS job postings
+     page names the page, links the page rather than the workbook, and the
+     opening sentence says where it was crawled from; a batch that came down
+     both roads says both. */
+  const pomsDoc = { ...doc, rowId: 'p', row: { ...doc.row, id: 'p', source: 'poms-opportunities',
+    adUrl: 'https://www.poms.org/sites/default/files/2026-09/x.pdf' } };
+  const pmail = renderReviewEmail(pomsDoc, { site: 'https://example.org', sheetUrl: 'https://docs.google.com/x/edit' });
+  ok(/crawled from the POMS job postings page/.test(pmail.html),
+    'a POMS posting says it was crawled from the POMS page');
+  ok(/auto-crawler from the POMS job postings page/.test(pmail.html),
+    'and the Posted-by line names that crawler');
+  ok(/open the POMS page/.test(pmail.html) && pmail.html.includes('https://www.poms.org/opportunities'),
+    'linking the page it came from');
+  ok(!/open the workbook/.test(pmail.html), 'and never the workbook, which it is not in');
+  ok(/read from your tracking sheet/.test(mail.html) && !/POMS/.test(mail.html),
+    'while a tracking-sheet posting still reads as the sheet\'s, with no POMS in it');
+  const mixed = renderDigestEmail([doc, pomsDoc], { site: 'https://example.org', sheetUrl: 'https://docs.google.com/x/edit' });
+  ok(/read from your tracking sheet and crawled from the POMS job postings page/.test(mixed.html),
+    'a batch from both crawlers says both');
+  ok(/open the workbook/.test(mixed.html) && /open the POMS page/.test(mixed.html),
+    'and links both places');
+  const pomsOnly = renderDigestEmail([pomsDoc, pomsDoc], { site: 'https://example.org', sheetUrl: 'https://docs.google.com/x/edit' });
+  ok(/crawled from the POMS job postings page/.test(pomsOnly.html) && !/open the workbook/.test(pomsOnly.html),
+    'a POMS-only batch names the page alone');
 
   // only pending-and-unmailed, oldest first
   const queue = [
