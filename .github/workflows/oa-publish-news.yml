@@ -1,0 +1,87 @@
+name: "OA: publish a What's new entry"
+
+# THE PUBLISH BUTTON ON /whats-new, PRESSED FROM HERE. An entry in
+# changelog.json is withheld from readers until the maintainer decides it
+# (CLAUDE.md, "Nothing on What's new publishes itself either"), and until now
+# the only place to decide one was the maintainer's own browser on /whats-new.
+# This writes the same document that button writes, so an entry can be
+# published, held or taken down from the Actions tab on the day it ships.
+#
+# LEAVE THE ID BLANK TO LIST THE LOG: one line per entry with its id, its date,
+# what the site does with it today and why. Every word printed is already
+# public (changelog.json is served to anyone who asks), and nothing here reads
+# a person.
+#
+# THE INPUT DEFAULTS TO A PLAN. `write: false` says what the document says now
+# and what it would say; tick it to write. Not a one-way door: every status is
+# one more press away, exactly as on the page.
+#
+# Nothing here is scheduled. Without FIREBASE_SERVICE_ACCOUNT nothing is read
+# or written; the run warns and exits 0.
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'Entry id from changelog.json (blank = list the log)'
+        type: string
+        default: ''
+      status:
+        description: 'Decision'
+        type: choice
+        options: ['approved', 'pending', 'removed']
+        default: 'approved'
+      write:
+        description: 'Write it (unticked = print the plan only)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-publish-news
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credential is present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: nothing will be read or written."
+          fi
+
+      # firebase-admin 12, like every other workflow here that runs a _scraper/
+      # script: _mail.mjs's firebaseAdmin() uses the NAMESPACED admin.* surface,
+      # which 14 removed whole. The ^14 in _functions/package.json is the
+      # deployed Cloud Functions runtime and a different thing.
+      - name: Install firebase-admin
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      - name: The script's own checks
+        run: node _scraper/publish-news.mjs --selftest
+
+      # The id is free text and goes through the ENVIRONMENT, never pasted into
+      # the script by ${{ }}, which the shell would see before anything else.
+      - name: Decide
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          IN_ID: ${{ inputs.id }}
+          IN_STATUS: ${{ inputs.status }}
+          IN_WRITE: ${{ inputs.write }}
+        run: |
+          set -- "--status=$IN_STATUS"
+          if [ -n "$IN_ID" ]; then set -- "$@" "--id=$IN_ID"; fi
+          if [ "$IN_WRITE" = "true" ]; then set -- "$@" --write; fi
+          node _scraper/publish-news.mjs "$@"
