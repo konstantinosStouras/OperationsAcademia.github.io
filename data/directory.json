@@ -5429,6 +5429,18 @@
   "lastPosted": "2026-01-23"
  },
  {
+  "id": "newcastle-university____operations-management",
+  "institution": "Newcastle University",
+  "department": "Operations Management",
+  "type": "University",
+  "country": "United Kingdom",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-22"
+ },
+ {
   "id": "norfolk-state-university____ba",
   "institution": "Norfolk State University",
   "department": "BA",

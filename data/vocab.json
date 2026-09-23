@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T23:05:29.014Z",
+ "generated": "2026-09-23T23:07:41.619Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1011,6 +1011,10 @@
   },
   {
    "v": "New York University Shanghai",
+   "n": 1
+  },
+  {
+   "v": "Newcastle University",
    "n": 1
   },
   {
@@ -3103,7 +3107,7 @@
   },
   {
    "v": "Operations Management",
-   "n": 10
+   "n": 11
   },
   {
    "v": "Data Analytics",
@@ -7736,6 +7740,17 @@
     "": [
      "Business Area, Statistics/Operations Management",
      "OM"
+    ]
+   }
+  },
+  "Newcastle University": {
+   "schools": [],
+   "units": [
+    "Operations Management"
+   ],
+   "bySchool": {
+    "": [
+     "Operations Management"
     ]
    }
   },
