@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T12:54:34.360Z",
+ "generated": "2026-09-23T14:18:57.626Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -96,6 +96,10 @@
   {
    "v": "University of Utah",
    "n": 4
+  },
+  {
+   "v": "Bucknell University",
+   "n": 3
   },
   {
    "v": "Carnegie Mellon University",
@@ -235,10 +239,6 @@
   },
   {
    "v": "Boston College",
-   "n": 2
-  },
-  {
-   "v": "Bucknell University",
    "n": 2
   },
   {
@@ -2172,6 +2172,10 @@
    "n": 2
   },
   {
+   "v": "Freeman College of Management",
+   "n": 2
+  },
+  {
    "v": "Fuqua School of Business",
    "n": 2
   },
@@ -2313,10 +2317,6 @@
   },
   {
    "v": "Frank G. Zarb School of Business",
-   "n": 1
-  },
-  {
-   "v": "Freeman College of Management",
    "n": 1
   },
   {
@@ -3355,6 +3355,10 @@
   },
   {
    "v": "Analytics",
+   "n": 1
+  },
+  {
+   "v": "Analytics and Operations Management",
    "n": 1
   },
   {
@@ -5254,6 +5258,7 @@
    ],
    "units": [
     "Accounting and Financial Management Area, Business Analytics",
+    "Analytics and Operations Management",
     "Business Analytics",
     "Management (Markets, Innovation, And Design)"
    ],
@@ -5263,6 +5268,7 @@
     ],
     "Freeman College of Management": [
      "Accounting and Financial Management Area, Business Analytics",
+     "Analytics and Operations Management",
      "Business Analytics"
     ]
    }
@@ -12049,6 +12055,7 @@
   ],
   "Freeman College of Management": [
    "Accounting and Financial Management Area, Business Analytics",
+   "Analytics and Operations Management",
    "Business Analytics"
   ],
   "Fu Foundation School of Engineering and Applied Science": [
