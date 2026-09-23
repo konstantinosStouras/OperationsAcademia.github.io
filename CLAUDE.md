@@ -2482,6 +2482,37 @@ what the maintainer sees, that a removed entry is off the list AND in the panel)
 is measured in `page-test.mjs`. **Inert until the rules are redeployed**:
 `firebase deploy --only firestore:rules --project operations-academia`.
 
+### …and the maintainer can press Publish from the Actions tab
+
+Owner, 2026-09-23: *"Publish the What's new entry too."* The decision document
+an entry waits on had ONE writer, the Publish button on `/whats-new` in the
+maintainer's browser, so from anywhere else (a session that has just shipped
+the entry, a phone, a runner) it sat pending.
+
+    _scraper/publish-news.mjs                the list, the plan, the write
+    .github/workflows/oa-publish-news.yml    pressed, never scheduled; a plan unless told otherwise
+
+**It is the same press.** The script writes `OANews.patchFor(status)` merged
+into `OANews.COLLECTION`: the page's own module names the collection, the
+three statuses and the document, and the selftest pins that the script spells
+out none of them and that every key it writes is one the rules allow. A run
+with no id LISTS the log (id, date, what the site does with the entry today
+and why); an id the log does not carry is refused, since a decision for it
+would be read by nothing; an entry already in the asked-for state writes
+nothing; and `write` defaults to a plan. Not a one-way door: `removed` and
+`pending` are one more press away, as on the page. Everything printed is
+already public, and nothing here reads a person. No rules change: the Admin
+SDK writes what the maintainer's browser is already allowed to write.
+
+Tests: `node _scraper/publish-news.mjs --selftest` (the arguments, the
+refusals, the patch as the page's own with `hidden` in step, the committed
+log's ids unique, the LIST line, and the source scans bounded to the writer
+half) and `testPublishNews` in `_scraper/selftest.mjs` (the suite spawned,
+the statuses against the rules both ways, the keys against `DOC_KEYS`, the
+module as the one definition, the workflow dispatch-only with the id through
+the environment and the chooser offering the rules' own list, and this
+section).
+
 ## The Admin area — one page for everything waiting on the maintainer
 
 `admin-area.html` (owner, 2026-08-23) gathers every review queue in one place:

@@ -19742,6 +19742,92 @@ async function testModuleSuites() {
   }
 }
 
+/* ----------------------------------- publishing a What's new entry from Actions
+
+   Owner, 2026-09-23: "Publish the What's new entry too." The decision document
+   an entry waits on (newsOverrides/{id}) had ONE writer, the Publish button on
+   /whats-new in the maintainer's browser, so from anywhere else the entry sat
+   pending. publish-news.mjs is that button pressed from a workflow, and what
+   these pins hold is that it is the SAME press: the page's own module names
+   the collection, the statuses and the document, and the script spells out
+   none of them. Every pin verified by putting the defect back. */
+async function testPublishNews() {
+  const root = path.join(HERE, '..');
+
+  /* its own suite: the arguments, the refusals, the patch, the committed log,
+     the LIST line and the writer half's source scans */
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'publish-news.mjs'), '--selftest'],
+      { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/publish-news selftest: \d+ checks passed/.test(out) && !/\bFAIL\b/.test(out),
+    "the publisher's own selftest is green:\n" + out.slice(0, 1500));
+
+  const P = await import('./publish-news.mjs');
+  const NEWS = require(path.join(root, 'assets', 'oa-news.js'));
+
+  /* THE STATUSES ARE THE RULES' OWN LIST, both ways: a status the script could
+     write that the rules refuse is a permission-denied on a runner, and one
+     the rules accept that the script cannot write is a decision the page can
+     make and this road cannot. */
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+  const m = rules.match(/match \/newsOverrides\/\{id\}[\s\S]*?status in \[([^\]]+)\]/);
+  ok(!!m, 'the rules bound the status of a newsOverrides document to a list');
+  const ruled = m ? m[1].split(',').map((s) => s.trim().replace(/^'|'$/g, '')).sort() : [];
+  eq([...P.STATUSES].sort(), ruled,
+    'the decisions the script may write are exactly the ones the rules accept');
+  for (const s of P.STATUSES) {
+    eq(Object.keys(P.patchFor(s)).filter((k) => !NEWS.DOC_KEYS.includes(k)), [],
+      `a ${s} decision writes only keys the rules allow`);
+    eq(P.patchFor(s).hidden, s === NEWS.REMOVED,
+      `and keeps hidden in step with the status, as the page does`);
+  }
+
+  /* THE SCRIPT IS A CALLER OF THE MODULE, NOT A COPY OF IT. Read with its
+     comments stripped and bounded to the writer half: the header names the
+     collection to explain why the code does not, and the fixtures below the
+     cut spell out status words. */
+  const whole = await readFile(path.join(HERE, 'publish-news.mjs'), 'utf8');
+  const cut = whole.indexOf('async function selftest');
+  ok(cut > 3000, 'the writer half is where it is expected');
+  const src = whole.slice(0, cut).replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  ok(/require\('\.\.\/assets\/oa-news\.js'\)/.test(src), 'it reads the page\'s own module');
+  ok(/NEWS\.COLLECTION/.test(src) && !/['"]newsOverrides['"]/.test(src), 'the collection is the module\'s');
+  ok(/NEWS\.patchFor\(/.test(src) && !/hidden:\s*(?:true|false)/.test(src), 'and so is the document');
+  ok(/NEWS\.statusOf\(/.test(src), 'what an entry does today is read through the page\'s own statusOf');
+  /* the guard itself sits BELOW the selftest, at the foot of the file, so it
+     is read off the whole file rather than the writer half */
+  const foot = whole.slice(cut).replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(/from '\.\/_main\.mjs'/.test(src) && /if \(isMain\(import\.meta\.url\)\)/.test(foot),
+    'the run guard is the shared one, and the module does nothing on import');
+  ok(/from '\.\/_mail\.mjs'/.test(src) && /await firestore\(\)/.test(src),
+    'and the Admin SDK handle is _mail.mjs\'s');
+
+  /* the workflow: pressed, never scheduled; the free-text id through env;
+     the chooser offering the rules' own list; a plan by default */
+  const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-publish-news.yml'), 'utf8');
+  ok(/^on:\s*\n\s*workflow_dispatch:/m.test(wf) && !/\bschedule:/.test(wf),
+    'the workflow is pressed, never scheduled');
+  ok(/publish-news\.mjs --selftest/.test(wf), 'it runs the script\'s own checks first');
+  ok(/IN_ID: \$\{\{ inputs\.id \}\}/.test(wf) && /"--id=\$IN_ID"/.test(wf),
+    'the id reaches the script through the environment');
+  ok(/IN_STATUS: \$\{\{ inputs\.status \}\}/.test(wf) && /"--status=\$IN_STATUS"/.test(wf),
+    'and so does the status');
+  ok(/write:\s*\n\s*description:[^\n]*\n\s*type: boolean\s*\n\s*default: false/.test(wf),
+    'write is a tick box that defaults to a plan');
+  const opts = (wf.match(/options: \[([^\]]+)\]/) || [, ''])[1]
+    .split(',').map((s) => s.trim().replace(/^'|'$/g, '')).sort();
+  eq(opts, ruled, 'the status chooser offers exactly the rules\' statuses');
+  ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wf), 'and it checks out the branch it was pressed on');
+
+  /* the record */
+  const doc = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  ok(/publish-news\.mjs/.test(doc) && /oa-publish-news\.yml/.test(doc), 'CLAUDE.md records the road');
+}
+
 async function testForumThreadRemoval() {
   const root = path.join(HERE, '..');
 
@@ -24166,6 +24252,7 @@ if (isMain(import.meta.url)) {
   await testForumSeasonRoll();
   await testForumSeed();
   await testForumThreadRemoval();
+  await testPublishNews();
   await testModuleSuites();
   process.exit(finish() ? 0 : 1);
 }
