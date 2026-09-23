@@ -1176,6 +1176,177 @@ denies every one of these hosts), and the workflow's `dry_run`/`scan`
 dispatch inputs are how a new host's readability is measured before anything
 is written. The queue pass needs `FIREBASE_SERVICE_ACCOUNT` and is a clean
 no-op without it.
+## The POMS job postings page is crawled into the review queue
+
+Owner, 2026-09-23: *"Create a crawler of this website:
+https://www.poms.org/opportunities so that any new jobs is auto-added to my
+'jobs under review'. For each new job posting, the crawler should be able to
+enter 'view posting' (which leads to either a PDF or interfolio website or a
+university website) and process the information there to fill up my own job
+posting form with as many information as possible. I will then review it on
+OA website and add the rest."* And of Interfolio: *"it looks hard to crawl.
+Can we access a relevant API to collect all interfolio jobs instead?"*
+
+    _scraper/poms.mjs            the page's table, what is new, the row (pure)
+    _scraper/advert-text.mjs     an advertisement that is only TEXT, in adverts.mjs's shape (pure)
+    _scraper/pdf-text.mjs        a PDF's words as lines, through pdfjs-dist (lazy, optional)
+    _scraper/render-page.mjs     a JavaScript shell as a browser shows it, through Playwright (lazy, optional)
+    _scraper/poms-crawl.mjs      fetch, read, queue; --scan --dry-run --since --limit --no-render --selftest
+    .github/workflows/oa-poms-crawl.yml   daily at 08:35 UTC, and on demand
+    _SETUP-POMS-CRAWL.md         what it does and what to expect, for the maintainer
+
+**WHAT THE PAGE IS, MEASURED BEFORE A LINE WAS WRITTEN.** A Drupal Views table
+(Position, University, Date, View), 381 rows on 2026-09-23 dated back to July
+2023 and never pruned. The View link is the advertisement, and 347 of the 381
+are PDFs the school uploaded to poms.org itself; five are Interfolio pages,
+the rest a long tail of applicant-tracking systems. So the Interfolio question
+the owner asked is the small half of the job, and reading a PDF is the large
+half: the advert pipeline had always recorded a PDF as `unreadable`, and now
+reads one.
+
+**THE SAME GATE AS THE TRACKING SHEET, AND THAT IS THE WHOLE DESIGN.** A row
+found on the page becomes a `jobReviews` document exactly as a workbook row
+does (`queueDoc`, with `dup`, `biz` and `ad` beside it), so it is read on the
+same review card, announced by the same mailer, counted in the same badge and
+approved with the same button. Every existing consumer works unchanged; each
+card and each e-mail says which crawler it came down. Two things differ from
+the workbook, and each is said where it bites:
+
+* **What the page keeps is not existence, so an approved POMS posting
+  publishes FROM ITS QUEUE DOCUMENT.** The workbook is the record of a
+  posting's life (a row deleted there takes the posting down), while POMS
+  lists a 2023 posting beside this week's and removes nothing. So there is
+  no `data/poms.json`, deliberately: a pending posting must not sit under
+  `data/`, and an approved one needs no second copy of its document.
+  `build-jobs.mjs` reads the approved queue on every build and takes a
+  `poms-opportunities` row WITHOUT the fifteen-minute window it applies to
+  workbook rows (that window exists because the sheet read carries a
+  workbook row afterwards; nothing carries a POMS row). The document is the
+  record: `pomsRead` (the queue read succeeded) is what "present" means for
+  these rows in the orphan carry and in the mirror sync, the `sheetPresent`
+  rule keyed on the read instead of the file, so a queue that could not be
+  read carries the served POMS rows rather than removing them and deletes
+  none of their edit handles. Every POMS row gets a mirror like a workbook
+  row, so the maintainer has Edit and Take down on the jobs page; the
+  hand-over and the takedown then work as for the workbook.
+* **"New" is judged by the ADVERTISEMENT LINK, never by the date alone.** A
+  link the queue already holds (any status, the maintainer's re-linking edit
+  included), the site already publishes, or the workbook already carries is a
+  posting the maintainer has already seen or will see from the other crawler.
+  A window on the date (`WINDOW_DAYS`, 30, widened by `--since`) is what
+  keeps the first run from queueing three years of the page. Measured on the
+  page of 2026-09-23 with a 30-day window: 19 rows to read, 358 before the
+  window, 4 not academic.
+
+**WHAT IS READ, AND HOW.** A PDF's text comes out of pdf.js one line per
+baseline (`linesFromItems`: runs grouped by their y, sorted by x, a space
+where two runs do not touch). A Workday or HigherEdJobs page goes through the
+readers `adverts-verify.mjs` already has. Any other page goes through
+`parseAdvert`, and when that reads nothing and is not a closure notice, the
+page is RENDERED in a headless Chromium and its innerText read as a PDF's
+text is. `advert-text.mjs` is the one reading of such text, in `parseAdvert`'s
+own shape: labelled lines in both shapes a page writes them ("Application
+deadline: October 15, 2026", and Interfolio's label-on-one-line, value-on-the-
+next), the "University: College: Division" hierarchy line Interfolio puts
+under its title, a school or department the prose names ("Michael F. Price
+College of Business", "Department of Supply Chain Management"), and the dates
+through the parsers that own them (`deadlineFrom`, `advertDate`,
+`extractReviewDate`, `extractFinalDate`). The read is stored on the document
+as the `ad` block through `cacheEntry` and `adBlock`, with `via` naming the
+road ('pdf', 'page', 'render'), so the review card draws a PDF's facts exactly
+as it draws a web page's.
+
+**THE INTERFOLIO ANSWER IS NO API, AND A BROWSER INSTEAD.** The apply page is
+an Angular shell whose HTML carries the title "Apply - Interfolio", the
+bundle's scripts and nothing about the position; all 42 Interfolio entries in
+`data/adverts.json` are `unreadable` for exactly that reason. Interfolio's
+documented Faculty Search API is for institutions, under an institution's own
+credentials, and cannot list other universities' positions, and the
+endpoint the shell itself fetches from is neither documented nor stable to
+build on. So the crawler reads the page the way a person does, which is
+also what serves every other JavaScript board on the page. The browser is
+the bounded, cached Playwright install `oa-checks.yml` already makes; both
+it and the PDF engine are BEST-EFFORT in the workflow, and a run without
+either still queues every new posting, carrying what the table said and
+saying in the comments that the advertisement could not be read. Such a
+posting is tried again after `READ_TTL_DAYS` (7) on its pending document, a
+merge of `row` and `ad` alone, never the decision, never the edits.
+
+**CURATED, NEVER GUESSED, at every step, and each rule is a shared one:**
+
+* the university is matched to the site's vocabulary by `institutionKey`
+  before the page's acronym is trusted, so "University of Oklahoma (OU)" is
+  "University of Oklahoma" and "UT San Antonio" is what the site already
+  calls UTSA; only then is a trailing "(OU)" / "(CSU, Stanislaus)" /
+  "(University Park, PA)" dropped (`stripAcronym`) and the bare name put
+  through `canonColumns`. The advertisement's own university displaces the
+  page's ONLY where the page's found nothing in the vocabulary and the
+  advertisement's did, so "University of Oklahoma Norman Campus" never wins;
+* the school and the department are the advertisement's, classified by
+  `advertPlace` against the vocabulary; failing those, the field the TITLE
+  names ("Assistant Professor **of Supply Chain Management**", "Open Rank,
+  Professional Track Faculty, **Business Analytics**"), which is the same
+  reading the workbook's hiring-unit column gets, offered for correction on
+  the card; a one-word field is taken only when the vocabulary lists it, so
+  "Business" alone is refused. Then `fillSchoolFromDirectory`, and only THEN
+  the type: a Georgia Tech posting in Operations Management is Scheller's,
+  and Scheller says business. Read before the fill, it said "University";
+* a closing date is believed only against the day POMS listed the posting
+  (`believableDeadline`, the guard both advert passes share), a suggested
+  date must fall before it, and the market year is the cascade's
+  (`marketYearOf`) with no tab floor, since the page has no tabs;
+* the entry level is `levelsFromRank` over the title, which gained
+  `professional track` and `teaching track` as non-tenure-track: "Open Rank,
+  Professional Track Faculty" is a track, never the rank beside it;
+* the country is the advertisement's stated location through the site's one
+  `canon()`, refused where canon hands the value back and refused for the one
+  country that is also a US state's name; `healCountry` then fills an empty
+  one from the directory, in the crawler and again in the build;
+* a row from something that is not a university, college or school and
+  advertises no academic post is SKIPPED and named in the log
+  (`looksAcademic`): the page lists a defence contractor's programme-manager
+  vacancies, which the maintainer would only reject.
+
+**WHAT THE MAINTAINER SEES.** The card's header says "from the POMS job
+postings page" (`CRAWLED_FROM` in `oa-jobreview.js`; a workbook card says the
+tracking sheet). The comments carry the advertised title (the site has no
+field for it), the deadline as worded where no date could be believed, the
+first sentences of the description, and one sentence saying the crawler read
+it and when. The duplicate flag is `duplicatesOf` against the served postings
+and the queue's approved rows, and where that finds nothing, `nearbyPostings`:
+the same university advertised within 21 days with an entry level in common,
+because the two crawlers draw on the same advertisements days apart under
+different wording and the link test cannot see it. A flagged posting still
+UNDER REVIEW from the tracking sheet is marked `pending` on the entry, and
+the card says "still under review" and links nothing, since it is nowhere on
+the site to link to. A FLAG, never a decision, as everywhere.
+
+**WHAT DELIBERATELY DID NOT CHANGE.** The workflow writes nothing under
+`data/`, so it is not a data writer, has no commit step and rings no
+doorbell: an approval publishes through `publishOnReview` and the build
+chain exactly as a workbook approval does. `queueNeedsFetch` stands down on
+a POMS document (one URL, one owner: the crawler wrote the block from the PDF
+or the rendered page, and the markup pass would record the same PDF as
+unreadable on top of it). `migratable()` refuses POMS rows as it refuses the
+workbook's. A same-day row from the workbook for the same university takes
+the POMS card over (`partition`'s `refreshQueued` replaces the row of a
+document whose id the sheet derives too), which is one posting, one card,
+and deliberate. The `jobReviews` rules gained no key: the crawler writes
+`queueDoc`'s keys and `ad`, all already named.
+
+Tests: `testPomsCrawler` in `_scraper/selftest.mjs` (the table over a fixture
+cut from the real page, the window and every skip reason, the names, the
+title's field, the row with and without an advertisement held to the served-
+file rules, the text reader's two label shapes, the hierarchy line, the
+prose names, the country, the PDF reader's lines and, where the engine is
+installed, a hand-built PDF read end to end, the crawler's writes read out of
+its own source, the retry rule, and the wiring in the build, the migration,
+the advert pass, the rank reader, the mailer, the panel, the admin page, the
+workflow, the change log and this section), `node _scraper/poms-crawl.mjs
+--selftest` (spawned by the suite, and run by the workflow with the PDF
+engine present so the round trip is required there), and the POMS block of
+`jobreview-mailer.mjs --selftest`.
+
 ## Two deadlines per posting: suggested and final
 
 Many searches have no fixed closing date yet name the day that matters most —

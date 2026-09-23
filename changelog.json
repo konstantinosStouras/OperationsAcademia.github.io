@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "poms-crawler-2026-09",
+      "date": "2026-09-23",
+      "title": "Job postings on the POMS page are crawled into the review queue",
+      "summary": "The POMS Society’s public list of job postings (poms.org/opportunities) is read once a day, and every posting the site has not seen before is queued for the maintainer beside the ones the tracking sheet contributes. Each posting’s own advertisement is read on the way in, PDFs included and, for pages that only a browser can show, the page as a browser shows it, so the card arrives with the school, the department, the closing date and the country filled in wherever the advertisement states them. Nothing publishes until the maintainer approves it, and an approved posting appears on the jobs page within a couple of minutes.",
+      "url": "/jobs"
+    },
+    {
       "id": "candidate-form-2026-09",
       "date": "2026-09-21",
       "title": "The candidate profile form, checked end to end and hardened",

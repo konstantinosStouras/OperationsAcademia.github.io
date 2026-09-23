@@ -251,7 +251,16 @@
   var DUP_SOURCE = {
     'oa-form': 'posted through the site',
     'sheet-import': 'from the legacy import',
-    'jobmarket-sheet': 'from the tracking sheet'
+    'jobmarket-sheet': 'from the tracking sheet',
+    'poms-opportunities': 'from the POMS job postings page'
+  };
+
+  /* Which crawler a queued row came down, for the card's own header line.
+     Keep in step with CRAWLER_SOURCES in _scraper/jobs-model.mjs; a source
+     this map does not know draws nothing rather than a guess. */
+  var CRAWLED_FROM = {
+    'jobmarket-sheet': 'the tracking sheet',
+    'poms-opportunities': 'the POMS job postings page'
   };
 
   /**
@@ -275,21 +284,27 @@
          now carries the season and the closing date it reads. Without the
          module the name is drawn with NO link: a link that is right most of
          the time is the worst shape for one. */
+      /* A posting still UNDER REVIEW (the POMS crawler names the queue's own
+         pending rows, since the two crawlers see one advertisement days
+         apart) is nowhere on the site to link to, so it says so and links
+         nothing. */
       var nav = window.OAJobNav;
-      var href = (nav && nav.hrefFor) ? nav.hrefFor(d) : '';
+      var href = (nav && nav.hrefFor && !d.pending) ? nav.hrefFor(d) : '';
       return '<li>' + esc(name || d.id) +
         (d.posted ? ' <span class="oa-hint" style="display:inline">(posted ' +
           esc(d.posted) + (DUP_SOURCE[d.source] ? ', ' + esc(DUP_SOURCE[d.source]) : '') +
+          (d.pending ? ', still under review' : '') +
           ')</span>' : '') +
         (href
           ? ' &middot; <a href="' + esc(href) + '" target="_blank" rel="noopener">see it live</a>'
           : '') +
         '</li>';
     }).join('');
+    var anyPending = dups.some(function (d) { return d.pending; });
     return '<div class="oa-note is-warn" data-dup>' +
       '<strong>&#9888; Possibly already on the site.</strong> This crawled posting ' +
       'looks like ' + (dups.length === 1 ? 'a job that is' : dups.length + ' jobs that are') +
-      ' already published:' +
+      (anyPending ? ' already published or under review:' : ' already published:') +
       '<ul style="margin:6px 0 4px;padding-left:20px">' + items + '</ul>' +
       'If it is the same job, <strong>Reject</strong> keeps this copy off the site; ' +
       'if it is a different one, <strong>Approve</strong> publishes it as usual.' +
@@ -416,6 +431,7 @@
         '<p class="oa-hint">Advertised ' + esc(row.posted || '?') +
           ' &middot; market ' + esc(String(row.year || '?')) +
           ' &middot; queued ' + esc(fmtDate(doc.queuedAt) || '?') +
+          (CRAWLED_FROM[row.source] ? ' &middot; from ' + esc(CRAWLED_FROM[row.source]) : '') +
           (ad ? ' &middot; <a href="' + esc(ad) + '" target="_blank" rel="noopener">' +
             'open the advert</a>' : '') +
         '</p>' +

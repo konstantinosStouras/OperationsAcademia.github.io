@@ -350,6 +350,13 @@
        Two postings arrived under it. */
     'University of San Diego': {
       'Knauss School of Business at the University of San Diego': 'Knauss School of Business' },
+    /* A campus note and an acronym on a form posting (2026-09-23): typed as
+       "UCL Global Business School for Health (GBSH) at UCL East campus". The
+       site lists the school under its own name; the note is where it sits,
+       not what it is called. */
+    'University College London': {
+      'UCL Global Business School for Health (GBSH) at UCL East campus': 'UCL Global Business School for Health',
+      'UCL Global Business School for Health (GBSH)': 'UCL Global Business School for Health' },
     'University of Southern California': { 'Marshall School of Business (incl. Leventhal)': 'Marshall School of Business' },
     'University of Toronto': { 'Rotman School of Management': 'Joseph L. Rotman School of Management' },
     'University of Illinois at Chicago': { 'College of Business Administration': 'College of Business' },

@@ -45,7 +45,7 @@
 
 import {
   text, url, longDate, OPEN_ENDED_RX, healReviewDate, canonColumns, withMarketYears,
-  stripEmails } from './jobs-model.mjs';
+  stripEmails, POMS_SOURCE } from './jobs-model.mjs';
 /* believableDeadline is ONE definition, shared with the pass it was written
    for: the same guard on both roads, or the two disagree about what an
    advertisement could have meant. */
@@ -103,7 +103,7 @@ const TRACKING_PARAM_RX = /^(utm_[a-z]+|linksource|mc_cid|mc_eid|fbclid|gclid)$/
 /** A listing that has come down. Kept generic and high-precision: every
     phrase here is one an applicant-facing notice actually uses, and a page
     matching none of them is parsed normally. */
-const GONE_RX =
+export const GONE_RX =
   /(no longer (?:available|active|accepting|being accepted|posted)|has (?:expired|been (?:removed|filled|closed|cancell?ed))|this (?:job|position|posting|vacancy|requisition) (?:is (?:closed|no longer)|has been)|position (?:has been )?filled|job (?:posting )?not found)/i;
 
 /**
@@ -178,7 +178,7 @@ function stripTags(s) {
 /** Entity decoding to a fixed point, bounded — the same reasoning as
     higheredjobs.mjs: several of these systems embed the employer's markup
     inside a JSON string, so it arrives double-encoded. */
-function decodeEntities(s) {
+export function decodeEntities(s) {
   let out = String(s || '');
   for (let i = 0; i < 3; i++) {
     const next = out
@@ -194,7 +194,7 @@ function decodeEntities(s) {
   return out;
 }
 
-function plain(s) {
+export function plain(s) {
   return stripTags(decodeEntities(stripTags(decodeEntities(s))))
     .replace(/\s+/g, ' ')
     .trim();
@@ -890,6 +890,7 @@ export function advertHostsReport(rows, { years = null } = {}) {
     const read = isHigherEdJobsUrl(r.adUrl) ? 'higheredjobs pipeline'
       : workdayApiUrl(r.adUrl) ? 'adverts pipeline (Workday JSON)'
       : !isAdvertUrl(r.adUrl) ? 'never fetched (login wall)'
+      : /(^|\.)poms\.org$/.test(host) ? 'poms pipeline (PDF text)'
       : /\.pdf(\?|$)/i.test(r.adUrl) ? 'adverts pipeline (PDF — unreadable)'
       : 'adverts pipeline (generic)';
 
@@ -917,6 +918,11 @@ export function advertHostsReport(rows, { years = null } = {}) {
  * current rather than stand still.
  */
 export function queueNeedsFetch(doc, { today = '', ttlDays = 7, force = false } = {}) {
+  /* ONE URL, ONE OWNER. A POMS posting's advertisement is read by the POMS
+     crawler itself — as a PDF, or as a rendered page — and written onto the
+     document as it queues it; this pass reads markup alone and would record
+     the same PDF as unreadable on top of a block that had read it. */
+  if (doc && doc.row && doc.row.source === POMS_SOURCE) return { fetch: false, url: '' };
   const effUrl = ((doc && doc.edits && doc.edits.adUrl) || (doc && doc.row && doc.row.adUrl) || '');
   if (!isAdvertUrl(effUrl) && !isHigherEdJobsUrl(effUrl)) return { fetch: false, url: '' };
   const ad = doc && doc.ad;

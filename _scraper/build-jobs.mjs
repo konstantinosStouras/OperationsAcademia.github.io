@@ -41,6 +41,7 @@ import {
   specMatches,
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE, backdatedDeadlines } from './jobmarket-sheet.mjs';
+import { SOURCE as POMS_SOURCE } from './poms.mjs';
 import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
 import { buildVocab, serialiseVocab, SCHOOLS, campusCountries, healCountry } from './vocab.mjs';
 import { adminUids } from './_mail.mjs';
@@ -666,6 +667,18 @@ async function main() {
     } catch { /* no meta — the approved-queue window below stays open */ }
   }
   const fromSheet = (r) => r.source === SHEET_SOURCE;
+  /* …AND THE POMS PAGE'S POSTINGS, which have no served file of their own
+     (poms.mjs: a pending posting must not sit under data/, and an approved
+     one needs no second copy of its document). They publish from the queue
+     read below, every build. `pomsRead` is that read succeeding, and it is
+     the whole of what "present" means for them: the page keeps no record
+     of a posting's life, so the queue's document is the record, and a
+     queue that could not be read must carry the served rows rather than
+     remove them — the `sheetPresent` rule, keyed on the read instead of
+     the file. */
+  const fromPoms = (r) => r.source === POMS_SOURCE;
+  let pomsRead = false;
+  let pomsAdded = 0;
 
   /* APPROVALS REACH THE SITE HERE, not at the next sheet read.
      data/jobmarket.json is written once a day by sync-jobmarket-sheet.mjs and
@@ -681,6 +694,7 @@ async function main() {
   if (db) {
     try {
       const snap = await db.collection(REVIEW_COL).where('status', '==', 'approved').get();
+      pomsRead = true;
       const byId = new Map(sheetRows.map((r) => [r.id, r]));
       let added = 0;
       for (const d of snap.docs) {
@@ -699,6 +713,19 @@ async function main() {
            the window between an approval and the sheet read that follows it
            — a row jobmarket.json already lists has been through that read. */
         if (byId.has(v.row.id)) continue;
+        /* A POMS POSTING HAS NO WORKBOOK ROW AND NO WINDOW. The window below
+           exists because the workbook is the record of a sheet posting's
+           existence and the sheet read is what carries it; the POMS page is
+           no such record (poms.mjs), so the approved document IS the
+           posting, on every build, until it is taken down through its
+           mirror or rejected. Through approvedRow like the rest, so it is
+           dated from its approval and the maintainer's edits are on it. */
+        if (v.row.source === POMS_SOURCE) {
+          const row = approvedRow(v.row, v);
+          byId.set(row.id, row);
+          pomsAdded++;
+          continue;
+        }
         /* …AND ONLY WHILE THAT WINDOW IS STILL OPEN. A row the WORKBOOK has
            since deleted (or re-keyed) is never in jobmarket.json again, so
            its frozen snapshot was re-added on every build for ever — the
@@ -719,11 +746,12 @@ async function main() {
         byId.set(row.id, row);
         added++;
       }
+      if (added || pomsAdded) sheetRows = Array.from(byId.values());
       if (added) {
-        sheetRows = Array.from(byId.values());
         log(`the review queue publishes ${added} newly-approved posting(s)` +
             ' ahead of the next sheet read');
       }
+      if (pomsAdded) log(`the review queue publishes ${pomsAdded} approved POMS posting(s)`);
     } catch (e) {
       warn(`could not read the review queue (${e.message}) — ` +
            'publishing what the last sheet read approved');
@@ -771,7 +799,12 @@ async function main() {
     log('--dry-run: not refreshing the tracking sheet\'s edit handles.');
   } else if (db && sheetPresent) {
     try {
-      await syncSheetMirrors(col, sheetRows, mirrorSnap.docs, claimedSheetIds, { now });
+      /* a POMS mirror is the queue's to keep: when the queue could not be
+         read this run its rows are absent from `sheetRows`, and the sync
+         below would delete every one of their handles as litter */
+      await syncSheetMirrors(col, sheetRows,
+        mirrorSnap.docs.filter((d) => pomsRead || !fromPoms(d.data() || {})),
+        claimedSheetIds, { now });
     } catch (e) {
       warn(`the tracking sheet's edit handles could not be refreshed (${e.message}) — ` +
            'the postings publish regardless');
@@ -831,7 +864,15 @@ async function main() {
        than given up. The document is left alone, so putting the row back in
        the workbook brings the maintainer's edit back with it. */
     const sid = buildOwned(d.data()) ? d.data().sheetId : '';
-    if (sid && sheetPresent && !sheetIds.has(sid)) {
+    /* a taken-over POMS posting exists while its queue document is still
+       approved — judged only when the queue answered (pomsRead), never on
+       a read that failed */
+    if (sid && fromPoms(d.data() || {})) {
+      if (pomsRead && !sheetIds.has(sid)) {
+        goneFromSheetDocs.push(sid);
+        continue;
+      }
+    } else if (sid && sheetPresent && !sheetIds.has(sid)) {
       goneFromSheetDocs.push(sid);
       continue;
     }
@@ -898,7 +939,7 @@ async function main() {
   if (sheetPresent) {
     const goneFromSheet = existing.filter(fromSheet).length -
       existing.filter((r) => fromSheet(r) && sheetRows.some((s) => s.id === r.id)).length;
-    log(`the tracking sheet carries ${sheetRows.length} posting(s)` +
+    log(`the tracking sheet carries ${sheetRows.filter(fromSheet).length} posting(s)` +
         (goneFromSheet > 0 ? `; ${goneFromSheet} previously published are no longer in it` : ''));
   }
 
@@ -999,6 +1040,7 @@ async function main() {
   const orphans = existing.filter((r) =>
     !live_ids.has(r.id) &&
     !(sheetPresent && fromSheet(r)) &&
+    !(pomsRead && fromPoms(r)) &&
     !applicable.some((x) => specMatches(x, r)));
   if (orphans.length) {
     warn(`${orphans.length} posting(s) in jobs.json have no document yet — carried ` +

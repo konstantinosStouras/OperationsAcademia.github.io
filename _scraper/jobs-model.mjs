@@ -345,8 +345,16 @@ export function ownerTag(uid) {
 
 /** The crawlers, and what to call each one in a sentence. A source not listed
     here is either the site's own form or something new — see `postedBy`. */
+/** The POMS job postings page (poms.org/opportunities), crawled by
+    _scraper/poms-crawl.mjs into the review queue. Named HERE rather than in
+    poms.mjs because this map is what decides a posting was made by a
+    machine, and the crawler imports the name from it so the two cannot
+    disagree. */
+export const POMS_SOURCE = 'poms-opportunities';
+
 export const CRAWLER_SOURCES = {
   'jobmarket-sheet': 'the OM Job Market tracking sheet (Google Sheets)',
+  [POMS_SOURCE]: 'the POMS job postings page (poms.org/opportunities)',
   'sheet-import': 'the legacy Google Form response sheet',
   'legacy-import': 'the legacy Awesome Tables spreadsheets',
 };

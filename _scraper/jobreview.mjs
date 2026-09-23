@@ -445,7 +445,7 @@ function foldedName(v) {
 /** What a duplicate entry carries onto the queue document: enough for the
     review card to say which posting it might repeat, and nothing else — a
     document is not a place to copy whole rows into. */
-function dupEntry(r) {
+export function dupEntry(r) {
   return {
     id: String(r.id || ''),
     ref: String(r.ref || ''),

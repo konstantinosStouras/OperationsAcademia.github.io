@@ -836,7 +836,11 @@ export function levelsFromRank(rank, kind = '') {
      "ttap": the sheet writes "non TTAP" for a non-tenure-track assistant
      professorship and "TTAP" for a tenure-track one, so the two differ by that
      one word and reading it wrongly files a teaching post as tenure-track. */
-  if (/lecturer|instructor|teaching|clinical|practice|professional in residence|adjunct|non.?tenure|non.?tt|\bntt\b|temporary|general faculty|educator/.test(s)) {
+  /* `professional track` and `teaching track` are how a US school names its
+     non-tenure-track faculty line ("Open Rank, Professional Track Faculty",
+     the POMS page's own wording, 2026-09-22); read as a track, never as the
+     rank beside it. */
+  if (/lecturer|instructor|teaching|clinical|practice|professional in residence|professional[\s-]*track|teaching[\s-]*track|career[\s-]*track|adjunct|non.?tenure|non.?tt|\bntt\b|temporary|general faculty|educator/.test(s)) {
     return ['Non-tenure track (teaching) position'];
   }
 
