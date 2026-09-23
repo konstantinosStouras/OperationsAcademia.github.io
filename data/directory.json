@@ -8821,6 +8821,27 @@
   "lastPosted": "2026-02-23"
  },
  {
+  "id": "university-college-london__ucl-global-business-school-for-health-gbsh-at-ucl-east-campu__population-health-sciences",
+  "institution": "University College London",
+  "school": "UCL Global Business School for Health (GBSH) at UCL East campus",
+  "department": "Population Health Sciences",
+  "type": "Business School",
+  "country": "United Kingdom",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-23"
+ },
+ {
   "id": "university-college-london__ucl-school-of-management",
   "institution": "University College London",
   "school": "UCL School of Management",

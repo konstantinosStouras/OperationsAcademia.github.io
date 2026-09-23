@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T13:11:28.804Z",
+ "generated": "2026-09-23T07:19:29.330Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -10,11 +10,11 @@
    "n": 8
   },
   {
-   "v": "National University of Singapore",
-   "n": 7
+   "v": "University College London",
+   "n": 8
   },
   {
-   "v": "University College London",
+   "v": "National University of Singapore",
    "n": 7
   },
   {
@@ -2504,6 +2504,10 @@
    "n": 1
   },
   {
+   "v": "UCL Global Business School for Health (GBSH)",
+   "n": 1
+  },
+  {
    "v": "UCL School of Management",
    "n": 1
   },
@@ -4031,6 +4035,10 @@
   },
   {
    "v": "Platform Operations and Data-Driven Market Design",
+   "n": 1
+  },
+  {
+   "v": "Population Health Sciences",
    "n": 1
   },
   {
@@ -9484,12 +9492,17 @@
   "University College London": {
    "schools": [
     "UCL Global Business School for Health",
+    "UCL Global Business School for Health (GBSH)",
     "UCL School of Management"
    ],
    "units": [
-    "Operations and Technology"
+    "Operations and Technology",
+    "Population Health Sciences"
    ],
    "bySchool": {
+    "UCL Global Business School for Health (GBSH)": [
+     "Population Health Sciences"
+    ],
     "UCL School of Management": [
      "Operations and Technology"
     ]
@@ -12482,6 +12495,9 @@
   "TUM School of Management": [
    "Operations and Supply Chain Management",
    "Operations and Technology"
+  ],
+  "UCL Global Business School for Health (GBSH)": [
+   "Population Health Sciences"
   ],
   "UCL School of Management": [
    "Operations and Technology"
