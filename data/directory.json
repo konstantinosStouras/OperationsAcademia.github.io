@@ -9414,11 +9414,18 @@
   "department": "Operations and Supply Chain Management",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-21"
+  "n": 2,
+  "lastPosted": "2026-09-23"
  },
  {
   "id": "university-of-california-riverside__school-of-business__operations-and-supply-chain-management",
