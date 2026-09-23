@@ -11317,6 +11317,14 @@ function testTwoDeadlines() {
   eq(healed.reviewDate, '2026-09-08', 'a row heals from its own apply-by prose');
   eq(healed.applyBy, 'Until filled.', 'and the captured sentence leaves the line');
   eq(healReviewDate(healed), healed, 'healing is idempotent — a second pass changes nothing');
+  const backdatedProse = { id: 'x', posted: '2026-09-22', applyBy: 'Until filled.', applyByDate: '', reviewDate: '',
+    comments: 'Review of applications will begin on January 15, 2026 and continue until the position is filled.' };
+  eq(healReviewDate(backdatedProse).reviewDate, '',
+    'a review date read out of the prose is refused when it falls before the posting date (the deadlineDay discipline; the build runs this heal over every row)');
+  eq(healReviewDate({ ...backdatedProse, posted: '2025-12-01' }).reviewDate, '2026-01-15', 'and believed on or after it');
+  eq(healReviewDate({ ...backdatedProse, posted: '' }).reviewDate, '2026-01-15', 'a row with no posting date has nothing to refuse it by');
+  eq(healReviewDate({ ...backdatedProse, reviewDate: '2026-01-15' }).reviewDate, '2026-01-15',
+    'a date somebody TYPED before the posting date is left where it is: reported by backdatedDeadlines, never repaired');
 
   const fromComments = healReviewDate({
     id: 'x', applyBy: 'Until filled.', applyByDate: '',
@@ -24246,6 +24254,11 @@ async function testPomsCrawler() {
   eq([healed.reviewDate, healed.year], ['', 2027],
     'a review date refused against the posting date is not read back out of the comments by healReviewDate, so the season comes from the posting date');
   eq(P.refreshFromAd(bare, healAd, { vocab: vocabFx, now }).reviewDate, '', 'and a later reading is held to the same guard');
+  /* …and so is the BUILD, which takes an approved document through approvedRow and then the
+     shared heal over the merged set: the refused sentence is still in the comments, and the
+     first cut of the heal put the date back and spanned the posting into a closed season. */
+  const built = withMarketYears(stripRowEmails(healReviewDate(healCountry(approvedRow(healed, { row: healed, edits: {}, reviewedAt: '2026-09-23T12:00:00Z' }), new Map()))));
+  eq([built.reviewDate, built.years], ['', [2027]], 'the published row keeps the refusal through the build\'s own heal, and spans one season');
   eq(P.fitDates({ applyByDate: '2026-01-15', applyBy: 'January 15, 2026', reviewDate: '2026-01-10' }, '2026-09-22', { applyByDate: '', applyBy: 'Until filled.' }),
     { applyByDate: '', applyBy: 'Until filled.', reviewDate: '' }, 'fitDates: a healed date the posting date refuses is put back to what stood before');
   eq(P.fitDates({ applyByDate: '2026-11-01', applyBy: 'November 1, 2026', reviewDate: '2026-10-15' }, '2026-09-22', { applyByDate: '2026-11-01', applyBy: 'November 1, 2026' }),

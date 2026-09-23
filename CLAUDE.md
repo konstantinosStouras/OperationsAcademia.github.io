@@ -1442,6 +1442,17 @@ crawl step's whole environment, the project's Admin credential included:
 it is launched with `browserEnv()`, a path, a home and a temp directory and
 nothing else, with the OS sandbox on where the runner allows it.
 
+One of the review's own verifiers then found the refused review date coming
+BACK one step downstream: the build takes an approved document through
+`approvedRow` and runs the shared `healReviewDate` over the merged set, the
+refused sentence is still in the comments the crawler carried, and the heal,
+fill-empty and tested only against the final date, put the date straight
+back and spanned the posting into a closed season. So the shared heal
+refuses a date it READS OUT OF PROSE when it falls before the posting date,
+the `deadlineDay` discipline; a date somebody typed is not the heal's to
+move and stays reported by `backdatedDeadlines`, never repaired. Measured
+before it was changed: no served row on the live build is touched.
+
 Tests: `testPomsCrawler` in `_scraper/selftest.mjs` (the table over a fixture
 cut from the real page, the window and every skip reason, the names, the
 title's field, the row with and without an advertisement held to the served-

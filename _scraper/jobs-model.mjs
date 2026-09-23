@@ -1421,6 +1421,18 @@ export function healReviewDate(row) {
   let finalDay = String(row.applyByDate || '');
   let applyBy = String(row.applyBy || '');
   const believable = (d) => !!d && (!finalDay || d < finalDay);
+  /* A DATE READ OUT OF THE PROSE IS BELIEVED ONLY ON OR AFTER THE POSTING
+     DATE, the deadlineDay discipline: the crawlers carry an advertisement's
+     own sentences onto the card, and "Review of applications will begin on
+     January 15, 2026" on a posting made in September reads as a suggested
+     date the row's own posting date contradicts. The POMS crawler had
+     already refused that date once, and this fill-empty heal, run by the
+     build over every row, put it straight back and spanned the posting into
+     a closed season (the 2026-09-23 review). A date somebody TYPED is not
+     this heal's to move: it is reported by backdatedDeadlines, never
+     repaired, so the stored value keeps the older test alone. */
+  const postedDay = day(row.posted);
+  const plausible = (d) => believable(d) && (!postedDay || d >= postedDay);
   let review = day(row.reviewDate);
   if (review && !believable(review)) review = '';
 
@@ -1443,7 +1455,7 @@ export function healReviewDate(row) {
 
   if (!review) {
     const found = extractReviewDate(applyBy);
-    if (believable(found.date)) {
+    if (plausible(found.date)) {
       review = found.date;
       applyBy = found.rest || (finalDay ? longDate(finalDay) : 'Until filled.');
     }
@@ -1458,7 +1470,7 @@ export function healReviewDate(row) {
   }
   if (!review) {
     const found = extractReviewDate(String(row.comments || ''));
-    if (believable(found.date)) review = found.date;
+    if (plausible(found.date)) review = found.date;
   }
   if (review === String(row.reviewDate || '') && applyBy === String(row.applyBy || '')
       && finalDay === String(row.applyByDate || '')) {
