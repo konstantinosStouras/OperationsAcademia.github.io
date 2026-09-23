@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T22:59:37.176Z",
+ "generated": "2026-09-23T23:04:02.069Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1482,6 +1482,10 @@
    "n": 1
   },
   {
+   "v": "University of Washington Bothell",
+   "n": 1
+  },
+  {
    "v": "University of Washington-Tacoma (Milgard School of Business)",
    "n": 1
   },
@@ -2212,6 +2216,10 @@
    "n": 2
   },
   {
+   "v": "School of Business",
+   "n": 2
+  },
+  {
    "v": "School of Management and Economics",
    "n": 2
   },
@@ -2457,10 +2465,6 @@
   },
   {
    "v": "School Economics and Management",
-   "n": 1
-  },
-  {
-   "v": "School of Business",
    "n": 1
   },
   {
@@ -4191,6 +4195,10 @@
   },
   {
    "v": "Supply Chain and Project Management",
+   "n": 1
+  },
+  {
+   "v": "Supply Chain Management and Operations",
    "n": 1
   },
   {
@@ -11213,6 +11221,19 @@
     ]
    }
   },
+  "University of Washington Bothell": {
+   "schools": [
+    "School of Business"
+   ],
+   "units": [
+    "Supply Chain Management and Operations"
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Supply Chain Management and Operations"
+    ]
+   }
+  },
   "University of Washington-Tacoma (Milgard School of Business)": {
    "schools": [],
    "units": [
@@ -12410,6 +12431,7 @@
    "Operations Management",
    "Operations, SCM and ITM",
    "Supply Chain Management and Analytics",
+   "Supply Chain Management and Operations",
    "Technology and Operations Management"
   ],
   "School of Business Administration": [
