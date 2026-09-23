@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T07:19:29.330Z",
+ "generated": "2026-09-23T08:20:25.161Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -47,6 +47,10 @@
   },
   {
    "v": "HEC Paris",
+   "n": 4
+  },
+  {
+   "v": "IESE Business School",
    "n": 4
   },
   {
@@ -127,10 +131,6 @@
   },
   {
    "v": "IE Business School",
-   "n": 3
-  },
-  {
-   "v": "IESE Business School",
    "n": 3
   },
   {
@@ -3622,6 +3622,10 @@
    "n": 1
   },
   {
+   "v": "IESE Behavioral Lab",
+   "n": 1
+  },
+  {
    "v": "Industrial Engineering",
    "n": 1
   },
@@ -6702,12 +6706,14 @@
   "IESE Business School": {
    "schools": [],
    "units": [
+    "IESE Behavioral Lab",
     "OM",
     "Operations, Information and Technology",
     "Production, Technology and Operations Management"
    ],
    "bySchool": {
     "": [
+     "IESE Behavioral Lab",
      "OM",
      "Operations, Information and Technology",
      "Production, Technology and Operations Management"
