@@ -118,6 +118,30 @@
     return names[+m[2] - 1] + ' ' + (+m[3]) + ', ' + (+m[1]);
   }
 
+  /** jobs-model.marketYearsOf(), for the approved-row echo. The review card
+      may move a deadline across July after the sheet derived `years`; the
+      temporary row must show the same seasons the build will publish. */
+  function marketYearsOf(row) {
+    function at(v) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || ''));
+      if (!m) return 0;
+      var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+      if (d.getUTCFullYear() !== +m[1] || d.getUTCMonth() !== +m[2] - 1
+          || d.getUTCDate() !== +m[3]) return 0;
+      return +m[1] + (+m[2] >= 7 ? 1 : 0);
+    }
+    var stored = Math.trunc(Number(row.year)) || 0;
+    var deadline = at(row.applyByDate) || at(row.reviewDate);
+    var advertised = at(row.posted);
+    var named = [stored, deadline, advertised].filter(function (y) { return y > 0; });
+    if (!named.length) return [];
+    var lo = Math.min.apply(null, named), hi = Math.max.apply(null, named);
+    if (hi - lo + 1 > 3) return Array.from(new Set(named)).sort(function (a, b) { return a - b; });
+    var years = [];
+    for (var y = lo; y <= hi; y++) years.push(y);
+    return years;
+  }
+
   /** jobs-model universitiesLink()/ownUniversitiesLink(), the browser twins —
       a renamed institution regenerates OUR "Further info" link exactly as
       settlePlace/healPlace do, and never touches a link the poster gave. */
@@ -276,6 +300,10 @@
     }
 
     stripEchoEmails(out);
+
+    /* The build re-derives this field after the maintainer's edits as well. */
+    var years = marketYearsOf(out);
+    if (years.length) out.years = years;
 
     /* DATED FROM ITS APPROVAL, because that is the day it reached the site and
        the day the e-mail alerts window on. A grandfathered document — whose

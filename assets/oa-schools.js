@@ -126,6 +126,12 @@
   /* A school field that names a department too, where no separator says so.
      The pair is what the row becomes. */
   var FUSED_SCHOOLS = {
+    /* This is one school's location-bearing name, not a school followed by a
+       department. The bare hyphen in Paris-La Defense must stay in the school
+       field when the workbook row is canonicalised again by the served-file
+       guard; its actual unit is already in the separate unit field. */
+    'Leonard de Vinci Business School Paris-La Defense':
+      { school: 'Leonard de Vinci Business School Paris-La Defense', unit: '' },
     'Ross School of Business Technology and Operations':
       { school: 'Stephen M. Ross School of Business', unit: 'Technology and Operations Management' },
     'Faculty of Business-Operations Management':

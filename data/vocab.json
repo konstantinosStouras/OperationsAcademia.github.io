@@ -2400,7 +2400,7 @@
    "n": 1
   },
   {
-   "v": "Leonard de Vinci Business School Paris",
+   "v": "Leonard de Vinci Business School Paris-La Defense",
    "n": 1
   },
   {
@@ -3798,10 +3798,6 @@
    "n": 1
   },
   {
-   "v": "La Defense, Management Information Systems, Artificial Intelligence and Supply Chain Management",
-   "n": 1
-  },
-  {
    "v": "Learning, Optimization, and Decision Analytics",
    "n": 1
   },
@@ -3831,6 +3827,10 @@
   },
   {
    "v": "Management Area",
+   "n": 1
+  },
+  {
+   "v": "Management Information Systems, Artificial Intelligence and Supply Chain Management",
    "n": 1
   },
   {
@@ -6144,14 +6144,14 @@
   },
   "EMLV (Ecole de Commerce et de Management)": {
    "schools": [
-    "Leonard de Vinci Business School Paris"
+    "Leonard de Vinci Business School Paris-La Defense"
    ],
    "units": [
-    "La Defense, Management Information Systems, Artificial Intelligence and Supply Chain Management"
+    "Management Information Systems, Artificial Intelligence and Supply Chain Management"
    ],
    "bySchool": {
-    "Leonard de Vinci Business School Paris": [
-     "La Defense, Management Information Systems, Artificial Intelligence and Supply Chain Management"
+    "Leonard de Vinci Business School Paris-La Defense": [
+     "Management Information Systems, Artificial Intelligence and Supply Chain Management"
     ]
    }
   },
@@ -12250,8 +12250,8 @@
    "Operations Group of the Division of Strategy, Entrepreneurship, and Operations",
    "Operations Management"
   ],
-  "Leonard de Vinci Business School Paris": [
-   "La Defense, Management Information Systems, Artificial Intelligence and Supply Chain Management"
+  "Leonard de Vinci Business School Paris-La Defense": [
+   "Management Information Systems, Artificial Intelligence and Supply Chain Management"
   ],
   "Leonard N. Stern School of Business": [
    "Information, Operations and Management Sciences",
