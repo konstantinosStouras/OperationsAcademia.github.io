@@ -2728,6 +2728,11 @@ async function testSchools() {
   eq(S.canonPlace({ school: 'Kelley School of Business - Operations and Decision Technologies' }),
     { institution: '', school: 'Kelley School of Business', unit: 'Operations and Decision Technologies' },
     'a department fused into the school field is moved across');
+  const emlv = { institution: 'EMLV (Ecole de Commerce et de Management)',
+    school: 'Leonard de Vinci Business School Paris-La Defense',
+    unit: 'Management Information Systems, Artificial Intelligence and Supply Chain Management' };
+  eq(S.canonPlace(emlv), emlv,
+    'a hyphenated campus name stays inside the school when the unit is separate');
   eq(S.canonPlace({ institution: 'Texas A&M University',
     school: 'Department of Information and Operations Management (INFO) at Mays Business School' }),
     { institution: 'Texas A&M University', school: 'Mays Business School',
@@ -10363,6 +10368,10 @@ async function testFreshEcho() {
     ['an edited levels list cleared to none', { id: 'p-17', year: 2026, posted: '2026-01-02',
       institution: 'Duke University', school: '', unit: 'OM', levels: ['Other Ranks'] },
       { edits: { levels: [] } }],
+    ['an edited deadline crosses the market roll', { id: 'p-18', year: 2027,
+      years: [2027], posted: '2026-09-05', institution: 'Duke University',
+      school: '', unit: 'OM', applyByDate: '' },
+      { edits: { applyByDate: '2027-10-01' } }],
   ];
   for (const [name, row, doc] of APPROVE_CASES) {
     const want = approvedRow(row, doc);
@@ -11183,6 +11192,16 @@ function testReviewEdits() {
   const dated = applyEdits(RV_ROW, { applyByDate: '2026-09-30' });
   eq(dated.applyByDate, '2026-09-30', 'an edited closing date is taken');
   eq(dated.applyBy, longDate('2026-09-30'), 'and the line shown follows it');
+
+  const seasonRow = { ...RV_ROW, year: 2027, years: [2027],
+    posted: '2026-09-05', applyByDate: '', reviewDate: '' };
+  eq(applyEdits(seasonRow, { applyByDate: '2027-10-01' }).years, [2027, 2028],
+    'an approved closing date crossing the market roll widens its listed seasons');
+  eq(applyEdits(seasonRow, { reviewDate: '2027-10-01' }).years, [2027, 2028],
+    'an approved suggested date also widens the seasons when no closing date exists');
+  eq(applyEdits({ ...seasonRow, years: [2027, 2028], applyByDate: '2027-10-01' },
+    { applyByDate: '' }).years, [2027],
+    'clearing a later date removes the season it no longer reaches');
 
   const opened = applyEdits({ ...RV_ROW, applyBy: 'September 30, 2026', applyByDate: '2026-09-30' },
     { applyBy: 'Until filled.' });

@@ -32,7 +32,8 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
-  ownUniversitiesLink, universitiesLink, stripRowEmails, OPEN_ENDED_RX, withCountries,
+  ownUniversitiesLink, universitiesLink, stripRowEmails, OPEN_ENDED_RX,
+  withCountries, withMarketYears,
 } from './jobs-model.mjs';
 import { joinDepartment, businessSchoolOf, BUSINESS_SCHOOL_NAME_RX } from './vocab.mjs';
 
@@ -288,7 +289,10 @@ export function applyEdits(row, edits) {
      is the fact being stated — and `withCountries` is still the one place
      either field is decided. */
   if ('country' in clean && !('countries' in clean)) out.countries = [];
-  return withCountries(stripRowEmails(settlePlace(settleDeadline(out), row)));
+  /* An approved edit can move the closing or suggested date into another
+     market season. The sheet and advert passes derived `years` before this
+     overlay, so derive it again from the final dates that will be published. */
+  return withMarketYears(withCountries(stripRowEmails(settlePlace(settleDeadline(out), row))));
 }
 
 /** A line that says the search has no closing date rather than naming one —
