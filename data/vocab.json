@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T23:07:41.619Z",
+ "generated": "2026-09-25T09:13:13.018Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -823,6 +823,10 @@
   },
   {
    "v": "Georgia Gwinnett College",
+   "n": 1
+  },
+  {
+   "v": "Georgia Institute of Technology",
    "n": 1
   },
   {
@@ -1710,10 +1714,6 @@
    "n": 0
   },
   {
-   "v": "Georgia Institute of Technology",
-   "n": 0
-  },
-  {
    "v": "Harvard Kennedy School",
    "n": 0
   },
@@ -2352,6 +2352,10 @@
    "n": 1
   },
   {
+   "v": "H. Milton Stewart School of Industrial and Systems Engineering",
+   "n": 1
+  },
+  {
    "v": "Harvard Business School",
    "n": 1
   },
@@ -2701,10 +2705,6 @@
   },
   {
    "v": "Guanghua School of Management",
-   "n": 0
-  },
-  {
-   "v": "H. Milton Stewart School of Industrial and Systems Engineering",
    "n": 0
   },
   {
