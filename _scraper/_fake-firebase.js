@@ -79,14 +79,33 @@
      value that is an object with a uid, so a new fixture needs no new name
      here. */
   if (!seed.askProfile) {
-    try {
-      Object.keys(seed).forEach(function (k) {
-        var v = seed[k];
-        if (v && typeof v === 'object' && typeof v.uid === 'string' && v.uid) {
-          sessionStorage.setItem('oaAskProfile:' + v.uid, '1');
-        }
-      });
-    } catch (e) { /* private mode, or no storage at all */ }
+    Object.keys(seed).forEach(function (k) {
+      var v = seed[k];
+      if (!(v && typeof v === 'object' && typeof v.uid === 'string' && v.uid)) return;
+      try { sessionStorage.setItem('oaAskProfile:' + v.uid, '1'); } catch (e) { /* private mode */ }
+      /* …AND A COMPLETE PROFILE (since 2026-09-28, when the gate widened to
+         every account: "For any user that we don't have email and
+         affiliation ... they won't be able to see any of the non-public
+         areas"). A seeded account with no profile document is an account
+         short of a name and an affiliation, and the accounts module now holds
+         such an account at its card on every page, signed out for everything
+         else — so without this every block that signs an ordinary reader in
+         would measure a gated reader. The profile is drawn from the seeded
+         user (its name from displayName, a stock affiliation, and a typed
+         address only where the sign-in carries none), it is ONLY filled in
+         where the seed carries no `profiles/<uid>` document of its own, and
+         a block that wants the ask or the gate passes `askProfile: true` or
+         seeds a profile with the gap it is about (the gate and the soft-ask
+         blocks do both). The same fixture rule as the latch above, for the
+         same reason: a default only one helper applied is a default most of
+         the suite does not have. */
+      if (!docs['profiles/' + v.uid]) {
+        var words = String(v.displayName || 'A Reader').trim().split(/\s+/);
+        var prof = { firstName: words[0], lastName: words.slice(1).join(' '), affiliation: 'Example University' };
+        if (!v.email) prof.contactEmail = 'reader@example.edu';
+        docs['profiles/' + v.uid] = prof;
+      }
+    });
   }
 
   /* ------------------------------------------------------------- firestore */
@@ -367,7 +386,10 @@
      profile card until its profile carries a first name, an affiliation and
      an address: seed such a provider and a profile that answers all three, or
      none, to drive whichever side of that gate a check is about. The default
-     used to be a Google sign-in, which that gate would hold on every page. */
+     used to be a Google sign-in, which that gate would hold on every page.
+     Since 2026-09-28 the gate holds EVERY account with a gap, so a seeded
+     account also gets a complete profile unless the seed carries one of its
+     own or asks for the card (`askProfile`); see the latch above. */
   function makeUser(spec, appName) {
     var u = Object.assign({ emailVerified: true, providerData: [{ providerId: 'password' }] }, spec);
     u.reload = function () {
