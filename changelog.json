@@ -6,7 +6,7 @@
       "id": "profile-gate-all-2026-09",
       "date": "2026-09-28",
       "title": "Every account gives its affiliation and an e-mail address before it can use the site",
-      "summary": "Since the 14th of September a Google or ORCID account has had to say who it is before it could sign in. An account with an e-mail address and a password was only asked, on a card it could close, and some never answered. Now every account is treated the same: if the site has no affiliation or no e-mail address for you (or no name), the next time you sign in one short card asks for exactly what is missing, and the site opens the moment it is saved. Until then the account is signed out for everything but that card. Nothing else is asked, and nothing you have already given is asked again.",
+      "summary": "Since the 14th of September a Google or ORCID account has had to say who it is before it could sign in. An account with an e-mail address and a password was only asked, on a card it could close, and some never answered. Now every account is treated the same: if the site has no affiliation or no e-mail address for you (or no name), the next time you come back one short card asks for exactly what is missing, and the site opens the moment it is saved. Until then the account is signed out for everything but that card. Nothing else is asked, and nothing you have already given is asked again.",
       "url": "/account"
     },
     {

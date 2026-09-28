@@ -5778,7 +5778,9 @@ const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
     (function(){
       var user = { uid:'u-test', email:'reader@example.com', displayName:'Kostas Stouras',
                    photoURL:'${PHOTO}', providerData:[] };
-      var prof = { firstName:'Kostas', lastName:'Stouras', photo:'${PHOTO}' };
+      /* complete, or the gate (every account since 2026-09-28) holds this
+         reader at its card and the chip is never the photograph */
+      var prof = { firstName:'Kostas', lastName:'Stouras', affiliation:'Example University', photo:'${PHOTO}' };
       function snap(){ return { exists:true, data:function(){ return prof; } }; }
       function doc(){ return { get:function(){ return new Promise(function(res){
             setTimeout(function(){ res(snap()); }, ${PROFILE_DELAY}); }); },
@@ -11500,29 +11502,44 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
   {
-    /* THE COUNTDOWN STANDS DOWN UNDER THE FIRST-RUN PROFILE CARD. The lift
-       that confirms the address also opens the accounts module's Welcome
-       dialog for an account with no profile yet, asking for a name and a
-       photo; the page used to replace itself under it four seconds later and
+    /* THE COUNTDOWN STANDS DOWN UNDER THE PROFILE CARD. The lift that
+       confirms the address sends the account through the same door the auth
+       event does (settleAccount, since 2026-09-28), and an account with no
+       profile yet is HELD at its card, asked for a name and an affiliation;
+       the page used to replace itself under that card four seconds later and
        throw the half-typed profile away. This is the fixture above WITHOUT
-       the oaProfileAsked mark that kept the dialog shut, and with
-       `askProfile` so the shim's own once-a-session latch does not keep it
-       shut either (owner, 2026-09-12: the card asks for what is missing, so
-       every other block stands it down and this one wants it). */
+       the oaProfileAsked mark that kept the card shut, and with `askProfile`
+       so the shim seeds no profile for the account (every other block stands
+       the card down and this one wants it). Until 2026-09-28 the lift entered
+       the session first and the card was the closable welcome ask, with
+       Continue already offered under it; the account is held now, so
+       Continue waits for the answer, and the answer brings it. */
     const { ctx, page: q, errors } = await signedInPage(LINK,
       { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main',
         askProfile: true });
     await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
     await q.waitForSelector('#oa-profile [aria-modal="true"]', { timeout: 15000 });
-    await q.waitForFunction(() => /Press Continue when you are ready/.test(document.getElementById('ve-count').textContent), null, { timeout: 8000 });
     await q.waitForTimeout(6000);
     const held = await q.evaluate(() => ({
       here: /\/verify-email$/.test(location.pathname),
       modal: !!document.querySelector('#oa-profile [aria-modal="true"]'),
+      x: !!document.querySelector('#oa-profile .oa-modal-x'),
+      rows: [...document.querySelectorAll('#oa-profile-form input')].map((el) => el.name),
+      user: !!window.OAAccounts.user(),
+      heldFlag: !!(window.OAAccounts.held && window.OAAccounts.held()),
       cont: !document.getElementById('ve-continue').hidden,
     }));
     ok(held.here && held.modal, 'verify page: with the profile card open the page is NOT replaced after five seconds');
-    ok(held.cont, 'verify page: and Continue stays for when the reader is done with it');
+    ok(!held.x && !held.user && held.heldFlag
+       && held.rows.includes('firstName') && held.rows.includes('affiliation'),
+      `verify page: …and the card is the GATE: the confirmed account is held for its name and affiliation, not entered for one page (rows ${JSON.stringify(held.rows)})`);
+    ok(!held.cont, 'verify page: …so Continue waits for the answer');
+    await q.fill('#oa-profile-form [name="firstName"]', 'Una');
+    await q.fill('#oa-profile-form [name="affiliation"]', 'Verified University');
+    await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+    await q.waitForFunction(() => !!window.OAAccounts.user()
+      && !document.getElementById('ve-continue').hidden, null, { timeout: 8000 });
+    ok(true, 'verify page: …and the answer opens the site and brings Continue, the card re-deciding itself on the lift');
     eq(errors, [], 'verify page: no uncaught script error while the countdown stands down');
     await ctx.close();
   }
@@ -12136,6 +12153,9 @@ for (const w of [320, 360, 390, 430]) {
     'gmail confirms: …whose connect lede says "you have just chosen", since this IS the registration');
   await q.click('#oa-connect-google');
   await q.waitForFunction(() => !document.querySelector('#oa-verify'), null, { timeout: 8000 });
+  /* the lift reads the profile before it enters (settleAccount, since
+     2026-09-28), so the session opens a beat after the card has gone */
+  await q.waitForFunction(() => !!window.OAAccounts.user(), null, { timeout: 8000 });
   const lifted = await q.evaluate(() => ({
     user: !!window.OAAccounts.user(),
     hint: window.OAAccounts.hint(),
@@ -12601,7 +12621,8 @@ for (const w of [320, 360, 390, 430]) {
      "it's not clear to me that I would have to fill up a certain field here
      so that I don't see this popup again"). No askProfile here, deliberately:
      the shim's once-a-session latch is SET for this account and the gate
-     ignores it, which is what tells the gate apart from the soft ask below. */
+     ignores it, which is what tells a gate apart from an ask (the password
+     block below is held the same way since 2026-09-28). */
   const LAPSED = { uid: 'lapsed-uid', email: 'lapsed@example.edu', emailVerified: true,
     displayName: 'Lapsed Reader', providerData: [{ providerId: 'google.com' }] };
   const fixture = { user: LAPSED, selector: '#main',

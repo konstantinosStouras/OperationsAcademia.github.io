@@ -78,11 +78,10 @@
      sign in as, and the pair a merge block carries — by taking any seeded
      value that is an object with a uid, so a new fixture needs no new name
      here. */
-  if (!seed.askProfile) {
-    Object.keys(seed).forEach(function (k) {
-      var v = seed[k];
-      if (!(v && typeof v === 'object' && typeof v.uid === 'string' && v.uid)) return;
-      try { sessionStorage.setItem('oaAskProfile:' + v.uid, '1'); } catch (e) { /* private mode */ }
+  function completeAccount(v) {
+    if (!(v && typeof v === 'object' && typeof v.uid === 'string' && v.uid)) return;
+    if (seed.askProfile) return;
+    try { sessionStorage.setItem('oaAskProfile:' + v.uid, '1'); } catch (e) { /* private mode */ }
       /* …AND A COMPLETE PROFILE (since 2026-09-28, when the gate widened to
          every account: "For any user that we don't have email and
          affiliation ... they won't be able to see any of the non-public
@@ -95,18 +94,21 @@
          address only where the sign-in carries none), it is ONLY filled in
          where the seed carries no `profiles/<uid>` document of its own, and
          a block that wants the ask or the gate passes `askProfile: true` or
-         seeds a profile with the gap it is about (the gate and the soft-ask
-         blocks do both). The same fixture rule as the latch above, for the
+         seeds a profile with the gap it is about (the gate blocks do the
+         second). The same fixture rule as the latch above, for the
          same reason: a default only one helper applied is a default most of
-         the suite does not have. */
+         the suite does not have. Applied to every account the seed names at
+         load AND to whoever signs in later (__signIn), since a block may set
+         `__FAKE_FB.user` after the page has loaded and sign in through the
+         box or the popup; that reader would otherwise be held at the card. */
       if (!docs['profiles/' + v.uid]) {
         var words = String(v.displayName || 'A Reader').trim().split(/\s+/);
         var prof = { firstName: words[0], lastName: words.slice(1).join(' '), affiliation: 'Example University' };
         if (!v.email) prof.contactEmail = 'reader@example.edu';
         docs['profiles/' + v.uid] = prof;
       }
-    });
   }
+  Object.keys(seed).forEach(function (k) { completeAccount(seed[k]); });
 
   /* ------------------------------------------------------------- firestore */
 
@@ -502,6 +504,7 @@
     if (seed.secondSignInFails && appName !== '[DEFAULT]') {
       return Promise.reject({ code: seed.secondSignInFails });
     }
+    completeAccount(spec);   // a reader named after the page loaded (see the latch above)
     var u = makeUser(spec, appName);
     APPS[appName].__user = u;
     APPS[appName].__fire();

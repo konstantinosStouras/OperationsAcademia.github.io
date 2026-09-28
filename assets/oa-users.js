@@ -892,7 +892,7 @@
             (seasonName(markYear()) ? ' for ' + esc(seasonName(markYear())) : '') : '') +
           (short ? ' · <span class="oa-u-short" title="Accounts still missing a ' +
             'name, an affiliation or an e-mail address. Each is asked the next ' +
-            'time it signs in and cannot use the site until it has answered; ' +
+            'time it comes back and cannot use the site until it has answered; ' +
             'one that has never confirmed its e-mail address is asked to do ' +
             'that first. Type incomplete into Find to list them.">' + short +
             ' incomplete</span>' : '') +
