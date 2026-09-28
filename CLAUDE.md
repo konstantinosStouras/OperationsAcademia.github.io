@@ -4385,11 +4385,12 @@ private window that throws on the accessor answers FALSE, because a browser
 that cannot remember being asked would otherwise be asked on every page it
 opens.
 
-**The card is never a trap, FOR A PASSWORD ACCOUNT.** There the X, Escape and
-the backdrop all still close it, and *Not now* is withheld only while something
-is required, because answering is what the card is for and asking again next
-session is what makes postponing safe rather than final. For a Google or ORCID
-account this stopped being the rule on 2026-09-14, at the owner's word: see
+**The card was never a trap, FOR A PASSWORD ACCOUNT, until 2026-09-28.** There
+the X, Escape and the backdrop all still closed it, and *Not now* was withheld
+only while something was required, because answering is what the card is for
+and asking again next session was what made postponing safe rather than
+final. For a Google or ORCID account this stopped being the rule on
+2026-09-14, and for every other account on 2026-09-28, at the owner's word: see
 "…and a Google or ORCID account is not signed in until it has answered" below,
 where the card is the one thing such an account can use until it answers, and
 Sign out is the other way out.
@@ -4560,8 +4561,9 @@ held to the same standard now, at the one point where it can be held.
 
 **THE GATE IS THE VERIFICATION GATE'S SHAPE, WITH A DIFFERENT KEY.**
 `needsProfile(u, p)` in `assets/oa-accounts.js` is the one definition:
-`providerOnly(u)` (a provider record and no `password` among them) AND
-`profileGaps(u, p)` non-empty. Keyed on the same `profileGaps` the ask is
+`profileGaps(u, p)` non-empty (until 2026-09-28 it was that AND
+`providerOnly(u)`, a provider record and no `password` among them; the
+subsection below is why the second half went). Keyed on the same `profileGaps` the ask is
 keyed on, so the gate and the card cannot disagree about what is owed: the
 first name and the affiliation for everybody, and an address where the
 sign-in shares none, which is what the 2026-09-12 rule already asked ORCID
@@ -4571,10 +4573,11 @@ because a roster row with a dash in the e-mail column is the same failure
 the sentence describes, and an ORCID account is the only kind that has one.
 
 The auth handler, after the verification branch and before it writes the
-hint, sends a provider account to `settleProvider`: ONE profile read, the
-provider's own name, picture and iD seeded first (fill-empty, as always, so a
-Google account is not asked for a name Google has just handed over), then
-`enterGate` or `admit`. `enterGate` does exactly what the verification
+hint, sends every signed-in account (a provider account alone, until
+2026-09-28) to `settleAccount` (`settleProvider` until then): ONE profile
+read, the provider's own name, picture and iD seeded first (fill-empty, as
+always, so a Google account is not asked for a name Google has just handed
+over), then `enterGate` or `admit`. `enterGate` does exactly what the verification
 branch does for an unconfirmed password account: `state.pending = 'profile'`,
 no hint, `PENDING_KEY` marked (every page's head snippet already reads that
 marker, so the next page paints signed out before any script runs and the
@@ -4606,13 +4609,67 @@ just saved, and the listeners told the user. From that press the account is a
 member like any other, its roster row written with the affiliation and the
 address on it, so the dash never appears.
 
-**A PASSWORD ACCOUNT KEEPS THE SOFT ASK.** It answered a form at creation, so
-an old record short of an affiliation (every account made before 2026-09-05)
-is asked once a session on the same compact card, with an X, and is signed in
-meanwhile; holding an old record to a new create-time rule is what this file
-refuses everywhere. An account with no provider record at all (the browser
-suite's `A_READER`) is not gated either, since nothing says how it signs in.
-And a Google account that later CONNECTS a password is a password account.
+**A PASSWORD ACCOUNT KEPT THE SOFT ASK until 2026-09-28.** It answered a form
+at creation, so an old record short of an affiliation (every account made
+before 2026-09-05) was asked once a session on the same compact card, with
+an X, and was signed in meanwhile, on the reasoning that holding an old
+record to a new create-time rule is what this file refuses everywhere. The
+owner overruled that two weeks later, and the subsection below is the
+record.
+
+#### …and since 2026-09-28 EVERY account is held, whichever way it signs in
+
+Owner, 2026-09-28, of a roster row reading a dash for the e-mail and a dash
+for the affiliation: *"For any user that we don't have email and
+affiliation, create a pop-up window asking them to fill this information to
+their profile next time they join in order to be able to use this website.
+Else, they won't be able to see any of the non-public areas of the website.
+Do not overthink, just do this and nothing else."*
+
+The row was an ORCID sign-up that stopped at its card, and the gate above
+already held it. What the sentence also names is the population the gate
+deliberately left out: a password account short of an affiliation was asked
+once a session on a card it could CLOSE, and was signed in meanwhile. An ask
+that can be closed is not "in order to be able to use this website", so
+`needsProfile` is `profileGaps(u, p).length > 0` alone; `providerOnly` stays
+as a fact the browser suite reads and decides nothing. The auth handler
+sends EVERY signed-in account through `settleAccount`: one profile read,
+then `enterGate` or `admit`, exactly as for a Google account, so a password
+account short of a name, an affiliation or an address meets the same compact
+card with no X, signed out for everything else, on every page, until it
+answers. The once-a-session ask in `loadProfile` is now the FALLBACK for the
+two roads that admit an account without that read: a profile read that
+failed on arrival (admitted, by the rule above), and the verify page's own
+lift, where `liftVerification` enters the session directly and the next
+page's auth event holds the account; there is nothing non-public on the
+verify page to hold it from, and the page moves on by itself.
+
+**The cost, stated.** An old password account whose owner never gave an
+affiliation meets the card on its next visit and is held until it types one
+word. That is what "next time they join" asks for, and it is the owner's
+call.
+
+**The browser suite's default reader carries a complete profile now.**
+`_fake-firebase.js` seeds `profiles/<uid>` (a name from `displayName`, the
+affiliation `Example University`, a typed address only where the sign-in
+carries none) for every seeded account with no profile of its own, inside
+the same `askProfile` guard as the session latch it already sets, or every
+block that signs an ordinary reader in would measure a gated one; a block
+about the gate seeds the gap it is about. Two fixtures gained an affiliation
+for the same reason, the merge's duplicate and the deletion block's leaver.
+
+Tests: the password block of `testRegistrationFields` in
+`_scraper/selftest.mjs` (the one definition with `providerOnly` out of it,
+the handler settling every account, the module's own reasons, the shim's
+default, the copy on the policy, the roster hint and the count line, the
+change log and this subsection) and the password gate block of
+`_scraper/page-test.mjs`, which drives it in a real browser: a password
+account short of an affiliation held at the card on arrival with the
+session latch already set, the lede naming the e-mail and password sign-in,
+no X, signed out with the marker set and the chip reading Finish
+registering, a second page in the same session gated over locked cards, a
+new session gated too, and the answer lifting it with the roster row
+carrying the affiliation. Every pin verified by putting the defect back.
 
 ### …and the card that asks is the ask, and nothing else
 

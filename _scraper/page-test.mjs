@@ -1340,7 +1340,9 @@ for (const [name, expect] of [
   const seed = {
     user: dupUser, keptUser,
     docs: [
-      { path: `profiles/${DUP}`, data: { firstName: 'Ada', lastName: 'Dup' } },
+      /* complete: since 2026-09-28 the gate holds ANY account short of an
+         affiliation, and the merge is offered only to an account that has entered */
+      { path: `profiles/${DUP}`, data: { firstName: 'Ada', lastName: 'Dup', affiliation: 'Dup College' } },
       /* the kept account signs in below as a GOOGLE account, which the gate
          (2026-09-14) holds until its profile is complete */
       { path: `profiles/${KEPT}`, data: { firstName: 'Ada', affiliation: 'Kept College' } },
@@ -8339,7 +8341,9 @@ for (const w of [320, 360, 390, 430]) {
     { path: 'candidateSubmissions/cand-leaver', data: { uid: LEAVER.uid, status: 'queued',
       first: 'Lee', last: 'Leaver', year: marketYear() } },
     { path: 'users/' + LEAVER.uid + '/alerts/a1', data: { name: 'Everything', topics: ['jobs'] } },
-    { path: 'profiles/' + LEAVER.uid, data: { firstName: 'Lee', lastName: 'Leaver' } },
+    /* complete, or the gate (every account since 2026-09-28) would hold the
+       leaver at its card before the delete panel was ever drawn */
+    { path: 'profiles/' + LEAVER.uid, data: { firstName: 'Lee', lastName: 'Leaver', affiliation: 'Leaver University' } },
     { path: 'registeredUsers/' + LEAVER.uid, data: { t: 1000 } },
     { path: 'userDirectory/' + LEAVER.uid, data: { name: 'Lee Leaver',
       email: 'leaver@example.edu', first: 1000, seen: 2000 } },
@@ -12572,7 +12576,7 @@ for (const w of [320, 360, 390, 430]) {
   eq(stored.profile.affiliation, 'Orcid University', 'orcid sign-up: …with the affiliation beside it');
   eq(stored.row.contactEmail, 'orla@example.edu',
     'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads');
-  /* The iD is seeded from the provider before the card is drawn (settleProvider),
+  /* The iD is seeded from the provider before the card is drawn (settleAccount),
      and the card draws no ORCID box while it is asking. Saving it must leave the
      one thing this sign-in proved exactly where it was. */
   eq(stored.profile.orcid, '0000-0002-1825-0097',
@@ -12720,52 +12724,94 @@ for (const w of [320, 360, 390, 430]) {
 }
 
 {
-  /* --- THE SOFT ASK STAYS for a PASSWORD account: it answered a form at
-     creation, so an old record short of an affiliation is asked once a
-     session on the same compact card, with an X, and is signed in meanwhile
-     (the "update" half of 2026-09-12, unchanged by the gate). ------------ */
+  /* --- THE GATE HOLDS A PASSWORD ACCOUNT TOO. Owner, 2026-09-28, of a roster
+     row reading a dash for the e-mail and a dash for the affiliation: "For
+     any user that we don't have email and affiliation, create a pop-up window
+     asking them to fill this information to their profile next time they
+     join in order to be able to use this website. Else, they won't be able
+     to see any of the non-public areas of the website." Until then a
+     password account short of an affiliation was asked once a session on a
+     card it could close, and was signed in meanwhile (this block measured
+     exactly that); now it meets the same card the Google account above
+     meets, with no X, signed out for everything else, on every page, until
+     it answers. No askProfile here either: the shim's once-a-session latch
+     is SET for this account and the gate ignores it, which is what tells a
+     gate apart from an ask. ---------------------------------------------- */
   const SOFT = { uid: 'soft-uid', email: 'soft@example.edu', emailVerified: true, displayName: '',
     providerData: [{ providerId: 'password' }] };
-  const fixture = { user: SOFT, selector: '#main', askProfile: true,
+  const fixture = { user: SOFT, selector: '#main',
     docs: [{ path: 'profiles/soft-uid', data: { firstName: 'Soft', lastName: 'Reader' } }] };
 
   const { ctx, page: q, errors } = await signedInPage('account.html', fixture);
   await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
   const soft = await q.evaluate(() => ({
+    latch: sessionStorage.getItem('oaAskProfile:soft-uid'),
     heading: (document.querySelector('#oa-profile-h') || {}).textContent,
+    lede: (document.querySelector('.oa-profile-ask') || {}).textContent || '',
     rows: [...document.querySelectorAll('#oa-profile-form input')].map((el) => el.name),
     x: !!document.querySelector('#oa-profile .oa-modal-x'),
     later: !!document.querySelector('#oa-profile-later'),
-    signout: !!document.querySelector('#oa-profile-signout'),
+    signout: (document.querySelector('#oa-profile-signout') || {}).textContent,
     needed: (document.querySelector('#oa-profile .oa-missing .oa-need') || {}).textContent,
     button: (document.querySelector('#oa-profile-form button[type="submit"]') || {}).textContent,
     user: !!window.OAAccounts.user(),
-    chip: !!document.querySelector('#oa-verify-chip'),
+    hint: window.OAAccounts.hint(),
+    pending: localStorage.getItem('oaAuthPending'),
+    storedHint: localStorage.getItem('oaAuthHint'),
+    chip: (document.querySelector('#oa-verify-chip') || {}).textContent || '',
+    pageSignedOut: !document.getElementById('pa-signedout').hidden,
   }));
-  eq(soft.heading, 'One thing we are missing', 'the soft ask: a password account short of an affiliation is asked, on the compact card');
-  eq(soft.rows, ['affiliation'], 'the soft ask: …which draws the one missing box');
-  ok(soft.x && !soft.later && !soft.signout && soft.needed === 'needed' && soft.button === 'Save and continue',
-    'the soft ask: with an X to close it, no Not now, no Sign out instead, the mark and the same button');
-  ok(soft.user && !soft.chip, 'the soft ask: …and the account IS signed in meanwhile: not a gate');
-  await q.click('#oa-profile .oa-modal-x');
-  const latch = await q.evaluate(() => sessionStorage.getItem('oaAskProfile:soft-uid'));
-  eq(latch, '1', 'the soft ask: closing it spends the session latch, so the rest of the visit is left alone');
+  eq(soft.latch, '1', 'the password gate: the session latch is SET (the shim stood the once-a-session ask down) and the card opened anyway: a gate, not an ask');
+  eq(soft.heading, 'One more step before you continue',
+    'the password gate: a password account short of an affiliation meets the card on arrival');
+  eq(soft.rows, ['affiliation'], 'the password gate: …which draws the one missing box and nothing else');
+  ok(/your affiliation/.test(soft.lede) && /e-mail and password sign-in/.test(soft.lede),
+    `the password gate: …and the lede says what is owed and which sign-in it unlocks (got "${soft.lede.slice(0, 160)}")`);
+  ok(!soft.x && !soft.later && soft.signout === 'Sign out instead'
+     && soft.needed === 'needed' && soft.button === 'Save and continue',
+    'the password gate: no X, no Not now, Sign out instead as the only other way out, the mark and the button');
+  ok(!soft.user && soft.hint === 'out' && soft.storedHint === null && soft.pending === 'soft-uid'
+     && soft.chip === 'Finish registering' && soft.pageSignedOut,
+    'the password gate: …and the account is NOT signed in meanwhile: user() null, hint out, no stored hint, ' +
+    'the pending marker set, the chip saying what is left, the personal area behind it signed out');
 
-  /* the SAME session, a second page: nothing opens */
+  /* the SAME session, a second page: gated again, over locked cards */
   await q.goto(BASE + 'jobs.html', { waitUntil: 'load' });
   await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
     null, { timeout: 15000 });
-  await q.waitForTimeout(600);
-  eq(await q.evaluate(() => !!document.querySelector('#oa-profile-form')), false,
-    'the soft ask: a second page in the same session is not a second modal');
-  eq(errors, [], 'the soft ask: no uncaught script error');
+  await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
+  await q.waitForSelector('.oa-card', { timeout: 15000 });
+  const second = await q.evaluate(() => ({
+    user: !!window.OAAccounts.user(),
+    locked: document.querySelectorAll('.oa-card.oa-card-locked').length,
+    cards: document.querySelectorAll('.oa-card').length,
+  }));
+  ok(!second.user && second.locked > 0 && second.locked === second.cards,
+    `the password gate: a second page in the same session is gated too, and every card is locked (${second.locked}/${second.cards})`);
+  eq(errors, [], 'the password gate: no uncaught script error');
   await ctx.close();
 
-  /* a NEW context is a new browsing session: asked again */
+  /* a NEW context is not a way past it, and the answer is */
   const again = await signedInPage('account.html', fixture);
   await again.page.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
-  ok(true, 'the soft ask: …and a new session asks again, which is what reaches the accounts that ' +
-    'registered before the rule');
+  eq(await again.page.evaluate(() => !!window.OAAccounts.user()), false,
+    'the password gate: a new browsing session meets the same card, still signed out');
+  await again.page.fill('#oa-profile-form [name="affiliation"]', 'Soft University');
+  await again.page.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await again.page.waitForFunction(() => !!window.OAAccounts.user()
+    && (window.__fb.dump()['userDirectory/soft-uid'] || {}).affiliation === 'Soft University',
+    null, { timeout: 8000 });
+  const lifted = await again.page.evaluate(() => ({
+    card: (() => { const w = document.getElementById('oa-profile'); return !!w && !w.hidden; })(),
+    hint: window.OAAccounts.hint(),
+    pending: localStorage.getItem('oaAuthPending'),
+    chip: !!document.querySelector('#oa-verify-chip'),
+    pageSignedOut: !document.getElementById('pa-signedout').hidden,
+  }));
+  ok(!lifted.card && lifted.hint === 'in' && lifted.pending === null && !lifted.chip && !lifted.pageSignedOut,
+    'the password gate: the answer lifts it: the card goes, the account is signed in, the marker is cleared, ' +
+    'the personal area opens and the roster row carries the affiliation');
+  eq(again.errors, [], 'the password gate: no uncaught script error after the lift');
   await again.ctx.close();
 }
 

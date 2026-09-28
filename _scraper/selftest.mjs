@@ -19231,9 +19231,10 @@ async function testEmailVerification() {
   ok(/openVerifyPanel\(null, null, true\)/.test(pendBranch),
     'accounts: …and the "Check your inbox" card opens instead');
   ok(/function enterSession\(u, fb, preloaded\)/.test(acct) && /enterSession\(u, fb\);/.test(acct)
-     && (acct.match(/enterSession\(u, fb/g) || []).length >= 5,
-    'accounts: everything a usable session does on arrival is ONE function, shared by the auth handler, ' +
-    'both lifts and the provider admission');
+     && (acct.match(/enterSession\(u, fb/g) || []).length >= 4
+     && /function admit\(u, fb, preloaded\) \{[\s\S]{0,300}enterSession\(u, fb, preloaded\);/.test(acct),
+    'accounts: everything a usable session does on arrival is ONE function, shared by both lifts and ' +
+    'by admit(), which is where the auth handler lands every account since 2026-09-28');
   /* the registration path no longer seeds the hint */
   const regAt = acct.indexOf('createUserWithEmailAndPassword(f.email.value');
   const regEnd = acct.indexOf('signInWithEmailAndPassword(f.email.value', regAt);
@@ -19982,13 +19983,14 @@ async function testCandidateFormHardening() {
   const gateFn = acct.slice(acct.indexOf('function enterGate('), acct.indexOf('function openGateCard('));
   ok(gateFn.length > 100 && !/queue\.length = 0/.test(gateFn),
     'the queue is held: enterGate no longer empties what whenSignedIn queued while the session restored');
-  const verify = acct.slice(acct.indexOf('state.pending = needsVerification(u);'), acct.indexOf('if (u && providerOnly(u)) {'));
+  const verifyStart = acct.indexOf('state.pending = needsVerification(u);');
+  const verify = acct.slice(verifyStart, acct.indexOf('settleAccount(u, fb);', verifyStart));
   ok(verify.length > 100 && !/queue\.length = 0/.test(verify),
     '…and neither does the verification branch: liftVerification runs it through enterSession');
   const leaving = acct.slice(acct.indexOf('function signOut('), acct.indexOf('function signOut(') + 1200);
   ok(leaving.length > 100 && /queue\.length = 0;/.test(leaving),
     '…while a sign-out still drops it, since the account it was queued for is leaving');
-  const enter = acct.slice(acct.indexOf('function enterSession('), acct.indexOf('function settleProvider('));
+  const enter = acct.slice(acct.indexOf('function enterSession('), acct.indexOf('function settleAccount('));
   ok(/var q = queue\.splice\(0, queue\.length\);/.test(enter),
     '…and enterSession, which both lifts go through, is where the held queue runs');
   ok(/held: function \(\) \{ return !!state\.pending; \}/.test(acct),
@@ -23733,7 +23735,7 @@ async function testRegistrationFields() {
     'gaps (browser): the module under test is the live one',
     'orcid sign-up: the welcome card asks for the affiliation AND an address, and requires both',
     'orcid sign-up: …and it reaches the ROSTER, which is what the maintainer reads',
-    'the soft ask: …and a new session asks again',
+    'the password gate: a new browsing session meets the same card, still signed out',
     'the gate: a complete Google account meets no card',
     'registration card: there is no ORCID box to fill in',
     'registration card: and NO sign-up pills',
@@ -23863,26 +23865,33 @@ async function testRegistrationFields() {
     'profile card: a typed address is checked whether or not it was compelled — a roster listing ' +
     'an address that bounces is worse than one listing none');
   ok(/\(firstRun && !req\.length/.test(acct),
-    'profile card: "Not now" is withheld while anything is required; on the soft ask (a password ' +
-    'account that registered before the rules) the X, Escape and the backdrop still close it, and ' +
-    'the card asks again next session; under the gate below there is no X at all');
+    'profile card: "Not now" is withheld while anything is required; on the fallback ask (an ' +
+    'account admitted before its profile could be read) the X, Escape and the backdrop still close ' +
+    'it, and the next page\'s gate holds the account; under the gate below there is no X at all');
   ok(/if \(!f\[k\]\) return;/.test(acct),
     'profile card: a field the card did not RENDER is skipped rather than saved as an empty ' +
     'string, so an address given once is never blanked by a later edit that never showed it');
 
   /* --- THE GATE (owner, 2026-09-14): a Google or ORCID account is not signed
-     in until it has answered ---------------------------------------------- */
+     in until it has answered; and (owner, 2026-09-28, of a roster row with
+     dashes: "For any user that we don't have email and affiliation ... they
+     won't be able to see any of the non-public areas of the website") neither
+     is ANY account, a password one included ------------------------------- */
   ok(/function providerOnly\(u\) \{\s*return !!u && providerIds\(u\)\.length > 0 && !hasProvider\('password', u\);/.test(acct)
-     && /function needsProfile\(u, p\) \{\s*return providerOnly\(u\) && profileGaps\(u, p\)\.length > 0;/.test(acct),
-    'the gate: ONE definition of who is held (a provider-only account) and of what holds it ' +
-    '(profileGaps, the ask\'s own list), so the gate and the card cannot disagree about what is owed');
+     && /function needsProfile\(u, p\) \{\s*return !!u && profileGaps\(u, p\)\.length > 0;/.test(acct)
+     && !/providerOnly\(u\) && profileGaps/.test(acct),
+    'the gate: ONE definition of who is held (any account with a gap, since 2026-09-28) and of what ' +
+    'holds it (profileGaps, the ask\'s own list), so the gate and the card cannot disagree about what ' +
+    'is owed; providerOnly stays a fact about the account and decides nothing');
   const verifyAt = acct.indexOf('state.pending = needsVerification(u);');
-  const provAt = acct.indexOf('if (u && providerOnly(u)) {');
-  ok(verifyAt > 0 && provAt > verifyAt
-     && /if \(u && providerOnly\(u\)\) \{\s*state\.resolved = false;\s*settleProvider\(u, fb\);\s*return;\s*\}\s*writeHint\(u\);/.test(acct),
-    'the gate: the auth handler decides a provider account by its profile AFTER the verification ' +
+  const settleAt = acct.indexOf('settleAccount(u, fb);', verifyAt);
+  ok(verifyAt > 0 && settleAt > verifyAt
+     && /if \(u\) \{\s*state\.resolved = false;\s*settleAccount\(u, fb\);\s*return;\s*\}\s*writeHint\(null\);/.test(acct),
+    'the gate: the auth handler decides EVERY signed-in account by its profile AFTER the verification ' +
     'branch and BEFORE the hint is written, the session unresolved for the length of that one read');
-  const settle = acct.slice(acct.indexOf('function settleProvider('), acct.indexOf('function admit('));
+  ok(!/providerOnly\(u\)\) \{/.test(acct.slice(verifyAt)),
+    'the gate: …and no branch of the handler still admits a password account past that read');
+  const settle = acct.slice(acct.indexOf('function settleAccount('), acct.indexOf('function admit('));
   ok(/function \(\) \{ return undefined; \}/.test(settle)
      && /if \(p !== undefined && needsProfile\(u, state\.profile\)\) enterGate\(u, profileGaps\(u, state\.profile\)\);/.test(settle)
      && /else admit\(u, fb, p === undefined \? undefined : \(state\.profile \|\| null\)\);/.test(settle)
@@ -23987,7 +23996,10 @@ async function testRegistrationFields() {
     'the gate: Sign out instead signs the account out and takes the card with it',
     'the gate: a new browsing session meets the same card, still signed out',
     'the gate: the answer lifts it',
-    'the soft ask: …and the account IS signed in meanwhile: not a gate',
+    'the password gate: …and the account is NOT signed in meanwhile',
+    'the password gate: a second page in the same session is gated too',
+    'the password gate: a new browsing session meets the same card, still signed out',
+    'the password gate: the answer lifts it',
     'google sign-up: the card draws the ONE box that is missing and nothing else',
     'orcid sign-up: THE GATE: no X, not signed in, and the header says what is left to do',
   ]) {
@@ -24004,6 +24016,49 @@ async function testRegistrationFields() {
      && /Finish registering/.test(gateDoc) && /PENDING_KEY/.test(gateDoc) && /password account/.test(gateDoc),
     'CLAUDE.md: the section records both owner messages, the one definition, the marker it reuses, ' +
     'the compact card and what stays soft');
+
+  /* --- …AND SINCE 2026-09-28 EVERY ACCOUNT IS HELD, a password one included.
+     Owner, of a roster row reading a dash for the e-mail and the affiliation:
+     "For any user that we don't have email and affiliation, create a pop-up
+     window asking them to fill this information to their profile next time
+     they join in order to be able to use this website. Else, they won't be
+     able to see any of the non-public areas of the website." The definition
+     and the handler are pinned above; what follows is every surface that
+     said a password account was only ASKED, each verified by putting the
+     old wording back. */
+  ok(/Until 2026-09-28 only a Google or ORCID account was held \(providerOnly\)/.test(acct)
+     && /SINCE 2026-09-28 THIS IS THE FALLBACK, NOT THE RULE/.test(acct),
+    'the password gate: the module says why providerOnly no longer decides, and that the ' +
+    'once-a-session ask in loadProfile is the fallback for an account admitted without the read');
+  ok(!/function settleProvider\(/.test(acct) && /function settleAccount\(u, fb\)/.test(acct),
+    'the password gate: the settle is named for what it settles now, every account');
+  ok(/if \(!docs\['profiles\/' \+ v\.uid\]\) \{/.test(shimSrc)
+     && /affiliation: 'Example University'/.test(shimSrc)
+     && /if \(!v\.email\) prof\.contactEmail = /.test(shimSrc)
+     && shimSrc.indexOf("if (!docs['profiles/' + v.uid]) {") > shimSrc.indexOf('if (!seed.askProfile) {'),
+    'shim: a seeded account with no profile of its own gets a COMPLETE one, inside the same ' +
+    'askProfile guard as the session latch, or every block that signs an ordinary reader in would ' +
+    'measure a gated one');
+  const allEntry = (changelog.updates || []).find((u) => u.id === 'profile-gate-all-2026-09');
+  ok(allEntry && allEntry.date === '2026-09-28' && allEntry.url === '/account'
+     && /every account/i.test(allEntry.summary) && /signed out for everything but that card/.test(allEntry.summary)
+     && !/—|\\u2014/.test(allEntry.title + allEntry.summary),
+    'changelog.json announces the widened gate, dated, with a link and no em dash');
+  const rosterHintAll = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(/cannot use the site until it has answered/.test(rosterHintAll)
+     && !/first time\s+they open the site in a browsing session/.test(rosterHintAll),
+    'roster hint: the panel says an incomplete account is held until it answers, and no longer ' +
+    'that most are merely asked once a session');
+  const usersAll = await readFile(path.join(HERE, '..', 'assets', 'oa-users.js', ), 'utf8')
+    .then((s) => s.replace(/'\s*\+\s*'/g, ''));
+  ok(/cannot use the site until it has answered/.test(usersAll) && !/browsing session/.test(usersAll),
+    'roster count line: …and its tooltip says the same');
+  const allAt = claude.indexOf('#### …and since 2026-09-28 EVERY account is held');
+  const allDoc = allAt > 0 ? claude.slice(allAt, claude.indexOf('\n### ', allAt)) : '';
+  ok(allDoc.length > 1200 && /2026-09-28/.test(allDoc) && /settleAccount/.test(allDoc)
+     && /profileGaps/.test(allDoc) && /fallback/i.test(allDoc) && /Example University/.test(allDoc),
+    'CLAUDE.md: the subsection records the owner\'s words, the one definition, the fallback ask and ' +
+    'the shim\'s default');
 
   /* --- the ask repeats, once a session, while anything is missing -------- */
   ok(/var ASK_SESSION = 'oaAskProfile:';/.test(acct)
@@ -24104,11 +24159,13 @@ async function testRegistrationFields() {
   /* --- disclosed, announced and written down ---------------------------- */
   const policy = await readFile(path.join(HERE, '..', 'privacy-policy.html'), 'utf8');
   ok(/shares no\s+e-mail address with us/.test(policy) && /not a way to sign in/.test(policy)
-     && /first time you open it in a browsing session/.test(policy),
+     && /the next time you sign in/.test(policy),
     'privacy policy: the roster paragraph names the address the Site asks for, says it is not a ' +
     'sign-in, and says when the asking happens');
-  ok(/signs in with Google or ORCID alone is asked\s+before it can use the Site/.test(policy),
-    'privacy policy: …and, since 2026-09-14, that a Google or ORCID account is asked before it can use the Site');
+  ok(/whichever way you sign in, and\s+the account cannot be used until it has answered/.test(policy)
+     && !/first time you open it in a browsing session/.test(policy),
+    'privacy policy: …and, since 2026-09-28, that EVERY account is asked before it can use the Site, ' +
+    'with the once-a-session wording gone');
   const askEntry = (changelog.updates || []).find((u) => u.id === 'registration-complete-2026-09');
   ok(askEntry && askEntry.date === '2026-09-12' && askEntry.url
      && !/—/.test(askEntry.title + askEntry.summary),

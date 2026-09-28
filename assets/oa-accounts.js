@@ -407,27 +407,34 @@
     return !!(u && u.emailVerified === false && hasProvider('password', u));
   }
 
-  /** A GOOGLE OR ORCID ACCOUNT THAT HAS NOT SAID WHO IT IS (owner, 2026-09-14:
-      "A registered new user should be able to log in with gmail or with their
-      ORCID only after they have provided name and affiliation"). The password
-      form asks for everything at creation and nothing gets through it short of
-      an answer; a provider sign-up answers nothing, so the answers are
-      collected on the card that follows, and until they are given the account
-      is signed out for everything but that card, the shape the e-mail
-      verification gate already has. Keyed on the same profileGaps the ask is
+  /** AN ACCOUNT THAT HAS NOT SAID WHO IT IS, whichever way it signs in.
+      Owner, 2026-09-14: "A registered new user should be able to log in with
+      gmail or with their ORCID only after they have provided name and
+      affiliation"; and 2026-09-28, of a roster row with dashes: "For any user
+      that we don't have email and affiliation, create a pop-up window asking
+      them to fill this information to their profile next time they join in
+      order to be able to use this website. Else, they won't be able to see
+      any of the non-public areas of the website." The answers are collected
+      on the card that follows the sign-in, and until they are given the
+      account is signed out for everything but that card, the shape the e-mail
+      verification gate already has. Keyed on the same profileGaps the card is
       keyed on, so the gate and the card cannot disagree about what is owed:
       the name and the affiliation for everybody, and an address where the
-      sign-in shares none (ORCID's does not), which is the 2026-09-12 rule. A
-      password account with a gap, one that registered before the rules, keeps
-      the once-a-session ask instead: it answered a form at creation, and
-      holding an old record to a new create-time rule is what this file refuses
-      everywhere. An account with no provider record at all is not gated,
-      since there is nothing to say how it signs in. */
+      sign-in shares none (ORCID's does not), which is the 2026-09-12 rule.
+
+      Until 2026-09-28 only a Google or ORCID account was held (providerOnly),
+      and a password account with a gap was asked once a session on a card it
+      could close, on the reasoning that it had answered a form at creation.
+      The owner's second sentence ends that: the roster showed password
+      accounts with dashes too, and an ask that can be closed is not what "in
+      order to be able to use this website" asks for. providerOnly stays as a
+      fact about the account (the browser suite reads it); it no longer
+      decides anything here. */
   function providerOnly(u) {
     return !!u && providerIds(u).length > 0 && !hasProvider('password', u);
   }
   function needsProfile(u, p) {
-    return providerOnly(u) && profileGaps(u, p).length > 0;
+    return !!u && profileGaps(u, p).length > 0;
   }
 
   /** How the account is described to its owner: "Google", "ORCID", "Google
@@ -1307,9 +1314,9 @@
         of the page's life. */
     function stillOurs() { return !!(state.user && state.user.uid === uid); }
 
-    /* settleProvider has usually read the document already, to decide whether
+    /* settleAccount has usually read the document already, to decide whether
        the account may enter at all, and hands it over here rather than paying
-       the read twice on every page a Google or ORCID member opens. */
+       the read twice on every page a member opens. */
     (preloaded !== undefined
       ? Promise.resolve({ exists: !!preloaded, data: function () { return preloaded; } })
       : OAFB.ready().then(function (fb) { return profileDoc(fb, uid).get(); }))
@@ -1363,7 +1370,15 @@
                a flat multi-page site, which is the nag the old rule was
                written to avoid. A session is the middle, and the card still
                closes on its X, on Escape and on the backdrop: the reader is
-               asked again next time rather than trapped now. */
+               asked again next time rather than trapped now.
+
+               SINCE 2026-09-28 THIS IS THE FALLBACK, NOT THE RULE. An account
+               with a gap is held at its card by settleAccount before it gets
+               here at all, so this reaches only an account admitted because
+               its profile could not be read on arrival (and read fine a beat
+               later), and one that has just confirmed its address on the
+               verify page, where liftVerification enters the session directly
+               and the next page's auth event holds it. */
             if (!leaving && gaps.length && takeSessionAsk(uid)) {
               localStorage.setItem('oaProfileAsked:' + uid, '1');
               openProfile(fresh || !greeted, { require: gaps });
@@ -1616,10 +1631,10 @@
               (asking ? 'Save and continue' : 'Save profile') + '</button>' +
             /* Withheld while anything is required, since answering is what the
                card is for. Under the gate the only other way out is signing
-               out, and the card says so; on the soft ask (a password account
-               that registered before the rules) the X, Escape and the backdrop
-               still close it, and the once-a-session ask is what makes
-               postponing safe. */
+               out, and the card says so; on the fallback ask (an account
+               admitted before its profile could be read, see loadProfile) the
+               X, Escape and the backdrop still close it, and the next page's
+               gate is what makes postponing safe. */
             (gated
               ? '<button type="button" class="oa-linkbtn" id="oa-profile-signout">Sign out instead</button>'
               : (firstRun && !req.length
@@ -3964,15 +3979,17 @@
     q.forEach(function (fn) { try { fn(u); } catch (e) { if (window.console) console.error(e); } });
   }
 
-  /** Read the profile of a Google or ORCID account and decide: a complete one
-      enters like anybody else, an incomplete one is gated behind its card. The
-      provider's own name and picture are seeded FIRST, fill-empty, so a Google
-      account is not asked for a name Google has just handed over. A read that
-      FAILS admits the account as it always did: the gate is a completeness
-      measure and not a security boundary (a scripted client writes what it
-      likes either way), and locking a complete member out on a network blip
-      is the worse error. */
-  function settleProvider(u, fb) {
+  /** Read the account's profile and decide: a complete one enters like
+      anybody else, an incomplete one is gated behind its card. Every account
+      since 2026-09-28; a Google or ORCID one before that, which is why the
+      provider's own name and picture are seeded FIRST, fill-empty, so a
+      Google account is not asked for a name Google has just handed over (a
+      no-op for a password account, whose displayName Firebase leaves null).
+      A read that FAILS admits the account as it always did: the gate is a
+      completeness measure and not a security boundary (a scripted client
+      writes what it likes either way), and locking a complete member out on
+      a network blip is the worse error. */
+  function settleAccount(u, fb) {
     var uid = u.uid;
     function ours() { return !!(state.user && state.user.uid === uid); }
     profileDoc(fb, uid).get()
@@ -4006,8 +4023,9 @@
   }
 
   /* THE GATE. Everything the verification branch of the auth handler does for
-     an unconfirmed password account, for a Google or ORCID account that has not
-     said who it is: no hint (the next page would paint it signed in), no
+     an unconfirmed password account, for any account that has not said who it
+     is (a Google or ORCID one alone until 2026-09-28): no hint (the next page
+     would paint it signed in), no
      roster row, no tally, no counts, the listeners hear null so every page
      locks, and the one card this account can use opens on every page until it
      is answered. The marker is the verification gate's own (PENDING_KEY), so
@@ -4130,33 +4148,29 @@
           return;
         }
 
-        /* A GOOGLE OR ORCID ACCOUNT IS ADMITTED BY ITS PROFILE (needsProfile,
-           and the owner's rule beside it). The decision needs the document, so
-           the session stays unresolved for the length of that one read: the
-           header goes on painting from the hint (a complete account's says
-           signed in, a gated one's is absent, so neither flashes), whenSignedIn
-           queues, and the listeners hear nothing until the answer is known.
-           The read is handed on to enterSession so the ordinary path does not
-           pay it twice. */
-        if (u && providerOnly(u)) {
+        /* EVERY SIGNED-IN ACCOUNT IS ADMITTED BY ITS PROFILE (needsProfile,
+           and the owner's rule beside it; a Google or ORCID account alone
+           until 2026-09-28). The decision needs the document, so the session
+           stays unresolved for the length of that one read: the header goes
+           on painting from the hint (a complete account's says signed in, a
+           gated one's is absent, so neither flashes), whenSignedIn queues,
+           and the listeners hear nothing until the answer is known. The read
+           is handed on to enterSession so the ordinary path does not pay it
+           twice. */
+        if (u) {
           state.resolved = false;
-          settleProvider(u, fb);
+          settleAccount(u, fb);
           return;
         }
 
-        writeHint(u);
+        writeHint(null);
         paint();
-
-        if (u) {
-          enterSession(u, fb);
-        } else {
-          // Anything queued during the restore window belongs to someone who
-          // turns out NOT to be signed in. Dropping it silently loses the
-          // click; whenSignedIn's own contract is to offer the sign-in box.
-          var pending = queue.splice(0, queue.length);
-          if (pending.length) openAuth();
-        }
-        notify(u);
+        // Anything queued during the restore window belongs to someone who
+        // turns out NOT to be signed in. Dropping it silently loses the
+        // click; whenSignedIn's own contract is to offer the sign-in box.
+        var pending = queue.splice(0, queue.length);
+        if (pending.length) openAuth();
+        notify(null);
       });
     }).catch(function (err) {
       // The SDK itself could not be loaded — offline, a blocked CDN, an ad
