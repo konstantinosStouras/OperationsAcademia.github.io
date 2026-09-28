@@ -19230,11 +19230,31 @@ async function testEmailVerification() {
     'accounts: while pending the hint is CLEARED and the session is never entered (no profile read, no roster row, no tally)');
   ok(/openVerifyPanel\(null, null, true\)/.test(pendBranch),
     'accounts: …and the "Check your inbox" card opens instead');
-  ok(/function enterSession\(u, fb, preloaded\)/.test(acct) && /enterSession\(u, fb\);/.test(acct)
-     && (acct.match(/enterSession\(u, fb/g) || []).length >= 4
-     && /function admit\(u, fb, preloaded\) \{[\s\S]{0,300}enterSession\(u, fb, preloaded\);/.test(acct),
-    'accounts: everything a usable session does on arrival is ONE function, shared by both lifts and ' +
-    'by admit(), which is where the auth handler lands every account since 2026-09-28');
+  ok(/function enterSession\(u, fb, preloaded\)/.test(acct)
+     && (acct.match(/enterSession\(u, fb/g) || []).length >= 3
+     && /function admit\(u, fb, preloaded\) \{[\s\S]{0,300}enterSession\(u, fb, preloaded\);/.test(acct)
+     && /function liftGate\(u\) \{[\s\S]{0,400}enterSession\(u, fb, state\.profile \|\| null\)/.test(acct),
+    'accounts: everything a usable session does on arrival is ONE function, shared by the profile ' +
+    'gate\'s lift and by admit(), which is where the auth handler AND the verification lift land ' +
+    'every account since 2026-09-28');
+  /* …AND THE VERIFICATION LIFT TAKES THE SAME DOOR. The 2026-09-28 review
+     found it entering the session directly on three roads (the verify page,
+     the inbox card's "I have verified it" on any page, a Gmail link
+     confirming the address), so an account short of an affiliation was in
+     for one page. It settles now, with the pending mark kept for the read. */
+  const liftV = acct.slice(acct.indexOf('function liftVerification('), acct.indexOf('function liftVerification(') + 900);
+  ok(/OAFB\.ready\(\)\.then\(function \(fb\) \{ settleAccount\(u, fb\); \}\)\.catch\(enter\);/.test(liftV)
+     && !/enterSession\(/.test(liftV)
+     && liftV.indexOf('state.pending = false;') > liftV.indexOf('function enter()'),
+    'accounts: liftVerification goes through settleAccount and never enters the session itself; the ' +
+    'pending mark is cleared only on the no-SDK road, where there is nothing to read');
+  ok(/var settling = null;/.test(acct) && /if \(settling === uid\) return;\s*settling = uid;/.test(acct)
+     && /\.then\(function \(\) \{ if \(settling === uid\) settling = null; \}\);/.test(acct),
+    'accounts: an account is settled once at a time, so a second lift while the first is reading ' +
+    'cannot enter the session twice');
+  ok(/function whenSignedIn\(fn\) \{[\s\S]{0,700}if \(!state\.resolved\) \{ queue\.push\(fn\); return; \}\s*if \(state\.user\) \{ fn\(state\.user\); return; \}/.test(acct),
+    'accounts: whenSignedIn queues while the session is UNRESOLVED before it looks at the user, so a ' +
+    'callback cannot run for an account whose profile read is still deciding whether to hold it');
   /* the registration path no longer seeds the hint */
   const regAt = acct.indexOf('createUserWithEmailAndPassword(f.email.value');
   const regEnd = acct.indexOf('signInWithEmailAndPassword(f.email.value', regAt);
@@ -19986,7 +20006,8 @@ async function testCandidateFormHardening() {
   const verifyStart = acct.indexOf('state.pending = needsVerification(u);');
   const verify = acct.slice(verifyStart, acct.indexOf('settleAccount(u, fb);', verifyStart));
   ok(verify.length > 100 && !/queue\.length = 0/.test(verify),
-    '…and neither does the verification branch: liftVerification runs it through enterSession');
+    '…and neither does the verification branch: liftVerification settles the account and admit() ' +
+    'runs it through enterSession');
   const leaving = acct.slice(acct.indexOf('function signOut('), acct.indexOf('function signOut(') + 1200);
   ok(leaving.length > 100 && /queue\.length = 0;/.test(leaving),
     '…while a sign-out still drops it, since the account it was queued for is leaving');
@@ -23748,7 +23769,7 @@ async function testRegistrationFields() {
   ]) {
     ok(pt.includes(needle), `page-test drives it: ${needle.slice(0, 60)}…`);
   }
-  ok(/if \(!seed\.askProfile\) \{/.test(shimSrc) && /sessionStorage\.setItem\('oaAskProfile:' \+ v\.uid, '1'\)/.test(shimSrc),
+  ok(/if \(seed\.askProfile\) return;/.test(shimSrc) && /sessionStorage\.setItem\('oaAskProfile:' \+ v\.uid, '1'\)/.test(shimSrc),
     'shim: a fresh context is a fresh SESSION, so the fixture says who has already been asked — in ' +
     'the SHIM, because a dozen blocks stand it up without page-test\'s own helper');
   ok(/askProfile: !!opts\.askProfile/.test(pt),
@@ -24015,7 +24036,7 @@ async function testRegistrationFields() {
   ok(gateDoc.length > 2500 && /2026-09-14/.test(gateDoc) && /needsProfile/.test(gateDoc)
      && /Finish registering/.test(gateDoc) && /PENDING_KEY/.test(gateDoc) && /password account/.test(gateDoc),
     'CLAUDE.md: the section records both owner messages, the one definition, the marker it reuses, ' +
-    'the compact card and what stays soft');
+    'the compact card and the password rule as it stood until 2026-09-28');
 
   /* --- …AND SINCE 2026-09-28 EVERY ACCOUNT IS HELD, a password one included.
      Owner, of a roster row reading a dash for the e-mail and the affiliation:
@@ -24032,13 +24053,18 @@ async function testRegistrationFields() {
     'once-a-session ask in loadProfile is the fallback for an account admitted without the read');
   ok(!/function settleProvider\(/.test(acct) && /function settleAccount\(u, fb\)/.test(acct),
     'the password gate: the settle is named for what it settles now, every account');
-  ok(/if \(!docs\['profiles\/' \+ v\.uid\]\) \{/.test(shimSrc)
-     && /affiliation: 'Example University'/.test(shimSrc)
-     && /if \(!v\.email\) prof\.contactEmail = /.test(shimSrc)
-     && shimSrc.indexOf("if (!docs['profiles/' + v.uid]) {") > shimSrc.indexOf('if (!seed.askProfile) {'),
+  const complete = shimSrc.slice(shimSrc.indexOf('function completeAccount(v) {'), shimSrc.indexOf('Object.keys(seed).forEach(function (k) { completeAccount(seed[k]); });'));
+  ok(complete.length > 200 && /if \(seed\.askProfile\) return;/.test(complete)
+     && /sessionStorage\.setItem\('oaAskProfile:' \+ v\.uid, '1'\)/.test(complete)
+     && /if \(!docs\['profiles\/' \+ v\.uid\]\) \{/.test(complete)
+     && /affiliation: 'Example University'/.test(complete)
+     && /if \(!v\.email\) prof\.contactEmail = /.test(complete),
     'shim: a seeded account with no profile of its own gets a COMPLETE one, inside the same ' +
     'askProfile guard as the session latch, or every block that signs an ordinary reader in would ' +
     'measure a gated one');
+  ok(/completeAccount\(spec\);\s*\/\/[^\n]*\n\s*var u = makeUser\(spec, appName\);/.test(shimSrc),
+    'shim: …and whoever signs in AFTER the page loaded gets the same, since a block may name the ' +
+    'reader in __FAKE_FB.user and sign in through the popup');
   const allEntry = (changelog.updates || []).find((u) => u.id === 'profile-gate-all-2026-09');
   ok(allEntry && allEntry.date === '2026-09-28' && allEntry.url === '/account'
      && /every account/i.test(allEntry.summary) && /signed out for everything but that card/.test(allEntry.summary)
@@ -24159,10 +24185,11 @@ async function testRegistrationFields() {
   /* --- disclosed, announced and written down ---------------------------- */
   const policy = await readFile(path.join(HERE, '..', 'privacy-policy.html'), 'utf8');
   ok(/shares no\s+e-mail address with us/.test(policy) && /not a way to sign in/.test(policy)
-     && /the next time you sign in/.test(policy),
+     && /the next time you come back/.test(policy),
     'privacy policy: the roster paragraph names the address the Site asks for, says it is not a ' +
-    'sign-in, and says when the asking happens');
-  ok(/whichever way you sign in, and\s+the account cannot be used until it has answered/.test(policy)
+    'sign-in, and says when the asking happens (the next visit, not a sign-in: a restored session ' +
+    'meets the card without signing in again)');
+  ok(/whichever way you sign in,\s+and\s+the account cannot be used until it has answered/.test(policy)
      && !/first time you open it in a browsing session/.test(policy),
     'privacy policy: …and, since 2026-09-28, that EVERY account is asked before it can use the Site, ' +
     'with the once-a-session wording gone');

@@ -18,10 +18,13 @@
        website and an ORCID iD the card calls highly recommended — owner,
        2026-08-17; NO confirm-password field) with a Terms/Privacy consent,
        and a "Back to site" escape. The profile card is deliberately NOT held
-       to the same rule: it is the EDIT surface, and the accounts that reach
-       it with no affiliation — every Google and ORCID registration, and
-       every account made before the rule — must stay able to correct their
-       name or their photograph without inventing one;
+       to the same rule on an ordinary Edit: it is the EDIT surface, and an
+       account correcting its name or its photograph is not asked to invent
+       an affiliation there. What DOES compel one, since 2026-09-28 for every
+       account and since 2026-09-14 for a Google or ORCID one, is the GATE
+       (needsProfile below): an account short of a name, an affiliation or an
+       address is held at that same card, signed out for everything else,
+       until it answers;
      - a successful REGISTRATION lands on account.html (the personal area
        welcome), while a plain sign-in stays where the reader was;
      - the off-canvas copy paints into this design's mobile SHEET, at its
@@ -428,8 +431,8 @@
       The owner's second sentence ends that: the roster showed password
       accounts with dashes too, and an ask that can be closed is not what "in
       order to be able to use this website" asks for. providerOnly stays as a
-      fact about the account (the browser suite reads it); it no longer
-      decides anything here. */
+      fact about the account (exported, and the selftest pins it); it no
+      longer decides anything here. */
   function providerOnly(u) {
     return !!u && providerIds(u).length > 0 && !hasProvider('password', u);
   }
@@ -1374,11 +1377,10 @@
 
                SINCE 2026-09-28 THIS IS THE FALLBACK, NOT THE RULE. An account
                with a gap is held at its card by settleAccount before it gets
-               here at all, so this reaches only an account admitted because
-               its profile could not be read on arrival (and read fine a beat
-               later), and one that has just confirmed its address on the
-               verify page, where liftVerification enters the session directly
-               and the next page's auth event holds it. */
+               here at all, on arrival and on the lift that confirms its
+               address alike, so this reaches only an account admitted because
+               its profile could not be read then (and read fine a beat
+               later), or entered without the SDK at all. */
             if (!leaving && gaps.length && takeSessionAsk(uid)) {
               localStorage.setItem('oaProfileAsked:' + uid, '1');
               openProfile(fresh || !greeted, { require: gaps });
@@ -3178,18 +3180,24 @@
       });
   }
 
-  /** The address is confirmed: the session becomes an ordinary signed-in one,
-      with everything the auth event would have done for it. */
+  /** The address is confirmed: the account goes through the SAME DOOR the
+      auth event takes (settleAccount), so one that never gave its
+      affiliation meets the profile card here rather than entering for one
+      page (the verify page, the inbox card's "I have verified it" on any
+      page, a Gmail link confirming the address: the 2026-09-28 review found
+      all three entering directly). The pending mark stays set for the length
+      of the read; admit() clears it, enterGate() replaces it. */
   function liftVerification(u) {
     state.user = u;
-    state.pending = false;
     closeVerifyPanel();
-    writeHint(u);
-    paint();
-    if (window.OAFB && OAFB.enabled) {
-      OAFB.ready().then(function (fb) { enterSession(u, fb); }).catch(function () { /* said elsewhere */ });
+    function enter() {
+      state.pending = false;
+      writeHint(u);
+      paint();
+      notify(u);
     }
-    notify(u);
+    if (!(window.OAFB && OAFB.enabled)) { enter(); return; }
+    OAFB.ready().then(function (fb) { settleAccount(u, fb); }).catch(enter);
   }
 
   /* =========================================================================
@@ -3934,8 +3942,13 @@
     // a pending account cannot run anything yet; what it can do is lift its
     // gate, so that is the card a click reaches
     if (state.pending) { openPendingCard(); return; }
-    if (state.user) { fn(state.user); return; }
+    /* UNRESOLVED BEFORE SIGNED IN: for the length of settleAccount's profile
+       read state.user is set and the answer is not yet known, and a callback
+       run then would act for an account about to be held at its card. The
+       2026-09-28 review found the two tests the other way round; enterSession
+       runs the queue once the account is admitted. */
     if (!state.resolved) { queue.push(fn); return; }
+    if (state.user) { fn(state.user); return; }
     openAuth();
   }
 
@@ -3989,8 +4002,15 @@
       completeness measure and not a security boundary (a scripted client
       writes what it likes either way), and locking a complete member out on
       a network blip is the worse error. */
+  var settling = null;   // the uid whose profile read is in flight
   function settleAccount(u, fb) {
     var uid = u.uid;
+    /* ONCE AT A TIME PER ACCOUNT: the auth event and a lift (a second press
+       of "I have verified it" while the first is still reading) must not
+       settle the same account twice, which would enter the session twice and
+       tell every listener twice. */
+    if (settling === uid) return;
+    settling = uid;
     function ours() { return !!(state.user && state.user.uid === uid); }
     profileDoc(fb, uid).get()
       .then(function (snap) { return (snap && snap.exists ? snap.data() : null) || null; },
@@ -4009,7 +4029,8 @@
             else admit(u, fb, p === undefined ? undefined : (state.profile || null));
           });
       })
-      .catch(function () { if (ours()) admit(u, fb); });
+      .catch(function () { if (ours()) admit(u, fb); })
+      .then(function () { if (settling === uid) settling = null; });
   }
 
   /** The ordinary signed-in arrival, once the account is known to be usable. */

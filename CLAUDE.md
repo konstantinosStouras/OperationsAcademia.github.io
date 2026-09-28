@@ -4256,7 +4256,9 @@ every ORCID one (`seedProfileFromUser` writes a name and a picture and nothing
 else), and every account made before today. Making the box compulsory there
 would hold their name and their photograph hostage to a field they were never
 asked for. So the asymmetry is the design, and the module header says so where
-the next reader will look.
+the next reader will look. (Narrowed on 2026-09-28: an ordinary Edit still
+compels nothing, but the GATE now holds every account with a gap at that same
+card until it answers; see "…and since 2026-09-28 EVERY account is held".)
 
 **AND THE OTHER TWO ROADS IN ARE ASKED TOO** (owner, 2026-09-05, on being
 shown that the rule reached one of the three ways an account is made). A Google
@@ -4378,7 +4380,9 @@ this section is otherwise entirely about". The trap is real and the owner has
 now asked for exactly that, which makes the question not *whether* to ask but
 *how often*. So the bound moved rather than disappearing: the card opens
 **once a session** while anything is missing (`oaAskProfile:<uid>` in
-`sessionStorage`), not once per account and not once per page. Once per account
+`sessionStorage`), not once per account and not once per page. (The rule
+until 2026-09-28; the gate now holds every account with a gap on every page,
+and this latch governs only the fallback ask in `loadProfile`.) Once per account
 is the defect being replaced; once per page is a modal on every navigation of a
 flat multi-page site, which is the nag the old rule was written to avoid. A
 private window that throws on the accessor answers FALSE, because a browser
@@ -4638,11 +4642,23 @@ then `enterGate` or `admit`, exactly as for a Google account, so a password
 account short of a name, an affiliation or an address meets the same compact
 card with no X, signed out for everything else, on every page, until it
 answers. The once-a-session ask in `loadProfile` is now the FALLBACK for the
-two roads that admit an account without that read: a profile read that
-failed on arrival (admitted, by the rule above), and the verify page's own
-lift, where `liftVerification` enters the session directly and the next
-page's auth event holds the account; there is nothing non-public on the
-verify page to hold it from, and the page moves on by itself.
+one road that admits an account without that read: a profile read that
+failed on arrival (admitted, by the rule above).
+
+**The lift that confirms an address goes through the same door.** The first
+cut left `liftVerification` entering the session directly, on the reasoning
+that the next page's auth event would hold the account and the verify page
+had nothing non-public on it; the review the same day found three roads
+reach it, the verify page, the inbox card's *I have verified it* on ANY page,
+and a Gmail link confirming the address, and on each an account short of an
+affiliation was fully in for that page, its hint written, every listener
+told. It calls `settleAccount` now, with the verification-pending mark kept
+for the length of the read, so `user()` answers null until the profile has
+decided; `settling` keeps a second lift from settling the same account
+twice. The same review found `whenSignedIn` testing `state.user` before
+`!state.resolved`, so for the length of the read a callback ran at once for
+an account about to be held; it queues while unresolved now, and
+`enterSession` runs the queue once the account is admitted.
 
 **The cost, stated.** An old password account whose owner never gave an
 affiliation meets the card on its next visit and is held until it types one
@@ -4713,7 +4729,8 @@ merge a moment later, which is one extra step and not a lost one.
 **The browser suite's default reader changed with it.** `_fake-firebase.js`
 seeded every user as a Google sign-in unless told otherwise, and under this
 gate a Google account with no profile is held on every page; the default is a
-verified password account now, the one kind neither gate holds, and the blocks
+verified password account now, the one kind neither gate held until 2026-09-28
+(it carries a complete profile since; see the subsection above), and the blocks
 about the gate seed their provider by name. The merge fixtures and the ORCID
 member fixture carry complete profiles for the same reason.
 
@@ -4733,7 +4750,8 @@ account gated on arrival with the shim's latch SET, gated again on the next
 page over locked cards, the chip putting the keyboard back in the box, Sign out
 instead, a new session gated too and the answer lifting it; a complete account
 not held; and a password account short of an affiliation asked on the same
-compact card with an X, signed in meanwhile, once a session.
+compact card with an X, signed in meanwhile, once a session (until 2026-09-28;
+that block drives the password gate now, see the subsection above).
 
 ### A mistyped sign-in address is corrected once, by hand
 
