@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-29T07:32:04.699Z",
+ "generated": "2026-09-29T09:36:14.605Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -787,6 +787,10 @@
   },
   {
    "v": "ESMT Berlin",
+   "n": 1
+  },
+  {
+   "v": "ESSEC",
    "n": 1
   },
   {
@@ -1698,10 +1702,6 @@
    "n": 0
   },
   {
-   "v": "ESSEC",
-   "n": 0
-  },
-  {
    "v": "European School of Management and Technology",
    "n": 0
   },
@@ -2312,6 +2312,10 @@
    "n": 1
   },
   {
+   "v": "ESSEC Business School",
+   "n": 1
+  },
+  {
    "v": "Faculty of Business and Economics",
    "n": 1
   },
@@ -2673,10 +2677,6 @@
   },
   {
    "v": "Econometric Institute",
-   "n": 0
-  },
-  {
-   "v": "ESSEC Business School",
    "n": 0
   },
   {
@@ -3702,6 +3702,10 @@
    "n": 1
   },
   {
+   "v": "Information Systems, Data Analytics and Operations",
+   "n": 1
+  },
+  {
    "v": "Information Technology",
    "n": 1
   },
@@ -4431,10 +4435,6 @@
   },
   {
    "v": "Information Systems and Supply Chain Management",
-   "n": 0
-  },
-  {
-   "v": "Information Systems, Data Analytics and Operations",
    "n": 0
   },
   {

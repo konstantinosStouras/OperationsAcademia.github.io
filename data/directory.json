@@ -2443,11 +2443,22 @@
   "school": "ESSEC Business School",
   "department": "Information Systems, Data Analytics and Operations",
   "type": "Business School",
+  "country": "France",
   "deptUrl": "https://faculty.essec.edu/en/?pagenum=1&s=&type=cv&filter%5Bdepartment-en%5D%5B%5D=Information%20Systems%2C%20Data%20Analytics%20and%20Operations",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-29"
  },
  {
   "id": "eth-zurich____empirical-business-problems",

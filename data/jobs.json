@@ -41,6 +41,48 @@
   "owner": ""
  },
  {
+  "id": "2027-essec-20260929",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-29",
+  "institution": "ESSEC",
+  "department": "ESSEC Business School, Information Systems, Data Analytics and Operations",
+  "school": "ESSEC Business School",
+  "unit": "Information Systems, Data Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 1, 2026",
+  "applyByDate": "2026-12-01",
+  "reviewDate": "2026-11-01",
+  "comments": "ESSEC Business School invites applications for a faculty position at the Assistant or early Associate Professor level. As part of its growth strategy, the Operations Management group of the « Information Systems, Data Analytics, and Operations (IDO) » Department at ESSEC Business School invites applications for a faculty position. The position is based at the ESSEC Cergy Pontoise campus (Greater Paris area) and has a starting date of September 1, 2027 or upon agreement.",
+  "country": "France",
+  "countries": [
+   "France"
+  ],
+  "adUrl": "https://drive.google.com/file/d/1OrKYxVx_jfxG0MgnYRX4UKiqL9cMwgJL/view?usp=drivesdk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=ESSEC",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-09-29T09:35:48Z",
+  "ref": "OA-JOB-260929-SFSN",
+  "owner": "eca0347aa7d9f9d1"
+ },
+ {
   "id": "2027-unsw-sydney-20260929",
   "year": 2027,
   "years": [
