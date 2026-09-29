@@ -11760,6 +11760,81 @@ under `?edit=` and offering none on a new posting, a real press writing the
 status and never deleting the document with the done panel replacing the form,
 and a CANCELLED confirmation writing nothing at all.
 
+### …and "Mark reviewed" is on the edit form too
+
+Owner, 2026-09-29, of a user-added posting opened from `/admin-area`: *"I open
+it, review it, but then the only option I have once I have opened it is to
+'save it'. I would like to have 'mark review' button [here] too."*
+
+"Open & correct" on the user-added card lands on `post-a-job?edit=<id>`, and
+the card offers three verbs: correct it, mark it reviewed, take it down. The
+form carried two of them. So a maintainer who had read a posting on the form
+and found nothing to change had to go back to the card to tick it off. The
+form's action row is now **Save changes · Mark reviewed · Take this posting
+down**, the card's own order, and the button is the card's in every way that
+matters:
+
+* **The same write.** One field, `reviewedAt`, merged with `update()` (which
+  cannot create a document that has since gone), after the fresh token like
+  every other write the form makes. No status, no `updatedAt`, no save: the
+  posting stays live, nothing is republished, and the mailer's own mark is
+  never touched. `REVIEWED_AT` and `LIVE` in `assets/oa-jobform.js` are the
+  names `_scraper/submissions-review.mjs` defines, pinned against that model
+  the way the card's copy is.
+* **The same list.** It is drawn only for a posting the card would list: live
+  (`queued` or `published`, never taken down, never a tracking-sheet mirror)
+  and not yet ticked off. That is `isWaiting` in the model, and the selftest
+  drives the form's rule against it over every status, ticked and not.
+* **The maintainer alone.** Shipped `hidden`, revealed by `fill()` once the
+  stored posting has been read, and only when `OAAccounts.isAdmin()` says so.
+  A poster correcting their own posting never sees it, and the press asks
+  again because a hidden button is still a button on a keyboard. The rules are
+  the authorisation (`jobSubmissions` is admin-write), so **no rules change
+  and no deploy**.
+
+**IT NEVER SAVES THE FORM, AND THE FORM STAYS OPEN.** Saving and ticking off
+are two acts, and the card keeps them apart too. Replacing the form with a
+done panel, the way Take down does, would throw away a correction typed but
+not yet saved, so the stamp is written, the button gives its place to **Back
+to the Admin area** (with the keyboard on it), and the line under the buttons
+says it stays live and has only left the list. Where the reader has typed into
+the form (a trusted `input` or `change` event) the line adds that the
+corrections still need Save changes. That flag decides wording only, never
+what is written, so a change the flag cannot see (a picker row chosen with the
+mouse) costs a sentence and never a correction.
+
+**The other order is answered by the done panel.** A maintainer who corrects
+first and presses Save changes meets the same button there while the posting
+is still waiting, beside Back to the Admin area. The save writes `queued`, so
+the offer is asked again after it: a hidden posting the maintainer has just
+put back is on their list again if nobody had ticked it off. Saving alone
+still ticks nothing off. A poster's own done panel offers neither.
+
+Tests: `testFormMarkReviewed` in `_scraper/selftest.mjs` (the button born
+hidden as `type="button"` between Save changes and Take down, called what the
+card calls it; the model's two names; the one-field `update()` and nothing
+else; the list rule driven against `isWaiting`; the maintainer gate on the
+offer and on the press; no save and the form kept open; the touched line; the
+done panel's button behind the same gate; the rules unchanged) and the edit
+block of `_scraper/page-test.mjs`, which drives it in a real browser: offered
+to the maintainer on one row in that order, the press stamping `reviewedAt`
+with every other field of the posting byte for byte as it was, the form still
+open with the way back focused, a typed note left unsaved and named in the
+line, nothing offered to the poster, to a posting already ticked off or to one
+taken down, and the save-then-tick path from the done panel.
+
+**And a school name whose hyphen is part of it.** The same change added one
+entry to `FUSED_SCHOOLS` in `assets/oa-schools.js`: "Leonard de Vinci
+Business School Paris-La Defense" is one school named after its business
+district, and the archive's separator split was reading it as a school called
+"...Paris" with a department called "La Defense". The selftest's fused-name
+sweep had gone red on master over a 2026-09-22 posting, which would have
+turned every pull request's check red. The entry keeps exactly what the poster
+typed, which is what the three-column canon already publishes, so no posting
+moved. The pickers' vocabulary had carried the mis-split (a school called
+"...Paris" and a department starting "La Defense,"), and
+`build-jobs.mjs --heal-names` rebuilt `data/vocab.json` in the same commit.
+
 
 ## The account menu counts what it links to
 

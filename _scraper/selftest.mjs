@@ -18613,6 +18613,154 @@ async function testJobTakedown() {
     'takedown: and the review panel\'s drawer is measured by its own block');
 }
 
+/* MARK REVIEWED ON THE EDIT FORM (owner, 2026-09-29: "I open it, review it,
+   but then the only option I have once I have opened it is to 'save it'. I
+   would like to have 'mark review' button [here] too").
+
+   "Open & correct" on the Admin area's user-added card lands on
+   post-a-job?edit=<id>, and the form offered Save changes and Take down but
+   not the card's third verb. The button that joins them is the card's in
+   every way that matters, and each of those is pinned here: the same ONE
+   stamp from the same model, the same rule for which postings are on the
+   list, the maintainer alone, and never a save of the form behind it. */
+async function testFormMarkReviewed() {
+  const root = path.join(HERE, '..');
+  const read = (...p) => readFile(path.join(root, ...p), 'utf8');
+  /* comment-stripped, because the form's own header QUOTES what the button
+     must never do ("`announcedAt` is never touched") */
+  const strip = (t) => String(t)
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const html = strip(await read('post-a-job.html'));
+  const raw = await read('assets', 'oa-jobform.js');
+  const js = strip(raw);
+  const card = strip(await read('assets', 'oa-jobreview.js'));
+
+  /* ---- 1. the button, where the card has it ---------------------------- */
+  const btn = /<button[^>]*id="oa-reviewed"[^>]*>([^<]*)<\/button>/.exec(html);
+  ok(!!btn, 'mark reviewed: the edit form ships the button');
+  ok(btn && /type="button"/.test(btn[0]),
+    'mark reviewed: …as type="button", so pressing it can never submit the form');
+  ok(btn && /\bhidden\b/.test(btn[0]),
+    'mark reviewed: …born hidden, because who may see it is known only once the posting is read');
+  ok(btn && /class="button"/.test(btn[0]),
+    'mark reviewed: …in the card’s own plain style, between the primary and the ghost');
+  const cardLabel = />([^<]*)<\/button> ' \+/.exec(
+    card.slice(card.indexOf('data-act="reviewed"')));
+  ok(btn && cardLabel && btn[1].trim() === cardLabel[1].trim() &&
+     btn[1].trim() === 'Mark reviewed',
+    'mark reviewed: …and called what the user-added card calls it');
+  const actions = html.slice(html.indexOf('<div class="oa-actions">'));
+  const iSubmit = actions.indexOf('id="oa-submit"');
+  const iRev = actions.indexOf('id="oa-reviewed"');
+  const iDown = actions.indexOf('id="oa-takedown"');
+  ok(iSubmit >= 0 && iSubmit < iRev && iRev < iDown && iDown < actions.indexOf('</div>'),
+    'mark reviewed: …in the action row, after Save changes and before Take down, ' +
+    'the card’s own order (correct, mark reviewed, take down)');
+
+  /* ---- 2. the same stamp, named by the model --------------------------- */
+  ok(js.includes(`var REVIEWED_AT = '${SUB_REVIEWED_AT}';`),
+    'mark reviewed: the form stamps the field the submissions model names');
+  ok(js.includes("var LIVE = ['queued', 'published'];"),
+    'mark reviewed: …and reads the same LIVE pair the model lists');
+  ok(!new RegExp(`['"\`]${SUB_ANNOUNCED_AT}['"\`]`).test(js),
+    'mark reviewed: …and never names the mailer’s own high-water mark');
+  const mark = js.slice(js.indexOf('function markReviewed()'),
+    js.indexOf('function wireReviewed()'));
+  ok(mark.length > 200 && mark.length < 2000,
+    `mark reviewed: the write is found and bounded (${mark.length} chars)`);
+  ok(/patch\[REVIEWED_AT\] = new Date\(\)\.toISOString\(\);/.test(mark) &&
+     /\.doc\(EDIT_ID\)\.update\(patch\)/.test(mark),
+    'mark reviewed: ONE field, merged onto the posting with update(), which cannot ' +
+    'create a document that has since gone');
+  ok(!/status|\.set\(|\.delete\s*\(|\[\s*'delete'\s*\]/.test(mark),
+    'mark reviewed: …and nothing else: no status, no set(), no delete, so the ' +
+    'posting stays live and nothing is republished');
+  ok(/freshClaims\(user\)/.test(mark),
+    'mark reviewed: …with the fresh token first, as before every other write this form makes');
+
+  /* ---- 3. the same list: a posting the card would list ------------------ */
+  const fnAt = js.indexOf('function waitingForReview(status, reviewed) {');
+  const fnSrc = js.slice(fnAt, js.indexOf('\n  }\n', fnAt) + 4);
+  ok(fnAt >= 0 && fnSrc.length > 40 && fnSrc.length < 400,
+    `mark reviewed: the list rule is found and bounded (${fnSrc.length} chars)`);
+  const waiting = new Function('LIVE', `${fnSrc}; return waitingForReview;`)(
+    ['queued', 'published']);
+  for (const status of ['queued', 'published', 'hidden', 'withdrawn', 'removed', 'sheet', '']) {
+    for (const reviewed of [false, true]) {
+      const doc = { status, ...(reviewed ? { [SUB_REVIEWED_AT]: '2026-09-29T00:00:00Z' } : {}) };
+      eq(waiting(status, reviewed), isWaiting(doc),
+        `mark reviewed: offered for a ${status || 'status-less'} posting ` +
+        `${reviewed ? 'already ticked off' : 'not yet ticked off'} exactly when the ` +
+        'model lists it');
+    }
+  }
+  ok(/EDIT_STATUS = String\(v\.status \|\| ''\);/.test(js) &&
+     /EDIT_REVIEWED = !!v\[REVIEWED_AT\];/.test(js) &&
+     js.indexOf('EDIT_REVIEWED = !!v[REVIEWED_AT]') < js.indexOf('function enterEditMode()'),
+    'mark reviewed: fill() records both from the STORED posting, never from the boxes');
+  ok(/function offerReview\(\) \{\s*return !!EDIT_ID && amMaintainer\(\) && waitingForReview\(EDIT_STATUS, EDIT_REVIEWED\);/.test(js),
+    'mark reviewed: offered on an edit, to the maintainer, for a posting still on the list');
+  ok(/function amMaintainer\(\) \{\s*return !!\(window\.OAAccounts && OAAccounts\.isAdmin && OAAccounts\.isAdmin\(\)\);/.test(js),
+    'mark reviewed: …the maintainer being OAAccounts.isAdmin(), the site’s one definition, ' +
+    'so a poster correcting their own posting is never offered it');
+
+  /* ---- 4. the press ------------------------------------------------------ */
+  const wire = js.slice(js.indexOf('function wireReviewed()'),
+    js.indexOf('function wireDoneReviewed('));
+  ok(wire.length > 200 && wire.length < 3000,
+    `mark reviewed: the press is found and bounded (${wire.length} chars)`);
+  ok(/addEventListener\('click', function \(\) \{\s*if \(!offerReview\(\)\) return;/.test(wire),
+    'mark reviewed: the press asks again, because a hidden button is still a button on a keyboard');
+  ok(!/collect\(|requestSubmit|\.submit\(|oa-submit/.test(wire),
+    'mark reviewed: …and never saves the form: saving and ticking off are two acts');
+  ok(!/show\(\$\('oa-job-form'\), false\)/.test(wire),
+    'mark reviewed: …and the form STAYS OPEN, so a correction typed but not saved is never thrown away');
+  ok(/e\.isTrusted\) FORM_TOUCHED = true/.test(wire) &&
+     /FORM_TOUCHED\s*\?\s*' Your corrections above are not saved yet: press Save changes to keep them\.'/.test(wire),
+    'mark reviewed: …and where the reader has typed, the line says their corrections still need Save changes');
+  ok(/a\.href = 'admin-area';/.test(wire) && /\$\('oa-reviewed-back'\)\.focus\(\)/.test(wire),
+    'mark reviewed: the way back to the list takes the button’s place, with the keyboard on it');
+  ok(/wireTakeDown\(\);\s*wireReviewed\(\);/.test(js),
+    'mark reviewed: boot() wires it beside Take down');
+
+  /* ---- 5. the other order: saved first, then ticked off ------------------ */
+  const saved = js.slice(js.indexOf("'<h3>Your changes have been saved.</h3>'") - 600,
+    js.indexOf("'<h3>Your changes have been saved.</h3>'") + 1400);
+  ok(/EDIT_STATUS = doc\.status;\s*var review = offerReview\(\);/.test(saved),
+    'mark reviewed: after a save the posting is live whatever it was, and the offer is asked again');
+  ok(/review \? '<button type="button" class="button blue" ' \+\s*'id="oa-done-reviewed">Mark reviewed<\/button> '/.test(saved) &&
+     /if \(review\) wireDoneReviewed\(done\);/.test(saved),
+    'mark reviewed: …and the done panel offers the same button while the posting is still on the list');
+  ok(/admin \? '<a class="button oa-btn-ghost" href="admin-area">'/.test(saved),
+    'mark reviewed: …with the way back to the Admin area, for the maintainer');
+  const done = js.slice(js.indexOf('function wireDoneReviewed('), js.indexOf('function wireTakeDown()'));
+  ok(done.length > 100 && done.length < 1500,
+    `mark reviewed: the done panel's press is found and bounded (${done.length} chars)`);
+  ok(/if \(!offerReview\(\)\) return;/.test(done) && /markReviewed\(\)/.test(done),
+    'mark reviewed: the done panel’s button is the same write behind the same gate');
+
+  /* ---- 6. no rules change ---------------------------------------------- */
+  const rules = await read('_firestore.rules');
+  const block = rules.slice(rules.indexOf('match /jobSubmissions/'));
+  ok(/allow write: if isAdmin\(\);/.test(block),
+    'mark reviewed: jobSubmissions is already admin-write, so the button needs no deploy');
+
+  /* ---- 7. the record, and the browser half ------------------------------ */
+  const docs = await read('CLAUDE.md');
+  ok(/### …and "Mark reviewed" is on the edit form too/.test(docs),
+    'mark reviewed: CLAUDE.md records the decision');
+  const pt = await read('_scraper', 'page-test.mjs');
+  for (const needle of [
+    'the maintainer is offered Mark reviewed on the edit form',
+    'a poster correcting their own posting is offered no Mark reviewed',
+    'a posting already ticked off is offered no Mark reviewed',
+    'the done panel after a save offers Mark reviewed',
+  ]) {
+    ok(pt.includes(needle), `mark reviewed: the browser suite measures "${needle}"`);
+  }
+}
+
 async function testSubmissionTokenRefresh() {
   const root = path.join(HERE, '..');
   const strip = (src) => src
@@ -24507,6 +24655,7 @@ if (isMain(import.meta.url)) {
   await testRulesBudgetGuard();
   await testJobComments();
   await testJobTakedown();
+  await testFormMarkReviewed();
   await testCandidateFormHardening();
   await testStrandedCvs();
   await testVerifyExistingUsers();

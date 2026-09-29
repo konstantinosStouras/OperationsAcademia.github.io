@@ -1266,6 +1266,12 @@
     if (EDIT_HAD.chairName) remark('f-chairName');
     if (EDIT_HAD.chairEmail) remark('f-chairEmail');
 
+    /* Whether this posting is still on the maintainer's list, read off the
+       STORED document (see "mark it reviewed" below). */
+    EDIT_STATUS = String(v.status || '');
+    EDIT_REVIEWED = !!v[REVIEWED_AT];
+    paintReviewed();
+
     /* Keep the derived department line and its preview in step, and let the
        name fields settle into the spelling the SITE publishes — the same
        canonColumns() this posting will go through when it is republished.
@@ -1403,6 +1409,171 @@
     if (ta && window.OAEditor) OAEditor.attach(ta);
   }
 
+  /* ------------------------------------------------- mark it reviewed
+
+     Owner, 2026-09-29, of a posting opened from the Admin area's user-added
+     tab: "I open it, review it, but then the only option I have once I have
+     opened it is to 'save it'. I would like to have 'mark review' button
+     [here] too."
+
+     "Open & correct" on /admin-area lands HERE, and the card it came from
+     offers three things: correct it, mark it reviewed, take it down. This
+     form carried two of them, so a maintainer who had read a posting on the
+     form, and found nothing to change, had to go back to the card to tick it
+     off. The button closes that gap, and it is the card's button in every way
+     that matters:
+
+     * THE SAME WRITE. One field, `reviewedAt`, and nothing else: the posting
+       stays live, nothing is republished, and the mailer's own mark
+       (`announcedAt`) is never touched. `REVIEWED_AT` and `LIVE` below are
+       the names _scraper/submissions-review.mjs defines, and selftest.mjs
+       pins this copy against that model exactly as it pins the card's.
+     * THE SAME LIST. It is drawn only for a posting the card would list: live
+       (queued or published, never a taken-down one or a tracking-sheet
+       mirror) and not yet ticked off. That is `isWaiting` in the model.
+     * THE MAINTAINER ALONE. A poster correcting their own posting is never
+       offered it (OAAccounts.isAdmin(), the one definition), and the click
+       asks again, because a hidden button is still a button on a keyboard.
+       The rules are the authorisation: jobSubmissions is admin-write.
+
+     IT NEVER SAVES THE FORM, AND THE FORM STAYS OPEN. Saving and ticking off
+     are two different acts (the card keeps them apart as well), and replacing
+     the form with a done panel here would throw away any correction typed
+     but not yet saved. So the stamp is written, the button goes, and the line
+     under the buttons says so; where the reader has typed into the form it
+     adds that their corrections still need Save changes. The other order, a
+     correction saved first, is answered by the done panel, which offers the
+     same button while the posting is still waiting. */
+
+  /** The names the submissions model defines (REVIEWED_AT and LIVE in
+      _scraper/submissions-review.mjs); selftest.mjs pins both. */
+  var REVIEWED_AT = 'reviewedAt';
+  var LIVE = ['queued', 'published'];
+
+  /** What the stored posting said, recorded by fill(): its status, and
+      whether the maintainer has already ticked it off. */
+  var EDIT_STATUS = '';
+  var EDIT_REVIEWED = false;
+
+  /** Whether the reader has typed into the form (a trusted input or change
+      event). It decides WORDING only, never whether anything is saved. */
+  var FORM_TOUCHED = false;
+
+  function amMaintainer() {
+    return !!(window.OAAccounts && OAAccounts.isAdmin && OAAccounts.isAdmin());
+  }
+
+  /** Still on the maintainer's list: live, and nobody has ticked it off.
+      The browser twin of isWaiting in the submissions model. */
+  function waitingForReview(status, reviewed) {
+    return LIVE.indexOf(String(status || '')) >= 0 && !reviewed;
+  }
+
+  function offerReview() {
+    return !!EDIT_ID && amMaintainer() && waitingForReview(EDIT_STATUS, EDIT_REVIEWED);
+  }
+
+  function paintReviewed() {
+    var btn = $('oa-reviewed');
+    if (!btn) return;
+    btn.disabled = false;
+    show(btn, offerReview());
+  }
+
+  /** The card's own write: one stamp, merged onto the posting. update(),
+      never set(), so it cannot create a document that has since gone, and
+      the fresh token first, as before every other write this form makes. */
+  function markReviewed() {
+    return new Promise(function (resolve, reject) {
+      OAAccounts.whenSignedIn(function (user) {
+        freshClaims(user).then(function () {
+          return OAFB.ready();
+        }).then(function (fb) {
+          var patch = {};
+          patch[REVIEWED_AT] = new Date().toISOString();
+          return fb.firestore().collection(OAFB.col.jobSubmissions)
+            .doc(EDIT_ID).update(patch);
+        }).then(function () {
+          EDIT_REVIEWED = true;
+          resolve();
+        }, reject);
+      });
+    });
+  }
+
+  /** What a tick means, said the card's way: it stays live, and it has only
+      left the list. */
+  var REVIEWED_SAYS = 'Marked reviewed. It stays live on the site; it has ' +
+    'only left your list in the ';
+
+  function reviewFailure() {
+    return 'We could not mark it reviewed. Please reload the page and try again.';
+  }
+
+  function wireReviewed() {
+    var form = $('oa-job-form');
+    if (form) {
+      var touch = function (e) { if (e && e.isTrusted) FORM_TOUCHED = true; };
+      form.addEventListener('input', touch, true);
+      form.addEventListener('change', touch, true);
+    }
+
+    var btn = $('oa-reviewed');
+    if (!btn || !EDIT_ID) return;
+    btn.addEventListener('click', function () {
+      if (!offerReview()) return;          // a page can be got round
+      btn.disabled = true;
+      say('Marking it reviewed…');
+      markReviewed().then(function () {
+        /* The way back to the list takes the button's place: that is where
+           the maintainer goes next, and a control says so better than a word
+           inside a sentence. */
+        show(btn, false);
+        if (!$('oa-reviewed-back')) {
+          var a = document.createElement('a');
+          a.id = 'oa-reviewed-back';
+          a.className = 'button oa-btn-ghost';
+          a.href = 'admin-area';
+          a.textContent = 'Back to the Admin area';
+          btn.parentNode.insertBefore(a, btn.nextSibling);
+        }
+        /* the keyboard was on the button that has just gone */
+        $('oa-reviewed-back').focus();
+        say(REVIEWED_SAYS + 'Admin area.' + (FORM_TOUCHED
+          ? ' Your corrections above are not saved yet: press Save changes to keep them.'
+          : ''), 'ok');
+      }).catch(function (err) {
+        btn.disabled = false;
+        say(reviewFailure(), 'err');
+        if (window.console) console.error('mark reviewed:', err);
+      });
+    });
+  }
+
+  /** The done panel after a SAVE, for a posting still on the list: the
+      correction is stored, and the tick is one press away rather than a
+      trip back to the card. */
+  function wireDoneReviewed(done) {
+    var btn = done.querySelector('#oa-done-reviewed');
+    var line = done.querySelector('#oa-done-review');
+    if (!btn || !line) return;
+    btn.addEventListener('click', function () {
+      if (!offerReview()) return;
+      btn.disabled = true;
+      line.textContent = 'Marking it reviewed…';
+      markReviewed().then(function () {
+        show(btn, false);
+        line.textContent = REVIEWED_SAYS + 'Admin area.';
+        var back = done.querySelector('a[href="admin-area"]');
+        if (back) back.focus();
+      }).catch(function (err) {
+        btn.disabled = false;
+        line.textContent = reviewFailure();
+        if (window.console) console.error('mark reviewed:', err);
+      });
+    });
+  }
+
   /* --------------------------------------------- take this posting down
 
      Owner, 2026-09-18, of a test posting of their own: "add a button here at
@@ -1505,6 +1676,7 @@
     wireDraft();
     enterEditMode();
     wireTakeDown();
+    wireReviewed();
     fillStaticOptions();
 
     var sent = false;                 // latched once a posting has been written
@@ -1715,13 +1887,30 @@
                                 canonCountry: window.OACountries ? OACountries.canon : null
                               }) });
             }
+            /* The save wrote `queued`, so the posting is live now whatever it
+               was before: a hidden one the maintainer has just put back is on
+               their list again if nobody had ticked it off. */
+            EDIT_STATUS = doc.status;
+            var review = offerReview();
+            var admin = amMaintainer();
             var done = $('oa-done');
             done.innerHTML =
               '<h3>Your changes have been saved.</h3>' +
               '<p>The <a href="jobs">job postings page</a> already shows your ' +
               'edit on this device. Everyone else sees it within a few minutes.</p>' +
+              /* MARK REVIEWED, one press away (owner, 2026-09-29): see
+                 "mark it reviewed" above. Only while the posting is still on
+                 the maintainer's list. */
+              (review ? '<p id="oa-done-review" role="status">It is still on your ' +
+                'list in the Admin area until you mark it reviewed.</p>' : '') +
               '<p class="oa-done-actions">' +
-              '<a class="button blue" href="jobs">Back to the job postings</a></p>';
+              (review ? '<button type="button" class="button blue" ' +
+                'id="oa-done-reviewed">Mark reviewed</button> ' : '') +
+              (admin ? '<a class="button oa-btn-ghost" href="admin-area">' +
+                'Back to the Admin area</a> ' : '') +
+              '<a class="button ' + (review ? 'oa-btn-ghost' : 'blue') +
+              '" href="jobs">Back to the job postings</a></p>';
+            if (review) wireDoneReviewed(done);
           } else {
             $('oa-ref').textContent = ref || '—';
             /* A NEW posting is one more than the account held, and the menu's
