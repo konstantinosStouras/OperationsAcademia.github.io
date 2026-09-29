@@ -66,7 +66,7 @@ Read the deployed list back against `_functions/index.js` every time.
 
 **NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30, AND THE ANSWER LANDED ON
 2026-08-30.** `_functions/package.json` names Node 22 and current SDKs
-(`firebase-functions` ^7.3.2; `firebase-admin` ^14.3.0 — a major that removes
+(`firebase-functions` ^7.4.0 since 2026-09-29; `firebase-admin` ^14.3.0 — a major that removes
 the namespaced `admin.*` API, which is why `recordVisit` now uses the modular
 one), and the deploy carrying them has run: `firebase functions:list` reports
 **every function on `nodejs22`** (four at that deploy; five once
@@ -296,6 +296,20 @@ one bit you. The sibling's five functions packages were audited and brought to
 old checkout ever hits the `ms` form, clear the variable for that window only —
 `set FIREBASE_FUNCTIONS_DISCOVERY_OUTPUT_PATH=` (an empty value is falsy) —
 or raise that project's `firebase-functions` above the floor.
+
+**THE `ms` FORM ALSO MEANS A SLOW DISK, and on this machine that was Dropbox.**
+This project is above the floor (`^7.4.0`), and on 2026-09-29 its deploy still
+died with `Timeout after 10000ms`. The file route waits for the loader to
+EXIT, and the loader was only slow: the checkout lives inside a Dropbox folder,
+and while Dropbox was syncing (right after an `npm install` had rewritten
+thousands of files under `_functions/node_modules`) reading them took longer
+than ten seconds. The same discovery finishes in half a second on a quiet disk.
+**Pause Dropbox syncing, or wait until it shows up to date, then deploy
+again**; that is what fixed it. Unlike the port route above,
+`FUNCTIONS_DISCOVERY_TIMEOUT` (in seconds) does apply to the file route, so
+`set FUNCTIONS_DISCOVERY_TIMEOUT=60` for the window is the other way through.
+A loader that genuinely CRASHED would not time out at all: the file route
+prints its error text instead.
 
 ## 4. Verify
 

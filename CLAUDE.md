@@ -7523,7 +7523,7 @@ deploying, and read the per-function lines, not the last one.
 **The Node.js 20 deadline is CLOSED — answered in the repository and carried
 live by the owner's 2026-08-30 deploy.** Google decommissioned Node 20
 deploys on **2026-10-30**; `_functions/package.json` names **Node 22** and
-current SDKs (`firebase-functions` ^7.3.2, the package the deploy warning
+current SDKs (`firebase-functions` ^7.4.0 since 2026-09-29, the package the deploy warning
 itself named; `firebase-admin` ^14.3.0 — a major that REMOVES the namespaced
 `admin.*` surface whole, which is why `recordVisit` was rewritten to the
 modular `firebase-admin/app` / `firebase-admin/firestore` API in the same
