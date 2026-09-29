@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-29T09:36:14.605Z",
+ "generated": "2026-09-29T12:57:02.644Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -279,6 +279,10 @@
   },
   {
    "v": "FLAME University",
+   "n": 2
+  },
+  {
+   "v": "George Mason University",
    "n": 2
   },
   {
@@ -831,10 +835,6 @@
   },
   {
    "v": "Fudan University",
-   "n": 1
-  },
-  {
-   "v": "George Mason University",
    "n": 1
   },
   {
@@ -2168,6 +2168,10 @@
    "n": 2
   },
   {
+   "v": "Costello College of Business",
+   "n": 2
+  },
+  {
    "v": "Curtis L. Carlson School of Management",
    "n": 2
   },
@@ -2285,10 +2289,6 @@
   },
   {
    "v": "College of Engineering",
-   "n": 1
-  },
-  {
-   "v": "Costello College of Business",
    "n": 1
   },
   {
@@ -3114,11 +3114,11 @@
    "n": 8
   },
   {
-   "v": "Business Analytics",
-   "n": 7
+   "v": "Information Systems and Operations Management",
+   "n": 8
   },
   {
-   "v": "Information Systems and Operations Management",
+   "v": "Business Analytics",
    "n": 7
   },
   {
