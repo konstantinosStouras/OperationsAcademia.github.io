@@ -598,6 +598,20 @@ exports.sendVerificationEmail = onCall(
    read as "no universities visit", which is precisely the misreading the rest
    of this page was rebuilt to prevent.
 
+   AND IT ASKS A SECOND PUBLIC RECORD WHEN THE FIRST NAMES NOBODY (owner,
+   2026-09-29: "these numbers stated are too little, are they correct?").
+   The counts were right and the chart was thin: in its first month reverse
+   DNS answered for 29% of visits and 5% were placed, because an IPv6
+   address, a phone's carrier and a campus behind a cloud VPN publish no
+   useful name. So an address reverse DNS does not place at a university is
+   looked up in the regional internet registry (RDAP, `registration` below),
+   whose record for a campus block names the university and gives contacts
+   at its own domain. The same curated map decides what counts, and the
+   answer is read in memory and discarded like the name is; `registry` and
+   `v6` are two more COUNTERS, so how much each look-up carries can be read
+   off the day documents. Visits already counted cannot be re-read (no
+   address was ever kept), so the gain shows from the deploy onwards.
+
    LIVE SINCE 2026-08-30, and its road here is worth the paragraph: the three
    doorbells above went live on 2026-08-27, but the 2026-08-29 deploy was made
    from a checkout that PREDATED this file, so it printed "Deploy complete!"
@@ -644,6 +658,64 @@ async function reverseDns(ip) {
     .finally(() => clearTimeout(timer));
 }
 
+/** The network's REGISTRATION, asked of the regional internet registry over
+    RDAP (the successor to WHOIS), for an address reverse DNS could not name.
+
+    WHY: over the resolver's first month reverse DNS answered for 29% of
+    visits and placed 5% at a university (see the registration section of
+    assets/oa-netorg.js), because an IPv6 address, a phone's carrier and a
+    campus behind a cloud VPN publish no useful name. A registration exists
+    for every routable network whether or not anybody publishes a name, and
+    it names the university that holds the block.
+
+    ONE ENTRY POINT: ARIN answers for its own region and REDIRECTS any other
+    address to the registry that holds it (RIPE, APNIC, LACNIC, AFRINIC),
+    measured 2026-09-29, so no bootstrap table has to be carried or kept
+    current here. The registry is told the address, which is what a registry
+    is for, exactly as the reverse look-up above tells the DNS; nothing it
+    answers is stored or logged, only the university the pure half in
+    netorg.js reads out of it. A slow or failed answer is null, which places
+    nothing, so this can only ever ADD a university the map already names. */
+const RDAP_URL = 'https://rdap.arin.net/registry/ip/';
+const RDAP_MS = 3000;
+async function registration(ip) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), RDAP_MS);
+  try {
+    const res = await fetch(RDAP_URL + ip, {
+      headers: { accept: 'application/rdap+json', 'user-agent': 'operations-academia-functions' },
+      redirect: 'follow',
+      signal: ctl.signal,
+    });
+    if (!res.ok) return null;
+    const text = await res.text();
+    /* an answer this large is not a network registration */
+    if (text.length > 500000) return null;
+    return JSON.parse(text);
+  } catch (e) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Where one visit came from, from the two public records of its network:
+    the reverse-DNS name first, and the registration when that name places
+    no university. Everything the address is needed for happens in here, so
+    the handler below never names it again. `via` says which record named
+    the university ('dns' or 'registry'), for the diagnostic counter. */
+async function placeVisit(ip) {
+  const host = await reverseDns(ip);
+  let hit = netorg.classify(host, UNI_DOMAINS);
+  let via = hit && hit.university ? 'dns' : '';
+  if (!via) {
+    const reg = netorg.classifyRegistration(await registration(ip), UNI_DOMAINS);
+    if (reg && reg.university) { hit = reg; via = 'registry'; }
+    else if (!hit && reg && reg.academic) hit = reg;
+  }
+  return { host, hit, via, v6: ip.indexOf(':') !== -1 };
+}
+
 function visitsDb() {
   adminApp();
   return getFirestore();
@@ -687,12 +759,12 @@ exports.recordVisit = onRequest(
     const ip = netorg.clientIp(req.headers['x-forwarded-for']);
     if (!ip) return done();
 
-    const host = await reverseDns(ip);
+    const { host, hit, via, v6 } = await placeVisit(ip);
     /* `ip` is not referenced again, is written nowhere, and is not logged:
-       the whole of what survives this line is `host`, and below it only the
-       university that host belongs to. */
+       the whole of what survives this line is whether reverse DNS answered,
+       which university (if any) either record named, and whether the visit
+       came over IPv6. */
 
-    const hit = netorg.classify(host, UNI_DOMAINS);
     const day = new Date().toISOString().slice(0, 10);
     const inc = FieldValue.increment(1);
 
@@ -710,6 +782,12 @@ exports.recordVisit = onRequest(
                    for — a different fact from "not a university", and the
                    thing that would otherwise be invisible.
          unis      one tally per named university.
+         registry  the named visits the REGISTRATION placed, reverse DNS
+                   having named none: the diagnostic that says how much of
+                   the chart the second look-up is carrying.
+         v6        visits that arrived over IPv6, which reverse DNS almost
+                   never names; with `resolved` beside it, the reason a thin
+                   chart is thin can be read off the counters.
 
        A NESTED MAP, never a dotted field path. `unis['St. John's University']`
        as a path would be read as three fields, and this site's own directory
@@ -719,6 +797,8 @@ exports.recordVisit = onRequest(
     if (host) patch.resolved = inc;
     if (hit && hit.university) patch.unis = { [hit.university]: inc };
     else if (hit && hit.academic) patch.academic = inc;
+    if (via === 'registry') patch.registry = inc;
+    if (v6) patch.v6 = inc;
 
     try {
       await visitsDb().collection('universityVisits').doc(day).set(patch, { merge: true });

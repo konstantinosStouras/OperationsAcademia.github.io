@@ -238,10 +238,24 @@ departments** rather than against whatever string an ISP happens to publish.
 | | |
 |---|---|
 | `assets/oa-visit.js` | one ping per browsing session, from every public page. No body, no identifier, no cookie, no page path — the whole of the request is that it happened. Not loaded on `admin-area.html`, so the maintainer's own desk never feeds the figures. |
-| `recordVisit` (`_functions/index.js`) | reads the address, reverse-resolves it, keeps the **university name**, discards the rest. |
+| `recordVisit` (`_functions/index.js`) | reads the address, reverse-resolves it, and when that name places no university asks the regional internet registry (RDAP, through `rdap.arin.net`, which redirects other regions) who the network is registered to; keeps the **university name**, discards the rest. The registry answer is read by `classifyRegistration` in `assets/oa-netorg.js`, through the same curated map. |
 | `data/university-domains.json` | domain → university, **derived** from each department's own page in the Universities directory by `_scraper/build-netmap.mjs`. Vendored into `_functions/` because `firebase deploy` ships only that directory. |
-| `universityVisits/{YYYY-MM-DD}` | counters only — `seen`, `resolved`, `academic`, and one tally per university. Closed to every client in `_firestore.rules`. |
+| `universityVisits/{YYYY-MM-DD}` | counters only — `seen`, `resolved`, `academic`, one tally per university, and since 2026-09-29 two diagnostics: `registry` (named visits the registration placed where reverse DNS named nobody) and `v6` (visits over IPv6). The builder logs both; neither is published. Closed to every client in `_firestore.rules`. |
 | `data/analytics.json` → `universities` | what the page draws: the whole record (`all`, `seen`, `resolved`, `academic`, `placed`) and, since 2026-09-08, the same counters tallied per period under `windows` (`30`, `90`, `365`, `all` — the page's own range ids, from `RANGES` in `assets/oa-analytics-model.js`), which is what the period row on the figure reads. Tallied by `visitWindows` in the model from the day documents; never per day. |
+
+**The pages list carries periods too** (since 2026-09-29): `pagesWindows` in
+`data/analytics.json` holds the most visited pages once per period under the
+same ids (`30`, `90`, `365`, `all`), each `{ days, from, to, views, pages }`
+with `views` the period's whole pageview count. `pageWindows` in the model
+tallies them from the first-party record, which the builder now reads WHOLE,
+projected to four fields (`start`, `page`, `dur`, `uid`); `pages` and
+`pagesWindow` stay the 90-day period.
+
+**The registry look-up needs a functions deploy.** It is code inside
+`recordVisit`, so it runs only after `git pull && npm install --prefix
+_functions && firebase deploy --only functions --project operations-academia`,
+read sixteen back. Visits counted before the deploy cannot be re-read: no
+address was ever kept.
 
 **The IP is never stored.** It is resolved in memory and goes out of scope
 when the request ends; it is not written and not logged. An ISP or a

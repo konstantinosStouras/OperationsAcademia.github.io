@@ -16624,9 +16624,11 @@ async function testAnalytics() {
   ok(/isPublicPath/.test(page),
     'the page filters as a second line — the builder is the defence, but a ' +
     'reader may still hold a copy fetched before it shipped');
-  ok(/var publicPages = \(data\.pages \|\| \[\]\)\.filter/.test(page),
+  ok(/var publicPages = \(\(pageWin \? pageWin\.pages : data\.pages\) \|\| \[\]\)\.filter/.test(page)
+     && page.indexOf('var publicPages = ') < page.indexOf('if (publicPages.length || hasPageWindows)'),
     '…and filters BEFORE deciding the figure exists, or a cached file of only ' +
-    'admin rows would draw a heading over an empty chart');
+    'admin rows would draw a heading over an empty chart (the chosen period\'s list, ' +
+    'or the default one where the file carries no periods)');
 
   /* ------------------------------------ the dimensions, and where each may come from
 
@@ -16849,8 +16851,7 @@ async function testAnalytics() {
   ok(/newVsReturning/.test(builder) && !/dimension\('newVsReturning'/.test(builder),
     'new-versus-returning is EXPLAINED as absent rather than silently missing: ' +
     'cookieless GA4 reports nearly every session as new, and the first-party ' +
-    'record could only answer it with the unbounded read the incremental query ' +
-    'is shaped to avoid');
+    'record could answer it but nobody has asked for that figure');
   ok(/windowFrom/.test(builder) && /BREAKDOWN_DAYS/.test(builder),
     'the tallies are recomputed over a stated window every run — they cannot be ' +
     'accumulated across runs the way days can, or the overlap would be counted twice');
@@ -17294,6 +17295,103 @@ async function testUniversityVisits() {
     'universities on plain national domains (ethz.ch, mcgill.ca, sdabocconi.it) are ' +
     'KEPT — outside the English-speaking world that is the normal shape');
 
+  /* --- the network's REGISTRATION (owner, 2026-09-29: "these numbers
+     stated are too little, are they correct?") ----------------------------
+
+     The counts were right and the chart was thin: reverse DNS answered for
+     29% of visits and 5% were placed, because an IPv6 address almost never
+     has a PTR record. The second look-up reads the regional internet
+     registry's RDAP record. These fixtures are the SHAPE of the live answers
+     measured on 2026-09-29, trimmed, with every personal contact replaced by
+     a role address (a registry record names staff; a test file must not). */
+  const card = (roles, fn, email) => ({ roles, vcardArray: ['vcard', [['version', {}, 'text', '4.0'],
+    ['fn', {}, 'text', fn], ...(email ? [['email', {}, 'text', email]] : [])]] });
+  const rdap = (name, entities) => ({ objectClassName: 'ip network', name, entities });
+  const RMAP = { 'cornell.edu': 'Cornell University', 'stanford.edu': 'Stanford University',
+    'ox.ac.uk': 'University of Oxford', 'hbs.edu': 'Harvard University', 'mit.edu': 'Massachusetts Institute of Technology (MIT)',
+    'ethz.ch': 'ETH Zurich' };
+  const cornell = rdap('CORNELL-NET', [{ ...card(['registrant'], 'Cornell University'),
+    entities: [card(['abuse'], 'NOC', 'noc@cornell.edu'), card(['technical'], 'Network Team', 'net@cornell.edu')] }]);
+  eq(N.classifyRegistration(cornell, RMAP), { university: 'Cornell University' },
+    'a campus block registered to a university, with contacts at its own domain, names that university — ' +
+    'the answer reverse DNS could not give for an address with no PTR record');
+  const stanford6 = rdap('SUNET-V6', [card(['registrant'], 'Stanford University'),
+    card(['abuse'], 'Abuse Reporting', 'security@stanford.edu')]);
+  eq(N.classifyRegistration(stanford6, RMAP), { university: 'Stanford University' },
+    'an IPv6 campus block is named the same way — IPv6 is where reverse DNS fails most');
+  const oxford6 = rdap('UNIV-OF-OXFORD', [card(['registrant'], 'JANET-HOSTMASTER'),
+    card(['administrative', 'technical'], 'University of Oxford Hostmaster', 'hostmaster@it.ox.ac.uk'),
+    card(['abuse'], 'Jisc CSIRT', 'irt@jisc.ac.uk')]);
+  eq(N.classifyRegistration(oxford6, RMAP), { university: 'University of Oxford' },
+    'a subdomain of the university\'s own domain counts, and the national research network beside it ' +
+    '(jisc.ac.uk, a domain the map does not carry) does not stop it');
+  const harvard = rdap('HARVARD-UNIV', [card(['registrant'], 'Harvard University'),
+    card(['noc'], 'Network Operations', 'noc@harvard.edu')]);
+  eq(N.classifyRegistration(harvard, RMAP), { university: 'Harvard University' },
+    'where the map carries the university under another domain (hbs.edu), the REGISTRANT\'s own name, ' +
+    'read exactly, still names it');
+  const mit = rdap('MIT', [card(['registrant'], 'Massachusetts Institute of Technology')]);
+  eq(N.classifyRegistration(mit, { 'mit.edu': 'Massachusetts Institute of Technology (MIT)' }).university,
+    'Massachusetts Institute of Technology (MIT)',
+    '…a trailing acronym in the map\'s spelling is folded away, and nothing else is');
+  eq(N.classifyRegistration(rdap('X', [card(['registrant'], 'Harvard University Press')]), RMAP), null,
+    'a registrant name is matched EXACTLY, never by containing a university\'s name');
+  const comcast = rdap('POMPANO-4', [card(['registrant'], 'Comcast Cable Communications, LLC'),
+    card(['abuse'], 'Network Abuse', 'abuse@comcast.net')]);
+  eq(N.classifyRegistration(comcast, RMAP), null,
+    'a home broadband block is NOT counted, exactly as an ISP hostname is not');
+  const cernet = rdap('CERNET2-TSINGHUA6', [card(['technical'], 'CERNET Helpdesk', 'helpdesk@cernet.edu.cn')]);
+  eq(N.classifyRegistration(cernet, RMAP), { academic: true },
+    'a block whose contacts are at an academic domain the site has no page for is academic-but-unnamed');
+  const shared = rdap('REGIONAL', [card(['technical'], 'A', 'noc@cornell.edu'), card(['technical'], 'B', 'noc@stanford.edu')]);
+  eq(N.classifyRegistration(shared, RMAP), { academic: true },
+    'a registration naming TWO universities names neither — the map\'s own refusal for a shared domain');
+  eq(N.classifyRegistration(null, RMAP), null, 'a failed look-up places nothing');
+  eq(N.classifyRegistration({ entities: 'junk' }, RMAP), null, '…and neither does junk');
+  const deep = { entities: [] };
+  let cur = deep;
+  for (let i = 0; i < 20; i++) { const next = { ...card(['technical'], 'x', 'noc@cornell.edu'), entities: [] }; cur.entities.push(next); cur = next; }
+  ok(N.registrationFacts(deep).domains.length === 1,
+    'the walk is bounded (depth and count): the answer comes from outside and is read inside a request');
+  eq(N.clientIp('::ffff:128.84.0.1'), '128.84.0.1',
+    'an IPv4 address written the IPv6 way is handed on as the IPv4 address the registry files');
+
+  /* the function asks the registry only when reverse DNS named nobody, and the
+     address is used for the two look-ups and nothing else */
+  {
+    const fnSrc = await readFile(path.join(root, '_functions', 'index.js'), 'utf8');
+    const placeAt = fnSrc.indexOf('async function placeVisit(');
+    const placeEnd = fnSrc.indexOf('function visitsDb()');
+    ok(placeAt > 0 && placeEnd > placeAt, 'placeVisit was found (or the checks below are vacuous)');
+    const place = fnSrc.slice(placeAt, placeEnd);
+    ok(/let via = hit && hit\.university \? 'dns' : '';/.test(place) &&
+        /if \(!via\) \{[\s\S]*classifyRegistration\(await registration\(ip\), UNI_DOMAINS\)/.test(place),
+      'the registry is asked only when reverse DNS placed no university, and read through the SAME curated map');
+    ok(/else if \(!hit && reg && reg\.academic\) hit = reg;/.test(place),
+      '…and an academic answer from it never overrides what reverse DNS already said');
+    const regAt = fnSrc.indexOf('async function registration(');
+    const reg = fnSrc.slice(regAt, placeAt);
+    ok(regAt > 0 && /https:\/\/rdap\.arin\.net\/registry\/ip\//.test(fnSrc) && /redirect: 'follow'/.test(reg),
+      'one entry point, ARIN, which redirects any other region\'s address to the registry that holds it');
+    ok(/AbortController/.test(reg) && /RDAP_MS = 3000/.test(fnSrc),
+      'the look-up is bounded in time, so a slow registry costs a visit its name and never the function');
+    ok(!/logger\./.test(reg) && !/logger\./.test(place),
+      'nothing about the look-up is logged: not the address, not what the registry said');
+    const handler = fnSrc.slice(fnSrc.indexOf('exports.recordVisit'));
+    ok(/const \{ host, hit, via, v6 \} = await placeVisit\(ip\);/.test(handler) &&
+        (handler.match(/\bip\b/g) || []).length <= 6,
+      'the handler hands the address to placeVisit and names it nowhere after that line');
+    ok(/if \(via === 'registry'\) patch\.registry = inc;/.test(handler) && /if \(v6\) patch\.v6 = inc;/.test(handler),
+      'two more COUNTERS say how much of the chart each look-up carries, and how much traffic is IPv6');
+    const fnMeta = fnSrc.slice(fnSrc.indexOf('exports.recordVisit = onRequest('), fnSrc.indexOf('async (req, res)', fnSrc.indexOf('exports.recordVisit = onRequest(')));
+    const secs = Number((/timeoutSeconds: (\d+)/.exec(fnMeta) || [])[1] || 0);
+    ok(secs * 1000 > 2250 + 3000 + 1000,
+      `the function's timeout (${secs}s) outlasts the reverse look-up, the registry look-up and the write`);
+  }
+  const ppReg = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
+  ok(/public register of internet addresses/.test(ppReg) && /those two look-ups/.test(ppReg),
+    'the Privacy Policy names the second look-up and says the address is used for the two and kept by neither');
+
   /* --- the vendored copies, which are what the deployed function reads --- */
 
   for (const [src, vendored] of [
@@ -17598,7 +17696,8 @@ async function testUniversityVisits() {
   ok(/redraw\('oa-pagerange', id\)/.test(pagejs) && /redraw\('oa-metric', id\)/.test(pagejs),
     '…and the control at the top and the metric switch go through the same redraw');
   const acss = await readFile(path.join(root, 'assets', 'oa-analytics.css'), 'utf8');
-  ok(/\.oa-figure > \.oa-unirange \{ margin:/.test(acss), 'the stylesheet spaces the row under the figure\'s heading');
+  ok(/\.oa-figure > \.oa-unirange,\s*\n\.oa-figure > \.oa-pagesrange \{ margin:/.test(acss),
+    'the stylesheet spaces the row under the figure\'s heading, on both figures that carry one');
   ok(/\.oa-switch button \{ min-height: 42px; \}/.test(acss),
     '…and the phone rule for the compact control reaches it (42px targets)');
   const clog = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
@@ -17609,6 +17708,90 @@ async function testUniversityVisits() {
     'CLAUDE.md records the periods: where they are tallied and where the row is drawn');
   ok(/windows/.test(await readFile(path.join(root, '_SETUP-ANALYTICS.md'), 'utf8')),
     '_SETUP-ANALYTICS.md names the served periods');
+
+  /* --- the most visited pages carry the same periods (owner, 2026-09-29) --
+
+     "add these buttons" to the pages figure. The builder reads the whole
+     first-party record (projected to four fields) and tallies the pages list
+     per period through the model's pageWindows, under the same ids and the
+     same calendar-day rule visitWindows keeps; assemble publishes the periods
+     with the list they belong to; the page draws the row through the same
+     chooser, prints the chosen period's own span and whole count, and shows
+     each page as the address the site writes. */
+  eq(Object.keys(AM.pageWindows([], { now: '2026-09-08' })), AM.RANGES.map((r) => r.id),
+    'pageWindows answers one list per range, under the range ids');
+  const precs = [
+    { day: '2026-09-08', pages: { '/jobs': [3, 300], '/jobs.html': [1, 100], '/admin-area.html': [9, 9], '/v2/jobs.html': [4, 4] } },
+    { day: '2026-08-15', pages: { '/': [5, 50], '/index.html': [1, 10] } },
+    { day: '2026-07-01', pages: { '/universities.html': [7, 70] } },
+    { day: '2025-01-01', pages: { '/jobs.html': [2, 2] } },
+    { day: '2026-09-09', pages: { '/tomorrow.html': [6, 6] } },
+    { day: 'junk', pages: { '/junk.html': [5, 5] } },
+    { day: '2026-09-01', pages: { '/neg.html': [-3, 1], '/nan.html': ['x', 1] } },
+  ];
+  const pwx = AM.pageWindows(precs, { now: '2026-09-08' });
+  eq(pwx['30'], { days: 30, from: '2026-08-15', to: '2026-09-08', views: 10, pages: [
+    { path: '/', title: '', views: 6, avgSec: 10 }, { path: '/jobs.html', title: '', views: 4, avgSec: 100 }] },
+  'a period is the N calendar days ending today, two spellings of one page are one row, the admin desk and ' +
+    'an archived tree reach no period, and a junk day, a negative count and a day after today are left out');
+  eq(pwx['90'].views, 17, 'a longer period reaches further back');
+  eq(pwx.all.views, 25, '…and everything on record keeps every valid day, the one dated after today included');
+  eq(pwx.all.pages[0], { path: '/universities.html', title: '', views: 7, avgSec: 10 },
+    'most views first, with the average time re-weighted by views');
+  eq(AM.pageWindows(precs, { now: '2026-09-08' }), pwx, 'the tally is deterministic when the day is given');
+  const pgap = AM.pageWindows([{ day: '2026-01-01', pages: { '/jobs.html': [1, 1] } }], { now: '2026-09-08' });
+  ok(pgap['30'].from === '' && pgap['30'].views === 0 && pgap.all.from === '2026-01-01',
+    'a period with no record carries empty dates, which is how the page says "nothing was recorded"');
+  ok(AM.emptyDataset().pagesWindows && typeof AM.emptyDataset().pagesWindows === 'object',
+    'the empty dataset names the pages periods, so a served file is self-describing');
+
+  const fromUsageSrc = bsrc.slice(bsrc.indexOf('async function fromUsage('), bsrc.indexOf('async function fromGa4('));
+  ok(fromUsageSrc.length > 500 && /\.select\('start', 'page', 'dur', 'uid'\)\.orderBy\('start'\)/.test(fromUsageSrc),
+    'the first-party record is read WHOLE, projected to the four fields the figures use');
+  ok(!/where\('start'/.test(fromUsageSrc),
+    '…with no `since`, because "Last 12 months" and "Everything" ask about all of it and a list cannot be ' +
+    'accumulated across runs without counting the overlap twice');
+  ok(/A\.pageWindows\(records, \{ now \}\)/.test(fromUsageSrc) && /pagesWindows\['90'\]/.test(fromUsageSrc),
+    'the periods are tallied through the model, and the default list IS the 90-day period');
+  ok(/A\.dayPlus\(todayIso, -\(A\.BREAKDOWN_DAYS - 1\)\) \+ 'T00:00:00Z'/.test(bsrc),
+    'the dimension window starts at a UTC midnight, so the hours, the time on a page and the default list ' +
+    'describe the same ninety calendar days');
+  ok(/pagesWindows = r\.pagesWindows \|\| null;/.test(asmSrc) && /pagesWindows = carry\.pagesWindows \|\| null;/.test(asmSrc) &&
+      /data\.pagesWindows = cutPageWindows\(pagesWindows\);/.test(bsrc),
+    'the periods belong to whichever source owns the list, travel with it through a failed read, and are cut in one shape');
+  const servedPW = JSON.parse(await readFile(path.join(root, 'data', 'analytics.json'), 'utf8')).pagesWindows || {};
+  if (Object.keys(servedPW).length) {
+    eq(Object.keys(servedPW), AM.RANGES.map((r) => r.id), 'the served pages periods are the page\'s own ids');
+    for (const id of Object.keys(servedPW)) {
+      const w = servedPW[id];
+      eq(Object.keys(w), ['days', 'from', 'to', 'views', 'pages'], `served pages period "${id}" has the one shape`);
+      ok(w.pages.length <= 25 && w.pages.every((x) => AM.isPublicPath(x.path) && x.path === AM.normPath(x.path)),
+        `served pages period "${id}" is cut, public and normalised`);
+      ok(w.pages.reduce((n, x) => n + x.views, 0) <= w.views,
+        `served pages period "${id}": its rows never add up to more than its stated whole`);
+    }
+  }
+  const pagesFig = pagejs.slice(pagejs.indexOf('var pw = data.pagesWindows'), pagejs.indexOf('renderUniversities();\n  }\n\n  /** One dimension figure'));
+  ok(pagesFig.length > 500 && /className: 'oa-switch oa-pagesrange'/.test(pagesFig) && /options: RANGES/.test(pagesFig),
+    'the pages figure draws the page\'s own range through the same chooser, in the compact shape');
+  ok(/state\.range = id; redraw\('oa-pagesrange', id\)/.test(pagesFig) &&
+      /insertBefore\(pbar, f4\.section\.querySelector\('\.oa-figure-sub'\)\)/.test(pagesFig),
+    '…under the heading, and a press sets the PAGE\'s range and keeps the reader in place');
+  ok(/as far back as the record goes/.test(pagesFig) && /Nothing was recorded in/.test(pagesFig) &&
+      /pageviews in that ' \+ \(pageProse \? 'period' : 'window'\)/.test(pagesFig),
+    'the caption names the chosen period\'s own span and whole count, and an empty period says so');
+  ok(/var address = addressOf\(p\.path\);/.test(pagesFig) && /href: address/.test(pagesFig),
+    'each page is shown and linked as the address the site writes, not the file\'s ".html" name');
+  eq(await (async () => {
+    const m = /function addressOf\(path\) \{[\s\S]*?\n  \}/.exec(pagejs);
+    const f = m ? new Function(m[0] + '; return addressOf;')() : () => null;
+    return ['/jobs.html', '/', '/informed_consent_statement.html', 'x.html'].map(f);
+  })(), ['/jobs', '/', '/informed_consent_statement', 'x.html'],
+  'addressOf drops the extension and nothing else (the home page stays "/")');
+  ok(clog.some((e) => e.url === '/analytics' && /most visited pages/i.test(e.summary) && /register/i.test(e.summary)),
+    'the change log announces the pages periods and the second university look-up');
+  ok(/pageWindows/.test(claudeMd) && /oa-pagesrange/.test(claudeMd) && /classifyRegistration/.test(claudeMd),
+    'CLAUDE.md records both: where the pages periods are tallied and drawn, and the registry look-up');
 
   /* --- the Privacy Policy discloses what is derived from an address ------- */
 

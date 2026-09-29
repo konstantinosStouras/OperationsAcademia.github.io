@@ -9447,6 +9447,77 @@ RECOUNTING the mistake in order to correct it), plus the universities block in
 `_scraper/page-test.mjs` (a live section carrying no archive chip and printing
 its own coverage, and an archived one still labelled with its range).
 
+### The numbers were checked, and the thin one gets a second look-up
+
+Owner, 2026-09-29, of the universities figure ("of 2,960 visits, 158 (5%)
+were placed") and the most visited pages ("all 7,517 pageviews"): *"these
+numbers stated are too little, are they correct? fix them. Also, add these
+buttons"* to the pages figure *"and check the numbers stated there too."*
+
+**The traffic numbers are right, and two independent records agree.** The
+analytics run of 2026-09-28 read 7,756 usage documents, 239 of them on the
+admin desk or an archive and left out, so 7,517 page opens between 17 August
+(the day the recorder went live) and 28 September; the listed rows add up to
+exactly that. The visit ping, a separate mechanism, counted 2,960 browsing
+sessions over 30 August to 28 September, against 2,299 first-party visitor-days
+in the same span, which is the ratio sessions to people should have. Google
+Analytics sees FEWER (about 50 sessions a day against the record's 70
+visitors), since a blocker or a privacy signal stops the tag. So nothing there
+was undercounted by the pipeline: it is the size of the site's readership.
+
+**The universities figure WAS too small, and not because of a count.** The
+counters were faithful; the resolver could only place what reverse DNS named,
+and it answered for 29% of visits. The measured reason is the PTR record: an
+IPv6 address almost never has one, and campus traffic increasingly arrives over
+IPv6 (Stanford's and Oxford's IPv6 blocks resolve to nothing at all). So
+`recordVisit` now asks a SECOND public record when the first places nobody: the
+network's registration at the regional internet registry, over RDAP
+(`registration` in `_functions/index.js`, one entry point at `rdap.arin.net`,
+which redirects any other region's address to the registry holding it).
+`classifyRegistration` in `assets/oa-netorg.js` is the pure half and keeps the
+map's rules: a university is named only through a contact address at a domain
+the map carries or a registrant name EXACTLY equal to one it carries (folded
+for case, accents, a leading "The" and a trailing acronym); two universities in
+one registration name neither; an academic contact domain the site has no page
+for (a research network) is academic-but-unnamed; a company, an ISP or a phone
+carrier is nothing. Measured against the live registries: Cornell, Columbia,
+Harvard, MIT, Stanford (v4 and v6), Oxford (v6), ETH Zurich and Simon Fraser
+named; Comcast, Sky and SWITCH not counted; CERNET academic.
+
+Two more counters (`registry`, `v6`) go on the day documents so the next
+question of this kind is answered from the log (`visits: … N named from the
+network's registration, M over IPv6`) rather than guessed at. Neither is
+published. **It is inert until `firebase deploy --only functions`**, and it
+cannot help the visits already counted, since no address was ever kept. The
+Privacy Policy names the second look-up.
+
+**The pages figure carries the universities figure's period row**
+(`.oa-pagesrange`, the same chooser, pressing it sets the page's range). The
+builder tallies the list once per period through `pageWindows` in the model,
+the same calendar-day rule `visitWindows` keeps, and publishes `pagesWindows`
+beside `pages`/`pagesWindow`, which stay the 90-day period. To answer "Last 12
+months" and "Everything" the first-party read is now the WHOLE collection,
+projected to four fields: a pages list cannot be accumulated across runs (last
+run's tally plus this run's counts the overlap twice), so reading it whole is
+the only honest answer, and it also ends a partial-day defect the bounded read
+would have started making on the record's ninetieth day (its window began at an
+instant, `now - 90 days`, so every day crossing it would have been truncated
+for good). The dimension window now starts at a UTC midnight for the same
+reason. The rows show the ADDRESS the site writes (`/jobs`), not the storage
+form `normPath` keeps (`/jobs.html`). A list another source owns (GA4, when the
+first-party read failed and nothing is carried) has no periods and draws no row.
+
+Tests: the registration block of `testUniversityVisits` (fixtures in the live
+answers' shape with every personal contact replaced by a role address, each
+rule both ways, the bounded walk, and the function's source: asked only when
+reverse DNS named nobody, bounded in time, logged nowhere, the address named
+nowhere after `placeVisit`, the timeout outlasting both look-ups) and the pages
+periods block beside the universities one (`pageWindows` over a fixture, the
+whole read and its projection, the carry, the served shape, the page's row,
+caption and addresses); the builder's own selftest (periods live, carried byte
+for byte, cut, and absent for a GA4-owned list); and the pages-periods block
+of `page-test.mjs`.
+
 ### How the community has grown, and what the dashed line is
 
 Owner, 2026-09-05: a chart of registered users over time, with the growth one

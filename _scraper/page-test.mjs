@@ -10248,6 +10248,130 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* --- the most visited pages carry the same periods --------------------
+
+     Owner, 2026-09-29: "add these buttons" (the universities figure's four
+     periods) to the pages figure, and check its numbers. The builder tallies
+     the pages list once per period under the range control's ids; the row on
+     the figure is the page's own range, so a press moves both figures and
+     the control at the top. Measured: the row, its order and its default,
+     the caption printing THAT period's span and whole pageview count, the
+     rows being that period's own, the shares taken against that whole, the
+     addresses shown as the site writes them (no ".html"), the top control
+     following, the reader kept on the figure, an empty period saying so,
+     and a file with no periods drawing the old figure with no row. */
+  {
+    const pagesDemo = {
+      ...demo,
+      pages: [{ path: '/jobs.html', title: '', views: 600, avgSec: 616 }, { path: '/', title: '', views: 400, avgSec: 383 }],
+      pagesWindow: { source: 'usage', from: '2026-07-01', to: '2026-08-28', views: 1000 },
+      pagesWindows: {
+        '30': { days: 30, from: '2026-07-30', to: '2026-08-28', views: 300,
+          pages: [{ path: '/', title: '', views: 200, avgSec: 60 }, { path: '/jobs.html', title: '', views: 100, avgSec: 120 }] },
+        '90': { days: 90, from: '2026-07-01', to: '2026-08-28', views: 1000,
+          pages: [{ path: '/jobs.html', title: '', views: 600, avgSec: 616 }, { path: '/', title: '', views: 400, avgSec: 383 }] },
+        '365': { days: 365, from: '2026-07-01', to: '2026-08-28', views: 1000,
+          pages: [{ path: '/jobs.html', title: '', views: 600, avgSec: 616 }, { path: '/', title: '', views: 400, avgSec: 383 }] },
+        all: { days: 0, from: '2026-07-01', to: '2026-08-28', views: 1000,
+          pages: [{ path: '/jobs.html', title: '', views: 600, avgSec: 616 }, { path: '/', title: '', views: 400, avgSec: 383 }] },
+      },
+    };
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1000 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics pages periods: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, pagesDemo);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-pagesrange', { timeout: 15000 });
+    const readPages = (pg) => pg.evaluate(() => {
+      const fig = [...document.querySelectorAll('.oa-figure')]
+        .find((s) => /most visited pages/.test((s.querySelector('h2') || {}).textContent || ''));
+      const bar = fig && fig.querySelector('.oa-pagesrange');
+      const sub = fig && fig.querySelector('.oa-figure-sub');
+      const h2 = fig && fig.querySelector('h2');
+      return {
+        labels: bar ? [...bar.querySelectorAll('button')].map((b) => b.textContent) : [],
+        pressed: bar ? [...bar.querySelectorAll('button')].map((b) => b.getAttribute('aria-pressed')) : [],
+        top: [...document.querySelectorAll('.oa-pagerange button')].map((b) => b.getAttribute('aria-pressed')),
+        uni: [...document.querySelectorAll('.oa-unirange button')].map((b) => b.getAttribute('aria-pressed')),
+        rowFirst: !!(bar && sub && (bar.compareDocumentPosition(sub) & Node.DOCUMENT_POSITION_FOLLOWING)),
+        sub: sub ? sub.textContent : '',
+        rows: fig ? [...fig.querySelectorAll('.oa-bar-row')].map((r) =>
+          r.querySelector('.oa-bar-name').textContent + ' ' + r.querySelector('.oa-bar-val').textContent) : [],
+        hrefs: fig ? [...fig.querySelectorAll('.oa-bar-row a[href]')].map((a) => a.getAttribute('href')) : [],
+        tips: fig ? [...fig.querySelectorAll('.oa-bar-row')].map((r) => r.getAttribute('aria-label') || r.title || '') : [],
+        y: window.pageYOffset,
+        headTop: h2 ? Math.round(h2.getBoundingClientRect().top) : -9999,
+        active: document.activeElement ? document.activeElement.textContent : '',
+      };
+    });
+    const p0 = await readPages(q);
+    eq(p0.labels, ['Last 30 days', 'Last 90 days', 'Last 12 months', 'Everything'],
+      'analytics pages periods: the pages figure offers the same four periods, in the same words and order');
+    eq(p0.pressed, ['false', 'true', 'false', 'false'],
+      'analytics pages periods: it opens on the page\'s own default, the last 90 days');
+    eq(p0.top, p0.pressed, 'analytics pages periods: …agreeing with the control at the top of the page');
+    ok(p0.rowFirst, 'analytics pages periods: the row sits under the heading, above the caption it rewrites');
+    ok(/in the last 90 days, 1 Jul 2026 to 28 Aug 2026, which is as far back as the record goes\./.test(p0.sub) &&
+        /share of all 1,000 pageviews in that period\./.test(p0.sub),
+      `analytics pages periods: the caption names the period, its span and its whole pageview count (${p0.sub})`);
+    eq(p0.rows, ['/jobs 600 views', '/ 400 views'],
+      'analytics pages periods: the rows are the period\'s own, shown as the site\'s addresses (no ".html")');
+    ok(p0.hrefs.includes('/jobs') && !p0.hrefs.some((h) => /\.html$/.test(h)),
+      `analytics pages periods: …and linked to the address the site uses (${p0.hrefs.join(', ')})`);
+    ok(p0.tips.some((t) => /60%/.test(t)),
+      `analytics pages periods: a row's share is of the period's whole 1,000 (600 is 60%): ${p0.tips.join(' | ')}`);
+
+    await q.evaluate(() => [...document.querySelectorAll('.oa-figure')]
+      .find((s) => /most visited pages/.test(s.querySelector('h2').textContent)).scrollIntoView());
+    const y0 = await q.evaluate(() => window.pageYOffset);
+    ok(y0 > 400, `analytics pages periods: the figure is far down the page (${y0}px), or the place-keeping check is vacuous`);
+    await q.click('.oa-pagesrange button[data-id="30"]');
+    await q.waitForTimeout(250);
+    const p1 = await readPages(q);
+    eq(p1.pressed, ['true', 'false', 'false', 'false'], 'analytics pages periods: pressing a period marks it chosen');
+    ok(/in the last 30 days, 30 Jul 2026 to 28 Aug 2026\./.test(p1.sub) && /all 300 pageviews in that period/.test(p1.sub) &&
+        !/as far back as the record goes/.test(p1.sub),
+      `analytics pages periods: the caption prints the chosen period's own span and total (${p1.sub})`);
+    eq(p1.rows, ['/ 200 views', '/jobs 100 views'], 'analytics pages periods: …and the rows are that period\'s ranking');
+    eq(p1.top, p1.pressed, 'analytics pages periods: the control at the top follows');
+    eq(p1.uni, p1.pressed, 'analytics pages periods: …and so does the universities figure: one range for the page');
+    ok(Math.abs(p1.y - y0) < 80 && p1.headTop > -40 && p1.headTop < 500,
+      `analytics pages periods: the reader is kept on the figure (${y0} before, ${p1.y} after, heading at ${p1.headTop}px)`);
+    eq(p1.active, 'Last 30 days', 'analytics pages periods: …with the keyboard on the button they pressed');
+
+    await q.click('.oa-pagerange button[data-id="all"]');
+    await q.waitForTimeout(250);
+    const p2 = await readPages(q);
+    ok(/Pageviews, and how long a reader spends on each, over 1 Jul 2026 to 28 Aug 2026\./.test(p2.sub) && !/in the last/.test(p2.sub),
+      `analytics pages periods: pressing Everything at the top names the whole record's span and no period (${p2.sub})`);
+
+    /* an empty period, and a file with no periods */
+    const e = await ctx.newPage();
+    e.on('pageerror', (err) => jsErrors.push('analytics pages periods empty: ' + err.message));
+    await e.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(e, { ...pagesDemo, pagesWindows: { ...pagesDemo.pagesWindows,
+      '90': { days: 90, from: '', to: '', views: 0, pages: [] } } });
+    await e.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await e.waitForSelector('.oa-pagesrange', { timeout: 15000 });
+    const none = await readPages(e);
+    ok(/Nothing was recorded in the last 90 days\. Choose a longer period/.test(none.sub) && none.rows.length === 0 &&
+        none.labels.length === 4,
+      'analytics pages periods: a period with no record says so, draws no bar, and still offers the others');
+    const o = await ctx.newPage();
+    o.on('pageerror', (err) => jsErrors.push('analytics pages periods old: ' + err.message));
+    await o.route('**/firebasejs/**', (r) => r.abort());
+    const oldPages = { ...pagesDemo };
+    delete oldPages.pagesWindows;
+    await serveDemo(o, oldPages);
+    await o.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await o.waitForSelector('.oa-figure', { timeout: 15000 });
+    const old = await readPages(o);
+    ok(old.labels.length === 0 && /over 1 Jul 2026 to 28 Aug 2026\./.test(old.sub) && old.rows.length === 2,
+      'analytics pages periods: a file carrying no periods draws the list over its own window and no row');
+    await ctx.close();
+  }
+
   /* --- the dimension figures, the durations and the interactivity -------
 
      Owner, 2026-08-29: several more plots, from Google Analytics, made

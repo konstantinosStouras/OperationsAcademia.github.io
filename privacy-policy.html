@@ -286,12 +286,16 @@
           session your browser sends us a request carrying no name, no identifier, no cookie and no
           message of any kind. Our server looks at the network address that request arrived from and
           asks the public directory of the internet what that network is called &mdash; the same
-          look-up an e-mail server or a web log performs. If the answer is a university we list a
-          department for, we add <strong>one</strong> to that university&rsquo;s count for the day.</p>
-          <p><strong>Your address is never stored.</strong> It is used for that one look-up, in memory,
+          look-up an e-mail server or a web log performs. When that name says nothing useful, it asks
+          the public register of internet addresses (the regional internet registry&rsquo;s record,
+          the successor to &ldquo;WHOIS&rdquo;) which organisation the network is registered to. If
+          either answer is a university we list a department for, we add <strong>one</strong> to that
+          university&rsquo;s count for the day.</p>
+          <p><strong>Your address is never stored.</strong> It is used for those two look-ups, in memory,
           and is gone when the request ends; it is not written to any file or database and it is not
           written to any log. What we keep is a daily tally &mdash; how many visits there were, how
-          many could be placed, and a number against each university. There is no record of an
+          many could be placed and by which of the two look-ups, how many arrived over the newer IPv6
+          kind of address, and a number against each university. There is no record of an
           individual visit and nothing that could be traced back to you.</p>
           <p>If your network turns out to belong to a company, an internet provider or a mobile
           operator rather than a university, <strong>nothing at all is recorded</strong> &mdash; not

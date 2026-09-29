@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "analytics-pages-periods-2026-09",
+      "date": "2026-09-29",
+      "title": "The most visited pages show a period of your choice, and more universities are recognised",
+      "summary": "On the analytics page, the most visited pages now carry the same row of periods as the universities chart: the last 30 days, the last 90 days, the last 12 months, or everything on record, with each page shown as the address you would type. The universities chart also recognises more of its readers from now on: when a network's name says nothing, the site asks the public register of internet addresses who the network is registered to, which names many campus networks, IPv6 ones especially, that were counted as unknown before.",
+      "url": "/analytics"
+    },
+    {
       "id": "profile-gate-all-2026-09",
       "date": "2026-09-28",
       "title": "Every account gives its affiliation and an e-mail address before it can use the site",

@@ -216,6 +216,11 @@
          a share OF. Zero until a source states it, and a share is simply not
          claimed without it. */
       pagesWindow: { source: '', from: '', to: '', views: 0 },
+      /* the same list per PERIOD, under the range control's ids (owner,
+         2026-09-29: the period row on the pages figure too) — see
+         pageWindows. Empty where the owning source tallies none, and the page
+         then draws no row and prints `pagesWindow` as it always did. */
+      pagesWindows: {},
       breakdowns: {},
       engagement: null,
       universities: { frozen: true, from: '', to: '', all: [], recent: [], windows: {} },
@@ -749,6 +754,69 @@
     return out;
   }
 
+  /** The most-visited pages tallied per period (owner, 2026-09-29: "add these
+      buttons" to the pages figure, the four the universities figure carries).
+
+      `records` are one per UTC day: { day, pages: { path: [views, seconds] } }
+      as the builder folds the first-party record. For every range the answer
+      is { days, from, to, views, pages } where `views` is the period's WHOLE
+      pageview count (the denominator a page's share is honest against, taken
+      before any list is cut), `from`/`to` are the first and last day with a
+      record inside the period (empty when there is none, which is how the page
+      tells "nothing recorded" from "nothing listed"), and `pages` is every
+      page, most views first and by path on a tie, each with its average time.
+
+      THE SAME PERIOD RULE AS visitWindows, deliberately: N calendar days
+      ending today in UTC, a day after today left out of every finite period
+      and kept by everything-on-record. Two figures on one page, one control
+      above them, and one reading of "the last 30 days".
+
+      NORMALISED AND FILTERED HERE TOO, the mergePages discipline: two
+      spellings of one page are one row and their views add, and a path the
+      public may not see never reaches a period. Pure and deterministic. */
+  function pageWindows(records, { now = Date.now(), ranges = RANGES } = {}) {
+    const today = isDay(now) ? String(now) : new Date(now).toISOString().slice(0, 10);
+    const count = (v) => Math.max(0, Math.round(Number(v) || 0));
+    const rows = (Array.isArray(records) ? records : [])
+      .filter((r) => r && isDay(r.day))
+      .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
+    const out = {};
+    for (const r of (Array.isArray(ranges) ? ranges : [])) {
+      if (!r || !r.id) continue;
+      const days = Math.max(0, Math.floor(Number(r.days)) || 0);
+      const cutoff = days ? dayPlus(today, -(days - 1)) : '';
+      const tally = new Map();
+      let views = 0, from = '', to = '';
+      for (const rec of rows) {
+        if (cutoff && (rec.day < cutoff || rec.day > today)) continue;
+        const pages = rec.pages && typeof rec.pages === 'object' ? rec.pages : {};
+        let any = false;
+        for (const raw of Object.keys(pages)) {
+          const path = normPath(raw);
+          if (!path || !isPublicPath(path)) continue;
+          const cell = Array.isArray(pages[raw]) ? pages[raw] : [];
+          const v = count(cell[0]);
+          if (!v) continue;
+          const sec = count(cell[1]);
+          const acc = tally.get(path) || { views: 0, sec: 0 };
+          acc.views += v;
+          acc.sec += sec;
+          tally.set(path, acc);
+          views += v;
+          any = true;
+        }
+        if (!any) continue;
+        if (!from || rec.day < from) from = rec.day;
+        if (!to || rec.day > to) to = rec.day;
+      }
+      const list = Array.from(tally.entries())
+        .map(([path, a]) => ({ path, title: '', views: a.views, avgSec: a.views ? Math.round(a.sec / a.views) : 0 }))
+        .sort((a, b) => b.views - a.views || (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+      out[String(r.id)] = { days, from, to, views, pages: list };
+    }
+    return out;
+  }
+
   function growthProjection(days, { window = 90, ahead = 7, today = '' } = {}) {
     const pts = (Array.isArray(days) ? days : [])
       .filter((p) => Array.isArray(p) && isDay(p[0]) && Number.isFinite(Number(p[1])))
@@ -801,6 +869,6 @@
     cleanLabel, prettyLabel, breakdown, mergeBreakdown, hourBuckets, withShare,
     engagement,
     growthProjection,
-    RANGES, visitWindows,
+    RANGES, visitWindows, pageWindows, dayPlus,
   };
 }));
