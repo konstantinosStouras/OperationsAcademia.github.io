@@ -66,7 +66,7 @@ Read the deployed list back against `_functions/index.js` every time.
 
 **NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30, AND THE ANSWER LANDED ON
 2026-08-30.** `_functions/package.json` names Node 22 and current SDKs
-(`firebase-functions` ^7.4.0 since 2026-09-29; `firebase-admin` ^14.3.0 — a major that removes
+(`firebase-functions` ^7.4.0 since 2026-09-29; `firebase-admin` ^14.5.0 — a major that removes
 the namespaced `admin.*` API, which is why `recordVisit` now uses the modular
 one), and the deploy carrying them has run: `firebase functions:list` reports
 **every function on `nodejs22`** (four at that deploy; five once
@@ -310,6 +310,30 @@ again**; that is what fixed it. Unlike the port route above,
 `set FUNCTIONS_DISCOVERY_TIMEOUT=60` for the window is the other way through.
 A loader that genuinely CRASHED would not time out at all: the file route
 prints its error text instead.
+
+**"npm warn install-scripts … not yet covered by allowScripts" is answered in
+`_functions/package.json`.** Newer npm blocks every dependency's install
+script until the project approves or denies it, and reads the answer from an
+`allowScripts` field. The two it names are DENIED there, which is what npm
+was already doing, now written down so it stops asking: `@firebase/util`'s
+script only writes a Firebase App Hosting default when `FIREBASE_WEBAPP_CONFIG`
+is set (the package ships the default it would write), and it comes in through
+`@firebase/rules-unit-testing`, a devDependency the deploy never uploads;
+`protobufjs`'s only prints a version-scheme hint. An older npm, which is what
+CI and Cloud Build run, ignores the field and runs both as it always has. If a
+later install names a new package, read its script before deciding; `npm
+install-scripts ls` lists what is still unanswered.
+
+**`Error: Failed to list functions for operations-academia` from
+`firebase functions:list` is the FIRST-generation list call failing**, and it
+aborts the whole command although every function here is second generation
+(firebase-tools reads both lists and throws on the first). It says nothing
+about the deploy, which reads its own answer. Run it again; if it fails twice,
+`firebase functions:list --project operations-academia --debug` prints the
+reason the plain message swallows (an expired login reads as a 401, fixed by
+`firebase login --reauth`). The runtime column is also on the Cloud Run
+functions page of the Google Cloud console, which does not depend on the CLI
+at all.
 
 ## 4. Verify
 
