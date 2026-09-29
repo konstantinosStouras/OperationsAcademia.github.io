@@ -192,6 +192,17 @@
   };
   function sourceName(id) { return SOURCE_NAMES[id] || id || 'an unnamed source'; }
 
+  /** A page's ADDRESS, as the site writes it. The file keeps the `.html`
+      form (normPath's storage form, the one a file on disk has) and the site
+      has shown and linked the extensionless address since 2026-09-08, so the
+      list reads "/jobs" and links "/jobs" rather than printing a spelling the
+      address bar never shows. */
+  function addressOf(path) {
+    var p = String(path || '');
+    if (p === '/' || p.charAt(0) !== '/') return p;
+    return p.replace(/\.html?$/i, '');
+  }
+
   function note(html, warn) {
     var box = document.createElement('div');
     box.className = 'oa-an-note' + (warn ? ' warn' : '');
@@ -562,45 +573,97 @@
        is world-readable and a render-time filter would leave the path sitting
        in it. This catches only what the builder cannot: a reader whose browser
        still holds a copy fetched before that shipped. */
-    var publicPages = (data.pages || []).filter(function (p) {
+    /* THE PERIODS (owner, 2026-09-29: the row the universities figure
+       carries, on this figure too). The builder tallies the list once per
+       period under the range control's own ids; the chosen one is drawn,
+       and a file carrying none (from before the periods existed, or a list
+       another source owns) draws `data.pages` over its own window with no
+       row, exactly as it always did. */
+    var pw = data.pagesWindows || {};
+    var hasPageWindows = RANGES.some(function (r) {
+      return pw[r.id] && Array.isArray(pw[r.id].pages);
+    });
+    var pagePick = RANGES.filter(function (x) { return x.id === state.range; })[0] || RANGES[1];
+    var pageWin = null;
+    var pagePeriod = null;
+    if (hasPageWindows) {
+      if (pw[pagePick.id] && Array.isArray(pw[pagePick.id].pages)) {
+        pageWin = pw[pagePick.id];
+        pagePeriod = pagePick;
+      } else if (pw.all && Array.isArray(pw.all.pages)) {
+        pageWin = pw.all;
+        pagePeriod = RANGES[RANGES.length - 1];
+      }
+    }
+    var publicPages = ((pageWin ? pageWin.pages : data.pages) || []).filter(function (p) {
       return A.isPublicPath(p && p.path);
     });
-    if (publicPages.length) {
-      var win = data.pagesWindow || {};
+    if (publicPages.length || hasPageWindows) {
+      var win = pageWin
+        ? { source: (data.pagesWindow || {}).source || '', from: pageWin.from, to: pageWin.to, views: pageWin.views }
+        : (data.pagesWindow || {});
       /* THE SHARE NEEDS A WHOLE. `views` is the window's entire pageview
          count, stated by the builder; the rows here are only the top of the
          list, so a share computed over them would be a share of the rows that
          fitted — the claim this figure briefly made. Without the stated
          whole, no share is offered and the subtitle does not promise one. */
       var pagesTotal = Math.max(0, Math.round(Number(win.views) || 0));
-      var f4 = figure('The most visited pages',
-        'Pageviews, and how long a reader spends on each' +
-        (span(win) ? ', over ' + span(win) : '') + '.' +
-        (pagesTotal ? ' Hover or tab through a row for its share of all ' +
-          C.full(pagesTotal) + ' pageviews in that window.' : ''));
+      var pageProse = pagePeriod && pagePeriod.prose ? pagePeriod.prose : '';
+      var recordFrom = pw.all && pw.all.from ? pw.all.from : '';
+      var pageSub;
+      if (pageWin && !pageWin.from) {
+        pageSub = 'Nothing was recorded in ' + pageProse + '. ' +
+          'Choose a longer period to see what the record holds.';
+      } else {
+        pageSub = 'Pageviews, and how long a reader spends on each' +
+          (pageProse ? ' in ' + pageProse : '') +
+          (span(win) ? (pageProse ? ', ' : ', over ') + span(win) : '') +
+          /* a period the record does not fill says so through its dates, the
+             universities figure's own rule, for the same reason */
+          (pageProse && recordFrom && win.from === recordFrom ? ', which is as far back as the record goes' : '') +
+          '.' +
+          (pagesTotal ? ' Hover or tab through a row for its share of all ' +
+            C.full(pagesTotal) + ' pageviews in that ' + (pageProse ? 'period' : 'window') + '.' : '');
+      }
+      var f4 = figure('The most visited pages', pageSub);
       root.appendChild(f4.section);
-      C.bars(f4.body, {
-        unit: 'views',
-        limit: 12,
-        total: pagesTotal,
-        xTitle: 'Page',
-        items: publicPages.map(function (p) {
-          return {
-            label: p.title || p.path,
-            href: p.path && p.path.charAt(0) === '/' ? p.path : null,
-            value: p.views,
-            /* SAID IN MINUTES, NOT IN SECONDS (owner, 2026-08-29). This line
-               used to read "1,952 seconds on average", which is a number a
-               reader has to divide by sixty before it means anything. AND
-               NAMED FOR WHAT IT IS (owner, 2026-09-08): "Average time on the
-               page" was the heading of a column in the numbers table under
-               this list, and when the table went (a bar list is its own
-               numbers; see bars() in oa-charts.js) the heading moved onto the
-               row, so the figure still says what the duration measures. */
-            sub: p.avgSec ? 'Average time on the page: ' + C.duration(p.avgSec) : '',
-          };
-        }),
-      });
+      if (hasPageWindows) {
+        /* the page's own range, as a row under the heading: pressing it is
+           pressing the control at the top, and the whole page follows */
+        var pbar = chooser(f4.section, {
+          label: 'How much of the record to show for the pages',
+          className: 'oa-switch oa-pagesrange',
+          options: RANGES,
+          value: pagePeriod ? pagePeriod.id : pagePick.id,
+          onPick: function (id) { state.range = id; redraw('oa-pagesrange', id); },
+        });
+        f4.section.insertBefore(pbar, f4.section.querySelector('.oa-figure-sub'));
+      }
+      if (publicPages.length) {
+        C.bars(f4.body, {
+          unit: 'views',
+          limit: 12,
+          total: pagesTotal,
+          xTitle: 'Page',
+          items: publicPages.map(function (p) {
+            var address = addressOf(p.path);
+            return {
+              label: p.title || address,
+              href: address && address.charAt(0) === '/' ? address : null,
+              value: p.views,
+              /* SAID IN MINUTES, NOT IN SECONDS (owner, 2026-08-29). This line
+                 used to read "1,952 seconds on average", which is a number a
+                 reader has to divide by sixty before it means anything. AND
+                 NAMED FOR WHAT IT IS (owner, 2026-09-08): "Average time on the
+                 page" was the heading of a column in the numbers table under
+                 this list, and when the table went (a bar list is its own
+                 numbers; see bars() in oa-charts.js) the heading moved onto the
+                 row, so the figure still says what the duration measures. */
+              sub: p.avgSec ? 'Average time on the page: ' + C.duration(p.avgSec) : '',
+            };
+          }),
+        });
+      }
       if (win.source) provenance(f4.section, win);
     }
 

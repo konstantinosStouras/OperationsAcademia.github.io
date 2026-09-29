@@ -171,7 +171,7 @@ async function firestore() {
   return app.firestore();
 }
 
-/** The site's OWN record. One usageSessions document per browsing session:
+/** The site's OWN record. One usageSessions document per page opened:
     who (a uid, or a stable random per-browser id), which page, when it
     started, how long it lasted.
 
@@ -180,40 +180,46 @@ async function firestore() {
     page. Pageviews are counted per session document because each document is
     one page — oa-usage.js files a session per page, not per visit.
 
-    It reads the days the dataset does not already hold, and never fewer than
-    the dimension window below — so a daily run costs a bounded query rather
-    than the whole collection, and the tallies it recomputes cover a stated
-    span rather than whatever slice the incremental read happened to fetch. */
-async function fromUsage(db, { since, windowFrom }) {
+    IT READS THE WHOLE RECORD, and that is a change of position (owner,
+    2026-09-29: the period row on the pages figure). It used to read only the
+    days the dataset did not already hold, bounded below by the ninety-day
+    dimension window, which kept the read small and could answer "the last 90
+    days" and nothing longer. "Last 12 months" and "Everything" are questions
+    about the whole record, and a list of pages cannot be accumulated across
+    runs the way a day row can (last run's tally plus this run's would count
+    the overlap twice), so the only honest way to answer them is to read it.
+    The cost is kept small rather than avoided: the read asks for FOUR FIELDS
+    (a projection, so a document's click and field lists never cross the
+    wire), and the collection grows by a couple of hundred small documents a
+    day. build-candidate-stats.mjs already reads the season's worth daily.
+
+    AND IT FIXES A PARTIAL DAY THE BOUNDED READ WOULD HAVE MADE. The window
+    started at an instant, `now - 90 days`, so from the day the record turned
+    ninety days old every run would have counted only the tail of its first
+    day, overwritten the complete count already served, and left each day that
+    crossed the line truncated for good. Read whole, every day is whole. */
+async function fromUsage(db, { windowFrom, now = Date.now() }) {
   if (!db) return null;
   const seen = new Map();        // day -> { uids:Set, sessions, views, pages:Map }
   let scanned = 0;
   let withheld = 0;              // sessions on admin / archived / test paths
 
-  /* THE DIMENSIONS ARE WINDOWED AND THE DAYS ARE NOT, and that difference is
-     the whole reason the read reaches back further than the incremental one.
-
-     A day row can be merged with what is already served, so it is enough to
-     re-read the few days that might still be moving. A TALLY cannot: adding
-     this run's hour-of-day counts to the last run's would double every
-     session in the overlap, and taking only the fresh ones would silently
-     turn "when people read the site" into "when people read it this week".
-     So the tallies are recomputed from scratch over one stated window every
-     run, and the page prints the window under the chart. */
+  /* THE DIMENSIONS ARE WINDOWED AND THE DAYS AND PAGES ARE NOT. The hour of
+     the day and the time on a page are recomputed from scratch over one
+     stated ninety-day window every run, and the page prints the window under
+     them; the day rows and the pages periods come from the whole record. */
   const hours = A.hourBuckets();
-  const winPages = new Map();
   let winSessions = 0, winSeconds = 0, winViews = 0;
   let winFrom = '', winTo = '';
 
   /* PAGED, with a cursor, until a page comes back short — the shape
      build-candidate-stats.mjs already reads this collection in. A single
      `.limit(50000)` ordered by `start` ASCENDING keeps the OLDEST fifty
-     thousand and silently drops everything after them, so the day the window
-     holds more than that the newest days would simply stop appearing: a
+     thousand and silently drops everything after them, so the day the record
+     held more than that the newest days would simply stop appearing: a
      figure that goes quietly wrong in the direction nobody checks, on a page
      whose whole point is that a thing which stops measuring must say so. */
-  let base = db.collection('usageSessions').orderBy('start');
-  if (since) base = base.where('start', '>=', since);
+  const base = db.collection('usageSessions').select('start', 'page', 'dur', 'uid').orderBy('start');
 
   const docs = [];
   let cursor = null, readPages = 0;
@@ -251,12 +257,16 @@ async function fromUsage(db, { since, windowFrom }) {
 
     let bucket = seen.get(day);
     if (!bucket) {
-      bucket = { uids: new Set(), sessions: 0, views: 0 };
+      bucket = { uids: new Set(), sessions: 0, views: 0, pages: {} };
       seen.set(day, bucket);
     }
     if (d.uid) bucket.uids.add(String(d.uid));
     bucket.sessions++;
     bucket.views++;
+    const sec = Math.max(0, Math.min(3600, Number(d.dur || 0)));
+    const cell = bucket.pages[page] || (bucket.pages[page] = [0, 0]);
+    cell[0]++;
+    cell[1] += sec;
 
     if (!windowFrom || started >= windowFrom) {
       /* the hour is read in UTC, exactly as the weekday buckets are: a local
@@ -265,13 +275,7 @@ async function fromUsage(db, { since, windowFrom }) {
       hours[new Date(started).getUTCHours()].value++;
       winSessions++;
       winViews++;
-      winSeconds += Math.max(0, Math.min(3600, Number(d.dur || 0)));
-      if (page) {
-        const acc = winPages.get(page) || { path: page, title: '', views: 0, sec: 0 };
-        acc.views++;
-        acc.sec += Math.max(0, Math.min(3600, Number(d.dur || 0)));
-        winPages.set(page, acc);
-      }
+      winSeconds += sec;
       /* the window REPORTED is the one the data actually covers, never the
          nominal ninety days. A nominal one slides every midnight and would
          rewrite the served file daily on a site nobody had visited */
@@ -283,16 +287,24 @@ async function fromUsage(db, { since, windowFrom }) {
   const days = {};
   for (const [day, b] of seen) days[day] = [b.uids.size || b.sessions, b.sessions, b.views];
 
+  /* the pages list per PERIOD, through the model's one definition of a
+     period (pageWindows, the rule visitWindows keeps for the universities) */
+  const records = Array.from(seen.entries()).map(([day, b]) => ({ day, pages: b.pages }));
+  const pagesWindows = A.pageWindows(records, { now });
+  /* the ninety-day period IS the list the file has always carried beside
+     the hours and the time on a page, so the three describe one span */
+  const ninety = pagesWindows['90'] || { from: '', to: '', views: 0, pages: [] };
+
   return {
     source: 'usage',
     days,
-    pages: Array.from(winPages.values())
-      .map((p) => ({ path: p.path, title: '', views: p.views, avgSec: p.views ? p.sec / p.views : 0 })),
+    pages: ninety.pages,
     /* `views` is the window's WHOLE pageview count — the denominator a page's
        share is honest against. The served pages list is only the top of the
        table, so a share computed over the listed rows would be a share of the
        rows that fitted. */
-    pagesWindow: { from: winFrom, to: winTo, views: winViews },
+    pagesWindow: { from: ninety.from, to: ninety.to, views: ninety.views },
+    pagesWindows,
     universities: [],
     breakdowns: {
       /* THE HOURS ARE THE FIRST-PARTY RECORD'S ALONE. It stamps the instant a
@@ -346,11 +358,10 @@ async function fromUsage(db, { since, windowFrom }) {
     cookieless, it reports very nearly every session as new, so the figure
     would be a measurement of the tag's own configuration rather than of the
     readers. The first-party record COULD answer it — its per-browser id is
-    stable — but only by reading the whole collection to find each browser's
-    first day, which is exactly the unbounded read the incremental query is
-    shaped to avoid. A figure that would be wrong from one source and
-    expensive from the other is better not drawn than drawn with a caveat
-    nobody reads. */
+    stable, and since 2026-09-29 the whole record is read (for the pages
+    periods) — but it would be a fresh figure nobody has asked for, with its
+    own caveats (a cleared browser is a new reader), and a figure drawn with a
+    caveat nobody reads is worse than none. Left for the owner to ask for. */
 async function fromGa4({ since, windowFrom, windowTo }) {
   const propertyId = String(process.env.GA4_PROPERTY_ID || '').replace(/\D/g, '');
   const c = creds('GA4_SERVICE_ACCOUNT');
@@ -587,10 +598,19 @@ async function fromVisits(db, { now = Date.now(), recentDays = RECENT_DAYS } = {
   if (snap.empty) return null;
 
   const records = [];
+  /* two DIAGNOSTIC counters, read for the run log and published nowhere:
+     how many named visits the network's registration placed where reverse
+     DNS named nobody, and how many visits arrived over IPv6 (which reverse
+     DNS almost never names). Together with `resolved` they say why a thin
+     chart is thin, which is the question the owner asked of it. */
+  let registry = 0, v6 = 0;
+  const count = (v) => Math.max(0, Math.round(Number(v) || 0));
   snap.forEach((doc) => {
     const d = doc.data() || {};
     const day = String(d.day || doc.id);
     if (!A.isDay(day)) return;
+    registry += count(d.registry);
+    v6 += count(d.v6);
     records.push({ day, seen: d.seen, resolved: d.resolved, academic: d.academic, unis: d.unis || {} });
   });
 
@@ -611,6 +631,8 @@ async function fromVisits(db, { now = Date.now(), recentDays = RECENT_DAYS } = {
     from: whole.from, to: whole.to,
     recentDays,
     windows,
+    registry,
+    v6,
   };
 }
 
@@ -623,6 +645,32 @@ function cutWindows(windows) {
   for (const [id, win] of Object.entries(windows && typeof windows === 'object' ? windows : {})) {
     if (!win || typeof win !== 'object') continue;
     out[id] = { ...win, all: (win.all || []).slice(0, TOP_UNIS) };
+  }
+  return out;
+}
+
+/** Every pages period, rebuilt in ONE fixed shape and cut at TOP_PAGES the
+    way the default list is. Rebuilt rather than passed through because the
+    same function serves a live source and the carry, and a credential-less
+    run must rewrite byte for byte the file it read (a key in another order
+    is the flip-flop the carry exists to refuse). Only the page's own period
+    ids are kept, in their order; `views` stays the period's WHOLE count,
+    taken before the cut, which is what a row's share is a share of. */
+function cutPageWindows(windows) {
+  const out = {};
+  const src = windows && typeof windows === 'object' ? windows : {};
+  for (const r of A.RANGES) {
+    const w = src[r.id];
+    if (!w || typeof w !== 'object' || !Array.isArray(w.pages)) continue;
+    const pages = new Map();
+    A.mergePages(pages, w.pages);
+    out[r.id] = {
+      days: Math.max(0, Math.round(Number(w.days) || 0)),
+      from: A.isDay(w.from) ? w.from : '',
+      to: A.isDay(w.to) ? w.to : '',
+      views: Math.max(0, Math.round(Number(w.views) || 0)),
+      pages: A.topPages(pages, TOP_PAGES),
+    };
   }
   return out;
 }
@@ -648,6 +696,10 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
   const breakdowns = {};
   let engagement = null;
   let pagesWindow = null;
+  /* the pages list per period, belonging to whichever source owns the list
+     (see cutPageWindows): the periods and the rows are one source's, or the
+     row on the page would switch between two measurements of one number */
+  let pagesWindows = null;
   for (const r of ordered) {
     const record = A.mergeDays(data.days, r.days, r.source);
     const before = pages.size;
@@ -673,6 +725,7 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
     if (!pagesWindow && r.pagesWindow && pages.size > before) {
       pagesWindow = { source: r.source, from: r.pagesWindow.from || '', to: r.pagesWindow.to || '',
         views: Math.max(0, Math.round(Number(r.pagesWindow.views) || 0)) };
+      pagesWindows = r.pagesWindows || null;
     }
     for (const u of r.universities || []) {
       const name = String((u && u.name) || '').trim();
@@ -710,7 +763,12 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
        its window) or nothing of it is taken. */
     if (!pages.size) {
       A.mergePages(pages, carry.pages || []);
-      if (!pagesWindow && carry.pagesWindow && pages.size) pagesWindow = carry.pagesWindow;
+      if (!pagesWindow && carry.pagesWindow && pages.size) {
+        pagesWindow = carry.pagesWindow;
+        /* the periods travel with the list they belong to, or a run whose
+           first-party read failed would drop the row off the figure */
+        pagesWindows = carry.pagesWindows || null;
+      }
     }
     for (const id of A.BREAKDOWN_IDS) {
       A.mergeBreakdown(breakdowns, id, (carry.breakdowns || {})[id]);
@@ -727,6 +785,7 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
 
   data.pages = A.topPages(pages, TOP_PAGES);
   data.pagesWindow = pagesWindow || { source: '', from: '', to: '', views: 0 };
+  data.pagesWindows = cutPageWindows(pagesWindows);
   data.breakdowns = breakdowns;
   data.engagement = engagement;
 
@@ -839,16 +898,25 @@ async function main() {
      would turn "when people read the site" into "when people read it this
      week". So the tallies are recomputed from scratch over one window every
      run. Ninety days is long enough to be a season and short enough that the
-     read stays bounded as the site grows. */
-  const windowFrom = Date.now() - A.BREAKDOWN_DAYS * 86400000;
+     read stays bounded as the site grows.
+
+     IT STARTS AT A MIDNIGHT (UTC), so it is the same ninety calendar days
+     the pages list's "Last 90 days" period is (pageWindows counts calendar
+     days ending today): the hours, the time on a page and the default pages
+     list then describe one span, and GA4's own window begins on that day
+     too. It used to start at `now - 90 days`, an instant, which made its
+     first day a partial one. */
+  const todayIso = iso(new Date());
+  const windowFrom = Date.parse(A.dayPlus(todayIso, -(A.BREAKDOWN_DAYS - 1)) + 'T00:00:00Z');
   const since = Math.min(incremental || windowFrom, windowFrom);
   /* GA4'S OWN FLOOR IS FOR THE FIRST RUN, and it was unreachable: `since` is
      never 0 (with no served days it falls back to `windowFrom`), so
      `fromGa4`'s `'2015-08-14'` branch could not be taken and the day record
      could never reach further back than ninety days however much history the
      property held. A report request is one call whatever its range, so the
-     first run asks for everything; the FIRST-PARTY read keeps its bounded
-     window, because that one is a collection scan and its cost is real. */
+     first run asks for everything. (The first-party read no longer takes a
+     `since` at all: it reads the whole record, projected to four fields,
+     because the pages periods ask about all of it; see fromUsage.) */
   const ga4Since = incremental ? since : 0;
 
   const results = [];
@@ -868,7 +936,7 @@ async function main() {
   let visits = null;
   if (db) {
     try {
-      const usage = await fromUsage(db, { since, windowFrom });
+      const usage = await fromUsage(db, { windowFrom });
       log(`usage: ${usage.scanned} session document(s) -> ${Object.keys(usage.days).length} day(s)` +
         (usage.withheld ? `, ${usage.withheld} withheld (admin / archived / test paths)` : ''));
       results.push(usage);
@@ -881,7 +949,8 @@ async function main() {
       if (visits) {
         const pct = visits.seen ? Math.round((visits.resolved / visits.seen) * 100) : 0;
         log(`visits: ${visits.all.length} universit(y/ies) over ${visits.seen} visit(s), ` +
-          `${visits.resolved} resolved (${pct}%), ${visits.academic} academic but unnamed`);
+          `${visits.resolved} resolved (${pct}%), ${visits.academic} academic but unnamed, ` +
+          `${visits.registry} named from the network's registration, ${visits.v6} over IPv6`);
       } else {
         /* the ordinary state until `firebase deploy --only functions` has been
            run — said plainly, because a silent zero here is indistinguishable
@@ -1111,6 +1180,43 @@ function selftest() {
     '…and it carries the window\'s WHOLE pageview count, which is the only ' +
     'denominator a page\'s share is honest against — the served rows are the ' +
     'top of the table, not the table');
+
+  /* --- the pages list per PERIOD (owner, 2026-09-29) --------------------- */
+  const pw = A.pageWindows([
+    { day: '2026-09-28', pages: { '/jobs': [3, 30], '/jobs.html': [1, 10], '/admin-area': [5, 5] } },
+    { day: '2026-08-17', pages: { '/': [2, 100] } },
+    ...Array.from({ length: TOP_PAGES + 3 }, (_, i) => ({ day: '2026-09-01', pages: { [`/p${i}.html`]: [1, 1] } })),
+  ], { now: '2026-09-28' });
+  const withPeriods = assemble([
+    { source: 'usage', days: { '2026-09-28': [2, 4, 4] }, pages: pw['90'].pages,
+      pagesWindow: { from: pw['90'].from, to: pw['90'].to, views: pw['90'].views }, pagesWindows: pw,
+      universities: [] },
+    { source: 'ga4', days: {}, pages: [{ path: '/jobs.html', views: 900, avgSec: 1 }],
+      pagesWindow: { from: '2026-07-01', to: '2026-09-28', views: 900 }, universities: [] },
+  ]);
+  ok(Object.keys(withPeriods.pagesWindows).join() === A.RANGES.map((r) => r.id).join(),
+    'the pages list carries one period per range the page offers, under the same ids');
+  ok(withPeriods.pagesWindows['30'].pages[0].path === '/jobs.html' &&
+      withPeriods.pagesWindows['30'].pages[0].views === 4,
+    'a period folds two spellings of one page into one row, as the default list does');
+  ok(!JSON.stringify(withPeriods.pagesWindows).includes('admin-area'),
+    'a path the public may not see reaches no period');
+  ok(withPeriods.pagesWindows.all.pages.length === TOP_PAGES,
+    `every period is cut at TOP_PAGES (${TOP_PAGES}) like the default list`);
+  ok(withPeriods.pagesWindows.all.views === 4 + 2 + TOP_PAGES + 3,
+    '…while its views are the WHOLE period\'s, taken before the cut, so a share survives it');
+  ok(withPeriods.pagesWindows['90'].from === '2026-08-17' && withPeriods.pagesWindows['30'].from === '2026-09-01',
+    'each period states the first and last day it really covers');
+  ok(withPeriods.pages[0].views === 4 && withPeriods.pagesWindow.source === 'usage',
+    'the default list is the 90-day period, owned by the source whose periods these are');
+  const gaOnly = assemble([{ source: 'ga4', days: {}, pages: [{ path: '/jobs.html', views: 9 }],
+    pagesWindow: { from: '2026-07-01', to: '2026-09-28', views: 9 }, universities: [] }]);
+  ok(Object.keys(gaOnly.pagesWindows).length === 0,
+    'a list another source owns carries no periods, so the page draws no row over it');
+  const carriedPages = assemble([], { carry: { pages: withPeriods.pages, pagesWindow: withPeriods.pagesWindow,
+    pagesWindows: withPeriods.pagesWindows } });
+  ok(JSON.stringify(carriedPages.pagesWindows) === JSON.stringify(withPeriods.pagesWindows),
+    'a run whose first-party read failed republishes the periods it was served, byte for byte');
 
   /* an id the model does not know is not a shape anybody has checked, and this
      file is world-readable */

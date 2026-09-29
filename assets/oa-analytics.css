@@ -475,5 +475,8 @@
    `.oa-switch` shape the daily chart's metric switch uses, so the two read
    as one kind of control; the phone rule for `.oa-switch button` (42px)
    therefore reaches it with nothing added here. A selector with two classes,
-   because `.oa-switch` alone sets the margin this row overrides. */
-.oa-figure > .oa-unirange { margin: 10px 0 14px; }
+   because `.oa-switch` alone sets the margin this row overrides. The most
+   visited pages carry the same row since 2026-09-29 (`.oa-pagesrange`), in
+   the same place and the same shape. */
+.oa-figure > .oa-unirange,
+.oa-figure > .oa-pagesrange { margin: 10px 0 14px; }

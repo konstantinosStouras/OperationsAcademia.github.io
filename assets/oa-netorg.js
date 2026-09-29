@@ -242,9 +242,148 @@
     const parts = String(forwardedFor || '').split(',');
     for (let i = parts.length - 1; i >= 0; i--) {
       const ip = bareIp(parts[i]);
-      if (isPublicIp(ip)) return ip;
+      /* an IPv4 address written the IPv6 way is handed on as the IPv4
+         address it is: both look-ups below ask about the network, and the
+         registry is asked in the form it files the network under */
+      const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/.exec(ip);
+      if (isPublicIp(ip)) return mapped ? mapped[1] : ip;
     }
     return '';
+  }
+
+  /* ------------------------------------------ the network's REGISTRATION
+
+     WHY A SECOND LOOK-UP EXISTS (owner, 2026-09-29: "these numbers stated
+     are too little, are they correct?"). They were correct as counts and
+     far too small as a picture. Over the resolver's first month (30 August
+     to 28 September 2026) it saw 2,960 visits, reverse DNS answered for 857
+     of them (29%) and 158 (5%) could be placed at a university. Reverse DNS
+     only names an address whose operator publishes a name for it, and most
+     no longer do: an IPv6 address almost never has one, which is how a
+     growing share of campus traffic now arrives, and a phone's carrier or a
+     cloud VPN names nothing useful.
+
+     Every routable network has a second public record that does not depend
+     on anybody publishing a name: its REGISTRATION at the regional internet
+     registry, served over RDAP (the successor to WHOIS). Cornell's addresses
+     are registered to Cornell University with contacts at cornell.edu,
+     Stanford's IPv6 block to Stanford University with contacts at
+     stanford.edu, Oxford's IPv6 block with contacts at it.ox.ac.uk, and a
+     home broadband range to Comcast or Sky. So when reverse DNS names no
+     university, the function asks the registry, and this is the pure half
+     that reads the answer (measured against the live registries on
+     2026-09-29; the fixtures in the selftest are those answers, trimmed).
+
+     THE SAME RULES AS THE REVERSE LOOK-UP, AND ONE STRICTER:
+       - a university is named only through the site's OWN map: the
+         registrable domain of a contact address must be a domain the map
+         carries, or the registrant's own name must equal a university name
+         the map carries, folded for case, accents and a trailing acronym and
+         otherwise EXACT. Nothing is guessed from a network's handle or a
+         free-text remark;
+       - a registration naming TWO universities names neither: it is counted
+         as academic and attributed to nobody, the same refusal the map makes
+         for a domain two universities claim;
+       - a registration whose contacts are at an academic domain the site has
+         no page for (a national research network, a university not listed)
+         is academic-but-unnamed, exactly as a PTR record under `.edu` is;
+       - anything else, a company, an internet provider or a mobile operator,
+         is null and nothing is recorded, the rule the rest of this file
+         keeps. */
+
+  /** The registrant's name, folded so that case, accents, a leading "The",
+      a parenthesised acronym and punctuation do not decide whether two
+      spellings are one name. Everything else still must match exactly. */
+  function foldName(v) {
+    return String(v || '')
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/\([^)]*\)/g, ' ')
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+      .replace(/^the /, '');
+  }
+
+  /** What an RDAP answer carries that can name a university: the registrable
+      domain of every contact address in it, and the name of every entity it
+      calls the REGISTRANT. The walk is bounded (depth and count) because the
+      answer comes from outside and is read inside a request. */
+  function registrationFacts(rdap) {
+    const domains = [];
+    const names = [];
+    let visited = 0;
+    function card(en) {
+      const vc = en && Array.isArray(en.vcardArray) && Array.isArray(en.vcardArray[1])
+        ? en.vcardArray[1] : [];
+      const roles = Array.isArray(en && en.roles) ? en.roles : [];
+      for (const prop of vc) {
+        if (!Array.isArray(prop)) continue;
+        const value = String(prop[3] == null ? '' : prop[3]);
+        if (prop[0] === 'email') {
+          const m = /@([a-z0-9.-]+)\s*$/i.exec(value);
+          const d = m ? registrableDomain(m[1]) : '';
+          if (d && !isDenied(d) && domains.indexOf(d) === -1) domains.push(d);
+        } else if (prop[0] === 'fn' && roles.indexOf('registrant') !== -1) {
+          const n = value.trim().slice(0, 200);
+          if (n && names.indexOf(n) === -1) names.push(n);
+        }
+      }
+    }
+    function walk(node, depth) {
+      if (!node || typeof node !== 'object' || depth > 4) return;
+      const list = Array.isArray(node.entities) ? node.entities : [];
+      for (const en of list) {
+        if (++visited > 200) return;
+        card(en);
+        walk(en, depth + 1);
+      }
+    }
+    walk(rdap, 0);
+    return { domains: domains, names: names };
+  }
+
+  /**
+   * What a network's REGISTRATION says it should be counted as — the same
+   * three answers `classify` gives for a hostname: { university },
+   * { academic }, or null. `rdap` is the registry's JSON answer (or null when
+   * the look-up failed, which is simply null here); `map` is
+   * data/university-domains.json.
+   */
+  function classifyRegistration(rdap, map) {
+    if (!rdap || typeof rdap !== 'object' || !map) return null;
+    const facts = registrationFacts(rdap);
+    const own = (d) => (Object.prototype.hasOwnProperty.call(map, d) &&
+      typeof map[d] === 'string' ? map[d] : '');
+
+    const byDomain = [];
+    for (const d of facts.domains) {
+      const u = own(d);
+      if (u && byDomain.indexOf(u) === -1) byDomain.push(u);
+    }
+    if (byDomain.length === 1) return { university: byDomain[0] };
+    if (byDomain.length > 1) return { academic: true };
+
+    /* the registrant's own name, against the names the map carries */
+    const known = {};
+    for (const d of Object.keys(map)) {
+      const u = map[d];
+      if (typeof u !== 'string') continue;
+      const f = foldName(u);
+      if (!f) continue;
+      if (!known[f]) known[f] = [];
+      if (known[f].indexOf(u) === -1) known[f].push(u);
+    }
+    const byName = [];
+    for (const n of facts.names) {
+      const hit = Object.prototype.hasOwnProperty.call(known, foldName(n)) ? known[foldName(n)] : null;
+      if (hit && hit.length === 1 && byName.indexOf(hit[0]) === -1) byName.push(hit[0]);
+    }
+    if (byName.length === 1) return { university: byName[0] };
+    if (byName.length > 1) return { academic: true };
+
+    if (facts.domains.some(looksAcademic)) return { academic: true };
+    return null;
   }
 
   return {
@@ -258,5 +397,8 @@
     bareIp: bareIp,
     isPublicIp: isPublicIp,
     clientIp: clientIp,
+    foldName: foldName,
+    registrationFacts: registrationFacts,
+    classifyRegistration: classifyRegistration,
   };
 }));
