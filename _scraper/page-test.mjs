@@ -2152,6 +2152,181 @@ for (const [name, expect] of [
   ok(Object.keys(tdDone.echo).some((k) => k === 'j7' && tdDone.echo[k].removed === true),
     'v3 edit: …with the echo stashed, so this browser’s next jobs page is already without it');
 
+  /* -- …and MARK REVIEWED on the edit form ---------------------------------
+
+     Owner, 2026-09-29: "I open it, review it, but then the only option I have
+     once I have opened it is to 'save it'. I would like to have 'mark review'
+     button [here] too." "Open & correct" on the Admin area's user-added card
+     lands on this form, and the card's third verb was missing from it.
+
+     Driven as the MAINTAINER for the offer and the press, and as the POSTER
+     and on an already-ticked posting for the two places it must not appear.
+     The stamp is the card's one field: the posting stays live and nothing else
+     on it moves, and the form stays open so a correction typed but not saved
+     is never thrown away. */
+
+  const MR_ADMIN = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
+    emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
+  const MR_POSTING = {
+    uid: KEPT, status: 'published', ref: 'OA-JOB-260929-MRMR',
+    institution: 'Review University', school: 'School X', unit: 'Unit Y',
+    department: 'School X, Unit Y', country: 'Australia', type: 'Business School',
+    levels: ['Assistant Professor'], applyByDate: '2026-12-01', untilFilled: false,
+    firstName: 'A', lastName: 'B', email: 'a@b.edu',
+    chairName: 'Rita Chair', chairEmail: 'rita@chair.edu',
+    year: 2027, createdAt: '2026-09-20T00:00:00.000Z',
+  };
+  const mrSeed = (user, extra = {}) => ({
+    user,
+    docs: [KEPT_PROFILE, { path: 'jobSubmissions/jr', data: { ...MR_POSTING, ...extra } }],
+  });
+  const mrOpen = async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.waitForFunction(() => document.getElementById('f-institution').value !== '',
+      null, { timeout: 8000 });
+    await q.waitForTimeout(300);
+  };
+  const mrOffered = (q) => q.evaluate(() => {
+    const b = document.getElementById('oa-reviewed');
+    if (!b) return { exists: false };
+    const r = b.getBoundingClientRect();
+    const s = document.getElementById('oa-submit').getBoundingClientRect();
+    const t = document.getElementById('oa-takedown').getBoundingClientRect();
+    return {
+      exists: true, shown: !b.hidden, label: b.textContent.trim(),
+      // one row: Save changes, Mark reviewed, Take down, left to right
+      order: s.right <= r.left && r.right <= t.left,
+      row: Math.round(r.top) === Math.round(s.top) && Math.round(r.top) === Math.round(t.top),
+      h: Math.round(r.height), type: b.type,
+    };
+  });
+
+  const mrPress = await onSite('post-a-job?edit=jr', mrSeed(MR_ADMIN), async (q) => {
+    await mrOpen(q);
+    const offered = await mrOffered(q);
+    await q.click('#oa-reviewed');
+    await q.waitForFunction(() =>
+      !!(window.__fb.dump()['jobSubmissions/jr'] || {}).reviewedAt, null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    return { offered, doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/jr']),
+      after: await q.evaluate(() => {
+        const back = document.getElementById('oa-reviewed-back');
+        return {
+          form: !document.getElementById('oa-job-form').hidden,
+          done: !document.getElementById('oa-done').hidden,
+          btn: !document.getElementById('oa-reviewed').hidden,
+          back: back ? back.getAttribute('href') : null,
+          focused: document.activeElement === back,
+          msg: document.getElementById('oa-msg').textContent,
+          cls: document.getElementById('oa-msg').className,
+        };
+      }) };
+  });
+  eq({ shown: mrPress.offered.shown, label: mrPress.offered.label, type: mrPress.offered.type },
+    { shown: true, label: 'Mark reviewed', type: 'button' },
+    'v3 edit: the maintainer is offered Mark reviewed on the edit form, in the card’s own words');
+  ok(mrPress.offered.order && mrPress.offered.row,
+    'v3 edit: …on one row with Save changes before it and Take down after it, the card’s order');
+  ok(mrPress.offered.h >= 42,
+    `v3 edit: …and a full-size target (${mrPress.offered.h}px)`);
+  ok(typeof mrPress.doc.reviewedAt === 'string' && !Number.isNaN(Date.parse(mrPress.doc.reviewedAt)),
+    'v3 edit: pressing it stamps reviewedAt, the one field the card writes');
+  const { reviewedAt: _stamp, ...mrRest } = mrPress.doc;
+  eq(mrRest, MR_POSTING,
+    'v3 edit: …and NOTHING else on the posting moves: still published, no updatedAt, no save');
+  eq({ form: mrPress.after.form, done: mrPress.after.done, btn: mrPress.after.btn },
+    { form: true, done: false, btn: false },
+    'v3 edit: the form stays open (a correction not yet saved is never thrown away) and the button goes');
+  ok(mrPress.after.back === 'admin-area' && mrPress.after.focused,
+    'v3 edit: …the way back to the Admin area takes its place, with the keyboard on it');
+  ok(/Marked reviewed/.test(mrPress.after.msg) && /stays live/.test(mrPress.after.msg) &&
+     /is-ok/.test(mrPress.after.cls) && !/Save changes/.test(mrPress.after.msg),
+    'v3 edit: …and the line says it stays live and has only left the list, with no ' +
+    'reminder to save when nothing was typed');
+
+  /* Typed a correction, then pressed it: the stamp is written, the typing is
+     NOT saved, and the line says so rather than letting it look saved. */
+  const mrTouched = await onSite('post-a-job?edit=jr', mrSeed(MR_ADMIN), async (q) => {
+    await mrOpen(q);
+    await q.fill('#f-note', 'a correction not yet saved');
+    await q.click('#oa-reviewed');
+    await q.waitForFunction(() =>
+      !!(window.__fb.dump()['jobSubmissions/jr'] || {}).reviewedAt, null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    return { doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/jr']),
+      msg: await q.evaluate(() => document.getElementById('oa-msg').textContent),
+      note: await q.evaluate(() => document.getElementById('f-note').value) };
+  });
+  eq(mrTouched.doc.note, undefined,
+    'v3 edit: Mark reviewed never saves the form, even with a correction typed');
+  ok(/press Save changes to keep them/.test(mrTouched.msg) &&
+     mrTouched.note === 'a correction not yet saved',
+    'v3 edit: …the typing is still in the box, and the line says it still needs Save changes');
+
+  /* The two places it must NOT appear. */
+  const mrPoster = await onSite('post-a-job?edit=jr', mrSeed(keptUser), async (q) => {
+    await mrOpen(q);
+    return mrOffered(q);
+  });
+  eq({ exists: mrPoster.exists, shown: mrPoster.shown }, { exists: true, shown: false },
+    'v3 edit: a poster correcting their own posting is offered no Mark reviewed: it is the maintainer’s list');
+  const mrTicked = await onSite('post-a-job?edit=jr',
+    mrSeed(MR_ADMIN, { reviewedAt: '2026-09-21T10:00:00.000Z' }), async (q) => {
+      await mrOpen(q);
+      return mrOffered(q);
+    });
+  eq(mrTicked.shown, false,
+    'v3 edit: a posting already ticked off is offered no Mark reviewed: it is not on the list');
+  const mrHidden = await onSite('post-a-job?edit=jr', mrSeed(MR_ADMIN, { status: 'hidden' }),
+    async (q) => { await mrOpen(q); return mrOffered(q); });
+  eq(mrHidden.shown, false,
+    'v3 edit: nor is a posting that has been taken down: the list reads live postings only');
+
+  /* The other order: a correction SAVED first, then ticked off from the done
+     panel, without a trip back to the card. */
+  const mrSaved = await onSite('post-a-job?edit=jr', mrSeed(MR_ADMIN), async (q) => {
+    await mrOpen(q);
+    await q.fill('#f-note', 'checked the advert');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    const panel = await q.evaluate(() => ({
+      btn: !!document.getElementById('oa-done-reviewed'),
+      admin: !!document.querySelector('#oa-done a[href="admin-area"]'),
+      line: (document.getElementById('oa-done-review') || {}).textContent || '',
+      stamped: !!(window.__fb.dump()['jobSubmissions/jr'] || {}).reviewedAt,
+    }));
+    await q.click('#oa-done-reviewed');
+    await q.waitForFunction(() =>
+      !!(window.__fb.dump()['jobSubmissions/jr'] || {}).reviewedAt, null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    return { panel, doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/jr']),
+      after: await q.evaluate(() => ({
+        btn: !document.getElementById('oa-done-reviewed').hidden,
+        line: document.getElementById('oa-done-review').textContent,
+      })) };
+  });
+  ok(mrSaved.panel.btn && mrSaved.panel.admin && /until you mark it reviewed/.test(mrSaved.panel.line),
+    'v3 edit: the done panel after a save offers Mark reviewed, and the way back to the Admin area');
+  eq(mrSaved.panel.stamped, false,
+    'v3 edit: …saving alone ticks nothing off: the two acts stay apart');
+  ok(mrSaved.doc.note === 'checked the advert' && typeof mrSaved.doc.reviewedAt === 'string',
+    'v3 edit: …and pressing it stamps the posting whose correction has just been saved');
+  ok(!mrSaved.after.btn && /Marked reviewed/.test(mrSaved.after.line),
+    'v3 edit: …the button goes and the line says what happened');
+
+  const mrPosterSaved = await onSite('post-a-job?edit=jr', mrSeed(keptUser), async (q) => {
+    await mrOpen(q);
+    await q.fill('#f-note', 'poster fix');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    return q.evaluate(() => ({
+      btn: !!document.getElementById('oa-done-reviewed'),
+      admin: !!document.querySelector('#oa-done a[href="admin-area"]'),
+    }));
+  });
+  eq(mrPosterSaved, { btn: false, admin: false },
+    'v3 edit: a poster’s own done panel offers neither Mark reviewed nor the Admin area');
+
   /* -- post a candidacy on /v3/ -------------------------------------------- */
 
   const cand = await onSite('post-a-candidate.html', { user: keptUser, docs: [KEPT_PROFILE] }, async (q) => {

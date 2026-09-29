@@ -540,6 +540,18 @@
 
                     <div class="oa-actions">
                       <button type="submit" class="button blue" id="oa-submit">Post this job</button>
+                      <!-- MARK REVIEWED, for the MAINTAINER alone and shipped
+                           hidden (owner, 2026-09-29: "I open it, review it,
+                           but then the only option I have once I have opened
+                           it is to 'save it'. I would like to have 'mark
+                           review' button [here] too"). It is the user-added
+                           card's own button on /admin-area, in the same order
+                           (correct, mark reviewed, take down), and it writes
+                           the card's one stamp and nothing else.
+                           oa-jobform.js reveals it once the posting has been
+                           read, only for a live posting nobody has ticked off
+                           yet: the same rule that puts a card on that list. -->
+                      <button type="button" class="button" id="oa-reviewed" hidden>Mark reviewed</button>
                       <!-- TAKE THIS POSTING DOWN, drawn in EDIT MODE ONLY and
                            shipped hidden (owner, 2026-09-18: "add a button
                            here at the bottom to 'delete' a job posting once

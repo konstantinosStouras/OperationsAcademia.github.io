@@ -146,7 +146,17 @@
        department — collapsing it to the school alone would throw the
        department away, and the row that carries it gave no other. */
     'Naveen Jindal School of Management/Healthcare Management Area':
-      { school: 'Naveen Jindal School of Management', unit: 'Healthcare Management' }
+      { school: 'Naveen Jindal School of Management', unit: 'Healthcare Management' },
+    /* THE HYPHEN IS PART OF THE NAME, not a separator: Paris-La Defense is the
+       business district the school is named after, so the value names ONE
+       school and no department. Left to the separator guess, the archive's
+       splitter read it as a school called "...Paris" with a department called
+       "La Defense" (a 2026-09-22 posting, the selftest's fused-name sweep).
+       The entry keeps what the poster typed, which is what the three-column
+       canon already publishes, so no posting moves; data/vocab.json, which
+       had carried the mis-split into the pickers, is rebuilt from it. */
+    'Leonard de Vinci Business School Paris-La Defense':
+      { school: 'Leonard de Vinci Business School Paris-La Defense', unit: '' }
   };
 
   /* A value that names the UNIVERSITY AND A SCHOOL in the university's own
