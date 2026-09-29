@@ -12336,6 +12336,26 @@
   ]
  },
  {
+  "id": "unsw-sydney__unsw-business-school__information-systems-and-technology-management",
+  "institution": "UNSW Sydney",
+  "school": "UNSW Business School",
+  "department": "Information Systems and Technology Management",
+  "type": "Business School",
+  "country": "Australia",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-29"
+ },
+ {
   "id": "unsw-sydney__unsw-business-school-school-of-information-systems-and-techn",
   "institution": "UNSW Sydney",
   "school": "UNSW Business School - School of Information Systems and Technology Management",

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-28T21:42:24.065Z",
+ "generated": "2026-09-29T07:32:04.699Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -511,6 +511,10 @@
   },
   {
    "v": "University of Wisconsin-Madison",
+   "n": 2
+  },
+  {
+   "v": "UNSW Sydney",
    "n": 2
   },
   {
@@ -1503,10 +1507,6 @@
   },
   {
    "v": "University of Wisconsin-Stout",
-   "n": 1
-  },
-  {
-   "v": "UNSW Sydney",
    "n": 1
   },
   {
@@ -2540,6 +2540,10 @@
    "n": 1
   },
   {
+   "v": "UNSW Business School",
+   "n": 1
+  },
+  {
    "v": "UNSW Business School - School of Information Systems and Technology Management",
    "n": 1
   },
@@ -3033,10 +3037,6 @@
   },
   {
    "v": "TUM School of Management",
-   "n": 0
-  },
-  {
-   "v": "UNSW Business School",
    "n": 0
   },
   {
@@ -3691,6 +3691,10 @@
   },
   {
    "v": "Information Systems and Technology",
+   "n": 1
+  },
+  {
+   "v": "Information Systems and Technology Management",
    "n": 1
   },
   {
@@ -4427,10 +4431,6 @@
   },
   {
    "v": "Information Systems and Supply Chain Management",
-   "n": 0
-  },
-  {
-   "v": "Information Systems and Technology Management",
    "n": 0
   },
   {
@@ -11359,10 +11359,17 @@
   },
   "UNSW Sydney": {
    "schools": [
+    "UNSW Business School",
     "UNSW Business School - School of Information Systems and Technology Management"
    ],
-   "units": [],
-   "bySchool": {}
+   "units": [
+    "Information Systems and Technology Management"
+   ],
+   "bySchool": {
+    "UNSW Business School": [
+     "Information Systems and Technology Management"
+    ]
+   }
   },
   "UT Austin McCombs": {
    "schools": [],
