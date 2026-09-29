@@ -1,22 +1,22 @@
 {
- "generated": "2026-09-28T11:05:21.081Z",
+ "generated": "2026-09-29T09:07:27.749Z",
  "sources": [
   {
    "source": "usage",
-   "days": 43,
+   "days": 44,
    "from": "",
    "to": ""
   },
   {
    "source": "ga4",
-   "days": 48,
+   "days": 46,
    "from": "",
    "to": ""
   }
  ],
- "days": 120,
+ "days": 121,
  "from": "2026-06-01",
- "to": "2026-09-28",
- "visitors": 4423,
- "pageviews": 11446
+ "to": "2026-09-29",
+ "visitors": 4620,
+ "pageviews": 11812
 }
