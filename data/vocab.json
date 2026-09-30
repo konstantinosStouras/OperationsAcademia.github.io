@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-30T13:37:42.323Z",
+ "generated": "2026-09-30T13:39:33.323Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -19,7 +19,7 @@
   },
   {
    "v": "Pennsylvania State University",
-   "n": 6
+   "n": 7
   },
   {
    "v": "The Hong Kong Polytechnic University",
@@ -2156,6 +2156,10 @@
    "n": 3
   },
   {
+   "v": "Smeal College of Business",
+   "n": 3
+  },
+  {
    "v": "Anderson School of Management",
    "n": 2
   },
@@ -2229,10 +2233,6 @@
   },
   {
    "v": "School of Management and Economics",
-   "n": 2
-  },
-  {
-   "v": "Smeal College of Business",
    "n": 2
   },
   {
@@ -3158,6 +3158,10 @@
    "n": 4
   },
   {
+   "v": "Supply Chain and Information Systems",
+   "n": 4
+  },
+  {
    "v": "Analytics and Operations",
    "n": 3
   },
@@ -3199,10 +3203,6 @@
   },
   {
    "v": "SCM/OM",
-   "n": 3
-  },
-  {
-   "v": "Supply Chain and Information Systems",
    "n": 3
   },
   {
