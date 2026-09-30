@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-29T12:57:02.644Z",
+ "generated": "2026-09-30T13:35:05.039Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -34,6 +34,10 @@
    "n": 5
   },
   {
+   "v": "Pennsylvania State University",
+   "n": 5
+  },
+  {
    "v": "University of Hong Kong",
    "n": 5
   },
@@ -51,10 +55,6 @@
   },
   {
    "v": "IESE Business School",
-   "n": 4
-  },
-  {
-   "v": "Pennsylvania State University",
    "n": 4
   },
   {
@@ -2524,6 +2524,10 @@
    "n": 1
   },
   {
+   "v": "Smeal College of Business",
+   "n": 1
+  },
+  {
    "v": "Stanford Graduate School of Business",
    "n": 1
   },
@@ -3008,10 +3012,6 @@
    "n": 0
   },
   {
-   "v": "Smeal College of Business",
-   "n": 0
-  },
-  {
    "v": "Smith School of Business",
    "n": 0
   },
@@ -3335,6 +3335,10 @@
   },
   {
    "v": "SCM/BA",
+   "n": 2
+  },
+  {
+   "v": "Supply Chain and Information Systems",
    "n": 2
   },
   {
@@ -4199,10 +4203,6 @@
   },
   {
    "v": "Strategic Management and Operations",
-   "n": 1
-  },
-  {
-   "v": "Supply Chain and Information Systems",
    "n": 1
   },
   {
