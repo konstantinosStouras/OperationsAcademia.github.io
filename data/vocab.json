@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-30T17:46:21.863Z",
+ "generated": "2026-09-30T17:48:22.341Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -38,6 +38,10 @@
    "n": 5
   },
   {
+   "v": "Cornell University",
+   "n": 5
+  },
+  {
    "v": "University of Hong Kong",
    "n": 5
   },
@@ -47,10 +51,6 @@
   },
   {
    "v": "Auburn University",
-   "n": 4
-  },
-  {
-   "v": "Cornell University",
    "n": 4
   },
   {
@@ -2236,6 +2236,10 @@
    "n": 2
   },
   {
+   "v": "School of Operations Research and Information Engineering (ORIE)",
+   "n": 2
+  },
+  {
    "v": "Tippie College of Business",
    "n": 2
   },
@@ -2525,10 +2529,6 @@
   },
   {
    "v": "School of Mathematical and Statistical Sciences",
-   "n": 1
-  },
-  {
-   "v": "School of Operations Research and Information Engineering (ORIE)",
    "n": 1
   },
   {
@@ -3322,6 +3322,10 @@
    "n": 2
   },
   {
+   "v": "Operations Research and Information Engineering",
+   "n": 2
+  },
+  {
    "v": "Operations, Information and Technology",
    "n": 2
   },
@@ -4015,10 +4019,6 @@
   },
   {
    "v": "Operations Research and Financial Engineering",
-   "n": 1
-  },
-  {
-   "v": "Operations Research and Information Engineering",
    "n": 1
   },
   {
