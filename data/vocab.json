@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-30T13:39:33.323Z",
+ "generated": "2026-09-30T17:46:21.863Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -47,6 +47,10 @@
   },
   {
    "v": "Auburn University",
+   "n": 4
+  },
+  {
+   "v": "Cornell University",
    "n": 4
   },
   {
@@ -119,10 +123,6 @@
   },
   {
    "v": "Clarkson University",
-   "n": 3
-  },
-  {
-   "v": "Cornell University",
    "n": 3
   },
   {
@@ -2528,6 +2528,10 @@
    "n": 1
   },
   {
+   "v": "School of Operations Research and Information Engineering (ORIE)",
+   "n": 1
+  },
+  {
    "v": "Stanford Graduate School of Business",
    "n": 1
   },
@@ -2985,10 +2989,6 @@
   },
   {
    "v": "School of Mechanical and Materials Engineering",
-   "n": 0
-  },
-  {
-   "v": "School of Operations Research and Information Engineering (ORIE)",
    "n": 0
   },
   {
@@ -4018,6 +4018,10 @@
    "n": 1
   },
   {
+   "v": "Operations Research and Information Engineering",
+   "n": 1
+  },
+  {
    "v": "Operations Strategy and Management Science",
    "n": 1
   },
@@ -4639,10 +4643,6 @@
   },
   {
    "v": "Operations Research and Industrial Engineering",
-   "n": 0
-  },
-  {
-   "v": "Operations Research and Information Engineering",
    "n": 0
   },
   {
@@ -5858,6 +5858,9 @@
      "Services Management"
     ],
     "Cornell Tech": [
+     "Operations Research and Information Engineering"
+    ],
+    "School of Operations Research and Information Engineering (ORIE)": [
      "Operations Research and Information Engineering"
     ]
    }
@@ -12538,6 +12541,9 @@
   ],
   "School of Mathematical and Statistical Sciences": [
    "Data Science and Decision Intelligence"
+  ],
+  "School of Operations Research and Information Engineering (ORIE)": [
+   "Operations Research and Information Engineering"
   ],
   "School of Science and Engineering": [
    "Industrial and Systems Engineering (ISyE)"
