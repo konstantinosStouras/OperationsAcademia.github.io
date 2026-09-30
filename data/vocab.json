@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-30T13:35:05.039Z",
+ "generated": "2026-09-30T13:37:42.323Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -18,6 +18,10 @@
    "n": 7
   },
   {
+   "v": "Pennsylvania State University",
+   "n": 6
+  },
+  {
    "v": "The Hong Kong Polytechnic University",
    "n": 6
   },
@@ -31,10 +35,6 @@
   },
   {
    "v": "Arizona State University",
-   "n": 5
-  },
-  {
-   "v": "Pennsylvania State University",
    "n": 5
   },
   {
@@ -2232,6 +2232,10 @@
    "n": 2
   },
   {
+   "v": "Smeal College of Business",
+   "n": 2
+  },
+  {
    "v": "Tippie College of Business",
    "n": 2
   },
@@ -2521,10 +2525,6 @@
   },
   {
    "v": "School of Mathematical and Statistical Sciences",
-   "n": 1
-  },
-  {
-   "v": "Smeal College of Business",
    "n": 1
   },
   {
@@ -3202,6 +3202,10 @@
    "n": 3
   },
   {
+   "v": "Supply Chain and Information Systems",
+   "n": 3
+  },
+  {
    "v": "Technology and Operations Management",
    "n": 3
   },
@@ -3335,10 +3339,6 @@
   },
   {
    "v": "SCM/BA",
-   "n": 2
-  },
-  {
-   "v": "Supply Chain and Information Systems",
    "n": 2
   },
   {
