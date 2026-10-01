@@ -53,6 +53,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
 import { firebaseAdmin } from './_mail.mjs';
 import { memberUniversities } from './directory-model.mjs';
 
@@ -68,6 +69,20 @@ export const ROSTER = 'userDirectory';
 export const TALLY = 'registeredUsers';
 export const NAMES_FILE = 'university-names.json';
 export const MEMBERS_FILE = 'member-universities.json';
+/* WHAT THE MEMBER FILE FEEDS, rebuilt in the SAME run, in the jobs build's own
+   order. Committing the member file alone stops the site publishing: the
+   selftest holds data/vocab.json to exactly what the postings, the two
+   directories and the member universities rebuild, and the jobs build runs
+   that check on the COMMITTED tree before it builds anything (the trap
+   CLAUDE.md records for an alias pushed without its heal). The first applied
+   run (2026-10-01) wrote the six names, went red on that check, and so
+   committed nothing. Offline, idempotent, each writes only what changed.
+   Child processes, never imports: the "delegate spawns the suite" rule. */
+export const DEPENDENTS = [
+  ['build-jobs.mjs', '--heal-names'],   // data/vocab.json (the posting form's list)
+  ['build-directory.mjs'],              // directory.json, directory-meta.json, university-names.json
+  ['build-netmap.mjs'],                 // the domain map, derived from the directory
+];
 /* the bound the rules put on both fields (str('affiliation', 300)) */
 export const MAXLEN = 300;
 
@@ -225,7 +240,17 @@ async function main() {
     if (had !== body) {
       await writeFile(path.join(DATA, MEMBERS_FILE), body);
       log(`wrote data/${MEMBERS_FILE}`);
+      rebuildDependents();
     }
+  }
+}
+
+/* A builder that fails throws here, so the run fails and the workflow commits
+   nothing: never a member file without the lists it feeds. */
+function rebuildDependents() {
+  for (const [script, ...args] of DEPENDENTS) {
+    log(`rebuilding: ${script} ${args.join(' ')}`.trim());
+    execFileSync(process.execPath, [path.join(HERE, script), ...args], { stdio: 'inherit' });
   }
 }
 
@@ -301,6 +326,18 @@ async function selftest() {
     'a plan writes nothing: the WRITE gate stands before the first write');
   ok(run.indexOf('if (!WRITE)') < run.indexOf('writeFile('),
     '…including the served file');
+
+  /* the member file never lands without the lists it feeds */
+  eq(DEPENDENTS, [['build-jobs.mjs', '--heal-names'], ['build-directory.mjs'], ['build-netmap.mjs']],
+    'the member file\'s dependents are rebuilt in the jobs build\'s own order: the vocabulary, the directory, the domain map');
+  const memberWrite = run.indexOf('await writeFile(path.join(DATA, MEMBERS_FILE), body);');
+  const rebuildCall = run.indexOf('rebuildDependents();');
+  ok(memberWrite > 0 && rebuildCall > memberWrite && rebuildCall - memberWrite < 200,
+    '…right after the member file is written, in the same branch, so a run that changed nothing rebuilds nothing');
+  const rebuildFn = run.slice(run.indexOf('function rebuildDependents()'));
+  ok(/execFileSync\(process\.execPath, \[path\.join\(HERE, script\), \.\.\.args\]/.test(rebuildFn)
+     && !/\bimport\(/.test(run),
+    '…as child processes, never imports, and a builder that fails fails the run');
 
   for (const f of fails) console.log('FAIL  ' + f);
   console.log(`affiliations selftest: ${pass} checks passed, ${fails.length} failed`);

@@ -1533,6 +1533,27 @@ stops the pass reading its own card as "already listed" and dropping it, which
 would flap the card off and on every day. A name leaves the file the day no
 member names it.
 
+**…AND IT NEVER LANDS ALONE, which the first applied run proved.** On
+2026-10-01 the pass standardised 66 profiles and their 66 roster rows, wrote
+six names to the member file, and then the re-check went red: `vocab.json is
+exactly what the postings, the two directories and the member universities
+rebuild`, because the file had changed and the vocabulary built from it had
+not. So nothing was committed, which is the gate doing its job, and committed
+it would have been worse: the jobs build runs that check on the COMMITTED tree
+before it builds anything, so a member file pushed alone stops the whole site
+publishing, the trap "the alias that settles it cannot be pushed on its own"
+records. The pass now rebuilds what the file feeds in the same run
+(`DEPENDENTS` in `affiliations.mjs`: `build-jobs.mjs --heal-names`, then
+`build-directory.mjs`, then `build-netmap.mjs`, the jobs build's own order, as
+child processes and only when the member file changed), the workflow commits
+all of their files with it, and it queues in the jobs build's own concurrency
+group (`oa-jobs-data-*`), since it now writes files that build writes. The
+builders are spawned by the SCRIPT rather than named in the workflow, because a
+builder in `BUILDERS` that a workflow also names fails the "never both" rule.
+The profiles written that day stay written: the pass leaves an affiliation
+already in its listed form alone, so the next run commits the six names and
+writes no profile twice.
+
 **The privacy line moved, and the copy says so.** An affiliation is still never
 shown with anybody's name; what is new is that a university's NAME can join a
 public list because a member gave it. The registration note, the profile
