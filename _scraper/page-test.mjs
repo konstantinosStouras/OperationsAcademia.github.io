@@ -11055,20 +11055,24 @@ for (const w of [320, 360, 390, 430]) {
         rest: 167,
       },
       countries: { count: 18, shown: [{ name: 'United States', members: 150 }, { name: 'France', members: 20 }], rest: 30, unknown: 68 },
-      signIn: { google: 96, password: 89, orcid: 42, several: 41 },
-      roles: { season: '2026-2027', candidates: 7, posters: 12 },
-      profile: { orcid: 142 },
     };
-    for (const [width, theme] of [[1180, 'light'], [1180, 'dark'], [390, 'light']]) {
+    /* a file written before the owner's cut (2026-10-01) still carries the
+       three removed figures; a reader holding a cached copy of one must see
+       the same two figures and nothing else */
+    const membersOld = { ...membersDemo, signIn: { google: 96, password: 89, orcid: 42, several: 41 },
+      roles: { season: '2026-2027', candidates: 7, posters: 12 }, profile: { orcid: 142 } };
+    for (const [width, theme, served] of [[1180, 'light', membersDemo], [1180, 'dark', membersDemo],
+                                          [390, 'light', membersDemo], [1180, 'light', membersOld]]) {
+      const tag = `${width} ${theme}${served === membersOld ? ', an older file' : ''}`;
       const ctx = await newCtx({ viewport: { width, height: 1000 }, colorScheme: theme,
         ...(width < 500 ? { isMobile: true, hasTouch: true } : {}) });
       const q = await ctx.newPage();
-      q.on('pageerror', (e) => jsErrors.push(`analytics members ${width} ${theme}: ` + e.message));
+      q.on('pageerror', (e) => jsErrors.push(`analytics members ${tag}: ` + e.message));
       await q.route('**/firebasejs/**', (r) => r.abort());
       await serveDemo(q, demo);
       await serveGrowth(q, growthDemo);
       await q.route('**/data/users-insights.json', (r) => r.fulfill({
-        status: 200, contentType: 'application/json', body: JSON.stringify(membersDemo) }));
+        status: 200, contentType: 'application/json', body: JSON.stringify(served) }));
       await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
       await q.waitForSelector('.oa-members', { timeout: 15000 });
       const m = await q.evaluate(() => {
@@ -11077,14 +11081,16 @@ for (const w of [320, 360, 390, 430]) {
         const work = fig('Where members work');
         const rows = work ? [...work.querySelectorAll('.oa-members-unis .oa-bar-row')] : [];
         const lefts = [...new Set(rows.map((r) => Math.round(r.getBoundingClientRect().left)))];
-        const strip = document.querySelector('.oa-members .oa-tiles');
         const doc = document.documentElement;
+        const all = document.querySelector('#oa-analytics').textContent;
         return {
           heads,
-          tiles: strip ? [...strip.querySelectorAll('.oa-tile')].map((t) => t.textContent.replace(/\s+/g, ' ').trim()) : [],
-          lede: (fig('Who the registered members are') || { querySelector: () => null }).querySelector('.oa-figure-sub')?.textContent || '',
-          signKeys: (fig('How members sign in') || document.createElement('div')).querySelectorAll('.oa-share-legend span').length,
-          gendered: /gender|women/i.test(document.querySelector('#oa-analytics').textContent),
+          membersClass: !!work && work.classList.contains('oa-members'),
+          tiles: work ? work.querySelectorAll('.oa-tile').length : -1,
+          lede: (work && work.querySelector('.oa-figure-sub')?.textContent) || '',
+          gendered: /gender|women/i.test(all),
+          cut: heads.some((h) => /How members sign in|Who the registered members are/.test(h))
+            || [work, fig('Where their universities are')].some((f) => f && /ORCID|sign in|candidate profile|posted a job/.test(f.textContent)),
           kinds: work ? [...work.querySelectorAll('.oa-share-legend span')].map((s) => s.textContent) : [],
           rows: rows.map((r) => r.querySelector('.oa-bar-name').textContent),
           subs: rows.map((r) => (r.querySelector('.oa-bar-sub') || {}).textContent || ''),
@@ -11093,32 +11099,26 @@ for (const w of [320, 360, 390, 430]) {
           overflowX: doc.scrollWidth > doc.clientWidth,
         };
       });
-      const at = m.heads.indexOf('Who the registered members are');
-      eq(m.heads.slice(at - 1, at + 4), ['How the community has grown', 'Who the registered members are',
-        'Where members work', 'Where their universities are', 'How members sign in'],
-      `analytics members (${width} ${theme}): the four figures, in order, right under the growth chart`);
-      ok(m.heads.indexOf('The weekly rhythm') === at + 4,
-        `analytics members (${width} ${theme}): …and the traffic charts carry on after them`);
-      eq(m.tiles.length, 5, `analytics members (${width} ${theme}): a strip of five tiles`);
-      /* the label and the value are two spans with nothing between them */
-      ok(/Registered members\s*268/.test(m.tiles[0]) && /Gave an affiliation\s*93%/.test(m.tiles[1])
-         && /Universities\s*90/.test(m.tiles[2]) && /ORCID iD\s*53%/.test(m.tiles[4]),
-        `analytics members (${width} ${theme}): the count, the share who gave an affiliation, the universities and the ORCID iDs`);
-      ok(/7 members hold a candidate profile for the 2026-2027 market/.test(m.lede) && /12 have posted a job/.test(m.lede)
-         && /nothing is guessed about anybody/.test(m.lede)
+      const at = m.heads.indexOf('Where members work');
+      eq(m.heads.slice(at - 1, at + 2), ['How the community has grown', 'Where members work', 'Where their universities are'],
+        `analytics members (${tag}): the two figures the owner kept, in order, right under the growth chart`);
+      ok(m.heads.indexOf('The weekly rhythm') === at + 2,
+        `analytics members (${tag}): …and the traffic charts carry on straight after them`);
+      ok(!m.cut, `analytics members (${tag}): no strip, no sign-in figure, no ORCID count and no roles (owner, 2026-10-01)`);
+      ok(m.membersClass && m.tiles === 0, `analytics members (${tag}): the first figure carries the members class and no tiles`);
+      ok(/268 registered members on/.test(m.lede) && /nothing is guessed about anybody/.test(m.lede)
          && /Anonymous by construction/.test(m.lede) && /fewer than 3 members/.test(m.lede),
-        `analytics members (${width} ${theme}): the opening caption carries the roles, says nothing is guessed, and says how it is kept anonymous`);
-      ok(!m.gendered, `analytics members (${width} ${theme}): there is no gender figure, since the site never asks for gender`);
+        `analytics members (${tag}): the first caption names the count and the day, says nothing is guessed, and how it is kept anonymous`);
+      ok(!m.gendered, `analytics members (${tag}): there is no gender figure, since the site never asks for gender`);
       eq(m.kinds, ['A university this site lists 75%', 'Another affiliation 19%', 'Not given 6.7%'],
-        `analytics members (${width} ${theme}): listed, another affiliation, and "Not given" as the muted tail`);
-      eq(m.signKeys, 4, `analytics members (${width} ${theme}): the four ways members sign in`);
-      eq(m.rows.length, 6, `analytics members (${width} ${theme}): every university the file names is a row`);
+        `analytics members (${tag}): listed, another affiliation, and "Not given" as the muted tail`);
+      eq(m.rows.length, 6, `analytics members (${tag}): every university the file names is a row`);
       ok(m.rows.includes(HOSTILE) && !m.injected,
-        `analytics members (${width} ${theme}): a name carrying markup is printed as text, never run`);
-      eq(m.subs[0], 'United States', `analytics members (${width} ${theme}): each university carries its country`);
+        `analytics members (${tag}): a name carrying markup is printed as text, never run`);
+      eq(m.subs[0], 'United States', `analytics members (${tag}): each university carries its country`);
       eq(m.columns, width >= 760 ? 2 : 1,
-        `analytics members (${width} ${theme}): the universities read down ${width >= 760 ? 'two columns' : 'one column'}`);
-      ok(!m.overflowX, `analytics members (${width} ${theme}): the page does not scroll sideways`);
+        `analytics members (${tag}): the universities read down ${width >= 760 ? 'two columns' : 'one column'}`);
+      ok(!m.overflowX, `analytics members (${tag}): the page does not scroll sideways`);
       await ctx.close();
     }
     /* the committed seed draws nothing at all */

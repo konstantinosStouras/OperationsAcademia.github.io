@@ -12,8 +12,17 @@
    and nothing but counts reaches the served file, data/users-insights.json,
    which the analytics page draws.
 
+   And, the same day, once the first version had been built: "update it to
+   include only: where they work, with a table of the universities that at
+   least three members name; the countries those universities are in. the
+   rest are not very interesting and do not show them." So there are TWO
+   figures and no more: where members work, and the countries of the
+   universities they named. How members sign in, ORCID iDs and the two roles
+   (a candidate profile, a posted job) were built and then removed at the
+   owner's word; they are not read, not counted and not published.
+
    NOTHING IS INFERRED ABOUT A PERSON. Every figure is a count of something a
-   member stated or did on the site:
+   member stated on their profile:
 
      affiliation   what they typed on their profile, matched to a university
                    the site lists ONLY by name: the site's own canon and its
@@ -27,10 +36,6 @@
                    directory says where its universities are), or a country
                    they wrote as the last part of their affiliation. Never
                    from an e-mail address.
-     sign-in       the ways they chose to sign in.
-     ORCID iD      whether they put one on their profile or signed in with it.
-     roles         whether they hold a live candidate profile for the season
-                   under way, and whether they have posted a job.
 
    THERE IS NO GENDER FIGURE, deliberately. The site has never asked anybody
    their gender, and reading it off a first name is a guess about a person,
@@ -38,10 +43,9 @@
    as an optional question on the profile, and counted from the answers.
 
    THE PERSON NEVER LEAVES MEMORY. `memberFacts` reads one account and keeps
-   only a university KEY, a country name, whether an affiliation was given,
-   the sign-in methods and whether an ORCID iD is on file. No name, no
-   address, no affiliation as typed. `membersInsights` counts those facts; the
-   uid they carry is the join key to the tally and the role sets and is
+   only a university KEY, a country name and whether an affiliation was
+   given. No name, no address, no affiliation as typed. `membersInsights`
+   counts those facts; the uid they carry is the join key to the tally and is
    dropped before anything is written.
 
    FOUR RULES KEEP THE SERVED FILE ANONYMOUS, each pinned by the selftest:
@@ -62,7 +66,6 @@ const require = createRequire(import.meta.url);
 const SCHOOLS = require('../assets/oa-schools.js');
 const COUNTRIES = require('../assets/oa-countries.js');
 const AFFILIATION = require('../assets/oa-affiliation.js');
-const NAV = require('../assets/oa-jobnav.js');
 
 /** The smallest group a named row of the served file may stand for. */
 export const K_MIN = 3;
@@ -71,15 +74,9 @@ export const MIN_MEMBERS = 20;
 /** The most universities the table names (all of them at K_MIN or more). */
 export const MAX_UNIVERSITIES = 40;
 /** EXACTLY the keys the served file carries, in order (pinned by the selftest). */
-export const INSIGHTS_KEYS = ['generated', 'members', 'k', 'affiliation', 'universities',
-  'countries', 'signIn', 'roles', 'profile'];
+export const INSIGHTS_KEYS = ['generated', 'members', 'k', 'affiliation', 'universities', 'countries'];
 /** The keys memberFacts keeps about one account, and nothing else. */
-export const FACT_KEYS = ['uid', 'disabled', 'affiliation', 'university', 'country', 'methods', 'orcid'];
-/** A candidate profile the build publishes is live: the candidates build's
-    own query, and assets/oa-users.js's CANDIDATE_LIVE (pinned both ways). */
-export const CANDIDATE_LIVE = ['queued', 'published'];
-/** The sign-in providers the site offers, by Firebase's provider id. */
-export const PROVIDERS = { 'google.com': 'google', 'password': 'password', 'oidc.orcid': 'orcid' };
+export const FACT_KEYS = ['uid', 'disabled', 'affiliation', 'university', 'country'];
 
 /** lower case, accents and punctuation gone, single spaces */
 const norm = (s) => SCHOOLS.fold(s);
@@ -346,7 +343,6 @@ export function memberFacts(user, profile, ctx) {
   const u = user || {};
   const p = profile || {};
   const idx = ctx && ctx.index;
-  const methods = [...new Set((u.providerData || []).map((x) => PROVIDERS[x && x.providerId] || 'other'))].sort();
   const typed = String(p.affiliation || '').trim();
   const key = resolveAffiliation(typed, idx);
   const country = (key && idx ? idx.country.get(key) || '' : '') || statedCountry(typed);
@@ -356,8 +352,6 @@ export function memberFacts(user, profile, ctx) {
     affiliation: key ? 'listed' : typed ? 'other' : 'none',
     university: key,
     country,
-    methods,
-    orcid: !!p.orcid || methods.includes('orcid'),
   };
 }
 
@@ -390,10 +384,8 @@ function named(map, max, extra) {
  * anything about them (MIN_MEMBERS). `facts` is memberFacts for every Auth
  * account; only the MEMBERS count (not disabled, carrying a registeredUsers
  * mark: the same people the front page and the growth chart count).
- * `candidates` and `posters` are uid sets, or null when their read failed
- * (and then `roles` is null rather than a false zero).
  */
-export function membersInsights(facts, { marks, candidates = null, posters = null, now, index } = {}) {
+export function membersInsights(facts, { marks, now, index } = {}) {
   const has = marks instanceof Set ? marks : new Set(marks || []);
   const list = (facts || []).filter((f) => f && !f.disabled && has.has(f.uid));
   if (list.length < MIN_MEMBERS) return null;
@@ -417,19 +409,6 @@ export function membersInsights(facts, { marks, candidates = null, posters = nul
   const cs = named(byCountry, 60, (k) => ({ name: k }));
   const countries = { count: byCountry.size, shown: cs.rows, rest: cs.rest, unknown: count((f) => !f.country) };
 
-  const one = (m) => (f) => f.methods.length === 1 && f.methods[0] === m;
-  const signIn = {
-    google: count(one('google')),
-    password: count(one('password')),
-    orcid: count(one('orcid')),
-    several: count((f) => f.methods.length > 1),
-  };
-
-  const roles = candidates instanceof Set && posters instanceof Set
-    ? { season: NAV.marketLabel(NAV.marketYear(at)), candidates: count((f) => candidates.has(f.uid)),
-        posters: count((f) => posters.has(f.uid)) }
-    : null;
-
   return {
     generated: at.toISOString(),
     members: list.length,
@@ -437,34 +416,7 @@ export function membersInsights(facts, { marks, candidates = null, posters = nul
     affiliation,
     universities,
     countries,
-    signIn,
-    roles,
-    profile: { orcid: count((f) => f.orcid) },
   };
-}
-
-/** The uids holding a LIVE candidate profile for the season under way, from
-    candidateSubmissions documents ({ uid, year, status }). */
-export function candidateUids(docs, now) {
-  const year = NAV.marketYear(now instanceof Date ? now : new Date(now || Date.now()));
-  const out = new Set();
-  for (const d of docs || []) {
-    if (!d || !d.uid || !CANDIDATE_LIVE.includes(d.status)) continue;
-    if (Math.trunc(Number(d.year)) === year) out.add(String(d.uid));
-  }
-  return out;
-}
-
-/** The uids that have posted at least one job through the site's form, from
-    jobSubmissions documents ({ uid, status }). A tracking-sheet MIRROR
-    (status 'sheet') is the workbook's, not anybody's posting. */
-export function posterUids(docs) {
-  const out = new Set();
-  for (const d of docs || []) {
-    if (!d || !d.uid || d.status === 'sheet') continue;
-    out.add(String(d.uid));
-  }
-  return out;
 }
 
 /** Is this a served insights document a reader may be shown? The exact keys,

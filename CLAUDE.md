@@ -10222,19 +10222,31 @@ of our users: gender, affiliation histogram/table, etc."*, and then, the same
 day, while it was being built: *"don't make guesses, it's risky. use only
 information actually provided from the users themselves."*
 
+**TWO FIGURES AND NO MORE.** The owner, the same evening, on reading the
+announcement of the first version: *"update it to include only: where they
+work, with a table of the universities that at least three members name; the
+countries those universities are in. the rest are not very interesting and do
+not show them."* So the page draws "Where members work" and "Where their
+universities are" and nothing else. The strip of tiles, how members sign in,
+the ORCID iD count and the two roles (a candidate profile for the season, a
+job posted) were built, shipped unseen and then REMOVED, from the page, the
+served file, the builder and the sync, which no longer reads
+`candidateSubmissions` or `jobSubmissions` for this file at all. Removed and
+not hidden: a figure the builder still counts is one edit from being drawn
+again, so the selftest pins each one as an absence. Bringing one back is the
+owner's call.
+
     _scraper/members-insights.mjs     facts per account, counts over everybody (pure)
     _scraper/sync-user-directory.mjs  computes them on its DAILY run
     data/users-insights.json          the served file, counts only
     assets/oa-analytics.js            drawMembers(), right under the growth chart
 
 **NOTHING IS GUESSED ABOUT ANYBODY, and that is the second instruction, not a
-preference.** Every figure is a count of something a member stated or did:
-the affiliation they typed, matched to a university only by NAME; the country
-of that university as the site's own directory records it, or a country they
-wrote as the last part of their affiliation; how they chose to sign in; an
-ORCID iD on their profile; a live candidate profile for the season under way,
-or a job posted through the form. What was built and then REMOVED, so nobody
-puts it back:
+preference.** Both figures count something a member stated on their profile:
+the affiliation they typed, matched to a university only by NAME, and the
+country of that university as the site's own directory records it, or a
+country they wrote as the last part of their affiliation. What was built and
+then REMOVED as a guess, so nobody puts it back:
 
 * **a gender estimate from first names** (WIPO's World Gender Name
   Dictionary, a strict list of names clearly one gender). Strict or not, it is
@@ -10284,28 +10296,25 @@ country named only by the site's own name for it); no group smaller than
 `K_MIN` (3) is named, the rest counted together; nothing is cross-tabulated;
 and below `MIN_MEMBERS` (20) nothing is published at all. `memberFacts` keeps
 exactly `FACT_KEYS` (a university KEY, a country, whether an affiliation was
-given, the sign-in methods, an ORCID yes/no, plus the uid as the join key to
-the tally and the role sets) and never the name, the address or the
-affiliation as typed; the pre-existing pin on the `accounts` array still
+given, and the uid as the join key to the tally) and never the name, the
+address or the affiliation as typed; the pre-existing pin on the `accounts` array still
 holds, since the facts are a separate array. `insightsProblems` checks the
 committed file.
 
-**What the page shows.** Right under "How the community has grown": a strip
-of five tiles (members, the share who gave an affiliation, universities
-named, countries of those universities, ORCID iD), with the roles in the
-opening caption; then "Where members work" (a share bar of listed university,
-another affiliation and not given, through a new generic `restLabel` on
-`share()`, then every university with three or more members as a bar list
-reading down two columns on a desktop, each with its country); "Where their
-universities are"; and "How members sign in". The figures follow neither
-range control: they are a dated snapshot.
+**What the page shows.** Right under "How the community has grown": "Where
+members work", whose caption carries the member count, the day of the
+snapshot and how the figures are kept anonymous (a share bar of listed
+university, another affiliation and not given, through a generic `restLabel`
+on `share()`, then every university with three or more members as a bar list
+reading down two columns on a desktop, each with its country); and "Where
+their universities are". No tiles. The figures follow neither range control:
+they are a dated snapshot.
 
 **The sync writes the file on its DAILY run only**, and only when the
 profiles, the tally and the university index were all read: without the
 profiles every member would read as unaffiliated, which is a failure rather
 than a finding, so the committed file stands. The hourly `--figures-only` run
-reads no profile and never touches it. A role read that fails makes `roles`
-null rather than a false zero. Written through `writeServed`, so a day that
+reads no profile and never touches it. Written through `writeServed`, so a day that
 changes nothing commits nothing; the workflow's `FILES` names it. The
 committed seed is `{"generated":"","members":0}` and the page draws nothing
 from it, so **the figures appear after the first daily run with the
@@ -10322,8 +10331,10 @@ not move when the daily run writes real figures.
 Tests: `testMemberInsights` in `_scraper/selftest.mjs` (the matches and the
 refusals against the committed index, every short form's target, one
 member's facts and what they never hold, the four rules over a fixture, the
-served file, the sync's wiring, the page with no gender and no e-mail figure,
-the policy, the change log and this section) and the members block of
+served file, the sync's wiring with no role read, the page drawing exactly
+the two figures with no tiles, no gender, no e-mail, no sign-in, no ORCID and
+no role figure, the lede, the policy and the change log naming only the two,
+and this section) and the members block of
 `_scraper/page-test.mjs`, which routes a fixture and measures the figures in a
 real browser in both themes and at 390px.
 
