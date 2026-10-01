@@ -9866,6 +9866,17 @@ for (const w of [320, 360, 390, 430]) {
    apart in BOTH themes, and that the seasonality chart never reports a month
    the record has not covered as a month with no visitors. */
 {
+  /* THE MEMBERS FILE AS IT SHIPS, the empty seed, in every context of this
+     block but the members' own: the daily roster sync writes real figures
+     into data/users-insights.json, and a check that read the committed file
+     would move with the corpus (the growth chart's lesson, recorded below).
+     A page-level route, which the members block sets, wins over this. */
+  const newCtx = async (opts) => {
+    const c = await browser.newContext(opts);
+    await c.route('**/data/users-insights.json', (r) => r.fulfill({
+      status: 200, contentType: 'application/json', body: '{"generated":"","members":0}' }));
+    return c;
+  };
   /* a realistic corpus rather than a fixture of three days: the weekday and
      seasonal shapes are the whole point of two of these charts, and a chart
      over three days cannot show either */
@@ -10002,7 +10013,7 @@ for (const w of [320, 360, 390, 430]) {
   /* --- with data, in BOTH themes ---------------------------------------- */
 
   for (const theme of ['light', 'dark']) {
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1400 }, colorScheme: theme });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 1400 }, colorScheme: theme });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push(`analytics ${theme}: ` + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10268,7 +10279,7 @@ for (const w of [320, 360, 390, 430]) {
      the 2014-2023 figures would be if they ever turned up. The label has to
      go on saying so, or a decade of UA counts would be read as this month's. */
   {
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1000 } });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 1000 } });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics archive: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10311,7 +10322,7 @@ for (const w of [320, 360, 390, 430]) {
      shorter than the period saying so, the two kinds of empty period, and a
      served file from before the periods existed drawing no row at all. */
   {
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1000 } });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 1000 } });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics periods: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10451,7 +10462,7 @@ for (const w of [320, 360, 390, 430]) {
           pages: [{ path: '/jobs.html', title: '', views: 600, avgSec: 616 }, { path: '/', title: '', views: 400, avgSec: 383 }] },
       },
     };
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1000 } });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 1000 } });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics pages periods: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10557,7 +10568,7 @@ for (const w of [320, 360, 390, 430]) {
      does not have. */
 
   {
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1400 } });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 1400 } });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics dims: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10776,7 +10787,7 @@ for (const w of [320, 360, 390, 430]) {
 
   {
     for (const width of [1400, 1180, 1024]) {
-      const ctx = await browser.newContext({ viewport: { width, height: 1400 } });
+      const ctx = await newCtx({ viewport: { width, height: 1400 } });
       const q = await ctx.newPage();
       q.on('pageerror', (e) => jsErrors.push('analytics full: ' + e.message));
       await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10819,7 +10830,7 @@ for (const w of [320, 360, 390, 430]) {
      combination no fixture covered. */
 
   {
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1400 } });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 1400 } });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics half: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10860,7 +10871,7 @@ for (const w of [320, 360, 390, 430]) {
      business. */
 
   {
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1000 } });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 1000 } });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics no-dims: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10897,7 +10908,7 @@ for (const w of [320, 360, 390, 430]) {
      phone claims for it are made here: no sideways scroll, every chart drawn
      at the size it is shown at, the growth figure among them. */
   {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const ctx = await newCtx({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics 390: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10929,7 +10940,7 @@ for (const w of [320, 360, 390, 430]) {
   /* --- with NOTHING, which is the state it ships in --------------------- */
 
   {
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 900 } });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 900 } });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics empty: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10965,7 +10976,7 @@ for (const w of [320, 360, 390, 430]) {
   /* --- a dataset that has STOPPED moving -------------------------------- */
 
   {
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 900 } });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 900 } });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics stale: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -10982,7 +10993,7 @@ for (const w of [320, 360, 390, 430]) {
   /* --- hostile input ---------------------------------------------------- */
 
   {
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 900 } });
+    const ctx = await newCtx({ viewport: { width: 1180, height: 900 } });
     const q = await ctx.newPage();
     q.on('pageerror', (e) => jsErrors.push('analytics hostile: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
@@ -11022,10 +11033,113 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* --- who the registered members are (owner, 2026-10-01) ---------------
+     Routed from a fixture in the served file's own shape, never read from
+     the committed file, which the daily sync rewrites: a browser check must
+     not move with the corpus. Hostile input rides in a university's name. */
+  {
+    const HOSTILE = '<img src=x onerror="window.__pwned=1">';
+    const membersDemo = {
+      generated: '2026-10-01T04:41:00.000Z', members: 268, k: 3,
+      affiliation: { listed: 200, other: 50, none: 18 },
+      universities: {
+        count: 90,
+        shown: [
+          { name: 'Massachusetts Institute of Technology (MIT)', country: 'United States', members: 10 },
+          { name: 'INSEAD', country: 'France', members: 8 },
+          { name: HOSTILE, country: '', members: 5 },
+          { name: 'University of Toronto', country: 'Canada', members: 4 },
+          { name: 'Bocconi University', country: 'Italy', members: 3 },
+          { name: 'University of Chicago', country: 'United States', members: 3 },
+        ],
+        rest: 167,
+      },
+      countries: { count: 18, shown: [{ name: 'United States', members: 150 }, { name: 'France', members: 20 }], rest: 30, unknown: 68 },
+      signIn: { google: 96, password: 89, orcid: 42, several: 41 },
+      roles: { season: '2026-2027', candidates: 7, posters: 12 },
+      profile: { orcid: 142 },
+    };
+    for (const [width, theme] of [[1180, 'light'], [1180, 'dark'], [390, 'light']]) {
+      const ctx = await newCtx({ viewport: { width, height: 1000 }, colorScheme: theme,
+        ...(width < 500 ? { isMobile: true, hasTouch: true } : {}) });
+      const q = await ctx.newPage();
+      q.on('pageerror', (e) => jsErrors.push(`analytics members ${width} ${theme}: ` + e.message));
+      await q.route('**/firebasejs/**', (r) => r.abort());
+      await serveDemo(q, demo);
+      await serveGrowth(q, growthDemo);
+      await q.route('**/data/users-insights.json', (r) => r.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify(membersDemo) }));
+      await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+      await q.waitForSelector('.oa-members', { timeout: 15000 });
+      const m = await q.evaluate(() => {
+        const heads = [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent);
+        const fig = (t) => [...document.querySelectorAll('.oa-figure')].find((f) => f.querySelector('h2').textContent === t);
+        const work = fig('Where members work');
+        const rows = work ? [...work.querySelectorAll('.oa-members-unis .oa-bar-row')] : [];
+        const lefts = [...new Set(rows.map((r) => Math.round(r.getBoundingClientRect().left)))];
+        const strip = document.querySelector('.oa-members .oa-tiles');
+        const doc = document.documentElement;
+        return {
+          heads,
+          tiles: strip ? [...strip.querySelectorAll('.oa-tile')].map((t) => t.textContent.replace(/\s+/g, ' ').trim()) : [],
+          lede: (fig('Who the registered members are') || { querySelector: () => null }).querySelector('.oa-figure-sub')?.textContent || '',
+          signKeys: (fig('How members sign in') || document.createElement('div')).querySelectorAll('.oa-share-legend span').length,
+          gendered: /gender|women/i.test(document.querySelector('#oa-analytics').textContent),
+          kinds: work ? [...work.querySelectorAll('.oa-share-legend span')].map((s) => s.textContent) : [],
+          rows: rows.map((r) => r.querySelector('.oa-bar-name').textContent),
+          subs: rows.map((r) => (r.querySelector('.oa-bar-sub') || {}).textContent || ''),
+          columns: lefts.length,
+          injected: !!document.querySelector('.oa-members-unis img') || window.__pwned === 1,
+          overflowX: doc.scrollWidth > doc.clientWidth,
+        };
+      });
+      const at = m.heads.indexOf('Who the registered members are');
+      eq(m.heads.slice(at - 1, at + 4), ['How the community has grown', 'Who the registered members are',
+        'Where members work', 'Where their universities are', 'How members sign in'],
+      `analytics members (${width} ${theme}): the four figures, in order, right under the growth chart`);
+      ok(m.heads.indexOf('The weekly rhythm') === at + 4,
+        `analytics members (${width} ${theme}): …and the traffic charts carry on after them`);
+      eq(m.tiles.length, 5, `analytics members (${width} ${theme}): a strip of five tiles`);
+      /* the label and the value are two spans with nothing between them */
+      ok(/Registered members\s*268/.test(m.tiles[0]) && /Gave an affiliation\s*93%/.test(m.tiles[1])
+         && /Universities\s*90/.test(m.tiles[2]) && /ORCID iD\s*53%/.test(m.tiles[4]),
+        `analytics members (${width} ${theme}): the count, the share who gave an affiliation, the universities and the ORCID iDs`);
+      ok(/7 members hold a candidate profile for the 2026-2027 market/.test(m.lede) && /12 have posted a job/.test(m.lede)
+         && /nothing is guessed about anybody/.test(m.lede)
+         && /Anonymous by construction/.test(m.lede) && /fewer than 3 members/.test(m.lede),
+        `analytics members (${width} ${theme}): the opening caption carries the roles, says nothing is guessed, and says how it is kept anonymous`);
+      ok(!m.gendered, `analytics members (${width} ${theme}): there is no gender figure, since the site never asks for gender`);
+      eq(m.kinds, ['A university this site lists 75%', 'Another affiliation 19%', 'Not given 6.7%'],
+        `analytics members (${width} ${theme}): listed, another affiliation, and "Not given" as the muted tail`);
+      eq(m.signKeys, 4, `analytics members (${width} ${theme}): the four ways members sign in`);
+      eq(m.rows.length, 6, `analytics members (${width} ${theme}): every university the file names is a row`);
+      ok(m.rows.includes(HOSTILE) && !m.injected,
+        `analytics members (${width} ${theme}): a name carrying markup is printed as text, never run`);
+      eq(m.subs[0], 'United States', `analytics members (${width} ${theme}): each university carries its country`);
+      eq(m.columns, width >= 760 ? 2 : 1,
+        `analytics members (${width} ${theme}): the universities read down ${width >= 760 ? 'two columns' : 'one column'}`);
+      ok(!m.overflowX, `analytics members (${width} ${theme}): the page does not scroll sideways`);
+      await ctx.close();
+    }
+    /* the committed seed draws nothing at all */
+    const ctx = await newCtx({ viewport: { width: 1180, height: 1000 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics members seed: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, demo);
+    await serveGrowth(q, growthDemo);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    await q.waitForTimeout(600);
+    eq(await q.evaluate(() => document.querySelectorAll('.oa-members').length), 0,
+      'analytics members: the empty seed (members 0) draws no members figure at all');
+    await ctx.close();
+  }
+
   /* --- the phone -------------------------------------------------------- */
 
   {
-    const ctx = await browser.newContext({
+    const ctx = await newCtx({
       viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
     });
     const q = await ctx.newPage();

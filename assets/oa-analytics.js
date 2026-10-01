@@ -146,7 +146,7 @@
     },
   ];
 
-  var state = { data: null, growth: null, range: '90', metric: 'visitors' };
+  var state = { data: null, growth: null, members: null, range: '90', metric: 'visitors' };
 
   /* THE GROWTH CHART'S TWO NUMBERS, in one place: the fit window and how far
      the dashed line is carried. The caption is BUILT from them, so the words
@@ -419,6 +419,7 @@
          community's growth has a file of its own and is drawn on the same
          terms */
       drawGrowth();
+      drawMembers();
       renderUniversities();
       return;
     }
@@ -489,6 +490,10 @@
        everything the reader has to scroll for. Drawn from its own served file
        and only when that file holds something (see drawGrowth). */
     drawGrowth();
+
+    /* 1c. who those members are, anonymously (see drawMembers), beside the
+       chart of how many there are */
+    drawMembers();
 
     /* 2 — the weekly rhythm */
     var wk = A.byWeekday(rows);
@@ -799,6 +804,147 @@
     });
   }
 
+  /** Who the registered members are: data/users-insights.json, written by
+   *  the roster sync on its daily run (_scraper/members-insights.mjs).
+   *
+   *  ONLY WHAT MEMBERS TOLD THE SITE, NOTHING GUESSED (owner, 2026-10-01:
+   *  "don't make guesses, it's risky. use only information actually provided
+   *  from the users themselves"). Every figure counts something a member
+   *  stated or did: the affiliation they typed, matched to a university only
+   *  by name; the country of that university, or one they wrote; how they
+   *  sign in; an ORCID iD on their profile; a candidate profile or a posting.
+   *  There is no gender figure because the site has never asked for gender.
+   *
+   *  ANONYMOUS BY CONSTRUCTION, and the opening caption says how. The file
+   *  holds counts and nothing else; no university or country is named for
+   *  fewer than `k` (three) members; and no figure crosses one fact with
+   *  another. The page draws nothing at all from the committed seed
+   *  (members: 0), the rule every figure here follows. */
+  function pctOf(n, of) {
+    return of ? Math.round((n / of) * 100) + '%' : '';
+  }
+
+  /* a part with nobody in it would draw a zero-width block and a "0%" key */
+  function nonZero(items) {
+    return items.filter(function (it) { return it.value > 0; });
+  }
+
+  function drawMembers() {
+    var m = state.members;
+    if (!m || !(m.members > 0) || !m.affiliation) return;
+    var n = m.members;
+    var when = m.generated ? pretty(String(m.generated).slice(0, 10)) : '';
+    var k = m.k || 3;
+    var aff = m.affiliation;
+    var u = m.universities || {};
+    var c = m.countries || null;
+    var given = (aff.listed || 0) + (aff.other || 0);
+
+    /* the strip: five tiles, the strip's own cap (see renderTiles) */
+    var html = '<div class="oa-tiles">';
+    html += tile('Registered members', C.full(n), when ? 'on ' + when : '');
+    html += tile('Gave an affiliation', pctOf(given, n), 'on their profile');
+    html += tile('Universities', C.full(u.count || 0), 'named in those affiliations');
+    if (c) html += tile('Countries', C.full(c.count), 'where those universities are');
+    if (m.profile) html += tile('ORCID iD', pctOf(m.profile.orcid, n), 'on file with their profile');
+    html += '</div>';
+
+    var season = m.roles && m.roles.season ? String(m.roles.season) : '';
+    var roles = m.roles
+      ? ' ' + C.full(m.roles.candidates) + (m.roles.candidates === 1 ? ' member holds' : ' members hold') +
+        ' a candidate profile' + (season ? ' for the ' + season + ' market' : ' this season') + ', and ' +
+        C.full(m.roles.posters) + (m.roles.posters === 1 ? ' has' : ' have') + ' posted a job through the site.'
+      : '';
+    var f0 = figure('Who the registered members are',
+      'A snapshot of the ' + C.full(n) + ' registered members' + (when ? ' on ' + when : '') +
+      ', counted once a day from what they told the site on their profiles and nothing else: ' +
+      'nothing is guessed about anybody.' + roles + ' Anonymous by construction: only counts are ' +
+      'published, no university or country is named for fewer than ' + k + ' members, and no figure ' +
+      'crosses one fact with another.');
+    f0.section.classList.add('oa-members');
+    root.appendChild(f0.section);
+    var strip = document.createElement('div');
+    strip.innerHTML = html;
+    f0.body.appendChild(strip.firstChild);
+
+    /* the affiliations: how many named a university the site lists, then
+       those universities by name */
+    var shown = Array.isArray(u.shown) ? u.shown : [];
+    var fa = figure('Where members work',
+      'The affiliation each member gave on their profile, matched to a university this site ' +
+      'lists only where it names one: by the university\'s name, one of its schools, or a short ' +
+      'form the site knows. ' + C.full(aff.listed || 0) + ' members name ' + C.full(u.count || 0) +
+      (u.count === 1 ? ' university' : ' universities') + '; the table names every one with at ' +
+      'least ' + k + ' members' + (u.rest ? ', and the ' + C.full(u.rest) + ' members at the others ' +
+      'are counted together rather than named' : '') + '. An affiliation that names no listed ' +
+      'university is counted as another affiliation, never sorted or placed.');
+    root.appendChild(fa.section);
+    C.share(fa.body, {
+      title: 'Members by affiliation',
+      unit: 'members',
+      total: n,
+      restLabel: 'Not given',
+      items: nonZero([
+        { label: 'A university this site lists', value: aff.listed || 0 },
+        { label: 'Another affiliation', value: aff.other || 0 },
+      ]),
+    });
+    if (shown.length) {
+      var list = document.createElement('div');
+      list.className = 'oa-members-unis';
+      fa.body.appendChild(list);
+      C.bars(list, {
+        unit: 'members',
+        limit: shown.length,
+        total: n,
+        xTitle: 'University',
+        items: shown.map(function (r) {
+          return { label: r.name, value: r.members, sub: r.country || '' };
+        }),
+      });
+    }
+
+    /* the countries of those universities */
+    if (c && Array.isArray(c.shown) && c.shown.length) {
+      var fc = figure('Where their universities are',
+        'The country of the university a member named, as this site\'s own directory records it, ' +
+        'or a country they wrote at the end of their affiliation. ' + C.full(c.count) +
+        (c.count === 1 ? ' country' : ' countries') + ' in all; those with at least ' + k +
+        ' members are named' + (c.rest ? ', the ' + C.full(c.rest) + ' members elsewhere are counted ' +
+        'together' : '') + (c.unknown ? ', and ' + C.full(c.unknown) + ' members named no university ' +
+        'or country the site can read' : '') + '.');
+      root.appendChild(fc.section);
+      C.bars(fc.body, {
+        unit: 'members',
+        limit: c.shown.length,
+        total: n,
+        xTitle: 'Country',
+        items: c.shown.map(function (r) { return { label: r.name, value: r.members }; }),
+      });
+    }
+
+    /* how they sign in */
+    var si = m.signIn;
+    if (si) {
+      var fs = figure('How members sign in',
+        'The ways each member chose to sign in: with Google, with ORCID, with an e-mail address ' +
+        'and a password, or with more than one of these.');
+      root.appendChild(fs.section);
+      C.share(fs.body, {
+        title: 'Members by sign-in',
+        unit: 'members',
+        total: n,
+        restLabel: 'Another way',
+        items: nonZero([
+          { label: 'Google only', value: si.google || 0 },
+          { label: 'E-mail and password only', value: si.password || 0 },
+          { label: 'ORCID only', value: si.orcid || 0 },
+          { label: 'More than one', value: si.several || 0 },
+        ]),
+      });
+    }
+  }
+
   /** Which universities read the site.
    *
    *  IT IS A SAMPLE AND IT SAYS SO. The university is worked out from the
@@ -991,6 +1137,19 @@
       if (state.data && state.growth && state.growth.days.length) draw();
     })
     .catch(function () { state.growth = null; });
+
+  /* THE MEMBERS FILE IS A THIRD, INDEPENDENT READ, on the growth file's
+     terms: a failure costs those figures and nothing else. */
+  fetch('/data/users-insights.json', { cache: 'no-cache' })
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function (d) {
+      state.members = d && d.members > 0 ? d : null;
+      if (state.data && state.members) draw();
+    })
+    .catch(function () { state.members = null; });
 
   fetch('/data/analytics.json', { cache: 'no-cache' })   // the shared substrate is absolute
     .then(function (r) {
