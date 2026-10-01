@@ -20386,6 +20386,20 @@ async function testAffiliationPicker() {
   eq(A.newUniversity('Bar University, Baz University', idx), '', 'new: never one of two');
   eq(A.newUniversity('https://bar.edu University', idx), '', 'new: never an address');
   eq(A.newUniversity('Stanford Universit', idx), '', 'new: never a slight respelling of a card already there');
+  /* the first plan run on master (2026-10-01) would have published a test
+     account's "university of john doe" as a card on the Universities page */
+  eq(A.newUniversity('university of john doe', idx), '', 'new: never a placeholder (the line the first plan run would have published)');
+  eq(A.newUniversity('University of John Doe', idx), '', 'new: never a placeholder, however it is capitalised');
+  eq(A.newUniversity('Test University', idx), '', 'new: never a test entry');
+  eq(A.newUniversity('bar polytechnic university', idx), '', 'new: never a line typed in lower case, which is not a name as written');
+  eq(A.newUniversity('the Bar Polytechnic University', idx), '', 'new: a lower-case first word is not a name either');
+  ok(A.writtenAsName('Universit\u00e4t f\u00fcr Bodenkultur Wien') && A.writtenAsName("Universit\u00e9 d'Aix-Marseille")
+     && A.writtenAsName('Universit\u00e0 degli Studi di Milano') && A.writtenAsName('Universidad de los Andes')
+     && A.writtenAsName('University of Wisconsin-Whitewater') && A.writtenAsName("Ca' Foscari University of Venice")
+     && A.writtenAsName('University of Foo (UoF)'),
+    'new: a name with its own connectives ("f\u00fcr", "d\u2019", "degli", "de los") still reads as a name');
+  ok(!A.writtenAsName('university of queensland') && !A.writtenAsName('University of queensland'),
+    'new: a capital missing from a word that needs one is refused');
 
   /* --- the directory and the posting form take the member universities ---- */
   const { buildDirectory, memberUniversities } = await import('./directory-model.mjs');
