@@ -311,6 +311,31 @@ again**; that is what fixed it. Unlike the port route above,
 A loader that genuinely CRASHED would not time out at all: the file route
 prints its error text instead.
 
+**AND IT CAME BACK ON 2026-10-01, SO THE ANSWER IS NOW PERMANENT.** The code
+cannot be trimmed out of this: measured on a plain Linux disk, `index.js` loads
+in 4.6 s the first time after an install and in 0.4 s after that, and 640 of
+the 699 files it loads are the `firebase-functions` SDK itself (the Firestore
+trigger module alone pulls in about 500). Our own code adds 59. A cold read of
+those files from a folder Dropbox is busy syncing, with the virus scanner
+looking at each new file too, is what goes past ten seconds. The CLI reads its
+limit from that one environment variable and from nothing in the repository
+(`getFunctionDiscoveryTimeout` in firebase-tools), so the fix lives on the
+machine, once:
+
+    setx FUNCTIONS_DISCOVERY_TIMEOUT 120
+
+It takes effect in the NEXT command window, not the one it was typed in. It is
+safe for every other project on the machine, unlike the `setx` above, because
+it only raises a ceiling: a load that takes half a second still takes half a
+second. To remove the cause as well, tell Dropbox to stop syncing the folder
+npm rewrites, from PowerShell in the repository folder:
+
+    Set-Content -Path .\_functions\node_modules -Stream com.dropbox.ignored -Value 1
+
+`node_modules` is ignored by git and rebuilt by `npm install`, so nothing is
+lost by keeping it out of Dropbox. `npm ci` deletes the folder before it
+rebuilds it, which removes the mark, so set it again after one.
+
 **"npm warn install-scripts … not yet covered by allowScripts" is answered in
 `_functions/package.json`.** Newer npm blocks every dependency's install
 script until the project approves or denies it, and reads the answer from an
