@@ -12,8 +12,12 @@ name: OA — members' affiliations, in the site's own names
 #     card's title, on the profile and the roster row (assets/oa-affiliation.js
 #     `match`, the same rule the registration form's picker settles a box by);
 #   * the universities members are at that nothing else lists are written to
-#     data/member-universities.json, names only, which the jobs build turns
-#     into cards on universities.html and entries in the posting form's list.
+#     data/member-universities.json, names only, which become cards on
+#     universities.html and entries in the posting form's list. The script
+#     rebuilds those lists itself in the same run (DEPENDENTS), and they are
+#     committed TOGETHER: the member file alone fails the selftest's
+#     "vocab.json is exactly what ... rebuild" check, which is how the first
+#     applied run (2026-10-01) standardised 66 profiles and committed nothing.
 #
 # DAILY, AND IT APPLIES. A member who typed "Kellogg School of Management"
 # before the list existed reads "Northwestern University" the next morning;
@@ -40,8 +44,11 @@ on:
 permissions:
   contents: write
 
+# THE JOBS BUILD'S GROUP, because this job now writes what it writes too
+# (data/vocab.json, data/directory.json, data/university-names.json): two
+# writers of one file queue behind each other rather than racing a commit.
 concurrency:
-  group: oa-affiliations
+  group: oa-jobs-data-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -95,7 +102,10 @@ jobs:
         run: |
           set -e
           REF='${{ github.ref_name }}'
-          FILES='data/member-universities.json'
+          # the member file AND every file affiliations.mjs rebuilds from it
+          # (DEPENDENTS): committed alone, the member file turns the jobs
+          # build's first check red and the whole site stops publishing.
+          FILES='data/member-universities.json data/vocab.json data/jobs.json data/jobs-meta.json data/directory.json data/directory-meta.json data/university-names.json data/university-domains.json _functions/university-domains.json _functions/netorg.js'
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "nothing changed."
             exit 0

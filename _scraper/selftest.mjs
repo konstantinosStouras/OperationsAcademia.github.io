@@ -20503,6 +20503,21 @@ async function testAffiliationPicker() {
   ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wfCode), 'the workflow checks out the branch tip');
   ok(/if: github\.ref_name == 'master' && env\.AFF_MODE == '--write'/.test(wfCode),
     'it commits only what a run that applied wrote');
+  /* THE MEMBER FILE NEVER LANDS ALONE. The first applied run (2026-10-01)
+     wrote it, the re-check went red on the vocabulary it feeds, and nothing
+     was committed; committed alone it would have stopped the jobs build. */
+  const affFiles = (wfCode.match(/FILES='([^']*)'/) || [])[1] || '';
+  for (const f of ['data/member-universities.json', 'data/vocab.json', 'data/jobs.json', 'data/jobs-meta.json',
+    'data/directory.json', 'data/directory-meta.json', 'data/university-names.json',
+    'data/university-domains.json', '_functions/university-domains.json', '_functions/netorg.js']) {
+    ok(affFiles.split(/\s+/).includes(f), `the affiliation workflow commits ${f} with the member file`);
+  }
+  eq(AF.DEPENDENTS.map((d) => d[0]), ['build-jobs.mjs', 'build-directory.mjs', 'build-netmap.mjs'],
+    '…because the pass rebuilds the vocabulary, the directory and the domain map itself');
+  ok(/concurrency:\s*\n\s*group: oa-jobs-data-\$\{\{ github\.ref \}\}/.test(wfCode),
+    '…and it queues behind the jobs build, the other writer of those files');
+  ok(/node _scraper\/affiliations\.mjs --write\s*\n\s*if ! node _scraper\/selftest\.mjs --publishing/.test(wfCode),
+    '…and a rejected push is rebuilt by the pass itself, dependents included, then re-checked');
 
   /* --- what the site says about it ----------------------------------------- */
   const policy = await src('privacy-policy.html');
