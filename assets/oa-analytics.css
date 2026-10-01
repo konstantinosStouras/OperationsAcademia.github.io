@@ -112,6 +112,23 @@
   font-weight: 600;
 }
 
+/* ------------------------------------------------------- who the members are
+
+   "Where members work" stacks a share bar and the universities in one card;
+   the list takes a gap of its own so the two read as two. */
+.oa-members .oa-tiles { margin-bottom: 4px; }
+.oa-members-unis { margin-top: 22px; }
+/* the universities run to forty rows, so on a screen with room for it the
+   list reads down two columns rather than one very long one; the order is
+   still the ranking, top to bottom and then the second column */
+@media (min-width: 760px) {
+  .oa-members-unis .oa-barlist {
+    columns: 2;
+    column-gap: 36px;
+  }
+  .oa-members-unis .oa-bar-row { break-inside: avoid; }
+}
+
 /* --------------------------------------------------------------- stat tiles */
 
 .oa-tiles {
