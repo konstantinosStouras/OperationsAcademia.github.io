@@ -1,0 +1,132 @@
+name: OA — members' affiliations, in the site's own names
+
+# Owner, 2026-10-01: a member's affiliation is chosen from the Universities
+# page's own list, a university not on it is added to it (and to the posting
+# form's list), and "we should try to update affiliations of registered users
+# that match any of the already existing universities so that they match with
+# the exact university name we refer to each university."
+#
+# _scraper/affiliations.mjs does both from ONE read of every profile:
+#
+#   * an affiliation that names a listed university is rewritten to that
+#     card's title, on the profile and the roster row (assets/oa-affiliation.js
+#     `match`, the same rule the registration form's picker settles a box by);
+#   * the universities members are at that nothing else lists are written to
+#     data/member-universities.json, names only, which the jobs build turns
+#     into cards on universities.html and entries in the posting form's list.
+#
+# DAILY, AND IT APPLIES. A member who typed "Kellogg School of Management"
+# before the list existed reads "Northwestern University" the next morning;
+# a member who chose "Add other" for a university nobody lists finds it on the
+# Universities page after the next jobs build. A press of the button is a PLAN
+# unless `write` is ticked, so the log can be read first.
+#
+# The log is PUBLIC: counts, and the university names the served file is
+# about to publish anyway, never an account beside an affiliation.
+#
+# A no-op, saying so, until FIREBASE_SERVICE_ACCOUNT is set.
+
+on:
+  schedule:
+    # off the hour, after the roster sync's daily run at 04:41
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+    inputs:
+      write:
+        description: 'Apply: rewrite matching affiliations and write the member universities file (unticked, a plan)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: oa-affiliations
+  cancel-in-progress: false
+
+jobs:
+  affiliations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # the branch tip, never github.sha: the list it matches against is
+          # the one the jobs build committed last
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credential is present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: nothing will be read."
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      - run: node _scraper/affiliations.mjs --selftest
+
+      # This job writes data/, so it runs the selftest in the publishing role
+      # like every other data writer.
+      - name: Offline checks
+        run: node _scraper/selftest.mjs --publishing
+
+      - name: Standardise the affiliations and collect the member universities
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # the schedule applies; a press applies only when `write` is ticked
+          APPLY: ${{ github.event_name == 'schedule' || inputs.write == true }}
+        run: |
+          MODE=''
+          if [ "$APPLY" = "true" ]; then MODE='--write'; fi
+          echo "AFF_MODE=$MODE" >> "$GITHUB_ENV"
+          node _scraper/affiliations.mjs $MODE
+
+      - name: Re-check the files we are about to commit
+        run: node _scraper/selftest.mjs --publishing
+
+      - name: Commit
+        if: github.ref_name == 'master' && env.AFF_MODE == '--write'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          set -e
+          REF='${{ github.ref_name }}'
+          FILES='data/member-universities.json'
+          if [ -z "$(git status --porcelain $FILES)" ]; then
+            echo "nothing changed."
+            exit 0
+          fi
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add $FILES
+          git commit -m 'data: refresh the universities members are at'
+          # A REJECTED PUSH IS REBUILT, NEVER REBASED: take the other writer's
+          # tip and run the pass again on top of it (it is idempotent: what it
+          # has already standardised it leaves alone).
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:"$REF"; then
+              echo "pushed"
+              exit 0
+            fi
+            echo "push rejected: running again on the new tip (attempt $i)"
+            sleep $((i * 3))
+            git fetch origin "$REF"
+            git reset --hard FETCH_HEAD
+            node _scraper/affiliations.mjs --write
+            if ! node _scraper/selftest.mjs --publishing; then
+              echo "::error::the file rebuilt on the new tip failed the selftest, so nothing was committed."
+              exit 1
+            fi
+            if [ -z "$(git status --porcelain $FILES)" ]; then
+              echo "the other writer published it all."
+              exit 0
+            fi
+            git add $FILES
+            git commit -m 'data: refresh the universities members are at'
+          done
+          echo "::error::could not push after five attempts"
+          exit 1

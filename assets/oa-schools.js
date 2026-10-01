@@ -808,6 +808,35 @@
     return parts.join('__').replace(/__+$/, '') || 'row';
   }
 
+  /* ----------------------------------------- the name a university is SHOWN
+
+     universities.html draws one card per university (rows grouped by
+     institutionKey) and has to title it with one of the spellings its rows
+     carry. That title is "the exact university name we refer to each
+     university" (owner, 2026-10-01): the registration form's affiliation list
+     offers exactly these names, and a member's affiliation is standardised to
+     one of them. So the rule lives HERE, in the module both the page
+     (assets/oa-directory.js) and the build (_scraper/directory-model.mjs,
+     which publishes data/university-names.json) already load: two copies of
+     it would let the list a member chooses from disagree with the card the
+     same name opens, silently.
+
+     The spelling most rows use; a tie goes to the longer (fuller) name; a tie
+     on both goes to the first seen, so the answer cannot flap between runs
+     over the same input. */
+  function cardName(names) {
+    var count = Object.create(null);
+    var best = '';
+    for (var i = 0; i < (names || []).length; i++) {
+      var n = String(names[i] == null ? '' : names[i]);
+      if (!n) continue;
+      count[n] = (count[n] || 0) + 1;
+      if (!best || count[n] > count[best] ||
+          (count[n] === count[best] && n.length > best.length)) best = n;
+    }
+    return best;
+  }
+
   /** The one name this school is published under. The university is optional
       and is consulted first, for the short forms that mean different schools
       at different universities. */
@@ -1488,6 +1517,7 @@
     schoolRepeatsInstitution: schoolRepeatsInstitution,
     slugPart: slugPart,
     directoryRowKey: directoryRowKey,
+    cardName: cardName,
     canonSchool: canonSchool,
     canonUnit: canonUnit,
     nameNeedles: nameNeedles,

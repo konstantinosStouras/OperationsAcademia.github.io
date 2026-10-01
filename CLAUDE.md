@@ -1375,6 +1375,149 @@ which control, the attribution line, and the page's mobile gate (it is in
 phone block, which switches views first). **Inert until the rules are
 redeployed**: `firebase deploy --only firestore:rules --project
 operations-academia`.
+## A member's affiliation is chosen from the Universities page
+
+Owner, 2026-10-01: *"When users register and need to provide us and write
+down their affiliation, show them a list of universities as a drop down menu
+for them to choose from, and also allow 'Add Other' for them to add anything
+not listed"*, then *"the list of universities should come from our list so
+far: /universities … any new universities added should be added to our list
+of universities, and job posting drop down university name too. Then, we
+should try to update affiliations of registered users that match any of the
+already existing universities so that they match with the exact university
+name we refer to each university."*
+
+    assets/oa-affiliation.js        the list, the matcher, the picker mount (dual-mode)
+    data/university-names.json      the card titles it offers (built)
+    data/member-universities.json   universities only members name (written by the pass)
+    _scraper/affiliations.mjs       standardise profiles, collect member universities
+    .github/workflows/oa-affiliations.yml   daily, applies; a press is a plan
+
+**THE LIST IS THE CARDS, TITLED AS THE PAGE TITLES THEM.** `OASchools.cardName`
+is the one definition of a Universities card's title (the spelling most rows
+use, a tie to the fuller name, then the first seen), read by
+`assets/oa-directory.js` and by `listFromDirectory`, which `build-directory.mjs`
+uses to write `data/university-names.json` beside `directory.json`. Its own
+small file (about 7 KB gzipped) because the registration card must not fetch a
+third of a megabyte of directory to offer a list of names. It carries the
+titles, the cards that exist only because of members (`fromMembers`), and the
+`[school, university]` pairs a school may vouch by. **Not the posting form's
+vocabulary**, deliberately: `vocab.json` spells some universities its own way
+(the most-posted spelling, `pickForm`), and the owner named the Universities
+page. The two disagree on about twenty spellings today ("The Pennsylvania State
+University" against "Pennsylvania State University"); aligning them is a change
+to what the posting pipeline publishes, and has not been made.
+
+**THE PICKER IS THE POSTING FORM'S, WITH ITS OWN WORDS.** `oa-combo.js` already
+answered "a select plus an Other box" with one control (its header says why);
+it gained a LEAD row (the listed name a typed line resolves to, which the text
+score cannot see), `addLabel` ("Add other: “…”", the owner's own words), a
+`hint` at the top of a browsed list, and its other strings as options, every
+one defaulting to what the posting form says, so the posting form is untouched.
+It is loaded ON DEMAND by `oa-accounts.js` (`mountAffiliation`, oa-schools.js
+first) only when a card draws the field: every page carries the accounts
+module, and only a card that asks the question pays for the list. Without it
+the box is the plain text box it always was.
+
+**ONE FIELD, `affFieldHTML`, ON EVERY CARD THAT ASKS IT**: the registration
+card, the profile card's ask and its ordinary edit (still optional there, the
+recorded rule). A real `<label for>` ABOVE the box rather than one wrapped
+round it, for two reasons that are both bugs otherwise: the picker's list and
+live status sit beside the box, and inside a wrapping label they become part
+of the box's accessible name; and a press on the label's own note under a
+closing list would re-open it through the label's activation. The arrow is a
+border triangle in `--mut`, so it follows both themes, and a press on it lands
+on the box. `v3.css` restates the two margins its wrapped-label rules would
+otherwise win, on specificity.
+
+**WHAT TEXT NAMES WHICH UNIVERSITY** is `match` in `oa-affiliation.js`, and
+the browser (settling a box when it is left, and on submit) and the pass
+(settling a stored profile) both call it. Curated, never guessed:
+
+* the name itself, however spelled (`institutionKey`, aliases included);
+* the acronym a card carries in its own brackets ("MIT"), dropped when two
+  cards claim one;
+* a school that VOUCHES: listed at exactly one university AND named with a
+  word of its own ("Kellogg", "Rotman", "Cardiff"). A school named for its
+  subject ("School of Mathematical and Statistical Sciences" is at Clemson and
+  Arizona State, and only one is in the directory) or for its initials
+  ("Faculty of Economics and Business (FEB)") vouches for nobody
+  (`SUBJECT_WORDS`, `strongSchool`), and a school that is also a card of its
+  own is that card;
+* a line in pieces ("Operations, Rotman School of Management, University of
+  Toronto"): commas are strong breaks and runs of pieces are tried longest
+  first, because a university's own name can carry a comma ("University of
+  California, Berkeley"); a dash, a slash, brackets and " at " are weak breaks.
+
+**One university or none.** Two named, or a leftover piece that still names a
+university the list lacks ("visiting University of Foo"), answers nothing: it
+is a person's call. A university NAMED outranks one a school vouches for,
+because the directory's filing of a school can be wrong. A prefix is never a
+university ("Penn" would become Penn State, the wrong school), and a company
+never is. Whatever names nothing is kept exactly as typed, tidied.
+
+**A UNIVERSITY NOBODY LISTS JOINS THE LIST** (`newUniversity`), and the bar is
+deliberately high, because a miss costs the maintainer one row while a
+sentence published as a university costs a card on a public page: exactly one
+comma-separated piece must carry a university word (`universit`,
+`hochschule`, `polytechnic`, `institute of technology`…), that piece must say
+nothing about a person or a unit ("PhD student at", "Department of", "School
+of"), it must not be a school the directory lists anywhere, and it must not be
+a slight respelling of a card already there (the FUZZY tier of `similarNames`,
+the eager one on purpose: "Hebrew University" beside "The Hebrew University of
+Jerusalem", "Stanford Universit"). Only REGISTERED MEMBERS count (the
+`registeredUsers` mark the figure counts), so an account that never confirmed
+its address cannot put a card on a public page.
+
+**THE PASS IS DAILY AND APPLIES.** `_scraper/affiliations.mjs` reads every
+profile once: an affiliation that names a listed university is rewritten to
+that card's title on the profile and its roster row (ONE key, `affiliation`,
+by `update()`, inside the rules' bound, so neither document is left in a shape
+its owner's next write is refused for), and the member universities are
+written to `data/member-universities.json`, names only, sorted, no timestamp,
+so a run that found what the last one found writes nothing. A press of the
+workflow's button is a PLAN unless `write` is ticked. The log is public, so it
+carries counts and the university names the served file is about to publish
+anyway, never an account beside an affiliation (the script's own selftest
+sweeps its log lines). An unreachable source changes nothing: no list or no
+profiles writes nothing at all, and a tally that cannot be read leaves the
+served file as it is while the standardising still runs.
+
+**THE MEMBER FILE FEEDS TWO BUILDS, and only adds.** `build-directory.mjs`
+gives each name a university-only card (source `members`, title rank 0) only
+where no other source lists the place, so a posting or the seed arriving later
+carries the card and the member row is simply not made; `build-jobs.mjs` adds
+each to the posting form's list as a directory row with no count
+(`memberVocabRows`), on BOTH of its paths, the build and `--heal-names`, and
+only where no posting or directory row names the place, so a member's spelling
+can never become the form's spelling of a place it already offers. A card
+exists only because members name it is carried in `fromMembers`, which is what
+stops the pass reading its own card as "already listed" and dropping it, which
+would flap the card off and on every day. A name leaves the file the day no
+member names it.
+
+**The privacy line moved, and the copy says so.** An affiliation is still never
+shown with anybody's name; what is new is that a university's NAME can join a
+public list because a member gave it. The registration note, the profile
+card's lede ("never shown with your name") and the Privacy Policy ("Two things
+about registered accounts are public…") all say exactly that.
+
+Tests: `testAffiliationPicker` in `_scraper/selftest.mjs` (the card-title rule
+and the page reading it, the served list against the directory byte for byte,
+which schools vouch, every branch of `match` and `newUniversity`, settle's
+idempotence, the member rows in both builds, the picker's new options and its
+untouched defaults, both cards' wiring, both stylesheets, the pass's own suite
+and its workflow, the copy and this section),
+`node _scraper/affiliations.mjs --selftest`, the vocabulary rebuild check
+(which now includes the member universities), and the affiliation-picker block
+of `_scraper/page-test.mjs`, which drives the registration card against a
+ROUTED list (so it never moves with the corpus): the names offered A-Z, the
+hint, the label above and not around the box, the arrow, a line resolving to
+its university first with no Add other, Add other taken from the keyboard
+keeping what was typed, a row pressed, a school settled as the box is left, a
+scripted value settled on submit and STORED that way, and at 390px the profile
+card's list on screen with 42px rows.
+
 ## Nothing from the tracking sheet publishes itself
 
 A posting crawled from the job market workbook is **queued for the maintainer,

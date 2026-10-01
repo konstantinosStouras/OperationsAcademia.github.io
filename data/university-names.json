@@ -1,0 +1,1218 @@
+{
+ "universities": [
+  "A’Sharqiyah University",
+  "Aalto University",
+  "Abdullah Al Salem University (AASU)",
+  "Abilene Christian University",
+  "Abu Dhabi University",
+  "Air Force Institute of Technology",
+  "Ajman University",
+  "Alabama A&M University",
+  "Alfaisal University (AU)",
+  "Alma College",
+  "American University in the Emirates",
+  "American University Kogod School of Business",
+  "American University of Beirut",
+  "American University of Beirut (School of Business)",
+  "American University of Kurdistan",
+  "American University of Phnom Penh",
+  "Appalachian State University",
+  "Arizona State University",
+  "Arkansas Tech University",
+  "Auburn University",
+  "Augusta University",
+  "Augustana University",
+  "Austin Peay State University",
+  "Babson College",
+  "Ball State University",
+  "Baruch College - CUNY",
+  "Baruch College, The City University of New York (CUNY)",
+  "Bayes Business School",
+  "Beijing Normal-Hong Kong Baptist University (BNBU)",
+  "Belmont University",
+  "Berry College",
+  "Bilkent University",
+  "Binghamton University",
+  "BITS School of Management",
+  "Black Hills State University",
+  "Bocconi",
+  "Bocconi University",
+  "Boston College",
+  "Boston University",
+  "Bowling Green State University",
+  "Brandeis University",
+  "Brigham Young University",
+  "Bryant University",
+  "Bucknell University",
+  "Butler University",
+  "Cal Poly San Luis Obispo",
+  "Caldwell University",
+  "California State Polytechnic University Pomona",
+  "California State University, Bakersfield",
+  "California State University, Channel Islands",
+  "California State University, East Bay",
+  "California State University, Fresno",
+  "California State University, Long Beach",
+  "California State University, Sacramento",
+  "California State University, Stanislaus",
+  "Campbellsville University",
+  "Canadian University Dubai",
+  "Cardiff University",
+  "Carnegie Mellon University",
+  "Case Western Reserve University",
+  "Cass Business School",
+  "Católica Lisbon",
+  "Católica Lisbon School of Business and Economics",
+  "Cedarville University",
+  "CEIBS",
+  "Chatham University",
+  "Chicago Booth",
+  "China Europe International Business School",
+  "City University of Hong Kong",
+  "City University of New York (CUNY)",
+  "Clarkson University",
+  "Clemson University",
+  "Coastal Carolina University",
+  "College of Charleston",
+  "College of Staten Island",
+  "College of William and Mary",
+  "Colorado School of Mines",
+  "Colorado State University",
+  "Columbia Basin College",
+  "Columbia Business School",
+  "Columbia University",
+  "Concordia University",
+  "Concordia University Chicago",
+  "Copenhagen Business School",
+  "Coppin State University",
+  "Cornell University",
+  "Cornell University/ Cornell Tech",
+  "Cottey College",
+  "County College of Morris",
+  "Cranfield University",
+  "CSU San Marcos",
+  "CUHK Business School",
+  "CUHK Shenzhen",
+  "CUNEF University",
+  "Dakota State University",
+  "Dartmouth College",
+  "DePaul University",
+  "DePauw University",
+  "DeSales University",
+  "Donghua University",
+  "Drexel University",
+  "Duke University",
+  "Durham University",
+  "East Tennessee State University",
+  "Eastern Illinois University",
+  "Eastern New Mexico University",
+  "EBS University",
+  "École polytechnique fédérale de Lausanne (EPFL)",
+  "Eindhoven University of Technology (TU/e)",
+  "EMLV (Ecole de Commerce et de Management)",
+  "Emory University",
+  "Endicott College",
+  "Erasmus University",
+  "Erasmus University Rotterdam",
+  "ESMT Berlin",
+  "ESSEC",
+  "ETH Zurich",
+  "European School of Management and Technology",
+  "Ewha School of Business",
+  "Ewha Womans University",
+  "Fairmont State University",
+  "Fayetteville State University",
+  "Ferris State University",
+  "Fisher College",
+  "FLAME University",
+  "Florida International University",
+  "Florida Polytechnic University",
+  "Florida State University",
+  "Frankfurt School of Finance and Management",
+  "Franklin and Marshall College",
+  "Fudan University",
+  "George Mason University",
+  "George Washington University",
+  "Georgetown University",
+  "Georgia Gwinnett College",
+  "Georgia Institute of Technology",
+  "Georgia Southern University",
+  "Georgia State University",
+  "Georgia Tech (ISyE)",
+  "Goldey-Beacom College",
+  "Grand Valley State University",
+  "Harvard Business School",
+  "Harvard Kennedy School",
+  "Harvard University",
+  "HEC Montréal",
+  "HEC Paris",
+  "Henderson State University",
+  "HKUST(GZ)",
+  "Hofstra University",
+  "Hong Kong Polytechnic University",
+  "Hood College",
+  "Houston Christian University",
+  "Howard University",
+  "Hull University Business School",
+  "IE Business School",
+  "IE University",
+  "IESE",
+  "IESE Business School",
+  "IESEG",
+  "IIM Ahmedabad",
+  "Imperial College London",
+  "Indian Institute of Technology (IIT) Bombay",
+  "Indian School of Business (ISB)",
+  "Indiana State University",
+  "Indiana University",
+  "Indiana University Bloomington",
+  "Indiana University (Kelley)",
+  "Indiana University Northwest",
+  "INSEAD",
+  "Institut Mines-Télécom",
+  "Iowa State University",
+  "IPADE Business School",
+  "IT University of Copenhagen",
+  "James Madison University",
+  "Johns Hopkins University",
+  "Judge Business School",
+  "KAIST",
+  "Katholieke Universiteit (KU) Leuven",
+  "Kean University",
+  "Kedge Business School",
+  "Kennesaw State University",
+  "KIMEP University",
+  "Koç University",
+  "Kogod School of Business",
+  "Korea University",
+  "KU Leuven",
+  "Kühne Logistics University",
+  "La Salle University",
+  "Lancaster University",
+  "LBS",
+  "Le Moyne College",
+  "Lehigh University",
+  "Lenoir-Rhyne University",
+  "Lincoln Memorial University",
+  "Lingnan University",
+  "London Business School (LBS)",
+  "Lone Star College System",
+  "Longwood University",
+  "Lousiana Tech Univ",
+  "Loyola University Chicago",
+  "Maastricht University",
+  "MacEwan University",
+  "Marian University",
+  "Marquette University",
+  "Massachusetts Institute of Technology (MIT)",
+  "McGill University",
+  "McMaster University",
+  "MEF University",
+  "Memorial University of Newfoundland",
+  "Miami University",
+  "Michigan State University",
+  "Middle Georgia State University",
+  "Minnesota State University",
+  "Mississippi State University",
+  "Missouri Southern State University",
+  "Missouri State University",
+  "Missouri University of Science and Technology",
+  "MIT Sloan",
+  "Monash University",
+  "Montclair State University",
+  "Morgan State University",
+  "Morningside University",
+  "Nanyang Technological University",
+  "National Chiao Tung University",
+  "National University of Singapore",
+  "Naval Postgraduate School",
+  "NC State University",
+  "Neeley School of Business (Texas Christian Univ)",
+  "Nevada State University",
+  "New York Institute of Technology",
+  "New York University",
+  "New York University Abu Dhabi",
+  "New York University Shanghai",
+  "Newcastle University",
+  "Norfolk State University",
+  "North Carolina A&T State University",
+  "North Carolina State University",
+  "North Central College",
+  "North Dakota State University",
+  "North Idaho College",
+  "Northeastern University",
+  "Northern Illinois University",
+  "Northern State University",
+  "Northwestern",
+  "Northwestern University",
+  "Nova School of Business and Economics",
+  "NTU",
+  "NYU Shanghai",
+  "NYU Stern",
+  "Oakland University",
+  "Oklahoma State University",
+  "Oregon State University",
+  "Özyeğin University",
+  "Palm Beach Atlantic University",
+  "Park University",
+  "Peking University",
+  "Pompeu Fabra University",
+  "Pontificia Universidad Catolica de Chile (PUC)",
+  "Prairie View A&M University",
+  "Prince Mohammad Bin Fahd University",
+  "Princeton University",
+  "Providence College",
+  "PSU Behrend",
+  "Purdue University",
+  "Purdue University Fort Wayne",
+  "Qatar University",
+  "Queen's University",
+  "Queens University of Charlotte",
+  "Rensselaer Polytechnic Institute (RPI)",
+  "Rice University",
+  "Rockhurst University",
+  "Rollins College",
+  "Rowan University",
+  "Rutgers Business School–Newark and New Brunswick",
+  "Rutgers University",
+  "Rutgers University at Newark and New Brunswick",
+  "Rutgers University (Stats)",
+  "Saarland University",
+  "Sabanci University",
+  "Saint Louis University",
+  "Saint Mary's College of California",
+  "Sam Houston State University",
+  "San Bernardino Community College District",
+  "San Diego State University",
+  "San Francisco State University (SFSU)",
+  "San José State University",
+  "Santa Clara University",
+  "Savannah College of Art and Design",
+  "Savannah State University",
+  "Seoul National University",
+  "Seton Hall University",
+  "Shanghai Jiao Tong University",
+  "Shanghai University of Finance and Economics (SUFE)",
+  "Shorter University",
+  "Simon Fraser University",
+  "Singapore Management University (SMU)",
+  "Singapore University of Technology and Design (SUTD)",
+  "SKEMA Business School",
+  "Skolkovo Institute of Science and Technology (Skoltech)",
+  "Smith School of Business",
+  "Southeastern Louisiana University",
+  "Southern Arkansas University",
+  "Southern Methodist University",
+  "Southern University of Science and Technology (SUSTech)",
+  "Southern Utah University",
+  "Southwest Minnesota State University",
+  "Spartanburg Methodist College",
+  "SRM University",
+  "St. Cloud State University",
+  "St.Gallen Institute of Management in Asia (SGI)",
+  "St John Fisher University",
+  "St. John's University",
+  "Stanford GSB",
+  "Stanford University",
+  "State University of New York at Geneseo",
+  "Stevens Institute of Technology",
+  "Stockholm School of Economics (SSE)",
+  "Stonehill College",
+  "Stony Brook University",
+  "SUNY Korea",
+  "Syracuse University",
+  "TBS Education",
+  "Technical University of Munich",
+  "Technion – Israel Institute of Technology",
+  "TED University",
+  "Tel Aviv University",
+  "Temple University",
+  "Tennessee State University",
+  "Tennessee Tech University",
+  "Texas A&M International University",
+  "Texas A&M University",
+  "Texas Christian University",
+  "Texas Southern University",
+  "Texas State University",
+  "Texas Tech University",
+  "The Catholic University of America",
+  "The Chinese University of Hong Kong",
+  "The Chinese University of Hong Kong, Shenzhen",
+  "The College of New Jersey",
+  "The Hebrew University of Jerusalem",
+  "The Hong Kong University of Science and Technology",
+  "The Hong Kong University of Science and Technology (Guangzhou)",
+  "The Ohio State University",
+  "The Pennsylvania State University",
+  "The University of Alabama",
+  "The University of Memphis",
+  "The University of Sydney",
+  "The University of Texas at Austin",
+  "Tilburg University",
+  "TOBB University of Economics and Technology",
+  "Tongji University",
+  "Trinity University",
+  "Tsinghua University",
+  "Tulane University",
+  "TUM School of Management",
+  "Tusculum University",
+  "UBC Sauder School of Business",
+  "UCL GBSH",
+  "UCL Global Business School for Health",
+  "UCL School of Management",
+  "Uni. of Illinois at Urbana-Champaign (Gies)",
+  "United States Military Academy - West Point",
+  "United States Naval Academy",
+  "Universidad de Chile",
+  "Universidad de los Andes",
+  "Universidad Torcuato di Tella",
+  "Universidade Católica Portuguesa",
+  "Universitat Pompeu Fabra",
+  "Université catholique de Louvain",
+  "Universite libre de Bruxelles",
+  "University at Buffalo",
+  "University at Buffalo - The State University of New York",
+  "University College Dublin",
+  "University College London",
+  "University of Alabama at Birmingham",
+  "University of Alabama - Birmingham",
+  "University of Alaska Fairbanks",
+  "University of Alberta",
+  "University of Amsterdam",
+  "University of Arizona",
+  "University of Arkansas",
+  "University of Arkansas at Fayetteville",
+  "University of Auckland",
+  "University of Bath",
+  "University of Bristol",
+  "University of British Columbia",
+  "University of Calgary",
+  "University of California, Berkeley",
+  "University of California, Davis",
+  "University of California, Irvine",
+  "University of California, Los Angeles (UCLA)",
+  "University of California, Merced",
+  "University of California Riverside",
+  "University of California, San Diego (UCSD)",
+  "University of Cambridge",
+  "University of Central Arkansas",
+  "University of Chicago",
+  "University of Cincinnati",
+  "University of Cologne",
+  "University of Colorado Boulder",
+  "University of Colorado Denver",
+  "University of Connecticut",
+  "University of Cyprus",
+  "University of Dayton",
+  "University of Evansville",
+  "University of Florida",
+  "University of Glasgow",
+  "University of Hartford",
+  "University of Hong Kong",
+  "University of Houston",
+  "University of Houston - Downtown",
+  "University of Illinois at Chicago",
+  "University of Illinois at Urbana-Champaign",
+  "University of Iowa",
+  "University of Kansas",
+  "University of Kentucky",
+  "University of Leeds, UK",
+  "University of Liverpool",
+  "University of London",
+  "University of Louisville",
+  "University of Maine at Augusta",
+  "University of Manitoba",
+  "University of Mannheim",
+  "University of Maryland",
+  "University of Maryland, College Park",
+  "University of Massachusetts Amherst",
+  "University of Massachusetts Boston",
+  "University of Massachusetts Lowell",
+  "University of Melbourne",
+  "University of Miami",
+  "University of Michigan",
+  "University of Michigan at Ann Arbor",
+  "University of Michigan-Dearborn",
+  "University of Michigan - Flint",
+  "University of Minnesota",
+  "University of Missouri",
+  "University of Missouri-Kansas City",
+  "University of Missouri-St. Louis",
+  "University of Navarra",
+  "University of Nebraska at Kearney",
+  "University of Nebraska - Lincoln",
+  "University of Nevada",
+  "University of Nevada, Las Vegas",
+  "University of New Mexico",
+  "University of New South Wales",
+  "University of North Carolina at Chapel Hill",
+  "University of North Carolina at Wilmington",
+  "University of North Carolina-Chapel Hill",
+  "University of North Carolina (UNC) Chapel Hill",
+  "University of North Texas",
+  "University of Northern Iowa",
+  "University of Notre Dame",
+  "University of Oklahoma",
+  "University of Oregon",
+  "University of Oxford",
+  "University of Pennsylvania",
+  "University of Pittsburgh",
+  "University of Portland",
+  "University of Richmond",
+  "University of Rochester",
+  "University of San Diego",
+  "University of Science and Technology of China",
+  "University of South Carolina",
+  "University of South Florida",
+  "University of Southern California (USC)",
+  "University of Southern Indiana",
+  "University of Southern Mississippi",
+  "University of Stirling",
+  "University of Tennessee",
+  "University of Tennessee at Chattanooga",
+  "University of Tennessee at Knoxville",
+  "University of Tennessee - Knoxville",
+  "University of Texas at Arlington",
+  "University of Texas at Dallas",
+  "University of Toledo",
+  "University of Toronto",
+  "University of Toronto Mississauga (UTM)",
+  "University of Toronto Scarborough (UTSC)",
+  "University of Toulouse",
+  "University of Utah",
+  "University of Vienna",
+  "University of Virgin Islands",
+  "University of Virginia",
+  "University of Warwick",
+  "University of Washington",
+  "University of Washington Bothell",
+  "University of Washington-Tacoma (Milgard School of Business)",
+  "University of Waterloo",
+  "University of West Florida",
+  "University of Wisconsin - Green Bay",
+  "University of Wisconsin - La Crosse",
+  "University of Wisconsin-Madison",
+  "University of Wisconsin-Milwaukee",
+  "University of Wisconsin-Stout",
+  "University of Zurich",
+  "UNSW Sydney",
+  "UT Austin McCombs",
+  "UT San Antonio",
+  "Utah Tech University",
+  "Utah Valley University",
+  "Valdosta State University",
+  "Valley City State University",
+  "Vanderbilt University",
+  "Vienna University of Economics and Business",
+  "Villanova University",
+  "VinUniversity",
+  "Virgina Darden",
+  "Virginia Commonwealth University (VCU)",
+  "Virginia Tech",
+  "Vrije Universiteit Amsterdam",
+  "Wageningen University",
+  "Wake Forest University",
+  "Warwick Business School",
+  "Washburn University",
+  "Washington University in St. Louis",
+  "Wayne State University",
+  "Weber State University",
+  "West Virginia University",
+  "Western Connecticut State University",
+  "Western Illinois University",
+  "Western University",
+  "Westfield State University",
+  "Wheaton College of Massachusetts",
+  "WHU – Otto Beisheim School of Management",
+  "Wilfrid Laurier University",
+  "William and Mary",
+  "Wilson College",
+  "Wingate University",
+  "Winona State University",
+  "WU Vienna",
+  "Xi'an Jiaotong-Liverpool University",
+  "Yale School of Management (Operations Management group)",
+  "Yale University",
+  "Yeshiva University",
+  "York University"
+ ],
+ "fromMembers": [],
+ "schools": [
+  [
+   "A. B. Freeman School of Business",
+   "Tulane University"
+  ],
+  [
+   "A. Gary Anderson Graduate School of Management",
+   "University of California Riverside"
+  ],
+  [
+   "Alberta School of Business",
+   "University of Alberta"
+  ],
+  [
+   "Amsterdam Business School, Amsterdam School of Economics",
+   "University of Amsterdam"
+  ],
+  [
+   "Anderson School of Management",
+   "University of California, Los Angeles (UCLA)"
+  ],
+  [
+   "Antai College of Economics and Management",
+   "Shanghai Jiao Tong University"
+  ],
+  [
+   "Beedie School of Business",
+   "Simon Fraser University"
+  ],
+  [
+   "Booth School of Business",
+   "University of Chicago"
+  ],
+  [
+   "Bristol Business School",
+   "University of Bristol"
+  ],
+  [
+   "C. T. Bauer College of Business",
+   "University of Houston"
+  ],
+  [
+   "Cardiff Business School",
+   "Cardiff University"
+  ],
+  [
+   "Carey Business School",
+   "Johns Hopkins University"
+  ],
+  [
+   "Carl H. Lindner College of Business",
+   "University of Cincinnati"
+  ],
+  [
+   "Carlos Alvarez College of Business",
+   "UT San Antonio"
+  ],
+  [
+   "Carroll School of Management",
+   "Boston College"
+  ],
+  [
+   "Charles H. Lundquist College of Business",
+   "University of Oregon"
+  ],
+  [
+   "Cockrell School of Engineering",
+   "The University of Texas at Austin"
+  ],
+  [
+   "College of Management CDM",
+   "École polytechnique fédérale de Lausanne (EPFL)"
+  ],
+  [
+   "Coller School of Management",
+   "Tel Aviv University"
+  ],
+  [
+   "Cornell SC Johnson College of Business",
+   "Cornell University"
+  ],
+  [
+   "Cornell Tech",
+   "Cornell University"
+  ],
+  [
+   "Costello College of Business",
+   "George Mason University"
+  ],
+  [
+   "Cranfield School of Management",
+   "Cranfield University"
+  ],
+  [
+   "Culverhouse College of Commerce",
+   "The University of Alabama"
+  ],
+  [
+   "Curtis L. Carlson School of Management",
+   "University of Minnesota"
+  ],
+  [
+   "D'Amore-McKim School of Business",
+   "Northeastern University"
+  ],
+  [
+   "Darden School of Business",
+   "University of Virginia"
+  ],
+  [
+   "Darla Moore School of Business",
+   "University of South Carolina"
+  ],
+  [
+   "David D. Reh School of Business",
+   "Clarkson University"
+  ],
+  [
+   "David Eccles School of Business",
+   "University of Utah"
+  ],
+  [
+   "DeGroote School of Business",
+   "McMaster University"
+  ],
+  [
+   "Desautels Faculty of Management",
+   "McGill University"
+  ],
+  [
+   "Driehaus College of Business",
+   "DePaul University"
+  ],
+  [
+   "Earl G. Graves School of Business and Management",
+   "Morgan State University"
+  ],
+  [
+   "EBS Business School",
+   "EBS University"
+  ],
+  [
+   "Econometric Institute",
+   "Erasmus University Rotterdam"
+  ],
+  [
+   "Ed G. Smith College of Business",
+   "University of Missouri-St. Louis"
+  ],
+  [
+   "Edwin L. Cox School of Business",
+   "Southern Methodist University"
+  ],
+  [
+   "Eli Broad College of Business",
+   "Michigan State University"
+  ],
+  [
+   "Feliciano School of Business",
+   "Montclair State University"
+  ],
+  [
+   "Fox School of Business",
+   "Temple University"
+  ],
+  [
+   "Frank G. Zarb School of Business",
+   "Hofstra University"
+  ],
+  [
+   "Freeman College of Management",
+   "Bucknell University"
+  ],
+  [
+   "Fuqua School of Business",
+   "Duke University"
+  ],
+  [
+   "G. Brint Ryan College of Business",
+   "University of North Texas"
+  ],
+  [
+   "Gatton College of Business and Economics",
+   "University of Kentucky"
+  ],
+  [
+   "Gies College of Business",
+   "University of Illinois at Urbana-Champaign"
+  ],
+  [
+   "Goizueta Business School",
+   "Emory University"
+  ],
+  [
+   "Grado Department of Industrial and Systems Engineering",
+   "Virginia Tech"
+  ],
+  [
+   "Guanghua School of Management",
+   "Peking University"
+  ],
+  [
+   "H. Milton Stewart School of Industrial and Systems Engineering",
+   "Georgia Institute of Technology"
+  ],
+  [
+   "Haas School of Business",
+   "University of California, Berkeley"
+  ],
+  [
+   "Harbert College of Business",
+   "Auburn University"
+  ],
+  [
+   "Haskayne School of Business",
+   "University of Calgary"
+  ],
+  [
+   "Hebrew University Business School",
+   "The Hebrew University of Jerusalem"
+  ],
+  [
+   "Heinz College of Information Systems and Public Policy",
+   "Carnegie Mellon University"
+  ],
+  [
+   "Heller School for Social Policy and Management",
+   "Brandeis University"
+  ],
+  [
+   "HKU Business School",
+   "University of Hong Kong"
+  ],
+  [
+   "HKUST School of Business and Management",
+   "The Hong Kong University of Science and Technology"
+  ],
+  [
+   "Imperial College Business School",
+   "Imperial College London"
+  ],
+  [
+   "Ira A. Fulton Schools of Engineering",
+   "Arizona State University"
+  ],
+  [
+   "Isenberg School of Management",
+   "University of Massachusetts Amherst"
+  ],
+  [
+   "Ivey Business School",
+   "Western University"
+  ],
+  [
+   "Ivy College of Business",
+   "Iowa State University"
+  ],
+  [
+   "J. B. Speed School of Engineering",
+   "University of Louisville"
+  ],
+  [
+   "J. Mack Robinson College of Business",
+   "Georgia State University"
+  ],
+  [
+   "Jesse H. Jones Graduate School of Business",
+   "Rice University"
+  ],
+  [
+   "John B. Goddard School of Business and Economics",
+   "Weber State University"
+  ],
+  [
+   "John Chambers College of Business and Economics",
+   "West Virginia University"
+  ],
+  [
+   "John Molson School of Business",
+   "Concordia University"
+  ],
+  [
+   "Joseph L. Rotman School of Management",
+   "University of Toronto"
+  ],
+  [
+   "Joseph M. Katz Graduate School of Business",
+   "University of Pittsburgh"
+  ],
+  [
+   "Kellogg School of Management",
+   "Northwestern University"
+  ],
+  [
+   "Knauss School of Business",
+   "University of San Diego"
+  ],
+  [
+   "Korea University Business School",
+   "Korea University"
+  ],
+  [
+   "Lally School of Management",
+   "Rensselaer Polytechnic Institute (RPI)"
+  ],
+  [
+   "Lazaridis School of Business and Economics",
+   "Wilfrid Laurier University"
+  ],
+  [
+   "Leavey School of Business",
+   "Santa Clara University"
+  ],
+  [
+   "LeBow College of Business",
+   "Drexel University"
+  ],
+  [
+   "Lee Business School",
+   "University of Nevada, Las Vegas"
+  ],
+  [
+   "Lee Kong Chian School of Business",
+   "Singapore Management University (SMU)"
+  ],
+  [
+   "Leeds School of Business",
+   "University of Colorado Boulder"
+  ],
+  [
+   "Leonard de Vinci Business School Paris-La Defense",
+   "EMLV (Ecole de Commerce et de Management)"
+  ],
+  [
+   "Leonard N. Stern School of Business",
+   "New York University"
+  ],
+  [
+   "Louvain School of Management",
+   "Université catholique de Louvain"
+  ],
+  [
+   "Lucas College and Graduate School of Business",
+   "San José State University"
+  ],
+  [
+   "Lyle School of Engineering",
+   "Southern Methodist University"
+  ],
+  [
+   "Manning School of Business",
+   "University of Massachusetts Lowell"
+  ],
+  [
+   "Marriott School of Business",
+   "Brigham Young University"
+  ],
+  [
+   "Marshall School of Business",
+   "University of Southern California (USC)"
+  ],
+  [
+   "Martin V. Smith School of Business and Economics",
+   "California State University, Channel Islands"
+  ],
+  [
+   "Max M. Fisher College of Business",
+   "The Ohio State University"
+  ],
+  [
+   "Mays Business School",
+   "Texas A&M University"
+  ],
+  [
+   "McCombs School of Business",
+   "The University of Texas at Austin"
+  ],
+  [
+   "McCormick School of Engineering",
+   "Northwestern University"
+  ],
+  [
+   "McCoy College of Business",
+   "Texas State University"
+  ],
+  [
+   "McDonough School of Business",
+   "Georgetown University"
+  ],
+  [
+   "Melbourne Business School",
+   "University of Melbourne"
+  ],
+  [
+   "Mendoza College of Business",
+   "University of Notre Dame"
+  ],
+  [
+   "Miami Herbert Business School",
+   "University of Miami"
+  ],
+  [
+   "Michael F. Price College of Business",
+   "University of Oklahoma"
+  ],
+  [
+   "Michael G. Foster School of Business",
+   "University of Washington"
+  ],
+  [
+   "Michael Smurfit Graduate Business School",
+   "University College Dublin"
+  ],
+  [
+   "Mike Ilitch School of Business",
+   "Wayne State University"
+  ],
+  [
+   "MIT Sloan School of Management",
+   "Massachusetts Institute of Technology (MIT)"
+  ],
+  [
+   "Mitchell E. Daniels, Jr. School of Business",
+   "Purdue University"
+  ],
+  [
+   "Monash Business School",
+   "Monash University"
+  ],
+  [
+   "Nanyang Business School",
+   "Nanyang Technological University"
+  ],
+  [
+   "Naveen Jindal School of Management",
+   "University of Texas at Dallas"
+  ],
+  [
+   "Neeley School of Business",
+   "Texas Christian University"
+  ],
+  [
+   "Neidorff School of Business",
+   "Trinity University"
+  ],
+  [
+   "NUS Business School",
+   "National University of Singapore"
+  ],
+  [
+   "Olin Business School",
+   "Washington University in St. Louis"
+  ],
+  [
+   "Otto-Beisheim School of Management",
+   "WHU – Otto Beisheim School of Management"
+  ],
+  [
+   "Owen Graduate School of Management",
+   "Vanderbilt University"
+  ],
+  [
+   "Pamplin College of Business",
+   "Virginia Tech"
+  ],
+  [
+   "Parker College of Business",
+   "Georgia Southern University"
+  ],
+  [
+   "Paul Merage School of Business",
+   "University of California, Irvine"
+  ],
+  [
+   "Peter J. Tobin College of Business",
+   "St. John's University"
+  ],
+  [
+   "Queen's School of Business",
+   "Queen's University"
+  ],
+  [
+   "Questrom School of Business",
+   "Boston University"
+  ],
+  [
+   "Quinlan School of Business",
+   "Loyola University Chicago"
+  ],
+  [
+   "Rady School of Management",
+   "University of California, San Diego (UCSD)"
+  ],
+  [
+   "Rawls College of Business",
+   "Texas Tech University"
+  ],
+  [
+   "Raymond A. Mason School of Business",
+   "College of William and Mary"
+  ],
+  [
+   "Robert Pamplin Jr. School of Business Administration (PSOBA)",
+   "University of Portland"
+  ],
+  [
+   "Robins School of Business",
+   "University of Richmond"
+  ],
+  [
+   "Rosen School of Business",
+   "Morningside University"
+  ],
+  [
+   "Rutgers Business School",
+   "Rutgers University at Newark and New Brunswick"
+  ],
+  [
+   "Sabanci Business School",
+   "Sabanci University"
+  ],
+  [
+   "Saïd Business School",
+   "University of Oxford"
+  ],
+  [
+   "Sam M. Walton College of Business",
+   "University of Arkansas at Fayetteville"
+  ],
+  [
+   "Samuel Curtis Johnson Graduate School of Management",
+   "Cornell University/ Cornell Tech"
+  ],
+  [
+   "Sauder School of Business",
+   "University of British Columbia"
+  ],
+  [
+   "Scarborough and Rotman School of Management",
+   "University of Toronto"
+  ],
+  [
+   "Scheller College of Business",
+   "Georgia Institute of Technology"
+  ],
+  [
+   "School of Business-Camden",
+   "Rutgers University"
+  ],
+  [
+   "School of Mechanical and Materials Engineering",
+   "University College Dublin"
+  ],
+  [
+   "Schulich School of Business",
+   "York University"
+  ],
+  [
+   "SDA School of Management",
+   "Bocconi University"
+  ],
+  [
+   "Sheldon B. Lubar School of Business",
+   "University of Wisconsin-Milwaukee"
+  ],
+  [
+   "Simon Business School",
+   "University of Rochester"
+  ],
+  [
+   "Smeal College of Business",
+   "The Pennsylvania State University"
+  ],
+  [
+   "Solvay Brussels School of Economics and Management",
+   "Universite libre de Bruxelles"
+  ],
+  [
+   "Stanford Graduate School of Business",
+   "Stanford University"
+  ],
+  [
+   "Suliman S. Olayan School of Business",
+   "American University of Beirut"
+  ],
+  [
+   "Tepper School of Business",
+   "Carnegie Mellon University"
+  ],
+  [
+   "Thayer School of Engineering",
+   "Dartmouth College"
+  ],
+  [
+   "Tilburg School of Economics and Management",
+   "Tilburg University"
+  ],
+  [
+   "Tippie College of Business",
+   "University of Iowa"
+  ],
+  [
+   "Toulouse Business School",
+   "University of Toulouse"
+  ],
+  [
+   "Tuck School of Business",
+   "Dartmouth College"
+  ],
+  [
+   "United States Military Academy",
+   "United States Military Academy - West Point"
+  ],
+  [
+   "UNSW Business School - School of Information Systems and Technology Management",
+   "UNSW Sydney"
+  ],
+  [
+   "Villanova School of Business",
+   "Villanova University"
+  ],
+  [
+   "Viterbi School of Engineering",
+   "University of Southern California (USC)"
+  ],
+  [
+   "Volgenau School of Engineering",
+   "George Mason University"
+  ],
+  [
+   "W. E. Simon Graduate School of Business Administration",
+   "University of Rochester"
+  ],
+  [
+   "W. P. Carey School of Business",
+   "Arizona State University"
+  ],
+  [
+   "Warrington College of Business",
+   "University of Florida"
+  ],
+  [
+   "Weatherhead School of Management",
+   "Case Western Reserve University"
+  ],
+  [
+   "Wesley J. Howe School of Technology Management",
+   "Stevens Institute of Technology"
+  ],
+  [
+   "Wharton School",
+   "University of Pennsylvania"
+  ],
+  [
+   "Whitman School of Management",
+   "Syracuse University"
+  ],
+  [
+   "Wilbur O. and Ann Powers College of Business",
+   "Clemson University"
+  ],
+  [
+   "Wirtschafts- und Sozialwissenschaftliche Fakultät",
+   "University of Cologne"
+  ],
+  [
+   "Wisconsin School of Business",
+   "University of Wisconsin-Madison"
+  ],
+  [
+   "Woodbury School of Business",
+   "Utah Valley University"
+  ],
+  [
+   "Zicklin School of Business",
+   "Baruch College, The City University of New York (CUNY)"
+  ]
+ ]
+}

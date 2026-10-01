@@ -1212,6 +1212,72 @@
     return words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1];
   }
 
+  /* ------------------------------------------- the affiliation, from a list
+
+     Owner, 2026-10-01: "When users register and need to provide us and write
+     down their affiliation, show them a list of universities as a drop down
+     menu for them to choose from, and also allow 'Add Other' for them to add
+     anything not listed", the list being the site's own Universities page.
+
+     ONE field, drawn the one way on every card that asks it (the registration
+     card, the profile card's ask and its ordinary edit), and a REAL
+     `<label for>` rather than a label wrapped round the box: the picker
+     (assets/oa-combo.js) puts its list and its live status beside the box,
+     and inside a wrapping label both would be read as part of the box's own
+     name, and a press that lands on the label's note under a closing list
+     would re-open it through the label's own activation.
+
+     The picker itself is assets/oa-affiliation.js, loaded on demand with
+     oa-combo.js and oa-schools.js the moment a card draws this field: every
+     page carries this file, and only a card that asks the question should pay
+     for the list. Until it lands, and wherever it cannot, the box is the plain
+     text box it always was, so nothing here can stop anybody registering. */
+  function affFieldHTML(o) {
+    return '<div class="oa-aff-field' + (o.missing ? ' oa-missing' : '') + '">' +
+      '<label for="' + o.id + '">Affiliation' +
+        (o.optional ? ' <span class="oa-opt">(optional)</span>' : '') + (o.mark || '') + '</label>' +
+      '<input type="text" id="' + o.id + '" name="affiliation" maxlength="160" ' +
+        (o.required ? 'required aria-required="true" ' : '') +
+        'autocomplete="organization" placeholder="Start typing your university" ' +
+        'aria-describedby="' + o.id + '-note" value="' + esc(o.value || '') + '">' +
+      '<span class="oa-opt oa-fine" id="' + o.id + '-note">' + o.note + '</span>' +
+    '</div>';
+  }
+
+  /** What the field's note says: how the list works, and, where the card asks
+      it of somebody new, where the answer goes. */
+  var AFF_HOW = 'Choose your university from the list, or type its name and choose &ldquo;Add other&rdquo;.';
+  var AFF_WHERE = ' Never shown with your name; a university new to our list is added to it.';
+
+  function mountAffiliation(wrap, input) {
+    if (!wrap || !input) return;
+    loadScript('assets/oa-schools.js', 'OASchools')
+      .then(function () { return loadScript('assets/oa-affiliation.js', 'OAAffiliation'); })
+      .then(function () { return window.OAAffiliation.mount(input, { load: loadScript }); })
+      .then(function (combo) {
+        if (!combo) return;
+        if (!wrap.isConnected) { combo.destroy(); return; }
+        wrap.__oaAff = combo;
+      })
+      .catch(function () { /* the plain box is the answer */ });
+  }
+
+  /** The card is going: the picker's one document-level listener goes with it. */
+  function dropAffiliation(wrap) {
+    if (!wrap || !wrap.__oaAff) return;
+    try { wrap.__oaAff.destroy(); } catch (e) { /* already gone */ }
+    wrap.__oaAff = null;
+  }
+
+  /** The affiliation as it will be stored: the listed university the text
+      names where it names one (the picker's own rule), else the text. A
+      submit that races the list goes as typed, and the affiliation pass
+      (_scraper/affiliations.mjs) settles it later on the same terms. */
+  function settleAffiliation(v) {
+    var t = String(v || '').trim();
+    return window.OAAffiliation && t ? window.OAAffiliation.settleLoaded(t) : t;
+  }
+
   /* A LOOSE, DELIBERATELY UNCLEVER ADDRESS TEST. It is asked of a box the
      reader typed into, on a field nothing authorises on, so the cost of
      refusing a legitimate address is far higher than the cost of accepting an
@@ -1521,7 +1587,7 @@
       return;
     }
     var old = $('#oa-profile');
-    if (old) old.parentNode.removeChild(old);
+    if (old) { dropAffiliation(old); old.parentNode.removeChild(old); }
 
     var p = state.profile || {};
     /* The picture and its two buttons, drawn from the profile AS IT STANDS,
@@ -1561,7 +1627,7 @@
             : 'Please add ' + esc(owed) + ' below, so the site knows who has registered. ') +
           'What you give here is never published; only you and the site&rsquo;s maintainer ever see it.</p>'
       : '<p class="oa-modal-lede">Your name is how you appear in the header and on ' +
-          'anything you post. Your affiliation is never published.</p>';
+          'anything you post. Your affiliation is never shown with your name.</p>';
     function needMark() { return '<span class="oa-need" aria-hidden="true">needed</span>'; }
     /* Only the FIRST name is ever compelled here, for the reason profileGaps
        gives: this card can reopen, and a person who goes by one name must not
@@ -1582,14 +1648,10 @@
        question put to the accounts that never saw the form). Every ordinary
        edit keeps the chip and keeps the box optional. */
     var affRow = mustAff
-      ? '<label class="oa-missing">Affiliation' + needMark() +
-          '<input name="affiliation" maxlength="160" required ' +
-            'placeholder="University or company" autocomplete="organization" ' +
-            'value="' + esc(p.affiliation || '') + '"></label>'
-      : (asking ? '' :
-        '<label>Affiliation <span class="oa-opt">(optional)</span>' +
-          '<input name="affiliation" maxlength="160" placeholder="University or company" ' +
-            'autocomplete="organization" value="' + esc(p.affiliation || '') + '"></label>');
+      ? affFieldHTML({ id: 'oa-prof-aff', missing: true, required: true, mark: needMark(),
+          value: p.affiliation, note: AFF_HOW + AFF_WHERE })
+      : (asking ? '' : affFieldHTML({ id: 'oa-prof-aff', optional: true,
+          value: p.affiliation, note: AFF_HOW + AFF_WHERE }));
     var websiteRow = asking ? '' :
       '<label>Website <span class="oa-opt">(optional)</span>' +
         '<input name="website" maxlength="300" placeholder="https://…" type="url" ' +
@@ -1662,6 +1724,8 @@
     var leave = $('#oa-profile-signout', wrap);
     if (leave) leave.addEventListener('click', function () { signOut(); });
     wireOtherAccounts(wrap, close);
+    // the affiliation is chosen from the site's own list (affFieldHTML)
+    mountAffiliation(wrap, $('#oa-prof-aff', wrap));
 
     /* the keyboard lands in the first box that is being asked for */
     var first = $('#oa-profile-form .oa-missing input:not([disabled])', wrap) ||
@@ -1748,6 +1812,9 @@
         if (!f[k]) return;
         out[k] = String(f[k].value || '').trim().slice(0, 300);
       });
+      /* the listed university the box names, the name the Universities page
+         shows, where it names one (settleAffiliation) */
+      if (out.affiliation) out.affiliation = settleAffiliation(out.affiliation).slice(0, 300);
 
       // The card's own lede says the profile is how you appear "on anything
       // you post", i.e. this field exists to be rendered as a link one day.
@@ -2302,18 +2369,15 @@
               // one the two name fields already carry: `required` refuses an
               // EMPTY box in the browser, and the submit guard below refuses a
               // box holding only spaces, which `required` accepts.
-              '<label>Affiliation' +
-                '<input type="text" name="affiliation" maxlength="160" required ' +
-                  'autocomplete="organization" placeholder="University or company">' +
-                /* The card asks for a personal field and compels it, so it says
-                   where the field goes. The SITE's own phrase for it, the one
-                   the profile card's lede and the Privacy Policy already use,
-                   so the two cards make one claim rather than two: profiles are
-                   owner-read with no admin clause, the roster carries name,
-                   address and the two dates and never this, and nothing under
-                   data/ carries it. The WELCOME card says it in its lede
-                   already and is deliberately not given it twice. */
-                '<span class="oa-opt oa-fine">Never published.</span></label>' +
+              /* CHOSEN FROM THE SITE'S OWN LIST (owner, 2026-10-01), with
+                 "Add other" for anything it does not carry: affFieldHTML and
+                 the picker mounted on it below. The card asks for a personal
+                 field and compels it, so the note under it says where the
+                 field goes, in the phrase the profile card's lede uses ("never
+                 shown with your name"): profiles are owner-read, the roster is
+                 the maintainer's, and the one public trace of an answer is a
+                 university new to the list joining it, without anybody's name. */
+              affFieldHTML({ id: 'oa-reg-aff', required: true, note: AFF_HOW + AFF_WHERE }) +
               '<label>Website <span class="oa-opt">(optional)</span>' +
                 '<input type="url" name="website" maxlength="300" ' +
                   'autocomplete="url" placeholder="https://…"></label>'
@@ -2422,11 +2486,13 @@
       '</div>';
     document.body.appendChild(wrap);
 
-    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
+    function close() { dropAffiliation(wrap); if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
     $('.oa-modal-x', wrap).addEventListener('click', close);
     $('#oa-auth-close', wrap).addEventListener('click', close);
     wireModalKeys(wrap, close);
+    // the affiliation is chosen from the site's own list (affFieldHTML)
+    if (registering) mountAffiliation(wrap, $('#oa-reg-aff', wrap));
     /* the keyboard lands on the FIRST box: on the register card that is the
        first name, not the e-mail five fields down */
     var firstBox = $('#oa-auth-form input', wrap);
@@ -2553,6 +2619,9 @@
           f.affiliation.focus();
           return;
         }
+        /* the listed university the box names, the name the Universities
+           page shows, where it names one (settleAffiliation) */
+        affiliation = settleAffiliation(affiliation);
         if (!f.email.value || !f.password.value) {
           say('Enter an e-mail address and a password of at least 6 characters.');
           return;

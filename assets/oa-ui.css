@@ -265,6 +265,43 @@
 
 #oa-profile-form input[disabled] { background: var(--bg-3, #f6f6f6); color: var(--mut, #777); }
 
+/* THE AFFILIATION FIELD (affFieldHTML in assets/oa-accounts.js), on the
+   registration card and the profile card. A real `<label for>` ABOVE the box
+   rather than one wrapped round it, because the university picker
+   (assets/oa-combo.js) puts its list beside the box and a wrapping label
+   would read the whole list as the box's name. So it is laid out here as the
+   wrapped labels around it are: the label's own line, the box under it, the
+   note under that, and the same gap to the next field. v3.css restates the
+   two margins its own label and input rules would otherwise win. */
+.oa-modal-card .oa-aff-field { margin-bottom: 12px; }
+.oa-modal-card .oa-aff-field > label { margin-bottom: 4px; }
+.oa-modal-card .oa-aff-field > .oa-opt.oa-fine {
+  display: block;
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--mut, #77808a);
+}
+
+/* A LIST, SAID WITHOUT WORDS: the owner asked for "a drop down menu", and a
+   text box reads as a box to type in. The arrow is drawn in the theme's own
+   muted ink (a border triangle, so it follows the palette in both themes,
+   where a data-URI chevron is one fixed colour), it sits over the box's right
+   edge, and a press on it lands on the box, which opens the list. */
+.oa-aff-field .oa-combo::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  margin-top: -3px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--mut, #77808a);
+  pointer-events: none;
+}
+.oa-modal-card .oa-aff-field .oa-combo input { padding-right: 34px; }
+
 /* A value we were GIVEN rather than one that is typed — an ORCID iD that came
    from an ORCID sign-in. Shaped like a label + field so it sits in the column
    with the real fields, but it is text, not an input. */
@@ -1786,6 +1823,17 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   border-radius: 10px;
 }
 .oa-namefix-form h3 { margin: 0 0 6px; font-size: 17px; }
+
+/* the line at the top of a list that is browsed, saying how it works (the
+   affiliation picker's "Not on the list? … Add other") */
+.oa-combo-hint {
+  margin: 0;
+  padding: 6px 12px 8px;
+  border-bottom: 1px solid var(--line-soft, #eef1f4);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-2, #454c56);
+}
 
 .oa-combo-more,
 .oa-combo-empty {
