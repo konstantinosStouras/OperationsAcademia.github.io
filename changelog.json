@@ -10,6 +10,13 @@
       "url": "/universities"
     },
     {
+      "id": "members-insights-2026-10",
+      "date": "2026-10-01",
+      "title": "Who the registered members are, on the analytics page",
+      "summary": "The analytics page now shows anonymous figures about the site's registered members, counted only from what they have told the site on their profiles: where they work, with a table of the universities that at least three members name; the countries those universities are in; how members sign in; how many have an ORCID iD on file; and how many hold a candidate profile or have posted a job. Nothing is guessed about anybody, and the site does not ask for or estimate gender. Only counts are published: no university or country is named for fewer than three members, no figure combines two facts, and nothing is kept about any one person. The figures are rebuilt once a day.",
+      "url": "/analytics"
+    },
+    {
       "id": "analytics-pages-periods-2026-09",
       "date": "2026-09-29",
       "title": "The most visited pages show a period of your choice, and more universities are recognised",

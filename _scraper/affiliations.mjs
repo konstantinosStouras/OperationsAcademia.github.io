@@ -252,35 +252,38 @@ async function selftest() {
     e: { affiliation: 'Bar Polytechnic University' },
     f: { affiliation: 'Baz University' },
     g: { affiliation: 'Foo Member University' },
-    h: { affiliation: 'stanford' },
+    h: { affiliation: 'Stanf' },
+    l: { affiliation: 'stanford' },
     i: { affiliation: 'PhD, Stanford University; visiting at University of Toronto' },
     j: {},
     k: { affiliation: 'MIT' },
   };
   const roster = { a: { affiliation: 'Rotman School of Management, University of Toronto' }, k: { affiliation: 'MIT' } };
-  const marks = new Set(['a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'k']);   // f is not a member
+  const marks = new Set(['a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'k', 'l']);   // f is not a member
   const p = plan({ profiles, roster, marks, list });
 
   eq(p.changes, [
     { uid: 'a', to: 'University of Toronto' },
     { uid: 'c', to: 'Northwestern University' },
     { uid: 'k', to: 'Massachusetts Institute of Technology (MIT)' },
-  ], 'standardised: a line naming one listed university, a school that vouches for one, and the acronym a card carries');
+    { uid: 'l', to: 'Stanford University' },
+  ], 'standardised: a line naming one listed university, a school that vouches for one, the acronym a card carries, ' +
+     'and a curated short form');
   eq(p.roster, [
     { uid: 'a', to: 'University of Toronto' },
     { uid: 'k', to: 'Massachusetts Institute of Technology (MIT)' },
   ], 'the roster row follows its profile where there is one');
   ok(!p.changes.some((x) => x.uid === 'b'), 'an affiliation already exact is not written');
-  ok(!p.changes.some((x) => x.uid === 'h'), 'a prefix alone ("stanford") is never taken for a university');
+  ok(!p.changes.some((x) => x.uid === 'h'), 'a prefix alone ("Stanf") is never taken for a university');
   ok(!p.changes.some((x) => x.uid === 'i'), 'two universities in one line is a person\'s call, never this pass\'s');
   ok(!p.changes.some((x) => x.uid === 'd'), 'a company is left exactly as it was');
   eq(p.universities, ['Bar Polytechnic University', 'Foo Member University'],
     'the served list: a member\'s new university, and a member-only card a member still names; ' +
     'never a non-member\'s, never a company');
-  eq(p.counts.given, 10, 'counted: ten profiles carry an affiliation');
+  eq(p.counts.given, 11, 'counted: eleven profiles carry an affiliation');
   eq(plan({ profiles, roster, marks: null, list }).universities, null,
     'a tally that could not be read leaves the served file as it is (null), never empty');
-  eq(plan({ profiles, roster, marks: null, list }).changes.length, 3,
+  eq(plan({ profiles, roster, marks: null, list }).changes.length, 4,
     '…while the standardising still runs, which does not depend on who is a member');
   ok(p.changes.every((x) => x.to.length <= MAXLEN), 'every value fits the rules\' bound');
   eq(serialise(['B', 'A']), '{\n "universities": [\n  "B",\n  "A"\n ]\n}\n', 'the file carries names and nothing else');

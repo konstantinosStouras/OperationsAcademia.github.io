@@ -108,12 +108,21 @@ import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { firebaseAdmin, redact } from './_mail.mjs';
+import { affiliationIndex, memberFacts, membersInsights, candidateUids, posterUids } from './members-insights.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
 /** The two served files, named once. */
 export const USERS_META = 'users-meta.json';
 export const USERS_GROWTH = 'users-growth.json';
+/** AND A THIRD, on the daily run only (owner, 2026-10-01: "anonymous and very
+    interesting insights about the characteristics of our users", and "use
+    only information actually provided from the users themselves"): who the
+    members are, as counts of what they stated. Built by members-insights.mjs,
+    whose header is the argument for why it is anonymous and guesses nothing;
+    it needs the profiles, so the hourly --figures-only run, which reads none,
+    never writes it. */
+export const USERS_INSIGHTS = 'users-insights.json';
 
 const argv = new Set(process.argv.slice(2));
 const SCAN = argv.has('--scan');
@@ -504,11 +513,55 @@ async function main() {
   }
   log(`${TALLY} holds ${marks ? marks.size : 0} mark(s)`);
 
+  /* WHAT THE THIRD FILE NEEDS, read on the daily run only: the site's own
+     university index (from the checkout) and the two role sets. A role read
+     that fails leaves its set NULL, and the file then says nothing about
+     roles rather than a false zero. The documents are reduced to uids here
+     and nothing else is kept. */
+  let insightCtx = null;
+  let candidates = null;
+  let posters = null;
+  if (!FIGURES) {
+    try {
+      const readData = async (f) => JSON.parse(await readFile(path.join(DATA, f), 'utf8'));
+      const index = affiliationIndex({
+        vocab: await readData('vocab.json'),
+        directory: await readData('directory.json'),
+        universities: await readData('universities.json'),
+      });
+      insightCtx = { index };
+      log(`insights: ${index.byKey.size} listed universities to match affiliations against`);
+    } catch (e) {
+      warn(`the university index could not be read: data/${USERS_INSIGHTS} is left as it is`);
+    }
+    try {
+      const docs = [];
+      (await fb.db.collection('candidateSubmissions').select('uid', 'year', 'status').get())
+        .forEach((d) => docs.push(d.data() || {}));
+      candidates = candidateUids(docs, new Date());
+    } catch (e) {
+      warn('candidateSubmissions could not be read: the members file says nothing about candidates this run');
+    }
+    try {
+      const docs = [];
+      (await fb.db.collection('jobSubmissions').select('uid', 'status').get())
+        .forEach((d) => docs.push(d.data() || {}));
+      posters = posterUids(docs);
+    } catch (e) {
+      warn('jobSubmissions could not be read: the members file says nothing about who has posted a job this run');
+    }
+  }
+
   let seen = 0, written = 0, skipped = 0;
   let pending = [];
   /* What the two served files are built from: the flags and the creation
      time of every account, never a name or an address. */
   const accounts = [];
+  /* What the third file is built from: memberFacts for every account, which
+     keeps a university KEY, a country, whether an affiliation was given, the
+     sign-in methods and whether an ORCID iD is on file, and never the name,
+     the address or the affiliation as typed (see members-insights.mjs). */
+  const facts = [];
 
   const flush = async () => {
     if (!pending.length || SCAN || DRY || FIGURES) { pending = []; return; }
@@ -538,6 +591,7 @@ async function main() {
          wrote none. The two served files need the flags and the creation time,
          which are already on `accounts`. */
       if (FIGURES) continue;
+      if (insightCtx && profiles) facts.push(memberFacts(user, profileOf(user.uid), insightCtx));
       const row = rowFromAuthUser(user, existing[user.uid], profileOf(user.uid));
       if (!row) { skipped++; continue; }
       written++;
@@ -606,6 +660,25 @@ async function main() {
       log(wrote.length
         ? `wrote ${wrote.join(' and ')}.`
         : `data/${USERS_META} and data/${USERS_GROWTH} already say ${meta.count}: nothing to commit.`);
+      /* THE THIRD FILE, on a full run whose profiles AND tally were read:
+         without the profiles every member would read as having given no
+         affiliation, which is a failure rather than a finding, so the
+         committed file stands, the unreachable-source rule. */
+      if (FIGURES) {
+        // the hourly run reads no profile and never touches it
+      } else if (!insightCtx || !profiles) {
+        log(`data/${USERS_INSIGHTS} not written: the profiles or the university index were not read.`);
+      } else {
+        const ins = membersInsights(facts, { marks, candidates, posters, now, index: insightCtx.index });
+        if (!ins) {
+          log(`data/${USERS_INSIGHTS} not written: too few members to publish anything about them.`);
+        } else if (await writeServed(USERS_INSIGHTS, ins, JSON.stringify(ins, null, 1) + '\n')) {
+          log(`wrote data/${USERS_INSIGHTS} (${ins.members} members, ${ins.universities.count} universities, ` +
+              `${ins.countries.count} countries).`);
+        } else {
+          log(`data/${USERS_INSIGHTS} already says the same: nothing to commit.`);
+        }
+      }
     } else {
       log(`would write data/${USERS_META} with count ${meta.count} and ` +
           `data/${USERS_GROWTH} with ${growth.days.length} day(s).`);

@@ -34,6 +34,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { buildDirectory, directoryStats, memberUniversities } from './directory-model.mjs';
+import { affiliationIndex, parentKeyOf } from './members-insights.mjs';
 
 const require = createRequire(import.meta.url);
 const AFFILIATION = require('../assets/oa-affiliation.js');
@@ -52,6 +53,16 @@ async function readJson(rel, fallback) {
     }
     throw err;
   }
+}
+
+/* Which card a card belongs under, when the directory lists one university a
+   second time under a posting's spelling of it ("Stanford GSB"): the
+   anonymous member counts' own rule (members-insights.mjs parentKeyOf, over
+   the same three files it reads), so the list a member chooses from and the
+   figures that count members fold the same names into the same university. */
+async function parentKeyFor(rows, archive) {
+  const vocab = await readJson('data/vocab.json', {});
+  return parentKeyOf(affiliationIndex({ vocab, directory: rows, universities: archive }));
 }
 
 async function main() {
@@ -75,7 +86,8 @@ async function main() {
      universities.html titles it, so the name chosen is the name the page
      shows. Its own small file, because the registration card must not fetch
      a third of a megabyte of directory to offer a list of names. */
-  const list = JSON.stringify(AFFILIATION.listFromDirectory(rows), null, 1) + '\n';
+  const list = JSON.stringify(AFFILIATION.listFromDirectory(rows,
+    { parentKey: await parentKeyFor(rows, archive) }), null, 1) + '\n';
 
   console.log(`directory: ${stats.count} rows — ${stats.universities} universities, ` +
     `${stats.departments} department rows`);

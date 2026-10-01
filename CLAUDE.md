@@ -1400,13 +1400,34 @@ use, a tie to the fuller name, then the first seen), read by
 uses to write `data/university-names.json` beside `directory.json`. Its own
 small file (about 7 KB gzipped) because the registration card must not fetch a
 third of a megabyte of directory to offer a list of names. It carries the
-titles, the cards that exist only because of members (`fromMembers`), and the
-`[school, university]` pairs a school may vouch by. **Not the posting form's
+titles, the cards that exist only because of members (`fromMembers`), the
+`[school, university]` pairs a school may vouch by, and the folded duplicate
+cards (`aliases`, below). **Not the posting form's
 vocabulary**, deliberately: `vocab.json` spells some universities its own way
 (the most-posted spelling, `pickForm`), and the owner named the Universities
 page. The two disagree on about twenty spellings today ("The Pennsylvania State
 University" against "Pennsylvania State University"); aligning them is a change
 to what the posting pipeline publishes, and has not been made.
+
+**ONE UNIVERSITY, ONE ENTRY, BY THE MEMBER COUNTS' OWN RULE.** The directory
+carries some universities a second time, as a card titled with a posting's
+spelling ("Stanford GSB", "LBS", "Cornell University/ Cornell Tech"). The list
+offers the university once: `build-directory.mjs` asks
+`_scraper/members-insights.mjs` (`affiliationIndex` + `parentKeyOf`, the
+`findParent` rule the anonymous member counts already fold by, over the same
+three files) which card a card belongs under, and the folded title is written
+as an ALIAS (`aliases` in the file) that settles to its parent. So the list a
+member chooses from and the figures that count members agree about what one
+university is, and somebody who typed "Stanford GSB" is standardised to
+Stanford University rather than to a posting's spelling of it.
+
+**THE CURATED SHORT FORMS ARE ONE TABLE.** `SHORT_FORMS` ("wharton", "kellogg",
+"stanford", "mit sloan"…) was written for the member counts the same morning;
+it lives in `assets/oa-affiliation.js` now, because the picker and the daily
+pass read it too, and `members-insights.mjs` re-exports it so its callers read
+it where they always did. The selftest holds the two exports to one object and
+refuses a second copy. **To recognise another short form, add it there**, a
+decision made once: "Penn" is deliberately absent, it is two universities.
 
 **THE PICKER IS THE POSTING FORM'S, WITH ITS OWN WORDS.** `oa-combo.js` already
 answered "a select plus an Other box" with one control (its header says why);
@@ -1434,7 +1455,9 @@ otherwise win, on specificity.
 the browser (settling a box when it is left, and on submit) and the pass
 (settling a stored profile) both call it. Curated, never guessed:
 
-* the name itself, however spelled (`institutionKey`, aliases included);
+* the name itself, however spelled (`institutionKey`, aliases included), or
+  the title of a card folded under it;
+* a curated short form (`SHORT_FORMS`, above);
 * the acronym a card carries in its own brackets ("MIT"), dropped when two
   cards claim one;
 * a school that VOUCHES: listed at exactly one university AND named with a
@@ -1453,8 +1476,8 @@ the browser (settling a box when it is left, and on submit) and the pass
 university the list lacks ("visiting University of Foo"), answers nothing: it
 is a person's call. A university NAMED outranks one a school vouches for,
 because the directory's filing of a school can be wrong. A prefix is never a
-university ("Penn" would become Penn State, the wrong school), and a company
-never is. Whatever names nothing is kept exactly as typed, tidied.
+university ("Penn" would become Penn State, the wrong school) unless it is a
+curated short form, and a company never is. Whatever names nothing is kept exactly as typed, tidied.
 
 **A UNIVERSITY NOBODY LISTS JOINS THE LIST** (`newUniversity`), and the bar is
 deliberately high, because a miss costs the maintainer one row while a
@@ -10155,6 +10178,119 @@ reader stays wired as a documented recovery path rather than being deleted,
 the same reasoning that kept `repository_dispatch: [oa-jobs-changed]` in
 place through the months the functions were undeployed — and that trigger is
 the live instant path now that they are.
+
+## Who the registered members are, as anonymous counts
+
+Owner, 2026-10-01: *"https://www.operationsacademia.org/analytics: add
+(anonymous and very interesting) insights/statistics about the characteristics
+of our users: gender, affiliation histogram/table, etc."*, and then, the same
+day, while it was being built: *"don't make guesses, it's risky. use only
+information actually provided from the users themselves."*
+
+    _scraper/members-insights.mjs     facts per account, counts over everybody (pure)
+    _scraper/sync-user-directory.mjs  computes them on its DAILY run
+    data/users-insights.json          the served file, counts only
+    assets/oa-analytics.js            drawMembers(), right under the growth chart
+
+**NOTHING IS GUESSED ABOUT ANYBODY, and that is the second instruction, not a
+preference.** Every figure is a count of something a member stated or did:
+the affiliation they typed, matched to a university only by NAME; the country
+of that university as the site's own directory records it, or a country they
+wrote as the last part of their affiliation; how they chose to sign in; an
+ORCID iD on their profile; a live candidate profile for the season under way,
+or a job posted through the form. What was built and then REMOVED, so nobody
+puts it back:
+
+* **a gender estimate from first names** (WIPO's World Gender Name
+  Dictionary, a strict list of names clearly one gender). Strict or not, it is
+  a guess about a person. **There is no gender figure**, and the Privacy
+  Policy says the site does not ask for, estimate or publish gender. If the
+  owner ever wants one, it has to be ASKED, as an optional question on the
+  profile, with its rule and its deploy, and counted from the answers;
+* **a university or a country read off the e-mail address's domain**, and
+  the "academic or personal mailbox" kind of address;
+* **sorting an unmatched affiliation into a kind by its words** ("another
+  university or institute" against "industry, government or other"). An
+  affiliation that names no listed university is "another affiliation", full
+  stop;
+* **loose matching**: a university found from one distinctive word, from the
+  initials of a name, from "X" meaning "X University", or from a city. These
+  produced real errors while it was being built (the University of
+  Pennsylvania folded into Penn State, the Indian School of Business into IIT
+  Bombay, Copenhagen Business School into the IT University of Copenhagen).
+
+**How an affiliation is matched, and only how**, segment by segment (a comma,
+a slash, brackets, " at "): the site's own canon (`institutionKey`, with the
+curated aliases in `oa-schools.js`); a curated short form (`SHORT_FORMS`,
+"MIT", "Chicago Booth", "Kellogg"; an entry is a decision made once, never
+derived, and the selftest holds every target to a listed university); a
+school the site lists under exactly one university ("Columbia Business
+School"); the acronym a listed name itself DECLARES in brackets ("(MIT)");
+and a listed university's full name written inside what they typed ("PhD
+student at Cornell University"). On the archive's 216 distinct placements and
+almae matres that matches 199; the rest are left unmatched rather than placed.
+**To match more, grow `SHORT_FORMS` (in `assets/oa-affiliation.js` since the
+affiliation picker, 2026-10-01) or the site's own vocabulary**, never the
+served file and never a looser rule.
+
+**ONE UNIVERSITY, ONE ROW.** The site's own index lists some universities a
+second time under the name a posting was made with ("MIT Sloan", "Columbia
+Business School", "Cornell University/ Cornell Tech"), so such a name is
+folded into the university the site's own data says it belongs to, by four
+routes and no others (`findParent`): the same name spelled two ways; a
+curated short form; a school listed under exactly one university; a listed
+university's full name followed by a suffix in brackets or after a slash.
+Nothing is folded into a federation (`FEDERATIONS`: London Business School is
+listed under the University of London and stays its own row).
+
+**FOUR RULES KEEP THE FILE ANONYMOUS**, each pinned in `testMemberInsights`:
+counts only (no uid, no address, no free text a member typed; a university or
+country named only by the site's own name for it); no group smaller than
+`K_MIN` (3) is named, the rest counted together; nothing is cross-tabulated;
+and below `MIN_MEMBERS` (20) nothing is published at all. `memberFacts` keeps
+exactly `FACT_KEYS` (a university KEY, a country, whether an affiliation was
+given, the sign-in methods, an ORCID yes/no, plus the uid as the join key to
+the tally and the role sets) and never the name, the address or the
+affiliation as typed; the pre-existing pin on the `accounts` array still
+holds, since the facts are a separate array. `insightsProblems` checks the
+committed file.
+
+**What the page shows.** Right under "How the community has grown": a strip
+of five tiles (members, the share who gave an affiliation, universities
+named, countries of those universities, ORCID iD), with the roles in the
+opening caption; then "Where members work" (a share bar of listed university,
+another affiliation and not given, through a new generic `restLabel` on
+`share()`, then every university with three or more members as a bar list
+reading down two columns on a desktop, each with its country); "Where their
+universities are"; and "How members sign in". The figures follow neither
+range control: they are a dated snapshot.
+
+**The sync writes the file on its DAILY run only**, and only when the
+profiles, the tally and the university index were all read: without the
+profiles every member would read as unaffiliated, which is a failure rather
+than a finding, so the committed file stands. The hourly `--figures-only` run
+reads no profile and never touches it. A role read that fails makes `roles`
+null rather than a false zero. Written through `writeServed`, so a day that
+changes nothing commits nothing; the workflow's `FILES` names it. The
+committed seed is `{"generated":"","members":0}` and the page draws nothing
+from it, so **the figures appear after the first daily run with the
+credential**, or a dispatch of the roster sync workflow (`oa-user-directory.yml`).
+
+**What is public changed, and the copy says so.** The Privacy Policy and the
+FAQ both used to say the one public fact about registered accounts is how
+many there are; both now say that what is public is counts, that no count
+says who anybody is, and the policy names every figure, that nothing is
+guessed, and the two thresholds. The analytics page's browser checks route
+the seed for this file in every context but the members block's, so they do
+not move when the daily run writes real figures.
+
+Tests: `testMemberInsights` in `_scraper/selftest.mjs` (the matches and the
+refusals against the committed index, every short form's target, one
+member's facts and what they never hold, the four rules over a fixture, the
+served file, the sync's wiring, the page with no gender and no e-mail figure,
+the policy, the change log and this section) and the members block of
+`_scraper/page-test.mjs`, which routes a fixture and measures the figures in a
+real browser in both themes and at 390px.
 
 ## The 2026-09-04 review sweep — what ten reviewers found, and what changed
 

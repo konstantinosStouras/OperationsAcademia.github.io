@@ -755,7 +755,10 @@
     const parts = items.map((it, i) => ({
       label: it.label, value: it.value, cls: 'oa-cat-' + ((i % 6) + 1),
     }));
-    if (rest > 0) parts.push({ label: 'Everything else', value: rest, cls: 'oa-cat-rest' });
+    /* `restLabel` names the tail where the caller knows what it is: the
+       members whose gender could not be estimated, the ones who gave no
+       affiliation. It stays the muted part either way. */
+    if (rest > 0) parts.push({ label: opts.restLabel || 'Everything else', value: rest, cls: 'oa-cat-rest' });
 
     const wrap = document.createElement('div');
     wrap.className = 'oa-chart-plot';

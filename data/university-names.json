@@ -13,7 +13,6 @@
   "American University in the Emirates",
   "American University Kogod School of Business",
   "American University of Beirut",
-  "American University of Beirut (School of Business)",
   "American University of Kurdistan",
   "American University of Phnom Penh",
   "Appalachian State University",
@@ -35,7 +34,6 @@
   "Binghamton University",
   "BITS School of Management",
   "Black Hills State University",
-  "Bocconi",
   "Bocconi University",
   "Boston College",
   "Boston University",
@@ -62,11 +60,9 @@
   "Case Western Reserve University",
   "Cass Business School",
   "Católica Lisbon",
-  "Católica Lisbon School of Business and Economics",
   "Cedarville University",
   "CEIBS",
   "Chatham University",
-  "Chicago Booth",
   "China Europe International Business School",
   "City University of Hong Kong",
   "City University of New York (CUNY)",
@@ -79,19 +75,16 @@
   "Colorado School of Mines",
   "Colorado State University",
   "Columbia Basin College",
-  "Columbia Business School",
   "Columbia University",
   "Concordia University",
   "Concordia University Chicago",
   "Copenhagen Business School",
   "Coppin State University",
   "Cornell University",
-  "Cornell University/ Cornell Tech",
   "Cottey College",
   "County College of Morris",
   "Cranfield University",
   "CSU San Marcos",
-  "CUHK Business School",
   "CUHK Shenzhen",
   "CUNEF University",
   "Dakota State University",
@@ -141,20 +134,17 @@
   "Georgia Tech (ISyE)",
   "Goldey-Beacom College",
   "Grand Valley State University",
-  "Harvard Business School",
   "Harvard Kennedy School",
   "Harvard University",
   "HEC Montréal",
   "HEC Paris",
   "Henderson State University",
-  "HKUST(GZ)",
   "Hofstra University",
   "Hong Kong Polytechnic University",
   "Hood College",
   "Houston Christian University",
   "Howard University",
   "Hull University Business School",
-  "IE Business School",
   "IE University",
   "IESE",
   "IESE Business School",
@@ -166,7 +156,6 @@
   "Indiana State University",
   "Indiana University",
   "Indiana University Bloomington",
-  "Indiana University (Kelley)",
   "Indiana University Northwest",
   "INSEAD",
   "Institut Mines-Télécom",
@@ -175,7 +164,6 @@
   "IT University of Copenhagen",
   "James Madison University",
   "Johns Hopkins University",
-  "Judge Business School",
   "KAIST",
   "Katholieke Universiteit (KU) Leuven",
   "Kean University",
@@ -189,7 +177,6 @@
   "Kühne Logistics University",
   "La Salle University",
   "Lancaster University",
-  "LBS",
   "Le Moyne College",
   "Lehigh University",
   "Lenoir-Rhyne University",
@@ -217,7 +204,6 @@
   "Missouri Southern State University",
   "Missouri State University",
   "Missouri University of Science and Technology",
-  "MIT Sloan",
   "Monash University",
   "Montclair State University",
   "Morgan State University",
@@ -243,12 +229,10 @@
   "Northeastern University",
   "Northern Illinois University",
   "Northern State University",
-  "Northwestern",
   "Northwestern University",
   "Nova School of Business and Economics",
   "NTU",
   "NYU Shanghai",
-  "NYU Stern",
   "Oakland University",
   "Oklahoma State University",
   "Oregon State University",
@@ -276,7 +260,6 @@
   "Rutgers Business School–Newark and New Brunswick",
   "Rutgers University",
   "Rutgers University at Newark and New Brunswick",
-  "Rutgers University (Stats)",
   "Saarland University",
   "Sabanci University",
   "Saint Louis University",
@@ -299,7 +282,6 @@
   "Singapore University of Technology and Design (SUTD)",
   "SKEMA Business School",
   "Skolkovo Institute of Science and Technology (Skoltech)",
-  "Smith School of Business",
   "Southeastern Louisiana University",
   "Southern Arkansas University",
   "Southern Methodist University",
@@ -312,7 +294,6 @@
   "St.Gallen Institute of Management in Asia (SGI)",
   "St John Fisher University",
   "St. John's University",
-  "Stanford GSB",
   "Stanford University",
   "State University of New York at Geneseo",
   "Stevens Institute of Technology",
@@ -341,7 +322,6 @@
   "The College of New Jersey",
   "The Hebrew University of Jerusalem",
   "The Hong Kong University of Science and Technology",
-  "The Hong Kong University of Science and Technology (Guangzhou)",
   "The Ohio State University",
   "The Pennsylvania State University",
   "The University of Alabama",
@@ -354,12 +334,9 @@
   "Trinity University",
   "Tsinghua University",
   "Tulane University",
-  "TUM School of Management",
   "Tusculum University",
   "UBC Sauder School of Business",
   "UCL GBSH",
-  "UCL Global Business School for Health",
-  "UCL School of Management",
   "Uni. of Illinois at Urbana-Champaign (Gies)",
   "United States Military Academy - West Point",
   "United States Naval Academy",
@@ -375,7 +352,6 @@
   "University College Dublin",
   "University College London",
   "University of Alabama at Birmingham",
-  "University of Alabama - Birmingham",
   "University of Alaska Fairbanks",
   "University of Alberta",
   "University of Amsterdam",
@@ -447,8 +423,6 @@
   "University of New South Wales",
   "University of North Carolina at Chapel Hill",
   "University of North Carolina at Wilmington",
-  "University of North Carolina-Chapel Hill",
-  "University of North Carolina (UNC) Chapel Hill",
   "University of North Texas",
   "University of Northern Iowa",
   "University of Notre Dame",
@@ -471,7 +445,6 @@
   "University of Tennessee",
   "University of Tennessee at Chattanooga",
   "University of Tennessee at Knoxville",
-  "University of Tennessee - Knoxville",
   "University of Texas at Arlington",
   "University of Texas at Dallas",
   "University of Toledo",
@@ -503,7 +476,6 @@
   "Valdosta State University",
   "Valley City State University",
   "Vanderbilt University",
-  "Vienna University of Economics and Business",
   "Villanova University",
   "VinUniversity",
   "Virgina Darden",
@@ -512,7 +484,6 @@
   "Vrije Universiteit Amsterdam",
   "Wageningen University",
   "Wake Forest University",
-  "Warwick Business School",
   "Washburn University",
   "Washington University in St. Louis",
   "Wayne State University",
@@ -1068,7 +1039,7 @@
   ],
   [
    "Samuel Curtis Johnson Graduate School of Management",
-   "Cornell University/ Cornell Tech"
+   "Cornell University"
   ],
   [
    "Sauder School of Business",
@@ -1213,6 +1184,124 @@
   [
    "Zicklin School of Business",
    "Baruch College, The City University of New York (CUNY)"
+  ]
+ ],
+ "aliases": [
+  [
+   "American University of Beirut (School of Business)",
+   "American University of Beirut"
+  ],
+  [
+   "Bocconi",
+   "Bocconi University"
+  ],
+  [
+   "Católica Lisbon School of Business and Economics",
+   "Universidade Católica Portuguesa"
+  ],
+  [
+   "Chicago Booth",
+   "University of Chicago"
+  ],
+  [
+   "Columbia Business School",
+   "Columbia University"
+  ],
+  [
+   "Cornell University/ Cornell Tech",
+   "Cornell University"
+  ],
+  [
+   "CUHK Business School",
+   "The Chinese University of Hong Kong"
+  ],
+  [
+   "Harvard Business School",
+   "Harvard University"
+  ],
+  [
+   "HKUST(GZ)",
+   "The Hong Kong University of Science and Technology"
+  ],
+  [
+   "IE Business School",
+   "IE University"
+  ],
+  [
+   "Indiana University (Kelley)",
+   "Indiana University"
+  ],
+  [
+   "Judge Business School",
+   "University of Cambridge"
+  ],
+  [
+   "LBS",
+   "London Business School (LBS)"
+  ],
+  [
+   "MIT Sloan",
+   "Massachusetts Institute of Technology (MIT)"
+  ],
+  [
+   "Northwestern",
+   "Northwestern University"
+  ],
+  [
+   "NYU Stern",
+   "New York University"
+  ],
+  [
+   "Rutgers University (Stats)",
+   "Rutgers University"
+  ],
+  [
+   "Smith School of Business",
+   "Queen's University"
+  ],
+  [
+   "Stanford GSB",
+   "Stanford University"
+  ],
+  [
+   "The Hong Kong University of Science and Technology (Guangzhou)",
+   "The Hong Kong University of Science and Technology"
+  ],
+  [
+   "TUM School of Management",
+   "Technical University of Munich"
+  ],
+  [
+   "UCL Global Business School for Health",
+   "University College London"
+  ],
+  [
+   "UCL School of Management",
+   "University College London"
+  ],
+  [
+   "University of Alabama - Birmingham",
+   "University of Alabama at Birmingham"
+  ],
+  [
+   "University of North Carolina-Chapel Hill",
+   "University of North Carolina at Chapel Hill"
+  ],
+  [
+   "University of North Carolina (UNC) Chapel Hill",
+   "University of North Carolina at Chapel Hill"
+  ],
+  [
+   "University of Tennessee - Knoxville",
+   "University of Tennessee at Knoxville"
+  ],
+  [
+   "Vienna University of Economics and Business",
+   "WU Vienna"
+  ],
+  [
+   "Warwick Business School",
+   "University of Warwick"
   ]
  ]
 }

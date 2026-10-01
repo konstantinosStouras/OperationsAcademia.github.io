@@ -122,6 +122,63 @@
     return false;
   }
 
+  /* ----------------------------------------------------- the short forms
+
+     What members type for a university that the site's own data does not
+     spell, each to the full name the site lists. CURATED: an entry is a
+     decision, made once, for a short form nobody could mean otherwise, never
+     derived ("Penn" is not here: it is two universities). ONE table for the
+     three things that read it: this matcher, the picker built on it, and the
+     anonymous member counts (_scraper/members-insights.mjs re-exports it).
+     Keyed by the folded short form. */
+  var SHORT_FORMS = {
+  'mit': 'Massachusetts Institute of Technology',
+  'mit sloan': 'Massachusetts Institute of Technology',
+  'nyu': 'New York University',
+  'nyu stern': 'New York University',
+  'cmu': 'Carnegie Mellon University',
+  'carnegie mellon': 'Carnegie Mellon University',
+  'nus': 'National University of Singapore',
+  'ucl': 'University College London',
+  'lbs': 'London Business School',
+  'georgia tech': 'Georgia Institute of Technology',
+  'gatech': 'Georgia Institute of Technology',
+  'ut austin': 'University of Texas at Austin',
+  'ut dallas': 'University of Texas at Dallas',
+  'utd': 'University of Texas at Dallas',
+  'upenn': 'University of Pennsylvania',
+  'wharton': 'University of Pennsylvania',
+  'the wharton school': 'University of Pennsylvania',
+  'uiuc': 'University of Illinois at Urbana-Champaign',
+  'hbs': 'Harvard University',
+  'harvard business school': 'Harvard University',
+  'stanford gsb': 'Stanford University',
+  'umich': 'University of Michigan',
+  'uchicago': 'University of Chicago',
+  'chicago booth': 'University of Chicago',
+  'kellogg': 'Northwestern University',
+  'northwestern': 'Northwestern University',
+  'duke': 'Duke University',
+  'fuqua': 'Duke University',
+  'columbia': 'Columbia University',
+  'cornell': 'Cornell University',
+  'stanford': 'Stanford University',
+  'harvard': 'Harvard University',
+  'princeton': 'Princeton University',
+  'yale': 'Yale University',
+  'yale som': 'Yale University',
+  'yale school of management': 'Yale University',
+  'bocconi': 'Bocconi University',
+  'unc': 'University of North Carolina at Chapel Hill',
+  'usc': 'University of Southern California',
+  'polyu': 'Hong Kong Polytechnic University',
+  };
+
+  function shortForm(v) {
+    var k = fold(v);
+    return Object.prototype.hasOwnProperty.call(SHORT_FORMS, k) ? SHORT_FORMS[k] : '';
+  }
+
   function schoolKey(name) {
     var s = S();
     return s ? s.fold(s.canonSchool(String(name || ''))) : fold(name);
@@ -139,7 +196,8 @@
                       would read as "already listed" and could never leave
        schools        [school, card] pairs: a school with a name of its own
                       that the directory lists at exactly one university */
-  function listFromDirectory(rows) {
+  function listFromDirectory(rows, opts) {
+    opts = opts || {};
     var s = S();
     var groups = Object.create(null);
     var order = [];
@@ -160,15 +218,36 @@
       }
     }
     var title = Object.create(null);
+    for (var o = 0; o < order.length; o++) {
+      var g0 = groups[order[o]];
+      title[order[o]] = s && s.cardName ? s.cardName(g0.names) : g0.names[0];
+    }
+    /* ONE UNIVERSITY, ONE ENTRY. The directory carries some universities a
+       second time, as a card titled with the name a posting was made under
+       ("Stanford GSB", "Cornell University/ Cornell Tech"). The caller says
+       which card such a name belongs under (`parentKey`, the anonymous member
+       counts' own rule, _scraper/members-insights.mjs findParent), and that
+       card is offered in its place: its title becomes an ALIAS that settles
+       to the parent, so somebody who typed it is standardised to the
+       university rather than to a posting's spelling of it. */
+    var parentOf = Object.create(null);
+    if (typeof opts.parentKey === 'function') {
+      for (var o2 = 0; o2 < order.length; o2++) {
+        var pk = '';
+        try { pk = opts.parentKey(title[order[o2]]) || ''; } catch (e) { pk = ''; }
+        if (pk && pk !== order[o2] && title[pk]) parentOf[order[o2]] = pk;
+      }
+    }
     var universities = [];
     var fromMembers = [];
-    for (var o = 0; o < order.length; o++) {
-      var g = groups[order[o]];
-      var name = s && s.cardName ? s.cardName(g.names) : g.names[0];
-      title[order[o]] = name;
-      universities.push(name);
+    var aliases = [];
+    for (var o3 = 0; o3 < order.length; o3++) {
+      var k3 = order[o3];
+      var g = groups[k3];
+      if (parentOf[k3]) { aliases.push([title[k3], title[parentOf[k3]]]); continue; }
+      universities.push(title[k3]);
       var only = Object.keys(g.sources);
-      if (only.length === 1 && only[0] === 'members') fromMembers.push(name);
+      if (only.length === 1 && only[0] === 'members') fromMembers.push(title[k3]);
     }
     var pairs = [];
     for (var sk2 in bySchool) {
@@ -179,7 +258,8 @@
          filed under the University of London and has a card) is that card:
          the name answers before any school could */
       if (title[uniKey(e.name)] || !strongSchool(e.name)) continue;
-      pairs.push([e.name, title[unis[0]]]);
+      var home = parentOf[unis[0]] ? title[parentOf[unis[0]]] : title[unis[0]];
+      pairs.push([e.name, home]);
     }
     var az = function (a, b) {
       return fold(a).localeCompare(fold(b)) || String(a).localeCompare(String(b));
@@ -187,7 +267,8 @@
     universities.sort(az);
     fromMembers.sort(az);
     pairs.sort(function (a, b) { return az(a[0], b[0]) || az(a[1], b[1]); });
-    return { universities: universities, fromMembers: fromMembers, schools: pairs };
+    aliases.sort(function (a, b) { return az(a[0], b[0]) || az(a[1], b[1]); });
+    return { universities: universities, fromMembers: fromMembers, schools: pairs, aliases: aliases };
   }
 
   /** The list, made ready to match against. */
@@ -228,6 +309,14 @@
       var sk = schoolKey(pair[0]);
       if (sk) idx.bySchool[sk] = idx.byKey[uk];
     }
+    /* a folded card's own title settles to the university it belongs under */
+    var al = list.aliases || [];
+    for (var x = 0; x < al.length; x++) {
+      var pair2 = al[x] || [];
+      var ck = uniKey(pair2[0]);
+      var to = idx.byKey[uniKey(pair2[1])];
+      if (ck && to && !idx.byKey[ck]) idx.byKey[ck] = to;
+    }
     var mem = list.fromMembers || [];
     for (var q = 0; q < mem.length; q++) idx.members[uniKey(mem[q])] = true;
     return idx;
@@ -240,6 +329,8 @@
     if (!p) return null;
     var hit = idx.byKey[uniKey(p)];
     if (hit) return { name: hit, how: 'name' };
+    var sf = shortForm(p);
+    if (sf && idx.byKey[uniKey(sf)]) return { name: idx.byKey[uniKey(sf)], how: 'short' };
     if (/^[A-Z][A-Z&]{1,9}$/.test(p) && idx.byAcronym[p]) return { name: idx.byAcronym[p], how: 'acronym' };
     var school = idx.bySchool[schoolKey(p)];
     if (school) return { name: school, how: 'school' };
@@ -475,6 +566,7 @@
 
   return {
     URL: URL,
+    SHORT_FORMS: SHORT_FORMS,
     SUBJECT_WORDS: SUBJECT_WORDS,
     WORDS: WORDS,
     addLabel: addLabel,
