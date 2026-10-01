@@ -1497,7 +1497,14 @@ a slight respelling of a card already there (the FUZZY tier of `similarNames`,
 the eager one on purpose: "Hebrew University" beside "The Hebrew University of
 Jerusalem", "Stanford Universit"). Only REGISTERED MEMBERS count (the
 `registeredUsers` mark the figure counts), so an account that never confirmed
-its address cannot put a card on a public page.
+its address cannot put a card on a public page. **And it must be a NAME, as
+written**: the first plan run on master (2026-10-01) would have published a
+test account's "university of john doe" as a card, so a placeholder
+(`PLACEHOLDER`: John or Jane Doe, test, example, dummy, asdf…) is refused, and
+so is a line not written as a name (`writtenAsName`: every word but a
+connective such as "of", "de", "für" or "degli" begins with a capital). A line
+typed in lower case keeps what its member typed and is simply not published;
+the maintainer can still add the place by hand.
 
 **THE PASS IS DAILY AND APPLIES.** `_scraper/affiliations.mjs` reads every
 profile once: an affiliation that names a listed university is rewritten to

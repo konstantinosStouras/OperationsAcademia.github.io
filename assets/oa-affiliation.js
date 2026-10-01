@@ -440,6 +440,46 @@
     return UNIVERSITY.test(t) && !NOT_A_NAME.test(t);
   }
 
+  /* A NAME, NOT A PLACEHOLDER. The first plan run of the daily pass
+     (2026-10-01) would have published "university of john doe" as a card on
+     the Universities page: a test account's affiliation, which passed every
+     rule above. Two more, both about the name as written and neither a guess
+     about a place:
+       - a placeholder is never a university (somebody testing the form, or
+         declining to say);
+       - a name is written as one: every word but a connective ("of", "de",
+         "für"...) begins with a capital, as every university's own name does.
+         A line typed all in lower case is not published as somebody's
+         university; its member keeps what they typed, and the maintainer can
+         still add the place by hand. */
+  var PLACEHOLDER = /\b(?:john|jane)\s+doe\b|\btest(?:ing)?\b|\bexample\b|\bsample\b|\bdummy\b|\bfake\b|\bplaceholder\b|\basdf\w*|\bqwerty\b|\blorem\b|\bipsum\b|\bx{3,}\b|\bunknown\b|\bnone\b|\bn\/a\b|\bmy university\b|\bsome university\b|\bany university\b/i;
+  var CONNECTIVES = {
+    a: 1, 'à': 1, al: 1, am: 1, an: 1, and: 1, at: 1, au: 1, aux: 1, auf: 1,
+    d: 1, da: 1, das: 1, de: 1, degli: 1, dei: 1, del: 1, dell: 1, della: 1,
+    delle: 1, dello: 1, den: 1, der: 1, des: 1, di: 1, do: 1, dos: 1, du: 1,
+    e: 1, el: 1, en: 1, et: 1, 'för': 1, for: 1, 'für': 1, fur: 1, het: 1,
+    i: 1, im: 1, in: 1, l: 1, la: 1, las: 1, le: 1, les: 1, los: 1, och: 1,
+    of: 1, og: 1, on: 1, 'över': 1, the: 1, to: 1, und: 1, upon: 1, van: 1,
+    voor: 1, von: 1, y: 1, zu: 1, zum: 1, zur: 1
+  };
+  function writtenAsName(v) {
+    var words = tidy(v).split(/\s+/).filter(Boolean);
+    if (!words.length) return false;
+    for (var i = 0; i < words.length; i++) {
+      /* the word as letters: an opening bracket or quote is not the word, and
+         an elided article ("d'Aix", "l'Aquila") is judged by what follows */
+      var w = words[i].replace(/^[("'\u2018\u201c\[]+/, '');
+      var lead = /^([dl])['\u2019](.+)$/i.exec(w);
+      if (lead) w = lead[2];
+      var c = w.charAt(0);
+      if (!c || c.toLowerCase() === c.toUpperCase()) continue;   // a digit, a dash
+      if (c === c.toUpperCase()) continue;                       // a capital
+      if (i > 0 && CONNECTIVES[w.toLowerCase().replace(/['\u2019.,;:)]+$/, '')]) continue;
+      return false;
+    }
+    return true;
+  }
+
   /**
    * The name a university the list does not carry should be listed under,
    * or '' when the line names none, names a listed one, or names several.
@@ -452,6 +492,7 @@
     if (cands.length !== 1) return '';
     var name = tidy(s ? s.canonInstitution(cands[0]) : cands[0]);
     if (!name || !looksLikeUniversity(name)) return '';
+    if (PLACEHOLDER.test(t) || !writtenAsName(name)) return '';
     if (idx && (idx.byKey[uniKey(name)] || idx.bySchool[schoolKey(name)])) return '';
     /* nor a slight respelling of a card already there: "Hebrew University"
        beside "The Hebrew University of Jerusalem" is the same place, and a
@@ -581,6 +622,7 @@
     settle: settle,
     looksLikeUniversity: looksLikeUniversity,
     newUniversity: newUniversity,
+    writtenAsName: writtenAsName,
     load: load,
     settleLoaded: settleLoaded,
     mount: mount,
