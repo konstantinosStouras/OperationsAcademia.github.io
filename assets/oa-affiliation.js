@@ -26,9 +26,15 @@
    So the box a person fills in and the pass that tidies what they typed agree
    about what "the same university" means, by construction.
 
-   THE LIST IS THE UNIVERSITIES PAGE'S OWN CARDS. One name per card, the
-   card's own title (OASchools.cardName, the rule universities.html titles a
-   card by), so the name a member chooses is the name the page shows.
+   THE LIST IS ONE ENTRY PER UNIVERSITY, drawn from the Universities page's
+   own cards. A card is offered under its own title (OASchools.cardName, the
+   rule universities.html titles a card by) when that title IS a university's
+   name. A card the site titles with a school, a department, a second
+   spelling or a misspelling is never offered: it is folded into the
+   university it belongs to (UNIVERSITY_OF, below, and the member counts' own
+   rule), and its title stays behind as an alias, so somebody who types it is
+   still answered with the university (owner, 2026-10-01: "a list of
+   university names only. Remove duplicates").
 
    CURATED, NEVER GUESSED. Free text becomes a listed university only where it
    names one outright: the same university however it is spelled
@@ -179,6 +185,122 @@
     return Object.prototype.hasOwnProperty.call(SHORT_FORMS, k) ? SHORT_FORMS[k] : '';
   }
 
+  /* ------------------------------------- a card that is not a university
+
+     Owner, 2026-10-01, of the list this file offers: "I want a list of
+     university names only. Remove duplicates and remove cases where you
+     mention the university name but you add the business school afterwards
+     or you add a department name too", and of "Yale School of Management
+     (Operations Management group)" beside "Yale University": "a duplicate
+     and is also not showing the university name".
+
+     The Universities page makes a card for every institution name a posting
+     was made under, so some cards are titled with a school, a department, a
+     second spelling of a university that has a card already, or a slip of
+     the keyboard. Each is named here as the university it is. CURATED, one
+     card at a time, never derived: a decision made once, the SHORT_FORMS
+     discipline. The university named may be a card already (the card folds
+     into it) or a name no card carries yet (the card is offered under that
+     name instead). Either way the card's own title becomes an ALIAS, so a
+     member who typed it is still standardised to the university.
+
+     Keyed by the card's title as the page shows it; folded at lookup, so a
+     difference of case or punctuation finds the same entry. A main campus
+     written beside the university's own name ("at Ann Arbor") is the
+     university; a campus with a name of its own ("University of Michigan-
+     Dearborn") is listed as itself. The selftest refuses a listed name that
+     still carries a school or a department, unless it is in STANDALONE. */
+  var UNIVERSITY_OF = {
+    /* a school, an institute or a department filed as the university */
+    'American University Kogod School of Business': 'American University',
+    'Kogod School of Business': 'American University',
+    'Bayes Business School': 'University of London',     // the site files City St George's under it (oa-schools.js)
+    'BITS School of Management': 'Birla Institute of Technology and Science, Pilani',
+    'Cass Business School': 'University of London',
+    'Católica Lisbon': 'Universidade Católica Portuguesa',
+    'Ewha School of Business': 'Ewha Womans University',
+    'Georgia Tech (ISyE)': 'Georgia Institute of Technology',
+    'Harvard Kennedy School': 'Harvard University',
+    'Hull University Business School': 'University of Hull',
+    'IESE': 'University of Navarra',
+    'IESE Business School': 'University of Navarra',
+    'IPADE Business School': 'Universidad Panamericana',
+    'Neeley School of Business (Texas Christian Univ)': 'Texas Christian University',
+    'Nova School of Business and Economics': 'NOVA University Lisbon',
+    'Rutgers Business School–Newark and New Brunswick': 'Rutgers University',
+    'UBC Sauder School of Business': 'University of British Columbia',
+    'UCL GBSH': 'University College London',
+    'Uni. of Illinois at Urbana-Champaign (Gies)': 'University of Illinois at Urbana-Champaign',
+    'University of Washington-Tacoma (Milgard School of Business)': 'University of Washington Tacoma',
+    'UT Austin McCombs': 'The University of Texas at Austin',
+    'Virgina Darden': 'University of Virginia',
+    'Yale School of Management (Operations Management group)': 'Yale University',
+
+    /* one university, written a second way */
+    'Baruch College - CUNY': 'Baruch College, The City University of New York (CUNY)',
+    'CEIBS': 'China Europe International Business School',
+    'CUHK Shenzhen': 'The Chinese University of Hong Kong, Shenzhen',
+    'Erasmus University': 'Erasmus University Rotterdam',
+    'European School of Management and Technology': 'ESMT Berlin',
+    'Katholieke Universiteit (KU) Leuven': 'KU Leuven',
+    'NC State University': 'North Carolina State University',
+    'NTU': 'Nanyang Technological University',           // its card's postings are in Singapore
+    'NYU Shanghai': 'New York University Shanghai',
+    'Pompeu Fabra University': 'Universitat Pompeu Fabra',
+    'Rutgers University at Newark and New Brunswick': 'Rutgers University',
+    'University at Buffalo - The State University of New York': 'University at Buffalo',
+    'UNSW Sydney': 'University of New South Wales',
+    'William and Mary': 'College of William and Mary',
+
+    /* the main campus, written beside the university's own name */
+    'Indiana University Bloomington': 'Indiana University',
+    'University of Arkansas at Fayetteville': 'University of Arkansas',
+    'University of Maryland, College Park': 'University of Maryland',
+    'University of Michigan at Ann Arbor': 'University of Michigan',
+    'University of Tennessee at Knoxville': 'University of Tennessee',
+
+    /* a misspelling, a country tag, or a name cut short */
+    'Lousiana Tech Univ': 'Louisiana Tech University',
+    'PSU Behrend': 'Penn State Behrend',
+    'University of California Riverside': 'University of California, Riverside',
+    'University of Leeds, UK': 'University of Leeds',
+    'University of Nevada': 'University of Nevada, Reno'   // its one row's own address is Reno
+  };
+
+  /* Institutions in their own right whose names say "School": not a school
+     of some university, so they stay on the list as themselves. The selftest
+     reads this beside UNIVERSITY_OF; a card it flags goes in one or the
+     other. */
+  var STANDALONE = [
+    'China Europe International Business School',
+    'Colorado School of Mines',
+    'Copenhagen Business School',
+    'EMLV (Ecole de Commerce et de Management)',
+    'Frankfurt School of Finance and Management',
+    'Indian School of Business (ISB)',
+    'Kedge Business School',
+    'London Business School (LBS)',
+    'Naval Postgraduate School',
+    'SKEMA Business School',
+    'Skolkovo Institute of Science and Technology (Skoltech)',
+    'Southern University of Science and Technology (SUSTech)',
+    'Stockholm School of Economics (SSE)',
+    'WHU – Otto Beisheim School of Management'
+  ];
+
+  var universityOfFolded = null;
+  /** The university a card's title names, where the title is not one, or ''. */
+  function universityOf(title) {
+    var table = universityOfFolded;
+    if (!table) {
+      table = Object.create(null);
+      for (var t in UNIVERSITY_OF) table[fold(t)] = UNIVERSITY_OF[t];
+      if (S()) universityOfFolded = table;            // never cache a fold made without the canon
+    }
+    var k = fold(title);
+    return k && table[k] ? table[k] : '';
+  }
+
   function schoolKey(name) {
     var s = S();
     return s ? s.fold(s.canonSchool(String(name || ''))) : fold(name);
@@ -189,13 +311,17 @@
      data/university-names.json, written by build-directory.mjs from the
      directory it has just built:
 
-       universities   every card's title, A-Z
-       fromMembers    the cards that exist ONLY because a member named the
-                      place (the 'members' source); the affiliation pass
+       universities   one name per university, A-Z: a card's own title, or
+                      the name UNIVERSITY_OF gives a card that is not titled
+                      with one
+       fromMembers    the universities that exist ONLY because a member named
+                      the place (the 'members' source); the affiliation pass
                       needs them apart, or a card made from a member's word
                       would read as "already listed" and could never leave
-       schools        [school, card] pairs: a school with a name of its own
-                      that the directory lists at exactly one university */
+       schools        [school, university] pairs: a school with a name of its
+                      own that the directory lists at exactly one university
+       aliases        [card title, university]: a card folded into the
+                      university it belongs to, so its title still settles */
   function listFromDirectory(rows, opts) {
     opts = opts || {};
     var s = S();
@@ -222,32 +348,60 @@
       var g0 = groups[order[o]];
       title[order[o]] = s && s.cardName ? s.cardName(g0.names) : g0.names[0];
     }
-    /* ONE UNIVERSITY, ONE ENTRY. The directory carries some universities a
-       second time, as a card titled with the name a posting was made under
-       ("Stanford GSB", "Cornell University/ Cornell Tech"). The caller says
-       which card such a name belongs under (`parentKey`, the anonymous member
-       counts' own rule, _scraper/members-insights.mjs findParent), and that
-       card is offered in its place: its title becomes an ALIAS that settles
-       to the parent, so somebody who typed it is standardised to the
-       university rather than to a posting's spelling of it. */
-    var parentOf = Object.create(null);
+    /* ONE UNIVERSITY, ONE ENTRY. Where a card belongs, by two rules and no
+       others: the curated table first (UNIVERSITY_OF, a decision made once,
+       which may name a university no card carries yet), then the caller's
+       rule (`parentKey`, the anonymous member counts' own, _scraper/
+       members-insights.mjs findParent), which folds only into another card.
+       `into` maps a card to the key it folds into; `named` gives a key the
+       name the curated table chose for it. */
+    var into = Object.create(null);
+    var named = Object.create(null);
+    for (var c = 0; c < order.length; c++) {
+      var ck = order[c];
+      var to = universityOf(title[ck]);
+      if (!to) continue;
+      var tk = uniKey(to);
+      if (!tk) continue;
+      if (tk !== ck) into[ck] = tk;
+      if (!title[tk] || tk === ck) named[tk] = named[tk] || to;
+    }
     if (typeof opts.parentKey === 'function') {
       for (var o2 = 0; o2 < order.length; o2++) {
+        var k2 = order[o2];
+        if (into[k2] || named[k2]) continue;              // the curated answer stands
         var pk = '';
-        try { pk = opts.parentKey(title[order[o2]]) || ''; } catch (e) { pk = ''; }
-        if (pk && pk !== order[o2] && title[pk]) parentOf[order[o2]] = pk;
+        try { pk = opts.parentKey(title[k2]) || ''; } catch (e) { pk = ''; }
+        if (pk && pk !== k2 && (title[pk] || named[pk])) into[k2] = pk;
       }
     }
-    var universities = [];
-    var fromMembers = [];
+    /* the university a card ends up under, following a fold that lands on a
+       card which itself folds; a loop (never written on purpose) stops */
+    function home(key) {
+      var seen = Object.create(null);
+      while (into[key] && !seen[key]) { seen[key] = true; key = into[key]; }
+      return key;
+    }
+    function nameOf(key) { return named[key] || title[key] || ''; }
+
+    var listed = Object.create(null);
+    var srcOf = Object.create(null);
+    var homes = [];
     var aliases = [];
     for (var o3 = 0; o3 < order.length; o3++) {
       var k3 = order[o3];
-      var g = groups[k3];
-      if (parentOf[k3]) { aliases.push([title[k3], title[parentOf[k3]]]); continue; }
-      universities.push(title[k3]);
-      var only = Object.keys(g.sources);
-      if (only.length === 1 && only[0] === 'members') fromMembers.push(title[k3]);
+      var h = home(k3);
+      if (!listed[h]) { listed[h] = nameOf(h); homes.push(h); srcOf[h] = Object.create(null); }
+      for (var sname in groups[k3].sources) srcOf[h][sname] = true;
+      if (uniKey(title[k3]) !== uniKey(listed[h])) aliases.push([title[k3], listed[h]]);
+    }
+    var universities = [];
+    var fromMembers = [];
+    for (var o4 = 0; o4 < homes.length; o4++) {
+      var h4 = homes[o4];
+      universities.push(listed[h4]);
+      var only = Object.keys(srcOf[h4]);
+      if (only.length === 1 && only[0] === 'members') fromMembers.push(listed[h4]);
     }
     var pairs = [];
     for (var sk2 in bySchool) {
@@ -258,8 +412,7 @@
          filed under the University of London and has a card) is that card:
          the name answers before any school could */
       if (title[uniKey(e.name)] || !strongSchool(e.name)) continue;
-      var home = parentOf[unis[0]] ? title[parentOf[unis[0]]] : title[unis[0]];
-      pairs.push([e.name, home]);
+      pairs.push([e.name, listed[home(unis[0])]]);
     }
     var az = function (a, b) {
       return fold(a).localeCompare(fold(b)) || String(a).localeCompare(String(b));
@@ -611,6 +764,9 @@
   return {
     URL: URL,
     SHORT_FORMS: SHORT_FORMS,
+    UNIVERSITY_OF: UNIVERSITY_OF,
+    STANDALONE: STANDALONE,
+    universityOf: universityOf,
     SUBJECT_WORDS: SUBJECT_WORDS,
     WORDS: WORDS,
     addLabel: addLabel,

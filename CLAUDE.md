@@ -1393,7 +1393,9 @@ name we refer to each university."*
     _scraper/affiliations.mjs       standardise profiles, collect member universities
     .github/workflows/oa-affiliations.yml   daily, applies; a press is a plan
 
-**THE LIST IS THE CARDS, TITLED AS THE PAGE TITLES THEM.** `OASchools.cardName`
+**THE LIST IS THE CARDS, TITLED AS THE PAGE TITLES THEM** (except a card
+titled with something that is not a university's name, which is offered under
+its university's; see "…and it offers university names ONLY"). `OASchools.cardName`
 is the one definition of a Universities card's title (the spelling most rows
 use, a tie to the fuller name, then the first seen), read by
 `assets/oa-directory.js` and by `listFromDirectory`, which `build-directory.mjs`
@@ -1409,7 +1411,9 @@ page. The two disagree on about twenty spellings today ("The Pennsylvania State
 University" against "Pennsylvania State University"); aligning them is a change
 to what the posting pipeline publishes, and has not been made.
 
-**ONE UNIVERSITY, ONE ENTRY, BY THE MEMBER COUNTS' OWN RULE.** The directory
+**ONE UNIVERSITY, ONE ENTRY, BY THE MEMBER COUNTS' OWN RULE** (and, since
+the same evening, by a curated table first; see "…and it offers university
+names ONLY" below). The directory
 carries some universities a second time, as a card titled with a posting's
 spelling ("Stanford GSB", "LBS", "Cornell University/ Cornell Tech"). The list
 offers the university once: `build-directory.mjs` asks
@@ -1560,8 +1564,80 @@ public list because a member gave it. The registration note, the profile
 card's lede ("never shown with your name") and the Privacy Policy ("Two things
 about registered accounts are public…") all say exactly that.
 
+### …and it offers university names ONLY
+
+Owner, the same day, over a screenshot of the list: *"I want a list of
+university names only. Remove duplicates and remove cases where you mention
+the university name but you add the business school afterwards or you add a
+department name too. That's too narrow."* And, of "Yale School of Management
+(Operations Management group)" listed beside "Yale University": *"a duplicate
+and is also not showing the university name."*
+
+**The cards are titled with whatever a posting was made under**, so the rule
+above, which folds only a card the site's data can tie to another CARD, left
+about forty entries that were a school, a department, a second spelling or a
+slip: "Kogod School of Business", "UT Austin McCombs", "Virgina Darden",
+"Georgia Tech (ISyE)", "CEIBS" beside "China Europe International Business
+School", "University of Michigan at Ann Arbor" beside "University of
+Michigan". No rule over names could have reached them without guessing, so
+they are a CURATED TABLE, `UNIVERSITY_OF` in `assets/oa-affiliation.js`: a
+card's title, named as the university it is, one decision at a time (the
+`SHORT_FORMS` discipline). The list went from 512 names to 476.
+
+Four properties hold it together:
+
+* **The university named may not be a card yet.** "Kogod School of Business"
+  and "American University Kogod School of Business" are American University,
+  which no card is titled; the two cards become ONE entry under that name.
+  So the list is no longer only card titles: it is a card's own title, or the
+  name the table gives one. A folded card's title stays behind as an alias,
+  so a member who typed it is still standardised to the university.
+* **A main campus written beside the university's own name is the
+  university** ("at Ann Arbor", "Bloomington", "College Park"); **a campus
+  with a name of its own is listed as itself** ("University of Michigan-
+  Dearborn", "University of Washington Bothell", "University of Toronto
+  Mississauga (UTM)"). That is the line, and it is why "University of
+  Washington-Tacoma (Milgard School of Business)" becomes "University of
+  Washington Tacoma" and not "University of Washington".
+* **A school that is an institution in its own right stays**: INSEAD, London
+  Business School, Copenhagen Business School, CEIBS, Stockholm School of
+  Economics. Those whose names say "School" are listed in `STANDALONE` beside
+  the table, so the guard below can tell them apart. A business school that
+  is a school OF a university folds into it: IESE into the University of
+  Navarra, IPADE into the Universidad Panamericana, Nova SBE into NOVA
+  University Lisbon, and Bayes (and its old name, Cass) into the University
+  of London, which is where the site already files City St George's
+  (`oa-schools.js`, the owner's 2026-08-18 ruling).
+* **The member counts fold by the same table.** `affiliationIndex` in
+  `_scraper/members-insights.mjs` reads `AFFILIATION.universityOf` first, ahead
+  of its four routes, and enters a university the table names even where no
+  file lists it under that name, so the figures on the analytics page and the
+  list a member chooses from agree. Entered by name only and never into the
+  index's `contained` list, because a short name such as "American University"
+  must not be found inside "American University in Cairo". The table is the
+  one fold allowed to land on a federation, since Bayes is filed there by the
+  site's own ruling.
+
+**The cards themselves do not move.** Nothing under `data/` changes but the
+list: a card keeps its title on the Universities page, and no posting's
+institution is renamed (that would move posting ids, which are permalinks and
+the join key for edits). The daily affiliation pass standardises any profile
+that chose a folded name to the university the next morning.
+
+**The guard is a TIDY sweep.** `testAffiliationPicker` refuses a listed name
+that carries "School", "Department", "Faculty", "group", an abbreviated
+"Univ", or a bracket holding words rather than initials, unless it is in
+`STANDALONE`. A new posting can bring such a card in at any time, so it fails
+the PR check, where a person adds the entry, and is only reported in a data
+writer's re-check, which must go on publishing. **To fix a name it reports,
+add the card to `UNIVERSITY_OF`, or to `STANDALONE` if it is an institution in
+its own right.**
+
 Tests: `testAffiliationPicker` in `_scraper/selftest.mjs` (the card-title rule
 and the page reading it, the served list against the directory byte for byte,
+the curated folds driven over fixtures and over the served list, the
+university-names-only guard both ways, the owner's Yale case, and the member
+counts folding by the same table,
 which schools vouch, every branch of `match` and `newUniversity`, settle's
 idempotence, the member rows in both builds, the picker's new options and its
 untouched defaults, both cards' wiring, both stylesheets, the pass's own suite

@@ -20327,15 +20327,49 @@ async function testAffiliationPicker() {
     byKey.get(k).push(r.institution);
   }
   for (const list of byKey.values()) titles.add(S.cardName(list));
-  eq(names.universities.filter((n) => !titles.has(n)), [], 'every name offered is a card\'s own title');
-  eq(names.universities.length + names.aliases.length, byKey.size,
-    '…and every card is either offered, once, or folded under the university it duplicates');
+  const curatedNames = new Set([...titles].map((t) => A.universityOf(t)).filter(Boolean));
+  eq(names.universities.filter((n) => !titles.has(n) && !curatedNames.has(n)), [],
+    'every name offered is a card\'s own title, or the name UNIVERSITY_OF gives a card titled otherwise');
+  eq(new Set(names.universities).size, names.universities.length, '…each offered once');
+  const aliased = new Set(names.aliases.map(([from]) => from));
+  eq([...titles].filter((t) => !names.universities.includes(t) && !aliased.has(t)
+    && !names.universities.some((n) => S.institutionKey(n) === S.institutionKey(t))), [],
+    '…and every card is either offered or folded, as an alias, under the university it belongs to');
   ok(names.aliases.every(([from, to]) => titles.has(from) && names.universities.includes(to)),
     '…a folded card settling to a university that is offered');
   ok(names.aliases.some(([from, to]) => from === 'Stanford GSB' && to === 'Stanford University')
      || !titles.has('Stanford GSB'),
     'e.g. "Stanford GSB", a posting\'s spelling of Stanford, is folded under Stanford University');
-  ok(names.universities.length > 500, `the list is the site's whole list (${names.universities.length} universities)`);
+  ok(names.universities.length > 450, `the list is the site's whole list (${names.universities.length} universities)`);
+
+  /* UNIVERSITY NAMES ONLY (owner, 2026-10-01: "remove cases where you mention
+     the university name but you add the business school afterwards or you add
+     a department name too", and of "Yale School of Management (Operations
+     Management group)": "a duplicate and is also not showing the university
+     name"). A name that still carries a school, a department, a group or an
+     abbreviated "Univ", or a bracket holding words rather than initials, is a
+     card the curated table has not met yet: it goes in UNIVERSITY_OF, or in
+     STANDALONE where it is an institution in its own right. TIDY, because a
+     new posting can bring such a card in, and that must never stop the site
+     publishing: it fails the PR check, where a person adds the entry. */
+  const standalone = new Set(A.STANDALONE);
+  const notAUniversity = (n) => /\b(school|department|dept|faculty|group)\b/i.test(n)
+    || /\b(univ|uni)\b/i.test(n) || /\([^)]*[a-z]{3}[^)]*\)/.test(n);
+  tidy(names.universities.filter((n) => notAUniversity(n) && !standalone.has(n)),
+    'the affiliation list offers university names only (a card titled with a school or a department goes in UNIVERSITY_OF, assets/oa-affiliation.js)');
+  ok(notAUniversity('Yale School of Management (Operations Management group)') && notAUniversity('Uni. of Illinois at Urbana-Champaign (Gies)')
+     && notAUniversity('Lousiana Tech Univ') && !notAUniversity('Massachusetts Institute of Technology (MIT)')
+     && !notAUniversity('Eindhoven University of Technology (TU/e)') && !notAUniversity('University of Toronto Mississauga (UTM)'),
+    '…the test reads a school, a department, an abbreviation or a worded bracket, and leaves a bracketed acronym alone');
+  ok(A.STANDALONE.every((n) => notAUniversity(n)), 'STANDALONE names only what the test would otherwise refuse');
+  ok(!names.universities.includes('Yale School of Management (Operations Management group)')
+     && names.aliases.some(([from, to]) => from === 'Yale School of Management (Operations Management group)' && to === 'Yale University'),
+    'the owner\'s own case: Yale\'s school and group is not offered, and settles to Yale University');
+  const targets = Object.entries(A.UNIVERSITY_OF).filter(([from]) => titles.has(from)).map(([, to]) => to);
+  eq(targets.filter((t) => !names.universities.some((n) => S.institutionKey(n) === S.institutionKey(t))), [],
+    'every university UNIVERSITY_OF names for a card on the page is offered');
+  ok(Object.entries(A.UNIVERSITY_OF).every(([from, to]) => from !== to && !/—/.test(from + to)),
+    'UNIVERSITY_OF: every entry names a different name, with no em dash');
   ok(!JSON.stringify(names).includes('@'), 'university-names.json carries no address');
   const build = strip(await src('_scraper/build-directory.mjs'));
   ok(/AFFILIATION\.listFromDirectory\(rows,/.test(build) && /'university-names\.json'/.test(build),
@@ -20372,6 +20406,51 @@ async function testAffiliationPicker() {
   eq(fl.fromMembers, ['Foo Member University'], 'listFromDirectory: a card only members name is marked so');
   eq(fl.schools.map((p) => p[0]), ['Kellogg School of Management', 'Rotman School of Management'],
     'listFromDirectory: a school vouches only with a name of its own and only at ONE university');
+
+  /* the curated table: a card titled with a school folds into a card, two
+     cards titled with one university's school become one entry under a name
+     no card carries, and a card misspelt is offered under its right name */
+  const cl = A.listFromDirectory([
+    { institution: 'Yale University', sources: ['directory'] },
+    { institution: 'Yale School of Management (Operations Management group)', sources: ['postings'] },
+    { institution: 'Kogod School of Business', school: 'Kogod School of Business', sources: ['postings'] },
+    { institution: 'American University Kogod School of Business', sources: ['members'] },
+    { institution: 'University of California Riverside', school: 'A. Gary Anderson Graduate School of Management', sources: ['directory'] },
+    { institution: 'University of Tennessee', sources: ['directory'] },
+    { institution: 'University of Tennessee at Knoxville', sources: ['postings'] },
+    { institution: 'University of Tennessee - Knoxville', sources: ['postings'] },
+  ], { parentKey: (n) => (n === 'University of Tennessee - Knoxville' ? S.institutionKey('University of Tennessee at Knoxville') : '') });
+  eq(cl.universities, ['American University', 'University of California, Riverside', 'University of Tennessee', 'Yale University'],
+    'listFromDirectory: one entry per university, under the university\'s own name');
+  eq(cl.aliases, [
+    ['American University Kogod School of Business', 'American University'],
+    ['Kogod School of Business', 'American University'],
+    ['University of Tennessee at Knoxville', 'University of Tennessee'],
+    ['University of Tennessee - Knoxville', 'University of Tennessee'],
+    ['Yale School of Management (Operations Management group)', 'Yale University'],
+  ], '…every folded card an alias of the university, a fold onto a folded card followed to the end, and a respelling in place needing none');
+  eq(cl.fromMembers, [], '…and a university is marked as only members\' when NOTHING folded into it has another source');
+  eq(cl.schools, [['A. Gary Anderson Graduate School of Management', 'University of California, Riverside']],
+    '…and a school vouches for the university under its listed name');
+  const cidx = A.index(cl);
+  eq((A.match('Kogod School of Business', cidx) || {}).name, 'American University', 'match: a folded card\'s title settles to the university');
+  eq((A.match('Yale School of Management (Operations Management group)', cidx) || {}).name, 'Yale University',
+    'match: the owner\'s case settles to Yale University');
+  eq(A.match('American University in Cairo', cidx), null, 'match: a university named for the curated one is not it');
+
+  /* …and the member counts fold by the same table */
+  const MIc = await import('./members-insights.mjs');
+  const ci = MIc.affiliationIndex({ directory: [
+    { institution: 'Kogod School of Business' }, { institution: 'Bayes Business School' }, { institution: 'University of London' },
+    { institution: 'American University of Beirut' }] });
+  eq(MIc.resolveAffiliation('Kogod School of Business', ci), S.institutionKey('American University'),
+    'member counts: a card the curated table names is counted under its university, which no file lists under that name');
+  eq(MIc.resolveAffiliation('Bayes Business School', ci), S.institutionKey('University of London'),
+    'member counts: the curated table may fold into a federation, where the site itself files the school there');
+  eq(MIc.resolveAffiliation('American University in Cairo', ci), '',
+    'member counts: the curated university is matched by name, never found inside a longer one');
+  ok(/AFFILIATION\.universityOf\(n\)/.test(await src('_scraper/members-insights.mjs')),
+    'members-insights.mjs reads the curated table from oa-affiliation.js and keeps no copy');
   const idx = A.index(fl);
 
   /* --- match: what free text names ----------------------------------------- */
@@ -20559,6 +20638,8 @@ async function testAffiliationPicker() {
   ok(/## A member's affiliation is chosen from the Universities page/.test(claude)
      && /data\/member-universities\.json/.test(claude) && /_scraper\/affiliations\.mjs/.test(claude),
     'CLAUDE.md records the decisions');
+  ok(/### …and it offers university names ONLY/.test(claude) && /`UNIVERSITY_OF`/.test(claude) && /`STANDALONE`/.test(claude),
+    'CLAUDE.md records the university-names-only rule, its table and its standalone list');
   const pt = await src('_scraper/page-test.mjs');
   for (const needle of [
     'affiliation picker: the box offers the Universities page',

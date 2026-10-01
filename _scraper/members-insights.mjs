@@ -132,12 +132,14 @@ function looseKey(name) {
  * ONE UNIVERSITY, ONE ROW. Those files list some universities a second time,
  * under the name a posting was made with ("MIT Sloan", "Columbia Business
  * School", "Cornell University/ Cornell Tech"). Such a name is folded into the
- * university the site's OWN DATA says it belongs to, by four routes and no
- * others: the same name spelled two ways (looseKey); a curated short form; a
- * school the site lists under exactly one university; and a university's full
- * listed name followed by a suffix in brackets or after a slash ("Indiana
- * University (Kelley)"). Nothing is folded into a federation. A name none of
- * these reaches stays its own row.
+ * university the site's OWN DATA says it belongs to: first by the curated
+ * table of names that are not a university's (AFFILIATION.UNIVERSITY_OF, the
+ * same table the registration form's list is folded by), then by four routes
+ * and no others: the same name spelled two ways (looseKey); a curated short
+ * form; a school the site lists under exactly one university; and a
+ * university's full listed name followed by a suffix in brackets or after a
+ * slash ("Indiana University (Kelley)"). Only the curated table may fold a
+ * name into a federation. A name none of these reaches stays its own row.
  */
 export function affiliationIndex({ vocab, directory, universities } = {}) {
   const byKey = new Map();          // institutionKey -> display name
@@ -177,6 +179,27 @@ export function affiliationIndex({ vocab, directory, universities } = {}) {
   }
   for (const [k, names] of spellings) for (const n of names) addTo(byAcronym, declaredAcronym(n), k);
 
+  /* the curated table (AFFILIATION.UNIVERSITY_OF): a name the site files as
+     an institution that is really a school, a department or a second
+     spelling, named as the university it is. The university is entered here
+     even where no file lists it under that name ("Kogod School of Business"
+     is American University), so the counts and the registration form's list
+     agree. Entered by NAME only, never into `contained`: a short name such as
+     "American University" must not be found inside "American University in
+     Cairo". */
+  const curated = new Map();
+  for (const [k, names] of spellings) {
+    for (const n of names) {
+      const to = AFFILIATION.universityOf(n);
+      if (!to) continue;
+      const tk = keyOf(to);
+      if (!tk) continue;
+      if (!byKey.has(tk)) byKey.set(tk, SCHOOLS.canonInstitution(to));
+      if (tk !== k) curated.set(k, tk);
+      break;
+    }
+  }
+
   /* the full names a typed affiliation may CONTAIN, longest first, so
      "University of California, Berkeley" is found before "University of
      California". Two words at least: one word inside a sentence is not the
@@ -201,7 +224,7 @@ export function affiliationIndex({ vocab, directory, universities } = {}) {
   }
   for (const [k, set] of dirCountries) if (!country.has(k) && set.size === 1) country.set(k, [...set][0]);
 
-  const idx = { byKey, bySchool, byAcronym, contained, country, parent: new Map(), canon: new Map() };
+  const idx = { byKey, bySchool, byAcronym, contained, country, curated, parent: new Map(), canon: new Map() };
   for (const k of byKey.keys()) {
     const p = findParent(k, idx);
     if (p) idx.parent.set(k, p);
@@ -235,11 +258,17 @@ export function parentKeyOf(idx) {
 }
 
 /** The university the site's own data says a listed name belongs to, or ''.
-    See affiliationIndex for the four routes. */
+    See affiliationIndex for the routes: the curated table first, then four. */
 function findParent(k, idx) {
   const name = idx.byKey.get(k);
   const kn = norm(name);
   const ok = (p) => !!p && p !== k && idx.byKey.has(p) && !FEDERATIONS.has(p);
+
+  /* 0. the curated table, a decision made once: it outranks every rule
+        below, and may name a federation on purpose (the site files City St
+        George's, and so Bayes, under the University of London) */
+  const cur = idx.curated && idx.curated.get(k);
+  if (cur && cur !== k && idx.byKey.has(cur)) return cur;
 
   /* 1. the same name spelled two ways: the one without brackets, then the
         longer, is the row */
