@@ -6675,6 +6675,12 @@ async function testMemberInsights() {
   ok(!/m\.signIn|m\.roles|m\.profile|ORCID|sign in|candidate profile|posted a job/.test(dm),
     'members: …and nothing about sign-in, ORCID iDs or roles');
   ok(/fa\.section\.classList\.add\('oa-members'\)/.test(dm), 'members: the first figure carries the members class');
+  /* countries.unknown counts EVERY member with no country, and that includes
+     members who named a listed university whose country the site's data does
+     not record (Cardiff, Vanderbilt): they are named in the table above, so
+     the caption must not say they named nothing the site can read */
+  ok(/members are not placed in ' \+\s*'any country/.test(dm) && !/named no university ' \+\s*'or country the site can read/.test(dm),
+    'members: the countries caption does not claim the unplaced members named nothing the site can read');
   ok(!/gender|women|estimat/i.test(dm) && !/m\.email/.test(dm), 'members: the page draws no gender and no e-mail figure');
   ok(/nothing is guessed about anybody/.test(dm) && /Anonymous by construction/.test(dm)
      && /no university or country is named for fewer than/.test(dm),

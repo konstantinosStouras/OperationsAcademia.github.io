@@ -892,8 +892,9 @@
         'or a country they wrote at the end of their affiliation. ' + C.full(c.count) +
         (c.count === 1 ? ' country' : ' countries') + ' in all; those with at least ' + k +
         ' members are named' + (c.rest ? ', the ' + C.full(c.rest) + ' members elsewhere are counted ' +
-        'together' : '') + (c.unknown ? ', and ' + C.full(c.unknown) + ' members named no university ' +
-        'or country the site can read' : '') + '.');
+        'together' : '') + (c.unknown ? ', and ' + C.full(c.unknown) + ' members are not placed in ' +
+        'any country: they gave no affiliation, or the site does not know where the university ' +
+        'they named is' : '') + '.');
       root.appendChild(fc.section);
       C.bars(fc.body, {
         unit: 'members',
