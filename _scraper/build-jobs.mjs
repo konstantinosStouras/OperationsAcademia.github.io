@@ -42,7 +42,8 @@ import {
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE, backdatedDeadlines } from './jobmarket-sheet.mjs';
 import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
-import { buildVocab, serialiseVocab, SCHOOLS, campusCountries, healCountry } from './vocab.mjs';
+import { buildVocab, serialiseVocab, SCHOOLS, campusCountries, healCountry, memberVocabRows } from './vocab.mjs';
+import { memberUniversities } from './directory-model.mjs';
 import { adminUids } from './_mail.mjs';
 import { ADMIN_EMAILS } from './build-candidate-stats.mjs';
 
@@ -68,6 +69,17 @@ const SHEET = path.join(DATA, 'jobmarket.json');
    form's cascading pickers read it through vocab.json: it is what knows which
    school a department sits in at a university that has never posted here. */
 const DIRECTORY = path.join(DATA, 'universities.json');
+/* The universities registered members are at that nothing else lists, written
+   by affiliations.mjs. They join the posting form's university list (owner,
+   2026-10-01: "and job posting drop down university name too"), each as a
+   directory row with no count, and only where no posting or directory row
+   already names the place. */
+const MEMBERS = path.join(DATA, 'member-universities.json');
+
+async function withMembers(rows, directoryRows) {
+  const names = memberUniversities(await readJson(MEMBERS, null));
+  return [...directoryRows, ...memberVocabRows(names, rows, directoryRows)];
+}
 
 /* The world's operations and supply chain schools, as a directory. A curated
    MODULE rather than rows in data/universities.json, because that file is
@@ -500,7 +512,7 @@ async function healNames() {
      served posting. Both writes are conditional on their own file, so a run
      with nothing to do still writes nothing. */
   const dir = await readJson(DIRECTORY, null);
-  const seeded = [...(Array.isArray(dir) ? dir : []), ...institutionSeed()];
+  const seeded = await withMembers(healed, [...(Array.isArray(dir) ? dir : []), ...institutionSeed()]);
   const vocabBefore = await readJson(VOCAB, null);
   const vocab = buildVocab(healed, {
     generated: (vocabBefore && vocabBefore.generated) || '', directory: seeded, fixes,
@@ -1160,7 +1172,7 @@ async function main() {
      the site publishes it, a place that is in both lists is one entry, and a
      seeded row counts for NOTHING — the "4 postings" note stays a posting count.
      Nothing else in the pipeline needs to know it exists. */
-  const seeded = [...(Array.isArray(directory) ? directory : []), ...institutionSeed()];
+  const seeded = await withMembers(rows, [...(Array.isArray(directory) ? directory : []), ...institutionSeed()]);
 
   const vocab = buildVocab(rows, { generated: now.toISOString(), directory: seeded, fixes });
 

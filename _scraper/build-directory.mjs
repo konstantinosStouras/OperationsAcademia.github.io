@@ -8,6 +8,11 @@
    unchanged inputs writes byte-identical files and commits nothing. The
    model (what merges with what, and why) lives in directory-model.mjs.
 
+   It also writes data/university-names.json: the card titles the
+   registration form's affiliation picker offers (assets/oa-affiliation.js),
+   and reads data/member-universities.json, the universities members are at
+   that nothing else lists, each of which gets a card of its own.
+
    It runs as the last step of oa-jobs-build.yml: the build has just rewritten
    jobs.json, so a posting from a university the directory does not carry
    creates its row — and with it a new card on universities.html — in the same
@@ -28,9 +33,12 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { buildDirectory, directoryStats } from './directory-model.mjs';
+import { buildDirectory, directoryStats, memberUniversities } from './directory-model.mjs';
+import { affiliationIndex, parentKeyOf } from './members-insights.mjs';
 
 const require = createRequire(import.meta.url);
+const AFFILIATION = require('../assets/oa-affiliation.js');
+const MEMBERS = 'data/member-universities.json';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
 const DRY = process.argv.includes('--dry-run');
@@ -47,6 +55,16 @@ async function readJson(rel, fallback) {
   }
 }
 
+/* Which card a card belongs under, when the directory lists one university a
+   second time under a posting's spelling of it ("Stanford GSB"): the
+   anonymous member counts' own rule (members-insights.mjs parentKeyOf, over
+   the same three files it reads), so the list a member chooses from and the
+   figures that count members fold the same names into the same university. */
+async function parentKeyFor(rows, archive) {
+  const vocab = await readJson('data/vocab.json', {});
+  return parentKeyOf(affiliationIndex({ vocab, directory: rows, universities: archive }));
+}
+
 async function main() {
   // the archive is REQUIRED — without it the directory would silently shrink
   // to the postings alone and the map's pins would lose their rows' twins
@@ -55,12 +73,21 @@ async function main() {
   const past = await readJson('data/past-postings.json', []);
   const seed = require('../assets/oa-institutions.js').directoryRows();
   const omlist = require('../assets/oa-omlist.js').directoryRows();
+  /* the universities registered members are at that no other source lists
+     (written by _scraper/affiliations.mjs). Optional: absent, it adds nothing */
+  const members = memberUniversities(await readJson(MEMBERS, { universities: [] }));
 
-  const { rows } = buildDirectory({ archive, seed, jobs, past, omlist });
+  const { rows } = buildDirectory({ archive, seed, jobs, past, omlist, members });
   const stats = directoryStats(rows);
 
   const body = JSON.stringify(rows, null, 1) + '\n';
   const meta = JSON.stringify(stats, null, 1) + '\n';
+  /* THE LIST A MEMBER CHOOSES THEIR AFFILIATION FROM: every card's title, as
+     universities.html titles it, so the name chosen is the name the page
+     shows. Its own small file, because the registration card must not fetch
+     a third of a megabyte of directory to offer a list of names. */
+  const list = JSON.stringify(AFFILIATION.listFromDirectory(rows,
+    { parentKey: await parentKeyFor(rows, archive) }), null, 1) + '\n';
 
   console.log(`directory: ${stats.count} rows — ${stats.universities} universities, ` +
     `${stats.departments} department rows`);
@@ -71,6 +98,7 @@ async function main() {
   }
   await writeFile(path.join(ROOT, 'data', 'directory.json'), body);
   await writeFile(path.join(ROOT, 'data', 'directory-meta.json'), meta);
+  await writeFile(path.join(ROOT, 'data', 'university-names.json'), list);
 }
 
 main().catch((err) => {

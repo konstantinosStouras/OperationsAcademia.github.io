@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "affiliation-list-2026-10",
+      "date": "2026-10-01",
+      "title": "Choose your affiliation from our list of universities",
+      "summary": "When you register, or edit your account, the Affiliation box now offers the universities on our Universities page: start typing and the list narrows, or pick from it. If yours is not there, type its name and choose Add other. A university new to us is then added to the Universities page and to the list a school can choose from when it posts a job, without your name or anything else about you. Affiliations that already name a listed university are brought into line with the name that page uses, so one university is spelled one way across the site.",
+      "url": "/universities"
+    },
+    {
       "id": "members-insights-2026-10",
       "date": "2026-10-01",
       "title": "Who the registered members are, on the analytics page",

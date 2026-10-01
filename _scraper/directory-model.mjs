@@ -160,10 +160,10 @@ function noteCharacteristics(row, chars, day) {
  * departments with their `deptUrl` links. PURE — reads its arguments,
  * touches nothing on disk.
  */
-export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], omlist = [] } = {}) {
+export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], omlist = [], members = [] } = {}) {
   const rows = new Map();          // id → row
   const display = new Map();       // instKey → { name, rank } — the card title
-  const RANK = { directory: 3, seed: 2, postings: 1, omlist: 2 };
+  const RANK = { directory: 3, seed: 2, postings: 1, omlist: 2, members: 0 };
 
   function claimName(institution, source) {
     const key = SCHOOLS.institutionKey(institution);
@@ -236,6 +236,25 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
     const row = rowFor(r.institution, r.school, r.department, 'omlist');
     if (!row) continue;
     if (!row.deptUrl && r.deptUrl) row.deptUrl = String(r.deptUrl);
+  }
+
+  /* A UNIVERSITY A MEMBER IS AT, THAT NO OTHER SOURCE LISTS, GETS A CARD
+     (owner, 2026-10-01: "any new universities added should be added to our
+     list of universities"). The names arrive in data/member-universities.json,
+     written by _scraper/affiliations.mjs from the affiliations registered
+     members gave — names only, never who gave them. Only a university nobody
+     else lists: a member's word never adds a row under a card that already
+     exists, and the moment a posting or the seed lists the place, its own rows
+     carry the card and this one is not made. The card's title is the member's
+     spelling only until anybody else's arrives (RANK 0). */
+  const known = new Set();
+  for (const row of rows.values()) known.add(SCHOOLS.institutionKey(row.institution));
+  for (const m of members) {
+    const name = names(typeof m === 'string' ? m : (m && m.institution), '', '').institution;
+    const key = SCHOOLS.institutionKey(name);
+    if (!key || known.has(key)) continue;
+    known.add(key);
+    rowFor(name, '', '', 'members');
   }
 
   /* A POSTING WITH NO SCHOOL JOINS THE ROW THAT NAMES ONE — the offline twin
@@ -362,6 +381,17 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
   const nameMap = new Map();
   for (const [key, v] of display) nameMap.set(key, v.name);
   return { rows: out, names: nameMap };
+}
+
+/** The names in data/member-universities.json, as buildDirectory and the
+    posting form's vocabulary read them. A file that is not that shape is no
+    names at all: it can only ever ADD cards, so the safe failure is adding
+    none. Bounded, and never an address. */
+export function memberUniversities(doc) {
+  const list = doc && Array.isArray(doc.universities) ? doc.universities : [];
+  return list
+    .map((v) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim())
+    .filter((v) => v && v.length <= 120 && !/@|https?:|www\./i.test(v));
 }
 
 /** The card-level summary the page's meta file carries: how many universities

@@ -46,8 +46,9 @@ import {
 import { parseIcs, longestLineOctets } from './_ics-read.mjs';
 import {
   splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey, businessSchoolOf,
-  campusCountries, healCountry, SCHOOLS,
+  campusCountries, healCountry, SCHOOLS, memberVocabRows,
 } from './vocab.mjs';
+import { memberUniversities } from './directory-model.mjs';
 import { docIdFor, migrationDoc, lostFields, migratable } from './migrate-to-firestore.mjs';
 import { syncSheetMirrors } from './build-jobs.mjs';
 import {
@@ -4271,12 +4272,17 @@ async function testVocabFile() {
      cascade offers the full database (owner, 2026-08-24). */
   const seed = require(path.join(HERE, '..', 'assets', 'oa-institutions.js'));
   const om = require(path.join(HERE, '..', 'assets', 'oa-omlist.js'));
+  /* …and the universities members are at that nothing else lists
+     (data/member-universities.json), through the same helper the build
+     calls, so the posting form offers them too (owner, 2026-10-01) */
+  const dirRows = [...directory, ...seed.directoryRows(), ...om.directoryRows()];
+  const members = memberUniversities(await read('member-universities.json'));
   const rebuilt = buildVocab(jobs, {
     generated: v.generated,
-    directory: [...directory, ...seed.directoryRows(), ...om.directoryRows()],
+    directory: [...dirRows, ...memberVocabRows(members, jobs, dirRows)],
   });
   eq(serialiseVocab(rebuilt), serialiseVocab(v),
-    'vocab.json is exactly what the postings and the two directories rebuild');
+    'vocab.json is exactly what the postings, the two directories and the member universities rebuild');
 
   /* the seed's whole point: a place with no posting is offered anyway. Every
      one of its universities is on the list, and carries no posting count it
@@ -11897,6 +11903,8 @@ async function testReviewWiring() {
     'oa-adverts-verify.yml', 'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml',
     // the roster sync writes data/users-meta.json and data/users-growth.json (2026-09-05)
     'oa-user-directory.yml',
+    // the affiliation pass writes data/member-universities.json (2026-10-01)
+    'oa-affiliations.yml',
     // the analytics build writes data/analytics.json (2026-09-06)
     'oa-analytics.yml'];
   const wfAll = (await readdir(path.join(HERE, '..', '.github', 'workflows')))
@@ -20218,6 +20226,294 @@ const DELEGATING_SUITES = ['build-jobs.mjs', 'migrate-to-firestore.mjs', 'selfte
 /* ...and the ones this file drives IN PROCESS, by importing them. */
 const IN_PROCESS_SUITES = ['build-candidate-stats.mjs'];
 
+/* ---------------------------------------------- the affiliation, from a list
+
+   Owner, 2026-10-01: "When users register and need to provide us and write
+   down their affiliation, show them a list of universities as a drop down
+   menu for them to choose from, and also allow 'Add Other' for them to add
+   anything not listed", then "the list of universities should come from our
+   list so far: /universities … any new universities added should be added to
+   our list of universities, and job posting drop down university name too.
+   Then, we should try to update affiliations of registered users that match
+   any of the already existing universities so that they match with the exact
+   university name we refer to each university."
+
+   The pieces, each pinned here:
+
+   - OASchools.cardName, the ONE rule a Universities card is titled by, read
+     by the page and by the build that publishes the list;
+   - data/university-names.json, the card titles (plus the member-only cards
+     and the schools that vouch for one university), built by
+     build-directory.mjs through assets/oa-affiliation.js;
+   - assets/oa-affiliation.js, which says which free text names which listed
+     university (match/settle) and which names a university nobody lists
+     (newUniversity), and mounts the picker;
+   - the picker (oa-combo.js) gained a lead row, its own words and a hint,
+     every one defaulting to what the posting form already said;
+   - both account cards draw the field through affFieldHTML and mount it;
+   - data/member-universities.json, written by _scraper/affiliations.mjs from
+     members' affiliations, read by the directory (a card each) and the
+     posting form's vocabulary (an entry each);
+   - _scraper/affiliations.mjs standardises the profiles, daily.            */
+async function testAffiliationPicker() {
+  const root = path.join(HERE, '..');
+  const S = require(path.join(root, 'assets', 'oa-schools.js'));
+  const A = require(path.join(root, 'assets', 'oa-affiliation.js'));
+  const src = async (rel) => readFile(path.join(root, rel), 'utf8');
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  /* --- the card's title: one rule, both sides ------------------------------ */
+  eq(S.cardName(['B Uni', 'A University', 'B Uni']), 'B Uni', 'cardName: the spelling most rows use');
+  eq(S.cardName(['Foo University', 'Foo University (FU)']), 'Foo University (FU)', 'cardName: a tie goes to the fuller name');
+  eq(S.cardName(['Abc', 'Xyz']), 'Abc', 'cardName: a tie on both goes to the first seen, so it cannot flap');
+  const dirJs = strip(await src('assets/oa-directory.js'));
+  ok(/OASchools\.cardName\(names\)/.test(dirJs) && !/count\[n\] > count\[best\]/.test(dirJs),
+    'universities.html titles a card through OASchools.cardName and keeps no copy of the rule');
+  const uniHtml = await src('universities.html');
+  ok(uniHtml.indexOf('src="assets/oa-schools.js"') > 0
+     && uniHtml.indexOf('src="assets/oa-schools.js"') < uniHtml.indexOf('src="assets/oa-directory.js"'),
+    'universities.html loads oa-schools.js before oa-directory.js, so the rule is there when a card is titled');
+
+  /* --- the served list ------------------------------------------------------ */
+  const dir = JSON.parse(await src('data/directory.json'));
+  const names = JSON.parse(await src('data/university-names.json'));
+  eq(Object.keys(names), ['universities', 'fromMembers', 'schools', 'aliases'], 'university-names.json: four keys and nothing else');
+  /* rebuilt the way build-directory.mjs builds it: the cards, with a card
+     that is another university's duplicate folded under it by the anonymous
+     member counts' own rule (members-insights.mjs), over the same files */
+  const MI = await import('./members-insights.mjs');
+  const parentKey = MI.parentKeyOf(MI.affiliationIndex({
+    vocab: JSON.parse(await src('data/vocab.json')), directory: dir,
+    universities: JSON.parse(await src('data/universities.json')) }));
+  eq(JSON.stringify(names, null, 1) + '\n', JSON.stringify(A.listFromDirectory(dir, { parentKey }), null, 1) + '\n',
+    'university-names.json is exactly what build-directory.mjs derives from the directory it serves');
+  ok(/parentKeyOf\(affiliationIndex\(\{ vocab, directory: rows, universities: archive \}\)\)/.test(await src('_scraper/build-directory.mjs')),
+    'build-directory.mjs folds a duplicate card by the member counts\' own rule, over the same three files');
+  eq(MI.SHORT_FORMS, A.SHORT_FORMS, 'the curated short forms are ONE table, read by the picker, the pass and the member counts');
+  ok(!/'mit': 'Massachusetts Institute of Technology'/.test(await src('_scraper/members-insights.mjs')),
+    '…kept in assets/oa-affiliation.js alone, with no second copy in the counts module');
+  const titles = new Set();
+  const byKey = new Map();
+  for (const r of dir) {
+    const k = S.institutionKey(r.institution);
+    if (!byKey.has(k)) byKey.set(k, []);
+    byKey.get(k).push(r.institution);
+  }
+  for (const list of byKey.values()) titles.add(S.cardName(list));
+  eq(names.universities.filter((n) => !titles.has(n)), [], 'every name offered is a card\'s own title');
+  eq(names.universities.length + names.aliases.length, byKey.size,
+    '…and every card is either offered, once, or folded under the university it duplicates');
+  ok(names.aliases.every(([from, to]) => titles.has(from) && names.universities.includes(to)),
+    '…a folded card settling to a university that is offered');
+  ok(names.aliases.some(([from, to]) => from === 'Stanford GSB' && to === 'Stanford University')
+     || !titles.has('Stanford GSB'),
+    'e.g. "Stanford GSB", a posting\'s spelling of Stanford, is folded under Stanford University');
+  ok(names.universities.length > 500, `the list is the site's whole list (${names.universities.length} universities)`);
+  ok(!JSON.stringify(names).includes('@'), 'university-names.json carries no address');
+  const build = strip(await src('_scraper/build-directory.mjs'));
+  ok(/AFFILIATION\.listFromDirectory\(rows,/.test(build) && /'university-names\.json'/.test(build),
+    'build-directory.mjs writes the list from the rows it has just built');
+  ok(/memberUniversities\(await readJson\(MEMBERS, \{ universities: \[\] \}\)\)/.test(build)
+     && /buildDirectory\(\{ archive, seed, jobs, past, omlist, members \}\)/.test(build),
+    'build-directory.mjs feeds the member universities into the merge, optional');
+  const gz = (await import('node:zlib')).gzipSync(await readFile(path.join(root, 'data', 'university-names.json'))).length;
+  ok(gz < 20000, `the list is small enough to fetch for one card (${gz} bytes gzipped)`);
+
+  /* which schools vouch: a name of its own, at one university */
+  ok(A.strongSchool('Kellogg School of Management') && A.strongSchool('Cardiff Business School'),
+    'a school with a word of its own vouches for its university');
+  ok(!A.strongSchool('School of Mathematical and Statistical Sciences')
+     && !A.strongSchool('Faculty of Economics and Business (FEB)')
+     && !A.strongSchool('College of Business'),
+    '…and one named for its subject, or for its own initials, vouches for nobody');
+  const fixtureDir = [
+    { institution: 'Northwestern University', school: 'Kellogg School of Management', sources: ['directory'] },
+    { institution: 'Clemson University', school: 'School of Mathematical and Statistical Sciences', sources: ['seed'] },
+    { institution: 'Alpha University', school: 'Zeta School of Business', sources: ['postings'] },
+    { institution: 'Beta University', school: 'Zeta School of Business', sources: ['postings'] },
+    { institution: 'University of Toronto', school: 'Rotman School of Management', sources: ['seed'] },
+    { institution: 'Massachusetts Institute of Technology (MIT)', sources: ['seed'] },
+    { institution: 'Massachusetts Institute of Technology', sources: ['postings'] },
+    { institution: 'Foo Member University', sources: ['members'] },
+    { institution: 'University of California, Berkeley', sources: ['directory'] },
+    { institution: 'Stanford University', sources: ['directory'] },
+  ];
+  const fl = A.listFromDirectory(fixtureDir.concat([{ institution: 'Stanford GSB', sources: ['postings'] }]),
+    { parentKey: (n) => (n === 'Stanford GSB' ? S.institutionKey('Stanford University') : '') });
+  eq(fl.aliases, [['Stanford GSB', 'Stanford University']], 'listFromDirectory: a card the caller folds becomes an alias of its parent');
+  ok(!fl.universities.includes('Stanford GSB'), '…and is not offered as a university of its own');
+  eq(fl.fromMembers, ['Foo Member University'], 'listFromDirectory: a card only members name is marked so');
+  eq(fl.schools.map((p) => p[0]), ['Kellogg School of Management', 'Rotman School of Management'],
+    'listFromDirectory: a school vouches only with a name of its own and only at ONE university');
+  const idx = A.index(fl);
+
+  /* --- match: what free text names ----------------------------------------- */
+  const M = (t) => { const m = A.match(t, idx); return m ? m.name : null; };
+  eq(M('Stanford University'), 'Stanford University', 'match: the name itself');
+  eq(A.match('Stanford University', idx).how, 'exact', '…as an exact answer');
+  eq(M('stanford university'), 'Stanford University', 'match: any case');
+  eq(M('UC Berkeley'), 'University of California, Berkeley', 'match: an alias the site already keeps');
+  eq(M('MIT'), 'Massachusetts Institute of Technology (MIT)', 'match: the acronym a card carries in its brackets');
+  eq(M('Kellogg School of Management'), 'Northwestern University', 'match: a school that vouches for its university');
+  eq(M('Rotman School of Management, University of Toronto'), 'University of Toronto', 'match: a line naming one listed university');
+  eq(M('Operations, Haas School of Business, University of California, Berkeley'), 'University of California, Berkeley',
+    'match: a university whose own name carries a comma, found by trying runs of pieces longest first');
+  eq(M('PhD student at Stanford University'), 'Stanford University', 'match: " at " is a weak break');
+  eq(M('PhD, Stanford University; visiting University of Toronto'), null,
+    'match: TWO universities named is a person\'s call, never this function\'s');
+  eq(M('Stanford GSB'), 'Stanford University', 'match: a folded card\'s own title settles to its parent');
+  eq(M('stanford'), 'Stanford University', 'match: a CURATED short form (SHORT_FORMS), a decision made once');
+  eq(A.match('stanford', idx).how, 'short', '…named as such');
+  eq(M('Stanf'), null, 'match: a prefix is never a university ("Penn" would become Penn State)');
+  eq(M('Penn'), null, '…and "Penn" is deliberately not a short form');
+  eq(M('Acme Analytics'), null, 'match: a company is never a university');
+  eq(M('School of Mathematical and Statistical Sciences'), null, 'match: a subject-named school vouches for nobody');
+  eq(M('Zeta School of Business'), null, 'match: nor one the directory lists at two universities');
+  eq(M(''), null, 'match: nothing is nothing');
+  for (const t of ['Kellogg School of Management', 'MIT', 'Acme Analytics', 'stanford', 'Stanf', 'Rotman School of Management, University of Toronto']) {
+    eq(A.settle(A.settle(t, idx), idx), A.settle(t, idx), `settle is idempotent ("${t}")`);
+  }
+  eq(A.settle('  Acme   Analytics ', idx), 'Acme Analytics', 'settle: what names no university is kept as typed, tidied');
+
+  /* --- newUniversity: what may join the public list ------------------------ */
+  eq(A.newUniversity('Bar Polytechnic University', idx), 'Bar Polytechnic University', 'new: a university nobody lists');
+  eq(A.newUniversity('Department of Operations, Bar Polytechnic University', idx), 'Bar Polytechnic University',
+    'new: the one piece of a line that is a university');
+  eq(A.newUniversity('Stanford University', idx), '', 'new: never a listed one');
+  eq(A.newUniversity('PhD student at Bar University', idx), '', 'new: never a piece that says something about a person');
+  eq(A.newUniversity('Acme Analytics', idx), '', 'new: never a company');
+  eq(A.newUniversity('Zeta School of Business', idx), '', 'new: never a school');
+  eq(A.newUniversity('Bar University, Baz University', idx), '', 'new: never one of two');
+  eq(A.newUniversity('https://bar.edu University', idx), '', 'new: never an address');
+  eq(A.newUniversity('Stanford Universit', idx), '', 'new: never a slight respelling of a card already there');
+
+  /* --- the directory and the posting form take the member universities ---- */
+  const { buildDirectory, memberUniversities } = await import('./directory-model.mjs');
+  const built = buildDirectory({ archive: [{ institution: 'Stanford University' }],
+    members: ['Bar Polytechnic University', 'Stanford University'] });
+  eq(built.rows.filter((r) => (r.sources || []).includes('members')).map((r) => r.institution),
+    ['Bar Polytechnic University'], 'directory: a member university nobody lists gets a card; a listed one gets nothing');
+  eq(memberUniversities({ universities: ['A University', 'x@y.edu', 'http://z', ' ', 'B  University'] }),
+    ['A University', 'B University'], 'memberUniversities: names only, never an address or a link');
+  eq(memberUniversities(null), [], '…and a file that is not that shape is no names at all');
+  const vrows = memberVocabRows(['Bar Polytechnic University', 'Stanford University'],
+    [{ institution: 'Stanford University' }], []);
+  eq(vrows, [{ institution: 'Bar Polytechnic University', school: '', department: '' }],
+    'posting form: a member university joins the list, only where no posting or directory row names the place');
+  const bj = strip(await src('_scraper/build-jobs.mjs'));
+  ok((bj.match(/await withMembers\(/g) || []).length === 2,
+    'build-jobs.mjs feeds the member universities into the vocabulary on BOTH paths, the build and --heal-names');
+  const mf = JSON.parse(await src('data/member-universities.json'));
+  eq(Object.keys(mf), ['universities'], 'member-universities.json: names and nothing else');
+  ok(Array.isArray(mf.universities) && mf.universities.every((n) => typeof n === 'string' && !/@/.test(n)),
+    '…every one a string, none an address');
+
+  /* --- the picker's new words, and its old ones kept ----------------------- */
+  const combo = await src('assets/oa-combo.js');
+  for (const k of ['opts.lead', 'opts.leadLabel', 'opts.addLabel', 'opts.hint', 'opts.nearNote', 'opts.emptyNote', 'opts.listLabel']) {
+    ok(combo.includes(k), `oa-combo.js reads ${k}`);
+  }
+  ok(/'Use “' \+ asPublished \+ '” — a name not on the list yet'/.test(combo)
+     && /'Already on the list — is one of these the place you mean\? ' \+/.test(combo)
+     && /'Nothing matches\. Type the full name to add it\.'/.test(combo),
+    'oa-combo.js: a caller that passes none of them reads exactly what the posting form always did');
+  ok(/var exact = typed && leadRows\.concat\(inScope, showRest \? rest : \[\]\)/.test(combo),
+    'oa-combo.js: a line that resolves to a listed name is never offered as "other"');
+  const hadAt = combo.indexOf('var hadFocus = document.activeElement === input;');
+  ok(hadAt > 0 && hadAt < combo.indexOf('wrap.appendChild(input);')
+     && combo.indexOf("input.addEventListener('focus',") > 0
+     && combo.indexOf('input.focus({ preventScroll: true })') < combo.indexOf("input.addEventListener('focus',"),
+    'oa-combo.js: mounting on a box that holds the keyboard keeps it there, without opening the list ' +
+    '(the gate card puts the cursor in the affiliation box before the picker has loaded)');
+  ok(/input\.addEventListener\('focus', function \(\) \{ if \(opts\.openOnFocus !== false\) open\(\); \}\);/.test(combo)
+     && /input\.addEventListener\('click', open\);/.test(combo),
+    'oa-combo.js: openOnFocus: false opens the list on a press, never on focus alone; left out, the posting form opens on focus as before');
+  ok(/openOnFocus: false,/.test(strip(await src('assets/oa-affiliation.js'))),
+    'the affiliation picker opens on a press, so a card putting the keyboard in the box draws no list over "Sign out instead"');
+  ok(/the keyboard in the box opens no list over the card/.test(await src('_scraper/page-test.mjs')),
+    'page-test.mjs measures the gate card with the keyboard in the box and the list shut');
+  eq(A.addLabel('Acme'), 'Add other: “Acme”', 'the new-name row says the owner\'s own "Add other"');
+  ok(!/—/.test(Object.values(A.WORDS).join(' ') + A.addLabel('x')), 'the picker\'s words carry no em dash');
+
+  /* --- both cards draw it, mount it and settle it -------------------------- */
+  const acct = await src('assets/oa-accounts.js');
+  const acctCode = strip(acct);
+  ok(/if \(registering\) mountAffiliation\(wrap, \$\('#oa-reg-aff', wrap\)\);/.test(acctCode)
+     && /mountAffiliation\(wrap, \$\('#oa-prof-aff', wrap\)\);/.test(acctCode),
+    'both cards mount the picker on their Affiliation box');
+  ok(/loadScript\('assets\/oa-schools\.js', 'OASchools'\)\s*\.then\(function \(\) \{ return loadScript\('assets\/oa-affiliation\.js', 'OAAffiliation'\); \}\)/.test(acctCode),
+    'the picker is loaded ON DEMAND, oa-schools.js first, so a page that never draws the card pays nothing');
+  ok(/affiliation = settleAffiliation\(affiliation\);/.test(acctCode)
+     && /if \(out\.affiliation\) out\.affiliation = settleAffiliation\(out\.affiliation\)\.slice\(0, 300\);/.test(acctCode),
+    'both submits store the listed name the box names, by the picker\'s own rule');
+  ok(/function close\(\) \{ dropAffiliation\(wrap\);/.test(acctCode) && /dropAffiliation\(old\); old\.parentNode\.removeChild\(old\);/.test(acctCode),
+    'a card that goes takes the picker\'s document listener with it');
+  ok(!/<label>Affiliation/.test(acctCode) && !/<label class="oa-missing">Affiliation/.test(acctCode),
+    'no card wraps the box in its label any more: the list beside it would be read as its name');
+  ok(/'<label for="' \+ o\.id \+ '">Affiliation'/.test(acctCode), '…it is a real label naming the box by id');
+
+  /* --- the stylesheets ------------------------------------------------------ */
+  const ui = await src('assets/oa-ui.css');
+  const v3 = await src('assets/v3.css');
+  ok(/\.oa-aff-field \.oa-combo::after \{[^}]*border-top: 6px solid var\(--mut, #77808a\);[^}]*pointer-events: none;/.test(ui),
+    'oa-ui.css: the field shows it is a list, in the theme\'s own ink, and a press on the arrow lands on the box');
+  ok(/\.oa-modal-card \.oa-aff-field > \.oa-opt\.oa-fine \{[^}]*display: block;/.test(ui),
+    'oa-ui.css: the note is a line of its own under the box');
+  ok(/\.oa-combo-hint \{[^}]*color: var\(--ink-2, #454c56\);/.test(ui), 'oa-ui.css: the list\'s hint names its own ink');
+  ok(/body\.v3 \.oa-modal-card form \.oa-aff-field > label \{ margin: 0 0 6px; \}/.test(v3)
+     && /body\.v3 \.oa-modal-card form \.oa-aff-field input\[type='text'\] \{ margin-top: 0;/.test(v3),
+    'v3.css: the label above and the box under it, restated on specificity over the wrapped-label rules');
+
+  /* --- the pass over existing members ------------------------------------- */
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'affiliations.mjs'), '--selftest'], { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/affiliations selftest: \d+ checks passed, 0 failed/.test(out) && !/\bFAIL\b/.test(out),
+    'the affiliation pass\'s own selftest is green:\n' + out.slice(0, 1500));
+  const AF = await import('./affiliations.mjs');
+  eq([AF.PROFILES, AF.ROSTER, AF.TALLY], ['profiles', 'userDirectory', 'registeredUsers'],
+    'the pass reads the collections the site writes');
+  const rules = await src('_firestore.rules');
+  ok(/str\('affiliation', 300\)/.test(rules) && AF.MAXLEN === 300,
+    'the pass writes within the bound the rules put on the field');
+  const wf = await src('.github/workflows/oa-affiliations.yml');
+  const wfCode = wf.replace(/^\s*#.*$/gm, '');
+  ok(/workflow_dispatch:[\s\S]*write:[\s\S]*type: boolean[\s\S]*default: false/.test(wfCode),
+    'the workflow\'s button is a PLAN unless `write` is ticked');
+  ok(/schedule:\s*\n\s*- cron: '23 5 \* \* \*'/.test(wfCode)
+     && /APPLY: \$\{\{ github\.event_name == 'schedule' \|\| inputs\.write == true \}\}/.test(wfCode),
+    '…and the daily run applies, so a member who typed a school reads its university the next morning');
+  ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wfCode), 'the workflow checks out the branch tip');
+  ok(/if: github\.ref_name == 'master' && env\.AFF_MODE == '--write'/.test(wfCode),
+    'it commits only what a run that applied wrote');
+
+  /* --- what the site says about it ----------------------------------------- */
+  const policy = await src('privacy-policy.html');
+  ok(/universit[^<]{0,40}not on\s+the\s+list[\s\S]{0,400}without your name/i.test(policy),
+    'the Privacy Policy says a university new to the list is added to it, without your name');
+  ok(/standardis/i.test(policy), 'the Privacy Policy says the affiliation is standardised to the list\'s own name');
+  const log = JSON.parse(await src('changelog.json'));
+  const entry = (log.updates || []).find((u) => u.id === 'affiliation-list-2026-10');
+  ok(entry && entry.date === '2026-10-01' && /Add other/.test(entry.summary) && !/—/.test(entry.summary + entry.title),
+    'changelog.json announces it, in the owner\'s words and with no em dash');
+  const claude = await src('CLAUDE.md');
+  ok(/## A member's affiliation is chosen from the Universities page/.test(claude)
+     && /data\/member-universities\.json/.test(claude) && /_scraper\/affiliations\.mjs/.test(claude),
+    'CLAUDE.md records the decisions');
+  const pt = await src('_scraper/page-test.mjs');
+  for (const needle of [
+    'affiliation picker: the box offers the Universities page',
+    'affiliation picker: a line naming a listed university is offered that university first',
+    'affiliation picker: a name not on the list is offered as Add other',
+    'affiliation picker: the account stores the listed name the box named',
+  ]) {
+    ok(pt.includes(needle), `page-test drives it in a browser: "${needle}"`);
+  }
+}
+
 async function testModuleSuites() {
   for (const f of SPAWNED_SUITES) {
     let out = '';
@@ -23793,6 +24089,8 @@ async function testRegisteredUsersFigure() {
      && /analytics">analytics page<\/a> shows how that has grown and, as\s+anonymous counts/.test(faq),
     'index.html: the privacy FAQ names the count, the growth chart and the anonymous member counts as what is public about accounts');
   ok(!/—/.test(faq.replace(/&mdash;/g, '—').slice(faq.indexOf('What is public'))), 'index.html: …with no em dash in the new sentence');
+  ok(/The one other thing is the name of a\s+university a member gave as their affiliation[\s\S]{0,200}it is added\s+to that page, without anybody&rsquo;s name and without any count/.test(faq),
+    'index.html: …and the name of a university a member gave that the Universities page did not list (2026-10-01)');
 
   /* the announcements */
   const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
@@ -23864,11 +24162,21 @@ async function testRegistrationFields() {
   const card = acct.slice(regAt, regEnd);
   ok(card.length > 1500 && card.length < 8000, 'registration: the card slice is the right size');
 
-  ok(/'<label>Affiliation' \+/.test(card),
-    'registration: Affiliation is a BARE label — no "(optional)" chip, which is how this card says a field is required');
-  ok(!/Affiliation <span class="oa-opt">\(optional\)<\/span>/.test(card),
+  /* The field is drawn by ONE helper since the university picker
+     (2026-10-01): affFieldHTML, a real `<label for>` above the box, so the
+     claims below are read off the helper and the registration card's call. */
+  const affFnAt = acct.indexOf('function affFieldHTML(o) {');
+  const affFn = affFnAt > 0 ? acct.slice(affFnAt, acct.indexOf('\n  }\n', affFnAt)) : '';
+  ok(affFn.length > 300 && affFn.length < 1500, 'registration: the affiliation field helper was found');
+  const regCall = /affFieldHTML\(\{ id: 'oa-reg-aff', required: true, note: AFF_HOW \+ AFF_WHERE \}\)/;
+  ok(regCall.test(card),
+    'registration: Affiliation is drawn through affFieldHTML with NO optional flag — a bare label, which is how this card says a field is required');
+  ok(!/Affiliation <span class="oa-opt">\(optional\)<\/span>/.test(card) && !/optional: true/.test(card),
     'registration: …and the old optional chip is gone, not merely moved');
-  ok(/name="affiliation" maxlength="160" required/.test(card),
+  ok(/'<label for="' \+ o\.id \+ '">Affiliation' \+/.test(affFn)
+     && /\(o\.optional \? ' <span class="oa-opt">\(optional\)<\/span>' : ''\)/.test(affFn),
+    'registration: the helper draws the chip only when asked to, beside a label that names the box by id');
+  ok(/name="affiliation" maxlength="160" ' \+\s*\(o\.required \? 'required aria-required="true" ' : ''\)/.test(affFn),
     'registration: …and the box carries the `required` attribute, like the two name boxes');
   for (const f of ['firstName', 'lastName']) {
     ok(new RegExp(`name="${f}"[\\s\\S]{0,120}required`).test(card),
@@ -23879,16 +24187,17 @@ async function testRegistrationFields() {
   /* It compels a personal field, so it says where the field goes — in the
      SITE's own words, the ones the profile card's lede already uses, so the two
      cards cannot make two different claims about one box. */
-  ok(/'<span class="oa-opt oa-fine">Never published\.<\/span><\/label>'/.test(card),
-    'registration: the affiliation box says where the field goes, under it');
-  ok(/Your affiliation is never published\./.test(acct),
-    'registration: …in the phrase the profile card already uses, so the two agree');
-  const welcomeAt = acct.indexOf("? '<label class=\"oa-missing\">Affiliation' + needMark() +");
-  const welcome = welcomeAt > 0 ? acct.slice(welcomeAt, welcomeAt + 400) : '';
-  ok(welcomeAt > 0 && !/Never published/.test(welcome),
-    'welcome card: …and is NOT given it twice, since its own lede already says it');
+  ok(/'<span class="oa-opt oa-fine" id="' \+ o\.id \+ '-note">' \+ o\.note \+ '<\/span>'/.test(affFn)
+     && /aria-describedby="' \+ o\.id \+ '-note"/.test(affFn),
+    'registration: the affiliation box says where the field goes, under it, and the box is described by it');
+  ok(/var AFF_WHERE = ' Never shown with your name; a university new to our list is added to it\.';/.test(acct)
+     && /Your affiliation is never shown with your name\./.test(acct),
+    'registration: …in the phrase the profile card\'s lede uses ("never shown with your name"), so the two agree, ' +
+    'and it says the one public trace an answer can leave');
+  ok(/var AFF_HOW = 'Choose your university from the list, or type its name and choose &ldquo;Add other&rdquo;\.';/.test(acct),
+    'registration: …and how the list works, in the owner\'s own "Add other"');
 
-  ok(/autocomplete="organization"/.test(card),
+  ok(/autocomplete="organization"/.test(affFn),
     'registration: the affiliation keeps autocomplete="organization" — it describes the person filling the form in, ' +
     'which is exactly the test the posting form\'s own autocomplete rule applies');
 
@@ -24192,13 +24501,13 @@ async function testRegistrationFields() {
   const profEnd = acct.indexOf('\'<div class="oa-auth-actions">\'', profAt);
   ok(profAt > 0 && profEnd > profAt, 'profile card: the form markup was found');
   const prof = acct.slice(profAt, profEnd);
-  ok(/'<label>Affiliation <span class="oa-opt">\(optional\)<\/span>'/.test(prof),
+  ok(/: \(asking \? '' : affFieldHTML\(\{ id: 'oa-prof-aff', optional: true,/.test(prof),
     'profile card: an ordinary EDIT still gets the optional chip — correcting a name must not demand an ' +
     'affiliation of the accounts that were never asked for one');
   /* The card has a second branch since the provider ask (below): the compulsory
      box exists, and what keeps the edit surface safe is that NOTHING but an
      explicit option can reach it. Pin that rather than the absence of the word. */
-  ok(/var affRow = mustAff\s*\? '<label class="oa-missing">Affiliation' \+ needMark\(\)/.test(prof),
+  ok(/var affRow = mustAff\s*\? affFieldHTML\(\{ id: 'oa-prof-aff', missing: true, required: true, mark: needMark\(\),/.test(prof),
     'profile card: the compulsory box is behind mustAff, never the default');
   ok(/var req = \(opts && opts\.require\) \|\| \[\];/.test(acct)
     && /var mustName = must\('name'\), mustAff = must\('affiliation'\), mustMail = must\('email'\);/.test(acct),
@@ -24514,11 +24823,12 @@ async function testRegistrationFields() {
     'ask card: the lede says what is owed, which sign-in it unlocks, and who sees the answer');
   ok(/class="oa-need" aria-hidden="true">needed<\/span>/.test(acct)
      && /'<div class="oa-prow' \+ \(mustName \? ' oa-missing' : ''\) \+ '">'/.test(acct)
-     && /'<label class="oa-missing">Affiliation' \+ needMark\(\)/.test(acct)
+     && /affFieldHTML\(\{ id: 'oa-prof-aff', missing: true, required: true, mark: needMark\(\),/.test(acct)
+     && /'<div class="oa-aff-field' \+ \(o\.missing \? ' oa-missing' : ''\) \+ '">'/.test(acct)
      && /mailRow\.replace\('class="oa-email-row"', 'class="oa-email-row oa-missing"'\)/.test(acct),
     'ask card: every compelled row is marked .oa-missing and carries the "needed" mark');
   ok(/var nameRow = \(!asking \|\| mustName\)/.test(acct)
-     && /: \(asking \? '' :\s*'<label>Affiliation <span class="oa-opt">\(optional\)/.test(acct)
+     && /: \(asking \? '' : affFieldHTML\(\{ id: 'oa-prof-aff', optional: true,/.test(acct)
      && /var websiteRow = asking \? '' :/.test(acct)
      && /var mailRow = \(!asking \|\| mustMail\) \? emailRowHTML\(u, p, mustMail\) : '';/.test(acct)
      && /\(asking \? '' : '<div class="oa-photo-side">'/.test(acct)
@@ -24870,6 +25180,7 @@ if (isMain(import.meta.url)) {
   await testForumSeed();
   await testForumThreadRemoval();
   await testPublishNews();
+  await testAffiliationPicker();
   await testModuleSuites();
   process.exit(finish() ? 0 : 1);
 }

@@ -97,6 +97,24 @@
    *                       the plain fold, which is right for a plain list
    *   publishAs fn      — what a name not on the list will be published as,
    *                       so the "new name" row offers that and not a promise
+   *   lead      fn(typed) -> [names] — rows drawn FIRST, under `leadLabel`,
+   *                       whatever their text score: the listed name a typed
+   *                       line resolves to ("Rotman School of Management,
+   *                       University of Toronto" -> University of Toronto),
+   *                       which the plain score cannot see
+   *   addLabel  fn(v) -> text — the words of the "new name" row
+   *   hint, leadLabel, nearNote, emptyNote, listLabel — the picker's other
+   *                       words, for a list that is not the posting form's.
+   *                       Every one defaults to what the posting form says,
+   *                       so a caller that passes none changes nothing.
+   *   openOnFocus  false — open the list on a PRESS, a keystroke or the
+   *                       down arrow, never on focus alone. A card that puts
+   *                       the keyboard in the box by itself (the account
+   *                       cards do, and so does their header chip) would
+   *                       otherwise draw a list nobody asked for over the
+   *                       card's own buttons, where the next press lands on
+   *                       a university instead of on "Sign out instead".
+   *                       Defaults to true, the posting form's behaviour.
    *   max       number      — options rendered at once (the list is scrollable;
    *                           this is about DOM size, not about hiding values).
    *                           Generous BECAUSE the list is alphabetical: a cap
@@ -111,8 +129,19 @@
     var id = 'oa-combo-' + (++uid);
     var wrap = document.createElement('div');
     wrap.className = 'oa-combo';
+    /* MOVING A FOCUSED BOX DROPS THE KEYBOARD: a picker mounted after the
+       card that holds it has put the cursor in the box (the account cards
+       load this file on demand) would otherwise leave the reader typing into
+       nothing. Put it back where it was, caret included, BEFORE the focus
+       listener below exists, so restoring it does not also open the list. */
+    var hadFocus = document.activeElement === input;
+    var caret = hadFocus ? [input.selectionStart, input.selectionEnd] : null;
     input.parentNode.insertBefore(wrap, input);
     wrap.appendChild(input);
+    if (hadFocus) {
+      try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+      try { input.setSelectionRange(caret[0], caret[1]); } catch (e) { /* not a text box */ }
+    }
 
     var list = document.createElement('div');
     list.className = 'oa-combo-list';
@@ -121,8 +150,8 @@
     /* a listbox needs a name of its own: the field's label is the only thing
        that says WHICH list this is once focus is inside it */
     var labelled = input.id && document.querySelector('label[for="' + input.id + '"]');
-    list.setAttribute('aria-label',
-      (labelled ? labelled.textContent.replace(/\s*\*\s*$/, '').trim() : 'Suggestions') + ' suggestions');
+    list.setAttribute('aria-label', opts.listLabel ||
+      ((labelled ? labelled.textContent.replace(/\s*\*\s*$/, '').trim() : 'Suggestions') + ' suggestions'));
     list.hidden = true;
     wrap.appendChild(list);
 
@@ -289,6 +318,16 @@
       state.rows = [];
       group = null;
 
+      /* With nothing typed, the line that says how the list works: a list of
+         five hundred names is browsed from the top, so that is where it goes. */
+      if (!typed && opts.hint) note('oa-combo-hint', opts.hint);
+
+      var lead = [];
+      if (typed && typeof opts.lead === 'function') {
+        try { lead = (opts.lead(typed) || []).filter(Boolean); } catch (err) { lead = []; }
+      }
+      var leadRows = lead.map(function (v) { return { v: v, n: state.counts[nameKey(v)] || 0 }; });
+
       var inScope = scope.values.length
         ? rank(scope.values.map(function (v) {
             return { v: v, n: state.counts[nameKey(v)] || 0 };
@@ -296,7 +335,9 @@
         : [];
 
       var seen = Object.create(null);
-      for (var i = 0; i < inScope.length; i++) seen[nameKey(inScope[i].v)] = true;
+      for (var i = 0; i < leadRows.length; i++) seen[nameKey(leadRows[i].v)] = true;
+      inScope = inScope.filter(function (o) { return !seen[nameKey(o.v)]; });
+      for (i = 0; i < inScope.length; i++) seen[nameKey(inScope[i].v)] = true;
       var rest = rank(state.options, needle).filter(function (o) {
         return !seen[nameKey(o.v)];
       });
@@ -307,11 +348,17 @@
          answer. A scope that matches nothing steps out of the way entirely. */
       var showRest = !scope.values.length || !!typed || !inScope.length;
 
-      var exact = typed && inScope.concat(showRest ? rest : []).some(function (o) {
+      var exact = typed && leadRows.concat(inScope, showRest ? rest : []).some(function (o) {
         return nameKey(o.v) === nameKey(typed);
       });
 
       var over = 0, room = state.max;
+      if (leadRows.length) {
+        if (opts.leadLabel) heading(opts.leadLabel);
+        for (i = 0; i < leadRows.length; i++) optionRow(leadRows[i], true);
+        room -= leadRows.length;
+        group = null;
+      }
       if (inScope.length) {
         if (scope.label) heading(scope.label);
         var mine = inScope.slice(0, room);
@@ -348,7 +395,7 @@
         try { near = opts.similar(typed) || []; } catch (err) { near = []; }
       }
       if (near.length) {
-        note('oa-combo-near',
+        note('oa-combo-near', opts.nearNote ||
           'Already on the list — is one of these the place you mean? ' +
           'Adding a second spelling would split its postings.');
         for (i = 0; i < near.length; i++) {
@@ -388,7 +435,9 @@
         add.innerHTML = '<span class="oa-combo-plus" aria-hidden="true">+</span>';
         var t = document.createElement('span');
         t.className = 'oa-combo-name';
-        t.textContent = 'Use “' + asPublished + '” — a name not on the list yet';
+        t.textContent = typeof opts.addLabel === 'function'
+          ? opts.addLabel(asPublished)
+          : 'Use “' + asPublished + '” — a name not on the list yet';
         add.appendChild(t);
         add.__value = asPublished;
         group = null;
@@ -397,7 +446,7 @@
       }
 
       if (!state.rows.length) {
-        note('oa-combo-empty', 'Nothing matches. Type the full name to add it.');
+        note('oa-combo-empty', opts.emptyNote || 'Nothing matches. Type the full name to add it.');
       }
 
       var offered = state.rows.length - (typed && !exact ? 1 : 0);
@@ -489,7 +538,7 @@
       input.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    input.addEventListener('focus', open);
+    input.addEventListener('focus', function () { if (opts.openOnFocus !== false) open(); });
     input.addEventListener('click', open);
     input.addEventListener('input', function () { open(); state.active = -1; render(); });
 

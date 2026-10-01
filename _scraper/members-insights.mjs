@@ -61,6 +61,7 @@ import { campusCountries } from './vocab.mjs';
 const require = createRequire(import.meta.url);
 const SCHOOLS = require('../assets/oa-schools.js');
 const COUNTRIES = require('../assets/oa-countries.js');
+const AFFILIATION = require('../assets/oa-affiliation.js');
 const NAV = require('../assets/oa-jobnav.js');
 
 /** The smallest group a named row of the served file may stand for. */
@@ -85,53 +86,16 @@ const norm = (s) => SCHOOLS.fold(s);
 const STOP = new Set(['of', 'the', 'and', 'at', 'in', 'for', 'de', 'la', 'le', 'des', 'del', 'di', 'du', 'und', 'y', 'et', 'a']);
 
 /** Short forms members type that the site's own data does not spell, each to
-    the full name the site lists. CURATED, like every alias table here: an
-    entry is a decision, made once, for a short form nobody could mean
-    otherwise; it is never derived. The selftest holds every target to a
-    university the committed index carries. */
-export const SHORT_FORMS = {
-  'mit': 'Massachusetts Institute of Technology',
-  'mit sloan': 'Massachusetts Institute of Technology',
-  'nyu': 'New York University',
-  'nyu stern': 'New York University',
-  'cmu': 'Carnegie Mellon University',
-  'carnegie mellon': 'Carnegie Mellon University',
-  'nus': 'National University of Singapore',
-  'ucl': 'University College London',
-  'lbs': 'London Business School',
-  'georgia tech': 'Georgia Institute of Technology',
-  'gatech': 'Georgia Institute of Technology',
-  'ut austin': 'University of Texas at Austin',
-  'ut dallas': 'University of Texas at Dallas',
-  'utd': 'University of Texas at Dallas',
-  'upenn': 'University of Pennsylvania',
-  'wharton': 'University of Pennsylvania',
-  'the wharton school': 'University of Pennsylvania',
-  'uiuc': 'University of Illinois at Urbana-Champaign',
-  'hbs': 'Harvard University',
-  'harvard business school': 'Harvard University',
-  'stanford gsb': 'Stanford University',
-  'umich': 'University of Michigan',
-  'uchicago': 'University of Chicago',
-  'chicago booth': 'University of Chicago',
-  'kellogg': 'Northwestern University',
-  'northwestern': 'Northwestern University',
-  'duke': 'Duke University',
-  'fuqua': 'Duke University',
-  'columbia': 'Columbia University',
-  'cornell': 'Cornell University',
-  'stanford': 'Stanford University',
-  'harvard': 'Harvard University',
-  'princeton': 'Princeton University',
-  'yale': 'Yale University',
-  'yale som': 'Yale University',
-  'yale school of management': 'Yale University',
-  'bocconi': 'Bocconi University',
-  'unc': 'University of North Carolina at Chapel Hill',
-  'usc': 'University of Southern California',
-  'polyu': 'Hong Kong Polytechnic University',
-};
+    the full name the site lists. CURATED: an entry is a decision, made once,
+    for a short form nobody could mean otherwise; it is never derived. The
+    selftest holds every target to a university the committed index carries.
 
+    THE TABLE LIVES IN assets/oa-affiliation.js since 2026-10-01, because the
+    registration form's affiliation picker and the daily pass that
+    standardises members' affiliations read the same short forms these counts
+    do: two copies of one curated table drift, silently. Re-exported here so
+    every caller of this module reads it where it always did. */
+export const SHORT_FORMS = AFFILIATION.SHORT_FORMS;
 /** Federations whose member schools are institutions in their own right
     ("London Business School" is listed under the University of London): a
     name is never folded INTO one of these. */
@@ -259,6 +223,18 @@ export function affiliationIndex({ vocab, directory, universities } = {}) {
   for (const [k, top] of idx.canon) if (country.has(k)) addTo(kids, top, country.get(k));
   for (const [top, set] of kids) if (!country.has(top) && set.size === 1) country.set(top, [...set][0]);
   return idx;
+}
+
+/** For any listed name, the KEY of the university the index folds it under,
+    or '' where it is its own: the rule the registration form's affiliation
+    list folds a duplicate card by (build-directory.mjs), so the list and
+    these counts agree about what one university is. */
+export function parentKeyOf(idx) {
+  return (name) => {
+    const k = SCHOOLS.institutionKey(name);
+    const top = idx && idx.canon ? idx.canon.get(k) : '';
+    return top && top !== k ? top : '';
+  };
 }
 
 /** The university the site's own data says a listed name belongs to, or ''.

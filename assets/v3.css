@@ -2019,6 +2019,14 @@ body.v3 .oa-connect-row.is-done { color: var(--ink-2); }
 body.v3 .oa-connect-tick { color: var(--ok); }
 body.v3 .oa-orcid-type { color: var(--ink-2); }
 body.v3 .oa-orcid-field > .oa-opt.oa-fine { color: var(--mut); }
+/* The affiliation field's label sits ABOVE its box (oa-ui.css says why), so
+   the two rules above that space a wrapped label and its box, (0,2,3) and
+   (0,3,3), would put 14px between the word and the box and push the box 6px
+   further. Restated here on SPECIFICITY, never on load order. */
+body.v3 .oa-modal-card form .oa-aff-field { margin: 0 0 14px; }
+body.v3 .oa-modal-card form .oa-aff-field > label { margin: 0 0 6px; }
+body.v3 .oa-modal-card form .oa-aff-field input[type='text'] { margin-top: 0; padding-right: 38px; }
+body.v3 .oa-aff-field > .oa-opt.oa-fine { color: var(--mut); }
 /* `body.v3 .oa-opt:hover` (0,3,1) outranks the card-wide reset in oa-ui.css
    (0,2,0), so the stand-down has to be restated here at (0,4,1) rather than
    left to load order: the ORCID chip and note are spans outside a label, and

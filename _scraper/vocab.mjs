@@ -672,6 +672,38 @@ export function universityForSchool(vocab, name, schools = SCHOOLS) {
   return hits.length === 1 ? hits[0] : null;
 }
 
+/**
+ * The universities registered members are at that the posting form does not
+ * offer yet, as DIRECTORY rows buildVocab can read (owner, 2026-10-01: "any
+ * new universities added should be added to our list of universities, and
+ * job posting drop down university name too").
+ *
+ *   names      data/member-universities.json's names (memberUniversities())
+ *   rows       the postings the vocabulary is built from
+ *   directory  the directory rows it is built from
+ *
+ * A name ONLY where neither already carries that university: a member's
+ * spelling must never become the form's spelling of a place the postings or
+ * the directory already name (pickForm's tie-break would otherwise let it),
+ * and it carries no posting count, like every directory row.
+ */
+export function memberVocabRows(names, rows = [], directory = []) {
+  const known = new Set();
+  for (const r of [...rows, ...directory]) {
+    const k = uniKeyOf(String((r && r.institution) || ''));
+    if (k) known.add(k);
+  }
+  const out = [];
+  for (const n of names || []) {
+    const name = SCHOOLS.canonColumns({ institution: String(n || ''), school: '', unit: '' }).institution;
+    const k = uniKeyOf(name);
+    if (!k || known.has(k)) continue;
+    known.add(k);
+    out.push({ institution: name, school: '', department: '' });
+  }
+  return out;
+}
+
 /** Stable JSON with a trailing newline, so a diff shows the names that changed. */
 export function serialiseVocab(vocab) {
   return JSON.stringify(vocab, null, 1) + '\n';

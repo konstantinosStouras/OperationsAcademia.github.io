@@ -170,17 +170,16 @@
 
   /* ---------------------------------------------------------- grouping */
 
+  /* The card's title: the spelling most rows use, a tie to the longer (fuller)
+     name. ONE definition, OASchools.cardName, because the same title is the
+     name the registration form's affiliation list offers and the name a
+     member's affiliation is standardised to (data/university-names.json,
+     written by the build through the same function). The page loads
+     oa-schools.js first, which the selftest pins; without it the card falls
+     back to its first row's spelling rather than to a second copy of the rule. */
   function displayNameOf(rows) {
-    // the spelling most rows use; a tie goes to the longer (fuller) name
-    var count = {};
-    var best = '';
-    for (var i = 0; i < rows.length; i++) {
-      var n = rows[i].institution;
-      count[n] = (count[n] || 0) + 1;
-      if (!best || count[n] > count[best] ||
-          (count[n] === count[best] && n.length > best.length)) best = n;
-    }
-    return best;
+    var names = rows.map(function (r) { return r.institution; });
+    return window.OASchools && OASchools.cardName ? OASchools.cardName(names) : (names[0] || '');
   }
 
   /** The names a row is ONE ROW by: its university, school and department

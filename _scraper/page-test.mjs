@@ -12156,6 +12156,134 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* -------------------------- THE AFFILIATION, FROM THE SITE'S OWN LIST (2026-10-01)
+
+   Owner: "show them a list of universities as a drop down menu for them to
+   choose from, and also allow 'Add Other' for them to add anything not
+   listed", the list being the Universities page's own. Driven on the
+   rendered registration card against a ROUTED list, so the checks never move
+   with the corpus: the served file is pinned against the directory in
+   selftest.mjs, and what is under test here is what a person filling the box
+   meets. Routing data/university-names.json is also what proves that is the
+   file the card asks for.                                                     */
+{
+  const LIST = {
+    universities: ['Massachusetts Institute of Technology (MIT)', 'Northwestern University',
+      'Stanford University', 'University of California, Berkeley', 'University of Toronto'],
+    fromMembers: [],
+    schools: [['Kellogg School of Management', 'Northwestern University']],
+    aliases: [['Stanford GSB', 'Stanford University']],
+  };
+  const NEWBIE = { uid: 'aff-uid-0000', email: 'aff@example.edu',
+    emailVerified: false, displayName: '', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedOutPage('jobs.html',
+    { seed: { signInUser: NEWBIE }, route: ['**/data/university-names.json', JSON.stringify(LIST)] });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('#oa-reg-aff[role="combobox"]', { timeout: 10000 });
+
+  const rowsOf = () => q.evaluate(() =>
+    [...document.querySelectorAll('#oa-auth .oa-combo-list [role="option"] .oa-combo-name')].map((e) => e.textContent));
+  await q.click('#oa-reg-aff');
+  await q.waitForSelector('#oa-auth .oa-combo-list:not([hidden])', { timeout: 5000 });
+  const open = await q.evaluate(() => {
+    const box = document.querySelector('#oa-reg-aff');
+    return {
+      hint: (document.querySelector('#oa-auth .oa-combo-hint') || {}).textContent || '',
+      label: document.querySelector('label[for="oa-reg-aff"]').textContent.trim(),
+      wrapped: !!box.closest('label'),
+      required: box.required,
+      note: (document.getElementById(box.getAttribute('aria-describedby')) || {}).textContent || '',
+      arrow: getComputedStyle(box.closest('.oa-combo'), '::after').borderTopWidth,
+      listName: document.querySelector('#oa-auth .oa-combo-list').getAttribute('aria-label'),
+    };
+  });
+  eq(await rowsOf(), LIST.universities, 'affiliation picker: the box offers the Universities page\'s own names, A-Z');
+  ok(/Add other/.test(open.hint), `affiliation picker: the open list says how to add one it lacks (got "${open.hint}")`);
+  eq(open.label, 'Affiliation', 'affiliation picker: a real label names the box, with no optional chip');
+  ok(!open.wrapped, 'affiliation picker: …and is not wrapped round it, so the list is not read as the box\'s name');
+  ok(open.required === true, 'affiliation picker: the box is still required');
+  ok(/Add other/.test(open.note) && /Never shown with your name/.test(open.note),
+    `affiliation picker: the note under the box says how the list works and where the answer goes (got "${open.note}")`);
+  eq(open.arrow, '6px', 'affiliation picker: the box shows it is a list');
+  eq(open.listName, 'Universities', 'affiliation picker: the list names itself for a screen reader');
+
+  await q.fill('#oa-reg-aff', 'Rotman School of Management, University of Toronto');
+  const lead = await q.evaluate(() => ({
+    first: (document.querySelector('#oa-auth .oa-combo-list [role="option"] .oa-combo-name') || {}).textContent,
+    add: !!document.querySelector('#oa-auth .oa-combo-add'),
+  }));
+  eq(lead.first, 'University of Toronto',
+    'affiliation picker: a line naming a listed university is offered that university first');
+  ok(!lead.add, 'affiliation picker: …and is never offered as "other"');
+
+  await q.fill('#oa-reg-aff', 'Stanford GSB');
+  eq(await q.evaluate(() => (document.querySelector('#oa-auth .oa-combo-list [role="option"] .oa-combo-name') || {}).textContent),
+    'Stanford University', 'affiliation picker: a duplicate card\'s title is offered the university it belongs under');
+
+  await q.fill('#oa-reg-aff', 'Acme Analytics Lab');
+  const add = await q.evaluate(() => (document.querySelector('#oa-auth .oa-combo-add') || {}).textContent || '');
+  ok(/Add other: “Acme Analytics Lab”/.test(add),
+    `affiliation picker: a name not on the list is offered as Add other (got "${add}")`);
+  await q.press('#oa-reg-aff', 'ArrowUp');
+  await q.press('#oa-reg-aff', 'Enter');
+  eq(await q.inputValue('#oa-reg-aff'), 'Acme Analytics Lab',
+    'affiliation picker: taking Add other from the keyboard keeps exactly what was typed');
+
+  await q.fill('#oa-reg-aff', 'toronto');
+  await q.locator('#oa-auth .oa-combo-list [role="option"]', { hasText: 'University of Toronto' }).first().click();
+  eq(await q.inputValue('#oa-reg-aff'), 'University of Toronto', 'affiliation picker: a press on a row fills the box');
+  ok(await q.evaluate(() => document.querySelector('#oa-auth .oa-combo-list').hidden),
+    'affiliation picker: …and shuts the list');
+
+  await q.fill('#oa-reg-aff', 'Kellogg School of Management');
+  await q.press('#oa-reg-aff', 'Escape');
+  await q.click('#oa-auth-form [name="email"]');
+  eq(await q.inputValue('#oa-reg-aff'), 'Northwestern University',
+    'affiliation picker: leaving the box settles a school that vouches for one university, in front of the reader');
+
+  /* a submit that reaches the guard with text no change event settled (a
+     browser's autofill, a value set by script) is settled on the way out */
+  await q.fill('#oa-auth-form [name="firstName"]', 'Ada');
+  await q.fill('#oa-auth-form [name="lastName"]', 'Lovelace');
+  await q.evaluate(() => { document.querySelector('#oa-reg-aff').value = 'MIT'; });
+  await q.fill('#oa-auth-form [name="email"]', 'aff@example.edu');
+  await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+  await q.check('#oa-auth-form [name="terms"]');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => window.__fb.at('set', 'profiles/') !== -1, null, { timeout: 8000 });
+  const stored = await q.evaluate(() => {
+    const docs = window.__fb.dump();
+    const k = Object.keys(docs).filter((x) => x.indexOf('profiles/') === 0)[0];
+    return docs[k] && docs[k].affiliation;
+  });
+  eq(stored, 'Massachusetts Institute of Technology (MIT)',
+    'affiliation picker: the account stores the listed name the box named');
+  eq(errors, [], 'affiliation picker: no uncaught script error');
+  await ctx.close();
+
+  /* the profile card asks it the same way, and at 390px the list fits */
+  const { ctx: pctx, page: pq, errors: perrs } = await signedInPage('jobs.html',
+    { viewport: { width: 390, height: 844 }, route: ['**/data/university-names.json', JSON.stringify(LIST)] });
+  await pq.evaluate(() => window.OAAccounts.openProfile());
+  await pq.waitForSelector('#oa-prof-aff[role="combobox"]', { timeout: 10000 });
+  await pq.click('#oa-prof-aff');
+  await pq.waitForSelector('#oa-profile .oa-combo-list:not([hidden])', { timeout: 5000 });
+  const phone = await pq.evaluate(() => {
+    const list = document.querySelector('#oa-profile .oa-combo-list').getBoundingClientRect();
+    const rows = [...document.querySelectorAll('#oa-profile .oa-combo-list [role="option"]')]
+      .map((r) => r.getBoundingClientRect().height);
+    return { left: list.left, right: list.right, vw: innerWidth,
+      minRow: Math.min(...rows), scroll: document.documentElement.scrollWidth > innerWidth,
+      optional: /\(optional\)/.test(document.querySelector('label[for="oa-prof-aff"]').textContent) };
+  });
+  ok(phone.optional, 'affiliation picker: Edit account offers the same list, the box still optional there');
+  ok(phone.left >= 0 && phone.right <= phone.vw, `affiliation picker: at 390px the list stays on screen (${phone.left}-${phone.right})`);
+  ok(phone.minRow >= 42, `affiliation picker: …its rows are thumb-sized (${phone.minRow}px)`);
+  ok(!phone.scroll, 'affiliation picker: …and nothing scrolls sideways');
+  eq(perrs, [], 'affiliation picker: no uncaught script error on the profile card');
+  await pctx.close();
+}
+
 /* ------------------------------------ WHAT REGISTRATION ASKS FOR (2026-09-05)
 
    The affiliation is compulsory on a new account and the ORCID iD says it is
@@ -12178,9 +12306,14 @@ for (const w of [320, 360, 390, 430]) {
   await q.waitForSelector('#oa-auth-form [name="affiliation"]', { timeout: 8000 });
 
   const card = await q.evaluate(() => {
+    /* a box's label is the one wrapped round it, or the one naming it by id
+       (the affiliation's, since the university picker: oa-accounts.js
+       affFieldHTML) */
     const lab = (name) => {
       const i = document.querySelector(`#oa-auth-form [name="${name}"]`);
-      return i && i.closest('label') ? i.closest('label').textContent.trim() : null;
+      if (!i) return null;
+      const l = i.closest('label') || (i.id && document.querySelector(`label[for="${i.id}"]`));
+      return l ? l.textContent.trim() : null;
     };
     const req = (name) => {
       const i = document.querySelector(`#oa-auth-form [name="${name}"]`);
@@ -12190,7 +12323,7 @@ for (const w of [320, 360, 390, 430]) {
       affLabel: lab('affiliation'), affReq: req('affiliation'),
       affNote: (() => {
         const i = document.querySelector('#oa-auth-form [name="affiliation"]');
-        const n = i.closest('label').querySelector('.oa-fine');
+        const n = document.getElementById(i.getAttribute('aria-describedby') || '');
         return n ? n.textContent.trim() : null;
       })(),
       siteLabel: lab('website'), siteReq: req('website'),
@@ -12229,8 +12362,8 @@ for (const w of [320, 360, 390, 430]) {
   ok(card.affReq === true, 'registration card: the affiliation box is required');
   ok(!/optional/i.test(card.affLabel || ''),
     `registration card: …and its label no longer says optional (got "${card.affLabel}")`);
-  eq(card.affNote, 'Never published.',
-    'registration card: …and it says where the compelled field goes, under the box');
+  ok(/Never shown with your name; a university new to our list is added to it\./.test(card.affNote || ''),
+    `registration card: …and it says where the compelled field goes, under the box (got "${card.affNote}")`);
   ok(card.firstReq === true && card.lastReq === true,
     'registration card: the two name boxes are required too, so the affiliation joins an existing rule');
   ok(card.siteReq === false && /\(optional\)/.test(card.siteLabel || ''),
@@ -12725,7 +12858,7 @@ for (const w of [320, 360, 390, 430]) {
     const ns = need ? getComputedStyle(need) : {};
     return {
       required: i.required,
-      label: i.closest('label').textContent.trim(),
+      label: (i.closest('label') || document.querySelector(`label[for="${i.id}"]`)).textContent.trim(),
       later: !!document.querySelector('#oa-profile-later'),
       heading: (document.querySelector('#oa-profile-h') || {}).textContent,
       lede: (document.querySelector('.oa-modal-lede') || {}).textContent || '',
@@ -13100,10 +13233,23 @@ for (const w of [320, 360, 390, 430]) {
   }));
   ok(!second.user && second.locked > 0 && second.locked === second.cards,
     `the gate: a second page in the same session is gated too, and reads as signed out (${second.locked}/${second.cards} cards locked)`);
-  /* the chip brings the card forward and puts the keyboard back in the box */
+  /* the chip brings the card forward and puts the keyboard back in the box.
+     The picker is waited for FIRST: it mounts on demand, and a check run
+     before it landed passed by the race rather than by the rule. */
+  await q.waitForSelector('#oa-profile-form [name="affiliation"][role="combobox"]', { timeout: 10000 });
   await q.evaluate(() => { document.activeElement.blur(); document.getElementById('oa-verify-chip').click(); });
   eq(await q.evaluate(() => (document.activeElement || {}).name), 'affiliation',
     'the gate: pressing the header chip puts the keyboard back in the missing box');
+  /* …and the list does NOT open on that focus: drawn over the card it
+     covered "Sign out instead", so the next press chose a university */
+  const shut = await q.evaluate(() => {
+    const list = document.querySelector('#oa-profile .oa-combo-list');
+    const b = document.getElementById('oa-profile-signout').getBoundingClientRect();
+    const top = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    return { hidden: !list || list.hidden, signout: !!top && top.id === 'oa-profile-signout' };
+  });
+  ok(shut.hidden && shut.signout,
+    'the gate: the keyboard in the box opens no list over the card, so Sign out instead is the thing a press lands on');
 
   /* Sign out instead: the card goes with the session */
   await q.click('#oa-profile-signout');
