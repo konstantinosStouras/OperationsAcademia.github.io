@@ -20421,9 +20421,17 @@ async function testAffiliationPicker() {
     'oa-combo.js: a line that resolves to a listed name is never offered as "other"');
   const hadAt = combo.indexOf('var hadFocus = document.activeElement === input;');
   ok(hadAt > 0 && hadAt < combo.indexOf('wrap.appendChild(input);')
-     && combo.indexOf('input.focus({ preventScroll: true })') < combo.indexOf("input.addEventListener('focus', open);"),
+     && combo.indexOf("input.addEventListener('focus',") > 0
+     && combo.indexOf('input.focus({ preventScroll: true })') < combo.indexOf("input.addEventListener('focus',"),
     'oa-combo.js: mounting on a box that holds the keyboard keeps it there, without opening the list ' +
     '(the gate card puts the cursor in the affiliation box before the picker has loaded)');
+  ok(/input\.addEventListener\('focus', function \(\) \{ if \(opts\.openOnFocus !== false\) open\(\); \}\);/.test(combo)
+     && /input\.addEventListener\('click', open\);/.test(combo),
+    'oa-combo.js: openOnFocus: false opens the list on a press, never on focus alone; left out, the posting form opens on focus as before');
+  ok(/openOnFocus: false,/.test(strip(await src('assets/oa-affiliation.js'))),
+    'the affiliation picker opens on a press, so a card putting the keyboard in the box draws no list over "Sign out instead"');
+  ok(/the keyboard in the box opens no list over the card/.test(await src('_scraper/page-test.mjs')),
+    'page-test.mjs measures the gate card with the keyboard in the box and the list shut');
   eq(A.addLabel('Acme'), 'Add other: “Acme”', 'the new-name row says the owner\'s own "Add other"');
   ok(!/—/.test(Object.values(A.WORDS).join(' ') + A.addLabel('x')), 'the picker\'s words carry no em dash');
 

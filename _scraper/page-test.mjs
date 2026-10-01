@@ -13233,10 +13233,23 @@ for (const w of [320, 360, 390, 430]) {
   }));
   ok(!second.user && second.locked > 0 && second.locked === second.cards,
     `the gate: a second page in the same session is gated too, and reads as signed out (${second.locked}/${second.cards} cards locked)`);
-  /* the chip brings the card forward and puts the keyboard back in the box */
+  /* the chip brings the card forward and puts the keyboard back in the box.
+     The picker is waited for FIRST: it mounts on demand, and a check run
+     before it landed passed by the race rather than by the rule. */
+  await q.waitForSelector('#oa-profile-form [name="affiliation"][role="combobox"]', { timeout: 10000 });
   await q.evaluate(() => { document.activeElement.blur(); document.getElementById('oa-verify-chip').click(); });
   eq(await q.evaluate(() => (document.activeElement || {}).name), 'affiliation',
     'the gate: pressing the header chip puts the keyboard back in the missing box');
+  /* …and the list does NOT open on that focus: drawn over the card it
+     covered "Sign out instead", so the next press chose a university */
+  const shut = await q.evaluate(() => {
+    const list = document.querySelector('#oa-profile .oa-combo-list');
+    const b = document.getElementById('oa-profile-signout').getBoundingClientRect();
+    const top = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    return { hidden: !list || list.hidden, signout: !!top && top.id === 'oa-profile-signout' };
+  });
+  ok(shut.hidden && shut.signout,
+    'the gate: the keyboard in the box opens no list over the card, so Sign out instead is the thing a press lands on');
 
   /* Sign out instead: the card goes with the session */
   await q.click('#oa-profile-signout');

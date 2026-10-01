@@ -552,6 +552,9 @@
         nearNote: WORDS.near,
         emptyNote: WORDS.empty,
         listLabel: WORDS.label,
+        /* the cards put the keyboard in this box themselves; a list drawn on
+           that focus covered the card's own buttons */
+        openOnFocus: false,
       });
       if (!combo) return null;
       /* Leaving the box settles it: what was typed becomes the listed name it

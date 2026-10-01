@@ -1440,6 +1440,13 @@ first) only when a card draws the field: every page carries the accounts
 module, and only a card that asks the question pays for the list. Without it
 the box is the plain text box it always was.
 
+**The list opens on a PRESS, never on focus alone** (`openOnFocus: false`, a
+combo option defaulting to the posting form's open-on-focus). The cards put
+the keyboard in this box themselves, and so does the header chip under the
+gate; the first CI run of this change caught the list opening on that focus
+and covering "Sign out instead", so the next press chose a university. A
+press, a keystroke or the down arrow opens it.
+
 **ONE FIELD, `affFieldHTML`, ON EVERY CARD THAT ASKS IT**: the registration
 card, the profile card's ask and its ordinary edit (still optional there, the
 recorded rule). A real `<label for>` ABOVE the box rather than one wrapped

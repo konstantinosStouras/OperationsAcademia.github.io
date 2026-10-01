@@ -107,6 +107,14 @@
    *                       words, for a list that is not the posting form's.
    *                       Every one defaults to what the posting form says,
    *                       so a caller that passes none changes nothing.
+   *   openOnFocus  false — open the list on a PRESS, a keystroke or the
+   *                       down arrow, never on focus alone. A card that puts
+   *                       the keyboard in the box by itself (the account
+   *                       cards do, and so does their header chip) would
+   *                       otherwise draw a list nobody asked for over the
+   *                       card's own buttons, where the next press lands on
+   *                       a university instead of on "Sign out instead".
+   *                       Defaults to true, the posting form's behaviour.
    *   max       number      — options rendered at once (the list is scrollable;
    *                           this is about DOM size, not about hiding values).
    *                           Generous BECAUSE the list is alphabetical: a cap
@@ -530,7 +538,7 @@
       input.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    input.addEventListener('focus', open);
+    input.addEventListener('focus', function () { if (opts.openOnFocus !== false) open(); });
     input.addEventListener('click', open);
     input.addEventListener('input', function () { open(); state.active = -1; render(); });
 
