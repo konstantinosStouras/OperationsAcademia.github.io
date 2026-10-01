@@ -11100,8 +11100,9 @@ for (const w of [320, 360, 390, 430]) {
       ok(m.heads.indexOf('The weekly rhythm') === at + 4,
         `analytics members (${width} ${theme}): …and the traffic charts carry on after them`);
       eq(m.tiles.length, 5, `analytics members (${width} ${theme}): a strip of five tiles`);
-      ok(/Registered members 268/.test(m.tiles[0]) && /Gave an affiliation 93%/.test(m.tiles[1])
-         && /Universities 90/.test(m.tiles[2]) && /ORCID iD 53%/.test(m.tiles[4]),
+      /* the label and the value are two spans with nothing between them */
+      ok(/Registered members\s*268/.test(m.tiles[0]) && /Gave an affiliation\s*93%/.test(m.tiles[1])
+         && /Universities\s*90/.test(m.tiles[2]) && /ORCID iD\s*53%/.test(m.tiles[4]),
         `analytics members (${width} ${theme}): the count, the share who gave an affiliation, the universities and the ORCID iDs`);
       ok(/7 members hold a candidate profile for the 2026-2027 market/.test(m.lede) && /12 have posted a job/.test(m.lede)
          && /nothing is guessed about anybody/.test(m.lede)
