@@ -1,1 +1,149 @@
-{"generated":"","members":0}
+{
+ "generated": "2026-10-01T14:12:43.721Z",
+ "members": 268,
+ "k": 3,
+ "affiliation": {
+  "listed": 176,
+  "other": 45,
+  "none": 47
+ },
+ "universities": {
+  "count": 105,
+  "shown": [
+   {
+    "name": "Cornell University",
+    "country": "United States",
+    "members": 8
+   },
+   {
+    "name": "National University of Singapore",
+    "country": "Singapore",
+    "members": 6
+   },
+   {
+    "name": "Columbia University",
+    "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "Harvard University",
+    "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "University of Mannheim",
+    "country": "Germany",
+    "members": 4
+   },
+   {
+    "name": "Carnegie Mellon University",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "George Mason University",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "Georgetown University",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "IE University",
+    "country": "Spain",
+    "members": 3
+   },
+   {
+    "name": "Massachusetts Institute of Technology (MIT)",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "McGill University",
+    "country": "Canada",
+    "members": 3
+   },
+   {
+    "name": "Stanford University",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "University of Massachusetts Amherst",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "University of Pennsylvania",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "University of South Carolina",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "University of Southern California",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "University of Washington",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "Yale University",
+    "country": "United States",
+    "members": 3
+   }
+  ],
+  "rest": 111
+ },
+ "countries": {
+  "count": 14,
+  "shown": [
+   {
+    "name": "United States",
+    "members": 111
+   },
+   {
+    "name": "Canada",
+    "members": 13
+   },
+   {
+    "name": "Singapore",
+    "members": 9
+   },
+   {
+    "name": "Hong Kong",
+    "members": 6
+   },
+   {
+    "name": "United Kingdom",
+    "members": 5
+   },
+   {
+    "name": "France",
+    "members": 4
+   },
+   {
+    "name": "Germany",
+    "members": 4
+   },
+   {
+    "name": "China",
+    "members": 3
+   },
+   {
+    "name": "Spain",
+    "members": 3
+   }
+  ],
+  "rest": 7,
+  "unknown": 103
+ }
+}
