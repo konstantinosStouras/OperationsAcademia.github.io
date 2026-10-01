@@ -22,9 +22,9 @@ name: OA — sync the registered-users roster
 # AND A THIRD, ON THE DAILY RUN ONLY (owner, 2026-10-01: anonymous insights
 # about who the members are, from what they told the site and nothing
 # guessed): data/users-insights.json, counts of the affiliations members
-# gave, the countries of those universities, sign-in methods, ORCID iDs and
-# roles, built by _scraper/members-insights.mjs from the profiles the daily
-# run already reads. No group smaller than three is named and nothing is
+# gave and the countries of those universities, and nothing else, built by
+# _scraper/members-insights.mjs from the profiles the daily run already
+# reads. No group smaller than three is named and nothing is
 # cross-tabulated; the hourly figures-only run reads no profile and never
 # touches it.
 #

@@ -6574,11 +6574,13 @@ async function testMemberInsights() {
   const prof = { firstName: 'Ada', lastName: 'Lovelace', affiliation: 'MIT Sloan', orcid: '0000-0002-1825-0097', contactEmail: 'x@y.org' };
   const f = M.memberFacts(user, prof, { index });
   eq(Object.keys(f), M.FACT_KEYS, 'members: memberFacts keeps exactly FACT_KEYS');
-  eq(M.FACT_KEYS, ['uid', 'disabled', 'affiliation', 'university', 'country', 'methods', 'orcid'],
+  eq(M.FACT_KEYS, ['uid', 'disabled', 'affiliation', 'university', 'country'],
     'members: …which hold no name, no gender, no address and no affiliation as typed');
-  ok(!/Lovelace|Ada|mit\.edu|MIT Sloan|0000-0002/.test(JSON.stringify(f)),
+  ok(!M.FACT_KEYS.includes('methods') && !M.FACT_KEYS.includes('orcid'),
+    'members: …and, since the owner\'s cut (2026-10-01), no sign-in method and no ORCID iD either');
+  ok(!/Lovelace|Ada|mit\.edu|MIT Sloan|0000-0002|google|password/.test(JSON.stringify(f)),
     'members: …and the facts carry none of them');
-  eq([f.affiliation, f.methods, f.orcid], ['listed', ['google', 'password'], true],
+  eq([f.affiliation, f.university, f.country], ['listed', key('MIT'), index.country.get(key('MIT')) || ''],
     'members: the facts read off that account are the right ones');
   eq(M.memberFacts({ uid: 'q', email: 'pat@mit.edu' }, { firstName: 'Pat', affiliation: 'PhD student' }, { index }).affiliation, 'other',
     'members: an affiliation naming no university stays "another affiliation", whatever the address says');
@@ -6590,22 +6592,25 @@ async function testMemberInsights() {
   const marks = new Set();
   const mk = (i, o) => {
     const x = Object.assign({ uid: 'fx' + i, disabled: false, affiliation: 'none', university: '',
-      country: '', methods: ['google'], orcid: false }, o);
+      country: '' }, o);
     facts.push(x);
     marks.add(x.uid);
   };
   for (let i = 0; i < 12; i++) mk(i, { affiliation: 'listed', university: 'massachusetts institute of technology', country: 'United States' });
   for (let i = 12; i < 14; i++) mk(i, { affiliation: 'listed', university: 'insead', country: 'France' });
-  for (let i = 14; i < 22; i++) mk(i, { affiliation: 'other', methods: ['password'] });
-  for (let i = 22; i < 25; i++) mk(i, { methods: ['orcid'], country: 'Greece', orcid: true });
+  for (let i = 14; i < 22; i++) mk(i, { affiliation: 'other' });
+  for (let i = 22; i < 25; i++) mk(i, { country: 'Greece' });
   mk(99, { university: 'insead' });
   marks.delete('fx99');                                   // never signed in usably: not a member
   mk(98, { disabled: true });                             // disabled: not a member
   const NOW = new Date('2026-10-01T04:41:00Z');
-  const doc = M.membersInsights(facts, { marks, candidates: new Set(['fx0', 'fx1']), posters: new Set(['fx14']), now: NOW, index });
+  const doc = M.membersInsights(facts, { marks, now: NOW, index });
   eq(Object.keys(doc), M.INSIGHTS_KEYS, 'members: the served document carries exactly INSIGHTS_KEYS, in order');
-  ok(!M.INSIGHTS_KEYS.includes('gender') && !M.INSIGHTS_KEYS.includes('email'),
-    'members: …and has no gender and no e-mail figure');
+  eq(M.INSIGHTS_KEYS, ['generated', 'members', 'k', 'affiliation', 'universities', 'countries'],
+    'members: …which are where members work and the countries of their universities, and nothing else (owner, 2026-10-01)');
+  for (const gone of ['gender', 'email', 'signIn', 'roles', 'profile']) {
+    ok(!M.INSIGHTS_KEYS.includes(gone), `members: …so the served document has no "${gone}" figure`);
+  }
   eq(doc.members, 25, 'members: the same people the front page counts (marked, not disabled)');
   eq(doc.affiliation, { listed: 14, other: 8, none: 3 }, 'members: listed, another affiliation, not given');
   eq(doc.universities.shown.map((r) => [r.name, r.members]), [['Massachusetts Institute of Technology (MIT)', 12]],
@@ -6615,11 +6620,6 @@ async function testMemberInsights() {
   eq(doc.countries.shown.map((r) => r.name), ['United States', 'Greece'], 'members: the countries obey the same rule');
   eq(doc.countries.shown.reduce((n, r) => n + r.members, 0) + doc.countries.rest + doc.countries.unknown, 25,
     'members: the named countries, the rest and the unknown add up to everybody');
-  eq(doc.signIn, { google: 14, password: 8, orcid: 3, several: 0 }, 'members: sign-in methods, each member once');
-  eq(doc.roles, { season: '2026-2027', candidates: 2, posters: 1 }, 'members: the roles, with the season under way');
-  eq(doc.profile, { orcid: 3 }, 'members: the ORCID iDs on file');
-  eq(M.membersInsights(facts, { marks, candidates: null, posters: new Set(), now: NOW, index }).roles, null,
-    'members: a role set that could not be read says nothing, never a false zero');
   eq(M.membersInsights(facts.slice(0, 19), { marks, now: NOW, index }), null,
     'members: fewer than twenty members and nothing is published');
   const raw = JSON.stringify(doc);
@@ -6627,11 +6627,11 @@ async function testMemberInsights() {
   eq(M.insightsProblems(doc), [], 'members: insightsProblems passes a real document');
   eq(M.insightsProblems({ ...doc, universities: { ...doc.universities, shown: [{ name: 'X', country: '', members: 2 }] } }),
     ['universities names a group under 3'], 'members: …and refuses one naming a group of two');
-  eq([...M.candidateUids([{ uid: 'a', year: 2027, status: 'published' }, { uid: 'b', year: 2027, status: 'withdrawn' },
-    { uid: 'c', year: 2026, status: 'queued' }], NOW)], ['a'],
-    'members: a candidate is a LIVE profile for the season under way');
-  eq([...M.posterUids([{ uid: 'a', status: 'published' }, { uid: 'b', status: 'sheet' }])], ['a'],
-    'members: a tracking-sheet mirror is nobody\'s posting');
+  for (const gone of ['candidateUids', 'posterUids', 'CANDIDATE_LIVE', 'PROVIDERS']) {
+    ok(!(gone in M), `members: the module exports no ${gone}: the roles and the sign-in figure were removed, not hidden`);
+  }
+  ok(!/oa-jobnav|providerData|methods|orcid/i.test(modCode),
+    'members: …and the insights code reads no season, no sign-in method and no ORCID iD');
 
   /* ---- the served file, as committed */
   const servedRaw = await readFile(path.join(root, 'data', 'users-insights.json'), 'utf8');
@@ -6648,16 +6648,18 @@ async function testMemberInsights() {
   ok(/writeServed\(USERS_INSIGHTS, ins,/.test(sync) && /\} else if \(!insightCtx \|\| !profiles\) \{/.test(sync)
      && sync.indexOf('if (FIGURES) {\n        // the hourly run') < sync.indexOf('writeServed(USERS_INSIGHTS'),
     'members: the file is written through writeServed, never on the hourly run, and never without the profiles');
-  ok(/collection\('candidateSubmissions'\)\.select\('uid', 'year', 'status'\)/.test(sync)
-     && /collection\('jobSubmissions'\)\.select\('uid', 'status'\)/.test(sync),
-    'members: the role reads take the fields they need and nothing else');
+  const syncCode = sync.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  ok(!/collection\('candidateSubmissions'\)|collection\('jobSubmissions'\)/.test(syncCode)
+     && !/candidateUids|posterUids/.test(syncCode),
+    'members: the sync reads no candidate profile and no job posting for the insights any more');
+  ok(/membersInsights\(facts, \{ marks, now, index: insightCtx\.index \}\)/.test(sync),
+    'members: …and hands the builder the marks and the index alone');
   ok(!/university-domains|given-names/.test(sync), 'members: the sync reads no domain map and no name list for the insights');
-  const users = await readFile(path.join(root, 'assets', 'oa-users.js'), 'utf8');
-  ok(users.includes(`var CANDIDATE_LIVE = ${JSON.stringify(M.CANDIDATE_LIVE).replace(/"/g, "'").replace(/,/g, ', ')};`),
-    'members: a live candidate profile is the Admin area\'s CANDIDATE_LIVE, the build\'s own query');
   const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-user-directory.yml'), 'utf8');
   ok(/data\/users-insights\.json/.test(wf) && /hourly figures-only run reads no profile and never\s*\n#\s*touches it/.test(wf),
     'members: the workflow commits the file and says the hourly run never touches it');
+  ok(!/sign-in methods|ORCID|roles/.test(wf.slice(0, wf.indexOf('IT RUNS EVERY HOUR'))),
+    'members: …and its header no longer promises the figures that were cut');
 
   /* ---- the page */
   const page = await readFile(path.join(root, 'assets', 'oa-analytics.js'), 'utf8');
@@ -6665,9 +6667,20 @@ async function testMemberInsights() {
   ok(/fetch\('\/data\/users-insights\.json', \{ cache: 'no-cache' \}\)/.test(page),
     'members: the page fetches the file with no-cache, absolute like every served file');
   const dm = pageCode.slice(pageCode.indexOf('function drawMembers('), pageCode.indexOf('function renderUniversities('));
-  ok(dm.length > 2500 && /if \(!m \|\| !\(m\.members > 0\) \|\| !m\.affiliation\) return;/.test(dm),
+  ok(dm.length > 2000 && /if \(!m \|\| !\(m\.members > 0\) \|\| !m\.affiliation\) return;/.test(dm),
     'members: drawMembers draws nothing from the empty seed');
-  ok((dm.match(/html \+= tile\(/g) || []).length <= 5, 'members: its strip keeps the five-tile cap');
+  eq((dm.match(/figure\('([^']+)'/g) || []).map((x) => x.slice(8, -1)), ['Where members work', 'Where their universities are'],
+    'members: drawMembers draws the two figures the owner kept, in that order, and no other (2026-10-01)');
+  ok(!/tile\(|oa-tiles/.test(dm), 'members: …with no strip of tiles above them');
+  ok(!/m\.signIn|m\.roles|m\.profile|ORCID|sign in|candidate profile|posted a job/.test(dm),
+    'members: …and nothing about sign-in, ORCID iDs or roles');
+  ok(/fa\.section\.classList\.add\('oa-members'\)/.test(dm), 'members: the first figure carries the members class');
+  /* countries.unknown counts EVERY member with no country, and that includes
+     members who named a listed university whose country the site's data does
+     not record (Cardiff, Vanderbilt): they are named in the table above, so
+     the caption must not say they named nothing the site can read */
+  ok(/members are not placed in ' \+\s*'any country/.test(dm) && !/named no university ' \+\s*'or country the site can read/.test(dm),
+    'members: the countries caption does not claim the unplaced members named nothing the site can read');
   ok(!/gender|women|estimat/i.test(dm) && !/m\.email/.test(dm), 'members: the page draws no gender and no e-mail figure');
   ok(/nothing is guessed about anybody/.test(dm) && /Anonymous by construction/.test(dm)
      && /no university or country is named for fewer than/.test(dm),
@@ -6675,6 +6688,10 @@ async function testMemberInsights() {
   ok(!/—|\\u2014/.test(dm), 'members: no em dash in what the page says');
   const css = await readFile(path.join(root, 'assets', 'oa-analytics.css'), 'utf8');
   ok(/\.oa-members-unis \.oa-barlist \{\s*columns: 2;/.test(css), 'members: the universities read down two columns where there is room');
+  ok(!/\.oa-members \.oa-tiles/.test(css), 'members: the stylesheet keeps no rule for the strip that was cut');
+  const lede = await readFile(path.join(root, 'analytics.html'), 'utf8');
+  ok(/where its members work and the countries of their universities/.test(lede) && !/how they sign in/.test(lede),
+    'members: the page\'s lede promises the two figures and not the cut one');
   const charts = await readFile(path.join(root, 'assets', 'oa-charts.js'), 'utf8');
   ok(/label: opts\.restLabel \|\| 'Everything else'/.test(charts), 'members: share() lets a caller name its tail, and keeps the old name otherwise');
 
@@ -6684,14 +6701,24 @@ async function testMemberInsights() {
      && /does not ask for, estimate or publish anyone&rsquo;s gender/.test(policy)
      && /fewer than three members/.test(policy) && /fewer than twenty members/.test(policy),
     'members: the Privacy Policy says what is published, that nothing is guessed, that gender is not, and the two thresholds');
+  const pp = policy.slice(policy.indexOf('shows anonymous'), policy.indexOf('Nothing is guessed or inferred'));
+  ok(pp.length > 100 && pp.length < 400 && /universities named in the affiliations/.test(pp)
+     && /countries those universities are in, and nothing else/.test(pp) && !/sign in|ORCID|candidate profile|posted a job/.test(pp),
+    'members: …and lists only the two figures, nothing else');
   const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
   const entry = log.find((e) => e.id === 'members-insights-2026-10');
   ok(entry && entry.date === '2026-10-01' && entry.url === '/analytics' && !/—/.test(entry.title + entry.summary)
      && /Nothing is guessed about anybody/.test(entry.summary),
     'members: the change log announces it, dated, linked, says nothing is guessed, with no em dash');
+  ok(entry && /where they work, with a table of the universities that at least three members name/.test(entry.summary)
+     && /the countries those universities are in/.test(entry.summary)
+     && !/sign in|ORCID|candidate profile|posted a job/.test(entry.summary),
+    'members: …and names the two figures and none of the ones that were cut');
   const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
   ok(/## Who the registered members are, as anonymous counts/.test(claude) && /There is no gender figure/.test(claude),
     'members: CLAUDE.md records the decisions, the removed gender estimate among them');
+  ok(/the rest are not very interesting and do\s+not show them/.test(claude) && /TWO FIGURES AND NO MORE/.test(claude),
+    'members: …and the owner\'s cut to two figures, in their own words');
 }
 
 /* ------------------------------ the Universities directory (owner, 2026-08-24)

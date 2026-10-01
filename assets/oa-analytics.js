@@ -491,8 +491,8 @@
        and only when that file holds something (see drawGrowth). */
     drawGrowth();
 
-    /* 1c. who those members are, anonymously (see drawMembers), beside the
-       chart of how many there are */
+    /* 1c. where those members work and where their universities are,
+       anonymously (see drawMembers), beside the chart of how many there are */
     drawMembers();
 
     /* 2 — the weekly rhythm */
@@ -809,20 +809,23 @@
    *
    *  ONLY WHAT MEMBERS TOLD THE SITE, NOTHING GUESSED (owner, 2026-10-01:
    *  "don't make guesses, it's risky. use only information actually provided
-   *  from the users themselves"). Every figure counts something a member
-   *  stated or did: the affiliation they typed, matched to a university only
-   *  by name; the country of that university, or one they wrote; how they
-   *  sign in; an ORCID iD on their profile; a candidate profile or a posting.
-   *  There is no gender figure because the site has never asked for gender.
+   *  from the users themselves"). Both figures count what a member stated on
+   *  their profile: the affiliation they typed, matched to a university only
+   *  by name, and the country of that university, or one they wrote. There is
+   *  no gender figure because the site has never asked for gender.
    *
-   *  ANONYMOUS BY CONSTRUCTION, and the opening caption says how. The file
+   *  TWO FIGURES AND NO MORE (owner, the same day: "update it to include
+   *  only: where they work, with a table of the universities that at least
+   *  three members name; the countries those universities are in. the rest
+   *  are not very interesting and do not show them"). The strip of tiles,
+   *  how members sign in, ORCID iDs and the two roles were built and then
+   *  removed; the served file no longer carries any of them.
+   *
+   *  ANONYMOUS BY CONSTRUCTION, and the first caption says how. The file
    *  holds counts and nothing else; no university or country is named for
    *  fewer than `k` (three) members; and no figure crosses one fact with
    *  another. The page draws nothing at all from the committed seed
    *  (members: 0), the rule every figure here follows. */
-  function pctOf(n, of) {
-    return of ? Math.round((n / of) * 100) + '%' : '';
-  }
 
   /* a part with nobody in it would draw a zero-width block and a "0%" key */
   function nonZero(items) {
@@ -838,46 +841,24 @@
     var aff = m.affiliation;
     var u = m.universities || {};
     var c = m.countries || null;
-    var given = (aff.listed || 0) + (aff.other || 0);
 
-    /* the strip: five tiles, the strip's own cap (see renderTiles) */
-    var html = '<div class="oa-tiles">';
-    html += tile('Registered members', C.full(n), when ? 'on ' + when : '');
-    html += tile('Gave an affiliation', pctOf(given, n), 'on their profile');
-    html += tile('Universities', C.full(u.count || 0), 'named in those affiliations');
-    if (c) html += tile('Countries', C.full(c.count), 'where those universities are');
-    if (m.profile) html += tile('ORCID iD', pctOf(m.profile.orcid, n), 'on file with their profile');
-    html += '</div>';
-
-    var season = m.roles && m.roles.season ? String(m.roles.season) : '';
-    var roles = m.roles
-      ? ' ' + C.full(m.roles.candidates) + (m.roles.candidates === 1 ? ' member holds' : ' members hold') +
-        ' a candidate profile' + (season ? ' for the ' + season + ' market' : ' this season') + ', and ' +
-        C.full(m.roles.posters) + (m.roles.posters === 1 ? ' has' : ' have') + ' posted a job through the site.'
-      : '';
-    var f0 = figure('Who the registered members are',
-      'A snapshot of the ' + C.full(n) + ' registered members' + (when ? ' on ' + when : '') +
-      ', counted once a day from what they told the site on their profiles and nothing else: ' +
-      'nothing is guessed about anybody.' + roles + ' Anonymous by construction: only counts are ' +
-      'published, no university or country is named for fewer than ' + k + ' members, and no figure ' +
-      'crosses one fact with another.');
-    f0.section.classList.add('oa-members');
-    root.appendChild(f0.section);
-    var strip = document.createElement('div');
-    strip.innerHTML = html;
-    f0.body.appendChild(strip.firstChild);
-
-    /* the affiliations: how many named a university the site lists, then
+    /* where they work: how many named a university the site lists, then
        those universities by name */
     var shown = Array.isArray(u.shown) ? u.shown : [];
     var fa = figure('Where members work',
-      'The affiliation each member gave on their profile, matched to a university this site ' +
-      'lists only where it names one: by the university\'s name, one of its schools, or a short ' +
-      'form the site knows. ' + C.full(aff.listed || 0) + ' members name ' + C.full(u.count || 0) +
+      'The affiliation each of the ' + C.full(n) + ' registered members' + (when ? ' on ' + when : '') +
+      ' gave on their profile, counted once a day from what they told the site and nothing else: ' +
+      'nothing is guessed about anybody. An affiliation is matched to a university this site lists ' +
+      'only where it names one: by the university\'s name, one of its schools, or a short form the ' +
+      'site knows. ' + C.full(aff.listed || 0) + ' members name ' + C.full(u.count || 0) +
       (u.count === 1 ? ' university' : ' universities') + '; the table names every one with at ' +
       'least ' + k + ' members' + (u.rest ? ', and the ' + C.full(u.rest) + ' members at the others ' +
       'are counted together rather than named' : '') + '. An affiliation that names no listed ' +
-      'university is counted as another affiliation, never sorted or placed.');
+      'university is counted as another affiliation, never sorted or placed. ' +
+      'Anonymous by construction: only counts are published, ' +
+      'no university or country is named for fewer than ' + k + ' members, ' +
+      'and no figure crosses one fact with another.');
+    fa.section.classList.add('oa-members');
     root.appendChild(fa.section);
     C.share(fa.body, {
       title: 'Members by affiliation',
@@ -911,8 +892,9 @@
         'or a country they wrote at the end of their affiliation. ' + C.full(c.count) +
         (c.count === 1 ? ' country' : ' countries') + ' in all; those with at least ' + k +
         ' members are named' + (c.rest ? ', the ' + C.full(c.rest) + ' members elsewhere are counted ' +
-        'together' : '') + (c.unknown ? ', and ' + C.full(c.unknown) + ' members named no university ' +
-        'or country the site can read' : '') + '.');
+        'together' : '') + (c.unknown ? ', and ' + C.full(c.unknown) + ' members are not placed in ' +
+        'any country: they gave no affiliation, or the site does not know where the university ' +
+        'they named is' : '') + '.');
       root.appendChild(fc.section);
       C.bars(fc.body, {
         unit: 'members',
@@ -920,27 +902,6 @@
         total: n,
         xTitle: 'Country',
         items: c.shown.map(function (r) { return { label: r.name, value: r.members }; }),
-      });
-    }
-
-    /* how they sign in */
-    var si = m.signIn;
-    if (si) {
-      var fs = figure('How members sign in',
-        'The ways each member chose to sign in: with Google, with ORCID, with an e-mail address ' +
-        'and a password, or with more than one of these.');
-      root.appendChild(fs.section);
-      C.share(fs.body, {
-        title: 'Members by sign-in',
-        unit: 'members',
-        total: n,
-        restLabel: 'Another way',
-        items: nonZero([
-          { label: 'Google only', value: si.google || 0 },
-          { label: 'E-mail and password only', value: si.password || 0 },
-          { label: 'ORCID only', value: si.orcid || 0 },
-          { label: 'More than one', value: si.several || 0 },
-        ]),
       });
     }
   }

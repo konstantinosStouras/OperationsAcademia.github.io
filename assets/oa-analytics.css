@@ -116,7 +116,6 @@
 
    "Where members work" stacks a share bar and the universities in one card;
    the list takes a gap of its own so the two read as two. */
-.oa-members .oa-tiles { margin-bottom: 4px; }
 .oa-members-unis { margin-top: 22px; }
 /* the universities run to forty rows, so on a screen with room for it the
    list reads down two columns rather than one very long one; the order is
