@@ -62,6 +62,7 @@
   "Católica Lisbon",
   "Cedarville University",
   "CEIBS",
+  "Chalmers University of Technology",
   "Chatham University",
   "China Europe International Business School",
   "City University of Hong Kong",
@@ -212,6 +213,7 @@
   "National Chiao Tung University",
   "National University of Singapore",
   "Naval Postgraduate School",
+  "Nazarbayev University",
   "NC State University",
   "Neeley School of Business (Texas Christian Univ)",
   "Nevada State University",
@@ -432,6 +434,8 @@
   "University of Pennsylvania",
   "University of Pittsburgh",
   "University of Portland",
+  "University of Puget Sound",
+  "University of Queensland",
   "University of Richmond",
   "University of Rochester",
   "University of San Diego",
@@ -467,6 +471,7 @@
   "University of Wisconsin-Madison",
   "University of Wisconsin-Milwaukee",
   "University of Wisconsin-Stout",
+  "University of Wisconsin-Whitewater",
   "University of Zurich",
   "UNSW Sydney",
   "UT Austin McCombs",
@@ -495,6 +500,7 @@
   "Westfield State University",
   "Wheaton College of Massachusetts",
   "WHU – Otto Beisheim School of Management",
+  "Wichita State University",
   "Wilfrid Laurier University",
   "William and Mary",
   "Wilson College",
@@ -507,7 +513,14 @@
   "Yeshiva University",
   "York University"
  ],
- "fromMembers": [],
+ "fromMembers": [
+  "Chalmers University of Technology",
+  "Nazarbayev University",
+  "University of Puget Sound",
+  "University of Queensland",
+  "University of Wisconsin-Whitewater",
+  "Wichita State University"
+ ],
  "schools": [
   [
    "A. B. Freeman School of Business",

@@ -1322,6 +1322,14 @@
   ]
  },
  {
+  "id": "chalmers-university-of-technology",
+  "institution": "Chalmers University of Technology",
+  "type": "University",
+  "sources": [
+   "members"
+  ]
+ },
+ {
   "id": "chatham-university____sustainable-management",
   "institution": "Chatham University",
   "department": "Sustainable Management",
@@ -5307,6 +5315,14 @@
   "lastPosted": "2024-08-19",
   "lat": 36.5987214,
   "lng": -121.8773408
+ },
+ {
+  "id": "nazarbayev-university",
+  "institution": "Nazarbayev University",
+  "type": "University",
+  "sources": [
+   "members"
+  ]
  },
  {
   "id": "nc-state-university____itao",
@@ -11373,6 +11389,22 @@
   "lng": -122.7277619
  },
  {
+  "id": "university-of-puget-sound",
+  "institution": "University of Puget Sound",
+  "type": "University",
+  "sources": [
+   "members"
+  ]
+ },
+ {
+  "id": "university-of-queensland",
+  "institution": "University of Queensland",
+  "type": "University",
+  "sources": [
+   "members"
+  ]
+ },
+ {
   "id": "university-of-richmond__robins-school-of-business__management",
   "institution": "University of Richmond",
   "school": "Robins School of Business",
@@ -12355,6 +12387,14 @@
   "lastPosted": "2026-02-03"
  },
  {
+  "id": "university-of-wisconsin-whitewater",
+  "institution": "University of Wisconsin-Whitewater",
+  "type": "University",
+  "sources": [
+   "members"
+  ]
+ },
+ {
   "id": "university-of-zurich__department-of-business-administration__business-analytics-and-operations",
   "institution": "University of Zurich",
   "school": "Department of Business Administration",
@@ -13014,6 +13054,14 @@
   "sources": [
    "omlist",
    "seed"
+  ]
+ },
+ {
+  "id": "wichita-state-university",
+  "institution": "Wichita State University",
+  "type": "University",
+  "sources": [
+   "members"
   ]
  },
  {

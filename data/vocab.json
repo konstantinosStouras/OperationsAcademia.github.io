@@ -1642,6 +1642,10 @@
    "n": 0
   },
   {
+   "v": "Chalmers University of Technology",
+   "n": 0
+  },
+  {
    "v": "City University of New York (CUNY)",
    "n": 0
   },
@@ -1791,6 +1795,10 @@
   },
   {
    "v": "Naval Postgraduate School",
+   "n": 0
+  },
+  {
+   "v": "Nazarbayev University",
    "n": 0
   },
   {
@@ -2018,6 +2026,14 @@
    "n": 0
   },
   {
+   "v": "University of Puget Sound",
+   "n": 0
+  },
+  {
+   "v": "University of Queensland",
+   "n": 0
+  },
+  {
    "v": "University of Richmond",
    "n": 0
   },
@@ -2066,6 +2082,10 @@
    "n": 0
   },
   {
+   "v": "University of Wisconsin-Whitewater",
+   "n": 0
+  },
+  {
    "v": "University of Zurich",
    "n": 0
   },
@@ -2095,6 +2115,10 @@
   },
   {
    "v": "WHU – Otto Beisheim School of Management",
+   "n": 0
+  },
+  {
+   "v": "Wichita State University",
    "n": 0
   },
   {
@@ -5539,6 +5563,11 @@
     ]
    }
   },
+  "Chalmers University of Technology": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
   "Chatham University": {
    "schools": [],
    "units": [
@@ -7654,6 +7683,11 @@
      "Operations Research"
     ]
    }
+  },
+  "Nazarbayev University": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "NC State University": {
    "schools": [
@@ -10819,6 +10853,16 @@
     ]
    }
   },
+  "University of Puget Sound": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
+  "University of Queensland": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
   "University of Richmond": {
    "schools": [
     "Robins School of Business"
@@ -11347,6 +11391,11 @@
     ]
    }
   },
+  "University of Wisconsin-Whitewater": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
   "University of Zurich": {
    "schools": [
     "Department of Business Administration"
@@ -11754,6 +11803,11 @@
      "Supply Chain Management"
     ]
    }
+  },
+  "Wichita State University": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "Wilfrid Laurier University": {
    "schools": [
