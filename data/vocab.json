@@ -1602,6 +1602,10 @@
    "n": 0
   },
   {
+   "v": "Bielefeld University",
+   "n": 0
+  },
+  {
    "v": "Bocconi University",
    "n": 0
   },
@@ -5130,6 +5134,11 @@
      "OM/SCM"
     ]
    }
+  },
+  "Bielefeld University": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "Bilkent University": {
    "schools": [

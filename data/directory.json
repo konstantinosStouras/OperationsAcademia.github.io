@@ -626,6 +626,14 @@
   "lastPosted": "2025-09-06"
  },
  {
+  "id": "bielefeld-university",
+  "institution": "Bielefeld University",
+  "type": "University",
+  "sources": [
+   "members"
+  ]
+ },
+ {
   "id": "bilkent-university__faculty-of-business-administration__operations-management",
   "institution": "Bilkent University",
   "school": "Faculty of Business Administration",
