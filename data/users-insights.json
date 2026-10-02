@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-01T14:12:43.721Z",
- "members": 268,
+ "generated": "2026-10-02T10:44:29.128Z",
+ "members": 273,
  "k": 3,
  "affiliation": {
-  "listed": 176,
-  "other": 45,
+  "listed": 180,
+  "other": 46,
   "none": 47
  },
  "universities": {
-  "count": 105,
+  "count": 104,
   "shown": [
    {
     "name": "Cornell University",
@@ -41,6 +41,11 @@
     "members": 3
    },
    {
+    "name": "Duke University",
+    "country": "United States",
+    "members": 3
+   },
+   {
     "name": "George Mason University",
     "country": "United States",
     "members": 3
@@ -66,7 +71,22 @@
     "members": 3
    },
    {
+    "name": "Northwestern University",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "Pennsylvania State University",
+    "country": "United States",
+    "members": 3
+   },
+   {
     "name": "Stanford University",
+    "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "University of Maryland",
     "country": "United States",
     "members": 3
    },
@@ -101,14 +121,14 @@
     "members": 3
    }
   ],
-  "rest": 111
+  "rest": 103
  },
  "countries": {
   "count": 14,
   "shown": [
    {
     "name": "United States",
-    "members": 111
+    "members": 116
    },
    {
     "name": "Canada",
