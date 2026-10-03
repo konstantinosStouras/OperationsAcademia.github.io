@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-02T10:44:29.128Z",
- "members": 273,
+ "generated": "2026-10-03T10:03:14.955Z",
+ "members": 276,
  "k": 3,
  "affiliation": {
-  "listed": 180,
-  "other": 46,
+  "listed": 184,
+  "other": 45,
   "none": 47
  },
  "universities": {
-  "count": 104,
+  "count": 107,
   "shown": [
    {
     "name": "Cornell University",
@@ -86,6 +86,11 @@
     "members": 3
    },
    {
+    "name": "University of Alberta",
+    "country": "Canada",
+    "members": 3
+   },
+   {
     "name": "University of Maryland",
     "country": "United States",
     "members": 3
@@ -121,18 +126,18 @@
     "members": 3
    }
   ],
-  "rest": 103
+  "rest": 104
  },
  "countries": {
   "count": 14,
   "shown": [
    {
     "name": "United States",
-    "members": 116
+    "members": 117
    },
    {
     "name": "Canada",
-    "members": 13
+    "members": 15
    },
    {
     "name": "Singapore",
