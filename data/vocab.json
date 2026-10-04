@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-04T04:03:50.429Z",
+ "generated": "2026-10-04T04:05:13.681Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -59,6 +59,10 @@
   },
   {
    "v": "IESE Business School",
+   "n": 4
+  },
+  {
+   "v": "Michigan State University",
    "n": 4
   },
   {
@@ -155,10 +159,6 @@
   },
   {
    "v": "Miami University",
-   "n": 3
-  },
-  {
-   "v": "Michigan State University",
    "n": 3
   },
   {
@@ -2172,6 +2172,10 @@
    "n": 3
   },
   {
+   "v": "Eli Broad College of Business",
+   "n": 3
+  },
+  {
    "v": "Faculty of Business",
    "n": 3
   },
@@ -2209,10 +2213,6 @@
   },
   {
    "v": "Desautels Faculty of Management",
-   "n": 2
-  },
-  {
-   "v": "Eli Broad College of Business",
    "n": 2
   },
   {
@@ -3111,7 +3111,7 @@
   },
   {
    "v": "Supply Chain Management",
-   "n": 47
+   "n": 48
   },
   {
    "v": "BA",
