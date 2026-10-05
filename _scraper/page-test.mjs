@@ -20,6 +20,11 @@ import { parseIcs } from './_ics-read.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marketYear, inCurrentMarket } from './jobs-model.mjs';
+import { createRequire as requireFor } from 'node:module';
+/* The jobs page's own order (newest ON THE SITE first, the sponsor and Featured
+   above), for a check that needs a posting the page draws on its FIRST page:
+   the file's order is the posting date's, and since 2026-10-05 the two differ. */
+const PAGE_ORDER = requireFor(import.meta.url)('../assets/oa-sponsors.js').compare;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -3665,7 +3670,7 @@ for (const [pageName, pick] of [
 {
   const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
   const current = jobs.filter((r) => r && r.institution && r.id
-    && Number(r.year) === marketYear());
+    && Number(r.year) === marketYear()).sort((a, b) => PAGE_ORDER(a, b));
   const target = current[0];
   const victim = current.find((r) => r !== target);
 
@@ -14182,7 +14187,12 @@ for (const w of [320, 360, 390, 430]) {
      cannot go red the day the corpus moves, the DEEP_UNI discipline */
   const { createRequire: reqNav } = await import('node:module');
   const NAV = reqNav(import.meta.url)(path.join(ROOT, 'assets', 'oa-jobnav.js'));
-  const live = rows.filter((r) => NAV.inCurrentMarket(r));
+  /* …and IN THE PAGE'S ORDER, not the file's: the signed-out half below reads
+     the card off page 1 of an unfiltered list. The two orders agreed until the
+     page began listing newest ON THE SITE first (2026-10-05), and then an
+     evening of approvals moved the file's first posting to page 2. */
+  const live = rows.filter((r) => NAV.inCurrentMarket(r))
+    .sort((a, b) => PAGE_ORDER(a, b));
   const pick = live.find((r) => r.country && r.country !== 'Ruritania');
   if (!pick) {
     ok(false, 'multi-country filter: the served file carries a live posting to re-state');
