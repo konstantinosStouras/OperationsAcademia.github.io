@@ -92,6 +92,44 @@
     return y ? (y - 1) + '-' + y : '';
   }
 
+  /** How many seasons one posting may be listed under: `MARKET_SPAN_MAX` in
+      _scraper/jobs-model.mjs, a guard against junk rather than a policy. */
+  var MARKET_SPAN_MAX = 3;
+
+  /**
+   * EVERY season a posting belongs to, ascending: the one it was advertised
+   * in (`posted`), the one it is filed under (`year`) and the one its
+   * deadline falls in (the final apply-by, else the suggested one), with the
+   * seasons between them filled in.
+   *
+   * The browser twin of `marketYearsOf` in _scraper/jobs-model.mjs, and pinned
+   * against it over every served posting by selftest.mjs. It exists for the
+   * approval ECHO (assets/oa-fresh.js): a review card can move a posting's
+   * dates, the span moves with them in the build, and an echo that kept the
+   * workbook's span would be a row the build does not publish. Pure and free
+   * of `now`, like its twin: a row with no dates answers its stored year.
+   */
+  function marketYearsOf(row) {
+    var at = function (v) {
+      var d = day(v);
+      return /^\d{4}-\d{2}-\d{2}$/.test(d) ? marketYear(new Date(d + 'T12:00:00Z')) : 0;
+    };
+    var stored = Math.trunc(Number(row && row.year)) || 0;
+    var deadline = at(row && row.applyByDate) || at(row && row.reviewDate);
+    var advertised = at(row && row.posted);
+    var named = [stored, deadline, advertised].filter(function (y) { return y > 0; });
+    if (!named.length) return [];
+    var lo = Math.min.apply(null, named);
+    var hi = Math.max.apply(null, named);
+    if (hi - lo + 1 > MARKET_SPAN_MAX) {
+      return named.filter(function (y, i) { return named.indexOf(y) === i; })
+        .sort(function (a, b) { return a - b; });
+    }
+    var out = [];
+    for (var y = lo; y <= hi; y++) out.push(y);
+    return out;
+  }
+
   /**
    * Is this posting still open for applications at `now`?
    *
@@ -289,6 +327,8 @@
     marketYear: marketYear,
     marketStart: marketStart,
     marketLabel: marketLabel,
+    MARKET_SPAN_MAX: MARKET_SPAN_MAX,
+    marketYearsOf: marketYearsOf,
     deadlineOpen: deadlineOpen,
     inCurrentMarket: inCurrentMarket,
     pageFor: pageFor,

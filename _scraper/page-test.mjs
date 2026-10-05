@@ -20,6 +20,11 @@ import { parseIcs } from './_ics-read.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marketYear, inCurrentMarket } from './jobs-model.mjs';
+import { createRequire as requireFor } from 'node:module';
+/* The jobs page's own order (newest ON THE SITE first, the sponsor and Featured
+   above), for a check that needs a posting the page draws on its FIRST page:
+   the file's order is the posting date's, and since 2026-10-05 the two differ. */
+const PAGE_ORDER = requireFor(import.meta.url)('../assets/oa-sponsors.js').compare;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -3665,7 +3670,7 @@ for (const [pageName, pick] of [
 {
   const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
   const current = jobs.filter((r) => r && r.institution && r.id
-    && Number(r.year) === marketYear());
+    && Number(r.year) === marketYear()).sort((a, b) => PAGE_ORDER(a, b));
   const target = current[0];
   const victim = current.find((r) => r !== target);
 
@@ -5320,7 +5325,7 @@ for (const [from, hash] of [
   const teaser = await hp.evaluate(async () => {
     const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
     const ten = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
-      .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
+      .sort(window.OASponsors.byListing)
       .slice(0, 10);
     const marked = ten.filter((r) => window.OASponsors.isSponsored(r));
     return { any: marked.length > 0, first: marked.length ? marked[0].institution : '' };
@@ -5359,7 +5364,7 @@ for (const [from, hash] of [
   const newestTen = await hp.evaluate(async () => {
     const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
     return rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
-      .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
+      .sort(window.OASponsors.byListing)
       .slice(0, 10).map((r) => r.institution).sort();
   });
   const shown = await hp.evaluate(() => [...document.querySelectorAll('#oa-jobs-recent .oa-card')]
@@ -5387,9 +5392,16 @@ for (const [from, hash] of [
     const newest = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
       .map((r) => String(r.posted || '')).sort().pop() || today;
     const when = newest > today ? newest : today;
+    /* …and its LISTING stamp past every row's, since the teaser selects the
+       ten most recent on the site (OASponsors.byListing) rather than by the
+       posting date alone. */
+    const stamp = rows.map((r) => window.OASponsors.listedAt(r)).sort().pop() || '';
+    const at = stamp > when + 'T23:59:59Z'
+      ? new Date(Date.parse(stamp) + 1000).toISOString().replace(/\.\d{3}Z$/, 'Z')
+      : when + 'T23:59:59Z';
     const base = rows.find((r) => window.OASponsors.isSponsored(Object.assign({}, r, { posted: when })));
     if (!base) return null;
-    const lead = Object.assign({}, base, { posted: when });
+    const lead = Object.assign({}, base, { posted: when, addedAt: at });
     return { lead: lead.institution, rows: [lead].concat(rows.filter((r) => r !== base)) };
   });
   if (fixture) {
@@ -5403,7 +5415,7 @@ for (const [from, hash] of [
     const want = await rp.evaluate(async () => {
       const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
       const ten = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
-        .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
+        .sort(window.OASponsors.byListing)
         .slice(0, 10);
       const ordered = ten.slice().sort((a, b) => window.OASponsors.compare(a, b));
       return {
@@ -7404,6 +7416,127 @@ for (const w of [320, 360, 390, 430]) {
 
     eq(errors, [], 'approve now: no uncaught script error');
     await ctx.close();
+  }
+
+  /* -- …and it carries Edit and Take down AT ONCE -----------------------------
+
+     Owner, 2026-10-05, over a screenshot of four postings just approved and
+     showing neither control: "how come several job postings do not show edit
+     and take down buttons?". The controls are drawn only where the page can
+     name a `jobSubmissions` document, and for a crawled posting that is the
+     MIRROR the build used to be the only writer of, so a posting the echo put
+     on the page had nothing to name until the next build. The approval now
+     writes the mirror itself. Measured in two halves, because the shim keeps
+     no document across a navigation: the approval writes it on /admin-area,
+     and /jobs, seeded with exactly that document, draws both controls on the
+     echoed card and takes the posting down through it. */
+  {
+    const extra = [{
+      path: 'jobReviews/ap2',
+      data: {
+        rowId: 'ap2', status: 'pending', queuedAt: '2026-08-20',
+        row: {
+          id: 'ap2', year: 2027, posted: '2026-08-21', country: 'United States',
+          institution: 'Handle Ready University', school: 'School of Business',
+          unit: 'Operations', department: 'School of Business, Operations',
+          levels: ['Assistant Professor'], applyByDate: '2026-11-09',
+          type: 'Business School', source: 'jobmarket-sheet',
+          addedAt: '2026-08-20T00:00:00Z',
+        },
+      },
+    }];
+    const { ctx, q, errors } = await adminAreaPage(ADMIN, 'about:blank', extra);
+    await q.route('**/data/jobs.json', (r) => r.fulfill({
+      status: 200, contentType: 'application/json', body: '[]' }));
+    await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    const card = q.locator('#oa-review-list .oa-rv-card', { hasText: 'Handle Ready University' });
+    await card.waitFor({ timeout: 10000 });
+    const cardEl = await card.elementHandle();
+    await cardEl.$('button[data-act="approve"]').then((b) => b.click());
+    /* The card says "on your own jobs page" only once the handle has landed,
+       so waiting for the words is waiting for the write. */
+    await q.waitForFunction((el) => /on your own jobs page straight away/
+      .test(el.textContent || ''), cardEl, { timeout: 10000 });
+    const handle = await q.evaluate(() => window.__fb.docs['jobSubmissions/ap2'] || null);
+    const review = await q.evaluate(() => window.__fb.docs['jobReviews/ap2'] || null);
+    ok(handle, 'edit handle: approving writes the posting\'s editing handle before the card says it is live');
+    eq(handle && handle.status, 'sheet', 'edit handle: an inert mirror, the status nothing publishes from');
+    eq(handle && handle.sheetId, 'ap2', 'edit handle: pinned to the workbook row it stands for');
+    eq(handle && handle.uid, null, 'edit handle: carrying no account, exactly as the build writes one');
+    eq(handle && handle.institution, 'Handle Ready University', 'edit handle: holding the posting the form will edit');
+    ok(handle && review && handle.createdAt
+       && handle.createdAt === String(review.reviewedAt).replace(/\.\d{3}Z$/, 'Z'),
+    'edit handle: dated from the approval, like the row the build publishes');
+    eq(errors, [], 'edit handle: no uncaught script error on the Admin area');
+
+    /* The jobs page, with the document the approval wrote and the echo the
+       approval left in this browser's storage. */
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({
+      user: ADMIN, docs: seedDocs.concat(extra, [{ path: 'jobSubmissions/ap2', data: handle }]),
+    })};`);
+    await q.goto(BASE + 'jobs.html', { waitUntil: 'load' });
+    const posted = q.locator('#oa-jobs .oa-card', { hasText: 'Handle Ready University' });
+    await posted.waitFor({ timeout: 15000 });
+    await q.waitForFunction(() => {
+      const c = [...document.querySelectorAll('#oa-jobs .oa-card')]
+        .find((x) => /Handle Ready University/.test(x.textContent || ''));
+      return c && c.querySelector('.oa-card-actions .oa-jobbtn-edit');
+    }, null, { timeout: 15000 }).catch(() => {});
+    eq(await posted.locator('.oa-card-actions .oa-jobbtn-edit').count(), 1,
+      'edit handle: the just-approved posting carries Edit on the jobs page at once');
+    eq(await posted.locator('.oa-card-actions .oa-jobbtn-del').count(), 1,
+      'edit handle: …and Take down');
+    q.once('dialog', (d) => d.accept());
+    await posted.locator('.oa-card-actions .oa-jobbtn-del').click();
+    await q.waitForFunction(() => {
+      const d = window.__fb.docs['jobSubmissions/ap2'];
+      return d && d.status === 'hidden';
+    }, null, { timeout: 10000 }).then(() => ok(true,
+      'edit handle: and Take down takes it down through that document, as on any other posting'))
+      .catch(() => ok(false, 'edit handle: and Take down takes it down through that document'));
+    eq(errors, [], 'edit handle: no uncaught script error on the jobs page');
+    await ctx.close();
+  }
+
+  /* -- NEWEST ON THE SITE FIRST -----------------------------------------------
+
+     Owner, 2026-10-05: "jobs should be posted by the order the admin approved
+     them (if they were initially logged by the auto-crawler)". A crawled
+     posting advertised three weeks ago and approved an hour ago leads a
+     posting made on the site yesterday, on the jobs page and in the home
+     page's ten most recent; a posting made on the site keeps its day. Routed,
+     so the check never moves with the corpus. */
+  {
+    const yr = marketYear();
+    const iso = (ms) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
+    const now = Date.now();
+    const day = (ms) => iso(ms).slice(0, 10);
+    const base = { year: yr, type: 'University', levels: ['Assistant Professor'],
+      country: 'United States', countries: ['United States'], applyBy: 'Until filled.',
+      applyByDate: '', department: 'Operations', unit: 'Operations', school: '' };
+    const rows = [
+      { ...base, id: `${yr}-user-yesterday`, institution: 'Yesterday Posted University',
+        source: 'oa-form', posted: day(now - 86400000), addedAt: iso(now - 86400000) },
+      { ...base, id: `${yr}-crawled-old`, institution: 'Approved Hour Ago University',
+        source: 'jobmarket-sheet', posted: day(now - 21 * 86400000), addedAt: iso(now - 3600000) },
+      { ...base, id: `${yr}-crawled-mid`, institution: 'Approved Last Week University',
+        source: 'jobmarket-sheet', posted: day(now - 10 * 86400000), addedAt: iso(now - 7 * 86400000) },
+    ];
+    const lp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    await lp.route('**/data/jobs.json*', (r) => r.fulfill({ status: 200,
+      contentType: 'application/json', body: JSON.stringify(rows) }));
+    await lp.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+    await lp.waitForSelector('#oa-jobs .oa-card', { timeout: 15000 });
+    const titles = await lp.evaluate(() => [...document.querySelectorAll('#oa-jobs .oa-card .oa-card-title')]
+      .map((t) => t.textContent.trim()));
+    eq(titles, ['Approved Hour Ago University', 'Yesterday Posted University', 'Approved Last Week University'],
+      'order: the jobs page lists newest ON THE SITE first: an approval an hour ago leads, whatever its advertisement\'s date');
+    await lp.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
+    await lp.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
+    const teaser = await lp.evaluate(() => [...document.querySelectorAll('#oa-jobs-recent .oa-card .oa-card-title')]
+      .map((t) => t.textContent.trim()));
+    eq(teaser, titles, 'order: …and the home page\'s ten most recent agree with it, approval included');
+    await lp.close();
   }
 
   /* -- "Check for duplicate adverts" ---------------------------------------
@@ -14054,7 +14187,12 @@ for (const w of [320, 360, 390, 430]) {
      cannot go red the day the corpus moves, the DEEP_UNI discipline */
   const { createRequire: reqNav } = await import('node:module');
   const NAV = reqNav(import.meta.url)(path.join(ROOT, 'assets', 'oa-jobnav.js'));
-  const live = rows.filter((r) => NAV.inCurrentMarket(r));
+  /* …and IN THE PAGE'S ORDER, not the file's: the signed-out half below reads
+     the card off page 1 of an unfiltered list. The two orders agreed until the
+     page began listing newest ON THE SITE first (2026-10-05), and then an
+     evening of approvals moved the file's first posting to page 2. */
+  const live = rows.filter((r) => NAV.inCurrentMarket(r))
+    .sort((a, b) => PAGE_ORDER(a, b));
   const pick = live.find((r) => r.country && r.country !== 'Ruritania');
   if (!pick) {
     ok(false, 'multi-country filter: the served file carries a live posting to re-state');

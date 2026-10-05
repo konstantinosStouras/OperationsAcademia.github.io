@@ -2215,8 +2215,15 @@ export function uniqueIds(rows) {
   });
 }
 
-/** Featured first, then newest posting first, then institution — the order the
-    page also sorts by, so the file reads the way the site does. */
+/** Featured first, then newest posting first, then institution.
+
+    The FILE's order, and deliberately no longer the page's: since 2026-10-05
+    the jobs page lists newest ON THE SITE first (OASponsors.listedAt in
+    assets/oa-sponsors.js, which reads a crawled posting by the day it was
+    approved). This one stays on the posting date because `uniqueIds` mints
+    the `-2` of a same-day pair in this order, and an id is a permalink and
+    the join key for edits and take-downs: reordering the file would hand two
+    published postings each other's ids. */
 export function displayOrder(a, b) {
   if (!!b.featured !== !!a.featured) return b.featured ? 1 : -1;
   const d = String(b.posted || '').localeCompare(String(a.posted || ''));

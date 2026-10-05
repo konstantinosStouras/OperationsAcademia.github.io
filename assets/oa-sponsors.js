@@ -46,6 +46,12 @@
    position. It never changes what a posting SAYS, never hides another
    posting, and never survives its own end date.
 
+   THE REST OF THAT ORDER LIVES HERE TOO, because the order is one thing:
+   beneath the sponsor and Featured, the jobs page lists the newest ON THE
+   SITE first (`listedAt`, since 2026-10-05), which for a posting gathered
+   from the tracking sheet is the moment the maintainer approved it. The home
+   page's teaser picks its ten by the same key (`byListing`).
+
    Written in ES5 so it needs no transpiling for either consumer.
    --------------------------------------------------------------------------- */
 (function (root, factory) {
@@ -225,8 +231,56 @@
   }
 
   /**
+   * WHEN A POSTING WENT ON THE SITE, as an ISO instant: the key "newest
+   * first" means on the jobs page.
+   *
+   * Owner, 2026-10-05: "jobs should be posted by the order the admin approved
+   * them (if they were initially logged by the auto-crawler)". The page used
+   * to order by `posted`, the day the ADVERTISEMENT went up, and for a posting
+   * the crawler found in the workbook that day is often a week or more before
+   * anybody could read it here: approved this morning, it was filed down the
+   * list among postings that had been on the site for days, and from the top
+   * of the page an approval looked as if it had published nothing.
+   *
+   * `addedAt` is the moment the site first listed the posting, and it is
+   * already exactly that for both roads in. For a crawled posting it is the
+   * APPROVAL (jobreview.mjs `approvedRow` dates it from the decision; a
+   * posting public before the gate existed keeps the day the crawler first
+   * saw it, which is the day it went up). For a posting made through the site
+   * it is the moment it was posted, which is the day `posted` already names,
+   * so their order by day is untouched and only a tie within one day is now
+   * settled by the clock rather than by the name. And it is the SAME field
+   * the e-mail alerts window on, so a posting leads this list exactly when an
+   * alert calls it new.
+   *
+   * Only those two sources are read by the instant. The legacy import's rows
+   * carry the day they were imported, not the day they went up, so anything
+   * else is listed by its posting date, as before.
+   */
+  var LISTED_SOURCES = ['jobmarket-sheet', 'oa-form'];
+  function listedAt(row) {
+    var r = row || {};
+    var posted = String(r.posted || '').slice(0, 10);
+    var added = String(r.addedAt || '');
+    if (LISTED_SOURCES.indexOf(String(r.source || '')) !== -1 &&
+        /^\d{4}-\d{2}-\d{2}T/.test(added) && added.slice(0, 10) >= posted) {
+      return added;
+    }
+    return posted ? posted + 'T00:00:00Z' : added;
+  }
+
+  /** Newest on the site first: the listing instant, then the posting date,
+      then nothing: a tie stays a tie so a stable sort keeps the file's own
+      order. The home page's teaser SELECTS its ten by this, and every list
+      that draws "the newest" orders by it beneath the sponsor and Featured. */
+  function byListing(a, b) {
+    return listedAt(b).localeCompare(listedAt(a))
+      || String((b && b.posted) || '').localeCompare(String((a && a.posted) || ''));
+  }
+
+  /**
    * The comparator the jobs page sorts by: a sponsored posting leads,
-   * then a Featured one, then the newest.
+   * then a Featured one, then the newest ON THE SITE (`listedAt` above).
    *
    * SPONSORED ABOVE FEATURED because a sponsorship is a commitment the site
    * has made to somebody and Featured is a note the maintainer left
@@ -246,7 +300,7 @@
     if (sa !== sb) return sa ? -1 : 1;
     var fa = !!(a && a.featured), fb = !!(b && b.featured);
     if (fa !== fb) return fa ? -1 : 1;
-    return String((b && b.posted) || '').localeCompare(String((a && a.posted) || ''));
+    return byListing(a, b);
   }
 
   /** The badge, in the shape `card.badges` returns — or null. The pages ask
@@ -280,6 +334,9 @@
     unitOf: unitOf,
     sponsorFor: sponsorFor,
     isSponsored: isSponsored,
+    LISTED_SOURCES: LISTED_SOURCES,
+    listedAt: listedAt,
+    byListing: byListing,
     compare: compare,
     badge: badge,
     markCard: markCard

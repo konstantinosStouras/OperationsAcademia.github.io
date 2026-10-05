@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "jobs-newest-on-site-2026-10",
+      "date": "2026-10-05",
+      "title": "The newest postings on the site lead the jobs page",
+      "summary": "The jobs page now lists postings by when they went up on the site, newest first. A posting gathered from the community job market spreadsheet goes up once the site's maintainer has checked and approved it, so it now appears at the top the moment it is approved, rather than further down under the day it was first advertised. A posting made through the site goes up at once, as before. The front page's ten most recent postings follow the same order, and e-mail alerts announce each posting from the moment it goes up, so what you see first and what an alert calls new are the same postings.",
+      "url": "/jobs"
+    },
+    {
       "id": "affiliation-list-2026-10",
       "date": "2026-10-01",
       "title": "Choose your affiliation from our list of universities",

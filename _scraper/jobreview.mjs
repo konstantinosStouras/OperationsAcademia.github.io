@@ -33,6 +33,7 @@ import { createRequire } from 'node:module';
 import {
   text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
   ownUniversitiesLink, universitiesLink, stripRowEmails, OPEN_ENDED_RX, withCountries,
+  withMarketYears,
 } from './jobs-model.mjs';
 import { joinDepartment, businessSchoolOf, BUSINESS_SCHOOL_NAME_RX } from './vocab.mjs';
 
@@ -288,7 +289,18 @@ export function applyEdits(row, edits) {
      is the fact being stated — and `withCountries` is still the one place
      either field is decided. */
   if ('country' in clean && !('countries' in clean)) out.countries = [];
-  return withCountries(stripRowEmails(settlePlace(settleDeadline(out), row)));
+  /* AND THE SEASONS FOLLOW THE DATES, LAST. `years` is derived from the two
+     apply-by dates (marketYearsOf), and this is the one place a review card
+     moves them, so a span carried in from the workbook's own dates goes on
+     naming seasons the edited dates no longer reach. selftest.mjs holds every
+     served file to "every posting states the seasons it is listed under", and
+     a red re-check commits NOTHING: from 2026-09-18 the sheet read wrote
+     data/jobmarket.json on every run and committed none of them, over two
+     approvals whose closing date the maintainer had corrected on the card
+     (Berkeley's from a 2027 date to 16 September 2026, which still read
+     [2027, 2028]). withMarketYears is pure, idempotent and by value, so a row
+     whose dates did not move comes back as it went in. */
+  return withMarketYears(withCountries(stripRowEmails(settlePlace(settleDeadline(out), row))));
 }
 
 /** A line that says the search has no closing date rather than naming one —

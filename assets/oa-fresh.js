@@ -289,7 +289,103 @@
         if (!out.addedAt || out.addedAt < stamp) out.addedAt = stamp;
       }
     }
+
+    /* THE SEASONS FOLLOW THE DATES, as `applyEdits` now makes them follow in
+       the build: a review card that corrects a closing date moves the span the
+       posting is listed under, and an echo carrying the workbook's span would
+       be a row the build does not publish. `marketYearsOf` is INJECTED
+       (OAJobNav.marketYearsOf in the browser, jobs-model's in Node) for the
+       reason canonColumns is; without it the span is left as it came, which is
+       what the echo did before. */
+    if (typeof o.marketYearsOf === 'function') {
+      var span = o.marketYearsOf(out);
+      if (span && span.length) out.years = span;
+    }
     return out;
+  }
+
+  /* ----------------------------------- the editing handle, at approval time */
+
+  /** jobs-model MIRROR_STATUS: the inert status no query in the pipeline
+      reads, which is what makes a mirror an editing handle and nothing else. */
+  var MIRROR_STATUS = 'sheet';
+  /** jobs-model COUNTRY_MAX. */
+  var COUNTRY_MAX = 8;
+
+  /**
+   * jobs-model sheetMirrorDoc() (with submissionFromRow inside it), the
+   * browser twin: the `jobSubmissions` document that gives the maintainer Edit
+   * and Take down on a posting the tracking sheet publishes.
+   *
+   * WHY THE BROWSER WRITES ONE AT ALL (owner, 2026-10-05: "how come several
+   * job postings do not show edit and take down buttons?"). The build makes a
+   * mirror for every workbook row it publishes, and an approved posting is on
+   * the maintainer's own jobs page AT ONCE, through the echo above, minutes
+   * before any build has run. oa-jobedit.js draws the two controls only where
+   * it can name a document, so every posting just approved sat there with no
+   * controls until the build caught up, which on a morning of approvals is a
+   * whole page of them. The panel that approves it now writes the handle in
+   * the same breath (oa-jobreview.js), and the build's own mirror pass then
+   * finds it already there and refreshes it only if the workbook has moved.
+   *
+   * PARITY-PINNED in selftest.mjs against the real `sheetMirrorDoc` over the
+   * approval case table and over every tracking-sheet posting the site
+   * serves, `mirroredAt` aside (it is a housekeeping stamp `mirrorDiffers`
+   * ignores). `canonCountry` is injected, as everywhere in this file.
+   */
+  function mirrorDoc(row, opts) {
+    var o = opts || {};
+    var r = row || {};
+    var now = (o.now instanceof Date) ? o.now : new Date();
+    var applyBy = String(r.applyBy || '');
+    var untilFilled = false;
+    var applyByNote = '';
+    if (/^until filled/i.test(applyBy.trim()) && !r.applyByDate) {
+      untilFilled = true;
+      applyByNote = applyBy.trim().replace(/^until filled\.?\s*/i, '');
+    } else if (r.applyByDate) {
+      var lead = longDate(r.applyByDate);
+      applyByNote = applyBy.indexOf(lead) === 0
+        ? applyBy.slice(lead.length).replace(/^\.\s*/, '')
+        : applyBy;
+    } else {
+      applyByNote = applyBy;
+    }
+    var composed = composeApplyBy({
+      untilFilled: untilFilled, applyByDate: r.applyByDate, applyByNote: applyByNote,
+    });
+
+    var doc = { ref: r.ref || '', uid: null, status: MIRROR_STATUS };
+    if (r.owner) doc.owner = r.owner;
+    if (r.adPending) doc.adPending = true;
+    if (composed !== applyBy) doc.applyByText = applyBy;
+    if (r.year !== undefined) doc.year = r.year;
+    if (r.posted !== undefined) doc.postedOn = r.posted;
+    doc.institution = r.institution || '';
+    doc.school = r.school || '';
+    doc.unit = r.unit || '';
+    doc.department = r.department || '';
+    doc.type = r.type || '';
+    doc.levels = (r.levels || []).slice();
+    doc.country = r.country || '';
+    doc.countries = countriesList(r, o.canonCountry).slice(0, COUNTRY_MAX);
+    doc.untilFilled = untilFilled;
+    doc.applyByDate = r.applyByDate || '';
+    doc.reviewDate = r.reviewDate || '';
+    doc.applyByNote = applyByNote;
+    doc.comments = r.comments || '';
+    doc.adUrl = r.adUrl || '';
+    doc.postedAtUrl = r.postedAtUrl || '';
+    doc.furtherInfoUrl = r.furtherInfoUrl || '';
+    doc.characteristics = (r.characteristics || []).slice();
+    doc.featured = !!r.featured;
+    doc.source = r.source || 'sheet-import';
+    doc.adLabel = r.adLabel || '';
+    doc.postedAtLabel = r.postedAtLabel || '';
+    doc.createdAt = r.addedAt || '';
+    doc.sheetId = r.id;
+    doc.mirroredAt = now.toISOString();
+    return doc;
   }
 
   /* --------------------------------------------------------------- storage */
@@ -561,6 +657,8 @@
     stash: stash,
     echoFields: echoFields,
     approvedRow: approvedRow,
+    MIRROR_STATUS: MIRROR_STATUS,
+    mirrorDoc: mirrorDoc,
     composeApplyBy: composeApplyBy,
     universitiesLink: universitiesLink,
     ownUniversitiesLink: ownUniversitiesLink,

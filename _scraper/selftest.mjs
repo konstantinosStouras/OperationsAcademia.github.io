@@ -4416,6 +4416,13 @@ async function testVocabFile() {
        like the field tacked onto the department's own name. */
     "St. John's University|Business Analytics|Business Analytics and Information Systems",
     'University of Kansas|Analytics, Information, Operations|Analytics, Information, Operations research',
+    /* A crawled posting of 2026-10-01 (published on master 2026-10-05) put
+       "Operations Management" beside the "Business Area, Statistics/Operations
+       Management" the directory already lists for NYU Shanghai: a slash field
+       beside one of its halves, the Houston shape above. Whether the
+       operations faculty there is one group with statistics or its own is the
+       owner's call; the answer goes in SCOPED_UNIT_ALIASES. */
+    'New York University Shanghai|Business Area, Statistics/Operations Management|Operations Management',
   ]);
   /* KEYED BY THE UNIVERSITY'S IDENTITY, not by the spelling the vocabulary
      files it under today — that is `pickForm`'s tie-break and it moves with
@@ -10482,10 +10489,215 @@ async function testCliMainGuards() {
     'and nothing here can throw inside a module that imports it');
 }
 
+/* ------------------- crawled postings: published, listed, editable, announced
+
+   Owner, 2026-10-05, three things in one evening: "jobs should be posted by
+   the order the admin approved them (if they were initially logged by the
+   auto-crawler)", alerts sent "once these are approved by the admin", and
+   "how come several job postings do not show edit and take down buttons?".
+
+   They were three faces of one pipeline, and the first thing wrong with it was
+   that it had stopped: the tracking-sheet read had committed nothing since
+   2026-09-18, because a review card's corrected closing date left the season
+   span (`years`) naming the workbook's dates and the served-file guard
+   refused the file. Everything below is pinned here, beside each other,
+   because each one is only true while the others are. */
+async function testCrawledPostingsPipeline() {
+  const NAV = require(path.join(HERE, '..', 'assets', 'oa-jobnav.js'));
+  const F = require(path.join(HERE, '..', 'assets', 'oa-fresh.js'));
+  const SP = require(path.join(HERE, '..', 'assets', 'oa-sponsors.js'));
+  const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+  const canonColumns = require(path.join(HERE, '..', 'assets', 'oa-schools.js')).canonColumns;
+  const canonCountry = require(path.join(HERE, '..', 'assets', 'oa-countries.js')).canon;
+  const served = (f) => JSON.parse(readFileSync(path.join(HERE, '..', 'data', f), 'utf8'));
+  const strip = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"\\])\/\/[^\n]*/g, '$1');
+
+  /* ---- 1. THE OUTAGE: an edited date moves the season span with it ------ */
+
+  /* The exact pair that stopped the sheet read. Berkeley's workbook row named
+     a 2027 closing date and the card corrected it to 16 September 2026; the
+     other went the other way. */
+  const sheetRow = (applyByDate) => withMarketYears({
+    id: '2027-uc-20260905', year: 2027, posted: '2026-09-05',
+    institution: 'University of California, Berkeley', school: '', unit: 'OM',
+    applyByDate, applyBy: '', reviewDate: '', source: 'jobmarket-sheet',
+    addedAt: '2026-09-06T00:00:00Z',
+  });
+  const decided = { queuedAt: '2026-09-06T00:00:00Z', reviewedAt: '2026-09-14T06:52:05.000Z' };
+  const late = sheetRow('2027-09-30');
+  eq(late.years, [2027, 2028], 'outage: the workbook\'s own date spans two seasons (the fixture)');
+  const pulledIn = approvedRow(late, { ...decided, edits: { applyByDate: '2026-09-16' } });
+  eq(pulledIn.years, marketYearsOf(pulledIn),
+    'outage: a closing date corrected on the review card takes the season span with it');
+  eq(pulledIn.years, [2027], 'outage: …which for Berkeley is one season, not the two the workbook named');
+  const pushedOut = approvedRow(sheetRow('2026-10-15'),
+    { ...decided, edits: { applyByDate: '2027-09-01' } });
+  eq(pushedOut.years, [2027, 2028], 'outage: and a date moved the other way widens it');
+  eq(applyEdits(late, { applyByDate: '2026-09-16' }).years, [2027],
+    'outage: it is applyEdits that settles it, so the review card and the sync agree');
+  const still = approvedRow(sheetRow('2026-10-15'), decided);
+  eq(still.years, marketYearsOf(still), 'outage: an approval that moves no date keeps the span it had');
+  {
+    const src = strip(await readFile(path.join(HERE, 'jobreview.mjs'), 'utf8'));
+    const fn = src.slice(src.indexOf('export function applyEdits('), src.indexOf('const OPEN_ENDED = '));
+    ok(fn.length > 300 && /return withMarketYears\(withCountries\(/.test(fn),
+      'outage: applyEdits re-derives the span LAST, over the row as it will publish');
+  }
+  /* What the guard says over the served files, so the fix is measured on the
+     shape that failed rather than only on a fixture. */
+  for (const f of ['jobs.json', 'jobmarket.json']) {
+    const wrong = served(f).filter((r) => r.source === 'jobmarket-sheet'
+      && JSON.stringify(approvedRow(r, {}).years) !== JSON.stringify(marketYearsOf(r)));
+    eq(wrong.map((r) => r.id).slice(0, 3), [],
+      `outage: re-approving every crawled posting in ${f} leaves its span true to its dates`);
+  }
+
+  /* ---- 2. the browser twin of the span, which the echo now carries ------- */
+
+  let drift = [];
+  for (const f of ['jobs.json', 'jobmarket.json', 'past-postings.json']) {
+    for (const r of served(f)) {
+      if (JSON.stringify(NAV.marketYearsOf(r)) !== JSON.stringify(marketYearsOf(r))) drift.push(`${f}:${r.id}`);
+    }
+  }
+  eq(drift.slice(0, 3), [], 'span twin: OAJobNav.marketYearsOf is jobs-model\'s over every served posting');
+  for (const r of [{}, { year: 2026 }, { year: 2026, posted: '2023-01-02', applyByDate: '2029-01-01' },
+    { posted: '2026-08-01' }, { year: 2027, reviewDate: '2027-08-01' }, { year: 'x', applyByDate: 'soon' }]) {
+    eq(NAV.marketYearsOf(r), marketYearsOf(r), `span twin: and over ${JSON.stringify(r)}`);
+  }
+  eq(NAV.MARKET_SPAN_MAX, MARKET_SPAN_MAX, 'span twin: the same cap on a junk span');
+  eq(F.approvedRow(late, { ...decided, edits: { applyByDate: '2026-09-16' } },
+    { canonColumns, canonCountry, marketYearsOf: NAV.marketYearsOf }).years, [2027],
+  'span twin: the approval echo carries the span the build will publish');
+
+  /* ---- 3. the EDIT HANDLE, written by the approval itself ------------------ */
+
+  const NOW = new Date('2026-10-05T21:00:00Z');
+  const sheetServed = served('jobs.json').filter((r) => r.source === 'jobmarket-sheet')
+    .concat(served('jobmarket.json'));
+  const mirrorDrift = [];
+  for (const r of sheetServed) {
+    const want = sheetMirrorDoc(r, { now: NOW });
+    const got = F.mirrorDoc(r, { now: NOW, canonCountry });
+    const keys = Object.keys(want).sort();
+    if (JSON.stringify(got, keys) !== JSON.stringify(want, keys)
+        || Object.keys(got).some((k) => !(k in want))) mirrorDrift.push(r.id);
+  }
+  ok(sheetServed.length > 400, 'handle: measured over every crawled posting the site serves');
+  eq(mirrorDrift.slice(0, 3), [], 'handle: OAFresh.mirrorDoc is the build\'s sheetMirrorDoc, field for field');
+  /* …and over the approval case of the outage, the row an approval publishes. */
+  const echoed = F.approvedRow(late, { ...decided, edits: { applyByDate: '2026-09-16' } },
+    { canonColumns, canonCountry, marketYearsOf: NAV.marketYearsOf });
+  const fromBuild = sheetMirrorDoc(approvedRow(late, { ...decided, edits: { applyByDate: '2026-09-16' } }), { now: NOW });
+  const fromBrowser = F.mirrorDoc(echoed, { now: NOW, canonCountry });
+  eq(mirrorDiffers(fromBuild, fromBrowser), false,
+    'handle: the mirror an approval writes is one the build\'s own pass leaves alone');
+  eq(fromBrowser.status, MIRROR_STATUS, 'handle: inert, the status no query in the pipeline reads');
+  eq(F.MIRROR_STATUS, MIRROR_STATUS, 'handle: one word for that status on both sides');
+  eq(fromBrowser.sheetId, late.id, 'handle: pinned to the workbook row it stands for');
+  ok(buildOwned(fromBrowser), 'handle: carries no uid, so the build honours its sheetId');
+  eq(fromBrowser.createdAt, echoed.addedAt, 'handle: dated from the approval, as the row is');
+  eq(fromBrowser.mirroredAt, NOW.toISOString(), 'handle: stamped like the build stamps one');
+  {
+    const src = strip(await readFile(path.join(HERE, '..', 'assets', 'oa-jobreview.js'), 'utf8'));
+    const fn = src.slice(src.indexOf('function mirrorApproval('), src.indexOf('function judgedRow('));
+    ok(fn.length > 300, 'handle: the panel has a mirrorApproval (bounded slice)');
+    ok(/collection\(SUBS_COL\)\.doc\(id\)/.test(fn) && /ref\.get\(\)\.then/.test(fn)
+       && /if \(snap\.exists\) return false;/.test(fn) && fn.indexOf('ref.get()') < fn.indexOf('ref.set('),
+    'handle: CREATE only where nothing exists: a get() first, never a blind set()');
+    ok(/\^\[A-Za-z0-9\._~-\]\+\$/.test(fn), 'handle: an id that is not a usable document id is skipped');
+    ok(/OAFresh\.mirrorDoc\(row/.test(fn), 'handle: written through the parity-pinned twin');
+    ok(/\['catch'\]\(function/.test(fn) && !/throw /.test(fn),
+      'handle: best effort: a refused write never costs the approval');
+    ok(/return Promise\.race\(\[write, waited\]\);/.test(fn) && /MIRROR_WAIT_MS = \d{4,5};/.test(src),
+      'handle: and bounded in time, so a write that never answers cannot hold a card on "Sending"');
+    const echo = src.slice(src.indexOf('function echoApproval('), src.indexOf('function publishedRow('));
+    ok(/return mirrorApproval\(db, row\);/.test(echo), 'handle: every approval echo writes it');
+    ok(/marketYearsOf: \(window\.OAJobNav && OAJobNav\.marketYearsOf\)/.test(src),
+      'handle: the echo is handed the browser span rule');
+    /* Both approval roads wait for it before telling the maintainer the
+       posting is on the jobs page, or a page left at once loses the write. */
+    ok(/return act === 'approve' \? echoApproval\(db, doc, edits, patch\.reviewedAt\) : null;\s*\}\)\s*\.then\(function \(\) \{/.test(src),
+      'handle: one approval waits for its handle before its card says it is on the jobs page');
+    ok(/handles\.push\(echoApproval\(db, doc, edits, reviewedAt\)\)/.test(src)
+       && /return Promise\.all\(handles\);\s*\}\)\.then\(function \(\) \{/.test(src),
+    'handle: approve-all writes them alongside and waits for all of them before its last line');
+  }
+  {
+    const admin = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+    ok(admin.includes('assets/oa-fresh.js') && admin.includes('assets/oa-jobnav.js'),
+      'handle: the Admin area loads both modules the approval reads');
+  }
+
+  /* ---- 4. THE ORDER: newest on the site first ----------------------------- */
+
+  const crawledToday = { id: 'c', source: 'jobmarket-sheet', posted: '2026-09-20',
+    addedAt: '2026-10-05T21:05:00Z', institution: 'University of Toronto' };
+  const userYesterday = { id: 'u', source: 'oa-form', posted: '2026-10-04',
+    addedAt: '2026-10-04T04:03:23Z', institution: 'Michigan State University' };
+  const userToday = { id: 'v', source: 'oa-form', posted: '2026-10-05',
+    addedAt: '2026-10-05T17:41:56Z', institution: 'Duke University' };
+  const legacy = { id: 'l', source: 'sheet-import', posted: '2026-10-03',
+    addedAt: '2026-08-16T13:09:54Z', institution: 'Old Import' };
+  eq(SP.listedAt(crawledToday), crawledToday.addedAt, 'order: a crawled posting is listed from its approval');
+  eq(SP.listedAt(userToday), userToday.addedAt, 'order: a posting made on the site from the moment it was posted');
+  eq(SP.listedAt(legacy), '2026-10-03T00:00:00Z',
+    'order: the legacy import\'s rows, whose stamp is the import\'s, by their posting date as before');
+  eq(SP.listedAt({ source: 'oa-form', posted: '2026-10-05', addedAt: '2026-10-01T00:00:00Z' }),
+    '2026-10-05T00:00:00Z', 'order: a stamp BEFORE the posting date is not believed');
+  eq(SP.listedAt({ source: 'jobmarket-sheet', posted: '2026-10-05' }), '2026-10-05T00:00:00Z',
+    'order: and a row with no stamp falls back to its posting date');
+  const order = [legacy, userYesterday, crawledToday, userToday].sort(SP.byListing).map((r) => r.id);
+  eq(order, ['c', 'v', 'u', 'l'],
+    'order: approved tonight leads, then by the moment each went up, the owner\'s own screenshot');
+  eq([userToday, crawledToday].sort((a, b) => SP.compare(a, b, '2026-10-05')).map((r) => r.id), ['c', 'v'],
+    'order: the jobs page\'s comparator ends on the same key');
+  const cuhk = served('jobs.json').find((r) => SP.isSponsored(r, '2026-10-05'));
+  if (cuhk) {
+    eq(SP.compare(cuhk, crawledToday, '2026-10-05') < 0, true,
+      'order: a sponsored posting still leads an approval made after it');
+  }
+  eq(SP.compare({ ...legacy, featured: true }, crawledToday, '2026-10-05') < 0, true,
+    'order: and Featured still leads everything beneath the sponsor');
+  /* Over the real list: for the two live sources the page's key IS the alert
+     window's, so a posting leads this list exactly when an alert calls it new. */
+  const live = served('jobs.json').filter((r) => SP.LISTED_SOURCES.includes(r.source));
+  ok(live.length > 500, 'order: measured over every posting from the two live roads');
+  eq(live.filter((r) => SP.listedAt(r) !== r.addedAt).map((r) => r.id).slice(0, 3), [],
+    'order: for every one of them the listing key is the addedAt the e-mail alerts window on');
+  /* user postings keep their order by DAY: the key only settles a tie within one */
+  const users = served('jobs.json').filter((r) => r.source === 'oa-form');
+  const byDay = users.slice().sort((a, b) => String(b.posted).localeCompare(String(a.posted))).map((r) => r.posted);
+  eq(users.slice().sort(SP.byListing).map((r) => r.posted), byDay,
+    'order: postings made on the site keep their day order exactly; the process for them is unchanged');
+  /* …and the FILE's own order is NOT this, on purpose: uniqueIds mints a
+     same-day `-2` in the file's order, and an id is a permalink. */
+  eq([{ ...crawledToday, featured: false }, { ...userYesterday }].sort(displayOrder).map((r) => r.id),
+    ['u', 'c'], 'order: data/jobs.json stays in posting-date order, so no id moves');
+
+  /* ---- 5. the ALERT: an approval is announced, by the same field --------- */
+
+  const lastSent = '2026-10-05T18:00:00Z';     // a digest went out before the approval
+  const published = approvedRow({ ...crawledToday, addedAt: '2026-09-21T00:00:00Z',
+    year: 2027, applyByDate: '2026-11-09', applyBy: '' },
+  { queuedAt: '2026-09-21T00:00:00Z', reviewedAt: '2026-10-05T21:05:00.000Z' });
+  eq(published.addedAt, '2026-10-05T21:05:00Z', 'alert: the approval dates the posting');
+  const wantsJobs = { topics: ['jobs'] };
+  eq(M.newJobsFor([published], wantsJobs, lastSent).map((r) => r.id), ['c'],
+    'alert: an alert last sent before the approval announces a posting crawled long before it');
+  eq(M.newJobsFor([published], wantsJobs, published.addedAt), [],
+    'alert: and announces it once; the next window starts at the newest posting it carried');
+  eq(SP.listedAt(published), published.addedAt,
+    'alert: the moment it leads the jobs page is the moment it counts as new');
+}
+
 /* -------------------------- the edit you just saved, shown before the build */
 
 async function testFreshEcho() {
   const F = require(path.join(HERE, '..', 'assets', 'oa-fresh.js'));
+  /* the browser's span rule, injected into the echo the way the page injects
+     it (assets/oa-jobreview.js passes OAJobNav.marketYearsOf) */
+  const JOBNAV_TWIN = require(path.join(HERE, '..', 'assets', 'oa-jobnav.js'));
 
   /* THE ECHO MAY ONLY SAY WHAT THE BUILD WOULD PUBLISH. Its field list is a
      subset of the served row's, its Apply-by line is composed by a browser
@@ -10588,7 +10800,8 @@ async function testFreshEcho() {
   ];
   for (const [name, row, doc] of APPROVE_CASES) {
     const want = approvedRow(row, doc);
-    const got = F.approvedRow(row, doc, { canonColumns, canonCountry });
+    const got = F.approvedRow(row, doc,
+      { canonColumns, canonCountry, marketYearsOf: JOBNAV_TWIN.marketYearsOf });
     eq(JSON.stringify(got, Object.keys(want).sort()),
       JSON.stringify(want, Object.keys(want).sort()),
       `the echoed approved row is the row the build publishes — ${name}`);
@@ -11233,9 +11446,9 @@ function testReviewDuplicates() {
      the echo for the maintainer at once, the chain for everyone else in a
      couple of minutes, and neither stale wording anywhere the maintainer
      reads. */
-  ok(/echoApproval\(doc, edits, patch\.reviewedAt\)/.test(rvSrc),
+  ok(/echoApproval\(db, doc, edits, patch\.reviewedAt\)/.test(rvSrc),
     'approving one posting echoes the row the build will publish');
-  ok(/echoApproval\(doc, edits, reviewedAt\)/.test(rvSrc),
+  ok(/echoApproval\(db, doc, edits, reviewedAt\)/.test(rvSrc),
     'and so does approving the whole page');
   ok(/OAFresh\.approvedRow\(row, \{/.test(rvSrc)
      && /canonColumns: OASchools\.canonColumns/.test(rvSrc),
@@ -15351,10 +15564,20 @@ async function testSponsors() {
     ok(/sort:\s*function\s*\(a, b\)\s*\{\s*return OASponsors\.compare\(a, b\);/.test(html),
       `sponsors: ${rel} sorts through the module`);
   }
-  /* …and the teaser's SELECTION is still by date, which is what keeps its own
-     heading honest. */
-  ok(/prepare:[\s\S]{0,400}?localeCompare\(a\.posted[\s\S]{0,80}?slice\(0, 10\)/.test(home),
-    'sponsors: the teaser still SELECTS the ten most recent by date before ordering them');
+  /* …and the teaser's SELECTION is still the ten most recent, which is what
+     keeps its own heading honest: most recent ON THE SITE since 2026-10-05,
+     by the jobs page's own key, so a posting approved this morning reaches the
+     panel that the jobs page one click away already leads with. */
+  ok(/prepare:[\s\S]{0,400}?\.sort\(OASponsors\.byListing\)\.slice\(0, 10\)/.test(home),
+    'sponsors: the teaser SELECTS the ten most recently listed, through the module, before ordering them');
+  {
+    /* bounded to the jobs teaser's own mount: the candidates and placements
+       teasers below it sort by date on purpose, and are not this list */
+    const at = home.indexOf("mount: '#oa-jobs-recent'");
+    const teaserSrc = home.slice(at, home.indexOf('filters:', at));
+    ok(at > 0 && teaserSrc.length > 200 && !/localeCompare\(a\.posted/.test(teaserSrc),
+      'sponsors: …and the jobs teaser keeps no private by-date selection of its own beside it');
+  }
   ok(!/b\.featured\s*\?\s*1\s*:\s*-1/.test(jobs),
     'sponsors: …and the jobs page kept no second, private copy of the Featured rule');
 
@@ -25288,6 +25511,7 @@ if (isMain(import.meta.url)) {
   await testMultiSelectFilters();
   await testPositionTypes();
   await testSponsors();
+  await testCrawledPostingsPipeline();
   await testReaderGate();
   await testClosingSoonDigest();
   await testSaveSearchAsAlert();

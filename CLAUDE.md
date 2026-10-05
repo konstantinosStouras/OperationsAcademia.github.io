@@ -545,7 +545,11 @@ is made or carried:
 * `import-legacy-tables.mjs`, on write and in `--heal-names`, because the
   archive has no daily build (nine of its 159 rows span two seasons);
 * `sync-jobmarket-sheet.mjs --heal-names`, which is how the committed file
-  gained the field without waiting for the workbook to change.
+  gained the field without waiting for the workbook to change;
+* `applyEdits` in `jobreview.mjs`, LAST, because a review card is the one
+  place a posting's dates are moved after it was made. Missing from this list
+  until 2026-10-05, and it stopped the sheet read committing for seventeen
+  days: see "A crawled posting goes up when it is approved" below.
 
 **AFTER the heal count in build-jobs, deliberately, and skipped in
 `diffRows`.** The field is derived from `posted`, `year` and the two apply-by
@@ -2307,6 +2311,135 @@ decision lands, with the build chained on its completion. Either way an
 approval is on the site in a couple of minutes; the half-hour sheet schedule
 is the safety net, not the promise. If any of that changes, change the panel's
 and the e-mail's promise with it.
+
+## A crawled posting goes up when it is approved, and is listed and edited from then
+
+Owner, 2026-10-05, three requests in one evening: *"jobs should be posted by
+the order the admin approved them (if they were initially logged by the
+auto-crawler). Also, subscribed users to job alerts should be notified of new
+jobs once these are approved by the admin … For jobs posted by registered
+users, the process stays as-is"*, and then, over a screenshot of four
+postings with no controls on them, *"how come several job postings do not
+show edit and take down buttons?"*
+
+### First, the sheet read had stopped, for seventeen days
+
+`data/jobmarket.json` had not been committed since **2026-09-18**. Every run
+of `oa-jobmarket-sheet.yml` read the workbook, wrote the file, and then went
+red on one guard in its re-check, *"data/jobmarket.json: every posting states
+the seasons it is listed under"*, over two postings: Berkeley (stored
+`[2027, 2028]`, its dates said `[2027]`) and Georgetown (the reverse). A red
+re-check commits nothing, so nothing the workbook said reached the site.
+
+**The cause was the review card.** `years` is derived from the two apply-by
+dates (`marketYearsOf`), and `applyEdits` is the one place a posting's dates
+move after it was made: the maintainer corrected Berkeley's closing date from
+a 2027 date to 16 September 2026, and the span went on naming the workbook's
+date. `withMarketYears` had been applied by every writer in the list under
+"Which seasons a posting is IN" except this one. It is the last step of
+`applyEdits` now, so `approvedRow`, the sync's `partition` and the build's
+direct read of the queue all publish a span true to the dates.
+
+**The browser twin moved with it.** The approval echo is parity-pinned
+against `approvedRow`, so `OAFresh.approvedRow` takes `marketYearsOf` injected
+(the canonColumns idiom) and the page hands it **`OAJobNav.marketYearsOf`**, a
+new browser twin pinned against jobs-model's over every served posting in all
+three files. Its vendored copy in `_functions/` is regenerated, by the byte
+pin; nothing in the functions calls it, so no deploy is owed for it.
+
+What kept the site going meanwhile is worth knowing: the build reads APPROVED
+queue documents directly and publishes any whose approval is newer than the
+last committed sheet read, so approvals still went up, from their frozen
+snapshots. What stopped was everything the workbook itself says.
+
+### Newest ON THE SITE first
+
+The jobs page ordered by `posted`, the day the ADVERTISEMENT went up. For a
+crawled posting that is often a week or more before anybody could read it
+here, so a posting approved this morning was filed down the list among
+postings that had been up for days.
+
+**`OASponsors.listedAt(row)` is the key**, in `assets/oa-sponsors.js` because
+that module already owns the page's whole order, and **`byListing`** compares
+by it (then the posting date, then a tie, so a stable sort keeps the file's
+order). For the two live roads it is `addedAt`, and `addedAt` was already the
+right instant on both: `approvedRow` dates a crawled posting from its
+APPROVAL, and a posting made on the site carries the moment it was posted.
+Anything else (the legacy import, whose stamp is the import's) is listed by
+its posting date, and so is a stamp earlier than the posting date.
+
+* **The process for user postings is unchanged.** Their stamp is the same day
+  as their `posted` on every served row (measured), so their order by day is
+  exactly what it was; only a tie within one day is now settled by the clock.
+* **The home page's teaser SELECTS its ten by the same key**
+  (`.sort(OASponsors.byListing).slice(0, 10)`), or the jobs page would lead
+  with an approval the "ten most recent" panel one click away never shows.
+* **The FILE keeps posting-date order** (`displayOrder` in jobs-model.mjs).
+  `uniqueIds` mints a same-day `-2` in file order, and an id is a permalink and
+  the join key for edits and take-downs; reordering the file would hand two
+  published postings each other's ids.
+* **Previous markets is untouched**: it orders by season and posting date, and
+  the archive's `addedAt` is the import's, not anybody's listing.
+
+### …which is also the alert window, and that is the point
+
+The e-mail alerts window on `addedAt` (`newJobsFor`, `lastJobAt`), so for
+every posting from the two live roads the listing key IS the alert key
+(pinned over the whole served file). A crawled posting is announced from its
+approval, not from the day the crawler found it, which is how it has worked
+since 2026-08-27 and is now pinned end to end beside the order: approve, the
+posting is dated from the decision, an alert last sent before the approval
+carries it, and the next window starts after it. User postings: unchanged.
+
+### Edit and Take down from the moment of approval
+
+The four postings in the screenshot were not in `data/jobs.json` yet. The
+echo (above, "An approved posting is on the maintainer's jobs page at once")
+had put them on the maintainer's own jobs page the moment they were approved,
+and `oa-jobedit.js` draws the two controls only where it can name a
+`jobSubmissions` document. For a crawled posting that document is its MIRROR
+(`sheetMirrorDoc`), and only the build wrote mirrors, so every posting just
+approved sat there with no controls until a build caught up. On an evening of
+approvals the builds queue behind each new decision's sheet read in the
+shared concurrency group, so that was a page of them.
+
+**The approval writes the mirror itself now** (`mirrorApproval` in
+`assets/oa-jobreview.js`), through **`OAFresh.mirrorDoc`**, a browser twin of
+`sheetMirrorDoc` pinned field for field over every crawled posting the site
+serves, `mirroredAt` aside. The build's own rules, to the letter: CREATE only
+where no document has the id (a `get()` first, never a blind `set()`), skip an
+id that is not a usable document id, and never let a failure cost the
+approval. The build's mirror pass then finds it there and refreshes it only if
+the workbook has moved (`mirrorDiffers`). It carries no uid, so `buildOwned`
+honours its `sheetId` exactly as it does the build's; the admin is the only
+browser the rules let write a uid-less `jobSubmissions` document.
+
+**Both approval roads wait for it** before telling the maintainer the posting
+is on the jobs page: a single approval chains it before its card's words, and
+Approve-all writes the handles alongside the decisions and waits for all of
+them before its last line. A page left before a write lands would leave a
+posting there with no controls.
+
+**What this does NOT cover:** a published crawled posting whose served id was
+renamed by `uniqueIds` (`-2`) is still keyed to its mirror by the workbook's
+id, so it draws no controls; that is the "two sources mint one id" case this
+file already leaves to the maintainer.
+
+Tests: `testCrawledPostingsPipeline` in `_scraper/selftest.mjs` (the outage's
+own pair both ways, `applyEdits` re-deriving last, every crawled posting
+re-approved keeping a true span; the span twin over every served posting; the
+mirror twin over every crawled posting and the approval case, inert, pinned to
+its row, uid-less and dated from the approval; the panel's get-before-set,
+the twin, best effort and both waits; the order's every branch, the owner's
+screenshot, sponsor and Featured still first, the key equal to `addedAt` over
+the two live roads, user postings' day order unchanged, the file's order
+unmoved; and the alert end to end), the echo's parity table now injected with
+the span rule, the teaser pin moved to `byListing`, and in
+`_scraper/page-test.mjs` the edit-handle block (approval writes the mirror,
+the jobs page draws Edit and Take down on the echoed posting and takes it down
+through it) and the order block (an approval an hour ago leads a posting made
+yesterday, on the jobs page and in the home page's ten). Every new pin
+verified by putting the defect back.
 
 ## …and what is posted through the site's own forms is ANNOUNCED
 
@@ -9074,6 +9207,11 @@ by anywhere but Hong Kong and they are gone). `featured` has always worked this
 way, and sponsored ranks ABOVE it: a sponsorship is a commitment the site made
 to somebody, Featured is a note the maintainer left themselves. That ordering
 is not hypothetical — the served file carries exactly one featured row.
+
+**Beneath both, the newest ON THE SITE leads** (since 2026-10-05), not the
+newest advertisement: `listedAt`/`byListing` in this module, which read a
+crawled posting by the moment it was approved. See "A crawled posting goes up
+when it is approved" for why, and why the FILE keeps posting-date order.
 
 **BOTH lists lead with the sponsor** — and that is a correction. The first
 build left the one-pager's teaser date-ordered, reasoning that "the ten most
