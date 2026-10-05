@@ -1,9 +1,13 @@
 {
- "generated": "2026-10-05T17:42:26.800Z",
+ "generated": "2026-10-05T21:15:55.526Z",
  "universities": [
   {
    "v": "University of Houston",
    "n": 9
+  },
+  {
+   "v": "National University of Singapore",
+   "n": 8
   },
   {
    "v": "Tulane University",
@@ -14,7 +18,7 @@
    "n": 8
   },
   {
-   "v": "National University of Singapore",
+   "v": "Michigan State University",
    "n": 7
   },
   {
@@ -42,6 +46,10 @@
    "n": 5
   },
   {
+   "v": "IESE Business School",
+   "n": 5
+  },
+  {
    "v": "University of Hong Kong",
    "n": 5
   },
@@ -55,14 +63,6 @@
   },
   {
    "v": "HEC Paris",
-   "n": 4
-  },
-  {
-   "v": "IESE Business School",
-   "n": 4
-  },
-  {
-   "v": "Michigan State University",
    "n": 4
   },
   {
@@ -108,6 +108,10 @@
   {
    "v": "Virginia Tech",
    "n": 4
+  },
+  {
+   "v": "Bucknell University",
+   "n": 3
   },
   {
    "v": "Carnegie Mellon University",
@@ -234,6 +238,10 @@
    "n": 2
   },
   {
+   "v": "American University of Beirut",
+   "n": 2
+  },
+  {
    "v": "American University of Phnom Penh",
    "n": 2
   },
@@ -247,10 +255,6 @@
   },
   {
    "v": "Boston College",
-   "n": 2
-  },
-  {
-   "v": "Bucknell University",
    "n": 2
   },
   {
@@ -366,6 +370,10 @@
    "n": 2
   },
   {
+   "v": "New York University Shanghai",
+   "n": 2
+  },
+  {
    "v": "NOVA School of Business and Economics",
    "n": 2
   },
@@ -375,6 +383,10 @@
   },
   {
    "v": "Park University",
+   "n": 2
+  },
+  {
+   "v": "Purdue University",
    "n": 2
   },
   {
@@ -454,6 +466,10 @@
    "n": 2
   },
   {
+   "v": "University of Chicago",
+   "n": 2
+  },
+  {
    "v": "University of Colorado Boulder",
    "n": 2
   },
@@ -498,11 +514,19 @@
    "n": 2
   },
   {
+   "v": "University of Pittsburgh",
+   "n": 2
+  },
+  {
    "v": "University of Southern California",
    "n": 2
   },
   {
    "v": "University of Texas at Austin",
+   "n": 2
+  },
+  {
+   "v": "University of Toronto",
    "n": 2
   },
   {
@@ -567,10 +591,6 @@
   },
   {
    "v": "American University Kogod School of Business",
-   "n": 1
-  },
-  {
-   "v": "American University of Beirut",
    "n": 1
   },
   {
@@ -750,6 +770,10 @@
    "n": 1
   },
   {
+   "v": "Cornell University (Cornell Tech)",
+   "n": 1
+  },
+  {
    "v": "Cottey College",
    "n": 1
   },
@@ -883,6 +907,10 @@
   },
   {
    "v": "Hood College",
+   "n": 1
+  },
+  {
+   "v": "IE University",
    "n": 1
   },
   {
@@ -1034,10 +1062,6 @@
    "n": 1
   },
   {
-   "v": "New York University Shanghai",
-   "n": 1
-  },
-  {
    "v": "Newcastle University",
    "n": 1
   },
@@ -1103,10 +1127,6 @@
   },
   {
    "v": "PSU Behrend",
-   "n": 1
-  },
-  {
-   "v": "Purdue University",
    "n": 1
   },
   {
@@ -1374,10 +1394,6 @@
    "n": 1
   },
   {
-   "v": "University of Chicago",
-   "n": 1
-  },
-  {
    "v": "University of Cincinnati",
    "n": 1
   },
@@ -1430,6 +1446,10 @@
    "n": 1
   },
   {
+   "v": "University of Missouri (Mizzou)",
+   "n": 1
+  },
+  {
    "v": "University of Missouri-Kansas City",
    "n": 1
   },
@@ -1463,10 +1483,6 @@
   },
   {
    "v": "University of Notre Dame",
-   "n": 1
-  },
-  {
-   "v": "University of Pittsburgh",
    "n": 1
   },
   {
@@ -1666,10 +1682,6 @@
    "n": 0
   },
   {
-   "v": "Cornell University/ Cornell Tech",
-   "n": 0
-  },
-  {
    "v": "Cranfield University",
    "n": 0
   },
@@ -1731,10 +1743,6 @@
   },
   {
    "v": "Hull University Business School",
-   "n": 0
-  },
-  {
-   "v": "IE University",
    "n": 0
   },
   {
@@ -2058,10 +2066,6 @@
    "n": 0
   },
   {
-   "v": "University of Toronto",
-   "n": 0
-  },
-  {
    "v": "University of Toronto Mississauga (UTM)",
    "n": 0
   },
@@ -2160,6 +2164,10 @@
    "n": 5
   },
   {
+   "v": "Eli Broad College of Business",
+   "n": 4
+  },
+  {
    "v": "C. T. Bauer College of Business",
    "n": 3
   },
@@ -2169,10 +2177,6 @@
   },
   {
    "v": "Edwin L. Cox School of Business",
-   "n": 3
-  },
-  {
-   "v": "Eli Broad College of Business",
    "n": 3
   },
   {
@@ -2208,6 +2212,14 @@
    "n": 2
   },
   {
+   "v": "Booth School of Business",
+   "n": 2
+  },
+  {
+   "v": "College of Engineering",
+   "n": 2
+  },
+  {
    "v": "Cornell SC Johnson College of Business",
    "n": 2
   },
@@ -2225,6 +2237,10 @@
   },
   {
    "v": "Fox School of Business",
+   "n": 2
+  },
+  {
+   "v": "Freeman College of Management",
    "n": 2
   },
   {
@@ -2300,10 +2316,6 @@
    "n": 1
   },
   {
-   "v": "Booth School of Business",
-   "n": 1
-  },
-  {
    "v": "Bristol Business School",
    "n": 1
   },
@@ -2332,10 +2344,6 @@
    "n": 1
   },
   {
-   "v": "College of Engineering",
-   "n": 1
-  },
-  {
    "v": "CUHK Business School",
    "n": 1
   },
@@ -2356,6 +2364,10 @@
    "n": 1
   },
   {
+   "v": "Faculty of Arts and Science",
+   "n": 1
+  },
+  {
    "v": "Faculty of Business and Economics",
    "n": 1
   },
@@ -2369,10 +2381,6 @@
   },
   {
    "v": "Frank G. Zarb School of Business",
-   "n": 1
-  },
-  {
-   "v": "Freeman College of Management",
    "n": 1
   },
   {
@@ -2413,6 +2421,10 @@
   },
   {
    "v": "HKUST School of Business and Management",
+   "n": 1
+  },
+  {
+   "v": "IE School of Science and Technology",
    "n": 1
   },
   {
@@ -2565,6 +2577,10 @@
   },
   {
    "v": "Stephen M. Ross School of Business",
+   "n": 1
+  },
+  {
+   "v": "Suliman S. Olayan School of Business",
    "n": 1
   },
   {
@@ -3048,10 +3064,6 @@
    "n": 0
   },
   {
-   "v": "Suliman S. Olayan School of Business",
-   "n": 0
-  },
-  {
    "v": "Thayer School of Engineering",
    "n": 0
   },
@@ -3111,7 +3123,7 @@
   },
   {
    "v": "Supply Chain Management",
-   "n": 48
+   "n": 49
   },
   {
    "v": "BA",
@@ -3126,11 +3138,11 @@
    "n": 14
   },
   {
-   "v": "OM/SCM",
-   "n": 13
+   "v": "Operations Management",
+   "n": 14
   },
   {
-   "v": "Operations Management",
+   "v": "OM/SCM",
    "n": 13
   },
   {
@@ -3210,6 +3222,10 @@
    "n": 3
   },
   {
+   "v": "Industrial and Systems Engineering",
+   "n": 3
+  },
+  {
    "v": "IS and Analytics",
    "n": 3
   },
@@ -3218,11 +3234,19 @@
    "n": 3
   },
   {
+   "v": "Logistics and Supply Chain Management",
+   "n": 3
+  },
+  {
    "v": "Operations and Business Analytics",
    "n": 3
   },
   {
    "v": "Operations and Information Management",
+   "n": 3
+  },
+  {
+   "v": "Operations Research and Information Engineering",
    "n": 3
   },
   {
@@ -3286,7 +3310,7 @@
    "n": 2
   },
   {
-   "v": "Industrial and Systems Engineering",
+   "v": "Industrial Engineering",
    "n": 2
   },
   {
@@ -3311,10 +3335,6 @@
   },
   {
    "v": "IT Management",
-   "n": 2
-  },
-  {
-   "v": "Logistics and Supply Chain Management",
    "n": 2
   },
   {
@@ -3347,10 +3367,6 @@
   },
   {
    "v": "Operations Research",
-   "n": 2
-  },
-  {
-   "v": "Operations Research and Information Engineering",
    "n": 2
   },
   {
@@ -3499,6 +3515,10 @@
   },
   {
    "v": "Business Data Analytics",
+   "n": 1
+  },
+  {
+   "v": "Business Information and Decision Systems",
    "n": 1
   },
   {
@@ -3658,6 +3678,10 @@
    "n": 1
   },
   {
+   "v": "Healthcare Analytics",
+   "n": 1
+  },
+  {
    "v": "Healthcare Management",
    "n": 1
   },
@@ -3690,7 +3714,7 @@
    "n": 1
   },
   {
-   "v": "Industrial Engineering",
+   "v": "Industrial Engineering (Manufacturing Systems)",
    "n": 1
   },
   {
@@ -3898,6 +3922,10 @@
    "n": 1
   },
   {
+   "v": "Managerial Decision Sciences",
+   "n": 1
+  },
+  {
    "v": "Marketing and International Business",
    "n": 1
   },
@@ -3914,7 +3942,15 @@
    "n": 1
   },
   {
+   "v": "Markets, Innovation, and Design (MiDE)",
+   "n": 1
+  },
+  {
    "v": "Mathematics",
+   "n": 1
+  },
+  {
+   "v": "Mechanical and Industrial Engineering",
    "n": 1
   },
   {
@@ -4222,7 +4258,19 @@
    "n": 1
   },
   {
+   "v": "Statistical Sciences",
+   "n": 1
+  },
+  {
    "v": "Statistics",
+   "n": 1
+  },
+  {
+   "v": "Statistics and Data Science",
+   "n": 1
+  },
+  {
+   "v": "Statistics and Probability",
    "n": 1
   },
   {
@@ -4323,10 +4371,6 @@
   },
   {
    "v": "Business Area, Statistics/Operations Management",
-   "n": 0
-  },
-  {
-   "v": "Business Information and Decision Systems",
    "n": 0
   },
   {
@@ -4583,10 +4627,6 @@
   },
   {
    "v": "Mathematics, Analytics and Optimization",
-   "n": 0
-  },
-  {
-   "v": "Mechanical and Industrial Engineering",
    "n": 0
   },
   {
@@ -5308,7 +5348,8 @@
    "units": [
     "Accounting and Financial Management Area, Business Analytics",
     "Analytics and Operations Management",
-    "Management (Markets, Innovation, And Design)"
+    "Management (Markets, Innovation, And Design)",
+    "Markets, Innovation, and Design (MiDE)"
    ],
    "bySchool": {
     "": [
@@ -5316,7 +5357,8 @@
     ],
     "Freeman College of Management": [
      "Accounting and Financial Management Area, Business Analytics",
-     "Analytics and Operations Management"
+     "Analytics and Operations Management",
+     "Markets, Innovation, and Design (MiDE)"
     ]
    }
   },
@@ -5903,12 +5945,18 @@
     ]
    }
   },
-  "Cornell University/ Cornell Tech": {
+  "Cornell University (Cornell Tech)": {
    "schools": [
     "Samuel Curtis Johnson Graduate School of Management"
    ],
-   "units": [],
-   "bySchool": {}
+   "units": [
+    "Operations Research and Information Engineering"
+   ],
+   "bySchool": {
+    "": [
+     "Operations Research and Information Engineering"
+    ]
+   }
   },
   "Cottey College": {
    "schools": [],
@@ -6776,10 +6824,12 @@
   },
   "IE University": {
    "schools": [
-    "IE Business School"
+    "IE Business School",
+    "IE School of Science and Technology"
    ],
    "units": [
     "Business",
+    "Industrial Engineering (Manufacturing Systems)",
     "Operations and Business Analytics"
    ],
    "bySchool": {
@@ -6788,6 +6838,9 @@
     ],
     "IE Business School": [
      "Operations and Business Analytics"
+    ],
+    "IE School of Science and Technology": [
+     "Industrial Engineering (Manufacturing Systems)"
     ]
    }
   },
@@ -6795,6 +6848,7 @@
    "schools": [],
    "units": [
     "IESE Behavioral Lab",
+    "Managerial Decision Sciences",
     "OM",
     "Operations, Information and Technology",
     "Production, Technology and Operations Management"
@@ -6802,6 +6856,7 @@
    "bySchool": {
     "": [
      "IESE Behavioral Lab",
+     "Managerial Decision Sciences",
      "OM",
      "Operations, Information and Technology",
      "Production, Technology and Operations Management"
@@ -7471,12 +7526,16 @@
     "Eli Broad College of Business"
    ],
    "units": [
+    "Logistics and Supply Chain Management",
     "SCM, AI",
+    "Statistics and Probability",
     "Supply Chain Management"
    ],
    "bySchool": {
     "": [
-     "SCM, AI"
+     "Logistics and Supply Chain Management",
+     "SCM, AI",
+     "Statistics and Probability"
     ],
     "Eli Broad College of Business": [
      "Supply Chain Management"
@@ -7665,14 +7724,16 @@
     "Information Systems and Analytics",
     "IS",
     "NUS Business School, Department of Analytics and Operations",
-    "simulation, sustainability, AI + X"
+    "simulation, sustainability, AI + X",
+    "Statistics and Data Science"
    ],
    "bySchool": {
     "": [
      "Industrial Systems Engineering and Management",
      "IS",
      "NUS Business School, Department of Analytics and Operations",
-     "simulation, sustainability, AI + X"
+     "simulation, sustainability, AI + X",
+     "Statistics and Data Science"
     ],
     "NUS Business School": [
      "Analytics and Operations"
@@ -7780,12 +7841,14 @@
    "schools": [],
    "units": [
     "Business Area, Statistics/Operations Management",
-    "OM"
+    "OM",
+    "Operations Management"
    ],
    "bySchool": {
     "": [
      "Business Area, Statistics/Operations Management",
-     "OM"
+     "OM",
+     "Operations Management"
     ]
    }
   },
@@ -8205,6 +8268,7 @@
   },
   "Purdue University": {
    "schools": [
+    "College of Engineering",
     "Mitchell E. Daniels, Jr. School of Business"
    ],
    "units": [
@@ -9946,10 +10010,12 @@
     "Booth School of Business"
    ],
    "units": [
+    "Healthcare Analytics",
     "Operations Management"
    ],
    "bySchool": {
     "Booth School of Business": [
+     "Healthcare Analytics",
      "Operations Management"
     ]
    }
@@ -10568,6 +10634,17 @@
     ]
    }
   },
+  "University of Missouri (Mizzou)": {
+   "schools": [],
+   "units": [
+    "Industrial and Systems Engineering"
+   ],
+   "bySchool": {
+    "": [
+     "Industrial and Systems Engineering"
+    ]
+   }
+  },
   "University of Missouri-Kansas City": {
    "schools": [],
    "units": [
@@ -11157,12 +11234,21 @@
   },
   "University of Toronto": {
    "schools": [
+    "Faculty of Arts and Science",
     "Joseph L. Rotman School of Management"
    ],
    "units": [
-    "Operations Management and Statistics"
+    "Mechanical and Industrial Engineering",
+    "Operations Management and Statistics",
+    "Statistical Sciences"
    ],
    "bySchool": {
+    "": [
+     "Mechanical and Industrial Engineering"
+    ],
+    "Faculty of Arts and Science": [
+     "Statistical Sciences"
+    ],
     "Joseph L. Rotman School of Management": [
      "Operations Management and Statistics"
     ]
@@ -11969,6 +12055,7 @@
    "Technology and Operations Management"
   ],
   "Booth School of Business": [
+   "Healthcare Analytics",
    "Operations Management"
   ],
   "Bristol Business School": [
@@ -12143,6 +12230,9 @@
   "ESSEC Business School": [
    "Information Systems, Data Analytics and Operations"
   ],
+  "Faculty of Arts and Science": [
+   "Statistical Sciences"
+  ],
   "Faculty of Business": [
    "Computing and Decision Sciences",
    "Fashion and Textiles",
@@ -12176,7 +12266,8 @@
   ],
   "Freeman College of Management": [
    "Accounting and Financial Management Area, Business Analytics",
-   "Analytics and Operations Management"
+   "Analytics and Operations Management",
+   "Markets, Innovation, and Design (MiDE)"
   ],
   "Fu Foundation School of Engineering and Applied Science": [
    "Industrial Engineering and Operations Research"
@@ -12244,6 +12335,9 @@
   ],
   "IE Business School": [
    "Operations and Business Analytics"
+  ],
+  "IE School of Science and Technology": [
+   "Industrial Engineering (Manufacturing Systems)"
   ],
   "IESE Business School": [
    "Operations, Information and Technology"
