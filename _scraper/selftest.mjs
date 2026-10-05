@@ -4416,6 +4416,13 @@ async function testVocabFile() {
        like the field tacked onto the department's own name. */
     "St. John's University|Business Analytics|Business Analytics and Information Systems",
     'University of Kansas|Analytics, Information, Operations|Analytics, Information, Operations research',
+    /* A crawled posting of 2026-10-01 (published on master 2026-10-05) put
+       "Operations Management" beside the "Business Area, Statistics/Operations
+       Management" the directory already lists for NYU Shanghai: a slash field
+       beside one of its halves, the Houston shape above. Whether the
+       operations faculty there is one group with statistics or its own is the
+       owner's call; the answer goes in SCOPED_UNIT_ALIASES. */
+    'New York University Shanghai|Business Area, Statistics/Operations Management|Operations Management',
   ]);
   /* KEYED BY THE UNIVERSITY'S IDENTITY, not by the spelling the vocabulary
      files it under today — that is `pickForm`'s tie-break and it moves with
