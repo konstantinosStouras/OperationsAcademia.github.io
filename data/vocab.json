@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-05T21:15:55.526Z",
+ "generated": "2026-10-05T22:38:08.916Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -26,6 +26,14 @@
    "n": 7
   },
   {
+   "v": "Arizona State University",
+   "n": 6
+  },
+  {
+   "v": "Cornell University",
+   "n": 6
+  },
+  {
    "v": "The Hong Kong Polytechnic University",
    "n": 6
   },
@@ -36,14 +44,6 @@
   {
    "v": "University of Virginia",
    "n": 6
-  },
-  {
-   "v": "Arizona State University",
-   "n": 5
-  },
-  {
-   "v": "Cornell University",
-   "n": 5
   },
   {
    "v": "IESE Business School",
@@ -142,6 +142,10 @@
    "n": 3
   },
   {
+   "v": "Georgetown University",
+   "n": 3
+  },
+  {
    "v": "Hofstra University",
    "n": 3
   },
@@ -202,7 +206,15 @@
    "n": 3
   },
   {
+   "v": "University of Illinois at Chicago",
+   "n": 3
+  },
+  {
    "v": "University of Minnesota",
+   "n": 3
+  },
+  {
+   "v": "University of Oklahoma",
    "n": 3
   },
   {
@@ -270,6 +282,10 @@
    "n": 2
   },
   {
+   "v": "Columbia University",
+   "n": 2
+  },
+  {
    "v": "CUHK Shenzhen",
    "n": 2
   },
@@ -298,7 +314,7 @@
    "n": 2
   },
   {
-   "v": "Georgetown University",
+   "v": "Georgia Institute of Technology",
    "n": 2
   },
   {
@@ -482,10 +498,6 @@
    "n": 2
   },
   {
-   "v": "University of Illinois at Chicago",
-   "n": 2
-  },
-  {
    "v": "University of Illinois at Urbana-Champaign",
    "n": 2
   },
@@ -510,7 +522,7 @@
    "n": 2
   },
   {
-   "v": "University of Oklahoma",
+   "v": "University of Notre Dame",
    "n": 2
   },
   {
@@ -758,10 +770,6 @@
    "n": 1
   },
   {
-   "v": "Columbia University",
-   "n": 1
-  },
-  {
    "v": "Concordia University Chicago",
    "n": 1
   },
@@ -867,10 +875,6 @@
   },
   {
    "v": "Georgia Gwinnett College",
-   "n": 1
-  },
-  {
-   "v": "Georgia Institute of Technology",
    "n": 1
   },
   {
@@ -1262,6 +1266,10 @@
    "n": 1
   },
   {
+   "v": "Tennessee Wesleyan University",
+   "n": 1
+  },
+  {
    "v": "Texas A&M International University",
    "n": 1
   },
@@ -1466,6 +1474,10 @@
    "n": 1
   },
   {
+   "v": "University of New South Wales",
+   "n": 1
+  },
+  {
    "v": "University of North Carolina at Chapel Hill",
    "n": 1
   },
@@ -1479,10 +1491,6 @@
   },
   {
    "v": "University of Northern Iowa",
-   "n": 1
-  },
-  {
-   "v": "University of Notre Dame",
    "n": 1
   },
   {
@@ -2018,10 +2026,6 @@
    "n": 0
   },
   {
-   "v": "University of New South Wales",
-   "n": 0
-  },
-  {
    "v": "University of North Carolina (UNC) Chapel Hill",
    "n": 0
   },
@@ -2149,7 +2153,7 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 11
+   "n": 12
   },
   {
    "v": "A. B. Freeman School of Business",
@@ -2192,6 +2196,10 @@
    "n": 3
   },
   {
+   "v": "Michael F. Price College of Business",
+   "n": 3
+  },
+  {
    "v": "School of Business",
    "n": 3
   },
@@ -2201,6 +2209,10 @@
   },
   {
    "v": "Smeal College of Business",
+   "n": 3
+  },
+  {
+   "v": "W. P. Carey School of Business",
    "n": 3
   },
   {
@@ -2272,7 +2284,11 @@
    "n": 2
   },
   {
-   "v": "Michael F. Price College of Business",
+   "v": "McDonough School of Business",
+   "n": 2
+  },
+  {
+   "v": "Mendoza College of Business",
    "n": 2
   },
   {
@@ -2296,7 +2312,7 @@
    "n": 2
   },
   {
-   "v": "W. P. Carey School of Business",
+   "v": "UNSW Business School",
    "n": 2
   },
   {
@@ -2341,6 +2357,10 @@
   },
   {
    "v": "College of Business and Economics",
+   "n": 1
+  },
+  {
+   "v": "Columbia Business School",
    "n": 1
   },
   {
@@ -2389,6 +2409,10 @@
   },
   {
    "v": "Gies College of Business",
+   "n": 1
+  },
+  {
+   "v": "Goodfriend College of Business and Professional Studies",
    "n": 1
   },
   {
@@ -2480,14 +2504,6 @@
    "n": 1
   },
   {
-   "v": "McDonough School of Business",
-   "n": 1
-  },
-  {
-   "v": "Mendoza College of Business",
-   "n": 1
-  },
-  {
    "v": "Miami Herbert Business School",
    "n": 1
   },
@@ -2529,6 +2545,10 @@
   },
   {
    "v": "Sauder School of Business",
+   "n": 1
+  },
+  {
+   "v": "Scheller College of Business",
    "n": 1
   },
   {
@@ -2593,10 +2613,6 @@
   },
   {
    "v": "UCL School of Management",
-   "n": 1
-  },
-  {
-   "v": "UNSW Business School",
    "n": 1
   },
   {
@@ -2681,10 +2697,6 @@
   },
   {
    "v": "Coller School of Management",
-   "n": 0
-  },
-  {
-   "v": "Columbia Business School",
    "n": 0
   },
   {
@@ -2984,10 +2996,6 @@
    "n": 0
   },
   {
-   "v": "Scheller College of Business",
-   "n": 0
-  },
-  {
    "v": "School of Business Administration",
    "n": 0
   },
@@ -3118,11 +3126,11 @@
  ],
  "units": [
   {
-   "v": "OM",
-   "n": 49
+   "v": "Supply Chain Management",
+   "n": 50
   },
   {
-   "v": "Supply Chain Management",
+   "v": "OM",
    "n": 49
   },
   {
@@ -3134,11 +3142,11 @@
    "n": 25
   },
   {
-   "v": "MIS",
-   "n": 14
+   "v": "Operations Management",
+   "n": 15
   },
   {
-   "v": "Operations Management",
+   "v": "MIS",
    "n": 14
   },
   {
@@ -3166,6 +3174,10 @@
    "n": 6
   },
   {
+   "v": "Business Administration",
+   "n": 6
+  },
+  {
    "v": "Management",
    "n": 6
   },
@@ -3182,11 +3194,11 @@
    "n": 5
   },
   {
-   "v": "Business Administration",
+   "v": "Decision Sciences",
    "n": 5
   },
   {
-   "v": "Decision Sciences",
+   "v": "Information Systems",
    "n": 5
   },
   {
@@ -3194,11 +3206,11 @@
    "n": 5
   },
   {
-   "v": "Information Systems",
+   "v": "Operations",
    "n": 4
   },
   {
-   "v": "Operations",
+   "v": "Operations Research and Information Engineering",
    "n": 4
   },
   {
@@ -3243,10 +3255,6 @@
   },
   {
    "v": "Operations and Information Management",
-   "n": 3
-  },
-  {
-   "v": "Operations Research and Information Engineering",
    "n": 3
   },
   {
@@ -3319,6 +3327,10 @@
   },
   {
    "v": "Information Systems and Analytics",
+   "n": 2
+  },
+  {
+   "v": "Information Systems and Technology Management",
    "n": 2
   },
   {
@@ -3622,6 +3634,10 @@
    "n": 1
   },
   {
+   "v": "Decision, Risk and Operations",
+   "n": 1
+  },
+  {
    "v": "Department of Decision and Information Sciences",
    "n": 1
   },
@@ -3730,6 +3746,10 @@
    "n": 1
   },
   {
+   "v": "Information and Decision Sciences",
+   "n": 1
+  },
+  {
    "v": "Information and Innovation Management",
    "n": 1
   },
@@ -3754,10 +3774,6 @@
    "n": 1
   },
   {
-   "v": "Information Systems and Technology Management",
-   "n": 1
-  },
-  {
    "v": "Information Systems, Business Statistics and Operations Management",
    "n": 1
   },
@@ -3767,6 +3783,10 @@
   },
   {
    "v": "Information Technology",
+   "n": 1
+  },
+  {
+   "v": "Information Technology, Analytics, and Operations",
    "n": 1
   },
   {
@@ -4035,6 +4055,10 @@
   },
   {
    "v": "Operation Management",
+   "n": 1
+  },
+  {
+   "v": "Operations and Analytics",
    "n": 1
   },
   {
@@ -4422,10 +4446,6 @@
    "n": 0
   },
   {
-   "v": "Decision, Risk, and Operations",
-   "n": 0
-  },
-  {
    "v": "Decisions, Operations and Technology Management",
    "n": 0
   },
@@ -4494,10 +4514,6 @@
    "n": 0
   },
   {
-   "v": "Information and Decision Sciences",
-   "n": 0
-  },
-  {
    "v": "Information and Service Economy",
    "n": 0
   },
@@ -4519,10 +4535,6 @@
   },
   {
    "v": "Information Systems, Statistics, and Management Science",
-   "n": 0
-  },
-  {
-   "v": "Information Technology, Analytics and Operations",
    "n": 0
   },
   {
@@ -4643,10 +4655,6 @@
   },
   {
    "v": "Operational Strategy",
-   "n": 0
-  },
-  {
-   "v": "Operations and Analytics",
    "n": 0
   },
   {
@@ -5002,6 +5010,7 @@
     "W. P. Carey School of Business"
    ],
    "units": [
+    "Information Systems",
     "IS",
     "Learning, Optimization, and Decision Analytics",
     "Supply Chain Management"
@@ -5012,6 +5021,7 @@
      "Learning, Optimization, and Decision Analytics"
     ],
     "W. P. Carey School of Business": [
+     "Information Systems",
      "Supply Chain Management"
     ]
    }
@@ -5850,7 +5860,7 @@
     "Fu Foundation School of Engineering and Applied Science"
    ],
    "units": [
-    "Decision, Risk, and Operations",
+    "Decision, Risk and Operations",
     "IEOR",
     "Industrial Engineering and Operations Research"
    ],
@@ -5859,7 +5869,7 @@
      "IEOR"
     ],
     "Columbia Business School": [
-     "Decision, Risk, and Operations"
+     "Decision, Risk and Operations"
     ],
     "Fu Foundation School of Engineering and Applied Science": [
      "Industrial Engineering and Operations Research"
@@ -5931,7 +5941,8 @@
    ],
    "bySchool": {
     "": [
-     "Applied Economics and Management"
+     "Applied Economics and Management",
+     "Operations Research and Information Engineering"
     ],
     "Cornell SC Johnson College of Business": [
      "Operations, Technology, and Information Management Area",
@@ -9128,6 +9139,19 @@
     ]
    }
   },
+  "Tennessee Wesleyan University": {
+   "schools": [
+    "Goodfriend College of Business and Professional Studies"
+   ],
+   "units": [
+    "Business Administration"
+   ],
+   "bySchool": {
+    "Goodfriend College of Business and Professional Studies": [
+     "Business Administration"
+    ]
+   }
+  },
   "Texas A&M International University": {
    "schools": [],
    "units": [
@@ -10839,12 +10863,12 @@
     "Mendoza College of Business"
    ],
    "units": [
-    "Information Technology, Analytics and Operations",
+    "Information Technology, Analytics, and Operations",
     "IT, Analytics, and Operations"
    ],
    "bySchool": {
     "Mendoza College of Business": [
-     "Information Technology, Analytics and Operations",
+     "Information Technology, Analytics, and Operations",
      "IT, Analytics, and Operations"
     ]
    }
@@ -12154,7 +12178,7 @@
    "Operational Strategy"
   ],
   "Columbia Business School": [
-   "Decision, Risk, and Operations"
+   "Decision, Risk and Operations"
   ],
   "Cornell SC Johnson College of Business": [
    "Operations, Technology, and Information Management Area",
@@ -12288,6 +12312,9 @@
   ],
   "Goizueta Business School": [
    "Information Systems & Operations Management"
+  ],
+  "Goodfriend College of Business and Professional Studies": [
+   "Business Administration"
   ],
   "Grado Department of Industrial and Systems Engineering": [
    "Operations Research"
@@ -12486,7 +12513,7 @@
    "Operations"
   ],
   "Mendoza College of Business": [
-   "Information Technology, Analytics and Operations",
+   "Information Technology, Analytics, and Operations",
    "IT, Analytics, and Operations"
   ],
   "Miami Herbert Business School": [
@@ -12558,7 +12585,7 @@
   ],
   "Poole College of Management": [
    "Business Management/Operations and Supply Chain",
-   "Information Technology, Analytics and Operations"
+   "Information Technology, Analytics, and Operations"
   ],
   "Questrom School of Business": [
    "Information Systems",
@@ -12782,6 +12809,7 @@
    "Operations Management"
   ],
   "W. P. Carey School of Business": [
+   "Information Systems",
    "Supply Chain Management"
   ],
   "Warrington College of Business": [
