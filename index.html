@@ -1246,10 +1246,14 @@
             loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
             unit: 'postings'
           },
+          /* The ten most recent ON THE SITE, by the jobs page's own key
+             (OASponsors.byListing: when each posting went up, which for a
+             crawled posting is the day the maintainer approved it). Selected
+             by the posting date alone, an approval this morning of a search
+             advertised last week never reached this panel at all, while the
+             jobs page one click away led with it. */
           prepare: function (rows) {
-            return rows.filter(inCurrentMarket).sort(function (a, b) {
-              return (b.posted || '').localeCompare(a.posted || '');
-            }).slice(0, 10);
+            return rows.filter(inCurrentMarket).sort(OASponsors.byListing).slice(0, 10);
           },
           /* The SELECTION is still the ten most recent (prepare, above) —
              what changes here is only their ORDER, so the sponsor leads the

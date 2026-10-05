@@ -522,6 +522,12 @@
     msg.textContent = 'Publishing 0 of ' + n + '…';
 
     var done = 0, failed = 0;
+    /* The edit handles are written alongside, not one after another: the
+       decisions stay a chain (each one is a write the next must not race),
+       and the handles are waited for once, at the end, before the line below
+       says the postings are on the jobs page, since a page left before they land
+       would leave postings there with no Edit button. */
+    var handles = [];
     var chain = Promise.resolve();
     pairs.forEach(function (pair) {
       chain = chain.then(function () {
@@ -535,7 +541,7 @@
         })
           .then(function () {
             done++;
-            echoApproval(doc, edits, reviewedAt);
+            handles.push(echoApproval(db, doc, edits, reviewedAt));
             if (card) {
               card.innerHTML = '<p class="oa-form-msg is-ok">Approved &mdash; ' +
                 esc((doc.row || {}).institution || doc.rowId) + '</p>';
@@ -553,6 +559,9 @@
     });
 
     chain.then(function () {
+      msg.textContent = 'Publishing ' + n + ' of ' + n + '\u2026';
+      return Promise.all(handles);
+    }).then(function () {
       /* Redraw what is left BEFORE the outcome is written (render() clears
          this line), so the cards just published leave the screen and the
          button's count says what is really still here. */
@@ -592,29 +601,82 @@
    * Entirely optional: without oa-fresh.js or oa-schools.js the approval works
    * exactly as before and simply waits for the build.
    */
-  function echoApproval(doc, edits, reviewedAt) {
-    if (!window.OAFresh || !window.OAFresh.approvedRow) return;
-    if (!window.OASchools || !OASchools.canonColumns) return;
-    var row = doc.row || {};
-    if (!row.id) return;
+  function echoApproval(db, doc, edits, reviewedAt) {
+    var row = null;
+    try { row = publishedRow(doc, edits, reviewedAt); } catch (e) { row = null; }
+    if (!row) return Promise.resolve(false);
     try {
-      OAFresh.stash({
-        docId: doc.rowId,
-        ref: row.ref || '',
-        added: OAFresh.approvedRow(row, {
-          edits: edits || doc.edits || {},
-          queuedAt: doc.queuedAt || '',
-          reviewedAt: reviewedAt || '',
-        }, {
-          canonColumns: OASchools.canonColumns,
-          /* the same canon the build applies to an edited country, so the
-             echo shows "United States" where the maintainer typed "USA".
-             Optional: absent, the echo does not re-spell, which is a
-             spelling and never a value the build would refuse. */
-          canonCountry: (window.OACountries && OACountries.canon) || null,
-        }),
-      });
+      OAFresh.stash({ docId: doc.rowId, ref: row.ref || '', added: row });
     } catch (e) { /* an echo is a courtesy: never let it cost the approval */ }
+    return mirrorApproval(db, row);
+  }
+
+  /** The row an approval publishes, through the parity-pinned twin, or null
+      where the modules it needs are not on the page. */
+  function publishedRow(doc, edits, reviewedAt) {
+    if (!window.OAFresh || !window.OAFresh.approvedRow) return null;
+    if (!window.OASchools || !OASchools.canonColumns) return null;
+    var row = doc.row || {};
+    if (!row.id) return null;
+    return OAFresh.approvedRow(row, {
+      edits: edits || doc.edits || {},
+      queuedAt: doc.queuedAt || '',
+      reviewedAt: reviewedAt || '',
+    }, {
+      canonColumns: OASchools.canonColumns,
+      /* the same canon the build applies to an edited country, so the
+         echo shows "United States" where the maintainer typed "USA".
+         Optional: absent, the echo does not re-spell, which is a
+         spelling and never a value the build would refuse. */
+      canonCountry: (window.OACountries && OACountries.canon) || null,
+      /* …and the seasons the edited dates name, the build's own rule
+         (applyEdits re-derives them since 2026-10-05). */
+      marketYearsOf: (window.OAJobNav && OAJobNav.marketYearsOf) || null,
+    });
+  }
+
+  /**
+   * THE EDITING HANDLE, written by the approval itself (owner, 2026-10-05:
+   * "how come several job postings do not show edit and take down buttons?").
+   *
+   * Edit and Take down are drawn only where oa-jobedit.js can name a
+   * `jobSubmissions` document, and for a posting the tracking sheet publishes
+   * that document is a MIRROR (jobs-model.mjs `sheetMirrorDoc`), which the
+   * build alone used to write. The echo above puts the posting on the
+   * maintainer's jobs page at once, so every posting they had just approved
+   * sat there with no controls until a build caught up. Now the approval
+   * writes the mirror in the same breath, through a parity-pinned twin, and
+   * the build's own mirror pass finds it there and refreshes it only if the
+   * workbook has moved since.
+   *
+   * The build's rules, to the letter: CREATE only where no document has the
+   * id (a `get()` first, never a blind `set()`, since an id in use is somebody
+   * else's posting), and an id that is not a usable document id is skipped.
+   * Best effort: a refused or failed write costs the two buttons until the
+   * next build and never the approval. And BOUNDED IN TIME (MIRROR_WAIT_MS),
+   * because both approval roads wait for it before their last word: a write
+   * whose acknowledgement never comes must not leave a card reading
+   * "Sending…" over a decision that has already saved.
+   */
+  var MIRROR_WAIT_MS = 8000;
+  function mirrorApproval(db, row) {
+    if (!db || !window.OAFresh || !OAFresh.mirrorDoc) return Promise.resolve(false);
+    var id = String((row && row.id) || '');
+    if (!/^[A-Za-z0-9._~-]+$/.test(id)) return Promise.resolve(false);
+    var ref = db.collection(SUBS_COL).doc(id);
+    var write = ref.get().then(function (snap) {
+      if (snap.exists) return false;
+      return ref.set(OAFresh.mirrorDoc(row, {
+        canonCountry: (window.OACountries && OACountries.canon) || null,
+      })).then(function () { return true; });
+    })['catch'](function (err) {
+      if (window.console) console.warn('edit handle for ' + id + ':', err);
+      return false;
+    });
+    var waited = new Promise(function (resolve) {
+      setTimeout(function () { resolve(false); }, MIRROR_WAIT_MS);
+    });
+    return Promise.race([write, waited]);
   }
 
   /* ------------------------------------------ one advertisement, one posting */
@@ -1570,7 +1632,12 @@
 
         writeDecision(db, doc, patch)
           .then(function () {
-            if (act === 'approve') echoApproval(doc, edits, patch.reviewedAt);
+            /* The edit handle lands before the card says the posting is on
+               the jobs page, so the page the maintainer opens next already
+               has its Edit and Take down. */
+            return act === 'approve' ? echoApproval(db, doc, edits, patch.reviewedAt) : null;
+          })
+          .then(function () {
             if (act === 'save') {
               doc.edits = edits;
               msg.className = 'oa-form-msg is-ok';
