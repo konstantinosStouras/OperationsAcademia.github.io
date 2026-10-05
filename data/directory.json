@@ -12641,6 +12641,25 @@
   "lastPosted": "2025-05-25"
  },
  {
+  "id": "virginia-commonwealth-university__school-of-business__information-systems",
+  "institution": "Virginia Commonwealth University",
+  "school": "School of Business",
+  "department": "Information Systems",
+  "type": "Business School",
+  "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-05"
+ },
+ {
   "id": "virginia-commonwealth-university__school-of-business__supply-chain-management-and-analytics",
   "institution": "Virginia Commonwealth University (VCU)",
   "school": "School of Business",

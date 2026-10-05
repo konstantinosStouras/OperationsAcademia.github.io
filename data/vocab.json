@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-04T04:05:13.681Z",
+ "generated": "2026-10-05T01:22:55.565Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -531,6 +531,10 @@
   },
   {
    "v": "Villanova University",
+   "n": 2
+  },
+  {
+   "v": "Virginia Commonwealth University",
    "n": 2
   },
   {
@@ -1538,10 +1542,6 @@
    "n": 1
   },
   {
-   "v": "Virginia Commonwealth University",
-   "n": 1
-  },
-  {
    "v": "Wake Forest University",
    "n": 1
   },
@@ -2184,6 +2184,10 @@
    "n": 3
   },
   {
+   "v": "School of Business",
+   "n": 3
+  },
+  {
    "v": "School of Management",
    "n": 3
   },
@@ -2257,10 +2261,6 @@
   },
   {
    "v": "NUS Business School",
-   "n": 2
-  },
-  {
-   "v": "School of Business",
    "n": 2
   },
   {
@@ -3182,6 +3182,10 @@
    "n": 5
   },
   {
+   "v": "Information Systems",
+   "n": 4
+  },
+  {
    "v": "SCM/Logistics",
    "n": 4
   },
@@ -3199,10 +3203,6 @@
   },
   {
    "v": "Data Analytics and Decision Sciences",
-   "n": 3
-  },
-  {
-   "v": "Information Systems",
    "n": 3
   },
   {
@@ -11576,6 +11576,7 @@
     "School of Business"
    ],
    "units": [
+    "Information Systems",
     "SCM and Analytics",
     "Supply Chain Management and Analytics"
    ],
@@ -11584,6 +11585,7 @@
      "SCM and Analytics"
     ],
     "School of Business": [
+     "Information Systems",
      "Supply Chain Management and Analytics"
     ]
    }
@@ -12527,6 +12529,7 @@
    "Decision Sciences",
    "Finance",
    "Information and Service Economy",
+   "Information Systems",
    "Information Systems and Operations Management",
    "Operations",
    "Operations and Information Management",
