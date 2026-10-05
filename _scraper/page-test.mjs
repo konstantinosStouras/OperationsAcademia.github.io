@@ -3671,7 +3671,11 @@ for (const [pageName, pick] of [
   const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
   const current = jobs.filter((r) => r && r.institution && r.id
     && Number(r.year) === marketYear()).sort((a, b) => PAGE_ORDER(a, b));
-  const target = current[0];
+  /* not the sponsor's, nor a Featured one: renaming the institution below is
+     the edit being echoed, and a sponsor renamed is no longer sponsored, so
+     its card would drop out of the lead and off the first page */
+  const SPONSOR = requireFor(import.meta.url)('../assets/oa-sponsors.js');
+  const target = current.find((r) => !r.featured && !SPONSOR.isSponsored(r));
   const victim = current.find((r) => r !== target);
 
   const seed = {};
@@ -5399,9 +5403,17 @@ for (const [from, hash] of [
     const at = stamp > when + 'T23:59:59Z'
       ? new Date(Date.parse(stamp) + 1000).toISOString().replace(/\.\d{3}Z$/, 'Z')
       : when + 'T23:59:59Z';
-    const base = rows.find((r) => window.OASponsors.isSponsored(Object.assign({}, r, { posted: when })));
+    /* A sponsor posting from one of the two LIVE roads first: the legacy
+       import's rows are listed by their posting date alone (listedAt), so a
+       re-dated 2025 import row ranks below every posting approved today and
+       an evening of approvals pushed it out of the ten. Failing that, the row
+       is re-stated as made on the site, which is how a sponsor posts. */
+    const sponsoredWhen = (r) => window.OASponsors.isSponsored(Object.assign({}, r, { posted: when }));
+    const base = rows.find((r) => window.OASponsors.LISTED_SOURCES.includes(r.source) && sponsoredWhen(r))
+      || rows.find(sponsoredWhen);
     if (!base) return null;
-    const lead = Object.assign({}, base, { posted: when, addedAt: at });
+    const lead = Object.assign({}, base, { posted: when, addedAt: at },
+      window.OASponsors.LISTED_SOURCES.includes(base.source) ? {} : { source: 'oa-form' });
     return { lead: lead.institution, rows: [lead].concat(rows.filter((r) => r !== base)) };
   });
   if (fixture) {
