@@ -2190,7 +2190,6 @@
    "PhD",
    "Masters",
    "MBA",
-   "Undergrad",
    "Exec Ed"
   ],
   "sources": [
@@ -2199,8 +2198,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2026-08-04",
+  "n": 3,
+  "lastPosted": "2026-10-05",
   "lat": 35.9990792,
   "lng": -78.9473769
  },
