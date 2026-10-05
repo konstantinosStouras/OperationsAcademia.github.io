@@ -56,6 +56,18 @@
   border: 1px solid var(--line-soft, #dee1e5);
 }
 
+/* a school section's head: its type chip, and Edit school for a signed-in
+   reader. The chip keeps its own look; the button sits at the right. */
+.oa-dir-schoolhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 0 0 6px;
+}
+.oa-dir-schoolhead .oa-dir-chip { margin: 0; }
+.oa-dir-schoolhead .oa-dir-editbtn { margin-left: auto; }
+
 /* one department row */
 .oa-dir-dept {
   display: flex;
@@ -105,6 +117,126 @@
 .oa-dir-foot a { color: var(--ink-2, #454c56); }
 .oa-dir-foot .oa-jobbtn { margin-left: 4px; }
 
+/* "Saved." under a card a form was just saved from */
+.oa-dir-saved {
+  margin: 0;
+  padding: 0 18px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ok, #2e7d4f);
+}
+.oa-dir-saved:focus { outline: none; }
+.oa-dir-saved:focus-visible { outline: 2px solid var(--brand, #3a424d); outline-offset: 2px; }
+
+/* ----------------------------------------- the one form per school
+
+   assets/oa-directory.js (owner, 2026-10-05): Edit school opens ONE form
+   inside the card with every field of the school and of each department in
+   it, in place of a chain of browser prompts. It paints its own ground, so it
+   names its own ink (the site rule), and every colour is a token with its
+   light value as the fallback. The focus ring is an OUTLINE in --brand: a
+   --brand-soft halo on an input is 1.19:1, which is no focus indicator at
+   all (measured for the forum's compose box). */
+.oa-dir-form {
+  font-family: var(--font-sans, inherit);
+  margin: 2px 0 4px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--line, #ccd1d7);
+  border-radius: 10px;
+  background: var(--bg, #f6f7f9);
+  color: var(--ink-2, #454c56);
+}
+.oa-dir-form-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink, #22272e);
+}
+.oa-dir-form-lede {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--mut, #646c78);
+}
+.oa-dir-fgroup { margin: 0 0 12px; padding: 12px 0 0; border-top: 1px solid var(--line-soft, #dee1e5); }
+.oa-dir-fgroup:first-of-type { padding-top: 0; border-top: 0; }
+.oa-dir-fgroup-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #22272e);
+}
+.oa-dir-fgroup-note { font-weight: 500; color: var(--mut, #646c78); }
+.oa-dir-fgroup-note.is-new { color: var(--gold, #b98a3e); font-weight: 600; }
+.oa-dir-fgroup-note.is-gone { color: var(--err, #b3413d); font-weight: 600; }
+
+.oa-dir-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 16px;
+}
+.oa-dir-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.oa-dir-field.is-wide { grid-column: 1 / -1; }
+.oa-dir-field > label,
+.oa-dir-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink, #22272e);
+}
+.oa-dir-field input[type='text'] {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 8px 11px;
+  font-family: var(--font-sans, inherit);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--ink, #22272e);
+  background-color: var(--bg-2, #ffffff);
+  border: 1px solid var(--line, #ccd1d7);
+  border-radius: 8px;
+}
+.oa-dir-field input[type='text']::placeholder { color: var(--mut, #646c78); opacity: 1; }
+.oa-dir-field input[type='text']:focus {
+  outline: 2px solid var(--brand, #3a424d);
+  outline-offset: 1px;
+  border-color: var(--brand, #3a424d);
+}
+.oa-dir-field input[aria-invalid='true'] { border-color: var(--err, #b3413d); }
+.oa-dir-hint { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--mut, #646c78); }
+
+.oa-dir-radios { display: flex; flex-wrap: wrap; gap: 2px 18px; }
+.oa-dir-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  font-size: 14px;
+  color: var(--ink-2, #454c56);
+  cursor: pointer;
+}
+.oa-dir-radio input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--brand, #3a424d);
+}
+
+/* always in the document (a live region that appears with its message is
+   often not announced), and nothing to see while it is empty */
+.oa-dir-form-msg { margin: 6px 0 0; font-size: 13.5px; color: var(--mut, #646c78); }
+.oa-dir-form-msg:empty { margin: 0; }
+.oa-dir-form-msg.is-err { color: var(--err, #b3413d); }
+
+.oa-dir-form-acts { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.oa-dir-form-acts .v3-btn { padding: 11px 20px; font-size: 14.5px; }
+
 /* THE MAINTAINER'S FILTER. Hidden for everybody else — visibility only, the
    buckets are computed from edit documents every visitor already downloads;
    the rules are the authorisation for everything that writes. */
@@ -115,6 +247,16 @@
 
 @media (max-width: 640px) {
   .oa-dir-acts { margin-left: 0; flex-basis: 100%; }
+  /* the form on a phone: one column, 16px boxes so iOS does not zoom the page
+     on focus (rule 2 of _MOBILE-STANDARDS.md), every radio row and both
+     buttons a 42px target, the buttons stacked full width (rules 3 and 11) */
+  .oa-dir-form { padding: 12px; }
+  .oa-dir-grid { grid-template-columns: minmax(0, 1fr); }
+  .oa-dir-field input[type='text'] { min-height: 44px; font-size: 16px; }
+  .oa-dir-radios { flex-direction: column; gap: 0; }
+  .oa-dir-radio { min-height: 42px; }
+  .oa-dir-form-acts .v3-btn { flex: 1 1 100%; min-height: 44px; }
+  .oa-dir-schoolhead .oa-dir-editbtn { margin-left: 0; }
   .oa-dir-views { width: 100%; }
   .oa-dir-views button { flex: 1 1 50%; }
 }

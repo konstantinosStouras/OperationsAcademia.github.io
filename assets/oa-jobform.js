@@ -855,6 +855,18 @@
         setError(deptUrlEl, '');
       }
     }
+    /* …and its sibling, the department's FACULTY page (owner, 2026-10-05),
+       the directory's second link: optional on every posting, never read into
+       the submission either, and checked here for the same reason. */
+    var facultyUrlEl = $('f-facultyUrl');
+    if (facultyUrlEl) {
+      if (httpUrl(facultyUrlEl.value) === null) {
+        setError(facultyUrlEl, 'That does not look like a web address. It should start with https://');
+        if (!firstBad) firstBad = facultyUrlEl;
+      } else {
+        setError(facultyUrlEl, '');
+      }
+    }
 
     out.characteristics = checked('characteristics');
     if (!EDIT_ID) {
@@ -1844,18 +1856,22 @@
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
           return col.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
-          /* The poster has just VERIFIED the department's page link against
-             the site's records: a changed value is filed into the
-             Universities directory's own overlay (directoryEdits — the same
-             correction any signed-in user makes on universities.html).
-             Fire-and-forget by contract: the posting is already sent, and
-             nothing here may un-confirm it. */
+          /* The poster has just VERIFIED the department's two links against
+             the site's records: the Universities directory's card for this
+             department is UPDATED by the posting (owner, 2026-10-05), so it
+             says who last updated it and when, and a changed link is filed
+             with it, into the directory's own overlay (directoryEdits, the
+             same correction any signed-in user makes on universities.html).
+             The names reach the directory through the build, which reads
+             every published posting. Fire-and-forget by contract: the posting
+             is already sent, and nothing here may un-confirm it. */
           if (window.OAUniInfo) {
             OAUniInfo.commit({
               uid: user.uid,
               name: (window.OAAccounts && OAAccounts.displayName()) || '',
               place: { institution: doc.institution, school: doc.school, unit: doc.unit },
               deptUrl: ($('f-deptUrl') || {}).value || '',
+              facultyUrl: ($('f-facultyUrl') || {}).value || '',
             })['catch'](function (err) {
               if (window.console) console.error('uniinfo:', err);
             });
@@ -2041,6 +2057,7 @@
         institution: inst, school: school, unit: unit,
         type: $('f-type'), country: $('f-country'),
         deptUrl: $('f-deptUrl'), deptUrlNote: $('f-deptUrl-note'),
+        facultyUrl: $('f-facultyUrl'), facultyUrlNote: $('f-facultyUrl-note'),
         chars: $('f-chars'), charsNote: $('f-chars-note'),
       }, { fillNames: !EDIT_ID });
     }

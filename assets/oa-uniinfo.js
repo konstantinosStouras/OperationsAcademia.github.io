@@ -28,13 +28,16 @@
    earlier fill, never over anything the poster typed (the maybeFillType
    discipline throughout).
 
-   THE WRITE-BACK IS BOUNDED AND HONEST. Exactly one thing is written outside
-   the posting itself: a department link that DIFFERS from the record, saved as
-   `directoryEdits/{rowId}` with `{ deptUrl, rowId, by, name, t }` via a MERGE
-   set, so a document holding somebody's other corrections keeps them. An
-   empty field never erases a recorded link, a row the maintainer has hidden
-   is never written to, and a failure is logged and swallowed — nothing here
-   may ever be the reason a posting fails to send. The row id is
+   THE WRITE-BACK IS BOUNDED AND HONEST. Exactly one document is written
+   outside the posting itself: `directoryEdits/{rowId}`, via a MERGE set so a
+   document holding somebody's other corrections keeps them. It always carries
+   WHO and WHEN (`{ rowId, by, name, t }`), because a posting UPDATES the
+   directory's card for its department (owner, 2026-10-05: the card then says
+   "Last updated by <poster> on <date>"), and it carries the department page
+   and the faculty page only where the poster's value DIFFERS from the record.
+   An empty field never erases a recorded link, a row the maintainer has
+   hidden is never written to, and a failure is logged and swallowed — nothing
+   here may ever be the reason a posting fails to send. The row id is
    OASchools.directoryRowKey, the ONE definition the build stamps onto
    data/directory.json, so a correction can never be filed against a row that
    does not exist — including a place posting here for the first time, whose
@@ -459,6 +462,13 @@
           'updates the Universities directory for everyone.';
     }
 
+    function noteFacultyUrl(f) {
+      if (!els.facultyUrlNote) return;
+      els.facultyUrlNote.textContent = (f.row && f.facultyUrl)
+        ? 'From the site’s records — please check it still lists the department’s faculty.'
+        : '';
+    }
+
     function resolve() {
       if (dead) return;
       record(opts.dirUrl).then(function (rows) {
@@ -498,7 +508,9 @@
 
         autoFill(els.country, 'data-oa-auto-country', f.country);
         autoFill(els.deptUrl, 'data-oa-auto-depturl', f.row ? f.deptUrl : '');
+        autoFill(els.facultyUrl, 'data-oa-auto-facultyurl', f.row ? f.facultyUrl : '');
         noteDeptUrl(f);
+        noteFacultyUrl(f);
         /* the checklist is the posting's own, exactly like its names: a stored
            posting that carries none must not gain the directory's because the
            form was opened (it used to, since only the names were gated) */
@@ -540,12 +552,21 @@
   }
 
   /**
-   * File the poster's department-link correction, after their posting was
-   * accepted. `place` is the submission's own (canonical) names; `deptUrl`
-   * the value the form validated. Resolves quietly with nothing written when
-   * the link matches the record, the field was empty, or the row is hidden.
-   * BEST-EFFORT BY CONTRACT: the caller fires and forgets — a failure here
-   * must never surface on the poster's confirmation.
+   * Update the Universities directory from the poster's posting, after it was
+   * accepted: the card for the posting's department now says who last updated
+   * it and when, and a department page or faculty page that differs from the
+   * record is filed with it. `place` is the submission's own (canonical)
+   * names; `deptUrl` and `facultyUrl` the values the form validated. Resolves
+   * quietly with nothing written when the row is hidden or no row id can be
+   * named. BEST-EFFORT BY CONTRACT: the caller fires and forgets — a failure
+   * here must never surface on the poster's confirmation.
+   *
+   * THE NAMES ARE NOT WRITTEN HERE, deliberately. A posting is one of the
+   * sources data/directory.json is built from, so its university, school and
+   * department reach the directory through the build that publishes it, and
+   * a place posting for the first time gets its card in that same run. The
+   * attribution is filed under the id that build mints (`rowId`), so it is on
+   * the card the moment the card exists.
    */
   function commit(args) {
     args = args || {};
@@ -558,18 +579,22 @@
     return record(args.dirUrl).then(function (rows) {
       var f = facts(rows || [], args.place, S);
       if ((f.row && f.row._hidden) || f.hiddenRow) return null;   // the maintainer took it down
-      var patch = deptUrlPatch(f.deptUrl, args.deptUrl);
-      if (!patch || !f.rowId) return null;
+      if (!f.rowId) return null;
       var doc = {
         rowId: f.rowId,
         by: uid,
         name: trim(args.name).slice(0, 120),
         t: Date.now(),
-        deptUrl: patch,
       };
+      /* the two links only where the poster CHANGED them — the same rule for
+         both, so an empty box never erases a recorded link */
+      var dept = deptUrlPatch(f.deptUrl, args.deptUrl);
+      if (dept) doc.deptUrl = dept;
+      var fac = deptUrlPatch(f.facultyUrl, args.facultyUrl);
+      if (fac) doc.facultyUrl = fac;
       return window.OAFB.ready().then(function (fb) {
         /* a MERGE, so a document holding somebody's other corrections keeps
-           them — this path only ever speaks for the link */
+           them — this path only ever speaks for the links and the byline */
         return fb.firestore().collection(COLLECTION).doc(f.rowId).set(doc, { merge: true });
       }).then(function () {
         var held = state.edits[f.rowId] || {};

@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "directory-form-2026-10",
+      "date": "2026-10-05",
+      "title": "Correct a university's card in one form",
+      "summary": "On the Universities page, Edit school now opens one form with every field of that school and its departments: the university, the school, the country, the school type, and each department's name and links. Change any of them and press Save, and every visitor sees the correction straight away. And a job posting made through the site now updates its department's card too: the card says who last updated it and when, and the job posting form lets you add the department's faculty page beside its own page.",
+      "url": "/universities"
+    },
+    {
       "id": "jobs-newest-on-site-2026-10",
       "date": "2026-10-05",
       "title": "The newest postings on the site lead the jobs page",

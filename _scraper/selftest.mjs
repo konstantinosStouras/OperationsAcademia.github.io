@@ -7970,6 +7970,157 @@ async function testUsersAndMessages() {
   ok(/Messages/.test(priv), '…and the messages');
 }
 
+/* ONE FORM PER SCHOOL (owner, 2026-10-05: "I want to be able to edit any
+   field directly when I want to, like one form per school with edit option
+   per field. Currently, when I click edit I have to check all fields one by
+   one"). The directory's Edit was a chain of seven browser prompts per
+   department; it is one form inside the card now, the school's own fields
+   asked once and each department's name and links beside them, saved as one
+   batch. And the same day: "when a registered user makes a new job posting
+   and is adding faculty link and the university and department name, these
+   should be updated in the Universities directory which should also keep
+   saying 'Last updated by X user on Y date'". Pinned here from the sources;
+   the browser half (the form drawn whole, a change saved as one write per
+   department carrying only what changed, the refusals, the phone) is the
+   directory form block of page-test.mjs. */
+async function testDirectoryForm() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const raw = await read('assets', 'oa-directory.js');
+  const js = strip(raw);
+  const css = strip(await read('assets', 'oa-directory.css'));
+  const fn = (name) => {
+    const at = js.indexOf('function ' + name + '(');
+    ok(at > -1, `dirform: oa-directory.js defines ${name}()`);
+    const end = js.indexOf('\n  function ', at + 10);
+    const body = js.slice(at, end > -1 ? end : at + 4000);
+    ok(body.length > 40 && body.length < 9000, `dirform: ${name}() is read whole (${body.length} chars)`);
+    return body;
+  };
+
+  /* no prompt chain is left anywhere in the module */
+  ok(!/window\.prompt\(/.test(js), 'dirform: the directory asks nothing through a browser prompt any more');
+
+  /* the fields, and where each is asked */
+  const spec = raw.slice(raw.indexOf('var FIELDS'), raw.indexOf('var TYPE_CHOICES'));
+  const scoped = [...spec.matchAll(/key: '([^']+)', scope: '(school|dept)'/g)].map((m) => [m[1], m[2]]);
+  eq(scoped.filter((x) => x[1] === 'school').map((x) => x[0]),
+    ['institution', 'school', 'country', 'type'],
+    'dirform: the school\'s own fields are asked ONCE, at the top of the form, for every department in it');
+  eq(scoped.filter((x) => x[1] === 'dept').map((x) => x[0]),
+    ['department', 'deptUrl', 'facultyUrl'],
+    'dirform: and each department\'s name and two links are asked per department');
+  eq(scoped.length, (spec.match(/key: '/g) || []).length,
+    'dirform: every field says where it is asked');
+  ok(/kind: 'type'/.test(spec) && /var TYPE_CHOICES = \[/.test(raw)
+     && /value: 'Business School'/.test(raw) && /value: 'University'/.test(raw) && /value: '', label: 'Not recorded'/.test(raw),
+    'dirform: the type is three radio buttons, never a box that had to be typed exactly');
+  ok(!/—/.test(spec.slice(spec.indexOf('hint:'))),
+    'dirform: the hints read in plain words, with no em dash');
+
+  /* ONE Edit per school, the read view and the form side by side */
+  ok(!/data-dir-edit/.test(fn('deptLineHTML')),
+    'dirform: a department row carries no Edit of its own any more');
+  const school = fn('schoolHTML');
+  ok(/data-dir-school="/.test(school) && /oa-dir-school-view/.test(school) && /data-dir-edit="/.test(school)
+     && /Edit school<\/button>/.test(school) && /if \(state\.user\)/.test(school),
+    'dirform: Edit school sits in the school\'s head, for a signed-in reader, over a read view the form replaces');
+  ok(/data-dir-addhost/.test(fn('cardRows')), 'dirform: the card\'s foot is where the add form opens');
+  ok(/openSchoolForm\(li, card, node\.getAttribute\('data-dir-edit'\)\)/.test(js)
+     && /openAddForm\(li, card\)/.test(js),
+    'dirform: the two buttons open the two forms');
+
+  /* the form, and the rules it saves by */
+  const form = fn('formHTML');
+  ok(/role="alert"/.test(form) && /type="submit"/.test(form) && /oa-dir-cancel/.test(form),
+    'dirform: one form with a Save, a Cancel and a message line always in the document');
+  ok(/role="group" aria-labelledby=/.test(form) && !/<h[1-6]/.test(form),
+    'dirform: its blocks are labelled groups, never headings that would join the page outline');
+  const text = fn('textFieldHTML');
+  ok(/autocomplete="off"/.test(text) && /maxlength="' \+ f\.max/.test(text) && /<label for="' \+ id/.test(text),
+    'dirform: every box has its own label, its rules bound and no browser autofill (the Greece lesson)');
+  ok(/role="radiogroup"/.test(fn('typeFieldHTML')), 'dirform: the type is a labelled radio group');
+  const plan = fn('planSchool');
+  ok(/fin\[f\.key\] = \(typed === KEEP \|\| trim\(typed\) === trim\(spec\.shown\[name\]\)\)\s*\? asText\(cur\[f\.key\]\)/.test(plan),
+    'dirform: a box nobody touched keeps exactly what the row holds, so the form never writes what nobody typed');
+  ok(/if \(x\.fin\[f\.key\] !== asText\(base\[f\.key\]\)\) patch\[f\.key\] = x\.fin\[f\.key\];/.test(plan),
+    'dirform: a built row stores only what differs from the committed file (the rowOverrides discipline)');
+  ok(/var after = overlaid\(\)/.test(plan) && /existingRow\(finals\[k\]\.fin, finals\[k\]\.id, after\)/.test(plan),
+    'dirform: a department a user added is checked against the table AS IT WILL BE once the save lands');
+  ok(/if \(!f \|\| trim\(spec\.shown\[name\]\) === v\) return '';/.test(fn('invalid')),
+    'dirform: only a box the reader CHANGED is held to the rules, so an old stored link never blocks a correction');
+  ok(!/doc\.type = KEEP|= KEEP;/.test(js) && /var KEEP = '__keep__';/.test(raw),
+    'dirform: "leave each as it is" is a sentinel that is compared, never stored');
+  const save = fn('save');
+  ok(/function save\(entries\)/.test(save) && /var batch = db\.batch\(\);/.test(save)
+     && /batch\.set\(db\.collection\(COLLECTION\)\.doc\(d\.rowId\), d\)/.test(save) && /return batch\.commit\(\);/.test(save),
+    'dirform: every department a form changed is written in ONE batch, so a card is never left half renamed');
+  ok(!/\.doc\(rowId\)\.set\(/.test(save), 'dirform: save() writes nothing outside the batch');
+  ok(/save\(\[\{ rowId: rowId, patch: \{ hidden: hidden \}, merge: true \}\]\)/.test(fn('hideRow')),
+    'dirform: the maintainer\'s Hide goes through the same writer');
+  ok(/if \(dirty\(state\.form\) && !window\.confirm\(/.test(fn('claimForm')),
+    'dirform: ONE form at a time, and opening another asks before throwing typing away');
+  ok(/if \(dirty\(spec\) && !window\.confirm\(/.test(fn('cancelForm')) && /ev\.key === 'Escape'/.test(fn('wireForm')),
+    'dirform: Cancel and Escape ask first when something has been typed');
+  ok(/if \(state\.form && state\.form\.cardId === card\.id\) \{\s*if \(state\.user\) mountForm\(li, false\);/.test(fn('onCard')),
+    'dirform: the form survives a redraw of the list, with what was typed in it');
+  ok(/'Last updated by ' \+/.test(fn('onCard')) && !/Last edited by/.test(js),
+    'dirform: every card says who last updated it and when (the owner\'s own words)');
+
+  /* the stylesheet: the form names its ink, rings focus visibly, and holds
+     the phone rules */
+  const formRule = /\.oa-dir-form \{([^}]*)\}/.exec(css);
+  ok(formRule && /background:/.test(formRule[1]) && /\bcolor:/.test(formRule[1]),
+    'oa-directory.css: the form paints its own ground and names its own ink');
+  ok(/\.oa-dir-field input\[type='text'\]:focus \{[^}]*outline: 2px solid var\(--brand/.test(css)
+     && !/box-shadow: 0 0 0 3px var\(--brand-soft/.test(css),
+    'oa-directory.css: focus is an outline in --brand, never a 1.19:1 --brand-soft halo');
+  const phone = css.slice(css.indexOf('@media (max-width: 640px)'));
+  ok(/\.oa-dir-field input\[type='text'\] \{[^}]*font-size: 16px/.test(phone),
+    'oa-directory.css: on a phone the boxes are 16px, so iOS does not zoom the page (rule 2)');
+  ok(/\.oa-dir-radio \{ min-height: 42px; \}/.test(phone) && /\.oa-dir-form-acts \.v3-btn \{[^}]*flex: 1 1 100%; min-height: 44px;/.test(phone),
+    'oa-directory.css: and every radio row and both buttons are full-size targets (rules 3 and 11)');
+  ok(!/#[0-9a-f]{3,6}\b(?![^(]*\))/i.test(css.replace(/var\([^)]*\)/g, '')),
+    'oa-directory.css: every colour is a token, its light value only ever a fallback');
+
+  /* the page says what the button does now */
+  const page = await read('universities.html');
+  ok(/press <strong>Edit school<\/strong>, and one form shows every field/.test(page),
+    'universities.html: the lede says Edit school opens one form');
+  ok(/a job posting made through the site updates its department&rsquo;s card too/.test(page),
+    'universities.html: and that a posting updates its department\'s card');
+
+  /* A POSTING UPDATES THE DIRECTORY: the faculty link joins the department
+     page on the posting form, never the submission, and the byline is filed
+     for every posting */
+  const pj = await read('post-a-job.html');
+  const tag = pj.slice(pj.lastIndexOf('<', pj.indexOf('id="f-facultyUrl"')), pj.indexOf('>', pj.indexOf('id="f-facultyUrl"')) + 1);
+  ok(/type="url"/.test(tag) && /maxlength="600"/.test(tag) && !/\brequired\b/.test(tag),
+    'post-a-job.html: the faculty page is an optional link box, bounded like the rules bound it');
+  ok(/for="f-facultyUrl">The department&rsquo;s faculty page \(optional\)</.test(pj) && /id="f-facultyUrl-note"/.test(pj),
+    'post-a-job.html: …labelled, with a note the records fill');
+  const jf = strip(await read('assets', 'oa-jobform.js'));
+  ok(!/\bout\.facultyUrl\b/.test(jf),
+    'oa-jobform.js: the faculty link never joins the submission document — jobSubmissions\' rules pin its field set');
+  ok(/facultyUrl: \$\('f-facultyUrl'\), facultyUrlNote: \$\('f-facultyUrl-note'\)/.test(jf)
+     && /facultyUrl: \(\$\('f-facultyUrl'\) \|\| \{\}\)\.value \|\| ''/.test(jf),
+    'oa-jobform.js: the records fill it, and it is filed with the posting\'s byline');
+  ok(/var facultyUrlEl = \$\('f-facultyUrl'\);[\s\S]{0,200}httpUrl\(facultyUrlEl\.value\) === null/.test(jf),
+    'oa-jobform.js: a faculty link that is not a web address is refused where the poster can fix it');
+  const ui = strip(await read('assets', 'oa-uniinfo.js'));
+  ok(/autoFill\(els\.facultyUrl, 'data-oa-auto-facultyurl', f\.row \? f\.facultyUrl : ''\);/.test(ui),
+    'oa-uniinfo.js: the faculty page is filled from the records like the department page');
+
+  /* the record of it */
+  const md = await read('CLAUDE.md');
+  ok(/### …and Edit is ONE FORM PER SCHOOL, and a posting updates the card/.test(md),
+    'CLAUDE.md records the form and the posting byline');
+  const log = JSON.parse(await read('changelog.json'));
+  const entry = (log.updates || []).find((u) => u.id === 'directory-form-2026-10');
+  ok(entry && entry.url === '/universities' && /one form/.test(entry.summary) && !/—/.test(entry.summary),
+    'changelog.json announces it, in plain words');
+}
+
 async function testDirectoryWiring() {
   const js = await readFile(path.join(HERE, '..', 'assets', 'oa-directory.js'), 'utf8');
   const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
@@ -8267,8 +8418,21 @@ async function testUniInfo() {
     src.indexOf('return {', src.indexOf('function commit(')));
   const docLit = /var doc = \{([\s\S]*?)\};/.exec(commitBody);
   ok(!!docLit, 'uniinfo: commit() builds one document literal the test can read');
-  const written = (docLit[1].match(/(\w+):/g) || []).map((m) => m.slice(0, -1));
-  ok(written.length >= 5, 'uniinfo: the document carries the link and its bookkeeping');
+  /* the literal is the BYLINE every posting writes (owner, 2026-10-05: a
+     posting updates its department's card, which then says who last updated
+     it and when); the two links join it by assignment, each only where the
+     poster changed it */
+  const written = [...(docLit[1].match(/(\w+):/g) || []).map((m) => m.slice(0, -1)),
+    ...[...commitBody.matchAll(/\bdoc\.(\w+)\s*=[^=]/g)].map((m) => m[1])];
+  eq(docLit[1].match(/(\w+):/g).map((m) => m.slice(0, -1)).sort(), ['by', 'name', 'rowId', 't'],
+    'uniinfo: every posting files the byline: who, when, and the row it is about');
+  eq([...commitBody.matchAll(/\bdoc\.(\w+)\s*=[^=]/g)].map((m) => m[1]).sort(), ['deptUrl', 'facultyUrl'],
+    'uniinfo: …and the department page and the faculty page join it');
+  ok(/var dept = deptUrlPatch\(f\.deptUrl, args\.deptUrl\);\s*if \(dept\) doc\.deptUrl = dept;/.test(commitBody)
+     && /var fac = deptUrlPatch\(f\.facultyUrl, args\.facultyUrl\);\s*if \(fac\) doc\.facultyUrl = fac;/.test(commitBody),
+    'uniinfo: …each only where the poster CHANGED it, so an empty box never erases a recorded link');
+  ok(!/if \(!patch/.test(commitBody) && /if \(!f\.rowId\) return null;/.test(commitBody),
+    'uniinfo: an unchanged link no longer skips the write: the byline is filed for every posting');
   for (const key of written) {
     ok(allowed.has(key), `uniinfo: commit() writes "${key}", and the rules allow it`);
   }
@@ -21925,10 +22089,12 @@ async function testSweep20260906() {
   /* 17. the directory refuses a second row for a place it lists */
   const dir = await rd('assets', 'oa-directory.js');
   ok(/function rowKeyOf\(r\) \{/.test(dir) && /var key = rowKeyOf\(r\);/.test(dir)
-     && /function existingRow\(doc, exceptId\) \{/.test(dir) && /function refuseClash\(doc, exceptId\) \{/.test(dir),
+     && /function existingRow\(doc, exceptId, rows\) \{/.test(dir) && /function clashText\(clash\) \{/.test(dir),
     'sweep: the directory has ONE definition of "the same place", used by the fold and by the refusal');
-  eq((dir.match(/if \(refuseClash\(doc, /g) || []).length, 2,
-    'sweep: ...and both addRow and editAdd refuse a row the table already lists, naming it');
+  eq((dir.match(/var clash = existingRow\(/g) || []).length, 2,
+    'sweep: ...and both the add form and the school form (for a department a user added) refuse a row the table already lists');
+  eq((dir.match(/return \{ error: clashText\(clash\)/g) || []).length, 2,
+    'sweep: ...naming it, in the form, where the reader can still change what they typed');
 
   /* 18, 19, 20, 21. uniinfo and the place picker */
   const uni = await rd('assets', 'oa-uniinfo.js');
@@ -25465,6 +25631,7 @@ if (isMain(import.meta.url)) {
   await testMemberInsights();
   await testDirectoryModel();
   await testDirectoryWiring();
+  await testDirectoryForm();
   await testUniInfo();
   await testMultiCountryPostings();
   await testMandatoryPostingFields();

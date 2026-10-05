@@ -1365,7 +1365,8 @@ from the maintainer to every signed-in account. An edit stores only what
 differs from the committed file; `add: true` marks a row contributed whole;
 every document carries `by` (pinned to the writing uid by the rules, so
 attribution cannot be forged), `name` and `t`, and **every card shows "Last
-edited by <name> on <date>"**. Renaming a row so its names match another
+updated by <name> on <date>"** (it read "Last edited by" until 2026-10-05,
+when a job posting began updating the card too; see the next subsection). Renaming a row so its names match another
 row's MERGES the two on screen — that plus the maintainer-only `hidden` flag
 (the duplicate's takedown, faded-with-Restore for them, never a one-way door)
 is the merge tool. The maintainer alone also deletes a document ("Reset to
@@ -1379,6 +1380,98 @@ which control, the attribution line, and the page's mobile gate (it is in
 phone block, which switches views first). **Inert until the rules are
 redeployed**: `firebase deploy --only firestore:rules --project
 operations-academia`.
+
+### …and Edit is ONE FORM PER SCHOOL, and a posting updates the card
+
+Owner, 2026-10-05, over screenshots of the browser asking "University (the full
+official name …)" and then "School (…)" in two dialogs: *"I want to be able to
+edit any field directly when I want to like one form per school with edit
+option per field. Currently, when I click edit I have to check all fields one
+by one. Update this across all universities."* And the same evening: *"when a
+registered user makes a new job posting and is adding faculty link and the
+university and department name, these should be updated in the Universities
+directory which should also keep saying 'Last updated by X user on Y date'."*
+
+**Edit was a chain of seven `window.prompt`s per department**: correcting one
+link meant pressing OK through six questions first, and giving two
+departments their school meant fourteen. It is **one form inside the card**
+now, opened by **Edit school** in each school section's head (the per-row
+Edit buttons are gone, since every one of them would open the same form):
+
+* the SCHOOL's own fields once, at the top, for every department in it —
+  University, School, Country and School type (three radio buttons, never a
+  box that had to be typed exactly). `scope: 'school'` in `FIELDS`;
+* then each department's name, department page and faculty page, every box
+  filled in and editable at once (`scope: 'dept'`);
+* **Save writes every department that changed as ONE Firestore batch**, so a
+  card is never left half renamed. Each department is still its own
+  `directoryEdits` document, the same full `set()` judged by the same rules,
+  so nothing about the rules, the overlay or the build moved and no deploy is
+  owed.
+
+Three rules make the form safe to put in front of everybody:
+
+* **A box nobody touched writes nothing new.** A department's value is taken
+  from the box only where the box differs from what the form SHOWED; anywhere
+  else it is the row's own stored value, even where the card showed it tidied
+  (a canonical spelling, a link folded in from a duplicate row). A built row
+  then stores only what differs from the committed file, exactly as the
+  prompts did (the rowOverrides discipline).
+* **A school field the departments disagree about** is shown empty with the
+  values in its placeholder, and the type with a fourth radio, *Leave each
+  department as it is*. Left alone it changes nothing; typed into, it sets
+  every department. The sentinel (`KEEP`) is compared and never stored.
+* **Only a box the reader changed is validated** (a university needs a name,
+  a link must start with `https://`), so a link stored long ago in some other
+  shape never blocks a correction to the school's name. A refusal is said in
+  the form, with the cursor put on the box; a department a user ADDED may not
+  be renamed onto a place the table already lists, checked against the table
+  as it will be once the save lands.
+
+**One form at a time, and it survives a redraw**: the list redraws whenever
+the sign-in state or the edits change, so what is typed lives in `state.form`
+and `onCard` mounts it again on the new card. Opening another form, Cancel
+and Escape all ask before throwing typing away. After a save the card says
+*"Saved. Every visitor now sees the change."* and the keyboard is put on that
+line. **+ Add a department** opens the same kind of form at the card's foot,
+department first. On a phone the boxes are 16px, the radio rows and both
+buttons 42px targets, and the buttons stack full width.
+
+**A POSTING UPDATES THE CARD.** The names already reached the directory
+through the build (a posting is one of `directory.json`'s sources, and a place
+posting for the first time gets its card in the run that publishes it). What
+was missing was the byline and the faculty link: `OAUniInfo.commit()` filed a
+`directoryEdits` document only when the poster CHANGED the department page,
+so a posting left the card saying nothing about who had last updated it. It
+now files the byline (`rowId`, `by`, `name`, `t`) for EVERY posting sent
+through the form, new or edited, with the department page and the new
+optional **faculty page** (`f-facultyUrl`, filled from the records like the
+department page) only where the poster's value differs from the record. Both
+links stay out of the submission document, whose rules pin its field set. The
+card's line reads **"Last updated by <name> on <date>"** for both roads. The
+maintainer's Reset to file now appears on rows a posting has touched, since
+those carry a document; resetting removes the byline with it.
+
+**What was left alone**: the map view's popup editor (`assets/oa-rowedit.js`,
+the maintainer's correction of `data/universities.json`, shared with Previous
+markets and Recent faculty) still asks through prompts. It is the
+maintainer's alone and edits a different dataset.
+
+Tests: `testDirectoryForm` in `_scraper/selftest.mjs` (no prompt left, the
+fields' scopes, Edit per school, the untouched-box rule, the stored-diff rule,
+the clash check against the table after the save, validation of changed boxes
+only, the sentinel never stored, the one batch, one form at a time, the form
+surviving a redraw, the byline wording, the stylesheet's ink, focus ring and
+phone rules, the page's copy, the posting form's faculty box kept out of the
+submission and filed with the byline, this section and the change log), the
+byline pins in `testUniInfo`, and the directory form block of
+`_scraper/page-test.mjs`, which drives it in a real browser through the fake
+Firebase shim: the form drawn whole with no dialog, a school typed once and
+saved as one document per department carrying only that field, a bad link
+refused with nothing written, Escape asking first, typing surviving a redraw,
+the add form, a duplicate department refused, and at 390px the 16px boxes,
+the 42px targets and no sideways scroll; and in the posting form's block, an
+unchanged link still filing the byline.
 ## A member's affiliation is chosen from the Universities page
 
 Owner, 2026-10-01: *"When users register and need to provide us and write
@@ -11942,10 +12035,14 @@ opened.
 page" field (`f-deptUrl`) pre-fills from the record with a note asking the
 poster to VERIFY it; it is never part of the submission document (the
 jobSubmissions rules pin that field set — the selftest checks no `out.deptUrl`
-ever appears), and after the posting is accepted a CHANGED link is filed as a
-`directoryEdits/{rowId}` MERGE (deptUrl + attribution only, so a document
-holding somebody's other corrections keeps them; an empty field never erases;
-a hidden row is never written). Every OTHER pre-filled field travels with the
+ever appears), and after the posting is accepted the poster's BYLINE is filed
+as a `directoryEdits/{rowId}` MERGE, with a CHANGED link beside it (the byline
+and the two links only, so a document holding somebody's other corrections
+keeps them; an empty field never erases; a hidden row is never written). Since
+2026-10-05 the byline goes on EVERY posting, changed link or not, and the
+department's faculty page (`f-facultyUrl`, optional) joins the department page
+under the same rules: see "…and Edit is ONE FORM PER SCHOOL, and a posting
+updates the card" under the Universities directory. Every OTHER pre-filled field travels with the
 posting itself and reaches the directory through the ordinary pipeline — the
 build re-reads the published rows. The row id is
 **`OASchools.directoryRowKey`, the ONE definition** — directory-model.mjs
