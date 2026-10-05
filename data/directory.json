@@ -264,8 +264,8 @@
    "directory",
    "postings"
   ],
-  "n": 1,
-  "lastPosted": "2014-10-25",
+  "n": 2,
+  "lastPosted": "2026-10-04",
   "lat": 33.8937913,
   "lng": 35.5017767
  },
@@ -954,6 +954,19 @@
   ],
   "n": 2,
   "lastPosted": "2026-09-23"
+ },
+ {
+  "id": "bucknell-university__freeman-college-of-management__markets-innovation-and-design-mide",
+  "institution": "Bucknell University",
+  "school": "Freeman College of Management",
+  "department": "Markets, Innovation, and Design (MiDE)",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-04"
  },
  {
   "id": "butler-university____supply-chain-management",
@@ -1916,6 +1929,18 @@
   ],
   "n": 2,
   "lastPosted": "2026-09-30"
+ },
+ {
+  "id": "cornell-university-cornell-tech____operations-research-and-information-engineering",
+  "institution": "Cornell University (Cornell Tech)",
+  "department": "Operations Research and Information Engineering",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
  },
  {
   "id": "cornell-university-cornell-tech__samuel-curtis-johnson-graduate-school-of-management",
@@ -3565,6 +3590,19 @@
   ]
  },
  {
+  "id": "ie-university__ie-school-of-science-and-technology__industrial-engineering-manufacturing-systems",
+  "institution": "IE University",
+  "school": "IE School of Science and Technology",
+  "department": "Industrial Engineering (Manufacturing Systems)",
+  "type": "University",
+  "country": "Spain",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
+ },
+ {
   "id": "iese",
   "institution": "IESE",
   "type": "Business School",
@@ -3614,6 +3652,18 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-23"
+ },
+ {
+  "id": "iese-business-school____managerial-decision-sciences",
+  "institution": "IESE Business School",
+  "department": "Managerial Decision Sciences",
+  "type": "Business School",
+  "country": "Spain",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
  },
  {
   "id": "iese-business-school____om",
@@ -4845,6 +4895,18 @@
   "lastPosted": "2025-08-11"
  },
  {
+  "id": "michigan-state-university____logistics-and-supply-chain-management",
+  "institution": "Michigan State University",
+  "department": "Logistics and Supply Chain Management",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-02"
+ },
+ {
   "id": "michigan-state-university____scm-ai",
   "institution": "Michigan State University",
   "department": "SCM, AI",
@@ -4855,6 +4917,18 @@
   ],
   "n": 1,
   "lastPosted": "2025-10-02"
+ },
+ {
+  "id": "michigan-state-university____statistics-and-probability",
+  "institution": "Michigan State University",
+  "department": "Statistics and Probability",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-05"
  },
  {
   "id": "michigan-state-university__eli-broad-college-of-business__supply-chain-management",
@@ -4880,7 +4954,7 @@
    "postings",
    "seed"
   ],
-  "n": 3,
+  "n": 4,
   "lastPosted": "2026-10-04",
   "lat": 42.7270051,
   "lng": -84.4728586
@@ -5210,6 +5284,18 @@
   "lastPosted": "2026-07-30"
  },
  {
+  "id": "national-university-of-singapore____statistics-and-data-science",
+  "institution": "National University of Singapore",
+  "department": "Statistics and Data Science",
+  "type": "University",
+  "country": "Singapore",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
+ },
+ {
   "id": "national-university-of-singapore__nus-business-school",
   "institution": "National University of Singapore",
   "school": "NUS Business School",
@@ -5474,16 +5560,16 @@
   "lng": 121.53415
  },
  {
-  "id": "new-york-university-shanghai____om",
+  "id": "new-york-university-shanghai____operations-management",
   "institution": "New York University Shanghai",
-  "department": "OM",
+  "department": "Operations Management",
   "type": "University",
   "country": "China",
   "sources": [
    "postings"
   ],
-  "n": 1,
-  "lastPosted": "2026-01-23"
+  "n": 2,
+  "lastPosted": "2026-10-01"
  },
  {
   "id": "newcastle-university____operations-management",
@@ -6224,6 +6310,18 @@
   ],
   "n": 1,
   "lastPosted": "2025-12-03"
+ },
+ {
+  "id": "purdue-university__college-of-engineering",
+  "institution": "Purdue University",
+  "school": "College of Engineering",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-05"
  },
  {
   "id": "purdue-university__mitchell-e-daniels-jr-school-of-business__quantitative-methods",
@@ -9603,6 +9701,19 @@
   "lastPosted": "2014-07-24"
  },
  {
+  "id": "university-of-chicago__booth-school-of-business__healthcare-analytics",
+  "institution": "University of Chicago",
+  "school": "Booth School of Business",
+  "department": "Healthcare Analytics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
+ },
+ {
   "id": "university-of-chicago__booth-school-of-business__operations-management",
   "institution": "University of Chicago",
   "school": "Booth School of Business",
@@ -10932,6 +11043,18 @@
   "lastPosted": "2026-01-15"
  },
  {
+  "id": "university-of-missouri-mizzou____industrial-and-systems-engineering",
+  "institution": "University of Missouri (Mizzou)",
+  "department": "Industrial and Systems Engineering",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-02"
+ },
+ {
   "id": "university-of-missouri-st-louis__ed-g-smith-college-of-business__supply-chain-management-and-analytics",
   "institution": "University of Missouri-St. Louis",
   "school": "Ed G. Smith College of Business",
@@ -11364,8 +11487,8 @@
    "directory",
    "postings"
   ],
-  "n": 1,
-  "lastPosted": "2025-10-06",
+  "n": 2,
+  "lastPosted": "2026-10-03",
   "lat": 40.4440427,
   "lng": -79.9580026
  },
@@ -11901,6 +12024,31 @@
   "lastPosted": "2014-10-31",
   "lat": 41.6601347,
   "lng": -83.6145086
+ },
+ {
+  "id": "university-of-toronto____mechanical-and-industrial-engineering",
+  "institution": "University of Toronto",
+  "department": "Mechanical and Industrial Engineering",
+  "type": "University",
+  "country": "Canada",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-01"
+ },
+ {
+  "id": "university-of-toronto__faculty-of-arts-and-science__statistical-sciences",
+  "institution": "University of Toronto",
+  "school": "Faculty of Arts and Science",
+  "department": "Statistical Sciences",
+  "type": "University",
+  "country": "Canada",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-05"
  },
  {
   "id": "university-of-toronto__joseph-l-rotman-school-of-management__operations-management-and-statistics",
