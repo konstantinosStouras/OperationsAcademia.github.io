@@ -245,6 +245,24 @@ marked global.
     collapsed both grid tracks onto one x and every check that was not
     geometric passed over a panel printing one column on top of the other.
 
+17. **A button's label is centred on its letters, and it wraps rather than
+    run past the button's edge.** Owner, 2026-10-05, of a Windows screenshot
+    of the filter bar's buttons and the calendar strip: "center the words
+    better within each button ... for any device type". Every label there sat
+    3 to 4px above the middle, because a button centres its line box and where
+    the letters sit inside it is the font's ascent and descent as that
+    platform reports them. `text-box: trim-both cap alphabetic` on the button
+    (one rule in `oa-list.css`) centres the caps and the baseline instead,
+    whatever the platform says; it needs the button to stay a block container
+    (a flex or grid button puts the label in an anonymous box the trim does
+    not reach) and to keep a fixed height or a 42px floor. The same sweep
+    found the calendar download's label wider than its button below about
+    375px (it names what it would send), so on a phone the strip's buttons
+    are `height: auto` over `min-height: 42px` and wrap, balanced. Since the
+    suite's Chromium centres Inter perfectly, `page-test.mjs` declares an
+    'Inter' with skewed metrics, proves the label rides high without the trim,
+    then measures it centred with it, at 1280, 390 and 320px.
+
 ## The test gate
 
 `_scraper/page-test.mjs` runs every list page at a 390px viewport and

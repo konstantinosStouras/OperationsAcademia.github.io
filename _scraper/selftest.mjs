@@ -16646,6 +16646,86 @@ async function testCalendars() {
 
 /* ------------------------------------------------- …and how it is wired */
 
+/* THE LABEL SITS IN THE MIDDLE OF ITS BUTTON (owner, 2026-10-05, of a Windows
+   screenshot of the filter bar and the calendar strip: "center the words
+   better within each button"). One rule in oa-list.css trims the line box of
+   those buttons to the letters, so what is centred is the caps and the
+   baseline rather than whatever ascent and descent the platform reports. The
+   rule is one line; what it DEPENDS ON is pinned here, because an edit to
+   either stylesheet could undo it without a single colour changing:
+
+   * v3.css never restates `text-box`, so the engine's rule reaches the site;
+   * no rule makes one of these buttons a flex or grid container, which would
+     put the label in an anonymous box that does not inherit the trim;
+   * every rule that sizes one gives it a fixed height, or `auto` with at
+     least a 42px floor, so trimming the line box never makes a button
+     shorter than the target it was;
+   * and on a phone the calendar buttons may wrap, since the download names
+     what it would send in more width than the button has below about 375px.
+
+   page-test.mjs measures the result in a browser, under a font whose metrics
+   are skewed on purpose, which is the only way a Linux run can see what the
+   Windows machine drew. */
+async function testButtonLabelCentring() {
+  const listCss = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
+  const v3css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  /* comments first: the paragraphs beside these rules name the flex
+     container and the heights they are about */
+  const bare = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '');
+  const rulesOf = (css) => [...bare(css).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+    .map((m) => ({ sel: m[1].trim().replace(/\s+/g, ' '), body: m[2] }));
+  const decl = (body, prop) => {
+    const m = body.match(new RegExp('(?:^|;)\\s*' + prop + '\\s*:\\s*([^;]+)'));
+    return m ? m[1].trim() : null;
+  };
+  const BUTTONS = ['oa-clear', 'oa-action', 'oa-cal-btn', 'oa-cal-go', 'oa-cal-all', 'oa-cal-none',
+    'oa-export', 'oa-alert-save', 'oa-talkcal'];
+  /* the buttons a rule's SUBJECT is, never a descendant of one */
+  const subjectOf = (sel) => BUTTONS.filter((c) => sel.split(',').some((part) =>
+    new RegExp('\\.' + c + '(?![\\w-])[^\\s>+~]*$').test(part.trim())));
+
+  const list = rulesOf(listCss), v3 = rulesOf(v3css);
+  eq(list.filter((r) => /text-box/.test(r.body)).map((r) => [r.sel, decl(r.body, 'text-box')]),
+    [['.oa-clear, .oa-action, .oa-cal-btn', 'trim-both cap alphabetic']],
+    'labels: ONE rule in oa-list.css trims the line box of the bar\'s and the strip\'s buttons to the letters');
+  ok(!/text-box/.test(bare(v3css)),
+    'labels: v3.css sets no text-box, so the engine\'s rule is the one that reaches the site');
+
+  let seen = 0;
+  for (const [name, rules] of [['oa-list.css', list], ['v3.css', v3]]) {
+    for (const r of rules) {
+      const hits = subjectOf(r.sel);
+      if (!hits.length) continue;
+      seen++;
+      const display = decl(r.body, 'display');
+      ok(!display || !/flex|grid/.test(display),
+        `labels: ${name} never makes ${hits.join('/')} a flex or grid container (${r.sel}: display ${display})`);
+      const h = decl(r.body, 'height');
+      const floor = decl(r.body, 'min-height');
+      ok(!h || /^\d+(\.\d+)?px$/.test(h) || (h === 'auto' && /^(4[2-9]|[5-9]\d)px$/.test(floor || '')),
+        `labels: ${name} gives ${hits.join('/')} a fixed height, or auto over a 42px floor (${r.sel}: height ${h}, min-height ${floor})`);
+    }
+  }
+  /* a scan that found nothing passes for the wrong reason */
+  ok(seen >= 12, `labels: the scan read the rules that style these buttons (${seen})`);
+
+  /* on a phone the calendar buttons wrap, balanced, over a 42px floor */
+  const phone = (css, p) => {
+    const blocks = [...bare(css).matchAll(/max-width:\s*640px\)\s*\{([\s\S]*?)\n\}/g)];
+    return blocks.flatMap((m) => rulesOf(m[1])).filter((r) => r.sel === p + '.oa-cal-btn');
+  };
+  const lp = phone(listCss, '');
+  ok(lp.length === 1 && decl(lp[0].body, 'white-space') === 'normal' &&
+     decl(lp[0].body, 'text-wrap') === 'balance' && decl(lp[0].body, 'min-height') === '42px' &&
+     decl(lp[0].body, 'height') === 'auto',
+    'labels: on a phone the calendar buttons wrap their label, balanced, over a 42px floor (oa-list.css)');
+  const vp = phone(v3css, 'body.v3 ');
+  ok(vp.length === 1 && decl(vp[0].body, 'height') === 'auto' && decl(vp[0].body, 'min-height') === '42px',
+    'labels: …and v3.css, which sizes them on the site, lets them grow past 42px rather than pinning 42');
+  ok(/\.oa-cal-btn\s*\{[^}]*white-space:\s*nowrap/.test(bare(listCss)),
+    'labels: on a desktop the strip\'s buttons stay on one line');
+}
+
 async function testCalendarsWiring() {
   const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
   const jobs = await read('jobs.html');
@@ -25517,6 +25597,7 @@ if (isMain(import.meta.url)) {
   await testSaveSearchAsAlert();
   await testCalendars();
   await testCalendarsWiring();
+  await testButtonLabelCentring();
   await testAnalytics();
   await testGa4Tag();
   await testUniversityVisits();
