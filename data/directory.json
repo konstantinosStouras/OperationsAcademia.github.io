@@ -5705,14 +5705,20 @@
   "mapUrl": "https://goo.gl/maps/8Om8U",
   "facultyUrl": "http://www.kellogg.northwestern.edu/departments/operations/faculty.aspx",
   "deptUrl": "https://www.kellogg.northwestern.edu/academics-research/faculty-directory/?academicDepartments=Operations",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-08-25",
+  "n": 2,
+  "lastPosted": "2026-10-05",
   "lat": 42.0571541,
   "lng": -87.6716362
  },
