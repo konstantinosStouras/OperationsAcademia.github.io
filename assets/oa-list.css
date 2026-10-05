@@ -345,6 +345,32 @@
 
 .oa-action[disabled] { opacity: 0.45; cursor: default; }
 
+/* THE LABEL SITS IN THE MIDDLE OF ITS BUTTON ON EVERY PLATFORM (owner,
+   2026-10-05, of a Windows screenshot of the bar and the calendar strip:
+   "center the words better within each button"). A button centres its LINE
+   BOX, and where the letters sit inside that box is decided by the font's
+   ascent and descent as the platform reports them. Inter's are balanced, so
+   on Linux and on a Mac the caps land in the middle; on the reported Windows
+   machine every label sat 3 to 4px above it (measured off the screenshot:
+   9 rows above the caps and 14 below, on all five buttons). `text-box`
+   trims the line box to the cap height and the alphabetic baseline, so what
+   is centred is the letters themselves, whatever the platform says the
+   ascent and descent are: page-test.mjs skews the font's metrics on purpose
+   and measures the caps centred anyway, and a font that is already balanced
+   moves by nothing.
+
+   Two things it depends on, both pinned in selftest.mjs. Every rule that
+   sizes one of these buttons gives it a FIXED height, or `auto` over a 42px
+   floor (the calendar strip on a phone, below), so trimming the line box
+   never makes a button shorter than its target. And none of them is a flex or grid
+   container: the label would then sit in an anonymous box that does not
+   inherit `text-box`, and the trim would silently do nothing. A browser
+   without `text-box` (Firefox, Safari before 18.2) ignores the line and
+   draws exactly what it drew before. */
+.oa-clear,
+.oa-action,
+.oa-cal-btn { text-box: trim-both cap alphabetic; }
+
 /* ---------------------------------------------------------------- result bar */
 
 .oa-resultbar {
@@ -1111,7 +1137,18 @@
   .oa-cal-pick .oa-cal-box { width: 20px; height: 20px; }
   .oa-cal-tray { margin: 16px 0; padding: 16px; gap: 12px; }
   .oa-cal-msg { flex-basis: 100%; }
-  .oa-cal-btn { flex: 0 0 100%; width: 100%; height: 42px; font-size: 15px; }
+  /* AT LEAST 42px, AND THE LABEL MAY WRAP. The download's label names what
+     it would send ("📅 Add 12 postings to your calendar"), and at 15px that
+     is wider than the button below about 375px: it ran into the right edge
+     at 320px with any count, and at 360px once it named postings. Balanced
+     over two lines it fits on every phone; on one line it keeps 42px, and
+     the label is centred either way (the text-box rule above). */
+  .oa-cal-btn {
+    flex: 0 0 100%; width: 100%;
+    height: auto; min-height: 42px; padding: 8px 14px;
+    font-size: 15px; line-height: 1.3;
+    white-space: normal; text-wrap: balance;
+  }
   /* the trigger is inside its own wrapper, so the wrapper is what the strip
      stacks and the button fills it */
   .oa-cal-menu { flex: 0 0 100%; width: 100%; }

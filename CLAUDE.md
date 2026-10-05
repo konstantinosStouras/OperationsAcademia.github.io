@@ -8789,6 +8789,50 @@ two rows deep — and at 390px AND 320px both buttons stacked, full width, 42px,
 inside the card, with nothing in the section past the container and no
 sideways scroll.
 
+### …and each label sits in the middle of its button, on every platform
+
+Owner, 2026-10-05, of a Windows screenshot of this bar and the calendar strip
+under it: *"center the words better within each button. Check that looks
+nicely for any device type"*. Every label there sat 3 to 4px ABOVE the middle
+(read off the screenshot: 9 rows above the caps, 14 below, on all five
+buttons), while this repository's Chromium centres them exactly. A button
+centres its LINE BOX, and where the letters sit inside that box is the font's
+ascent and descent as the platform reports them. Inter's own metrics are
+balanced (checked in every file Google Fonts serves, per browser), so no
+Linux run could see what that machine drew, and nothing here could say why
+Windows reports otherwise.
+
+**So the fix does not depend on the reason.** `.oa-clear, .oa-action,
+.oa-cal-btn { text-box: trim-both cap alphabetic; }` in `oa-list.css` (v3.css
+never restates it, so this is the rule that reaches the site) trims the line
+box to the cap height and the baseline, so what the button centres is the
+letters. A font that is already balanced moves by nothing; a browser without
+`text-box` (Firefox, Safari before 18.2) draws what it drew before. It holds
+only while each of these buttons is a BLOCK container with a fixed height:
+made a flex or grid container, the label sits in an anonymous box that does
+not inherit the trim, and the line silently does nothing. Both are pinned.
+
+**The same sweep found the calendar download overflowing on small phones.**
+Its label names what it would send ("📅 Add 12 postings to your calendar"),
+and at 15px that is wider than the button below about 375px: it ran into the
+right edge at 320px with any count. On a phone the strip's buttons are
+`height: auto` over `min-height: 42px` and the label wraps, balanced, so it
+fits on every phone and still reads 42px on one line. The filter bar's three
+buttons fit at 320px and are unchanged.
+
+**The picker buttons were deliberately left out.** Their label clips its
+overflow for the ellipsis, so trimming its box would cut off the descenders.
+
+Tests: `testButtonLabelCentring` in `_scraper/selftest.mjs` (the one rule,
+v3.css silent on it, no flex or grid button, every height fixed or `auto` over
+a 42px floor, the phone wrap in both stylesheets, and a guard that the scan
+read the rules at all) and the labels block of `_scraper/page-test.mjs`, which
+declares an 'Inter' from a local system font with `ascent-override` and
+`descent-override`, proves the label rides high with the trim lifted, then
+measures it centred off the painted pixels at 1280, 390 and 320px, and holds
+the calendar label inside its button on a phone. Every pin verified by putting
+the defect back.
+
 ### …and a search can be saved as an e-mail alert
 
 Owner, 2026-09-04: a signed-in reader who has narrowed the jobs list can

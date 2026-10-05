@@ -16529,6 +16529,135 @@ for (const w of [320, 360, 390, 430]) {
   await ctx2.close();
 }
 
+/* -------------------------------- the label sits in the middle of its button
+
+   Owner, 2026-10-05, of a Windows screenshot of the filter bar's buttons and
+   the calendar strip: "center the words better within each button. Check that
+   looks nicely for any device type". Every label sat 3 to 4px ABOVE the
+   middle there (9 rows of the screenshot above the caps, 14 below, on all
+   five buttons), while this suite's Chromium centres them exactly: a button
+   centres its LINE BOX, and where the letters sit inside that box is the
+   font's ascent and descent as the platform reports them. Inter's are
+   balanced, so no Linux run could ever see what that machine drew.
+
+   So the font is SKEWED HERE ON PURPOSE. An 'Inter' declared from a local
+   system font with `ascent-override` and `descent-override` reproduces the
+   reported look (the letters ride high) in any browser, CI's included; and
+   the check is held to proving that FIRST, with the trim lifted from two of
+   the buttons, before it is allowed to measure them centred with the rule in
+   place. Without that step a run whose local font did not match would measure
+   an unskewed font, find it centred, and pass for having nothing to look at.
+
+   The labels are read off the PIXELS the browser painted, never off a range's
+   rectangle: a rectangle is the font's ascent-to-descent box, which is the
+   very thing that disagrees with where the glyphs are. */
+async function labelGaps(q, sel) {
+  const h = await q.$(sel);
+  if (!h) return null;
+  await h.scrollIntoViewIfNeeded();
+  const png = (await h.screenshot()).toString('base64');
+  return q.evaluate(async ({ png, sel }) => {
+    const b = document.querySelector(sel);
+    const r = b.getBoundingClientRect();
+    const bt = parseFloat(getComputedStyle(b).borderTopWidth) || 0;
+    const img = new Image();
+    img.src = 'data:image/png;base64,' + png;
+    await img.decode();
+    const c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    const g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    const k = c.width / r.width;                       // device px per CSS px
+    const inset = Math.ceil((bt + 2) * k);              // clear of the border
+    const y0 = inset, y1 = c.height - inset;
+    const x0 = Math.ceil((r.height / 2) * k), x1 = c.width - x0;   // clear of a pill's rounded ends
+    const counts = new Map();
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      const i = (y * c.width + x) * 4;
+      const key = d[i] + ',' + d[i + 1] + ',' + d[i + 2];
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    const ground = [...counts.entries()].sort((a, z) => z[1] - a[1])[0][0].split(',').map(Number);
+    let top = -1, bottom = -1;
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      const i = (y * c.width + x) * 4;
+      if (Math.abs(d[i] - ground[0]) + Math.abs(d[i + 1] - ground[1]) + Math.abs(d[i + 2] - ground[2]) > 60) {
+        if (top < 0) top = y;
+        bottom = y;
+        break;
+      }
+    }
+    if (top < 0) return { sel, ink: false };
+    const above = top / k, below = (c.height - bottom - 1) / k;
+    return { sel, ink: true, h: Math.round(r.height), above: +above.toFixed(1), below: +below.toFixed(1),
+      off: +((below - above) / 2).toFixed(2) };
+  }, { png, sel });
+}
+{
+  const SKEW = `@font-face {
+    font-family: 'Inter'; font-style: normal; font-weight: 100 900;
+    src: local('DejaVu Sans'), local('DejaVuSans'), local('Liberation Sans'), local('LiberationSans'),
+         local('FreeSans'), local('Noto Sans'), local('NotoSans-Regular'), local('Arial'), local('Helvetica');
+    ascent-override: 80%; descent-override: 67%; line-gap-override: 0%;
+  }`;
+  /* the two whose labels carry no descender and no symbol from another font,
+     so the ink's top and bottom ARE the letters' top and baseline */
+  const PLAIN = ['.oa-clear', '.oa-cal-all'];
+  for (const width of [1280, 390, 320]) {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html', { viewport: { width, height: 900 } });
+    await q.waitForSelector('.oa-cal-tray:not([hidden]) .oa-cal-all', { timeout: 15000 });
+    await q.addStyleTag({ content: SKEW });
+    await q.evaluate(() => document.fonts.load("600 13px 'Inter'"));
+    await q.waitForTimeout(200);
+
+    /* the rule, on every button of both rows */
+    const css = await q.evaluate(() => ['.oa-clear', '.oa-export', '.oa-alert-save', '.oa-cal-all', '.oa-cal-go']
+      .map((s) => { const cs = getComputedStyle(document.querySelector(s));
+        return `${s} ${cs.textBoxTrim} / ${cs.textBoxEdge}`; }));
+    ok(css.every((s) => / trim-both \/ cap alphabetic$/.test(s)),
+      `labels @${width}: every button of the bar and the strip trims its line box to the letters (got ${css.join('; ')})`);
+
+    /* FIRST the skew has to be real: with the trim lifted, the letters ride high */
+    await q.evaluate((s) => s.forEach((x) => { document.querySelector(x).style.textBox = 'none'; }), PLAIN);
+    const raw = [];
+    for (const s of PLAIN) raw.push(await labelGaps(q, s));
+    ok(raw.every((g) => g && g.ink && g.off >= 2),
+      `labels @${width}: the skewed font is in force, so without the trim the label rides high ` +
+      `(${JSON.stringify(raw)}). If this fails, no local font matched the @font-face above and the ` +
+      'check below would be measuring a font nothing is wrong with');
+
+    /* THEN, with the shipped rule, the letters sit in the middle */
+    await q.evaluate((s) => s.forEach((x) => { document.querySelector(x).style.textBox = ''; }), PLAIN);
+    const fixed = [];
+    for (const s of PLAIN) fixed.push(await labelGaps(q, s));
+    ok(fixed.every((g) => g && g.ink && Math.abs(g.off) <= 1),
+      `labels @${width}: with the skewed font, each label sits in the middle of its button (${JSON.stringify(fixed)})`);
+
+    /* ON A PHONE the download's label wraps rather than running into the
+       button's edge: it named what it would send in more width than the
+       button had below about 375px. Asked with the longest wording it uses. */
+    if (width < 641) {
+      const fit = await q.evaluate(() => {
+        const go = document.querySelector('.oa-cal-go');
+        const keep = go.textContent;
+        const out = [];
+        for (const l of ['📅 Add all 476 to your calendar', '📅 Add 12 postings to your calendar']) {
+          go.textContent = l;
+          out.push({ l, scroll: go.scrollWidth, client: go.clientWidth, h: Math.round(go.getBoundingClientRect().height) });
+        }
+        go.textContent = keep;
+        return { out, over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      ok(fit.out.every((o) => o.scroll <= o.client && o.h >= 42),
+        `labels @${width}: the calendar button holds its whole label, at least 42px tall (${JSON.stringify(fit.out)})`);
+      eq(fit.over, 0, `labels @${width}: nothing scrolls sideways`);
+    }
+    eq(errors, [], `labels @${width}: no uncaught script error`);
+    await ctx.close();
+  }
+}
+
 /* ------------------------------------------------------------------ done */
 
 
