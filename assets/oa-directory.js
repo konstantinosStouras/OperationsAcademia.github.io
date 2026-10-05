@@ -35,18 +35,41 @@
 
   var COLLECTION = 'directoryEdits';
 
-  /* The fields an edit may change, in the order the editor asks them. The key
+  /* The fields an edit may change, in the order the form shows them. The key
      set is a SUBSET of what _firestore.rules allows — selftest.mjs pins the
-     two together BOTH WAYS, exactly as it does for oa-rowedit.js. */
+     two together BOTH WAYS, exactly as it does for oa-rowedit.js.
+
+     `scope` is where a field lives in the ONE-FORM-PER-SCHOOL editor (owner,
+     2026-10-05): a 'school' field is the school's own and is asked ONCE, at
+     the top of the form, for every department in it; a 'dept' field belongs to
+     one department and is asked once per department. Each department is still
+     its own `directoryEdits` document underneath, so the rules, the overlay and
+     the build are exactly what they were; only the asking changed. */
   var FIELDS = [
-    { key: 'institution', label: 'University (the full official name — renaming a row to another university moves it to that card)', max: 220 },
-    { key: 'school', label: 'School (e.g. "Haas School of Business"; leave empty when the department reports to the university itself)', max: 200 },
-    { key: 'department', label: 'Department (the bare field name, e.g. "Operations Management")', max: 260 },
-    { key: 'type', label: 'Type — "Business School" or "University" (a non-business school: engineering, IEOR, information…)', max: 40 },
-    { key: 'country', label: 'Country (the full name, e.g. "United States")', max: 80 },
-    { key: 'deptUrl', label: 'Department page (https://…)', max: 600 },
-    { key: 'facultyUrl', label: 'Faculty directory page (https://…)', max: 600 },
+    { key: 'institution', scope: 'school', label: 'University', max: 220,
+      hint: 'The full official name. Changing it moves every department below to that university’s card.' },
+    { key: 'school', scope: 'school', label: 'School', max: 200,
+      hint: 'For example "Haas School of Business". Leave it empty when the department reports to the university itself.' },
+    { key: 'country', scope: 'school', label: 'Country', max: 80,
+      hint: 'The full name, for example "United States".' },
+    { key: 'type', scope: 'school', label: 'School type', max: 40, kind: 'type' },
+    { key: 'department', scope: 'dept', label: 'Department', max: 260,
+      hint: 'The field name alone, for example "Operations Management".' },
+    { key: 'deptUrl', scope: 'dept', label: 'Department page', max: 600, kind: 'url' },
+    { key: 'facultyUrl', scope: 'dept', label: 'Faculty directory page', max: 600, kind: 'url' },
   ];
+
+  /* The two stored type values and the empty one, as the form offers them:
+     three radio buttons rather than a box that had to be typed exactly. */
+  var TYPE_CHOICES = [
+    { value: 'Business School', label: 'Business school' },
+    { value: 'University', label: 'Non-business school (engineering, IEOR, information…)' },
+    { value: '', label: 'Not recorded' },
+  ];
+
+  /* What a school-level radio group answers when its departments DIFFER and
+     the reader has not chosen: leave each department as it is. Never stored. */
+  var KEEP = '__keep__';
 
   /* What the two stored type values are CALLED on this page. The stored
      vocabulary is the posting form's ("Business School" / "University"); the
@@ -69,6 +92,8 @@
     admin: false,
     list: null,
     host: null,
+    form: null,        // the ONE edit form open on the page, with what is typed in it
+    flash: null,       // "Saved." under the card a form was just saved from
   };
 
   /* ------------------------------------------------------------------ utils */
@@ -185,7 +210,8 @@
   /** The names a row is ONE ROW by: its university, school and department
       through the same canon the posting form applies, so a correction lands
       on the site's one spelling. regroup() folds two rows sharing it into the
-      first, and addRow() refuses to make a second. One definition, so the
+      first, and the add form (and the school form, for a department a user
+      added) refuses to make a second. One definition, so the
       fold and the refusal cannot disagree about what "the same place" is. */
   function rowKeyOf(r) {
     var canon = window.OASchools ? OASchools.canonColumns : null;
@@ -203,11 +229,15 @@
       regroup() folds it into the built row, the built row keeps the id every
       control carries, the add row's values fill the built row's blanks, the
       maintainer's Hide on the built row is undone by the add row standing in
-      for it, and nothing on the page reaches the add document at all. */
-  function existingRow(doc, exceptId) {
+      for it, and nothing on the page reaches the add document at all.
+
+      `rows` is the table to look in: the school form passes the table AS IT
+      WILL BE once its save lands, so a department added by a user cannot be
+      renamed onto another department the same save is renaming too. */
+  function existingRow(doc, exceptId, rows) {
     var key = rowKeyOf({ institution: doc.institution, school: doc.school, department: doc.department });
     if (!key) return null;
-    var rows = overlaid();
+    rows = rows || overlaid();
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i];
       if (exceptId && r.id === exceptId) continue;
@@ -369,7 +399,6 @@
 
   function deptLineHTML(r) {
     var bits = [];
-    var canEdit = !!state.user;
     bits.push('<div class="oa-dir-dept' + (r._hidden ? ' oa-dir-hidden' : '') +
       '" data-dir-row="' + esc(r.id) + '">');
     bits.push('<span class="oa-dir-dname">' +
@@ -389,22 +418,19 @@
     if (r._hidden) {
       bits.push('<span class="oa-dir-gone">Taken down — only you can see this row.</span>');
     }
-    if (canEdit || state.admin) {
+    /* The department row carries the maintainer's own controls only. Editing
+       is the SCHOOL's form now (owner, 2026-10-05), opened from the school's
+       head above: one form shows every field of every department in it. */
+    if (state.admin) {
       var acts = [];
-      if (canEdit) {
-        acts.push('<button type="button" class="oa-jobbtn oa-jobbtn-edit" data-dir-edit="' +
-          esc(r.id) + '">Edit</button>');
-      }
-      if (state.admin) {
-        acts.push(r._hidden
-          ? '<button type="button" class="oa-jobbtn oa-jobbtn-edit" data-dir-restore="' +
-            esc(r.id) + '">Restore</button>'
-          : '<button type="button" class="oa-jobbtn oa-jobbtn-del" data-dir-hide="' +
-            esc(r.id) + '">Hide</button>');
-        if (state.edits[r.id]) {
-          acts.push('<button type="button" class="oa-jobbtn oa-jobbtn-del" data-dir-reset="' +
-            esc(r.id) + '" title="Discard the stored edit and show the committed file’s row">Reset to file</button>');
-        }
+      acts.push(r._hidden
+        ? '<button type="button" class="oa-jobbtn oa-jobbtn-edit" data-dir-restore="' +
+          esc(r.id) + '">Restore</button>'
+        : '<button type="button" class="oa-jobbtn oa-jobbtn-del" data-dir-hide="' +
+          esc(r.id) + '">Hide</button>');
+      if (state.edits[r.id]) {
+        acts.push('<button type="button" class="oa-jobbtn oa-jobbtn-del" data-dir-reset="' +
+          esc(r.id) + '" title="Discard the stored edit and show the committed file’s row">Reset to file</button>');
       }
       bits.push('<span class="oa-dir-acts">' + acts.join('') + '</span>');
     }
@@ -412,17 +438,35 @@
     return bits.join('');
   }
 
+  /** One school section. It is drawn inside a wrapper the edit form is
+      mounted into: while the form is open the read view beside it is hidden,
+      and the form puts it back when it closes. */
   function schoolHTML(card, school) {
     var bits = [];
+    bits.push('<div class="oa-dir-school" data-dir-school="' + esc(schoolKeyOf(school)) + '">');
+    bits.push('<div class="oa-dir-school-view">');
+    var head = [];
     var chip = TYPE_LABEL[school.type];
     if (chip) {
-      bits.push('<span class="oa-dir-chip' +
+      head.push('<span class="oa-dir-chip' +
         (school.type === 'Business School' ? ' is-biz' : ' is-nonbiz') + '">' +
         esc(chip) + '</span>');
     }
+    if (state.user) {
+      head.push('<button type="button" class="oa-jobbtn oa-jobbtn-edit oa-dir-editbtn" data-dir-edit="' +
+        esc(schoolKeyOf(school)) + '" aria-label="' +
+        esc('Edit ' + (school.name || 'the departments with no school recorded') + ', ' + card.institution) +
+        '">Edit school</button>');
+    }
+    if (head.length) bits.push('<div class="oa-dir-schoolhead">' + head.join('') + '</div>');
     for (var i = 0; i < school.rows.length; i++) bits.push(deptLineHTML(school.rows[i]));
+    bits.push('</div></div>');
     return bits.join('');
   }
+
+  /** What a school is called inside its card, for finding it again after a
+      redraw: the regrouping folds a school's name the same way. */
+  function schoolKeyOf(school) { return fold(school.name || ''); }
 
   function cardRows(card) {
     var rows = [];
@@ -452,7 +496,8 @@
       foot.push('<button type="button" class="oa-jobbtn oa-jobbtn-edit" data-dir-add="' +
         esc(card.institution) + '">+ Add a department</button>');
     }
-    rows.push({ label: 'More', html: '<span class="oa-dir-foot">' + foot.join(' · ') + '</span>' });
+    rows.push({ label: 'More', html: '<div class="oa-dir-addhost" data-dir-addhost="1">' +
+      '<span class="oa-dir-foot">' + foot.join(' · ') + '</span></div>' });
     return rows;
   }
 
@@ -488,103 +533,526 @@
     return String(n).slice(0, 120);
   }
 
-  /** The prompt-chain editor — the shape oa-rowedit.js already uses on the
-      archives, because it needs no markup and works identically on a phone.
-      Only what DIFFERS from the committed file is stored, so a field left
-      alone stays the file's to correct later (the rowOverrides discipline). */
-  function editRow(rowId) {
-    var row = findRow(rowId);
-    var base = baseOf(rowId);
-    var e = state.edits[rowId];
-    if (!row) return;
-    if (e && e.add) { editAdd(rowId); return; }
-    if (!base) return;
+  function asText(v) { return v === null || v === undefined ? '' : String(v); }
+  function trim(v) { return asText(v).trim(); }
 
-    var patch = {};
-    var changed = false;
-    var asText = function (v) { return v === null || v === undefined ? '' : String(v); };
-    for (var i = 0; i < FIELDS.length; i++) {
-      var f = FIELDS[i];
-      var got = window.prompt(f.label + ':', asText(row[f.key]));
-      if (got === null) return;                      // cancelled — save nothing
-      got = String(got).trim().slice(0, f.max);
-      if (f.key === 'type' && got && got !== 'Business School' && got !== 'University') {
-        window.alert('Type must be exactly "Business School" or "University" (leave it ' +
-          'empty when unsure). Nothing was saved.');
-        return;
-      }
-      if (got !== asText(row[f.key])) changed = true;
-      if (got !== asText(base[f.key])) patch[f.key] = got;
-    }
-    if (!changed) return;
-    save(rowId, patch, { replace: true });
+  function fieldOf(key) {
+    for (var i = 0; i < FIELDS.length; i++) if (FIELDS[i].key === key) return FIELDS[i];
+    return null;
   }
 
-  /* A user-added row has no committed base, so its whole content is the
-     document: the editor rewrites it rather than diffing against a file. */
-  function editAdd(docId) {
-    var e = state.edits[docId];
-    if (!e) return;
-    var doc = { add: true };
-    for (var i = 0; i < FIELDS.length; i++) {
-      var f = FIELDS[i];
-      var got = window.prompt(f.label + ':', e[f.key] || '');
-      if (got === null) return;
-      got = String(got).trim().slice(0, f.max);
-      if (f.key === 'type' && got && got !== 'Business School' && got !== 'University') {
-        window.alert('Type must be exactly "Business School" or "University". Nothing was saved.');
-        return;
-      }
-      if (got) doc[f.key] = got;
-    }
-    if (!doc.institution) {
-      window.alert('The university name is required. Nothing was saved.');
-      return;
-    }
-    if (refuseClash(doc, docId)) return;
-    save(docId, doc, { replace: true });
+  function findCard(cardId) {
+    for (var i = 0; i < state.cards.length; i++) if (state.cards[i].id === cardId) return state.cards[i];
+    return null;
   }
 
-  /** Say no to a row the table already lists (see existingRow), naming it. */
-  function refuseClash(doc, exceptId) {
-    var clash = existingRow(doc, exceptId);
-    if (!clash) return false;
-    var name = [clash.institution, clash.school, clash.department].filter(Boolean).join(' · ');
-    window.alert('The directory already lists ' + name + '.' +
-      (clash._hidden ? ' That row is hidden; the maintainer can restore it.' : ' Edit that row instead.') +
-      ' Nothing was saved.');
+  function findSchool(card, key) {
+    for (var i = 0; i < card.schools.length; i++) {
+      if (schoolKeyOf(card.schools[i]) === key) return card.schools[i];
+    }
+    return null;
+  }
+
+  /** The card a row lands on once its names are saved — the regrouping's own
+      key, so the "Saved." line is drawn under the card the reader will find
+      the school on, which is another card when the university was renamed. */
+  function cardIdFor(r) {
+    var inst = r.institution || '';
+    if (window.OASchools) {
+      inst = OASchools.canonColumns({ institution: inst, school: r.school || '', unit: r.department || '' }).institution;
+    }
+    return slug(instKey(inst));
+  }
+
+  /* ------------------------------------------------------- the edit form
+
+     ONE FORM PER SCHOOL (owner, 2026-10-05: "I want to be able to edit any
+     field directly when I want to, like one form per school with edit option
+     per field. Currently, when I click edit I have to check all fields one by
+     one"). Edit used to be a chain of seven browser prompts per department, so
+     correcting one link meant pressing OK through six questions first, and
+     giving two departments their school meant fourteen.
+
+     Now Edit school opens ONE form inside the card: the school's own fields
+     (university, school, type, country) once at the top, then each
+     department's name and two links, every box filled in and editable at
+     once. Save writes every department that changed in one batch.
+
+     WHAT IS SAVED is the same thing the prompts saved, per department: only
+     what differs from the committed file, so a field left alone stays the
+     file's to correct later (the rowOverrides discipline). A box the reader
+     did not touch keeps exactly what the row holds now, even where the card
+     showed it tidied (a canonical spelling, a link folded in from a
+     duplicate row): the form never writes what nobody typed.
+
+     A SCHOOL FIELD THE DEPARTMENTS DISAGREE ABOUT is shown empty with the
+     values it has in its placeholder, and left alone it changes nothing;
+     typed into, it sets every department. The type is the same through a
+     fourth radio button, "leave each as it is".
+
+     ONE FORM AT A TIME, and it SURVIVES A REDRAW: the list redraws whenever
+     the sign-in state or the edits change, so what is typed lives in
+     state.form and onCard mounts it again on the new card. */
+
+  var formSeq = 0;
+
+  /* The add form asks for the DEPARTMENT first, since that is what is being
+     added; the university is already filled in from the card. */
+  var ADD_ORDER = ['department', 'institution', 'school', 'deptUrl', 'facultyUrl', 'country', 'type'];
+
+  function dirty(spec) {
+    for (var k in spec.values) {
+      if (!Object.prototype.hasOwnProperty.call(spec.values, k)) continue;
+      if (trim(spec.values[k]) !== trim(spec.shown[k])) return true;
+    }
+    return false;
+  }
+
+  /** Make room for a new form: the one already open is closed, after asking
+      when something has been typed into it. */
+  function claimForm() {
+    if (!state.form) return true;
+    if (dirty(state.form) && !window.confirm('Discard what you typed in the form that is open?')) {
+      var open = document.querySelector('.oa-dir-form');
+      if (open) focusFirst(open);
+      return false;
+    }
+    unmountForm();
+    state.form = null;
     return true;
   }
 
-  function addRow(institution) {
-    if (!state.user) return;
-    var docId = 'add-' + Date.now().toString(36) + '-' +
-      Math.random().toString(36).slice(2, 8);
-    var doc = { add: true };
-    if (institution) doc.institution = institution;
-    for (var i = 0; i < FIELDS.length; i++) {
-      var f = FIELDS[i];
-      if (f.key === 'institution' && institution) {
-        var kept = window.prompt(f.label + ':', institution);
-        if (kept === null) return;
-        doc.institution = String(kept).trim().slice(0, f.max) || institution;
-        continue;
+  function openSchoolForm(li, card, key) {
+    var school = findSchool(card, key);
+    if (!school || !school.rows.length || !state.user) return;
+    if (!claimForm()) return;
+    var spec = {
+      kind: 'school', cardId: card.id, school: key, seq: ++formSeq,
+      title: school.name || '', institution: card.institution,
+      rows: [], shown: {}, mixed: {}, campuses: [],
+    };
+    school.rows.forEach(function (r, i) {
+      spec.rows.push({
+        id: r.id,
+        added: !!(state.edits[r.id] && state.edits[r.id].add),
+        hidden: !!r._hidden,
+      });
+      FIELDS.forEach(function (f) {
+        if (f.scope === 'dept') spec.shown['r' + i + '.' + f.key] = asText(r[f.key]);
+      });
+      (r.countries || []).forEach(function (c) {
+        if (spec.campuses.indexOf(c) === -1) spec.campuses.push(c);
+      });
+    });
+    FIELDS.forEach(function (f) {
+      if (f.scope !== 'school') return;
+      var seen = [];
+      school.rows.forEach(function (r) {
+        var v = asText(r[f.key]);
+        if (seen.indexOf(v) === -1) seen.push(v);
+      });
+      var name = 's.' + f.key;
+      if (seen.length === 1) {
+        spec.shown[name] = seen[0];
+      } else {
+        spec.shown[name] = f.kind === 'type' ? KEEP : '';
+        spec.mixed[name] = seen;
       }
-      var got = window.prompt(f.label + ':', '');
-      if (got === null) return;
-      got = String(got).trim().slice(0, f.max);
-      if (f.key === 'type' && got && got !== 'Business School' && got !== 'University') {
-        window.alert('Type must be exactly "Business School" or "University". Nothing was saved.');
+    });
+    spec.values = copyOf(spec.shown);
+    state.form = spec;
+    mountForm(li, true);
+  }
+
+  function openAddForm(li, card) {
+    if (!state.user) return;
+    if (!claimForm()) return;
+    var spec = {
+      kind: 'add', cardId: card.id, seq: ++formSeq,
+      institution: card.institution,
+      schools: card.schools.map(function (s) { return s.name; }).filter(Boolean),
+      rows: [], shown: {}, mixed: {}, campuses: [],
+    };
+    FIELDS.forEach(function (f) { spec.shown['a.' + f.key] = ''; });
+    spec.shown['a.institution'] = card.institution;
+    if (card.countries.length === 1) spec.shown['a.country'] = card.countries[0];
+    spec.values = copyOf(spec.shown);
+    state.form = spec;
+    mountForm(li, true);
+  }
+
+  function copyOf(o) {
+    var out = {};
+    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) out[k] = o[k];
+    return out;
+  }
+
+  function fid(spec, name) { return 'oa-dirf' + spec.seq + '-' + name.replace(/\./g, '-'); }
+
+  function textFieldHTML(spec, name, f, opts) {
+    opts = opts || {};
+    var id = fid(spec, name);
+    var mixed = spec.mixed[name];
+    var hint = f.hint || '';
+    var ph = '';
+    if (spec.kind === 'add' && f.key === 'institution') hint = 'The full official name.';
+    if (mixed) {
+      ph = 'Differs: ' + mixed.map(function (v) { return v || '(empty)'; }).join(' / ');
+      hint = 'The departments below differ here. Leave it empty to keep each as it is, or type to set it for all of them.';
+    } else if (f.key === 'country' && !spec.shown[name] && spec.campuses.length) {
+      ph = 'Several campuses: ' + spec.campuses.join(', ');
+      hint = 'Leave it empty to keep every campus country, or type one country to replace them.';
+    } else if (f.kind === 'url') {
+      ph = 'https://';
+    }
+    return '<div class="oa-dir-field' + (opts.wide ? ' is-wide' : '') + '">' +
+      '<label for="' + id + '">' + esc(f.label) + '</label>' +
+      '<input type="text" id="' + id + '" data-f="' + esc(name) + '" value="' +
+        esc(spec.values[name]) + '" maxlength="' + f.max + '" autocomplete="off"' +
+        ' spellcheck="' + (f.kind === 'url' ? 'false' : 'true') + '"' +
+        (f.kind === 'url' ? ' inputmode="url"' : '') +
+        (opts.list ? ' list="' + opts.list + '"' : '') +
+        (ph ? ' placeholder="' + esc(ph) + '"' : '') +
+        (hint ? ' aria-describedby="' + id + '-hint"' : '') + '>' +
+      (hint ? '<p class="oa-dir-hint" id="' + id + '-hint">' + esc(hint) + '</p>' : '') +
+      '</div>';
+  }
+
+  function typeFieldHTML(spec, name, f) {
+    var id = fid(spec, name);
+    var mixed = spec.mixed[name];
+    var choices = TYPE_CHOICES.slice();
+    if (mixed) {
+      choices.push({ value: KEEP, label: 'Leave each department as it is (' +
+        mixed.map(function (v) { return TYPE_LABEL[v] || 'not recorded'; }).join(', ') + ')' });
+    }
+    var bits = ['<div class="oa-dir-field is-wide" role="radiogroup" aria-labelledby="' + id + '-l">',
+      '<span class="oa-dir-label" id="' + id + '-l">' + esc(f.label) + '</span>',
+      '<div class="oa-dir-radios">'];
+    choices.forEach(function (c) {
+      bits.push('<label class="oa-dir-radio"><input type="radio" name="' + id + '" data-f="' +
+        esc(name) + '" value="' + esc(c.value) + '"' +
+        (spec.values[name] === c.value ? ' checked' : '') + '> <span>' + esc(c.label) + '</span></label>');
+    });
+    bits.push('</div></div>');
+    return bits.join('');
+  }
+
+  function fieldHTML(spec, name, f, opts) {
+    return f.kind === 'type' ? typeFieldHTML(spec, name, f) : textFieldHTML(spec, name, f, opts);
+  }
+
+  function formHTML(spec) {
+    var bits = [];
+    var id = fid(spec, 'form');
+    bits.push('<form class="oa-dir-form" data-dir-form="' + spec.kind + '" novalidate aria-labelledby="' + id + '-t">');
+    if (spec.kind === 'add') {
+      bits.push('<p class="oa-dir-form-title" id="' + id + '-t">Add a department to ' + esc(spec.institution) + '</p>');
+      bits.push('<p class="oa-dir-form-lede">Fill in what you know and press Save. Every visitor sees the new department straight away, with your name beside it.</p>');
+      var listId = fid(spec, 'schools');
+      bits.push('<div class="oa-dir-grid">');
+      ADD_ORDER.forEach(function (key) {
+        var f = fieldOf(key);
+        bits.push(fieldHTML(spec, 'a.' + key, f, { list: key === 'school' && spec.schools.length ? listId : '' }));
+      });
+      bits.push('</div>');
+      if (spec.schools.length) {
+        bits.push('<datalist id="' + listId + '">' + spec.schools.map(function (n) {
+          return '<option value="' + esc(n) + '">';
+        }).join('') + '</datalist>');
+      }
+    } else {
+      bits.push('<p class="oa-dir-form-title" id="' + id + '-t">Editing ' +
+        esc(spec.title || 'the departments with no school recorded') + '</p>');
+      bits.push('<p class="oa-dir-form-lede">Change any box, then press Save. Only what you change is saved, with your name and today’s date.</p>');
+      var hid = fid(spec, 'school');
+      bits.push('<div class="oa-dir-fgroup" role="group" aria-labelledby="' + hid + '-h">');
+      bits.push('<p class="oa-dir-fgroup-h" id="' + hid + '-h">The school' +
+        '<span class="oa-dir-fgroup-note">' + (spec.rows.length === 1
+          ? 'for the department below' : 'for all ' + spec.rows.length + ' departments below') + '</span></p>');
+      bits.push('<div class="oa-dir-grid">');
+      FIELDS.forEach(function (f) {
+        if (f.scope === 'school') bits.push(fieldHTML(spec, 's.' + f.key, f));
+      });
+      bits.push('</div></div>');
+      spec.rows.forEach(function (sr, i) {
+        var gid = fid(spec, 'r' + i);
+        var shownName = trim(spec.shown['r' + i + '.department']);
+        bits.push('<div class="oa-dir-fgroup" role="group" aria-labelledby="' + gid + '-h">');
+        bits.push('<p class="oa-dir-fgroup-h" id="' + gid + '-h">' +
+          (spec.rows.length > 1 ? 'Department ' + (i + 1) + ' of ' + spec.rows.length : 'The department') +
+          (shownName ? '<span class="oa-dir-fgroup-note">' + esc(shownName) + '</span>' : '') +
+          (sr.added ? '<span class="oa-dir-fgroup-note is-new">added by a user</span>' : '') +
+          (sr.hidden ? '<span class="oa-dir-fgroup-note is-gone">hidden from visitors</span>' : '') +
+          '</p>');
+        bits.push('<div class="oa-dir-grid">');
+        FIELDS.forEach(function (f) {
+          if (f.scope === 'dept') bits.push(fieldHTML(spec, 'r' + i + '.' + f.key, f));
+        });
+        bits.push('</div></div>');
+      });
+    }
+    /* always in the document, so a screen reader announces the first words
+       put into it: a live region that appears WITH its message is often
+       not announced at all */
+    bits.push('<p class="oa-dir-form-msg" role="alert"></p>');
+    bits.push('<div class="oa-dir-form-acts">' +
+      '<button type="submit" class="v3-btn primary oa-dir-save">' +
+        (spec.kind === 'add' ? 'Add the department' : 'Save changes') + '</button>' +
+      '<button type="button" class="v3-btn ghost oa-dir-cancel">Cancel</button>' +
+      '</div>');
+    bits.push('</form>');
+    return bits.join('');
+  }
+
+  /** Where in a card the open form belongs: the school's own section, or the
+      foot of the card for a department being added. */
+  function formHostIn(li, spec) {
+    if (spec.kind === 'add') return li.querySelector('[data-dir-addhost]');
+    var hosts = li.querySelectorAll('[data-dir-school]');
+    for (var i = 0; i < hosts.length; i++) {
+      if (hosts[i].getAttribute('data-dir-school') === spec.school) return hosts[i];
+    }
+    return null;
+  }
+
+  function mountForm(li, focusIt) {
+    var spec = state.form;
+    if (!spec || !li) return;
+    var host = formHostIn(li, spec);
+    if (!host) return;
+    var old = host.querySelector('.oa-dir-form');
+    if (old) old.parentNode.removeChild(old);
+    var view = host.querySelector('.oa-dir-school-view');
+    if (view) view.hidden = true;
+    var addBtn = host.querySelector('[data-dir-add]');
+    if (addBtn) addBtn.hidden = true;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = formHTML(spec);
+    var form = wrap.firstChild;
+    host.appendChild(form);
+    wireForm(form, spec, li);
+    if (focusIt) focusFirst(form);
+  }
+
+  function focusFirst(form) {
+    var first = form.querySelector('input[type="text"], input[type="radio"]:checked');
+    if (first) {
+      try { first.focus({ preventScroll: false }); } catch (e) { first.focus(); }
+    }
+  }
+
+  function unmountForm() {
+    var forms = document.querySelectorAll('.oa-dir-form');
+    for (var i = 0; i < forms.length; i++) {
+      var host = forms[i].parentNode;
+      host.removeChild(forms[i]);
+      var view = host.querySelector('.oa-dir-school-view');
+      if (view) view.hidden = false;
+      var addBtn = host.querySelector('[data-dir-add]');
+      if (addBtn) addBtn.hidden = false;
+    }
+  }
+
+  function wireForm(form, spec, li) {
+    function take(ev) {
+      var t = ev.target;
+      var name = t && t.getAttribute && t.getAttribute('data-f');
+      if (!name) return;
+      if (t.type === 'radio' && !t.checked) return;
+      spec.values[name] = t.value;
+      if (t.getAttribute('aria-invalid')) t.removeAttribute('aria-invalid');
+    }
+    form.addEventListener('input', take);
+    form.addEventListener('change', take);
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      submitForm(form, spec);
+    });
+    form.querySelector('.oa-dir-cancel').addEventListener('click', function () {
+      cancelForm(li, spec);
+    });
+    form.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' || ev.key === 'Esc') {
+        ev.preventDefault();
+        cancelForm(li, spec);
+      }
+    });
+  }
+
+  function cancelForm(li, spec) {
+    if (state.form !== spec) return;
+    if (dirty(spec) && !window.confirm('Discard the changes you typed?')) return;
+    unmountForm();
+    state.form = null;
+    // the keyboard goes back to the button that opened the form
+    var back = spec.kind === 'add'
+      ? li.querySelector('[data-dir-add]')
+      : (function () {
+        var bs = li.querySelectorAll('[data-dir-edit]');
+        for (var i = 0; i < bs.length; i++) {
+          if (bs[i].getAttribute('data-dir-edit') === spec.school) return bs[i];
+        }
+        return null;
+      })();
+    if (back) back.focus();
+  }
+
+  function say(form, text, isErr, field) {
+    var msg = form.querySelector('.oa-dir-form-msg');
+    msg.textContent = text;
+    msg.classList.toggle('is-err', !!isErr);
+    if (field) {
+      var el = form.querySelector('[data-f="' + field + '"]');
+      if (el) {
+        el.setAttribute('aria-invalid', 'true');
+        el.focus();
+      }
+    }
+  }
+
+  /** What a typed box must be before anything is saved. Only a box the reader
+      CHANGED is held to it, so a link stored long ago in some other shape does
+      not stop a correction to the school's name. */
+  function invalid(spec, name) {
+    var f = fieldOf(name.split('.')[1]);
+    var v = trim(spec.values[name]);
+    if (!f || trim(spec.shown[name]) === v) return '';
+    if (f.key === 'institution' && !v) return 'The university needs a name.';
+    if (f.kind === 'url' && v && !/^https?:\/\/\S+$/i.test(v)) {
+      return f.label + ' must be a web address starting with https://';
+    }
+    return '';
+  }
+
+  /** The school form → one entry per department that changed. */
+  function planSchool(spec) {
+    var names = Object.keys(spec.values);
+    for (var n = 0; n < names.length; n++) {
+      var bad = invalid(spec, names[n]);
+      if (bad) return { error: bad, field: names[n] };
+    }
+    var finals = [];
+    spec.rows.forEach(function (sr, i) {
+      var cur = findRow(sr.id);
+      if (!cur) return;
+      var fin = {};
+      FIELDS.forEach(function (f) {
+        var name = (f.scope === 'school' ? 's.' : 'r' + i + '.') + f.key;
+        var typed = spec.values[name];
+        fin[f.key] = (typed === KEEP || trim(typed) === trim(spec.shown[name]))
+          ? asText(cur[f.key])
+          : trim(typed).slice(0, f.max);
+      });
+      finals.push({ id: sr.id, added: sr.added, cur: cur, fin: fin, i: i });
+    });
+
+    /* A department a user ADDED may not be renamed onto a place the table
+       already lists: the two would fold into one card row and the added
+       document would be out of reach. Checked against the table as it will be
+       once this save lands. A built row renamed onto another IS the merge
+       tool, as it always was. */
+    var after = overlaid().map(function (r) {
+      for (var j = 0; j < finals.length; j++) {
+        if (finals[j].id === r.id) {
+          var c = copyOf(r);
+          FIELDS.forEach(function (f) { c[f.key] = finals[j].fin[f.key]; });
+          return c;
+        }
+      }
+      return r;
+    });
+    for (var k = 0; k < finals.length; k++) {
+      if (!finals[k].added) continue;
+      var clash = existingRow(finals[k].fin, finals[k].id, after);
+      if (clash) return { error: clashText(clash), field: 'r' + finals[k].i + '.department' };
+    }
+
+    var entries = [];
+    finals.forEach(function (x) {
+      var changed = FIELDS.some(function (f) { return x.fin[f.key] !== asText(x.cur[f.key]); });
+      if (!changed) return;
+      if (x.added) {
+        var doc = { add: true };
+        FIELDS.forEach(function (f) { if (x.fin[f.key]) doc[f.key] = x.fin[f.key]; });
+        entries.push({ rowId: x.id, patch: doc });
         return;
       }
-      if (got) doc[f.key] = got;
+      var base = baseOf(x.id);
+      if (!base) return;
+      var patch = {};
+      FIELDS.forEach(function (f) {
+        if (x.fin[f.key] !== asText(base[f.key])) patch[f.key] = x.fin[f.key];
+      });
+      entries.push({ rowId: x.id, patch: patch });
+    });
+    return { entries: entries, cardId: finals.length ? cardIdFor(finals[0].fin) : spec.cardId };
+  }
+
+  /** The add form → the one new department. */
+  function planAdd(spec) {
+    var doc = { add: true };
+    var names = Object.keys(spec.values);
+    for (var n = 0; n < names.length; n++) {
+      var bad = invalid(spec, names[n]);
+      if (bad) return { error: bad, field: names[n] };
     }
-    if (!doc.institution) {
-      window.alert('The university name is required. Nothing was saved.');
+    FIELDS.forEach(function (f) {
+      var v = trim(spec.values['a.' + f.key]).slice(0, f.max);
+      if (v) doc[f.key] = v;
+    });
+    if (!doc.institution) return { error: 'The university needs a name.', field: 'a.institution' };
+    if (!doc.department && !doc.school) {
+      return { error: 'Name the department you are adding (or at least its school).', field: 'a.department' };
+    }
+    var clash = existingRow(doc, '');
+    if (clash) return { error: clashText(clash), field: 'a.department' };
+    var docId = 'add-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    return { entries: [{ rowId: docId, patch: doc }], cardId: cardIdFor(doc) };
+  }
+
+  /** Say no to a row the table already lists (see existingRow), naming it. */
+  function clashText(clash) {
+    var name = [clash.institution, clash.school, clash.department].filter(Boolean).join(' · ');
+    return 'The directory already lists ' + name + '.' +
+      (clash._hidden ? ' That row is hidden; the maintainer can restore it.' : ' Edit that row instead.') +
+      ' Nothing was saved.';
+  }
+
+  function submitForm(form, spec) {
+    if (state.form !== spec || spec.saving) return;
+    var plan = spec.kind === 'add' ? planAdd(spec) : planSchool(spec);
+    if (plan.error) { say(form, plan.error, true, plan.field); return; }
+    if (!plan.entries.length) {
+      unmountForm();
+      state.form = null;
+      flash(spec.cardId, 'Nothing was changed, so nothing was saved.');
+      refresh();
       return;
     }
-    if (refuseClash(doc, '')) return;
-    save(docId, doc, { replace: true });
+    var btns = form.querySelectorAll('button');
+    for (var b = 0; b < btns.length; b++) btns[b].disabled = true;
+    say(form, 'Saving…', false);
+    spec.saving = true;   // a second press, or the form redrawn mid-save, sends nothing twice
+    save(plan.entries).then(function () {
+      if (state.form === spec) state.form = null;
+      flash(plan.cardId, spec.kind === 'add'
+        ? 'Added. Every visitor now sees the new department.'
+        : 'Saved. Every visitor now sees the change.');
+      refresh();
+    }, function (err) {
+      spec.saving = false;
+      /* the form on screen, which a redraw during the save may have replaced */
+      var live = (form.isConnected ? form : document.querySelector('.oa-dir-form')) || form;
+      btns = live.querySelectorAll('button');
+      for (var b2 = 0; b2 < btns.length; b2++) btns[b2].disabled = false;
+      say(live, refusedText(err, false), true);
+      if (window.console) console.error('oa-directory:', err);
+    });
+  }
+
+  function flash(cardId, text) {
+    state.flash = { cardId: cardId, text: text, until: Date.now() + 20000, focus: true };
   }
 
   function hideRow(rowId, hidden) {
@@ -592,7 +1060,8 @@
     if (hidden && !window.confirm('Hide this row from every visitor?\n\nNothing is ' +
       'deleted — it stays in the data, faded for you, and Restore puts it back. ' +
       'Hiding the lesser copy is how two duplicate rows are merged.')) return;
-    save(rowId, { hidden: hidden }, { merge: true });
+    save([{ rowId: rowId, patch: { hidden: hidden }, merge: true }])
+      .then(function () { refresh(); }, saveFailed);
   }
 
   function resetRow(rowId) {
@@ -607,43 +1076,63 @@
     })['catch'](function (err) { saveFailed(err); });
   }
 
-  function save(rowId, patch, opts) {
-    if (!state.user) return;
-    var doc = {};
-    var had = state.edits[rowId];
-    if (opts && opts.merge && had) {
-      for (var a in had) if (Object.prototype.hasOwnProperty.call(had, a)) doc[a] = had[a];
+  /** Write every entry — { rowId, patch, merge } — as ONE batch: a school
+      form changing four departments either lands whole or not at all, never
+      leaving the card half renamed. Each document is the same full set() it
+      always was, judged by the rules on its own. */
+  function save(entries) {
+    if (!state.user) return Promise.reject(new Error('signed out'));
+    var docs = [];
+    var now = Date.now();
+    for (var i = 0; i < entries.length; i++) {
+      var rowId = entries[i].rowId;
+      var patch = entries[i].patch;
+      var doc = {};
+      var had = state.edits[rowId];
+      if (entries[i].merge && had) {
+        for (var a in had) if (Object.prototype.hasOwnProperty.call(had, a)) doc[a] = had[a];
+      }
+      for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) doc[k] = patch[k];
+      /* hidden is the maintainer's mark and survives an ordinary edit: a user
+         correcting a hidden row must not silently republish it.
+
+         CARRIED WHENEVER THE ROW HAS THE KEY, not only when it is TRUE. This is
+         a full set(), so a field left out of `doc` is a field deleted from the
+         document, and the rules read the RESULTING document: on a row the
+         maintainer had RESTORED, `hidden` is stored as false, `had.hidden` is
+         falsy, the key was dropped, and the write is refused. Omitting it is
+         changing it, which is the maintainer's alone. */
+      if (had && ('hidden' in had) && !('hidden' in patch)) doc.hidden = !!had.hidden;
+      doc.rowId = rowId;
+      doc.by = state.user.uid;
+      doc.name = editorName();
+      doc.t = now;
+      docs.push(doc);
     }
-    for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) doc[k] = patch[k];
-    /* hidden is the maintainer's mark and survives an ordinary edit: a user
-       correcting a hidden row must not silently republish it.
-
-       CARRIED WHENEVER THE ROW HAS THE KEY, not only when it is TRUE. This is
-       a full set(), so a field left out of `doc` is a field deleted from the
-       document, and the rules read the RESULTING document: on a row the
-       maintainer had RESTORED, `hidden` is stored as false, `had.hidden` is
-       falsy, the key was dropped, and the write is refused. Omitting it is
-       changing it, which is the maintainer's alone. */
-    if (had && ('hidden' in had) && !('hidden' in patch)) doc.hidden = !!had.hidden;
-    doc.rowId = rowId;
-    doc.by = state.user.uid;
-    doc.name = editorName();
-    doc.t = Date.now();
-
-    OAFB.ready().then(function (fb) {
-      return fb.firestore().collection(COLLECTION).doc(rowId).set(doc);
+    return OAFB.ready().then(function (fb) {
+      var db = fb.firestore();
+      var batch = db.batch();
+      docs.forEach(function (d) { batch.set(db.collection(COLLECTION).doc(d.rowId), d); });
+      return batch.commit();
     }).then(function () {
-      state.edits[rowId] = doc;
-      refresh();
-    })['catch'](function (err) { saveFailed(err); });
+      docs.forEach(function (d) { state.edits[d.rowId] = d; });
+    });
+  }
+
+  /** The words for a write that did not land. It names no cause the page
+      cannot know: a refusal is the site's answer, said as one. */
+  function refusedText(err, adminAction) {
+    if (err && err.code === 'permission-denied') {
+      return adminAction
+        ? 'That could not be saved. Hiding, restoring and resetting a row are the ' +
+          'maintainer’s alone; if you are the maintainer, please reload the page and try once more.'
+        : 'The site did not accept this change, so nothing was saved. Please reload the page and try once more.';
+    }
+    return 'We could not save that, so nothing was saved. Please check your connection and try again.';
   }
 
   function saveFailed(err) {
-    window.alert(err && err.code === 'permission-denied'
-      ? 'That could not be saved. Only the maintainer may hide, restore or reset a row ' +
-        '— and if this was an ordinary edit, the updated Firestore rules have not ' +
-        'been published yet.'
-      : 'We could not save that. Please check your connection and try again.');
+    window.alert(refusedText(err, true));
     if (window.console) console.error('oa-directory:', err);
   }
 
@@ -665,32 +1154,58 @@
   /* ------------------------------------------------------------- mount */
 
   function onCard(li, card) {
-    /* the attribution line the owner asked for — on EVERY card that has one */
+    /* THE BYLINE the owner asked for, on EVERY card that has one: who last
+       updated it and when. An edit made here sets it, and so does a job
+       posting made through the site for one of the card's departments
+       (assets/oa-uniinfo.js, owner 2026-10-05), since a posting updates the
+       directory too. */
     if (card.edited && card.edited.t) {
       var p = document.createElement('p');
       p.className = 'oa-dir-edited';
-      p.textContent = 'Last edited by ' + (card.edited.name || 'a registered user') +
+      p.textContent = 'Last updated by ' + (card.edited.name || 'a registered user') +
         ' on ' + fmtStamp(card.edited.t);
       li.appendChild(p);
     } else if (state.user) {
       var q = document.createElement('p');
       q.className = 'oa-dir-edited is-never';
-      q.textContent = 'Not edited yet — spot something wrong? Open the card and press Edit.';
+      q.textContent = 'Not updated yet. Spot something wrong? Open the card and press Edit school.';
       li.appendChild(q);
+    }
+
+    /* "Saved." under the card a form was just saved from, for a while, and
+       the keyboard on it the first time it is drawn, so a keyboard reader is
+       not left on a form that is no longer there */
+    var fl = state.flash;
+    if (fl && fl.cardId === card.id && Date.now() < fl.until) {
+      var note = document.createElement('p');
+      note.className = 'oa-dir-saved';
+      note.setAttribute('role', 'status');
+      note.setAttribute('tabindex', '-1');
+      note.textContent = fl.text;
+      li.appendChild(note);
+      if (fl.focus) {
+        fl.focus = false;
+        setTimeout(function () { if (note.isConnected) note.focus(); }, 0);
+      }
+    }
+
+    /* the form open on this card comes back on every redraw, with what was
+       typed in it */
+    if (state.form && state.form.cardId === card.id) {
+      if (state.user) mountForm(li, false);
+      else state.form = null;
     }
 
     if (li.getAttribute('data-dir-wired')) return;
     li.setAttribute('data-dir-wired', '1');
     li.addEventListener('click', function (ev) {
-      var t = ev.target;
-      while (t && t !== li && !t.getAttribute) t = t.parentNode;
       // walk up from the click to the nearest control carrying a data-dir-* verb
-      var node = t;
+      var node = ev.target;
       while (node && node !== li) {
         if (node.getAttribute) {
-          if (node.getAttribute('data-dir-edit')) {
+          if (node.hasAttribute('data-dir-edit')) {
             ev.preventDefault(); ev.stopPropagation();
-            editRow(node.getAttribute('data-dir-edit')); return;
+            openSchoolForm(li, card, node.getAttribute('data-dir-edit')); return;
           }
           if (node.getAttribute('data-dir-hide')) {
             ev.preventDefault(); ev.stopPropagation();
@@ -704,10 +1219,11 @@
             ev.preventDefault(); ev.stopPropagation();
             resetRow(node.getAttribute('data-dir-reset')); return;
           }
-          if (node.getAttribute('data-dir-add') !== null && node.hasAttribute('data-dir-add')) {
+          if (node.hasAttribute('data-dir-add')) {
             ev.preventDefault(); ev.stopPropagation();
-            addRow(node.getAttribute('data-dir-add')); return;
+            openAddForm(li, card); return;
           }
+          if (node.tagName === 'FORM') return;   // a press inside the open form is the form's
         }
         node = node.parentNode;
       }

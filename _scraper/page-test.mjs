@@ -1855,6 +1855,77 @@ for (const [name, expect] of [
   eq(prefilled.editDoc.rowId, DS_ROW,
     'v3 post-a-job: \u2026as a MERGE onto the row\u2019s own document, where the page reads it');
 
+  /* -- a posting UPDATES its department's card (owner, 2026-10-05) ---------
+
+     The card says who last updated it and when, so the byline is filed for
+     EVERY posting, not only for one whose department link was corrected: the
+     link is left here exactly as the records filled it, and the document must
+     still name the poster and keep the earlier link (a MERGE). The faculty
+     page is the new optional box beside it, filed because it was changed. */
+  const bylined = await onSite('post-a-job.html', {
+    user: keptUser,
+    docs: [KEPT_PROFILE, { path: 'directoryEdits/' + DS_ROW, data: {
+      rowId: DS_ROW, by: 'someone-else', name: 'A. User', t: 5,
+      deptUrl: 'https://edited.example/ds',
+    } }],
+  }, async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.fill('#f-institution', 'INSEAD');
+    await q.waitForFunction(() => document.getElementById('f-school').value !== '',
+      null, { timeout: 8000 });
+    await q.fill('#f-unit', 'Decision Sciences');
+    await q.waitForFunction(() => document.getElementById('f-deptUrl').value !== '',
+      null, { timeout: 8000 });
+    const linkKept = await q.$eval('#f-deptUrl', (n) => n.value);
+    await q.fill('#f-facultyUrl', 'not a link');
+    await q.fill('#f-country', 'France');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.check('input[name="levels"][value="Assistant Professor"]');
+    await q.check('input[name="characteristics"][value="PhD"]');
+    await q.check('#f-untilFilled');
+    await q.fill('#f-firstName', 'Kon');
+    await q.fill('#f-lastName', 'Stouras');
+    await q.fill('#f-email', 'kon@example.edu');
+    await q.fill('#f-chairName', 'Chair Person');
+    await q.fill('#f-chairEmail', 'chair@example.edu');
+    await q.click('#oa-submit');
+    await q.waitForTimeout(300);
+    const refused = {
+      invalid: await q.$eval('#f-facultyUrl', (n) => n.getAttribute('aria-invalid')),
+      sent: await q.evaluate(() => Object.keys(window.__fb.dump()).some((k) => k.startsWith('jobSubmissions/'))),
+    };
+    await q.fill('#f-facultyUrl', 'https://faculty.example/ds');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    await q.waitForFunction((row) => {
+      const d = window.__fb.dump()['directoryEdits/' + row];
+      return !!d && d.t !== 5;
+    }, DS_ROW, { timeout: 8000 });
+    return {
+      linkKept, refused,
+      editDoc: await q.evaluate((row) => window.__fb.dump()['directoryEdits/' + row], DS_ROW),
+      sub: await q.evaluate(() => {
+        const d = window.__fb.dump();
+        return d[Object.keys(d).find((k) => k.startsWith('jobSubmissions/'))];
+      }),
+    };
+  });
+  eq(bylined.linkKept, 'https://edited.example/ds',
+    'v3 post-a-job: (the link is left as the records filled it)');
+  eq(bylined.refused.invalid, 'true',
+    'v3 post-a-job: a faculty page that is not a web address is refused where the poster can fix it');
+  eq(bylined.refused.sent, false, 'v3 post-a-job: \u2026and nothing is sent');
+  eq(bylined.editDoc.by, KEPT,
+    'v3 post-a-job: an UNCHANGED link still files the byline: the card says the poster last updated it');
+  ok(bylined.editDoc.name && bylined.editDoc.name !== 'A. User' && bylined.editDoc.t > 5,
+    `v3 post-a-job: \u2026by name and with today's date ("${bylined.editDoc.name}")`);
+  eq(bylined.editDoc.deptUrl, 'https://edited.example/ds',
+    'v3 post-a-job: \u2026and the link already on record is kept, since the write is a MERGE');
+  eq(bylined.editDoc.facultyUrl, 'https://faculty.example/ds',
+    'v3 post-a-job: the faculty page the poster added is filed into the directory');
+  ok(bylined.sub && !('facultyUrl' in bylined.sub) && !('deptUrl' in bylined.sub),
+    'v3 post-a-job: \u2026and neither link joins the posting itself');
+
   /* -- a pre-fill mark never outlives its value (the CI race) --------------
 
      The failure the first CI run caught, made deterministic: the records
@@ -4189,7 +4260,7 @@ for (const [pageName, listSel] of [
   eq(anon.controls, 0, 'directory: a signed-out visitor is offered no edit control');
   ok(anon.firstRow, 'directory: every department row carries the id an edit is keyed on');
 
-  // a REGISTERED USER: Edit on every row, Add on every card, the attribution
+  // a REGISTERED USER: Edit school on every school, Add on every card, the attribution
   // line — and none of the maintainer's controls
   /* the fixture name must be one canonUnit() leaves alone — a "…Department"
      suffix is a wrapper word the canon strips, which is correct on the page
@@ -4219,7 +4290,7 @@ for (const [pageName, listSel] of [
     'directory: a registered user may edit any row and add a department');
   eq(asUser.adminOnly, 0, 'directory: Hide and Reset stay the maintainer\'s alone');
   eq(asUser.lastEditedShown, false, 'directory: …and so does the Last-edited filter');
-  ok(/Last edited by Test Editor on /.test(asUser.note),
+  ok(/Last updated by Test Editor on /.test(asUser.note),
     `directory: the card says who last edited it and when ("${asUser.note.trim()}")`);
   ok(asUser.corrected,
     'directory: the correction is what every visitor reads — overlaid at read time');
@@ -4244,6 +4315,202 @@ for (const [pageName, listSel] of [
   ok(asAdmin.restores > 0 && asAdmin.hiddenRows > 0,
     'directory: a hidden row stays visible TO THE MAINTAINER, faded, with Restore');
   await p.close();
+}
+
+/* ------------------------------ the Universities directory: one form per school
+
+   Owner, 2026-10-05: "I want to be able to edit any field directly when I want
+   to like one form per school with edit option per field. Currently, when I
+   click edit I have to check all fields one by one." Edit was a chain of seven
+   browser prompts per department. It is ONE form inside the card now, driven
+   here through the fake Firebase shim so a save really lands somewhere a check
+   can read: the form drawn whole and no dialog, a school typed ONCE written to
+   every department as only that field, a bad link refused with nothing
+   written, Escape asking first, typing surviving a redraw, the add form, a
+   duplicate refused, and at 390px the standard's own numbers.
+
+   THE FIXTURE IS FOUND, NOT NAMED: the first school on page one with two or
+   more departments, none of them added by a user, so the check does not move
+   with the corpus. */
+
+{
+  const DF_NEW_SCHOOL = 'Testing School of Forms';
+  const { ctx, page: d, errors } = await signedInPage('universities.html', { selector: '#oa-dir .oa-card' });
+  const dialogs = [];
+  d.on('dialog', (x) => { dialogs.push(x.message()); x.accept(); });
+  await d.waitForTimeout(300);
+
+  /* a card on page one with a school of two or more departments */
+  const pick = await d.evaluate(() => {
+    const cards = [...document.querySelectorAll('#oa-dir .oa-card')];
+    for (const li of cards) {
+      for (const sec of li.querySelectorAll('[data-dir-school]')) {
+        const rows = sec.querySelectorAll('[data-dir-row]');
+        if (rows.length >= 2 && !sec.querySelector('.oa-dir-new')) {
+          return { card: li.id, school: sec.getAttribute('data-dir-school'),
+            rows: [...rows].map((r) => r.getAttribute('data-dir-row')) };
+        }
+      }
+    }
+    return null;
+  });
+  ok(!!pick, 'directory form: a card on page one has a school with two departments to edit');
+  if (pick) {
+    const card = '#' + pick.card;
+    const editBtn = `${card} [data-dir-edit="${pick.school}"]`;
+    await d.click(`${card} .oa-card-head`);
+    await d.waitForSelector(editBtn, { state: 'visible', timeout: 5000 });
+    eq(await d.$$eval(`${card} [data-dir-row] [data-dir-edit]`, (n) => n.length), 0,
+      'directory form: a department row carries no Edit of its own');
+    await d.click(editBtn);
+    await d.waitForSelector(`${card} .oa-dir-form`, { timeout: 5000 });
+    const shape = await d.evaluate((c) => {
+      const f = document.querySelector(c + ' .oa-dir-form');
+      const named = (n) => f.querySelector(`[data-f="${n}"]`);
+      return {
+        school: ['s.institution', 's.school', 's.country'].every((n) => !!named(n)),
+        types: f.querySelectorAll('input[type="radio"][data-f="s.type"]').length,
+        deptBoxes: f.querySelectorAll('input[type="text"][data-f^="r"]').length,
+        labelled: [...f.querySelectorAll('input[type="text"]')].every((i) =>
+          !!f.querySelector(`label[for="${i.id}"]`)),
+        viewHidden: f.parentNode.querySelector('.oa-dir-school-view').hidden,
+        focused: document.activeElement && document.activeElement.getAttribute('data-f'),
+        headings: f.querySelectorAll('h1, h2, h3, h4, h5, h6').length,
+      };
+    }, card);
+    ok(shape.school && shape.types >= 3,
+      'directory form: the school\'s own fields are in the form once, the type as radio buttons');
+    eq(shape.deptBoxes, pick.rows.length * 3,
+      'directory form: …and every department\'s name and two links, all at once');
+    ok(shape.labelled, 'directory form: every box has its own label');
+    eq(shape.viewHidden, true, 'directory form: the form takes the school\'s place while it is open');
+    eq(shape.focused, 's.institution', 'directory form: the keyboard lands in the first box');
+    eq(shape.headings, 0, 'directory form: no heading joins the page outline');
+    eq(dialogs.length, 0, 'directory form: opening it asks nothing through a browser dialog');
+
+    /* a link that is not one is refused, and nothing is written */
+    await d.fill(`${card} [data-f="r0.deptUrl"]`, 'not a link');
+    await d.click(`${card} .oa-dir-save`);
+    await d.waitForTimeout(250);
+    const bad = await d.evaluate((c) => ({
+      msg: document.querySelector(c + ' .oa-dir-form-msg').textContent,
+      focus: document.activeElement.getAttribute('data-f'),
+      writes: Object.keys(window.__fb.dump()).filter((k) => k.startsWith('directoryEdits/')).length,
+    }), card);
+    ok(/https:\/\//.test(bad.msg), `directory form: a bad link is refused, saying why ("${bad.msg}")`);
+    eq(bad.focus, 'r0.deptUrl', 'directory form: …with the cursor put back on the box');
+    eq(bad.writes, 0, 'directory form: …and nothing written');
+
+    /* typing survives a redraw of the list */
+    await d.fill(`${card} [data-f="r0.deptUrl"]`, '');
+    await d.fill(`${card} [data-f="s.school"]`, DF_NEW_SCHOOL);
+    await d.evaluate(() => OADirectory.__setForTest({}));
+    await d.waitForTimeout(300);
+    eq(await d.$eval(`${card} [data-f="s.school"]`, (n) => n.value), DF_NEW_SCHOOL,
+      'directory form: what was typed survives a redraw of the list');
+
+    /* a school typed ONCE is saved to every department, as that field alone */
+    await d.click(`${card} .oa-dir-save`);
+    await d.waitForFunction((rows) => rows.every((r) => !!window.__fb.dump()['directoryEdits/' + r]),
+      pick.rows, { timeout: 8000 });
+    await d.waitForTimeout(300);
+    const saved = await d.evaluate((rows) => rows.map((r) => window.__fb.dump()['directoryEdits/' + r]), pick.rows);
+    ok(saved.every((x) => x.school === DF_NEW_SCHOOL),
+      `directory form: the school typed once is saved to all ${pick.rows.length} departments`);
+    ok(saved.every((x) => Object.keys(x).sort().join() === 'by,name,rowId,school,t'),
+      `directory form: …carrying that field and the byline and nothing else (${Object.keys(saved[0]).sort().join(', ')})`);
+    ok(saved.every((x) => x.by === 'reader-uid-00000000' && x.t === saved[0].t),
+      'directory form: …written together, by the reader');
+    const after = await d.evaluate((name) => ({
+      forms: document.querySelectorAll('.oa-dir-form').length,
+      label: [...document.querySelectorAll('#oa-dir .oa-kv th')].some((t) => t.textContent === name),
+      saved: [...document.querySelectorAll('.oa-dir-saved')].map((n) => n.textContent).join(' '),
+      byline: [...document.querySelectorAll('.oa-dir-edited')].map((n) => n.textContent)
+        .find((t) => /Last updated by/.test(t)) || '',
+    }), DF_NEW_SCHOOL);
+    eq(after.forms, 0, 'directory form: the form closes on a save');
+    ok(after.label, 'directory form: the card now lists the departments under the school typed');
+    ok(/Saved/.test(after.saved), 'directory form: …and says it saved');
+    ok(/^Last updated by .+ on \d{1,2} [A-Z][a-z]{2} \d{4}$/.test(after.byline),
+      `directory form: …and who last updated it, and when ("${after.byline}")`);
+
+    /* Escape asks first when something was typed, and gives the keyboard back */
+    const reopen = `[data-dir-edit]`;
+    await d.click(`${card} ${reopen}`);
+    await d.waitForSelector(`${card} .oa-dir-form`, { timeout: 5000 });
+    await d.fill(`${card} [data-f="r0.department"]`, 'Something Else Entirely');
+    const before = dialogs.length;
+    await d.keyboard.press('Escape');
+    await d.waitForTimeout(200);
+    eq(dialogs.length, before + 1, 'directory form: Escape over typed text asks before throwing it away');
+    eq(await d.$$eval('.oa-dir-form', (n) => n.length), 0, 'directory form: …and then closes');
+    ok(await d.evaluate(() => document.activeElement && document.activeElement.hasAttribute('data-dir-edit')),
+      'directory form: …giving the keyboard back to Edit school');
+
+    /* the add form: the department first, and a duplicate refused */
+    await d.click(`${card} [data-dir-add]`);
+    await d.waitForSelector(`${card} .oa-dir-form[data-dir-form="add"]`, { timeout: 5000 });
+    eq(await d.evaluate(() => document.activeElement.getAttribute('data-f')), 'a.department',
+      'directory form: Add a department puts the keyboard in the department box');
+    /* a department already listed under the school the save above named */
+    const dupName = await d.evaluate(([c, name]) => {
+      const row = [...document.querySelectorAll(c + ' .oa-kv tr')]
+        .find((tr) => tr.querySelector('th').textContent === name);
+      const dn = row && [...row.querySelectorAll('.oa-dir-dname')].find((n) => !n.querySelector('em'));
+      return dn ? dn.textContent : '';
+    }, [card, DF_NEW_SCHOOL]);
+    ok(!!dupName, 'directory form: (a named department sits under the school just saved)');
+    await d.fill(`${card} [data-f="a.school"]`, DF_NEW_SCHOOL);
+    await d.fill(`${card} [data-f="a.department"]`, dupName);
+    const writesBefore = await d.evaluate(() => Object.keys(window.__fb.dump()).filter((k) => k.startsWith('directoryEdits/')).length);
+    await d.click(`${card} .oa-dir-save`);
+    await d.waitForTimeout(250);
+    const dup = await d.evaluate(() => ({
+      msg: document.querySelector('.oa-dir-form .oa-dir-form-msg').textContent,
+      writes: Object.keys(window.__fb.dump()).filter((k) => k.startsWith('directoryEdits/')).length,
+    }));
+    ok(/already lists/.test(dup.msg), 'directory form: a department the card already lists is refused, naming it');
+    eq(dup.writes, writesBefore, 'directory form: …and nothing is written');
+    await d.fill(`${card} [data-f="a.department"]`, 'Formal Methods Test Area');
+    await d.click(`${card} .oa-dir-save`);
+    await d.waitForFunction(() => Object.keys(window.__fb.dump()).some((k) => k.startsWith('directoryEdits/add-')),
+      null, { timeout: 8000 });
+    const added = await d.evaluate(() => {
+      const dmp = window.__fb.dump();
+      return dmp[Object.keys(dmp).find((k) => k.startsWith('directoryEdits/add-'))];
+    });
+    ok(added.add === true && added.school === DF_NEW_SCHOOL && /Formal Methods/.test(added.department) && added.institution,
+      'directory form: the new department is saved whole, under the card\'s university');
+  }
+  eq(errors, [], 'directory form: no page errors');
+  await ctx.close();
+
+  /* on a phone: 16px boxes, 42px targets, nothing sideways */
+  const ph = await signedInPage('universities.html', { selector: '#oa-dir .oa-card',
+    viewport: { width: 390, height: 844 } });
+  await ph.page.click('#oa-dir .oa-card .oa-card-head');
+  await ph.page.click('#oa-dir .oa-card [data-dir-edit]');
+  await ph.page.waitForSelector('.oa-dir-form', { timeout: 5000 });
+  const mob = await ph.page.evaluate(() => {
+    const f = document.querySelector('.oa-dir-form');
+    const doc = document.documentElement;
+    const r = f.getBoundingClientRect();
+    return {
+      overflowX: doc.scrollWidth > doc.clientWidth,
+      inside: r.left >= 0 && r.right <= doc.clientWidth,
+      minFont: Math.min(...[...f.querySelectorAll('input[type="text"]')].map((i) => parseFloat(getComputedStyle(i).fontSize))),
+      minRadio: Math.min(...[...f.querySelectorAll('.oa-dir-radio')].map((l) => l.getBoundingClientRect().height)),
+      buttons: [...f.querySelectorAll('button')].map((b) => Math.round(b.getBoundingClientRect().height)),
+      fullWidth: [...f.querySelectorAll('button')].every((b) => b.getBoundingClientRect().width > r.width * 0.8),
+    };
+  });
+  eq(mob.overflowX, false, 'directory form at 390px: nothing scrolls sideways');
+  ok(mob.inside, 'directory form at 390px: the form is inside the screen');
+  ok(mob.minFont >= 16, `directory form at 390px: every box is 16px or more (${mob.minFont}px), so iOS does not zoom`);
+  ok(mob.minRadio >= 42, `directory form at 390px: every radio row is a 42px target (${mob.minRadio}px)`);
+  ok(mob.buttons.every((h) => h >= 42) && mob.fullWidth,
+    `directory form at 390px: Save and Cancel are full-width 42px targets (${mob.buttons.join(', ')}px)`);
+  await ph.ctx.close();
 }
 
 /* --------------------------------------------------- the Universities map

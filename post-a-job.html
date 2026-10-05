@@ -473,6 +473,24 @@
                                placeholder="https://" required>
                         <p class="oa-hint oa-derived" id="f-deptUrl-note" aria-live="polite"></p>
                       </div>
+                      <!-- THE FACULTY PAGE, the directory's second link (owner,
+                           2026-10-05: a posting's faculty link and names update
+                           the Universities directory, which then says who last
+                           updated it). Optional, and like the department page
+                           it is never part of the posting: it is filled from
+                           the records where the site has one, and a changed
+                           value is filed into the directory after the posting
+                           is sent (assets/oa-uniinfo.js). -->
+                      <div class="oa-field">
+                        <label for="f-facultyUrl">The department&rsquo;s faculty page (optional)</label>
+                        <p class="oa-hint">Also not published with the posting: the page that lists
+                        the department&rsquo;s faculty, which the Universities directory links beside
+                        the department&rsquo;s own page. Your posting updates the directory&rsquo;s card
+                        for your department, which then says you last updated it.</p>
+                        <input type="url" id="f-facultyUrl" name="facultyUrl" maxlength="600"
+                               placeholder="https://">
+                        <p class="oa-hint oa-derived" id="f-facultyUrl-note" aria-live="polite"></p>
+                      </div>
 
                       <div class="oa-field">
                         <span class="oa-label-text" id="lbl-chars">Does your school or department have any of the following? <span class="oa-req oa-req-new" aria-hidden="true">*</span></span>
