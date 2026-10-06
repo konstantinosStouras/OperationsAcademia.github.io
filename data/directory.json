@@ -671,12 +671,16 @@
   "address": "4400 Vestal Pkwy E, Binghamton, NY 13902",
   "mapUrl": "https://goo.gl/maps/b6yv0",
   "facultyUrl": "http://www.binghamton.edu/som/faculty-research/index.html",
+  "characteristics": [
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "directory",
    "postings"
   ],
-  "n": 1,
-  "lastPosted": "2014-09-27",
+  "n": 2,
+  "lastPosted": "2026-10-06",
   "lat": 42.0934421,
   "lng": -75.9719572
  },

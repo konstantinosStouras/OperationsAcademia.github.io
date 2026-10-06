@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-05T22:38:08.916Z",
+ "generated": "2026-10-06T14:31:31.174Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -263,6 +263,10 @@
   },
   {
    "v": "Ball State University",
+   "n": 2
+  },
+  {
+   "v": "Binghamton University",
    "n": 2
   },
   {
@@ -659,10 +663,6 @@
   },
   {
    "v": "Bilkent University",
-   "n": 1
-  },
-  {
-   "v": "Binghamton University",
    "n": 1
   },
   {
@@ -2172,6 +2172,10 @@
    "n": 4
   },
   {
+   "v": "School of Management",
+   "n": 4
+  },
+  {
    "v": "C. T. Bauer College of Business",
    "n": 3
   },
@@ -2201,10 +2205,6 @@
   },
   {
    "v": "School of Business",
-   "n": 3
-  },
-  {
-   "v": "School of Management",
    "n": 3
   },
   {
@@ -3510,6 +3510,10 @@
    "n": 1
   },
   {
+   "v": "Business Analytics and Operations",
+   "n": 1
+  },
+  {
    "v": "Business Analytics, Operations Management, Project Management",
    "n": 1
   },
@@ -4387,10 +4391,6 @@
   },
   {
    "v": "Business Administration/Supply Chain Management",
-   "n": 0
-  },
-  {
-   "v": "Business Analytics and Operations",
    "n": 0
   },
   {

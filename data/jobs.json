@@ -41,6 +41,43 @@
   "owner": ""
  },
  {
+  "id": "2027-binghamton-university-20261006",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-06",
+  "institution": "Binghamton University",
+  "department": "School of Management, Business Analytics and Operations",
+  "school": "School of Management",
+  "unit": "Business Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://binghamton.interviewexchange.com/jobofferdetails.jsp?JOBID=205076",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://binghamton.interviewexchange.com/jobofferdetails.jsp?JOBID=205076",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Binghamton%20University",
+  "characteristics": [
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-10-06T14:30:34Z",
+  "ref": "OA-JOB-261006-2ZK2",
+  "owner": "69343d8fcc1924ec"
+ },
+ {
   "id": "2027-duke-university-20261005",
   "year": 2027,
   "years": [
