@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-05T11:51:01.344Z",
- "members": 286,
+ "generated": "2026-10-06T11:31:05.869Z",
+ "members": 290,
  "k": 3,
  "affiliation": {
-  "listed": 196,
+  "listed": 202,
   "other": 45,
-  "none": 45
+  "none": 43
  },
  "universities": {
-  "count": 113,
+  "count": 116,
   "shown": [
    {
     "name": "Cornell University",
@@ -27,6 +27,11 @@
    },
    {
     "name": "Harvard University",
+    "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "Northwestern University",
     "country": "United States",
     "members": 4
    },
@@ -68,11 +73,6 @@
    {
     "name": "McGill University",
     "country": "Canada",
-    "members": 3
-   },
-   {
-    "name": "Northwestern University",
-    "country": "United States",
     "members": 3
    },
    {
@@ -126,14 +126,14 @@
     "members": 3
    }
   ],
-  "rest": 115
+  "rest": 120
  },
  "countries": {
-  "count": 14,
+  "count": 15,
   "shown": [
    {
     "name": "United States",
-    "members": 125
+    "members": 127
    },
    {
     "name": "Canada",
@@ -145,19 +145,19 @@
    },
    {
     "name": "Germany",
+    "members": 7
+   },
+   {
+    "name": "United Kingdom",
+    "members": 7
+   },
+   {
+    "name": "France",
     "members": 6
    },
    {
     "name": "Hong Kong",
     "members": 6
-   },
-   {
-    "name": "United Kingdom",
-    "members": 6
-   },
-   {
-    "name": "France",
-    "members": 5
    },
    {
     "name": "China",
@@ -168,7 +168,7 @@
     "members": 3
    }
   ],
-  "rest": 7,
-  "unknown": 101
+  "rest": 8,
+  "unknown": 99
  }
 }
