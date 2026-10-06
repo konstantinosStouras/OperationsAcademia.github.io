@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-06T20:00:39.527Z",
+ "generated": "2026-10-06T20:02:57.118Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1143,6 +1143,10 @@
   },
   {
    "v": "Queens University of Charlotte",
+   "n": 1
+  },
+  {
+   "v": "Rochester Institute of Technology",
    "n": 1
   },
   {
@@ -2548,6 +2552,10 @@
    "n": 1
   },
   {
+   "v": "Saunders College of Business",
+   "n": 1
+  },
+  {
    "v": "Scheller College of Business",
    "n": 1
   },
@@ -3166,11 +3174,11 @@
    "n": 8
   },
   {
-   "v": "Business Analytics",
-   "n": 7
+   "v": "Management",
+   "n": 8
   },
   {
-   "v": "Management",
+   "v": "Business Analytics",
    "n": 7
   },
   {
@@ -8378,6 +8386,19 @@
     ]
    }
   },
+  "Rochester Institute of Technology": {
+   "schools": [
+    "Saunders College of Business"
+   ],
+   "units": [
+    "Management"
+   ],
+   "bySchool": {
+    "Saunders College of Business": [
+     "Management"
+    ]
+   }
+  },
   "Rockhurst University": {
    "schools": [],
    "units": [
@@ -12637,6 +12658,9 @@
   "Sauder School of Business": [
    "Operations and Logistics",
    "Transportation Operations"
+  ],
+  "Saunders College of Business": [
+   "Management"
   ],
   "Scheller College of Business": [
    "Operations Management"

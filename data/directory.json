@@ -6511,6 +6511,19 @@
   "lng": -95.4034911
  },
  {
+  "id": "rochester-institute-of-technology__saunders-college-of-business__management",
+  "institution": "Rochester Institute of Technology",
+  "school": "Saunders College of Business",
+  "department": "Management",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-06"
+ },
+ {
   "id": "rockhurst-university____business-intelligence-and-analytics",
   "institution": "Rockhurst University",
   "department": "Business Intelligence and Analytics",

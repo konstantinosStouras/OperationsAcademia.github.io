@@ -78,40 +78,6 @@
   "owner": "69343d8fcc1924ec"
  },
  {
-  "id": "2027-hec-montreal-20261006-2",
-  "year": 2027,
-  "years": [
-   2027
-  ],
-  "posted": "2026-10-06",
-  "institution": "HEC Montréal",
-  "department": "Management",
-  "school": "",
-  "unit": "Management",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor",
-   "Other Ranks"
-  ],
-  "applyBy": "November 15, 2026",
-  "applyByDate": "2026-11-15",
-  "comments": "Tenure-Track Professor in **Project Management**",
-  "country": "Canada",
-  "countries": [
-   "Canada"
-  ],
-  "adUrl": "https://tre.tbe.taleo.net/tre01/ats/careers/v2/viewRequisition?org=NYQEDG&cws=43&rid=1414",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=HEC%20Montr%C3%A9al",
-  "characteristics": [],
-  "featured": false,
-  "source": "jobmarket-sheet",
-  "addedAt": "2026-10-06T19:51:26Z",
-  "owner": ""
- },
- {
   "id": "2027-hec-montreal-20261006",
   "year": 2027,
   "years": [
@@ -146,6 +112,40 @@
   "owner": ""
  },
  {
+  "id": "2027-hec-montreal-20261006-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-06",
+  "institution": "HEC Montréal",
+  "department": "Management",
+  "school": "",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 15, 2026",
+  "applyByDate": "2026-11-15",
+  "comments": "Tenure-Track Professor in **Project Management**",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://tre.tbe.taleo.net/tre01/ats/careers/v2/viewRequisition?org=NYQEDG&cws=43&rid=1414",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=HEC%20Montr%C3%A9al",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-06T19:51:26Z",
+  "owner": ""
+ },
+ {
   "id": "2027-mit-20261006",
   "year": 2027,
   "years": [
@@ -176,6 +176,39 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-06T19:57:51Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-rochester-institute-of-technology-saunders-colle-20261006",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-06",
+  "institution": "Rochester Institute of Technology",
+  "department": "Saunders College of Business, Management",
+  "school": "Saunders College of Business",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "The Management Department in the Saunders College of Business at Rochester Institute of Technology invites applications for a full-time, tenure-track assistant professor of supply chain management starting August 11, 2027. Candidates who are close to completing their doctoral degree in supply chain management, operations management, logistics, sourcing, purchasing and supply management, or related areas are encouraged to apply. Assistant professors with prior experience are also encouraged to apply. Teaching load is 2/2 for pre-tenure faculty and includes teaching undergraduate and graduate courses in supply chain analytics, sourcing, logistics, operations management, decision sciences, project management, and other related areas. The ideal candidate will demonstrate the potential to produce high-quality research. Evidence of teaching effectiveness at either the undergraduate or graduate level is expected.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://rit.wd12.myworkdayjobs.com/en-US/careers/job/Assistant-Professor--Tenure-Track---Supply-Chain--Proj---Oper-Mgt-Quant-Meth_JR103197?_gl=1*13dq4va*_gcl_au*MTQxMDU4NTU2Ny4xNzg1ODU2MTE1*_ga*Nzg3NjY4Njc0LjE3NjQwODQwODU.*_ga_DY6XXZS0V2*czE3OTEyODk4Mjkkbzg4JGcwJHQxNzkxMjg5ODMwJGo1OSRsMCRoMA",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Rochester%20Institute%20of%20Technology",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-06T20:01:32Z",
   "owner": ""
  },
  {
