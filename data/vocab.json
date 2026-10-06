@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-06T19:52:50.766Z",
+ "generated": "2026-10-06T20:00:39.527Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -330,6 +330,10 @@
    "n": 2
   },
   {
+   "v": "HEC Montréal",
+   "n": 2
+  },
+  {
    "v": "Houston Christian University",
    "n": 2
   },
@@ -367,6 +371,10 @@
   },
   {
    "v": "MacEwan University",
+   "n": 2
+  },
+  {
+   "v": "Massachusetts Institute of Technology (MIT)",
    "n": 2
   },
   {
@@ -898,10 +906,6 @@
    "n": 1
   },
   {
-   "v": "HEC Montréal",
-   "n": 1
-  },
-  {
    "v": "Henderson State University",
    "n": 1
   },
@@ -1011,10 +1015,6 @@
   },
   {
    "v": "Marquette University",
-   "n": 1
-  },
-  {
-   "v": "Massachusetts Institute of Technology (MIT)",
    "n": 1
   },
   {
@@ -3582,6 +3582,10 @@
    "n": 1
   },
   {
+   "v": "Center for Transportation and Logistics",
+   "n": 1
+  },
+  {
    "v": "Chair of Production Management",
    "n": 1
   },
@@ -3895,6 +3899,10 @@
   },
   {
    "v": "Learning, Optimization, and Decision Analytics",
+   "n": 1
+  },
+  {
+   "v": "Logistics and Operations Management",
    "n": 1
   },
   {
@@ -4410,10 +4418,6 @@
    "n": 0
   },
   {
-   "v": "Center for Transportation and Logistics",
-   "n": 0
-  },
-  {
    "v": "Computer Information Systems",
    "n": 0
   },
@@ -4559,10 +4563,6 @@
   },
   {
    "v": "Institute of Communication, Culture, Information and Technology",
-   "n": 0
-  },
-  {
-   "v": "Logistics and Operations Management",
    "n": 0
   },
   {

@@ -112,6 +112,73 @@
   "owner": ""
  },
  {
+  "id": "2027-hec-montreal-20261006",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-06",
+  "institution": "HEC Montréal",
+  "department": "Logistics and Operations Management",
+  "school": "",
+  "unit": "Logistics and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 1, 2026",
+  "applyByDate": "2026-11-01",
+  "comments": "Tenure-Track Professor - **Logistics and Operations Management** (Open Rank)",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://tre.tbe.taleo.net/tre01/ats/careers/v2/viewRequisition?org=NYQEDG&cws=43&rid=1412",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=HEC%20Montr%C3%A9al",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-06T19:59:02Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-mit-20261006",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-06",
+  "institution": "Massachusetts Institute of Technology (MIT)",
+  "department": "Center for Transportation and Logistics",
+  "school": "",
+  "unit": "Center for Transportation and Logistics",
+  "type": "University",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.peopleclick.com/careerscp/client_mit/external/jobDetails/jobDetail.html?jobPostId=34861&localeCode=en-us",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Massachusetts%20Institute%20of%20Technology%20(MIT)",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-06T19:57:51Z",
+  "owner": ""
+ },
+ {
   "id": "2027-duke-university-20261005",
   "year": 2027,
   "years": [

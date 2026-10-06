@@ -3275,8 +3275,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2014-09-23",
+  "n": 2,
+  "lastPosted": "2026-10-06",
   "lat": 45.50333,
   "lng": -73.6206714
  },
@@ -4735,8 +4735,11 @@
   "mapUrl": "https://goo.gl/maps/iHu7x",
   "facultyUrl": "http://ctl.mit.edu/about/faculty",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-06",
   "lat": 42.3611549,
   "lng": -71.0848775
  },
