@@ -3281,6 +3281,18 @@
   "lng": -73.6206714
  },
  {
+  "id": "hec-montreal____management",
+  "institution": "HEC Montréal",
+  "department": "Management",
+  "type": "Business School",
+  "country": "Canada",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-06"
+ },
+ {
   "id": "hec-paris____ai",
   "institution": "HEC Paris",
   "department": "AI",

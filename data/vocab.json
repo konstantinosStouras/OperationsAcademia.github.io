@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-06T14:31:31.174Z",
+ "generated": "2026-10-06T19:52:50.766Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -898,6 +898,10 @@
    "n": 1
   },
   {
+   "v": "HEC Montréal",
+   "n": 1
+  },
+  {
    "v": "Henderson State University",
    "n": 1
   },
@@ -1743,10 +1747,6 @@
   },
   {
    "v": "Harvard Kennedy School",
-   "n": 0
-  },
-  {
-   "v": "HEC Montréal",
    "n": 0
   },
   {
@@ -3170,15 +3170,15 @@
    "n": 7
   },
   {
+   "v": "Management",
+   "n": 7
+  },
+  {
    "v": "Business",
    "n": 6
   },
   {
    "v": "Business Administration",
-   "n": 6
-  },
-  {
-   "v": "Management",
    "n": 6
   },
   {
@@ -6695,12 +6695,14 @@
    "schools": [],
    "units": [
     "Decision Sciences",
-    "Logistics and Operations Management"
+    "Logistics and Operations Management",
+    "Management"
    ],
    "bySchool": {
     "": [
      "Decision Sciences",
-     "Logistics and Operations Management"
+     "Logistics and Operations Management",
+     "Management"
     ]
    }
   },
