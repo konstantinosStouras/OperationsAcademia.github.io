@@ -11605,12 +11605,19 @@
   "lng": -122.7277619
  },
  {
-  "id": "university-of-puget-sound",
+  "id": "university-of-puget-sound____business",
   "institution": "University of Puget Sound",
-  "type": "University",
+  "department": "Business",
+  "type": "Business School",
+  "country": "United States",
+  "characteristics": [
+   "Undergrad"
+  ],
   "sources": [
-   "members"
-  ]
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-07"
  },
  {
   "id": "university-of-queensland",

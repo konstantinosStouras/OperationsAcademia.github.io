@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-06T20:02:57.118Z",
+ "generated": "2026-10-07T18:13:05.565Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1502,6 +1502,10 @@
    "n": 1
   },
   {
+   "v": "University of Puget Sound",
+   "n": 1
+  },
+  {
    "v": "University of Science and Technology of China",
    "n": 1
   },
@@ -2043,10 +2047,6 @@
   },
   {
    "v": "University of Portland",
-   "n": 0
-  },
-  {
-   "v": "University of Puget Sound",
    "n": 0
   },
   {
@@ -3178,12 +3178,12 @@
    "n": 8
   },
   {
-   "v": "Business Analytics",
+   "v": "Business",
    "n": 7
   },
   {
-   "v": "Business",
-   "n": 6
+   "v": "Business Analytics",
+   "n": 7
   },
   {
    "v": "Business Administration",
@@ -10988,8 +10988,14 @@
   },
   "University of Puget Sound": {
    "schools": [],
-   "units": [],
-   "bySchool": {}
+   "units": [
+    "Business"
+   ],
+   "bySchool": {
+    "": [
+     "Business"
+    ]
+   }
   },
   "University of Queensland": {
    "schools": [],
