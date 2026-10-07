@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-06T11:31:05.869Z",
- "members": 290,
+ "generated": "2026-10-07T11:21:10.946Z",
+ "members": 295,
  "k": 3,
  "affiliation": {
-  "listed": 202,
+  "listed": 207,
   "other": 45,
   "none": 43
  },
  "universities": {
-  "count": 116,
+  "count": 117,
   "shown": [
    {
     "name": "Cornell University",
@@ -18,7 +18,7 @@
    {
     "name": "National University of Singapore",
     "country": "Singapore",
-    "members": 6
+    "members": 7
    },
    {
     "name": "Columbia University",
@@ -31,6 +31,11 @@
     "members": 4
    },
    {
+    "name": "McGill University",
+    "country": "Canada",
+    "members": 4
+   },
+   {
     "name": "Northwestern University",
     "country": "United States",
     "members": 4
@@ -38,6 +43,11 @@
    {
     "name": "University of Mannheim",
     "country": "Germany",
+    "members": 4
+   },
+   {
+    "name": "University of Massachusetts Amherst",
+    "country": "United States",
     "members": 4
    },
    {
@@ -71,11 +81,6 @@
     "members": 3
    },
    {
-    "name": "McGill University",
-    "country": "Canada",
-    "members": 3
-   },
-   {
     "name": "Pennsylvania State University",
     "country": "United States",
     "members": 3
@@ -92,11 +97,6 @@
    },
    {
     "name": "University of Maryland",
-    "country": "United States",
-    "members": 3
-   },
-   {
-    "name": "University of Massachusetts Amherst",
     "country": "United States",
     "members": 3
    },
@@ -126,22 +126,22 @@
     "members": 3
    }
   ],
-  "rest": 120
+  "rest": 122
  },
  "countries": {
   "count": 15,
   "shown": [
    {
     "name": "United States",
-    "members": 127
+    "members": 129
    },
    {
     "name": "Canada",
-    "members": 15
+    "members": 17
    },
    {
     "name": "Singapore",
-    "members": 9
+    "members": 10
    },
    {
     "name": "Germany",
