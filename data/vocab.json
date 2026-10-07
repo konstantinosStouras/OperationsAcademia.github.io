@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-07T18:13:05.565Z",
+ "generated": "2026-10-07T18:13:52.942Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -3178,12 +3178,12 @@
    "n": 8
   },
   {
-   "v": "Business",
+   "v": "Business Analytics",
    "n": 7
   },
   {
-   "v": "Business Analytics",
-   "n": 7
+   "v": "Business",
+   "n": 6
   },
   {
    "v": "Business Administration",
@@ -3527,6 +3527,10 @@
   },
   {
    "v": "Business Analytics/Statistics, Operations Management, and Information Systems",
+   "n": 1
+  },
+  {
+   "v": "Business and Leadership",
    "n": 1
   },
   {
@@ -10989,11 +10993,11 @@
   "University of Puget Sound": {
    "schools": [],
    "units": [
-    "Business"
+    "Business and Leadership"
    ],
    "bySchool": {
     "": [
-     "Business"
+     "Business and Leadership"
     ]
    }
   },
