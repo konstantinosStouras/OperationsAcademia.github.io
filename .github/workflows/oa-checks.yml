@@ -57,6 +57,7 @@ jobs:
       - name: The data model, the merge, and the served file
         run: |
           node _scraper/selftest.mjs
+          node _scraper/reference-test.mjs
           node _scraper/import-sheet.mjs --selftest
           node _scraper/import-legacy-tables.mjs --selftest
           node _scraper/sync-jobmarket-sheet.mjs --selftest

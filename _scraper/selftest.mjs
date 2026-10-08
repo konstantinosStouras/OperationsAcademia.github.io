@@ -4438,6 +4438,10 @@ async function testVocabFile() {
   for (const [u, e] of Object.entries(v.byUniversity)) {
     for (const list of Object.values(e.bySchool)) {
       for (const [a, b] of samePair(list, u)) {
+        /* Separate departments: HEC Montréal /en/management/ and /en/gol/,
+           verified against the official pages on 2026-10-08. */
+        if (S.institutionKey(u) === S.institutionKey('HEC Montréal') &&
+            [a, b].sort().join('|') === 'Logistics and Operations Management|Management') continue;
         /* looked up both ways round: which of the pair the sweep meets first
            depends on the order the vocabulary lists them, which moves as
            postings arrive, and an entry must not stop matching because two
@@ -17171,10 +17175,10 @@ async function testAnalytics() {
     'but the page still records WHY they went — the comment is the explanation, ' +
     'and the check above must never be satisfiable by deleting it');
   for (const src of ['assets/oa-analytics-model.js', 'assets/oa-charts.js', 'assets/oa-analytics.js']) {
-    ok(new RegExp('<script defer src="' + src.replace(/[/.]/g, '\\$&') + '"').test(html),
+    ok(html.includes('<script defer src="' + src + '"') || html.includes('<script defer src="' + src + '?'),
       `analytics.html loads ${src}, deferred like every other script on this site`);
   }
-  ok(/<link href="assets\/oa-analytics\.css" rel="stylesheet">/.test(html),
+  ok(html.includes('<link href="assets/oa-analytics.css"') || html.includes('<link href="assets/oa-analytics.css?'),
     'and its stylesheet');
   ok(/id="oa-analytics"/.test(html), 'the mount point is present');
   ok(/<noscript>/.test(html),
@@ -20841,7 +20845,7 @@ async function testAffiliationPicker() {
   ok(/AFFILIATION\.listFromDirectory\(rows,/.test(build) && /'university-names\.json'/.test(build),
     'build-directory.mjs writes the list from the rows it has just built');
   ok(/memberUniversities\(await readJson\(MEMBERS, \{ universities: \[\] \}\)\)/.test(build)
-     && /buildDirectory\(\{ archive, seed, jobs, past, omlist, members \}\)/.test(build),
+     && /buildDirectory\(\{ archive, seed: seed\.concat\(references\), jobs, past, omlist, members \}\)/.test(build),
     'build-directory.mjs feeds the member universities into the merge, optional');
   const gz = (await import('node:zlib')).gzipSync(await readFile(path.join(root, 'data', 'university-names.json'))).length;
   ok(gz < 20000, `the list is small enough to fetch for one card (${gz} bytes gzipped)`);

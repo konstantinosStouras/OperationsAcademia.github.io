@@ -288,7 +288,26 @@
   /** The overlaid record, or null while it has not arrived. */
   function record(url) {
     return Promise.all([loadRows(url), loadEdits()]).then(function (got) {
-      return got[0] ? overlay(got[0], state.edits) : null;
+      if (!got[0]) return null;
+      var rows = overlay(got[0], state.edits);
+      var S = window.OASchools;
+      if (!S) return rows;
+      var merged = Object.create(null);
+      var hidden = [];
+      rows.forEach(function (r) {
+        if (r._hidden) { hidden.push(r); return; }
+        var key = S.directoryRowKey(r.institution, r.school, r.department);
+        var held = merged[key];
+        var stamp = function (row) { return (state.edits[row.id] || {}).t || 0; };
+        var named = function (row) {
+          var edit = state.edits[row.id] || {};
+          return ['institution', 'school', 'department'].some(function (f) {
+            return Object.prototype.hasOwnProperty.call(edit, f);
+          });
+        };
+        if (!held || (named(r) && !named(held)) || (named(r) === named(held) && stamp(r) > stamp(held))) merged[key] = r;
+      });
+      return Object.keys(merged).map(function (key) { return merged[key]; }).concat(hidden);
     });
   }
 
@@ -612,6 +631,7 @@
     wire: wire,
     commit: commit,
     loadRows: loadRows,
+    record: record,
     DIR_URL: DIR_URL,
     COLLECTION: COLLECTION,
     EDIT_FIELDS: EDIT_FIELDS,
