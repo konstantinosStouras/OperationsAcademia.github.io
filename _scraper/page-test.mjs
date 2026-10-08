@@ -4388,8 +4388,8 @@ for (const [pageName, listSel] of [
     }, card);
     ok(shape.school && shape.types >= 3,
       'directory form: the school\'s own fields are in the form once, the type as radio buttons');
-    eq(shape.deptBoxes, pick.rows.length * 3,
-      'directory form: …and every department\'s name and two links, all at once');
+    eq(shape.deptBoxes, pick.rows.length * 4,
+      'directory form: …and every department\'s school, name and two links, all at once');
     ok(shape.labelled, 'directory form: every box has its own label');
     eq(shape.viewHidden, true, 'directory form: the form takes the school\'s place while it is open');
     eq(shape.focused, 's.institution', 'directory form: the keyboard lands in the first box');
