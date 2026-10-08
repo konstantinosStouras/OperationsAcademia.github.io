@@ -747,8 +747,13 @@
     setError(countryBox, out.countries.length
       ? '' : 'Please give the country of the campus.');
     if (!out.countries.length && !firstBad) firstBad = countryBox;
-    need('f-firstName', 'firstName', 'your first name');
-    need('f-lastName', 'lastName', 'your last name');
+    if (!EDIT_CRAWLER_NO_CONTACT) {
+      need('f-firstName', 'firstName', 'your first name');
+      need('f-lastName', 'lastName', 'your last name');
+    } else {
+      out.firstName = String($('f-firstName').value || '').trim().slice(0, MAX.firstName);
+      out.lastName = String($('f-lastName').value || '').trim().slice(0, MAX.lastName);
+    }
 
     var type = $('f-type');
     setError(type, type.value ? '' : 'Please choose a type of institution.');
@@ -757,7 +762,7 @@
 
     var email = $('f-email');
     var ev = String(email.value || '').trim();
-    var emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ev);
+    var emailOk = (!ev && EDIT_CRAWLER_NO_CONTACT) || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ev);
     setError(email, emailOk ? '' : 'Please give an e-mail address we can reach you at.');
     if (!emailOk && !firstBad) firstBad = email;
     out.email = ev.slice(0, MAX.email);
@@ -1188,6 +1193,7 @@
      just cleared. Recorded by fill(), so before the document has loaded
      nothing is claimed either way. */
   var EDIT_HAD = { chairName: false, chairEmail: false };
+  var EDIT_CRAWLER_NO_CONTACT = false;
 
   /** Put back the `required` attribute and the * mark enterEditMode() lifted,
       for one field an edit turns out not to be allowed to empty after all.
@@ -1241,6 +1247,17 @@
     set('f-firstName', v.firstName);
     set('f-lastName', v.lastName);
     set('f-email', v.email || v.authEmail);
+    /* Crawled adverts have no submitting person's contact details. An admin
+       correcting one must not invent a poster merely to save public fields. */
+    EDIT_CRAWLER_NO_CONTACT = !!EDIT_ID && amMaintainer() && v.source === 'jobmarket-sheet' &&
+      !v.firstName && !v.lastName && !v.email && !v.authEmail;
+    if (EDIT_CRAWLER_NO_CONTACT) {
+      ['f-firstName', 'f-lastName', 'f-email'].forEach(function (id) {
+        $(id).removeAttribute('required');
+        var label = document.querySelector('label[for="' + id + '"] .oa-req');
+        if (label) label.remove();
+      });
+    }
     set('f-chairName', v.chairName);
     set('f-chairEmail', v.chairEmail);
     set('f-note', v.note);
