@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-08T11:37:25.368Z",
- "members": 299,
+ "generated": "2026-10-08T20:01:13.648Z",
+ "members": 301,
  "k": 3,
  "affiliation": {
-  "listed": 212,
+  "listed": 214,
   "other": 45,
   "none": 42
  },
@@ -27,6 +27,11 @@
    },
    {
     "name": "Harvard University",
+    "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "Massachusetts Institute of Technology (MIT)",
     "country": "United States",
     "members": 4
    },
@@ -76,6 +81,11 @@
     "members": 3
    },
    {
+    "name": "The Hong Kong University of Science and Technology",
+    "country": "Hong Kong",
+    "members": 3
+   },
+   {
     "name": "IE University",
     "country": "Spain",
     "members": 3
@@ -83,11 +93,6 @@
    {
     "name": "London Business School",
     "country": "United Kingdom",
-    "members": 3
-   },
-   {
-    "name": "Massachusetts Institute of Technology (MIT)",
-    "country": "United States",
     "members": 3
    },
    {
@@ -141,14 +146,14 @@
     "members": 3
    }
   ],
-  "rest": 118
+  "rest": 116
  },
  "countries": {
   "count": 15,
   "shown": [
    {
     "name": "United States",
-    "members": 133
+    "members": 134
    },
    {
     "name": "Canada",
@@ -167,11 +172,11 @@
     "members": 7
    },
    {
-    "name": "France",
-    "members": 6
+    "name": "Hong Kong",
+    "members": 7
    },
    {
-    "name": "Hong Kong",
+    "name": "France",
     "members": 6
    },
    {
