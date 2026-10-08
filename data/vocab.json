@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-08T07:40:07.738Z",
+ "generated": "2026-10-08T07:42:40.637Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -187,6 +187,10 @@
   },
   {
    "v": "Prince Mohammad Bin Fahd University",
+   "n": 3
+  },
+  {
+   "v": "Purdue University",
    "n": 3
   },
   {
@@ -411,10 +415,6 @@
   },
   {
    "v": "Park University",
-   "n": 2
-  },
-  {
-   "v": "Purdue University",
    "n": 2
   },
   {
@@ -2188,6 +2188,10 @@
    "n": 3
   },
   {
+   "v": "College of Engineering",
+   "n": 3
+  },
+  {
    "v": "Darla Moore School of Business",
    "n": 3
   },
@@ -2233,10 +2237,6 @@
   },
   {
    "v": "Booth School of Business",
-   "n": 2
-  },
-  {
-   "v": "College of Engineering",
    "n": 2
   },
   {
