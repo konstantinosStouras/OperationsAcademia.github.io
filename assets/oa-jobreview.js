@@ -1017,7 +1017,7 @@
       drawer.innerHTML = '<summary>Rejected postings (' + state.rejected.length + ')</summary>' +
         state.rejected.map(function (doc, i) {
           var ad = safeHref(fieldValue(doc, 'adUrl'));
-          return '<article class="oa-fb-card"><strong>' + esc(fieldValue(doc, 'institution')) + '</strong>' +
+          return '<article class="oa-fb-card"><strong>' + esc(fieldValue(doc, 'institution') || doc.rowId) + '</strong>' +
             '<p>' + esc(fieldValue(doc, 'department') || fieldValue(doc, 'unit')) + '</p>' +
             '<p>' + esc((fieldValue(doc, 'levels') || []).join(', ')) + '</p>' +
             (ad ? '<p><a href="' + esc(ad) + '" target="_blank" rel="noopener">Open the advert</a></p>' : '') +
