@@ -2548,7 +2548,7 @@ async function testCountries() {
        a guard that cannot tell an explanation from the thing it explains. */
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
     const at = html.indexOf('src="assets/oa-countries.js"');
-    const to = html.indexOf(`src="assets/${consumer}"`);
+    const to = html.match(new RegExp('src="assets/' + consumer.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"'))?.index ?? -1;
     ok(at !== -1 && to !== -1 && at < to,
       `${page}: loads the countries module before ${consumer}`);
   }
@@ -18837,7 +18837,7 @@ async function testJobComments() {
     'job comments: the hint says what the buttons do and what an address becomes');
   ok(/<link href="assets\/oa-editor\.css" rel="stylesheet">\s*\n\s*<link href="assets\/v3\.css" rel="stylesheet">/.test(pageForm),
     'job comments: the form links the shared stylesheet before the live design\'s');
-  const formTag = (f) => pageForm.indexOf('<script defer src="assets/' + f + '"></script>');
+  const formTag = (f) => pageForm.match(new RegExp('<script defer src="assets/' + f.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"></script>'))?.index ?? -1;
   ok(formTag('oa-forum-markup.js') > 0
      && formTag('oa-forum-markup.js') < formTag('oa-editor.js')
      && formTag('oa-editor.js') < formTag('oa-jobform.js'),
@@ -19185,7 +19185,7 @@ async function testJobTakedown() {
       .filter((f) => f.endsWith('.html'))) {
     const html = await read(page);
     const loads = html.includes('src="assets/oa-takedown.js"');
-    const needs = CONSUMERS.some((c) => html.includes(`src="assets/${c}"`));
+    const needs = CONSUMERS.some((c) => new RegExp('src="assets/' + c.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"').test(html));
     ok(loads === needs,
       `takedown: ${page} loads the module exactly when something on it calls it`);
   }
