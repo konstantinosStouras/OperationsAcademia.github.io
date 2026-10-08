@@ -394,7 +394,7 @@
     root.textContent = '';
     if (data.generated) {
       var fresh = document.createElement('p');
-      fresh.className = 'oa-figure-src';
+      fresh.className = 'oa-figure-src oa-snapshot';
       fresh.textContent = 'Traffic snapshot: ' + new Date(data.generated).toLocaleString('en-GB') +
         '. Figures refresh throughout the day; today is still incomplete.';
       root.appendChild(fresh);
@@ -464,7 +464,7 @@
     var srcs = (data.sources || []).filter(function (r) { return r && r.days > 0; });
     if (srcs.length) {
       var sp = document.createElement('p');
-      sp.className = 'oa-figure-src';   // the same line the dimension figures carry
+      sp.className = 'oa-figure-src oa-figure-src-intro';
       sp.textContent = 'Measured by ' + srcs.map(function (r) {
         return sourceName(r.source) + ' (' + r.days +
           (r.days === 1 ? ' day' : ' days') + ')';

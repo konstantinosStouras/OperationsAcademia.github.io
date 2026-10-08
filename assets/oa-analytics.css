@@ -74,6 +74,12 @@
 
 /* ------------------------------------------------------------------ figures */
 
+/* Keep the introductory text, snapshot and cards together. */
+.v3-pa-hero.oa-analytics-hero { padding-bottom: 14px; }
+.oa-analytics-hero .v3-container > p:last-child { margin-bottom: 0; }
+#oa-analytics > .oa-snapshot { margin: 0 0 10px; }
+
+
 .oa-figure {
   background: var(--bg-2);
   border: 1px solid var(--line);
@@ -453,6 +459,7 @@
   color: var(--mut);
   font-size: 12.5px;
 }
+.oa-figure-src.oa-figure-src-intro { margin: 0 0 10px; }
 
 /* ------------------------------------------- which number the chart plots */
 
