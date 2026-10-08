@@ -14,12 +14,18 @@ import { BUILDERS, plan } from './build-all.mjs';
 import * as NETMAP from './build-netmap.mjs';
 import { PAIRS as VENDOR_PAIRS, drift as vendorDrift } from './build-functions-vendor.mjs';
 import * as CSTATS from './build-candidate-stats.mjs';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile as rawReadFile, readdir } from 'node:fs/promises';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
+
+// Source-extraction checks use LF boundaries on both Windows and CI.
+async function readFile(...args) {
+  const value = await rawReadFile(...args);
+  return typeof value === 'string' ? value.replace(/\r\n/g, '\n') : value;
+}
 
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
