@@ -2220,6 +2220,14 @@
   "lastPosted": "2025-06-24"
  },
  {
+  "id": "cornell____operations-technology-and-information-management",
+  "institution": "Cornell",
+  "department": "Operations, Technology, and Information Management",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "cornell-university____applied-economics-and-management",
   "institution": "Cornell University",
   "department": "Applied Economics and Management",
@@ -4206,6 +4214,15 @@
   "lastPosted": "2014-05-08",
   "lat": 53.7691679,
   "lng": -0.369098
+ },
+ {
+  "id": "idaho-state-university____supply-chain-and-operations-management",
+  "institution": "Idaho State University",
+  "department": "Supply Chain and Operations Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "ie-business-school____ds",
@@ -9357,6 +9374,15 @@
   "lastPosted": "2025-06-06"
  },
  {
+  "id": "texas-state-university____supply-chain",
+  "institution": "Texas State University",
+  "department": "supply chain",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "texas-state-university__mccoy-college-of-business__information-systems-and-analytics",
   "institution": "Texas State University",
   "school": "McCoy College of Business",
@@ -13240,6 +13266,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-01-19"
+ },
+ {
+  "id": "university-of-northern-iowa____business-analytics-and-applied-ai",
+  "institution": "University of Northern Iowa",
+  "department": "Business Analytics and Applied AI",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "university-of-northern-iowa__david-w-wilson-college-of-business__management",
