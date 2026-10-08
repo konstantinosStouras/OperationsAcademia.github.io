@@ -27,6 +27,12 @@ async function readFile(...args) {
   return typeof value === 'string' ? value.replace(/\r\n/g, '\n') : value;
 }
 
+// A revision query refreshes a script; its module and load order stay the same.
+function scriptIndex(html, source) {
+  const escaped = source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return html.search(new RegExp('<script\\b[^>]*\\bsrc="' + escaped + '(?:\\?[^"\\s]*)?"'));
+}
+
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   universitiesLink, ownUniversitiesLink,
@@ -2547,8 +2553,8 @@ async function testCountries() {
        records for the analytics page's "no iframes" check, one layer over:
        a guard that cannot tell an explanation from the thing it explains. */
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
-    const at = html.indexOf('src="assets/oa-countries.js"');
-    const to = html.indexOf(`src="assets/${consumer}"`);
+    const at = scriptIndex(html, 'assets/oa-countries.js');
+    const to = scriptIndex(html, `assets/${consumer}`);
     ok(at !== -1 && to !== -1 && at < to,
       `${page}: loads the countries module before ${consumer}`);
   }
@@ -3533,8 +3539,9 @@ async function testCascadeWiring() {
   const adminArea = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   // the SCRIPT TAGS, not the first mention — the page's own comments name the
   // modules long before the tags do
-  ok(adminArea.indexOf('src="assets/oa-place-picker.js') <
-     adminArea.indexOf('src="assets/oa-jobreview.js"'),
+  ok(scriptIndex(adminArea, 'assets/oa-place-picker.js') >= 0 &&
+     scriptIndex(adminArea, 'assets/oa-place-picker.js') <
+     scriptIndex(adminArea, 'assets/oa-jobreview.js'),
     'admin-area.html: and before the review panel that asks for it');
 }
 
@@ -18837,7 +18844,7 @@ async function testJobComments() {
     'job comments: the hint says what the buttons do and what an address becomes');
   ok(/<link href="assets\/oa-editor\.css" rel="stylesheet">\s*\n\s*<link href="assets\/v3\.css" rel="stylesheet">/.test(pageForm),
     'job comments: the form links the shared stylesheet before the live design\'s');
-  const formTag = (f) => pageForm.indexOf('<script defer src="assets/' + f + '"></script>');
+  const formTag = (f) => scriptIndex(pageForm, 'assets/' + f);
   ok(formTag('oa-forum-markup.js') > 0
      && formTag('oa-forum-markup.js') < formTag('oa-editor.js')
      && formTag('oa-editor.js') < formTag('oa-jobform.js'),
@@ -19184,8 +19191,8 @@ async function testJobTakedown() {
   for (const page of (await readdir(path.join(root)))
       .filter((f) => f.endsWith('.html'))) {
     const html = await read(page);
-    const loads = html.includes('src="assets/oa-takedown.js"');
-    const needs = CONSUMERS.some((c) => html.includes(`src="assets/${c}"`));
+    const loads = scriptIndex(html, 'assets/oa-takedown.js') >= 0;
+    const needs = CONSUMERS.some((c) => scriptIndex(html, `assets/${c}`) >= 0);
     ok(loads === needs,
       `takedown: ${page} loads the module exactly when something on it calls it`);
   }
@@ -20780,8 +20787,8 @@ async function testAffiliationPicker() {
   ok(/OASchools\.cardName\(names\)/.test(dirJs) && !/count\[n\] > count\[best\]/.test(dirJs),
     'universities.html titles a card through OASchools.cardName and keeps no copy of the rule');
   const uniHtml = await src('universities.html');
-  ok(uniHtml.indexOf('src="assets/oa-schools.js"') > 0
-     && uniHtml.indexOf('src="assets/oa-schools.js"') < uniHtml.indexOf('src="assets/oa-directory.js"'),
+  ok(scriptIndex(uniHtml, 'assets/oa-schools.js') > 0
+     && scriptIndex(uniHtml, 'assets/oa-schools.js') < scriptIndex(uniHtml, 'assets/oa-directory.js'),
     'universities.html loads oa-schools.js before oa-directory.js, so the rule is there when a card is titled');
 
   /* --- the served list ------------------------------------------------------ */
