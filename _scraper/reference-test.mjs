@@ -30,6 +30,17 @@ assert.equal(exported.length, 1);
 assert.deepEqual(Object.keys(exported[0]).sort(), ['department', 'institution', 'school']);
 assert.equal(exported[0].institution, 'National University of Singapore');
 assert.ok(!JSON.stringify(exported).includes('private'));
+const legacy = referencePlaces([
+  { affiliation: 'Rotman School of Management, University of Toronto', name: 'Private candidate' },
+  { affiliation: 'University of Nantes', email: 'private@example.com' },
+  { affiliation: 'PhD, University of Toronto; visiting Stanford University' },
+  { affiliation: 'Private Analytics Company' },
+], { universities: ['University of Toronto', 'Stanford University'],
+  schools: [['Rotman School of Management', 'University of Toronto']] });
+assert.equal(legacy.length, 2);
+assert.equal(legacy.find(p => p.institution === 'University of Toronto').school, 'Joseph L. Rotman School of Management');
+assert.ok(legacy.some(p => p.institution === 'University of Nantes'));
+assert.ok(!JSON.stringify(legacy).includes('Private'));
 console.log('Reference tests passed: shared names, official department titles, hidden rows and names-only export.');
 const directoryContext = { window: { OASchools: S }, OASchools: S };
 vm.createContext(directoryContext);
