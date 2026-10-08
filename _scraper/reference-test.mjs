@@ -21,6 +21,9 @@ const settled = picker.fixedPlace({ institution: place.institution, school: plac
   unit: 'Supply Chain and Operations Management Faculty' });
 assert.equal(settled.unit, place.department);
 assert.equal(settled.school, place.school);
+const empty = picker.fixedPlace({ institution: place.institution, school: '', unit: '' });
+assert.equal(empty.school, '');
+assert.equal(empty.unit, '');
 const exported = referencePlaces([{ row: { institution: 'NUS', school: 'NUS Business School',
   unit: 'Analytics and Operations', name: 'Private person', email: 'private@example.com', id: 'private' } }]);
 assert.equal(exported.length, 1);

@@ -145,7 +145,8 @@
       var f = window.OAUniInfo.facts(referenceRows, place, S);
       if (f.row) {
         place = { institution: f.row.institution.replace(/^The\s+/i, ''),
-          school: f.row.school || '', unit: f.row.department || '' };
+          school: place.school ? (f.row.school || '') : '',
+          unit: place.unit ? (f.row.department || '') : '' };
       }
     }
     return place;
