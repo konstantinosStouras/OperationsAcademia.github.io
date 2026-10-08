@@ -4384,8 +4384,6 @@ async function testVocabFile() {
      on it is reported by `node _scraper/selftest.mjs --open`. Delete the entry
      when the owner rules on it (the answer goes in SCOPED_UNIT_ALIASES). */
   const AWAITING_OWNER = new Set([
-    // Keep these existing names distinct until their hiring units are verified.
-    'HEC Montréal|Logistics and Operations Management|Management',
     /* THE WORKBOOK WRITES A FIELD WHERE THE SITE ASKS FOR A DEPARTMENT. Its
        hiring-unit column holds what the post is IN — "OM", "BA", "SCM/OM",
        "IS/BA" — and the pipeline publishes that as the department name, so one
