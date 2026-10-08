@@ -34,6 +34,39 @@
   "owner": ""
  },
  {
+  "id": "2027-purdue-20261007",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-07",
+  "institution": "Purdue University",
+  "department": "College of Engineering",
+  "school": "College of Engineering",
+  "unit": "",
+  "type": "University",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Causal Foundation Models for Multimodal Precision Treatment-Response Discovery Project Description Precision medicine increasingly relies on heterogeneous data spanning electronic health records (EHRs), multi-omics, and longitudinal functional measurements from wearable and mobile sensors. Yet current multimodal foundation models primarily learn associations for prediction rather than uncovering how treatments causally affect outcomes across heterogeneous patients. This project will develop a causal multimodal foundation model for treatment-response discovery, integrating EHR trajectories, molecular profiles, and high-frequency functional data within a unified representation and causal inference framework. The research will address three fundamental challenges: (1) learning transferable patient representations across modalities with different temporal scales, missingness patterns, and measurement processes; (2) distinguishing treatment effects from correlations arising from confounding and clinical selection; and (3) discovering patient-specific and subgroup-specific treatment-response heterogeneity. The fellow will combine multimodal representation learning and foundation models with causal inference, longitudinal modeling, and operations research methods for treatment decision-making.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://engineering.purdue.edu/Engr/Research/GilbrethFellowships/ResearchProposals/2025-26/causal-foundation-models-for-multimodal-precision-treatmentresponse-discovery",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Purdue%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-08T07:41:22Z",
+  "owner": ""
+ },
+ {
   "id": "2027-hec-montreal-20261006",
   "year": 2027,
   "years": [
