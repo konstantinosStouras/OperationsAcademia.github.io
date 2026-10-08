@@ -17536,10 +17536,8 @@ async function testAnalytics() {
   ok(/hours: A\.breakdown\('hours'[\s\S]{0,400}source: 'usage'/.test(builder),
     'the HOURS come from the site\'s own record, which stamps the instant a ' +
     'session began');
-  ok(!/dimension\('hour'/.test(builder),
-    '…and are deliberately NOT also asked of GA4, which reports them on the ' +
-    'property\'s own clock: one chart whose meaning changed time zone with its ' +
-    'source would be worse than no chart');
+  ok(/dimension\('hour'/.test(builder),
+    'GA4 hours cover the complete selected period; the page labels its reporting time zone explicitly');
   ok(/newVsReturning/.test(builder) && !/dimension\('newVsReturning'/.test(builder),
     'new-versus-returning is EXPLAINED as absent rather than silently missing: ' +
     'cookieless GA4 reports nearly every session as new, and the first-party ' +

@@ -583,6 +583,34 @@ async function fromGa4({ since, windowFrom, windowTo }) {
   }
 
   const breakdownWindows = { '90': breakdowns };
+  const engagementWindows = { '90': engagement };
+  // Hours and engagement need the same complete periods as the other tables.
+  for (const range of A.RANGES) {
+    const from = range.days ? A.dayPlus(windowTo, -(range.days - 1)) : startDate;
+    const covered = known.filter(d => d >= from && d <= windowTo);
+    const span = { from: covered[0] || '', to: covered[covered.length - 1] || '' };
+    breakdownWindows[range.id] ||= {};
+    const hourly = await dimension('hour', 24, from);
+    if (hourly.length) {
+      const buckets = A.hourBuckets();
+      for (const item of hourly) {
+        const hour = Number(item.name);
+        if (Number.isInteger(hour) && hour >= 0 && hour < 24) buckets[hour].value += item.value;
+      }
+      breakdownWindows[range.id].hours = A.breakdown('hours', { source: 'ga4', ...span,
+        zone: 'property', items: buckets, limit: 24 });
+    }
+    if (range.id === '90') continue;
+    try {
+      const report = await runReport({ dateRanges: [{ startDate: from, endDate }],
+        metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' }, { name: 'screenPageViews' }],
+        dimensionFilter: excludeAdmin, limit: 1 });
+      const metrics = report.rows?.[0]?.metricValues || [];
+      const sessions = Number(metrics[0]?.value || 0);
+      engagementWindows[range.id] = A.engagement({ source: 'ga4', ...span, sessions,
+        seconds: sessions * Number(metrics[1]?.value || 0), views: Number(metrics[2]?.value || 0) });
+    } catch (e) { warn(`the GA4 ${range.id} engagement report failed (${e.message})`); }
+  }
   for (const range of A.RANGES.filter(r => r.id !== '90')) {
     const from = range.days ? A.dayPlus(windowTo, -(range.days - 1)) : startDate;
     const covered = known.filter(d => d >= from && d <= windowTo);
@@ -590,14 +618,14 @@ async function fromGa4({ since, windowFrom, windowTo }) {
     const ids = ['countries', 'devices', 'channels', 'referrers'];
     const names = ['country', 'deviceCategory', 'sessionDefaultChannelGroup', 'sessionSource'];
     const items = await Promise.all(names.map(name => dimension(name, 10000, from)));
-    breakdownWindows[range.id] = {};
+    breakdownWindows[range.id] ||= {};
     ids.forEach((id, i) => {
       const record = A.breakdown(id, { source: 'ga4', ...span, items: items[i], limit: items[i].length });
       if (record) breakdownWindows[range.id][id] = record;
     });
   }
   return {
-    source: 'ga4', days, pages, breakdownWindows,
+    source: 'ga4', days, pages, breakdownWindows, engagementWindows,
     pageRecords: Array.from(pageDays, ([day, pages]) => ({ day, pages })),
     /* the same whole-window pageview count the usage leg states — see there */
     pagesWindow: { ...win, views: winViews },
@@ -898,6 +926,11 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
   for (const range of A.RANGES) {
     const dimensions = {};
     let periodEngagement = null;
+    const ga4Period = ordered.find(result => result.source === 'ga4');
+    if (ga4Period) {
+      A.mergeBreakdown(dimensions, 'hours', ((ga4Period.breakdownWindows || {})[range.id] || {}).hours);
+      periodEngagement = (ga4Period.engagementWindows || {})[range.id] || null;
+    }
     for (const result of ordered) {
       for (const id of A.BREAKDOWN_IDS) A.mergeBreakdown(dimensions, id, ((result.breakdownWindows || {})[range.id] || {})[id]);
       if (!periodEngagement) periodEngagement = (result.engagementWindows || {})[range.id] || null;

@@ -164,6 +164,8 @@ the page.
 
 ## Source 3 — the historical archive  ·  **CHECKED, AND IT IS EMPTY**
 
+Hourly session counts and engagement now query GA4 separately for every selectable period, including its complete surviving history. GA4 owns these figures when available; first-party figures remain a fallback, and overlapping sources are never added together.
+
 **Do not go looking for this again.** It was checked on 2026-08-29 and the
 answer is final.
 

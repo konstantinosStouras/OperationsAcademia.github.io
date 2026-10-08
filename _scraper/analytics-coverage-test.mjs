@@ -63,3 +63,12 @@ assert.equal(periods.breakdownWindows.all.hours.total, 5);
 assert.equal(periods.breakdownWindows['30'].hours.total, 3);
 assert.equal(periods.engagementWindows.all.sessions, 5);
 assert.equal(periods.engagementWindows['30'].sessions, 3);
+const fullGa4 = { source: 'ga4', days: {}, breakdownWindows: {
+  all: { hours: A.breakdown('hours', { source: 'ga4', items: [{ name: '00', value: 100 }], limit: 24 }) }
+}, engagementWindows: { all: A.engagement({ source: 'ga4', sessions: 100, seconds: 500, views: 200 }) } };
+const fullPeriods = assemble([{ source: 'usage', days: {}, ...periods }, fullGa4], { now: Date.parse('2026-10-08') });
+assert.equal(fullPeriods.breakdownWindows.all.hours.source, 'ga4');
+assert.equal(fullPeriods.breakdownWindows.all.hours.total, 100);
+assert.equal(fullPeriods.engagementWindows.all.source, 'ga4');
+assert.equal(fullPeriods.engagementWindows.all.sessions, 100);
+console.log('Full-history GA4 hours and engagement take precedence without adding overlapping measurements');
