@@ -6423,12 +6423,13 @@ async function testUserDirectorySync() {
     'never on a scan or a dry run, and the Admin SDK comes from _mail.mjs, the one definition');
   /* the hourly cron is the whole point of the change: pinned so nobody quietly
      puts it back to once a day and leaves the front page a decade behind */
-  ok(/- cron: '41 0-3,5-23 \* \* \*'/.test(wf),
-    'the served FIGURES are refreshed every hour, never once a day: at ten accounts a day and a '
+  ok(/- cron: '11,26,41,56 0-3,5-23 \* \* \*'/.test(wf),
+    'the served FIGURES are refreshed every 15 minutes, never once a day: at ten accounts a day and a '
     + 'figure rounded down to the nearest ten, a daily run leaves the front page most of a decade behind');
   ok(/- cron: '41 4 \* \* \*'/.test(wf) && !/- cron: '41 \* \* \* \*'/.test(wf),
     'and the ROSTER keeps its daily fire on an hour the other cron leaves out, so exactly one fires at a time');
-  ok(/MODE='--figures-only'/.test(wf) && /github\.event\.schedule \}\}" = '41 0-3,5-23 \* \* \*'/.test(wf)
+  ok(/MODE='--figures-only'/.test(wf) && /github\.event_name \}\}" = "schedule"/.test(wf)
+     && /github\.event\.schedule \}\}" != '41 4 \* \* \*'/.test(wf)
      && /echo "SYNC_MODE=\$MODE" >> "\$GITHUB_ENV"/.test(wf)
      && /sync-user-directory\.mjs \$SYNC_MODE/.test(wf),
     'the hourly fire takes --figures-only, a dispatch takes the whole roster, and the retry rebuild takes the same mode');

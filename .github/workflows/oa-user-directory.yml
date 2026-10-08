@@ -28,7 +28,12 @@ name: OA — sync the registered-users roster
 # cross-tabulated; the hourly figures-only run reads no profile and never
 # touches it.
 #
-# IT RUNS EVERY HOUR, and it used to run once a day (owner, 2026-09-09: the
+# It runs every hour at least; since 2026-10-08 the figures refresh every
+# 15 minutes. The daily roster still runs at 04:41 UTC. GitHub can delay
+# scheduled runs; manually dispatch this workflow for an immediate refresh.
+# Only changed figures commit, and no member details are published.
+# Historical rationale for the earlier hourly schedule follows.
+# IT RAN EVERY HOUR, and it used to run once a day (owner, 2026-09-09: the
 # front page said "130+" over an Admin area tile reading 142). Twenty-three of
 # those twenty-four fires refresh the two SERVED FIGURES only; the roster
 # itself is still rebuilt once a day, for the reasons under the crons below.
@@ -74,10 +79,11 @@ name: OA — sync the registered-users roster
 
 on:
   schedule:
-    # EVERY HOUR BUT ONE, the two served figures only: the tally and Auth, which
+    # EVERY 15 MINUTES EXCEPT THE DAILY ROSTER RUN, the two served figures only: the tally and Auth, which
     # is the one collection the count is made of. Off the hour so it does not
     # queue behind every other :00 job.
-    - cron: '41 0-3,5-23 * * *'
+    - cron: '11,26,41,56 0-3,5-23 * * *'
+    - cron: '11,26,56 4 * * *'
     # AND ONCE A DAY the whole roster with them. The hours do not overlap, so
     # exactly one of these fires at a time and `github.event.schedule` below
     # says which. Keeping the roster daily is not thrift alone: the Admin area,
@@ -136,14 +142,14 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          # The hourly fire takes the figures alone; the daily one, and every
+          # The frequent scheduled fire takes the figures alone; the daily one, and every
           # dispatch (which is what a rules deploy presses), takes the roster
           # too. github.event.schedule is empty on a dispatch, so the full run
           # is the default and a new trigger can only ever be too thorough.
           # Each step is its own shell, so the Commit step's rebuild reads this
           # back from the environment rather than working the mode out again.
           MODE=''
-          if [ "${{ github.event.schedule }}" = '41 0-3,5-23 * * *' ]; then
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "${{ github.event.schedule }}" != '41 4 * * *' ]; then
             MODE='--figures-only'
           fi
           echo "SYNC_MODE=$MODE" >> "$GITHUB_ENV"
