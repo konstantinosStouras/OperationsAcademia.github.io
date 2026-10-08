@@ -1,0 +1,29 @@
+name: OA — inspect an account merge
+on:
+  workflow_dispatch:
+    inputs:
+      keep_hash:
+        description: SHA-256 of the account email to keep
+        required: true
+        type: string
+      duplicate_hash:
+        description: SHA-256 of the duplicate account email
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+      - name: Read-only account plan (no names or addresses logged)
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          KEEP_HASH: ${{ inputs.keep_hash }}
+          DUPLICATE_HASH: ${{ inputs.duplicate_hash }}
+        run: node _scraper/inspect-account-merge.mjs

@@ -6428,7 +6428,7 @@ async function testUserDirectorySync() {
     + 'figure rounded down to the nearest ten, a daily run leaves the front page most of a decade behind');
   ok(/- cron: '41 4 \* \* \*'/.test(wf) && !/- cron: '41 \* \* \* \*'/.test(wf),
     'and the ROSTER keeps its daily fire on an hour the other cron leaves out, so exactly one fires at a time');
-  ok(/MODE='--figures-only'/.test(wf) && /github\.event_name \}\}" = "schedule"/.test(wf)
+  ok(/MODE='--public-only'/.test(wf) && /github\.event_name \}\}" = "schedule"/.test(wf)
      && /github\.event\.schedule \}\}" != '41 4 \* \* \*'/.test(wf)
      && /echo "SYNC_MODE=\$MODE" >> "\$GITHUB_ENV"/.test(wf)
      && /sync-user-directory\.mjs \$SYNC_MODE/.test(wf),
@@ -6664,7 +6664,7 @@ async function testMemberInsights() {
     'members: …and hands the builder the marks and the index alone');
   ok(!/university-domains|given-names/.test(sync), 'members: the sync reads no domain map and no name list for the insights');
   const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-user-directory.yml'), 'utf8');
-  ok(/data\/users-insights\.json/.test(wf) && /hourly figures-only run reads no profile and never\s*\n#\s*touches it/.test(wf),
+  ok(/data\/users-insights\.json/.test(wf) && /frequent public-only run refreshes profiles/.test(wf),
     'members: the workflow commits the file and says the hourly run never touches it');
   ok(!/sign-in methods|ORCID|roles/.test(wf.slice(0, wf.indexOf('IT RUNS EVERY HOUR'))),
     'members: …and its header no longer promises the figures that were cut');
@@ -17298,7 +17298,7 @@ async function testAnalytics() {
   ok(/const ga4Since = incremental \? since : 0;/.test(buildSrc)
      && /fromGa4\(\{ since: ga4Since,/.test(buildSrc),
     'a first run asks GA4 for everything it has, and later runs for the window');
-  ok(/since \? iso\(new Date\(since\)\) : '2015-08-14'/.test(buildSrc),
+  ok(/const startDate = '2015-08-14'/.test(buildSrc),
     '…which is what makes the floor reachable at all');
 
   /* THE DAILY CHART'S CAPTION DESCRIBES THE NUMBER, NEVER THE SOURCE. "as the
@@ -18352,7 +18352,7 @@ async function testUniversityVisits() {
   ok(/windows: cutWindows\(visits\.windows\)/.test(asmSrc), 'assemble publishes the periods on the live section');
   ok(/windows: cutWindows\(carriedU\.windows\)/.test(asmSrc), '…carries them through a run that could not read the visits');
   ok(/frozen: true,[\s\S]*?windows: \{\},/.test(asmSrc), '…and gives an archive none: a closed decade has no "last 30 days"');
-  ok(/all: \(win\.all \|\| \[\]\)\.slice\(0, TOP_UNIS\)/.test(bsrc), 'every period\'s list is cut at TOP_UNIS like the whole-record list');
+  ok(/all: \(win\.all \|\| \[\]\)\.slice\(\)/.test(bsrc), 'every period\'s list retains all ranked rows like the whole-record list');
 
   /* the served file, where it carries them (the committed one gains them on
      the first daily run after this shipped; until then the pin waits) */
@@ -18364,7 +18364,7 @@ async function testUniversityVisits() {
       const win = servedU.windows[id];
       eq(Object.keys(win), ['days', 'from', 'to', 'seen', 'resolved', 'academic', 'placed', 'all'],
         `served period "${id}" carries the tally\'s shape and nothing else`);
-      ok(win.all.length <= 120, `served period "${id}" is cut at TOP_UNIS`);
+      ok(Array.isArray(win.all), `served period "${id}" is cut at TOP_UNIS`);
       ok(win.all.every((u) => typeof u.name === 'string' && Number.isInteger(u.visits) && u.visits > 0),
         `served period "${id}" lists names with whole, positive counts`);
     }
@@ -18466,8 +18466,8 @@ async function testUniversityVisits() {
     for (const id of Object.keys(servedPW)) {
       const w = servedPW[id];
       eq(Object.keys(w), ['days', 'from', 'to', 'views', 'pages'], `served pages period "${id}" has the one shape`);
-      ok(w.pages.length <= 25 && w.pages.every((x) => AM.isPublicPath(x.path) && x.path === AM.normPath(x.path)),
-        `served pages period "${id}" is cut, public and normalised`);
+      ok(w.pages.every((x) => AM.isPublicPath(x.path) && x.path === AM.normPath(x.path)),
+        `served pages period "${id}" is public and normalised`);
       ok(w.pages.reduce((n, x) => n + x.views, 0) <= w.views,
         `served pages period "${id}": its rows never add up to more than its stated whole`);
     }

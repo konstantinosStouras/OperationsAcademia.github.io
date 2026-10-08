@@ -1,7 +1,7 @@
 # The analytics page — what it needs, and how each source is switched on
 
 `analytics.html` draws its own charts now, from one served file
-(`data/analytics.json`) built daily by `_scraper/build-analytics.mjs`. This is
+(`data/analytics.json`) refreshed every 15 minutes by `_scraper/build-analytics.mjs`. This is
 the setup guide for its sources. **Nothing here is required for the page
 to work** — it is honest and functional with no source at all — but each one
 you switch on adds figures to it.
@@ -377,3 +377,9 @@ read) and the maintainer on the Admin area's inbox card. The step is
 `continue-on-error`, so a failure there never holds the analytics commit back.
 Offline: `node _scraper/build-candidate-stats.mjs --selftest`; a real run needs
 the secret and is a clean no-op without it.
+
+## Refresh and coverage (8 October 2026)
+
+Traffic and university-network aggregates refresh every 15 minutes. Member counts, growth and anonymous affiliation aggregates also refresh every 15 minutes, without rewriting the private roster. Candidate view statistics and the private roster remain daily. GitHub scheduling, Pages publication and GA4 processing can add delay; this is a frequently refreshed snapshot, not a real-time feed.
+
+GA4 daily history is re-read in full so previously missed older dates and corrections can be recovered. Paginated reports include the complete source tail in denominators. University-network day documents are paginated too. Private, archived and test-page exclusions remain. The public charts retain their stated periods, expandable rankings and member anonymity thresholds.

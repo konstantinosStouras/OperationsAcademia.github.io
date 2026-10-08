@@ -131,7 +131,7 @@
     {
       id: 'referrers', kind: 'bars',
       title: 'Which sites send readers',
-      sub: 'The source of each visit as Google Analytics records it. A search engine ' +
+      sub: 'The source of each visit as Google Analytics records it. Awesome Table, Firebase and GitHub are excluded. A search engine ' +
         'appears under its own name; a reader who typed the address or opened a ' +
         'bookmark has no referring site and is counted as such.',
       unit: 'visits', limit: 10,
@@ -391,6 +391,13 @@
 
     drawnAt = root.clientWidth || 0;
     root.textContent = '';
+    if (data.generated) {
+      var fresh = document.createElement('p');
+      fresh.className = 'oa-figure-src';
+      fresh.textContent = 'Traffic snapshot: ' + new Date(data.generated).toLocaleString('en-GB') +
+        '. Figures refresh throughout the day; today is still incomplete.';
+      root.appendChild(fresh);
+    }
 
     var stale = A.staleness(data, Date.now());
     if (stale) {
@@ -406,7 +413,7 @@
       root.appendChild(note(
         '<h2>Nothing is being measured yet</h2>' +
         '<p>This page draws its charts from <code>data/analytics.json</code>, which is ' +
-        'built once a day by <code>_scraper/build-analytics.mjs</code>. That file is ' +
+        'refreshed throughout the day by <code>_scraper/build-analytics.mjs</code>. That file is ' +
         'currently empty, because neither of its two live sources is switched ' +
         'on yet.</p>' +
         '<p>The charts that used to be here were Google Sheets embeds fed by the ' +
@@ -645,7 +652,7 @@
         f4.section.insertBefore(pbar, f4.section.querySelector('.oa-figure-sub'));
       }
       if (publicPages.length) {
-        C.bars(f4.body, {
+        C.bars(f4.body, { showAll: true,
           unit: 'views',
           limit: 12,
           total: pagesTotal,
@@ -686,6 +693,7 @@
   function drawDimension(id) {
     var def = DIMENSIONS.filter(function (d) { return d.id === id; })[0];
     var rec = ((state.data.breakdowns || {})[id]) || null;
+    if (id === 'referrers') rec = A.referralRecord(rec);
     if (!def || !rec || !rec.items || !rec.items.length) return;
 
     var f = figure(def.title, def.sub);
@@ -715,7 +723,7 @@
         }),
       });
     } else {
-      C.bars(f.body, {
+      C.bars(f.body, { showAll: true,
         unit: def.unit,
         limit: def.limit,
         total: rec.total,
@@ -847,7 +855,7 @@
     var shown = Array.isArray(u.shown) ? u.shown : [];
     var fa = figure('Where members work',
       'The affiliation each of the ' + C.full(n) + ' registered members' + (when ? ' on ' + when : '') +
-      ' gave on their profile, counted once a day from what they told the site and nothing else: ' +
+      ' gave on their profile, refreshed throughout the day from what they told the site and nothing else: ' +
       'nothing is guessed about anybody. An affiliation is matched to a university this site lists ' +
       'only where it names one: by the university\'s name, one of its schools, or a short form the ' +
       'site knows. ' + C.full(aff.listed || 0) + ' members name ' + C.full(u.count || 0) +
@@ -1039,7 +1047,7 @@
       f.section.insertBefore(bar, f.section.querySelector('.oa-figure-sub'));
     }
     if (!w.all.length) return;
-    C.bars(f.body, { unit: 'visits', limit: 25, xTitle: 'University',
+    C.bars(f.body, { showAll: true, unit: 'visits', limit: 25, xTitle: 'University',
       /* the live figure's shares are of PLACED visits — the builder's true
          total for the chosen period, the same number the sentence above
          quotes — never of the 25 rows that fitted (bars() offers no share
@@ -1129,4 +1137,45 @@
         'did not come back. It is a plain served file, so this is usually a ' +
         'network problem rather than a broken page. Reloading is worth a try.</p>'));
     });
+  /* Poll the three independent snapshots while visible. Failed reads retain
+     the last good charts; no member details or database access are exposed.
+     Do not rebuild a chart while a reader is using its keyboard controls. */
+  var refreshing = false;
+  var pendingRedraw = false;
+  function refreshSnapshots() {
+    if (document.hidden || refreshing || root.contains(document.activeElement)) return;
+    if (pendingRedraw && state.data) { draw(); pendingRedraw = false; }
+    refreshing = true;
+    var stamp = Date.now();
+    var specs = [
+      { key: 'data', file: 'analytics', valid: function (d) { return d && d.days && typeof d.days === 'object'; } },
+      { key: 'growth', file: 'users-growth', valid: function (d) { return d && Array.isArray(d.days); } },
+      { key: 'members', file: 'users-insights', valid: function (d) { return d && d.members > 0 && d.affiliation; } },
+    ];
+    var changed = false;
+    Promise.all(specs.map(function (spec) {
+      var controller = new AbortController();
+      var timeout = setTimeout(function () { controller.abort(); }, 10000);
+      return fetch('/data/' + spec.file + '.json?v=' + stamp,
+        { cache: 'no-store', signal: controller.signal })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (d) {
+          if (spec.valid(d) && JSON.stringify(d) !== JSON.stringify(state[spec.key])) {
+            state[spec.key] = d;
+            changed = true;
+          }
+        }).catch(function () {})
+        .then(function () { clearTimeout(timeout); });
+    })).then(function () {
+      refreshing = false;
+      pendingRedraw = pendingRedraw || changed;
+      if (pendingRedraw && state.data && !root.contains(document.activeElement)) {
+        draw(); pendingRedraw = false;
+      }
+    });
+  }
+  setInterval(refreshSnapshots, 60000);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) refreshSnapshots();
+  });
 }());

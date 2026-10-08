@@ -1013,14 +1013,7 @@
          inter-linked"). */
       function uniLink(name) {
         name = String(name || '').replace(/^\s+|\s+$/g, '');
-        /* A candidate's affiliation is the whole joined line, smallest part
-           first ("Operations, Kellogg …, Northwestern University"); the
-           directory's search is contains-the-needle over the university, so
-           the full line found nothing. The LAST part is the university. */
-        if (name.indexOf(',') !== -1) {
-          var parts = name.split(',');
-          name = parts[parts.length - 1].replace(/^\s+|\s+$/g, '') || name;
-        }
+        name = OACandCard.universityName(name);
         if (!name) return null;
         var a = document.createElement('a');
         a.href = 'universities?filterA=' + encodeURIComponent(name);

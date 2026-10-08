@@ -19,14 +19,14 @@ name: OA — sync the registered-users roster
 # A tally that cannot be read leaves both files as they are.
 # Counts and dates only, nothing under data/ may carry a name or an address.
 #
-# AND A THIRD, ON THE DAILY RUN ONLY (owner, 2026-10-01: anonymous insights
+# AND A THIRD, ON EVERY RUN (owner, 2026-10-01: anonymous insights
 # about who the members are, from what they told the site and nothing
 # guessed): data/users-insights.json, counts of the affiliations members
 # gave and the countries of those universities, and nothing else, built by
 # _scraper/members-insights.mjs from the profiles the daily run already
 # reads. No group smaller than three is named and nothing is
-# cross-tabulated; the hourly figures-only run reads no profile and never
-# touches it.
+# cross-tabulated; the frequent public-only run refreshes profiles and
+# anonymous insights without reading or writing the private roster.
 #
 # It runs every hour at least; since 2026-10-08 the figures refresh every
 # 15 minutes. The daily roster still runs at 04:41 UTC. GitHub can delay
@@ -142,7 +142,7 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          # The frequent scheduled fire takes the figures alone; the daily one, and every
+          # The frequent scheduled fire refreshes all public aggregates; the daily one, and every
           # dispatch (which is what a rules deploy presses), takes the roster
           # too. github.event.schedule is empty on a dispatch, so the full run
           # is the default and a new trigger can only ever be too thorough.
@@ -150,7 +150,7 @@ jobs:
           # back from the environment rather than working the mode out again.
           MODE=''
           if [ "${{ github.event_name }}" = "schedule" ] && [ "${{ github.event.schedule }}" != '41 4 * * *' ]; then
-            MODE='--figures-only'
+            MODE='--public-only'
           fi
           echo "SYNC_MODE=$MODE" >> "$GITHUB_ENV"
           if [ "${{ inputs.scan }}" = "true" ]; then
