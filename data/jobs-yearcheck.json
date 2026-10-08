@@ -1,6 +1,19 @@
 {
- "generated": "2026-09-18T07:14:05.375Z",
+ "generated": "2026-10-08T23:48:03.795Z",
  "postings": [
+  {
+   "id": "2027-university-of-alabama-20261005",
+   "ref": "",
+   "institution": "University of Alabama",
+   "department": "Culverhouse College of Business, Information Systems, Statistics, and Management Science",
+   "posted": "2026-10-05",
+   "applyByDate": "2027-08-01",
+   "reviewDate": "",
+   "stored": 2027,
+   "should": 2028,
+   "from": "final",
+   "current": true
+  },
   {
    "id": "2026-mcgill-university-20260728",
    "ref": "",
