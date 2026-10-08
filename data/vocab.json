@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-07T18:13:52.942Z",
+ "generated": "2026-10-08T07:40:07.738Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -891,6 +891,10 @@
   },
   {
    "v": "Georgia Tech (ISyE)",
+   "n": 1
+  },
+  {
+   "v": "Ghent University",
    "n": 1
   },
   {
@@ -2400,6 +2404,10 @@
    "n": 1
   },
   {
+   "v": "Faculty of Engineering and Architecture",
+   "n": 1
+  },
+  {
    "v": "Feliciano School of Business",
    "n": 1
   },
@@ -3759,6 +3767,10 @@
   },
   {
    "v": "Industrial Systems Engineering and Management",
+   "n": 1
+  },
+  {
+   "v": "Industrial Systems Engineering and Product Design",
    "n": 1
   },
   {
@@ -6649,6 +6661,19 @@
    "bySchool": {
     "": [
      "ISyE"
+    ]
+   }
+  },
+  "Ghent University": {
+   "schools": [
+    "Faculty of Engineering and Architecture"
+   ],
+   "units": [
+    "Industrial Systems Engineering and Product Design"
+   ],
+   "bySchool": {
+    "Faculty of Engineering and Architecture": [
+     "Industrial Systems Engineering and Product Design"
     ]
    }
   },
@@ -12310,6 +12335,9 @@
   "Faculty of Engineering": [
    "Industrial Engineering",
    "Systems Engineering and Engineering Management"
+  ],
+  "Faculty of Engineering and Architecture": [
+   "Industrial Systems Engineering and Product Design"
   ],
   "Feliciano School of Business": [
    "Information Management and Business Analytics"
