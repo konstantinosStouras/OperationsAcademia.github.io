@@ -188,6 +188,7 @@
   var SOURCE_NAMES = {
     usage: 'the site’s own record',
     ga4: 'Google Analytics',
+    'usage+ga4': 'the site’s own record and Google Analytics',
     history: 'the 2014–2023 archive',
   };
   function sourceName(id) { return SOURCE_NAMES[id] || id || 'an unnamed source'; }
@@ -612,7 +613,7 @@
     });
     if (publicPages.length || hasPageWindows) {
       var win = pageWin
-        ? { source: (data.pagesWindow || {}).source || '', from: pageWin.from, to: pageWin.to, views: pageWin.views }
+        ? { source: pageWin.source || (data.pagesWindow || {}).source || '', from: pageWin.from, to: pageWin.to, views: pageWin.views }
         : (data.pagesWindow || {});
       /* THE SHARE NEEDS A WHOLE. `views` is the window's entire pageview
          count, stated by the builder; the rows here are only the top of the

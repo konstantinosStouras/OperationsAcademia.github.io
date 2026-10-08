@@ -20,6 +20,14 @@ on:
     - cron: '25 4 * * *'
   workflow_dispatch:
     inputs:
+      merge_accounts:
+        description: 'Plan a guarded provider merge; no analytics build'
+        type: boolean
+        default: false
+      merge_write:
+        description: 'Apply the specifically requested account merge'
+        type: boolean
+        default: false
       audit:
         description: 'Read-only audit of held candidate cards and requested referral URLs'
         type: boolean
@@ -50,7 +58,7 @@ permissions:
 
 jobs:
   build:
-    if: ${{ !inputs.audit }}
+    if: ${{ !inputs.audit && !inputs.merge_accounts }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -162,6 +170,7 @@ jobs:
       - run: npm install --no-save --no-audit --no-fund firebase-admin@12 playwright@1 google-auth-library@9
       - run: npx playwright install --with-deps chromium
       - run: node _scraper/analytics-coverage-test.mjs
+      - run: node _scraper/audit-analytics-page.mjs
       - name: Read-only candidate layout audit
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
@@ -178,3 +187,22 @@ jobs:
           KEEP_HASH: ${{ inputs.keep_hash }}
           DUPLICATE_HASH: ${{ inputs.duplicate_hash }}
         run: node _scraper/inspect-account-merge.mjs
+
+  merge:
+    if: ${{ inputs.merge_accounts }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+      - run: node _scraper/account-merge-test.mjs
+      - name: Plan or apply the guarded account merge
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          KEEP_HASH: ${{ inputs.keep_hash }}
+          DUPLICATE_HASH: ${{ inputs.duplicate_hash }}
+          APPLY_MERGE: ${{ inputs.merge_write }}
+        run: node _scraper/merge-account-identities.mjs

@@ -330,7 +330,7 @@ async function fromUsage(db, { windowFrom, now = Date.now() }) {
        table, so a share computed over the listed rows would be a share of the
        rows that fitted. */
     pagesWindow: { from: ninety.from, to: ninety.to, views: ninety.views },
-    pagesWindows,
+    pagesWindows, pageRecords: records,
     universities: [],
     breakdowns: {
       /* THE HOURS ARE THE FIRST-PARTY RECORD'S ALONE. It stamps the instant a
@@ -483,8 +483,8 @@ async function fromGa4({ since, windowFrom, windowTo }) {
   const winTo = inWindow[inWindow.length - 1] || '';
 
   const paged = await readAllReportRows(runReport, {
-    dateRanges: [{ startDate: winStart, endDate }],
-    dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
+    dateRanges: [{ startDate, endDate }],
+    dimensions: [{ name: 'date' }, { name: 'pagePath' }, { name: 'pageTitle' }],
     metrics: [{ name: 'screenPageViews' }, { name: 'userEngagementDuration' }],
     orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
     dimensionFilter: excludeAdmin,
@@ -492,14 +492,22 @@ async function fromGa4({ since, windowFrom, windowTo }) {
   });
 
   const pages = [];
+  const pageDays = new Map();
   for (const row of paged.rows || []) {
-    const p = row.dimensionValues?.[0]?.value || '';
+    const rawDay = row.dimensionValues?.[0]?.value || '';
+    if (!/^\d{8}$/.test(rawDay)) continue;
+    const day = rawDay.slice(0, 4) + '-' + rawDay.slice(4, 6) + '-' + rawDay.slice(6, 8);
+    const p = A.normPath(row.dimensionValues?.[1]?.value || '');
     const views = Number(row.metricValues?.[0]?.value || 0);
     const secs = Number(row.metricValues?.[1]?.value || 0);
-    if (!p || !views) continue;
+    if (!p || !views || !A.isDay(day) || !A.isPublicPath(p)) continue;
+    if (!pageDays.has(day)) pageDays.set(day, {});
+    const cell = pageDays.get(day)[p] || (pageDays.get(day)[p] = [0, 0]);
+    cell[0] += views; cell[1] += secs;
+    if (day < winStart) continue;
     pages.push({
       path: A.normPath(p),
-      title: row.dimensionValues?.[1]?.value || '',
+      title: row.dimensionValues?.[2]?.value || '',
       views,
       avgSec: views ? secs / views : 0,
     });
@@ -575,6 +583,7 @@ async function fromGa4({ since, windowFrom, windowTo }) {
 
   return {
     source: 'ga4', days, pages,
+    pageRecords: Array.from(pageDays, ([day, pages]) => ({ day, pages })),
     /* the same whole-window pageview count the usage leg states — see there */
     pagesWindow: { ...win, views: winViews },
     universities: [], breakdowns, engagement,
@@ -697,9 +706,27 @@ function cutPageWindows(windows) {
       to: A.isDay(w.to) ? w.to : '',
       views: Math.max(0, Math.round(Number(w.views) || 0)),
       pages: A.topPages(pages, pages.size),
+      ...(w.source ? { source: String(w.source) } : {}),
     };
   }
   return out;
+}
+
+export function pagePeriodsFromSources(sources, now) {
+  const byDay = new Map();
+  for (const source of sources) {
+    for (const record of source.pageRecords || []) {
+      if (A.isDay(record.day) && !byDay.has(record.day)) byDay.set(record.day, { ...record, source: source.source });
+    }
+  }
+  if (!byDay.size) return null;
+  const records = Array.from(byDay.values());
+  const windows = A.pageWindows(records, { now });
+  for (const window of Object.values(windows)) {
+    const used = new Set(records.filter(r => r.day >= window.from && r.day <= window.to).map(r => r.source));
+    window.source = A.SOURCE_ORDER.filter(id => used.has(id)).join('+');
+  }
+  return windows;
 }
 
 /* ---------------------------------------------------------------------- main */
@@ -813,6 +840,24 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
   data.pages = A.topPages(pages, pages.size);
   data.pagesWindow = pagesWindow || { source: '', from: '', to: '', views: 0 };
   data.pagesWindows = cutPageWindows(pagesWindows);
+  // Extend page rankings with older GA4 days, while one source owns each day.
+  // If a previously combined source is down, keep the complete last snapshot.
+  const pageSources = ordered.filter(r => Array.isArray(r.pageRecords));
+  const priorSources = String(carry && carry.pagesWindow && carry.pagesWindow.source || '').split('+');
+  const missingPageSource = priorSources.length > 1 && priorSources.some(id => !pageSources.some(r => r.source === id));
+  if (missingPageSource && carry && carry.pagesWindows) {
+    data.pages = carry.pages;
+    data.pagesWindow = carry.pagesWindow;
+    data.pagesWindows = cutPageWindows(carry.pagesWindows);
+  } else {
+    const combined = pagePeriodsFromSources(pageSources, now);
+    if (combined) {
+      data.pagesWindows = cutPageWindows(combined);
+      const ninety = combined['90'];
+      data.pages = ninety.pages;
+      data.pagesWindow = { source: ninety.source, from: ninety.from, to: ninety.to, views: ninety.views };
+    }
+  }
   data.breakdowns = breakdowns;
   data.engagement = engagement;
 

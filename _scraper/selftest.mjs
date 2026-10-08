@@ -18465,7 +18465,7 @@ async function testUniversityVisits() {
     eq(Object.keys(servedPW), AM.RANGES.map((r) => r.id), 'the served pages periods are the page\'s own ids');
     for (const id of Object.keys(servedPW)) {
       const w = servedPW[id];
-      eq(Object.keys(w), ['days', 'from', 'to', 'views', 'pages'], `served pages period "${id}" has the one shape`);
+      eq(Object.keys(w), ['days', 'from', 'to', 'views', 'pages'].concat(w.source ? ['source'] : []), `served pages period "${id}" has the one shape`);
       ok(w.pages.every((x) => AM.isPublicPath(x.path) && x.path === AM.normPath(x.path)),
         `served pages period "${id}" is public and normalised`);
       ok(w.pages.reduce((n, x) => n + x.views, 0) <= w.views,

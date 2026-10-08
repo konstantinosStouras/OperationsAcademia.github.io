@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 const A = createRequire(import.meta.url)('../assets/oa-analytics-model.js');
-import { readAllDocuments, readAllReportRows, assemble } from './build-analytics.mjs';
+import { readAllDocuments, readAllReportRows, assemble, pagePeriodsFromSources } from './build-analytics.mjs';
 const records = Array.from({ length: 7 }, (_, i) => ({ id: i }));
 const base = { startAfter: (cursor) => query(cursor.id + 1), limit: (size) => query(0).limit(size) };
 function query(offset) { return { limit: (size) => ({ get: async () => ({ docs: records.slice(offset, offset + size), size: records.slice(offset, offset + size).length }) }) }; }
@@ -38,3 +38,19 @@ assert.equal(ref.items.length, 2);
 assert.deepEqual(A.referralRecord({ total: 50, items: [
   { name: 'github.com', value: 30 }, { name: 'en.wikipedia.org', value: 20 },
 ] }), { total: 20, items: [{ name: 'en.wikipedia.org', value: 20 }] });
+
+const usageRecords = { source: 'usage', days: { '2026-10-08': [1, 3, 3] },
+  pageRecords: [{ day: '2026-10-08', pages: { '/jobs': [3, 30] } }] };
+const gaRecords = { source: 'ga4', days: { '2026-10-07': [1, 5, 5], '2026-10-08': [10, 100, 100] },
+  pageRecords: [{ day: '2026-10-07', pages: { '/jobs': [5, 50] } }, { day: '2026-10-08', pages: { '/jobs': [100, 1000] } }] };
+const history = pagePeriodsFromSources([usageRecords, gaRecords], '2026-10-08');
+assert.equal(history.all.views, 8);
+assert.equal(history.all.pages[0].views, 8);
+assert.equal(history.all.source, 'usage+ga4');
+const mixed = assemble([usageRecords, gaRecords], { now: Date.parse('2026-10-08') });
+assert.equal(mixed.pagesWindow.views, 8);
+assert.deepEqual(assemble([usageRecords], { carry: mixed, now: Date.parse('2026-10-08') }).pagesWindows, mixed.pagesWindows);
+const C = (await import('node:module')).createRequire(import.meta.url)('../assets/oa-candcard.js');
+assert.equal(C.universityName('Operations, Haas School of Business, University of California, Berkeley'), 'University of California, Berkeley');
+assert.equal(C.universityName('Operations, Kellogg School of Management, Northwestern University'), 'Northwestern University');
+console.log('Historical page coverage: earlier GA4 days, overlap deduplication and failed-source retention passed');

@@ -383,3 +383,5 @@ the secret and is a clean no-op without it.
 Traffic and university-network aggregates refresh every 15 minutes. Member counts, growth and anonymous affiliation aggregates also refresh every 15 minutes, without rewriting the private roster. Candidate view statistics and the private roster remain daily. GitHub scheduling, Pages publication and GA4 processing can add delay; this is a frequently refreshed snapshot, not a real-time feed.
 
 GA4 daily history is re-read in full so previously missed older dates and corrections can be recovered. Paginated reports include the complete source tail in denominators. University-network day documents are paginated too. Private, archived and test-page exclusions remain. The public charts retain their stated periods, expandable rankings and member anonymity thresholds.
+
+Page rankings now include GA4 history from before first-party collection began. One source owns each day, so overlapping measurements are never added. Each period states its actual contributing sources. If a contributing source fails, the complete last combined page snapshot is retained.
