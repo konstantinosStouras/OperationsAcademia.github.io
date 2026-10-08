@@ -1,3 +1,4 @@
+import { sameMailbox } from './merge-account-identities.mjs';
 import { createHash } from 'node:crypto';
 const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
 let credential; try { credential = JSON.parse(raw); } catch { credential = JSON.parse(Buffer.from(raw || '', 'base64').toString()); }
@@ -31,4 +32,5 @@ const counts = async uid => {
 console.log(JSON.stringify({ keeper: { providers: keeper.providerData.map(p => p.providerId), emailVerified: keeper.emailVerified, disabled: keeper.disabled, content: await counts(keeper.uid) },
   duplicate: { providers: duplicate.providerData.map(p => p.providerId), emailVerified: duplicate.emailVerified, disabled: duplicate.disabled, content: await counts(duplicate.uid) },
   sameName: !!name(kp) && name(kp) === name(dp), conflictingOrcid: !!kp.orcid && !!dp.orcid && kp.orcid !== dp.orcid,
+  googleMailboxMatchesPrimary: duplicate.providerData.some(p => p.providerId === 'google.com' && sameMailbox(p.email, duplicate.email)),
   inspectedOnly: true }));

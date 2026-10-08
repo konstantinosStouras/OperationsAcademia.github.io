@@ -335,7 +335,7 @@
     var out = [];
     var day = rows[0].day;
     var last = rows[rows.length - 1].day;
-    while (day <= last && out.length < 4200) {
+    while (day <= last) {
       out.push(have[day] ||
         { day: day, visitors: null, sessions: null, pageviews: null });
       day = dayShift(day, 1);

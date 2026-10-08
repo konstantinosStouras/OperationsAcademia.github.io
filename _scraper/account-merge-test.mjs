@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { guardMerge, mergeProfile } from './merge-account-identities.mjs';
+import { guardMerge, mergeProfile, sameMailbox } from './merge-account-identities.mjs';
 const keep = { uid: 'keep', disabled: false, emailVerified: true, providerData: [{ providerId: 'password' }] };
 const duplicate = { uid: 'duplicate', disabled: false, providerData: [{ providerId: 'google.com' }, { providerId: 'oidc.orcid' }, { providerId: 'password' }] };
 const kp = { firstName: 'Test', lastName: 'Researcher', affiliation: 'Keep University' };
@@ -15,3 +15,8 @@ assert.equal(merged.affiliation, kp.affiliation);
 assert.equal(merged.website, dp.website);
 assert.equal(merged.orcidVerified, true);
 console.log('Account merge: identity, provider-conflict, content-preservation and fill-empty guards passed');
+
+assert.equal(sameMailbox('some.name+tag@gmail.com', 'somename@gmail.com'), true);
+assert.equal(sameMailbox('some.name@googlemail.com', 'somename@gmail.com'), true);
+assert.equal(sameMailbox('some.name@uw.edu', 'somename@uw.edu'), false);
+assert.equal(sameMailbox('different@gmail.com', 'somename@gmail.com'), false);

@@ -488,7 +488,7 @@ async function fromGa4({ since, windowFrom, windowTo }) {
     metrics: [{ name: 'screenPageViews' }, { name: 'userEngagementDuration' }],
     orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
     dimensionFilter: excludeAdmin,
-    limit: 200,
+    limit: 10000,
   });
 
   const pages = [];

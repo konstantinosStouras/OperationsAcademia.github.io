@@ -1,6 +1,17 @@
 import { createHash } from 'node:crypto';
 import { isMain } from './_main.mjs';
 import { rowFromAuthUser } from './sync-user-directory.mjs';
+class MergeGuardError extends Error {}
+export function sameMailbox(a, b) {
+  const canonical = raw => {
+    const email = String(raw || '').trim().toLowerCase();
+    const parts = email.split('@');
+    if (parts.length !== 2) return email;
+    if (['gmail.com', 'googlemail.com'].includes(parts[1])) return parts[0].split('+')[0].replace(/\./g, '') + '@gmail.com';
+    return email;
+  };
+  return !!a && !!b && canonical(a) === canonical(b);
+}
 export function mergeProfile(keep = {}, duplicate = {}) {
   const result = { ...keep };
   for (const key of ['firstName', 'lastName', 'affiliation', 'website', 'contactEmail', 'orcid', 'photo']) {
@@ -13,15 +24,15 @@ export function mergeProfile(keep = {}, duplicate = {}) {
 }
 export function guardMerge(keep, duplicate, kp, dp, counts) {
   const name = p => [p.firstName, p.lastName].filter(Boolean).join(' ').trim().toLowerCase().replace(/\s+/g, ' ');
-  if (!keep || !duplicate || keep.uid === duplicate.uid || keep.disabled || duplicate.disabled) throw new Error('Two distinct active accounts are required.');
-  if (!name(kp) || name(kp) !== name(dp)) throw new Error('The names must match.');
-  if (kp.orcid && dp.orcid && kp.orcid !== dp.orcid) throw new Error('The ORCID identities conflict.');
-  if (!keep.emailVerified || !keep.providerData.some(p => p.providerId === 'password')) throw new Error('The kept account must have a verified email/password login.');
-  if (!duplicate.providerData.some(p => p.providerId === 'google.com')) throw new Error('The duplicate must have Google linked.');
+  if (!keep || !duplicate || keep.uid === duplicate.uid || keep.disabled || duplicate.disabled) throw new MergeGuardError('Two distinct active accounts are required.');
+  if (!name(kp) || name(kp) !== name(dp)) throw new MergeGuardError('The names must match.');
+  if (kp.orcid && dp.orcid && kp.orcid !== dp.orcid) throw new MergeGuardError('The ORCID identities conflict.');
+  if (!keep.emailVerified || !keep.providerData.some(p => p.providerId === 'password')) throw new MergeGuardError('The kept account must have a verified email/password login.');
+  if (!duplicate.providerData.some(p => p.providerId === 'google.com')) throw new MergeGuardError('The duplicate must have Google linked.');
   const moving = duplicate.providerData.filter(p => p.providerId !== 'password');
-  if (moving.some(p => !['google.com', 'oidc.orcid'].includes(p.providerId))) throw new Error('Unsupported provider: nothing changed.');
-  if (moving.some(p => keep.providerData.some(k => k.providerId === p.providerId))) throw new Error('The kept account already has a provider that would conflict.');
-  if (Object.values(counts).some(n => n !== 0)) throw new Error('The duplicate has content that needs a separate transfer: nothing changed.');
+  if (moving.some(p => !['google.com', 'oidc.orcid'].includes(p.providerId))) throw new MergeGuardError('Unsupported provider: nothing changed.');
+  if (moving.some(p => keep.providerData.some(k => k.providerId === p.providerId))) throw new MergeGuardError('The kept account already has a provider that would conflict.');
+  if (Object.values(counts).some(n => n !== 0)) throw new MergeGuardError('The duplicate has content that needs a separate transfer: nothing changed.');
   return moving;
 }
 async function main() {
@@ -32,11 +43,11 @@ async function main() {
   const auth = admin.auth(), db = admin.firestore();
   const hash = email => createHash('sha256').update(String(email || '').trim().toLowerCase()).digest('hex');
   const kh = process.env.KEEP_HASH, dh = process.env.DUPLICATE_HASH;
-  if (!/^[a-f0-9]{64}$/.test(kh || '') || !/^[a-f0-9]{64}$/.test(dh || '') || kh === dh) throw new Error('Two account hashes are required.');
+  if (!/^[a-f0-9]{64}$/.test(kh || '') || !/^[a-f0-9]{64}$/.test(dh || '') || kh === dh) throw new MergeGuardError('Two account hashes are required.');
   const journal = db.collection('accountMergeBackups').doc(kh + '-' + dh);
   const prior = (await journal.get()).data();
   if (prior && prior.status === 'complete') { console.log('This merge is already complete.'); return; }
-  if (prior && prior.status !== 'rolled-back') throw new Error('A prior attempt requires review before retrying.');
+  if (prior && prior.status !== 'rolled-back') throw new MergeGuardError('A prior attempt requires review before retrying.');
   let keep, duplicate, token;
   do {
     const page = await auth.listUsers(1000, token);
@@ -46,7 +57,7 @@ async function main() {
     }
     token = page.pageToken;
   } while (token);
-  if (!keep || !duplicate) throw new Error('Both accounts must exist.');
+  if (!keep || !duplicate) throw new MergeGuardError('Both accounts must exist.');
   const roots = ['profiles', 'registeredUsers', 'userDirectory', 'candidateMarkers', 'users', 'messages'];
   const snapshots = [];
   for (const col of roots) {
@@ -66,7 +77,7 @@ async function main() {
     for (const col of collections) if (!['alerts', 'items'].includes(col.id)) counts[root + ':' + col.id] = (await col.get()).size;
   }
   const moving = guardMerge(keep, duplicate, kp, dp, counts);
-  if (!moving.some(p => p.providerId === 'google.com' && hash(p.email) === dh)) throw new Error('The Google address does not match the specified duplicate.');
+  if (!moving.some(p => p.providerId === 'google.com' && sameMailbox(p.email, duplicate.email))) throw new MergeGuardError('The Google address does not match the specified duplicate.');
   const keys = await db.collection('accountKeys').where('uid', '==', duplicate.uid).get();
   const usage = await db.collection('usageSessions').where('uid', '==', duplicate.uid).get();
   const keptCandidates = await db.collection('candidateSubmissions').where('uid', '==', keep.uid).get();
@@ -87,9 +98,9 @@ async function main() {
       await auth.updateUser(keep.uid, { providerToLink: link });
     }
     const verified = await auth.getUser(keep.uid);
-    if (verified.email !== keep.email || verified.emailVerified !== keep.emailVerified || !verified.providerData.some(p => p.providerId === 'password')) throw new Error('The UW login changed unexpectedly.');
+    if (verified.email !== keep.email || verified.emailVerified !== keep.emailVerified || !verified.providerData.some(p => p.providerId === 'password')) throw new MergeGuardError('The UW login changed unexpectedly.');
     for (const provider of moving) {
-      if ((await auth.getUserByProviderUid(provider.providerId, provider.uid)).uid !== keep.uid) throw new Error('Provider link verification failed.');
+      if ((await auth.getUserByProviderUid(provider.providerId, provider.uid)).uid !== keep.uid) throw new MergeGuardError('Provider link verification failed.');
     }
     await journal.update({ status: 'providers-linked' });
   } catch {
@@ -103,7 +114,7 @@ async function main() {
     }
     if (restored) await auth.updateUser(duplicate.uid, { disabled: false });
     await journal.update({ status: restored ? 'rolled-back' : 'review-required' });
-    throw new Error(restored ? 'Provider transfer failed; original provider links restored.' : 'Provider transfer needs recovery from the private backup.');
+    throw new MergeGuardError(restored ? 'Provider transfer failed; original provider links restored.' : 'Provider transfer needs recovery from the private backup.');
   }
   const combined = mergeProfile(kp, dp);
   const roster = rowFromAuthUser(await auth.getUser(keep.uid), get('userDirectory', keep.uid), combined);
@@ -120,18 +131,18 @@ async function main() {
     await changes.commit();
   }
   const candidatesAfter = await db.collection('candidateSubmissions').where('uid', '==', keep.uid).get();
-  if (JSON.stringify(keptCandidates.docs.map(d => [d.id, d.data()])) !== JSON.stringify(candidatesAfter.docs.map(d => [d.id, d.data()]))) throw new Error('Candidate data changed during the merge: review before retirement.');
+  if (JSON.stringify(keptCandidates.docs.map(d => [d.id, d.data()])) !== JSON.stringify(candidatesAfter.docs.map(d => [d.id, d.data()]))) throw new MergeGuardError('Candidate data changed during the merge: review before retirement.');
   await journal.update({ status: 'data-preserved' });
   await auth.deleteUser(duplicate.uid);
-  if ((await auth.getUserByEmail(keep.email)).uid !== keep.uid) throw new Error('UW account lookup failed.');
-  for (const provider of moving) if ((await auth.getUserByProviderUid(provider.providerId, provider.uid)).uid !== keep.uid) throw new Error('Final provider lookup failed.');
+  if ((await auth.getUserByEmail(keep.email)).uid !== keep.uid) throw new MergeGuardError('UW account lookup failed.');
+  for (const provider of moving) if ((await auth.getUserByProviderUid(provider.providerId, provider.uid)).uid !== keep.uid) throw new MergeGuardError('Final provider lookup failed.');
   await journal.update({ status: 'complete', completedAt: Date.now() });
   console.log(JSON.stringify({ merged: true, keepPassword: true, preservedProviders: ['password', ...moving.map(p => p.providerId)],
     candidateProfilesPreserved: candidatesAfter.size, retiredDuplicate: true, privateBackup: true }));
 }
 if (isMain(import.meta.url)) main().catch((e) => {
   // Our own guard errors carry no personal values; SDK errors log only a code.
-  const safe = /^(Two |Both |The |Unsupported |A prior |Provider transfer |UW account |Final provider |Candidate data )/.test(e.message) && !e.message.includes('@');
+  const safe = e instanceof MergeGuardError;
   console.error(safe ? e.message : 'Account merge stopped (code ' + (e.code || 'unknown') + '); no personal details are logged.');
   process.exitCode = 1;
 });
