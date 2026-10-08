@@ -72,7 +72,7 @@
        of the page or the editor's own filter goes on hiding the posting they
        have just corrected */
     'countries',
-    'applyBy', 'applyByDate', 'reviewDate', 'comments', 'characteristics',
+    'applyBy', 'applyByDate', 'reviewDate', 'comments', 'characteristics', 'applicationStatus',
     'adUrl', 'postedAtUrl',
   ];
 
@@ -371,6 +371,7 @@
     doc.countries = countriesList(r, o.canonCountry).slice(0, COUNTRY_MAX);
     doc.untilFilled = untilFilled;
     doc.applyByDate = r.applyByDate || '';
+    doc.applicationStatus = r.applicationStatus === 'Expired' ? 'Expired' : '';
     doc.reviewDate = r.reviewDate || '';
     doc.applyByNote = applyByNote;
     doc.comments = r.comments || '';
@@ -496,6 +497,7 @@
       levels: (doc.levels || []).slice(),
       country: canonCountry(doc.country || '') || '',
       applyByDate: doc.applyByDate || '',
+      applicationStatus: doc.applicationStatus === 'Expired' ? 'Expired' : '',
       applyBy: composeApplyBy(doc),
       comments: doc.comments || '',
       characteristics: (doc.characteristics || []).slice(),

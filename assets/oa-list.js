@@ -175,6 +175,7 @@
 
   var DERIVE = {
     deadline: function (row) {
+      if (row.applicationStatus === 'Expired') return 'Expired';
       // No closing date on record — the sheet's "Until filled." postings.
       // (The writers guarantee the two cannot disagree: a row whose prose says
       // "until filled"/"rolling" carries NO date, in every pipeline and in the

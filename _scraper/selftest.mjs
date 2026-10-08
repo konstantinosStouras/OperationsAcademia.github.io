@@ -1829,7 +1829,7 @@ async function testMultiCountryPostings() {
     'the jobSubmissions rules block is bounded for the two pins below');
   eq((jobsBlock.match(/keys\(\)\.size\(\) <= /g) || []).length, 1,
     '_firestore.rules: jobSubmissions carries exactly ONE key ceiling');
-  ok(/allow create: if verified\(\)[\s\S]{0,900}?keys\(\)\.size\(\) <= 35;/.test(jobsBlock),
+  ok(/allow create: if verified\(\)[\s\S]{0,900}?keys\(\)\.size\(\) <= 36;/.test(jobsBlock),
     '…and it is on the CREATE, so an edit is never refused for the key it gained');
 
   /* --- 10. AND EVERY CONSUMER READS THE LIST ---------------------------- */
@@ -4384,6 +4384,8 @@ async function testVocabFile() {
      on it is reported by `node _scraper/selftest.mjs --open`. Delete the entry
      when the owner rules on it (the answer goes in SCOPED_UNIT_ALIASES). */
   const AWAITING_OWNER = new Set([
+    // Keep these existing names distinct until their hiring units are verified.
+    'HEC Montréal|Logistics and Operations Management|Management',
     /* THE WORKBOOK WRITES A FIELD WHERE THE SITE ASKS FOR A DEPARTMENT. Its
        hiring-unit column holds what the post is IN — "OM", "BA", "SCM/OM",
        "IS/BA" — and the pipeline publishes that as the department name, so one
@@ -11744,6 +11746,13 @@ function testReviewBusiness() {
 }
 
 function testReviewEdits() {
+  eq(cleanEdit('applicationStatus', 'Expired'), 'Expired', 'a closed search can be retained without inventing a date');
+  eq(cleanEdit('applicationStatus', ''), '', 'expiry can be cleared when a search reopens');
+  eq(cleanEdit('applicationStatus', 'Unknown'), undefined, 'unknown application statuses are refused');
+  const expired = applyEdits(RV_ROW, { applicationStatus: 'Expired' });
+  eq(expired.applicationStatus, 'Expired', 'expiry survives the publication transform');
+  eq(expired.applyByDate, RV_ROW.applyByDate, 'expiry does not fabricate or replace the closing date');
+  ok(PUBLIC_FIELDS.includes('applicationStatus'), 'the public listing carries explicit expiry');
   /* An edit is sanitised exactly as an ingest would sanitise it: a browser is
      not the authority on what a posting may contain. */
   eq(cleanEdit('country', 'USA'), 'United States',
@@ -17171,10 +17180,10 @@ async function testAnalytics() {
     'but the page still records WHY they went — the comment is the explanation, ' +
     'and the check above must never be satisfiable by deleting it');
   for (const src of ['assets/oa-analytics-model.js', 'assets/oa-charts.js', 'assets/oa-analytics.js']) {
-    ok(new RegExp('<script defer src="' + src.replace(/[/.]/g, '\\$&') + '"').test(html),
+    ok(new RegExp('<script defer src="' + src.replace(/[/.]/g, '\\$&') + '(?:\\?[^"<>]*)?"').test(html),
       `analytics.html loads ${src}, deferred like every other script on this site`);
   }
-  ok(/<link href="assets\/oa-analytics\.css" rel="stylesheet">/.test(html),
+  ok(/<link href="assets\/oa-analytics\.css(?:\?[^"<>]*)?" rel="stylesheet">/.test(html),
     'and its stylesheet');
   ok(/id="oa-analytics"/.test(html), 'the mount point is present');
   ok(/<noscript>/.test(html),

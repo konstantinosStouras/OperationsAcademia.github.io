@@ -141,7 +141,9 @@
     { key: 'comments', label: 'Comments', max: 1500, area: true },
     { key: 'adUrl', label: 'Link to the advert', max: 600 },
     { key: 'postedAtUrl', label: 'Posted at', max: 600 },
-    { key: 'furtherInfoUrl', label: 'Further info', max: 600 }
+    { key: 'furtherInfoUrl', label: 'Further info', max: 600 },
+    { key: 'applicationStatus', label: 'Application status', max: 20,
+      options: ['', 'Expired'] }
   ];
 
   /** The line the card publishes: the school and the department joined. ONE
@@ -417,7 +419,8 @@
         '<strong>' + esc(fieldValue(doc, 'institution') || row.id || 'Untitled posting') + '</strong>' +
         (line ? ' <span class="oa-hint" style="display:inline">— ' +
           esc(line) + '</span>' : '') +
-        '<span class="oa-fb-status is-open">under review</span>' +
+        '<span class="oa-fb-status is-open">' +
+          (fieldValue(doc, 'applicationStatus') === 'Expired' ? 'expired · under review' : 'under review') + '</span>' +
         '<p class="oa-hint">Advertised ' + esc(row.posted || '?') +
           ' &middot; market ' + esc(String(row.year || '?')) +
           ' &middot; queued ' + esc(fmtDate(doc.queuedAt) || '?') +
@@ -888,7 +891,7 @@
      screen — kept so a decision can refresh the tab counts without re-reading
      anything. */
   var state = {
-    crawled: [], user: [], userError: false, source: 'crawled', year: '*',
+    crawled: [], rejected: [], rejectedError: false, user: [], userError: false, source: 'crawled', year: '*',
     /* What the MAINTAINER has taken down on the user tab, and whether that
        read answered. Deliberately NOT a third source tab: it is not a queue,
        nothing is waiting on it, and a tab reading (3) beside the two that
@@ -995,6 +998,53 @@
     renderSources(db, source);
     renderYears(db, all, year, s);
     render(db, shownDocs, source);
+    renderRejected(db);
+  }
+
+  /* Rejection is recoverable. Restore keeps the original row and corrections;
+     restoring as expired records the application's state without inventing
+     a closing date or approving the posting. */
+  function renderRejected(db) {
+    var old = $('oa-review-rejected');
+    if (old) old.remove();
+    if (state.source !== 'crawled') return;
+    var drawer = document.createElement('details');
+    drawer.id = 'oa-review-rejected';
+    if (state.rejectedError) {
+      drawer.innerHTML = '<summary>Rejected postings</summary><p class="oa-form-msg is-err">Could not read rejected postings. Reload to try again.</p>';
+    } else {
+      if (!state.rejected.length) return;
+      drawer.innerHTML = '<summary>Rejected postings (' + state.rejected.length + ')</summary>' +
+        state.rejected.map(function (doc, i) {
+          var ad = safeHref(fieldValue(doc, 'adUrl'));
+          return '<article class="oa-fb-card"><strong>' + esc(fieldValue(doc, 'institution')) + '</strong>' +
+            '<p>' + esc(fieldValue(doc, 'department') || fieldValue(doc, 'unit')) + '</p>' +
+            '<p>' + esc((fieldValue(doc, 'levels') || []).join(', ')) + '</p>' +
+            (ad ? '<p><a href="' + esc(ad) + '" target="_blank" rel="noopener">Open the advert</a></p>' : '') +
+            '<button type="button" class="button" data-restore-review="' + i + '">Restore to review</button> ' +
+            '<button type="button" class="button" data-restore-expired="' + i + '">Restore as expired</button>' +
+            '<p data-msg role="status"></p></article>';
+        }).join('');
+      drawer.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-restore-review],button[data-restore-expired]');
+        if (!b) return;
+        var expired = b.hasAttribute('data-restore-expired');
+        var doc = state.rejected[Number(b.getAttribute(expired ? 'data-restore-expired' : 'data-restore-review'))];
+        var card = b.closest('article');
+        var msg = card.querySelector('[data-msg]');
+        var edits = Object.assign({}, doc.edits || {});
+        if (expired) edits.applicationStatus = 'Expired';
+        Array.prototype.forEach.call(card.querySelectorAll('button'), function (x) { x.disabled = true; });
+        msg.textContent = 'Restoring…';
+        writeDecision(db, doc, { status: 'pending', edits: edits, reviewedAt: new Date().toISOString() })
+          .then(function () { load(db); })
+          .catch(function () {
+            msg.textContent = 'Could not restore. Try again after reloading.';
+            Array.prototype.forEach.call(card.querySelectorAll('button'), function (x) { x.disabled = false; });
+          });
+      });
+    }
+    $('oa-review-list').parentNode.appendChild(drawer);
   }
 
   /** A card the maintainer has dealt with leaves its tab's counts, so the two
@@ -1068,15 +1118,20 @@
    */
   function wireDeadline(card) {
     var date = card.querySelector('[data-key="applyByDate"]');
+    var status = card.querySelector('[data-key="applicationStatus"]');
     var derived = card.querySelector('[data-derived="deadline"]');
     if (!date || !derived) return;
 
     function preview() {
       var v = String(date.value || '').trim();
-      derived.textContent = 'Published as: ' + (v ? longDate(v) : 'Until filled.');
+      var expired = status && status.value === 'Expired';
+      derived.textContent = 'Published as: ' + (expired
+        ? 'Expired' + (v ? ' (' + longDate(v) + ')' : '')
+        : (v ? longDate(v) : 'Until filled.'));
     }
     date.addEventListener('input', preview);
     date.addEventListener('change', preview);
+    if (status) status.addEventListener('change', preview);
     preview();
   }
 
@@ -1786,12 +1841,17 @@
           .filter(function (d) { return d && d.rowId; });
       });
 
-    Promise.all([crawled, readUser(db)])
+    var rejected = db.collection(COL).where('status', '==', 'rejected').get()
+      .then(function (snap) { return snap.docs.map(function (d) { return d.data(); }).filter(function (d) { return d && d.rowId; }); })
+      ['catch'](function () { return null; });
+    Promise.all([crawled, readUser(db), rejected])
       .then(function (r) {
         /* Sorted here rather than in the query so no composite index is
            needed for collections this small; the comparator is rankBy's
            next-market-first, newest-advertisement-within-it. */
         state.crawled = r[0].sort(rankBy(SOURCES.crawled));
+        state.rejected = (r[2] || []).sort(rankBy(SOURCES.crawled));
+        state.rejectedError = r[2] === null;
         setUser(r[1]);
         paint(db, 'crawled', null);
       })

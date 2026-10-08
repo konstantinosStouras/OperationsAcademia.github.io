@@ -255,7 +255,8 @@ service cloud.firestore {
                     && !('featured' in request.resource.data)
                     // the account merge writes this; a new posting never does
                     && !('mergedFrom' in request.resource.data)
-                    && request.resource.data.keys().size() <= 35;
+                    // applicationStatus retains an expired posting without inventing a deadline.
+                    && request.resource.data.keys().size() <= 36;
 
       // A poster may read, correct and withdraw their own posting.
       allow read: if isOwner(resource.data.uid) || isAdmin();
@@ -1258,7 +1259,7 @@ service cloud.firestore {
                                 'institution', 'department', 'school', 'unit',
                                 'type', 'levels', 'country',
                                 'applyBy', 'applyByDate', 'reviewDate', 'comments',
-                                'adUrl', 'postedAtUrl', 'furtherInfoUrl',
+                                'adUrl', 'postedAtUrl', 'furtherInfoUrl', 'applicationStatus',
                               ])));
       allow delete: if isAdmin();
     }
