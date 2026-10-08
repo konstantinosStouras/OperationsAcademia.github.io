@@ -171,6 +171,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node _scraper/analytics-coverage-test.mjs
       - run: node _scraper/audit-analytics-page.mjs
+      - run: node _scraper/audit-candidate-refresh.mjs
       - name: Read-only candidate layout audit
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

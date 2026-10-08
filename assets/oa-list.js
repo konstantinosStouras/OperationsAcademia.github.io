@@ -1431,6 +1431,28 @@
 
     return {
       reload: function () { apply(); },
+      /* Fetch newly published rows without losing this list's filters. A failed
+         refresh retains the last good rows, including an empty pre-reveal list. */
+      refresh: function () {
+        var request = typeof cfg.source === 'function'
+          ? Promise.resolve().then(cfg.source)
+          : fetch(cfg.data + (cfg.data.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now(),
+              { credentials: 'same-origin', cache: 'no-store' })
+            .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+            .then(function (data) { return window.OAFresh ? OAFresh.apply(cfg.data, data) : data; });
+        return request.then(function (data) {
+          var next = (Array.isArray(data) ? data : data.rows || []).filter(Boolean);
+          next.forEach(function (r, i) { if (!r.id) r.id = 'r' + i; });
+          if (cfg.prepare) next = cfg.prepare(next);
+          if (loaded && JSON.stringify(next) === JSON.stringify(rows)) return false;
+          rows = next;
+          loaded = true;
+          loadFailed = false;
+          buildBar();
+          apply();
+          return true;
+        }).catch(function () { return false; });
+      },
       /* Re-run the render with the rows already loaded. Sign-in resolves AFTER
          the first paint, so the controls a signed-in user may see have to be
          able to arrive late without refetching the dataset. */
