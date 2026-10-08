@@ -14,12 +14,18 @@ import { BUILDERS, plan } from './build-all.mjs';
 import * as NETMAP from './build-netmap.mjs';
 import { PAIRS as VENDOR_PAIRS, drift as vendorDrift } from './build-functions-vendor.mjs';
 import * as CSTATS from './build-candidate-stats.mjs';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile as rawReadFile, readdir } from 'node:fs/promises';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
+
+// Source-extraction checks use LF boundaries on both Windows and CI.
+async function readFile(...args) {
+  const value = await rawReadFile(...args);
+  return typeof value === 'string' ? value.replace(/\r\n/g, '\n') : value;
+}
 
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
@@ -4384,8 +4390,6 @@ async function testVocabFile() {
      on it is reported by `node _scraper/selftest.mjs --open`. Delete the entry
      when the owner rules on it (the answer goes in SCOPED_UNIT_ALIASES). */
   const AWAITING_OWNER = new Set([
-    // Keep these existing names distinct until their hiring units are verified.
-    'HEC Montréal|Logistics and Operations Management|Management',
     /* THE WORKBOOK WRITES A FIELD WHERE THE SITE ASKS FOR A DEPARTMENT. Its
        hiring-unit column holds what the post is IN — "OM", "BA", "SCM/OM",
        "IS/BA" — and the pipeline publishes that as the department name, so one
@@ -4440,6 +4444,10 @@ async function testVocabFile() {
   for (const [u, e] of Object.entries(v.byUniversity)) {
     for (const list of Object.values(e.bySchool)) {
       for (const [a, b] of samePair(list, u)) {
+        /* Separate departments: HEC Montréal /en/management/ and /en/gol/,
+           verified against the official pages on 2026-10-08. */
+        if (S.institutionKey(u) === S.institutionKey('HEC Montréal') &&
+            [a, b].sort().join('|') === 'Logistics and Operations Management|Management') continue;
         /* looked up both ways round: which of the pair the sweep meets first
            depends on the order the vocabulary lists them, which moves as
            postings arrive, and an entry must not stop matching because two
@@ -20850,7 +20858,7 @@ async function testAffiliationPicker() {
   ok(/AFFILIATION\.listFromDirectory\(rows,/.test(build) && /'university-names\.json'/.test(build),
     'build-directory.mjs writes the list from the rows it has just built');
   ok(/memberUniversities\(await readJson\(MEMBERS, \{ universities: \[\] \}\)\)/.test(build)
-     && /buildDirectory\(\{ archive, seed, jobs, past, omlist, members \}\)/.test(build),
+     && /buildDirectory\(\{ archive, seed: seed\.concat\(references\), jobs, past, omlist, members \}\)/.test(build),
     'build-directory.mjs feeds the member universities into the merge, optional');
   const gz = (await import('node:zlib')).gzipSync(await readFile(path.join(root, 'data', 'university-names.json'))).length;
   ok(gz < 20000, `the list is small enough to fetch for one card (${gz} bytes gzipped)`);

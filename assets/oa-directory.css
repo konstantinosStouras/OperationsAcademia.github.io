@@ -260,3 +260,12 @@
   .oa-dir-views { width: 100%; }
   .oa-dir-views button { flex: 1 1 50%; }
 }
+.oa-dir-checked {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  min-height: 42px;
+  padding: .4rem 0;
+  cursor: pointer;
+}
+.oa-dir-checked input { width: 20px; height: 20px; flex: 0 0 20px; }

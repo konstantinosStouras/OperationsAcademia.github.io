@@ -54,7 +54,7 @@
       hint: 'The full name, for example "United States".' },
     { key: 'type', scope: 'school', label: 'School type', max: 40, kind: 'type' },
     { key: 'department', scope: 'dept', label: 'Department', max: 260,
-      hint: 'The field name alone, for example "Operations Management".' },
+      hint: 'The full official department, area or group name.' },
     { key: 'deptUrl', scope: 'dept', label: 'Department page', max: 600, kind: 'url' },
     { key: 'facultyUrl', scope: 'dept', label: 'Faculty directory page', max: 600, kind: 'url' },
   ];
@@ -262,7 +262,11 @@
          here. The build's own rows are already canonical (no-ops). */
       if (canon) {
         var c = canon({ institution: r.institution, school: r.school || '', unit: r.department || '' });
-        r.institution = c.institution; r.school = c.school; r.department = c.unit;
+        r.institution = c.institution.replace(/^The\s+/i, '');
+        /* An explicit directory correction is the official display title.
+           Canonicalisation still supplies the identity used by rowKeyOf. */
+        r.school = r._edit ? r.school : c.school;
+        r.department = r._edit ? r.department : c.unit;
       }
       if (!r.institution) continue;
       var key = rowKeyOf(r);
@@ -280,7 +284,13 @@
       if ((!held.countries || !held.countries.length) && r.countries && r.countries.length) {
         held.countries = r.countries;
       }
-      if (r._edit && (!held._edit || r._edit.t > held._edit.t)) held._edit = r._edit;
+      if (r._edit && (!held._edit || r._edit.t > held._edit.t)) {
+        var correction = state.edits[r.id] || {};
+        ['institution', 'school', 'department', 'deptUrl', 'facultyUrl', 'type', 'country'].forEach(function (f) {
+          if (Object.prototype.hasOwnProperty.call(correction, f)) held[f] = r[f];
+        });
+        held._edit = r._edit;
+      }
       if (r._hidden && held._hidden) held._hidden = true; else held._hidden = false;
     }
 
@@ -640,6 +650,9 @@
       FIELDS.forEach(function (f) {
         if (f.scope === 'dept') spec.shown['r' + i + '.' + f.key] = asText(r[f.key]);
       });
+      ['school', 'type'].forEach(function (key) {
+        spec.shown['r' + i + '.' + key] = asText(r[key]);
+      });
       (r.countries || []).forEach(function (c) {
         if (spec.campuses.indexOf(c) === -1) spec.campuses.push(c);
       });
@@ -789,12 +802,22 @@
         FIELDS.forEach(function (f) {
           if (f.scope === 'dept') bits.push(fieldHTML(spec, 'r' + i + '.' + f.key, f));
         });
+        ['school', 'type'].forEach(function (key) {
+          var f = copyOf(fieldOf(key));
+          f.label = key === 'school' ? 'School for this department' : 'School type for this department';
+          f.hint = 'Change this only to assign this department separately. The school fields above apply to all departments.';
+          bits.push(fieldHTML(spec, 'r' + i + '.' + key, f));
+        });
         bits.push('</div></div>');
       });
     }
     /* always in the document, so a screen reader announces the first words
        put into it: a live region that appears WITH its message is often
        not announced at all */
+    if (spec.kind === 'school') {
+      bits.push('<label class="oa-dir-checked"><input type="checkbox" class="oa-dir-check-today"' +
+        (spec.checked ? ' checked' : '') + '> I checked the names and department and faculty links today</label>');
+    }
     bits.push('<p class="oa-dir-form-msg" role="alert"></p>');
     bits.push('<div class="oa-dir-form-acts">' +
       '<button type="submit" class="v3-btn primary oa-dir-save">' +
@@ -865,6 +888,8 @@
     }
     form.addEventListener('input', take);
     form.addEventListener('change', take);
+    var checked = form.querySelector('.oa-dir-check-today');
+    if (checked) checked.addEventListener('change', function () { spec.checked = checked.checked; });
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       submitForm(form, spec);
@@ -943,6 +968,11 @@
         fin[f.key] = (typed === KEEP || trim(typed) === trim(spec.shown[name]))
           ? asText(cur[f.key])
           : trim(typed).slice(0, f.max);
+        var own = 'r' + i + '.' + f.key;
+        if ((f.key === 'school' || f.key === 'type') && spec.values[own] !== undefined
+            && trim(spec.values[own]) !== trim(spec.shown[own])) {
+          fin[f.key] = trim(spec.values[own]).slice(0, f.max);
+        }
       });
       finals.push({ id: sr.id, added: sr.added, cur: cur, fin: fin, i: i });
     });
@@ -971,7 +1001,7 @@
     var entries = [];
     finals.forEach(function (x) {
       var changed = FIELDS.some(function (f) { return x.fin[f.key] !== asText(x.cur[f.key]); });
-      if (!changed) return;
+      if (!changed && !spec.checked) return;
       if (x.added) {
         var doc = { add: true };
         FIELDS.forEach(function (f) { if (x.fin[f.key]) doc[f.key] = x.fin[f.key]; });

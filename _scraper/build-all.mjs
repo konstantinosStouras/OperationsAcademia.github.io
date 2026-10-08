@@ -59,6 +59,7 @@ export const BUILDERS = [
   { script: 'build-jobs.mjs', label: 'job postings', needsFirebase: true },
   { script: 'build-candidates.mjs', label: 'candidate profiles', needsFirebase: true },
   { script: 'build-placements.mjs', label: 'confirmed placements', needsFirebase: true },
+  { script: 'sync-reference-places.mjs', label: 'institution names from the queues and profiles', needsFirebase: true },
   /* AFTER THE THREE, and never gated: it reads only the files they just
      rewrote plus the committed archive and seed, so a posting from a
      university the directory does not carry creates its card in the same run
