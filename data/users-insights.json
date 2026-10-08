@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-07T11:21:10.946Z",
- "members": 295,
+ "generated": "2026-10-08T11:37:25.368Z",
+ "members": 299,
  "k": 3,
  "affiliation": {
-  "listed": 207,
+  "listed": 212,
   "other": 45,
-  "none": 43
+  "none": 42
  },
  "universities": {
-  "count": 117,
+  "count": 118,
   "shown": [
    {
     "name": "Cornell University",
@@ -71,8 +71,18 @@
     "members": 3
    },
    {
+    "name": "Georgia Institute of Technology",
+    "country": "United States",
+    "members": 3
+   },
+   {
     "name": "IE University",
     "country": "Spain",
+    "members": 3
+   },
+   {
+    "name": "London Business School",
+    "country": "United Kingdom",
     "members": 3
    },
    {
@@ -116,6 +126,11 @@
     "members": 3
    },
    {
+    "name": "University of Toronto",
+    "country": "Canada",
+    "members": 3
+   },
+   {
     "name": "University of Washington",
     "country": "United States",
     "members": 3
@@ -126,29 +141,29 @@
     "members": 3
    }
   ],
-  "rest": 122
+  "rest": 118
  },
  "countries": {
   "count": 15,
   "shown": [
    {
     "name": "United States",
-    "members": 129
+    "members": 133
    },
    {
     "name": "Canada",
-    "members": 17
+    "members": 18
    },
    {
     "name": "Singapore",
     "members": 10
    },
    {
-    "name": "Germany",
-    "members": 7
+    "name": "United Kingdom",
+    "members": 8
    },
    {
-    "name": "United Kingdom",
+    "name": "Germany",
     "members": 7
    },
    {
@@ -169,6 +184,6 @@
    }
   ],
   "rest": 8,
-  "unknown": 99
+  "unknown": 97
  }
 }
