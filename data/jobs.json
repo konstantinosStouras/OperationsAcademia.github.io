@@ -38,7 +38,8 @@
   "featured": true,
   "source": "sheet-import",
   "addedAt": "2025-08-06T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-bilkent-university-20261008",
@@ -243,7 +244,8 @@
   "source": "oa-form",
   "addedAt": "2026-10-07T18:12:35Z",
   "ref": "OA-JOB-261007-XUFG",
-  "owner": "8dc19f5eb931f0b3"
+  "owner": "8dc19f5eb931f0b3",
+  "applicationStatus": ""
  },
  {
   "id": "2027-binghamton-university-20261006",
@@ -280,7 +282,8 @@
   "source": "oa-form",
   "addedAt": "2026-10-06T14:30:34Z",
   "ref": "OA-JOB-261006-2ZK2",
-  "owner": "69343d8fcc1924ec"
+  "owner": "69343d8fcc1924ec",
+  "applicationStatus": ""
  },
  {
   "id": "2027-hec-montreal-20261006",
@@ -414,7 +417,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-06T20:01:32Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-duke-university-20261005",
@@ -455,7 +459,8 @@
   "source": "oa-form",
   "addedAt": "2026-10-05T17:41:56Z",
   "ref": "OA-JOB-261005-DJX6",
-  "owner": "c2a5b4f1d3ae030d"
+  "owner": "c2a5b4f1d3ae030d",
+  "applicationStatus": ""
  },
  {
   "id": "2027-michigan-state-university-20261005",
@@ -530,7 +535,8 @@
   "source": "oa-form",
   "addedAt": "2026-10-05T16:20:26Z",
   "ref": "OA-JOB-261005-V4BZ",
-  "owner": "e85cc0f801ed680e"
+  "owner": "e85cc0f801ed680e",
+  "applicationStatus": ""
  },
  {
   "id": "2027-purdue-university-20261005",
@@ -670,7 +676,8 @@
   "source": "oa-form",
   "addedAt": "2026-10-05T01:22:31Z",
   "ref": "OA-JOB-261004-RDCT",
-  "owner": "9eddd19e6e3e2a22"
+  "owner": "9eddd19e6e3e2a22",
+  "applicationStatus": ""
  },
  {
   "id": "2027-american-university-of-beirut-20261004",
@@ -779,7 +786,8 @@
   "source": "oa-form",
   "addedAt": "2026-10-04T04:03:23Z",
   "ref": "OA-JOB-261004-GR5Z",
-  "owner": "60cb1105551d4035"
+  "owner": "60cb1105551d4035",
+  "applicationStatus": ""
  },
  {
   "id": "2027-michigan-state-university-20261004-2",
@@ -821,7 +829,8 @@
   "source": "oa-form",
   "addedAt": "2026-10-04T04:04:51Z",
   "ref": "OA-JOB-261004-CKUD",
-  "owner": "60cb1105551d4035"
+  "owner": "60cb1105551d4035",
+  "applicationStatus": ""
  },
  {
   "id": "2027-cornell-university-cornell-tech-20261003",
@@ -1235,7 +1244,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-30T17:47:48Z",
   "ref": "OA-JOB-260930-2KED",
-  "owner": "e997f3340a4145b9"
+  "owner": "e997f3340a4145b9",
+  "applicationStatus": ""
  },
  {
   "id": "2027-cornell-university-20260930-2",
@@ -1275,7 +1285,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-30T17:45:52Z",
   "ref": "OA-JOB-260930-D84Q",
-  "owner": "e997f3340a4145b9"
+  "owner": "e997f3340a4145b9",
+  "applicationStatus": ""
  },
  {
   "id": "2027-pennsylvania-state-university-20260930",
@@ -1318,7 +1329,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-30T13:39:02Z",
   "ref": "OA-JOB-260930-UUFZ",
-  "owner": "09bc104f084148cf"
+  "owner": "09bc104f084148cf",
+  "applicationStatus": ""
  },
  {
   "id": "2027-pennsylvania-state-university-20260930-2",
@@ -1361,7 +1373,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-30T13:37:16Z",
   "ref": "OA-JOB-260930-JMAD",
-  "owner": "09bc104f084148cf"
+  "owner": "09bc104f084148cf",
+  "applicationStatus": ""
  },
  {
   "id": "2027-pennsylvania-state-university-20260930-3",
@@ -1403,7 +1416,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-30T13:34:34Z",
   "ref": "OA-JOB-260930-JWN4",
-  "owner": "09bc104f084148cf"
+  "owner": "09bc104f084148cf",
+  "applicationStatus": ""
  },
  {
   "id": "2027-essec-20260929",
@@ -1445,7 +1459,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-29T09:35:48Z",
   "ref": "OA-JOB-260929-SFSN",
-  "owner": "eca0347aa7d9f9d1"
+  "owner": "eca0347aa7d9f9d1",
+  "applicationStatus": ""
  },
  {
   "id": "2027-george-mason-university-20260929",
@@ -1485,7 +1500,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-29T12:56:31Z",
   "ref": "OA-JOB-260929-QJSN",
-  "owner": "4c4b4eb904286d9b"
+  "owner": "4c4b4eb904286d9b",
+  "applicationStatus": ""
  },
  {
   "id": "2027-unsw-sydney-20260929",
@@ -1526,7 +1542,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-29T07:31:36Z",
   "ref": "OA-JOB-260929-S5J6",
-  "owner": "47379fa5437254b9"
+  "owner": "47379fa5437254b9",
+  "applicationStatus": ""
  },
  {
   "id": "2027-shanghai-university-of-finance-and-economics-20260927",
@@ -1567,7 +1584,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-27T12:29:41Z",
   "ref": "OA-JOB-260927-DXCQ",
-  "owner": "2f902a43665d676e"
+  "owner": "2f902a43665d676e",
+  "applicationStatus": ""
  },
  {
   "id": "2027-the-university-of-texas-at-austin-20260927",
@@ -1639,7 +1657,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-23T14:18:27Z",
   "ref": "OA-JOB-260923-CBBA",
-  "owner": "1e3a9f84d97888c4"
+  "owner": "1e3a9f84d97888c4",
+  "applicationStatus": ""
  },
  {
   "id": "2027-georgia-tech-isye-20260923",
@@ -1713,7 +1732,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-23T08:19:59Z",
   "ref": "OA-JOB-260923-JKQ9",
-  "owner": "b634c4738dcb2337"
+  "owner": "b634c4738dcb2337",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-college-london-20260923",
@@ -1754,7 +1774,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-23T07:19:07Z",
   "ref": "OA-JOB-260923-X2AP",
-  "owner": "b634c4738dcb2337"
+  "owner": "b634c4738dcb2337",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-california-riverside-20260923",
@@ -1795,7 +1816,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-23T21:19:55Z",
   "ref": "OA-JOB-260923-HQHL",
-  "owner": "2130877e039a76f6"
+  "owner": "2130877e039a76f6",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-washington-bothell-20260923",
@@ -1973,7 +1995,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-22T13:10:59Z",
   "ref": "OA-JOB-260922-BRUT",
-  "owner": "743281438c1785ac"
+  "owner": "743281438c1785ac",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-illinois-at-chicago-20260922",
@@ -2016,7 +2039,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-22T05:10:35Z",
   "ref": "OA-JOB-260922-96NW",
-  "owner": "b9a1f20914505f17"
+  "owner": "b9a1f20914505f17",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-illinois-at-chicago-20260922-2",
@@ -2058,7 +2082,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-22T04:58:20Z",
   "ref": "OA-JOB-260921-BH7Z",
-  "owner": "b9a1f20914505f17"
+  "owner": "b9a1f20914505f17",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-washington-20260922",
@@ -2167,7 +2192,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-21T02:04:36Z",
   "ref": "OA-JOB-260921-ZMEB",
-  "owner": "9c3de5fb0a5fda8e"
+  "owner": "9c3de5fb0a5fda8e",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-california-los-angeles-ucla-20260921",
@@ -2208,7 +2234,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-21T18:49:16Z",
   "ref": "OA-JOB-260921-TR7T",
-  "owner": "f9cd16828d317403"
+  "owner": "f9cd16828d317403",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-michigan-flint-20260921",
@@ -2348,7 +2375,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-18T19:37:46Z",
   "ref": "OA-JOB-260918-QRQU",
-  "owner": "b634c4738dcb2337"
+  "owner": "b634c4738dcb2337",
+  "applicationStatus": ""
  },
  {
   "id": "2027-london-business-school-20260918",
@@ -2388,7 +2416,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-18T06:10:16Z",
   "ref": "OA-JOB-260918-3LKN",
-  "owner": "3d7fa56ec340b974"
+  "owner": "3d7fa56ec340b974",
+  "applicationStatus": ""
  },
  {
   "id": "2027-stockholm-school-of-economics-20260918",
@@ -2490,7 +2519,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-17T20:21:53Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-southern-california-20260917",
@@ -2565,7 +2595,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-17T20:01:24Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-arizona-state-university-20260915",
@@ -2702,7 +2733,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-15T10:29:48Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-new-south-wales-20260914",
@@ -3247,7 +3279,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-03T14:00:36Z",
   "ref": "OA-JOB-260903-94R8",
-  "owner": "c0f7618380865dfd"
+  "owner": "c0f7618380865dfd",
+  "applicationStatus": ""
  },
  {
   "id": "2027-iese-business-school-20260902",
@@ -3286,7 +3319,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-02T10:35:49Z",
   "ref": "OA-JOB-260902-7JJK",
-  "owner": "61d970c252637622"
+  "owner": "61d970c252637622",
+  "applicationStatus": ""
  },
  {
   "id": "2027-universidade-catolica-portuguesa-20260902",
@@ -3326,7 +3360,8 @@
   "source": "oa-form",
   "addedAt": "2026-09-02T08:06:12Z",
   "ref": "OA-JOB-260902-QW2T",
-  "owner": "35fb7e590351d3b6"
+  "owner": "35fb7e590351d3b6",
+  "applicationStatus": ""
  },
  {
   "id": "2027-nova-school-of-business-and-economics-20260901",
@@ -3504,7 +3539,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-31T10:37:18Z",
   "ref": "OA-JOB-260831-UTPG",
-  "owner": "d2de4df06e1e539e"
+  "owner": "d2de4df06e1e539e",
+  "applicationStatus": ""
  },
  {
   "id": "2027-southern-methodist-university-20260831",
@@ -3579,7 +3615,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-28T17:25:54Z",
   "ref": "OA-JOB-260828-C749",
-  "owner": "1a036c48030f1389"
+  "owner": "1a036c48030f1389",
+  "applicationStatus": ""
  },
  {
   "id": "2027-the-chinese-university-of-hong-kong-20260827",
@@ -3620,7 +3657,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-27T05:59:04Z",
   "ref": "OA-JOB-260827-T4BW",
-  "owner": "871a8c470e64807e"
+  "owner": "871a8c470e64807e",
+  "applicationStatus": ""
  },
  {
   "id": "2027-alma-college-20260826",
@@ -3687,7 +3725,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-27T08:35:55Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-babson-college-20260826",
@@ -3721,7 +3760,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-27T15:48:19Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-morningside-university-20260826",
@@ -3997,7 +4037,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-25T07:40:10Z",
   "ref": "OA-JOB-260825-UGHD",
-  "owner": "cab1275d573362e3"
+  "owner": "cab1275d573362e3",
+  "applicationStatus": ""
  },
  {
   "id": "2027-the-hong-kong-polytechnic-university-20260825-2",
@@ -4036,7 +4077,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-25T07:43:28Z",
   "ref": "OA-JOB-260825-GP39",
-  "owner": "cab1275d573362e3"
+  "owner": "cab1275d573362e3",
+  "applicationStatus": ""
  },
  {
   "id": "2027-the-hong-kong-polytechnic-university-20260825-3",
@@ -4075,7 +4117,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-25T07:32:36Z",
   "ref": "OA-JOB-260825-3XYV",
-  "owner": "cab1275d573362e3"
+  "owner": "cab1275d573362e3",
+  "applicationStatus": ""
  },
  {
   "id": "2027-upenn-wharton-20260825",
@@ -4148,7 +4191,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-24T18:20:49Z",
   "ref": "OA-JOB-260824-YSE4",
-  "owner": "0900189dfe83173c"
+  "owner": "0900189dfe83173c",
+  "applicationStatus": ""
  },
  {
   "id": "2027-tulane-university-20260824-2",
@@ -4182,7 +4226,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-24T17:50:32Z",
   "ref": "OA-JOB-260824-TNEN",
-  "owner": "0900189dfe83173c"
+  "owner": "0900189dfe83173c",
+  "applicationStatus": ""
  },
  {
   "id": "2027-tulane-university-20260824-3",
@@ -4222,7 +4267,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-24T18:17:50Z",
   "ref": "OA-JOB-260824-7LAA",
-  "owner": "0900189dfe83173c"
+  "owner": "0900189dfe83173c",
+  "applicationStatus": ""
  },
  {
   "id": "2027-bryant-university-20260823",
@@ -4700,7 +4746,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-21T17:20:13Z",
   "ref": "OA-JOB-260821-WC53",
-  "owner": "71fbdd21e661afc0"
+  "owner": "71fbdd21e661afc0",
+  "applicationStatus": ""
  },
  {
   "id": "2027-george-mason-university-20260820",
@@ -4740,7 +4787,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-20T17:34:59Z",
   "ref": "OA-JOB-260820-NWP8",
-  "owner": "20f06c0b41ba17f9"
+  "owner": "20f06c0b41ba17f9",
+  "applicationStatus": ""
  },
  {
   "id": "2027-singapore-management-university-20260820",
@@ -4810,7 +4858,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-20T07:08:18Z",
   "ref": "OA-JOB-260820-HLA8",
-  "owner": "f61d6e6968eee6bc"
+  "owner": "f61d6e6968eee6bc",
+  "applicationStatus": ""
  },
  {
   "id": "2027-the-chinese-university-of-hong-kong-shenzhen-20260819",
@@ -4851,7 +4900,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-19T02:16:53Z",
   "ref": "OA-JOB-260819-NYAG",
-  "owner": "c53f7643a45bc521"
+  "owner": "c53f7643a45bc521",
+  "applicationStatus": ""
  },
  {
   "id": "2027-clemson-university-20260818",
@@ -4925,7 +4975,8 @@
   "source": "oa-form",
   "addedAt": "2026-08-18T10:06:28Z",
   "ref": "OA-JOB-260818-Y9JS",
-  "owner": "b634c4738dcb2337"
+  "owner": "b634c4738dcb2337",
+  "applicationStatus": ""
  },
  {
   "id": "2027-national-university-of-singapore-is-20260818",
@@ -5032,7 +5083,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-19T06:04:41Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-iowa-20260814",
@@ -5306,7 +5358,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-08-12T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-ewha-womans-university-20260811",
@@ -5413,7 +5466,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-08-10T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-princeton-university-20260808",
@@ -5487,7 +5541,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-08-06T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-rollins-college-20260805",
@@ -5520,7 +5575,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-05T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-st-john-s-university-20260805",
@@ -5557,7 +5613,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-05T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-bristol-20260805",
@@ -5625,7 +5682,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-05T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-virginia-20260805",
@@ -5663,7 +5721,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-05T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-cornell-sc-johnson-school-of-business-20260804",
@@ -5864,7 +5923,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-07-30T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-national-university-of-singapore-20260730",
@@ -5905,7 +5965,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-07-30T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-mcgill-university-20260728",
@@ -5947,7 +6008,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-07-28T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-ut-san-antonio-20260726",
@@ -6252,7 +6314,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-07-08T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-ku-leuven-20260702",
@@ -6291,7 +6354,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-07-02T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-indiana-university-bloomington-20260622",
@@ -7051,7 +7115,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-04-28T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-rockhurst-university-20260423",
@@ -7311,7 +7376,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-04-08T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-tulane-university-20260407",
@@ -7350,7 +7416,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-04-07T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-tulane-university-20260407-2",
@@ -7389,7 +7456,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-04-07T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-tulane-university-20260407",
@@ -7429,7 +7497,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-04-07T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-bath-20260330",
@@ -7747,7 +7816,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-03-19T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-oklahoma-20260318",
@@ -9025,7 +9095,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-02-24T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-tusculum-university-20260224",
@@ -9126,7 +9197,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-02-23T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-college-london-20260223",
@@ -9164,7 +9236,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-02-23T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-college-of-staten-island-20260221",
@@ -9729,7 +9802,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-02-10T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-colorado-denver-20260210",
@@ -9864,7 +9938,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-02-09T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-ferris-state-university-20260207",
@@ -9966,7 +10041,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-02-06T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-appalachian-state-university-20260205",
@@ -10161,7 +10237,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-02-03T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-indiana-university-northwest-20260203",
@@ -10791,7 +10868,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-01-27T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-houston-downtown-20260127",
@@ -11267,7 +11345,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-01-19T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-nc-state-university-20260119",
@@ -11833,7 +11912,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-01-11T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-ipade-business-school-20260108",
@@ -11962,7 +12042,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2026-01-06T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-new-york-university-abu-dhabi-20260103",
@@ -12555,7 +12636,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-12-08T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-purdue-university-20251203",
@@ -12626,7 +12708,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-12-03T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-coastal-carolina-university-20251202",
@@ -12851,7 +12934,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-11-20T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-rutgers-university-20251119",
@@ -12984,7 +13068,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-11-18T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-rutgers-university-20251118",
@@ -13270,7 +13355,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-11-13T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-macewan-university-20251111",
@@ -13557,7 +13643,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-11-06T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-the-pennsylvania-state-university-20251104",
@@ -13599,7 +13686,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-11-04T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-alabama-birmingham-20251030",
@@ -13669,7 +13757,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-29T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-south-carolina-20251027",
@@ -13805,7 +13894,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-24T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-california-berkeley-20251023",
@@ -13840,7 +13930,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-23T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-virgina-darden-20251023",
@@ -13911,7 +14002,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-22T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-california-berkeley-20251022",
@@ -13949,7 +14041,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-22T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-arizona-state-university-20251021",
@@ -14082,7 +14175,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-21T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-indiana-state-university-20251019",
@@ -14184,7 +14278,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-17T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-san-diego-20251017",
@@ -14219,7 +14314,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-17T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-grand-valley-state-university-20251016",
@@ -14539,7 +14635,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-13T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-oklahoma-state-university-20251011",
@@ -14735,7 +14832,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-10T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-universitat-pompeu-fabra-20251010",
@@ -14992,7 +15090,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-07T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-michigan-20251007",
@@ -15093,7 +15192,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-07T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-american-university-of-beirut-20251006",
@@ -15351,7 +15451,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-05T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-depauw-university-20251004",
@@ -15424,7 +15525,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-10-04T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-tsinghua-university-20251004",
@@ -15992,7 +16094,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-29T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-minnesota-20250929",
@@ -16030,7 +16133,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-29T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-austin-peay-state-university-20250927",
@@ -16256,7 +16360,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-26T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-columbia-business-school-20250925",
@@ -16357,7 +16462,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-25T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-virginia-20250925",
@@ -16397,7 +16503,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-25T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-belmont-university-20250924",
@@ -16470,7 +16577,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-24T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-lousiana-tech-univ-20250923",
@@ -16543,7 +16651,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-23T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-california-riverside-20250923",
@@ -16737,7 +16846,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-22T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-neeley-school-of-business-texas-christian-univ-20250919",
@@ -16932,7 +17042,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-18T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-southern-methodist-university-20250918",
@@ -16999,7 +17110,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-18T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-london-business-school-20250916",
@@ -17378,7 +17490,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-13T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-shanghai-jiao-tong-university-20250912",
@@ -17542,7 +17655,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-11T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-bayes-business-school-20250910",
@@ -17646,7 +17760,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-10T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-national-university-of-singapore-isem-20250909",
@@ -17902,7 +18017,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-04T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-college-london-20250903",
@@ -17942,7 +18058,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-03T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-institut-mines-telecom-20250902",
@@ -17980,7 +18097,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-09-02T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-oklahoma-20250902",
@@ -18114,7 +18232,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-30T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-imperial-college-london-20250829",
@@ -18251,7 +18370,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-27T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-evansville-20250823",
@@ -18480,7 +18600,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-19T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-college-dublin-20250817",
@@ -18520,7 +18641,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-17T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-iese-business-school-20250816",
@@ -18560,7 +18682,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-16T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-mit-sloan-20250816",
@@ -18632,7 +18755,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-15T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-wisconsin-madison-20250815",
@@ -18730,7 +18854,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-14T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-notre-dame-20250813",
@@ -19110,7 +19235,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-07T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-wake-forest-university-20250806",
@@ -19177,7 +19303,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-05T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-chicago-booth-20250804",
@@ -19809,7 +19936,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-07-08T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-hec-paris-20250704",
@@ -20546,7 +20674,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-06-21T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-lone-star-college-system-20250620",
@@ -20843,7 +20972,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-06-12T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-cincinnati-20250612",
@@ -21395,7 +21525,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-06-05T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-university-of-mannheim-20250605",
@@ -21692,7 +21823,8 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-05-26T00:00:00Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2026-a-sharqiyah-university-20250525",
