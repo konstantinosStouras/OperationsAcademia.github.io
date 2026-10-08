@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-08T19:46:01.348Z",
+ "generated": "2026-10-08T23:48:03.795Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -386,7 +386,7 @@
    "n": 2
   },
   {
-   "v": "Massachusetts Institute of Technology (MIT)",
+   "v": "Massachusetts Institute of Technology",
    "n": 2
   },
   {
@@ -2308,6 +2308,10 @@
    "n": 2
   },
   {
+   "v": "School of Engineering",
+   "n": 2
+  },
+  {
    "v": "School of Management and Economics",
    "n": 2
   },
@@ -2368,6 +2372,10 @@
    "n": 1
   },
   {
+   "v": "College of Natural Science",
+   "n": 1
+  },
+  {
    "v": "Columbia Business School",
    "n": 1
   },
@@ -2376,7 +2384,7 @@
    "n": 1
   },
   {
-   "v": "Culverhouse College of Commerce",
+   "v": "Culverhouse College of Business",
    "n": 1
   },
   {
@@ -2608,10 +2616,6 @@
    "n": 1
   },
   {
-   "v": "School of Engineering",
-   "n": 1
-  },
-  {
    "v": "School of Engineering and Applied Science",
    "n": 1
   },
@@ -2733,6 +2737,10 @@
   },
   {
    "v": "Cranfield School of Management",
+   "n": 0
+  },
+  {
+   "v": "Culverhouse College of Commerce",
    "n": 0
   },
   {
@@ -3930,6 +3938,10 @@
    "n": 1
   },
   {
+   "v": "Lillian Gilbreth Postdoctoral Fellowships",
+   "n": 1
+  },
+  {
    "v": "Logistics and Operations Management",
    "n": 1
   },
@@ -4087,6 +4099,10 @@
   },
   {
    "v": "OM/Statistics",
+   "n": 1
+  },
+  {
+   "v": "One Health – Intelligent Medicines",
    "n": 1
   },
   {
@@ -7495,9 +7511,10 @@
     ]
    }
   },
-  "Massachusetts Institute of Technology (MIT)": {
+  "Massachusetts Institute of Technology": {
    "schools": [
-    "MIT Sloan School of Management"
+    "MIT Sloan School of Management",
+    "School of Engineering"
    ],
    "units": [
     "Center for Transportation and Logistics",
@@ -7511,6 +7528,9 @@
     "MIT Sloan School of Management": [
      "Operations Management",
      "Operations Research and Statistics"
+    ],
+    "School of Engineering": [
+     "Center for Transportation and Logistics"
     ]
    }
   },
@@ -7577,6 +7597,7 @@
   },
   "Michigan State University": {
    "schools": [
+    "College of Natural Science",
     "Eli Broad College of Business"
    ],
    "units": [
@@ -7588,7 +7609,9 @@
    "bySchool": {
     "": [
      "Logistics and Supply Chain Management",
-     "SCM, AI",
+     "SCM, AI"
+    ],
+    "College of Natural Science": [
      "Statistics and Probability"
     ],
     "Eli Broad College of Business": [
@@ -8327,12 +8350,18 @@
    ],
    "units": [
     "Heathcare (OM included)",
+    "Lillian Gilbreth Postdoctoral Fellowships",
+    "One Health – Intelligent Medicines",
     "Quantitative Methods",
     "Supply Chain and Operations Management Faculty"
    ],
    "bySchool": {
     "": [
      "Heathcare (OM included)"
+    ],
+    "College of Engineering": [
+     "Lillian Gilbreth Postdoctoral Fellowships",
+     "One Health – Intelligent Medicines"
     ],
     "Mitchell E. Daniels, Jr. School of Business": [
      "Quantitative Methods",
@@ -9767,6 +9796,7 @@
   },
   "University of Alabama": {
    "schools": [
+    "Culverhouse College of Business",
     "Culverhouse College of Commerce"
    ],
    "units": [
@@ -9776,6 +9806,9 @@
    "bySchool": {
     "": [
      "OM"
+    ],
+    "Culverhouse College of Business": [
+     "Information Systems, Statistics, and Management Science"
     ],
     "Culverhouse College of Commerce": [
      "Information Systems, Statistics, and Management Science"
@@ -12229,7 +12262,9 @@
    "Supply Chain"
   ],
   "College of Engineering": [
+   "Lillian Gilbreth Postdoctoral Fellowships",
    "Mechanical and Industrial Engineering",
+   "One Health – Intelligent Medicines",
    "Systems Engineering",
    "Wm Michael Barnes’ 64 Department of Industrial and Systems Engineering"
   ],
@@ -12241,6 +12276,9 @@
   ],
   "College of Management of Technology (CMT)": [
    "Technology and Operations Management"
+  ],
+  "College of Natural Science": [
+   "Statistics and Probability"
   ],
   "Coller School of Management": [
    "Operational Strategy"
@@ -12265,6 +12303,9 @@
    "Decision Sciences and Managerial Economics",
    "Decisions, Operations and Technology",
    "Operations Management"
+  ],
+  "Culverhouse College of Business": [
+   "Information Systems, Statistics, and Management Science"
   ],
   "Culverhouse College of Commerce": [
    "Information Systems, Statistics, and Management Science"
@@ -12769,6 +12810,7 @@
    "Operations Management"
   ],
   "School of Engineering": [
+   "Center for Transportation and Logistics",
    "Industrial and Systems Engineering",
    "Management Science and Engineering"
   ],
