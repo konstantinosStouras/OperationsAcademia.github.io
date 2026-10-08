@@ -85,7 +85,7 @@
   function vocabulary(url) {
     if (!url && window.OAUniInfo && window.OAUniInfo.record) {
       return window.OAUniInfo.record().then(function (rows) {
-        if (!rows) return vocabulary(DEFAULT_URL);
+        if (!rows) { referenceRows = []; return null; }
         referenceRows = rows;
         return directoryVocabulary(rows);
       });
