@@ -44,8 +44,52 @@
      re-downloads: Pages serves data/ with ten minutes of freshness and a
      posting approved a minute ago has to be visible. */
   var pending = Object.create(null);
+  var referenceRows = [];
+
+  /* The same reference rows and community corrections the Universities page
+     displays. Vocabulary is a projection of that database, not another list. */
+  function directoryVocabulary(rows) {
+    var S = window.OASchools;
+    var groups = Object.create(null), byUniversity = Object.create(null);
+    var bySchool = Object.create(null), schools = [], units = [];
+    function add(list, value) { if (value && list.indexOf(value) < 0) list.push(value); }
+    (rows || []).forEach(function (r) {
+      if (!r || r._hidden || !r.institution) return;
+      var key = S ? S.institutionKey(r.institution) : r.institution;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(r);
+    });
+    Object.keys(groups).forEach(function (key) {
+      var own = groups[key];
+      var name = (S ? S.cardName(own.map(function (r) { return r.institution; }))
+        : own[0].institution).replace(/^The\s+/i, '');
+      var entry = { schools: [], units: [], bySchool: Object.create(null) };
+      own.forEach(function (r) {
+        var school = r.school || '', unit = r.department || '';
+        add(entry.schools, school); add(entry.units, unit);
+        if (!entry.bySchool[school]) entry.bySchool[school] = [];
+        add(entry.bySchool[school], unit);
+        add(schools, school); add(units, unit);
+        if (school) {
+          if (!bySchool[school]) bySchool[school] = [];
+          add(bySchool[school], unit);
+        }
+      });
+      byUniversity[name] = entry;
+    });
+    function options(list) { return list.sort().map(function (v) { return { v: v, n: 0 }; }); }
+    return { universities: options(Object.keys(byUniversity)), schools: options(schools),
+      units: options(units), byUniversity: byUniversity, bySchool: bySchool };
+  }
 
   function vocabulary(url) {
+    if (!url && window.OAUniInfo && window.OAUniInfo.record) {
+      return window.OAUniInfo.record().then(function (rows) {
+        if (!rows) return vocabulary(DEFAULT_URL);
+        referenceRows = rows;
+        return directoryVocabulary(rows);
+      });
+    }
     var key = url || DEFAULT_URL;
     if (!pending[key]) {
       pending[key] = fetch(key, { cache: 'no-cache' })
@@ -96,8 +140,16 @@
       the same fixes again at ingest). */
   function fixedPlace(place) {
     var S = window.OASchools;
-    if (!loadedFixes.length || !S || !S.fixPlace) return place;
-    return S.fixPlace(place, loadedFixes);
+    if (loadedFixes.length && S && S.fixPlace) place = S.fixPlace(place, loadedFixes);
+    if (S && window.OAUniInfo && referenceRows.length) {
+      var f = window.OAUniInfo.facts(referenceRows, place, S);
+      if (f.row) {
+        place = { institution: f.row.institution.replace(/^The\s+/i, ''),
+          school: place.school ? (f.row.school || '') : '',
+          unit: place.unit ? (f.row.department || '') : '' };
+      }
+    }
+    return place;
   }
 
   /** A key -> name index over an array of names or an object's keys. */

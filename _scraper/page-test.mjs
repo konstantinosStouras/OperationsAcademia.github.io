@@ -1951,14 +1951,22 @@ for (const [name, expect] of [
      drives that one; when the catalogue holds none it says so and skips,
      because a race in the browser is not evidence about anybody's
      departments. */
-  const vocab = JSON.parse(await readFile(path.join(ROOT, 'data', 'vocab.json'), 'utf8'));
+  const reference = JSON.parse(await readFile(path.join(ROOT, 'data', 'directory.json'), 'utf8'));
+  const referenceSchools = requireFor(import.meta.url)('../assets/oa-schools.js');
   const soloUni = (() => {
-    for (const [uni, entry] of Object.entries(vocab.byUniversity || {})) {
-      const schools = Object.entries(entry.bySchool || {});
-      if (schools.length !== 1) continue;
-      const [school, units] = schools[0];
-      const list = Array.isArray(units) ? units : Object.keys(units || {});
-      if (list.length === 1 && school && list[0]) return { uni, school, unit: list[0] };
+    const groups = new Map();
+    for (const row of reference) {
+      const key = referenceSchools.institutionKey(row.institution);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(row);
+    }
+    for (const rows of groups.values()) {
+      const schools = new Set(rows.map(r => referenceSchools.canonSchool(r.school, r.institution)));
+      const units = new Set(rows.filter(r => r.department).map(r => referenceSchools.canonUnit(r.department, r.institution)));
+      const candidate = rows.find(r => r.school && r.department);
+      if (schools.size === 1 && units.size === 1 && candidate) {
+        return { uni: candidate.institution.replace(/^The\s+/i, ''), school: candidate.school, unit: candidate.department };
+      }
     }
     return null;
   })();
@@ -4380,8 +4388,8 @@ for (const [pageName, listSel] of [
     }, card);
     ok(shape.school && shape.types >= 3,
       'directory form: the school\'s own fields are in the form once, the type as radio buttons');
-    eq(shape.deptBoxes, pick.rows.length * 3,
-      'directory form: …and every department\'s name and two links, all at once');
+    eq(shape.deptBoxes, pick.rows.length * 4,
+      'directory form: …and every department\'s school, name and two links, all at once');
     ok(shape.labelled, 'directory form: every box has its own label');
     eq(shape.viewHidden, true, 'directory form: the form takes the school\'s place while it is open');
     eq(shape.focused, 's.institution', 'directory form: the keyboard lands in the first box');

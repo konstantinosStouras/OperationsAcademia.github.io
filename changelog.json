@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "university-reference-2026-10",
+      "date": "2026-10-08",
+      "title": "University names shared across the directory and posting forms",
+      "summary": "Job and candidate forms now offer the names recorded on the Universities page, including community corrections. Official department titles are retained when edited, and each department can be assigned its own school. Editors can record that they checked the names and department and faculty links today, even when no correction was needed. Institutions mentioned in queued jobs and candidate profiles are included in the directory's reference list.",
+      "url": "/universities"
+    },
+    {
       "id": "directory-form-2026-10",
       "date": "2026-10-05",
       "title": "Correct a university's card in one form",

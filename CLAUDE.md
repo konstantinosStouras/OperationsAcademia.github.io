@@ -1,5 +1,29 @@
 # Repository conventions
 
+## University reference names (owner, 2026-10-08)
+
+The owner requests full official university, school and department titles,
+without a leading "The" on a university, with the date the names and links
+were checked. This supersedes the older bare-department DISPLAY convention.
+Identity still uses canonical keys, so legacy abbreviations merge, but an
+explicit directoryEdits title survives display and selection unchanged.
+
+Job and candidate pickers read OAUniInfo.record() — directory.json plus the
+same live corrections the Universities page displays. The vocabulary file is
+only a fallback when the directory cannot be read. Each department can be
+assigned its own school and type inside the school editor. The explicit
+"I checked ... today" box stamps the existing byline even if no text changed;
+an untouched form without that box still writes nothing.
+
+sync-reference-places.mjs runs before the offline directory build and exports
+only distinct institution/school/department names from pending and approved
+job reviews, live job submissions and candidate submissions. It exports no
+people, contacts, document ids, posting details, status or source association.
+The directory adds those names as seed rows. A failed database read aborts
+the sync rather than replacing the last reference file with a partial scan.
+The reference tests in _scraper/reference-test.mjs cover the projection,
+official titles, separate school assignments and the names-only export.
+
 This repo is the source of **operationsacademia.org** (the Operations job
 market site), served by GitHub Pages from `master`. No build step — HTML/CSS/JS
 are committed and served as-is; the data files under `data/` are written by the

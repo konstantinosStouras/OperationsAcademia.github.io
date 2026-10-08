@@ -76,8 +76,9 @@ async function main() {
   /* the universities registered members are at that no other source lists
      (written by _scraper/affiliations.mjs). Optional: absent, it adds nothing */
   const members = memberUniversities(await readJson(MEMBERS, { universities: [] }));
+  const references = await readJson('data/reference-places.json', []);
 
-  const { rows } = buildDirectory({ archive, seed, jobs, past, omlist, members });
+  const { rows } = buildDirectory({ archive, seed: seed.concat(references), jobs, past, omlist, members });
   const stats = directoryStats(rows);
 
   const body = JSON.stringify(rows, null, 1) + '\n';
