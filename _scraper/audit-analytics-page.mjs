@@ -6,6 +6,10 @@ import { chromium } from 'playwright';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixtures = {};
 for (const file of ['analytics', 'users-growth', 'users-insights']) fixtures[file] = JSON.parse(await readFile(path.join(root, 'data', file + '.json'), 'utf8'));
+fixtures.analytics.breakdownWindows = { '90': fixtures.analytics.breakdowns, all: {
+  ...fixtures.analytics.breakdowns, countries: { ...fixtures.analytics.breakdowns.countries,
+    total: 321, items: [{ name: 'Auditland', value: 321 }] }
+} };
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const page = await context.newPage();
@@ -39,6 +43,7 @@ assert.equal(await universities.locator('li').count(), beforeRows);
 const all = page.getByRole('button', { name: 'Everything', exact: true }).first();
 await all.click();
 assert.equal(await all.getAttribute('aria-pressed'), 'true');
+await page.getByText('Auditland', { exact: true }).waitFor();
 const latest = fixtures['users-growth'].days.at(-1);
 latest[1] += 1;
 fixtures.analytics.generated = new Date().toISOString();

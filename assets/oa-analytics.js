@@ -434,7 +434,8 @@
 
     var tiles = document.createElement('div');
     root.appendChild(tiles);
-    renderTiles(tiles, rows, data);
+    var tileData = Object.assign({}, data, { engagement: (data.engagementWindows || {})[state.range] || data.engagement });
+    renderTiles(tiles, rows, tileData);
 
     var ranges = document.createElement('div');
     root.appendChild(ranges);
@@ -693,7 +694,8 @@
       and the selftest pins this line for that reason. */
   function drawDimension(id) {
     var def = DIMENSIONS.filter(function (d) { return d.id === id; })[0];
-    var rec = ((state.data.breakdowns || {})[id]) || null;
+    var period = (state.data.breakdownWindows || {})[state.range];
+    var rec = (period ? period[id] : (state.data.breakdowns || {})[id]) || null;
     if (id === 'referrers') rec = A.referralRecord(rec);
     if (!def || !rec || !rec.items || !rec.items.length) return;
 

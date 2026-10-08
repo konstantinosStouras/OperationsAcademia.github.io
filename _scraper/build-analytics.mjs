@@ -283,10 +283,11 @@ async function fromUsage(db, { windowFrom, now = Date.now() }) {
 
     let bucket = seen.get(day);
     if (!bucket) {
-      bucket = { uids: new Set(), sessions: 0, views: 0, pages: {} };
+      bucket = { uids: new Set(), sessions: 0, views: 0, pages: {}, hours: Array(24).fill(0) };
       seen.set(day, bucket);
     }
     if (d.uid) bucket.uids.add(String(d.uid));
+    bucket.hours[new Date(started).getUTCHours()]++;
     bucket.sessions++;
     bucket.views++;
     const sec = Math.max(0, Math.min(3600, Number(d.dur || 0)));
@@ -315,7 +316,7 @@ async function fromUsage(db, { windowFrom, now = Date.now() }) {
 
   /* the pages list per PERIOD, through the model's one definition of a
      period (pageWindows, the rule visitWindows keeps for the universities) */
-  const records = Array.from(seen.entries()).map(([day, b]) => ({ day, pages: b.pages }));
+  const records = Array.from(seen.entries()).map(([day, b]) => ({ day, pages: b.pages, hours: b.hours }));
   const pagesWindows = A.pageWindows(records, { now });
   /* the ninety-day period IS the list the file has always carried beside
      the hours and the time on a page, so the three describe one span */
@@ -330,7 +331,7 @@ async function fromUsage(db, { windowFrom, now = Date.now() }) {
        table, so a share computed over the listed rows would be a share of the
        rows that fitted. */
     pagesWindow: { from: ninety.from, to: ninety.to, views: ninety.views },
-    pagesWindows, pageRecords: records,
+    pagesWindows, pageRecords: records, ...usagePeriods(records, now),
     universities: [],
     breakdowns: {
       /* THE HOURS ARE THE FIRST-PARTY RECORD'S ALONE. It stamps the instant a
@@ -516,10 +517,10 @@ async function fromGa4({ since, windowFrom, windowTo }) {
   /** One dimension, ranked by sessions over the window. Non-fatal on its own:
       a country list that 500s must not cost the daily figures, which have
       already been fetched above. */
-  async function dimension(name, limit) {
+  async function dimension(name, limit, from = winStart) {
     try {
       const res = await readAllReportRows(runReport, {
-        dateRanges: [{ startDate: winStart, endDate }],
+        dateRanges: [{ startDate: from, endDate }],
         dimensions: [{ name }],
         metrics: [{ name: 'sessions' }],
         orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
@@ -581,8 +582,22 @@ async function fromGa4({ since, windowFrom, windowTo }) {
     warn(`the GA4 engagement report failed (${e.message}) — that figure is skipped`);
   }
 
+  const breakdownWindows = { '90': breakdowns };
+  for (const range of A.RANGES.filter(r => r.id !== '90')) {
+    const from = range.days ? A.dayPlus(windowTo, -(range.days - 1)) : startDate;
+    const covered = known.filter(d => d >= from && d <= windowTo);
+    const span = { from: covered[0] || '', to: covered[covered.length - 1] || '' };
+    const ids = ['countries', 'devices', 'channels', 'referrers'];
+    const names = ['country', 'deviceCategory', 'sessionDefaultChannelGroup', 'sessionSource'];
+    const items = await Promise.all(names.map(name => dimension(name, 10000, from)));
+    breakdownWindows[range.id] = {};
+    ids.forEach((id, i) => {
+      const record = A.breakdown(id, { source: 'ga4', ...span, items: items[i], limit: items[i].length });
+      if (record) breakdownWindows[range.id][id] = record;
+    });
+  }
   return {
-    source: 'ga4', days, pages,
+    source: 'ga4', days, pages, breakdownWindows,
     pageRecords: Array.from(pageDays, ([day, pages]) => ({ day, pages })),
     /* the same whole-window pageview count the usage leg states — see there */
     pagesWindow: { ...win, views: winViews },
@@ -710,6 +725,24 @@ function cutPageWindows(windows) {
     };
   }
   return out;
+}
+
+export function usagePeriods(records, now) {
+  const windows = A.pageWindows(records, { now });
+  const breakdownWindows = {}, engagementWindows = {};
+  for (const range of A.RANGES) {
+    const win = windows[range.id];
+    const hours = A.hourBuckets();
+    let seconds = 0;
+    for (const record of records) {
+      if (record.day < win.from || record.day > win.to) continue;
+      for (let i = 0; i < 24; i++) hours[i].value += (record.hours || [])[i] || 0;
+      for (const values of Object.values(record.pages || {})) seconds += Number(values[1]) || 0;
+    }
+    breakdownWindows[range.id] = { hours: A.breakdown('hours', { source: 'usage', from: win.from, to: win.to, metric: 'visits', zone: 'UTC', items: hours, limit: 24 }) };
+    engagementWindows[range.id] = A.engagement({ source: 'usage', from: win.from, to: win.to, sessions: win.views, seconds, views: win.views });
+  }
+  return { breakdownWindows, engagementWindows };
 }
 
 export function pagePeriodsFromSources(sources, now) {
@@ -860,6 +893,22 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
   }
   data.breakdowns = breakdowns;
   data.engagement = engagement;
+  data.breakdownWindows = {};
+  data.engagementWindows = {};
+  for (const range of A.RANGES) {
+    const dimensions = {};
+    let periodEngagement = null;
+    for (const result of ordered) {
+      for (const id of A.BREAKDOWN_IDS) A.mergeBreakdown(dimensions, id, ((result.breakdownWindows || {})[range.id] || {})[id]);
+      if (!periodEngagement) periodEngagement = (result.engagementWindows || {})[range.id] || null;
+    }
+    if (carry) {
+      for (const id of A.BREAKDOWN_IDS) A.mergeBreakdown(dimensions, id, ((carry.breakdownWindows || {})[range.id] || {})[id]);
+      if (!periodEngagement) periodEngagement = (carry.engagementWindows || {})[range.id] || null;
+    }
+    if (Object.keys(dimensions).length) data.breakdownWindows[range.id] = dimensions;
+    if (periodEngagement) data.engagementWindows[range.id] = periodEngagement;
+  }
 
   /* ------------------------------------------------------------ universities
 
@@ -1066,6 +1115,8 @@ async function main() {
       pagesWindow: previous.pagesWindow || null,
       pagesWindows: previous.pagesWindows || null,
       breakdowns: previous.breakdowns || {},
+      breakdownWindows: previous.breakdownWindows || {},
+      engagementWindows: previous.engagementWindows || {},
       engagement: previous.engagement || null,
       /* the WHOLE previous universities block, not just its rows: it carries
          the range, the frozen flag and the coverage counts, and a carry that

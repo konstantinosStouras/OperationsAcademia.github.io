@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 const A = createRequire(import.meta.url)('../assets/oa-analytics-model.js');
-import { readAllDocuments, readAllReportRows, assemble, pagePeriodsFromSources } from './build-analytics.mjs';
+import { readAllDocuments, readAllReportRows, assemble, pagePeriodsFromSources, usagePeriods } from './build-analytics.mjs';
 const records = Array.from({ length: 7 }, (_, i) => ({ id: i }));
 const base = { startAfter: (cursor) => query(cursor.id + 1), limit: (size) => query(0).limit(size) };
 function query(offset) { return { limit: (size) => ({ get: async () => ({ docs: records.slice(offset, offset + size), size: records.slice(offset, offset + size).length }) }) }; }
@@ -54,3 +54,12 @@ const C = (await import('node:module')).createRequire(import.meta.url)('../asset
 assert.equal(C.universityName('Operations, Haas School of Business, University of California, Berkeley'), 'University of California, Berkeley');
 assert.equal(C.universityName('Operations, Kellogg School of Management, Northwestern University'), 'Northwestern University');
 console.log('Historical page coverage: earlier GA4 days, overlap deduplication and failed-source retention passed');
+
+const periods = usagePeriods([
+  { day: '2026-06-01', pages: { '/jobs': [2, 20] }, hours: [2] },
+  { day: '2026-10-08', pages: { '/jobs': [3, 60] }, hours: [3] },
+], Date.parse('2026-10-08'));
+assert.equal(periods.breakdownWindows.all.hours.total, 5);
+assert.equal(periods.breakdownWindows['30'].hours.total, 3);
+assert.equal(periods.engagementWindows.all.sessions, 5);
+assert.equal(periods.engagementWindows['30'].sessions, 3);
