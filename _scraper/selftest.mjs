@@ -6631,7 +6631,7 @@ async function testMemberInsights() {
   }
   eq(doc.members, 25, 'members: the same people the front page counts (marked, not disabled)');
   eq(doc.affiliation, { listed: 14, other: 8, none: 3 }, 'members: listed, another affiliation, not given');
-  eq(doc.universities.shown.map((r) => [r.name, r.members]), [['Massachusetts Institute of Technology (MIT)', 12]],
+  eq(doc.universities.shown.map((r) => [r.name, r.members]), [[uni('MIT'), 12]],
     'members: a university with three or more members is named');
   eq([doc.universities.count, doc.universities.rest], [2, 2],
     'members: …one with two is counted in the rest and NEVER named (K_MIN is 3)');
