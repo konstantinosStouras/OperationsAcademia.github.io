@@ -573,12 +573,27 @@
       that the other way round is the classic way a "top countries" chart comes
       to claim its leader is 40% of all traffic when it is 40% of the ten
       countries that happened to fit. */
+  function referralAllowed(raw) {
+    var name = String(raw || '').trim().toLowerCase();
+    name = name.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
+    return !/(^|\.)(github\.com|github\.io|firebase\.com|firebase\.google\.com|firebaseapp\.com|web\.app|awesome-table\.com|view-awesome-table\.com|awesometables\.com)$/.test(name);
+  }
+
+  function referralRecord(rec) {
+    if (!rec || !Array.isArray(rec.items)) return rec;
+    var removed = rec.items.filter(function (it) { return !referralAllowed(it.name); })
+      .reduce(function (n, it) { return n + (Number(it.value) || 0); }, 0);
+    return { ...rec, total: Math.max(0, (Number(rec.total) || 0) - removed),
+      items: rec.items.filter(function (it) { return referralAllowed(it.name); }) };
+  }
+
   function breakdown(id, { source, from = '', to = '', metric = 'visits', zone = '',
     items = [], limit = 12 } = {}) {
     if (BREAKDOWN_IDS.indexOf(id) === -1) return null;
     const rows = [];
     let total = 0;
     for (const it of items || []) {
+      if (id === 'referrers' && !referralAllowed(it && it.name)) continue;
       const name = prettyLabel(it && it.name);
       if (!name) continue;
       const value = num(it && it.value);
@@ -866,7 +881,7 @@
     isDay, dayRow, emptyDataset, mergeDays, orderSources,
     series, rollingMean, byWeekday, byMonth, summarise, staleness,
     mergePages, topPages,
-    cleanLabel, prettyLabel, breakdown, mergeBreakdown, hourBuckets, withShare,
+    referralAllowed, referralRecord, cleanLabel, prettyLabel, breakdown, mergeBreakdown, hourBuckets, withShare,
     engagement,
     growthProjection,
     RANGES, visitWindows, pageWindows, dayPlus,

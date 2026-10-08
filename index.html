@@ -1013,14 +1013,7 @@
          inter-linked"). */
       function uniLink(name) {
         name = String(name || '').replace(/^\s+|\s+$/g, '');
-        /* A candidate's affiliation is the whole joined line, smallest part
-           first ("Operations, Kellogg …, Northwestern University"); the
-           directory's search is contains-the-needle over the university, so
-           the full line found nothing. The LAST part is the university. */
-        if (name.indexOf(',') !== -1) {
-          var parts = name.split(',');
-          name = parts[parts.length - 1].replace(/^\s+|\s+$/g, '') || name;
-        }
+        name = OACandCard.universityName(name);
         if (!name) return null;
         var a = document.createElement('a');
         a.href = 'universities?filterA=' + encodeURIComponent(name);
@@ -1414,6 +1407,30 @@
         });
         if (window.OACandidateEdit) OACandidateEdit.attach(cands);
         OAGate.watch(cands);
+        /* A page opened before the reveal must not keep its cached empty list
+           forever. Read only public snapshots after the announced instant. */
+        var refreshingCandidates = false;
+        function refreshRevealedCandidates() {
+          var host = document.getElementById('oa-candidates');
+          if (document.hidden || refreshingCandidates || host.contains(document.activeElement)) return;
+          refreshingCandidates = true;
+          fetch('/data/candidates-meta.json?v=' + Date.now(), { cache: 'no-store' })
+            .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+            .then(function (meta) {
+              if (!OAReveal.isRevealed(meta.revealAt)) return;
+              return cands.refresh().then(function () {
+                if (cands.rows().length) {
+                  var waiting = document.getElementById('oa-reveal-note');
+                  if (waiting) waiting.hidden = true;
+                }
+              });
+            }).catch(function () {})
+            .then(function () { refreshingCandidates = false; });
+        }
+        setInterval(refreshRevealedCandidates, 60000);
+        document.addEventListener('visibilitychange', function () {
+          if (!document.hidden) refreshRevealedCandidates();
+        });
       });
 
       V3.lazy('#oa-placements', function () {

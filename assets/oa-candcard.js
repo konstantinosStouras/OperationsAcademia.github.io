@@ -376,14 +376,20 @@
     return a.outerHTML;
   }
 
-  function defaultUniLink(name) {
-    name = String(name || '').replace(/^\s+|\s+$/g, '');
-    /* the affiliation is the whole joined line, smallest part first; the
-       LAST part is the university, which is what the directory searches */
-    if (name.indexOf(',') !== -1) {
-      var parts = name.split(',');
-      name = parts[parts.length - 1].replace(/^\s+|\s+$/g, '') || name;
+  function universityName(affiliation, canon) {
+    var name = String(affiliation || '').trim();
+    var parts = name.split(',');
+    var canonicalise = canon || (root && root.OASchools && root.OASchools.canonInstitution) || function (v) { return v; };
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var suffix = parts.slice(i).join(',').trim();
+      var canonical = canonicalise(suffix);
+      if (/univers|institut|college|school|hochschule|école|escuela|\bhec\b/i.test(canonical)) return canonical;
     }
+    return parts[parts.length - 1].trim() || name;
+  }
+
+  function defaultUniLink(name) {
+    name = universityName(name);
     if (!name) return null;
     var a = document.createElement('a');
     a.href = 'universities?filterA=' + encodeURIComponent(name);
@@ -532,6 +538,7 @@
     render: render,
     mount: mount,
     link: defaultLink,
+    universityName: universityName,
     uniLink: defaultUniLink,
     mailto: defaultMailto
   };

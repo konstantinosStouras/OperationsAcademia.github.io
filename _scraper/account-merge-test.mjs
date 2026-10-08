@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { guardMerge, mergeProfile, sameMailbox } from './merge-account-identities.mjs';
+const keep = { uid: 'keep', disabled: false, emailVerified: true, providerData: [{ providerId: 'password' }] };
+const duplicate = { uid: 'duplicate', disabled: false, providerData: [{ providerId: 'google.com' }, { providerId: 'oidc.orcid' }, { providerId: 'password' }] };
+const kp = { firstName: 'Test', lastName: 'Researcher', affiliation: 'Keep University' };
+const dp = { firstName: 'Test', lastName: 'Researcher', affiliation: 'Other University', website: 'https://example.org', orcid: 'test-orcid', orcidVerified: true };
+assert.deepEqual(guardMerge(keep, duplicate, kp, dp, { candidateSubmissions: 0 }).map(p => p.providerId), ['google.com', 'oidc.orcid']);
+assert.throws(() => guardMerge(keep, duplicate, kp, { ...dp, lastName: 'Someone else' }, {}));
+assert.throws(() => guardMerge(keep, duplicate, { ...kp, orcid: 'other' }, dp, {}));
+assert.throws(() => guardMerge(keep, duplicate, kp, dp, { candidateSubmissions: 1 }));
+assert.throws(() => guardMerge({ ...keep, emailVerified: false }, duplicate, kp, dp, {}));
+assert.throws(() => guardMerge({ ...keep, providerData: [...keep.providerData, { providerId: 'google.com' }] }, duplicate, kp, dp, {}));
+const merged = mergeProfile(kp, dp);
+assert.equal(merged.affiliation, kp.affiliation);
+assert.equal(merged.website, dp.website);
+assert.equal(merged.orcidVerified, true);
+console.log('Account merge: identity, provider-conflict, content-preservation and fill-empty guards passed');
+
+assert.equal(sameMailbox('some.name+tag@gmail.com', 'somename@gmail.com'), true);
+assert.equal(sameMailbox('some.name@googlemail.com', 'somename@gmail.com'), true);
+assert.equal(sameMailbox('some.name@uw.edu', 'somename@uw.edu'), false);
+assert.equal(sameMailbox('different@gmail.com', 'somename@gmail.com'), false);

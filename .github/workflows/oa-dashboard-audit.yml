@@ -1,0 +1,26 @@
+name: OA — dashboard and held-candidate audit
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 playwright@1 google-auth-library@9
+      - run: npx playwright install --with-deps chromium
+      - run: node _scraper/analytics-coverage-test.mjs
+      - name: Read-only check of held profiles and real card layouts
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node _scraper/audit-held-candidates.mjs
+      - name: Requested Awesome Table and Wikipedia referring URLs
+        env:
+          GA4_SERVICE_ACCOUNT: ${{ secrets.GA4_SERVICE_ACCOUNT }}
+          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID || '384653143' }}
+        run: node _scraper/audit-referral-links.mjs

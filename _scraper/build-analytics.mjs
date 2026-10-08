@@ -116,6 +116,32 @@ function sameFigures(a, b) {
   return blank(a) === blank(b);
 }
 
+export async function readAllDocuments(base, pageSize = READ_PAGE) {
+  const docs = [];
+  let cursor = null;
+  for (;;) {
+    const page = await (cursor ? base.startAfter(cursor) : base).limit(pageSize).get();
+    docs.push(...page.docs);
+    if (page.size < pageSize) return docs;
+    cursor = page.docs[page.docs.length - 1];
+  }
+}
+
+export async function readAllReportRows(run, body) {
+  const limit = body.limit || 10000;
+  let offset = 0;
+  const rows = [];
+  for (;;) {
+    const page = await run({ ...body, limit, offset });
+    const chunk = page.rows || [];
+    rows.push(...chunk);
+    offset += chunk.length;
+    if (!chunk.length || chunk.length < limit || offset >= Number(page.rowCount)) {
+      return { ...page, rows };
+    }
+  }
+}
+
 /* ------------------------------------------------------------------ sources */
 
 /** The committed archive of the years UA measured. Needs no credential and
@@ -257,10 +283,11 @@ async function fromUsage(db, { windowFrom, now = Date.now() }) {
 
     let bucket = seen.get(day);
     if (!bucket) {
-      bucket = { uids: new Set(), sessions: 0, views: 0, pages: {} };
+      bucket = { uids: new Set(), sessions: 0, views: 0, pages: {}, hours: Array(24).fill(0) };
       seen.set(day, bucket);
     }
     if (d.uid) bucket.uids.add(String(d.uid));
+    bucket.hours[new Date(started).getUTCHours()]++;
     bucket.sessions++;
     bucket.views++;
     const sec = Math.max(0, Math.min(3600, Number(d.dur || 0)));
@@ -289,7 +316,7 @@ async function fromUsage(db, { windowFrom, now = Date.now() }) {
 
   /* the pages list per PERIOD, through the model's one definition of a
      period (pageWindows, the rule visitWindows keeps for the universities) */
-  const records = Array.from(seen.entries()).map(([day, b]) => ({ day, pages: b.pages }));
+  const records = Array.from(seen.entries()).map(([day, b]) => ({ day, pages: b.pages, hours: b.hours }));
   const pagesWindows = A.pageWindows(records, { now });
   /* the ninety-day period IS the list the file has always carried beside
      the hours and the time on a page, so the three describe one span */
@@ -304,7 +331,7 @@ async function fromUsage(db, { windowFrom, now = Date.now() }) {
        table, so a share computed over the listed rows would be a share of the
        rows that fitted. */
     pagesWindow: { from: ninety.from, to: ninety.to, views: ninety.views },
-    pagesWindows,
+    pagesWindows, pageRecords: records, ...usagePeriods(records, now),
     universities: [],
     breakdowns: {
       /* THE HOURS ARE THE FIRST-PARTY RECORD'S ALONE. It stamps the instant a
@@ -401,7 +428,7 @@ async function fromGa4({ since, windowFrom, windowTo }) {
     return res.json();
   }
 
-  const startDate = since ? iso(new Date(since)) : '2015-08-14';   // GA4's own floor
+  const startDate = '2015-08-14';   // GA4's own floor
   const endDate = 'today';
   const winStart = iso(new Date(windowFrom));
 
@@ -428,7 +455,7 @@ async function fromGa4({ since, windowFrom, windowTo }) {
     },
   };
 
-  const daily = await runReport({
+  const daily = await readAllReportRows(runReport, {
     dateRanges: [{ startDate, endDate }],
     dimensions: [{ name: 'date' }],
     metrics: [{ name: 'totalUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }],
@@ -456,24 +483,32 @@ async function fromGa4({ since, windowFrom, windowTo }) {
   const winFrom = inWindow[0] || '';
   const winTo = inWindow[inWindow.length - 1] || '';
 
-  const paged = await runReport({
-    dateRanges: [{ startDate: winStart, endDate }],
-    dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
+  const paged = await readAllReportRows(runReport, {
+    dateRanges: [{ startDate, endDate }],
+    dimensions: [{ name: 'date' }, { name: 'pagePath' }, { name: 'pageTitle' }],
     metrics: [{ name: 'screenPageViews' }, { name: 'userEngagementDuration' }],
     orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
     dimensionFilter: excludeAdmin,
-    limit: 200,
+    limit: 10000,
   });
 
   const pages = [];
+  const pageDays = new Map();
   for (const row of paged.rows || []) {
-    const p = row.dimensionValues?.[0]?.value || '';
+    const rawDay = row.dimensionValues?.[0]?.value || '';
+    if (!/^\d{8}$/.test(rawDay)) continue;
+    const day = rawDay.slice(0, 4) + '-' + rawDay.slice(4, 6) + '-' + rawDay.slice(6, 8);
+    const p = A.normPath(row.dimensionValues?.[1]?.value || '');
     const views = Number(row.metricValues?.[0]?.value || 0);
     const secs = Number(row.metricValues?.[1]?.value || 0);
-    if (!p || !views) continue;
+    if (!p || !views || !A.isDay(day) || !A.isPublicPath(p)) continue;
+    if (!pageDays.has(day)) pageDays.set(day, {});
+    const cell = pageDays.get(day)[p] || (pageDays.get(day)[p] = [0, 0]);
+    cell[0] += views; cell[1] += secs;
+    if (day < winStart) continue;
     pages.push({
       path: A.normPath(p),
-      title: row.dimensionValues?.[1]?.value || '',
+      title: row.dimensionValues?.[2]?.value || '',
       views,
       avgSec: views ? secs / views : 0,
     });
@@ -482,10 +517,10 @@ async function fromGa4({ since, windowFrom, windowTo }) {
   /** One dimension, ranked by sessions over the window. Non-fatal on its own:
       a country list that 500s must not cost the daily figures, which have
       already been fetched above. */
-  async function dimension(name, limit) {
+  async function dimension(name, limit, from = winStart) {
     try {
-      const res = await runReport({
-        dateRanges: [{ startDate: winStart, endDate }],
+      const res = await readAllReportRows(runReport, {
+        dateRanges: [{ startDate: from, endDate }],
         dimensions: [{ name }],
         metrics: [{ name: 'sessions' }],
         orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
@@ -514,10 +549,10 @@ async function fromGa4({ since, windowFrom, windowTo }) {
 
   const win = { from: winFrom, to: winTo };
   const breakdowns = {
-    countries: A.breakdown('countries', { source: 'ga4', ...win, items: countries, limit: 12 }),
-    devices: A.breakdown('devices', { source: 'ga4', ...win, items: devices, limit: 6 }),
-    channels: A.breakdown('channels', { source: 'ga4', ...win, items: channels, limit: 6 }),
-    referrers: A.breakdown('referrers', { source: 'ga4', ...win, items: referrers, limit: 10 }),
+    countries: A.breakdown('countries', { source: 'ga4', ...win, items: countries, limit: countries.length }),
+    devices: A.breakdown('devices', { source: 'ga4', ...win, items: devices, limit: devices.length }),
+    channels: A.breakdown('channels', { source: 'ga4', ...win, items: channels, limit: channels.length }),
+    referrers: A.breakdown('referrers', { source: 'ga4', ...win, items: referrers, limit: referrers.length }),
   };
 
   /* How long a visit lasts, and how much of the site it covers. GA4 reports
@@ -547,8 +582,23 @@ async function fromGa4({ since, windowFrom, windowTo }) {
     warn(`the GA4 engagement report failed (${e.message}) — that figure is skipped`);
   }
 
+  const breakdownWindows = { '90': breakdowns };
+  for (const range of A.RANGES.filter(r => r.id !== '90')) {
+    const from = range.days ? A.dayPlus(windowTo, -(range.days - 1)) : startDate;
+    const covered = known.filter(d => d >= from && d <= windowTo);
+    const span = { from: covered[0] || '', to: covered[covered.length - 1] || '' };
+    const ids = ['countries', 'devices', 'channels', 'referrers'];
+    const names = ['country', 'deviceCategory', 'sessionDefaultChannelGroup', 'sessionSource'];
+    const items = await Promise.all(names.map(name => dimension(name, 10000, from)));
+    breakdownWindows[range.id] = {};
+    ids.forEach((id, i) => {
+      const record = A.breakdown(id, { source: 'ga4', ...span, items: items[i], limit: items[i].length });
+      if (record) breakdownWindows[range.id][id] = record;
+    });
+  }
   return {
-    source: 'ga4', days, pages,
+    source: 'ga4', days, pages, breakdownWindows,
+    pageRecords: Array.from(pageDays, ([day, pages]) => ({ day, pages })),
     /* the same whole-window pageview count the usage leg states — see there */
     pagesWindow: { ...win, views: winViews },
     universities: [], breakdowns, engagement,
@@ -590,7 +640,8 @@ async function fromGa4({ since, windowFrom, windowTo }) {
 async function fromVisits(db, { now = Date.now(), recentDays = RECENT_DAYS } = {}) {
   if (!db) return null;
 
-  const snap = await db.collection('universityVisits').orderBy('day').limit(20000).get();
+  const docs = await readAllDocuments(db.collection('universityVisits').orderBy('day'));
+  const snap = { empty: !docs.length, forEach: (fn) => docs.forEach(fn) };
   /* NOTHING COLLECTED YET is not the same as "nobody visited": until the
      Cloud Functions are deployed the browser's ping has nowhere to land. So
      an empty collection returns null, the committed file stands untouched,
@@ -644,7 +695,7 @@ function cutWindows(windows) {
   const out = {};
   for (const [id, win] of Object.entries(windows && typeof windows === 'object' ? windows : {})) {
     if (!win || typeof win !== 'object') continue;
-    out[id] = { ...win, all: (win.all || []).slice(0, TOP_UNIS) };
+    out[id] = { ...win, all: (win.all || []).slice() };
   }
   return out;
 }
@@ -669,10 +720,46 @@ function cutPageWindows(windows) {
       from: A.isDay(w.from) ? w.from : '',
       to: A.isDay(w.to) ? w.to : '',
       views: Math.max(0, Math.round(Number(w.views) || 0)),
-      pages: A.topPages(pages, TOP_PAGES),
+      pages: A.topPages(pages, pages.size),
+      ...(w.source ? { source: String(w.source) } : {}),
     };
   }
   return out;
+}
+
+export function usagePeriods(records, now) {
+  const windows = A.pageWindows(records, { now });
+  const breakdownWindows = {}, engagementWindows = {};
+  for (const range of A.RANGES) {
+    const win = windows[range.id];
+    const hours = A.hourBuckets();
+    let seconds = 0;
+    for (const record of records) {
+      if (record.day < win.from || record.day > win.to) continue;
+      for (let i = 0; i < 24; i++) hours[i].value += (record.hours || [])[i] || 0;
+      for (const values of Object.values(record.pages || {})) seconds += Number(values[1]) || 0;
+    }
+    breakdownWindows[range.id] = { hours: A.breakdown('hours', { source: 'usage', from: win.from, to: win.to, metric: 'visits', zone: 'UTC', items: hours, limit: 24 }) };
+    engagementWindows[range.id] = A.engagement({ source: 'usage', from: win.from, to: win.to, sessions: win.views, seconds, views: win.views });
+  }
+  return { breakdownWindows, engagementWindows };
+}
+
+export function pagePeriodsFromSources(sources, now) {
+  const byDay = new Map();
+  for (const source of sources) {
+    for (const record of source.pageRecords || []) {
+      if (A.isDay(record.day) && !byDay.has(record.day)) byDay.set(record.day, { ...record, source: source.source });
+    }
+  }
+  if (!byDay.size) return null;
+  const records = Array.from(byDay.values());
+  const windows = A.pageWindows(records, { now });
+  for (const window of Object.values(windows)) {
+    const used = new Set(records.filter(r => r.day >= window.from && r.day <= window.to).map(r => r.source));
+    window.source = A.SOURCE_ORDER.filter(id => used.has(id)).join('+');
+  }
+  return windows;
 }
 
 /* ---------------------------------------------------------------------- main */
@@ -783,11 +870,45 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
     if (!data.sources.length) data.sources = (carry.sources || []).slice();
   }
 
-  data.pages = A.topPages(pages, TOP_PAGES);
+  data.pages = A.topPages(pages, pages.size);
   data.pagesWindow = pagesWindow || { source: '', from: '', to: '', views: 0 };
   data.pagesWindows = cutPageWindows(pagesWindows);
+  // Extend page rankings with older GA4 days, while one source owns each day.
+  // If a previously combined source is down, keep the complete last snapshot.
+  const pageSources = ordered.filter(r => Array.isArray(r.pageRecords));
+  const priorSources = String(carry && carry.pagesWindow && carry.pagesWindow.source || '').split('+');
+  const missingPageSource = priorSources.length > 1 && priorSources.some(id => !pageSources.some(r => r.source === id));
+  if (missingPageSource && carry && carry.pagesWindows) {
+    data.pages = carry.pages;
+    data.pagesWindow = carry.pagesWindow;
+    data.pagesWindows = cutPageWindows(carry.pagesWindows);
+  } else {
+    const combined = pagePeriodsFromSources(pageSources, now);
+    if (combined) {
+      data.pagesWindows = cutPageWindows(combined);
+      const ninety = combined['90'];
+      data.pages = ninety.pages;
+      data.pagesWindow = { source: ninety.source, from: ninety.from, to: ninety.to, views: ninety.views };
+    }
+  }
   data.breakdowns = breakdowns;
   data.engagement = engagement;
+  data.breakdownWindows = {};
+  data.engagementWindows = {};
+  for (const range of A.RANGES) {
+    const dimensions = {};
+    let periodEngagement = null;
+    for (const result of ordered) {
+      for (const id of A.BREAKDOWN_IDS) A.mergeBreakdown(dimensions, id, ((result.breakdownWindows || {})[range.id] || {})[id]);
+      if (!periodEngagement) periodEngagement = (result.engagementWindows || {})[range.id] || null;
+    }
+    if (carry) {
+      for (const id of A.BREAKDOWN_IDS) A.mergeBreakdown(dimensions, id, ((carry.breakdownWindows || {})[range.id] || {})[id]);
+      if (!periodEngagement) periodEngagement = (carry.engagementWindows || {})[range.id] || null;
+    }
+    if (Object.keys(dimensions).length) data.breakdownWindows[range.id] = dimensions;
+    if (periodEngagement) data.engagementWindows[range.id] = periodEngagement;
+  }
 
   /* ------------------------------------------------------------ universities
 
@@ -822,8 +943,8 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
       frozen: false,
       from: visits.from || '',
       to: visits.to || '',
-      all: visits.all.slice(0, TOP_UNIS),
-      recent: visits.recent.slice(0, TOP_UNIS),
+      all: visits.all.slice(),
+      recent: visits.recent.slice(),
       /* the same counters per period, under the page's own range ids — the
          reader's choice on the figure (owner, 2026-09-08). HERE, before the
          counts, because the carry path spreads the empty block first and a
@@ -843,7 +964,7 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
       frozen: true,
       from: hist.from || '',
       to: hist.to || '',
-      all: archivedRows.slice(0, TOP_UNIS),
+      all: archivedRows.slice(),
       recent: [],
       /* a closed period has no "last 30 days": the page draws no period
          control over an archive */
@@ -853,8 +974,8 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
     data.universities = {
       ...A.emptyDataset().universities,
       ...carriedU,
-      all: (carriedU.all || []).slice(0, TOP_UNIS),
-      recent: (carriedU.recent || []).slice(0, TOP_UNIS),
+      all: (carriedU.all || []).slice(),
+      recent: (carriedU.recent || []).slice(),
       windows: cutWindows(carriedU.windows),
     };
   } else {
@@ -992,7 +1113,10 @@ async function main() {
       /* carried for the same reason the days are: a source that timed out this
          afternoon must cost a day of freshness, never the figure itself */
       pagesWindow: previous.pagesWindow || null,
+      pagesWindows: previous.pagesWindows || null,
       breakdowns: previous.breakdowns || {},
+      breakdownWindows: previous.breakdownWindows || {},
+      engagementWindows: previous.engagementWindows || {},
       engagement: previous.engagement || null,
       /* the WHOLE previous universities block, not just its rows: it carries
          the range, the frozen flag and the coverage counts, and a carry that
@@ -1138,8 +1262,8 @@ function selftest() {
   ok(v.universities.windows['30'].placed === 4 && v.universities.windows['30'].seen === 30 &&
     v.universities.windows['30'].all[0].name === 'Boston University',
     'each period keeps its own ranking and its own coverage counts, not the whole record\'s');
-  ok(v.universities.windows.all.all.length === TOP_UNIS,
-    `a period's list is cut at TOP_UNIS (${TOP_UNIS}) like the whole-record list`);
+  ok(v.universities.windows.all.all.length === TOP_UNIS + 3,
+    `every university survives the former 120-row cap`);
   ok(v.universities.windows.all.placed === 15 + TOP_UNIS + 1,
     '…while its placed total is the TRUE one, so the share the page prints survives the cut');
   ok(Object.keys(a.universities.windows).length === 0,
@@ -1201,8 +1325,8 @@ function selftest() {
     'a period folds two spellings of one page into one row, as the default list does');
   ok(!JSON.stringify(withPeriods.pagesWindows).includes('admin-area'),
     'a path the public may not see reaches no period');
-  ok(withPeriods.pagesWindows.all.pages.length === TOP_PAGES,
-    `every period is cut at TOP_PAGES (${TOP_PAGES}) like the default list`);
+  ok(withPeriods.pagesWindows.all.pages.length === TOP_PAGES + 5,
+    `every page survives the former 25-row cap`);
   ok(withPeriods.pagesWindows.all.views === 4 + 2 + TOP_PAGES + 3,
     '…while its views are the WHOLE period\'s, taken before the cut, so a share survives it');
   ok(withPeriods.pagesWindows['90'].from === '2026-08-17' && withPeriods.pagesWindows['30'].from === '2026-09-01',

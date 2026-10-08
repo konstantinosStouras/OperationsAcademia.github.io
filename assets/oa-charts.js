@@ -615,7 +615,7 @@
       a proportion of the ten that happened to fit. */
   function bars(host, opts) {
     const all = opts.items || [];
-    const items = all.slice(0, opts.limit || 12);
+    const items = all.slice(0, opts.expanded ? all.length : (opts.limit || 12));
     host.textContent = '';
     host.classList.add('oa-chart', 'oa-chart-bars');
     if (!items.length) return;
@@ -710,6 +710,19 @@
       list.appendChild(li);
     });
     wrap.appendChild(list);
+    if (opts.showAll && all.length > (opts.limit || 12)) {
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'oa-btn';
+      toggle.setAttribute('aria-expanded', String(!!opts.expanded));
+      toggle.textContent = opts.expanded ? 'Show fewer' : 'Show all ' + full(all.length);
+      toggle.addEventListener('click', () => {
+        bars(host, { ...opts, expanded: !opts.expanded });
+        const next = host.querySelector('button');
+        if (next) next.focus({ preventScroll: true });
+      });
+      host.appendChild(toggle);
+    }
     /* No numbers table under the list (owner, 2026-09-08, of the universities
        figure and the pages figure with their "Show the numbers" block
        circled, then of every plot on the page). A bar list is its own

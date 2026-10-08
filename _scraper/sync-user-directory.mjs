@@ -137,6 +137,7 @@ const DRY = argv.has('--dry-run');
    _SETUP-FIREBASE.md all say `first` and the affiliation are filled DAILY from
    Auth, and they still are. */
 const FIGURES = argv.has('--figures-only');
+const PUBLIC = argv.has('--public-only');
 
 const log = (...a) => console.log(...a);
 const warn = (...a) => console.log('::warning::' + a.join(' '));
@@ -483,7 +484,7 @@ async function main() {
   } else {
     /* What the roster already holds, read once: the merge needs the stored row
        to preserve a site-derived name and to leave an unchanged account alone. */
-    (await col.get()).forEach((d) => { existing[d.id] = d.data() || {}; });
+    if (!PUBLIC) (await col.get()).forEach((d) => { existing[d.id] = d.data() || {}; });
     log(`roster holds ${Object.keys(existing).length} row(s) before this run`);
 
     /* Every profile, read once, for the affiliation each row carries. NULL when
@@ -547,7 +548,7 @@ async function main() {
   const facts = [];
 
   const flush = async () => {
-    if (!pending.length || SCAN || DRY || FIGURES) { pending = []; return; }
+    if (!pending.length || SCAN || DRY || FIGURES || PUBLIC) { pending = []; return; }
     const batch = fb.db.batch();
     /* A REPLACE, NOT A MERGE, and that is what lets the key GO. `row` is the
        whole document — the rules bound it to exactly these five keys — so a
@@ -575,6 +576,7 @@ async function main() {
          which are already on `accounts`. */
       if (FIGURES) continue;
       if (insightCtx && profiles) facts.push(memberFacts(user, profileOf(user.uid), insightCtx));
+      if (PUBLIC) continue;
       const row = rowFromAuthUser(user, existing[user.uid], profileOf(user.uid));
       if (!row) { skipped++; continue; }
       written++;
@@ -593,7 +595,7 @@ async function main() {
 
   await flush();
 
-  log(FIGURES
+  log(FIGURES || PUBLIC
     ? `${seen} account(s) in Auth; the roster was not read or written on this run.`
     : summarise({ seen, written, skipped }));
 
