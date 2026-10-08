@@ -784,6 +784,7 @@
       out.applyByDate = day;
     }
     out.untilFilled = !!untilFilled;
+    out.applicationStatus = val('f-applicationStatus') === 'Expired' ? 'Expired' : '';
 
     /* The SUGGESTED apply-by — the first-review / full-consideration date.
        Optional: most postings name none. The build validates again
@@ -1231,6 +1232,7 @@
        single country — `countriesOf`'s fallback, in the browser */
     setCountries((v.countries && v.countries.length ? v.countries : [v.country]));
     set('f-applyByDate', v.applyByDate);
+    set('f-applicationStatus', v.applicationStatus || '');
     set('f-reviewDate', v.reviewDate);
     set('f-applyByNote', v.applyByNote);
     set('f-comments', v.comments);

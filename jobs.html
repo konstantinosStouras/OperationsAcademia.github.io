@@ -601,7 +601,7 @@
               /* the suggested (first-review) date, only where the posting
                  names one — an empty row is skipped by the engine */
               { label: 'Suggested apply by', value: OAList.longDate(r.reviewDate) },
-              { label: 'Final apply by',     value: r.applyBy },
+              { label: 'Final apply by',     value: r.applicationStatus === 'Expired' ? 'Expired' + (r.applyByDate ? ' (' + r.applyBy + ')' : '') : r.applyBy },
               /* the poster's own prose, read by the site's one markup module
                  (owner, 2026-09-17) -- one definition for all three lists */
               OAJobNav.commentsRow(r),

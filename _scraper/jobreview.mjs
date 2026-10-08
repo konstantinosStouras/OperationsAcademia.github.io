@@ -113,6 +113,7 @@ export const EDITABLE = [
   { key: 'adUrl', label: 'Link to the advert', max: 600, url: true },
   { key: 'postedAtUrl', label: 'Posted at', max: 600, url: true },
   { key: 'furtherInfoUrl', label: 'Further info', max: 600, url: true },
+  { key: 'applicationStatus', label: 'Application status', max: 20, oneOf: ['', 'Expired'] },
 ];
 
 const EDITABLE_KEYS = EDITABLE.map((f) => f.key);

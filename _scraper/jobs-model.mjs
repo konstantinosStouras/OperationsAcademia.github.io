@@ -53,7 +53,7 @@ export const PUBLIC_FIELDS = [
   'id', 'year', 'years', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
   'applyBy', 'applyByDate', 'reviewDate', 'comments', 'country', 'countries',
   'adUrl', 'adPending', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
-  'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner',
+  'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner', 'applicationStatus',
 ];
 
 /* Prose that means the search stays open. ONE definition — and it is one for
@@ -1125,6 +1125,7 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
     levels,
     applyBy: text(applyBy, MAXLEN.applyBy),
     applyByDate,
+    applicationStatus: doc.applicationStatus === 'Expired' ? 'Expired' : '',
     /* The SUGGESTED apply-by — the first-review / full-consideration date.
        The form's own field first; healReviewDate below then validates it
        against the final date and, for a document made before the field
@@ -1574,6 +1575,7 @@ export function submissionFromRow(row, { uid = null, status = 'published' } = {}
     countries: countriesOf(row),
     untilFilled,
     applyByDate: row.applyByDate || '',
+    applicationStatus: row.applicationStatus === 'Expired' ? 'Expired' : '',
     reviewDate: row.reviewDate || '',
     applyByNote,
     comments: row.comments || '',
