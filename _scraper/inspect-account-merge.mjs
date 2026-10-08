@@ -33,4 +33,7 @@ console.log(JSON.stringify({ keeper: { providers: keeper.providerData.map(p => p
   duplicate: { providers: duplicate.providerData.map(p => p.providerId), emailVerified: duplicate.emailVerified, disabled: duplicate.disabled, content: await counts(duplicate.uid) },
   sameName: !!name(kp) && name(kp) === name(dp), conflictingOrcid: !!kp.orcid && !!dp.orcid && kp.orcid !== dp.orcid,
   googleMailboxMatchesPrimary: duplicate.providerData.some(p => p.providerId === 'google.com' && sameMailbox(p.email, duplicate.email)),
+  googleMailboxMatchesKeeper: duplicate.providerData.some(p => p.providerId === 'google.com' && sameMailbox(p.email, keeper.email)),
+  googleEmailPresent: duplicate.providerData.some(p => p.providerId === 'google.com' && !!p.email),
+  googleEmailIsGmail: duplicate.providerData.some(p => p.providerId === 'google.com' && /@(gmail|googlemail)\.com$/i.test(p.email || '')),
   inspectedOnly: true }));
