@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-08T20:01:13.648Z",
- "members": 301,
+ "generated": "2026-10-08T21:35:31.919Z",
+ "members": 304,
  "k": 3,
  "affiliation": {
-  "listed": 214,
+  "listed": 217,
   "other": 45,
   "none": 42
  },
@@ -52,6 +52,11 @@
    },
    {
     "name": "University of Massachusetts Amherst",
+    "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "University of Washington",
     "country": "United States",
     "members": 4
    },
@@ -116,6 +121,11 @@
     "members": 3
    },
    {
+    "name": "University of Michigan",
+    "country": "United States",
+    "members": 3
+   },
+   {
     "name": "University of Pennsylvania",
     "country": "United States",
     "members": 3
@@ -136,24 +146,19 @@
     "members": 3
    },
    {
-    "name": "University of Washington",
-    "country": "United States",
-    "members": 3
-   },
-   {
     "name": "Yale University",
     "country": "United States",
     "members": 3
    }
   ],
-  "rest": 116
+  "rest": 115
  },
  "countries": {
   "count": 15,
   "shown": [
    {
     "name": "United States",
-    "members": 134
+    "members": 137
    },
    {
     "name": "Canada",
