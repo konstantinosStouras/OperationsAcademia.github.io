@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-08T19:42:28.511Z",
+ "generated": "2026-10-08T19:46:01.348Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -486,6 +486,10 @@
    "n": 2
   },
   {
+   "v": "University of Alabama",
+   "n": 2
+  },
+  {
    "v": "University of Bath",
    "n": 2
   },
@@ -535,6 +539,10 @@
   },
   {
    "v": "University of Nevada, Las Vegas",
+   "n": 2
+  },
+  {
+   "v": "University of North Texas",
    "n": 2
   },
   {
@@ -1362,10 +1370,6 @@
    "n": 1
   },
   {
-   "v": "University of Alabama",
-   "n": 1
-  },
-  {
    "v": "University of Alabama - Birmingham",
    "n": 1
   },
@@ -1495,10 +1499,6 @@
   },
   {
    "v": "University of North Carolina at Wilmington",
-   "n": 1
-  },
-  {
-   "v": "University of North Texas",
    "n": 1
   },
   {
@@ -2376,6 +2376,10 @@
    "n": 1
   },
   {
+   "v": "Culverhouse College of Commerce",
+   "n": 1
+  },
+  {
    "v": "David D. Reh School of Business",
    "n": 1
   },
@@ -2417,6 +2421,10 @@
   },
   {
    "v": "Frank G. Zarb School of Business",
+   "n": 1
+  },
+  {
+   "v": "G. Brint Ryan College of Business",
    "n": 1
   },
   {
@@ -2728,10 +2736,6 @@
    "n": 0
   },
   {
-   "v": "Culverhouse College of Commerce",
-   "n": 0
-  },
-  {
    "v": "D'Amore-McKim School of Business",
    "n": 0
   },
@@ -2777,10 +2781,6 @@
   },
   {
    "v": "Fu Foundation School of Engineering and Applied Science",
-   "n": 0
-  },
-  {
-   "v": "G. Brint Ryan College of Business",
    "n": 0
   },
   {
@@ -3143,7 +3143,7 @@
  "units": [
   {
    "v": "Supply Chain Management",
-   "n": 50
+   "n": 51
   },
   {
    "v": "OM",
@@ -3811,6 +3811,10 @@
   },
   {
    "v": "Information Systems, Data Analytics and Operations",
+   "n": 1
+  },
+  {
+   "v": "Information Systems, Statistics, and Management Science",
    "n": 1
   },
   {
@@ -4563,10 +4567,6 @@
   },
   {
    "v": "Information Systems, Operations, Supply Chain and Analytics",
-   "n": 0
-  },
-  {
-   "v": "Information Systems, Statistics, and Management Science",
    "n": 0
   },
   {

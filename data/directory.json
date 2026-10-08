@@ -8408,8 +8408,8 @@
    "directory",
    "postings"
   ],
-  "n": 1,
-  "lastPosted": "2014-09-09",
+  "n": 2,
+  "lastPosted": "2026-10-05",
   "lat": 33.211914,
   "lng": -87.5490236
  },
@@ -11368,11 +11368,15 @@
   "school": "G. Brint Ryan College of Business",
   "department": "Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://cob.unt.edu/people/?type=Faculty&department=Department+of+Supply+Chain+Management",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-08"
  },
  {
   "id": "university-of-northern-iowa____ba",
