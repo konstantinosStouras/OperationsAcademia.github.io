@@ -50,7 +50,7 @@ on:
         default: false
 
 concurrency:
-  group: oa-analytics-${{ github.ref }}
+  group: oa-analytics-${{ github.ref }}-${{ inputs.audit && 'audit' || inputs.merge_accounts && 'merge' || 'build' }}
   cancel-in-progress: false
 
 permissions:

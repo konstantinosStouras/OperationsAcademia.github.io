@@ -129,4 +129,9 @@ async function main() {
   console.log(JSON.stringify({ merged: true, keepPassword: true, preservedProviders: ['password', ...moving.map(p => p.providerId)],
     candidateProfilesPreserved: candidatesAfter.size, retiredDuplicate: true, privateBackup: true }));
 }
-if (isMain(import.meta.url)) main().catch(() => { console.error('Account merge did not complete; review its private journal before retrying. No account details are logged.'); process.exitCode = 1; });
+if (isMain(import.meta.url)) main().catch((e) => {
+  // Our own guard errors carry no personal values; SDK errors log only a code.
+  const safe = /^(Two |Both |The |Unsupported |A prior |Provider transfer |UW account |Final provider |Candidate data )/.test(e.message) && !e.message.includes('@');
+  console.error(safe ? e.message : 'Account merge stopped (code ' + (e.code || 'unknown') + '); no personal details are logged.');
+  process.exitCode = 1;
+});
