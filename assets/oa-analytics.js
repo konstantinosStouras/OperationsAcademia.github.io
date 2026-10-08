@@ -699,7 +699,11 @@
     if (id === 'referrers') rec = A.referralRecord(rec);
     if (!def || !rec || !rec.items || !rec.items.length) return;
 
-    var f = figure(def.title, def.sub);
+    var ga4Hours = id === 'hours' && rec.source === 'ga4';
+    var subtitle = ga4Hours
+      ? 'Sessions by hour of the day, in the Google Analytics property’s reporting time zone. Includes all available data in the selected period.'
+      : def.sub;
+    var f = figure(def.title, subtitle);
     root.appendChild(f.section);
 
     if (def.kind === 'columns') {
@@ -709,7 +713,7 @@
            are page opens — the same honesty the daily chart's retired Visits
            metric and the engagement tile already keep */
         unit: (def.unitBySource && def.unitBySource[rec.source]) || def.unit,
-        xTitle: def.xTitle || '',
+        xTitle: ga4Hours ? 'Hour of the day (Google Analytics reporting time)' : (def.xTitle || ''),
         items: rec.items.map(function (it) {
           return { label: it.name + ':00', short: it.name, value: it.value };
         }),
