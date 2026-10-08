@@ -20,6 +20,18 @@ on:
     - cron: '25 4 * * *'
   workflow_dispatch:
     inputs:
+      audit:
+        description: 'Read-only audit of held candidate cards and requested referral URLs'
+        type: boolean
+        default: false
+      keep_hash:
+        description: 'Optional account hash for the read-only merge plan'
+        type: string
+        default: ''
+      duplicate_hash:
+        description: 'Optional duplicate account hash for the read-only merge plan'
+        type: string
+        default: ''
       dry_run:
         description: 'Build it and write nothing'
         type: boolean
@@ -38,6 +50,7 @@ permissions:
 
 jobs:
   build:
+    if: ${{ !inputs.audit }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -136,3 +149,32 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           GA4_SERVICE_ACCOUNT: ${{ secrets.GA4_SERVICE_ACCOUNT }}
           GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID || '384653143' }}
+
+  audit:
+    if: ${{ inputs.audit }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 playwright@1 google-auth-library@9
+      - run: npx playwright install --with-deps chromium
+      - run: node _scraper/analytics-coverage-test.mjs
+      - name: Read-only candidate layout audit
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node _scraper/audit-held-candidates.mjs
+      - name: Requested referral links
+        env:
+          GA4_SERVICE_ACCOUNT: ${{ secrets.GA4_SERVICE_ACCOUNT }}
+          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID || '384653143' }}
+        run: node _scraper/audit-referral-links.mjs
+      - name: Read-only merge plan
+        if: ${{ inputs.keep_hash != '' && inputs.duplicate_hash != '' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          KEEP_HASH: ${{ inputs.keep_hash }}
+          DUPLICATE_HASH: ${{ inputs.duplicate_hash }}
+        run: node _scraper/inspect-account-merge.mjs
