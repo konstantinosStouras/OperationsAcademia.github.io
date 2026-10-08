@@ -3533,7 +3533,7 @@ async function testCascadeWiring() {
   const adminArea = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   // the SCRIPT TAGS, not the first mention — the page's own comments name the
   // modules long before the tags do
-  ok(adminArea.indexOf('src="assets/oa-place-picker.js"') <
+  ok(adminArea.indexOf('src="assets/oa-place-picker.js') <
      adminArea.indexOf('src="assets/oa-jobreview.js"'),
     'admin-area.html: and before the review panel that asks for it');
 }
