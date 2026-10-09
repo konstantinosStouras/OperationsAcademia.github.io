@@ -708,8 +708,9 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "November 15, 2026",
-  "applyByDate": "2026-11-15",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-15",
   "comments": "",
   "country": "Lebanon",
   "countries": [
@@ -724,7 +725,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-05T20:46:41Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-bucknell-university-20261004",
