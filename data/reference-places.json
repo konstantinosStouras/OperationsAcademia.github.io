@@ -542,11 +542,6 @@
  {
   "institution": "China Europe International Business School",
   "school": "",
-  "department": "Economics and Decision Sciences"
- },
- {
-  "institution": "China Europe International Business School",
-  "school": "",
   "department": "OM"
  },
  {
@@ -676,6 +671,11 @@
  },
  {
   "institution": "Cornell University",
+  "school": "Cornell SC Johnson College of Business, Cornell Peter and Stephanie Nolan School of Hotel Administration",
+  "department": "Operations, Technology, and Information Management Area"
+ },
+ {
+  "institution": "Cornell University",
   "school": "Cornell SC Johnson College of Business",
   "department": "Operations, Technology, and Information Management Area"
  },
@@ -703,11 +703,6 @@
   "institution": "Cornell University",
   "school": "School of Operations Research and Information Engineering (ORIE)",
   "department": "Operations Research and Information Engineering"
- },
- {
-  "institution": "Cornell",
-  "school": "",
-  "department": "Operations, Technology, and Information Management"
  },
  {
   "institution": "Cottey College",
@@ -1171,8 +1166,8 @@
  },
  {
   "institution": "Idaho State University",
-  "school": "",
-  "department": "Supply Chain and Operations Management"
+  "school": "College of Business",
+  "department": "Marketing and Management, Supply Chain and Operations Management"
  },
  {
   "institution": "IE Business School",
@@ -2526,8 +2521,8 @@
  },
  {
   "institution": "Texas State University",
-  "school": "",
-  "department": "supply chain"
+  "school": "McCoy College of Business",
+  "department": "Management, Supply Chain Management"
  },
  {
   "institution": "Texas Tech University",
@@ -3391,8 +3386,8 @@
  },
  {
   "institution": "University of Northern Iowa",
-  "school": "",
-  "department": "Business Analytics and Applied AI"
+  "school": "David W. Wilson College of Business",
+  "department": "Management, Business Analytics and Applied Artificial Intelligence"
  },
  {
   "institution": "University of Northern Iowa",
@@ -3978,6 +3973,11 @@
   "institution": "Xi’an Jiaotong-Liverpool University",
   "school": "School of Intelligent Finance and Business",
   "department": "Supply Chain Management"
+ },
+ {
+  "institution": "Yale School of Management",
+  "school": "",
+  "department": "Operations Management"
  },
  {
   "institution": "Yeshiva University",
