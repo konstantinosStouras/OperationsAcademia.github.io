@@ -155,7 +155,7 @@ jobs:
           # step): a missing PDF engine fails the checks below on its own, a
           # missing database client would be a GREEN run that queues nothing
           for m in firebase-admin pdfjs-dist; do
-            node -e "require('$m/package.json')" ||
+            node -e "require.resolve('$m')" ||
               { echo "::error::$m is no longer installed: a later npm install pruned it"; exit 1; }
           done
           node _scraper/poms-crawl.mjs --selftest
