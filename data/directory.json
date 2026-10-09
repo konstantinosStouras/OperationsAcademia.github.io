@@ -3632,16 +3632,6 @@
   "lng": -84.384841
  },
  {
-  "id": "georgia-southern-university__parker-college-of-business__information-systems-and-analytics",
-  "institution": "Georgia Southern University",
-  "school": "Parker College of Business",
-  "department": "Information Systems and Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "georgia-southern-university__parker-college-of-business__logistics-and-supply-chain-management",
   "institution": "Georgia Southern University",
   "school": "Parker College of Business",
