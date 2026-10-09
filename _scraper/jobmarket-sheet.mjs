@@ -228,7 +228,7 @@ export function classifyTab(name) {
   const rest = s.replace(/\b20\d{2}\b/g, ' ').replace(/[^A-Za-z/&+\- ]+/g, ' ').trim();
 
   // NTT/PD first: "2026 NTT/PD Jobs" is an NTT tab that happens to say Jobs
-  if (/\bntt\b|\bpd\b|non.?tenure|post.?doc|teaching|visiting|lecturer/i.test(rest)) {
+  if (/\bntt(?:pd)?\b|\bpd\b|non.?tenure|post.?doc|teaching|visiting|lecturer/i.test(rest)) {
     return { year: Number(year), kind: 'ntt-pd' };
   }
   if (/\bjobs?\b|postings?|tenure.?track|\btt\b|faculty|positions?/i.test(rest)) {
@@ -253,7 +253,7 @@ export function isIntroTab(name) {
 export function conventionalTabs(years) {
   const out = [];
   for (const y of years) {
-    out.push(`${y} Jobs`, `${y} NTT/PD`, `${y} NTT-PD`, `${y} NTT PD`);
+    out.push(`${y} Jobs`, `${y} NTTPD`, `${y} NTT/PD`, `${y} NTT-PD`, `${y} NTT PD`);
   }
   return out;
 }

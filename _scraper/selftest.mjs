@@ -5216,6 +5216,8 @@ function testJobMarketSheetParsing() {
   // which tabs are read, and which are not
   eq(classifyTab('2026 Jobs'), { year: 2026, kind: 'jobs' }, 'a jobs tab');
   eq(classifyTab('2026 NTT/PD'), { year: 2026, kind: 'ntt-pd' }, 'an NTT/PD tab');
+  eq(classifyTab('2026 NTTPD'), { year: 2026, kind: 'ntt-pd' }, 'the workbook compact NTT/PD spelling');
+  ok(conventionalTabs([2026]).includes('2026 NTTPD'), 'fallback discovery includes the compact NTT/PD tab');
   eq(classifyTab('2027 NTT-PD'), { year: 2027, kind: 'ntt-pd' }, 'however it is punctuated');
   eq(classifyTab('Jobs 2026'), { year: 2026, kind: 'jobs' }, 'whichever way round it is written');
   eq(classifyTab('2026 NTT/PD Jobs'), { year: 2026, kind: 'ntt-pd' },
