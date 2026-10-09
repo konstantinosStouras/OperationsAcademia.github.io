@@ -56,6 +56,10 @@ on:
         description: 'Never start a browser for a page the parser could not read'
         type: boolean
         default: false
+      only_urls:
+        description: 'Optional JSON array of POMS advert URLs to import; blank reads all'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -155,7 +159,7 @@ jobs:
           # step): a missing PDF engine fails the checks below on its own, a
           # missing database client would be a GREEN run that queues nothing
           for m in firebase-admin pdfjs-dist; do
-            node -e "require('$m/package.json')" ||
+            node -e "require.resolve('$m')" ||
               { echo "::error::$m is no longer installed: a later npm install pruned it"; exit 1; }
           done
           node _scraper/poms-crawl.mjs --selftest
@@ -168,6 +172,7 @@ jobs:
           # the shell ever sees them, and this step holds the credential.
           IN_SINCE: ${{ inputs.since }}
           IN_LIMIT: ${{ inputs.limit }}
+          POMS_ONLY_URLS: ${{ inputs.only_urls }}
           # the browser is used only when both of its installs succeeded
           RENDER_OK: ${{ steps.pw.outcome == 'success' && steps.browser.outcome == 'success' }}
         run: |
