@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-09T06:06:44.519Z",
+ "generated": "2026-10-09T06:08:30.550Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -2212,6 +2212,10 @@
    "n": 3
   },
   {
+   "v": "Jack C. Massey College of Business",
+   "n": 3
+  },
+  {
    "v": "Knauss School of Business",
    "n": 3
   },
@@ -2281,10 +2285,6 @@
   },
   {
    "v": "Ivey Business School",
-   "n": 2
-  },
-  {
-   "v": "Jack C. Massey College of Business",
    "n": 2
   },
   {
@@ -5256,9 +5256,6 @@
     "Supply Chain Management"
    ],
    "bySchool": {
-    "": [
-     "Supply Chain Management"
-    ],
     "Jack C. Massey College of Business": [
      "Business Systems and Analytics",
      "Supply Chain Management"
