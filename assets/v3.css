@@ -1138,7 +1138,6 @@ body.v3 .oa-action:hover:not([disabled]) {
    button fits inside. */
 @media (min-width: 641px) {
   body.v3 #oa-jobs .oa-filter-actions { grid-column: span 3 / -1; }
-  body.v3 #oa-candidates .oa-filter-actions { grid-column: span 2 / -1; }
 }
 @media (max-width: 640px) {
   /* the mobile standard, in grid form: pickers two per row, every text

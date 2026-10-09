@@ -383,7 +383,7 @@
       while (into[key] && !seen[key]) { seen[key] = true; key = into[key]; }
       return key;
     }
-    function nameOf(key) { return named[key] || title[key] || ''; }
+    function nameOf(key) { return String(named[key] || title[key] || '').replace(/^the\s+/i, ''); }
 
     var listed = Object.create(null);
     var srcOf = Object.create(null);

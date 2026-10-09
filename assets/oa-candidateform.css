@@ -1,0 +1,11 @@
+/* Candidate form prose and document fields share the fieldset margins. */
+body.v3.oa-candidate-page .oa-form .oa-advert { max-width: none; }
+body.v3.oa-candidate-page .oa-form #f-cvUrl { width: 100%; }
+
+@media (min-width: 641px) {
+  body.v3.oa-candidate-page #oa-intro p,
+  body.v3.oa-candidate-page .oa-form .oa-field > .oa-hint {
+    text-align: justify;
+    text-align-last: left;
+  }
+}

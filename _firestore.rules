@@ -345,9 +345,10 @@ service cloud.firestore {
       }
       function candLinksOk() {
         let d = request.resource.data;
-        // 2200 = 600 + 600 + 600 + 200 + 200
+        // 2800 = four links of 600 + two addresses of 200
         return (d.get('cvUrl', '') + d.get('rsUrl', '') + d.get('webUrl', '')
-                + d.get('email', '') + d.get('personalEmail', '')).size() <= 2200;
+                + d.get('informsUrl', '')
+                + d.get('email', '') + d.get('personalEmail', '')).size() <= 2800;
       }
 
       function candShapeOk() {
@@ -373,6 +374,12 @@ service cloud.firestore {
                     && str('rsUploadType', 100)))
             && list('researchAreas', 10) && list('informsDays', 10)
             && talksOk()
+            && (!('jobTalk' in request.resource.data)
+                || (request.resource.data.jobTalk is map
+                    && request.resource.data.jobTalk.keys().hasOnly(['date', 'at', 'end', 'location', 'title'])
+                    && (request.resource.data.jobTalk.get('date', '') + request.resource.data.jobTalk.get('at', '')
+                        + request.resource.data.jobTalk.get('end', '') + request.resource.data.jobTalk.get('location', '')
+                        + request.resource.data.jobTalk.get('title', '')).size() <= 460))
             && (!('emailPublic' in request.resource.data)
                 || request.resource.data.emailPublic is bool)
             && request.resource.data.year is int

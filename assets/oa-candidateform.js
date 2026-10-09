@@ -44,7 +44,7 @@
   var MAX = {
     first: 100, last: 100, affiliation: 220, position: 160,
     institution: 160, school: 160, unit: 160,
-    cvUrl: 500, webUrl: 500, email: 160, personalEmail: 160, note: 1200,
+    informsUrl: 500, cvUrl: 500, webUrl: 500, email: 160, personalEmail: 160, note: 1200,
     /* the signed-in account's own address: written, never asked for, and
        bounded by str('authEmail', 200) in the rules. */
     authEmail: 160
@@ -322,6 +322,7 @@
      TALK_KEYS / TALK_MAXLEN, pinned by the selftest. */
   var TALK_KEYS = ['at', 'session', 'room', 'title'];
   var TALK_MAXLEN = { at: 5, session: 40, room: 120, title: 200 };
+  var JOB_TALK_MAX = { date: 10, at: 5, end: 5, location: 240, title: 200 };
   var TALK_LABELS = {
     at: 'Session starts at',
     session: 'Session code',
@@ -420,6 +421,27 @@
       var h = block.querySelector('.oa-talk-h');
       if (h) h.textContent = 'Your talk on ' + ((m && M.dayLabel) ? M.dayLabel(m, day) : day);
     });
+    var presenting = checked('informsDays').length > 0;
+    var talkLink = $('f-informsUrl');
+    if (talkLink) {
+      talkLink.required = presenting;
+      talkLink.setAttribute('aria-required', presenting ? 'true' : 'false');
+      if (!presenting) setError(talkLink, '');
+    }
+    var requiredMark = $('f-informsUrl-required');
+    if (requiredMark) requiredMark.hidden = !presenting;
+    ['date', 'at', 'end', 'location', 'title'].forEach(function (key) {
+      var el = $('f-jobTalk-' + key);
+      if (!el) return;
+      var schedulingRequired = presenting;
+      el.required = schedulingRequired;
+      el.setAttribute('aria-required', schedulingRequired ? 'true' : 'false');
+      if (!presenting) setError(el, '');
+      if (key === 'date' && m && M) {
+        el.min = M.dateOf(m, 'Sunday');
+        el.max = M.dateOf(m, 'Wednesday');
+      }
+    });
   }
 
   /** The talk map as the submission carries it: the ticked days' blocks,
@@ -508,6 +530,7 @@
     if (window.OAPlacePicker && OAPlacePicker.fixedPlace) {
       place = OAPlacePicker.fixedPlace(place);
     }
+    if (S && S.displayInstitution) place.institution = S.displayInstitution(place.institution);
     return place;
   }
 
@@ -568,7 +591,13 @@
        a key left out of the payload would leave last time's details on the
        document after the candidate cleared them */
     out.talks = readTalks(out.informsDays);
+    out.jobTalk = {};
+    if (out.informsDays.length) Object.keys(JOB_TALK_MAX).forEach(function (key) {
+      var value = String((($('f-jobTalk-' + key) || {}).value) || '').trim().slice(0, JOB_TALK_MAX[key]);
+      if (value) out.jobTalk[key] = value;
+    });
 
+    out.informsUrl = val('f-informsUrl', 'informsUrl');
     out.cvUrl = val('f-cvUrl', 'cvUrl');
     out.webUrl = val('f-webUrl', 'webUrl');
 
@@ -594,6 +623,7 @@
     need('f-first', 'first', 'your first name');
     need('f-last', 'last', 'your last name');
     need('f-institution', 'institution', 'the university you are at');
+    need('f-unit', 'unit', 'your department, area or group');
 
     var position = $('f-position');
     setError(position, out.position ? '' : 'Please choose your current position.');
@@ -618,7 +648,7 @@
       setError($('f-areas'), '');
     }
 
-    var urlFields = [['f-cvUrl', 'cvUrl'], ['f-webUrl', 'webUrl']];
+    var urlFields = [['f-cvUrl', 'cvUrl'], ['f-webUrl', 'webUrl'], ['f-informsUrl', 'informsUrl']];
     for (var i = 0; i < urlFields.length; i++) {
       var el = $(urlFields[i][0]);
       var u = httpUrl(el.value);
@@ -630,6 +660,53 @@
         setError(el, '');
         out[urlFields[i][1]] = u.slice(0, MAX[urlFields[i][1]]);
       }
+    }
+
+    if (out.informsDays.length && !out.informsUrl) {
+      setError($('f-informsUrl'), 'Please enter the specific presentation link for your INFORMS talk.');
+      bad($('f-informsUrl'));
+    } else if (out.informsUrl) {
+      var presentationUrl = null;
+      try { presentationUrl = new URL(out.informsUrl); } catch (e) {}
+      if (!presentationUrl || presentationUrl.protocol !== 'https:' ||
+          presentationUrl.hostname !== 'submissions.mirasmart.com' ||
+          presentationUrl.pathname.toLowerCase() !== '/informsannual2026/itinerary/presentationdetail.aspx' ||
+          !/^[1-9][0-9]*$/.test(presentationUrl.searchParams.get('evdid') || '')) {
+        setError($('f-informsUrl'), 'Use the specific INFORMS 2026 presentation page, including its evdid number, rather than a search-results link.');
+        bad($('f-informsUrl'));
+      }
+    }
+
+    if (out.informsDays.length) {
+      var jobTalk = out.jobTalk || {};
+      var labels = { date: 'the date of your job talk', at: 'its start time', end: 'its end time', location: 'its location / room', title: 'the title of your presentation' };
+      var schedulingRequired = true;
+      Object.keys(labels).forEach(function (key) {
+        var el = $('f-jobTalk-' + key);
+        if (schedulingRequired && !jobTalk[key]) { setError(el, 'Please enter ' + labels[key] + '.'); bad(el); }
+      });
+      var m = meeting();
+      var M = window.OAInforms;
+      if (jobTalk.date && m && M && !out.informsDays.some(function (day) { return M.dateOf(m, day) === jobTalk.date; })) {
+        setError($('f-jobTalk-date'), 'Choose the date matching one of your selected INFORMS presentation days.');
+        bad($('f-jobTalk-date'));
+      }
+      ['at', 'end'].forEach(function (key) {
+        if (jobTalk[key] && !/^([01]\d|2[0-3]):[0-5]\d$/.test(jobTalk[key])) {
+          setError($('f-jobTalk-' + key), 'Please enter a valid time.'); bad($('f-jobTalk-' + key));
+        }
+      });
+      if (jobTalk.at && jobTalk.end && jobTalk.end <= jobTalk.at) {
+        setError($('f-jobTalk-end'), 'The end time must be after the start time.'); bad($('f-jobTalk-end'));
+      }
+    }
+
+    // A saved upload counts while it is waiting to be filed, until removed.
+    var hasCv = !!out.cvUrl || !!(cvSlot && (cvSlot.file ||
+      (cvSlot.pending && !cvSlot.removePending)));
+    if (!hasCv && !String(($('f-cvUrl') || {}).value || '').trim()) {
+      setError($('f-cvUrl'), 'Please upload your CV or paste a link to it.');
+      bad($('f-cvUrl'));
     }
 
     if (firstBad) {
@@ -765,6 +842,7 @@
         }
         slot.file = f || null;
         sayFile('');
+        setError(urlEl, '');
         paint();
         if (slot.onChange) slot.onChange();
       });
@@ -1058,6 +1136,10 @@
     set('f-position', v.position);
     EDIT_YEAR = Number(v.year) || 0;
     paintYearNote();                 // the profile's own season, never today's
+    set('f-informsUrl', v.informsUrl);
+    var legacyTalkFields = $('f-talks');
+    if (legacyTalkFields) legacyTalkFields.hidden = !v.talks || !Object.keys(v.talks).length;
+    Object.keys(JOB_TALK_MAX).forEach(function (key) { set('f-jobTalk-' + key, (v.jobTalk || {})[key]); });
     set('f-cvUrl', v.cvUrl);
     set('f-webUrl', v.webUrl);
     set('f-email', v.email || v.authEmail);

@@ -778,6 +778,40 @@
     return BY_INSTITUTION[fold(s)] || s;
   }
 
+  // Display names can change without changing stored identities or permalinks.
+  function displayInstitution(v) {
+    return canonInstitution(v).replace(/^the\s+/i, '');
+  }
+
+  function displayUniversityText(value) {
+    return String(value == null ? '' : value).replace(
+      /(^|,\s*|\s[\u2014\u00b7]\s)The\s+(?=[^,;\u2014]*\b(?:University|College|Institute)\b)/g, '$1');
+  }
+
+  function candidateInstitution(row, names) {
+    if (row.institution) return displayInstitution(row.institution);
+    var parts = String(row.affiliation || '').split(/,\s*/);
+    for (var start = 0; start < parts.length; start++) {
+      var suffix = parts.slice(start).join(', ');
+      var key = institutionKey(suffix);
+      for (var i = 0; i < (names || []).length; i++) {
+        if (institutionKey(names[i]) === key) return displayInstitution(names[i]);
+      }
+    }
+    return displayInstitution(parts[parts.length - 1] || '');
+  }
+
+  function displayAffiliation(value, names) {
+    var parts = String(value || '').split(/,\s*/);
+    var university = candidateInstitution({ affiliation: value }, names);
+    for (var start = 0; start < parts.length; start++) {
+      if (institutionKey(parts.slice(start).join(', ')) === institutionKey(university)) {
+        return parts.slice(0, start).concat([university]).join(', ');
+      }
+    }
+    return String(value || '');
+  }
+
   /**
    * The same university, however it is written — an identity for GROUPING,
    * never a name to publish.
@@ -863,7 +897,7 @@
     var count = Object.create(null);
     var best = '';
     for (var i = 0; i < (names || []).length; i++) {
-      var n = String(names[i] == null ? '' : names[i]);
+      var n = String(names[i] == null ? '' : names[i]).replace(/^the\s+/i, '');
       if (!n) continue;
       count[n] = (count[n] || 0) + 1;
       if (!best || count[n] > count[best] ||
@@ -1548,6 +1582,10 @@
     UNIT_HOME: UNIT_HOME,
     fold: fold,
     canonInstitution: canonInstitution,
+    displayInstitution: displayInstitution,
+    displayUniversityText: displayUniversityText,
+    candidateInstitution: candidateInstitution,
+    displayAffiliation: displayAffiliation,
     institutionKey: institutionKey,
     schoolRepeatsInstitution: schoolRepeatsInstitution,
     slugPart: slugPart,

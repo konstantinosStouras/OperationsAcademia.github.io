@@ -1,0 +1,29 @@
+name: OA — update verified candidate presentations
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Save the validated updates
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: oa-candidate-presentation-updates
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+      - run: node _scraper/candidate-calendar-selftest.mjs
+      - run: node _scraper/update-candidate-presentations.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          OA_CANDIDATE_PRESENTATION_UPDATES: ${{ secrets.OA_CANDIDATE_PRESENTATION_UPDATES }}
+          OA_APPLY_UPDATES: ${{ inputs.apply }}

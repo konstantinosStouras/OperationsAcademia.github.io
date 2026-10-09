@@ -69,18 +69,22 @@
   "Cardiff University",
   "Carnegie Mellon University",
   "Case Western Reserve University",
+  "Catholic University of America",
   "Cedarville University",
   "Central Washington University",
   "Chalmers University of Technology",
   "Chapman University",
   "Chatham University",
   "China Europe International Business School",
+  "Chinese University of Hong Kong",
+  "Chinese University of Hong Kong, Shenzhen",
   "City University of Hong Kong",
   "City University of New York (CUNY)",
   "Clarkson University",
   "Clemson University",
   "Coastal Carolina University",
   "College of Charleston",
+  "College of New Jersey",
   "College of Staten Island",
   "College of William and Mary",
   "Colorado School of Mines",
@@ -151,11 +155,14 @@
   "Hamad Bin Khalifa University",
   "Harris-Stowe State University",
   "Harvard University",
+  "Hebrew University of Jerusalem",
   "HEC Montréal",
   "HEC Paris",
   "Henderson State University",
   "High Point University",
   "Hofstra University",
+  "Hong Kong Polytechnic University",
+  "Hong Kong University of Science and Technology",
   "Hood College",
   "Houston Christian University",
   "Howard University",
@@ -252,6 +259,7 @@
   "Northwestern University",
   "NOVA University Lisbon",
   "Oakland University",
+  "Ohio State University",
   "Oklahoma State University",
   "Oregon State University",
   "Özyeğin University",
@@ -259,6 +267,7 @@
   "Park University",
   "Peking University",
   "Penn State Behrend",
+  "Pennsylvania State University",
   "Pontificia Universidad Catolica de Chile (PUC)",
   "Prairie View A&M University",
   "Prince Mohammad Bin Fahd University",
@@ -341,18 +350,6 @@
   "Texas Southern University",
   "Texas State University",
   "Texas Tech University",
-  "The Catholic University of America",
-  "The Chinese University of Hong Kong",
-  "The Chinese University of Hong Kong, Shenzhen",
-  "The College of New Jersey",
-  "The Hebrew University of Jerusalem",
-  "The Hong Kong Polytechnic University",
-  "The Hong Kong University of Science and Technology",
-  "The Ohio State University",
-  "The Pennsylvania State University",
-  "The University of Memphis",
-  "The University of Sydney",
-  "The University of Texas at Austin",
   "Tilburg University",
   "TOBB University of Economics and Technology",
   "Tongji University",
@@ -432,6 +429,7 @@
   "University of Massachusetts Boston",
   "University of Massachusetts Lowell",
   "University of Melbourne",
+  "University of Memphis",
   "University of Miami",
   "University of Michigan",
   "University of Michigan-Dearborn",
@@ -477,10 +475,12 @@
   "University of Southern Indiana",
   "University of Southern Mississippi",
   "University of Stirling",
+  "University of Sydney",
   "University of Tampa",
   "University of Tennessee",
   "University of Tennessee at Chattanooga",
   "University of Texas at Arlington",
+  "University of Texas at Austin",
   "University of Texas at Dallas",
   "University of Texas at El Paso",
   "University of Toledo",
@@ -655,7 +655,7 @@
   ],
   [
    "Cockrell School of Engineering",
-   "The University of Texas at Austin"
+   "University of Texas at Austin"
   ],
   [
    "College of Business and Digital Innovation",
@@ -899,7 +899,7 @@
   ],
   [
    "Hebrew University Business School",
-   "The Hebrew University of Jerusalem"
+   "Hebrew University of Jerusalem"
   ],
   [
    "Heinz College of Information Systems and Public Policy",
@@ -915,7 +915,7 @@
   ],
   [
    "HKUST School of Business and Management",
-   "The Hong Kong University of Science and Technology"
+   "Hong Kong University of Science and Technology"
   ],
   [
    "Imperial College Business School",
@@ -1079,7 +1079,7 @@
   ],
   [
    "Max M. Fisher College of Business",
-   "The Ohio State University"
+   "Ohio State University"
   ],
   [
    "Mays Business School",
@@ -1087,7 +1087,7 @@
   ],
   [
    "McCombs School of Business",
-   "The University of Texas at Austin"
+   "University of Texas at Austin"
   ],
   [
    "McCormick School of Engineering",
@@ -1335,7 +1335,7 @@
   ],
   [
    "Smeal College of Business",
-   "The Pennsylvania State University"
+   "Pennsylvania State University"
   ],
   [
    "Solvay Brussels School of Economics and Management",
@@ -1533,11 +1533,11 @@
   ],
   [
    "CUHK Business School",
-   "The Chinese University of Hong Kong"
+   "Chinese University of Hong Kong"
   ],
   [
    "CUHK Shenzhen",
-   "The Chinese University of Hong Kong, Shenzhen"
+   "Chinese University of Hong Kong, Shenzhen"
   ],
   [
    "Erasmus University",
@@ -1565,11 +1565,11 @@
   ],
   [
    "HKUST(GZ)",
-   "The Hong Kong University of Science and Technology"
+   "Hong Kong University of Science and Technology"
   ],
   [
    "Hong Kong University of Science and Technology (Guangzhou)",
-   "The Hong Kong University of Science and Technology"
+   "Hong Kong University of Science and Technology"
   ],
   [
    "Hull University Business School",
@@ -1757,7 +1757,7 @@
   ],
   [
    "UT Austin McCombs",
-   "The University of Texas at Austin"
+   "University of Texas at Austin"
   ],
   [
    "Vienna University of Economics and Business",

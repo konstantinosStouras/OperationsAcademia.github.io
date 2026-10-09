@@ -929,6 +929,7 @@
     <script defer src="assets/oa-informs.js"></script>
     <script defer src="assets/oa-ics.js"></script>
     <script defer src="assets/oa-talkcal.js"></script>
+    <script defer src="assets/oa-candidate-calendar.js"></script>
     <!-- oa-candcard.js: the candidate card, the ONE renderer the list below
          and the two own-card previews (account.html, post-a-candidate.html)
          share, so a preview cannot drift from the card it previews. -->
@@ -1379,9 +1380,6 @@
              writes what the list is SHOWING, so a committee can narrow by
              research area first. Registered readers only, the module's own
              gate (assets/oa-talkcal.js). */
-          actions: [
-            window.OATalkCal ? OATalkCal.action() : null
-          ],
 
           /* the "Profile updated on" line first (inside the body, so a locked
              card never gets one), then the owner's Edit / Take down bar */

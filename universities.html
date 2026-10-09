@@ -294,6 +294,7 @@
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-schools.js?v=20261009-buffalo"></script>
     <script defer src="assets/oa-list.js"></script>
+    <script defer src="assets/oa-jobnav.js"></script>
     <script defer src="assets/leaflet/leaflet.js"></script>
     <script defer src="assets/leaflet/leaflet.markercluster.js"></script>
     <script defer src="assets/oa-uni-map.js"></script>
@@ -394,7 +395,14 @@
         uniMap = OAUniMap.mount({
           mount: '#oa-uni',
           data: '/data/universities.json',
-          prepare: function (rows) { return RowEdit.apply('universities', rows); },
+          prepare: function (rows) {
+            return RowEdit.apply('universities', rows).map(function (row) {
+              var copy = Object.assign({}, row);
+              copy.institution = OASchools.displayInstitution(copy.institution);
+              copy.name = OASchools.displayUniversityText(copy.name);
+              return copy;
+            });
+          },
           onPopup: function (node, row) {
             RowEdit.onPopup('universities')(node, row);
             addOmDepartments(node, row);
