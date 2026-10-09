@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-09T06:08:30.550Z",
+ "generated": "2026-10-09T07:34:19.848Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -547,6 +547,10 @@
   },
   {
    "v": "University of North Texas",
+   "n": 2
+  },
+  {
+   "v": "University of Northern Iowa",
    "n": 2
   },
   {
@@ -1502,10 +1506,6 @@
    "n": 1
   },
   {
-   "v": "University of Northern Iowa",
-   "n": 1
-  },
-  {
    "v": "University of Puget Sound",
    "n": 1
   },
@@ -2397,6 +2397,10 @@
   },
   {
    "v": "David Eccles School of Business",
+   "n": 1
+  },
+  {
+   "v": "David W. Wilson College of Business",
    "n": 1
   },
   {
@@ -4019,6 +4023,10 @@
   },
   {
    "v": "Management Science/ Department Management and Technology",
+   "n": 1
+  },
+  {
+   "v": "Management, Business Analytics and Applied Artificial Intelligence",
    "n": 1
   },
   {
@@ -10978,13 +10986,19 @@
    }
   },
   "University of Northern Iowa": {
-   "schools": [],
+   "schools": [
+    "David W. Wilson College of Business"
+   ],
    "units": [
-    "BA"
+    "BA",
+    "Management, Business Analytics and Applied Artificial Intelligence"
    ],
    "bySchool": {
     "": [
      "BA"
+    ],
+    "David W. Wilson College of Business": [
+     "Management, Business Analytics and Applied Artificial Intelligence"
     ]
    }
   },
@@ -12365,6 +12379,9 @@
   ],
   "David Eccles School of Business": [
    "Operations and Information Systems"
+  ],
+  "David W. Wilson College of Business": [
+   "Management, Business Analytics and Applied Artificial Intelligence"
   ],
   "Debbie and Jerry Ivy College of Business": [
    "IS/BA",

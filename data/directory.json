@@ -3632,6 +3632,16 @@
   "lng": -84.384841
  },
  {
+  "id": "georgia-southern-university__parker-college-of-business__information-systems-and-analytics",
+  "institution": "Georgia Southern University",
+  "school": "Parker College of Business",
+  "department": "Information Systems and Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "georgia-southern-university__parker-college-of-business__logistics-and-supply-chain-management",
   "institution": "Georgia Southern University",
   "school": "Parker College of Business",
@@ -13309,9 +13319,13 @@
   "school": "David W. Wilson College of Business",
   "department": "Management, Business Analytics and Applied Artificial Intelligence",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-08"
  },
  {
   "id": "university-of-notre-dame",
