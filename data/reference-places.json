@@ -686,6 +686,11 @@
  },
  {
   "institution": "Cornell University",
+  "school": "Duffield College of Engineering",
+  "department": "Operations Research and Information Engineering (Cornell Tech)"
+ },
+ {
+  "institution": "Cornell University",
   "school": "School of Operations Research and Information Engineering (ORIE)",
   "department": ""
  },
@@ -1763,6 +1768,11 @@
   "institution": "New York University",
   "school": "Leonard N. Stern School of Business",
   "department": "Technology, Operations and Statistics"
+ },
+ {
+  "institution": "Newcastle University",
+  "school": "",
+  "department": "Information Systems and Operations Subject Group, Operations Management"
  },
  {
   "institution": "Newcastle University",

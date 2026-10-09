@@ -2305,6 +2305,20 @@
   "lng": -73.9562112
  },
  {
+  "id": "cornell-university__duffield-college-of-engineering__operations-research-and-information-engineering-cornell-tech",
+  "institution": "Cornell University",
+  "school": "Duffield College of Engineering",
+  "department": "Operations Research and Information Engineering (Cornell Tech)",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
+ },
+ {
   "id": "cornell-university__school-of-operations-research-and-information-engineering-or",
   "institution": "Cornell University",
   "school": "School of Operations Research and Information Engineering (ORIE)",
@@ -2345,13 +2359,9 @@
   "institution": "Cornell University (Cornell Tech)",
   "department": "Operations Research and Information Engineering",
   "type": "University",
-  "country": "United States",
   "sources": [
-   "postings",
    "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-03"
+  ]
  },
  {
   "id": "cornell-university-cornell-tech__samuel-curtis-johnson-graduate-school-of-management",
@@ -6603,6 +6613,15 @@
   ],
   "n": 2,
   "lastPosted": "2026-10-01"
+ },
+ {
+  "id": "newcastle-university____information-systems-and-operations-subject-group-operations-",
+  "institution": "Newcastle University",
+  "department": "Information Systems and Operations Subject Group, Operations Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "newcastle-university____operations-management",
