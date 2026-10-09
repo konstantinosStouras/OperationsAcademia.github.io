@@ -695,6 +695,11 @@
   "department": "Operations Research and Information Engineering"
  },
  {
+  "institution": "Cornell",
+  "school": "",
+  "department": "Operations, Technology, and Information Management"
+ },
+ {
   "institution": "Cottey College",
   "school": "",
   "department": "Operation Management"
@@ -1148,6 +1153,11 @@
   "institution": "Howard University",
   "school": "",
   "department": "open disciplinary focus"
+ },
+ {
+  "institution": "Idaho State University",
+  "school": "",
+  "department": "Supply Chain and Operations Management"
  },
  {
   "institution": "IE Business School",
@@ -2480,6 +2490,11 @@
   "department": "IS"
  },
  {
+  "institution": "Texas State University",
+  "school": "",
+  "department": "supply chain"
+ },
+ {
   "institution": "Texas Tech University",
   "school": "",
   "department": "Marketing and SCM"
@@ -3333,6 +3348,11 @@
   "institution": "University of Northern Iowa",
   "school": "",
   "department": "BA"
+ },
+ {
+  "institution": "University of Northern Iowa",
+  "school": "",
+  "department": "Business Analytics and Applied AI"
  },
  {
   "institution": "University of Northern Iowa",
