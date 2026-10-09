@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-09T05:01:10.042Z",
+ "generated": "2026-10-09T06:05:01.432Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -108,6 +108,10 @@
   {
    "v": "Virginia Tech",
    "n": 4
+  },
+  {
+   "v": "Belmont University",
+   "n": 3
   },
   {
    "v": "Bucknell University",
@@ -667,10 +671,6 @@
   },
   {
    "v": "Beijing Normal-Hong Kong Baptist University (BNBU)",
-   "n": 1
-  },
-  {
-   "v": "Belmont University",
    "n": 1
   },
   {
@@ -2284,6 +2284,10 @@
    "n": 2
   },
   {
+   "v": "Jack C. Massey College of Business",
+   "n": 2
+  },
+  {
    "v": "Kelley School of Business",
    "n": 2
   },
@@ -3163,7 +3167,7 @@
  "units": [
   {
    "v": "Supply Chain Management",
-   "n": 50
+   "n": 51
   },
   {
    "v": "OM",
@@ -3615,6 +3619,10 @@
   },
   {
    "v": "Business Stat/DA/SCM/OM",
+   "n": 1
+  },
+  {
+   "v": "Business Systems and Analytics",
    "n": 1
   },
   {
@@ -5240,12 +5248,19 @@
    }
   },
   "Belmont University": {
-   "schools": [],
+   "schools": [
+    "Jack C. Massey College of Business"
+   ],
    "units": [
+    "Business Systems and Analytics",
     "Supply Chain Management"
    ],
    "bySchool": {
     "": [
+     "Supply Chain Management"
+    ],
+    "Jack C. Massey College of Business": [
+     "Business Systems and Analytics",
      "Supply Chain Management"
     ]
    }
@@ -12555,6 +12570,10 @@
    "Computer Information Systems",
    "Management",
    "Managerial Sciences"
+  ],
+  "Jack C. Massey College of Business": [
+   "Business Systems and Analytics",
+   "Supply Chain Management"
   ],
   "Jesse H. Jones Graduate School of Business": [
    "Operations Management"
