@@ -8935,6 +8935,14 @@
   "lng": -73.125016
  },
  {
+  "id": "sungkyunkwan-university",
+  "institution": "Sungkyunkwan University",
+  "type": "University",
+  "sources": [
+   "members"
+  ]
+ },
+ {
   "id": "suny-korea____technology-management",
   "institution": "SUNY Korea",
   "department": "Technology Management",

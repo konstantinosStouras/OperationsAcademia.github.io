@@ -1914,6 +1914,10 @@
    "n": 0
   },
   {
+   "v": "Sungkyunkwan University",
+   "n": 0
+  },
+  {
    "v": "Technion – Israel Institute of Technology",
    "n": 0
   },
@@ -9148,6 +9152,11 @@
      "Operations Management"
     ]
    }
+  },
+  "Sungkyunkwan University": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "SUNY Korea": {
    "schools": [],
