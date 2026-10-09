@@ -398,13 +398,25 @@ async function main() {
         'If this persists, the page has moved or the host refuses automation.');
     return 1;
   }
-  const opps = parseOpportunities(page.html);
+  let opps = parseOpportunities(page.html);
   if (!opps.length) {
     err('the POMS page was read but no posting table was found in it — its layout has changed; ' +
         'see parseOpportunities in _scraper/poms.mjs');
     return 1;
   }
   log(`${opps.length} posting(s) listed on the page, newest ${opps[0].date || '?'}`);
+  let selected = null;
+  if (process.env.POMS_ONLY_URLS?.trim()) {
+    const urls = JSON.parse(process.env.POMS_ONLY_URLS);
+    if (!Array.isArray(urls) || !urls.length || urls.some((u) => typeof u !== 'string')) {
+      throw new Error('POMS_ONLY_URLS must be a nonempty JSON array of advertisement URLs');
+    }
+    selected = new Set(urls);
+    const available = new Set(opps.map((o) => o.href));
+    if (urls.some((u) => !available.has(u))) throw new Error('Selected advertisement is absent from the POMS page');
+    opps = opps.filter((o) => selected.has(o.href));
+    log(`Restricted to ${opps.length} explicitly selected POMS advertisements`);
+  }
 
   const site = await readJson(JOBS_FILE, []);
   const sheet = await readJson(SHEET_FILE, []);
@@ -521,6 +533,7 @@ async function main() {
      never the row. */
   let reflagged = 0;
   for (const d of queue.docs.filter((x) => x && x.status === PENDING && x.row && x.row.source === SOURCE)) {
+    if (selected && !selected.has(d.row.adUrl)) continue;
     let dup = duplicatesOf(d.row, compared);
     if (!dup.length) dup = nearbyPostings(d.row, compared);
     const biz = businessCheck(d.row, vocab);
@@ -545,6 +558,7 @@ async function main() {
 
   let refreshed = 0, retried = 0;
   for (const d of needReread(queue.docs, { today })) {
+    if (selected && !selected.has(d.row?.adUrl)) continue;
     if (budget.left <= 0 || Date.now() > budget.until) break;
     budget.left--;
     retried++;
