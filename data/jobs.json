@@ -6241,6 +6241,40 @@
   "owner": ""
  },
  {
+  "id": "2027-belmont-university-20260720",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-20",
+  "institution": "Belmont University",
+  "department": "Jack C. Massey College of Business, Supply Chain Management",
+  "school": "Jack C. Massey College of Business",
+  "unit": "Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://belmont.csod.com/ux/ats/careersite/10/home/requisition/4873?c=belmont",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Belmont%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T06:03:34Z",
+  "owner": ""
+ },
+ {
   "id": "2027-clarkson-university-20260720",
   "year": 2027,
   "years": [
@@ -6271,6 +6305,74 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-07-20T00:00:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-belmont-university-20260718",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-18",
+  "institution": "Belmont University",
+  "department": "Jack C. Massey College of Business, Business Systems and Analytics",
+  "school": "Jack C. Massey College of Business",
+  "unit": "Business Systems and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Assistant/Associate Professor of **Business Systems & Analytics**",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://belmont.csod.com/ux/ats/careersite/10/home/requisition/4872?c=belmont",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Belmont%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T06:04:49Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-santa-clara-university-20260718",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-18",
+  "institution": "Santa Clara University",
+  "department": "Leavey School of Business, Information Systems and Analytics",
+  "school": "Leavey School of Business",
+  "unit": "Information Systems and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — priority 2026-10-01",
+  "applyByDate": "",
+  "reviewDate": "2026-10-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://wd1.myworkdaysite.com/en-US/recruiting/scu/scu/job/Santa-Clara-CA/Tenure-Track-Assistant-Professor-in-Information-Systems_R7811",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Santa%20Clara%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T06:06:31Z",
   "owner": ""
  },
  {
