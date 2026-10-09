@@ -47,6 +47,9 @@
      Only the ones that arrived twice. The canonical spelling is the full one,
      accents and all. */
   var INSTITUTION_ALIASES = {
+    /* Keep existing correction addresses while the directory displays the
+       explicitly verified full university name. */
+    'Virginia Polytechnic Institute and State University': 'Virginia Tech',
     'University of California Berkeley': 'University of California, Berkeley',
     'UC Berkeley': 'University of California, Berkeley',
     'KU LEUVEN': 'KU Leuven',
