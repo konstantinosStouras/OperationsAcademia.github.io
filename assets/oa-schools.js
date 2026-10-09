@@ -47,6 +47,9 @@
      Only the ones that arrived twice. The canonical spelling is the full one,
      accents and all. */
   var INSTITUTION_ALIASES = {
+    /* Keep existing correction addresses while the directory displays the
+       explicitly verified full university name. */
+    'Virginia Polytechnic Institute and State University': 'Virginia Tech',
     'University of California Berkeley': 'University of California, Berkeley',
     'UC Berkeley': 'University of California, Berkeley',
     'KU LEUVEN': 'KU Leuven',
@@ -407,6 +410,8 @@
       'Cass Business School': 'Bayes Business School'
     },
     'Cornell University': {
+      'Cornell SC Johnson College of Business, Cornell Peter and Stephanie Nolan School of Hotel Administration':
+        'Cornell Peter and Stephanie Nolan School of Hotel Administration',
       'SC Johnson College of Business, Johnson Graduate School of Management (Incl. Dyson and Nolan)':
         'Cornell SC Johnson College of Business',
       /* the Johnson school is INSIDE that college, and after the owner's
@@ -460,6 +465,12 @@
      else the generic rule still applies, so a poster typing "Operations
      Management Department" at some other school still lands on the bare name. */
   var SCOPED_UNIT_ALIASES = {
+    'Michigan State University': {
+      /* The department encompasses logistics and operations; these imported
+         research-field combinations are not separate departments. */
+      'Supply Chain Management, Logistics': 'Supply Chain Management',
+      'Supply Chain Management, Operations Management': 'Supply Chain Management'
+    },
     'Católica Lisbon School of Business and Economics': {
       /* the OM list names the school's two operations groups BY CAMPUS —
          "(Lisbon)" and "(Porto)" — and the site's own unsuffixed entry is the

@@ -3167,7 +3167,7 @@
  "units": [
   {
    "v": "Supply Chain Management",
-   "n": 51
+   "n": 53
   },
   {
    "v": "OM",
@@ -3447,10 +3447,6 @@
   },
   {
    "v": "Supply Chain Management and Analytics",
-   "n": 2
-  },
-  {
-   "v": "Supply Chain Management, Operations Management",
    "n": 2
   },
   {
@@ -4422,7 +4418,7 @@
    "n": 1
   },
   {
-   "v": "Supply Chain Management, Logistics",
+   "v": "Supply Chain Management, Operations Management",
    "n": 1
   },
   {
@@ -7647,9 +7643,7 @@
    "units": [
     "SCM, AI",
     "Statistics and Probability",
-    "Supply Chain Management",
-    "Supply Chain Management, Logistics",
-    "Supply Chain Management, Operations Management"
+    "Supply Chain Management"
    ],
    "bySchool": {
     "": [
@@ -7659,9 +7653,7 @@
      "Statistics and Probability"
     ],
     "Eli Broad College of Business": [
-     "Supply Chain Management",
-     "Supply Chain Management, Logistics",
-     "Supply Chain Management, Operations Management"
+     "Supply Chain Management"
     ]
    }
   },
@@ -12424,9 +12416,7 @@
    "ITOM"
   ],
   "Eli Broad College of Business": [
-   "Supply Chain Management",
-   "Supply Chain Management, Logistics",
-   "Supply Chain Management, Operations Management"
+   "Supply Chain Management"
   ],
   "ESSEC Business School": [
    "Information Systems, Data Analytics and Operations"

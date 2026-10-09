@@ -6,6 +6,10 @@ import { referencePlaces } from './sync-reference-places.mjs';
 const require = createRequire(import.meta.url);
 const S = require('../assets/oa-schools.js');
 const U = require('../assets/oa-uniinfo.js');
+assert.equal(S.institutionKey('Virginia Polytechnic Institute and State University'),
+  S.institutionKey('Virginia Tech'), 'The full name must share the existing university identity');
+assert.equal(S.directoryRowKey('Virginia Polytechnic Institute and State University', '', 'Data Science'),
+  S.directoryRowKey('Virginia Tech', '', 'Data Science'), 'Existing correction addresses must remain stable');
 for (const [institution, short, full, unit, id] of [
   ['Auburn University', 'Harbert College of Business', 'Raymond J. Harbert College of Business',
     'Supply Chain Management', 'auburn-university__harbert-college-of-business__supply-chain-management'],
@@ -104,4 +108,14 @@ assert.equal(D.state.cards.length, 1, 'A full university title retains its canon
 assert.equal(D.state.cards[0].institution, 'ESSEC Business School',
   'Keep the explicit full university title while dropping its leading The');
 assert.equal(D.state.cards[0].n, 2, 'Renaming the title retains both postings');
+D.state.flat = [
+  { id: 'vt-existing', institution: 'Virginia Tech', school: 'College of Science', department: 'Data Science', n: 1 },
+  { id: 'vt-new-posting', institution: 'Virginia Tech', school: 'College of Engineering', department: 'Operations Research', n: 1 },
+];
+D.state.edits = { 'vt-existing': {
+  institution: 'Virginia Polytechnic Institute and State University', department: 'Academy of Data Science', t: 1,
+} };
+D.regroup();
+assert.equal(D.state.cards.length, 1, 'A later short-name posting joins the corrected university card');
+assert.equal(D.state.cards[0].n, 2, 'Both university spellings retain their posting references');
 console.log('Directory tests passed: individual school assignment and retention of official department titles.');
