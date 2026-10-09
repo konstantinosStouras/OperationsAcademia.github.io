@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-08T14:57:37Z",
+ "generated": "2026-10-09T14:41:43Z",
  "ads": {
   "academicjobsonline.org/ajo/jobs/32106": {
    "url": "https://academicjobsonline.org/ajo/jobs/32106",
@@ -64,6 +64,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-09-29T14:22:15Z"
+  },
+  "academicjobsonline.org/ajo/jobs/32404": {
+   "url": "https://academicjobsonline.org/ajo/jobs/32404",
+   "status": "unreadable",
+   "via": "page",
+   "title": "AcademicJobsOnline .org",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "academicjobsonline.org/ajo/jobs/32634": {
    "url": "https://academicjobsonline.org/ajo/jobs/32634",
@@ -719,7 +735,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-09-30T14:15:07Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "apply.interfolio.com/187140": {
    "url": "https://apply.interfolio.com/187140",
@@ -783,7 +799,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-09-28T16:01:01Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "apply.interfolio.com/191598": {
    "url": "https://apply.interfolio.com/191598",
@@ -799,7 +815,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-02T14:10:01Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "apply.interfolio.com/191650": {
    "url": "https://apply.interfolio.com/191650",
@@ -815,7 +831,23 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-09-30T14:15:07Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
+  },
+  "apply.interfolio.com/191728": {
+   "url": "https://apply.interfolio.com/191728",
+   "status": "unreadable",
+   "via": "page",
+   "title": "",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "apply.interfolio.com/191983": {
    "url": "https://apply.interfolio.com/191983",
@@ -864,6 +896,70 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-10-07T14:45:57Z"
+  },
+  "apply.interfolio.com/193265": {
+   "url": "https://apply.interfolio.com/193265",
+   "status": "unreadable",
+   "via": "page",
+   "title": "",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
+  },
+  "apply.interfolio.com/193335": {
+   "url": "https://apply.interfolio.com/193335",
+   "status": "unreadable",
+   "via": "page",
+   "title": "",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
+  },
+  "apply.interfolio.com/193341": {
+   "url": "https://apply.interfolio.com/193341",
+   "status": "unreadable",
+   "via": "page",
+   "title": "",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
+  },
+  "apply.interfolio.com/193347": {
+   "url": "https://apply.interfolio.com/193347",
+   "status": "unreadable",
+   "via": "page",
+   "title": "",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "apply.interfolio.com/193916": {
    "url": "https://apply.interfolio.com/193916",
@@ -1251,7 +1347,7 @@
   },
   "careercenter.informs.org/job/assistant-or-associate-professor-business-operations-camarillo-california-5512": {
    "url": "https://careercenter.informs.org/job/assistant-or-associate-professor-business-operations-camarillo-california-5512",
-   "status": "ok",
+   "status": "gone",
    "via": "page",
    "title": "Assistant or Associate Professor – Business (Operations)",
    "institution": "California State University Channel Islands",
@@ -1263,7 +1359,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "OTHER",
-   "checkedAt": "2026-10-01T14:47:32Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "careercenter.informs.org/job/assistant-professor-in-operations-management-evanston-illinois-5481": {
    "url": "https://careercenter.informs.org/job/assistant-professor-in-operations-management-evanston-illinois-5481",
@@ -1279,7 +1375,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "FULL_TIME",
-   "checkedAt": "2026-09-28T16:01:01Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "careercenter.informs.org/job/assistant-professor-massachusetts-institute-of-technology-sloan-school-of-management-operations-management-cambridge-massachusetts-5461": {
    "url": "https://careercenter.informs.org/job/assistant-professor-massachusetts-institute-of-technology-sloan-school-of-management-operations-management-cambridge-massachusetts-5461",
@@ -1295,7 +1391,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "OTHER",
-   "checkedAt": "2026-09-30T14:15:07Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "careercenter.informs.org/job/assistant-professor-of-analytics-operations-at-nus-business-school-national-university-of-singapore-singapore-4835": {
    "url": "https://careercenter.informs.org/job/assistant-professor-of-analytics-operations-at-nus-business-school-national-university-of-singapore-singapore-4835?utm_source=wj_newsletter&utm_medium=cpc&utm_campaign=xml",
@@ -1359,7 +1455,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "OTHER",
-   "checkedAt": "2026-09-28T16:01:01Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "careercenter.informs.org/job/faculty-positions-in-operations-information-and-technology-stanford-california-5458": {
    "url": "https://careercenter.informs.org/job/faculty-positions-in-operations-information-and-technology-stanford-california-5458",
@@ -1407,7 +1503,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "FULL_TIME",
-   "checkedAt": "2026-09-29T14:22:15Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "careercenter.informs.org/job/indian-school-of-business-positions-in-operations-management-area-academic-year-2026-27-hyderabad-telangana-4840": {
    "url": "https://careercenter.informs.org/job/indian-school-of-business-positions-in-operations-management-area-academic-year-2026-27-hyderabad-telangana-4840?utm_source=wj_newsletter&utm_medium=cpc&utm_campaign=xml",
@@ -1553,6 +1649,22 @@
    "employmentType": "",
    "checkedAt": "2026-09-15T12:54:53Z"
   },
+  "careercenter.informs.org/job/professor-of-operations-management-yale-school-of-management-new-haven-connecticut-5606": {
+   "url": "https://careercenter.informs.org/job/professor-of-operations-management-yale-school-of-management-new-haven-connecticut-5606?utm_source=wj_newsletter&utm_medium=cpc&utm_campaign=xml",
+   "status": "ok",
+   "via": "page",
+   "title": "Professor of Operations Management, Yale School of Management",
+   "institution": "Yale School of Management",
+   "school": "",
+   "department": "",
+   "location": "New Haven, Connecticut, United States",
+   "posted": "",
+   "applyByDate": "2026-11-30",
+   "applyByProse": "applications must be submitted by November 30, 2026 to https://apply",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-10-09T14:41:43Z"
+  },
   "careercenter.informs.org/job/tenure-track-and-educator-track-positions-in-information-systems-and-analytics-singapore-4912": {
    "url": "https://careercenter.informs.org/job/tenure-track-and-educator-track-positions-in-information-systems-and-analytics-singapore-4912",
    "status": "ok",
@@ -1567,7 +1679,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "FULL_TIME",
-   "checkedAt": "2026-09-30T14:15:07Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "careercenter.informs.org/job/tenure-track-assistant-professor-in-information-systems-minneapolis-minnesota-5518": {
    "url": "https://careercenter.informs.org/job/tenure-track-assistant-professor-in-information-systems-minneapolis-minnesota-5518",
@@ -1583,7 +1695,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "OTHER",
-   "checkedAt": "2026-10-01T14:47:32Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "careercenter.informs.org/job/tenure-track-associate-professor-assistant-professor-in-the-department-of-data-and-systems-engineering-hong-kong-4903": {
    "url": "https://careercenter.informs.org/job/tenure-track-associate-professor-assistant-professor-in-the-department-of-data-and-systems-engineering-hong-kong-4903/?utm_medium=jbemail&utm_source=job_agent&utm_keyword=",
@@ -1744,6 +1856,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-10-03T12:45:13Z"
+  },
+  "careers.hprod.onehcm.usg.edu/psp/careers/CAREERS/HRMS/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Action=U&FOCUS=Applicant&JobOpeningId=303622&Page=HRS_APP_JBPST_FL&PostingSeq=1&SiteId=3000": {
+   "url": "https://careers.hprod.onehcm.usg.edu/psp/careers/CAREERS/HRMS/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Page=HRS_APP_JBPST_FL&Action=U&FOCUS=Applicant&SiteId=3000&JobOpeningId=303622&PostingSeq=1",
+   "status": "unreadable",
+   "via": "page",
+   "title": "PeopleSoft",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "careers.insidehighered.com/job/3250931/adjunct-faculty-section-lead-pool-online-ms-in-business-analytics": {
    "url": "https://careers.insidehighered.com/job/3250931/adjunct-faculty-section-lead-pool-online-ms-in-business-analytics/",
@@ -2145,6 +2273,22 @@
    "employmentType": "",
    "checkedAt": "2026-10-02T14:10:01Z"
   },
+  "careers.ua.edu/jobs/assistant-associate-professor-of-operations-management-tenure-track-or-tenured-530704-tuscaloosa-alabama-united-states": {
+   "url": "https://careers.ua.edu/jobs/assistant-associate-professor-of-operations-management-tenure-track-or-tenured-530704-tuscaloosa-alabama-united-states#apply",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant/Associate Professor of Operations Management (Tenure-Track or Tenured) - 530704",
+   "institution": "The University of Alabama",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-10-09T14:41:43Z"
+  },
   "careers.uh.edu/jobs/assistant-or-associate-professor-supply-chain-logistics-and-technology-houston-texas-united-states": {
    "url": "https://careers.uh.edu/jobs/assistant-or-associate-professor-supply-chain-logistics-and-technology-houston-texas-united-states",
    "status": "gone",
@@ -2257,6 +2401,22 @@
    "employmentType": "",
    "checkedAt": "2026-08-27T18:25:04Z"
   },
+  "careers.untsystem.edu/jobs/assistant-professor-of-supply-chain-management-denton-texas-united-states": {
+   "url": "https://careers.untsystem.edu/jobs/assistant-professor-of-supply-chain-management-denton-texas-united-states",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor of Supply Chain Management",
+   "institution": "University of North Texas System",
+   "school": "",
+   "department": "UNT-Supply Chain Management-131350",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-10-09T14:41:43Z"
+  },
   "careers.untsystem.edu/jobs/asst-professor-business-analytics-dallas-texas-united-states": {
    "url": "https://careers.untsystem.edu/jobs/asst-professor-business-analytics-dallas-texas-united-states",
    "status": "gone",
@@ -2335,7 +2495,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-09-30T14:15:07Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "connect.informs.org/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=bccc48c6-357d-295d-4a3a-7a8a6a4156b4&forceDialog=0": {
    "url": "https://connect.informs.org/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=bccc48c6-357d-295d-4a3a-7a8a6a4156b4&forceDialog=0",
@@ -2720,6 +2880,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-10-04T13:29:21Z"
+  },
+  "hhs.varbi.com/en/what:job/jobID:964923": {
+   "url": "https://hhs.varbi.com/en/what:job/jobID:964923/",
+   "status": "unreadable",
+   "via": "page",
+   "title": "Assistant Professor (Tenure Track) Position in Information Systems and Innovation Management with a focus on Artificial Intelligence – House of Innovation, Stockholm School of Economics",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "hr.kimep.kz/en-US/Home/Vacancy/718": {
    "url": "https://hr.kimep.kz/en-US/Home/Vacancy/718",
@@ -3439,7 +3615,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "[\"FULL_TIME\"]",
-   "checkedAt": "2026-10-01T14:47:32Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "jobs.coastal.edu/postings/120535": {
    "url": "https://jobs.coastal.edu/postings/120535",
@@ -4047,7 +4223,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-01T14:47:32Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "mcgill.wd3.myworkdayjobs.com/en-US/McGill_Careers/job/Bronfman-Building/Tenure-Track-Position-in-Operations-Management--Desautels-Faculty-of-Management--McGill-University_JR0000078492?workerSubType=5b8bbc1be9ca01d9ed26d340de00890e": {
    "url": "https://mcgill.wd3.myworkdayjobs.com/en-US/McGill_Careers/job/Bronfman-Building/Tenure-Track-Position-in-Operations-Management--Desautels-Faculty-of-Management--McGill-University_JR0000078492?workerSubType=5b8bbc1be9ca01d9ed26d340de00890e",
@@ -4111,7 +4287,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-01T14:47:32Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "northcentralcollege.peopleadmin.com/postings/16002": {
    "url": "https://northcentralcollege.peopleadmin.com/postings/16002",
@@ -4127,7 +4303,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-02T14:10:01Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "ozyegin.edu.tr/en/insan-kaynaklari/open-rank-faculty-position-operations-management": {
    "url": "https://www.ozyegin.edu.tr/en/insan-kaynaklari/open-rank-faculty-position-operations-management",
@@ -4415,7 +4591,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "OTHER",
-   "checkedAt": "2026-09-30T14:15:07Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "recruit.tum.de/": {
    "url": "https://www.recruit.tum.de/",
@@ -4448,6 +4624,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-08-24T05:15:29Z"
+  },
+  "recrutement.skema.edu/?id=1620&page=advertisement_display": {
+   "url": "https://recrutement.skema.edu/?page=advertisement_display&id=1620",
+   "status": "unreadable",
+   "via": "page",
+   "title": "Assistant Professor in Optimization or Game Theory",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "rit.wd12.myworkdayjobs.com/en-US/careers/job/Assistant-Professor--Tenure-Track---Supply-Chain--Proj---Oper-Mgt-Quant-Meth_JR103197?_gl=1*13dq4va*_gcl_au*MTQxMDU4NTU2Ny4xNzg1ODU2MTE1*_ga*Nzg3NjY4Njc0LjE3NjQwODQwODU.*_ga_DY6XXZS0V2*czE3OTEyODk4Mjkkbzg4JGcwJHQxNzkxMjg5ODMwJGo1OSRsMCRoMA": {
    "url": "https://rit.wd12.myworkdayjobs.com/en-US/careers/job/Assistant-Professor--Tenure-Track---Supply-Chain--Proj---Oper-Mgt-Quant-Meth_JR103197?_gl=1*13dq4va*_gcl_au*MTQxMDU4NTU2Ny4xNzg1ODU2MTE1*_ga*Nzg3NjY4Njc0LjE3NjQwODQwODU.*_ga_DY6XXZS0V2*czE3OTEyODk4Mjkkbzg4JGcwJHQxNzkxMjg5ODMwJGo1OSRsMCRoMA",
@@ -4513,6 +4705,22 @@
    "employmentType": "OTHER",
    "checkedAt": "2026-10-03T12:45:13Z"
   },
+  "se.cuhk.edu.hk/professors-associate-professors-assistant-professors-250001sc": {
+   "url": "https://www.se.cuhk.edu.hk/professors-associate-professors-assistant-professors-250001sc/",
+   "status": "unreadable",
+   "via": "page",
+   "title": "Professor(s) / Associate Professor(s) / Assistant Professor(s) – (260001KF) - Department of Systems Engineering and Engineering Management, CUHK",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
+  },
   "shsu.peopleadmin.com/postings/45365": {
    "url": "https://shsu.peopleadmin.com/postings/45365",
    "status": "unreadable",
@@ -4559,7 +4767,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-01T14:47:32Z"
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "stat.nus.edu.sg/jobs": {
    "url": "https://www.stat.nus.edu.sg/jobs/",
@@ -4800,6 +5008,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-10-02T14:10:01Z"
+  },
+  "usccareers.usc.edu/job/los-angeles/assistant-professor-associate-professor-and-full-professor-of-industrial-and-systems-engineering/1209/100736016464": {
+   "url": "https://usccareers.usc.edu/job/los-angeles/assistant-professor-associate-professor-and-full-professor-of-industrial-and-systems-engineering/1209/100736016464",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor, Associate Professor, and Full Professor of Industrial and Systems Engineering",
+   "institution": "Viterbi School of Engineering",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "2026-09-16",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-09T14:41:43Z"
   },
   "usccareers.usc.edu/job/los-angeles/assistant-professor-associate-professor-and-full-professor-of-industrial-and-systems-engineering/1209/86761870464": {
    "url": "https://usccareers.usc.edu/job/los-angeles/assistant-professor-associate-professor-and-full-professor-of-industrial-and-systems-engineering/1209/86761870464",
