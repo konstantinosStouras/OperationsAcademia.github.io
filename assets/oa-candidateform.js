@@ -666,8 +666,9 @@
       setError($('f-informsUrl'), 'Please enter the specific presentation link for your INFORMS talk.');
       bad($('f-informsUrl'));
     } else if (out.informsUrl) {
-      var presentationUrl = new URL(out.informsUrl);
-      if (presentationUrl.protocol !== 'https:' ||
+      var presentationUrl = null;
+      try { presentationUrl = new URL(out.informsUrl); } catch (e) {}
+      if (!presentationUrl || presentationUrl.protocol !== 'https:' ||
           presentationUrl.hostname !== 'submissions.mirasmart.com' ||
           presentationUrl.pathname.toLowerCase() !== '/informsannual2026/itinerary/presentationdetail.aspx' ||
           !/^[1-9][0-9]*$/.test(presentationUrl.searchParams.get('evdid') || '')) {

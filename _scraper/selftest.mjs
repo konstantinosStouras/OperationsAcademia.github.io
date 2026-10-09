@@ -24472,8 +24472,13 @@ async function testForum() {
   ok(!cvCheck('https://example.edu/cv.pdf', null, ['Monday'], exactTalk, 'Operations', {}).result,
     'candidate form: new presenters must supply schedule information');
   ok(!cvCheck('https://example.edu/cv.pdf', null, ['Monday'], exactTalk, 'Operations',
-    { date: '2026-11-02', at: '10:00', end: '09:00', location: 'Moscone' }).result,
+    { date: '2026-11-02', at: '10:00', end: '09:00', location: 'Moscone', title: 'Job market talk' }).result,
     'candidate form: end time before start is rejected');
+  ok(!cvCheck('https://example.edu/cv.pdf', null, ['Monday'], exactTalk, 'Operations',
+    { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone' }).result,
+    'candidate form: the presentation title is required');
+  ok(!cvCheck('https://example.edu/cv.pdf', null, ['Monday'], 'https://').result,
+    'candidate form: malformed presentation links report validation errors');
 
   const home = await read('index.html');
   if (announced) {
