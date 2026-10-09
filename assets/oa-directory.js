@@ -262,7 +262,7 @@
          here. The build's own rows are already canonical (no-ops). */
       if (canon) {
         var c = canon({ institution: r.institution, school: r.school || '', unit: r.department || '' });
-        r.institution = c.institution.replace(/^The\s+/i, '');
+        r.institution = (r._edit ? r.institution : c.institution).replace(/^The\s+/i, '');
         /* An explicit directory correction is the official display title.
            Canonicalisation still supplies the identity used by rowKeyOf. */
         r.school = r._edit ? r.school : c.school;

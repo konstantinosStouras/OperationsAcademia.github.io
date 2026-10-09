@@ -91,4 +91,17 @@ assert.ok(D.planSchool(unchanged).entries.every(e => Object.keys(e.patch).length
 D.state.edits = { supply: { department: 'Department of Supply Chain Management', t: 1 } };
 D.regroup();
 assert.ok(D.state.cards.some(c => c.schools.some(s => s.rows.some(r => r.department === 'Department of Supply Chain Management'))));
+D.state.flat = [
+  { id: 'essec-old', institution: 'ESSEC', school: 'ESSEC Business School', department: 'Operations Management', n: 1 },
+  { id: 'essec-new', institution: 'ESSEC', school: 'ESSEC Business School', department: 'Information Systems, Data Analytics and Operations', n: 1 },
+];
+D.state.edits = Object.fromEntries(D.state.flat.map((r, i) => [r.id, {
+  institution: 'The ESSEC Business School',
+  department: 'Department of Information Systems, Data Analytics and Operations', t: i + 1,
+}]));
+D.regroup();
+assert.equal(D.state.cards.length, 1, 'A full university title retains its canonical identity');
+assert.equal(D.state.cards[0].institution, 'ESSEC Business School',
+  'Keep the explicit full university title while dropping its leading The');
+assert.equal(D.state.cards[0].n, 2, 'Renaming the title retains both postings');
 console.log('Directory tests passed: individual school assignment and retention of official department titles.');
