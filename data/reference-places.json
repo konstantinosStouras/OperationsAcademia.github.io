@@ -986,6 +986,11 @@
  },
  {
   "institution": "Georgia Institute of Technology",
+  "school": "College of Engineering",
+  "department": "H. Milton Stewart School of Industrial and Systems Engineering"
+ },
+ {
+  "institution": "Georgia Institute of Technology",
   "school": "H. Milton Stewart School of Industrial and Systems Engineering",
   "department": ""
  },
@@ -3268,6 +3273,11 @@
   "institution": "University of Minnesota",
   "school": "",
   "department": "OM/SCM"
+ },
+ {
+  "institution": "University of Minnesota",
+  "school": "Curtis L. Carlson School of Management",
+  "department": "Information and Decision Sciences"
  },
  {
   "institution": "University of Minnesota",

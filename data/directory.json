@@ -3574,6 +3574,20 @@
   ]
  },
  {
+  "id": "georgia-institute-of-technology__college-of-engineering__h-milton-stewart-school-of-industrial-and-systems-engineerin",
+  "institution": "Georgia Institute of Technology",
+  "school": "College of Engineering",
+  "department": "H. Milton Stewart School of Industrial and Systems Engineering",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-23"
+ },
+ {
   "id": "georgia-institute-of-technology__h-milton-stewart-school-of-industrial-and-systems-engineerin",
   "institution": "Georgia Institute of Technology",
   "school": "H. Milton Stewart School of Industrial and Systems Engineering",
@@ -3584,11 +3598,8 @@
   "facultyUrl": "https://www.isye.gatech.edu/people",
   "sources": [
    "directory",
-   "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-23",
   "lat": 33.7728416,
   "lng": -84.390568
  },
@@ -12892,10 +12903,10 @@
   "lastPosted": "2025-09-09"
  },
  {
-  "id": "university-of-minnesota__curtis-l-carlson-school-of-management__information-systems",
+  "id": "university-of-minnesota__curtis-l-carlson-school-of-management__information-and-decision-sciences",
   "institution": "University of Minnesota",
   "school": "Curtis L. Carlson School of Management",
-  "department": "Information Systems",
+  "department": "Information and Decision Sciences",
   "type": "Business School",
   "country": "United States",
   "sources": [
@@ -12904,6 +12915,16 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-11"
+ },
+ {
+  "id": "university-of-minnesota__curtis-l-carlson-school-of-management__information-systems",
+  "institution": "University of Minnesota",
+  "school": "Curtis L. Carlson School of Management",
+  "department": "Information Systems",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "university-of-minnesota__curtis-l-carlson-school-of-management__supply-chain-and-operations",

@@ -1687,16 +1687,17 @@
   ],
   "posted": "2026-09-23",
   "institution": "Georgia Institute of Technology",
-  "department": "H. Milton Stewart School of Industrial and Systems Engineering",
-  "school": "H. Milton Stewart School of Industrial and Systems Engineering",
-  "unit": "",
+  "department": "College of Engineering, H. Milton Stewart School of Industrial and Systems Engineering",
+  "school": "College of Engineering",
+  "unit": "H. Milton Stewart School of Industrial and Systems Engineering",
   "type": "University",
   "levels": [
    "Assistant Professor",
    "Other Ranks"
   ],
-  "applyBy": "October 31, 2026",
-  "applyByDate": "2026-10-31",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-31",
   "comments": "",
   "country": "United States",
   "countries": [
@@ -1711,7 +1712,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-25T09:11:53Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-iese-business-school-20260923",
@@ -2865,15 +2867,16 @@
   ],
   "posted": "2026-09-11",
   "institution": "University of Minnesota",
-  "department": "Curtis L. Carlson School of Management, Information Systems",
+  "department": "Curtis L. Carlson School of Management, Information and Decision Sciences",
   "school": "Curtis L. Carlson School of Management",
-  "unit": "Information Systems",
+  "unit": "Information and Decision Sciences",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "October 10, 2026",
-  "applyByDate": "2026-10-10",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-10",
   "comments": "",
   "country": "United States",
   "countries": [
@@ -2888,7 +2891,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T06:23:48Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-california-state-university-channel-islands-20260909",

@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-09T04:58:38.653Z",
+ "generated": "2026-10-09T04:59:21.744Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -2176,16 +2176,16 @@
    "n": 7
   },
   {
+   "v": "College of Engineering",
+   "n": 5
+  },
+  {
    "v": "Darden School of Business",
    "n": 5
   },
   {
    "v": "Eli Broad College of Business",
    "n": 5
-  },
-  {
-   "v": "College of Engineering",
-   "n": 4
   },
   {
    "v": "School of Management",
@@ -2469,10 +2469,6 @@
   },
   {
    "v": "Graduate School of Management",
-   "n": 1
-  },
-  {
-   "v": "H. Milton Stewart School of Industrial and Systems Engineering",
    "n": 1
   },
   {
@@ -2813,6 +2809,10 @@
   },
   {
    "v": "Guanghua School of Management",
+   "n": 0
+  },
+  {
+   "v": "H. Milton Stewart School of Industrial and Systems Engineering",
    "n": 0
   },
   {
@@ -3238,10 +3238,6 @@
    "n": 5
   },
   {
-   "v": "Information Systems",
-   "n": 4
-  },
-  {
    "v": "Operations",
    "n": 4
   },
@@ -3267,6 +3263,10 @@
   },
   {
    "v": "Industrial and Systems Engineering",
+   "n": 3
+  },
+  {
+   "v": "Information Systems",
    "n": 3
   },
   {
@@ -3355,6 +3355,10 @@
   },
   {
    "v": "Industrial Engineering and Operations Research",
+   "n": 2
+  },
+  {
+   "v": "Information and Decision Sciences",
    "n": 2
   },
   {
@@ -3742,6 +3746,10 @@
    "n": 1
   },
   {
+   "v": "H. Milton Stewart School of Industrial and Systems Engineering",
+   "n": 1
+  },
+  {
    "v": "Healthcare",
    "n": 1
   },
@@ -3799,10 +3807,6 @@
   },
   {
    "v": "Information",
-   "n": 1
-  },
-  {
-   "v": "Information and Decision Sciences",
    "n": 1
   },
   {
@@ -6650,13 +6654,18 @@
   },
   "Georgia Institute of Technology": {
    "schools": [
+    "College of Engineering",
     "H. Milton Stewart School of Industrial and Systems Engineering",
     "Scheller College of Business"
    ],
    "units": [
+    "H. Milton Stewart School of Industrial and Systems Engineering",
     "Operations Management"
    ],
    "bySchool": {
+    "College of Engineering": [
+     "H. Milton Stewart School of Industrial and Systems Engineering"
+    ],
     "Scheller College of Business": [
      "Operations Management"
     ]
@@ -10760,7 +10769,7 @@
    ],
    "units": [
     "Industrial and Systems Engineering (ISyE)",
-    "Information Systems",
+    "Information and Decision Sciences",
     "OM/SCM",
     "Supply Chain and Operations"
    ],
@@ -10769,7 +10778,7 @@
      "OM/SCM"
     ],
     "Curtis L. Carlson School of Management": [
-     "Information Systems",
+     "Information and Decision Sciences",
      "Supply Chain and Operations"
     ],
     "School of Science and Engineering": [
@@ -12298,6 +12307,7 @@
    "Supply Chain"
   ],
   "College of Engineering": [
+   "H. Milton Stewart School of Industrial and Systems Engineering",
    "Lillian Gilbreth Postdoctoral Fellowships",
    "Mechanical and Industrial Engineering",
    "One Health – Intelligent Medicines",
@@ -12344,7 +12354,7 @@
    "Information Systems, Statistics, and Management Science"
   ],
   "Curtis L. Carlson School of Management": [
-   "Information Systems",
+   "Information and Decision Sciences",
    "Supply Chain and Operations"
   ],
   "D'Amore-McKim School of Business": [
