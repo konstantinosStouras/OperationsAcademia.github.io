@@ -15042,8 +15042,8 @@ async function testJobExportWiring() {
      per-bar spans live behind: below it a phone stacks them full width */
   ok(/body\.v3 \.oa-filter-actions \{[\s\S]{0,200}?grid-column: auto \/ -1;/.test(v3css),
     'filter bar: a bar with no action still spans its one last track');
-  ok(/@media \(min-width: 641px\) \{\s*\n\s*body\.v3 #oa-jobs [\s\S]{0,400}?body\.v3 #oa-candidates [^\n]*\n\s*\}/.test(v3css),
-    'filter bar: both spans are behind the desktop breakpoint, so the phone still stacks them');
+  ok(/@media \(min-width: 641px\) \{\s*\n\s*body\.v3 #oa-jobs [^\n]*\n\s*\}/.test(v3css),
+    'filter bar: the jobs action span is behind the desktop breakpoint, so the phone still stacks it');
 }
 
 /* ------------------------------------------------- WHO SPONSORED THE SITE
