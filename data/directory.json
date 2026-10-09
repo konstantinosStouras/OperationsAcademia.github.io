@@ -1733,15 +1733,6 @@
   "lastPosted": "2025-01-15"
  },
  {
-  "id": "china-europe-international-business-school____economics-and-decision-sciences",
-  "institution": "China Europe International Business School",
-  "department": "Economics and Decision Sciences",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "china-europe-international-business-school____om",
   "institution": "China Europe International Business School",
   "department": "OM",
@@ -2230,14 +2221,6 @@
   "lastPosted": "2025-06-24"
  },
  {
-  "id": "cornell____operations-technology-and-information-management",
-  "institution": "Cornell",
-  "department": "Operations, Technology, and Information Management",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "cornell-university____applied-economics-and-management",
   "institution": "Cornell University",
   "department": "Applied Economics and Management",
@@ -2297,6 +2280,16 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-04"
+ },
+ {
+  "id": "cornell-university__cornell-sc-johnson-college-of-business-cornell-peter-and-ste__operations-technology-and-information-management-area",
+  "institution": "Cornell University",
+  "school": "Cornell SC Johnson College of Business, Cornell Peter and Stephanie Nolan School of Hotel Administration",
+  "department": "Operations, Technology, and Information Management Area",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "cornell-university__cornell-tech__operations-research-and-information-engineering",
@@ -4235,10 +4228,11 @@
   "lng": -0.369098
  },
  {
-  "id": "idaho-state-university____supply-chain-and-operations-management",
+  "id": "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem",
   "institution": "Idaho State University",
-  "department": "Supply Chain and Operations Management",
-  "type": "University",
+  "school": "College of Business",
+  "department": "Marketing and Management, Supply Chain and Operations Management",
+  "type": "Business School",
   "sources": [
    "seed"
   ]
@@ -9398,15 +9392,6 @@
   "lastPosted": "2025-06-06"
  },
  {
-  "id": "texas-state-university____supply-chain",
-  "institution": "Texas State University",
-  "department": "supply chain",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "texas-state-university__mccoy-college-of-business__information-systems-and-analytics",
   "institution": "Texas State University",
   "school": "McCoy College of Business",
@@ -9427,6 +9412,16 @@
   "deptUrl": "https://mgt.mccoy.txst.edu/about/faculty.html",
   "sources": [
    "omlist",
+   "seed"
+  ]
+ },
+ {
+  "id": "texas-state-university__mccoy-college-of-business__management-supply-chain-management",
+  "institution": "Texas State University",
+  "school": "McCoy College of Business",
+  "department": "Management, Supply Chain Management",
+  "type": "Business School",
+  "sources": [
    "seed"
   ]
  },
@@ -13302,19 +13297,20 @@
   "lastPosted": "2026-01-19"
  },
  {
-  "id": "university-of-northern-iowa____business-analytics-and-applied-ai",
+  "id": "university-of-northern-iowa__david-w-wilson-college-of-business__management",
   "institution": "University of Northern Iowa",
-  "department": "Business Analytics and Applied AI",
+  "school": "David W. Wilson College of Business",
+  "department": "Management",
   "type": "Business School",
   "sources": [
    "seed"
   ]
  },
  {
-  "id": "university-of-northern-iowa__david-w-wilson-college-of-business__management",
+  "id": "university-of-northern-iowa__david-w-wilson-college-of-business__management-business-analytics-and-applied-artificial-intelli",
   "institution": "University of Northern Iowa",
   "school": "David W. Wilson College of Business",
-  "department": "Management",
+  "department": "Management, Business Analytics and Applied Artificial Intelligence",
   "type": "Business School",
   "sources": [
    "seed"
@@ -15713,6 +15709,15 @@
   "institution": "Xi'an Jiaotong University",
   "school": "School of Management",
   "department": "IS",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
+  "id": "yale-school-of-management____operations-management",
+  "institution": "Yale School of Management",
+  "department": "Operations Management",
   "type": "Business School",
   "sources": [
    "seed"
