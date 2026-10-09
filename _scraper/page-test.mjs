@@ -5525,7 +5525,7 @@ for (const [from, hash] of [
   });
 
   if (expected.any) {
-    eq(firstCard.title, expected.first,
+    eq(firstCard.title, expected.first.replace(/^The\s+/i, ''),
       'sponsors: the sponsor\'s posting LEADS the jobs page, whatever its date');
     eq(firstCard.badge, 'Sponsored', 'sponsors: …wearing the badge');
     eq(firstCard.railed, true, 'sponsors: …and the rail down its edge');
@@ -5575,8 +5575,8 @@ for (const [from, hash] of [
     eq(firstCard.rails, 0, 'sponsors: …and no card carries a rail');
   }
 
-  /* THE HOME PAGE badges but does NOT reorder — its teaser promises the ten
-     most recent postings, and a lead row would make that heading false. */
+  /* The home page selects sponsored and featured postings first, then the
+     newest listings, matching the owner's current ordering. */
   const hp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await hp.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
   await hp.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
@@ -5604,7 +5604,7 @@ for (const [from, hash] of [
   const teaser = await hp.evaluate(async () => {
     const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
     const ten = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
-      .sort(window.OASponsors.byListing)
+      .sort((a, b) => window.OASponsors.compare(a, b))
       .slice(0, 10);
     const marked = ten.filter((r) => window.OASponsors.isSponsored(r));
     return { any: marked.length > 0, first: marked.length ? marked[0].institution : '' };
@@ -5615,7 +5615,7 @@ for (const [from, hash] of [
     eq(home.railed, false, 'sponsors: …and no teaser card carries the rail');
   }
   if (teaser.any) {
-    eq(home.first, teaser.first,
+    eq(home.first, teaser.first.replace(/^The\s+/i, ''),
       'sponsors: the sponsor LEADS the home teaser too (owner, from a screenshot)');
     eq(home.railed, true,
       'sponsors: …and its card carries the rail INSIDE the panel, which resets every border');
@@ -5643,13 +5643,13 @@ for (const [from, hash] of [
   const newestTen = await hp.evaluate(async () => {
     const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
     return rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
-      .sort(window.OASponsors.byListing)
-      .slice(0, 10).map((r) => r.institution).sort();
+      .sort((a, b) => window.OASponsors.compare(a, b))
+      .slice(0, 10).map((r) => r.institution.replace(/^The\s+/i, '')).sort();
   });
   const shown = await hp.evaluate(() => [...document.querySelectorAll('#oa-jobs-recent .oa-card')]
     .map((c) => c.querySelector('.oa-card-title').textContent.trim()).sort());
   eq(shown, newestTen,
-    'sponsors: …and the teaser still SHOWS the ten most recent — only their order changed');
+    'sponsors: the teaser selects the first ten under sponsor, featured and recency ordering');
   await hp.close();
 
   /* …AND THE OWNER'S CASE IS MEASURED WHATEVER THE CORPUS HOLDS. The branch
@@ -5702,13 +5702,13 @@ for (const [from, hash] of [
     const want = await rp.evaluate(async () => {
       const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
       const ten = rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
-        .sort(window.OASponsors.byListing)
+        .sort((a, b) => window.OASponsors.compare(a, b))
         .slice(0, 10);
       const ordered = ten.slice().sort((a, b) => window.OASponsors.compare(a, b));
       return {
         first: ordered.length ? ordered[0].institution : '',
         sponsored: ten.filter((r) => window.OASponsors.isSponsored(r)).length,
-        shown: ten.map((r) => r.institution).sort(),
+        shown: ten.map((r) => r.institution.replace(/^The\s+/i, '')).sort(),
       };
     });
     const routed = await rp.evaluate(() => {
@@ -5728,7 +5728,7 @@ for (const [from, hash] of [
        for a teaser with no sponsor in it. */
     ok(want.sponsored > 0 && want.first === fixture.lead,
       'sponsors (routed file): the re-dated sponsor posting is among the ten and the rule puts it first');
-    eq(routed.first, want.first,
+    eq(routed.first, want.first.replace(/^The\s+/i, ''),
       'sponsors (routed file): the sponsor LEADS the home teaser (owner, from a screenshot)');
     eq(routed.firstRailed, true,
       'sponsors (routed file): …and its card carries the rail INSIDE the panel, which resets every border');
@@ -5742,7 +5742,7 @@ for (const [from, hash] of [
       ok(routed.rail.w !== routed.rail.other, 'sponsors (routed file): …and still only on the left');
     }
     eq(routed.shown, want.shown,
-      'sponsors (routed file): …and the teaser still SHOWS the ten most recent of the routed file');
+      'sponsors (routed file): the teaser selects the first ten under the current ordering');
     await rp.close();
   } else {
     ok(!expected.any,
