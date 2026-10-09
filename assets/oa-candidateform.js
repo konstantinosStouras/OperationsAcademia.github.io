@@ -1137,6 +1137,8 @@
     EDIT_YEAR = Number(v.year) || 0;
     paintYearNote();                 // the profile's own season, never today's
     set('f-informsUrl', v.informsUrl);
+    var legacyTalkFields = $('f-talks');
+    if (legacyTalkFields) legacyTalkFields.hidden = !v.talks || !Object.keys(v.talks).length;
     Object.keys(JOB_TALK_MAX).forEach(function (key) { set('f-jobTalk-' + key, (v.jobTalk || {})[key]); });
     set('f-cvUrl', v.cvUrl);
     set('f-webUrl', v.webUrl);
