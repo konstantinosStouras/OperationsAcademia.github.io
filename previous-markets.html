@@ -537,7 +537,7 @@
             ],
 
             card: {
-              title:    function (r) { return r.institution; },
+              title:    function (r) { return r.institution.replace(/^The\s+/, ''); },
               subtitle: function (r) { return r.department; },
               rows: function (r) {
                 return [

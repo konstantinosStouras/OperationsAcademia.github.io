@@ -1170,6 +1170,8 @@ async function testMarketYearCascade() {
   const now = new Date('2026-08-26T12:00:00Z');
   const served = JSON.parse(await readFile(JOBS, 'utf8'));
 
+
+
   // 1. the cascade, in the owner's own order
   eq(marketYearOf({ applyByDate: '2026-10-15', reviewDate: '2026-09-08', posted: '2026-05-01' }, { now }),
     { year: 2027, from: 'final' },
@@ -15595,6 +15597,28 @@ async function testSponsors() {
   const SP = require(path.join(HERE, '..', 'assets', 'oa-sponsors.js'));
   const served = JSON.parse(await readFile(JOBS, 'utf8'));
 
+  {
+    const sponsor = { institution: 'The Chinese University of Hong Kong',
+      unit: 'Decisions, Operations and Technology', posted: '2026-09-01' };
+    const newer = Array.from({ length: 12 }, (_, i) => ({
+      institution: 'Example University ' + i, posted: '2026-10-' + String(i + 1).padStart(2, '0')
+    }));
+    const selection = SP.recent(newer.concat(sponsor), 10, '2026-10-09');
+    eq(selection.length, 10, 'sponsors: the teaser stays at ten postings');
+    eq(selection[0], sponsor, 'sponsors: an older sponsor survives the ten-posting cutoff and leads');
+    eq(selection[1], newer[11], 'sponsors: the newest ordinary posting follows the sponsor');
+    eq(SP.recent(newer.concat(sponsor), 10, '2027-09-01')[0], newer[11],
+      'sponsors: expired sponsorship no longer reserves a teaser place');
+    const directory = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'directory.json'), 'utf8'));
+    const identities = new Set(directory.map(r => SCHOOLS.institutionKey(r.institution)));
+    for (const r of served) {
+      const key = SCHOOLS.institutionKey(r.institution);
+      ok(identities.has(key), `directory: published job ${r.id} maps to a university`);
+      const target = new URL(r.furtherInfoUrl).searchParams.get('filterA');
+      eq(SCHOOLS.institutionKey(target), key, `directory: ${r.id} links to its own university`);
+    }
+  }
+
   /* ---- the record itself ------------------------------------------------ */
 
   ok(SP.SPONSORS.length >= 1, 'sponsors: the table names at least one sponsor');
@@ -15743,24 +15767,12 @@ async function testSponsors() {
       `sponsors: ${rel} never writes the badge's own text — one definition, like every other`);
   }
 
-  /* BOTH lists lead with the sponsor (owner, 2026-08-29, from a screenshot of
-     the one-pager: the mark was on the card and the card was second). The
-     first build left the teaser date-ordered on the reasoning that "the ten
-     most recent postings" would become false — but that heading names WHICH
-     ten, not what order they are in, and the teaser's `prepare` still selects
-     them by date before this comparator ever runs. So a posting outside the
-     newest ten is still not shown, and the heading stays true. */
   for (const [rel, html] of [['jobs.html', jobs], ['index.html', home]]) {
     ok(/sort:\s*function\s*\(a, b\)\s*\{\s*return OASponsors\.compare\(a, b\);/.test(html),
       `sponsors: ${rel} sorts through the module`);
   }
-  /* …and the teaser's SELECTION is still the ten most recent, which is what
-     keeps its own heading honest: most recent ON THE SITE since 2026-10-05,
-     by the jobs page's own key, so a posting approved this morning reaches the
-     panel that the jobs page one click away already leads with. */
-  ok(/prepare:[\s\S]{0,400}?\.sort\(OASponsors\.byListing\)\.slice\(0, 10\)/.test(home),
-    'sponsors: the teaser SELECTS the ten most recently listed, through the module, before ordering them');
-  {
+  ok(/OASponsors\.recent\(rows\.filter\(inCurrentMarket\), 10\)/.test(home),
+    'sponsors: the teaser reserves sponsored places before selecting the newest listings');  {
     /* bounded to the jobs teaser's own mount: the candidates and placements
        teasers below it sort by date on purpose, and are not this list */
     const at = home.indexOf("mount: '#oa-jobs-recent'");

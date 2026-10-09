@@ -278,6 +278,15 @@
       || String((b && b.posted) || '').localeCompare(String((a && a.posted) || ''));
   }
 
+  /** Reserve the first places for active sponsors, then fill with the newest
+      listings. Apply the market filter before calling this selector. */
+  function recent(rows, limit, now) {
+    return rows.slice().sort(function (a, b) {
+      var sa = isSponsored(a, now), sb = isSponsored(b, now);
+      return sa !== sb ? (sa ? -1 : 1) : byListing(a, b);
+    }).slice(0, limit);
+  }
+
   /**
    * The comparator the jobs page sorts by: a sponsored posting leads,
    * then a Featured one, then the newest ON THE SITE (`listedAt` above).
@@ -337,6 +346,7 @@
     LISTED_SOURCES: LISTED_SOURCES,
     listedAt: listedAt,
     byListing: byListing,
+    recent: recent,
     compare: compare,
     badge: badge,
     markCard: markCard

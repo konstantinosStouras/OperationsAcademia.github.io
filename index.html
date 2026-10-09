@@ -306,7 +306,7 @@
             <div class="v3-jobs-right v3-reveal">
               <div class="v3-panel">
                 <div class="v3-panel-head">
-                  <h3>&#10022; The ten most recent postings</h3>
+                  <h3>&#10022; Ten most recent postings</h3>
                   <a href="jobs">Full list &rarr;</a>
                 </div>
                 <div id="oa-jobs-recent"></div>
@@ -1239,19 +1239,10 @@
             loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
             unit: 'postings'
           },
-          /* The ten most recent ON THE SITE, by the jobs page's own key
-             (OASponsors.byListing: when each posting went up, which for a
-             crawled posting is the day the maintainer approved it). Selected
-             by the posting date alone, an approval this morning of a search
-             advertised last week never reached this panel at all, while the
-             jobs page one click away led with it. */
+          /* Active sponsors lead; remaining places show the newest listings. */
           prepare: function (rows) {
-            return rows.filter(inCurrentMarket).sort(OASponsors.byListing).slice(0, 10);
+            return OASponsors.recent(rows.filter(inCurrentMarket), 10);
           },
-          /* The SELECTION is still the ten most recent (prepare, above) —
-             what changes here is only their ORDER, so the sponsor leads the
-             card without the heading becoming false. A posting outside the
-             newest ten is still not shown, sponsored or not. */
           sort: function (a, b) { return OASponsors.compare(a, b); },
           filters: [],
 
@@ -1279,7 +1270,7 @@
             window.OAJobEdit && OAJobEdit.onCard(li, r);
           },
           card: {
-            title:    function (r) { return r.institution; },
+            title:    function (r) { return r.institution.replace(/^The\s+/, ''); },
             subtitle: function (r) { return r.department; },
             badges:   function (r) {
               var out = [];
