@@ -281,6 +281,7 @@
     'Kedge Business School',
     'London Business School (LBS)',
     'Naval Postgraduate School',
+    'NEOMA Business School',
     'SKEMA Business School',
     'Skolkovo Institute of Science and Technology (Skoltech)',
     'Southern University of Science and Technology (SUSTech)',

@@ -6,6 +6,18 @@ import { referencePlaces } from './sync-reference-places.mjs';
 const require = createRequire(import.meta.url);
 const S = require('../assets/oa-schools.js');
 const U = require('../assets/oa-uniinfo.js');
+for (const [institution, short, full, unit, id] of [
+  ['Auburn University', 'Harbert College of Business', 'Raymond J. Harbert College of Business',
+    'Supply Chain Management', 'auburn-university__harbert-college-of-business__supply-chain-management'],
+  ['George Mason University', 'Costello College of Business', 'Donald G. Costello College of Business',
+    'Information Systems and Operations Management', 'george-mason-university__costello-college-of-business__information-systems-and-operations-management'],
+  ['Iowa State University', 'Ivy College of Business', 'Debbie and Jerry Ivy College of Business',
+    'Supply Chain Management', 'iowa-state-university__ivy-college-of-business__supply-chain-management'],
+]) {
+  assert.equal(S.canonSchool(short, institution), full);
+  assert.equal(S.directoryRowKey(institution, full, unit), id,
+    'The official full name must preserve the existing correction address');
+}
 const place = { institution: 'Purdue University', school: 'Mitch Daniels School of Business',
   department: 'Supply Chain and Operations Management Department', id: 'verified' };
 const hidden = { institution: 'Hidden University', school: '', department: '', _hidden: true };

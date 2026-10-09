@@ -14086,7 +14086,8 @@ async function testCandidateReveal() {
     'alerts: the matcher carries no private copy of the reveal rule');
 
   /* ---- the pages load the module before its users -------------------- */
-  const tagAt = (html, f) => html.indexOf('<script defer src="assets/' + f + '"></script>');
+  const tagAt = (html, f) => html.search(new RegExp('<script defer src="assets/' +
+    f.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"></script>'));
   const index = await read('index.html');
   ok(tagAt(index, 'oa-reveal.js') > 0, 'index.html loads oa-reveal.js, deferred');
   ok(tagAt(index, 'oa-reveal.js') < index.indexOf('OAReveal.isRevealed('),
@@ -15793,7 +15794,7 @@ async function testSponsors() {
      So both halves are pinned: the pages load it FIRST, and the module says
      nothing at all without it. */
   for (const [rel, html] of [['jobs.html', jobs], ['index.html', home]]) {
-    ok(html.includes('<script defer src="assets/oa-schools.js"></script>'),
+    ok(/<script defer src="assets\/oa-schools\.js(?:\?[^"\s]*)?"><\/script>/.test(html),
       `sponsors: ${rel} loads oa-schools.js, which the sponsor rule is built on`);
     ok(html.indexOf('assets/oa-schools.js') < html.indexOf('assets/oa-sponsors.js'),
       `sponsors: …BEFORE oa-sponsors.js, whose factory is handed it`);
@@ -20842,10 +20843,10 @@ async function testAffiliationPicker() {
      STANDALONE where it is an institution in its own right. TIDY, because a
      new posting can bring such a card in, and that must never stop the site
      publishing: it fails the PR check, where a person adds the entry. */
-  const standalone = new Set(A.STANDALONE);
+  const standalone = new Set(A.STANDALONE.map(n => S.institutionKey(n)));
   const notAUniversity = (n) => /\b(school|department|dept|faculty|group)\b/i.test(n)
     || /\b(univ|uni)\b/i.test(n) || /\([^)]*[a-z]{3}[^)]*\)/.test(n);
-  tidy(names.universities.filter((n) => notAUniversity(n) && !standalone.has(n)),
+  tidy(names.universities.filter((n) => notAUniversity(n) && !standalone.has(S.institutionKey(n))),
     'the affiliation list offers university names only (a card titled with a school or a department goes in UNIVERSITY_OF, assets/oa-affiliation.js)');
   ok(notAUniversity('Yale School of Management (Operations Management group)') && notAUniversity('Uni. of Illinois at Urbana-Champaign (Gies)')
      && notAUniversity('Lousiana Tech Univ') && !notAUniversity('Massachusetts Institute of Technology (MIT)')

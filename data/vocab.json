@@ -2244,15 +2244,15 @@
    "n": 2
   },
   {
-   "v": "Costello College of Business",
-   "n": 2
-  },
-  {
    "v": "Curtis L. Carlson School of Management",
    "n": 2
   },
   {
    "v": "Desautels Faculty of Management",
+   "n": 2
+  },
+  {
+   "v": "Donald G. Costello College of Business",
    "n": 2
   },
   {
@@ -2396,6 +2396,10 @@
    "n": 1
   },
   {
+   "v": "Debbie and Jerry Ivy College of Business",
+   "n": 1
+  },
+  {
    "v": "Ed G. Smith College of Business",
    "n": 1
   },
@@ -2485,10 +2489,6 @@
   },
   {
    "v": "Institut Mines-Télécom Business School",
-   "n": 1
-  },
-  {
-   "v": "Ivy College of Business",
    "n": 1
   },
   {
@@ -2804,10 +2804,6 @@
    "n": 0
   },
   {
-   "v": "Harbert College of Business",
-   "n": 0
-  },
-  {
    "v": "Haskayne School of Business",
    "n": 0
   },
@@ -2985,6 +2981,10 @@
   },
   {
    "v": "Raymond A. Mason School of Business",
+   "n": 0
+  },
+  {
+   "v": "Raymond J. Harbert College of Business",
    "n": 0
   },
   {
@@ -5083,7 +5083,7 @@
   },
   "Auburn University": {
    "schools": [
-    "Harbert College of Business"
+    "Raymond J. Harbert College of Business"
    ],
    "units": [
     "BA",
@@ -5099,7 +5099,7 @@
      "Industrial and Systems Engineering",
      "IS/BA"
     ],
-    "Harbert College of Business": [
+    "Raymond J. Harbert College of Business": [
      "Supply Chain Management"
     ]
    }
@@ -6560,8 +6560,7 @@
   },
   "George Mason University": {
    "schools": [
-    "Costello College of Business",
-    "School of Business",
+    "Donald G. Costello College of Business",
     "Volgenau School of Engineering"
    ],
    "units": [
@@ -6569,10 +6568,7 @@
     "Systems Engineering and Operations Research"
    ],
    "bySchool": {
-    "Costello College of Business": [
-     "Information Systems and Operations Management"
-    ],
-    "School of Business": [
+    "Donald G. Costello College of Business": [
      "Information Systems and Operations Management"
     ],
     "Volgenau School of Engineering": [
@@ -7096,7 +7092,7 @@
   },
   "Iowa State University": {
    "schools": [
-    "Ivy College of Business"
+    "Debbie and Jerry Ivy College of Business"
    ],
    "units": [
     "IS/BA",
@@ -7104,7 +7100,7 @@
     "Supply Chain Management"
    ],
    "bySchool": {
-    "Ivy College of Business": [
+    "Debbie and Jerry Ivy College of Business": [
      "IS/BA",
      "Supply Chain and Information Systems",
      "Supply Chain Management"
@@ -12293,9 +12289,6 @@
   "Cornell Tech": [
    "Operations Research and Information Engineering"
   ],
-  "Costello College of Business": [
-   "Information Systems and Operations Management"
-  ],
   "Cranfield School of Management": [
    "Logistics, Procurement and Supply Chain Management"
   ],
@@ -12332,6 +12325,11 @@
   "David Eccles School of Business": [
    "Operations and Information Systems"
   ],
+  "Debbie and Jerry Ivy College of Business": [
+   "IS/BA",
+   "Supply Chain and Information Systems",
+   "Supply Chain Management"
+  ],
   "DeGroote School of Business": [
    "Health Policy and Management"
   ],
@@ -12340,6 +12338,9 @@
   ],
   "Desautels Faculty of Management": [
    "Operations Management"
+  ],
+  "Donald G. Costello College of Business": [
+   "Information Systems and Operations Management"
   ],
   "Driehaus College of Business": [
    "Management and Entrepreneurship"
@@ -12449,9 +12450,6 @@
    "Business and Public Policy",
    "Operations and Information Technology Management"
   ],
-  "Harbert College of Business": [
-   "Supply Chain Management"
-  ],
   "Harvard Business School": [
    "Technology and Operations Management"
   ],
@@ -12494,11 +12492,6 @@
   "Ivey Business School": [
    "Management Science",
    "Operations Management"
-  ],
-  "Ivy College of Business": [
-   "IS/BA",
-   "Supply Chain and Information Systems",
-   "Supply Chain Management"
   ],
   "J. B. Speed School of Engineering": [
    "Industrial Engineering"
@@ -12714,6 +12707,9 @@
   ],
   "Raymond A. Mason School of Business": [
    "Operations Management and Information Technology"
+  ],
+  "Raymond J. Harbert College of Business": [
+   "Supply Chain Management"
   ],
   "Robert H. Smith School of Business": [
    "Decision, Operations and Information Technologies",

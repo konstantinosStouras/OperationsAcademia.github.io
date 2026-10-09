@@ -546,24 +546,24 @@
   "lastPosted": "2025-11-20"
  },
  {
-  "id": "auburn-university__harbert-college-of-business__supply-chain-management",
-  "institution": "Auburn University",
-  "school": "Harbert College of Business",
-  "department": "Supply Chain Management",
-  "type": "Business School",
-  "deptUrl": "https://harbertsearch.auburn.edu/s/search.html?f.Department%7CpeopleDepartment=Supply+Chain+Management&profile=directory&collection=harbert%7Esp-search",
-  "sources": [
-   "omlist",
-   "seed"
-  ]
- },
- {
-  "id": "auburn-university__raymond-j-harbert-college-of-business__business-analytics-and-information-systems",
+  "id": "auburn-university__harbert-college-of-business__business-analytics-and-information-systems",
   "institution": "Auburn University",
   "school": "Raymond J. Harbert College of Business",
   "department": "Business Analytics and Information Systems",
   "type": "Business School",
   "sources": [
+   "seed"
+  ]
+ },
+ {
+  "id": "auburn-university__harbert-college-of-business__supply-chain-management",
+  "institution": "Auburn University",
+  "school": "Raymond J. Harbert College of Business",
+  "department": "Supply Chain Management",
+  "type": "Business School",
+  "deptUrl": "https://harbertsearch.auburn.edu/s/search.html?f.Department%7CpeopleDepartment=Supply+Chain+Management&profile=directory&collection=harbert%7Esp-search",
+  "sources": [
+   "omlist",
    "seed"
   ]
  },
@@ -3370,10 +3370,13 @@
  {
   "id": "george-mason-university__costello-college-of-business__information-systems-and-operations-management",
   "institution": "George Mason University",
-  "school": "Costello College of Business",
+  "school": "Donald G. Costello College of Business",
   "department": "Information Systems and Operations Management",
   "type": "Business School",
   "country": "United States",
+  "address": "4400 University Dr, Fairfax, VA 22030",
+  "mapUrl": "https://goo.gl/maps/oBtjz",
+  "facultyUrl": "http://business.gmu.edu/facultyandresearch/faculty/information-systems-and-operations-management/",
   "deptUrl": "https://business.gmu.edu/faculty-and-research/academic-areas/information-systems-and-operations-management-area?size=n_20_n&filters%5B0%5D%5Bfield%5D=domains&filters%5B0%5D%5Bvalues%5D%5B0%5D=https%3A%2F%2Fbusiness.gmu.edu&filters%5B0%5D%5Btype%5D=all",
   "characteristics": [
    "Research seminars",
@@ -3383,36 +3386,13 @@
    "Undergrad"
   ],
   "sources": [
+   "directory",
    "omlist",
    "postings",
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-09-29"
- },
- {
-  "id": "george-mason-university__donald-g-costello-college-of-business__information-systems-and-operations-management",
-  "institution": "George Mason University",
-  "school": "Donald G. Costello College of Business",
-  "department": "Information Systems and Operations Management",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
-  "id": "george-mason-university__school-of-business__information-systems-and-operations-management",
-  "institution": "George Mason University",
-  "school": "School of Business",
-  "department": "Information Systems and Operations Management",
-  "type": "Business School",
-  "country": "United States",
-  "address": "4400 University Dr, Fairfax, VA 22030",
-  "mapUrl": "https://goo.gl/maps/oBtjz",
-  "facultyUrl": "http://business.gmu.edu/facultyandresearch/faculty/information-systems-and-operations-management/",
-  "sources": [
-   "directory"
-  ],
+  "lastPosted": "2026-09-29",
   "lat": 38.8415539,
   "lng": -77.3411251
  },
@@ -4755,19 +4735,9 @@
   "lastPosted": "2026-03-19"
  },
  {
-  "id": "iowa-state-university__debbie-and-jerry-ivy-college-of-business__supply-chain-management",
-  "institution": "Iowa State University",
-  "school": "Debbie and Jerry Ivy College of Business",
-  "department": "Supply Chain Management",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "iowa-state-university__ivy-college-of-business__is-ba",
   "institution": "Iowa State University",
-  "school": "Ivy College of Business",
+  "school": "Debbie and Jerry Ivy College of Business",
   "department": "IS/BA",
   "type": "Business School",
   "country": "United States",
@@ -4781,7 +4751,7 @@
  {
   "id": "iowa-state-university__ivy-college-of-business__supply-chain-and-information-systems",
   "institution": "Iowa State University",
-  "school": "Ivy College of Business",
+  "school": "Debbie and Jerry Ivy College of Business",
   "department": "Supply Chain and Information Systems",
   "type": "Business School",
   "country": "United States",
@@ -4797,7 +4767,7 @@
  {
   "id": "iowa-state-university__ivy-college-of-business__supply-chain-management",
   "institution": "Iowa State University",
-  "school": "Ivy College of Business",
+  "school": "Debbie and Jerry Ivy College of Business",
   "department": "Supply Chain Management",
   "type": "Business School",
   "deptUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM",
