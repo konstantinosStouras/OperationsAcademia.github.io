@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-09T04:59:21.744Z",
+ "generated": "2026-10-09T05:01:10.042Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -3178,11 +3178,11 @@
    "n": 25
   },
   {
-   "v": "Operations Management",
-   "n": 15
+   "v": "MIS",
+   "n": 14
   },
   {
-   "v": "MIS",
+   "v": "Operations Management",
    "n": 14
   },
   {
@@ -3239,7 +3239,7 @@
   },
   {
    "v": "Operations",
-   "n": 4
+   "n": 5
   },
   {
    "v": "SCM/Logistics",
@@ -5502,11 +5502,11 @@
     "Martin V. Smith School of Business and Economics"
    ],
    "units": [
-    "Operations Management"
+    "Operations"
    ],
    "bySchool": {
     "Martin V. Smith School of Business and Economics": [
-     "Operations Management"
+     "Operations"
     ]
    }
   },
@@ -12643,7 +12643,7 @@
    "Data Sciences and Operations"
   ],
   "Martin V. Smith School of Business and Economics": [
-   "Operations Management"
+   "Operations"
   ],
   "Max M. Fisher College of Business": [
    "Management Science",

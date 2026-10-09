@@ -1287,10 +1287,10 @@
   "lastPosted": "2026-01-19"
  },
  {
-  "id": "california-state-university-channel-islands__martin-v-smith-school-of-business-and-economics__operations-management",
+  "id": "california-state-university-channel-islands__martin-v-smith-school-of-business-and-economics__operations",
   "institution": "California State University, Channel Islands",
   "school": "Martin V. Smith School of Business and Economics",
-  "department": "Operations Management",
+  "department": "Operations",
   "type": "Business School",
   "country": "United States",
   "sources": [
@@ -1299,6 +1299,16 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-09"
+ },
+ {
+  "id": "california-state-university-channel-islands__martin-v-smith-school-of-business-and-economics__operations-management",
+  "institution": "California State University, Channel Islands",
+  "school": "Martin V. Smith School of Business and Economics",
+  "department": "Operations Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "california-state-university-east-bay__college-of-business-and-economics__management",

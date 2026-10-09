@@ -2902,16 +2902,17 @@
   ],
   "posted": "2026-09-09",
   "institution": "California State University, Channel Islands",
-  "department": "Martin V. Smith School of Business and Economics, Operations Management",
+  "department": "Martin V. Smith School of Business and Economics, Operations",
   "school": "Martin V. Smith School of Business and Economics",
-  "unit": "Operations Management",
+  "unit": "Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
    "Other Ranks"
   ],
-  "applyBy": "October 1, 2026",
-  "applyByDate": "2026-10-01",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-01",
   "comments": "",
   "country": "United States",
   "countries": [
@@ -2926,7 +2927,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T06:25:30Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-fudan-university-20260909",
