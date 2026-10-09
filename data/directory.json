@@ -5928,38 +5928,10 @@
    "postings",
    "seed"
   ],
-  "n": 3,
+  "n": 5,
   "lastPosted": "2026-10-04",
   "lat": 42.7270051,
   "lng": -84.4728586
- },
- {
-  "id": "michigan-state-university__eli-broad-college-of-business__supply-chain-management-logistics",
-  "institution": "Michigan State University",
-  "school": "Eli Broad College of Business",
-  "department": "Supply Chain Management, Logistics",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-02"
- },
- {
-  "id": "michigan-state-university__eli-broad-college-of-business__supply-chain-management-operations-management",
-  "institution": "Michigan State University",
-  "school": "Eli Broad College of Business",
-  "department": "Supply Chain Management, Operations Management",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-02"
  },
  {
   "id": "microsoft____applied-science",

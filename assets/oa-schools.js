@@ -463,6 +463,12 @@
      else the generic rule still applies, so a poster typing "Operations
      Management Department" at some other school still lands on the bare name. */
   var SCOPED_UNIT_ALIASES = {
+    'Michigan State University': {
+      /* The department encompasses logistics and operations; these imported
+         research-field combinations are not separate departments. */
+      'Supply Chain Management, Logistics': 'Supply Chain Management',
+      'Supply Chain Management, Operations Management': 'Supply Chain Management'
+    },
     'Católica Lisbon School of Business and Economics': {
       /* the OM list names the school's two operations groups BY CAMPUS —
          "(Lisbon)" and "(Porto)" — and the site's own unsuffixed entry is the
