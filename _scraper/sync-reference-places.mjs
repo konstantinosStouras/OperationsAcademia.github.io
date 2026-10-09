@@ -6,11 +6,23 @@ import { isMain } from './_main.mjs';
 import { approvedRow } from './jobreview.mjs';
 const require = createRequire(import.meta.url);
 const S = require('../assets/oa-schools.js');
+const A = require('../assets/oa-affiliation.js');
 
-export function referencePlaces(documents) {
+export function referencePlaces(documents, catalogue = {}) {
   const places = new Map();
+  const index = A.index(catalogue);
   for (const document of documents || []) {
-    const r = document.row ? approvedRow(document.row, document) : document;
+    let r = document.row ? approvedRow(document.row, document) : document;
+    if (!r.institution && r.affiliation) {
+      const match = A.match(r.affiliation, index);
+      const institution = match ? match.name : A.newUniversity(r.affiliation, index);
+      if (!institution) continue;
+      const affiliation = S.fold(A.tidy(r.affiliation));
+      const schools = (catalogue.schools || []).filter(([school, university]) =>
+        S.institutionKey(university) === S.institutionKey(institution)
+        && (' ' + affiliation + ' ').includes(' ' + S.fold(school) + ' '));
+      r = { institution, school: schools.length === 1 ? schools[0][0] : '', unit: '' };
+    }
     if (!r.institution) continue;
     const p = S.canonColumns({ institution: r.institution, school: r.school || '', unit: r.unit || '' });
     if (!p.institution) continue;
@@ -37,7 +49,8 @@ async function main() {
     db.collection('jobSubmissions').where('status', 'in', ['queued', 'published']).get(),
     db.collection('candidateSubmissions').where('status', 'in', ['queued', 'published']).get(),
   ]);
-  const places = referencePlaces(snapshots.flatMap(s => s.docs.map(d => d.data())));
+  const catalogue = JSON.parse(await readFile(new URL('../data/university-names.json', import.meta.url)));
+  const places = referencePlaces(snapshots.flatMap(s => s.docs.map(d => d.data())), catalogue);
   console.log(`reference places: ${places.length} distinct institution/school/department names`);
   if (!process.argv.includes('--dry-run')) {
     await writeFile(new URL('../data/reference-places.json', import.meta.url), JSON.stringify(places, null, 1) + '\n');

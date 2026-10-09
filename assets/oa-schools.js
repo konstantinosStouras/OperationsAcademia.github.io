@@ -272,6 +272,17 @@
      NUS Business School, so the university has to be known before they can be
      told apart. Keyed by university, then by the name as posted. */
   var SCOPED_SCHOOL_ALIASES = {
+    'Auburn University': {
+      'Harbert College of Business': 'Raymond J. Harbert College of Business'
+    },
+    'George Mason University': {
+      'Costello College of Business': 'Donald G. Costello College of Business',
+      'School of Business': 'Donald G. Costello College of Business'
+    },
+    'Iowa State University': {
+      'Ivy College of Business': 'Debbie and Jerry Ivy College of Business',
+      'College of Business': 'Debbie and Jerry Ivy College of Business'
+    },
     'National University of Singapore': { 'Business School': 'NUS Business School' },
     'Özyeğin University': { 'School of Business': 'Faculty of Business' },
     /* A standalone school's card is labelled generically "School of Business"
@@ -800,9 +811,17 @@
       university row with no school and no department is the university part
       alone. */
   function directoryRowKey(institution, school, unit) {
+    // Full display names keep the established addresses of their corrections.
+    var stableSchools = {
+      'auburn university': { 'raymond j harbert college of business': 'Harbert College of Business' },
+      'george mason university': { 'donald g costello college of business': 'Costello College of Business' },
+      'iowa state university': { 'debbie and jerry ivy college of business': 'Ivy College of Business' }
+    };
+    var stable = stableSchools[institutionKey(institution || '')];
+    var schoolPart = stable && stable[fold(school)] || school;
     var parts = [
       slugPart(institutionKey(institution || '')),
-      slugPart(school),
+      slugPart(schoolPart),
       slugPart(unit),
     ];
     return parts.join('__').replace(/__+$/, '') || 'row';

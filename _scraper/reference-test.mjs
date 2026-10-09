@@ -6,6 +6,18 @@ import { referencePlaces } from './sync-reference-places.mjs';
 const require = createRequire(import.meta.url);
 const S = require('../assets/oa-schools.js');
 const U = require('../assets/oa-uniinfo.js');
+for (const [institution, short, full, unit, id] of [
+  ['Auburn University', 'Harbert College of Business', 'Raymond J. Harbert College of Business',
+    'Supply Chain Management', 'auburn-university__harbert-college-of-business__supply-chain-management'],
+  ['George Mason University', 'Costello College of Business', 'Donald G. Costello College of Business',
+    'Information Systems and Operations Management', 'george-mason-university__costello-college-of-business__information-systems-and-operations-management'],
+  ['Iowa State University', 'Ivy College of Business', 'Debbie and Jerry Ivy College of Business',
+    'Supply Chain Management', 'iowa-state-university__ivy-college-of-business__supply-chain-management'],
+]) {
+  assert.equal(S.canonSchool(short, institution), full);
+  assert.equal(S.directoryRowKey(institution, full, unit), id,
+    'The official full name must preserve the existing correction address');
+}
 const place = { institution: 'Purdue University', school: 'Mitch Daniels School of Business',
   department: 'Supply Chain and Operations Management Department', id: 'verified' };
 const hidden = { institution: 'Hidden University', school: '', department: '', _hidden: true };
@@ -24,12 +36,26 @@ assert.equal(settled.school, place.school);
 const empty = picker.fixedPlace({ institution: place.institution, school: '', unit: '' });
 assert.equal(empty.school, '');
 assert.equal(empty.unit, '');
+context.window.OAUniInfo.record = async () => null;
+assert.equal(await picker.vocabulary(), null,
+  'An unavailable directory must not offer names from a different vocabulary');
 const exported = referencePlaces([{ row: { institution: 'NUS', school: 'NUS Business School',
   unit: 'Analytics and Operations', name: 'Private person', email: 'private@example.com', id: 'private' } }]);
 assert.equal(exported.length, 1);
 assert.deepEqual(Object.keys(exported[0]).sort(), ['department', 'institution', 'school']);
 assert.equal(exported[0].institution, 'National University of Singapore');
 assert.ok(!JSON.stringify(exported).includes('private'));
+const legacy = referencePlaces([
+  { affiliation: 'Rotman School of Management, University of Toronto', name: 'Private candidate' },
+  { affiliation: 'University of Nantes', email: 'private@example.com' },
+  { affiliation: 'PhD, University of Toronto; visiting Stanford University' },
+  { affiliation: 'Private Analytics Company' },
+], { universities: ['University of Toronto', 'Stanford University'],
+  schools: [['Rotman School of Management', 'University of Toronto']] });
+assert.equal(legacy.length, 2);
+assert.equal(legacy.find(p => p.institution === 'University of Toronto').school, 'Joseph L. Rotman School of Management');
+assert.ok(legacy.some(p => p.institution === 'University of Nantes'));
+assert.ok(!JSON.stringify(legacy).includes('Private'));
 console.log('Reference tests passed: shared names, official department titles, hidden rows and names-only export.');
 const directoryContext = { window: { OASchools: S }, OASchools: S };
 vm.createContext(directoryContext);

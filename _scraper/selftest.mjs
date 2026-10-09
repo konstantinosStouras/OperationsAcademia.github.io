@@ -27,6 +27,12 @@ async function readFile(...args) {
   return typeof value === 'string' ? value.replace(/\r\n/g, '\n') : value;
 }
 
+// A revision query refreshes a script; its module and load order stay the same.
+function scriptIndex(html, source) {
+  const escaped = source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return html.search(new RegExp('<script\\b[^>]*\\bsrc="' + escaped + '(?:\\?[^"\\s]*)?"'));
+}
+
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   universitiesLink, ownUniversitiesLink,
@@ -2547,8 +2553,8 @@ async function testCountries() {
        records for the analytics page's "no iframes" check, one layer over:
        a guard that cannot tell an explanation from the thing it explains. */
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
-    const at = html.indexOf('src="assets/oa-countries.js"');
-    const to = html.match(new RegExp('src="assets/' + consumer.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"'))?.index ?? -1;
+    const at = scriptIndex(html, 'assets/oa-countries.js');
+    const to = scriptIndex(html, `assets/${consumer}`);
     ok(at !== -1 && to !== -1 && at < to,
       `${page}: loads the countries module before ${consumer}`);
   }
@@ -3533,8 +3539,9 @@ async function testCascadeWiring() {
   const adminArea = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   // the SCRIPT TAGS, not the first mention — the page's own comments name the
   // modules long before the tags do
-  ok(adminArea.indexOf('src="assets/oa-place-picker.js"') <
-     adminArea.indexOf('src="assets/oa-jobreview.js"'),
+  ok(scriptIndex(adminArea, 'assets/oa-place-picker.js') >= 0 &&
+     scriptIndex(adminArea, 'assets/oa-place-picker.js') <
+     scriptIndex(adminArea, 'assets/oa-jobreview.js'),
     'admin-area.html: and before the review panel that asks for it');
 }
 
@@ -14079,7 +14086,8 @@ async function testCandidateReveal() {
     'alerts: the matcher carries no private copy of the reveal rule');
 
   /* ---- the pages load the module before its users -------------------- */
-  const tagAt = (html, f) => html.indexOf('<script defer src="assets/' + f + '"></script>');
+  const tagAt = (html, f) => html.search(new RegExp('<script defer src="assets/' +
+    f.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"></script>'));
   const index = await read('index.html');
   ok(tagAt(index, 'oa-reveal.js') > 0, 'index.html loads oa-reveal.js, deferred');
   ok(tagAt(index, 'oa-reveal.js') < index.indexOf('OAReveal.isRevealed('),
@@ -15786,7 +15794,7 @@ async function testSponsors() {
      So both halves are pinned: the pages load it FIRST, and the module says
      nothing at all without it. */
   for (const [rel, html] of [['jobs.html', jobs], ['index.html', home]]) {
-    ok(html.includes('<script defer src="assets/oa-schools.js"></script>'),
+    ok(/<script defer src="assets\/oa-schools\.js(?:\?[^"\s]*)?"><\/script>/.test(html),
       `sponsors: ${rel} loads oa-schools.js, which the sponsor rule is built on`);
     ok(html.indexOf('assets/oa-schools.js') < html.indexOf('assets/oa-sponsors.js'),
       `sponsors: …BEFORE oa-sponsors.js, whose factory is handed it`);
@@ -18837,7 +18845,7 @@ async function testJobComments() {
     'job comments: the hint says what the buttons do and what an address becomes');
   ok(/<link href="assets\/oa-editor\.css" rel="stylesheet">\s*\n\s*<link href="assets\/v3\.css" rel="stylesheet">/.test(pageForm),
     'job comments: the form links the shared stylesheet before the live design\'s');
-  const formTag = (f) => pageForm.match(new RegExp('<script defer src="assets/' + f.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"></script>'))?.index ?? -1;
+  const formTag = (f) => scriptIndex(pageForm, 'assets/' + f);
   ok(formTag('oa-forum-markup.js') > 0
      && formTag('oa-forum-markup.js') < formTag('oa-editor.js')
      && formTag('oa-editor.js') < formTag('oa-jobform.js'),
@@ -19184,8 +19192,8 @@ async function testJobTakedown() {
   for (const page of (await readdir(path.join(root)))
       .filter((f) => f.endsWith('.html'))) {
     const html = await read(page);
-    const loads = html.includes('src="assets/oa-takedown.js"');
-    const needs = CONSUMERS.some((c) => new RegExp('src="assets/' + c.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"').test(html));
+    const loads = scriptIndex(html, 'assets/oa-takedown.js') >= 0;
+    const needs = CONSUMERS.some((c) => scriptIndex(html, `assets/${c}`) >= 0);
     ok(loads === needs,
       `takedown: ${page} loads the module exactly when something on it calls it`);
   }
@@ -20780,8 +20788,8 @@ async function testAffiliationPicker() {
   ok(/OASchools\.cardName\(names\)/.test(dirJs) && !/count\[n\] > count\[best\]/.test(dirJs),
     'universities.html titles a card through OASchools.cardName and keeps no copy of the rule');
   const uniHtml = await src('universities.html');
-  ok(uniHtml.indexOf('src="assets/oa-schools.js"') > 0
-     && uniHtml.indexOf('src="assets/oa-schools.js"') < uniHtml.indexOf('src="assets/oa-directory.js"'),
+  ok(scriptIndex(uniHtml, 'assets/oa-schools.js') > 0
+     && scriptIndex(uniHtml, 'assets/oa-schools.js') < scriptIndex(uniHtml, 'assets/oa-directory.js'),
     'universities.html loads oa-schools.js before oa-directory.js, so the rule is there when a card is titled');
 
   /* --- the served list ------------------------------------------------------ */
@@ -20835,10 +20843,10 @@ async function testAffiliationPicker() {
      STANDALONE where it is an institution in its own right. TIDY, because a
      new posting can bring such a card in, and that must never stop the site
      publishing: it fails the PR check, where a person adds the entry. */
-  const standalone = new Set(A.STANDALONE);
+  const standalone = new Set(A.STANDALONE.map(n => S.institutionKey(n)));
   const notAUniversity = (n) => /\b(school|department|dept|faculty|group)\b/i.test(n)
     || /\b(univ|uni)\b/i.test(n) || /\([^)]*[a-z]{3}[^)]*\)/.test(n);
-  tidy(names.universities.filter((n) => notAUniversity(n) && !standalone.has(n)),
+  tidy(names.universities.filter((n) => notAUniversity(n) && !standalone.has(S.institutionKey(n))),
     'the affiliation list offers university names only (a card titled with a school or a department goes in UNIVERSITY_OF, assets/oa-affiliation.js)');
   ok(notAUniversity('Yale School of Management (Operations Management group)') && notAUniversity('Uni. of Illinois at Urbana-Champaign (Gies)')
      && notAUniversity('Lousiana Tech Univ') && !notAUniversity('Massachusetts Institute of Technology (MIT)')
