@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-09T11:16:21.063Z",
+ "generated": "2026-10-09T13:29:41.139Z",
  "members": 307,
  "k": 3,
  "affiliation": {
-  "listed": 221,
-  "other": 45,
+  "listed": 222,
+  "other": 44,
   "none": 41
  },
  "universities": {
-  "count": 120,
+  "count": 121,
   "shown": [
    {
     "name": "Cornell University",
@@ -151,7 +151,7 @@
     "members": 3
    }
   ],
-  "rest": 118
+  "rest": 119
  },
  "countries": {
   "count": 15,
