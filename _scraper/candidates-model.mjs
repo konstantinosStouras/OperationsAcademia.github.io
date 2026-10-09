@@ -63,7 +63,7 @@ const OAReveal = require('../assets/oa-reveal.js');
     `addedAt` alone, so an edit never re-announces a profile. */
 export const CANDIDATE_PUBLIC_FIELDS = [
   'id', 'year', 'posted', 'first', 'last', 'name', 'affiliation', 'position',
-  'researchAreas', 'informsDays', 'talks', 'cvUrl', 'rsUrl', 'webUrl', 'email',
+  'researchAreas', 'informsDays', 'talks', 'jobTalk', 'informsUrl', 'cvUrl', 'rsUrl', 'webUrl', 'email',
   'source', 'addedAt', 'updatedAt', 'ref', 'owner',
 ];
 
@@ -83,6 +83,18 @@ export const CANDIDATE_PUBLIC_FIELDS = [
 export const TALK_KEYS = ['at', 'session', 'room', 'title'];
 export const TALK_MAXLEN = { at: 5, session: 40, room: 120, title: 200 };
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+export function jobTalkFrom(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const out = {};
+  for (const [key, max] of Object.entries({ date: 10, at: 5, end: 5, location: 240, title: 200 })) {
+    let v = text(value[key], max);
+    if (key === 'date') v = day(v) || '';
+    if ((key === 'at' || key === 'end') && !TIME_RE.test(v)) v = '';
+    if (v) out[key] = v;
+  }
+  return out;
+}
 
 /**
  * The talk map, sanitised: only the days in `days` (the row's own published
@@ -118,7 +130,7 @@ export const INFORMS_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday'];
 const MAXLEN = {
   first: 100, last: 100, affiliation: 220, position: 160,
   institution: 160, school: 160, unit: 160,
-  cvUrl: 500, rsUrl: 500, webUrl: 500, email: 160,
+  informsUrl: 500, cvUrl: 500, rsUrl: 500, webUrl: 500, email: 160,
 };
 
 /**
@@ -139,6 +151,7 @@ export function joinCandidateAffiliation(doc) {
     school: text(doc.school, MAXLEN.school),
     unit: text(doc.unit, MAXLEN.unit),
   });
+  place.institution = String(place.institution || '').replace(/^the\s+/i, '');
   return [place.unit, place.school, place.institution]
     .filter(Boolean).join(', ').slice(0, MAXLEN.affiliation);
 }
@@ -251,12 +264,14 @@ export function rowFromCandidateSubmission(doc, { now = new Date() } = {}) {
     researchAreas: freeList(doc.researchAreas),
     informsDays: pickList(doc.informsDays, INFORMS_DAYS),
     talks: {},           // filled below, from the days that survived
+    jobTalk: jobTalkFrom(doc.jobTalk),
     /* The typed link is preferred over the Drive upload BY CONSTRUCTION, the
        way the old display tab's formula preferred it: the build only files an
        upload into Drive when the document has no cvUrl/rsUrl (see
        build-candidates.mjs transferUploads), and the form clears the link
        field when a file is chosen — so whichever the candidate gave last is
        what this reads. */
+    informsUrl: url(doc.informsUrl),
     cvUrl: url(doc.cvUrl),
     rsUrl: url(doc.rsUrl),
     webUrl: url(doc.webUrl),
@@ -363,7 +378,7 @@ export function publicCandidateRow(row) {
     if ((k === 'ref' || k === 'email' || k === 'updatedAt') && !row[k]) continue;
     // `talks` too: most profiles give no session details, and an empty
     // map on every row would be diff noise for nothing
-    if (k === 'talks' && (!row[k] || !Object.keys(row[k]).length)) continue;
+    if ((k === 'talks' || k === 'jobTalk') && (!row[k] || !Object.keys(row[k]).length)) continue;
     out[k] = row[k];
   }
   return out;

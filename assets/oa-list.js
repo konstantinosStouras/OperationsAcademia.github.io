@@ -64,7 +64,8 @@
         var v = attrs[k];
         if (v === null || v === false || v === undefined) continue;
         if (k === 'class') n.className = v;
-        else if (k === 'text') n.textContent = v;
+        else if (k === 'text') n.textContent = window.OASchools && OASchools.displayUniversityText
+          ? OASchools.displayUniversityText(v) : v;
         else if (k === 'html') n.innerHTML = v;
         else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v);
         else n.setAttribute(k, v === true ? '' : v);

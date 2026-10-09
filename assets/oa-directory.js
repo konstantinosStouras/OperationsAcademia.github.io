@@ -84,6 +84,7 @@
 
   var state = {
     flat: [],          // directory.json as served
+    candidates: [],    // only the public, reveal-gated candidate snapshot
     flatLoaded: false, // …and whether it has actually arrived yet
     cards: [],         // ONE array for the list's lifetime — regroup() refills it
     edits: {},         // docId → document
@@ -486,6 +487,20 @@
         label: sc.name || 'School not recorded yet',
         html: schoolHTML(card, sc),
       });
+    }
+    var candidates = state.candidates.filter(function (candidate) {
+      var university = window.OASchools
+        ? OASchools.candidateInstitution(candidate, state.cards.map(function (c) { return c.institution; }))
+        : String(candidate.affiliation || '').split(', ').pop();
+      return instKey(university) === instKey(card.institution);
+    });
+    if (candidates.length) {
+      rows.push({ label: 'Job market candidates', html: '<ul class="oa-dir-candidates">' +
+        candidates.map(function (candidate) {
+          return '<li><a href="./?c_name=' + encodeURIComponent(candidate.name) + '#candidates">' +
+            esc(candidate.name) + '</a>' + (candidate.position ? ' — ' + esc(candidate.position) : '') +
+            '<div class="oa-hint">' + esc(candidate.affiliation) + '</div></li>';
+        }).join('') + '</ul>' });
     }
     /* THE SAME LINK SET THE MAP'S POPUP OFFERS (owner, 2026-08-24: "lists
        should be inter-linked") — one university, every list about it, each
@@ -1318,6 +1333,16 @@
       },
       onCard: onCard,
     });
+
+    // The build leaves this public file empty before reveal; never read held
+    // submissions here. The private local preview uses its isolated snapshot.
+    OAList.load('/data/candidates.json').then(function (rows) {
+      state.candidates = (Array.isArray(rows) ? rows : []).filter(function (r) {
+        var current = window.OAJobNav && OAJobNav.marketYear ? OAJobNav.marketYear(new Date()) : new Date().getFullYear() + 1;
+        return Number(r.year) === current;
+      });
+      if (state.flatLoaded && state.list) state.list.reload();
+    })['catch'](function () { /* the directory still works without candidate data */ });
 
     attach();
     return state.list;

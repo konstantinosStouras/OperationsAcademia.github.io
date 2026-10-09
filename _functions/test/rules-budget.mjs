@@ -137,6 +137,8 @@ function maximal(FV) {
         Tuesday: { at: '12:45', session: pad(40), room: pad(120), title: pad(200) },
         Wednesday: { at: '13:45', session: pad(40), room: pad(120), title: pad(200) },
       },
+      informsUrl: 'https://example.edu/' + pad(400),
+      jobTalk: { date: '2026-11-02', at: '11:45', end: '12:03', location: pad(240), title: pad(200) },
       cvUrl: 'https://example.edu/' + pad(400),
       rsUrl: 'https://example.edu/' + pad(400),
       webUrl: 'https://example.edu/' + pad(400),

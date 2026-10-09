@@ -14173,7 +14173,7 @@ async function testCandidateReveal() {
   const rules = await read('_firestore.rules');
   const candBlock = rules.slice(rules.indexOf('match /candidateSubmissions/{id}'),
     rules.indexOf('// ---------------------------------------------------------- placements'));
-  ok(candBlock.length > 1500 && candBlock.length < 9000, 'updatedAt: the rules slice is the candidates block');
+  ok(candBlock.length > 1500 && candBlock.length < 11000, 'updatedAt: the rules slice is the candidates block');
   ok(/&& str\('updatedAt', 40\)/.test(candBlock), 'updatedAt: candShapeOk bounds it as a string');
   ok(!/hasOnly\(\[[^\]]*updatedAt/.test(candBlock), 'updatedAt: never in the merge hand-over’s hasOnly');
   ok(/allow update: if isOwner\(resource\.data\.uid\)\n\s+&& request\.resource\.data\.uid == resource\.data\.uid[\s\S]*?&& candShapeOk\(\);/.test(candBlock),
@@ -14295,6 +14295,18 @@ async function testCandidateReveal() {
 
   /* ---- ONE renderer, ONE projection: assets/oa-candcard.js ----------- */
   const C = require(path.join(HERE, '..', 'assets', 'oa-candcard.js'));
+  eq(SCHOOLS.displayInstitution('The Hong Kong University of Science and Technology'),
+    'Hong Kong University of Science and Technology', 'university display drops a leading The');
+  eq(SCHOOLS.cardName(['The Ohio State University', 'Ohio State University']),
+    'Ohio State University', 'university cards use the same display spelling');
+  const campusNames = ['Hong Kong University of Science and Technology',
+    'Hong Kong University of Science and Technology (Guangzhou)'];
+  eq(SCHOOLS.candidateInstitution({ affiliation: 'Business School, HKUST' }, campusNames),
+    campusNames[0], 'candidate university matches directory spelling through aliases');
+  eq(SCHOOLS.candidateInstitution({ affiliation: 'Business School, The Hong Kong University of Science and Technology (Guangzhou)' }, campusNames),
+    campusNames[1], 'candidate matching keeps the Guangzhou campus distinct');
+  eq(SCHOOLS.displayAffiliation('Business School, The Hong Kong University of Science and Technology', campusNames),
+    'Business School, Hong Kong University of Science and Technology', 'candidate affiliation uses directory name without The');
   eq(C.FIELDS, CANDIDATE_PUBLIC_FIELDS,
     'candcard: FIELDS is CANDIDATE_PUBLIC_FIELDS, in order (both ways, by equality)');
   for (const k of C.FIELDS) ok(CANDIDATE_PUBLIC_FIELDS.includes(k), `candcard: ${k} is a published field`);
@@ -14396,6 +14408,7 @@ async function testCandidateReveal() {
   {
     const calls = [];
     const helpers = {
+      calendar: require(path.join(HERE, '..', 'assets', 'oa-candidate-calendar.js')),
       link: (u, l) => { calls.push(['link', u, l]); return u ? '<a>' + l + '</a>' : null; },
       uniLink: (n) => { calls.push(['uni', n]); return '<a>' + n + '</a>'; },
       mailto: (e) => { calls.push(['mail', e]); return e ? '<a>' + e + '</a>' : null; },
@@ -14406,14 +14419,25 @@ async function testCandidateReveal() {
     eq(cfg.subtitle(row), 'Operations, Kellogg School of Management, Northwestern University — PhD Candidate',
       'candcard: the subtitle is affiliation, position');
     const rows = cfg.rows(row);
-    eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'University page', 'CV',
-      'Research summary', 'Web page', 'Contact'], 'candcard: the seven labels, in the list’s order');
+    eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk(s)', 'Presentation details', 'INFORMS job talk', 'CV',
+      'Research summary', 'Web page', 'Contact'], 'candcard: calendars preserve submitted profile information');
     eq(rows[0].value, 'Operations, Queueing Theory', 'candcard: areas joined');
-    eq(rows[1].value, 'Monday, Sunday', 'candcard: INFORMS days as given');
-    eq(calls.map((c) => c[0]), ['uni', 'link', 'link', 'link', 'mail'], 'candcard: every link goes through the injected helper');
-    eq(calls[0][1], row.affiliation, 'candcard: the university link is asked of the whole affiliation line');
+    eq(calls.map((c) => c[0]), ['link', 'link', 'link', 'link', 'mail'], 'candcard: document and contact links go through injected helpers');
+    eq(rows[4].html, null, 'candcard: missing schedule details draw no calendar links');
+    const custom = C.publicRowFromDoc({ ...ok3,
+      informsUrl: 'https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=374',
+      jobTalk: { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone South-312', title: 'Job talk' } }, inject);
+    eq(custom.informsUrl, 'https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=374', 'candcard: specific programme URL survives projection');
+    eq(rowFromCandidateSubmission({ ...ok3, informsUrl: custom.informsUrl }).informsUrl,
+      custom.informsUrl, 'candcard: build preserves the same programme URL');
+    ok(/>Google<\/a>/.test(cfg.rows(custom)[4].html || '') && />Outlook\/Apple<\/a>/.test(cfg.rows(custom)[4].html || ''),
+      'candcard: complete job talk gives exactly the two calendar links');
+    ok(!cfg.rows({ ...custom, informsDays: [], talks: {} }).some((r) => /INFORMS/.test(r.label)),
+      'candcard: non-presenters have neither INFORMS row, even with a stored link');
+    eq(C.publicRowFromDoc({ ...ok3, informsUrl: 'javascript:alert(1)' }, inject).informsUrl,
+      '', 'candcard: unsafe programme URL is discarded');
     eq(calls[1].slice(1), ['https://example.edu/cv.pdf', 'link to CV'], 'candcard: the CV link and its label');
-    eq(rows[4].html, null, 'candcard: an empty research-summary link draws nothing');
+    eq(rows[6].html, null, 'candcard: an empty research-summary link draws nothing');
     ok(/parts\[parts\.length - 1\]/.test(await read('assets', 'oa-candcard.js')),
       'candcard: the default university link reads the LAST part of the line, like index.html’s');
     /* a profile WITH talk details gains one row per day, right after the
@@ -14429,14 +14453,12 @@ async function testCandidateReveal() {
        card disclosed the candidate's INFORMS days, which is one of the three
        things the gate withholds. The open card still reads the same facts in
        the same order. */
-    eq(trows.map((r) => r.label).slice(0, 4),
-      ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk', 'INFORMS talk'],
-      'candcard: one talk row per day with details, in the order the days were given');
-    eq(trows[2].value, 'Monday · 10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
-      'candcard: the talk row names its day, then time, session, room, title');
+    eq(trows.filter(r => r.label === 'INFORMS talk').length, 2, 'candcard: all submitted legacy talk details stay visible');
+    eq(C.talkRows(talky)[0].value, 'Monday · 10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
+      'candcard: legacy details remain readable without being displayed as separate lines');
     ok(!trows.some((r) => /Monday|Tuesday|Sunday|Wednesday/.test(r.label || '')),
       'candcard: …and no row LABEL names a day, so the locked card’s strip of labels cannot disclose one');
-    eq(trows.length, rows.length + 2, 'candcard: …and nothing else moved');
+    eq(trows.length, rows.length + 2, 'candcard: calendar links preserve submitted talk details');
   }
   eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' }, R.formatDay),
     'Profile updated on 2 October 2026', 'candcard: the updated line, day-month-year, no suffix');
@@ -17086,14 +17108,14 @@ async function testCalendarsWiring() {
   ok(tagAt(index, 'assets/oa-ics.js') !== -1 && tagAt(index, 'assets/oa-ics.js') < tagAt(index, 'assets/oa-talkcal.js') &&
      tagAt(index, 'assets/oa-informs.js') < tagAt(index, 'assets/oa-talkcal.js'),
     'calendar: index.html loads the writer and the meeting record before the module whose factory takes them');
-  ok(/actions: \[\s*window\.OATalkCal \? OATalkCal\.action\(\) : null\s*\]/.test(index.slice(index.indexOf("mount: '#oa-candidates'"))),
+  ok(/assets\/oa-candidate-calendar.js/.test(index),
     'calendar: the candidates mount declares the talks-calendar action');
   ok(/download the\s+talks as a calendar file/.test(index), 'calendar: the candidates lede says so');
   ok(/Can I put the deadlines in my calendar\?/.test(index) && /calendar file of every talk/.test(index),
     'calendar: the FAQ answers both');
   ok(/id="f-talks"/.test(cand) && /id="f-days-meeting"/.test(cand),
     'calendar: the form has the talk blocks\' host and the meeting line');
-  ok(/Times are the meeting&rsquo;s own local time/.test(cand), 'calendar: …and says whose clock the time is');
+  ok(/Times are local to the meeting/.test(cand), 'calendar: …and says whose clock the time is');
   ok(/out\.talks = readTalks\(out\.informsDays\);/.test(formJs) && /fillTalks\(v\.talks\);/.test(formJs),
     'calendar: the form reads the ticked days\' blocks and fills them back');
   ok(/input\.type = k === 'at' \? 'time' : 'text';/.test(formJs), 'calendar: the time is asked with a time box');
@@ -19838,7 +19860,7 @@ async function testRulesBudgetGuard() {
      The addends are the per-field bounds candShapeOk carried before the
      grouping; the sum is pinned so raising it has to be deliberate. */
   const NAMES = [100, 100, 220, 160, 220, 220, 220];   // first last affiliation position institution school unit
-  const LINKS = [600, 600, 600, 200, 200];             // cvUrl rsUrl webUrl email personalEmail
+  const LINKS = [600, 600, 600, 600, 200, 200];        // cvUrl rsUrl webUrl informsUrl email personalEmail
   const total = (a) => a.reduce((n, v) => n + v, 0);
   ok(new RegExp('\\.size\\(\\) <= ' + total(NAMES) + ';').test(fn('candNamesOk')),
     `_firestore.rules: candNamesOk bounds the seven names by ${total(NAMES)}, the sum of the bounds it replaced`);
@@ -24410,6 +24432,49 @@ async function testForum() {
     'oa-candidateform.js: a link a chosen file superseded comes back when the file goes');
 
   /* the home page, the standard, the stylesheet */
+  // Exercise the actual submission validator: CV link OR accepted upload.
+  const collectStart = candForm.indexOf('function collect()');
+  const collectEnd = candForm.indexOf('/* A human-quotable', collectStart);
+  const collectSource = candForm.slice(collectStart, collectEnd);
+  const cvCheck = (cvUrl, slot, days = [], informsUrl = '', unit = 'Operations',
+    jobTalk = { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone South-312' }) => {
+    const values = { 'f-first': 'Ada', 'f-last': 'Reader', 'f-institution': 'University',
+      'f-position': 'PhD Candidate', 'f-email': 'ada@example.edu',
+      'f-personalEmail': 'ada@example.com', 'f-cvUrl': cvUrl, 'f-webUrl': '', 'f-informsUrl': informsUrl, 'f-unit': unit };
+    const elements = Object.fromEntries(Object.entries(values).map(([k, v]) => [k, { value: v }]));
+    for (const key of ['date', 'at', 'end', 'location', 'title']) elements['f-jobTalk-' + key] = { value: jobTalk[key] || '' };
+    const errors = [];
+    const invoke = new Function('readForm', '$', 'setError', 'httpUrl', 'MAX', 'EMAIL_RE', 'AREAS_MAX', 'cvSlot', 'say', 'meeting', 'window',
+      collectSource + '; return collect();');
+    const result = invoke(() => ({ first: 'Ada', last: 'Reader', institution: 'University',
+      position: 'PhD Candidate', researchAreas: [], cvUrl, informsDays: days, informsUrl, unit, jobTalk }),
+      (id) => elements[id], (el, msg) => { if (msg) errors.push(msg); },
+      (v) => !v ? '' : /^https:\/\//.test(v) ? v : null,
+      { cvUrl: 500, webUrl: 500, informsUrl: 500 }, /^[^@]+@[^@]+\.[^@]+$/, 10, slot, () => {},
+      () => require(path.join(HERE, '..', 'assets', 'oa-informs.js')).meetingFor(2027),
+      { OAInforms: require(path.join(HERE, '..', 'assets', 'oa-informs.js')) });
+    return { result, errors };
+  };
+  ok(!cvCheck('', null).result, 'candidate form: missing CV blocks submission');
+  ok(cvCheck('https://example.edu/cv.pdf', null).result, 'candidate form: CV link satisfies requirement');
+  ok(cvCheck('', { file: { name: 'cv.pdf' } }).result, 'candidate form: new accepted upload satisfies requirement');
+  ok(cvCheck('', { pending: true, removePending: false }).result, 'candidate form: existing pending upload satisfies requirement');
+  ok(!cvCheck('', { pending: false, removePending: true }).result, 'candidate form: removing the only CV requires a replacement');
+  ok(!cvCheck('invalid', null).result, 'candidate form: invalid CV link blocks submission');
+  const exactTalk = 'https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=374';
+  ok(!cvCheck('https://example.edu/cv.pdf', null, ['Monday']).result, 'candidate form: presenter must give a talk link');
+  ok(cvCheck('https://example.edu/cv.pdf', null, ['Monday'], exactTalk).result, 'candidate form: specific presentation link is accepted');
+  ok(!cvCheck('https://example.edu/cv.pdf', null, ['Monday'], 'https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/SearchHome.aspx?s=ada').result,
+    'candidate form: search-results link is refused');
+  ok(!cvCheck('https://example.edu/cv.pdf', null, ['Monday'], exactTalk.replace('evdid=374', 'evdid=')).result,
+    'candidate form: presentation link needs a specific talk number');
+  ok(!cvCheck('https://example.edu/cv.pdf', null, [], '', '').result, 'candidate form: department, area or group is required');
+  ok(!cvCheck('https://example.edu/cv.pdf', null, ['Monday'], exactTalk, 'Operations', {}).result,
+    'candidate form: new presenters must supply schedule information');
+  ok(!cvCheck('https://example.edu/cv.pdf', null, ['Monday'], exactTalk, 'Operations',
+    { date: '2026-11-02', at: '10:00', end: '09:00', location: 'Moscone' }).result,
+    'candidate form: end time before start is rejected');
+
   const home = await read('index.html');
   if (announced) {
     ok(/<a class="v3-btn ghost" href="forum">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');

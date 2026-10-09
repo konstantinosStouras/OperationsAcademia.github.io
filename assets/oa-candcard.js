@@ -51,7 +51,7 @@
      until it is added to the other. */
   var FIELDS = [
     'id', 'year', 'posted', 'first', 'last', 'name', 'affiliation', 'position',
-    'researchAreas', 'informsDays', 'talks', 'cvUrl', 'rsUrl', 'webUrl', 'email',
+    'researchAreas', 'informsDays', 'talks', 'jobTalk', 'informsUrl', 'cvUrl', 'rsUrl', 'webUrl', 'email',
     'source', 'addedAt', 'updatedAt', 'ref', 'owner'
   ];
 
@@ -61,12 +61,24 @@
   var TALK_MAXLEN = { at: 5, session: 40, room: 120, title: 200 };
   var TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
+  function jobTalkFrom(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    var out = {}, bounds = { date: 10, at: 5, end: 5, location: 240, title: 200 };
+    Object.keys(bounds).forEach(function (key) {
+      var v = text(value[key], bounds[key]);
+      if (key === 'date') v = day(v) || '';
+      if ((key === 'at' || key === 'end') && !TIME_RE.test(v)) v = '';
+      if (v) out[key] = v;
+    });
+    return out;
+  }
+
   /* the same bounds as the model; a value longer than these is cut, never
      refused, so the preview shows the cut the build would make */
   var MAXLEN = {
     first: 100, last: 100, affiliation: 220, position: 160,
     institution: 160, school: 160, unit: 160,
-    cvUrl: 500, rsUrl: 500, webUrl: 500, email: 160
+    informsUrl: 500, cvUrl: 500, rsUrl: 500, webUrl: 500, email: 160
   };
   var INFORMS_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday'];
   var AREAS_MAX = 10;
@@ -236,6 +248,7 @@
       school: text(doc.school, MAXLEN.school),
       unit: text(doc.unit, MAXLEN.unit)
     }) || {};
+    place.institution = String(place.institution || '').replace(/^the\s+/i, '');
     var affiliation = [place.unit, place.school, place.institution]
       .filter(Boolean).join(', ').slice(0, MAXLEN.affiliation)
       || text(doc.affiliation, MAXLEN.affiliation);
@@ -270,6 +283,8 @@
       researchAreas: freeList(doc.researchAreas),
       informsDays: pickList(doc.informsDays, INFORMS_DAYS),
       talks: {},
+      jobTalk: jobTalkFrom(doc.jobTalk),
+      informsUrl: url(doc.informsUrl),
       cvUrl: url(doc.cvUrl),
       rsUrl: url(doc.rsUrl),
       webUrl: url(doc.webUrl),
@@ -293,7 +308,7 @@
       var k = FIELDS[i];
       if (row[k] === undefined) continue;
       if ((k === 'ref' || k === 'email' || k === 'updatedAt') && !row[k]) continue;
-      if (k === 'talks' && (!row[k] || !Object.keys(row[k]).length)) continue;
+      if ((k === 'talks' || k === 'jobTalk') && (!row[k] || !Object.keys(row[k]).length)) continue;
       if (k === 'owner' && !h.ownerTag) continue;
       out[k] = row[k];
     }
@@ -417,6 +432,7 @@
     var link = h.link || defaultLink;
     var uniLink = h.uniLink || defaultUniLink;
     var mailto = h.mailto || defaultMailto;
+    var calendar = h.calendar || (root && root.OACandidateCalendar);
     return {
       title: function (r) { return r.name; },
       subtitle: function (r) {
@@ -424,10 +440,13 @@
       },
       rows: function (r) {
         return [
-          { label: 'Research area(s)',      value: (r.researchAreas || []).join(', ') },
-          { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') }
-        ].concat(talkRows(r), [
-          { label: 'University page',       html: uniLink(r.affiliation) },
+          { label: 'Research area(s)',      value: (r.researchAreas || []).join(', ') }
+        ].concat((r.informsDays || []).length ? [
+          { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
+          { label: 'INFORMS talk(s)', html: link(r.informsUrl, 'link') },
+          { label: 'Presentation details', value: r.jobTalk ? [r.jobTalk.date, [r.jobTalk.at, r.jobTalk.end].filter(Boolean).join('–'), r.jobTalk.location, r.jobTalk.title].filter(Boolean).join(' · ') : '' },
+          { label: 'INFORMS job talk', html: calendar && calendar.links ? calendar.links(r) : null }
+        ].concat(talkRows(r)) : [], [
           { label: 'CV',                    html: link(r.cvUrl, 'link to CV') },
           // the form stopped asking for a research summary (2026-08-24);
           // the row stays for profiles filed while it still did, and an
