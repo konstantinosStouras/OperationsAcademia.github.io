@@ -6,6 +6,12 @@ import { referencePlaces } from './sync-reference-places.mjs';
 const require = createRequire(import.meta.url);
 const S = require('../assets/oa-schools.js');
 const U = require('../assets/oa-uniinfo.js');
+for (const variant of ['University at Buffalo - The State University of New York',
+  'University at Buffalo, The State University of New York', 'State University of New York at Buffalo']) {
+  assert.equal(S.canonInstitution(variant), 'University at Buffalo');
+  assert.equal(S.directoryRowKey(variant, '', 'Operations Management'),
+    S.directoryRowKey('University at Buffalo', '', 'Operations Management'));
+}
 assert.equal(S.institutionKey('Virginia Polytechnic Institute and State University'),
   S.institutionKey('Virginia Tech'), 'The full name must share the existing university identity');
 assert.equal(S.directoryRowKey('Virginia Polytechnic Institute and State University', '', 'Data Science'),

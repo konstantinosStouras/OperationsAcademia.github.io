@@ -1950,10 +1950,6 @@
    "n": 0
   },
   {
-   "v": "University at Buffalo, The State University of New York",
-   "n": 0
-  },
-  {
    "v": "University of Amsterdam",
    "n": 0
   },
@@ -9778,27 +9774,18 @@
    "bySchool": {}
   },
   "University at Buffalo": {
-   "schools": [],
-   "units": [
-    "SCM and OM"
-   ],
-   "bySchool": {
-    "": [
-     "SCM and OM"
-    ]
-   }
-  },
-  "University at Buffalo, The State University of New York": {
    "schools": [
     "School of Management"
    ],
    "units": [
     "Industrial and Systems Engineering",
-    "Operations Management"
+    "Operations Management",
+    "SCM and OM"
    ],
    "bySchool": {
     "": [
-     "Industrial and Systems Engineering"
+     "Industrial and Systems Engineering",
+     "SCM and OM"
     ],
     "School of Management": [
      "Operations Management"
