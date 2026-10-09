@@ -1,0 +1,70 @@
+name: OA candidates — publish at the scheduled reveal
+
+# Candidate publication remains checked, but does not rebuild job postings.
+# Share the data writer lock with oa-jobs-build.yml and preserve the same
+# reveal gate in build-candidates.mjs. Before the reveal, its output is [].
+on:
+  repository_dispatch:
+    types: [oa-jobs-changed]
+  schedule:
+    - cron: '9,29,49 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Report without writing
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: oa-jobs-data-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  candidates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+      GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+      GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: master
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
+      - run: node _scraper/build-candidates.mjs --selftest
+      - run: node _scraper/candidate-calendar-selftest.mjs
+      - name: Check, build and publish only candidate data
+        run: |
+          set -euo pipefail
+          node _scraper/selftest.mjs --publishing
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            node _scraper/build-candidates.mjs --dry-run
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            node _scraper/build-candidates.mjs
+            node _scraper/selftest.mjs --publishing
+            if git diff --quiet -- data/candidates.json data/candidates-meta.json; then
+              echo 'Candidate dataset is current.'
+              exit 0
+            fi
+            git add data/candidates.json data/candidates-meta.json
+            git commit -m 'OA candidates: publish the checked candidate dataset'
+            if git push origin HEAD:master; then exit 0; fi
+            # This is an ephemeral checkout containing generated data only.
+            git fetch origin master
+            git reset --hard origin/master
+          done
+          echo 'Candidate publication failed after three fresh rebuilds.'
+          exit 1
