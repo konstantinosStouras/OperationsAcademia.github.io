@@ -2246,6 +2246,16 @@
   "lastPosted": "2026-09-17"
  },
  {
+  "id": "cornell-university__cornell-peter-and-stephanie-nolan-school-of-hotel-administra__operations-technology-and-information-management-area",
+  "institution": "Cornell University",
+  "school": "Cornell Peter and Stephanie Nolan School of Hotel Administration",
+  "department": "Operations, Technology, and Information Management Area",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "cornell-university__cornell-sc-johnson-college-of-business__operations-technology-and-information-management-area",
   "institution": "Cornell University",
   "school": "Cornell SC Johnson College of Business",
@@ -2280,16 +2290,6 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-04"
- },
- {
-  "id": "cornell-university__cornell-sc-johnson-college-of-business-cornell-peter-and-ste__operations-technology-and-information-management-area",
-  "institution": "Cornell University",
-  "school": "Cornell SC Johnson College of Business, Cornell Peter and Stephanie Nolan School of Hotel Administration",
-  "department": "Operations, Technology, and Information Management Area",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
  },
  {
   "id": "cornell-university__cornell-tech__operations-research-and-information-engineering",

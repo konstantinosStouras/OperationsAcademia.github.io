@@ -410,6 +410,8 @@
       'Cass Business School': 'Bayes Business School'
     },
     'Cornell University': {
+      'Cornell SC Johnson College of Business, Cornell Peter and Stephanie Nolan School of Hotel Administration':
+        'Cornell Peter and Stephanie Nolan School of Hotel Administration',
       'SC Johnson College of Business, Johnson Graduate School of Management (Incl. Dyson and Nolan)':
         'Cornell SC Johnson College of Business',
       /* the Johnson school is INSIDE that college, and after the owner's
