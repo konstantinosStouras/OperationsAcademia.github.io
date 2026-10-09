@@ -12369,7 +12369,7 @@ async function testReviewWiring() {
      bad figure was committed and turned the checks red on MASTER instead of
      failing its own run. The literal list stays as the floor, so a workflow
      that stops matching the scan still has to be dealt with deliberately. */
-  const WRITERS_KNOWN = ['oa-jobs-build.yml', 'oa-jobmarket-sheet.yml', 'oa-higheredjobs-verify.yml',
+  const WRITERS_KNOWN = ['oa-jobs-build.yml', 'oa-candidates-build.yml', 'oa-jobmarket-sheet.yml', 'oa-higheredjobs-verify.yml',
     'oa-adverts-verify.yml', 'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml',
     // the roster sync writes data/users-meta.json and data/users-growth.json (2026-09-05)
     'oa-user-directory.yml',

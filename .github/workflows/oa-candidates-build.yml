@@ -40,20 +40,20 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
-      - run: node _scraper/build-candidates.mjs --selftest
+      - run: node _scraper/build-all.mjs --candidates-only --selftest
       - run: node _scraper/candidate-calendar-selftest.mjs
       - name: Check, build and publish only candidate data
         run: |
           set -euo pipefail
           node _scraper/selftest.mjs --publishing
           if [ "${{ inputs.dry_run }}" = "true" ]; then
-            node _scraper/build-candidates.mjs --dry-run
+            node _scraper/build-all.mjs --candidates-only --dry-run
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           for attempt in 1 2 3; do
-            node _scraper/build-candidates.mjs
+            node _scraper/build-all.mjs --candidates-only
             node _scraper/selftest.mjs --publishing
             if git diff --quiet -- data/candidates.json data/candidates-meta.json; then
               echo 'Candidate dataset is current.'
