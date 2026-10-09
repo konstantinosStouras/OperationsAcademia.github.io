@@ -2944,8 +2944,9 @@
    "Assistant Professor",
    "Other Ranks"
   ],
-  "applyBy": "October 12, 2026",
-  "applyByDate": "2026-10-12",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-12",
   "comments": "",
   "country": "China",
   "countries": [
@@ -2960,7 +2961,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T06:39:46Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-science-and-technology-of-china-20260909",
