@@ -47,6 +47,11 @@
      Only the ones that arrived twice. The canonical spelling is the full one,
      accents and all. */
   var INSTITUTION_ALIASES = {
+    /* UB's official naming guide uses University at Buffalo as its formal
+       academic name; the SUNY modifier and legal name denote the same place. */
+    'University at Buffalo - The State University of New York': 'University at Buffalo',
+    'University at Buffalo, The State University of New York': 'University at Buffalo',
+    'State University of New York at Buffalo': 'University at Buffalo',
     /* Keep existing correction addresses while the directory displays the
        explicitly verified full university name. */
     'Virginia Polytechnic Institute and State University': 'Virginia Tech',

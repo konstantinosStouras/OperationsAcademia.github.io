@@ -10518,21 +10518,8 @@
   "lng": 4.3826168
  },
  {
-  "id": "university-at-buffalo____scm-and-om",
+  "id": "university-at-buffalo____industrial-and-systems-engineering",
   "institution": "University at Buffalo",
-  "department": "SCM and OM",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-04-09"
- },
- {
-  "id": "university-at-buffalo-the-state-university-of-new-york____industrial-and-systems-engineering",
-  "institution": "University at Buffalo - The State University of New York",
   "department": "Industrial and Systems Engineering",
   "type": "University",
   "country": "United States",
@@ -10546,8 +10533,21 @@
   "lng": -78.7879084
  },
  {
-  "id": "university-at-buffalo-the-state-university-of-new-york__school-of-management__operations-management",
-  "institution": "University at Buffalo, The State University of New York",
+  "id": "university-at-buffalo____scm-and-om",
+  "institution": "University at Buffalo",
+  "department": "SCM and OM",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-04-09"
+ },
+ {
+  "id": "university-at-buffalo__school-of-management__operations-management",
+  "institution": "University at Buffalo",
   "school": "School of Management",
   "department": "Operations Management",
   "type": "Business School",
