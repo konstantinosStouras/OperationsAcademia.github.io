@@ -936,11 +936,6 @@
  },
  {
   "institution": "George Mason University",
-  "school": "Costello College of Business",
-  "department": "Information Systems and Operations Management"
- },
- {
-  "institution": "George Mason University",
   "school": "Donald G. Costello College of Business",
   "department": "Information Systems and Operations Management"
  },
@@ -978,6 +973,11 @@
   "institution": "Georgia Gwinnett College",
   "school": "",
   "department": "Supply Chain Management"
+ },
+ {
+  "institution": "Georgia Institute of Technology",
+  "school": "",
+  "department": ""
  },
  {
   "institution": "Georgia Institute of Technology",
@@ -1282,12 +1282,12 @@
  {
   "institution": "Iowa State University",
   "school": "Debbie and Jerry Ivy College of Business",
-  "department": "Supply Chain Management"
+  "department": "IS/BA"
  },
  {
   "institution": "Iowa State University",
-  "school": "Ivy College of Business",
-  "department": "IS/BA"
+  "school": "Debbie and Jerry Ivy College of Business",
+  "department": "Supply Chain Management"
  },
  {
   "institution": "IPADE Business School",

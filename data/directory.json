@@ -3556,6 +3556,14 @@
   "lastPosted": "2026-01-06"
  },
  {
+  "id": "georgia-institute-of-technology",
+  "institution": "Georgia Institute of Technology",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "georgia-institute-of-technology__h-milton-stewart-school-of-industrial-and-systems-engineerin",
   "institution": "Georgia Institute of Technology",
   "school": "H. Milton Stewart School of Industrial and Systems Engineering",
