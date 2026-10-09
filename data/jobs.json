@@ -1063,15 +1063,15 @@
   ],
   "posted": "2026-10-02",
   "institution": "Michigan State University",
-  "department": "Eli Broad College of Business, Supply Chain Management",
+  "department": "Eli Broad College of Business, Supply Chain Management, Operations Management",
   "school": "Eli Broad College of Business",
-  "unit": "Supply Chain Management",
+  "unit": "Supply Chain Management, Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "November 10, 2026",
-  "applyByDate": "2026-11-10",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
   "reviewDate": "2026-10-10",
   "comments": "",
   "country": "United States",
@@ -1087,7 +1087,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-05T20:59:46Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-michigan-state-university-20261002-2",
@@ -1097,15 +1098,15 @@
   ],
   "posted": "2026-10-02",
   "institution": "Michigan State University",
-  "department": "Logistics and Supply Chain Management",
-  "school": "",
-  "unit": "Logistics and Supply Chain Management",
+  "department": "Eli Broad College of Business, Supply Chain Management, Logistics",
+  "school": "Eli Broad College of Business",
+  "unit": "Supply Chain Management, Logistics",
   "type": "University",
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "November 10, 2026",
-  "applyByDate": "2026-11-10",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
   "reviewDate": "2026-10-10",
   "comments": "",
   "country": "United States",
@@ -1121,7 +1122,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-05T21:02:40Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-missouri-20261002",
@@ -1946,9 +1948,9 @@
   ],
   "posted": "2026-09-22",
   "institution": "Newcastle University",
-  "department": "Operations Management",
+  "department": "Information Systems and Operations Subject Group, Operations Management",
   "school": "",
-  "unit": "Operations Management",
+  "unit": "Information Systems and Operations Subject Group, Operations Management",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -1969,7 +1971,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-23T23:06:29Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": "Expired"
  },
  {
   "id": "2027-nova-school-of-business-and-economics-20260922",

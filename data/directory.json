@@ -5852,13 +5852,9 @@
   "institution": "Michigan State University",
   "department": "Logistics and Supply Chain Management",
   "type": "University",
-  "country": "United States",
   "sources": [
-   "postings",
    "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-02"
+  ]
  },
  {
   "id": "michigan-state-university____scm-ai",
@@ -5911,10 +5907,38 @@
    "postings",
    "seed"
   ],
-  "n": 4,
+  "n": 3,
   "lastPosted": "2026-10-04",
   "lat": 42.7270051,
   "lng": -84.4728586
+ },
+ {
+  "id": "michigan-state-university__eli-broad-college-of-business__supply-chain-management-logistics",
+  "institution": "Michigan State University",
+  "school": "Eli Broad College of Business",
+  "department": "Supply Chain Management, Logistics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-02"
+ },
+ {
+  "id": "michigan-state-university__eli-broad-college-of-business__supply-chain-management-operations-management",
+  "institution": "Michigan State University",
+  "school": "Eli Broad College of Business",
+  "department": "Supply Chain Management, Operations Management",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-02"
  },
  {
   "id": "microsoft____applied-science",
@@ -6619,15 +6643,6 @@
   "institution": "Newcastle University",
   "department": "Information Systems and Operations Subject Group, Operations Management",
   "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
-  "id": "newcastle-university____operations-management",
-  "institution": "Newcastle University",
-  "department": "Operations Management",
-  "type": "University",
   "country": "United Kingdom",
   "sources": [
    "postings",
@@ -6635,6 +6650,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-22"
+ },
+ {
+  "id": "newcastle-university____operations-management",
+  "institution": "Newcastle University",
+  "department": "Operations Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "norfolk-state-university____ba",
