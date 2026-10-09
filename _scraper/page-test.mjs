@@ -14204,6 +14204,8 @@ for (const w of [320, 360, 390, 430]) {
     const {ctx,page:q,errors}=await signedInPage('index.html',{wait:false});
     await q.route('**/data/candidates.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify([row])}));
     await q.goto(BASE+'index.html',{waitUntil:'load'});
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()), null, { timeout: 15000 });
+    await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
     await q.waitForSelector('#oa-candidates .oa-card',{timeout:15000});
     await q.click('#oa-candidates .oa-card-head');
     const info=await q.locator('#oa-candidates .oa-card-body').textContent();
