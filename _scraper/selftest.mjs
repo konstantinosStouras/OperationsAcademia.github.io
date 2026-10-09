@@ -24437,7 +24437,7 @@ async function testForum() {
   const collectEnd = candForm.indexOf('/* A human-quotable', collectStart);
   const collectSource = candForm.slice(collectStart, collectEnd);
   const cvCheck = (cvUrl, slot, days = [], informsUrl = '', unit = 'Operations',
-    jobTalk = { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone South-312' }) => {
+    jobTalk = { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone South-312', title: 'Job market presentation' }) => {
     const values = { 'f-first': 'Ada', 'f-last': 'Reader', 'f-institution': 'University',
       'f-position': 'PhD Candidate', 'f-email': 'ada@example.edu',
       'f-personalEmail': 'ada@example.com', 'f-cvUrl': cvUrl, 'f-webUrl': '', 'f-informsUrl': informsUrl, 'f-unit': unit };

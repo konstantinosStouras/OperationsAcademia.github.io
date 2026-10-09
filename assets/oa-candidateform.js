@@ -430,10 +430,10 @@
     }
     var requiredMark = $('f-informsUrl-required');
     if (requiredMark) requiredMark.hidden = !presenting;
-    ['date', 'at', 'end', 'location'].forEach(function (key) {
+    ['date', 'at', 'end', 'location', 'title'].forEach(function (key) {
       var el = $('f-jobTalk-' + key);
       if (!el) return;
-      var schedulingRequired = presenting && !(EDIT_ID && window.OAAccounts && OAAccounts.isAdmin());
+      var schedulingRequired = presenting;
       el.required = schedulingRequired;
       el.setAttribute('aria-required', schedulingRequired ? 'true' : 'false');
       if (!presenting) setError(el, '');
@@ -678,8 +678,8 @@
 
     if (out.informsDays.length) {
       var jobTalk = out.jobTalk || {};
-      var labels = { date: 'the date of your job talk', at: 'its start time', end: 'its end time', location: 'its location / room' };
-      var schedulingRequired = !(typeof EDIT_ID !== 'undefined' && EDIT_ID && window.OAAccounts && OAAccounts.isAdmin());
+      var labels = { date: 'the date of your job talk', at: 'its start time', end: 'its end time', location: 'its location / room', title: 'the title of your presentation' };
+      var schedulingRequired = true;
       Object.keys(labels).forEach(function (key) {
         var el = $('f-jobTalk-' + key);
         if (schedulingRequired && !jobTalk[key]) { setError(el, 'Please enter ' + labels[key] + '.'); bad(el); }
