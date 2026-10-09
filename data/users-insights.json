@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-08T21:35:31.919Z",
- "members": 304,
+ "generated": "2026-10-09T00:17:47.013Z",
+ "members": 305,
  "k": 3,
  "affiliation": {
-  "listed": 217,
-  "other": 45,
+  "listed": 219,
+  "other": 44,
   "none": 42
  },
  "universities": {
-  "count": 118,
+  "count": 119,
   "shown": [
    {
     "name": "Cornell University",
@@ -31,7 +31,7 @@
     "members": 4
    },
    {
-    "name": "Massachusetts Institute of Technology (MIT)",
+    "name": "Massachusetts Institute of Technology",
     "country": "United States",
     "members": 4
    },
@@ -53,6 +53,11 @@
    {
     "name": "University of Massachusetts Amherst",
     "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "University of Toronto",
+    "country": "Canada",
     "members": 4
    },
    {
@@ -141,17 +146,12 @@
     "members": 3
    },
    {
-    "name": "University of Toronto",
-    "country": "Canada",
-    "members": 3
-   },
-   {
     "name": "Yale University",
     "country": "United States",
     "members": 3
    }
   ],
-  "rest": 115
+  "rest": 116
  },
  "countries": {
   "count": 15,
@@ -162,7 +162,7 @@
    },
    {
     "name": "Canada",
-    "members": 18
+    "members": 19
    },
    {
     "name": "Singapore",
