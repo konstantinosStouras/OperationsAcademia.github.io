@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-09T06:05:01.432Z",
+ "generated": "2026-10-09T06:06:44.519Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -423,6 +423,10 @@
   },
   {
    "v": "Park University",
+   "n": 2
+  },
+  {
+   "v": "Santa Clara University",
    "n": 2
   },
   {
@@ -1207,10 +1211,6 @@
   },
   {
    "v": "San José State University",
-   "n": 1
-  },
-  {
-   "v": "Santa Clara University",
    "n": 1
   },
   {
@@ -2512,6 +2512,10 @@
    "n": 1
   },
   {
+   "v": "Leavey School of Business",
+   "n": 1
+  },
+  {
    "v": "Lee Business School",
    "n": 1
   },
@@ -2885,10 +2889,6 @@
   },
   {
    "v": "Lazaridis School of Business and Economics",
-   "n": 0
-  },
-  {
-   "v": "Leavey School of Business",
    "n": 0
   },
   {
@@ -3274,6 +3274,10 @@
    "n": 3
   },
   {
+   "v": "Information Systems and Analytics",
+   "n": 3
+  },
+  {
    "v": "IS and Analytics",
    "n": 3
   },
@@ -3363,10 +3367,6 @@
   },
   {
    "v": "Information and Decision Sciences",
-   "n": 2
-  },
-  {
-   "v": "Information Systems and Analytics",
    "n": 2
   },
   {
