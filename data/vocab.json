@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-09T04:57:54.451Z",
+ "generated": "2026-10-09T04:58:38.653Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -411,10 +411,6 @@
   },
   {
    "v": "New York University Shanghai",
-   "n": 2
-  },
-  {
-   "v": "NOVA School of Business and Economics",
    "n": 2
   },
   {
@@ -1107,6 +1103,14 @@
   },
   {
    "v": "Northwestern",
+   "n": 1
+  },
+  {
+   "v": "NOVA School of Business and Economics",
+   "n": 1
+  },
+  {
+   "v": "NOVA University Lisbon",
    "n": 1
   },
   {
@@ -2564,6 +2568,10 @@
    "n": 1
   },
   {
+   "v": "NOVA School of Business and Economics",
+   "n": 1
+  },
+  {
    "v": "Parker College of Business",
    "n": 1
   },
@@ -3226,12 +3234,12 @@
    "n": 5
   },
   {
-   "v": "Information Systems",
+   "v": "Logistics and Maritime Studies",
    "n": 5
   },
   {
-   "v": "Logistics and Maritime Studies",
-   "n": 5
+   "v": "Information Systems",
+   "n": 4
   },
   {
    "v": "Operations",
@@ -3987,6 +3995,10 @@
   },
   {
    "v": "Management Information Systems, Artificial Intelligence and Supply Chain Management",
+   "n": 1
+  },
+  {
+   "v": "Management of Information Systems",
    "n": 1
   },
   {
@@ -8115,16 +8127,27 @@
     "School of Business and Economics"
    ],
    "units": [
-    "Information Systems",
     "Operations, Technology and Innovation Management"
    ],
    "bySchool": {
     "": [
-     "Information Systems",
      "Operations, Technology and Innovation Management"
     ],
     "School of Business and Economics": [
      "Operations, Technology and Innovation Management"
+    ]
+   }
+  },
+  "NOVA University Lisbon": {
+   "schools": [
+    "NOVA School of Business and Economics"
+   ],
+   "units": [
+    "Management of Information Systems"
+   ],
+   "bySchool": {
+    "NOVA School of Business and Economics": [
+     "Management of Information Systems"
     ]
    }
   },
@@ -12684,6 +12707,9 @@
   ],
   "Neidorff School of Business": [
    "Finance and Business Analytics"
+  ],
+  "NOVA School of Business and Economics": [
+   "Management of Information Systems"
   ],
   "NUS Business School": [
    "Analytics and Operations"

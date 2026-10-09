@@ -6975,13 +6975,9 @@
   "institution": "NOVA School of Business and Economics",
   "department": "Information Systems",
   "type": "Business School",
-  "country": "Portugal",
   "sources": [
-   "postings",
    "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-09-01"
+  ]
  },
  {
   "id": "nova-school-of-business-and-economics____operations-management",
@@ -7026,6 +7022,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-22"
+ },
+ {
+  "id": "nova-university-lisbon__nova-school-of-business-and-economics__management-of-information-systems",
+  "institution": "NOVA University Lisbon",
+  "school": "NOVA School of Business and Economics",
+  "department": "Management of Information Systems",
+  "type": "Business School",
+  "country": "Portugal",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-01"
  },
  {
   "id": "ntu____om",
