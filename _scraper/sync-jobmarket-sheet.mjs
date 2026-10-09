@@ -54,7 +54,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   marketFloor, isoStamp, healPlace, healReviewDate, stripRowEmails, withMarketYears,
-  withCountries,
+  withCountries, POMS_SOURCE,
 } from './jobs-model.mjs';
 import {
   SEED_SHEET_ID, STALE_DAYS, STALE_REPEAT_DAYS,
@@ -69,7 +69,7 @@ import { applyAdverts, emptyCache as emptyAdvertsCache } from './adverts.mjs';
 import {
   COLLECTION as REVIEW_COL, partition, needMail, PENDING, REJECTED,
   duplicatesOf, sameDups, businessCheck, sameBiz,
-  advertRepeat, findAdvertRepeats, repeatNote,
+  advertRepeat, findAdvertRepeats, repeatNote, clearOfCrawledIds,
 } from './jobreview.mjs';
 import { fillSchoolFromDirectory, campusCountries, healCountry } from './vocab.mjs';
 import { shell, esc, send, transport, toPlain, firestore, SITE, CONTACT } from './_mail.mjs';
@@ -602,6 +602,22 @@ async function main() {
          row carries the date it was first seen, so the two together are the
          real "already known" set. */
       const queue = await loadReviewQueue();
+
+      /* A SHEET ROW NEVER TAKES AN ID A CRAWLED DOCUMENT HOLDS. The POMS
+         crawler queues into this same collection, and a job id is (season,
+         university, day), so a workbook row added days after the crawler
+         queued a posting at the same university on the same day derived the
+         same id and `partition` took the POMS document for its own: pending,
+         the crawled row was overwritten; approved, the sheet row published
+         through the other posting's approval, unreviewed. The crawled ids are
+         taken and the sheet row moves to the next free suffix, BEFORE `known`
+         is built, or the carry and the dating below would join the sheet row
+         to the other crawler's posting through the same id
+         (clearOfCrawledIds in jobreview.mjs, where the argument is). */
+      const cleared = clearOfCrawledIds(collected.rows, queue.docs || []);
+      for (const m of cleared.moved) {
+        log(`  ${m.from} is a POMS posting's id in the review queue — the workbook's row is ${m.to}`);
+      }
       const known = existing.concat(
         (queue.docs || []).map((d) => d.row).filter((r) => r && r.id));
 
@@ -618,7 +634,7 @@ async function main() {
          live). LOUD, because a degraded read the log never names is how the
          last one went out as eight phantom edits. */
       const tabReads = [].concat(...results.map((x) => x.tabReads || []));
-      const carriedBack = carryUnreadColumns(collected.rows, known, tabReads);
+      const carriedBack = carryUnreadColumns(cleared.rows, known, tabReads);
       if (carriedBack.carried.length) {
         const tabsHit = [...new Set(carriedBack.carried.map((c) => c.tab))].join('", "');
         warn(`tab "${tabsHit}": read without its header (columns inferred) — ` +
@@ -783,6 +799,27 @@ async function main() {
            duplicate is posted later and clears when it is taken down. */
         const site = await readJson(JOBS_FILE, []);
 
+        /* THE OTHER CRAWLER'S PENDING ROWS ARE "IN THE QUEUE" TOO (the
+           2026-09-23 review). `partition` visits the workbook's rows alone, so
+           a POMS posting waiting for review was in none of the sets below: a
+           contributor copying the same advertisement into the workbook days
+           after the POMS crawler had queued it got a second, unflagged card,
+           and the owner's rule ("if it already exists in a posting that is
+           live or in the queue, then remove that new job from the queue")
+           held only when the sheet got there first. The crawler already
+           measures its rows against the pending SHEET rows (poms-crawl.mjs);
+           this is the same set the other way round, marked `_pending` so a
+           flag says "still under review" rather than linking a posting that
+           is not on the site (dupEntry). The sweep of the sheet's own pending
+           documents deliberately stays among sheet documents: it keeps the
+           OLDEST of a pair, which a set cannot say pair by pair, and the Admin
+           area's own Check-for-duplicate-adverts button sweeps the whole
+           crawled queue, POMS documents included, on demand. */
+        const pomsPending = (queue.docs || [])
+          .filter((d) => d && d.status === PENDING && d.row && d.row.source === POMS_SOURCE)
+          .map((d) => ({ ...d.row, _pending: true }));
+        const flagAgainst = [...site, ...pomsPending];
+
         /* THE SAME ADVERTISEMENT TWICE IS NOT A DECISION TO MAKE (owner,
            2026-08-26): "check the Link to the advert — if it already exists in
            a previous posting that is live or in the queue, then remove that
@@ -866,7 +903,7 @@ async function main() {
         /* Now the fresh rows, against everything already listed plus the
            queue that survived — plus each fresh row this run accepts, so the
            workbook listing one advertisement twice queues it once. */
-        const listed = [...listedNow, ...swept.keep].filter(Boolean);
+        const listed = [...listedNow, ...swept.keep, ...pomsPending].filter(Boolean);
         for (const doc of split.queue) {
           if (doc.status === PENDING) {
             const repeat = advertRepeat(doc.row, listed);
@@ -882,7 +919,7 @@ async function main() {
                too — the workbook can list one advertisement twice. */
             listed.push(doc.row);
           }
-          doc.dup = duplicatesOf(doc.row, site);
+          doc.dup = duplicatesOf(doc.row, flagAgainst);
           /* THE BUSINESS-SCHOOL FLAG (owner, 2026-08-23): a posting whose
              text says "business" is typed Business School at ingest, and its
              card names the business school the site's directory knows at
@@ -916,7 +953,7 @@ async function main() {
           if (droppedIds.has(doc.rowId)) continue;   // leaving the queue, not being re-flagged
           const row = freshRow.get(doc.rowId) || doc.row;
           const patch = {};
-          const dup = duplicatesOf(row, site);
+          const dup = duplicatesOf(row, flagAgainst);
           if (!sameDups(dup, doc.dup)) patch.dup = dup;
           const biz = businessCheck(row, vocab);
           if (!sameBiz(biz, doc.biz)) patch.biz = biz;

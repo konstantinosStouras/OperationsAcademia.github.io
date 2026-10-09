@@ -37,6 +37,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { submissionFromRow, rowFromSubmission, publicRow } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
+import { SOURCE as POMS_SOURCE } from './poms.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
@@ -59,7 +60,9 @@ const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
    break both directions. The mirrors are the sheet's own; they are created
    and refreshed by the build, not minted here. */
 export function migratable(row) {
-  return !!row && row.source !== SHEET_SOURCE;
+  /* …and the POMS page's rows the same way, for the same reason: they are the
+     queue's own, mirrored by the build, never minted here. */
+  return !!row && row.source !== SHEET_SOURCE && row.source !== POMS_SOURCE;
 }
 
 const argv = new Set(process.argv.slice(2));

@@ -228,7 +228,7 @@ export function classifyTab(name) {
   const rest = s.replace(/\b20\d{2}\b/g, ' ').replace(/[^A-Za-z/&+\- ]+/g, ' ').trim();
 
   // NTT/PD first: "2026 NTT/PD Jobs" is an NTT tab that happens to say Jobs
-  if (/\bntt\b|\bpd\b|non.?tenure|post.?doc|teaching|visiting|lecturer/i.test(rest)) {
+  if (/\bntt(?:pd)?\b|\bpd\b|non.?tenure|post.?doc|teaching|visiting|lecturer/i.test(rest)) {
     return { year: Number(year), kind: 'ntt-pd' };
   }
   if (/\bjobs?\b|postings?|tenure.?track|\btt\b|faculty|positions?/i.test(rest)) {
@@ -253,7 +253,7 @@ export function isIntroTab(name) {
 export function conventionalTabs(years) {
   const out = [];
   for (const y of years) {
-    out.push(`${y} Jobs`, `${y} NTT/PD`, `${y} NTT-PD`, `${y} NTT PD`);
+    out.push(`${y} Jobs`, `${y} NTTPD`, `${y} NTT/PD`, `${y} NTT-PD`, `${y} NTT PD`);
   }
   return out;
 }
@@ -858,7 +858,11 @@ export function levelsFromRank(rank, kind = '') {
      "ttap": the sheet writes "non TTAP" for a non-tenure-track assistant
      professorship and "TTAP" for a tenure-track one, so the two differ by that
      one word and reading it wrongly files a teaching post as tenure-track. */
-  if (/lecturer|instructor|teaching|clinical|practice|professional in residence|adjunct|non.?tenure|non.?tt|\bntt\b|temporary|general faculty|educator/.test(s)) {
+  /* `professional track` and `teaching track` are how a US school names its
+     non-tenure-track faculty line ("Open Rank, Professional Track Faculty",
+     the POMS page's own wording, 2026-09-22); read as a track, never as the
+     rank beside it. */
+  if (/lecturer|instructor|teaching|clinical|practice|professional in residence|professional[\s-]*track|teaching[\s-]*track|career[\s-]*track|adjunct|non.?tenure|non.?tt|\bntt\b|temporary|general faculty|educator/.test(s)) {
     return ['Non-tenure track (teaching) position'];
   }
 
