@@ -13,33 +13,41 @@ read changes nothing (its postings keep what the tracking sheet said).
 
 | Postings | Website | Years | How it is read |
 |---:|---|---|---|
-| 156 | higheredjobs.com | 2026, 2027 | higheredjobs pipeline |
-| 36 | apply.interfolio.com | 2026, 2027 | adverts pipeline (generic) |
-| 27 | jobs.chronicle.com | 2026, 2027 | adverts pipeline (generic) |
-| 18 | careercenter.informs.org | 2026, 2027 | adverts pipeline (generic) |
+| 182 | higheredjobs.com | 2026, 2027 | higheredjobs pipeline |
+| 44 | apply.interfolio.com | 2026, 2027 | adverts pipeline (generic) |
+| 30 | careercenter.informs.org | 2026, 2027 | adverts pipeline (generic) |
+| 28 | jobs.chronicle.com | 2026, 2027 | adverts pipeline (generic) |
 | 15 | careers.insidehighered.com | 2026, 2027 | adverts pipeline (generic) |
-| 9 | poms.org | 2026 | adverts pipeline (PDF — unreadable) |
-| 8 | connect.informs.org | 2026 | adverts pipeline (generic) |
-| 6 | careers.uh.edu | 2026, 2027 | adverts pipeline (generic) |
+| 9 | connect.informs.org | 2026, 2027 | adverts pipeline (generic) |
+| 9 | poms.org | 2026 | poms pipeline (PDF text) |
+| 7 | careers.uh.edu | 2026, 2027 | adverts pipeline (generic) |
 | 5 | business.academickeys.com | 2026, 2027 | adverts pipeline (generic) |
+| 4 | academicjobsonline.org | 2027 | adverts pipeline (generic) |
 | 3 | jobs.rutgers.edu | 2026 | adverts pipeline (generic) |
 | 3 | psu.wd1.myworkdayjobs.com | 2026 | adverts pipeline (Workday JSON) |
 | 3 | schooljobs.com | 2026 | adverts pipeline (generic) |
 | 3 | warwick-careers.tal.net | 2026 | adverts pipeline (generic) |
+| 2 | acem.sjtu.edu.cn | 2027 | adverts pipeline (generic) |
 | 2 | aprecruit.berkeley.edu | 2026 | adverts pipeline (generic) |
 | 2 | auemployment.com | 2026 | adverts pipeline (generic) |
 | 2 | bath.ac.uk | 2026 | adverts pipeline (generic) |
 | 2 | cityu.edu.hk | 2026, 2027 | adverts pipeline (generic) |
 | 2 | illinois.csod.com | 2026 | adverts pipeline (generic) |
+| 2 | indiana.peopleadmin.com | 2026, 2027 | adverts pipeline (generic) |
 | 2 | jobs.indstate.edu | 2026 | adverts pipeline (generic) |
 | 2 | jobs.virginia.gov | 2026 | adverts pipeline (generic) |
 | 2 | linkedin.com | 2026 | never fetched (login wall) |
 | 2 | macewan.ca | 2026 | adverts pipeline (generic) |
 | 2 | my.corehr.com | 2026 | adverts pipeline (generic) |
 | 2 | paycomonline.net | 2026 | adverts pipeline (generic) |
+| 2 | recrutement.skema.edu | 2026, 2027 | adverts pipeline (generic) |
+| 2 | smucareers.taleo.net | 2026, 2027 | adverts pipeline (generic) |
 | 2 | ucl.ac.uk | 2026 | adverts pipeline (generic) |
+| 2 | usccareers.usc.edu | 2026, 2027 | adverts pipeline (generic) |
 | 2 | uscjobs.sc.edu | 2026 | adverts pipeline (generic) |
 | 2 | utah.peopleadmin.com | 2026 | adverts pipeline (generic) |
+| 1 | akadeus.com | 2027 | adverts pipeline (generic) |
+| 1 | american.wd1.myworkdayjobs.com | 2027 | adverts pipeline (Workday JSON) |
 | 1 | arizona.csod.com | 2026 | adverts pipeline (generic) |
 | 1 | aub.edu.lb | 2026 | adverts pipeline (generic) |
 | 1 | berry.interviewexchange.com | 2026 | adverts pipeline (generic) |
@@ -66,6 +74,7 @@ read changes nothing (its postings keep what the tracking sheet said).
 | 1 | eiasm.org | 2026 | adverts pipeline (PDF — unreadable) |
 | 1 | employment.marquette.edu | 2026 | adverts pipeline (generic) |
 | 1 | ethz.ch | 2026 | adverts pipeline (generic) |
+| 1 | eureka.ewha.ac.kr | 2027 | adverts pipeline (generic) |
 | 1 | evansville.edu | 2026 | adverts pipeline (generic) |
 | 1 | explore.jobs.ufl.edu | 2026 | adverts pipeline (generic) |
 | 1 | fa-exer-saasfaprod1.fa.ocs.oraclecloud.com | 2026 | adverts pipeline (generic) |
@@ -74,17 +83,18 @@ read changes nothing (its postings keep what the tracking sheet said).
 | 1 | grad.uwo.ca | 2026 | adverts pipeline (PDF — unreadable) |
 | 1 | gvsu.wd1.myworkdayjobs.com | 2026 | adverts pipeline (Workday JSON) |
 | 1 | hartford.peopleadmin.com | 2026 | adverts pipeline (generic) |
+| 1 | hhs.varbi.com | 2027 | adverts pipeline (generic) |
 | 1 | howard.wd1.myworkdayjobs.com | 2026 | adverts pipeline (Workday JSON) |
 | 1 | hr.kimep.kz | 2026 | adverts pipeline (generic) |
 | 1 | iaejup.fa.ocs.oraclecloud.com | 2026 | adverts pipeline (generic) |
 | 1 | ibqzjb.fa.ocs.oraclecloud.com | 2026 | adverts pipeline (generic) |
 | 1 | iima.ac.in | 2026 | adverts pipeline (generic) |
 | 1 | imperial.ac.uk | 2026 | adverts pipeline (generic) |
-| 1 | indiana.peopleadmin.com | 2026 | adverts pipeline (generic) |
 | 1 | institutminestelecom.recruitee.com | 2026 | adverts pipeline (generic) |
 | 1 | isu.wd1.myworkdayjobs.com | 2026 | adverts pipeline (Workday JSON) |
 | 1 | isye.gatech.edu | 2026 | adverts pipeline (generic) |
 | 1 | jobmarket.unibocconi.eu | 2026 | adverts pipeline (generic) |
+| 1 | jobs.ac.uk | 2027 | adverts pipeline (generic) |
 | 1 | jobs.calpoly.edu | 2026 | adverts pipeline (generic) |
 | 1 | jobs.cam.ac.uk | 2026 | adverts pipeline (generic) |
 | 1 | jobs.coastal.edu | 2026 | adverts pipeline (generic) |
@@ -108,6 +118,7 @@ read changes nothing (its postings keep what the tracking sheet said).
 | 1 | jobs.stonehill.edu | 2026 | adverts pipeline (generic) |
 | 1 | jobs.tcu.edu | 2026 | adverts pipeline (generic) |
 | 1 | jobs.uc.edu | 2026 | adverts pipeline (generic) |
+| 1 | jobs.uiowa.edu | 2027 | adverts pipeline (generic) |
 | 1 | jobs.uncw.edu | 2026 | adverts pipeline (generic) |
 | 1 | jobs.univie.ac.at | 2026 | adverts pipeline (generic) |
 | 1 | jobs.utdallas.edu | 2026 | adverts pipeline (generic) |
@@ -116,27 +127,32 @@ read changes nothing (its postings keep what the tracking sheet said).
 | 1 | klu.jobs.personio.de | 2026 | adverts pipeline (generic) |
 | 1 | listings.jobs.gmu.edu | 2027 | adverts pipeline (generic) |
 | 1 | london.edu | 2026 | adverts pipeline (generic) |
+| 1 | mccormick.northwestern.edu | 2027 | adverts pipeline (generic) |
+| 1 | mcgill.wd3.myworkdayjobs.com | 2027 | adverts pipeline (Workday JSON) |
 | 1 | mgmt.ucl.ac.uk | 2026 | adverts pipeline (generic) |
 | 1 | mgt.tum.de | 2026 | adverts pipeline (PDF — unreadable) |
 | 1 | minnstate.wd1.myworkdayjobs.com | 2026 | adverts pipeline (Workday JSON) |
+| 1 | msande.stanford.edu | 2027 | adverts pipeline (generic) |
+| 1 | northcentralcollege.peopleadmin.com | 2027 | adverts pipeline (generic) |
 | 1 | ozyegin.edu.tr | 2026 | adverts pipeline (generic) |
 | 1 | phe.tbe.taleo.net | 2026 | adverts pipeline (generic) |
 | 1 | provost.catholic.edu | 2026 | adverts pipeline (PDF — unreadable) |
 | 1 | recruit.apo.ucla.edu | 2027 | adverts pipeline (generic) |
 | 1 | recruit.tum.de | 2026 | adverts pipeline (generic) |
-| 1 | recrutement.skema.edu | 2026 | adverts pipeline (generic) |
+| 1 | se.cuhk.edu.hk | 2027 | adverts pipeline (generic) |
 | 1 | shsu.peopleadmin.com | 2026 | adverts pipeline (generic) |
 | 1 | slu.wd5.myworkdayjobs.com | 2026 | adverts pipeline (Workday JSON) |
-| 1 | smucareers.taleo.net | 2026 | adverts pipeline (generic) |
+| 1 | stir.ac.uk | 2027 | adverts pipeline (generic) |
 | 1 | tamus.wd1.myworkdayjobs.com | 2026 | adverts pipeline (generic) |
 | 1 | tcnj.taleo.net | 2026 | adverts pipeline (generic) |
+| 1 | trinity.wd1.myworkdayjobs.com | 2027 | adverts pipeline (Workday JSON) |
 | 1 | uab.peopleadmin.com | 2026 | adverts pipeline (generic) |
 | 1 | uchicago.wd5.myworkdayjobs.com | 2026 | adverts pipeline (Workday JSON) |
 | 1 | umd.wd1.myworkdayjobs.com | 2026 | adverts pipeline (Workday JSON) |
 | 1 | uni.wd5.myworkdayjobs.com | 2026 | adverts pipeline (generic) |
 | 1 | unimelb.wd105.myworkdayjobs.com | 2026 | adverts pipeline (Workday JSON) |
 | 1 | unm.csod.com | 2026 | adverts pipeline (generic) |
-| 1 | usccareers.usc.edu | 2026 | adverts pipeline (generic) |
+| 1 | usajobs.gov | 2027 | adverts pipeline (generic) |
 | 1 | uta.peopleadmin.com | 2026 | adverts pipeline (generic) |
 | 1 | vcu.csod.com | 2026 | adverts pipeline (generic) |
 | 1 | viprecprod.ad.umanitoba.ca | 2026 | adverts pipeline (generic) |
