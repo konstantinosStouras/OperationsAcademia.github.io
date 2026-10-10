@@ -15,7 +15,7 @@ on:
   # failed build committed no new postings. Daily/weekly/monthly subscriptions
   # are simply not due on most fires.
   workflow_run:
-    workflows: ["OA data — publish queued postings, candidates and placements"]
+    workflows: ["OA data — publish queued postings, candidates and placements", "OA candidates — publish at the scheduled reveal"]
     types: [completed]
   schedule:
     # hourly, off the hour — the safety net for anything the chain missed;

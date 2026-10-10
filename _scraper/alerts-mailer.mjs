@@ -222,7 +222,7 @@ export function renderCandidatesLiveEmail({ alert, count }) {
       Operations job market are now live on Operations Academia. ${esc(who)}, with
       their research areas, their CVs and the INFORMS days they will be around.</p>
     <p style="margin:24px 0;">
-      <a href="${esc(SITE)}/#candidates" style="display:inline-block;background:#3B7DBC;color:#fff;
+      <a href="${esc(SITE)}/candidates" style="display:inline-block;background:#3B7DBC;color:#fff;
          padding:9px 18px;border-radius:3px;text-decoration:none;font-weight:600;">
          Meet the candidates</a></p>
     <p style="margin:0 0 14px;">More profiles will keep arriving as the season goes on.
@@ -266,7 +266,7 @@ export function renderAlertEmail({ alert, jobs, updates, candidates = [], closin
     parts.push('</ul>');
     if (nc > MAX_ROWS) {
       parts.push(`<p style="color:#666;font-size:13px;">…and ${nc - MAX_ROWS} more.
-        <a href="${esc(SITE)}/#candidates">See them all on the site</a>.</p>`);
+        <a href="${esc(SITE)}/candidates">See them all on the site</a>.</p>`);
     }
   }
 
@@ -307,7 +307,7 @@ export function renderAlertEmail({ alert, jobs, updates, candidates = [], closin
   // The button aims where the e-mail's news is: a candidates-only message
   // must not end on "Browse all job postings" about postings it never named.
   const cta = (nc && !n && !nd)
-    ? { href: `${SITE}/#candidates`, label: 'Meet the candidates' }
+    ? { href: `${SITE}/candidates`, label: 'Meet the candidates' }
     : { href: `${SITE}/jobs`, label: 'Browse all job postings' };
   parts.push(`<p style="margin-top:20px;">
     <a href="${esc(cta.href)}" style="display:inline-block;background:#3B7DBC;color:#fff;
@@ -513,7 +513,7 @@ async function selftest() {
 
   const live = renderCandidatesLiveEmail({ alert: { id: 'x', name: 'My alert' }, count: 2 });
   ok(live.includes('2 candidates'), 'the live note says how many profiles are up');
-  ok(live.includes('#candidates'), 'the live note links to the candidates section');
+  ok(live.includes('/candidates'), 'the live note links to the candidates section');
   ok(live.includes('Unsubscribe'), 'the live note offers an unsubscribe');
   ok(!live.includes('—') && !live.includes('&mdash;'),
     'and carries no em-dash, per the owner’s instruction on its wording');
@@ -564,6 +564,16 @@ async function selftest() {
       addedAt: '2026-09-01T00:00:00Z' },
   ];
   const DL = { topics: ['deadlines'] };
+  const late = M.closingSoonFor([CLOSING[0]], DL,
+    {from:TODAY, until:DL_UNTIL, coveredUntil:DL_UNTIL, seen:[]});
+  ok(late.length === 1, 'a job added inside an already checked deadline window is still announced');
+  const seenDeadlines = late.map(M.deadlineKey);
+  ok(M.closingSoonFor([CLOSING[0]], DL,
+    {from:TODAY, until:DL_UNTIL, seen:seenDeadlines}).length === 0, 'a delivered deadline is not repeated');
+  ok(M.closingSoonFor([{...CLOSING[0], applyByDate:'2026-09-09'}], DL,
+    {from:TODAY, until:DL_UNTIL, seen:seenDeadlines}).length === 1, 'a changed deadline is announced at its new date');
+  ok(M.closingSoonFor([CLOSING[0]], DL,
+    {from:TODAY, until:DL_UNTIL, seen:[]}).length === 1, 'a failed send leaves the same deadline available for retry');
   const win = (covered) => M.closingSoonFor(CLOSING, DL,
     { from: TODAY, until: DL_UNTIL, coveredUntil: covered });
   ok(win('').map((e) => e.row.id + ':' + e.kind + ':' + e.date).join(',') ===
@@ -870,6 +880,7 @@ async function main() {
   let jobsOk = true;
   const [rows, changelog, candRowsAll, candMeta] = await Promise.all([
     readFile(path.join(HERE, '..', 'data', 'jobs.json'), 'utf8').then(JSON.parse)
+      .then(value => { if (!Array.isArray(value)) throw new Error('Invalid jobs dataset'); return value; })
       .catch(() => { jobsOk = false; return []; }),
     readFile(path.join(HERE, '..', 'changelog.json'), 'utf8').then(JSON.parse)
       .catch(() => ({ updates: [] })),
@@ -960,7 +971,14 @@ async function main() {
   let sent = 0, skipped = 0, failed = 0;
 
   for (const doc of snap.docs) {
-    const a = { id: doc.id, ...doc.data() };
+    if (!/^users\/[^/]+\/alerts\/[^/]+$/.test(doc.ref.path)) { skipped++; continue; }
+    // Re-read before processing: a subscription may have been paused/deleted
+    // after the collection query. One failed read must not abort everyone else.
+    let current;
+    try { current = await doc.ref.get(); }
+    catch (err) { failed++; console.log('::warning::could not read an alert; retrying next run'); continue; }
+    if (!current.exists) { skipped++; continue; }
+    const a = { ...current.data(), id: doc.id, uid: doc.ref.parent.parent.id };
     const label = `${a.name || '(unnamed)'} <${redact(a.email)}>`;
 
     if (a.enabled === false) { skipped++; if (SCAN) console.log(`  paused   ${label}`); continue; }
@@ -1037,7 +1055,17 @@ async function main() {
     const wantsDeadlines = M.wantsDeadlines(a.criteria);
     const closing = M.closingSoonFor(rows, a.criteria, {
       from: today, until: deadlineUntil, coveredUntil: a.lastDeadlineUntil || '',
+      seen: a.deadlineNotices,
     });
+    // Track individual deadlines, not only a rolling date boundary: a newly
+    // published job can close inside a window previously checked as empty.
+    // Migrate existing alerts without replaying reminders already covered.
+    const deadlineNotices = Array.isArray(a.deadlineNotices)
+      ? a.deadlineNotices.filter(key => String(key).slice(-10) >= today)
+      : M.closingSoonFor(rows, a.criteria, {from:today, until:deadlineUntil})
+          .filter(entry => a.lastDeadlineUntil && entry.date <= a.lastDeadlineUntil)
+          .map(M.deadlineKey);
+    const coveredNotices = Array.from(new Set(deadlineNotices.concat(closing.map(M.deadlineKey))));
 
     if (!jobs.length && !news.length && !cand && !closing.length) {
       // NOTHING NEW IS NOT A SEND. Advance the mark anyway, so tomorrow's
@@ -1058,7 +1086,9 @@ async function main() {
         // next run announces only what enters the window after today's end —
         // but only if the file was READ; an unread file is not an empty window
         if (wantsDeadlines && jobsOk) idle.lastDeadlineUntil = deadlineUntil;
-        await doc.ref.update(idle);
+        if (wantsDeadlines && jobsOk) idle.deadlineNotices = coveredNotices;
+        try { await doc.ref.update(idle); }
+        catch (err) { failed++; console.log('::warning::could not update an idle alert; other alerts continue'); }
       }
       continue;
     }
@@ -1093,6 +1123,13 @@ async function main() {
             lastCandidateAt: cand.mark || now.toISOString(),
             lastCheckedAt: now.toISOString(),
           };
+          // A candidate-only announcement is a real send for frequency limits.
+          // When a separate digest is pending, let that delivery own its clock
+          // so an SMTP failure can still retry the pending jobs/updates.
+          if (!jobs.length && !news.length && !closing.length) {
+            notePatch.lastSentAt = now.toISOString();
+            notePatch.lastSentCount = cand.count;
+          }
           if (!a.lastJobAt) notePatch.lastJobAt = since;   // freeze the job floor too
           // freeze the update-window floor here too — a run whose whole
           // output is this note must not leave it sliding (see the idle
@@ -1179,6 +1216,7 @@ async function main() {
          the idle stamp: an updates-only digest over an unread jobs file has
          covered nothing. */
       if (wantsDeadlines && jobsOk) patch.lastDeadlineUntil = deadlineUntil;
+      if (wantsDeadlines && jobsOk) patch.deadlineNotices = coveredNotices;
       await doc.ref.update(patch);
 
       sent++;
