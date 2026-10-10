@@ -357,7 +357,7 @@ page.on('pageerror', (e) => jsErrors.push(e.message));
   const rows=Array.from({length:12},(_,i)=>({id:'audience-'+i,year:marketYear(),posted:new Date().toISOString().slice(0,10),first:'Candidate',last:String(i).padStart(2,'0'),name:'Candidate '+String(i).padStart(2,'0'),affiliation:'Example University',position:'PhD Candidate',cvUrl:'https://example.edu/cv.pdf',researchAreas:['Operations']}));
   const seed=['**/data/candidates.json',JSON.stringify(rows)];
   const {ctx,page:q,errors}=await signedOutPage('index.html',{wait:false,route:seed});
-  await q.evaluate(()=>document.getElementById('oa-candidates').scrollIntoView());
+  await q.evaluate(()=>document.querySelector('#candidates, #oa-candidates').scrollIntoView());
   await q.waitForSelector('#oa-candidates .oa-card');
   eq(await q.locator('#oa-candidates .oa-card').count(),10,'candidate overview: exactly ten previews');
   ok(!/Candidate 00/.test(await q.locator('#oa-candidates').innerText()),'candidate overview: names are withheld');
@@ -6052,7 +6052,7 @@ for (const [from, hash] of [
     await out.goto(BASE + 'candidates.html', { waitUntil: 'load' });
     await out.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
-    await out.evaluate(() => document.querySelector('#oa-candidates')
+    await out.evaluate(() => document.querySelector('#candidates, #oa-candidates')
       .scrollIntoView({ block: 'center' }));
     await out.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
     await out.waitForTimeout(300);
@@ -6076,7 +6076,7 @@ for (const [from, hash] of [
     await q.goto(BASE + 'candidates.html', { waitUntil: 'load' });
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
-    await q.evaluate(() => document.querySelector('#oa-candidates')
+    await q.evaluate(() => document.querySelector('#candidates, #oa-candidates')
       .scrollIntoView({ block: 'center' }));
     await q.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
     await q.click('#oa-candidates .oa-card .oa-card-head');
@@ -6117,7 +6117,7 @@ for (const [from, hash] of [
     await q.waitForFunction(() => window.OAAccounts.resolved() && !window.OAAccounts.user(),
       null, { timeout: 15000 });
 
-    await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await q.evaluate(() => document.querySelector('#candidates, #oa-candidates').scrollIntoView({ block: 'center' }));
     await q.waitForSelector('#oa-candidates .oa-card-locked', { timeout: 15000 });
     await q.waitForTimeout(300);
 
@@ -9561,7 +9561,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.goto(BASE + 'candidates.html', { waitUntil: 'load' });
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
-    await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await q.evaluate(() => document.querySelector('#candidates, #oa-candidates').scrollIntoView({ block: 'center' }));
     await q.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
     for (const h of await q.$$('#oa-candidates .oa-card .oa-card-head')) await h.click();
     await q.waitForTimeout(250);
@@ -9584,7 +9584,7 @@ for (const w of [320, 360, 390, 430]) {
     await out.goto(BASE + 'candidates.html', { waitUntil: 'load' });
     await out.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
-    await out.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await out.evaluate(() => document.querySelector('#candidates, #oa-candidates').scrollIntoView({ block: 'center' }));
     await out.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
     await out.waitForTimeout(300);
     const locked = await out.evaluate(() => ({
@@ -14236,7 +14236,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.route('**/data/candidates.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify([row])}));
     await q.goto(BASE+'candidates.html',{waitUntil:'load'});
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()), null, { timeout: 15000 });
-    await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await q.evaluate(() => document.querySelector('#candidates, #oa-candidates').scrollIntoView({ block: 'center' }));
     await q.waitForSelector('#oa-candidates .oa-card',{timeout:15000});
     await q.click('#oa-candidates .oa-card-head');
     const info=await q.locator('#oa-candidates .oa-card-body').textContent();
