@@ -97,6 +97,9 @@ jobs:
       - name: Offline checks
         run: node _scraper/selftest.mjs --publishing
 
+      - name: Unpublished changes never send edit notifications
+        run: node _scraper/notify-job-changes.mjs --selftest
+
       # THE WHOLE BUILD, IN ONE STEP, because the Commit step below has to be
       # able to run it AGAIN. data/ is generated, so a rejected push has
       # nothing to rebase — the recovery is to take the other writer's tip and
@@ -108,6 +111,7 @@ jobs:
       # and prints a heading per builder so the log reads as it did.
       - name: Publish everything queued
         env:
+          OA_CHANGE_REPORT: ${{ runner.temp }}/oa-job-changes.json
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           # The Drive credentials, for filing uploaded adverts and candidates'
           # CVs into the season's folders. Missing = the build still
@@ -144,6 +148,7 @@ jobs:
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run
         env:
+          OA_CHANGE_REPORT: ${{ runner.temp }}/oa-job-changes.json
           # the SAME credentials the build step carries: a rejected push
           # REBUILDS on the new tip, and a rebuild reads Firestore
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
@@ -191,6 +196,7 @@ jobs:
           for i in 1 2 3 4 5; do
             if git push origin HEAD:"$REF"; then
               echo "pushed"
+              node _scraper/notify-job-changes.mjs "$OA_CHANGE_REPORT" --published
               exit 0
             fi
 
@@ -199,8 +205,8 @@ jobs:
             git fetch origin "$REF" || exit 1
             git reset --hard FETCH_HEAD || exit 1
 
-            # OA_REBUILD: the first pass already mailed the "what changed"
-            # diff; a second, slightly narrower copy from the retry is noise
+            # Rebuild replaces the pending report against the newest tip.
+            # Nothing is mailed until the checked dataset is pushed.
             if ! OA_REBUILD=1 node _scraper/build-all.mjs; then
               echo "::error title=Publishing has STOPPED::the rebuild on the new \
               tip failed, so nothing was committed. The build's own errors are above."

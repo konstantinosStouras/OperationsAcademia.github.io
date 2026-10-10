@@ -1414,7 +1414,11 @@ async function main() {
      message into this log instead — the record still exists, just not in an
      inbox — and a send failure never stops the publish; the change is already
      live, which is the point. */
-  if (before !== after && !DRY && !process.env.OA_REBUILD) {   // the retry loop mails nothing twice
+  if (process.env.OA_CHANGE_REPORT && !DRY) {
+    // Replace the pending report on every rebuild, including a no-change retry.
+    await writeFile(process.env.OA_CHANGE_REPORT, 'null\n');
+  }
+  if (before !== after && !DRY && (!process.env.OA_REBUILD || process.env.OA_CHANGE_REPORT)) {
     try {
       if (changes.edits.length || changes.takedowns.length) {
         const mail = await import('./_mail.mjs');
@@ -1446,7 +1450,7 @@ async function main() {
         }
         const whoFor = (row) => postedBy(
           (row && row.ref && docByRef.get(row.ref + '|' + String(row.owner || ''))) || null, row);
-        await mail.send(tx, {
+        const message = {
           to: process.env.ADMIN_NOTIFY || 'kstouras@gmail.com',
           subject: `[OA] Job postings changed: ${what}`,
           html: mail.shell({
@@ -1454,9 +1458,15 @@ async function main() {
             bodyHtml: renderChangesHtml(changes, { whoFor }),
             manageUrl: null,
           }),
-        });
-        log(`change e-mail: ${what} -> ${process.env.ADMIN_NOTIFY || 'kstouras@gmail.com'}` +
-            (tx ? '' : ' (printed only — SMTP is not configured)'));
+        };
+        if (process.env.OA_CHANGE_REPORT) {
+          await writeFile(process.env.OA_CHANGE_REPORT, JSON.stringify(message));
+          log(`change report prepared: ${what}; notification waits for successful publication`);
+        } else {
+          await mail.send(tx, message);
+          log(`change e-mail: ${what} -> ${process.env.ADMIN_NOTIFY || 'kstouras@gmail.com'}` +
+              (tx ? '' : ' (printed only — SMTP is not configured)'));
+        }
       }
     } catch (e) {
       warn(`change e-mail failed (${e.message}) — the changes are live regardless`);
