@@ -4608,7 +4608,7 @@ for (const [pageName, listSel] of [
   for (const [want, what] of [
     ['recent-faculty?placement=', 'recent hires'],
     ['recent-faculty?alma=', 'PhD alumni'],
-    ['./?c_affiliation=', 'candidates'],
+    ['candidates?c_affiliation=', 'candidates'],
     ['jobs?institution=', 'current openings'],
     ['previous-markets?university=', 'past postings'],
   ]) {
@@ -4665,6 +4665,7 @@ for (const [pageName, listSel] of [
      redirect resolves and looks fine while silently discarding the filter. */
   for (const href of pop.links.filter((h) => !/^https?:/.test(h))) {
     const d = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    if (href.startsWith('candidates')) await d.route('**/data/candidates-reveal.json', r => r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({revealAt:'2026-01-01'})}));
     await d.goto(BASE + href.replace(/^\.\//, ''), { waitUntil: 'domcontentloaded' });
     await d.waitForTimeout(3500);
     /* A filter that took a value from the URL is one showing it — as a CHIP
@@ -5262,7 +5263,7 @@ for (const [from, to] of [
 }
 
 for (const [from, hash] of [
-  ['candidates.html', '#candidates'], ['placements.html', '#placements'],
+  ['placements.html', '#placements'],
   ['faqs.html', '#faq'], ['contact.html', '#contact'],
   ['resources-for-candidates.html', '#resources'],
   ['directors-and-contributors.html', '#about'],
@@ -13978,6 +13979,7 @@ for (const w of [320, 360, 390, 430]) {
        measured it: assert the box itself answers at its own top edge, and
        press it with a REAL pointer rather than element.click(), which does
        not do a hit test at all. */
+    await q.locator('.oa-cal-box').first().scrollIntoViewIfNeeded();
     eq(await q.evaluate(() => {
       const b = document.querySelector('.oa-cal-box').getBoundingClientRect();
       const at = (y) => (document.elementFromPoint(b.left + b.width / 2, y) || {}).className;
