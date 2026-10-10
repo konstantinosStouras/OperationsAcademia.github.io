@@ -971,13 +971,14 @@ async function main() {
   let sent = 0, skipped = 0, failed = 0;
 
   for (const doc of snap.docs) {
+    if (!/^users\/[^/]+\/alerts\/[^/]+$/.test(doc.ref.path)) { skipped++; continue; }
     // Re-read before processing: a subscription may have been paused/deleted
     // after the collection query. One failed read must not abort everyone else.
     let current;
     try { current = await doc.ref.get(); }
     catch (err) { failed++; console.log('::warning::could not read an alert; retrying next run'); continue; }
     if (!current.exists) { skipped++; continue; }
-    const a = { id: doc.id, ...current.data() };
+    const a = { ...current.data(), id: doc.id, uid: doc.ref.parent.parent.id };
     const label = `${a.name || '(unnamed)'} <${redact(a.email)}>`;
 
     if (a.enabled === false) { skipped++; if (SCAN) console.log(`  paused   ${label}`); continue; }
