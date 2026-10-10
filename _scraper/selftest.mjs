@@ -15684,8 +15684,15 @@ async function testSponsors() {
     for (const r of served) {
       const key = SCHOOLS.institutionKey(r.institution);
       ok(identities.has(key), `directory: published job ${r.id} maps to a university`);
-      const target = new URL(r.furtherInfoUrl).searchParams.get('filterA');
-      eq(SCHOOLS.institutionKey(target), key, `directory: ${r.id} links to its own university`);
+      // Generated directory links must name the correct university. The form
+      // also deliberately permits a poster's external Further info URL.
+      if (ownUniversitiesLink(r.furtherInfoUrl)) {
+        const params = new URL(r.furtherInfoUrl).searchParams;
+        const target = params.get('filterA') || params.get('university');
+        eq(SCHOOLS.institutionKey(target), key, `directory: ${r.id} links to its own university`);
+      } else {
+        ok(/^https?:\/\//.test(r.furtherInfoUrl), `directory: ${r.id} has a valid external information link`);
+      }
     }
   }
 
