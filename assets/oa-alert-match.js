@@ -457,7 +457,9 @@
         var d = tries[i][1];
         if (!ISO_DAY.test(d)) continue;
         if (d < from || d > until) continue;
-        if (covered && d <= covered) continue;
+        if (Array.isArray(opts.seen)) {
+          if (opts.seen.indexOf(deadlineKey({row:r, kind:tries[i][0], date:d})) !== -1) return;
+        } else if (covered && d <= covered) continue;
         out.push({ row: r, kind: tries[i][0], date: d });
         return;
       }
@@ -487,6 +489,10 @@
     }
   }
 
+  function deadlineKey(entry) {
+    return String(entry.row.id || '') + '|' + entry.kind + '|' + entry.date;
+  }
+
   /** An alert with nothing selected must never be saved — it would be silence.
       Read straight off the stored topics: an alert that names none has no
       intent, and nothing anywhere may quietly supply one for it. */
@@ -514,6 +520,7 @@
     daysBefore: daysBefore,
     shiftDay: shiftDay,
     closingSoonFor: closingSoonFor,
+    deadlineKey: deadlineKey,
     isDue: isDue,
     hasIntent: hasIntent
   };

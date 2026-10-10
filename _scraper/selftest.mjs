@@ -12651,7 +12651,8 @@ async function testReviewWiring() {
      the alerts page promises a subscriber. */
   const alertsWf = await readFile(path.join(wfDir, 'oa-alerts-mail.yml'), 'utf8');
   const buildName = (buildSrc.match(/^name:\s*(.+)$/m) || [])[1];
-  ok(buildName && alertsWf.includes(`workflows: ["${buildName.trim()}"]`),
+  ok(buildName && alertsWf.includes(`"${buildName.trim()}"`) &&
+    alertsWf.includes('"OA candidates — publish at the scheduled reveal"'),
     'the alerts mailer is chained to the build BY ITS CURRENT NAME — renaming a ' +
     'workflow silently unchains every workflow_run listening for it');
 
