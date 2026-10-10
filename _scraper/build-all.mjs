@@ -80,13 +80,15 @@ export const BUILDERS = [
 
 /** Which builders a given environment can actually run. Pure, so the selftest
     can hold it to the gate the workflow used to apply per step. */
-export function plan({ firebase = false } = {}) {
-  return BUILDERS.filter((b) => !b.needsFirebase || firebase);
+export function plan({ firebase = false, candidatesOnly = false } = {}) {
+  return BUILDERS.filter((b) => (!candidatesOnly || b.script === 'build-candidates.mjs') && (!b.needsFirebase || firebase));
 }
 
 export function buildAll(args = [], { firebase = false, run = null } = {}) {
-  const chosen = plan({ firebase });
-  const skipped = BUILDERS.length - chosen.length;
+  const candidatesOnly = args.includes('--candidates-only');
+  const forwarded = args.filter(arg => arg !== '--candidates-only');
+  const chosen = plan({ firebase, candidatesOnly });
+  const skipped = plan({ firebase: true, candidatesOnly }).length - chosen.length;
   if (skipped) {
     console.log(`Firebase is not configured — skipping ${skipped} builder(s) that ` +
       'read Firestore. See _SETUP-FIREBASE.md');
@@ -98,7 +100,7 @@ export function buildAll(args = [], { firebase = false, run = null } = {}) {
        reads when a build misbehaves; it must not get harder to follow. */
     console.log(`\n=== ${b.label} (${b.script}) ===`);
     const res = (run || spawnSync)(
-      process.execPath, [path.join(HERE, b.script), ...args], { stdio: 'inherit' });
+      process.execPath, [path.join(HERE, b.script), ...forwarded], { stdio: 'inherit' });
     /* A builder that could not be STARTED (spawn error) is a failure too —
        `status` is null there, and treating null as "not non-zero" would
        report a build that never ran as a success, which is this
