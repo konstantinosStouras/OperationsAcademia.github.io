@@ -1345,13 +1345,13 @@
         var cands = OAList.mount({
           mount: '#oa-candidates',
           data: '/data/candidates.json',
+          perPage: 10,
+          urlPrefix: 'c_',
           source: function () {
             return fetch('/data/candidates.json', {cache:'no-store'}).then(function (response) { if (!response.ok) throw new Error('Candidate data unavailable'); return response.json(); }).then(function (rows) {
               return rows.length ? rows : fetch('/data/candidate-previews.json', {cache:'no-store'}).then(function (response) { if (!response.ok) throw new Error('Candidate previews unavailable'); return response.json(); });
             });
           },
-          perPage: 10,
-          urlPrefix: 'c_',
           strings: {
             loading: 'Loading candidate profiles…',
             emptyData: 'No candidate profiles are public yet.',
@@ -1365,7 +1365,7 @@
           prepare: function (rows) { return rows.filter(inCurrentMarket).sort(candidateSurnameOrder).slice(0, 10); },
           sort: candidateSurnameOrder,
           filters: [],
-          cardOpen: OAGate.cardOpen({ note: 'Create a free account to view candidate profiles', authMode: 'register', full: function (r) { return r.previewOnly ? 'candidates' : 'candidates?c_id=' + encodeURIComponent(r.id); }, fullNote: 'Open profile on the full candidate list' }),
+          cardOpen: OAGate.cardOpen({ note: 'Create a free account to view candidate profiles', authMode: 'register', blur: function (r) { return !!r.previewOnly; }, full: function (r) { return r.previewOnly ? 'candidates' : 'candidates?c_id=' + encodeURIComponent(r.id); }, fullNote: 'Open profile on the full candidate list' }),
 
           /* THE TALKS CALENDAR (owner, 2026-09-06): every listed candidate's
              INFORMS talk, with its time, date and room where the profile
