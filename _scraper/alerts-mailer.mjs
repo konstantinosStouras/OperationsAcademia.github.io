@@ -880,6 +880,7 @@ async function main() {
   let jobsOk = true;
   const [rows, changelog, candRowsAll, candMeta] = await Promise.all([
     readFile(path.join(HERE, '..', 'data', 'jobs.json'), 'utf8').then(JSON.parse)
+      .then(value => { if (!Array.isArray(value)) throw new Error('Invalid jobs dataset'); return value; })
       .catch(() => { jobsOk = false; return []; }),
     readFile(path.join(HERE, '..', 'changelog.json'), 'utf8').then(JSON.parse)
       .catch(() => ({ updates: [] })),
@@ -1121,6 +1122,13 @@ async function main() {
             lastCandidateAt: cand.mark || now.toISOString(),
             lastCheckedAt: now.toISOString(),
           };
+          // A candidate-only announcement is a real send for frequency limits.
+          // When a separate digest is pending, let that delivery own its clock
+          // so an SMTP failure can still retry the pending jobs/updates.
+          if (!jobs.length && !news.length && !closing.length) {
+            notePatch.lastSentAt = now.toISOString();
+            notePatch.lastSentCount = cand.count;
+          }
           if (!a.lastJobAt) notePatch.lastJobAt = since;   // freeze the job floor too
           // freeze the update-window floor here too — a run whose whole
           // output is this note must not leave it sliding (see the idle
