@@ -2,7 +2,7 @@
 <!-- The LIVE site only. The archived designs at /v1/ and /v2/ are deliberately
      absent: every page in them carries noindex so an archived copy never
      competes in search with the page that replaced it. The six addresses the
-     one-page site absorbed as sections (candidates, placements, faqs, contact,
+     one-page site absorbed as sections (placements, faqs, contact,
      resources-for-candidates, directors-and-contributors) are absent for the
      same reason — they redirect, and it is the section they land on that
      belongs in an index. The three sign-in-only shells (account, my-postings,
@@ -13,6 +13,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.operationsacademia.org/</loc></url>
   <url><loc>https://www.operationsacademia.org/jobs</loc></url>
+  <url><loc>https://www.operationsacademia.org/candidates</loc></url>
   <url><loc>https://www.operationsacademia.org/universities</loc></url>
   <url><loc>https://www.operationsacademia.org/recent-faculty</loc></url>
   <url><loc>https://www.operationsacademia.org/previous-markets</loc></url>

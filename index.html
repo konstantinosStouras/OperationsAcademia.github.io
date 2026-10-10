@@ -125,8 +125,8 @@
 
         <nav class="v3-nav" aria-label="Site sections">
           <a href="#jobs">Jobs</a>
-          <a href="#candidates">Candidates</a>
-          <a href="forum">Forum</a>
+          <a href="candidates">Candidates</a>
+          <a href="forum">Forum <span class="oa-nav-new">New</span></a>
           <a href="#survey">Survey</a>
           <div class="v3-nav-more">
             <button type="button" class="v3-more-btn" aria-expanded="false" aria-controls="v3-more">More<svg class="v3-more-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
@@ -172,8 +172,8 @@
       </div>
       <nav aria-label="Site sections">
         <a href="#jobs">Jobs</a>
-        <a href="#candidates">Candidates</a>
-        <a href="forum">Forum</a>
+        <a href="candidates">Candidates</a>
+        <a href="forum">Forum <span class="oa-nav-new">New</span></a>
         <a href="#survey">Survey</a>
         <div class="v3-sheet-group" role="group" aria-labelledby="v3-sheet-market">
           <span class="v3-sheet-h" id="v3-sheet-market">The market</span>
@@ -335,7 +335,7 @@
             <div class="v3-section-cta">
               <a class="v3-btn primary" href="post-a-candidate">Create your candidate profile</a>
               <a class="v3-btn ghost" href="#resources">Resources for candidates</a>
-              <a class="v3-btn ghost" href="forum">Candidates&rsquo; forum</a>
+              <a class="v3-btn ghost" href="forum?room=candidates">Candidates-only JM Forum <span class="oa-nav-new">New</span></a>
             </div>
           </div>
 
@@ -364,7 +364,9 @@
             else&rsquo;s at that moment.</p>
           </div>
 
+          <div class="v3-section-head"><h3>Ten candidate previews</h3><a class="v3-link" href="candidates">Full candidate list →</a></div>
           <div id="oa-candidates"></div>
+          <p><a class="v3-btn ghost" href="candidates">Explore all candidates →</a></p>
         </div>
       </section>
 
@@ -863,7 +865,7 @@
             <h4>Discover</h4>
             <ul>
               <li><a href="#jobs">Job postings</a></li>
-              <li><a href="#candidates">Candidates</a></li>
+              <li><a href="candidates">Candidates</a></li>
               <li><a href="#placements">Placements</a></li>
               <li><a href="previous-markets">Previous markets</a></li>
               <li><a href="universities">Universities</a></li>
@@ -1261,7 +1263,7 @@
              prevent, and it would send a reader to a page that by definition
              cannot hold their posting the day its season rolls. */
           cardOpen: OAGate.cardOpen({
-            note: 'Sign in to read this posting',
+            note: 'Sign in to read this posting', authMode: 'register',
             fullNote: 'Open it on the full list \u2192',
             full: function (r) { return NAV.hrefFor(r); }
           }),
@@ -1327,10 +1329,17 @@
         if (res) res.remove();
       });
 
+      function candidateSurnameOrder(a, b) {
+            var surname = (a.last || (a.name || '').trim().split(/\s+/).pop()).localeCompare(b.last || (b.name || '').trim().split(/\s+/).pop(), 'en', { sensitivity: 'base' });
+            if (surname) return surname;
+            return (a.first || a.name || '').localeCompare(b.first || b.name || '', 'en', { sensitivity: 'base' });
+          }
       V3.lazy('#oa-candidates', function () {
+        var candidateTeaserCard = OACandCard.cardConfig();
+        candidateTeaserCard.title = function (r) { return OACandCard.universityName(r.affiliation); };
+        candidateTeaserCard.subtitle = function () { return ''; };
         var cands = OAList.mount({
           mount: '#oa-candidates',
-          bottomPager: true,
           data: '/data/candidates.json',
           perPage: 10,
           urlPrefix: 'c_',
@@ -1344,35 +1353,10 @@
             loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
             unit: 'profiles'
           },
-          prepare: function (rows) { return rows.filter(inCurrentMarket); },
-          sort: function (a, b) {
-            var surname = (a.last || (a.name || '').trim().split(/\s+/).pop()).localeCompare(b.last || (b.name || '').trim().split(/\s+/).pop(), 'en', { sensitivity: 'base' });
-            if (surname) return surname;
-            return (a.first || a.name || '').localeCompare(b.first || b.name || '', 'en', { sensitivity: 'base' });
-          },
-          filters: [
-            { key: 'name',        label: 'Name',             type: 'text',
-              fields: ['name'], placeholder: 'Search by name…' },
-            { key: 'affiliation', label: 'Affiliation',      type: 'text',
-              fields: ['affiliation'], placeholder: 'Search by affiliation…',
-              legacyParam: 'filterE' },
-            { key: 'position',    label: 'Current position', field: 'position',
-              placeholder: 'All positions' },
-            { key: 'area',        label: 'Research area',    field: 'researchAreas',
-              placeholder: 'All areas' },
-            { key: 'day',         label: 'INFORMS day',      field: 'informsDays',
-              placeholder: 'All days' },
-            { key: 'posted',      label: 'Date posted',      derive: 'datePosted',
-              placeholder: 'Any date' }
-          ],
-          /* A candidate's name is what a hiring committee is looking for and
-             stays readable; their CV, their INFORMS days and their e-mail
-             address are the details, and they are for registered readers
-             (owner, 2026-08-29 — "never be able to view details of job
-             postings or candidates"). There is no fuller list to send anyone
-             to: candidates live on this page, so a signed-in reader opens the
-             card where it stands. */
-          cardOpen: OAGate.cardOpen({ note: 'Sign in to see this profile' }),
+          prepare: function (rows) { return rows.filter(inCurrentMarket).sort(candidateSurnameOrder).slice(0, 10); },
+          sort: candidateSurnameOrder,
+          filters: [],
+          cardOpen: OAGate.cardOpen({ note: 'Create a free account to view candidate profiles', authMode: 'register', full: function (r) { return 'candidates?c_id=' + encodeURIComponent(r.id); }, fullNote: 'Open profile on the full candidate list' }),
 
           /* THE TALKS CALENDAR (owner, 2026-09-06): every listed candidate's
              INFORMS talk, with its time, date and room where the profile
@@ -1384,18 +1368,16 @@
 
           /* the "Profile updated on" line first (inside the body, so a locked
              card never gets one), then the owner's Edit / Take down bar */
-          onCard: function (li, r) {
-            OACandCard.decorate(li, r);
-            if (window.OACandidateEdit) OACandidateEdit.onCard(li, r);
-          },
+
           /* THE CARD IS DRAWN BY assets/oa-candcard.js, the one renderer the
              account page's own-card preview and the posting form's live
              preview share (owner, 2026-09-04): title, subtitle and the seven
              labelled rows in their order. This page's own three link helpers
              are passed in, so the list's output is exactly what it was. */
-          card: OACandCard.cardConfig({ link: link, uniLink: uniLink, mailto: mailto })
+          card: candidateTeaserCard
         });
-        if (window.OACandidateEdit) OACandidateEdit.attach(cands);
+        var host = document.getElementById('oa-candidates');
+        ['.oa-filters','.oa-resultbar'].forEach(function(sel){var bar=host.querySelector(sel);if(bar)bar.remove();});
         OAGate.watch(cands);
         /* A page opened before the reveal must not keep its cached empty list
            forever. Read only public snapshots after the announced instant. */

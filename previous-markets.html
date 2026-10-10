@@ -116,8 +116,8 @@
         </a>
         <nav class="v3-nav" aria-label="Site sections">
           <a href="jobs">Jobs</a>
-          <a href="./#candidates">Candidates</a>
-          <a href="forum">Forum</a>
+          <a href="candidates">Candidates</a>
+          <a href="forum">Forum <span class="oa-nav-new">New</span></a>
           <a href="./#survey">Survey</a>
           <div class="v3-nav-more">
             <button type="button" class="v3-more-btn is-active" aria-expanded="false" aria-controls="v3-more">More<svg class="v3-more-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
@@ -161,8 +161,8 @@
       </div>
       <nav aria-label="Site sections">
         <a href="jobs">Jobs</a>
-        <a href="./#candidates">Candidates</a>
-        <a href="forum">Forum</a>
+        <a href="candidates">Candidates</a>
+        <a href="forum">Forum <span class="oa-nav-new">New</span></a>
         <a href="./#survey">Survey</a>
         <div class="v3-sheet-group" role="group" aria-labelledby="v3-sheet-market">
           <span class="v3-sheet-h" id="v3-sheet-market">The market</span>
@@ -572,7 +572,7 @@
                than of registering. The maintainer's own row editor and the
                Edit / Take down controls are drawn from `onCard`, outside the
                head, and they are only ever drawn for somebody signed in. */
-            cardOpen: OAGate.cardOpen({ note: 'Sign in to read this posting' }),
+            cardOpen: OAGate.cardOpen({ note: 'Sign in to read this posting', authMode: 'register' }),
 
             onCard: function (li, r) {
               if (window.OAJobEdit) OAJobEdit.onCard(li, r);

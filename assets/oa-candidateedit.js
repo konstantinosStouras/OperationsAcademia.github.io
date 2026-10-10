@@ -84,7 +84,7 @@
     var bar = document.createElement('div');
     bar.className = 'oa-card-actions';
 
-    bar.appendChild(button('Edit', 'oa-jobbtn-edit',
+    bar.appendChild(button(perm.own[id] ? 'Edit my profile' : 'Edit profile', 'oa-jobbtn-edit',
       'Edit this profile — its text, its files, or both', function () {
         location.href = 'post-a-candidate?edit=' + encodeURIComponent(id);
       }));

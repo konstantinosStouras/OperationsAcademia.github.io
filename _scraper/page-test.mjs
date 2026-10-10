@@ -6014,9 +6014,9 @@ for (const [from, hash] of [
     const seed = (pg) => pg.route('**/data/candidates.json', (r) =>
       r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
 
-    const { ctx: outCtx, page: out } = await signedOutPage('index.html', { wait: false });
+    const { ctx: outCtx, page: out } = await signedOutPage('candidates.html', { wait: false });
     await seed(out);
-    await out.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await out.goto(BASE + 'candidates.html', { waitUntil: 'load' });
     await out.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
     await out.evaluate(() => document.querySelector('#oa-candidates')
@@ -6031,16 +6031,16 @@ for (const [from, hash] of [
         // the address is the field that must never be on a public page
         html: document.querySelector('#oa-candidates').innerHTML };
     });
-    eq(c.name, 'A Candidate', 'gate: a candidate\'s NAME is readable signed out');
+    eq(c.name, 'Somewhere University', 'gate: only the school is readable signed out');
     eq([c.locked, c.bodies], [true, 0],
       'gate: …and their profile is not — no CV, no INFORMS days, no address');
     ok(!/someone@example\.edu/.test(c.html),
       'gate: the e-mail address is not in the document at all');
     await outCtx.close();
 
-    const { ctx, page: q } = await signedInPage('index.html', { wait: false });
+    const { ctx, page: q } = await signedInPage('candidates.html', { wait: false });
     await seed(q);
-    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.goto(BASE + 'candidates.html', { waitUntil: 'load' });
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
     await q.evaluate(() => document.querySelector('#oa-candidates')
@@ -6074,19 +6074,16 @@ for (const [from, hash] of [
       researchAreas: ['Operations'], informsDays: ['Sunday'],
       email: 'someone@example.edu', cvUrl: 'https://example.edu/cv.pdf' }];
 
-    const { ctx, page: q, errors } = await signedInPage('index.html', { wait: false });
+    const { ctx, page: q, errors } = await signedInPage('candidates.html', { wait: false });
     await q.route('**/data/candidates.json', (r) =>
       r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
-    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.goto(BASE + 'candidates.html', { waitUntil: 'load' });
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
     await q.evaluate(() => window.OAAccounts.signOut());
     await q.waitForFunction(() => window.OAAccounts.resolved() && !window.OAAccounts.user(),
       null, { timeout: 15000 });
 
-    // both lists mounted, teaser first — the order a reader scrolling creates
-    await q.evaluate(() => document.querySelector('#oa-jobs-recent').scrollIntoView({ block: 'center' }));
-    await q.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
     await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
     await q.waitForSelector('#oa-candidates .oa-card-locked', { timeout: 15000 });
     await q.waitForTimeout(300);
@@ -6135,7 +6132,7 @@ for (const [from, hash] of [
    map with its vendored Leaflet controls. The whole set was walked once by
    hand to find the offenders; this is what keeps them gone without adding a
    minute to every CI run. */
-const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
+const THEME_PAGES = ['candidates.html', 'jobs.html', 'post-a-job.html',
   'feedback.html', 'universities.html'];
 
 {
@@ -6675,7 +6672,7 @@ for (const w of [320, 360, 390, 430]) {
 
   /* AND THE FORUM IS IN THE MENU, on the page and not merely in the source. */
   const forumLink = await p.evaluate(() => {
-    const a = [...document.querySelectorAll('.v3-nav > a')].find((x) => x.textContent.trim() === 'Forum');
+    const a = [...document.querySelectorAll('.v3-nav > a')].find((x) => /^Forum(?: New)?$/.test(x.textContent.trim()));
     if (!a) return null;
     const b = a.getBoundingClientRect();
     return { href: a.getAttribute('href'), visible: b.width > 0 && b.height > 0 };
@@ -9526,9 +9523,9 @@ for (const w of [320, 360, 390, 430]) {
     ];
     const seed = (pg) => pg.route('**/data/candidates.json', (r) =>
       r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
-    const { ctx, page: q } = await signedInPage('index.html', { wait: false });
+    const { ctx, page: q } = await signedInPage('candidates.html', { wait: false });
     await seed(q);
-    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.goto(BASE + 'candidates.html', { waitUntil: 'load' });
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
     await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
@@ -9549,9 +9546,9 @@ for (const w of [320, 360, 390, 430]) {
     ok(u[0].last, 'served rows: ...as the LAST line of the card body');
     await ctx.close();
 
-    const { ctx: outCtx, page: out } = await signedOutPage('index.html', { wait: false });
+    const { ctx: outCtx, page: out } = await signedOutPage('candidates.html', { wait: false });
     await seed(out);
-    await out.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await out.goto(BASE + 'candidates.html', { waitUntil: 'load' });
     await out.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
     await out.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
@@ -14201,9 +14198,9 @@ for (const w of [320, 360, 390, 430]) {
   /* Per-candidate invitations preserve submitted information. */
   {
     const row={id:'tc-ada',year:2027,posted:TODAY,name:'Ada Reader',affiliation:'Northwestern University',position:'PhD Candidate',researchAreas:['Operations'],informsDays:['Monday'],cvUrl:'https://example.edu/cv.pdf',informsUrl:'https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=374',jobTalk:{date:'2026-11-02',at:'10:00',end:'10:18',location:'Moscone South-312',title:'Queues and prices'}};
-    const {ctx,page:q,errors}=await signedInPage('index.html',{wait:false});
+    const {ctx,page:q,errors}=await signedInPage('candidates.html',{wait:false});
     await q.route('**/data/candidates.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify([row])}));
-    await q.goto(BASE+'index.html',{waitUntil:'load'});
+    await q.goto(BASE+'candidates.html',{waitUntil:'load'});
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()), null, { timeout: 15000 });
     await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
     await q.waitForSelector('#oa-candidates .oa-card',{timeout:15000});

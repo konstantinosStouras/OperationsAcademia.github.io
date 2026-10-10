@@ -2470,3 +2470,18 @@ body.ve-focus #main .v3-pa-signin { margin: 24px auto; }
 
 /* [hidden] must always win — the reset lesson from _PLAN.md, carried over */
 [hidden] { display: none !important; }
+
+/* Forum navigation cue, shared by desktop and mobile. */
+.oa-nav-new { color: #4285e8; font-size: 10px; font-weight: 700; margin-left: 3px; vertical-align: super; }
+
+/* Compact candidate cards; other lists retain their spacing. */
+body.v3 #oa-candidates .oa-card { margin-bottom: 8px; }
+body.v3 #oa-candidates .oa-card-head { padding-bottom: 14px; }
+body.v3 #oa-candidates .oa-card-actions { position: static; padding: 0 22px 12px; flex-wrap: wrap; }
+body.v3 #oa-candidates .oa-card-owned .oa-card-head { padding-right: 22px; }
+
+body.v3 #oa-candidates .oa-card-lock-note { display: none; }
+
+body.v3 #oa-jobs .oa-card-locked .oa-card-lock-note,
+body.v3 #oa-jobs-recent .oa-card-locked .oa-card-lock-note,
+body.v3 #oa-past .oa-card-locked .oa-card-lock-note { display: none; }

@@ -58,7 +58,7 @@
 
   var G = (typeof window !== 'undefined') ? window : null;
 
-  var SITE = 'https://www.operationsacademia.org/';
+  var SITE = 'https://www.operationsacademia.org/candidates';
 
   /** The name follows the season, as the deadlines file's does (owner,
       2026-09-06: "Ops JM '27", and "Ops JM '28" the year after): the talks
@@ -81,7 +81,7 @@
       filter's key), so the link opens the list with one card in it. */
   function profileUrl(row) {
     var name = txt(row && row.name);
-    return SITE + (name ? '?c_name=' + encodeURIComponent(name) : '') + '#candidates';
+    return SITE + (name ? '?c_name=' + encodeURIComponent(name) : '');
   }
 
   /**
@@ -229,7 +229,7 @@
         named.join(' and the ') + ', as their profiles stood on ' +
         OAInforms.longDay(now.toISOString().slice(0, 10)) + '. ' +
         'A day whose time and room are not on the profile yet is an all-day entry. ' +
-        SITE + '#candidates',
+        SITE,
       now: now,
       timezones: timezonesFor(rows)
     });
