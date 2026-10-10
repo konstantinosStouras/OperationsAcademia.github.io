@@ -22,8 +22,9 @@
         function mountCandidates() {
         function inCurrentMarket(row) { return OAJobNav.inCurrentMarket(row); }
         var candidateCard = OACandCard.cardConfig();
+        var profileSubtitle = candidateCard.subtitle;
         candidateCard.title = function (r) { return OAGate.signedIn() ? r.name : OACandCard.universityName(r.affiliation); };
-        candidateCard.subtitle = function (r) { return OAGate.signedIn() ? [r.affiliation, r.position].filter(Boolean).join(' — ') : ''; };
+        candidateCard.subtitle = function (r) { return OAGate.signedIn() ? profileSubtitle(r) : ''; };
         var heading = document.getElementById('oa-candidates-heading');
         heading.textContent = 'Job market candidates (' + (OAJobNav.marketYear()-1) + '-' + OAJobNav.marketYear() + ')';
         var cands = OAList.mount({

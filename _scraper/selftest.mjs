@@ -14416,8 +14416,8 @@ async function testCandidateReveal() {
     const cfg = C.cardConfig(helpers);
     const row = C.publicRowFromDoc(ok3, inject);
     eq(cfg.title(row), 'Ada Reader', 'candcard: the title is the name');
-    eq(cfg.subtitle(row), 'Operations, Kellogg School of Management, Northwestern University — PhD Candidate',
-      'candcard: the subtitle is affiliation, position');
+    eq(cfg.subtitle(row), 'PhD Candidate\nNorthwestern University · Kellogg School of Management · Operations',
+      'candcard: position and university-first affiliation occupy separate lines');
     const rows = cfg.rows(row);
     eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk', 'CV',
       'Research summary', 'Web page', 'Contact'], 'candcard: calendars preserve submitted profile information');

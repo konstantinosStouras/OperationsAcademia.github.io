@@ -2501,3 +2501,6 @@ html[data-theme="dark"] body.v3 a.oa-view-all:hover { background:#203452; }
 
 .oa-nav-new { color: #1d4ed8; }
 html[data-theme="dark"] .oa-nav-new { color: #93c5fd; }
+
+body.v3 #oa-candidates .oa-card-sub, body.v3 .oa-card-preview .oa-card-sub { white-space:pre-line; line-height:1.5; }
+body.v3 #oa-candidates .oa-card-sub::first-line, body.v3 .oa-card-preview .oa-card-sub::first-line { color:var(--ink); font-weight:500; }
