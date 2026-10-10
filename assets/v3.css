@@ -2498,3 +2498,6 @@ html[data-theme="dark"] body.v3 a.oa-view-all:hover { background:#203452; }
 #oa-candidates-content > .v3-lock-card .v3-lock-card-inner { max-width:none; box-shadow:none; }
 #oa-candidates-content > .v3-lock-card .v3-cta-row { justify-content:flex-start; }
 @media(max-width:640px) { .oa-preview-heading, .v3-panel-head { flex-wrap:wrap; } }
+
+.oa-nav-new { color: #1d4ed8; }
+html[data-theme="dark"] .oa-nav-new { color: #93c5fd; }
