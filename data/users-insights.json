@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-10T19:22:11.374Z",
- "members": 314,
+ "generated": "2026-10-10T22:42:12.682Z",
+ "members": 318,
  "k": 3,
  "affiliation": {
-  "listed": 230,
+  "listed": 234,
   "other": 44,
   "none": 40
  },
@@ -21,12 +21,17 @@
     "members": 7
    },
    {
+    "name": "Columbia University",
+    "country": "United States",
+    "members": 5
+   },
+   {
     "name": "Northwestern University",
     "country": "United States",
     "members": 5
    },
    {
-    "name": "Columbia University",
+    "name": "Georgia Institute of Technology",
     "country": "United States",
     "members": 4
    },
@@ -82,11 +87,6 @@
    },
    {
     "name": "Georgetown University",
-    "country": "United States",
-    "members": 3
-   },
-   {
-    "name": "Georgia Institute of Technology",
     "country": "United States",
     "members": 3
    },
@@ -156,14 +156,14 @@
     "members": 3
    }
   ],
-  "rest": 123
+  "rest": 125
  },
  "countries": {
   "count": 15,
   "shown": [
    {
     "name": "United States",
-    "members": 147
+    "members": 151
    },
    {
     "name": "Canada",
