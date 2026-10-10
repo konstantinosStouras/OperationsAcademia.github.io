@@ -9521,9 +9521,10 @@ for (const w of [320, 360, 390, 430]) {
       title: document.getElementById('f-jobTalk-title').value,
       preview: (document.querySelector('#oa-cand-preview .oa-card-title') || {}).textContent || '',
     }));
-    ok(back.inst === 'Somewhere University' && back.monday && back.block && back.title === 'Queueing in Practice',
-      'draft: …and a reload restores it, the talk block shown for its restored day');
+    ok(back.inst === '' && back.monday && back.block && back.title === 'Queueing in Practice',
+      'draft: reload restores the talk while the new application affiliation stays blank');
     ok(/Draft Keeper/.test(back.preview), 'draft: …with the preview repainted from it');
+    await q.fill('#f-institution', 'Somewhere University');
     await q.fill('#f-unit', 'Operations');
     await q.fill('#f-cvUrl', 'https://example.edu/cv.pdf');
     await q.fill('#f-jobTalk-date', '2026-11-02');
