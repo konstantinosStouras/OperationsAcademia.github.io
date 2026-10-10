@@ -422,6 +422,10 @@
       if (h) h.textContent = 'Your talk on ' + ((m && M.dayLabel) ? M.dayLabel(m, day) : day);
     });
     var presenting = checked('informsDays').length > 0;
+    var notAttending = $('f-informs-none');
+    if (notAttending && presenting) notAttending.checked = false;
+    var presentationFields = $('f-jobTalk-details');
+    if (presentationFields) presentationFields.hidden = !presenting;
     var talkLink = $('f-informsUrl');
     if (talkLink) {
       talkLink.required = presenting;
@@ -651,6 +655,9 @@
     var urlFields = [['f-cvUrl', 'cvUrl'], ['f-webUrl', 'webUrl'], ['f-informsUrl', 'informsUrl']];
     for (var i = 0; i < urlFields.length; i++) {
       var el = $(urlFields[i][0]);
+      if (urlFields[i][1] === 'informsUrl' && !out.informsDays.length) {
+        setError(el, ''); out.informsUrl = ''; continue;
+      }
       var u = httpUrl(el.value);
       if (u === null) {
         setError(el, 'That does not look like a web address. It should start with https://');
@@ -1605,6 +1612,12 @@
     buildTalkBlocks();
     Array.prototype.forEach.call(document.querySelectorAll('input[name="informsDays"]'),
       function (box) { box.addEventListener('change', syncTalkBlocks); });
+    var notAttending = $('f-informs-none');
+    if (notAttending) notAttending.addEventListener('change', function () {
+      if (notAttending.checked) Array.prototype.forEach.call(
+        document.querySelectorAll('input[name="informsDays"]'), function (box) { box.checked = false; });
+      syncTalkBlocks();
+    });
     enterEditMode();
     wireTakeDown();
     paintYearNote();

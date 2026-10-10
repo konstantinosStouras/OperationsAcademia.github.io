@@ -14209,7 +14209,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForSelector('#oa-candidates .oa-card',{timeout:15000});
     await q.click('#oa-candidates .oa-card-head');
     const info=await q.locator('#oa-candidates .oa-card-body').textContent();
-    ok(/Presenting at INFORMS/.test(info)&&/Monday/.test(info)&&/Queues and prices/.test(info)&&/CV/.test(info),'candidate calendar: submitted details stay visible');
+    ok(/Presenting at INFORMS/.test(info)&&/Monday/.test(info)&&!/Presentation details/.test(info)&&/CV/.test(info),'candidate calendar: submitted details stay visible');
     const google=await q.locator('#oa-candidates a').filter({hasText:'Google'}).getAttribute('href');
     const apple=await q.locator('#oa-candidates a').filter({hasText:'Outlook/Apple'}).getAttribute('href');
     ok(/calendar.google.com/.test(google)&&/20261102T180000Z/.test(google),'candidate calendar: Google uses the talk time in the meeting timezone');
@@ -14218,9 +14218,15 @@ for (const w of [320, 360, 390, 430]) {
   }
   {
     const {ctx,page:q,errors}=await signedInPage('post-a-candidate.html',{docs:[],selector:'#oa-cand-form:not([hidden])'});
+    ok(await q.locator('#f-jobTalk-details').isHidden(), 'candidate presentation: questions start hidden');
     await q.check('input[name="informsDays"][value="Monday"]');
+    ok(await q.locator('#f-jobTalk-details').isVisible(), 'candidate presentation: a selected day reveals the questions');
     const required=await q.evaluate(()=>['date','at','end','location','title'].every(k=>document.getElementById('f-jobTalk-'+k).required)&&document.getElementById('f-informsUrl').required);
     ok(required,'candidate presentation: selecting a day requires every field, including title');
+    await q.check('#f-informs-none');
+    ok(await q.evaluate(() => document.getElementById('f-jobTalk-details').hidden && !document.querySelector('input[name="informsDays"]:checked') && !document.getElementById('f-jobTalk-title').required), 'candidate presentation: not attending clears days, hides questions and removes requirements');
+    await q.check('input[name="informsDays"][value="Monday"]');
+    ok(await q.evaluate(() => !document.getElementById('f-informs-none').checked && !document.getElementById('f-jobTalk-details').hidden), 'candidate presentation: selecting a day clears not attending');
     await q.uncheck('input[name="informsDays"][value="Monday"]');
     ok(await q.evaluate(()=>!document.getElementById('f-jobTalk-title').required&&!document.getElementById('f-informsUrl').required),'candidate presentation: non-presenters have no presentation requirement');
     await q.check('input[name="informsDays"][value="Monday"]');

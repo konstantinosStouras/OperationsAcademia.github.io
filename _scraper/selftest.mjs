@@ -14419,25 +14419,25 @@ async function testCandidateReveal() {
     eq(cfg.subtitle(row), 'Operations, Kellogg School of Management, Northwestern University — PhD Candidate',
       'candcard: the subtitle is affiliation, position');
     const rows = cfg.rows(row);
-    eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk(s)', 'Presentation details', 'INFORMS job talk', 'CV',
+    eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk(s)', 'CV',
       'Research summary', 'Web page', 'Contact'], 'candcard: calendars preserve submitted profile information');
     eq(rows[0].value, 'Operations, Queueing Theory', 'candcard: areas joined');
     eq(calls.map((c) => c[0]), ['link', 'link', 'link', 'link', 'mail'], 'candcard: document and contact links go through injected helpers');
-    eq(rows[4].html, null, 'candcard: missing schedule details draw no calendar links');
+    eq(rows[2].html, null, 'candcard: missing schedule details draw no calendar links');
     const custom = C.publicRowFromDoc({ ...ok3,
       informsUrl: 'https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=374',
       jobTalk: { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone South-312', title: 'Job talk' } }, inject);
     eq(custom.informsUrl, 'https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=374', 'candcard: specific programme URL survives projection');
     eq(rowFromCandidateSubmission({ ...ok3, informsUrl: custom.informsUrl }).informsUrl,
       custom.informsUrl, 'candcard: build preserves the same programme URL');
-    ok(/>Google<\/a>/.test(cfg.rows(custom)[4].html || '') && />Outlook\/Apple<\/a>/.test(cfg.rows(custom)[4].html || ''),
+    ok(/>Google<\/a>/.test(cfg.rows(custom)[2].html || '') && />Outlook\/Apple<\/a>/.test(cfg.rows(custom)[2].html || ''),
       'candcard: complete job talk gives exactly the two calendar links');
     ok(!cfg.rows({ ...custom, informsDays: [], talks: {} }).some((r) => /INFORMS/.test(r.label)),
       'candcard: non-presenters have neither INFORMS row, even with a stored link');
     eq(C.publicRowFromDoc({ ...ok3, informsUrl: 'javascript:alert(1)' }, inject).informsUrl,
       '', 'candcard: unsafe programme URL is discarded');
     eq(calls[1].slice(1), ['https://example.edu/cv.pdf', 'link to CV'], 'candcard: the CV link and its label');
-    eq(rows[6].html, null, 'candcard: an empty research-summary link draws nothing');
+    eq(rows[4].html, null, 'candcard: an empty research-summary link draws nothing');
     ok(/parts\[parts\.length - 1\]/.test(await read('assets', 'oa-candcard.js')),
       'candcard: the default university link reads the LAST part of the line, like index.html’s');
     /* a profile WITH talk details gains one row per day, right after the

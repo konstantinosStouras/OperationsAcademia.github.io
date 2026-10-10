@@ -376,6 +376,7 @@
                           <label class="oa-check"><input type="checkbox" name="informsDays" value="Monday"> Monday</label>
                           <label class="oa-check"><input type="checkbox" name="informsDays" value="Tuesday"> Tuesday</label>
                           <label class="oa-check"><input type="checkbox" name="informsDays" value="Wednesday"> Wednesday</label>
+                          <label class="oa-check"><input type="checkbox" id="f-informs-none" name="informsAttendance" value="none"> Not attending INFORMS</label>
                         </div>
                         <!-- one block per ticked day, drawn by oa-candidateform.js
                              (talkBlock): the session's start time, its code, the
@@ -383,7 +384,7 @@
                              what is read is what the day's block says. -->
                         <div id="f-talks" hidden></div>
                       </div>
-                      <div class="oa-field">
+                      <div class="oa-field" id="f-jobTalk-details" hidden>
                         <span class="oa-label-text">Your INFORMS job market presentation</span>
                         <p class="oa-hint"><strong>All fields below are required if you are presenting.</strong> Enter the details of your own job talk
                         below. Use the talk's individual start and end times, rather than the whole session.

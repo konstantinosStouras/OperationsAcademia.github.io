@@ -30,6 +30,15 @@ assert.equal(Cal.links({ ...row, informsDays: [] }), null);
 assert.equal(Cal.links({ ...row, informsUrl: 'https://example.edu/' }), null);
 assert.equal(Cal.links({ ...row, jobTalk: { ...row.jobTalk, end: '13:00' } }), null);
 assert.equal(Cal.links({ ...row, jobTalk: { ...row.jobTalk, date: '2026-11-02' } }), null);
+assert.equal(Cal.links({ ...row, jobTalk: { ...row.jobTalk, title: '' } }), null);
+const updated = { ...row, cvUrl: 'https://example.edu/new-cv.pdf', webUrl: 'https://example.edu/new-profile' };
+for (const content of [new URL(Cal.googleUrl(updated)).searchParams.get('details'), Cal.calendar(updated).replace(/\r\n /g, '')]) {
+  assert.ok(content.includes(updated.cvUrl));
+  assert.ok(content.includes(updated.webUrl));
+  assert.ok(content.includes(row.name));
+  assert.ok(content.includes(row.jobTalk.title));
+  assert.ok(!content.includes(row.cvUrl));
+}
 const links = Cal.links(row);
 assert.match(links, />Google<\/a>/);
 assert.match(links, /download="informs-job-talk-demo-candidate.ics"/);
@@ -42,7 +51,7 @@ assert.deepEqual(build.jobTalk, browser.jobTalk);
 assert.equal(publicCandidateRow(build).jobTalk.secret, undefined);
 assert.equal(Cal.event(browser).minutes, 18);
 const rows = Card.cardConfig({ calendar: Cal, link: (url) => url || null, mailto: () => null }).rows(row);
-assert.equal(rows.filter(r => r.label === 'INFORMS job talk').length, 1);
+assert.equal(rows.filter(r => r.label === 'INFORMS job talk').length, 0);
 assert.ok(rows.some(r => r.label === 'Presenting at INFORMS'));
-assert.ok(rows.some(r => r.label === 'INFORMS talk(s)' && r.html === row.informsUrl));
+assert.ok(rows.some(r => r.label === 'INFORMS talk(s)' && r.html.includes(row.informsUrl) && r.html.includes('Add to calendar:') && r.html.includes('>Google</a>') && r.html.includes('>Outlook/Apple</a>')));
 console.log('candidate-calendar: checks passed');
