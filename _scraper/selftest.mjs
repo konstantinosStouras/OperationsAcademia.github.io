@@ -5110,13 +5110,13 @@ async function testLegacyTables() {
      that drops the query and show every candidate instead of the school's.
      The page names the target; the key it names must be the one the
      one-pager's candidates mount actually reads, prefix included. */
-  const idxHtml = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+  const idxHtml = await readFile(path.join(HERE, '..', 'assets', 'oa-candidates-page.js'), 'utf8');
   const candPrefix = (idxHtml.match(/mount: '#oa-candidates',[\s\S]{0,400}?urlPrefix: '([^']*)'/) || [])[1];
   ok(candPrefix !== undefined, 'index.html: the candidates mount declares its URL prefix');
-  ok(/candidatesHref: function \(q\) \{ return '\.\/\?/.test(uniHtml),
+  ok(uniHtml.includes("candidatesHref: function (q) { return 'candidates?c_affiliation=' + q; }"),
     'universities.html names where the candidates list lives, rather than taking the default');
   ok(candPrefix !== undefined &&
-     uniHtml.includes(`'./?${candPrefix}affiliation=' + q + '#candidates'`),
+     uniHtml.includes(`'candidates?${candPrefix}affiliation=' + q`),
     `universities.html deep-links the candidates section on ${candPrefix}affiliation, the key it reads`);
   ok(/{ key: 'affiliation'/.test(idxHtml),
     'index.html: and the candidates mount carries an affiliation filter to receive it');
@@ -14416,8 +14416,8 @@ async function testCandidateReveal() {
     const cfg = C.cardConfig(helpers);
     const row = C.publicRowFromDoc(ok3, inject);
     eq(cfg.title(row), 'Ada Reader', 'candcard: the title is the name');
-    eq(cfg.subtitle(row), 'Operations, Kellogg School of Management, Northwestern University — PhD Candidate',
-      'candcard: the subtitle is affiliation, position');
+    eq(cfg.subtitle(row), 'PhD Candidate\nNorthwestern University · Kellogg School of Management · Operations',
+      'candcard: position and university-first affiliation occupy separate lines');
     const rows = cfg.rows(row);
     eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk', 'CV',
       'Research summary', 'Web page', 'Contact'], 'candcard: calendars preserve submitted profile information');
@@ -14453,7 +14453,7 @@ async function testCandidateReveal() {
        card disclosed the candidate's INFORMS days, which is one of the three
        things the gate withholds. The open card still reads the same facts in
        the same order. */
-    eq(trows.filter(r => r.label === 'INFORMS talk').length, 2, 'candcard: all submitted legacy talk details stay visible');
+    eq(trows.filter(r => r.label === 'INFORMS talk' && r.value).length, 2, 'candcard: all submitted legacy talk details stay visible');
     eq(C.talkRows(talky)[0].value, 'Monday · 10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
       'candcard: legacy details remain readable without being displayed as separate lines');
     ok(!trows.some((r) => /Monday|Tuesday|Sunday|Wednesday/.test(r.label || '')),
@@ -14499,9 +14499,9 @@ async function testCandidateReveal() {
      was (the page passes its OWN three link helpers) */
   ok(cardTag(index) > tagAt(index, 'oa-list.js') && cardTag(index) < index.indexOf('OACandCard.cardConfig('),
     'index.html loads oa-candcard.js after the engine and before the mount that asks it');
-  ok(/card: OACandCard\.cardConfig\(\{ link: link, uniLink: uniLink, mailto: mailto \}\)/.test(index),
+  ok(/candidateTeaserCard = OACandCard\.cardConfig\(\)/.test(index),
     'index.html: the candidate card is cardConfig with the page’s own helpers injected');
-  ok(/OACandCard\.decorate\(li, r\);/.test(index), 'index.html: onCard decorates (the updated line) then hands over to the edit layer');
+  ok(!/OACandCard\.decorate\(li, r\);/.test(index), 'index.html: school-only previews carry no owner edit actions');
   ok(!/label: 'Research area\(s\)'/.test(index), 'index.html: no inline copy of the rows remains');
   ok(/mount: '#oa-candidates'[\s\S]{0,400}urlPrefix/.test(index) && /cardOpen: OAGate\.cardOpen\(/.test(index),
     'index.html: cardOpen, urlPrefix and the filters stay inline (the gate and deep-link pins)');
@@ -16865,11 +16865,11 @@ async function testCalendars() {
      /Affiliation: Operations, Kellogg School of Management, Northwestern University, PhD Candidate/.test(tevs[0].description) &&
      /Research areas: Supply Chain Management, Queueing Theory/.test(tevs[0].description) &&
      /CV: https:\/\/example\.edu\/cv\.pdf/.test(tevs[0].description) &&
-     /Profile on Operations Academia: https:\/\/www\.operationsacademia\.org\/\?c_name=Ada%20Reader#candidates/.test(tevs[0].description),
+     /Profile on Operations Academia: https:\/\/www\.operationsacademia\.org\/candidates\?c_name=Ada%20Reader/.test(tevs[0].description),
     'talkcal: the description says the talk, the session, the room, the clock, who they are, the CV and the profile');
   ok(/not on the profile yet/.test(tevs[1].description), 'talkcal: an all-day entry says the details are still to come');
   ok(!/ada@example\.edu/.test(JSON.stringify(tevs)), 'talkcal: the address is NOT in any entry, though the row carries it');
-  eq(tevs[0].url, 'https://www.operationsacademia.org/?c_name=Ada%20Reader#candidates',
+  eq(tevs[0].url, 'https://www.operationsacademia.org/candidates?c_name=Ada%20Reader',
     'talkcal: the entry links the profile: the candidates list, narrowed to the name');
   eq(T.eventsFor([{ ...cands[0], year: 2026 }], { now: NOW }), [], 'talkcal: a season with no meeting recorded gives no entry');
   eq(T.eventsFor([cands[2]], { now: NOW }), [], 'talkcal: no presenting day, no entry');
@@ -16899,10 +16899,10 @@ async function testCalendars() {
   ok(!treads.has('email'), 'talkcal: the module never reads the address, even where the candidate published it');
   eq([...treads].filter((f) => !CANDIDATE_PUBLIC_FIELDS.includes(f)), [],
     'talkcal: every field it reads is a published one');
-  eq(T.profileUrl({ name: 'Ada Reader' }), 'https://www.operationsacademia.org/?c_name=Ada%20Reader#candidates',
+  eq(T.profileUrl({ name: 'Ada Reader' }), 'https://www.operationsacademia.org/candidates?c_name=Ada%20Reader',
     'talkcal: the profile link is the candidates list narrowed by the engine\'s own key');
   const index = await read('index.html');
-  const candMount = index.slice(index.indexOf("mount: '#oa-candidates'"), index.indexOf("V3.lazy('#oa-placements'"));
+  const candMount = await read('assets/oa-candidates-page.js');
   ok(/urlPrefix: 'c_'/.test(candMount) && /key: 'name',\s+label: 'Name',\s+type: 'text'/.test(candMount),
     'talkcal: …which the mount really declares (c_ plus name)');
 }
@@ -19242,7 +19242,7 @@ async function testJobTakedown() {
   /* EVERY PAGE THAT PRESSES ONE LOADS THE DEFINITION, and the echo it stashes
      into. A page short of either is a control that throws, or one that
      silently loses the echo -- the shape the two old copies were in. */
-  const CONSUMERS = ['oa-jobedit.js', 'oa-myjobs.js', 'oa-jobform.js'];
+  const CONSUMERS = ['oa-jobedit.js', 'oa-myjobs.js', 'oa-jobform.js', 'oa-candidateedit.js'];
   const PAGES = ['index.html', 'jobs.html', 'previous-markets.html',
     'my-postings.html', 'post-a-job.html'];
   for (const page of PAGES) {
@@ -22422,7 +22422,7 @@ async function testTopMenu() {
     const head = /<nav class="v3-nav" aria-label="Site sections">[\s\S]*?<\/nav>/.exec(src);
     if (!head) continue;                       /* the six redirect stubs */
     withNav++;
-    const nav = head[0];
+    const nav = head[0].replace(/ <span class="oa-nav-new">New<\/span>/g, "");
     const home = nm === 'index.html';
 
     /* the five top-level items, in order, and NOTHING else at the top level */
@@ -22452,7 +22452,7 @@ async function testTopMenu() {
     }
 
     /* the sheet says the same thing, as headings rather than a dropdown */
-    const sheet = /<nav aria-label="Site sections">[\s\S]*?<\/nav>/.exec(src.slice(src.indexOf('<aside class="v3-sheet"')));
+    const sheet = /<nav aria-label="Site sections">[\s\S]*?<\/nav>/.exec(src.replace(/ <span class="oa-nav-new">New<\/span>/g, '').slice(src.indexOf('<aside class="v3-sheet"')));
     ok(sheet, `${nm}: the sheet has its own nav`);
     const stop = [...sheet[0].matchAll(/^ {8}<a [^>]*>([^<]+)<\/a>/gm)].map((m) => m[1]);
     eq(stop, TOP, `${nm}: the sheet's top level matches the header's`);
@@ -22496,7 +22496,7 @@ async function testTopMenu() {
       }
     }
   }
-  eq(withNav, 23, 'every root page but the six redirect stubs carries the nav');
+  eq(withNav, 24, 'every root page but the five redirect stubs carries the nav');
 
   /* ------------------------------------------------------------ the styles */
   const css = await readFile(path.join(root, 'assets', 'v3.css'), 'utf8');
@@ -24482,7 +24482,7 @@ async function testForum() {
 
   const home = await read('index.html');
   if (announced) {
-    ok(/<a class="v3-btn ghost" href="forum">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');
+    ok(/<a class="v3-btn ghost" href="forum\?room=candidates">Candidates-only JM Forum(?: <span class="oa-nav-new">New<\/span>)?<\/a>/.test(home), 'index.html: the candidates section links the forum');
     const faq = home.slice(home.indexOf('Is there somewhere to talk to other candidates'), home.indexOf('Is my personal information published?'));
     ok(faq.length > 300 && faq.length < 2500 && /href="forum"/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
       'index.html: the FAQ names both rooms and where the forum is reached');

@@ -116,7 +116,7 @@
         return {
           blur: true,
           note: unavailable() ? NOTE_UNAVAILABLE : (opts.note || NOTE),
-          run: unavailable() ? null : signIn
+          run: unavailable() ? null : function (row) { signIn(row, opts.authMode); }
         };
       }
       if (typeof opts.full !== 'function') return null;   // open it here
@@ -136,10 +136,11 @@
       are signed in, QUEUES if the session is still restoring — so a click in
       that window is not silently lost — and opens the box if they are not. */
   var pending = '';
-  function signIn(row) {
+  function signIn(row, mode) {
     pending = String((row && row.id) || '');
     var A = G.OAAccounts;
-    if (A && A.whenSignedIn) A.whenSignedIn(function () {});
+    if (mode && A && A.openAuth) A.openAuth(mode);
+    else if (A && A.whenSignedIn) A.whenSignedIn(function () {});
   }
 
   /**

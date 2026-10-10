@@ -403,6 +403,27 @@
     return parts[parts.length - 1].trim() || name;
   }
 
+  /* Display the university first, preserving the submitted school and group. */
+  function affiliationLine(row) {
+    if (row.institution) return [row.institution, row.school, row.unit].filter(Boolean).join(' · ');
+    var original = String(row.affiliation || '').trim();
+    var university = universityName(original);
+    var parts = original.split(',');
+    var cut = parts.length - 1;
+    var canon = (root && root.OASchools && root.OASchools.canonInstitution) || function (v) { return v; };
+    for (var i = 0; i < parts.length; i++) {
+      if (canon(parts.slice(i).join(',').trim()) === university) { cut = i; break; }
+    }
+    var prefix = parts.slice(0, cut).map(function (v) { return v.trim(); });
+    var schoolAt = -1;
+    for (var j = prefix.length - 1; j >= 0; j--) {
+      if (/school|faculty|college/i.test(prefix[j])) { schoolAt = j; break; }
+    }
+    var school = schoolAt < 0 ? '' : prefix.slice(schoolAt).join(', ');
+    var group = (schoolAt < 0 ? prefix : prefix.slice(0, schoolAt)).join(', ');
+    return [university, school, group].filter(Boolean).join(' · ');
+  }
+
   function defaultUniLink(name) {
     name = universityName(name);
     if (!name) return null;
@@ -436,7 +457,7 @@
     return {
       title: function (r) { return r.name; },
       subtitle: function (r) {
-        return [r.affiliation, r.position].filter(Boolean).join(' \u2014 ');
+        return [r.position, affiliationLine(r)].filter(Boolean).join('\n');
       },
       rows: function (r) {
         var presentationLink = (r.informsDays || []).length ? link(r.informsUrl, 'link') : null;
@@ -559,6 +580,7 @@
     mount: mount,
     link: defaultLink,
     universityName: universityName,
+    affiliationLine: affiliationLine,
     uniLink: defaultUniLink,
     mailto: defaultMailto
   };

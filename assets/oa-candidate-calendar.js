@@ -24,7 +24,7 @@
         !TIME.test(t.end || '') || minutes(t.end) <= minutes(t.at) || !text(t.location) || !text(t.title)) return null;
     var day = (row.informsDays || []).filter(function (d) { return Informs.dateOf(meeting, d) === t.date; });
     if (!day.length) return null;
-    var profile = 'https://www.operationsacademia.org/?c_name=' + encodeURIComponent(row.name) + '#candidates';
+    var profile = 'https://www.operationsacademia.org/candidates?c_name=' + encodeURIComponent(row.name);
     var details = [row.name, [row.position, row.affiliation].filter(Boolean).join(' — ')];
     if (t.title) details.push('Job talk: ' + t.title);
     details.push('INFORMS presentation: ' + url);

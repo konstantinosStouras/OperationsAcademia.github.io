@@ -250,7 +250,7 @@ export const PAGES = [
     why: 'e-mail verification landing page (noindex), reached from the link in a message; an og:url on it would claim an identity nobody should share' },
   { file: 'forum.html', card: false,
     why: 'members-only forum (noindex), answered only to signed-in accounts; an og:url on it would claim a preview for a page nobody can share into' },
-  { file: 'candidates.html', card: false, why: 'redirect stub → /#candidates' },
+  { file: 'candidates.html', url: '/candidates', title: 'Candidates — Operations Academia', ogTitle: 'Job market candidates in Operations', description: 'Explore job market candidates in Operations, sorted by surname. Registered users can search profiles and view CVs and INFORMS talks.' },
   { file: 'placements.html', card: false, why: 'redirect stub → /#placements' },
   { file: 'faqs.html', card: false, why: 'redirect stub → /#faq' },
   { file: 'contact.html', card: false, why: 'redirect stub → /#contact' },
