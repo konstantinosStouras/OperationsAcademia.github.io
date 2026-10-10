@@ -439,11 +439,14 @@
         return [r.affiliation, r.position].filter(Boolean).join(' \u2014 ');
       },
       rows: function (r) {
+        var presentationLink = (r.informsDays || []).length ? link(r.informsUrl, 'link') : null;
+        var invitations = calendar && calendar.links ? calendar.links(r) : null;
+        var talkLinks = [presentationLink, invitations ? 'Add to calendar: ' + invitations : null].filter(Boolean).join(' · ') || null;
         return [
           { label: 'Research area(s)',      value: (r.researchAreas || []).join(', ') }
         ].concat((r.informsDays || []).length ? [
           { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
-          { label: 'INFORMS talk(s)', html: link(r.informsUrl, 'link') },          { label: 'INFORMS job talk', html: calendar && calendar.links ? calendar.links(r) : null }
+          { label: 'INFORMS talk(s)', html: talkLinks }
         ].concat(talkRows(r)) : [], [
           { label: 'CV',                    html: link(r.cvUrl, 'link to CV') },
           // the form stopped asking for a research summary (2026-08-24);
