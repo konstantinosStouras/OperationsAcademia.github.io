@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-10T15:17:49.323Z",
- "members": 312,
+ "generated": "2026-10-10T19:22:11.374Z",
+ "members": 314,
  "k": 3,
  "affiliation": {
-  "listed": 228,
+  "listed": 230,
   "other": 44,
   "none": 40
  },
@@ -121,6 +121,11 @@
     "members": 3
    },
    {
+    "name": "University of California, Los Angeles (UCLA)",
+    "country": "United States",
+    "members": 3
+   },
+   {
     "name": "University of Maryland",
     "country": "United States",
     "members": 3
@@ -151,14 +156,14 @@
     "members": 3
    }
   ],
-  "rest": 124
+  "rest": 123
  },
  "countries": {
   "count": 15,
   "shown": [
    {
     "name": "United States",
-    "members": 145
+    "members": 147
    },
    {
     "name": "Canada",
