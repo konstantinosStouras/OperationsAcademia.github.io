@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-10T08:56:26.453Z",
+ "generated": "2026-10-10T10:33:06.390Z",
  "members": 312,
  "k": 3,
  "affiliation": {
@@ -158,7 +158,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 142
+    "members": 145
    },
    {
     "name": "Canada",
@@ -194,6 +194,6 @@
    }
   ],
   "rest": 8,
-  "unknown": 98
+  "unknown": 95
  }
 }
