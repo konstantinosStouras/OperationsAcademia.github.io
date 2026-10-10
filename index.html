@@ -364,9 +364,9 @@
             else&rsquo;s at that moment.</p>
           </div>
 
-          <div class="oa-preview-heading"><h3>Ten candidate previews</h3><a class="oa-view-all" href="candidates">View all candidates →</a></div>
+          <div id="oa-candidate-teaser" hidden><div class="oa-preview-heading"><h3>Ten candidate previews</h3><a class="oa-view-all" href="candidates">View all candidates →</a></div>
           <div id="oa-candidates"></div>
-          <p><a class="oa-view-all" href="candidates">View all candidates →</a></p>
+          <p><a class="oa-view-all" href="candidates">View all candidates →</a></p></div>
         </div>
       </section>
 
@@ -1334,7 +1334,7 @@
             if (surname) return surname;
             return (a.first || a.name || '').localeCompare(b.first || b.name || '', 'en', { sensitivity: 'base' });
           }
-      V3.lazy('#oa-candidates', function () {
+      V3.lazy('#candidates', function () {
         var candidateTeaserCard = OACandCard.cardConfig();
         candidateTeaserCard.title = function (r) { return OACandCard.universityName(r.affiliation); };
         candidateTeaserCard.subtitle = function () { return ''; };
@@ -1374,6 +1374,7 @@
              preview share (owner, 2026-09-04): title, subtitle and the seven
              labelled rows in their order. This page's own three link helpers
              are passed in, so the list's output is exactly what it was. */
+          onRender: function (snapshot) { document.getElementById('oa-candidate-teaser').hidden = !snapshot.rows.length; },
           card: candidateTeaserCard
         });
         var host = document.getElementById('oa-candidates');
