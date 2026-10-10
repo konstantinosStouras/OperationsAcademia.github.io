@@ -37,6 +37,7 @@ import {
   healReviewDate,
   marketYear, marketYearReview, inCurrentMarket, collectChanges, renderChangesHtml, postedBy,
   ownerTag,
+  universitiesLink, ownUniversitiesLink,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
   specMatches,
 } from './jobs-model.mjs';
@@ -1179,7 +1180,9 @@ async function main() {
      different way: `diffRows` reads BOTH SIDES through `countriesOf`, so a
      row that predates the field answers its own single country and the first
      run reports nothing, while a poster genuinely adding a campus does. */
-  const rows = healedRows.map(withMarketYears).map(withCountries);
+  const rows = healedRows.map(withMarketYears).map(withCountries).map(row =>
+    ownUniversitiesLink(row.furtherInfoUrl)
+      ? {...row, furtherInfoUrl:universitiesLink(row.institution)} : row);
 
   /* A MULTI-COUNTRY POSTING IS EXEMPT FROM THE COUNTRY HEAL, so the one thing
      that heal would have caught is NAMED instead — reported, never repaired,

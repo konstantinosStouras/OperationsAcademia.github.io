@@ -280,6 +280,7 @@
      NUS Business School, so the university has to be known before they can be
      told apart. Keyed by university, then by the name as posted. */
   var SCOPED_SCHOOL_ALIASES = {
+    'Yale University': { 'Yale School of Management': 'School of Management' },
     'Auburn University': {
       'Harbert College of Business': 'Raymond J. Harbert College of Business'
     },

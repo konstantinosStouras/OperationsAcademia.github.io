@@ -3596,7 +3596,8 @@ async function testRenamedNamesStillFound() {
 
   ok(matches('Marketing') > 0, 'an ordinary word still matches');
   ok(matches('Wibble') === 0, 'a word nobody has posted still matches nothing');
-  ok(matches('Systems Operations') === 0, 'and it is a substring search, not a bag of words');
+  ok(!M.matchesJob({institution:'Example University',department:'Operations and Systems'},
+    {topics:['jobs'],text:'Systems Operations'}), 'and it is a substring search, not a bag of words');
   ok(matches('ZZQX') === 0, 'an acronym that spells no initials matches nothing');
 
   /* The jobs page and the e-mails must read a search the same way, or "what I
@@ -3817,7 +3818,14 @@ async function testScopedUnits() {
       const elsewhere = Object.entries(bySchool)
         .filter(([s]) => s && s !== school)
         .filter(([, list]) => list.includes(name)).map(([s]) => s);
-      eq(elsewhere, [], `and no other school at ${uni} claims "${name}"`);
+      // The directory can legitimately list a constituent school as well
+      // as its parent college (Cornell's Nolan school is one example).
+      const directoryRows = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'directory.json'), 'utf8'));
+      const unrecorded = elsewhere.filter(schoolName => !directoryRows.some(row =>
+        S.institutionKey(row.institution) === S.institutionKey(uni) &&
+        S.fold(S.canonSchool(row.school || '', uni)) === S.fold(S.canonSchool(schoolName, uni)) &&
+        S.canonUnit(row.department || '', uni) === name));
+      eq(unrecorded, [], `no unrecorded school at ${uni} claims "${name}"`);
       eq(bySchool[school].filter((u) => variants.slice(0, 2).includes(u)), [],
         `and the names it replaced are gone from ${school}`);
     }
