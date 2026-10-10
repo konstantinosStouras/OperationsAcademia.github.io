@@ -1,5 +1,5 @@
       document.addEventListener('DOMContentLoaded', function () {
-        var inCurrentMarket = OAJobNav.inCurrentMarket;
+        function inCurrentMarket(row) { return OAJobNav.inCurrentMarket(row); }
         var candidateCard = OACandCard.cardConfig();
         candidateCard.title = function (r) { return OAGate.signedIn() ? r.name : OACandCard.universityName(r.affiliation); };
         candidateCard.subtitle = function (r) { return OAGate.signedIn() ? [r.affiliation, r.position].filter(Boolean).join(' — ') : ''; };
