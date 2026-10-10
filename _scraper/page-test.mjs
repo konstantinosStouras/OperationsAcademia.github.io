@@ -9523,7 +9523,7 @@ for (const w of [320, 360, 390, 430]) {
     }));
     ok(back.inst === '' && back.monday && back.block && back.title === 'Queueing in Practice',
       'draft: reload restores the talk while the new application affiliation stays blank');
-    ok(/Draft Keeper/.test(back.preview), 'draft: …with the preview repainted from it');
+    ok(!/Draft Keeper/.test(back.preview), 'draft: the incomplete affiliation does not render a candidate card');
     await q.fill('#f-institution', 'Somewhere University');
     await q.fill('#f-unit', 'Operations');
     await q.fill('#f-cvUrl', 'https://example.edu/cv.pdf');
