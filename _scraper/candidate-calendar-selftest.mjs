@@ -30,6 +30,15 @@ assert.equal(Cal.links({ ...row, informsDays: [] }), null);
 assert.equal(Cal.links({ ...row, informsUrl: 'https://example.edu/' }), null);
 assert.equal(Cal.links({ ...row, jobTalk: { ...row.jobTalk, end: '13:00' } }), null);
 assert.equal(Cal.links({ ...row, jobTalk: { ...row.jobTalk, date: '2026-11-02' } }), null);
+assert.equal(Cal.links({ ...row, jobTalk: { ...row.jobTalk, title: '' } }), null);
+const updated = { ...row, cvUrl: 'https://example.edu/new-cv.pdf', webUrl: 'https://example.edu/new-profile' };
+for (const content of [new URL(Cal.googleUrl(updated)).searchParams.get('details'), Cal.calendar(updated).replace(/\r\n /g, '')]) {
+  assert.ok(content.includes(updated.cvUrl));
+  assert.ok(content.includes(updated.webUrl));
+  assert.ok(content.includes(row.name));
+  assert.ok(content.includes(row.jobTalk.title));
+  assert.ok(!content.includes(row.cvUrl));
+}
 const links = Cal.links(row);
 assert.match(links, />Google<\/a>/);
 assert.match(links, /download="informs-job-talk-demo-candidate.ics"/);
