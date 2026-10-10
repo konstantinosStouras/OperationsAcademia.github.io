@@ -9341,8 +9341,8 @@ for (const w of [320, 360, 390, 430]) {
     }));
     eq(a.heading, 'How your profile will appear', 'own card: headed as a preview before the reveal');
     eq([a.cards, a.title], [1, 'Ada Reader'], 'own card: one card, and it is the reader’s own');
-    eq(a.sub, 'Operations, School of Business, Somewhere University — PhD Candidate',
-      'own card: the affiliation line the build would publish, joined smallest first');
+    eq(a.sub, 'PhD Candidate\nSomewhere University · School of Business · Operations',
+      'own card: role and university-first affiliation occupy separate lines');
     ok(!/Nobody Elsewhere|Other University/.test(a.html),
       'own card: somebody else’s profile is nowhere in the document');
     ok(/Only you and the site's maintainer can see this until the reveal/.test(a.note),
