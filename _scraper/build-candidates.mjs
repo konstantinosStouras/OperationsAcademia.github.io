@@ -43,6 +43,7 @@ import { marketYear, inCurrentMarket, ownerTag, removalSpecs, specMatches } from
 import { adminUids } from './_mail.mjs';
 import { ADMIN_EMAILS } from './build-candidate-stats.mjs';
 import { createRequire } from 'node:module';
+import { candidatePreviews } from './candidate-previews.mjs';
 
 // the reveal INSTANT (14:00 UTC on the reveal day), the one definition the
 // gate itself calls; read here only to name it in the log
@@ -451,6 +452,12 @@ async function main() {
     (await readJson(path.join(DATA, 'candidates-reveal.json'), {})).revealAt, now);
   const waiting = rows.filter((r) => inCurrentMarket(r, now));
   const projected = reveal.held ? [] : rows;
+  const previewsPath = path.join(DATA, 'candidate-previews.json');
+  const previews = candidatePreviews(waiting);
+  if (!DRY && JSON.stringify(await readJson(previewsPath, null)) !== JSON.stringify(previews)) {
+    await writeFile(previewsPath, JSON.stringify(previews, null, 1) + '\n');
+    log('wrote school-only candidate-previews.json');
+  }
   if (reveal.held) {
     log(`reveal gate: ${waiting.length} profile(s) held until ` +
         (reveal.revealAt

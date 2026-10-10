@@ -42,6 +42,7 @@ jobs:
       - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
       - run: node _scraper/build-all.mjs --candidates-only --selftest
       - run: node _scraper/candidate-calendar-selftest.mjs
+      - run: node _scraper/candidate-previews.mjs
       - name: Check, build and publish only candidate data
         run: |
           set -euo pipefail
@@ -55,11 +56,11 @@ jobs:
           for attempt in 1 2 3; do
             node _scraper/build-all.mjs --candidates-only
             node _scraper/selftest.mjs --publishing
-            if git diff --quiet -- data/candidates.json data/candidates-meta.json; then
+            if git diff --quiet -- data/candidates.json data/candidates-meta.json data/candidate-previews.json; then
               echo 'Candidate dataset is current.'
               exit 0
             fi
-            git add data/candidates.json data/candidates-meta.json
+            git add data/candidates.json data/candidates-meta.json data/candidate-previews.json
             git commit -m 'OA candidates: publish the checked candidate dataset'
             if git push origin HEAD:master; then exit 0; fi
             # This is an ephemeral checkout containing generated data only.

@@ -123,7 +123,7 @@
       var href = opts.full(row);
       if (!href) return null;
       return {
-        blur: false,
+        blur: typeof opts.blur === 'function' && !!opts.blur(row),
         note: opts.fullNote || NOTE_FULL,
         run: function () { G.location.href = href; }
       };

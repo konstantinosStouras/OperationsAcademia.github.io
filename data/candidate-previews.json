@@ -1,0 +1,62 @@
+[
+ {
+  "id": "candidate-preview-1",
+  "year": 2027,
+  "affiliation": "University of Toronto",
+  "previewOnly": true
+ },
+ {
+  "id": "candidate-preview-2",
+  "year": 2027,
+  "affiliation": "Kazakh-American Free University",
+  "previewOnly": true
+ },
+ {
+  "id": "candidate-preview-3",
+  "year": 2027,
+  "affiliation": "Massachusetts Institute of Technology (MIT)",
+  "previewOnly": true
+ },
+ {
+  "id": "candidate-preview-4",
+  "year": 2027,
+  "affiliation": "University of California, Los Angeles (UCLA)",
+  "previewOnly": true
+ },
+ {
+  "id": "candidate-preview-5",
+  "year": 2027,
+  "affiliation": "University of Mannheim",
+  "previewOnly": true
+ },
+ {
+  "id": "candidate-preview-6",
+  "year": 2027,
+  "affiliation": "University of Alberta",
+  "previewOnly": true
+ },
+ {
+  "id": "candidate-preview-7",
+  "year": 2027,
+  "affiliation": "University of Pennsylvania",
+  "previewOnly": true
+ },
+ {
+  "id": "candidate-preview-8",
+  "year": 2027,
+  "affiliation": "Xi'an Jiaotong University",
+  "previewOnly": true
+ },
+ {
+  "id": "candidate-preview-9",
+  "year": 2027,
+  "affiliation": "University of Washington",
+  "previewOnly": true
+ },
+ {
+  "id": "candidate-preview-10",
+  "year": 2027,
+  "affiliation": "Microsoft",
+  "previewOnly": true
+ }
+]
