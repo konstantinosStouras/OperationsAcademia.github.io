@@ -328,6 +328,9 @@ async function signedInPage(url, opts = {}) {
     await p.route(opts.route[0], (r) => r.fulfill({ status: 200,
       contentType: 'application/json', body: opts.route[1] }));
   }
+  if (/^candidates(?:\.html)?(?:[?#]|$)/.test(url)) {
+    await p.route('**/data/candidates-reveal.json', r => r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({revealAt:opts.holdCandidates ? '2099-01-01' : '2026-01-01'})}));
+  }
   await p.goto(BASE + url, { waitUntil: opts.waitUntil || 'load' });
   if (opts.wait !== false) {
     await p.waitForSelector(opts.selector || '.oa-card', { timeout: 15000 });
@@ -347,6 +350,35 @@ const jsErrors = [];
 page.on('pageerror', (e) => jsErrors.push(e.message));
 
 /* ------------------------------------------------------------- first paint */
+
+
+/* The candidate overview and dedicated list have distinct audiences. */
+{
+  const rows=Array.from({length:12},(_,i)=>({id:'audience-'+i,year:marketYear(),posted:new Date().toISOString().slice(0,10),first:'Candidate',last:String(i).padStart(2,'0'),name:'Candidate '+String(i).padStart(2,'0'),affiliation:'Example University',position:'PhD Candidate',cvUrl:'https://example.edu/cv.pdf',researchAreas:['Operations']}));
+  const seed=['**/data/candidates.json',JSON.stringify(rows)];
+  const {ctx,page:q,errors}=await signedOutPage('index.html',{wait:false,route:seed});
+  await q.evaluate(()=>document.getElementById('oa-candidates').scrollIntoView());
+  await q.waitForSelector('#oa-candidates .oa-card');
+  eq(await q.locator('#oa-candidates .oa-card').count(),10,'candidate overview: exactly ten previews');
+  ok(!/Candidate 00/.test(await q.locator('#oa-candidates').innerText()),'candidate overview: names are withheld');
+  ok(await q.locator('#oa-candidates .oa-card-lock-note').first().isHidden(),'candidate overview: no repeated sign-in note');
+  await q.locator('#oa-candidates .oa-card-head').first().click();
+  await q.waitForSelector('.oa-modal');
+  ok(/Create/.test(await q.locator('.oa-modal').innerText()),'candidate overview: pressing a preview opens registration');
+  eq(errors,[],'candidate overview: no script errors');await ctx.close();
+  const held=await signedInPage('candidates.html',{wait:false,route:seed,holdCandidates:true});
+  await held.page.waitForSelector('#oa-reveal-note');await held.page.waitForTimeout(200);
+  ok(await held.page.locator('#oa-candidates-content').isHidden(),'candidate page: before reveal the full list stays hidden');
+  eq(await held.page.locator('#oa-candidates .oa-card').count(),0,'candidate page: no profile rendered before reveal');await held.ctx.close();
+  const reader=await signedInPage('candidates.html',{route:seed});
+  eq(await reader.page.locator('#oa-candidates .oa-card-actions').count(),0,'candidate page: regular readers have no edit controls');
+  await reader.page.evaluate(()=>OACandidateEdit.__setPermissionsForTest({ready:true,byId:{'audience-0':'audience-0'},own:{'audience-0':true}}));
+  eq(await reader.page.locator('#oa-candidates .oa-card-actions').count(),1,'candidate page: owner gets controls on only their profile');
+  eq(await reader.page.locator('.oa-card-actions .oa-jobbtn-edit').first().innerText(),'Edit my profile','candidate page: owner wording');
+  await reader.page.locator('#oa-candidates .oa-resultbar-bottom button[aria-label="Next page"]').click();
+  eq(await reader.page.locator('#oa-candidates .oa-count').allTextContents(),['11 - 12 / 12','11 - 12 / 12'],'candidate page: both pagination bars stay synchronized');
+  eq(reader.errors,[],'candidate page: no script errors');await reader.ctx.close();
+}
 
 await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card', { timeout: 15000 });

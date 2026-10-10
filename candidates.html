@@ -195,7 +195,7 @@
       <section class="v3-pa-hero"><div class="v3-container">
         <span class="v3-kicker">Candidates</span>
         <h1 class="v3-h1" id="oa-candidates-heading">Job market candidates (2026-2027)</h1>
-        <p class="v3-lede" style="margin-top:14px">Explore this season’s candidates, sorted by surname. Sign in to search and view their profiles, CVs and INFORMS talks.</p>
+        <p class="v3-lede" id="oa-candidates-intro" hidden style="margin-top:14px">Explore this season’s candidates, sorted by surname. Sign in to search and view their profiles, CVs and INFORMS talks.</p>
         <div class="v3-cta-row" style="margin-top:24px">
           <a class="v3-btn primary" href="post-a-candidate">Create your candidate profile</a>
           <a class="v3-btn ghost" href="forum?room=candidates">Candidates-only JM Forum <span class="oa-nav-new">New</span></a>
@@ -203,13 +203,15 @@
         </div>
       </div></section>
       <div class="v3-container" style="padding-bottom:90px">
-        <p class="v3-mut" id="oa-reveal-note" hidden></p>
+        <p class="v3-mut" id="oa-reveal-note">The candidate list will open at the announced reveal time. You can create or update your profile now.</p>
+        <div id="oa-candidates-content" hidden>
         <div class="v3-lock-card" id="v3-lock-card" hidden><div class="v3-lock-card-inner">
           <h3>Sign in to view candidate profiles</h3>
           <p>The schools are listed below. Candidate names, research interests, CVs, contact details and INFORMS talk calendars are available to registered users. Creating an account is free.</p>
           <div class="v3-cta-row"><button class="v3-btn primary" type="button" id="v3-lock-signin">Sign in</button><button class="v3-btn ghost" type="button" id="v3-lock-register">Create account</button></div>
         </div></div>
         <div id="oa-candidates"></div>
+        </div>
       </div>
     </main>
 

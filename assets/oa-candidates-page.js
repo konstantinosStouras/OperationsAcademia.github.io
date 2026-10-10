@@ -1,4 +1,25 @@
       document.addEventListener('DOMContentLoaded', function () {
+        var started = false, checking = false;
+        function checkReveal() {
+          if (started || checking) return;
+          checking = true;
+          fetch('/data/candidates-reveal.json', {cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(meta){
+            var note = document.getElementById('oa-reveal-note');
+            if (!OAReveal.isRevealed(meta.revealAt)) {
+              if (meta.revealAt) note.textContent='The candidate list opens on ' + OAReveal.formatDay(meta.revealAt) + ' at 14:00 UTC. Until then, candidate profiles remain private. You can create or update your profile now.';
+              return;
+            }
+            started = true;
+            note.hidden = true;
+            document.getElementById('oa-candidates-content').hidden = false;
+            document.getElementById('oa-candidates-intro').hidden = false;
+            mountCandidates();
+          }).catch(function(){}).then(function(){checking=false;});
+        }
+        checkReveal();
+        setInterval(checkReveal, 60000);
+        document.addEventListener('visibilitychange', function(){if(!document.hidden)checkReveal();});
+        function mountCandidates() {
         function inCurrentMarket(row) { return OAJobNav.inCurrentMarket(row); }
         var candidateCard = OACandCard.cardConfig();
         candidateCard.title = function (r) { return OAGate.signedIn() ? r.name : OACandCard.universityName(r.affiliation); };
@@ -79,13 +100,6 @@
         OAAccounts.onChange(updateLock);
         document.getElementById('v3-lock-signin').addEventListener('click', function () { OAAccounts.openAuth(); });
         document.getElementById('v3-lock-register').addEventListener('click', function () { OAAccounts.openAuth('register'); });
-        fetch('/data/candidates-reveal.json', {cache:'no-cache'}).then(function(r){return r.json();}).then(function(meta){
-          var note=document.getElementById('oa-reveal-note');
-          if (meta.revealAt && !OAReveal.isRevealed(meta.revealAt)) {
-            note.textContent='Candidate profiles will appear together on ' + OAReveal.formatDay(meta.revealAt) + ' at 14:00 UTC. Until then, profiles remain private.';
-            note.hidden=false;
-          }
-        }).catch(function(){});
         /* A page opened before the reveal must not keep its cached empty list
            forever. Read only public snapshots after the announced instant. */
         var refreshingCandidates = false;
@@ -110,5 +124,5 @@
         document.addEventListener('visibilitychange', function () {
           if (!document.hidden) refreshRevealedCandidates();
         });
+        }
       });
-
