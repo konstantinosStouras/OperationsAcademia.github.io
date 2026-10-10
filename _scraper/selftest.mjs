@@ -14419,7 +14419,7 @@ async function testCandidateReveal() {
     eq(cfg.subtitle(row), 'Operations, Kellogg School of Management, Northwestern University — PhD Candidate',
       'candcard: the subtitle is affiliation, position');
     const rows = cfg.rows(row);
-    eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk(s)', 'CV',
+    eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'INFORMS talk', 'CV',
       'Research summary', 'Web page', 'Contact'], 'candcard: calendars preserve submitted profile information');
     eq(rows[0].value, 'Operations, Queueing Theory', 'candcard: areas joined');
     eq(calls.map((c) => c[0]), ['link', 'link', 'link', 'link', 'mail'], 'candcard: document and contact links go through injected helpers');

@@ -53,5 +53,5 @@ assert.equal(Cal.event(browser).minutes, 18);
 const rows = Card.cardConfig({ calendar: Cal, link: (url) => url || null, mailto: () => null }).rows(row);
 assert.equal(rows.filter(r => r.label === 'INFORMS job talk').length, 0);
 assert.ok(rows.some(r => r.label === 'Presenting at INFORMS'));
-assert.ok(rows.some(r => r.label === 'INFORMS talk(s)' && r.html.includes(row.informsUrl) && r.html.includes('Add to calendar:') && r.html.includes('>Google</a>') && r.html.includes('>Outlook/Apple</a>')));
+assert.ok(rows.some(r => r.label === 'INFORMS talk' && r.html.includes(row.informsUrl) && r.html.includes('Add to calendar:') && r.html.includes('>Google</a>') && r.html.includes('>Outlook/Apple</a>')));
 console.log('candidate-calendar: checks passed');
