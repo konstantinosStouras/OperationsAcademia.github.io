@@ -2154,6 +2154,10 @@
    "n": 0
   },
   {
+   "v": "Sogang University",
+   "n": 0
+  },
+  {
    "v": "Southern University of Science and Technology (SUSTech)",
    "n": 0
   },
@@ -10315,6 +10319,11 @@
      "Digital Technology"
     ]
    }
+  },
+  "Sogang University": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "Southeastern Louisiana University": {
    "schools": [

@@ -8791,6 +8791,14 @@
   "lastPosted": "2025-10-03"
  },
  {
+  "id": "sogang-university",
+  "institution": "Sogang University",
+  "type": "University",
+  "sources": [
+   "members"
+  ]
+ },
+ {
   "id": "southeastern-louisiana-university____supply-chain-management",
   "institution": "Southeastern Louisiana University",
   "department": "Supply Chain Management",
