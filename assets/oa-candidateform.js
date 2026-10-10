@@ -1611,7 +1611,11 @@
        the form's own delegated change listener repaints the preview */
     buildTalkBlocks();
     Array.prototype.forEach.call(document.querySelectorAll('input[name="informsDays"]'),
-      function (box) { box.addEventListener('change', syncTalkBlocks); });
+      function (box) { box.addEventListener('change', function () {
+        if (box.checked) Array.prototype.forEach.call(document.querySelectorAll('input[name="informsDays"]'),
+          function (other) { if (other !== box) other.checked = false; });
+        syncTalkBlocks();
+      }); });
     var notAttending = $('f-informs-none');
     if (notAttending) notAttending.addEventListener('change', function () {
       if (notAttending.checked) Array.prototype.forEach.call(
