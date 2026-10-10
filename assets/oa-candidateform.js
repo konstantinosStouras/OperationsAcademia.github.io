@@ -1023,7 +1023,7 @@
       if (!raw) return;
       var data = JSON.parse(raw);
       Object.keys(data).forEach(function (id) {
-        if (id === '__checks' || id === '__talks') return;
+        if (id === '__checks' || id === '__talks' || ['f-institution', 'f-school', 'f-unit'].indexOf(id) !== -1) return;
         var el = $(id);
         if (el && !el.value) el.value = data[id];
       });
@@ -1587,6 +1587,9 @@
   function wireVocab() {
     var inst = $('f-institution'), school = $('f-school'), unit = $('f-unit');
     if (!inst || !school || !unit) return;
+    // A new application starts blank, including after browser form restoration.
+    // Editing loads the saved candidate document separately.
+    if (!EDIT_ID) [inst, school, unit].forEach(function (el) { el.value = ''; });
 
     [inst, school, unit].forEach(function (el) {
       el.addEventListener('input', paintAffiliationPreview);
