@@ -31,9 +31,13 @@
   "school": "Faculty of Engineering and Science",
   "department": "Materials and Production",
   "type": "University",
+  "country": "Denmark",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-28"
  },
  {
   "id": "aalto-university____production-om",
@@ -109,9 +113,13 @@
   "school": "College of Business Administration",
   "department": "Management Science",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-04"
  },
  {
   "id": "abu-dhabi-university____om",
@@ -132,9 +140,13 @@
   "school": "Robert B. Willumstad School of Business",
   "department": "Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "ahmedabad-university__amrut-mody-school-of-management__data-analytics-decision-sciences-information-systems-innovat",
@@ -142,9 +154,13 @@
   "school": "Amrut Mody School of Management",
   "department": "Data Analytics, Decision Sciences, Information Systems, Innovation and Technology Management, Operations Management, Operations Research, and Applied Statistics",
   "type": "Business School",
+  "country": "India",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-16"
  },
  {
   "id": "air-force-institute-of-technology____scm-and-logistics",
@@ -429,9 +445,13 @@
   "school": "Ira A. Fulton Schools of Engineering",
   "department": "Computing and Augmented Intelligence",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 3,
+  "lastPosted": "2026-09-29"
  },
  {
   "id": "arizona-state-university__w-p-carey-school-of-business__information-systems",
@@ -494,9 +514,13 @@
   "school": "Faculty of Engineering and Computer Science",
   "department": "Digital Production Technologies",
   "type": "University",
+  "country": "Germany",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
  },
  {
   "id": "auburn-university",
@@ -551,9 +575,13 @@
   "school": "Raymond J. Harbert College of Business",
   "department": "Business Analytics and Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-18"
  },
  {
   "id": "auburn-university__harbert-college-of-business__supply-chain-management",
@@ -584,17 +612,21 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2025-11-06"
+  "n": 2,
+  "lastPosted": "2026-10-03"
  },
  {
   "id": "augsburg-university____business-administration-and-economics",
   "institution": "Augsburg University",
   "department": "Business Administration and Economics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 2,
+  "lastPosted": "2026-08-11"
  },
  {
   "id": "augusta-university____mis",
@@ -672,8 +704,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2026-08-21"
+  "n": 3,
+  "lastPosted": "2026-09-24"
  },
  {
   "id": "baruch-college-cuny____or-om-da",
@@ -758,9 +790,13 @@
   "school": "W. Fielding Rubel School of Business",
   "department": "Business Technology and Artificial Intelligence",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-18"
  },
  {
   "id": "belmont-university__jack-c-massey-college-of-business__business-systems-and-analytics",
@@ -787,8 +823,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2026-07-20"
+  "n": 3,
+  "lastPosted": "2026-08-05"
  },
  {
   "id": "bergen-community-college__division-of-mathematics-science-and-technology__computer-science-engineering-and-information-technologies",
@@ -796,9 +832,13 @@
   "school": "Division of Mathematics, Science, and Technology",
   "department": "Computer Science, Engineering and Information Technologies",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-13"
  },
  {
   "id": "berry-college____om-scm",
@@ -1063,9 +1103,13 @@
   "school": "Allen W. and Carol M. Schmidthorst College of Business",
   "department": "Business Analytics, Economics and Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
  },
  {
   "id": "bradley-university__foster-college-of-business__management-information-systems",
@@ -1073,9 +1117,13 @@
   "school": "Foster College of Business",
   "department": "Management Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-02"
  },
  {
   "id": "brandeis-university__heller-school-for-social-policy-and-management",
@@ -1098,9 +1146,13 @@
   "school": "Louis M. Ricciardi College of Business",
   "department": "Management and Marketing",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
  },
  {
   "id": "brigham-young-university__marriott-school-of-business__marketing-and-global-supply-chain",
@@ -1273,9 +1325,13 @@
   "school": "College of Business Administration",
   "department": "Computer Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-11"
  },
  {
   "id": "california-state-university-bakersfield____mis-ba-ai",
@@ -1348,9 +1404,13 @@
   "school": "Craig School of Business",
   "department": "Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "california-state-university-fullerton__college-of-business-and-economics__management",
@@ -1358,9 +1418,13 @@
   "school": "College of Business and Economics",
   "department": "Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-03"
  },
  {
   "id": "california-state-university-long-beach__college-of-business__information-systems",
@@ -1373,8 +1437,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2025-08-11"
+  "n": 2,
+  "lastPosted": "2026-07-30"
  },
  {
   "id": "california-state-university-northridge__david-nazarian-college-of-business-and-economics__systems-and-operations-management",
@@ -1382,9 +1446,13 @@
   "school": "David Nazarian College of Business and Economics",
   "department": "Systems and Operations Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-24"
  },
  {
   "id": "california-state-university-sacramento____ai",
@@ -1413,14 +1481,32 @@
   "lastPosted": "2026-08-25"
  },
  {
+  "id": "california-state-university-stanislaus__college-of-business-administration__management-information-systems",
+  "institution": "California State University, Stanislaus",
+  "school": "College of Business Administration",
+  "department": "Management Information Systems",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
+ },
+ {
   "id": "calvin-university__school-of-business__business-analytics",
   "institution": "Calvin University",
   "school": "School of Business",
   "department": "Business Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-30"
  },
  {
   "id": "campbellsville-university____business-it",
@@ -1677,9 +1763,13 @@
   "school": "College of Education and Professional Studies",
   "department": "Information Technology Management",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-22"
  },
  {
   "id": "chalmers-university-of-technology",
@@ -1695,9 +1785,13 @@
   "school": "George L. Argyros College of Business and Economics",
   "department": "Management Science",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "chatham-university____sustainable-management",
@@ -2255,9 +2349,13 @@
   "school": "Cornell Peter and Stephanie Nolan School of Hotel Administration",
   "department": "Operations, Technology, and Information Management Area",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-08"
  },
  {
   "id": "cornell-university__cornell-sc-johnson-college-of-business__operations-technology-and-information-management-area",
@@ -2497,9 +2595,13 @@
   "school": "School of Business, Economics and Law",
   "department": "Business Management",
   "type": "Business School",
+  "country": "Spain",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-09"
  },
  {
   "id": "cunef-university____om",
@@ -2615,9 +2717,13 @@
   "institution": "Dongbei University of Finance and Economics",
   "department": "Institute of Supply Chain Analytics",
   "type": "University",
+  "country": "China",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 2,
+  "lastPosted": "2026-06-04"
  },
  {
   "id": "donghua-university____om-scm-logistics",
@@ -2633,14 +2739,32 @@
   "lastPosted": "2025-05-20"
  },
  {
+  "id": "donghua-university__glorious-sun-school-of-business-and-management__operations-management-logistics-and-supply-chain-management",
+  "institution": "Donghua University",
+  "school": "Glorious Sun School of Business and Management",
+  "department": "Operations Management, Logistics and Supply Chain Management",
+  "type": "Business School",
+  "country": "China",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-04-22"
+ },
+ {
   "id": "donghua-university__glorious-sun-school-of-economics-and-management__operations-and-logistics-information-management-decision-sci",
   "institution": "Donghua University",
   "school": "Glorious Sun School of Economics and Management",
   "department": "Operations and Logistics, Information Management, Decision Science, Behavioral Sciences and Financial Engineering",
   "type": "University",
+  "country": "China",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-23"
  },
  {
   "id": "drexel-university__lebow-college-of-business__decision-sciences-and-management-information-systems",
@@ -2784,9 +2908,13 @@
   "school": "College of Business",
   "department": "Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-08"
  },
  {
   "id": "ebs-university__ebs-business-school__institute-for-supply-chain-management",
@@ -3208,9 +3336,13 @@
   "school": "Lutgert College of Business",
   "department": "Information Systems, Analytics, and Supply Chain",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 2,
+  "lastPosted": "2026-09-29"
  },
  {
   "id": "florida-international-university____is",
@@ -3388,9 +3520,13 @@
   "school": "College of Business",
   "department": "Business Analytics and Quantitative Methods",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-15"
  },
  {
   "id": "george-mason-university__costello-college-of-business__information-systems-and-operations-management",
@@ -3416,7 +3552,7 @@
    "postings",
    "seed"
   ],
-  "n": 2,
+  "n": 3,
   "lastPosted": "2026-09-29",
   "lat": 38.8415539,
   "lng": -77.3411251
@@ -3455,9 +3591,13 @@
   "school": "School of Business",
   "department": "Information Systems and Technology Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-29"
  },
  {
   "id": "georgetown-university",
@@ -3555,9 +3695,13 @@
   "school": "J. Whitney Bunting College of Business and Technology",
   "department": "Management, Marketing, and Logistics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-13"
  },
  {
   "id": "georgia-gwinnett-college____supply-chain-management",
@@ -3637,9 +3781,13 @@
   "school": "Parker College of Business",
   "department": "Information Systems and Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "georgia-southern-university__parker-college-of-business__logistics-and-supply-chain-management",
@@ -3661,9 +3809,13 @@
   "school": "College of Business and Computing",
   "department": "Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-02"
  },
  {
   "id": "georgia-state-university",
@@ -3789,9 +3941,13 @@
   "institution": "Hainan Bielefeld University of Applied Sciences",
   "department": "Production and Operations Management",
   "type": "University",
+  "country": "China",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-30"
  },
  {
   "id": "hamad-bin-khalifa-university__college-of-science-and-engineering__engineering-management-and-decision-sciences",
@@ -3799,9 +3955,13 @@
   "school": "College of Science and Engineering",
   "department": "Engineering Management and Decision Sciences",
   "type": "University",
+  "country": "Qatar",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-23"
  },
  {
   "id": "harris-stowe-state-university__anheuser-busch-school-of-business__management-information-systems",
@@ -3809,9 +3969,13 @@
   "school": "Anheuser-Busch School of Business",
   "department": "Management Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
  },
  {
   "id": "harvard-business-school____om",
@@ -4025,8 +4189,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2025-09-30"
+  "n": 2,
+  "lastPosted": "2026-07-18"
  },
  {
   "id": "high-point-university__earl-n-phillips-school-of-business__supply-chain-management",
@@ -4034,9 +4198,13 @@
   "school": "Earl N. Phillips School of Business",
   "department": "Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "hkust____ds-and-analytics-thrust",
@@ -4237,9 +4405,13 @@
   "school": "College of Business",
   "department": "Marketing and Management, Supply Chain and Operations Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-08"
  },
  {
   "id": "ie-business-school____ds",
@@ -4616,9 +4788,13 @@
   "school": "Scott College of Business",
   "department": "Marketing and Operations",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-13"
  },
  {
   "id": "indiana-university__kelley-school-of-business__operations-and-decision-technologies",
@@ -4685,13 +4861,6 @@
   ],
   "n": 2,
   "lastPosted": "2026-02-03"
- },
- {
-  "id": "insead",
-  "institution": "INSEAD",
-  "sources": [
-   "seed"
-  ]
  },
  {
   "id": "insead____humanitarian-research-group-hrg-social-innovation-center",
@@ -4824,11 +4993,15 @@
   "school": "Debbie and Jerry Ivy College of Business",
   "department": "Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-14"
  },
  {
   "id": "ipade-business-school____om-and-is",
@@ -4848,9 +5021,13 @@
   "institution": "IPADE Business School",
   "department": "Operations Management",
   "type": "Business School",
+  "country": "Mexico",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-04"
  },
  {
   "id": "it-university-of-copenhagen____ba",
@@ -4905,9 +5082,13 @@
   "school": "College of Hospitality and Business",
   "department": "Operations and Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-27"
  },
  {
   "id": "judge-business-school____om-tech",
@@ -5072,9 +5253,13 @@
   "school": "Michael J. Coles College of Business",
   "department": "Information Systems and Security",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-17"
  },
  {
   "id": "kimep-university____om",
@@ -5095,9 +5280,13 @@
   "school": "Bang College of Business",
   "department": "Operations Management and Business Analytics",
   "type": "Business School",
+  "country": "Kazakhstan",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-04"
  },
  {
   "id": "koc-university____om-is",
@@ -5275,9 +5464,13 @@
   "school": "School of Business",
   "department": "Business Administration",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "lancaster-university__management-school__management-science",
@@ -5322,9 +5515,13 @@
   "school": "School of Business and Management",
   "department": "Business Administration",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "lehigh-university",
@@ -5392,9 +5589,13 @@
   "school": "P. C. Rossin College of Engineering and Applied Science",
   "department": "Industrial and Systems Engineering",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-08"
  },
  {
   "id": "lenoir-rhyne-university____om",
@@ -5601,9 +5802,13 @@
   "school": "Loeb-Sullivan School of International Business and Logistics",
   "department": "International Business and Logistics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
  },
  {
   "id": "marian-university____business-statistics",
@@ -5815,9 +6020,13 @@
   "school": "School of Business",
   "department": "Business Administration",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
  },
  {
   "id": "miami-university____emerging-technology-in-business-and-design",
@@ -5988,8 +6197,11 @@
   "facultyUrl": "http://www.ise.msstate.edu/people/faculty/",
   "sources": [
    "directory",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-28"
  },
  {
   "id": "missouri-southern-state-university____data-analytics",
@@ -6180,9 +6392,13 @@
   "school": "Arthur J. Bauernfeind College of Business",
   "department": "Management, Marketing and Business Administration",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-29"
  },
  {
   "id": "nanyang-technological-university",
@@ -6436,8 +6652,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2024-08-19",
+  "n": 2,
+  "lastPosted": "2026-08-05",
   "lat": 36.5987214,
   "lng": -121.8773408
  },
@@ -6495,9 +6711,13 @@
   "institution": "NEOMA Business School",
   "department": "Information Systems, Supply Chain and Decision Making",
   "type": "Business School",
+  "country": "France",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-31"
  },
  {
   "id": "nevada-state-university____scm-quantitative-analysis",
@@ -6518,9 +6738,13 @@
   "school": "School of Management",
   "department": "Industrial Management",
   "type": "Business School",
+  "country": "Uzbekistan",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-04"
  },
  {
   "id": "new-york-institute-of-technology____ms-mis-stat",
@@ -6617,6 +6841,23 @@
   "lng": 121.53415
  },
  {
+  "id": "new-york-university-shanghai____operations-and-business-analytics",
+  "institution": "New York University Shanghai",
+  "department": "Operations and Business Analytics",
+  "type": "Business School",
+  "country": "China",
+  "characteristics": [
+   "Masters",
+   "Undergrad"
+  ],
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-09"
+ },
+ {
   "id": "new-york-university-shanghai____operations-management",
   "institution": "New York University Shanghai",
   "department": "Operations Management",
@@ -6628,6 +6869,19 @@
   ],
   "n": 2,
   "lastPosted": "2026-10-01"
+ },
+ {
+  "id": "new-york-university-shanghai____technology-operations-and-statistics",
+  "institution": "New York University Shanghai",
+  "department": "Technology, Operations, and Statistics",
+  "type": "University",
+  "country": "China",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-09"
  },
  {
   "id": "newcastle-university____information-systems-and-operations-subject-group-operations-",
@@ -6683,9 +6937,13 @@
   "school": "Willie A. Deese College of Business and Economics",
   "department": "Business Information Systems and Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "north-carolina-state-university____operations-and-supply-chain-management",
@@ -6706,9 +6964,13 @@
   "school": "College of Engineering",
   "department": "Edward P. Fitts Department of Industrial and Systems Engineering",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-26"
  },
  {
   "id": "north-carolina-state-university__poole-college-of-management__information-technology-analytics-and-operations",
@@ -6846,9 +7108,13 @@
   "school": "College of Informatics",
   "department": "Computing and Analytics",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-13"
  },
  {
   "id": "northern-state-university____quantitative-analytics",
@@ -6869,9 +7135,13 @@
   "school": "School of Business",
   "department": "Business Analytics and Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-17"
  },
  {
   "id": "northwestern____science-and-innovation",
@@ -7146,9 +7416,13 @@
   "school": "Spears School of Business",
   "department": "Management Science and Information Systems, Center for Health Systems Innovation",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "oregon-state-university____business-analytics",
@@ -7286,9 +7560,13 @@
   "school": "Robert W. Plaster School of Business",
   "department": "Information Systems and Business Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-22"
  },
  {
   "id": "peking-university____om-and-is",
@@ -7533,9 +7811,13 @@
   "school": "Mitch Daniels School of Business",
   "department": "Management Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-29"
  },
  {
   "id": "purdue-university__mitch-daniels-school-of-business__quantitative-methods",
@@ -7543,9 +7825,13 @@
   "school": "Mitch Daniels School of Business",
   "department": "Quantitative Methods",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-22"
  },
  {
   "id": "purdue-university__mitchell-e-daniels-jr-school-of-business__quantitative-methods",
@@ -7656,9 +7942,13 @@
   "school": "Oakley School of Business",
   "department": "Business Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-03"
  },
  {
   "id": "rensselaer-polytechnic-institute__lally-school-of-management__supply-chain-management-and-analytics",
@@ -7765,9 +8055,13 @@
   "school": "Crummer Graduate School of Business",
   "department": "Operations and Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-03"
  },
  {
   "id": "rowan-university____scm-logistics",
@@ -8015,9 +8309,13 @@
   "school": "Fowler College of Business",
   "department": "Management Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 2,
+  "lastPosted": "2026-07-23"
  },
  {
   "id": "san-francisco-state-university____decision-sciences",
@@ -8053,9 +8351,13 @@
   "school": "Lucas College and Graduate School of Business",
   "department": "Information Systems and Technology",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-23"
  },
  {
   "id": "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-decision-sciences",
@@ -8178,9 +8480,13 @@
   "school": "School of Finance",
   "department": "Large Language Model Research Institute",
   "type": "University",
+  "country": "China",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-23"
  },
  {
   "id": "shanghai-jiao-tong-university____ba-om-or-stochastic-models-data-driven-ai",
@@ -8408,9 +8714,13 @@
   "institution": "Skagit Valley College",
   "department": "Professional Technical Education, Bachelor of Applied Science in Management",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "skema-business-school____om",
@@ -8444,8 +8754,11 @@
   "department": "SKEMA Centre for Artificial Intelligence",
   "type": "Business School",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 3,
+  "lastPosted": "2026-09-28"
  },
  {
   "id": "skolkovo-institute-of-science-and-technology-skoltech",
@@ -8496,9 +8809,13 @@
   "school": "College of Business",
   "department": "Marketing and Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-12"
  },
  {
   "id": "southern-arkansas-university____supply-chain-management",
@@ -8719,9 +9036,13 @@
   "school": "Gus Machado College of Business",
   "department": "Quantitative and Statistical Analysis, Supply Chain, Operations and Logistics Management, and Managerial Economics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-17"
  },
  {
   "id": "stanford-gsb____om",
@@ -8822,9 +9143,13 @@
   "school": "School of Business Administration",
   "department": "Business Systems, AI and Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-12"
  },
  {
   "id": "stevens-institute-of-technology__wesley-j-howe-school-of-technology-management__operations-management",
@@ -9302,9 +9627,13 @@
   "school": "College of Business Administration",
   "department": "Logistics and Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "texas-christian-university____analytics-business-is",
@@ -9336,8 +9665,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2014-10-21",
+  "n": 2,
+  "lastPosted": "2026-09-05",
   "lat": 32.7088639,
   "lng": -97.3564038
  },
@@ -9436,9 +9765,13 @@
   "school": "McCoy College of Business",
   "department": "Management, Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-08"
  },
  {
   "id": "texas-tech-university____marketing-and-scm",
@@ -9459,9 +9792,13 @@
   "school": "Edward E. Whitacre Jr. College of Engineering",
   "department": "Industrial, Manufacturing and Systems Engineering",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-18"
  },
  {
   "id": "texas-tech-university__rawls-college-of-business__marketing",
@@ -9793,11 +10130,15 @@
   "school": "Max M. Fisher College of Business",
   "department": "Marketing and Logistics",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://fisher.osu.edu/academic-departments/marketing-logistics/faculty-and-staff",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "ohio-state-university__max-m-fisher-college-of-business__operations-and-business-analytics",
@@ -10492,8 +10833,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2014-11-05",
+  "n": 2,
+  "lastPosted": "2026-09-22",
   "lat": 50.6697528,
   "lng": 4.6152477
  },
@@ -10503,9 +10844,13 @@
   "school": "Faculty of Business Administration",
   "department": "Operations and Decision Systems",
   "type": "Business School",
+  "country": "Canada",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-15"
  },
  {
   "id": "universite-libre-de-bruxelles__solvay-brussels-school-of-economics-and-management",
@@ -10824,9 +11169,13 @@
   "school": "College of Business and Public Policy",
   "department": "Management, Marketing, Logistics, and Business Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-18"
  },
  {
   "id": "university-of-alaska-fairbanks____business-administration",
@@ -10947,9 +11296,13 @@
   "school": "Sam M. Walton College of Business",
   "department": "J.B. Hunt Transport Department of Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-28"
  },
  {
   "id": "university-of-arkansas-at-fayetteville__sam-m-walton-college-of-business__supply-chain-management",
@@ -11056,9 +11409,13 @@
   "school": "Faculty of Management",
   "department": "Operations and Supply Chain Management",
   "type": "University",
+  "country": "Canada",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-10"
  },
  {
   "id": "university-of-british-columbia__sauder-school-of-business__operations-and-logistics",
@@ -11442,9 +11799,13 @@
   "school": "Barry S. Miller College of Business",
   "department": "Intelligent Work Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-05"
  },
  {
   "id": "university-of-chicago__booth-school-of-business",
@@ -11782,9 +12143,13 @@
   "school": "Terry College of Business",
   "department": "Management Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-30"
  },
  {
   "id": "university-of-glasgow__school-of-computing-science",
@@ -11819,9 +12184,13 @@
   "school": "Barney School of Business",
   "department": "Business Insights",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-05"
  },
  {
   "id": "university-of-hong-kong____ba",
@@ -12173,9 +12542,13 @@
   "school": "Gies College of Business",
   "department": "Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-03"
  },
  {
   "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-supply-chain-and-analytics",
@@ -12195,9 +12568,13 @@
   "school": "School of Labor and Employment Relations",
   "department": "Human Resources and Technology",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "university-of-iowa__tippie-college-of-business__business-analytics",
@@ -12234,8 +12611,11 @@
   "facultyUrl": "https://business.ku.edu/people/academic-areas/analytics-information-systems-and-operations/",
   "sources": [
    "directory",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-08-05",
   "lat": 38.958542,
   "lng": -95.2476138
  },
@@ -12298,8 +12678,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-05",
+  "n": 2,
+  "lastPosted": "2026-09-30",
   "lat": 38.0378977,
   "lng": -84.5066279
  },
@@ -12309,9 +12689,13 @@
   "school": "Martin School of Public Policy and Administration",
   "department": "Public and Nonprofit Management",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
  },
  {
   "id": "university-of-leeds-uk____optimisation-for-decision-support-in-disaster-response",
@@ -12411,9 +12795,13 @@
   "school": "Faculty of Business Administration",
   "department": "Accounting and Information Management",
   "type": "Business School",
+  "country": "Macau",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-05"
  },
  {
   "id": "university-of-macau__institute-of-artificial-intelligence-and-brain-sciences__data-science",
@@ -12421,9 +12809,13 @@
   "school": "Institute of Artificial Intelligence and Brain Sciences",
   "department": "Data Science",
   "type": "University",
+  "country": "Macau",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-06"
  },
  {
   "id": "university-of-maine-at-augusta____business-management",
@@ -12757,8 +13149,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2025-10-07"
+  "n": 2,
+  "lastPosted": "2026-09-29"
  },
  {
   "id": "university-of-michigan__school-of-information",
@@ -12810,8 +13202,8 @@
    "postings",
    "seed"
   ],
-  "n": 3,
-  "lastPosted": "2026-07-08",
+  "n": 4,
+  "lastPosted": "2026-07-14",
   "lat": 42.2727776,
   "lng": -83.737529
  },
@@ -12980,9 +13372,13 @@
   "school": "Robert J. Trulaske, Sr. College of Business",
   "department": "Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-21"
  },
  {
   "id": "university-of-missouri-kansas-city____supply-chain-management",
@@ -13057,9 +13453,13 @@
   "school": "College of Public Affairs and Community Service, School of Public Administration",
   "department": "Nonprofit Management",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-30"
  },
  {
   "id": "university-of-nebraska-lincoln__college-of-business__supply-chain-management-and-analytics",
@@ -13135,9 +13535,13 @@
   "school": "College of Business and Digital Innovation",
   "department": "Business Analytics",
   "type": "Business School",
+  "country": "Saudi Arabia",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
  },
  {
   "id": "university-of-new-mexico____om",
@@ -13179,9 +13583,13 @@
   "school": "College of Arts and Sciences",
   "department": "Statistics and Operations Research",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "university-of-north-carolina-at-chapel-hill__kenan-flagler-business-school__operations",
@@ -13213,9 +13621,13 @@
   "school": "Belk College of Business",
   "department": "Business Information Systems and Operations Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "university-of-north-carolina-at-wilmington____supply-chain-management",
@@ -13265,9 +13677,13 @@
   "school": "Mike Cottrell College of Business",
   "department": "Marketing and Logistics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-02"
  },
  {
   "id": "university-of-north-texas____ba",
@@ -13317,9 +13733,13 @@
   "school": "David W. Wilson College of Business",
   "department": "Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "university-of-northern-iowa__david-w-wilson-college-of-business__management-business-analytics-and-applied-artificial-intelli",
@@ -13405,9 +13825,13 @@
   "school": "Michael F. Price College of Business",
   "department": "Management Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-30"
  },
  {
   "id": "university-of-oklahoma__michael-f-price-college-of-business__marketing-supply-chain-management-and-healthcare",
@@ -13632,9 +14056,13 @@
   "school": "School of Business and Leadership",
   "department": "Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
  },
  {
   "id": "university-of-queensland",
@@ -13855,9 +14283,13 @@
   "school": "School of Business Administration",
   "department": "Management Science",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-05"
  },
  {
   "id": "university-of-south-carolina-upstate__george-dean-johnson-jr-college-of-business-and-economics__economics-finance-and-accounting",
@@ -13865,9 +14297,13 @@
   "school": "George Dean Johnson, Jr. College of Business and Economics",
   "department": "Economics, Finance and Accounting",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-07"
  },
  {
   "id": "university-of-south-florida____is",
@@ -13924,9 +14360,13 @@
   "school": "Faculty of Engineering",
   "department": "Technology and Innovation, Center for Supply Chain Digitalisation",
   "type": "University",
+  "country": "Denmark",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-04"
  },
  {
   "id": "university-of-southern-indiana____cis",
@@ -13961,9 +14401,13 @@
   "school": "College of Business and Economic Development",
   "department": "Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-05"
  },
  {
   "id": "university-of-stirling____project-management",
@@ -13984,9 +14428,13 @@
   "school": "Sykes College of Business",
   "department": "Information and Technology Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  },
  {
   "id": "university-of-tennessee____ba",
@@ -14039,9 +14487,13 @@
   "school": "Gary W. Rollins College of Business",
   "department": "Data Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-11"
  },
  {
   "id": "university-of-tennessee-at-knoxville__haslam-college-of-business__business-analytics",
@@ -14100,9 +14552,13 @@
   "school": "Tickle College of Engineering",
   "department": "Industrial and Systems Engineering",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-03"
  },
  {
   "id": "university-of-texas-at-arlington____ai",
@@ -14228,9 +14684,13 @@
   "school": "Woody L. Hunt College of Business",
   "department": "Accounting and Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-11"
  },
  {
   "id": "university-of-toledo__college-of-business-and-innovation__information-operations-and-technology-management",
@@ -14578,9 +15038,13 @@
   "school": "Business School",
   "department": "Supply Chain Management",
   "type": "Business School",
+  "country": "China",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-08"
  },
  {
   "id": "university-of-warwick____is",
@@ -14601,9 +15065,13 @@
   "school": "Faculty of Science, Engineering and Medicine",
   "department": "Warwick Manufacturing Group, Applied Artificial Intelligence",
   "type": "University",
+  "country": "United Kingdom",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-05"
  },
  {
   "id": "university-of-warwick__warwick-business-school__operations-management",
@@ -15051,9 +15519,13 @@
   "school": "Villanova School of Business",
   "department": "Accounting and Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-22"
  },
  {
   "id": "villanova-university__villanova-school-of-business__management-and-operations",
@@ -15323,9 +15795,13 @@
   "school": "Williams School of Commerce, Economics and Politics",
   "department": "Business Administration",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-28"
  },
  {
   "id": "washington-university-in-st-louis____scm-om",
@@ -15550,9 +16026,13 @@
   "school": "Business and Technology",
   "department": "Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-13"
  },
  {
   "id": "westfield-state-university____management-operations-and-supply-chain-management",
@@ -15672,9 +16152,13 @@
   "institution": "Worcester State University",
   "department": "Business Administration and Economics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-10"
  },
  {
   "id": "wu-vienna__vienna-university-of-economics-and-business__information-systems-and-operations",
@@ -15709,9 +16193,13 @@
   "school": "International Business School Suzhou",
   "department": "Intelligent Operations and Marketing",
   "type": "Business School",
+  "country": "China",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-15"
  },
  {
   "id": "xi-an-jiaotong-liverpool-university__school-of-intelligent-finance-and-business__supply-chain-management",
@@ -15719,24 +16207,19 @@
   "school": "School of Intelligent Finance and Business",
   "department": "Supply Chain Management",
   "type": "Business School",
+  "country": "China",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-22"
  },
  {
   "id": "xi-an-jiaotong-university__school-of-management__is",
   "institution": "Xi'an Jiaotong University",
   "school": "School of Management",
   "department": "IS",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
-  "id": "yale-school-of-management____operations-management",
-  "institution": "Yale School of Management",
-  "department": "Operations Management",
   "type": "Business School",
   "sources": [
    "seed"
@@ -15767,8 +16250,11 @@
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-08",
   "lat": 41.3149405,
   "lng": -72.9203459
  },
@@ -15815,17 +16301,25 @@
   "school": "Williamson College of Business Administration",
   "department": "Lariccia School of Accounting and Finance",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-15"
  },
  {
   "id": "zhejiang-university____center-for-interdisciplinary-applied-mathematics",
   "institution": "Zhejiang University",
   "department": "Center for Interdisciplinary Applied Mathematics",
   "type": "University",
+  "country": "China",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-09-30"
  }
 ]

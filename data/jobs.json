@@ -42,6 +42,79 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-new-york-university-shanghai-20261009",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-09",
+  "institution": "New York University Shanghai",
+  "department": "Operations and Business Analytics",
+  "school": "",
+  "unit": "Operations and Business Analytics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 15, 2026",
+  "applyByDate": "2026-11-15",
+  "reviewDate": "2026-10-20",
+  "comments": "NYU Shanghai is currently inviting applications for positions at the rank of Assistant Professor in Technology, Operations, and Statistics, expected to start in the Fall Semester of 2027. Terms of employment at NYU Shanghai are comparable to NYU New York and other U.S. institutions with respect to research start-up funds and compensation, and they include housing subsidies and educational subsidies for children. Faculty may in certain cases have the opportunity to spend time at NYU New York and other sites of the NYU Global Network, engaging in both research and teaching. We seek candidates who have completed a Ph.D. in Information Systems, Operations Management, Operations Research, Statistics, or a closely related discipline and demonstrate a strong commitment to excellence in scholarly research and teaching. We invite applications from candidates in any field and have a special interest in those with expertise in healthcare and in AI for business. For more information about NYU Shanghai and this position, please visit our application page: https://apply.interfolio.com/194865.",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://drive.google.com/file/d/1O60mHaDdJsyBZjJv3QwJaxxkXi2zxqt6/view",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/194865",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=New%20York%20University%20Shanghai",
+  "characteristics": [
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-10-09T20:24:02Z",
+  "ref": "OA-JOB-261009-7MX6",
+  "owner": "582ff4f422f8e244",
+  "applicationStatus": ""
+ },
+ {
+  "id": "2027-new-york-university-shanghai-20261009-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-09",
+  "institution": "New York University Shanghai",
+  "department": "Technology, Operations, and Statistics",
+  "school": "",
+  "unit": "Technology, Operations, and Statistics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 15, 2026",
+  "applyByDate": "2026-11-15",
+  "reviewDate": "2026-10-15",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://apply.interfolio.com/194860",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=New%20York%20University%20Shanghai",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T19:43:38Z",
+  "owner": ""
+ },
+ {
   "id": "2027-bilkent-university-20261008",
   "year": 2027,
   "years": [
@@ -79,6 +152,108 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-cornell-20261008",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-08",
+  "institution": "Cornell University",
+  "department": "Cornell Peter and Stephanie Nolan School of Hotel Administration, Operations, Technology, and Information Management Area",
+  "school": "Cornell Peter and Stephanie Nolan School of Hotel Administration",
+  "unit": "Operations, Technology, and Information Management Area",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179581815&Title=Assistant%20or%20Associate%20Teaching%20Professor%20in%20Operations%2C%20Technology%2C%20and%20Information%20Management%2C%20SC%20Johnson%20College%20of%20Business",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Cornell%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:53Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-idaho-state-university-20261008",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-08",
+  "institution": "Idaho State University",
+  "department": "College of Business, Marketing and Management, Supply Chain and Operations Management",
+  "school": "College of Business",
+  "unit": "Marketing and Management, Supply Chain and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179582129&Title=Assistant%2FAssociate%20Professor%20of%20Management%2C%20College%20of%20Business%20%283313%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Idaho%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:53Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-lehigh-university-20261008",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-08",
+  "institution": "Lehigh University",
+  "department": "P. C. Rossin College of Engineering and Applied Science, Industrial and Systems Engineering",
+  "school": "P. C. Rossin College of Engineering and Applied Science",
+  "unit": "Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 15, 2026",
+  "applyByDate": "2026-12-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/194807",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Lehigh%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:53Z",
+  "owner": ""
+ },
+ {
   "id": "2027-texas-a-m-university-20261008",
   "year": 2027,
   "years": [
@@ -111,6 +286,39 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-08T19:40:58Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-texas-state-university-20261008",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-08",
+  "institution": "Texas State University",
+  "department": "McCoy College of Business, Management, Supply Chain Management",
+  "school": "McCoy College of Business",
+  "unit": "Management, Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 5, 2026",
+  "applyByDate": "2026-11-05",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179581413&Title=Assistant%20Professor%20of%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Texas%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
   "owner": ""
  },
  {
@@ -179,6 +387,39 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-09T07:33:04Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-yale-school-of-management-20261008",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-08",
+  "institution": "Yale University",
+  "department": "School of Management, Operations Department",
+  "school": "School of Management",
+  "unit": "Operations Department",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careercenter.informs.org/job/professor-of-operations-management-yale-school-of-management-new-haven-connecticut-5606?utm_source=wj_newsletter&utm_medium=cpc&utm_campaign=xml",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Yale%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:34:57Z",
   "owner": ""
  },
  {
@@ -285,6 +526,40 @@
   "ref": "OA-JOB-261007-XUFG",
   "owner": "8dc19f5eb931f0b3",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-university-of-south-carolina-upstate-20261007",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-07",
+  "institution": "University of South Carolina Upstate",
+  "department": "George Dean Johnson, Jr. College of Business and Economics, Economics, Finance and Accounting",
+  "school": "George Dean Johnson, Jr. College of Business and Economics",
+  "unit": "Economics, Finance and Accounting",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Open until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://uscjobs.sc.edu/postings/214247",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20South%20Carolina%20Upstate",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
+  "owner": ""
  },
  {
   "id": "2027-binghamton-university-20261006",
@@ -656,6 +931,73 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-university-of-central-florida-20261005",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-05",
+  "institution": "University of Central Florida",
+  "department": "Barry S. Miller College of Business, Intelligent Work Systems",
+  "school": "Barry S. Miller College of Business",
+  "unit": "Intelligent Work Systems",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.ucf.edu/jobs/professor-and-miller-technology-endowed-chair-in-intelligent-work-systems-the-barry-s-miller-college-of-business-orlando-florida-united-states-4c4f4cf6-e79e-4bc9-a5b5-e60d0f3d82df",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Central%20Florida",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-hartford-20261005",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-05",
+  "institution": "University of Hartford",
+  "department": "Barney School of Business, Business Insights",
+  "school": "Barney School of Business",
+  "unit": "Business Insights",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179578224&Title=Tenure%20Track%20Assistant%20Professor%20Business%20Insights%2FAnalytics%20%282027%202028%29%20January%202027",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Hartford",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-toronto-20261005",
   "year": 2027,
   "years": [
@@ -798,6 +1140,40 @@
   "owner": ""
  },
  {
+  "id": "2027-kimep-university-20261004",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-04",
+  "institution": "KIMEP University",
+  "department": "Bang College of Business, Operations Management and Business Analytics",
+  "school": "Bang College of Business",
+  "unit": "Operations Management and Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "",
+  "country": "Kazakhstan",
+  "countries": [
+   "Kazakhstan"
+  ],
+  "adUrl": "https://hr.kimep.kz/en-US/Home/Vacancy/791",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=KIMEP%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
+  "owner": ""
+ },
+ {
   "id": "2027-michigan-state-university-20261004",
   "year": 2027,
   "years": [
@@ -882,6 +1258,210 @@
   "ref": "OA-JOB-261004-CKUD",
   "owner": "60cb1105551d4035",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-new-uzbekistan-university-20261004",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-04",
+  "institution": "New Uzbekistan University",
+  "department": "School of Management, Industrial Management",
+  "school": "School of Management",
+  "unit": "Industrial Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "November 7, 2026",
+  "applyByDate": "2026-11-07",
+  "comments": "",
+  "country": "Uzbekistan",
+  "countries": [
+   "Uzbekistan"
+  ],
+  "adUrl": "https://www.timeshighereducation.com/unijobs/listing/403146/assistant-associate-visiting-professor-of-operations-management/?LinkSource=PremiumListing",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=New%20Uzbekistan%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-southern-denmark-20261004",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-04",
+  "institution": "University of Southern Denmark",
+  "department": "Faculty of Engineering, Technology and Innovation, Center for Supply Chain Digitalisation",
+  "school": "Faculty of Engineering",
+  "unit": "Technology and Innovation, Center for Supply Chain Digitalisation",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 15, 2026",
+  "applyByDate": "2026-10-15",
+  "comments": "",
+  "country": "Denmark",
+  "countries": [
+   "Denmark"
+  ],
+  "adUrl": "https://www.workwithus.dk/assistant-professor-operations-and-supply-chain-digitalisation",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Southern%20Denmark",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-aschaffenburg-university-of-applied-sciences-20261003",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-03",
+  "institution": "Aschaffenburg University of Applied Sciences",
+  "department": "Faculty of Engineering and Computer Science, Digital Production Technologies",
+  "school": "Faculty of Engineering and Computer Science",
+  "unit": "Digital Production Technologies",
+  "type": "University",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "October 8, 2026",
+  "applyByDate": "2026-10-08",
+  "comments": "",
+  "country": "Germany",
+  "countries": [
+   "Germany"
+  ],
+  "adUrl": "https://academicpositions.com/ad/university-of-applied-sciences-aschaffenburg/2026/w2-professorship-digital-production-technologies-m-f-d/252012",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Aschaffenburg%20University%20of%20Applied%20Sciences",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-auburn-university-20261003",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-03",
+  "institution": "Auburn University",
+  "department": "Samuel Ginn College of Engineering, Industrial and Systems Engineering",
+  "school": "Samuel Ginn College of Engineering",
+  "unit": "Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-09",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.auburn.edu/auburn-careers-home/jobs/9907",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Auburn%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-bowling-green-state-university-20261003",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-03",
+  "institution": "Bowling Green State University",
+  "department": "Allen W. and Carol M. Schmidthorst College of Business, Business Analytics, Economics and Information Systems",
+  "school": "Allen W. and Carol M. Schmidthorst College of Business",
+  "unit": "Business Analytics, Economics and Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179577911&Title=Assistant%20Professor%20of%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Bowling%20Green%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:54Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-california-state-university-stanislaus-20261003",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-03",
+  "institution": "California State University, Stanislaus",
+  "department": "College of Business Administration, Management Information Systems",
+  "school": "College of Business Administration",
+  "unit": "Management Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-14",
+  "comments": "Assistant or Associate Professor of Computer Information Systems; full-time tenure-track appointment beginning Fall 2027 in Turlock, California. Teaching and research emphasize Artificial Intelligence and Business Analytics; interdisciplinary operations and supply chain interests are desirable. A relevant doctorate from an AACSB-accredited doctoral institution is required by appointment. Screening begins October 14, 2026 and continues until filled. Submit an application letter, graduate transcripts, teaching philosophy and evidence, research sample, CV and three references. Department chair: Dr. Pengtao Li ([e-mail removed]), as named in the POMS PDF and https://www.csustan.edu/people/dr-pengtao-li. Verified manually from the POMS PDF on October 9, 2026.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.poms.org/sites/default/files/2026-10/9869343.pdf",
+  "adLabel": "job ad (PDF)",
+  "postedAtUrl": "https://www.poms.org/opportunities",
+  "postedAtLabel": "POMS job postings",
+  "furtherInfoUrl": "https://www.csustan.edu/cba/departments-programs/department-management-information-systems",
+  "characteristics": [],
+  "featured": false,
+  "source": "poms-opportunities",
+  "addedAt": "2026-10-09T13:07:37Z",
+  "owner": ""
  },
  {
   "id": "2027-cornell-university-cornell-tech-20261003",
@@ -1022,6 +1602,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-05T20:53:39Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-quincy-university-20261003",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-03",
+  "institution": "Quincy University",
+  "department": "Oakley School of Business, Business Analytics",
+  "school": "Oakley School of Business",
+  "unit": "Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179576999&Title=Full%2DTime%2C%20Tenure%2DTrack%20Business%20Analytics%20Faculty%20Position%20in%20the%20Oakley%20School%20of%20Business",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Quincy%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:55Z",
   "owner": ""
  },
  {
@@ -1262,6 +1876,108 @@
   "owner": ""
  },
  {
+  "id": "2027-adelphi-university-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Adelphi University",
+  "department": "Robert B. Willumstad School of Business, Management",
+  "school": "Robert B. Willumstad School of Business",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-02",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179571473&Title=Assistant%20Professor%20%2D%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Adelphi%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:55Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-california-state-university-fresno-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "California State University, Fresno",
+  "department": "Craig School of Business, Management",
+  "school": "Craig School of Business",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "March 31, 2027",
+  "applyByDate": "2027-03-31",
+  "reviewDate": "2026-11-02",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179572951&Title=Management%20Assistant%2FAssociate%20Professor",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=California%20State%20University%2C%20Fresno",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:55Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-chapman-university-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Chapman University",
+  "department": "George L. Argyros College of Business and Economics, Management Science",
+  "school": "George L. Argyros College of Business and Economics",
+  "unit": "Management Science",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179572407&Title=Assistant%20Professor%20of%20Management%20Science%2C%20Tenure%2DTrack%2C%20Fall%202027",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Chapman%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:55Z",
+  "owner": ""
+ },
+ {
   "id": "2027-cornell-university-20260930",
   "year": 2027,
   "years": [
@@ -1341,6 +2057,242 @@
   "ref": "OA-JOB-260930-D84Q",
   "owner": "e997f3340a4145b9",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-georgia-southern-university-20260930",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Georgia Southern University",
+  "department": "Parker College of Business, Information Systems and Analytics",
+  "school": "Parker College of Business",
+  "unit": "Information Systems and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-03-23",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179368958",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Georgia%20Southern%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:55Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-high-point-university-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "High Point University",
+  "department": "Earl N. Phillips School of Business, Supply Chain Management",
+  "school": "Earl N. Phillips School of Business",
+  "unit": "Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "October 31, 2026",
+  "applyByDate": "2026-10-31",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179571810&Title=Professor%20of%20the%20Practice%20of%20Supply%20Chain%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=High%20Point%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:55Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-lake-erie-college-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Lake Erie College",
+  "department": "School of Business, Business Administration",
+  "school": "School of Business",
+  "unit": "Business Administration",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179574134&Title=Assistant%20Professor%20of%20Business%20Administration",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Lake%20Erie%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:55Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-lees-mcrae-college-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Lees-McRae College",
+  "department": "School of Business and Management, Business Administration",
+  "school": "School of Business and Management",
+  "unit": "Business Administration",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179573528&Title=Assistant%20Professor%20of%20Business%20Administration",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Lees-McRae%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:55Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-north-carolina-a-t-state-university-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "North Carolina Agricultural and Technical State University",
+  "department": "Willie A. Deese College of Business and Economics, Business Information Systems and Analytics",
+  "school": "Willie A. Deese College of Business and Economics",
+  "unit": "Business Information Systems and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179571404&Title=Assistant%2FAssociate%20Professor%20%2D%20Business%20Information%20Systems%20and%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=North%20Carolina%20Agricultural%20and%20Technical%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-ohio-state-university-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Ohio State University",
+  "department": "Max M. Fisher College of Business, Marketing and Logistics",
+  "school": "Max M. Fisher College of Business",
+  "unit": "Marketing and Logistics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 15, 2026",
+  "applyByDate": "2026-12-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://osu.wd1.myworkdayjobs.com/OSUCareers/job/Columbus-Campus/Senior-Assistant-or-Associate-Professor-in-Logistics-and-Supply-Chain-Management_R160191-2",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Ohio%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-oklahoma-state-university-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Oklahoma State University",
+  "department": "Spears School of Business, Management Science and Information Systems, Center for Health Systems Innovation",
+  "school": "Spears School of Business",
+  "unit": "Management Science and Information Systems, Center for Health Systems Innovation",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179571975&Title=Post%20Doctoral%20Fellow%20AF7752",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Oklahoma%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
  },
  {
   "id": "2027-pennsylvania-state-university-20260930",
@@ -1474,6 +2426,411 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-skagit-valley-college-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Skagit Valley College",
+  "department": "Professional Technical Education, Bachelor of Applied Science in Management",
+  "school": "",
+  "unit": "Professional Technical Education, Bachelor of Applied Science in Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.governmentjobs.com/jobs/5498838-0/bachelor-of-management-faculty-tenure-track",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Skagit%20Valley%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-texas-a-m-university-central-texas-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Texas A&M University–Central Texas",
+  "department": "College of Business Administration, Logistics and Supply Chain Management",
+  "school": "College of Business Administration",
+  "unit": "Logistics and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179571048&Title=Assistant%20Professor%20of%20Supply%20Chain%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Texas%20A%26M%20University%E2%80%93Central%20Texas",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-illinois-at-urbana-champaign-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "University of Illinois at Urbana-Champaign",
+  "department": "School of Labor and Employment Relations, Human Resources and Technology",
+  "school": "School of Labor and Employment Relations",
+  "unit": "Human Resources and Technology",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 1, 2026",
+  "applyByDate": "2026-11-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179571445&Title=Assistant%20Professor%20in%20HR%20and%20Technology",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Illinois%20at%20Urbana-Champaign",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-kentucky-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "University of Kentucky",
+  "department": "Gatton College of Business and Economics, Marketing and Supply Chain",
+  "school": "Gatton College of Business and Economics",
+  "unit": "Marketing and Supply Chain",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179571444&Title=Lecturer%20in%20Supply%20Chain%20and%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Kentucky",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-unc-chapel-hill-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "University of North Carolina at Chapel Hill",
+  "department": "College of Arts and Sciences, Statistics and Operations Research",
+  "school": "College of Arts and Sciences",
+  "unit": "Statistics and Operations Research",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 15, 2026",
+  "applyByDate": "2026-12-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://unc.peopleadmin.com/postings/325969",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20North%20Carolina%20at%20Chapel%20Hill",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-unc-charlotte-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "University of North Carolina at Charlotte",
+  "department": "Belk College of Business, Business Information Systems and Operations Management",
+  "school": "Belk College of Business",
+  "unit": "Business Information Systems and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://lnkd.in/p/eMRqWJmj",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20North%20Carolina%20at%20Charlotte",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-northern-iowa-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "University of Northern Iowa",
+  "department": "David W. Wilson College of Business, Management",
+  "school": "David W. Wilson College of Business",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-02",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179571552&Title=Assistant%20Professor%20of%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Northern%20Iowa",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-tampa-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "University of Tampa",
+  "department": "Sykes College of Business, Information and Technology Management",
+  "school": "Sykes College of Business",
+  "unit": "Information and Technology Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179569814&Title=Assistant%20Professor%2C%20Information%20And%20Technology%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Tampa",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:57Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-zhejiang-university-20260930",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-30",
+  "institution": "Zhejiang University",
+  "department": "Center for Interdisciplinary Applied Mathematics",
+  "school": "",
+  "unit": "Center for Interdisciplinary Applied Mathematics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 31, 2026",
+  "applyByDate": "2026-12-31",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://www.mathjobs.org/jobs/list/28487",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Zhejiang%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:57Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-arizona-state-university-20260929",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-29",
+  "institution": "Arizona State University",
+  "department": "Ira A. Fulton Schools of Engineering, Computing and Augmented Intelligence",
+  "school": "Ira A. Fulton Schools of Engineering",
+  "unit": "Computing and Augmented Intelligence",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-29",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/194202",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Arizona%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:57Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-arizona-state-university-20260929-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-29",
+  "institution": "Arizona State University",
+  "department": "Ira A. Fulton Schools of Engineering, Computing and Augmented Intelligence",
+  "school": "Ira A. Fulton Schools of Engineering",
+  "unit": "Computing and Augmented Intelligence",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-29",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/194270",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Arizona%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:57Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-arizona-state-university-20260929-3",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-29",
+  "institution": "Arizona State University",
+  "department": "Ira A. Fulton Schools of Engineering, Computing and Augmented Intelligence",
+  "school": "Ira A. Fulton Schools of Engineering",
+  "unit": "Computing and Augmented Intelligence",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-29",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/194258",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Arizona%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:57Z",
+  "owner": ""
+ },
+ {
   "id": "2027-essec-20260929",
   "year": 2027,
   "years": [
@@ -1517,6 +2874,40 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-florida-gulf-coast-university-20260929",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-29",
+  "institution": "Florida Gulf Coast University",
+  "department": "Lutgert College of Business, Information Systems, Analytics, and Supply Chain",
+  "school": "Lutgert College of Business",
+  "unit": "Information Systems, Analytics, and Supply Chain",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "open until filled. November 1, 2026, priority consideration.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.fgcu.edu/jobs/assistant-professor-supply-chain-management-multiple-positions-fort-myers-florida-united-states",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Florida%20Gulf%20Coast%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:57Z",
+  "owner": ""
+ },
+ {
   "id": "2027-george-mason-university-20260929",
   "year": 2027,
   "years": [
@@ -1556,6 +2947,143 @@
   "ref": "OA-JOB-260929-QJSN",
   "owner": "4c4b4eb904286d9b",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-george-washington-university-20260929",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-29",
+  "institution": "George Washington University",
+  "department": "School of Business, Information Systems and Technology Management",
+  "school": "School of Business",
+  "unit": "Information Systems and Technology Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "until filled",
+  "applyByDate": "",
+  "reviewDate": "2026-10-26",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.gwu.jobs/postings/128790",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=George%20Washington%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:57Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-murray-state-20260929",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-29",
+  "institution": "Murray State University",
+  "department": "Arthur J. Bauernfeind College of Business, Management, Marketing and Business Administration",
+  "school": "Arthur J. Bauernfeind College of Business",
+  "unit": "Management, Marketing and Business Administration",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "until filled",
+  "applyByDate": "",
+  "reviewDate": "2026-11-24",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.murraystatejobs.com/postings/12881",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Murray%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:57Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-purdue-university-20260929",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-29",
+  "institution": "Purdue University",
+  "department": "Mitch Daniels School of Business, Management Information Systems",
+  "school": "Mitch Daniels School of Business",
+  "unit": "Management Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-17",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.purdue.edu/job/Assistant-Professor%2C-Management-Information-Systems/44041-en_US/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Purdue%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:57Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-michigan-20260929",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-29",
+  "institution": "University of Michigan",
+  "department": "College of Engineering, Industrial and Operations Engineering",
+  "school": "College of Engineering",
+  "unit": "Industrial and Operations Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-20",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/194357",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Michigan",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:58Z",
+  "owner": ""
  },
  {
   "id": "2027-unsw-sydney-20260929",
@@ -1598,6 +3126,176 @@
   "ref": "OA-JOB-260929-S5J6",
   "owner": "47379fa5437254b9",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-aalborg-university-20260928",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-28",
+  "institution": "Aalborg University",
+  "department": "Faculty of Engineering and Science, Materials and Production",
+  "school": "Faculty of Engineering and Science",
+  "unit": "Materials and Production",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "September 30, 2026",
+  "applyByDate": "2026-09-30",
+  "comments": "",
+  "country": "Denmark",
+  "countries": [
+   "Denmark"
+  ],
+  "adUrl": "https://www.vacancies.aau.dk/scientific-positions/show-vacancy/vacancyId/950756",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Aalborg%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:58Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-mississippi-state-university-20260928",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-28",
+  "institution": "Mississippi State University",
+  "department": "James Worth Bagley College of Engineering, Industrial and Systems Engineering",
+  "school": "James Worth Bagley College of Engineering",
+  "unit": "Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://explore.msujobs.msstate.edu/jobs/assistant-professor-associate-professor-or-professor-main-campus-starkville-ms-mississippi-united-states-57a3c1ec-2875-4a64-9c12-fda9b3509e2a",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Mississippi%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:58Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-skema-business-school-20260928",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-28",
+  "institution": "SKEMA Business School",
+  "department": "SKEMA Centre for Artificial Intelligence",
+  "school": "",
+  "unit": "SKEMA Centre for Artificial Intelligence",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 31, 2026",
+  "applyByDate": "2026-12-31",
+  "comments": "",
+  "country": "France",
+  "countries": [
+   "France"
+  ],
+  "adUrl": "https://recrutement.skema.edu/?page=advertisement_display&id=1609",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=SKEMA%20Business%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:58Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-skema-business-school-20260928-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-28",
+  "institution": "SKEMA Business School",
+  "department": "SKEMA Centre for Artificial Intelligence",
+  "school": "",
+  "unit": "SKEMA Centre for Artificial Intelligence",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 31, 2026",
+  "applyByDate": "2026-12-31",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://recrutement.skema.edu/?page=advertisement_display&id=1612",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=SKEMA%20Business%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:58Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-skema-business-school-20260928-3",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-28",
+  "institution": "SKEMA Business School",
+  "department": "SKEMA Centre for Artificial Intelligence",
+  "school": "",
+  "unit": "SKEMA Centre for Artificial Intelligence",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 31, 2026",
+  "applyByDate": "2026-12-31",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://recrutement.skema.edu/?page=advertisement_display&id=1613",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=SKEMA%20Business%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:58Z",
+  "owner": ""
  },
  {
   "id": "2027-shanghai-university-of-finance-and-economics-20260927",
@@ -1674,6 +3372,108 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-28T21:40:51Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-north-carolina-state-university-20260926",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-26",
+  "institution": "North Carolina State University",
+  "department": "College of Engineering, Edward P. Fitts Department of Industrial and Systems Engineering",
+  "school": "College of Engineering",
+  "unit": "Edward P. Fitts Department of Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-05",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.ncsu.edu/postings/235361",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=North%20Carolina%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:58Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-ball-state-university-20260924",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-24",
+  "institution": "Ball State University",
+  "department": "Miller College of Business, Information Systems and Operations Management",
+  "school": "Miller College of Business",
+  "unit": "Information Systems and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 28, 2026",
+  "applyByDate": "2026-10-28",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://bsu.wd12.myworkdayjobs.com/External/job/Ball-State-University/Assistant-Professor-of-Information-Systems-and-Operations-Management_R-03186",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Ball%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:58Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-california-state-university-northridge-20260924",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-24",
+  "institution": "California State University, Northridge",
+  "department": "David Nazarian College of Business and Economics, Systems and Operations Management",
+  "school": "David Nazarian College of Business and Economics",
+  "unit": "Systems and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-30",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.pageuppeople.com/873/nr/en-us/job/561285/assistant-professor-of-information-systems-department-of-systems-and-operations-management-2706",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=California%20State%20University%2C%20Northridge",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:58Z",
   "owner": ""
  },
  {
@@ -1790,6 +3590,40 @@
   "ref": "OA-JOB-260923-JKQ9",
   "owner": "b634c4738dcb2337",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-san-jose-state-university-20260923",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-23",
+  "institution": "San José State University",
+  "department": "Lucas College and Graduate School of Business, Information Systems and Technology",
+  "school": "Lucas College and Graduate School of Business",
+  "unit": "Information Systems and Technology",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careercenter.informs.org/job/assistant-professor-marketing-business-analytics-business-analytics-san-jose-california-5541",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=San%20Jos%C3%A9%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
+  "owner": ""
  },
  {
   "id": "2027-university-college-london-20260923",
@@ -2056,6 +3890,108 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-park-university-20260922",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-22",
+  "institution": "Park University",
+  "department": "Robert W. Plaster School of Business, Information Systems and Business Analytics",
+  "school": "Robert W. Plaster School of Business",
+  "unit": "Information Systems and Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-19",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/region/details.cfm?JobCode=179564199&Title=Assistant%20Professor%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Park%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-purdue-20260922",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-22",
+  "institution": "Purdue University",
+  "department": "Mitch Daniels School of Business, Quantitative Methods",
+  "school": "Mitch Daniels School of Business",
+  "unit": "Quantitative Methods",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2027-01-08",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179564423&Title=Clinical%20Assistant%20Professor%2C%20Quantitative%20Methods",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Purdue%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-uclouvain-20260922",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-22",
+  "institution": "Université catholique de Louvain",
+  "department": "Louvain School of Management, Center for Operations Research and Econometrics",
+  "school": "Louvain School of Management",
+  "unit": "Center for Operations Research and Econometrics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 5, 2026",
+  "applyByDate": "2026-11-05",
+  "comments": "",
+  "country": "Belgium",
+  "countries": [
+   "Belgium"
+  ],
+  "adUrl": "https://jobs.uclouvain.be/PersonnelAcademique/job/An-academic-in-Quantitative-Supply-Chain-Management/1433540233/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Universit%C3%A9%20catholique%20de%20Louvain",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-illinois-at-chicago-20260922",
   "year": 2027,
   "years": [
@@ -2174,6 +4110,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-23T12:53:22Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-villanova-university-20260922",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-22",
+  "institution": "Villanova University",
+  "department": "Villanova School of Business, Accounting and Information Systems",
+  "school": "Villanova School of Business",
+  "unit": "Accounting and Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "rolling until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179564686&Title=Tenure%20Track%20Faculty%2C%20Management%20Information%20Systems",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Villanova%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
   "owner": ""
  },
  {
@@ -2396,6 +4366,40 @@
   "owner": ""
  },
  {
+  "id": "2027-auburn-university-20260918",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-18",
+  "institution": "Auburn University",
+  "department": "Raymond J. Harbert College of Business, Business Analytics and Information Systems",
+  "school": "Raymond J. Harbert College of Business",
+  "unit": "Business Analytics and Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.auburn.edu/auburn-careers-home/jobs/10326?lang=en-us",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Auburn%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
+  "owner": ""
+ },
+ {
   "id": "2027-insead-20260918",
   "year": 2027,
   "years": [
@@ -2510,6 +4514,73 @@
   "owner": ""
  },
  {
+  "id": "2027-texas-tech-university-20260918",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-18",
+  "institution": "Texas Tech University",
+  "department": "Edward E. Whitacre Jr. College of Engineering, Industrial, Manufacturing and Systems Engineering",
+  "school": "Edward E. Whitacre Jr. College of Engineering",
+  "unit": "Industrial, Manufacturing and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179561222",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Texas%20Tech%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-alaska-anchorage-20260918",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-18",
+  "institution": "University of Alaska Anchorage",
+  "department": "College of Business and Public Policy, Management, Marketing, Logistics, and Business Analytics",
+  "school": "College of Business and Public Policy",
+  "unit": "Management, Marketing, Logistics, and Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-20",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179560125&Title=Assistant%20Professor%20of%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Alaska%20Anchorage",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
+  "owner": ""
+ },
+ {
   "id": "2027-cornell-university-20260917",
   "year": 2027,
   "years": [
@@ -2612,6 +4683,41 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-18T20:06:24Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-ahmedabad-university-20260916",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-16",
+  "institution": "Ahmedabad University",
+  "department": "Amrut Mody School of Management, Data Analytics, Decision Sciences, Information Systems, Innovation and Technology Management, Operations Management, Operations Research, and Applied Statistics",
+  "school": "Amrut Mody School of Management",
+  "unit": "Data Analytics, Decision Sciences, Information Systems, Innovation and Technology Management, Operations Management, Operations Research, and Applied Statistics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "India",
+  "countries": [
+   "India"
+  ],
+  "adUrl": "https://careercenter.informs.org/job/assistant-associate-full-professor-ahmedabad-gujarat-5531",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Ahmedabad%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
   "owner": ""
  },
  {
@@ -2725,6 +4831,40 @@
   "owner": ""
  },
  {
+  "id": "2027-george-fox-university-20260915",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-15",
+  "institution": "George Fox University",
+  "department": "College of Business, Business Analytics and Quantitative Methods",
+  "school": "College of Business",
+  "unit": "Business Analytics and Quantitative Methods",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179556518&Title=Assistant%2FAssociate%20Professor%20of%20Business%20%28Business%20Analytics%20%26%20Quantitative%20Methods%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=George%20Fox%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:59Z",
+  "owner": ""
+ },
+ {
   "id": "2027-georgia-tech-scheller-college-of-business-20260915",
   "year": 2027,
   "years": [
@@ -2756,6 +4896,107 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-17T20:27:05Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-laval-university-20260915",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-15",
+  "institution": "Université Laval",
+  "department": "Faculty of Business Administration, Operations and Decision Systems",
+  "school": "Faculty of Business Administration",
+  "unit": "Operations and Decision Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-20",
+  "comments": "",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://www.rh.ulaval.ca/emplois-disponibles/corps-professoral/professeures-et-professeurs/HCM/11033",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Universit%C3%A9%20Laval",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-xi-an-jiaotong-liverpool-university-20260915",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-15",
+  "institution": "Xi'an Jiaotong-Liverpool University",
+  "department": "International Business School Suzhou, Intelligent Operations and Marketing",
+  "school": "International Business School Suzhou",
+  "unit": "Intelligent Operations and Marketing",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179556358&Title=Professor%20in%20Project%20Management%2C%20Intelligent%20Operations%2C%20Information%20Management%2C%20and%20Marketing",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Xi'an%20Jiaotong-Liverpool%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-youngstown-state-university-20260915",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-15",
+  "institution": "Youngstown State University",
+  "department": "Williamson College of Business Administration, Lariccia School of Accounting and Finance",
+  "school": "Williamson College of Business Administration",
+  "unit": "Lariccia School of Accounting and Finance",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179556442&Title=Assistant%20Professor%2C%20Business%20Analytics%20%28Tenure%2DTrack%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Youngstown%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
   "owner": ""
  },
  {
@@ -2892,6 +5133,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-15T10:32:38Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-stetson-university-20260912",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-12",
+  "institution": "Stetson University",
+  "department": "School of Business Administration, Business Systems, AI and Analytics",
+  "school": "School of Business Administration",
+  "unit": "Business Systems, AI and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-09-25",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179549351&Title=Assistant%20Professor%20of%20AI%20%26amp%3B%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Stetson%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
   "owner": ""
  },
  {
@@ -3169,6 +5444,140 @@
   "owner": ""
  },
  {
+  "id": "2027-bridgewater-state-university-20260905",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-05",
+  "institution": "Bridgewater State University",
+  "department": "Louis M. Ricciardi College of Business, Management and Marketing",
+  "school": "Louis M. Ricciardi College of Business",
+  "unit": "Management and Marketing",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 25, 2026",
+  "applyByDate": "2026-11-25",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179545835&Title=Assistant%20Professor%20of%20Management%20with%20a%20concentration%20in%20Management%20Information%20Systems%2C%20Department%20of%20Management%20and%20Marketing",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Bridgewater%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-harris-stowe-state-university-20260905-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-05",
+  "institution": "Harris-Stowe State University",
+  "department": "Anheuser-Busch School of Business, Management Information Systems",
+  "school": "Anheuser-Busch School of Business",
+  "unit": "Management Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179546919&Title=Assistant%20Professor%20of%20Management%20Information%20Systems",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Harris-Stowe%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-maine-maritime-academy-20260905",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-05",
+  "institution": "Maine Maritime Academy",
+  "department": "Loeb-Sullivan School of International Business and Logistics, International Business and Logistics",
+  "school": "Loeb-Sullivan School of International Business and Logistics",
+  "unit": "International Business and Logistics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://mainemaritime.edu/employment-at-mma/faculty-positions/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Maine%20Maritime%20Academy",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-mercy-university-20260905",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-05",
+  "institution": "Mercy University",
+  "department": "School of Business, Business Administration",
+  "school": "School of Business",
+  "unit": "Business Administration",
+  "type": "Business School",
+  "levels": [
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179548156&Title=Visiting%20Assistant%20Professor-%20F00330",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Mercy%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
   "id": "2027-montclair-state-university-20260905",
   "year": 2027,
   "years": [
@@ -3199,6 +5608,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T06:45:50Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-texas-christian-university-20260905",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-05",
+  "institution": "Texas Christian University",
+  "department": "Neeley School of Business, Information Systems and Supply Chain Management",
+  "school": "Neeley School of Business",
+  "unit": "Information Systems and Supply Chain Management",
+  "type": "University",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179546564&Title=Instructor%2C%20Instructor%20II%20or%20Senior%20Instructor%20of%20Analytics%2FStatistics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Texas%20Christian%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
   "owner": ""
  },
  {
@@ -3270,6 +5713,144 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-kentucky-20260905",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-05",
+  "institution": "University of Kentucky",
+  "department": "Martin School of Public Policy and Administration, Public and Nonprofit Management",
+  "school": "Martin School of Public Policy and Administration",
+  "unit": "Public and Nonprofit Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-09",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179547685&Title=Assistant%20or%20Associate%20Professor%20of%20Public%20Policy%20and%20Nonprofit%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Kentucky",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-new-haven-20260905",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-05",
+  "institution": "University of New Haven",
+  "department": "College of Business and Digital Innovation, Business Analytics",
+  "school": "College of Business and Digital Innovation",
+  "unit": "Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-09-18",
+  "comments": "",
+  "country": "Saudi Arabia",
+  "countries": [
+   "Saudi Arabia"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179548284&Title=Assistant%20Professor%20of%20Practice%20%2D%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20New%20Haven",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:00Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-university-of-puget-sound-20260905",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-05",
+  "institution": "University of Puget Sound",
+  "department": "School of Business and Leadership, Management",
+  "school": "School of Business and Leadership",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179547311&Title=Assistant%20Professor%2C%20Management%20(Tenure%20Track)",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Puget%20Sound",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:01Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-southern-mississippi-20260905",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-05",
+  "institution": "University of Southern Mississippi",
+  "department": "College of Business and Economic Development, Management",
+  "school": "College of Business and Economic Development",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-09-10",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179546431&Title=Assistant%20Professor%2C%20School%20of%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Southern%20Mississippi",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:01Z",
+  "owner": ""
+ },
+ {
   "id": "2027-sabanci-university-20260904",
   "year": 2027,
   "years": [
@@ -3301,6 +5882,74 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T06:56:03Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-california-state-university-fullerton-20260903",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-03",
+  "institution": "California State University, Fullerton",
+  "department": "College of Business and Economics, Management",
+  "school": "College of Business and Economics",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-09",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/search/details.cfm?JobCode=179544672&Title=Assistant%20Professor%2C%20Operations%20and%20Supply%20Chain%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=California%20State%20University%2C%20Fullerton",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:01Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-rollins-college-20260903",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-03",
+  "institution": "Rollins College",
+  "department": "Crummer Graduate School of Business, Operations and Supply Chain Management",
+  "school": "Crummer Graduate School of Business",
+  "unit": "Operations and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/search/details.cfm?JobCode=179544946&Title=Associate%2FFull%20Professor%2C%20Operations%20Management%20%26amp%3B%20Supply%20Chain%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Rollins%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:01Z",
   "owner": ""
  },
  {
@@ -3344,6 +5993,40 @@
   "ref": "OA-JOB-260903-94R8",
   "owner": "c0f7618380865dfd",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-university-of-tennessee-knoxville-ise-20260903",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-03",
+  "institution": "University of Tennessee, Knoxville",
+  "department": "Tickle College of Engineering, Industrial and Systems Engineering",
+  "school": "Tickle College of Engineering",
+  "unit": "Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-05",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/192401",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Tennessee%2C%20Knoxville",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:01Z",
+  "owner": ""
  },
  {
   "id": "2027-iese-business-school-20260902",
@@ -3608,6 +6291,41 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-neoma-business-school-20260831",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-31",
+  "institution": "NEOMA Business School",
+  "department": "Information Systems, Supply Chain and Decision Making",
+  "school": "",
+  "unit": "Information Systems, Supply Chain and Decision Making",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-15",
+  "comments": "",
+  "country": "France",
+  "countries": [
+   "France"
+  ],
+  "adUrl": "https://apply.interfolio.com/192571",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=NEOMA%20Business%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:01Z",
+  "owner": ""
+ },
+ {
   "id": "2027-southern-methodist-university-20260831",
   "year": 2027,
   "years": [
@@ -3638,6 +6356,39 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T07:47:28Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-arkansas-20260828",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-28",
+  "institution": "University of Arkansas",
+  "department": "Sam M. Walton College of Business, J.B. Hunt Transport Department of Supply Chain Management",
+  "school": "Sam M. Walton College of Business",
+  "unit": "J.B. Hunt Transport Department of Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 31, 2026",
+  "applyByDate": "2026-10-31",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://uasys.wd5.myworkdayjobs.com/en-US/UAF_External_Career_Site/job/Fayetteville-AR/Assistant-Professor_R0090609?q=assistant+professor",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Arkansas",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:01Z",
   "owner": ""
  },
  {
@@ -4739,6 +7490,40 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-missouri-20260821",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-21",
+  "institution": "University of Missouri",
+  "department": "Robert J. Trulaske, Sr. College of Business, Management",
+  "school": "Robert J. Trulaske, Sr. College of Business",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179532324&Title=NTT%20Teaching%20Faculty%20%2D%20Analytics%2C%20Operations%2C%20and%2For%20Supply%20Chain%20Management%20%28SCM%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Missouri",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:01Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-missouri-st-louis-20260821",
   "year": 2027,
   "years": [
@@ -5186,6 +7971,40 @@
   "owner": ""
  },
  {
+  "id": "2027-george-mason-university-20260813-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-13",
+  "institution": "George Mason University",
+  "department": "Donald G. Costello College of Business, Information Systems and Operations Management",
+  "school": "Donald G. Costello College of Business",
+  "unit": "Information Systems and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-08-27",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://listings.jobs.gmu.edu/jobs/tenure-track-assistant-professor-of-management-information-systems-fairfax-va-virginia-united-states-other",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=George%20Mason%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:01Z",
+  "owner": ""
+ },
+ {
   "id": "2027-syracuse-university-20260813",
   "year": 2027,
   "years": [
@@ -5321,6 +8140,41 @@
   "owner": ""
  },
  {
+  "id": "2027-southeastern-louisiana-university-20260812",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-12",
+  "institution": "Southeastern Louisiana University",
+  "department": "College of Business, Marketing and Supply Chain Management",
+  "school": "College of Business",
+  "unit": "Marketing and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "September 9, 2026",
+  "applyByDate": "2026-09-09",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179525821",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Southeastern%20Louisiana%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
   "id": "2027-stanford-gsb-20260812",
   "year": 2027,
   "years": [
@@ -5427,6 +8281,74 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-augsburg-university-20260811",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-11",
+  "institution": "Augsburg University",
+  "department": "Business Administration and Economics",
+  "school": "",
+  "unit": "Business Administration and Economics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — initial review 2026-11-01",
+  "applyByDate": "",
+  "reviewDate": "2026-11-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179558120",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Augsburg%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-cal-poly-pomona-20260811",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-11",
+  "institution": "California State Polytechnic University, Pomona",
+  "department": "College of Business Administration, Computer Information Systems",
+  "school": "College of Business Administration",
+  "unit": "Computer Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-11",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179523912&Title=Tenure%20Track%20Faculty%20Position%20Computer%20Information%20Systems%20Department%20College%20of%20Business%20Administration",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=California%20State%20Polytechnic%20University%2C%20Pomona",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
+ },
+ {
   "id": "2027-ewha-womans-university-20260811",
   "year": 2027,
   "years": [
@@ -5494,6 +8416,74 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-tennessee-at-chattanooga-20260811",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-11",
+  "institution": "University of Tennessee at Chattanooga",
+  "department": "Gary W. Rollins College of Business, Data Analytics",
+  "school": "Gary W. Rollins College of Business",
+  "unit": "Data Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-09-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179524950&Title=Assistant%20Professor%20of%20Logistics%20and%20Supply%20Chain%20Management%20%28Tenure%20Track%29%20%2D%20Department%20of%20Data%20Analytics%2C%20Gary%20W%2E%20Rollins%20College%20of%20Business",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Tennessee%20at%20Chattanooga",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-texas-at-el-paso-20260811",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-11",
+  "institution": "University of Texas at El Paso",
+  "department": "Woody L. Hunt College of Business, Accounting and Information Systems",
+  "school": "Woody L. Hunt College of Business",
+  "unit": "Accounting and Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — full consideration 2026-09-30",
+  "applyByDate": "",
+  "reviewDate": "2026-09-30",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179523834&Title=Assistant%20Professor%20in%20Information%20Systems%20and%20Business%20Analytics%20%28Artificial%20Intelligence%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Texas%20at%20El%20Paso",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
+ },
+ {
   "id": "2027-the-ohio-state-university-20260810",
   "year": 2027,
   "years": [
@@ -5535,6 +8525,107 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-ubc-okanagan-20260810",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-10",
+  "institution": "University of British Columbia",
+  "department": "Faculty of Management, Operations and Supply Chain Management",
+  "school": "Faculty of Management",
+  "unit": "Operations and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling - start 2026-09-11",
+  "applyByDate": "",
+  "reviewDate": "2026-09-11",
+  "comments": "",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179523778&Title=Assistant%20Professor%20Tenure%20Track%20Positions%20in%20Operations%20and%20Supply%20Chain%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20British%20Columbia",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-worcester-state-university-20260810",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-10",
+  "institution": "Worcester State University",
+  "department": "Business Administration and Economics",
+  "school": "",
+  "unit": "Business Administration and Economics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Rolling",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179523037&Title=Instructor%2F%20Assistant%2F%20Associate%20Professor%20of%20Management%20and%20Business%20Analytics%20%28Tenure%2DTrack%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Worcester%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-eastern-new-mexico-university-20260808",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-08",
+  "institution": "Eastern New Mexico University",
+  "department": "College of Business, Management",
+  "school": "College of Business",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — review begins immediately",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179521308&Title=Assistant%20Professor%20of%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Eastern%20New%20Mexico%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
+ },
+ {
   "id": "2027-princeton-university-20260808",
   "year": 2027,
   "years": [
@@ -5566,6 +8657,40 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-08T00:00:00Z",
   "owner": ""
+ },
+ {
+  "id": "2027-university-of-waikato-20260808",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-08",
+  "institution": "University of Waikato",
+  "department": "Business School, Supply Chain Management",
+  "school": "Business School",
+  "unit": "Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "August 31, 2026",
+  "applyByDate": "2026-08-31",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179521547&Title=Senior%20Lecturer%2C%20Associate%20Professor%20or%20Professor%20in%20Supply%20Chain%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Waikato",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": "",
+  "applicationStatus": "Expired"
  },
  {
   "id": "2028-university-of-kansas-20260806",
@@ -5608,6 +8733,74 @@
   "addedAt": "2026-08-06T00:00:00Z",
   "owner": "",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-belmont-university-20260805",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-05",
+  "institution": "Belmont University",
+  "department": "Jack C. Massey College of Business, Supply Chain Management",
+  "school": "Jack C. Massey College of Business",
+  "unit": "Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Rolling",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://belmont.csod.com/ux/ats/careersite/10/home/requisition/4860?c=belmont&cfdd[0][id]=22&cfdd[0][options][0]=58",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Belmont%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-naval-postgraduate-school-20260805",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-05",
+  "institution": "Naval Postgraduate School",
+  "department": "Operations Research",
+  "school": "",
+  "unit": "Operations Research",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Rolling — priority 2026-09-30",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://nps.edu/web/or/hiring",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Naval%20Postgraduate%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
  },
  {
   "id": "2027-rollins-college-20260805",
@@ -5751,6 +8944,110 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-university-of-kansas-20260805",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-05",
+  "institution": "University of Kansas",
+  "department": "School of Business, Analytics, Information and Operations Management",
+  "school": "School of Business",
+  "unit": "Analytics, Information and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — first review 2026-09-08",
+  "applyByDate": "",
+  "reviewDate": "2026-09-08",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.chronicle.com/job/38022042/assistant-professor-of-operations-management/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Kansas",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-university-of-macau-20260805",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-05",
+  "institution": "University of Macau",
+  "department": "Faculty of Business Administration, Accounting and Information Management",
+  "school": "Faculty of Business Administration",
+  "unit": "Accounting and Information Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Rolling",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Macau",
+  "countries": [
+   "Macau"
+  ],
+  "adUrl": "https://career.admo.um.edu.mo/fba_bia_is_aap_07_2026/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Macau",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-south-carolina-aiken-20260805",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-05",
+  "institution": "University of South Carolina Aiken",
+  "department": "School of Business Administration, Management Science",
+  "school": "School of Business Administration",
+  "unit": "Management Science",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — initial screening 2026-09-03",
+  "applyByDate": "",
+  "reviewDate": "2026-09-03",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179519203&Title=Asst%20Prof%2C%20Management%20Science",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20South%20Carolina%20Aiken",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
   "id": "2027-university-of-virginia-20260805",
   "year": 2027,
   "years": [
@@ -5788,6 +9085,40 @@
   "addedAt": "2026-08-05T00:00:00Z",
   "owner": "",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-abilene-christian-university-20260804",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-04",
+  "institution": "Abilene Christian University",
+  "department": "College of Business Administration, Management Science",
+  "school": "College of Business Administration",
+  "unit": "Management Science",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://acu.wd108.myworkdayjobs.com/en-US/ACUCareers/job/Professor---Information-Systems-College-Faculty-or-Tenure-Track_JR100261",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Abilene%20Christian%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": ""
  },
  {
   "id": "2027-cornell-sc-johnson-school-of-business-20260804",
@@ -5889,6 +9220,39 @@
   "owner": ""
  },
  {
+  "id": "2027-ipade-business-school-20260804",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-04",
+  "institution": "IPADE Business School",
+  "department": "Operations Management",
+  "school": "",
+  "unit": "Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Mexico",
+  "countries": [
+   "Mexico"
+  ],
+  "adUrl": "https://facultycareers.ipade.mx/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=IPADE%20Business%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": ""
+ },
+ {
   "id": "2027-mcgill-university-20260731",
   "year": 2027,
   "years": [
@@ -5922,6 +9286,73 @@
   "owner": ""
  },
  {
+  "id": "2027-california-state-university-long-beach-20260730",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-30",
+  "institution": "California State University, Long Beach",
+  "department": "College of Business, Information Systems",
+  "school": "College of Business",
+  "unit": "Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — review began 2026-08-17",
+  "applyByDate": "",
+  "reviewDate": "2026-08-17",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.pageuppeople.com/873/lb/en-us/job/559681/assistant-professor-of-information-systems-2-open-positions",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=California%20State%20University%2C%20Long%20Beach",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-calvin-university-20260730",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-30",
+  "institution": "Calvin University",
+  "department": "School of Business, Business Analytics",
+  "school": "School of Business",
+  "unit": "Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — review begins immediately",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.insidehighered.com/job/3529886/school-of-business-tenure-track-business-analytics-faculty/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Calvin%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": ""
+ },
+ {
   "id": "2027-georgia-southern-university-20260730",
   "year": 2027,
   "years": [
@@ -5952,6 +9383,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-07-30T00:00:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-hainan-bielefeld-university-of-applied-sciences-20260730",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-30",
+  "institution": "Hainan Bielefeld University of Applied Sciences",
+  "department": "Production and Operations Management",
+  "school": "",
+  "unit": "Production and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://www.hainan-biuh.edu.cn/en/job/lecturer-associate-professor-professor-in-production-and-operations-management/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Hainan%20Bielefeld%20University%20of%20Applied%20Sciences",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
   "owner": ""
  },
  {
@@ -6034,6 +9499,110 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-university-of-georgia-20260730",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-30",
+  "institution": "University of Georgia",
+  "department": "Terry College of Business, Management Information Systems",
+  "school": "Terry College of Business",
+  "unit": "Management Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — full consideration 2026-10-01",
+  "applyByDate": "",
+  "reviewDate": "2026-10-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.chronicle.com/job/38020300/assistant-professor/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Georgia",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-nebraska-at-omaha-20260730",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-30",
+  "institution": "University of Nebraska at Omaha",
+  "department": "College of Public Affairs and Community Service, School of Public Administration, Nonprofit Management",
+  "school": "College of Public Affairs and Community Service, School of Public Administration",
+  "unit": "Nonprofit Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Rolling — full consideration 2026-09-08",
+  "applyByDate": "",
+  "reviewDate": "2026-09-08",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.chronicle.com/job/38018993/assistant-associate-professor-nonprofit-management/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Nebraska%20at%20Omaha",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-university-of-oklahoma-20260730",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-30",
+  "institution": "University of Oklahoma",
+  "department": "Michael F. Price College of Business, Management Information Systems",
+  "school": "Michael F. Price College of Business",
+  "unit": "Management Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-08-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/171749",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Oklahoma",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:03Z",
+  "owner": ""
+ },
+ {
   "id": "2026-mcgill-university-20260728",
   "year": 2026,
   "years": [
@@ -6110,6 +9679,41 @@
   "owner": ""
  },
  {
+  "id": "2027-donghua-university-20260723",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-23",
+  "institution": "Donghua University",
+  "department": "Glorious Sun School of Economics and Management, Operations and Logistics, Information Management, Decision Science, Behavioral Sciences and Financial Engineering",
+  "school": "Glorious Sun School of Economics and Management",
+  "unit": "Operations and Logistics, Information Management, Decision Science, Behavioral Sciences and Financial Engineering",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://careercenter.informs.org/job/glorious-sun-school-of-economics-and-management-donghua-university-shanghai-faculty-recruitment-shanghai-shanghai-5393",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Donghua%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
+  "owner": ""
+ },
+ {
   "id": "2027-esmt-berlin-20260723",
   "year": 2027,
   "years": [
@@ -6143,6 +9747,41 @@
   "owner": ""
  },
  {
+  "id": "2027-hamad-bin-khalifa-university-hbku-20260723",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-23",
+  "institution": "Hamad Bin Khalifa University",
+  "department": "College of Science and Engineering, Engineering Management and Decision Sciences",
+  "school": "College of Science and Engineering",
+  "unit": "Engineering Management and Decision Sciences",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Qatar",
+  "countries": [
+   "Qatar"
+  ],
+  "adUrl": "https://careercenter.informs.org/job/open-rank-assistant-associate-full-professor-operations-management-supply-chain-management-operations-research-management-science-and-industrial-systems-engineering-ar-rayyan-5342",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Hamad%20Bin%20Khalifa%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
   "id": "2027-imperial-college-london-20260723",
   "year": 2027,
   "years": [
@@ -6173,6 +9812,109 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T07:32:35Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-san-diego-state-university-20260723",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-23",
+  "institution": "San Diego State University",
+  "department": "Fowler College of Business, Management Information Systems",
+  "school": "Fowler College of Business",
+  "unit": "Management Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — full consideration 2026-10-30",
+  "applyByDate": "",
+  "reviewDate": "2026-10-30",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.sdsu.edu/en-us/job/560000/department-of-management-information-systems-assistant-professor-pool-data-science-20272028",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=San%20Diego%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-san-diego-state-university-20260723-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-23",
+  "institution": "San Diego State University",
+  "department": "Fowler College of Business, Management Information Systems",
+  "school": "Fowler College of Business",
+  "unit": "Management Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — full consideration 2026-10-30",
+  "applyByDate": "",
+  "reviewDate": "2026-10-30",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.sdsu.edu/en-us/job/559998/department-of-management-information-systems-assistant-professor-pool-information-systems-20272028",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=San%20Diego%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-shandong-university-of-finance-and-economics-20260723",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-23",
+  "institution": "Shandong University of Finance and Economics",
+  "department": "School of Finance, Large Language Model Research Institute",
+  "school": "School of Finance",
+  "unit": "Large Language Model Research Institute",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Post-Doc"
+  ],
+  "applyBy": "Rolling — initial deadline 2026-05-07 (passed)",
+  "applyByDate": "",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://agi.sdufe.edu.cn/info/1071/1762.htm",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Shandong%20University%20of%20Finance%20and%20Economics",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
   "owner": ""
  },
  {
@@ -6243,6 +9985,40 @@
   "owner": ""
  },
  {
+  "id": "2027-central-washington-university-20260722",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-22",
+  "institution": "Central Washington University",
+  "department": "College of Education and Professional Studies, Information Technology Management",
+  "school": "College of Education and Professional Studies",
+  "unit": "Information Technology Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179503942&Title=Assistant%20Professor%20of%20Information%20Technology%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Central%20Washington%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-california-berkeley-20260722",
   "year": 2027,
   "years": [
@@ -6273,6 +10049,39 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-07-22T00:00:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-xi-an-jiaotong-liverpool-university-20260722",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-22",
+  "institution": "Xi’an Jiaotong-Liverpool University",
+  "department": "School of Intelligent Finance and Business, Supply Chain Management",
+  "school": "School of Intelligent Finance and Business",
+  "unit": "Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://www.xjtlu.edu.cn/en/study/departments/school-of-intelligent-finance-and-business/jobs/faculty-positions-supply-chain",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Xi%E2%80%99an%20Jiaotong-Liverpool%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
   "owner": ""
  },
  {
@@ -6343,6 +10152,40 @@
   "owner": ""
  },
  {
+  "id": "2027-bellarmine-university-20260718",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-18",
+  "institution": "Bellarmine University",
+  "department": "W. Fielding Rubel School of Business, Business Technology and Artificial Intelligence",
+  "school": "W. Fielding Rubel School of Business",
+  "unit": "Business Technology and Artificial Intelligence",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.chronicle.com/job/38016580/assistant-or-associate-professor-of-information-systems-and-artificial-intelligence/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Bellarmine%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
+  "owner": ""
+ },
+ {
   "id": "2027-belmont-university-20260718",
   "year": 2027,
   "years": [
@@ -6374,6 +10217,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-09T06:04:49Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-henderson-state-university-20260718",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-18",
+  "institution": "Henderson State University",
+  "department": "College of Business, Operations Management",
+  "school": "College of Business",
+  "unit": "Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-08-17",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/search/details.cfm?JobCode=179503623&Title=Assistant%20Professor%20of%20Operations%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Henderson%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
   "owner": ""
  },
  {
@@ -6411,6 +10288,143 @@
   "owner": ""
  },
  {
+  "id": "2027-kennesaw-state-university-20260717",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-17",
+  "institution": "Kennesaw State University",
+  "department": "Michael J. Coles College of Business, Information Systems and Security",
+  "school": "Michael J. Coles College of Business",
+  "unit": "Information Systems and Security",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — full consideration 2026-09-30",
+  "applyByDate": "",
+  "reviewDate": "2026-09-30",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179502443&Title=Assistant%20Professor%20of%20Information%20Systems%20and%20Security",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Kennesaw%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:04Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-northern-state-university-20260717",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-17",
+  "institution": "Northern State University",
+  "department": "School of Business, Business Analytics and Information Systems",
+  "school": "School of Business",
+  "unit": "Business Analytics and Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-09-08",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://yourfuture.sdbor.edu/postings/48998",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Northern%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-st-thomas-university-20260717",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-17",
+  "institution": "St. Thomas University",
+  "department": "Gus Machado College of Business, Quantitative and Statistical Analysis, Supply Chain, Operations and Logistics Management, and Managerial Economics",
+  "school": "Gus Machado College of Business",
+  "unit": "Quantitative and Statistical Analysis, Supply Chain, Operations and Logistics Management, and Managerial Economics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179503388&Title=Assistant%20Professor%20of%20Quantitative%20and%20Statistical%20Analysis%20Supply%20Chain%20Operations%20Logistics%20and%20Economics%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=St.%20Thomas%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-iowa-state-university-20260714",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-14",
+  "institution": "Iowa State University",
+  "department": "Debbie and Jerry Ivy College of Business, Supply Chain Management",
+  "school": "Debbie and Jerry Ivy College of Business",
+  "unit": "Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — guaranteed consideration 2026-08-31",
+  "applyByDate": "",
+  "reviewDate": "2026-08-31",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://isu.wd1.myworkdayjobs.com/IowaStateJobs/job/Ames-IA/Assistant-Professor-in-Supply-Chain-Management_R19606",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Iowa%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": ""
+ },
+ {
   "id": "2027-technical-university-of-munich-tum-20260714",
   "year": 2027,
   "years": [
@@ -6441,6 +10455,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T07:12:25Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-michigan-20260714",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-14",
+  "institution": "University of Michigan",
+  "department": "Stephen M. Ross School of Business, Technology and Operations Management",
+  "school": "Stephen M. Ross School of Business",
+  "unit": "Technology and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-15",
+  "comments": "Tenured Associate or Full Professor in Technology and Operations, Cognitive Manufacturing cluster (UM posting 280089; Interfolio 189178). Research focuses on AI, advanced manufacturing and supply chain resilience. This is distinct from the Sustainable Semiconductors position already listed. Apply at https://apply.interfolio.com/189178 with CV, up to three research papers, research and teaching statements, and teaching evaluations. Full consideration by October 15, 2026; review may continue until filled. Area chair: Izak Duenyas ([e-mail removed]), verified on the official department page. Application contact named in the PDF: Shandra Bremer ([e-mail removed]). Verified manually from the POMS PDF and official department page on October 9, 2026.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.poms.org/sites/default/files/2026-07/Cog%20Mfct%20JOB%20AD.pdf",
+  "adLabel": "job ad (PDF)",
+  "postedAtUrl": "https://www.poms.org/opportunities",
+  "postedAtLabel": "POMS job postings",
+  "furtherInfoUrl": "https://michiganross.umich.edu/faculty-research/areas-of-study/technology-operations",
+  "characteristics": [],
+  "featured": false,
+  "source": "poms-opportunities",
+  "addedAt": "2026-10-09T13:08:49Z",
   "owner": ""
  },
  {
@@ -6485,6 +10533,143 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-university-of-macau-20260706",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-06",
+  "institution": "University of Macau",
+  "department": "Institute of Artificial Intelligence and Brain Sciences, Data Science",
+  "school": "Institute of Artificial Intelligence and Brain Sciences",
+  "unit": "Data Science",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Macau",
+  "countries": [
+   "Macau"
+  ],
+  "adUrl": "https://career.admo.um.edu.mo/iaibs_faap_ds_07_2026/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Macau",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-illinois-at-urbana-champaign-20260703",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-03",
+  "institution": "University of Illinois at Urbana-Champaign",
+  "department": "Gies College of Business, Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
+  "school": "Gies College of Business",
+  "unit": "Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-07-06",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/details.cfm?JobCode=179488090",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Illinois%20at%20Urbana-Champaign",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-bradley-university-20260702",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-02",
+  "institution": "Bradley University",
+  "department": "Foster College of Business, Management Information Systems",
+  "school": "Foster College of Business",
+  "unit": "Management Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — initial screening began 2026-07-13",
+  "applyByDate": "",
+  "reviewDate": "2026-07-13",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179486278",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Bradley%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-georgia-southwestern-state-university-20260702",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-02",
+  "institution": "Georgia Southwestern State University",
+  "department": "College of Business and Computing, Management",
+  "school": "College of Business and Computing",
+  "unit": "Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179487342&Title=Assistant%2FAssociate%20Professor%20of%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Georgia%20Southwestern%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": ""
+ },
+ {
   "id": "2027-ku-leuven-20260702",
   "year": 2027,
   "years": [
@@ -6523,6 +10708,110 @@
   "addedAt": "2026-07-02T00:00:00Z",
   "owner": "",
   "applicationStatus": ""
+ },
+ {
+  "id": "2027-university-of-north-georgia-20260702",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-07-02",
+  "institution": "University of North Georgia",
+  "department": "Mike Cottrell College of Business, Marketing and Logistics",
+  "school": "Mike Cottrell College of Business",
+  "unit": "Marketing and Logistics",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179486588&Title=Lecturer%20of%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20North%20Georgia",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-washington-and-lee-university-20260628",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-28",
+  "institution": "Washington and Lee University",
+  "department": "Williams School of Commerce, Economics and Politics, Business Administration",
+  "school": "Williams School of Commerce, Economics and Politics",
+  "unit": "Business Administration",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — review began 2026-07-24",
+  "applyByDate": "",
+  "reviewDate": "2026-07-24",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179483729&Title=Assistant%20Professor%20of%20Business%20Administration%20%20Data%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Washington%20and%20Lee%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-johnson-and-wales-university-20260627",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-27",
+  "institution": "Johnson and Wales University",
+  "department": "College of Hospitality and Business, Operations and Supply Chain Management",
+  "school": "College of Hospitality and Business",
+  "unit": "Operations and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179482306&Title=Faculty%20%E2%80%93%20Supply%20Chain%20%26%20Operations%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Johnson%20and%20Wales%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": "",
+  "applicationStatus": "Expired"
  },
  {
   "id": "2027-indiana-university-bloomington-20260622",
@@ -6596,6 +10885,147 @@
   "owner": ""
  },
  {
+  "id": "2027-augsburg-university-20260613",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-13",
+  "institution": "Augsburg University",
+  "department": "Business Administration and Economics",
+  "school": "",
+  "unit": "Business Administration and Economics",
+  "type": "Business School",
+  "levels": [
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-07-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179463302",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Augsburg%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-bergen-community-college-20260613",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-13",
+  "institution": "Bergen Community College",
+  "department": "Division of Mathematics, Science, and Technology, Computer Science, Engineering and Information Technologies",
+  "school": "Division of Mathematics, Science, and Technology",
+  "unit": "Computer Science, Engineering and Information Technologies",
+  "type": "University",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179467320&Title=Tenure-Track%20Faculty%20Information%20Technology",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Bergen%20Community%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:40:42Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-florida-gulf-coast-university-20260613",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-13",
+  "institution": "Florida Gulf Coast University",
+  "department": "Lutgert College of Business, Information Systems, Analytics, and Supply Chain",
+  "school": "Lutgert College of Business",
+  "unit": "Information Systems, Analytics, and Supply Chain",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179465320&Title=Instructor%20I%2C%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Florida%20Gulf%20Coast%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:05Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-georgia-college-and-state-university-20260613",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-13",
+  "institution": "Georgia College and State University",
+  "department": "J. Whitney Bunting College of Business and Technology, Management, Marketing, and Logistics",
+  "school": "J. Whitney Bunting College of Business and Technology",
+  "unit": "Management, Marketing, and Logistics",
+  "type": "Business School",
+  "levels": [
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179465456&Title=Visiting%20Teaching%20Fellow%20of%20Logistics%20and%20Supply%20Chain%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Georgia%20College%20and%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:06Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
   "id": "2027-hofstra-university-20260613",
   "year": 2027,
   "years": [
@@ -6628,6 +11058,41 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-27T09:33:23Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-indiana-state-university-20260613",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-13",
+  "institution": "Indiana State University",
+  "department": "Scott College of Business, Marketing and Operations",
+  "school": "Scott College of Business",
+  "unit": "Marketing and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling — full consideration 2026-08-15 (passed)",
+  "applyByDate": "",
+  "reviewDate": "2026-08-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179464315&Title=Assistant%20Professor%20of%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Indiana%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:06Z",
   "owner": ""
  },
  {
@@ -6664,6 +11129,41 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T07:07:07Z",
   "owner": ""
+ },
+ {
+  "id": "2027-northern-kentucky-university-20260613",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-13",
+  "institution": "Northern Kentucky University",
+  "department": "College of Informatics, Computing and Analytics",
+  "school": "College of Informatics",
+  "unit": "Computing and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179466722&Title=Visiting%20Assistant%20Teaching%20Professor%2C%20Information%20Systems%20%26%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Northern%20Kentucky%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:06Z",
+  "owner": "",
+  "applicationStatus": "Expired"
  },
  {
   "id": "2027-university-of-central-arkansas-20260613",
@@ -6735,6 +11235,77 @@
   "owner": ""
  },
  {
+  "id": "2027-western-wyoming-community-college-20260613",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-13",
+  "institution": "Western Wyoming Community College",
+  "department": "Business and Technology, Information Systems",
+  "school": "Business and Technology",
+  "unit": "Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Rolling",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179463512&Title=Instructor%2FAssistant%20Professor%20of%20Information%20Systems",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Western%20Wyoming%20Community%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:06Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
+  "id": "2027-cunef-university-20260609",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-09",
+  "institution": "CUNEF Universidad",
+  "department": "School of Business, Economics and Law, Business Management",
+  "school": "School of Business, Economics and Law",
+  "unit": "Business Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "August 30, 2026",
+  "applyByDate": "2026-08-30",
+  "reviewDate": "2026-07-15",
+  "comments": "",
+  "country": "Spain",
+  "countries": [
+   "Spain"
+  ],
+  "adUrl": "https://academicjobsonline.org/ajo/jobs/32180",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=CUNEF%20Universidad",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:06Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
   "id": "2027-university-of-washington-20260608",
   "year": 2027,
   "years": [
@@ -6804,6 +11375,42 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-warwick-20260605",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-05",
+  "institution": "University of Warwick",
+  "department": "Faculty of Science, Engineering and Medicine, Warwick Manufacturing Group, Applied Artificial Intelligence",
+  "school": "Faculty of Science, Engineering and Medicine",
+  "unit": "Warwick Manufacturing Group, Applied Artificial Intelligence",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "June 18, 2026",
+  "applyByDate": "2026-06-18",
+  "comments": "",
+  "country": "United Kingdom",
+  "countries": [
+   "United Kingdom"
+  ],
+  "adUrl": "https://www.jobs.ac.uk/job/DRO402/assistant-or-associate-professor-in-applied-artificial-intelligence-53294-0526",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Warwick",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:06Z",
+  "owner": "",
+  "applicationStatus": "Expired"
+ },
+ {
   "id": "2027-air-force-institute-of-technology-20260604",
   "year": 2027,
   "years": [
@@ -6836,6 +11443,41 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-27T09:22:28Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-dongbei-university-of-finance-and-economics-20260604",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-06-04",
+  "institution": "Dongbei University of Finance and Economics",
+  "department": "Institute of Supply Chain Analytics",
+  "school": "",
+  "unit": "Institute of Supply Chain Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://careercenter.informs.org/job/tenure-track-assistant-associate-full-professor-recruitment-dalian-liaoning-5511",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Dongbei%20University%20of%20Finance%20and%20Economics",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:06Z",
   "owner": ""
  },
  {
@@ -7442,6 +12084,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-23T10:26:59Z",
+  "owner": ""
+ },
+ {
+  "id": "2026-donghua-university-20260422",
+  "year": 2026,
+  "years": [
+   2026
+  ],
+  "posted": "2026-04-22",
+  "institution": "Donghua University",
+  "department": "Glorious Sun School of Business and Management, Operations Management, Logistics and Supply Chain Management",
+  "school": "Glorious Sun School of Business and Management",
+  "unit": "Operations Management, Logistics and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "2026–2027 full-time faculty recruitment in Shanghai: Full Professor (tenured), Associate Professor (tenure-track), and Research Assistant Professor, with interests in operations management, logistics and supply chain management. Relevant doctorate required by August 2027. No closing date stated. Submit a research plan, two representative papers, applicant and doctoral-advisor CVs, dissertation if available, supporting materials and two recommendation letters, combined as instructed in the PDF. Recruitment contact: Lili Zhou ([e-mail removed]), the contact given in the PDF and confirmed by the official profile https://glxy.dhu.edu.cn/2021/0601/c20098a281736/page.psp; she is an administrative recruitment contact, not identified as department head. This is the 2026–2027 call, distinct from the older 2025 advert on the site. Verified manually October 9, 2026.",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://www.poms.org/sites/default/files/2026-04/POMS%20Job%20Advertisement-2026.pdf",
+  "adLabel": "job ad (PDF)",
+  "postedAtUrl": "https://www.poms.org/opportunities",
+  "postedAtLabel": "POMS job postings",
+  "furtherInfoUrl": "https://glxy.dhu.edu.cn/",
+  "characteristics": [],
+  "featured": false,
+  "source": "poms-opportunities",
+  "addedAt": "2026-10-09T13:09:23Z",
   "owner": ""
  },
  {
@@ -8170,6 +12846,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-23T10:27:04Z",
+  "owner": ""
+ },
+ {
+  "id": "2026-dongbei-university-of-finance-and-economics-dali-20260313",
+  "year": 2026,
+  "years": [
+   2026
+  ],
+  "posted": "2026-03-13",
+  "institution": "Dongbei University of Finance and Economics",
+  "department": "Institute of Supply Chain Analytics",
+  "school": "",
+  "unit": "Institute of Supply Chain Analytics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Full-time tenure-track Assistant, Associate and Full Professor recruitment at the Institute of Supply Chain Analytics (ISCA), Dalian. Areas include business/data/marketing analytics, information systems, supply chain finance, operations management and supply chain management; theoretical and empirical research are welcome. PhD required before appointment; higher-rank applicants should show strong research and teaching records. No closing date stated. Submit cover letter, CV, three representative research papers, three referees and teaching evidence if available to both [e-mail removed] and [e-mail removed].",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://www.poms.org/sites/default/files/2026-03/POMS-ISCA%20Recruitment%20information.pdf",
+  "adLabel": "job ad (PDF)",
+  "postedAtUrl": "https://www.poms.org/opportunities",
+  "postedAtLabel": "POMS job postings",
+  "furtherInfoUrl": "https://isca.dufe.edu.cn/gywm/rczp/",
+  "characteristics": [],
+  "featured": false,
+  "source": "poms-opportunities",
+  "addedAt": "2026-10-09T13:10:01Z",
   "owner": ""
  },
  {
@@ -13829,9 +18539,8 @@
    "Assistant Professor",
    "Other Ranks"
   ],
-  "applyBy": "Until filled.",
+  "applyBy": "Until filled. Review of applications will begin approximately 10/31/2025 and will continue until the position is filled.",
   "applyByDate": "",
-  "reviewDate": "2025-10-31",
   "comments": "",
   "country": "United States",
   "countries": [

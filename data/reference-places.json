@@ -465,6 +465,11 @@
   "department": "Supply Chain Management, Operations Management"
  },
  {
+  "institution": "California State University, Stanislaus",
+  "school": "College of Business Administration",
+  "department": "Management Information Systems"
+ },
+ {
   "institution": "Calvin University",
   "school": "School of Business",
   "department": "Business Analytics"
@@ -773,6 +778,11 @@
   "institution": "Donghua University",
   "school": "",
   "department": "OM, SCM, Logistics"
+ },
+ {
+  "institution": "Donghua University",
+  "school": "Glorious Sun School of Business and Management",
+  "department": "Operations Management, Logistics and Supply Chain Management"
  },
  {
   "institution": "Donghua University",
@@ -1272,11 +1282,6 @@
  {
   "institution": "INSEAD",
   "school": "",
-  "department": ""
- },
- {
-  "institution": "INSEAD",
-  "school": "",
   "department": "Decision Sciences"
  },
  {
@@ -1762,7 +1767,17 @@
  {
   "institution": "New York University Shanghai",
   "school": "",
+  "department": "Operations and Business Analytics"
+ },
+ {
+  "institution": "New York University Shanghai",
+  "school": "",
   "department": "Operations Management"
+ },
+ {
+  "institution": "New York University Shanghai",
+  "school": "",
+  "department": "Technology, Operations, and Statistics"
  },
  {
   "institution": "New York University",
@@ -3965,9 +3980,9 @@
   "department": "Supply Chain Management"
  },
  {
-  "institution": "Yale School of Management",
-  "school": "",
-  "department": "Operations Management"
+  "institution": "Yale University",
+  "school": "School of Management",
+  "department": "Operations Department"
  },
  {
   "institution": "Yeshiva University",
