@@ -307,12 +307,12 @@
               <div class="v3-panel">
                 <div class="v3-panel-head">
                   <h3>&#10022; Ten most recent postings</h3>
-                  <a href="jobs">Full list &rarr;</a>
+                  <a class="oa-view-all" href="jobs">View all jobs &rarr;</a>
                 </div>
                 <div id="oa-jobs-recent"></div>
                 <div class="v3-panel-foot">
                   <span class="v3-mut">Updated automatically as postings arrive</span>
-                  <a href="jobs" id="v3-jobs-all">Explore all postings &rarr;</a>
+                  <a class="oa-view-all" href="jobs" id="v3-jobs-all">View all jobs &rarr;</a>
                 </div>
               </div>
             </div>
@@ -364,9 +364,9 @@
             else&rsquo;s at that moment.</p>
           </div>
 
-          <div class="v3-section-head"><h3>Ten candidate previews</h3><a class="v3-link" href="candidates">Full candidate list →</a></div>
+          <div class="oa-preview-heading"><h3>Ten candidate previews</h3><a class="oa-view-all" href="candidates">View all candidates →</a></div>
           <div id="oa-candidates"></div>
-          <p><a class="v3-btn ghost" href="candidates">Explore all candidates →</a></p>
+          <p><a class="oa-view-all" href="candidates">View all candidates →</a></p>
         </div>
       </section>
 
@@ -1045,7 +1045,7 @@
           var rows = (Array.isArray(data) ? data : data.rows || []).filter(inCurrentMarket);
           if (!rows.length) return;
           var all = document.getElementById('v3-jobs-all');
-          if (all) all.textContent = 'Explore all ' + rows.length + ' postings →';
+          if (all) all.textContent = 'View all ' + rows.length + ' jobs →';
 
           // the values the full page's filters offer, so a pick here lands on
           // exactly the same facet there
