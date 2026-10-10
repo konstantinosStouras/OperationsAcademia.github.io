@@ -393,6 +393,8 @@
     host.appendChild(resEl);
     host.appendChild(focusEl);
     host.appendChild(listEl);
+    var bottomResEl = cfg.bottomPager ? el('div', { class: 'oa-resultbar oa-resultbar-bottom' }) : null;
+    if (bottomResEl) host.appendChild(bottomResEl);
     host.appendChild(liveEl);
 
     listEl.appendChild(el('li', { class: 'oa-loading', text: STR.loading }));
@@ -982,6 +984,14 @@
       prev.disabled = page === 0;
       next.disabled = (page + 1) * perPage >= view.length;
       resEl.appendChild(el('div', { class: 'oa-pager' }, [prev, next]));
+      if (bottomResEl) {
+        bottomResEl.innerHTML = '';
+        bottomResEl.hidden = !view.length;
+        Array.prototype.forEach.call(resEl.children, function (child) { bottomResEl.appendChild(child.cloneNode(true)); });
+        var bottomButtons = bottomResEl.querySelectorAll('button');
+        bottomButtons[0].addEventListener('click', function () { prev.click(); });
+        bottomButtons[1].addEventListener('click', function () { next.click(); });
+      }
       /* THE PAGER MUST NOT DROP THE KEYBOARD. render() rebuilds this bar, so
          the button just pressed is gone and focus falls to <body>: a reader
          turning pages from the keyboard had to Tab all the way back in for

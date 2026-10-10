@@ -1330,6 +1330,7 @@
       V3.lazy('#oa-candidates', function () {
         var cands = OAList.mount({
           mount: '#oa-candidates',
+          bottomPager: true,
           data: '/data/candidates.json',
           perPage: 10,
           urlPrefix: 'c_',
@@ -1345,9 +1346,9 @@
           },
           prepare: function (rows) { return rows.filter(inCurrentMarket); },
           sort: function (a, b) {
-            var d = (b.posted || '').localeCompare(a.posted || '');
-            if (d) return d;
-            return (a.name || '').localeCompare(b.name || '');
+            var surname = (a.last || (a.name || '').trim().split(/\s+/).pop()).localeCompare(b.last || (b.name || '').trim().split(/\s+/).pop(), 'en', { sensitivity: 'base' });
+            if (surname) return surname;
+            return (a.first || a.name || '').localeCompare(b.first || b.name || '', 'en', { sensitivity: 'base' });
           },
           filters: [
             { key: 'name',        label: 'Name',             type: 'text',
