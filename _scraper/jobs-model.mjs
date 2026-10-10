@@ -288,7 +288,7 @@ export function universitiesLink(institution) {
 
 /** True when a stored link is one WE generated, and so ours to regenerate. */
 export function ownUniversitiesLink(v) {
-  return /^https?:\/\/(www\.)?operationsacademia\.org\/universities\?filterA=/i.test(String(v ?? ''));
+  return /^https?:\/\/(www\.)?operationsacademia\.org\/universities\?(?:filterA|university)=/i.test(String(v ?? ''));
 }
 
 export function jobId(row) {
