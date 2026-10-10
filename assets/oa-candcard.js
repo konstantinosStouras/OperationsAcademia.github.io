@@ -443,9 +443,7 @@
           { label: 'Research area(s)',      value: (r.researchAreas || []).join(', ') }
         ].concat((r.informsDays || []).length ? [
           { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
-          { label: 'INFORMS talk(s)', html: link(r.informsUrl, 'link') },
-          { label: 'Presentation details', value: r.jobTalk ? [r.jobTalk.date, [r.jobTalk.at, r.jobTalk.end].filter(Boolean).join('–'), r.jobTalk.location, r.jobTalk.title].filter(Boolean).join(' · ') : '' },
-          { label: 'INFORMS job talk', html: calendar && calendar.links ? calendar.links(r) : null }
+          { label: 'INFORMS talk(s)', html: link(r.informsUrl, 'link') },          { label: 'INFORMS job talk', html: calendar && calendar.links ? calendar.links(r) : null }
         ].concat(talkRows(r)) : [], [
           { label: 'CV',                    html: link(r.cvUrl, 'link to CV') },
           // the form stopped asking for a research summary (2026-08-24);
