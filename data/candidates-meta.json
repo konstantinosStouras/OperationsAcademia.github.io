@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-11T15:36:43.323Z",
+ "generated": "2026-10-11T16:06:47.951Z",
  "count": 33,
  "years": {
   "2027": 33
@@ -12,10 +12,10 @@
  },
  "researchAreas": {
   "Machine Learning and Data Science": 15,
-  "Empirical Operations": 11,
   "Operations Research / Optimization": 11,
+  "Empirical Operations": 10,
+  "Service Operations": 10,
   "Technology, Platforms and Marketplaces": 10,
-  "Service Operations": 9,
   "Behavioral Operations": 7,
   "Healthcare Operations": 7,
   "Supply Chain Management": 7,
@@ -33,11 +33,11 @@
   "Biomedical Applications": 1,
   "Business Model Innovation": 1,
   "Deep Learning": 1,
-  "Education Operations": 1,
   "Energy Markets": 1,
   "Energy Systems": 1,
   "Extreme Risk Management": 1,
   "Human-AI": 1,
+  "human-AI collaboration": 1,
   "Human-AI Collaboration": 1,
   "Human-AI Collaboration and Decision-Making": 1,
   "Innovative Business Models": 1,

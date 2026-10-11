@@ -773,10 +773,10 @@
   "position": "PhD Candidate",
   "researchAreas": [
    "Healthcare Operations",
+   "Service Operations",
    "Machine Learning and Data Science",
-   "Empirical Operations",
    "AI/LLM for Social Good",
-   "Education Operations"
+   "human-AI collaboration"
   ],
   "informsDays": [
    "Sunday"
@@ -790,10 +790,10 @@
   },
   "jobTalk": {
    "date": "2026-11-01",
-   "at": "11:00",
-   "end": "11:18",
-   "location": "Marriott Marquis-Sierra D (5th Floor), Moscone Center, San Francisco",
-   "title": "Improving Access to Essential Medicines via Decision-Aware Machine Learning"
+   "at": "16:15",
+   "end": "17:00",
+   "location": "Moscone South-151 (Upper Mezz)",
+   "title": "Effective Personalized AI Tutors via LLM-Guided Reinforcement Learning"
   },
   "informsUrl": "https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=5799",
   "cvUrl": "https://angel-chung.github.io/assets/pdf/AngelCV.pdf",
@@ -802,7 +802,7 @@
   "email": "angelchg@wharton.upenn.edu",
   "source": "oa-form",
   "addedAt": "2026-09-22T20:46:22Z",
-  "updatedAt": "2026-10-09",
+  "updatedAt": "2026-10-11",
   "ref": "OA-CAND-260922-LVY2",
   "owner": "cf6cede565d390f6"
  },
