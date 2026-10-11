@@ -22512,7 +22512,7 @@ async function testTopMenu() {
       }
     }
   }
-  eq(withNav, 24, 'every root page but the five redirect stubs carries the nav');
+  eq(withNav, 25, 'every root page but the five redirect stubs carries the nav');
 
   /* ------------------------------------------------------------ the styles */
   const css = await readFile(path.join(root, 'assets', 'v3.css'), 'utf8');

@@ -314,7 +314,9 @@ const USAGE_PAGE = 2000;
 async function killUsage(db, uid) {
   const snap = await db.collection('usageSessions').where('uid', '==', uid)
     .limit(USAGE_PAGE).get();
-  return killAll(db, snap.docs.map((d) => d.ref));
+  const batches = await db.collection('usageEventBatches').where('uid', '==', uid).limit(USAGE_PAGE).get();
+  return (await killAll(db, snap.docs.map((d) => d.ref))) +
+    (await killAll(db, batches.docs.map((d) => d.ref)));
 }
 
 async function killThread(db, uid) {
@@ -627,6 +629,10 @@ async function purgeSubmissions(fb, uid, order, held) {
   for (const s of SUBMISSIONS) {
     const docs = held[s.col] || [];
     if (docs.length) {
+      for (const doc of docs) {
+        const reports = await db.collection(s.col).doc(doc.id).collection('analytics').get();
+        await killAll(db, reports.docs.map(d => d.ref));
+      }
       deleted += await killAll(db, docs.map((d) => db.collection(s.col).doc(d.id)));
     }
   }

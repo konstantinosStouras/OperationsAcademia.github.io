@@ -100,6 +100,16 @@ jobs:
       # cadence; a run with no credential is a clean no-op like the build
       # above. continue-on-error, deliberately: a failure here must never
       # hold the analytics figures back from their commit below.
+      - name: Private Profile Analytics
+        if: ${{ !inputs.scan }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GA4_SERVICE_ACCOUNT: ${{ secrets.GA4_SERVICE_ACCOUNT }}
+          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID || '384653143' }}
+        run: |
+          node _scraper/profile-analytics-test.mjs
+          node _scraper/build-profile-analytics.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+
       - name: Candidate statistics
         if: ${{ !inputs.scan && (github.event_name == 'workflow_dispatch' || startsWith(github.event.schedule, '25 4')) }}
         continue-on-error: true
