@@ -1150,6 +1150,11 @@
   "department": "DS and Analytics"
  },
  {
+  "institution": "Hong Kong University of Science and Technology",
+  "school": "Business School",
+  "department": "OM and IS"
+ },
+ {
   "institution": "Hood College",
   "school": "",
   "department": "CS and Information Technology"
@@ -2588,11 +2593,6 @@
   "institution": "The Hong Kong University of Science and Technology",
   "school": "",
   "department": "ISOM"
- },
- {
-  "institution": "The Hong Kong University of Science and Technology",
-  "school": "Business School",
-  "department": ""
  },
  {
   "institution": "The Hong Kong University of Science and Technology",
