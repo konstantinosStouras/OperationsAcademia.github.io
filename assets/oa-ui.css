@@ -2505,3 +2505,12 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   .oa-u-act { margin-top: 4px; }
   .oa-u-hide { padding: 8px 0; display: inline-block; }
 }
+
+/* Unread messages stay visible even while the account menu is closed. */
+.oa-acct-chip .oa-message-badge {
+  margin-left: 0;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+}

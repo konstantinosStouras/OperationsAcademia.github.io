@@ -624,6 +624,7 @@
         '<button type="button" class="oa-acct-chip" id="oa-chip" aria-haspopup="menu" ' +
           'aria-expanded="false" title="My personal area">' +
           avatarHTML(u, false, true) +
+          '<span class="oa-acct-n oa-message-badge" data-count="messages" hidden></span>' +
           '<span class="oa-acct-name">' + esc(displayName(u)) + '</span>' +
           '<span class="oa-caret" aria-hidden="true"></span>' +
         '</button>' +
@@ -981,6 +982,9 @@
       var show = n > 0;
       el.textContent = show ? String(n) : '';
       el.hidden = !show;
+      if (el.classList.contains('oa-message-badge')) {
+        el.setAttribute('aria-label', show ? n + (n === 1 ? ' unread message' : ' unread messages') : '');
+      }
     });
     /* …and the rows drawn only for what the account holds (rule 4): the
        header menu's and the phone sheet's alike, since both are in the
@@ -1030,9 +1034,29 @@
     return ref.get().then(function (snap) { return snap ? snap.size : null; });
   }
 
+  var messageUnsubscribe = null;
+  var messageWatchVersion = 0;
+
+  function watchMessages(u) {
+    var version = ++messageWatchVersion;
+    if (messageUnsubscribe) messageUnsubscribe();
+    messageUnsubscribe = null;
+    if (!u) return;
+    OAFB.ready().then(function (fb) {
+      if (version !== messageWatchVersion || !state.user || state.user.uid !== u.uid) return;
+      messageUnsubscribe = fb.firestore().collection(OAFB.col.messages).doc(u.uid)
+        .onSnapshot(function (snap) {
+          if (version !== messageWatchVersion || !state.user || state.user.uid !== u.uid) return;
+          var n = snap && snap.exists ? (snap.data() || {}).userUnread : 0;
+          setCount('messages', typeof n === 'number' && isFinite(n) ? Math.max(0, Math.floor(n)) : 0);
+        }, function () { /* Keep the last known count if the connection fails. */ });
+    }).catch(function () { /* The next session can reconnect. */ });
+  }
+
   function loadCounts(u) {
     if (!u) return;
     var uid = u.uid;
+    watchMessages(u);
     paintCounts(readCounts(uid));
 
     var fresh = false;
@@ -1047,18 +1071,8 @@
         countOf(db.collection(OAFB.col.users).doc(uid).collection(OAFB.col.alerts))
           .catch(function () { return null; }),
         adminish(state.user) ? adminPending() : Promise.resolve(null),
-        /* Unread messages. ONE get() of the person's own thread head — not a
-           count() over a query — because the thread is keyed on the uid, so
-           there is exactly one document to look at and no composite index to
-           deploy. A thread that does not exist is not an error: it is nobody
-           having written to them, which is zero. */
-        db.collection(OAFB.col.messages).doc(uid).get()
-          .then(function (snap) {
-            if (!snap || !snap.exists) return 0;
-            var n = (snap.data() || {}).userUnread;
-            return typeof n === 'number' ? n : 0;
-          })
-          .catch(function () { return null; }),
+        // The live thread listener owns this count; never overwrite it with a stale get.
+        Promise.resolve(null),
         /* Candidate profiles — the row of the menu that exists only when
            there is something behind it (rule 4). The SAME query the
            candidate form's own one-profile check and account.html issue,
@@ -4207,6 +4221,7 @@
            another on the same machine, and the second account's chip wore the
            first one's photograph. Clear it whenever the uid changes. */
         var was = state.user && state.user.uid;
+        watchMessages(null);
         state.user = u || null;
         state.resolved = true;
         if (!u || was !== u.uid) state.profile = null;
