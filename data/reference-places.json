@@ -961,6 +961,11 @@
  },
  {
   "institution": "George Washington University",
+  "school": "",
+  "department": "Analytics and AI, Decision Sciences"
+ },
+ {
+  "institution": "George Washington University",
   "school": "School of Business",
   "department": "Information Systems and Technology Management"
  },
