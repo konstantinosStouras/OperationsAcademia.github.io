@@ -24453,11 +24453,13 @@ async function testForum() {
   const collectEnd = candForm.indexOf('/* A human-quotable', collectStart);
   const collectSource = candForm.slice(collectStart, collectEnd);
   const cvCheck = (cvUrl, slot, days = [], informsUrl = '', unit = 'Operations',
-    jobTalk = { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone South-312', title: 'Job market presentation' }) => {
+    jobTalk = { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone South-312', title: 'Job market presentation' }, attendanceAnswered = true) => {
     const values = { 'f-first': 'Ada', 'f-last': 'Reader', 'f-institution': 'University',
       'f-position': 'PhD Candidate', 'f-email': 'ada@example.edu',
       'f-personalEmail': 'ada@example.com', 'f-cvUrl': cvUrl, 'f-webUrl': '', 'f-informsUrl': informsUrl, 'f-unit': unit };
     const elements = Object.fromEntries(Object.entries(values).map(([k, v]) => [k, { value: v }]));
+    elements['f-informs-none'] = { checked: !days.length && attendanceAnswered };
+    elements['f-days'] = {};
     for (const key of ['date', 'at', 'end', 'location', 'title']) elements['f-jobTalk-' + key] = { value: jobTalk[key] || '' };
     const errors = [];
     const invoke = new Function('readForm', '$', 'setError', 'httpUrl', 'MAX', 'EMAIL_RE', 'AREAS_MAX', 'cvSlot', 'say', 'meeting', 'window',
@@ -24471,6 +24473,8 @@ async function testForum() {
       { OAInforms: require(path.join(HERE, '..', 'assets', 'oa-informs.js')) });
     return { result, errors };
   };
+  ok(!cvCheck('https://example.edu/cv.pdf', null, [], '', 'Operations', {}, false).result, 'candidate form: every candidate must answer INFORMS attendance');
+  ok(cvCheck('https://example.edu/cv.pdf', null, [], '', 'Operations', {}, true).result, 'candidate form: explicit Not attending satisfies attendance requirement');
   ok(!cvCheck('', null).result, 'candidate form: missing CV blocks submission');
   ok(cvCheck('https://example.edu/cv.pdf', null).result, 'candidate form: CV link satisfies requirement');
   ok(cvCheck('', { file: { name: 'cv.pdf' } }).result, 'candidate form: new accepted upload satisfies requirement');

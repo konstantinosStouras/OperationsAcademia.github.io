@@ -631,7 +631,7 @@
 
     var attendanceAnswered = out.informsDays.length > 0 || !!(($('f-informs-none') || {}).checked);
     setError($('f-days'), attendanceAnswered ? '' : 'Please choose your presentation day or Not attending INFORMS.');
-    if (!attendanceAnswered) bad(document.querySelector('input[name="informsDays"]'));
+    if (!attendanceAnswered) bad($('f-informs-none'));
 
 
     var position = $('f-position');
