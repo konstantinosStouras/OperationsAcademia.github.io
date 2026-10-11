@@ -51,6 +51,8 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'mobile has no horizontal overflow');
     if (process.env.QA_OUTPUT) await page.screenshot({ path: path.join(process.env.QA_OUTPUT, 'profile-analytics-mobile-' + theme + '.png'), fullPage: true });
   }
+  await page.evaluate(() => { Date.now = () => Date.parse('2026-11-16T00:00:00Z'); OAFeatureBadges.refresh(); });
+  assert.equal(await page.locator('.oa-nav-new:visible').count(), 0, 'all New badges expire together');
   await page.evaluate(() => changeUser(null));
   assert.equal(await page.locator('.pa-metric').count(), 0, 'sign-out immediately clears private figures');
   assert.match(await page.locator('#profile-analytics').innerText(), /Sign in/);
