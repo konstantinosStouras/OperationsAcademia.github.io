@@ -48,7 +48,7 @@ async function countryReports(now) {
   const { token } = await client.getAccessToken();
   const url = `https://analyticsdata.googleapis.com/v1beta/properties/${process.env.GA4_PROPERTY_ID || '384653143'}:runReport`;
   const run = async body => {
-    const res = await fetch(url, { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await fetch(url, { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(30000) });
     if (!res.ok) throw new Error(`Country report unavailable (${res.status}); check the GA4 reporting credential and property access.`);
     return res.json();
   };
@@ -96,6 +96,7 @@ export async function build() {
   const profiles = await readAllDocuments(db.collection('profiles'), 1000);
   const universities = new Map(profiles.map(d => [d.id, affiliation.match(d.data().affiliation || '', names)?.name || 'Unknown']));
   for (const session of sessions) session.university = universities.get(session.uid) || 'Unknown';
+  const priorReports = new Map((await readAllDocuments(db.collectionGroup('analytics'), 1000)).map(d => [d.ref.path, d.data()]));
   let countries = null;
   try { countries = await countryReports(now); } catch (e) { console.warn(e.message); }
   for (const [type, col, file] of [['candidate', 'candidateSubmissions', 'candidates'], ['job', 'jobSubmissions', 'jobs']]) {
@@ -105,8 +106,7 @@ export async function build() {
     for (const doc of documents) {
       const submission = doc.data(), row = byRef.get(submission.ref);
       const ref = doc.ref.collection('analytics').doc('current');
-      const previous = await ref.get();
-      const prior = previous.exists ? previous.data() : {};
+      const prior = priorReports.get(ref.path) || {};
       // Keep refreshing a withdrawn listing's rolling period using its proven mapping.
       const listingId = row?.id || (prior.sourceRef === submission.ref && prior.listingId);
       if (!listingId || !submission.uid) continue;
