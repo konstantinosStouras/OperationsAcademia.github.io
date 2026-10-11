@@ -18,7 +18,11 @@
   }
   function event(row) {
     if (!row || !row.id || !row.name || !(row.informsDays || []).length) return null;
-    var t = row.jobTalk || {}, meeting = Informs.meetingFor(row.year);
+    var t = Object.assign({}, row.jobTalk || {}), meeting = Informs.meetingFor(row.year);
+    var legacyDay = (row.informsDays || []).filter(function (d) { return meeting && Informs.dateOf(meeting, d) === t.date; })[0];
+    var legacy = legacyDay && row.talks ? row.talks[legacyDay] || {} : {};
+    if (!text(t.title)) t.title = text(legacy.title);
+    if (!text(t.location)) t.location = text(legacy.room);
     var url = presentationUrl(row.informsUrl);
     if (!meeting || !url || !Ics.isoDayOk(t.date) || !TIME.test(t.at || '') ||
         !TIME.test(t.end || '') || minutes(t.end) <= minutes(t.at) || !text(t.location) || !text(t.title)) return null;
@@ -30,6 +34,10 @@
     details.push('INFORMS presentation: ' + url);
     details.push('When: ' + t.date + ', ' + t.at + '–' + t.end + ' (' + meeting.tz.id + ')');
     details.push('Location: ' + t.location);
+    if (text(legacy.session)) details.push('INFORMS session: ' + text(legacy.session));
+    if (text(legacy.at)) details.push('Submitted session start: ' + text(legacy.at) + ' (' + meeting.tz.id + ')');
+    if (text(legacy.room) && text(legacy.room) !== text(t.location)) details.push('Submitted room: ' + text(legacy.room));
+    if (text(legacy.title) && text(legacy.title) !== text(t.title)) details.push('Submitted presentation title: ' + text(legacy.title));
     if ((row.researchAreas || []).length) details.push('Research areas: ' + row.researchAreas.join(', '));
     if (Ics.safeUrl(row.cvUrl)) details.push('CV: ' + row.cvUrl);
     if (Ics.safeUrl(row.webUrl)) details.push('Website: ' + row.webUrl);
