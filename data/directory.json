@@ -2332,6 +2332,15 @@
   "lastPosted": "2025-08-11"
  },
  {
+  "id": "cornell-university____center-for-data-science-for-enterprise-and-society",
+  "institution": "Cornell University",
+  "department": "Center for Data Science for Enterprise and Society",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "cornell-university____operations-research-and-information-engineering",
   "institution": "Cornell University",
   "department": "Operations Research and Information Engineering",

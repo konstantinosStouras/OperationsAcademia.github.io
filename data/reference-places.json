@@ -676,6 +676,11 @@
  },
  {
   "institution": "Cornell University",
+  "school": "",
+  "department": "Center for Data Science for Enterprise and Society"
+ },
+ {
+  "institution": "Cornell University",
   "school": "Cornell Peter and Stephanie Nolan School of Hotel Administration",
   "department": "Operations, Technology, and Information Management Area"
  },
