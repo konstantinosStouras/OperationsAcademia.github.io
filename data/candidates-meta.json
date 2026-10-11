@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-11T19:30:15.562Z",
+ "generated": "2026-10-11T20:06:34.883Z",
  "count": 34,
  "years": {
   "2027": 34
@@ -12,8 +12,8 @@
  },
  "researchAreas": {
   "Machine Learning and Data Science": 16,
-  "Technology, Platforms and Marketplaces": 12,
   "Operations Research / Optimization": 11,
+  "Technology, Platforms and Marketplaces": 11,
   "Empirical Operations": 10,
   "Service Operations": 9,
   "Behavioral Operations": 7,
@@ -30,6 +30,7 @@
   "AI for Social Good": 1,
   "AI-enabled Operations": 1,
   "AI/LLM for Social Good": 1,
+  "Algorithmic Intermediation in Platform Operstions": 1,
   "Biomedical Applications": 1,
   "Business Model Innovation": 1,
   "Deep Learning": 1,
@@ -45,6 +46,7 @@
   "LLMs": 1,
   "Machine Learning": 1,
   "Market Design": 1,
+  "Marketplace Aanlytics": 1,
   "public sector operations": 1,
   "Public Sector Operations": 1,
   "Queueing Theory": 1,
