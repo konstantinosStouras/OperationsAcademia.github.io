@@ -42,6 +42,40 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-george-washington-university-20261011",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-11",
+  "institution": "George Washington University",
+  "department": "School of Business, Decision Sciences",
+  "school": "School of Business",
+  "unit": "Decision Sciences",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 9, 2026",
+  "applyByDate": "2026-11-09",
+  "reviewDate": "2026-10-25",
+  "comments": "Assistant Professor in Analytics and AI. We particularly welcome methodological research that develops algorithms and mathematical models in computational and statistical machine learning, optimization, and algorithmic decision-making. We value both methodological advances and rigorous applied research on AI that help organizations improve prediction, optimization, and decision-making under uncertainty. The successful candidate will conduct research for publication in leading journals and conferences, teach undergraduate and graduate courses in analytics and AI, mentor graduate students, and participate in university and professional service. A strong commitment to teaching excellence and student learning is essential, along with the ability and flexibility to teach a range of courses as departmental and program needs evolve. The appointment will support the department’s business analytics programs and the AI Analytics track of the school’s new MS in AI for Business.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.gwu.jobs/postings/129265",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=George%20Washington%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-11T20:17:27Z",
+  "owner": ""
+ },
+ {
   "id": "2027-new-york-university-shanghai-20261009",
   "year": 2027,
   "years": [

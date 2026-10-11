@@ -3583,25 +3583,20 @@
   "lng": -77.3411251
  },
  {
-  "id": "george-washington-university____analytics-and-ai-decision-sciences",
-  "institution": "George Washington University",
-  "department": "Analytics and AI, Decision Sciences",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "george-washington-university__school-of-business__decision-sciences",
   "institution": "George Washington University",
   "school": "School of Business",
   "department": "Decision Sciences",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://business.gwu.edu/about/departments/decision-sciences#faculty",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
  },
  {
   "id": "george-washington-university__school-of-business__information-systems-and-technology-management",

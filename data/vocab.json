@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-10T10:12:54.012Z",
+ "generated": "2026-10-11T20:18:33.077Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -407,6 +407,10 @@
   },
   {
    "v": "Florida Gulf Coast University",
+   "n": 2
+  },
+  {
+   "v": "George Washington University",
    "n": 2
   },
   {
@@ -1063,10 +1067,6 @@
   },
   {
    "v": "George Fox University",
-   "n": 1
-  },
-  {
-   "v": "George Washington University",
    "n": 1
   },
   {
@@ -2417,7 +2417,7 @@
   },
   {
    "v": "School of Business",
-   "n": 10
+   "n": 11
   },
   {
    "v": "A. B. Freeman School of Business",
@@ -3766,15 +3766,15 @@
    "n": 6
   },
   {
+   "v": "Decision Sciences",
+   "n": 6
+  },
+  {
    "v": "OM/IS",
    "n": 6
   },
   {
    "v": "AI",
-   "n": 5
-  },
-  {
-   "v": "Decision Sciences",
    "n": 5
   },
   {
