@@ -1140,5 +1140,40 @@
   "addedAt": "2026-08-17T18:03:29Z",
   "ref": "OA-CAND-260817-CRHM",
   "owner": "1fdb6db950ea199b"
+ },
+ {
+  "id": "2027-xu-jiannan",
+  "year": 2027,
+  "posted": "2026-08-17",
+  "first": "Jiannan",
+  "last": "Xu",
+  "name": "Jiannan Xu",
+  "affiliation": "Decision, Operations and Information Technologies, Robert H. Smith School of Business, University of Maryland",
+  "position": "PhD Candidate",
+  "researchAreas": [
+   "Service Operations",
+   "Marketplace Analytics",
+   "AI for Social Good"
+  ],
+  "informsDays": [
+   "Sunday"
+  ],
+  "jobTalk": {
+   "date": "2026-11-01",
+   "at": "17:05",
+   "end": "17:30",
+   "location": "Moscone South-207 (Level 2)",
+   "title": "The AI Bullwhip Effect: Operations in AI Model Marketplaces"
+  },
+  "informsUrl": "https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=6037",
+  "cvUrl": "https://jiannan-xu.github.io/CV_Jiannan/Jiannan_CV.pdf",
+  "rsUrl": "",
+  "webUrl": "https://jiannan-xu.github.io/",
+  "email": "jiannan@umd.edu",
+  "source": "oa-form",
+  "addedAt": "2026-08-17T17:56:44Z",
+  "updatedAt": "2026-10-11",
+  "ref": "OA-CAND-260817-H742",
+  "owner": "d2259b22f8e1870e"
  }
 ]
