@@ -12944,7 +12944,8 @@
   "address": "7621 Mowatt Ln, College Park, MD 20742, United States",
   "facultyUrl": "https://www.rhsmith.umd.edu/directory",
   "sources": [
-   "directory"
+   "directory",
+   "seed"
   ],
   "lat": 38.983057,
   "lng": -76.9470355
