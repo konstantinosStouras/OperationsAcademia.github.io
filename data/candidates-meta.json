@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-11T16:06:47.951Z",
+ "generated": "2026-10-11T16:20:50.208Z",
  "count": 33,
  "years": {
   "2027": 33
@@ -13,9 +13,9 @@
  "researchAreas": {
   "Machine Learning and Data Science": 15,
   "Operations Research / Optimization": 11,
+  "Technology, Platforms and Marketplaces": 11,
   "Empirical Operations": 10,
   "Service Operations": 10,
-  "Technology, Platforms and Marketplaces": 10,
   "Behavioral Operations": 7,
   "Healthcare Operations": 7,
   "Supply Chain Management": 7,
@@ -45,7 +45,6 @@
   "LLMs": 1,
   "Machine Learning": 1,
   "Market Design": 1,
-  "Marketplace Analytics": 1,
   "Public Sector Operations": 1,
   "Queueing Theory": 1,
   "Resource Allocation": 1,
@@ -53,7 +52,8 @@
   "Statistics and Decisions": 1,
   "Stochastic Dynamic Programming": 1,
   "Stochastic Modeling & Simulation": 1,
-  "Stochastic Processes": 1
+  "Stochastic Processes": 1,
+  "Trustworthy AI": 1
  },
  "informsDays": {
   "Sunday": 11,
