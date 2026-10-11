@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-11T07:20:06.600Z",
- "members": 319,
+ "generated": "2026-10-11T18:52:57.616Z",
+ "members": 322,
  "k": 3,
  "affiliation": {
-  "listed": 234,
+  "listed": 237,
   "other": 45,
   "none": 40
  },
  "universities": {
-  "count": 125,
+  "count": 126,
   "shown": [
    {
     "name": "Cornell University",
@@ -67,6 +67,11 @@
    },
    {
     "name": "University of Washington",
+    "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "Yale University",
     "country": "United States",
     "members": 4
    },
@@ -149,21 +154,16 @@
     "name": "University of Southern California",
     "country": "United States",
     "members": 3
-   },
-   {
-    "name": "Yale University",
-    "country": "United States",
-    "members": 3
    }
   ],
-  "rest": 125
+  "rest": 127
  },
  "countries": {
-  "count": 15,
+  "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 151
+    "members": 153
    },
    {
     "name": "Canada",
@@ -198,7 +198,7 @@
     "members": 3
    }
   ],
-  "rest": 8,
+  "rest": 9,
   "unknown": 96
  }
 }
