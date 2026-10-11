@@ -1,19 +1,19 @@
 {
- "generated": "2026-10-11T16:30:04.942Z",
- "count": 33,
+ "generated": "2026-10-11T19:30:15.562Z",
+ "count": 34,
  "years": {
-  "2027": 33
+  "2027": 34
  },
  "positions": {
   "PhD Candidate": 19,
-  "Post-Doctoral Researcher": 9,
+  "Post-Doctoral Researcher": 10,
   "Assistant Professor": 3,
   "Research Scientist": 2
  },
  "researchAreas": {
-  "Machine Learning and Data Science": 15,
+  "Machine Learning and Data Science": 16,
+  "Technology, Platforms and Marketplaces": 12,
   "Operations Research / Optimization": 11,
-  "Technology, Platforms and Marketplaces": 11,
   "Empirical Operations": 10,
   "Service Operations": 9,
   "Behavioral Operations": 7,
@@ -58,11 +58,11 @@
  },
  "informsDays": {
   "Sunday": 11,
-  "Monday": 8,
+  "Monday": 9,
   "Tuesday": 3,
   "Wednesday": 1
  },
- "withCv": 30,
+ "withCv": 31,
  "newestPosted": "2026-10-11",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",

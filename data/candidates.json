@@ -1,5 +1,38 @@
 [
  {
+  "id": "2027-liu-david",
+  "year": 2027,
+  "posted": "2026-10-11",
+  "first": "David",
+  "last": "Liu",
+  "name": "David Liu",
+  "affiliation": "Center for Data Science for Enterprise and Society, Cornell University",
+  "position": "Post-Doctoral Researcher",
+  "researchAreas": [
+   "Technology, Platforms and Marketplaces",
+   "Machine Learning and Data Science"
+  ],
+  "informsDays": [
+   "Monday"
+  ],
+  "jobTalk": {
+   "date": "2026-11-02",
+   "at": "14:15",
+   "end": "14:30",
+   "location": "Moscone South-21 (Exhibit Level)",
+   "title": "Forecasting Instant Runoff Voting from Polls"
+  },
+  "informsUrl": "https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=6432",
+  "cvUrl": "https://drive.google.com/file/d/1_qjap4u_1GS5XmMAfy0dhtqNT3Czw2Qe/view?usp=drivesdk",
+  "rsUrl": "",
+  "webUrl": "https://dliu18.github.io/",
+  "email": "davidliu@cornell.edu",
+  "source": "oa-form",
+  "addedAt": "2026-10-11T19:29:48Z",
+  "ref": "OA-CAND-261011-8FDG",
+  "owner": "41e605b2f1402b17"
+ },
+ {
   "id": "2027-shi-jiaqi",
   "year": 2027,
   "posted": "2026-10-11",
