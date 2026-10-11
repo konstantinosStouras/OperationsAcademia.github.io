@@ -629,6 +629,11 @@
     need('f-institution', 'institution', 'the university you are at');
     need('f-unit', 'unit', 'your department, area or group');
 
+    var attendanceAnswered = out.informsDays.length > 0 || !!(($('f-informs-none') || {}).checked);
+    setError($('f-days'), attendanceAnswered ? '' : 'Please choose your presentation day or Not attending INFORMS.');
+    if (!attendanceAnswered) bad($('f-informs-none'));
+
+
     var position = $('f-position');
     setError(position, out.position ? '' : 'Please choose your current position.');
     if (!out.position) bad(position);

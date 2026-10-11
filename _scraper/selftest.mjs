@@ -14462,12 +14462,12 @@ async function testCandidateReveal() {
        card disclosed the candidate's INFORMS days, which is one of the three
        things the gate withholds. The open card still reads the same facts in
        the same order. */
-    eq(trows.filter(r => r.label === 'INFORMS talk' && r.value).length, 2, 'candcard: all submitted legacy talk details stay visible');
+    eq(trows.filter(r => r.label === 'INFORMS talk').length, 1, 'candcard: legacy fields do not add duplicate presentation rows');
     eq(C.talkRows(talky)[0].value, 'Monday · 10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
       'candcard: legacy details remain readable without being displayed as separate lines');
     ok(!trows.some((r) => /Monday|Tuesday|Sunday|Wednesday/.test(r.label || '')),
       'candcard: …and no row LABEL names a day, so the locked card’s strip of labels cannot disclose one');
-    eq(trows.length, rows.length + 2, 'candcard: calendar links preserve submitted talk details');
+    eq(trows.length, rows.length, 'candcard: all profiles keep the same compact row structure');
   }
   eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' }, R.formatDay),
     'Profile updated on 2 October 2026', 'candcard: the updated line, day-month-year, no suffix');
@@ -24453,11 +24453,13 @@ async function testForum() {
   const collectEnd = candForm.indexOf('/* A human-quotable', collectStart);
   const collectSource = candForm.slice(collectStart, collectEnd);
   const cvCheck = (cvUrl, slot, days = [], informsUrl = '', unit = 'Operations',
-    jobTalk = { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone South-312', title: 'Job market presentation' }) => {
+    jobTalk = { date: '2026-11-02', at: '10:00', end: '10:18', location: 'Moscone South-312', title: 'Job market presentation' }, attendanceAnswered = true) => {
     const values = { 'f-first': 'Ada', 'f-last': 'Reader', 'f-institution': 'University',
       'f-position': 'PhD Candidate', 'f-email': 'ada@example.edu',
       'f-personalEmail': 'ada@example.com', 'f-cvUrl': cvUrl, 'f-webUrl': '', 'f-informsUrl': informsUrl, 'f-unit': unit };
     const elements = Object.fromEntries(Object.entries(values).map(([k, v]) => [k, { value: v }]));
+    elements['f-informs-none'] = { checked: !days.length && attendanceAnswered };
+    elements['f-days'] = {};
     for (const key of ['date', 'at', 'end', 'location', 'title']) elements['f-jobTalk-' + key] = { value: jobTalk[key] || '' };
     const errors = [];
     const invoke = new Function('readForm', '$', 'setError', 'httpUrl', 'MAX', 'EMAIL_RE', 'AREAS_MAX', 'cvSlot', 'say', 'meeting', 'window',
@@ -24471,6 +24473,8 @@ async function testForum() {
       { OAInforms: require(path.join(HERE, '..', 'assets', 'oa-informs.js')) });
     return { result, errors };
   };
+  ok(!cvCheck('https://example.edu/cv.pdf', null, [], '', 'Operations', {}, false).result, 'candidate form: every candidate must answer INFORMS attendance');
+  ok(cvCheck('https://example.edu/cv.pdf', null, [], '', 'Operations', {}, true).result, 'candidate form: explicit Not attending satisfies attendance requirement');
   ok(!cvCheck('', null).result, 'candidate form: missing CV blocks submission');
   ok(cvCheck('https://example.edu/cv.pdf', null).result, 'candidate form: CV link satisfies requirement');
   ok(cvCheck('', { file: { name: 'cv.pdf' } }).result, 'candidate form: new accepted upload satisfies requirement');
