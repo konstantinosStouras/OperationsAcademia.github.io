@@ -468,7 +468,7 @@
         ].concat((r.informsDays || []).length ? [
           { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
           { label: 'INFORMS talk', html: talkLinks }
-        ].concat(talkRows(r)) : [], [
+        ] : [], [
           { label: 'CV',                    html: link(r.cvUrl, 'link to CV') },
           // the form stopped asking for a research summary (2026-08-24);
           // the row stays for profiles filed while it still did, and an
