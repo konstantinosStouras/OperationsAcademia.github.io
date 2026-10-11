@@ -14462,12 +14462,12 @@ async function testCandidateReveal() {
        card disclosed the candidate's INFORMS days, which is one of the three
        things the gate withholds. The open card still reads the same facts in
        the same order. */
-    eq(trows.filter(r => r.label === 'INFORMS talk' && r.value).length, 2, 'candcard: all submitted legacy talk details stay visible');
+    eq(trows.filter(r => r.label === 'INFORMS talk').length, 1, 'candcard: legacy fields do not add duplicate presentation rows');
     eq(C.talkRows(talky)[0].value, 'Monday · 10:45 · session MB12 · Moscone Center, Room 2004 · “First”',
       'candcard: legacy details remain readable without being displayed as separate lines');
     ok(!trows.some((r) => /Monday|Tuesday|Sunday|Wednesday/.test(r.label || '')),
       'candcard: …and no row LABEL names a day, so the locked card’s strip of labels cannot disclose one');
-    eq(trows.length, rows.length + 2, 'candcard: calendar links preserve submitted talk details');
+    eq(trows.length, rows.length, 'candcard: all profiles keep the same compact row structure');
   }
   eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' }, R.formatDay),
     'Profile updated on 2 October 2026', 'candcard: the updated line, day-month-year, no suffix');
