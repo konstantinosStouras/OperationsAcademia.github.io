@@ -1,11 +1,11 @@
 {
- "generated": "2026-10-11T14:00:32.265Z",
- "count": 33,
+ "generated": "2026-10-11T15:33:54.146Z",
+ "count": 32,
  "years": {
-  "2027": 33
+  "2027": 32
  },
  "positions": {
-  "PhD Candidate": 19,
+  "PhD Candidate": 18,
   "Post-Doctoral Researcher": 9,
   "Assistant Professor": 3,
   "Research Scientist": 2
@@ -15,7 +15,7 @@
   "Empirical Operations": 11,
   "Operations Research / Optimization": 11,
   "Technology, Platforms and Marketplaces": 10,
-  "Service Operations": 9,
+  "Service Operations": 8,
   "Behavioral Operations": 7,
   "Healthcare Operations": 7,
   "Supply Chain Management": 7,
@@ -27,7 +27,6 @@
   "Transportation and Logistics": 2,
   "AI and Ethics": 1,
   "AI for Operations Research": 1,
-  "AI for Social Good": 1,
   "AI-enabled Operations": 1,
   "AI/LLM for Social Good": 1,
   "Biomedical Applications": 1,
@@ -45,7 +44,6 @@
   "LLMs": 1,
   "Machine Learning": 1,
   "Market Design": 1,
-  "Marketplace Analytics": 1,
   "Public Sector Operations": 1,
   "Queueing Theory": 1,
   "Resource Allocation": 1,
@@ -56,12 +54,12 @@
   "Stochastic Processes": 1
  },
  "informsDays": {
-  "Sunday": 11,
+  "Sunday": 10,
   "Monday": 8,
   "Tuesday": 3,
   "Wednesday": 1
  },
- "withCv": 30,
+ "withCv": 29,
  "newestPosted": "2026-10-11",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
