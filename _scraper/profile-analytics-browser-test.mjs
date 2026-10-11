@@ -18,11 +18,12 @@ try {
   });
   await page.addInitScript(() => {
     window.testQueries = [];
-    const metrics = { views: 128, viewers: 84, opens: 136, clicks: 42, seconds: 5376, countries: [{ name: 'United Kingdom', views: 48 }, { name: 'United States', views: 32 }, { name: 'Germany', views: 18 }], days: {} };
+    const metrics = { views: 128, viewers: 84, opens: 136, clicks: 42, seconds: 5376, countries: [{ name: 'United Kingdom', views: 48 }, { name: 'United States', views: 32 }, { name: 'Germany', views: 18 }], days: {}, universities: [{ name: 'University of Oxford', views: 24, clicks: 11, seconds: 1392, averageSeconds: 58 }, { name: 'Massachusetts Institute of Technology', views: 18, clicks: 8, seconds: 1152, averageSeconds: 64 }, { name: 'Unknown', views: 86, clicks: 23, seconds: 2832, averageSeconds: 33 }] };
     for (let i = 0; i < 30; i++) metrics.days[new Date(Date.UTC(2026, 9, 11) - i * 86400000).toISOString().slice(0, 10)] = i % 7 + 2;
     window.OAAccounts = { user: () => ({ uid: 'owner', metadata: { creationTime: '2026-10-10T12:00:00Z' } }), isAdmin: () => false, onChange: fn => { window.changeUser = fn; fn({ uid: 'owner' }); } };
     window.OAFB = { enabled: true, ready: async () => ({ firestore: () => ({ collection: col => ({ where: (field, op, uid) => ({ get: async () => {
       window.testQueries.push({ col, field, op, uid });
+      if (window.singleListing && col === 'jobSubmissions') return { docs: [] };
       return { docs: [{ data: () => col === 'candidateSubmissions' ? { first: 'Alex', last: 'Morgan', ref: 'OA-CAND-TEST' } : { institution: 'Example University', ref: 'OA-JOB-TEST' }, ref: { path: col + '/test', collection: () => ({ doc: () => ({ get: async () => ({ exists: true, data: () => ({ all: metrics, last30: metrics, updatedAt: Date.UTC(2026, 9, 11), countriesUpdatedAt: Date.UTC(2026, 9, 11), countriesReady: true }) }) }) }) } }] };
     } }) }) }) }) };
   });
@@ -31,6 +32,7 @@ try {
   assert.equal(await page.locator('.pa-metric').count(), 4);
   assert.equal(await page.locator('.pa-bar').count(), 30);
   assert.equal(await page.locator('.pa-countries li').count(), 3);
+  assert.equal(await page.locator('.pa-universities tbody tr').count(), 3);
   assert.ok((await page.evaluate(() => testQueries)).every(q => q.uid === 'owner' && q.field === 'uid'));
   await page.getByLabel('Choose a listing').selectOption('1');
   await page.getByRole('heading', { name: 'Example University' }).waitFor();
@@ -38,6 +40,9 @@ try {
   await page.getByLabel('Reporting period').selectOption('all');
   await page.getByLabel('Choose a listing').selectOption('0');
   await page.getByRole('heading', { name: 'Alex Morgan' }).waitFor();
+  await page.evaluate(() => { window.singleListing = true; changeUser({ uid: 'owner' }); });
+  await page.getByRole('heading', { name: 'Views over time' }).waitFor();
+  assert.equal(await page.getByLabel('Choose a listing').count(), 0, 'one listing opens directly without a chooser');
   if (process.env.QA_OUTPUT) { await fs.mkdir(process.env.QA_OUTPUT, { recursive: true }); await page.screenshot({ path: path.join(process.env.QA_OUTPUT, 'profile-analytics-desktop.png'), fullPage: true }); }
   for (const theme of ['light', 'dark']) {
     await page.evaluate(theme => document.documentElement.dataset.theme = theme, theme);

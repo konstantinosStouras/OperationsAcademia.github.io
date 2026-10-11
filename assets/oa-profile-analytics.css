@@ -30,3 +30,9 @@
 .pa-daily table { width:100%; }
 @media(max-width:900px) { .pa-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .pa-columns { grid-template-columns:1fr; } }
 @media(max-width:540px) { .pa-controls { grid-template-columns:1fr; gap:18px; padding:18px; } .pa-metric { padding:18px; } .pa-panel { padding:20px; } .pa-chart { gap:3px; } }
+
+.pa-universities { margin-top:24px; }
+.pa-table-scroll { overflow-x:auto; margin-top:22px; }
+.pa-universities table { width:100%; min-width:520px; font-size:14px; }
+.pa-universities th,.pa-universities td { padding:14px 12px; text-align:left; }
+.pa-private-note { align-self:center; color:var(--mut); font-size:14px; }

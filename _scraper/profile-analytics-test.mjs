@@ -7,7 +7,7 @@ const sessions = [{ uid: 'reader', clicks: events }, { uid: 'reader', clicks: [e
   { uid: 'owner', clicks: events }, { uid: 'old-owner', clicks: events },
   { uid: 'admin', email: 'kstouras@gmail.com', clicks: events },
   { uid: 'other', clicks: [event('view', { m: 'oa-placements' }), event('view', { m: 'oa-jobs' }), event('engagement', { d: -10 })] }];
-assert.deepEqual(aggregate(sessions, listing, 0, 20), { views: 2, viewers: 1, opens: 1, clicks: 1, seconds: 12, countries: [], days: { '1970-01-01': 2 } });
+assert.deepEqual(aggregate(sessions, listing, 0, 20), { views: 2, viewers: 1, opens: 1, clicks: 1, seconds: 12, countries: [], days: { '1970-01-01': 2 }, universities: [{ name: 'Unknown', views: 2, clicks: 1, seconds: 12, averageSeconds: 6 }] });
 assert.equal(aggregate(sessions, listing, 11, 20).views, 0);
 assert.equal(aggregate(sessions, { ...listing, type: 'job' }, 0, 20).views, 1);
 console.log('Profile Analytics: ownership exclusion, list attribution, repeated views, time and reporting window passed.');
@@ -31,3 +31,9 @@ const countries = countriesFromRows([
 assert.deepEqual(countries.get('candidate:test'), { all: [{ name: 'UK', views: 5 }], last30: [{ name: 'UK', views: 3 }] });
 assert.equal(countries.get('job:test').all[0].views, 7);
 console.log('Country attribution and London registration/badge expiry boundaries passed.');
+
+const universityStats = aggregate([{ uid: 'reader', university: 'University A', clicks: events }, { uid: 'reader2', university: 'University A', clicks: [event('view'), event('engagement', { d: 24 })] }, { uid: 'reader3', university: 'University B', clicks: [event('view'), event('engagement', { d: 9 })] }], listing, 0, 20);
+assert.equal(universityStats.universities[0].averageSeconds, 18);
+assert.equal(universityStats.universities[0].views, 2);
+assert.equal(universityStats.universities[1].averageSeconds, 9);
+console.log('University totals and time weighted across visits passed.');

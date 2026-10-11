@@ -58,3 +58,14 @@ retroactively reconstructed from data the site never collected.
 created before 19 October 2026 in London, including existing accounts. The
 registration cutoff is 18 October at 23:00 UTC (BST); expiry is 16 November at
 00:00 UTC (GMT). Date boundaries are covered by the model tests.
+
+## University reports
+
+University rows use the current OA account affiliation, matched through the
+same canonical university matcher as registration. They do not infer that a
+university hired, endorsed or formally reviewed a candidate. Anonymous or
+unmatched viewers appear as Unknown. Each row includes views, link clicks and
+total active seconds divided by that row's view count; it is a weighted
+average across visits, not an average of individual users' averages. Only
+aggregate rows reach the listing owner. The existing IP/network lookup is
+site-wide and cannot be retroactively joined to listing visits.

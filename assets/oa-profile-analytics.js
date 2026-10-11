@@ -54,6 +54,17 @@
       countries.appendChild(el('p', 'Country data updated ' + new Date(data.countriesUpdatedAt).toLocaleString(), 'pa-footnote'));
     }
     columns.appendChild(countries); parent.appendChild(columns);
+    var universityPanel = el('section', '', 'pa-panel pa-universities');
+    universityPanel.append(el('h3', 'Universities viewing your listing'), el('p', 'Based on the university currently listed in signed-in visitors’ OA accounts. Anonymous and unmatched visits appear as Unknown.', 'v3-mut'));
+    var universityTable = el('table', '', 'oa-kv');
+    var head = el('tr'); ['University', 'Views', 'Link clicks', 'Average reading time'].forEach(function (label) { var th = el('th', label); th.scope = 'col'; head.appendChild(th); });
+    var thead = el('thead'); thead.appendChild(head); universityTable.appendChild(thead);
+    var tbody = el('tbody');
+    (r.universities || []).forEach(function (uni) { var row = el('tr'); row.append(el('th', uni.name), el('td', number(uni.views)), el('td', number(uni.clicks)), el('td', uni.averageSeconds == null ? '—' : duration(uni.averageSeconds))); row.firstChild.scope = 'row'; tbody.appendChild(row); });
+    universityTable.appendChild(tbody); var scroll = el('div', '', 'pa-table-scroll'); scroll.appendChild(universityTable); universityPanel.appendChild(scroll);
+    if (!(r.universities || []).length) universityPanel.appendChild(el('p', 'No university visits have been measured for this period yet.'));
+    universityPanel.appendChild(el('p', 'Average reading time = total active reading time from that university ÷ measured views. These are visitors’ stated affiliations, not proof that a university is recruiting you. Individual visitors are never identified.', 'pa-footnote'));
+    parent.appendChild(universityPanel);
     var detail = el('details', '', 'pa-definition'); detail.appendChild(el('summary', 'How these figures are measured'));
     detail.appendChild(el('p', 'Views count expanded cards visible in a focused tab. Returning to a card starts a new viewing episode. Reading time pauses in hidden tabs and after 60 seconds without interaction. Unique viewers are approximate browser/account counts. First-party totals exclude your own visits and admin visits. Browser privacy settings and interrupted connections can prevent measurement. Time on external CVs or websites cannot be measured.'));
     detail.appendChild(el('p', 'Total active reading time: ' + duration(r.seconds) + '. Listing-open clicks: ' + number(r.opens) + '.'));
@@ -84,14 +95,14 @@
         var jobs = el('a', 'Post a job', 'v3-btn primary'); jobs.href = 'post-a-job';
         var candidate = el('a', 'Post your candidacy', 'v3-btn ghost'); candidate.href = 'post-a-candidate'; root.append(jobs, candidate); return;
       }
-      var controls = el('div', '', 'pa-controls'), chooserLabel = el('label', admin ? 'All listings · Admin view' : 'Your listing'), chooser = el('select');
+      var controls = el('div', '', 'pa-controls'), chooserLabel = el('label', admin ? 'All users’ listings · Admin view' : 'Your profiles and job postings'), chooser = el('select');
       chooser.setAttribute('aria-label', 'Choose a listing');
       listings.forEach(function (item, i) {
         var option = el('option', (item.type === 'candidate' ? 'Candidate · ' : 'Job · ') + title(item) + (item.data.ref ? ' · ' + item.data.ref : ''));
         option.value = String(i); chooser.appendChild(option);
       }); chooserLabel.appendChild(chooser);
       var periodLabel = el('label', 'Period'), period = el('select'); period.setAttribute('aria-label', 'Reporting period');
-      [['last30', 'Last 30 days'], ['all', 'Since tracking began']].forEach(function (v) { var option = el('option', v[1]); option.value = v[0]; period.appendChild(option); }); periodLabel.appendChild(period); controls.append(chooserLabel, periodLabel); root.appendChild(controls);
+      [['last30', 'Last 30 days'], ['all', 'Since tracking began']].forEach(function (v) { var option = el('option', v[1]); option.value = v[0]; period.appendChild(option); }); periodLabel.appendChild(period); controls.append(admin || listings.length > 1 ? chooserLabel : el('p', 'Private to you and the site administrator', 'pa-private-note'), periodLabel); root.appendChild(controls);
       var heading = el('div', '', 'pa-listing-heading'), content = el('div'); content.setAttribute('aria-live', 'polite'); root.append(heading, content);
       var cached = new Map();
       async function show() {

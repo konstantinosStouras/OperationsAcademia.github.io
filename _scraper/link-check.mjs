@@ -144,6 +144,8 @@ const ATTR = /\s(?:href|src|data-include)="([^"]*)"/g;
    this excepts exists so a live page cannot deindex itself by accident — a
    noindex here is no accident: */
 const NOINDEX_OK = new Set([
+  // Private per-listing reports; no public audience or share card.
+  'profile-analytics.html',
   // the maintainer's review desk — admin-gated, shared with nobody, and a
   // page whose whole audience is one signed-in account has no business in a
   // search index (share-check lists it card: false for the same reason)

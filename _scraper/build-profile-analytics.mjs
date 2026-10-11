@@ -1,16 +1,24 @@
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+const affiliation = createRequire(import.meta.url)('../assets/oa-affiliation.js');
 import { isMain } from './_main.mjs';
 import { readAllDocuments, readAllReportRows } from './build-analytics.mjs';
 
 export function aggregate(sessions, listing, from = 0, until = Date.now()) {
-  const out = { views: 0, viewers: 0, opens: 0, clicks: 0, seconds: 0, countries: [], days: {} };
-  const viewers = new Set();
+  const out = { views: 0, viewers: 0, opens: 0, clicks: 0, seconds: 0, countries: [], days: {}, universities: [] };
+  const viewers = new Set(), universities = new Map();
   for (const s of sessions) {
     if (!s.uid || s.uid === listing.uid || s.uid === listing.mergedFrom || s.email === 'kstouras@gmail.com') continue;
     for (const e of s.clicks || []) {
       if (!e || !Number.isFinite(e.t) || e.t < from || e.t > until || e.c !== 'job-' + listing.id) continue;
       const correct = listing.type === 'candidate' ? e.m === 'oa-candidates' : ['oa-jobs', 'oa-jobs-recent'].includes(e.m);
       if (!correct) continue;
+      const name = s.university || 'Unknown';
+      if (!universities.has(name)) universities.set(name, { name, views: 0, clicks: 0, seconds: 0 });
+      const university = universities.get(name);
+      if (e.k === 'view') university.views++;
+      if (e.k === 'link') university.clicks++;
+      if (e.k === 'engagement' && Number.isFinite(e.d) && e.d >= 0) university.seconds += Math.min(60, e.d);
       if (e.k === 'view') { out.views++; viewers.add(s.uid);
         const day = new Date(e.t).toISOString().slice(0, 10); out.days[day] = (out.days[day] || 0) + 1; }
       if (e.o === 1) out.opens++;
@@ -18,6 +26,9 @@ export function aggregate(sessions, listing, from = 0, until = Date.now()) {
       if (e.k === 'engagement' && Number.isFinite(e.d) && e.d >= 0) out.seconds += Math.min(60, e.d);
     }
   }
+  out.universities = [...universities.values()].filter(u => u.views || u.clicks || u.seconds)
+    .map(u => ({ ...u, seconds: Math.round(u.seconds), averageSeconds: u.views ? Math.round(u.seconds / u.views) : null }))
+    .sort((a, b) => b.views - a.views || a.name.localeCompare(b.name));
   out.viewers = viewers.size; out.seconds = Math.round(out.seconds);
   return out;
 }
@@ -81,6 +92,10 @@ export async function build() {
   if (!admin.apps.length) admin.initializeApp({ credential: admin.credential.cert(c) });
   const db = admin.firestore(), now = Date.now();
   const sessions = (await readAllDocuments(db.collection('usageEventBatches'), 5000)).map(d => d.data());
+  const names = affiliation.index(JSON.parse(await readFile(new URL('../data/university-names.json', import.meta.url), 'utf8')));
+  const profiles = await readAllDocuments(db.collection('profiles'), 1000);
+  const universities = new Map(profiles.map(d => [d.id, affiliation.match(d.data().affiliation || '', names)?.name || 'Unknown']));
+  for (const session of sessions) session.university = universities.get(session.uid) || 'Unknown';
   let countries = null;
   try { countries = await countryReports(now); } catch (e) { console.warn(e.message); }
   for (const [type, col, file] of [['candidate', 'candidateSubmissions', 'candidates'], ['job', 'jobSubmissions', 'jobs']]) {
