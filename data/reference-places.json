@@ -895,6 +895,11 @@
   "department": "DA"
  },
  {
+  "institution": "Ferris State University",
+  "school": "",
+  "department": "Project Management"
+ },
+ {
   "institution": "Fisher College",
   "school": "",
   "department": "OM"
@@ -1700,6 +1705,11 @@
   "department": ""
  },
  {
+  "institution": "Nanyang Technological University",
+  "school": "",
+  "department": "Information Systems"
+ },
+ {
   "institution": "National University of Singapore (ISEM)",
   "school": "",
   "department": "simulation, sustainability, AI + X"
@@ -2448,6 +2458,11 @@
   "institution": "Technical University of Munich",
   "school": "",
   "department": "Operations Research and AI"
+ },
+ {
+  "institution": "Tecnológico de Monterrey",
+  "school": "",
+  "department": "Supply Chain and Logistics Systems"
  },
  {
   "institution": "Temple University",

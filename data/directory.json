@@ -3301,6 +3301,15 @@
   "lastPosted": "2026-02-07"
  },
  {
+  "id": "ferris-state-university____project-management",
+  "institution": "Ferris State University",
+  "department": "Project Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "fisher-college____om",
   "institution": "Fisher College",
   "department": "OM",
@@ -6422,6 +6431,15 @@
   ]
  },
  {
+  "id": "nanyang-technological-university____information-systems",
+  "institution": "Nanyang Technological University",
+  "department": "Information Systems",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "nanyang-technological-university__college-of-computing-and-data-science",
   "institution": "Nanyang Technological University",
   "school": "College of Computing and Data Science",
@@ -9433,6 +9451,14 @@
   "type": "University",
   "sources": [
    "omlist",
+   "seed"
+  ]
+ },
+ {
+  "id": "tecnologico-de-monterrey____supply-chain-and-logistics-systems",
+  "institution": "Tecnológico de Monterrey",
+  "department": "Supply Chain and Logistics Systems",
+  "sources": [
    "seed"
   ]
  },
