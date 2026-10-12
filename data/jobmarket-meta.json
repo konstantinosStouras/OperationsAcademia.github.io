@@ -1,54 +1,57 @@
 {
- "generated": "2026-10-09T07:35:20.231Z",
- "count": 571,
- "newestPosted": "2026-10-08",
+ "generated": "2026-10-12T11:25:56.793Z",
+ "count": 708,
+ "newestPosted": "2026-10-11",
  "oldestPosted": "2025-01-03",
  "years": {
   "2026": 426,
-  "2027": 145
+  "2027": 282
  },
  "countries": {
-  "United States": 424,
-  "United Kingdom": 20,
-  "China": 18,
-  "Canada": 14,
+  "United States": 531,
+  "China": 28,
+  "United Kingdom": 21,
+  "Canada": 16,
   "Hong Kong": 11,
-  "Singapore": 9,
-  "France": 7,
-  "Germany": 7,
-  "Spain": 7,
+  "Singapore": 10,
+  "France": 9,
+  "Germany": 8,
+  "Spain": 8,
+  "India": 6,
   "United Arab Emirates": 6,
-  "India": 5,
   "Turkey": 5,
+  "Saudi Arabia": 4,
   "Australia": 3,
+  "Denmark": 3,
   "Lebanon": 3,
-  "Saudi Arabia": 3,
+  "Mexico": 3,
   "South Korea": 3,
   "Austria": 2,
+  "Belgium": 2,
   "Cambodia": 2,
   "Finland": 2,
   "Ireland": 2,
+  "Kazakhstan": 2,
+  "Macau": 2,
   "Oman": 2,
   "Portugal": 2,
   "Sweden": 2,
-  "Belgium": 1,
   "Chile": 1,
-  "Denmark": 1,
   "Iraq": 1,
   "Italy": 1,
-  "Kazakhstan": 1,
   "Kuwait": 1,
-  "Mexico": 1,
   "Netherlands": 1,
   "New Zealand": 1,
-  "Switzerland": 1
+  "Qatar": 1,
+  "Switzerland": 1,
+  "Uzbekistan": 1
  },
  "levels": {
-  "Assistant Professor": 110,
-  "Other Ranks": 67,
-  "Non-tenure track (teaching) position": 28,
-  "Post-Doc": 7,
-  "Visiting Faculty (various levels)": 4
+  "Assistant Professor": 225,
+  "Other Ranks": 117,
+  "Non-tenure track (teaching) position": 40,
+  "Post-Doc": 10,
+  "Visiting Faculty (various levels)": 10
  },
  "sheets": [
   "1zJPoPCUm11AZ5B74pzmaZKGNSUqU7onIIRQSzIxDkq8"
@@ -56,15 +59,7 @@
  "tabs": [
   "2025 Jobs",
   "2025 NTT/PD",
-  "2025 NTT-PD",
-  "2025 NTT PD",
   "2026 Jobs",
-  "2026 NTT/PD",
-  "2026 NTT-PD",
-  "2026 NTT PD",
-  "2027 Jobs",
-  "2027 NTT/PD",
-  "2027 NTT-PD",
-  "2027 NTT PD"
+  "2026 NTT/PD"
  ]
 }
