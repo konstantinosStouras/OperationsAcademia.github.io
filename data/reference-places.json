@@ -2391,6 +2391,11 @@
  },
  {
   "institution": "Stanford University",
+  "school": "",
+  "department": "Data Science"
+ },
+ {
+  "institution": "Stanford University",
   "school": "School of Engineering",
   "department": "Management Science and Engineering"
  },
