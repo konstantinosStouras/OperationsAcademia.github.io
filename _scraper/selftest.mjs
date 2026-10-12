@@ -26174,7 +26174,7 @@ async function testPomsCrawler() {
   ok(/if \(!page\.ok\) \{[\s\S]{0,400}return 1;/.test(cli) && /no posting table was found[\s\S]{0,200}return 1;/.test(cli),
     'an unreadable page and a page without the table are errors the run reports, not quiet runs');
   ok(/queue\.ok\)[\s\S]{0,200}warn\(/.test(cli), 'and no queue is said rather than hidden');
-  ok(/advertRepeat\(row, compared\)/.test(cli) && /duplicatesOf\(row, compared\)/.test(cli) && /nearbyPostings\(row, compared\)/.test(cli)
+  ok(/advertRepeat\(row, duplicateRows\)/.test(cli) && /duplicatesOf\(row, duplicateRows\)/.test(cli) && /nearbyPostings\(row, duplicateRows\)/.test(cli)
      && /_pending: true/.test(cli), 'repeats, duplicates and nearby postings are judged against the site AND the queue, pending rows marked');
   ok(/healCountry\(row, byCountry\)/.test(cli), 'the country the directory knows is filled before the card is drawn');
   const rr = CLI.needReread([
@@ -26328,9 +26328,8 @@ async function testPomsCrawler() {
   ok(/npm install[^\n]*firebase-admin@12 pdfjs-dist@4/.test(wfCode), 'and installs the database client and the PDF engine');
   ok(/npm install[^\n]*firebase-admin@12 pdfjs-dist@4 playwright@1/.test(wfCode) && !/npm install[^\n]* playwright@1;/.test(wfCode.replace(/firebase-admin@12 pdfjs-dist@4 playwright@1/g, '')),
     'the Playwright step names them again: a root `npm install --no-save` with a shorter list prunes what an earlier one installed (reproduced with npm 10)');
-  ok(/for m in firebase-admin pdfjs-dist; do[\s\S]{0,240}require\('\$m\/package\.json'\)[\s\S]{0,200}::error::/.test(wfCode)
-     && wfCode.indexOf('for m in firebase-admin pdfjs-dist') < wfCode.indexOf('node _scraper/poms-crawl.mjs --selftest'),
-    'and the offline checks first prove both are still installed, out loud, since a missing client would be a green run that queues nothing');
+  ok(wfCode.includes("require('firebase-admin/app')") && wfCode.includes("require.resolve('pdfjs-dist/legacy/build/pdf.mjs')")
+    && !wfCode.includes("require('$m/package.json')"), 'dependency checks use supported package entry points');
   ok(/playwright@1/.test(wfCode) && /continue-on-error: true/.test(wfCode) && /--no-render/.test(wfCode),
     'the browser is best-effort, and a run without it says --no-render');
   ok(/POMS_REQUIRE_PDF: '1'/.test(wfCode) && /poms-crawl\.mjs --selftest/.test(wfCode),
@@ -26338,7 +26337,7 @@ async function testPomsCrawler() {
   ok(!/git commit/.test(wfCode) && !/git add/.test(wfCode) && !/oa-jobs-changed/.test(wfCode),
     'it commits nothing and rings no doorbell: an approval publishes through the existing chain');
   ok(/permissions:\s*\n\s*contents: read/.test(wfCode), 'with read-only contents, since it writes none');
-  ok(/timeout-minutes: 40/.test(wfCode) && !/timeout-minutes: 30/.test(wfCode) && /concurrency:\s*\n\s*group: oa-poms-crawl-/.test(wfCode),
+  ok(/timeout-minutes: 40/.test(wfCode) && !/timeout-minutes: 30/.test(wfCode) && /concurrency:\s*\n\s*group: oa-poms-crawl\s*\n/.test(wfCode),
     'bounded at forty minutes (up to fifteen of bounded browser installs run ahead of the twenty-minute read window), in a group of its own');
   const buildWf = await read('.github/workflows/oa-jobs-build.yml');
   ok(!/crawl the POMS job postings page/.test(buildWf), 'the build is not chained to it (one event, one build; it writes no data)');

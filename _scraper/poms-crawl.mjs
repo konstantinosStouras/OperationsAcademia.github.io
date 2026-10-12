@@ -52,7 +52,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lookup as dnsLookup } from 'node:dns/promises';
 
-import { isoStamp, marketFloor, LEVELS, TYPES, PUBLIC_FIELDS, stripRowEmails } from './jobs-model.mjs';
+import { isoStamp, marketFloor, LEVELS, TYPES, PUBLIC_FIELDS, stripRowEmails, rowFromSubmission } from './jobs-model.mjs';
 import { firestore } from './_mail.mjs';
 import {
   COLLECTION as REVIEW_COL, PENDING, APPROVED, queueDoc, duplicatesOf, businessCheck,
@@ -316,8 +316,14 @@ async function loadQueue() {
   }
   if (!db) return { ok: false, db: null, docs: [], error: 'no Firebase credentials in this environment' };
   try {
-    const snap = await db.collection(REVIEW_COL).get();
-    return { ok: true, db, docs: snap.docs.map((d) => d.data()).filter((d) => d && d.rowId), error: '' };
+    const [snap, submissions] = await Promise.all([
+      db.collection(REVIEW_COL).get(), db.collection('jobSubmissions').get(),
+    ]);
+    const submissionRows = submissions.docs.map((d) => {
+      const data = d.data();
+      return rowFromSubmission(data) || { ...data, id: d.id };
+    });
+    return { ok: true, db, docs: snap.docs.map((d) => d.data()).filter((d) => d && d.rowId), submissionRows, error: '' };
   } catch (e) {
     return { ok: false, db: null, docs: [], error: e.message };
   }
@@ -415,10 +421,11 @@ async function main() {
   if (!queue.ok) {
     warn(`the review queue is unreachable (${queue.error}) — nothing can be queued this run.`);
     /* --scan still says what WOULD be new against the served files alone */
-    if (!SCAN) return 0;
+    if (!SCAN) return 1;
   }
 
-  const known = knownLinks({ docs: queue.docs, rows: [...(Array.isArray(site) ? site : []), ...(Array.isArray(sheet) ? sheet : [])] });
+  const existingRows = [...(Array.isArray(site) ? site : []), ...(Array.isArray(sheet) ? sheet : []), ...(queue.submissionRows || [])];
+  const known = knownLinks({ docs: queue.docs, rows: existingRows });
   const { fresh, skipped } = newOpportunities(opps, { since, minYear, known, now });
   const why = {};
   for (const s of skipped) why[s.why] = (why[s.why] || 0) + 1;
@@ -442,6 +449,7 @@ async function main() {
     .map((d) => ({ ...d.row, _pending: true }));
   const listedNow = [...(Array.isArray(site) ? site : []), ...approvedRows];
   const compared = [...listedNow, ...pendingRows];
+  const duplicateRows = [...existingRows, ...queue.docs.filter((d) => d.row).map((d) => ({ ...d.row, ...d.edits }))];
 
   const taken = new Set([
     ...queue.docs.map((d) => d.rowId),
@@ -450,7 +458,7 @@ async function main() {
   ].filter(Boolean));
 
   const col = queue.db ? queue.db.collection(REVIEW_COL) : null;
-  let queued = 0, unread = 0, skippedIds = 0;
+  let queued = 0, unread = 0, skippedIds = 0, eligible = 0, failed = 0;
 
   for (const opp of fresh) {
     if (budget.left <= 0 || Date.now() > budget.until) {
@@ -475,7 +483,7 @@ async function main() {
 
     /* the same advertisement already listed is never a decision to make —
        the link check above catches nearly all of these before the read */
-    const repeat = advertRepeat(row, compared);
+    const repeat = advertRepeat(row, duplicateRows);
     if (repeat) {
       skippedIds++;
       log(`  x same advertisement as ${repeat.ref || repeat.id} — not queued: ${row.posted}  ${row.institution}`);
@@ -483,8 +491,14 @@ async function main() {
       continue;
     }
 
-    let dup = duplicatesOf(row, compared);
-    if (!dup.length) dup = nearbyPostings(row, compared);
+    let dup = duplicatesOf(row, duplicateRows);
+    if (!dup.length) dup = nearbyPostings(row, duplicateRows);
+    if (dup.length) {
+      skippedIds++;
+      warn(`possible duplicate, not queued: ${opp.href} — ${row.institution}; matches ${dup.map((d) => d.ref || d.id).join(', ')}`);
+      continue;
+    }
+    eligible++;
     const biz = businessCheck(row, vocab);
     const doc = queueDoc(row, { now: isoStamp(now), dup, biz });
     doc.ad = block;
@@ -496,13 +510,28 @@ async function main() {
 
     if (DRY) {
       log('    ' + JSON.stringify({ id, row: doc.row, ad: doc.ad, dup: doc.dup, biz: doc.biz }));
+      duplicateRows.push(row);
     } else if (col) {
       try {
+        // Re-read decisions and submissions after fetching the advertisement.
+        const latest = await loadQueue();
+        if (!latest.ok) throw new Error(latest.error);
+        const currentRows = [...duplicateRows, ...latest.submissionRows,
+          ...latest.docs.filter((d) => d.row).map((d) => ({ ...d.row, ...d.edits }))];
+        if (latest.docs.some((d) => d.rowId === id) || advertRepeat(row, currentRows)
+          || duplicatesOf(row, currentRows).length || nearbyPostings(row, currentRows).length) {
+          warn(`duplicate found on final check, not queued: ${opp.href}`);
+          continue;
+        }
         await col.doc(id).create(doc);
+        const saved = await col.doc(id).get();
+        if (!saved.exists || saved.data().status !== PENDING) throw new Error('pending record could not be verified');
         queued++;
+        compared.push(row);
+        duplicateRows.push(row);
       } catch (e) {
         if (e && e.code === 6) { skippedIds++; log(`  = ${id} is already in the queue — left as it is`); }
-        else warn(`could not queue ${id}: ${e.message}`);
+        else { failed++; warn(`could not queue ${id}: ${e.message}`); }
       }
     }
     await sleep(PACE_MS);
@@ -573,11 +602,11 @@ async function main() {
   }
 
   const waiting = queue.docs.filter((d) => d.status === PENDING).length + (DRY ? 0 : queued);
-  log((DRY ? `--dry-run: would have queued ${fresh.length - skippedIds} posting(s)` : `queued ${queued} posting(s) for review`) +
+  log((DRY ? `--dry-run: would have queued ${eligible} posting(s)` : `queued ${queued} posting(s) for review`) +
       (unread ? `, ${unread} with an advertisement that could not be read` : '') +
       (retried ? `; ${retried} earlier posting(s) had their advertisement tried again, ${refreshed} filled in` : '') + '.');
   if (waiting) log(`  ${waiting} posting(s) awaiting you at https://www.operationsacademia.org/admin-area`);
-  return 0;
+  return failed ? 1 : 0;
 }
 
 /* ----------------------------------------------------------------- selftest */

@@ -64,7 +64,7 @@ permissions:
 # writers, and a second fire while one is running should wait rather than
 # read the same page twice.
 concurrency:
-  group: oa-poms-crawl-${{ github.ref }}
+  group: oa-poms-crawl
   cancel-in-progress: false
 
 jobs:
@@ -154,10 +154,8 @@ jobs:
           # the first step's packages must still be here (see the Playwright
           # step): a missing PDF engine fails the checks below on its own, a
           # missing database client would be a GREEN run that queues nothing
-          for m in firebase-admin pdfjs-dist; do
-            node -e "require('$m/package.json')" ||
-              { echo "::error::$m is no longer installed: a later npm install pruned it"; exit 1; }
-          done
+          # Check public entry points: firebase-admin does not export package.json.
+          node -e "require('firebase-admin/app'); require.resolve('pdfjs-dist/legacy/build/pdf.mjs')"
           node _scraper/poms-crawl.mjs --selftest
 
       - name: Crawl the page
