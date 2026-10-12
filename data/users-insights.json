@@ -1,11 +1,11 @@
 {
- "generated": "2026-10-12T17:48:29.788Z",
- "members": 329,
+ "generated": "2026-10-12T23:49:59.833Z",
+ "members": 333,
  "k": 3,
  "affiliation": {
-  "listed": 246,
+  "listed": 249,
   "other": 44,
-  "none": 39
+  "none": 40
  },
  "universities": {
   "count": 129,
@@ -41,6 +41,11 @@
     "members": 5
    },
    {
+    "name": "University of Massachusetts Amherst",
+    "country": "United States",
+    "members": 5
+   },
+   {
     "name": "Massachusetts Institute of Technology",
     "country": "United States",
     "members": 4
@@ -56,7 +61,7 @@
     "members": 4
    },
    {
-    "name": "University of Massachusetts Amherst",
+    "name": "University of Southern California",
     "country": "United States",
     "members": 4
    },
@@ -126,6 +131,11 @@
     "members": 3
    },
    {
+    "name": "University of California, Berkeley",
+    "country": "United States",
+    "members": 3
+   },
+   {
     "name": "University of California, Los Angeles (UCLA)",
     "country": "United States",
     "members": 3
@@ -154,21 +164,16 @@
     "name": "University of South Carolina",
     "country": "United States",
     "members": 3
-   },
-   {
-    "name": "University of Southern California",
-    "country": "United States",
-    "members": 3
    }
   ],
-  "rest": 130
+  "rest": 128
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 159
+    "members": 162
    },
    {
     "name": "Canada",
@@ -204,6 +209,6 @@
    }
   ],
   "rest": 9,
-  "unknown": 94
+  "unknown": 95
  }
 }
