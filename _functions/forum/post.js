@@ -127,9 +127,13 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
       if (!hv.guideAt && !accept) P.refuse('failed-precondition', 'guide');
       const now = M.minute();
       const c = P.counters(hv, now);
-      P.checkLimit(c, 'dayThreads', M.RATE.threads);
-      P.checkLimit(c, 'dayPosts', M.RATE.posts);
-      P.checkGap(c, now);
+      // The verified maintainer imports the source sheet in batches. Admission
+      // derives isAdmin from the authenticated token, never request data.
+      if (!m.isAdmin) {
+        P.checkLimit(c, 'dayThreads', M.RATE.threads);
+        P.checkLimit(c, 'dayPosts', M.RATE.posts);
+        P.checkGap(c, now);
+      }
 
       /* @doc thread */
       const thread = {
@@ -266,8 +270,10 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
     if (!hv.guideAt && !accept) P.refuse('failed-precondition', 'guide');
     const now = M.minute();
     const c = P.counters(hv, now);
-    P.checkLimit(c, 'dayPosts', M.RATE.posts);
-    P.checkGap(c, now);
+    if (!m.isAdmin) {
+      P.checkLimit(c, 'dayPosts', M.RATE.posts);
+      P.checkGap(c, now);
+    }
     n = (Number(tv.n) || 0) + 1;
 
     /* @doc post */
