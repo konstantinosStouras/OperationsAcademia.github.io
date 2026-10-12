@@ -5930,9 +5930,9 @@ async function testJobMarketSheetChain() {
     items.push({name: "2026 Q\x26A", pageUrl: "unused", gid: "1131089593"});
     items.push({name: "bad\q", pageUrl: "unused", gid: "4"});`;
   eq(tabsFromHtml(scriptTabs), [
-    { name: '2026 Jobs', gid: '2050222708' },
-    { name: '2026 NTT/PD', gid: '1514861818' },
-    { name: '2026 Q&A', gid: '1131089593' },
+    { gid: '2050222708', name: '2026 Jobs' },
+    { gid: '1514861818', name: '2026 NTT/PD' },
+    { gid: '1131089593', name: '2026 Q&A' },
   ], 'current Google tab descriptors decode slashes and hex escapes without executing JavaScript');
   eq(tabsFromHtml(html + scriptTabs).map((t) => t.name),
     ['Intro', '2026 NTT/PD', '2026 Jobs', '2026 Q&A'],
