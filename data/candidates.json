@@ -694,19 +694,28 @@
   "position": "Post-Doctoral Researcher",
   "researchAreas": [
    "Machine Learning and Data Science",
-   "Statistics and Decisions",
+   "Statistics",
    "AI",
    "Biomedical Applications"
   ],
-  "informsDays": [],
-  "informsUrl": "",
+  "informsDays": [
+   "Tuesday"
+  ],
+  "jobTalk": {
+   "date": "2026-11-03",
+   "at": "08:00",
+   "end": "08:25",
+   "location": "Moscone South-206 (Level 2), San Francisco",
+   "title": "Bayesian Inference, Deep Generative Models and Synthetic Data"
+  },
+  "informsUrl": "https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=4117",
   "cvUrl": "https://edrictam.com/edric_tam_cv.pdf",
   "rsUrl": "",
   "webUrl": "https://edrictam.com",
   "email": "edrictam@stanford.edu",
   "source": "oa-form",
   "addedAt": "2026-09-27T05:47:34Z",
-  "updatedAt": "2026-09-27",
+  "updatedAt": "2026-10-12",
   "ref": "OA-CAND-260926-6R8F",
   "owner": "64581dc803548407"
  },

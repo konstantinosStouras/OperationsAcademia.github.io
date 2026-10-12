@@ -892,6 +892,11 @@
  {
   "institution": "Ferris State University",
   "school": "",
+  "department": "Accountancy Finance and Information Systems"
+ },
+ {
+  "institution": "Ferris State University",
+  "school": "",
   "department": "DA"
  },
  {
@@ -1700,6 +1705,11 @@
   "department": ""
  },
  {
+  "institution": "Nanyang Technological University",
+  "school": "Nanyang Business School",
+  "department": "Information Technology and Operations Management"
+ },
+ {
   "institution": "National University of Singapore (ISEM)",
   "school": "",
   "department": "simulation, sustainability, AI + X"
@@ -1878,6 +1888,11 @@
   "institution": "Northern State University",
   "school": "School of Business",
   "department": "Business Analytics and Information Systems"
+ },
+ {
+  "institution": "Northwestern University",
+  "school": "Kellogg School of Management",
+  "department": "Managerial Economics and Decision Sciences"
  },
  {
   "institution": "Northwestern University",
@@ -2185,6 +2200,11 @@
   "department": "Information Systems and Technology"
  },
  {
+  "institution": "San José State University",
+  "school": "Lucas College and Graduate School of Business",
+  "department": "Marketing and Business Analytics"
+ },
+ {
   "institution": "Santa Clara University",
   "school": "",
   "department": "IS and Analytics"
@@ -2448,6 +2468,11 @@
   "institution": "Technical University of Munich",
   "school": "",
   "department": "Operations Research and AI"
+ },
+ {
+  "institution": "Tecnológico de Monterrey",
+  "school": "Institute for Advanced Materials for Sustainable Manufacturing",
+  "department": "Supply Chain and Logistics Systems"
  },
  {
   "institution": "Temple University",
@@ -2998,6 +3023,11 @@
   "institution": "University of Florida",
   "school": "",
   "department": "ISE-Smart Manufacturing"
+ },
+ {
+  "institution": "University of Florida",
+  "school": "Warrington College of Business",
+  "department": "Information Systems and Operations Management"
  },
  {
   "institution": "University of Georgia",

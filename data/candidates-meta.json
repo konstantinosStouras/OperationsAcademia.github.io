@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-11T20:08:30.588Z",
+ "generated": "2026-10-12T11:22:04.206Z",
  "count": 34,
  "years": {
   "2027": 34
@@ -52,7 +52,7 @@
   "Queueing Theory": 1,
   "Resource Allocation": 1,
   "Socially Responsible Operations": 1,
-  "Statistics and Decisions": 1,
+  "Statistics": 1,
   "Stochastic Dynamic Programming": 1,
   "Stochastic Modeling & Simulation": 1,
   "Stochastic Processes": 1,
@@ -61,7 +61,7 @@
  "informsDays": {
   "Sunday": 11,
   "Monday": 9,
-  "Tuesday": 3,
+  "Tuesday": 4,
   "Wednesday": 1
  },
  "withCv": 31,

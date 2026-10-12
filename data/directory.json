@@ -1325,13 +1325,9 @@
   "school": "College of Business Administration",
   "department": "Computer Information Systems",
   "type": "Business School",
-  "country": "United States",
   "sources": [
-   "postings",
    "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-08-11"
+  ]
  },
  {
   "id": "california-state-university-bakersfield____mis-ba-ai",
@@ -2353,6 +2349,18 @@
   "lastPosted": "2026-09-17"
  },
  {
+  "id": "cornell-university____operations-technology-and-information-management-area",
+  "institution": "Cornell University",
+  "department": "Operations, Technology, and Information Management Area",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-01-31"
+ },
+ {
   "id": "cornell-university__cornell-peter-and-stephanie-nolan-school-of-hotel-administra__operations-technology-and-information-management-area",
   "institution": "Cornell University",
   "school": "Cornell Peter and Stephanie Nolan School of Hotel Administration",
@@ -2383,8 +2391,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2026-01-31",
+  "n": 1,
+  "lastPosted": "2014-10-21",
   "lat": 42.4458918,
   "lng": -76.4833009
  },
@@ -3288,6 +3296,19 @@
   "lastPosted": "2026-03-19"
  },
  {
+  "id": "ferris-state-university____accountancy-finance-and-information-systems",
+  "institution": "Ferris State University",
+  "department": "Accountancy Finance and Information Systems",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
+ },
+ {
   "id": "ferris-state-university____da",
   "institution": "Ferris State University",
   "department": "DA",
@@ -3561,7 +3582,7 @@
    "postings",
    "seed"
   ],
-  "n": 3,
+  "n": 2,
   "lastPosted": "2026-09-29",
   "lat": 38.8415539,
   "lng": -77.3411251
@@ -6462,11 +6483,15 @@
   "school": "Nanyang Business School",
   "department": "Information Technology and Operations Management",
   "type": "Business School",
+  "country": "Singapore",
   "deptUrl": "https://www.ntu.edu.sg/business/research/academic-divisions/itom/our-faculty",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
  },
  {
   "id": "nanyang-technological-university__nanyang-business-school__informaton-technology-and-operatons-management",
@@ -7179,6 +7204,20 @@
   ],
   "n": 1,
   "lastPosted": "2014-07-24"
+ },
+ {
+  "id": "northwestern-university__kellogg-school-of-management__managerial-economics-and-decision-sciences",
+  "institution": "Northwestern University",
+  "school": "Kellogg School of Management",
+  "department": "Managerial Economics and Decision Sciences",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
  },
  {
   "id": "northwestern-university__kellogg-school-of-management__operations",
@@ -8373,6 +8412,20 @@
   "lastPosted": "2026-09-23"
  },
  {
+  "id": "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-business-analytics",
+  "institution": "San José State University",
+  "school": "Lucas College and Graduate School of Business",
+  "department": "Marketing and Business Analytics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
+ },
+ {
   "id": "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-decision-sciences",
   "institution": "San Jose State University",
   "school": "Lucas College and Graduate School of Business",
@@ -9435,6 +9488,20 @@
    "omlist",
    "seed"
   ]
+ },
+ {
+  "id": "tecnologico-de-monterrey__institute-for-advanced-materials-for-sustainable-manufacturi__supply-chain-and-logistics-systems",
+  "institution": "Tecnológico de Monterrey",
+  "school": "Institute for Advanced Materials for Sustainable Manufacturing",
+  "department": "Supply Chain and Logistics Systems",
+  "type": "University",
+  "country": "Mexico",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
  },
  {
   "id": "ted-university",
@@ -12143,11 +12210,15 @@
   "school": "Warrington College of Business",
   "department": "Information Systems and Operations Management",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://warrington.ufl.edu/faculty-research/academic-groups/#h-information-systems-and-operations-management",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
  },
  {
   "id": "university-of-georgia__terry-college-of-business__management-information-systems",
