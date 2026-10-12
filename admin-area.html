@@ -408,7 +408,8 @@
                 and cannot use the site until it has answered, so the number comes down on its own; one that has never
                 confirmed its e-mail address is asked to do that first and for nothing else until it has. Type
                 <em>incomplete</em> into Find to list them.
-                Tick the people you want to reach and write once: the message
+                Click Message beside a person to open their conversation and write to them.
+                For several people, tick their rows and choose Message selected. The message
                 appears in their own area on this site under &ldquo;Messages&rdquo;,
                 where they can reply to you. <strong>No e-mail is sent</strong>
                 &mdash; the address links open your own mail client when e-mail
@@ -420,8 +421,18 @@
                 minutes (at the site&rsquo;s next update at the latest), and you
                 can call it off until then; the row goes on its own once it has.</p>
               <div id="oa-aa-users-list"><p class="oa-hint">Loading&hellip;</p></div>
-              <div id="oa-aa-users-thread" hidden></div>
-              <div id="oa-aa-users-compose"></div>
+              <dialog id="oa-u-dialog" aria-labelledby="oa-u-title" aria-describedby="oa-u-delivery">
+                <header class="oa-u-dialog-head">
+                  <h3 id="oa-u-title">Message</h3>
+                  <button type="button" class="button oa-btn-ghost" id="oa-u-close" aria-label="Close message">Close</button>
+                </header>
+                <div class="oa-u-dialog-content">
+                  <div id="oa-u-recipients"></div>
+                  <p class="oa-hint" id="oa-u-delivery">Delivered on this site under Messages. Recipients can reply there. No e-mail is sent.</p>
+                  <div id="oa-aa-users-thread" hidden></div>
+                  <div id="oa-aa-users-compose"></div>
+                </div>
+              </dialog>
             </section>
 
           </div>

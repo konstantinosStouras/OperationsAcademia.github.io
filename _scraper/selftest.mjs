@@ -7978,8 +7978,9 @@ async function testUsersAndMessages() {
      and the ticks is right after a send that reached somebody; after one that
      reached NOBODY it threw away the message and every recipient, so the only
      way to try again was to write the whole thing out afresh. */
-  ok(/if \(sent\) \{\s*\n\s*if \(ta\) ta\.value = '';\s*\n\s*state\.picked = \{\};/.test(users),
-    'a send that delivered nothing leaves the message and the recipients alone');
+  ok(/if \(failed\) \{\s*state\.composeUids = failedUids;/.test(users) &&
+     /if \(failedUids\.indexOf\(uid\) < 0\) delete state\.picked\[uid\];/.test(users),
+    'a failed send keeps the failed recipients selected for retry; browser checks verify the draft and writes');
 
   /* THE TILE AND THE BADGE ARE THE SAME NUMBER, computed by one function so
      that they cannot disagree — and the badge is cached per account and

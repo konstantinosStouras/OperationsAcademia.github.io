@@ -8364,7 +8364,7 @@ for (const w of [320, 360, 390, 430]) {
        market's candidates are written to together. */
     await q.click('#oa-u-all');
     await q.waitForFunction(() =>
-      (document.getElementById('oa-u-send') || {}).textContent.indexOf('1 person') !== -1,
+      (document.getElementById('oa-u-bulk') || {}).textContent.indexOf('(1)') !== -1,
       null, { timeout: 10000 });
     ok(true, 'roster: select-all under a chosen season picks that season\'s candidates, which is how they are messaged together');
     await q.click('#oa-u-all');
@@ -8590,8 +8590,8 @@ for (const w of [320, 360, 390, 430]) {
     ok(true, 'roster: Find narrows the list');
     await q.click('#oa-u-all');
     await q.waitForFunction(() =>
-      (document.getElementById('oa-u-send') || {}).disabled === false, null, { timeout: 10000 });
-    ok((await q.textContent('#oa-u-send')).indexOf('1 person') !== -1,
+      (document.getElementById('oa-u-bulk') || {}).textContent.indexOf('(1)') !== -1, null, { timeout: 10000 });
+    ok((await q.textContent('#oa-u-bulk')).indexOf('(1)') !== -1,
       'roster: select-all takes only the rows on screen, so the filter IS the picker');
 
     /* EVERY row opens its conversation. The "Message replies waiting" tile
@@ -8627,26 +8627,26 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForFunction(() =>
       document.querySelectorAll('#oa-aa-users tbody tr').length > 1, null, { timeout: 10000 });
 
-    /* A message already typed must survive choosing who to send it to — which
-       is the order people actually work in. Bea is NOT picked at this point
-       (select-all above ran with the list filtered to Cy), so this ticks her
-       and then unticks her, leaving the selection exactly as it was. */
-    await q.fill('#oa-u-body', 'Draft that must survive.');
-    await q.click('#oa-aa-users tr:has-text("bea@example.edu") .oa-u-pick');
-    await q.waitForFunction(() =>
-      (document.getElementById('oa-u-send') || {}).textContent.indexOf('2 people') !== -1,
-      null, { timeout: 10000 });
-    eq(await q.inputValue('#oa-u-body'), 'Draft that must survive.',
-      'roster: ticking a recipient does not throw away the message already written');
-    await q.click('#oa-aa-users tr:has-text("bea@example.edu") .oa-u-pick');
-    await q.waitForFunction(() =>
-      (document.getElementById('oa-u-send') || {}).textContent.indexOf('1 person') !== -1,
-      null, { timeout: 10000 });
-    ok(true, 'roster: …and a tick can be undone — the box shows the state it is in');
+    /* A row targets that person alone, without disturbing a bulk selection.
+       Each conversation keeps its own draft across close / reopen. */
+    await q.click('#oa-aa-users tr:has-text("bea@example.edu") .oa-u-open');
+    eq(await q.textContent('#oa-u-title'), 'Message Bea Baker', 'messaging: the dialog names the row recipient');
+    eq(await q.evaluate(() => document.activeElement.id), 'oa-u-body', 'messaging: ready to write immediately');
+    ok(await q.locator('#oa-u-send').isDisabled(), 'messaging: an empty message cannot be sent');
+    await q.fill('#oa-u-body', 'Draft for Bea.');
+    await q.keyboard.press('Escape');
+    ok(await q.locator('#oa-u-dialog').isHidden(), 'messaging: Escape returns to the roster');
+    ok(await q.locator('tr:has-text("cy@example.edu") .oa-u-pick').isChecked(), 'messaging: row action preserves the bulk selection');
+    await q.click('#oa-aa-users tr:has-text("cy@example.edu") .oa-u-open');
+    eq(await q.inputValue('#oa-u-body'), '', 'messaging: Bea’s draft never appears in Cy’s conversation');
+    await q.click('#oa-u-close');
+    await q.click('#oa-aa-users tr:has-text("bea@example.edu") .oa-u-open');
+    eq(await q.inputValue('#oa-u-body'), 'Draft for Bea.', 'messaging: a closed draft is restored for its recipient');
+    await q.click('#oa-u-close');
+    await q.click('#oa-aa-users tr:has-text("cy@example.edu") .oa-u-open');
 
     /* …and sending really writes, with `from` the rules pin */
     await q.fill('#oa-u-body', 'A message to Cy.');
-    q.once('dialog', (d) => d.accept());
     await q.click('#oa-u-send');
     await q.waitForFunction(() => {
       const d = window.__fb.dump();
@@ -8667,7 +8667,10 @@ for (const w of [320, 360, 390, 430]) {
     /* A BROADCAST IS NOT AN ANSWER. Bea has replied and is waiting; sending
        her a message must not quietly drop her out of the "awaiting you" queue
        — only reading the thread and marking it answered does that. */
+    await q.waitForFunction(() => /Sent to/.test(document.getElementById('oa-u-msg').textContent));
+    await q.click('#oa-u-close');
     await q.click('#oa-aa-users tr:has-text("bea@example.edu") .oa-u-pick');
+    await q.click('#oa-u-bulk');
     await q.fill('#oa-u-body', 'A broadcast.');
     q.once('dialog', (d) => d.accept());
     await q.click('#oa-u-send');
@@ -8677,6 +8680,9 @@ for (const w of [320, 360, 390, 430]) {
     eq(await q.evaluate(() => window.__fb.dump()['messages/u-msg-2'].needsAdmin), true,
       'roster: a broadcast leaves somebody who is still owed an answer IN the queue');
 
+    await q.waitForFunction(() => /Sent to/.test(document.getElementById('oa-u-msg').textContent));
+    await q.click('#oa-u-close');
+
     /* An orphaned thread can really be removed — the panel says so. */
     q.once('dialog', (d) => d.accept());
     await q.click('#oa-aa-users .oa-u-del[data-uid="u-gone-9"]');
@@ -8685,6 +8691,81 @@ for (const w of [320, 360, 390, 430]) {
     ok(true, 'roster: and the delete the ghost panel offers actually deletes it');
 
     eq(errors, [], 'roster: maintainer run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* The composer works within the viewport, with native modal keyboard
+     navigation, and a failed broadcast can be retried without duplicates. */
+  {
+    const { ctx, q, errors } = await open(ADMIN, 'admin-area.html');
+    await q.waitForSelector('#oa-aa-users tbody tr');
+    await q.click('tr:has-text("bea@example.edu") .oa-u-pick');
+    await q.click('tr:has-text("cy@example.edu") .oa-u-pick');
+    await q.click('#oa-u-bulk');
+    await q.locator('#oa-u-recipients summary').click();
+    eq(await q.locator('#oa-u-recipients li').count(), 2, 'messaging: bulk recipients can be reviewed before sending');
+    await q.fill('#oa-u-body', 'Retry this message.');
+    // Refuse exactly the second atomic write, before any of it reaches the fake database.
+    await q.evaluate(async () => {
+      const fb = await OAFB.ready();
+      const batchPrototype = Object.getPrototypeOf(fb.firestore().batch());
+      const original = batchPrototype.commit;
+      let calls = 0;
+      batchPrototype.commit = function () {
+        if (++calls === 2) {
+          batchPrototype.commit = original;
+          return Promise.reject(new Error('Simulated delivery failure'));
+        }
+        return original.call(this);
+      };
+    });
+    q.once('dialog', d => d.accept());
+    await q.click('#oa-u-send');
+    await q.waitForFunction(() => /could not be delivered/.test(document.getElementById('oa-u-msg').textContent));
+    eq(await q.inputValue('#oa-u-body'), 'Retry this message.', 'messaging: partial failure keeps the draft');
+    eq(await q.locator('#oa-u-recipients li').count(), 1, 'messaging: retry names only the failed recipient');
+    await q.click('#oa-u-close');
+    await q.click('#oa-u-bulk');
+    eq(await q.inputValue('#oa-u-body'), 'Retry this message.', 'messaging: failed bulk draft survives closing and reopening');
+    q.once('dialog', d => d.accept());
+    await q.click('#oa-u-send');
+    await q.waitForFunction(() => /Sent to 1 person/.test(document.getElementById('oa-u-msg').textContent));
+    const deliveries = await q.evaluate(() => Object.entries(__fb.dump())
+      .filter(([path, item]) => path.includes('/items/') && item.body === 'Retry this message.')
+      .map(([path]) => path.split('/')[1]).sort());
+    eq(deliveries, ['u-msg-2', 'u-msg-3'], 'messaging: retry delivers exactly once to each intended recipient');
+    await q.click('#oa-u-close');
+    await q.click('tr:has-text("wilhelmina.featherstonehaugh-cholmondeley@") .oa-u-open');
+    for (const width of [390, 1280]) {
+      await q.setViewportSize({ width, height: 844 });
+      for (const theme of ['light', 'dark']) {
+        await q.evaluate(t => document.documentElement.setAttribute('data-theme', t), theme);
+        await q.evaluate(() => document.getAnimations().forEach(animation => animation.finish()));
+        const fit = await q.evaluate(() => {
+          const dialog = document.getElementById('oa-u-dialog');
+          const r = dialog.getBoundingClientRect();
+          const ta = document.getElementById('oa-u-body');
+          return { fits: r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight,
+            noOverflow: dialog.scrollWidth <= dialog.clientWidth,
+            inputSize: parseFloat(getComputedStyle(ta).fontSize),
+            sendHeight: document.getElementById('oa-u-send').getBoundingClientRect().height };
+        });
+        ok(fit.fits && fit.noOverflow && fit.inputSize >= 16 && fit.sendHeight >= 42,
+          `messaging: ${width}px ${theme} dialog fits with long recipient details and usable controls (${JSON.stringify(fit)})`);
+      }
+    }
+    await q.focus('#oa-u-close');
+    await q.keyboard.press('Shift+Tab');
+    ok(await q.evaluate(() => document.getElementById('oa-u-dialog').contains(document.activeElement)),
+      'messaging: keyboard focus stays inside the dialog');
+    await q.keyboard.press('Escape');
+    ok(await q.evaluate(() => document.activeElement.classList.contains('oa-u-open')),
+      'messaging: closing restores focus to the initiating row');
+    await q.click('.oa-u-ghosts .oa-u-open');
+    ok(await q.locator('#oa-aa-users-compose').textContent().then(t => t.includes('read-only')),
+      'messaging: a removed account’s conversation cannot be messaged');
+    eq(await q.locator('#oa-u-send').count(), 0, 'messaging: orphaned conversations have no send control');
+    eq(errors, [], 'messaging: no uncaught errors across compose, retry, and resize');
     await ctx.close();
   }
 

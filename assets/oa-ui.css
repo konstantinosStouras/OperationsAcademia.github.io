@@ -2485,6 +2485,73 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-msg-reply textarea,
 #oa-aa-users-compose textarea { width: 100%; font-size: 16px; }
 
+/* Messaging stays beside the task, independent of the length of the roster.
+   Native dialog supplies modal focus containment and an inert background. */
+#oa-u-dialog {
+  width: min(640px, calc(100vw - 28px));
+  max-width: none;
+  max-height: calc(100dvh - 28px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--line, #dcdfe4);
+  border-radius: 16px;
+  background: var(--bg-2, #fff);
+  color: var(--ink, #23272e);
+  box-shadow: 0 24px 80px #0005;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+#oa-u-dialog::backdrop { background: #0009; }
+body:has(#oa-u-dialog[open]) { overflow: hidden; }
+#oa-u-dialog .oa-u-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line, #dcdfe4);
+}
+#oa-u-title { margin: 0; font-size: 20px; line-height: 1.4; overflow-wrap: anywhere; }
+#oa-u-dialog .oa-u-dialog-content { padding: 20px 24px; }
+#oa-u-dialog button { min-height: 42px; }
+#oa-u-close { flex-shrink: 0; }
+.oa-u-recipients { list-style: none; padding: 0; margin: 0 0 12px; }
+.oa-u-recipients li { padding: 8px 0; overflow-wrap: anywhere; }
+.oa-u-recipients span { display: block; color: var(--mut, #646c78); font-size: 13px; }
+#oa-u-recipients details { margin-bottom: 12px; }
+#oa-u-recipients summary { cursor: pointer; font-weight: 600; }
+#oa-u-recipients details ul { max-height: 160px; overflow-y: auto; }
+#oa-u-dialog .oa-u-thread { max-height: 26dvh; overflow-y: auto; overscroll-behavior: contain; }
+#oa-u-dialog .oa-u-msg p { overflow-wrap: anywhere; }
+#oa-u-dialog .oa-u-empty { padding: 18px; background: var(--bg-3, #f7f8fa); border-radius: 8px; color: var(--mut, #646c78); }
+#oa-aa-users-compose label { display: block; font-weight: 600; margin-bottom: 8px; }
+#oa-aa-users-compose textarea { min-height: 140px; max-height: 35dvh; resize: vertical; }
+.oa-u-compose-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 16px 0 8px; }
+#oa-aa-users .oa-u-selection {
+  position: sticky;
+  top: 80px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin: 0 0 12px;
+  border: 1px solid var(--line, #dcdfe4);
+  border-radius: 10px;
+  background: var(--bg-2, #fff);
+  color: var(--ink, #23272e);
+  box-shadow: 0 4px 16px #0002;
+}
+#oa-aa-users .oa-u-selection[hidden] { display: none; }
+#oa-aa-users .oa-u-selection > span { margin-right: auto; }
+@media (max-width: 480px) {
+  #oa-u-dialog .oa-u-dialog-head { padding: 14px 16px; }
+  #oa-u-dialog .oa-u-dialog-content { padding: 16px; }
+  #oa-u-title { font-size: 18px; }
+  #oa-u-send { width: 100%; }
+}
+
 @media (max-width: 480px) {
   /* The action column never wraps its button; everything else may. */
   .oa-u-bar { gap: 8px; }

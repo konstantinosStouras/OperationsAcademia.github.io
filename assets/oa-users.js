@@ -520,6 +520,11 @@
     filter: '',
     picked: {},          // uid -> true
     open: null,          // uid of the thread being read, if any
+    composeUids: [],     // fixed recipients for the open dialog, independent of roster ticks
+    draftKey: null,
+    drafts: Object.create(null),
+    sending: false,
+    returnFocus: null,
     /* The watch over a queued deletion (below): the timer and its tick
        count, or null while nothing on the page is waiting for the sweep. */
     watch: null
@@ -621,7 +626,7 @@
    */
   function actionsFor(r) {
     var open = '<button type="button" class="button oa-btn-ghost oa-u-open" data-uid="' +
-      esc(r.uid) + '">' + (r.thread ? 'Open' : 'Message') + '</button>';
+      esc(r.uid) + '" aria-label="Message ' + esc(nameOf(r) || addressOf(r) || r.uid) + '">Message</button>';
     var D = root.OAAccountDelete;
     if (!D || state.deletions === null) return open;
     /* …and never on the maintainer's OWN row. The rules would allow it — an
@@ -900,6 +905,10 @@
         '<button type="button" class="button oa-btn-ghost" id="oa-u-csv">' +
           'Download CSV</button>' +
       '</div>' +
+      '<div class="oa-u-selection"' + (picked ? '' : ' hidden') + '>' +
+        '<span>' + picked + ' selected</span>' +
+        '<button type="button" class="button blue" id="oa-u-bulk">Message selected (' + picked + ')</button>' +
+        '<button type="button" class="button oa-btn-ghost" id="oa-u-clear">Clear selection</button></div>' +
       '<div class="oa-u-wrap"><table class="oa-u-table"><thead>' + head +
         '</thead><tbody>' + body + '</tbody></table></div>' +
       ghosts;
@@ -908,6 +917,10 @@
   }
 
   function wireTable() {
+    var bulk = $('oa-u-bulk');
+    if (bulk) bulk.addEventListener('click', function () { openComposer(null); });
+    var clear = $('oa-u-clear');
+    if (clear) clear.addEventListener('click', function () { state.picked = {}; renderTable(); });
     var f = $('oa-u-filter');
     if (f) {
       f.addEventListener('input', function () {
@@ -1045,29 +1058,92 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 0);
   }
 
+  function saveDraft() {
+    var draft = ($('oa-u-body') || {}).value || '';
+    if (state.draftKey) state.drafts[state.draftKey] = draft;
+  }
+
+  function closeComposer() {
+    if (state.sending) return;
+    saveDraft();
+    $('oa-u-dialog').close();
+    state.open = null;
+    state.draftKey = null;
+    if (state.returnFocus && state.returnFocus.isConnected) state.returnFocus.focus({ preventScroll: true });
+    else {
+      var buttons = document.querySelectorAll('.oa-u-open');
+      for (var i = 0; i < buttons.length; i++) {
+        if (buttons[i].getAttribute('data-uid') === state.composeUids[0]) {
+          buttons[i].focus({ preventScroll: true }); return;
+        }
+      }
+      if ($('oa-u-bulk')) $('oa-u-bulk').focus({ preventScroll: true });
+    }
+  }
+
+  function renderRecipients() {
+    var uids = state.composeUids;
+    var recipients = uids.map(function (uid) {
+      var r = rowFor(uid);
+      return '<li><strong>' + esc(nameOf(r) || addressOf(r) || uid) + '</strong>' +
+        (nameOf(r) && addressOf(r) ? '<span>' + esc(addressOf(r)) + '</span>' : '') +
+        (r.affiliation ? '<span>' + esc(r.affiliation) + '</span>' : '') + '</li>';
+    }).join('');
+    $('oa-u-title').textContent = state.open ? 'Message ' +
+      (nameOf(rowFor(state.open)) || addressOf(rowFor(state.open)) || state.open) :
+      'Message ' + uids.length + (uids.length === 1 ? ' person' : ' people');
+    $('oa-u-recipients').innerHTML = state.open ? '<ul class="oa-u-recipients">' + recipients + '</ul>' :
+      '<details><summary>To: ' + uids.length + ' selected — review recipients</summary>' +
+      '<ul class="oa-u-recipients">' + recipients + '</ul></details>' +
+      '<p class="oa-hint">Each person receives a separate, private message.</p>';
+  }
+
+  function openComposer(uid) {
+    var dialog = $('oa-u-dialog');
+    if (!dialog || state.sending) return;
+    saveDraft();
+    state.returnFocus = document.activeElement;
+    state.open = uid;
+    state.composeUids = uid ? (state.rows.some(function (r) { return r.uid === uid; }) ? [uid] : []) : pickedUids();
+    state.draftKey = uid ? 'user:' + uid : 'bulk:' + state.composeUids.slice().sort().join(',');
+    $('oa-aa-users-compose').innerHTML = '';
+    renderRecipients();
+    renderCompose();
+    show($('oa-aa-users-thread'), !!uid);
+    if (!dialog.open) dialog.showModal();
+    if (uid) readThread(uid);
+    var focus = $('oa-u-body') || $('oa-u-close');
+    if (root.matchMedia && root.matchMedia('(pointer: coarse)').matches) focus = $('oa-u-close');
+    focus.focus({ preventScroll: true });
+  }
+
   function renderCompose() {
     var host = $('oa-aa-users-compose');
-    if (!host) return;
-    var n = pickedUids().length;
-    /* Ticking a recipient re-renders this block, and rebuilding the textarea
-       would throw away a message already written — which is exactly the order
-       people work in: write, then choose who. Carry the draft across. */
-    var draft = ($('oa-u-body') || {}).value || '';
+    if (!host || !state.draftKey) return;
+    saveDraftIfMounted();
+    var n = state.composeUids.length;
+    if (!n) { host.innerHTML = '<p class="oa-hint">This account no longer exists. This conversation is read-only.</p>'; return; }
     host.innerHTML =
-      '<h4 class="oa-aa-group-h">Send a message</h4>' +
-      '<p class="oa-hint">It appears in the person’s own area on this site under ' +
-        '“Messages”, and they can reply to you there. No e-mail is sent — ' +
-        'use the address links above if e-mail is what you want.</p>' +
-      '<p><textarea id="oa-u-body" rows="5" maxlength="' + MAXLEN.body + '" ' +
-        'placeholder="Write your message…"></textarea></p>' +
-      '<p><button type="button" class="button blue" id="oa-u-send"' +
-        (n ? '' : ' disabled') + '>' +
-        (n ? 'Send to ' + n + (n === 1 ? ' person' : ' people') : 'Select who to message') +
-        '</button> <span class="oa-form-msg" id="oa-u-msg" role="status"></span></p>';
-    var ta = $('oa-u-body');
-    if (ta && draft) ta.value = draft;
-    var b = $('oa-u-send');
-    if (b) b.addEventListener('click', send);
+      '<label for="oa-u-body">Your message</label>' +
+      '<textarea id="oa-u-body" rows="5" maxlength="' + MAXLEN.body + '" ' +
+        'aria-describedby="oa-u-delivery" placeholder="Write your message…"></textarea>' +
+      '<div class="oa-u-compose-actions"><button type="button" class="button blue" id="oa-u-send">' +
+        (state.open ? 'Send message' : 'Send to ' + n + (n === 1 ? ' person' : ' people')) +
+        '</button><span class="oa-form-msg" id="oa-u-msg" role="status"></span></div>' +
+      '<p class="oa-hint">Drafts are kept while this page stays open.</p>';
+    $('oa-u-body').value = state.drafts[state.draftKey] || '';
+    $('oa-u-body').addEventListener('input', updateSendButton);
+    $('oa-u-send').addEventListener('click', send);
+    updateSendButton();
+  }
+
+  function saveDraftIfMounted() { if ($('oa-u-body')) saveDraft(); }
+
+  function updateSendButton() {
+    var ta = $('oa-u-body'), btn = $('oa-u-send');
+    if (btn) btn.disabled = state.sending || !ta || !ta.value.trim();
+    if (ta) ta.disabled = state.sending;
+    $('oa-u-close').disabled = state.sending;
   }
 
   /* --------------------------------------------------------------- sending */
@@ -1076,13 +1152,16 @@
     var ta = $('oa-u-body');
     var msg = $('oa-u-msg');
     var body = ta ? String(ta.value || '').trim() : '';
-    var uids = pickedUids();
+    if (state.sending) return;
+    var uids = state.composeUids.slice();
     if (!body) { if (msg) { msg.className = 'oa-form-msg is-err'; msg.textContent = 'Write a message first.'; } return; }
     if (body.length > MAXLEN.body) { if (msg) { msg.className = 'oa-form-msg is-err'; msg.textContent = 'That is longer than ' + MAXLEN.body + ' characters.'; } return; }
     if (!uids.length) return;
 
     var who = uids.length === 1 ? 'this person' : uids.length + ' people';
-    if (!root.confirm('Send this message to ' + who + '?')) return;
+    if (!state.open && !root.confirm('Send this message to ' + who + '?')) return;
+    state.sending = true;
+    updateSendButton();
 
     var btn = $('oa-u-send');
     if (btn) btn.disabled = true;
@@ -1091,7 +1170,7 @@
     root.OAFB.ready().then(function (fb) {
       var d = fb.firestore();
       var now = Date.now();
-      var sent = 0, failed = 0;
+      var sent = 0, failed = 0, failedUids = [];
       /* One at a time, failures counted rather than thrown — the shape
          approveAll uses for a whole season of postings. A half-finished
          broadcast must report what it did, not vanish into a rejection. */
@@ -1128,27 +1207,32 @@
           }
           return batch.commit()
             .then(function () { sent++; })
-            ['catch'](function () { failed++; });
+            ['catch'](function () { failed++; failedUids.push(uid); });
         });
       }, Promise.resolve()).then(function () {
-        /* KEEP THE MESSAGE WHEN NOTHING WENT. Emptying the box and the ticks
-           is right after a send that reached somebody; after one that reached
-           NOBODY it throws away what the maintainer typed and every recipient
-           they had picked, so the only way to try again is to write the whole
-           thing out afresh. renderCompose carries a live draft across its own
-           re-render, so leaving the value alone is all this takes. */
-        if (sent) {
+        if (failed) {
+          state.composeUids = failedUids;
+          if (!state.open) {
+            state.drafts[state.draftKey] = '';
+            state.draftKey = 'bulk:' + failedUids.slice().sort().join(',');
+          }
+          renderRecipients();
+        } else {
           if (ta) ta.value = '';
-          state.picked = {};
+          state.drafts[state.draftKey] = '';
         }
-        /* Reload FIRST — it repaints the compose block, which would otherwise
-           wipe the line below — then say what happened. */
+        if (!state.open) uids.forEach(function (uid) {
+          if (failedUids.indexOf(uid) < 0) delete state.picked[uid];
+        });
         return load().then(function () {
+          state.sending = false;
+          if (state.open) readThread(state.open);
+          updateSendButton();
           var after = $('oa-u-msg');
           if (after) {
             after.className = failed ? 'oa-form-msg is-err' : 'oa-form-msg is-ok';
             after.textContent = failed
-              ? 'Sent to ' + sent + '; ' + failed + ' could not be delivered.'
+              ? 'Sent to ' + sent + '; ' + failed + ' could not be delivered. Your draft is kept; retry sends only to these recipients.'
               : 'Sent to ' + sent + (sent === 1 ? ' person.' : ' people.');
           }
         });
@@ -1157,6 +1241,8 @@
       /* Re-enable whichever button is on screen: the reload above may already
          have replaced the one we disabled, and a Send stuck disabled is a
          panel the maintainer has to reload to use again. */
+      state.sending = false;
+      updateSendButton();
       var live = $('oa-u-send');
       if (live) live.disabled = false;
       if (btn) btn.disabled = false;
@@ -1173,8 +1259,9 @@
 
   /* ------------------------------------------------------ reading a thread */
 
-  function openThread(uid) {
-    state.open = uid;
+  function openThread(uid) { openComposer(uid); }
+
+  function readThread(uid) {
     var host = $('oa-aa-users-thread');
     if (!host) return;
     show(host, true);
@@ -1182,12 +1269,14 @@
     db().then(function (d) {
       return d.collection(THREADS).doc(uid).collection(ITEMS).orderBy('t').get()
         .then(function (snap) {
+          if (state.open !== uid || !$('oa-u-dialog').open) return;
           var items = [];
           snap.forEach(function (doc) { items.push(doc.data() || {}); });
           var row = state.rows.filter(function (r) { return r.uid === uid; })[0];
           var who = row ? (nameOf(row) || addressOf(row) || uid) : uid;
           host.innerHTML =
-            '<h4 class="oa-aa-group-h">Conversation with ' + esc(who) + '</h4>' +
+            '<h4 class="oa-aa-group-h">Conversation</h4>' +
+            (items.length ? '' : '<p class="oa-u-empty">No messages yet. Start the conversation below.</p>') +
             '<ul class="oa-u-thread">' + items.map(function (m) {
               /* A message the reader has taken off THEIR list is still here,
                  and is shown as exactly that. The maintainer's copy is the
@@ -1203,15 +1292,18 @@
                 (gone ? '<p class="oa-hint">Removed from their list — they can ' +
                   'restore it; you still have it.</p>' : '') + '</li>';
             }).join('') + '</ul>' +
-            '<p><button type="button" class="button oa-btn-ghost" id="oa-u-close">Close</button> ' +
-            '<button type="button" class="button oa-btn-ghost" id="oa-u-seen">Mark answered</button> ' +
+            '<p><button type="button" class="button oa-btn-ghost" id="oa-u-seen">Mark answered</button> ' +
             '<span class="oa-form-msg" id="oa-u-tmsg" role="status"></span></p>';
-          var c = $('oa-u-close');
-          if (c) c.addEventListener('click', function () { state.open = null; show(host, false); });
           var s = $('oa-u-seen');
-          if (s) s.addEventListener('click', function () { markAnswered(uid); });
+          if (s) {
+            s.hidden = !row || !row.thread || !row.thread.needsAdmin;
+            s.addEventListener('click', function () { markAnswered(uid); });
+          }
+          var history = host.querySelector('.oa-u-thread');
+          if (history) history.scrollTop = history.scrollHeight;
         });
     })['catch'](function (err) {
+      if (state.open !== uid || !$('oa-u-dialog').open) return;
       host.innerHTML = '<p class="oa-form-msg is-err">Could not open the ' +
         'conversation (' + esc(err && (err.code || err.message)) + ').</p>';
     });
@@ -1333,8 +1425,32 @@
 
   function boot() {
     if (!root.OAAccounts || !root.OAFB || !$('oa-aa-users')) return;
+    $('oa-u-close').addEventListener('click', closeComposer);
+    $('oa-u-dialog').addEventListener('cancel', function (event) { event.preventDefault(); closeComposer(); });
+    $('oa-u-dialog').addEventListener('keydown', function (event) {
+      if (event.key !== 'Tab') return;
+      // Cycle within the dialog rather than letting an edge Tab reach browser chrome.
+      var controls = Array.prototype.filter.call(this.querySelectorAll(
+        'button:not([disabled]), textarea:not([disabled]), summary, [tabindex="0"]'),
+        function (el) { return el.getClientRects().length > 0; });
+      if (!controls.length) { event.preventDefault(); return; }
+      var first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    });
     root.OAAccounts.onChange(function () {
-      if (!root.OAAccounts.isAdmin()) { show($('oa-aa-users'), false); return; }
+      if (!root.OAAccounts.isAdmin()) {
+        $('oa-u-dialog').close();
+        state.open = null;
+        state.draftKey = null;
+        state.drafts = Object.create(null);
+        $('oa-aa-users-compose').innerHTML = '';
+        show($('oa-aa-users'), false);
+        return;
+      }
       show($('oa-aa-users'), true);
       load();
     });
