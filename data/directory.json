@@ -6431,15 +6431,6 @@
   ]
  },
  {
-  "id": "nanyang-technological-university____information-systems",
-  "institution": "Nanyang Technological University",
-  "department": "Information Systems",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "nanyang-technological-university__college-of-computing-and-data-science",
   "institution": "Nanyang Technological University",
   "school": "College of Computing and Data Science",
@@ -6480,11 +6471,15 @@
   "school": "Nanyang Business School",
   "department": "Information Technology and Operations Management",
   "type": "Business School",
+  "country": "Singapore",
   "deptUrl": "https://www.ntu.edu.sg/business/research/academic-divisions/itom/our-faculty",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
  },
  {
   "id": "nanyang-technological-university__nanyang-business-school__informaton-technology-and-operatons-management",
@@ -7244,6 +7239,15 @@
   "lastPosted": "2026-08-12",
   "lat": 42.0574908,
   "lng": -87.6758491
+ },
+ {
+  "id": "northwestern-university-kellogg____managerial-economics-and-decision-sciences",
+  "institution": "Northwestern University (Kellogg)",
+  "department": "Managerial Economics and Decision Sciences",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "nova-school-of-business-and-economics",
@@ -8375,6 +8379,15 @@
   ],
   "n": 1,
   "lastPosted": "2025-07-31"
+ },
+ {
+  "id": "san-jose-state-university____business-analytics",
+  "institution": "San José State University",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "san-jose-state-university__lucas-college-and-graduate-school-of-business__information-systems-and-technology",

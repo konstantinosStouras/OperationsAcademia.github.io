@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-11T20:18:33.077Z",
+ "generated": "2026-10-12T08:48:10.379Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -507,6 +507,10 @@
   },
   {
    "v": "Morgan State University",
+   "n": 2
+  },
+  {
+   "v": "Nanyang Technological University",
    "n": 2
   },
   {
@@ -1267,10 +1271,6 @@
   },
   {
    "v": "Murray State University",
-   "n": 1
-  },
-  {
-   "v": "Nanyang Technological University",
    "n": 1
   },
   {
@@ -2612,6 +2612,10 @@
    "n": 2
   },
   {
+   "v": "Nanyang Business School",
+   "n": 2
+  },
+  {
    "v": "NUS Business School",
    "n": 2
   },
@@ -3045,10 +3049,6 @@
   },
   {
    "v": "MIT Sloan School of Management",
-   "n": 1
-  },
-  {
-   "v": "Nanyang Business School",
    "n": 1
   },
   {
@@ -3838,6 +3838,10 @@
    "n": 3
   },
   {
+   "v": "Information Technology and Operations Management",
+   "n": 3
+  },
+  {
    "v": "IS and Analytics",
    "n": 3
   },
@@ -3947,10 +3951,6 @@
   },
   {
    "v": "Information Systems, Analytics, and Supply Chain",
-   "n": 2
-  },
-  {
-   "v": "Information Technology and Operations Management",
    "n": 2
   },
   {

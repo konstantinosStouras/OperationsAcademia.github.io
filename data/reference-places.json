@@ -1706,8 +1706,8 @@
  },
  {
   "institution": "Nanyang Technological University",
-  "school": "",
-  "department": "Information Systems"
+  "school": "Nanyang Business School",
+  "department": "Information Technology and Operations Management"
  },
  {
   "institution": "National University of Singapore (ISEM)",
@@ -1888,6 +1888,11 @@
   "institution": "Northern State University",
   "school": "School of Business",
   "department": "Business Analytics and Information Systems"
+ },
+ {
+  "institution": "Northwestern University (Kellogg)",
+  "school": "",
+  "department": "Managerial Economics and Decision Sciences"
  },
  {
   "institution": "Northwestern University",
@@ -2188,6 +2193,11 @@
   "institution": "San José State University",
   "school": "",
   "department": "BA and Marketing"
+ },
+ {
+  "institution": "San José State University",
+  "school": "",
+  "department": "Business Analytics"
  },
  {
   "institution": "San José State University",
@@ -3008,6 +3018,11 @@
   "institution": "University of Florida",
   "school": "",
   "department": "ISE-Smart Manufacturing"
+ },
+ {
+  "institution": "University of Florida",
+  "school": "Warrington College of Business",
+  "department": "Information Systems and Operations Management"
  },
  {
   "institution": "University of Georgia",
