@@ -8390,15 +8390,6 @@
   "lastPosted": "2025-07-31"
  },
  {
-  "id": "san-jose-state-university____business-analytics",
-  "institution": "San José State University",
-  "department": "Business Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "san-jose-state-university__lucas-college-and-graduate-school-of-business__information-systems-and-technology",
   "institution": "San José State University",
   "school": "Lucas College and Graduate School of Business",
@@ -8411,6 +8402,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-23"
+ },
+ {
+  "id": "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-business-analytics",
+  "institution": "San José State University",
+  "school": "Lucas College and Graduate School of Business",
+  "department": "Marketing and Business Analytics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
  },
  {
   "id": "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-decision-sciences",
@@ -12188,11 +12193,15 @@
   "school": "Warrington College of Business",
   "department": "Information Systems and Operations Management",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://warrington.ufl.edu/faculty-research/academic-groups/#h-information-systems-and-operations-management",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
  },
  {
   "id": "university-of-georgia__terry-college-of-business__management-information-systems",

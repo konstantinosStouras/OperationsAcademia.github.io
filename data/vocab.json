@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-12T10:58:11.192Z",
+ "generated": "2026-10-12T11:05:42.755Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -247,6 +247,10 @@
   },
   {
    "v": "San Diego State University",
+   "n": 3
+  },
+  {
+   "v": "San José State University",
    "n": 3
   },
   {
@@ -538,10 +542,6 @@
    "n": 2
   },
   {
-   "v": "San José State University",
-   "n": 2
-  },
-  {
    "v": "Santa Clara University",
    "n": 2
   },
@@ -647,6 +647,10 @@
   },
   {
    "v": "University of Evansville",
+   "n": 2
+  },
+  {
+   "v": "University of Florida",
    "n": 2
   },
   {
@@ -1670,10 +1674,6 @@
    "n": 1
   },
   {
-   "v": "University of Florida",
-   "n": 1
-  },
-  {
    "v": "University of Georgia",
    "n": 1
   },
@@ -2596,6 +2596,10 @@
    "n": 2
   },
   {
+   "v": "Lucas College and Graduate School of Business",
+   "n": 2
+  },
+  {
    "v": "Lutgert College of Business",
    "n": 2
   },
@@ -3008,10 +3012,6 @@
    "n": 1
   },
   {
-   "v": "Lucas College and Graduate School of Business",
-   "n": 1
-  },
-  {
    "v": "Martin School of Public Policy and Administration",
    "n": 1
   },
@@ -3229,6 +3229,10 @@
   },
   {
    "v": "W. Fielding Rubel School of Business",
+   "n": 1
+  },
+  {
+   "v": "Warrington College of Business",
    "n": 1
   },
   {
@@ -3680,10 +3684,6 @@
    "n": 0
   },
   {
-   "v": "Warrington College of Business",
-   "n": 0
-  },
-  {
    "v": "Warwick Business School",
    "n": 0
   },
@@ -3742,11 +3742,11 @@
    "n": 13
   },
   {
-   "v": "Business Analytics",
-   "n": 10
+   "v": "Information Systems and Operations Management",
+   "n": 11
   },
   {
-   "v": "Information Systems and Operations Management",
+   "v": "Business Analytics",
    "n": 10
   },
   {
@@ -4799,6 +4799,10 @@
   },
   {
    "v": "Managerial Economics and Decision Sciences",
+   "n": 1
+  },
+  {
+   "v": "Marketing and Business Analytics",
    "n": 1
   },
   {
@@ -10118,6 +10122,7 @@
    "units": [
     "BA and Marketing",
     "Information Systems and Technology",
+    "Marketing and Business Analytics",
     "Marketing and Decision Sciences"
    ],
    "bySchool": {
@@ -10126,6 +10131,7 @@
     ],
     "Lucas College and Graduate School of Business": [
      "Information Systems and Technology",
+     "Marketing and Business Analytics",
      "Marketing and Decision Sciences"
     ]
    }
@@ -14651,6 +14657,7 @@
   ],
   "Lucas College and Graduate School of Business": [
    "Information Systems and Technology",
+   "Marketing and Business Analytics",
    "Marketing and Decision Sciences"
   ],
   "Lutgert College of Business": [
