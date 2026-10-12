@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-12T11:05:42.755Z",
+ "generated": "2026-10-12T11:26:40.752Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -195,10 +195,6 @@
   },
   {
    "v": "Fayetteville State University",
-   "n": 3
-  },
-  {
-   "v": "George Mason University",
    "n": 3
   },
   {
@@ -415,6 +411,10 @@
   },
   {
    "v": "Florida Gulf Coast University",
+   "n": 2
+  },
+  {
+   "v": "George Mason University",
    "n": 2
   },
   {
@@ -895,10 +895,6 @@
   },
   {
    "v": "Caldwell University",
-   "n": 1
-  },
-  {
-   "v": "California State Polytechnic University, Pomona",
    "n": 1
   },
   {
@@ -1934,6 +1930,10 @@
    "n": 0
   },
   {
+   "v": "California State Polytechnic University Pomona",
+   "n": 0
+  },
+  {
    "v": "California State University, East Bay",
    "n": 0
   },
@@ -2440,16 +2440,16 @@
    "n": 6
   },
   {
-   "v": "College of Business Administration",
-   "n": 5
-  },
-  {
    "v": "Darden School of Business",
    "n": 5
   },
   {
    "v": "Eli Broad College of Business",
    "n": 5
+  },
+  {
+   "v": "College of Business Administration",
+   "n": 4
   },
   {
    "v": "Jack C. Massey College of Business",
@@ -2465,10 +2465,6 @@
   },
   {
    "v": "Darla Moore School of Business",
-   "n": 3
-  },
-  {
-   "v": "Donald G. Costello College of Business",
    "n": 3
   },
   {
@@ -2532,10 +2528,6 @@
    "n": 2
   },
   {
-   "v": "Cornell SC Johnson College of Business",
-   "n": 2
-  },
-  {
    "v": "Curtis L. Carlson School of Management",
    "n": 2
   },
@@ -2549,6 +2541,10 @@
   },
   {
    "v": "Desautels Faculty of Management",
+   "n": 2
+  },
+  {
+   "v": "Donald G. Costello College of Business",
    "n": 2
   },
   {
@@ -2785,6 +2781,10 @@
   },
   {
    "v": "Cornell Peter and Stephanie Nolan School of Hotel Administration",
+   "n": 1
+  },
+  {
+   "v": "Cornell SC Johnson College of Business",
    "n": 1
   },
   {
@@ -3742,11 +3742,11 @@
    "n": 13
   },
   {
-   "v": "Information Systems and Operations Management",
-   "n": 11
+   "v": "Business Analytics",
+   "n": 10
   },
   {
-   "v": "Business Analytics",
+   "v": "Information Systems and Operations Management",
    "n": 10
   },
   {
@@ -4295,10 +4295,6 @@
   },
   {
    "v": "Chair of Production Management",
-   "n": 1
-  },
-  {
-   "v": "Computer Information Systems",
    "n": 1
   },
   {
@@ -5323,6 +5319,10 @@
   },
   {
    "v": "Business Management/Operations and Supply Chain",
+   "n": 0
+  },
+  {
+   "v": "Computer Information Systems",
    "n": 0
   },
   {
@@ -6422,20 +6422,14 @@
    "units": [],
    "bySchool": {}
   },
-  "California State Polytechnic University, Pomona": {
-   "schools": [
-    "College of Business Administration"
-   ],
+  "California State Polytechnic University Pomona": {
+   "schools": [],
    "units": [
-    "Computer Information Systems",
     "Technology and Operations Management"
    ],
    "bySchool": {
     "": [
      "Technology and Operations Management"
-    ],
-    "College of Business Administration": [
-     "Computer Information Systems"
     ]
    }
   },
@@ -7057,7 +7051,8 @@
    "bySchool": {
     "": [
      "Applied Economics and Management",
-     "Operations Research and Information Engineering"
+     "Operations Research and Information Engineering",
+     "Operations, Technology, and Information Management Area"
     ],
     "Cornell Peter and Stephanie Nolan School of Hotel Administration": [
      "Operations, Technology, and Information Management Area"
@@ -14201,7 +14196,6 @@
   "College of Business Administration": [
    "Business Administration",
    "Business Analytics and Statistics",
-   "Computer Information Systems",
    "Decision Sciences and Information Systems",
    "Logistics and Supply Chain Management",
    "Management Information Systems",
