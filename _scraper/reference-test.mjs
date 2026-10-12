@@ -19,6 +19,8 @@ for (const [institution, school] of [
 assert.equal(S.canonSchool('College of Business', 'University of Southern Mississippi'),
   'College of Business and Economic Development');
 assert.equal(S.canonSchool('College of Business', 'Other University'), 'College of Business');
+assert.equal(S.canonUnit('Management and International Business', 'University of Southern Mississippi'),
+  S.canonUnit('Management', 'University of Southern Mississippi'));
 for (const [institution, variant] of [
   ['Texas State University', 'Management, Supply Chain Management'],
   ['University of Northern Iowa', 'Management, Business Analytics and Applied Artificial Intelligence'],

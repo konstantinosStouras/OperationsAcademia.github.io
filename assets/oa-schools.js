@@ -484,6 +484,13 @@
      else the generic rule still applies, so a poster typing "Operations
      Management Department" at some other school still lands on the bare name. */
   var SCOPED_UNIT_ALIASES = {
+    /* Former Management and International Business department, now School
+       of Management. Checked 2026-10-12: https://www.usm.edu/management/
+       https://aquila.usm.edu/mang_intnlbus_fac_pubs/ */
+    'University of Southern Mississippi': {
+      'Management': 'School of Management',
+      'Management and International Business': 'School of Management'
+    },
     /* Imported hiring fields appended to their department, not new units.
        Official department titles checked 2026-10-12:
        https://mgt.mccoy.txst.edu/
