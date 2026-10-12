@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-10-12T09:42:31.715Z",
+ "generated": "2026-10-12T11:51:31.589Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -5927,9 +5927,9 @@
    261
   ],
   "2026-09-09": [
-   92,
-   226,
-   226
+   91,
+   221,
+   221
   ],
   "2026-09-10": [
    65,
@@ -6012,9 +6012,9 @@
    144
   ],
   "2026-09-26": [
-   62,
-   133,
-   133
+   61,
+   131,
+   131
   ],
   "2026-09-27": [
    59,
@@ -6047,9 +6047,9 @@
    168
   ],
   "2026-10-03": [
-   72,
-   145,
-   145
+   71,
+   142,
+   142
   ],
   "2026-10-04": [
    98,
@@ -6092,35 +6092,35 @@
    526
   ],
   "2026-10-12": [
-   60,
-   173,
-   173
+   72,
+   225,
+   225
   ]
  },
  "pages": [
   {
    "path": "/jobs.html",
    "title": "",
-   "views": 5623,
-   "avgSec": 613
+   "views": 5633,
+   "avgSec": 614
   },
   {
    "path": "/",
    "title": "",
-   "views": 4429,
-   "avgSec": 330
+   "views": 4438,
+   "avgSec": 329
   },
   {
    "path": "/candidates.html",
    "title": "",
-   "views": 523,
-   "avgSec": 213
+   "views": 537,
+   "avgSec": 237
   },
   {
    "path": "/universities.html",
    "title": "",
-   "views": 459,
-   "avgSec": 471
+   "views": 463,
+   "avgSec": 475
   },
   {
    "path": "/verify-email.html",
@@ -6129,40 +6129,40 @@
    "avgSec": 112
   },
   {
-   "path": "/account.html",
-   "title": "",
-   "views": 378,
-   "avgSec": 245
-  },
-  {
    "path": "/post-a-job.html",
    "title": "",
-   "views": 376,
+   "views": 377,
    "avgSec": 399
+  },
+  {
+   "path": "/account.html",
+   "title": "",
+   "views": 376,
+   "avgSec": 246
   },
   {
    "path": "/post-a-candidate.html",
    "title": "",
-   "views": 287,
-   "avgSec": 449
+   "views": 293,
+   "avgSec": 440
   },
   {
    "path": "/recent-faculty.html",
    "title": "",
    "views": 194,
-   "avgSec": 248
+   "avgSec": 265
   },
   {
    "path": "/previous-markets.html",
    "title": "",
-   "views": 168,
-   "avgSec": 162
+   "views": 169,
+   "avgSec": 168
   },
   {
    "path": "/analytics.html",
    "title": "",
-   "views": 125,
-   "avgSec": 591
+   "views": 124,
+   "avgSec": 596
   },
   {
    "path": "/survey.html",
@@ -6457,32 +6457,38 @@
   "source": "usage+ga4",
   "from": "2026-07-15",
   "to": "2026-10-12",
-  "views": 13762
+  "views": 13804
  },
  "pagesWindows": {
   "30": {
    "days": 30,
    "from": "2026-09-13",
    "to": "2026-10-12",
-   "views": 6935,
+   "views": 6982,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 2992,
-     "avgSec": 784
+     "views": 3003,
+     "avgSec": 786
     },
     {
      "path": "/",
      "title": "",
-     "views": 2144,
-     "avgSec": 352
+     "views": 2155,
+     "avgSec": 350
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 268,
-     "avgSec": 415
+     "views": 282,
+     "avgSec": 452
+    },
+    {
+     "path": "/universities.html",
+     "title": "",
+     "views": 262,
+     "avgSec": 624
     },
     {
      "path": "/verify-email.html",
@@ -6491,46 +6497,40 @@
      "avgSec": 136
     },
     {
-     "path": "/universities.html",
-     "title": "",
-     "views": 258,
-     "avgSec": 620
-    },
-    {
      "path": "/post-a-candidate.html",
      "title": "",
-     "views": 231,
-     "avgSec": 409
+     "views": 238,
+     "avgSec": 398
     },
     {
      "path": "/post-a-job.html",
      "title": "",
-     "views": 206,
+     "views": 207,
      "avgSec": 423
     },
     {
      "path": "/account.html",
      "title": "",
-     "views": 182,
-     "avgSec": 333
+     "views": 181,
+     "avgSec": 335
     },
     {
      "path": "/previous-markets.html",
      "title": "",
-     "views": 102,
-     "avgSec": 145
+     "views": 103,
+     "avgSec": 155
     },
     {
      "path": "/recent-faculty.html",
      "title": "",
      "views": 87,
-     "avgSec": 246
+     "avgSec": 284
     },
     {
      "path": "/analytics.html",
      "title": "",
-     "views": 63,
-     "avgSec": 572
+     "views": 62,
+     "avgSec": 580
     },
     {
      "path": "/alerts.html",
@@ -6611,31 +6611,31 @@
    "days": 90,
    "from": "2026-07-15",
    "to": "2026-10-12",
-   "views": 13762,
+   "views": 13804,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 5623,
-     "avgSec": 613
+     "views": 5633,
+     "avgSec": 614
     },
     {
      "path": "/",
      "title": "",
-     "views": 4429,
-     "avgSec": 330
+     "views": 4438,
+     "avgSec": 329
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 523,
-     "avgSec": 213
+     "views": 537,
+     "avgSec": 237
     },
     {
      "path": "/universities.html",
      "title": "",
-     "views": 459,
-     "avgSec": 471
+     "views": 463,
+     "avgSec": 475
     },
     {
      "path": "/verify-email.html",
@@ -6644,40 +6644,40 @@
      "avgSec": 112
     },
     {
-     "path": "/account.html",
-     "title": "",
-     "views": 378,
-     "avgSec": 245
-    },
-    {
      "path": "/post-a-job.html",
      "title": "",
-     "views": 376,
+     "views": 377,
      "avgSec": 399
+    },
+    {
+     "path": "/account.html",
+     "title": "",
+     "views": 376,
+     "avgSec": 246
     },
     {
      "path": "/post-a-candidate.html",
      "title": "",
-     "views": 287,
-     "avgSec": 449
+     "views": 293,
+     "avgSec": 440
     },
     {
      "path": "/recent-faculty.html",
      "title": "",
      "views": 194,
-     "avgSec": 248
+     "avgSec": 265
     },
     {
      "path": "/previous-markets.html",
      "title": "",
-     "views": 168,
-     "avgSec": 162
+     "views": 169,
+     "avgSec": 168
     },
     {
      "path": "/analytics.html",
      "title": "",
-     "views": 125,
-     "avgSec": 591
+     "views": 124,
+     "avgSec": 596
     },
     {
      "path": "/survey.html",
@@ -6974,25 +6974,25 @@
    "days": 365,
    "from": "2025-10-13",
    "to": "2026-10-12",
-   "views": 35540,
+   "views": 35582,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 13608,
-     "avgSec": 253
+     "views": 13618,
+     "avgSec": 254
     },
     {
      "path": "/",
      "title": "",
-     "views": 10353,
+     "views": 10362,
      "avgSec": 141
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 3785,
-     "avgSec": 29
+     "views": 3799,
+     "avgSec": 34
     },
     {
      "path": "/placements.html",
@@ -7003,8 +7003,8 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 897,
-     "avgSec": 241
+     "views": 901,
+     "avgSec": 244
     },
     {
      "path": "/resources-for-candidates.html",
@@ -7025,34 +7025,34 @@
      "avgSec": 112
     },
     {
-     "path": "/account.html",
-     "title": "",
-     "views": 378,
-     "avgSec": 245
-    },
-    {
      "path": "/post-a-job.html",
      "title": "",
-     "views": 376,
+     "views": 377,
      "avgSec": 399
+    },
+    {
+     "path": "/account.html",
+     "title": "",
+     "views": 376,
+     "avgSec": 246
     },
     {
      "path": "/recent-faculty.html",
      "title": "",
      "views": 355,
-     "avgSec": 135
-    },
-    {
-     "path": "/previous-markets.html",
-     "title": "",
-     "views": 290,
-     "avgSec": 94
+     "avgSec": 145
     },
     {
      "path": "/post-a-candidate.html",
      "title": "",
-     "views": 287,
-     "avgSec": 449
+     "views": 293,
+     "avgSec": 440
+    },
+    {
+     "path": "/previous-markets.html",
+     "title": "",
+     "views": 291,
+     "avgSec": 98
     },
     {
      "path": "/logoHeader.html",
@@ -7069,8 +7069,8 @@
     {
      "path": "/analytics.html",
      "title": "",
-     "views": 157,
-     "avgSec": 471
+     "views": 156,
+     "avgSec": 474
     },
     {
      "path": "/faqs.html",
@@ -7979,25 +7979,25 @@
    "days": 0,
    "from": "2023-06-16",
    "to": "2026-10-12",
-   "views": 135569,
+   "views": 135611,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 46751,
+     "views": 46761,
      "avgSec": 74
     },
     {
      "path": "/",
      "title": "",
-     "views": 36163,
+     "views": 36172,
      "avgSec": 40
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 20445,
-     "avgSec": 5
+     "views": 20459,
+     "avgSec": 6
     },
     {
      "path": "/placements.html",
@@ -8014,8 +8014,8 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 2719,
-     "avgSec": 80
+     "views": 2723,
+     "avgSec": 81
     },
     {
      "path": "/survey.html",
@@ -8027,7 +8027,7 @@
      "path": "/recent-faculty.html",
      "title": "",
      "views": 1439,
-     "avgSec": 33
+     "avgSec": 36
     },
     {
      "path": "/logoHeader.html",
@@ -8038,8 +8038,8 @@
     {
      "path": "/previous-markets.html",
      "title": "",
-     "views": 1130,
-     "avgSec": 24
+     "views": 1131,
+     "avgSec": 25
     },
     {
      "path": "/jobsFooterWasClicked.html",
@@ -8072,16 +8072,16 @@
      "avgSec": 11
     },
     {
-     "path": "/account.html",
-     "title": "",
-     "views": 378,
-     "avgSec": 245
-    },
-    {
      "path": "/post-a-job.html",
      "title": "",
-     "views": 376,
+     "views": 377,
      "avgSec": 399
+    },
+    {
+     "path": "/account.html",
+     "title": "",
+     "views": 376,
+     "avgSec": 246
     },
     {
      "path": "/contact.html",
@@ -8098,14 +8098,14 @@
     {
      "path": "/analytics.html",
      "title": "",
-     "views": 347,
-     "avgSec": 213
+     "views": 346,
+     "avgSec": 214
     },
     {
      "path": "/post-a-candidate.html",
      "title": "",
-     "views": 287,
-     "avgSec": 449
+     "views": 293,
+     "avgSec": 440
     },
     {
      "path": "/recent-facultyFooterWasClicked.html",
@@ -9690,7 +9690,7 @@
    "to": "2026-10-12",
    "metric": "visits",
    "zone": "UTC",
-   "total": 11735,
+   "total": 11777,
    "items": [
     {
      "name": "00",
@@ -9710,7 +9710,7 @@
     },
     {
      "name": "04",
-     "value": 415
+     "value": 413
     },
     {
      "name": "05",
@@ -9730,19 +9730,19 @@
     },
     {
      "name": "09",
-     "value": 448
+     "value": 449
     },
     {
      "name": "10",
-     "value": 339
+     "value": 367
     },
     {
      "name": "11",
-     "value": 306
+     "value": 329
     },
     {
      "name": "12",
-     "value": 394
+     "value": 391
     },
     {
      "name": "13",
@@ -9754,7 +9754,7 @@
     },
     {
      "name": "15",
-     "value": 607
+     "value": 602
     },
     {
      "name": "16",
@@ -10243,8 +10243,8 @@
   "source": "usage",
   "from": "2026-08-17",
   "to": "2026-10-12",
-  "sessions": 11735,
-  "avgSessionSec": 502,
+  "sessions": 11777,
+  "avgSessionSec": 504,
   "viewsPerSession": 1
  },
  "universities": {
@@ -10329,12 +10329,12 @@
     "visits": 5
    },
    {
-    "name": "The University of Texas at Austin",
+    "name": "Singapore Management University (SMU)",
     "visits": 5
    },
    {
-    "name": "Singapore Management University (SMU)",
-    "visits": 4
+    "name": "The University of Texas at Austin",
+    "visits": 5
    },
    {
     "name": "University College London",
@@ -10555,6 +10555,10 @@
     "visits": 2
    },
    {
+    "name": "Singapore Management University (SMU)",
+    "visits": 2
+   },
+   {
     "name": "Stanford University",
     "visits": 2
    },
@@ -10584,10 +10588,6 @@
    },
    {
     "name": "Georgia Institute of Technology",
-    "visits": 1
-   },
-   {
-    "name": "Singapore Management University (SMU)",
     "visits": 1
    },
    {
@@ -10632,10 +10632,10 @@
     "days": 30,
     "from": "2026-09-13",
     "to": "2026-10-12",
-    "seen": 3813,
-    "resolved": 1164,
+    "seen": 3827,
+    "resolved": 1169,
     "academic": 39,
-    "placed": 385,
+    "placed": 386,
     "all": [
      {
       "name": "Indiana University Bloomington",
@@ -10702,15 +10702,15 @@
       "visits": 5
      },
      {
+      "name": "Singapore Management University (SMU)",
+      "visits": 5
+     },
+     {
       "name": "University of South Carolina",
       "visits": 5
      },
      {
       "name": "New York University",
-      "visits": 4
-     },
-     {
-      "name": "Singapore Management University (SMU)",
       "visits": 4
      },
      {
@@ -10867,10 +10867,10 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-10-12",
-    "seen": 5252,
-    "resolved": 1576,
+    "seen": 5266,
+    "resolved": 1581,
     "academic": 53,
-    "placed": 449,
+    "placed": 450,
     "all": [
      {
       "name": "Indiana University Bloomington",
@@ -10949,12 +10949,12 @@
       "visits": 5
      },
      {
-      "name": "The University of Texas at Austin",
+      "name": "Singapore Management University (SMU)",
       "visits": 5
      },
      {
-      "name": "Singapore Management University (SMU)",
-      "visits": 4
+      "name": "The University of Texas at Austin",
+      "visits": 5
      },
      {
       "name": "University College London",
@@ -11122,10 +11122,10 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-10-12",
-    "seen": 5252,
-    "resolved": 1576,
+    "seen": 5266,
+    "resolved": 1581,
     "academic": 53,
-    "placed": 449,
+    "placed": 450,
     "all": [
      {
       "name": "Indiana University Bloomington",
@@ -11204,12 +11204,12 @@
       "visits": 5
      },
      {
-      "name": "The University of Texas at Austin",
+      "name": "Singapore Management University (SMU)",
       "visits": 5
      },
      {
-      "name": "Singapore Management University (SMU)",
-      "visits": 4
+      "name": "The University of Texas at Austin",
+      "visits": 5
      },
      {
       "name": "University College London",
@@ -11377,10 +11377,10 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-10-12",
-    "seen": 5252,
-    "resolved": 1576,
+    "seen": 5266,
+    "resolved": 1581,
     "academic": 53,
-    "placed": 449,
+    "placed": 450,
     "all": [
      {
       "name": "Indiana University Bloomington",
@@ -11459,12 +11459,12 @@
       "visits": 5
      },
      {
-      "name": "The University of Texas at Austin",
+      "name": "Singapore Management University (SMU)",
       "visits": 5
      },
      {
-      "name": "Singapore Management University (SMU)",
-      "visits": 4
+      "name": "The University of Texas at Austin",
+      "visits": 5
      },
      {
       "name": "University College London",
@@ -11630,15 +11630,15 @@
    }
   },
   "recentDays": 7,
-  "seen": 5252,
-  "resolved": 1576,
+  "seen": 5266,
+  "resolved": 1581,
   "academic": 53,
-  "placed": 449
+  "placed": 450
  },
  "totals": {
-  "visitors": 46384,
-  "sessions": 62363,
-  "pageviews": 135627,
+  "visitors": 46393,
+  "sessions": 62405,
+  "pageviews": 135669,
   "days": 1215,
   "universities": 61
  },
