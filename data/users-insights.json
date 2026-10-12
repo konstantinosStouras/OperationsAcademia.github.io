@@ -1,10 +1,10 @@
 {
- "generated": "2026-10-12T08:07:15.785Z",
- "members": 325,
+ "generated": "2026-10-12T11:52:22.447Z",
+ "members": 326,
  "k": 3,
  "affiliation": {
-  "listed": 241,
-  "other": 45,
+  "listed": 243,
+  "other": 44,
   "none": 39
  },
  "universities": {
@@ -161,7 +161,7 @@
     "members": 3
    }
   ],
-  "rest": 127
+  "rest": 129
  },
  "countries": {
   "count": 16,
@@ -176,7 +176,11 @@
    },
    {
     "name": "Singapore",
-    "members": 11
+    "members": 12
+   },
+   {
+    "name": "Hong Kong",
+    "members": 8
    },
    {
     "name": "United Kingdom",
@@ -184,10 +188,6 @@
    },
    {
     "name": "Germany",
-    "members": 7
-   },
-   {
-    "name": "Hong Kong",
     "members": 7
    },
    {
@@ -204,6 +204,6 @@
    }
   ],
   "rest": 9,
-  "unknown": 95
+  "unknown": 94
  }
 }
