@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-12T08:48:10.379Z",
+ "generated": "2026-10-12T08:55:45.402Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -399,6 +399,10 @@
   },
   {
    "v": "Fairmont State University",
+   "n": 2
+  },
+  {
+   "v": "Ferris State University",
    "n": 2
   },
   {
@@ -1035,10 +1039,6 @@
   },
   {
    "v": "Ewha Womans University",
-   "n": 1
-  },
-  {
-   "v": "Ferris State University",
    "n": 1
   },
   {
@@ -4056,6 +4056,10 @@
   {
    "v": "Technology Management",
    "n": 2
+  },
+  {
+   "v": "Accountancy Finance and Information Systems",
+   "n": 1
   },
   {
    "v": "Accounting and Information Management",
@@ -7532,10 +7536,12 @@
   "Ferris State University": {
    "schools": [],
    "units": [
+    "Accountancy Finance and Information Systems",
     "DA"
    ],
    "bySchool": {
     "": [
+     "Accountancy Finance and Information Systems",
      "DA"
     ]
    }

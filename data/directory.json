@@ -3288,6 +3288,19 @@
   "lastPosted": "2026-03-19"
  },
  {
+  "id": "ferris-state-university____accountancy-finance-and-information-systems",
+  "institution": "Ferris State University",
+  "department": "Accountancy Finance and Information Systems",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
+ },
+ {
   "id": "ferris-state-university____da",
   "institution": "Ferris State University",
   "department": "DA",
@@ -3299,15 +3312,6 @@
   ],
   "n": 1,
   "lastPosted": "2026-02-07"
- },
- {
-  "id": "ferris-state-university____project-management",
-  "institution": "Ferris State University",
-  "department": "Project Management",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
  },
  {
   "id": "fisher-college____om",
