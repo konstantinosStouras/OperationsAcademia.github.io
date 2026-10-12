@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-10-12T11:51:31.589Z",
+ "generated": "2026-10-12T12:15:23.903Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -6092,34 +6092,34 @@
    526
   ],
   "2026-10-12": [
-   72,
-   225,
-   225
+   74,
+   231,
+   231
   ]
  },
  "pages": [
   {
    "path": "/jobs.html",
    "title": "",
-   "views": 5633,
+   "views": 5634,
    "avgSec": 614
   },
   {
    "path": "/",
    "title": "",
-   "views": 4438,
+   "views": 4440,
    "avgSec": 329
   },
   {
    "path": "/candidates.html",
    "title": "",
-   "views": 537,
-   "avgSec": 237
+   "views": 538,
+   "avgSec": 242
   },
   {
    "path": "/universities.html",
    "title": "",
-   "views": 463,
+   "views": 465,
    "avgSec": 475
   },
   {
@@ -6457,37 +6457,37 @@
   "source": "usage+ga4",
   "from": "2026-07-15",
   "to": "2026-10-12",
-  "views": 13804
+  "views": 13810
  },
  "pagesWindows": {
   "30": {
    "days": 30,
    "from": "2026-09-13",
    "to": "2026-10-12",
-   "views": 6982,
+   "views": 6988,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 3003,
+     "views": 3004,
      "avgSec": 786
     },
     {
      "path": "/",
      "title": "",
-     "views": 2155,
+     "views": 2157,
      "avgSec": 350
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 282,
-     "avgSec": 452
+     "views": 283,
+     "avgSec": 459
     },
     {
      "path": "/universities.html",
      "title": "",
-     "views": 262,
+     "views": 264,
      "avgSec": 624
     },
     {
@@ -6611,30 +6611,30 @@
    "days": 90,
    "from": "2026-07-15",
    "to": "2026-10-12",
-   "views": 13804,
+   "views": 13810,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 5633,
+     "views": 5634,
      "avgSec": 614
     },
     {
      "path": "/",
      "title": "",
-     "views": 4438,
+     "views": 4440,
      "avgSec": 329
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 537,
-     "avgSec": 237
+     "views": 538,
+     "avgSec": 242
     },
     {
      "path": "/universities.html",
      "title": "",
-     "views": 463,
+     "views": 465,
      "avgSec": 475
     },
     {
@@ -6974,24 +6974,24 @@
    "days": 365,
    "from": "2025-10-13",
    "to": "2026-10-12",
-   "views": 35582,
+   "views": 35588,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 13618,
+     "views": 13619,
      "avgSec": 254
     },
     {
      "path": "/",
      "title": "",
-     "views": 10362,
+     "views": 10364,
      "avgSec": 141
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 3799,
+     "views": 3800,
      "avgSec": 34
     },
     {
@@ -7003,8 +7003,8 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 901,
-     "avgSec": 244
+     "views": 903,
+     "avgSec": 245
     },
     {
      "path": "/resources-for-candidates.html",
@@ -7979,24 +7979,24 @@
    "days": 0,
    "from": "2023-06-16",
    "to": "2026-10-12",
-   "views": 135611,
+   "views": 135617,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 46761,
+     "views": 46762,
      "avgSec": 74
     },
     {
      "path": "/",
      "title": "",
-     "views": 36172,
+     "views": 36174,
      "avgSec": 40
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 20459,
+     "views": 20460,
      "avgSec": 6
     },
     {
@@ -8014,7 +8014,7 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 2723,
+     "views": 2725,
      "avgSec": 81
     },
     {
@@ -9690,7 +9690,7 @@
    "to": "2026-10-12",
    "metric": "visits",
    "zone": "UTC",
-   "total": 11777,
+   "total": 11783,
    "items": [
     {
      "name": "00",
@@ -9738,11 +9738,11 @@
     },
     {
      "name": "11",
-     "value": 329
+     "value": 332
     },
     {
      "name": "12",
-     "value": 391
+     "value": 394
     },
     {
      "name": "13",
@@ -10243,7 +10243,7 @@
   "source": "usage",
   "from": "2026-08-17",
   "to": "2026-10-12",
-  "sessions": 11777,
+  "sessions": 11783,
   "avgSessionSec": 504,
   "viewsPerSession": 1
  },
@@ -10632,8 +10632,8 @@
     "days": 30,
     "from": "2026-09-13",
     "to": "2026-10-12",
-    "seen": 3827,
-    "resolved": 1169,
+    "seen": 3829,
+    "resolved": 1170,
     "academic": 39,
     "placed": 386,
     "all": [
@@ -10867,8 +10867,8 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-10-12",
-    "seen": 5266,
-    "resolved": 1581,
+    "seen": 5268,
+    "resolved": 1582,
     "academic": 53,
     "placed": 450,
     "all": [
@@ -11122,8 +11122,8 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-10-12",
-    "seen": 5266,
-    "resolved": 1581,
+    "seen": 5268,
+    "resolved": 1582,
     "academic": 53,
     "placed": 450,
     "all": [
@@ -11377,8 +11377,8 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-10-12",
-    "seen": 5266,
-    "resolved": 1581,
+    "seen": 5268,
+    "resolved": 1582,
     "academic": 53,
     "placed": 450,
     "all": [
@@ -11630,15 +11630,15 @@
    }
   },
   "recentDays": 7,
-  "seen": 5266,
-  "resolved": 1581,
+  "seen": 5268,
+  "resolved": 1582,
   "academic": 53,
   "placed": 450
  },
  "totals": {
-  "visitors": 46393,
-  "sessions": 62405,
-  "pageviews": 135669,
+  "visitors": 46395,
+  "sessions": 62411,
+  "pageviews": 135675,
   "days": 1215,
   "universities": 61
  },
