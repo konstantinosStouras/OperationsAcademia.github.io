@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-12T08:55:45.402Z",
+ "generated": "2026-10-12T08:57:20.424Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -1514,6 +1514,10 @@
    "n": 1
   },
   {
+   "v": "Tecnológico de Monterrey",
+   "n": 1
+  },
+  {
    "v": "Tennessee State University",
    "n": 1
   },
@@ -2937,6 +2941,10 @@
   },
   {
    "v": "Institut Mines-Télécom Business School",
+   "n": 1
+  },
+  {
+   "v": "Institute for Advanced Materials for Sustainable Manufacturing",
    "n": 1
   },
   {
@@ -5199,6 +5207,10 @@
   },
   {
    "v": "Strategic Management and Operations",
+   "n": 1
+  },
+  {
+   "v": "Supply Chain and Logistics Systems",
    "n": 1
   },
   {
@@ -10681,6 +10693,19 @@
     ]
    }
   },
+  "Tecnológico de Monterrey": {
+   "schools": [
+    "Institute for Advanced Materials for Sustainable Manufacturing"
+   ],
+   "units": [
+    "Supply Chain and Logistics Systems"
+   ],
+   "bySchool": {
+    "Institute for Advanced Materials for Sustainable Manufacturing": [
+     "Supply Chain and Logistics Systems"
+    ]
+   }
+  },
   "TED University": {
    "schools": [],
    "units": [],
@@ -14506,6 +14531,9 @@
   ],
   "Institut Mines-Télécom Business School": [
    "Management, Marketing and Strategy"
+  ],
+  "Institute for Advanced Materials for Sustainable Manufacturing": [
+   "Supply Chain and Logistics Systems"
   ],
   "Institute of Artificial Intelligence and Brain Sciences": [
    "Data Science"

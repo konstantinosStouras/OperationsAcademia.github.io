@@ -9463,12 +9463,18 @@
   ]
  },
  {
-  "id": "tecnologico-de-monterrey____supply-chain-and-logistics-systems",
+  "id": "tecnologico-de-monterrey__institute-for-advanced-materials-for-sustainable-manufacturi__supply-chain-and-logistics-systems",
   "institution": "Tecnológico de Monterrey",
+  "school": "Institute for Advanced Materials for Sustainable Manufacturing",
   "department": "Supply Chain and Logistics Systems",
+  "type": "University",
+  "country": "Mexico",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
  },
  {
   "id": "ted-university",
