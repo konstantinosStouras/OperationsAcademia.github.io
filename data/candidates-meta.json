@@ -1,17 +1,17 @@
 {
- "generated": "2026-10-12T06:12:58.832Z",
- "count": 33,
+ "generated": "2026-10-12T11:22:04.206Z",
+ "count": 34,
  "years": {
-  "2027": 33
+  "2027": 34
  },
  "positions": {
   "PhD Candidate": 19,
-  "Post-Doctoral Researcher": 9,
+  "Post-Doctoral Researcher": 10,
   "Assistant Professor": 3,
   "Research Scientist": 2
  },
  "researchAreas": {
-  "Machine Learning and Data Science": 15,
+  "Machine Learning and Data Science": 16,
   "Operations Research / Optimization": 11,
   "Technology, Platforms and Marketplaces": 11,
   "Empirical Operations": 10,
@@ -22,15 +22,16 @@
   "Sustainable Operations": 7,
   "Innovation and New Product Development": 5,
   "Revenue Management and Pricing": 5,
+  "AI": 2,
   "Sequential Decision Making": 2,
   "Transportation and Logistics": 2,
-  "AI": 1,
   "AI and Ethics": 1,
   "AI for Operations Research": 1,
   "AI for Social Good": 1,
   "AI-enabled Operations": 1,
   "AI/LLM for Social Good": 1,
   "Algorithmic Intermediation in Platform Operations": 1,
+  "Biomedical Applications": 1,
   "Business Model Innovation": 1,
   "Deep Learning": 1,
   "Energy Markets": 1,
@@ -51,6 +52,7 @@
   "Queueing Theory": 1,
   "Resource Allocation": 1,
   "Socially Responsible Operations": 1,
+  "Statistics": 1,
   "Stochastic Dynamic Programming": 1,
   "Stochastic Modeling & Simulation": 1,
   "Stochastic Processes": 1,
@@ -59,10 +61,10 @@
  "informsDays": {
   "Sunday": 11,
   "Monday": 9,
-  "Tuesday": 3,
+  "Tuesday": 4,
   "Wednesday": 1
  },
- "withCv": 30,
+ "withCv": 31,
  "newestPosted": "2026-10-11",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
