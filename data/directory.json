@@ -7198,6 +7198,20 @@
   "lastPosted": "2014-07-24"
  },
  {
+  "id": "northwestern-university__kellogg-school-of-management__managerial-economics-and-decision-sciences",
+  "institution": "Northwestern University",
+  "school": "Kellogg School of Management",
+  "department": "Managerial Economics and Decision Sciences",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-11"
+ },
+ {
   "id": "northwestern-university__kellogg-school-of-management__operations",
   "institution": "Northwestern University",
   "school": "Kellogg School of Management",
@@ -7243,15 +7257,6 @@
   "lastPosted": "2026-08-12",
   "lat": 42.0574908,
   "lng": -87.6758491
- },
- {
-  "id": "northwestern-university-kellogg____managerial-economics-and-decision-sciences",
-  "institution": "Northwestern University (Kellogg)",
-  "department": "Managerial Economics and Decision Sciences",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
  },
  {
   "id": "nova-school-of-business-and-economics",

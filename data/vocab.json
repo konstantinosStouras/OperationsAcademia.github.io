@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-12T08:57:20.424Z",
+ "generated": "2026-10-12T10:58:11.192Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -99,6 +99,10 @@
   },
   {
    "v": "New York University Shanghai",
+   "n": 4
+  },
+  {
+   "v": "Northwestern University",
    "n": 4
   },
   {
@@ -227,10 +231,6 @@
   },
   {
    "v": "North Central College",
-   "n": 3
-  },
-  {
-   "v": "Northwestern University",
    "n": 3
   },
   {
@@ -2492,6 +2492,10 @@
    "n": 3
   },
   {
+   "v": "Kellogg School of Management",
+   "n": 3
+  },
+  {
    "v": "Knauss School of Business",
    "n": 3
   },
@@ -2589,10 +2593,6 @@
   },
   {
    "v": "Kelley School of Business",
-   "n": 2
-  },
-  {
-   "v": "Kellogg School of Management",
    "n": 2
   },
   {
@@ -4795,6 +4795,10 @@
   },
   {
    "v": "Managerial Decision Sciences",
+   "n": 1
+  },
+  {
+   "v": "Managerial Economics and Decision Sciences",
    "n": 1
   },
   {
@@ -9489,10 +9493,12 @@
    ],
    "units": [
     "Industrial Engineering and Management Sciences",
+    "Managerial Economics and Decision Sciences",
     "Operations"
    ],
    "bySchool": {
     "Kellogg School of Management": [
+     "Managerial Economics and Decision Sciences",
      "Operations"
     ],
     "McCormick School of Engineering": [
@@ -14595,6 +14601,7 @@
    "Supply Chain and Operations"
   ],
   "Kellogg School of Management": [
+   "Managerial Economics and Decision Sciences",
    "Operations"
   ],
   "Kenan-Flagler Business School": [
