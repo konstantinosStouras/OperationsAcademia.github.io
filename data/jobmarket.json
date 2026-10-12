@@ -448,9 +448,9 @@
   ],
   "posted": "2026-10-08",
   "institution": "Texas State University",
-  "department": "McCoy College of Business, Management, Supply Chain Management",
+  "department": "McCoy College of Business, Department of Management",
   "school": "McCoy College of Business",
-  "unit": "Management, Supply Chain Management",
+  "unit": "Department of Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -514,9 +514,9 @@
   ],
   "posted": "2026-10-08",
   "institution": "University of Northern Iowa",
-  "department": "David W. Wilson College of Business, Management, Business Analytics and Applied Artificial Intelligence",
+  "department": "David W. Wilson College of Business, Department of Management",
   "school": "David W. Wilson College of Business",
-  "unit": "Management, Business Analytics and Applied Artificial Intelligence",
+  "unit": "Department of Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -751,8 +751,8 @@
   ],
   "posted": "2026-10-06",
   "institution": "Massachusetts Institute of Technology (MIT)",
-  "department": "Center for Transportation and Logistics",
-  "school": "",
+  "department": "School of Engineering, Center for Transportation and Logistics",
+  "school": "School of Engineering",
   "unit": "Center for Transportation and Logistics",
   "type": "University",
   "levels": [
@@ -817,8 +817,8 @@
   ],
   "posted": "2026-10-05",
   "institution": "Michigan State University",
-  "department": "Statistics and Probability",
-  "school": "",
+  "department": "College of Natural Science, Statistics and Probability",
+  "school": "College of Natural Science",
   "unit": "Statistics and Probability",
   "type": "University",
   "levels": [
@@ -2235,9 +2235,9 @@
   ],
   "posted": "2026-09-30",
   "institution": "University of Northern Iowa",
-  "department": "David W. Wilson College of Business, Management",
+  "department": "David W. Wilson College of Business, Department of Management",
   "school": "David W. Wilson College of Business",
-  "unit": "Management",
+  "unit": "Department of Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -5769,8 +5769,9 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "October 5, 2026",
-  "applyByDate": "2026-10-05",
+  "applyBy": "November 5, 2026",
+  "applyByDate": "2026-11-05",
+  "reviewDate": "2026-10-05",
   "comments": "Open date: August 21, 2026 Next review date: Monday, Oct 5, 2026 at 11:59pm (Pacific Time) Apply by this date to ensure full consideration by the committee. Final date: Thursday, Nov 5, 2026 at 11:59pm (Pacific Time) Applications will continue to be accepted until this date, but those received after the review date will only be considered if the position has not yet been filled.",
   "country": "United States",
   "countries": [
@@ -8593,9 +8594,9 @@
   ],
   "posted": "2026-07-03",
   "institution": "University of Illinois at Urbana-Champaign",
-  "department": "Gies College of Business, Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
+  "department": "Gies College of Business, Information Systems, Operations, Supply Chain, and Analytics",
   "school": "Gies College of Business",
-  "unit": "Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
+  "unit": "Information Systems, Operations, Supply Chain, and Analytics",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
