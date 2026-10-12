@@ -1950,6 +1950,11 @@
   "department": "Marketing and Logistics"
  },
  {
+  "institution": "Ohio State University",
+  "school": "Max M. Fisher College of Business",
+  "department": "Operations and Business Analytics"
+ },
+ {
   "institution": "Oklahoma State University",
   "school": "",
   "department": "MIS"
@@ -2567,7 +2572,7 @@
  {
   "institution": "Texas State University",
   "school": "McCoy College of Business",
-  "department": "Management, Supply Chain Management"
+  "department": "Department of Management"
  },
  {
   "institution": "Texas Tech University",
@@ -2638,11 +2643,6 @@
   "institution": "The Ohio State University",
   "school": "",
   "department": ""
- },
- {
-  "institution": "The Ohio State University",
-  "school": "Max M. Fisher College of Business",
-  "department": "Operations and Business Analytics"
  },
  {
   "institution": "The Pennsylvania State University",
@@ -3142,7 +3142,7 @@
  {
   "institution": "University of Illinois at Urbana-Champaign",
   "school": "Gies College of Business",
-  "department": "Business Administration, Information Systems, Operations, Supply Chain, and Analytics"
+  "department": "Information Systems, Operations, Supply Chain, and Analytics"
  },
  {
   "institution": "University of Illinois at Urbana-Champaign",
@@ -3432,12 +3432,7 @@
  {
   "institution": "University of Northern Iowa",
   "school": "David W. Wilson College of Business",
-  "department": "Management, Business Analytics and Applied Artificial Intelligence"
- },
- {
-  "institution": "University of Northern Iowa",
-  "school": "David W. Wilson College of Business",
-  "department": "Management"
+  "department": "Department of Management"
  },
  {
   "institution": "University of Notre Dame",
@@ -3582,7 +3577,7 @@
  {
   "institution": "University of Southern Mississippi",
   "school": "College of Business and Economic Development",
-  "department": "Management"
+  "department": "School of Management"
  },
  {
   "institution": "University of Stirling",
