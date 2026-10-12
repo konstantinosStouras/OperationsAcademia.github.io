@@ -116,6 +116,7 @@ export const CARD_ALT = 'Operations Academia — matching supply with demand in 
    cards never broke.
    --------------------------------------------------------------------------- */
 export const PAGES = [
+  { file: 'profile-analytics.html', card: false, why: 'Owner/admin-only analytics, deliberately noindex and not shareable' },
   {
     file: 'index.html', url: '/',
     title: 'Operations Academia',

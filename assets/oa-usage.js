@@ -22,6 +22,8 @@
 (function () {
   'use strict';
   if (!window.OAFB || !OAFB.enabled) return;
+  if (navigator.globalPrivacyControl || navigator.doNotTrack === '1') return;
+  if (!/^(www\.)?operationsacademia\.org$/.test(location.hostname)) return;
 
   var sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
   var start = Date.now();
@@ -29,7 +31,34 @@
   var fields = [];
   var user = null;      // Firebase user, or null while anonymous
   var timer = null;
-  var pending = false;
+  var pending = false, dirty = false;
+  var events = [], retryBatches = [], batchWriting = false, resolved = false;
+  // Separate append-only batches retain every interaction without inflating
+  // page-session counts or overwriting earlier clicks on long visits.
+  function flushEvents() {
+    if (!resolved || batchWriting) return;
+    if (events.length) {
+      var batchId = sid + Math.random().toString(36).slice(2, 10);
+      var identity = who();
+      retryBatches.push({ id: identity + '__' + batchId,
+        data: { uid: identity, email: (user && user.email) || '', sid: batchId,
+          start: Date.now(), page: location.pathname.slice(0, 300), clicks: events.splice(0, 100) } });
+    }
+    if (!retryBatches.length) return;
+    batchWriting = true;
+    var batch = retryBatches[0];
+    OAFB.ready().then(function (fb) {
+      return fb.firestore().collection('usageEventBatches').doc(batch.id).set(batch.data);
+    }).then(function () {
+      retryBatches.shift(); batchWriting = false;
+      if (retryBatches.length || events.length >= 100) flushEvents();
+    }).catch(function () { batchWriting = false; });
+  }
+  function recordEvent(rec) {
+    events.push(rec);
+    if (events.length >= 100) flushEvents();
+  }
+  setInterval(flushEvents, 5000);
 
   /** A password account whose address is not confirmed yet is signed out
       for everything on the site, this record included: the rules refuse a
@@ -70,27 +99,19 @@
   }
 
   function flush() {
-    if (pending) return;
-    pending = true;
-    var id = who();
-    var payload = {
-      uid: id,
-      email: (user && user.email) || '',
-      sid: sid,
-      page: pageOf(),
-      start: start,
-      last: Date.now(),
+    if (pending) { dirty = true; return; }
+    pending = true; dirty = false;
+    var id = who(), documentId = id + '__' + sid;
+    var payload = { uid: id, email: (user && user.email) || '', sid: sid,
+      page: pageOf(), start: start, last: Date.now(),
       dur: Math.round((Date.now() - start) / 1000),
-      clicks: clicks.slice(0, 400),
-      fields: fields.slice(0, 300)
-    };
-    OAFB.ready()
-      .then(function (fb) {
-        return fb.firestore().collection('usageSessions')
-          .doc(id + '__' + sid).set(payload, { merge: true });
-      })
-      .then(function () { pending = false; })
-      .catch(function () { pending = false; /* rules not deployed / offline */ });
+      clicks: clicks.slice(-400), fields: fields.slice(-300) };
+    OAFB.ready().then(function (fb) {
+      return fb.firestore().collection('usageSessions').doc(documentId).set(payload, { merge: true });
+    }).then(function () {
+      pending = false;
+      if (dirty) flush();
+    }).catch(function () { pending = false; });
   }
 
   /* WHICH CARD a click landed in, when it landed in one (2026-09-05). A card
@@ -122,23 +143,32 @@
     var up = li.parentElement && li.parentElement.closest && li.parentElement.closest('[id]');
     if (up && up.id) out.m = String(up.id).slice(0, 60);
     if (el.classList.contains('oa-card-head') &&
-        !li.classList.contains('oa-card-locked') &&
+        !li.classList.contains('oa-card-gated') &&
         el.getAttribute('aria-expanded') !== 'true') {
       out.o = 1;
     }
     return out;
   }
 
+  function safeHref(raw) {
+    if (!raw) return '';
+    try {
+      var url = new URL(raw, location.href);
+      // Contact addresses, tokens and form parameters do not belong in telemetry.
+      return /^https?:$/.test(url.protocol) ? (url.origin + url.pathname).slice(0, 200) : url.protocol;
+    } catch (e) { return ''; }
+  }
+
   // capture-phase, so a click that navigates away is still seen; only
   // interactive elements, short label only — never form VALUES
   document.addEventListener('click', function (e) {
-    var el = e.target && e.target.closest && e.target.closest('a, button');
+    var el = e.target && e.target.closest && e.target.closest('a, button, input, select, textarea, summary, [role="button"], [role="tab"], [onclick]');
     if (!el) return;
     var rec = {
       t: Date.now(),
       k: el.tagName.toLowerCase(),
-      x: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
-      h: (el.getAttribute('href') || '').slice(0, 200)
+      x: (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) ? fieldName(el) : (el.textContent || '')).replace(/\s+/g, ' ').trim().slice(0, 80),
+      h: safeHref(el.getAttribute('href'))
     };
     var card = cardOf(el);
     if (card) {
@@ -148,6 +178,8 @@
     }
     clicks.push(rec);
     if (clicks.length > 400) clicks = clicks.slice(-400);
+    recordEvent(rec);
+    flush();
   }, true);
 
   /** Form INTERACTION, not content: which field, when it was entered, and
@@ -167,7 +199,8 @@
 
   OAFB.ready().then(function (fb) {
     fb.auth().onAuthStateChanged(function (u) {
-      user = usable(u);
+      flushEvents();
+      user = usable(u); resolved = true;
       if (!timer) {
         flush();                                  // session opens
         timer = setInterval(flush, 60000);        // rolling duration
@@ -175,8 +208,9 @@
     });
   }).catch(function () { /* SDK unreachable — record nothing */ });
 
-  window.addEventListener('pagehide', flush);
+  window.OAUsageRecord = recordEvent;
+  window.addEventListener('pagehide', function () { flush(); flushEvents(); });
   document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'hidden') flush();
+    if (document.visibilityState === 'hidden') { flush(); flushEvents(); }
   });
 })();

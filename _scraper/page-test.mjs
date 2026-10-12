@@ -2462,6 +2462,8 @@ for (const [name, expect] of [
     // tick's spelling rather than publish the same area twice
     await q.fill('#f-areasOther', 'Queueing Theory; supply chain management, Energy Markets');
     await q.fill('#f-cvUrl', 'https://example.edu/grace-cv.pdf');
+    // Attendance became mandatory on 11 October; this fixture is a non-presenter.
+    await q.check('#f-informs-none');
     await q.click('#oa-submit');
     await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
     const ref = await q.textContent('#oa-ref');

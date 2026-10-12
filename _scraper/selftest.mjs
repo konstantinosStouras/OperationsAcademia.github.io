@@ -18717,10 +18717,10 @@ async function testCandidateStats() {
   ok(/closest\('li\.oa-card'\)/.test(usage) && /c: String\(li\.id\)\.slice\(0, 120\)/.test(usage),
     'a click inside a card carries the card’s element id, capped');
   ok(/classList\.contains\('oa-card-head'\)/.test(usage) &&
-     /!li\.classList\.contains\('oa-card-locked'\)/.test(usage) &&
+     /!li\.classList\.contains\('oa-card-gated'\)/.test(usage) &&
      /getAttribute\('aria-expanded'\) !== 'true'/.test(usage),
     'and `o` marks an OPEN: the head, on a card the reader may read, not already expanded');
-  const payload = usage.slice(usage.indexOf('var payload = {'), usage.indexOf('OAFB.ready()'));
+  const payload = usage.slice(usage.indexOf('var payload = {'), usage.indexOf('OAFB.ready()', usage.indexOf('var payload = {')));
   ok(payload.length > 100 && payload.length < 800, 'the payload slice is bounded');
   ok(!/\bc:|\bo:/.test(payload),
     'no new TOP-LEVEL field joins the session document — the attribution rides inside ' +
@@ -18828,8 +18828,8 @@ async function testCandidateStats() {
 
   /* --- disclosed and announced ------------------------------------------- */
   const pp = await read('privacy-policy.html');
-  ok(/how often each\s+candidate profile was opened and its CV clicked/.test(pp) &&
-     /shown only to that candidate/.test(pp),
+  ok(/candidate profile or job posting was viewed, opened and clicked/.test(pp) &&
+     /to the listing owner and the maintainer/.test(pp),
     'the Privacy Policy says the count exists and who sees it');
   const log = JSON.parse(await read('changelog.json'));
   const entry = log.updates.find((u) => u.id === 'candidate-profile-view-statistics');
@@ -22545,7 +22545,7 @@ async function testTopMenu() {
       }
     }
   }
-  eq(withNav, 24, 'every root page but the five redirect stubs carries the nav');
+  eq(withNav, 25, 'every root page but the five redirect stubs carries the nav');
 
   /* ------------------------------------------------------------ the styles */
   const css = await readFile(path.join(root, 'assets', 'v3.css'), 'utf8');
@@ -23840,10 +23840,10 @@ async function testForum() {
   ok(/yours to edit and to delete at any time/.test(await read('assets', 'oa-forum-guide.js')), 'forum guide: rule 13 says a post is editable at any time');
   ok(page.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
     'forum page: the head snippet, the exact line every live page carries');
-  const LOAD = ['v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-forum-markup.js', 'oa-editor.js', 'oa-list.js', 'oa-forum.js'];
+  const LOAD = ['oa-feature-badges.js', 'v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-forum-markup.js', 'oa-editor.js', 'oa-list.js', 'oa-forum.js'];
   const tagAt = (f) => page.indexOf('<script defer src="assets/' + f + '"></script>');
   ok(LOAD.every((f, i) => tagAt(f) > 0 && (i === 0 || tagAt(f) > tagAt(LOAD[i - 1]))),
-    'forum page: the eleven scripts load in dependency order, each deferred');
+    'forum page: the twelve scripts load in dependency order, each deferred');
   eq((page.match(/<script[^>]*\ssrc=/g) || []).length, LOAD.length, 'forum page: and no other external script');
   for (const f of ['oa-ga4.js', 'oa-usage.js', 'oa-visit.js']) ok(!page.includes('assets/' + f), `forum page: quiet by design, no ${f}`);
   for (const f of ['oa-list.css', 'oa-ui.css', 'oa-editor.css', 'v3.css', 'oa-forum.css']) ok(page.includes('assets/' + f), `forum page: loads ${f}`);

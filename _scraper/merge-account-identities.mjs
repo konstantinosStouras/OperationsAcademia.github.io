@@ -79,7 +79,7 @@ async function main() {
   const moving = guardMerge(keep, duplicate, kp, dp, counts);
   if (!moving.some(p => p.providerId === 'google.com' && sameMailbox(p.email, duplicate.email))) throw new MergeGuardError('The Google address does not match the specified duplicate.');
   const keys = await db.collection('accountKeys').where('uid', '==', duplicate.uid).get();
-  const usage = await db.collection('usageSessions').where('uid', '==', duplicate.uid).get();
+  const usage = { docs: (await Promise.all(['usageSessions', 'usageEventBatches'].map(col => db.collection(col).where('uid', '==', duplicate.uid).get()))).flatMap(snap => snap.docs) };
   const keptCandidates = await db.collection('candidateSubmissions').where('uid', '==', keep.uid).get();
   console.log(JSON.stringify({ keepPassword: true, moveProviders: moving.map(p => p.providerId),
     candidateProfilesPreserved: keptCandidates.size, duplicateContent: counts, privateBackup: true }));

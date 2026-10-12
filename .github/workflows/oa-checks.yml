@@ -89,12 +89,9 @@ jobs:
       - name: No secret ever reaches a served file
         run: |
           set -e
-          # The repository is public. data/ is fetched by every visitor, so a
-          # submitter's e-mail address landing there would be a disclosure.
-          if grep -rEl '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' data/ ; then
-            echo "::error::an e-mail address is present in data/"
-            exit 1
-          fi
+          # Candidate contact emails are explicitly opt-in. Check that exact
+          # field while still rejecting addresses everywhere else in data/.
+          node _scraper/disclosure-check.mjs
           # A pasted Firebase WEB config is fine — those are public by design and
           # appear in the page source of every Firebase site. A service-account
           # PRIVATE key is not.
@@ -108,7 +105,7 @@ jobs:
             echo "::error::private key material is committed in the served tree"
             exit 1
           fi
-          echo "no e-mail addresses and no private key material in the served files"
+          echo "no private e-mail addresses and no private key material in the served files"
 
       # Getting a browser onto the runner is THREE separate network fetches
       # that fail in different ways — the npm package, the browser build, and

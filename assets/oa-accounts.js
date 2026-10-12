@@ -555,6 +555,7 @@
   }
 
   function paint() {
+    if (window.OAFeatureBadges) setTimeout(OAFeatureBadges.refresh, 0);
     // The off-canvas copy first: it must follow every state change even on a
     // page without #oa-account, and even down the early-return branches below.
     paintPanel();
@@ -649,6 +650,7 @@
           '<div class="oa-acct-group">' +
             '<a role="menuitem" class="oa-acct-primary" href="account">' +
               '<span class="oa-mi" aria-hidden="true">&#128100;</span>My personal area</a>' +
+            '<a role="menuitem" href="profile-analytics">Profile Analytics <span class="oa-nav-new" data-profile-analytics-new hidden>New</span></a>' +
           '</div>' +
           '<div class="oa-acct-group">' +
             '<a role="menuitem" href="post-a-job">' +
@@ -810,6 +812,7 @@
       // (owner, 2026-08-24) — the same order the header menu draws
       (adminish(u) ? '<a class="link depth-0" href="admin-area">Admin area</a>' : '') +
       '<a class="link depth-0" href="account">My personal area</a>' +
+      '<a class="link depth-0" href="profile-analytics">Profile Analytics <span class="oa-nav-new" data-profile-analytics-new hidden>New</span></a>' +
       // the same two held rows as the header menu, under the same rule —
       // hidden until paintCounts knows the account holds one (see paint())
       '<a class="link depth-0" href="my-postings" data-held="postings" hidden>My postings</a>' +

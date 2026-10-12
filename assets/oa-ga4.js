@@ -95,7 +95,7 @@
     try {
       if (/[?&]oobCode=/.test(location.search || '')) return location.origin + location.pathname;
     } catch (e) { /* nothing sane to do */ }
-    return location.href;
+    return location.origin + location.pathname;
   }
 
   gtag('js', new Date());

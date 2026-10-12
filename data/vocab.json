@@ -2421,7 +2421,7 @@
   },
   {
    "v": "School of Business",
-   "n": 11
+   "n": 10
   },
   {
    "v": "A. B. Freeman School of Business",
@@ -2864,7 +2864,7 @@
    "n": 1
   },
   {
-   "v": "Faculty of Science",
+   "v": "Faculty of Science, Engineering and Medicine",
    "n": 1
   },
   {
@@ -3148,6 +3148,10 @@
    "n": 1
   },
   {
+   "v": "School of Business, Economics and Law",
+   "n": 1
+  },
+  {
    "v": "School of Computing",
    "n": 1
   },
@@ -3240,7 +3244,7 @@
    "n": 1
   },
   {
-   "v": "Williams School of Commerce",
+   "v": "Williams School of Commerce, Economics and Politics",
    "n": 1
   },
   {
@@ -3722,12 +3726,12 @@
    "n": 25
   },
   {
-   "v": "Management",
-   "n": 17
-  },
-  {
    "v": "Operations Management",
    "n": 16
+  },
+  {
+   "v": "Management",
+   "n": 15
   },
   {
    "v": "Management Science",
@@ -3742,16 +3746,16 @@
    "n": 13
   },
   {
+   "v": "Business Administration",
+   "n": 10
+  },
+  {
    "v": "Business Analytics",
    "n": 10
   },
   {
    "v": "Information Systems and Operations Management",
    "n": 10
-  },
-  {
-   "v": "Business Administration",
-   "n": 9
   },
   {
    "v": "Data Analytics",
@@ -3842,6 +3846,10 @@
    "n": 3
   },
   {
+   "v": "Department of Management",
+   "n": 3
+  },
+  {
    "v": "Information Systems and Technology Management",
    "n": 3
   },
@@ -3899,6 +3907,10 @@
   },
   {
    "v": "Business Analytics and Statistics",
+   "n": 2
+  },
+  {
+   "v": "Business Management",
    "n": 2
   },
   {
@@ -4170,10 +4182,6 @@
    "n": 1
   },
   {
-   "v": "Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
-   "n": 1
-  },
-  {
    "v": "Business Analytics and Operations",
    "n": 1
   },
@@ -4243,10 +4251,6 @@
   },
   {
    "v": "Business IT",
-   "n": 1
-  },
-  {
-   "v": "Business Management",
    "n": 1
   },
   {
@@ -4390,14 +4394,6 @@
    "n": 1
   },
   {
-   "v": "Economics and Law, Business Management",
-   "n": 1
-  },
-  {
-   "v": "Economics and Politics, Business Administration",
-   "n": 1
-  },
-  {
    "v": "Economics, Finance and Accounting",
    "n": 1
   },
@@ -4411,10 +4407,6 @@
   },
   {
    "v": "Empirical business problems",
-   "n": 1
-  },
-  {
-   "v": "Engineering and Medicine, Warwick Manufacturing Group, Applied Artificial Intelligence",
    "n": 1
   },
   {
@@ -4559,6 +4551,10 @@
   },
   {
    "v": "Information Systems, Data Analytics and Operations",
+   "n": 1
+  },
+  {
+   "v": "Information Systems, Operations, Supply Chain, and Analytics",
    "n": 1
   },
   {
@@ -4770,10 +4766,6 @@
    "n": 1
   },
   {
-   "v": "Management, Business Analytics and Applied Artificial Intelligence",
-   "n": 1
-  },
-  {
    "v": "Management, Marketing and Business Administration",
    "n": 1
   },
@@ -4783,10 +4775,6 @@
   },
   {
    "v": "Management, Marketing, Logistics, and Business Analytics",
-   "n": 1
-  },
-  {
-   "v": "Management, Supply Chain Management",
    "n": 1
   },
   {
@@ -5102,6 +5090,10 @@
    "n": 1
   },
   {
+   "v": "School of Management",
+   "n": 1
+  },
+  {
    "v": "Science and Innovation",
    "n": 1
   },
@@ -5286,6 +5278,10 @@
    "n": 1
   },
   {
+   "v": "Warwick Manufacturing Group, Applied Artificial Intelligence",
+   "n": 1
+  },
+  {
    "v": "Wm Michael Barnes’ 64 Department of Industrial and Systems Engineering",
    "n": 1
   },
@@ -5430,10 +5426,6 @@
    "n": 0
   },
   {
-   "v": "Information Systems, Operations, Supply Chain and Analytics",
-   "n": 0
-  },
-  {
    "v": "Information, Decisions and Operations",
    "n": 0
   },
@@ -5475,10 +5467,6 @@
   },
   {
    "v": "Management and Entrepreneurship",
-   "n": 0
-  },
-  {
-   "v": "Management and International Business",
    "n": 0
   },
   {
@@ -7151,14 +7139,14 @@
   },
   "CUNEF Universidad": {
    "schools": [
-    "School of Business"
+    "School of Business, Economics and Law"
    ],
    "units": [
-    "Economics and Law, Business Management"
+    "Business Management"
    ],
    "bySchool": {
-    "School of Business": [
-     "Economics and Law, Business Management"
+    "School of Business, Economics and Law": [
+     "Business Management"
     ]
    }
   },
@@ -10865,11 +10853,10 @@
    ],
    "units": [
     "Analytics",
+    "Department of Management",
     "Information Systems and Analytics",
     "IS",
-    "IS and Analytics",
-    "Management",
-    "Management, Supply Chain Management"
+    "IS and Analytics"
    ],
    "bySchool": {
     "": [
@@ -10878,9 +10865,8 @@
      "IS and Analytics"
     ],
     "McCoy College of Business": [
-     "Information Systems and Analytics",
-     "Management",
-     "Management, Supply Chain Management"
+     "Department of Management",
+     "Information Systems and Analytics"
     ]
    }
   },
@@ -12007,10 +11993,9 @@
    ],
    "units": [
     "Business Administration",
-    "Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
     "Human Resources and Technology",
     "Industrial and Enterprise Systems Engineering",
-    "Information Systems, Operations, Supply Chain and Analytics",
+    "Information Systems, Operations, Supply Chain, and Analytics",
     "IS/OM/SCM/BA"
    ],
    "bySchool": {
@@ -12020,8 +12005,7 @@
     ],
     "Gies College of Business": [
      "Business Administration",
-     "Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
-     "Information Systems, Operations, Supply Chain and Analytics"
+     "Information Systems, Operations, Supply Chain, and Analytics"
     ],
     "School of Labor and Employment Relations": [
      "Human Resources and Technology"
@@ -12670,16 +12654,14 @@
    ],
    "units": [
     "BA",
-    "Management",
-    "Management, Business Analytics and Applied Artificial Intelligence"
+    "Department of Management"
    ],
    "bySchool": {
     "": [
      "BA"
     ],
     "David W. Wilson College of Business": [
-     "Management",
-     "Management, Business Analytics and Applied Artificial Intelligence"
+     "Department of Management"
     ]
    }
   },
@@ -12979,19 +12961,14 @@
   },
   "University of Southern Mississippi": {
    "schools": [
-    "College of Business",
     "College of Business and Economic Development"
    ],
    "units": [
-    "Management",
-    "Management and International Business"
+    "School of Management"
    ],
    "bySchool": {
-    "College of Business": [
-     "Management and International Business"
-    ],
     "College of Business and Economic Development": [
-     "Management"
+     "School of Management"
     ]
    }
   },
@@ -13312,20 +13289,20 @@
   },
   "University of Warwick": {
    "schools": [
-    "Faculty of Science",
+    "Faculty of Science, Engineering and Medicine",
     "Warwick Business School"
    ],
    "units": [
-    "Engineering and Medicine, Warwick Manufacturing Group, Applied Artificial Intelligence",
     "IS",
-    "Operations Management"
+    "Operations Management",
+    "Warwick Manufacturing Group, Applied Artificial Intelligence"
    ],
    "bySchool": {
     "": [
      "IS"
     ],
-    "Faculty of Science": [
-     "Engineering and Medicine, Warwick Manufacturing Group, Applied Artificial Intelligence"
+    "Faculty of Science, Engineering and Medicine": [
+     "Warwick Manufacturing Group, Applied Artificial Intelligence"
     ],
     "Warwick Business School": [
      "Operations Management"
@@ -13733,14 +13710,14 @@
   },
   "Washington and Lee University": {
    "schools": [
-    "Williams School of Commerce"
+    "Williams School of Commerce, Economics and Politics"
    ],
    "units": [
-    "Economics and Politics, Business Administration"
+    "Business Administration"
    ],
    "bySchool": {
-    "Williams School of Commerce": [
-     "Economics and Politics, Business Administration"
+    "Williams School of Commerce, Economics and Politics": [
+     "Business Administration"
     ]
    }
   },
@@ -14177,7 +14154,6 @@
    "Information and Decision Sciences",
    "Information Systems",
    "Management",
-   "Management and International Business",
    "Management Science",
    "Managerial Sciences Department, Marketing",
    "Marketing",
@@ -14208,7 +14184,7 @@
    "Business Analytics"
   ],
   "College of Business and Economic Development": [
-   "Management"
+   "School of Management"
   ],
   "College of Business and Economics": [
    "Accounting, Economics, Finance, and Information Systems",
@@ -14322,8 +14298,7 @@
    "Systems and Operations Management"
   ],
   "David W. Wilson College of Business": [
-   "Management",
-   "Management, Business Analytics and Applied Artificial Intelligence"
+   "Department of Management"
   ],
   "Debbie and Jerry Ivy College of Business": [
    "IS/BA",
@@ -14415,8 +14390,8 @@
   "Faculty of Management": [
    "Operations and Supply Chain Management"
   ],
-  "Faculty of Science": [
-   "Engineering and Medicine, Warwick Manufacturing Group, Applied Artificial Intelligence"
+  "Faculty of Science, Engineering and Medicine": [
+   "Warwick Manufacturing Group, Applied Artificial Intelligence"
   ],
   "Feliciano School of Business": [
    "Information Management and Business Analytics"
@@ -14463,8 +14438,7 @@
   ],
   "Gies College of Business": [
    "Business Administration",
-   "Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
-   "Information Systems, Operations, Supply Chain and Analytics"
+   "Information Systems, Operations, Supply Chain, and Analytics"
   ],
   "Glorious Sun School of Business and Management": [
    "Operations Management, Logistics and Supply Chain Management"
@@ -14694,9 +14668,8 @@
    "Industrial Engineering and Management Sciences"
   ],
   "McCoy College of Business": [
-   "Information Systems and Analytics",
-   "Management",
-   "Management, Supply Chain Management"
+   "Department of Management",
+   "Information Systems and Analytics"
   ],
   "McDonough School of Business": [
    "NRF Business of Retail Initiative",
@@ -14890,7 +14863,6 @@
    "Business Analytics",
    "Business Analytics and Information Systems",
    "Decision Sciences",
-   "Economics and Law, Business Management",
    "Finance",
    "Information and Service Economy",
    "Information Systems",
@@ -14930,6 +14902,9 @@
   ],
   "School of Business, Analytics": [
    "Information and Operations Management"
+  ],
+  "School of Business, Economics and Law": [
+   "Business Management"
   ],
   "School of Computing": [
    "Information Systems and Analytics"
@@ -15114,8 +15089,8 @@
   "Wilbur O. and Ann Powers College of Business": [
    "Management"
   ],
-  "Williams School of Commerce": [
-   "Economics and Politics, Business Administration"
+  "Williams School of Commerce, Economics and Politics": [
+   "Business Administration"
   ],
   "Williamson College of Business Administration": [
    "Lariccia School of Accounting and Finance"

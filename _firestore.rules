@@ -1327,6 +1327,28 @@ service cloud.firestore {
     // which is safe because the doc id embeds the session's random sid (a
     // stranger cannot name another session's doc) and the shape is bounded.
     // Disclosed in the Privacy Policy.
+    // Reports contain aggregates only. Ownership is checked against the live
+    // submission, so an account transfer immediately revokes the former owner.
+    match /candidateSubmissions/{submission}/analytics/{report} {
+      allow read: if isAdmin() || isOwner(get(/databases/$(database)/documents/candidateSubmissions/$(submission)).data.uid);
+      allow write: if false;
+    }
+    match /jobSubmissions/{submission}/analytics/{report} {
+      allow read: if isAdmin() || isOwner(get(/databases/$(database)/documents/jobSubmissions/$(submission)).data.uid);
+      allow write: if false;
+    }
+    match /usageEventBatches/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['uid', 'email', 'sid', 'start', 'page', 'clicks'])
+        && request.resource.data.uid is string
+        && str('sid', 80) && str('email', 200) && str('page', 300)
+        && request.resource.data.start is number && list('clicks', 100)
+        && id == request.resource.data.uid + '__' + request.resource.data.sid
+        && ((verified() && request.resource.data.uid == request.auth.uid)
+            || request.resource.data.uid.matches('anon:[a-z0-9]+'));
+      // A retry after an uncertain network response must be idempotent.
+      allow update: if request.resource.data == resource.data;
+      allow read, delete: if isAdmin();
+    }
     match /usageSessions/{id} {
       allow create, update: if request.resource.data.uid is string
                     && request.resource.data.sid is string

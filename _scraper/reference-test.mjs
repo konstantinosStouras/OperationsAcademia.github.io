@@ -6,6 +6,37 @@ import { referencePlaces } from './sync-reference-places.mjs';
 const require = createRequire(import.meta.url);
 const S = require('../assets/oa-schools.js');
 const U = require('../assets/oa-uniinfo.js');
+// Regression: official commas stay inside school names on both ingest paths.
+for (const [institution, school] of [
+  ['Washington and Lee University', 'Williams School of Commerce, Economics and Politics'],
+  ['CUNEF Universidad', 'School of Business, Economics and Law'],
+  ['University of Warwick', 'Faculty of Science, Engineering and Medicine'],
+]) {
+  const place = { institution, school, unit: 'Business Administration' };
+  assert.deepEqual(S.canonPlace(place), place);
+  assert.deepEqual(S.canonColumns(place), place);
+}
+assert.equal(S.canonSchool('College of Business', 'University of Southern Mississippi'),
+  'College of Business and Economic Development');
+assert.equal(S.canonSchool('College of Business', 'Other University'), 'College of Business');
+assert.equal(S.canonUnit('Management and International Business', 'University of Southern Mississippi'),
+  S.canonUnit('Management', 'University of Southern Mississippi'));
+for (const [institution, variant] of [
+  ['Texas State University', 'Management, Supply Chain Management'],
+  ['University of Northern Iowa', 'Management, Business Analytics and Applied Artificial Intelligence'],
+]) {
+  assert.equal(S.canonUnit(variant, institution), 'Department of Management');
+  assert.equal(S.canonUnit('Management', institution), 'Department of Management');
+  assert.equal(S.canonUnit(S.canonUnit(variant, institution), institution), 'Department of Management');
+  assert.equal(S.directoryRowKey(institution, 'Business School', 'Department of Management'),
+    S.directoryRowKey(institution, 'Business School', 'Management'),
+    'A fuller department title preserves existing correction addresses');
+}
+const illinois = 'University of Illinois at Urbana-Champaign';
+assert.equal(S.canonUnit('Business Administration, Information Systems, Operations, Supply Chain, and Analytics', illinois),
+  S.canonUnit('Information Systems, Operations, Supply Chain and Analytics', illinois));
+assert.equal(S.canonUnit('Business Administration', illinois), 'Business Administration',
+  'The parent department remains distinct from its IOSA area');
 for (const variant of ['University at Buffalo - The State University of New York',
   'University at Buffalo, The State University of New York', 'State University of New York at Buffalo']) {
   assert.equal(S.canonInstitution(variant), 'University at Buffalo');

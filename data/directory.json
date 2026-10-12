@@ -9824,6 +9824,22 @@
   "lastPosted": "2025-06-06"
  },
  {
+  "id": "texas-state-university__mccoy-college-of-business__management",
+  "institution": "Texas State University",
+  "school": "McCoy College of Business",
+  "department": "Department of Management",
+  "type": "Business School",
+  "country": "United States",
+  "deptUrl": "https://mgt.mccoy.txst.edu/about/faculty.html",
+  "sources": [
+   "omlist",
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-08"
+ },
+ {
   "id": "texas-state-university__mccoy-college-of-business__information-systems-and-analytics",
   "institution": "Texas State University",
   "school": "McCoy College of Business",
@@ -9834,32 +9850,6 @@
    "omlist",
    "seed"
   ]
- },
- {
-  "id": "texas-state-university__mccoy-college-of-business__management",
-  "institution": "Texas State University",
-  "school": "McCoy College of Business",
-  "department": "Management",
-  "type": "Business School",
-  "deptUrl": "https://mgt.mccoy.txst.edu/about/faculty.html",
-  "sources": [
-   "omlist",
-   "seed"
-  ]
- },
- {
-  "id": "texas-state-university__mccoy-college-of-business__management-supply-chain-management",
-  "institution": "Texas State University",
-  "school": "McCoy College of Business",
-  "department": "Management, Supply Chain Management",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-08"
  },
  {
   "id": "texas-tech-university____marketing-and-scm",
@@ -12620,30 +12610,20 @@
   "lng": -88.2298467
  },
  {
-  "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__business-administration-information-systems-operations-suppl",
+  "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-supply-chain-and-analytics",
   "institution": "University of Illinois at Urbana-Champaign",
   "school": "Gies College of Business",
-  "department": "Business Administration, Information Systems, Operations, Supply Chain, and Analytics",
+  "department": "Information Systems, Operations, Supply Chain, and Analytics",
   "type": "Business School",
   "country": "United States",
+  "deptUrl": "https://giesbusiness.illinois.edu/faculty-and-research/find-faculty?searchit=IOSA",
   "sources": [
+   "omlist",
    "postings",
    "seed"
   ],
   "n": 1,
   "lastPosted": "2026-07-03"
- },
- {
-  "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-supply-chain-and-analytics",
-  "institution": "University of Illinois at Urbana-Champaign",
-  "school": "Gies College of Business",
-  "department": "Information Systems, Operations, Supply Chain and Analytics",
-  "type": "Business School",
-  "deptUrl": "https://giesbusiness.illinois.edu/faculty-and-research/find-faculty?searchit=IOSA",
-  "sources": [
-   "omlist",
-   "seed"
-  ]
  },
  {
   "id": "university-of-illinois-at-urbana-champaign__school-of-labor-and-employment-relations__human-resources-and-technology",
@@ -13814,28 +13794,14 @@
   "id": "university-of-northern-iowa__david-w-wilson-college-of-business__management",
   "institution": "University of Northern Iowa",
   "school": "David W. Wilson College of Business",
-  "department": "Management",
+  "department": "Department of Management",
   "type": "Business School",
   "country": "United States",
   "sources": [
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-30"
- },
- {
-  "id": "university-of-northern-iowa__david-w-wilson-college-of-business__management-business-analytics-and-applied-artificial-intelli",
-  "institution": "University of Northern Iowa",
-  "school": "David W. Wilson College of Business",
-  "department": "Management, Business Analytics and Applied Artificial Intelligence",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
+  "n": 2,
   "lastPosted": "2026-10-08"
  },
  {
@@ -14465,32 +14431,23 @@
   "lastPosted": "2025-06-24"
  },
  {
-  "id": "university-of-southern-mississippi__college-of-business__management-and-international-business",
+  "id": "university-of-southern-mississippi__college-of-business-and-economic-development__school-of-management",
   "institution": "University of Southern Mississippi",
-  "school": "College of Business",
-  "department": "Management and International Business",
+  "school": "College of Business and Economic Development",
+  "department": "School of Management",
   "type": "Business School",
+  "country": "United States",
   "address": "https://www.google.com/maps/place/The+University+of+Southern+Mississippi/@31.3306147,-89.3353975,17z/data=!4m12!1m6!3m5!1s0x0:0xb634fb5bc3d337e0!2sScianna+Hall!8m2!3d31.3299778!4d-89.3296985!3m4!1s0x0000000000000000:0xbb4867d179a31f12!8m2!3d31.3310083!4d-89.3357402",
   "facultyUrl": "https://www.usm.edu/business/faculty-and-staff",
   "sources": [
-   "directory"
-  ],
-  "lat": 31.3300115,
-  "lng": -89.3340423
- },
- {
-  "id": "university-of-southern-mississippi__college-of-business-and-economic-development__management",
-  "institution": "University of Southern Mississippi",
-  "school": "College of Business and Economic Development",
-  "department": "Management",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
+   "directory",
    "postings",
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-05"
+  "lastPosted": "2026-09-05",
+  "lat": 31.3300115,
+  "lng": -89.3340423
  },
  {
   "id": "university-of-stirling____project-management",

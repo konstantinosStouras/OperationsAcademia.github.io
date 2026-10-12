@@ -134,6 +134,15 @@
   /* A school field that names a department too, where no separator says so.
      The pair is what the row becomes. */
   var FUSED_SCHOOLS = {
+    /* Official school titles contain these commas; they do not introduce a
+       department. Checked 2026-10-12: wlu.edu/the-williams-school,
+       cunef.edu/en/about-us/academic-organisation/, warwick.ac.uk/fac/sci/. */
+    'Williams School of Commerce, Economics and Politics':
+      { school: 'Williams School of Commerce, Economics and Politics', unit: '' },
+    'School of Business, Economics and Law':
+      { school: 'School of Business, Economics and Law', unit: '' },
+    'Faculty of Science, Engineering and Medicine':
+      { school: 'Faculty of Science, Engineering and Medicine', unit: '' },
     'Ross School of Business Technology and Operations':
       { school: 'Stephen M. Ross School of Business', unit: 'Technology and Operations Management' },
     'Faculty of Business-Operations Management':
@@ -280,6 +289,10 @@
      NUS Business School, so the university has to be known before they can be
      told apart. Keyed by university, then by the name as posted. */
   var SCOPED_SCHOOL_ALIASES = {
+    /* Official title checked 2026-10-12: https://www.usm.edu/business/ */
+    'University of Southern Mississippi': {
+      'College of Business': 'College of Business and Economic Development'
+    },
     'Yale University': { 'Yale School of Management': 'School of Management' },
     'Auburn University': {
       'Harbert College of Business': 'Raymond J. Harbert College of Business'
@@ -471,6 +484,34 @@
      else the generic rule still applies, so a poster typing "Operations
      Management Department" at some other school still lands on the bare name. */
   var SCOPED_UNIT_ALIASES = {
+    /* Former Management and International Business department, now School
+       of Management. Checked 2026-10-12: https://www.usm.edu/management/
+       https://aquila.usm.edu/mang_intnlbus_fac_pubs/ */
+    'University of Southern Mississippi': {
+      'Management': 'School of Management',
+      'Management and International Business': 'School of Management'
+    },
+    /* Imported hiring fields appended to their department, not new units.
+       Official department titles checked 2026-10-12:
+       https://mgt.mccoy.txst.edu/
+       https://business.uni.edu/management/management-majors-minors-programs */
+    'Texas State University': {
+      'Management': 'Department of Management',
+      'Management, Supply Chain Management': 'Department of Management'
+    },
+    'University of Northern Iowa': {
+      'Management': 'Department of Management',
+      'Management, Business Analytics and Applied Artificial Intelligence': 'Department of Management'
+    },
+    /* IOSA is an area within Business Administration. Keep the parent
+       department distinct, and merge only the two names for this area.
+       Checked 2026-10-12: https://giesbusiness.illinois.edu/business-administration/badm-areas-iosa */
+    'University of Illinois at Urbana-Champaign': {
+      'Business Administration, Information Systems, Operations, Supply Chain, and Analytics':
+        'Information Systems, Operations, Supply Chain, and Analytics',
+      'Information Systems, Operations, Supply Chain and Analytics':
+        'Information Systems, Operations, Supply Chain, and Analytics'
+    },
     'Michigan State University': {
       /* The department encompasses logistics and operations; these imported
          research-field combinations are not separate departments. */
@@ -870,10 +911,13 @@
     };
     var stable = stableSchools[institutionKey(institution || '')];
     var schoolPart = stable && stable[fold(school)] || school;
+    var universityKey = institutionKey(institution || '');
+    var unitPart = (universityKey === 'texas state university' || universityKey === 'university of northern iowa') &&
+      fold(unit) === 'department of management' ? 'Management' : unit;
     var parts = [
       slugPart(institutionKey(institution || '')),
       slugPart(schoolPart),
-      slugPart(unit),
+      slugPart(unitPart),
     ];
     return parts.join('__').replace(/__+$/, '') || 'row';
   }
