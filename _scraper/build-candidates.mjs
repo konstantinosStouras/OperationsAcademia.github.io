@@ -831,7 +831,7 @@ function selftest() {
      Read with the comments stripped and the slice bounded at both ends: this
      block explains the very fields it refuses, and a scan over the whole file
      would have to be satisfied by deleting the explanation. */
-  const srcAll = readFileSync(fileURLToPath(import.meta.url), 'utf8');
+  const srcAll = readFileSync(fileURLToPath(import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   const runSrc = srcAll.slice(srcAll.indexOf('async function transferUploads'),
     srcAll.indexOf('function selftest('))
     .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');

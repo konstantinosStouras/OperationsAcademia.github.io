@@ -736,7 +736,7 @@ async function selftest() {
   ok(/3 form visit\(s\)/.test(vrep.subject) && noDash(vrep.subject) && noDash(vrep.html), 'the subject counts the visits');
 
   /* --- the file's own source: the guards that keep the log clean ------------ */
-  const src = await readFile(fileURLToPath(import.meta.url), 'utf8');
+  const src = (await readFile(fileURLToPath(import.meta.url), 'utf8')).replace(/\r\n/g, '\n');
   const mainAt = src.indexOf('async function main()');
   const mainEnd = src.indexOf('/* ---------------------------------------------------------------- selftest */');
   ok(mainAt > 0 && mainEnd > mainAt, 'main() was found');

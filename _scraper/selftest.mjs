@@ -7404,7 +7404,7 @@ async function testAccountDeletion() {
      alone, never the roster, bounded, and a reload only once an order has
      moved on. Reverting the call in load() leaves the chip until a reload,
      which is the half of the report about how long it "stays there". */
-  ok(/function watchQueued\(\)/.test(users) && /watchQueued\(\);/.test(users.slice(users.indexOf('function load()'))),
+  ok(/function watchQueued\(\)/.test(users) && /watchQueued\(\);/.test(users.slice(users.indexOf('function load('))),
     'the roster starts a watch after every read');
   ok(/st\.queued && st\.cancellable/.test(users),
     '…over the rows whose order is filed and not yet started, by the chip\'s own rule');
@@ -18756,8 +18756,8 @@ async function testCandidateStats() {
     'a click stamped in the future is refused, with a day of clock skew allowed');
 
   /* --- the rules: an owner CARRIES the map, never writes it -------------- */
-  const block = rules.slice(rules.indexOf('match /candidateSubmissions/'),
-                            rules.indexOf('match /placementSubmissions/'));
+  const candidateStart = rules.indexOf('match /candidateSubmissions/');
+  const block = rules.slice(candidateStart, rules.indexOf('\n    match /', candidateStart + 1));
   ok(block.length > 500, 'the candidateSubmissions block was sliced');
   ok(/function statsUntouched\(\)/.test(block) &&
      /request\.resource\.data\.stats == resource\.data\.stats/.test(block),

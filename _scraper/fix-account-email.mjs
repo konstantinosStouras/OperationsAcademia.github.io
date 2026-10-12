@@ -354,7 +354,7 @@ function selftest() {
 }
 
 function readOwnSource() {
-  return readFileSync(fileURLToPath(import.meta.url), 'utf8');
+  return readFileSync(fileURLToPath(import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 }
 
 if (isMain(import.meta.url)) {

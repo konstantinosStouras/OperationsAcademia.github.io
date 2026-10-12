@@ -189,10 +189,11 @@
 
         var patch = {};
         patch[REVIEWED_AT] = new Date().toISOString();
-        db.collection(it.kind.collection).doc(it.id).set(patch, { merge: true })
+        db.collection(it.kind.collection).doc(it.id).update(patch)
           .then(function () {
-            card.innerHTML = '<p class="oa-form-msg is-ok">Marked reviewed &mdash; ' +
-              esc(it.kind.title(it.data)) + '</p>';
+            items = items.filter(function (row) { return row.id !== it.id; });
+            render(db, items, revealAt);
+            document.dispatchEvent(new CustomEvent('oa:candidate-reviewed'));
           })
           .catch(function (err) {
             msg.className = 'oa-form-msg is-err';
