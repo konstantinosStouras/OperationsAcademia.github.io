@@ -1,11 +1,11 @@
 {
- "generated": "2026-10-11T22:32:34.761Z",
+ "generated": "2026-10-12T01:43:37.033Z",
  "members": 324,
  "k": 3,
  "affiliation": {
-  "listed": 239,
+  "listed": 240,
   "other": 45,
-  "none": 40
+  "none": 39
  },
  "universities": {
   "count": 128,
@@ -131,6 +131,11 @@
     "members": 3
    },
    {
+    "name": "University of Illinois at Urbana-Champaign",
+    "country": "United States",
+    "members": 3
+   },
+   {
     "name": "University of Maryland",
     "country": "United States",
     "members": 3
@@ -156,14 +161,14 @@
     "members": 3
    }
   ],
-  "rest": 129
+  "rest": 127
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 155
+    "members": 156
    },
    {
     "name": "Canada",
@@ -199,6 +204,6 @@
    }
   ],
   "rest": 9,
-  "unknown": 96
+  "unknown": 95
  }
 }
