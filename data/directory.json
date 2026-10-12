@@ -9096,15 +9096,6 @@
   "lastPosted": "2025-08-02"
  },
  {
-  "id": "stanford-university____data-science",
-  "institution": "Stanford University",
-  "department": "Data Science",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "stanford-university__department-of-management-science-and-engineering-ms-e",
   "institution": "Stanford University",
   "school": "Department of Management Science and Engineering (MS&E)",
