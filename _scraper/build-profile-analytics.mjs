@@ -97,6 +97,18 @@ export async function build() {
   const universities = new Map(profiles.map(d => [d.id, affiliation.match(d.data().affiliation || '', names)?.name || 'Unknown']));
   for (const session of sessions) session.university = universities.get(session.uid) || 'Unknown';
   const priorReports = new Map((await readAllDocuments(db.collectionGroup('analytics'), 1000)).map(d => [d.ref.path, d.data()]));
+  const diagnostic = { batches: sessions.length, events: 0, viewEvents: 0, adminViewEvents: 0,
+    latestEventAt: null, reports: 0, reportsWithViews: 0, countedViews: 0, priorCountedViews: 0 };
+  let latestEvent = 0;
+  for (const session of sessions) for (const event of session.clicks || []) {
+    diagnostic.events++;
+    if (event.k === 'view') {
+      diagnostic.viewEvents++;
+      if (session.email === 'kstouras@gmail.com') diagnostic.adminViewEvents++;
+    }
+    if (Number.isFinite(event.t)) latestEvent = Math.max(latestEvent, event.t);
+  }
+  if (latestEvent) diagnostic.latestEventAt = new Date(latestEvent).toISOString();
   let countries = null;
   try { countries = await countryReports(now); } catch (e) { console.warn(e.message); }
   for (const [type, col, file] of [['candidate', 'candidateSubmissions', 'candidates'], ['job', 'jobSubmissions', 'jobs']]) {
@@ -112,6 +124,10 @@ export async function build() {
       if (!listingId || !submission.uid) continue;
       const listing = { ...submission, type, id: listingId };
       const all = aggregate(sessions, listing, 0, now);
+      diagnostic.reports++;
+      diagnostic.countedViews += all.views;
+      diagnostic.priorCountedViews += prior.all?.views || 0;
+      if (all.views) diagnostic.reportsWithViews++;
       const last30 = aggregate(sessions, listing, Date.parse(new Date(now - 29 * 86400000).toISOString().slice(0, 10)), now);
       const country = countries?.get(type + ':' + listingId);
       all.countries = country?.all || (countries ? [] : prior.all?.countries || []);
@@ -122,6 +138,8 @@ export async function build() {
       if (!process.argv.includes('--dry-run')) await ref.set(report);
     }
   }
+  // Dry-run diagnostics are totals only: no visitor or listing identifiers.
+  if (process.argv.includes('--dry-run')) console.log('Profile Analytics diagnostic: ' + JSON.stringify(diagnostic));
   console.log('Private Profile Analytics refreshed.');
 }
 if (isMain(import.meta.url)) build().catch(e => { console.error(e.message); process.exitCode = 1; });
