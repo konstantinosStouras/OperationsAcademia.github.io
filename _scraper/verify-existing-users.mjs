@@ -380,7 +380,7 @@ async function selftest() {
     'a trailing slash on the site root is folded');
 
   /* --- the file's own source: the guards that keep the log clean ------------ */
-  const src = await readFile(fileURLToPath(import.meta.url), 'utf8');
+  const src = (await readFile(fileURLToPath(import.meta.url), 'utf8')).replace(/\r\n/g, '\n');
   const mainAt = src.indexOf('async function main()');
   const mainEnd = src.indexOf('/* ---------------------------------------------------------------- selftest */');
   ok(mainAt > 0 && mainEnd > mainAt, 'main() was found');

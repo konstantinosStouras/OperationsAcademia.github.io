@@ -387,6 +387,7 @@
   function renderCandidates(db, revealAt) {
     var list = $('oa-aa-cands-list');
     if (!list) return Promise.resolve(null);
+    var reviewedOpen = !!(list.querySelector('.oa-aa-cands-reviewed') || {}).open;
     list.innerHTML = '<p class="oa-hint">Loading&hellip;</p>';
 
     return db.collection(OAFB.col.candidateSubmissions).get().then(function (snap) {
@@ -402,16 +403,30 @@
         return String(fmtDate(b.v.createdAt)).localeCompare(String(fmtDate(a.v.createdAt)));
       };
 
-      var out = '';
+      var out = '', reviewed = '', reviewedCount = 0;
       CAND_GROUPS.forEach(function (g) {
         var rows = groups[g[0]];
         if (!rows.length) return;
         rows.sort(byNewest);
-        out += '<h4 class="oa-aa-group-h">' + g[1] + ' (' + rows.length + ')</h4>' +
-          rows.map(function (r) { return candCard(r.id, r.v, g[0]); }).join('');
+        var pending = rows.filter(function (r) { return !r.v.reviewedAt; });
+        var done = rows.filter(function (r) { return !!r.v.reviewedAt; });
+        var section = function (items) {
+          return items.length ? '<h4 class="oa-aa-group-h">' + g[1] +
+            ' (' + items.length + ')</h4>' + items.map(function (r) {
+              return candCard(r.id, r.v, g[0]);
+            }).join('') : '';
+        };
+        out += section(pending);
+        reviewed += section(done);
+        reviewedCount += done.length;
       });
-      list.innerHTML = out ||
-        '<p class="oa-hint">No candidate profiles have been filed yet.</p>';
+      list.innerHTML = (out || '<p class="oa-hint">Nothing waiting. ' +
+        'No unreviewed candidate profiles.</p>') +
+        (reviewedCount ? '<details class="oa-aa-cands-reviewed"' +
+          (reviewedOpen ? ' open' : '') + '><summary>Reviewed profiles (' +
+          reviewedCount + ')</summary>' + reviewed + '</details>' : '');
+      // Keep publication groups intact: reviewing does not change the reveal
+      // gate, and the held-profile statistic still counts every held profile.
       return groups;
     })['catch'](function (err) {
       list.innerHTML = '<p class="oa-form-msg is-err">Could not load the profiles (' +
@@ -426,6 +441,9 @@
     var list = $('oa-aa-cands-list');
     if (!list || list.dataset.oaWired) return;
     list.dataset.oaWired = '1';
+    document.addEventListener('oa:candidate-reviewed', function () {
+      if (OAAccounts.isAdmin()) renderCandidates(db, revealAt).then(correctBadge);
+    });
     list.addEventListener('click', function (e) {
       var btn = e.target.closest ? e.target.closest('button[data-act]') : null;
       if (!btn) return;
@@ -916,7 +934,8 @@
               'ones held back until the reveal at <strong>' + esc(when.utc) + ' on ' +
               esc(when.dayLong) + '</strong>. Edit opens the same form the candidate ' +
               'used; a held profile is visible to nobody but you and its candidate ' +
-              'until the reveal publishes it.';
+              'until the reveal publishes it. Reviewed profiles are tucked away ' +
+              'below; expand them whenever you need to edit or take one down.';
           }
           show($('oa-aa-cands'), true);
           wireCandidateActions(db, revealAt);

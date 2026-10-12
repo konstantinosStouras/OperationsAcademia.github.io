@@ -925,7 +925,7 @@ function selftest() {
     'and a profiles read that fails hands rowFromAuthUser UNDEFINED, never null — unknown is not none');
 
   /* --- the run's own log, which prints into a PUBLIC Actions log ---------- */
-  const src = readFileSync(fileURLToPath(import.meta.url), 'utf8');
+  const src = readFileSync(fileURLToPath(import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   const mainAt = src.indexOf('async function main()');
   const mainEnd = src.indexOf('/* ---------------------------------------------------------------- selftest */');
   ok(mainAt > 0 && mainEnd > mainAt, 'main() was found');
