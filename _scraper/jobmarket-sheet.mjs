@@ -147,6 +147,16 @@ export function tabsFromHtml(html) {
     add(m[1], m[2]);
   }
 
+  // Current htmlview builds the tab strip from items.push(...) descriptors.
+  // Read only their string fields; never execute script from the workbook.
+  for (const m of s.matchAll(
+    /items\.push\(\{\s*name:\s*"((?:\\.|[^"\\])*)"\s*,\s*pageUrl:\s*"(?:\\.|[^"\\])*"\s*,\s*gid:\s*"(\d+)"/g)) {
+    try {
+      const name = JSON.parse('"' + m[1].replace(/\\x([0-9a-f]{2})/gi, '\\u00$1') + '"');
+      add(m[2], name);
+    } catch { /* A malformed descriptor must not hide the other tabs. */ }
+  }
+
   return out;
 }
 

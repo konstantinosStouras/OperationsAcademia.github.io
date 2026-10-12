@@ -4064,10 +4064,12 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
      day) collide, and whichever writes later silently wins. */
   const jobs = await read('jobs.json');
 
-  /* the tracking sheet's own file, which build-jobs republishes verbatim */
+  /* Reviewed sheet rows have three explicit place fields, just like jobs.json.
+     Applying the archive's fused-column splitter here blocked every sync
+     after legitimate school/department corrections were approved. */
   const sheet = await read('jobmarket.json');
   const badSheet = sheet.filter((r) => {
-    const p = S.canonPlace(r);
+    const p = S.canonColumns(r);
     return p.institution !== r.institution || p.school !== (r.school || '') || p.unit !== (r.unit || '');
   }).map((r) => r.id);
   eq(badSheet, [], 'data/jobmarket.json: and so do the tracking sheet\'s postings');
@@ -5424,6 +5426,23 @@ function testJobMarketSheetColumns() {
 }
 
 function testJobMarketSheetRows() {
+  // Both live 2026 layouts (checked 2026-10-12): the Jobs tab repeats
+  // "Location" where NTT/PD correctly says "School". Keep both ingest paths.
+  const liveHead = ['DO NOT FILTER OR SORT #', 'School', 'Location', 'Country',
+    'Date Added', 'Job Focus Area', 'Rank', 'Salary', 'Teaching Load', 'Deadline', 'Link'];
+  const liveNtt = rowsFromTab(csvOf([liveHead, ...JMS_ROWS]),
+    { tab: '2026 NTT/PD', kind: 'ntt-pd', minYear: 2026, cycleYear: 2027 });
+  const liveJobs = rowsFromTab(csvOf([
+    liveHead.map((v, i) => i === 1 ? 'Location' : v), ...JMS_ROWS,
+  ]), { tab: '2026 Jobs', kind: 'jobs', minYear: 2026, cycleYear: 2027 });
+  eq(liveNtt.rows.length, 4, 'the current NTT/PD School header imports every fixture posting');
+  eq(liveJobs.rows.map((r) => r.id), liveNtt.rows.map((r) => r.id),
+    'the current Jobs duplicate Location header reads the same institutions and dates');
+  eq(liveNtt.rows.map((r) => r.levels), [
+    ['Visiting Faculty (various levels)'], ['Non-tenure track (teaching) position'],
+    ['Post-Doc'], ['Non-tenure track (teaching) position'],
+  ], 'NTT/PD retains visiting, teaching and postdoctoral classifications');
+
   const withHead = rowsFromTab(csvOf([JMS_HEAD, ...JMS_ROWS]),
     { tab: '2026 NTT/PD', kind: 'ntt-pd', minYear: 2026 });
   const headless = rowsFromTab(csvOf(JMS_ROWS),
@@ -5905,6 +5924,19 @@ async function testJobMarketSheetChain() {
 
   eq(tabsFromHtml(html).map((t) => t.name), ['Intro', '2026 NTT/PD', '2026 Jobs'],
     'the tab names are read from the HTML view — the CSV endpoint cannot list them');
+  const scriptTabs = String.raw`
+    items.push({name: "2026 Jobs", pageUrl: "https:\/\/docs.google.com\/htmlview\/sheet?headers\x3dtrue&gid=2050222708", gid: "2050222708",initialSheet: false});
+    items.push({name: "2026 NTT\/PD", pageUrl: "https:\/\/docs.google.com\/htmlview\/sheet?headers\x3dtrue&gid=1514861818", gid: "1514861818",initialSheet: false});
+    items.push({name: "2026 Q\x26A", pageUrl: "unused", gid: "1131089593"});
+    items.push({name: "bad\q", pageUrl: "unused", gid: "4"});`;
+  eq(tabsFromHtml(scriptTabs), [
+    { name: '2026 Jobs', gid: '2050222708' },
+    { name: '2026 NTT/PD', gid: '1514861818' },
+    { name: '2026 Q&A', gid: '1131089593' },
+  ], 'current Google tab descriptors decode slashes and hex escapes without executing JavaScript');
+  eq(tabsFromHtml(html + scriptTabs).map((t) => t.name),
+    ['Intro', '2026 NTT/PD', '2026 Jobs', '2026 Q&A'],
+    'HTML and script tab lists are deduplicated');
   eq(sheetIdsFromHtml(html, { exclude: [SEED_SHEET_ID] }), [NEXT],
     'and so is the link to next year\'s workbook, through Google\'s redirector');
   eq(sheetIdsFromHtml(html, { exclude: [SEED_SHEET_ID, NEXT] }), [],

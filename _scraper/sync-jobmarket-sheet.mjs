@@ -370,6 +370,12 @@ async function readWorkbook(id, { minYear, now }) {
     }
   }
 
+  // Keep the fallback's oldest-cycle-first, Jobs-before-NTT order. The tab
+  // strip puts the current cycle first; changing ingest order could reassign
+  // collision suffixes (and hence review decisions) between real postings.
+  wanted.sort((a, b) => a.year - b.year ||
+    Number(a.kind === 'ntt-pd') - Number(b.kind === 'ntt-pd'));
+
   const perTab = [];
   const dead = [];
   let readAny = false;
