@@ -58,13 +58,33 @@ try {
   await page.getByRole('heading', { name: 'Views over time' }).waitFor();
   assert.equal(await page.getByLabel('Choose a listing').count(), 0, 'one listing opens directly without a chooser');
   if (process.env.QA_OUTPUT) { await fs.mkdir(process.env.QA_OUTPUT, { recursive: true }); await page.screenshot({ path: path.join(process.env.QA_OUTPUT, 'profile-analytics-desktop.png'), fullPage: true }); }
-  for (const theme of ['light', 'dark']) {
+  await page.evaluate(() => { window.singleListing = false; changeUser({ uid: 'owner' }); });
+  await page.getByLabel('Choose a listing').waitFor();
+  for (const theme of ['light', 'dark']) for (const width of [320, 360, 390, 430]) {
     await page.evaluate(theme => document.documentElement.dataset.theme = theme, theme);
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.waitForTimeout(450);
-    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'mobile has no horizontal overflow');
-    if (process.env.QA_OUTPUT) await page.screenshot({ path: path.join(process.env.QA_OUTPUT, 'profile-analytics-mobile-' + theme + '.png'), fullPage: true });
+    await page.setViewportSize({ width, height: 844 });
+    for (const [value, type] of [['0', 'candidate'], ['1', 'job']]) for (const period of ['last30', 'all']) {
+      await page.getByLabel('Choose a listing').selectOption(value);
+      await page.getByLabel('Reporting period').selectOption(period);
+      const rows = page.locator('.pa-click-table tbody');
+      assert.match(await rows.innerText(), type === 'candidate'
+        ? period === 'last30' ? /CV\s+7\s+5\s+1 min 30 sec\s+30 sec/ : /CV\s+20\s+15\s+4 min 0 sec\s+1 min 20 sec/
+        : period === 'last30' ? /Job advertisement\s+3\s+3\s+1 min 0 sec\s+30 sec/ : /Job advertisement\s+12\s+12\s+3 min 0 sec\s+1 min 30 sec/);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${type} ${width}px ${theme}: no page overflow`);
+      assert.equal(await page.locator('.pa-clicks .pa-table-scroll').evaluate(el => el.scrollWidth <= el.clientWidth), true, `${type} ${width}px: all detail values fit without horizontal scrolling`);
+      assert.equal(await page.locator('.pa-click-table td').evaluateAll(cells => cells.every(cell => {
+        const label = cell.getAttribute('data-label'), style = getComputedStyle(cell, '::before');
+        const box = cell.getBoundingClientRect();
+        return label && style.content === '"' + label + '"' && style.display !== 'none' && box.height > 0 && cell.scrollWidth <= cell.clientWidth + 1;
+      })), true, `${type} ${width}px ${theme}: every value has a visible label and fits its cell`);
+      if (process.env.QA_OUTPUT && width === 390 && period === 'last30') {
+        await page.locator('.pa-clicks').evaluate(el => scrollTo({ top: scrollY + el.getBoundingClientRect().top - 80, behavior: 'instant' }));
+        await page.screenshot({ path: path.join(process.env.QA_OUTPUT, `${type}-detail-time-mobile-${theme}.png`) });
+      }
+    }
   }
+  await page.getByLabel('Choose a listing').selectOption('0');
+  await page.getByLabel('Reporting period').selectOption('last30');
   await page.evaluate(() => { window.oldParts = true; changeUser({ uid: 'owner' }); });
   await page.getByRole('heading', { name: 'Clicks and reading time by detail' }).waitFor();
   assert.match(await page.locator('.pa-click-table tbody').innerText(), /CV\s+7\s+5\s+—\s+—/);
@@ -81,5 +101,5 @@ try {
   assert.match(await page.locator('#profile-analytics').innerText(), /Sign in/);
   assert.deepEqual(errors, []);
   await page.close();
-  console.log('Profile Analytics browser: owner-scoped queries, candidate/job selection, reporting period, responsive themes and logout passed.');
+  console.log('Profile Analytics browser: owner-scoped queries, candidate/job selection, reporting period, 32 mobile report/period/theme combinations at 320–430px with labeled, unclipped times, and logout passed.');
 } finally { await browser.close(); }

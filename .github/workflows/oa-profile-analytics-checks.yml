@@ -10,6 +10,7 @@ on:
       - '_firestore.rules'
       - '_scraper/*profile-analytics*'
       - '_scraper/listing-tracking-browser-test.mjs'
+      - '_scraper/listing-detail-layout-test.mjs'
       - '_functions/test/profile-analytics-rules.mjs'
       - '.github/workflows/oa-profile-analytics-checks.yml'
   workflow_dispatch:
@@ -34,4 +35,5 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node _scraper/profile-analytics-browser-test.mjs
       - run: node _scraper/listing-tracking-browser-test.mjs
+      - run: node _scraper/listing-detail-layout-test.mjs
       - run: npx firebase emulators:exec --project demo-oa-analytics --only firestore "node _functions/test/profile-analytics-rules.mjs"
