@@ -67,8 +67,24 @@ sequence `n`. Group by the private batch's uid and event `s` for a visit;
 order by `n`. These identifiers are not sent to GA4. Count only
 `k: interaction` for detailed click totals: legacy element events and `k: link`
 remain available for existing reports and must not be added to the same total.
-Current owner reports continue to show views, opens, link clicks and active
-time; detailed parts are retained for future reporting.
+Owner reports now show total listing clicks and a “What people click” table
+with each detail's click count and its link-click subset. This breakdown counts
+only semantic interaction events, deduplicated by viewer/page-visit/sequence
+when those identifiers exist. Legacy link and element events are never added
+to those counts. Labels come from a fixed vocabulary; arbitrary raw event text,
+paths and visitor identifiers never enter the owner-facing breakdown.
+
+Total and average active reading time are prominent summary cards. Time belongs
+to the whole expanded listing, not individual details or external pages. Both
+period selections recalculate the breakdown from retained events. Reports that
+predate the breakdown show a pending message rather than a false zero; new
+reports with no detail events show an explicit empty state. Detail coverage
+starts on 13 October 2026, later than the legacy link totals.
+
+The report builder resolves released candidates from the private candidate
+snapshot, falling back to the former public file only before migration. Reports
+continue to use the existing owner/admin-only submission subdocuments and the
+same exclusion of owner, merged-owner and administrator activity.
 
 `oa_page_engagement` / `k: page_engagement` adds focused, visible, non-idle
 page seconds. Existing `oa_listing_engagement` / `k: engagement` retains

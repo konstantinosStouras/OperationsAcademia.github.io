@@ -6,7 +6,7 @@
     if (cls) n.className = cls; return n;
   }
   function number(n) { return Number(n || 0).toLocaleString(); }
-  function duration(n) { n = Math.round(n || 0); return n < 60 ? n + ' sec' : Math.floor(n / 60) + ' min ' + n % 60 + ' sec'; }
+  function duration(n) { n = Math.round(n || 0); return n < 60 ? n + ' sec' : n < 3600 ? Math.floor(n / 60) + ' min ' + n % 60 + ' sec' : Math.floor(n / 3600) + ' hr ' + Math.floor(n % 3600 / 60) + ' min'; }
   function title(item) {
     var d = item.data;
     return d.name || [d.first, d.last].filter(Boolean).join(' ') || d.institution || d.ref || item.type;
@@ -19,9 +19,32 @@
     [[type === 'candidate' ? 'Profile views' : 'Posting views', number(r.views), 'Visible, expanded views'],
       ['Unique viewers', number(r.viewers), 'Approximate accounts and browsers'],
       ['Link clicks', number(r.clicks), 'Links within this listing'],
-      ['Average reading time', duration(r.views ? r.seconds / r.views : 0), 'Active time per view']].forEach(function (v) {
+      ['Listing clicks', typeof r.interactions === 'number' ? number(r.interactions) : '—', 'Detail and control clicks since 13 Oct 2026'],
+      ['Total reading time', duration(r.seconds), 'Active time across all measured views'],
+      ['Average reading time', r.views ? duration(r.seconds / r.views) : '—', 'Active time per view']].forEach(function (v) {
       var box = el('div', '', 'pa-metric'); box.append(el('p', v[0]), el('strong', v[1]), el('span', v[2])); metrics.appendChild(box);
     }); parent.appendChild(metrics);
+    var clicksPanel = el('section', '', 'pa-panel pa-clicks');
+    clicksPanel.append(el('h3', 'What people click'), el('p', 'See which parts of your ' + (type === 'candidate' ? 'profile' : 'job posting') + ' people interact with. Clicks include links, controls and text.', 'v3-mut'));
+    if (!Array.isArray(r.parts)) {
+      clicksPanel.appendChild(el('p', 'The click breakdown will appear after the next report refresh. Earlier reports did not include these details.'));
+    } else if (!r.parts.length) {
+      clicksPanel.appendChild(el('p', 'No detail clicks were measured in this period yet.'));
+    } else {
+      var table = el('table', '', 'pa-click-table'), theadClicks = el('thead'), headings = el('tr');
+      ['Listing detail', 'Clicks', 'Link clicks'].forEach(function (label) { var th = el('th', label); th.scope = 'col'; headings.appendChild(th); });
+      theadClicks.appendChild(headings); table.appendChild(theadClicks);
+      var rows = el('tbody'), most = Math.max.apply(null, r.parts.map(function (p) { return p.clicks; }).concat([1]));
+      r.parts.forEach(function (p) {
+        var tr = el('tr'), name = el('th', p.name); name.scope = 'row';
+        var count = el('td'), meter = el('span', '', 'pa-click-meter');
+        meter.style.setProperty('--share', Math.max(0, Math.min(100, 100 * p.clicks / most)) + '%'); meter.setAttribute('aria-hidden', 'true');
+        count.append(el('strong', number(p.clicks)), meter); tr.append(name, count, el('td', number(p.linkClicks))); rows.appendChild(tr);
+      });
+      table.appendChild(rows); var clickScroll = el('div', '', 'pa-table-scroll'); clickScroll.appendChild(table); clicksPanel.appendChild(clickScroll);
+    }
+    clicksPanel.appendChild(el('p', 'Detailed clicks have been collected since 13 October 2026. Link clicks are included in each row’s click count. Opening and closing the listing also count as clicks. Reading time is measured for the whole expanded listing, not individual details or external CVs and websites.', 'pa-footnote'));
+    parent.appendChild(clicksPanel);
     var columns = el('div', '', 'pa-columns'), trend = el('section', '', 'pa-panel');
     trend.append(el('h3', 'Views over time'), el('p', 'The last 30 calendar days (UTC)', 'v3-mut'));
     var days = [], end = new Date(data.updatedAt); end.setUTCHours(0, 0, 0, 0);

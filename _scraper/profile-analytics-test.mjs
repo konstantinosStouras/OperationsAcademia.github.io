@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { aggregate } from './build-profile-analytics.mjs';
+import { aggregate, listingRows } from './build-profile-analytics.mjs';
 const listing = { id: 'same-id', type: 'candidate', uid: 'owner', mergedFrom: 'old-owner' };
 const event = (k, extra = {}) => ({ k, c: 'job-same-id', m: 'oa-candidates', t: 10, ...extra });
 const events = [event('view'), event('engagement', { d: 12 }), event('link'), event('button', { o: 1 })];
@@ -7,7 +7,7 @@ const sessions = [{ uid: 'reader', clicks: events }, { uid: 'reader', clicks: [e
   { uid: 'owner', clicks: events }, { uid: 'old-owner', clicks: events },
   { uid: 'admin', email: 'kstouras@gmail.com', clicks: events },
   { uid: 'other', clicks: [event('view', { m: 'oa-placements' }), event('view', { m: 'oa-jobs' }), event('engagement', { d: -10 })] }];
-assert.deepEqual(aggregate(sessions, listing, 0, 20), { views: 2, viewers: 1, opens: 1, clicks: 1, seconds: 12, countries: [], days: { '1970-01-01': 2 }, universities: [{ name: 'Unknown', views: 2, clicks: 1, seconds: 12, averageSeconds: 6 }] });
+assert.deepEqual(aggregate(sessions, listing, 0, 20), { views: 2, viewers: 1, opens: 1, clicks: 1, seconds: 12, countries: [], days: { '1970-01-01': 2 }, universities: [{ name: 'Unknown', views: 2, clicks: 1, seconds: 12, averageSeconds: 6 }], interactions: 0, parts: [] });
 assert.equal(aggregate(sessions, listing, 11, 20).views, 0);
 assert.equal(aggregate(sessions, { ...listing, type: 'job' }, 0, 20).views, 1);
 assert.equal(aggregate([{ uid: 'reader', clicks: [event('view', { m: 'oa-past' })] }], { ...listing, type: 'job' }, 0, 20).views, 1);
@@ -39,3 +39,41 @@ assert.equal(universityStats.universities[0].averageSeconds, 18);
 assert.equal(universityStats.universities[0].views, 2);
 assert.equal(universityStats.universities[1].averageSeconds, 9);
 console.log('University totals and time weighted across visits passed.');
+
+const detail = (p, a, n, extra = {}) => event('interaction', { p, a, s: 'visit', n, v: 2, ...extra });
+const detailEvents = [detail('cv', 'link', 1), detail('cv', 'content', 2), detail('header', 'open', 3),
+  detail('contact', 'link', 4), detail('arbitrary private text', 'content', 5),
+  detail('cv', 'locked', 6), event('link', { p: 'cv' }), event('a', { p: 'cv' }),
+  event('view'), event('engagement', { d: 15 }), event('page_engagement', { d: 50 })];
+const detailSessions = [{ uid: 'reader', clicks: detailEvents },
+  { uid: 'reader', clicks: [detailEvents[0]] }, // same batch event returned twice
+  ...['owner', 'old-owner'].map(uid => ({ uid, clicks: detailEvents })),
+  { uid: 'admin', email: 'kstouras@gmail.com', clicks: detailEvents },
+  { uid: 'reader', clicks: [detail('cv', 'link', 7, { m: 'oa-jobs' }), detail('cv', 'link', 8, { t: 25 })] }];
+const detailed = aggregate(detailSessions, listing, 0, 20);
+assert.equal(detailed.interactions, 5);
+assert.equal(detailed.seconds, 15, 'page engagement never inflates listing reading time');
+assert.equal(detailed.clicks, 1, 'legacy link total stays separate from detail events');
+assert.deepEqual(detailed.parts, [
+  { part: 'cv', name: 'CV', clicks: 2, linkClicks: 1 },
+  { part: 'contact', name: 'Contact', clicks: 1, linkClicks: 1 },
+  { part: 'header', name: 'Listing header', clicks: 1, linkClicks: 0 },
+  { part: 'detail', name: 'Other details', clicks: 1, linkClicks: 0 }
+]);
+assert.equal(aggregate(detailSessions, listing, 11, 20).interactions, 0);
+assert.equal(aggregate(detailSessions, { ...listing, type: 'job' }, 0, 20).interactions, 1);
+assert.equal(aggregate([...detailSessions, { uid: 'reader2', clicks: [detailEvents[0]] }], listing, 0, 20).interactions, 6, 'sequence IDs are scoped to the viewer');
+assert.ok(!JSON.stringify(detailed).includes('arbitrary private text'));
+console.log('Detail breakdown: no duplicate legacy clicks, owner exclusion, period/list isolation, safe labels and reading time passed.');
+
+const privateRow = { id: 'private-row', ref: 'OA-CAND-PRIVATE' };
+const privateDb = revealAt => ({ collection: () => ({
+  doc: () => ({ get: async () => ({ exists: true, data: () => ({ ready: true, revealAt, generated: 'generation-1' }) }) }),
+  where: (key, op, value) => {
+    assert.deepEqual([key, op, value], ['generation', '==', 'generation-1']);
+    return { get: async () => ({ docs: [{ data: () => ({ row: privateRow }) }] }) };
+  }
+}) });
+assert.deepEqual(await listingRows(privateDb('2025-01-01'), 'candidate'), [privateRow]);
+assert.deepEqual(await listingRows(privateDb('2099-01-01'), 'candidate'), []);
+console.log('Private candidate listing mapping respects the release gate.');

@@ -3,16 +3,41 @@ import { createRequire } from 'node:module';
 const affiliation = createRequire(import.meta.url)('../assets/oa-affiliation.js');
 import { isMain } from './_main.mjs';
 import { readAllDocuments, readAllReportRows } from './build-analytics.mjs';
+import { readPrivateCandidates } from './private-candidates.mjs';
+
+// A fixed vocabulary keeps arbitrary client text and visitor details out of
+// owner-visible reports. Only the semantic interaction event counts here.
+const PARTS = Object.freeze({
+  title: 'Title', subtitle: 'Affiliation and position', header: 'Listing header',
+  body: 'Listing body', card: 'Other listing controls', detail: 'Other details',
+  research_areas: 'Research areas', informs_days: 'INFORMS presentation days',
+  informs_talk: 'INFORMS talk and calendar', cv: 'CV', research_summary: 'Research summary',
+  website: 'Website', contact: 'Contact', position_type: 'Position type',
+  suggested_deadline: 'Suggested deadline', final_deadline: 'Final deadline',
+  job_file: 'Job advertisement', posting_source: 'Original posting', further_info: 'Further information',
+  job_description: 'Job description', campus_countries: 'Campus countries', posting_id: 'Posting ID'
+});
 
 export function aggregate(sessions, listing, from = 0, until = Date.now()) {
-  const out = { views: 0, viewers: 0, opens: 0, clicks: 0, seconds: 0, countries: [], days: {}, universities: [] };
+  const out = { views: 0, viewers: 0, opens: 0, clicks: 0, seconds: 0, countries: [], days: {}, universities: [], interactions: 0, parts: [] };
   const viewers = new Set(), universities = new Map();
+  const parts = new Map(), seenInteractions = new Set();
   for (const s of sessions) {
     if (!s.uid || s.uid === listing.uid || s.uid === listing.mergedFrom || s.email === 'kstouras@gmail.com') continue;
     for (const e of s.clicks || []) {
       if (!e || !Number.isFinite(e.t) || e.t < from || e.t > until || e.c !== 'job-' + listing.id) continue;
       const correct = listing.type === 'candidate' ? e.m === 'oa-candidates' : ['oa-jobs', 'oa-jobs-recent', 'oa-past'].includes(e.m);
       if (!correct) continue;
+      if (e.k === 'interaction' && ['open', 'close', 'link', 'control', 'content'].includes(e.a)) {
+        const key = typeof e.s === 'string' && Number.isInteger(e.n) && e.n > 0
+          ? JSON.stringify([s.uid, e.s, e.n]) : null;
+        if (key && seenInteractions.has(key)) continue;
+        if (key) seenInteractions.add(key);
+        const part = Object.hasOwn(PARTS, e.p) ? e.p : 'detail';
+        if (!parts.has(part)) parts.set(part, { part, name: PARTS[part], clicks: 0, linkClicks: 0 });
+        const row = parts.get(part); row.clicks++; out.interactions++;
+        if (e.a === 'link') row.linkClicks++;
+      }
       const name = s.university || 'Unknown';
       if (!universities.has(name)) universities.set(name, { name, views: 0, clicks: 0, seconds: 0 });
       const university = universities.get(name);
@@ -30,6 +55,7 @@ export function aggregate(sessions, listing, from = 0, until = Date.now()) {
     .map(u => ({ ...u, seconds: Math.round(u.seconds), averageSeconds: u.views ? Math.round(u.seconds / u.views) : null }))
     .sort((a, b) => b.views - a.views || a.name.localeCompare(b.name));
   out.viewers = viewers.size; out.seconds = Math.round(out.seconds);
+  out.parts = [...parts.values()].sort((a, b) => b.clicks - a.clicks || a.name.localeCompare(b.name));
   return out;
 }
 
@@ -85,6 +111,14 @@ export function countriesFromRows(rows, from) {
   return result;
 }
 
+export async function listingRows(db, type) {
+  if (type === 'candidate') {
+    return await readPrivateCandidates(db, { releasedOnly: true })
+      ?? JSON.parse(await readFile(new URL('../data/candidates.json', import.meta.url), 'utf8'));
+  }
+  return JSON.parse(await readFile(new URL('../data/jobs.json', import.meta.url), 'utf8'));
+}
+
 export async function build() {
   const c = credentials('FIREBASE_SERVICE_ACCOUNT');
   if (!c) { console.log('Profile Analytics: no Firebase credential; no changes.'); return; }
@@ -99,8 +133,8 @@ export async function build() {
   const priorReports = new Map((await readAllDocuments(db.collectionGroup('analytics'), 1000)).map(d => [d.ref.path, d.data()]));
   let countries = null;
   try { countries = await countryReports(now); } catch (e) { console.warn(e.message); }
-  for (const [type, col, file] of [['candidate', 'candidateSubmissions', 'candidates'], ['job', 'jobSubmissions', 'jobs']]) {
-    const served = JSON.parse(await readFile(new URL(`../data/${file}.json`, import.meta.url), 'utf8'));
+  for (const [type, col] of [['candidate', 'candidateSubmissions'], ['job', 'jobSubmissions']]) {
+    const served = await listingRows(db, type);
     const byRef = new Map(served.filter(r => r.ref).map(r => [r.ref, r]));
     const documents = await readAllDocuments(db.collection(col), 1000);
     for (const doc of documents) {
@@ -117,6 +151,7 @@ export async function build() {
       all.countries = country?.all || (countries ? [] : prior.all?.countries || []);
       last30.countries = country?.last30 || (countries ? [] : prior.last30?.countries || []);
       const report = { all, last30, listingId, sourceRef: submission.ref, updatedAt: now, trackingSince: '2026-10-11',
+        detailTrackingSince: '2026-10-13', schemaVersion: 2,
         countriesReady: countries !== null || prior.countriesReady === true,
         countriesUpdatedAt: countries !== null ? now : prior.countriesUpdatedAt || null };
       if (!process.argv.includes('--dry-run')) await ref.set(report);
