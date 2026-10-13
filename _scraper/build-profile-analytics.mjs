@@ -21,22 +21,26 @@ const PARTS = Object.freeze({
 export function aggregate(sessions, listing, from = 0, until = Date.now()) {
   const out = { views: 0, viewers: 0, opens: 0, clicks: 0, seconds: 0, countries: [], days: {}, universities: [], interactions: 0, parts: [] };
   const viewers = new Set(), universities = new Map();
-  const parts = new Map(), seenInteractions = new Set();
+  const parts = new Map(), seenDetails = new Set();
   for (const s of sessions) {
     if (!s.uid || s.uid === listing.uid || s.uid === listing.mergedFrom || s.email === 'kstouras@gmail.com') continue;
     for (const e of s.clicks || []) {
       if (!e || !Number.isFinite(e.t) || e.t < from || e.t > until || e.c !== 'job-' + listing.id) continue;
       const correct = listing.type === 'candidate' ? e.m === 'oa-candidates' : ['oa-jobs', 'oa-jobs-recent', 'oa-past'].includes(e.m);
       if (!correct) continue;
-      if (e.k === 'interaction' && ['open', 'close', 'link', 'control', 'content'].includes(e.a)) {
+      const isClick = e.k === 'interaction' && ['open', 'close', 'link', 'control', 'content'].includes(e.a);
+      const isTime = e.k === 'part_engagement' && Number.isFinite(e.d) && e.d > 0 && e.d <= 60;
+      if (isClick || isTime || e.k === 'part_view') {
         const key = typeof e.s === 'string' && Number.isInteger(e.n) && e.n > 0
           ? JSON.stringify([s.uid, e.s, e.n]) : null;
-        if (key && seenInteractions.has(key)) continue;
-        if (key) seenInteractions.add(key);
+        if (key && seenDetails.has(key)) continue;
+        if (key) seenDetails.add(key);
         const part = Object.hasOwn(PARTS, e.p) ? e.p : 'detail';
-        if (!parts.has(part)) parts.set(part, { part, name: PARTS[part], clicks: 0, linkClicks: 0 });
-        const row = parts.get(part); row.clicks++; out.interactions++;
-        if (e.a === 'link') row.linkClicks++;
+        if (!parts.has(part)) parts.set(part, { part, name: PARTS[part], clicks: 0, linkClicks: 0, views: 0, seconds: 0 });
+        const row = parts.get(part);
+        if (isClick) { row.clicks++; out.interactions++; if (e.a === 'link') row.linkClicks++; }
+        if (e.k === 'part_view') row.views++;
+        if (isTime) row.seconds += e.d;
       }
       const name = s.university || 'Unknown';
       if (!universities.has(name)) universities.set(name, { name, views: 0, clicks: 0, seconds: 0 });
@@ -55,7 +59,9 @@ export function aggregate(sessions, listing, from = 0, until = Date.now()) {
     .map(u => ({ ...u, seconds: Math.round(u.seconds), averageSeconds: u.views ? Math.round(u.seconds / u.views) : null }))
     .sort((a, b) => b.views - a.views || a.name.localeCompare(b.name));
   out.viewers = viewers.size; out.seconds = Math.round(out.seconds);
-  out.parts = [...parts.values()].sort((a, b) => b.clicks - a.clicks || a.name.localeCompare(b.name));
+  out.parts = [...parts.values()].map(p => ({ ...p, seconds: Math.round(p.seconds),
+    averageSeconds: p.views ? Math.round(p.seconds / p.views) : null }))
+    .sort((a, b) => b.clicks - a.clicks || b.seconds - a.seconds || a.name.localeCompare(b.name));
   return out;
 }
 
@@ -151,7 +157,7 @@ export async function build() {
       all.countries = country?.all || (countries ? [] : prior.all?.countries || []);
       last30.countries = country?.last30 || (countries ? [] : prior.last30?.countries || []);
       const report = { all, last30, listingId, sourceRef: submission.ref, updatedAt: now, trackingSince: '2026-10-11',
-        detailTrackingSince: '2026-10-13', schemaVersion: 2,
+        detailTrackingSince: '2026-10-13', partTimeTrackingSince: '2026-10-13', schemaVersion: 3,
         countriesReady: countries !== null || prior.countriesReady === true,
         countriesUpdatedAt: countries !== null ? now : prior.countriesUpdatedAt || null };
       if (!process.argv.includes('--dry-run')) await ref.set(report);

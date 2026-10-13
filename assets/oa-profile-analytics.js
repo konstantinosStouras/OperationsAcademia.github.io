@@ -25,25 +25,30 @@
       var box = el('div', '', 'pa-metric'); box.append(el('p', v[0]), el('strong', v[1]), el('span', v[2])); metrics.appendChild(box);
     }); parent.appendChild(metrics);
     var clicksPanel = el('section', '', 'pa-panel pa-clicks');
-    clicksPanel.append(el('h3', 'What people click'), el('p', 'See which parts of your ' + (type === 'candidate' ? 'profile' : 'job posting') + ' people interact with. Clicks include links, controls and text.', 'v3-mut'));
+    clicksPanel.append(el('h3', 'Clicks and reading time by detail'), el('p', 'See which parts of your ' + (type === 'candidate' ? 'profile' : 'job posting') + ' people interact with and how long each detail is visible while they read. Clicks include links, controls and text.', 'v3-mut'));
     if (!Array.isArray(r.parts)) {
       clicksPanel.appendChild(el('p', 'The click breakdown will appear after the next report refresh. Earlier reports did not include these details.'));
     } else if (!r.parts.length) {
-      clicksPanel.appendChild(el('p', 'No detail clicks were measured in this period yet.'));
+      clicksPanel.appendChild(el('p', 'No detail activity was measured in this period yet.'));
     } else {
       var table = el('table', '', 'pa-click-table'), theadClicks = el('thead'), headings = el('tr');
-      ['Listing detail', 'Clicks', 'Link clicks'].forEach(function (label) { var th = el('th', label); th.scope = 'col'; headings.appendChild(th); });
+      ['Listing detail', 'Clicks', 'Link clicks', 'Reading time', 'Average per view'].forEach(function (label) { var th = el('th', label); th.scope = 'col'; headings.appendChild(th); });
       theadClicks.appendChild(headings); table.appendChild(theadClicks);
       var rows = el('tbody'), most = Math.max.apply(null, r.parts.map(function (p) { return p.clicks; }).concat([1]));
       r.parts.forEach(function (p) {
         var tr = el('tr'), name = el('th', p.name); name.scope = 'row';
         var count = el('td'), meter = el('span', '', 'pa-click-meter');
         meter.style.setProperty('--share', Math.max(0, Math.min(100, 100 * p.clicks / most)) + '%'); meter.setAttribute('aria-hidden', 'true');
-        count.append(el('strong', number(p.clicks)), meter); tr.append(name, count, el('td', number(p.linkClicks))); rows.appendChild(tr);
+        count.append(el('strong', number(p.clicks)), meter); tr.append(name, count, el('td', number(p.linkClicks)),
+          el('td', typeof p.seconds === 'number' ? duration(p.seconds) : '—'),
+          el('td', p.averageSeconds == null ? '—' : duration(p.averageSeconds)));
+        ['Clicks', 'Link clicks', 'Reading time', 'Average per view'].forEach(function (label, i) { tr.children[i + 1].setAttribute('data-label', label); });
+        rows.appendChild(tr);
       });
       table.appendChild(rows); var clickScroll = el('div', '', 'pa-table-scroll'); clickScroll.appendChild(table); clicksPanel.appendChild(clickScroll);
     }
-    clicksPanel.appendChild(el('p', 'Detailed clicks have been collected since 13 October 2026. Link clicks are included in each row’s click count. Opening and closing the listing also count as clicks. Reading time is measured for the whole expanded listing, not individual details or external CVs and websites.', 'pa-footnote'));
+    clicksPanel.appendChild(el('p', 'Detailed clicks have been collected since 13 October 2026. Link clicks are included in each row’s click count. Opening and closing the listing also count as clicks. Reading time estimates active time with each detail on screen. Average per view is per viewing episode of that detail. Details visible together accrue overlapping time, so their times should not be added together. External CVs and websites cannot be timed.', 'pa-footnote'));
+    clicksPanel.appendChild(el('p', data.partTimeTrackingSince ? 'Detail reading time has been collected since 13 October 2026.' : 'Detail reading time will appear after the next report refresh.', 'pa-footnote'));
     parent.appendChild(clicksPanel);
     var columns = el('div', '', 'pa-columns'), trend = el('section', '', 'pa-panel');
     trend.append(el('h3', 'Views over time'), el('p', 'The last 30 calendar days (UTC)', 'v3-mut'));

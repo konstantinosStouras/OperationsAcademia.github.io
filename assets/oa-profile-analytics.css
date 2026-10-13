@@ -39,10 +39,20 @@
 .pa-universities th,.pa-universities td { padding:14px 12px; text-align:left; }
 .pa-private-note { align-self:center; color:var(--mut); font-size:14px; }
 .pa-clicks { margin-bottom:24px; }
-.pa-click-table { width:100%; border-collapse:collapse; font-size:14px; }
+.pa-click-table { width:100%; min-width:590px; border-collapse:collapse; font-size:14px; }
 .pa-click-table th,.pa-click-table td { padding:14px 10px; border-bottom:1px solid var(--line); text-align:left; overflow-wrap:anywhere; }
 .pa-click-table thead th { font-size:12px; color:var(--mut); }
-.pa-click-table tbody th { width:50%; font-weight:500; }
-.pa-click-table td { width:25%; font-variant-numeric:tabular-nums; }
+.pa-click-table tbody th { width:32%; font-weight:500; }
+.pa-click-table td { width:17%; font-variant-numeric:tabular-nums; }
 .pa-click-meter { display:block; margin-top:8px; height:5px; background:var(--line-soft); border-radius:5px; }
 .pa-click-meter::before { content:''; display:block; width:var(--share); height:100%; background:var(--brand); border-radius:5px; }
+
+@media(max-width:700px) {
+  .pa-click-table { min-width:0; }
+  .pa-click-table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  .pa-click-table tbody { display:block; }
+  .pa-click-table tbody tr { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:12px 0; border-bottom:1px solid var(--line); }
+  .pa-click-table tbody th { grid-column:1 / -1; width:auto; font-weight:600; }
+  .pa-click-table tbody th,.pa-click-table td { display:block; width:auto; border:0; padding:8px 6px; }
+  .pa-click-table td::before { content:attr(data-label); display:block; font-size:11px; color:var(--mut); margin-bottom:6px; }
+}

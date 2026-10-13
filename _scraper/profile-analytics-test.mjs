@@ -55,10 +55,10 @@ assert.equal(detailed.interactions, 5);
 assert.equal(detailed.seconds, 15, 'page engagement never inflates listing reading time');
 assert.equal(detailed.clicks, 1, 'legacy link total stays separate from detail events');
 assert.deepEqual(detailed.parts, [
-  { part: 'cv', name: 'CV', clicks: 2, linkClicks: 1 },
-  { part: 'contact', name: 'Contact', clicks: 1, linkClicks: 1 },
-  { part: 'header', name: 'Listing header', clicks: 1, linkClicks: 0 },
-  { part: 'detail', name: 'Other details', clicks: 1, linkClicks: 0 }
+  { part: 'cv', name: 'CV', clicks: 2, linkClicks: 1, views: 0, seconds: 0, averageSeconds: null },
+  { part: 'contact', name: 'Contact', clicks: 1, linkClicks: 1, views: 0, seconds: 0, averageSeconds: null },
+  { part: 'header', name: 'Listing header', clicks: 1, linkClicks: 0, views: 0, seconds: 0, averageSeconds: null },
+  { part: 'detail', name: 'Other details', clicks: 1, linkClicks: 0, views: 0, seconds: 0, averageSeconds: null }
 ]);
 assert.equal(aggregate(detailSessions, listing, 11, 20).interactions, 0);
 assert.equal(aggregate(detailSessions, { ...listing, type: 'job' }, 0, 20).interactions, 1);
@@ -77,3 +77,24 @@ const privateDb = revealAt => ({ collection: () => ({
 assert.deepEqual(await listingRows(privateDb('2025-01-01'), 'candidate'), [privateRow]);
 assert.deepEqual(await listingRows(privateDb('2099-01-01'), 'candidate'), []);
 console.log('Private candidate listing mapping respects the release gate.');
+
+const partEvent = (k, p, n, extra = {}) => event(k, { p, s: 'part-visit', n, ...extra });
+const readingEvents = [partEvent('part_view', 'research_summary', 1),
+  partEvent('part_engagement', 'research_summary', 2, { d: 12 }),
+  partEvent('part_view', 'research_summary', 3),
+  partEvent('part_engagement', 'research_summary', 4, { d: 8 }),
+  partEvent('part_engagement', 'cv', 5, { d: 2 }), // view outside reporting window
+  ...[-1, NaN, Infinity, 61].map((d, i) => partEvent('part_engagement', 'cv', i + 6, { d }))];
+const readingSessions = [{ uid: 'reader', clicks: readingEvents },
+  { uid: 'reader', clicks: readingEvents }, // retried batches cannot inflate time/views
+  { uid: 'owner', clicks: readingEvents }, { uid: 'old-owner', clicks: readingEvents },
+  { uid: 'admin', email: 'kstouras@gmail.com', clicks: readingEvents }];
+const reading = aggregate(readingSessions, listing, 0, 20);
+assert.deepEqual(reading.parts, [
+  { part: 'research_summary', name: 'Research summary', clicks: 0, linkClicks: 0, views: 2, seconds: 20, averageSeconds: 10 },
+  { part: 'cv', name: 'CV', clicks: 0, linkClicks: 0, views: 0, seconds: 2, averageSeconds: null }
+]);
+assert.equal(reading.views, 0); assert.equal(reading.seconds, 0); assert.equal(reading.interactions, 0);
+assert.deepEqual(aggregate(readingSessions, listing, 11, 20).parts, []);
+assert.deepEqual(aggregate(readingSessions, { ...listing, type: 'job' }, 0, 20).parts, []);
+console.log('Detail time: zero-click rows, weighted averages, duplicate suppression, invalid durations, owner exclusion and reporting boundaries passed.');

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { aggregate } from './build-profile-analytics.mjs';
 import fs from 'node:fs/promises';
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
@@ -110,5 +111,70 @@ try {
   await gaOnly.locator('button').click();
   assert.equal(await gaOnly.evaluate(() => ga.filter(e => e[1] === 'oa_site_click').length), 1);
   await gaOnly.close();
+  // Real layout + controlled time: each semantic row accrues only while visible.
+  for (const type of ['candidate', 'job']) {
+    const detailPage = await browser.newPage({ viewport: { width: 800, height: 600 } });
+    const mount = type === 'candidate' ? 'oa-candidates' : 'oa-jobs';
+    await detailPage.route('**/*', r => r.fulfill({ contentType: 'text/html', body: `
+      <style>body{margin:0}.v3-header{position:fixed;top:0;height:60px;width:100%;background:white;z-index:10}
+      ul,li{margin:0;padding:0} .oa-card-head{height:30px}.oa-kv,.oa-kv tbody,.oa-kv tr{display:block}
+      .oa-kv{margin-top:100px}.oa-kv tr{height:100px}#research-row{margin-top:700px}</style>
+      <header class="v3-header">Menu</header><div id="${mount}"><ul><li class="oa-card" id="job-timing">
+      <button class="oa-card-head" aria-expanded="true"><span class="oa-card-title">Hidden under header</span></button>
+      <div class="oa-card-body"><table class="oa-kv"><tbody>
+      <tr id="cv-row"><th>CV</th><td>CV link</td></tr>
+      <tr id="research-row"><th>Research summary</th><td>A long research summary</td></tr>
+      </tbody></table></div></li></ul></div><div style="height:1000px"></div>` }));
+    await detailPage.goto('https://www.operationsacademia.org/' + (type === 'candidate' ? 'candidates' : 'jobs'));
+    await detailPage.evaluate(() => {
+      window.savedParts = []; window.partGa = []; window.timers = {}; window.now = 1000;
+      window.focused = true; window.visible = 'visible'; window.seq = 0;
+      Date.now = () => now; document.hasFocus = () => focused;
+      Object.defineProperty(document, 'visibilityState', { get: () => visible });
+      window.setInterval = (fn, ms) => { timers[ms] = fn; return ms; };
+      window.OAUsageRecord = e => savedParts.push({ ...e, s: 'reading', n: ++seq });
+      window.gtag = (...args) => partGa.push(args);
+      window.advance = count => { for (let i = 0; i < count; i++) { now += 1000; timers[1000](); } };
+    });
+    await detailPage.addScriptTag({ content: await fs.readFile(new URL('../assets/oa-listing-tracking.js', import.meta.url), 'utf8') });
+    await detailPage.evaluate(() => { advance(3); timers[15000](); timers[15000](); });
+    let partData = await detailPage.evaluate(() => savedParts);
+    assert.equal(partData.filter(e => e.k === 'part_view' && e.p === 'cv').length, 1);
+    assert.equal(partData.filter(e => e.k === 'part_engagement').reduce((n, e) => n + e.d, 0), 3);
+    assert.ok(!partData.some(e => e.p === 'title' || e.p === 'research_summary'), 'header-covered and offscreen parts are not timed');
+    await detailPage.evaluate(() => { scrollTo(0, 800); document.dispatchEvent(new Event('scroll')); timers[1000](); advance(2); timers[15000](); });
+    partData = await detailPage.evaluate(() => savedParts);
+    assert.equal(partData.filter(e => e.k === 'part_engagement' && e.p === 'research_summary').reduce((n, e) => n + e.d, 0), 2);
+    assert.equal(partData.filter(e => e.k === 'part_engagement' && e.p === 'cv').reduce((n, e) => n + e.d, 0), 3, 'offscreen CV stops accruing time');
+    await detailPage.evaluate(() => { visible = 'hidden'; document.dispatchEvent(new Event('visibilitychange')); advance(10); visible = 'visible'; document.dispatchEvent(new Event('visibilitychange')); advance(1); focused = false; dispatchEvent(new Event('blur')); advance(10); focused = true; dispatchEvent(new Event('focus')); advance(1); now += 61000; timers[1000](); timers[15000](); });
+    partData = await detailPage.evaluate(() => savedParts);
+    assert.equal(partData.filter(e => e.k === 'part_engagement' && e.p === 'research_summary').reduce((n, e) => n + e.d, 0), 4, 'hidden, unfocused and idle seconds excluded');
+    await detailPage.evaluate(() => { document.dispatchEvent(new Event('pointerdown')); timers[1000](); advance(1); document.querySelector('.oa-card-head').setAttribute('aria-expanded', 'false'); timers[1000](); advance(3); });
+    const beforeClose = await detailPage.evaluate(() => savedParts.filter(e => e.k === 'part_engagement').reduce((n, e) => n + e.d, 0));
+    await detailPage.evaluate(() => { document.querySelector('.oa-card-head').setAttribute('aria-expanded', 'true'); timers[1000](); advance(1); dispatchEvent(new Event('pagehide')); dispatchEvent(new Event('pagehide')); });
+    partData = await detailPage.evaluate(() => savedParts);
+    assert.equal(partData.filter(e => e.k === 'part_engagement').reduce((n, e) => n + e.d, 0), beforeClose + 1, 'collapse and final navigation flush once');
+    const report = aggregate([{ uid: 'reader', clicks: partData }], { id: 'timing', type, uid: 'owner' }, 0, 200000);
+    const cv = report.parts.find(p => p.part === 'cv'), research = report.parts.find(p => p.part === 'research_summary');
+    assert.equal(cv.seconds, 3); assert.equal(cv.averageSeconds, 3); assert.equal(cv.clicks, 0);
+    assert.equal(research.seconds, 6); assert.equal(report.interactions, 0);
+    assert.ok((await detailPage.evaluate(() => partGa)).some(e => e[1] === 'oa_listing_part_engagement' && e[2].listing_type === type && e[2].listing_part === 'research_summary' && e[2].active_seconds > 0));
+    await detailPage.evaluate(() => {
+      savedParts = []; scrollTo(0, 0); document.querySelector('#research-row').style.marginTop = '0';
+      dispatchEvent(new Event('pageshow')); advance(1); timers[15000]();
+    });
+    partData = await detailPage.evaluate(() => savedParts);
+    assert.equal(partData.filter(e => e.k === 'part_engagement').reduce((n, e) => n + e.d, 0), 2, 'two visible details accrue simultaneous exposure');
+    await detailPage.evaluate(() => {
+      document.querySelector('#research-row').style.height = '1000px'; timers[1000](); advance(1); timers[15000]();
+    });
+    assert.ok((await detailPage.evaluate(() => savedParts)).filter(e => e.k === 'part_engagement' && e.p === 'research_summary').length >= 2, 'long descriptions can qualify without fitting the screen');
+    await detailPage.evaluate(() => { document.querySelector('#research-row').style.display = 'none'; timers[1000](); savedParts = []; advance(1); timers[15000](); });
+    assert.ok(!(await detailPage.evaluate(() => savedParts)).some(e => e.p === 'research_summary'), 'hidden detail rows are never timed');
+    await detailPage.evaluate(() => { document.querySelector('.oa-card').classList.add('oa-card-gated'); timers[1000](); savedParts = []; advance(2); timers[15000](); });
+    assert.ok(!(await detailPage.evaluate(() => savedParts)).some(e => e.k === 'part_view' || e.k === 'part_engagement'), 'gated profiles cannot accrue detail time');
+    await detailPage.close();
+  }
+  console.log('Per-detail time: viewport/scroll/header boundaries, zero-click reading, focus/idle/collapse/navigation, GA and private candidate/job report pipeline passed.');
   console.log('Listing tracking: focused/hidden/idle time, append-only batches, 450 rapid clicks, URL/field redaction and privacy opt-out passed.');
 } finally { await browser.close(); }

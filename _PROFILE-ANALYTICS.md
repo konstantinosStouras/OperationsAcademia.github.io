@@ -74,8 +74,8 @@ when those identifiers exist. Legacy link and element events are never added
 to those counts. Labels come from a fixed vocabulary; arbitrary raw event text,
 paths and visitor identifiers never enter the owner-facing breakdown.
 
-Total and average active reading time are prominent summary cards. Time belongs
-to the whole expanded listing, not individual details or external pages. Both
+Total and average active reading time are prominent summary cards. The summary measures the whole expanded listing; the detail table also shows
+total and average active visible time per detail. External pages cannot be timed. Both
 period selections recalculate the breakdown from retained events. Reports that
 predate the breakdown show a pending message rather than a false zero; new
 reports with no detail events show an explicit empty state. Detail coverage
@@ -131,3 +131,22 @@ total active seconds divided by that row's view count; it is a weighted
 average across visits, not an average of individual users' averages. Only
 aggregate rows reach the listing owner. The existing IP/network lookup is
 site-wide and cannot be retroactively joined to listing visits.
+
+## Per-detail reading time (13 October 2026)
+
+`part_view` / `oa_listing_part_view` starts a viewing episode for each title,
+subtitle or semantic detail row in an expanded listing. `part_engagement` /
+`oa_listing_part_engagement` records its active seconds, checkpointed every
+15 seconds and on exit. At least half the element height and width must be
+visible, capped at half the available viewport for oversized elements; the
+fixed header is excluded. Time pauses for hidden/unfocused/idle tabs, collapsed
+or gated cards, and offscreen details. This estimates exposure, not eye tracking.
+Simultaneously visible details overlap in time; totals are not additive.
+Repeated rows with the same semantic part count once per tick.
+
+Schema 3 reports add `views`, `seconds` and `averageSeconds` to part rows and
+`partTimeTrackingSince` to the report. Detail events are deduplicated using
+viewer/session/sequence IDs and retain the existing owner/admin exclusions.
+They never change listing views or total listing seconds. Old reports show
+an unavailable dash; rows with time but no clicks are included. The existing
+GA4 `listing_part` dimension and `active_seconds` metric apply to these events.

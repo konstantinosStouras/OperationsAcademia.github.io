@@ -63,11 +63,44 @@
       transport_type: 'beacon'
     });
   }
+  // A detail must occupy at least half of its possible visible height/width.
+  // Tall descriptions can qualify without fitting wholly on the screen.
+  function visiblePart(node, top) {
+    var r = node.getBoundingClientRect(), style = getComputedStyle(node);
+    if (!r.width || !r.height || style.visibility === 'hidden' || style.display === 'none') return false;
+    var height = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, top));
+    var width = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0));
+    return height >= Math.min(r.height, innerHeight - top) / 2 &&
+      width >= Math.min(r.width, innerWidth) / 2;
+  }
+  function flushPart(v, part) {
+    var seconds = v.parts[part];
+    if (seconds > 0) send({ t: Date.now(), k: 'part_engagement', c: v.c, m: v.m,
+      p: part, d: seconds, x: '', h: '' }, v.type, 'oa_listing_part_engagement');
+    v.parts[part] = 0;
+  }
+  function tickParts(v, card, delta, top) {
+    var seen = {};
+    card.querySelectorAll('.oa-card-title, .oa-card-sub, .oa-card-body .oa-kv tr').forEach(function (node) {
+      if (visiblePart(node, top)) seen[details(node).part] = true;
+    });
+    Object.keys(seen).forEach(function (part) {
+      if (!v.visibleParts[part]) {
+        v.parts[part] = 0;
+        send({ t: Date.now(), k: 'part_view', c: v.c, m: v.m, p: part, x: '', h: '' }, v.type, 'oa_listing_part_view');
+      } else v.parts[part] += delta;
+    });
+    Object.keys(v.visibleParts).forEach(function (part) {
+      if (!seen[part]) { flushPart(v, part); delete v.parts[part]; }
+    });
+    v.visibleParts = seen;
+  }
   function finish(key) {
     var v = active[key];
     if (!v) return;
     if (v.seconds > 0) send({ t: Date.now(), k: 'engagement', c: v.c, m: v.m,
       d: v.seconds, x: '', h: '' }, v.type, 'oa_listing_engagement');
+    Object.keys(v.parts).forEach(function (part) { flushPart(v, part); });
     delete active[key];
   }
   function tick() {
@@ -77,6 +110,8 @@
     var eligible = !away && document.visibilityState === 'visible' && document.hasFocus() && now - interaction < 60000;
     if (eligible) {
       if (pageRunning) pageSeconds += delta;
+      var header = document.querySelector('.v3-header'), top = 0;
+      if (header) { var h = header.getBoundingClientRect(); if (h.top <= 0) top = Math.max(0, Math.min(innerHeight - 1, h.bottom)); }
       document.querySelectorAll('li.oa-card').forEach(function (card) {
         var meta = entity(card), head = card.querySelector('.oa-card-head');
         if (!meta || !head || head.getAttribute('aria-expanded') !== 'true') return;
@@ -85,9 +120,10 @@
         var key = meta.type + ':' + meta.c;
         seen[key] = true;
         if (!active[key]) {
-          active[key] = Object.assign({ seconds: 0 }, meta);
+          active[key] = Object.assign({ seconds: 0, parts: {}, visibleParts: {} }, meta);
           send({ t: now, k: 'view', c: meta.c, m: meta.m, x: '', h: '' }, meta.type, 'oa_listing_view');
         } else active[key].seconds += delta;
+        tickParts(active[key], card, delta, top);
       });
     }
     pageRunning = eligible;
@@ -121,6 +157,7 @@
         send({ t: Date.now(), k: 'engagement', c: v.c, m: v.m, d: v.seconds, x: '', h: '' }, v.type, 'oa_listing_engagement');
         v.seconds = 0;
       }
+      Object.keys(v.parts).forEach(function (part) { flushPart(v, part); });
     });
     if (pageSeconds > 0) {
       send({ t: Date.now(), k: 'page_engagement', d: pageSeconds, x: '', h: '' }, '', 'oa_page_engagement');
