@@ -201,6 +201,11 @@
  },
  {
   "institution": "Auburn University",
+  "school": "Raymond J. Harbert College of Business",
+  "department": "Supply Chain Management"
+ },
+ {
+  "institution": "Auburn University",
   "school": "Samuel Ginn College of Engineering",
   "department": "Industrial and Systems Engineering"
  },
@@ -2113,6 +2118,11 @@
   "institution": "Rockhurst University",
   "school": "",
   "department": "Business Intelligence and Analytics"
+ },
+ {
+  "institution": "Rollins College",
+  "school": "",
+  "department": "Business Analytics"
  },
  {
   "institution": "Rollins College",

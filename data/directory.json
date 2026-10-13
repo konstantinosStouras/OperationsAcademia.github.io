@@ -8089,6 +8089,15 @@
   "lastPosted": "2026-04-23"
  },
  {
+  "id": "rollins-college____business-analytics",
+  "institution": "Rollins College",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "rollins-college____supply-chain-management",
   "institution": "Rollins College",
   "department": "Supply Chain Management",
