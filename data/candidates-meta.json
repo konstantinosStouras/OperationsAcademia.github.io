@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-13T15:13:44.800Z",
+ "generated": "2026-10-13T21:44:30.643Z",
  "count": 37,
  "years": {
   "2027": 37
@@ -12,7 +12,7 @@
  },
  "researchAreas": {
   "Machine Learning and Data Science": 16,
-  "Operations Research / Optimization": 13,
+  "Operations Research / Optimization": 14,
   "Technology, Platforms and Marketplaces": 11,
   "Empirical Operations": 10,
   "Service Operations": 9,
@@ -79,7 +79,7 @@
   },
   {
    "label": "Optimization",
-   "count": 13
+   "count": 14
   },
   {
    "label": "Healthcare operations",
