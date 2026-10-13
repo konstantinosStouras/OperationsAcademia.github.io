@@ -8093,15 +8093,6 @@
   "lastPosted": "2026-04-23"
  },
  {
-  "id": "rollins-college____business-analytics",
-  "institution": "Rollins College",
-  "department": "Business Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "rollins-college____supply-chain-management",
   "institution": "Rollins College",
   "department": "Supply Chain Management",
@@ -8113,6 +8104,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-05"
+ },
+ {
+  "id": "rollins-college__crummer-graduate-school-of-business__business-analytics",
+  "institution": "Rollins College",
+  "school": "Crummer Graduate School of Business",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-12"
  },
  {
   "id": "rollins-college__crummer-graduate-school-of-business__operations-and-supply-chain-management",

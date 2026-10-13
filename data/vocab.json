@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-13T06:20:01.254Z",
+ "generated": "2026-10-13T08:26:47.068Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -239,6 +239,10 @@
   },
   {
    "v": "Prince Mohammad Bin Fahd University",
+   "n": 3
+  },
+  {
+   "v": "Rollins College",
    "n": 3
   },
   {
@@ -535,10 +539,6 @@
   },
   {
    "v": "Oregon State University",
-   "n": 2
-  },
-  {
-   "v": "Rollins College",
    "n": 2
   },
   {
@@ -2528,6 +2528,10 @@
    "n": 2
   },
   {
+   "v": "Crummer Graduate School of Business",
+   "n": 2
+  },
+  {
    "v": "Curtis L. Carlson School of Management",
    "n": 2
   },
@@ -2793,10 +2797,6 @@
   },
   {
    "v": "Craig School of Business",
-   "n": 1
-  },
-  {
-   "v": "Crummer Graduate School of Business",
    "n": 1
   },
   {
@@ -3746,11 +3746,11 @@
    "n": 13
   },
   {
-   "v": "Business Administration",
-   "n": 10
+   "v": "Business Analytics",
+   "n": 11
   },
   {
-   "v": "Business Analytics",
+   "v": "Business Administration",
    "n": 10
   },
   {
@@ -9914,6 +9914,7 @@
     "Crummer Graduate School of Business"
    ],
    "units": [
+    "Business Analytics",
     "Operations and Supply Chain Management",
     "Supply Chain Management"
    ],
@@ -9922,6 +9923,7 @@
      "Supply Chain Management"
     ],
     "Crummer Graduate School of Business": [
+     "Business Analytics",
      "Operations and Supply Chain Management"
     ]
    }
@@ -14259,6 +14261,7 @@
    "Logistics, Procurement and Supply Chain Management"
   ],
   "Crummer Graduate School of Business": [
+   "Business Analytics",
    "Operations and Supply Chain Management"
   ],
   "CUHK Business School": [
