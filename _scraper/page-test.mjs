@@ -3615,7 +3615,7 @@ for (const [name, expect] of [
       const acts = document.querySelector('.oa-filter-actions').getBoundingClientRect();
       return {
         lines: rows.length,
-        cells: new Set([...bar.children].map((c) => Math.round(c.getBoundingClientRect().top))).size,
+        cells: new Set([...bar.querySelectorAll(':scope > .oa-filter')].map((c) => Math.round(c.getBoundingClientRect().top))).size,
         clearGap: edge - acts.right,
         chips: document.querySelectorAll('.oa-chip').length,
       };
@@ -9952,7 +9952,8 @@ for (const w of [320, 360, 390, 430]) {
        ever moves. */
     const bar = await q.evaluate(() => {
       const tops = new Map();
-      for (const cell of document.querySelector('.oa-filters').children) {
+      // The separate Sort by row is not part of the two-row filter grid.
+      for (const cell of document.querySelectorAll('.oa-filters > .oa-filter')) {
         const top = Math.round(cell.getBoundingClientRect().top);
         const lab = cell.querySelector('.oa-label, label');
         const name = (lab ? lab.textContent : 'actions').trim();
@@ -10304,7 +10305,7 @@ for (const w of [320, 360, 390, 430]) {
           const row = lines.find((r) => Math.abs(r.top - t) < 1.5);
           if (row) row.n++; else lines.push({ top: t, n: 1 });
         });
-        const cells = new Set([...bar.children]
+        const cells = new Set([...bar.querySelectorAll(':scope > .oa-filter')]
           .map((c) => Math.round(c.getBoundingClientRect().top))).size;
         const menus = [...document.querySelectorAll('.oa-pick .oa-pick-btn')].map((btn) => {
           btn.click();
@@ -12037,7 +12038,7 @@ for (const w of [320, 360, 390, 430]) {
       const b = document.querySelector('.oa-alert-save');
       const r = g('.oa-alert-save'), c = g('.oa-clear'), x = g('.oa-export');
       const cell = b.closest('.oa-filter-actions').getBoundingClientRect();
-      const tops = new Set([...document.querySelector('.oa-filters').children]
+      const tops = new Set([...document.querySelectorAll('.oa-filters > .oa-filter')]
         .map((n) => Math.round(n.getBoundingClientRect().top)));
       return { disabled: b.disabled, title: b.title, text: b.textContent.trim(),
         top: Math.round(r.top), h: Math.round(r.height), w: Math.round(r.width), x: Math.round(r.x),
