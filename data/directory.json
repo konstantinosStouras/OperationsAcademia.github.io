@@ -395,9 +395,13 @@
   "institution": "American University of Sharjah",
   "department": "Information Systems and Business Analytics",
   "type": "Business School",
+  "country": "United Arab Emirates",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-13"
  },
  {
   "id": "appalachian-state-university____cis",

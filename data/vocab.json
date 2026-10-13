@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-13T17:24:51.544Z",
+ "generated": "2026-10-13T17:45:02.570Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -803,6 +803,10 @@
   },
   {
    "v": "American University of Kurdistan",
+   "n": 1
+  },
+  {
+   "v": "American University of Sharjah",
    "n": 1
   },
   {
@@ -3850,6 +3854,10 @@
    "n": 3
   },
   {
+   "v": "Information Systems and Business Analytics",
+   "n": 3
+  },
+  {
    "v": "Information Systems and Technology Management",
    "n": 3
   },
@@ -3959,10 +3967,6 @@
   },
   {
    "v": "Information and Decision Sciences",
-   "n": 2
-  },
-  {
-   "v": "Information Systems and Business Analytics",
    "n": 2
   },
   {
@@ -5899,6 +5903,17 @@
    "bySchool": {
     "": [
      "MIS"
+    ]
+   }
+  },
+  "American University of Sharjah": {
+   "schools": [],
+   "units": [
+    "Information Systems and Business Analytics"
+   ],
+   "bySchool": {
+    "": [
+     "Information Systems and Business Analytics"
     ]
    }
   },
