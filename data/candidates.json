@@ -380,7 +380,7 @@
     "at": "16:15",
     "session": "SE01",
     "room": "Moscone South-50 (Lower Mezz)",
-    "title": "Stationary Online Contention Resolution Schemes and Applications to Reusable Resource Allocation"
+    "title": "Stationary Online Contention Resolution Schemes: Theory and Applications to Bayesian Online Resource Allocation"
    },
    "Tuesday": {
     "at": "14:45",
@@ -391,19 +391,19 @@
   },
   "jobTalk": {
    "date": "2026-11-01",
-   "at": "13:30",
-   "end": "13:45",
+   "at": "17:05",
+   "end": "17:30",
    "location": "Moscone South-50 (Lower Mezz), Moscone Center, San Francisco",
-   "title": "Stationary Online Contention Resolution Schemes for Reusable Resource Allocation"
+   "title": "Stationary Online Contention Resolution Schemes: Theory and Applications to Bayesian Online Resource Allocation"
   },
-  "informsUrl": "https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=6088",
+  "informsUrl": "https://submissions.mirasmart.com/InformsAnnual2026/Itinerary/PresentationDetail.aspx?evdid=6422",
   "cvUrl": "https://pranavnuti.com/Pranav_CV_Current.pdf",
   "rsUrl": "",
   "webUrl": "https://pranavnuti.com",
   "email": "pranavnuti@gmail.com",
   "source": "oa-form",
   "addedAt": "2026-10-05T04:39:18Z",
-  "updatedAt": "2026-10-09",
+  "updatedAt": "2026-10-13",
   "ref": "OA-CAND-261004-MVNV",
   "owner": "757178983bfb00c0"
  },
