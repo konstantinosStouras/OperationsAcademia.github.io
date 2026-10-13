@@ -43,9 +43,10 @@ async function pageFor(user = null) {
   await page.route('**/firebasejs/**', route => route.fulfill({ contentType: 'text/javascript', body: fake + `
     if (!window.__candidateCallableInstalled) {
       window.__candidateCallableInstalled = true;
-      const original = firebase.functions;
-      firebase.functions = function () {
-        const functions = original.apply(firebase, arguments);
+      if (!firebase.apps.length) firebase.initializeApp({});
+      const original = firebase.app().functions;
+      firebase.app().functions = function () {
+        const functions = original.apply(firebase.app(), arguments);
         const call = functions.httpsCallable;
         functions.httpsCallable = function (name) {
           if (name !== 'readCandidateProfiles') return call.call(functions, name);

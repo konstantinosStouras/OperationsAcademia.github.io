@@ -22,7 +22,7 @@
     var uid = account.uid, started = epoch;
     return OAFB.readyFunctions().then(function (fb) {
       if (!user() || user().uid !== uid || epoch !== started) return { data: { rows: [] } };
-      return fb.functions('us-central1').httpsCallable('readCandidateProfiles')({});
+      return fb.app().functions('us-central1').httpsCallable('readCandidateProfiles')({});
     }).then(function (result) {
       // Never admit a response that arrived after sign-out or an account switch.
       if (!user() || user().uid !== uid || epoch !== started) return [];

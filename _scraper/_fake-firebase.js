@@ -986,7 +986,10 @@
   };
 
   if (!seed.noFunctions) {
-    firebase.functions = functionsFor;
+    firebase.functions = function (app, region) {
+      if (app && !(app instanceof App)) throw new Error('Invalid Firebase app argument');
+      return (app || firebase.app()).functions(region);
+    };
     App.prototype.functions = functionsFor;
   }
 

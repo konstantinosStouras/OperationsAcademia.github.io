@@ -192,6 +192,10 @@ jobs:
             sleep 15
           done
 
+      - name: The candidate loader matches the deployed browser SDK
+        timeout-minutes: 2
+        run: node _scraper/candidate-sdk-test.mjs
+
       - name: The page renders its data
         timeout-minutes: 8
         # If the two steps above somehow leave no browser behind, this fails
