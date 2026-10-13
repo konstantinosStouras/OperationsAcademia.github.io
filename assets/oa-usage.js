@@ -22,7 +22,7 @@
 (function () {
   'use strict';
   if (!window.OAFB || !OAFB.enabled) return;
-  if (navigator.globalPrivacyControl || navigator.doNotTrack === '1') return;
+  if (navigator.globalPrivacyControl || navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
   if (!/^(www\.)?operationsacademia\.org$/.test(location.hostname)) return;
 
   var sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -33,6 +33,7 @@
   var timer = null;
   var pending = false, dirty = false;
   var events = [], retryBatches = [], batchWriting = false, resolved = false;
+  var sequence = 0;
   // Separate append-only batches retain every interaction without inflating
   // page-session counts or overwriting earlier clicks on long visits.
   function flushEvents() {
@@ -51,10 +52,12 @@
       return fb.firestore().collection('usageEventBatches').doc(batch.id).set(batch.data);
     }).then(function () {
       retryBatches.shift(); batchWriting = false;
-      if (retryBatches.length || events.length >= 100) flushEvents();
+      if (retryBatches.length || events.length) flushEvents();
     }).catch(function () { batchWriting = false; });
   }
   function recordEvent(rec) {
+    // Join append-only batches back to one page visit and order equal-time clicks.
+    rec.s = sid; rec.n = ++sequence; rec.v = 2;
     events.push(rec);
     if (events.length >= 100) flushEvents();
   }
@@ -72,14 +75,10 @@
     return u.emailVerified === false && pw ? null : u;
   }
 
-  /** The page a session is filed under. verify-email.html is opened with a
-      one-time verification code on its query string, and a code is a
-      credential: it is never copied into a record, so a query carrying one
-      is dropped whole and the path alone is kept. */
+  /** Keep only the page path: verification codes, search text and other
+      query/fragment values are not needed to group page sessions. */
   function pageOf() {
-    var q = String(location.search || '');
-    if (/[?&]oobCode=/.test(q)) return location.pathname.slice(0, 300);
-    return (location.pathname + q).slice(0, 300);
+    return location.pathname.slice(0, 300);
   }
 
   /** The identity a session is filed under: the uid, else a stable random
@@ -159,6 +158,17 @@
     } catch (e) { return ''; }
   }
 
+  function clickLabel(el) {
+    if (el.isContentEditable) return 'editable';
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return fieldName(el);
+    if (el.closest('li.oa-card') && window.OAInteractionDetails) {
+      var part = window.OAInteractionDetails(el).part;
+      // The older candidate stats reader recognises the uppercase CV label.
+      return part === 'cv' ? 'CV' : part;
+    }
+    return el.textContent || '';
+  }
+
   // capture-phase, so a click that navigates away is still seen; only
   // interactive elements, short label only — never form VALUES
   document.addEventListener('click', function (e) {
@@ -167,7 +177,7 @@
     var rec = {
       t: Date.now(),
       k: el.tagName.toLowerCase(),
-      x: (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) ? fieldName(el) : (el.textContent || '')).replace(/\s+/g, ' ').trim().slice(0, 80),
+      x: clickLabel(el).replace(/\s+/g, ' ').trim().slice(0, 80),
       h: safeHref(el.getAttribute('href'))
     };
     var card = cardOf(el);
@@ -209,6 +219,9 @@
   }).catch(function () { /* SDK unreachable — record nothing */ });
 
   window.OAUsageRecord = recordEvent;
+  // The engagement tracker runs after this file. Its lifecycle handler must
+  // flush again AFTER adding final time segments to the queue.
+  window.OAUsageFlush = flushEvents;
   window.addEventListener('pagehide', function () { flush(); flushEvents(); });
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') { flush(); flushEvents(); }

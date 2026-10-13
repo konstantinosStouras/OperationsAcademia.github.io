@@ -41,6 +41,52 @@ GA country failures preserve the last successful figures and their own date.
 
 ## Deployment and validation
 
+### Detailed interaction collection (13 October 2026)
+
+All current pages that load the shared tracker send `oa_site_click` to GA4
+and `k: interaction` to the private usage batches. This includes plain-content
+clicks, controls, keyboard-activated clicks, touch-generated clicks and middle
+clicks, including cards rendered after page load and jobs on Previous markets.
+The forum and archived trees
+keep their existing exclusions. Gated cards never acquire a listing identity
+or count as a listing view; their clicks have action `locked`.
+
+Each interaction carries the following first-party fields (GA4 names in
+parentheses): `c` (listing_id, without the `job-` prefix), `m` (the list mount,
+mapped to listing_type), `p` (listing_part), `a` (interaction_action), `e`
+(element_type), `r` (page_region), `z` (target_path), and `b` (mouse_button).
+Parts distinguish title, subtitle, CV, website, contact, research areas/summary,
+INFORMS talk/days, position type, deadlines, description, campus countries,
+job file, posting source, further information and posting ID. Unknown detail
+rows use `detail`; a structural DOM path distinguishes controls without sending
+their text, IDs or destinations to Google. Paths can change with layout changes.
+GA4 also receives `source_page`, stripped of queries and fragments.
+
+Every new batch event has `v: 2`, page-visit identifier `s`, and increasing
+sequence `n`. Group by the private batch's uid and event `s` for a visit;
+order by `n`. These identifiers are not sent to GA4. Count only
+`k: interaction` for detailed click totals: legacy element events and `k: link`
+remain available for existing reports and must not be added to the same total.
+Current owner reports continue to show views, opens, link clicks and active
+time; detailed parts are retained for future reporting.
+
+`oa_page_engagement` / `k: page_engagement` adds focused, visible, non-idle
+page seconds. Existing `oa_listing_engagement` / `k: engagement` retains
+per-listing active seconds. Multiple visible expanded listings each accrue
+time, so their totals must not be interpreted as exclusive page time.
+Lifecycle checkpoints drain the usage queue after final segments are recorded;
+in-flight batches also drain smaller queued tails. Delivery still depends on
+the browser/network; blockers, opt-outs and crashes prevent complete coverage.
+
+GA4 collects these event parameters without configuration. To use the new
+parameters in GA4 Explorations, register the required event-scoped custom
+dimensions (for example listing_type, listing_part, interaction_action and
+source_page) and the custom metric active_seconds. High-cardinality listing IDs
+and target paths are better analysed in event exports. The existing country
+report continues using standard dimensions and needs no change.
+See Google's [event parameter setup](https://developers.google.com/analytics/devguides/collection/ga4/event-parameters)
+for the reporting registration requirement.
+
 1. Run Profile Analytics checks (model, browser, tracker and Firestore emulator).
 2. Publish `_firestore.rules` through the existing guarded rules workflow.
 3. Deploy the site and run `oa-analytics.yml`. The existing Firebase and GA4

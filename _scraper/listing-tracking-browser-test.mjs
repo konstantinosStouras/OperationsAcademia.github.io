@@ -43,6 +43,53 @@ try {
   const ga = await page.evaluate(() => window.ga);
   assert.ok(ga.some(e => e[1] === 'oa_listing_view' && e[2].page_location.endsWith('/candidates?oa_listing=test')));
   assert.ok(!JSON.stringify(ga).includes('reader@example.test'));
+  // Detail text, middle-clicks, dynamic cards and site-wide controls all have
+  // semantic records in both destinations without exporting their contents.
+  await page.evaluate(() => {
+    document.querySelector('li.oa-card').insertAdjacentHTML('beforeend', '<div class="oa-card-body"><table class="oa-kv"><tr><th>CV</th><td><a id="cv" href="https://example.org/cv?token=secret">private@example.test</a></td></tr><tr><th>Research area(s)</th><td id="research">Sensitive draft research</td></tr></table></div>');
+    document.body.insertAdjacentHTML('beforeend', '<div id="oa-jobs"><ul><li id="job-role" class="oa-card"><button class="oa-card-head" aria-expanded="true">Job</button><div class="oa-card-body"><table class="oa-kv"><tr><th>Further info</th><td><a id="job-link" href="https://example.org/apply?token=secret">Apply</a></td></tr></table></div></li><li id="job-locked" class="oa-card oa-card-gated"><button class="oa-card-head" aria-expanded="false">Locked</button></li></ul></div>');
+    document.addEventListener('click', e => e.preventDefault());
+    document.addEventListener('auxclick', e => e.preventDefault());
+    document.querySelector('#cv').dispatchEvent(new MouseEvent('auxclick', { bubbles: true, button: 1 }));
+    document.querySelector('#research').click();
+    document.querySelector('#job-link').click();
+    document.querySelector('#job-locked button').click();
+  });
+  data = await records();
+  const detailedGa = await page.evaluate(() => window.ga.filter(e => e[1] === 'oa_site_click'));
+  assert.ok(data.some(e => e.k === 'interaction' && e.c === 'job-test' && e.p === 'cv' && e.b === 1));
+  assert.ok(data.some(e => e.k === 'interaction' && e.p === 'research_areas' && e.a === 'content'));
+  assert.ok(detailedGa.some(e => e[2].listing_id === 'role' && e[2].listing_type === 'job' && e[2].listing_part === 'further_info'));
+  assert.ok(detailedGa.some(e => e[2].interaction_action === 'locked' && e[2].listing_id === ''));
+  assert.equal(detailedGa.filter(e => e[2].listing_type === 'none' && e[2].element_type === 'button' && e[2].interaction_action === 'control').length, 450);
+  assert.ok(!JSON.stringify(detailedGa).match(/private@example|Sensitive draft|token=secret|never-record-this/));
+  assert.ok(data.every(e => e.v === 2 && typeof e.s === 'string' && Number.isInteger(e.n)));
+  assert.equal(new Set(data.map(e => e.s + ':' + e.n)).size, data.length, 'batched events retain unique ordered identities');
+  await page.evaluate(() => {
+    document.querySelector('#oa-jobs').id = 'oa-past';
+    document.querySelector('#job-link').click();
+  });
+  assert.ok((await records()).some(e => e.k === 'interaction' && e.c === 'job-role' && e.m === 'oa-past'));
+
+  // pagehide must save the segment produced AFTER oa-usage's own handler,
+  // even with an earlier batch in flight and fewer than 100 events queued.
+  await page.evaluate(() => {
+    focused = true; visible = 'visible';
+    document.dispatchEvent(new Event('pointerdown'));
+    intervals[1000](); clockNow += 1000; intervals[1000]();
+  });
+  const beforeExit = (await records()).filter(e => e.k === 'engagement').reduce((n, e) => n + e.d, 0);
+  await page.evaluate(async () => {
+    window.dispatchEvent(new Event('pagehide'));
+    for (let i = 0; i < 100; i++) await Promise.resolve();
+  });
+  const exitData = await page.evaluate(() => Object.entries(saved).filter(([k]) => k.startsWith('usageEventBatches/')).flatMap(([, v]) => v.clicks));
+  assert.ok(exitData.filter(e => e.k === 'engagement').reduce((n, e) => n + e.d, 0) > beforeExit, 'final listing time is flushed without another timer');
+  assert.ok(exitData.some(e => e.k === 'page_engagement' && e.d > 0));
+  assert.equal(exitData.filter(e => e.k === 'page_engagement').reduce((n, e) => n + e.d, 0), 2, 'page time excludes the hidden/idle gap and the instant of returning');
+  const countAtExit = exitData.length;
+  await page.evaluate(async () => { window.dispatchEvent(new Event('pagehide')); for (let i = 0; i < 100; i++) await Promise.resolve(); });
+  assert.equal((await records()).length, countAtExit, 'repeated lifecycle flushes do not duplicate time');
   assert.deepEqual(errors, []);
   await page.close();
   // Browser privacy opt-out prevents both trackers, including GA events.
@@ -50,6 +97,18 @@ try {
   await privatePage.goto('https://www.operationsacademia.org/jobs');
   await privatePage.evaluate(() => { Object.defineProperty(navigator, 'globalPrivacyControl', { value: true }); window.OAFB = { enabled: true, ready: () => { throw new Error('must not contact Firebase'); } }; });
   await privatePage.addScriptTag({ content: await fs.readFile(new URL('../assets/oa-usage.js', import.meta.url), 'utf8') });
+  await privatePage.addScriptTag({ content: await fs.readFile(new URL('../assets/oa-listing-tracking.js', import.meta.url), 'utf8') });
   assert.equal(await privatePage.evaluate(() => typeof window.OAUsageRecord), 'undefined');
+  assert.equal(await privatePage.evaluate(() => typeof window.OAInteractionDetails), 'undefined');
+  await privatePage.close();
+  // GA events remain available when Firebase is unavailable.
+  const gaOnly = await browser.newPage();
+  await gaOnly.route('**/*', r => r.fulfill({ body: '<button>Menu</button>' }));
+  await gaOnly.goto('https://www.operationsacademia.org/jobs');
+  await gaOnly.evaluate(() => { window.ga = []; window.gtag = (...args) => ga.push(args); });
+  await gaOnly.addScriptTag({ content: await fs.readFile(new URL('../assets/oa-listing-tracking.js', import.meta.url), 'utf8') });
+  await gaOnly.locator('button').click();
+  assert.equal(await gaOnly.evaluate(() => ga.filter(e => e[1] === 'oa_site_click').length), 1);
+  await gaOnly.close();
   console.log('Listing tracking: focused/hidden/idle time, append-only batches, 450 rapid clicks, URL/field redaction and privacy opt-out passed.');
 } finally { await browser.close(); }

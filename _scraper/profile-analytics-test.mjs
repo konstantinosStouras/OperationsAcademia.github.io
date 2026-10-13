@@ -10,6 +10,8 @@ const sessions = [{ uid: 'reader', clicks: events }, { uid: 'reader', clicks: [e
 assert.deepEqual(aggregate(sessions, listing, 0, 20), { views: 2, viewers: 1, opens: 1, clicks: 1, seconds: 12, countries: [], days: { '1970-01-01': 2 }, universities: [{ name: 'Unknown', views: 2, clicks: 1, seconds: 12, averageSeconds: 6 }] });
 assert.equal(aggregate(sessions, listing, 11, 20).views, 0);
 assert.equal(aggregate(sessions, { ...listing, type: 'job' }, 0, 20).views, 1);
+assert.equal(aggregate([{ uid: 'reader', clicks: [event('view', { m: 'oa-past' })] }], { ...listing, type: 'job' }, 0, 20).views, 1);
+assert.equal(aggregate([{ uid: 'reader', clicks: [event('view', { m: 'oa-past' })] }], listing, 0, 20).views, 0);
 console.log('Profile Analytics: ownership exclusion, list attribution, repeated views, time and reporting window passed.');
 
 import { countriesFromRows } from './build-profile-analytics.mjs';

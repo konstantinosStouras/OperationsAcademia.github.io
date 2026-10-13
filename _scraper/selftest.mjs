@@ -20539,7 +20539,7 @@ async function testEmailVerification() {
   ok(/function usable\(u\) \{[\s\S]*?providerId === 'password'[\s\S]*?return u\.emailVerified === false && pw \? null : u;/.test(usage)
      && /user = usable\(u\);/.test(usage) && !/user = u \|\| null;/.test(usage),
     'oa-usage.js files an unconfirmed password account as an anonymous visitor, since the rule refuses its uid and the refusal is silent');
-  ok(/function pageOf\(\) \{[\s\S]*?\[\?&\]oobCode=[\s\S]*?return location\.pathname/.test(usage) && /page: pageOf\(\),/.test(usage),
+  ok(/function pageOf\(\) \{\s*return location\.pathname\.slice\(0, 300\);\s*\}/.test(usage) && /page: pageOf\(\),/.test(usage),
     'oa-usage.js never records a query carrying a one-time code');
   const ga4 = await readFile(path.join(root, 'assets', 'oa-ga4.js'), 'utf8');
   ok(/function pageLocation\(\) \{[\s\S]*?\[\?&\]oobCode=[\s\S]*?return location\.origin \+ location\.pathname;/.test(ga4)

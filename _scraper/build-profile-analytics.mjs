@@ -11,7 +11,7 @@ export function aggregate(sessions, listing, from = 0, until = Date.now()) {
     if (!s.uid || s.uid === listing.uid || s.uid === listing.mergedFrom || s.email === 'kstouras@gmail.com') continue;
     for (const e of s.clicks || []) {
       if (!e || !Number.isFinite(e.t) || e.t < from || e.t > until || e.c !== 'job-' + listing.id) continue;
-      const correct = listing.type === 'candidate' ? e.m === 'oa-candidates' : ['oa-jobs', 'oa-jobs-recent'].includes(e.m);
+      const correct = listing.type === 'candidate' ? e.m === 'oa-candidates' : ['oa-jobs', 'oa-jobs-recent', 'oa-past'].includes(e.m);
       if (!correct) continue;
       const name = s.university || 'Unknown';
       if (!universities.has(name)) universities.set(name, { name, views: 0, clicks: 0, seconds: 0 });
