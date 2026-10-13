@@ -4516,6 +4516,7 @@ for (const [pageName, listSel] of [
     eq(dialogs.length, 0, 'directory form: opening it asks nothing through a browser dialog');
 
     /* a link that is not one is refused, and nothing is written */
+    const originalDeptUrl = await d.inputValue(`${card} [data-f="r0.deptUrl"]`);
     await d.fill(`${card} [data-f="r0.deptUrl"]`, 'not a link');
     await d.click(`${card} .oa-dir-save`);
     await d.waitForTimeout(250);
@@ -4529,7 +4530,7 @@ for (const [pageName, listSel] of [
     eq(bad.writes, 0, 'directory form: …and nothing written');
 
     /* typing survives a redraw of the list */
-    await d.fill(`${card} [data-f="r0.deptUrl"]`, '');
+    await d.fill(`${card} [data-f="r0.deptUrl"]`, originalDeptUrl);
     await d.fill(`${card} [data-f="s.school"]`, DF_NEW_SCHOOL);
     await d.evaluate(() => OADirectory.__setForTest({}));
     await d.waitForTimeout(300);
