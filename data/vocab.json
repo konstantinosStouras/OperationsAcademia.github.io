@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-12T11:26:40.752Z",
+ "generated": "2026-10-13T06:20:01.254Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -26,16 +26,16 @@
    "n": 8
   },
   {
+   "v": "Auburn University",
+   "n": 7
+  },
+  {
    "v": "Michigan State University",
    "n": 7
   },
   {
    "v": "Pennsylvania State University",
    "n": 7
-  },
-  {
-   "v": "Auburn University",
-   "n": 6
   },
   {
    "v": "The Hong Kong Polytechnic University",
@@ -2628,6 +2628,10 @@
    "n": 2
   },
   {
+   "v": "Raymond J. Harbert College of Business",
+   "n": 2
+  },
+  {
    "v": "School of Business Administration",
    "n": 2
   },
@@ -3085,10 +3089,6 @@
   },
   {
    "v": "Peter J. Tobin College of Business",
-   "n": 1
-  },
-  {
-   "v": "Raymond J. Harbert College of Business",
    "n": 1
   },
   {
@@ -3711,7 +3711,7 @@
  "units": [
   {
    "v": "Supply Chain Management",
-   "n": 58
+   "n": 59
   },
   {
    "v": "OM",
