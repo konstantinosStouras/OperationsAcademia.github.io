@@ -1,24 +1,24 @@
 {
- "generated": "2026-10-13T03:58:27.462Z",
- "members": 337,
+ "generated": "2026-10-13T19:31:50.801Z",
+ "members": 341,
  "k": 3,
  "affiliation": {
-  "listed": 253,
+  "listed": 258,
   "other": 44,
-  "none": 40
+  "none": 39
  },
  "universities": {
   "count": 130,
   "shown": [
    {
+    "name": "National University of Singapore",
+    "country": "Singapore",
+    "members": 10
+   },
+   {
     "name": "Cornell University",
     "country": "United States",
     "members": 9
-   },
-   {
-    "name": "National University of Singapore",
-    "country": "Singapore",
-    "members": 8
    },
    {
     "name": "Columbia University",
@@ -44,6 +44,11 @@
     "name": "University of Massachusetts Amherst",
     "country": "United States",
     "members": 5
+   },
+   {
+    "name": "Georgetown University",
+    "country": "United States",
+    "members": 4
    },
    {
     "name": "Massachusetts Institute of Technology",
@@ -96,7 +101,7 @@
     "members": 3
    },
    {
-    "name": "Georgetown University",
+    "name": "George Washington University",
     "country": "United States",
     "members": 3
    },
@@ -166,14 +171,14 @@
     "members": 3
    }
   ],
-  "rest": 131
+  "rest": 130
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 164
+    "members": 167
    },
    {
     "name": "Canada",
@@ -181,7 +186,7 @@
    },
    {
     "name": "Singapore",
-    "members": 12
+    "members": 14
    },
    {
     "name": "Hong Kong",
@@ -209,6 +214,6 @@
    }
   ],
   "rest": 10,
-  "unknown": 95
+  "unknown": 94
  }
 }
