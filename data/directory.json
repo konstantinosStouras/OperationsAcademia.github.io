@@ -391,6 +391,15 @@
   "lastPosted": "2026-01-15"
  },
  {
+  "id": "american-university-of-sharjah____information-systems-and-business-analytics",
+  "institution": "American University of Sharjah",
+  "department": "Information Systems and Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "appalachian-state-university____cis",
   "institution": "Appalachian State University",
   "department": "CIS",
