@@ -3,6 +3,20 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "profile-analytics-2026-10",
+      "date": "2026-10-13",
+      "title": "See the reach of your profiles and job postings",
+      "summary": "Open Profile Analytics from your account to see views, approximate unique viewers, link clicks, average reading time, and audience breakdowns by country and university for your candidate profiles and job postings. Private reports help candidates and employers understand their reach and how readers engage with their listings over time, without identifying individual visitors.",
+      "url": "/profile-analytics"
+    },
+    {
+      "id": "jobs-deadline-sort-2026-10",
+      "date": "2026-10-13",
+      "title": "Sort jobs by suggested or final deadline",
+      "summary": "Use Sort by on the jobs page to order postings by suggested or final deadline, earliest or latest first. Postings without the selected deadline appear last. Sorting works with your filters and carries through to the Excel download, helping you prioritise approaching deadlines and plan your applications.",
+      "url": "/jobs"
+    },
+    {
       "id": "university-reference-2026-10",
       "date": "2026-10-08",
       "title": "University names shared across the directory and posting forms",
