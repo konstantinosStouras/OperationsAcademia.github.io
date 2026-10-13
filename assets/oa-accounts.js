@@ -650,7 +650,7 @@
           '<div class="oa-acct-group">' +
             '<a role="menuitem" class="oa-acct-primary" href="account">' +
               '<span class="oa-mi" aria-hidden="true">&#128100;</span>My personal area</a>' +
-            '<a role="menuitem" href="profile-analytics">Profile Analytics <span class="oa-nav-new" data-profile-analytics-new hidden>New</span></a>' +
+            '<a role="menuitem" href="profile-analytics"><span class="oa-mi" aria-hidden="true">&#128202;</span>Profile Analytics <span class="oa-nav-new" data-profile-analytics-new hidden>New</span></a>' +
           '</div>' +
           '<div class="oa-acct-group">' +
             '<a role="menuitem" href="post-a-job">' +
