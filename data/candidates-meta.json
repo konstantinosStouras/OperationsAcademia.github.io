@@ -1,11 +1,11 @@
 {
- "generated": "2026-10-13T11:17:40.762Z",
- "count": 35,
+ "generated": "2026-10-13T14:25:30.751Z",
+ "count": 36,
  "years": {
-  "2027": 35
+  "2027": 36
  },
  "positions": {
-  "PhD Candidate": 19,
+  "PhD Candidate": 20,
   "Post-Doctoral Researcher": 11,
   "Assistant Professor": 3,
   "Research Scientist": 2
@@ -17,9 +17,9 @@
   "Empirical Operations": 10,
   "Service Operations": 9,
   "Supply Chain Management": 8,
+  "Sustainable Operations": 8,
   "Behavioral Operations": 7,
   "Healthcare Operations": 7,
-  "Sustainable Operations": 7,
   "Revenue Management and Pricing": 6,
   "Innovation and New Product Development": 5,
   "AI": 2,
@@ -37,6 +37,7 @@
   "Deep Learning": 1,
   "Energy Markets": 1,
   "Energy Systems": 1,
+  "Energy Transition": 1,
   "Extreme Risk Management": 1,
   "Human-AI": 1,
   "human-AI collaboration": 1,
@@ -61,12 +62,12 @@
   "Trustworthy AI": 1
  },
  "informsDays": {
-  "Sunday": 11,
+  "Sunday": 12,
   "Monday": 9,
   "Tuesday": 4,
   "Wednesday": 1
  },
- "withCv": 31,
+ "withCv": 32,
  "newestPosted": "2026-10-13",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
