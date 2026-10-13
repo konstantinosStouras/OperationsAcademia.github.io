@@ -9725,15 +9725,15 @@ for (const w of [320, 360, 390, 430]) {
         researchAreas: ['Operations'], informsDays: ['Monday'],
         addedAt: '2026-08-21T00:00:00Z', cvUrl: 'https://example.edu/cv2.pdf' },
     ];
-    const seed = (pg) => pg.route('**/data/candidates.json', (r) =>
-      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
-    const { ctx, page: q } = await signedInPage('candidates.html', { wait: false });
-    await seed(q);
-    await q.goto(BASE + 'candidates.html', { waitUntil: 'load' });
+    // Seed both public previews and the authenticated response before navigation.
+    // Auth resolution precedes the protected list refresh: school-only preview
+    // cards must not satisfy a test about full profile contents.
+    const route = ['**/data/candidates.json', JSON.stringify(SEED)];
+    const { ctx, page: q } = await signedInPage('candidates.html', { wait: false, route });
     await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
     await q.evaluate(() => document.querySelector('#candidates, #oa-candidates').scrollIntoView({ block: 'center' }));
-    await q.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+    await q.waitForSelector('#oa-candidates #job-upd-1 .oa-card-head', { timeout: 15000 });
     for (const h of await q.$$('#oa-candidates .oa-card .oa-card-head')) await h.click();
     await q.waitForTimeout(250);
     const u = await q.evaluate(() => Array.from(document.querySelectorAll('#oa-candidates .oa-card'))
@@ -9750,9 +9750,7 @@ for (const w of [320, 360, 390, 430]) {
     ok(u[0].last, 'served rows: ...as the LAST line of the card body');
     await ctx.close();
 
-    const { ctx: outCtx, page: out } = await signedOutPage('candidates.html', { wait: false });
-    await seed(out);
-    await out.goto(BASE + 'candidates.html', { waitUntil: 'load' });
+    const { ctx: outCtx, page: out } = await signedOutPage('candidates.html', { wait: false, route });
     await out.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
       null, { timeout: 15000 });
     await out.evaluate(() => document.querySelector('#candidates, #oa-candidates').scrollIntoView({ block: 'center' }));

@@ -92,7 +92,7 @@
     detail.appendChild(el('p', 'Views count expanded cards visible in a focused tab. Returning to a card starts a new viewing episode. Reading time pauses in hidden tabs and after 60 seconds without interaction. Unique viewers are approximate browser/account counts. First-party totals exclude your own visits and admin visits. Browser privacy settings and interrupted connections can prevent measurement. Time on external CVs or websites cannot be measured.'));
     detail.appendChild(el('p', 'Total active reading time: ' + duration(r.seconds) + '. Listing-open clicks: ' + number(r.opens) + '.'));
     parent.appendChild(detail);
-    parent.appendChild(el('p', 'Updated ' + new Date(data.updatedAt).toLocaleString() + ' · Refreshes approximately every 15 minutes. New measures begin at deployment; previous unrecorded visits cannot be recovered.', 'pa-footnote'));
+    parent.appendChild(el('p', 'Updated ' + new Date(data.updatedAt).toLocaleString() + ' · Refreshes approximately every 15 minutes.', 'pa-footnote'));
   }
   if (!window.OAFB || !OAFB.enabled) { root.textContent = 'Analytics is not available yet.'; return; }
   OAAccounts.onChange(async function (user) {
