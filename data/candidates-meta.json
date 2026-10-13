@@ -1,27 +1,27 @@
 {
- "generated": "2026-10-12T15:48:51.551Z",
- "count": 34,
+ "generated": "2026-10-13T11:17:40.762Z",
+ "count": 35,
  "years": {
-  "2027": 34
+  "2027": 35
  },
  "positions": {
   "PhD Candidate": 19,
-  "Post-Doctoral Researcher": 10,
+  "Post-Doctoral Researcher": 11,
   "Assistant Professor": 3,
   "Research Scientist": 2
  },
  "researchAreas": {
   "Machine Learning and Data Science": 16,
-  "Operations Research / Optimization": 11,
+  "Operations Research / Optimization": 12,
   "Technology, Platforms and Marketplaces": 11,
   "Empirical Operations": 10,
   "Service Operations": 9,
+  "Supply Chain Management": 8,
   "Behavioral Operations": 7,
   "Healthcare Operations": 7,
-  "Supply Chain Management": 7,
   "Sustainable Operations": 7,
+  "Revenue Management and Pricing": 6,
   "Innovation and New Product Development": 5,
-  "Revenue Management and Pricing": 5,
   "AI": 2,
   "Sequential Decision Making": 2,
   "Transportation and Logistics": 2,
@@ -31,6 +31,7 @@
   "AI-enabled Operations": 1,
   "AI/LLM for Social Good": 1,
   "Algorithmic Intermediation in Platform Operations": 1,
+  "Approximation Algorithms": 1,
   "Biomedical Applications": 1,
   "Business Model Innovation": 1,
   "Deep Learning": 1,
@@ -47,6 +48,7 @@
   "Machine Learning": 1,
   "Market Design": 1,
   "Marketplace Aanlytics": 1,
+  "Online Algorithms": 1,
   "public sector operations": 1,
   "Public Sector Operations": 1,
   "Queueing Theory": 1,
@@ -64,8 +66,8 @@
   "Tuesday": 4,
   "Wednesday": 1
  },
- "withCv": 30,
- "newestPosted": "2026-10-11",
+ "withCv": 31,
+ "newestPosted": "2026-10-13",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
  "heldCount": 0

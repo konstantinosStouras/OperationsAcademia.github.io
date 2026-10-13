@@ -1,5 +1,32 @@
 [
  {
+  "id": "2027-wu-tongwen",
+  "year": 2027,
+  "posted": "2026-10-13",
+  "first": "Tongwen",
+  "last": "Wu",
+  "name": "Tongwen Wu",
+  "affiliation": "Operations Management and Statistics, Joseph L. Rotman School of Management, University of Toronto",
+  "position": "Post-Doctoral Researcher",
+  "researchAreas": [
+   "Supply Chain Management",
+   "Operations Research / Optimization",
+   "Revenue Management and Pricing",
+   "Online Algorithms",
+   "Approximation Algorithms"
+  ],
+  "informsDays": [],
+  "informsUrl": "",
+  "cvUrl": "https://drive.google.com/file/d/1Yqxj0KnyNQlpitaFuq8G8HVwEnz4Zp7A/view?usp=drivesdk",
+  "rsUrl": "",
+  "webUrl": "https://wtw666.github.io/",
+  "email": "tw.wu@rotman.utoronto.ca",
+  "source": "oa-form",
+  "addedAt": "2026-10-13T11:17:12Z",
+  "ref": "OA-CAND-261013-E9P4",
+  "owner": "a40df139457c3f9f"
+ },
+ {
   "id": "2027-liu-david",
   "year": 2027,
   "posted": "2026-10-11",
