@@ -23,14 +23,16 @@
         function inCurrentMarket(row) { return OAJobNav.inCurrentMarket(row); }
         var candidateCard = OACandCard.cardConfig();
         var profileSubtitle = candidateCard.subtitle;
-        candidateCard.title = function (r) { return OAGate.signedIn() ? r.name : OACandCard.universityName(r.affiliation); };
-        candidateCard.subtitle = function (r) { return OAGate.signedIn() ? profileSubtitle(r) : ''; };
+        candidateCard.title = function (r) { return !r.previewOnly && OAGate.signedIn() ? r.name : OACandCard.universityName(r.affiliation); };
+        candidateCard.subtitle = function (r) { return !r.previewOnly && OAGate.signedIn() ? profileSubtitle(r) : ''; };
         var heading = document.getElementById('oa-candidates-heading');
         heading.textContent = 'Job market candidates (' + (OAJobNav.marketYear()-1) + '-' + OAJobNav.marketYear() + ')';
         var cands = OAList.mount({
           mount: '#oa-candidates',
           bottomPager: true,
           data: '/data/candidates.json',
+          source: function () { return OACandidateData.load(); },
+          protectedSource: true,
           perPage: 10,
           urlPrefix: 'c_',
           strings: {
@@ -89,7 +91,6 @@
         });
         window.OACandidateList = cands;
         if (window.OACandidateEdit) OACandidateEdit.attach(cands);
-        OAGate.watch(cands);
         var host = document.getElementById('oa-candidates');
         var lock = document.getElementById('v3-lock-card');
         function updateLock() {
@@ -98,7 +99,19 @@
           lock.hidden = !locked;
         }
         updateLock();
-        OAAccounts.onChange(updateLock);
+        var initialAccount = OAAccounts.resolved() ? OAAccounts.user() : null;
+        var lastAccount = OAAccounts.resolved() ? (initialAccount ? initialAccount.uid : '') : undefined;
+        OAAccounts.onChange(function (user) {
+          updateLock();
+          var next = user ? user.uid : '';
+          if (next === lastAccount) return;
+          lastAccount = next;
+          cands.clear();
+          cands.refresh().then(function () { OAGate.resume(cands); });
+        });
+        // Clear the school-only rows before the gate tries to resume a card;
+        // otherwise it can open the placeholder and consume its pending id.
+        OAGate.watch(cands);
         document.getElementById('v3-lock-signin').addEventListener('click', function () { OAAccounts.openAuth(); });
         document.getElementById('v3-lock-register').addEventListener('click', function () { OAAccounts.openAuth('register'); });
         /* A page opened before the reveal must not keep its cached empty list
@@ -113,6 +126,7 @@
             .then(function (meta) {
               if (!OAReveal.isRevealed(meta.revealAt)) return;
               return cands.refresh().then(function () {
+                OAGate.resume(cands);
                 if (cands.rows().length) {
                   var waiting = document.getElementById('oa-reveal-note');
                   if (waiting) waiting.hidden = true;

@@ -74,6 +74,7 @@
 import { isMain } from './_main.mjs';
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
+import { readPrivateCandidates } from './private-candidates.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -597,7 +598,9 @@ async function purgeSubmissions(fb, uid, order, held) {
     for (const s of SUBMISSIONS) {
       const docs = held[s.col] || [];
       if (!docs.length) continue;
-      const rows = await servedRows(s.file);
+      const rows = s.file === 'candidates.json'
+        ? await readPrivateCandidates(db).catch(() => null)
+        : await servedRows(s.file);
       if (rows === null) return { done: false, why: `data/${s.file} could not be read` };
       if (stillServed(rows, specOf(uid, docs)).length) {
         return { done: false, why: `the site is still showing something in data/${s.file}` };

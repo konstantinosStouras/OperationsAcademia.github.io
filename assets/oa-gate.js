@@ -12,22 +12,19 @@
    THE RULE (owner, 2026-08-29, from two screenshots of the site signed out):
    a reader who is not registered and not signed in may see WHO is hiring and
    WHO is on the market — the sponsor's posting and the universities behind
-   the ones beside it, every candidate's name — and nothing else. The card
+   the ones beside it, candidates' institutions — and nothing else. The card
    does not open on them, and the details are drawn as a blurred, unreadable
    strip so it is plain that there is something there and plain how to reach
    it. Expanding a posting in place belongs to a registered reader who has
    opened the full list.
 
-   IT IS A NUDGE, NOT AN ACCESS CONTROL, AND IT CANNOT BE ONE HERE. This is a
-   static site on GitHub Pages: `data/jobs.json` and `data/candidates.json` are
-   served to anybody who asks for them, and no rule in this repository can
-   change that without a backend to put them behind. So what this file decides
-   is WHAT THE SITE SHOWS, which is a product decision and a real one — it is
-   the difference between a page that reads as a directory of open positions
-   and one that reads as a list of universities with a reason to register —
-   and no page, no comment and no e-mail may describe it as security. The
-   sign-in card on jobs.html says exactly that, and `selftest.mjs` pins that
-   nothing claims otherwise.
+   IT IS A NUDGE, NOT AN ACCESS CONTROL. This file decides WHAT THE SITE SHOWS.
+   Jobs still use the world-readable data/jobs.json snapshot. Candidates now
+   have a separate server access check: oa-candidate-data.js calls the Firebase
+   readCandidateProfiles callable only after sign-in, and that callable checks
+   authentication and the reveal time before reading its private snapshot.
+   data/candidates.json is an empty compatibility file. A remembered sign-in
+   hint here cannot grant access to the authenticated candidate source.
 
    WHY THE DECISION IS TAKEN FROM THE HINT FIRST. `OAAccounts.hint()` is the
    localStorage memory of the last resolved auth state, and it is what the
@@ -143,6 +140,15 @@
     else if (A && A.whenSignedIn) A.whenSignedIn(function () {});
   }
 
+  // Authenticated candidate rows arrive asynchronously and use private profile
+  // ids. Only the signed-in response supplies the public-preview alias.
+  function resume(list) {
+    if (!pending || !signedIn() || !list || !list.rows || !list.open) return;
+    var id = pending;
+    list.rows().forEach(function (row) { if (row.previewId === pending) id = row.id; });
+    if (list.open(id)) pending = '';
+  }
+
   /**
    * Re-render a mounted list whenever the auth state changes, and open the
    * card whose lock was pressed if that is what changed it.
@@ -169,7 +175,12 @@
       list.rerender();
       /* Signing OUT drops it: an id pressed in one session must not open a
          card for whoever signs in next on the same machine. */
-      if (!user) { pending = ''; return; }
+      if (!user) {
+        // A restored session or unfinished registration also reports null.
+        // Keep the selection through those steps; a real sign-out clears it.
+        if ((!A.resolved || A.resolved()) && !(A.held && A.held())) pending = '';
+        return;
+      }
       if (pending && list.open && list.open(pending)) pending = '';
     });
   }
@@ -183,6 +194,7 @@
     locked: locked,
     cardOpen: cardOpen,
     watch: watch,
+    resume: resume,
     /** See `forced` above: the browser checks' only way to put a reader on
         either side of the gate without a Firebase to sign them in. */
     __setForTest: function (isLocked) {

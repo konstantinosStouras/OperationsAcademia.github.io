@@ -53,6 +53,7 @@ import { fileURLToPath } from 'node:url';
 
 import { isMain } from './_main.mjs';
 import { rowFromCandidateSubmission, assignCandidateIds } from './candidates-model.mjs';
+import { readPrivateCandidates } from './private-candidates.mjs';
 import { marketStart } from './jobs-model.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -354,7 +355,7 @@ async function main() {
     return;
   }
 
-  const served = await readServed();
+  const served = await readPrivateCandidates(db, { releasedOnly: true }) ?? await readServed();
   if (served === null) return;          // an unreadable served file changes nothing
 
   const now = new Date();

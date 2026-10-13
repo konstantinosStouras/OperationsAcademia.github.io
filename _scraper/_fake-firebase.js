@@ -935,6 +935,19 @@
     return simRefuse('not-found', 'thread');
   }
 
+  function candidateSim() {
+    if (!firebase.auth().currentUser) return Promise.reject({ code: 'functions/unauthenticated' });
+    // Full rows exist only in browser-test fixtures at this legacy URL.
+    return fetch('/data/candidates.json').then(function (res) { return res.json(); })
+      .then(function (rows) {
+        var targets = {};
+        rows.slice().sort(function (a, b) {
+          return String(a.last || a.name || '').localeCompare(String(b.last || b.name || ''));
+        }).slice(0,10).forEach(function (row, i) { targets['candidate-preview-' + (i + 1)] = row.id; });
+        return { data: { rows: rows, previewTargets: targets } };
+      });
+  }
+
   function functionsFor() {
     return {
       httpsCallable: function (name) {
@@ -945,6 +958,7 @@
             // hands it over on err.message (the throttle names its reason there)
             return Promise.reject({ code: seed.callableFails, message: seed.callableMessage || seed.callableFails });
           }
+          if (name === 'readCandidateProfiles') return candidateSim();
           if (FORUM_NAMES.indexOf(String(name)) !== -1) return forumSim(String(name), data);
           return Promise.resolve({ data: { sent: true, to: 'r***@example.edu' } });
         };

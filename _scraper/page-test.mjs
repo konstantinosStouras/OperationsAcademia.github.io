@@ -74,7 +74,7 @@ const V2 = 'v2/';
 
 let chromium;
 try {
-  ({ chromium } = await import('playwright'));
+  ({ chromium } = requireFor(import.meta.url)('playwright'));
 } catch {
   /* Locally this is a convenience: the rest of the suite still runs on a
      machine with no browser installed. In CI it never is — the workflow
@@ -324,6 +324,10 @@ async function signedInPage(url, opts = {}) {
   /* a served file answered with a fixture — for a check whose case the live
      corpus does not carry, and which would otherwise be green for having
      nothing to look at */
+  if (opts.route && opts.route[0] === '**/data/candidates.json') {
+    const previews = JSON.parse(opts.route[1]).map((r,i)=>({id:'candidate-preview-'+(i+1),year:r.year,affiliation:r.affiliation,previewOnly:true}));
+    await p.route('**/data/candidate-previews.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(previews)}));
+  }
   if (opts.route) {
     await p.route(opts.route[0], (r) => r.fulfill({ status: 200,
       contentType: 'application/json', body: opts.route[1] }));
@@ -438,13 +442,13 @@ page.on('pageerror', (e) => jsErrors.push(e.message));
   const seed=['**/data/candidates.json',JSON.stringify(rows)];
   const {ctx,page:q,errors}=await signedOutPage('index.html',{wait:false,route:seed});
   await q.evaluate(()=>document.querySelector('#candidates, #oa-candidates').scrollIntoView());
-  await q.waitForSelector('#oa-candidates .oa-card');
-  eq(await q.locator('#oa-candidates .oa-card').count(),10,'candidate overview: exactly ten previews');
-  ok(!/Candidate 00/.test(await q.locator('#oa-candidates').innerText()),'candidate overview: names are withheld');
-  ok(await q.locator('#oa-candidates .oa-card-lock-note').first().isHidden(),'candidate overview: no repeated sign-in note');
-  await q.locator('#oa-candidates .oa-card-head').first().click();
+  await q.waitForSelector('#oa-cohort-count');
+  eq(await q.locator('#candidates .oa-card').count(),0,'candidate overview: no school-card column');
+  eq(await q.locator('#candidates a.v3-btn').count(),2,'candidate overview: two clear actions');
+  ok(!/Candidate 00/.test(await q.locator('#candidates').innerText()),'candidate overview: names are withheld');
+  await q.locator('#candidates a.v3-btn.primary').click();
   await q.waitForSelector('.oa-modal');
-  ok(/Create/.test(await q.locator('.oa-modal').innerText()),'candidate overview: pressing a preview opens registration');
+  ok(/Create/.test(await q.locator('.oa-modal').innerText()),'candidate overview: create-account action opens registration');
   eq(errors,[],'candidate overview: no script errors');await ctx.close();
   const held=await signedInPage('candidates.html',{wait:false,route:seed,holdCandidates:true});
   await held.page.waitForSelector('#oa-reveal-note');await held.page.waitForTimeout(200);
@@ -6126,8 +6130,10 @@ for (const [from, hash] of [
       posted: new Date().toISOString().slice(0, 10),
       researchAreas: ['Operations'], informsDays: ['Sunday'],
       email: 'someone@example.edu', cvUrl: 'https://example.edu/cv.pdf' }];
-    const seed = (pg) => pg.route('**/data/candidates.json', (r) =>
-      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+    const seed = async (pg) => {
+      await pg.route('**/data/candidates.json', r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(SEED)}));
+      await pg.route('**/data/candidate-previews.json', r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(SEED.map((r,i)=>({id:'candidate-preview-'+(i+1),year:r.year,affiliation:r.affiliation,previewOnly:true})))}));
+    };
 
     const { ctx: outCtx, page: out } = await signedOutPage('candidates.html', { wait: false });
     await seed(out);

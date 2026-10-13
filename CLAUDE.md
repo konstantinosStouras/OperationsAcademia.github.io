@@ -4714,7 +4714,7 @@ whole point.** The sweep stays a workflow with the Admin SDK, live on merge;
 the doorbell only makes it prompt, exactly as `publishOnChange` does for a
 posting. Inert until the functions are deployed, and while it is inert nothing
 is lost: the build chain and the daily cron carry a deletion on the old
-cadence. **The deploy count is SIXTEEN** for it, moved in the header, both
+cadence. **The deploy count is SEVENTEEN** for it, moved in the header, both
 setup pages and every count sentence in this file, so a deploy read back at
 fifteen is a stale checkout. `git pull && npm install --prefix _functions &&
 firebase deploy --only functions --project operations-academia`, and read
@@ -4972,7 +4972,7 @@ live site's from `assets/v3.css`, the button is a coloured table cell with a
 VML fallback for Outlook, and the link is written out in full as text as well
 as behind the button.
 
-**The deploy count is SIXTEEN now.** Five doorbells (`revealCandidates` and
+**The deploy count is SEVENTEEN now.** Five doorbells (`revealCandidates` and
 `purgeOnRequest` among them), `recordVisit`, `sendVerificationEmail`, and the
 nine forum callables
 (see "The forum"). Read the list back after every deploy; fewer means a stale
@@ -6761,7 +6761,7 @@ deliberately NOT named in any workflow: the "every builder has a caller,
 never both" guard refuses a builder both in `BUILDERS` and in a workflow, and
 the byte pin already catches drift, so the `--check` mode is for a hand run.
 
-**The deploy count is SIXTEEN.** `_functions/index.js` re-exports the nine
+**The deploy count is SEVENTEEN.** `_functions/index.js` re-exports the nine
 callables one per line (`exports.forumX = forum.forumX;`) so a deploy's
 per-function lines and the selftest's count of them agree; the header, both
 setup pages and the count sentences in this file moved from six together,
@@ -13462,3 +13462,12 @@ into the very file it is reading.
 `page-test.mjs` drives BOTH served designs: the checks that assert on the old
 chrome (`#nav`, `#header-wrapper`, `#titleBar`, `#navPanel`, `window.ga`,
 jQuery) run against `V2 + 'page.html'`, and the rest against the root.
+
+
+## Homepage candidate overview and authenticated profiles (2026-10-13)
+
+The homepage now shows one candidate count and broad cohort research totals, refreshed from candidates-meta.json every minute and when the tab resumes. Desktop introductory prose is justified; phones retain left alignment. It has two actions and no school-card column. Before reveal, only the submitted count appears; research totals are withheld.
+
+Full candidate rows now live in privateCandidateProfiles, in complete generations selected by privateCandidateState/current. The default Firestore deny rule keeps both collections closed to browser reads. readCandidateProfiles is a verified Firebase callable: it checks sign-in (and password-account email verification), enforces the reveal instant, and returns only the candidate row field allowlist. The public candidates.json compatibility file must stay empty. The builder stages the private snapshot before changing public files or stamping submissions, and trusted mailers, deletion checks and profile analytics read the private snapshot. Never restore the public full-profile export.
+
+Before publishing a migration, deploy functions:readCandidateProfiles to operations-academia and initialize the private snapshot from the latest published rows. The candidate builder then keeps it current using its existing CI service account. The initial migration preserved all 35 published profiles, including a profile added during implementation. The candidate workflow's optional verify_reader input checks that a registered maintainer receives every private profile through the live callable. Previously published Git history and externally shared CV copies remain public; this change does not erase those copies. Run node _scraper/candidate-access-test.mjs as well as the existing checks.

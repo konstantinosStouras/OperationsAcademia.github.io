@@ -66,8 +66,8 @@ firebase deploy --only functions --project operations-academia
 checkout that predates it has never installed. Without the install the load
 dies and the deploy reports a discovery error over code that is fine.
 
-**Read the deployed list back and count SIXTEEN.** The deploy prints one line
-per function and there must be sixteen of them: `publishOnChange`,
+**Read the deployed list back and count SEVENTEEN.** The deploy prints one line
+per function and there must be seventeen of them: `readCandidateProfiles`, `publishOnChange`,
 `publishOnCandidateChange`, `publishOnReview`, `revealCandidates`,
 `purgeOnRequest`, `recordVisit`, `sendVerificationEmail`, and the nine forum
 callables
@@ -80,7 +80,7 @@ Then
 firebase functions:list --project operations-academia
 ```
 
-must list the same sixteen, all on `nodejs22`. Fewer means the deploy ran from a
+must list the same seventeen, all on `nodejs22`. Fewer means the deploy ran from a
 checkout without this function, which prints "Deploy complete!" over the
 older set (`_SETUP-INSTANT-PUBLISH.md` records how that happened once).
 

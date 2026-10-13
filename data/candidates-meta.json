@@ -70,5 +70,19 @@
  "newestPosted": "2026-10-13",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
- "heldCount": 0
+ "heldCount": 0,
+ "researchSummary": [
+  {
+   "label": "Machine learning",
+   "count": 16
+  },
+  {
+   "label": "Optimization",
+   "count": 12
+  },
+  {
+   "label": "Healthcare operations",
+   "count": 7
+  }
+ ]
 }

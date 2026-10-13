@@ -481,6 +481,7 @@ async function testServedFile() {
     if (f === 'candidates.json') {
       const rows = JSON.parse(raw);
       ok(Array.isArray(rows), 'data/candidates.json is a list');
+      ok(rows.length === 0, 'data/candidates.json contains no public full profiles');
       for (const r of rows) {
         const rest = { ...r };
         delete rest.email;
@@ -7397,7 +7398,7 @@ async function testAccountDeletion() {
     'and the purge workflow answers that event');
   ok(/^\s*schedule:/m.test(wf) && /workflow_run:/.test(wf),
     '…while the build chain and the daily cron stay as the safety net');
-  ok(/SIXTEEN functions/.test(fnSrc.slice(0, 2000)) && /purgeOnRequest/.test(fnSrc.slice(0, 2000)),
+  ok(/SEVENTEEN functions/.test(fnSrc.slice(0, 2000)) && /purgeOnRequest/.test(fnSrc.slice(0, 2000)),
     'the header counts it, so a deploy read back at fifteen is a stale checkout');
 
   /* …and the roster watches, so the row goes on its own. The ORDER documents
@@ -14321,7 +14322,7 @@ async function testCandidateReveal() {
     }
   }
   const setup = await read('_SETUP-INSTANT-PUBLISH.md');
-  ok(/`revealCandidates`/.test(setup) && /which is sixteen/.test(setup) && /read back\s+sixteen/.test(setup),
+  ok(/`revealCandidates`/.test(setup) && /which is seventeen/.test(setup) && /read back\s+seventeen/.test(setup),
     'setup guide: names revealCandidates and counts sixteen functions');
   ok(/functions:revealCandidates/.test(setup), 'setup guide: the explicit --only list carries it');
   ok(/Cloud Scheduler/.test(setup), 'setup guide: says the deploy creates the Cloud Scheduler job');
@@ -14537,18 +14538,12 @@ async function testCandidateReveal() {
 
   /* ---- the three pages, wired in order --------------------------------- */
   const cardTag = (html) => tagAt(html, 'oa-candcard.js');
-  /* index.html: the list goes through the module and its output is what it
-     was (the page passes its OWN three link helpers) */
-  ok(cardTag(index) > tagAt(index, 'oa-list.js') && cardTag(index) < index.indexOf('OACandCard.cardConfig('),
-    'index.html loads oa-candcard.js after the engine and before the mount that asks it');
-  ok(/candidateTeaserCard = OACandCard\.cardConfig\(\)/.test(index),
-    'index.html: the candidate card is cardConfig with the page’s own helpers injected');
-  ok(!/OACandCard\.decorate\(li, r\);/.test(index), 'index.html: school-only previews carry no owner edit actions');
-  ok(!/label: 'Research area\(s\)'/.test(index), 'index.html: no inline copy of the rows remains');
-  ok(/mount: '#oa-candidates'[\s\S]{0,400}urlPrefix/.test(index) && /cardOpen: OAGate\.cardOpen\(/.test(index),
-    'index.html: cardOpen, urlPrefix and the filters stay inline (the gate and deep-link pins)');
+  ok(/OACandidateSummary.mount/.test(index) && tagAt(index, 'oa-candidate-summary.js') > 0,
+    'index.html loads and mounts the public cohort summary');
+  ok(!/candidateTeaserCard|mount: '#oa-candidates'/.test(index),
+    'index.html contains no candidate cards or full-profile data source');
   /* the reveal note: a static sentence true without JS, filled in by JS */
-  const noteHtml = index.slice(index.indexOf('id="oa-reveal-note"'), index.indexOf('id="oa-candidates"'));
+  const noteHtml = index.slice(index.indexOf('id="oa-reveal-note"'), index.indexOf('id="oa-cohort-research"'));
   ok(noteHtml.length > 300 && noteHtml.length < 2000, 'index.html: the reveal note slice is bounded both ends');
   ok(/at 14:00 UTC on/.test(noteHtml) && /id="oa-reveal-cities"><\/span>/.test(noteHtml),
     'index.html: the note’s static sentence names the UTC time and leaves the city clocks to the script (an empty span)');
@@ -14580,7 +14575,7 @@ async function testCandidateReveal() {
       'index.html: the count reads "So far, N Candidate profiles have already been filed.", the count alone in bold');
     ok(!/' profile has' : ' profiles have'/.test(index), 'index.html: the old count sentence is gone');
   }
-  ok(/emptyDataHint: '[^']*14:00 UTC/.test(index), 'index.html: the empty list’s hint names the time');
+  ok(/14:00 UTC/.test(noteHtml), 'index.html: the reveal note names the time');
   ok(/Can I see my profile before the reveal\?/.test(index) && /Can I change my profile\?/.test(index),
     'index.html: the FAQ gains the two questions');
   ok(/only you and the\s+site&rsquo;s maintainer can\s+see\s+it/.test(index.replace(/<[^>]+>/g, ''))
@@ -15064,7 +15059,6 @@ async function testJobExportWiring() {
     return (html.slice(opens, html.indexOf('],', opens)).match(/\.action\(/g) || []).length;
   };
   for (const [id, html, where] of [['oa-jobs', jobs, 'jobs.html'],
-                                   ['oa-candidates', index, 'index.html'],
                                    ['oa-jobs-recent', index, 'index.html'],
                                    ['oa-placements', index, 'index.html']]) {
     const n = declared(html, id);
@@ -15494,8 +15488,8 @@ async function testReaderGate() {
      than one page at a time: the archive is where postings GO when a season
      rolls, and leaving it open would have made the gate on the jobs page a
      matter of waiting rather than of registering. */
-  eq((home.match(/cardOpen:\s*OAGate\.cardOpen\(/g) || []).length, 2,
-    'gate: the one-pager gates BOTH its lists — the job teaser and the candidates');
+  eq((home.match(/cardOpen:\s*OAGate\.cardOpen\(/g) || []).length, 1,
+    'gate: the one-pager gates its job teaser; candidates use the protected directory');
   /* …and the teaser is the one that sends a signed-in reader to the full
      list, through the site's single answer to "which page carries this
      posting" rather than a fourth copy of that rule. */
@@ -17161,7 +17155,7 @@ async function testCalendarsWiring() {
     'calendar: index.html loads the writer and the meeting record before the module whose factory takes them');
   ok(/assets\/oa-candidate-calendar.js/.test(index),
     'calendar: the candidates mount declares the talks-calendar action');
-  ok(/download the\s+talks as a calendar file/.test(index), 'calendar: the candidates lede says so');
+  ok(/INFORMS talks/.test(index), 'calendar: the candidates lede says so');
   ok(/Can I put the deadlines in my calendar\?/.test(index) && /calendar file of every talk/.test(index),
     'calendar: the FAQ answers both');
   ok(/id="f-talks"/.test(cand) && /id="f-days-meeting"/.test(cand),
@@ -18746,8 +18740,8 @@ async function testCandidateStats() {
     'the tally reads it, and a record written before it is read exactly as before');
   const oneP = await read('index.html');
   for (const id of CSTATS.CANDIDATE_MOUNTS) {
-    ok(oneP.includes(`mount: '#${id}'`),
-      `the mount named as a candidates list (#${id}) is one the home page really mounts`);
+    ok((oneP + await read('assets/oa-candidates-page.js')).includes(`mount: '#${id}'`),
+      `the mount named as a candidates list (#${id}) is one the current candidate page mounts (legacy homepage opens remain counted)`);
   }
   ok(/mount: '#oa-placements'/.test(oneP) && !CSTATS.CANDIDATE_MOUNTS.has('oa-placements'),
     'and the placements list beside it is not one of them — the collision this exists for');
@@ -20329,10 +20323,10 @@ async function testEmailVerification() {
   const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
   ok(blockAt > 0 && blockEnd > blockAt && noDash(fn.slice(blockAt, blockEnd)),
     'function: no em dash in the verification block');
-  ok(/SIXTEEN functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
-    'function: the file header counts sixteen and names the mailer');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 16,
-    'function: the file exports exactly sixteen functions, the count a deploy must read back');
+  ok(/SEVENTEEN functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
+    'function: the file header counts seventeen and names the mailer');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 17,
+    'function: the file exports exactly seventeen functions, the count a deploy must read back');
 
   const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
   ok(pkg.dependencies && pkg.dependencies.nodemailer,
@@ -20351,7 +20345,7 @@ async function testEmailVerification() {
   ok(/npm install --prefix _functions/.test(setup)
      && /firebase deploy --only functions --project operations-academia/.test(setup),
     'setup: install, then deploy, naming the project');
-  ok(/\bsixteen\b/i.test(setup) && /functions:list/.test(setup),
+  ok(/seventeen/i.test(setup) && /functions:list/.test(setup),
     'setup: read the deployed list back and count SIXTEEN');
   ok(/fall(s|ing)? back/i.test(setup) && /sendEmailVerification/.test(setup)
      && /firebaseapp\.com/.test(setup),
@@ -21899,8 +21893,8 @@ async function testVerifyExistingUsers() {
   const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
   ok(!/function siteVerifyLink\b/.test(fn) && /function siteVerifyLink\(generated, site\)/.test(rendererSrc),
     'siteVerifyLink is defined in verify-email.js and nowhere else, so index.js cannot carry a second copy');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 16,
-    'the helper lives in verify-email.js, so index.js still exports exactly sixteen functions');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 17,
+    'the helper lives in verify-email.js, so index.js still exports exactly seventeen functions');
 
   /* the shared Admin SDK handle */
   const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
@@ -22701,8 +22695,8 @@ async function testForum() {
   /* --- the vendored pairs, byte for byte ------------------------------- */
 
   eq(VENDOR_PAIRS.map((p) => p[0]).sort(),
-    ['assets/oa-forum-guard.js', 'assets/oa-forum-guide.js', 'assets/oa-forum-markup.js', 'assets/oa-forum-model.js', 'assets/oa-jobnav.js'],
-    'forum: the vendor builder copies the five modules the functions read');
+    ['assets/oa-forum-guard.js', 'assets/oa-forum-guide.js', 'assets/oa-forum-markup.js', 'assets/oa-forum-model.js', 'assets/oa-jobnav.js', 'assets/oa-reveal.js'],
+    'forum: the vendor builder copies the six modules the functions read');
   for (const [src, vendored] of VENDOR_PAIRS) {
     eq(await read(vendored), await read(src),
       `forum: ${vendored} is byte-identical to ${src}: firebase deploy ships only _functions, so a drifted copy would refuse text the page allows`);
@@ -23283,7 +23277,7 @@ async function testForum() {
   for (const w of [/season \+ ':' \+\s+uid/, /randomInt/, /secretVersion/, /both rooms/, /quote/, /tags/, /`up`/, /Moderator/, /R1\b/, /R10/, /@doc/]) {
     ok(w.test(cf), `forum: CLAUDE.md records ${w}`);
   }
-  ok(/SIXTEEN/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads sixteen');
+  ok(/SEVENTEEN/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads sixteen');
   for (const [f, src] of [...Object.entries(forumSrc), ['build-functions-vendor.mjs', await read('_scraper', 'build-functions-vendor.mjs')],
     ['oa-forum-model.js', await read('assets', 'oa-forum-model.js')], ['oa-forum-guard.js', await read('assets', 'oa-forum-guard.js')],
     ['oa-forum-guide.js', await read('assets', 'oa-forum-guide.js')], ['forum-emulator.mjs', em]]) {
@@ -24537,7 +24531,7 @@ async function testForum() {
 
   const home = await read('index.html');
   if (announced) {
-    ok(/<a class="v3-btn ghost" href="forum\?room=candidates">Candidates-only JM Forum(?: <span class="oa-nav-new">New<\/span>)?<\/a>/.test(home), 'index.html: the candidates section links the forum');
+    ok(/href="forum"/.test(home), 'index.html: the main navigation links the forum');
     const faq = home.slice(home.indexOf('Is there somewhere to talk to other candidates'), home.indexOf('Is my personal information published?'));
     ok(faq.length > 300 && faq.length < 2500 && /href="forum"/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
       'index.html: the FAQ names both rooms and where the forum is reached');

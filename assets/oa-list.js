@@ -1483,6 +1483,12 @@
 
     return {
       reload: function () { apply(); },
+      // Authenticated sources must erase the previous account's rows immediately,
+      // including expanded details and calendar exports, before any refetch.
+      clear: function () {
+        rows = []; view = []; expanded = {}; loaded = true; loadFailed = false;
+        buildBar(); apply();
+      },
       /* Fetch newly published rows without losing this list's filters. A failed
          refresh retains the last good rows, including an empty pre-reveal list. */
       refresh: function () {
@@ -1503,7 +1509,13 @@
           buildBar();
           apply();
           return true;
-        }).catch(function () { return false; });
+        }).catch(function () {
+          if (cfg.protectedSource && !rows.some(function (row) { return !row.previewOnly; })) {
+            loadFailed = true;
+            paintLoadError();
+          }
+          return false;
+        });
       },
       /* Re-run the render with the rows already loaded. Sign-in resolves AFTER
          the first paint, so the controls a signed-in user may see have to be

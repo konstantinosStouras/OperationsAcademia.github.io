@@ -43,7 +43,9 @@ import { marketYear, inCurrentMarket, ownerTag, removalSpecs, specMatches } from
 import { adminUids } from './_mail.mjs';
 import { ADMIN_EMAILS } from './build-candidate-stats.mjs';
 import { createRequire } from 'node:module';
-import { candidatePreviews } from './candidate-previews.mjs';
+import { candidatePreviews, candidatePreviewTargets } from './candidate-previews.mjs';
+import { researchSummary } from './candidate-summary.mjs';
+import { readPrivateCandidates, writePrivateCandidates } from './private-candidates.mjs';
 
 // the reveal INSTANT (14:00 UTC on the reveal day), the one definition the
 // gate itself calls; read here only to name it in the log
@@ -395,7 +397,8 @@ async function main() {
   // Distinct ids, stably — two candidates sharing a name in one year.
   assignCandidateIds(fresh);
 
-  const existing = await readCandidatesStrict(CANDS);
+  const privateRows = await readPrivateCandidates(db);
+  const existing = privateRows === null ? await readCandidatesStrict(CANDS) : privateRows;
   /* Takedowns are keyed on the id as well as the reference — `ref` is issued
      by the FORM, so an imported row has none and hiding one used to change
      nothing at all. `removalSpecs` decides whose word to take: a reference is
@@ -452,6 +455,11 @@ async function main() {
     (await readJson(path.join(DATA, 'candidates-reveal.json'), {})).revealAt, now);
   const waiting = rows.filter((r) => inCurrentMarket(r, now));
   const projected = reveal.held ? [] : rows;
+  // Persist the complete projection privately BEFORE changing any public file.
+  // A failed authenticated snapshot write must never publish half a migration.
+  if (!DRY) await writePrivateCandidates(db, rows.map(publicCandidateRow), {
+    revealAt: reveal.revealAt, generated: now.toISOString(), previewTargets: candidatePreviewTargets(waiting),
+  });
   const previewsPath = path.join(DATA, 'candidate-previews.json');
   const previews = candidatePreviews(waiting);
   if (!DRY && JSON.stringify(await readJson(previewsPath, null)) !== JSON.stringify(previews)) {
@@ -465,13 +473,15 @@ async function main() {
           : '(no date announced yet)'));
   }
 
-  const before = serialiseCandidates(existing);
-  const after = serialiseCandidates(projected);
+  const before = serialiseCandidates(await readCandidatesStrict(CANDS));
+  // Retain the legacy URL as an empty compatibility file. No full profiles,
+  // names, personal links or name-derived ids are ever served by Pages again.
+  const after = serialiseCandidates([]);
 
   if (before === after) {
     log('the dataset is already up to date — writing nothing.');
   } else {
-    log(`candidates.json: +${added} new, ${updated} updated, ${removed} removed  (${projected.length} served)`);
+    log(`private candidate profiles: +${added} new, ${updated} updated, ${removed} removed  (${projected.length} released)`);
     /* the FIRESTORE id as the fallback, never the row id: a candidate row's id
      is `${year}-${slug(last)}-${slug(first)}`, i.e. the person's name, and this
      log is the Actions log of a public repository. Every sibling line in this
@@ -488,11 +498,13 @@ async function main() {
   /* The meta is written on its OWN change, not the dataset's: during the held
      phase the dataset is a constant [] while heldCount moves with every new
      profile — and heldCount is what the page announces. */
-  const meta = buildCandidatesMeta(projected, {
+  const current = projected.filter(r => inCurrentMarket(r, now));
+  const meta = buildCandidatesMeta(current, {
     generated: now.toISOString(),
     revealAt: reveal.revealAt,
     heldCount: reveal.held ? waiting.length : 0,
   });
+  meta.researchSummary = researchSummary(current);
   if (!DRY) {
     const prevMeta = await readJson(META, null);
     const changed = !prevMeta ||

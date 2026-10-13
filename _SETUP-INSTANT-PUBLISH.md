@@ -39,7 +39,7 @@ minutes again, and an approval up to half an hour.
 **THE FIRST THREE ARE LIVE.** They were deployed on 2026-08-27 and have dispatched
 on every decision since. `revealCandidates` (2026-09-04) rides along with the
 next `firebase deploy --only functions --project operations-academia` and is
-inert until that deploy has run; read the count back (SIXTEEN, see "Deploying"
+inert until that deploy has run; read the count back (SEVENTEEN, see "Deploying"
 below) rather than trusting the deploy log. `purgeOnRequest` (2026-09-14) is the
 same: until it is deployed the maintainer's deletion waits for the next build,
 and the roster says "Deletion queued" for up to twenty minutes. To check rather than trust: filter this repository's
@@ -145,7 +145,8 @@ npm install --prefix _functions
 firebase deploy --only functions --project operations-academia
 ```
 
-This deploys EVERY function in `_functions/`, which is sixteen: the five
+This deploys EVERY function in `_functions/`, which is seventeen: **`readCandidateProfiles`**,
+the authenticated candidate reader (no secret required); the five
 doorbells above; **`recordVisit`**, the university-visit resolver behind
 the Analytics page's "which universities visited" chart, which needs no secret
 and is inert until this command has been run (`_SETUP-ANALYTICS.md`, source 4);
@@ -155,7 +156,7 @@ first (`_SETUP-EMAIL-VERIFICATION.md`); and the nine forum callables
 (**`forumJoin`, `forumPost`, `forumEdit`, `forumDelete`, `forumAccept`,
 `forumVote`, `forumThreadVotes`, `forumView`, `forumModerate`**), which need
 `FORUM_SECRET` set first (the next section).
-`firebase functions:list` must read back sixteen; fewer means the checkout
+`firebase functions:list` must read back seventeen; fewer means the checkout
 predates one of them.
 
 `revealCandidates` is a SCHEDULED function, so its first deploy also creates a

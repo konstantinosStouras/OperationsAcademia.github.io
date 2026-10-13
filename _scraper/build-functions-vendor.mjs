@@ -37,6 +37,7 @@ const ROOT = path.join(HERE, '..');
 /** source (under assets/) -> vendored copy (under _functions/). The selftest
     reads this table, so a pair added here is pinned without a second list. */
 export const PAIRS = [
+  ['assets/oa-reveal.js', '_functions/reveal.js'],
   ['assets/oa-jobnav.js', '_functions/jobnav.js'],
   ['assets/oa-forum-model.js', '_functions/forum-model.js'],
   ['assets/oa-forum-guard.js', '_functions/forum-guard.js'],
@@ -95,7 +96,7 @@ function selftest() {
   let pass = 0;
   const fails = [];
   const ok = (c, m) => { if (c) pass++; else fails.push(m); };
-  ok(PAIRS.length === 5, 'five pairs');
+  ok(PAIRS.length === 6, 'six pairs');
   ok(PAIRS.every(([s, v]) => s.startsWith('assets/oa-') && v.startsWith('_functions/') && !v.includes('/forum/')),
     'every pair copies an assets module to the top of _functions/, never into the forum directory the functions own');
   ok(new Set(PAIRS.map((p) => p[1])).size === PAIRS.length, 'no two sources land on one copy');

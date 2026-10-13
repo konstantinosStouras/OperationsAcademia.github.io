@@ -2,14 +2,15 @@
    Operations Academia: instant publish, the visit resolver, and the
    verification mailer.
 
-   SIXTEEN functions live in this file: five doorbells (publishOnChange,
+   SEVENTEEN functions live in this file: five doorbells (publishOnChange,
    publishOnCandidateChange, publishOnReview, purgeOnRequest, and the clock,
    revealCandidates), the university-visit resolver (recordVisit), the e-mail
    verification mailer (sendVerificationEmail, set up in
    _SETUP-EMAIL-VERIFICATION.md), and the nine forum callables re-exported
    from ./forum (forumJoin, forumPost, forumEdit, forumDelete, forumAccept,
    forumVote, forumThreadVotes, forumView, forumModerate; the FORUM_SECRET
-   runbook is in _SETUP-INSTANT-PUBLISH.md). A deploy lists all sixteen, and
+   runbook is in _SETUP-INSTANT-PUBLISH.md), plus the authenticated candidate
+   reader (readCandidateProfiles). A deploy lists all seventeen, and
    reading that count back is how a deploy from a stale checkout is caught.
 
    FIVE doorbells, one job each. When a job posting changes in Firestore,
@@ -110,6 +111,17 @@ const CONTACT = 'operations.academia@gmail.com';
 function adminApp() {
   if (!getApps().some((a) => a.name === '[DEFAULT]')) initializeApp();
 }
+
+const candidateAccess = require('./candidate-access');
+const candidateReveal = require('./reveal');
+exports.readCandidateProfiles = onCall(
+  { region: 'us-central1', maxInstances: 10, memory: '256MiB', timeoutSeconds: 30 },
+  candidateAccess.createReader({
+    db: () => { adminApp(); return getFirestore(); },
+    HttpsError,
+    revealed: (day) => candidateReveal.isRevealed(day),
+  })
+);
 
 const REPO = 'konstantinosStouras/OperationsAcademia.github.io';
 const EVENT_TYPE = 'oa-jobs-changed';
@@ -558,7 +570,7 @@ exports.sendVerificationEmail = onCall(
   });
 
 /* ===========================================================================
-   WHICH UNIVERSITY A VISITOR CAME FROM: the seventh function in this file,
+   WHICH UNIVERSITY A VISITOR CAME FROM: the eighth function in this file,
    and one of the two here that are not doorbells (the other is the
    verification mailer above; the five doorbells are publishOnChange,
    publishOnCandidateChange, revealCandidates, publishOnReview and

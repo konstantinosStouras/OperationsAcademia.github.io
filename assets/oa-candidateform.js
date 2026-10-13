@@ -1612,6 +1612,7 @@
   }
 
   function boot() {
+    var registrationRequested = new URLSearchParams(location.search).get('register') === '1';
     cvSlot = makeSlot('cv', 'CV');
     // a file chosen, un-chosen or removed is a change, like a typed field
     cvSlot.onChange = function () { dirty = true; paintCardPreview(); };
@@ -1791,6 +1792,10 @@
     }
 
     OAAccounts.onChange(function (user) {
+      if (registrationRequested) {
+        registrationRequested = false;
+        if (!user && !(OAAccounts.held && OAAccounts.held())) OAAccounts.openAuth('register');
+      }
       // The profile has already been sent — a later auth event must not put
       // the form back over the confirmation. See oa-jobform.js.
       if (sent) return;

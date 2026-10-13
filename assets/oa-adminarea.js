@@ -84,6 +84,7 @@
      cache says the queue is a size it no longer is. */
   var jsonMemo = {};
   function fetchJson(url) {
+    if (url === '/data/candidates.json') return OACandidateData.load();
     if (jsonMemo[url]) return jsonMemo[url];
     jsonMemo[url] = fetch(url, { credentials: 'same-origin', cache: 'no-cache' })
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })

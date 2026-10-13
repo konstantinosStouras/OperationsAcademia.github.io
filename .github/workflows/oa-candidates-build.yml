@@ -14,6 +14,10 @@ on:
         description: Report without writing
         type: boolean
         default: false
+      verify_reader:
+        description: Verify deployed reader using the existing registered maintainer account
+        type: boolean
+        default: false
 permissions:
   contents: write
 concurrency:
@@ -43,6 +47,9 @@ jobs:
       - run: node _scraper/build-all.mjs --candidates-only --selftest
       - run: node _scraper/candidate-calendar-selftest.mjs
       - run: node _scraper/candidate-previews.mjs
+      - name: Verify registered access to the deployed reader
+        if: inputs.verify_reader == true
+        run: node _scraper/candidate-live-check.mjs
       - name: Check, build and publish only candidate data
         run: |
           set -euo pipefail

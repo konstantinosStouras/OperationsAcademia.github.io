@@ -642,8 +642,7 @@
       /* the candidates preview: the SERVED rows (empty until the reveal) and
          the meta's reveal date + waiting count. A failed read of either is
          simply the held state's wording without a date — never an error. */
-      fetch('data/candidates.json', { credentials: 'same-origin', cache: 'no-cache' })
-        .then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }),
+      OACandidateData.load().catch(function () { return []; }),
       fetch('data/candidates-meta.json', { credentials: 'same-origin', cache: 'no-cache' })
         .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
     ]).then(function (res) {
@@ -717,6 +716,7 @@
     });
 
     OAAccounts.onChange(function (user) {
+      cands = [];
       show($('oa-alerts-app'), !!user);
       show($('oa-needauth'), !user);
       if (!user) {
@@ -738,6 +738,10 @@
         return;
       }
       ready.then(function () {
+        return OACandidateData.load().catch(function () { return []; });
+      }).then(function (rows) {
+        if (!OAAccounts.user() || OAAccounts.user().uid !== user.uid) return;
+        cands = rows;
         resetForm();
         return load();
       }).then(handleUnsubscribeLink)

@@ -50,6 +50,7 @@ import {
   safeError,
 } from './_mail.mjs';
 import { longDate, countriesOf } from './jobs-model.mjs';
+import { readPrivateCandidates } from './private-candidates.mjs';
 /* WHICH PAGE a posting is on, and the link that opens THAT one — the same
    `livePostingUrl` the poster's own "your posting is live" e-mail uses, which
    asks assets/oa-jobnav.js. A posting whose season has rolled lives on
@@ -890,8 +891,7 @@ async function main() {
        reveal gate holds here because there is nothing to leak, not because
        this file remembers to check a date. A read failure is [] too: the safe
        direction (nothing sent, no mark advanced, retried next run). */
-    readFile(path.join(HERE, '..', 'data', 'candidates.json'), 'utf8')
-      .then(JSON.parse).catch(() => []),
+    readPrivateCandidates(db, { releasedOnly: true }).then(rows => rows || []).catch(() => []),
     // the meta names the reveal day — what decides announcement vs listing
     readFile(path.join(HERE, '..', 'data', 'candidates-meta.json'), 'utf8')
       .then(JSON.parse).catch(() => null),

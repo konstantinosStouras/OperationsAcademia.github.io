@@ -675,6 +675,35 @@ body.v3-sheet-open { overflow: hidden; }
 .v3-section-head .v3-lede { margin: 14px 0 0; }
 .v3-section-cta { margin: 22px 0 30px; display: flex; flex-wrap: wrap; gap: 12px; }
 
+/* The homepage cohort introduction: one quiet column, aligned on both edges. */
+#candidates > .v3-container { max-width: 1000px; }
+#candidates .v3-section-head { margin-bottom: 26px; }
+#candidates .v3-h2 { font-size: clamp(30px, 4.5vw, 48px); line-height: 1.16; text-wrap: balance; }
+#candidates .v3-lede { text-align: justify; text-align-last: left; }
+.oa-cohort-count { display: flex; align-items: baseline; flex-wrap: wrap; gap: 14px; margin: 26px 0 0; color: var(--ink); }
+.oa-cohort-count strong { font-family: var(--font-serif); font-size: clamp(44px, 6vw, 64px); font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.oa-cohort-count span { font-size: 17px; }
+.oa-cohort-actions { margin: 24px 0 14px; }
+.oa-cohort-actions .v3-btn { border-radius: 9px; min-height: 46px; line-height: 1.4; }
+.oa-cohort-actions .v3-btn.primary { background: #2457e8; border-color: #2457e8; color: #fff; }
+.oa-cohort-actions .v3-btn.primary:hover { background: #1d46bc; border-color: #1d46bc; color: #fff; }
+.oa-cohort-signin { margin: 0; font-size: 14px; color: var(--mut); }
+.oa-cohort-signin-link { padding: 4px 0; border: 0; background: transparent; color: var(--ink); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.oa-cohort-research { display: flex; align-items: center; gap: 26px; padding: 24px 28px; margin-top: 28px; border-radius: var(--radius); background: var(--brand-soft); color: var(--ink); }
+.oa-cohort-research[hidden] { display: none; }
+.oa-cohort-research h3 { margin: 0; font: 600 23px/1.3 var(--font-serif); }
+.oa-cohort-research-body { flex: 1; min-width: 0; padding-left: 26px; border-left: 1px solid var(--line); }
+.oa-cohort-research ul { display: flex; flex-wrap: wrap; gap: 10px 20px; list-style: none; padding: 0; margin: 0; font-size: 14px; }
+.oa-cohort-research li { margin: 0; }
+.oa-cohort-research-body p { margin: 9px 0 0; color: var(--mut); font-size: 12.5px; }
+@media (max-width: 680px) {
+  #candidates .v3-lede { text-align: left; }
+  .oa-cohort-actions { flex-direction: column; align-items: stretch; }
+  .oa-cohort-actions .v3-btn { white-space: normal; text-align: center; padding: 12px 16px; }
+  .oa-cohort-research { flex-direction: column; align-items: stretch; gap: 14px; padding: 20px; }
+  .oa-cohort-research-body { padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+}
+
 /* soft full-width band (survey) */
 .v3-band {
   background: var(--bg-3);

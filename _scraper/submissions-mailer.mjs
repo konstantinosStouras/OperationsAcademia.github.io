@@ -53,6 +53,7 @@ import { isMain } from './_main.mjs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
+import { readPrivateCandidates } from './private-candidates.mjs';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -379,7 +380,9 @@ async function main() {
   const live = [];
   const liveStamp = [];
   for (const kind of KINDS) {
-    const rows = await readJson(kind.dataset, []);
+    const rows = kind.dataset === 'candidates.json'
+      ? (await readPrivateCandidates(db, { releasedOnly: true }) || [])
+      : await readJson(kind.dataset, []);
     const published = idsOf(rows);
     const snap = await db.collection(kind.collection)
       .where('status', 'in', ['queued', 'published']).get();

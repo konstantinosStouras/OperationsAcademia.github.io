@@ -494,10 +494,10 @@
         : String(candidate.affiliation || '').split(', ').pop();
       return instKey(university) === instKey(card.institution);
     });
-    if (candidates.length) {
+    if (candidates.length && !candidates[0].previewOnly) {
       rows.push({ label: 'Job market candidates', html: '<ul class="oa-dir-candidates">' +
         candidates.map(function (candidate) {
-          return '<li><a href="./?c_name=' + encodeURIComponent(candidate.name) + '#candidates">' +
+          return '<li><a href="candidates?c_name=' + encodeURIComponent(candidate.name) + '">' +
             esc(candidate.name) + '</a>' + (candidate.position ? ' — ' + esc(candidate.position) : '') +
             '<div class="oa-hint">' + esc(candidate.affiliation) + '</div></li>';
         }).join('') + '</ul>' });
@@ -516,7 +516,7 @@
     }
     foot.push('<a href="recent-faculty?placement=' + q + '">Recent hires</a>');
     foot.push('<a href="recent-faculty?alma=' + q + '">PhD alumni</a>');
-    foot.push('<a href="./?c_affiliation=' + q + '#candidates">Candidates on the market</a>');
+    foot.push('<a href="candidates?c_affiliation=' + q + '">Candidates on the market</a>');
     if (state.user) {
       foot.push('<button type="button" class="oa-jobbtn oa-jobbtn-edit" data-dir-add="' +
         esc(card.institution) + '">+ Add a department</button>');
@@ -1336,13 +1336,19 @@
 
     // The build leaves this public file empty before reveal; never read held
     // submissions here. The private local preview uses its isolated snapshot.
-    OAList.load('/data/candidates.json').then(function (rows) {
+    function loadCandidateLinks() {
+      state.candidates = [];
+      if (state.flatLoaded && state.list) state.list.reload();
+      OACandidateData.load().then(function (rows) {
       state.candidates = (Array.isArray(rows) ? rows : []).filter(function (r) {
         var current = window.OAJobNav && OAJobNav.marketYear ? OAJobNav.marketYear(new Date()) : new Date().getFullYear() + 1;
         return Number(r.year) === current;
       });
       if (state.flatLoaded && state.list) state.list.reload();
-    })['catch'](function () { /* the directory still works without candidate data */ });
+      })['catch'](function () { /* the directory still works without candidate data */ });
+    }
+    loadCandidateLinks();
+    if (window.OAAccounts) OAAccounts.onChange(loadCandidateLinks);
 
     attach();
     return state.list;
