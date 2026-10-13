@@ -16129,7 +16129,9 @@ async function testSaveSearchAsAlert() {
      wording names a real filter — read from the mount, so a filter added to
      jobs.html tomorrow fails here rather than reaching the note unnamed */
   const jobs = await read('jobs.html');
-  const keys = [...jobs.matchAll(/\{\s*key:\s*'([a-z]+)'/g)].map((m) => m[1]);
+  // Sorting changes order, not membership: only inspect the filter descriptors.
+  const filterBlock = jobs.match(/\bfilters:\s*\[([\s\S]*?)\n\s*\],/);
+  const keys = [...(filterBlock?.[1] || '').matchAll(/\{\s*key:\s*'([a-z]+)'/g)].map((m) => m[1]);
   ok(keys.length >= 8, `save-search: the jobs mount's filter keys were found (${keys.length})`);
   for (const k of keys) {
     ok(['institution', 'type', 'level', 'country'].includes(k) || k in S.DROPPED,

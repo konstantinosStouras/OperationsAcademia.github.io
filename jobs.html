@@ -197,7 +197,7 @@
           <h1 class="v3-h1" id="oa-jobs-heading">Job postings (2026-2027)</h1>
           <p class="v3-lede" style="margin-top:14px">Every academic opening the community has
           posted for the market year under way, searchable and filterable. Results appear as
-          you type, ranked by posting date.</p>
+          you type. Sort by newest postings, suggested deadline or final deadline.</p>
           <div class="v3-cta-row" style="margin-top:24px">
             <a class="v3-btn primary" href="post-a-job">Post a job &mdash; it&rsquo;s free</a>
             <a class="v3-btn ghost" href="alerts">Get e-mail alerts</a>
@@ -425,6 +425,22 @@
       });
 
       /* ------------------------------------------------- the full list */
+      // Explicit deadline ordering is chronological across all postings.
+      // Missing dates stay last in either direction; ties use the usual order.
+      function byDeadline(field, direction) {
+        function date(row) {
+          var value = row[field];
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return '';
+          var parsed = new Date(value + 'T00:00:00Z');
+          return !isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value ? value : '';
+        }
+        return function (a, b) {
+          var da = date(a), db = date(b);
+          if (!!da !== !!db) return da ? -1 : 1;
+          if (da !== db) return (da < db ? -1 : 1) * direction;
+          return OASponsors.compare(a, b);
+        };
+      }
       var jobs = OAList.mount({
         mount: '#oa-jobs',
         data: '/data/jobs.json',
@@ -507,6 +523,18 @@
         sort: function (a, b) {
           return OASponsors.compare(a, b);
         },
+        sortOptions: [
+          { key: 'newest', label: 'Newest postings',
+            hint: 'Sponsored and featured postings appear first.' },
+          { key: 'suggested-asc', label: 'Suggested deadline — earliest first',
+            compare: byDeadline('reviewDate', 1), hint: 'Postings without a suggested deadline appear last.' },
+          { key: 'suggested-desc', label: 'Suggested deadline — latest first',
+            compare: byDeadline('reviewDate', -1), hint: 'Postings without a suggested deadline appear last.' },
+          { key: 'final-asc', label: 'Final deadline — earliest first',
+            compare: byDeadline('applyByDate', 1), hint: 'Postings without a final deadline appear last.' },
+          { key: 'final-desc', label: 'Final deadline — latest first',
+            compare: byDeadline('applyByDate', -1), hint: 'Postings without a final deadline appear last.' },
+        ],
 
         filters: [
           /* Searching Department under this label is deliberate and PAIRED

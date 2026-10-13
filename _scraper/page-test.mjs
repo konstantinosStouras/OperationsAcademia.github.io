@@ -344,6 +344,86 @@ async function signedInPage(url, opts = {}) {
 /** The same page, read by somebody who has not signed in but could. */
 const signedOutPage = (url, opts = {}) => signedInPage(url, { ...opts, user: null });
 
+/* Deadline sorting: exercise the real jobs page, including pagination and
+   the downloaded workbook, with dates spanning a year and missing dates. */
+{
+  const fixtures = Array.from({ length: 13 }, (_, i) => ({
+    id: 'sort-' + i, institution: 'Sort University ' + String(i).padStart(2, '0'),
+    department: 'Operations', country: i % 2 ? 'France' : 'United States',
+    countries: [i % 2 ? 'France' : 'United States'], levels: ['Assistant Professor'],
+    year: marketYear(), posted: '2026-09-' + String(i + 1).padStart(2, '0'),
+    reviewDate: i < 10 ? (i < 5 ? '2026-12-' : '2027-01-') + String(i + 1).padStart(2, '0')
+      : i === 10 ? '2027-02-30' : '',
+    applyByDate: i < 11 ? '2027-06-' + String(20 - i).padStart(2, '0') : '',
+    featured: i === 8,
+  }));
+  // Equal dates should stay deterministic using the existing default order.
+  fixtures[3].reviewDate = fixtures[2].reviewDate;
+  const { ctx, page: q, errors } = await signedInPage('jobs?utm_source=sort-check', {
+    route: ['**/data/jobs.json', JSON.stringify(fixtures)], acceptDownloads: true,
+  });
+  const selector = '#oas-sort';
+  const ids = () => q.$$eval('#oa-jobs .oa-card', ns => ns.map(n => n.id.replace(/^job-/, '')));
+  const suggested = [0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 12, 11, 10].map(i => 'sort-' + i);
+  const final = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12, 11].map(i => 'sort-' + i);
+  const newest = [...fixtures].sort(PAGE_ORDER).map(r => r.id);
+  eq(await ids(), newest.slice(0, 10), 'sort: default preserves promoted/newest order');
+  await q.selectOption(selector, 'suggested-asc');
+  eq(await ids(), suggested.slice(0, 10), 'sort: suggested dates cross years and ties are stable');
+  await q.locator('.oa-resultbar .oa-pager button').last().click();
+  eq(await ids(), suggested.slice(10), 'sort: invalid and missing suggested dates come last');
+  await q.selectOption(selector, 'final-asc');
+  eq(await ids(), final.slice(0, 10), 'sort: final dates sort the whole list and reset pagination');
+  ok(new URL(q.url()).searchParams.get('sort') === 'final-asc'
+    && !new URL(q.url()).searchParams.has('page')
+    && new URL(q.url()).searchParams.get('utm_source') === 'sort-check',
+    'sort: URL records the order and preserves unrelated parameters');
+  await q.reload();
+  await q.waitForSelector('#oa-jobs .oa-card');
+  eq(await q.inputValue(selector), 'final-asc', 'sort: reload restores selected order');
+  eq(await ids(), final.slice(0, 10), 'sort: reload restores chronological results');
+  await q.fill('#oaf-institution', 'Sort University 0');
+  await q.waitForTimeout(200);
+  eq(await ids(), final.filter(id => Number(id.slice(5)) < 10), 'sort: search keeps the selected order');
+  await q.click('.oa-clear');
+  eq(await q.inputValue(selector), 'final-asc', 'sort: Clear filters keeps sort choice');
+  const downloadPromise = q.waitForEvent('download');
+  await q.click('.oa-export');
+  const download = await downloadPromise;
+  const cells = sheetCells(unzipStore(new Uint8Array(await readFile(await download.path())))['xl/worksheets/sheet1.xml']);
+  eq(Array.from({ length: fixtures.length }, (_, i) => cells['A' + (i + 2)].v),
+    final.map(id => fixtures.find(r => r.id === id).institution),
+    'sort: Excel contains every page in the displayed order');
+  await q.selectOption(selector, 'final-desc');
+  eq(await ids(), Array.from({ length: 10 }, (_, i) => 'sort-' + i), 'sort: final latest first');
+  await q.locator('.oa-resultbar .oa-pager button').last().click();
+  eq(await ids(), ['sort-10', 'sort-12', 'sort-11'], 'sort: latest-first still puts missing dates last');
+  await q.selectOption(selector, 'suggested-desc');
+  eq(await ids(), [9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map(i => 'sort-' + i), 'sort: suggested latest first');
+  for (const width of [320, 390, 1280]) {
+    await q.setViewportSize({ width, height: 1000 });
+    for (const theme of ['light', 'dark']) {
+      await q.evaluate(t => document.documentElement.setAttribute('data-theme', t), theme);
+      const size = await q.$eval(selector, el => {
+        const r = el.getBoundingClientRect();
+        return { left: r.left, right: r.right, height: r.height, font: parseFloat(getComputedStyle(el).fontSize),
+          overflow: document.documentElement.scrollWidth > window.innerWidth };
+      });
+      ok(size.left >= 0 && size.right <= width && !size.overflow && size.height >= 44,
+        `sort: control fits and has a touch-sized target at ${width}px in ${theme}`);
+      if (width < 641) ok(size.font >= 16, `sort: readable mobile text in ${theme}`);
+    }
+  }
+  await q.selectOption(selector, 'newest');
+  eq(await ids(), newest.slice(0, 10), 'sort: newest restores original ordering');
+  ok(!new URL(q.url()).searchParams.has('sort'), 'sort: default keeps the URL clean');
+  await q.goto(BASE + 'jobs?sort=unknown');
+  await q.waitForSelector('#oa-jobs .oa-card');
+  eq(await q.inputValue(selector), 'newest', 'sort: unknown URL order safely falls back');
+  eq(errors, [], 'sort: no uncaught browser errors');
+  await ctx.close();
+}
+
 const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
 
 const jsErrors = [];

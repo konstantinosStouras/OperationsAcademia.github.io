@@ -28,6 +28,40 @@
 
 /* ---------------------------------------------------------------- filter bar */
 
+.oa-sort {
+  grid-column: 1 / -1;
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-width: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line, #d9d9d9);
+}
+.oa-sort label { font-weight: 700; }
+.oa-sort select {
+  width: auto;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line, #d9d9d9);
+  border-radius: 10px;
+  font: inherit;
+  color: var(--ink, #222);
+  background: var(--bg, #fff);
+  cursor: pointer;
+}
+.oa-sort select:focus-visible {
+  outline: 2px solid var(--brand, #555);
+  outline-offset: 2px;
+}
+.oa-sort-hint { color: var(--mut, #666); font-size: 13px; }
+@media (max-width: 640px) {
+  .oa-sort select { width: 100%; min-width: 0; font-size: 16px; }
+  .oa-sort-hint { flex-basis: 100%; }
+}
+
 .oa-filters {
   display: flex;
   flex-wrap: wrap;

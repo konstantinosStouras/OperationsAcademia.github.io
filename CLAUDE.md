@@ -9651,7 +9651,7 @@ anybody else's, and never survives its own end date. The Excel download gains a
 computed from, because there is no `sponsored` in the served file and
 deliberately never will be.
 
-**The sort is TOTAL, not "while no filter is set".** The owner's words were
+**The default sort is TOTAL, not "while no filter is set".** The owner's words were
 "top of the list … without any user-defined search filters being applied yet",
 which describes when they will SEE it rather than asking for a conditional
 comparator — and a list that re-ordered itself as the reader typed would be a
@@ -9665,6 +9665,16 @@ is not hypothetical — the served file carries exactly one featured row.
 newest advertisement: `listedAt`/`byListing` in this module, which read a
 crawled posting by the moment it was approved. See "A crawled posting goes up
 when it is approved" for why, and why the FILE keeps posting-date order.
+
+Since 2026-10-13 the jobs page also offers explicit suggested-deadline and
+final-deadline sorting, earliest or latest first. These modes order the entire
+filtered list chronologically, with missing or invalid dates last in either
+direction; the default comparator breaks ties. Choosing Newest postings
+restores sponsor/featured priority. OAList's optional `sortOptions` selector
+preserves the choice in `?sort=`, resets pagination when changed, and survives
+Clear filters. Excel downloads follow the selected order. The browser checks
+in `_scraper/page-test.mjs` cover dates, ties, missing values, pagination,
+search, reloads, exports, and mobile layouts in both themes.
 
 **BOTH lists lead with the sponsor** — and that is a correction. The first
 build left the one-pager's teaser date-ordered, reasoning that "the ten most

@@ -31,6 +31,10 @@
    rows, for a list whose dataset is not a served file (the forum reads its
    threads from Firestore). Everything after the rows land is the same.
 
+   `sortOptions: [{ key, label, compare, hint }]` adds a sort selector. The
+   first option is the default; an option without compare uses cfg.sort.
+   Selection is preserved in the prefixed URL and when filters are cleared.
+
    `onRender: fn(snapshot)` is called after every repaint with what an
    action is handed ({ view, rows, total, filters }), for a page that draws
    something of its own beside the list and needs its numbers to follow the
@@ -305,6 +309,11 @@
     var filters = cfg.filters || [];
     // v3: several engines share one page — each namespaces its URL keys.
     var prefix = cfg.urlPrefix || '';
+    var sortOptions = cfg.sortOptions || [];
+    var sortKey = sortOptions.length ? sortOptions[0].key : '';
+    function selectedSort() {
+      return sortOptions.filter(function (s) { return s.key === sortKey; })[0] || sortOptions[0];
+    }
     // v3: per-dataset wording for the states the engine paints itself.
     var STR = {
       loading: 'Loading job postings…',
@@ -505,7 +514,9 @@
         if (!one && focusTitleWas) { document.title = focusTitleWas; focusTitleWas = ''; }
       } else {
         view = passing(null);
-        if (cfg.sort) view.sort(cfg.sort);
+        var order = selectedSort();
+        var compare = (order && order.compare) || cfg.sort;
+        if (compare) view.sort(compare);
         /* ...AND WHEN THE FOCUS IS LEFT. The restore was inside the focused
            branch, so it ran when a focused id turned out not to be here and
            never when the reader pressed "Show all postings": the tab, the
@@ -690,6 +701,25 @@
       });
 
       barEl.appendChild(actionsCell);
+      if (sortOptions.length) {
+        var sortId = 'oas-' + prefix + 'sort';
+        var sortHint = el('span', { id: sortId + '-hint', class: 'oa-sort-hint',
+          text: selectedSort().hint || '' });
+        var sortSelect = el('select', { id: sortId, 'aria-describedby': sortId + '-hint' });
+        sortOptions.forEach(function (s) {
+          sortSelect.appendChild(el('option', { value: s.key, text: s.label }));
+        });
+        sortSelect.value = sortKey;
+        sortSelect.addEventListener('change', function () {
+          sortKey = sortSelect.value;
+          sortHint.textContent = selectedSort().hint || '';
+          page = 0;
+          apply();
+        });
+        barEl.appendChild(el('div', { class: 'oa-sort' }, [
+          el('label', { for: sortId, text: 'Sort by' }), sortSelect, sortHint,
+        ]));
+      }
     }
 
     /* What an action is handed: the postings on screen, in the order they are
@@ -1052,7 +1082,8 @@
           listEl.appendChild(card(r));
         });
       }
-      liveEl.textContent = view.length + ' ' + STR.unit + ' match';
+      liveEl.textContent = view.length + ' ' + STR.unit + ' match' +
+        (sortOptions.length ? '. Sorted by ' + selectedSort().label : '');
       var clear = barEl.querySelector('.oa-clear');
       if (clear) clear.disabled = !anySelected();
       var snap = null;
@@ -1288,6 +1319,10 @@
         if (f.legacyParam) p['delete'](f.legacyParam);
       });
       p['delete'](prefix + 'page');
+      if (sortOptions.length) {
+        p['delete'](prefix + 'sort');
+        if (sortKey !== sortOptions[0].key) p.set(prefix + 'sort', sortKey);
+      }
       /* The engine owns the focus parameter too, or "Show all postings" would
          drop the card and leave the URL still naming it — one reload and the
          reader is back on the single posting they had just left. */
@@ -1332,6 +1367,11 @@
 
     function readUrl() {
       var p = new URLSearchParams(location.search);
+      if (sortOptions.length) {
+        var requestedSort = p.get(prefix + 'sort');
+        sortKey = sortOptions.some(function (s) { return s.key === requestedSort; })
+          ? requestedSort : sortOptions[0].key;
+      }
       filters.forEach(function (f) {
         // ?filterA= is the legacy Awesome Table deep link the footer and the
         // "Further info" column still emit — honour it as the text filter.
