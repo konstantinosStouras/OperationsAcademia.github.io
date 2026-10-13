@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-13T08:26:47.068Z",
+ "generated": "2026-10-13T17:24:51.544Z",
  "universities": [
   {
    "v": "Arizona State University",
@@ -195,6 +195,10 @@
   },
   {
    "v": "Fayetteville State University",
+   "n": 3
+  },
+  {
+   "v": "George Washington University",
    "n": 3
   },
   {
@@ -419,10 +423,6 @@
   },
   {
    "v": "George Mason University",
-   "n": 2
-  },
-  {
-   "v": "George Washington University",
    "n": 2
   },
   {
@@ -2421,7 +2421,7 @@
   },
   {
    "v": "School of Business",
-   "n": 10
+   "n": 11
   },
   {
    "v": "A. B. Freeman School of Business",
@@ -3770,15 +3770,15 @@
    "n": 8
   },
   {
+   "v": "Decision Sciences",
+   "n": 7
+  },
+  {
    "v": "Industrial and Systems Engineering",
    "n": 7
   },
   {
    "v": "Business",
-   "n": 6
-  },
-  {
-   "v": "Decision Sciences",
    "n": 6
   },
   {

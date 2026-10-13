@@ -42,6 +42,49 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-george-washington-university-20261013",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-13",
+  "institution": "George Washington University",
+  "department": "School of Business, Decision Sciences",
+  "school": "School of Business",
+  "unit": "Decision Sciences",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 9, 2026",
+  "applyByDate": "2026-11-09",
+  "reviewDate": "2026-10-25",
+  "comments": "Tenure-Track Assistant Professor of Analytics and AI The George Washington University School of Business Department of Decision Sciences Washington, D.C. The Department of Decision Sciences at the George Washington University School of Business invites applications for a full-time, tenure-track Assistant Professor of Analytics and AI position as early as Fall 2027. Salary is competitive and commensurate with experience and an established research record. We particularly welcome methodological research that develops algorithms and mathematical models in computational and statistical machine learning, optimization, and algorithmic decision-making. We value both methodological advances and rigorous applied research on AI that help organizations improve prediction, optimization, and decision-making under uncertainty. The successful candidate will conduct research for publication in leading journals and conferences, teach undergraduate and graduate courses in analytics and AI, mentor graduate students, and participate in university and professional service. A strong commitment to teaching excellence and student learning is essential, along with the ability and flexibility to teach a",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.gwu.jobs/postings/129265",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=George%20Washington%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-10-13T17:23:43Z",
+  "ref": "OA-JOB-261013-64JW",
+  "owner": "2f2edf2b59ac911d",
+  "applicationStatus": ""
+ },
+ {
   "id": "2027-auburn-university-20261012",
   "year": 2027,
   "years": [

@@ -3624,13 +3624,21 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://business.gwu.edu/about/departments/decision-sciences#faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-10-11"
+  "n": 2,
+  "lastPosted": "2026-10-13"
  },
  {
   "id": "george-washington-university__school-of-business__information-systems-and-technology-management",
