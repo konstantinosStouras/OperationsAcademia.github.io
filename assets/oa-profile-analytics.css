@@ -26,7 +26,9 @@
 .pa-footnote { font-size:12px; line-height:1.6; color:var(--mut); margin-top:20px; }
 .pa-definition,.pa-daily { margin-top:24px; font-size:14px; }
 .pa-definition summary,.pa-daily summary { cursor:pointer; padding:10px 0; font-weight:600; }
-.pa-definition p { max-width:85ch; line-height:1.7; color:var(--mut); }
+.pa-definition p { line-height:1.7; color:var(--mut); }
+/* Match OA prose: align both edges, with a natural final line. */
+.pa-definition p,.pa-panel > p,.pa-footnote { text-align:justify; text-align-last:left; }
 .pa-daily table { width:100%; }
 @media(max-width:900px) { .pa-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .pa-columns { grid-template-columns:1fr; } }
 @media(max-width:540px) { .pa-controls { grid-template-columns:1fr; gap:18px; padding:18px; } .pa-metric { padding:18px; } .pa-panel { padding:20px; } .pa-chart { gap:3px; } }
