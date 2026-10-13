@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-12T23:49:59.833Z",
- "members": 333,
+ "generated": "2026-10-13T03:58:27.462Z",
+ "members": 337,
  "k": 3,
  "affiliation": {
-  "listed": 249,
+  "listed": 253,
   "other": 44,
   "none": 40
  },
  "universities": {
-  "count": 129,
+  "count": 130,
   "shown": [
    {
     "name": "Cornell University",
@@ -23,7 +23,7 @@
    {
     "name": "Columbia University",
     "country": "United States",
-    "members": 5
+    "members": 6
    },
    {
     "name": "Georgia Institute of Technology",
@@ -166,14 +166,14 @@
     "members": 3
    }
   ],
-  "rest": 128
+  "rest": 131
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 162
+    "members": 164
    },
    {
     "name": "Canada",
@@ -185,7 +185,7 @@
    },
    {
     "name": "Hong Kong",
-    "members": 8
+    "members": 9
    },
    {
     "name": "United Kingdom",
@@ -208,7 +208,7 @@
     "members": 3
    }
   ],
-  "rest": 9,
+  "rest": 10,
   "unknown": 95
  }
 }
