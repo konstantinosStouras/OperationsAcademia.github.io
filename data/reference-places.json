@@ -3102,6 +3102,11 @@
  {
   "institution": "University of Houston",
   "school": "",
+  "department": "Industrial and Systems Engineering"
+ },
+ {
+  "institution": "University of Houston",
+  "school": "",
   "department": "ISE (supply chain and logistics tech)"
  },
  {
@@ -3428,6 +3433,11 @@
   "institution": "University of North Carolina at Wilmington",
   "school": "",
   "department": "Supply Chain Management"
+ },
+ {
+  "institution": "University of North Carolina, Charlotte",
+  "school": "",
+  "department": "Industrial and Systems Engineering"
  },
  {
   "institution": "University of North Georgia",

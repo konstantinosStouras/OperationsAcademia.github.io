@@ -12366,6 +12366,15 @@
   "lastPosted": "2025-07-03"
  },
  {
+  "id": "university-of-houston____industrial-and-systems-engineering",
+  "institution": "University of Houston",
+  "department": "Industrial and Systems Engineering",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "university-of-houston____ise-supply-chain-and-logistics-tech",
   "institution": "University of Houston",
   "department": "ISE (supply chain and logistics tech)",
@@ -13756,6 +13765,15 @@
   ],
   "n": 1,
   "lastPosted": "2014-09-19"
+ },
+ {
+  "id": "university-of-north-carolina-charlotte____industrial-and-systems-engineering",
+  "institution": "University of North Carolina, Charlotte",
+  "department": "Industrial and Systems Engineering",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "university-of-north-carolina-unc-chapel-hill__kenan-flagler-business-school__operations",
