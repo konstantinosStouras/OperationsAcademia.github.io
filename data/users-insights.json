@@ -1,10 +1,10 @@
 {
- "generated": "2026-10-14T13:03:55.592Z",
- "members": 350,
+ "generated": "2026-10-14T17:57:57.948Z",
+ "members": 351,
  "k": 3,
  "affiliation": {
   "listed": 267,
-  "other": 44,
+  "other": 45,
   "none": 39
  },
  "universities": {
@@ -229,6 +229,6 @@
    }
   ],
   "rest": 11,
-  "unknown": 94
+  "unknown": 95
  }
 }
