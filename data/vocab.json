@@ -1,12 +1,12 @@
 {
- "generated": "2026-10-13T17:45:02.570Z",
+ "generated": "2026-10-14T07:23:31.057Z",
  "universities": [
   {
-   "v": "Arizona State University",
-   "n": 9
+   "v": "University of Houston",
+   "n": 10
   },
   {
-   "v": "University of Houston",
+   "v": "Arizona State University",
    "n": 9
   },
   {
@@ -1742,6 +1742,10 @@
    "n": 1
   },
   {
+   "v": "University of North Carolina, Charlotte",
+   "n": 1
+  },
+  {
    "v": "University of North Georgia",
    "n": 1
   },
@@ -2808,6 +2812,10 @@
    "n": 1
   },
   {
+   "v": "Cullen College of Engineering",
+   "n": 1
+  },
+  {
    "v": "Culverhouse College of Business",
    "n": 1
   },
@@ -3245,6 +3253,10 @@
   },
   {
    "v": "Whitman School of Management",
+   "n": 1
+  },
+  {
+   "v": "William States Lee College of Engineering",
    "n": 1
   },
   {
@@ -3766,6 +3778,10 @@
    "n": 9
   },
   {
+   "v": "Industrial and Systems Engineering",
+   "n": 9
+  },
+  {
    "v": "Operations and Supply Chain Management",
    "n": 9
   },
@@ -3775,10 +3791,6 @@
   },
   {
    "v": "Decision Sciences",
-   "n": 7
-  },
-  {
-   "v": "Industrial and Systems Engineering",
    "n": 7
   },
   {
@@ -11944,12 +11956,14 @@
   },
   "University of Houston": {
    "schools": [
-    "C. T. Bauer College of Business"
+    "C. T. Bauer College of Business",
+    "Cullen College of Engineering"
    ],
    "units": [
     "Business Analytics",
     "Decision and IIS",
     "Department of Decision and Information Sciences",
+    "Industrial and Systems Engineering",
     "ISE (supply chain and logistics tech)",
     "OM",
     "OM/IS",
@@ -11970,6 +11984,9 @@
      "Business Analytics",
      "Department of Decision and Information Sciences",
      "The Bauer Human-Centered Artificial Intelligence Institute"
+    ],
+    "Cullen College of Engineering": [
+     "Industrial and Systems Engineering"
     ]
    }
   },
@@ -12632,6 +12649,19 @@
    "bySchool": {
     "": [
      "Supply Chain Management"
+    ]
+   }
+  },
+  "University of North Carolina, Charlotte": {
+   "schools": [
+    "William States Lee College of Engineering"
+   ],
+   "units": [
+    "Industrial and Systems Engineering"
+   ],
+   "bySchool": {
+    "William States Lee College of Engineering": [
+     "Industrial and Systems Engineering"
     ]
    }
   },
@@ -14284,6 +14314,9 @@
    "Decisions, Operations and Technology",
    "Operations Management"
   ],
+  "Cullen College of Engineering": [
+   "Industrial and Systems Engineering"
+  ],
   "Culverhouse College of Business": [
    "Information Systems, Statistics, and Management Science"
   ],
@@ -15106,6 +15139,9 @@
   ],
   "Wilbur O. and Ann Powers College of Business": [
    "Management"
+  ],
+  "William States Lee College of Engineering": [
+   "Industrial and Systems Engineering"
   ],
   "Williams School of Commerce, Economics and Politics": [
    "Business Administration"

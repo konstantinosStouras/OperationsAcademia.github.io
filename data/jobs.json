@@ -118,6 +118,75 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-university-of-houston-20261013",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-13",
+  "institution": "University of Houston",
+  "department": "Cullen College of Engineering, Industrial and Systems Engineering",
+  "school": "Cullen College of Engineering",
+  "unit": "Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-01",
+  "comments": "Deadline as listed: Informs (10/23), DDL: 12/1",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.uh.edu/jobs/assistant-or-associate-professor-ai-enabled-manufacturing-systems-houston-texas-united-states",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://ie.uh.edu/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-14T07:21:55Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-north-carolina-charlotte-20261013",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-13",
+  "institution": "University of North Carolina, Charlotte",
+  "department": "William States Lee College of Engineering, Industrial and Systems Engineering",
+  "school": "William States Lee College of Engineering",
+  "unit": "Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-16",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.charlotte.edu/postings/71055",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://engineering.charlotte.edu/academics/department/industrial-systems-engineering/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-14T07:22:06Z",
+  "owner": ""
+ },
+ {
   "id": "2027-auburn-university-20261012",
   "year": 2027,
   "years": [

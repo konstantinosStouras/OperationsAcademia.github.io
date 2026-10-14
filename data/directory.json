@@ -12497,9 +12497,13 @@
   "school": "Cullen College of Engineering",
   "department": "Industrial and Systems Engineering",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-13"
  },
  {
   "id": "university-of-houston-downtown____mis",
@@ -13773,9 +13777,13 @@
   "school": "William States Lee College of Engineering",
   "department": "Industrial and Systems Engineering",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-13"
  },
  {
   "id": "university-of-north-carolina-unc-chapel-hill__kenan-flagler-business-school__operations",
