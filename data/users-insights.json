@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-14T07:30:30.124Z",
- "members": 344,
+ "generated": "2026-10-14T09:27:31.097Z",
+ "members": 347,
  "k": 3,
  "affiliation": {
-  "listed": 261,
+  "listed": 264,
   "other": 44,
   "none": 39
  },
@@ -116,6 +116,11 @@
     "members": 3
    },
    {
+    "name": "INSEAD",
+    "country": "France",
+    "members": 3
+   },
+   {
     "name": "London Business School",
     "country": "United Kingdom",
     "members": 3
@@ -146,6 +151,11 @@
     "members": 3
    },
    {
+    "name": "University of Hong Kong",
+    "country": "Hong Kong",
+    "members": 3
+   },
+   {
     "name": "University of Illinois at Urbana-Champaign",
     "country": "United States",
     "members": 3
@@ -171,7 +181,7 @@
     "members": 3
    }
   ],
-  "rest": 131
+  "rest": 128
  },
  "countries": {
   "count": 16,
@@ -190,19 +200,19 @@
    },
    {
     "name": "Hong Kong",
-    "members": 9
+    "members": 10
    },
    {
     "name": "United Kingdom",
     "members": 8
    },
    {
-    "name": "Germany",
+    "name": "France",
     "members": 7
    },
    {
-    "name": "France",
-    "members": 6
+    "name": "Germany",
+    "members": 7
    },
    {
     "name": "China",
@@ -213,7 +223,7 @@
     "members": 3
    }
   ],
-  "rest": 10,
+  "rest": 11,
   "unknown": 94
  }
 }
