@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-14T11:04:22.326Z",
+ "generated": "2026-10-14T16:27:25.521Z",
  "count": 38,
  "years": {
   "2027": 38
@@ -11,7 +11,7 @@
   "Research Scientist": 2
  },
  "researchAreas": {
-  "Machine Learning and Data Science": 16,
+  "Machine Learning and Data Science": 17,
   "Operations Research / Optimization": 14,
   "Technology, Platforms and Marketplaces": 12,
   "Empirical Operations": 10,
@@ -78,7 +78,7 @@
  "researchSummary": [
   {
    "label": "Machine learning",
-   "count": 16
+   "count": 17
   },
   {
    "label": "Optimization",
