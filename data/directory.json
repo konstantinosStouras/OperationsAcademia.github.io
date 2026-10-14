@@ -6557,6 +6557,15 @@
   ]
  },
  {
+  "id": "national-university-of-singapore____institute-of-operations-research-and-analytics",
+  "institution": "National University of Singapore",
+  "department": "Institute of Operations Research and Analytics",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "national-university-of-singapore____is",
   "institution": "National University of Singapore",
   "department": "IS",
