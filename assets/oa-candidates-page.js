@@ -24,6 +24,7 @@
         function inCurrentMarket(row) { return OAJobNav.inCurrentMarket(row); }
         var candidateCard = OACandCard.cardConfig();
         var profileSubtitle = candidateCard.subtitle;
+        var profileGate = OAGate.cardOpen({ note: 'Create a free account to view this profile', authMode: 'register' });
         candidateCard.title = function (r) { return !r.previewOnly && OAGate.signedIn() ? r.name : OACandCard.universityName(r.affiliation); };
         candidateCard.subtitle = function (r) { return !r.previewOnly && OAGate.signedIn() ? profileSubtitle(r) : ''; };
         var heading = document.getElementById('oa-candidates-heading');
@@ -67,7 +68,9 @@
             { key: 'posted',      label: 'Date posted',      derive: 'datePosted',
               placeholder: 'Any date' }
           ],
-          cardOpen: OAGate.cardOpen({ note: 'Create a free account to view this profile', authMode: 'register' }),
+          cardOpen: function (row) {
+            return profileGate(row) || (row.previewOnly ? { note: 'Loading profile…' } : null);
+          },
 
           /* THE TALKS CALENDAR (owner, 2026-09-06): every listed candidate's
              INFORMS talk, with its time, date and room where the profile
@@ -106,12 +109,14 @@
           updateLock();
           var next = user ? user.uid : '';
           if (next === lastAccount) return;
+          var previous = lastAccount;
           lastAccount = next;
-          cands.clear({ loading: true });
+          if (previous === undefined && !next) return;
+          // Keep safe school previews during sign-in; clear private rows on exit.
+          if (previous) cands.clear({ loading: true });
           cands.refresh().then(function () { OAGate.resume(cands); });
         });
-        // Clear the school-only rows before the gate tries to resume a card;
-        // otherwise it can open the placeholder and consume its pending id.
+        // Preview cards stay gated until their authenticated replacement arrives.
         OAGate.watch(cands);
         document.getElementById('v3-lock-signin').addEventListener('click', function () { OAAccounts.openAuth(); });
         document.getElementById('v3-lock-register').addEventListener('click', function () { OAAccounts.openAuth('register'); });

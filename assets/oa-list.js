@@ -337,6 +337,7 @@
       }
     }
     var rows = [];
+    var requestVersion = 0, urlRead = false;
     var loaded = false;       // the dataset has landed (or failed) — see rerender
     var loadFailed = false;
     var view = [];
@@ -1455,17 +1456,21 @@
        under the rules). It deliberately skips `load()`, and with it the
        OAFresh echo overlay that path applies: the echo is about a POSTING
        saved in this browser, and nothing a source answers has one. */
+    var initialRequest = ++requestVersion;
     (typeof cfg.source === 'function' ? Promise.resolve().then(cfg.source) : load(cfg.data))
       .then(function (data) {
+        if (initialRequest !== requestVersion) return;
         loaded = true;
         rows = (Array.isArray(data) ? data : data.rows || []).filter(Boolean);
         rows.forEach(function (r, i) { if (!r.id) r.id = 'r' + i; });
         if (cfg.prepare) rows = cfg.prepare(rows);
         readUrl();
+        urlRead = true;
         buildBar();
         apply();
       })
       .catch(function (err) {
+        if (initialRequest !== requestVersion) return;
         loadFailed = true;
         paintLoadError();
         if (window.console) console.error('OAList: failed to load ' + (cfg.data || STR.unit), err);
@@ -1486,6 +1491,7 @@
       // Authenticated sources must erase the previous account's rows immediately,
       // including expanded details and calendar exports, before any refetch.
       clear: function (options) {
+        requestVersion++;
         rows = []; view = []; expanded = {}; loaded = !(options && options.loading); loadFailed = false;
         buildBar(); apply();
         if (!loaded) {
@@ -1496,6 +1502,7 @@
       /* Fetch newly published rows without losing this list's filters. A failed
          refresh retains the last good rows, including an empty pre-reveal list. */
       refresh: function () {
+        var version = ++requestVersion;
         var request = typeof cfg.source === 'function'
           ? Promise.resolve().then(cfg.source)
           : fetch(cfg.data + (cfg.data.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now(),
@@ -1503,17 +1510,20 @@
             .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
             .then(function (data) { return window.OAFresh ? OAFresh.apply(cfg.data, data) : data; });
         return request.then(function (data) {
+          if (version !== requestVersion) return false;
           var next = (Array.isArray(data) ? data : data.rows || []).filter(Boolean);
           next.forEach(function (r, i) { if (!r.id) r.id = 'r' + i; });
           if (cfg.prepare) next = cfg.prepare(next);
           if (loaded && JSON.stringify(next) === JSON.stringify(rows)) return false;
           rows = next;
+          if (!urlRead) { readUrl(); urlRead = true; }
           loaded = true;
           loadFailed = false;
           buildBar();
           apply();
           return true;
         }).catch(function () {
+          if (version !== requestVersion) return false;
           if (cfg.protectedSource && !rows.some(function (row) { return !row.previewOnly; })) {
             loadFailed = true;
             paintLoadError();

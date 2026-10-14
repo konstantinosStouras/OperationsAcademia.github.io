@@ -30,6 +30,7 @@ try {
   await page.evaluate(() => {
     firebase.initializeApp({ projectId: 'operations-academia', apiKey: 'synthetic-key' });
     window.OAAccounts = { resolved: () => true, user: () => ({ uid: 'synthetic-user' }), onChange: () => {} };
+    firebase.auth = () => ({ currentUser: { uid: 'synthetic-user' } });
     window.OAFB = { readyFunctions: () => Promise.resolve(firebase) };
     const functions = firebase.app().functions('us-central1');
     functions._delegate.contextProvider.auth = { getToken: async () => ({ accessToken: 'synthetic-token' }) };

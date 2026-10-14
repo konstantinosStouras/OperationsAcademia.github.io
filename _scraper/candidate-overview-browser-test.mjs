@@ -113,6 +113,24 @@ try {
   assert.ok(!(await page.locator('#oa-candidates').innerText()).includes(profile.name));
   await context.close();
 
+  const warming = await pageFor(member);
+  await warming.page.addInitScript(() => {
+    window.__FAKE_FB.holdReads = ['profiles/synthetic-reader'];
+  });
+  await warming.page.goto(base + '/candidates');
+  await warming.page.waitForFunction(() => window.__candidateCalls === 1);
+  assert.equal(await warming.page.evaluate(() => OAAccounts.resolved()), false,
+    'private request starts in parallel with the still-pending account-profile check');
+  await warming.page.waitForSelector('#oa-candidates .oa-card');
+  assert.equal(await warming.page.evaluate(() => OACandidateList.rows().every(row => row.previewOnly)), true,
+    'only safe school previews render before the account is admitted');
+  await warming.page.evaluate(() => { __fb.holdReads = []; __fb.release(); });
+  await warming.page.waitForFunction(() => document.getElementById('oa-candidates').textContent.includes('Synthetic Candidate'));
+  assert.equal(await warming.page.evaluate(() => window.__candidateCalls), 1,
+    'the admitted account consumes the prefetched response without a duplicate call');
+  assert.equal(await warming.page.locator('#oa-candidates .oa-loading').count(), 0);
+  await warming.context.close();
+
   const signed = await pageFor(member);
   await signed.page.goto(base + '/candidates');
   await signed.page.waitForFunction(() => document.getElementById('oa-candidates').textContent.includes('Synthetic Candidate'));
@@ -155,6 +173,19 @@ try {
   });
   await signed.page.waitForSelector('#oa-candidates .oa-card-body:not([hidden])');
   assert.match(await signed.page.locator('#oa-candidates .oa-card-body').innerHTML(), /example.org\/cv/, 'the selected public preview opens once authenticated rows arrive');
+  const race = await signed.page.evaluate(async () => {
+    const host = document.createElement('div'); host.id = 'race-check'; document.body.appendChild(host);
+    let release, calls = 0;
+    const list = OAList.mount({ mount: '#race-check', filters: [],
+      source: () => ++calls === 1 ? new Promise(resolve => { release = resolve; }) : Promise.resolve([{id:'new'}]),
+      card: { title: row => row.id, subtitle: () => '', rows: [] } });
+    await Promise.resolve();
+    await list.refresh();
+    release([{id:'old'}]);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const ids = list.rows().map(row => row.id); host.remove(); return ids;
+  });
+  assert.deepEqual(race, ['new'], 'a slow initial preview cannot overwrite newer authenticated rows');
   await signed.context.close();
   assert.deepEqual(errors, [], 'no uncaught browser errors');
   console.log('candidate overview browser: desktop/tablet/phone, both themes, automatic refresh, public previews, registered profiles and immediate sign-out clearing passed');
