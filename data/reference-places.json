@@ -3102,11 +3102,6 @@
  {
   "institution": "University of Houston",
   "school": "",
-  "department": "Industrial and Systems Engineering"
- },
- {
-  "institution": "University of Houston",
-  "school": "",
   "department": "ISE (supply chain and logistics tech)"
  },
  {
@@ -3138,6 +3133,11 @@
   "institution": "University of Houston",
   "school": "C. T. Bauer College of Business",
   "department": "Business Analytics"
+ },
+ {
+  "institution": "University of Houston",
+  "school": "Cullen College of Engineering",
+  "department": "Industrial and Systems Engineering"
  },
  {
   "institution": "University of Illinois at Chicago",
@@ -3436,7 +3436,7 @@
  },
  {
   "institution": "University of North Carolina, Charlotte",
-  "school": "",
+  "school": "William States Lee College of Engineering",
   "department": "Industrial and Systems Engineering"
  },
  {

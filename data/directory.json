@@ -12366,15 +12366,6 @@
   "lastPosted": "2025-07-03"
  },
  {
-  "id": "university-of-houston____industrial-and-systems-engineering",
-  "institution": "University of Houston",
-  "department": "Industrial and Systems Engineering",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "university-of-houston____ise-supply-chain-and-logistics-tech",
   "institution": "University of Houston",
   "department": "ISE (supply chain and logistics tech)",
@@ -12496,6 +12487,16 @@
   "school": "C. T. Bauer College of Business",
   "department": "The Bauer Human-Centered Artificial Intelligence Institute",
   "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
+  "id": "university-of-houston__cullen-college-of-engineering__industrial-and-systems-engineering",
+  "institution": "University of Houston",
+  "school": "Cullen College of Engineering",
+  "department": "Industrial and Systems Engineering",
+  "type": "University",
   "sources": [
    "seed"
   ]
@@ -13767,8 +13768,9 @@
   "lastPosted": "2014-09-19"
  },
  {
-  "id": "university-of-north-carolina-charlotte____industrial-and-systems-engineering",
+  "id": "university-of-north-carolina-charlotte__william-states-lee-college-of-engineering__industrial-and-systems-engineering",
   "institution": "University of North Carolina, Charlotte",
+  "school": "William States Lee College of Engineering",
   "department": "Industrial and Systems Engineering",
   "type": "University",
   "sources": [
