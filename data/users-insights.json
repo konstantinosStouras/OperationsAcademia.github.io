@@ -1,19 +1,19 @@
 {
- "generated": "2026-10-14T09:27:31.097Z",
- "members": 347,
+ "generated": "2026-10-14T13:03:55.592Z",
+ "members": 350,
  "k": 3,
  "affiliation": {
-  "listed": 264,
+  "listed": 267,
   "other": 44,
   "none": 39
  },
  "universities": {
-  "count": 130,
+  "count": 131,
   "shown": [
    {
     "name": "National University of Singapore",
     "country": "Singapore",
-    "members": 10
+    "members": 11
    },
    {
     "name": "Cornell University",
@@ -88,6 +88,11 @@
    {
     "name": "Carnegie Mellon University",
     "country": "United States",
+    "members": 3
+   },
+   {
+    "name": "Chinese University of Hong Kong",
+    "country": "Hong Kong",
     "members": 3
    },
    {
@@ -181,14 +186,14 @@
     "members": 3
    }
   ],
-  "rest": 128
+  "rest": 127
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 169
+    "members": 170
    },
    {
     "name": "Canada",
@@ -196,11 +201,11 @@
    },
    {
     "name": "Singapore",
-    "members": 14
+    "members": 15
    },
    {
     "name": "Hong Kong",
-    "members": 10
+    "members": 11
    },
    {
     "name": "United Kingdom",
