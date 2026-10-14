@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-14T02:01:41.571Z",
- "members": 342,
+ "generated": "2026-10-14T07:30:30.124Z",
+ "members": 344,
  "k": 3,
  "affiliation": {
-  "listed": 259,
+  "listed": 261,
   "other": 44,
   "none": 39
  },
@@ -36,6 +36,11 @@
     "members": 5
    },
    {
+    "name": "Massachusetts Institute of Technology",
+    "country": "United States",
+    "members": 5
+   },
+   {
     "name": "Northwestern University",
     "country": "United States",
     "members": 5
@@ -46,12 +51,12 @@
     "members": 5
    },
    {
-    "name": "Georgetown University",
-    "country": "United States",
-    "members": 4
+    "name": "University of Toronto",
+    "country": "Canada",
+    "members": 5
    },
    {
-    "name": "Massachusetts Institute of Technology",
+    "name": "Georgetown University",
     "country": "United States",
     "members": 4
    },
@@ -68,11 +73,6 @@
    {
     "name": "University of Southern California",
     "country": "United States",
-    "members": 4
-   },
-   {
-    "name": "University of Toronto",
-    "country": "Canada",
     "members": 4
    },
    {
@@ -178,11 +178,11 @@
   "shown": [
    {
     "name": "United States",
-    "members": 168
+    "members": 169
    },
    {
     "name": "Canada",
-    "members": 19
+    "members": 20
    },
    {
     "name": "Singapore",
