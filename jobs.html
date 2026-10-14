@@ -425,7 +425,7 @@
       });
 
       /* ------------------------------------------------- the full list */
-      // Explicit deadline ordering is chronological across all postings.
+      // Sponsored and featured postings keep their usual order above deadline sorting.
       // Missing dates stay last in either direction; ties use the usual order.
       function byDeadline(field, direction) {
         function date(row) {
@@ -435,6 +435,9 @@
           return !isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value ? value : '';
         }
         return function (a, b) {
+          if (OASponsors.isSponsored(a) || a.featured || OASponsors.isSponsored(b) || b.featured) {
+            return OASponsors.compare(a, b);
+          }
           var da = date(a), db = date(b);
           if (!!da !== !!db) return da ? -1 : 1;
           if (da !== db) return (da < db ? -1 : 1) * direction;
@@ -527,13 +530,13 @@
           { key: 'newest', label: 'Newest postings',
             hint: 'Sponsored and featured postings appear first.' },
           { key: 'suggested-asc', label: 'Suggested deadline — earliest first',
-            compare: byDeadline('reviewDate', 1), hint: 'Postings without a suggested deadline appear last.' },
+            compare: byDeadline('reviewDate', 1), hint: 'Sponsored and featured postings appear first. Other postings without a suggested deadline appear last.' },
           { key: 'suggested-desc', label: 'Suggested deadline — latest first',
-            compare: byDeadline('reviewDate', -1), hint: 'Postings without a suggested deadline appear last.' },
+            compare: byDeadline('reviewDate', -1), hint: 'Sponsored and featured postings appear first. Other postings without a suggested deadline appear last.' },
           { key: 'final-asc', label: 'Final deadline — earliest first',
-            compare: byDeadline('applyByDate', 1), hint: 'Postings without a final deadline appear last.' },
+            compare: byDeadline('applyByDate', 1), hint: 'Sponsored and featured postings appear first. Other postings without a final deadline appear last.' },
           { key: 'final-desc', label: 'Final deadline — latest first',
-            compare: byDeadline('applyByDate', -1), hint: 'Postings without a final deadline appear last.' },
+            compare: byDeadline('applyByDate', -1), hint: 'Sponsored and featured postings appear first. Other postings without a final deadline appear last.' },
         ],
 
         filters: [

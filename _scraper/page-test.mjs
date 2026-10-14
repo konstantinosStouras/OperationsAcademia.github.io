@@ -368,8 +368,8 @@ const signedOutPage = (url, opts = {}) => signedInPage(url, { ...opts, user: nul
   });
   const selector = '#oas-sort';
   const ids = () => q.$$eval('#oa-jobs .oa-card', ns => ns.map(n => n.id.replace(/^job-/, '')));
-  const suggested = [0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 12, 11, 10].map(i => 'sort-' + i);
-  const final = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12, 11].map(i => 'sort-' + i);
+  const suggested = [8, 0, 1, 3, 2, 4, 5, 6, 7, 9, 12, 11, 10].map(i => 'sort-' + i);
+  const final = [8, 10, 9, 7, 6, 5, 4, 3, 2, 1, 0, 12, 11].map(i => 'sort-' + i);
   const newest = [...fixtures].sort(PAGE_ORDER).map(r => r.id);
   eq(await ids(), newest.slice(0, 10), 'sort: default preserves promoted/newest order');
   await q.selectOption(selector, 'suggested-asc');
@@ -399,11 +399,11 @@ const signedOutPage = (url, opts = {}) => signedInPage(url, { ...opts, user: nul
     final.map(id => fixtures.find(r => r.id === id).institution),
     'sort: Excel contains every page in the displayed order');
   await q.selectOption(selector, 'final-desc');
-  eq(await ids(), Array.from({ length: 10 }, (_, i) => 'sort-' + i), 'sort: final latest first');
+  eq(await ids(), [8, 0, 1, 2, 3, 4, 5, 6, 7, 9].map(i => 'sort-' + i), 'sort: final latest first keeps featured first');
   await q.locator('.oa-resultbar .oa-pager button').last().click();
   eq(await ids(), ['sort-10', 'sort-12', 'sort-11'], 'sort: latest-first still puts missing dates last');
   await q.selectOption(selector, 'suggested-desc');
-  eq(await ids(), [9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map(i => 'sort-' + i), 'sort: suggested latest first');
+  eq(await ids(), [8, 9, 7, 6, 5, 4, 3, 2, 1, 0].map(i => 'sort-' + i), 'sort: suggested latest first keeps featured first');
   for (const width of [320, 390, 1280]) {
     await q.setViewportSize({ width, height: 1000 });
     for (const theme of ['light', 'dark']) {
