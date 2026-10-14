@@ -1,11 +1,11 @@
 {
- "generated": "2026-10-13T21:44:30.643Z",
- "count": 37,
+ "generated": "2026-10-14T11:04:22.326Z",
+ "count": 38,
  "years": {
-  "2027": 37
+  "2027": 38
  },
  "positions": {
-  "PhD Candidate": 21,
+  "PhD Candidate": 22,
   "Post-Doctoral Researcher": 11,
   "Assistant Professor": 3,
   "Research Scientist": 2
@@ -13,14 +13,14 @@
  "researchAreas": {
   "Machine Learning and Data Science": 16,
   "Operations Research / Optimization": 14,
-  "Technology, Platforms and Marketplaces": 11,
+  "Technology, Platforms and Marketplaces": 12,
   "Empirical Operations": 10,
-  "Service Operations": 9,
+  "Service Operations": 10,
   "Supply Chain Management": 9,
   "Sustainable Operations": 8,
   "Behavioral Operations": 7,
   "Healthcare Operations": 7,
-  "Revenue Management and Pricing": 6,
+  "Revenue Management and Pricing": 7,
   "Innovation and New Product Development": 5,
   "AI": 2,
   "Sequential Decision Making": 2,
@@ -31,6 +31,7 @@
   "AI-enabled Operations": 1,
   "AI/LLM for Social Good": 1,
   "Algorithmic Intermediation in Platform Operations": 1,
+  "and Online Learning": 1,
   "Approximation Algorithms": 1,
   "Biomedical Applications": 1,
   "Business Model Innovation": 1,
@@ -39,10 +40,12 @@
   "Energy Systems": 1,
   "Energy Transition": 1,
   "Extreme Risk Management": 1,
+  "Game Theory": 1,
   "Human-AI": 1,
   "human-AI collaboration": 1,
   "Human-AI Collaboration": 1,
   "Human-AI Collaboration and Decision-Making": 1,
+  "Information Design": 1,
   "Innovative Business Models": 1,
   "Inventory Management": 1,
   "LLMs": 1,
@@ -62,13 +65,13 @@
   "Trustworthy AI": 1
  },
  "informsDays": {
-  "Sunday": 13,
+  "Sunday": 14,
   "Monday": 9,
   "Tuesday": 4,
   "Wednesday": 1
  },
- "withCv": 33,
- "newestPosted": "2026-10-13",
+ "withCv": 34,
+ "newestPosted": "2026-10-14",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
  "heldCount": 0,
