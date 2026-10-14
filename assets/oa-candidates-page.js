@@ -6,6 +6,7 @@
           fetch('/data/candidates-reveal.json', {cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(meta){
             var note = document.getElementById('oa-reveal-note');
             if (!OAReveal.isRevealed(meta.revealAt)) {
+              note.hidden = false;
               if (meta.revealAt) note.textContent='The candidate list opens on ' + OAReveal.formatDay(meta.revealAt) + ' at 14:00 UTC. Until then, candidate profiles remain private. You can create or update your profile now.';
               return;
             }
@@ -37,8 +38,8 @@
           urlPrefix: 'c_',
           strings: {
             loading: 'Loading candidate profiles…',
-            emptyData: 'No candidate profiles are public yet.',
-            emptyDataHint: 'Before the reveal, profiles are held privately and appear here together at 14:00 UTC on the reveal date (this list can take a few minutes to catch up with that moment); after it, new ones appear as candidates post them.',
+            emptyData: 'No candidate profiles are listed at the moment.',
+            emptyDataHint: 'Please check back soon — new profiles are added as candidates post them.',
             emptyFiltered: 'No candidate profiles match these filters.',
             emptyFilteredHint: 'Try removing a filter, or clear them all to see every profile.',
             loadError: 'The candidate profiles could not be loaded.',
@@ -106,7 +107,7 @@
           var next = user ? user.uid : '';
           if (next === lastAccount) return;
           lastAccount = next;
-          cands.clear();
+          cands.clear({ loading: true });
           cands.refresh().then(function () { OAGate.resume(cands); });
         });
         // Clear the school-only rows before the gate tries to resume a card;

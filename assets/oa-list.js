@@ -1485,9 +1485,13 @@
       reload: function () { apply(); },
       // Authenticated sources must erase the previous account's rows immediately,
       // including expanded details and calendar exports, before any refetch.
-      clear: function () {
-        rows = []; view = []; expanded = {}; loaded = true; loadFailed = false;
+      clear: function (options) {
+        rows = []; view = []; expanded = {}; loaded = !(options && options.loading); loadFailed = false;
         buildBar(); apply();
+        if (!loaded) {
+          listEl.innerHTML = "";
+          listEl.appendChild(el("li", { class: "oa-loading", text: STR.loading }));
+        }
       },
       /* Fetch newly published rows without losing this list's filters. A failed
          refresh retains the last good rows, including an empty pre-reveal list. */

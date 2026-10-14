@@ -116,6 +116,21 @@ try {
   const signed = await pageFor(member);
   await signed.page.goto(base + '/candidates');
   await signed.page.waitForFunction(() => document.getElementById('oa-candidates').textContent.includes('Synthetic Candidate'));
+  await signed.page.evaluate(() => {
+    window.__holdCandidateResponse = true;
+    OACandidateList.clear({ loading: true });
+    window.__pendingListRefresh = OACandidateList.refresh();
+    OACandidateList.rerender();
+  });
+  await signed.page.waitForFunction(() => typeof window.__releaseCandidateResponse === 'function');
+  assert.equal(await signed.page.locator('#oa-candidates .oa-empty').count(), 0, 'pending account refresh never shows an empty list notice');
+  assert.equal(await signed.page.locator('#oa-candidates .oa-loading').count(), 1);
+  assert.equal(await signed.page.locator('#oa-reveal-note').isVisible(), false, 'collection notice stays hidden after reveal');
+  await signed.page.evaluate(async () => {
+    window.__releaseCandidateResponse();
+    await window.__pendingListRefresh;
+    window.__holdCandidateResponse = false;
+  });
   await signed.page.locator('#oa-candidates .oa-card-head').first().click();
   await signed.page.waitForSelector('#oa-candidates .oa-card-body');
   assert.ok((await signed.page.locator('#oa-candidates').innerHTML()).includes(profile.cvUrl));
