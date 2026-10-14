@@ -1566,6 +1566,11 @@
  },
  {
   "institution": "Massachusetts Institute of Technology",
+  "school": "Operations Research Center",
+  "department": "OR/OM"
+ },
+ {
+  "institution": "Massachusetts Institute of Technology",
   "school": "School of Engineering",
   "department": "Center for Transportation and Logistics"
  },

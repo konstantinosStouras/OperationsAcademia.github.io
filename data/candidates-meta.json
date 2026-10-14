@@ -1,11 +1,11 @@
 {
- "generated": "2026-10-14T16:27:25.521Z",
- "count": 38,
+ "generated": "2026-10-14T19:11:01.887Z",
+ "count": 39,
  "years": {
-  "2027": 38
+  "2027": 39
  },
  "positions": {
-  "PhD Candidate": 22,
+  "PhD Candidate": 23,
   "Post-Doctoral Researcher": 11,
   "Assistant Professor": 3,
   "Research Scientist": 2
@@ -14,10 +14,10 @@
   "Machine Learning and Data Science": 17,
   "Operations Research / Optimization": 14,
   "Technology, Platforms and Marketplaces": 12,
-  "Empirical Operations": 10,
+  "Empirical Operations": 11,
   "Service Operations": 10,
   "Supply Chain Management": 9,
-  "Sustainable Operations": 8,
+  "Sustainable Operations": 9,
   "Behavioral Operations": 7,
   "Healthcare Operations": 7,
   "Revenue Management and Pricing": 7,
@@ -65,12 +65,12 @@
   "Trustworthy AI": 1
  },
  "informsDays": {
-  "Sunday": 14,
+  "Sunday": 15,
   "Monday": 9,
   "Tuesday": 4,
   "Wednesday": 1
  },
- "withCv": 34,
+ "withCv": 35,
  "newestPosted": "2026-10-14",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
