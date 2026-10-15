@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-15T14:28:51.929Z",
- "members": 354,
+ "generated": "2026-10-15T18:37:09.966Z",
+ "members": 357,
  "k": 3,
  "affiliation": {
-  "listed": 270,
+  "listed": 273,
   "other": 45,
   "none": 39
  },
  "universities": {
-  "count": 132,
+  "count": 134,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -26,17 +26,17 @@
     "members": 6
    },
    {
+    "name": "Massachusetts Institute of Technology",
+    "country": "United States",
+    "members": 6
+   },
+   {
     "name": "Georgia Institute of Technology",
     "country": "United States",
     "members": 5
    },
    {
     "name": "Harvard University",
-    "country": "United States",
-    "members": 5
-   },
-   {
-    "name": "Massachusetts Institute of Technology",
     "country": "United States",
     "members": 5
    },
@@ -191,14 +191,14 @@
     "members": 3
    }
   ],
-  "rest": 127
+  "rest": 129
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 172
+    "members": 175
    },
    {
     "name": "Canada",
