@@ -8972,6 +8972,15 @@
   "lastPosted": "2025-11-16"
  },
  {
+  "id": "southern-illinois-university____business-analytics",
+  "institution": "Southern Illinois University",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "southern-methodist-university____it-om",
   "institution": "Southern Methodist University",
   "department": "IT/OM",
