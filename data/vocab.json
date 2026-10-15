@@ -2414,6 +2414,10 @@
    "n": 0
   },
   {
+   "v": "Worcester Polytechnic Institute",
+   "n": 0
+  },
+  {
    "v": "WU Vienna",
    "n": 0
   },
@@ -13976,6 +13980,11 @@
      "MIS"
     ]
    }
+  },
+  "Worcester Polytechnic Institute": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "Worcester State University": {
    "schools": [],
