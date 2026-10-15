@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-15T12:49:28.220Z",
+ "generated": "2026-10-15T20:49:28.527Z",
  "universities": [
   {
    "v": "University of Houston",
-   "n": 11
+   "n": 12
   },
   {
    "v": "Arizona State University",
@@ -1467,6 +1467,10 @@
   },
   {
    "v": "Southern Arkansas University",
+   "n": 1
+  },
+  {
+   "v": "Southern Illinois University",
    "n": 1
   },
   {
@@ -3747,7 +3751,7 @@
   },
   {
    "v": "Operations Management",
-   "n": 16
+   "n": 17
   },
   {
    "v": "Management",
@@ -3767,7 +3771,7 @@
   },
   {
    "v": "Business Analytics",
-   "n": 11
+   "n": 12
   },
   {
    "v": "Business Administration",
@@ -10399,6 +10403,17 @@
     ]
    }
   },
+  "Southern Illinois University": {
+   "schools": [],
+   "units": [
+    "Business Analytics"
+   ],
+   "bySchool": {
+    "": [
+     "Business Analytics"
+    ]
+   }
+  },
   "Southern Methodist University": {
    "schools": [
     "Edwin L. Cox School of Business",
@@ -11972,6 +11987,7 @@
     "OM",
     "OM/IS",
     "OM/SCM",
+    "Operations Management",
     "SCM/OM",
     "The Bauer Human-Centered Artificial Intelligence Institute"
    ],
@@ -11982,6 +11998,7 @@
      "OM",
      "OM/IS",
      "OM/SCM",
+     "Operations Management",
      "SCM/OM"
     ],
     "C. T. Bauer College of Business": [

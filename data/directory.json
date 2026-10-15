@@ -8986,9 +8986,13 @@
   "institution": "Southern Illinois University",
   "department": "Business Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-15"
  },
  {
   "id": "southern-methodist-university____it-om",
@@ -12461,8 +12465,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-03-14"
+  "n": 2,
+  "lastPosted": "2026-10-15"
  },
  {
   "id": "university-of-houston____scm-om",
