@@ -1,20 +1,20 @@
 {
- "generated": "2026-10-15T15:40:52.977Z",
- "count": 40,
+ "generated": "2026-10-15T19:38:34.041Z",
+ "count": 41,
  "years": {
-  "2027": 40
+  "2027": 41
  },
  "positions": {
-  "PhD Candidate": 23,
+  "PhD Candidate": 24,
   "Post-Doctoral Researcher": 12,
   "Assistant Professor": 3,
   "Research Scientist": 2
  },
  "researchAreas": {
-  "Machine Learning and Data Science": 18,
+  "Machine Learning and Data Science": 19,
   "Operations Research / Optimization": 14,
   "Technology, Platforms and Marketplaces": 13,
-  "Empirical Operations": 11,
+  "Empirical Operations": 12,
   "Service Operations": 10,
   "Supply Chain Management": 9,
   "Sustainable Operations": 9,
@@ -69,12 +69,12 @@
   "Trustworthy AI": 1
  },
  "informsDays": {
-  "Sunday": 15,
+  "Sunday": 16,
   "Monday": 10,
   "Tuesday": 4,
   "Wednesday": 1
  },
- "withCv": 36,
+ "withCv": 37,
  "newestPosted": "2026-10-15",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
@@ -82,7 +82,7 @@
  "researchSummary": [
   {
    "label": "Machine learning",
-   "count": 18
+   "count": 19
   },
   {
    "label": "Optimization",
