@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-14T07:23:31.057Z",
+ "generated": "2026-10-15T12:49:28.220Z",
  "universities": [
   {
    "v": "University of Houston",
-   "n": 10
+   "n": 11
   },
   {
    "v": "Arizona State University",
@@ -2460,6 +2460,10 @@
    "n": 5
   },
   {
+   "v": "C. T. Bauer College of Business",
+   "n": 4
+  },
+  {
    "v": "College of Business Administration",
    "n": 4
   },
@@ -2470,10 +2474,6 @@
   {
    "v": "Michael F. Price College of Business",
    "n": 4
-  },
-  {
-   "v": "C. T. Bauer College of Business",
-   "n": 3
   },
   {
    "v": "Darla Moore School of Business",
@@ -3962,6 +3962,10 @@
    "n": 2
   },
   {
+   "v": "Department of Decision and Information Sciences",
+   "n": 2
+  },
+  {
    "v": "DS and Analytics",
    "n": 2
   },
@@ -4383,10 +4387,6 @@
   },
   {
    "v": "Decision, Risk and Operations",
-   "n": 1
-  },
-  {
-   "v": "Department of Decision and Information Sciences",
    "n": 1
   },
   {
