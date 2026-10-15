@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-14T17:57:57.948Z",
- "members": 351,
+ "generated": "2026-10-15T00:04:35.358Z",
+ "members": 352,
  "k": 3,
  "affiliation": {
-  "listed": 267,
+  "listed": 268,
   "other": 45,
   "none": 39
  },
@@ -186,14 +186,14 @@
     "members": 3
    }
   ],
-  "rest": 127
+  "rest": 128
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 170
+    "members": 171
    },
    {
     "name": "Canada",
