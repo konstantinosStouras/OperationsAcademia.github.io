@@ -1680,6 +1680,11 @@
   "department": "OR/Stat"
  },
  {
+  "institution": "MIT",
+  "school": "Laboratory for Information and Decision Systems",
+  "department": "AI/ML/DS/Stats"
+ },
+ {
   "institution": "Monash University",
   "school": "",
   "department": "OR/OM"

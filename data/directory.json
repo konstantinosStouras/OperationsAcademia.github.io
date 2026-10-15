@@ -6314,6 +6314,15 @@
   "lng": -91.7738192
  },
  {
+  "id": "mit__laboratory-for-information-and-decision-systems__ai-ml-ds-stats",
+  "institution": "MIT",
+  "school": "Laboratory for Information and Decision Systems",
+  "department": "AI/ML/DS/Stats",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "mit-sloan____om",
   "institution": "MIT Sloan",
   "department": "OM",
