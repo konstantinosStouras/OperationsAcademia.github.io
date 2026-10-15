@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-15T18:37:09.966Z",
- "members": 357,
+ "generated": "2026-10-15T21:44:31.176Z",
+ "members": 359,
  "k": 3,
  "affiliation": {
-  "listed": 273,
+  "listed": 275,
   "other": 45,
   "none": 39
  },
@@ -21,6 +21,11 @@
     "members": 9
    },
    {
+    "name": "Harvard University",
+    "country": "United States",
+    "members": 7
+   },
+   {
     "name": "Columbia University",
     "country": "United States",
     "members": 6
@@ -32,11 +37,6 @@
    },
    {
     "name": "Georgia Institute of Technology",
-    "country": "United States",
-    "members": 5
-   },
-   {
-    "name": "Harvard University",
     "country": "United States",
     "members": 5
    },
@@ -198,7 +198,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 175
+    "members": 177
    },
    {
     "name": "Canada",
