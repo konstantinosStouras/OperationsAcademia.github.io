@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-16T08:58:00.247Z",
- "members": 360,
+ "generated": "2026-10-16T18:11:56.664Z",
+ "members": 361,
  "k": 3,
  "affiliation": {
-  "listed": 277,
+  "listed": 278,
   "other": 45,
   "none": 38
  },
@@ -54,6 +54,11 @@
     "name": "University of Toronto",
     "country": "Canada",
     "members": 5
+   },
+   {
+    "name": "George Washington University",
+    "country": "United States",
+    "members": 4
    },
    {
     "name": "Georgetown University",
@@ -107,11 +112,6 @@
    },
    {
     "name": "George Mason University",
-    "country": "United States",
-    "members": 3
-   },
-   {
-    "name": "George Washington University",
     "country": "United States",
     "members": 3
    },
@@ -203,7 +203,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 179
+    "members": 180
    },
    {
     "name": "Canada",
