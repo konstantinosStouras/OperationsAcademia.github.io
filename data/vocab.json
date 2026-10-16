@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-15T20:49:28.527Z",
+ "generated": "2026-10-16T14:16:13.527Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -531,6 +531,10 @@
   },
   {
    "v": "Northern State University",
+   "n": 2
+  },
+  {
+   "v": "NOVA School of Business and Economics",
    "n": 2
   },
   {
@@ -1343,14 +1347,6 @@
   },
   {
    "v": "Northwestern",
-   "n": 1
-  },
-  {
-   "v": "NOVA School of Business and Economics",
-   "n": 1
-  },
-  {
-   "v": "NOVA University Lisbon",
    "n": 1
   },
   {
@@ -3093,10 +3089,6 @@
   },
   {
    "v": "Neidorff School of Business",
-   "n": 1
-  },
-  {
-   "v": "NOVA School of Business and Economics",
    "n": 1
   },
   {
@@ -9533,27 +9525,16 @@
     "School of Business and Economics"
    ],
    "units": [
+    "Management of Information Systems",
     "Operations, Technology and Innovation Management"
    ],
    "bySchool": {
     "": [
+     "Management of Information Systems",
      "Operations, Technology and Innovation Management"
     ],
     "School of Business and Economics": [
      "Operations, Technology and Innovation Management"
-    ]
-   }
-  },
-  "NOVA University Lisbon": {
-   "schools": [
-    "NOVA School of Business and Economics"
-   ],
-   "units": [
-    "Management of Information Systems"
-   ],
-   "bySchool": {
-    "NOVA School of Business and Economics": [
-     "Management of Information Systems"
     ]
    }
   },
@@ -14816,9 +14797,6 @@
   ],
   "Neidorff School of Business": [
    "Finance and Business Analytics"
-  ],
-  "NOVA School of Business and Economics": [
-   "Management of Information Systems"
   ],
   "NUS Business School": [
    "Analytics and Operations"

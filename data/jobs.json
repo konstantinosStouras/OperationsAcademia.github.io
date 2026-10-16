@@ -6673,9 +6673,9 @@
    2027
   ],
   "posted": "2026-09-01",
-  "institution": "NOVA University Lisbon",
-  "department": "NOVA School of Business and Economics, Management of Information Systems",
-  "school": "NOVA School of Business and Economics",
+  "institution": "Nova School of Business and Economics",
+  "department": "Management of Information Systems",
+  "school": "",
   "unit": "Management of Information Systems",
   "type": "Business School",
   "levels": [
@@ -6694,7 +6694,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=NOVA%20University%20Lisbon",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Nova%20School%20of%20Business%20and%20Economics",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
