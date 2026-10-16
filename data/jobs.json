@@ -42,6 +42,75 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-koc-university-20261016",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-16",
+  "institution": "Koç University",
+  "department": "College of Engineering, Industrial Engineering",
+  "school": "College of Engineering",
+  "unit": "Industrial Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "March 1, 2027",
+  "applyByDate": "2027-03-01",
+  "reviewDate": "2026-10-13",
+  "comments": "",
+  "country": "Turkey",
+  "countries": [
+   "Turkey"
+  ],
+  "adUrl": "https://academicjobsonline.org/ajo/jobs/33054",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://eng.ku.edu.tr/en/industrial-engineering/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-16T21:11:22Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-florida-20261016",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-16",
+  "institution": "University of Florida",
+  "department": "College of Health and Human Performance, Sport Management",
+  "school": "College of Health and Human Performance",
+  "unit": "Sport Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-30",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://explore.jobs.ufl.edu/en-us/job/541569/ast-prof",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://hhp.ufl.edu/academics/sports-management-spm/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-16T21:10:23Z",
+  "owner": ""
+ },
+ {
   "id": "2027-southern-illinois-university-20261015",
   "year": 2027,
   "years": [

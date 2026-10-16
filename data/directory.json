@@ -4032,10 +4032,10 @@
   "lastPosted": "2026-07-23"
  },
  {
-  "id": "hanken-school-of-economics____business-analytics",
+  "id": "hanken-school-of-economics____statistics-department-of-finance-and-economics",
   "institution": "Hanken School of Economics",
-  "department": "Business Analytics",
-  "type": "Business School",
+  "department": "Statistics, Department of Finance and Economics",
+  "type": "University",
   "sources": [
    "seed"
   ]
@@ -5376,15 +5376,6 @@
   "lastPosted": "2026-10-04"
  },
  {
-  "id": "koc-university____industrial-engineering-and-operations-research",
-  "institution": "Koç University",
-  "department": "Industrial Engineering and Operations Research",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "koc-university____om-is",
   "institution": "Koc University",
   "department": "OM/IS",
@@ -5424,6 +5415,20 @@
   ],
   "lat": 41.1977964,
   "lng": 29.0673835
+ },
+ {
+  "id": "koc-university__college-of-engineering__industrial-engineering",
+  "institution": "Koç University",
+  "school": "College of Engineering",
+  "department": "Industrial Engineering",
+  "type": "University",
+  "country": "Turkey",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "koc-university__graduate-school-of-business__operations-management-and-information-systems",
@@ -12311,13 +12316,18 @@
   "lastPosted": "2025-06-06"
  },
  {
-  "id": "university-of-florida____sport-related-data-analytics",
+  "id": "university-of-florida__college-of-health-and-human-performance__sport-management",
   "institution": "University of Florida",
-  "department": "Sport-related data analytics",
+  "school": "College of Health and Human Performance",
+  "department": "Sport Management",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "university-of-florida__warrington-college-of-business__information-systems-and-operations-management",

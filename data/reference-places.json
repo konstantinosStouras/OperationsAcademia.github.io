@@ -1097,7 +1097,7 @@
  {
   "institution": "Hanken School of Economics",
   "school": "",
-  "department": "Business Analytics"
+  "department": "Statistics, Department of Finance and Economics"
  },
  {
   "institution": "Harris-Stowe State University",
@@ -1445,14 +1445,14 @@
   "department": "Operations Management and Business Analytics"
  },
  {
-  "institution": "Koç University",
-  "school": "",
-  "department": "Industrial Engineering and Operations Research"
- },
- {
   "institution": "Koc University",
   "school": "",
   "department": "OM/IS"
+ },
+ {
+  "institution": "Koç University",
+  "school": "College of Engineering",
+  "department": "Industrial Engineering"
  },
  {
   "institution": "KU Leuven",
@@ -3091,8 +3091,8 @@
  },
  {
   "institution": "University of Florida",
-  "school": "",
-  "department": "Sport-related data analytics"
+  "school": "College of Health and Human Performance",
+  "department": "Sport Management"
  },
  {
   "institution": "University of Florida",
