@@ -2911,6 +2911,15 @@
   "lastPosted": "2025-05-29"
  },
  {
+  "id": "east-texas-a-m-university____management-science-focused-on-supply-chain-operations",
+  "institution": "East Texas A&M University",
+  "department": "Management Science focused on Supply Chain/Operations",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "eastern-illinois-university____om",
   "institution": "Eastern Illinois University",
   "department": "OM",
@@ -8556,6 +8565,15 @@
   ],
   "lat": 37.3379434,
   "lng": -121.9378605
+ },
+ {
+  "id": "santa-clara-university____business-analytics-statistics-operations-and-supply-chain-an",
+  "institution": "Santa Clara University",
+  "department": "Business Analytics, Statistics, Operations and Supply Chain Analytics, and AI Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "santa-clara-university____is-and-analytics",

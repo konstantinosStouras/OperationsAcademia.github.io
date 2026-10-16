@@ -825,6 +825,11 @@
   "department": "Supply Chain Management"
  },
  {
+  "institution": "East Texas A&M University",
+  "school": "",
+  "department": "Management Science focused on Supply Chain/Operations"
+ },
+ {
   "institution": "Eastern Illinois University",
   "school": "",
   "department": "OM"
@@ -2263,6 +2268,11 @@
   "institution": "San José State University",
   "school": "Lucas College and Graduate School of Business",
   "department": "Marketing and Business Analytics"
+ },
+ {
+  "institution": "Santa Clara University",
+  "school": "",
+  "department": "Business Analytics, Statistics, Operations and Supply Chain Analytics, and AI Analytics"
  },
  {
   "institution": "Santa Clara University",
