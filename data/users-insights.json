@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-16T04:22:47.553Z",
- "members": 359,
+ "generated": "2026-10-16T08:58:00.247Z",
+ "members": 360,
  "k": 3,
  "affiliation": {
-  "listed": 276,
+  "listed": 277,
   "other": 45,
   "none": 38
  },
@@ -84,6 +84,11 @@
     "name": "Yale University",
     "country": "United States",
     "members": 4
+   },
+   {
+    "name": "Boston University",
+    "country": "United States",
+    "members": 3
    },
    {
     "name": "Carnegie Mellon University",
@@ -191,14 +196,14 @@
     "members": 3
    }
   ],
-  "rest": 129
+  "rest": 127
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 178
+    "members": 179
    },
    {
     "name": "Canada",
