@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-10-16T09:08:48.162Z",
+ "generated": "2026-10-16T09:41:21.400Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -6122,7 +6122,7 @@
    "path": "/jobs.html",
    "title": "",
    "views": 6003,
-   "avgSec": 620
+   "avgSec": 621
   },
   {
    "path": "/",
@@ -6619,7 +6619,7 @@
      "path": "/jobs.html",
      "title": "",
      "views": 6003,
-     "avgSec": 620
+     "avgSec": 621
     },
     {
      "path": "/",
@@ -9786,7 +9786,7 @@
    "to": "2026-10-16",
    "metric": "visits",
    "zone": "",
-   "total": 5369,
+   "total": 5371,
    "items": [
     {
      "name": "United States",
@@ -9794,7 +9794,7 @@
     },
     {
      "name": "Singapore",
-     "value": 288
+     "value": 289
     },
     {
      "name": "Canada",
@@ -9882,7 +9882,7 @@
     },
     {
      "name": "Indonesia",
-     "value": 6
+     "value": 7
     },
     {
      "name": "Israel",
@@ -10050,7 +10050,7 @@
    "to": "2026-10-16",
    "metric": "visits",
    "zone": "",
-   "total": 5381,
+   "total": 5383,
    "items": [
     {
      "name": "Direct",
@@ -10058,7 +10058,7 @@
     },
     {
      "name": "Organic Search",
-     "value": 1392
+     "value": 1394
     },
     {
      "name": "Referral",
@@ -10084,7 +10084,7 @@
    "to": "2026-10-16",
    "metric": "visits",
    "zone": "",
-   "total": 5139,
+   "total": 5141,
    "items": [
     {
      "name": "Typed or bookmarked",
@@ -10092,7 +10092,7 @@
     },
     {
      "name": "google",
-     "value": 1350
+     "value": 1352
     },
     {
      "name": "gemini.google.com",
@@ -11904,7 +11904,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "property",
-    "total": 3323,
+    "total": 3327,
     "items": [
      {
       "name": "00",
@@ -11928,7 +11928,7 @@
      },
      {
       "name": "05",
-      "value": 137
+      "value": 138
      },
      {
       "name": "06",
@@ -11936,7 +11936,7 @@
      },
      {
       "name": "07",
-      "value": 108
+      "value": 111
      },
      {
       "name": "08",
@@ -12010,15 +12010,15 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 3141,
+    "total": 3145,
     "items": [
      {
       "name": "United States",
-      "value": 1906
+      "value": 1908
      },
      {
       "name": "Singapore",
-      "value": 184
+      "value": 185
      },
      {
       "name": "Hong Kong",
@@ -12121,15 +12121,15 @@
       "value": 4
      },
      {
+      "name": "Indonesia",
+      "value": 3
+     },
+     {
       "name": "Belgium",
       "value": 2
      },
      {
       "name": "Czechia",
-      "value": 2
-     },
-     {
-      "name": "Indonesia",
       "value": 2
      },
      {
@@ -12200,11 +12200,11 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 3140,
+    "total": 3144,
     "items": [
      {
       "name": "desktop",
-      "value": 2634
+      "value": 2638
      },
      {
       "name": "mobile",
@@ -12222,15 +12222,15 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 3133,
+    "total": 3137,
     "items": [
      {
       "name": "Direct",
-      "value": 1994
+      "value": 1996
      },
      {
       "name": "Organic Search",
-      "value": 781
+      "value": 783
      },
      {
       "name": "Referral",
@@ -12256,15 +12256,15 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 3010,
+    "total": 3014,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 1994
+      "value": 1996
      },
      {
       "name": "google",
-      "value": 753
+      "value": 755
      },
      {
       "name": "gemini.google.com",
@@ -12380,7 +12380,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "property",
-    "total": 5644,
+    "total": 5648,
     "items": [
      {
       "name": "00",
@@ -12404,7 +12404,7 @@
      },
      {
       "name": "05",
-      "value": 237
+      "value": 238
      },
      {
       "name": "06",
@@ -12412,7 +12412,7 @@
      },
      {
       "name": "07",
-      "value": 194
+      "value": 197
      },
      {
       "name": "08",
@@ -12486,7 +12486,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 5369,
+    "total": 5371,
     "items": [
      {
       "name": "United States",
@@ -12494,7 +12494,7 @@
      },
      {
       "name": "Singapore",
-      "value": 288
+      "value": 289
      },
      {
       "name": "Canada",
@@ -12582,7 +12582,7 @@
      },
      {
       "name": "Indonesia",
-      "value": 6
+      "value": 7
      },
      {
       "name": "Israel",
@@ -12750,7 +12750,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 5381,
+    "total": 5383,
     "items": [
      {
       "name": "Direct",
@@ -12758,7 +12758,7 @@
      },
      {
       "name": "Organic Search",
-      "value": 1392
+      "value": 1394
      },
      {
       "name": "Referral",
@@ -12784,7 +12784,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 5139,
+    "total": 5141,
     "items": [
      {
       "name": "Typed or bookmarked",
@@ -12792,7 +12792,7 @@
      },
      {
       "name": "google",
-      "value": 1350
+      "value": 1352
      },
      {
       "name": "gemini.google.com",
@@ -12940,7 +12940,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "property",
-    "total": 15197,
+    "total": 15201,
     "items": [
      {
       "name": "00",
@@ -12964,7 +12964,7 @@
      },
      {
       "name": "05",
-      "value": 655
+      "value": 656
      },
      {
       "name": "06",
@@ -12972,7 +12972,7 @@
      },
      {
       "name": "07",
-      "value": 492
+      "value": 495
      },
      {
       "name": "08",
@@ -13046,7 +13046,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 14761,
+    "total": 14763,
     "items": [
      {
       "name": "United States",
@@ -13062,7 +13062,7 @@
      },
      {
       "name": "Singapore",
-      "value": 562
+      "value": 563
      },
      {
       "name": "Hong Kong",
@@ -13173,12 +13173,12 @@
       "value": 13
      },
      {
-      "name": "Nigeria",
+      "name": "Indonesia",
       "value": 12
      },
      {
-      "name": "Indonesia",
-      "value": 11
+      "name": "Nigeria",
+      "value": 12
      },
      {
       "name": "Norway",
@@ -13426,7 +13426,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 14572,
+    "total": 14575,
     "items": [
      {
       "name": "Direct",
@@ -13434,7 +13434,7 @@
      },
      {
       "name": "Organic Search",
-      "value": 4031
+      "value": 4034
      },
      {
       "name": "Referral",
@@ -13460,7 +13460,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 14300,
+    "total": 14301,
     "items": [
      {
       "name": "Typed or bookmarked",
@@ -13468,7 +13468,7 @@
      },
      {
       "name": "google",
-      "value": 3902
+      "value": 3903
      },
      {
       "name": "gemini.google.com",
@@ -13672,7 +13672,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "property",
-    "total": 56611,
+    "total": 56615,
     "items": [
      {
       "name": "00",
@@ -13696,7 +13696,7 @@
      },
      {
       "name": "05",
-      "value": 2138
+      "value": 2139
      },
      {
       "name": "06",
@@ -13704,7 +13704,7 @@
      },
      {
       "name": "07",
-      "value": 1691
+      "value": 1694
      },
      {
       "name": "08",
@@ -13778,7 +13778,7 @@
     "to": "2026-10-16",
     "metric": "visits",
     "zone": "",
-    "total": 55845,
+    "total": 55847,
     "items": [
      {
       "name": "United States",
@@ -13790,7 +13790,7 @@
      },
      {
       "name": "Singapore",
-      "value": 1974
+      "value": 1975
      },
      {
       "name": "Hong Kong",
@@ -13921,12 +13921,12 @@
       "value": 51
      },
      {
-      "name": "United Arab Emirates",
+      "name": "Indonesia",
       "value": 48
      },
      {
-      "name": "Indonesia",
-      "value": 47
+      "name": "United Arab Emirates",
+      "value": 48
      },
      {
       "name": "Denmark",
@@ -14672,7 +14672,7 @@
    "from": "2026-09-17",
    "to": "2026-10-16",
    "sessions": 3153,
-   "avgSessionSec": 218,
+   "avgSessionSec": 219,
    "viewsPerSession": 2.22
   },
   "90": {
