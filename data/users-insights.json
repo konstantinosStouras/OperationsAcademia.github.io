@@ -1,11 +1,11 @@
 {
- "generated": "2026-10-15T21:44:31.176Z",
+ "generated": "2026-10-16T04:22:47.553Z",
  "members": 359,
  "k": 3,
  "affiliation": {
-  "listed": 275,
+  "listed": 276,
   "other": 45,
-  "none": 39
+  "none": 38
  },
  "universities": {
   "count": 134,
@@ -26,12 +26,12 @@
     "members": 7
    },
    {
-    "name": "Columbia University",
+    "name": "Massachusetts Institute of Technology",
     "country": "United States",
-    "members": 6
+    "members": 7
    },
    {
-    "name": "Massachusetts Institute of Technology",
+    "name": "Columbia University",
     "country": "United States",
     "members": 6
    },
@@ -198,7 +198,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 177
+    "members": 178
    },
    {
     "name": "Canada",
@@ -234,6 +234,6 @@
    }
   ],
   "rest": 11,
-  "unknown": 96
+  "unknown": 95
  }
 }
