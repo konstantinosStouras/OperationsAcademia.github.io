@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-16T21:11:40.226Z",
+ "generated": "2026-10-16T21:15:25.328Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -798,6 +798,10 @@
    "n": 1
   },
   {
+   "v": "Alba Graduate Business School",
+   "n": 1
+  },
+  {
    "v": "Alma College",
    "n": 1
   },
@@ -1115,6 +1119,10 @@
   },
   {
    "v": "Hamad Bin Khalifa University",
+   "n": 1
+  },
+  {
+   "v": "Hanken School of Economics",
    "n": 1
   },
   {
@@ -4206,6 +4214,10 @@
    "n": 1
   },
   {
+   "v": "Business Analytics and AI",
+   "n": 1
+  },
+  {
    "v": "Business Analytics and Operations",
    "n": 1
   },
@@ -4447,6 +4459,10 @@
   },
   {
    "v": "Finance and Business Analytics",
+   "n": 1
+  },
+  {
+   "v": "Finance and Economics",
    "n": 1
   },
   {
@@ -5833,6 +5849,17 @@
     "": [
      "MIS",
      "SCM/Logistics"
+    ]
+   }
+  },
+  "Alba Graduate Business School": {
+   "schools": [],
+   "units": [
+    "Business Analytics and AI"
+   ],
+   "bySchool": {
+    "": [
+     "Business Analytics and AI"
     ]
    }
   },
@@ -7929,6 +7956,17 @@
    "bySchool": {
     "College of Science and Engineering": [
      "Engineering Management and Decision Sciences"
+    ]
+   }
+  },
+  "Hanken School of Economics": {
+   "schools": [],
+   "units": [
+    "Finance and Economics"
+   ],
+   "bySchool": {
+    "": [
+     "Finance and Economics"
     ]
    }
   },

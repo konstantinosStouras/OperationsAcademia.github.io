@@ -249,9 +249,13 @@
   "institution": "Alba Graduate Business School",
   "department": "Business Analytics and AI",
   "type": "Business School",
+  "country": "Greece",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "alfaisal-university",
@@ -4032,13 +4036,17 @@
   "lastPosted": "2026-07-23"
  },
  {
-  "id": "hanken-school-of-economics____statistics-department-of-finance-and-economics",
+  "id": "hanken-school-of-economics____finance-and-economics",
   "institution": "Hanken School of Economics",
-  "department": "Statistics, Department of Finance and Economics",
+  "department": "Finance and Economics",
   "type": "University",
+  "country": "Finland",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "harris-stowe-state-university__anheuser-busch-school-of-business__management-information-systems",
