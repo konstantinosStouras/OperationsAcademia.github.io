@@ -1945,6 +1945,11 @@
   "department": "Science and Innovation"
  },
  {
+  "institution": "Nova School of Business and Economics (Universidade Nova de Lisboa)",
+  "school": "Nova SBE offers programs in management, economics, and finance",
+  "department": "Operations Management"
+ },
+ {
   "institution": "NOVA School of Business and Economics",
   "school": "",
   "department": "Information Systems"
@@ -1963,6 +1968,11 @@
   "institution": "NTU",
   "school": "",
   "department": "OM"
+ },
+ {
+  "institution": "NYU Shanghai",
+  "school": "",
+  "department": "Technology"
  },
  {
   "institution": "NYU Stern",
@@ -2983,6 +2993,11 @@
   "institution": "University of California, Berkeley",
   "school": "",
   "department": "IEOR"
+ },
+ {
+  "institution": "University of California, Berkeley",
+  "school": "",
+  "department": "Industrial Engineering and Operations Research"
  },
  {
   "institution": "University of California, Berkeley",

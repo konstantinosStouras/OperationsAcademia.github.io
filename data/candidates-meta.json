@@ -1,18 +1,18 @@
 {
- "generated": "2026-10-15T19:38:34.041Z",
- "count": 41,
+ "generated": "2026-10-16T13:37:47.046Z",
+ "count": 42,
  "years": {
-  "2027": 41
+  "2027": 42
  },
  "positions": {
-  "PhD Candidate": 24,
+  "PhD Candidate": 25,
   "Post-Doctoral Researcher": 12,
   "Assistant Professor": 3,
   "Research Scientist": 2
  },
  "researchAreas": {
-  "Machine Learning and Data Science": 19,
-  "Operations Research / Optimization": 14,
+  "Machine Learning and Data Science": 20,
+  "Operations Research / Optimization": 15,
   "Technology, Platforms and Marketplaces": 13,
   "Empirical Operations": 12,
   "Service Operations": 10,
@@ -36,6 +36,7 @@
   "Approximation Algorithms": 1,
   "Biomedical Applications": 1,
   "Business Model Innovation": 1,
+  "Control Theory": 1,
   "Deep Learning": 1,
   "Energy Markets": 1,
   "Energy Systems": 1,
@@ -61,6 +62,7 @@
   "Public Sector Operations": 1,
   "Queueing Theory": 1,
   "Resource Allocation": 1,
+  "Robust AI Systems": 1,
   "Socially Responsible Operations": 1,
   "Statistics": 1,
   "Stochastic Dynamic Programming": 1,
@@ -71,22 +73,22 @@
  "informsDays": {
   "Sunday": 16,
   "Monday": 10,
-  "Tuesday": 4,
+  "Tuesday": 5,
   "Wednesday": 1
  },
- "withCv": 37,
- "newestPosted": "2026-10-15",
+ "withCv": 38,
+ "newestPosted": "2026-10-16",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
  "heldCount": 0,
  "researchSummary": [
   {
    "label": "Machine learning",
-   "count": 19
+   "count": 20
   },
   {
    "label": "Optimization",
-   "count": 14
+   "count": 15
   },
   {
    "label": "Healthcare operations",

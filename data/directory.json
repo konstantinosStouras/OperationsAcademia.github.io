@@ -7400,6 +7400,16 @@
   "lastPosted": "2026-09-22"
  },
  {
+  "id": "nova-school-of-business-and-economics-universidade-nova-de-l__nova-sbe-offers-programs-in-management-economics-and-finance__operations-management",
+  "institution": "Nova School of Business and Economics (Universidade Nova de Lisboa)",
+  "school": "Nova SBE offers programs in management, economics, and finance",
+  "department": "Operations Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "nova-university-lisbon__nova-school-of-business-and-economics__management-of-information-systems",
   "institution": "NOVA University Lisbon",
   "school": "NOVA School of Business and Economics",
@@ -7458,6 +7468,14 @@
   ],
   "n": 1,
   "lastPosted": "2024-10-03"
+ },
+ {
+  "id": "nyu-shanghai____technology",
+  "institution": "NYU Shanghai",
+  "department": "Technology",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "nyu-stern____technology",
