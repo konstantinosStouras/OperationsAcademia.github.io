@@ -80,6 +80,11 @@
   "department": "SCM/Logistics"
  },
  {
+  "institution": "Alba Graduate Business School",
+  "school": "",
+  "department": "Business Analytics and AI"
+ },
+ {
   "institution": "Alma College",
   "school": "",
   "department": "Business Administration"
@@ -1090,6 +1095,11 @@
   "department": "Engineering Management and Decision Sciences"
  },
  {
+  "institution": "Hanken School of Economics",
+  "school": "",
+  "department": "Business Analytics"
+ },
+ {
   "institution": "Harris-Stowe State University",
   "school": "Anheuser-Busch School of Business",
   "department": "Management Information Systems"
@@ -1433,6 +1443,11 @@
   "institution": "KIMEP University",
   "school": "Bang College of Business",
   "department": "Operations Management and Business Analytics"
+ },
+ {
+  "institution": "Koç University",
+  "school": "",
+  "department": "Industrial Engineering and Operations Research"
  },
  {
   "institution": "Koc University",
@@ -3073,6 +3088,11 @@
   "institution": "University of Florida",
   "school": "",
   "department": "ISE-Smart Manufacturing"
+ },
+ {
+  "institution": "University of Florida",
+  "school": "",
+  "department": "Sport-related data analytics"
  },
  {
   "institution": "University of Florida",

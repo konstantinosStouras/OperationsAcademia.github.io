@@ -245,6 +245,15 @@
   "lastPosted": "2025-07-03"
  },
  {
+  "id": "alba-graduate-business-school____business-analytics-and-ai",
+  "institution": "Alba Graduate Business School",
+  "department": "Business Analytics and AI",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "alfaisal-university",
   "institution": "Alfaisal University (AU)",
   "type": "University",
@@ -4023,6 +4032,15 @@
   "lastPosted": "2026-07-23"
  },
  {
+  "id": "hanken-school-of-economics____business-analytics",
+  "institution": "Hanken School of Economics",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "harris-stowe-state-university__anheuser-busch-school-of-business__management-information-systems",
   "institution": "Harris-Stowe State University",
   "school": "Anheuser-Busch School of Business",
@@ -5356,6 +5374,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-04"
+ },
+ {
+  "id": "koc-university____industrial-engineering-and-operations-research",
+  "institution": "Koç University",
+  "department": "Industrial Engineering and Operations Research",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "koc-university____om-is",
@@ -12282,6 +12309,15 @@
   ],
   "n": 1,
   "lastPosted": "2025-06-06"
+ },
+ {
+  "id": "university-of-florida____sport-related-data-analytics",
+  "institution": "University of Florida",
+  "department": "Sport-related data analytics",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "university-of-florida__warrington-college-of-business__information-systems-and-operations-management",
