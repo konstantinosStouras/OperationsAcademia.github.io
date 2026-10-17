@@ -10156,6 +10156,15 @@ async function testHigherEdJobsWiring() {
      the postings simply keep saying "Until filled.", which is what they said
      before anyone noticed. */
   const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  {
+    /* An approval re-derives the row, so the caches are applied AGAIN after
+       partition, or the re-check below goes red and nothing commits (the
+       2026-10-14 to 17 outage). */
+    const after = sync.slice(sync.indexOf('rows = split.publish;'));
+    ok(sync.includes('rows = split.publish;') &&
+       /applyVerified\(rows[\s\S]{0,200}applyAdverts\(rows/.test(after.slice(0, 2000)),
+      'the sheet sync re-applies both advertisement caches after the approvals');
+  }
   ok(sync.includes('applyVerified'),
     'the sheet sync re-applies what the advertisements said');
   ok(sync.includes('higheredjobs.json'), 'reading it from the committed cache');
