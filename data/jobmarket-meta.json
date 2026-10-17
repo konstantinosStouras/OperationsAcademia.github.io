@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-13T08:26:08.801Z",
- "count": 710,
- "newestPosted": "2026-10-12",
+ "generated": "2026-10-17T23:22:33.440Z",
+ "count": 727,
+ "newestPosted": "2026-10-16",
  "oldestPosted": "2025-01-03",
  "years": {
   "2026": 426,
-  "2027": 284
+  "2027": 301
  },
  "countries": {
-  "United States": 533,
+  "United States": 546,
   "China": 28,
   "United Kingdom": 21,
   "Canada": 16,
@@ -17,19 +17,19 @@
   "France": 9,
   "Germany": 8,
   "Spain": 8,
+  "United Arab Emirates": 7,
   "India": 6,
-  "United Arab Emirates": 6,
-  "Turkey": 5,
+  "Turkey": 6,
   "Saudi Arabia": 4,
   "Australia": 3,
   "Denmark": 3,
+  "Finland": 3,
   "Lebanon": 3,
   "Mexico": 3,
   "South Korea": 3,
   "Austria": 2,
   "Belgium": 2,
   "Cambodia": 2,
-  "Finland": 2,
   "Ireland": 2,
   "Kazakhstan": 2,
   "Macau": 2,
@@ -37,6 +37,7 @@
   "Portugal": 2,
   "Sweden": 2,
   "Chile": 1,
+  "Greece": 1,
   "Iraq": 1,
   "Italy": 1,
   "Kuwait": 1,
@@ -47,9 +48,9 @@
   "Uzbekistan": 1
  },
  "levels": {
-  "Assistant Professor": 226,
-  "Other Ranks": 118,
-  "Non-tenure track (teaching) position": 40,
+  "Assistant Professor": 242,
+  "Other Ranks": 127,
+  "Non-tenure track (teaching) position": 41,
   "Post-Doc": 10,
   "Visiting Faculty (various levels)": 10
  },
