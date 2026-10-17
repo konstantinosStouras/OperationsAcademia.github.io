@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T18:28:21.485Z",
+ "generated": "2026-10-17T18:29:50.577Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -387,6 +387,10 @@
   },
   {
    "v": "Coastal Carolina University",
+   "n": 2
+  },
+  {
+   "v": "College of Staten Island",
    "n": 2
   },
   {
@@ -963,10 +967,6 @@
   },
   {
    "v": "College of Charleston",
-   "n": 1
-  },
-  {
-   "v": "College of Staten Island",
    "n": 1
   },
   {
@@ -3044,6 +3044,10 @@
    "n": 1
   },
   {
+   "v": "Lucille and Jay Chazanoff School of Business",
+   "n": 1
+  },
+  {
    "v": "Martin School of Public Policy and Administration",
    "n": 1
   },
@@ -4567,6 +4571,10 @@
   },
   {
    "v": "Information Science and Systems",
+   "n": 1
+  },
+  {
+   "v": "Information Systems and Informatics",
    "n": 1
   },
   {
@@ -6941,13 +6949,19 @@
    }
   },
   "College of Staten Island": {
-   "schools": [],
+   "schools": [
+    "Lucille and Jay Chazanoff School of Business"
+   ],
    "units": [
-    "Healthcare/Sustainability"
+    "Healthcare/Sustainability",
+    "Information Systems and Informatics"
    ],
    "bySchool": {
     "": [
      "Healthcare/Sustainability"
+    ],
+    "Lucille and Jay Chazanoff School of Business": [
+     "Information Systems and Informatics"
     ]
    }
   },
@@ -14741,6 +14755,9 @@
    "Information Systems and Technology",
    "Marketing and Business Analytics",
    "Marketing and Decision Sciences"
+  ],
+  "Lucille and Jay Chazanoff School of Business": [
+   "Information Systems and Informatics"
   ],
   "Lutgert College of Business": [
    "Information Systems, Analytics, and Supply Chain"
