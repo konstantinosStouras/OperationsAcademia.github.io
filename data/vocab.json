@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T18:29:50.577Z",
+ "generated": "2026-10-17T18:31:16.095Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -179,6 +179,10 @@
   },
   {
    "v": "Clarkson University",
+   "n": 3
+  },
+  {
+   "v": "Columbia University",
    "n": 3
   },
   {
@@ -391,10 +395,6 @@
   },
   {
    "v": "College of Staten Island",
-   "n": 2
-  },
-  {
-   "v": "Columbia University",
    "n": 2
   },
   {
@@ -4398,6 +4398,10 @@
    "n": 1
   },
   {
+   "v": "data-driven decision-making, optimization under uncertainty",
+   "n": 1
+  },
+  {
    "v": "Decision and IIS",
    "n": 1
   },
@@ -7030,12 +7034,14 @@
     "Fu Foundation School of Engineering and Applied Science"
    ],
    "units": [
+    "data-driven decision-making, optimization under uncertainty",
     "Decision, Risk and Operations",
     "IEOR",
     "Industrial Engineering and Operations Research"
    ],
    "bySchool": {
     "": [
+     "data-driven decision-making, optimization under uncertainty",
      "IEOR"
     ],
     "Columbia Business School": [

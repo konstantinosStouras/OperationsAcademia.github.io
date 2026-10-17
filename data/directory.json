@@ -2245,9 +2245,13 @@
   "institution": "Columbia University",
   "department": "data-driven decision-making, optimization under uncertainty",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "columbia-university__columbia-business-school__decision-risk-and-operations",
