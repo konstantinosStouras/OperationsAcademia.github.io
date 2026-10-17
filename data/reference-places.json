@@ -631,7 +631,7 @@
  },
  {
   "institution": "College of Staten Island",
-  "school": "",
+  "school": "Lucille and Jay Chazanoff School of Business",
   "department": "Information Systems and Informatics"
  },
  {
@@ -703,11 +703,6 @@
   "institution": "Cornell University",
   "school": "",
   "department": "Center for Data Science for Enterprise and Society"
- },
- {
-  "institution": "Cornell University",
-  "school": "",
-  "department": "Operations, Technology, and Information Management Area"
  },
  {
   "institution": "Cornell University",
@@ -841,8 +836,8 @@
  },
  {
   "institution": "East Texas A&M University",
-  "school": "",
-  "department": "Management Science focused on Supply Chain/Operations"
+  "school": "College of Business",
+  "department": "Management, Marketing, and Management Science"
  },
  {
   "institution": "Eastern Illinois University",
@@ -2287,11 +2282,6 @@
  {
   "institution": "Santa Clara University",
   "school": "",
-  "department": "Business Analytics, Statistics, Operations and Supply Chain Analytics, and AI Analytics"
- },
- {
-  "institution": "Santa Clara University",
-  "school": "",
   "department": "IS and Analytics"
  },
  {
@@ -2748,11 +2738,6 @@
   "institution": "The University of Memphis",
   "school": "",
   "department": "Marketing and Supply Chain Management"
- },
- {
-  "institution": "The University of Texas at Dallas",
-  "school": "",
-  "department": "Information Systems"
  },
  {
   "institution": "Tilburg University",
@@ -3706,11 +3691,6 @@
  },
  {
   "institution": "University of Tampa",
-  "school": "",
-  "department": "Business Analytics"
- },
- {
-  "institution": "University of Tampa",
   "school": "Sykes College of Business",
   "department": "Information and Technology Management"
  },
@@ -3788,6 +3768,11 @@
   "institution": "University of Texas at Dallas",
   "school": "",
   "department": "OM/IS (Healthcare Management)"
+ },
+ {
+  "institution": "University of Texas at Dallas",
+  "school": "Naveen Jindal School of Management",
+  "department": "Information Systems"
  },
  {
   "institution": "University of Texas at El Paso",
@@ -3976,7 +3961,7 @@
  },
  {
   "institution": "Valparaiso University",
-  "school": "",
+  "school": "College of Business",
   "department": "Business Analytics"
  },
  {

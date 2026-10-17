@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-16T21:15:25.328Z",
+ "generated": "2026-10-17T18:28:21.485Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -531,10 +531,6 @@
   },
   {
    "v": "Nanyang Technological University",
-   "n": 2
-  },
-  {
-   "v": "North Carolina State University",
    "n": 2
   },
   {
@@ -1339,6 +1335,10 @@
   },
   {
    "v": "North Carolina Agricultural and Technical State University",
+   "n": 1
+  },
+  {
+   "v": "North Carolina State University",
    "n": 1
   },
   {
@@ -3794,11 +3794,11 @@
    "n": 9
   },
   {
-   "v": "Operations and Supply Chain Management",
-   "n": 9
+   "v": "Management Information Systems",
+   "n": 8
   },
   {
-   "v": "Management Information Systems",
+   "v": "Operations and Supply Chain Management",
    "n": 8
   },
   {
@@ -9417,13 +9417,9 @@
    ],
    "units": [
     "Edward P. Fitts Department of Industrial and Systems Engineering",
-    "Information Technology, Analytics and Operations",
-    "Operations and Supply Chain Management"
+    "Information Technology, Analytics and Operations"
    ],
    "bySchool": {
-    "": [
-     "Operations and Supply Chain Management"
-    ],
     "College of Engineering": [
      "Edward P. Fitts Department of Industrial and Systems Engineering"
     ],

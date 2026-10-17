@@ -2148,10 +2148,11 @@
   "lastPosted": "2026-02-21"
  },
  {
-  "id": "college-of-staten-island____information-systems-and-informatics",
+  "id": "college-of-staten-island__lucille-and-jay-chazanoff-school-of-business__information-systems-and-informatics",
   "institution": "College of Staten Island",
+  "school": "Lucille and Jay Chazanoff School of Business",
   "department": "Information Systems and Informatics",
-  "type": "University",
+  "type": "Business School",
   "sources": [
    "seed"
   ]
@@ -2403,8 +2404,7 @@
   "type": "University",
   "country": "United States",
   "sources": [
-   "postings",
-   "seed"
+   "postings"
   ],
   "n": 1,
   "lastPosted": "2026-01-31"
@@ -2930,10 +2930,11 @@
   "lastPosted": "2025-05-29"
  },
  {
-  "id": "east-texas-a-m-university____management-science-focused-on-supply-chain-operations",
+  "id": "east-texas-a-m-university__college-of-business__management-marketing-and-management-science",
   "institution": "East Texas A&M University",
-  "department": "Management Science focused on Supply Chain/Operations",
-  "type": "University",
+  "school": "College of Business",
+  "department": "Management, Marketing, and Management Science",
+  "type": "Business School",
   "sources": [
    "seed"
   ]
@@ -7119,13 +7120,9 @@
   "institution": "North Carolina State University",
   "department": "Operations and Supply Chain Management",
   "type": "University",
-  "country": "United States",
   "sources": [
-   "postings",
    "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-02-18"
+  ]
  },
  {
   "id": "north-carolina-state-university__college-of-engineering__edward-p-fitts-department-of-industrial-and-systems-engineer",
@@ -8584,15 +8581,6 @@
   ],
   "lat": 37.3379434,
   "lng": -121.9378605
- },
- {
-  "id": "santa-clara-university____business-analytics-statistics-operations-and-supply-chain-an",
-  "institution": "Santa Clara University",
-  "department": "Business Analytics, Statistics, Operations and Supply Chain Analytics, and AI Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
  },
  {
   "id": "santa-clara-university____is-and-analytics",
@@ -10594,15 +10582,6 @@
   "lastPosted": "2026-09-27",
   "lat": 30.2851035,
   "lng": -97.7375539
- },
- {
-  "id": "university-of-texas-at-dallas____information-systems",
-  "institution": "The University of Texas at Dallas",
-  "department": "Information Systems",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
  },
  {
   "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__healthcare-management",
@@ -14680,15 +14659,6 @@
   "lastPosted": "2026-05-29"
  },
  {
-  "id": "university-of-tampa____business-analytics",
-  "institution": "University of Tampa",
-  "department": "Business Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "university-of-tampa__sykes-college-of-business__information-and-technology-management",
   "institution": "University of Tampa",
   "school": "Sykes College of Business",
@@ -14911,6 +14881,16 @@
   ],
   "n": 1,
   "lastPosted": "2025-10-10"
+ },
+ {
+  "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__information-systems",
+  "institution": "University of Texas at Dallas",
+  "school": "Naveen Jindal School of Management",
+  "department": "Information Systems",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__information-systems-and-operations-management",
@@ -15729,8 +15709,9 @@
   "lastPosted": "2026-03-10"
  },
  {
-  "id": "valparaiso-university____business-analytics",
+  "id": "valparaiso-university__college-of-business__business-analytics",
   "institution": "Valparaiso University",
+  "school": "College of Business",
   "department": "Business Analytics",
   "type": "Business School",
   "sources": [
