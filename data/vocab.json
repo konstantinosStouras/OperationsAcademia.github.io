@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T18:31:16.095Z",
+ "generated": "2026-10-17T18:33:56.296Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -11,7 +11,7 @@
   },
   {
    "v": "Cornell University",
-   "n": 8
+   "n": 9
   },
   {
    "v": "National University of Singapore",
@@ -2548,6 +2548,10 @@
    "n": 2
   },
   {
+   "v": "Cornell SC Johnson College of Business",
+   "n": 2
+  },
+  {
    "v": "Crummer Graduate School of Business",
    "n": 2
   },
@@ -2813,10 +2817,6 @@
   },
   {
    "v": "Cornell Peter and Stephanie Nolan School of Hotel Administration",
-   "n": 1
-  },
-  {
-   "v": "Cornell SC Johnson College of Business",
    "n": 1
   },
   {
@@ -3922,6 +3922,10 @@
    "n": 3
   },
   {
+   "v": "Operations, Technology, and Information Management Area",
+   "n": 3
+  },
+  {
    "v": "SCM and Logistics",
    "n": 3
   },
@@ -4075,10 +4079,6 @@
   },
   {
    "v": "Operations, Information and Technology",
-   "n": 2
-  },
-  {
-   "v": "Operations, Technology, and Information Management Area",
    "n": 2
   },
   {
