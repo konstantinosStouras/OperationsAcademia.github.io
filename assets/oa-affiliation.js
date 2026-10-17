@@ -272,11 +272,13 @@
      reads this beside UNIVERSITY_OF; a card it flags goes in one or the
      other. */
   var STANDALONE = [
+    'Alba Graduate Business School',
     'China Europe International Business School',
     'Colorado School of Mines',
     'Copenhagen Business School',
     'EMLV (Ecole de Commerce et de Management)',
     'Frankfurt School of Finance and Management',
+    'Hanken School of Economics',
     'Indian School of Business (ISB)',
     'Kedge Business School',
     'London Business School (LBS)',
