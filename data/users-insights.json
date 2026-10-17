@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-17T18:53:41.196Z",
- "members": 366,
+ "generated": "2026-10-17T23:04:00.294Z",
+ "members": 367,
  "k": 3,
  "affiliation": {
-  "listed": 284,
+  "listed": 285,
   "other": 45,
   "none": 37
  },
@@ -181,6 +181,11 @@
     "members": 3
    },
    {
+    "name": "University of Miami",
+    "country": "United States",
+    "members": 3
+   },
+   {
     "name": "University of Michigan",
     "country": "United States",
     "members": 3
@@ -196,14 +201,14 @@
     "members": 3
    }
   ],
-  "rest": 132
+  "rest": 130
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 181
+    "members": 182
    },
    {
     "name": "Canada",
