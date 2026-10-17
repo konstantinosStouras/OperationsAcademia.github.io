@@ -793,6 +793,20 @@ async function main() {
         });
         rows = split.publish;
 
+        /* …AND THE CACHES AGAIN, AFTER THE APPROVALS. `partition` publishes an
+           approved row through `approvedRow`, which re-derives it from the
+           fresh workbook row and lays the maintainer's edits on top, so a row
+           can come out of it open-ended again (an edited advert link, a
+           changed workbook date) with a deadline its own advertisement states.
+           The re-check holds data/jobmarket.json to "already carries what the
+           advertisements said", and from 2026-10-14 to 2026-10-17 every read
+           went red on exactly that and committed nothing. Both applies only
+           fill an open-ended row and never overwrite a date, so a second pass
+           is idempotent and changes nothing the first one did not. */
+        const today = isoStamp(now).slice(0, 10);
+        rows = applyVerified(rows, await readVerifiedCache(), { today }).rows;
+        rows = applyAdverts(rows, await readAdvertsCache(), { today }).rows;
+
         /* THE SAME JOB, ALREADY POSTED. A school that advertises on the site's
            own form is routinely also entered in the tracking workbook by its
            contributors, and the crawled copy then arrives here as a fresh
