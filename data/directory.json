@@ -14681,8 +14681,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-30"
+  "n": 2,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "university-of-tennessee____ba",
@@ -14900,9 +14900,13 @@
   "school": "Naveen Jindal School of Management",
   "department": "Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__information-systems-and-operations-management",
@@ -15726,9 +15730,13 @@
   "school": "College of Business",
   "department": "Business Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "vanderbilt-university__owen-graduate-school-of-management__operations-management-and-quantitative-methods",

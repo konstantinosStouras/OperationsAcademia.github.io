@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T18:36:13.464Z",
+ "generated": "2026-10-17T18:37:01.000Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -143,6 +143,10 @@
   },
   {
    "v": "University of Texas at Arlington",
+   "n": 4
+  },
+  {
+   "v": "University of Texas at Dallas",
    "n": 4
   },
   {
@@ -303,10 +307,6 @@
   },
   {
    "v": "University of South Florida",
-   "n": 3
-  },
-  {
-   "v": "University of Texas at Dallas",
    "n": 3
   },
   {
@@ -719,6 +719,10 @@
   },
   {
    "v": "University of Southern California",
+   "n": 2
+  },
+  {
+   "v": "University of Tampa",
    "n": 2
   },
   {
@@ -1790,10 +1794,6 @@
    "n": 1
   },
   {
-   "v": "University of Tampa",
-   "n": 1
-  },
-  {
    "v": "University of Tennessee",
    "n": 1
   },
@@ -1843,6 +1843,10 @@
   },
   {
    "v": "Valley City State University",
+   "n": 1
+  },
+  {
+   "v": "Valparaiso University",
    "n": 1
   },
   {
@@ -2441,7 +2445,7 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 19
+   "n": 20
   },
   {
    "v": "School of Business",
@@ -2656,6 +2660,10 @@
    "n": 2
   },
   {
+   "v": "Naveen Jindal School of Management",
+   "n": 2
+  },
+  {
    "v": "NUS Business School",
    "n": 2
   },
@@ -2689,6 +2697,10 @@
   },
   {
    "v": "Stephen M. Ross School of Business",
+   "n": 2
+  },
+  {
+   "v": "Sykes College of Business",
    "n": 2
   },
   {
@@ -3100,10 +3112,6 @@
    "n": 1
   },
   {
-   "v": "Naveen Jindal School of Management",
-   "n": 1
-  },
-  {
    "v": "Neeley School of Business",
    "n": 1
   },
@@ -3229,10 +3237,6 @@
   },
   {
    "v": "Suliman S. Olayan School of Business",
-   "n": 1
-  },
-  {
-   "v": "Sykes College of Business",
    "n": 1
   },
   {
@@ -3778,12 +3782,12 @@
    "n": 14
   },
   {
-   "v": "OM/SCM",
+   "v": "Business Analytics",
    "n": 13
   },
   {
-   "v": "Business Analytics",
-   "n": 12
+   "v": "OM/SCM",
+   "n": 13
   },
   {
    "v": "Business Administration",
@@ -3818,15 +3822,15 @@
    "n": 6
   },
   {
+   "v": "Information Systems",
+   "n": 6
+  },
+  {
    "v": "OM/IS",
    "n": 6
   },
   {
    "v": "AI",
-   "n": 5
-  },
-  {
-   "v": "Information Systems",
    "n": 5
   },
   {
@@ -4007,6 +4011,10 @@
   },
   {
    "v": "Information and Decision Sciences",
+   "n": 2
+  },
+  {
+   "v": "Information and Technology Management",
    "n": 2
   },
   {
@@ -4567,10 +4575,6 @@
   },
   {
    "v": "Information and Operations Management",
-   "n": 1
-  },
-  {
-   "v": "Information and Technology Management",
    "n": 1
   },
   {
@@ -13254,6 +13258,7 @@
    ],
    "units": [
     "Healthcare Management",
+    "Information Systems",
     "OM",
     "OM/IS (Healthcare Management)",
     "Operations Management Area"
@@ -13265,6 +13270,7 @@
     ],
     "Naveen Jindal School of Management": [
      "Healthcare Management",
+     "Information Systems",
      "Operations Management Area"
     ]
    }
@@ -13670,6 +13676,19 @@
    "bySchool": {
     "": [
      "data analytics and AI"
+    ]
+   }
+  },
+  "Valparaiso University": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Business Analytics"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Business Analytics"
     ]
    }
   },
@@ -14292,6 +14311,7 @@
    "Statistics and Operations Research"
   ],
   "College of Business": [
+   "Business Analytics",
    "Business Analytics and Quantitative Methods",
    "Decision Analytics and Operations",
    "Decision and Technology Analytics",
@@ -14891,6 +14911,7 @@
   ],
   "Naveen Jindal School of Management": [
    "Healthcare Management",
+   "Information Systems",
    "Operations Management Area"
   ],
   "Neeley School of Business": [

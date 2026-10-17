@@ -349,6 +349,107 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-tampa-20261016",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-16",
+  "institution": "University of Tampa",
+  "department": "Sykes College of Business, Information and Technology Management",
+  "school": "Sykes College of Business",
+  "unit": "Information and Technology Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "review immediately until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179587962&Title=Assistant%20Professor%20Of%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.ut.edu/academics/sykes-college-of-business/information-and-technology-management-itm-degrees",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-17T18:36:27Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-the-university-of-texas-at-dallas-20261016",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-16",
+  "institution": "University of Texas at Dallas",
+  "department": "Naveen Jindal School of Management, Information Systems",
+  "school": "Naveen Jindal School of Management",
+  "unit": "Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "April 30, 2027",
+  "applyByDate": "2027-04-30",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179588175&Title=Open%20Rank%20Faculty%20Position%20in%20Information%20Systems",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.utdallas.edu/postings/32958",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://jindal.utdallas.edu/faculty/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-17T18:36:21Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-valparaiso-university-20261016",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-16",
+  "institution": "Valparaiso University",
+  "department": "College of Business, Business Analytics",
+  "school": "College of Business",
+  "unit": "Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "rolling until filled",
+  "applyByDate": "",
+  "reviewDate": "2026-12-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179588077&Title=Assistant%20Professor%20of%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/195666",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.valpo.edu/college-of-business/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-17T18:36:35Z",
+  "owner": ""
+ },
+ {
   "id": "2027-southern-illinois-university-20261015",
   "year": 2027,
   "years": [
