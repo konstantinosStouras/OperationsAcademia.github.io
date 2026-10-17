@@ -2148,6 +2148,15 @@
   "lastPosted": "2026-02-21"
  },
  {
+  "id": "college-of-staten-island____information-systems-and-informatics",
+  "institution": "College of Staten Island",
+  "department": "Information Systems and Informatics",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "college-of-william-and-mary__raymond-a-mason-school-of-business__operations-management-and-information-technology",
   "institution": "College of William and Mary",
   "school": "Raymond A. Mason School of Business",
@@ -2221,6 +2230,15 @@
  {
   "id": "columbia-university",
   "institution": "Columbia University",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
+  "id": "columbia-university____data-driven-decision-making-optimization-under-uncertainty",
+  "institution": "Columbia University",
+  "department": "data-driven decision-making, optimization under uncertainty",
   "type": "University",
   "sources": [
    "seed"
@@ -2385,7 +2403,8 @@
   "type": "University",
   "country": "United States",
   "sources": [
-   "postings"
+   "postings",
+   "seed"
   ],
   "n": 1,
   "lastPosted": "2026-01-31"
@@ -10577,6 +10596,15 @@
   "lng": -97.7375539
  },
  {
+  "id": "university-of-texas-at-dallas____information-systems",
+  "institution": "The University of Texas at Dallas",
+  "department": "Information Systems",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__healthcare-management",
   "institution": "The University of Texas at Dallas",
   "school": "Naveen Jindal School of Management",
@@ -14652,6 +14680,15 @@
   "lastPosted": "2026-05-29"
  },
  {
+  "id": "university-of-tampa____business-analytics",
+  "institution": "University of Tampa",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "university-of-tampa__sykes-college-of-business__information-and-technology-management",
   "institution": "University of Tampa",
   "school": "Sykes College of Business",
@@ -15690,6 +15727,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-03-10"
+ },
+ {
+  "id": "valparaiso-university____business-analytics",
+  "institution": "Valparaiso University",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "vanderbilt-university__owen-graduate-school-of-management__operations-management-and-quantitative-methods",

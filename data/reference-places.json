@@ -630,6 +630,11 @@
   "department": "Healthcare/Sustainability"
  },
  {
+  "institution": "College of Staten Island",
+  "school": "",
+  "department": "Information Systems and Informatics"
+ },
+ {
   "institution": "Colorado School of Mines",
   "school": "",
   "department": "BA/OR"
@@ -653,6 +658,11 @@
   "institution": "Columbia University",
   "school": "",
   "department": ""
+ },
+ {
+  "institution": "Columbia University",
+  "school": "",
+  "department": "data-driven decision-making, optimization under uncertainty"
  },
  {
   "institution": "Columbia University",
@@ -693,6 +703,11 @@
   "institution": "Cornell University",
   "school": "",
   "department": "Center for Data Science for Enterprise and Society"
+ },
+ {
+  "institution": "Cornell University",
+  "school": "",
+  "department": "Operations, Technology, and Information Management Area"
  },
  {
   "institution": "Cornell University",
@@ -2735,6 +2750,11 @@
   "department": "Marketing and Supply Chain Management"
  },
  {
+  "institution": "The University of Texas at Dallas",
+  "school": "",
+  "department": "Information Systems"
+ },
+ {
   "institution": "Tilburg University",
   "school": "",
   "department": ""
@@ -3686,6 +3706,11 @@
  },
  {
   "institution": "University of Tampa",
+  "school": "",
+  "department": "Business Analytics"
+ },
+ {
+  "institution": "University of Tampa",
   "school": "Sykes College of Business",
   "department": "Information and Technology Management"
  },
@@ -3948,6 +3973,11 @@
   "institution": "Valley City State University",
   "school": "",
   "department": "data analytics and AI"
+ },
+ {
+  "institution": "Valparaiso University",
+  "school": "",
+  "department": "Business Analytics"
  },
  {
   "institution": "Vienna University of Economics and Business",
