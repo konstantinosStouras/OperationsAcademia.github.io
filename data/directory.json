@@ -2943,9 +2943,13 @@
   "school": "College of Business",
   "department": "Management, Marketing, and Management Science",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "eastern-illinois-university____om",
@@ -8620,8 +8624,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-07-18",
+  "n": 2,
+  "lastPosted": "2026-10-16",
   "lat": 37.3499438,
   "lng": -121.9406449
  },

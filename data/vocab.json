@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T18:33:56.296Z",
+ "generated": "2026-10-17T18:36:13.464Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -259,6 +259,10 @@
   },
   {
    "v": "San José State University",
+   "n": 3
+  },
+  {
+   "v": "Santa Clara University",
    "n": 3
   },
   {
@@ -551,10 +555,6 @@
   },
   {
    "v": "Oregon State University",
-   "n": 2
-  },
-  {
-   "v": "Santa Clara University",
    "n": 2
   },
   {
@@ -1027,6 +1027,10 @@
   },
   {
    "v": "East Tennessee State University",
+   "n": 1
+  },
+  {
+   "v": "East Texas A&M University",
    "n": 1
   },
   {
@@ -2437,7 +2441,7 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 18
+   "n": 19
   },
   {
    "v": "School of Business",
@@ -2617,6 +2621,10 @@
   },
   {
    "v": "Kelley School of Business",
+   "n": 2
+  },
+  {
+   "v": "Leavey School of Business",
    "n": 2
   },
   {
@@ -3009,10 +3017,6 @@
   },
   {
    "v": "Kenan-Flagler Business School",
-   "n": 1
-  },
-  {
-   "v": "Leavey School of Business",
    "n": 1
   },
   {
@@ -3826,6 +3830,10 @@
    "n": 5
   },
   {
+   "v": "Information Systems and Analytics",
+   "n": 5
+  },
+  {
    "v": "Logistics and Maritime Studies",
    "n": 5
   },
@@ -3835,10 +3843,6 @@
   },
   {
    "v": "Business Analytics and Information Systems",
-   "n": 4
-  },
-  {
-   "v": "Information Systems and Analytics",
    "n": 4
   },
   {
@@ -4819,6 +4823,10 @@
   },
   {
    "v": "Management, Marketing, and Logistics",
+   "n": 1
+  },
+  {
+   "v": "Management, Marketing, and Management Science",
    "n": 1
   },
   {
@@ -7391,6 +7399,19 @@
    "bySchool": {
     "": [
      "Supply Chain Management"
+    ]
+   }
+  },
+  "East Texas A&M University": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Management, Marketing, and Management Science"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Management, Marketing, and Management Science"
     ]
    }
   },
@@ -14281,6 +14302,7 @@
    "Information Systems",
    "Management",
    "Management Science",
+   "Management, Marketing, and Management Science",
    "Managerial Sciences Department, Marketing",
    "Marketing",
    "Marketing and Management, Supply Chain and Operations Management",

@@ -178,6 +178,40 @@
   "owner": ""
  },
  {
+  "id": "2027-east-texas-a-m-university-20261016",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-16",
+  "institution": "East Texas A&M University",
+  "department": "College of Business, Management, Marketing, and Management Science",
+  "school": "College of Business",
+  "unit": "Management, Marketing, and Management Science",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://tamus.wd1.myworkdayjobs.com/en-US/ETAMU_External/details/Open-Rank-Professor---Management-Science_R-097477-1",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.etamu.edu/college-of-business/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-17T18:35:08Z",
+  "owner": ""
+ },
+ {
   "id": "2027-hanken-school-of-economics-20261016",
   "year": 2027,
   "years": [
@@ -244,6 +278,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-16T21:11:22Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-santa-clara-university-20261016",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-16",
+  "institution": "Santa Clara University",
+  "department": "Leavey School of Business, Information Systems and Analytics",
+  "school": "Leavey School of Business",
+  "unit": "Information Systems and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-05",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://wd1.myworkdaysite.com/en-US/recruiting/scu/scu/details/Tenure-Track-Assistant-Professor-in-Operations-and-Business-Analytics_R8268?q=Operations+and+Business+Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.scu.edu/business/isa/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-17T18:35:52Z",
   "owner": ""
  },
  {
