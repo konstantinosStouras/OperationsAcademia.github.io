@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-16T23:43:13.085Z",
- "members": 363,
+ "generated": "2026-10-17T01:38:09.000Z",
+ "members": 365,
  "k": 3,
  "affiliation": {
-  "listed": 280,
+  "listed": 282,
   "other": 45,
   "none": 38
  },
  "universities": {
-  "count": 136,
+  "count": 137,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -18,7 +18,7 @@
    {
     "name": "Cornell University",
     "country": "United States",
-    "members": 9
+    "members": 10
    },
    {
     "name": "Harvard University",
@@ -196,14 +196,14 @@
     "members": 3
    }
   ],
-  "rest": 129
+  "rest": 130
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 180
+    "members": 181
    },
    {
     "name": "Canada",
@@ -231,7 +231,7 @@
    },
    {
     "name": "China",
-    "members": 4
+    "members": 5
    },
    {
     "name": "Spain",
