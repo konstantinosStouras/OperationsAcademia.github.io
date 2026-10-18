@@ -1050,6 +1050,15 @@
   "lastPosted": "2014-10-21"
  },
  {
+  "id": "boston-university____future-of-healthy-aging",
+  "institution": "Boston University",
+  "department": "Future of Healthy Aging",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "boston-university__college-of-engineering__systems-engineering",
   "institution": "Boston University",
   "school": "College of Engineering",
@@ -1592,6 +1601,15 @@
   ],
   "n": 1,
   "lastPosted": "2025-05-26"
+ },
+ {
+  "id": "carnegie-mellon-university____is",
+  "institution": "Carnegie Mellon University",
+  "department": "IS",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "carnegie-mellon-university__heinz-college-of-information-systems-and-public-policy",
@@ -5411,6 +5429,15 @@
   "lastPosted": "2026-02-09"
  },
  {
+  "id": "kimep-university____operations-management-business-analytics",
+  "institution": "KIMEP University",
+  "department": "Operations Management/Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "kimep-university__bang-college-of-business__operations-management-and-business-analytics",
   "institution": "KIMEP University",
   "school": "Bang College of Business",
@@ -7785,6 +7812,15 @@
   ]
  },
  {
+  "id": "pennsylvania-state-university____artificial-intelligence",
+  "institution": "Pennsylvania State University",
+  "department": "Artificial Intelligence",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "pennsylvania-state-university____scm-sourcing-focus",
   "institution": "Pennsylvania State University",
   "department": "SCM (sourcing focus)",
@@ -8426,6 +8462,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-04"
+ },
+ {
+  "id": "sacred-heart-university____management-innovation-technology-management-ai",
+  "institution": "Sacred Heart University",
+  "department": "Management (Innovation, technology management, AI)",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "saint-louis-university____om-and-it",
@@ -9925,9 +9970,9 @@
   "lng": -97.3564038
  },
  {
-  "id": "texas-southern-university____mis",
+  "id": "texas-southern-university____management-information-systems",
   "institution": "Texas Southern University",
-  "department": "MIS",
+  "department": "Management Information Systems",
   "type": "University",
   "country": "United States",
   "sources": [
@@ -10701,6 +10746,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-01"
+ },
+ {
+  "id": "trinity-university____business-analytics",
+  "institution": "Trinity University",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "trinity-university__neidorff-school-of-business__finance-and-business-analytics",
@@ -14669,6 +14723,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-05-29"
+ },
+ {
+  "id": "university-of-tampa____business-analytics",
+  "institution": "University of Tampa",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "university-of-tampa__sykes-college-of-business__information-and-technology-management",

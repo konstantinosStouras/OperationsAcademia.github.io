@@ -356,6 +356,11 @@
  },
  {
   "institution": "Boston University",
+  "school": "",
+  "department": "Future of Healthy Aging"
+ },
+ {
+  "institution": "Boston University",
   "school": "College of Engineering",
   "department": "Systems Engineering"
  },
@@ -508,6 +513,11 @@
   "institution": "Carnegie Mellon University",
   "school": "",
   "department": "Contextualized Evaluation of AI for Healthcare"
+ },
+ {
+  "institution": "Carnegie Mellon University",
+  "school": "",
+  "department": "IS"
  },
  {
   "institution": "Carnegie Mellon University",
@@ -1456,6 +1466,11 @@
  },
  {
   "institution": "KIMEP University",
+  "school": "",
+  "department": "Operations Management/Business Analytics"
+ },
+ {
+  "institution": "KIMEP University",
   "school": "Bang College of Business",
   "department": "Operations Management and Business Analytics"
  },
@@ -2077,6 +2092,11 @@
  {
   "institution": "Pennsylvania State University",
   "school": "",
+  "department": "Artificial Intelligence"
+ },
+ {
+  "institution": "Pennsylvania State University",
+  "school": "",
   "department": "SCM (sourcing focus)"
  },
  {
@@ -2233,6 +2253,11 @@
   "institution": "Sabanci University",
   "school": "Sabanci Business School",
   "department": "Business Analytics and Information Systems"
+ },
+ {
+  "institution": "Sacred Heart University",
+  "school": "",
+  "department": "Management (Innovation, technology management, AI)"
  },
  {
   "institution": "Saint Louis University",
@@ -2622,6 +2647,11 @@
  {
   "institution": "Texas Southern University",
   "school": "",
+  "department": "Management Information Systems"
+ },
+ {
+  "institution": "Texas Southern University",
+  "school": "",
   "department": "MIS"
  },
  {
@@ -2753,6 +2783,11 @@
   "institution": "Tongji University",
   "school": "School of Economics and Management",
   "department": "Operations Management"
+ },
+ {
+  "institution": "Trinity University",
+  "school": "",
+  "department": "Business Analytics"
  },
  {
   "institution": "Trinity University",
@@ -3688,6 +3723,11 @@
   "institution": "University of Stirling",
   "school": "",
   "department": "Project Management"
+ },
+ {
+  "institution": "University of Tampa",
+  "school": "",
+  "department": "Business Analytics"
  },
  {
   "institution": "University of Tampa",
