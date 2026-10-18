@@ -1,11 +1,11 @@
 {
- "generated": "2026-10-17T23:04:00.294Z",
- "members": 367,
+ "generated": "2026-10-18T00:56:36.323Z",
+ "members": 368,
  "k": 3,
  "affiliation": {
-  "listed": 285,
-  "other": 45,
-  "none": 37
+  "listed": 286,
+  "other": 46,
+  "none": 36
  },
  "universities": {
   "count": 139,
@@ -38,7 +38,7 @@
    {
     "name": "Georgia Institute of Technology",
     "country": "United States",
-    "members": 5
+    "members": 6
    },
    {
     "name": "Northwestern University",
@@ -208,7 +208,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 182
+    "members": 183
    },
    {
     "name": "Canada",
