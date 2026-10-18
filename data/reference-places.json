@@ -5,6 +5,11 @@
   "department": "Operations Management/Business Analytics"
  },
  {
+  "institution": "(duplicate with #295) University of Tampa",
+  "school": "",
+  "department": "Business Analytics"
+ },
+ {
   "institution": "A’Sharqiyah University",
   "school": "",
   "department": "IS and DA"
@@ -1832,6 +1837,11 @@
  {
   "institution": "Naval Postgraduate School",
   "school": "",
+  "department": "Data Analytics"
+ },
+ {
+  "institution": "Naval Postgraduate School",
+  "school": "",
   "department": "Operations Research"
  },
  {
@@ -2113,6 +2123,11 @@
   "institution": "Pennsylvania State University",
   "school": "Smeal College of Business",
   "department": "Supply Chain and Information Systems"
+ },
+ {
+  "institution": "Pontificia Universidad Católica de Chile",
+  "school": "",
+  "department": "Operations research"
  },
  {
   "institution": "Prairie View A&M University",
@@ -2673,6 +2688,11 @@
   "institution": "Texas State University",
   "school": "",
   "department": "Analytics"
+ },
+ {
+  "institution": "Texas State University",
+  "school": "",
+  "department": "Engineering Management"
  },
  {
   "institution": "Texas State University",

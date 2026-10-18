@@ -2956,6 +2956,15 @@
   ]
  },
  {
+  "id": "duplicate-with-295-university-of-tampa____business-analytics",
+  "institution": "(duplicate with #295) University of Tampa",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "durham-university__business-school__management-and-marketing",
   "institution": "Durham University",
   "school": "Business School",
@@ -6862,6 +6871,15 @@
   "lng": 103.7777822
  },
  {
+  "id": "naval-postgraduate-school____data-analytics",
+  "institution": "Naval Postgraduate School",
+  "department": "Data Analytics",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "naval-postgraduate-school____operations-research",
   "institution": "Naval Postgraduate School",
   "department": "Operations Research",
@@ -7887,6 +7905,14 @@
   "lastPosted": "2014-10-01",
   "lat": 41.3789691,
   "lng": 2.1797937
+ },
+ {
+  "id": "pontificia-universidad-catolica-de-chile____operations-research",
+  "institution": "Pontificia Universidad Católica de Chile",
+  "department": "Operations research",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "pontificia-universidad-catolica-de-chile__school-of-management__management-science",
@@ -10046,6 +10072,15 @@
   ],
   "n": 1,
   "lastPosted": "2025-10-08"
+ },
+ {
+  "id": "texas-state-university____engineering-management",
+  "institution": "Texas State University",
+  "department": "Engineering Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "texas-state-university____is",
