@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-16T12:31:36Z",
+ "generated": "2026-10-18T12:06:14Z",
  "ads": {
   "179138675": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179138675",
@@ -2991,7 +2991,7 @@
    "category": "Business Analytics",
    "salary": "Commensurate",
    "jobNumber": "",
-   "checkedAt": "2026-10-11T14:09:48Z"
+   "checkedAt": "2026-10-18T12:06:14Z"
   },
   "179529368": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179529368",
@@ -4032,6 +4032,102 @@
    "salary": "",
    "jobNumber": "",
    "checkedAt": "2026-10-13T15:08:14Z"
+  },
+  "179585772": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179585772",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor in Information Systems and Business Analytics",
+   "institution": "American University of Sharjah",
+   "location": "Sharjah, United Arab Emirates",
+   "type": "Full-Time",
+   "posted": "2026-10-13",
+   "applyByDate": "2026-12-31",
+   "applyByProse": "12/31/2026",
+   "category": "Business Analytics",
+   "salary": "The salary is competitive, commensurate with experience and tax-free",
+   "jobNumber": "",
+   "checkedAt": "2026-10-18T12:06:14Z"
+  },
+  "179587962": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179587962",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor Of Business Analytics",
+   "institution": "University of Tampa",
+   "location": "Tampa, FL",
+   "type": "Full-Time",
+   "posted": "2026-10-14",
+   "applyByDate": "",
+   "applyByProse": "",
+   "category": "Business Analytics",
+   "salary": "",
+   "jobNumber": "",
+   "checkedAt": "2026-10-18T12:06:14Z"
+  },
+  "179588077": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179588077",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor of Business Analytics",
+   "institution": "Valparaiso University",
+   "location": "Valparaiso, IN",
+   "type": "Full-Time",
+   "posted": "2026-10-14",
+   "applyByDate": "",
+   "applyByProse": "Open Until Filled",
+   "category": "Business Analytics",
+   "salary": "",
+   "jobNumber": "",
+   "checkedAt": "2026-10-18T12:06:14Z"
+  },
+  "179588175": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179588175",
+   "status": "ok",
+   "via": "page",
+   "title": "Open Rank Faculty Position in Information Systems",
+   "institution": "The University of Texas at Dallas",
+   "location": "Dallas, TX",
+   "type": "Full-Time",
+   "posted": "2026-10-14",
+   "applyByDate": "2027-04-30",
+   "applyByProse": "04/30/2027",
+   "category": "Information Systems and Technology",
+   "salary": "",
+   "jobNumber": "",
+   "checkedAt": "2026-10-18T12:06:14Z"
+  },
+  "179589039": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179589039",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor - Business Analytics",
+   "institution": "Southern Illinois University Carbondale",
+   "location": "Carbondale, IL",
+   "type": "Full-Time",
+   "posted": "2026-10-15",
+   "applyByDate": "2026-12-01",
+   "applyByProse": "12/01/2026",
+   "category": "Business Analytics",
+   "salary": "$12,000.00 Monthly",
+   "jobNumber": "2600402",
+   "checkedAt": "2026-10-18T12:06:14Z"
+  },
+  "179590605": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179590605",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant, Associate or Full Professor – Information Systems & Informatics",
+   "institution": "College of Staten Island",
+   "location": "Staten Island, NY",
+   "type": "Full-Time",
+   "posted": "2026-10-16",
+   "applyByDate": "",
+   "applyByProse": "",
+   "category": "Information Systems and Technology",
+   "salary": "",
+   "jobNumber": "",
+   "checkedAt": "2026-10-18T12:06:14Z"
   }
  }
 }
