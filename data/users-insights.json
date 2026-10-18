@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-18T19:29:20.343Z",
- "members": 370,
+ "generated": "2026-10-18T21:49:06.767Z",
+ "members": 371,
  "k": 3,
  "affiliation": {
-  "listed": 289,
+  "listed": 290,
   "other": 45,
   "none": 36
  },
@@ -56,6 +56,11 @@
     "members": 5
    },
    {
+    "name": "Duke University",
+    "country": "United States",
+    "members": 4
+   },
+   {
     "name": "George Washington University",
     "country": "United States",
     "members": 4
@@ -103,11 +108,6 @@
    {
     "name": "Chinese University of Hong Kong",
     "country": "Hong Kong",
-    "members": 3
-   },
-   {
-    "name": "Duke University",
-    "country": "United States",
     "members": 3
    },
    {
@@ -208,7 +208,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 184
+    "members": 185
    },
    {
     "name": "Canada",
