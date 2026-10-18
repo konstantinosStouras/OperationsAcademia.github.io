@@ -15518,6 +15518,14 @@
   "lng": -87.2185862
  },
  {
+  "id": "university-of-windsor",
+  "institution": "University of Windsor",
+  "type": "University",
+  "sources": [
+   "members"
+  ]
+ },
+ {
   "id": "university-of-wisconsin-green-bay____scm-and-logistics",
   "institution": "University of Wisconsin - Green Bay",
   "department": "SCM and Logistics",
