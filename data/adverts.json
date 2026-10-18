@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T11:46:07Z",
+ "generated": "2026-10-18T12:11:55Z",
  "ads": {
   "academicjobsonline.org/ajo/jobs/32106": {
    "url": "https://academicjobsonline.org/ajo/jobs/32106",
@@ -113,6 +113,38 @@
    "employmentType": "",
    "checkedAt": "2026-10-14T13:06:21Z"
   },
+  "academicjobsonline.org/ajo/jobs/33054": {
+   "url": "https://academicjobsonline.org/ajo/jobs/33054",
+   "status": "unreadable",
+   "via": "page",
+   "title": "AcademicJobsOnline .org",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-18T12:11:55Z"
+  },
+  "academicjobsonline.org/ajo/jobs/33091": {
+   "url": "https://academicjobsonline.org/ajo/jobs/33091",
+   "status": "unreadable",
+   "via": "page",
+   "title": "AcademicJobsOnline .org",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-18T12:11:55Z"
+  },
   "acem.sjtu.edu.cn/acem/hr/97770.html": {
    "url": "https://www.acem.sjtu.edu.cn/acem/hr/97770.html",
    "status": "unreadable",
@@ -192,6 +224,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-10-17T11:46:07Z"
+  },
+  "alba.acg.edu/about-alba/work-with-us/assistant-or-associate-professor-in-business-analytics-and-artificial-intelligence": {
+   "url": "https://alba.acg.edu/about-alba/work-with-us/assistant-or-associate-professor-in-business-analytics-and-artificial-intelligence",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant or Associate Professor in Business Analytics and Artificial Intelligence | Alba",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "2026-10-21",
+   "applyByProse": "Application Deadline: October 21, 2026 Anticipated Start Date: January 1, 2027 App",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "american.wd1.myworkdayjobs.com/AU/job/Main-Campus-Washington-DC/Professorial-Lecturer_R4814": {
    "url": "https://american.wd1.myworkdayjobs.com/AU/job/Main-Campus-Washington-DC/Professorial-Lecturer_R4814",
@@ -751,7 +799,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-11T14:23:19Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "apply.interfolio.com/180405": {
    "url": "https://apply.interfolio.com/180405",
@@ -2175,7 +2223,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "OTHER",
-   "checkedAt": "2026-10-11T14:23:19Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "careercenter.informs.org/jobs?city=&city_state_zip=&country=&job_id=4884&keywords=monash&latitude=&locale=en&longitude=&sort=date&state=&zip=": {
    "url": "https://careercenter.informs.org/jobs?keywords=monash&locale=en&sort=date&country=&state=&city=&zip=&latitude=&longitude=&city_state_zip=&job_id=4884",
@@ -2817,6 +2865,38 @@
    "employmentType": "FULL_TIME",
    "checkedAt": "2026-10-16T12:45:06Z"
   },
+  "careers.uh.edu/jobs/assistant-associate-or-full-professor-decision-information-sciences-houston-texas-united-states": {
+   "url": "https://careers.uh.edu/jobs/assistant-associate-or-full-professor-decision-information-sciences-houston-texas-united-states",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant, Associate, or Full Professor - Decision & Information Sciences",
+   "institution": "University of Houston System",
+   "school": "",
+   "department": "Decision & Information Science",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-10-18T12:11:55Z"
+  },
+  "careers.uh.edu/jobs/assistant-or-associate-professor-ai-enabled-manufacturing-systems-houston-texas-united-states": {
+   "url": "https://careers.uh.edu/jobs/assistant-or-associate-professor-ai-enabled-manufacturing-systems-houston-texas-united-states",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant or Associate Professor - AI-Enabled Manufacturing Systems",
+   "institution": "University of Houston System",
+   "school": "",
+   "department": "Industrial and Systems Engineering",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-10-18T12:11:55Z"
+  },
   "careers.uh.edu/jobs/assistant-or-associate-professor-supply-chain-logistics-and-technology-houston-texas-united-states": {
    "url": "https://careers.uh.edu/jobs/assistant-or-associate-professor-supply-chain-logistics-and-technology-houston-texas-united-states",
    "status": "gone",
@@ -3153,6 +3233,22 @@
    "employmentType": "",
    "checkedAt": "2026-08-24T05:15:29Z"
   },
+  "connect.informs.org/healthapplications/discussion/postdoc-position-at-columbia-university-1": {
+   "url": "https://connect.informs.org/healthapplications/discussion/postdoc-position-at-columbia-university-1#bmb8abb718-b6ea-4aa8-9a94-adc43e1a640f",
+   "status": "unreadable",
+   "via": "page",
+   "title": "",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-18T12:11:55Z"
+  },
   "connect.informs.org/msom/discussion/faculty-position-in-transportation-operations-at-ubc-sauder-school-of-business-1": {
    "url": "https://connect.informs.org/msom/discussion/faculty-position-in-transportation-operations-at-ubc-sauder-school-of-business-1#bm90362ac9-1ac6-45ce-80a8-70df842f5c30",
    "status": "unreadable",
@@ -3361,6 +3457,22 @@
    "employmentType": "",
    "checkedAt": "2026-10-12T17:01:50Z"
   },
+  "explore.jobs.ufl.edu/en-us/job/541569/ast-prof": {
+   "url": "https://explore.jobs.ufl.edu/en-us/job/541569/ast-prof",
+   "status": "ok",
+   "via": "page",
+   "title": "Careers at UF",
+   "institution": "",
+   "school": "",
+   "department": "26040100 - HH-SPM ADMIN-INSTRUCTION",
+   "location": "Main Campus (Gainesville, FL)",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "AST PROF",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-18T12:11:55Z"
+  },
   "explore.msujobs.msstate.edu/jobs/assistant-professor-associate-professor-or-professor-main-campus-starkville-ms-mississippi-united-states-57a3c1ec-2875-4a64-9c12-fda9b3509e2a": {
    "url": "https://explore.msujobs.msstate.edu/jobs/assistant-professor-associate-professor-or-professor-main-campus-starkville-ms-mississippi-united-states-57a3c1ec-2875-4a64-9c12-fda9b3509e2a",
    "status": "ok",
@@ -3439,7 +3551,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-10T13:59:00Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "facultycareers.ipade.mx/": {
    "url": "https://facultycareers.ipade.mx/",
@@ -3553,6 +3665,22 @@
    "employmentType": "",
    "checkedAt": "2026-10-13T15:17:47Z"
   },
+  "hanken.rekrytointi.com/paikat?jid=402&o=A_A&rspvt=g10tam7mx0gg4sssck4k4w0ckk0gc80": {
+   "url": "https://hanken.rekrytointi.com/paikat/?jid=402&o=A_A&rspvt=g10tam7mx0gg4sssck4k4w0ckk0gc80&",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor, Associate Professor, or Full Professor in Business Analytics (tenure track) / Biträdande professor (nivå 1), biträdande professor (nivå 2) eller professor inom affärsanalytik (tenure track)",
+   "institution": "",
+   "school": "",
+   "department": "",
+   "location": "",
+   "posted": "",
+   "applyByDate": "2026-10-18",
+   "applyByProse": "application deadline is October 18th, 2026",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-18T12:11:55Z"
+  },
   "hartford.peopleadmin.com/postings/7422": {
    "url": "https://hartford.peopleadmin.com/postings/7422",
    "status": "unreadable",
@@ -3631,7 +3759,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-11T14:23:19Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "ibqzjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/job/111": {
    "url": "https://ibqzjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/job/111",
@@ -3889,6 +4017,22 @@
    "employmentType": "FULL_TIME",
    "checkedAt": "2026-10-13T15:17:47Z"
   },
+  "jobs.auburn.edu/auburn-careers-home/jobs/10498?lang=en-us": {
+   "url": "https://jobs.auburn.edu/auburn-careers-home/jobs/10498?lang=en-us",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor",
+   "institution": "Auburn University",
+   "school": "",
+   "department": "",
+   "location": "Auburn University, AL, United States",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-10-18T12:11:55Z"
+  },
   "jobs.auburn.edu/auburn-careers-home/jobs/9907": {
    "url": "https://jobs.auburn.edu/auburn-careers-home/jobs/9907",
    "status": "ok",
@@ -3936,6 +4080,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-08-24T08:28:50Z"
+  },
+  "jobs.charlotte.edu/postings/71055": {
+   "url": "https://jobs.charlotte.edu/postings/71055",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor",
+   "institution": "",
+   "school": "College of Engineering (Col)",
+   "department": "Industrial & Systems Engineering",
+   "location": "",
+   "posted": "",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "",
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "jobs.chronicle.com/job/37832322/adjunct-faculty-department-of-management": {
    "url": "https://jobs.chronicle.com/job/37832322/adjunct-faculty-department-of-management/",
@@ -5391,7 +5551,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-10T13:59:00Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "poms.org/sites/default/files/2025-04/POMS%20Job%20Advertisement.pdf": {
    "url": "https://www.poms.org/sites/default/files/2025-04/POMS%20Job%20Advertisement.pdf",
@@ -5503,7 +5663,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-10T13:59:00Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "poms.org/sites/default/files/2026-03/SCMPosition-Spring2026.pdf": {
    "url": "https://www.poms.org/sites/default/files/2026-03/SCMPosition-Spring2026.pdf",
@@ -5519,7 +5679,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-10T13:59:00Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "provost.catholic.edu/_media/faculty-position-ads/261-bus-mgmt-fa26-rev.pdf": {
    "url": "https://provost.catholic.edu/_media/faculty-position-ads/261-bus-mgmt-fa26-rev.pdf",
@@ -5535,7 +5695,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-10T13:59:00Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "psu.wd1.myworkdayjobs.com/en-US/PSU_Academic/job/Penn-State-Erie-The-Behrend-College/Tenure-Track-Faculty-in-Project-Management-Supply-Chain-Management_REQ_0000071503-1?q=REQ_0000071503": {
    "url": "https://psu.wd1.myworkdayjobs.com/en-US/PSU_Academic/job/Penn-State-Erie-The-Behrend-College/Tenure-Track-Faculty-in-Project-Management-Supply-Chain-Management_REQ_0000071503-1?q=REQ_0000071503",
@@ -5873,6 +6033,22 @@
    "employmentType": "",
    "checkedAt": "2026-10-17T11:46:07Z"
   },
+  "tamus.wd1.myworkdayjobs.com/en-US/ETAMU_External/details/Open-Rank-Professor---Management-Science_R-097477-1": {
+   "url": "https://tamus.wd1.myworkdayjobs.com/en-US/ETAMU_External/details/Open-Rank-Professor---Management-Science_R-097477-1",
+   "status": "ok",
+   "via": "page",
+   "title": "Open Rank Professor - Management Science",
+   "institution": "East Texas A&M University",
+   "school": "",
+   "department": "",
+   "location": "Commerce, TX, United States of America",
+   "posted": "2026-09-24",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-10-18T12:11:55Z"
+  },
   "tamus.wd1.myworkdayjobs.com/en-US/TAMIU_External/details/Assistant-Professor-of-Transportation-and-International-Logistics_R-088429-2?q=transport&workerSubType=0e1cd8ed3502012ddf607157e74b7d04": {
    "url": "https://tamus.wd1.myworkdayjobs.com/en-US/TAMIU_External/details/Assistant-Professor-of-Transportation-and-International-Logistics_R-088429-2?q=transport&workerSubType=0e1cd8ed3502012ddf607157e74b7d04",
    "status": "unreadable",
@@ -5887,7 +6063,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-11T14:23:19Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "tcnj.taleo.net/careersection/00_ex_faculty/jobdetail.ftl?job=25000520&tz=GMT-04:00&tzname=America/New_York": {
    "url": "https://tcnj.taleo.net/careersection/00_ex_faculty/jobdetail.ftl?job=25000520&tz=GMT-04%3A00&tzname=America%2FNew_York",
@@ -6223,7 +6399,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-10-10T13:59:00Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "utah.peopleadmin.com/postings/189425": {
    "url": "https://utah.peopleadmin.com/postings/189425",
@@ -6255,7 +6431,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "Faculty",
-   "checkedAt": "2026-10-10T13:59:00Z"
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "vacancies.aau.dk/scientific-positions/show-vacancy/vacancyId/950756": {
    "url": "https://www.vacancies.aau.dk/scientific-positions/show-vacancy/vacancyId/950756",
@@ -6352,6 +6528,22 @@
    "listedUntil": "",
    "employmentType": "",
    "checkedAt": "2026-08-25T08:23:41Z"
+  },
+  "wd1.myworkdaysite.com/en-US/recruiting/scu/scu/details/Tenure-Track-Assistant-Professor-in-Operations-and-Business-Analytics_R8268?q=Operations and Business Analytics": {
+   "url": "https://wd1.myworkdaysite.com/en-US/recruiting/scu/scu/details/Tenure-Track-Assistant-Professor-in-Operations-and-Business-Analytics_R8268?q=Operations+and+Business+Analytics",
+   "status": "ok",
+   "via": "page",
+   "title": "Tenure-Track Assistant Professor in Operations and Business Analytics",
+   "institution": "President and Board of Trustees of Santa Clara College",
+   "school": "",
+   "department": "",
+   "location": "Bldg. Lucas Hall, United States of America",
+   "posted": "2026-10-14",
+   "applyByDate": "",
+   "applyByProse": "",
+   "listedUntil": "",
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-10-18T12:11:55Z"
   },
   "wd1.myworkdaysite.com/en-US/recruiting/scu/scu/job/Santa-Clara-CA/Tenure-Track-Assistant-Professor-in-Information-Systems_R7811": {
    "url": "https://wd1.myworkdaysite.com/en-US/recruiting/scu/scu/job/Santa-Clara-CA/Tenure-Track-Assistant-Professor-in-Information-Systems_R7811",
