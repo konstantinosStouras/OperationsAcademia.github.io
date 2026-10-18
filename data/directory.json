@@ -1508,6 +1508,15 @@
   "lastPosted": "2026-03-19"
  },
  {
+  "id": "california-state-university-stanislaus____computer-information-systems",
+  "institution": "California State University - Stanislaus",
+  "department": "Computer Information Systems",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "california-state-university-stanislaus____supply-chain-management-operations-management",
   "institution": "California State University, Stanislaus",
   "department": "Supply Chain Management, Operations Management",
@@ -9599,6 +9608,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-13"
+ },
+ {
+  "id": "taejae-university____technology-and-business-innovation",
+  "institution": "Taejae University",
+  "department": "Technology and business innovation",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "tbs-education",

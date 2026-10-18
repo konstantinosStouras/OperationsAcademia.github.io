@@ -435,6 +435,11 @@
   "department": "Computer Information Systems"
  },
  {
+  "institution": "California State University - Stanislaus",
+  "school": "",
+  "department": "Computer Information Systems"
+ },
+ {
   "institution": "California State University, Bakersfield",
   "school": "",
   "department": "MIS/BA/AI"
@@ -2553,6 +2558,11 @@
   "institution": "Syracuse University",
   "school": "Whitman School of Management",
   "department": "Supply Chain Management"
+ },
+ {
+  "institution": "Taejae University",
+  "school": "",
+  "department": "Technology and business innovation"
  },
  {
   "institution": "TBS Education",
