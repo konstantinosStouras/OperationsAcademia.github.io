@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T18:37:01.000Z",
+ "generated": "2026-10-18T18:07:21.944Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -18,6 +18,10 @@
    "n": 8
   },
   {
+   "v": "Pennsylvania State University",
+   "n": 8
+  },
+  {
    "v": "Tulane University",
    "n": 8
   },
@@ -31,10 +35,6 @@
   },
   {
    "v": "Michigan State University",
-   "n": 7
-  },
-  {
-   "v": "Pennsylvania State University",
    "n": 7
   },
   {
@@ -83,6 +83,10 @@
   },
   {
    "v": "Belmont University",
+   "n": 4
+  },
+  {
+   "v": "Carnegie Mellon University",
    "n": 4
   },
   {
@@ -163,10 +167,6 @@
   },
   {
    "v": "Bucknell University",
-   "n": 3
-  },
-  {
-   "v": "Carnegie Mellon University",
    "n": 3
   },
   {
@@ -278,6 +278,10 @@
    "n": 3
   },
   {
+   "v": "Texas Southern University",
+   "n": 3
+  },
+  {
    "v": "UCL Global Business School for Health",
    "n": 3
   },
@@ -367,6 +371,10 @@
   },
   {
    "v": "Boston College",
+   "n": 2
+  },
+  {
+   "v": "Boston University",
    "n": 2
   },
   {
@@ -610,10 +618,6 @@
    "n": 2
   },
   {
-   "v": "Texas Southern University",
-   "n": 2
-  },
-  {
    "v": "Texas Tech University",
    "n": 2
   },
@@ -623,6 +627,10 @@
   },
   {
    "v": "Tilburg University",
+   "n": 2
+  },
+  {
+   "v": "Trinity University",
    "n": 2
   },
   {
@@ -887,10 +895,6 @@
   },
   {
    "v": "Bocconi",
-   "n": 1
-  },
-  {
-   "v": "Boston University",
    "n": 1
   },
   {
@@ -1434,6 +1438,10 @@
    "n": 1
   },
   {
+   "v": "Sacred Heart University",
+   "n": 1
+  },
+  {
    "v": "Saint Louis University",
    "n": 1
   },
@@ -1567,10 +1575,6 @@
   },
   {
    "v": "Tongji University",
-   "n": 1
-  },
-  {
-   "v": "Trinity University",
    "n": 1
   },
   {
@@ -2668,6 +2672,10 @@
    "n": 2
   },
   {
+   "v": "Neidorff School of Business",
+   "n": 2
+  },
+  {
    "v": "NUS Business School",
    "n": 2
   },
@@ -2784,6 +2792,10 @@
    "n": 1
   },
   {
+   "v": "Carnegie Mellon University in Qatar",
+   "n": 1
+  },
+  {
    "v": "Católica-Lisbon School of Business and Economics",
    "n": 1
   },
@@ -2821,6 +2833,10 @@
   },
   {
    "v": "College of Informatics",
+   "n": 1
+  },
+  {
+   "v": "College of Information Sciences and Technology",
    "n": 1
   },
   {
@@ -3024,7 +3040,15 @@
    "n": 1
   },
   {
+   "v": "Jack Welch College of Business and Technology",
+   "n": 1
+  },
+  {
    "v": "James Worth Bagley College of Engineering",
+   "n": 1
+  },
+  {
+   "v": "Jesse H. Jones School of Business",
    "n": 1
   },
   {
@@ -3120,10 +3144,6 @@
    "n": 1
   },
   {
-   "v": "Neidorff School of Business",
-   "n": 1
-  },
-  {
    "v": "Oakley School of Business",
    "n": 1
   },
@@ -3133,6 +3153,10 @@
   },
   {
    "v": "Peter J. Tobin College of Business",
+   "n": 1
+  },
+  {
+   "v": "Questrom School of Business",
    "n": 1
   },
   {
@@ -3584,10 +3608,6 @@
    "n": 0
   },
   {
-   "v": "Questrom School of Business",
-   "n": 0
-  },
-  {
    "v": "Quinlan School of Business",
    "n": 0
   },
@@ -3775,7 +3795,7 @@
   },
   {
    "v": "Management",
-   "n": 15
+   "n": 16
   },
   {
    "v": "Management Science",
@@ -3811,7 +3831,7 @@
   },
   {
    "v": "Management Information Systems",
-   "n": 8
+   "n": 9
   },
   {
    "v": "Operations and Supply Chain Management",
@@ -3822,11 +3842,11 @@
    "n": 7
   },
   {
-   "v": "Business",
-   "n": 6
+   "v": "Information Systems",
+   "n": 7
   },
   {
-   "v": "Information Systems",
+   "v": "Business",
    "n": 6
   },
   {
@@ -3999,6 +4019,10 @@
   },
   {
    "v": "DS and Analytics",
+   "n": 2
+  },
+  {
+   "v": "Finance and Business Analytics",
    "n": 2
   },
   {
@@ -4482,11 +4506,11 @@
    "n": 1
   },
   {
-   "v": "Finance and Business Analytics",
+   "v": "Finance and Economics",
    "n": 1
   },
   {
-   "v": "Finance and Economics",
+   "v": "Future of Healthy Aging",
    "n": 1
   },
   {
@@ -4567,6 +4591,10 @@
   },
   {
    "v": "Industrial, Manufacturing and Systems Engineering",
+   "n": 1
+  },
+  {
+   "v": "Informatics and Intelligent Systems",
    "n": 1
   },
   {
@@ -6364,6 +6392,7 @@
     "Questrom School of Business"
    ],
    "units": [
+    "Future of Healthy Aging",
     "Information Systems",
     "Operations and Technology Management",
     "Systems Engineering"
@@ -6373,6 +6402,7 @@
      "Systems Engineering"
     ],
     "Questrom School of Business": [
+     "Future of Healthy Aging",
      "Information Systems",
      "Operations and Technology Management"
     ]
@@ -6686,6 +6716,7 @@
   },
   "Carnegie Mellon University": {
    "schools": [
+    "Carnegie Mellon University in Qatar",
     "Heinz College of Information Systems and Public Policy",
     "Tepper School of Business"
    ],
@@ -6693,11 +6724,15 @@
     "Business Technologies",
     "Contextualized Evaluation of AI for Healthcare",
     "Heinz College",
+    "Information Systems",
     "Operations Management"
    ],
    "bySchool": {
     "": [
      "Contextualized Evaluation of AI for Healthcare"
+    ],
+    "Carnegie Mellon University in Qatar": [
+     "Information Systems"
     ],
     "Tepper School of Business": [
      "Business Technologies",
@@ -9766,9 +9801,11 @@
   },
   "Pennsylvania State University": {
    "schools": [
+    "College of Information Sciences and Technology",
     "Smeal College of Business"
    ],
    "units": [
+    "Informatics and Intelligent Systems",
     "SCM (sourcing focus)",
     "SCM (Tech focus)",
     "Supply Chain and Information Systems",
@@ -9780,6 +9817,9 @@
      "SCM (Tech focus)",
      "Supply Chain and Information Systems",
      "Supply Chain Management"
+    ],
+    "College of Information Sciences and Technology": [
+     "Informatics and Intelligent Systems"
     ],
     "Smeal College of Business": [
      "Supply Chain and Information Systems"
@@ -10131,6 +10171,19 @@
    "bySchool": {
     "Sabanci Business School": [
      "Business Analytics and Information Systems"
+    ]
+   }
+  },
+  "Sacred Heart University": {
+   "schools": [
+    "Jack Welch College of Business and Technology"
+   ],
+   "units": [
+    "Management"
+   ],
+   "bySchool": {
+    "Jack Welch College of Business and Technology": [
+     "Management"
     ]
    }
   },
@@ -10960,8 +11013,11 @@
    }
   },
   "Texas Southern University": {
-   "schools": [],
+   "schools": [
+    "Jesse H. Jones School of Business"
+   ],
    "units": [
+    "Management Information Systems",
     "MIS",
     "Operations and Logistics Management"
    ],
@@ -10969,6 +11025,9 @@
     "": [
      "MIS",
      "Operations and Logistics Management"
+    ],
+    "Jesse H. Jones School of Business": [
+     "Management Information Systems"
     ]
    }
   },
@@ -14301,6 +14360,9 @@
   "Carlos Alvarez College of Business": [
    "Operations and Analytics Department"
   ],
+  "Carnegie Mellon University in Qatar": [
+   "Information Systems"
+  ],
   "Carroll School of Management": [
    "Business Analytics"
   ],
@@ -14401,6 +14463,9 @@
   ],
   "College of Informatics": [
    "Computing and Analytics"
+  ],
+  "College of Information Sciences and Technology": [
+   "Informatics and Intelligent Systems"
   ],
   "College of Management": [
    "Industrial Engineering and Management"
@@ -14731,11 +14796,17 @@
    "Business Systems and Analytics",
    "Supply Chain Management"
   ],
+  "Jack Welch College of Business and Technology": [
+   "Management"
+  ],
   "James Worth Bagley College of Engineering": [
    "Industrial and Systems Engineering"
   ],
   "Jesse H. Jones Graduate School of Business": [
    "Operations Management"
+  ],
+  "Jesse H. Jones School of Business": [
+   "Management Information Systems"
   ],
   "John B. Goddard School of Business and Economics": [
    "Business Administration/Supply Chain Management"
@@ -14966,6 +15037,7 @@
    "Information Technology, Analytics, and Operations"
   ],
   "Questrom School of Business": [
+   "Future of Healthy Aging",
    "Information Systems",
    "Operations and Technology Management"
   ],

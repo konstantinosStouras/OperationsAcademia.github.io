@@ -361,13 +361,13 @@
  },
  {
   "institution": "Boston University",
-  "school": "",
-  "department": "Future of Healthy Aging"
+  "school": "College of Engineering",
+  "department": "Systems Engineering"
  },
  {
   "institution": "Boston University",
-  "school": "College of Engineering",
-  "department": "Systems Engineering"
+  "school": "Questrom School of Business",
+  "department": "Future of Healthy Aging"
  },
  {
   "institution": "Bowling Green State University",
@@ -521,8 +521,8 @@
  },
  {
   "institution": "Carnegie Mellon University",
-  "school": "",
-  "department": "IS"
+  "school": "Carnegie Mellon University in Qatar",
+  "department": "Information Systems"
  },
  {
   "institution": "Carnegie Mellon University",
@@ -1471,11 +1471,6 @@
  },
  {
   "institution": "KIMEP University",
-  "school": "",
-  "department": "Operations Management/Business Analytics"
- },
- {
-  "institution": "KIMEP University",
   "school": "Bang College of Business",
   "department": "Operations Management and Business Analytics"
  },
@@ -2097,17 +2092,17 @@
  {
   "institution": "Pennsylvania State University",
   "school": "",
-  "department": "Artificial Intelligence"
- },
- {
-  "institution": "Pennsylvania State University",
-  "school": "",
   "department": "SCM (sourcing focus)"
  },
  {
   "institution": "Pennsylvania State University",
   "school": "",
   "department": "SCM (Tech focus)"
+ },
+ {
+  "institution": "Pennsylvania State University",
+  "school": "College of Information Sciences and Technology",
+  "department": "Informatics and Intelligent Systems"
  },
  {
   "institution": "Pennsylvania State University",
@@ -2261,8 +2256,8 @@
  },
  {
   "institution": "Sacred Heart University",
-  "school": "",
-  "department": "Management (Innovation, technology management, AI)"
+  "school": "Jack Welch College of Business and Technology",
+  "department": "Management"
  },
  {
   "institution": "Saint Louis University",
@@ -2652,17 +2647,17 @@
  {
   "institution": "Texas Southern University",
   "school": "",
-  "department": "Management Information Systems"
- },
- {
-  "institution": "Texas Southern University",
-  "school": "",
   "department": "MIS"
  },
  {
   "institution": "Texas Southern University",
   "school": "",
   "department": "Operations and Logistics Management"
+ },
+ {
+  "institution": "Texas Southern University",
+  "school": "Jesse H. Jones School of Business",
+  "department": "Management Information Systems"
  },
  {
   "institution": "Texas State University",
@@ -2788,11 +2783,6 @@
   "institution": "Tongji University",
   "school": "School of Economics and Management",
   "department": "Operations Management"
- },
- {
-  "institution": "Trinity University",
-  "school": "",
-  "department": "Business Analytics"
  },
  {
   "institution": "Trinity University",

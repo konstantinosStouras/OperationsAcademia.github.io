@@ -1050,15 +1050,6 @@
   "lastPosted": "2014-10-21"
  },
  {
-  "id": "boston-university____future-of-healthy-aging",
-  "institution": "Boston University",
-  "department": "Future of Healthy Aging",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "boston-university__college-of-engineering__systems-engineering",
   "institution": "Boston University",
   "school": "College of Engineering",
@@ -1071,6 +1062,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-21"
+ },
+ {
+  "id": "boston-university__questrom-school-of-business__future-of-healthy-aging",
+  "institution": "Boston University",
+  "school": "Questrom School of Business",
+  "department": "Future of Healthy Aging",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-17"
  },
  {
   "id": "boston-university__questrom-school-of-business__information-systems",
@@ -1603,13 +1608,18 @@
   "lastPosted": "2025-05-26"
  },
  {
-  "id": "carnegie-mellon-university____is",
+  "id": "carnegie-mellon-university__carnegie-mellon-university-in-qatar__information-systems",
   "institution": "Carnegie Mellon University",
-  "department": "IS",
+  "school": "Carnegie Mellon University in Qatar",
+  "department": "Information Systems",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-17"
  },
  {
   "id": "carnegie-mellon-university__heinz-college-of-information-systems-and-public-policy",
@@ -5438,15 +5448,6 @@
   "lastPosted": "2026-02-09"
  },
  {
-  "id": "kimep-university____operations-management-business-analytics",
-  "institution": "KIMEP University",
-  "department": "Operations Management/Business Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "kimep-university__bang-college-of-business__operations-management-and-business-analytics",
   "institution": "KIMEP University",
   "school": "Bang College of Business",
@@ -7821,15 +7822,6 @@
   ]
  },
  {
-  "id": "pennsylvania-state-university____artificial-intelligence",
-  "institution": "Pennsylvania State University",
-  "department": "Artificial Intelligence",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "pennsylvania-state-university____scm-sourcing-focus",
   "institution": "Pennsylvania State University",
   "department": "SCM (sourcing focus)",
@@ -7854,6 +7846,20 @@
   ],
   "n": 1,
   "lastPosted": "2025-10-10"
+ },
+ {
+  "id": "pennsylvania-state-university__college-of-information-sciences-and-technology__informatics-and-intelligent-systems",
+  "institution": "Pennsylvania State University",
+  "school": "College of Information Sciences and Technology",
+  "department": "Informatics and Intelligent Systems",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-17"
  },
  {
   "id": "pompeu-fabra-university____economics-and-business",
@@ -8473,13 +8479,18 @@
   "lastPosted": "2026-09-04"
  },
  {
-  "id": "sacred-heart-university____management-innovation-technology-management-ai",
+  "id": "sacred-heart-university__jack-welch-college-of-business-and-technology__management",
   "institution": "Sacred Heart University",
-  "department": "Management (Innovation, technology management, AI)",
-  "type": "University",
+  "school": "Jack Welch College of Business and Technology",
+  "department": "Management",
+  "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-17"
  },
  {
   "id": "saint-louis-university____om-and-it",
@@ -9979,19 +9990,6 @@
   "lng": -97.3564038
  },
  {
-  "id": "texas-southern-university____management-information-systems",
-  "institution": "Texas Southern University",
-  "department": "Management Information Systems",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-02-26"
- },
- {
   "id": "texas-southern-university____operations-and-logistics-management",
   "institution": "Texas Southern University",
   "department": "Operations and Logistics Management",
@@ -10003,6 +10001,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-02-12"
+ },
+ {
+  "id": "texas-southern-university__jesse-h-jones-school-of-business__management-information-systems",
+  "institution": "Texas Southern University",
+  "school": "Jesse H. Jones School of Business",
+  "department": "Management Information Systems",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 2,
+  "lastPosted": "2026-10-17"
  },
  {
   "id": "texas-state-university____analytics",
@@ -10757,15 +10769,6 @@
   "lastPosted": "2026-09-01"
  },
  {
-  "id": "trinity-university____business-analytics",
-  "institution": "Trinity University",
-  "department": "Business Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "trinity-university__neidorff-school-of-business__finance-and-business-analytics",
   "institution": "Trinity University",
   "school": "Neidorff School of Business",
@@ -10776,8 +10779,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-07-23"
+  "n": 2,
+  "lastPosted": "2026-10-17"
  },
  {
   "id": "tsinghua-university____om-is",
