@@ -2928,6 +2928,15 @@
   "lng": -78.9473769
  },
  {
+  "id": "duplicate-with-248-kimep-university____operations-management-business-analytics",
+  "institution": "(duplicate with #248) KIMEP University",
+  "department": "Operations Management/Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "durham-university__business-school__management-and-marketing",
   "institution": "Durham University",
   "school": "Business School",
