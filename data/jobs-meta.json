@@ -1,17 +1,17 @@
 {
- "generated": "2026-10-19T11:58:11.232Z",
- "count": 866,
+ "generated": "2026-10-19T13:42:50.370Z",
+ "count": 867,
  "years": {
   "2026": 496,
-  "2027": 369,
+  "2027": 370,
   "2028": 1
  },
  "types": {
-  "University": 432,
+  "University": 433,
   "Business School": 397
  },
  "levels": {
-  "Assistant Professor": 344,
+  "Assistant Professor": 345,
   "Other Ranks": 186,
   "Non-tenure track (teaching) position": 54,
   "Post-Doc": 19,
@@ -43,11 +43,11 @@
   "Kazakhstan": 3,
   "Lebanon": 3,
   "Mexico": 3,
+  "Netherlands": 3,
   "Austria": 2,
   "Cambodia": 2,
   "Chile": 2,
   "Macau": 2,
-  "Netherlands": 2,
   "Oman": 2,
   "Sweden": 2,
   "Cyprus": 1,
@@ -62,10 +62,10 @@
  },
  "characteristics": {
   "MBA": 107,
-  "Research seminars": 105,
-  "Masters": 103,
-  "Undergrad": 103,
-  "PhD": 90,
+  "Research seminars": 106,
+  "Masters": 104,
+  "Undergrad": 104,
+  "PhD": 91,
   "Exec Ed": 84
  },
  "featured": 1,

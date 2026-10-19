@@ -42,6 +42,47 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-eindhoven-university-of-technology-tu-e-20261019",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-19",
+  "institution": "Eindhoven University of Technology (TU/e)",
+  "department": "School of Industrial Engineering, Industrial Engineering and Innovation Sciences",
+  "school": "School of Industrial Engineering",
+  "unit": "Industrial Engineering and Innovation Sciences",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 31, 2026. Screening starts immediately.",
+  "applyByDate": "2026-12-31",
+  "reviewDate": "2026-12-01",
+  "comments": "",
+  "country": "Netherlands",
+  "countries": [
+   "Netherlands"
+  ],
+  "adUrl": "https://www.tue.nl/en/working-at-tue/vacancy-overview/two-assistant-professors-in-operations-management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Eindhoven%20University%20of%20Technology%20(TU%2Fe)",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-10-19T13:40:19Z",
+  "ref": "OA-JOB-261019-RFMS",
+  "owner": "e1fb1392ab2bc37a",
+  "applicationStatus": ""
+ },
+ {
   "id": "2027-peking-university-20261019",
   "year": 2027,
   "years": [
