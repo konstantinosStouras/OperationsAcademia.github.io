@@ -47,6 +47,9 @@
      Only the ones that arrived twice. The canonical spelling is the full one,
      accents and all. */
   var INSTITUTION_ALIASES = {
+    /* A review note typed into the university box (2026-10-18). */
+    '(duplicate with #248) KIMEP University': 'KIMEP University',
+    '(duplicate with #295) University of Tampa': 'University of Tampa',
     /* UB's official naming guide uses University at Buffalo as its formal
        academic name; the SUNY modifier and legal name denote the same place. */
     'University at Buffalo - The State University of New York': 'University at Buffalo',
