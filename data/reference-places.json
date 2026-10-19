@@ -326,6 +326,11 @@
  },
  {
   "institution": "Binghamton University",
+  "school": "",
+  "department": "Operations and Supply Chain Management"
+ },
+ {
+  "institution": "Binghamton University",
   "school": "School of Management",
   "department": "Business Analytics and Operations"
  },
@@ -2650,6 +2655,11 @@
   "department": "Transportation/Logistics"
  },
  {
+  "institution": "Texas A&M University-Corpus Christi",
+  "school": "",
+  "department": "Industrial Engineering"
+ },
+ {
   "institution": "Texas A&M University–Central Texas",
   "school": "College of Business Administration",
   "department": "Logistics and Supply Chain Management"
@@ -2833,6 +2843,11 @@
   "institution": "Tsinghua University",
   "school": "",
   "department": "OM/IS"
+ },
+ {
+  "institution": "TU Eindhoven",
+  "school": "",
+  "department": "Industrial Engineering and Innovation Sciences"
  },
  {
   "institution": "Tulane University",
@@ -3218,6 +3233,11 @@
   "institution": "University of Houston - Downtown",
   "school": "",
   "department": "MIS"
+ },
+ {
+  "institution": "University of Houston-Downtown",
+  "school": "",
+  "department": "Project Management and Process Improvement"
  },
  {
   "institution": "University of Houston-Downtown",

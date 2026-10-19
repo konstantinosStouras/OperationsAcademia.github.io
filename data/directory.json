@@ -921,6 +921,15 @@
   "lastPosted": "2026-02-24"
  },
  {
+  "id": "binghamton-university____operations-and-supply-chain-management",
+  "institution": "Binghamton University",
+  "department": "Operations and Supply Chain Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "binghamton-university__school-of-management__business-analytics-and-operations",
   "institution": "Binghamton University",
   "school": "School of Management",
@@ -10052,6 +10061,15 @@
   "lastPosted": "2026-09-30"
  },
  {
+  "id": "texas-a-m-university-corpus-christi____industrial-engineering",
+  "institution": "Texas A&M University-Corpus Christi",
+  "department": "Industrial Engineering",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "texas-christian-university____analytics-business-is",
   "institution": "Texas Christian University",
   "department": "Analytics/Business IS",
@@ -10915,6 +10933,14 @@
   "deptUrl": "https://www.sem.tsinghua.edu.cn/en/Faculty/Faculty/Current_Faculty/DepartmentCampus/Management_Science_and_Engineering.htm",
   "sources": [
    "omlist",
+   "seed"
+  ]
+ },
+ {
+  "id": "tu-eindhoven____industrial-engineering-and-innovation-sciences",
+  "institution": "TU Eindhoven",
+  "department": "Industrial Engineering and Innovation Sciences",
+  "sources": [
    "seed"
   ]
  },
@@ -12835,6 +12861,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-03-07"
+ },
+ {
+  "id": "university-of-houston-downtown____project-management-and-process-improvement",
+  "institution": "University of Houston-Downtown",
+  "department": "Project Management and Process Improvement",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "university-of-houston-downtown____supply-chain-management",
