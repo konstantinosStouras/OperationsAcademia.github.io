@@ -172,6 +172,8 @@
        The entry keeps what the poster typed, which is what the three-column
        canon already publishes, so no posting moves; data/vocab.json, which
        had carried the mis-split into the pickers, is rebuilt from it. */
+    'School of Arts, Sciences and Technology':
+      { school: 'School of Arts, Sciences and Technology', unit: '' },   // Taejae University, one school
     'Leonard de Vinci Business School Paris-La Defense':
       { school: 'Leonard de Vinci Business School Paris-La Defense', unit: '' }
   };

@@ -807,6 +807,15 @@ async function main() {
         rows = applyVerified(rows, await readVerifiedCache(), { today }).rows;
         rows = applyAdverts(rows, await readAdvertsCache(), { today }).rows;
 
+        /* …AND THE COUNTRY AGAIN, for the same reason. A review-card edit can
+           set a country the directory contradicts (a Carnegie Mellon posting
+           for its Doha campus, set to Qatar), and the heal above ran before
+           the edits were laid on. build-jobs heals its merged set, so
+           data/jobs.json already said United States; this file went red on
+           the country guard from 2026-10-18 and committed nothing. Same heal,
+           same stand-down on a multi-country posting, so it is idempotent. */
+        rows = rows.map((r) => healCountry(r, byCountry));
+
         /* THE SAME JOB, ALREADY POSTED. A school that advertises on the site's
            own form is routinely also entered in the tracking workbook by its
            contributors, and the crawled copy then arrives here as a fresh

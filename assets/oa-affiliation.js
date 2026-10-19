@@ -212,6 +212,9 @@
      still carries a school or a department, unless it is in STANDALONE. */
   var UNIVERSITY_OF = {
     /* a school, an institute or a department filed as the university */
+    /* a review note typed into the university field (2026-10-18) */
+    '(duplicate with #248) KIMEP University': 'KIMEP University',
+    '(duplicate with #295) University of Tampa': 'University of Tampa',
     'American University Kogod School of Business': 'American University',
     'Kogod School of Business': 'American University',
     'Bayes Business School': 'University of London',     // the site files City St George's under it (oa-schools.js)
@@ -221,6 +224,7 @@
     'Ewha School of Business': 'Ewha Womans University',
     'Georgia Tech (ISyE)': 'Georgia Institute of Technology',
     'Harvard Kennedy School': 'Harvard University',
+    'Harvard Medical School': 'Harvard University',
     'Hull University Business School': 'University of Hull',
     'IESE': 'University of Navarra',
     'IESE Business School': 'University of Navarra',

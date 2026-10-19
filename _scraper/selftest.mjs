@@ -10164,6 +10164,8 @@ async function testHigherEdJobsWiring() {
     ok(sync.includes('rows = split.publish;') &&
        /applyVerified\(rows[\s\S]{0,200}applyAdverts\(rows/.test(after.slice(0, 2000)),
       'the sheet sync re-applies both advertisement caches after the approvals');
+    ok(/healCountry\(r, byCountry\)/.test(after.slice(0, 3000)),
+      'the sheet sync heals the country again after the approvals');
   }
   ok(sync.includes('applyVerified'),
     'the sheet sync re-applies what the advertisements said');
