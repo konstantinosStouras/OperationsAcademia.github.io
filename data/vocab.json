@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T11:56:31.156Z",
+ "generated": "2026-10-19T11:58:11.232Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -319,6 +319,10 @@
   },
   {
    "v": "University of South Florida",
+   "n": 3
+  },
+  {
+   "v": "University of Tampa",
    "n": 3
   },
   {
@@ -739,10 +743,6 @@
   },
   {
    "v": "University of Southern California",
-   "n": 2
-  },
-  {
-   "v": "University of Tampa",
    "n": 2
   },
   {
@@ -2552,6 +2552,10 @@
    "n": 3
   },
   {
+   "v": "Sykes College of Business",
+   "n": 3
+  },
+  {
    "v": "W. P. Carey School of Business",
    "n": 3
   },
@@ -2725,10 +2729,6 @@
   },
   {
    "v": "Stephen M. Ross School of Business",
-   "n": 2
-  },
-  {
-   "v": "Sykes College of Business",
    "n": 2
   },
   {
@@ -3938,6 +3938,10 @@
    "n": 3
   },
   {
+   "v": "Information and Technology Management",
+   "n": 3
+  },
+  {
    "v": "Information Systems and Business Analytics",
    "n": 3
   },
@@ -4067,10 +4071,6 @@
   },
   {
    "v": "Information and Decision Sciences",
-   "n": 2
-  },
-  {
-   "v": "Information and Technology Management",
    "n": 2
   },
   {

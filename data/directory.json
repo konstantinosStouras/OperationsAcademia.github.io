@@ -14838,15 +14838,6 @@
   "lastPosted": "2026-05-29"
  },
  {
-  "id": "university-of-tampa____business-analytics",
-  "institution": "University of Tampa",
-  "department": "Business Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "university-of-tampa__sykes-college-of-business__information-and-technology-management",
   "institution": "University of Tampa",
   "school": "Sykes College of Business",
@@ -14857,8 +14848,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2026-10-16"
+  "n": 3,
+  "lastPosted": "2026-10-17"
  },
  {
   "id": "university-of-tennessee____ba",
