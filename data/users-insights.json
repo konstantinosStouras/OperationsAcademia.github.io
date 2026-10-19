@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-19T14:37:24.354Z",
- "members": 372,
+ "generated": "2026-10-19T20:09:24.425Z",
+ "members": 374,
  "k": 3,
  "affiliation": {
-  "listed": 290,
+  "listed": 292,
   "other": 46,
   "none": 36
  },
@@ -43,7 +43,7 @@
    {
     "name": "Northwestern University",
     "country": "United States",
-    "members": 5
+    "members": 6
    },
    {
     "name": "University of Massachusetts Amherst",
@@ -73,6 +73,11 @@
    {
     "name": "McGill University",
     "country": "Canada",
+    "members": 4
+   },
+   {
+    "name": "Ohio State University",
+    "country": "United States",
     "members": 4
    },
    {
@@ -133,11 +138,6 @@
    {
     "name": "London Business School",
     "country": "United Kingdom",
-    "members": 3
-   },
-   {
-    "name": "The Ohio State University",
-    "country": "United States",
     "members": 3
    },
    {
@@ -208,7 +208,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 185
+    "members": 187
    },
    {
     "name": "Canada",
