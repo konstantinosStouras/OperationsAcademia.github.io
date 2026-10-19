@@ -1509,12 +1509,16 @@
  },
  {
   "id": "california-state-university-stanislaus____computer-information-systems",
-  "institution": "California State University - Stanislaus",
+  "institution": "California State University, Stanislaus",
   "department": "Computer Information Systems",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-18"
  },
  {
   "id": "california-state-university-stanislaus____supply-chain-management-operations-management",

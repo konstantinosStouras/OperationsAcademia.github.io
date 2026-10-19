@@ -440,11 +440,6 @@
   "department": "Computer Information Systems"
  },
  {
-  "institution": "California State University - Stanislaus",
-  "school": "",
-  "department": "Computer Information Systems"
- },
- {
   "institution": "California State University, Bakersfield",
   "school": "",
   "department": "MIS/BA/AI"
@@ -493,6 +488,11 @@
   "institution": "California State University, Sacramento",
   "school": "",
   "department": "AI"
+ },
+ {
+  "institution": "California State University, Stanislaus",
+  "school": "",
+  "department": "Computer Information Systems"
  },
  {
   "institution": "California State University, Stanislaus",

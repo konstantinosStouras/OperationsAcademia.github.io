@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T11:44:43.902Z",
+ "generated": "2026-10-19T11:50:01.718Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -167,6 +167,10 @@
   },
   {
    "v": "Bucknell University",
+   "n": 3
+  },
+  {
+   "v": "California State University, Stanislaus",
    "n": 3
   },
   {
@@ -387,10 +391,6 @@
   },
   {
    "v": "California State University, Long Beach",
-   "n": 2
-  },
-  {
-   "v": "California State University, Stanislaus",
    "n": 2
   },
   {
@@ -4402,6 +4402,10 @@
    "n": 1
   },
   {
+   "v": "Computer Information Systems",
+   "n": 1
+  },
+  {
    "v": "Computer Science, Engineering and Information Technologies",
    "n": 1
   },
@@ -5443,10 +5447,6 @@
   },
   {
    "v": "Business Management/Operations and Supply Chain",
-   "n": 0
-  },
-  {
-   "v": "Computer Information Systems",
    "n": 0
   },
   {
@@ -6686,11 +6686,13 @@
     "College of Business Administration"
    ],
    "units": [
+    "Computer Information Systems",
     "Management Information Systems",
     "Supply Chain Management, Operations Management"
    ],
    "bySchool": {
     "": [
+     "Computer Information Systems",
      "Supply Chain Management, Operations Management"
     ],
     "College of Business Administration": [
