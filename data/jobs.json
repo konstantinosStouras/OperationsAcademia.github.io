@@ -177,6 +177,40 @@
   "owner": ""
  },
  {
+  "id": "2027-naval-postgraduate-school-20261018",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-18",
+  "institution": "Naval Postgraduate School",
+  "department": "Acquisition, Finance, and Manpower",
+  "school": "",
+  "unit": "Acquisition, Finance, and Manpower",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled",
+  "applyByDate": "",
+  "comments": "Open-rank, tenure-track faculty position in the data analysis track within the Financial Management and Manpower areas.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://main.hercjobs.org/jobs/22622070/data-analytics-assistant-associate-full-professor",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Naval%20Postgraduate%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-19T11:55:23Z",
+  "owner": ""
+ },
+ {
   "id": "2027-pontificia-universidad-catolica-de-chile-20261018",
   "year": 2027,
   "years": [
@@ -378,6 +412,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-18T18:06:45Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-kimep-university-20261017",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-17",
+  "institution": "KIMEP University",
+  "department": "Bang College of Business, Operations Management and Business Analytics",
+  "school": "Bang College of Business",
+  "unit": "Operations Management and Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 15, 2026",
+  "applyByDate": "2026-11-15",
+  "comments": "",
+  "country": "Kazakhstan",
+  "countries": [
+   "Kazakhstan"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179588474&Title=Assistant%2FAssociate%20Professor%20of%20Operations%20Management%2FBusiness%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://hr.kimep.kz/en-US/Home/Vacancy/791",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=KIMEP%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-19T11:56:27Z",
   "owner": ""
  },
  {

@@ -2951,24 +2951,6 @@
   "lng": -78.9473769
  },
  {
-  "id": "duplicate-with-248-kimep-university____operations-management-business-analytics",
-  "institution": "(duplicate with #248) KIMEP University",
-  "department": "Operations Management/Business Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
-  "id": "duplicate-with-295-university-of-tampa____business-analytics",
-  "institution": "(duplicate with #295) University of Tampa",
-  "department": "Business Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "durham-university__business-school__management-and-marketing",
   "institution": "Durham University",
   "school": "Business School",
@@ -5508,8 +5490,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-10-04"
+  "n": 2,
+  "lastPosted": "2026-10-17"
  },
  {
   "id": "koc-university____om-is",
@@ -6903,13 +6885,17 @@
   "lng": 103.7777822
  },
  {
-  "id": "naval-postgraduate-school____data-analytics",
+  "id": "naval-postgraduate-school____acquisition-finance-and-manpower",
   "institution": "Naval Postgraduate School",
-  "department": "Data Analytics",
+  "department": "Acquisition, Finance, and Manpower",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-18"
  },
  {
   "id": "naval-postgraduate-school____operations-research",

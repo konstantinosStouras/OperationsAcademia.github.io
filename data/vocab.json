@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T11:54:48.217Z",
+ "generated": "2026-10-19T11:56:31.156Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -235,6 +235,10 @@
   },
   {
    "v": "Institut Mines-Télécom",
+   "n": 3
+  },
+  {
+   "v": "KIMEP University",
    "n": 3
   },
   {
@@ -510,10 +514,6 @@
    "n": 2
   },
   {
-   "v": "KIMEP University",
-   "n": 2
-  },
-  {
    "v": "Koç University",
    "n": 2
   },
@@ -551,6 +551,10 @@
   },
   {
    "v": "Nanyang Technological University",
+   "n": 2
+  },
+  {
+   "v": "Naval Postgraduate School",
    "n": 2
   },
   {
@@ -1303,10 +1307,6 @@
   },
   {
    "v": "Murray State University",
-   "n": 1
-  },
-  {
-   "v": "Naval Postgraduate School",
    "n": 1
   },
   {
@@ -2564,6 +2564,10 @@
    "n": 2
   },
   {
+   "v": "Bang College of Business",
+   "n": 2
+  },
+  {
    "v": "Booth School of Business",
    "n": 2
   },
@@ -2765,10 +2769,6 @@
   },
   {
    "v": "Arthur J. Bauernfeind College of Business",
-   "n": 1
-  },
-  {
-   "v": "Bang College of Business",
    "n": 1
   },
   {
@@ -3966,6 +3966,10 @@
    "n": 3
   },
   {
+   "v": "Operations Management and Business Analytics",
+   "n": 3
+  },
+  {
    "v": "Operations Research",
    "n": 3
   },
@@ -4142,10 +4146,6 @@
    "n": 2
   },
   {
-   "v": "Operations Management and Business Analytics",
-   "n": 2
-  },
-  {
    "v": "Operations, Information and Technology",
    "n": 2
   },
@@ -4187,6 +4187,10 @@
   },
   {
    "v": "Accounting, Economics, Finance, and Information Systems",
+   "n": 1
+  },
+  {
+   "v": "Acquisition, Finance, and Manpower",
    "n": 1
   },
   {
@@ -9374,10 +9378,12 @@
   "Naval Postgraduate School": {
    "schools": [],
    "units": [
+    "Acquisition, Finance, and Manpower",
     "Operations Research"
    ],
    "bySchool": {
     "": [
+     "Acquisition, Finance, and Manpower",
      "Operations Research"
     ]
    }
