@@ -1,17 +1,17 @@
 {
- "generated": "2026-10-19T13:42:50.370Z",
- "count": 867,
+ "generated": "2026-10-19T19:03:41.017Z",
+ "count": 868,
  "years": {
   "2026": 496,
-  "2027": 370,
+  "2027": 371,
   "2028": 1
  },
  "types": {
-  "University": 433,
+  "University": 434,
   "Business School": 397
  },
  "levels": {
-  "Assistant Professor": 345,
+  "Assistant Professor": 346,
   "Other Ranks": 186,
   "Non-tenure track (teaching) position": 54,
   "Post-Doc": 19,
@@ -20,7 +20,7 @@
   "RA or Pre-doc": 1
  },
  "countries": {
-  "United States": 622,
+  "United States": 623,
   "China": 38,
   "United Kingdom": 33,
   "Hong Kong": 20,
@@ -62,10 +62,10 @@
  },
  "characteristics": {
   "MBA": 107,
-  "Research seminars": 106,
-  "Masters": 104,
-  "Undergrad": 104,
-  "PhD": 91,
+  "Research seminars": 107,
+  "Masters": 105,
+  "Undergrad": 105,
+  "PhD": 92,
   "Exec Ed": 84
  },
  "featured": 1,

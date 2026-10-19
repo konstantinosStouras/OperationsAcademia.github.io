@@ -83,6 +83,47 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-ohio-state-university-20261019",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-19",
+  "institution": "Ohio State University",
+  "department": "College of Engineering, Integrated Systems Engineering",
+  "school": "College of Engineering",
+  "unit": "Integrated Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-16",
+  "comments": "The Integrated Systems Engineering and Electrical and Computer Engineering at The Ohio State University invite applications for an assistant professor tenure-track appointment in the area of Optimization for Machine Learning. This position will start as early as August 15, 2027. The candidate is expected to hold a 70% appointment in the ISE Department and 30% appointment in the ECE Department. The successful candidate is expected to develop a rigorous research program in Optimization for Machine Learning (ML) and Artificial Intelligence (AI), with Operations Research (OR) providing foundational methods and tools. The successful candidate is also expected to obtain funding, teach courses, and mentor students. Review of applications will begin November 16, 2026.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://drive.google.com/file/d/16QFxCjINo0ImdPdqMQh6rl3nL6Miho3F/view?usp=drivesdk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/195349",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Ohio%20State%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-10-19T19:03:08Z",
+  "ref": "OA-JOB-261019-E68M",
+  "owner": "0ce9c2a99f44b10c",
+  "applicationStatus": ""
+ },
+ {
   "id": "2027-peking-university-20261019",
   "year": 2027,
   "years": [

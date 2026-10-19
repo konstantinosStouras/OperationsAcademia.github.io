@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T13:42:50.370Z",
+ "generated": "2026-10-19T19:03:41.017Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -62,6 +62,10 @@
    "n": 5
   },
   {
+   "v": "Ohio State University",
+   "n": 5
+  },
+  {
    "v": "Purdue University",
    "n": 5
   },
@@ -119,10 +123,6 @@
   },
   {
    "v": "The Chinese University of Hong Kong, Shenzhen",
-   "n": 4
-  },
-  {
-   "v": "The Ohio State University",
    "n": 4
   },
   {
@@ -2468,11 +2468,11 @@
    "n": 11
   },
   {
-   "v": "A. B. Freeman School of Business",
-   "n": 8
+   "v": "College of Engineering",
+   "n": 9
   },
   {
-   "v": "College of Engineering",
+   "v": "A. B. Freeman School of Business",
    "n": 8
   },
   {
@@ -4727,6 +4727,10 @@
   },
   {
    "v": "Innovation and Entrepreneurship",
+   "n": 1
+  },
+  {
+   "v": "Integrated Systems Engineering",
    "n": 1
   },
   {
@@ -9768,6 +9772,32 @@
     ]
    }
   },
+  "Ohio State University": {
+   "schools": [
+    "College of Engineering",
+    "Max M. Fisher College of Business"
+   ],
+   "units": [
+    "Integrated Systems Engineering",
+    "Management Science",
+    "Marketing and Logistics",
+    "OM/BA",
+    "Operations and Business Analytics"
+   ],
+   "bySchool": {
+    "": [
+     "OM/BA"
+    ],
+    "College of Engineering": [
+     "Integrated Systems Engineering"
+    ],
+    "Max M. Fisher College of Business": [
+     "Management Science",
+     "Marketing and Logistics",
+     "Operations and Business Analytics"
+    ]
+   }
+  },
   "Oklahoma State University": {
    "schools": [
     "School of Industrial Engineering and Management",
@@ -11267,27 +11297,6 @@
     ],
     "HKUST School of Business and Management": [
      "Information Systems, Business Statistics and Operations Management"
-    ]
-   }
-  },
-  "The Ohio State University": {
-   "schools": [
-    "Max M. Fisher College of Business"
-   ],
-   "units": [
-    "Management Science",
-    "Marketing and Logistics",
-    "OM/BA",
-    "Operations and Business Analytics"
-   ],
-   "bySchool": {
-    "": [
-     "OM/BA"
-    ],
-    "Max M. Fisher College of Business": [
-     "Management Science",
-     "Marketing and Logistics",
-     "Operations and Business Analytics"
     ]
    }
   },
@@ -14537,6 +14546,7 @@
    "H. Milton Stewart School of Industrial and Systems Engineering",
    "Industrial and Operations Engineering",
    "Industrial Engineering",
+   "Integrated Systems Engineering",
    "Lillian Gilbreth Postdoctoral Fellowships",
    "Mechanical and Industrial Engineering",
    "One Health – Intelligent Medicines",
