@@ -1651,6 +1651,11 @@
  },
  {
   "institution": "McGill University",
+  "school": "",
+  "department": "OM"
+ },
+ {
+  "institution": "McGill University",
   "school": "Desautels Faculty of Management",
   "department": "Operations Management"
  },
