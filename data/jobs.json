@@ -42,6 +42,177 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-huron-university-20261018",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-18",
+  "institution": "Huron University",
+  "department": "Faculty of Arts and Social Science, Management and Organizational Studies",
+  "school": "Faculty of Arts and Social Science",
+  "unit": "Management and Organizational Studies",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-06",
+  "comments": "",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://workforcenow.adp.com/mascsr/default/mdf/recruitment/recruitment.html?cid=53019667-5da5-4bc0-a460-1cad572c63d4&ccId=19000101_000001&jobId=575362&lang=en_CA&source=CC2",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://huronu.ca/programs/management-and-organizational-studies/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-19T06:38:32Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-pontificia-universidad-catolica-de-chile-20261018",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-18",
+  "institution": "Pontificia Universidad Catolica de Chile (PUC)",
+  "department": "School of Engineering, Industrial and Systems Engineering and Electrical Engineering",
+  "school": "School of Engineering",
+  "unit": "Industrial and Systems Engineering and Electrical Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-31",
+  "comments": "",
+  "country": "Chile",
+  "countries": [
+   "Chile"
+  ],
+  "adUrl": "https://www.ing.uc.cl/trabaja-con-nosotros/areas-to-apply-2/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.ing.uc.cl/industrial-y-sistemas/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-19T06:38:31Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-taejae-university-20261018",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-18",
+  "institution": "Taejae University",
+  "department": "School of Arts, Sciences and Technology, Business Innovation",
+  "school": "School of Arts, Sciences and Technology",
+  "unit": "Business Innovation",
+  "type": "University",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "October 31, 2026",
+  "applyByDate": "2026-10-31",
+  "comments": "",
+  "country": "South Korea",
+  "countries": [
+   "South Korea"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179590084&Title=Full%2DTime%20Faculty%20Positions%20in%20the%20Business%20Innovation%20Program%20%7C%20Spring%202027%20Appointment",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.taejae.ac.kr/academics/who-learn-from",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-19T06:38:30Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-texas-state-university-20261018",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-18",
+  "institution": "Texas State University",
+  "department": "College of Science and Engineering, Engineering Technology",
+  "school": "College of Science and Engineering",
+  "unit": "Engineering Technology",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.hr.txstate.edu/postings/58931",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.txst.edu/technology.html",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-19T06:38:29Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-nebraska-lincoln-20261018",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-18",
+  "institution": "University of Nebraska - Lincoln",
+  "department": "College of Business, Supply Chain Management and Analytics",
+  "school": "College of Business",
+  "unit": "Supply Chain Management and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://employment.unl.edu/postings/102824",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://business.unl.edu/supply-chain-management-analytics/supply-chain-management-and-analytics-faculty-and-staff/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-19T06:38:28Z",
+  "owner": ""
+ },
+ {
   "id": "2027-boston-university-20261017",
   "year": 2027,
   "years": [

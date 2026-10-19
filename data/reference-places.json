@@ -1271,8 +1271,8 @@
  },
  {
   "institution": "Huron University",
-  "school": "",
-  "department": "Operations"
+  "school": "Faculty of Arts and Social Science",
+  "department": "Management and Organizational Studies"
  },
  {
   "institution": "Idaho State University",
@@ -2145,9 +2145,9 @@
   "department": "Supply Chain and Information Systems"
  },
  {
-  "institution": "Pontificia Universidad Católica de Chile",
-  "school": "",
-  "department": "Operations research"
+  "institution": "Pontificia Universidad Catolica de Chile (PUC)",
+  "school": "School of Engineering",
+  "department": "Industrial and Systems Engineering and Electrical Engineering"
  },
  {
   "institution": "Prairie View A&M University",
@@ -2596,8 +2596,8 @@
  },
  {
   "institution": "Taejae University",
-  "school": "",
-  "department": "Technology and business innovation"
+  "school": "School of Arts, Sciences and Technology",
+  "department": "Business Innovation"
  },
  {
   "institution": "TBS Education",
@@ -2712,17 +2712,17 @@
  {
   "institution": "Texas State University",
   "school": "",
-  "department": "Engineering Management"
- },
- {
-  "institution": "Texas State University",
-  "school": "",
   "department": "IS and Analytics"
  },
  {
   "institution": "Texas State University",
   "school": "",
   "department": "IS"
+ },
+ {
+  "institution": "Texas State University",
+  "school": "College of Science and Engineering",
+  "department": "Engineering Technology"
  },
  {
   "institution": "Texas State University",
@@ -3535,6 +3535,11 @@
   "department": "Management"
  },
  {
+  "institution": "University of Nebraska - Lincoln",
+  "school": "College of Business",
+  "department": "Supply Chain Management and Analytics"
+ },
+ {
   "institution": "University of Nebraska at Kearney",
   "school": "",
   "department": "Supply Chain Management"
@@ -3543,11 +3548,6 @@
   "institution": "University of Nebraska at Omaha",
   "school": "College of Public Affairs and Community Service, School of Public Administration",
   "department": "Nonprofit Management"
- },
- {
-  "institution": "University of Nebraska-Lincoln",
-  "school": "",
-  "department": "Business Analytics, Supply Chain Management, and OM"
  },
  {
   "institution": "University of Nevada Las Vegas",

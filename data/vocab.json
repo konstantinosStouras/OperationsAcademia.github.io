@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-18T18:07:21.944Z",
+ "generated": "2026-10-19T06:39:25.433Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -38,6 +38,10 @@
    "n": 7
   },
   {
+   "v": "Texas State University",
+   "n": 6
+  },
+  {
    "v": "The Hong Kong Polytechnic University",
    "n": 6
   },
@@ -63,10 +67,6 @@
   },
   {
    "v": "SKEMA Business School",
-   "n": 5
-  },
-  {
-   "v": "Texas State University",
    "n": 5
   },
   {
@@ -1162,6 +1162,10 @@
    "n": 1
   },
   {
+   "v": "Huron University",
+   "n": 1
+  },
+  {
    "v": "Idaho State University",
    "n": 1
   },
@@ -1390,6 +1394,10 @@
    "n": 1
   },
   {
+   "v": "Pontificia Universidad Catolica de Chile (PUC)",
+   "n": 1
+  },
+  {
    "v": "Prairie View A&M University",
    "n": 1
   },
@@ -1539,6 +1547,10 @@
   },
   {
    "v": "Syracuse University",
+   "n": 1
+  },
+  {
+   "v": "Taejae University",
    "n": 1
   },
   {
@@ -1731,6 +1743,10 @@
   },
   {
    "v": "University of Missouri-St. Louis",
+   "n": 1
+  },
+  {
+   "v": "University of Nebraska - Lincoln",
    "n": 1
   },
   {
@@ -2138,10 +2154,6 @@
    "n": 0
   },
   {
-   "v": "Pontificia Universidad Catolica de Chile (PUC)",
-   "n": 0
-  },
-  {
    "v": "Providence College",
    "n": 0
   },
@@ -2318,10 +2330,6 @@
    "n": 0
   },
   {
-   "v": "University of Nebraska–Lincoln",
-   "n": 0
-  },
-  {
    "v": "University of Nevada",
    "n": 0
   },
@@ -2453,7 +2461,7 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 20
+   "n": 21
   },
   {
    "v": "School of Business",
@@ -2536,6 +2544,10 @@
    "n": 3
   },
   {
+   "v": "School of Engineering",
+   "n": 3
+  },
+  {
    "v": "Smeal College of Business",
    "n": 3
   },
@@ -2561,6 +2573,10 @@
   },
   {
    "v": "College of Business and Economics",
+   "n": 2
+  },
+  {
+   "v": "College of Science and Engineering",
    "n": 2
   },
   {
@@ -2693,10 +2709,6 @@
   },
   {
    "v": "School of Business and Leadership",
-   "n": 2
-  },
-  {
-   "v": "School of Engineering",
    "n": 2
   },
   {
@@ -2848,10 +2860,6 @@
    "n": 1
   },
   {
-   "v": "College of Science and Engineering",
-   "n": 1
-  },
-  {
    "v": "Columbia Business School",
    "n": 1
   },
@@ -2913,6 +2921,10 @@
   },
   {
    "v": "Faculty of Arts and Science",
+   "n": 1
+  },
+  {
+   "v": "Faculty of Arts and Social Science",
    "n": 1
   },
   {
@@ -3201,6 +3213,10 @@
   },
   {
    "v": "School Economics and Management",
+   "n": 1
+  },
+  {
+   "v": "School of Arts",
    "n": 1
   },
   {
@@ -3970,6 +3986,10 @@
    "n": 3
   },
   {
+   "v": "Supply Chain Management and Analytics",
+   "n": 3
+  },
+  {
    "v": "Accounting and Information Systems",
    "n": 2
   },
@@ -4135,10 +4155,6 @@
   },
   {
    "v": "SCM/BA",
-   "n": 2
-  },
-  {
-   "v": "Supply Chain Management and Analytics",
    "n": 2
   },
   {
@@ -4498,6 +4514,10 @@
    "n": 1
   },
   {
+   "v": "Engineering Technology",
+   "n": 1
+  },
+  {
    "v": "Enterprise AI and Systems",
    "n": 1
   },
@@ -4567,6 +4587,10 @@
   },
   {
    "v": "Industrial and Operations Engineering",
+   "n": 1
+  },
+  {
+   "v": "Industrial and Systems Engineering and Electrical Engineering",
    "n": 1
   },
   {
@@ -4819,6 +4843,10 @@
   },
   {
    "v": "Management and Operations",
+   "n": 1
+  },
+  {
+   "v": "Management and Organizational Studies",
    "n": 1
   },
   {
@@ -5187,6 +5215,10 @@
   },
   {
    "v": "Science and Innovation",
+   "n": 1
+  },
+  {
+   "v": "Sciences and Technology, Business Innovation",
    "n": 1
   },
   {
@@ -8242,6 +8274,19 @@
    "units": [],
    "bySchool": {}
   },
+  "Huron University": {
+   "schools": [
+    "Faculty of Arts and Social Science"
+   ],
+   "units": [
+    "Management and Organizational Studies"
+   ],
+   "bySchool": {
+    "Faculty of Arts and Social Science": [
+     "Management and Organizational Studies"
+    ]
+   }
+  },
   "Idaho State University": {
    "schools": [
     "College of Business"
@@ -9839,12 +9884,17 @@
   },
   "Pontificia Universidad Catolica de Chile (PUC)": {
    "schools": [
+    "School of Engineering",
     "School of Management"
    ],
    "units": [
+    "Industrial and Systems Engineering and Electrical Engineering",
     "Management Science"
    ],
    "bySchool": {
+    "School of Engineering": [
+     "Industrial and Systems Engineering and Electrical Engineering"
+    ],
     "School of Management": [
      "Management Science"
     ]
@@ -10819,6 +10869,19 @@
     ]
    }
   },
+  "Taejae University": {
+   "schools": [
+    "School of Arts"
+   ],
+   "units": [
+    "Sciences and Technology, Business Innovation"
+   ],
+   "bySchool": {
+    "School of Arts": [
+     "Sciences and Technology, Business Innovation"
+    ]
+   }
+  },
   "TBS Education": {
    "schools": [],
    "units": [
@@ -11033,11 +11096,13 @@
   },
   "Texas State University": {
    "schools": [
+    "College of Science and Engineering",
     "McCoy College of Business"
    ],
    "units": [
     "Analytics",
     "Department of Management",
+    "Engineering Technology",
     "Information Systems and Analytics",
     "IS",
     "IS and Analytics"
@@ -11047,6 +11112,9 @@
      "Analytics",
      "IS",
      "IS and Analytics"
+    ],
+    "College of Science and Engineering": [
+     "Engineering Technology"
     ],
     "McCoy College of Business": [
      "Department of Management",
@@ -12646,6 +12714,19 @@
     ]
    }
   },
+  "University of Nebraska - Lincoln": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Supply Chain Management and Analytics"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Supply Chain Management and Analytics"
+    ]
+   }
+  },
   "University of Nebraska at Kearney": {
    "schools": [],
    "units": [
@@ -12667,19 +12748,6 @@
    "bySchool": {
     "College of Public Affairs and Community Service, School of Public Administration": [
      "Nonprofit Management"
-    ]
-   }
-  },
-  "University of Nebraska–Lincoln": {
-   "schools": [
-    "College of Business"
-   ],
-   "units": [
-    "Supply Chain Management and Analytics"
-   ],
-   "bySchool": {
-    "College of Business": [
-     "Supply Chain Management and Analytics"
     ]
    }
   },
@@ -14480,7 +14548,8 @@
    "Nonprofit Management"
   ],
   "College of Science and Engineering": [
-   "Engineering Management and Decision Sciences"
+   "Engineering Management and Decision Sciences",
+   "Engineering Technology"
   ],
   "Coller School of Management": [
    "Operational Strategy"
@@ -14603,6 +14672,9 @@
   ],
   "Faculty of Arts and Science": [
    "Statistical Sciences"
+  ],
+  "Faculty of Arts and Social Science": [
+   "Management and Organizational Studies"
   ],
   "Faculty of Business": [
    "Computing and Decision Sciences",
@@ -15112,6 +15184,9 @@
   "School Economics and Management": [
    "Business and Public Administration"
   ],
+  "School of Arts": [
+   "Sciences and Technology, Business Innovation"
+  ],
   "School of Business": [
    "Analytics",
    "Analytics, Information and Operations Management",
@@ -15180,6 +15255,7 @@
   "School of Engineering": [
    "Center for Transportation and Logistics",
    "Industrial and Systems Engineering",
+   "Industrial and Systems Engineering and Electrical Engineering",
    "Management Science and Engineering"
   ],
   "School of Engineering and Applied Science": [

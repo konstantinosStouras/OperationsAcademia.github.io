@@ -1,30 +1,30 @@
 {
- "generated": "2026-10-18T18:07:21.944Z",
- "count": 855,
+ "generated": "2026-10-19T06:39:25.433Z",
+ "count": 860,
  "years": {
   "2026": 496,
-  "2027": 358,
+  "2027": 363,
   "2028": 1
  },
  "types": {
-  "University": 425,
-  "Business School": 393
+  "University": 429,
+  "Business School": 394
  },
  "levels": {
-  "Assistant Professor": 336,
-  "Other Ranks": 180,
-  "Non-tenure track (teaching) position": 52,
+  "Assistant Professor": 339,
+  "Other Ranks": 182,
+  "Non-tenure track (teaching) position": 54,
   "Post-Doc": 18,
   "Visiting Faculty (various levels)": 16,
   "PhD": 1,
   "RA or Pre-doc": 1
  },
  "countries": {
-  "United States": 616,
+  "United States": 618,
   "China": 37,
   "United Kingdom": 33,
   "Hong Kong": 20,
-  "Canada": 18,
+  "Canada": 19,
   "France": 16,
   "Singapore": 14,
   "Spain": 12,
@@ -33,9 +33,9 @@
   "United Arab Emirates": 7,
   "Turkey": 6,
   "Australia": 5,
+  "South Korea": 5,
   "Portugal": 4,
   "Saudi Arabia": 4,
-  "South Korea": 4,
   "Belgium": 3,
   "Denmark": 3,
   "Finland": 3,
@@ -44,12 +44,12 @@
   "Mexico": 3,
   "Austria": 2,
   "Cambodia": 2,
+  "Chile": 2,
   "Kazakhstan": 2,
   "Macau": 2,
   "Netherlands": 2,
   "Oman": 2,
   "Sweden": 2,
-  "Chile": 1,
   "Cyprus": 1,
   "Greece": 1,
   "Iraq": 1,
@@ -69,5 +69,5 @@
   "Exec Ed": 84
  },
  "featured": 1,
- "newestPosted": "2026-10-17"
+ "newestPosted": "2026-10-18"
 }

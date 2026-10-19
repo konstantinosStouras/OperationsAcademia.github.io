@@ -4609,13 +4609,18 @@
   "lng": -0.369098
  },
  {
-  "id": "huron-university____operations",
+  "id": "huron-university__faculty-of-arts-and-social-science__management-and-organizational-studies",
   "institution": "Huron University",
-  "department": "Operations",
+  "school": "Faculty of Arts and Social Science",
+  "department": "Management and Organizational Studies",
   "type": "University",
+  "country": "Canada",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-18"
  },
  {
   "id": "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem",
@@ -7934,12 +7939,18 @@
   "lng": 2.1797937
  },
  {
-  "id": "pontificia-universidad-catolica-de-chile____operations-research",
-  "institution": "Pontificia Universidad Católica de Chile",
-  "department": "Operations research",
+  "id": "pontificia-universidad-catolica-de-chile__school-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin",
+  "institution": "Pontificia Universidad Catolica de Chile (PUC)",
+  "school": "School of Engineering",
+  "department": "Industrial and Systems Engineering and Electrical Engineering",
+  "type": "University",
+  "country": "Chile",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-18"
  },
  {
   "id": "pontificia-universidad-catolica-de-chile__school-of-management__management-science",
@@ -9663,13 +9674,18 @@
   "lastPosted": "2026-08-13"
  },
  {
-  "id": "taejae-university____technology-and-business-innovation",
+  "id": "taejae-university__school-of-arts-sciences-and-technology__business-innovation",
   "institution": "Taejae University",
-  "department": "Technology and business innovation",
+  "school": "School of Arts, Sciences and Technology",
+  "department": "Business Innovation",
   "type": "Business School",
+  "country": "South Korea",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-18"
  },
  {
   "id": "tbs-education",
@@ -10101,15 +10117,6 @@
   "lastPosted": "2025-10-08"
  },
  {
-  "id": "texas-state-university____engineering-management",
-  "institution": "Texas State University",
-  "department": "Engineering Management",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "texas-state-university____is",
   "institution": "Texas State University",
   "department": "IS",
@@ -10134,6 +10141,20 @@
   ],
   "n": 2,
   "lastPosted": "2025-06-06"
+ },
+ {
+  "id": "texas-state-university__college-of-science-and-engineering__engineering-technology",
+  "institution": "Texas State University",
+  "school": "College of Science and Engineering",
+  "department": "Engineering Technology",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-18"
  },
  {
   "id": "texas-state-university__mccoy-college-of-business__management",
@@ -13865,15 +13886,6 @@
   "lastPosted": "2026-07-30"
  },
  {
-  "id": "university-of-nebraska-lincoln____business-analytics-supply-chain-management-and-om",
-  "institution": "University of Nebraska-Lincoln",
-  "department": "Business Analytics, Supply Chain Management, and OM",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "university-of-nebraska-lincoln__college-of-business__supply-chain-management-and-analytics",
   "institution": "University of Nebraska - Lincoln",
   "school": "College of Business",
@@ -13896,8 +13908,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2024-09-20",
+  "n": 2,
+  "lastPosted": "2026-10-18",
   "lat": 40.8169275,
   "lng": -96.69772
  },
