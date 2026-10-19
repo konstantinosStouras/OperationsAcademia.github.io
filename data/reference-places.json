@@ -336,6 +336,11 @@
  },
  {
   "institution": "Binghamton University",
+  "school": "",
+  "department": "Operations Management/Supply Chain Management"
+ },
+ {
+  "institution": "Binghamton University",
   "school": "School of Management",
   "department": "Business Analytics and Operations"
  },
@@ -1150,6 +1155,11 @@
   "department": "OM"
  },
  {
+  "institution": "Harvard Medical School",
+  "school": "",
+  "department": "Health Policy Modeling"
+ },
+ {
   "institution": "Harvard University",
   "school": "",
   "department": ""
@@ -1258,6 +1268,11 @@
   "institution": "Howard University",
   "school": "",
   "department": "open disciplinary focus"
+ },
+ {
+  "institution": "Huron University",
+  "school": "",
+  "department": "Operations"
  },
  {
   "institution": "Idaho State University",
@@ -3523,6 +3538,11 @@
   "institution": "University of Nebraska at Omaha",
   "school": "College of Public Affairs and Community Service, School of Public Administration",
   "department": "Nonprofit Management"
+ },
+ {
+  "institution": "University of Nebraska-Lincoln",
+  "school": "",
+  "department": "Business Analytics, Supply Chain Management, and OM"
  },
  {
   "institution": "University of Nevada Las Vegas",

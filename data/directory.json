@@ -921,6 +921,15 @@
   "lastPosted": "2026-02-24"
  },
  {
+  "id": "binghamton-university____operations-management-supply-chain-management",
+  "institution": "Binghamton University",
+  "department": "Operations Management/Supply Chain Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "binghamton-university__school-of-management__business-analytics-and-operations",
   "institution": "Binghamton University",
   "school": "School of Management",
@@ -4189,6 +4198,15 @@
   "lng": -71.1221527
  },
  {
+  "id": "harvard-medical-school____health-policy-modeling",
+  "institution": "Harvard Medical School",
+  "department": "Health Policy Modeling",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "harvard-university",
   "institution": "Harvard University",
   "type": "University",
@@ -4589,6 +4607,15 @@
   "lastPosted": "2014-05-08",
   "lat": 53.7691679,
   "lng": -0.369098
+ },
+ {
+  "id": "huron-university____operations",
+  "institution": "Huron University",
+  "department": "Operations",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem",
@@ -13836,6 +13863,15 @@
   ],
   "n": 1,
   "lastPosted": "2026-07-30"
+ },
+ {
+  "id": "university-of-nebraska-lincoln____business-analytics-supply-chain-management-and-om",
+  "institution": "University of Nebraska-Lincoln",
+  "department": "Business Analytics, Supply Chain Management, and OM",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "university-of-nebraska-lincoln__college-of-business__supply-chain-management-and-analytics",
