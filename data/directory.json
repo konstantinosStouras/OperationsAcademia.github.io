@@ -4193,15 +4193,6 @@
   "lng": -71.1221527
  },
  {
-  "id": "harvard-medical-school____health-policy-modeling",
-  "institution": "Harvard Medical School",
-  "department": "Health Policy Modeling",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "harvard-university",
   "institution": "Harvard University",
   "type": "University",
@@ -4265,6 +4256,20 @@
   "sources": [
    "seed"
   ]
+ },
+ {
+  "id": "harvard-university__harvard-medical-school__health-care-policy",
+  "institution": "Harvard University",
+  "school": "Harvard Medical School",
+  "department": "Health Care Policy",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-18"
  },
  {
   "id": "hec-montreal____decision-sciences",

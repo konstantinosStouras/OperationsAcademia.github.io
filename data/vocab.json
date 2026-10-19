@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T11:50:01.718Z",
+ "generated": "2026-10-19T11:54:48.217Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -459,6 +459,10 @@
   },
   {
    "v": "Grand Valley State University",
+   "n": 2
+  },
+  {
+   "v": "Harvard University",
    "n": 2
   },
   {
@@ -1143,10 +1147,6 @@
   },
   {
    "v": "Harvard Business School",
-   "n": 1
-  },
-  {
-   "v": "Harvard University",
    "n": 1
   },
   {
@@ -3016,6 +3016,10 @@
    "n": 1
   },
   {
+   "v": "Harvard Medical School",
+   "n": 1
+  },
+  {
    "v": "Heinz College of Information Systems and Public Policy",
    "n": 1
   },
@@ -4547,6 +4551,10 @@
   },
   {
    "v": "H. Milton Stewart School of Industrial and Systems Engineering",
+   "n": 1
+  },
+  {
+   "v": "Health Care Policy",
    "n": 1
   },
   {
@@ -8119,14 +8127,19 @@
   },
   "Harvard University": {
    "schools": [
-    "Harvard Business School"
+    "Harvard Business School",
+    "Harvard Medical School"
    ],
    "units": [
+    "Health Care Policy",
     "Technology and Operations Management"
    ],
    "bySchool": {
     "Harvard Business School": [
      "Technology and Operations Management"
+    ],
+    "Harvard Medical School": [
+     "Health Care Policy"
     ]
    }
   },
@@ -14805,6 +14818,9 @@
   ],
   "Harvard Business School": [
    "Technology and Operations Management"
+  ],
+  "Harvard Medical School": [
+   "Health Care Policy"
   ],
   "Haskayne School of Business": [
    "Operations and Supply Chain Management"

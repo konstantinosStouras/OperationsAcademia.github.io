@@ -1150,11 +1150,6 @@
   "department": "OM"
  },
  {
-  "institution": "Harvard Medical School",
-  "school": "",
-  "department": "Health Policy Modeling"
- },
- {
   "institution": "Harvard University",
   "school": "",
   "department": ""
@@ -1168,6 +1163,11 @@
   "institution": "Harvard University",
   "school": "Harvard Kennedy School",
   "department": "Public Policy"
+ },
+ {
+  "institution": "Harvard University",
+  "school": "Harvard Medical School",
+  "department": "Health Care Policy"
  },
  {
   "institution": "HEC Montréal",
