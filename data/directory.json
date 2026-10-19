@@ -7856,6 +7856,15 @@
   "lastPosted": "2026-09-22"
  },
  {
+  "id": "peking-university____management-science-information-system",
+  "institution": "Peking University",
+  "department": "Management Science/ Information System",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "peking-university____om-and-is",
   "institution": "Peking University",
   "department": "OM and IS",
