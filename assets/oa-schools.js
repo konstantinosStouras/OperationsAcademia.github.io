@@ -47,6 +47,9 @@
      Only the ones that arrived twice. The canonical spelling is the full one,
      accents and all. */
   var INSTITUTION_ALIASES = {
+    /* A review note typed into the university box (2026-10-18). */
+    '(duplicate with #248) KIMEP University': 'KIMEP University',
+    '(duplicate with #295) University of Tampa': 'University of Tampa',
     /* UB's official naming guide uses University at Buffalo as its formal
        academic name; the SUNY modifier and legal name denote the same place. */
     'University at Buffalo - The State University of New York': 'University at Buffalo',
@@ -172,6 +175,8 @@
        The entry keeps what the poster typed, which is what the three-column
        canon already publishes, so no posting moves; data/vocab.json, which
        had carried the mis-split into the pickers, is rebuilt from it. */
+    'School of Arts, Sciences and Technology':
+      { school: 'School of Arts, Sciences and Technology', unit: '' },   // Taejae University, one school
     'Leonard de Vinci Business School Paris-La Defense':
       { school: 'Leonard de Vinci Business School Paris-La Defense', unit: '' }
   };

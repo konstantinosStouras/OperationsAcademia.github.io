@@ -3216,7 +3216,7 @@
    "n": 1
   },
   {
-   "v": "School of Arts",
+   "v": "School of Arts, Sciences and Technology",
    "n": 1
   },
   {
@@ -4326,6 +4326,10 @@
    "n": 1
   },
   {
+   "v": "Business Innovation",
+   "n": 1
+  },
+  {
    "v": "Business Insights",
    "n": 1
   },
@@ -5215,10 +5219,6 @@
   },
   {
    "v": "Science and Innovation",
-   "n": 1
-  },
-  {
-   "v": "Sciences and Technology, Business Innovation",
    "n": 1
   },
   {
@@ -10871,14 +10871,14 @@
   },
   "Taejae University": {
    "schools": [
-    "School of Arts"
+    "School of Arts, Sciences and Technology"
    ],
    "units": [
-    "Sciences and Technology, Business Innovation"
+    "Business Innovation"
    ],
    "bySchool": {
-    "School of Arts": [
-     "Sciences and Technology, Business Innovation"
+    "School of Arts, Sciences and Technology": [
+     "Business Innovation"
     ]
    }
   },
@@ -15184,8 +15184,8 @@
   "School Economics and Management": [
    "Business and Public Administration"
   ],
-  "School of Arts": [
-   "Sciences and Technology, Business Innovation"
+  "School of Arts, Sciences and Technology": [
+   "Business Innovation"
   ],
   "School of Business": [
    "Analytics",

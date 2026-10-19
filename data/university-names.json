@@ -113,8 +113,6 @@
   "Donghua University",
   "Drexel University",
   "Duke University",
-  "(duplicate with #248) KIMEP University",
-  "(duplicate with #295) University of Tampa",
   "Durham University",
   "East Tennessee State University",
   "East Texas A&M University",
@@ -160,7 +158,6 @@
   "Hamad Bin Khalifa University",
   "Hanken School of Economics",
   "Harris-Stowe State University",
-  "Harvard Medical School",
   "Harvard University",
   "Hebrew University of Jerusalem",
   "HEC Montréal",
@@ -1620,6 +1617,10 @@
   ],
   [
    "Harvard Kennedy School",
+   "Harvard University"
+  ],
+  [
+   "Harvard Medical School",
    "Harvard University"
   ],
   [

@@ -221,6 +221,7 @@
     'Ewha School of Business': 'Ewha Womans University',
     'Georgia Tech (ISyE)': 'Georgia Institute of Technology',
     'Harvard Kennedy School': 'Harvard University',
+    'Harvard Medical School': 'Harvard University',
     'Hull University Business School': 'University of Hull',
     'IESE': 'University of Navarra',
     'IESE Business School': 'University of Navarra',
