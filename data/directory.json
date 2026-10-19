@@ -1378,9 +1378,13 @@
   "school": "College of Business Administration",
   "department": "Computer Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-11"
  },
  {
   "id": "california-state-university-bakersfield____mis-ba-ai",
@@ -1635,13 +1639,9 @@
   "school": "Carnegie Mellon University in Qatar",
   "department": "Information Systems",
   "type": "University",
-  "country": "United States",
   "sources": [
-   "postings",
    "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-17"
+  ]
  },
  {
   "id": "carnegie-mellon-university__heinz-college-of-information-systems-and-public-policy",
@@ -1721,6 +1721,15 @@
   "lastPosted": "2014-10-01",
   "lat": 40.4441647,
   "lng": -79.9433725
+ },
+ {
+  "id": "carnegie-mellon-university-qatar____is",
+  "institution": "Carnegie Mellon University Qatar",
+  "department": "IS",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "case-western-reserve-university__weatherhead-school-of-management__operations",
@@ -5509,8 +5518,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2026-10-17"
+  "n": 1,
+  "lastPosted": "2026-10-04"
  },
  {
   "id": "koc-university____om-is",
@@ -6195,8 +6204,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2026-07-31",
+  "n": 1,
+  "lastPosted": "2026-07-28",
   "lat": 45.5026099,
   "lng": -73.5764347
  },
@@ -14913,8 +14922,8 @@
    "postings",
    "seed"
   ],
-  "n": 3,
-  "lastPosted": "2026-10-17"
+  "n": 2,
+  "lastPosted": "2026-10-16"
  },
  {
   "id": "university-of-tennessee____ba",

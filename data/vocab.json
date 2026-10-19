@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T19:03:41.017Z",
+ "generated": "2026-10-19T22:18:16.600Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -90,10 +90,6 @@
    "n": 4
   },
   {
-   "v": "Carnegie Mellon University",
-   "n": 4
-  },
-  {
    "v": "HEC Paris",
    "n": 4
   },
@@ -174,6 +170,10 @@
    "n": 3
   },
   {
+   "v": "Carnegie Mellon University",
+   "n": 3
+  },
+  {
    "v": "Chicago Booth",
    "n": 3
   },
@@ -235,10 +235,6 @@
   },
   {
    "v": "Institut Mines-Télécom",
-   "n": 3
-  },
-  {
-   "v": "KIMEP University",
    "n": 3
   },
   {
@@ -319,10 +315,6 @@
   },
   {
    "v": "University of South Florida",
-   "n": 3
-  },
-  {
-   "v": "University of Tampa",
    "n": 3
   },
   {
@@ -518,6 +510,10 @@
    "n": 2
   },
   {
+   "v": "KIMEP University",
+   "n": 2
+  },
+  {
    "v": "Koç University",
    "n": 2
   },
@@ -531,10 +527,6 @@
   },
   {
    "v": "Massachusetts Institute of Technology",
-   "n": 2
-  },
-  {
-   "v": "McGill University",
    "n": 2
   },
   {
@@ -746,6 +738,10 @@
    "n": 2
   },
   {
+   "v": "University of Tampa",
+   "n": 2
+  },
+  {
    "v": "University of Tennessee at Chattanooga",
    "n": 2
   },
@@ -931,6 +927,10 @@
   },
   {
    "v": "Caldwell University",
+   "n": 1
+  },
+  {
+   "v": "California State Polytechnic University, Pomona",
    "n": 1
   },
   {
@@ -1275,6 +1275,10 @@
   },
   {
    "v": "Marquette University",
+   "n": 1
+  },
+  {
+   "v": "McGill University",
    "n": 1
   },
   {
@@ -1978,10 +1982,6 @@
    "n": 0
   },
   {
-   "v": "California State Polytechnic University Pomona",
-   "n": 0
-  },
-  {
    "v": "California State University, East Bay",
    "n": 0
   },
@@ -2484,6 +2484,10 @@
    "n": 6
   },
   {
+   "v": "College of Business Administration",
+   "n": 5
+  },
+  {
    "v": "Darden School of Business",
    "n": 5
   },
@@ -2493,10 +2497,6 @@
   },
   {
    "v": "C. T. Bauer College of Business",
-   "n": 4
-  },
-  {
-   "v": "College of Business Administration",
    "n": 4
   },
   {
@@ -2552,10 +2552,6 @@
    "n": 3
   },
   {
-   "v": "Sykes College of Business",
-   "n": 3
-  },
-  {
    "v": "W. P. Carey School of Business",
    "n": 3
   },
@@ -2565,10 +2561,6 @@
   },
   {
    "v": "Antai College of Economics and Management",
-   "n": 2
-  },
-  {
-   "v": "Bang College of Business",
    "n": 2
   },
   {
@@ -2605,10 +2597,6 @@
   },
   {
    "v": "Debbie and Jerry Ivy College of Business",
-   "n": 2
-  },
-  {
-   "v": "Desautels Faculty of Management",
    "n": 2
   },
   {
@@ -2732,6 +2720,10 @@
    "n": 2
   },
   {
+   "v": "Sykes College of Business",
+   "n": 2
+  },
+  {
    "v": "Tippie College of Business",
    "n": 2
   },
@@ -2772,6 +2764,10 @@
    "n": 1
   },
   {
+   "v": "Bang College of Business",
+   "n": 1
+  },
+  {
    "v": "Barney School of Business",
    "n": 1
   },
@@ -2801,10 +2797,6 @@
   },
   {
    "v": "Carlos Alvarez College of Business",
-   "n": 1
-  },
-  {
-   "v": "Carnegie Mellon University in Qatar",
    "n": 1
   },
   {
@@ -2893,6 +2885,10 @@
   },
   {
    "v": "David Nazarian College of Business and Economics",
+   "n": 1
+  },
+  {
+   "v": "Desautels Faculty of Management",
    "n": 1
   },
   {
@@ -3810,11 +3806,11 @@
    "n": 25
   },
   {
-   "v": "Operations Management",
-   "n": 17
+   "v": "Management",
+   "n": 16
   },
   {
-   "v": "Management",
+   "v": "Operations Management",
    "n": 16
   },
   {
@@ -3862,11 +3858,11 @@
    "n": 7
   },
   {
-   "v": "Information Systems",
-   "n": 7
+   "v": "Business",
+   "n": 6
   },
   {
-   "v": "Business",
+   "v": "Information Systems",
    "n": 6
   },
   {
@@ -3938,10 +3934,6 @@
    "n": 3
   },
   {
-   "v": "Information and Technology Management",
-   "n": 3
-  },
-  {
    "v": "Information Systems and Business Analytics",
    "n": 3
   },
@@ -3967,10 +3959,6 @@
   },
   {
    "v": "Operations and Information Management",
-   "n": 3
-  },
-  {
-   "v": "Operations Management and Business Analytics",
    "n": 3
   },
   {
@@ -4026,6 +4014,10 @@
    "n": 2
   },
   {
+   "v": "Computer Information Systems",
+   "n": 2
+  },
+  {
    "v": "Data Science",
    "n": 2
   },
@@ -4071,6 +4063,10 @@
   },
   {
    "v": "Information and Decision Sciences",
+   "n": 2
+  },
+  {
+   "v": "Information and Technology Management",
    "n": 2
   },
   {
@@ -4143,6 +4139,10 @@
   },
   {
    "v": "Operations and Information Systems",
+   "n": 2
+  },
+  {
+   "v": "Operations Management and Business Analytics",
    "n": 2
   },
   {
@@ -4407,10 +4407,6 @@
   },
   {
    "v": "Chair of Production Management",
-   "n": 1
-  },
-  {
-   "v": "Computer Information Systems",
    "n": 1
   },
   {
@@ -6578,14 +6574,20 @@
    "units": [],
    "bySchool": {}
   },
-  "California State Polytechnic University Pomona": {
-   "schools": [],
+  "California State Polytechnic University, Pomona": {
+   "schools": [
+    "College of Business Administration"
+   ],
    "units": [
+    "Computer Information Systems",
     "Technology and Operations Management"
    ],
    "bySchool": {
     "": [
      "Technology and Operations Management"
+    ],
+    "College of Business Administration": [
+     "Computer Information Systems"
     ]
    }
   },
@@ -6766,7 +6768,6 @@
   },
   "Carnegie Mellon University": {
    "schools": [
-    "Carnegie Mellon University in Qatar",
     "Heinz College of Information Systems and Public Policy",
     "Tepper School of Business"
    ],
@@ -6774,15 +6775,11 @@
     "Business Technologies",
     "Contextualized Evaluation of AI for Healthcare",
     "Heinz College",
-    "Information Systems",
     "Operations Management"
    ],
    "bySchool": {
     "": [
      "Contextualized Evaluation of AI for Healthcare"
-    ],
-    "Carnegie Mellon University in Qatar": [
-     "Information Systems"
     ],
     "Tepper School of Business": [
      "Business Technologies",
@@ -14460,9 +14457,6 @@
   "Carlos Alvarez College of Business": [
    "Operations and Analytics Department"
   ],
-  "Carnegie Mellon University in Qatar": [
-   "Information Systems"
-  ],
   "Carroll School of Management": [
    "Business Analytics"
   ],
@@ -14511,6 +14505,7 @@
   "College of Business Administration": [
    "Business Administration",
    "Business Analytics and Statistics",
+   "Computer Information Systems",
    "Decision Sciences and Information Systems",
    "Logistics and Supply Chain Management",
    "Management Information Systems",

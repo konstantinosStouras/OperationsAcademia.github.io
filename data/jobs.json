@@ -464,73 +464,6 @@
   "owner": ""
  },
  {
-  "id": "2027-carnegie-mellon-university-20261017",
-  "year": 2027,
-  "years": [
-   2027
-  ],
-  "posted": "2026-10-17",
-  "institution": "Carnegie Mellon University",
-  "department": "Carnegie Mellon University in Qatar, Information Systems",
-  "school": "Carnegie Mellon University in Qatar",
-  "unit": "Information Systems",
-  "type": "University",
-  "levels": [
-   "Non-tenure track (teaching) position"
-  ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "United States",
-  "countries": [
-   "United States"
-  ],
-  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179586104&Title=Faculty%20Positions%20in%20Information%20Systems",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.qatar.cmu.edu/academics/information-systems/",
-  "characteristics": [],
-  "featured": false,
-  "source": "jobmarket-sheet",
-  "addedAt": "2026-10-18T18:06:45Z",
-  "owner": ""
- },
- {
-  "id": "2027-kimep-university-20261017",
-  "year": 2027,
-  "years": [
-   2027
-  ],
-  "posted": "2026-10-17",
-  "institution": "KIMEP University",
-  "department": "Bang College of Business, Operations Management and Business Analytics",
-  "school": "Bang College of Business",
-  "unit": "Operations Management and Business Analytics",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor",
-   "Other Ranks"
-  ],
-  "applyBy": "November 15, 2026",
-  "applyByDate": "2026-11-15",
-  "comments": "",
-  "country": "Kazakhstan",
-  "countries": [
-   "Kazakhstan"
-  ],
-  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179588474&Title=Assistant%2FAssociate%20Professor%20of%20Operations%20Management%2FBusiness%20Analytics",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://hr.kimep.kz/en-US/Home/Vacancy/791",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=KIMEP%20University",
-  "characteristics": [],
-  "featured": false,
-  "source": "jobmarket-sheet",
-  "addedAt": "2026-10-19T11:56:27Z",
-  "owner": ""
- },
- {
   "id": "2027-pennsylvania-state-university-20261017",
   "year": 2027,
   "years": [
@@ -662,39 +595,6 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-18T18:06:24Z",
-  "owner": ""
- },
- {
-  "id": "2027-university-of-tampa-20261017",
-  "year": 2027,
-  "years": [
-   2027
-  ],
-  "posted": "2026-10-17",
-  "institution": "University of Tampa",
-  "department": "Sykes College of Business, Information and Technology Management",
-  "school": "Sykes College of Business",
-  "unit": "Information and Technology Management",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "United States",
-  "countries": [
-   "United States"
-  ],
-  "adUrl": "https://utampa.wd1.myworkdayjobs.com/en-US/Faculty/job/Tampa/Assistant-Professor-of-Business-Analytics_R0011137-1?applicant_id=D297C189-07C5-465C-9544-4AEB43DA3FDC&ad_id=9DEDA075-F60D-4BBB-AC70-70DB2C88F101",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179587962&Title=Assistant%20Professor%20Of%20Business%20Analytics",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Tampa",
-  "characteristics": [],
-  "featured": false,
-  "source": "jobmarket-sheet",
-  "addedAt": "2026-10-19T11:57:52Z",
   "owner": ""
  },
  {
@@ -9902,6 +9802,40 @@
   "owner": ""
  },
  {
+  "id": "2027-cal-poly-pomona-20260811",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-11",
+  "institution": "California State Polytechnic University, Pomona",
+  "department": "College of Business Administration, Computer Information Systems",
+  "school": "College of Business Administration",
+  "unit": "Computer Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-11",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179523912&Title=Tenure%20Track%20Faculty%20Position%20Computer%20Information%20Systems%20Department%20College%20of%20Business%20Administration",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=California%20State%20Polytechnic%20University%2C%20Pomona",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-09T07:41:02Z",
+  "owner": ""
+ },
+ {
   "id": "2027-ewha-womans-university-20260811",
   "year": 2027,
   "years": [
@@ -10803,39 +10737,6 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-09T07:41:03Z",
-  "owner": ""
- },
- {
-  "id": "2027-mcgill-university-20260731",
-  "year": 2027,
-  "years": [
-   2027
-  ],
-  "posted": "2026-07-31",
-  "institution": "McGill University",
-  "department": "Desautels Faculty of Management, Operations Management",
-  "school": "Desautels Faculty of Management",
-  "unit": "Operations Management",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "October 16, 2026",
-  "applyByDate": "2026-10-16",
-  "comments": "The position is open to candidates with a Ph.D. in any area of specialization in Operations Management, particularly in the field of data analytics related to operations management or operations research topics (e.g., revenue management, supply chain management, sustainable operations, big data, etc.), as well as to applicants demonstrating outstanding potential who are doctoral students in those fields and plan to have completed the requirements for their Ph.D. by December 2027. We have a particular interest in candidates with research and teaching focus in the Faculty priority areas of Analytics, AI & Advanced Digital Technologies; Innovation & Entrepreneurship; Sustainability; or Equity, Diversity & Inclusion.",
-  "country": "Canada",
-  "countries": [
-   "Canada"
-  ],
-  "adUrl": "https://mcgill.wd3.myworkdayjobs.com/en-US/McGill_Careers/job/Bronfman-Building/Tenure-Track-Position-in-Operations-Management--Desautels-Faculty-of-Management--McGill-University_JR0000078492?workerSubType=5b8bbc1be9ca01d9ed26d340de00890e",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=McGill%20University",
-  "characteristics": [],
-  "featured": false,
-  "source": "jobmarket-sheet",
-  "addedAt": "2026-09-14T07:37:55Z",
   "owner": ""
  },
  {
