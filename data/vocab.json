@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T06:39:25.433Z",
+ "generated": "2026-10-19T11:44:43.902Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -563,6 +563,10 @@
   },
   {
    "v": "Oregon State University",
+   "n": 2
+  },
+  {
+   "v": "Peking University",
    "n": 2
   },
   {
@@ -1387,10 +1391,6 @@
   },
   {
    "v": "Özyeğin University",
-   "n": 1
-  },
-  {
-   "v": "Peking University",
    "n": 1
   },
   {
@@ -3004,6 +3004,10 @@
    "n": 1
   },
   {
+   "v": "Guanghua School of Management",
+   "n": 1
+  },
+  {
    "v": "Gus Machado College of Business",
    "n": 1
   },
@@ -3477,10 +3481,6 @@
   },
   {
    "v": "Graduate School of Business",
-   "n": 0
-  },
-  {
-   "v": "Guanghua School of Management",
    "n": 0
   },
   {
@@ -4091,6 +4091,10 @@
   },
   {
    "v": "Management and Marketing",
+   "n": 2
+  },
+  {
+   "v": "Management Science and Information Systems",
    "n": 2
   },
   {
@@ -4863,10 +4867,6 @@
   },
   {
    "v": "Management Science and Engineering",
-   "n": 1
-  },
-  {
-   "v": "Management Science and Information Systems",
    "n": 1
   },
   {
@@ -9833,6 +9833,7 @@
    ],
    "units": [
     "Management Science and Information System",
+    "Management Science and Information Systems",
     "OM and IS"
    ],
    "bySchool": {
@@ -9840,7 +9841,8 @@
      "OM and IS"
     ],
     "Guanghua School of Management": [
-     "Management Science and Information System"
+     "Management Science and Information System",
+     "Management Science and Information Systems"
     ]
    }
   },
@@ -14789,7 +14791,8 @@
    "Operations Management"
   ],
   "Guanghua School of Management": [
-   "Management Science and Information System"
+   "Management Science and Information System",
+   "Management Science and Information Systems"
   ],
   "Gus Machado College of Business": [
    "Quantitative and Statistical Analysis, Supply Chain, Operations and Logistics Management, and Managerial Economics"
