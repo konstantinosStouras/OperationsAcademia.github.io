@@ -81,6 +81,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Queued runs must read the current branch, not the dispatch's SHA.
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-node@v5
         with:
@@ -137,6 +140,10 @@ jobs:
 
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          IN_SHEET: ${{ inputs.sheet }}
+          IN_MIN_YEAR: ${{ inputs.min_year }}
         run: |
           if [ -z "$(git status --porcelain data)" ]; then
             echo "no change — nothing to commit"
@@ -147,27 +154,34 @@ jobs:
           git add data
           git commit -m "OA jobs: read the job market tracking sheet"
 
-          # plain fast-forward, with rebase-and-retry — the postings build may
-          # have moved the branch on while this run was working
+          # Generated datasets cannot be rebased: another sheet run changes
+          # the same rows and timestamps. Re-read on the new tip instead.
           for i in 1 2 3 4 5; do
             if git push origin HEAD:${{ github.ref_name }}; then
               echo "pushed"
               exit 0
             fi
-            echo "push rejected — rebasing onto the new tip (attempt $i)"
-            git pull --rebase origin ${{ github.ref_name }} || exit 1
-            # THE REBUILT TREE GOES THROUGH THE SAME GATE, exactly as the
-            # build's own retry does. A rebase brings another writer's data/ in
-            # under this run's commit, and the re-apply above then rewrites the
-            # served files against it -- so what is about to be pushed is NOT
-            # what the gate passed before the loop. Without this, a retry can
-            # commit precisely what the gate exists to refuse, which is the
-            # rule this repository already wrote down for oa-jobs-build.yml.
+            if [ "$i" = 5 ]; then break; fi
+            echo "push rejected — re-reading on the new tip (attempt $i)"
+            sleep $((i * 3))
+            git fetch origin ${{ github.ref_name }} || exit 1
+            git reset --hard FETCH_HEAD || exit 1
+            # Preserve the requested workbook/year. A retry must not send a
+            # second staleness alert; real read/gate failures still fail CI.
+            set -- --no-mail
+            if [ -n "$IN_SHEET" ]; then set -- "$@" "--sheet" "$IN_SHEET"; fi
+            if [ -n "$IN_MIN_YEAR" ]; then set -- "$@" "--min-year" "$IN_MIN_YEAR"; fi
+            node _scraper/sync-jobmarket-sheet.mjs "$@" || exit 1
             if ! node _scraper/selftest.mjs --publishing; then
               echo "::error::the rebuilt data/ does not pass the publishing gate - pushing nothing"
               exit 1
             fi
-            sleep $((i * 3))
+            if [ -z "$(git status --porcelain data)" ]; then
+              echo "the other writer published it all — nothing left to commit"
+              exit 0
+            fi
+            git add data
+            git commit -m "OA jobs: read the job market tracking sheet"
           done
           echo "could not push after 5 attempts"
           exit 1
