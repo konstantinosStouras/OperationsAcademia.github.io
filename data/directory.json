@@ -921,15 +921,6 @@
   "lastPosted": "2026-02-24"
  },
  {
-  "id": "binghamton-university____operations-and-supply-chain-management",
-  "institution": "Binghamton University",
-  "department": "Operations and Supply Chain Management",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "binghamton-university__school-of-management__business-analytics-and-operations",
   "institution": "Binghamton University",
   "school": "School of Management",
@@ -2967,15 +2958,6 @@
   "lastPosted": "2026-10-05",
   "lat": 35.9990792,
   "lng": -78.9473769
- },
- {
-  "id": "duplicate-with-222-lake-erie-college____business-administration",
-  "institution": "(duplicate with #222) Lake Erie College",
-  "department": "Business Administration",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
  },
  {
   "id": "durham-university__business-school__management-and-marketing",
