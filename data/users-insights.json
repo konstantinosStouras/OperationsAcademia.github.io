@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-19T23:35:39.125Z",
- "members": 375,
+ "generated": "2026-10-20T09:22:07.846Z",
+ "members": 376,
  "k": 3,
  "affiliation": {
-  "listed": 293,
+  "listed": 294,
   "other": 46,
   "none": 36
  },
@@ -13,7 +13,7 @@
    {
     "name": "National University of Singapore",
     "country": "Singapore",
-    "members": 11
+    "members": 12
    },
    {
     "name": "Cornell University",
@@ -216,7 +216,7 @@
    },
    {
     "name": "Singapore",
-    "members": 15
+    "members": 16
    },
    {
     "name": "Hong Kong",
