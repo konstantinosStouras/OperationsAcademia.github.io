@@ -3971,9 +3971,13 @@
   "institution": "Georgia Military College",
   "department": "Supply Chain and Logistics Systems",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-19"
  },
  {
   "id": "georgia-southern-university__parker-college-of-business__information-systems-and-analytics",
@@ -10108,13 +10112,18 @@
   "lastPosted": "2026-09-30"
  },
  {
-  "id": "texas-a-m-university-corpus-christi____industrial-engineering",
+  "id": "texas-a-m-university-corpus-christi__college-of-engineering-and-computer-science__industrial-engineering",
   "institution": "Texas A&M University-Corpus Christi",
+  "school": "College of Engineering and Computer Science",
   "department": "Industrial Engineering",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-19"
  },
  {
   "id": "texas-christian-university____analytics-business-is",
@@ -12910,15 +12919,6 @@
   "lastPosted": "2026-03-07"
  },
  {
-  "id": "university-of-houston-downtown____project-management-and-process-improvement",
-  "institution": "University of Houston-Downtown",
-  "department": "Project Management and Process Improvement",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "university-of-houston-downtown____supply-chain-management",
   "institution": "University of Houston-Downtown",
   "department": "Supply Chain Management",
@@ -12930,6 +12930,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-01-27"
+ },
+ {
+  "id": "university-of-houston-downtown__marilyn-davies-college-of-business__general-business-marketing-and-supply-chain-management",
+  "institution": "University of Houston-Downtown",
+  "school": "Marilyn Davies College of Business",
+  "department": "General Business, Marketing, and Supply Chain Management",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-19"
  },
  {
   "id": "university-of-illinois-at-chicago__college-of-business__enterprise-ai-and-systems",

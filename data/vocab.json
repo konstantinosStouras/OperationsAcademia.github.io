@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T22:18:16.600Z",
+ "generated": "2026-10-20T07:07:40.382Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -295,6 +295,10 @@
   },
   {
    "v": "University of Florida",
+   "n": 3
+  },
+  {
+   "v": "University of Houston-Downtown",
    "n": 3
   },
   {
@@ -679,10 +683,6 @@
   },
   {
    "v": "University of Hartford",
-   "n": 2
-  },
-  {
-   "v": "University of Houston - Downtown",
    "n": 2
   },
   {
@@ -1119,6 +1119,10 @@
   },
   {
    "v": "Georgia Gwinnett College",
+   "n": 1
+  },
+  {
+   "v": "Georgia Military College",
    "n": 1
   },
   {
@@ -1575,6 +1579,10 @@
   },
   {
    "v": "Texas A&M International University",
+   "n": 1
+  },
+  {
+   "v": "Texas A&M University-Corpus Christi",
    "n": 1
   },
   {
@@ -2828,6 +2836,10 @@
    "n": 1
   },
   {
+   "v": "College of Engineering and Computer Science",
+   "n": 1
+  },
+  {
    "v": "College of Health and Human Performance",
    "n": 1
   },
@@ -3105,6 +3117,10 @@
   },
   {
    "v": "Lucille and Jay Chazanoff School of Business",
+   "n": 1
+  },
+  {
+   "v": "Marilyn Davies College of Business",
    "n": 1
   },
   {
@@ -3890,6 +3906,10 @@
    "n": 4
   },
   {
+   "v": "Industrial Engineering",
+   "n": 4
+  },
+  {
    "v": "Operations and Business Analytics",
    "n": 4
   },
@@ -3927,10 +3947,6 @@
   },
   {
    "v": "Department of Management",
-   "n": 3
-  },
-  {
-   "v": "Industrial Engineering",
    "n": 3
   },
   {
@@ -4163,6 +4179,10 @@
   },
   {
    "v": "SCM/BA",
+   "n": 2
+  },
+  {
+   "v": "Supply Chain and Logistics Systems",
    "n": 2
   },
   {
@@ -4543,6 +4563,10 @@
   },
   {
    "v": "Future of Healthy Aging",
+   "n": 1
+  },
+  {
+   "v": "General Business, Marketing, and Supply Chain Management",
    "n": 1
   },
   {
@@ -5351,10 +5375,6 @@
   },
   {
    "v": "Strategic Management and Operations",
-   "n": 1
-  },
-  {
-   "v": "Supply Chain and Logistics Systems",
    "n": 1
   },
   {
@@ -7968,6 +7988,17 @@
     ],
     "Scheller College of Business": [
      "Operations Management"
+    ]
+   }
+  },
+  "Georgia Military College": {
+   "schools": [],
+   "units": [
+    "Supply Chain and Logistics Systems"
+   ],
+   "bySchool": {
+    "": [
+     "Supply Chain and Logistics Systems"
     ]
    }
   },
@@ -11095,6 +11126,19 @@
     ]
    }
   },
+  "Texas A&M University-Corpus Christi": {
+   "schools": [
+    "College of Engineering and Computer Science"
+   ],
+   "units": [
+    "Industrial Engineering"
+   ],
+   "bySchool": {
+    "College of Engineering and Computer Science": [
+     "Industrial Engineering"
+    ]
+   }
+  },
   "Texas A&M University–Central Texas": {
    "schools": [
     "College of Business Administration"
@@ -12249,9 +12293,12 @@
     ]
    }
   },
-  "University of Houston - Downtown": {
-   "schools": [],
+  "University of Houston-Downtown": {
+   "schools": [
+    "Marilyn Davies College of Business"
+   ],
    "units": [
+    "General Business, Marketing, and Supply Chain Management",
     "MIS",
     "Supply Chain Management"
    ],
@@ -12259,6 +12306,9 @@
     "": [
      "MIS",
      "Supply Chain Management"
+    ],
+    "Marilyn Davies College of Business": [
+     "General Business, Marketing, and Supply Chain Management"
     ]
    }
   },
@@ -14548,6 +14598,9 @@
    "Systems Engineering",
    "Wm Michael Barnes’ 64 Department of Industrial and Systems Engineering"
   ],
+  "College of Engineering and Computer Science": [
+   "Industrial Engineering"
+  ],
   "College of Engineering, Computing and Applied Sciences": [
    "Industrial Engineering"
   ],
@@ -15003,6 +15056,9 @@
   ],
   "Manning School of Business": [
    "Operations and Information Systems"
+  ],
+  "Marilyn Davies College of Business": [
+   "General Business, Marketing, and Supply Chain Management"
   ],
   "Marriott School of Business": [
    "Marketing and Global Supply Chain"
