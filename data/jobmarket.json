@@ -1,5 +1,38 @@
 [
  {
+  "id": "2027-georgia-military-college-20261019",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-19",
+  "institution": "Georgia Military College",
+  "department": "Supply Chain and Logistics Systems",
+  "school": "",
+  "unit": "Supply Chain and Logistics Systems",
+  "type": "University",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179592179&Title=College%20Faculty%3A%20Business%2FSupply%20Chain%20Logistics%3A%20Main%20%28In%2DPerson%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Georgia%20Military%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-20T07:05:12Z",
+  "owner": ""
+ },
+ {
   "id": "2027-peking-university-20261019",
   "year": 2027,
   "years": [
@@ -31,6 +64,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-19T11:43:41Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-texas-a-m-university-corpus-christi-20261019",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-19",
+  "institution": "Texas A&M University-Corpus Christi",
+  "department": "College of Engineering and Computer Science, Industrial Engineering",
+  "school": "College of Engineering and Computer Science",
+  "unit": "Industrial Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 12, 2026",
+  "applyByDate": "2026-11-12",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.world.edu/jobs/assistant-associate-professor-industrial-engineering/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.tamucc.edu/engineering/departments/engineering/index.php",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-20T07:05:23Z",
   "owner": ""
  },
  {
