@@ -3958,6 +3958,15 @@
   "lng": -84.384841
  },
  {
+  "id": "georgia-military-college____supply-chain-and-logistics-systems",
+  "institution": "Georgia Military College",
+  "department": "Supply Chain and Logistics Systems",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "georgia-southern-university__parker-college-of-business__information-systems-and-analytics",
   "institution": "Georgia Southern University",
   "school": "Parker College of Business",
