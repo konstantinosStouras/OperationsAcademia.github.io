@@ -1,10 +1,10 @@
 {
- "generated": "2026-10-20T12:57:06.019Z",
- "members": 377,
+ "generated": "2026-10-20T17:56:43.483Z",
+ "members": 379,
  "k": 3,
  "affiliation": {
-  "listed": 295,
-  "other": 46,
+  "listed": 296,
+  "other": 47,
   "none": 36
  },
  "universities": {
@@ -23,7 +23,7 @@
    {
     "name": "Harvard University",
     "country": "United States",
-    "members": 7
+    "members": 8
    },
    {
     "name": "Massachusetts Institute of Technology",
@@ -208,7 +208,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 188
+    "members": 189
    },
    {
     "name": "Canada",
@@ -244,6 +244,6 @@
    }
   ],
   "rest": 11,
-  "unknown": 97
+  "unknown": 98
  }
 }
