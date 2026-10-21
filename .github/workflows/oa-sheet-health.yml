@@ -1,0 +1,54 @@
+name: OA sheet - report persistent failures
+
+on:
+  workflow_run:
+    workflows: ["OA jobs — read the job market tracking sheet"]
+    types: [completed]
+
+permissions:
+  actions: read
+  issues: write
+
+concurrency:
+  group: oa-sheet-health
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # No checkout or secrets: only inspect run metadata and manage one issue.
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const repo = context.repo;
+            const title = 'Action needed: OA job-market sheet updates are failing';
+            const marker = '<!-- oa-sheet-health-v1 -->';
+            const runs = (await github.rest.actions.listWorkflowRuns({
+              ...repo, workflow_id: 'oa-jobmarket-sheet.yml', branch: 'master',
+              status: 'completed', per_page: 20
+            })).data.workflow_runs
+              .filter(r => ['success', 'failure', 'timed_out'].includes(r.conclusion))
+              .sort((a, b) => b.run_number - a.run_number);
+            if (!runs.length) return;
+            // Re-read current health, rather than acting on a queued old event.
+            const latest = runs[0];
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              ...repo, state: 'open', creator: 'github-actions[bot]', per_page: 100
+            });
+            const open = issues.filter(i => !i.pull_request &&
+              i.title === title && (i.body || '').includes(marker));
+            if (latest.conclusion === 'success') {
+              for (const issue of open) await github.rest.issues.update({
+                ...repo, issue_number: issue.number, state: 'closed', state_reason: 'completed'
+              });
+              return;
+            }
+            // One transient failure is not an incident. Three consecutive
+            // failed runs are actionable; repeated failures leave the issue alone.
+            if (runs.length < 3 || runs.slice(0, 3).some(r => r.conclusion === 'success') || open.length) return;
+            await github.rest.issues.create({
+              ...repo, title,
+              body: `${marker}\n@${repo.owner} The job-market sheet importer has failed on three consecutive runs. New sheet changes may not have reached the site.\n\nLatest failed run: ${latest.html_url}\n\nOpen that run and check its failed step. This incident produces one alert, rather than an email on every retry. It closes automatically after a successful import.`
+            });

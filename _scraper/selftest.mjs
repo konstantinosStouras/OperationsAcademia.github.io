@@ -2642,6 +2642,16 @@ async function testCountries() {
   ok(!byUni.has(SCHOOLS.institutionKey('INSEAD')),
     'a university with campuses in two countries has NO single answer, which is '
     + 'what makes correcting the others safe');
+  ok(!byUni.has(SCHOOLS.institutionKey('Carnegie Mellon University')),
+    'mapping Tepper in Pittsburgh does not make all CMU postings American');
+  const qatarPosting = { institution: 'Carnegie Mellon University',
+    school: 'Carnegie Mellon University in Qatar', country: 'Qatar', countries: ['Qatar'] };
+  ok(healCountry(qatarPosting, byUni) === qatarPosting,
+    'a Qatar-campus posting keeps Qatar through the country heal and publishing gate');
+  const pittsburghPosting = { ...qatarPosting, school: 'Tepper School of Business',
+    country: 'United States', countries: ['United States'] };
+  ok(healCountry(pittsburghPosting, byUni) === pittsburghPosting,
+    'a Pittsburgh-campus posting also keeps its own country');
 
   /* BOTH FILES THE PIPELINE HEALS. data/jobmarket.json is served in its own
      right — the workbook's postings, which the jobs page filters by country

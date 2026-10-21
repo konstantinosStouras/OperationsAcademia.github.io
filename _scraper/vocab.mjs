@@ -503,16 +503,19 @@ export function fillSchoolFromDirectory(row, vocab, schools = SCHOOLS) {
    is the same discipline `schoolForUnit` applies to a department two schools
    both claim. That guard is what makes correcting the others safe.           */
 
-/** Curated campus countries for universities the Universities directory does
-    not carry. The directory answers 197 of them; these are the ones that have
+/** Curated campus countries missing from the Universities directory.
+    The directory answers 197 universities; these are the ones that have
     POSTED here without ever being mapped, so the audit would otherwise have
     nothing to check them against.
 
     GROW THIS LIST, exactly as oa-institutions.js is grown — one line per
-    university, and only where the campus country is not in doubt. A university
-    with campuses in two countries belongs in neither this list nor the heal:
-    leave it out and the audit stays quiet about it. */
+    university, and only where the campus country is not in doubt. Use an
+    array for a university with campuses in multiple countries, including
+    when the directory maps only one of them. Such a university must not be
+    corrected to the country of that one mapped campus. */
 export const CAMPUS_COUNTRY = {
+  // The directory maps Tepper in Pittsburgh, but postings also come from CMU-Q.
+  'Carnegie Mellon University': ['United States', 'Qatar'],
   'Morgan State University': 'United States',        // Baltimore, Maryland
   'Rollins College': 'United States',                // Winter Park, Florida
   "St. John's University": 'United States',          // Queens, New York
@@ -541,8 +544,10 @@ export function campusCountries(directory = [], schools = SCHOOLS) {
     if (!r || !r.institution) continue;
     add(r.institution, COUNTRIES.countryFromAddress(r.address));
   }
-  for (const [institution, country] of Object.entries(CAMPUS_COUNTRY)) {
-    add(institution, country);
+  for (const [institution, countries] of Object.entries(CAMPUS_COUNTRY)) {
+    for (const country of (Array.isArray(countries) ? countries : [countries])) {
+      add(institution, country);
+    }
   }
 
   const out = new Map();
