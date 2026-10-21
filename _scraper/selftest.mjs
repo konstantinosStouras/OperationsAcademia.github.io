@@ -10175,6 +10175,7 @@ async function testHigherEdJobsWiring() {
     /* An approval re-derives the row, so the caches are applied AGAIN after
        partition, or the re-check below goes red and nothing commits (the
        2026-10-14 to 17 outage). */
+    ok(sync.indexOf('const site = await readJson(JOBS_FILE, []);') < sync.indexOf('const publishCheck = findAdvertRepeats'), 'the publication duplicate check loads existing jobs before using them');
     const after = sync.slice(sync.indexOf('rows = publishCheck.keep;'));
     ok(sync.includes('rows = publishCheck.keep;') &&
        /applyVerified\(rows[\s\S]{0,200}applyAdverts\(rows/.test(after.slice(0, 2000)),

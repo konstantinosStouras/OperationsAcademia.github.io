@@ -784,6 +784,7 @@ async function main() {
              'data/jobmarket.json was left exactly as it is');
         rows = existing;
       } else {
+        const site = await readJson(JOBS_FILE, []);
         const split = partition(rows, queue.docs, {
           now: isoStamp(now),
           /* What the site is showing right now. Postings already public are
@@ -825,7 +826,7 @@ async function main() {
            them: approving still publishes, rejecting still keeps it off.
            Pending rows are re-checked every sync, so a flag appears when the
            duplicate is posted later and clears when it is taken down. */
-        const site = await readJson(JOBS_FILE, []);
+
 
         /* THE OTHER CRAWLER'S PENDING ROWS ARE "IN THE QUEUE" TOO (the
            2026-09-23 review). `partition` visits the workbook's rows alone, so
