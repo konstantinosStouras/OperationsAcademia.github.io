@@ -921,6 +921,15 @@
   "lastPosted": "2026-02-24"
  },
  {
+  "id": "binghamton-university____operations-and-supply-chain-management",
+  "institution": "Binghamton University",
+  "department": "Operations and Supply Chain Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "binghamton-university__school-of-management__business-analytics-and-operations",
   "institution": "Binghamton University",
   "school": "School of Management",
@@ -1959,6 +1968,15 @@
   ],
   "n": 1,
   "lastPosted": "2025-09-26"
+ },
+ {
+  "id": "city-university-of-hong-kong____systems-engineering",
+  "institution": "City University of Hong Kong",
+  "department": "Systems Engineering",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "city-university-of-hong-kong__college-of-business__decision-analytics-and-operations",
@@ -3407,6 +3425,15 @@
   ],
   "n": 1,
   "lastPosted": "2025-08-11"
+ },
+ {
+  "id": "fayetteville-state-university____operations-management",
+  "institution": "Fayetteville State University",
+  "department": "Operations Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "fayetteville-state-university____supply-chain-management",

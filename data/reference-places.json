@@ -326,6 +326,11 @@
  },
  {
   "institution": "Binghamton University",
+  "school": "",
+  "department": "Operations and Supply Chain Management"
+ },
+ {
+  "institution": "Binghamton University",
   "school": "School of Management",
   "department": "Business Analytics and Operations"
  },
@@ -598,6 +603,11 @@
   "institution": "City University of Hong Kong",
   "school": "",
   "department": "OM/Statistics"
+ },
+ {
+  "institution": "City University of Hong Kong",
+  "school": "",
+  "department": "Systems Engineering"
  },
  {
   "institution": "City University of Hong Kong",
@@ -933,6 +943,11 @@
   "institution": "Fayetteville State University",
   "school": "",
   "department": "ISBA"
+ },
+ {
+  "institution": "Fayetteville State University",
+  "school": "",
+  "department": "Operations Management"
  },
  {
   "institution": "Fayetteville State University",
