@@ -1457,6 +1457,11 @@
  {
   "institution": "KAIST",
   "school": "",
+  "department": "Industrial and Systems Engineering"
+ },
+ {
+  "institution": "KAIST",
+  "school": "",
   "department": "Organization/Man. Sci"
  },
  {
@@ -3068,6 +3073,11 @@
   "institution": "University of Bath",
   "school": "",
   "department": "Operations Management / Supply Chain Management / Project Management"
+ },
+ {
+  "institution": "University of Bristol Business School",
+  "school": "",
+  "department": "Forecasting"
  },
  {
   "institution": "University of Bristol",
