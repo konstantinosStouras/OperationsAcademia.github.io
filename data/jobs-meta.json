@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21T21:42:52.130Z",
+ "generated": "2026-10-21T21:48:38.943Z",
  "count": 873,
  "years": {
   "2026": 496,
@@ -20,7 +20,7 @@
   "RA or Pre-doc": 1
  },
  "countries": {
-  "United States": 627,
+  "United States": 626,
   "China": 38,
   "United Kingdom": 34,
   "Hong Kong": 21,
@@ -49,6 +49,7 @@
   "Kazakhstan": 2,
   "Macau": 2,
   "Oman": 2,
+  "Qatar": 2,
   "Sweden": 2,
   "Cyprus": 1,
   "Greece": 1,
@@ -56,7 +57,6 @@
   "Italy": 1,
   "Kuwait": 1,
   "New Zealand": 1,
-  "Qatar": 1,
   "Switzerland": 1,
   "Uzbekistan": 1
  },
