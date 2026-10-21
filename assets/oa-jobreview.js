@@ -499,7 +499,27 @@
    * note) is left as it is, exactly as before.
    */
   function writeDecision(db, doc, patch) {
-    return db.collection(COL).doc(doc.rowId).set(patch, { mergeFields: Object.keys(patch) });
+    var check = Promise.resolve();
+    if (patch.status === 'approved') {
+      // Recheck at the final gate, including approvals not yet in jobs.json.
+      // Failure to read either source must fail closed, not publish unchecked.
+      check = Promise.all([
+        fetch('data/jobs.json', { cache: 'no-cache' }).then(function (r) {
+          if (!r.ok) throw new Error('Could not check existing jobs.');
+          return r.json();
+        }),
+        db.collection(COL).where('status', '==', 'approved').get()
+      ]).then(function (got) {
+        if (!window.OAAdvertDup || !Array.isArray(got[0])) throw new Error('Duplicate check unavailable.');
+        var existing = got[0].concat(got[1].docs.map(function (d) { return judgedRow(d.data()); }));
+        var row = judgedRow(Object.assign({}, doc, { edits: patch.edits || doc.edits || {} }));
+        var repeat = OAAdvertDup.advertRepeat(row, existing);
+        if (repeat) throw new Error('Already listed: ' + (repeat.ref || repeat.id) + '. Left under review.');
+      });
+    }
+    return check.then(function () {
+      return db.collection(COL).doc(doc.rowId).set(patch, { mergeFields: Object.keys(patch) });
+    });
   }
 
   /**

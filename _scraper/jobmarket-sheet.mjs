@@ -1007,6 +1007,9 @@ export function rowsFromTab(csv, {
 
   for (const raw of grid.slice(head.at + 1)) {
     const institution = text(redactEmails(cell(raw, index, 'institution')), 160);
+    // A sheet editor explicitly marked this as a duplicate, not a university
+    // named "(duplicate with #222) ...". Never queue or mail this row.
+    if (/^\s*\(duplicate\s+with\s+#\d+\)/i.test(institution)) { skipped++; continue; }
     const posted = sheetDay(cell(raw, index, 'posted'));
 
     /* A row needs a name and a date: the date is half its identity (jobId is

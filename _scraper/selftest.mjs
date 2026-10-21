@@ -5447,6 +5447,11 @@ function testJobMarketSheetRows() {
     liveHead.map((v, i) => i === 1 ? 'Location' : v), ...JMS_ROWS,
   ]), { tab: '2026 Jobs', kind: 'jobs', minYear: 2026, cycleYear: 2027 });
   eq(liveNtt.rows.length, 4, 'the current NTT/PD School header imports every fixture posting');
+  const markedRows = JMS_ROWS.map(r => r.slice());
+  markedRows[0][1] = '(duplicate with #222) Lake Erie College';
+  const marked = rowsFromTab(csvOf([liveHead, ...markedRows]),
+    { tab: '2026 NTT/PD', kind: 'ntt-pd', minYear: 2026, cycleYear: 2027 });
+  eq(marked.rows.length, 3, 'an explicitly duplicate-marked sheet row never reaches the review queue');
   eq(liveJobs.rows.map((r) => r.id), liveNtt.rows.map((r) => r.id),
     'the current Jobs duplicate Location header reads the same institutions and dates');
   eq(liveNtt.rows.map((r) => r.levels), [
@@ -10170,8 +10175,8 @@ async function testHigherEdJobsWiring() {
     /* An approval re-derives the row, so the caches are applied AGAIN after
        partition, or the re-check below goes red and nothing commits (the
        2026-10-14 to 17 outage). */
-    const after = sync.slice(sync.indexOf('rows = split.publish;'));
-    ok(sync.includes('rows = split.publish;') &&
+    const after = sync.slice(sync.indexOf('rows = publishCheck.keep;'));
+    ok(sync.includes('rows = publishCheck.keep;') &&
        /applyVerified\(rows[\s\S]{0,200}applyAdverts\(rows/.test(after.slice(0, 2000)),
       'the sheet sync re-applies both advertisement caches after the approvals');
   }
@@ -11518,17 +11523,31 @@ function testReviewDuplicates() {
      from the queue." `duplicatesOf` raises a flag; `advertRepeat` decides, so
      its guards are what keep a real posting out of the bin. */
   const sameAd = { ...crawled, adUrl: 'https://apply.interfolio.com/12345' };
+  const binghamton = { id: 'existing', year: 2027, institution: 'Binghamton University',
+    unit: 'Business Analytics and Operations', levels: ['Assistant Professor'],
+    adUrl: 'https://binghamton.interviewexchange.com/jobofferdetails.jsp?JOBID=205076' };
+  eq(advertRepeat({ ...binghamton, id: 'new', unit: 'Operations and Supply Chain Management',
+    adUrl: binghamton.adUrl + '&utm_source=sheet' }, [binghamton]).id, 'existing',
+    'same specific vacancy survives tracking and department-label differences');
+  eq(advertRepeat({ ...binghamton, id: 'new',
+    adUrl: binghamton.adUrl.replace('205076', '205077') }, [binghamton]), null,
+    'different requisitions at the same department remain distinct');
+  eq(advertRepeat({ ...sameAd, institution: '(duplicate with #222) The University of Nevada, Las Vegas' }, site).id,
+    'OA-1', 'duplicate annotations do not create a fictional university identity');
+  eq(advertRepeat({ ...sameAd, adUrl: 'https://apply.interfolio.com/12345?utm_source=sheet#apply' }, site).id,
+    'OA-1', 'tracking parameters and fragments do not create a second vacancy');
   ok(!!advertRepeat(sameAd, site), 'a crawled row advertising a listed vacancy is a repeat');
   eq(advertRepeat(sameAd, site).id, 'OA-1', 'and it names the posting it repeats');
 
   eq(advertRepeat({ ...sameAd, year: 2026 }, site), null,
     'the SAME link in another market year is not — CityU links one vacancies ' +
     'page from two seasons, the case this rule was once abandoned over');
-  eq(advertRepeat({ ...sameAd, unit: 'Supply Chain Management',
-    department: 'Supply Chain Management' }, site), null,
+  eq(advertRepeat({ ...sameAd, adUrl: 'https://example.edu/vacancies', unit: 'Supply Chain Management',
+    department: 'Supply Chain Management' }, [{ ...site[0], adUrl: 'https://example.edu/vacancies' }]), null,
     'nor is a different department behind one endpoint — the UCD CoreHR case, ' +
     'the only shared link in the whole served corpus');
-  eq(advertRepeat({ ...sameAd, levels: ['Post-Doc'] }, site), null,
+  eq(advertRepeat({ ...sameAd, adUrl: 'https://example.edu/vacancies', levels: ['Post-Doc'] },
+    [{ ...site[0], adUrl: 'https://example.edu/vacancies' }]), null,
     'nor two searches whose entry levels share nothing — the Houston lesson');
   eq(advertRepeat({ ...sameAd, institution: 'Emory University' }, site), null,
     'nor the same link at another university');

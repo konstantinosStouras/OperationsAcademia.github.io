@@ -32,7 +32,12 @@
    identifies the advertisement 481 times out of 482, and the single exception
    is told apart by its DEPARTMENT.
 
-   Hence the three contradictions, each of which keeps a real posting:
+   For generic links the three contradictions keep a real posting. A known
+   vacancy-specific requisition ID is stronger evidence than scraped rank or
+   department labels and overrides those two guards, never market/university.
+   Unrecognised URLs and similar descriptions alone do not prove duplication.
+
+   Hence the three contradictions for generic links:
      - the market year and the university must match      (the CityU case)
      - two rows both naming a department, differently     (the UCD case)
      - two rows whose entry levels share nothing          (the Houston lesson)
@@ -51,6 +56,7 @@
 
   var schools = SCHOOLS || {};
   function institutionKey(v) {
+    v = String(v || '').replace(/^\s*\(duplicate\s+with\s+#\d+\)\s*/i, '');
     return schools.institutionKey ? schools.institutionKey(v) : String(v || '').toLowerCase();
   }
   function foldedName(v) {
@@ -67,9 +73,32 @@
    * advertisement carries it — and neither does an empty cell.
    */
   function advertLink(row) {
-    var v = String((row && row.adUrl) || '').trim().toLowerCase()
-      .replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '');
+    var raw = String((row && row.adUrl) || '').trim();
+    var v;
+    try {
+      var u = new URL(raw);
+      u.hash = '';
+      Array.from(u.searchParams.keys()).forEach(function (k) {
+        if (/^(utm_.+|fbclid|gclid)$/i.test(k) ||
+            (/^(www\.)?higheredjobs\.com$/i.test(u.hostname) && /^title$/i.test(k))) u.searchParams.delete(k);
+      });
+      u.searchParams.sort();
+      v = u.toString().replace(/^https?:\/\/(www\.)?/i, '').replace(/\/?$/, '').toLowerCase();
+    } catch (_) { v = raw.toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, ''); }
     return v && !/^operationsacademia\.org$/.test(v) ? v : '';
+  }
+
+  // Only identifiers known to address ONE vacancy may override differing
+  // department/rank labels. Generic search/landing pages keep all old guards.
+  function vacancyKey(row) {
+    var link = advertLink(row);
+    var m;
+    if ((m = link.match(/^higheredjobs\.com\/.*[?&]jobcode=(\d+)/))) return 'hej:' + m[1];
+    if ((m = link.match(/^([^/]+\.interviewexchange\.com)\/.*[?&]jobid=(\d+)/))) return m[1] + ':' + m[2];
+    if ((m = link.match(/^apply\.interfolio\.com\/(\d+)(?:[/?]|$)/))) return 'interfolio:' + m[1];
+    if ((m = link.match(/^([^/]+\.varbi\.com)\/.*jobid(?:%3a|:)(\d+)/))) return m[1] + ':' + m[2];
+    if ((m = link.match(/^([^/]+\.myworkdayjobs\.com)\/.*[_/](jr[\w-]+)(?:[/?]|$)/))) return m[1] + ':' + m[2];
+    return '';
   }
 
   /** Enough for a person to recognise the posting a repeat points at, and no
@@ -104,9 +133,11 @@
     for (var i = 0; i < list.length; i++) {
       var s = list[i];
       if (!s || !s.institution) continue;
-      if (String(s.id || '') === String(row.id || '')) continue;
+      if (s.id && row.id && String(s.id) === String(row.id)) continue;
       if (Number(s.year) !== Number(row.year)) continue;
       if (institutionKey(s.institution) !== key) continue;
+      var vacancy = vacancyKey(row);
+      if (vacancy && vacancy === vacancyKey(s)) return entry(s);
       if (advertLink(s) !== link) continue;
 
       var sLevels = Object.prototype.toString.call(s.levels) === '[object Array]'
@@ -173,6 +204,7 @@
 
   return {
     advertLink: advertLink,
+    vacancyKey: vacancyKey,
     advertRepeat: advertRepeat,
     findAdvertRepeats: findAdvertRepeats,
     repeatNote: repeatNote

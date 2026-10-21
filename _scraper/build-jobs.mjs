@@ -43,7 +43,7 @@ import {
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE, backdatedDeadlines } from './jobmarket-sheet.mjs';
 import { SOURCE as POMS_SOURCE } from './poms.mjs';
-import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
+import { COLLECTION as REVIEW_COL, approvedRow, findAdvertRepeats } from './jobreview.mjs';
 import { buildVocab, serialiseVocab, SCHOOLS, campusCountries, healCountry, memberVocabRows } from './vocab.mjs';
 import { memberUniversities } from './directory-model.mjs';
 import { adminUids } from './_mail.mjs';
@@ -1180,7 +1180,11 @@ async function main() {
      different way: `diffRows` reads BOTH SIDES through `countriesOf`, so a
      row that predates the field answers its own single country and the first
      run reports nothing, while a poster genuinely adding a campus does. */
-  const rows = healedRows.map(withMarketYears).map(withCountries).map(row =>
+  const publishable = findAdvertRepeats(healedRows.filter(r => r.source === SHEET_SOURCE),
+    healedRows.filter(r => r.source !== SHEET_SOURCE));
+  const duplicateSheetIds = new Set(publishable.drop.map(d => d.row.id));
+  for (const d of publishable.drop) log(`Suppressed duplicate sheet job ${d.row.id}: ${d.of.ref || d.of.id}`);
+  const rows = healedRows.map(withMarketYears).map(withCountries).filter(r => !duplicateSheetIds.has(r.id)).map(row =>
     ownUniversitiesLink(row.furtherInfoUrl)
       ? {...row, furtherInfoUrl:universitiesLink(row.institution)} : row);
 

@@ -791,7 +791,15 @@ async function main() {
              answers — see partition(). */
           published: new Set(existing.map((r) => r.id)),
         });
-        rows = split.publish;
+        // An approval is not a waiver of identity checks: another copy may
+        // have been published since review. Keep the existing non-sheet job,
+        // or the first approved sheet row, instead of emitting both copies.
+        const publishCheck = findAdvertRepeats(split.publish,
+          site.filter((r) => r.source !== 'jobmarket-sheet'));
+        rows = publishCheck.keep;
+        for (const d of publishCheck.drop) {
+          warn(`not publishing ${d.row.id}: same vacancy as ${d.of.ref || d.of.id}`);
+        }
 
         /* …AND THE CACHES AGAIN, AFTER THE APPROVALS. `partition` publishes an
            approved row through `approvedRow`, which re-derives it from the
@@ -899,6 +907,17 @@ async function main() {
 
         const dropped = [];
         const rejects = [];
+        // These rows are intentionally absent from the new parser output.
+        // Retire their old queue records too, otherwise they wait forever:
+        // partition can only sweep rows still present in the workbook read.
+        for (const old of queue.docs || []) {
+          if (old.status !== PENDING || !old.row || old.row.source !== 'jobmarket-sheet') continue;
+          const marker = String(old.row.institution || '').match(/^\s*\(duplicate\s+with\s+#(\d+)\)/i);
+          if (marker) rejects.push({ rowId: old.rowId, patch: {
+            status: REJECTED, reviewedAt: isoStamp(now),
+            note: `Suppressed: the source sheet explicitly marks this as a duplicate of row #${marker[1]}.`,
+          } });
+        }
         const droppedIds = new Set();
         for (const d of swept.drop) {
           const doc = docForRow.get(d.row);
