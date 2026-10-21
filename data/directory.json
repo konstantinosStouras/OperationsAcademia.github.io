@@ -1630,9 +1630,13 @@
   "school": "Carnegie Mellon University in Qatar",
   "department": "Information Systems",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-17"
  },
  {
   "id": "carnegie-mellon-university__heinz-college-of-information-systems-and-public-policy",
@@ -1712,15 +1716,6 @@
   "lastPosted": "2014-10-01",
   "lat": 40.4441647,
   "lng": -79.9433725
- },
- {
-  "id": "carnegie-mellon-university-qatar____is",
-  "institution": "Carnegie Mellon University Qatar",
-  "department": "IS",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
  },
  {
   "id": "case-western-reserve-university__weatherhead-school-of-management__operations",

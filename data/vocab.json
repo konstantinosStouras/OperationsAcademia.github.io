@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21T09:05:46.392Z",
+ "generated": "2026-10-21T09:14:01.922Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -90,6 +90,10 @@
    "n": 4
   },
   {
+   "v": "Carnegie Mellon University",
+   "n": 4
+  },
+  {
    "v": "HEC Paris",
    "n": 4
   },
@@ -167,10 +171,6 @@
   },
   {
    "v": "California State University, Stanislaus",
-   "n": 3
-  },
-  {
-   "v": "Carnegie Mellon University",
    "n": 3
   },
   {
@@ -2808,6 +2808,10 @@
    "n": 1
   },
   {
+   "v": "Carnegie Mellon University in Qatar",
+   "n": 1
+  },
+  {
    "v": "Católica-Lisbon School of Business and Economics",
    "n": 1
   },
@@ -3878,11 +3882,11 @@
    "n": 7
   },
   {
-   "v": "Business",
-   "n": 6
+   "v": "Information Systems",
+   "n": 7
   },
   {
-   "v": "Information Systems",
+   "v": "Business",
    "n": 6
   },
   {
@@ -6792,6 +6796,7 @@
   },
   "Carnegie Mellon University": {
    "schools": [
+    "Carnegie Mellon University in Qatar",
     "Heinz College of Information Systems and Public Policy",
     "Tepper School of Business"
    ],
@@ -6799,11 +6804,15 @@
     "Business Technologies",
     "Contextualized Evaluation of AI for Healthcare",
     "Heinz College",
+    "Information Systems",
     "Operations Management"
    ],
    "bySchool": {
     "": [
      "Contextualized Evaluation of AI for Healthcare"
+    ],
+    "Carnegie Mellon University in Qatar": [
+     "Information Systems"
     ],
     "Tepper School of Business": [
      "Business Technologies",
@@ -14517,6 +14526,9 @@
   ],
   "Carlos Alvarez College of Business": [
    "Operations and Analytics Department"
+  ],
+  "Carnegie Mellon University in Qatar": [
+   "Information Systems"
   ],
   "Carroll School of Management": [
    "Business Analytics"
