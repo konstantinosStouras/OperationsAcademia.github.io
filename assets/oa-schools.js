@@ -134,6 +134,10 @@
   /* A school field that names a department too, where no separator says so.
      The pair is what the row becomes. */
   var FUSED_SCHOOLS = {
+    /* A comma inside Taejae's school name does not introduce a department.
+       https://taejae.ac.kr/academics/what-learn */
+    'School of Arts, Sciences and Technology':
+      { school: 'School of Arts, Sciences and Technology', unit: '' },
     /* Official school titles contain these commas; they do not introduce a
        department. Checked 2026-10-12: wlu.edu/the-williams-school,
        cunef.edu/en/about-us/academic-organisation/, warwick.ac.uk/fac/sci/. */
@@ -289,6 +293,11 @@
      NUS Business School, so the university has to be known before they can be
      told apart. Keyed by university, then by the name as posted. */
   var SCOPED_SCHOOL_ALIASES = {
+    /* Scoped to this university: UWE also has a Bristol Business School.
+       https://www.bristol.ac.uk/business-school/ */
+    'University of Bristol': {
+      'Bristol Business School': 'University of Bristol Business School'
+    },
     /* Official title checked 2026-10-12: https://www.usm.edu/business/ */
     'University of Southern Mississippi': {
       'College of Business': 'College of Business and Economic Development'

@@ -1,8 +1,8 @@
-name: OA sheet - report persistent failures
+name: OA workflows - report persistent failures
 
 on:
   workflow_run:
-    workflows: ["OA jobs — read the job market tracking sheet"]
+    workflows: ["OA jobs — read the job market tracking sheet", "OA — checks"]
     types: [completed]
 
 permissions:
@@ -23,13 +23,26 @@ jobs:
         with:
           script: |
             const repo = context.repo;
-            const title = 'Action needed: OA job-market sheet updates are failing';
-            const marker = '<!-- oa-sheet-health-v1 -->';
+            const targets = {
+              'OA jobs — read the job market tracking sheet': {
+                file: 'oa-jobmarket-sheet.yml', marker: '<!-- oa-sheet-health-v1 -->',
+                title: 'Action needed: OA job-market sheet updates are failing',
+                impact: 'New sheet changes may not have reached the site.'
+              },
+              'OA — checks': {
+                file: 'oa-checks.yml', marker: '<!-- oa-checks-health-v1 -->',
+                title: 'Action needed: OA site checks are persistently failing',
+                impact: 'Site validation needs attention. Inspect the failed checks before making further changes.'
+              }
+            };
+            const target = targets[context.payload.workflow_run.name];
+            if (!target || context.payload.workflow_run.head_branch !== 'master') return;
+            const { title, marker } = target;
             const runs = (await github.rest.actions.listWorkflowRuns({
-              ...repo, workflow_id: 'oa-jobmarket-sheet.yml', branch: 'master',
+              ...repo, workflow_id: target.file, branch: 'master',
               status: 'completed', per_page: 20
             })).data.workflow_runs
-              .filter(r => ['success', 'failure', 'timed_out'].includes(r.conclusion))
+              .filter(r => r.event !== 'pull_request' && ['success', 'failure', 'timed_out'].includes(r.conclusion))
               .sort((a, b) => b.run_number - a.run_number);
             if (!runs.length) return;
             // Re-read current health, rather than acting on a queued old event.
@@ -50,5 +63,5 @@ jobs:
             if (runs.length < 3 || runs.slice(0, 3).some(r => r.conclusion === 'success') || open.length) return;
             await github.rest.issues.create({
               ...repo, title,
-              body: `${marker}\n@${repo.owner} The job-market sheet importer has failed on three consecutive runs. New sheet changes may not have reached the site.\n\nLatest failed run: ${latest.html_url}\n\nOpen that run and check its failed step. This incident produces one alert, rather than an email on every retry. It closes automatically after a successful import.`
+              body: `${marker}\n@${repo.owner} ${context.payload.workflow_run.name} has failed on three consecutive runs. ${target.impact}\n\nLatest failed run: ${latest.html_url}\n\nOpen that run and check its failed step. This incident produces one alert, rather than an email on every retry. It closes automatically after a successful run.`
             });

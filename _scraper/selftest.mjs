@@ -2884,6 +2884,14 @@ async function testSchools() {
   }
 
   // it is safe to run twice — every writer applies it on every rebuild
+  eq(S.canonPlace({ institution: 'Taejae University',
+    school: 'School of Arts, Sciences and Technology', unit: 'Business Innovation' }),
+  { institution: 'Taejae University', school: 'School of Arts, Sciences and Technology',
+    unit: 'Business Innovation' }, 'a comma inside Taejae\'s school name never moves into the department');
+  eq(S.canonSchool('Bristol Business School', 'University of Bristol'),
+    'University of Bristol Business School', 'Bristol\'s short and full school names resolve together');
+  eq(S.canonSchool('Bristol Business School', 'University of the West of England'),
+    'Bristol Business School', 'the Bristol alias never renames UWE\'s separate school');
   for (const row of [{ institution: 'Tulane University', school: 'Freeman School of Business', unit: 'Management Sciences Area' },
     { institution: 'University of Pennsylvania (The Wharton School), Operations and Information Management (OPIM) Department' }]) {
     const once = S.canonPlace(row);

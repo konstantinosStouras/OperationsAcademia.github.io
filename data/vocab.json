@@ -2736,6 +2736,10 @@
    "n": 2
   },
   {
+   "v": "University of Bristol Business School",
+   "n": 2
+  },
+  {
    "v": "UNSW Business School",
    "n": 2
   },
@@ -2789,10 +2793,6 @@
   },
   {
    "v": "Belk College of Business",
-   "n": 1
-  },
-  {
-   "v": "Bristol Business School",
    "n": 1
   },
   {
@@ -3244,7 +3244,7 @@
    "n": 1
   },
   {
-   "v": "School of Arts",
+   "v": "School of Arts, Sciences and Technology",
    "n": 1
   },
   {
@@ -3333,10 +3333,6 @@
   },
   {
    "v": "UCL School of Management",
-   "n": 1
-  },
-  {
-   "v": "University of Bristol Business School",
    "n": 1
   },
   {
@@ -4374,6 +4370,10 @@
    "n": 1
   },
   {
+   "v": "Business Innovation",
+   "n": 1
+  },
+  {
    "v": "Business Insights",
    "n": 1
   },
@@ -5279,10 +5279,6 @@
   },
   {
    "v": "Science and Innovation",
-   "n": 1
-  },
-  {
-   "v": "Sciences and Technology, Business Innovation",
    "n": 1
   },
   {
@@ -10986,14 +10982,14 @@
   },
   "Taejae University": {
    "schools": [
-    "School of Arts"
+    "School of Arts, Sciences and Technology"
    ],
    "units": [
-    "Sciences and Technology, Business Innovation"
+    "Business Innovation"
    ],
    "bySchool": {
-    "School of Arts": [
-     "Sciences and Technology, Business Innovation"
+    "School of Arts, Sciences and Technology": [
+     "Business Innovation"
     ]
    }
   },
@@ -11887,7 +11883,6 @@
   },
   "University of Bristol": {
    "schools": [
-    "Bristol Business School",
     "University of Bristol Business School"
    ],
    "units": [
@@ -11895,10 +11890,8 @@
     "Technology and Operations Management"
    ],
    "bySchool": {
-    "Bristol Business School": [
-     "Artificial Intelligence and Business Analytics"
-    ],
     "University of Bristol Business School": [
+     "Artificial Intelligence and Business Analytics",
      "Technology and Operations Management"
     ]
    }
@@ -14515,9 +14508,6 @@
    "Healthcare Analytics",
    "Operations Management"
   ],
-  "Bristol Business School": [
-   "Artificial Intelligence and Business Analytics"
-  ],
   "Broadwell College of Business and Economics": [
    "Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration"
   ],
@@ -15317,8 +15307,8 @@
   "School Economics and Management": [
    "Business and Public Administration"
   ],
-  "School of Arts": [
-   "Sciences and Technology, Business Innovation"
+  "School of Arts, Sciences and Technology": [
+   "Business Innovation"
   ],
   "School of Business": [
    "Analytics",
@@ -15509,6 +15499,7 @@
    "Operations and Technology"
   ],
   "University of Bristol Business School": [
+   "Artificial Intelligence and Business Analytics",
    "Technology and Operations Management"
   ],
   "UNSW Business School": [
