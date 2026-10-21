@@ -1,5 +1,73 @@
 [
  {
+  "id": "2027-city-university-of-hong-kong-20261021",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-21",
+  "institution": "City University of Hong Kong",
+  "department": "College of Engineering, Systems Engineering",
+  "school": "College of Engineering",
+  "unit": "Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-08-24",
+  "comments": "",
+  "country": "Hong Kong",
+  "countries": [
+   "Hong Kong"
+  ],
+  "adUrl": "https://www.cityu.edu.hk/hro/en/job/current/academic.asp?ref=uac-r26426",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs1.cityu.edu.hk/apply/Account/Login.aspx?ReturnUrl=%2fapply%2fapplicant%2fApplyAcad.aspx%3fapply%3dR%2f264%2f26&apply=R/264/26",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.cityu.edu.hk/sye/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-21T20:04:01Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-fayetteville-state-university-20261021",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-21",
+  "institution": "Fayetteville State University",
+  "department": "Broadwell College of Business and Economics, Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration",
+  "school": "Broadwell College of Business and Economics",
+  "unit": "Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.uncfsu.edu/postings/29543",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.uncfsu.edu/postings/29543/pre_apply",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.uncfsu.edu/academics/colleges-schools-and-departments/broadwell-college-of-business-and-economics/department-of-management-marketing-entrepreneurship-and-fire-and-emergency-services-administration",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-21T21:41:41Z",
+  "owner": ""
+ },
+ {
   "id": "2027-kaist-20261020",
   "year": 2027,
   "years": [
@@ -539,6 +607,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-18T18:06:46Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-carnegie-mellon-university-qatar-20261017",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-17",
+  "institution": "Carnegie Mellon University",
+  "department": "Carnegie Mellon University in Qatar, Information Systems",
+  "school": "Carnegie Mellon University in Qatar",
+  "unit": "Information Systems",
+  "type": "University",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-01",
+  "comments": "",
+  "country": "Qatar",
+  "countries": [
+   "Qatar"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179586104&Title=Faculty%20Positions%20in%20Information%20Systems",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/195270",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.qatar.cmu.edu/academics/information-systems/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-21T09:12:43Z",
   "owner": ""
  },
  {
