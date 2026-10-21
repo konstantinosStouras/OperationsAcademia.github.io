@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21T20:05:22.017Z",
+ "generated": "2026-10-21T21:42:52.130Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -95,6 +95,10 @@
   },
   {
    "v": "City University of Hong Kong",
+   "n": 4
+  },
+  {
+   "v": "Fayetteville State University",
    "n": 4
   },
   {
@@ -203,10 +207,6 @@
   },
   {
    "v": "Eastern New Mexico University",
-   "n": 3
-  },
-  {
-   "v": "Fayetteville State University",
    "n": 3
   },
   {
@@ -2796,6 +2796,10 @@
    "n": 1
   },
   {
+   "v": "Broadwell College of Business and Economics",
+   "n": 1
+  },
+  {
    "v": "Business and Technology",
    "n": 1
   },
@@ -4947,6 +4951,10 @@
   },
   {
    "v": "Management, Marketing, and Management Science",
+   "n": 1
+  },
+  {
+   "v": "Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration",
    "n": 1
   },
   {
@@ -7753,10 +7761,13 @@
    }
   },
   "Fayetteville State University": {
-   "schools": [],
+   "schools": [
+    "Broadwell College of Business and Economics"
+   ],
    "units": [
     "Healthcare",
     "ISBA",
+    "Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration",
     "Supply Chain Management"
    ],
    "bySchool": {
@@ -7764,6 +7775,9 @@
      "Healthcare",
      "ISBA",
      "Supply Chain Management"
+    ],
+    "Broadwell College of Business and Economics": [
+     "Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration"
     ]
    }
   },
@@ -14503,6 +14517,9 @@
   ],
   "Bristol Business School": [
    "Artificial Intelligence and Business Analytics"
+  ],
+  "Broadwell College of Business and Economics": [
+   "Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration"
   ],
   "Business and Technology": [
    "Information Systems"

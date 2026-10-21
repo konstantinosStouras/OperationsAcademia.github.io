@@ -3450,9 +3450,13 @@
   "school": "Broadwell College of Business and Economics",
   "department": "Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-21"
  },
  {
   "id": "ferris-state-university____accountancy-finance-and-information-systems",
