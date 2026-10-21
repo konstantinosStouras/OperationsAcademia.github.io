@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-21T19:16:55.500Z",
- "members": 382,
+ "generated": "2026-10-21T22:28:46.678Z",
+ "members": 383,
  "k": 3,
  "affiliation": {
-  "listed": 299,
+  "listed": 300,
   "other": 47,
   "none": 36
  },
@@ -107,7 +107,7 @@
    },
    {
     "name": "Carnegie Mellon University",
-    "country": "United States",
+    "country": "",
     "members": 3
    },
    {
@@ -206,14 +206,14 @@
     "members": 3
    }
   ],
-  "rest": 134
+  "rest": 135
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 190
+    "members": 188
    },
    {
     "name": "Canada",
@@ -249,6 +249,6 @@
    }
   ],
   "rest": 11,
-  "unknown": 99
+  "unknown": 102
  }
 }
