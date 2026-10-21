@@ -11527,6 +11527,29 @@ function testReviewDuplicates() {
   const binghamton = { id: 'existing', year: 2027, institution: 'Binghamton University',
     unit: 'Business Analytics and Operations', levels: ['Assistant Professor'],
     adUrl: 'https://binghamton.interviewexchange.com/jobofferdetails.jsp?JOBID=205076' };
+  const syndicated = { ...binghamton, adUrl: 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179000001',
+    postedAtUrl: binghamton.adUrl };
+  eq(advertRepeat({ ...binghamton, id: 'syndicated-copy', institution: 'The Binghamton University (SUNY)' },
+    [syndicated])?.id, 'existing', 'alternate advert hosts and university acronym/leading-The variants share the official application requisition');
+  eq(advertRepeat({ ...binghamton, id: 'different-job', adUrl: binghamton.adUrl.replace('205076', '205077') },
+    [syndicated]), null, 'a different application requisition is not suppressed');
+  eq(advertRepeat({ ...syndicated, id: 'different-hej', adUrl: syndicated.adUrl.replace('179000001', '179000002') },
+    [syndicated]), null, 'conflicting advert requisitions override an accidentally shared application link');
+  const genericApply = { ...binghamton, postedAtUrl: 'https://jobs.example.edu/login' };
+  for (const officialUrl of ['https://jobs.uncfsu.edu/postings/29543',
+    'https://www.cityu.edu.hk/hro/en/job/current/academic.asp?ref=uac-r26426']) {
+    eq(advertRepeat({ ...binghamton, id: 'mirror', adUrl: 'https://example.edu/advert', postedAtUrl: officialUrl },
+      [{ ...binghamton, adUrl: officialUrl }])?.id, 'existing',
+      'recognised university HR vacancy links bridge syndicated adverts');
+  }
+  eq(advertRepeat({ ...genericApply, id: 'other', adUrl: 'https://different.example.edu/job' }, [genericApply]),
+    null, 'generic shared application portals never establish vacancy identity');
+  eq(advertRepeat({ ...binghamton, id: 'alias', institution: 'University of Illinois Chicago' },
+    [{ ...binghamton, institution: 'University of Illinois at Chicago' }])?.id, 'existing',
+    'curated reordered university aliases match');
+  eq(advertRepeat({ ...binghamton, id: 'campus', institution: 'University of Illinois at Urbana-Champaign' },
+    [{ ...binghamton, institution: 'University of Illinois at Chicago' }]), null,
+    'different campuses are not merged by similar university names');
   eq(advertRepeat({ ...binghamton, id: 'new', unit: 'Operations and Supply Chain Management',
     adUrl: binghamton.adUrl + '&utm_source=sheet' }, [binghamton]).id, 'existing',
     'same specific vacancy survives tracking and department-label differences');
@@ -11558,12 +11581,14 @@ function testReviewDuplicates() {
     [{ ...site[0], adUrl: 'https://operationsacademia.org' }]), null,
     'and our own home page identifies nothing, so it drops nothing');
 
-  /* The DECIDING half reads only the advertisement link, never "posted at" —
-     `duplicatesOf` can afford the wider net because a person reads its
-     answer. */
+  /* A recognised vacancy-specific application is evidence too, but only
+     with compatible affiliations/ranks; generic portals remain insufficient. */
   eq(advertRepeat({ ...crawled, adUrl: '', postedAtUrl: 'https://apply.interfolio.com/12345' },
-    site), null,
-    'the drop keys on the advert link alone, not on where it was posted');
+    site)?.id, 'OA-1',
+    'a specific application requisition bridges a missing advert link');
+  eq(advertRepeat({ ...crawled, adUrl: 'https://example.edu/another',
+    postedAtUrl: 'https://apply.interfolio.com/12345', unit: 'Human Resources', department: 'Human Resources' },
+    site), null, 'cross-site application evidence with conflicting departments requires human review');
 
   /* A row already IN THE QUEUE counts as listed, not only a live one — half
      the owner's sentence, and the half a site-only comparison would miss. */

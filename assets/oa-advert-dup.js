@@ -66,8 +66,8 @@
   /**
    * The row's ADVERTISEMENT link, normalised — the one field the owner named
    * ("Link to the advert"). `duplicatesOf` also reads `postedAtUrl` because a
-   * FLAG can afford the wider net; this decides on its own, so it keeps to the
-   * link that identifies the advertisement itself.
+   * application link is also evidence only when it contains a recognised
+   * vacancy-specific identifier. A shared application portal proves nothing.
    *
    * Our own home page identifies nothing — a workbook row naming no
    * advertisement carries it — and neither does an empty cell.
@@ -96,9 +96,25 @@
     if ((m = link.match(/^higheredjobs\.com\/.*[?&]jobcode=(\d+)/))) return 'hej:' + m[1];
     if ((m = link.match(/^([^/]+\.interviewexchange\.com)\/.*[?&]jobid=(\d+)/))) return m[1] + ':' + m[2];
     if ((m = link.match(/^apply\.interfolio\.com\/(\d+)(?:[/?]|$)/))) return 'interfolio:' + m[1];
+    if ((m = link.match(/^((?:jobs|careers)\.[^/]+\.edu)\/postings\/(\d+)(?:[/?]|$)/))) return m[1] + ':' + m[2];
+    if ((m = link.match(/^cityu\.edu\.hk\/hro\/.*[?&]ref=uac-([a-z\d]+)/))) return 'cityu:' + m[1];
     if ((m = link.match(/^([^/]+\.varbi\.com)\/.*jobid(?:%3a|:)(\d+)/))) return m[1] + ':' + m[2];
     if ((m = link.match(/^([^/]+\.myworkdayjobs\.com)\/.*[_/](jr[\w-]+)(?:[/?]|$)/))) return m[1] + ':' + m[2];
     return '';
+  }
+
+  function vacancyKeys(row) {
+    return [vacancyKey(row), vacancyKey({ adUrl: row.postedAtUrl })].filter(Boolean);
+  }
+
+  function sameVacancy(a, b) {
+    var adA = vacancyKey(a), adB = vacancyKey(b);
+    // Distinct requisitions on the same host are explicit contrary evidence,
+    // even if an application URL was copied incorrectly onto both records.
+    if (adA && adB && adA !== adB &&
+        adA.slice(0, adA.lastIndexOf(':')) === adB.slice(0, adB.lastIndexOf(':'))) return false;
+    var aa = vacancyKeys(a), bb = vacancyKeys(b);
+    return aa.some(function (k) { return bb.indexOf(k) !== -1; });
   }
 
   /** Enough for a person to recognise the posting a repeat points at, and no
@@ -121,7 +137,7 @@
   function advertRepeat(row, others) {
     if (!row || !row.institution) return null;
     var link = advertLink(row);
-    if (!link) return null;
+    if (!link && !vacancyKeys(row).length) return null;
 
     var key = institutionKey(row.institution);
     var levels = Object.prototype.toString.call(row.levels) === '[object Array]'
@@ -136,9 +152,12 @@
       if (s.id && row.id && String(s.id) === String(row.id)) continue;
       if (Number(s.year) !== Number(row.year)) continue;
       if (institutionKey(s.institution) !== key) continue;
-      var vacancy = vacancyKey(row);
-      if (vacancy && vacancy === vacancyKey(s)) return entry(s);
-      if (advertLink(s) !== link) continue;
+      var sharedVacancy = sameVacancy(row, s);
+      var directVacancy = vacancyKey(row);
+      if (sharedVacancy && directVacancy && directVacancy === vacancyKey(s)) return entry(s);
+      // Cross-site application evidence still needs compatible department and
+      // rank: conflicting metadata stays available for a person to review.
+      if (!sharedVacancy && (!link || advertLink(s) !== link)) continue;
 
       var sLevels = Object.prototype.toString.call(s.levels) === '[object Array]'
         ? s.levels : [];
