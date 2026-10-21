@@ -1970,15 +1970,6 @@
   "lastPosted": "2025-09-26"
  },
  {
-  "id": "city-university-of-hong-kong____systems-engineering",
-  "institution": "City University of Hong Kong",
-  "department": "Systems Engineering",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "city-university-of-hong-kong__college-of-business__decision-analytics-and-operations",
   "institution": "City University of Hong Kong",
   "school": "College of Business",
@@ -2037,6 +2028,20 @@
    "omlist",
    "seed"
   ]
+ },
+ {
+  "id": "city-university-of-hong-kong__college-of-engineering__systems-engineering",
+  "institution": "City University of Hong Kong",
+  "school": "College of Engineering",
+  "department": "Systems Engineering",
+  "type": "University",
+  "country": "Hong Kong",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-21"
  },
  {
   "id": "city-university-of-new-york",
@@ -3427,15 +3432,6 @@
   "lastPosted": "2025-08-11"
  },
  {
-  "id": "fayetteville-state-university____operations-management",
-  "institution": "Fayetteville State University",
-  "department": "Operations Management",
-  "type": "University",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "fayetteville-state-university____supply-chain-management",
   "institution": "Fayetteville State University",
   "department": "Supply Chain Management",
@@ -3447,6 +3443,16 @@
   ],
   "n": 1,
   "lastPosted": "2026-03-19"
+ },
+ {
+  "id": "fayetteville-state-university__broadwell-college-of-business-and-economics__management-marketing-entrepreneurship-and-fire-and-emergency",
+  "institution": "Fayetteville State University",
+  "school": "Broadwell College of Business and Economics",
+  "department": "Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ]
  },
  {
   "id": "ferris-state-university____accountancy-finance-and-information-systems",

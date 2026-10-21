@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21T09:14:01.922Z",
+ "generated": "2026-10-21T20:05:22.017Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -94,6 +94,10 @@
    "n": 4
   },
   {
+   "v": "City University of Hong Kong",
+   "n": 4
+  },
+  {
    "v": "HEC Paris",
    "n": 4
   },
@@ -179,10 +183,6 @@
   },
   {
    "v": "Chinese University of Hong Kong",
-   "n": 3
-  },
-  {
-   "v": "City University of Hong Kong",
    "n": 3
   },
   {
@@ -2477,7 +2477,7 @@
   },
   {
    "v": "College of Engineering",
-   "n": 9
+   "n": 10
   },
   {
    "v": "A. B. Freeman School of Business",
@@ -4202,6 +4202,10 @@
    "n": 2
   },
   {
+   "v": "Systems Engineering",
+   "n": 2
+  },
+  {
    "v": "Technology Management",
    "n": 2
   },
@@ -5415,10 +5419,6 @@
   },
   {
    "v": "Systems and Operations Management",
-   "n": 1
-  },
-  {
-   "v": "Systems Engineering",
    "n": 1
   },
   {
@@ -6991,13 +6991,15 @@
   },
   "City University of Hong Kong": {
    "schools": [
-    "College of Business"
+    "College of Business",
+    "College of Engineering"
    ],
    "units": [
     "Decision Analytics and Operations",
     "Management Science",
     "OM/Statistics",
-    "Operations Research and Operations Management"
+    "Operations Research and Operations Management",
+    "Systems Engineering"
    ],
    "bySchool": {
     "": [
@@ -7007,6 +7009,9 @@
      "Decision Analytics and Operations",
      "Management Science",
      "Operations Research and Operations Management"
+    ],
+    "College of Engineering": [
+     "Systems Engineering"
     ]
    }
   },

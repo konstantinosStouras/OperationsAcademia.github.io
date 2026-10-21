@@ -606,13 +606,13 @@
  },
  {
   "institution": "City University of Hong Kong",
-  "school": "",
-  "department": "Systems Engineering"
+  "school": "College of Business",
+  "department": "Decision Analytics and Operations"
  },
  {
   "institution": "City University of Hong Kong",
-  "school": "College of Business",
-  "department": "Decision Analytics and Operations"
+  "school": "College of Engineering",
+  "department": "Systems Engineering"
  },
  {
   "institution": "Clarkson University",
@@ -947,12 +947,12 @@
  {
   "institution": "Fayetteville State University",
   "school": "",
-  "department": "Operations Management"
+  "department": "Supply Chain Management"
  },
  {
   "institution": "Fayetteville State University",
-  "school": "",
-  "department": "Supply Chain Management"
+  "school": "Broadwell College of Business and Economics",
+  "department": "Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration"
  },
  {
   "institution": "Ferris State University",

@@ -42,6 +42,41 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-city-university-of-hong-kong-20261021",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-21",
+  "institution": "City University of Hong Kong",
+  "department": "College of Engineering, Systems Engineering",
+  "school": "College of Engineering",
+  "unit": "Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-08-24",
+  "comments": "",
+  "country": "Hong Kong",
+  "countries": [
+   "Hong Kong"
+  ],
+  "adUrl": "https://www.cityu.edu.hk/hro/en/job/current/academic.asp?ref=uac-r26426",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs1.cityu.edu.hk/apply/Account/Login.aspx?ReturnUrl=%2fapply%2fapplicant%2fApplyAcad.aspx%3fapply%3dR%2f264%2f26&apply=R/264/26",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.cityu.edu.hk/sye/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-21T20:04:01Z",
+  "owner": ""
+ },
+ {
   "id": "2027-kaist-20261020",
   "year": 2027,
   "years": [
