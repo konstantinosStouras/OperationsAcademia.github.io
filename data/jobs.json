@@ -42,6 +42,74 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-kaist-20261020",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-20",
+  "institution": "KAIST",
+  "department": "Industrial and Systems Engineering",
+  "school": "",
+  "unit": "Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "",
+  "country": "South Korea",
+  "countries": [
+   "South Korea"
+  ],
+  "adUrl": "https://ise.kaist.ac.kr/faculty-opening/view/id/3352",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://ise.kaist.ac.kr/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-21T09:04:17Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-bristol-business-school-20261020",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-20",
+  "institution": "University of Bristol",
+  "department": "University of Bristol Business School, Technology and Operations Management",
+  "school": "University of Bristol Business School",
+  "unit": "Technology and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 1, 2026",
+  "applyByDate": "2026-11-01",
+  "comments": "",
+  "country": "United Kingdom",
+  "countries": [
+   "United Kingdom"
+  ],
+  "adUrl": "https://www.bristol.ac.uk/jobs/find/details/?nPostingId=208621&nPostingTargetId=391743&id=Q50FK026203F3VBQBV7V77V83&LG=UK&languageSelect=UK&mask=newuobext",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.bristol.ac.uk/business-school/about/academic-groups/technology-and-operations/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-21T09:04:26Z",
+  "owner": ""
+ },
+ {
   "id": "2027-eindhoven-university-of-technology-tu-e-20261019",
   "year": 2027,
   "years": [

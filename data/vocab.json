@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-20T07:07:40.382Z",
+ "generated": "2026-10-21T09:05:46.392Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -235,6 +235,10 @@
   },
   {
    "v": "Institut Mines-Télécom",
+   "n": 3
+  },
+  {
+   "v": "KAIST",
    "n": 3
   },
   {
@@ -510,10 +514,6 @@
    "n": 2
   },
   {
-   "v": "KAIST",
-   "n": 2
-  },
-  {
    "v": "KIMEP University",
    "n": 2
   },
@@ -655,6 +655,10 @@
   },
   {
    "v": "University of Bath",
+   "n": 2
+  },
+  {
+   "v": "University of Bristol",
    "n": 2
   },
   {
@@ -1687,10 +1691,6 @@
   },
   {
    "v": "University of Auckland",
-   "n": 1
-  },
-  {
-   "v": "University of Bristol",
    "n": 1
   },
   {
@@ -3328,6 +3328,10 @@
    "n": 1
   },
   {
+   "v": "University of Bristol Business School",
+   "n": 1
+  },
+  {
    "v": "UNSW Business School - School of Information Systems and Technology Management",
    "n": 1
   },
@@ -3850,15 +3854,15 @@
    "n": 10
   },
   {
+   "v": "Industrial and Systems Engineering",
+   "n": 10
+  },
+  {
    "v": "Information Systems and Operations Management",
    "n": 10
   },
   {
    "v": "Data Analytics",
-   "n": 9
-  },
-  {
-   "v": "Industrial and Systems Engineering",
    "n": 9
   },
   {
@@ -3902,6 +3906,10 @@
    "n": 5
   },
   {
+   "v": "Technology and Operations Management",
+   "n": 5
+  },
+  {
    "v": "Business Analytics and Information Systems",
    "n": 4
   },
@@ -3919,10 +3927,6 @@
   },
   {
    "v": "Supply Chain and Information Systems",
-   "n": 4
-  },
-  {
-   "v": "Technology and Operations Management",
    "n": 4
   },
   {
@@ -8672,11 +8676,13 @@
     "College of Business"
    ],
    "units": [
+    "Industrial and Systems Engineering",
     "Operations Strategy and Management Science",
     "Organization/Man. Sci"
    ],
    "bySchool": {
     "": [
+     "Industrial and Systems Engineering",
      "Organization/Man. Sci"
     ],
     "College of Business": [
@@ -11853,14 +11859,19 @@
   },
   "University of Bristol": {
    "schools": [
-    "Bristol Business School"
+    "Bristol Business School",
+    "University of Bristol Business School"
    ],
    "units": [
-    "Artificial Intelligence and Business Analytics"
+    "Artificial Intelligence and Business Analytics",
+    "Technology and Operations Management"
    ],
    "bySchool": {
     "Bristol Business School": [
      "Artificial Intelligence and Business Analytics"
+    ],
+    "University of Bristol Business School": [
+     "Technology and Operations Management"
     ]
    }
   },
@@ -15462,6 +15473,9 @@
   ],
   "UCL School of Management": [
    "Operations and Technology"
+  ],
+  "University of Bristol Business School": [
+   "Technology and Operations Management"
   ],
   "UNSW Business School": [
    "Information Systems and Technology Management"

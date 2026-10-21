@@ -5364,9 +5364,14 @@
   "id": "kaist____industrial-and-systems-engineering",
   "institution": "KAIST",
   "department": "Industrial and Systems Engineering",
+  "type": "University",
+  "country": "South Korea",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-20"
  },
  {
   "id": "kaist____organization-man-sci",
@@ -11888,13 +11893,18 @@
   "lastPosted": "2026-08-05"
  },
  {
-  "id": "university-of-bristol-business-school____forecasting",
-  "institution": "University of Bristol Business School",
-  "department": "Forecasting",
+  "id": "university-of-bristol__university-of-bristol-business-school__technology-and-operations-management",
+  "institution": "University of Bristol",
+  "school": "University of Bristol Business School",
+  "department": "Technology and Operations Management",
   "type": "Business School",
+  "country": "United Kingdom",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-20"
  },
  {
   "id": "university-of-british-columbia__faculty-of-management__operations-and-supply-chain-management",
