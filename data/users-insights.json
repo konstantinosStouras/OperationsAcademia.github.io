@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-20T17:56:43.483Z",
- "members": 379,
+ "generated": "2026-10-21T09:18:15.957Z",
+ "members": 380,
  "k": 3,
  "affiliation": {
-  "listed": 296,
+  "listed": 297,
   "other": 47,
   "none": 36
  },
@@ -121,6 +121,11 @@
     "members": 3
    },
    {
+    "name": "The Hong Kong Polytechnic University",
+    "country": "Hong Kong",
+    "members": 3
+   },
+   {
     "name": "The Hong Kong University of Science and Technology",
     "country": "Hong Kong",
     "members": 3
@@ -201,7 +206,7 @@
     "members": 3
    }
   ],
-  "rest": 134
+  "rest": 132
  },
  "countries": {
   "count": 16,
@@ -220,7 +225,7 @@
    },
    {
     "name": "Hong Kong",
-    "members": 11
+    "members": 12
    },
    {
     "name": "United Kingdom",
