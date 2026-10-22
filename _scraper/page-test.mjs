@@ -4369,7 +4369,7 @@ for (const [pageName, listSel] of [
   p.on('pageerror', (e) => jsErrors.push('directory: ' + e.message));
   await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
   // Exercise the retained directory editor component independently of the public map.
-  await p.evaluate(() => document.getElementById('oa-dir').classList.remove('oa-directory-map'));
+  await p.evaluate(() => document.getElementById('oa-dir').removeAttribute('data-view'));
   await p.waitForSelector('#oa-dir .oa-card', { timeout: 15000 });
 
   const anon = await p.evaluate(() => {
@@ -4465,7 +4465,7 @@ for (const [pageName, listSel] of [
 {
   const DF_NEW_SCHOOL = 'Testing School of Forms';
   const { ctx, page: d, errors } = await signedInPage('universities.html', { selector: '#oa-dir .oa-filters' });
-  await d.evaluate(() => document.getElementById('oa-dir').classList.remove('oa-directory-map'));
+  await d.evaluate(() => document.getElementById('oa-dir').removeAttribute('data-view'));
   await d.waitForSelector('#oa-dir .oa-card');
   const dialogs = [];
   d.on('dialog', (x) => { dialogs.push(x.message()); x.accept(); });
@@ -4620,7 +4620,7 @@ for (const [pageName, listSel] of [
   /* on a phone: 16px boxes, 42px targets, nothing sideways */
   const ph = await signedInPage('universities.html', { selector: '#oa-dir .oa-card',
     viewport: { width: 390, height: 844 } });
-  await ph.page.evaluate(() => document.getElementById('oa-dir').classList.remove('oa-directory-map'));
+  await ph.page.evaluate(() => document.getElementById('oa-dir').removeAttribute('data-view'));
   await ph.page.click('#oa-dir .oa-card .oa-card-head');
   await ph.page.click('#oa-dir .oa-card [data-dir-edit]');
   await ph.page.waitForSelector('.oa-dir-form', { timeout: 5000 });
@@ -4785,6 +4785,8 @@ for (const [pageName, listSel] of [
   m.on('pageerror', (e) => jsErrors.push('universities mobile: ' + e.message));
   await m.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
   await m.waitForSelector('#oa-uni .leaflet-container', { timeout: 15000 });
+  await m.waitForSelector('#oa-dir .oa-card', { state: 'attached', timeout: 15000 });
+  ok(!await m.locator('#oa-dir .oa-cards').isVisible(), 'universities: async directory loading keeps cards hidden above the map');
   await m.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
 
   const mob = await m.evaluate(() => {

@@ -30,7 +30,7 @@ body.v3 .oa-uni a,.oa-uni .leaflet-popup .oa-uni-pop a { color:var(--map-link);t
 .oa-map-results summary { cursor:pointer;min-height:44px;box-sizing:border-box;padding:10px 0;overflow-wrap:anywhere; }
 .oa-map-results ul { padding-left:20px; }.oa-map-results li { margin:6px 0; }
 /* Keep the ONE existing filter engine and its admin visibility rules active. */
-#oa-dir.oa-directory-map .oa-cards,#oa-dir.oa-directory-map .oa-resultbar,#oa-dir.oa-directory-map .oa-focusbar { display:none; }
+#oa-dir[data-view="map"] .oa-cards,#oa-dir[data-view="map"] .oa-resultbar,#oa-dir[data-view="map"] .oa-focusbar { display:none; }
 @media(max-width:640px) {
  .oa-uni { padding:0 14px; }
  .oa-uni .oa-uni-map { height:60vh;max-height:520px; }
