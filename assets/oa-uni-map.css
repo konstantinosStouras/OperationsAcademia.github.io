@@ -10,7 +10,8 @@
 .oa-uni .oa-uni-map { height:600px;max-height:75vh;min-height:300px;background:var(--map-ocean);border:1px solid var(--map-border);border-radius:5px;z-index:0;font-family:inherit; }
 .oa-map-logo { background:transparent;border:0; }
 .oa-map-logo-face { display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:#fff;border:2px solid #326c5b;border-radius:50%;color:#20352f;position:relative;box-shadow:0 0 0 3px #d9e5dd;font-weight:700;font-size:12px; }
-.oa-map-logo-face img { position:absolute;inset:4px; width:32px;height:32px;object-fit:contain;border-radius:50%;background:#fff;max-width:none; }
+.oa-map-logo-face { overflow:hidden; }
+#oa-uni-map .oa-map-logo-face img { position:absolute;inset:4px;width:32px;height:32px;max-width:32px;max-height:32px;object-fit:contain;border-radius:50%;background:#fff; }
 .oa-map-cluster { border-radius:50%;background:var(--map-halo);padding:4px;box-sizing:border-box; }
 .oa-map-cluster span { display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:#326c5b;color:#fff;font-weight:700;font-size:14px; }
 .oa-uni .leaflet-popup-content-wrapper,.oa-uni .leaflet-popup-tip { background:var(--map-surface);color:var(--map-ink); }
