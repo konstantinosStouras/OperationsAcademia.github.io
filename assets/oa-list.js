@@ -1078,7 +1078,7 @@
                   el('span', { text: STR.emptyDataHint }),
                 ])
         );
-      } else {
+      } else if (cfg.renderCards !== false) {
         view.slice(page * perPage, (page + 1) * perPage).forEach(function (r) {
           listEl.appendChild(card(r));
         });

@@ -4369,7 +4369,7 @@ for (const [pageName, listSel] of [
   p.on('pageerror', (e) => jsErrors.push('directory: ' + e.message));
   await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
   // Exercise the retained directory editor component independently of the public map.
-  await p.evaluate(() => document.getElementById('oa-dir').removeAttribute('data-view'));
+  await p.evaluate(() => { document.getElementById('oa-dir').removeAttribute('data-view'); OADirectory.mount({ mount: '#oa-dir' }); });
   await p.waitForSelector('#oa-dir .oa-card', { timeout: 15000 });
 
   const anon = await p.evaluate(() => {
@@ -4465,7 +4465,7 @@ for (const [pageName, listSel] of [
 {
   const DF_NEW_SCHOOL = 'Testing School of Forms';
   const { ctx, page: d, errors } = await signedInPage('universities.html', { selector: '#oa-dir .oa-filters' });
-  await d.evaluate(() => document.getElementById('oa-dir').removeAttribute('data-view'));
+  await d.evaluate(() => { document.getElementById('oa-dir').removeAttribute('data-view'); OADirectory.mount({ mount: '#oa-dir' }); });
   await d.waitForSelector('#oa-dir .oa-card');
   const dialogs = [];
   d.on('dialog', (x) => { dialogs.push(x.message()); x.accept(); });
@@ -4618,9 +4618,9 @@ for (const [pageName, listSel] of [
   await ctx.close();
 
   /* on a phone: 16px boxes, 42px targets, nothing sideways */
-  const ph = await signedInPage('universities.html', { selector: '#oa-dir .oa-card',
+  const ph = await signedInPage('universities.html', { selector: '#oa-dir .oa-filters',
     viewport: { width: 390, height: 844 } });
-  await ph.page.evaluate(() => document.getElementById('oa-dir').removeAttribute('data-view'));
+  await ph.page.evaluate(() => { document.getElementById('oa-dir').removeAttribute('data-view'); OADirectory.mount({ mount: '#oa-dir' }); });
   await ph.page.click('#oa-dir .oa-card .oa-card-head');
   await ph.page.click('#oa-dir .oa-card [data-dir-edit]');
   await ph.page.waitForSelector('.oa-dir-form', { timeout: 5000 });

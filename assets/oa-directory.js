@@ -107,8 +107,16 @@
 
   function fold(s) { return window.OAList ? OAList.fold(s) : String(s || '').toLowerCase(); }
 
+  var institutionKeys=new Map(), columnKeys=new Map();
   function instKey(s) {
-    return window.OASchools ? OASchools.institutionKey(String(s || '')) : fold(s);
+    s=String(s||'');
+    if(!institutionKeys.has(s))institutionKeys.set(s,window.OASchools?OASchools.institutionKey(s):fold(s));
+    return institutionKeys.get(s);
+  }
+  function cachedColumns(row) {
+    var key=JSON.stringify([row.institution,row.school,row.unit]);
+    if(!columnKeys.has(key))columnKeys.set(key,OASchools.canonColumns(row));
+    return columnKeys.get(key);
   }
 
   function fmtDay(iso) {
@@ -165,6 +173,8 @@
         copy._edit = { name: e.name || '', t: e.t || 0 };
         if (e.hidden) copy._hidden = true;
       }
+      if (copy.directoryHidden) continue;
+      if (copy.suppressFacultyLink) copy.facultyUrl = '';
       out.push(copy);
     }
     /* A row a signed-in user ADDED — a department no source carries yet. It
@@ -214,10 +224,10 @@
       first, and the add form (and the school form, for a department a user
       added) refuses to make a second. One definition, so the
       fold and the refusal cannot disagree about what "the same place" is. */
-  function rowKeyOf(r) {
-    var canon = window.OASchools ? OASchools.canonColumns : null;
+  function rowKeyOf(r, canonical) {
+    var canon = window.OASchools ? cachedColumns : null;
     var inst = r.institution || '', school = r.school || '', dept = r.department || '';
-    if (canon) {
+    if (canon && !canonical) {
       var c = canon({ institution: inst, school: school, unit: dept });
       inst = c.institution; school = c.school; dept = c.unit;
     }
@@ -249,7 +259,7 @@
 
   function regroup() {
     var rows = overlaid();
-    var canon = window.OASchools ? OASchools.canonColumns : null;
+    var canon = window.OASchools ? cachedColumns : null;
     var merged = {};   // instKey||school||dept → row (duplicates collapse)
     var order = [];
     var i, r;
@@ -261,7 +271,7 @@
          so a correction lands on the site's one spelling — and two rows whose
          corrected names now agree become ONE, which is what "merge" means
          here. The build's own rows are already canonical (no-ops). */
-      if (canon) {
+      if (canon && r._edit) {
         var c = canon({ institution: r.institution, school: r.school || '', unit: r.department || '' });
         r.institution = (r._edit ? r.institution : c.institution).replace(/^The\s+/i, '');
         /* An explicit directory correction is the official display title.
@@ -269,8 +279,9 @@
         r.school = r._edit ? r.school : c.school;
         r.department = r._edit ? r.department : c.unit;
       }
+      r.institution=(r.institution||'').replace(/^The\s+/i,'');
       if (!r.institution) continue;
-      var key = rowKeyOf(r);
+      var key = rowKeyOf(r, !r._edit);
       var held = merged[key];
       if (!held) { merged[key] = r; order.push(key); continue; }
       // the fuller row wins the display fields; counts and provenance add up
@@ -1283,6 +1294,7 @@
       mount: cfg.mount,
       data: cfg.data || '/data/directory.json',
       perPage: cfg.perPage || 12,
+      renderCards: !cfg.mapOnly,
       // The map consumes the same filters and live correction overlay.
       onRender: cfg.onRender,
       strings: {
@@ -1339,6 +1351,7 @@
     // The build leaves this public file empty before reveal; never read held
     // submissions here. The private local preview uses its isolated snapshot.
     function loadCandidateLinks() {
+      if(!window.OACandidateData)return;
       state.candidates = [];
       if (state.flatLoaded && state.list) state.list.reload();
       OACandidateData.load().then(function (rows) {
@@ -1349,10 +1362,10 @@
       if (state.flatLoaded && state.list) state.list.reload();
       })['catch'](function () { /* the directory still works without candidate data */ });
     }
-    loadCandidateLinks();
-    if (window.OAAccounts) OAAccounts.onChange(loadCandidateLinks);
+    if (!cfg.mapOnly) loadCandidateLinks();
+    if (!cfg.mapOnly && window.OAAccounts) OAAccounts.onChange(loadCandidateLinks);
 
-    attach();
+    if (!cfg.deferAccounts) attach();
     return state.list;
   }
 
@@ -1375,8 +1388,9 @@
 
     if (window.OAAccounts) {
       OAAccounts.onChange(function (u) {
-        state.user = u || null;
-        state.admin = !!(u && OAAccounts.isAdmin());
+        var nextUser=u||null, nextAdmin=!!(u&&OAAccounts.isAdmin());
+        if(state.user===nextUser && state.admin===nextAdmin)return;
+        state.user=nextUser;state.admin=nextAdmin;
         refresh();
       });
     }
@@ -1384,6 +1398,7 @@
 
   window.OADirectory = {
     mount: mount,
+    connect: attach,
     fields: function () { return FIELDS.map(function (f) { return f.key; }); },
     cards: function () { return state.cards.slice(); },
 

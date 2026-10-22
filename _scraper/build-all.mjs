@@ -65,6 +65,7 @@ export const BUILDERS = [
      university the directory does not carry creates its card in the same run
      that published the posting. */
   { script: 'build-directory.mjs', label: 'the Universities directory', needsFirebase: false },
+  { script: 'build-map-data.mjs', label: 'the compact university map data', needsFirebase: false },
   /* AFTER the directory, because it is DERIVED from it: the domain a visitor's
      network is matched against is the host of a department's own page, so a
      university that gained a card in this very run can be recognised from its

@@ -370,6 +370,13 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
         if (k !== 'institution') delete rec[k];
       }
     }
+    // Owner correction, 2026-10-22: retain historical provenance without
+    // presenting this former research group or the redundant Faculty link.
+    if (rec.id === 'insead____humanitarian-research-group-hrg-social-innovation-center') rec.directoryHidden = true;
+    if (rec.id === 'insead__school-of-business__technology-and-operations-management') {
+      delete rec.facultyUrl;
+      rec.suppressFacultyLink = true;
+    }
     return rec;
   });
 

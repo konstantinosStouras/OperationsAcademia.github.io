@@ -5126,7 +5126,7 @@ async function testLegacyTables() {
     'previous-markets.html reads the market-roll rule the jobs page reads');
 
   const uniHtml = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8');
-  ok(uniHtml.includes('assets/leaflet/leaflet.js') && uniHtml.includes('OAUniMap.mount'),
+  ok(uniHtml.includes('assets/leaflet/leaflet.js') && (await readFile(path.join(HERE, '..', 'assets', 'oa-universities-page.js'), 'utf8')).includes('OAUniMap.mount'),
     'universities.html mounts the vendored map');
   const uniJs = await readFile(path.join(HERE, '..', 'assets', 'oa-uni-map.js'), 'utf8');
   ok((await readFile(path.join(HERE, '..', 'assets', 'oa-directory.js'), 'utf8')).includes("legacyParam: 'filterA'"),
@@ -8278,10 +8278,10 @@ async function testDirectoryWiring() {
   eq(meta, directoryStats(dir), 'directory-meta.json agrees with the table it describes');
 
   /* the page mounts the whole of it, and the gates cover the page */
-  const page = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8');
+  const page = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8') + await readFile(path.join(HERE, '..', 'assets', 'oa-universities-page.js'), 'utf8');
   for (const need of ['assets/oa-list.js', 'assets/oa-list.css', 'assets/oa-directory.js',
     'assets/oa-directory.css', 'OADirectory.mount', 'oa-directory-map',
-    'assets/oa-uni-map.js', 'assets/oa-rowedit.js']) {
+    'assets/oa-uni-map.js', 'assets/oa-universities-page.js']) {
     ok(page.includes(need), `universities.html carries ${need}`);
   }
   const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
@@ -8923,7 +8923,7 @@ async function testRowOverrides() {
 
   // Universities now shares the community directory overlay instead of the
   // retired, separate maintainer-only rowOverrides map dataset.
-  const universities = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8');
+  const universities = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8') + await readFile(path.join(HERE, '..', 'assets', 'oa-universities-page.js'), 'utf8');
   const directory = await readFile(path.join(HERE, '..', 'assets', 'oa-directory.js'), 'utf8');
   ok(universities.includes('snapshot: directorySnapshot'), 'the map receives the directory snapshot');
   ok(universities.includes('uniMap.update(snapshot)'), 'directory corrections update the map immediately');
@@ -12850,7 +12850,7 @@ async function testReviewWiring() {
      with, drop it the other and a posting's new card waits for a secret its
      build never needed. */
   eq(plan({ firebase: false }).map((b) => b.script),
-    ['build-directory.mjs', 'build-netmap.mjs', 'build-functions-vendor.mjs'],
+    ['build-directory.mjs', 'build-map-data.mjs', 'build-netmap.mjs', 'build-functions-vendor.mjs'],
     'without the service account only the three OFFLINE builders run');
   eq(plan({ firebase: true }).map((b) => b.script), BUILDERS.map((b) => b.script),
     'with it, the whole build does');
@@ -22391,7 +22391,7 @@ async function testSweep20260906() {
 
   /* 17. the directory refuses a second row for a place it lists */
   const dir = await rd('assets', 'oa-directory.js');
-  ok(/function rowKeyOf\(r\) \{/.test(dir) && /var key = rowKeyOf\(r\);/.test(dir)
+  ok(/function rowKeyOf\(r, canonical\) \{/.test(dir) && /var key = rowKeyOf\(r, !r\._edit\);/.test(dir)
      && /function existingRow\(doc, exceptId, rows\) \{/.test(dir) && /function clashText\(clash\) \{/.test(dir),
     'sweep: the directory has ONE definition of "the same place", used by the fold and by the refusal');
   eq((dir.match(/var clash = existingRow\(/g) || []).length, 2,

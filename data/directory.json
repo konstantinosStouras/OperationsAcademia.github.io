@@ -5132,7 +5132,8 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2014-07-11"
+  "lastPosted": "2014-07-11",
+  "directoryHidden": true
  },
  {
   "id": "insead__school-of-business__decision-sciences",
@@ -5167,7 +5168,6 @@
    "Singapore",
    "United Arab Emirates"
   ],
-  "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
   "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#group-faculty",
   "sources": [
    "directory",
@@ -5176,7 +5176,8 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2014-09-15"
+  "lastPosted": "2014-09-15",
+  "suppressFacultyLink": true
  },
  {
   "id": "institut-mines-telecom",
