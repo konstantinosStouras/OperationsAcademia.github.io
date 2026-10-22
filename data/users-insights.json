@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-22T15:36:37.784Z",
- "members": 385,
+ "generated": "2026-10-22T19:26:49.349Z",
+ "members": 386,
  "k": 3,
  "affiliation": {
-  "listed": 303,
+  "listed": 304,
   "other": 47,
   "none": 35
  },
@@ -78,6 +78,11 @@
    {
     "name": "Ohio State University",
     "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "University of Alberta",
+    "country": "Canada",
     "members": 4
    },
    {
@@ -166,11 +171,6 @@
     "members": 3
    },
    {
-    "name": "University of Alberta",
-    "country": "Canada",
-    "members": 3
-   },
-   {
     "name": "University of California, Berkeley",
     "country": "United States",
     "members": 3
@@ -222,7 +222,7 @@
    },
    {
     "name": "Canada",
-    "members": 21
+    "members": 22
    },
    {
     "name": "Singapore",
