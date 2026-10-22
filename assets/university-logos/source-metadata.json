@@ -1,0 +1,13 @@
+{
+  "source": "Wikidata item coordinates (P625), matched by name",
+  "retrievedAt": "2026-10-18",
+  "note": "Approximate location for map display only. Matches are name based and unreviewed unless reviewed:true, in which case the match follows the correction recorded in data/location-review.json.",
+  "mapped": 459,
+  "total": 462,
+  "reviewed": 60,
+  "logos": {
+    "note": "Logos from each institution's official website (Wikidata P856), the logo, seal and coat-of-arms files Wikidata, Wikimedia Commons and Wikipedia record for it, or a reviewed file listed in data/logo-review.json; for identification only.",
+    "count": 431
+  },
+  "country": "Country of the matched Wikidata item (P17), English label."
+}

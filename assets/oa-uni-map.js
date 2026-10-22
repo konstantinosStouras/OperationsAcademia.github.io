@@ -1,287 +1,239 @@
-/* ---------------------------------------------------------------------------
-   Operations Academia — the Universities map.
-
-   Replaces the Awesome Table map view. Vanilla ES5-compatible JS; the map
-   itself is Leaflet + OpenStreetMap tiles, vendored under assets/leaflet/ so
-   the only third party in the reading path is the tile server. One global:
-   window.OAUniMap.
-
-       OAUniMap.mount({ mount: '#oa-uni', data: 'data/universities.json' });
-
-   What it reproduces from the vendor view, deliberately one-for-one:
-     - a search field above the map, filtering the pins as you type;
-     - clustered pins (the vendor used Google's marker clusterer);
-     - a popup per school with the same rows the vendor's tooltip had —
-       School/Department, then links to Faculty, Recent hires, PhD Alumni,
-       Candidates on the market, Current job openings, Past job postings —
-       each pointing at the corresponding page of THIS site, pre-filtered to
-       that school (the same ?filter deep links the site has always used).
-   The legacy ?filterA=/?filterB= deep links (jobs.json's "Further info"
-   column links every posting here as ?filterA=<school>) land in the search
-   field, exactly as they landed in the vendor's search filter.
-   --------------------------------------------------------------------------- */
+/* Operations Academia map. Directory snapshots own every search/filter/edit;
+   this component only applies a geographic region and renders that same view.
+   Land, locations and logos are local snapshots, independent of other sites. */
 (function () {
   'use strict';
-
-  /* Diacritic- AND punctuation-insensitive — the same rule as oa-list.js, so
-     searching "munster" finds Münster on every page alike, and a posting's
-     "Further info" link still lands on its university after the site tidied
-     the spelling ("University of California Berkeley" finding "University of
-     California, Berkeley"). Both sides are folded the same way, so it only
-     ever finds MORE. Keep it in step with oa-list.js and oa-alert-match.js. */
-  function fold(s) {
-    s = String(s === null || s === undefined ? '' : s).toLowerCase();
-    if (s.normalize) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');
-    return s.replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '');
-  }
-
-  function safeUrl(u) {
-    u = String(u || '').trim();
-    return /^https?:\/\//i.test(u) ? u : '';
-  }
-
-  function el(tag, attrs, kids) {
+  function el(tag, attrs, children) {
     var n = document.createElement(tag);
-    if (attrs) {
-      for (var k in attrs) {
-        if (!Object.prototype.hasOwnProperty.call(attrs, k)) continue;
-        var v = attrs[k];
-        if (v === null || v === false || v === undefined) continue;
-        if (k === 'class') n.className = v;
-        else if (k === 'text') n.textContent = v;
-        else n.setAttribute(k, v === true ? '' : v);
-      }
-    }
-    (kids || []).forEach(function (c) {
-      if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (k === 'text') n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]);
     });
+    (children || []).forEach(function(c) { n.appendChild(c); });
     return n;
   }
-
-  /* The rows of a school's popup: the vendor tooltip's own list, each link
-     pre-filtering the matching page by the school's institution name. Built
-     as DOM, never as an HTML string — the dataset is operator-supplied, but
-     this page is public and nothing here should ever be interpretable. */
-  function popupContent(r, cfg) {
-    var inst = r.institution || r.name;
-    var q = encodeURIComponent(inst);
-
-    function row(label, node) {
-      if (!node) return null;
-      return el('tr', null, [
-        el('td', { class: 'oa-uni-poplabel', text: label }),
-        el('td', null, [node]),
-      ]);
-    }
-    function extLink(url, label) {
-      var u = safeUrl(url);
-      if (!u) return null;
-      return el('a', { href: u, target: '_blank', rel: 'noopener', text: label || 'link' });
-    }
-    function siteLink(href) {
-      return el('a', { href: href, text: 'link' });
-    }
-
-    var rows = [
-      row('School, Department', r.schoolDept ? el('span', { text: r.schoolDept }) : null),
-      row('Faculty', extLink(r.facultyUrl, 'link')),
-      row('Recent hires', siteLink('recent-faculty?placement=' + q)),
-      row('PhD Alumni', siteLink('recent-faculty?alma=' + q)),
-      /* Where the candidates list LIVES differs between the designs that
-         serve this map: a page of its own in the /v2/ archive, a section of
-         the one-page site on the live one — where three list engines share
-         the query string, so its filter keys are namespaced (urlPrefix 'c_').
-         The page says which; the default is the page-of-its-own form, so the
-         archive's copy of this engine behaves exactly as it always did. */
-      row('Candidates on the market', siteLink(
-        (cfg && cfg.candidatesHref) ? cfg.candidatesHref(q) : 'candidates?affiliation=' + q)),
-      row('Current job openings', siteLink('jobs?institution=' + q)),
-      row('Past job postings', siteLink('previous-markets?university=' + q)),
-      row('Campus location', extLink(r.mapUrl, 'map')),
-    ].filter(Boolean);
-
-    return el('div', { class: 'oa-uni-pop' }, [
-      el('h3', { text: inst }),
-      el('table', null, [el('tbody', null, rows)]),
-    ]);
+  function key(s) { return window.OASchools ? OASchools.institutionKey(String(s || '')) : String(s || '').toLowerCase(); }
+  function fold(s) {
+    if (window.OAList) return OAList.fold(s);
+    s=String(s || '').toLowerCase();
+    if(s.normalize)s=s.normalize('NFD').replace(/[̀-ͯ]/g,'');
+    return s.replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '');
   }
-
-  function matchesQuery(r, needle) {
-    if (!needle) return true;
-    var hay = [r.name, r.institution, r.school, r.department, r.schoolDept, r.address];
-    for (var i = 0; i < hay.length; i++) {
-      if (fold(hay[i]).indexOf(needle) !== -1) return true;
-    }
-    return false;
+  var REGIONS = [
+    ['world','World'],['north-america','North America'],['south-america','South America'],
+    ['europe','Europe'],['africa','Africa'],['asia','Asia'],['oceania','Oceania']
+  ];
+  var COUNTRIES = {
+    'north-america': 'Canada|United States|United States of America|Mexico|Guatemala|Belize|Honduras|El Salvador|Nicaragua|Costa Rica|Panama|Cuba|Jamaica|Haiti|Dominican Republic|Puerto Rico|Trinidad and Tobago|Barbados|Bahamas|Greenland',
+    'south-america': 'Brazil|Argentina|Chile|Peru|Colombia|Venezuela|Ecuador|Bolivia|Paraguay|Uruguay|Guyana|Suriname|French Guiana',
+    europe: 'United Kingdom|Ireland|France|Germany|Italy|Spain|Portugal|Netherlands|Belgium|Luxembourg|Switzerland|Austria|Denmark|Norway|Sweden|Finland|Iceland|Poland|Czech Republic|Czechia|Slovakia|Hungary|Romania|Bulgaria|Greece|Cyprus|Malta|Slovenia|Croatia|Serbia|Bosnia and Herzegovina|Albania|Montenegro|North Macedonia|Kosovo|Estonia|Latvia|Lithuania|Ukraine|Belarus|Moldova|Russia|Russian Federation',
+    africa: 'South Africa|Egypt|Morocco|Algeria|Tunisia|Libya|Sudan|South Sudan|Ethiopia|Eritrea|Djibouti|Somalia|Kenya|Uganda|Tanzania|Rwanda|Burundi|Ghana|Nigeria|Senegal|Cameroon|Ivory Coast|Côte d’Ivoire|Zambia|Zimbabwe|Botswana|Namibia|Mozambique|Angola|Mauritius|Madagascar|Malawi|Lesotho|Eswatini|Democratic Republic of the Congo|Republic of the Congo|Gabon|Benin|Togo|Mali|Niger|Chad|Burkina Faso|Liberia|Sierra Leone|Guinea|Cape Verde|Seychelles',
+    asia: 'China|Hong Kong|Taiwan|Macau|Macao|Japan|South Korea|Republic of Korea|North Korea|Mongolia|India|Pakistan|Bangladesh|Sri Lanka|Nepal|Bhutan|Maldives|Singapore|Malaysia|Indonesia|Thailand|Vietnam|Philippines|Cambodia|Laos|Myanmar|Brunei|Timor-Leste|Saudi Arabia|United Arab Emirates|Qatar|Bahrain|Kuwait|Oman|Yemen|Israel|Palestine|Jordan|Lebanon|Syria|Iraq|Iran|Turkey|Türkiye|Georgia|Armenia|Azerbaijan|Kazakhstan|Uzbekistan|Turkmenistan|Kyrgyzstan|Tajikistan|Afghanistan',
+    oceania: 'Australia|New Zealand|Fiji|Papua New Guinea|Samoa|Tonga|Vanuatu|Solomon Islands|New Caledonia|Guam|French Polynesia'
+  };
+  function regionOf(r) {
+    var country = fold(r.country);
+    var found = Object.keys(COUNTRIES).find(function(k) {
+      return COUNTRIES[k].split('|').some(function(c) { return fold(c) === country; });
+    });
+    if (found) return found;
+    if (!Number.isFinite(r.lat) || !Number.isFinite(r.lng)) return null;
+    // Coordinates fill gaps in historic records; country metadata wins above.
+    if (r.lng < -30) return r.lat >= 8 ? 'north-america' : 'south-america';
+    if (r.lat < -10 && r.lng > 110) return 'oceania';
+    if (r.lng >= -20 && r.lng <= 55 && r.lat < 37) return 'africa';
+    if (r.lat >= 35 && r.lng < 45) return 'europe';
+    return 'asia';
   }
-
   function mount(cfg) {
     var host = document.querySelector(cfg.mount);
     if (!host) return;
-
-    host.className = 'oa-uni';
-    host.innerHTML = '';
-
-    var input = el('input', {
-      id: 'oa-uni-search',
-      type: 'search',
-      placeholder: 'University',
-      autocomplete: 'off',
-      'aria-label': 'Search universities on the map',
+    host.className = 'oa-uni'; host.replaceChildren();
+    var saved = new URLSearchParams(location.search).get('region');
+    var region = REGIONS.some(function(r) { return r[0] === saved; }) ? saved : 'world';
+    var snapshot = cfg.snapshot || {view:[],rows:[]};
+    var locations = new Map(), historic = new Map(), rowInstitutions = {}, ready = false, lastSignature = '';
+    var tabs = el('div', {class:'oa-map-regions', role:'group', 'aria-label':'Continent'});
+    REGIONS.forEach(function(r) {
+      var b = el('button',{type:'button','data-region':r[0],text:r[1]});
+      b.addEventListener('click',function() {
+        region=r[0]; syncRegion(); draw(false); updateButtons();
+      }); tabs.appendChild(b);
     });
-    var count = el('span', {
-      class: 'oa-uni-count',
-      role: 'status',
-      'aria-live': 'polite',
-    });
-    var bar = el('div', { class: 'oa-uni-bar' }, [
-      el('label', { for: 'oa-uni-search', text: 'University' }),
-      input,
-      count,
-    ]);
-    var mapEl = el('div', { class: 'oa-uni-map', id: 'oa-uni-map' });
-    host.appendChild(bar);
-    host.appendChild(mapEl);
-
-    function fail(msg) {
-      mapEl.className = 'oa-uni-map is-empty';
-      mapEl.textContent = msg;
+    var status = el('p',{class:'oa-map-status',role:'status','aria-live':'polite'});
+    var mapEl = el('div',{class:'oa-uni-map',id:'oa-uni-map',role:'region','aria-label':'University locations map','aria-describedby':'oa-map-help'});
+    var help = el('p',{id:'oa-map-help',class:'oa-map-help',text:'Select a logo for school details, or a numbered group for nearby universities and zoom options. The list below provides the same details without using the map.'});
+    var legend = el('p',{class:'oa-map-legend',text:'Logo: university location · Number: grouped universities · Initials: logo unavailable. Locations are approximate.'});
+    var details = el('details',{class:'oa-map-results'});
+    var summary = el('summary',{text:'Matching universities'}), resultList=el('ul',{});
+    details.append(summary,resultList);
+    host.append(tabs,status,help,mapEl,legend,details);
+    function updateButtons() {
+      tabs.querySelectorAll('button').forEach(function(b) { b.setAttribute('aria-pressed',String(b.getAttribute('data-region')===region)); });
     }
-
-    if (!window.L || !window.L.map) {
-      fail('The map could not be loaded. Please reload the page, or let us know if it keeps happening.');
-      return;
+    updateButtons();
+    function syncRegion() {
+      var p=new URLSearchParams(location.search); p.set('view','map');
+      if(region==='world') p.delete('region'); else p.set('region',region);
+      history.replaceState(null,'',location.pathname+'?'+p+location.hash);
     }
-
-    var map = L.map(mapEl, {
-      // wheel zoom off: the map sits mid-page, and a wheel that zooms the map
-      // traps the scroll that was meant to pass it (the vendor's embed had the
-      // same behaviour); the +/- controls and pinch still zoom.
-      scrollWheelZoom: false,
-      worldCopyJump: true,
-    });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
-
-    var cluster = (L.markerClusterGroup ? L.markerClusterGroup({ showCoverageOnHover: false })
-      : L.layerGroup());
-    cluster.addTo(map);
-
-    var base = [];      // the file, exactly as it was served
-    var rows = [];      // what is drawn — `base` after cfg.prepare, if any
-    var shown = [];
-    var timer = null;
-
-    /* A page may correct the dataset before it is drawn (universities.html
-       overlays the maintainer's `rowOverrides` — see assets/oa-rowedit.js).
-       The engine keeps the file it fetched, so the overlay can arrive LATE —
-       Firestore resolves after this fetch as often as not — and be applied
-       without going back to the network. */
-    function prepared(list) {
-      if (typeof cfg.prepare !== 'function') return list.slice();
-      var out = cfg.prepare(list.slice());
-      return (out || []).filter(function (r) { return r && numeric(r.lat) && numeric(r.lng); });
+    if(!window.L) { status.textContent='The map could not load. Switch to Cards to explore the directory.'; return; }
+    var map=L.map(mapEl,{scrollWheelZoom:false,worldCopyJump:false,minZoom:0,maxZoom:17,zoomSnap:.25,zoomControl:false,attributionControl:true});
+    L.control.zoom({position:'topright'}).addTo(map);
+    map.setView([22,10],2);
+    map.attributionControl.addAttribution('Land: Natural Earth / world-atlas');
+    var reset=L.control({position:'topright'});
+    reset.onAdd=function() {
+      var box=el('div',{class:'leaflet-bar oa-map-reset'}), b=el('button',{type:'button','aria-label':'Reset map to selected continent',text:'↺'});
+      box.appendChild(b); L.DomEvent.disableClickPropagation(box);
+      b.addEventListener('click',function(){frame(currentPoints);}); return box;
+    }; reset.addTo(map);
+    var land=null;
+    function palette() {
+      var css=getComputedStyle(host);
+      return {color:css.getPropertyValue('--map-border').trim(),fillColor:css.getPropertyValue('--map-land').trim(),weight:0.6,fillOpacity:1};
     }
-
-    function bounds(list) {
-      var b = L.latLngBounds([]);
-      list.forEach(function (r) { b.extend([r.lat, r.lng]); });
-      return b;
+    var observer=new MutationObserver(function(){if(land)land.setStyle(palette());});
+    observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+    var cluster=L.markerClusterGroup({showCoverageOnHover:false,zoomToBoundsOnClick:false,spiderfyOnMaxZoom:false,
+      maxClusterRadius:42,animate:!matchMedia('(prefers-reduced-motion: reduce)').matches,
+      iconCreateFunction:function(c) {
+        var count=new Set(c.getAllChildMarkers().map(function(m){return m.oaCard.id;})).size;
+        var size=Math.min(68,40+Math.sqrt(count)*3);
+        return L.divIcon({className:'oa-map-cluster',html:'<span>'+count+'</span>',iconSize:[size,size]});
+      }}).addTo(map);
+    var currentPoints=[],markers=new Map(),opener=null,autoFrame=true,framing=false;
+    function frame(points) {
+      framing=true;autoFrame=true;
+      if(region==='world') map.fitBounds([[-56,-172],[76,180]],{padding:[8,8],animate:false});
+      else if(points.length) map.fitBounds(L.latLngBounds(points.map(function(p){return [p.lat,p.lng];})).pad(.1),{maxZoom:points.length===1?8:5,animate:false});
+      else map.setView([22,10],2,{animate:false});
+      framing=false;
     }
-
-    function draw(q, opts) {
-      var keepView = !!(opts && opts.keepView);
-      var needle = fold(q);
-      shown = rows.filter(function (r) { return matchesQuery(r, needle); });
-      /* Close before clearing. A popup whose marker is about to leave the
-         cluster is no longer Leaflet's to auto-close, so it lingers in the DOM
-         and the next pin opens a SECOND one beside it. */
-      map.closePopup();
-      cluster.clearLayers();
-      shown.forEach(function (r) {
-        var m = L.marker([r.lat, r.lng], { title: r.name });
-        var pop = popupContent(r, cfg);
-        // A page may add its own controls to a popup — the maintainer's Edit
-        // and Take down on universities.html. The hook is the map's twin of
-        // OAList's `onCard`, and like it, drawing a button is never authority.
-        if (typeof cfg.onPopup === 'function') {
-          try { cfg.onPopup(pop, r); } catch (e) { if (window.console) console.error(e); }
-        }
-        m.bindPopup(pop, { maxWidth: 320 });
-        cluster.addLayer(m);
-      });
-      count.textContent = !rows.length ? ''
-        : needle
-          ? shown.length + ' of ' + rows.length + ' universities'
-          : rows.length + ' universities';
-      /* A SEARCH frames what it found; a REDRAW must not. Re-fitting on a
-         redraw undoes a viewport the reader chose deliberately — and every
-         correction made from a pin causes one. */
-      if (shown.length && !keepView) {
-        map.fitBounds(bounds(shown).pad(0.1), { maxZoom: needle ? 8 : 17 });
-      }
+    map.on('dragstart zoomstart',function(){if(!framing)autoFrame=false;});
+    function makeLink(text,href) {
+      if(!href || !/^(https?:\/\/|(?:universities|jobs|candidates|recent-faculty|previous-markets)\?)/i.test(href)) return el('span',{text:text});
+      var a=el('a',{text:text,href:href});
+      if(/^https?:/i.test(href)){a.target='_blank';a.rel='noopener';} return a;
     }
-
-    /* Filter state lives in the query string, like every list page — and the
-       vendor's own ?filterA=/?filterB= deep links (every posting's "Further
-       info" link names this page that way) are honoured as the search. */
-    /* `isFinite(null)` is true, and a null coordinate would pin 0°,0° */
-    function numeric(v) { return typeof v === 'number' && isFinite(v); }
-    function readUrl() {
-      var p = new URLSearchParams(location.search);
-      return p.get('q') || p.get('filterA') || p.get('filterB') || '';
-    }
-    function syncUrl() {
-      var p = new URLSearchParams(location.search);
-      p['delete']('q'); p['delete']('filterA'); p['delete']('filterB');
-      if (input.value) { p.set('q', input.value); p.set('view', 'map'); }   // a search is a map search
-      var qs = p.toString();
-      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
-    }
-
-    input.addEventListener('input', function () {
-      clearTimeout(timer);
-      timer = setTimeout(function () { draw(input.value); syncUrl(); }, 140);
-    });
-
-    fetch(cfg.data, { credentials: 'same-origin', cache: 'no-cache' })
-      .then(function (res) {
-        if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
-        return res.json();
-      })
-      .then(function (data) {
-        base = (Array.isArray(data) ? data : []).filter(function (r) {
-          return r && numeric(r.lat) && numeric(r.lng);
+    function cardContent(card,point) {
+      var pop=el('div',{class:'oa-uni-pop',tabindex:'-1'});
+      pop.appendChild(el('h3',{text:card.institution}));
+      pop.appendChild(el('p',{text:(card.countries||[]).join(' · ')}));
+      pop.appendChild(el('p',{text:(card.schools||[]).length+' schools · '+(card.schools||[]).reduce(function(n,s){return n+(s.rows||[]).length;},0)+' department listings · '+(card.n||0)+' past postings'}));
+      (card.schools||[]).forEach(function(s) {
+        if(s.name)pop.appendChild(el('h4',{text:s.name}));
+        (s.rows||[]).forEach(function(r) {
+          var p=el('p',{}); p.appendChild(makeLink(r.department||'School listing',r.deptUrl));
+          if(r.facultyUrl) {p.appendChild(document.createTextNode(' · '));p.appendChild(makeLink('Faculty',r.facultyUrl));}
+          pop.appendChild(p);
         });
-        rows = prepared(base);
-        input.value = readUrl();
-        draw(input.value);
-        if (!rows.length) fail('No universities could be loaded. Please reload the page, or let us know if it keeps happening.');
-      })
-      ['catch'](function (err) {
-        fail('The universities could not be loaded. Please reload the page, or let us know if it keeps happening.');
-        if (window.console) console.error('OAUniMap: failed to load ' + cfg.data, err);
       });
-
-    return {
-      rows: function () { return rows.slice(); },
-      shown: function () { return shown.slice(); },
-      /** Re-run cfg.prepare over the file as served, and redraw IN PLACE —
-          the reader's viewport is kept. (The popup closes: its marker is
-          destroyed by the redraw, and reopening one on a marker the cluster
-          has not finished placing leaves two popups on screen. Keeping the
-          VIEW is what makes correcting a run of schools workable; the reader
-          is still looking at the same place.) */
-      refresh: function () {
-        if (!base.length) return;
-        rows = prepared(base);
-        draw(input.value, { keepView: true });
-      },
-      map: map,
-    };
+      var q=encodeURIComponent(card.institution),nav=el('p',{class:'oa-map-popup-links'});
+      [['University profile','universities?university='+q],['Current jobs','jobs?institution='+q],['Candidates','candidates?c_affiliation='+q],['Recent hires','recent-faculty?placement='+q],['PhD alumni','recent-faculty?alma='+q],['Past jobs','previous-markets?university='+q]].forEach(function(item){nav.appendChild(makeLink(item[0],item[1]));});
+      pop.appendChild(nav);
+      if(card.edited && card.edited.t)pop.appendChild(el('p',{text:'Last updated '+new Date(card.edited.t).toLocaleDateString()+(card.edited.name?' by '+card.edited.name:'')}));
+      if(point && point.mapUrl)pop.appendChild(makeLink('Campus location',point.mapUrl));
+      return pop;
+    }
+    function openPopup(content,latlng,source) {
+      map.closePopup();
+      opener=source||document.activeElement;
+      L.popup({maxWidth:360,minWidth:Math.min(260,window.innerWidth-80),autoPanPadding:[20,20],className:'oa-map-popup'})
+        .setLatLng(latlng).setContent(content).openOn(map);
+      setTimeout(function(){var link=content.querySelector('a,button'); (link||content).focus();},0);
+    }
+    map.on('popupclose',function(e){if(opener && document.contains(opener) && e.popup.getElement().contains(document.activeElement))opener.focus({preventScroll:true});opener=null;});
+    mapEl.addEventListener('keydown',function(e){if(e.key==='Escape'){map.closePopup();} if((e.key===' '||e.key==='Enter')&&e.target.classList.contains('leaflet-marker-icon')){e.preventDefault();e.stopImmediatePropagation();e.target.click();}},true);
+    cluster.on('clusterclick',function(e) {
+      var all=e.layer.getAllChildMarkers(),unique=new Map(); all.forEach(function(m){unique.set(m.oaCard.id,m);});
+      var pop=el('div',{class:'oa-uni-pop',tabindex:'-1'},[el('h3',{text:unique.size+(unique.size===1?' university nearby':' universities nearby')})]);
+      var list=el('ul',{class:'oa-map-cluster-list'});
+      unique.forEach(function(m) {
+        var b=el('button',{type:'button',text:m.oaCard.institution});
+        b.addEventListener('click',function(){openPopup(cardContent(m.oaCard,m.oaPoint),m.getLatLng(),mapEl);});
+        list.appendChild(el('li',{},[b]));
+      });pop.appendChild(list);
+      var zoom=el('button',{type:'button',class:'oa-map-expand',text:'Zoom in to separate universities'});
+      zoom.addEventListener('click',function(){map.closePopup();if(map.getZoom()>=map.getMaxZoom() || all.every(function(m){return m.getLatLng().equals(all[0].getLatLng());})){e.layer.spiderfy();}else{e.layer.zoomToBounds({padding:[35,35],maxZoom:Math.min(map.getMaxZoom(),map.getZoom()+3)});}});
+      pop.appendChild(zoom); openPopup(pop,e.latlng,e.layer.getElement());
+    });
+    function labelClusters() {
+      mapEl.querySelectorAll('.oa-map-cluster').forEach(function(n){n.setAttribute('role','button');n.setAttribute('aria-label',n.textContent+' grouped universities. Open list and zoom options');n.setAttribute('tabindex','0');});
+    }
+    cluster.on('animationend',labelClusters);map.on('moveend',labelClusters);
+    function pointsFor(card) {
+      var names=[card.institution].concat((card.aka||'').split(' · '));
+      (card.schools||[]).forEach(function(s){(s.rows||[]).forEach(function(r){if(rowInstitutions[r.id])names.push(rowInstitutions[r.id]);});});
+      var pts=[],seen=new Set(),fallback=null;
+      names.forEach(function(name) {
+        var k=key(name),r=locations.get(k);if(r&&!fallback)fallback=r;
+        (historic.get(k)||[]).forEach(function(p){
+          var coord=p.lat.toFixed(4)+','+p.lng.toFixed(4);if(seen.has(coord))return;seen.add(coord);
+          var schoolLogo=locations.get(key(p.school));
+          pts.push(Object.assign({},p,{logo:schoolLogo&&schoolLogo.logo||r&&r.logo,country:r&&r.country||(card.countries||[])[0]||''}));
+        });
+      });
+      if(!pts.length&&fallback)pts.push(fallback);
+      return pts;
+    }
+    function draw(keepView) {
+      if(!ready)return;
+      var cards=snapshot.view||[],points=[],missing=[],inRegion=[];
+      cards.forEach(function(c){
+        var ps=pointsFor(c);
+        if(!ps.length){if(region==='world'||(c.countries||[]).some(function(country){return regionOf({country:country})===region;}))missing.push(c);return;}
+        ps=ps.filter(function(p){return region==='world'||regionOf(p)===region;});
+        if(ps.length)inRegion.push(c);
+        ps.forEach(function(p){points.push(Object.assign({},p,{card:c}));});
+      });
+      map.closePopup();cluster.clearLayers();markers.clear();currentPoints=points;
+      points.forEach(function(p) {
+        var card=p.card,face=el('span',{class:'oa-map-logo-face'});
+        var initials=card.institution.split(/\s+/).slice(0,2).map(function(s){return s[0];}).join('');
+        face.textContent=initials;
+        if(p.logo && /^\/assets\/university-logos\/[^/]+$/.test(p.logo)) {
+          var img=el('img',{src:p.logo,alt:'',width:'32',height:'32',loading:'lazy'});
+          img.addEventListener('error',function(){img.remove();});face.appendChild(img);
+        }
+        var icon=L.divIcon({className:'oa-map-logo',html:face.outerHTML,iconSize:[44,44],iconAnchor:[22,22]});
+        // Leaflet accepts markup, but the icon was built from DOM with textContent.
+        var m=L.marker([p.lat,p.lng],{icon:icon,title:card.institution,alt:card.institution,keyboard:true});
+        m.oaCard=card;m.oaPoint=p;
+        m.on('add',function(){var n=m.getElement();if(n){n.setAttribute('aria-label','Open '+card.institution);n.setAttribute('role','button');var im=n.querySelector('img');if(im)im.addEventListener('error',function(){im.remove();});}});
+        m.on('click',function(){openPopup(cardContent(card,p),m.getLatLng(),m.getElement());});
+        cluster.addLayer(m);if(!markers.has(card.id))markers.set(card.id,m);
+      });
+      var sorted=inRegion.concat(missing).sort(function(a,b){return a.institution.localeCompare(b.institution);});
+      resultList.replaceChildren();
+      sorted.forEach(function(c){
+        var item=el('li',{}),m=markers.get(c.id),entry=el('details',{});
+        entry.append(el('summary',{text:c.institution+(m?'':' — location unavailable')}),cardContent(c,m&&m.oaPoint));
+        if(m){var b=el('button',{type:'button',text:'Show on map'});b.addEventListener('click',function(){cluster.zoomToShowLayer(m,function(){openPopup(cardContent(c,m.oaPoint),m.getLatLng(),b);});});entry.appendChild(b);}
+        item.appendChild(entry);resultList.appendChild(item);
+      });
+      summary.textContent='Matching universities ('+sorted.length+')';
+      status.textContent=inRegion.length+(inRegion.length===1?' university · ':' universities · ')+points.length+(points.length===1?' mapped location':' mapped locations')+(missing.length?' · '+missing.length+' without coordinates (available in the list)':'')+'.'+(!sorted.length?' No matches. Try another continent or clear the search filters.':'');
+      if(!keepView)frame(points);labelClusters();
+    }
+    function update(next) {
+      snapshot=next;
+      var signature=JSON.stringify((next.filters||[]));
+      var keep=signature===lastSignature;lastSignature=signature;draw(keep);
+    }
+    Promise.all([
+      fetch('/data/university-map-locations.json').then(function(r){if(!r.ok)throw Error('locations');return r.json();}),
+      fetch('/data/universities.json').then(function(r){if(!r.ok)throw Error('campuses');return r.json();}),
+      fetch('/assets/world/countries.geojson').then(function(r){if(!r.ok)throw Error('geography');return r.json();})
+    ]).then(function(data) {
+      data[0].records.forEach(function(r){locations.set(key(r.name),r);});
+      rowInstitutions=data[0].rowInstitutions||{};
+      data[1].forEach(function(r){if(!Number.isFinite(r.lat)||!Number.isFinite(r.lng))return;var k=key(r.institution||r.name);if(!historic.has(k))historic.set(k,[]);historic.get(k).push(r);});
+      land=L.geoJSON(data[2],{style:palette,interactive:false}).addTo(map);land.bringToBack();
+      ready=true;draw(false);
+    }).catch(function(err){status.textContent='Map assets could not load. Switch to Cards to use all directory searches and filters.';console.error('OAUniMap',err);});
+    var resize=new ResizeObserver(function(){map.invalidateSize({pan:false});if(ready&&autoFrame&&mapEl.clientWidth)frame(currentPoints);});resize.observe(mapEl);
+    window.addEventListener('popstate',function(){var p=new URLSearchParams(location.search).get('region');region=REGIONS.some(function(r){return r[0]===p;})?p:'world';updateButtons();draw(false);});
+    return {map:map,update:update,refresh:function(){draw(true);},shown:function(){return currentPoints.slice();},rows:function(){return snapshot.rows.slice();}};
   }
-
-  window.OAUniMap = { mount: mount, fold: fold };
+  window.OAUniMap={mount:mount,fold:fold,regionOf:regionOf};
 })();

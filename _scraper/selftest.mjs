@@ -969,7 +969,7 @@ async function testMobileStandards() {
   }
   // universities.html is a MAP, not a list — it cannot mount OAList, so it has
   // its own phone block in page-test.mjs instead of a MOBILE_PAGES entry
-  ok(pt.includes('oa-uni-search'), 'the universities map has its own mobile gate');
+  ok(pt.includes('oaf-university'), 'the universities map tests the shared directory search on mobile');
   // forum.html cannot join MOBILE_PAGES either (signed out it shows a sign-in
   // card and mounts no list, and the loop waits for both), so it has a block
   // of its own, and that block measures the LIST with the loop's own function:
@@ -5129,7 +5129,7 @@ async function testLegacyTables() {
   ok(uniHtml.includes('assets/leaflet/leaflet.js') && uniHtml.includes('OAUniMap.mount'),
     'universities.html mounts the vendored map');
   const uniJs = await readFile(path.join(HERE, '..', 'assets', 'oa-uni-map.js'), 'utf8');
-  ok(uniJs.includes("'filterA'") || uniJs.includes('filterA'),
+  ok((await readFile(path.join(HERE, '..', 'assets', 'oa-directory.js'), 'utf8')).includes("legacyParam: 'filterA'"),
     'the map honours the ?filterA deep link every posting’s Further-info column emits');
 
   /* EVERY link a school's popup offers must land PRE-FILTERED on that school.
@@ -5142,10 +5142,10 @@ async function testLegacyTables() {
   const idxHtml = await readFile(path.join(HERE, '..', 'assets', 'oa-candidates-page.js'), 'utf8');
   const candPrefix = (idxHtml.match(/mount: '#oa-candidates',[\s\S]{0,400}?urlPrefix: '([^']*)'/) || [])[1];
   ok(candPrefix !== undefined, 'index.html: the candidates mount declares its URL prefix');
-  ok(uniHtml.includes("candidatesHref: function (q) { return 'candidates?c_affiliation=' + q; }"),
+  ok(uniJs.includes("'candidates?c_affiliation='+q"),
     'universities.html names where the candidates list lives, rather than taking the default');
   ok(candPrefix !== undefined &&
-     uniHtml.includes(`'candidates?${candPrefix}affiliation=' + q`),
+     uniJs.includes(`'candidates?${candPrefix}affiliation='+q`),
     `universities.html deep-links the candidates section on ${candPrefix}affiliation, the key it reads`);
   ok(/{ key: 'affiliation'/.test(idxHtml),
     'index.html: and the candidates mount carries an affiliation filter to receive it');
@@ -8380,8 +8380,9 @@ async function testDirectoryWiring() {
     'build-directory.mjs feeds the OM list into the merge');
   ok(dir.filter((r) => r.deptUrl).length >= 150,
     'data/directory.json carries the department links the OM list supplies');
-  ok(page.includes('assets/oa-omlist.js') && page.includes('addOmDepartments'),
-    'universities.html loads the module and appends its departments to the map\'s popups');
+  const mapSource = await readFile(path.join(HERE, '..', 'assets', 'oa-uni-map.js'), 'utf8');
+  ok(page.includes('snapshot: directorySnapshot') && mapSource.includes('(card.schools||[])') && mapSource.includes('r.deptUrl'),
+    'universities.html supplies the same directory departments and links to map popups');
 }
 
 /* ------------------------------------------------------------------------
@@ -8907,7 +8908,6 @@ async function testRowOverrides() {
   for (const [page, dataset] of [
     ['previous-markets.html', 'past-postings'],
     ['recent-faculty.html', 'recent-faculty'],
-    ['universities.html', 'universities'],
   ]) {
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
     ok(html.includes('assets/oa-rowedit.js'), `${page} loads the archive editor`);
@@ -8923,6 +8923,15 @@ async function testRowOverrides() {
       `${page} still renders its data if the admin module never loads`);
   }
 
+  // Universities now shares the community directory overlay instead of the
+  // retired, separate maintainer-only rowOverrides map dataset.
+  const universities = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8');
+  const directory = await readFile(path.join(HERE, '..', 'assets', 'oa-directory.js'), 'utf8');
+  ok(universities.includes('snapshot: directorySnapshot'), 'the map receives the directory snapshot');
+  ok(universities.includes('uniMap.update(snapshot)'), 'directory corrections update the map immediately');
+  ok(directory.includes('onRender: cfg.onRender'), 'directory filtering forwards the existing list snapshot');
+  ok(directory.includes('!window.OAFB || !OAFB.enabled'), 'the public directory renders when the edit backend is unavailable');
+
   /* previous-markets.html carries TWO kinds of row — the archive's own, and the
      postings folded in from data/jobs.json, which are real submissions. Those
      get the FULL form, and this is the ONLY page that reaches them: the jobs
@@ -8933,8 +8942,8 @@ async function testRowOverrides() {
 
   /* The map is not an OAList page, so its half rides on hooks of its own. */
   const map = await readFile(path.join(HERE, '..', 'assets', 'oa-uni-map.js'), 'utf8');
-  ok(map.includes('cfg.prepare'), 'the map lets a page correct the dataset before it is drawn');
-  ok(map.includes('cfg.onPopup'), 'and add controls to a pin');
+  ok(map.includes('cfg.snapshot'), 'the map consumes the directory correction overlay through a shared snapshot');
+  ok(map.includes('cardContent(card,p)'), 'the pin renders the current directory schools and departments');
   ok(map.includes('refresh:'), 'and redraw when a correction arrives late');
 
   /* THE SAME ONE-WAY DOOR, on the feature this pattern came from. */

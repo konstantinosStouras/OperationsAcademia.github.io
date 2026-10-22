@@ -207,7 +207,7 @@
       </section>
 
       <div class="v3-container" style="padding-bottom:90px">
-        <div class="oa-dir-views" role="tablist" aria-label="View">
+        <div class="oa-dir-views" role="group" aria-label="View">
           <button type="button" id="oa-dir-viewcards" class="is-on" aria-pressed="true">Cards</button>
           <button type="button" id="oa-dir-viewmap" aria-pressed="false">Map</button>
         </div>
@@ -217,11 +217,7 @@
              directoryEdits overlaid at read time. -->
         <div id="oa-dir"></div>
 
-        <!-- The map view. The SAME Leaflet map the page has carried since the
-             vendor rebuild — pins, clustering and per-school popups unchanged
-             (assets/oa-uni-map.js over data/universities.json, with the
-             maintainer's rowOverrides) — mounted lazily on the first switch,
-             so the cards view costs no tile traffic. -->
+        <!-- Map consumes the live, filtered directory cards. -->
         <div id="oa-uni" hidden></div>
       </div>
     </main>
@@ -319,7 +315,11 @@
          curated archive + the oa-institutions seed + every posting) grouped
          one card per university, with the community's `directoryEdits`
          overlaid at read time — assets/oa-directory.js owns all of it. */
-      OADirectory.mount({ mount: '#oa-dir' });
+      var directorySnapshot = { view: [], rows: [] };
+      OADirectory.mount({ mount: '#oa-dir', onRender: function (snapshot) {
+        directorySnapshot = snapshot;
+        if (uniMap && uniMap.update) uniMap.update(snapshot);
+      } });
 
       /* the hero's own count, from the meta file the build writes beside the
          table — the fallback words in the markup stand until it arrives */
@@ -331,100 +331,12 @@
           'site’s curated records';
       })['catch'](function () { /* the fallback words are already right */ });
 
-      /* ------------------------------------------------------- the map view
-
-         Mounted LAZILY on the first switch — the cards are the landing view,
-         and mounting Leaflet up front would fetch tiles nobody asked for.
-         Everything about the map itself is unchanged from the page's previous
-         design: data/universities.json, the maintainer's rowOverrides
-         corrections (assets/oa-rowedit.js), Edit/Take down on the popups. */
+      // Lazily mount the local geography map over the directory snapshot.
       var uniMap = null;
-
-      var RowEdit = window.OARowEdit || {
-        signature: function () { return ''; },
-        apply: function (dataset, rows) { return rows; },
-        own: function () {},
-        onCard: function () { return function () {}; },
-        onPopup: function () { return function () {}; },
-        attach: function () {},
-      };
-
-      /* The OM list's departments on the pin's popup — the same records
-         assets/oa-omlist.js feeds the card directory through the build, so a
-         pin and its card cannot disagree. Joined by institutionKey, the join
-         the cards use; each department links to its page on the university's
-         own website where the OM list carries one. */
-      var omByUni = null;
-      function omRecordFor(inst) {
-        if (!window.OAOMList || !window.OASchools) return null;
-        if (!omByUni) {
-          omByUni = {};
-          OAOMList.LIST.forEach(function (r) {
-            omByUni[OASchools.institutionKey(r.u)] = r;
-          });
-        }
-        return omByUni[OASchools.institutionKey(String(inst || ''))] || null;
-      }
-      function addOmDepartments(node, row) {
-        var rec = omRecordFor(row.institution || row.name);
-        if (!rec || !rec.d.length) return;
-        var tbody = node.querySelector('tbody');
-        if (!tbody) return;
-        var tr = document.createElement('tr');
-        var label = document.createElement('td');
-        label.className = 'oa-uni-poplabel';
-        label.textContent = 'Operations departments';
-        var val = document.createElement('td');
-        rec.d.forEach(function (dep, i) {
-          if (i) val.appendChild(document.createTextNode(' · '));
-          if (dep.url && /^https?:\/\//i.test(dep.url)) {
-            var a = document.createElement('a');
-            a.href = dep.url;
-            a.target = '_blank';
-            a.rel = 'noopener';
-            a.textContent = dep.n;
-            val.appendChild(a);
-          } else {
-            val.appendChild(document.createTextNode(dep.n));
-          }
-        });
-        tr.appendChild(label);
-        tr.appendChild(val);
-        tbody.appendChild(tr);
-      }
 
       function mountMap() {
         if (uniMap) return;
-        uniMap = OAUniMap.mount({
-          mount: '#oa-uni',
-          data: '/data/universities.json',
-          prepare: function (rows) {
-            return RowEdit.apply('universities', rows).map(function (row) {
-              var copy = Object.assign({}, row);
-              copy.institution = OASchools.displayInstitution(copy.institution);
-              copy.name = OASchools.displayUniversityText(copy.name);
-              return copy;
-            });
-          },
-          onPopup: function (node, row) {
-            RowEdit.onPopup('universities')(node, row);
-            addOmDepartments(node, row);
-          },
-          /* The candidates list is a SECTION of the one-page site, and three
-             list engines share that page's query string, so its filter keys
-             are namespaced — see the root jobs page for the same note. */
-          candidatesHref: function (q) { return 'candidates?c_affiliation=' + q; },
-        });
-
-        var uniSig = RowEdit.signature('universities');
-        RowEdit.attach('universities', {
-          onChange: function () {
-            var now = RowEdit.signature('universities');
-            if (now === uniSig) return;
-            uniSig = now;
-            if (uniMap && uniMap.refresh) uniMap.refresh();
-          },
-        });
+        uniMap = OAUniMap.mount({ mount: '#oa-uni', snapshot: directorySnapshot });
       }
 
       var dirEl = document.getElementById('oa-dir');
@@ -433,15 +345,13 @@
       var btnMap = document.getElementById('oa-dir-viewmap');
 
       function setView(map) {
-        dirEl.hidden = map;
+        dirEl.hidden = false;
+        dirEl.classList.toggle('oa-directory-map', map);
         mapEl.hidden = !map;
-        /* The address says which view is showing. The map writes its search
-           as ?q=, and a link copied after switching back to Cards carried a
-           `q` the cards ignore and no `view=map` to restore it — a shareable
-           state that was neither. Cards drops the map's search; Map keeps it. */
+        // View selection retains all shared directory filter parameters.
         try {
           var sp = new URLSearchParams(location.search);
-          if (map) sp.set('view', 'map'); else { sp['delete']('view'); sp['delete']('q'); }
+          if (map) sp.set('view', 'map'); else { sp['delete']('view'); }
           var qs = sp.toString();
           history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
         } catch (e) { /* an old browser keeps the address it has */ }

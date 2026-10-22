@@ -4653,34 +4653,21 @@ for (const [pageName, listSel] of [
    DOM is the part that is ours. */
 
 {
-  const unis = JSON.parse(await readFile(path.join(ROOT, 'data', 'universities.json'), 'utf8'));
   const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   p.on('pageerror', (e) => jsErrors.push('universities: ' + e.message));
-  await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
-  await p.waitForSelector('#oa-dir-viewmap', { timeout: 15000 });
-  await p.click('#oa-dir-viewmap');
-  await p.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
-
-  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length} universities`,
-    'universities: the count line carries the whole dataset');
-
-  // search filters the pins as you type, and lands in the URL
-  const needle = 'insead';
-  const expect = unis.filter((r) =>
-    [r.name, r.institution, r.school, r.department, r.schoolDept, r.address]
-      .some((v) => String(v || '').toLowerCase().includes(needle))).length;
-  ok(expect >= 1, 'universities: the search fixture exists in the dataset');
-  await p.fill('#oa-uni-search', needle);
+  await p.goto(BASE + 'universities?view=map', { waitUntil: 'domcontentloaded' });
+  await p.waitForFunction(() => document.querySelector('.oa-map-status')?.textContent.includes('mapped locations'));
+  ok(await p.$eval('#oa-dir .oa-filters', n => n.getBoundingClientRect().height > 0),
+    'universities: map retains the shared directory filters');
+  await p.fill('#oaf-university', 'insead');
   await p.waitForTimeout(400);
-  eq(await p.$eval('.oa-uni-count', (n) => n.textContent),
-    `${expect} of ${unis.length} universities`,
-    'universities: the search narrows the pins as you type');
-  eq(await p.$$eval('img.leaflet-marker-icon', (ns) => ns.length), expect,
-    'universities: what the count says is what the map shows');
-  ok(p.url().includes('q=' + needle), 'universities: the search is shareable from the address bar');
+  ok(await p.$eval('.oa-map-status', n => /^1 university/.test(n.textContent)),
+    'universities: shared university search narrows to one university');
+  ok(p.url().includes('university=insead'), 'universities: map search uses the directory URL state');
+  ok(await p.$$eval('.oa-map-logo', ns => ns.length > 0), 'universities: local logo markers render');
 
   // a pin's popup is the vendor tooltip: the school, then the site's own pages
-  await p.$eval('img.leaflet-marker-icon', (n) =>
+  await p.$eval('.oa-map-logo', (n) =>
     n.dispatchEvent(new MouseEvent('click', { bubbles: true })));
   await p.waitForSelector('.leaflet-popup .oa-uni-pop', { timeout: 5000 });
   const pop = await p.$eval('.leaflet-popup .oa-uni-pop', (n) => ({
@@ -4798,7 +4785,7 @@ for (const [pageName, listSel] of [
 
   const mob = await m.evaluate(() => {
     const doc = document.documentElement;
-    const input = document.querySelector('#oa-uni-search');
+    const input = document.querySelector('#oaf-university');
     const box = document.querySelector('.oa-uni-map').getBoundingClientRect();
     return {
       overflowX: doc.scrollWidth > doc.clientWidth,
@@ -5070,65 +5057,23 @@ for (const [pageName, sel, least, mapBtn] of [
    injected here exactly as on the two archive lists.                        */
 
 {
-  const unis = JSON.parse(await readFile(path.join(ROOT, 'data', 'universities.json'), 'utf8'));
   const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
-  p.on('pageerror', (e) => jsErrors.push('universities/edit: ' + e.message));
-  await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
-  // the cards are the landing view — the map mounts on the switch
-  await p.waitForSelector('#oa-dir-viewmap', { timeout: 15000 });
-  await p.click('#oa-dir-viewmap');
-  await p.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
-
-  const openPopup = async () => {
-    await p.$eval('img.leaflet-marker-icon', (n) =>
-      n.dispatchEvent(new MouseEvent('click', { bubbles: true })));
-    await p.waitForSelector('.leaflet-popup .oa-uni-pop', { timeout: 5000 });
-  };
-
-  await openPopup();
-  eq(await p.$$eval('.leaflet-popup .oa-uni-admin', (n) => n.length), 0,
-    'universities: a visitor who is not signed in gets no controls on a pin');
-
-  await p.evaluate(() =>
-    window.OARowEdit.__setForTest('universities', { ready: true, admin: true }));
-  await p.waitForTimeout(400);
-  await openPopup();
-  eq(await p.$$eval('.leaflet-popup .oa-uni-admin .oa-jobbtn', (n) =>
-    n.map((x) => x.textContent)), ['Edit', 'Take down'],
-    'universities: the maintainer gets both controls on a pin, in that order');
-  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length} universities`,
-    'universities: and the map still carries the whole dataset');
-
-  /* A CORRECTION IS WHAT EVERY VISITOR SEES. `institution` is the field every
-     link on a popup filters by, so an override has to reach the links too —
-     not only the heading. */
-  const victim = unis.find((r) => isFinite(r.lat) && isFinite(r.lng));
-  await p.evaluate((v) => window.OARowEdit.__setForTest('universities', {
-    ready: true, admin: false,
-    rows: { [v]: { institution: 'Corrected School', name: 'Corrected School' } },
-  }), victim.id);
-  await p.waitForTimeout(500);
-  await p.fill('#oa-uni-search', 'Corrected School');
-  await p.waitForTimeout(400);
-  eq(await p.$$eval('img.leaflet-marker-icon', (n) => n.length), 1,
-    'universities: the corrected school is findable by its new name');
-  await openPopup();
-  eq(await p.$eval('.leaflet-popup .oa-uni-pop h3', (n) => n.textContent), 'Corrected School',
-    'universities: and the popup names it that way');
-  ok(await p.$$eval('.leaflet-popup .oa-uni-pop a', (ns) =>
-    ns.some((a) => (a.getAttribute('href') || '').includes('Corrected%20School'))),
-    'universities: every link on the popup follows the corrected name');
-
-  // A TAKEN-DOWN SCHOOL LEAVES THE MAP, for everybody.
-  await p.fill('#oa-uni-search', '');
-  await p.waitForTimeout(400);
-  await p.evaluate((v) => window.OARowEdit.__setForTest('universities', {
-    ready: true, admin: false, rows: { [v]: { hidden: true } },
-  }), victim.id);
-  await p.waitForTimeout(500);
-  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length - 1} universities`,
-    'universities: a taken-down school is off the map for every visitor');
-
+  p.on('pageerror', e => jsErrors.push('universities/edit: ' + e.message));
+  await p.goto(BASE + 'universities?view=map&university=Aalto', {waitUntil:'domcontentloaded'});
+  await p.waitForSelector('.oa-map-logo');
+  const rows = JSON.parse(await readFile(path.join(ROOT,'data','directory.json'),'utf8'));
+  const victims = rows.filter(r => r.institution === 'Aalto University');
+  ok(victims.length > 0, 'universities: Aalto correction fixture exists');
+  await p.evaluate(id => OADirectory.__setForTest({edits:{[id]:{department:'Corrected Operations Department',t:Date.now(),name:'Map test'}}}), victims[0].id);
+  await p.waitForTimeout(200);
+  await p.$eval('.oa-map-logo', n => n.click());
+  await p.waitForSelector('.oa-uni-pop');
+  ok(await p.$eval('.oa-uni-pop', n => n.textContent.includes('Corrected Operations Department')),
+    'universities: map popup receives the same live department correction as cards');
+  await p.evaluate(ids => OADirectory.__setForTest({admin:false,edits:Object.fromEntries(ids.map(id=>[id,{hidden:true}]))}), victims.map(r=>r.id));
+  await p.waitForTimeout(200);
+  eq(await p.$$eval('.oa-map-logo', ns=>ns.length), 0,
+    'universities: hidden directory rows leave the map for visitors');
   await p.close();
 }
 

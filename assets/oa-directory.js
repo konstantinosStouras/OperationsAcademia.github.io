@@ -1283,6 +1283,8 @@
       mount: cfg.mount,
       data: cfg.data || '/data/directory.json',
       perPage: cfg.perPage || 12,
+      // The map consumes the same filters and live correction overlay.
+      onRender: cfg.onRender,
       strings: {
         loading: 'Loading the universities directory…',
         emptyFiltered: 'No universities match these filters.',

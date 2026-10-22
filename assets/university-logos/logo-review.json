@@ -1,0 +1,250 @@
+{
+ "version": 1,
+ "note": "Reviewed exceptions for the map logos chosen by scripts/fetch-institution-logos.mjs, keyed by Wikidata item. `pick` names the collected candidate to use (its URL or part of it), `url` adds a file the automatic search did not find, `same` gives a merged or historical institution (or a faculty) the logo of its successor or parent, `skip` lists source URLs (or parts of them) that gave a wrong, generic or unreadable image, `reject` leaves the institution with initials. Each entry gives the institution, the reason and the review date.",
+ "records": {
+  "Q34433": {
+   "institution": "University of Oxford",
+   "skip": [
+    "icons.duckduckgo.com",
+    "google.com/s2/favicons"
+   ],
+   "reason": "Both favicon services return the generic Drupal content-system icon, not the university's.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q1481050": {
+   "institution": "London Business School",
+   "skip": [
+    "london.edu"
+   ],
+   "reason": "The site's icons are a plain navy block with a red line that does not identify the school on the map.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q1136919": {
+   "institution": "Iowa State University",
+   "skip": [
+    "cdn.theme.iastate.edu/favicon/apple-touch-icon"
+   ],
+   "reason": "The apple-touch icon is a plain red and gold block that does not identify the school on the map.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q761534": {
+   "institution": "University of Georgia",
+   "pick": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/University_of_Georgia_logo.svg&width=512",
+   "reason": "The automatic choice was a black \"g\" from a Commons search; the arch logo from the Wikipedia infobox is the university's mark.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q1420239": {
+   "institution": "Temple University",
+   "pick": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/Temple_University_logo.svg&width=512",
+   "reason": "The automatic choice was the ice hockey club's logo from a Commons search; the \"T\" from the Wikipedia infobox is the university's mark.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q1654025": {
+   "institution": "Kwame Nkrumah University of Science and Technology",
+   "pick": "https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Kwame_Nkrumah_University_of_Science_and_Technology_Faculty_of_Law_logo.png&width=512",
+   "reason": "The automatic choice was a college's wordmark from a Commons search; the university crest is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q3551621": {
+   "institution": "Université de Lille",
+   "pick": "https://www.univ-lille.fr/_assets/cf96958808510cb4a29e461391f0eb9e/assets/img/favicon.svg",
+   "reason": "The automatic choice was the Sciences Po Lille logo from a Commons search; the university's own site icon is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q192964": {
+   "institution": "Istanbul University",
+   "pick": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/%C4%B0stanbul_%C3%9Cniversitesi_Logo.svg&width=512",
+   "reason": "The automatic choice was a student club's logo from a Commons search; the university seal is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q280824": {
+   "institution": "Eindhoven University of Technology",
+   "pick": "https://www.tue.nl/favicon-64.ico",
+   "reason": "The automatic choice was a crop showing only the letter T; the TU/e site icon is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q300980": {
+   "institution": "Aalto University",
+   "pick": "https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Aalto_University_logo.svg&width=512",
+   "reason": "The automatic choice was the logo of a former school of Aalto; the university's own \"A!\" logo is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q230899": {
+   "institution": "University of Manchester",
+   "pick": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/Shield_of_the_University_of_Manchester.svg&width=512",
+   "reason": "The automatic choice was another coat of arms from a Commons search; the university's arms (with bees) from Wikipedia is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q392189": {
+   "institution": "Université de Montréal",
+   "pick": "https://www.umontreal.ca/apple-touch-icon.png",
+   "reason": "The automatic choice was a coat of arms from a Commons search; the university's own app icon is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q49213": {
+   "institution": "The University of Texas at Austin",
+   "pick": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/University_of_Texas_at_Austin_logo.svg&width=512",
+   "reason": "The automatic choice was a very pale seal; the shield from the Wikipedia infobox is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q17014550": {
+   "institution": "Academy of Mathematics and Systems Science, CAS",
+   "pick": "http://english.amss.cas.cn//images/logo-amss.png",
+   "reason": "The academy's own icon is only 32 px and blurs on the map; the emblem of its parent, the Chinese Academy of Sciences, is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q310695": {
+   "institution": "Technical University of Darmstadt",
+   "pick": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/Athene_logo_sw.svg&width=512",
+   "reason": "The Athene logo from the Wikipedia infobox is used; the site icons are 80 px or smaller.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q4587760": {
+   "institution": "Beijing Jiaotong University",
+   "url": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/Beijing_Jiaotong_University.png&width=512",
+   "reason": "Logo file in the English Wikipedia infobox (named after the university, so the automatic search missed it).",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q590201": {
+   "institution": "Université Toulouse 1 Capitole",
+   "url": "https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Logo_UTCapitole_Carre_RVB_12_12cm_72pp.jpg&width=512",
+   "reason": "Logo file in the English Wikipedia infobox.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q317053": {
+   "institution": "University of Giessen",
+   "url": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/Logo-justus-liebig-universit%C3%A4t-giessen.gif&width=512",
+   "reason": "Logo file in the English Wikipedia infobox.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q702499": {
+   "institution": "Osnabrück University",
+   "url": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/Universit%C3%A4t_Osnabr%C3%BCck.svg&width=512",
+   "reason": "Logo file in the English Wikipedia infobox.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q2096604": {
+   "institution": "Sharif University of Technology",
+   "url": "https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Sharif-University-of-Technology.jpg&width=512",
+   "reason": "Logo file in the English Wikipedia infobox.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q691851": {
+   "institution": "University of Naples Federico II",
+   "url": "https://it.wikipedia.org/w/index.php?title=Special:Redirect/file/Federico_II_University_Logo.svg&width=512",
+   "reason": "Logo file in the Italian Wikipedia infobox.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q45855": {
+   "institution": "University of Bergamo",
+   "url": "https://it.wikipedia.org/w/index.php?title=Special:Redirect/file/UNIBG_Logo_2018.svg&width=512",
+   "reason": "Logo file (2018) in the Italian Wikipedia infobox.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q1724372": {
+   "institution": "University of Vaasa",
+   "url": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/University_of_Vaasa.svg&width=512",
+   "reason": "Logo file in the English Wikipedia infobox.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q30946111": {
+   "institution": "University of Chinese Academy of Social Sciences",
+   "url": "https://zh.wikipedia.org/w/index.php?title=Special:Redirect/file/University_of_Chinese_Academy_of_Social_Sciences_logo.png&width=512",
+   "reason": "Logo file in the Chinese Wikipedia infobox.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q2600751": {
+   "institution": "Escola Politécnica da USP",
+   "url": "https://pt.wikipedia.org/w/index.php?title=Special:Redirect/file/Logotipo_da_POLI-USP.jpg&width=512",
+   "reason": "Logo file in the Portuguese Wikipedia infobox.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q10274560": {
+   "institution": "FGV EAESP",
+   "url": "https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Logo_FGV_-_Funda%C3%A7%C3%A3o_Getulio_Vargas.png&width=512",
+   "reason": "The school's own icons are too small or white; the logo of its parent, Fundação Getulio Vargas, from Wikimedia Commons is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q612648": {
+   "institution": "Université Blaise Pascal",
+   "url": "https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Logo_Universit%C3%A9_Clermont-Auvergne_%28partenariat_Wikim%C3%A9dia%29.png&width=512",
+   "reason": "Merged in 2017 into Université Clermont Auvergne; its successor's logo from Wikimedia Commons is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q500740": {
+   "institution": "Université des Sciences et Technologies de Lille",
+   "same": "Q3551621",
+   "reason": "Merged in 2018 into the Université de Lille; its successor's logo is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q13335": {
+   "institution": "Université Montesquieu-Bordeaux IV",
+   "same": "Q13344",
+   "reason": "Merged in 2014 into the University of Bordeaux; its successor's logo is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q1204304": {
+   "institution": "Université de la Méditerranée Aix-Marseille II",
+   "same": "Q2302586",
+   "reason": "Merged in 2012 into Aix-Marseille University; its successor's logo is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q134605089": {
+   "institution": "Case Institute of Technology",
+   "same": "Q1047060",
+   "reason": "Merged in 1967 into Case Western Reserve University; its successor's logo is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q3577931": {
+   "institution": "Geneva School of Economics and Management",
+   "same": "Q503473",
+   "reason": "A faculty of the University of Geneva; the university's emblem is used instead of a crop of its app icon.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q3551644": {
+   "institution": "University of Nantes (Nantes Université)",
+   "skip": [
+    "nantes"
+   ],
+   "url": "https://fr.wikipedia.org/w/index.php?title=Special:Redirect/file/Logotype_Nantes-U_noir-72dpi.png&width=512",
+   "reason": "The website recorded on Wikidata gives the icon of a university rowing club, so the site icons are skipped; the Nantes Université logo from the French Wikipedia infobox is used.",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q316595": {
+   "institution": "WHU – Otto Beisheim School of Management",
+   "pick": "commons.wikimedia.org/w/index.php?title=Special:Redirect/file/WHU_Logo.svg",
+   "reason": "The site icon is 32 px and blurs on the map; the WHU logo from Wikimedia Commons is used.",
+   "reviewedAt": "2026-10-18"
+  },
+  "Q392904": {
+   "institution": "Politecnico di Milano",
+   "pick": "Politecnico_di_Milano_-_wordmark_(Italy%2C_2024).svg",
+   "reason": "The seal drawings are thin lines that turn grey on the map; the current (2024) Politecnico di Milano wordmark from Wikimedia Commons is used.",
+   "reviewedAt": "2026-10-18"
+  },
+  "Q2570220": {
+   "institution": "Arts et Métiers ParisTech (ENSAM)",
+   "url": "https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Logo_Arts_et_M%C3%A9tiers.svg&width=512",
+   "reason": "Logo file on Wikimedia Commons (the item records no logo).",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q154804": {
+   "institution": "Leipzig University",
+   "url": "https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Universit%C3%A4t_Leipzig_logo.svg&width=512",
+   "reason": "The Leipzig University logo from Wikimedia Commons (the item records no logo file).",
+   "reviewedAt": "2026-10-17"
+  },
+  "Q5935959": {
+   "institution": "Mazandaran University of Science and Technology",
+   "url": "https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/MUST_Logo.gif&width=512",
+   "reason": "The site gives no icon; the logo file of the English Wikipedia article (a GIF, which the automatic search leaves out) is used.",
+   "reviewedAt": "2026-10-18"
+  },
+  "Q273461": {
+   "institution": "École Centrale de Lille",
+   "pick": "centralelille.fr",
+   "reason": "The Wikipedia lead image is a photograph of a building; the school's own site icon is used.",
+   "reviewedAt": "2026-10-18"
+  }
+ }
+}
