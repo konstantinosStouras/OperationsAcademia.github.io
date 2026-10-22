@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21T21:42:52.130Z",
+ "generated": "2026-10-22T20:23:15.563Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -98,6 +98,10 @@
    "n": 4
   },
   {
+   "v": "Columbia University",
+   "n": 4
+  },
+  {
    "v": "Fayetteville State University",
    "n": 4
   },
@@ -191,10 +195,6 @@
   },
   {
    "v": "Clarkson University",
-   "n": 3
-  },
-  {
-   "v": "Columbia University",
    "n": 3
   },
   {
@@ -2980,6 +2980,10 @@
    "n": 1
   },
   {
+   "v": "Fu Foundation School of Engineering and Applied Science",
+   "n": 1
+  },
+  {
    "v": "G. Brint Ryan College of Business",
    "n": 1
   },
@@ -3500,10 +3504,6 @@
    "n": 0
   },
   {
-   "v": "Fu Foundation School of Engineering and Applied Science",
-   "n": 0
-  },
-  {
    "v": "Goizueta Business School",
    "n": 0
   },
@@ -3958,6 +3958,10 @@
    "n": 3
   },
   {
+   "v": "Industrial Engineering and Operations Research",
+   "n": 3
+  },
+  {
    "v": "Information Systems and Business Analytics",
    "n": 3
   },
@@ -4079,10 +4083,6 @@
   },
   {
    "v": "IEOR",
-   "n": 2
-  },
-  {
-   "v": "Industrial Engineering and Operations Research",
    "n": 2
   },
   {
