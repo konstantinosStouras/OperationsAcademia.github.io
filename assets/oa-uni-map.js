@@ -11,7 +11,12 @@
     (children || []).forEach(function(c) { n.appendChild(c); });
     return n;
   }
-  function key(s) { return window.OASchools ? OASchools.institutionKey(String(s || '')) : String(s || '').toLowerCase(); }
+  var nameKeys=new Map();
+  function key(s) {
+    s=String(s||'');
+    if(!nameKeys.has(s))nameKeys.set(s,window.OASchools?OASchools.institutionKey(s):s.toLowerCase());
+    return nameKeys.get(s);
+  }
   function fold(s) {
     if (window.OAList) return OAList.fold(s);
     s=String(s || '').toLowerCase();
@@ -186,6 +191,24 @@
       if(!pts.length&&fallback)pts.push(Object.assign({},fallback,{logo:logoFor(card)||fallback.logo}));
       return pts;
     }
+    var pendingResults=[];
+    function renderResults() {
+      if(!details.open || resultList.childElementCount)return;
+      var fragment=document.createDocumentFragment();
+      pendingResults.forEach(function(c){
+        var item=el('li',{}),m=markers.get(c.id),entry=el('details',{}),built=false;
+        var heading=el('summary',{text:c.institution+(m?'':' — location unavailable')});
+        entry.appendChild(heading);
+        entry.addEventListener('toggle',function(){
+          if(!entry.open||built)return;built=true;
+          entry.appendChild(cardContent(c,m&&m.oaPoint));
+          if(m){var b=el('button',{type:'button',text:'Show on map'});b.addEventListener('click',function(){cluster.zoomToShowLayer(m,function(){openPopup(cardContent(c,m.oaPoint),m.getLatLng(),b);});});entry.appendChild(b);}
+        });
+        item.appendChild(entry);fragment.appendChild(item);
+      });
+      resultList.appendChild(fragment);
+    }
+    details.addEventListener('toggle',renderResults);
     function draw(keepView) {
       if(!ready)return;
       var cards=snapshot.view||[],points=[],missing=[],inRegion=[];
@@ -197,6 +220,8 @@
         ps.forEach(function(p){points.push(Object.assign({},p,{card:c}));});
       });
       map.closePopup();cluster.clearLayers();markers.clear();currentPoints=points;
+      if(!keepView)frame(points);
+      var layers=[];
       points.forEach(function(p) {
         var card=p.card,face=el('span',{class:'oa-map-logo-face'});
         var initials=card.institution.split(/\s+/).slice(0,2).map(function(s){return s[0];}).join('');
@@ -211,21 +236,14 @@
         m.oaCard=card;m.oaPoint=p;
         m.on('add',function(){var n=m.getElement();if(n){n.setAttribute('aria-label','Open '+card.institution);n.setAttribute('role','button');var im=n.querySelector('img');if(im){im.addEventListener('load',function(){if(im.naturalWidth/im.naturalHeight>1.6)im.classList.add('oa-map-logo-wide');});im.addEventListener('error',function(){im.remove();});if(im.complete&&im.naturalWidth&&im.naturalWidth/im.naturalHeight>1.6)im.classList.add('oa-map-logo-wide');}}});
         m.on('click',function(){openPopup(cardContent(card,p),m.getLatLng(),m.getElement());});
-        cluster.addLayer(m);if(!markers.has(card.id))markers.set(card.id,m);
+        layers.push(m);if(!markers.has(card.id))markers.set(card.id,m);
       });
+      cluster.addLayers(layers);
       var sorted=inRegion.concat(missing).sort(function(a,b){return a.institution.localeCompare(b.institution);});
-      resultList.replaceChildren();
-      sorted.forEach(function(c){
-        var item=el('li',{}),m=markers.get(c.id),entry=el('details',{});
-        var heading=el('summary',{text:c.institution+(m?'':' — location unavailable')});
-        var brand=logoImage(c);if(brand)heading.prepend(brand);
-        entry.append(heading,cardContent(c,m&&m.oaPoint));
-        if(m){var b=el('button',{type:'button',text:'Show on map'});b.addEventListener('click',function(){cluster.zoomToShowLayer(m,function(){openPopup(cardContent(c,m.oaPoint),m.getLatLng(),b);});});entry.appendChild(b);}
-        item.appendChild(entry);resultList.appendChild(item);
-      });
+      pendingResults=sorted;resultList.replaceChildren();renderResults();
       summary.textContent='Matching universities ('+sorted.length+')';
       status.textContent=inRegion.length+(inRegion.length===1?' university · ':' universities · ')+points.length+(points.length===1?' mapped location':' mapped locations')+(missing.length?' · '+missing.length+' without coordinates (available in the list)':'')+'.'+(!sorted.length?' No matches. Try another continent or clear the search filters.':'');
-      if(!keepView)frame(points);labelClusters();
+      labelClusters();
     }
     function update(next) {
       snapshot=next;

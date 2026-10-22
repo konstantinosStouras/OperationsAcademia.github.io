@@ -96,10 +96,15 @@
          still arrives promptly when oa-firebase.js asks for it. -->
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/oa-list.css" rel="stylesheet">
+    <link rel="preload" as="fetch" href="/data/directory.json" crossorigin>
+    <link rel="preload" as="fetch" href="/data/university-map-locations.json?v=20261022-complete" crossorigin>
+    <link rel="preload" as="fetch" href="/data/universities.json" crossorigin>
+    <link rel="preload" as="fetch" href="/assets/world/countries.geojson" crossorigin>
+    <link rel="preload" as="fetch" href="/data/university-logos.json?v=20261022-complete" crossorigin>
     <link href="assets/leaflet/leaflet.css" rel="stylesheet">
     <link href="assets/leaflet/MarkerCluster.css" rel="stylesheet">
     <link href="assets/leaflet/MarkerCluster.Default.css" rel="stylesheet">
-    <link href="assets/oa-uni-map.css?v=20261022-logo-fit" rel="stylesheet">
+    <link href="assets/oa-uni-map.css?v=20261022-fast-map" rel="stylesheet">
     <link href="assets/oa-directory.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
   </head>
@@ -290,7 +295,7 @@
     <script defer src="assets/oa-jobnav.js"></script>
     <script defer src="assets/leaflet/leaflet.js"></script>
     <script defer src="assets/leaflet/leaflet.markercluster.js"></script>
-    <script defer src="assets/oa-uni-map.js?v=20261022-logo-fit"></script>
+    <script defer src="assets/oa-uni-map.js?v=20261022-fast-map"></script>
     <script defer src="assets/oa-rowedit.js"></script>
     <script defer src="assets/oa-omlist.js"></script>
     <script defer src="assets/oa-candidate-data.js?v=20261013-2"></script>
