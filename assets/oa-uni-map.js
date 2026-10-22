@@ -143,7 +143,7 @@
         });
       });
       var q=encodeURIComponent(card.institution),nav=el('p',{class:'oa-map-popup-links'});
-      [['Focus university','universities?university='+q],['Current jobs','jobs?institution='+q],['Candidates','candidates?c_affiliation='+q],['Recent hires','recent-faculty?placement='+q],['PhD alumni','recent-faculty?alma='+q],['Past jobs','previous-markets?university='+q]].forEach(function(item){nav.appendChild(makeLink(item[0],item[1]));});
+      [['Open university profile','universities?university='+q],['Current jobs','jobs?institution='+q],['Candidates','candidates?c_affiliation='+q],['Recent hires','recent-faculty?placement='+q],['PhD alumni','recent-faculty?alma='+q],['Past jobs','previous-markets?university='+q]].forEach(function(item){nav.appendChild(makeLink(item[0],item[1]));});
       pop.appendChild(nav);
       if(card.edited && card.edited.t)pop.appendChild(el('p',{text:'Last updated '+new Date(card.edited.t).toLocaleDateString()+(card.edited.name?' by '+card.edited.name:'')}));
       if(point && point.mapUrl)pop.appendChild(makeLink('Campus location',point.mapUrl));
@@ -202,14 +202,14 @@
         var initials=card.institution.split(/\s+/).slice(0,2).map(function(s){return s[0];}).join('');
         face.textContent=initials;
         if(p.logo && /^\/assets\/university-logos\/[^/]+$/.test(p.logo)) {
-          var img=el('img',{src:p.logo,alt:'',width:'32',height:'32',loading:'lazy'});
+          var img=el('img',{src:p.logo,alt:'',width:'40',height:'40',loading:'lazy'});
           img.addEventListener('error',function(){img.remove();});face.appendChild(img);
         }
         var icon=L.divIcon({className:'oa-map-logo',html:face.outerHTML,iconSize:[44,44],iconAnchor:[22,22]});
         // Leaflet accepts markup, but the icon was built from DOM with textContent.
         var m=L.marker([p.lat,p.lng],{icon:icon,title:card.institution,alt:card.institution,keyboard:true});
         m.oaCard=card;m.oaPoint=p;
-        m.on('add',function(){var n=m.getElement();if(n){n.setAttribute('aria-label','Open '+card.institution);n.setAttribute('role','button');var im=n.querySelector('img');if(im)im.addEventListener('error',function(){im.remove();});}});
+        m.on('add',function(){var n=m.getElement();if(n){n.setAttribute('aria-label','Open '+card.institution);n.setAttribute('role','button');var im=n.querySelector('img');if(im){im.addEventListener('load',function(){if(im.naturalWidth/im.naturalHeight>1.6)im.classList.add('oa-map-logo-wide');});im.addEventListener('error',function(){im.remove();});if(im.complete&&im.naturalWidth&&im.naturalWidth/im.naturalHeight>1.6)im.classList.add('oa-map-logo-wide');}}});
         m.on('click',function(){openPopup(cardContent(card,p),m.getLatLng(),m.getElement());});
         cluster.addLayer(m);if(!markers.has(card.id))markers.set(card.id,m);
       });
