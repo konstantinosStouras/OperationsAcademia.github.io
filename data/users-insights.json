@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-21T22:28:46.678Z",
- "members": 383,
+ "generated": "2026-10-22T05:30:39.058Z",
+ "members": 384,
  "k": 3,
  "affiliation": {
-  "listed": 300,
+  "listed": 301,
   "other": 47,
   "none": 36
  },
@@ -99,6 +99,11 @@
     "name": "Yale University",
     "country": "United States",
     "members": 4
+   },
+   {
+    "name": "A’Sharqiyah University",
+    "country": "Oman",
+    "members": 3
    },
    {
     "name": "Boston University",
@@ -206,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 135
+  "rest": 133
  },
  "countries": {
   "count": 16,
@@ -246,9 +251,13 @@
    {
     "name": "Spain",
     "members": 4
+   },
+   {
+    "name": "Oman",
+    "members": 3
    }
   ],
-  "rest": 11,
+  "rest": 9,
   "unknown": 102
  }
 }
