@@ -8184,10 +8184,8 @@ async function testDirectoryForm() {
 
   /* the page says what the button does now */
   const page = await read('universities.html');
-  ok(/press <strong>Edit school<\/strong>, and one form shows every field/.test(page),
-    'universities.html: the lede says Edit school opens one form');
-  ok(/a job posting made through the site updates its department&rsquo;s card too/.test(page),
-    'universities.html: and that a posting updates its department\'s card');
+  ok(page.includes('Search the map below'), 'universities.html: the lede directs visitors to map search');
+  ok(!page.includes('oa-dir-viewcards'), 'universities.html: the redundant Cards switch is absent');
 
   /* A POSTING UPDATES THE DIRECTORY: the faculty link joins the department
      page on the posting form, never the submission, and the byline is filed
@@ -8282,7 +8280,7 @@ async function testDirectoryWiring() {
   /* the page mounts the whole of it, and the gates cover the page */
   const page = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8');
   for (const need of ['assets/oa-list.js', 'assets/oa-list.css', 'assets/oa-directory.js',
-    'assets/oa-directory.css', 'OADirectory.mount', 'oa-dir-viewmap',
+    'assets/oa-directory.css', 'OADirectory.mount', 'oa-directory-map',
     'assets/oa-uni-map.js', 'assets/oa-rowedit.js']) {
     ok(page.includes(need), `universities.html carries ${need}`);
   }

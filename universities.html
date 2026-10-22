@@ -196,8 +196,7 @@
         <div class="v3-container">
           <span class="v3-kicker">Universities</span>
           <h1 class="v3-h1">Universities &amp; schools with Operations departments</h1>
-          <p class="v3-lede" style="margin-top:14px">One card per university: its business school, its engineering or other non-business school, and every department doing Operations in them — <span id="oa-dir-count">built from every posting made here and the site&rsquo;s curated records</span>. Search below, or switch to the map.</p>
-          <p class="v3-mut oa-dir-note" style="margin-top:12px">Signed in? Every card is yours to correct: open it and press <strong>Edit school</strong>, and one form shows every field of that school and its departments, ready to change and save. Or press <strong>+ Add a department</strong>. Each card shows who last updated it and when, and a job posting made through the site updates its department&rsquo;s card too.</p>
+          <p class="v3-lede" style="margin-top:14px">Explore each university: its business school, its engineering or other non-business school, and every department doing Operations in them — <span id="oa-dir-count">built from every posting made here and the site&rsquo;s curated records</span>. Search the map below, then select a university for its schools and departments.</p>
           <div class="v3-cta-row" style="margin-top:24px">
             <a class="v3-btn primary" href="post-a-job">Post a job &mdash; it&rsquo;s free</a>
             <a class="v3-btn ghost" href="./#resources">&larr; Back to the overview</a>
@@ -207,18 +206,14 @@
       </section>
 
       <div class="v3-container" style="padding-bottom:90px">
-        <div class="oa-dir-views" role="group" aria-label="View">
-          <button type="button" id="oa-dir-viewcards" class="is-on" aria-pressed="true">Cards</button>
-          <button type="button" id="oa-dir-viewmap" aria-pressed="false">Map</button>
-        </div>
 
         <!-- The directory: OAList over data/directory.json, grouped one card
              per university by assets/oa-directory.js, with the community's
              directoryEdits overlaid at read time. -->
-        <div id="oa-dir"></div>
+        <div id="oa-dir" class="oa-directory-map"></div>
 
         <!-- Map consumes the live, filtered directory cards. -->
-        <div id="oa-uni" hidden></div>
+        <div id="oa-uni"></div>
       </div>
     </main>
     <footer class="v3-footer">
@@ -331,51 +326,8 @@
           'site’s curated records';
       })['catch'](function () { /* the fallback words are already right */ });
 
-      // Lazily mount the local geography map over the directory snapshot.
-      var uniMap = null;
-
-      function mountMap() {
-        if (uniMap) return;
-        uniMap = OAUniMap.mount({ mount: '#oa-uni', snapshot: directorySnapshot });
-      }
-
-      var dirEl = document.getElementById('oa-dir');
-      var mapEl = document.getElementById('oa-uni');
-      var btnCards = document.getElementById('oa-dir-viewcards');
-      var btnMap = document.getElementById('oa-dir-viewmap');
-
-      function setView(map) {
-        dirEl.hidden = false;
-        dirEl.classList.toggle('oa-directory-map', map);
-        mapEl.hidden = !map;
-        // View selection retains all shared directory filter parameters.
-        try {
-          var sp = new URLSearchParams(location.search);
-          if (map) sp.set('view', 'map'); else { sp['delete']('view'); }
-          var qs = sp.toString();
-          history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
-        } catch (e) { /* an old browser keeps the address it has */ }
-        btnCards.classList.toggle('is-on', !map);
-        btnMap.classList.toggle('is-on', map);
-        btnCards.setAttribute('aria-pressed', map ? 'false' : 'true');
-        btnMap.setAttribute('aria-pressed', map ? 'true' : 'false');
-        if (map) {
-          mountMap();
-          /* a map mounted while its container had another size needs telling
-             the container is on screen again, or the tiles sit misaligned */
-          if (uniMap && uniMap.map) {
-            setTimeout(function () { uniMap.map.invalidateSize(); }, 0);
-          }
-        }
-      }
-      btnCards.addEventListener('click', function () { setView(false); });
-      btnMap.addEventListener('click', function () { setView(true); });
-
-      /* ?view=map deep-links straight to the pins — and the map's own legacy
-         search keys (?q=, the vendor's ?filterA=/?filterB=) are claimed by
-         the CARD search now, which is where those links' readers land. */
-      var params = new URLSearchParams(location.search);
-      if (params.get('view') === 'map') setView(true);
+      // All university links open the searchable map, retaining shared filters.
+      var uniMap = OAUniMap.mount({ mount: '#oa-uni', snapshot: directorySnapshot });
     });
     </script>
   </body>

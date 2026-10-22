@@ -4368,6 +4368,8 @@ for (const [pageName, listSel] of [
   const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   p.on('pageerror', (e) => jsErrors.push('directory: ' + e.message));
   await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  // Exercise the retained directory editor component independently of the public map.
+  await p.evaluate(() => document.getElementById('oa-dir').classList.remove('oa-directory-map'));
   await p.waitForSelector('#oa-dir .oa-card', { timeout: 15000 });
 
   const anon = await p.evaluate(() => {
@@ -4462,7 +4464,9 @@ for (const [pageName, listSel] of [
 
 {
   const DF_NEW_SCHOOL = 'Testing School of Forms';
-  const { ctx, page: d, errors } = await signedInPage('universities.html', { selector: '#oa-dir .oa-card' });
+  const { ctx, page: d, errors } = await signedInPage('universities.html', { selector: '#oa-dir .oa-filters' });
+  await d.evaluate(() => document.getElementById('oa-dir').classList.remove('oa-directory-map'));
+  await d.waitForSelector('#oa-dir .oa-card');
   const dialogs = [];
   d.on('dialog', (x) => { dialogs.push(x.message()); x.accept(); });
   await d.waitForTimeout(300);
@@ -4616,6 +4620,7 @@ for (const [pageName, listSel] of [
   /* on a phone: 16px boxes, 42px targets, nothing sideways */
   const ph = await signedInPage('universities.html', { selector: '#oa-dir .oa-card',
     viewport: { width: 390, height: 844 } });
+  await ph.page.evaluate(() => document.getElementById('oa-dir').classList.remove('oa-directory-map'));
   await ph.page.click('#oa-dir .oa-card .oa-card-head');
   await ph.page.click('#oa-dir .oa-card [data-dir-edit]');
   await ph.page.waitForSelector('.oa-dir-form', { timeout: 5000 });
@@ -4760,7 +4765,7 @@ for (const [pageName, listSel] of [
   const viaA = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   viaA.on('pageerror', (e) => jsErrors.push('universities filterA: ' + e.message));
   await viaA.goto(BASE + 'universities?filterA=INSEAD', { waitUntil: 'domcontentloaded' });
-  await viaA.waitForSelector('#oa-dir .oa-card, #oa-dir .oa-empty', { timeout: 15000 });
+  await viaA.waitForSelector('.oa-map-status', { timeout: 15000 });
   eq(await viaA.$eval('#oa-dir .oa-chip .oa-chip-label', (n) => n.textContent), 'INSEAD',
     'universities: ?filterA lands on the cards as a chip, as it landed in the vendor filter');
   const viaCount = await viaA.$eval('#oa-dir .oa-count', (n) => n.textContent);
@@ -4779,8 +4784,7 @@ for (const [pageName, listSel] of [
   });
   m.on('pageerror', (e) => jsErrors.push('universities mobile: ' + e.message));
   await m.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
-  await m.waitForSelector('#oa-dir-viewmap', { timeout: 15000 });
-  await m.click('#oa-dir-viewmap');
+  await m.waitForSelector('#oa-uni .leaflet-container', { timeout: 15000 });
   await m.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
 
   const mob = await m.evaluate(() => {
@@ -4966,7 +4970,7 @@ for (const [pageName, sel, least, mapBtn] of [
   // the directory lands on its cards, which never touch the module; the MAP
   // view is where oa-rowedit hooks in, so it is switched to and held to the
   // same rule — the stand-in draws nothing and the pins still render
-  ['universities.html', 'img.leaflet-marker-icon', 1, '#oa-dir-viewmap'],
+  ['universities.html', '.leaflet-marker-icon', 1, null],
 ]) {
   const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
   const errs = [];

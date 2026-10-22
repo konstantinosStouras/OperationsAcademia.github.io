@@ -115,8 +115,22 @@
       var a=el('a',{text:text,href:href});
       if(/^https?:/i.test(href)){a.target='_blank';a.rel='noopener';} return a;
     }
+    var universityLogos = new Map();
+    function logoFor(card) {
+      var names=[card.institution].concat((card.aka||'').split(' · '));
+      (card.schools||[]).forEach(function(s){(s.rows||[]).forEach(function(r){if(rowInstitutions[r.id])names.push(rowInstitutions[r.id]);});});
+      for(var i=0;i<names.length;i++){var record=universityLogos.get(key(names[i]))||locations.get(key(names[i]));if(record&&record.logo)return record.logo;}
+      return null;
+    }
+    function logoImage(card) {
+      var url=logoFor(card);
+      if(!url||!/^\/assets\/university-logos\/[^/]+$/.test(url))return null;
+      var img=el('img',{class:'oa-map-result-logo',src:url,alt:'',width:'40',height:'40',loading:'lazy'});
+      img.addEventListener('error',function(){img.remove();});return img;
+    }
     function cardContent(card,point) {
       var pop=el('div',{class:'oa-uni-pop',tabindex:'-1'});
+      var brand=logoImage(card);if(brand)pop.appendChild(brand);
       pop.appendChild(el('h3',{text:card.institution}));
       pop.appendChild(el('p',{text:(card.countries||[]).join(' · ')}));
       pop.appendChild(el('p',{text:(card.schools||[]).length+' schools · '+(card.schools||[]).reduce(function(n,s){return n+(s.rows||[]).length;},0)+' department listings · '+(card.n||0)+' past postings'}));
@@ -129,7 +143,7 @@
         });
       });
       var q=encodeURIComponent(card.institution),nav=el('p',{class:'oa-map-popup-links'});
-      [['University profile','universities?university='+q],['Current jobs','jobs?institution='+q],['Candidates','candidates?c_affiliation='+q],['Recent hires','recent-faculty?placement='+q],['PhD alumni','recent-faculty?alma='+q],['Past jobs','previous-markets?university='+q]].forEach(function(item){nav.appendChild(makeLink(item[0],item[1]));});
+      [['Focus university','universities?university='+q],['Current jobs','jobs?institution='+q],['Candidates','candidates?c_affiliation='+q],['Recent hires','recent-faculty?placement='+q],['PhD alumni','recent-faculty?alma='+q],['Past jobs','previous-markets?university='+q]].forEach(function(item){nav.appendChild(makeLink(item[0],item[1]));});
       pop.appendChild(nav);
       if(card.edited && card.edited.t)pop.appendChild(el('p',{text:'Last updated '+new Date(card.edited.t).toLocaleDateString()+(card.edited.name?' by '+card.edited.name:'')}));
       if(point && point.mapUrl)pop.appendChild(makeLink('Campus location',point.mapUrl));
@@ -170,10 +184,10 @@
         (historic.get(k)||[]).forEach(function(p){
           var coord=p.lat.toFixed(4)+','+p.lng.toFixed(4);if(seen.has(coord))return;seen.add(coord);
           var schoolLogo=locations.get(key(p.school));
-          pts.push(Object.assign({},p,{logo:schoolLogo&&schoolLogo.logo||r&&r.logo,country:r&&r.country||(card.countries||[])[0]||''}));
+          pts.push(Object.assign({},p,{logo:schoolLogo&&schoolLogo.logo||logoFor(card)||r&&r.logo,country:r&&r.country||(card.countries||[])[0]||''}));
         });
       });
-      if(!pts.length&&fallback)pts.push(fallback);
+      if(!pts.length&&fallback)pts.push(Object.assign({},fallback,{logo:logoFor(card)||fallback.logo}));
       return pts;
     }
     function draw(keepView) {
@@ -207,7 +221,9 @@
       resultList.replaceChildren();
       sorted.forEach(function(c){
         var item=el('li',{}),m=markers.get(c.id),entry=el('details',{});
-        entry.append(el('summary',{text:c.institution+(m?'':' — location unavailable')}),cardContent(c,m&&m.oaPoint));
+        var heading=el('summary',{text:c.institution+(m?'':' — location unavailable')});
+        var brand=logoImage(c);if(brand)heading.prepend(brand);
+        entry.append(heading,cardContent(c,m&&m.oaPoint));
         if(m){var b=el('button',{type:'button',text:'Show on map'});b.addEventListener('click',function(){cluster.zoomToShowLayer(m,function(){openPopup(cardContent(c,m.oaPoint),m.getLatLng(),b);});});entry.appendChild(b);}
         item.appendChild(entry);resultList.appendChild(item);
       });
@@ -223,14 +239,16 @@
     Promise.all([
       fetch('/data/university-map-locations.json').then(function(r){if(!r.ok)throw Error('locations');return r.json();}),
       fetch('/data/universities.json').then(function(r){if(!r.ok)throw Error('campuses');return r.json();}),
-      fetch('/assets/world/countries.geojson').then(function(r){if(!r.ok)throw Error('geography');return r.json();})
+      fetch('/assets/world/countries.geojson').then(function(r){if(!r.ok)throw Error('geography');return r.json();}),
+      fetch('/data/university-logos.json').then(function(r){if(!r.ok)throw Error('logos');return r.json();})
     ]).then(function(data) {
       data[0].records.forEach(function(r){locations.set(key(r.name),r);});
+      data[3].records.forEach(function(r){universityLogos.set(key(r.name),r);});
       rowInstitutions=data[0].rowInstitutions||{};
       data[1].forEach(function(r){if(!Number.isFinite(r.lat)||!Number.isFinite(r.lng))return;var k=key(r.institution||r.name);if(!historic.has(k))historic.set(k,[]);historic.get(k).push(r);});
       land=L.geoJSON(data[2],{style:palette,interactive:false}).addTo(map);land.bringToBack();
       ready=true;draw(false);
-    }).catch(function(err){status.textContent='Map assets could not load. Switch to Cards to use all directory searches and filters.';console.error('OAUniMap',err);});
+    }).catch(function(err){status.textContent='Map assets could not load. Please reload the page to try again.';console.error('OAUniMap',err);});
     var resize=new ResizeObserver(function(){map.invalidateSize({pan:false});if(ready&&autoFrame&&mapEl.clientWidth)frame(currentPoints);});resize.observe(mapEl);
     window.addEventListener('popstate',function(){var p=new URLSearchParams(location.search).get('region');region=REGIONS.some(function(r){return r[0]===p;})?p:'world';updateButtons();draw(false);});
     return {map:map,update:update,refresh:function(){draw(true);},shown:function(){return currentPoints.slice();},rows:function(){return snapshot.rows.slice();}};
