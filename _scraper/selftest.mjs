@@ -26584,6 +26584,7 @@ if (isMain(import.meta.url)) {
   // New directory institutions must retain independent, local identification assets.
   {
     const key = createRequire(import.meta.url)('../assets/oa-schools.js').institutionKey;
+    const read = f => readFile(path.join(HERE, '..', f), 'utf8');
     const rows = JSON.parse(await read('data/directory.json'));
     const logos = JSON.parse(await read('data/university-logos.json')).records;
     const byName = new Map(logos.map(r => [key(r.name), r]));

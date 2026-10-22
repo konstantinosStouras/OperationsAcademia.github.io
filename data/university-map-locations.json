@@ -1,6 +1,6 @@
 {
   "copiedAt": "2026-10-22",
-  "source": "Ops PhD Placements institution-locations.json and employer-locations.json, snapshots retrieved 2026-10-18. Approximate, name-matched coordinates; not campus boundaries. Additional institution coordinates retrieved from Wikidata on 2026-10-22; individual added records identify their source.",
+  "source": "Ops PhD Placements institution-locations.json and employer-locations.json, snapshots retrieved 2026-10-18. Approximate, name-matched coordinates; not campus boundaries. Additional institution coordinates retrieved on 2026-10-22 from Wikidata, Google Maps and Amap, with campus identities checked against official university or government pages where needed. Individual added records identify their source and scope.",
   "rowInstitutions": {
     "a-sharqiyah-university____is-and-da": "A’Sharqiyah University",
     "a-sharqiyah-university____scm-and-logistics": "A’Sharqiyah University",
@@ -13073,7 +13073,7 @@
       "lat": 37.9821795,
       "lng": 23.7575791,
       "country": "Greece",
-      "coordinateSource": "https://www.google.com/maps/place/?q=place_id:ChIJ9QruAVS9oRQ9FCFoDjAyOw",
+      "coordinateSource": "https://www.google.com/maps/place/Alba+Graduate+Business+School,+The+American+College+of+Greece/@37.9821795,23.7575791,17z/",
       "coordinateNote": "Google Maps named place; official address corroborated at https://alba.acg.edu/about-alba/contact/",
       "coordinateRetrievedAt": "2026-10-22",
       "coordinateScope": "University campus location, approximate point; not a boundary.",
@@ -13220,13 +13220,14 @@
     },
     {
       "name": "SUNY Korea",
-      "lat": 37.3766625,
+      "lat": 37.3766875,
       "lng": 126.667171875,
       "country": "South Korea",
       "coordinateSource": "https://www.google.com/maps/search/SUNY%20Korea%20South%20Korea/",
       "coordinateRetrievedAt": "2026-10-22",
       "coordinateScope": "Named university or campus place verified on Google Maps.",
-      "mapUrl": "https://www.google.com/maps/search/?api=1&query=37.3766625,126.667171875"
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=37.3766625,126.667171875",
+      "coordinateNote": "Google Maps named SUNY Korea campus at 119-2 Songdo Munhwa-ro. Coordinate decoded from the place URL full Plus Code 8Q989MG8+MVF."
     },
     {
       "name": "Abdullah Al Salem University (AASU)",
@@ -13393,6 +13394,28 @@
       "coordinateRetrievedAt": "2026-10-22",
       "coordinateScope": "Named university or campus place verified on Google Maps.",
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=49.9512049,82.6176788"
+    },
+    {
+      "name": "Microsoft",
+      "lat": 47.6458093,
+      "lng": -122.1319698,
+      "country": "United States",
+      "coordinateSource": "https://www.google.com/maps/search/Microsoft+headquarters+Redmond/",
+      "coordinateScope": "Company headquarters in Redmond; Microsoft is an existing non-university directory entry, not an academic campus.",
+      "coordinateRetrievedAt": "2026-10-22",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=47.6458093,-122.1319698"
+    },
+    {
+      "name": "Hainan Bielefeld University of Applied Sciences",
+      "lat": 19.773922,
+      "lng": 109.244034,
+      "country": "China",
+      "coordinateSource": "https://www.amap.com/place/B0KA27HTF5",
+      "identitySource": "https://www.crs.jsj.edu.cn/aproval/detail/3511",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Permanent Yangpu campus at No. 1 Xizhao Road, Danzhou. Amap GCJ-02 source point 19.771977,109.248123 converted approximately to WGS84.",
+      "coordinateNote": "Google Maps name search returned no campus. Confirmed current address with Ministry of Education, matching Amap named university campus. Not the former Lingshui temporary campus.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=19.773922,109.244034"
     }
   ]
 }

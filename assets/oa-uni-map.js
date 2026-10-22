@@ -237,10 +237,10 @@
       var keep=signature===lastSignature;lastSignature=signature;draw(keep);
     }
     Promise.all([
-      fetch('/data/university-map-locations.json').then(function(r){if(!r.ok)throw Error('locations');return r.json();}),
+      fetch('/data/university-map-locations.json?v=20261022-complete').then(function(r){if(!r.ok)throw Error('locations');return r.json();}),
       fetch('/data/universities.json').then(function(r){if(!r.ok)throw Error('campuses');return r.json();}),
       fetch('/assets/world/countries.geojson').then(function(r){if(!r.ok)throw Error('geography');return r.json();}),
-      fetch('/data/university-logos.json').then(function(r){if(!r.ok)throw Error('logos');return r.json();})
+      fetch('/data/university-logos.json?v=20261022-complete').then(function(r){if(!r.ok)throw Error('logos');return r.json();})
     ]).then(function(data) {
       data[0].records.forEach(function(r){locations.set(key(r.name),r);});
       data[3].records.forEach(function(r){universityLogos.set(key(r.name),r);});
