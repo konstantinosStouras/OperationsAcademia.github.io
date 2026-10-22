@@ -13067,6 +13067,332 @@
       "coordinateRetrievedAt": "2026-10-22",
       "coordinateScope": "University campus or institutional location; approximate point, not a campus boundary.",
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Youngstown%20State%20University%20United%20States"
+    },
+    {
+      "name": "Alba Graduate Business School",
+      "lat": 37.9821795,
+      "lng": 23.7575791,
+      "country": "Greece",
+      "coordinateSource": "https://www.google.com/maps/place/?q=place_id:ChIJ9QruAVS9oRQ9FCFoDjAyOw",
+      "coordinateNote": "Google Maps named place; official address corroborated at https://alba.acg.edu/about-alba/contact/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=37.9821795,23.7575791"
+    },
+    {
+      "name": "Ajman University",
+      "lat": 25.4125302,
+      "lng": 55.5066053,
+      "country": "United Arab Emirates",
+      "coordinateSource": "https://www.google.com/maps/place/Ajman+University/@25.4125302,55.5066053,17z/",
+      "coordinateNote": "Google Maps named university, University Street, Al Jerf 1.",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=25.4125302,55.5066053"
+    },
+    {
+      "name": "Canadian University Dubai",
+      "lat": 25.2075439,
+      "lng": 55.2644192,
+      "country": "United Arab Emirates",
+      "coordinateSource": "https://www.google.com/maps/search/Canadian+University+Dubai/",
+      "coordinateNote": "Google Maps named City Walk campus; university website cud.ac.ae on the place listing.",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=25.2075439,55.2644192"
+    },
+    {
+      "name": "Aschaffenburg University of Applied Sciences",
+      "lat": 49.9719444444,
+      "lng": 9.1613888889,
+      "country": "Germany",
+      "qid": "Q1523703",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q1523703",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=49.9719444444,9.1613888889"
+    },
+    {
+      "name": "Huron University",
+      "lat": 43.0119,
+      "lng": -81.2799,
+      "country": "Canada",
+      "qid": "Q5946948",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q5946948",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=43.0119,-81.2799"
+    },
+    {
+      "name": "New York University Abu Dhabi",
+      "lat": 24.5239,
+      "lng": 54.4346,
+      "country": "United Arab Emirates",
+      "qid": "Q566189",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q566189",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=24.5239,54.4346"
+    },
+    {
+      "name": "PSU Behrend",
+      "lat": 42.119402777778,
+      "lng": -79.988772222222,
+      "country": "United States",
+      "qid": "Q7163248",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q7163248",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=42.119402777778,-79.988772222222"
+    },
+    {
+      "name": "University of Washington Bothell",
+      "lat": 47.7594,
+      "lng": -122.191,
+      "country": "United States",
+      "qid": "Q7896565",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q7896565",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=47.7594,-122.191"
+    },
+    {
+      "name": "University of Washington-Tacoma (Milgard School of Business)",
+      "lat": 47.2448,
+      "lng": -122.438,
+      "country": "United States",
+      "qid": "Q7896583",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q7896583",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=47.2448,-122.438"
+    },
+    {
+      "name": "Indiana University (Kelley)",
+      "lat": 39.1722,
+      "lng": -86.5184,
+      "country": "United States",
+      "qid": "Q6123576",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q6123576",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=39.1722,-86.5184"
+    },
+    {
+      "name": "FLAME University",
+      "lat": 18.5233078,
+      "lng": 73.7317384,
+      "country": "India",
+      "coordinateSource": "https://www.google.com/maps/search/FLAME%20University%20India/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=18.5233078,73.7317384"
+    },
+    {
+      "name": "A’Sharqiyah University",
+      "lat": 22.7824181,
+      "lng": 58.5207561,
+      "country": "Oman",
+      "coordinateSource": "https://www.google.com/maps/search/A%E2%80%99Sharqiyah%20University%20Oman/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=22.7824181,58.5207561"
+    },
+    {
+      "name": "EMLV (Ecole de Commerce et de Management)",
+      "lat": 48.892704,
+      "lng": 2.223556,
+      "country": "France",
+      "coordinateSource": "https://www.google.com/maps/search/EMLV%20(Ecole%20de%20Commerce%20et%20de%20Management)%20France/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=48.892704,2.223556"
+    },
+    {
+      "name": "IPADE Business School",
+      "lat": 19.4639424,
+      "lng": -99.1871372,
+      "country": "Mexico",
+      "coordinateSource": "https://www.google.com/maps/search/IPADE%20Business%20School%20Mexico/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=19.4639424,-99.1871372"
+    },
+    {
+      "name": "SUNY Korea",
+      "lat": 37.3766625,
+      "lng": 126.667171875,
+      "country": "South Korea",
+      "coordinateSource": "https://www.google.com/maps/search/SUNY%20Korea%20South%20Korea/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=37.3766625,126.667171875"
+    },
+    {
+      "name": "Abdullah Al Salem University (AASU)",
+      "lat": 29.3217476,
+      "lng": 47.9719305,
+      "country": "Kuwait",
+      "coordinateSource": "https://www.google.com/maps/search/Abdullah%20Al%20Salem%20University%20(AASU)%20Kuwait/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=29.3217476,47.9719305"
+    },
+    {
+      "name": "Coastal Carolina University",
+      "lat": 33.7961194,
+      "lng": -79.0136958,
+      "country": "United States",
+      "coordinateSource": "https://www.google.com/maps/search/Coastal%20Carolina%20University%20United%20States/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=33.7961194,-79.0136958"
+    },
+    {
+      "name": "Dongbei University of Finance and Economics",
+      "lat": 38.876672,
+      "lng": 121.549827,
+      "country": "China",
+      "coordinateSource": "https://www.google.com/maps/search/Dongbei%20University%20of%20Finance%20and%20Economics%20China/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=38.876672,121.549827"
+    },
+    {
+      "name": "New Uzbekistan University",
+      "lat": 41.3160556,
+      "lng": 69.2954717,
+      "country": "Uzbekistan",
+      "coordinateSource": "https://www.google.com/maps/search/New%20Uzbekistan%20University%20Uzbekistan/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=41.3160556,69.2954717"
+    },
+    {
+      "name": "Prince Mohammad Bin Fahd University",
+      "lat": 26.1472848,
+      "lng": 50.0934331,
+      "country": "Saudi Arabia",
+      "coordinateSource": "https://www.google.com/maps/search/Prince%20Mohammad%20Bin%20Fahd%20University%20Saudi%20Arabia/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=26.1472848,50.0934331"
+    },
+    {
+      "name": "San Bernardino Community College District",
+      "lat": 34.0669907,
+      "lng": -117.2737915,
+      "country": "United States",
+      "coordinateSource": "https://www.google.com/maps/search/San%20Bernardino%20Community%20College%20District%20United%20States/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=34.0669907,-117.2737915"
+    },
+    {
+      "name": "TUM School of Management",
+      "lat": 48.1500457,
+      "lng": 11.5670102,
+      "country": "Germany",
+      "coordinateSource": "https://www.google.com/maps/search/TUM%20School%20of%20Management%20Germany/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=48.1500457,11.5670102"
+    },
+    {
+      "name": "Marian University",
+      "lat": 39.814166666667,
+      "lng": -86.203055555556,
+      "country": "United States",
+      "qid": "Q6761994",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q6761994",
+      "identitySource": "https://www.marian.edu/directory/domonique-gregory",
+      "coordinateNote": "Business Statistics entry corroborated by matching official faculty title at Marian University Indianapolis.",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=39.814166666667,-86.203055555556"
+    },
+    {
+      "name": "University of New Haven",
+      "lat": 24.697046,
+      "lng": 46.5741267,
+      "country": "Saudi Arabia",
+      "coordinateSource": "https://sa.newhaven.edu/en/contact/",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=24.697046,46.5741267",
+      "coordinateNote": "Riyadh College of Business and Digital Innovation campus. Coordinates taken from official university contact-page Google Maps link.",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary."
+    },
+    {
+      "name": "Institut Mines-Télécom",
+      "lat": 48.6251574,
+      "lng": 2.4429366,
+      "country": "France",
+      "coordinateSource": "https://www.google.com/maps/search/Institut%20Mines-T%C3%A9l%C3%A9com%20France/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=48.6251574,2.4429366"
+    },
+    {
+      "name": "UCL School of Management",
+      "lat": 51.5049489,
+      "lng": -0.0195006,
+      "country": "United Kingdom",
+      "coordinateSource": "https://www.google.com/maps/search/UCL%20School%20of%20Management%20United%20Kingdom/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=51.5049489,-0.0195006"
+    },
+    {
+      "name": "UCL GBSH",
+      "lat": 51.5373206,
+      "lng": -0.0116013,
+      "country": "United Kingdom",
+      "coordinateSource": "https://www.google.com/maps/search/UCL%20GBSH%20United%20Kingdom/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=51.5373206,-0.0116013"
+    },
+    {
+      "name": "UCL Global Business School for Health",
+      "lat": 51.5373206,
+      "lng": -0.0116013,
+      "country": "United Kingdom",
+      "coordinateSource": "https://www.google.com/maps/search/UCL%20Global%20Business%20School%20for%20Health%20United%20Kingdom/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=51.5373206,-0.0116013"
+    },
+    {
+      "name": "NEOMA Business School",
+      "lat": 49.4631981,
+      "lng": 1.0639311,
+      "country": "France",
+      "coordinateSource": "https://www.google.com/maps/search/NEOMA%20Business%20School%20France/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=49.4631981,1.0639311"
+    },
+    {
+      "name": "University of Waikato",
+      "lat": 37.529734,
+      "lng": 122.060834,
+      "country": "China",
+      "coordinateSource": "https://www.google.com/maps/search/Shandong+University+Weihai/",
+      "identitySource": "https://www.waikato.ac.nz/int/about/global-partnerships/global-programmes/",
+      "coordinateNote": "Weihai campus of Shandong University, home of SDU-UoW International Business School. Directory supply-chain posting is for Weihai, China (https://business.academickeys.com/seeker_search.php?dothis=select&job%5Binstitution_IDX%5D=2757). This is not Waikato main campus in New Zealand.",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "University campus location, approximate point; not a boundary.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=37.529734,122.060834"
+    },
+    {
+      "name": "Kazakh-American Free University",
+      "lat": 49.9512049,
+      "lng": 82.6176788,
+      "country": "Kazakhstan",
+      "coordinateSource": "https://www.google.com/maps/search/Kazakh-American%20Free%20University%20Kazakhstan/",
+      "coordinateRetrievedAt": "2026-10-22",
+      "coordinateScope": "Named university or campus place verified on Google Maps.",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=49.9512049,82.6176788"
     }
   ]
 }

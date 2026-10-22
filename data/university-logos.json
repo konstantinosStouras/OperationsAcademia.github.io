@@ -4049,6 +4049,12 @@
       "source": "Existing local institutional logo; identity matched to San Diego State University"
     },
     {
+      "name": "San Francisco State University (SFSU)",
+      "logo": "/assets/university-logos/Q1256981.png",
+      "qid": "Q1256981",
+      "source": "Existing local institutional logo; identity matched to San Francisco State University"
+    },
+    {
       "name": "San José State University",
       "logo": "/assets/university-logos/Q498526.png",
       "qid": "Q498526",
@@ -4097,10 +4103,94 @@
       "source": "Existing local institutional logo; identity matched to Simon Fraser University"
     },
     {
+      "name": "Smith School of Business",
+      "logo": "/assets/university-logos/Q105424537.png",
+      "qid": "Q105424537",
+      "source": "Existing local institutional logo; identity matched to Smith School of Business"
+    },
+    {
+      "name": "Sogang University",
+      "logo": "/assets/university-logos/Q374457.png",
+      "qid": "Q374457",
+      "source": "Existing local institutional logo; identity matched to Sogang University"
+    },
+    {
+      "name": "Southeastern Louisiana University",
+      "logo": "/assets/university-logos/Q615998.png",
+      "qid": "Q615998",
+      "source": "Existing local institutional logo; identity matched to Southeastern Louisiana University"
+    },
+    {
+      "name": "Southern Arkansas University",
+      "logo": "/assets/university-logos/Q1724577.png",
+      "qid": "Q1724577",
+      "source": "Existing local institutional logo; identity matched to Southern Arkansas University"
+    },
+    {
+      "name": "Southern Illinois University",
+      "logo": "/assets/university-logos/Q1472347.png",
+      "qid": "Q1472347",
+      "source": "Existing local institutional logo; identity matched to Southern Illinois University Carbondale"
+    },
+    {
+      "name": "Southern University of Science and Technology (SUSTech)",
+      "logo": "/assets/university-logos/Q7568723.png",
+      "qid": "Q7568723",
+      "source": "Existing local institutional logo; identity matched to Southern University of Science and Technology"
+    },
+    {
+      "name": "Southern Utah University",
+      "logo": "/assets/university-logos/Q632573.png",
+      "qid": "Q632573",
+      "source": "Existing local institutional logo; identity matched to Southern Utah University"
+    },
+    {
+      "name": "Southwest Minnesota State University",
+      "logo": "/assets/university-logos/Q7571324.png",
+      "qid": "Q7571324",
+      "source": "Existing local institutional logo; identity matched to Southwest Minnesota State University"
+    },
+    {
+      "name": "Spartanburg Methodist College",
+      "logo": "/assets/university-logos/Q7573934.png",
+      "qid": "Q7573934",
+      "source": "Existing local institutional logo; identity matched to Spartanburg Methodist College"
+    },
+    {
+      "name": "SRM University",
+      "logo": "/assets/university-logos/Q7392844.png",
+      "qid": "Q7392844",
+      "source": "Existing local institutional logo; identity matched to SRM Institute of Science and Technology"
+    },
+    {
+      "name": "St. Cloud State University",
+      "logo": "/assets/university-logos/Q1136874.png",
+      "qid": "Q1136874",
+      "source": "Existing local institutional logo; identity matched to St. Cloud State University"
+    },
+    {
       "name": "St.Gallen Institute of Management in Asia (SGI)",
       "logo": "/assets/university-logos/Q673354.png",
       "qid": "Q673354",
       "source": "Existing local institutional logo; identity matched to University of St. Gallen"
+    },
+    {
+      "name": "St John Fisher University",
+      "logo": "/assets/university-logos/Q7588902.png",
+      "qid": "Q7588902",
+      "source": "Existing local institutional logo; identity matched to St. John Fisher University"
+    },
+    {
+      "name": "St. John's University",
+      "logo": "/assets/university-logos/Q1138374.png",
+      "qid": "Q1138374",
+      "source": "Existing local institutional logo; identity matched to St. John's University (New York City)"
+    },
+    {
+      "name": "St. Thomas University",
+      "logo": "/assets/university-logos/Q2323376.png",
+      "qid": "Q2323376",
+      "source": "Existing local institutional logo; identity matched to St. Thomas University (Florida)"
     },
     {
       "name": "Stanford GSB",
@@ -4493,16 +4583,84 @@
       "source": "Existing local institutional logo; identity matched to University of Missouri"
     },
     {
+      "name": "University of Missouri-Kansas City",
+      "logo": "/assets/university-logos/Q940690.png",
+      "qid": "Q940690",
+      "source": "Existing local institutional logo; identity matched to University of Missouri–Kansas City"
+    },
+    {
       "name": "University of Missouri (Mizzou)",
       "logo": "/assets/university-logos/Q579968.png",
       "qid": "Q579968",
       "source": "Existing local institutional logo; identity matched to University of Missouri"
     },
     {
+      "name": "University of Missouri-St. Louis",
+      "logo": "/assets/university-logos/university-of-missouri-st-louis.svg",
+      "source": "https://www.umsl.edu",
+      "sourceImage": "https://www.umsl.edu/files/images/sitewide/umsl-logo-red.svg",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "University of Nebraska at Kearney",
+      "logo": "/assets/university-logos/Q7895890.png",
+      "qid": "Q7895890",
+      "source": "Existing local institutional logo; identity matched to University of Nebraska at Kearney"
+    },
+    {
+      "name": "University of Nebraska at Omaha",
+      "logo": "/assets/university-logos/Q2495890.png",
+      "qid": "Q2495890",
+      "source": "Existing local institutional logo; identity matched to University of Nebraska Omaha"
+    },
+    {
+      "name": "University of Nevada",
+      "logo": "/assets/university-logos/Q1185955.png",
+      "qid": "Q1185955",
+      "source": "Existing local institutional logo; identity matched to University of Nevada, Reno"
+    },
+    {
+      "name": "University of Nevada Las Vegas",
+      "logo": "/assets/university-logos/Q2302311.png",
+      "qid": "Q2302311",
+      "source": "Existing local institutional logo; identity matched to University of Nevada, Las Vegas"
+    },
+    {
+      "name": "University of New Haven",
+      "logo": "/assets/university-logos/Q917899.png",
+      "qid": "Q917899",
+      "source": "Existing local institutional logo; identity matched to University of New Haven"
+    },
+    {
+      "name": "University of New Mexico",
+      "logo": "/assets/university-logos/Q1190812.png",
+      "qid": "Q1190812",
+      "source": "Existing local institutional logo; identity matched to University of New Mexico"
+    },
+    {
+      "name": "University of North Carolina at Charlotte",
+      "logo": "/assets/university-logos/Q1783178.png",
+      "qid": "Q1783178",
+      "source": "Existing local institutional logo; identity matched to University of North Carolina at Charlotte"
+    },
+    {
+      "name": "University of North Carolina at Wilmington",
+      "logo": "/assets/university-logos/Q2092214.png",
+      "qid": "Q2092214",
+      "source": "Existing local institutional logo; identity matched to University of North Carolina Wilmington"
+    },
+    {
       "name": "University of North Carolina-Chapel Hill",
       "logo": "/assets/university-logos/Q192334.png",
       "qid": "Q192334",
       "source": "Existing local institutional logo; identity matched to University of North Carolina at Chapel Hill"
+    },
+    {
+      "name": "University of North Carolina, Charlotte",
+      "logo": "/assets/university-logos/Q1783178.png",
+      "qid": "Q1783178",
+      "source": "Existing local institutional logo; identity matched to University of North Carolina at Charlotte"
     },
     {
       "name": "University of North Carolina (UNC) Chapel Hill",
@@ -4613,6 +4771,18 @@
       "source": "Existing local institutional logo; identity matched to University of Toronto"
     },
     {
+      "name": "University of Virgin Islands",
+      "logo": "/assets/university-logos/Q7896780.png",
+      "qid": "Q7896780",
+      "source": "Existing local institutional logo; identity matched to University of the Virgin Islands"
+    },
+    {
+      "name": "University of Waikato",
+      "logo": "/assets/university-logos/Q606140.png",
+      "qid": "Q606140",
+      "source": "Existing local institutional logo; identity matched to University of Waikato"
+    },
+    {
       "name": "University of Washington Bothell",
       "logo": "/assets/university-logos/Q219563.png",
       "qid": "Q219563",
@@ -4625,6 +4795,42 @@
       "source": "Existing local institutional logo; identity matched to University of Washington"
     },
     {
+      "name": "University of West Florida",
+      "logo": "/assets/university-logos/Q659255.png",
+      "qid": "Q659255",
+      "source": "Existing local institutional logo; identity matched to University of West Florida"
+    },
+    {
+      "name": "University of Wisconsin - Green Bay",
+      "logo": "/assets/university-logos/Q2378091.png",
+      "qid": "Q2378091",
+      "source": "Existing local institutional logo; identity matched to University of Wisconsin–Green Bay"
+    },
+    {
+      "name": "University of Wisconsin - La Crosse",
+      "logo": "/assets/university-logos/Q2688358.png",
+      "qid": "Q2688358",
+      "source": "Existing local institutional logo; identity matched to University of Wisconsin–La Crosse"
+    },
+    {
+      "name": "University of Wisconsin-Stout",
+      "logo": "/assets/university-logos/Q2590529.png",
+      "qid": "Q2590529",
+      "source": "Existing local institutional logo; identity matched to University of Wisconsin–Stout Polytechnic"
+    },
+    {
+      "name": "University of Wisconsin-Whitewater",
+      "logo": "/assets/university-logos/Q3551772.png",
+      "qid": "Q3551772",
+      "source": "Existing local institutional logo; identity matched to University of Wisconsin–Whitewater"
+    },
+    {
+      "name": "University of Zurich",
+      "logo": "/assets/university-logos/Q206702.png",
+      "qid": "Q206702",
+      "source": "Existing local institutional logo; identity matched to University of Zurich"
+    },
+    {
       "name": "UNSW Sydney",
       "logo": "/assets/university-logos/Q734764.png",
       "qid": "Q734764",
@@ -4635,6 +4841,36 @@
       "logo": "/assets/university-logos/Q49213.png",
       "qid": "Q49213",
       "source": "Existing local institutional logo; identity matched to University of Texas at Austin"
+    },
+    {
+      "name": "UT San Antonio",
+      "logo": "/assets/university-logos/Q183170.png",
+      "qid": "Q183170",
+      "source": "Existing local institutional logo; identity matched to University of Texas at San Antonio"
+    },
+    {
+      "name": "Utah Tech University",
+      "logo": "/assets/university-logos/Q1231724.png",
+      "qid": "Q1231724",
+      "source": "Existing local institutional logo; identity matched to Utah Tech University"
+    },
+    {
+      "name": "Utah Valley University",
+      "logo": "/assets/university-logos/Q940919.png",
+      "qid": "Q940919",
+      "source": "Existing local institutional logo; identity matched to Utah Valley University"
+    },
+    {
+      "name": "Valdosta State University",
+      "logo": "/assets/university-logos/Q2508061.png",
+      "qid": "Q2508061",
+      "source": "Existing local institutional logo; identity matched to Valdosta State University"
+    },
+    {
+      "name": "Valley City State University",
+      "logo": "/assets/university-logos/Q7912012.png",
+      "qid": "Q7912012",
+      "source": "Existing local institutional logo; identity matched to Valley City State University"
     },
     {
       "name": "Valparaiso University",
@@ -4733,10 +4969,58 @@
       "source": "Existing local institutional logo; identity matched to Westfield State University"
     },
     {
+      "name": "Wheaton College of Massachusetts",
+      "logo": "/assets/university-logos/Q924318.png",
+      "qid": "Q924318",
+      "source": "Existing local institutional logo; identity matched to Wheaton College (Massachusetts)"
+    },
+    {
+      "name": "Wichita State University",
+      "logo": "/assets/university-logos/Q429561.png",
+      "qid": "Q429561",
+      "source": "Existing local institutional logo; identity matched to Wichita State University"
+    },
+    {
+      "name": "Wilfrid Laurier University",
+      "logo": "/assets/university-logos/Q2166701.png",
+      "qid": "Q2166701",
+      "source": "Existing local institutional logo; identity matched to Wilfrid Laurier University"
+    },
+    {
       "name": "William and Mary",
       "logo": "/assets/university-logos/Q875637.png",
       "qid": "Q875637",
       "source": "Existing local institutional logo; identity matched to College of William & Mary"
+    },
+    {
+      "name": "Wilson College",
+      "logo": "/assets/university-logos/Q8023017.png",
+      "qid": "Q8023017",
+      "source": "Existing local institutional logo; identity matched to Wilson College (Pennsylvania)"
+    },
+    {
+      "name": "Wingate University",
+      "logo": "/assets/university-logos/Q8025153.png",
+      "qid": "Q8025153",
+      "source": "Existing local institutional logo; identity matched to Wingate University"
+    },
+    {
+      "name": "Winona State University",
+      "logo": "/assets/university-logos/Q3233786.png",
+      "qid": "Q3233786",
+      "source": "Existing local institutional logo; identity matched to Winona State University"
+    },
+    {
+      "name": "Worcester Polytechnic Institute",
+      "logo": "/assets/university-logos/Q195046.png",
+      "qid": "Q195046",
+      "source": "Existing local institutional logo; identity matched to Worcester Polytechnic Institute"
+    },
+    {
+      "name": "Worcester State University",
+      "logo": "/assets/university-logos/Q3446068.png",
+      "qid": "Q3446068",
+      "source": "Existing local institutional logo; identity matched to Worcester State University"
     },
     {
       "name": "WU Vienna",
@@ -4745,10 +5029,78 @@
       "source": "Existing local institutional logo; identity matched to Vienna University of Economics and Business"
     },
     {
+      "name": "Xi'an Jiaotong-Liverpool University",
+      "logo": "/assets/university-logos/Q13562485.png",
+      "qid": "Q13562485",
+      "source": "Existing local institutional logo; identity matched to Xi'an Jiaotong–Liverpool University"
+    },
+    {
+      "name": "Xi'an Jiaotong University",
+      "logo": "/assets/university-logos/Q981237.png",
+      "qid": "Q981237",
+      "source": "Existing local institutional logo; identity matched to Xi'an Jiaotong University"
+    },
+    {
       "name": "Yale School of Management (Operations Management group)",
       "logo": "/assets/university-logos/Q49112.png",
       "qid": "Q49112",
       "source": "Existing local institutional logo; identity matched to Yale University"
+    },
+    {
+      "name": "Yeshiva University",
+      "logo": "/assets/university-logos/Q1048851.png",
+      "qid": "Q1048851",
+      "source": "Existing local institutional logo; identity matched to Yeshiva University"
+    },
+    {
+      "name": "York University",
+      "logo": "/assets/university-logos/Q849751.png",
+      "qid": "Q849751",
+      "source": "Existing local institutional logo; identity matched to York University"
+    },
+    {
+      "name": "Youngstown State University",
+      "logo": "/assets/university-logos/Q1783191.png",
+      "qid": "Q1783191",
+      "source": "Existing local institutional logo; identity matched to Youngstown State University"
+    },
+    {
+      "name": "Hull University Business School",
+      "logo": "/assets/university-logos/Q1474019.png",
+      "qid": "Q1474019",
+      "source": "Existing local institutional logo; identity matched to University of Hull"
+    },
+    {
+      "name": "Huron University",
+      "logo": "/assets/university-logos/huron-university.svg",
+      "source": "https://huronu.ca",
+      "sourceImage": "https://huronu.ca/wp-content/themes/theme/images/huron-logo2.svg",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "Idaho State University",
+      "logo": "/assets/university-logos/Q1656608.png",
+      "qid": "Q1656608",
+      "source": "Existing local institutional logo; identity matched to Idaho State University"
+    },
+    {
+      "name": "IE Business School",
+      "logo": "/assets/university-logos/Q1153198.png",
+      "qid": "Q1153198",
+      "source": "Existing local institutional logo; identity matched to IE Business School"
+    },
+    {
+      "name": "IESE",
+      "logo": "/assets/university-logos/Q705316.png",
+      "qid": "Q705316",
+      "source": "Existing local institutional logo; identity matched to IESE Business School"
+    },
+    {
+      "name": "IESE Business School",
+      "logo": "/assets/university-logos/Q705316.png",
+      "qid": "Q705316",
+      "source": "Existing local institutional logo; identity matched to IESE Business School"
     },
     {
       "name": "IIM Ahmedabad",
@@ -4757,76 +5109,34 @@
       "source": "Existing local institutional logo; identity matched to Indian Institute of Management Ahmedabad"
     },
     {
-      "name": "Youngstown State University",
-      "logo": "/assets/university-logos/Q1783191.png",
-      "qid": "Q1783191",
-      "source": "https://en.wikipedia.org/wiki/File:Youngstown_State_University_Seal.svg",
-      "sourceImage": "https://thumb.wikimedia.org/wikipedia/en/thumb/7/75/Youngstown_State_University_Seal.svg/250px-Youngstown_State_University_Seal.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "license": "Fair use",
-      "retrievedAt": "2026-10-22"
-    },
-    {
-      "name": "Huron University",
-      "logo": "/assets/university-logos/Q5946944.png",
-      "qid": "Q5946944",
-      "source": "https://en.wikipedia.org/wiki/File:Huron_University_logo.png",
-      "sourceImage": "https://upload.wikimedia.org/wikipedia/en/a/ae/Huron_University_logo.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-      "license": "Fair use",
-      "retrievedAt": "2026-10-22"
-    },
-    {
-      "name": "Idaho State University",
-      "logo": "/assets/university-logos/Q1656608.png",
-      "qid": "Q1656608",
-      "source": "https://en.wikipedia.org/wiki/File:Idaho_State_University_seal.svg",
-      "sourceImage": "https://thumb.wikimedia.org/wikipedia/en/thumb/8/8f/Idaho_State_University_seal.svg/250px-Idaho_State_University_seal.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "license": "Fair use",
-      "retrievedAt": "2026-10-22"
-    },
-    {
-      "name": "IE Business School",
-      "logo": "/assets/university-logos/Q1153198.png",
-      "qid": "Q1153198",
-      "source": "https://commons.wikimedia.org/wiki/File:IE_Business_School_logo.svg",
-      "sourceImage": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/IE_Business_School_logo.svg/250px-IE_Business_School_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "license": "Public domain",
-      "retrievedAt": "2026-10-22"
-    },
-    {
-      "name": "IESE",
-      "logo": "/assets/university-logos/Q705316.png",
-      "qid": "Q705316",
-      "source": "https://commons.wikimedia.org/wiki/File:IESE_LOGO_UPDATED_2023.png",
-      "sourceImage": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/IESE_LOGO_UPDATED_2023.png/250px-IESE_LOGO_UPDATED_2023.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "license": "Public domain",
-      "retrievedAt": "2026-10-22"
-    },
-    {
-      "name": "IESE Business School",
-      "logo": "/assets/university-logos/Q705316.png",
-      "qid": "Q705316",
-      "source": "https://commons.wikimedia.org/wiki/File:IESE_LOGO_UPDATED_2023.png",
-      "sourceImage": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/IESE_LOGO_UPDATED_2023.png/250px-IESE_LOGO_UPDATED_2023.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "license": "Public domain",
-      "retrievedAt": "2026-10-22"
+      "name": "Indian Institute of Technology (IIT) Bombay",
+      "logo": "/assets/university-logos/Q1661242.png",
+      "qid": "Q1661242",
+      "source": "Existing local institutional logo; identity matched to IIT Bombay"
     },
     {
       "name": "Indiana State University",
       "logo": "/assets/university-logos/Q666128.png",
       "qid": "Q666128",
-      "source": "https://en.wikipedia.org/wiki/File:Indiana_State_University_Seal.svg",
-      "sourceImage": "https://thumb.wikimedia.org/wikipedia/en/thumb/8/89/Indiana_State_University_Seal.svg/250px-Indiana_State_University_Seal.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "license": "Fair use",
-      "retrievedAt": "2026-10-22"
+      "source": "Existing local institutional logo; identity matched to Indiana State University"
+    },
+    {
+      "name": "Indiana University (Kelley)",
+      "logo": "/assets/university-logos/Q1079140.png",
+      "qid": "Q1079140",
+      "source": "Existing local institutional logo; identity matched to Indiana University Bloomington"
+    },
+    {
+      "name": "Indiana University Northwest",
+      "logo": "/assets/university-logos/Q1079140.png",
+      "qid": "Q1079140",
+      "source": "Existing local institutional logo; identity matched to Indiana University Bloomington"
     },
     {
       "name": "Institut Mines-Télécom",
       "logo": "/assets/university-logos/Q7885718.png",
       "qid": "Q7885718",
-      "source": "https://commons.wikimedia.org/wiki/File:IMT_logo_2017.png",
-      "sourceImage": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/IMT_logo_2017.png/250px-IMT_logo_2017.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "license": "CC BY-SA 4.0",
-      "retrievedAt": "2026-10-22"
+      "source": "Existing local institutional logo; identity matched to Institut Mines-Télécom"
     },
     {
       "name": "A’Sharqiyah University",
@@ -4953,6 +5263,70 @@
       "logo": "/assets/university-logos/universidad-torcuato-di-tella.svg",
       "source": "https://www.utdt.edu/",
       "sourceImage": "https://www.utdt.edu/Images/UI/logo2018.svg?v=20180628",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "FLAME University",
+      "logo": "/assets/university-logos/flame-university.png",
+      "source": "https://www.flame.edu.in",
+      "sourceImage": "https://www.flame.edu.in/images/FLAME-Logo.png",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "IESEG",
+      "logo": "/assets/university-logos/ieseg.svg",
+      "source": "https://www.ieseg.fr",
+      "sourceImage": "https://www.ieseg.fr/wp-content/themes/ieseg-2020/dps-2020/img/logos/logo_ieseg_footer.svg",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "IT University of Copenhagen",
+      "logo": "/assets/university-logos/it-university-of-copenhagen.svg",
+      "source": "https://en.itu.dk",
+      "sourceImage": "https://en.itu.dk/svg/itu/logo_en.svg",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "County College of Morris",
+      "logo": "/assets/university-logos/county-college-of-morris.svg",
+      "source": "https://www.ccm.edu/",
+      "sourceImage": "https://www.ccm.edu/#main-logo",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "Hainan Bielefeld University of Applied Sciences",
+      "logo": "/assets/university-logos/hainan-bielefeld.svg",
+      "source": "http://www.hainan-biuh.edu.cn/",
+      "sourceImage": "http://www.hainan-biuh.edu.cn/wp-content/themes/maw/public/assets/img/logo-full.svg",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "IPADE Business School",
+      "logo": "/assets/university-logos/ipade-business-school.svg",
+      "source": "https://www.ipade.mx/",
+      "sourceImage": "https://www.ipade.mx/wp-content/uploads/2022/10/logo-ipade-color-1.svg",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "SUNY Korea",
+      "logo": "/assets/university-logos/suny-korea.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:SUNY_Korea_Logo.jpg",
+      "sourceImage": "https://upload.wikimedia.org/wikipedia/commons/a/a2/SUNY_Korea_Logo.jpg",
+      "retrievedAt": "2026-10-22",
+      "license": "Institutional trademark"
+    },
+    {
+      "name": "BITS School of Management",
+      "logo": "/assets/university-logos/bits-school-of-management.png",
+      "source": "https://learning.bitsom.edu.in/",
+      "sourceImage": "https://learning.bitsom.edu.in/d2l/lp/navbars/6606/theme/viewimage/313/view?v=20.24.5.18329",
       "retrievedAt": "2026-10-22",
       "license": "Institutional trademark"
     },

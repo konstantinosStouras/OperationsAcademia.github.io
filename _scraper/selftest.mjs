@@ -26581,5 +26581,18 @@ if (isMain(import.meta.url)) {
   await testPublishNews();
   await testAffiliationPicker();
   await testModuleSuites();
+  // New directory institutions must retain independent, local identification assets.
+  {
+    const key = createRequire(import.meta.url)('../assets/oa-schools.js').institutionKey;
+    const rows = JSON.parse(await read('data/directory.json'));
+    const logos = JSON.parse(await read('data/university-logos.json')).records;
+    const byName = new Map(logos.map(r => [key(r.name), r]));
+    for (const name of new Set(rows.map(r => r.institution))) {
+      const record = byName.get(key(name));
+      ok(record && /^\/assets\/university-logos\/[^/]+$/.test(record.logo) &&
+        existsSync(path.join(HERE, '..', record.logo.slice(1))),
+        'university map: local logo exists for ' + name);
+    }
+  }
   process.exit(finish() ? 0 : 1);
 }
