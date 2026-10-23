@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-23T05:59:03.432Z",
- "members": 388,
+ "generated": "2026-10-23T09:16:54.006Z",
+ "members": 389,
  "k": 3,
  "affiliation": {
-  "listed": 305,
+  "listed": 306,
   "other": 48,
   "none": 35
  },
@@ -131,6 +131,11 @@
     "members": 3
    },
    {
+    "name": "The Chinese University of Hong Kong, Shenzhen",
+    "country": "China",
+    "members": 3
+   },
+   {
     "name": "George Mason University",
     "country": "United States",
     "members": 3
@@ -204,14 +209,9 @@
     "name": "University of Pennsylvania",
     "country": "United States",
     "members": 3
-   },
-   {
-    "name": "University of South Carolina",
-    "country": "United States",
-    "members": 3
    }
   ],
-  "rest": 135
+  "rest": 136
  },
  "countries": {
   "count": 16,
@@ -237,16 +237,16 @@
     "members": 8
    },
    {
+    "name": "China",
+    "members": 7
+   },
+   {
     "name": "France",
     "members": 7
    },
    {
     "name": "Germany",
     "members": 7
-   },
-   {
-    "name": "China",
-    "members": 6
    },
    {
     "name": "Spain",
