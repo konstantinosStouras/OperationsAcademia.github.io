@@ -13072,6 +13072,15 @@
   "lng": -88.2433829
  },
  {
+  "id": "university-of-illinois-at-urbana-champaign____information-systems-operations-management-supply-chain-manag",
+  "institution": "University of Illinois at Urbana-Champaign",
+  "department": "Information Systems, Operations Management, Supply Chain Management, and Analytics",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "university-of-illinois-at-urbana-champaign____is-om-scm-ba",
   "institution": "University of Illinois at Urbana-Champaign",
   "department": "IS/OM/SCM/BA",
