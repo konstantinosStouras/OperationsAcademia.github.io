@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-23T07:54:14.723Z",
+ "generated": "2026-10-23T12:54:30.302Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -62,6 +62,10 @@
    "n": 6
   },
   {
+   "v": "Columbia University",
+   "n": 5
+  },
+  {
    "v": "IESE Business School",
    "n": 5
   },
@@ -99,10 +103,6 @@
   },
   {
    "v": "City University of Hong Kong",
-   "n": 4
-  },
-  {
-   "v": "Columbia University",
    "n": 4
   },
   {
@@ -2624,6 +2624,10 @@
    "n": 2
   },
   {
+   "v": "Fu Foundation School of Engineering and Applied Science",
+   "n": 2
+  },
+  {
    "v": "Gatton College of Business and Economics",
    "n": 2
   },
@@ -2973,10 +2977,6 @@
   },
   {
    "v": "Frank G. Zarb School of Business",
-   "n": 1
-  },
-  {
-   "v": "Fu Foundation School of Engineering and Applied Science",
    "n": 1
   },
   {
@@ -3918,6 +3918,10 @@
    "n": 4
   },
   {
+   "v": "Industrial Engineering and Operations Research",
+   "n": 4
+  },
+  {
    "v": "Information Systems, Operations, Supply Chain, and Analytics",
    "n": 4
   },
@@ -3959,10 +3963,6 @@
   },
   {
    "v": "Department of Management",
-   "n": 3
-  },
-  {
-   "v": "Industrial Engineering and Operations Research",
    "n": 3
   },
   {
