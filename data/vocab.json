@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-22T20:23:15.563Z",
+ "generated": "2026-10-23T04:59:12.520Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -78,6 +78,10 @@
    "n": 5
   },
   {
+   "v": "University of Illinois at Urbana-Champaign",
+   "n": 5
+  },
+  {
    "v": "University of Iowa",
    "n": 5
   },
@@ -135,10 +139,6 @@
   },
   {
    "v": "The Chinese University of Hong Kong, Shenzhen",
-   "n": 4
-  },
-  {
-   "v": "University of Illinois at Urbana-Champaign",
    "n": 4
   },
   {
@@ -4723,6 +4723,10 @@
   },
   {
    "v": "Information Systems, Data Analytics and Operations",
+   "n": 1
+  },
+  {
+   "v": "Information Systems, Operations Management, Supply Chain Management, and Analytics",
    "n": 1
   },
   {
@@ -12370,12 +12374,14 @@
     "Business Administration",
     "Human Resources and Technology",
     "Industrial and Enterprise Systems Engineering",
+    "Information Systems, Operations Management, Supply Chain Management, and Analytics",
     "Information Systems, Operations, Supply Chain, and Analytics",
     "IS/OM/SCM/BA"
    ],
    "bySchool": {
     "": [
      "Industrial and Enterprise Systems Engineering",
+     "Information Systems, Operations Management, Supply Chain Management, and Analytics",
      "IS/OM/SCM/BA"
     ],
     "Gies College of Business": [
