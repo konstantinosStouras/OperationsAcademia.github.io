@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-23T07:54:14.723Z",
+ "generated": "2026-10-23T12:03:55.366Z",
  "count": 874,
  "years": {
   "2026": 496,
@@ -7,12 +7,12 @@
   "2028": 1
  },
  "types": {
-  "University": 439,
+  "University": 440,
   "Business School": 398
  },
  "levels": {
-  "Assistant Professor": 350,
-  "Other Ranks": 192,
+  "Assistant Professor": 351,
+  "Other Ranks": 193,
   "Non-tenure track (teaching) position": 55,
   "Post-Doc": 19,
   "Visiting Faculty (various levels)": 16,
