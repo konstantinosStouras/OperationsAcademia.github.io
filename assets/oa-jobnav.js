@@ -319,7 +319,20 @@
     return { label: COUNTRIES_LABEL, value: cs.join(', ') };
   }
 
+  // Enrich only our directory links; a poster's external URL is authoritative.
+  function furtherInfoUrl(row) {
+    var url = String(row.furtherInfoUrl || '');
+    if (!/^https?:\/\/(www\.)?operationsacademia\.org\/universities(?:\.html)?\?/i.test(url)) return url;
+    var p = new URLSearchParams();
+    p.set('university', row.institution || '');
+    p.set('focus', 'department');
+    if (row.school) p.set('school', row.school);
+    if (row.unit || row.department) p.set('department', row.unit || row.department);
+    return 'https://www.operationsacademia.org/universities?' + p;
+  }
+
   return {
+    furtherInfoUrl: furtherInfoUrl,
     MARKET_ROLL_MONTH: MARKET_ROLL_MONTH,
     FOCUS_PARAM: FOCUS_PARAM,
     JOBS_PAGE: JOBS_PAGE,

@@ -50,6 +50,10 @@
    "n": 6
   },
   {
+   "v": "University of Illinois at Urbana-Champaign",
+   "n": 6
+  },
+  {
    "v": "University of Michigan",
    "n": 6
   },
@@ -75,10 +79,6 @@
   },
   {
    "v": "University of Hong Kong",
-   "n": 5
-  },
-  {
-   "v": "University of Illinois at Urbana-Champaign",
    "n": 5
   },
   {
@@ -1634,10 +1634,6 @@
    "n": 1
   },
   {
-   "v": "Uni. of Illinois at Urbana-Champaign (Gies)",
-   "n": 1
-  },
-  {
    "v": "United States Naval Academy",
    "n": 1
   },
@@ -2504,6 +2500,10 @@
    "n": 5
   },
   {
+   "v": "Gies College of Business",
+   "n": 5
+  },
+  {
    "v": "C. T. Bauer College of Business",
    "n": 4
   },
@@ -2533,10 +2533,6 @@
   },
   {
    "v": "Fuqua School of Business",
-   "n": 3
-  },
-  {
-   "v": "Gies College of Business",
    "n": 3
   },
   {
@@ -3768,6 +3764,10 @@
    "n": 0
   },
   {
+   "v": "The Grainger College of Engineering",
+   "n": 0
+  },
+  {
    "v": "Toulouse Business School",
    "n": 0
   },
@@ -3890,10 +3890,6 @@
    "n": 6
   },
   {
-   "v": "OM/IS",
-   "n": 6
-  },
-  {
    "v": "AI",
    "n": 5
   },
@@ -3906,6 +3902,10 @@
    "n": 5
   },
   {
+   "v": "OM/IS",
+   "n": 5
+  },
+  {
    "v": "Technology and Operations Management",
    "n": 5
   },
@@ -3915,6 +3915,10 @@
   },
   {
    "v": "Industrial Engineering",
+   "n": 4
+  },
+  {
+   "v": "Information Systems, Operations, Supply Chain, and Analytics",
    "n": 4
   },
   {
@@ -4726,14 +4730,6 @@
    "n": 1
   },
   {
-   "v": "Information Systems, Operations Management, Supply Chain Management, and Analytics",
-   "n": 1
-  },
-  {
-   "v": "Information Systems, Operations, Supply Chain, and Analytics",
-   "n": 1
-  },
-  {
    "v": "Information Systems, Statistics, and Management Science",
    "n": 1
   },
@@ -4823,10 +4819,6 @@
   },
   {
    "v": "IS/Decision Sciences",
-   "n": 1
-  },
-  {
-   "v": "IS/OM/SCM/BA",
    "n": 1
   },
   {
@@ -11544,17 +11536,6 @@
     ]
    }
   },
-  "Uni. of Illinois at Urbana-Champaign (Gies)": {
-   "schools": [],
-   "units": [
-    "OM&IS"
-   ],
-   "bySchool": {
-    "": [
-     "OM&IS"
-    ]
-   }
-  },
   "United States Naval Academy": {
    "schools": [],
    "units": [
@@ -12368,28 +12349,25 @@
   "University of Illinois at Urbana-Champaign": {
    "schools": [
     "Gies College of Business",
-    "School of Labor and Employment Relations"
+    "School of Labor and Employment Relations",
+    "The Grainger College of Engineering"
    ],
    "units": [
     "Business Administration",
     "Human Resources and Technology",
     "Industrial and Enterprise Systems Engineering",
-    "Information Systems, Operations Management, Supply Chain Management, and Analytics",
-    "Information Systems, Operations, Supply Chain, and Analytics",
-    "IS/OM/SCM/BA"
+    "Information Systems, Operations, Supply Chain, and Analytics"
    ],
    "bySchool": {
-    "": [
-     "Industrial and Enterprise Systems Engineering",
-     "IS/OM/SCM/BA"
-    ],
     "Gies College of Business": [
      "Business Administration",
-     "Information Systems, Operations Management, Supply Chain Management, and Analytics",
      "Information Systems, Operations, Supply Chain, and Analytics"
     ],
     "School of Labor and Employment Relations": [
      "Human Resources and Technology"
+    ],
+    "The Grainger College of Engineering": [
+     "Industrial and Enterprise Systems Engineering"
     ]
    }
   },
@@ -14882,7 +14860,6 @@
   ],
   "Gies College of Business": [
    "Business Administration",
-   "Information Systems, Operations Management, Supply Chain Management, and Analytics",
    "Information Systems, Operations, Supply Chain, and Analytics"
   ],
   "Glorious Sun School of Business and Management": [
@@ -15478,6 +15455,9 @@
   ],
   "Terry College of Business": [
    "Management Information Systems"
+  ],
+  "The Grainger College of Engineering": [
+   "Industrial and Enterprise Systems Engineering"
   ],
   "Tickle College of Engineering": [
    "Industrial and Systems Engineering"

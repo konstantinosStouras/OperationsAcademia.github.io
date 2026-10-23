@@ -12,7 +12,7 @@ export async function buildMapData({dryRun=false}={}){
  const payload={
   rowInstitutions:locations.rowInstitutions,
   locations:locations.records.map(r=>({...select(r,['name','lat','lng','country','logo','mapUrl']),key:schools.institutionKey(r.name)})),
-  historic:historic.filter(r=>Number.isFinite(r.lat)&&Number.isFinite(r.lng)).map(r=>({...select(r,['institution','name','school','lat','lng','country','mapUrl']),key:schools.institutionKey(r.institution||r.name)})),
+  historic:historic.filter(r=>Number.isFinite(r.lat)&&Number.isFinite(r.lng)).map(r=>({...select(r,['institution','name','school','department','lat','lng','country','mapUrl']),key:schools.institutionKey(r.institution||r.name)})),
   logos:logos.records.map(r=>({name:r.name,key:schools.institutionKey(r.name),logo:r.logo}))
  };
  if(!dryRun)await writeFile(path.join(root,'data/university-map.json'),JSON.stringify(payload)+'\n');

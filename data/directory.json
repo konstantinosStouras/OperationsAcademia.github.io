@@ -11201,18 +11201,6 @@
   "lastPosted": "2025-07-15"
  },
  {
-  "id": "uni-of-illinois-at-urbana-champaign-gies____om-is",
-  "institution": "Uni. of Illinois at Urbana-Champaign (Gies)",
-  "department": "OM&IS",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-09-19"
- },
- {
   "id": "united-states-military-academy-west-point__united-states-military-academy__systems-engineering",
   "institution": "United States Military Academy - West Point",
   "school": "United States Military Academy",
@@ -13057,34 +13045,6 @@
   "lastPosted": "2014-09-11"
  },
  {
-  "id": "university-of-illinois-at-urbana-champaign____industrial-and-enterprise-systems-engineering",
-  "institution": "University of Illinois at Urbana-Champaign",
-  "department": "Industrial and Enterprise Systems Engineering",
-  "type": "University",
-  "country": "United States",
-  "address": "Champaign, IL",
-  "mapUrl": "https://goo.gl/maps/2n5zA",
-  "facultyUrl": "http://ise.illinois.edu/directory/faculty",
-  "sources": [
-   "directory"
-  ],
-  "lat": 40.1164204,
-  "lng": -88.2433829
- },
- {
-  "id": "university-of-illinois-at-urbana-champaign____is-om-scm-ba",
-  "institution": "University of Illinois at Urbana-Champaign",
-  "department": "IS/OM/SCM/BA",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-03-30"
- },
- {
   "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__business-administration",
   "institution": "University of Illinois at Urbana-Champaign",
   "school": "Gies College of Business",
@@ -13110,20 +13070,6 @@
   "lng": -88.2298467
  },
  {
-  "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-management-supply-chain-manag",
-  "institution": "University of Illinois at Urbana-Champaign",
-  "school": "Gies College of Business",
-  "department": "Information Systems, Operations Management, Supply Chain Management, and Analytics",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-22"
- },
- {
   "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-supply-chain-and-analytics",
   "institution": "University of Illinois at Urbana-Champaign",
   "school": "Gies College of Business",
@@ -13136,22 +13082,24 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-07-03"
+  "n": 4,
+  "lastPosted": "2026-10-22"
  },
  {
-  "id": "university-of-illinois-at-urbana-champaign__school-of-labor-and-employment-relations__human-resources-and-technology",
+  "id": "university-of-illinois-at-urbana-champaign__the-grainger-college-of-engineering__industrial-and-enterprise-systems-engineering",
   "institution": "University of Illinois at Urbana-Champaign",
-  "school": "School of Labor and Employment Relations",
-  "department": "Human Resources and Technology",
+  "school": "The Grainger College of Engineering",
+  "department": "Industrial and Enterprise Systems Engineering",
   "type": "University",
   "country": "United States",
+  "address": "Transportation Building, 104 South Mathews Avenue, Urbana, IL 61801",
+  "mapUrl": "https://www.google.com/maps/search/?api=1&query=40.110649,-88.225576",
+  "facultyUrl": "https://ise.illinois.edu/directory/faculty",
   "sources": [
-   "postings",
-   "seed"
+   "directory"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-30"
+  "lat": 40.110649,
+  "lng": -88.225576
  },
  {
   "id": "university-of-iowa__tippie-college-of-business__business-analytics",

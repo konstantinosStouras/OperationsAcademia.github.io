@@ -49,3 +49,4 @@ body.v3 .oa-uni a,.oa-uni .leaflet-popup .oa-uni-pop a { color:var(--map-link);t
 .oa-uni img[src$="american-university-of-kurdistan.png"], #oa-uni img[src$="american-university-of-kurdistan.png"], #oa-uni img[src$="cottey-college.svg"], #oa-uni img[src$="hamad-bin-khalifa-university.svg"], #oa-uni img[src$="ted-university.svg"] { background:#173f52; border-radius:5px; }
 
 #oa-uni img[src$="ieseg.svg"] { background:#173f52; border-radius:5px; }
+.oa-uni .oa-map-selected-department { border-left:3px solid var(--map-link); padding-left:8px; font-weight:700; }

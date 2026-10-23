@@ -84,6 +84,7 @@
     'City University of New York, Baruch College':
       'Baruch College, The City University of New York (CUNY)',
     'University of Illinois Urbana-Champaign': 'University of Illinois at Urbana-Champaign',
+    'Uni. of Illinois at Urbana-Champaign (Gies)': 'University of Illinois at Urbana-Champaign',
     'University of Illinois Chicago': 'University of Illinois at Chicago',
 
     /* Owner, 2026-08-18. Two universities the source directory named with an
@@ -121,6 +122,7 @@
      punctuation variants — "C.T. Bauer" and "C. T. Bauer" are one key — so
      those need only ONE entry, naming the form to keep. */
   var SCHOOL_LIST = [
+    'The Grainger College of Engineering',
     'A. B. Freeman School of Business',
     'C. T. Bauer College of Business',
     'Eli Broad College of Business',
@@ -281,6 +283,11 @@
      Keyed by the CANONICAL names, since that is what `assemble` has by the
      time it asks. */
   var UNIT_HOME = {
+    'University of Illinois at Urbana-Champaign': {
+      'Industrial and Enterprise Systems Engineering': 'The Grainger College of Engineering',
+      'Business Administration': 'Gies College of Business',
+      'Information Systems, Operations, Supply Chain, and Analytics': 'Gies College of Business'
+    },
     'UT San Antonio': { 'Operations and Analytics Department': 'Carlos Alvarez College of Business' },
     'University of Houston': {
       'Department of Decision and Information Sciences': 'C. T. Bauer College of Business',
@@ -293,6 +300,9 @@
      NUS Business School, so the university has to be known before they can be
      told apart. Keyed by university, then by the name as posted. */
   var SCOPED_SCHOOL_ALIASES = {
+    'University of Illinois at Urbana-Champaign': {
+      'Grainger College of Engineering': 'The Grainger College of Engineering'
+    },
     /* Scoped to this university: UWE also has a Bristol Business School.
        https://www.bristol.ac.uk/business-school/ */
     'University of Bristol': {
@@ -516,6 +526,10 @@
        department distinct, and merge only the two names for this area.
        Checked 2026-10-12: https://giesbusiness.illinois.edu/business-administration/badm-areas-iosa */
     'University of Illinois at Urbana-Champaign': {
+      'IS/OM/SCM/BA': 'Information Systems, Operations, Supply Chain, and Analytics',
+      'OM&IS': 'Information Systems, Operations, Supply Chain, and Analytics',
+      'Information Systems, Operations Management, Supply Chain Management, and Analytics':
+        'Information Systems, Operations, Supply Chain, and Analytics',
       'Business Administration, Information Systems, Operations, Supply Chain, and Analytics':
         'Information Systems, Operations, Supply Chain, and Analytics',
       'Information Systems, Operations, Supply Chain and Analytics':
@@ -1633,6 +1647,12 @@
     UNIT_ALIASES: UNIT_ALIASES,
     SCOPED_UNIT_ALIASES: SCOPED_UNIT_ALIASES,
     FUSED_INSTITUTIONS: FUSED_INSTITUTIONS,
+    // Owner's directory scope correction, 2026-10-23. Historical jobs remain
+    // intact; future rebuilds and live directory overlays share this exclusion.
+    directoryExcluded: function(place) {
+      return institutionKey(place.institution) === institutionKey('University of Illinois at Urbana-Champaign') &&
+        fold(place.school) === fold('School of Labor and Employment Relations');
+    },
     UNIT_HOME: UNIT_HOME,
     fold: fold,
     canonInstitution: canonInstitution,

@@ -266,6 +266,7 @@
 
     for (i = 0; i < rows.length; i++) {
       r = rows[i];
+      if (window.OASchools && OASchools.directoryExcluded(r)) continue;
       if (r._hidden && !state.admin) continue;
       /* An EDITED name goes through the same canon the posting form applies,
          so a correction lands on the site's one spelling — and two rows whose
@@ -377,7 +378,7 @@
       cards.push({
         id: slug(uk2),
         institution: name,
-        aka: aka.join(' · '),
+        aka: aka.concat(window.OAMapModel?[OAMapModel.displayName(name)]:[]).join(' · '),
         countries: countries.sort(),
         types: types,
         activity: n > 0 ? 'Has posted here' : 'Never posted here',

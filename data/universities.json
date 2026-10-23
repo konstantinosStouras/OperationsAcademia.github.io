@@ -2497,16 +2497,18 @@
  },
  {
   "id": "university-of-illinois-at-urbana-champaign",
-  "name": "University of Illinois at Urbana-Champaign",
+  "name": "University of Illinois at Urbana-Champaign, The Grainger College of Engineering",
   "institution": "University of Illinois at Urbana-Champaign",
-  "school": "",
+  "school": "The Grainger College of Engineering",
   "department": "Industrial and Enterprise Systems Engineering",
-  "schoolDept": "Industrial and Enterprise Systems Engineering",
-  "address": "Champaign, IL",
-  "lat": 40.1164204,
-  "lng": -88.2433829,
-  "mapUrl": "https://goo.gl/maps/2n5zA",
-  "facultyUrl": "http://ise.illinois.edu/directory/faculty"
+  "schoolDept": "The Grainger College of Engineering, Industrial and Enterprise Systems Engineering",
+  "address": "Transportation Building, 104 South Mathews Avenue, Urbana, IL 61801",
+  "lat": 40.110649,
+  "lng": -88.225576,
+  "mapUrl": "https://www.google.com/maps/search/?api=1&query=40.110649,-88.225576",
+  "facultyUrl": "https://ise.illinois.edu/directory/faculty",
+  "locationSource": "https://icap.sustainability.illinois.edu/all-places?page=30",
+  "checked": "2026-10-23"
  },
  {
   "id": "university-of-illinois-at-urbana-champaign-gies",

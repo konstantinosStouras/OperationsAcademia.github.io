@@ -180,6 +180,7 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
   function rowFor(institution, school, unit, source) {
     const n = names(institution, school, unit);
     if (!n.institution) return null;
+    if (SCHOOLS.directoryExcluded(n)) return null;
     claimName(n.institution, source);
     const id = rowKey(n.institution, n.school, n.unit);
     let row = rows.get(id);
