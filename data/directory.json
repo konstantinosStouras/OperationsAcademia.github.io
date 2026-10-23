@@ -13072,19 +13072,6 @@
   "lng": -88.2433829
  },
  {
-  "id": "university-of-illinois-at-urbana-champaign____information-systems-operations-management-supply-chain-manag",
-  "institution": "University of Illinois at Urbana-Champaign",
-  "department": "Information Systems, Operations Management, Supply Chain Management, and Analytics",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-22"
- },
- {
   "id": "university-of-illinois-at-urbana-champaign____is-om-scm-ba",
   "institution": "University of Illinois at Urbana-Champaign",
   "department": "IS/OM/SCM/BA",
@@ -13121,6 +13108,20 @@
   "lastPosted": "2025-09-25",
   "lat": 40.1036099,
   "lng": -88.2298467
+ },
+ {
+  "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-management-supply-chain-manag",
+  "institution": "University of Illinois at Urbana-Champaign",
+  "school": "Gies College of Business",
+  "department": "Information Systems, Operations Management, Supply Chain Management, and Analytics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-22"
  },
  {
   "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-supply-chain-and-analytics",
