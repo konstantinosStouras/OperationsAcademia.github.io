@@ -19284,8 +19284,11 @@
   "department": "Gies College of Business, Information Systems, Operations, Supply Chain, and Analytics",
   "school": "Gies College of Business",
   "unit": "Information Systems, Operations, Supply Chain, and Analytics",
-  "type": "",
-  "levels": [],
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
   "applyBy": "October 19, 2025",
   "applyByDate": "2025-10-19",
   "comments": "",
