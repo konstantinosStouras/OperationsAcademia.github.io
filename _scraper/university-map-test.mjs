@@ -10,6 +10,7 @@ const model=require('../assets/oa-map-model.js');
 assert.equal(model.displayName('KAIST'),'Korea Advanced Institute of Science and Technology (KAIST)');
 assert.equal(model.displayName('MIT'),'Massachusetts Institute of Technology (MIT)');
 assert.equal(model.departmentName('OR/OM'),'Operations Research, Operations Management');
+assert.ok(model.rowMatchScore({school:'Duffield College of Engineering',department:'School of Operations Research and Information Engineering',mapAliases:[{school:'',department:'Operations Research and Information Engineering'}]},'', 'Operations Research and Information Engineering') > model.rowMatchScore({school:'Cornell Tech',department:'Operations Research and Information Engineering'},'', 'Operations Research and Information Engineering'),'legacy school-less department links prefer their exact original row over another campus');
 const shared=model.pointsFor({id:'same',institution:'Test University',countries:['United States'],schools:[
   {name:'Business School',rows:[{id:'business',department:'Operations Management',lat:40,lng:-88}]},
   {name:'Engineering School',rows:[{id:'engineering',department:'Industrial Engineering',lat:40,lng:-88}]}
@@ -47,7 +48,7 @@ async function pageAt(query='',mobile=false){
       api=v;const mount=v.mount;v.mount=function(cfg){window.testMap=mount(cfg);return window.testMap;};
     }});
   });
-  await p.goto(base+'/universities'+query);
+  await p.goto(base+'/universities'+query,{waitUntil:'domcontentloaded',timeout:60000});
   await p.waitForFunction(()=>window.testMap&&window.testMap.shown().length>0);
   return p;
 }

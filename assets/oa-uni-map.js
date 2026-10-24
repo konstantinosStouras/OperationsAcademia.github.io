@@ -152,7 +152,7 @@
         var evidence=el('p',{text:'Location checked '+point.checked+' · '});
         evidence.appendChild(makeLink('Official address',point.addressSource));
         evidence.appendChild(document.createTextNode(' · '));
-        evidence.appendChild(makeLink('Official building map',point.coordinateSource));
+        evidence.appendChild(makeLink('Building map',point.coordinateSource));
         pop.appendChild(evidence);
       }
       pop.appendChild(el('p',{text:(card.schools||[]).length+((card.schools||[]).length===1?' school · ':' schools · ')+(card.schools||[]).reduce(function(n,s){return n+(s.rows||[]).length;},0)+' department listings · '+(card.n||0)+' past postings'}));
@@ -267,7 +267,12 @@
         if(matches.length) {
           var target=OASchools.canonColumns({institution:targetUniversity,school:targetSchool,unit:targetDepartment});
           targetSchool=target.school;targetDepartment=target.unit;
-          var chosen=matches.find(function(m){return m.oaCard.schools.some(function(s){return s.rows.some(function(r){return targetDepartment&&OAMapModel.matchesRow(r,targetSchool,targetDepartment);});});}) || matches.find(function(m){return targetSchool && m.oaCard.schools.some(function(s){return s.rows.some(function(r){return OAMapModel.matchesRow(r,targetSchool,'');});});});
+          var chosen=null,bestScore=0;
+          if(targetDepartment)matches.forEach(function(m){m.oaCard.schools.forEach(function(s){s.rows.forEach(function(r){
+            var score=OAMapModel.rowMatchScore(r,targetSchool,targetDepartment);
+            if(score>bestScore){chosen=m;bestScore=score;}
+          });});});
+          chosen=chosen || matches.find(function(m){return targetSchool && m.oaCard.schools.some(function(s){return s.rows.some(function(r){return OAMapModel.matchesRow(r,targetSchool,'');});});});
           if(!chosen && !targetSchool && !targetDepartment && matches.length===1)chosen=matches[0];
           if(!chosen){status.textContent+=' The requested department is not in the directory; showing the available schools.';return;}
           focusApplied=true;autoFrame=false;
