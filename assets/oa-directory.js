@@ -170,7 +170,7 @@
            NAMES one has answered the question the build could not, so their
            answer stands alone rather than beside the abstention's list. */
         if (Object.prototype.hasOwnProperty.call(e, 'country')) delete copy.countries;
-        copy._edit = { name: e.name || '', t: e.t || 0 };
+        copy._edit = { name: e.name || '', t: e.t || 0, fields: FIELDS.map(function(f){return f.key;}).filter(function(k){return Object.prototype.hasOwnProperty.call(e,k);}) };
         if (e.hidden) copy._hidden = true;
       }
       if (copy.directoryHidden) continue;

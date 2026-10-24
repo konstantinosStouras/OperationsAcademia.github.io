@@ -39,7 +39,12 @@
       var uiuc=S.institutionKey(card.institution)===S.institutionKey('University of Illinois at Urbana-Champaign');
       var school=uiuc?c.school:(s.name||c.school), department=uiuc?c.unit:r.department;
       var aliases=[{school:school,department:department}];
-      if(verified){school=typeof verified.school==='string'?verified.school:school;department=verified.department||department;r=Object.assign({},r,verified,{id:r.id,locationVerified:true,mapUrl:'https://www.google.com/maps/search/?api=1&query='+verified.lat+','+verified.lng});}
+      if(verified){
+        var edited=r._edit&&r._edit.fields||[];
+        if(edited.indexOf('school')===-1)school=typeof verified.school==='string'?verified.school:school;
+        if(edited.indexOf('department')===-1)department=verified.department||department;
+        r=Object.assign({},r,verified,{id:r.id,locationVerified:true,mapUrl:'https://www.google.com/maps/search/?api=1&query='+verified.lat+','+verified.lng});
+      }
       var id=school?'school:'+fold(school):'department:'+fold(department);
       // Verified departments in different buildings must not inherit one another's pins.
       if(verified)id+=':location:'+verified.id;

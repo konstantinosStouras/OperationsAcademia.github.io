@@ -4232,6 +4232,613 @@
       ],
       "checked": "2026-10-24",
       "notes": "Official November 2025 faculty CV identifies operations professor Dan Iancu in Faculty Building East 369. Current university faculty profile confirms academic area. Exact named east-wing building footprint corroborated by university access map distinguishing Faculty East from Botha-Chan/Faculty West, Bass Center and the broader Knight complex."
+    },
+    {
+      "id": "trinity-finance-business-analytics-chapman",
+      "institution": "Trinity University",
+      "rowIds": [
+        "trinity-university__neidorff-school-of-business__finance-and-business-analytics"
+      ],
+      "school": "Michael Neidorff School of Business",
+      "department": "Department of Finance and Business Analytics",
+      "building": "Chapman Center",
+      "address": "Room 313, Chapman Center, One Trinity Place, San Antonio, TX 78212, United States",
+      "lat": 29.4651884,
+      "lng": -98.4838668,
+      "addressSource": "https://trinity.edu/finance",
+      "coordinateSource": "https://www.openstreetmap.org/relation/8348270",
+      "supportingSources": [
+        "https://trinity.edu/directory/dyoung1",
+        "https://trinity.edu/directory/jcolazo"
+      ],
+      "notes": "Current department page identifies Chapman Center; chairDianaYoung has room313. Exact named university building footprint used.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "texas-southern-business-administration-jones",
+      "institution": "Texas Southern University",
+      "rowIds": [
+        "texas-southern-university__jesse-h-jones-school-of-business__management-information-systems",
+        "texas-southern-university____operations-and-logistics-management"
+      ],
+      "school": "Jesse H. Jones School of Business",
+      "department": "Department of Business Administration",
+      "building": "Jesse H. Jones School of Business Building",
+      "address": "Third floor, Suites 315 and 340, 3100 Cleburne Street, Houston, TX 77004, United States",
+      "lat": 29.722069,
+      "lng": -95.35626,
+      "addressSource": "https://catalog.tsu.edu/undergraduate/schools-colleges/business/business-administration/",
+      "coordinateSource": "https://www.openstreetmap.org/way/374988001",
+      "supportingSources": [
+        "https://tsu.edu/about/campus/pdf/tsu-campus-map.pdf"
+      ],
+      "notes": "Current2026-2027academic catalog locates the department in third-floor suites315and340 and identifies Management Information Systems, Management, Management Science and operations/supply-chain teaching as its disciplines. Official campus plan building150 at Cleburne and Sampson corroborates the named footprint centroid. Not the similarly named Rice business school.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "sacred-heart-management-west-campus-east",
+      "institution": "Sacred Heart University",
+      "rowIds": [
+        "sacred-heart-university__jack-welch-college-of-business-and-technology__management"
+      ],
+      "school": "Jack Welch College of Business and Technology",
+      "department": "Department of Management",
+      "building": "West Campus East Building",
+      "address": "First floor, 3135 Easton Turnpike, Fairfield, CT 06825, United States",
+      "lat": 41.216381,
+      "lng": -73.253166,
+      "addressSource": "https://www.sacredheart.edu/academics/colleges--schools/college-of-business--technology/departments--schools/management/faculty--staff/",
+      "coordinateSource": "https://map.concept3d.com/?id=2076#!m/633460",
+      "supportingSources": [
+        "https://www.sacredheart.edu/about-shu/campuses--locations/campus-map/",
+        "https://www.sacredheart.edu/about-shu/campuses--locations/west-campus/"
+      ],
+      "notes": "Current department contact identifies first floor East Building. The official campus map has a department-specific Management marker633460; used instead of whole West Campus pin or main university coordinates.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "santa-clara-information-systems-analytics-lucas",
+      "institution": "Santa Clara University",
+      "rowIds": [
+        "santa-clara-university____is-and-analytics"
+      ],
+      "school": "Leavey School of Business",
+      "department": "Department of Information Systems and Analytics",
+      "building": "Lucas Hall",
+      "address": "Third floor, 500 El Camino Real, Santa Clara, CA 95053, United States",
+      "lat": 37.35117,
+      "lng": -121.939491,
+      "addressSource": "https://www.scu.edu/business/isa/about/",
+      "coordinateSource": "https://www.scu.edu/map/l/Lucas-Hall",
+      "supportingSources": [
+        "https://www.scu.edu/appdata/map-data/hoverareas.js"
+      ],
+      "notes": "Official department contact identifies Lucas Hall Floor3. Campus map lists the department in this building and its official geometry supplies Lucas Hall marker148 coordinates.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "boston-systems-engineering-manufacturing",
+      "institution": "Boston University",
+      "rowIds": [
+        "boston-university__college-of-engineering__systems-engineering"
+      ],
+      "school": "College of Engineering",
+      "department": "Division of Systems Engineering",
+      "building": "Engineering Manufacturing Building",
+      "address": "Room 117, 15 Saint Marys Street, Brookline, MA 02446, United States",
+      "lat": 42.349293,
+      "lng": -71.106949,
+      "addressSource": "https://www.bu.edu/eng/about-eng/engineering-offices-leadership/",
+      "coordinateSource": "https://maps.bu.edu/?id=647#!m/207917",
+      "notes": "Current official division directory or department chair profile confirms exact building and office. Official university map marker supplies the location; Systems Engineering division is distinct from the research center that moved to665Commonwealth.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "boston-operations-technology-hariri",
+      "institution": "Boston University",
+      "rowIds": [
+        "boston-university__school-of-management__operations-and-technology-management"
+      ],
+      "school": "Questrom School of Business",
+      "department": "Department of Operations and Technology Management",
+      "building": "Rafik B. Hariri Building",
+      "address": "Room 655, 595 Commonwealth Avenue, Boston, MA 02215, United States",
+      "lat": 42.349651,
+      "lng": -71.099571,
+      "addressSource": "https://www.bu.edu/questrom/profiles/z-justin-ren/",
+      "coordinateSource": "https://maps.bu.edu/?id=647#!m/208227",
+      "notes": "Current official division directory or department chair profile confirms exact building and office. Official university map marker supplies the location; Systems Engineering division is distinct from the research center that moved to665Commonwealth.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "st-john-fisher-management-marketing-salerno",
+      "school": "School of Business",
+      "department": "Department of Management and Marketing",
+      "building": "Victor E. Salerno Center for American Enterprise, Room 238",
+      "address": "3690 East Avenue, Rochester, New York 14618",
+      "lat": 43.11834,
+      "lng": -77.513306,
+      "addressSource": "https://www.sjf.edu/major-minors/management/faculty/",
+      "coordinateSource": "https://map.concept3d.com/?id=287#!m/40542",
+      "supportingSources": [
+        "https://www.sjf.edu/schools/school-of-business/facility-highlights/"
+      ],
+      "notes": "Official management faculty directory locates chair Christine Bataille in Salerno 238 and operations faculty Sukruth Suresh in Salerno 136. Exact academic building marker from official campus map; the separate panorama marker and accessible entrance were not used.",
+      "institution": "St John Fisher University",
+      "rowIds": [
+        "st-john-fisher-university____business-analytics-operations-management-project-management"
+      ],
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "georgia-southwestern-management-business-history-building",
+      "school": "College of Business and Computing",
+      "department": "Management",
+      "building": "Business, History and Political Science Building, Room 212",
+      "address": "800 Georgia Southwestern State University Drive, Americus, Georgia 31709",
+      "lat": 32.05428,
+      "lng": -84.2162,
+      "addressSource": "https://www.gsw.edu/directory/Faculty_Pages/allen-brown.html",
+      "coordinateSource": "https://map.gsw.edu/scripts/script.js",
+      "supportingSources": [
+        "https://www.gsw.edu/directory/index.json",
+        "https://map.gsw.edu/"
+      ],
+      "notes": "Current official directory places business undergraduate chair Allen Brown in room 212 and management faculty throughout this building. Coordinates select an interior point of the named businessHistoryCoord building polygon in the university map, not its campus default center. One management professor has an individual office in Collum Hall; the chair and majority of the department are at this verified building.",
+      "institution": "Georgia Southwestern State University",
+      "rowIds": [
+        "georgia-southwestern-state-university__college-of-business-and-computing__management"
+      ],
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "utah-valley-strategic-management-operations-woodbury",
+      "institution": "Utah Valley University",
+      "rowIds": [
+        "utah-valley-university__woodbury-school-of-business__strategic-management-and-operations",
+        "utah-valley-university____operations-and-supply-chain-management"
+      ],
+      "school": "Woodbury School of Business",
+      "department": "Department of Strategic Management and Operations",
+      "building": "Woodbury Building, Room 134",
+      "address": "800 West University Parkway, Orem, Utah 84058",
+      "lat": 40.277424,
+      "lng": -111.71312,
+      "addressSource": "https://www.uvu.edu/woodbury/strategic-management/",
+      "coordinateSource": "https://www.uvu.edu/maps/map.html?id=382#!m/11898",
+      "supportingSources": [
+        "https://www.uvu.edu/directory/department/?id=22504"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current official department page explicitly lists WB 134 and identifies Operations and Supply Chain Management as a major within Strategic Management and Operations. Used the named Woodbury Building marker in the official campus map. The school-level directory references Keller Building, which is a distinct building; department-specific contact is used instead of that general college location."
+    },
+    {
+      "id": "north-georgia-marketing-logistics-cottrell-center",
+      "institution": "University of North Georgia",
+      "rowIds": [
+        "university-of-north-georgia__mike-cottrell-college-of-business__marketing-and-logistics"
+      ],
+      "school": "Mike Cottrell College of Business",
+      "department": "Department of Marketing and Logistics",
+      "building": "Cottrell Center for Business, Technology and Innovation, Room 260",
+      "address": "Dahlonega Campus, Dahlonega, Georgia 30597",
+      "lat": 34.529175,
+      "lng": -83.982414,
+      "addressSource": "https://ung.edu/mike-cottrell-college-of-business/marketing-logistics.php",
+      "coordinateSource": "https://maps.ung.edu/?id=1104#!m/489530",
+      "supportingSources": [
+        "https://ung.edu/mike-cottrell-college-of-business/contact.php"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official department contact is explicitly Cottrell Center 260 on the Dahlonega campus. Exact named academic building marker from official campus map. Lecturer vacancy covers teaching across multiple campuses; this marker identifies the department home, rather than asserting all instruction occurs at Dahlonega. Older Newton Oakes school location is not used."
+    },
+    {
+      "id": "southern-california-industrial-systems-andrus",
+      "school": "Viterbi School of Engineering",
+      "department": "Daniel J. Epstein Department of Industrial and Systems Engineering",
+      "building": "Ethel Percy Andrus Gerontology Center, Room 240",
+      "address": "3715 McClintock Avenue, Los Angeles, California 90089-0193",
+      "lat": 34.020148,
+      "lng": -118.2905,
+      "addressSource": "https://ise.usc.edu/about/visiting/",
+      "coordinateSource": "https://calendar.usc.edu/andrus_gerontology_center_ger",
+      "notes": "Department visiting page explicitly identifies room 240. Coordinates are the named building GeoCoordinates in the official university calendar, rather than the general engineering admissions address.",
+      "institution": "University of Southern California (USC)",
+      "rowIds": [
+        "university-of-southern-california__viterbi-school-of-engineering__industrial-and-systems-engineering"
+      ],
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "berkeley-industrial-engineering-etcheverry",
+      "school": "College of Engineering",
+      "department": "Department of Industrial Engineering and Operations Research",
+      "building": "Etcheverry Hall, Room 4141",
+      "address": "Etcheverry Hall, Berkeley, California 94720-1777",
+      "lat": 37.8756626,
+      "lng": -122.2592805,
+      "addressSource": "https://ieor.berkeley.edu/about/",
+      "coordinateSource": "https://www.google.com/maps/dir//Etcheverry+Hall,+Berkeley,+CA+94709/@37.8756668,-122.2614692,17z/data=!4m13!1m4!3m3!1s0x80857c23d166f735:0xf214fbc1cf22acf5!2sEtcheverry+Hall,+Berkeley,+CA+94709!3b1!4m7!1m0!1m5!1m1!1s0x80857c23d166f735:0xf214fbc1cf22acf5!2m2!1d-122.2592805!2d37.8756626",
+      "notes": "Official department about page lists office 4141 and directly links this Google directions destination. Used destination coordinates, not viewport center. Expanded abbreviated department label.",
+      "institution": "University of California, Berkeley",
+      "rowIds": [
+        "university-of-california-berkeley____ieor-decision-analytics"
+      ],
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "channel-islands-business-martin-smith-hall",
+      "school": "Martin V. Smith School of Business and Economics",
+      "department": "Business and Economics",
+      "building": "Martin V. Smith Hall, Room 2167",
+      "address": "One University Drive, Camarillo, California 93012",
+      "lat": 34.162903,
+      "lng": -119.044807,
+      "addressSource": "https://www.csuci.edu/student-life/advising/advisor/faculty-advisors.html",
+      "coordinateSource": "https://map.concept3d.com/?id=502#!m/133403",
+      "supportingSources": [
+        "https://www.csuci.edu/business/contact-us.html",
+        "https://business.csuci.edu/course-syllabi/business/bus-fall-2023/bus320-03-yoo-f23.pdf",
+        "https://maps.csuci.edu/"
+      ],
+      "notes": "Current official advising directory locates business department chair Jared Barton in Martin V. Smith Hall 2167. Operations faculty syllabus corroborates the same hall, room 2112. Exact hall marker is distinct from nearby Smith Decision Center despite its map description mentioning the business school. Operations labels are subjects within Business and Economics, not separate departments.",
+      "institution": "California State University, Channel Islands",
+      "rowIds": [
+        "california-state-university-channel-islands__martin-v-smith-school-of-business-and-economics__operations",
+        "california-state-university-channel-islands__martin-v-smith-school-of-business-and-economics__operations-management"
+      ],
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "alaska-anchorage-management-rasmuson",
+      "school": "College of Business and Public Policy",
+      "department": "Department of Management, Marketing, Logistics, and Business Analytics",
+      "building": "Edward and Cathryn Rasmuson Hall, Room 308E",
+      "address": "3416 Seawolf Drive, Anchorage, Alaska 99508",
+      "lat": 61.1895014,
+      "lng": -149.8310406,
+      "addressSource": "https://www.uaa.alaska.edu/academics/college-of-business-and-public-policy/departments/mmlba/faculty.cshtml",
+      "coordinateSource": "https://www.openstreetmap.org/way/211383058",
+      "supportingSources": [
+        "https://www.uaa.alaska.edu/academics/college-of-business-and-public-policy/about/contact.cshtml",
+        "https://cdn.maps.moderncampus.net/uploads/map/167/static/stops/4118.html"
+      ],
+      "notes": "Current official faculty directory places department chair Helena Wisniewski in Rasmuson Hall 308E and other faculty throughout the same hall. Physical street address comes from college contact page, distinct from mailing address on Providence Drive. Exact named university-building footprint from OpenStreetMap, corroborated against the official named campus-map entry.",
+      "institution": "University of Alaska Anchorage",
+      "rowIds": [
+        "university-of-alaska-anchorage__college-of-business-and-public-policy__management-marketing-logistics-and-business-analytics"
+      ],
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "northridge-systems-operations-bookstein",
+      "school": "David Nazarian College of Business and Economics",
+      "department": "Department of Systems and Operations Management",
+      "building": "Bookstein Hall, Room 3121",
+      "address": "18111 Nordhoff Street, Northridge, California 91330",
+      "lat": 34.242008,
+      "lng": -118.530609,
+      "addressSource": "https://catalog.csun.edu/academics/som/faculty/",
+      "coordinateSource": "https://3dmap.csun.edu/?id=1100#!m/167147",
+      "supportingSources": [
+        "https://www.csun.edu/som/index.htm"
+      ],
+      "notes": "Current catalog and department contact both identify Bookstein Hall 3121. Exact named building marker from official university map also explicitly lists the department; excluded courtyard, defibrillator and bike-rack markers.",
+      "institution": "California State University, Northridge",
+      "rowIds": [
+        "california-state-university-northridge__david-nazarian-college-of-business-and-economics__systems-and-operations-management"
+      ],
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "washburn-business-macvicar",
+      "institution": "Washburn University",
+      "institutionKey": "Washburn University",
+      "rowIds": [
+        "washburn-university____da-quantitative-methods"
+      ],
+      "school": "Gregory D. and Ronda K. Brenneman School of Business",
+      "department": "Data Analytics and Quantitative Methods",
+      "building": "Brenneman School of Business Building",
+      "address": "1729 Southwest MacVicar Avenue, Topeka, Kansas 66604, United States",
+      "lat": 39.0358692911987,
+      "lng": -95.70683298141829,
+      "addressSource": "https://www.washburn.edu/academics/college-schools/business/bba-data-analytics.html",
+      "coordinateSource": "https://washburn.hostexp.com/xml/CL_washburn.xml",
+      "supportingSources": [
+        "https://www.washburn.edu/about/visit/virtual-tour/index.html",
+        "https://www.washburn.edu/our-faculty/akhadian-harnowo",
+        "https://www.washburn.edu/student-life/health-safety/police/building-hours/index.html"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official Data Analytics page explicitly distinguishes current physical address at 1729 Southwest MacVicar Avenue from university mailing address. Official map building BLD_20220902144103123 confirms temporary business school in the former Alumni Association and Foundation building until Advisors Excel Hall construction finishes in spring 2027; named geographic marker GPNT_20240908164038132 provides exact building point. Do not use closed Henderson/Advisors Excel Hall or mailing campus coordinates."
+    },
+    {
+      "id": "lenoir-rhyne-management-mauney",
+      "institution": "Lenoir-Rhyne University",
+      "institutionKey": "Lenoir-Rhyne University",
+      "rowIds": [
+        "lenoir-rhyne-university____om"
+      ],
+      "school": "Charles M. Snipes College of Business and Economics",
+      "department": "Management",
+      "building": "Mauney Hall",
+      "address": "Mauney Hall, 625 7th Avenue Northeast, Hickory, North Carolina 28601, United States",
+      "lat": 35.739223,
+      "lng": -81.326782,
+      "addressSource": "https://www.lr.edu/about/directory/ali-oguz",
+      "coordinateSource": "https://map.lr.edu/?id=1227#!m/243599",
+      "supportingSources": [
+        "https://www.lr.edu/work-at-lr/assistant-professor-management-2026",
+        "https://www.lr.edu/management-ba"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current official management faculty recruitment expressly includes operations management. Official quantitative and operations management instructor Ali Oguz is in Mauney Hall 103. Official campus map named Mauney Hall marker explicitly houses the College of Business and Economics; distinct from Mauney Music Building and Rhyne Building."
+    },
+    {
+      "id": "middle-georgia-management-professional-sciences",
+      "institution": "Middle Georgia State University",
+      "institutionKey": "Middle Georgia State University",
+      "rowIds": [
+        "middle-georgia-state-university____management",
+        "middle-georgia-state-university____supply-chain-management"
+      ],
+      "school": "School of Business",
+      "department": "Department of Management and Marketing",
+      "building": "Professional Sciences Center",
+      "address": "Professional Sciences Center, 100 University Parkway, Macon, Georgia 31206, United States",
+      "lat": 32.8095622,
+      "lng": -83.7342495,
+      "addressSource": "https://www.mga.edu/directory/people.php?name=narsing-anthony",
+      "coordinateSource": "https://www.openstreetmap.org/relation/6393504",
+      "supportingSources": [
+        "https://www.mga.edu/directory/people.php?name=napier-cassie",
+        "https://www.mga.edu/about/campuses/docs/MGA_Macon_Campus_Map.pdf",
+        "https://www.mga.edu/business/newsletters/issue-1-faculty.php",
+        "https://www.mga.edu/hatcher-conference-center/directions.php"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official current directory places operations and supply chain professor Anthony Narsing in Professional Sciences Center 366, Department of Management and Marketing; newly appointed supply chain faculty Cassie Napier specifies fall 2026 office 382 in the same building. External OpenStreetMap named Professional Sciences Center footprint centroid, joining outer ways 429728396 and 713586978, corroborated against official November 2024 campus map building 8 beside Jones Building and lake. Management and supply chain aliases resolve to one actual department."
+    },
+    {
+      "id": "augusta-hull-allgood",
+      "institution": "Augusta University",
+      "institutionKey": "Augusta University",
+      "rowIds": [
+        "augusta-university____mis",
+        "augusta-university____om-and-scm"
+      ],
+      "school": "James M. Hull College of Business",
+      "department": "",
+      "building": "Allgood Hall",
+      "address": "Allgood Hall, 2500 Walton Way, Augusta, Georgia 30909, United States",
+      "lat": 33.475349,
+      "lng": -82.024208,
+      "addressSource": "https://www.augusta.edu/faculty/directory/view.php?id=CHOPARK",
+      "coordinateSource": "https://map.augusta.edu/?id=824#!m/125899",
+      "supportingSources": [
+        "https://www.augusta.edu/faculty/directory/view.php?id=RFRANZA",
+        "https://www.augusta.edu/faculty/directory/view.php?id=YFERRAND",
+        "https://www.augusta.edu/maps/building-codes.php",
+        "https://www.augusta.edu/hull/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current official faculty profiles place Management Information Systems chair ChongWoo Park in Allgood E136 and operations/supply chain faculty Richard Franza in E135 and Yann Ferrand in E140. The university directory assigns these fields directly to Hull College rather than separate named departments, so these discipline aliases share their actual school card. Official named Allgood Hall map marker provides point and physical address; 1120 15th Street is a mailing address on a different campus and must not be used."
+    },
+    {
+      "id": "alabama-agricultural-mechanical-management-609-verified",
+      "institution": "Alabama Agricultural and Mechanical University",
+      "institutionKey": "Alabama A&M University",
+      "rowIds": [
+        "alabama-a-m-university____mis"
+      ],
+      "school": "College of Business and Public Affairs",
+      "department": "Department of Management, Marketing, and Logistics",
+      "building": "School of Business Building, room 316",
+      "address": "School of Business Building, Huntsville, Alabama, United States",
+      "lat": 34.781194,
+      "lng": -86.568319,
+      "addressSource": "https://www.aamu.edu/academics/colleges/business-public-affairs/departments/management-marketing-logistics/",
+      "coordinateSource": "https://cdn.maps.moderncampus.net/nucloudmap/index.html?map=906&marker=18290",
+      "supportingSources": [
+        "https://www.aamu.edu/directory/department-directory.html",
+        "https://www.aamu.edu/about/visit-us/campus-map.html"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official department page explicitly includes both management information systems and logistics/supply chain management disciplines, and identifies department office room 316. Official campus map School of Business marker 18290 provides building-specific geo_lat/geo_lon; not map extent or generic university address coordinates."
+    },
+    {
+      "id": "alabama-agricultural-mechanical-management-610-verified",
+      "institution": "Alabama Agricultural and Mechanical University",
+      "institutionKey": "Alabama A&M University",
+      "rowIds": [
+        "alabama-a-m-university____scm-logistics"
+      ],
+      "school": "College of Business and Public Affairs",
+      "department": "Department of Management, Marketing, and Logistics",
+      "building": "School of Business Building, room 316",
+      "address": "School of Business Building, Huntsville, Alabama, United States",
+      "lat": 34.781194,
+      "lng": -86.568319,
+      "addressSource": "https://www.aamu.edu/academics/colleges/business-public-affairs/departments/management-marketing-logistics/",
+      "coordinateSource": "https://cdn.maps.moderncampus.net/nucloudmap/index.html?map=906&marker=18290",
+      "supportingSources": [
+        "https://www.aamu.edu/directory/department-directory.html",
+        "https://www.aamu.edu/about/visit-us/campus-map.html"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official department page explicitly includes both management information systems and logistics/supply chain management disciplines, and identifies department office room 316. Official campus map School of Business marker 18290 provides building-specific geo_lat/geo_lon; not map extent or generic university address coordinates."
+    },
+    {
+      "id": "north-carolina-wilmington-supply-chain-verified",
+      "institution": "University of North Carolina Wilmington",
+      "institutionKey": "University of North Carolina at Wilmington",
+      "rowIds": [
+        "university-of-north-carolina-at-wilmington____supply-chain-management"
+      ],
+      "school": "Cameron School of Business",
+      "department": "David S. Congdon School of Business Analytics, Information Systems and Supply Chain",
+      "building": "Congdon Hall, department director office 2014",
+      "address": "4893 Price Drive, Wilmington, North Carolina 28403, United States",
+      "lat": 34.226112,
+      "lng": -77.871849,
+      "addressSource": "https://www.uncw.edu/academics/colleges/csb/about/contacts",
+      "coordinateSource": "https://map.concept3d.com/?id=1197#!m/299252",
+      "supportingSources": [
+        "https://www.uncw.edu/academics/majors-programs/csb/business-administration-bs/details/scm-concentration",
+        "https://uncw.edu/campus-map/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official contacts place director Cem Canel in Congdon Hall 2014. Official named building marker lists Business Analytics, Information Systems and Supply Chain as occupant and exact physical address 4893 Price Drive. Reject generic Cameron Hall college contact and 601 South College Road campus mailing coordinates."
+    },
+    {
+      "id": "location-616-official-building",
+      "institution": "Stonehill College",
+      "institutionKey": "Stonehill College",
+      "rowIds": [
+        "stonehill-college____data-analytics"
+      ],
+      "school": "Leo J. Meehan School of Business",
+      "department": "Department of Management and Business Analytics — Data Analytics",
+      "building": "Meehan School of Business, faculty offices 333 and 330",
+      "address": "320 Washington Street, Easton, Massachusetts 02357, United States",
+      "lat": 42.059269,
+      "lng": -71.0784928,
+      "addressSource": "https://www.stonehill.edu/programs/data-analytics-masters/faculty/",
+      "coordinateSource": "https://www.openstreetmap.org/way/212957822",
+      "supportingSources": [
+        "https://www.stonehill.edu/programs/business-analytics/business-analytics-faculty/"
+      ],
+      "notes": "Current official faculty directory places Data Analytics faculty Mahmut Cavur and Fatemeh Farajzadeh in Meehan 333 and 330, and department co-chair in Meehan 235. Coordinates are external mapped named Meehan building footprint, not campus mailing address centroid.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "location-622-official-building",
+      "institution": "University of Cincinnati",
+      "institutionKey": "University of Cincinnati",
+      "rowIds": [
+        "university-of-cincinnati____is"
+      ],
+      "school": "Carl H. Lindner College of Business",
+      "department": "Department of Operations, Business Analytics, and Information Systems",
+      "building": "Carl H. Lindner Hall",
+      "address": "2906 Woodside Drive, Cincinnati, Ohio 45221, United States",
+      "lat": 39.1338239,
+      "lng": -84.5144521,
+      "addressSource": "https://www.business.uc.edu/faculty-research/obais.html",
+      "coordinateSource": "https://www.openstreetmap.org/relation/9795766",
+      "supportingSources": [
+        "https://jobs.uc.edu/job/Cincinnati-Assistant-Professor%2C-Information-Systems%2C-Department-of-OBAIS%2C-Carl-H_-Lindner-College-of-Business-OH-45201/1297370700/"
+      ],
+      "notes": "Official department contact identifies current hall and 2906 Woodside Drive; posting explicitly identifies hiring department. Coordinates are external named current hall building footprint, not former Lindner building or university centroid.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "southern-indiana-computer-information-systems-building",
+      "institution": "University of Southern Indiana",
+      "institutionKey": "University of Southern Indiana",
+      "rowIds": [
+        "university-of-southern-indiana____cis"
+      ],
+      "school": "Romain College of Business",
+      "department": "Department of Management and Information Sciences — Computer Information Systems",
+      "building": "Business and Engineering Center, chair office 2076",
+      "address": "8600 University Boulevard, Evansville, Indiana 47712, United States",
+      "lat": 37.961213,
+      "lng": -87.67819,
+      "addressSource": "https://www.usi.edu/business/computer-information-systems/faculty",
+      "coordinateSource": "https://www.usi.edu/api/CampusMap/GetLocations/",
+      "supportingSources": [
+        "https://www.usi.edu/map#Business%20and%20Engineering%20Center"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official faculty page places department chair Nicholas Rhew in Business and Engineering Center 2076. Official campus map building ID 18 supplies exact coordinates and identifies Romain College as occupant. Distinct from the Applied Engineering Center to the east."
+    },
+    {
+      "id": "location-633-official-building",
+      "institution": "East Tennessee State University",
+      "institutionKey": "East Tennessee State University",
+      "rowIds": [
+        "east-tennessee-state-university____supply-chain-management"
+      ],
+      "school": "College of Business and Technology",
+      "department": "Department of Management and Supply Chain",
+      "building": "Sam Wilson Hall, department chair office 225",
+      "address": "Sam Wilson Hall, Ross Drive, Johnson City, Tennessee, United States",
+      "lat": 36.3024115,
+      "lng": -82.3697409,
+      "addressSource": "https://www.etsu.edu/cbat/management-supply-chain/facstaff/hall.php",
+      "coordinateSource": "https://www.openstreetmap.org/way/123416591",
+      "supportingSources": [
+        "https://www.etsu.edu/cbat/management-supply-chain/facstaff/default.php"
+      ],
+      "notes": "Current official department chair Kelly Renee Hall is in Sam Wilson Hall 225. Department headquarters located here; individual faculty may occupy other buildings, including Nicks Hall. External named university building footprint coordinates, not generic university mailing address.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "location-637-official-building",
+      "institution": "Prairie View A&M University",
+      "institutionKey": "Prairie View A&M University",
+      "rowIds": [
+        "prairie-view-a-m-university____scm-quantitative-mgt"
+      ],
+      "school": "College of Business",
+      "department": "Department of Management and Marketing — Supply Chain and Quantitative Management",
+      "building": "Agriculture and Business Multipurpose Building, room 349",
+      "address": "A. C. Cleaver Street, Prairie View, Texas 77446, United States",
+      "lat": 30.0949801,
+      "lng": -95.9910563,
+      "addressSource": "https://www.pvamu.edu/business/departments/management-marketing/",
+      "coordinateSource": "https://www.openstreetmap.org/way/614997823",
+      "supportingSources": [
+        "https://www.pvamu.edu/business/about-us/faculty-and-staff/"
+      ],
+      "notes": "Official department contact identifies main-campus room 349; university faculty directory independently places faculty offices in this building. External named building footprint; not Northwest Houston graduate program administration.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "location-638-official-building",
+      "institution": "William & Mary",
+      "institutionKey": "William and Mary",
+      "rowIds": [
+        "william-and-mary____ba"
+      ],
+      "school": "Raymond A. Mason School of Business",
+      "department": "Operations and Information Systems Management — Business Analytics",
+      "building": "Alan B. Miller Hall, area head office 3026",
+      "address": "101 Ukrop Way, Williamsburg, Virginia 23185, United States",
+      "lat": 37.2662887,
+      "lng": -76.7182994,
+      "addressSource": "https://mason.wm.edu/faculty/directory/by-area/operations/",
+      "coordinateSource": "https://www.openstreetmap.org/way/41263067",
+      "supportingSources": [
+        "https://mason.wm.edu/contact/visiting/directions/",
+        "https://catalog.wm.edu/programs/business-analytics-ms-business-analytics/index.html"
+      ],
+      "notes": "Official faculty directory identifies business analytics faculty and area head Eleanor Loiacono in Miller Hall. Official school directions provide precise building address. External named building footprint coordinates. Online program mapped to its academic faculty headquarters, not remote students or Peninsula Center.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "caldwell-business-computer-science-werner",
+      "institution": "Caldwell University",
+      "institutionKey": "Caldwell University",
+      "rowIds": [
+        "caldwell-university"
+      ],
+      "school": "School of Business and Computer Science",
+      "department": "Business Analytics",
+      "building": "Werner Hall, school office 216",
+      "address": "120 Bloomfield Avenue, Caldwell, New Jersey 07006, United States",
+      "lat": 40.8336081,
+      "lng": -74.2724971,
+      "addressSource": "https://www.caldwell.edu/wp-content/uploads/2026/03/27116-5-C-Book-2025-2026_260116.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/1091742838",
+      "supportingSources": [
+        "https://www.caldwell.edu/graduate/academic-department/graduate-school-of-business-cis/",
+        "https://www.caldwell.edu/academics/academic-departments/dept-computer-science-info-systems/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official 2025-2026 university handbook locates school office in Werner 216. Current official school pages identify business analytics programs. Named building footprint supplied by external OpenStreetMap, rather than generic campus coordinates."
     }
   ]
 }

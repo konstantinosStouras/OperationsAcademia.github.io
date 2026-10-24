@@ -5068,15 +5068,18 @@ for (const [pageName, sel, least, mapBtn] of [
   const rows = JSON.parse(await readFile(path.join(ROOT,'data','directory.json'),'utf8'));
   const victims = rows.filter(r => r.institution === 'Aalto University');
   ok(victims.length > 0, 'universities: Aalto correction fixture exists');
-  const target = new URLSearchParams({view:'map',university:'Aalto University',school:victims[0].school,department:victims[0].department});
+  const target = new URLSearchParams({view:'map',focus:'department',university:'Aalto University',school:victims[0].school||'',department:victims[0].department||''});
   await p.goto(BASE + 'universities?' + target, {waitUntil:'domcontentloaded'});
   await p.waitForSelector('.oa-map-logo');
   await p.evaluate(id => OADirectory.__setForTest({edits:{[id]:{department:'Corrected Operations Department',t:Date.now(),name:'Map test'}}}), victims[0].id);
   await p.waitForTimeout(200);
-  await p.$eval('.oa-map-logo', n => n.click());
-  await p.waitForSelector('.oa-uni-pop');
-  ok(await p.$eval('.oa-uni-pop', n => n.textContent.includes('Corrected Operations Department')),
-    'universities: map popup receives the same live department correction as cards');
+  let correctedPopup = false;
+  for (const marker of await p.locator('.oa-map-logo').all()) {
+    await marker.evaluate(n => n.click());
+    await p.waitForSelector('.oa-uni-pop');
+    if (await p.$eval('.oa-uni-pop', n => n.textContent.includes('Corrected Operations Department'))) { correctedPopup = true; break; }
+  }
+  ok(correctedPopup, 'universities: the matching department popup receives the same live correction as cards');
   await p.evaluate(ids => OADirectory.__setForTest({admin:false,edits:Object.fromEntries(ids.map(id=>[id,{hidden:true}]))}), victims.map(r=>r.id));
   await p.waitForTimeout(200);
   eq(await p.$$eval('.oa-map-logo', ns=>ns.length), 0,
@@ -5170,7 +5173,8 @@ for (const pageName of MOBILE_PAGES) {
   // per poll until BOTH a rendered list and a VISIBLE filter bar exist. On
   // every root page both are there at the first look, with no scrolling.
   await m.waitForFunction(() => {
-    const listed = document.querySelector('.oa-card, .oa-empty');
+    const listed = document.querySelector('.oa-card, .oa-empty') ||
+      (window.OADirectory && window.OADirectory.cards().length > 0 && document.querySelector('#oa-uni-map'));
     const bars = [...document.querySelectorAll('.oa-filters')];
     const bar = bars.find((el) => el.offsetParent !== null);
     if (listed && bar) return true;

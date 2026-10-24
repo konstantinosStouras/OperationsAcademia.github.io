@@ -33,3 +33,11 @@ assert.ok(points.find(p=>p.lat===39).approximate,'an unverified department must 
 assert.ok(model.matchesRow(points[0].card.schools[0].rows[0],'Engineering','Systems'),'old department links survive official name corrections');
 assert.ok(!model.matchesRow(points[1].card.schools[0].rows[0],'Engineering','Systems'),'no cross-department match');
 console.log(`${verified.length} evidence-backed locations checked; separate buildings and legacy links passed.`);
+
+const editedCard=JSON.parse(JSON.stringify(card));
+editedCard.schools[0].rows[0].department='Community corrected department';
+editedCard.schools[0].rows[0]._edit={fields:['department']};
+const editedPoint=model.pointsFor(editedCard,data).find(p=>p.lat===40);
+assert.equal(editedPoint.card.schools[0].rows[0].department,'Community corrected department','explicit community edits take precedence over verified names');
+assert.equal(editedPoint.card.schools[0].name,'Engineering','unedited verified school remains intact');
+assert.equal(editedPoint.lng,-70,'name corrections preserve verified coordinates');
