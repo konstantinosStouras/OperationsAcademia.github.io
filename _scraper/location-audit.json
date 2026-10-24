@@ -77,7 +77,7 @@
       "rowIds": [
         "city-university-of-hong-kong__college-of-engineering__systems-engineering"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.cityu.edu.hk/hro/en/job/current/academic.asp?ref=uac-r26426"
@@ -100,7 +100,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "city-hong-kong-systems-yeung"
+      ]
     },
     {
       "id": "city-university-of-hong-kong::department:om statistics::22.33600,114.17300",
@@ -112,7 +115,7 @@
       "rowIds": [
         "city-university-of-hong-kong____om-statistics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.cityu.edu.hk/hro/en/job/current/academic.asp?ref=uac-b560"
@@ -131,7 +134,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "city-hong-kong-decision-lau"
+      ]
     },
     {
       "id": "fayetteville-state-university::school:broadwell college of business and economics::35.07200,-78.89450",
@@ -3194,7 +3200,7 @@
       "rowIds": [
         "lehigh-university__p-c-rossin-college-of-engineering-and-applied-science__industrial-and-systems-engineering"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://apply.interfolio.com/194807"
@@ -3213,7 +3219,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "lehigh-industrial-systems-mohler"
+      ]
     },
     {
       "id": "lehigh-university::department:om::40.60700,-75.37900",
@@ -3225,7 +3234,7 @@
       "rowIds": [
         "lehigh-university____om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://apply.interfolio.com/173556"
@@ -3244,7 +3253,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "lehigh-decision-technology-rauch"
+      ]
     },
     {
       "id": "texas-a-m-university::school:college of engineering::30.61000,-96.34400",
@@ -3256,7 +3268,7 @@
       "rowIds": [
         "texas-a-m-university__college-of-engineering__wm-michael-barnes-64-department-of-industrial-and-systems-en"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://apply.interfolio.com/193335"
@@ -3275,7 +3287,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "texas-am-industrial-emerging"
+      ]
     },
     {
       "id": "texas-a-m-university::department:is::30.61000,-96.34400",
@@ -3287,7 +3302,7 @@
       "rowIds": [
         "texas-a-m-university____is"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.linkedin.com/posts/jordanageorge_were-hiring-position-title-tenure-track-activity-7405804068155248640-goxl?utm_source=share&utm_medium=member_ios&rcm=ACoAAAm9G6sBq8yvKq3ZxCWExvojWnnDUXzst4c"
@@ -3306,7 +3321,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "texas-am-information-operations-wehner"
+      ]
     },
     {
       "id": "university-of-northern-iowa::school:david w wilson college of business::42.51500,-92.46056",
@@ -3318,7 +3336,7 @@
       "rowIds": [
         "university-of-northern-iowa__david-w-wilson-college-of-business__management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179581084&Title=Assistant%20Professor%20%28Tenure%2DTrack%29%20or%20Assistant%20Professor%20of%20Practice%20%2D%20Business%20Analytics%20and%20Applied%20AI",
@@ -3338,7 +3356,10 @@
         "status": null,
         "error": "The operation was aborted due to timeout",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "northern-iowa-management-curris"
+      ]
     },
     {
       "id": "university-of-northern-iowa::department:ba::42.51500,-92.46056",
@@ -3350,7 +3371,7 @@
       "rowIds": [
         "university-of-northern-iowa____ba"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://uni.wd5.myworkdayjobs.com/en-US/UNI/details/Assistant-Professor---Business-Analytics_JR947?q=business+analytic"
@@ -3369,7 +3390,10 @@
         "status": null,
         "error": "The operation was aborted due to timeout",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "northern-iowa-management-curris"
+      ]
     },
     {
       "id": "bilkent-university::school:faculty of business administration::39.86700,32.75100",
@@ -3740,7 +3764,7 @@
       "rowIds": [
         "binghamton-university____mis"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179373296&Title=Tenure-Track%20Assistant%20Professor%20of%20MIS"
@@ -3759,7 +3783,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "binghamton-information-systems-academic-a"
+      ]
     },
     {
       "id": "hec-montreal::department:management::45.50400,-73.62100",
@@ -3906,7 +3933,7 @@
       "rowIds": [
         "michigan-state-university__college-of-natural-science__statistics-and-probability"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.msu.edu/jobs/assistant-professor-tenure-system-east-lansing-michigan-united-states-101ba973-0e7e-498c-b3d6-8e6f7fa6a40d"
@@ -3925,7 +3952,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "michigan-state-statistics-wells"
+      ]
     },
     {
       "id": "michigan-state-university::department:logistics and supply chain management::42.70200,-84.48200",
@@ -3937,7 +3967,7 @@
       "rowIds": [
         "michigan-state-university____logistics-and-supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -3954,7 +3984,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "michigan-state-supply-chain-north-business"
+      ]
     },
     {
       "id": "michigan-state-university::department:scm ai::42.70200,-84.48200",
@@ -3966,7 +3999,7 @@
       "rowIds": [
         "michigan-state-university____scm-ai"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.msu.edu/jobs/assistant-associate-professor-tenure-system-east-lansing-michigan-united-states-638308b1-5d2d-434c-9dd7-888de4a1fae8"
@@ -3985,7 +4018,10 @@
         "status": 200,
         "error": "The operation was aborted due to timeout",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "michigan-state-supply-chain-north-business"
+      ]
     },
     {
       "id": "university-of-alabama::school:culverhouse college of business::33.21100,-87.54600",
@@ -4225,7 +4261,7 @@
       "rowIds": [
         "virginia-commonwealth-university____scm-and-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://vcu.csod.com/ux/ats/careersite/1/home/requisition/7112?c=vcu&sq=req7112&sq=req7112"
@@ -4244,7 +4280,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "virginia-commonwealth-supply-chain-snead"
+      ]
     },
     {
       "id": "university-of-central-florida::school:barry s miller college of business::28.60160,-81.20050",
@@ -6551,7 +6590,7 @@
       "rowIds": [
         "university-of-washington-bothell__school-of-business__supply-chain-management-and-operations"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://ap.washington.edu/ahr/position-details/?job_id=191342"
@@ -6570,7 +6609,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "washington-bothell-operations-beardslee"
+      ]
     },
     {
       "id": "nova-school-of-business-and-economics::school:school of business and economics::38.72225,-9.13934",
@@ -6582,7 +6624,7 @@
       "rowIds": [
         "nova-school-of-business-and-economics__school-of-business-and-economics__operations-technology-and-innovation-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.novasbe.unl.pt/en/faculty-research/faculty"
       ],
@@ -6603,7 +6645,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "nova-operations-technology-innovation-cascais-hall"
+      ]
     },
     {
       "id": "nova-school-of-business-and-economics::department:information systems::38.72225,-9.13934",
@@ -6615,7 +6660,7 @@
       "rowIds": [
         "nova-school-of-business-and-economics____information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -6632,7 +6677,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "nova-operations-technology-innovation-cascais-hall"
+      ]
     },
     {
       "id": "nova-school-of-business-and-economics::department:management of information systems::38.72225,-9.13934",
@@ -6644,7 +6692,7 @@
       "rowIds": [
         "nova-school-of-business-and-economics____management-of-information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careercenter.informs.org/job/management-of-information-systems-professor-open-rank-at-novasbe-carcavelos-lisbon-5500"
@@ -6663,7 +6711,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "nova-operations-technology-innovation-cascais-hall"
+      ]
     },
     {
       "id": "nova-school-of-business-and-economics::department:operations management::38.72225,-9.13934",
@@ -6675,7 +6726,7 @@
       "rowIds": [
         "nova-school-of-business-and-economics____operations-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -6692,7 +6743,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "nova-operations-technology-innovation-cascais-hall"
+      ]
     },
     {
       "id": "park-university::school:robert w plaster school of business::39.18990,-94.68010",
@@ -6808,7 +6862,7 @@
         "villanova-university__villanova-school-of-business__accounting-and-information-systems",
         "villanova-university__villanova-school-of-business__management-and-operations"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.villanova.edu/university/business/faculty-and-research/faculty-by-department.html#4"
       ],
@@ -6830,7 +6884,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "villanova-accounting-information-systems-bartley",
+        "villanova-management-operations-bartley"
+      ]
     },
     {
       "id": "villanova-university::department:ba ai::40.03800,-75.33800",
@@ -6873,7 +6931,7 @@
       "rowIds": [
         "emlv-ecole-de-commerce-et-de-management__leonard-de-vinci-business-school-paris-la-defense__management-information-systems-artificial-intelligence-and-s"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.flatchr.io/fr/company/devinci/vacancy/lezbvp5owwqnmovm-assistant-associate-professor-management-information-systems-artificial-intelligence-and-supply-chain-management-m-f/"
@@ -6892,7 +6950,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "devinci-business-innovation-information-systems-campus-parc"
+      ]
     },
     {
       "id": "newcastle-university::department:information systems and operations subject group operations management::54.97800,-1.61500",
@@ -6995,7 +7056,7 @@
       "rowIds": [
         "university-of-michigan-flint____om-scm"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://apply.interfolio.com/173298"
@@ -7014,7 +7075,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "michigan-flint-management-marketing-riverfront"
+      ]
     },
     {
       "id": "chinese-university-of-hong-kong::department:om is::22.42000,114.20700",
@@ -7057,7 +7121,7 @@
       "rowIds": [
         "london-business-school____om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://apply.interfolio.com/173946"
@@ -7076,7 +7140,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "london-business-management-science-ratcliffe-a-wing"
+      ]
     },
     {
       "id": "insead::school:school of business::48.40500,2.68500",
@@ -7122,7 +7189,7 @@
       "rowIds": [
         "stockholm-school-of-economics____entrepreneurship-innovation-and-technology"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://hhs.varbi.com/en/what:job/jobID:964923/"
@@ -7141,7 +7208,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "stockholm-entrepreneurship-innovation-norrtullsgatan"
+      ]
     },
     {
       "id": "stockholm-school-of-economics::department:supply chain management::59.34167,18.05694",
@@ -7153,7 +7223,7 @@
       "rowIds": [
         "stockholm-school-of-economics____supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.hhs.se/en/job/stockholm/post_doc_opportunity_in_sustainable_supply_chain_transformation__at_the_house_of_innovation_stockholm_school_of_economics_sse-836498.html"
@@ -7172,7 +7242,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "stockholm-entrepreneurship-innovation-norrtullsgatan"
+      ]
     },
     {
       "id": "texas-tech-university::school:edward e whitacre jr college of engineering::33.58500,-101.88000",
@@ -7324,7 +7397,7 @@
         "university-of-oklahoma__michael-f-price-college-of-business__marketing-supply-chain-management-and-healthcare",
         "university-of-oklahoma__michael-f-price-college-of-business__supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.ou.edu/price/directory/areas#mscm"
       ],
@@ -7348,7 +7421,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "oklahoma-information-systems-adams",
+        "oklahoma-marketing-supply-chain-adams"
+      ]
     },
     {
       "id": "university-of-southern-california::school:viterbi school of engineering::34.02200,-118.28500",
@@ -7518,7 +7595,7 @@
       "rowIds": [
         "george-fox-university__college-of-business__business-analytics-and-quantitative-methods"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179556518&Title=Assistant%2FAssociate%20Professor%20of%20Business%20%28Business%20Analytics%20%26%20Quantitative%20Methods%29"
@@ -7537,7 +7614,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "george-fox-business-analytics-hoover"
+      ]
     },
     {
       "id": "universite-laval::school:faculty of business administration::46.78000,-71.27500",
@@ -7583,7 +7663,7 @@
       "rowIds": [
         "youngstown-state-university__williamson-college-of-business-administration__lariccia-school-of-accounting-and-finance"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179556442&Title=Assistant%20Professor%2C%20Business%20Analytics%20%28Tenure%2DTrack%29"
@@ -7602,7 +7682,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "youngstown-lariccia-williamson"
+      ]
     },
     {
       "id": "georgetown-university::department:sustainability::38.90700,-77.07300",
@@ -7674,7 +7757,7 @@
       "rowIds": [
         "stetson-university__school-of-business-administration__business-systems-ai-and-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179549351&Title=Assistant%20Professor%20of%20AI%20%26amp%3B%20Analytics"
@@ -7693,7 +7776,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "stetson-business-systems-analytics-lynn"
+      ]
     },
     {
       "id": "university-of-minnesota::department:om scm::44.97500,-93.23500",
@@ -7705,7 +7791,7 @@
       "rowIds": [
         "university-of-minnesota____om-scm"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -7722,7 +7808,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "minnesota-supply-chain-operations-nelson"
+      ]
     },
     {
       "id": "california-state-university-channel-islands::school:martin v smith school of business and economics::34.16200,-119.04400",
@@ -8031,7 +8120,7 @@
       "rowIds": [
         "bridgewater-state-university__louis-m-ricciardi-college-of-business__management-and-marketing"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179545835&Title=Assistant%20Professor%20of%20Management%20with%20a%20concentration%20in%20Management%20Information%20Systems%2C%20Department%20of%20Management%20and%20Marketing"
@@ -8050,7 +8139,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "bridgewater-state-management-marketing-harrington"
+      ]
     },
     {
       "id": "harris-stowe-state-university::school:anheuser busch school of business::38.62194,-90.23694",
@@ -9178,7 +9270,7 @@
       "rowIds": [
         "miami-university____emerging-technology-in-business-and-design"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179531048&Title=Visiting%20Faculty"
@@ -9197,7 +9289,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "miami-emerging-technology-mcvey"
+      ]
     },
     {
       "id": "miami-university::department:information systems and analytics::39.51200,-84.73500",
@@ -9209,7 +9304,7 @@
       "rowIds": [
         "miami-university____information-systems-and-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179467878&Title=Assistant%20or%20Associate%20Professor%20-%20Information%20Systems"
@@ -9228,7 +9323,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "miami-information-systems-analytics-farmer"
+      ]
     },
     {
       "id": "miami-university::department:information systems and technology::39.51200,-84.73500",
@@ -9403,7 +9501,7 @@
       "rowIds": [
         "university-of-missouri__robert-j-trulaske-sr-college-of-business__management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179532324&Title=NTT%20Teaching%20Faculty%20%2D%20Analytics%2C%20Operations%2C%20and%2For%20Supply%20Chain%20Management%20%28SCM%29"
@@ -9422,7 +9520,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "missouri-management-cornell"
+      ]
     },
     {
       "id": "university-of-missouri::department:analytics operations scm::38.94530,-92.32880",
@@ -9496,7 +9597,7 @@
       "rowIds": [
         "longwood-university__college-of-business-and-economics__accounting-economics-finance-and-information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179535043&Title=Assistant%20Professor%20of%20Information%20Systems%20and%20Cyber%20Security"
@@ -9515,7 +9616,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "longwood-accounting-economics-finance-information-systems-hiner"
+      ]
     },
     {
       "id": "university-of-missouri-st-louis::school:ed g smith college of business::38.71000,-90.31100",
@@ -9795,7 +9899,7 @@
       "rowIds": [
         "syracuse-university__whitman-school-of-management__supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://whitman.syracuse.edu/academic-areas/supply-chain-management/supply-chain-faculty"
       ],
@@ -9816,7 +9920,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "syracuse-supply-chain-whitman"
+      ]
     },
     {
       "id": "university-of-virginia::department:om::38.03600,-78.50300",
@@ -15627,7 +15734,7 @@
       "rowIds": [
         "southwest-minnesota-state-university____business-technology"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.chronicle.com/job/37938847/assistant-professor-of-management-ifo/"
@@ -15646,7 +15753,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "southwest-minnesota-business-science-technology"
+      ]
     },
     {
       "id": "texas-a-m-international-university::department:transportation logistics::27.57300,-99.43500",
@@ -15658,7 +15768,7 @@
       "rowIds": [
         "texas-a-m-international-university____transportation-logistics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://tamus.wd1.myworkdayjobs.com/en-US/TAMIU_External/details/Assistant-Professor-of-Transportation-and-International-Logistics_R-088429-2?q=transport&workerSubType=0e1cd8ed3502012ddf607157e74b7d04"
@@ -15677,7 +15787,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "texas-am-international-logistics-western-hemispheric"
+      ]
     },
     {
       "id": "iim-ahmedabad::department:management::23.03167,72.53611",
@@ -15689,7 +15802,7 @@
       "rowIds": [
         "iim-ahmedabad____management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.iima.ac.in/the-institute/administration/work-with-us/faculty-dubai-campus"
@@ -15708,7 +15821,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "indian-institute-management-ahmedabad-dubai"
+      ]
     },
     {
       "id": "northwestern::department:science and innovation::42.05646,-87.67527",
@@ -15720,7 +15836,7 @@
       "rowIds": [
         "northwestern____science-and-innovation"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.kellogg.northwestern.edu/academics-research/science-of-science/faculty-and-contributors/join-the-community/"
@@ -15739,7 +15855,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "northwestern-science-innovation-sherman"
+      ]
     },
     {
       "id": "augusta-university::department:mis::33.47170,-81.98890",
@@ -15850,7 +15969,7 @@
       "rowIds": [
         "california-state-university-bakersfield____mis-ba-ai"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179340914&Title=Assistant%20Professor%20of%20Management"
@@ -15869,7 +15988,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "california-state-bakersfield-management-business-development"
+      ]
     },
     {
       "id": "north-carolina-a-t-state-university::department:business is and analytics::36.07500,-79.77400",
@@ -15881,7 +16003,7 @@
       "rowIds": [
         "north-carolina-a-t-state-university____business-is-and-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.ncat.edu/postings/39100"
@@ -15900,7 +16022,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "north-carolina-agricultural-technical-information-systems-merrick"
+      ]
     },
     {
       "id": "desales-university::department:ba::40.54000,-75.37700",
@@ -15975,7 +16100,7 @@
       "rowIds": [
         "le-moyne-college____is"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179335641&Title=Assistant%20Professor%2C%20Information%20Systems"
@@ -15994,7 +16119,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "lemoyne-information-systems-mitchell"
+      ]
     },
     {
       "id": "minnesota-state-university::department:mis and ba::44.14611,-93.99861",
@@ -16006,7 +16134,7 @@
       "rowIds": [
         "minnesota-state-university____mis-and-ba"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://minnstate.wd1.myworkdayjobs.com/Minnesota_State_Careers/job/Mankato/Assistant-Professor--Management---Entrepreneurship--AA27029-_JR0000003739"
@@ -16025,7 +16153,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "minnesota-state-mankato-management-morris"
+      ]
     },
     {
       "id": "purdue-university-fort-wayne::department:mis and ba::41.11882,-85.10902",
@@ -16037,7 +16168,7 @@
       "rowIds": [
         "purdue-university-fort-wayne____mis-and-ba"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179338126&Title=Assistant%20Professor%20of%20Management%20Information%20Systems%20%26%20Business%20Analytics"
@@ -16056,7 +16187,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "purdue-fort-wayne-management-doermer"
+      ]
     },
     {
       "id": "university-of-missouri-kansas-city::department:supply chain management::39.03355,-94.57558",
@@ -16068,7 +16202,7 @@
       "rowIds": [
         "university-of-missouri-kansas-city____supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.poms.org/sites/default/files/2026-01/post%20on%20POMS-INFORMS-positiondescription.supplychain2025%20%28004%29.pdf"
@@ -16087,7 +16221,10 @@
         "status": 404,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "missouri-kansas-city-marketing-supply-chain-heritage"
+      ]
     },
     {
       "id": "abu-dhabi-university::department:om::24.36667,54.56444",
@@ -17679,7 +17816,7 @@
       "rowIds": [
         "american-university-of-beirut-school-of-business____om-analytics-statistics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.aub.edu.lb/osb/about/Pages/Employment.aspx"
@@ -17698,7 +17835,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "beirut-business-information-decision-olayan"
+      ]
     },
     {
       "id": "bits-school-of-management::department:om::19.25546,73.20200",
@@ -20448,7 +20588,7 @@
       "rowIds": [
         "wheaton-college-of-massachusetts____ba"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.chronicle.com/job/37841499/professor-of-the-practice-business-analytics/"
@@ -20467,7 +20607,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "wheaton-business-analytics-discovery-center"
+      ]
     },
     {
       "id": "caldwell-university::department:::40.83400,-74.27300",
@@ -20609,7 +20752,7 @@
       "rowIds": [
         "kean-university____scm-and-om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.chronicle.com/job/37832322/adjunct-faculty-department-of-management/"
@@ -20628,7 +20771,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "kean-management-hynes-hall"
+      ]
     },
     {
       "id": "prairie-view-a-m-university::department:scm quantitative mgt::30.09190,-95.98940",
@@ -21049,7 +21195,7 @@
       "rowIds": [
         "university-of-sydney____business-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -21066,7 +21212,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "sydney-business-analytics-belinda-hutchinson"
+      ]
     },
     {
       "id": "york-university::school:schulich school of business::43.77300,-79.50400",
@@ -21204,7 +21353,7 @@
       "rowIds": [
         "erasmus-university__rotterdam-school-of-management__technology-and-operations-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -21221,7 +21370,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "erasmus-technology-operations-mandeville"
+      ]
     },
     {
       "id": "university-of-north-carolina-chapel-hill::school:kenan flagler business school::35.90861,-79.04917",
@@ -21262,7 +21414,7 @@
       "rowIds": [
         "ecole-polytechnique-federale-de-lausanne__college-of-management-cdm__chair-of-technology-and-operations-management-tom"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -21279,7 +21431,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "epfl-technology-operations-management-odyssea"
+      ]
     },
     {
       "id": "katholieke-universiteit-ku-leuven::department:research center for operations management::50.87796,4.70029",
@@ -21291,7 +21446,7 @@
       "rowIds": [
         "katholieke-universiteit-ku-leuven____research-center-for-operations-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -21308,7 +21463,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "leuven-operations-management-hogenheuvelcollege"
+      ]
     },
     {
       "id": "yale-school-of-management-operations-management-group::department:::41.31111,-72.92667",
@@ -21320,7 +21478,7 @@
       "rowIds": [
         "yale-school-of-management-operations-management-group"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -21337,7 +21495,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-659-official-building"
+      ]
     },
     {
       "id": "bielefeld-university::department:::52.03800,8.49000",
@@ -21349,7 +21510,7 @@
       "rowIds": [
         "bielefeld-university"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -21366,7 +21527,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-660-university-level-verified"
+      ]
     },
     {
       "id": "bocconi-university::school:sda school of management::45.45028,9.18972",
@@ -21409,7 +21573,7 @@
       "rowIds": [
         "brigham-young-university__marriott-school-of-business__marketing-and-global-supply-chain"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://marriott.byu.edu/directory/departmental/#dept-21"
       ],
@@ -21428,7 +21592,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-662-official-building"
+      ]
     },
     {
       "id": "cardiff-university::school:cardiff business school::51.48700,-3.17800",
@@ -21660,7 +21827,7 @@
       "rowIds": [
         "depaul-university__driehaus-college-of-business__management-and-entrepreneurship"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.depaul.edu/faculty?college=Driehaus+College+of+Business&department=Management+%26+Entrepreneurship"
       ],
@@ -21679,7 +21846,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-670-official-building"
+      ]
     },
     {
       "id": "drexel-university::school:lebow college of business::39.95600,-75.18900",
@@ -21691,7 +21861,7 @@
       "rowIds": [
         "drexel-university__lebow-college-of-business__decision-sciences-and-management-information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.lebow.drexel.edu/faculty-research/schools-academic-departments/decision-sciences-mis/decision-sciences-mis-faculty"
       ],
@@ -21710,7 +21880,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-671-official-building"
+      ]
     },
     {
       "id": "european-school-of-management-and-technology::department:management science::52.51560,13.40110",
@@ -21943,7 +22116,7 @@
       "rowIds": [
         "lancaster-university__management-school__management-science"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.lancaster.ac.uk/lums/our-departments/management-science/people/"
       ],
@@ -21962,7 +22135,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-679-official-building"
+      ]
     },
     {
       "id": "maastricht-university::school:school of business and economics::50.84700,5.68700",
@@ -21974,7 +22150,7 @@
       "rowIds": [
         "maastricht-university__school-of-business-and-economics__marketing-and-supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.maastrichtuniversity.nl/research/mscm/faculty-and-staff"
       ],
@@ -21993,7 +22169,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-680-official-building"
+      ]
     },
     {
       "id": "microsoft::department:applied science::47.64581,-122.13197",
@@ -22066,7 +22245,7 @@
       "rowIds": [
         "nazarbayev-university"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22083,7 +22262,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-683-university-level-verified"
+      ]
     },
     {
       "id": "north-dakota-state-university::school:college of business::46.89200,-96.80000",
@@ -22095,7 +22277,7 @@
       "rowIds": [
         "north-dakota-state-university__college-of-business__finance-supply-chain-and-transportation"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.ndsu.edu/business/our-team/by-department#accordion__item-1092898"
       ],
@@ -22114,7 +22296,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-684-official-building"
+      ]
     },
     {
       "id": "northern-illinois-university::school:college of business::41.93389,-88.77778",
@@ -22282,7 +22467,7 @@
       "rowIds": [
         "sogang-university"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22299,7 +22484,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "sogang-university-level-administration"
+      ]
     },
     {
       "id": "sungkyunkwan-university::department:::37.58722,126.99417",
@@ -22311,7 +22499,7 @@
       "rowIds": [
         "sungkyunkwan-university"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22328,7 +22516,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "sungkyunkwan-university-level-administration"
+      ]
     },
     {
       "id": "technion-israel-institute-of-technology::school:faculty of data and decision sciences::32.77800,35.02200",
@@ -22432,7 +22623,7 @@
       "rowIds": [
         "university-of-amsterdam__amsterdam-business-school-amsterdam-school-of-economics__business-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://abs.uva.nl/content/sections/business-analytics/staff/staff.html#Faculty"
       ],
@@ -22451,7 +22642,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "amsterdam-business-analytics-building-m"
+      ]
     },
     {
       "id": "university-of-arkansas-at-fayetteville::school:sam m walton college of business::36.06900,-94.17600",
@@ -22497,7 +22691,7 @@
       "rowIds": [
         "university-of-cologne__wirtschafts-und-sozialwissenschaftliche-fakultat__operations-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://om.uni-koeln.de/de/team"
       ],
@@ -22516,7 +22710,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "cologne-operations-management-wiso-highrise"
+      ]
     },
     {
       "id": "university-of-liverpool::school:management school::53.40600,-2.96700",
@@ -22689,7 +22886,7 @@
       "rowIds": [
         "university-of-queensland"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22706,7 +22903,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-703-university-level-verified"
+      ]
     },
     {
       "id": "university-of-tennessee-at-knoxville::school:haslam college of business::35.95200,-83.93000",
@@ -22756,7 +22956,7 @@
       "rowIds": [
         "university-of-windsor"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22773,7 +22973,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-705-university-level-administration"
+      ]
     },
     {
       "id": "university-of-wisconsin-whitewater::department:::42.83800,-88.74300",
@@ -22785,7 +22988,7 @@
       "rowIds": [
         "university-of-wisconsin-whitewater"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22802,7 +23005,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-706-university-level-administration"
+      ]
     },
     {
       "id": "university-of-zurich::school:department of business administration::47.37500,8.54800",
@@ -22877,7 +23083,7 @@
       "rowIds": [
         "west-virginia-university__john-chambers-college-of-business-and-economics__supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://business.wvu.edu/faculty-and-staff/directory?dname=Supply%20Chain%20Management"
       ],
@@ -22896,7 +23102,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-709-official-building"
+      ]
     },
     {
       "id": "whu-otto-beisheim-school-of-management::school:otto beisheim school of management::50.40000,7.61400",
@@ -22939,7 +23148,7 @@
       "rowIds": [
         "wichita-state-university"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22956,7 +23165,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "location-711-university-level-administration"
+      ]
     },
     {
       "id": "worcester-polytechnic-institute::department:::42.27349,-71.80735",
@@ -22968,7 +23180,7 @@
       "rowIds": [
         "worcester-polytechnic-institute"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22979,7 +23191,10 @@
           "https://www.wpi.edu/about/locations",
           "https://www.wpi.edu/visit"
         ]
-      }
+      },
+      "verificationIds": [
+        "location-712-university-level-administration"
+      ]
     },
     {
       "id": "xi-an-jiaotong-university::school:school of management::34.24472,108.98361",
@@ -23013,9 +23228,9 @@
   ],
   "summary": {
     "baseline": 714,
-    "verified": 285,
+    "verified": 356,
     "partiallyVerified": 1,
-    "pending": 428,
+    "pending": 357,
     "sourceSearches": 714
   }
 }

@@ -5068,17 +5068,23 @@ for (const [pageName, sel, least, mapBtn] of [
   const rows = JSON.parse(await readFile(path.join(ROOT,'data','directory.json'),'utf8'));
   const victims = rows.filter(r => r.institution === 'Aalto University');
   ok(victims.length > 0, 'universities: Aalto correction fixture exists');
+  await p.addInitScript(() => {
+    let api;
+    Object.defineProperty(window, 'OAUniMap', {configurable:true, get:()=>api, set:value=>{
+      api=value; const mount=value.mount;
+      value.mount=function(config){window.editTestMap=mount(config);return window.editTestMap;};
+    }});
+  });
   const target = new URLSearchParams({view:'map',focus:'department',university:'Aalto University',school:victims[0].school||'',department:victims[0].department||''});
   await p.goto(BASE + 'universities?' + target, {waitUntil:'domcontentloaded'});
   await p.waitForSelector('.oa-map-logo');
   await p.evaluate(id => OADirectory.__setForTest({edits:{[id]:{department:'Corrected Operations Department',t:Date.now(),name:'Map test'}}}), victims[0].id);
-  await p.waitForTimeout(200);
-  let correctedPopup = false;
-  for (const marker of await p.locator('.oa-map-logo').all()) {
-    await marker.evaluate(n => n.click());
-    await p.waitForSelector('.oa-uni-pop');
-    if (await p.$eval('.oa-uni-pop', n => n.textContent.includes('Corrected Operations Department'))) { correctedPopup = true; break; }
-  }
+  await p.waitForFunction(() => editTestMap.shown().some(point=>point.card.schools.some(s=>s.rows.some(r=>r.department==='Corrected Operations Department'))));
+  await p.evaluate(() => editTestMap.map.eachLayer(layer=>{
+    if(layer.oaCard && layer.oaCard.schools.some(s=>s.rows.some(r=>r.department==='Corrected Operations Department'))) layer.fire('click');
+  }));
+  await p.waitForSelector('.oa-uni-pop');
+  const correctedPopup = await p.$eval('.oa-uni-pop', n=>n.textContent.includes('Corrected Operations Department'));
   ok(correctedPopup, 'universities: the matching department popup receives the same live correction as cards');
   await p.evaluate(ids => OADirectory.__setForTest({admin:false,edits:Object.fromEntries(ids.map(id=>[id,{hidden:true}]))}), victims.map(r=>r.id));
   await p.waitForTimeout(200);

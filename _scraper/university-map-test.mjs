@@ -102,6 +102,13 @@ try{
   const evidence=JSON.parse(fs.readFileSync(path.join(root,'data/school-map-locations.json'),'utf8')).records;
   const directory=JSON.parse(fs.readFileSync(path.join(root,'data/directory.json'),'utf8'));
   const evidenceQueue=evidence.flatMap(location=>location.rowIds.map(id=>({location,id})));
+  const dubai=evidence.find(location=>location.id==='indian-institute-management-ahmedabad-dubai');
+  if(dubai){
+    const campus=await pageAt('?'+new URLSearchParams({university:dubai.institutionKey,country:'United Arab Emirates'}));
+    assert.ok(await campus.evaluate(()=>testMap.shown().every(point=>point.country==='United Arab Emirates')),'country filter scopes individual campuses');
+    assert.ok(await campus.evaluate(expected=>testMap.shown().some(point=>point.lat===expected.lat&&point.lng===expected.lng),dubai),'Dubai campus is discoverable under its verified country');
+    await campus.close();
+  }
   await Promise.all(Array.from({length:4},async()=>{
     while(evidenceQueue.length){
       const {location,id}=evidenceQueue.shift();

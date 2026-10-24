@@ -224,9 +224,12 @@
       var cards=snapshot.view||[],points=[],missing=[],inRegion=[];
       var deptFilter=(snapshot.filters||[]).find(function(f){return f.key==='dept';});
       var queries=deptFilter?deptFilter.values.map(fold).filter(Boolean):[];
+      var countryFilter=(snapshot.filters||[]).find(function(f){return f.key==='country';});
+      var countryQueries=countryFilter?countryFilter.values.map(fold).filter(Boolean):[];
       cards.forEach(function(c){
         var ps=pointsFor(c);
         ps=ps.filter(function(p){return region==='world'||regionOf(p)===region;});
+        if(countryQueries.length)ps=ps.filter(function(p){return countryQueries.indexOf(fold(p.country))!==-1;});
         // A university-only search keeps all its schools. Department search
         // narrows the actual map cards as well as the directory's university.
         if(queries.length)ps=ps.filter(function(p){var text=fold(p.school+' '+p.card.schools[0].rows.map(function(r){return r.department+' '+(r.mapAliases||[]).map(function(a){return a.school+' '+a.department;}).join(' ');}).join(' '));return queries.some(function(q){return q.split(' ').every(function(w){return text.indexOf(w)!==-1;});});});

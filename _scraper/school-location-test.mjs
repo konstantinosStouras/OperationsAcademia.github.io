@@ -19,6 +19,7 @@ for(const v of verified){
   assert.ok(!seen.has(id),'ambiguous location for '+id);seen.add(id);
   const row=rows.find(r=>r.id===id);assert.ok(row,'unknown directory row '+id);
   assert.equal(S.institutionKey(row.institution),S.institutionKey(v.institutionKey||v.institution));
+  if(v.country) assert.equal(row.country,v.country,'verified campus country reaches directory filters: '+v.id);
  }
 }
 const card={id:'test',institution:'Test University',schools:[{name:'Engineering',rows:[

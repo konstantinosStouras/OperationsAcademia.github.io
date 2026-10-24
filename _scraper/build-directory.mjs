@@ -84,6 +84,11 @@ async function main() {
   const locations = await readJson('data/school-map-locations.json');
   const mapTerms = new Map(locations.records.flatMap(location => location.rowIds.map(id => [id, [location.school, location.department].filter(Boolean)])));
   for (const row of rows) if (mapTerms.has(row.id)) row.mapSearchTerms = mapTerms.get(row.id);
+  const mapCountries = new Map(locations.records.filter(location => location.country).flatMap(location => location.rowIds.map(id => [id, location.country])));
+  for (const row of rows) if (mapCountries.has(row.id)) {
+    row.country = mapCountries.get(row.id);
+    delete row.countries;
+  }
   const stats = directoryStats(rows);
 
   const body = JSON.stringify(rows, null, 1) + '\n';
