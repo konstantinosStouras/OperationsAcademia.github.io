@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-24T13:40:07.377Z",
- "members": 397,
+ "generated": "2026-10-24T19:27:14.367Z",
+ "members": 398,
  "k": 3,
  "affiliation": {
-  "listed": 314,
+  "listed": 315,
   "other": 48,
   "none": 35
  },
@@ -51,6 +51,11 @@
     "members": 5
    },
    {
+    "name": "University of Michigan",
+    "country": "United States",
+    "members": 5
+   },
+   {
     "name": "University of Toronto",
     "country": "Canada",
     "members": 5
@@ -88,11 +93,6 @@
    {
     "name": "University of Mannheim",
     "country": "Germany",
-    "members": 4
-   },
-   {
-    "name": "University of Michigan",
-    "country": "United States",
     "members": 4
    },
    {
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 196
+    "members": 197
    },
    {
     "name": "Canada",
