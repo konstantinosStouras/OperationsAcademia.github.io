@@ -2676,7 +2676,7 @@
       "rowIds": [
         "auburn-university__samuel-ginn-college-of-engineering__industrial-and-systems-engineering"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.auburn.edu/auburn-careers-home/jobs/9907",
@@ -2696,7 +2696,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "auburn-industrial-systems-shelby"
+      ]
     },
     {
       "id": "auburn-university::department:ba::32.60300,-85.48600",
@@ -3339,7 +3342,7 @@
       "rowIds": [
         "university-of-north-texas__g-brint-ryan-college-of-business__supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://cob.unt.edu/people/?type=Faculty&department=Department+of+Supply+Chain+Management"
       ],
@@ -3360,7 +3363,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "north-texas-supply-chain-business-leadership"
+      ]
     },
     {
       "id": "university-of-north-texas::department:ba::33.21100,-97.14700",
@@ -3372,7 +3378,7 @@
       "rowIds": [
         "university-of-north-texas____ba"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.untsystem.edu/jobs/asst-professor-business-analytics-dallas-texas-united-states"
@@ -3391,7 +3397,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "north-texas-information-decision-business-leadership"
+      ]
     },
     {
       "id": "idaho-state-university::school:college of business::42.86126,-112.43429",
@@ -3726,7 +3735,7 @@
         "massachusetts-institute-of-technology__operations-research-center",
         "massachusetts-institute-of-technology__operations-research-center__or-om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -3743,7 +3752,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "massachusetts-operations-research-muckley"
+      ]
     },
     {
       "id": "massachusetts-institute-of-technology::school:school of engineering::42.36000,-71.09200",
@@ -3755,7 +3767,7 @@
       "rowIds": [
         "massachusetts-institute-of-technology__school-of-engineering__center-for-transportation-and-logistics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "http://ctl.mit.edu/about/faculty"
       ],
@@ -3776,7 +3788,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "massachusetts-transportation-logistics-muckley"
+      ]
     },
     {
       "id": "rochester-institute-of-technology::school:saunders college of business::43.08400,-77.67500",
@@ -4676,7 +4691,7 @@
       "rowIds": [
         "bowling-green-state-university__allen-w-and-carol-m-schmidthorst-college-of-business__business-analytics-economics-and-information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179577911&Title=Assistant%20Professor%20of%20Business%20Analytics"
@@ -4695,7 +4710,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "bowling-green-business-analytics-maurer"
+      ]
     },
     {
       "id": "bowling-green-state-university::department:supply chain management::41.38000,-83.64000",
@@ -4707,7 +4725,7 @@
       "rowIds": [
         "bowling-green-state-university____supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.poms.org/sites/default/files/2026-01/FY27-FAC-1041%20QRF%20SCM_Faculty%20Vacancy%20Announcement%202025%282%29.pdf"
@@ -4726,7 +4744,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "bowling-green-management-maurer"
+      ]
     },
     {
       "id": "aschaffenburg-university-of-applied-sciences::school:faculty of engineering and computer science::49.97194,9.16139",
@@ -6324,7 +6345,7 @@
       "rowIds": [
         "georgia-institute-of-technology__college-of-engineering__h-milton-stewart-school-of-industrial-and-systems-engineerin"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.isye.gatech.edu/isye-employment-opportunities?position=8205"
@@ -6343,7 +6364,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "georgia-tech-stewart-industrial-systems-george-tower"
+      ]
     },
     {
       "id": "university-of-california-riverside::school:a gary anderson graduate school of management::33.97600,-117.33100",
@@ -8627,7 +8651,7 @@
       "rowIds": [
         "babson-college____operations-and-information-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/institution/details.cfm?JobCode=179538935"
@@ -8646,7 +8670,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "babson-operations-information-management-babson-hall"
+      ]
     },
     {
       "id": "morningside-university::school:rosen school of business::42.47560,-96.35890",
@@ -8945,7 +8972,7 @@
       "rowIds": [
         "stanford-university____data-science"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -8962,7 +8989,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "stanford-data-science-computing-building"
+      ]
     },
     {
       "id": "miami-university::department:emerging technology in business and design::39.51200,-84.73500",
@@ -14284,7 +14314,7 @@
       "rowIds": [
         "university-of-south-florida____is"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179369393&Title=Assistant%20Professor",
@@ -14305,7 +14335,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "south-florida-information-systems-communication-building"
+      ]
     },
     {
       "id": "shorter-university::department:general business::34.25920,-85.19450",
@@ -14472,7 +14505,7 @@
       "rowIds": [
         "appalachian-state-university____cis"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.chronicle.com/job/37947170/assistant-professor-in-computer-information-systems/"
@@ -14491,7 +14524,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "appalachian-computer-information-systems-peacock"
+      ]
     },
     {
       "id": "queens-university-of-charlotte::department:ba::35.18880,-80.83230",
@@ -15099,7 +15135,7 @@
       "rowIds": [
         "tennessee-tech-university____decision-sciences"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179329778&Title=Lecturer%20-%20Decision%20Sciences"
@@ -15118,7 +15154,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "tennessee-tech-decision-sciences-foundation"
+      ]
     },
     {
       "id": "tennessee-tech-university::department:is::36.17610,-85.50960",
@@ -15130,7 +15169,7 @@
       "rowIds": [
         "tennessee-tech-university____is"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179352176&Title=Assistant%20Professor"
@@ -15149,7 +15188,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "tennessee-tech-decision-sciences-foundation"
+      ]
     },
     {
       "id": "colorado-school-of-mines::department:ba or::39.75111,-105.22250",
@@ -15875,7 +15917,7 @@
       "rowIds": [
         "northeastern-university__d-amore-mckim-school-of-business__supply-chain-and-information-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://damore-mckim.northeastern.edu/group/supply-chain/members/"
       ],
@@ -15894,7 +15936,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "northeastern-supply-chain-information-hayden"
+      ]
     },
     {
       "id": "northeastern-university::department:scm and it::42.34000,-71.08800",
@@ -15906,7 +15951,7 @@
       "rowIds": [
         "northeastern-university____scm-and-it"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -15923,7 +15968,10 @@
         "status": 404,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "northeastern-supply-chain-information-hayden"
+      ]
     },
     {
       "id": "csu-san-marcos::department:om::33.12833,-117.15944",
@@ -16395,7 +16443,7 @@
       "rowIds": [
         "coastal-carolina-university____om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.coastal.edu/postings/120535"
@@ -16414,7 +16462,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "coastal-carolina-management-decision-sciences-wall"
+      ]
     },
     {
       "id": "coastal-carolina-university::department:operations::33.79612,-79.01370",
@@ -16426,7 +16477,7 @@
       "rowIds": [
         "coastal-carolina-university____operations"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179140634&Title=Visiting%20Assistant%20Professor%2C%20Management%20-%20Operations"
@@ -16445,7 +16496,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "coastal-carolina-management-decision-sciences-wall"
+      ]
     },
     {
       "id": "university-of-melbourne::school:melbourne business school::-37.79600,144.96100",
@@ -16677,7 +16731,7 @@
       "rowIds": [
         "butler-university____supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://fa-exer-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/1717"
@@ -16696,7 +16750,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "butler-supply-chain-dugan"
+      ]
     },
     {
       "id": "goldey-beacom-college::department:ba::39.74203,-75.68953",
@@ -16958,7 +17015,7 @@
       "rowIds": [
         "university-of-alabama-birmingham____scm-distribution-mkt"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://uab.peopleadmin.com/postings/26557"
@@ -16977,7 +17034,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "alabama-birmingham-marketing-distribution-economics-collat"
+      ]
     },
     {
       "id": "virgina-darden::department:dads::38.03556,-78.50333",
@@ -17020,7 +17080,7 @@
       "rowIds": [
         "tennessee-state-university____supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179275659&Title=Assistant%2FAssociate%20Professor%20of%20Supply%20Chain%20Management"
@@ -17039,7 +17099,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "tennessee-state-business-administration-avon-williams"
+      ]
     },
     {
       "id": "grand-valley-state-university::department:management::42.96361,-85.88861",
@@ -19860,7 +19923,7 @@
       "rowIds": [
         "eth-zurich____management-technology-and-economics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://mtec.ethz.ch/people/scientists/professors.html"
       ],
@@ -19879,7 +19942,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "swiss-federal-technology-management-wev"
+      ]
     },
     {
       "id": "lincoln-memorial-university::department:ba::36.58080,-83.65660",
@@ -20353,7 +20419,7 @@
       "rowIds": [
         "university-of-manitoba____supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=38249"
@@ -20372,7 +20438,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "manitoba-supply-chain-drake"
+      ]
     },
     {
       "id": "wayne-state-university::department:supply chain management::42.35700,-83.07000",
@@ -21570,7 +21639,7 @@
       "rowIds": [
         "northern-illinois-university__college-of-business__operations-management-and-information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.cob.niu.edu/about/directory/index.shtml#operations"
       ],
@@ -21589,7 +21658,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "northern-illinois-operations-information-systems-barsema"
+      ]
     },
     {
       "id": "rochester-institute-of-technology-saunders-college-of-business::school:saunders college of business::43.08444,-77.67500",
@@ -21904,7 +21976,7 @@
       "rowIds": [
         "university-of-arkansas-at-fayetteville__sam-m-walton-college-of-business__supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://walton.uark.edu/departments/supplychain/directory.php"
       ],
@@ -21923,7 +21995,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "arkansas-supply-chain-hunt-center"
+      ]
     },
     {
       "id": "university-of-cologne::school:wirtschafts und sozialwissenschaftliche fakultat::50.92800,6.92900",
@@ -22031,7 +22106,7 @@
       "rowIds": [
         "university-of-massachusetts-lowell__manning-school-of-business__operations-and-information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.uml.edu/msb/departments/operations-info-systems/faculty/"
       ],
@@ -22050,7 +22125,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "massachusetts-lowell-operations-pulichino-tong"
+      ]
     },
     {
       "id": "university-of-michigan-at-ann-arbor::school:stephen m ross school of business::42.27700,-83.73800",
@@ -22448,9 +22526,9 @@
   ],
   "summary": {
     "baseline": 714,
-    "verified": 97,
+    "verified": 123,
     "partiallyVerified": 1,
-    "pending": 616,
+    "pending": 590,
     "sourceSearches": 714
   }
 }

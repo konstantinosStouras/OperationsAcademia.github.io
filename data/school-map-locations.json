@@ -1487,6 +1487,453 @@
       "coordinateSource": "https://calendar.utk.edu/stokely_management_center_280",
       "checked": "2026-10-24",
       "notes": "Department heads located Stokely229(BusinessAnalytics) andStokely312(SupplyChain) oncurrent officialleadership/faculty pages. Officialbuildingcalendar suppliesGeoCoordinates. Genericcollegefooter453HaslamBusinessBuildingwasnotused."
+    },
+    {
+      "id": "massachusetts-operations-research-muckley",
+      "institution": "Massachusetts Institute of Technology",
+      "rowIds": [
+        "massachusetts-institute-of-technology__operations-research-center",
+        "massachusetts-institute-of-technology__operations-research-center__or-om"
+      ],
+      "school": "Operations Research Center",
+      "department": "",
+      "building": "Muckley Building",
+      "address": "E40-103, 1 Amherst Street, Cambridge, MA, United States",
+      "lat": 42.36116319,
+      "lng": -71.08485302,
+      "addressSource": "https://officesdirectory.mit.edu/orc",
+      "coordinateSource": "https://whereis.mit.edu/?q=E40",
+      "supportingSources": [
+        "https://whereis.mit.edu/search?type=building&q=E40&output=json"
+      ],
+      "notes": "Official center address and university building record agree on Building E40. Uses named building coordinates, not the mailing address at 77 Massachusetts Avenue.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "massachusetts-transportation-logistics-muckley",
+      "institution": "Massachusetts Institute of Technology",
+      "rowIds": [
+        "massachusetts-institute-of-technology__school-of-engineering__center-for-transportation-and-logistics"
+      ],
+      "school": "School of Engineering",
+      "department": "Center for Transportation and Logistics",
+      "building": "Muckley Building",
+      "address": "E40, Floor 2, 1 Amherst Street, Cambridge, MA, United States",
+      "lat": 42.36116319,
+      "lng": -71.08485302,
+      "addressSource": "https://ctl.mit.edu/visit",
+      "coordinateSource": "https://whereis.mit.edu/?q=E40",
+      "supportingSources": [
+        "https://whereis.mit.edu/search?type=building&q=E40&output=json"
+      ],
+      "notes": "Official center address and university building record agree on Building E40. Uses named building coordinates, not the mailing address at 77 Massachusetts Avenue.",
+      "checked": "2026-10-24"
+    },
+    {
+      "checked": "2026-10-24",
+      "id": "auburn-industrial-systems-shelby",
+      "institution": "Auburn University",
+      "rowIds": [
+        "auburn-university__samuel-ginn-college-of-engineering__industrial-and-systems-engineering"
+      ],
+      "school": "Samuel Ginn College of Engineering",
+      "department": "Department of Industrial and Systems Engineering",
+      "building": "Shelby Center for Engineering Technology",
+      "address": "3301 Shelby Center, Auburn, AL 36849, United States",
+      "lat": 32.6061983,
+      "lng": -85.4874699,
+      "addressSource": "https://www.eng.auburn.edu/insy/about/contact-us.html",
+      "coordinateSource": "https://goo.gl/maps/nqmkJxZTr5kFqy3W6",
+      "notes": "Official department contact links the named Shelby Center map destination; !3d/!4d coordinates used, not viewport center."
+    },
+    {
+      "checked": "2026-10-24",
+      "id": "north-texas-supply-chain-business-leadership",
+      "institution": "University of North Texas",
+      "rowIds": [
+        "university-of-north-texas__g-brint-ryan-college-of-business__supply-chain-management"
+      ],
+      "school": "G. Brint Ryan College of Business",
+      "department": "Supply Chain Management",
+      "building": "Business Leadership Building",
+      "address": "Room 206, 1307 West Highland Street, Denton, TX 76201, United States",
+      "lat": 33.2088775,
+      "lng": -97.1476583,
+      "addressSource": "https://cob.unt.edu/scm/contact.html",
+      "coordinateSource": "https://maps.unt.edu/",
+      "notes": "Official department physical address matches campus map building feature160; LAT/LON attributes from university facilities dataset."
+    },
+    {
+      "checked": "2026-10-24",
+      "id": "north-texas-information-decision-business-leadership",
+      "institution": "University of North Texas",
+      "rowIds": [
+        "university-of-north-texas____ba"
+      ],
+      "school": "G. Brint Ryan College of Business",
+      "department": "Department of Information Technology and Decision Sciences",
+      "building": "Business Leadership Building",
+      "address": "Room 208, 1307 West Highland Street, Denton, TX 76201, United States",
+      "lat": 33.2088775,
+      "lng": -97.1476583,
+      "addressSource": "https://www.unt.edu/academics/programs/business-analytics-degree.html",
+      "coordinateSource": "https://maps.unt.edu/",
+      "notes": "Business analytics official program lists department and Room208. University facilities campus map building feature160 supplies LAT/LON."
+    },
+    {
+      "checked": "2026-10-24",
+      "id": "bowling-green-business-analytics-maurer",
+      "institution": "Bowling Green State University",
+      "rowIds": [
+        "bowling-green-state-university__allen-w-and-carol-m-schmidthorst-college-of-business__business-analytics-economics-and-information-systems"
+      ],
+      "school": "Allen W. and Carol M. Schmidthorst College of Business",
+      "department": "Business Analytics, Economics and Information Systems",
+      "building": "Robert W. and Patricia A. Maurer Center",
+      "address": "Room 241J, 870 East Wooster Street, Bowling Green, OH 43403, United States",
+      "lat": 41.374362,
+      "lng": -83.639315,
+      "addressSource": "https://www.bgsu.edu/business/departments-and-programs/economics/faculty-staff.html",
+      "coordinateSource": "https://events.bgsu.edu/robert_w_and_patricia_a_maurer_center_974",
+      "notes": "Department chair and administrative assistant listed in Maurer241G/241J; official building page supplies named-building geocoordinates."
+    },
+    {
+      "checked": "2026-10-24",
+      "id": "bowling-green-management-maurer",
+      "institution": "Bowling Green State University",
+      "rowIds": [
+        "bowling-green-state-university____supply-chain-management"
+      ],
+      "school": "Allen W. and Carol M. Schmidthorst College of Business",
+      "department": "Department of Management",
+      "building": "Robert W. and Patricia A. Maurer Center",
+      "address": "Room 240B, 870 East Wooster Street, Bowling Green, OH 43403, United States",
+      "lat": 41.374362,
+      "lng": -83.639315,
+      "addressSource": "https://www.bgsu.edu/content/bgsu/en/business/departments-and-programs/management.html",
+      "coordinateSource": "https://events.bgsu.edu/robert_w_and_patricia_a_maurer_center_974",
+      "notes": "Department contact confirms240B and includes Supply Chain Management program; university building page supplies named-building geocoordinates."
+    },
+    {
+      "id": "stanford-data-science-computing-building",
+      "institution": "Stanford University",
+      "rowIds": [
+        "stanford-university____data-science"
+      ],
+      "school": "",
+      "department": "Stanford Data Science",
+      "building": "Computing and Data Science Building",
+      "address": "389 Jane Stanford Way, Stanford, CA 94305, United States",
+      "lat": 37.429924,
+      "lng": -122.17178,
+      "addressSource": "https://engineering.stanford.edu/get-involved/support-engineering/funding-initiatives/computing-and-data-science-coda",
+      "coordinateSource": "https://campus-map.stanford.edu/?id=07-430",
+      "supportingSources": [
+        "https://campus-map.stanford.edu/bldg_xml.cfm?srch=07-430",
+        "https://news.stanford.edu/stories/2025/02/coda-marks-new-era-for-computing-and-data-science-at-stanford"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The new Computing and Data Science building opened in 2025 and is the home of Stanford Data Science. The official campus map lists Data Science among its occupants and supplies this named building coordinate in its building XML."
+    },
+    {
+      "id": "georgia-tech-stewart-industrial-systems-george-tower",
+      "institution": "Georgia Institute of Technology",
+      "rowIds": [
+        "georgia-institute-of-technology__college-of-engineering__h-milton-stewart-school-of-industrial-and-systems-engineerin"
+      ],
+      "school": "College of Engineering",
+      "department": "H. Milton Stewart School of Industrial and Systems Engineering",
+      "building": "George Tower",
+      "address": "55 Fifth Street NW, Atlanta, GA 30332-0205, United States",
+      "lat": 33.777197,
+      "lng": -84.388073,
+      "addressSource": "https://www.isye.gatech.edu/about/maps-directions",
+      "coordinateSource": "https://map.gatech.edu/?id=82#!m/577448",
+      "supportingSources": [
+        "https://www.scheller.gatech.edu/news/2026/georgia-tech-celebrates-completion-of-george-tower-scheller-tower.html"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The school moved from the Groseclose complex to George Tower in 2026. Current official directions and the September 2026 opening announcement confirm the new home. Coordinates come from the official campus map marker for the named George Tower and Scheller Tower complex."
+    },
+    {
+      "id": "babson-operations-information-management-babson-hall",
+      "institution": "Babson College",
+      "rowIds": [
+        "babson-college____operations-and-information-management"
+      ],
+      "school": "",
+      "department": "Operations and Information Management Division",
+      "building": "Babson Hall",
+      "address": "7 Babson College Drive, Babson Park, MA 02457, United States",
+      "lat": 42.29834,
+      "lng": -71.266319,
+      "addressSource": "https://www.babson.edu/contact-babson/",
+      "coordinateSource": "https://maps.babson.edu/?id=126#!m/43646",
+      "checked": "2026-10-24",
+      "notes": "The current college contact directory locates the Operations and Information Management Division in Babson Hall. The named building marker in the official campus map supplies its street address and coordinates."
+    },
+    {
+      "id": "butler-supply-chain-dugan",
+      "school": "Andre B. Lacy School of Business",
+      "department": "Supply Chain",
+      "building": "Bill and Joanne Dugan Hall",
+      "address": "625 Butler Way, Indianapolis, IN 46208, United States",
+      "lat": 39.838886,
+      "lng": -86.170525,
+      "addressSource": "https://majors.butler.edu/programs/supply-chain/",
+      "coordinateSource": "https://map.butler.edu/?id=416#!m/274418",
+      "supportingSources": [
+        "https://www.butler.edu/lacy-business/",
+        "https://www.butler.edu/campus-services/facilities/building-information/"
+      ],
+      "notes": "Official program identifies the school; the school contact identifies Dugan Hall. Facilities directory provides the building street address, distinct from the general university mailing address. Coordinates are the official campus map academic building marker.",
+      "rowIds": [
+        "butler-university____supply-chain-management"
+      ],
+      "institution": "Butler University",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "coastal-carolina-management-decision-sciences-wall",
+      "school": "E. Craig Wall Sr. College of Business Administration",
+      "department": "Department of Management and Decision Sciences",
+      "building": "E. Craig Wall Sr. College of Business Administration Building",
+      "address": "119 Chanticleer Drive East, Conway, SC 29526, United States",
+      "lat": 33.7976645,
+      "lng": -79.0129851,
+      "addressSource": "https://www.coastal.edu/business/mgmt/",
+      "coordinateSource": "https://www.coastal.edu/map/",
+      "supportingSources": [
+        "https://goo.gl/maps/jzdgdTMr4kUwrEaq9"
+      ],
+      "notes": "Official department page gives chair Wall 323F and administrative specialist Wall 323A and includes operations and supply chain management. The university building directory identifies 119 Chanticleer Drive East and links the named Wall building Google Maps destination. Coordinates use destination !3d/!4d, not the unrelated map viewport.",
+      "rowIds": [
+        "coastal-carolina-university____om",
+        "coastal-carolina-university____operations"
+      ],
+      "institution": "Coastal Carolina University",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "northeastern-supply-chain-information-hayden",
+      "institution": "Northeastern University",
+      "rowIds": [
+        "northeastern-university__d-amore-mckim-school-of-business__supply-chain-and-information-management",
+        "northeastern-university____scm-and-it"
+      ],
+      "school": "D’Amore-McKim School of Business",
+      "department": "Supply Chain and Information Management Group",
+      "building": "Hayden Hall",
+      "address": "370 Huntington Avenue, Boston, MA 02115, United States",
+      "lat": 42.3393133,
+      "lng": -71.0884561,
+      "addressSource": "https://damore-mckim.northeastern.edu/people/john-haley/",
+      "coordinateSource": "https://campusmap.northeastern.edu/",
+      "supportingSources": [
+        "https://www.arcgis.com/home/item.html?id=ea233bbefd4c4f9cbf4e0c95f99f9fba"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official group faculty profile gives Hayden Hall. Official university Boston Buildings layer identifies Hayden Hall at 370 Huntington Avenue (the profile uses general mailing address 360 Huntington Avenue). Coordinates computed from the centroid of the university-published Hayden Hall building footprint, OBJECTID 60, Facility_ID HA."
+    },
+    {
+      "id": "appalachian-computer-information-systems-peacock",
+      "institution": "Appalachian State University",
+      "rowIds": [
+        "appalachian-state-university____cis"
+      ],
+      "school": "Walker College of Business",
+      "department": "Department of Computer Information Systems",
+      "building": "Peacock Hall",
+      "address": "416 Howard Street, Room 2101, Boone, NC 28608-2037, United States",
+      "lat": 36.216404,
+      "lng": -81.682045,
+      "addressSource": "https://cis.appstate.edu/directory",
+      "coordinateSource": "https://map.concept3d.com/?id=1329#!m/293308",
+      "checked": "2026-10-24",
+      "notes": "Official department directory gives its office, administrator and chair in Peacock Hall. Coordinates are the official Academic Buildings marker, not the nearby construction or parking marker."
+    },
+    {
+      "id": "tennessee-tech-decision-sciences-foundation",
+      "institution": "Tennessee Technological University",
+      "institutionKey": "Tennessee Tech University",
+      "rowIds": [
+        "tennessee-tech-university____decision-sciences",
+        "tennessee-tech-university____is"
+      ],
+      "school": "College of Business",
+      "department": "Department of Decision Sciences and Management",
+      "building": "Foundation Hall",
+      "address": "242 East 10th Street, Cookeville, TN 38501, United States",
+      "lat": 36.1759663,
+      "lng": -85.5001938,
+      "addressSource": "https://www.tntech.edu/directory/business/kyle-turner.php",
+      "coordinateSource": "https://www.tntech.edu/education/testing-center/parking-directions.php",
+      "supportingSources": [
+        "https://www.tntech.edu/directory/business/susan-wells.php",
+        "https://www.tntech.edu/business/pdf/AspireMagazine-2026-Issue.pdf",
+        "https://cdn.maps.moderncampus.net/uploads/map/619/static/stops/13857.html"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Corrected current temporary location: Johnson Hall is closed for renovation until fall 2027. The current department chair is in Foundation Hall 226-3 and information technology/business intelligence faculty in Foundation Hall 114-3. The 2026 college magazine confirms all faculty offices moved here. Coordinates are the Foundation Hall destination linked from the university directions page, not the generic university address or outdated Johnson Hall listings."
+    },
+    {
+      "id": "alabama-birmingham-marketing-distribution-economics-collat",
+      "institution": "The University of Alabama at Birmingham",
+      "institutionKey": "University of Alabama - Birmingham",
+      "rowIds": [
+        "university-of-alabama-birmingham____scm-distribution-mkt"
+      ],
+      "school": "Collat School of Business",
+      "department": "Department of Marketing, Industrial Distribution and Economics",
+      "building": "Collat School of Business Building",
+      "address": "710 13th Street South, Birmingham, AL 35233, United States",
+      "lat": 33.501055,
+      "lng": -86.809438,
+      "addressSource": "https://www.uab.edu/business/home/people/marketing-industrial-distribution-economics",
+      "coordinateSource": "https://calendar.uab.edu/collat-school-of-business",
+      "checked": "2026-10-24",
+      "notes": "Official departmental directory places the chair and administrative associate in Collat School of Business rooms257-C and257-E. Coordinates come from the official named building event location GeoCoordinates metadata; physical address differs from the general1720SecondAvenue mailing address."
+    },
+    {
+      "id": "tennessee-state-business-administration-avon-williams",
+      "institution": "Tennessee State University",
+      "rowIds": [
+        "tennessee-state-university____supply-chain-management"
+      ],
+      "school": "College of Business",
+      "department": "Department of Business Administration",
+      "building": "Avon Williams Off-Campus Instructional Site",
+      "address": "330 10th Avenue North, Nashville, TN 37203, United States",
+      "lat": 36.1633889,
+      "lng": -86.7871389,
+      "addressSource": "https://www.tnstate.edu/businessadmin/pleasants-r1.aspx",
+      "coordinateSource": "https://tnstate.libguides.com/website/about/avon-williams",
+      "supportingSources": [
+        "https://jobs.tnstate.edu/position_descriptions/10014"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official supply chain program director office is Avon Williams K414, and official operations/supply chain job description identifies Business Administration at Avon Williams. University library directions explicitly identify the library as the lower level of this same building and embed a coordinate destination labeled36°09′48.2N86°47′13.7W; converted destination coordinates are used, not the offset map viewport or main campus."
+    },
+    {
+      "id": "south-florida-information-systems-communication-building",
+      "institution": "University of South Florida",
+      "rowIds": [
+        "university-of-south-florida____is"
+      ],
+      "school": "Muma College of Business",
+      "department": "School of Information Systems",
+      "building": "Communication and Information Sciences Building",
+      "address": "Communication and Information Sciences Building, Tampa Campus, Tampa, FL 33620, United States",
+      "lat": 28.0585586,
+      "lng": -82.4111331,
+      "addressSource": "https://www.usf.edu/business/about/bios/ma-tengteng.aspx",
+      "coordinateSource": "https://digitalcommons.usf.edu/usf_photos/87/",
+      "supportingSources": [
+        "https://www.usf.edu/business/about/bios/mullarkey-matthew.aspx",
+        "https://www.usf.edu/business/schools/information-systems/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current official school faculty profiles explicitly locate Tampa offices in Communication and Information Sciences Building rooms2056 and1040. The university library archival building record publishes this exact building latitude/longitude. The business college footer BSN3403 is not the faculty building and is not used."
+    },
+    {
+      "id": "massachusetts-lowell-operations-pulichino-tong",
+      "institution": "University of Massachusetts Lowell",
+      "institutionKey": "University of Massachusetts Lowell",
+      "rowIds": [
+        "university-of-massachusetts-lowell__manning-school-of-business__operations-and-information-systems"
+      ],
+      "school": "Manning School of Business",
+      "department": "Operations and Information Systems Department",
+      "building": "Pulichino Tong Business Center",
+      "address": "Fourth floor, 72 University Avenue, Lowell, MA 01854, United States",
+      "lat": 42.653352,
+      "lng": -71.326815,
+      "addressSource": "https://www.uml.edu/msb/departments/operations-info-systems/contact-us.aspx",
+      "coordinateSource": "https://www.uml.edu/maps/#/buildings/pulichino-tong-business-center",
+      "supportingSources": [
+        "https://www.uml.edu/Facilities/Building-Codes.aspx"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Department contact identifies fourth floor; university facilities list gives physical72UniversityAvenue distinct from department mailing1UniversityAvenue. Official map PointsOfInterest entry91f2aabb-5f77-4f18-9d19-8a09f3fb8376 supplies coordinates."
+    },
+    {
+      "id": "swiss-federal-technology-management-wev",
+      "institution": "Swiss Federal Institute of Technology Zurich",
+      "institutionKey": "ETH Zurich",
+      "rowIds": [
+        "eth-zurich____management-technology-and-economics"
+      ],
+      "school": "",
+      "department": "Department of Management, Technology, and Economics",
+      "building": "WEV",
+      "address": "Weinbergstrasse 56/58, 8092 Zurich, Switzerland",
+      "lat": 47.381712,
+      "lng": 8.5441626,
+      "addressSource": "https://mtec.ethz.ch/utils/contact.html",
+      "coordinateSource": "https://im.ethz.ch/about/how-to-find-us.html",
+      "checked": "2026-10-24",
+      "notes": "Department administration explicitly located WEV E12. Official co-occupant InformationManagement directions links exactnamedETHWEV destination47.381712,8.5441626. NotgeneralETHmainbuilding."
+    },
+    {
+      "id": "northern-illinois-operations-information-systems-barsema",
+      "institution": "Northern Illinois University",
+      "institutionKey": "Northern Illinois University",
+      "rowIds": [
+        "northern-illinois-university__college-of-business__operations-management-and-information-systems"
+      ],
+      "school": "College of Business",
+      "department": "Operations Management and Information Systems",
+      "building": "Barsema Hall, Room 328",
+      "address": "740 Garden Road, DeKalb, Illinois 60115, United States",
+      "lat": 41.941443,
+      "lng": -88.762397,
+      "addressSource": "https://www.cob.niu.edu/academics/omis/index.shtml",
+      "coordinateSource": "https://calendar.niu.edu/barsema_hall",
+      "checked": "2026-10-24",
+      "notes": "Official department contact specifies Barsema Hall 328; official university building calendar provides exact GeoCoordinates for Barsema Hall."
+    },
+    {
+      "id": "manitoba-supply-chain-drake",
+      "institution": "University of Manitoba",
+      "institutionKey": "University of Manitoba",
+      "rowIds": [
+        "university-of-manitoba____supply-chain-management"
+      ],
+      "school": "Asper School of Business",
+      "department": "Department of Supply Chain Management",
+      "building": "Drake Centre, sixth floor",
+      "address": "181 Freedman Crescent, Winnipeg, Manitoba R3T 5V4, Canada",
+      "lat": 49.8080235,
+      "lng": -97.130168,
+      "addressSource": "https://umanitoba.ca/asper/department-supply-chain-management",
+      "coordinateSource": "https://umanitoba.ca/asper/department-supply-chain-management",
+      "supportingSources": [
+        "https://umanitoba.ca/asper/asper-school-business/staff"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Department contact specifies Room 631 Drake Building; staff directory places department office administrator in Room 638 Drake Centre. Same sixth-floor building. Exact named 181 Freedman Crescent marker coordinates extracted from university-embedded Google map, not university campus coordinates."
+    },
+    {
+      "id": "arkansas-supply-chain-hunt-center",
+      "institution": "University of Arkansas at Fayetteville",
+      "institutionKey": "University of Arkansas at Fayetteville",
+      "rowIds": [
+        "university-of-arkansas-at-fayetteville__sam-m-walton-college-of-business__supply-chain-management"
+      ],
+      "school": "Sam M. Walton College of Business",
+      "department": "J.B. Hunt Transport Department of Supply Chain Management",
+      "building": "J.B. Hunt Transport Services Inc. Center for Academic Excellence, department administration Room 405",
+      "address": "227 North Harmon Avenue, Fayetteville, Arkansas 72701, United States",
+      "lat": 36.066063,
+      "lng": -94.173776,
+      "addressSource": "https://walton.uark.edu/departments/supplychain/directory.php",
+      "coordinateSource": "https://calendars.uark.edu/jbht-jb-hunt-transport-service-inc-center-for-academic-excellence",
+      "supportingSources": [
+        "https://walton.uark.edu/departments/supplychain/",
+        "https://brand.uark.edu/editorial-style-and-usage/editorial-guide.php"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Department directory places administrative support supervisor Casey Spatz in JBHT 405 and several department faculty on its fourth floor. Some faculty have other offices, which is not represented as separate department sites. Official building calendar gives exact GeoCoordinates and street address; not generic Walton College coordinates."
     }
   ]
 }
