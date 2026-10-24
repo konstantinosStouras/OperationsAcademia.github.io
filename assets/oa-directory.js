@@ -371,6 +371,7 @@
         if (sc.name) deptText.push(sc.name);
         for (var j4 = 0; j4 < sc.rows.length; j4++) {
           if (sc.rows[j4].department) deptText.push(sc.rows[j4].department);
+          (sc.rows[j4].mapSearchTerms || []).forEach(function(term) { deptText.push(term); });
         }
       }
 

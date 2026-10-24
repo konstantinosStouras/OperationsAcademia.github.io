@@ -21256,7 +21256,7 @@ async function testAffiliationPicker() {
   ok(/affiliation = settleAffiliation\(affiliation\);/.test(acctCode)
      && /if \(out\.affiliation\) out\.affiliation = settleAffiliation\(out\.affiliation\)\.slice\(0, 300\);/.test(acctCode),
     'both submits store the listed name the box names, by the picker\'s own rule');
-  ok(/function close\(\) \{ dropAffiliation\(wrap\);/.test(acctCode) && /dropAffiliation\(old\); old\.parentNode\.removeChild\(old\);/.test(acctCode),
+  ok(/function close\(\) \{ (?:stopGoogle\(\); )?dropAffiliation\(wrap\);/.test(acctCode) && /dropAffiliation\(old\); old\.parentNode\.removeChild\(old\);/.test(acctCode),
     'a card that goes takes the picker\'s document listener with it');
   ok(!/<label>Affiliation/.test(acctCode) && !/<label class="oa-missing">Affiliation/.test(acctCode),
     'no card wraps the box in its label any more: the list beside it would be read as its name');

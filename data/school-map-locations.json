@@ -1,0 +1,714 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "id": "texas-san-antonio-operations-analytics-business-building",
+      "institution": "The University of Texas at San Antonio",
+      "institutionKey": "UT San Antonio",
+      "rowIds": [
+        "ut-san-antonio__carlos-alvarez-college-of-business__operations-and-analytics-department"
+      ],
+      "school": "Carlos Alvarez College of Business",
+      "department": "Department of Operations and Analytics",
+      "building": "Business Building",
+      "address": "Room 4.01.10, 5 Paseo Del Norte, San Antonio, TX 78249, United States",
+      "lat": 29.5851098,
+      "lng": -98.6181187,
+      "addressSource": "https://business.utsa.edu/operations-analytics/",
+      "coordinateSource": "https://business.utsa.edu/connect/map-and-directions/",
+      "supportingSources": [
+        "https://business.utsa.edu/students/",
+        "https://www.utsa.edu/marcomstudio/resources/style-guides/quick_start-editorial.html"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The department page identifies its main-campus office as Business Building 4.01.10. The college map embed resolves the named Business Building destination (0xa8332d2a94d6b469) to these coordinates. The university's style guide confirms its full regental name after the merger."
+    },
+    {
+      "id": "nebraska-omaha-public-administration",
+      "institution": "University of Nebraska at Omaha",
+      "rowIds": [
+        "university-of-nebraska-at-omaha__college-of-public-affairs-and-community-service-school-of-pu__nonprofit-management"
+      ],
+      "school": "College of Public Affairs and Community Service",
+      "department": "School of Public Administration",
+      "building": "College of Public Affairs and Community Service Building",
+      "address": "Room 111, 6001 Dodge Street, Omaha, NE 68182, United States",
+      "lat": 41.2580916,
+      "lng": -96.009559,
+      "addressSource": "https://www.unomaha.edu/college-of-public-affairs-and-community-service/emergency-management-and-disaster-science/academics/academic-advising.php",
+      "coordinateSource": "https://www.unomaha.edu/about-uno/buildings-and-maps/college-of-public-affairs-and-community-service.php",
+      "supportingSources": [
+        "https://www.unomaha.edu/college-of-public-affairs-and-community-service/docs/cpacs-building-occupant-guide.pdf",
+        "https://www.unomaha.edu/college-of-public-affairs-and-community-service/public-administration/engagement/spa-newsroom.php"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The official advising page and building occupant guide identify the School of Public Administration office in room 111. The school identifies Nonprofit Management among its specialties. The university building page links the named building's exact Google place coordinates, which differ from the university-wide map link on the same page."
+    },
+    {
+      "id": "alabama-information-systems-statistics-management-science-alston",
+      "institution": "University of Alabama",
+      "rowIds": [
+        "university-of-alabama__culverhouse-college-of-business__information-systems-statistics-and-management-science"
+      ],
+      "school": "Culverhouse College of Business",
+      "department": "Department of Information Systems, Statistics, and Management Science",
+      "building": "Alston Hall",
+      "address": "Room 300, 361 Stadium Drive, Tuscaloosa, AL 35487, United States",
+      "lat": 33.211914,
+      "lng": -87.5490236,
+      "addressSource": "https://culverhouse.ua.edu/ism/",
+      "coordinateSource": "https://culverhouse.ua.edu/contact/",
+      "supportingSources": [
+        "https://culverhouse.ua.edu/people/sadie-crawford/",
+        "https://prelaw.ua.edu/venue/alston-hall-room-parlor-4th-floor/"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The department page identifies its administration in Alston 300 and department head in Alston 304. A university venue page independently identifies Alston Hall at 361 Stadium Drive. The college's embedded map resolves that street address to these destination coordinates (place 4607482894788326816). This is the department office; individual faculty also have offices in other college buildings."
+    },
+    {
+      "id": "montreal-management-racanelli",
+      "institution": "École des hautes études commerciales de Montréal",
+      "institutionKey": "HEC Montréal",
+      "rowIds": [
+        "hec-montreal____management"
+      ],
+      "school": "",
+      "department": "Department of Management",
+      "building": "Édifice Lise-et-Giuseppe-Racanelli",
+      "address": "Room 5.217, 3000 chemin de la Côte-Sainte-Catherine, Montréal, QC H3T 2A7, Canada",
+      "lat": 45.5035488,
+      "lng": -73.6211175,
+      "addressSource": "https://www.hec.ca/management/nous_joindre/index.html",
+      "coordinateSource": "https://www.hec.ca/en/contact-us",
+      "supportingSources": [
+        "https://www.hec.ca/campus/edifice-lise-et-giuseppe-racanelli",
+        "https://francais-hiver-immersion.hec.ca/en/about-us/"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The department's contact page identifies room 5.217 in the renamed Lise-et-Giuseppe-Racanelli building. Of the school's three embedded maps, the 3000 chemin de la Côte-Sainte-Catherine destination (16681589563677424477) matches that address; the other two buildings are not used. The school's own English-language program site supplies the full institutional name."
+    },
+    {
+      "id": "european-management-technology-management-science-schlossplatz",
+      "institution": "European School of Management and Technology",
+      "rowIds": [
+        "european-school-of-management-and-technology____management-science"
+      ],
+      "school": "",
+      "department": "Management Science",
+      "building": "Schlossplatz 1 (former State Council Building)",
+      "address": "Schlossplatz 1, 10178 Berlin, Germany",
+      "lat": 52.5156495,
+      "lng": 13.4011508,
+      "addressSource": "https://esmt.berlin/about/campus",
+      "coordinateSource": "https://esmt.berlin/about/campus",
+      "supportingSources": [
+        "https://esmt.berlin/faculty-research/faculty-overview",
+        "https://esmt.berlin/person/huseyin-gurkan"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The official campus description identifies the school and faculty's single historic building at Schlossplatz 1. The faculty directory confirms Management Science as a faculty area. The embedded building map resolves place 0x2ec750f8d979acef to these coordinates; the viewport longitude differs and is not used."
+    },
+    {
+      "id": "laval-operations-decision-palasis-prince",
+      "institution": "Université Laval",
+      "rowIds": [
+        "universite-laval__faculty-of-business-administration__operations-and-decision-systems"
+      ],
+      "school": "Faculty of Business Administration",
+      "department": "Department of Operations and Decision Systems",
+      "building": "Pavillon Palasis-Prince",
+      "address": "Room 2507, 2325 rue de la Terrasse, Québec, QC G1V 0A6, Canada",
+      "lat": 46.7833884,
+      "lng": -71.2739384,
+      "addressSource": "https://www.fsa.ulaval.ca/faculte/departements-ecole/osd/",
+      "coordinateSource": "https://www.fsa.ulaval.ca/en/contact-information/",
+      "supportingSources": [
+        "https://www.fsa.ulaval.ca/en/expert/paolo-landa/"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The department page and head's directory entry identify room 2507 in Palasis-Prince. The faculty contact page links a named building place with these destination coordinates, distinct from its viewport centre."
+    },
+    {
+      "id": "british-columbia-management-okanagan-engineering-management-education",
+      "institution": "University of British Columbia",
+      "rowIds": [
+        "university-of-british-columbia__faculty-of-management__operations-and-supply-chain-management"
+      ],
+      "school": "Faculty of Management",
+      "department": "Operations and Supply Chain Management",
+      "building": "Engineering, Management and Education Building",
+      "address": "Room 4145, 1137 Alumni Avenue, Kelowna, BC V1V 1V7, Canada",
+      "lat": 49.9390343,
+      "lng": -119.3943338,
+      "addressSource": "https://management.ok.ubc.ca/about/contact-people/",
+      "coordinateSource": "https://management.ok.ubc.ca/about/contact-people/",
+      "supportingSources": [
+        "https://management.ok.ubc.ca/2021/06/29/faculty-of-management-research-spotlight-2/"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The faculty directory identifies its Okanagan campus office in room 4145 and operations/supply-chain faculty in rooms 4107 and 4111 of the same building. The university's embedded map resolves the named building place (10903794266366713654) to these destination coordinates, not the viewport centre. Corrects a fallback pin on the Vancouver campus. Operations and Supply Chain Management is a research area, not a separately named department."
+    },
+    {
+      "id": "vienna-information-systems-operations-d2",
+      "institution": "Vienna University of Economics and Business",
+      "institutionKey": "WU Vienna",
+      "rowIds": [
+        "wu-vienna__vienna-university-of-economics-and-business__information-systems-and-operations"
+      ],
+      "school": "",
+      "department": "Department of Information Systems and Operations Management",
+      "building": "Building D2, Entrance C",
+      "address": "Front office D2.2.108, Welthandelsplatz 1, 1020 Vienna, Austria",
+      "country": "Austria",
+      "lat": 48.212622,
+      "lng": 16.409058,
+      "addressSource": "https://www.wu.ac.at/index.php?id=6015",
+      "coordinateSource": "https://campus.wu.ac.at/de/?campus=1&q=D2.2.108",
+      "checked": "2026-10-23",
+      "notes": "The department links directly to room D2.2.108 on its official campus map. The public map response identifies building D2 and supplies the room centre in EPSG:3857: [1826647.927038652,6142300.678853158]. Converted to WGS84 and rounded to six decimal places. This also corrects an existing non-fallback pin incorrectly placed in North America; it is additional to the original 714-entry audit."
+    },
+    {
+      "id": "north-carolina-state-information-technology-analytics-operations",
+      "institution": "North Carolina State University",
+      "rowIds": [
+        "north-carolina-state-university__poole-college-of-management__information-technology-analytics-and-operations",
+        "north-carolina-state-university____operations-and-supply-chain-management"
+      ],
+      "school": "Poole College of Management",
+      "department": "Department of Information Technology, Analytics and Operations",
+      "building": "Nelson Hall",
+      "address": "2801 Founders Drive, Raleigh, NC 27607, United States",
+      "lat": 35.788759,
+      "lng": -78.673696,
+      "addressSource": "https://poole.ncsu.edu/people/hsheese/",
+      "coordinateSource": "https://poole.ncsu.edu/about/contact-us/",
+      "supportingSources": [
+        "https://poole.ncsu.edu/faculty-and-research/it-analytics-operations-department/"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The department head is in Nelson Hall 2346. The department's official description explicitly includes supply chain and operations management. The college's embedded map contains this destination point for Nelson Hall, not just a university or viewport coordinate."
+    },
+    {
+      "id": "north-carolina-state-industrial-systems-fitts-woolard",
+      "institution": "North Carolina State University",
+      "rowIds": [
+        "north-carolina-state-university__college-of-engineering__edward-p-fitts-department-of-industrial-and-systems-engineer"
+      ],
+      "school": "College of Engineering",
+      "department": "Edward P. Fitts Department of Industrial and Systems Engineering",
+      "building": "Fitts-Woolard Hall",
+      "address": "Room 4121, 915 Partners Way, Raleigh, NC 27606, United States",
+      "lat": 35.7706171,
+      "lng": -78.6758466,
+      "addressSource": "https://ise.ncsu.edu/contact-us/",
+      "coordinateSource": "https://ccee.ncsu.edu/about/contact-us/",
+      "checked": "2026-10-23",
+      "notes": "The Industrial and Systems Engineering department gives Room 4121 at 915 Partners Way. The university's other department in the same named building, Fitts-Woolard Hall, publishes a Google Maps place link with these building coordinates. Its Room 3250 is not used as the industrial engineering office."
+    },
+    {
+      "id": "houston-downtown-general-business-marketing-supply-chain",
+      "institution": "University of Houston-Downtown",
+      "rowIds": [
+        "university-of-houston-downtown__marilyn-davies-college-of-business__general-business-marketing-and-supply-chain-management",
+        "university-of-houston-downtown____supply-chain-management"
+      ],
+      "school": "Marilyn Davies College of Business",
+      "department": "Department of General Business, Marketing, and Supply Chain Management",
+      "building": "Marilyn Davies College of Business (Shea Street Building)",
+      "address": "Room B410, 320 North Main Street, Houston, TX 77002, United States",
+      "lat": 29.768923,
+      "lng": -95.357994,
+      "addressSource": "https://www.uhd.edu/academics/business/gmsc/general-business-marketing-and-supply-chain-management-faculty.html",
+      "coordinateSource": "https://maps.uhd.edu/?id=1133#!m/183873",
+      "supportingSources": [
+        "https://www.uhd.edu/academics/business/gmsc/index.html",
+        "https://www.uhd.edu/sssl/student-success/career/business/our-location.aspx"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The department directory places its chair and administration in B410 and supply-chain faculty in the same B building. The official university campus map publishes the business-college marker at these coordinates (location 256256, marker 183873)."
+    },
+    {
+      "id": "houston-downtown-finance-information-systems",
+      "institution": "University of Houston-Downtown",
+      "rowIds": [
+        "university-of-houston-downtown____mis"
+      ],
+      "school": "Marilyn Davies College of Business",
+      "department": "Department of Finance, Information Systems, Economics and Risk Management",
+      "building": "Marilyn Davies College of Business (Shea Street Building)",
+      "address": "Room B410, 320 North Main Street, Houston, TX 77002, United States",
+      "lat": 29.768923,
+      "lng": -95.357994,
+      "addressSource": "https://www.uhd.edu/academics/business/fiser/finance-and-management-information-systems-faculty.html",
+      "coordinateSource": "https://maps.uhd.edu/?id=1133#!m/183873",
+      "supportingSources": [
+        "https://www.uhd.edu/academics/business/fiser/index.html",
+        "https://www.uhd.edu/sssl/student-success/career/business/our-location.aspx"
+      ],
+      "checked": "2026-10-23",
+      "notes": "The department page identifies Management Information Systems as its subject. Its official faculty directory lists the department administration and information-systems faculty in the B building. The university campus-map business-college marker supplies the coordinates."
+    },
+    {
+      "id": "columbia-decision-risk-operations-kravis",
+      "institution": "Columbia University",
+      "rowIds": [
+        "columbia-university__graduate-school-of-business__decision-risk-and-operations",
+        "columbia-university__columbia-business-school__decision-risk-and-operations"
+      ],
+      "school": "Columbia Business School",
+      "department": "Decision, Risk, and Operations Division",
+      "building": "Henry R. Kravis Hall",
+      "address": "940 Kravis, 665 West 130th Street, New York, NY 10027, United States",
+      "lat": 40.8181357,
+      "lng": -73.9593244,
+      "addressSource": "https://business.columbia.edu/directory/departments/dro",
+      "coordinateSource": "https://operations.cufo.columbia.edu/content/henry-r-kravis-hall",
+      "checked": "2026-10-23",
+      "notes": "The division's official directory gives 940 Kravis. Facilities identifies Kravis Hall and publishes these building coordinates."
+    },
+    {
+      "id": "kaist-industrial-systems-e2",
+      "institution": "Korea Advanced Institute of Science and Technology",
+      "institutionKey": "kaist",
+      "rowIds": [
+        "kaist____industrial-and-systems-engineering"
+      ],
+      "school": "College of Engineering",
+      "department": "Department of Industrial and Systems Engineering",
+      "building": "Industrial and Management Building (E2-2)",
+      "address": "Room 2126, Industrial and Management Building, 291 Daehak-ro, Yuseong-gu, Daejeon, Republic of Korea",
+      "lat": 36.367371,
+      "lng": 127.364438,
+      "addressSource": "https://ise.kaist.ac.kr/contact",
+      "coordinateSource": "https://aai.kaist.ac.kr/sub1_1.php",
+      "checked": "2026-10-23",
+      "notes": "Department office is E2 room 2126. The department's Applied Artificial Intelligence Laboratory embeds a map of the Industrial and Management Building. The map's named place (15618825904033148007) confirms these pin coordinates, independently of the viewport centre. The College of Business is in Seoul and is not assigned this location."
+    },
+    {
+      "id": "ohio-state-integrated-systems-baker",
+      "institution": "Ohio State University",
+      "rowIds": [
+        "ohio-state-university__college-of-engineering__integrated-systems-engineering"
+      ],
+      "school": "College of Engineering",
+      "department": "Department of Integrated Systems Engineering",
+      "building": "Baker Systems Engineering Building",
+      "address": "210 Baker Systems Engineering Building, 1971 Neil Avenue, Columbus, OH 43210, United States",
+      "lat": 40.0016552,
+      "lng": -83.0159311,
+      "addressSource": "https://ise.osu.edu/giving-ise-department",
+      "coordinateSource": "https://ise.osu.edu/map-directions",
+      "checked": "2026-10-23",
+      "notes": "The official department directions link to a Google Maps place with these !3d/!4d coordinates, distinct from the map viewport centre."
+    },
+    {
+      "id": "ball-state-information-systems-operations-whitinger",
+      "institution": "Ball State University",
+      "rowIds": [
+        "ball-state-university__miller-college-of-business__information-systems-and-operations-management"
+      ],
+      "school": "Miller College of Business",
+      "department": "Department of Information Systems and Operations Management",
+      "building": "Whitinger Business Building",
+      "address": "Room 203, Whitinger Business Building, Muncie, IN 47306, United States",
+      "lat": 40.20348358,
+      "lng": -85.40643311,
+      "addressSource": "https://bsu.edu/academics/collegesanddepartments/isom/about-us/contact-us",
+      "coordinateSource": "https://www.bsu.edu/map/buildings/campus/whitinger-business-building",
+      "checked": "2026-10-24",
+      "notes": "The department contact page identifies its main office as WB 203. The university building map explicitly marks the named Whitinger Business Building with these coordinates."
+    },
+    {
+      "id": "bath-information-decisions-operations-10-east",
+      "institution": "University of Bath",
+      "rowIds": [
+        "university-of-bath__school-of-management__information-decisions-and-operations",
+        "university-of-bath____om",
+        "university-of-bath____operations-management-supply-chain-management-project-manage"
+      ],
+      "school": "School of Management",
+      "department": "Information, Decisions and Operations Division",
+      "building": "10 East",
+      "address": "10 East, Claverton Down, Bath BA2 7AY, United Kingdom",
+      "lat": 51.3782385,
+      "lng": -2.3255707,
+      "addressSource": "https://www.bath.ac.uk/research-groups/information-decisions-and-operations-division/",
+      "coordinateSource": "https://www.bath.ac.uk/locations/10-east/",
+      "supportingSources": [
+        "https://www.bath.ac.uk/teams/school-of-management-reception/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The division's contact section explicitly names its School of Management reception at 10 East; the official building page publishes these GPS coordinates. The division includes operations research and supply chain management, resolving the existing abbreviated and discipline aliases to their host division."
+    },
+    {
+      "id": "massachusetts-technology-sloan-operations-management-e62",
+      "institution": "Massachusetts Institute of Technology",
+      "institutionKey": "MIT Sloan",
+      "rowIds": [
+        "mit-sloan____om"
+      ],
+      "school": "Sloan School of Management",
+      "department": "Operations Management",
+      "building": "Building E62",
+      "address": "100 Main Street, Cambridge, MA 02142, United States",
+      "lat": 42.361164,
+      "lng": -71.082175,
+      "addressSource": "https://orc.mit.edu/people/faculty/",
+      "coordinateSource": "https://calendar.mit.edu/building_e62",
+      "supportingSources": [
+        "https://capitalprojects.mit.edu/projects/mit-sloan-school-e62"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official faculty directory locates Operations Management faculty Freund and Golrezaei and Operations Research and Statistics faculty Jacquillat in Building E62. Official building calendar provides named E62 GeoCoordinates; not the generic Sloan map pin."
+    },
+    {
+      "id": "massachusetts-technology-sloan-operations-research-statistics-e62",
+      "institution": "Massachusetts Institute of Technology",
+      "institutionKey": "MIT Sloan",
+      "rowIds": [
+        "mit-sloan____or-stat"
+      ],
+      "school": "Sloan School of Management",
+      "department": "Operations Research and Statistics",
+      "building": "Building E62",
+      "address": "100 Main Street, Cambridge, MA 02142, United States",
+      "lat": 42.361164,
+      "lng": -71.082175,
+      "addressSource": "https://orc.mit.edu/people/faculty/",
+      "coordinateSource": "https://calendar.mit.edu/building_e62",
+      "supportingSources": [
+        "https://capitalprojects.mit.edu/projects/mit-sloan-school-e62"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official faculty directory locates Operations Management faculty Freund and Golrezaei and Operations Research and Statistics faculty Jacquillat in Building E62. Official building calendar provides named E62 GeoCoordinates; not the generic Sloan map pin."
+    },
+    {
+      "id": "murray-state-management-marketing-business-building",
+      "institution": "Murray State University",
+      "rowIds": [
+        "murray-state-university__arthur-j-bauernfeind-college-of-business__management-marketing-and-business-administration"
+      ],
+      "school": "Arthur J. Bauernfeind College of Business",
+      "department": "Department of Management, Marketing and Business Administration",
+      "building": "Business Building",
+      "address": "Room 451, Business Building, Murray, KY 42071, United States",
+      "lat": 36.61177,
+      "lng": -88.32371,
+      "addressSource": "https://www.murraystate.edu/about/Offices/InformationSystems/DepartmentalPhoneListings.aspx",
+      "coordinateSource": "https://www.murraystate.edu/about/CampusMap.aspx",
+      "supportingSources": [
+        "https://murraystate.maps.arcgis.com/apps/MapTour/index.html?appid=3cc28a808a454ea08139e59a56f8f5a9"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The current university departmental directory identifies the office at 451 Business Building. The interactive map linked from the official campus map contains the named Business Building feature with explicit latitude and longitude."
+    },
+    {
+      "id": "morgan-state-graves-school-business-center",
+      "institution": "Morgan State University",
+      "rowIds": [
+        "morgan-state-university__earl-g-graves-school-of-business-and-management"
+      ],
+      "school": "Earl G. Graves School of Business and Management",
+      "department": "",
+      "building": "Morgan Business Center",
+      "address": "4200 Hillen Road, Baltimore, MD 21218, United States",
+      "lat": 39.341241,
+      "lng": -76.588063,
+      "addressSource": "https://www.morgan.edu/gsbm",
+      "coordinateSource": "https://events.morgan.edu/morgan_business_center",
+      "supportingSources": [
+        "https://www.morgan.edu/gsbm",
+        "https://www.morgan.edu/information-science-and-systems/academic-programs",
+        "https://morgan.peopleadmin.com/postings/8917"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The university building page provides explicit GeoCoordinates for Morgan Business Center. The school supplies its current physical address as 4200 Hillen Road; the department contact uses 4100 Hillen Road but identifies the same building and Suite 510. The official lecturer posting confirms the Supply Chain and Project Management posting belongs to Information Science and Systems; the department also hosts Services and Supply Chain Management."
+    },
+    {
+      "id": "morgan-state-information-science-systems-business-center",
+      "institution": "Morgan State University",
+      "rowIds": [
+        "morgan-state-university____information-science-and-systems",
+        "morgan-state-university____supply-chain-and-project-management",
+        "morgan-state-university____supply-chain-management"
+      ],
+      "school": "Earl G. Graves School of Business and Management",
+      "department": "Department of Information Science and Systems",
+      "building": "Morgan Business Center",
+      "address": "Suite 510, 4200 Hillen Road, Baltimore, MD 21218, United States",
+      "lat": 39.341241,
+      "lng": -76.588063,
+      "addressSource": "https://www.morgan.edu/sbm/inss",
+      "coordinateSource": "https://events.morgan.edu/morgan_business_center",
+      "supportingSources": [
+        "https://www.morgan.edu/gsbm",
+        "https://www.morgan.edu/information-science-and-systems/academic-programs",
+        "https://morgan.peopleadmin.com/postings/8917"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The university building page provides explicit GeoCoordinates for Morgan Business Center. The school supplies its current physical address as 4200 Hillen Road; the department contact uses 4100 Hillen Road but identifies the same building and Suite 510. The official lecturer posting confirms the Supply Chain and Project Management posting belongs to Information Science and Systems; the department also hosts Services and Supply Chain Management."
+    },
+    {
+      "id": "ucl-global-business-health-marshgate",
+      "institution": "University College London",
+      "institutionKey": "UCL Global Business School for Health",
+      "rowIds": [
+        "ucl-global-business-school-for-health____operations-and-project-management-ai-focus",
+        "ucl-global-business-school-for-health____supply-chain-management",
+        "ucl-global-business-school-for-health____sustainable-scm"
+      ],
+      "school": "Global Business School for Health",
+      "department": "",
+      "building": "Marshgate",
+      "address": "7 Sidings Street, Stratford, London E20 2AE, United Kingdom",
+      "lat": 51.5376263,
+      "lng": -0.0120081,
+      "addressSource": "https://www.ucl.ac.uk/engage/ucl-east/about-ucl-east/spaces-and-facilities",
+      "coordinateSource": "https://www.ucl.ac.uk/engage/ucl-east/about-ucl-east/visit-us",
+      "supportingSources": [
+        "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The official building directory locates the Global Business School for Health workspace in Marshgate. University directions link to a Google Maps query for 51.5376263,-0.0120081, specifically under Marshgate. These discipline-labelled rows belong to the school, rather than separate documented departments."
+    },
+    {
+      "id": "oakland-decision-information-sciences-elliott",
+      "institution": "Oakland University",
+      "rowIds": [
+        "oakland-university____quant-methods-man-sci"
+      ],
+      "school": "School of Business Administration",
+      "department": "Department of Decision and Information Sciences",
+      "building": "Elliott Hall",
+      "address": "Room 440, 275 Varner Drive, Rochester, MI 48309-4485, United States",
+      "lat": 42.672165,
+      "lng": -83.214035,
+      "addressSource": "https://oakland.edu/business/academic-departments/decision-and-information-sciences/",
+      "coordinateSource": "https://map.concept3d.com/?id=566#!m/46963",
+      "supportingSources": [
+        "https://www.oakland.edu/about/map/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The department contact office is Elliott Hall 440; the university-linked campus map academic-building marker 46963 explicitly identifies Elliott Hall and its faculty offices. Coordinates are the named building marker, not the university-wide pin."
+    },
+    {
+      "id": "texas-arlington-information-systems-operations-business",
+      "institution": "The University of Texas at Arlington",
+      "institutionKey": "University of Texas at Arlington",
+      "rowIds": [
+        "university-of-texas-at-arlington____business-statistics",
+        "university-of-texas-at-arlington____isba",
+        "university-of-texas-at-arlington____om"
+      ],
+      "school": "College of Business",
+      "department": "Department of Information Systems and Operations Management",
+      "building": "Business Building",
+      "address": "Room 535, 701 South West Street, Arlington, TX 76019, United States",
+      "lat": 32.729774,
+      "lng": -97.110603,
+      "addressSource": "https://www.uta.edu/academics/schools-colleges/business/departments/information-systems-and-operations-management/faculty-and-staff",
+      "coordinateSource": "https://maps.uta.edu/?id=2229#!m/813835",
+      "supportingSources": [
+        "https://catalog.uta.edu/pdf/2025-2026.pdf",
+        "https://www.uta.edu/academics/schools-colleges/business/departments/information-systems-and-operations-management/bachelor-of-science-business-analytics"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The university campus map supplies an explicit department marker in Business Building. Department offices are 535C and 535D, and the university catalog confirms the department location and business-statistics, information-systems, analytics and operations scope. The separate artificial-intelligence row remains unresolved because its hiring unit has not been verified."
+    },
+    {
+      "id": "colorado-boulder-strategy-entrepreneurship-operations-koelbel",
+      "institution": "University of Colorado Boulder",
+      "rowIds": [
+        "university-of-colorado-boulder____scm-analytics-om"
+      ],
+      "school": "Leeds School of Business",
+      "department": "Strategy, Entrepreneurship and Operations Division",
+      "building": "Koelbel Building",
+      "address": "995 Regent Drive, Boulder, CO 80309-0419, United States",
+      "lat": 40.005684,
+      "lng": -105.263451,
+      "addressSource": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty",
+      "coordinateSource": "https://www.colorado.edu/map/?id=336#!m/136278",
+      "supportingSources": [
+        "https://www.colorado.edu/business/media/18076"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official division directory and current supply-chain faculty director curriculum vitae identify Koelbel Building. Exact building coordinates and street address are supplied by the university campus map marker 136278."
+    },
+    {
+      "id": "cambridge-judge-550",
+      "institution": "University of Cambridge",
+      "institutionKey": "Judge Business School",
+      "rowIds": [
+        "judge-business-school____om-tech"
+      ],
+      "school": "Cambridge Judge Business School",
+      "department": "Operations and Technology Management",
+      "building": "Cambridge Judge Business School, Old Addenbrooke’s site",
+      "address": "Trumpington Street, Cambridge CB2 1AG, United Kingdom",
+      "lat": 52.1999507,
+      "lng": 0.1216127,
+      "addressSource": "https://www.jbs.cam.ac.uk/faculty-research/subject-groups/operations-technology-management/",
+      "coordinateSource": "https://www.jbs.cam.ac.uk/about/contact/",
+      "supportingSources": [
+        "https://www.jbs.cam.ac.uk/about/contact/access-for-people-with-disabilities/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official subject-group and contact pages locate these groups at Cambridge Judge. Exact named Judge Business School marker extracted from its official contact-page map; not embed viewport."
+    },
+    {
+      "id": "cambridge-judge-551",
+      "institution": "University of Cambridge",
+      "institutionKey": "Judge Business School",
+      "rowIds": [
+        "judge-business-school____ot-is"
+      ],
+      "school": "Cambridge Judge Business School",
+      "department": "Organisational Theory and Information Systems",
+      "building": "Cambridge Judge Business School, Old Addenbrooke’s site",
+      "address": "Trumpington Street, Cambridge CB2 1AG, United Kingdom",
+      "lat": 52.1999507,
+      "lng": 0.1216127,
+      "addressSource": "https://www.jbs.cam.ac.uk/faculty-research/subject-groups/organisational-theory-information-systems/",
+      "coordinateSource": "https://www.jbs.cam.ac.uk/about/contact/",
+      "supportingSources": [
+        "https://www.jbs.cam.ac.uk/about/contact/access-for-people-with-disabilities/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official subject-group and contact pages locate these groups at Cambridge Judge. Exact named Judge Business School marker extracted from its official contact-page map; not embed viewport."
+    },
+    {
+      "id": "york-schulich-operations-information-systems",
+      "institution": "York University",
+      "rowIds": [
+        "york-university__schulich-school-of-business__operations-management-and-information-systems"
+      ],
+      "school": "Schulich School of Business",
+      "department": "Operations Management and Information Systems",
+      "building": "Seymour Schulich Building",
+      "address": "Area coordinator office S340, 111 Ian Macdonald Boulevard, Toronto, ON M3J 1P3, Canada",
+      "lat": 43.7732271,
+      "lng": -79.4982574,
+      "addressSource": "https://schulich.yorku.ca/faculty/adam-diamant/",
+      "coordinateSource": "https://schulich.yorku.ca/about/directions/",
+      "checked": "2026-10-24",
+      "notes": "The area coordinator profile identifies office S340; the official directions page identifies the Keele campus Schulich building and its exact destination coordinates. Downtown executive centre is a separate map and was not used."
+    },
+    {
+      "id": "london-business-management-science-sussex",
+      "institution": "University of London",
+      "rowIds": [
+        "university-of-london__london-business-school__management-science-and-operations"
+      ],
+      "school": "London Business School",
+      "department": "Management Science and Operations",
+      "building": "London Business School, Sussex Place",
+      "address": "Sussex Place, Regent’s Park, London NW1 4SA, United Kingdom",
+      "lat": 51.5261552,
+      "lng": -0.160668,
+      "addressSource": "https://assets.london.edu/hxo16fanegqh/5bGvYUKlWkeGIp7bZdpkDQ/34c375a6f079d65bb2b39d38bd2dd841/CV_SAYANG_202406.pdf",
+      "coordinateSource": "https://www.london.edu/about/contact",
+      "supportingSources": [
+        "https://www.london.edu/faculty-and-research/management-science-and-operations/faculty-profiles"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Management Science and Operations professor Alex Yang lists Sussex Place as his professional address. Official school contact page links the exact Sussex Place named map destination; its Dubai map is not used."
+    },
+    {
+      "id": "technion-data-decision-operations",
+      "institution": "Technion – Israel Institute of Technology",
+      "rowIds": [
+        "technion-israel-institute-of-technology__faculty-of-data-and-decision-sciences__operations-management"
+      ],
+      "school": "Faculty of Data and Decision Sciences",
+      "department": "Operations Management",
+      "building": "Faculty of Data and Decision Sciences",
+      "address": "Technion City, Haifa 3200003, Israel",
+      "lat": 32.7741998,
+      "lng": 35.0236655,
+      "addressSource": "https://dds.technion.ac.il/contact_us/",
+      "coordinateSource": "https://dds.technion.ac.il/contact_us/",
+      "supportingSources": [
+        "https://dds.technion.ac.il/people/academic-staff/mendelson-gal/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Faculty contact-page map names the Faculty of Data and Decision Sciences, with marker coordinates extracted from the embedded map data, not its different viewport centre. Operations Management faculty profile confirms membership and office Bloomfield 302."
+    },
+    {
+      "id": "queens-smith-557",
+      "institution": "Queen’s University",
+      "institutionKey": "Smith School of Business",
+      "rowIds": [
+        "smith-school-of-business____digital-technology"
+      ],
+      "school": "Smith School of Business",
+      "department": "Digital Technology",
+      "building": "Goodes Hall",
+      "address": "143 Union Street West, Kingston, ON K7L 3N6, Canada",
+      "lat": 44.228302,
+      "lng": -76.4975972,
+      "addressSource": "https://dev.smith.queensu.ca/faculty_and_research/faculty_list/CVs/Shaun-Cahill-CV.pdf",
+      "coordinateSource": "https://smith.queensu.ca/about/contact.php",
+      "supportingSources": [
+        "https://smith.queensu.ca/faculty_and_research/faculty_list/brohman-kathryn.php"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official faculty CV identifies Goodes Hall office. Official school contact page embeds two maps; the Goodes Hall named marker is used, not Toronto executive-education site or map viewport. Current area names come from official faculty profiles."
+    },
+    {
+      "id": "queens-smith-653",
+      "institution": "Queen’s University",
+      "institutionKey": "Queen's University",
+      "rowIds": [
+        "queen-s-university__queen-s-school-of-business__management-science-and-operations-management"
+      ],
+      "school": "Smith School of Business",
+      "department": "Management Analytics",
+      "building": "Goodes Hall",
+      "address": "143 Union Street West, Kingston, ON K7L 3N6, Canada",
+      "lat": 44.228302,
+      "lng": -76.4975972,
+      "addressSource": "https://smith.queensu.ca/faculty_and_research/faculty_list/CVs/Guang-Li-CV.pdf",
+      "coordinateSource": "https://smith.queensu.ca/about/contact.php",
+      "supportingSources": [
+        "https://smith.queensu.ca/faculty_and_research/faculty_list/burns-richard.php"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official faculty CV identifies Goodes Hall office. Official school contact page embeds two maps; the Goodes Hall named marker is used, not Toronto executive-education site or map viewport. Current area names come from official faculty profiles."
+    },
+    {
+      "id": "grand-valley-management-seidman",
+      "institution": "Grand Valley State University",
+      "rowIds": [
+        "grand-valley-state-university____management"
+      ],
+      "school": "Seidman College of Business",
+      "department": "Management Department",
+      "building": "L. William Seidman Center",
+      "address": "Suite 3057, 50 Front Avenue Southwest, Grand Rapids, MI 49504, United States",
+      "lat": 42.9617669,
+      "lng": -85.6793429,
+      "addressSource": "https://www.gvsu.edu/management/contact-us-24.htm",
+      "coordinateSource": "https://calendar.gvsu.edu/l-william-seidman-center-502",
+      "checked": "2026-10-24",
+      "notes": "Department office explicitly Suite3057. Exact named Seidman Center destination extracted from official building calendar map, not nearby map centre or parking lot."
+    },
+    {
+      "id": "arizona-management-information-systems-mcclelland",
+      "institution": "University of Arizona",
+      "rowIds": [
+        "university-of-arizona____mis"
+      ],
+      "school": "Eller College of Management",
+      "department": "Department of Management Information Systems",
+      "building": "McClelland Hall",
+      "address": "Room 430, 1130 East Helen Street, Tucson, AZ 85721, United States",
+      "lat": 32.2366572,
+      "lng": -110.9543371,
+      "addressSource": "https://eller.arizona.edu/departments-research/schools-departments/mis",
+      "coordinateSource": "https://eller.arizona.edu/visit",
+      "checked": "2026-10-24",
+      "notes": "Department office explicitly McClelland430. Official college visit-page map destination is McClelland Hall with these coordinates; excludes its viewport and Phoenix campus."
+    }
+  ]
+}

@@ -17,7 +17,10 @@
       'UCL GBSH':'University College London — Global Business School for Health',
       'ESSEC':'ESSEC Business School',
       'IESE':'IESE Business School',
-      'IESEG':'IÉSEG School of Management'
+      'IESEG':'IÉSEG School of Management',
+      'HEC Montréal':'École des hautes études commerciales de Montréal (HEC Montréal)',
+      'UT San Antonio':'The University of Texas at San Antonio',
+      'WU Vienna':'Vienna University of Economics and Business'
     };
     return names[name]||name;
   }
@@ -31,13 +34,22 @@
     var groups=new Map(), names=[card.institution].concat((card.aka||'').split(' · '));
     (card.schools||[]).forEach(function(s){(s.rows||[]).forEach(function(r){
       if(S.directoryExcluded({institution:card.institution,school:s.name}))return;
+      var verified=(data.verified||[]).find(function(v){return S.institutionKey(v.institutionKey||v.institution)===S.institutionKey(card.institution)&&v.rowIds.indexOf(r.id)!==-1;});
       var c=S.canonColumns({institution:card.institution,school:s.name||'',unit:r.department||''});
       var uiuc=S.institutionKey(card.institution)===S.institutionKey('University of Illinois at Urbana-Champaign');
       var school=uiuc?c.school:(s.name||c.school), department=uiuc?c.unit:r.department;
+      var aliases=[{school:school,department:department}];
+      if(verified){school=typeof verified.school==='string'?verified.school:school;department=verified.department||department;r=Object.assign({},r,verified,{id:r.id,locationVerified:true,mapUrl:'https://www.google.com/maps/search/?api=1&query='+verified.lat+','+verified.lng});}
       var id=school?'school:'+fold(school):'department:'+fold(department);
+      // Verified departments in different buildings must not inherit one another's pins.
+      if(verified)id+=':location:'+verified.id;
       if(!groups.has(id))groups.set(id,{name:school,rows:[],seen:new Set()});
       var g=groups.get(id),rk=fold(department);
-      if(!g.seen.has(rk)){g.rows.push(Object.assign({},r,{school:school,department:department}));g.seen.add(rk);}
+      if(!g.seen.has(rk)){g.rows.push(Object.assign({},r,{school:school,department:department,mapAliases:aliases}));g.seen.add(rk);}
+      else {
+        var existing=g.rows.find(function(row){return fold(row.department)===rk;});
+        existing.mapAliases.push.apply(existing.mapAliases,aliases);
+      }
       if(data.rowInstitutions[r.id])names.push(data.rowInstitutions[r.id]);
     });});
     // An unspecified university row adds no separate department beside named ones.
@@ -50,7 +62,7 @@
     var out=[];
     groups.forEach(function(g,id){
       var candidates=g.rows.filter(located).map(function(r){return Object.assign({},r);});
-      history.forEach(function(p){
+      if(!g.rows.some(function(r){return r.locationVerified;}))history.forEach(function(p){
         var c=S.canonColumns({institution:card.institution,school:p.school||'',unit:p.department||''});
         if((g.name&&fold(c.school)===fold(g.name)) || (!g.name&&!c.school&&g.rows.some(function(r){return fold(r.department)===fold(c.unit);})))candidates.push(p);
       });
@@ -67,13 +79,16 @@
         var xy=located(p)?coord(p):'unmapped';if(seen.has(xy))return;seen.add(xy);
         var rows=g.rows.filter(function(r){return !located(r)||coord(r)===xy;});
         if(!rows.length)return;
-        var scoped=Object.assign({},card,{id:card.id+'::'+id+'::'+xy,universityId:card.id,
-          schools:[{name:g.name,rows:rows}],n:rows.reduce(function(n,r){return n+(r.n||0);},0)});
+        var scoped=Object.assign({},card,{id:card.id+'::'+id+'::'+xy,universityId:card.id,officialInstitution:p.locationVerified?p.institution:null,
+          schools:[{name:g.name,rows:rows}],countries:p.locationVerified&&p.country?[p.country]:card.countries,n:rows.reduce(function(n,r){return n+(r.n||0);},0)});
         out.push(Object.assign({},p,{school:g.name,card:scoped,approximate:approximate,
           country:p.country||(card.countries||[])[0]||'',label:g.name||rows.map(function(r){return r.department;}).filter(Boolean).join(' · ')||card.institution}));
       });
     });
     return out;
   }
-  return {pointsFor:pointsFor,located:located,displayName:displayName,departmentName:departmentName};
+  function matchesRow(r,school,department){
+    return [{school:r.school,department:r.department}].concat(r.mapAliases||[]).some(function(a){return (!school||fold(a.school)===fold(school))&&(!department||fold(a.department)===fold(department));});
+  }
+  return {pointsFor:pointsFor,located:located,displayName:displayName,departmentName:departmentName,matchesRow:matchesRow};
 }));

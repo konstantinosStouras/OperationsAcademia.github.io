@@ -79,6 +79,11 @@ async function main() {
   const references = await readJson('data/reference-places.json', []);
 
   const { rows } = buildDirectory({ archive, seed: seed.concat(references), jobs, past, omlist, members });
+  // Building verification can resolve an old posting abbreviation to an
+  // official department. Keep stable row identities and retain both search terms.
+  const locations = await readJson('data/school-map-locations.json');
+  const mapTerms = new Map(locations.records.flatMap(location => location.rowIds.map(id => [id, [location.school, location.department].filter(Boolean)])));
+  for (const row of rows) if (mapTerms.has(row.id)) row.mapSearchTerms = mapTerms.get(row.id);
   const stats = directoryStats(rows);
 
   const body = JSON.stringify(rows, null, 1) + '\n';

@@ -98,7 +98,25 @@ try{
   assert.ok(await fullName.evaluate(()=>testMap.shown().every(p=>p.card.institution==='KAIST')));
   await fullName.close();
 
+  const evidence=JSON.parse(fs.readFileSync(path.join(root,'data/school-map-locations.json'),'utf8')).records;
+  const directory=JSON.parse(fs.readFileSync(path.join(root,'data/directory.json'),'utf8'));
+  for(const location of evidence){
+    for(const id of location.rowIds){
+      const row=directory.find(r=>r.id===id);
+      const url=nav.furtherInfoUrl({institution:row.institution,school:row.school,unit:row.department,furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=legacy'});
+      const q=await pageAt(new URL(url).search);
+      try{await q.waitForSelector(row.department?'.oa-map-selected-department':'.oa-map-popup',{timeout:5000});}
+      catch(error){throw new Error(id+': '+await q.locator('.oa-map-status').innerText(),{cause:error});}
+      assert.ok((await q.locator('.oa-map-popup').innerText()).includes(location.address),id+' opens its verified address');
+      assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[location.lat,location.lng],id+' opens the building pin');
+      await q.locator('#oaf-dept').fill(location.department||location.school||'');
+      await q.waitForFunction(expected=>testMap.shown().some(p=>p.locationVerified&&p.lat===expected.lat&&p.lng===expected.lng),location);
+      await q.close();
+    }
+  }
+
   const all=await pageAt();
+  if(process.env.MAP_AUDIT_PATH)fs.writeFileSync(process.env.MAP_AUDIT_PATH,JSON.stringify(await all.evaluate(()=>testMap.shown()),null,2)+'\n');
   const audit=await all.evaluate(()=>{
     const points=testMap.shown(), failures=[], groups=[];
     testMap.map.eachLayer(layer=>{if(layer instanceof L.MarkerClusterGroup)groups.push(layer);});
