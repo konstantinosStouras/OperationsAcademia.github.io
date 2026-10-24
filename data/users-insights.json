@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-24T05:44:04.143Z",
- "members": 394,
+ "generated": "2026-10-24T08:49:32.064Z",
+ "members": 395,
  "k": 3,
  "affiliation": {
-  "listed": 311,
+  "listed": 312,
   "other": 48,
   "none": 35
  },
@@ -211,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 141
+  "rest": 142
  },
  "countries": {
   "count": 16,
@@ -253,11 +253,15 @@
     "members": 4
    },
    {
+    "name": "Australia",
+    "members": 3
+   },
+   {
     "name": "Oman",
     "members": 3
    }
   ],
-  "rest": 9,
+  "rest": 7,
   "unknown": 102
  }
 }
