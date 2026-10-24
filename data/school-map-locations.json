@@ -709,6 +709,784 @@
       "coordinateSource": "https://eller.arizona.edu/visit",
       "checked": "2026-10-24",
       "notes": "Department office explicitly McClelland430. Official college visit-page map destination is McClelland Hall with these coordinates; excludes its viewport and Phoenix campus."
+    },
+    {
+      "id": "texas-state-engineering-technology-mitte",
+      "institution": "Texas State University",
+      "rowIds": [
+        "texas-state-university__college-of-science-and-engineering__engineering-technology"
+      ],
+      "school": "College of Science and Engineering",
+      "department": "Department of Engineering Technology",
+      "building": "Roy F. Mitte Building",
+      "address": "Room 2240, 749 North Comanche Street, San Marcos, TX 78666-3400, United States",
+      "lat": 29.889027,
+      "lng": -97.946999,
+      "addressSource": "https://www.txst.edu/technology/aboutus.html",
+      "coordinateSource": "https://map.concept3d.com/?id=308#!m/233378",
+      "notes": "Current department contact page gives room2240 and physical street address. Official campus map academic-building marker233378 supplies the point; excludes adjacent Joann Cole Mitte and the Ingram School's other building.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "pennsylvania-state-informatics-intelligent-systems-westgate",
+      "institution": "Pennsylvania State University",
+      "rowIds": [
+        "pennsylvania-state-university__college-of-information-sciences-and-technology__informatics-and-intelligent-systems"
+      ],
+      "school": "College of Information Sciences and Technology",
+      "department": "Informatics and Intelligent Systems",
+      "building": "Westgate Building",
+      "address": "288 North Burrowes Road, University Park, PA 16802, United States",
+      "lat": 40.793678,
+      "lng": -77.868317,
+      "addressSource": "https://ist.psu.edu/about/location-and-contact",
+      "coordinateSource": "https://map.psu.edu/?id=1134#!m/191654",
+      "supportingSources": [
+        "https://ist.psu.edu/directory/kvr5517",
+        "https://ist.psu.edu/directory/dvc5952"
+      ],
+      "notes": "Official faculty profiles place Informatics and Intelligent Systems faculty in Westgate E313 and E331. The college contact page confirms classrooms/faculty are in Westgate, while its dean is separately in Innovation Hub. University campus-map named Westgate marker191654 supplies coordinates.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "houston-industrial-systems-engineering-building-2",
+      "institution": "University of Houston",
+      "rowIds": [
+        "university-of-houston__cullen-college-of-engineering__industrial-and-systems-engineering"
+      ],
+      "school": "Cullen College of Engineering",
+      "department": "Department of Industrial and Systems Engineering",
+      "building": "Engineering Building 2",
+      "address": "Room E206, 4222 Martin Luther King Boulevard, Houston, TX 77204-4008, United States",
+      "lat": 29.7235,
+      "lng": -95.3412222,
+      "addressSource": "https://www.ise.uh.edu/contact-us",
+      "coordinateSource": "https://goo.gl/maps/3sb2iwFMTwB2",
+      "supportingSources": [
+        "https://www.ise.uh.edu/"
+      ],
+      "notes": "Department contact page explicitly supplies Building2 RoomE206 and links a building-specific Google map. Its linked point is encoded as29°43′24.6″N95°20′28.4″W; converted to decimal degrees. Excludes the separate supply-chain technology program until its campus is confirmed.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "texas-state-information-systems-analytics-mccoy",
+      "institution": "Texas State University",
+      "rowIds": [
+        "texas-state-university__mccoy-college-of-business__information-systems-and-analytics",
+        "texas-state-university____is",
+        "texas-state-university____is-and-analytics"
+      ],
+      "school": "McCoy College of Business",
+      "department": "Department of Information Systems and Analytics",
+      "building": "Emmett and Miriam McCoy Hall",
+      "address": "Room 404, 601 University Drive, San Marcos, TX 78666-4616, United States",
+      "lat": 29.88829,
+      "lng": -97.944794,
+      "addressSource": "https://isa.mccoy.txst.edu/about/contact-us.html",
+      "coordinateSource": "https://map.concept3d.com/?id=308#!m/233380",
+      "notes": "The department gives McCoy Hall 404. The official Texas State maps URL redirects to campus map308; named McCoy Hall marker233380 gives the building point. Existing information-systems aliases resolve to this department; the separate ambiguous Analytics posting is not included.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "texas-state-management-mccoy",
+      "institution": "Texas State University",
+      "rowIds": [
+        "texas-state-university__mccoy-college-of-business__management"
+      ],
+      "school": "McCoy College of Business",
+      "department": "Department of Management",
+      "building": "Emmett and Miriam McCoy Hall",
+      "address": "McCoy Hall, 601 University Drive, San Marcos, TX 78666, United States",
+      "lat": 29.88829,
+      "lng": -97.944794,
+      "addressSource": "https://www.mccoy.txst.edu/about/contact.html",
+      "coordinateSource": "https://map.concept3d.com/?id=308#!m/233380",
+      "notes": "The college contact page and official campus-map building description both identify Management in McCoy Hall; named building marker233380 supplies coordinates.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "auburn-business-analytics-information-systems-lowder",
+      "institution": "Auburn University",
+      "rowIds": [
+        "auburn-university__harbert-college-of-business__business-analytics-and-information-systems",
+        "auburn-university____ba",
+        "auburn-university____ba-is",
+        "auburn-university____is-ba"
+      ],
+      "school": "Raymond J. Harbert College of Business",
+      "department": "Department of Business Analytics and Information Systems",
+      "building": "Edward L. and Catherine K. Lowder Business Building",
+      "address": "Second floor, 405 West Magnolia Avenue, Auburn, AL 36849, United States",
+      "lat": 32.6062071,
+      "lng": -85.4889434,
+      "addressSource": "https://harbert.auburn.edu/about/academic-departments/business-analytics-and-information-systems.html",
+      "coordinateSource": "https://harbert.auburn.edu/about/business-complex-maps.html",
+      "notes": "Official department page places the department on Lowder's second floor and identifies business analytics and information systems as its programs. The official building-map embed resolves named Lowder building place6966847520939494379 to these coordinates, not its viewport.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "auburn-supply-chain-lowder",
+      "institution": "Auburn University",
+      "rowIds": [
+        "auburn-university__harbert-college-of-business__supply-chain-management"
+      ],
+      "school": "Raymond J. Harbert College of Business",
+      "department": "Department of Supply Chain Management",
+      "building": "Edward L. and Catherine K. Lowder Business Building",
+      "address": "Fourth floor, 405 West Magnolia Avenue, Auburn, AL 36849, United States",
+      "lat": 32.6062071,
+      "lng": -85.4889434,
+      "addressSource": "https://harbert.auburn.edu/about/academic-departments/supply-chain-management.html",
+      "coordinateSource": "https://harbert.auburn.edu/about/business-complex-maps.html",
+      "notes": "Official department page explicitly places Supply Chain Management on Lowder's fourth floor. Building coordinates are the official linked map destination, distinct from the nearby Horton-Hardgrave building.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "pennsylvania-state-supply-chain-information-systems-business",
+      "institution": "Pennsylvania State University",
+      "rowIds": [
+        "pennsylvania-state-university____scm-sourcing-focus",
+        "pennsylvania-state-university____scm-tech-focus",
+        "pennsylvania-state-university____supply-chain-management"
+      ],
+      "school": "Smeal College of Business",
+      "department": "Department of Supply Chain and Information Systems",
+      "building": "Business Building",
+      "address": "Room 454, University Park, PA 16802, United States",
+      "lat": 40.804043,
+      "lng": -77.865181,
+      "addressSource": "https://smeal.psu.edu/directory?dept=scis",
+      "coordinateSource": "https://map.psu.edu/?id=1134#!m/205489",
+      "notes": "The department directory identifies 454 Business Building. The official University Park map names Business Building at marker205489, excluding Hostetter Business Services Building and nearby meadow markers. The source hiring links explicitly identify University Park and supply-chain management.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "houston-decision-information-sciences-melcher",
+      "institution": "University of Houston",
+      "rowIds": [
+        "university-of-houston__c-t-bauer-college-of-business__business-analytics",
+        "university-of-houston__c-t-bauer-college-of-business__department-of-decision-and-information-sciences",
+        "university-of-houston____decision-and-iis",
+        "university-of-houston____om-scm",
+        "university-of-houston____operations-management",
+        "university-of-houston____scm-om"
+      ],
+      "school": "C. T. Bauer College of Business",
+      "department": "Department of Decision and Information Sciences",
+      "building": "Leroy and Lucile Melcher Hall",
+      "address": "Room 280, 4250 Martin Luther King Boulevard, Houston, TX 77204-6021, United States",
+      "lat": 29.7207464,
+      "lng": -95.3390041,
+      "addressSource": "https://bauer.uh.edu/departments/disc/recruitment.php",
+      "coordinateSource": "https://www.bauer.uh.edu/search/parking-directions/",
+      "supportingSources": [
+        "https://www.bauer.uh.edu/search/building-maps/",
+        "https://careers.uh.edu/jobs/professor-of-practice-decision-information-sciences-houston-texas-united-states-fce2c1fc-eb84-4ad7-af50-c6f6d93d7eb6"
+      ],
+      "notes": "Department recruitment page gives Melcher Hall280 and Business Analytics hiring. University job description confirms operations management and information systems within the department. Official directions link the named Melcher/Bauer destination at4250MartinLutherKingBoulevard with these coordinates. This pin represents the main department office; some teaching can occur at Katy. The unrelated AI energy-systems posting is excluded.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "california-riverside-operations-supply-chain-business-building",
+      "institution": "University of California, Riverside",
+      "institutionKey": "University of California Riverside",
+      "rowIds": [
+        "university-of-california-riverside__a-gary-anderson-graduate-school-of-management__operations-and-supply-chain-management"
+      ],
+      "school": "School of Business, A. Gary Anderson Graduate School of Management",
+      "department": "Operations and Supply Chain Management",
+      "building": "School of Business Building",
+      "address": "School of Business Building, 900 University Avenue, Riverside, CA 92521, United States",
+      "lat": 33.969376,
+      "lng": -117.325363,
+      "addressSource": "https://business.ucr.edu/areas/oscm",
+      "coordinateSource": "https://campusmap.ucr.edu/?id=2106#!m/652321",
+      "supportingSources": [
+        "https://business.ucr.edu/contact-us",
+        "https://insideucr.ucr.edu/stories/2024/10/22/school-business-celebrates-new-building"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The faculty and school moved to the new School of Business Building in September 2024. The official current contact page places graduate programs there. The operations area page lists its seminars in SBB 420; the Information Systems faculty profile gives SBB 410. The university campus map School of Business Building marker 652321 gives the new building coordinates, distinct from old Anderson Hall."
+    },
+    {
+      "id": "california-riverside-information-systems-business-building",
+      "institution": "University of California, Riverside",
+      "institutionKey": "University of California Riverside",
+      "rowIds": [
+        "university-of-california-riverside____is"
+      ],
+      "school": "School of Business, A. Gary Anderson Graduate School of Management",
+      "department": "Information Systems",
+      "building": "School of Business Building",
+      "address": "School of Business Building, 900 University Avenue, Riverside, CA 92521, United States",
+      "lat": 33.969376,
+      "lng": -117.325363,
+      "addressSource": "https://profiles.ucr.edu/app/home/profile/richyueh",
+      "coordinateSource": "https://campusmap.ucr.edu/?id=2106#!m/652321",
+      "supportingSources": [
+        "https://business.ucr.edu/contact-us",
+        "https://insideucr.ucr.edu/stories/2024/10/22/school-business-celebrates-new-building"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The faculty and school moved to the new School of Business Building in September 2024. The official current contact page places graduate programs there. The operations area page lists its seminars in SBB 420; the Information Systems faculty profile gives SBB 410. The university campus map School of Business Building marker 652321 gives the new building coordinates, distinct from old Anderson Hall."
+    },
+    {
+      "id": "virginia-tech-grado-industrial-systems-durham",
+      "institution": "Virginia Polytechnic Institute and State University",
+      "institutionKey": "Virginia Tech",
+      "rowIds": [
+        "virginia-tech__grado-department-of-industrial-and-systems-engineering__operations-research"
+      ],
+      "school": "College of Engineering",
+      "department": "Grado Department of Industrial and Systems Engineering",
+      "building": "Durham Hall",
+      "address": "Room 250, 1145 Perry Street, Blacksburg, VA 24061, United States",
+      "lat": 37.23174,
+      "lng": -80.42382,
+      "addressSource": "https://www.ise.vt.edu/academics/undergrad/seniordesign-program/contact_us.html",
+      "coordinateSource": "https://www.vt.edu/about/locations/buildings/durham-hall.html",
+      "checked": "2026-10-24",
+      "notes": "The current department contact confirms the named building and office. The official university building page explicitly publishes these coordinates. Operations Research belongs to the Grado department; the medical Healthcare Operations posting is a different Roanoke location and is not merged here."
+    },
+    {
+      "id": "virginia-tech-business-information-technology-pamplin",
+      "institution": "Virginia Polytechnic Institute and State University",
+      "institutionKey": "Virginia Tech",
+      "rowIds": [
+        "virginia-tech__pamplin-college-of-business__business-information-technology"
+      ],
+      "school": "Pamplin College of Business",
+      "department": "Department of Business Information Technology",
+      "building": "Pamplin Hall",
+      "address": "Suite 1007, 880 West Campus Drive, Blacksburg, VA 24061, United States",
+      "lat": 37.22876,
+      "lng": -80.42462,
+      "addressSource": "https://bit.vt.edu/contact-us.html",
+      "coordinateSource": "https://www.vt.edu/about/locations/buildings/pamplin-hall.html",
+      "checked": "2026-10-24",
+      "notes": "The current department contact confirms the named building and office. The official university building page explicitly publishes these coordinates. Operations Research belongs to the Grado department; the medical Healthcare Operations posting is a different Roanoke location and is not merged here."
+    },
+    {
+      "id": "mississippi-state-industrial-systems-mccain",
+      "institution": "Mississippi State University",
+      "rowIds": [
+        "mississippi-state-university__james-worth-bagley-college-of-engineering__industrial-and-systems-engineering"
+      ],
+      "school": "James Worth Bagley College of Engineering",
+      "department": "Department of Industrial and Systems Engineering",
+      "building": "McCain Hall",
+      "address": "Room 260, McCain Hall, Mississippi State, MS 39762, United States",
+      "lat": 33.454246,
+      "lng": -88.788224,
+      "addressSource": "https://www.ise.msstate.edu/people/staff/",
+      "coordinateSource": "https://map.msstate.edu/",
+      "supportingSources": [
+        "https://www.ise.msstate.edu/people/faculty/",
+        "https://services5.arcgis.com/lQlymWSQoJ6CRYhh/arcgis/rest/services/BuildinglabelPoint/FeatureServer/104/3?f=pjson",
+        "https://services5.arcgis.com/lQlymWSQoJ6CRYhh/arcgis/rest/services/Building_Simple/FeatureServer/2/3?f=pjson"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Department administrative staff and chair are in McCain Hall room260. Official campus map links to ArcGIS experience18fb04cd79a5440a86940cec9fc797b2, webmapf5b30f4fa94e4afda062b9948274394e; its named McCain label point is inside the matching McCain Engineering footprint, whose description confirms Industrial Engineering occupancy."
+    },
+    {
+      "id": "texas-tech-industrial-manufacturing-systems",
+      "institution": "Texas Tech University",
+      "rowIds": [
+        "texas-tech-university__edward-e-whitacre-jr-college-of-engineering__industrial-manufacturing-and-systems-engineering"
+      ],
+      "school": "Edward E. Whitacre Jr. College of Engineering",
+      "department": "Department of Industrial, Manufacturing and Systems Engineering",
+      "building": "Industrial, Manufacturing and Systems Engineering Building",
+      "address": "905 Canton Avenue, Lubbock, TX 79409, United States",
+      "lat": 33.586981,
+      "lng": -101.8765183,
+      "addressSource": "https://www.depts.ttu.edu/imse/department/DepartmentFlyer.pdf",
+      "coordinateSource": "https://www.ttu.edu/campus-locations/listing.php",
+      "supportingSources": [
+        "https://maps.app.goo.gl/mnu6MGyjyNZvMZuUA"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The university campus locations directory supplies a named building Google Maps link; its destination !3d/!4d coordinates are used, not viewport centre. The official department flyer confirms engineering building street address; the current university catalog confirms Marketing and Supply Chain Management are a single area with office241 in Business Administration."
+    },
+    {
+      "id": "texas-tech-marketing-supply-chain-rawls",
+      "institution": "Texas Tech University",
+      "rowIds": [
+        "texas-tech-university__rawls-college-of-business__marketing",
+        "texas-tech-university____marketing-and-scm"
+      ],
+      "school": "Jerry S. Rawls College of Business",
+      "department": "Area of Marketing and Supply Chain Management",
+      "building": "Rawls College of Business Building",
+      "address": "Room 241, 703 Flint Avenue, Lubbock, TX 79409, United States",
+      "lat": 33.5878553,
+      "lng": -101.8792343,
+      "addressSource": "https://www.depts.ttu.edu/officialpublications/pdfs/2025-26_catalog_TTU.pdf",
+      "coordinateSource": "https://www.ttu.edu/campus-locations/listing.php",
+      "supportingSources": [
+        "https://maps.app.goo.gl/VDaUBKxotuSGKKh18"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The university campus locations directory supplies a named building Google Maps link; its destination !3d/!4d coordinates are used, not viewport centre. The official department flyer confirms engineering building street address; the current university catalog confirms Marketing and Supply Chain Management are a single area with office241 in Business Administration."
+    },
+    {
+      "id": "stanford-management-science-engineering-huang",
+      "institution": "Stanford University",
+      "rowIds": [
+        "stanford-university__school-of-engineering__management-science-and-engineering"
+      ],
+      "school": "School of Engineering",
+      "department": "Department of Management Science and Engineering",
+      "building": "Jen-Hsun Huang Engineering Center",
+      "address": "475 Via Ortega, Stanford, CA 94305, United States",
+      "lat": 37.42787956,
+      "lng": -122.17429865,
+      "addressSource": "https://msande.stanford.edu/get-involved/contact-us",
+      "coordinateSource": "https://campus-map.stanford.edu/?id=04-080",
+      "supportingSources": [
+        "https://maps.stanford.edu/ada/building-ada.cfm?facil_id=04-080"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Department contact confirms Huang Engineering Center. The official campus access guide confirms official building name and department occupancy; campus map XML named building04-080 gives the exact coordinates."
+    },
+    {
+      "id": "kennesaw-information-systems-security-burruss",
+      "institution": "Kennesaw State University",
+      "rowIds": [
+        "kennesaw-state-university__michael-j-coles-college-of-business__information-systems-and-security",
+        "kennesaw-state-university____is-cybersecurity",
+        "kennesaw-state-university____is-fintech"
+      ],
+      "school": "Michael J. Coles College of Business",
+      "department": "Department of Information Systems and Security",
+      "building": "Burruss Building",
+      "address": "560 Parliament Garden Way NW, Kennesaw, GA 30144, United States",
+      "lat": 34.039386,
+      "lng": -84.581745,
+      "addressSource": "https://campus.kennesaw.edu/colleges-departments/coles/academics/information-systems-security/faculty-staff.php",
+      "coordinateSource": "https://calendar.kennesaw.edu/burruss_building",
+      "checked": "2026-10-24",
+      "notes": "The current department directory puts its chair in Burruss481 and department faculty across the same building. Cybersecurity and FinTech are specialties in job titles explicitly naming Information Systems and Security; mapped to department office, not separate research center. The official named building calendar publishes these GeoCoordinates."
+    },
+    {
+      "id": "kennesaw-data-science-analytics-atrium",
+      "institution": "Kennesaw State University",
+      "rowIds": [
+        "kennesaw-state-university____ds-and-analytics"
+      ],
+      "school": "College of Computing and Software Engineering",
+      "department": "School of Data Science and Analytics",
+      "building": "Atrium Building",
+      "address": "Room J333, 680 Arntson Drive, Marietta, GA 30060, United States",
+      "lat": 33.937123,
+      "lng": -84.520178,
+      "addressSource": "https://campus.kennesaw.edu/colleges-departments/ccse/academics/data-science-analytics/contact-us.php",
+      "coordinateSource": "https://calendar.kennesaw.edu/atrium_building",
+      "checked": "2026-10-24",
+      "notes": "The current school contact explicitly gives AtriumJ333 on the Marietta campus, distinct from the Kennesaw campus. The official named Atrium building calendar publishes these GeoCoordinates."
+    },
+    {
+      "id": "hofstra-information-systems-business-analytics-guthart",
+      "institution": "Hofstra University",
+      "rowIds": [
+        "hofstra-university__frank-g-zarb-school-of-business__information-systems-and-business-analytics",
+        "hofstra-university____is"
+      ],
+      "school": "Frank G. Zarb School of Business",
+      "department": "Department of Information Systems and Business Analytics",
+      "building": "Leo A. Guthart Hall for Innovation and Discovery",
+      "address": "Room 365, California Avenue, Hempstead, NY 11549, United States",
+      "lat": 40.713627,
+      "lng": -73.597252,
+      "addressSource": "https://www.hofstra.edu/academics/colleges-and-schools/business/department-of-information-systems-business-analytics/",
+      "coordinateSource": "https://map.concept3d.com/?id=19#!m/272272",
+      "supportingSources": [
+        "https://www.hofstra.edu/about/visitors-guide/interactive-map/",
+        "https://news.hofstra.edu/2021/05/20/hofstra-renames-business-school-building-center-for-entrepreneurship-to-honor-leo-a-guthart/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The department page gives the executive secretary office as Guthart Hall 365 and department chair as 331. The campus map exact named academic-building marker identifies the renamed business building, distinct from Guthart Cultural Center Theater."
+    },
+    {
+      "id": "georgia-college-management-marketing-logistics-atkinson",
+      "institution": "Georgia College and State University",
+      "rowIds": [
+        "georgia-college-and-state-university__j-whitney-bunting-college-of-business-and-technology__management-marketing-and-logistics"
+      ],
+      "school": "J. Whitney Bunting College of Business and Technology",
+      "department": "Department of Management, Marketing and Logistics",
+      "building": "Atkinson Hall",
+      "address": "Room 201, 301 West Hancock Street, Milledgeville, GA 31061, United States",
+      "lat": 33.081757,
+      "lng": -83.230972,
+      "addressSource": "https://www.gcsu.edu/business/mml",
+      "coordinateSource": "https://map.concept3d.com/?id=941#!m/128341",
+      "supportingSources": [
+        "https://www.gcsu.edu/about/campus-maps"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Department contact page identifies room201 Atkinson Hall. The official university-linked campus map academic-building marker gives the exact building pin; its physical-address layer identifies301WestHancockStreet."
+    },
+    {
+      "id": "utah-operations-information-systems-eccles",
+      "institution": "University of Utah",
+      "rowIds": [
+        "university-of-utah____om-scm",
+        "university-of-utah____operations-and-is",
+        "university-of-utah____operations-and-supply-chain-management"
+      ],
+      "school": "David Eccles School of Business",
+      "department": "Department of Operations and Information Systems",
+      "building": "Spencer Fox Eccles Business Building",
+      "address": "Room 7132, 1655 East Campus Center Drive, Salt Lake City, UT 84112, United States",
+      "lat": 40.7648656,
+      "lng": -111.8378095,
+      "addressSource": "https://catalog.utah.edu/pages/department-OIS",
+      "coordinateSource": "https://eccles.utah.edu/doman/contact/",
+      "supportingSources": [
+        "https://digitallearning.utah.edu/classroom-search/room.php?room=143"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current university catalog gives the department office at Spencer Fox Eccles Business Building7132. The official Doman Innovation Studio contact page in the same building embeds an explicit map query for40.76486564288415,-111.83780945613323 under Map to Spencer Fox Eccles Business Building."
+    },
+    {
+      "id": "buffalo-operations-management-strategy-jacobs",
+      "institution": "University at Buffalo",
+      "rowIds": [
+        "university-at-buffalo__school-of-management__operations-management",
+        "university-at-buffalo____scm-and-om"
+      ],
+      "school": "School of Management",
+      "department": "Department of Operations Management and Strategy",
+      "building": "Jacobs Management Center",
+      "address": "Room 326, Jacobs Management Center, Buffalo, NY 14260, United States",
+      "lat": 42.999775,
+      "lng": -78.787046,
+      "addressSource": "https://management.buffalo.edu/about/contact-visit/office-department-directory.html",
+      "coordinateSource": "https://management.buffalo.edu/about/contact-visit/directions-parking.html",
+      "checked": "2026-10-24",
+      "notes": "Official department directory identifies room326JacobsManagementCenter. Directions publishes GPS coordinates; the embedded map was independently resolved and confirms that they are the named School of Management destination at160JacobsManagementCenter, place10852719090995651534, rather than only viewport or parking coordinates."
+    },
+    {
+      "id": "st-cloud-management-centennial",
+      "institution": "St. Cloud State University",
+      "rowIds": [
+        "st-cloud-state-university____scm-om-healthcare-om"
+      ],
+      "school": "Herberger Business School",
+      "department": "Department of Management",
+      "building": "Centennial Hall",
+      "address": "201 8th Street South, St. Cloud, MN 56301, United States",
+      "lat": 45.552581,
+      "lng": -94.150622,
+      "addressSource": "https://campusmap.stcloudstate.edu/building.aspx?bldgAbbr=CH",
+      "coordinateSource": "https://campusmap.stcloudstate.edu/building.aspx?bldgAbbr=CH",
+      "supportingSources": [
+        "https://www.stcloudstate.edu/programs/operations-management/default.aspx",
+        "https://www.stcloudstate.edu/hbs/about/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official campus building page explicitly lists Management and Herberger Business School in Centennial Hall and publishes building-specific GPS coordinates. Management-Operations program confirms the operations and supply-chain scope. The school remains the business education unit after2026formation of College of Business, Engineering and Technology."
+    },
+    {
+      "id": "aalto-mathematics-systems-analysis-undergraduate-centre",
+      "institution": "Aalto University",
+      "rowIds": [
+        "aalto-university____production-om"
+      ],
+      "school": "School of Science",
+      "department": "Department of Mathematics and Systems Analysis",
+      "building": "Undergraduate Centre",
+      "address": "Otakaari 1, 02150 Espoo, Finland",
+      "lat": 60.1862997,
+      "lng": 24.8285437,
+      "addressSource": "https://www.aalto.fi/en/department-of-mathematics-and-systems-analysis",
+      "coordinateSource": "https://www.aalto.fi/en/locations/undergraduate-centre",
+      "supportingSources": [
+        "https://list.aalto.fi/pipermail/job-offers-cs/2026-March/002622.html",
+        "https://users.math.tkk.fi/en/contact/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The original job category Production/OM refers to the Operations Research vacancy in Mathematics and Systems Analysis, confirmed by the university hiring announcement. Department location links Undergraduate Centre; official building page explicitly embeds marker60.18629968447946,24.828543663024902."
+    },
+    {
+      "id": "aalto-information-service-management-business",
+      "institution": "Aalto University",
+      "rowIds": [
+        "aalto-university____supply-chain-management"
+      ],
+      "school": "School of Business",
+      "department": "Department of Information and Service Management",
+      "building": "School of Business",
+      "address": "Ekonominaukio 1, 02150 Espoo, Finland",
+      "lat": 60.185937,
+      "lng": 24.8233938,
+      "addressSource": "https://www.aalto.fi/en/department-of-information-and-service-management",
+      "coordinateSource": "https://www.aalto.fi/en/locations/school-of-business",
+      "supportingSources": [
+        "https://www.aalto.fi/en/department-of-information-and-service-management/logistics"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Department page identifies supply-chain management as part of Logistics and provides visiting address Ekonominaukio1. Official building page has explicit OpenStreetMap marker60.18593695835851,24.82339382171631, distinct from the mathematics department building."
+    },
+    {
+      "id": "marquette-supply-chain-information-systems-analytics-obrien",
+      "institution": "Marquette University",
+      "rowIds": [
+        "marquette-university____oscm"
+      ],
+      "school": "College of Business Administration",
+      "department": "Supply Chain, Information Systems and Analytics",
+      "building": "Dr. E. J. and Margaret O’Brien Hall",
+      "address": "1530 West Wisconsin Avenue, Milwaukee, WI 53233, United States",
+      "lat": 43.0391949,
+      "lng": -87.9323313,
+      "addressSource": "https://www.marquette.edu/business/management/sc-is-an.php",
+      "coordinateSource": "https://www.marquette.edu/business/obrien-hall/index.php",
+      "supportingSources": [
+        "https://www.marquette.edu/business/directory/documents/terence-ow-curriculum-vitae.pdf"
+      ],
+      "checked": "2026-10-24",
+      "notes": "The official group page places operations and supply chain within Supply Chain, Information Systems and Analytics. Faculty directory identifies O’Brien Hall. Building page links https://goo.gl/maps/oZsbi8fVPjTcQTqXA which resolves the named building with destination3d43.0391949/4d-87.9323313, distinct from viewport43.0391959,-87.932975."
+    },
+    {
+      "id": "nebraska-kearney-supply-chain-west-center",
+      "institution": "University of Nebraska at Kearney",
+      "rowIds": [
+        "university-of-nebraska-at-kearney____supply-chain-management"
+      ],
+      "school": "College of Business and Technology",
+      "department": "Department of Marketing, Agribusiness, and Supply Chain Management",
+      "building": "West Center",
+      "address": "1917 West 24th Street, Kearney, NE, United States",
+      "lat": 40.700115,
+      "lng": -99.107248,
+      "addressSource": "https://catalog.unk.edu/graduate/general-information/facilities/",
+      "coordinateSource": "https://www.unk.edu/campus-map/?q=m5",
+      "supportingSources": [
+        "https://www.unk.edu/academics/marketing-agribusiness-scm/index.php"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current university facilities catalog explicitly places the department in West Center. Official campus map m5 marker supplies building coordinates and1917West24thStreet address."
+    },
+    {
+      "id": "columbia-business-operations-supply-chain-kravis",
+      "institution": "Columbia University",
+      "rowIds": [
+        "columbia-business-school____om-scm"
+      ],
+      "school": "Columbia Business School",
+      "department": "Decision, Risk, and Operations Division",
+      "building": "Henry R. Kravis Hall",
+      "address": "940 Kravis, 665 West 130th Street, New York, NY 10027, United States",
+      "lat": 40.8181357,
+      "lng": -73.9593244,
+      "addressSource": "https://business.columbia.edu/directory/departments/dro",
+      "coordinateSource": "https://operations.cufo.columbia.edu/content/henry-r-kravis-hall",
+      "checked": "2026-10-24",
+      "notes": "The division's official directory gives 940 Kravis. Facilities identifies Kravis Hall and publishes these building coordinates. Official operations management course identifies Decision,Risk,andOperations as its division; division directory explicitly covers supply-chain management.",
+      "institutionKey": "Columbia Business School",
+      "supportingSources": [
+        "https://courses.business.columbia.edu/B5102"
+      ]
+    },
+    {
+      "id": "oregon-state-austin-558",
+      "institution": "Oregon State University",
+      "rowIds": [
+        "oregon-state-university____business-analytics"
+      ],
+      "school": "College of Business",
+      "department": "Business Analytics",
+      "building": "Austin Hall",
+      "address": "2751 Southwest Jefferson Way, Corvallis, OR 97331, United States",
+      "lat": 44.564934,
+      "lng": -123.282011,
+      "addressSource": "https://business.oregonstate.edu/programs/undergraduate/business-analytics",
+      "coordinateSource": "https://events.oregonstate.edu/austin_hall_69",
+      "supportingSources": [
+        "https://business.oregonstate.edu/about/austin-hall"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official program pages identify Corvallis and Austin Hall for the in-person programs, and the building page confirms faculty offices. Official building calendar provides the named Austin Hall GeoCoordinates."
+    },
+    {
+      "id": "oregon-state-austin-559",
+      "institution": "Oregon State University",
+      "rowIds": [
+        "oregon-state-university____business-is"
+      ],
+      "school": "College of Business",
+      "department": "Business Information Systems",
+      "building": "Austin Hall",
+      "address": "2751 Southwest Jefferson Way, Corvallis, OR 97331, United States",
+      "lat": 44.564934,
+      "lng": -123.282011,
+      "addressSource": "https://business.oregonstate.edu/programs/undergraduate/business-information-systems",
+      "coordinateSource": "https://events.oregonstate.edu/austin_hall_69",
+      "supportingSources": [
+        "https://business.oregonstate.edu/about/austin-hall"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official program pages identify Corvallis and Austin Hall for the in-person programs, and the building page confirms faculty offices. Official building calendar provides the named Austin Hall GeoCoordinates."
+    },
+    {
+      "id": "harvard-technology-operations-morgan",
+      "institution": "Harvard University",
+      "institutionKey": "Harvard Business School",
+      "rowIds": [
+        "harvard-business-school____om"
+      ],
+      "school": "Harvard Business School",
+      "department": "Technology and Operations Management",
+      "building": "Morgan Hall",
+      "address": "Soldiers Field, Boston, MA 02163, United States",
+      "lat": 42.3667845,
+      "lng": -71.1239862,
+      "addressSource": "https://www.hbs.edu/ris/Profile%20Files/Kris%20Ferreira%20CV%202026_01_01_4c0ea004-a824-4eed-b530-935b079af8af.pdf",
+      "coordinateSource": "https://www.hbs.edu/about/campus-and-culture/map",
+      "supportingSources": [
+        "https://www.hbs.edu/about/campus-and-culture/campus-built-on-philanthropy/morgan-hall"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current Technology and Operations Management faculty CV identifies Morgan Hall413. Official school map lists a building-specific Morgan Hall Google destination with these exact coordinates, rather than school-wide location or visitor entrance."
+    },
+    {
+      "id": "new-york-stern-technology-kaufman",
+      "institution": "New York University",
+      "institutionKey": "NYU Stern",
+      "rowIds": [
+        "nyu-stern____technology"
+      ],
+      "school": "Leonard N. Stern School of Business",
+      "department": "Department of Information, Operations and Management Sciences",
+      "building": "Henry Kaufman Management Center",
+      "address": "44 West Fourth Street, New York, NY 10012, United States",
+      "lat": 40.7291002,
+      "lng": -73.9962513,
+      "addressSource": "https://www.stern.nyu.edu/faculty/bio/guthrie-collin",
+      "coordinateSource": "https://www.stern.nyu.edu/experience-stern/contact-us",
+      "supportingSources": [
+        "https://pages.stern.nyu.edu/~nlevina/Papers/Natalia%20Levina%20Vitae.pdf"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official department faculty and Information Systems group contact identify Kaufman Management Center. Official contact-page map names Stern at44West4thStreet; exact marker coordinates extracted, not viewport."
+    },
+    {
+      "id": "vienna-economics-transport-logistics-d1",
+      "institution": "Vienna University of Economics and Business",
+      "institutionKey": "Vienna University of Economics and Business",
+      "rowIds": [
+        "vienna-university-of-economics-and-business____transport-and-logistics-management"
+      ],
+      "school": "Department of Global Business and Trade",
+      "department": "Institute for Transport and Logistics Management",
+      "building": "Building D1",
+      "address": "Welthandelsplatz 1, 1020 Vienna, Austria",
+      "lat": 48.213293,
+      "lng": 16.409202,
+      "addressSource": "https://www.wu.ac.at/en/itl/about-us/contact",
+      "coordinateSource": "https://campus.wu.ac.at/de/?campus=1&q=Transport",
+      "supportingSources": [
+        "https://www.wu.ac.at/en/welthandel/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Institute contact confirms D1 and parent department. Public official campus map search Transport identifies the institute front office D1.3.006 with EPSG3857 centre1826664.023278418,6142412.842748507, converted to geographic coordinates. Contact page says4thfloor while map says3rd; floor omitted pending reconciliation, but both unambiguously locate the institute in D1."
+    },
+    {
+      "id": "university-college-london-operations-canada-square",
+      "institution": "University College London",
+      "institutionKey": "UCL School of Management",
+      "rowIds": [
+        "ucl-school-of-management____om"
+      ],
+      "school": "School of Management",
+      "department": "Operations and Technology",
+      "building": "One Canada Square",
+      "address": "Level 49, 1 Canada Square, London E14 5AA, United Kingdom",
+      "lat": 51.5049867,
+      "lng": -0.0196081,
+      "addressSource": "https://www.mgmt.ucl.ac.uk/user/49",
+      "coordinateSource": "https://www.ucl.ac.uk/management/student-experience/campus",
+      "checked": "2026-10-24",
+      "notes": "Operations and Technology head Rouba Ibrahim lists Level49,1CanadaSquare. Current official school campus page links Google Maps with explicit destination query51.5049867,-0.0196081. This differs from university Bloomsbury coordinates."
+    },
+    {
+      "id": "zurich-business-analytics-operations-plr",
+      "institution": "University of Zurich",
+      "rowIds": [
+        "university-of-zurich__department-of-business-administration__business-analytics-and-operations"
+      ],
+      "school": "Department of Business Administration",
+      "department": "Business Analytics and Operations",
+      "building": "PLR",
+      "address": "Plattenstrasse 14, 8032 Zurich, Switzerland",
+      "lat": 47.37392,
+      "lng": 8.552927,
+      "addressSource": "https://www.business.uzh.ch/en/research/professorships/quantitative/Contact.html",
+      "coordinateSource": "https://www.plaene.uzh.ch/PLR",
+      "supportingSources": [
+        "https://business.uzh.ch/en/groups/operations.html",
+        "https://www.business.uzh.ch/en/research/professorships/sustom/Contact.html",
+        "https://www.business.uzh.ch/de/research/professorships/math/kontakt.html",
+        "https://www.business.uzh.ch/de/research/professorships/som/Team/Sekretariat.html"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current group page names its fourchairs; each chair contact has officePLR-F atPlattenstrasse14. Official campus-map public building list gives PLR47.37392,8.552927, distinct from neighbouringPLM at same streetaddress. Uses PLR not genericuniversityorPLM pin."
+    },
+    {
+      "id": "tennessee-knoxville-stokely-ba-alias",
+      "institution": "University of Tennessee, Knoxville",
+      "institutionKey": "University of Tennessee",
+      "rowIds": [
+        "university-of-tennessee____ba"
+      ],
+      "school": "Haslam College of Business",
+      "department": "Department of Business Analytics and Statistics",
+      "building": "Stokely Management Center",
+      "address": "916 Volunteer Boulevard, Knoxville, TN 37996, United States",
+      "lat": 35.956174,
+      "lng": -83.92965,
+      "addressSource": "https://haslam.utk.edu/people/profile/bogdan-bichescu/",
+      "coordinateSource": "https://calendar.utk.edu/stokely_management_center_280",
+      "checked": "2026-10-24",
+      "notes": "Department heads located Stokely229(BusinessAnalytics) andStokely312(SupplyChain) oncurrent officialleadership/faculty pages. Officialbuildingcalendar suppliesGeoCoordinates. Genericcollegefooter453HaslamBusinessBuildingwasnotused."
+    },
+    {
+      "id": "tennessee-knoxville-stokely-ba",
+      "institution": "University of Tennessee, Knoxville",
+      "institutionKey": "University of Tennessee at Knoxville",
+      "rowIds": [
+        "university-of-tennessee-at-knoxville__haslam-college-of-business__business-analytics"
+      ],
+      "school": "Haslam College of Business",
+      "department": "Department of Business Analytics and Statistics",
+      "building": "Stokely Management Center",
+      "address": "916 Volunteer Boulevard, Knoxville, TN 37996, United States",
+      "lat": 35.956174,
+      "lng": -83.92965,
+      "addressSource": "https://haslam.utk.edu/people/profile/bogdan-bichescu/",
+      "coordinateSource": "https://calendar.utk.edu/stokely_management_center_280",
+      "checked": "2026-10-24",
+      "notes": "Department heads located Stokely229(BusinessAnalytics) andStokely312(SupplyChain) oncurrent officialleadership/faculty pages. Officialbuildingcalendar suppliesGeoCoordinates. Genericcollegefooter453HaslamBusinessBuildingwasnotused."
+    },
+    {
+      "id": "tennessee-knoxville-stokely-supply-chain",
+      "institution": "University of Tennessee, Knoxville",
+      "institutionKey": "University of Tennessee at Knoxville",
+      "rowIds": [
+        "university-of-tennessee-at-knoxville__haslam-college-of-business__supply-chain"
+      ],
+      "school": "Haslam College of Business",
+      "department": "Department of Supply Chain Management",
+      "building": "Stokely Management Center",
+      "address": "916 Volunteer Boulevard, Knoxville, TN 37996, United States",
+      "lat": 35.956174,
+      "lng": -83.92965,
+      "addressSource": "https://haslam.utk.edu/leadership-team/",
+      "coordinateSource": "https://calendar.utk.edu/stokely_management_center_280",
+      "checked": "2026-10-24",
+      "notes": "Department heads located Stokely229(BusinessAnalytics) andStokely312(SupplyChain) oncurrent officialleadership/faculty pages. Officialbuildingcalendar suppliesGeoCoordinates. Genericcollegefooter453HaslamBusinessBuildingwasnotused."
     }
   ]
 }

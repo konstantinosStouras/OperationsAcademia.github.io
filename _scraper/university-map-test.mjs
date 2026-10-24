@@ -100,8 +100,10 @@ try{
 
   const evidence=JSON.parse(fs.readFileSync(path.join(root,'data/school-map-locations.json'),'utf8')).records;
   const directory=JSON.parse(fs.readFileSync(path.join(root,'data/directory.json'),'utf8'));
-  for(const location of evidence){
-    for(const id of location.rowIds){
+  const evidenceQueue=evidence.flatMap(location=>location.rowIds.map(id=>({location,id})));
+  await Promise.all(Array.from({length:4},async()=>{
+    while(evidenceQueue.length){
+      const {location,id}=evidenceQueue.shift();
       const row=directory.find(r=>r.id===id);
       const url=nav.furtherInfoUrl({institution:row.institution,school:row.school,unit:row.department,furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=legacy'});
       const q=await pageAt(new URL(url).search);
@@ -113,7 +115,7 @@ try{
       await q.waitForFunction(expected=>testMap.shown().some(p=>p.locationVerified&&p.lat===expected.lat&&p.lng===expected.lng),location);
       await q.close();
     }
-  }
+  }));
 
   const all=await pageAt();
   if(process.env.MAP_AUDIT_PATH)fs.writeFileSync(process.env.MAP_AUDIT_PATH,JSON.stringify(await all.evaluate(()=>testMap.shown()),null,2)+'\n');
