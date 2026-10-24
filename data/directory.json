@@ -329,7 +329,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-26"
+  "lastPosted": "2026-08-26",
+  "mapSearchTerms": [
+   "Kogod School of Business",
+   "Department of Information Technology and Analytics"
+  ]
  },
  {
   "id": "american-university-of-beirut",
@@ -692,7 +696,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-08-11"
+  "lastPosted": "2026-08-11",
+  "mapSearchTerms": [
+   "School of Business",
+   "Department of Business Administration and Economics"
+  ]
  },
  {
   "id": "augusta-university____mis",
@@ -744,7 +752,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-27"
+  "lastPosted": "2025-09-27",
+  "mapSearchTerms": [
+   "College of Business",
+   "Management and Marketing Department — Business Analytics"
+  ]
  },
  {
   "id": "babson-college____operations-and-information-management",
@@ -883,7 +895,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-18"
+  "lastPosted": "2026-07-18",
+  "mapSearchTerms": [
+   "Jack C. Massey College of Business",
+   "Department of Business Systems and Analytics, Business Law, and Business Ethics"
+  ]
  },
  {
   "id": "belmont-university__jack-c-massey-college-of-business__supply-chain-management",
@@ -897,7 +913,11 @@
    "seed"
   ],
   "n": 3,
-  "lastPosted": "2026-08-05"
+  "lastPosted": "2026-08-05",
+  "mapSearchTerms": [
+   "Jack C. Massey College of Business",
+   "Department of Management, International Business, and Supply Chain Management"
+  ]
  },
  {
   "id": "bergen-community-college__division-of-mathematics-science-and-technology__computer-science-engineering-and-information-technologies",
@@ -924,7 +944,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-06"
+  "lastPosted": "2025-09-06",
+  "mapSearchTerms": [
+   "Campbell School of Business",
+   "Operations and Supply Chain Management"
+  ]
  },
  {
   "id": "bielefeld-university",
@@ -1023,7 +1047,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-19"
+  "lastPosted": "2025-05-19",
+  "mapSearchTerms": [
+   "Department of Management and Technology"
+  ]
  },
  {
   "id": "bocconi-university__sda-school-of-management__operations-and-supply-chain-management",
@@ -1218,7 +1245,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-02"
+  "lastPosted": "2026-07-02",
+  "mapSearchTerms": [
+   "Foster College of Business",
+   "Department of Management Information Systems"
+  ]
  },
  {
   "id": "brandeis-university__heller-school-for-social-policy-and-management",
@@ -1386,7 +1417,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-25"
+  "lastPosted": "2025-11-25",
+  "mapSearchTerms": [
+   "Orfalea College of Business",
+   "Industrial Technology, Packaging, and Entrepreneurship"
+  ]
  },
  {
   "id": "caldwell-university",
@@ -1664,6 +1699,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Cardiff Business School",
+   "Logistics and Operations Management Section"
   ]
  },
  {
@@ -1857,7 +1896,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-10"
+  "lastPosted": "2026-02-10",
+  "mapSearchTerms": [
+   "Robert W. Plaster School of Business",
+   "Management"
+  ]
  },
  {
   "id": "cedarville-university____statistics",
@@ -1870,7 +1913,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-19"
+  "lastPosted": "2026-03-19",
+  "mapSearchTerms": [
+   "Robert W. Plaster School of Business",
+   "Management"
+  ]
  },
  {
   "id": "ceibs____decision-sciences-and-management-information-systems",
@@ -2330,7 +2377,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-30"
+  "lastPosted": "2026-01-30",
+  "mapSearchTerms": [
+   "Department of Economics and Business"
+  ]
  },
  {
   "id": "colorado-state-university__college-of-business__supply-chain-management",
@@ -2771,7 +2821,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-12-28"
+  "lastPosted": "2025-12-28",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Operations, Supply Chain, and Business Analytics"
+  ]
  },
  {
   "id": "cuhk-business-school",
@@ -2933,7 +2987,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2025-10-04"
+  "lastPosted": "2025-10-04",
+  "mapSearchTerms": [
+   "School of Business and Leadership",
+   "Business Analytics"
+  ]
  },
  {
   "id": "desales-university____ba",
@@ -3137,7 +3195,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-04"
+  "lastPosted": "2025-08-04",
+  "mapSearchTerms": [
+   "College of Business",
+   "Management"
+  ]
  },
  {
   "id": "eastern-new-mexico-university____production-and-om",
@@ -3150,7 +3212,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-19"
+  "lastPosted": "2026-03-19",
+  "mapSearchTerms": [
+   "College of Business",
+   "Management"
+  ]
  },
  {
   "id": "eastern-new-mexico-university__college-of-business__management",
@@ -3164,7 +3230,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-08"
+  "lastPosted": "2026-08-08",
+  "mapSearchTerms": [
+   "College of Business",
+   "Management"
+  ]
  },
  {
   "id": "ebs-university__ebs-business-school__institute-for-supply-chain-management",
@@ -3490,7 +3560,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-15"
+  "lastPosted": "2026-01-15",
+  "mapSearchTerms": [
+   "College of Business and Aviation",
+   "Marketing and Management Studies — Information Systems Management"
+  ]
  },
  {
   "id": "fairmont-state-university____it-management",
@@ -3503,7 +3577,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-03"
+  "lastPosted": "2026-02-03",
+  "mapSearchTerms": [
+   "College of Business and Aviation",
+   "Marketing and Management Studies — Information Systems Management"
+  ]
  },
  {
   "id": "fayetteville-state-university____healthcare",
@@ -3516,7 +3594,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-21"
+  "lastPosted": "2026-02-21",
+  "mapSearchTerms": [
+   "Broadwell College of Business and Economics",
+   "Department of Accounting, Finance, Healthcare Administration, and Information Systems"
+  ]
  },
  {
   "id": "fayetteville-state-university____isba",
@@ -3529,7 +3611,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-11"
+  "lastPosted": "2025-08-11",
+  "mapSearchTerms": [
+   "Broadwell College of Business and Economics",
+   "Department of Accounting, Finance, Healthcare Administration, and Information Systems"
+  ]
  },
  {
   "id": "fayetteville-state-university____supply-chain-management",
@@ -3542,7 +3628,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-19"
+  "lastPosted": "2026-03-19",
+  "mapSearchTerms": [
+   "Broadwell College of Business and Economics",
+   "Department of Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration"
+  ]
  },
  {
   "id": "fayetteville-state-university__broadwell-college-of-business-and-economics__management-marketing-entrepreneurship-and-fire-and-emergency",
@@ -3556,7 +3646,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-21"
+  "lastPosted": "2026-10-21",
+  "mapSearchTerms": [
+   "Broadwell College of Business and Economics",
+   "Department of Management, Marketing, Entrepreneurship, and Fire and Emergency Services Administration"
+  ]
  },
  {
   "id": "ferris-state-university____accountancy-finance-and-information-systems",
@@ -3569,7 +3663,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-11"
+  "lastPosted": "2026-10-11",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Accountancy, Finance, and Information Systems"
+  ]
  },
  {
   "id": "ferris-state-university____da",
@@ -3582,7 +3680,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-07"
+  "lastPosted": "2026-02-07",
+  "mapSearchTerms": [
+   "College of Business",
+   "Data Science and Analytics"
+  ]
  },
  {
   "id": "fisher-college____om",
@@ -3693,7 +3795,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-31"
+  "lastPosted": "2025-08-31",
+  "mapSearchTerms": [
+   "Herbert Wertheim College of Business",
+   "Department of Business Analytics, Information Systems and Supply Chain"
+  ]
  },
  {
   "id": "florida-state-university__college-of-business__marketing",
@@ -4435,7 +4541,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-18"
+  "lastPosted": "2026-10-18",
+  "mapSearchTerms": [
+   "Harvard Medical School",
+   "Department of Health Care Policy"
+  ]
  },
  {
   "id": "hec-montreal____decision-sciences",
@@ -4714,7 +4824,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-05-16"
+  "lastPosted": "2026-05-16",
+  "mapSearchTerms": [
+   "Computer Science and Information Technology"
+  ]
  },
  {
   "id": "houston-christian-university____business-data-analytics",
@@ -5462,7 +5575,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-30"
+  "lastPosted": "2025-09-30",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Computer Information Systems and Business Analytics"
+  ]
  },
  {
   "id": "johns-hopkins-university__carey-business-school__operations-management-and-business-analytics",
@@ -5958,7 +6075,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-17"
+  "lastPosted": "2026-03-17",
+  "mapSearchTerms": [
+   "London Business School",
+   "Management Science and Operations"
+  ]
  },
  {
   "id": "le-moyne-college____is",
@@ -6245,7 +6366,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-11"
+  "lastPosted": "2025-11-11",
+  "mapSearchTerms": [
+   "Triffo School of Business",
+   "Department of Decision Sciences"
+  ]
  },
  {
   "id": "macewan-university____scm-logistics",
@@ -6258,7 +6383,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-11"
+  "lastPosted": "2025-11-11",
+  "mapSearchTerms": [
+   "Triffo School of Business",
+   "Department of Decision Sciences"
+  ]
  },
  {
   "id": "maine-maritime-academy__loeb-sullivan-school-of-international-business-and-logistics__international-business-and-logistics",
@@ -6706,7 +6835,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-27"
+  "lastPosted": "2025-09-27",
+  "mapSearchTerms": [
+   "Robert W. Plaster School of Business",
+   "Business Administration — Data Analytics"
+  ]
  },
  {
   "id": "missouri-state-university____supply-chain-management",
@@ -7704,7 +7837,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-06-13"
+  "lastPosted": "2026-06-13",
+  "mapSearchTerms": [
+   "College of Informatics",
+   "School of Computing and Analytics"
+  ]
  },
  {
   "id": "northern-state-university____quantitative-analytics",
@@ -9564,7 +9701,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-16"
+  "lastPosted": "2025-09-16",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Marketing and Supply Chain Management"
+  ]
  },
  {
   "id": "southeastern-louisiana-university__college-of-business__marketing-and-supply-chain-management",
@@ -9578,7 +9719,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-12"
+  "lastPosted": "2026-08-12",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Marketing and Supply Chain Management"
+  ]
  },
  {
   "id": "southern-arkansas-university____supply-chain-management",
@@ -9922,7 +10067,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-26"
+  "lastPosted": "2026-02-26",
+  "mapSearchTerms": [
+   "School of Business",
+   "Data Analytics"
+  ]
  },
  {
   "id": "stetson-university__school-of-business-administration__business-systems-ai-and-analytics",
@@ -10287,7 +10436,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2025-10-10"
+  "lastPosted": "2025-10-10",
+  "mapSearchTerms": [
+   "Fox School of Business and Management",
+   "Department of Statistics, Operations, and Data Science"
+  ]
  },
  {
   "id": "temple-university__fox-school-of-business__statistics-operations-and-data-science",
@@ -10303,7 +10456,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-01"
+  "lastPosted": "2025-10-01",
+  "mapSearchTerms": [
+   "Fox School of Business and Management",
+   "Department of Statistics, Operations, and Data Science"
+  ]
  },
  {
   "id": "tennessee-state-university____supply-chain-management",
@@ -10491,7 +10648,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-24"
+  "lastPosted": "2026-02-24",
+  "mapSearchTerms": [
+   "Neeley School of Business",
+   "Department of Information Systems and Supply Chain Management"
+  ]
  },
  {
   "id": "texas-christian-university__neeley-school-of-business__information-systems-and-supply-chain-management",
@@ -11161,7 +11322,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-26"
+  "lastPosted": "2026-08-26",
+  "mapSearchTerms": [
+   "Fogelman College of Business and Economics",
+   "Department of Marketing and Supply Chain Management"
+  ]
  },
  {
   "id": "university-of-michigan-flint__school-of-management__management-and-marketing",
@@ -11506,7 +11671,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-27"
+  "lastPosted": "2025-08-27",
+  "mapSearchTerms": [
+   "Sauder School of Business",
+   "Operations and Logistics Division"
+  ]
  },
  {
   "id": "ucl-gbsh____om",
@@ -11702,7 +11871,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-10"
+  "lastPosted": "2025-10-10",
+  "mapSearchTerms": [
+   "Faculty of Economics and Business",
+   "Department of Economics and Business — Operations, Analytics and Technology"
+  ]
  },
  {
   "id": "universite-catholique-de-louvain__louvain-school-of-management__center-for-operations-research-and-econometrics",
@@ -13843,7 +14016,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-05"
+  "lastPosted": "2026-08-05",
+  "mapSearchTerms": [
+   "Faculty of Business Administration",
+   "Department of Accounting and Information Management"
+  ]
  },
  {
   "id": "university-of-macau__institute-of-artificial-intelligence-and-brain-sciences__data-science",
@@ -13857,7 +14034,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-06"
+  "lastPosted": "2026-07-06",
+  "mapSearchTerms": [
+   "Institute of Artificial Intelligence and Brain Sciences",
+   "Data Science"
+  ]
  },
  {
   "id": "university-of-maine-at-augusta____business-management",
@@ -14470,7 +14651,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-21"
+  "lastPosted": "2026-08-21",
+  "mapSearchTerms": [
+   "Ed G. Smith College of Business",
+   "Department of Supply Chain and Analytics"
+  ]
  },
  {
   "id": "university-of-navarra__iese-business-school__operations-information-and-technology",
@@ -14572,7 +14757,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-04-23"
+  "lastPosted": "2026-04-23",
+  "mapSearchTerms": [
+   "Lee Business School",
+   "Department of Marketing and International Business"
+  ]
  },
  {
   "id": "university-of-nevada-las-vegas__lee-business-school",
@@ -14585,7 +14774,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-20"
+  "lastPosted": "2026-08-20",
+  "mapSearchTerms": [
+   "Lee Business School"
+  ]
  },
  {
   "id": "university-of-new-haven__college-of-business-and-digital-innovation__business-analytics",
@@ -15481,7 +15673,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-05-29"
+  "lastPosted": "2026-05-29",
+  "mapSearchTerms": [
+   "University of Stirling Business School",
+   "Strategy, Operations, Analytics and Systems"
+  ]
  },
  {
   "id": "university-of-tampa__sykes-college-of-business__information-and-technology-management",
@@ -15544,7 +15740,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-12"
+  "lastPosted": "2025-06-12",
+  "mapSearchTerms": [
+   "Gary W. Rollins College of Business",
+   "Department of Data Analytics"
+  ]
  },
  {
   "id": "university-of-tennessee-at-chattanooga__gary-w-rollins-college-of-business__data-analytics",
@@ -15558,7 +15758,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-11"
+  "lastPosted": "2026-08-11",
+  "mapSearchTerms": [
+   "Gary W. Rollins College of Business",
+   "Department of Data Analytics"
+  ]
  },
  {
   "id": "university-of-tennessee-at-knoxville__haslam-college-of-business__business-analytics",
@@ -15801,7 +16005,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-11"
+  "lastPosted": "2026-08-11",
+  "mapSearchTerms": [
+   "Woody L. Hunt College of Business",
+   "Department of Accounting and Information Systems"
+  ]
  },
  {
   "id": "university-of-toledo__college-of-business-and-innovation__information-operations-and-technology-management",
@@ -16188,7 +16396,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-20"
+  "lastPosted": "2025-06-20",
+  "mapSearchTerms": [
+   "Warwick Business School",
+   "Information Systems Management and Analytics"
+  ]
  },
  {
   "id": "university-of-warwick__faculty-of-science-engineering-and-medicine__warwick-manufacturing-group-applied-artificial-intelligence",
@@ -16214,6 +16426,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Warwick Business School",
+   "Operations Management"
   ]
  },
  {
@@ -16289,7 +16505,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-11"
+  "lastPosted": "2025-10-11",
+  "mapSearchTerms": [
+   "Milgard School of Business",
+   "Supply Chain Management and Business Analytics"
+  ]
  },
  {
   "id": "university-of-waterloo____management-science",
@@ -16368,7 +16588,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-06"
+  "lastPosted": "2025-10-06",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Management Department"
+  ]
  },
  {
   "id": "university-of-wisconsin-madison",
@@ -16521,7 +16745,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-02"
+  "lastPosted": "2025-09-02",
+  "mapSearchTerms": [
+   "McCombs School of Business",
+   "Department of Information, Risk, and Operations Management"
+  ]
  },
  {
   "id": "ut-san-antonio__carlos-alvarez-college-of-business__operations-and-analytics-department",
@@ -17150,7 +17378,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-26"
+  "lastPosted": "2026-03-26",
+  "mapSearchTerms": [
+   "College of Business and Technology",
+   "School of Accounting and Business Administration"
+  ]
  },
  {
   "id": "western-university__ivey-business-school",
@@ -17230,7 +17462,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-14"
+  "lastPosted": "2025-10-14",
+  "mapSearchTerms": [
+   "College of Professional Studies",
+   "Management and Marketing Department"
+  ]
  },
  {
   "id": "wheaton-college-of-massachusetts____ba",
@@ -17330,7 +17566,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-07"
+  "lastPosted": "2026-03-07",
+  "mapSearchTerms": [
+   "College of Business",
+   "Business Administration Department — Management Information Systems"
+  ]
  },
  {
   "id": "worcester-polytechnic-institute",
@@ -17351,7 +17591,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-10"
+  "lastPosted": "2026-08-10",
+  "mapSearchTerms": [
+   "Department of Business Administration and Economics"
+  ]
  },
  {
   "id": "wu-vienna__vienna-university-of-economics-and-business__information-systems-and-operations",

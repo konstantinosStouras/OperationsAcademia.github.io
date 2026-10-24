@@ -4785,8 +4785,8 @@ for (const [pageName, listSel] of [
   m.on('pageerror', (e) => jsErrors.push('universities mobile: ' + e.message));
   await m.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
   await m.waitForSelector('#oa-uni .leaflet-container', { timeout: 15000 });
-  await m.waitForSelector('#oa-dir .oa-card', { state: 'attached', timeout: 15000 });
-  ok(!await m.locator('#oa-dir .oa-cards').isVisible(), 'universities: async directory loading keeps cards hidden above the map');
+  await m.waitForFunction(() => window.OADirectory && OADirectory.cards().length > 0, null, { timeout: 15000 });
+  ok(await m.locator('#oa-dir .oa-card').count() === 0, 'universities: map-only loading does not render redundant directory cards above the map');
   await m.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
 
   const mob = await m.evaluate(() => {
