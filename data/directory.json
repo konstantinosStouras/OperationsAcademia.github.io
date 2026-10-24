@@ -803,7 +803,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-20"
+  "lastPosted": "2025-08-20",
+  "mapSearchTerms": [
+   "Zicklin School of Business",
+   "Narendra Paul Loomba Department of Management — Operations and Decision Analytics"
+  ]
  },
  {
   "id": "baruch-college-the-city-university-of-new-york",
@@ -1303,7 +1307,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-23"
+  "lastPosted": "2026-08-23",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Management"
+  ]
  },
  {
   "id": "bucknell-university____management-markets-innovation-and-design",
@@ -1620,7 +1628,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-18"
+  "lastPosted": "2026-10-18",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Department of Management Information Systems"
+  ]
  },
  {
   "id": "california-state-university-stanislaus____supply-chain-management-operations-management",
@@ -1633,7 +1645,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-25"
+  "lastPosted": "2026-08-25",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Department of Management, Operations, and Marketing"
+  ]
  },
  {
   "id": "california-state-university-stanislaus__college-of-business-administration__management-information-systems",
@@ -1647,7 +1663,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-03"
+  "lastPosted": "2026-10-03",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Department of Management Information Systems"
+  ]
  },
  {
   "id": "calvin-university__school-of-business__business-analytics",
@@ -2396,7 +2416,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-08"
+  "lastPosted": "2025-08-08",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Management — Supply Chain Management"
+  ]
  },
  {
   "id": "columbia-basin-college____logistics-and-supply-chain",
@@ -2853,7 +2877,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2025-08-06"
+  "lastPosted": "2025-08-06",
+  "mapSearchTerms": [
+   "Business School",
+   "Department of Decisions, Operations and Technology"
+  ]
  },
  {
   "id": "cuhk-shenzhen____or-om-cs-ds-ml-ai",
@@ -2865,7 +2893,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-22"
+  "lastPosted": "2025-08-22",
+  "mapSearchTerms": [
+   "School of Data Science",
+   "Operations Research, Operations Management, Computer Science, Data Science, Machine Learning, and Artificial Intelligence"
+  ]
  },
  {
   "id": "cuhk-shenzhen____platform-operations-and-data-driven-market-design",
@@ -2877,7 +2909,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-01"
+  "lastPosted": "2025-06-01",
+  "mapSearchTerms": [
+   "School of Management and Economics",
+   "Operations Management — Platform Operations and Data-Driven Market Design"
+  ]
  },
  {
   "id": "cunef-universidad__school-of-business-economics-and-law__business-management",
@@ -3182,7 +3218,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-02-24"
+  "lastPosted": "2026-02-24",
+  "mapSearchTerms": [
+   "Lumpkin College of Business and Technology",
+   "School of Business"
+  ]
  },
  {
   "id": "eastern-new-mexico-university____om",
@@ -5293,7 +5333,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2025-10-19"
+  "lastPosted": "2025-10-19",
+  "mapSearchTerms": [
+   "Scott College of Business",
+   "Department of Marketing and Operations"
+  ]
  },
  {
   "id": "indiana-state-university__scott-college-of-business__marketing-and-operations",
@@ -5307,7 +5351,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-06-13"
+  "lastPosted": "2026-06-13",
+  "mapSearchTerms": [
+   "Scott College of Business",
+   "Department of Marketing and Operations"
+  ]
  },
  {
   "id": "indiana-university__kelley-school-of-business__operations-and-decision-technologies",
@@ -6941,6 +6989,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Monash Business School",
+   "Department of Management"
   ]
  },
  {
@@ -7049,7 +7101,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-26"
+  "lastPosted": "2026-08-26",
+  "mapSearchTerms": [
+   "Rosen School of Business",
+   "Department of Accounting and Business"
+  ]
  },
  {
   "id": "murray-state-university__arthur-j-bauernfeind-college-of-business__management-marketing-and-business-administration",
@@ -7706,7 +7762,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-08"
+  "lastPosted": "2025-10-08",
+  "mapSearchTerms": [
+   "School of Business and Entrepreneurship",
+   "Department of Management and Marketing"
+  ]
  },
  {
   "id": "north-central-college____scm-ba-stat",
@@ -7719,7 +7779,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-31"
+  "lastPosted": "2026-01-31",
+  "mapSearchTerms": [
+   "School of Business and Entrepreneurship",
+   "Department of Management and Marketing"
+  ]
  },
  {
   "id": "north-central-college__school-of-business-and-entrepreneurship__management-and-marketing",
@@ -7733,7 +7797,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-26"
+  "lastPosted": "2026-08-26",
+  "mapSearchTerms": [
+   "School of Business and Entrepreneurship",
+   "Department of Management and Marketing"
+  ]
  },
  {
   "id": "north-dakota-state-university__college-of-business__finance-supply-chain-and-transportation",
@@ -8128,7 +8196,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-15"
+  "lastPosted": "2025-09-15",
+  "mapSearchTerms": [
+   "Max M. Fisher College of Business",
+   "Department of Operations and Business Analytics"
+  ]
  },
  {
   "id": "ohio-state-university__college-of-engineering__integrated-systems-engineering",
@@ -8319,7 +8391,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-25"
+  "lastPosted": "2025-05-25",
+  "mapSearchTerms": [
+   "Robert W. Plaster School of Business",
+   "Robert W. Plaster Division of Business Administration and Management"
+  ]
  },
  {
   "id": "park-university____stat-analytics-and-scm",
@@ -8332,7 +8408,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-30"
+  "lastPosted": "2026-01-30",
+  "mapSearchTerms": [
+   "Robert W. Plaster School of Business",
+   "Robert W. Plaster Division of Business Administration and Management"
+  ]
  },
  {
   "id": "park-university__robert-w-plaster-school-of-business__information-systems-and-business-analytics",
@@ -8346,7 +8426,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-22"
+  "lastPosted": "2026-09-22",
+  "mapSearchTerms": [
+   "Robert W. Plaster School of Business",
+   "Robert W. Plaster Division of Business Administration and Management"
+  ]
  },
  {
   "id": "peking-university____om-and-is",
@@ -9736,7 +9820,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-16"
+  "lastPosted": "2025-11-16",
+  "mapSearchTerms": [
+   "David F. Rankin College of Business",
+   "Department of Management, Marketing, and Information Systems"
+  ]
  },
  {
   "id": "southern-illinois-university____business-analytics",
@@ -9979,7 +10067,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-02"
+  "lastPosted": "2025-08-02",
+  "mapSearchTerms": [
+   "Graduate School of Business",
+   "Operations, Information and Technology"
+  ]
  },
  {
   "id": "stanford-university____data-science",
@@ -10213,7 +10305,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-04"
+  "lastPosted": "2025-08-04",
+  "mapSearchTerms": [
+   "Stony Brook University",
+   "Department of Technology, Artificial Intelligence, and Society"
+  ]
  },
  {
   "id": "syracuse-university__whitman-school-of-management__supply-chain-management",
@@ -12013,7 +12109,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-13"
+  "lastPosted": "2025-06-13",
+  "mapSearchTerms": [
+   "Michael Smurfit Graduate Business School",
+   "Management Subject Area — Supply Chain Management"
+  ]
  },
  {
   "id": "university-college-dublin__school-of-business",
@@ -12936,7 +13036,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-06-13"
+  "lastPosted": "2026-06-13",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Marketing and Management"
+  ]
  },
  {
   "id": "university-of-central-florida__barry-s-miller-college-of-business__intelligent-work-systems",
@@ -14352,7 +14456,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-11"
+  "lastPosted": "2025-08-11",
+  "mapSearchTerms": [
+   "School of Information"
+  ]
  },
  {
   "id": "university-of-michigan____sports-analytics",
@@ -14365,7 +14472,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-20"
+  "lastPosted": "2026-01-20",
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Department of Industrial and Operations Engineering"
+  ]
  },
  {
   "id": "university-of-michigan__college-of-engineering__industrial-and-operations-engineering",
@@ -14381,7 +14492,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-09-29"
+  "lastPosted": "2026-09-29",
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Department of Industrial and Operations Engineering"
+  ]
  },
  {
   "id": "university-of-michigan__school-of-information",
@@ -14839,7 +14954,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "College of Arts and Sciences",
+   "Department of Statistics and Operations Research"
+  ]
  },
  {
   "id": "university-of-north-carolina-at-chapel-hill__kenan-flagler-business-school__operations",
@@ -14863,7 +14982,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-21"
+  "lastPosted": "2026-08-21",
+  "mapSearchTerms": [
+   "Kenan-Flagler Business School",
+   "Operations"
+  ]
  },
  {
   "id": "university-of-north-carolina-at-charlotte__belk-college-of-business__business-information-systems-and-operations-management",
@@ -15932,7 +16055,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-03"
+  "lastPosted": "2025-10-03",
+  "mapSearchTerms": [
+   "Naveen Jindal School of Management",
+   "Operations Management"
+  ]
  },
  {
   "id": "university-of-texas-at-dallas____om-is-healthcare-management",
@@ -15945,7 +16072,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-10"
+  "lastPosted": "2025-10-10",
+  "mapSearchTerms": [
+   "Naveen Jindal School of Management",
+   "Healthcare Leadership and Management"
+  ]
  },
  {
   "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__information-systems",
@@ -16562,7 +16693,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-13"
+  "lastPosted": "2026-03-13",
+  "mapSearchTerms": [
+   "Austin E. Cofrin School of Business",
+   "Department of Business Administration"
+  ]
  },
  {
   "id": "university-of-wisconsin-green-bay____sustainable-management",
@@ -16575,7 +16710,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-12"
+  "lastPosted": "2026-02-12",
+  "mapSearchTerms": [
+   "Austin E. Cofrin School of Business",
+   "Department of Business Administration"
+  ]
  },
  {
   "id": "university-of-wisconsin-la-crosse____om-scm",
@@ -17131,7 +17270,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-06"
+  "lastPosted": "2025-08-06",
+  "mapSearchTerms": [
+   "School of Business",
+   "Department of Analytics, Information Systems, Marketing, and Operations Management"
+  ]
  },
  {
   "id": "wake-forest-university__school-of-business__analytics",
@@ -17143,6 +17286,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "School of Business",
+   "Department of Analytics, Information Systems, Marketing, and Operations Management"
   ]
  },
  {
@@ -17166,7 +17313,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2024-09-16"
+  "lastPosted": "2024-09-16",
+  "mapSearchTerms": [
+   "School of Business",
+   "Department of Analytics, Information Systems, Marketing, and Operations Management"
+  ]
  },
  {
   "id": "warwick-business-school____om",

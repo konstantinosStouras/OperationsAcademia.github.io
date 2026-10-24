@@ -5065,11 +5065,12 @@ for (const [pageName, sel, least, mapBtn] of [
 {
   const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   p.on('pageerror', e => jsErrors.push('universities/edit: ' + e.message));
-  await p.goto(BASE + 'universities?view=map&university=Aalto', {waitUntil:'domcontentloaded'});
-  await p.waitForSelector('.oa-map-logo');
   const rows = JSON.parse(await readFile(path.join(ROOT,'data','directory.json'),'utf8'));
   const victims = rows.filter(r => r.institution === 'Aalto University');
   ok(victims.length > 0, 'universities: Aalto correction fixture exists');
+  const target = new URLSearchParams({view:'map',university:'Aalto University',school:victims[0].school,department:victims[0].department});
+  await p.goto(BASE + 'universities?' + target, {waitUntil:'domcontentloaded'});
+  await p.waitForSelector('.oa-map-logo');
   await p.evaluate(id => OADirectory.__setForTest({edits:{[id]:{department:'Corrected Operations Department',t:Date.now(),name:'Map test'}}}), victims[0].id);
   await p.waitForTimeout(200);
   await p.$eval('.oa-map-logo', n => n.click());
