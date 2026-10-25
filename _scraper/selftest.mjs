@@ -2884,6 +2884,17 @@ async function testSchools() {
   }
 
   // it is safe to run twice — every writer applies it on every rebuild
+  for (const school of ['College of Science, Engineering and Technology',
+    'College of Science, Engineering & Technology', 'College of Science, Engineering, and Technology']) {
+    eq(S.canonColumns({ institution: 'Minnesota State University, Mankato', school,
+      unit: 'Computer Information Science' }),
+    { institution: 'Minnesota State University, Mankato', school: 'College of Science, Engineering and Technology',
+      unit: 'Computer Information Science' }, 'Mankato college punctuation stays inside the school column');
+  }
+  eq(S.canonColumns({ institution: 'Minnesota State University, Mankato',
+    school: 'College of Science, Engineering and Technology, Computer Information Science', unit: '' }),
+  { institution: 'Minnesota State University, Mankato', school: 'College of Science, Engineering and Technology',
+    unit: 'Computer Information Science' }, 'Mankato fused college and department separate at the actual boundary');
   eq(S.canonPlace({ institution: 'Taejae University',
     school: 'School of Arts, Sciences and Technology', unit: 'Business Innovation' }),
   { institution: 'Taejae University', school: 'School of Arts, Sciences and Technology',

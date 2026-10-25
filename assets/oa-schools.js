@@ -136,6 +136,16 @@
   /* A school field that names a department too, where no separator says so.
      The pair is what the row becomes. */
   var FUSED_SCHOOLS = {
+    /* Official college-name punctuation, checked 2026-10-25:
+       https://cset.mnsu.edu/departments/computer-information-science/ */
+    'College of Science, Engineering and Technology':
+      { school: 'College of Science, Engineering and Technology', unit: '' },
+    'College of Science, Engineering & Technology':
+      { school: 'College of Science, Engineering and Technology', unit: '' },
+    'College of Science, Engineering, and Technology':
+      { school: 'College of Science, Engineering and Technology', unit: '' },
+    'College of Science, Engineering and Technology, Computer Information Science':
+      { school: 'College of Science, Engineering and Technology', unit: 'Computer Information Science' },
     /* A comma inside Taejae's school name does not introduce a department.
        https://taejae.ac.kr/academics/what-learn */
     'School of Arts, Sciences and Technology':

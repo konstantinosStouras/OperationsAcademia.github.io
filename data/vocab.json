@@ -2888,7 +2888,7 @@
    "n": 1
   },
   {
-   "v": "College of Science",
+   "v": "College of Science, Engineering and Technology",
    "n": 1
   },
   {
@@ -3449,10 +3449,6 @@
   },
   {
    "v": "College of Management of Technology (CMT)",
-   "n": 0
-  },
-  {
-   "v": "College of Science, Engineering and Technology",
    "n": 0
   },
   {
@@ -4470,6 +4466,10 @@
    "n": 1
   },
   {
+   "v": "Computer Information Science",
+   "n": 1
+  },
+  {
    "v": "Computer Science, Engineering and Information Technologies",
    "n": 1
   },
@@ -4579,10 +4579,6 @@
   },
   {
    "v": "Empirical business problems",
-   "n": 1
-  },
-  {
-   "v": "Engineering and Technology, Computer Information Science",
    "n": 1
   },
   {
@@ -5519,10 +5515,6 @@
   },
   {
    "v": "Business Management/Operations and Supply Chain",
-   "n": 0
-  },
-  {
-   "v": "Computer Information Science",
    "n": 0
   },
   {
@@ -9276,17 +9268,12 @@
   },
   "Minnesota State University, Mankato": {
    "schools": [
-    "College of Science",
     "College of Science, Engineering and Technology"
    ],
    "units": [
-    "Computer Information Science",
-    "Engineering and Technology, Computer Information Science"
+    "Computer Information Science"
    ],
    "bySchool": {
-    "College of Science": [
-     "Engineering and Technology, Computer Information Science"
-    ],
     "College of Science, Engineering and Technology": [
      "Computer Information Science"
     ]
@@ -14714,9 +14701,6 @@
   ],
   "College of Public Affairs and Community Service, School of Public Administration": [
    "Nonprofit Management"
-  ],
-  "College of Science": [
-   "Engineering and Technology, Computer Information Science"
   ],
   "College of Science and Engineering": [
    "Engineering Management and Decision Sciences",
