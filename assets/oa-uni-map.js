@@ -283,14 +283,14 @@
           if(eligible.length>1&&eligible.every(function(m){return m.oaPoint.locationGroup&&m.oaPoint.locationGroup===eligible[0].oaPoint.locationGroup;})) {
             var options=el('div',{class:'oa-uni-pop oa-map-location-options',tabindex:'-1'});
             options.appendChild(el('h3',{text:chosen.oaCard.officialInstitution||OAMapModel.displayName(chosen.oaCard.institution)}));
-            options.appendChild(el('p',{class:'oa-map-selected-department',text:'This posting permits several academic locations. Select a school or department to see its card.'}));
+            options.appendChild(el('p',{class:'oa-map-selected-department',text:'This department or posting has several academic locations. Select a location to see its card.'}));
             eligible.forEach(function(m){
               var p=el('p'),button=el('button',{type:'button',text:m.oaPoint.school+' · '+m.oaPoint.department+' · '+m.oaPoint.building});
               button.addEventListener('click',function(){map.setView(m.getLatLng(),14,{animate:false});openPopup(cardContent(m.oaCard,m.oaPoint),m.getLatLng());});
               p.appendChild(button);options.appendChild(p);
               options.appendChild(el('p',{text:m.oaPoint.address}));
             });
-            options.appendChild(makeLink('Official posting',chosen.oaPoint.locationGroupSource));
+            options.appendChild(makeLink('Official location information',chosen.oaPoint.locationGroupSource));
             map.fitBounds(L.latLngBounds(eligible.map(function(m){return m.getLatLng();})),{padding:[40,40],maxZoom:14,animate:false});
             openPopup(options,map.getCenter());
             return;

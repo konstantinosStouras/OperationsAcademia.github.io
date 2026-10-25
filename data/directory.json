@@ -386,7 +386,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-06"
+  "lastPosted": "2025-10-06",
+  "mapSearchTerms": [
+   "Maroun Semaan Faculty of Engineering and Architecture",
+   "Department of Industrial Engineering and Management"
+  ]
  },
  {
   "id": "american-university-of-beirut__suliman-s-olayan-school-of-business__business-information-and-decision-systems",
@@ -1114,7 +1118,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-05-16"
+  "lastPosted": "2026-05-16",
+  "mapSearchTerms": [
+   "College of Business",
+   "Business Analytics and Operations Management"
+  ]
  },
  {
   "id": "bocconi____management-science-department-management-and-technology",
@@ -2021,7 +2029,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-05"
+  "lastPosted": "2025-09-05",
+  "mapSearchTerms": [
+   "Católica Lisbon School of Business and Economics",
+   "Information Systems, Operations Research and Data Science"
+  ]
  },
  {
   "id": "catolica-lisbon-school-of-business-and-economics__school-of-management__operations-and-data-science-lisbon",
@@ -2033,6 +2045,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Católica Lisbon School of Business and Economics",
+   "Operations and Data Science"
   ]
  },
  {
@@ -2391,7 +2407,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-26"
+  "lastPosted": "2026-01-26",
+  "mapSearchTerms": [
+   "Wilbur O. and Ann Powers College of Business",
+   "Department of Management"
+  ]
  },
  {
   "id": "clemson-university__college-of-business-and-behavioral-science__management",
@@ -3628,7 +3648,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-14"
+  "lastPosted": "2026-02-14",
+  "mapSearchTerms": [
+   "Curtis L. Gerrish School of Business"
+  ]
  },
  {
   "id": "erasmus-university__rotterdam-school-of-management__technology-and-operations-management",
@@ -4518,7 +4541,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-19"
+  "lastPosted": "2026-10-19",
+  "mapSearchTerms": [
+   "Mathematics, Technology and Business — Supply Chain and Logistics"
+  ]
  },
  {
   "id": "georgia-southern-university__parker-college-of-business__information-systems-and-analytics",
@@ -5957,7 +5983,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-08"
+  "lastPosted": "2026-01-08",
+  "mapSearchTerms": [
+   "Operations Management"
+  ]
  },
  {
   "id": "ipade-business-school____operations-management",
@@ -5970,7 +5999,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-04"
+  "lastPosted": "2026-08-04",
+  "mapSearchTerms": [
+   "Operations Management"
+  ]
  },
  {
   "id": "it-university-of-copenhagen____ba",
@@ -6314,7 +6346,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-27"
+  "lastPosted": "2025-09-27",
+  "mapSearchTerms": [
+   "College of Administrative Sciences and Economics",
+   "Operations Management and Information Systems"
+  ]
  },
  {
   "id": "koc-university__college-of-administrative-sciences-and-economics-case",
@@ -6356,7 +6392,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-16"
+  "lastPosted": "2026-10-16",
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Department of Industrial Engineering"
+  ]
  },
  {
   "id": "koc-university__graduate-school-of-business__operations-management-and-information-systems",
@@ -6368,6 +6408,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "College of Administrative Sciences and Economics",
+   "Operations Management and Information Systems"
   ]
  },
  {
@@ -6397,7 +6441,12 @@
   "sources": [
    "omlist",
    "seed"
-  ]
+  ],
+  "mapSearchTerms": [
+   "Korea University Business School",
+   "Logistics, Service and Operations Management"
+  ],
+  "country": "South Korea"
  },
  {
   "id": "ku-leuven____economics-and-business",
@@ -6693,7 +6742,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-06"
+  "lastPosted": "2025-06-06",
+  "mapSearchTerms": [
+   "School of Business",
+   "Business Analytics"
+  ]
  },
  {
   "id": "lingnan-university__faculty-of-business__computing-and-decision-sciences",
@@ -8002,7 +8055,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-31"
+  "lastPosted": "2026-08-31",
+  "mapSearchTerms": [
+   "NEOMA Business School",
+   "Department of Information Systems, Supply Chain and Decision Making"
+  ]
  },
  {
   "id": "nevada-state-university____scm-quantitative-analysis",
@@ -8391,7 +8448,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-05-16"
+  "lastPosted": "2026-05-16",
+  "mapSearchTerms": [
+   "Business Division",
+   "Business Administration"
+  ]
  },
  {
   "id": "northeastern-university____scm-and-it",
@@ -9497,7 +9558,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-05"
+  "lastPosted": "2026-02-05",
+  "mapSearchTerms": [
+   "McColl School of Business",
+   "Business Analytics"
+  ]
  },
  {
   "id": "quincy-university__oakley-school-of-business__business-analytics",
@@ -9605,7 +9670,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-04-23"
+  "lastPosted": "2026-04-23",
+  "mapSearchTerms": [
+   "College of Business and Technology",
+   "Analytics and Technology"
+  ]
  },
  {
   "id": "rollins-college____supply-chain-management",
@@ -9618,7 +9687,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-05"
+  "lastPosted": "2026-08-05",
+  "mapSearchTerms": [
+   "College of Liberal Arts",
+   "Department of Business — Supply Chain Management"
+  ]
  },
  {
   "id": "rollins-college__crummer-graduate-school-of-business__business-analytics",
@@ -9764,7 +9837,12 @@
   "sources": [
    "omlist",
    "seed"
-  ]
+  ],
+  "mapSearchTerms": [
+   "Rutgers Business School",
+   "Supply Chain Management"
+  ],
+  "country": "United States"
  },
  {
   "id": "rutgers-university-stats____reinforcement-learning",
@@ -10101,7 +10179,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-01"
+  "lastPosted": "2026-03-01",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "General Business"
+  ]
  },
  {
   "id": "seoul-national-university__business-school__operations-management",
@@ -10130,7 +10212,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-03"
+  "lastPosted": "2026-02-03",
+  "mapSearchTerms": [
+   "Stillman School of Business",
+   "Department of Computing and Decision Sciences"
+  ]
  },
  {
   "id": "seton-hall-university____scm-ba",
@@ -10143,7 +10229,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-03"
+  "lastPosted": "2026-02-03",
+  "mapSearchTerms": [
+   "Stillman School of Business",
+   "Department of Computing and Decision Sciences"
+  ]
  },
  {
   "id": "shandong-university-of-finance-and-economics__school-of-finance__large-language-model-research-institute",
@@ -10365,7 +10455,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-22"
+  "lastPosted": "2026-08-22",
+  "mapSearchTerms": [
+   "Engineering Systems and Design"
+  ]
  },
  {
   "id": "singapore-university-of-technology-and-design",
@@ -10572,7 +10665,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-18"
+  "lastPosted": "2025-09-18",
+  "mapSearchTerms": [
+   "Edwin L. Cox School of Business",
+   "Department of Information Technology and Operations Management"
+  ]
  },
  {
   "id": "southern-methodist-university__edwin-l-cox-school-of-business__information-technology-and-operations-management",
@@ -11098,7 +11195,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-18"
+  "lastPosted": "2026-10-18",
+  "mapSearchTerms": [
+   "School of Arts, Sciences and Technology",
+   "Business Innovation Program"
+  ]
  },
  {
   "id": "tbs-education",
@@ -11613,7 +11714,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-08"
+  "lastPosted": "2025-10-08",
+  "mapSearchTerms": [
+   "McCoy College of Business",
+   "Department of Information Systems and Analytics"
+  ]
  },
  {
   "id": "texas-state-university____is",
@@ -11765,7 +11870,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-04"
+  "lastPosted": "2026-02-04",
+  "mapSearchTerms": [
+   "Tim and Steph Busch School of Business",
+   "Business Administration"
+  ]
  },
  {
   "id": "chinese-university-of-hong-kong__cuhk-business-school",
@@ -12824,11 +12933,7 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-02",
-  "mapSearchTerms": [
-   "Católica Lisbon School of Business and Economics",
-   "Operations and Data Science"
-  ]
+  "lastPosted": "2026-09-02"
  },
  {
   "id": "universitat-pompeu-fabra____om-or",
@@ -13160,7 +13265,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2014-09-15"
+  "lastPosted": "2014-09-15",
+  "mapSearchTerms": [
+   "School of Management",
+   "Management Science and Innovation"
+  ]
  },
  {
   "id": "university-of-alabama____om",
@@ -13975,7 +14084,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-05"
+  "lastPosted": "2026-10-05",
+  "mapSearchTerms": [
+   "Barry S. Miller College of Business",
+   "Intelligent Work Systems"
+  ]
  },
  {
   "id": "university-of-chicago__booth-school-of-business",
@@ -15730,7 +15843,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-03"
+  "lastPosted": "2025-10-03",
+  "mapSearchTerms": [
+   "Robert J. Trulaske, Sr. College of Business",
+   "Department of Management"
+  ]
  },
  {
   "id": "university-of-missouri__robert-j-trulaske-sr-college-of-business__management",
@@ -18066,7 +18183,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-19"
+  "lastPosted": "2025-11-19",
+  "mapSearchTerms": [
+   "College of Business",
+   "Information Systems and Analytics"
+  ]
  },
  {
   "id": "utah-valley-university____operations-and-supply-chain-management",
@@ -18993,7 +19114,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-25"
+  "lastPosted": "2025-05-25",
+  "mapSearchTerms": [
+   "International Business School Suzhou",
+   "Department of Intelligent Operations and Marketing"
+  ]
  },
  {
   "id": "xi-an-jiaotong-liverpool-university__international-business-school-suzhou__intelligent-operations-and-marketing",
@@ -19007,7 +19132,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-15"
+  "lastPosted": "2026-09-15",
+  "mapSearchTerms": [
+   "International Business School Suzhou",
+   "Department of Intelligent Operations and Marketing"
+  ]
  },
  {
   "id": "xi-an-jiaotong-liverpool-university__school-of-intelligent-finance-and-business__supply-chain-management",
