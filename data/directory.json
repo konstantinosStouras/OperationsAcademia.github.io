@@ -1150,13 +1150,9 @@
   "institution": "Bellarmine University",
   "department": "Information Systems and Artificial Intelligence",
   "type": "University",
-  "country": "United States",
   "sources": [
-   "postings",
    "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-23"
+  ]
  },
  {
   "id": "bellarmine-university__w-fielding-rubel-school-of-business__business-technology-and-artificial-intelligence",
