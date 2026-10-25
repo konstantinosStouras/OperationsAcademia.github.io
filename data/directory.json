@@ -241,9 +241,13 @@
   "school": "Robert B. Willumstad School of Business",
   "department": "Decision Sciences and Marketing",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-23",
   "mapLocationIds": [
    "adelphi-decision-sciences-marketing-hagedorn"
   ],
@@ -254,8 +258,7 @@
   "mapSearchTerms": [
    "Robert B. Willumstad School of Business",
    "Decision Sciences and Marketing Department"
-  ],
-  "country": "United States"
+  ]
  },
  {
   "id": "adelphi-university__robert-b-willumstad-school-of-business__management",
@@ -862,8 +865,20 @@
   ],
   "n": 4,
   "lastPosted": "2026-09-15",
+  "sourceRowIds": [
+   "arizona-state-university____is"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "IS"
+   }
+  ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "IS"
+  ]
  },
  {
   "id": "arizona-state-university__w-p-carey-school-of-business__supply-chain-management",
@@ -1089,16 +1104,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-10-03",
+  "sourceRowIds": [
+   "auburn-university____industrial-and-systems-engineering"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Industrial and Systems Engineering"
+   }
+  ],
   "mapLocationIds": [
    "auburn-industrial-systems-shelby"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Auburn University"
-  ],
   "mapSearchTerms": [
    "Samuel Ginn College of Engineering",
-   "Department of Industrial and Systems Engineering"
+   "Department of Industrial and Systems Engineering",
+   "Industrial and Systems Engineering"
+  ],
+  "mapInstitutionNames": [
+   "Auburn University"
   ]
  },
  {
@@ -1254,16 +1279,26 @@
   ],
   "n": 3,
   "lastPosted": "2026-09-24",
+  "sourceRowIds": [
+   "ball-state-university____isom"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "ISOM"
+   }
+  ],
   "mapLocationIds": [
    "ball-state-information-systems-operations-whitinger"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Ball State University"
-  ],
   "mapSearchTerms": [
    "Miller College of Business",
-   "Department of Information Systems and Operations Management"
+   "Department of Information Systems and Operations Management",
+   "ISOM"
+  ],
+  "mapInstitutionNames": [
+   "Ball State University"
   ]
  },
  {
@@ -1382,6 +1417,21 @@
   ]
  },
  {
+  "id": "bellarmine-university____information-systems-and-artificial-intelligence",
+  "institution": "Bellarmine University",
+  "department": "Information Systems and Artificial Intelligence",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-23",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "bellarmine-university__w-fielding-rubel-school-of-business__business-technology-and-artificial-intelligence",
   "institution": "Bellarmine University",
   "school": "W. Fielding Rubel School of Business",
@@ -1444,16 +1494,26 @@
   ],
   "n": 3,
   "lastPosted": "2026-08-05",
+  "sourceRowIds": [
+   "belmont-university____supply-chain-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Supply Chain Management"
+   }
+  ],
   "mapLocationIds": [
    "belmont-supply-chain"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Belmont University"
-  ],
   "mapSearchTerms": [
    "Jack C. Massey College of Business",
-   "Department of Management, International Business, and Supply Chain Management"
+   "Department of Management, International Business, and Supply Chain Management",
+   "Supply Chain Management"
+  ],
+  "mapInstitutionNames": [
+   "Belmont University"
   ]
  },
  {
@@ -1536,16 +1596,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-10-08",
+  "sourceRowIds": [
+   "bilkent-university____om"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OM"
+   }
+  ],
   "mapLocationIds": [
    "bilkent-operations-management-ma"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Bilkent University"
-  ],
   "mapSearchTerms": [
    "Faculty of Business Administration",
-   "Operations Management"
+   "Operations Management",
+   "OM"
+  ],
+  "mapInstitutionNames": [
+   "Bilkent University"
   ]
  },
  {
@@ -1739,10 +1809,22 @@
   ],
   "n": 2,
   "lastPosted": "2025-09-15",
+  "sourceRowIds": [
+   "boston-college____ba"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "BA"
+   }
+  ],
   "lat": 42.3303798,
   "lng": -71.166187,
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "BA"
+  ]
  },
  {
   "id": "boston-college__carroll-school-of-management__operations-management",
@@ -2435,16 +2517,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-07-30",
+  "sourceRowIds": [
+   "california-state-university-long-beach____is"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "IS"
+   }
+  ],
   "mapLocationIds": [
    "long-beach-information-systems-business-building"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "California State University, Long Beach"
-  ],
   "mapSearchTerms": [
    "College of Business",
-   "Department of Information Systems"
+   "Department of Information Systems",
+   "IS"
+  ],
+  "mapInstitutionNames": [
+   "California State University, Long Beach"
   ]
  },
  {
@@ -3435,18 +3527,27 @@
   ],
   "n": 1,
   "lastPosted": "2026-07-20",
+  "sourceRowIds": [
+   "clarkson-university____operations-and-information-systems"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Operations and Information Systems"
+   }
+  ],
   "lat": 44.6650767,
   "lng": -74.9943713,
   "mapLocationIds": [
    "clarkson-information-systems-bertrand-snell"
   ],
   "mapLocationKind": "department",
-  "mapInstitutionNames": [
-   "Clarkson University"
-  ],
   "mapSearchTerms": [
    "David D. Reh School of Business",
    "Operations and Information Systems"
+  ],
+  "mapInstitutionNames": [
+   "Clarkson University"
   ]
  },
  {
@@ -3750,16 +3851,26 @@
   ],
   "n": 1,
   "lastPosted": "2025-08-08",
+  "sourceRowIds": [
+   "colorado-state-university____supply-chain-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Supply Chain Management"
+   }
+  ],
   "mapLocationIds": [
    "colorado-state-supply-chain-verified"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Colorado State University"
-  ],
   "mapSearchTerms": [
    "College of Business",
-   "Department of Management — Supply Chain Management"
+   "Department of Management — Supply Chain Management",
+   "Supply Chain Management"
+  ],
+  "mapInstitutionNames": [
+   "Colorado State University"
   ]
  },
  {
@@ -3893,10 +4004,28 @@
   ],
   "n": 4,
   "lastPosted": "2026-10-22",
+  "sourceRowIds": [
+   "columbia-university____ieor",
+   "columbia-university____industrial-engineering-and-operations-research"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "IEOR"
+   },
+   {
+    "school": "",
+    "department": "Industrial Engineering and Operations Research"
+   }
+  ],
   "lat": 40.8093788,
   "lng": -73.9599019,
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "IEOR",
+   "Industrial Engineering and Operations Research"
+  ]
  },
  {
   "id": "columbia-university__graduate-school-of-business__decision-risk-and-operations",
@@ -3980,15 +4109,25 @@
    "omlist",
    "seed"
   ],
+  "sourceRowIds": [
+   "copenhagen-business-school____operations-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Operations Management"
+   }
+  ],
   "mapLocationIds": [
    "location-verified-668"
   ],
   "mapLocationKind": "exact",
+  "mapSearchTerms": [
+   "Department of Operations Management",
+   "Operations Management"
+  ],
   "mapInstitutionNames": [
    "Copenhagen Business School"
-  ],
-  "mapSearchTerms": [
-   "Department of Operations Management"
   ]
  },
  {
@@ -4635,16 +4774,26 @@
   ],
   "n": 2,
   "lastPosted": "2025-10-04",
+  "sourceRowIds": [
+   "depauw-university____ba"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "BA"
+   }
+  ],
   "mapLocationIds": [
    "depauw-business-analytics-harrison"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "DePauw University"
-  ],
   "mapSearchTerms": [
    "School of Business and Leadership",
-   "Business Analytics"
+   "Business Analytics",
+   "BA"
+  ],
+  "mapInstitutionNames": [
+   "DePauw University"
   ]
  },
  {
@@ -6421,16 +6570,25 @@
   ],
   "n": 1,
   "lastPosted": "2026-07-30",
+  "sourceRowIds": [
+   "georgia-southern-university____logistics-and-supply-chain-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Logistics and Supply Chain Management"
+   }
+  ],
   "mapLocationIds": [
    "georgia-southern-parker-logistics-supply-chain-management"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Georgia Southern University"
-  ],
   "mapSearchTerms": [
    "Parker College of Business",
    "Logistics and Supply Chain Management"
+  ],
+  "mapInstitutionNames": [
+   "Georgia Southern University"
   ]
  },
  {
@@ -7090,15 +7248,25 @@
   ],
   "n": 2,
   "lastPosted": "2026-02-03",
+  "sourceRowIds": [
+   "hec-paris____information-systems-and-operations-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Information Systems and Operations Management"
+   }
+  ],
   "mapLocationIds": [
    "hec-paris-information-operations-building-v"
   ],
   "mapLocationKind": "exact",
+  "mapSearchTerms": [
+   "Department of Information Systems and Operations Management",
+   "Information Systems and Operations Management"
+  ],
   "mapInstitutionNames": [
    "École des Hautes Études Commerciales de Paris (HEC Paris)"
-  ],
-  "mapSearchTerms": [
-   "Department of Information Systems and Operations Management"
   ]
  },
  {
@@ -7114,16 +7282,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-07-18",
+  "sourceRowIds": [
+   "henderson-state-university____om"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OM"
+   }
+  ],
   "mapLocationIds": [
    "henderson-state-business-mooney"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Henderson State University"
-  ],
   "mapSearchTerms": [
    "College of Business",
-   "Operations Management"
+   "Operations Management",
+   "OM"
+  ],
+  "mapInstitutionNames": [
+   "Henderson State University"
   ]
  },
  {
@@ -7268,16 +7446,26 @@
   ],
   "n": 6,
   "lastPosted": "2026-08-25",
+  "sourceRowIds": [
+   "hong-kong-polytechnic-university____logistics-and-maritime-studies"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Logistics and Maritime Studies"
+   }
+  ],
   "mapLocationIds": [
    "hong-kong-polytechnic-logistics-hung-hom-bay"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Hong Kong Polytechnic University"
-  ],
   "mapSearchTerms": [
    "Faculty of Business",
-   "Department of Logistics and Maritime Studies"
+   "Department of Logistics and Maritime Studies",
+   "Logistics and Maritime Studies"
+  ],
+  "mapInstitutionNames": [
+   "Hong Kong Polytechnic University"
   ]
  },
  {
@@ -7959,8 +8147,20 @@
   ],
   "n": 2,
   "lastPosted": "2026-07-23",
+  "sourceRowIds": [
+   "imperial-college-london____om"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OM"
+   }
+  ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "OM"
+  ]
  },
  {
   "id": "indian-institute-of-technology-iit-bombay____industrial-engineering-and-operations-research",
@@ -8037,18 +8237,28 @@
   ],
   "n": 3,
   "lastPosted": "2025-08-07",
+  "sourceRowIds": [
+   "indian-school-of-business____om"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OM"
+   }
+  ],
   "lat": 17.4358411,
   "lng": 78.3467857,
   "mapLocationIds": [
    "indian-school-business-operations-academic-centre"
   ],
   "mapLocationKind": "department",
-  "mapInstitutionNames": [
-   "Indian School of Business"
-  ],
   "mapSearchTerms": [
    "Indian School of Business",
-   "Operations Management"
+   "Operations Management",
+   "OM"
+  ],
+  "mapInstitutionNames": [
+   "Indian School of Business"
   ]
  },
  {
@@ -8131,6 +8341,32 @@
   "mapLocationKind": "unresolved"
  },
  {
+  "id": "indiana-university-bloomington__kelley-school-of-business__operations-and-decision-technologies",
+  "institution": "Indiana University Bloomington",
+  "school": "Kelley School of Business",
+  "department": "Operations and Decision Technologies",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-23",
+  "mapLocationIds": [
+   "indiana-kelley-hodge-569"
+  ],
+  "mapLocationKind": "department",
+  "mapInstitutionNames": [
+   "Indiana University Bloomington"
+  ],
+  "mapSearchTerms": [
+   "Kelley School of Business",
+   "Department of Operations and Decision Technologies"
+  ],
+  "deptUrl": "https://kelley.iu.edu/faculty-research/departments/operations-decision-technologies/faculty/supply-chain-and-operations/index.html"
+ },
+ {
   "id": "indiana-university-bloomington__kelley-school-of-business__supply-chain-and-operations",
   "institution": "Indiana University Bloomington",
   "school": "Kelley School of Business",
@@ -8151,7 +8387,8 @@
   "mapSearchTerms": [
    "Kelley School of Business",
    "Department of Operations and Decision Technologies"
-  ]
+  ],
+  "country": "United States"
  },
  {
   "id": "indiana-university-kelley____is",
@@ -8238,16 +8475,25 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-18",
+  "sourceRowIds": [
+   "insead____decision-sciences"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Decision Sciences"
+   }
+  ],
   "mapLocationIds": [
    "insead-france-decision-sciences-octapharma"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Institut Européen d’Administration des Affaires (INSEAD)"
-  ],
   "mapSearchTerms": [
    "Institut Européen d’Administration des Affaires (INSEAD)",
    "Decision Sciences"
+  ],
+  "mapInstitutionNames": [
+   "Institut Européen d’Administration des Affaires (INSEAD)"
   ],
   "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
  },
@@ -8271,16 +8517,25 @@
   ],
   "n": 1,
   "lastPosted": "2014-09-15",
+  "sourceRowIds": [
+   "insead____technology-and-operations-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Technology and Operations Management"
+   }
+  ],
   "mapLocationIds": [
    "insead-france-technology-and-operations-management-octapharma"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Institut Européen d’Administration des Affaires (INSEAD)"
-  ],
   "mapSearchTerms": [
    "Institut Européen d’Administration des Affaires (INSEAD)",
    "Technology and Operations Management"
+  ],
+  "mapInstitutionNames": [
+   "Institut Européen d’Administration des Affaires (INSEAD)"
   ],
   "country": "",
   "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
@@ -8336,16 +8591,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-03-19",
+  "sourceRowIds": [
+   "institut-mines-telecom____management-marketing-and-strategy"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Management, Marketing and Strategy"
+   }
+  ],
   "mapLocationIds": [
    "institut-mines-telecom-management-evry-campus-fallback"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Institut Mines-Télécom"
-  ],
   "mapSearchTerms": [
    "Institut Mines-Télécom Business School",
-   "Department of Management, Marketing and Strategy"
+   "Department of Management, Marketing and Strategy",
+   "Management, Marketing and Strategy"
+  ],
+  "mapInstitutionNames": [
+   "Institut Mines-Télécom"
   ]
  },
  {
@@ -9851,16 +10116,25 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-06",
+  "sourceRowIds": [
+   "massachusetts-institute-of-technology____center-for-transportation-and-logistics"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Center for Transportation and Logistics"
+   }
+  ],
   "mapLocationIds": [
    "massachusetts-transportation-logistics-muckley"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Massachusetts Institute of Technology"
-  ],
   "mapSearchTerms": [
    "School of Engineering",
    "Center for Transportation and Logistics"
+  ],
+  "mapInstitutionNames": [
+   "Massachusetts Institute of Technology"
   ]
  },
  {
@@ -10238,16 +10512,26 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-05",
+  "sourceRowIds": [
+   "michigan-state-university____statistics-and-probability"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Statistics and Probability"
+   }
+  ],
   "mapLocationIds": [
    "michigan-state-statistics-wells"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Michigan State University"
-  ],
   "mapSearchTerms": [
    "College of Natural Science",
-   "Department of Statistics and Probability"
+   "Department of Statistics and Probability",
+   "Statistics and Probability"
+  ],
+  "mapInstitutionNames": [
+   "Michigan State University"
   ]
  },
  {
@@ -10387,9 +10671,13 @@
   "school": "College of Science, Engineering and Technology",
   "department": "Computer Information Science",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-25",
   "mapLocationIds": [
    "minnesota-state-mankato-computer-information-science-wissink"
   ],
@@ -10400,8 +10688,7 @@
   "mapSearchTerms": [
    "College of Science, Engineering and Technology",
    "Department of Computer Information Science"
-  ],
-  "country": "United States"
+  ]
  },
  {
   "id": "mississippi-state-university__james-worth-bagley-college-of-engineering__industrial-and-systems-engineering",
@@ -10418,16 +10705,26 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-28",
+  "sourceRowIds": [
+   "mississippi-state-university____industrial-and-systems-engineering"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Industrial and Systems Engineering"
+   }
+  ],
   "mapLocationIds": [
    "mississippi-state-industrial-systems-mccain"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Mississippi State University"
-  ],
   "mapSearchTerms": [
    "James Worth Bagley College of Engineering",
-   "Department of Industrial and Systems Engineering"
+   "Department of Industrial and Systems Engineering",
+   "Industrial and Systems Engineering"
+  ],
+  "mapInstitutionNames": [
+   "Mississippi State University"
   ]
  },
  {
@@ -11559,16 +11856,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-10-01",
+  "sourceRowIds": [
+   "new-york-university-shanghai____om"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OM"
+   }
+  ],
   "mapLocationIds": [
    "new-york-shanghai-operations-south"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "New York University Shanghai"
-  ],
   "mapSearchTerms": [
    "Business",
-   "Operations and Business Analytics"
+   "Operations and Business Analytics",
+   "OM"
+  ],
+  "mapInstitutionNames": [
+   "New York University Shanghai"
   ]
  },
  {
@@ -11698,8 +12005,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-30",
+  "n": 2,
+  "lastPosted": "2026-10-23",
   "mapLocationIds": [
    "north-carolina-agricultural-technical-business-information-systems-merrick"
   ],
@@ -12308,16 +12615,25 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-22",
+  "sourceRowIds": [
+   "nova-school-of-business-and-economics____operations-technology-and-innovation-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Operations, Technology and Innovation Management"
+   }
+  ],
   "mapLocationIds": [
    "nova-operations-technology-innovation-cascais-hall"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Nova School of Business and Economics"
-  ],
   "mapSearchTerms": [
    "Nova School of Business and Economics",
    "Operations, Technology and Innovation Management"
+  ],
+  "mapInstitutionNames": [
+   "Nova School of Business and Economics"
   ]
  },
  {
@@ -12473,6 +12789,17 @@
   "deptUrl": "https://fisher.osu.edu/directory?department=224"
  },
  {
+  "id": "ohio-state-university____optimization-for-machine-learning",
+  "institution": "Ohio State University",
+  "department": "Optimization for Machine Learning",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "ohio-state-university__college-of-engineering__integrated-systems-engineering",
   "institution": "Ohio State University",
   "school": "College of Engineering",
@@ -12489,8 +12816,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-10-19",
+  "n": 2,
+  "lastPosted": "2026-10-23",
   "mapLocationIds": [
    "ohio-state-integrated-systems-baker"
   ],
@@ -12667,8 +12994,20 @@
   ],
   "n": 2,
   "lastPosted": "2025-10-03",
+  "sourceRowIds": [
+   "ozyegin-university____om"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OM"
+   }
+  ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "OM"
+  ]
  },
  {
   "id": "ozyegin-university__graduate-school-of-business",
@@ -13108,10 +13447,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-08",
+  "sourceRowIds": [
+   "princeton-university____operations-research-and-financial-engineering"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Operations Research and Financial Engineering"
+   }
+  ],
   "lat": 40.3490485,
   "lng": -74.652812,
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "Operations Research and Financial Engineering"
+  ]
  },
  {
   "id": "providence-college__school-of-business__finance",
@@ -14777,10 +15128,22 @@
   ],
   "n": 3,
   "lastPosted": "2026-08-20",
+  "sourceRowIds": [
+   "singapore-management-university____om"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OM"
+   }
+  ],
   "lat": 1.2962727,
   "lng": 103.8501578,
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "OM"
+  ]
  },
  {
   "id": "singapore-management-university__school-of-information-systems",
@@ -15137,18 +15500,28 @@
   ],
   "n": 3,
   "lastPosted": "2026-08-31",
+  "sourceRowIds": [
+   "southern-methodist-university__edwin-l-cox-school-of-business__itom"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "Edwin L. Cox School of Business",
+    "department": "ITOM"
+   }
+  ],
   "lat": 32.8425575,
   "lng": -96.7841136,
   "mapLocationIds": [
    "southern-methodist-information-technology-miller-quadrangle"
   ],
   "mapLocationKind": "department",
-  "mapInstitutionNames": [
-   "Southern Methodist University"
-  ],
   "mapSearchTerms": [
    "Edwin L. Cox School of Business",
-   "Department of Information Technology and Operations Management"
+   "Department of Information Technology and Operations Management",
+   "ITOM"
+  ],
+  "mapInstitutionNames": [
+   "Southern Methodist University"
   ]
  },
  {
@@ -16593,16 +16966,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-10-17",
+  "sourceRowIds": [
+   "texas-southern-university____mis"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "MIS"
+   }
+  ],
   "mapLocationIds": [
    "texas-southern-business-administration-jones"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Texas Southern University"
-  ],
   "mapSearchTerms": [
    "Jesse H. Jones School of Business",
-   "Department of Business Administration"
+   "Department of Business Administration",
+   "MIS"
+  ],
+  "mapInstitutionNames": [
+   "Texas Southern University"
   ]
  },
  {
@@ -17024,15 +17407,25 @@
   ],
   "n": 3,
   "lastPosted": "2026-08-19",
+  "sourceRowIds": [
+   "chinese-university-of-hong-kong-shenzhen____information-systems-and-operations-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Information Systems and Operations Management"
+   }
+  ],
   "mapLocationIds": [
    "shenzhen-management-platform-operations-verified"
   ],
   "mapLocationKind": "school",
+  "mapSearchTerms": [
+   "School of Management and Economics",
+   "Information Systems and Operations Management"
+  ],
   "mapInstitutionNames": [
    "The Chinese University of Hong Kong, Shenzhen"
-  ],
-  "mapSearchTerms": [
-   "School of Management and Economics"
   ]
  },
  {
@@ -17419,18 +17812,28 @@
   ],
   "n": 6,
   "lastPosted": "2026-09-30",
+  "sourceRowIds": [
+   "pennsylvania-state-university____supply-chain-and-information-systems"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Supply Chain and Information Systems"
+   }
+  ],
   "lat": 40.7964727,
   "lng": -77.8628163,
   "mapLocationIds": [
    "pennsylvania-state-supply-chain-information-systems-business"
   ],
   "mapLocationKind": "department",
-  "mapInstitutionNames": [
-   "Pennsylvania State University"
-  ],
   "mapSearchTerms": [
    "Smeal College of Business",
-   "Department of Supply Chain and Information Systems"
+   "Department of Supply Chain and Information Systems",
+   "Supply Chain and Information Systems"
+  ],
+  "mapInstitutionNames": [
+   "Pennsylvania State University"
   ]
  },
  {
@@ -17625,18 +18028,28 @@
   ],
   "n": 3,
   "lastPosted": "2026-09-27",
+  "sourceRowIds": [
+   "university-of-texas-at-austin____irom"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "IROM"
+   }
+  ],
   "lat": 30.2851035,
   "lng": -97.7375539,
   "mapLocationIds": [
    "texas-austin-mccombs-irom-verified"
   ],
   "mapLocationKind": "department",
-  "mapInstitutionNames": [
-   "The University of Texas at Austin"
-  ],
   "mapSearchTerms": [
    "McCombs School of Business",
-   "Department of Information, Risk, and Operations Management"
+   "Department of Information, Risk, and Operations Management",
+   "IROM"
+  ],
+  "mapInstitutionNames": [
+   "The University of Texas at Austin"
   ]
  },
  {
@@ -19510,18 +19923,28 @@
   ],
   "n": 3,
   "lastPosted": "2025-10-24",
+  "sourceRowIds": [
+   "university-of-california-berkeley____ieor"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "IEOR"
+   }
+  ],
   "lat": 37.8756626,
   "lng": -122.2592805,
   "mapLocationIds": [
    "berkeley-industrial-engineering-etcheverry"
   ],
   "mapLocationKind": "department",
-  "mapInstitutionNames": [
-   "University of California, Berkeley"
-  ],
   "mapSearchTerms": [
    "College of Engineering",
-   "Department of Industrial Engineering and Operations Research"
+   "Department of Industrial Engineering and Operations Research",
+   "IEOR"
+  ],
+  "mapInstitutionNames": [
+   "University of California, Berkeley"
   ]
  },
  {
@@ -19559,10 +19982,22 @@
   ],
   "n": 2,
   "lastPosted": "2026-07-22",
+  "sourceRowIds": [
+   "university-of-california-berkeley____operations-and-information-technology-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Operations and Information Technology Management"
+   }
+  ],
   "lat": 37.8715011,
   "lng": -122.2538019,
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "Operations and Information Technology Management"
+  ]
  },
  {
   "id": "university-of-california-davis__graduate-school-of-management__business-analytics",
@@ -19579,16 +20014,26 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-05",
+  "sourceRowIds": [
+   "university-of-california-davis____business-analytics"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Business Analytics"
+   }
+  ],
   "mapLocationIds": [
    "davis-business-analytics-san-francisco-kane"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of California, Davis"
-  ],
   "mapSearchTerms": [
    "Graduate School of Management",
-   "Master of Science in Business Analytics — San Francisco programme office"
+   "Master of Science in Business Analytics — San Francisco programme office",
+   "Business Analytics"
+  ],
+  "mapInstitutionNames": [
+   "University of California, Davis"
   ]
  },
  {
@@ -20732,16 +21177,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-10-15",
+  "sourceRowIds": [
+   "university-of-houston____om"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OM"
+   }
+  ],
   "mapLocationIds": [
    "houston-decision-information-sciences-melcher"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Houston"
-  ],
   "mapSearchTerms": [
    "C. T. Bauer College of Business",
-   "Department of Decision and Information Sciences"
+   "Department of Decision and Information Sciences",
+   "OM"
+  ],
+  "mapInstitutionNames": [
+   "University of Houston"
   ],
   "deptUrl": "https://www.bauer.uh.edu/search/directory/index2.asp?dept=DISC"
  },
@@ -21145,16 +21600,26 @@
   ],
   "n": 5,
   "lastPosted": "2026-09-03",
+  "sourceRowIds": [
+   "university-of-iowa____ba"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "BA"
+   }
+  ],
   "mapLocationIds": [
    "iowa-business-analytics-pappajohn"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Iowa"
-  ],
   "mapSearchTerms": [
    "Tippie College of Business",
-   "Department of Business Analytics"
+   "Department of Business Analytics",
+   "BA"
+  ],
+  "mapInstitutionNames": [
+   "University of Iowa"
   ]
  },
  {
@@ -21174,10 +21639,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-05",
+  "sourceRowIds": [
+   "university-of-kansas____analytics-information-and-operations-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Analytics, Information and Operations Management"
+   }
+  ],
   "lat": 38.958542,
   "lng": -95.2476138,
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "Analytics, Information and Operations Management"
+  ]
  },
  {
   "id": "university-of-kansas__school-of-business__analytics-information-operations",
@@ -21609,8 +22086,20 @@
   ],
   "n": 1,
   "lastPosted": "2025-06-05",
+  "sourceRowIds": [
+   "university-of-mannheim____supply-chain-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Supply Chain Management"
+   }
+  ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "Supply Chain Management"
+  ]
  },
  {
   "id": "university-of-maryland____om-is",
@@ -21835,16 +22324,25 @@
    "directory",
    "seed"
   ],
+  "sourceRowIds": [
+   "university-of-melbourne____faculty-of-business-and-economics"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Faculty of Business and Economics"
+   }
+  ],
   "mapLocationIds": [
    "melbourne-management-marketing-the-spot"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "The University of Melbourne"
-  ],
   "mapSearchTerms": [
    "Faculty of Business and Economics",
    "Department of Management and Marketing - Operations and Supply Chain Management"
+  ],
+  "mapInstitutionNames": [
+   "The University of Melbourne"
   ]
  },
  {
@@ -22004,16 +22502,32 @@
   ],
   "n": 2,
   "lastPosted": "2026-09-29",
+  "sourceRowIds": [
+   "university-of-michigan____industrial-and-operations-engineering",
+   "university-of-michigan____ioe"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Industrial and Operations Engineering"
+   },
+   {
+    "school": "",
+    "department": "IOE"
+   }
+  ],
   "mapLocationIds": [
    "michigan-industrial-operations-engineering-beal"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Michigan"
-  ],
   "mapSearchTerms": [
    "College of Engineering",
-   "Department of Industrial and Operations Engineering"
+   "Department of Industrial and Operations Engineering",
+   "Industrial and Operations Engineering",
+   "IOE"
+  ],
+  "mapInstitutionNames": [
+   "University of Michigan"
   ]
  },
  {
@@ -23152,16 +23666,26 @@
   ],
   "n": 4,
   "lastPosted": "2026-09-17",
+  "sourceRowIds": [
+   "university-of-oklahoma____supply-chain-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Supply Chain Management"
+   }
+  ],
   "mapLocationIds": [
    "oklahoma-marketing-supply-chain-adams"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Oklahoma"
-  ],
   "mapSearchTerms": [
    "Michael F. Price College of Business",
-   "Division of Marketing and Supply Chain Management"
+   "Division of Marketing and Supply Chain Management",
+   "Supply Chain Management"
+  ],
+  "mapInstitutionNames": [
+   "University of Oklahoma"
   ]
  },
  {
@@ -23278,10 +23802,22 @@
   ],
   "n": 2,
   "lastPosted": "2026-08-25",
+  "sourceRowIds": [
+   "university-of-pennsylvania____oid"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OID"
+   }
+  ],
   "lat": 39.9529106,
   "lng": -75.1982674,
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "OID"
+  ]
  },
  {
   "id": "university-of-pittsburgh____industrial-engineering",
@@ -23412,9 +23948,13 @@
   "school": "College of Engineering",
   "department": "Mechanical, Industrial and Systems Engineering",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-23",
   "mapLocationIds": [
    "rhode-island-mechanical-industrial-systems-fascitelli"
   ],
@@ -23425,8 +23965,7 @@
   "mapSearchTerms": [
    "College of Engineering",
    "Department of Mechanical, Industrial and Systems Engineering"
-  ],
-  "country": "United States"
+  ]
  },
  {
   "id": "university-of-richmond__robins-school-of-business__management",
@@ -23776,16 +24315,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-09-17",
+  "sourceRowIds": [
+   "university-of-southern-california____ise"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "ISE"
+   }
+  ],
   "mapLocationIds": [
    "southern-california-industrial-systems-andrus"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Southern California (USC)"
-  ],
   "mapSearchTerms": [
    "Viterbi School of Engineering",
-   "Daniel J. Epstein Department of Industrial and Systems Engineering"
+   "Daniel J. Epstein Department of Industrial and Systems Engineering",
+   "ISE"
+  ],
+  "mapInstitutionNames": [
+   "University of Southern California (USC)"
   ]
  },
  {
@@ -24908,18 +25457,27 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-05",
+  "sourceRowIds": [
+   "university-of-virginia____technology-and-operations-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Technology and Operations Management"
+   }
+  ],
   "lat": 38.052169,
   "lng": -78.5134856,
   "mapLocationIds": [
    "virginia-darden-technology-operations"
   ],
   "mapLocationKind": "department",
-  "mapInstitutionNames": [
-   "University of Virginia"
-  ],
   "mapSearchTerms": [
    "Darden School of Business",
    "Technology and Operations Management"
+  ],
+  "mapInstitutionNames": [
+   "University of Virginia"
   ]
  },
  {
@@ -25561,16 +26119,26 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-15",
+  "sourceRowIds": [
+   "utah-valley-university____strategic-management-and-operations"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Strategic Management and Operations"
+   }
+  ],
   "mapLocationIds": [
    "utah-valley-strategic-management-operations-woodbury"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Utah Valley University"
-  ],
   "mapSearchTerms": [
    "Woodbury School of Business",
-   "Department of Strategic Management and Operations"
+   "Department of Strategic Management and Operations",
+   "Strategic Management and Operations"
+  ],
+  "mapInstitutionNames": [
+   "Utah Valley University"
   ]
  },
  {
@@ -25997,16 +26565,26 @@
   ],
   "n": 2,
   "lastPosted": "2026-09-23",
+  "sourceRowIds": [
+   "virginia-tech____or"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "OR"
+   }
+  ],
   "mapLocationIds": [
    "virginia-tech-grado-industrial-systems-durham"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Virginia Polytechnic Institute and State University"
-  ],
   "mapSearchTerms": [
    "College of Engineering",
-   "Grado Department of Industrial and Systems Engineering"
+   "Grado Department of Industrial and Systems Engineering",
+   "OR"
+  ],
+  "mapInstitutionNames": [
+   "Virginia Polytechnic Institute and State University"
   ],
   "facultyUrl": "https://www.ise.vt.edu/people/faculty.html"
  },

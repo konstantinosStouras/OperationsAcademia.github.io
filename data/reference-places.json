@@ -47,6 +47,11 @@
  {
   "institution": "Adelphi University",
   "school": "Robert B. Willumstad School of Business",
+  "department": "Decision Sciences and Marketing"
+ },
+ {
+  "institution": "Adelphi University",
+  "school": "Robert B. Willumstad School of Business",
   "department": "Management"
  },
  {
@@ -278,6 +283,11 @@
   "institution": "Beijing Normal-Hong Kong Baptist University (BNBU)",
   "school": "",
   "department": "BA"
+ },
+ {
+  "institution": "Bellarmine University",
+  "school": "",
+  "department": "Information Systems and Artificial Intelligence"
  },
  {
   "institution": "Bellarmine University",
@@ -1380,6 +1390,11 @@
   "department": "IS"
  },
  {
+  "institution": "Indiana University Bloomington",
+  "school": "Kelley School of Business",
+  "department": "Operations and Decision Technologies"
+ },
+ {
   "institution": "Indiana University Northwest",
   "school": "",
   "department": "MIS"
@@ -1735,6 +1750,11 @@
   "department": "Supply Chain Management"
  },
  {
+  "institution": "Minnesota State University, Mankato",
+  "school": "College of Science, Engineering and Technology",
+  "department": "Computer Information Science"
+ },
+ {
   "institution": "Minnesota State University",
   "school": "",
   "department": "MIS and BA"
@@ -2063,6 +2083,11 @@
   "institution": "Ohio State University",
   "school": "",
   "department": "OM/BA"
+ },
+ {
+  "institution": "Ohio State University",
+  "school": "",
+  "department": "Optimization for Machine Learning"
  },
  {
   "institution": "Ohio State University",
@@ -3713,6 +3738,11 @@
   "institution": "University of Puget Sound",
   "school": "School of Business and Leadership",
   "department": "Management"
+ },
+ {
+  "institution": "University of Rhode Island",
+  "school": "College of Engineering",
+  "department": "Mechanical, Industrial and Systems Engineering"
  },
  {
   "institution": "University of San Diego",

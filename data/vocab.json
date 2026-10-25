@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-23T12:54:30.302Z",
+ "generated": "2026-10-25T21:24:13.714Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -38,6 +38,10 @@
    "n": 7
   },
   {
+   "v": "Ohio State University",
+   "n": 6
+  },
+  {
    "v": "Texas State University",
    "n": 6
   },
@@ -67,10 +71,6 @@
   },
   {
    "v": "IESE Business School",
-   "n": 5
-  },
-  {
-   "v": "Ohio State University",
    "n": 5
   },
   {
@@ -346,6 +346,10 @@
    "n": 2
   },
   {
+   "v": "Adelphi University",
+   "n": 2
+  },
+  {
    "v": "Air Force Institute of Technology",
    "n": 2
   },
@@ -371,6 +375,10 @@
   },
   {
    "v": "Augusta University",
+   "n": 2
+  },
+  {
+   "v": "Bellarmine University",
    "n": 2
   },
   {
@@ -555,6 +563,10 @@
   },
   {
    "v": "Naval Postgraduate School",
+   "n": 2
+  },
+  {
+   "v": "North Carolina Agricultural and Technical State University",
    "n": 2
   },
   {
@@ -810,10 +822,6 @@
    "n": 1
   },
   {
-   "v": "Adelphi University",
-   "n": 1
-  },
-  {
    "v": "Ahmedabad University",
    "n": 1
   },
@@ -883,10 +891,6 @@
   },
   {
    "v": "Beijing Normal-Hong Kong Baptist University (BNBU)",
-   "n": 1
-  },
-  {
-   "v": "Bellarmine University",
    "n": 1
   },
   {
@@ -1202,6 +1206,10 @@
    "n": 1
   },
   {
+   "v": "Indiana University Bloomington",
+   "n": 1
+  },
+  {
    "v": "INSEAD",
    "n": 1
   },
@@ -1302,6 +1310,10 @@
    "n": 1
   },
   {
+   "v": "Minnesota State University, Mankato",
+   "n": 1
+  },
+  {
    "v": "Mississippi State University",
    "n": 1
   },
@@ -1367,10 +1379,6 @@
   },
   {
    "v": "North Carolina A&T State University",
-   "n": 1
-  },
-  {
-   "v": "North Carolina Agricultural and Technical State University",
    "n": 1
   },
   {
@@ -1798,6 +1806,10 @@
    "n": 1
   },
   {
+   "v": "University of Rhode Island",
+   "n": 1
+  },
+  {
    "v": "University of Science and Technology of China",
    "n": 1
   },
@@ -2094,10 +2106,6 @@
    "n": 0
   },
   {
-   "v": "Indiana University Bloomington",
-   "n": 0
-  },
-  {
    "v": "Kedge Business School",
    "n": 0
   },
@@ -2131,10 +2139,6 @@
   },
   {
    "v": "Memorial University of Newfoundland",
-   "n": 0
-  },
-  {
-   "v": "Minnesota State University, Mankato",
    "n": 0
   },
   {
@@ -2366,10 +2370,6 @@
    "n": 0
   },
   {
-   "v": "University of Rhode Island",
-   "n": 0
-  },
-  {
    "v": "University of Richmond",
    "n": 0
   },
@@ -2476,12 +2476,12 @@
    "n": 21
   },
   {
-   "v": "School of Business",
-   "n": 11
+   "v": "College of Engineering",
+   "n": 12
   },
   {
-   "v": "College of Engineering",
-   "n": 10
+   "v": "School of Business",
+   "n": 11
   },
   {
    "v": "A. B. Freeman School of Business",
@@ -2545,6 +2545,10 @@
   },
   {
    "v": "Ira A. Fulton Schools of Engineering",
+   "n": 3
+  },
+  {
+   "v": "Kelley School of Business",
    "n": 3
   },
   {
@@ -2656,10 +2660,6 @@
    "n": 2
   },
   {
-   "v": "Kelley School of Business",
-   "n": 2
-  },
-  {
    "v": "Kellogg School of Management",
    "n": 2
   },
@@ -2716,6 +2716,10 @@
    "n": 2
   },
   {
+   "v": "Robert B. Willumstad School of Business",
+   "n": 2
+  },
+  {
    "v": "School of Business Administration",
    "n": 2
   },
@@ -2757,6 +2761,10 @@
   },
   {
    "v": "Wharton School",
+   "n": 2
+  },
+  {
+   "v": "Willie A. Deese College of Business and Economics",
    "n": 2
   },
   {
@@ -2877,6 +2885,10 @@
   },
   {
    "v": "College of Public Affairs and Community Service, School of Public Administration",
+   "n": 1
+  },
+  {
+   "v": "College of Science",
    "n": 1
   },
   {
@@ -3208,10 +3220,6 @@
    "n": 1
   },
   {
-   "v": "Robert B. Willumstad School of Business",
-   "n": 1
-  },
-  {
    "v": "Robert J. Trulaske, Sr. College of Business",
    "n": 1
   },
@@ -3373,10 +3381,6 @@
   },
   {
    "v": "Williamson College of Business Administration",
-   "n": 1
-  },
-  {
-   "v": "Willie A. Deese College of Business and Economics",
    "n": 1
   },
   {
@@ -4002,6 +4006,10 @@
    "n": 3
   },
   {
+   "v": "Operations and Decision Technologies",
+   "n": 3
+  },
+  {
    "v": "Operations and Information Management",
    "n": 3
   },
@@ -4047,6 +4055,10 @@
   },
   {
    "v": "Business Analytics and Statistics",
+   "n": 2
+  },
+  {
+   "v": "Business Information Systems and Analytics",
    "n": 2
   },
   {
@@ -4122,6 +4134,10 @@
    "n": 2
   },
   {
+   "v": "Integrated Systems Engineering",
+   "n": 2
+  },
+  {
    "v": "IS/BA",
    "n": 2
   },
@@ -4171,10 +4187,6 @@
   },
   {
    "v": "OM/OR",
-   "n": 2
-  },
-  {
-   "v": "Operations and Decision Technologies",
    "n": 2
   },
   {
@@ -4378,10 +4390,6 @@
    "n": 1
   },
   {
-   "v": "Business Information Systems and Analytics",
-   "n": 1
-  },
-  {
    "v": "Business Information Systems and Operations Management",
    "n": 1
   },
@@ -4526,6 +4534,10 @@
    "n": 1
   },
   {
+   "v": "Decision Sciences and Marketing",
+   "n": 1
+  },
+  {
    "v": "Decision, Risk and Operations",
    "n": 1
   },
@@ -4567,6 +4579,10 @@
   },
   {
    "v": "Empirical business problems",
+   "n": 1
+  },
+  {
+   "v": "Engineering and Technology, Computer Information Science",
    "n": 1
   },
   {
@@ -4718,6 +4734,10 @@
    "n": 1
   },
   {
+   "v": "Information Systems and Artificial Intelligence",
+   "n": 1
+  },
+  {
    "v": "Information Systems and Informatics",
    "n": 1
   },
@@ -4775,10 +4795,6 @@
   },
   {
    "v": "Innovation and Entrepreneurship",
-   "n": 1
-  },
-  {
-   "v": "Integrated Systems Engineering",
    "n": 1
   },
   {
@@ -5011,6 +5027,10 @@
   },
   {
    "v": "Mechanical and Industrial Engineering",
+   "n": 1
+  },
+  {
+   "v": "Mechanical, Industrial and Systems Engineering",
    "n": 1
   },
   {
@@ -5530,10 +5550,6 @@
    "n": 0
   },
   {
-   "v": "Decision Sciences and Marketing",
-   "n": 0
-  },
-  {
    "v": "Decision Sciences/Operations Management",
    "n": 0
   },
@@ -5703,10 +5719,6 @@
   },
   {
    "v": "Mathematics, Analytics and Optimization",
-   "n": 0
-  },
-  {
-   "v": "Mechanical, Industrial and Systems Engineering",
    "n": 0
   },
   {
@@ -6333,9 +6345,13 @@
     "W. Fielding Rubel School of Business"
    ],
    "units": [
-    "Business Technology and Artificial Intelligence"
+    "Business Technology and Artificial Intelligence",
+    "Information Systems and Artificial Intelligence"
    ],
    "bySchool": {
+    "": [
+     "Information Systems and Artificial Intelligence"
+    ],
     "W. Fielding Rubel School of Business": [
      "Business Technology and Artificial Intelligence"
     ]
@@ -8570,10 +8586,12 @@
     "Kelley School of Business"
    ],
    "units": [
+    "Operations and Decision Technologies",
     "Supply Chain and Operations"
    ],
    "bySchool": {
     "Kelley School of Business": [
+     "Operations and Decision Technologies",
      "Supply Chain and Operations"
     ]
    }
@@ -9266,12 +9284,17 @@
   },
   "Minnesota State University, Mankato": {
    "schools": [
+    "College of Science",
     "College of Science, Engineering and Technology"
    ],
    "units": [
-    "Computer Information Science"
+    "Computer Information Science",
+    "Engineering and Technology, Computer Information Science"
    ],
    "bySchool": {
+    "College of Science": [
+     "Engineering and Technology, Computer Information Science"
+    ],
     "College of Science, Engineering and Technology": [
      "Computer Information Science"
     ]
@@ -14699,6 +14722,9 @@
   ],
   "College of Public Affairs and Community Service, School of Public Administration": [
    "Nonprofit Management"
+  ],
+  "College of Science": [
+   "Engineering and Technology, Computer Information Science"
   ],
   "College of Science and Engineering": [
    "Engineering Management and Decision Sciences",
