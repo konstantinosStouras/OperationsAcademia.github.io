@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-25T01:47:55.938Z",
- "members": 399,
+ "generated": "2026-10-25T07:00:13.608Z",
+ "members": 401,
  "k": 3,
  "affiliation": {
-  "listed": 316,
+  "listed": 318,
   "other": 48,
   "none": 35
  },
  "universities": {
-  "count": 146,
+  "count": 147,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -46,12 +46,12 @@
     "members": 6
    },
    {
-    "name": "University of Massachusetts Amherst",
+    "name": "University of Michigan",
     "country": "United States",
-    "members": 5
+    "members": 6
    },
    {
-    "name": "University of Michigan",
+    "name": "University of Massachusetts Amherst",
     "country": "United States",
     "members": 5
    },
@@ -211,14 +211,14 @@
     "members": 3
    }
   ],
-  "rest": 145
+  "rest": 146
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 197
+    "members": 199
    },
    {
     "name": "Canada",
