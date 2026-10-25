@@ -82,6 +82,7 @@
      not because anything was lost.                                            */
 
   var LIST = [
+    { u: 'Adelphi University', s: 'Robert B. Willumstad School of Business', d: ['Decision Sciences and Marketing'] },
     { u: 'Arizona State University', s: 'W.P. Carey School of Business', d: ['Supply Chain Management'] },
     { u: 'Auburn University', s: 'Harbert College of Business', d: ['Supply Chain Management'] },
     { u: 'Bilkent University', s: 'Faculty of Business Administration', d: ['Operations Management'] },
@@ -142,6 +143,7 @@
     { u: 'Massachusetts Institute of Technology', s: 'Sloan School of Management', d: ['Operations Management', 'Operations Research and Statistics'] },
     { u: 'McGill University', s: 'Desautels Faculty of Management', d: ['Operations Management'] },
     { u: 'Michigan State University', s: 'The Eli Broad College of Business', d: ['Supply Chain Management'] },
+    { u: 'Minnesota State University, Mankato', s: 'College of Science, Engineering and Technology', d: ['Computer Information Science'] },
     { u: 'Monash University', s: 'Monash Business School', d: ['Management'] },
     { u: 'Morgan State University', s: 'Earl G. Graves School of Business and Management', d: [] },
     { u: 'Nanyang Technological University', s: 'Nanyang Business School', d: ['Information Technology and Operations Management'] },
@@ -238,6 +240,7 @@
     { u: 'University of Oxford', s: 'Saïd Business School', d: ['Technology and Operations Management'] },
     { u: 'University of Pennsylvania', s: 'The Wharton School', d: ['Operations, Information and Decisions'] },
     { u: 'University of Pittsburgh', s: 'The Joseph M. Katz Graduate School of Business', d: ['Business Analytics & Operations'] },
+    { u: 'University of Rhode Island', s: 'College of Engineering', d: ['Mechanical, Industrial and Systems Engineering'] },
     { u: 'University of Rochester', s: 'Simon Business School', d: ['Operations Management'] },
     { u: 'University of Science and Technology of China', s: 'School of Management', d: ['Management Science'] },
     { u: 'University of South Carolina', s: 'Darla Moore School of Business', d: ['Management Science'] },
@@ -263,11 +266,7 @@
     { u: 'Western University', s: 'Ivey Business School', d: ['Operations Management'] },
     { u: 'WHU – Otto Beisheim School of Management', s: 'Otto-Beisheim School of Management', d: ['Supply Chain Management'] },
     { u: 'Yale University', s: 'School of Management', d: ['Operations'] },
-    { u: 'York University', s: 'Schulich School of Business', d: ['Operations Management and Information Systems'] },
-    // Official hiring departments and department pages checked 2026-10-25.
-    { u: 'Adelphi University', s: 'Robert B. Willumstad School of Business', d: ['Decision Sciences and Marketing'] },
-    { u: 'Minnesota State University, Mankato', s: 'College of Science, Engineering and Technology', d: ['Computer Information Science'] },
-    { u: 'University of Rhode Island', s: 'College of Engineering', d: ['Mechanical, Industrial and Systems Engineering'] }
+    { u: 'York University', s: 'Schulich School of Business', d: ['Operations Management and Information Systems'] }
   ];
 
   /* ------------------------------------------------------------------ folding */
