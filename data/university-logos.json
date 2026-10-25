@@ -5337,6 +5337,18 @@
       "sourceImage": "https://material.hkust-gz.edu.cn/wp-content/uploads/2023/04/cropped-favicon-1-1-192x192.png",
       "retrievedAt": "2026-10-22",
       "license": "Institutional trademark"
+    },
+    {
+      "name": "Minnesota State University, Mankato",
+      "logo": "/assets/university-logos/Q1937387.png",
+      "qid": "Q1937387",
+      "source": "Alias for the existing Minnesota State University, Mankato institutional logo; official hiring name checked 2026-10-25"
+    },
+    {
+      "name": "University of Rhode Island",
+      "logo": "/assets/university-logos/university-of-rhode-island.png",
+      "source": "https://www.uri.edu/wp-content/themes/uri-modern/images/logo-print.png",
+      "checked": "2026-10-25"
     }
   ]
 }
