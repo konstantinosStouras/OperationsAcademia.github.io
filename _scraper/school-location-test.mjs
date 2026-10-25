@@ -6,7 +6,7 @@ const read=name=>JSON.parse(fs.readFileSync(new URL(name,import.meta.url),'utf8'
 const verified=read('../data/school-map-locations.json').records;
 const directory=read('../data/directory.json');
 const rows=Array.isArray(directory)?directory:directory.rows;
-const seen=new Set(), ids=new Set();
+const seen=new Map(), ids=new Set();
 assert.equal(model.displayName('WU Vienna'),'Vienna University of Economics and Business');
 for(const v of verified){
  assert.ok(v.id&&!ids.has(v.id),'unique location identity');ids.add(v.id);
@@ -16,10 +16,14 @@ for(const v of verified){
  for(const field of ['addressSource','coordinateSource'])assert.equal(new URL(v[field]).protocol,'https:');
  assert.ok(v.rowIds.length);
  for(const id of v.rowIds){
-  assert.ok(!seen.has(id),'ambiguous location for '+id);seen.add(id);
+  if(seen.has(id)) {
+   assert.ok(v.locationGroup&&v.locationGroup===seen.get(id).locationGroup,'ambiguous location for '+id);
+   assert.equal(new URL(v.locationGroupSource).protocol,'https:');
+  }
+  seen.set(id,v);
   const row=rows.find(r=>r.id===id);assert.ok(row,'unknown directory row '+id);
   assert.equal(S.institutionKey(row.institution),S.institutionKey(v.institutionKey||v.institution));
-  if(v.country) assert.equal(row.country,v.country,'verified campus country reaches directory filters: '+v.id);
+  if(v.country) assert.ok((row.countries||[row.country]).includes(v.country),'verified campus country reaches directory filters: '+v.id);
  }
 }
 const card={id:'test',institution:'Test University',schools:[{name:'Engineering',rows:[
@@ -42,3 +46,7 @@ const editedPoint=model.pointsFor(editedCard,data).find(p=>p.lat===40);
 assert.equal(editedPoint.card.schools[0].rows[0].department,'Community corrected department','explicit community edits take precedence over verified names');
 assert.equal(editedPoint.card.schools[0].name,'Engineering','unedited verified school remains intact');
 assert.equal(editedPoint.lng,-70,'name corrections preserve verified coordinates');
+const multi=model.pointsFor(card,{...data,verified:[{...source,locationGroup:'eligible-hosts'}, {...source,id:'another-host',locationGroup:'eligible-hosts',school:'Science',department:'Computer Science',lat:42}]});
+assert.equal(multi.filter(p=>p.locationGroup==='eligible-hosts').length,2,'one posting can have two explicitly evidenced hosts');
+assert.ok(multi.filter(p=>p.locationGroup).every(p=>model.matchesRow(p.card.schools[0].rows[0],'Engineering','Systems')),'each eligible host retains the original posting link');
+assert.equal(card.schools[0].rows[0].department,'Systems','additional locations do not mutate the original row');

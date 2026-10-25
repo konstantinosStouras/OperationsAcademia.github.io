@@ -34,7 +34,9 @@
     var groups=new Map(), names=[card.institution].concat((card.aka||'').split(' · '));
     (card.schools||[]).forEach(function(s){(s.rows||[]).forEach(function(r){
       if(S.directoryExcluded({institution:card.institution,school:s.name}))return;
-      var verified=(data.verified||[]).find(function(v){return S.institutionKey(v.institutionKey||v.institution)===S.institutionKey(card.institution)&&v.rowIds.indexOf(r.id)!==-1;});
+        var locations=(data.verified||[]).filter(function(v){return S.institutionKey(v.institutionKey||v.institution)===S.institutionKey(card.institution)&&v.rowIds.indexOf(r.id)!==-1;});
+        (locations.length?locations:[null]).forEach(function(verified){
+        var originalRow=r;
       var c=S.canonColumns({institution:card.institution,school:s.name||'',unit:r.department||''});
       var uiuc=S.institutionKey(card.institution)===S.institutionKey('University of Illinois at Urbana-Champaign');
       var school=uiuc?c.school:(s.name||c.school), department=uiuc?c.unit:r.department;
@@ -56,6 +58,8 @@
         existing.mapAliases.push.apply(existing.mapAliases,aliases);
       }
       if(data.rowInstitutions[r.id])names.push(data.rowInstitutions[r.id]);
+        r=originalRow;
+        });
     });});
     // An unspecified university row adds no separate department beside named ones.
     if(groups.size>1)groups.delete('department:');

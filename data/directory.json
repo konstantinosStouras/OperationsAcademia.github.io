@@ -197,7 +197,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-05-16"
+  "lastPosted": "2026-05-16",
+  "mapSearchTerms": [
+   "Graduate School of Engineering and Management",
+   "Department of Operational Sciences"
+  ]
  },
  {
   "id": "air-force-institute-of-technology__graduate-school-of-engineering-and-management__air-force-headquarters",
@@ -496,7 +500,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-18"
+  "lastPosted": "2025-10-18",
+  "mapSearchTerms": [
+   "Ira A. Fulton Schools of Engineering",
+   "School of Computing and Augmented Intelligence — Learning, Optimization, and Decision Analytics"
+  ]
  },
  {
   "id": "arizona-state-university__ira-a-fulton-schools-of-engineering",
@@ -985,7 +993,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-06-13"
+  "lastPosted": "2026-06-13",
+  "mapSearchTerms": [
+   "Division of Mathematics, Science, and Technology",
+   "Computer Science, Engineering and Information Technologies Department"
+  ]
  },
  {
   "id": "berry-college____om-scm",
@@ -1858,7 +1870,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-26"
+  "lastPosted": "2025-05-26",
+  "mapSearchTerms": [
+   "Heinz College of Information Systems and Public Policy",
+   "Contextualized Evaluation of Artificial Intelligence for Healthcare"
+  ]
  },
  {
   "id": "carnegie-mellon-university__carnegie-mellon-university-in-qatar__information-systems",
@@ -1892,7 +1908,10 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2026-01-19"
+  "lastPosted": "2026-01-19",
+  "mapSearchTerms": [
+   "Heinz College of Information Systems and Public Policy"
+  ]
  },
  {
   "id": "carnegie-mellon-university__tepper-school-of-business",
@@ -2961,7 +2980,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-21"
+  "lastPosted": "2026-08-21",
+  "mapSearchTerms": [
+   "Business Administration — Operations Management"
+  ]
  },
  {
   "id": "county-college-of-morris____ai",
@@ -3722,7 +3744,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-06"
+  "lastPosted": "2025-06-06",
+  "mapSearchTerms": [
+   "Department of Management, Technology, and Economics"
+  ]
  },
  {
   "id": "eth-zurich____management-technology-and-economics",
@@ -4906,7 +4931,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-29"
+  "lastPosted": "2025-06-29",
+  "mapSearchTerms": [
+   "Department of Information Systems and Operations Management"
+  ]
  },
  {
   "id": "hec-paris____operations-management-and-information-technology",
@@ -4918,7 +4946,10 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2014-12-15"
+  "lastPosted": "2014-12-15",
+  "mapSearchTerms": [
+   "Department of Information Systems and Operations Management"
+  ]
  },
  {
   "id": "hec-paris__school-of-business__information-systems-and-operations-management",
@@ -4944,7 +4975,10 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-02-03"
+  "lastPosted": "2026-02-03",
+  "mapSearchTerms": [
+   "Department of Information Systems and Operations Management"
+  ]
  },
  {
   "id": "henderson-state-university__college-of-business__operations-management",
@@ -5102,6 +5136,10 @@
   "type": "University",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Information Hub",
+   "Data Science and Analytics Thrust"
   ]
  },
  {
@@ -5115,7 +5153,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-22"
+  "lastPosted": "2025-05-22",
+  "mapSearchTerms": [
+   "Information Hub",
+   "Data Science and Analytics Thrust"
+  ]
  },
  {
   "id": "hood-college____cs-and-information-technology",
@@ -5226,7 +5268,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-18"
+  "lastPosted": "2026-10-18",
+  "mapSearchTerms": [
+   "Faculty of Arts and Social Science",
+   "Management and Organizational Studies"
+  ]
  },
  {
   "id": "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem",
@@ -5949,7 +5995,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-06-27"
+  "lastPosted": "2026-06-27",
+  "mapSearchTerms": [
+   "College of Hospitality and Business",
+   "Operations and Supply Chain Management"
+  ]
  },
  {
   "id": "judge-business-school____om-tech",
@@ -6484,7 +6534,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "School of Business and Management",
+   "Business Administration"
+  ]
  },
  {
   "id": "lehigh-university",
@@ -8094,7 +8148,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-22"
+  "lastPosted": "2026-09-22",
+  "mapSearchTerms": [
+   "Newcastle University Business School",
+   "Information Systems and Operations"
+  ]
  },
  {
   "id": "newcastle-university____operations-management",
@@ -8103,6 +8161,10 @@
   "type": "University",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Newcastle University Business School",
+   "Information Systems and Operations"
   ]
  },
  {
@@ -8150,7 +8212,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "Willie A. Deese College of Business and Economics",
+   "Department of Business Information Systems and Analytics"
+  ]
  },
  {
   "id": "north-carolina-state-university____operations-and-supply-chain-management",
@@ -8374,7 +8440,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-04"
+  "lastPosted": "2025-08-04",
+  "mapSearchTerms": [
+   "School of Business",
+   "Management, Information Systems, and Marketing"
+  ]
  },
  {
   "id": "northern-state-university__school-of-business__business-analytics-and-information-systems",
@@ -8388,7 +8458,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-17"
+  "lastPosted": "2026-07-17",
+  "mapSearchTerms": [
+   "School of Business",
+   "Management, Information Systems, and Marketing"
+  ]
  },
  {
   "id": "northwestern____science-and-innovation",
@@ -8609,7 +8683,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2024-09-26"
+  "lastPosted": "2024-09-26",
+  "mapSearchTerms": [
+   "Business",
+   "Information Systems and Business Analytics"
+  ]
  },
  {
   "id": "nyu-shanghai____business-operations-and-business-analytics",
@@ -8626,7 +8704,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2024-10-03"
+  "lastPosted": "2024-10-03",
+  "mapSearchTerms": [
+   "Business",
+   "Operations and Business Analytics"
+  ]
  },
  {
   "id": "nyu-stern____technology",
@@ -8862,7 +8944,11 @@
    "seed"
   ],
   "n": 3,
-  "lastPosted": "2026-05-22"
+  "lastPosted": "2026-05-22",
+  "mapSearchTerms": [
+   "Marshall E. Rinker, Sr. College of Business",
+   "Accounting, Finance, Economics, and Data Analytics"
+  ]
  },
  {
   "id": "park-university____scm-analytics",
@@ -9799,7 +9885,13 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-19"
+  "lastPosted": "2026-01-19",
+  "mapSearchTerms": [
+   "College of Sciences",
+   "Department of Computer Science",
+   "College of Engineering",
+   "Department of Electrical and Computer Engineering"
+  ]
  },
  {
   "id": "san-diego-state-university__fowler-college-of-business__management-information-systems",
@@ -9945,7 +10037,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-20"
+  "lastPosted": "2025-06-20",
+  "mapSearchTerms": [
+   "De Sole School of Business Innovation",
+   "Creative Business Leadership"
+  ]
  },
  {
   "id": "savannah-state-university____general-business",
@@ -10248,7 +10344,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "Bachelor of Applied Science in Management"
+  ]
  },
  {
   "id": "skema-business-school____om",
@@ -10261,7 +10360,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-06"
+  "lastPosted": "2025-09-06",
+  "mapSearchTerms": [
+   "Centre for Analytics and Operations — Operations Management"
+  ]
  },
  {
   "id": "skema-business-school____optimization-or-game-theory",
@@ -10274,7 +10376,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-19"
+  "lastPosted": "2026-09-19",
+  "mapSearchTerms": [
+   "Centre for Analytics and Operations — Optimization and Game Theory"
+  ]
  },
  {
   "id": "skema-business-school____skema-centre-for-artificial-intelligence",
@@ -10286,7 +10391,16 @@
    "seed"
   ],
   "n": 3,
-  "lastPosted": "2026-09-28"
+  "lastPosted": "2026-09-28",
+  "mapSearchTerms": [
+   "Centre for Artificial Intelligence"
+  ],
+  "country": "",
+  "countries": [
+   "France",
+   "China",
+   "United States"
+  ]
  },
  {
   "id": "skolkovo-institute-of-science-and-technology-skoltech",
@@ -11009,7 +11123,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-10"
+  "lastPosted": "2026-03-10",
+  "mapSearchTerms": [
+   "School of Management",
+   "Operations Research and Artificial Intelligence"
+  ]
  },
  {
   "id": "technical-university-of-munich__tum-school-of-management__operations-and-supply-chain-management",
@@ -11050,7 +11168,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-14"
+  "lastPosted": "2026-07-14",
+  "mapSearchTerms": [
+   "School of Management",
+   "Technology Management"
+  ]
  },
  {
   "id": "technion-israel-institute-of-technology__faculty-of-data-and-decision-sciences__operations-management",
@@ -11786,6 +11908,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "The Hebrew University Business School",
+   "Operations Research"
   ]
  },
  {
@@ -11863,7 +11989,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2024-09-22"
+  "lastPosted": "2024-09-22",
+  "mapSearchTerms": [
+   "Systems Hub",
+   "Smart Manufacturing Thrust"
+  ]
  },
  {
   "id": "hong-kong-university-of-science-and-technology____industrial-engineering-and-logistics-management",
@@ -12192,7 +12322,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-24"
+  "lastPosted": "2025-06-24",
+  "mapSearchTerms": [
+   "Tilburg School of Economics and Management",
+   "Department of Information Systems and Operations Management"
+  ]
  },
  {
   "id": "tilburg-university__tilburg-school-of-economics-and-management__information-systems-and-operations-management",
@@ -13064,7 +13198,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-05"
+  "lastPosted": "2026-02-05",
+  "mapSearchTerms": [
+   "College of Business and Security Management",
+   "Business Administration"
+  ]
  },
  {
   "id": "university-of-alberta____ba",
@@ -13321,7 +13459,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-05"
+  "lastPosted": "2026-08-05",
+  "mapSearchTerms": [
+   "University of Bristol Business School",
+   "Artificial Intelligence and Business Analytics"
+  ]
  },
  {
   "id": "university-of-bristol__university-of-bristol-business-school__technology-and-operations-management",
@@ -13335,7 +13477,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-20"
+  "lastPosted": "2026-10-20",
+  "mapSearchTerms": [
+   "University of Bristol Business School",
+   "Technology and Operations Management"
+  ]
  },
  {
   "id": "university-of-british-columbia__faculty-of-management__operations-and-supply-chain-management",
@@ -13506,7 +13652,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-05"
+  "lastPosted": "2026-08-05",
+  "mapSearchTerms": [
+   "Graduate School of Management",
+   "Master of Science in Business Analytics — San Francisco programme office"
+  ]
  },
  {
   "id": "university-of-california-davis__graduate-school-of-management__operations-management",
@@ -13518,6 +13668,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Graduate School of Management",
+   "Operations Management"
   ]
  },
  {
@@ -14111,7 +14265,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-16"
+  "lastPosted": "2026-10-16",
+  "mapSearchTerms": [
+   "College of Health and Human Performance",
+   "Sport Management"
+  ]
  },
  {
   "id": "university-of-florida__warrington-college-of-business__information-systems-and-operations-management",
@@ -14127,7 +14285,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-11"
+  "lastPosted": "2026-10-11",
+  "mapSearchTerms": [
+   "Warrington College of Business",
+   "Information Systems and Operations Management"
+  ]
  },
  {
   "id": "university-of-georgia__terry-college-of-business__management-information-systems",
@@ -14172,7 +14334,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-11"
+  "lastPosted": "2025-11-11",
+  "mapSearchTerms": [
+   "Barney School of Business",
+   "Department of Business Insights"
+  ]
  },
  {
   "id": "university-of-hartford__barney-school-of-business__business-insights",
@@ -14186,11 +14352,7 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-05",
-  "mapSearchTerms": [
-   "Barney School of Business",
-   "Department of Business Insights"
-  ]
+  "lastPosted": "2026-10-05"
  },
  {
   "id": "university-of-hong-kong____ba",
@@ -15708,7 +15870,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-16"
+  "lastPosted": "2025-09-16",
+  "mapSearchTerms": [
+   "The James & Gail Ellis School of Business Leadership",
+   "Marketing, Information and Decision Sciences — Operations Management"
+  ]
  },
  {
   "id": "university-of-new-south-wales__unsw-business-school__information-systems-and-technology-management",
@@ -17252,7 +17418,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-07-21"
+  "lastPosted": "2025-07-21",
+  "mapSearchTerms": [
+   "Faculty of Business, Economics and Statistics",
+   "Business Decisions and Analytics — Operations Research"
+  ]
  },
  {
   "id": "university-of-virgin-islands____decision-sciences",
@@ -17286,7 +17456,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-23"
+  "lastPosted": "2025-09-23",
+  "mapSearchTerms": [
+   "Darden School of Business",
+   "Technology and Operations Management"
+  ]
  },
  {
   "id": "university-of-virginia__darden-school-of-business",
@@ -17868,7 +18042,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-10"
+  "lastPosted": "2026-03-10",
+  "mapSearchTerms": [
+   "Department of Business"
+  ]
  },
  {
   "id": "valparaiso-university__college-of-business__business-analytics",
@@ -18279,7 +18456,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-06-28"
+  "lastPosted": "2026-06-28",
+  "mapSearchTerms": [
+   "Ernest Williams II School of Commerce, Economics, and Politics",
+   "Business Administration Department"
+  ]
  },
  {
   "id": "washington-university-in-st-louis____scm-om",
@@ -18642,7 +18823,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-17"
+  "lastPosted": "2026-03-17",
+  "mapSearchTerms": [
+   "Porter B. Byrum School of Business",
+   "Data Analytics and Business Statistics"
+  ]
  },
  {
   "id": "winona-state-university____mis",
@@ -18753,6 +18938,10 @@
   "type": "Business School",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "School of Management",
+   "Information Systems and Intelligent Business"
   ]
  },
  {

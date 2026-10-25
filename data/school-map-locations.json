@@ -2068,21 +2068,22 @@
       "id": "hartford-business-insights-auerbach",
       "institution": "University of Hartford",
       "rowIds": [
-        "university-of-hartford__barney-school-of-business__business-insights"
+        "university-of-hartford____ba-marketing-or-scm"
       ],
       "school": "Barney School of Business",
       "department": "Department of Business Insights",
       "building": "Beatrice Fox Auerbach Hall",
-      "address": "Room 310B, 200 Bloomfield Avenue, West Hartford, CT 06117, United States",
+      "address": "Beatrice Fox Auerbach Hall, 200 Bloomfield Avenue, West Hartford, CT 06117, United States",
       "lat": 41.795197,
       "lng": -72.715797,
-      "addressSource": "https://www.hartford.edu/directory/barney/hao-andy-wei.aspx",
+      "addressSource": "https://www.hartford.edu/about/buildings-locations/",
       "coordinateSource": "https://map.concept3d.com/?id=813#!m/124573",
       "supportingSources": [
-        "https://www.hartford.edu/unotes/2025/06/barney-school-of-business-welcomes-new-leadership-team-members.aspx"
+        "https://www.hartford.edu/barney/academics/business-insights/default.aspx",
+        "https://www.hartford.edu/barney/academics/student-services.aspx"
       ],
-      "notes": "Current department chair office310B in Auerbach Hall; official academic building marker124573, not Auerbach Computer and Administration Center or shuttle stop.",
-      "checked": "2026-10-24"
+      "checked": "2026-10-25",
+      "notes": "Current department page groups business analytics, marketing and supply chain under Business Insights. Official building directory and campus marker identify the academic Auerbach Hall housing Barney, including its analytics lab; not the separate Auerbach Computer and Administration Center. Building-level location; no individual faculty room claimed."
     },
     {
       "id": "san-jose-marketing-business-analytics-tower",
@@ -8901,6 +8902,1058 @@
       ],
       "checked": "2026-10-25",
       "notes": "Official 2025–26 college contact directory places College of Business in Brohm 230; current business assistant-dean/faculty profile confirms Brohm 238. The college accreditation profile independently gives second floor Brohm. Original hiring title is Professor of Business (Data Analytics), so mapped to the verified college faculty offices; no invented standalone Data Analytics department. Exact named building footprint."
+    },
+    {
+      "id": "san-diego-state-artificial-intelligence-computer-science",
+      "institution": "San Diego State University",
+      "rowIds": [
+        "san-diego-state-university____ai"
+      ],
+      "school": "College of Sciences",
+      "department": "Department of Computer Science",
+      "building": "Geology, Mathematics and Computer Science Building",
+      "address": "Room 413, Geology, Mathematics and Computer Science Building, 5500 Campanile Drive, San Diego, CA 92182-7720, United States",
+      "lat": 32.776617,
+      "lng": -117.069395,
+      "addressSource": "https://cs.sdsu.edu/contact-us/",
+      "coordinateSource": "https://library2.sdsu.edu/wayfinder/wayfinder.php?kiosk=0&urlid=27",
+      "checked": "2026-10-25",
+      "notes": "Official department contact office room 413 and official named building destination coordinates.",
+      "locationGroup": "san-diego-state-artificial-intelligence-eligible-hosts",
+      "locationGroupSource": "https://csucareers.calstate.edu/en-us/job/553479/assistant-professor-of-ai"
+    },
+    {
+      "id": "san-diego-state-artificial-intelligence-electrical-engineering",
+      "institution": "San Diego State University",
+      "rowIds": [
+        "san-diego-state-university____ai"
+      ],
+      "school": "College of Engineering",
+      "department": "Department of Electrical and Computer Engineering",
+      "building": "Engineering Building",
+      "address": "Room 426, Engineering Building, 5500 Campanile Drive, San Diego, CA 92182, United States",
+      "lat": 32.777506,
+      "lng": -117.069996,
+      "addressSource": "https://electrical.sdsu.edu/about/contact",
+      "coordinateSource": "https://library2.sdsu.edu/wayfinder/wayfinder.php?kiosk=0&urlid=19",
+      "checked": "2026-10-25",
+      "notes": "Official department contact office E-426; official campus wayfinder Engineering destination point.",
+      "locationGroup": "san-diego-state-artificial-intelligence-eligible-hosts",
+      "locationGroupSource": "https://csucareers.calstate.edu/en-us/job/553479/assistant-professor-of-ai"
+    },
+    {
+      "id": "huron-management-administration",
+      "institution": "Huron University",
+      "school": "Faculty of Arts and Social Science",
+      "department": "Management and Organizational Studies",
+      "building": "Administration Wing, Room A2B",
+      "address": "1349 Western Road, London, Ontario N6G 1H3, Canada",
+      "lat": 43.00918,
+      "lng": -81.27784,
+      "addressSource": "https://huronu.ca/wp-content/uploads/MOS-4310A-F2022-Ramani.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/126668336",
+      "supportingSources": [
+        "https://huronu.ca/profiles/faculty/srikanth-ramani/",
+        "https://map.huronu.ca/",
+        "https://huronu.ca/sites/default/files/HUR2324-Campus-Map-2023-Update-V3.pdf"
+      ],
+      "notes": "Current department chair identified by official profile; published office A2B is in Administration Wing. Official current campus tour confirms faculty offices in this wing. Marker within northern Administration Wing of connected building, not campus centroid.",
+      "rowIds": [
+        "huron-university__faculty-of-arts-and-social-science__management-and-organizational-studies"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "lees-mcrae-business-campbell",
+      "institution": "Lees-McRae College",
+      "school": "School of Business and Management",
+      "department": "Business Administration",
+      "building": "Campbell Hall, Room 103",
+      "address": "South Campus Drive, Banner Elk, North Carolina 28604, United States",
+      "lat": 36.1503713,
+      "lng": -81.8793813,
+      "addressSource": "https://www.lmc.edu/directory/employee/anderson-amy.htm",
+      "coordinateSource": "https://www.openstreetmap.org/way/1251877176",
+      "supportingSources": [
+        "https://www.lmc.edu/directory/employee/walsh-joe.htm",
+        "https://www.lmc.edu/campus-life/campus-safety/campus-operations/files/campus-parking-map.pdf"
+      ],
+      "notes": "Current business coordinator and operations management lecturer are in Campbell Hall. Official 2026 campus map building 64 identifies the south-campus footprint, south of Hickory Cottage and north of Neale Cottage.",
+      "rowIds": [
+        "lees-mcrae-college__school-of-business-and-management__business-administration"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "carnegie-mellon-heinz-hamburg",
+      "institution": "Carnegie Mellon University",
+      "school": "Heinz College of Information Systems and Public Policy",
+      "department": null,
+      "building": "Hamburg Hall",
+      "address": "4800 Forbes Avenue, Pittsburgh, Pennsylvania 15213, United States",
+      "lat": 40.4441768,
+      "lng": -79.9455512,
+      "addressSource": "https://www.heinz.cmu.edu/heinz-shared/_files/pdf/heinz-edu-instr-handbook-08-20-2024-update.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/27591096",
+      "rowIds": [
+        "carnegie-mellon-university__heinz-college-of-information-systems-and-public-policy"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "florida-information-operations-stuzin",
+      "institution": "University of Florida",
+      "school": "Warrington College of Business",
+      "department": "Information Systems and Operations Management",
+      "building": "Stuzin Hall, Room 351",
+      "address": "1454 Union Road, Gainesville, Florida 32611, United States",
+      "lat": 29.6509774,
+      "lng": -82.3412471,
+      "addressSource": "https://gradcatalog.ufl.edu/graduate/colleges-departments/business/information-systems-operations-management/",
+      "coordinateSource": "https://www.openstreetmap.org/relation/7173438",
+      "rowIds": [
+        "university-of-florida__warrington-college-of-business__information-systems-and-operations-management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "florida-sport-management-gym",
+      "institution": "University of Florida",
+      "school": "College of Health and Human Performance",
+      "department": "Sport Management",
+      "building": "Florida Gymnasium, Room 330",
+      "address": "1864 Stadium Road, Gainesville, Florida 32611, United States",
+      "lat": 29.6493436,
+      "lng": -82.3472722,
+      "addressSource": "https://hhp.ufl.edu/about-hhp/contact-connect/",
+      "coordinateSource": "https://www.openstreetmap.org/way/45719891",
+      "supportingSources": [
+        "https://admissions.ufl.edu/college-contacts"
+      ],
+      "rowIds": [
+        "university-of-florida__college-of-health-and-human-performance__sport-management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "carnegie-mellon-healthcare-evaluation-hamburg",
+      "institution": "Carnegie Mellon University",
+      "school": "Heinz College of Information Systems and Public Policy",
+      "department": "Contextualized Evaluation of Artificial Intelligence for Healthcare",
+      "building": "Hamburg Hall, Room 2101H",
+      "address": "4800 Forbes Avenue, Pittsburgh, Pennsylvania 15213, United States",
+      "lat": 40.4441768,
+      "lng": -79.9455512,
+      "addressSource": "https://www.heinz.cmu.edu/faculty-research/profiles/wiberg-holly",
+      "coordinateSource": "https://www.openstreetmap.org/way/27591096",
+      "supportingSources": [
+        "https://apply.interfolio.com/167191"
+      ],
+      "notes": "Original university recruitment names Heinz College in Pittsburgh and supervisors Rema Padman and Holly Wiberg. Wiberg official profile identifies Hamburg Hall office.",
+      "rowIds": [
+        "carnegie-mellon-university____contextualized-evaluation-of-ai-for-healthcare"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "bristol-business-sloane-0",
+      "institution": "University of Bristol",
+      "school": "University of Bristol Business School",
+      "department": "Artificial Intelligence and Business Analytics",
+      "building": "Sloane Robinson Building",
+      "address": "Cattle Market Road, Bristol BS1 6AZ, United Kingdom",
+      "lat": 51.449721,
+      "lng": -2.5786124,
+      "addressSource": "https://www.bristol.ac.uk/people/person/Sunil-Tiwari-2fe86b81-80f7-4969-a61e-0c24efae16f7/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1491099409",
+      "supportingSources": [
+        "https://www.bristol.ac.uk/business-school/contact-us/",
+        "https://www.bristol.ac.uk/news/2026/september/tqec-opens.html"
+      ],
+      "notes": "Operations management lecturer and Business Analytics programme director official profile confirms Sloane Robinson Building, opened September 2026; replaces old campus location.",
+      "rowIds": [
+        "university-of-bristol__university-of-bristol-business-school__artificial-intelligence-and-business-analytics"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "bristol-business-sloane-1",
+      "institution": "University of Bristol",
+      "school": "University of Bristol Business School",
+      "department": "Technology and Operations Management",
+      "building": "Sloane Robinson Building",
+      "address": "Cattle Market Road, Bristol BS1 6AZ, United Kingdom",
+      "lat": 51.449721,
+      "lng": -2.5786124,
+      "addressSource": "https://www.bristol.ac.uk/people/person/Sunil-Tiwari-2fe86b81-80f7-4969-a61e-0c24efae16f7/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1491099409",
+      "supportingSources": [
+        "https://www.bristol.ac.uk/business-school/contact-us/",
+        "https://www.bristol.ac.uk/news/2026/september/tqec-opens.html"
+      ],
+      "notes": "Operations management lecturer and Business Analytics programme director official profile confirms Sloane Robinson Building, opened September 2026; replaces old campus location.",
+      "rowIds": [
+        "university-of-bristol__university-of-bristol-business-school__technology-and-operations-management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "davis-business-analytics-san-francisco-kane",
+      "institution": "University of California, Davis",
+      "rowIds": [
+        "university-of-california-davis__graduate-school-of-management__business-analytics"
+      ],
+      "school": "Graduate School of Management",
+      "department": "Master of Science in Business Analytics — San Francisco programme office",
+      "building": "Mary Kay Kane Hall",
+      "address": "Room 211, Mary Kay Kane Hall, 200 McAllister Street, San Francisco, California 94102, United States",
+      "lat": 37.781036,
+      "lng": -122.4157319,
+      "addressSource": "https://gsm.ucdavis.edu/sites/default/files/2026-08/SF_CampusGuide_2026.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/165846555",
+      "supportingSources": [
+        "https://recruit.ucdavis.edu/JPF07773",
+        "https://gsm.ucdavis.edu/post/san-francisco-campus-civic-center",
+        "https://gsm.ucdavis.edu/news/uc-davis-msba-welcomes-new-chapter-davis-campus-2027",
+        "https://www.uclawsf.edu/map-directions/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official vacancy JPF07773 for 2026-2027 explicitly teaches in San Francisco. The currently linked August 2026 campus guide places its programme office in Kane Hall room 211, with Saturday classes in room 122 and weekday classes at adjacent Cotchett Law Center. This point is the programme office, not a claim that every class meets here. The official October 14, 2026 announcement relocates the programme to Davis beginning with August 2027 entrants; this record reflects the current 2026-2027 posting. Coordinates identify the exact 200 McAllister building footprint."
+    },
+    {
+      "id": "davis-operations-management-gallagher",
+      "institution": "University of California, Davis",
+      "rowIds": [
+        "university-of-california-davis__graduate-school-of-management__operations-management"
+      ],
+      "school": "Graduate School of Management",
+      "department": "Operations Management",
+      "building": "Maurice J. Gallagher, Jr. Hall",
+      "address": "Gallagher Hall, 540 Alumni Lane, Davis, California 95616, United States",
+      "lat": 38.5348084,
+      "lng": -121.747266,
+      "addressSource": "https://gsm.ucdavis.edu/faculty-and-research/faculty-directory?glossary_filter=All&search=&field_content_group_target_id=70",
+      "coordinateSource": "https://www.openstreetmap.org/way/43150882",
+      "supportingSources": [
+        "https://gsm.ucdavis.edu/sites/default/files/2025-09/Davis%20Campus%20Guide%20-%20Fall2025.pdf",
+        "https://facilities.ucdavis.edu/sites/g/files/dgvnsk6436/files/inline-files/2019MapBook.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The current Operations Management faculty directory places Rachel Chen in Gallagher Hall 3208 and David Woodruff in 3416. The university campus guide and building inventory identify the exact building at 540 Alumni Lane. Its footprint coordinates are distinct from both the Davis campus centroid and the current Business Analytics programme office in San Francisco."
+    },
+    {
+      "id": "cottey-business-rogers-fine-arts",
+      "institution": "Cottey College",
+      "rowIds": [
+        "cottey-college____operation-management"
+      ],
+      "school": "",
+      "department": "Business Administration — Operations Management",
+      "building": "Judy and Glenn Rogers Fine Arts Building",
+      "address": "Judy and Glenn Rogers Fine Arts Building, Rooms 209 and 223, Cottey College, Nevada, Missouri 64772, United States",
+      "lat": 37.8380595,
+      "lng": -94.3705449,
+      "addressSource": "https://cottey.edu/wp-content/uploads/2024/08/Cottey-2024-Faculty-Telephone-List.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/1018339177",
+      "supportingSources": [
+        "https://catalog.cottey.edu/business-administration",
+        "https://cottey.edu/wp-content/uploads/2025/08/Cottey-Campus-Map.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current Business Administration catalogue identifies coordinator Paula Chelminska and Michelle Bruce. The latest located official faculty telephone directory places them in Rogers Fine Arts Building rooms 223 and 209 respectively; older directories placed Chelminska in Alumnae Hall and are superseded. The official campus map names this building in full as Judy and Glenn Rogers Fine Arts Building (B). Coordinates identify its exact footprint, not the general college address."
+    },
+    {
+      "id": "virginia-darden-technology-operations",
+      "institution": "University of Virginia",
+      "rowIds": [
+        "university-of-virginia____om"
+      ],
+      "school": "Darden School of Business",
+      "department": "Technology and Operations Management",
+      "building": "Faculty Office Building",
+      "address": "90 Darden Boulevard, Charlottesville, Virginia 22903, United States",
+      "lat": 38.05183,
+      "lng": -78.514526,
+      "addressSource": "https://www.darden.virginia.edu/faculty-research/directory/doug-thomas",
+      "coordinateSource": "https://fm-atlas.eservices.virginia.edu/server/rest/services/Public/PublicFacilitiesSearch/MapServer/0/318?f=pjson",
+      "supportingSources": [
+        "https://www.darden.virginia.edu/sites/default/files/inline-files/2021_Darden-Map_floorplan_accessible-routes.pdf",
+        "https://www.poms.org/sites/default/files/2025-09/TOM%20Faculty%20Position%202025-2026.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current Technology and Operations Management faculty office is FOB 239. The university official facilities map identifies active Darden Faculty building 0552, street address 90 Darden Boulevard, with building-specific GPS coordinates. This distinguishes the faculty office wing from the classroom wing, library, and proposed future addition."
+    },
+    {
+      "id": "newcastle-information-systems-operations",
+      "institution": "Newcastle University",
+      "rowIds": [
+        "newcastle-university____information-systems-and-operations-subject-group-operations-",
+        "newcastle-university____operations-management"
+      ],
+      "school": "Newcastle University Business School",
+      "department": "Information Systems and Operations",
+      "building": "Newcastle University Business School Building",
+      "address": "5 Barrack Road, Newcastle upon Tyne NE1 4SE, United Kingdom",
+      "lat": 54.974367548154,
+      "lng": -1.623276802343907,
+      "addressSource": "https://www.ncl.ac.uk/business/people/profile/yingyang2.html",
+      "coordinateSource": "https://roomfinder.ncl.ac.uk/map.php",
+      "supportingSources": [
+        "https://www.ncl.ac.uk/business/research/groups/information-systems-and-operations/",
+        "https://www.ncl.ac.uk/business/about/contact/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Operations and Supply Chain research lead Ying Yang has room 8.13 in the Business School at 5 Barrack Road. Coordinates come from the official Room Finder marker HXNUB and its building polygon, not the Google embedded viewport or main university campus. Both operations listing aliases belong to this subject group."
+    },
+    {
+      "id": "washington-lee-business-childress",
+      "institution": "Washington and Lee University",
+      "institutionKey": "Washington and Lee University",
+      "rowIds": [
+        "washington-and-lee-university__williams-school-of-commerce-economics-and-politics__business-administration"
+      ],
+      "school": "Ernest Williams II School of Commerce, Economics, and Politics",
+      "department": "Business Administration Department",
+      "building": "Childress Hall",
+      "address": "216 West Washington Street, Lexington, Virginia 24450, United States",
+      "lat": 37.786869,
+      "lng": -79.444679,
+      "addressSource": "https://www.wlu.edu/the-williams-school/departments-and-programs/business-administration-department/faculty-and-staff",
+      "coordinateSource": "https://campusmap.wlu.edu/xml/CL_wluva.xml",
+      "supportingSources": [
+        "https://campusmap.wlu.edu/",
+        "https://columns.wlu.edu/interdisciplinary-investment/",
+        "https://email.wlu.io/internal/the-columns-weekly-8-20-26/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current department head Amanda Bower office336, administrative assistant322, data analytics faculty Keri Larson335 and Lingshu Hu320 in new Williams School building. Opened August2025 and renamed Childress Hall August17,2026. Official updated AnyMap BLD_20250822192538788 and GPS_20250822195301031 explicitly identify building, street address, and coordinates. Reject outdated Huntley Hall listings and unrelated Founders Hall admissions project."
+    },
+    {
+      "id": "bergen-computer-science-technology",
+      "institution": "Bergen Community College",
+      "institutionKey": "Bergen Community College",
+      "rowIds": [
+        "bergen-community-college__division-of-mathematics-science-and-technology__computer-science-engineering-and-information-technologies"
+      ],
+      "school": "Division of Mathematics, Science, and Technology",
+      "department": "Computer Science, Engineering and Information Technologies Department",
+      "building": "Technology Building",
+      "address": "Room TEC-102A, 400 Paramus Road, Paramus, New Jersey 07652, United States",
+      "lat": 40.95031875,
+      "lng": -74.08713345,
+      "addressSource": "https://bergen.edu/academics/academic-divisions-departments/computer-science-engineering-and-information-technologies-department/our-faculty/",
+      "coordinateSource": "https://www.openstreetmap.org/way/44106245",
+      "supportingSources": [
+        "https://bergen.edu/academics/academic-divisions-departments/computer-science-engineering-and-information-technologies-department/",
+        "https://ilr.bergen.edu/classroom-locations-and-directions/",
+        "https://bergen.edu/about-us/campus-maps/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Department chair Matt King office TEC-102A establishes administrative anchor in Technology Building; individual computing faculty also occupy Pitkin offices. Official current campus directions distinguish standalone Technology Building east of Pitkin beside LotB and observatory. Exact named external building footprint; not campus centroid."
+    },
+    {
+      "id": "valley-city-business-vangstad",
+      "institution": "Valley City State University",
+      "institutionKey": "Valley City State University",
+      "rowIds": [
+        "valley-city-state-university____data-analytics-and-ai"
+      ],
+      "school": "",
+      "department": "Department of Business",
+      "building": "Vangstad Hall",
+      "address": "Room 114, 101 College Street Southwest, Valley City, North Dakota 58072, United States",
+      "lat": 46.91852031,
+      "lng": -98.00360788,
+      "addressSource": "https://www.vcsu.edu/departments/business/",
+      "coordinateSource": "https://www.openstreetmap.org/way/142416928",
+      "supportingSources": [
+        "https://www.vcsu.edu/about-vcsu/campus-facilities/",
+        "https://www.vcsu.edu/business-ed/",
+        "https://www.vcsu.edu/wp-content/uploads/VCSU_CampusProfile.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Listed job is Assistant Professor of Business; data analytics and artificial intelligence are preferred teaching experience, not a separate hiring department. Official department office and chair Wesley Wright in Vangstad114, other business faculty116/117/120. Current campus facilities confirms business offices in Vangstad. Exact named external building footprint; do not confuse separate Data Analytics and Visualization degree hosted by Computer Systems and Software Engineering in McFarland."
+    },
+    {
+      "id": "wingate-business-analytics-neu",
+      "institution": "Wingate University",
+      "institutionKey": "Wingate University",
+      "rowIds": [
+        "wingate-university____da-ba-business-stat"
+      ],
+      "school": "Porter B. Byrum School of Business",
+      "department": "Data Analytics and Business Statistics",
+      "building": "David W. and Esperanza M. Neu Building",
+      "address": "316 North Main Street, Wingate, North Carolina 28174, United States",
+      "lat": 34.98513153,
+      "lng": -80.44847014,
+      "addressSource": "https://resources.finalsite.net/images/v1744829297/wingateedu/epkowiqzt1yq5ux0dmnm/WingateMBAProgram-AtaGlance.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/595956910",
+      "supportingSources": [
+        "https://www.wingate.edu/mygate-students/campus-safety",
+        "https://embed-rech-01.dialog.cm/wingateuniversity/docs/wingate_university_academic_catalog_2026-2027"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current 2025-26 business-school publication identifies Neu Building at316NorthMainStreet. Current campus safety places Dean office in Neu first-floor lobby. Current2026-27 catalog identifies Data Analytics BUS323 and Business Statistics BUS308 within business-school core. Department field is expanded hiring subject area, not a claimed standalone administrative department. Exact externally named school-building footprint matches official street address; not Byrum residence or Cannon dormitory."
+    },
+    {
+      "id": "tilburg-information-operations-koopmans",
+      "institution": "Tilburg University",
+      "institutionKey": "Tilburg University",
+      "rowIds": [
+        "tilburg-university____is"
+      ],
+      "school": "Tilburg School of Economics and Management",
+      "department": "Department of Information Systems and Operations Management",
+      "building": "Koopmans Building",
+      "address": "Room K807, Warandelaan 2, 5037 AB Tilburg, Netherlands",
+      "lat": 51.5627935,
+      "lng": 5.04227473,
+      "addressSource": "https://www.tilburguniversity.edu/about/schools/economics-and-management/organization/departments/information-systems-and-operations-management/faculty",
+      "coordinateSource": "https://www.openstreetmap.org/way/280648925",
+      "supportingSources": [
+        "https://www.tilburguniversity.edu/contact/campus-map-and-buildings/koopmans",
+        "https://www.architectuur.org/bouwwerk/931/Koopmansgebouw.html"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official department contact explicitly roomK807, Koopmans Building. Exact named external building footprint corroborated by official building page and architectural building coordinates. Expanded original Information Systems shorthand into current combined department name."
+    },
+    {
+      "id": "alaska-fairbanks-business-bunnell",
+      "institution": "University of Alaska Fairbanks",
+      "institutionKey": "University of Alaska Fairbanks",
+      "rowIds": [
+        "university-of-alaska-fairbanks____business-administration"
+      ],
+      "school": "College of Business and Security Management",
+      "department": "Business Administration",
+      "building": "Charles Bunnell Building",
+      "address": "1790 Tanana Loop, Fairbanks, Alaska 99775, United States",
+      "lat": 64.85558606,
+      "lng": -147.81946889,
+      "addressSource": "https://www.uaf.edu/cbsm/about/contact-us/faculty-directory/index.php",
+      "coordinateSource": "https://www.openstreetmap.org/way/60711359",
+      "supportingSources": [
+        "https://www.uaf.edu/campusmap/for-visitors/buildings/bunnell.php",
+        "https://www.uaf.edu/cbsm/about/contact-us/index.php"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official faculty directory locates Business Administration program directors and faculty in Bunnell (213D,208B,218A/B,219B). University building page confirms college offices and street address. Exact named external footprint matching1790TananaLoop; not Bunnell House childcare building, campus centroid, or Cornerstone Plaza directions destination."
+    },
+    {
+      "id": "hebrew-university-operations-research-recanati",
+      "institution": "The Hebrew University of Jerusalem",
+      "institutionKey": "Hebrew University of Jerusalem",
+      "rowIds": [
+        "hebrew-university-of-jerusalem__hebrew-university-business-school__operations-research"
+      ],
+      "school": "The Hebrew University Business School",
+      "department": "Operations Research",
+      "building": "Recanati Building, Social Sciences Block 1",
+      "address": "Mount Scopus Campus, Jerusalem 9190501",
+      "lat": 31.79362,
+      "lng": 35.24342,
+      "addressSource": "https://bschool-en.huji.ac.il/faculty-members",
+      "coordinateSource": "https://www.openstreetmap.org/way/86122631",
+      "supportingSources": [
+        "https://rector.huji.ac.il/files/self_evaluation_report_business_administration.pdf",
+        "https://ellasegev.huji.ac.il/contact",
+        "https://oreg.huji.ac.il/contact"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current faculty directory lists Operations Research faculty in rooms 21503, 21504, 21618 and 21622, establishing Social Sciences Block 1. Official self-evaluation identifies the school as Recanati Building (Block 1) and its final-page campus map locates it at the southeastern end of the connected Social Sciences building beside the Forum and opposite Bloomfield Library. Point is manually placed within that identified southeastern wing using the matching public building footprint, approximately to wing precision; it is not the center of the wider faculty building or university. Ella Segev current contact independently confirms the Business School building on Mount Scopus, with an alternative internal room numbering scheme."
+    },
+    {
+      "id": "new-york-university-shanghai-648-south-hall",
+      "institution": "New York University Shanghai",
+      "institutionKey": "NYU Shanghai",
+      "rowIds": [
+        "nyu-shanghai____business-information-systems-technology"
+      ],
+      "school": "Business",
+      "department": "Information Systems and Business Analytics",
+      "building": "South Hall, New Bund Campus, room S808",
+      "address": "567 West Yangsi Road, Pudong New District, Shanghai 200124, China",
+      "lat": 31.15037,
+      "lng": 121.4772,
+      "addressSource": "https://shanghai.nyu.edu/academics/faculty/directory/bruno-abrahao",
+      "coordinateSource": "https://www.openstreetmap.org/way/1164785875",
+      "supportingSources": [
+        "https://cdn.shanghai.nyu.edu/sites/default/files/nyush_qiantan_campus.pdf",
+        "https://shanghai.nyu.edu/about/directions",
+        "https://www.sh.nyu.edu/academics/faculty/directory/shukai-li"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official faculty directory places this business subject in South Hall: Bruno Abrahao S808 (information systems), Chen Chen S810 and Shukai Li S726 (operations). Official New Bund campus brochure identifies four halls and street orientations. Coordinate manually positioned within the south wing along Chuntiao Road of the matching current academic-building footprint, with wing-level precision; not the campus courtyard, former Century Avenue building, or New York liaison office. Full university name used before any acronym."
+    },
+    {
+      "id": "new-york-university-shanghai-649-south-hall",
+      "institution": "New York University Shanghai",
+      "institutionKey": "NYU Shanghai",
+      "rowIds": [
+        "nyu-shanghai____business-operations-and-business-analytics"
+      ],
+      "school": "Business",
+      "department": "Operations and Business Analytics",
+      "building": "South Hall, New Bund Campus, room S810",
+      "address": "567 West Yangsi Road, Pudong New District, Shanghai 200124, China",
+      "lat": 31.15037,
+      "lng": 121.4772,
+      "addressSource": "https://shanghai.nyu.edu/academics/faculty/directory/chen-chen",
+      "coordinateSource": "https://www.openstreetmap.org/way/1164785875",
+      "supportingSources": [
+        "https://cdn.shanghai.nyu.edu/sites/default/files/nyush_qiantan_campus.pdf",
+        "https://shanghai.nyu.edu/about/directions",
+        "https://www.sh.nyu.edu/academics/faculty/directory/shukai-li"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official faculty directory places this business subject in South Hall: Bruno Abrahao S808 (information systems), Chen Chen S810 and Shukai Li S726 (operations). Official New Bund campus brochure identifies four halls and street orientations. Coordinate manually positioned within the south wing along Chuntiao Road of the matching current academic-building footprint, with wing-level precision; not the campus courtyard, former Century Avenue building, or New York liaison office. Full university name used before any acronym."
+    },
+    {
+      "id": "north-carolina-agricultural-technical-business-information-systems-merrick",
+      "institution": "North Carolina Agricultural and Technical State University",
+      "rowIds": [
+        "north-carolina-agricultural-and-technical-state-university__willie-a-deese-college-of-business-and-economics__business-information-systems-and-analytics"
+      ],
+      "school": "Willie A. Deese College of Business and Economics",
+      "department": "Department of Business Information Systems and Analytics",
+      "building": "Merrick Hall",
+      "address": "Room 324, Merrick Hall, North Carolina Agricultural and Technical State University, Greensboro, NC 27411, United States",
+      "lat": 36.079121,
+      "lng": -79.769532,
+      "addressSource": "https://www.ncat.edu/cobe/academic-departments/bisa/bs-management-mis.php",
+      "coordinateSource": "https://www.openstreetmap.org/way/277755936",
+      "supportingSources": [
+        "https://www.ncat.edu/_files/pdfs/visit/campusmap.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current department contact lists chair Pankaj Chaudhary in room 324 Merrick. Official campus map identifies building 36 east of Barnes Hall, immediately south of Sullivan Street and west of Benbow Road; matching building footprint supplies point. Uses academic department building rather than general university postal address."
+    },
+    {
+      "id": "skagit-valley-management-lewis",
+      "institution": "Skagit Valley College",
+      "rowIds": [
+        "skagit-valley-college____professional-technical-education-bachelor-of-applied-science"
+      ],
+      "school": "",
+      "department": "Bachelor of Applied Science in Management",
+      "building": "Lewis Hall",
+      "address": "Room L-301D, Lewis Hall, 2405 East College Way, Mount Vernon, WA 98273, United States",
+      "lat": 48.4368338,
+      "lng": -122.3116469,
+      "addressSource": "https://skagit.edu/academics/areas-of-study/business/management.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/344120721",
+      "checked": "2026-10-25",
+      "notes": "Current official program page gives program chair Sunaina Virendra office Lewis Hall L-301D. This is the bachelor program, distinct from associate-level Business Management. Named building footprint supplies point."
+    },
+    {
+      "id": "arizona-state-learning-optimization-brickyard",
+      "institution": "Arizona State University",
+      "rowIds": [
+        "arizona-state-university____learning-optimization-and-decision-analytics"
+      ],
+      "school": "Ira A. Fulton Schools of Engineering",
+      "department": "School of Computing and Augmented Intelligence — Learning, Optimization, and Decision Analytics",
+      "building": "Brickyard Engineering",
+      "address": "Brickyard Engineering, 699 South Mill Avenue, Tempe, AZ 85281, United States",
+      "lat": 33.4234901,
+      "lng": -111.9395103,
+      "addressSource": "https://scai.engineering.asu.edu/contact/",
+      "coordinateSource": "https://www.openstreetmap.org/way/157628480",
+      "supportingSources": [
+        "https://scai.engineering.asu.edu/faculty/hao-yan/",
+        "https://tours.asu.edu/tempe/brickyard",
+        "https://jobseq.eqsuite.com/JobPost/View/68f2d3a19b7d5002808c5897/professor-all-ranks-in-learning-optimization-and-decision-analytics?lic=2040&uid=37255"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Archived employer vacancy identifies School of Computing and Augmented Intelligence, Tempe, and search chair Hao Yan. Current official school contact and chair faculty page independently confirm Brickyard Engineering (chair room338). The title denotes a recruitment research area, not a separate department. Pin is school building, not an unassigned new faculty office."
+    },
+    {
+      "id": "technical-munich-operations-research-artificial-intelligence",
+      "institution": "Technical University of Munich",
+      "rowIds": [
+        "technical-university-of-munich____operations-research-and-ai"
+      ],
+      "school": "School of Management",
+      "department": "Operations Research and Artificial Intelligence",
+      "building": "Building 0505 — School of Management visiting entrance",
+      "address": "Arcisstrasse 21, entrance at Luisenstrasse / Theresienstrasse, 80333 Munich, Germany",
+      "lat": 48.148949,
+      "lng": 11.568508,
+      "addressSource": "https://www.mgt.tum.de/about/contact-directions",
+      "coordinateSource": "https://www.mgt.tum.de/about/contact-directions",
+      "supportingSources": [
+        "https://www.mgt.tum.de/about/jobs",
+        "https://www.mgt.tum.de/fileadmin/mgt.tum.de/about/career/TUM%E2%80%93Open_Positions_07-2025_Mail.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "New professorship advertised for the School of Management at Munich campus. An individual professorial office has not been publicly assigned. The marker identifies the host school visiting entrance to building0505, explicitly named and geocoded in the official school contact page. It does not claim this new professorship shares the office of an existing chair with a similar name."
+    },
+    {
+      "id": "technical-munich-technology-management",
+      "institution": "Technical University of Munich",
+      "rowIds": [
+        "technical-university-of-munich____technology-management"
+      ],
+      "school": "School of Management",
+      "department": "Technology Management",
+      "building": "Building 0505 — School of Management visiting entrance",
+      "address": "Arcisstrasse 21, entrance at Luisenstrasse / Theresienstrasse, 80333 Munich, Germany",
+      "lat": 48.148949,
+      "lng": 11.568508,
+      "addressSource": "https://www.mgt.tum.de/about/contact-directions",
+      "coordinateSource": "https://www.mgt.tum.de/about/contact-directions",
+      "supportingSources": [
+        "https://www.mgt.tum.de/about/jobs",
+        "https://www.mgt.tum.de/fileadmin/mgt.tum.de/about/career/TUM%E2%80%93Open_Positions_07-2025_Mail.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "New professorship advertised for the School of Management at Munich campus. An individual professorial office has not been publicly assigned. The marker identifies the host school visiting entrance to building0505, explicitly named and geocoded in the official school contact page. It does not claim this new professorship shares the office of an existing chair with a similar name."
+    },
+    {
+      "id": "skema-optimization-lille",
+      "institution": "School of Knowledge Economy and Management (SKEMA Business School)",
+      "institutionKey": "skema-business-school",
+      "rowIds": [
+        "skema-business-school____optimization-or-game-theory"
+      ],
+      "school": "",
+      "department": "Centre for Analytics and Operations — Optimization and Game Theory",
+      "building": "Euralille Business School premises",
+      "address": "Avenue Willy Brandt, 59777 Euralille, France",
+      "lat": 50.6364427,
+      "lng": 3.0757852,
+      "addressSource": "https://www.skema.edu/en/campus/lille",
+      "coordinateSource": "https://www.openstreetmap.org/node/6411699387",
+      "supportingSources": [
+        "https://www.skema.edu/en/skema-business-school-brand",
+        "https://skema-admissions.xenoapp.help/hc/lille-fr/comment-acceder-au-campus-de-lille?lang=en"
+      ],
+      "locationGroup": "skema-optimization-france",
+      "locationGroupSource": "https://recrutement.skema.edu/?page=advertisement_display&id=1620",
+      "checked": "2026-10-25",
+      "notes": "The official appointment explicitly allows Lille or Grand Paris, so both eligible locations are represented. School premises matched to the officially stated street address. Lille occupies the Euralille upper-level premises reached from Avenue Willy Brandt; Grand Paris occupies the former Airbus building at5QuaiMarcelDassault. Newly advertised faculty office not individually assigned."
+    },
+    {
+      "id": "skema-optimization-paris",
+      "institution": "School of Knowledge Economy and Management (SKEMA Business School)",
+      "institutionKey": "skema-business-school",
+      "rowIds": [
+        "skema-business-school____optimization-or-game-theory"
+      ],
+      "school": "",
+      "department": "Centre for Analytics and Operations — Optimization and Game Theory",
+      "building": "Grand Paris Business School building",
+      "address": "5 Quai Marcel Dassault, 92150 Suresnes, France",
+      "lat": 48.8607928,
+      "lng": 2.2240477,
+      "addressSource": "https://www.skema.edu/en/campus/paris",
+      "coordinateSource": "https://www.openstreetmap.org/way/70963913",
+      "supportingSources": [
+        "https://www.skema.edu/en/skema-business-school-brand",
+        "https://skema-admissions.xenoapp.help/hc/lille-fr/comment-acceder-au-campus-de-lille?lang=en"
+      ],
+      "locationGroup": "skema-optimization-france",
+      "locationGroupSource": "https://recrutement.skema.edu/?page=advertisement_display&id=1620",
+      "checked": "2026-10-25",
+      "notes": "The official appointment explicitly allows Lille or Grand Paris, so both eligible locations are represented. School premises matched to the officially stated street address. Lille occupies the Euralille upper-level premises reached from Avenue Willy Brandt; Grand Paris occupies the former Airbus building at5QuaiMarcelDassault. Newly advertised faculty office not individually assigned."
+    },
+    {
+      "id": "skema-artificial-intelligence-sophia-antipolis",
+      "institution": "School of Knowledge Economy and Management (SKEMA Business School)",
+      "institutionKey": "skema-business-school",
+      "rowIds": [
+        "skema-business-school____skema-centre-for-artificial-intelligence"
+      ],
+      "school": "",
+      "department": "Centre for Artificial Intelligence",
+      "building": "Business School Buildings 1 and 2",
+      "address": "60 Rue Fedor Dostoievski, 06902 Sophia Antipolis, France",
+      "country": "France",
+      "lat": 43.613156,
+      "lng": 7.0563958,
+      "addressSource": "https://www.skema.edu/en/campus/sophia-antipolis",
+      "coordinateSource": "https://www.openstreetmap.org/relation/2054373",
+      "supportingSources": [
+        "https://recrutement.skema.edu/?page=advertisement_display&id=1609",
+        "https://www.skema.edu/en/skema-business-school-brand"
+      ],
+      "locationGroup": "skema-artificial-intelligence-global",
+      "locationGroupSource": "https://recrutement.skema.edu/?page=advertisement_display&id=1609",
+      "checked": "2026-10-25",
+      "notes": "The source row combines three separately advertised positions explicitly assigned to Sophia Antipolis, Suzhou and Raleigh. All three hosts are represented. A new individual faculty office is not assigned publicly. Official school address and named building multipolygon distinguish Buildings1and2 from Building3 at157RueAlbertEinstein."
+    },
+    {
+      "id": "skema-artificial-intelligence-suzhou",
+      "institution": "School of Knowledge Economy and Management (SKEMA Business School)",
+      "institutionKey": "skema-business-school",
+      "rowIds": [
+        "skema-business-school____skema-centre-for-artificial-intelligence"
+      ],
+      "school": "",
+      "department": "Centre for Artificial Intelligence",
+      "building": "Buildings A4 and A5",
+      "address": "99 Renai Road, Buildings A4 and A5, Dushu Lake Science and Education Innovation District, Suzhou 215123, China",
+      "country": "China",
+      "lat": 31.2768914862,
+      "lng": 120.7355608994,
+      "addressSource": "https://www.skema-bs.cn/campus/suzhou",
+      "coordinateSource": "https://surl.amap.com/2ldNpni1s4VO",
+      "supportingSources": [
+        "https://recrutement.skema.edu/?page=advertisement_display&id=1612",
+        "https://www.skema.edu/en/skema-business-school-brand"
+      ],
+      "locationGroup": "skema-artificial-intelligence-global",
+      "locationGroupSource": "https://recrutement.skema.edu/?page=advertisement_display&id=1612",
+      "checked": "2026-10-25",
+      "notes": "The source row combines three separately advertised positions explicitly assigned to Sophia Antipolis, Suzhou and Raleigh. All three hosts are represented. A new individual faculty office is not assigned publicly. Official Chinese school website links Amap marker B0FFFEUTCA for exact A4/A5 premises. Its GCJ-02 coordinate120.739923,31.274879 was converted to WGS84 and corroborated against OSM school footprint1036594343. The English admissions Google link incorrectly locates the school roughly875metres west and was rejected."
+    },
+    {
+      "id": "skema-artificial-intelligence-raleigh",
+      "institution": "School of Knowledge Economy and Management (SKEMA Business School)",
+      "institutionKey": "skema-business-school",
+      "rowIds": [
+        "skema-business-school____skema-centre-for-artificial-intelligence"
+      ],
+      "school": "",
+      "department": "Centre for Artificial Intelligence",
+      "building": "Venture II, Suite 101",
+      "address": "920 Main Campus Drive, Venture II, Suite 101, Raleigh, North Carolina 27606, United States",
+      "country": "United States",
+      "lat": 35.7727862,
+      "lng": -78.6778009,
+      "addressSource": "https://www.skema.edu/en/campus/raleigh",
+      "coordinateSource": "https://www.openstreetmap.org/way/47917912",
+      "supportingSources": [
+        "https://recrutement.skema.edu/?page=advertisement_display&id=1613",
+        "https://www.skema.edu/en/skema-business-school-brand"
+      ],
+      "locationGroup": "skema-artificial-intelligence-global",
+      "locationGroupSource": "https://recrutement.skema.edu/?page=advertisement_display&id=1613",
+      "checked": "2026-10-25",
+      "notes": "The source row combines three separately advertised positions explicitly assigned to Sophia Antipolis, Suzhou and Raleigh. All three hosts are represented. A new individual faculty office is not assigned publicly. Exact VentureII building footprint at920MainCampusDrive matches official school suite101 address; not NorthCarolinaStateUniversity general coordinates."
+    },
+    {
+      "id": "skema-operations-lille",
+      "institution": "School of Knowledge Economy and Management (SKEMA Business School)",
+      "institutionKey": "skema-business-school",
+      "rowIds": [
+        "skema-business-school____om"
+      ],
+      "school": "",
+      "department": "Centre for Analytics and Operations — Operations Management",
+      "building": "Euralille Business School premises",
+      "address": "Avenue Willy Brandt, 59777 Euralille, France",
+      "lat": 50.6364427,
+      "lng": 3.0757852,
+      "addressSource": "https://www.skema.edu/en/campus/lille",
+      "coordinateSource": "https://www.openstreetmap.org/node/6411699387",
+      "supportingSources": [
+        "https://akadeus.com/announcement/9395",
+        "https://www.skema.edu/sites/default/files/cv/documents/cv_8040_en.pdf",
+        "https://skema-admissions.xenoapp.help/hc/lille-fr/comment-acceder-au-campus-de-lille?lang=en"
+      ],
+      "checked": "2026-10-25",
+      "notes": "September 2025 employer advertisement for September 2026 Operations Management appointment specifies Lille. Original recruitment link1456 now redirects to all jobs, but the employer text is preserved by its recruitment publisher. Current official operations faculty curriculum vitae independently confirms Lille. Exact school premises are above Euralille, accessed from Avenue Willy Brandt."
+    },
+    {
+      "id": "northern-state-business-health-innovation",
+      "institution": "Northern State University",
+      "rowIds": [
+        "northern-state-university__school-of-business__business-analytics-and-information-systems",
+        "northern-state-university____quantitative-analytics"
+      ],
+      "school": "School of Business",
+      "department": "Management, Information Systems, and Marketing",
+      "building": "Business and Health Innovation Center",
+      "address": "Business and Health Innovation Center, Room 121, 1200 South Jay Street, Aberdeen, South Dakota 57401, United States",
+      "lat": 45.4523,
+      "lng": -98.48445,
+      "addressSource": "https://northern.edu/node/7377",
+      "coordinateSource": "https://northern.edu/sites/default/files/map/nsu-campus-map-2026.pdf",
+      "supportingSources": [
+        "https://northern.edu/about/campus/facilities-and-hours/business-and-health-innovation-center",
+        "https://northern.edu/academics/school-of-business/about",
+        "https://northern.edu/about/departments",
+        "https://www.openstreetmap.org/way/248423838"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current department chair Dan Shannahan is in room121 and the school office is room103 of the Business and Health Innovation Center, opened January2026. Building2 on the official2026 campus plan is on the former Lincoln/Briscoe site south of12th Avenue and east ofWashington Street. Building-specific approximate coordinates were registered from that official plan against adjoining mapped footprints and streets. OpenStreetMap still names demolished Lincoln and Briscoe halls; those names are superseded, and the old Lincoln centroid is not used. Coordinate precision is limited to the official illustrated plan."
+    },
+    {
+      "id": "hec-paris-information-operations-building-v",
+      "institution": "École des Hautes Études Commerciales de Paris (HEC Paris)",
+      "institutionKey": "HEC Paris",
+      "rowIds": [
+        "hec-paris__school-of-business__information-systems-and-operations-management",
+        "hec-paris____om",
+        "hec-paris____operations-management-and-information-technology"
+      ],
+      "school": "",
+      "department": "Department of Information Systems and Operations Management",
+      "building": "Building V",
+      "address": "1 rue de la Libération, 78351 Jouy-en-Josas Cedex, France",
+      "lat": 48.75621131,
+      "lng": 2.16300914,
+      "addressSource": "https://www.hec.edu/en/faculty-research/departments/information-systems-and-operations-management",
+      "coordinateSource": "https://www.openstreetmap.org/way/216431779",
+      "supportingSources": [
+        "https://learning-center.hec.edu/wp-content/uploads/2020/09/plan-campus-hec-pdf.pdf",
+        "https://www.onisep.fr/ressources/structures-enseignement/ile-de-france/yvelines/ecole-des-hautes-etudes-commerciales-de-paris"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official department chair Sam Aflaki officeV212 and department assistant Pascale FliniauxV221 establish exact department building. Official campus plan explicitly labels V Faculty Offices west of U and W1. Exact named external footprint corroborated against plan. Full institution name from French national education information agency; acronym retained only as trailing alias. Operations/Information Technology variants refer to the same current combined department. Artificial Intelligence posting left pending until its hiring host is confirmed."
+    },
+    {
+      "id": "air-force-operational-sciences-building-641",
+      "institution": "Air Force Institute of Technology",
+      "institutionKey": "Air Force Institute of Technology",
+      "rowIds": [
+        "air-force-institute-of-technology____scm-and-logistics"
+      ],
+      "school": "Graduate School of Engineering and Management",
+      "department": "Department of Operational Sciences",
+      "building": "Building 641 (Twining Hall)",
+      "address": "Room 201, Building 641, 2950 Hobson Way, Wright-Patterson Air Force Base, Ohio 45433, United States",
+      "lat": 39.78356883,
+      "lng": -84.0831514,
+      "addressSource": "https://www.afit.edu/ens/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1073969194",
+      "supportingSources": [
+        "https://www.afit.edu/ens/faculty.cfm",
+        "https://mailman.mit.edu/pipermail/logprofs/2026/001413.html",
+        "https://www.afit.edu/docs/afit%20campus%20map.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department contact explicitly names Building 641 Room 201; current faculty directory places logistics and supply chain management faculty in this department. May 2026 faculty search announcement by search chair confirms this hiring host. External exact named Building 641 footprint, also described as Twining Hall, matches official campus map building identifier. Distinct from the continuing-education School of Systems and Logistics."
+    },
+    {
+      "id": "palm-beach-atlantic-data-analytics-rinker-business",
+      "institution": "Palm Beach Atlantic University",
+      "institutionKey": "Palm Beach Atlantic University",
+      "rowIds": [
+        "palm-beach-atlantic-university____data-analytics"
+      ],
+      "school": "Marshall E. Rinker, Sr. College of Business",
+      "department": "Accounting, Finance, Economics, and Data Analytics",
+      "building": "Marshall and Vera Lea Rinker Business Hall",
+      "address": "1095 South Olive Avenue, West Palm Beach, Florida 33401, United States",
+      "lat": 26.7034499,
+      "lng": -80.0524344,
+      "addressSource": "https://www.pba.edu/news/pbas-rinker-business-hall-receives-merit-award/",
+      "coordinateSource": "https://feverup.com/m/646953",
+      "supportingSources": [
+        "https://www.pba.edu/directory/claudia-strow/",
+        "https://my.pba.edu/ICS/Departments/Public_Safety/PARKING_AND_TRANSPORTATION.jnz",
+        "https://www.pba.edu/wp-content/uploads/2025/11/PBA-CampusMap-Aug-2025.pdf",
+        "https://www.pba.edu/news/new-business-hall-opens-opportunities-for-palm-beach-atlantic-university-students/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "New business college building opened March 19, 2026, confirmed by October 2026 university news. Current official campus PDF (served under an older filename) labels building19 NOW OPEN, north of Gruber Place and west of South Olive Avenue. University Public Safety specifies street address1095 South Olive Avenue. Coordinates from external exact named Titus Lecture Hall venue data inside this new building, corroborated against official building plan and address; not the generic901 South Flagler footer or older Rinker residence hall. Official faculty directory identifies the accounting, finance, economics and data analytics academic unit within the college."
+    },
+    {
+      "id": "johnson-wales-operations-xavier",
+      "institution": "Johnson & Wales University",
+      "institutionKey": "Johnson and Wales University",
+      "rowIds": [
+        "johnson-and-wales-university__college-of-hospitality-and-business__operations-and-supply-chain-management"
+      ],
+      "school": "College of Hospitality and Business",
+      "department": "Operations and Supply Chain Management",
+      "building": "Xavier Academic Complex",
+      "address": "29 Claverick Street, Providence, Rhode Island 02903, United States",
+      "lat": 41.81852377,
+      "lng": -71.41438428,
+      "addressSource": "https://www.jwu.edu/campuses/providence/facilities-labs/hospitality-business/",
+      "coordinateSource": "https://www.openstreetmap.org/way/141567789",
+      "supportingSources": [
+        "https://catalog.jwu.edu/aboutjwu/campuses/providence/",
+        "https://www3.jwu.edu/faculty/kumthekar-nihar.html"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official current college facilities page places hospitality and business faculty offices in Xavier Academic Complex at29 Claverick Street. Official catalog gives its alternative entrance address259 Pine Street and explicitly places business administrative and faculty offices here. Current operations/supply chain faculty profile confirms Providence campus. Coordinates from exact named academic office building footprint, not adjacent Xavier Hall residence or university mailing address."
+    },
+    {
+      "id": "xian-jiaotong-information-systems-wenguan",
+      "institution": "Xi’an Jiaotong University",
+      "institutionKey": "Xi'an Jiaotong University",
+      "rowIds": [
+        "xi-an-jiaotong-university__school-of-management__is"
+      ],
+      "school": "School of Management",
+      "department": "Information Systems and Intelligent Business",
+      "building": "Wenguan Building, room 503",
+      "address": "28 Xianning West Road, Beilin District, Xi’an, Shaanxi 710049, China",
+      "lat": 34.2431962,
+      "lng": 108.97676815,
+      "addressSource": "https://gr.xjtu.edu.cn/jiapengliu/zh_CN/index.htm",
+      "coordinateSource": "https://www.openstreetmap.org/way/263633895",
+      "supportingSources": [
+        "https://som.xjtu.edu.cn/xygk/xsjs/xxxtyznswx.htm",
+        "https://vi.xjtu.edu.cn/qt/jddt.htm",
+        "https://vi.xjtu.edu.cn/__local/C/35/45/DF38B73EB02BB3CF16DC78D73FD_7F93FACD_DDB02.png",
+        "https://som.xjtu.edu.cn/bszn/lxfs.htm"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current department head Jiapeng Liu explicitly lists Wenguan Building, management room 503, at Xingqing campus. Official school department page confirms Information Systems and Intelligent Business as the current host. Official Xingqing plan identifies Wenguan on the southern boundary, west of the south gate; the matching named management-building footprint supplies bounds-center coordinates. School also has graduate services in Hanying Building at Innovation Harbour, but this record uses the verified departmental head office, not an assumed wholesale campus relocation."
+    },
+    {
+      "id": "hong-kong-science-technology-guangzhou-data-science-e3-640",
+      "institution": "The Hong Kong University of Science and Technology (Guangzhou)",
+      "institutionKey": "Hong Kong University of Science and Technology (Guangzhou)",
+      "rowIds": [
+        "hong-kong-university-of-science-and-technology-guangzhou____data-science-and-analytics-dsa-thrust"
+      ],
+      "school": "Information Hub",
+      "department": "Data Science and Analytics Thrust",
+      "building": "E3, room 230, second floor",
+      "address": "1 Duxue Road, Nansha District, Guangzhou, Guangdong 511453, China",
+      "lat": 22.8911057,
+      "lng": 113.47875725,
+      "addressSource": "https://dsa.hkust-gz.edu.cn/about/contact-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1096049213",
+      "supportingSources": [
+        "https://www.hkust-gz.edu.cn/academics/hubs-and-thrust-areas/information-hub/data-science-and-analytics/",
+        "https://hse.hkust-gz.edu.cn/wp-content/uploads/2025/02/CSC-SECD-2024-034%E9%A6%99%E6%B8%AF%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%EF%BC%88%E5%B9%BF%E5%B7%9E%EF%BC%89%E7%81%AB%E7%81%BE%E4%B8%93%E9%A1%B9%E5%BA%94%E6%80%A5%E9%A2%84%E6%A1%88.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official thrust contact explicitly gives E3-2F-230. Official campus fire/emergency map page 17 labels E3 as the third building along the eastern laboratory row, matching the named public footprint. Coordinates are the E3 building bounds center rather than the university campus centroid. DS and Analytics is an abbreviated source alias; its hiring link spells out Data Science and Analytics Thrust, and the display uses the official full name."
+    },
+    {
+      "id": "hong-kong-science-technology-guangzhou-data-science-e3-641",
+      "institution": "The Hong Kong University of Science and Technology (Guangzhou)",
+      "institutionKey": "Hong Kong University of Science and Technology (Guangzhou)",
+      "rowIds": [
+        "hong-kong-university-of-science-and-technology-guangzhou____ds-and-analytics"
+      ],
+      "school": "Information Hub",
+      "department": "Data Science and Analytics Thrust",
+      "building": "E3, room 230, second floor",
+      "address": "1 Duxue Road, Nansha District, Guangzhou, Guangdong 511453, China",
+      "lat": 22.8911057,
+      "lng": 113.47875725,
+      "addressSource": "https://dsa.hkust-gz.edu.cn/about/contact-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1096049213",
+      "supportingSources": [
+        "https://www.hkust-gz.edu.cn/academics/hubs-and-thrust-areas/information-hub/data-science-and-analytics/",
+        "https://hse.hkust-gz.edu.cn/wp-content/uploads/2025/02/CSC-SECD-2024-034%E9%A6%99%E6%B8%AF%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%EF%BC%88%E5%B9%BF%E5%B7%9E%EF%BC%89%E7%81%AB%E7%81%BE%E4%B8%93%E9%A1%B9%E5%BA%94%E6%80%A5%E9%A2%84%E6%A1%88.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official thrust contact explicitly gives E3-2F-230. Official campus fire/emergency map page 17 labels E3 as the third building along the eastern laboratory row, matching the named public footprint. Coordinates are the E3 building bounds center rather than the university campus centroid. DS and Analytics is an abbreviated source alias; its hiring link spells out Data Science and Analytics Thrust, and the display uses the official full name."
+    },
+    {
+      "id": "hong-kong-science-technology-guangzhou-smart-manufacturing-w4",
+      "institution": "The Hong Kong University of Science and Technology (Guangzhou)",
+      "institutionKey": "Hong Kong University of Science and Technology (Guangzhou)",
+      "rowIds": [
+        "hong-kong-university-of-science-and-technology-guangzhou____smart-manufacturing-thrust-systems-hub"
+      ],
+      "school": "Systems Hub",
+      "department": "Smart Manufacturing Thrust",
+      "building": "W4, room 314, third floor",
+      "address": "1 Duxue Road, Nansha District, Guangzhou, Guangdong 511453, China",
+      "lat": 22.8925521,
+      "lng": 113.47701665,
+      "addressSource": "https://facultyprofiles.hkust-gz.edu.cn/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1098450397",
+      "supportingSources": [
+        "https://sysh.hkust-gz.edu.cn/thrust-areas/smmg/faculty-profile/",
+        "https://mektang.people.ust.hk/public_files/full-cv.pdf",
+        "https://hse.hkust-gz.edu.cn/wp-content/uploads/2025/02/CSC-SECD-2024-034%E9%A6%99%E6%B8%AF%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%EF%BC%88%E5%B9%BF%E5%B7%9E%EF%BC%89%E7%81%AB%E7%81%BE%E4%B8%93%E9%A1%B9%E5%BA%94%E6%80%A5%E9%A2%84%E6%A1%88.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official faculty directory lists Kai Tang in W4 L3 314; Systems Hub faculty page and September 2025 curriculum vitae identify him as current Smart Manufacturing Thrust Head. Department is anchored at the verified head office. Official emergency campus map labels W4 at the north end of the west academic-building row, matching the named public building footprint. This is separate from the Data Science and Analytics thrust office in E3."
+    },
+    {
+      "id": "new-mexico-operations-anderson-building-76",
+      "institution": "The University of New Mexico",
+      "institutionKey": "University of New Mexico",
+      "rowIds": [
+        "university-of-new-mexico____om"
+      ],
+      "school": "The James & Gail Ellis School of Business Leadership",
+      "department": "Marketing, Information and Decision Sciences — Operations Management",
+      "building": "Anderson School of Management Building 76, room 2148",
+      "address": "Central Campus, Albuquerque, New Mexico 87131, United States",
+      "lat": 35.086346,
+      "lng": -106.619736,
+      "addressSource": "https://business.unm.edu/faculty-research/faculty-profile.html?username=btan",
+      "coordinateSource": "https://map.concept3d.com/?id=1984#!m/630085",
+      "supportingSources": [
+        "https://business.unm.edu/faculty-research/academic-departments/marketing-information-and-decision-science.html",
+        "https://fm.unm.edu/quick-links/buildings.html",
+        "https://news.unm.edu/newsmedia/map"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official school faculty profile, through its linked public Digital Measures profile, lists operations-management faculty member Burcu Tan Erciyes office/office hours in ASM 2148. Department page confirms her operations-management role and current parent department. Official facilities directory identifies ASM as building 76, distinct from graduate school/library 87 and McKinnon. Coordinates use the official university-linked building-directory marker. Current full school name retained while the physical building still carries Anderson on the university facilities map."
+    },
+    {
+      "id": "savannah-art-design-creative-business-gulfstream",
+      "institution": "Savannah College of Art and Design",
+      "institutionKey": "Savannah College of Art and Design",
+      "rowIds": [
+        "savannah-college-of-art-and-design____creative-business-leadership"
+      ],
+      "school": "De Sole School of Business Innovation",
+      "department": "Creative Business Leadership",
+      "building": "Gulfstream Center for Design",
+      "address": "3116 Montgomery Street, Savannah, Georgia 31405, United States",
+      "lat": 32.0503536,
+      "lng": -81.1066255,
+      "addressSource": "https://www.scad.edu/sites/default/files/PDF/Savannah-facilities-map-2024.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/761925725",
+      "supportingSources": [
+        "https://careers.pageuppeople.com/1090/cw/en-us/job/501503/professor-creative-business-leadership",
+        "https://www.scad.edu/academics/programs/creative-business-leadership",
+        "https://catalog.scad.edu/de-sole-school-business-innovation/creative-business-leadership/creative-busi-leadership-mbi/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official Savannah facilities map explicitly lists Creative Business Leadership in Gulfstream Center for Design at 3116 Montgomery Street. Official recruitment position 501503 has the matching Professor, Creative Business Leadership title and expressly specifies Savannah. Current program also offers Atlanta and online delivery; this record represents the verified Savannah hiring location, not an assumption that all program activity is exclusively Savannah. Exact named public building footprint."
+    },
+    {
+      "id": "swiss-federal-technology-decision-sciences-wev",
+      "institution": "Swiss Federal Institute of Technology Zurich",
+      "institutionKey": "ETH Zurich",
+      "rowIds": [
+        "eth-zurich____empirical-business-problems"
+      ],
+      "school": "",
+      "department": "Department of Management, Technology, and Economics",
+      "building": "WEV",
+      "address": "Weinbergstrasse 56/58, 8092 Zurich, Switzerland",
+      "lat": 47.381712,
+      "lng": 8.5441626,
+      "addressSource": "https://mtec.ethz.ch/utils/contact.html",
+      "coordinateSource": "https://im.ethz.ch/about/how-to-find-us.html",
+      "checked": "2026-10-25",
+      "notes": "Original source phrase empirical business problems is a research description, not a department. The university-authored Decision Sciences hiring advertisement preserved by the Production and Operations Management Society expressly identifies Department of Management, Technology, and Economics as the hiring host. Mapped to that verified department administration in WEV E12, Weinbergstrasse 56/58. No claim that an as-yet-unidentified new Decision Sciences professor has an individually assigned office here. Exact official WEV destination coordinates are shared with the department record.",
+      "supportingSources": [
+        "https://www.poms.org/sites/default/files/2025-06/Desicion_Science_2.pdf",
+        "https://wirtschaftsinformatik.de/ausschreibungen/eth-z%C3%BCrich-assistant-professor-%28tenure-track%29-of-decision-science"
+      ]
+    },
+    {
+      "id": "vienna-operations-research-business-decisions-morgenstern",
+      "institution": "University of Vienna",
+      "institutionKey": "University of Vienna",
+      "rowIds": [
+        "university-of-vienna____or"
+      ],
+      "school": "Faculty of Business, Economics and Statistics",
+      "department": "Business Decisions and Analytics — Operations Research",
+      "building": "Oskar-Morgenstern-Platz 1, sixth floor",
+      "address": "Oskar-Morgenstern-Platz 1, 1090 Vienna, Austria",
+      "lat": 48.2190633,
+      "lng": 16.3664547,
+      "addressSource": "https://bda.univie.ac.at/team/offices/office-tierneynovakraunerwindsperger/",
+      "coordinateSource": "https://www.openstreetmap.org/relation/1529002",
+      "supportingSources": [
+        "https://international-business.univie.ac.at/team/floor-plans/",
+        "https://ucrisportal.univie.ac.at/en/organisations/institut-f%C3%BCr-business-decisions-and-analytics/",
+        "https://www.ifors.org/tenure-track-professorship-in-operations-research-at-the-faculty-of-business-economics-and-statistics-at-the-university-of-vienna/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Original 2025 Operations Research tenure-track advertisement identifies Business Decisions and Analytics as the hiring department, explicitly distinct from collaboration with Statistics and Operations Research. Official department office directory and university floor plan place this department on sixth floor of Oskar-Morgenstern-Platz 1 (office 6.617, professor 6.616). Exact named 12-story university building footprint verified, rather than Kolingasse or main university coordinates. Abbreviated OR source label expanded."
     }
   ]
 }

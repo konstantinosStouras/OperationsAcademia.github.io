@@ -82,12 +82,19 @@ async function main() {
   // Building verification can resolve an old posting abbreviation to an
   // official department. Keep stable row identities and retain both search terms.
   const locations = await readJson('data/school-map-locations.json');
-  const mapTerms = new Map(locations.records.flatMap(location => location.rowIds.map(id => [id, [location.school, location.department].filter(Boolean)])));
+  const mapTerms = new Map();
+  for (const location of locations.records) for (const id of location.rowIds) {
+    mapTerms.set(id,[...new Set([...(mapTerms.get(id)||[]),location.school,location.department].filter(Boolean))]);
+  }
   for (const row of rows) if (mapTerms.has(row.id)) row.mapSearchTerms = mapTerms.get(row.id);
-  const mapCountries = new Map(locations.records.filter(location => location.country).flatMap(location => location.rowIds.map(id => [id, location.country])));
+  const mapCountries = new Map();
+  for (const location of locations.records.filter(location=>location.country)) for (const id of location.rowIds) {
+    mapCountries.set(id,[...new Set([...(mapCountries.get(id)||[]),location.country])]);
+  }
   for (const row of rows) if (mapCountries.has(row.id)) {
-    row.country = mapCountries.get(row.id);
-    delete row.countries;
+    const countries=mapCountries.get(row.id);
+    row.country = countries.length===1?countries[0]:'';
+    if(countries.length>1)row.countries=countries;else delete row.countries;
   }
   const stats = directoryStats(rows);
 

@@ -270,15 +270,31 @@
         if(matches.length) {
           var target=OASchools.canonColumns({institution:targetUniversity,school:targetSchool,unit:targetDepartment});
           targetSchool=target.school;targetDepartment=target.unit;
-          var chosen=null,bestScore=0;
+          var chosen=null,bestScore=0,eligible=[];
           if(targetDepartment)matches.forEach(function(m){m.oaCard.schools.forEach(function(s){s.rows.forEach(function(r){
             var score=OAMapModel.rowMatchScore(r,targetSchool,targetDepartment);
-            if(score>bestScore){chosen=m;bestScore=score;}
+            if(score>bestScore){chosen=m;bestScore=score;eligible=[m];}
+            else if(score&&score===bestScore&&eligible.indexOf(m)===-1)eligible.push(m);
           });});});
           chosen=chosen || matches.find(function(m){return targetSchool && m.oaCard.schools.some(function(s){return s.rows.some(function(r){return OAMapModel.matchesRow(r,targetSchool,'');});});});
           if(!chosen && !targetSchool && !targetDepartment && matches.length===1)chosen=matches[0];
           if(!chosen){status.textContent+=' The requested department is not in the directory; showing the available schools.';return;}
           focusApplied=true;autoFrame=false;
+          if(eligible.length>1&&eligible.every(function(m){return m.oaPoint.locationGroup&&m.oaPoint.locationGroup===eligible[0].oaPoint.locationGroup;})) {
+            var options=el('div',{class:'oa-uni-pop oa-map-location-options',tabindex:'-1'});
+            options.appendChild(el('h3',{text:chosen.oaCard.officialInstitution||OAMapModel.displayName(chosen.oaCard.institution)}));
+            options.appendChild(el('p',{class:'oa-map-selected-department',text:'This posting permits several academic locations. Select a school or department to see its card.'}));
+            eligible.forEach(function(m){
+              var p=el('p'),button=el('button',{type:'button',text:m.oaPoint.school+' · '+m.oaPoint.department+' · '+m.oaPoint.building});
+              button.addEventListener('click',function(){map.setView(m.getLatLng(),14,{animate:false});openPopup(cardContent(m.oaCard,m.oaPoint),m.getLatLng());});
+              p.appendChild(button);options.appendChild(p);
+              options.appendChild(el('p',{text:m.oaPoint.address}));
+            });
+            options.appendChild(makeLink('Official posting',chosen.oaPoint.locationGroupSource));
+            map.fitBounds(L.latLngBounds(eligible.map(function(m){return m.getLatLng();})),{padding:[40,40],maxZoom:14,animate:false});
+            openPopup(options,map.getCenter());
+            return;
+          }
           map.setView(chosen.getLatLng(),14,{animate:false});
           openPopup(cardContent(chosen.oaCard,chosen.oaPoint),chosen.getLatLng());
         }

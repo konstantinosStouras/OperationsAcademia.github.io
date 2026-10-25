@@ -112,11 +112,18 @@ try{
   await Promise.all(Array.from({length:4},async()=>{
     while(evidenceQueue.length){
       const {location,id}=evidenceQueue.shift();
+      if(evidenceQueue.length%25===0)console.log('Department links remaining:',evidenceQueue.length);
       const row=directory.find(r=>r.id===id);
       const url=nav.furtherInfoUrl({institution:row.institution,school:row.school,unit:row.department,furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=legacy'});
       const q=await pageAt(new URL(url).search);
       try{await q.waitForSelector(row.department?'.oa-map-selected-department':'.oa-map-popup',{timeout:5000});}
       catch(error){throw new Error(id+': '+await q.locator('.oa-map-status').innerText(),{cause:error});}
+      if(location.locationGroup){
+        const options=q.locator('.oa-map-location-options');
+        assert.ok((await options.innerText()).includes(location.address),id+' offers its eligible host address');
+        await options.getByRole('button',{name:location.school+' · '+location.department+' · '+location.building,exact:true}).click();
+        await q.waitForFunction(()=>document.querySelectorAll('.oa-map-popup').length===1&&!document.querySelector('.oa-map-location-options'));
+      }
       assert.ok((await q.locator('.oa-map-popup').innerText()).includes(location.address),id+' opens its verified address');
       assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[location.lat,location.lng],id+' opens the building pin');
       await q.locator('#oaf-dept').fill(location.department||location.school||'');

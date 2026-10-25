@@ -197,7 +197,8 @@ jobs:
         run: node _scraper/candidate-sdk-test.mjs
 
       - name: The page renders its data
-        timeout-minutes: 8
+        # Every verified department link is exercised as the location audit grows.
+        timeout-minutes: 15
         # If the two steps above somehow leave no browser behind, this fails
         # rather than skipping: page-test.mjs keeps its friendly "playwright is
         # not installed" skip for a local run, but exits 1 on CI, where the

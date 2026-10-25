@@ -9,10 +9,10 @@ for(const range of ['0-179','180-359','360-539','540-713']){
   if(index<0)data.records.push(record);else data.records[index]=record;
  }
 }
-const rows=new Set();
+const rows=new Map();
 for(const r of data.records)for(const id of r.rowIds){
- if(rows.has(id))throw new Error(`Multiple location records for ${id}`);
- rows.add(id);
+ if(rows.has(id)&&(!r.locationGroup||r.locationGroup!==rows.get(id).locationGroup||!r.locationGroupSource))throw new Error(`Unexplained multiple location records for ${id}`);
+ rows.set(id,r);
 }
 fs.writeFileSync(target,JSON.stringify(data,null,2)+'\n');
 console.log(`Merged ${data.records.length} verified records covering ${rows.size} directory rows.`);
