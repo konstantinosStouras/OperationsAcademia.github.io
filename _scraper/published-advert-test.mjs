@@ -39,3 +39,11 @@ assert.equal(publishedAdvertRepeat({ id: 'empty', postedAtUrl: '' }, [live]), nu
 assert.equal(publishedAdvertRepeat({ id: 'home', postedAtUrl: 'https://operationsacademia.org/' },
   [{ ...live, postedAtUrl: 'https://operationsacademia.org/' }]), null);
 console.log('Advert and Posted at cross-field admission checks passed.');
+const board = 'https://www.poms.org/opportunities';
+assert.equal(publishedAdvertRepeat({ ...crawled, adUrl: 'https://example.edu/job-a.pdf', postedAtUrl: board },
+  [{ ...live, adUrl: 'https://example.edu/job-b.pdf', postedAtUrl: board }]), null,
+  'a shared Posted at source board must not suppress unrelated jobs');
+assert.equal(publishedAdvertRepeat({ ...crawled, adUrl: 'https://example.edu/job-a.pdf', postedAtUrl: board },
+  [{ ...live, adUrl: 'https://example.edu/job-a.pdf', postedAtUrl: board }])?.id, 'live',
+  'identical advert links still match when Posted at is a source board');
+console.log('Shared source-board regression checks passed.');

@@ -138,13 +138,19 @@
   // Admission rule for new crawled jobs: a published advert or Posted at link is enough,
   // regardless of the scraped institution, market year, department or rank.
   // Callers supply published rows only; pending comparisons retain their guards.
+  // Posted at often points to a shared source board (e.g. POMS opportunities).
+  // Only a recognised vacancy ID makes that field evidence of one job.
+  function admissionLinks(row) {
+    var posted = { adUrl: row.postedAtUrl };
+    return [advertLink(row), vacancyKey(posted) ? advertLink(posted) : ''].filter(Boolean);
+  }
   function publishedAdvertRepeat(row, published) {
     if (!row) return null;
-    var links = [advertLink(row), advertLink({ adUrl: row.postedAtUrl })].filter(Boolean);
+    var links = admissionLinks(row);
     if (!links.length) return null;
     var match = (published || []).find(function (other) {
       if (!other || (row.id && other.id && String(row.id) === String(other.id))) return false;
-      return [advertLink(other), advertLink({ adUrl: other.postedAtUrl })].some(function (link) {
+      return admissionLinks(other).some(function (link) {
         return link && links.indexOf(link) !== -1;
       });
     });
