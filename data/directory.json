@@ -876,7 +876,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-10"
+  "lastPosted": "2025-09-10",
+  "mapSearchTerms": [
+   "Bayes Business School",
+   "Operations and Supply Chain Management"
+  ]
  },
  {
   "id": "beijing-normal-hong-kong-baptist-university____ba",
@@ -1629,7 +1633,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-03"
+  "lastPosted": "2026-09-03",
+  "mapSearchTerms": [
+   "College of Business and Economics",
+   "Department of Management"
+  ]
  },
  {
   "id": "california-state-university-long-beach__college-of-business__information-systems",
@@ -2029,7 +2037,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-22"
+  "lastPosted": "2026-07-22",
+  "mapSearchTerms": [
+   "College of Education and Professional Studies",
+   "Department of Information Technology Management"
+  ]
  },
  {
   "id": "chalmers-university-of-technology",
@@ -3111,7 +3123,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-18"
+  "lastPosted": "2026-01-18",
+  "mapSearchTerms": [
+   "Waterbury Reilly School of Business"
+  ]
  },
  {
   "id": "dongbei-university-of-finance-and-economics____institute-of-supply-chain-analytics",
@@ -4020,7 +4035,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-06"
+  "lastPosted": "2026-09-06",
+  "mapSearchTerms": [
+   "Department of Business, Organizations and Society"
+  ]
  },
  {
   "id": "fudan-university__school-of-management__management-science",
@@ -4129,7 +4147,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-10-13"
+  "lastPosted": "2026-10-13",
+  "mapSearchTerms": [
+   "School of Business",
+   "Department of Decision Sciences"
+  ]
  },
  {
   "id": "george-washington-university__school-of-business__information-systems-and-technology-management",
@@ -4143,7 +4165,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-29"
+  "lastPosted": "2026-09-29",
+  "mapSearchTerms": [
+   "School of Business",
+   "Department of Information Systems and Technology Management"
+  ]
  },
  {
   "id": "georgetown-university",
@@ -4264,7 +4290,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-06"
+  "lastPosted": "2026-01-06",
+  "mapSearchTerms": [
+   "School of Business",
+   "Department of Economics, Marketing and Supply Chain Management"
+  ]
  },
  {
   "id": "georgia-institute-of-technology",
@@ -4567,7 +4597,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-05"
+  "lastPosted": "2026-09-05",
+  "mapSearchTerms": [
+   "Anheuser-Busch School of Business",
+   "Department of Information Science and Computer Technology"
+  ]
  },
  {
   "id": "harvard-business-school____om",
@@ -6195,7 +6229,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-27"
+  "lastPosted": "2025-09-27",
+  "mapSearchTerms": [
+   "School of Business",
+   "Department of Finance and Analytics — Business Systems and Analytics"
+  ]
  },
  {
   "id": "lake-erie-college__school-of-business__business-administration",
@@ -6493,7 +6531,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-23"
+  "lastPosted": "2025-09-23",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Management — Sustainable Supply Chain Management"
+  ]
  },
  {
   "id": "loyola-university-chicago__quinlan-school-of-business",
@@ -6591,7 +6633,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-05"
+  "lastPosted": "2026-09-05",
+  "mapSearchTerms": [
+   "Loeb-Sullivan School of International Business and Logistics",
+   "International Business and Logistics"
+  ]
  },
  {
   "id": "marian-university____business-statistics",
@@ -7320,7 +7366,10 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2024-10-29"
+  "lastPosted": "2024-10-29",
+  "mapSearchTerms": [
+   "College of Computing and Data Science"
+  ]
  },
  {
   "id": "nanyang-technological-university__nanyang-business-school",
@@ -7403,6 +7452,9 @@
   "type": "University",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Institute of Operations Research and Analytics"
   ]
  },
  {
@@ -7416,7 +7468,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-06"
+  "lastPosted": "2025-10-06",
+  "mapSearchTerms": [
+   "School of Computing",
+   "Department of Information Systems and Analytics"
+  ]
  },
  {
   "id": "national-university-of-singapore____nus-business-school-department-of-analytics-and-operations",
@@ -7437,7 +7493,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-30"
+  "lastPosted": "2026-07-30",
+  "mapSearchTerms": [
+   "National University of Singapore Business School",
+   "Department of Analytics and Operations"
+  ]
  },
  {
   "id": "national-university-of-singapore____statistics-and-data-science",
@@ -7450,7 +7510,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-03"
+  "lastPosted": "2026-10-03",
+  "mapSearchTerms": [
+   "Faculty of Science",
+   "Department of Statistics and Data Science"
+  ]
  },
  {
   "id": "national-university-of-singapore__nus-business-school",
@@ -7476,7 +7540,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-18"
+  "lastPosted": "2026-08-18",
+  "mapSearchTerms": [
+   "School of Computing",
+   "Department of Information Systems and Analytics"
+  ]
  },
  {
   "id": "national-university-of-singapore____simulation-sustainability-ai-x",
@@ -7489,7 +7557,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-09"
+  "lastPosted": "2025-09-09",
+  "mapSearchTerms": [
+   "College of Design and Engineering",
+   "Department of Industrial Systems Engineering and Management"
+  ]
  },
  {
   "id": "national-university-of-singapore____industrial-systems-engineering-and-management",
@@ -7742,7 +7814,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-03"
+  "lastPosted": "2026-01-03",
+  "mapSearchTerms": [
+   "Stern School of Business at New York University Abu Dhabi",
+   "Technology, Operations and Statistics"
+  ]
  },
  {
   "id": "new-york-university__leonard-n-stern-school-of-business__information-operations-and-management-sciences",
@@ -8319,7 +8395,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-11"
+  "lastPosted": "2025-09-11",
+  "mapSearchTerms": [
+   "Nanyang Business School",
+   "Department of Information Technology and Operations Management — Operations Management"
+  ]
  },
  {
   "id": "nyu-shanghai____business-information-systems-technology",
@@ -8878,7 +8958,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-12-23"
+  "lastPosted": "2025-12-23",
+  "mapSearchTerms": [
+   "Black School of Business",
+   "Marketing and Project and Supply Chain Management"
+  ]
  },
  {
   "id": "purdue-university____heathcare-om-included",
@@ -9144,7 +9228,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-06"
+  "lastPosted": "2026-10-06",
+  "mapSearchTerms": [
+   "Saunders College of Business",
+   "Department of Management"
+  ]
  },
  {
   "id": "rochester-institute-of-technology-saunders-college-of-busine__saunders-college-of-business__management",
@@ -9154,6 +9242,10 @@
   "type": "Business School",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Saunders College of Business",
+   "Management"
   ]
  },
  {
@@ -9194,7 +9286,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-12"
+  "lastPosted": "2026-10-12",
+  "mapSearchTerms": [
+   "Crummer Graduate School of Business",
+   "Business Analytics"
+  ]
  },
  {
   "id": "rollins-college__crummer-graduate-school-of-business__operations-and-supply-chain-management",
@@ -9208,7 +9304,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-03"
+  "lastPosted": "2026-09-03",
+  "mapSearchTerms": [
+   "Crummer Graduate School of Business",
+   "Operations and Supply Chain Management"
+  ]
  },
  {
   "id": "rowan-university____scm-logistics",
@@ -9484,7 +9584,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-07-23"
+  "lastPosted": "2026-07-23",
+  "mapSearchTerms": [
+   "Fowler College of Business",
+   "Department of Management Information Systems"
+  ]
  },
  {
   "id": "san-francisco-state-university____decision-sciences",
@@ -10992,7 +11096,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-19"
+  "lastPosted": "2026-10-19",
+  "mapSearchTerms": [
+   "College of Engineering and Computer Science",
+   "Industrial Engineering"
+  ]
  },
  {
   "id": "texas-christian-university____analytics-business-is",
@@ -12060,7 +12168,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-11"
+  "lastPosted": "2025-09-11",
+  "mapSearchTerms": [
+   "Global Business School for Health",
+   "Technology and Operations Management"
+  ]
  },
  {
   "id": "ucl-global-business-school-for-health____operations-and-project-management-ai-focus",
@@ -12166,7 +12278,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2026-01-06"
+  "lastPosted": "2026-01-06",
+  "mapSearchTerms": [
+   "Division of Mathematics and Science",
+   "Mathematics Department"
+  ]
  },
  {
   "id": "universidad-de-chile____industrial-engineering",
@@ -12604,7 +12720,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-23"
+  "lastPosted": "2026-08-23",
+  "mapSearchTerms": [
+   "Collat School of Business",
+   "Department of Management, Information Systems and Quantitative Methods"
+  ]
  },
  {
   "id": "university-of-alabama-birmingham____scm-distribution-mkt",
@@ -12819,7 +12939,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-24"
+  "lastPosted": "2025-06-24",
+  "mapSearchTerms": [
+   "University of Auckland Business School",
+   "Department of Information Systems and Operations Management"
+  ]
  },
  {
   "id": "university-of-auckland__business-school__information-systems-and-operations-management",
@@ -13721,7 +13845,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-30"
+  "lastPosted": "2026-07-30",
+  "mapSearchTerms": [
+   "Terry College of Business",
+   "Department of Management Information Systems"
+  ]
  },
  {
   "id": "university-of-glasgow__school-of-computing-science",
@@ -14359,7 +14487,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2025-09-11"
+  "lastPosted": "2025-09-11",
+  "mapSearchTerms": [
+   "Bayes Business School",
+   "Operations and Supply Chain Management"
+  ]
  },
  {
   "id": "university-of-london__bayes-business-school__operations-and-supply-chain-management",
@@ -14371,6 +14503,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Bayes Business School",
+   "Operations and Supply Chain Management"
   ]
  },
  {
@@ -15343,7 +15479,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2014-09-19"
+  "lastPosted": "2014-09-19",
+  "mapSearchTerms": [
+   "Kenan-Flagler Business School",
+   "Operations"
+  ]
  },
  {
   "id": "university-of-north-carolina-charlotte__william-states-lee-college-of-engineering__industrial-and-systems-engineering",
@@ -15770,7 +15910,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-07"
+  "lastPosted": "2026-10-07",
+  "mapSearchTerms": [
+   "School of Business and Leadership"
+  ]
  },
  {
   "id": "university-of-puget-sound__school-of-business-and-leadership__management",
@@ -15784,7 +15927,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-05"
+  "lastPosted": "2026-09-05",
+  "mapSearchTerms": [
+   "School of Business and Leadership"
+  ]
  },
  {
   "id": "university-of-queensland",

@@ -6229,6 +6229,726 @@
       ],
       "checked": "2026-10-24",
       "notes": "Current official Business Information and Decision Systems faculty profile identifies primary office Olayan School of Business 311 and analytics/statistics teaching. Exact external named Olayan business-school footprint, not campus center or Beirut street centroid."
+    },
+    {
+      "id": "george-washington-decision-funger",
+      "institution": "The George Washington University",
+      "institutionKey": "George Washington University",
+      "rowIds": [
+        "george-washington-university__school-of-business__decision-sciences"
+      ],
+      "school": "School of Business",
+      "department": "Department of Decision Sciences",
+      "building": "Funger Hall",
+      "address": "Suite 415, 2201 G Street Northwest, Washington, DC 20052, United States",
+      "lat": 38.8985963,
+      "lng": -77.0494745,
+      "addressSource": "https://my.gwu.edu/mod/directory/index.cfm?dept_id=1731",
+      "coordinateSource": "https://www.openstreetmap.org/way/66409308",
+      "notes": "Official department contact identifies a distinct suite in Funger Hall. Separate department cards retained even though building coordinates match. Coordinates are exact named building footprint.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "george-washington-information-funger",
+      "institution": "The George Washington University",
+      "institutionKey": "George Washington University",
+      "rowIds": [
+        "george-washington-university__school-of-business__information-systems-and-technology-management"
+      ],
+      "school": "School of Business",
+      "department": "Department of Information Systems and Technology Management",
+      "building": "Funger Hall",
+      "address": "Suite 515, 2201 G Street Northwest, Washington, DC 20052, United States",
+      "lat": 38.8985963,
+      "lng": -77.0494745,
+      "addressSource": "https://business.gwu.edu/about/departments/information-systems-technology-management",
+      "coordinateSource": "https://www.openstreetmap.org/way/66409308",
+      "notes": "Official department contact identifies a distinct suite in Funger Hall. Separate department cards retained even though building coordinates match. Coordinates are exact named building footprint.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "puget-sound-business-leadership-mcintyre",
+      "institution": "University of Puget Sound",
+      "rowIds": [
+        "university-of-puget-sound__school-of-business-and-leadership__management",
+        "university-of-puget-sound____business-and-leadership"
+      ],
+      "school": "School of Business and Leadership",
+      "department": "",
+      "building": "McIntyre Hall",
+      "address": "Room 111, University of Puget Sound, Tacoma, WA 98416, United States",
+      "lat": 47.2640047,
+      "lng": -122.4804385,
+      "addressSource": "https://www.pugetsound.edu/offices-services-listing",
+      "coordinateSource": "https://www.openstreetmap.org/way/559275335",
+      "supportingSources": [
+        "https://www.pugetsound.edu/academics/business-leadership"
+      ],
+      "notes": "Official office directory explicitly places School of Business and Leadership in McIntyre111; management faculty belong to that school. Named external building footprint supplies coordinates.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "rollins-crummer-0",
+      "institution": "Rollins College",
+      "rowIds": [
+        "rollins-college__crummer-graduate-school-of-business__business-analytics"
+      ],
+      "school": "Crummer Graduate School of Business",
+      "department": "Business Analytics",
+      "building": "Crummer Hall",
+      "address": "1000 Holt Avenue, Winter Park, FL 32789, United States",
+      "lat": 28.5936034,
+      "lng": -81.3482599,
+      "addressSource": "https://crummer.rollins.edu/contact-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/539039144",
+      "supportingSources": [
+        "https://crummer.rollins.edu/wp-content/uploads/2024/11/edba-student-handbook.pdf",
+        "https://crummer.rollins.edu/academic-programs/graduate-certificate-in-business-analytics/",
+        "https://lib.rollins.edu/olin/Archives/Architecture/Arch/crummer_hall.htm"
+      ],
+      "notes": "Graduate school contact and current handbook confirm Crummer Hall, located by exact named external footprint. Distinct from undergraduate Department of Business supply-chain appointment, which is not included in this evidence.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "rollins-crummer-1",
+      "institution": "Rollins College",
+      "rowIds": [
+        "rollins-college__crummer-graduate-school-of-business__operations-and-supply-chain-management"
+      ],
+      "school": "Crummer Graduate School of Business",
+      "department": "Operations and Supply Chain Management",
+      "building": "Crummer Hall",
+      "address": "1000 Holt Avenue, Winter Park, FL 32789, United States",
+      "lat": 28.5936034,
+      "lng": -81.3482599,
+      "addressSource": "https://crummer.rollins.edu/contact-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/539039144",
+      "supportingSources": [
+        "https://crummer.rollins.edu/wp-content/uploads/2024/11/edba-student-handbook.pdf",
+        "https://crummer.rollins.edu/academic-programs/graduate-certificate-in-business-analytics/",
+        "https://lib.rollins.edu/olin/Archives/Architecture/Arch/crummer_hall.htm"
+      ],
+      "notes": "Graduate school contact and current handbook confirm Crummer Hall, located by exact named external footprint. Distinct from undergraduate Department of Business supply-chain appointment, which is not included in this evidence.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "rochester-management-lowenthal",
+      "institution": "Rochester Institute of Technology",
+      "rowIds": [
+        "rochester-institute-of-technology__saunders-college-of-business__management"
+      ],
+      "school": "Saunders College of Business",
+      "department": "Department of Management",
+      "building": "Max Lowenthal Hall",
+      "address": "Room A329, 107 Lomb Memorial Drive, Rochester, NY 14623, United States",
+      "lat": 43.0828461,
+      "lng": -77.6770251,
+      "addressSource": "https://www.rit.edu/business/directory/ridbbu-rich-dejordy",
+      "coordinateSource": "https://www.openstreetmap.org/way/55450497",
+      "supportingSources": [
+        "https://www.rit.edu/business/management-department",
+        "https://www.rit.edu/business/contact"
+      ],
+      "notes": "Current management chair profile identifies LOW-A329; college contact explicitly names Max Lowenthal Hall at107Lomb. Coordinates locate exact named building footprint.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "texas-corpus-christi-industrial-furgason",
+      "institution": "Texas A&M University-Corpus Christi",
+      "rowIds": [
+        "texas-a-m-university-corpus-christi__college-of-engineering-and-computer-science__industrial-engineering"
+      ],
+      "school": "College of Engineering and Computer Science",
+      "department": "Industrial Engineering",
+      "building": "Dr. Robert R. Furgason Engineering Building",
+      "address": "Third floor, 6300 Ocean Drive, Corpus Christi, TX 78412, United States",
+      "lat": 27.71277,
+      "lng": -97.325691,
+      "addressSource": "https://www3.tamucc.edu/programs/undergraduate-programs/industrial-engineering-bs.php",
+      "coordinateSource": "https://campusmap.tamucc.edu/?id=1758#!m/309503",
+      "supportingSources": [
+        "https://www.tamucc.edu/engineering/departments/engineering/industrial-engineering/template.php"
+      ],
+      "notes": "Official program coordinator pages agree on Furgason third floor (individual office numbers differ320/314D). Official campus academic building marker309503 supplies coordinates; nearby panorama coordinate is not used.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "singapore-information-analytics-computing2",
+      "institution": "National University of Singapore",
+      "rowIds": [
+        "national-university-of-singapore__school-of-computing__information-systems-and-analytics",
+        "national-university-of-singapore____is"
+      ],
+      "school": "School of Computing",
+      "department": "Department of Information Systems and Analytics",
+      "building": "Computing 2",
+      "address": "Department administration, 15 Computing Drive, Singapore 117418",
+      "lat": 1.2939495,
+      "lng": 103.774022,
+      "addressSource": "https://www.comp.nus.edu.sg/disa/people/",
+      "coordinateSource": "https://www.openstreetmap.org/way/54619699",
+      "notes": "Official department administration roster places manager and departmental leadership in Computing2, rather than generic School of Computing postal address at Computing1. Named external building footprint supplies coordinates.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "singapore-analytics-operations-riady",
+      "institution": "National University of Singapore",
+      "rowIds": [
+        "national-university-of-singapore____nus-business-school-department-of-analytics-and-operations"
+      ],
+      "school": "National University of Singapore Business School",
+      "department": "Department of Analytics and Operations",
+      "building": "Mochtar Riady Building",
+      "address": "Level8, 15 Kent Ridge Drive, Singapore 119245",
+      "lat": 1.292447,
+      "lng": 103.7741756,
+      "addressSource": "https://bschool.nus.edu.sg/analytics-operations/contact-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/140087160",
+      "notes": "Official department contact specifies exact building and floor; named external footprint supplies building coordinates.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "singapore-statistics-s16",
+      "institution": "National University of Singapore",
+      "rowIds": [
+        "national-university-of-singapore____statistics-and-data-science"
+      ],
+      "school": "Faculty of Science",
+      "department": "Department of Statistics and Data Science",
+      "building": "Block S16",
+      "address": "Level7, 6 Science Drive2, Singapore 117546",
+      "lat": 1.2967305,
+      "lng": 103.7803937,
+      "addressSource": "https://www.stat.nus.edu.sg/about/contact/",
+      "coordinateSource": "https://www.openstreetmap.org/way/141906506",
+      "notes": "Official department contact specifies exact building and floor; named external footprint supplies building coordinates.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "singapore-operations-research-innovation4",
+      "institution": "National University of Singapore",
+      "rowIds": [
+        "national-university-of-singapore____institute-of-operations-research-and-analytics"
+      ],
+      "school": "",
+      "department": "Institute of Operations Research and Analytics",
+      "building": "Innovation 4.0",
+      "address": "Unit04-01, 3 Research Link, Singapore 117602",
+      "lat": 1.2945764,
+      "lng": 103.7756446,
+      "addressSource": "https://iora.nus.edu.sg/contact-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/54619703",
+      "notes": "Official institute contact identifies Innovation4.0 and unit04-01. Exact building at3ResearchLink supplies coordinates; similarly named roads in western Singapore were rejected.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "singapore-industrial-systems-e1a",
+      "institution": "National University of Singapore",
+      "rowIds": [
+        "national-university-of-singapore____simulation-sustainability-ai-x"
+      ],
+      "school": "College of Design and Engineering",
+      "department": "Department of Industrial Systems Engineering and Management",
+      "building": "Block E1A",
+      "address": "Unit06-25, 1 Engineering Drive2, Singapore 117576",
+      "lat": 1.2992993,
+      "lng": 103.7708068,
+      "addressSource": "https://cde.nus.edu.sg/isem/about-us/contact-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/139976357",
+      "supportingSources": [
+        "https://cde.nus.edu.sg/isem/about-us/careers/",
+        "https://www.linkedin.com/posts/department-of-industrial-systems-engineering-and-management_tenure-tracktenured-positions-in-data-science-activity-7373266640827854848-XDaM"
+      ],
+      "notes": "Department official recruitment page and its recruitment announcement identify simulation/sustainability/machine-learning host as Industrial Systems Engineering and Management. Official general office is E1A06-25; exact named external footprint supplies location.",
+      "checked": "2026-10-25"
+    },
+    {
+      "institution": "Maine Maritime Academy",
+      "rowIds": [
+        "maine-maritime-academy__loeb-sullivan-school-of-international-business-and-logistics__international-business-and-logistics"
+      ],
+      "id": "maine-maritime-logistics-pilot-house",
+      "school": "Loeb-Sullivan School of International Business and Logistics",
+      "department": "International Business and Logistics",
+      "building": "Pilot House",
+      "address": "First floor, Pilot House, Pleasant Street, Castine, ME 04420, United States",
+      "lat": 44.3896861,
+      "lng": -68.8029523,
+      "addressSource": "https://mainemaritime.edu/academics/academic-leadership-and-faculty/faculty-bio/?username=jeffrey.simpson",
+      "coordinateSource": "https://www.openstreetmap.org/way/1113728460",
+      "supportingSources": [
+        "https://mainemaritime.edu/undergraduate-catalog/the-campus/",
+        "https://mainemaritime.edu/about-mma/wp-content/uploads/sites/2/2021/09/campus-map.pdf",
+        "https://mainemaritime.college-tour.com/virtual-map"
+      ],
+      "notes": "Current chair Jeffrey Simpson lists first floor Pilot House; official catalog and interactive map explicitly identify school administration and faculty there. Coordinate is interior centroid of the small building footprint on east side of Pleasant Street immediately northwest of Commons and north of Perkins House, matched to Pilot House number 9 on official map. OpenStreetMap lacks current building name and still labels former dormitory use; official map supplies authoritative identity. Street number omitted because municipal historic inventory and external map differ.",
+      "checked": "2026-10-24"
+    },
+    {
+      "institution": "Franklin and Marshall College",
+      "rowIds": [
+        "franklin-and-marshall-college____business-organizations-and-society"
+      ],
+      "id": "franklin-marshall-business-organizations-harris",
+      "school": "",
+      "department": "Department of Business, Organizations and Society",
+      "building": "Patricia E. Harris Center for Business, Government and Public Policy",
+      "address": "Patricia E. Harris Center for Business, Government and Public Policy, Williamson Way, Lancaster, PA 17603, United States",
+      "lat": 40.0479283,
+      "lng": -76.3199985,
+      "addressSource": "https://library.fandm.edu/archives/fastfacts/buildings",
+      "coordinateSource": "https://www.openstreetmap.org/way/34213369",
+      "supportingSources": [
+        "https://www.fandm.edu/_resources/pdfs/adv-2025%20Open%20Class%20List.docx.pdf",
+        "https://imodules.fandm.edu/s/1840/images/gid2/editor_documents/campus_map.pdf"
+      ],
+      "notes": "Official college archives identifies this building as home to Business, Organizations and Society, with current official class schedule corroborating the department in Harris. Exact named building footprint from OpenStreetMap matches building 21 on official campus map; no individual room claimed.",
+      "checked": "2026-10-24"
+    },
+    {
+      "institution": "Harris-Stowe State University",
+      "rowIds": [
+        "harris-stowe-state-university__anheuser-busch-school-of-business__management-information-systems"
+      ],
+      "id": "harris-stowe-information-science-givens",
+      "school": "Anheuser-Busch School of Business",
+      "department": "Department of Information Science and Computer Technology",
+      "building": "Dr. Henry Givens Jr. Administration Building",
+      "address": "Room 307, Dr. Henry Givens Jr. Administration Building, 3026 Laclede Avenue, St. Louis, MO 63103, United States",
+      "lat": 38.6318082,
+      "lng": -90.2239711,
+      "addressSource": "https://www.hssu.edu/rsp_content.html?pid=477&wid=50",
+      "coordinateSource": "https://www.openstreetmap.org/way/238459485",
+      "supportingSources": [
+        "https://www.hssu.edu/rsp_content.html?pid=236&wid=36",
+        "https://www.hssu.edu/directory.cfm"
+      ],
+      "notes": "Official campus-information endpoint jsnwebdata.cfm?wid=50&pid=477 places business school in Givens room 307 at 3026 Laclede; current directory corroborates school office. Degree page explicitly places Management Information Systems under Information Science and Computer Technology. Exact named Givens building footprint from OpenStreetMap; obsolete Wilson Avenue south-campus location rejected.",
+      "checked": "2026-10-24"
+    },
+    {
+      "institution": "California State University, Fullerton",
+      "rowIds": [
+        "california-state-university-fullerton__college-of-business-and-economics__management"
+      ],
+      "id": "fullerton-management-mihaylo",
+      "school": "College of Business and Economics",
+      "department": "Department of Management",
+      "building": "Steven G. Mihaylo Hall",
+      "address": "Room 5313, Steven G. Mihaylo Hall, 800 North State College Boulevard, Fullerton, CA 92831, United States",
+      "lat": 33.878837,
+      "lng": -117.883428,
+      "addressSource": "https://business.fullerton.edu/academics/management/studentservicesresources",
+      "coordinateSource": "https://www.fullerton.edu/campusmap/locations.json?v=1.11",
+      "supportingSources": [
+        "https://www.fullerton.edu/campusmap/"
+      ],
+      "notes": "Official Management contact states room 5313. Campus map data names Steven G. Mihaylo Hall and includes Management in its department list; coordinates are that building marker, not campus center.",
+      "checked": "2026-10-24"
+    },
+    {
+      "institution": "University of Alabama at Birmingham",
+      "rowIds": [
+        "university-of-alabama-at-birmingham____applied-statistics-and-ba"
+      ],
+      "id": "alabama-birmingham-mis-quantitative-collat",
+      "school": "Collat School of Business",
+      "department": "Department of Management, Information Systems and Quantitative Methods",
+      "building": "Collat School of Business Building",
+      "address": "Room 357-C, Collat School of Business Building, 710 13th Street South, Birmingham, AL 35233, United States",
+      "lat": 33.500052349566,
+      "lng": -86.8097294122,
+      "addressSource": "https://www.uab.edu/business/home/people/management-information-systems-quantitative-methods",
+      "coordinateSource": "https://www.uab.edu/campusmap/?collat",
+      "supportingSources": [
+        "https://uab.peopleadmin.com/postings/28299",
+        "https://www.uab.edu/campusmap/jsondata.php"
+      ],
+      "notes": "Official job advertisement identifies Applied Statistics and Business Analytics appointment in this department. Current directory places chair Scott Boyar in room 357-C. Exact official campus map marker id533 (building code CSB), confirmed against named building footprint. Official calendar has a misplaced point north of building and was not used.",
+      "checked": "2026-10-24"
+    },
+    {
+      "institution": "University of Georgia",
+      "rowIds": [
+        "university-of-georgia__terry-college-of-business__management-information-systems"
+      ],
+      "id": "georgia-management-information-benson",
+      "school": "Terry College of Business",
+      "department": "Department of Management Information Systems",
+      "building": "Benson Hall",
+      "address": "Room C404A, Benson Hall, 630 South Lumpkin Street, Athens, GA 30605, United States",
+      "lat": 33.952465,
+      "lng": -83.37712,
+      "addressSource": "https://www.terry.uga.edu/directory/gerald-c-kane/",
+      "coordinateSource": "https://calendar.uga.edu/benson_hall_596",
+      "notes": "Official department head Gerald Kane lists C404A Benson Hall. University calendar explicitly supplies Benson Hall GeoCoordinates and physical address. Older program handbook uses general complex address 610 South Lumpkin; exact Benson building address 630 is retained.",
+      "checked": "2026-10-24"
+    },
+    {
+      "institution": "San Diego State University",
+      "rowIds": [
+        "san-diego-state-university__fowler-college-of-business__management-information-systems"
+      ],
+      "id": "san-diego-state-information-systems-lamden",
+      "school": "Fowler College of Business",
+      "department": "Department of Management Information Systems",
+      "building": "Lamden Hall",
+      "address": "Room 448H, Lamden Hall, 5500 Campanile Drive, San Diego, CA 92182, United States",
+      "lat": 32.775546,
+      "lng": -117.068387,
+      "addressSource": "https://business.sdsu.edu/directory/mis",
+      "coordinateSource": "https://library2.sdsu.edu/wayfinder/wayfinder.php?kiosk=0&urlid=129",
+      "supportingSources": [
+        "https://business.sdsu.edu/graduate/mssci"
+      ],
+      "notes": "Current department directory and program page place department chair Bongsik Shin in Lamden Hall 448H. Official campus wayfinder supplies named building destination coordinates. Older school contact pages still list a shared administrative office in Student Services East; this record uses the current academic department chair and faculty offices in Lamden Hall.",
+      "checked": "2026-10-24"
+    },
+    {
+      "institution": "Central Washington University",
+      "rowIds": [
+        "central-washington-university__college-of-education-and-professional-studies__information-technology-management"
+      ],
+      "id": "central-washington-it-management-samuelson",
+      "school": "College of Education and Professional Studies",
+      "department": "Department of Information Technology Management",
+      "building": "Samuelson Hall",
+      "address": "Room 206, Samuelson Hall, Ellensburg, WA 98926, United States",
+      "lat": 47.0014338,
+      "lng": -120.5406229,
+      "addressSource": "https://www.cwu.edu/academics/it-management/index.php",
+      "coordinateSource": "https://www.openstreetmap.org/way/272843452",
+      "supportingSources": [
+        "https://www.cwu.edu/academics/it-management/_documents/it-642-strategic-management-for-it1.pdf",
+        "https://www.cwu.edu/about/offices/contracts/_documents/rfp-23-001-freelance-photo-video.pdf"
+      ],
+      "notes": "Official current department homepage gives Samuelson 206, corroborated by September 2025 departmental syllabus. Exact named Samuelson building footprint from OpenStreetMap matches official campus map between Black and Bouillon halls.",
+      "checked": "2026-10-24"
+    },
+    {
+      "id": "desales-business-gambet",
+      "institution": "DeSales University",
+      "institutionKey": "DeSales University",
+      "rowIds": [
+        "desales-university____ba"
+      ],
+      "school": "Waterbury Reilly School of Business",
+      "department": "",
+      "building": "Gambet Center for Business and Healthcare",
+      "address": "Gambet Center for Business and Healthcare, 2755 Station Avenue, Center Valley, Pennsylvania 18034, United States",
+      "lat": 40.53545535015797,
+      "lng": -75.37795066849219,
+      "addressSource": "https://www.desales.edu/academics/schools/college-of-business",
+      "coordinateSource": "https://map.desales.edu/",
+      "supportingSources": [
+        "https://desales.edu/profiles/thomas-craig",
+        "https://desales.edu/beyond-the-classroom/center-for-data-analytics"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current business school name and faculty offices verified: dean 242N, business analytics faculty Thomas Craig 242C and Brennan Pursell 242P Gambet. Not a separately named Business Analytics department. University AnyTour CL_desales.xml building BLD_20240905162223937 links via AL_desales.xml to ADDR_20240905162221735, whose address field explicitly provides these geographic coordinates; not relative image polygon coordinates."
+    },
+    {
+      "id": "georgia-gwinnett-supply-chain-building-w",
+      "institution": "Georgia Gwinnett College",
+      "institutionKey": "Georgia Gwinnett College",
+      "rowIds": [
+        "georgia-gwinnett-college____supply-chain-management"
+      ],
+      "school": "School of Business",
+      "department": "Department of Economics, Marketing and Supply Chain Management",
+      "building": "Building W",
+      "address": "Building W, 1000 University Center Lane, Lawrenceville, Georgia 30043, United States",
+      "lat": 33.9797029,
+      "lng": -84.0066771,
+      "addressSource": "https://www.ggc.edu/directory/amanda-wilsker",
+      "coordinateSource": "https://www.openstreetmap.org/way/955646073",
+      "supportingSources": [
+        "https://www.ggc.edu/about-ggc/maps-and-directions",
+        "https://www.ggc.edu/sites/default/files/2026-04/Building-W-Map.pdf",
+        "https://www.ggc.edu/admission-aid/admissions/visit-and-learn-about-ggc/virtual-tour",
+        "https://map.concept3d.com/?id=1088#!m/403203"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Department chair Amanda Wilsker W-2104 and other departmental faculty in W; official floor plan identifies second-floor School of Business. Exact named external W Building footprint centroid, corroborated by official campus map and its Building W wireless-location marker within same footprint. Not nearby C Building or general college coordinates."
+    },
+    {
+      "id": "united-states-naval-academy-mathematics-chauvenet",
+      "institution": "United States Naval Academy",
+      "institutionKey": "United States Naval Academy",
+      "rowIds": [
+        "united-states-naval-academy____mathematics"
+      ],
+      "school": "Division of Mathematics and Science",
+      "department": "Mathematics Department",
+      "building": "Chauvenet Hall",
+      "address": "Chauvenet Hall, 572C Holloway Road, Annapolis, Maryland 21402, United States",
+      "lat": 38.98325,
+      "lng": -76.48414549,
+      "addressSource": "https://www.usna.edu/MathDept/about/contact.php",
+      "coordinateSource": "https://www.openstreetmap.org/relation/5633269",
+      "supportingSources": [
+        "https://www.usna.edu/Academics/Academic-Facilities/",
+        "https://usna.edu/PAO/phone-directory/index.php",
+        "https://sites.google.com/usna.edu/medynets/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official mathematics contact, departmental facilities directory and current faculty page all identify Chauvenet Hall at 572C Holloway Road. External exact named footprint relation carries 572 Holloway Road. Coordinate calculated as interior point in building footprint excluding central courtyard, not courtyard centroid or academy location. School field denotes actual Mathematics and Science division."
+    },
+    {
+      "id": "new-york-abu-dhabi-stern-a6",
+      "institution": "New York University Abu Dhabi",
+      "institutionKey": "New York University Abu Dhabi",
+      "rowIds": [
+        "new-york-university-abu-dhabi____is"
+      ],
+      "school": "Stern School of Business at New York University Abu Dhabi",
+      "department": "Technology, Operations and Statistics",
+      "building": "Building A6",
+      "address": "Building A6, New York University Abu Dhabi, Saadiyat Island, Abu Dhabi, United Arab Emirates",
+      "lat": 24.5221403,
+      "lng": 54.4354542,
+      "addressSource": "https://stern.nyuad.nyu.edu/events/grem2025/",
+      "coordinateSource": "https://www.openstreetmap.org/node/13330552254",
+      "supportingSources": [
+        "https://stern.nyuad.nyu.edu/programs-admissions/faculty/",
+        "https://nyuad.nyu.edu/content/dam/nyuad/about/contacts-and-location/NYUAD-campus-map%202024-1.pdf"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official Stern campus directions explicitly state school is hosted in A6. Current faculty page identifies Technology, Operations and Statistics group. Exact externally mapped Stern at NYUAD point used, corroborated against university A6 building identification; not general university pin or Social Science A5. Full institution name expanded in display school."
+    },
+    {
+      "id": "pennsylvania-state-behrend-project-supply-chain-burke",
+      "institution": "Pennsylvania State University, Erie, The Behrend College",
+      "institutionKey": "PSU Behrend",
+      "rowIds": [
+        "psu-behrend____project-and-scm"
+      ],
+      "school": "Black School of Business",
+      "department": "Marketing and Project and Supply Chain Management",
+      "building": "Jack Burke Research and Economic Development Center",
+      "address": "Jack Burke Research and Economic Development Center, 5101 Jordan Road, Erie, Pennsylvania 16563, United States",
+      "lat": 42.118832,
+      "lng": -79.980042,
+      "addressSource": "https://behrend.psu.edu/school-of-business/academic-programs/project-and-supply-chain-management/faculty",
+      "coordinateSource": "https://map.concept3d.com/?id=1138#!m/218684",
+      "supportingSources": [
+        "https://behrend.psu.edu/general-services/mail-services/departmental-services/departmental-addresses",
+        "https://behrend.psu.edu/map"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Official current project/supply-chain faculty directory locates chair Ray Venkataraman in Burke 255 and colleagues 254/257B/260/265/288/289. University departmental address list gives Black School office at 5101 Jordan Road. Exact official Behrend Concept3D Campus Buildings marker, not University Park or generic Behrend coordinates. Institution expanded from abbreviated posting label."
+    },
+    {
+      "id": "louisiana-tech-supply-chain-college-business",
+      "institution": "Louisiana Tech University",
+      "institutionKey": "Lousiana Tech Univ",
+      "rowIds": [
+        "lousiana-tech-univ____supply-chain-management"
+      ],
+      "school": "College of Business",
+      "department": "Department of Management — Sustainable Supply Chain Management",
+      "building": "College of Business Building, faculty offices 317 and 319",
+      "address": "College of Business Building, Ruston, Louisiana 71272, United States",
+      "lat": 32.5274581,
+      "lng": -92.6444786,
+      "addressSource": "https://www.latech.edu/directory/index.php",
+      "coordinateSource": "https://www.openstreetmap.org/way/531370295",
+      "supportingSources": [
+        "https://coes.latech.edu/facultystaff-directory/single-entry/",
+        "https://business.latech.edu/college-leadership/"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current official directory places Sustainable Supply Chain faculty Matthew Roberts in COBB 319 and Kevin Watson in COBB 317. Official directory identifies Management host; college leadership confirms building abbreviation. External named business building footprint used, not generic campus or dean mailing-address geocode."
+    },
+    {
+      "id": "auckland-information-systems-operations-glenn",
+      "institution": "University of Auckland",
+      "institutionKey": "University of Auckland",
+      "rowIds": [
+        "university-of-auckland____om-scm"
+      ],
+      "school": "University of Auckland Business School",
+      "department": "Department of Information Systems and Operations Management",
+      "building": "Sir Owen G Glenn Building, level 4",
+      "address": "12 Grafton Road, Auckland 1010, New Zealand",
+      "lat": -36.8531046,
+      "lng": 174.7712914,
+      "addressSource": "https://www.auckland.ac.nz/en/business/about-business-school/isom/contact.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/23894203",
+      "supportingSources": [
+        "https://www.auckland.ac.nz/en/business/about-business-school/our-faculty/maps-and-location.html"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current official department contact gives level 4, named building, street address, and Operations and Supply Chain Management lead. External named academic building footprint, corroborated by official school maps, not city-campus centroid or historical Tamaki campus."
+    },
+    {
+      "id": "university-college-london-global-health-marshgate-576",
+      "institution": "University College London",
+      "institutionKey": "UCL GBSH",
+      "rowIds": [
+        "ucl-gbsh____om"
+      ],
+      "school": "Global Business School for Health",
+      "department": "Technology and Operations Management",
+      "building": "Marshgate, Level 6",
+      "address": "7 Sidings Street, London E20 2AE, United Kingdom",
+      "lat": 51.537542,
+      "lng": -0.0119821,
+      "addressSource": "https://profiles.ucl.ac.uk/88467-rodolfo-catena/publications",
+      "coordinateSource": "https://www.openstreetmap.org/way/964277509",
+      "supportingSources": [
+        "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=37142&jobTitle=Lecturer+in+Technology+and+Operations+Management"
+      ],
+      "checked": "2026-10-24",
+      "notes": "Current university profile locates Operations and Supply Chain Management academic Rodolfo Catena at the school on Level 6 of Marshgate. Exact named Marshgate building footprint coordinates from OpenStreetMap corroborate the official building address; not the older One Pool Street event venue or campus coordinates."
+    },
+    {
+      "id": "location-verified-88",
+      "institutionKey": "Nanyang Technological University",
+      "rowIds": [
+        "nanyang-technological-university__college-of-computing-and-data-science"
+      ],
+      "checked": "2026-10-24",
+      "institution": "Nanyang Technological University",
+      "school": "College of Computing and Data Science",
+      "department": "",
+      "building": "Block S3, General Office B1c-123",
+      "address": "Nanyang Avenue, Singapore 639798",
+      "lat": 1.3437794,
+      "lng": 103.6827254,
+      "addressSource": "https://www.ntu.edu.sg/computing/contact-us/general-office",
+      "coordinateSource": "https://www.openstreetmap.org/way/49967805",
+      "notes": "Current college general-office page explicitly locates it in Block S3 B1c-123. Coordinates are the exact S3 building footprint center. OpenStreetMap retains the former Nanyang Business School occupant label; that school has moved to Gaia. Building identifier S3, not the outdated occupant, establishes this location."
+    },
+    {
+      "id": "location-verified-575",
+      "institutionKey": "NTU",
+      "rowIds": [
+        "ntu____om"
+      ],
+      "checked": "2026-10-24",
+      "institution": "Nanyang Technological University",
+      "school": "Nanyang Business School",
+      "department": "Department of Information Technology and Operations Management — Operations Management",
+      "building": "Gaia (Academic Building South), offices ABS-05-045 and ABS-06-019",
+      "address": "91 Nanyang Avenue, Wee Cho Yaw Plaza, Singapore 639956",
+      "lat": 1.3419987,
+      "lng": 103.6833286,
+      "addressSource": "https://www.ntu.edu.sg/business/research/academic-divisions/itom",
+      "coordinateSource": "https://www.google.com/maps?cid=15609889485973217265",
+      "supportingSources": [
+        "https://blogs.ntu.edu.sg/cts2025/symposium-venue/",
+        "https://maps.app.goo.gl/dKK5oM3jqRXR4w5C6"
+      ],
+      "notes": "Original directory row specifies Singapore, establishing Nanyang Technological University for the NTU alias. Current department page locates academic support and department head in Academic Building South at 91 Nanyang Avenue. University symposium venue page confirms Gaia and links the same named Google place (CID 15609889485973217265). Coordinates extracted from the exact place marker !3d/!4d, not viewport coordinates. Separate from former business-school Block S3, now the College of Computing and Data Science general office."
+    },
+    {
+      "id": "location-verified-577",
+      "institutionKey": "University of London",
+      "rowIds": [
+        "university-of-london__bayes-business-school",
+        "university-of-london__bayes-business-school__operations-and-supply-chain-management"
+      ],
+      "checked": "2026-10-24",
+      "institution": "City St George’s, University of London",
+      "school": "Bayes Business School",
+      "department": "Operations and Supply Chain Management",
+      "building": "Bayes Business School, Bunhill Row",
+      "address": "106 Bunhill Row, London EC1Y 8TZ, United Kingdom",
+      "lat": 51.5220541,
+      "lng": -0.0903741,
+      "addressSource": "https://gredos.usal.es/bitstream/handle/10366/169071/20260110_RMD%20IEEE%20_Risk.pdf?sequence=1",
+      "coordinateSource": "https://www.openstreetmap.org/way/48637954",
+      "supportingSources": [
+        "https://www.bayes.citystgeorges.ac.uk/faculties-and-research/management/people",
+        "https://www.bayes.citystgeorges.ac.uk/faculties-and-research/experts/narges-mohammadi",
+        "https://www.bayes.citystgeorges.ac.uk/about/find-us"
+      ],
+      "notes": "Current faculty directory identifies the Operations and Supply Chain Management group and its head Canan Kocabasoglu-Hillmer. University-hosted January 2026 accepted paper gives the head and group faculty Byung-Gak Son address as 106 Bunhill Row, corroborated by current official school directions. Lecturer in Analytics is explicitly in this group per current Narges Mohammadi profile. Exact named Bunhill Row building footprint coordinates, not Northampton Square or the separate Finsbury Square teaching location."
+    },
+    {
+      "id": "location-verified-579",
+      "institutionKey": "Bayes Business School",
+      "rowIds": [
+        "bayes-business-school____om-ai"
+      ],
+      "checked": "2026-10-24",
+      "institution": "City St George’s, University of London",
+      "school": "Bayes Business School",
+      "department": "Operations and Supply Chain Management",
+      "building": "Bayes Business School, Bunhill Row",
+      "address": "106 Bunhill Row, London EC1Y 8TZ, United Kingdom",
+      "lat": 51.5220541,
+      "lng": -0.0903741,
+      "addressSource": "https://gredos.usal.es/bitstream/handle/10366/169071/20260110_RMD%20IEEE%20_Risk.pdf?sequence=1",
+      "coordinateSource": "https://www.openstreetmap.org/way/48637954",
+      "supportingSources": [
+        "https://www.bayes.citystgeorges.ac.uk/faculties-and-research/management/people",
+        "https://www.bayes.citystgeorges.ac.uk/faculties-and-research/experts/narges-mohammadi",
+        "https://www.bayes.citystgeorges.ac.uk/about/find-us"
+      ],
+      "notes": "Current faculty directory identifies the Operations and Supply Chain Management group and its head Canan Kocabasoglu-Hillmer. University-hosted January 2026 accepted paper gives the head and group faculty Byung-Gak Son address as 106 Bunhill Row, corroborated by current official school directions. Lecturer in Analytics is explicitly in this group per current Narges Mohammadi profile. Exact named Bunhill Row building footprint coordinates, not Northampton Square or the separate Finsbury Square teaching location."
+    },
+    {
+      "id": "location-verified-656",
+      "institutionKey": "University of North Carolina-Chapel Hill",
+      "rowIds": [
+        "university-of-north-carolina-chapel-hill__kenan-flagler-business-school__operations"
+      ],
+      "checked": "2026-10-24",
+      "institution": "University of North Carolina at Chapel Hill",
+      "school": "Kenan-Flagler Business School",
+      "department": "Operations",
+      "building": "McColl Building",
+      "address": "300 Kenan Center Drive, Chapel Hill, North Carolina, United States",
+      "lat": 35.8996661,
+      "lng": -79.0460975,
+      "addressSource": "https://unc.peopleadmin.com/postings/324090",
+      "coordinateSource": "https://www.openstreetmap.org/way/44664431",
+      "notes": "Official August 2026 faculty recruitment explicitly addresses the Operations Search Committee in McColl Building. Exact named building footprint coordinates corroborate McColl; not the separate new Steven D. Bell Hall."
+    },
+    {
+      "id": "location-verified-686",
+      "institutionKey": "Rochester Institute of Technology Saunders College of Business",
+      "rowIds": [
+        "rochester-institute-of-technology-saunders-college-of-busine__saunders-college-of-business__management"
+      ],
+      "checked": "2026-10-24",
+      "institution": "Rochester Institute of Technology",
+      "school": "Saunders College of Business",
+      "department": "Management",
+      "building": "Max Lowenthal Hall",
+      "address": "107 Lomb Memorial Drive, Rochester, NY 14623, United States",
+      "lat": 43.0828461,
+      "lng": -77.6770251,
+      "addressSource": "https://www.rit.edu/business/contact",
+      "coordinateSource": "https://www.openstreetmap.org/way/55450497",
+      "supportingSources": [
+        "https://www.rit.edu/admissions/sites/rit.edu.admissions/files/docs/Campus-Visit-Map.pdf",
+        "https://wiki.scb.rit.edu/971-2/"
+      ],
+      "notes": "Current official school contact places its dean and academic services in Max Lowenthal Hall; official campus map identifies Global Business Management and Supply Chain Management there. Current technical room directory confirms building occupancy. Exact named building footprint coordinates, not the institute main address."
+    },
+    {
+      "id": "location-verified-564",
+      "institution": "La Salle University",
+      "institutionKey": "La Salle University",
+      "rowIds": [
+        "la-salle-university____ba"
+      ],
+      "school": "School of Business",
+      "department": "Department of Finance and Analytics — Business Systems and Analytics",
+      "building": "Founders’ Hall, Room 537",
+      "address": "Intersection of Olney, Chew and Wister Avenues, Philadelphia, Pennsylvania, United States",
+      "lat": 40.0410345,
+      "lng": -75.158851,
+      "addressSource": "https://catalog.lasalle.edu/undergraduate/business/finance-analytics/",
+      "coordinateSource": "https://www.openstreetmap.org/way/771818959",
+      "supportingSources": [
+        "https://www.lasalle.edu/school-of-business/centers-and-facilities/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official 2026–2027 catalog locates department chair Jan Ambrose in Founders Hall 537 and places Business Systems and Analytics in this department. Official facilities page identifies Founders Hall as the business school building at Olney/Chew/Wister. Coordinates are the matching named business-building footprint center, not university coordinates or older business offices."
     }
   ]
 }
