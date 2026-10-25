@@ -7495,6 +7495,516 @@
       ],
       "checked": "2026-10-25",
       "notes": "Source directory row is a university-only members record with no school or departmental affiliation. Preserves that university-level identity rather than inventing a business department. Current official October 2026 university contact directs visitors to Servicecenter in Chalmers Entre, Chalmersplatsen 1. Coordinates are the exact numbered building address point, not the campus centroid or nearby parcel locker."
+    },
+    {
+      "id": "high-point-supply-chain-phillips",
+      "institution": "High Point University",
+      "school": "Earl N. Phillips School of Business",
+      "department": "Management — Supply Chain Management",
+      "building": "Phillips Hall, Room 115",
+      "address": "One University Parkway, High Point, North Carolina 27268, United States",
+      "lat": 35.970898,
+      "lng": -79.99498,
+      "addressSource": "https://www.highpoint.edu/faculty-staff/management/bradley-venable/",
+      "coordinateSource": "https://map.concept3d.com/?id=1933#!m/411789",
+      "supportingSources": [
+        "https://www.highpoint.edu/campusmap/",
+        "https://www.highpoint.edu/businessadministration/"
+      ],
+      "notes": "The current management chair and supply chain professor lists Phillips 115; the marker follows his office, not the general Wilson Commerce teaching space.",
+      "rowIds": [
+        "high-point-university__earl-n-phillips-school-of-business__supply-chain-management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "kentucky-martin-public-policy-miller",
+      "institution": "University of Kentucky",
+      "school": "Martin School of Public Policy and Administration",
+      "department": "Public and Nonprofit Management",
+      "building": "Miller Hall, second and third floors",
+      "address": "504 Administration Drive, Lexington, Kentucky 40506, United States",
+      "lat": 38.038006,
+      "lng": -84.5046472,
+      "addressSource": "https://martin.uky.edu/people",
+      "coordinateSource": "https://www.openstreetmap.org/way/402327042",
+      "notes": "Current school directory places the director and active public policy faculty in Miller Hall; older sources listing Patterson Office Tower do not represent the current main school offices.",
+      "rowIds": [
+        "university-of-kentucky__martin-school-of-public-policy-and-administration__public-and-nonprofit-management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "kentucky-marketing-supply-chain-gatton",
+      "institution": "University of Kentucky",
+      "school": "Gatton College of Business and Economics",
+      "department": "Marketing and Supply Chain",
+      "building": "Carol Martin Gatton Business and Economics Building",
+      "address": "550 South Limestone, Lexington, Kentucky 40506, United States",
+      "lat": 38.038045,
+      "lng": -84.5063598,
+      "addressSource": "https://gatton.uky.edu/faculty-research/departments/marketing-supply-chain",
+      "coordinateSource": "https://www.openstreetmap.org/way/130061843",
+      "supportingSources": [
+        "https://gatton.uky.edu/faculty-research/faculty-directory",
+        "https://purchasing.uky.edu/sites/default/files/2026-04/uk-3151.0-1-26.pdf"
+      ],
+      "rowIds": [
+        "university-of-kentucky____scm-and-marketing"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "peking-management-science-guanghua-two",
+      "institution": "Peking University",
+      "school": "Guanghua School of Management",
+      "department": "Management Science and Information Systems",
+      "building": "Guanghua School of Management Building No. 2",
+      "address": "5 Yiheyuan Road, Haidian District, Beijing 100871, China",
+      "lat": 39.9947728,
+      "lng": 116.3076886,
+      "addressSource": "https://en.gsm.pku.edu.cn/mis/",
+      "coordinateSource": "https://www.openstreetmap.org/way/240825568",
+      "supportingSources": [
+        "https://www.gsm.pku.edu.cn/thought_leadership/en/info/9359/1315.htm"
+      ],
+      "rowIds": [
+        "peking-university__guanghua-school-of-management__management-science-and-information-system",
+        "peking-university__guanghua-school-of-management__management-science-and-information-systems",
+        "peking-university____om-and-is"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "bucknell-markets-innovation-design-holmes",
+      "institution": "Bucknell University",
+      "school": "Kenneth W. Freeman College of Management",
+      "department": "Markets, Innovation and Design",
+      "building": "Holmes Hall, Room 236",
+      "address": "Bucknell University, Lewisburg, Pennsylvania 17837, United States",
+      "lat": 40.9527084,
+      "lng": -76.8814593,
+      "addressSource": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/markets-innovation-design/faculty-staff",
+      "coordinateSource": "https://www.openstreetmap.org/way/1396053194",
+      "supportingSources": [
+        "https://www.bucknell.edu/azdirectory/university-advancement/gifts-facilities/holmes-hall"
+      ],
+      "rowIds": [
+        "bucknell-university____management-markets-innovation-and-design"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "alba-business-analytics-xenias",
+      "institution": "Alba Graduate Business School",
+      "school": "Alba Graduate Business School, The American College of Greece",
+      "department": "Business Analytics and Artificial Intelligence",
+      "building": "Alba Graduate Business School downtown building",
+      "address": "6–8 Xenias Street, Athens 11528, Greece",
+      "lat": 37.98218,
+      "lng": 23.75758,
+      "addressSource": "https://alba.acg.edu/about-alba/contact/",
+      "coordinateSource": "https://alba.acg.edu/about-alba/contact/",
+      "supportingSources": [
+        "https://alba.acg.edu/about-alba/work-with-us/assistant-or-associate-professor-in-business-analytics-and-artificial-intelligence",
+        "https://www.acg.edu/about-acg/contact-information/"
+      ],
+      "rowIds": [
+        "alba-graduate-business-school____business-analytics-and-ai"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official contact page mapCard data-lat and data-long supply the downtown building marker, distinct from the American College of Greece Aghia Paraskevi campus."
+    },
+    {
+      "id": "bilkent-operations-management-ma",
+      "institution": "Bilkent University",
+      "school": "Faculty of Business Administration",
+      "department": "Operations Management",
+      "building": "Faculty of Business Administration, MA Building",
+      "address": "Main Campus, Bilkent University, Ankara 06800, Türkiye",
+      "lat": 39.867335,
+      "lng": 32.7499043,
+      "addressSource": "https://fba.bilkent.edu.tr/operations-management/",
+      "coordinateSource": "https://www.openstreetmap.org/node/2052493522",
+      "supportingSources": [
+        "https://fba.bilkent.edu.tr/contact/",
+        "https://www.bilkent.edu.tr/phonedir/dep/tyf.htm"
+      ],
+      "rowIds": [
+        "bilkent-university__faculty-of-business-administration__operations-management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "new-york-shanghai-operations-south",
+      "institution": "New York University Shanghai",
+      "school": "Business",
+      "department": "Operations and Business Analytics",
+      "building": "New Bund Academic Building, South Wing, eighth floor",
+      "address": "567 West Yangsi Road, Pudong New District, Shanghai 200124, China",
+      "lat": 31.150405,
+      "lng": 121.477164,
+      "addressSource": "https://sh.nyu.edu/academics/faculty/directory/chen-chen",
+      "coordinateSource": "https://www.openstreetmap.org/way/1164785875",
+      "supportingSources": [
+        "https://apply.interfolio.com/194765",
+        "https://apply.interfolio.com/194860",
+        "https://cdn.shanghai.nyu.edu/sites/default/files/nyush_qiantan_campus.pdf",
+        "https://bulletins.nyu.edu/undergraduate/shanghai/facilities/facilities.pdf"
+      ],
+      "rowIds": [
+        "new-york-university-shanghai____operations-and-business-analytics",
+        "new-york-university-shanghai____operations-management",
+        "new-york-university-shanghai____technology-operations-and-statistics"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official faculty directory locates operations professor Chen Chen in S810. Both official recruitment records identify the Shanghai Operations and Business Analytics unit. Marker is the midpoint of the south wing of the connected academic building footprint, rather than the campus quadrangle or former Century Avenue campus."
+    },
+    {
+      "id": "east-texas-management-science-mcdowell",
+      "institution": "East Texas A&M University",
+      "school": "College of Business",
+      "department": "Management, Marketing, and Management Science",
+      "building": "McDowell Business Administration Building, Room 327",
+      "address": "2008 University Drive, Commerce, Texas 75428, United States",
+      "lat": 33.24377,
+      "lng": -95.908523,
+      "addressSource": "https://www.etamu.edu/people/atefeh-yazdanparast-ph-d/",
+      "coordinateSource": "https://calendar.etamu.edu/business_administration",
+      "supportingSources": [
+        "https://www.etamu.edu/management-and-economics/"
+      ],
+      "notes": "Department head office BA327; official building calendar provides GeoCoordinates.",
+      "rowIds": [
+        "east-texas-a-m-university__college-of-business__management-marketing-and-management-science"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "idaho-state-marketing-management-business",
+      "institution": "Idaho State University",
+      "school": "College of Business",
+      "department": "Marketing and Management",
+      "building": "Business Administration Building, Room 441",
+      "address": "755 East Carter Street, Pocatello, Idaho 83209, United States",
+      "lat": 42.86167,
+      "lng": -112.43537,
+      "addressSource": "https://www.isu.edu/cob/leadership-center/faculty/",
+      "coordinateSource": "https://www.openstreetmap.org/way/972429802",
+      "supportingSources": [
+        "https://www.isu.edu/media/libraries/facilities/misc/ISU-Building-List-March-2024-_2-page-by-Campus.pdf",
+        "https://www.isu.edu/cob/programs/certificates/supply-chain-management/"
+      ],
+      "rowIds": [
+        "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "valparaiso-business-analytics-urschel",
+      "institution": "Valparaiso University",
+      "school": "College of Business",
+      "department": "Business Analytics",
+      "building": "Urschel Hall",
+      "address": "1909 Chapel Drive, Valparaiso, Indiana 46383, United States",
+      "lat": 41.4641724,
+      "lng": -87.0375921,
+      "addressSource": "https://www.valpo.edu/general-counsel/files/2019/10/2019-2020-Student-Guide-10.14.19.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/293491229",
+      "supportingSources": [
+        "https://forms.valpo.edu/machform/view.php?id=118539",
+        "https://www.valpo.edu/college-of-business/cathlin-upton-cpa-mba/"
+      ],
+      "notes": "Official college directory and current internship contact identify Urschel Hall; college business statistics faculty office also confirmed there.",
+      "rowIds": [
+        "valparaiso-university__college-of-business__business-analytics"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "hong-kong-science-technology-isom-lee-shau-kee",
+      "institution": "Hong Kong University of Science and Technology",
+      "rowIds": [
+        "hong-kong-university-of-science-and-technology__business-school__information-systems-business-statistics-and-operations-manag",
+        "hong-kong-university-of-science-and-technology____isom"
+      ],
+      "school": "School of Business and Management",
+      "department": "Department of Information Systems, Business Statistics and Operations Management",
+      "building": "Lee Shau Kee Business Building",
+      "address": "Lee Shau Kee Business Building, Clear Water Bay, Kowloon, Hong Kong",
+      "lat": 22.3334006,
+      "lng": 114.2649997,
+      "addressSource": "https://isom.hkust.edu.hk/sites/isom/files/course-attachments/Spring%2025-26%20%28OM%29/Syllabus_L1_ISOM2700_Spring2026.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/315573847",
+      "supportingSources": [
+        "https://isom.hkust.edu.hk/sites/isom/files/course-attachments/Spring%2025-26%20%28IS%29/ISOM2010-L5-L6%20Syllabus%20Spring%202025-26.pdf",
+        "https://pomshk2017.hkust.edu.hk/files/LSK.pdf",
+        "https://congregation.hkust.edu.hk/sites/default/files/4A0_site%20map.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current 2026 operations management and information systems syllabi locate faculty offices in rooms 4070 and 5045 of Lee Shau Kee Business Building, respectively. Exact named building footprint matches university campus map at southern Lee Shau Kee campus. Consolidates full department name and acronym-only alias without using the main university coordinates."
+    },
+    {
+      "id": "european-school-management-technology-innovation-berlin",
+      "institution": "European School of Management and Technology Berlin",
+      "institutionKey": "esmt-berlin",
+      "rowIds": [
+        "esmt-berlin____innovation-and-entrepreneurship"
+      ],
+      "school": "European School of Management and Technology Berlin",
+      "department": "Innovation and Entrepreneurship",
+      "building": "Former State Council Building (Staatsratsgebaude)",
+      "address": "Schlossplatz 1, 10178 Berlin, Germany",
+      "lat": 52.5156891,
+      "lng": 13.4013831,
+      "addressSource": "https://esmt.berlin/about/campus",
+      "coordinateSource": "https://www.openstreetmap.org/way/23075450",
+      "supportingSources": [
+        "https://esmt.berlin/about/our-campus/historical-campus-tours",
+        "https://esmt.berlin/about/areas-impact/entrepreneurship-and-innovation",
+        "https://spiral.imperial.ac.uk/server/api/core/bitstreams/06db450a-40bf-4614-948e-2617b4f6db66/content"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official school campus description identifies former State Council Building as its teaching and research home. Innovation faculty Linus Dahlander author contact gives Schlossplatz 1. Uses exact historic academic building footprint, not larger institutional grounds polygon. Official campus page supplies expanded institutional name."
+    },
+    {
+      "id": "chinese-university-hong-kong-shenzhen-data-science-dao-yuan",
+      "institution": "Chinese University of Hong Kong, Shenzhen",
+      "rowIds": [
+        "chinese-university-of-hong-kong-shenzhen__school-of-data-science__operations-research"
+      ],
+      "school": "School of Data Science",
+      "department": "Operations Research",
+      "building": "Dao Yuan Building",
+      "address": "4/F, Dao Yuan Building, 2001 Longxiang Boulevard, Longgang District, Shenzhen, Guangdong, China",
+      "lat": 22.6887116,
+      "lng": 114.2072543,
+      "addressSource": "https://sds.cuhk.edu.cn/en/page/182",
+      "coordinateSource": "https://www.openstreetmap.org/way/330000555",
+      "supportingSources": [
+        "https://mypage.cuhk.edu.cn/academics/wangzizhuo/",
+        "https://sds.cuhk.edu.cn/en/page/2123"
+      ],
+      "checked": "2026-10-25",
+      "notes": "School contact page explicitly locates its main office on fourth floor of Dao Yuan, corroborated by operations research professor and associate dean Zizhuo Wang in room 407. Exact named Dao Yuan building footprint is used. Some faculty and career services have additional offices in adjacent Zhi Xin; this marker represents the verified academic school office, not every faculty room."
+    },
+    {
+      "id": "hamad-bin-khalifa-mechanical-industrial-penrose",
+      "institution": "Hamad Bin Khalifa University",
+      "rowIds": [
+        "hamad-bin-khalifa-university__college-of-science-and-engineering__engineering-management-and-decision-sciences"
+      ],
+      "school": "College of Science and Engineering",
+      "department": "Division of Mechanical and Industrial Engineering",
+      "building": "Penrose House (formerly LAS Building)",
+      "address": "A-032F, Penrose House, Education City, Al Rayyan, Qatar",
+      "lat": 25.315559,
+      "lng": 51.4344355,
+      "addressSource": "https://www.hbku.edu.qa/en/staff/roberto-baldacci",
+      "coordinateSource": "https://www.openstreetmap.org/relation/2134756",
+      "supportingSources": [
+        "https://www.hbku.edu.qa/en/staff/adel-elomri",
+        "https://www.hbku.edu.qa/en/cse/divisions",
+        "https://www.hbku.edu.qa/sites/default/files/student-handbook.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current operations research professor Roberto Baldacci explicitly gives A-032F in LAS Building, corroborated by supply chain professor Adel Elomri A032-E. Official handbook identifies LAS as Penrose House and the graduate engineering home. Current 2026-27 division is Mechanical and Industrial Engineering, encompassing logistics, supply chain, operations and decision sciences formerly listed as Engineering Management and Decision Sciences. Exact named Penrose House building footprint supplies coordinates."
+    },
+    {
+      "id": "waikato-supply-chain-weihai-beiheng",
+      "institution": "University of Waikato",
+      "rowIds": [
+        "university-of-waikato__business-school__supply-chain-management"
+      ],
+      "school": "Waikato Management School — Shandong University–University of Waikato International Business School",
+      "department": "Supply Chain Management",
+      "building": "Beiheng Building",
+      "address": "2/F, Beiheng Building, Shandong University Weihai Campus, 180 Wenhua West Road, Weihai, Shandong, China",
+      "lat": 37.5268925,
+      "lng": 122.058144,
+      "addressSource": "https://zbb.wh.sdu.edu.cn/zb/cggghwl/8288.chtml",
+      "coordinateSource": "https://www.openstreetmap.org/way/970258574",
+      "supportingSources": [
+        "https://www.en.sdu.edu.cn/info/1157/8769.htm",
+        "https://business.academickeys.com/job/vgkmqe17/Senior-Lecturer-Associate-Professor-or-Professor-in-Supply-Chain-Management"
+      ],
+      "checked": "2026-10-25",
+      "notes": "This specific Waikato faculty posting is expressly based in Weihai, China, for the joint doctoral program, not Hamilton. Official January 2026 partner university announcement confirms joint school and supply chain doctorate. August 2026 official university procurement notice identifies second floor of Beiheng Building as the exclusive Waikato international partnership teaching and research area. Exact named Beiheng building footprint supplies coordinates."
+    },
+    {
+      "id": "houston-christian-analytics-hinton",
+      "institution": "Houston Christian University",
+      "institutionKey": "Houston Christian University",
+      "rowIds": [
+        "houston-christian-university____business-data-analytics"
+      ],
+      "school": "Archie W. Dunham College of Business",
+      "department": "Department of Business, Analytics, and Marketing",
+      "building": "Hinton Center",
+      "address": "Hinton Center, 7502 Fondren Road, Houston, Texas 77074, United States",
+      "lat": 29.6938648,
+      "lng": -95.51500184,
+      "addressSource": "https://hc.edu/contact/richard-kniffen/",
+      "coordinateSource": "https://www.openstreetmap.org/way/521382890",
+      "supportingSources": [
+        "https://hc.edu/about-hcu/the-campus/facilities/",
+        "https://hc.edu/publications/CampusMap/HCU_CampusMap-07-2026-Digital.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Department chair and business data analytics faculty Richard Kniffen Hinton 351. Exact external unnamed building footprint identified by matching official July 2026 campus map Hinton Center F5 outline southeast of Holcombe Mall, north of Morris Cultural Arts Center, east of Moody Library. Distinct from Hinton House."
+    },
+    {
+      "id": "houston-christian-management-hinton",
+      "institution": "Houston Christian University",
+      "institutionKey": "Houston Christian University",
+      "rowIds": [
+        "houston-christian-university____om"
+      ],
+      "school": "Archie W. Dunham College of Business",
+      "department": "Department of Management, Leadership, and International Business",
+      "building": "Hinton Center",
+      "address": "Hinton Center, 7502 Fondren Road, Houston, Texas 77074, United States",
+      "lat": 29.6938648,
+      "lng": -95.51500184,
+      "addressSource": "https://hc.edu/contact/pauline-akatsa-hinga/",
+      "coordinateSource": "https://www.openstreetmap.org/way/521382890",
+      "supportingSources": [
+        "https://hc.edu/about-hcu/the-campus/facilities/",
+        "https://hc.edu/publications/CampusMap/HCU_CampusMap-07-2026-Digital.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Original posting is Professor of Management despite abbreviated OM directory label. Department chair Pauline Akatsa-Hinga Hinton 357; management program coordinator Timothy Ewest Hinton 303. Exact external unnamed building footprint identified by matching official July 2026 campus map Hinton Center F5 outline southeast of Holcombe Mall, north of Morris Cultural Arts Center, east of Moody Library. Distinct from Hinton House."
+    },
+    {
+      "id": "evansville-supply-chain-schroeder",
+      "institution": "University of Evansville",
+      "institutionKey": "University of Evansville",
+      "rowIds": [
+        "university-of-evansville____supply-chain-management"
+      ],
+      "school": "Schroeder Family School of Business Administration",
+      "department": "Supply Chain Management",
+      "building": "Schroeder Family School of Business Administration Building",
+      "address": "Schroeder Family School of Business Administration Building, 1800 Lincoln Avenue, Evansville, Indiana 47722, United States",
+      "lat": 37.97069009,
+      "lng": -87.5328348,
+      "addressSource": "https://www.evansville.edu/center-for-supply-chain-management/people.cfm",
+      "coordinateSource": "https://www.openstreetmap.org/way/353224560",
+      "supportingSources": [
+        "https://www.evansville.edu/offices/hr/employment-detail/3277",
+        "https://www.evansville.edu/campusmap/downloads/CampusMap.pdf",
+        "https://www.evansville.edu/offices/deanstudents/downloads/student-handbook-2025-26-full.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official posting names school and contact Yolanda Obaze; current official faculty directory locates her in business building Room121. Exact named building footprint matches campus plan buildings23/23a west of oval and north of Lincoln Avenue. Not Schroeder Residence Hall12 on Walnut Street. Supply Chain Management denotes faculty subject area, not a separately evidenced administrative department."
+    },
+    {
+      "id": "maryland-decision-operations-van-munching",
+      "institution": "University of Maryland, College Park",
+      "institutionKey": "University of Maryland",
+      "rowIds": [
+        "university-of-maryland____om-is"
+      ],
+      "school": "Robert H. Smith School of Business",
+      "department": "Department of Decision, Operations, and Information Technologies",
+      "building": "Van Munching Hall",
+      "address": "Van Munching Hall, 7699 Mowatt Lane, College Park, Maryland 20742, United States",
+      "lat": 38.983189120166095,
+      "lng": -76.94705014455688,
+      "addressSource": "https://www.rhsmith.umd.edu/departments/decision-operations-information-technologies/contact-us",
+      "coordinateSource": "https://maps.umd.edu/map/index.html?feature=building&name=039",
+      "supportingSources": [
+        "https://services9.arcgis.com/1rOwFRpAwrxe0rBl/arcgis/rest/services/CampusMapDefault_NoInsite/FeatureServer/4/11"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Department managers4340/4363; current faculty Yi Xu4317 and Siva Viswanathan4313. Workday posting JR103217 explicitly names this department. Exact current university ArcGIS BuildingPoint geometry for building039, object11. Separate department cards at shared business-school building."
+    },
+    {
+      "id": "maryland-logistics-van-munching",
+      "institution": "University of Maryland, College Park",
+      "institutionKey": "University of Maryland",
+      "rowIds": [
+        "university-of-maryland____supply-chain-management"
+      ],
+      "school": "Robert H. Smith School of Business",
+      "department": "Department of Logistics, Business and Public Policy",
+      "building": "Van Munching Hall",
+      "address": "Van Munching Hall, 7699 Mowatt Lane, College Park, Maryland 20742, United States",
+      "lat": 38.983189120166095,
+      "lng": -76.94705014455688,
+      "addressSource": "https://www.rhsmith.umd.edu/departments/logistics-business-public-policy",
+      "coordinateSource": "https://maps.umd.edu/map/index.html?feature=building&name=039",
+      "supportingSources": [
+        "https://services9.arcgis.com/1rOwFRpAwrxe0rBl/arcgis/rest/services/CampusMapDefault_NoInsite/FeatureServer/4/11"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Department office3411. Official authored March2026 supply-chain posting explicitly names this department. Exact current university ArcGIS BuildingPoint geometry for building039, object11. Separate department cards at shared business-school building."
+    },
+    {
+      "id": "rowan-supply-chain-business-hall",
+      "institution": "Rowan University",
+      "institutionKey": "Rowan University",
+      "rowIds": [
+        "rowan-university____scm-logistics"
+      ],
+      "school": "William G. Rohrer College of Business",
+      "department": "Department of Marketing and Business Information Systems",
+      "building": "Business Hall",
+      "address": "Business Hall, 201 Mullica Hill Road, Glassboro, New Jersey 08028, United States",
+      "lat": 39.71004953,
+      "lng": -75.12252515,
+      "addressSource": "https://business.rowan.edu/faculty-staff/kuppusamy-faculty.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/354604129",
+      "supportingSources": [
+        "https://business.rowan.edu/about/advisory-boards-councils/supply-chain-logistics.html",
+        "https://www.rowan.edu/about/visiting/map.pdf",
+        "https://rowan.university-tour.com/main-campus"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official supply-chain faculty Saravanan Kuppusamy in Business Hall371; original vacancy and current advisory council establish Marketing and Business Information Systems host. Exact external named building footprint corresponds to official map building11 and university-linked virtual tour Business Hall. Campus point replaced with business-building location."
+    },
+    {
+      "id": "location-verified-644",
+      "institution": "Kühne Logistics University",
+      "institutionKey": "Kühne Logistics University",
+      "rowIds": [
+        "kuhne-logistics-university____om-and-business-analytics"
+      ],
+      "school": "",
+      "department": "Department of Operations and Technology — Operations Management and Business Analytics",
+      "building": "Kühne Logistics University, Hamburg building",
+      "address": "Großer Grasbrook 17, 20457 Hamburg, Germany",
+      "lat": 53.5405721,
+      "lng": 9.9943719,
+      "addressSource": "https://www.klu.org/about-klu/contacts-directory",
+      "coordinateSource": "https://www.openstreetmap.org/way/27568638",
+      "supportingSources": [
+        "https://www.klu.org/directions",
+        "https://www.klu.org/imprint"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Original directory source specifies Germany for this hiring record. Current official faculty directory identifies the Operations and Technology department and Hamburg faculty office; official visitor directions and imprint locate the Hamburg building at Grosser Grasbrook 17. Exact building footprint with building=university, not a campus centroid. Separate new Saigon campus is not the location of this German posting."
+    },
+    {
+      "id": "college-of-charleston-supply-chain-information-management-beatty",
+      "institution": "College of Charleston",
+      "institutionKey": "College of Charleston",
+      "rowIds": [
+        "college-of-charleston____supply-chain-management"
+      ],
+      "school": "School of Business",
+      "department": "Department of Supply Chain and Information Management",
+      "building": "Beatty Center, room 304",
+      "address": "5 Liberty Street, Charleston, South Carolina 29424, United States",
+      "lat": 32.78278255,
+      "lng": -79.9350833,
+      "addressSource": "https://chouc.people.charleston.edu/cv-chou.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/283667434",
+      "supportingSources": [
+        "https://blogs.charleston.edu/sb/2024/05/06/school-of-business-announces-2023-24-distinguished-faculty-award-recipients/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department chair curriculum vitae explicitly gives room 304 at 5 Liberty Street and his Supply Chain and Information Management chair appointment. Exact named Beatty Center building footprint at this numbered address; coordinates are footprint bounds center, not campus centroid."
     }
   ]
 }
