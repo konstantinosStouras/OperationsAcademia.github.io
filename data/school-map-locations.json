@@ -2076,22 +2076,25 @@
       "id": "hartford-business-insights-auerbach",
       "institution": "University of Hartford",
       "rowIds": [
+        "university-of-hartford__barney-school-of-business__business-insights",
         "university-of-hartford____ba-marketing-or-scm"
       ],
       "school": "Barney School of Business",
       "department": "Department of Business Insights",
       "building": "Beatrice Fox Auerbach Hall",
-      "address": "Beatrice Fox Auerbach Hall, 200 Bloomfield Avenue, West Hartford, CT 06117, United States",
+      "address": "Room 310B, 200 Bloomfield Avenue, West Hartford, CT 06117, United States",
       "lat": 41.795197,
       "lng": -72.715797,
-      "addressSource": "https://www.hartford.edu/about/buildings-locations/",
+      "addressSource": "https://www.hartford.edu/directory/barney/hao-andy-wei.aspx",
       "coordinateSource": "https://map.concept3d.com/?id=813#!m/124573",
       "supportingSources": [
+        "https://www.hartford.edu/unotes/2025/06/barney-school-of-business-welcomes-new-leadership-team-members.aspx",
+        "https://www.hartford.edu/about/buildings-locations/",
         "https://www.hartford.edu/barney/academics/business-insights/default.aspx",
         "https://www.hartford.edu/barney/academics/student-services.aspx"
       ],
-      "checked": "2026-10-25",
-      "notes": "Current department page groups business analytics, marketing and supply chain under Business Insights. Official building directory and campus marker identify the academic Auerbach Hall housing Barney, including its analytics lab; not the separate Auerbach Computer and Administration Center. Building-level location; no individual faculty room claimed."
+      "notes": "Current department chair office310B in Auerbach Hall; official academic building marker124573, not Auerbach Computer and Administration Center or shuttle stop.",
+      "checked": "2026-10-25"
     },
     {
       "id": "san-jose-marketing-business-analytics-tower",
@@ -12595,6 +12598,733 @@
       ],
       "checked": "2026-10-25",
       "notes": "Current university profiles place operations faculty Reeju Guha and Mehmet Donmez in D2-9 and department director Juan Pablo Maicas in D2-5. University Building D accessibility certificate and September 2026 event independently identify Beatriz de Bobadilla 18. Exact-address external geocode (40.4485385,-3.715689) falls inside the southwest campus building; marker uses that building footprint center. Replaces obsolete Leonardo Prieto Castro campus coordinates. Historical expanded institution name precedes current CUNEF Universidad brand."
+    },
+    {
+      "id": "essec-information-systems-data-analytics-operations-nautile",
+      "institution": "École Supérieure des Sciences Économiques et Commerciales (ESSEC)",
+      "institutionKey": "essec",
+      "rowIds": [
+        "essec__essec-business-school__information-systems-data-analytics-and-operations"
+      ],
+      "school": "ESSEC Business School",
+      "department": "Department of Information Systems, Data Analytics and Operations",
+      "building": "Le Nautile",
+      "address": "Office N321, 3 Avenue Bernard Hirsch, 95021 Cergy-Pontoise Cedex, France",
+      "lat": 49.03251734,
+      "lng": 2.07575074,
+      "addressSource": "https://ido-department.essec.edu/contact",
+      "coordinateSource": "https://www.openstreetmap.org/relation/18349913",
+      "supportingSources": [
+        "https://drive.google.com/file/d/1ti26jgtBV-81fApbbjewoM-2aMb1oSNP/view",
+        "https://operations-mgt-track-cergy.essec.edu/contact"
+      ],
+      "notes": "The current department contact page places all three discipline assistants in N321 (older track page N305/N306). Its linked university campus plan identifies N as Le Nautile, the dean and faculty offices. The distinctive fan-shaped Nautile at the end of the administrative-tower wing matches OpenStreetMap relation18349913; coordinate is the mean of its mapped outline vertices. This is the department office in Cergy; teaching exchanges in Singapore are not treated as relocation of that office.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "shandong-finance-large-language-model-finance-building",
+      "institution": "Shandong University of Finance and Economics",
+      "institutionKey": "shandong-university-of-finance-and-economics",
+      "rowIds": [
+        "shandong-university-of-finance-and-economics__school-of-finance__large-language-model-research-institute"
+      ],
+      "school": "School of Finance",
+      "department": "Large Language Model Research Institute",
+      "building": "Finance Building (Teaching Building 6, Financial Training Center)",
+      "address": "School of Finance office 6110, Shungeng Campus, 40 Shungeng Road, Jinan, Shandong, China",
+      "lat": 36.62489,
+      "lng": 117.01629,
+      "addressSource": "https://www.sdufe.edu.cn/xyfw/xydh.htm",
+      "coordinateSource": "https://www.sdufe.edu.cn/xyfw/xydt/sgxq.htm",
+      "checked": "2026-10-25",
+      "notes": "Official 2026 recruitment https://agi.sdufe.edu.cn/info/1071/1762.htm identifies the School of Finance and institute as joint host; the university directory places Finance in Shungeng Building 6, room 6110. Exact Finance Building is labelled 教6 金融培训中心 on the university arrival map https://student.sdufe.edu.cn/info/1090/6390.htm (image https://www.sdufe.edu.cn/__local/9/60/8E/661EB26A4C773E3825920BD78EC_72C3A885_8CA36.jpg). Its footprint was georeferenced using six adjacent named building markers from the current official interactive map: Office, Library, Teaching 1, Teaching 2, Teaching 3 and Auditorium. Affine fit residuals under 7 metres; building-center estimate approximately 10–20 metres precision. Official Baidu BD-09 result converted through GCJ-02 to WGS84 and rounded to five decimals. This is the Finance teaching building west of student dormitory 6, not that dormitory, and not the Yanshan campus. Host school location; individual appointee office is not assigned."
+    },
+    {
+      "id": "insead-france-decision-sciences-octapharma",
+      "institution": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "institutionKey": "insead",
+      "rowIds": [
+        "insead__school-of-business__decision-sciences"
+      ],
+      "school": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "department": "Decision Sciences",
+      "building": "Octapharma Building (formerly Plessis Mornay), faculty office wing",
+      "address": "Boulevard de Constance, 77305 Fontainebleau, France",
+      "lat": 48.40629,
+      "lng": 2.68589,
+      "addressSource": "https://www.insead.edu/system/files/2023-07/CV.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/289353654",
+      "checked": "2026-10-25",
+      "notes": "Official faculty CV locates Spyros Zoumpoulis in Plessis Mornay 0.19; current Georgina Hall faculty website https://sites.google.com/view/georgina-hall gives PMLS 0.16. The university renamed Plessis Mornay in January 2025: https://www.insead.edu/news/octapharma-foundation-supports-inseads-europe-campus-re-imagination-transformational-eu20m-donation . Official campus map https://www.insead.edu/sites/default/files/assets/dept/centres/wicfe/docs/insead-campus-map-2022.pdf identifies faculty/admin wing 13, distinct from rotunda 12 and teaching crescent 14. Precise point selected inside the corresponding rectangular southeastern faculty wing of the exact OpenStreetMap building footprint, cross-checked against the map linked by the 2025 faculty finance symposium https://sites.google.com/view/insead-finance-symposium/2025 . Rounded to five decimals; this is a building-level faculty-wing location, not an individual office coordinate. This record covers the verified France location."
+    },
+    {
+      "id": "insead-france-technology-and-operations-management-octapharma",
+      "institution": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "institutionKey": "insead",
+      "rowIds": [
+        "insead__school-of-business__technology-and-operations-management"
+      ],
+      "school": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "department": "Technology and Operations Management",
+      "building": "Octapharma Building (formerly Plessis Mornay), faculty office wing",
+      "address": "Boulevard de Constance, 77305 Fontainebleau, France",
+      "lat": 48.40629,
+      "lng": 2.68589,
+      "addressSource": "https://www.insead.edu/faculty-personal-site/manuel-sosa/research",
+      "coordinateSource": "https://www.openstreetmap.org/way/289353654",
+      "checked": "2026-10-25",
+      "notes": "Current university-hosted Manuel Sosa research page (including July 2026 conference service) explicitly gives Europe Campus office PMLS 0.14. The university renamed Plessis Mornay in January 2025: https://www.insead.edu/news/octapharma-foundation-supports-inseads-europe-campus-re-imagination-transformational-eu20m-donation . Official campus map https://www.insead.edu/sites/default/files/assets/dept/centres/wicfe/docs/insead-campus-map-2022.pdf identifies faculty/admin wing 13, distinct from rotunda 12 and teaching crescent 14. Precise point selected inside the corresponding rectangular southeastern faculty wing of the exact OpenStreetMap building footprint, cross-checked against the map linked by the 2025 faculty finance symposium https://sites.google.com/view/insead-finance-symposium/2025 . Rounded to five decimals; this is a building-level faculty-wing location, not an individual office coordinate. This record covers the verified France location."
+    },
+    {
+      "id": "st-thomas-florida-gus-machado-faculty-building",
+      "institution": "St. Thomas University",
+      "institutionKey": "st-thomas-university",
+      "rowIds": [
+        "st-thomas-university__gus-machado-college-of-business__quantitative-and-statistical-analysis-supply-chain-operation"
+      ],
+      "school": "Gus Machado College of Business",
+      "department": "Quantitative and Statistical Analysis, Supply Chain, Operations and Logistics Management, and Managerial Economics",
+      "building": "Gus Machado College of Business, faculty and administration building",
+      "address": "16401 Northwest 37th Avenue, Miami Gardens, Florida 33054, United States",
+      "lat": 25.92342,
+      "lng": -80.25523,
+      "addressSource": "https://www.stu.edu/business/",
+      "coordinateSource": "https://www.stu.edu/campus-map/",
+      "checked": "2026-10-25",
+      "notes": "Current university school page identifies the faculty and college; official campus map labels the dedicated business complex 23, northwest of the main campus. University announcement https://www.stu.edu/news/building-excitement-donors-faculty-and-students-tour-new-business-building-slated-to-open-this-summer/ confirms purpose-built business facilities. University-issued 2020 dedication release https://www.businesswire.com/news/home/20201008006046/en/New-Gus-Machado-College-of-Business-Complex-to-Be-Formally-Dedicated-at-St.-Thomas-University distinguishes larger academic building from second faculty-office building. Constructor https://nv2agroup.com/projects/gus-machado-college-of-business/ identifies classroom and administration areas as 36777 and 13667 square feet, corroborating the smaller western rectangle as faculty/administration. The precise smaller-building center in official August 2025 map was georeferenced using five nearby existing OpenStreetMap footprints (141922790,141927779,141922788,141922784,141927828); affine residuals under 8 m. Approximately 10–20 m coordinate accuracy, rounded to five decimals. Faculty-building identity is inferred from the official two-building description and constructor size distinction. No individual appointee room is asserted."
+    },
+    {
+      "id": "mercy-business-administration-manhattan",
+      "institution": "Mercy University",
+      "institutionKey": "mercy-university",
+      "rowIds": [
+        "mercy-university__school-of-business__business-administration"
+      ],
+      "school": "School of Business",
+      "department": "Business Administration",
+      "building": "Mercy Manhattan academic premises",
+      "address": "47 West 34th Street, New York, NY 10001, United States",
+      "lat": 40.7496978,
+      "lng": -73.9871027,
+      "addressSource": "https://mercy.edu/campus-locations/explore-manhattan",
+      "coordinateSource": "https://www.openstreetmap.org/node/2709702410",
+      "checked": "2026-10-25",
+      "notes": "Exact vacancy F00330 is assigned to Manhattan: original university application URL https://talenthub.mercy.edu/jobs/visiting-assistant-professor-f00330-manhattan-new-york-united-states was recovered from the how_to_apply field of https://www.academicjobs.com/university-jobs/visiting-assistant-professor-f00330/817871 ; the official job URL has expired. Multiple exact-title copies including https://us.trabajo.org/job-5003-13e2b88e63b8ac34fc1e471474d60a6f explicitly give Manhattan. AcademicJobs generic employer-address metadata says Dobbs Ferry and conflicts with its own original Manhattan application URL; that headquarters metadata is not used. Current official school page https://www.mercy.edu/academics/school-business confirms programs across all three campuses. Official Manhattan campus page identifies these standalone academic premises at 47 West 34th Street, corroborated by university-issued opening announcement https://www.prnewswire.com/news-releases/mercy-college-unveils-new-manhattan-campus-in-the-heart-of-herald-square-300944455.html . Exact-address OpenStreetMap university node at that building, not Westchester campus center. No individual faculty room is assigned publicly."
+    },
+    {
+      "id": "rutgers-supply-chain-management-new-brunswick",
+      "institutionKey": "Rutgers University",
+      "institution": "Rutgers, The State University of New Jersey",
+      "rowIds": [
+        "rutgers-university____scm-second-position",
+        "rutgers-university____supply-chain-management"
+      ],
+      "school": "Rutgers Business School - Newark and New Brunswick",
+      "department": "Department of Supply Chain Management",
+      "building": "Rutgers Business School, 100 Rockafeller Road",
+      "address": "100 Rockafeller Road, Piscataway, New Jersey 08854, United States",
+      "lat": 40.52348,
+      "lng": -74.440546,
+      "addressSource": "https://sites.rutgers.edu/weiwei-chen/people/about/",
+      "coordinateSource": "https://events.business.rutgers.edu/100-rockafeller-road-378",
+      "supportingSources": [
+        "https://www.business.rutgers.edu/faculty-research/supply-chain-management",
+        "https://facilities.business.rutgers.edu/home/rbs-buildings",
+        "https://globalhealth.rutgers.edu/directory/alok-baveja/"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "rutgers-supply-chain-management-two-campuses",
+      "locationGroupSource": "https://sites.rutgers.edu/weiwei-chen/people/about/",
+      "notes": "Current official supply-chain professor profile explicitly lists offices in both 100 Rockafeller Road and 1 Washington Park. Official department offers programs on both campuses. Coordinates are exact building GeoCoordinates in official university events pages. Closed vacancy links do not establish a single hiring campus; both verified departmental campuses are represented."
+    },
+    {
+      "id": "rutgers-supply-chain-management-newark",
+      "institutionKey": "Rutgers University",
+      "institution": "Rutgers, The State University of New Jersey",
+      "rowIds": [
+        "rutgers-university____scm-second-position",
+        "rutgers-university____supply-chain-management"
+      ],
+      "school": "Rutgers Business School - Newark and New Brunswick",
+      "department": "Department of Supply Chain Management",
+      "building": "Rutgers Business School, 1 Washington Park",
+      "address": "1 Washington Park, Newark, New Jersey 07102, United States",
+      "lat": 40.745035,
+      "lng": -74.170282,
+      "addressSource": "https://sites.rutgers.edu/weiwei-chen/people/about/",
+      "coordinateSource": "https://events.business.rutgers.edu/newark",
+      "supportingSources": [
+        "https://www.business.rutgers.edu/faculty-research/supply-chain-management",
+        "https://facilities.business.rutgers.edu/home/rbs-buildings",
+        "https://globalhealth.rutgers.edu/directory/alok-baveja/"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "rutgers-supply-chain-management-two-campuses",
+      "locationGroupSource": "https://sites.rutgers.edu/weiwei-chen/people/about/",
+      "notes": "Current official supply-chain professor profile explicitly lists offices in both 100 Rockafeller Road and 1 Washington Park. Official department offers programs on both campuses. Coordinates are exact building GeoCoordinates in official university events pages. Closed vacancy links do not establish a single hiring campus; both verified departmental campuses are represented."
+    },
+    {
+      "id": "rutgers-industrial-systems-engineering-core",
+      "institutionKey": "Rutgers University",
+      "institution": "Rutgers, The State University of New Jersey",
+      "rowIds": [
+        "rutgers-university____ie"
+      ],
+      "school": "School of Engineering",
+      "department": "Department of Industrial and Systems Engineering",
+      "building": "Computing Research and Education Building, room 201",
+      "address": "96 Frelinghuysen Road, Piscataway, New Jersey 08854, United States",
+      "lat": 40.52137,
+      "lng": -74.46135,
+      "addressSource": "https://ise.rutgers.edu/contact",
+      "coordinateSource": "https://mapcarta.com/W251381443",
+      "supportingSources": [
+        "https://ise.rutgers.edu/contact-graduate-office",
+        "https://soe.rutgers.edu/staff-directory/mohsen-jafari-phd",
+        "https://search.rutgers.edu/buildings.html?q=ARC"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department contact page identifies main office, chair and faculty rooms on the second floor of Computing Research and Education Building. Exact named building geocode matches official university building3883 address."
+    },
+    {
+      "id": "rutgers-statistics-reinforcement-learning-hill",
+      "institutionKey": "Rutgers University (Stats)",
+      "institution": "Rutgers, The State University of New Jersey",
+      "rowIds": [
+        "rutgers-university-stats____reinforcement-learning"
+      ],
+      "school": "School of Arts and Sciences",
+      "department": "Department of Statistics - Reinforcement Learning",
+      "building": "Hill Center for the Mathematical Sciences",
+      "address": "110 Frelinghuysen Road, Piscataway, New Jersey 08854, United States",
+      "lat": 40.521983,
+      "lng": -74.462832,
+      "addressSource": "https://statistics.rutgers.edu/people-pages/faculty/people/383-zhiqiang-tan",
+      "coordinateSource": "https://cqb.rutgers.edu/directions",
+      "supportingSources": [
+        "https://statistics.rutgers.edu/people-pages/faculty/people/815-hu-yifan",
+        "https://statistics.rutgers.edu/contact-us",
+        "https://www.linkedin.com/jobs/view/postdoc-in-reinforcement-learning-at-rutgers-university%E2%80%93new-brunswick-4340195131",
+        "https://mapcarta.com/W251381866"
+      ],
+      "checked": "2026-10-25",
+      "notes": "University employer job listing matches the exact application-form URL and names Statistics supervisors Zhiqiang Tan and Yifan Hu. Official current faculty directory places both in Hill Center. Coordinates are explicit Hill Center GPS on the official quantitative biology directions page and match the named building footprint; the old mathematics directions longitude74.47168 is inconsistent with the actual building and was rejected."
+    },
+    {
+      "institutionKey": "University of Melbourne",
+      "institution": "The University of Melbourne",
+      "checked": "2026-10-25",
+      "id": "melbourne-management-marketing-the-spot",
+      "rowIds": [
+        "university-of-melbourne__melbourne-business-school__faculty-of-business-and-economics",
+        "university-of-melbourne____scm-management"
+      ],
+      "school": "Faculty of Business and Economics",
+      "department": "Department of Management and Marketing - Operations and Supply Chain Management",
+      "building": "The Spot, level 10 (building 110)",
+      "address": "198 Berkeley Street, Carlton, Victoria 3010, Australia",
+      "lat": -37.8016,
+      "lng": 144.9587,
+      "addressSource": "https://fbe.unimelb.edu.au/contact",
+      "coordinateSource": "https://maps.unimelb.edu.au/parkville/building/110",
+      "supportingSources": [
+        "https://fbe.unimelb.edu.au/managementmarketing/mhrmu/about/contact",
+        "https://www.hubmub.com/jobs/715892/academic-positions-in-management"
+      ],
+      "notes": "Department faculty directory linked by original row and current official departmental contact identify The Spot level 10. Exact JR-005389 vacancy is preserved with Department of Management and Marketing host and Operations and Supply Chain Management specialization. Official building110 map point matches named building footprint; generic point-page campus viewport rejected. This is separate from Melbourne Business School Operations faculty at 200 Leicester Street."
+    },
+    {
+      "institutionKey": "University of Melbourne",
+      "institution": "The University of Melbourne",
+      "checked": "2026-10-25",
+      "id": "melbourne-business-school-operations-leicester",
+      "rowIds": [
+        "university-of-melbourne__melbourne-business-school__operations"
+      ],
+      "school": "Melbourne Business School",
+      "department": "Operations Management",
+      "building": "Melbourne Business School, Carlton building",
+      "address": "200 Leicester Street, Carlton, Victoria 3053, Australia",
+      "lat": -37.80136,
+      "lng": 144.96126,
+      "addressSource": "https://mbs.edu/about-us/contact-us",
+      "coordinateSource": "https://mapcarta.com/W463359503",
+      "supportingSources": [
+        "https://mbs.edu/faculty-and-research/faculty/yalcin-akcay",
+        "https://mbs.edu/events/2022-04-05-tds-professor-yalcin-akcay",
+        "https://fbe.unimelb.edu.au/contact"
+      ],
+      "notes": "Official Operations professor profile and school contact establish Melbourne Business School at 200 Leicester Street, separately from Faculty of Business and Economics Management and Marketing at The Spot. Exact named five-storey school office building footprint at the matching address; proposed future innovation campus at 168-176 Leicester Street is not used."
+    },
+    {
+      "id": "ajman-data-analytics-j2",
+      "institutionKey": "Ajman University",
+      "institution": "Ajman University",
+      "rowIds": [
+        "ajman-university____data-analytics"
+      ],
+      "school": "College of Engineering and Information Technology",
+      "department": "Department of Information Technology - Data Analytics",
+      "building": "Sheikh Humaid bin Rashid Al Nuaimi Building (J2)",
+      "address": "University Street, Al Jurf, Ajman, United Arab Emirates",
+      "lat": 25.41178,
+      "lng": 55.50782,
+      "addressSource": "https://www.ajman.ac.ae/en/explore/our-campus",
+      "coordinateSource": "https://mapcarta.com/W195738299",
+      "supportingSources": [
+        "https://www.ajman.ac.ae/en/engineering/departments/department-of-information-technology",
+        "https://www.ajman.ac.ae/upload/docs/Student_Handbook_2025-2026.pdf?v=1771556146",
+        "https://www.ajman.ac.ae/upload/staff_files/Salam-Fraihat_cv.pdf?v=1770278757"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department page lists the Data Analytics program and coordinator. Current faculty CV confirms data analytics faculty in Information Technology. Official campus description and 2025-26 handbook identify Engineering and Information Technology in J2. Exact named J2 building point replaces campus centroid approximately150m northwest."
+    },
+    {
+      "id": "american-phnom-penh-business-main-building",
+      "institutionKey": "American University of Phnom Penh",
+      "institution": "American University of Phnom Penh",
+      "rowIds": [
+        "american-university-of-phnom-penh____mis"
+      ],
+      "school": "Faculty of Business and Management",
+      "department": "Management Information Systems",
+      "building": "Main academic building",
+      "address": "278H Street 201R, Kroalkor Village, Sangkat Kilometer 6, Khan Russey Keo, Phnom Penh, Cambodia",
+      "lat": 11.61593,
+      "lng": 104.90132,
+      "addressSource": "https://www.aupp.edu.kh/contact/",
+      "coordinateSource": "https://mapcarta.com/W632107003",
+      "supportingSources": [
+        "https://www.aupp.edu.kh/faculty-of-business-and-management/",
+        "https://www.aupp.edu.kh/campus-tour/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official school page now redirects from School of Business to Faculty of Business and Management. Official campus tour identifies the main academic building containing classrooms, computer lab and learning facilities at current Street201R campus. Exact named university building footprint, not surrounding campus polygon. Reject historical temporary Street315 campus, which remains on some external maps and establishment decree."
+    },
+    {
+      "id": "american-kurdistan-business-mustafa-barzani",
+      "institutionKey": "American University of Kurdistan",
+      "institution": "The American University of Kurdistan",
+      "rowIds": [
+        "american-university-of-kurdistan____ba-mis"
+      ],
+      "school": "College of Business",
+      "department": "Business Analytics and Management Information Systems",
+      "building": "Mustafa Barzani Building",
+      "address": "Zakho Road, Sumel, Duhok 42003, Kurdistan Region, Iraq",
+      "lat": 36.86143,
+      "lng": 42.86178,
+      "addressSource": "https://finance.auk.edu.krd/storage/tenders/6/rfp-data-center-project.pdf",
+      "coordinateSource": "https://mapcarta.com/W597306174",
+      "supportingSources": [
+        "https://auk.edu.krd/academics/colleges/college-of-business",
+        "https://auk.edu.krd/academics/colleges/college-of-business/faculty-2",
+        "https://auk.edu.krd/contact/",
+        "https://legacy.auk.edu.krd/campus-services-department/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official 2025 facilities tender identifies the four-storey Mustafa Barzani Building as the academic facility; other completed/planned buildings are residences. Official college confirms business faculty. Exact four-storey academic footprint matches this building, distinct from campus amenity point270m northeast. Existing point was already close to correct academic building."
+    },
+    {
+      "id": "tusculum-business-meen",
+      "institutionKey": "Tusculum University",
+      "institution": "Tusculum University",
+      "rowIds": [
+        "tusculum-university____supply-chain-management"
+      ],
+      "school": "School of Business, Education and Sport",
+      "department": "Division of Business - Supply Chain Management",
+      "building": "Ronald H. and Verna June Meen Center for Science and Math, third-floor business offices",
+      "address": "Meen Center, 60 Shiloh Road, Greeneville, Tennessee 37745, United States",
+      "lat": 36.1744,
+      "lng": -82.7573,
+      "addressSource": "https://web.tusculum.edu/directory/",
+      "coordinateSource": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=-82.7592,36.1736,-82.7554,36.1750&bboxSR=4326&imageSR=4326&size=1500,700&format=jpg&f=json",
+      "supportingSources": [
+        "https://web.tusculum.edu/about/wp-content/uploads/2025/10/Campus-Map-25-26_V5.pdf",
+        "https://web.tusculum.edu/about/campus-map-2/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official directory places business professor David Hite in Meen300-B and school dean John Alpers in Meen309-D. Official 2025-26 map identifies Meen as building13, between Annie Hogan Byrd Fine Arts and round Shulman Center, north of parking. Because OpenStreetMap omits its footprint, exact roof point manually georeferenced against Esri aerial export (pixel750,310 in1500x700, returned geographic extent xmin-82.7592 xmax-82.7554 ymin36.1734133333 ymax36.1751866667), matching official map shape and surrounding buildings. Point lies on central academic roof, not campus centroid or viewport center."
+    },
+    {
+      "id": "whu-supply-chain-group-speaker-building-v",
+      "institution": "Wissenschaftliche Hochschule für Unternehmensführung – Otto Beisheim School of Management (WHU)",
+      "institutionKey": "WHU – Otto Beisheim School of Management",
+      "rowIds": [
+        "whu-otto-beisheim-school-of-management__otto-beisheim-school-of-management__supply-chain-management"
+      ],
+      "school": "Otto Beisheim School of Management",
+      "department": "Supply Chain Management Group",
+      "building": "Building V, room V-004 – group speaker office",
+      "address": "D’Esterstraße 9, 56179 Vallendar, Germany",
+      "lat": 50.4003753,
+      "lng": 7.6146621,
+      "addressSource": "https://www.whu.edu/de/fakultaet-forschung/supply-chain-management-group/demand-management-and-sustainable-transport/arne-strauss/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1053172318",
+      "supportingSources": [
+        "https://www.whu.edu/en/faculty-research/supply-chain-management-group/",
+        "https://www.whu.edu/en/faculty-research/supply-chain-management-group/logistics-and-services-management/",
+        "https://www.whu.edu/fileadmin/CONTENT/whu.edu/1_Programs/1.3_MBA_Program/LP/Admissions_Page/WHU-Campus-Duesseldorf-Map.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Verified office V-004 of current group speaker Arne Strauss, in the exact named Building V footprint. The group also has the Chair of Logistics and Services Management in Düsseldorf; a separate record identifies its connected Building 5 using the official academic-chair campus map. These records identify the group office at each campus, not every individual faculty room.",
+      "locationGroup": "whu-supply-chain-management-group",
+      "locationGroupSource": "https://www.whu.edu/en/faculty-research/supply-chain-management-group/"
+    },
+    {
+      "institution": "University of Navarra",
+      "school": "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
+      "department": "Operations, Information and Technology",
+      "building": "North Campus, Building S – operations faculty offices",
+      "address": "Carrer d’Arnús i de Garí 3–7, 08034 Barcelona, Spain",
+      "lat": 41.39401275,
+      "lng": 2.10513155,
+      "addressSource": "https://www.iese.edu/wp-content/uploads/2024/06/Mihalis-Markakis-CV.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/644435048",
+      "supportingSources": [
+        "https://www.iese.edu/faculty-research/faculty/mihalis-markakis/",
+        "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/",
+        "https://www.readkong.com/page/mba-welcome-guide-welcome-to-do-s-contents-iese-business-8604077",
+        "https://www.iese.edu/about/campuses/barcelona/",
+        "https://ribas-arquitectos.com/portfolio/2006-campus-norte-iese-2/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current university profile links Markakis CV identifying North Campus S-501. Official department directory confirms Operations, Information and Technology affiliation. Coordinates inferred by matching the university MBA Welcome Guide map (2017–2019, mirrored transcription page16) to aerial imagery and OpenStreetMap footprint: S, T, U are the three faculty-office bars northwest-to-southeast immediately north of Q; S is the separate northwest rectangle, way644435048. Independent second-agent review corroborated ordering and footprint. Marker represents this verified departmental faculty office, not South Campus reception or the University of Navarra campus in Pamplona. Map labels and architect campus description corroborate the office-block arrangement.",
+      "id": "iese-operations-building-s",
+      "institutionKey": "IESE",
+      "rowIds": [
+        "iese__iese-business-school__operations-information-and-technology"
+      ]
+    },
+    {
+      "institution": "University of Navarra",
+      "school": "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
+      "department": "Operations, Information and Technology",
+      "building": "North Campus, Building S – operations faculty offices",
+      "address": "Carrer d’Arnús i de Garí 3–7, 08034 Barcelona, Spain",
+      "lat": 41.39401275,
+      "lng": 2.10513155,
+      "addressSource": "https://www.iese.edu/wp-content/uploads/2024/06/Mihalis-Markakis-CV.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/644435048",
+      "supportingSources": [
+        "https://www.iese.edu/faculty-research/faculty/mihalis-markakis/",
+        "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/",
+        "https://www.readkong.com/page/mba-welcome-guide-welcome-to-do-s-contents-iese-business-8604077",
+        "https://www.iese.edu/about/campuses/barcelona/",
+        "https://ribas-arquitectos.com/portfolio/2006-campus-norte-iese-2/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current university profile links Markakis CV identifying North Campus S-501. Official department directory confirms Operations, Information and Technology affiliation. Coordinates inferred by matching the university MBA Welcome Guide map (2017–2019, mirrored transcription page16) to aerial imagery and OpenStreetMap footprint: S, T, U are the three faculty-office bars northwest-to-southeast immediately north of Q; S is the separate northwest rectangle, way644435048. Independent second-agent review corroborated ordering and footprint. Marker represents this verified departmental faculty office, not South Campus reception or the University of Navarra campus in Pamplona. Map labels and architect campus description corroborate the office-block arrangement.",
+      "id": "navarra-iese-operations-building-s",
+      "institutionKey": "University of Navarra",
+      "rowIds": [
+        "university-of-navarra__iese-business-school__operations-information-and-technology"
+      ]
+    },
+    {
+      "institution": "University of Navarra",
+      "school": "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
+      "department": "Operations, Information and Technology",
+      "building": "North Campus, Building S – operations faculty offices",
+      "address": "Carrer d’Arnús i de Garí 3–7, 08034 Barcelona, Spain",
+      "lat": 41.39401275,
+      "lng": 2.10513155,
+      "addressSource": "https://www.iese.edu/wp-content/uploads/2024/06/Mihalis-Markakis-CV.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/644435048",
+      "supportingSources": [
+        "https://www.iese.edu/faculty-research/faculty/mihalis-markakis/",
+        "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/",
+        "https://www.readkong.com/page/mba-welcome-guide-welcome-to-do-s-contents-iese-business-8604077",
+        "https://www.iese.edu/about/campuses/barcelona/",
+        "https://ribas-arquitectos.com/portfolio/2006-campus-norte-iese-2/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current university profile links Markakis CV identifying North Campus S-501. Official department directory confirms Operations, Information and Technology affiliation. Coordinates inferred by matching the university MBA Welcome Guide map (2017–2019, mirrored transcription page16) to aerial imagery and OpenStreetMap footprint: S, T, U are the three faculty-office bars northwest-to-southeast immediately north of Q; S is the separate northwest rectangle, way644435048. Independent second-agent review corroborated ordering and footprint. Marker represents this verified departmental faculty office, not South Campus reception or the University of Navarra campus in Pamplona. Map labels and architect campus description corroborate the office-block arrangement.",
+      "id": "iese-business-school-operations-building-s",
+      "institutionKey": "IESE Business School",
+      "rowIds": [
+        "iese-business-school____om",
+        "iese-business-school____operations-information-and-technology"
+      ]
+    },
+    {
+      "id": "texas-am-central-texas-logistics-founders-hall",
+      "institution": "Texas A&M University–Central Texas",
+      "rowIds": [
+        "texas-a-m-university-central-texas__college-of-business-administration__logistics-and-supply-chain-management"
+      ],
+      "school": "College of Business Administration",
+      "department": "Logistics and Supply Chain Management",
+      "building": "General Robert M. Shoemaker Founders Hall",
+      "address": "Room 217B, 1001 Leadership Place, Killeen, TX 76549, United States",
+      "lat": 31.052643,
+      "lng": -97.773943,
+      "addressSource": "https://www.tamuct.edu/academics/college-of-business-administration/management-and-marketing/",
+      "coordinateSource": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=-97.7765,31.0515,-97.7715,31.0545&bboxSR=4326&imageSR=4326&size=1400,1000&format=jpg&f=json",
+      "supportingSources": [
+        "https://tamuct.teamdynamix.com/TDClient/54/Portal/KB/Article/12914/Facility-Capacities",
+        "https://tamuct.teamdynamix.com/TDClient/54/Portal/Shared/FileOpen?AttachmentID=17eb2926-1118-45ca-a49a-84a8db985538&ItemID=12914&ItemComponent=26&IsInline=-1"
+      ],
+      "notes": "Official department faculty directory places Logistics and Supply Chain Management lecturer Chester Xiang in Founders217B, alongside department chair217. University-hosted floor-plan PDF page2 identifies the long east-west building with a distinctive central diagonal projection; it matches the eastern academic building in georeferenced aerial imagery, distinct from the northwest Warrior Hall and southwest Heritage Hall. Point is selected roof pixel(716,600) in1400x1000 image with returned extent west-97.7765/east-97.7715/south31.051214285714288/north31.054785714285714. Building-level visual estimate, not a surveyed room coordinate.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "harvard-climate-sustainability-impact-lab-cotting",
+      "institution": "Harvard University",
+      "rowIds": [
+        "harvard-university____climate-and-sustainability-impact-lab-digital-data-design-in"
+      ],
+      "school": "Harvard Business School",
+      "department": "Climate and Sustainability Impact Lab",
+      "building": "Cotting House",
+      "address": "50 North Harvard Street, Boston, MA 02163, United States",
+      "lat": 42.36704401,
+      "lng": -71.1245018,
+      "addressSource": "https://harvardplanning.emuseum.com/sites/262/cotting-house",
+      "coordinateSource": "https://www.openstreetmap.org/way/29680207",
+      "supportingSources": [
+        "https://aiinstitute.hbs.edu/labs/climate-and-sustainability-impact-lab/",
+        "https://yifanliu0304.github.io/",
+        "https://yifanliu0304.github.io/CV_YifanLiu.pdf"
+      ],
+      "notes": "The official current lab roster confirms Yifan Liu as a postdoctoral fellow. Her current personal academic CV (updated August2026, Harvard appointment from July2026) gives50 North Harvard Street. Harvard University Property Information Resource Center identifies that exact address as Cotting House; named building footprint supplies coordinates. This verifies a current lab researcher office/contact location, not a claim that every principal investigator shares one building. The institute name changed from Digital Data Design Institute to Harvard Business School Artificial Intelligence Institute; a sibling lab address at150 Western Avenue was not applied to this lab.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "zhejiang-interdisciplinary-applied-mathematics-qiushi-east-north-annex",
+      "institution": "Zhejiang University",
+      "rowIds": [
+        "zhejiang-university____center-for-interdisciplinary-applied-mathematics"
+      ],
+      "school": "",
+      "department": "Center for Interdisciplinary Applied Mathematics",
+      "building": "Qiushi Lecture Hall East Annex, North Building",
+      "address": "Room 102, Zijingang Campus, 866 Yuhangtang Road, Xihu District, Hangzhou, Zhejiang 310058, China",
+      "lat": 30.30444951,
+      "lng": 120.07600223,
+      "addressSource": "https://futre.zju.edu.cn/2025/0725/c82783a3071550/page.htm",
+      "coordinateSource": "https://www.openstreetmap.org/way/703249692",
+      "supportingSources": [
+        "https://futre.zju.edu.cn/82810/list.htm",
+        "https://www.mathjobs.org/jobs/list/28487",
+        "https://www.zju.edu.cn/2017/0521/c32862a510453/pagem.htm"
+      ],
+      "notes": "Official centre postdoctoral recruitment gives room102 in the east annex of Qiushi Lecture Hall; the institute contact directory specifies the north building of that annex. OpenStreetMap way703249692 is explicitly named for the Institute for Fundamental and Interdisciplinary Research and is the northern of the east-annex pair, east of separately mapped Qiushi Lecture Hall529029530. Coordinates are the mean of8 unique outline vertices in WGS84. Replaces the unrelated general university location; optional work at distant research institutions in the recruitment notice is not treated as an assigned campus.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "alma-business-administration-swanson",
+      "institution": "Alma College",
+      "institutionKey": "alma-college",
+      "rowIds": [
+        "alma-college____business-administration"
+      ],
+      "school": "",
+      "department": "Department of Business Administration",
+      "building": "Swanson Academic Center",
+      "address": "Swanson Academic Center, Alma College, 614 West Superior Street, Alma, MI 48801, United States",
+      "lat": 43.379866,
+      "lng": -84.670783,
+      "addressSource": "https://selfservice.alma.edu/student/Courses/Search?subjects=BUS",
+      "coordinateSource": "https://uploads.knightlab.com/storymapjs/c768e5b01bbb597ebb5067bed0b96e97/alma-college-virtual-tour/published.json",
+      "checked": "2026-10-25",
+      "notes": "Official public course catalog Fall 2026 verifies Business Analytics I (BUS-117) in Swanson 109, Business Analytics II (BUS-317) in Swanson 213, Sports Management (BUS-230) in Swanson 216 and Management (BUS-323) in Swanson 108. These current department teaching locations corroborate the 2023 published Business Administration faculty affiliation Swanson Academic Center Unit 236; no new appointee office is claimed. The university virtual tour at https://www.alma.edu/admissions/connect-and-visit/virtual-tour/ embeds the cited Knight Lab tour, whose named Swanson Academic Center marker supplies the coordinates. Official 2025 campus map also labels this building 26. Current university-hosted job https://www.schooljobs.com/careers/alma/jobs/5461211/assistant-associate-professor-of-business-analytics-and-sports-management identifies the hiring field."
+    },
+    {
+      "id": "cunef-business-management-building-d",
+      "institutionKey": "CUNEF Universidad",
+      "institution": "CUNEF Universidad",
+      "rowIds": [
+        "cunef-universidad__school-of-business-economics-and-law__business-management"
+      ],
+      "school": "School of Business, Economics and Law",
+      "department": "Department of Business Management",
+      "building": "Building D, second-floor faculty offices, Almansa Campus",
+      "address": "Calle de Beatriz de Bobadilla 18, 28040 Madrid, Spain",
+      "lat": 40.448481296398,
+      "lng": -3.715616289394,
+      "addressSource": "https://www.cunef.edu/en/faculty-and-research/trifu-andreea-claudia/",
+      "coordinateSource": "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=*&maxLocations=3&SingleLine=Calle%20Beatriz%20de%20Bobadilla%2018%20Madrid%20Spain",
+      "supportingSources": [
+        "https://www.cunef.edu/claustro-e-investigacion/bhatia-sonali-kaur/",
+        "https://www.cunef.edu/eventos/jornada-sobre-la-simplificacion-de-la-regulacion-bancaria/",
+        "https://files.griddo.cunef.edu/ais-2444-int-2025-edificiod-cunef.pdf",
+        "https://www.openstreetmap.org/way/340010492"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official Business Management faculty offices D2-4 (Andreea Trifu) and D2-10 (Sonali Kaur Bhatia) establish Building D. Official September 2026 event and accessibility certificate identify Building D specifically at Beatriz de Bobadilla18, rather than generic Almansa101 campus footer. Esri exact PointAddress score100 resolves number18 inside southwest academic building footprint340010492. This is a building-address point, not campus centroid; southeast building and old Pirineos campus rejected."
+    },
+    {
+      "id": "goldey-beacom-business-analytics-fulmer",
+      "institutionKey": "Goldey-Beacom College",
+      "institution": "Goldey-Beacom College",
+      "rowIds": [
+        "goldey-beacom-college____ba"
+      ],
+      "school": "",
+      "department": "Business Analytics",
+      "building": "Fulmer Center",
+      "address": "4701 Limestone Road, Wilmington, Delaware 19808, United States",
+      "lat": 39.74149,
+      "lng": -75.68971,
+      "addressSource": "https://campusweb.gbc.edu/ICS/Academics/BA/BA___328/2025_F-BA___328-F2F__01/Course_Information.jnz",
+      "coordinateSource": "https://mapcarta.com/W440881133",
+      "supportingSources": [
+        "https://www.gbc.edu/maps-and-directions/",
+        "https://www.gbc.edu/wp-content/uploads/full-size-campus-map.pdf",
+        "https://www.gbc.edu/academics/programs/business-analytics-bs/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official face-to-face Business Analytics BA328 timetable identifies instructor Victoria Neagoe and Fulmer Center classroom303 (M FC303). Current official campus guide confirms faculty housed in Fulmer Center. Exact named building footprint440881133 corroborated against official diagram: Fulmer Center south of separate Fulmer Annex, west of Event Center/Jones Center. Replaces generic campus coordinate north of teaching building. Program is a Business Administration concentration, not a separate invented school."
+    },
+    {
+      "id": "southern-utah-analytics-leavitt",
+      "institutionKey": "Southern Utah University",
+      "institution": "Southern Utah University",
+      "rowIds": [
+        "southern-utah-university____ba"
+      ],
+      "school": "Dixie L. Leavitt School of Business",
+      "department": "Department of Marketing, Entrepreneurship, Sales, and Analytics",
+      "building": "Dixie Leavitt Business Building, classroom118",
+      "address": "University Boulevard, Cedar City, Utah84720, United States",
+      "lat": 37.676483,
+      "lng": -113.070541,
+      "addressSource": "https://my.suu.edu/syllabus/departments/MESA/",
+      "coordinateSource": "https://map.concept3d.com/?id=821#!m/91220",
+      "supportingSources": [
+        "https://www.suu.edu/map/",
+        "https://www.suu.edu/business/directory.html",
+        "https://www.suu.edu/news/2024/08/business-building-groundbreaking-ceremony.html"
+      ],
+      "locationGroup": "southern-utah-analytics-two-teaching-buildings",
+      "locationGroupSource": "https://my.suu.edu/syllabus/departments/MESA/",
+      "checked": "2026-10-25",
+      "notes": "Official Fall2026 departmental syllabus listing explicitly places ANLY2500 and ANLY4100 in this teaching building. Department operates in both existing Leavitt building and newly opened Burgess extension; two points are not duplicate campus centroids. Exact official Concept3D map821 building marker91220. Public faculty office directory is undergoing maintenance, so this evidence establishes current academic teaching location without asserting a particular faculty office."
+    },
+    {
+      "id": "southern-utah-analytics-burgess",
+      "institutionKey": "Southern Utah University",
+      "institution": "Southern Utah University",
+      "rowIds": [
+        "southern-utah-university____ba"
+      ],
+      "school": "Dixie L. Leavitt School of Business",
+      "department": "Department of Marketing, Entrepreneurship, Sales, and Analytics",
+      "building": "Joe and Beverly Burgess Family Business Center, classroom101",
+      "address": "University Boulevard, Cedar City, Utah84720, United States",
+      "lat": 37.676731,
+      "lng": -113.071274,
+      "addressSource": "https://my.suu.edu/syllabus/departments/MESA/",
+      "coordinateSource": "https://map.concept3d.com/?id=821#!m/91241",
+      "supportingSources": [
+        "https://www.suu.edu/map/",
+        "https://www.suu.edu/business/directory.html",
+        "https://www.suu.edu/news/2024/08/business-building-groundbreaking-ceremony.html"
+      ],
+      "locationGroup": "southern-utah-analytics-two-teaching-buildings",
+      "locationGroupSource": "https://my.suu.edu/syllabus/departments/MESA/",
+      "checked": "2026-10-25",
+      "notes": "Official Fall2026 departmental syllabus listing explicitly places ANLY6100 in this teaching building. Department operates in both existing Leavitt building and newly opened Burgess extension; two points are not duplicate campus centroids. Exact official Concept3D map821 building marker91241. Public faculty office directory is undergoing maintenance, so this evidence establishes current academic teaching location without asserting a particular faculty office."
+    },
+    {
+      "id": "beijing-normal-hong-kong-baptist-business-analytics-t1",
+      "institutionKey": "Beijing Normal-Hong Kong Baptist University (BNBU)",
+      "institution": "Beijing Normal-Hong Kong Baptist University",
+      "rowIds": [
+        "beijing-normal-hong-kong-baptist-university____ba"
+      ],
+      "school": "Faculty of Business and Management",
+      "department": "Business Analytics",
+      "building": "T1 Business and Management Building (Houde Building), office401-R10",
+      "address": "2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong519087, China",
+      "lat": 22.351915,
+      "lng": 113.5152254,
+      "addressSource": "https://ar.bnbu.edu.cn/current_students/course_registration/Course_Withdrawal.htm",
+      "coordinateSource": "https://u-map.haotian22.top/poi-directory.html",
+      "supportingSources": [
+        "https://fbm.bnbu.edu.cn/icrsc_en/Our_Team/Members.htm",
+        "https://fbm.bnbu.edu.cn/busa/students/student_support/slss.htm",
+        "https://www.bnbu.edu.cn/UICDiscover20190515.pdf",
+        "https://www.openstreetmap.org/way/664082910"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official academic registry identifies Business Analytics designated approver PeiminChen officeT1-401-R10; official faculty research directory confirms his main appointment Business Analytics, and programme support lists T1-302-R3-H7. Exact named T1 Business and Management Building OpenStreetMap footprint664082910, six storeys, matches public campus POI coordinates. Point checked inside footprint, not campus centroid; official campus guide identifies T1 within teaching area at2000JintongRoad. Replaces old generic location about2.5km east. Current official university name used, former United International College remains searchable through existing aliases."
+    },
+    {
+      "id": "canadian-university-dubai-management-building",
+      "institution": "Canadian University Dubai",
+      "institutionKey": "Canadian University Dubai",
+      "rowIds": [
+        "canadian-university-dubai____ba-ds"
+      ],
+      "school": "School of Management",
+      "department": "Business Analytics",
+      "building": "School of Management Building, office SOM201",
+      "address": "City Walk, Al Safa Street, Dubai, United Arab Emirates",
+      "lat": 25.207433,
+      "lng": 55.264,
+      "addressSource": "https://www.cud.ac.ae/personnel/dr-zaher-ali-al-sai",
+      "coordinateSource": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=55.262,25.204,55.267,25.209&bboxSR=4326&imageSR=4326&size=1500,1500&format=png&f=image",
+      "supportingSources": [
+        "https://www.cud.ac.ae/sites/default/files/files/2021/Canadian%20University%20Dubai%20-%20Location%20Map%20-%20City%20Walk%20.pdf",
+        "https://www.cud.ac.ae/sites/default/files/general/Orientation_booklet.pdf",
+        "https://www.cud.ac.ae/sites/default/files/files/2025/cud_brochure_2025_26.pdf",
+        "https://www.cud.ac.ae/sustainability/social-responsibility/people-of-determination",
+        "https://www.openstreetmap.org/way/495448021"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official Business Analytics faculty profile identifies Zaher Ali Al-Sai office SOM201. Current brochure and accessibility directory distinguish School of Management and HUB buildings. Official orientation map page16 and 2021 location diagram place the smaller university wing next to Roxy Cinemas; the HUB is the separate larger pentagonal building. Coordinates manually inferred inside the smaller management wing northeast of the cinema roof, matching university diagrams to georeferenced aerial imagery (pixel600,470 in1500x1500 image; exact extent55.262,25.204,55.267,25.209). A second agent independently confirmed the diagram/roof alignment. Precision is approximate building-wing level; do not use whole OSM495448021 centroid, which includes Roxy, or HUB495448027."
+    },
+    {
+      "id": "whu-supply-chain-building-5-duesseldorf",
+      "institution": "Wissenschaftliche Hochschule für Unternehmensführung – Otto Beisheim School of Management (WHU)",
+      "institutionKey": "WHU – Otto Beisheim School of Management",
+      "rowIds": [
+        "whu-otto-beisheim-school-of-management__otto-beisheim-school-of-management__supply-chain-management"
+      ],
+      "school": "Otto Beisheim School of Management",
+      "department": "Supply Chain Management Group",
+      "building": "Building 5 – academic-chair offices",
+      "address": "Erkrather Straße 228c / 230, 40233 Düsseldorf, Germany",
+      "lat": 51.2192315,
+      "lng": 6.8154397,
+      "addressSource": "https://www.whu.edu/en/faculty-research/supply-chain-management-group/logistics-and-services-management/",
+      "coordinateSource": "https://www.openstreetmap.org/way/152447944",
+      "supportingSources": [
+        "https://www.whu.edu/fileadmin/CONTENT/whu.edu/1_Programs/1.3_MBA_Program/LP/Admissions_Page/WHU-Campus-Duesseldorf-Map.pdf",
+        "https://www.openstreetmap.org/way/152447946",
+        "https://www.openstreetmap.org/way/282619379",
+        "https://www.whu.edu/en/faculty-research/supply-chain-management-group/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official chair page places Carl Marcus Wallenburg and his chair team in Düsseldorf through its local contact information. The official campus diagram locates academic chairs at entrances 228c and 230, both explicitly part of the same connected U-shaped Building 5. OpenStreetMap splits this building into wings: 152447944 (228c), 152447946 (230), connected through 282619379 (228d). The marker represents Building 5 using the 228c wing footprint, not a verified room or chair-specific entrance. Exact wing/room remains unspecified by the university; building-level location independently reviewed. Do not use the generic 224a postal/reception address, which is Building 4 and houses the Master of Business Administration program.",
+      "locationGroup": "whu-supply-chain-management-group",
+      "locationGroupSource": "https://www.whu.edu/en/faculty-research/supply-chain-management-group/"
+    },
+    {
+      "id": "warwick-applied-artificial-intelligence-imc",
+      "institutionKey": "University of Warwick",
+      "institution": "University of Warwick",
+      "rowIds": [
+        "university-of-warwick__faculty-of-science-engineering-and-medicine__warwick-manufacturing-group-applied-artificial-intelligence"
+      ],
+      "school": "Faculty of Science, Engineering and Medicine",
+      "department": "Warwick Manufacturing Group, Applied Artificial Intelligence",
+      "building": "International Manufacturing Centre",
+      "address": "Lord Bhattacharyya Way, Coventry CV4 7AL, United Kingdom",
+      "lat": 52.3833,
+      "lng": -1.56102,
+      "addressSource": "https://warwick.ac.uk/fac/sci/wmg/research/research-areas/visualisation/people/",
+      "coordinateSource": "https://mapcarta.com/W28480072",
+      "supportingSources": [
+        "https://sitebuilder.warwick.ac.uk/sitebuilder2/api/dataentry/entries.json?page=/fac/sci/wmg/research/research-areas/visualisation/people/people-contents",
+        "https://warwick.ac.uk/fac/sci/wmg/about/location-facilities/international-manufacturing-centre/",
+        "https://uk.linkedin.com/jobs/view/assistant-or-associate-professor-in-applied-artificial-intelligence-53294-0526-at-university-of-warwick-4416943088"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Exact employer posting 53294-0526 names Professor Kurt Debattista as contact. Current university research team page, populated by its public SiteBuilder data endpoint, explicitly places Kurt Debattista, Alan Chalmers, Thomas Bashford-Rogers and Abhishek Goswami in the International Manufacturing Centre. The official building page confirms Lord Bhattacharyya Way address; coordinate is the exact named building footprint 28480072, not the generic university coordinate. Historical International Digital Laboratory affiliations were not used."
     }
   ]
 }

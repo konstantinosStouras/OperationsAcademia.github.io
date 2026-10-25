@@ -46,7 +46,7 @@
       "rowIds": [
         "columbia-university____data-driven-decision-making-optimization-under-uncertainty"
       ],
-      "status": "pending",
+      "status": "excluded-by-user",
       "departmentUrls": [],
       "postingUrls": [
         "https://connect.informs.org/healthapplications/discussion/postdoc-position-at-columbia-university-1#bmb8abb718-b6ea-4aa8-9a94-adc43e1a640f"
@@ -65,6 +65,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
+      },
+      "verificationExcluded": {
+        "date": "2026-10-25",
+        "reason": "User explicitly requested ignoring this inaccessible original advert after being asked for its hiring department, supervisor, or campus."
       }
     },
     {
@@ -339,7 +343,7 @@
       "rowIds": [
         "kaist____organization-man-sci"
       ],
-      "status": "pending",
+      "status": "excluded-by-user",
       "departmentUrls": [],
       "postingUrls": [
         "https://careercenter.informs.org/c-academic-jobs.html?locale=en&page=1&sort=date&country=&state=&city=&zip=&latitude=&longitude=&job_type_filter=Academic&keywords=&city_state_zip=&job_id=5229"
@@ -358,6 +362,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
+      },
+      "verificationExcluded": {
+        "date": "2026-10-25",
+        "reason": "User explicitly requested ignoring this inaccessible original advert after being asked for its hiring department, supervisor, or campus."
       }
     },
     {
@@ -1065,7 +1073,7 @@
       "rowIds": [
         "harvard-university____climate-and-sustainability-impact-lab-digital-data-design-in"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -1082,7 +1090,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "harvard-climate-sustainability-impact-lab-cotting"
+      ]
     },
     {
       "id": "naval-postgraduate-school::department:acquisition finance and manpower::36.59800,-121.87300",
@@ -4364,7 +4375,7 @@
       "rowIds": [
         "university-of-hartford__barney-school-of-business__business-insights"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179578224&Title=Tenure%20Track%20Assistant%20Professor%20Business%20Insights%2FAnalytics%20%282027%202028%29%20January%202027"
@@ -4964,7 +4975,7 @@
       "rowIds": [
         "iese-business-school____om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://apply.interfolio.com/171505"
@@ -4983,7 +4994,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "iese-business-school-operations-building-s"
+      ]
     },
     {
       "id": "iese-business-school::department:operations information and technology::41.39400,2.10800",
@@ -4995,7 +5009,7 @@
       "rowIds": [
         "iese-business-school____operations-information-and-technology"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -5012,7 +5026,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "iese-business-school-operations-building-s"
+      ]
     },
     {
       "id": "bowling-green-state-university::school:allen w and carol m schmidthorst college of business::41.38000,-83.64000",
@@ -5807,7 +5824,7 @@
       "rowIds": [
         "texas-a-m-university-central-texas__college-of-business-administration__logistics-and-supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179571048&Title=Assistant%20Professor%20of%20Supply%20Chain%20Management"
@@ -5826,7 +5843,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "texas-am-central-texas-logistics-founders-hall"
+      ]
     },
     {
       "id": "university-of-north-carolina-at-charlotte::school:belk college of business::35.30639,-80.73333",
@@ -5872,7 +5892,7 @@
       "rowIds": [
         "zhejiang-university____center-for-interdisciplinary-applied-mathematics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.mathjobs.org/jobs/list/28487"
@@ -5891,7 +5911,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "zhejiang-interdisciplinary-applied-mathematics-qiushi-east-north-annex"
+      ]
     },
     {
       "id": "arizona-state-university::department:learning optimization and decision analytics::33.41700,-111.93600",
@@ -6041,7 +6064,7 @@
       "rowIds": [
         "essec__essec-business-school__information-systems-data-analytics-and-operations"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://faculty.essec.edu/en/?pagenum=1&s=&type=cv&filter%5Bdepartment-en%5D%5B%5D=Information%20Systems%2C%20Data%20Analytics%20and%20Operations"
       ],
@@ -6062,7 +6085,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "essec-information-systems-data-analytics-operations-nautile"
+      ]
     },
     {
       "id": "florida-gulf-coast-university::school:lutgert college of business::26.46250,-81.77290",
@@ -7471,7 +7497,7 @@
         "insead__school-of-business__decision-sciences",
         "insead__school-of-business__technology-and-operations-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.insead.edu/faculty-research/academic-areas/decision-sciences#group-faculty",
         "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#group-faculty"
@@ -7491,7 +7517,11 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "insead-france-decision-sciences-octapharma",
+        "insead-france-technology-and-operations-management-octapharma"
+      ]
     },
     {
       "id": "stockholm-school-of-economics::department:entrepreneurship innovation and technology::59.34167,18.05694",
@@ -8569,7 +8599,7 @@
       "rowIds": [
         "mercy-university__school-of-business__business-administration"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179548156&Title=Visiting%20Assistant%20Professor-%20F00330"
@@ -8588,7 +8618,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "mercy-business-administration-manhattan"
+      ]
     },
     {
       "id": "university-of-new-haven::school:college of business and digital innovation::24.69705,46.57413",
@@ -9223,7 +9256,7 @@
       "rowIds": [
         "alma-college____business-administration"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179539061&Title=Assistant%2FAssociate%20Professor%20of%20Business%20Analytics%20and%20Sports%20Management"
@@ -9242,7 +9275,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "alma-business-administration-swanson"
+      ]
     },
     {
       "id": "american-university-kogod-school-of-business::department:information technology business analytics ai::38.93706,-77.08692",
@@ -11625,7 +11661,7 @@
       "rowIds": [
         "shandong-university-of-finance-and-economics__school-of-finance__large-language-model-research-institute"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://agi.sdufe.edu.cn/info/1071/1762.htm"
@@ -11644,7 +11680,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "shandong-finance-large-language-model-finance-building"
+      ]
     },
     {
       "id": "central-washington-university::school:college of education and professional studies::47.00200,-120.54000",
@@ -11997,7 +12036,7 @@
       "rowIds": [
         "st-thomas-university__gus-machado-college-of-business__quantitative-and-statistical-analysis-supply-chain-operation"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179503388&Title=Assistant%20Professor%20of%20Quantitative%20and%20Statistical%20Analysis%20Supply%20Chain%20Operations%20Logistics%20and%20Economics%20Management"
@@ -12016,7 +12055,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "st-thomas-florida-gus-machado-faculty-building"
+      ]
     },
     {
       "id": "technical-university-of-munich::department:computer science::48.14800,11.56800",
@@ -12666,7 +12708,7 @@
       "rowIds": [
         "cunef-universidad__school-of-business-economics-and-law__business-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://academicjobsonline.org/ajo/jobs/32180"
@@ -12685,7 +12727,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "cunef-business-management-building-d"
+      ]
     },
     {
       "id": "university-of-warwick::school:faculty of science engineering and medicine::52.38000,-1.56200",
@@ -12697,7 +12742,7 @@
       "rowIds": [
         "university-of-warwick__faculty-of-science-engineering-and-medicine__warwick-manufacturing-group-applied-artificial-intelligence"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.jobs.ac.uk/job/DRO402/assistant-or-associate-professor-in-applied-artificial-intelligence-53294-0526"
@@ -12716,7 +12761,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "warwick-applied-artificial-intelligence-imc"
+      ]
     },
     {
       "id": "university-of-warwick::school:warwick business school::52.38000,-1.56200",
@@ -14993,7 +15041,7 @@
       "rowIds": [
         "american-university-of-kurdistan____ba-mis"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179373349&Title=Assistant%20Professor%2FAssociate%20Professor%20at%20the%20College%20of%20Business"
@@ -15012,7 +15060,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "american-kurdistan-business-mustafa-barzani"
+      ]
     },
     {
       "id": "san-bernardino-community-college-district::department:business math::34.06699,-117.27379",
@@ -15055,7 +15106,7 @@
       "rowIds": [
         "tusculum-university____supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179373226&Title=Assistant%20Professor%20of%20Supply%20Chain%20Management%2FProgram%20Director%20of%20the%20MS%20in%20Supply%20Chain%20Management"
@@ -15074,7 +15125,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "tusculum-business-meen"
+      ]
     },
     {
       "id": "wilson-college::department:supply chain management::39.94800,-77.65300",
@@ -15416,7 +15470,7 @@
       "rowIds": [
         "ajman-university____data-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179365266&Title=Associate%20%2F%20Assistant%20Professor%20in%20Data%20Analytics"
@@ -15435,7 +15489,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "ajman-data-analytics-j2"
+      ]
     },
     {
       "id": "endicott-college::department:business::42.55197,-70.84264",
@@ -16731,7 +16788,7 @@
       "rowIds": [
         "american-university-of-phnom-penh____mis"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179337672&Title=Assistant%2FAssociate%20Professor%2C%20School%20of%20Business%20(Management%20Information%20System)",
@@ -16751,7 +16808,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "american-phnom-penh-business-main-building"
+      ]
     },
     {
       "id": "le-moyne-college::department:is::43.04810,-76.08640",
@@ -17163,7 +17223,7 @@
       "rowIds": [
         "beijing-normal-hong-kong-baptist-university____ba"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179327558&Title=Professor%2FAssociate%20Professor%2FAssistant%20Professor%20in%20Business%20Analytics"
@@ -17182,7 +17242,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "beijing-normal-hong-kong-baptist-business-analytics-t1"
+      ]
     },
     {
       "id": "university-of-maine-at-augusta::department:business management::44.33830,-69.79720",
@@ -17512,7 +17575,7 @@
       "rowIds": [
         "rutgers-university____ie"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.rutgers.edu/postings/263486"
@@ -17531,7 +17594,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "rutgers-industrial-systems-engineering-core"
+      ]
     },
     {
       "id": "rutgers-university::department:scm second position::40.50200,-74.44800",
@@ -17543,7 +17609,7 @@
       "rowIds": [
         "rutgers-university____scm-second-position"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.rutgers.edu/postings/263489"
@@ -17562,7 +17628,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "rutgers-supply-chain-management-new-brunswick",
+        "rutgers-supply-chain-management-newark"
+      ]
     },
     {
       "id": "rutgers-university::department:supply chain management::40.50200,-74.44800",
@@ -17574,7 +17644,7 @@
       "rowIds": [
         "rutgers-university____supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.rutgers.edu/postings/257055"
@@ -17593,7 +17663,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "rutgers-supply-chain-management-new-brunswick",
+        "rutgers-supply-chain-management-newark"
+      ]
     },
     {
       "id": "coastal-carolina-university::department:om::33.79612,-79.01370",
@@ -17675,7 +17749,7 @@
         "university-of-melbourne__melbourne-business-school__faculty-of-business-and-economics",
         "university-of-melbourne__melbourne-business-school__operations"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "http://fbe.unimelb.edu.au/managementmarketing/staff/academic-staff",
         "https://mbs.edu/faculty-and-research/faculty?facultyType=Operations"
@@ -17695,7 +17769,11 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "melbourne-management-marketing-the-spot",
+        "melbourne-business-school-operations-leicester"
+      ]
     },
     {
       "id": "university-of-melbourne::department:scm management::-37.79600,144.96100",
@@ -17707,7 +17785,7 @@
       "rowIds": [
         "university-of-melbourne____scm-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://unimelb.wd105.myworkdayjobs.com/en-US/UoM_External_Career/job/Parkville/Academic-Positions-in-Management_JR-005389-3?jobFamilyGroup=e696831e52a91000b83e4738eb1a0000"
@@ -17726,7 +17804,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "melbourne-management-marketing-the-spot"
+      ]
     },
     {
       "id": "cal-poly-san-luis-obispo::department:supply chain management::35.30167,-120.65982",
@@ -17806,7 +17887,7 @@
       "rowIds": [
         "southern-utah-university____ba"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.schooljobs.com/careers/suu/jobs/5146220/assistant-professor-of-analytics"
@@ -17825,7 +17906,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "southern-utah-analytics-leavitt",
+        "southern-utah-analytics-burgess"
+      ]
     },
     {
       "id": "utah-tech-university::department:ba is ds::37.09530,-113.57800",
@@ -17871,7 +17956,7 @@
       "rowIds": [
         "rutgers-university-stats____reinforcement-learning"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://docs.google.com/forms/d/e/1FAIpQLSdALcUuq4MkgOxSoia6foURxkZVyTrE8bNhy5TbWH8WHgLkhg/viewform"
@@ -17890,7 +17975,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "rutgers-statistics-reinforcement-learning-hill"
+      ]
     },
     {
       "id": "butler-university::department:supply chain management::39.83944,-86.17139",
@@ -17936,7 +18024,7 @@
       "rowIds": [
         "goldey-beacom-college____ba"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.paycomonline.net/v4/ats/web.php/jobs/ViewJobDetails?job=191207&clientkey=019DF7F6E271614BAB2785B88C6A379F"
@@ -17955,7 +18043,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "goldey-beacom-business-analytics-fulmer"
+      ]
     },
     {
       "id": "southern-arkansas-university::department:supply chain management::33.29160,-93.23590",
@@ -20809,7 +20900,7 @@
       "rowIds": [
         "canadian-university-dubai____ba-ds"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179167033&Title=Business%20Analytics%2FData%20Sciences%20Assistant%20Professor"
@@ -20828,7 +20919,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "canadian-university-dubai-management-building"
+      ]
     },
     {
       "id": "coppin-state-university::department:decision sciences::39.31030,-76.65860",
@@ -22084,7 +22178,7 @@
       "rowIds": [
         "iese__iese-business-school__operations-information-and-technology"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22101,7 +22195,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "iese-operations-building-s"
+      ]
     },
     {
       "id": "queen-s-university::school:queen s school of business::44.22500,-76.49500",
@@ -23746,7 +23843,7 @@
       "rowIds": [
         "university-of-navarra__iese-business-school__operations-information-and-technology"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/"
       ],
@@ -23765,7 +23862,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "navarra-iese-operations-building-s"
+      ]
     },
     {
       "id": "university-of-queensland::department:::-27.49722,153.01306",
@@ -24011,7 +24111,7 @@
       "rowIds": [
         "whu-otto-beisheim-school-of-management__otto-beisheim-school-of-management__supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.whu.edu/en/faculty-research/supply-chain-management-group/"
       ],
@@ -24030,7 +24130,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "whu-supply-chain-group-speaker-building-v",
+        "whu-supply-chain-building-5-duesseldorf"
+      ]
     },
     {
       "id": "wichita-state-university::department:::37.71917,-97.29306",
@@ -24125,9 +24229,10 @@
   ],
   "summary": {
     "baseline": 714,
-    "verified": 641,
+    "excludedByUser": 2,
+    "verified": 672,
     "partiallyVerified": 1,
-    "pending": 72,
+    "pending": 39,
     "sourceSearches": 714
   }
 }

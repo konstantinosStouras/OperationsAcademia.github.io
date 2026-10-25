@@ -256,7 +256,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-16"
+  "lastPosted": "2026-02-16",
+  "mapSearchTerms": [
+   "College of Engineering and Information Technology",
+   "Department of Information Technology - Data Analytics"
+  ]
  },
  {
   "id": "alabama-a-m-university____mis",
@@ -334,7 +338,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-26"
+  "lastPosted": "2026-08-26",
+  "mapSearchTerms": [
+   "Department of Business Administration"
+  ]
  },
  {
   "id": "american-university-in-the-emirates____business-intelligence-da",
@@ -452,7 +459,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-24"
+  "lastPosted": "2026-02-24",
+  "mapSearchTerms": [
+   "College of Business",
+   "Business Analytics and Management Information Systems"
+  ]
  },
  {
   "id": "american-university-of-phnom-penh____mis",
@@ -465,7 +476,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-01-15"
+  "lastPosted": "2026-01-15",
+  "mapSearchTerms": [
+   "Faculty of Business and Management",
+   "Management Information Systems"
+  ]
  },
  {
   "id": "american-university-of-sharjah____information-systems-and-business-analytics",
@@ -952,7 +967,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-12-27"
+  "lastPosted": "2025-12-27",
+  "mapSearchTerms": [
+   "Faculty of Business and Management",
+   "Business Analytics"
+  ]
  },
  {
   "id": "bellarmine-university__w-fielding-rubel-school-of-business__business-technology-and-artificial-intelligence",
@@ -1875,7 +1894,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-24"
+  "lastPosted": "2025-06-24",
+  "mapSearchTerms": [
+   "School of Management",
+   "Business Analytics"
+  ]
  },
  {
   "id": "cardiff-university__cardiff-business-school__logistics-and-operations-management",
@@ -3212,7 +3235,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-06-09"
+  "lastPosted": "2026-06-09",
+  "mapSearchTerms": [
+   "School of Business, Economics and Law",
+   "Department of Business Management"
+  ]
  },
  {
   "id": "cunef-university____om",
@@ -3862,7 +3889,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-29"
+  "lastPosted": "2026-09-29",
+  "mapSearchTerms": [
+   "ESSEC Business School",
+   "Department of Information Systems, Data Analytics and Operations"
+  ]
  },
  {
   "id": "eth-zurich____empirical-business-problems",
@@ -4803,7 +4834,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-16"
+  "lastPosted": "2025-11-16",
+  "mapSearchTerms": [
+   "Business Analytics"
+  ]
  },
  {
   "id": "grand-valley-state-university____management",
@@ -4946,7 +4980,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2025-01-30"
+  "lastPosted": "2025-01-30",
+  "mapSearchTerms": [
+   "Harvard Business School",
+   "Climate and Sustainability Impact Lab"
+  ]
  },
  {
   "id": "harvard-university__harvard-business-school__technology-and-operations-management",
@@ -5584,7 +5622,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2024-08-07"
+  "lastPosted": "2024-08-07",
+  "mapSearchTerms": [
+   "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
+   "Operations, Information and Technology"
+  ]
  },
  {
   "id": "iese-business-school",
@@ -5642,7 +5684,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-10"
+  "lastPosted": "2025-08-10",
+  "mapSearchTerms": [
+   "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
+   "Operations, Information and Technology"
+  ]
  },
  {
   "id": "iese-business-school____operations-information-and-technology",
@@ -5661,7 +5707,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-09-02"
+  "lastPosted": "2026-09-02",
+  "mapSearchTerms": [
+   "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
+   "Operations, Information and Technology"
+  ]
  },
  {
   "id": "iese-business-school____production-technology-and-operations-management",
@@ -5966,7 +6016,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-18"
+  "lastPosted": "2026-09-18",
+  "mapSearchTerms": [
+   "Institut Européen d’Administration des Affaires (INSEAD)",
+   "Decision Sciences"
+  ]
  },
  {
   "id": "insead__school-of-business__technology-and-operations-management",
@@ -5988,7 +6042,11 @@
   ],
   "n": 1,
   "lastPosted": "2014-09-15",
-  "suppressFacultyLink": true
+  "suppressFacultyLink": true,
+  "mapSearchTerms": [
+   "Institut Européen d’Administration des Affaires (INSEAD)",
+   "Technology and Operations Management"
+  ]
  },
  {
   "id": "institut-mines-telecom",
@@ -7317,7 +7375,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-05"
+  "lastPosted": "2026-09-05",
+  "mapSearchTerms": [
+   "School of Business",
+   "Business Administration"
+  ]
  },
  {
   "id": "miami-university____emerging-technology-in-business-and-design",
@@ -9920,7 +9982,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-18"
+  "lastPosted": "2025-11-18",
+  "mapSearchTerms": [
+   "School of Engineering",
+   "Department of Industrial and Systems Engineering"
+  ]
  },
  {
   "id": "rutgers-university____scm-second-position",
@@ -9933,7 +9999,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-12-08"
+  "lastPosted": "2025-12-08",
+  "mapSearchTerms": [
+   "Rutgers Business School - Newark and New Brunswick",
+   "Department of Supply Chain Management"
+  ]
  },
  {
   "id": "rutgers-university____supply-chain-management",
@@ -9946,7 +10016,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-07-31"
+  "lastPosted": "2025-07-31",
+  "mapSearchTerms": [
+   "Rutgers Business School - Newark and New Brunswick",
+   "Department of Supply Chain Management"
+  ]
  },
  {
   "id": "rutgers-university__school-of-business-camden__operations-management",
@@ -9992,7 +10066,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-18"
+  "lastPosted": "2025-11-18",
+  "mapSearchTerms": [
+   "School of Arts and Sciences",
+   "Department of Statistics - Reinforcement Learning"
+  ]
  },
  {
   "id": "saarland-university____fachrichtung-wirtschaftswissenschaft",
@@ -10384,7 +10462,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-23"
+  "lastPosted": "2026-07-23",
+  "mapSearchTerms": [
+   "School of Finance",
+   "Large Language Model Research Institute"
+  ]
  },
  {
   "id": "shanghai-jiao-tong-university____ba-om-or-stochastic-models-data-driven-ai",
@@ -10895,7 +10977,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-19"
+  "lastPosted": "2025-11-19",
+  "mapSearchTerms": [
+   "Dixie L. Leavitt School of Business",
+   "Department of Marketing, Entrepreneurship, Sales, and Analytics"
+  ]
  },
  {
   "id": "southwest-minnesota-state-university____business-technology",
@@ -11051,7 +11137,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-17"
+  "lastPosted": "2026-07-17",
+  "mapSearchTerms": [
+   "Gus Machado College of Business",
+   "Quantitative and Statistical Analysis, Supply Chain, Operations and Logistics Management, and Managerial Economics"
+  ]
  },
  {
   "id": "stanford-gsb____om",
@@ -11778,7 +11868,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Logistics and Supply Chain Management"
+  ]
  },
  {
   "id": "texas-a-m-university-corpus-christi__college-of-engineering-and-computer-science__industrial-engineering",
@@ -12890,7 +12984,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-24"
+  "lastPosted": "2026-02-24",
+  "mapSearchTerms": [
+   "School of Business, Education and Sport",
+   "Division of Business - Supply Chain Management"
+  ]
  },
  {
   "id": "ubc-sauder-school-of-business____om",
@@ -14708,7 +14806,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-05"
+  "lastPosted": "2026-10-05",
+  "mapSearchTerms": [
+   "Barney School of Business",
+   "Department of Business Insights"
+  ]
  },
  {
   "id": "university-of-hong-kong____ba",
@@ -15666,7 +15768,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-29"
+  "lastPosted": "2025-11-29",
+  "mapSearchTerms": [
+   "Faculty of Business and Economics",
+   "Department of Management and Marketing - Operations and Supply Chain Management"
+  ]
  },
  {
   "id": "university-of-melbourne__melbourne-business-school__faculty-of-business-and-economics",
@@ -15679,6 +15785,10 @@
   "sources": [
    "directory",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Business and Economics",
+   "Department of Management and Marketing - Operations and Supply Chain Management"
   ]
  },
  {
@@ -15691,6 +15801,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Melbourne Business School",
+   "Operations Management"
   ]
  },
  {
@@ -16120,6 +16234,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
+   "Operations, Information and Technology"
   ]
  },
  {
@@ -17992,7 +18110,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-06-05"
+  "lastPosted": "2026-06-05",
+  "mapSearchTerms": [
+   "Faculty of Science, Engineering and Medicine",
+   "Warwick Manufacturing Group, Applied Artificial Intelligence"
+  ]
  },
  {
   "id": "university-of-warwick__warwick-business-school__operations-management",
@@ -19185,6 +19307,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Otto Beisheim School of Management",
+   "Supply Chain Management Group"
   ]
  },
  {
@@ -19496,6 +19622,9 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "Center for Interdisciplinary Applied Mathematics"
+  ]
  }
 ]

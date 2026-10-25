@@ -101,7 +101,8 @@ try{
 
   const evidence=JSON.parse(fs.readFileSync(path.join(root,'data/school-map-locations.json'),'utf8')).records;
   const directory=JSON.parse(fs.readFileSync(path.join(root,'data/directory.json'),'utf8'));
-  const evidenceQueue=evidence.flatMap(location=>location.rowIds.map(id=>({location,id})));
+  const testRows=process.env.MAP_TEST_ROWS?new Set(process.env.MAP_TEST_ROWS.split(',')):null;
+  const evidenceQueue=evidence.flatMap(location=>location.rowIds.map(id=>({location,id}))).filter(item=>!testRows||testRows.has(item.id));
   const dubai=evidence.find(location=>location.id==='indian-institute-management-ahmedabad-dubai');
   if(dubai){
     const campus=await pageAt('?'+new URLSearchParams({university:dubai.institutionKey,country:'United Arab Emirates'}));
@@ -118,7 +119,7 @@ try{
       const q=await pageAt(new URL(url).search);
       try{await q.waitForSelector(row.department?'.oa-map-selected-department':'.oa-map-popup',{timeout:5000});}
       catch(error){throw new Error(id+': '+await q.locator('.oa-map-status').innerText(),{cause:error});}
-      if(location.locationGroup){
+      if(location.locationGroup && evidence.filter(candidate=>candidate.rowIds.includes(id)).length>1){
         const options=q.locator('.oa-map-location-options');
         assert.ok((await options.innerText()).includes(location.address),id+' offers its eligible host address');
         await options.getByRole('button',{name:location.school+' · '+location.department+' · '+location.building,exact:true}).click();
