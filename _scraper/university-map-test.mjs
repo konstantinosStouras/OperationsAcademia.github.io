@@ -51,7 +51,7 @@ assert.equal(nav.furtherInfoUrl({...job,furtherInfoUrl:'https://example.org/job'
 const errors=[];
 async function pageAt(query='',mobile=false){
   if(process.env.MAP_DEBUG_LOG)console.log('Opening map:',query||'(all)',mobile?'mobile':'desktop');
-  const p=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1280,height:1000}});
+  const p=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1280,height:1000},isMobile:mobile,hasTouch:mobile});
   p.on('pageerror',e=>errors.push(e.message));
   await p.route('**/*',r=>{
     const url=new URL(r.request().url());if(url.origin!==base)return r.abort();
@@ -100,6 +100,10 @@ try{
     await q.waitForSelector('.oa-map-selected-department');
     const popup=await q.locator('.oa-map-popup').innerText();
     assert.match(popup,/Gies College of Business/);
+    assert.equal(await q.locator('.oa-map-card-identity h3').innerText(),'Gies College of Business','school identity leads the card');
+    assert.equal(await q.locator('.oa-map-card-identity .oa-map-university-name').innerText(),university);
+    assert.equal(await q.locator('.oa-map-community').getAttribute('open'),null,'secondary links start collapsed');
+    assert.equal(await q.locator('.oa-map-primary-action').innerText(),'Current jobs');
     const addressLink=q.locator('.oa-map-popup .oa-map-address a');
     assert.equal(await addressLink.count(),1,'the address is the map link');
     const addressUrl=new URL(await addressLink.getAttribute('href'));
@@ -113,11 +117,23 @@ try{
       const p=document.querySelector('.oa-map-popup').getBoundingClientRect(),m=document.querySelector('.oa-uni-map').getBoundingClientRect();
       return p.left>=m.left&&p.right<=m.right&&p.top>=m.top&&p.bottom<=m.bottom;
     });
+    await q.locator('.oa-map-community > summary').click();
+    assert.equal(await q.locator('.oa-map-community a').count(),4,'community navigation remains available');
+    await q.locator('.oa-map-community > summary').click();
+    if(mobile){
+      await q.setViewportSize({width:320,height:740});
+      await q.waitForFunction(()=>{const popup=document.querySelector('.oa-map-popup').getBoundingClientRect(),map=document.querySelector('.oa-uni-map').getBoundingClientRect();return popup.left>=map.left&&popup.right<=map.right;});
+      assert.equal(await q.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'narrow phone has no horizontal overflow');
+      assert.ok(await q.locator('.leaflet-popup-close-button').evaluate(n=>n.getBoundingClientRect().width>=44),'close target is touch sized');
+      assert.ok(await q.locator('.oa-map-department-name a').first().evaluate(n=>n.getBoundingClientRect().height>=44),'department faculty link is touch sized');
+      await q.evaluate(()=>document.documentElement.setAttribute('data-theme','dark'));
+    }
     if(process.env.MAP_SCREENSHOT_DIR)await q.locator('.oa-uni-map').screenshot({path:path.join(process.env.MAP_SCREENSHOT_DIR,mobile?'map-phone.png':'map-desktop.png')});
     await q.locator('.leaflet-popup-close-button').click();
     await q.evaluate(()=>testMap.refresh());
     await q.waitForFunction(()=>!document.querySelector('.oa-map-popup'));
     assert.equal(await q.locator('.oa-map-popup').count(),0,'refresh does not reopen a dismissed popup');
+    assert.equal(await q.locator('.leaflet-control-zoom-in').isVisible(),true,'map controls return after closing the card');
     await q.close();
   }
   const eng=await pageAt(new URL(nav.furtherInfoUrl({...job,school:'The Grainger College of Engineering',unit:'Industrial and Enterprise Systems Engineering'})).search);
@@ -138,6 +154,33 @@ try{
   // Filtering must not change their representative or strip sibling departments.
   const baselinePage=await pageAt();
   const physicalBaseline=await baselinePage.evaluate(()=>testMap.shown());
+  const cardAudit=await baselinePage.evaluate(()=>{
+    const list=document.querySelector('.oa-map-results');list.open=true;list.dispatchEvent(new Event('toggle'));
+    list.querySelectorAll('li > details').forEach(entry=>{entry.open=true;entry.dispatchEvent(new Event('toggle'));});
+    const points=new Map(testMap.shown().map(point=>[point.card.id,point]));
+    const failures=[];let cards=0,facultyLinks=0,missing=0;
+    list.querySelectorAll('.oa-uni-pop').forEach(pop=>{
+      const point=points.get(pop.dataset.mapCardId);if(!point)return;cards++;
+      const expected=point.card.schools.flatMap(s=>s.rows).filter(r=>OAMapModel.departmentName(r.department));
+      const actual=Array.from(pop.querySelectorAll('.oa-map-department'));
+      if(expected.length!==actual.length)failures.push(point.card.id+' department coverage');
+      expected.forEach(row=>{
+        const name=OAMapModel.departmentName(row.department);
+        const match=actual.find(node=>node.querySelector('.oa-map-department-name').textContent===name);
+        if(!match){failures.push(point.card.id+' missing '+name);return;}
+        const links=match.querySelectorAll('.oa-map-department-name a');
+        const faculty=!row.suppressFacultyLink&&/^https?:\/\//i.test(row.facultyUrl||'')?row.facultyUrl:'';
+        if(faculty){facultyLinks++;if(links.length!==1||links[0].getAttribute('href')!==faculty)failures.push(point.card.id+' faculty destination');}
+        else{missing++;if(links.length||!match.textContent.includes('Faculty page not listed'))failures.push(point.card.id+' invented faculty destination');}
+      });
+      if(!pop.querySelector('.oa-map-card-identity h3')||!pop.querySelector('.oa-map-primary-action')||pop.querySelector('.oa-map-community').open)failures.push(point.card.id+' card structure');
+      if(Array.from(pop.querySelectorAll('a')).some(a=>a.textContent==='Faculty'||a.textContent==='Department'))failures.push(point.card.id+' duplicate link labels');
+    });
+    return {cards,facultyLinks,missing,failures};
+  });
+  assert.equal(cardAudit.cards,physicalBaseline.length,'every physical map card follows the shared renderer');
+  assert.deepEqual(cardAudit.failures,[]);
+  console.log('Uniform card and faculty-link audit:',JSON.stringify(cardAudit));
   await baselinePage.close();
   const byEvidence=new Map();
   for(const point of physicalBaseline)for(const id of point.sourceEvidenceIds||[]){
@@ -249,10 +292,10 @@ try{
         await q.waitForFunction(()=>document.querySelectorAll('.oa-map-popup').length===1&&!document.querySelector('.oa-map-location-options'));
       }
       assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.address),id+' opens its verified address');
-      if((id.startsWith('insead__')||id.startsWith('university-of-alaska-'))&&row.department&&row.deptUrl){
+      if((id.startsWith('insead__')||id.startsWith('university-of-alaska-'))&&row.department&&row.facultyUrl){
         const selected=q.locator('.oa-map-selected-department');
-        assert.equal(await selected.locator('a').first().getAttribute('href'),row.deptUrl,id+' shows the official department link');
-        if(row.facultyUrl)assert.equal(await selected.getByRole('link',{name:'Faculty',exact:true}).getAttribute('href'),row.facultyUrl,id+' shows the official faculty link');
+        assert.equal(await selected.locator('.oa-map-department-name a').getAttribute('href'),row.facultyUrl,id+' department name links directly to faculty');
+        assert.equal(await selected.getByRole('link',{name:'Faculty',exact:true}).count(),0,'no separate faculty label');
       }
       if(displayLocation.locationPrecision==='campus')assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.locationContext),id+' explains campus fallback');
       assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[displayLocation.lat,displayLocation.lng],id+' opens the representative school pin');

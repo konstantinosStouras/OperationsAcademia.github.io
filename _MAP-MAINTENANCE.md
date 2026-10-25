@@ -21,6 +21,14 @@ department. It never borrows another department's links merely because they
 share a school card. Add official corrections here instead of editing the
 generated directory.
 
+Map cards lead with the school name and logo, then the university and linked
+address. A department's full display name links only to its faculty URL; do
+not substitute the department homepage when that URL is missing. Missing
+faculty pages are labelled plainly. Current jobs and the university profile
+remain visible, community/history links are collapsed, and verification dates
+appear in the footer. The map and its accessible results list share this
+renderer, including for newly published postings.
+
 After source changes, run `node _scraper/build-directory.mjs` and
 `node _scraper/build-map-data.mjs`. Both posting and affiliation publication
 paths rebuild the map. The map payload omits research notes and secondary

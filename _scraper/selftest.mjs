@@ -8390,8 +8390,8 @@ async function testDirectoryWiring() {
   ok(dir.filter((r) => r.deptUrl).length >= 150,
     'data/directory.json carries the department links the OM list supplies');
   const mapSource = await readFile(path.join(HERE, '..', 'assets', 'oa-uni-map.js'), 'utf8');
-  ok(page.includes('snapshot: directorySnapshot') && mapSource.includes('(card.schools||[])') && mapSource.includes('r.deptUrl'),
-    'universities.html supplies the same directory departments and links to map popups');
+  ok(page.includes('snapshot: directorySnapshot') && mapSource.includes('(card.schools||[])') && mapSource.includes('r.facultyUrl'),
+    'universities.html supplies the directory departments and their faculty links to map popups');
 }
 
 /* ------------------------------------------------------------------------
