@@ -15337,6 +15337,71 @@
       "locationContext": "Corporate headquarters; the hiring team location is not confirmed.",
       "notes": "Microsoft official corporate facts provide One Microsoft Way; https://www.microsoft.com/en-us/about/office-locations confirms the Redmond global headquarters campus. Coordinates are the external named headquarters campus geocode, not an Applied Science office. The user explicitly requested headquarters in Redmond for this record. No source identifies a specific hiring team location. The user explicitly authorized campus or institutional fallback locations when the exact department building cannot be established.",
       "country": "United States"
+    },
+    {
+      "id": "minnesota-state-mankato-computer-information-science-wissink",
+      "institution": "Minnesota State University, Mankato",
+      "school": "College of Science, Engineering and Technology",
+      "department": "Department of Computer Information Science",
+      "building": "Wissink Hall",
+      "address": "273 Wissink Hall, Mankato, MN 56001, United States",
+      "lat": 44.14806,
+      "lng": -93.99762,
+      "addressSource": "https://cset.mnsu.edu/departments/computer-information-science/",
+      "coordinateSource": "https://mapcarta.com/W170831802",
+      "supportingSources": [
+        "https://mankato.mnsu.edu/about-the-university/fast-facts/buildings/"
+      ],
+      "checked": "2026-10-25",
+      "country": "United States",
+      "notes": "Official department and hiring advert identify Computer Information Science in Wissink Hall, separate from the existing Management and Entrepreneurship location in Morris Hall. Coordinates identify the named Wissink Hall building (OpenStreetMap way 170831802), not a general university center.",
+      "rowIds": [
+        "minnesota-state-university-mankato__college-of-science-engineering-and-technology__computer-information-science"
+      ]
+    },
+    {
+      "id": "rhode-island-mechanical-industrial-systems-fascitelli",
+      "institution": "University of Rhode Island",
+      "school": "College of Engineering",
+      "department": "Department of Mechanical, Industrial and Systems Engineering",
+      "building": "Fascitelli Center for Advanced Engineering",
+      "address": "Room 260, 2 East Alumni Avenue, Kingston, RI 02881, United States",
+      "lat": 41.48799,
+      "lng": -71.52636,
+      "addressSource": "https://web.uri.edu/mcise/contact/",
+      "coordinateSource": "https://mapcarta.com/W966637672",
+      "supportingSources": [
+        "https://web.uri.edu/mcise/",
+        "https://jobs.uri.edu/postings/17217"
+      ],
+      "checked": "2026-10-25",
+      "country": "United States",
+      "notes": "Official department contact locates the hiring department in Fascitelli Center room 260. Industrial and Systems Engineering is a program within this department. Coordinates identify the named Fascitelli building (OpenStreetMap way 966637672), not the Google embed viewport center or the older Kirk Hall address.",
+      "rowIds": [
+        "university-of-rhode-island__college-of-engineering__mechanical-industrial-and-systems-engineering"
+      ]
+    },
+    {
+      "id": "adelphi-decision-sciences-marketing-hagedorn",
+      "institution": "Adelphi University",
+      "school": "Robert B. Willumstad School of Business",
+      "department": "Decision Sciences and Marketing Department",
+      "building": "Hagedorn Hall of Enterprise",
+      "address": "Room 334, Hagedorn Hall of Enterprise, Garden City, NY 11530, United States",
+      "lat": 40.7212717,
+      "lng": -73.6512451,
+      "addressSource": "https://www.adelphi.edu/directory/?filters%5Bdepartment%5D=decision-sciences-and-marketing-department",
+      "coordinateSource": "https://www.openstreetmap.org/way/589561114",
+      "supportingSources": [
+        "https://www.adelphi.edu/business/faculty/decision-sciences-and-marketing/",
+        "https://www.adelphi.edu/faculty/profiles/profile.php?PID=0075"
+      ],
+      "rowIds": [
+        "adelphi-university__robert-b-willumstad-school-of-business__decision-sciences-and-marketing"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department directory identifies Decision Sciences and Marketing Department in room334. Current MIS and business analytics faculty are assigned to this department. Reuses the verified Hagedorn building point already used by Management, without moving that separate department.",
+      "locationIdentity": "adelphi-management-hagedorn"
     }
   ]
 }

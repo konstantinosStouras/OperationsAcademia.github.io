@@ -263,7 +263,11 @@
     { u: 'Western University', s: 'Ivey Business School', d: ['Operations Management'] },
     { u: 'WHU – Otto Beisheim School of Management', s: 'Otto-Beisheim School of Management', d: ['Supply Chain Management'] },
     { u: 'Yale University', s: 'School of Management', d: ['Operations'] },
-    { u: 'York University', s: 'Schulich School of Business', d: ['Operations Management and Information Systems'] }
+    { u: 'York University', s: 'Schulich School of Business', d: ['Operations Management and Information Systems'] },
+    // Official hiring departments and department pages checked 2026-10-25.
+    { u: 'Adelphi University', s: 'Robert B. Willumstad School of Business', d: ['Decision Sciences and Marketing'] },
+    { u: 'Minnesota State University, Mankato', s: 'College of Science, Engineering and Technology', d: ['Computer Information Science'] },
+    { u: 'University of Rhode Island', s: 'College of Engineering', d: ['Mechanical, Industrial and Systems Engineering'] }
   ];
 
   /* ------------------------------------------------------------------ folding */
