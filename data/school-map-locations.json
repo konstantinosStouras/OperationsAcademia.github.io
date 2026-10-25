@@ -8005,6 +8005,902 @@
       ],
       "checked": "2026-10-25",
       "notes": "Official department chair curriculum vitae explicitly gives room 304 at 5 Liberty Street and his Supply Chain and Information Management chair appointment. Exact named Beatty Center building footprint at this numbered address; coordinates are footprint bounds center, not campus centroid."
+    },
+    {
+      "id": "ghent-product-system-design-kortrijk",
+      "institution": "Ghent University",
+      "school": "Faculty of Engineering and Architecture",
+      "department": "Industrial Systems Engineering and Product Design",
+      "building": "Industrial Design Center",
+      "address": "Marksesteenweg 58, 8500 Kortrijk, Belgium",
+      "lat": 50.8215408,
+      "lng": 3.250448,
+      "addressSource": "https://www.ugent.be/ea/design-nexus/en/contact",
+      "coordinateSource": "https://www.ugent.be/ea/design-nexus/en/contact",
+      "supportingSources": [
+        "https://jobs.ugent.be/job/Kortrijk-Professor-in-Product-System-Design-for-Industry-5_0-8500/1370857557/",
+        "https://www.ugent.be/ea/design-nexus/en/about-design-nexus"
+      ],
+      "notes": "Official recruitment specifies Kortrijk. Research group contact distinguishes actual offices at Marksesteenweg 58 from postal address; coordinates are its embedded destination marker, not map viewport.",
+      "rowIds": [
+        "ghent-university__faculty-of-engineering-and-architecture__industrial-systems-engineering-and-product-design"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "southern-denmark-supply-chain-alsion",
+      "institution": "University of Southern Denmark",
+      "school": "Faculty of Engineering",
+      "department": "Technology and Innovation, Center for Supply Chain Digitalisation",
+      "building": "Alsion, Block E, Fourth Floor",
+      "address": "Alsion 2, 6400 Sønderborg, Denmark",
+      "lat": 54.9130368,
+      "lng": 9.7792788,
+      "addressSource": "https://www.sdu.dk/en/forskning/sdu_center_for_supply_chain_digitalisation/contact",
+      "coordinateSource": "https://www.openstreetmap.org/way/24289294",
+      "supportingSources": [
+        "https://sdunet.dk/-/media/files/om_sdu/beredskab/oversigtskort/soenderborg/beredskabskort_soenderborg_level_0_130524.pdf",
+        "https://fa-eosd-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/job/4245/"
+      ],
+      "notes": "Official center contact updated June 2026 identifies fourth floor Block E at Alsion in Sønderborg, not the Odense engineering campus. Marker locates the connected Alsion building.",
+      "rowIds": [
+        "university-of-southern-denmark__faculty-of-engineering__technology-and-innovation-center-for-supply-chain-digitalisa"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "kimep-operations-dostyk",
+      "institution": "KIMEP University",
+      "school": "Bang College of Business",
+      "department": "Operations Management and Business Analytics",
+      "building": "Dostyk Building",
+      "address": "2 Abay Avenue, Almaty 050010, Kazakhstan",
+      "lat": 43.24228,
+      "lng": 76.95662,
+      "addressSource": "https://www.kimep.kz/about/files/2025/07/Catalog-2025-2026_final.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/1459001135",
+      "supportingSources": [
+        "https://hr.kimep.kz/Files/general-useful-information-for-incoming-faculty-members.pdf",
+        "https://hr.kimep.kz/en-US/Home/Vacancy/791"
+      ],
+      "notes": "Current official catalogue locates business college in Dostyk. Official campus map identifies eastern Dostyk wing, distinct from Valikhanov and New Academic buildings; marker placed within this wing footprint.",
+      "rowIds": [
+        "kimep-university__bang-college-of-business__operations-management-and-business-analytics",
+        "kimep-university____om"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "southern-illinois-analytics-rehn",
+      "institution": "Southern Illinois University",
+      "school": "College of Business and Analytics",
+      "department": "School of Analytics, Finance, and Economics",
+      "building": "Henry J. Rehn Hall, Room 134",
+      "address": "1025 Lincoln Drive, Carbondale, Illinois 62901, United States",
+      "lat": 37.7167384,
+      "lng": -89.2228049,
+      "addressSource": "https://afe.siu.edu/analytics/",
+      "coordinateSource": "https://www.openstreetmap.org/way/180319670",
+      "supportingSources": [
+        "https://catalog.siu.edu/colleges/by.php",
+        "https://faculty.siu.edu/profiles/m-p/perry-ty.php"
+      ],
+      "notes": "Official business analytics program contact identifies host school and Rehn Hall office, corroborated by analytics faculty office.",
+      "rowIds": [
+        "southern-illinois-university____business-analytics"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "tampa-information-technology-jenkins",
+      "institution": "University of Tampa",
+      "school": "Sykes College of Business",
+      "department": "Information and Technology Management",
+      "building": "Jenkins Technology Building, Room 581D",
+      "address": "401 West Kennedy Boulevard, Tampa, Florida 33606, United States",
+      "lat": 27.9479116,
+      "lng": -82.4667635,
+      "addressSource": "https://www.ut.edu/academics/sykes-college-of-business/information-and-technology-management-itm-degrees/itm-faculty",
+      "coordinateSource": "https://www.openstreetmap.org/way/992014317",
+      "supportingSources": [
+        "https://www.ut.edu/campus-buildings"
+      ],
+      "notes": "Current department chair and faculty directory place the department in Jenkins Technology Building, separate from the Sykes business building and Jenkins residence.",
+      "rowIds": [
+        "university-of-tampa__sykes-college-of-business__information-and-technology-management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "oklahoma-state-business-158",
+      "institution": "Oklahoma State University",
+      "school": "Spears School of Business",
+      "department": "Management Science and Information Systems, Center for Health Systems Innovation",
+      "building": "Business Building, Room 370",
+      "address": "111 North Hester Street, Stillwater, Oklahoma 74078, United States",
+      "lat": 36.1225771,
+      "lng": -97.0669796,
+      "addressSource": "https://business.okstate.edu/chsi",
+      "coordinateSource": "https://www.openstreetmap.org/way/539548104",
+      "rowIds": [
+        "oklahoma-state-university__spears-school-of-business__management-science-and-information-systems-center-for-health"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "oklahoma-state-business-159",
+      "institution": "Oklahoma State University",
+      "school": "Spears School of Business",
+      "department": "Management Science and Information Systems",
+      "building": "Business Building, Room 449",
+      "address": "111 North Hester Street, Stillwater, Oklahoma 74078, United States",
+      "lat": 36.1225771,
+      "lng": -97.0669796,
+      "addressSource": "https://business.okstate.edu/departments_programs/msis/meet_the_department",
+      "coordinateSource": "https://www.openstreetmap.org/way/539548104",
+      "rowIds": [
+        "oklahoma-state-university____mis"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "georgia-southern-parker-isa",
+      "institution": "Georgia Southern University",
+      "school": "Parker College of Business",
+      "department": "Information Systems and Analytics",
+      "building": "Parker College of Business Building, Room 2202",
+      "address": "621 College of Business Administration Drive, Statesboro, Georgia 30458, United States",
+      "lat": 32.422537,
+      "lng": -81.78595,
+      "addressSource": "https://www.georgiasouthern.edu/colleges/parker-business/departments/isa/student-resources",
+      "coordinateSource": "https://www.openstreetmap.org/way/358413024",
+      "supportingSources": [
+        "https://www.georgiasouthern.edu/research/impact-areas/logistics-and-supply-chain-innovations"
+      ],
+      "rowIds": [
+        "georgia-southern-university__parker-college-of-business__information-systems-and-analytics"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "georgia-southern-parker-logistics-supply-chain-management",
+      "institution": "Georgia Southern University",
+      "school": "Parker College of Business",
+      "department": "Logistics and Supply Chain Management",
+      "building": "Parker College of Business Building, Room 3309",
+      "address": "621 College of Business Administration Drive, Statesboro, Georgia 30458, United States",
+      "lat": 32.422537,
+      "lng": -81.78595,
+      "addressSource": "https://www.georgiasouthern.edu/colleges/parker-business/departments/logistics-supply-chain-management/student-resources",
+      "coordinateSource": "https://www.openstreetmap.org/way/358413024",
+      "supportingSources": [
+        "https://www.georgiasouthern.edu/research/impact-areas/logistics-and-supply-chain-innovations"
+      ],
+      "rowIds": [
+        "georgia-southern-university__parker-college-of-business__logistics-and-supply-chain-management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "institution": "Sabanci University",
+      "rowIds": [
+        "sabanci-university__sabanci-business-school__business-analytics-and-information-systems"
+      ],
+      "id": "sabanci-operations-information-management-fman",
+      "school": "Sabancı Business School",
+      "department": "Operations and Information Management",
+      "building": "Sabancı Business School building",
+      "address": "Sabanci University Tuzla Campus, Orta Mahalle, 34956 Tuzla, Istanbul, Türkiye",
+      "lat": 40.8919607,
+      "lng": 29.3790354,
+      "addressSource": "https://sbs.sabanciuniv.edu/en/careers",
+      "coordinateSource": "https://www.openstreetmap.org/relation/4809176",
+      "supportingSources": [
+        "https://iro.sabanciuniv.edu/sites/iro.sabanciuniv.edu/files/SU_international_students_guide_undergraduate_24-25.pdf",
+        "https://www.sabanciuniv.edu/en/campus-map",
+        "https://sbs.sabanciuniv.edu/en/faculty-members-research-area/820",
+        "https://www.sabanciuniv.edu/en/node/1197"
+      ],
+      "notes": "Official school careers page links this business analytics and information systems opening. Campus guide explicitly identifies the business school building as FMAN/SBS, building 3. Exact named FMAN building footprint corroborated with current university map. No individual office room is assigned from old syllabi.",
+      "checked": "2026-10-25"
+    },
+    {
+      "institution": "Technical University of Munich",
+      "rowIds": [
+        "technical-university-of-munich____computer-science"
+      ],
+      "id": "technical-university-munich-computer-science-garching",
+      "school": "School of Computation, Information and Technology",
+      "department": "Department of Computer Science",
+      "building": "Mathematics and Informatics Building",
+      "address": "Boltzmannstrasse 3, 85748 Garching bei München, Germany",
+      "lat": 48.2625535,
+      "lng": 11.6680432,
+      "addressSource": "https://www.cit.tum.de/en/cit/school/locations/",
+      "coordinateSource": "https://www.openstreetmap.org/way/27917482",
+      "supportingSources": [
+        "https://portal.mytum.de/jobs/sonstige/NewsArticle_20250225_120727/PDF-Stellenanzeige",
+        "https://www.cs.cit.tum.de/en/cs/home/"
+      ],
+      "notes": "Official locations page explicitly places Computer Science in the Mathematics/Informatics building at Boltzmannstrasse 3; official department-manager recruitment confirms department administration is at Garching Research Campus. Uses exact named building footprint, not central Munich university point. This general department record represents its Garching headquarters; the university also lists Computer Science activities in Heilbronn.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "catolica-lisbon-operations-data-science-building-five",
+      "institution": "Universidade Católica Portuguesa",
+      "rowIds": [
+        "universidade-catolica-portuguesa__catolica-lisbon-school-of-business-and-economics__operations-and-data-science"
+      ],
+      "school": "Católica Lisbon School of Business and Economics",
+      "department": "Operations and Data Science",
+      "building": "Building 5 — Católica Lisbon School of Business and Economics",
+      "address": "Palma de Cima, 1649-023 Lisboa, Portugal",
+      "lat": 38.7488,
+      "lng": -9.1649,
+      "addressSource": "https://www.clsbe.lisboa.ucp.pt/glance/contacts-directions",
+      "coordinateSource": "https://www.clsbe.lisboa.ucp.pt/glance/contacts-directions",
+      "supportingSources": [
+        "https://clsbe.lisboa.ucp.pt/glance/campus",
+        "https://catolicalaw.fd.lisboa.ucp.pt/about-overview/campus-0",
+        "https://www.openstreetmap.org/way/239939624"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official business school contact page supplies GPS coordinates and identifies its separate building 5. Official campus description and diagram corroborate this business school building distinct from law/theology and rectorate/library. Published point falls within building 5 footprint (OpenStreetMap way239939624), not a university centroid."
+    },
+    {
+      "id": "ahmedabad-amrut-mody-heritage",
+      "institution": "Ahmedabad University",
+      "rowIds": [
+        "ahmedabad-university__amrut-mody-school-of-management__data-analytics-decision-sciences-information-systems-innovat"
+      ],
+      "school": "Amrut Mody School of Management",
+      "department": "Data Analytics, Decision Sciences, Information Systems, Innovation and Technology Management, Operations Management, Operations Research, and Applied Statistics",
+      "building": "Amrut Mody School of Management Heritage Building",
+      "address": "Central Campus, Navrangpura, Ahmedabad 380009, Gujarat, India",
+      "lat": 23.0368936,
+      "lng": 72.5535982,
+      "addressSource": "https://ahduni.edu.in/academics/schools-centres/amrut-mody-school-of-management/",
+      "coordinateSource": "https://www.openstreetmap.org/way/374538122",
+      "supportingSources": [
+        "https://ahduni.edu.in/site/assets/files/6931/course_catalogue_2025-2026.pdf",
+        "https://ahduni.edu.in/academics/libraries/services-facilities-1/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The current school homepage explicitly identifies its move to the Art Deco Heritage Building. The 2025-2026 course catalogue places its management programmes there, and the library page identifies its Bloomberg laboratory in Heritage Building room 09. Coordinates identify the exact named school building footprint, not the university campus centroid."
+    },
+    {
+      "id": "tennessee-wesleyan-business-elliott",
+      "institution": "Tennessee Wesleyan University",
+      "rowIds": [
+        "tennessee-wesleyan-university__goodfriend-college-of-business-and-professional-studies__business-administration"
+      ],
+      "school": "Goodfriend College of Business and Professional Studies",
+      "department": "Business Administration",
+      "building": "Elliott Hall",
+      "address": "Elliott Hall, Coach Farmer Drive, Athens, Tennessee 37303, United States",
+      "lat": 35.44698865,
+      "lng": -84.59373725,
+      "addressSource": "https://www.tnwesleyan.edu/wp-content/uploads/2025/08/TWU.Academic-Catalog-2025-2026_website.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/496780057",
+      "supportingSources": [
+        "https://www.tnwesleyan.edu/wp-content/uploads/2023/11/TWU-Campus-Map-rev12_2025.png",
+        "https://www.tnwesleyan.edu/academic-restructuring/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The 2025-2026 academic catalogue page 13 explicitly houses the School of Business in Elliott Hall. The current campus map identifies Elliott Hall as building 15, on the northwest side of the library at the end of Coach Farmer Drive. Coordinates are the midpoint of the matching rectangular building footprint, corroborated against that map, not the university centroid. College name follows the official 2024 restructuring announcement."
+    },
+    {
+      "id": "leuven-business-operations-hogenheuvelcollege",
+      "institution": "Katholieke Universiteit Leuven",
+      "institutionKey": "ku-leuven",
+      "rowIds": [
+        "ku-leuven__faculty-of-economics-and-business",
+        "ku-leuven____economics-and-business"
+      ],
+      "school": "Faculty of Economics and Business",
+      "department": "Operations Management Research Group",
+      "building": "Hogenheuvelcollege",
+      "address": "Naamsestraat 69, box 3555, 3000 Leuven, Belgium",
+      "lat": 50.8746733,
+      "lng": 4.7009918,
+      "addressSource": "https://www.kuleuven.be/wieiswie/en/person/00123235",
+      "coordinateSource": "https://www.openstreetmap.org/way/448309343",
+      "supportingSources": [
+        "https://www.kuleuven.be/personeel/jobsite/jobs/proxy/download/60640174",
+        "https://feb.kuleuven.be/contact",
+        "https://www.kuleuven.be/kulag/en/gebouw/172-32",
+        "https://admin.kuleuven.be/sab/jd/en/id-sheet"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The linked posting, downloaded from its Google Drive attachment and matched to official vacancy ZAP-2026-32, explicitly requires commitment to the Leuven campus and joins Operations Management, despite teaching across other campuses. Search chair Jannik Matuschke occupies room 04.123 at Naamsestraat 69. The faculty contact page identifies this as the Leuven main building. Official building guide confirms Hogenheuvelcollege at that address; coordinates are its exact building footprint, not the erroneous viewport parameters in the embedded university map URL. Full legal institution name is used first per user instruction; KU Leuven remains the alias."
+    },
+    {
+      "id": "st-johns-business-analytics-bent",
+      "institution": "St. John's University",
+      "rowIds": [
+        "st-john-s-university__peter-j-tobin-college-of-business__business-analytics-and-information-systems",
+        "st-john-s-university____business-analytics"
+      ],
+      "school": "Peter J. Tobin College of Business",
+      "department": "Department of Business Analytics and Information Systems",
+      "building": "Bent Hall",
+      "address": "Bent Hall, Room 414, 8000 Utopia Parkway, Queens, New York 11439, United States",
+      "lat": 40.7234443,
+      "lng": -73.7943028,
+      "addressSource": "https://www.stjohns.edu/academics/programs/business-analytics-master-science",
+      "coordinateSource": "https://www.openstreetmap.org/way/248317322",
+      "supportingSources": [
+        "https://www.stjohns.edu/offices-departments/business-analytics-information-systems",
+        "https://www.stjohns.edu/sites/default/files/2019-02/m1-10649_queens_map_legend.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The official programme page places Business Analytics on the Queens campus and identifies faculty programme director Yanni Ping in Bent Hall room 414. The official campus map labels Bent Hall building 6; coordinates identify that exact building footprint, not the campus location."
+    },
+    {
+      "id": "abilene-management-information-systems-mabee",
+      "institution": "Abilene Christian University",
+      "rowIds": [
+        "abilene-christian-university__college-of-business-administration__management-science",
+        "abilene-christian-university____is"
+      ],
+      "school": "College of Business Administration",
+      "department": "Department of Management Sciences — Information Systems",
+      "building": "Mabee Business Building",
+      "address": "Mabee Business Building, ACU Drive, Abilene, Texas 79699, United States",
+      "lat": 32.467621,
+      "lng": -99.7069805,
+      "addressSource": "https://acu.edu/faculty/brent-reeves/",
+      "coordinateSource": "https://www.openstreetmap.org/way/474837985",
+      "supportingSources": [
+        "https://acu.edu/academics/business-administration/coba-faculty/",
+        "https://acu.edu/wp-content/uploads/2024/10/ACU-Campus-Map-5.25-2.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The current faculty directory places Brent Reeves in Management Sciences and Information Technology and Computing, and his faculty profile identifies Mabee Business Building room 273. Both source rows advertise Information Systems. The official 2025 campus map identifies this as building 46; the exact named business-building footprint supplies coordinates, distinct from Mabee residence hall."
+    },
+    {
+      "id": "calvin-business-analytics-devos",
+      "institution": "Calvin University",
+      "rowIds": [
+        "calvin-university__school-of-business__business-analytics"
+      ],
+      "school": "School of Business",
+      "department": "Business Analytics",
+      "building": "DeVos Communication Center",
+      "address": "Room 265, DeVos Communication Center, 1810 East Beltline Avenue SE, Grand Rapids, Michigan 49546-5951, United States",
+      "lat": 42.9302,
+      "lng": -85.58332,
+      "addressSource": "https://calvin.edu/people/bernardo-hargous",
+      "coordinateSource": "https://calvin.edu/places/devos-communication-center",
+      "supportingSources": [
+        "https://calvin.edu/taxonomy/term/450?page=7",
+        "https://calvin.edu/places/school-business"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The Business Analytics programme identifies Bernardo Hargous as faculty, and his current faculty profile places his office in DeVos Communication Center room 265. The official building page supplies these coordinates. This department office point is distinguished from the adjacent School of Business classroom addition to the south."
+    },
+    {
+      "id": "long-beach-information-systems-business-building",
+      "institution": "California State University, Long Beach",
+      "rowIds": [
+        "california-state-university-long-beach__college-of-business__information-systems"
+      ],
+      "school": "College of Business",
+      "department": "Department of Information Systems",
+      "building": "College of Business Building",
+      "address": "Room 426, College of Business Building, 1250 Bellflower Boulevard, Long Beach, California 90840, United States",
+      "lat": 33.7840578,
+      "lng": -118.1160851,
+      "addressSource": "https://web.csulb.edu/colleges/cob/contact/index.php?dept=4",
+      "coordinateSource": "https://www.openstreetmap.org/relation/6573042",
+      "supportingSources": [
+        "https://www.csulb.edu/college-of-business/information-systems"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The current Information Systems directory locates department chair Banafsheh Behzad in College of Business room 426 and department faculty throughout its fourth floor. Coordinates identify the exact named business-building footprint, not the university coordinates."
+    },
+    {
+      "id": "south-carolina-aiken-management-science-business-education",
+      "institution": "University of South Carolina Aiken",
+      "rowIds": [
+        "university-of-south-carolina-aiken__school-of-business-administration__management-science"
+      ],
+      "school": "School of Business Administration",
+      "department": "Management Science",
+      "building": "Business and Education Building",
+      "address": "Room 223, Business and Education Building, 452 Scholar Loop, Aiken, South Carolina 29801, United States",
+      "lat": 33.5740304,
+      "lng": -81.7689033,
+      "addressSource": "https://www.usca.edu/academics/soba/",
+      "coordinateSource": "https://www.openstreetmap.org/way/540899037",
+      "supportingSources": [
+        "https://uscjobs.sc.edu/postings/211807"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The official Management Science vacancy identifies School of Business Administration and its dean Ravi Narayanaswamy as the host. The current school contact page locates the academic office in Business and Education room 223. Coordinates identify the exact named building footprint and street address, not Penland Administration or the campus centroid."
+    },
+    {
+      "id": "virginia-darden-data-analytics-faculty-office",
+      "institution": "University of Virginia",
+      "institutionKey": "Virgina Darden",
+      "rowIds": [
+        "virgina-darden____dads"
+      ],
+      "school": "Darden School of Business",
+      "department": "Data Analytics and Decision Sciences",
+      "building": "Faculty Office Building",
+      "address": "Faculty Office Building, 100 Darden Boulevard, Charlottesville, Virginia 22903, United States",
+      "lat": 38.052,
+      "lng": -78.51444767,
+      "addressSource": "https://www.darden.virginia.edu/faculty-research/directory/rupert-freeman",
+      "coordinateSource": "https://www.openstreetmap.org/relation/4218706",
+      "supportingSources": [
+        "https://www.darden.virginia.edu/faculty-research/academic-areas/data-analytics-decision-sciences",
+        "https://www.darden.virginia.edu/faculty-research/directory/saed-alizamir",
+        "https://apply.darden.virginia.edu/www/documents/Darden%20Self-Guided%20Tour.pdf",
+        "https://giving.darden.virginia.edu/about-campaign/grounds-technology-innovation/faculty-office-building"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current academic-area faculty Rupert Freeman office252 and Saed Alizamir169 explicitly in Faculty Office Building. Official floor plan identifies southeastern long faculty-office wing separate from Saunders Hall central entrance and southwestern classroom wing. External composite footprint relation is generically named Saunders Hall but contains entire connected complex; point selected inside correct southeastern faculty-office wing at latitude38.052, midpoint of eastern solid-building interval, excluding courtyard holes. Current renovation page schedules construction summer2027, not older proposed2026 timeline. Institution spelling and abbreviations corrected in display while stable key retained."
+    },
+    {
+      "id": "wisconsin-stout-operations-jarvis-technology",
+      "institution": "University of Wisconsin–Stout",
+      "institutionKey": "University of Wisconsin-Stout",
+      "rowIds": [
+        "university-of-wisconsin-stout____om"
+      ],
+      "school": "School of Management",
+      "department": "Operations and Management Department",
+      "building": "Jarvis Hall Technology Wing",
+      "address": "Jarvis Hall Technology Wing, 410 10th Avenue East, Menomonie, Wisconsin 54751, United States",
+      "lat": 44.87251,
+      "lng": -91.925345,
+      "addressSource": "https://www.uwstout.edu/academics/colleges-schools/college-science-technology-engineering-mathematics-management/school-management/operations-management-department",
+      "coordinateSource": "https://snazzymaps.com/embed/4378",
+      "supportingSources": [
+        "https://www.uwstout.edu/maps-directions",
+        "https://www.uwstout.edu/a-to-z-directory/D"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Department contact Renee Surdick281E and department chair John Dzissah234 both explicitly Jarvis Hall Technology Wing. Official campus map embedded SnazzyMaps marker named Jarvis Hall Technology Wing distinguishes this southern wing from Science Wing marker44.873095 and Science Addition farther north. Rejected event-page generic Jarvis pin44.873437 as wrong wing. Full institution and department names expand abbreviations."
+    },
+    {
+      "id": "arkansas-tech-management-rothwell",
+      "institution": "Arkansas Tech University",
+      "institutionKey": "Arkansas Tech University",
+      "rowIds": [
+        "arkansas-tech-university____om-scm"
+      ],
+      "school": "College of Business and Economic Development — School of Business",
+      "department": "Management",
+      "building": "Rothwell Hall",
+      "address": "Rothwell Hall, 106 West O Street, Russellville, Arkansas 72801, United States",
+      "lat": 35.29434685,
+      "lng": -93.13389726,
+      "addressSource": "https://www.atu.edu/business/profiles-mm/akhattab.php",
+      "coordinateSource": "https://www.openstreetmap.org/way/786317652",
+      "supportingSources": [
+        "https://www.atu.edu/business/schoolofbusiness/facultystaff.php",
+        "https://www.atu.edu/career/contact.php",
+        "https://www.atu.edu/facilities/docs/SKM_454e19112115280.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current operations-management faculty Akram Khattab office Rothwell442; current faculty roster places Management within School of Business. Exact named external building footprint with matching106WestOStreet address and university embedded named Rothwell map corroboration. Management is faculty discipline under School of Business; posting title Professor of Management."
+    },
+    {
+      "id": "indiana-northwest-information-systems-dunes",
+      "institution": "Indiana University Northwest",
+      "institutionKey": "Indiana University Northwest",
+      "rowIds": [
+        "indiana-university-northwest____mis"
+      ],
+      "school": "School of Business and Economics",
+      "department": "Management Information Systems",
+      "building": "Dunes Medical/Professional Building",
+      "address": "Dunes Medical/Professional Building, 3400 Broadway, Gary, Indiana 46408, United States",
+      "lat": 41.5557272,
+      "lng": -87.33944229,
+      "addressSource": "https://northwest.iu.edu/business/index.html",
+      "coordinateSource": "https://map.concept3d.com/?id=954#!m/9540068",
+      "supportingSources": [
+        "https://northwest.iu.edu/map/",
+        "https://northwest.iu.edu/business/faculty-staff/index.html",
+        "https://news.iu.edu/northwest/live/news/35076-redhawk-enterprise-an-iu-northwest-student-run"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official school contact Room1103 and current business faculty offices occupy Dunes Medical/Professional Building; university news explicitly identifies Ranjan Kini as Management–Information Systems professor in this school. Official university-linked map building NW817, marker9540068 provides exact building point. Management Information Systems is subject area under business school, distinct from Computer Information Systems in Hawthorn Hall."
+    },
+    {
+      "id": "hong-kong-business-innovation-kk-leung",
+      "institution": "The University of Hong Kong",
+      "institutionKey": "University of Hong Kong",
+      "rowIds": [
+        "university-of-hong-kong__hku-business-school__business-analytics-statistics-operations-management-and-info",
+        "university-of-hong-kong____ba"
+      ],
+      "school": "Faculty of Business and Economics (HKU Business School)",
+      "department": "Innovation and Information Management",
+      "building": "K. K. Leung Building",
+      "address": "K. K. Leung Building, Pokfulam Road, Hong Kong",
+      "lat": 22.2832784705427,
+      "lng": 114.139060189163,
+      "addressSource": "https://www.hkubs.hku.hk/sc/people/yulin-fang/",
+      "coordinateSource": "https://www.hku.hk/maps/getlocationjson.php?id=13&type=Locations",
+      "supportingSources": [
+        "https://www.hkubs.hku.hk/about-us/campuses/",
+        "https://www.hkubs.hku.hk/sc/people/haipeng-shen/",
+        "https://www.hkubs.hku.hk/event/rise-from-the-call-center/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current area head Yulin Fang KK1315 and business analytics chair Haipeng Shen KK815; official seminar identifies Business Analytics Group within Innovation and Information Management. Both directory rows link identical Business Analytics vacancy179422894 and merge as same host. Exact official campus-map marker13. Full faculty name from official university map precedes branded school alias; distinct from Cyberport postgraduate teaching campus."
+    },
+    {
+      "id": "hong-kong-data-systems-haking-wong",
+      "institution": "The University of Hong Kong",
+      "institutionKey": "University of Hong Kong",
+      "rowIds": [
+        "university-of-hong-kong____data-and-systems-engineering"
+      ],
+      "school": "Faculty of Engineering",
+      "department": "Department of Data and Systems Engineering",
+      "building": "Haking Wong Building",
+      "address": "8/F, Haking Wong Building, Pokfulam Road, Hong Kong",
+      "lat": 22.2829806418923,
+      "lng": 114.136442353165,
+      "addressSource": "https://www.dase.hku.hk/about-us/contact-us",
+      "coordinateSource": "https://www.hku.hk/maps/getlocationjson.php?id=45&type=Locations",
+      "supportingSources": [
+        "https://www.dase.hku.hk/f/page/860/4730/IntroductoryHandbook_2025-26_EngSc.v1.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current department contact and 2025–26 handbook locate general office and main faculty cluster on Haking Wong eighth floor. Exact official building marker45. Separate card from business-school analytics, with current department name replacing earlier Industrial and Manufacturing Systems Engineering terminology."
+    },
+    {
+      "id": "hong-kong-science-technology-guangzhou-data-e3",
+      "institution": "The Hong Kong University of Science and Technology (Guangzhou)",
+      "institutionKey": "HKUST(GZ)",
+      "rowIds": [
+        "hkust____ds-and-analytics-thrust"
+      ],
+      "school": "Information Hub",
+      "department": "Data Science and Analytics Thrust",
+      "building": "E3 Building",
+      "address": "E3-2F-230, No. 1 Duxue Road, Nansha District, Guangzhou, Guangdong 511453, China",
+      "country": "China",
+      "lat": 22.89110007,
+      "lng": 113.47875988,
+      "addressSource": "https://dsa.hkust-gz.edu.cn/about/contact-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1096049213",
+      "supportingSources": [
+        "https://studyathkustgz.hkust-gz.edu.cn/detail-819",
+        "https://www.hkust-gz.edu.cn/academics/hubs-and-thrust-areas/information-hub/data-science-and-analytics/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official current thrust administrative office E3-2F-230 used as department anchor; faculty occupy multiple campus buildings. Exact external named E3 building footprint in WGS84 corroborated against official campus diagram showing E3 between E2 and E4 on east concourse. Not a university centroid, not Hong Kong main campus, and no shifted Baidu/Gaode coordinates used. Official full university name expands abbreviated directory institution."
+    },
+    {
+      "id": "saint-louis-university-operations-information-technology-cook",
+      "institution": "Saint Louis University",
+      "institutionKey": "Saint Louis University",
+      "rowIds": [
+        "saint-louis-university____om-and-it"
+      ],
+      "school": "Richard A. Chaifetz School of Business",
+      "department": "Department of Operations and Information Technology Management",
+      "building": "John and Lucy Cook Hall, room 334, interconnected business school building",
+      "address": "3674 Lindell Boulevard, Saint Louis, Missouri 63108, United States",
+      "lat": 38.637384,
+      "lng": -90.2357417,
+      "addressSource": "https://www.slu.edu/business/centers/supply-chain-excellence/index.php",
+      "coordinateSource": "https://www.openstreetmap.org/way/338495043",
+      "supportingSources": [
+        "https://www.slu.edu/business/about/departments/operations-information-technology-management.php",
+        "https://www.slu.edu/business/about/staff.php",
+        "https://www.slu.edu/business/about/facilities/index.php",
+        "https://www.slu.edu/campusmap/?campus=1"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department faculty list identifies Vineet Sharma; current staff and center pages explicitly locate him and the Center for Supply Chain Excellence in Cook Hall 334. Official facilities page confirms Cook Hall is an expansion interconnected with Davis-Shaughnessy Hall. Coordinate is the bounds center of the combined business school building footprint labelled Davis-Shaughnessey in OpenStreetMap, not the university centroid; official campus map distinguishes the connected Cook and Davis portions. Building-complex precision, not an individual room coordinate."
+    },
+    {
+      "id": "coppin-state-decision-sciences-college-business",
+      "institution": "Coppin State University",
+      "institutionKey": "Coppin State University",
+      "rowIds": [
+        "coppin-state-university____decision-sciences"
+      ],
+      "school": "College of Business",
+      "department": "Department of Accounting, Data Science and Management Information Systems — Decision Sciences",
+      "building": "College of Business Building, first floor, room 106 (renovated Percy Julian building)",
+      "address": "2500 West North Avenue, Baltimore, Maryland 21216, United States",
+      "lat": 39.30987055,
+      "lng": -76.65768035,
+      "addressSource": "https://www.coppin.edu/accounting-data-science-and-management-information-systems-department/mamunur-rahman",
+      "coordinateSource": "https://www.openstreetmap.org/way/124259671",
+      "supportingSources": [
+        "https://www.coppin.edu/news/coppin-state-university-celebrate-new-college-business-opening",
+        "https://www.coppin.edu/news/csu-college-business-announces-launch-center-strategic-entrepreneurship",
+        "https://www.coppin.edu/sites/default/files/pdf-library/2022-03/CSUCampusMap.pdf",
+        "https://www.coppin.edu/coppin-facilities/college-business-building"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official Decision Sciences faculty directory identifies Mamunur Rahman in College of Business room 106. Official opening announcement and entrepreneurship center page establish that the former Percy Julian building was renovated into the business building. Official campus map building 16 visually corroborates the footprint at North and Warwick, southeast of the library. OpenStreetMap retains the former Percy Julian name; coordinates use that exact building footprint, not the university general address geocode."
+    },
+    {
+      "id": "university-of-liverpool-operations-supply-chain-chatham",
+      "institution": "University of Liverpool",
+      "institutionKey": "University of Liverpool",
+      "rowIds": [
+        "university-of-liverpool__management-school__operations-and-supply-chain-management"
+      ],
+      "school": "University of Liverpool Management School",
+      "department": "Operations and Supply Chain Management",
+      "building": "Chatham Building",
+      "address": "Chatham Street, Liverpool L69 7ZH, United Kingdom",
+      "lat": 53.4016661,
+      "lng": -2.9638907,
+      "addressSource": "https://www.liverpool.ac.uk/management/research/centres/cscr/",
+      "coordinateSource": "https://www.openstreetmap.org/way/85621318",
+      "supportingSources": [
+        "https://www.liverpool.ac.uk/people/andrew-lyons",
+        "https://www.liverpool.ac.uk/management/about/school-history/",
+        "https://www.liverpool.ac.uk/management/staff/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official subject-group head profile establishes that the Operations and Supply Chain Management group leads the Centre for Supply Chain Research; the centre explicitly gives Chatham Building as its contact address. Exact named Chatham footprint. The OpenStreetMap building=chapel tag reflects the former use, not a wrong location: official school history confirms the former Welsh Methodist chapel became the Management School."
+    },
+    {
+      "id": "tsinghua-management-science-engineering-lihua-555",
+      "institution": "Tsinghua University",
+      "institutionKey": "Tsinghua University",
+      "rowIds": [
+        "tsinghua-university__school-of-economics-and-management__management-science-and-engineering"
+      ],
+      "school": "School of Economics and Management",
+      "department": "Department of Management Science and Engineering",
+      "building": "Lihua Building, Jianhua–Lihua academic building complex",
+      "address": "30 Shuangqing Road, Haidian District, Beijing 100084, China",
+      "lat": 39.99829875,
+      "lng": 116.32318485,
+      "addressSource": "https://www.sem.tsinghua.edu.cn/en/info/1219/7083.htm",
+      "coordinateSource": "https://www.openstreetmap.org/way/937482182",
+      "supportingSources": [
+        "https://www.sem.tsinghua.edu.cn/en/info/1219/5728.htm",
+        "https://sem.tsinghua.edu.cn/en/info/1219/7044.htm",
+        "https://cdc.sem.tsinghua.edu.cn/ecdc/Employer_Portal/Campus_Directory.htm",
+        "https://www.sem.tsinghua.edu.cn/en/6-guanlikexueyugongchengxizhaopinguanggao20261009.pdf",
+        "https://www.sem.tsinghua.edu.cn/en/About_SEM/About_the_School/History.htm"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official Operations Management faculty Shuo Huang lists Lihua 420; Information Systems professors Zhijie Lin and Dengpan Liu list Lihua 426 and 427. October 2026 official department recruitment explicitly covers both Operations Management and Information Systems, establishing the original abbreviated alias host. Official history confirms Jianhua and Lihua came into use in 2022. Coordinate is bounds center of their specifically named combined academic building footprint, not university coordinates; complex-level precision, not individual faculty rooms."
+    },
+    {
+      "id": "tsinghua-management-science-engineering-lihua-556",
+      "institution": "Tsinghua University",
+      "institutionKey": "Tsinghua University",
+      "rowIds": [
+        "tsinghua-university____om-is"
+      ],
+      "school": "School of Economics and Management",
+      "department": "Department of Management Science and Engineering",
+      "building": "Lihua Building, Jianhua–Lihua academic building complex",
+      "address": "30 Shuangqing Road, Haidian District, Beijing 100084, China",
+      "lat": 39.99829875,
+      "lng": 116.32318485,
+      "addressSource": "https://www.sem.tsinghua.edu.cn/en/info/1219/7083.htm",
+      "coordinateSource": "https://www.openstreetmap.org/way/937482182",
+      "supportingSources": [
+        "https://www.sem.tsinghua.edu.cn/en/info/1219/5728.htm",
+        "https://sem.tsinghua.edu.cn/en/info/1219/7044.htm",
+        "https://cdc.sem.tsinghua.edu.cn/ecdc/Employer_Portal/Campus_Directory.htm",
+        "https://www.sem.tsinghua.edu.cn/en/6-guanlikexueyugongchengxizhaopinguanggao20261009.pdf",
+        "https://www.sem.tsinghua.edu.cn/en/About_SEM/About_the_School/History.htm"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official Operations Management faculty Shuo Huang lists Lihua 420; Information Systems professors Zhijie Lin and Dengpan Liu list Lihua 426 and 427. October 2026 official department recruitment explicitly covers both Operations Management and Information Systems, establishing the original abbreviated alias host. Official history confirms Jianhua and Lihua came into use in 2022. Coordinate is bounds center of their specifically named combined academic building footprint, not university coordinates; complex-level precision, not individual faculty rooms."
+    },
+    {
+      "id": "howard-business-analytics-information-systems-supply-chain",
+      "institution": "Howard University",
+      "institutionKey": "Howard University",
+      "rowIds": [
+        "howard-university____ba"
+      ],
+      "school": "School of Business",
+      "department": "Department of Information Systems and Supply Chain Management — Business Analytics",
+      "building": "School of Business Building, suite 438",
+      "address": "2600 6th Street Northwest, Washington, District of Columbia 20059, United States",
+      "lat": 38.92442995,
+      "lng": -77.02191335,
+      "addressSource": "https://business.howard.edu/departments/information-systems-supply-chain-management",
+      "coordinateSource": "https://www.openstreetmap.org/way/291680508",
+      "supportingSources": [
+        "https://events.howard.edu/school_of_business_school_of_business",
+        "https://builtin.com/job/assistant-professor/9451891",
+        "https://business.howard.edu/about/faculty-staff"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department contact explicitly invites visitors to suite 438 in the School of Business. Official building page gives 2600 6th Street and locates its supply-chain and analytics centers in this building. Public recruiting copy describes the Business and Digital Analytics appointment within Information Systems and Supply Chain Management. Coordinates use exact named business building footprint, not the separate central Office of Data Analytics at 2301 Georgia Avenue."
+    },
+    {
+      "id": "university-of-warwick-operations-management-business-school",
+      "institution": "University of Warwick",
+      "institutionKey": "Warwick Business School",
+      "rowIds": [
+        "warwick-business-school____om"
+      ],
+      "school": "Warwick Business School",
+      "department": "Operations Management Group",
+      "building": "Warwick Business School, office 1.212",
+      "address": "Scarman Road, Coventry CV4 7AL, United Kingdom",
+      "lat": 52.3819507,
+      "lng": -1.5653059,
+      "addressSource": "https://www.wbs.ac.uk/about/person/pietro-micheli/",
+      "coordinateSource": "https://www.openstreetmap.org/way/56066268",
+      "supportingSources": [
+        "https://www.wbs.ac.uk/research/subject-groups/ops/",
+        "https://www.wbs.ac.uk/contact/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official current group page and faculty profile identify head Pietro Micheli and office 1.212 within Warwick Business School. School contact gives Scarman Road in Coventry and distinguishes the London Shard office. Exact named university business building footprint, not the cafe point or university centroid."
+    },
+    {
+      "id": "cranfield-logistics-supply-chain-building-32",
+      "institution": "Cranfield University",
+      "institutionKey": "Cranfield University",
+      "rowIds": [
+        "cranfield-university__cranfield-school-of-management__logistics-procurement-and-supply-chain-management"
+      ],
+      "school": "Cranfield School of Management",
+      "department": "Centre for Logistics, Procurement and Supply Chain Management",
+      "building": "Building 32",
+      "address": "Cranfield University, Cranfield, Bedfordshire MK43 0AL, United Kingdom",
+      "lat": 52.07439835,
+      "lng": -0.62801605,
+      "addressSource": "https://www.cranfield.ac.uk/som/people/professor-emel-aktas-508615",
+      "coordinateSource": "https://www.openstreetmap.org/way/112842814",
+      "supportingSources": [
+        "https://www.cranfield.ac.uk/som/research-centres/centre-for-logistics-procurement-and-supply-chain-management",
+        "https://link.springer.com/book/10.1007/978-3-031-68885-0",
+        "https://www.cranfield.ac.uk/-/media/files/maps/cranfield-university-campus-map.ashx",
+        "https://www.cranfield.ac.uk/virtualmap"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official university profile and centre pages establish Professor of Supply Chain Analytics Emel Aktas in this academic group. Her author affiliation in the 2025 Springer book Supply Chain Disruptions and Stock Prices explicitly identifies School of Management Building 32. Official campus map identifies that numbered building; exact named Building 32 footprint provides coordinates. Deliberately not the general School of Management reception/library Building 111. Faculty-building precision; no claim of a particular room or exclusive occupation by the whole group."
+    },
+    {
+      "id": "vinuniversity-business-management-building-i",
+      "institution": "VinUniversity",
+      "institutionKey": "VinUniversity",
+      "rowIds": [
+        "vinuniversity__college-of-business-and-management__supply-chain"
+      ],
+      "school": "College of Business and Management",
+      "department": "Supply Chain Management",
+      "building": "Building I, level 4",
+      "address": "Vinhomes Ocean Park, Gia Lam, Hanoi, Vietnam",
+      "lat": 20.98884745,
+      "lng": 105.9447832,
+      "addressSource": "https://policy.vinuni.edu.vn/wp-content/uploads/2025/12/University-Directory-25-26.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/896414898",
+      "supportingSources": [
+        "https://vinuni.edu.vn/wp-content/uploads/2020/07/STUDENT-GUIDE-2024-2025.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official 2025–2026 university directory explicitly places College of Business and Management on level 4 of Building I. Official student campus map identifies I as the academic administrative office building, distinct from library A and teaching blocks C/D. Coordinate is the exact named I Building footprint; OpenStreetMap level count is stale and was not used as evidence of the office floor."
+    },
+    {
+      "id": "kazakh-american-free-university-business-gorky-76",
+      "institution": "Kazakh-American Free University",
+      "institutionKey": "Kazakh-American Free University",
+      "rowIds": [
+        "kazakh-american-free-university____business"
+      ],
+      "school": "School of Business, Law and Education",
+      "department": "Business Department",
+      "building": "Main academic building, room 401",
+      "address": "76 Maxim Gorky Street, Ust-Kamenogorsk 070004, Kazakhstan",
+      "lat": 49.9513499,
+      "lng": 82.6181071,
+      "addressSource": "https://kafu.edu.kz/ru/study/kafedra-biznesa/zaveduyushhij-kafedroj-biznesa/",
+      "coordinateSource": "https://www.openstreetmap.org/way/47859184",
+      "supportingSources": [
+        "https://kafu.edu.kz/en/home-english/about-the-university/address-and-contacts/",
+        "https://kafu.edu.kz/ru/studentam/biblioteka/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official current Business Department head page identifies Ilona Bordiyanu and explicitly gives Maxim Gorky 76, room 401. Exact numbered building footprint; distinct from the university college and residence addresses elsewhere in the city."
+    },
+    {
+      "id": "yeshiva-information-decision-sciences-belfer",
+      "institution": "Yeshiva University",
+      "institutionKey": "Yeshiva University",
+      "rowIds": [
+        "yeshiva-university____data-analytics"
+      ],
+      "school": "Sy Syms School of Business",
+      "department": "Information and Decision Sciences — Data Analytics",
+      "building": "Belfer Hall",
+      "address": "2495 Amsterdam Avenue, New York, New York 10033, United States",
+      "lat": 40.8495629,
+      "lng": -73.9292649,
+      "addressSource": "https://www.yu.edu/faculty/pages/rosenthal-yitzchak",
+      "coordinateSource": "https://www.openstreetmap.org/way/275099144",
+      "supportingSources": [
+        "https://www.yu.edu/faculty/pages/yoo-changseung-chang",
+        "https://careers.pageuppeople.com/876/cw/en-us/job/498174/nutrition-health-instructor-communications-admissions-coordinator"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official recruitment listing identifies Clinical Assistant Professor IDS as Sy Syms School of Business at Wilf Campus. Current Information and Decision Sciences faculty list Belfer Hall primary offices (Rosenthal 1313D; Yoo 403B). The separately listed Beren campus secondary offices are not the campus specified for this job. Exact Belfer Hall building footprint rather than general university address at 500 West 185th Street."
+    },
+    {
+      "id": "united-states-military-academy-systems-engineering-mahan",
+      "institution": "United States Military Academy at West Point",
+      "institutionKey": "United States Military Academy - West Point",
+      "rowIds": [
+        "united-states-military-academy-west-point__united-states-military-academy__systems-engineering"
+      ],
+      "school": "United States Military Academy",
+      "department": "Department of Systems Engineering",
+      "building": "Mahan Hall (Building 752), fourth floor",
+      "address": "752 Thayer Road, West Point, New York 10996, United States",
+      "lat": 41.3888427,
+      "lng": -73.9557517,
+      "addressSource": "https://s3.amazonaws.com/usma-media/inline-images/academics/academic_departments/systems_engineering/2025%20GDRKMCC%20Program.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/1034595191",
+      "supportingSources": [
+        "https://s3.amazonaws.com/usma-media/inline-images/academics/academic_departments/systems_engineering/DSE_S1/DSE%20Prospective%20Faculty%20FAQs%2020220906.pdf",
+        "https://www.nan.usace.army.mil/Portals/37/2025%20May%2030%20Industry%20Day%20Master%20Deck.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official 2025 department conference program explicitly locates Systems Engineering faculty and department conference room on Mahan fourth floor; official prospective-faculty FAQ confirms Building 752. Exact named numbered building footprint. Army construction plans list future Building 606 renovation for Mathematics and Systems Engineering as an FY2026 acquisition, not a completed relocation; no replacement address was inferred from that future project."
+    },
+    {
+      "id": "columbia-basin-logistics-supply-chain-social-sciences",
+      "institution": "Columbia Basin College",
+      "institutionKey": "Columbia Basin College",
+      "rowIds": [
+        "columbia-basin-college____logistics-and-supply-chain"
+      ],
+      "school": "School of Business and Computer Science",
+      "department": "Logistics and Supply Chain Resilience",
+      "building": "Social Sciences and World Languages Building",
+      "address": "2600 North 20th Avenue, Pasco, Washington 99301, United States",
+      "lat": 46.2544125,
+      "lng": -119.12040375,
+      "addressSource": "https://www.columbiabasin.edu/directory/smatin.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/629696906",
+      "supportingSources": [
+        "https://www.columbiabasin.edu/learn/discover-your-path/business/logistics-and-supply-chain/index.html",
+        "https://www.columbiabasin.edu/_documents/maps/pasco-campus-map.pdf",
+        "https://catalog.columbiabasin.edu/2026-2027-catalog/26-27-board-of-trustees-faculty-administrative-exempt.html"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current university directory explicitly places Assistant Professor of Logistics and Supply Chain Resilience Saima Matin in the Social Sciences and World Languages building, confirmed as a 2025 hire in the 2026–27 catalog. Exact named building footprint; not the generic Business Building or campus centroid. Building hosts faculty across multiple academic areas."
+    },
+    {
+      "id": "concordia-chicago-business-data-analytics-brohm",
+      "institution": "Concordia University Chicago",
+      "institutionKey": "Concordia University Chicago",
+      "rowIds": [
+        "concordia-university-chicago____data-analytics"
+      ],
+      "school": "College of Business",
+      "department": "Data Analytics",
+      "building": "Brohm Hall, second floor",
+      "address": "7400 Augusta Street, River Forest, Illinois 60305, United States",
+      "lat": 41.89874885,
+      "lng": -87.8089042,
+      "addressSource": "https://webserv.cuchicago.edu/files/forms-repository/handbooks/student-handbooks/2025-2026%20Student%20Handbook.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/418849082",
+      "supportingSources": [
+        "https://www.cuchicago.edu/faculty/college-of-business/division-undergraduate/donald-granholm/",
+        "https://acbsp.org/members/?id=18775629",
+        "https://www.cuchicago.edu/academics/colleges/college-of-business/about-the-college-of-business/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official 2025–26 college contact directory places College of Business in Brohm 230; current business assistant-dean/faculty profile confirms Brohm 238. The college accreditation profile independently gives second floor Brohm. Original hiring title is Professor of Business (Data Analytics), so mapped to the verified college faculty offices; no invented standalone Data Analytics department. Exact named building footprint."
     }
   ]
 }
