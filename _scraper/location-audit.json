@@ -993,7 +993,7 @@
       "rowIds": [
         "harvard-university__harvard-kennedy-school__public-policy"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -1010,7 +1010,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "harvard-kennedy-public-policy-littauer"
+      ]
     },
     {
       "id": "harvard-university::school:harvard medical school::42.37400,-71.11700",
@@ -1320,7 +1323,7 @@
       "rowIds": [
         "carnegie-mellon-university__carnegie-mellon-university-in-qatar__information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179586104&Title=Faculty%20Positions%20in%20Information%20Systems"
@@ -1339,7 +1342,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "carnegie-mellon-qatar-information-systems"
+      ]
     },
     {
       "id": "carnegie-mellon-university::school:heinz college of information systems and public policy::40.44300,-79.94300",
@@ -2349,7 +2355,7 @@
         "university-of-houston__c-t-bauer-college-of-business__department-of-decision-and-information-sciences",
         "university-of-houston__c-t-bauer-college-of-business__the-bauer-human-centered-artificial-intelligence-institute"
       ],
-      "status": "partially-verified",
+      "status": "verified",
       "departmentUrls": [
         "https://www.bauer.uh.edu/search/directory/index2.asp?dept=DISC"
       ],
@@ -2373,7 +2379,9 @@
         "hasCoordinateStrings": false
       },
       "verificationIds": [
-        "houston-decision-information-sciences-melcher"
+        "houston-decision-information-sciences-melcher",
+        "houston-human-centered-artificial-intelligence-melcher",
+        "houston-bauer-college-melcher"
       ]
     },
     {
@@ -2454,7 +2462,7 @@
       "rowIds": [
         "university-of-houston____ise-supply-chain-and-logistics-tech"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.uh.edu/jobs/assistant-or-associate-professor-supply-chain-logistics-and-technology-houston-texas-united-states"
@@ -2473,7 +2481,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "houston-supply-chain-logistics-engineering4"
+      ]
     },
     {
       "id": "university-of-houston::department:om is::29.71900,-95.33900",
@@ -2485,7 +2496,7 @@
       "rowIds": [
         "university-of-houston____om-is"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.uh.edu/jobs/assistant-professor-artificial-intelligence-ai-for-energy-systems-houston-texas-united-states"
@@ -2504,7 +2515,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "houston-decision-information-sciences-melcher"
+      ]
     },
     {
       "id": "university-of-houston::department:om scm::29.71900,-95.33900",
@@ -3814,7 +3828,7 @@
       "rowIds": [
         "university-of-south-carolina-upstate__george-dean-johnson-jr-college-of-business-and-economics__economics-finance-and-accounting"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://uscjobs.sc.edu/postings/214247"
@@ -3833,7 +3847,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "south-carolina-upstate-economics-finance-accounting-george"
+      ]
     },
     {
       "id": "binghamton-university::department:mis::42.08900,-75.96700",
@@ -4999,7 +5016,7 @@
       "rowIds": [
         "aschaffenburg-university-of-applied-sciences__faculty-of-engineering-and-computer-science__digital-production-technologies"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://academicpositions.com/ad/university-of-applied-sciences-aschaffenburg/2026/w2-professorship-digital-production-technologies-m-f-d/252012"
@@ -5018,7 +5035,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "aschaffenburg-digital-production-building24"
+      ]
     },
     {
       "id": "ie-university::school:ie business school::40.95300,-4.11800",
@@ -5123,7 +5143,7 @@
       "rowIds": [
         "university-of-missouri-mizzou____industrial-and-systems-engineering"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careercenter.informs.org/job/assistant-professor-in-industrial-and-systems-engineering-quantum-optimization-columbia-missouri-5550"
@@ -5142,7 +5162,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "missouri-industrial-systems-lafferre"
+      ]
     },
     {
       "id": "university-of-kentucky::school:martin school of public policy and administration::38.03200,-84.50200",
@@ -8055,7 +8078,7 @@
       "rowIds": [
         "university-of-science-and-technology-of-china__school-of-management__management-science"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://bs.ustc.edu.cn/english/teachers-2.html"
       ],
@@ -8076,7 +8099,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "china-science-technology-management-research"
+      ]
     },
     {
       "id": "university-of-british-columbia::school:faculty of management::49.26500,-123.25300",
@@ -10404,7 +10430,7 @@
       "rowIds": [
         "ewha-womans-university__college-of-business-administration__business-administration"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://eureka.ewha.ac.kr/eureka/my/ea/pf/EAPFBoardController.do?method=fildlist&strDiv=1&lang=e"
@@ -10423,7 +10449,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "ewha-business-shinsegae"
+      ]
     },
     {
       "id": "university-of-texas-at-el-paso::school:woody l hunt college of business::31.77000,-106.50500",
@@ -11214,7 +11243,7 @@
       "rowIds": [
         "donghua-university__glorious-sun-school-of-business-and-management__operations-management-logistics-and-supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.poms.org/sites/default/files/2026-04/POMS%20Job%20Advertisement-2026.pdf"
@@ -11227,7 +11256,10 @@
           "https://glxy.dhu.edu.cn/_t199/lxwm/list.htm",
           "https://hudong.moe.gov.cn/srcsite/A02/zfs_gdxxzc/201311/t20131128_182124.html"
         ]
-      }
+      },
+      "verificationIds": [
+        "donghua-management-science-glorious-sun"
+      ]
     },
     {
       "id": "donghua-university::school:glorious sun school of economics and management::31.20350,121.41400",
@@ -11239,7 +11271,7 @@
       "rowIds": [
         "donghua-university__glorious-sun-school-of-economics-and-management__operations-and-logistics-information-management-decision-sci"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careercenter.informs.org/job/glorious-sun-school-of-economics-and-management-donghua-university-shanghai-faculty-recruitment-shanghai-shanghai-5393"
@@ -11252,7 +11284,10 @@
           "https://glxy.dhu.edu.cn/_t199/lxwm/list.htm",
           "https://hudong.moe.gov.cn/srcsite/A02/zfs_gdxxzc/201311/t20131128_182124.html"
         ]
-      }
+      },
+      "verificationIds": [
+        "donghua-economics-management-glorious-sun"
+      ]
     },
     {
       "id": "donghua-university::department:om scm logistics::31.20350,121.41400",
@@ -11264,7 +11299,7 @@
       "rowIds": [
         "donghua-university____om-scm-logistics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.poms.org/sites/default/files/2025-04/POMS%20Job%20Advertisement.pdf"
@@ -11277,7 +11312,10 @@
           "https://english.dhu.edu.cn/_upload/article/files/78/e4/716d73ba4c82921914110a72dd36/c717f970-6acf-4be6-a601-c395e17ea185.pdf",
           "https://cumulusassociation.org/our-community/our-member-institutions/donghua-university"
         ]
-      }
+      },
+      "verificationIds": [
+        "donghua-management-science-glorious-sun"
+      ]
     },
     {
       "id": "san-diego-state-university::school:fowler college of business::32.77528,-117.07222",
@@ -11492,7 +11530,7 @@
       "rowIds": [
         "clarkson-university____is"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179146758&Title=Tenure-track%20Associate%20Professor%2C%20Information%20Systems",
@@ -11512,7 +11550,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "clarkson-information-systems-bertrand-snell"
+      ]
     },
     {
       "id": "henderson-state-university::school:college of business::34.13070,-93.05880",
@@ -12431,7 +12472,7 @@
       "rowIds": [
         "western-wyoming-community-college__business-and-technology__information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179463512&Title=Instructor%2FAssistant%20Professor%20of%20Information%20Systems"
@@ -12450,7 +12491,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "western-wyoming-information-systems-main-academic"
+      ]
     },
     {
       "id": "cunef-universidad::school:school of business economics and law::40.45200,-3.72000",
@@ -15224,7 +15268,7 @@
       "rowIds": [
         "georgia-state-university____operations-and-supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://facultycareers.gsu.edu/postings/6565"
@@ -15243,7 +15287,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "georgia-state-management-robinson-broad"
+      ]
     },
     {
       "id": "university-of-colorado-denver::department:is and technology::39.74346,-105.00312",
@@ -16320,7 +16367,7 @@
       "rowIds": [
         "dakota-state-university____production-and-om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179343964&Title=Assistant%20Professor%20-%20Business"
@@ -16339,7 +16386,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "dakota-state-business-east-hall"
+      ]
     },
     {
       "id": "california-state-university-bakersfield::department:mis ba ai::35.35042,-119.10419",
@@ -19403,7 +19453,7 @@
       "rowIds": [
         "tum-school-of-management____om-scm-mis-f-ai"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.mgt.tum.de/fileadmin/mgt.tum.de/about/career/230722-MGT_Infopackage_AI_APP_MANAGEMENT_v7_CG_PL-72_50.pdf"
@@ -19422,7 +19472,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "technical-university-munich-ai-management-heilbronn-lbau"
+      ]
     },
     {
       "id": "berry-college::department:om scm::34.30750,-85.21361",
@@ -19667,7 +19720,7 @@
       "rowIds": [
         "universidad-de-los-andes____om-scm-mis"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://connect.informs.org/discussion/assistantassociate-professor-management-science-operations-management-supply-chain-management-management-information-systems-marketing-logistics-universidad-de-los-andes-chile"
@@ -19686,7 +19739,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "andes-chile-business-el-reloj"
+      ]
     },
     {
       "id": "baruch-college-cuny::department:or om da::40.74016,-73.98338",
@@ -19732,7 +19788,7 @@
       "rowIds": [
         "university-college-dublin__school-of-business"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -19749,7 +19805,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "dublin-business-quinn-official-directory"
+      ]
     },
     {
       "id": "university-college-dublin::department:mis::53.30800,-6.22000",
@@ -19761,7 +19820,7 @@
       "rowIds": [
         "university-college-dublin____mis"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://my.corehr.com/pls/ucdrecruit/erq_jobspec_version_4.display_form"
@@ -19780,7 +19839,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "dublin-management-information-systems-quinn-official-directory"
+      ]
     },
     {
       "id": "university-college-dublin::department:supply chain management::53.30800,-6.22000",
@@ -20064,7 +20126,7 @@
       "rowIds": [
         "monash-university____or-om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careercenter.informs.org/jobs?keywords=monash&locale=en&sort=date&country=&state=&city=&zip=&latitude=&longitude=&city_state_zip=&job_id=4884"
@@ -20083,7 +20145,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "monash-operations-research-econometrics-caulfield-h"
+      ]
     },
     {
       "id": "suny-korea::department:technology management::37.37669,126.66717",
@@ -22577,7 +22642,7 @@
       "rowIds": [
         "kedge-business-school____operations-management-and-information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://student.kedge.edu/faculty/departments/operations-management-and-information-systems-mosi"
       ],
@@ -22596,7 +22661,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "kedge-operations-information-systems-bordeaux-administration"
+      ]
     },
     {
       "id": "korea-university::school:korea university business school::37.58917,127.03250",
@@ -23782,9 +23850,9 @@
   ],
   "summary": {
     "baseline": 714,
-    "verified": 536,
-    "partiallyVerified": 1,
-    "pending": 177,
+    "verified": 559,
+    "partiallyVerified": 0,
+    "pending": 155,
     "sourceSearches": 714
   }
 }

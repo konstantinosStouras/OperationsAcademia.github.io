@@ -606,7 +606,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-03"
+  "lastPosted": "2026-10-03",
+  "mapSearchTerms": [
+   "Faculty of Engineering and Computer Science",
+   "Digital Production Technologies"
+  ]
  },
  {
   "id": "auburn-university",
@@ -1888,7 +1892,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-17"
+  "lastPosted": "2026-10-17",
+  "mapSearchTerms": [
+   "Carnegie Mellon University in Qatar",
+   "Information Systems"
+  ]
  },
  {
   "id": "carnegie-mellon-university__heinz-college-of-information-systems-and-public-policy",
@@ -2347,7 +2355,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2025-05-29"
+  "lastPosted": "2025-05-29",
+  "mapSearchTerms": [
+   "David D. Reh School of Business",
+   "Operations and Information Systems"
+  ]
  },
  {
   "id": "clarkson-university__david-d-reh-school-of-business__operations-and-information-systems",
@@ -3133,7 +3145,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-23"
+  "lastPosted": "2026-01-23",
+  "mapSearchTerms": [
+   "College of Business and Information Systems",
+   "Production and Operations Management"
+  ]
  },
  {
   "id": "dartmouth-college__thayer-school-of-engineering",
@@ -3253,7 +3269,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-20"
+  "lastPosted": "2025-05-20",
+  "mapSearchTerms": [
+   "Glorious Sun School of Economics and Management",
+   "Management Science and Engineering"
+  ]
  },
  {
   "id": "donghua-university__glorious-sun-school-of-business-and-management__operations-management-logistics-and-supply-chain-management",
@@ -3267,7 +3287,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-04-22"
+  "lastPosted": "2026-04-22",
+  "mapSearchTerms": [
+   "Glorious Sun School of Economics and Management",
+   "Management Science and Engineering"
+  ]
  },
  {
   "id": "donghua-university__glorious-sun-school-of-economics-and-management__operations-and-logistics-information-management-decision-sci",
@@ -3281,7 +3305,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-23"
+  "lastPosted": "2026-07-23",
+  "mapSearchTerms": [
+   "Glorious Sun School of Economics and Management",
+   "Operations and Logistics, Information Management, Decision Science, Behavioral Sciences and Financial Engineering"
+  ]
  },
  {
   "id": "drexel-university__lebow-college-of-business__decision-sciences-and-management-information-systems",
@@ -3805,7 +3833,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-11"
+  "lastPosted": "2026-08-11",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Business Administration"
+  ]
  },
  {
   "id": "fairmont-state-university____is",
@@ -4561,7 +4593,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-11"
+  "lastPosted": "2026-02-11",
+  "mapSearchTerms": [
+   "J. Mack Robinson College of Business",
+   "Department of Management"
+  ]
  },
  {
   "id": "georgia-state-university__j-mack-robinson-college-of-business__computer-information-systems",
@@ -4832,6 +4868,10 @@
   "type": "University",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Harvard Kennedy School",
+   "Public Policy"
   ]
  },
  {
@@ -6154,6 +6194,9 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Operations Management and Information Systems"
   ]
  },
  {
@@ -7429,7 +7472,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-04"
+  "lastPosted": "2025-08-04",
+  "mapSearchTerms": [
+   "Monash Business School",
+   "Econometrics and Business Statistics — Operations Research and Operations Management"
+  ]
  },
  {
   "id": "monash-university__monash-business-school__management",
@@ -12544,7 +12591,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-08"
+  "lastPosted": "2025-09-08",
+  "mapSearchTerms": [
+   "School of Management",
+   "Center for Digital Transformation — Artificial Intelligence Applications in Management"
+  ]
  },
  {
   "id": "tusculum-university____supply-chain-management",
@@ -12736,7 +12787,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-21"
+  "lastPosted": "2025-08-21",
+  "mapSearchTerms": [
+   "School of Business and Economics",
+   "Operations Management, Supply Chain Management and Management Information Systems"
+  ]
  },
  {
   "id": "universidad-torcuato-di-tella__school-of-business",
@@ -12915,7 +12970,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-13"
+  "lastPosted": "2025-06-13",
+  "mapSearchTerms": [
+   "School of Business",
+   "Management Information Systems"
+  ]
  },
  {
   "id": "university-college-dublin____supply-chain-management",
@@ -12944,7 +13003,10 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2014-07-04"
+  "lastPosted": "2014-07-04",
+  "mapSearchTerms": [
+   "School of Business"
+  ]
  },
  {
   "id": "university-college-dublin__michael-smurfit-graduate-business-school__management-area",
@@ -14442,7 +14504,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-09"
+  "lastPosted": "2025-10-09",
+  "mapSearchTerms": [
+   "Cullen College of Engineering",
+   "Supply Chain and Logistics Technology"
+  ]
  },
  {
   "id": "university-of-houston____om-is",
@@ -14455,7 +14521,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-23"
+  "lastPosted": "2025-09-23",
+  "mapSearchTerms": [
+   "C. T. Bauer College of Business",
+   "Department of Decision and Information Sciences"
+  ]
  },
  {
   "id": "university-of-houston____om-scm",
@@ -14519,7 +14589,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-12"
+  "lastPosted": "2026-08-12",
+  "mapSearchTerms": [
+   "C. T. Bauer College of Business"
+  ]
  },
  {
   "id": "university-of-houston__c-t-bauer-college-of-business__business-analytics",
@@ -14575,6 +14648,10 @@
   "type": "Business School",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "C. T. Bauer College of Business",
+   "Human-Centered Artificial Intelligence Institute"
   ]
  },
  {
@@ -15701,7 +15778,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-02"
+  "lastPosted": "2026-10-02",
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Department of Industrial and Systems Engineering"
+  ]
  },
  {
   "id": "university-of-missouri-st-louis__ed-g-smith-college-of-business__supply-chain-management-and-analytics",
@@ -16584,7 +16665,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-09"
+  "lastPosted": "2026-09-09",
+  "mapSearchTerms": [
+   "School of Management",
+   "Management Science"
+  ]
  },
  {
   "id": "university-of-south-carolina",
@@ -16694,7 +16779,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-07"
+  "lastPosted": "2026-10-07",
+  "mapSearchTerms": [
+   "George Dean Johnson, Jr. College of Business and Economics",
+   "Department of Economics, Finance, and Accounting"
+  ]
  },
  {
   "id": "university-of-south-florida____is",
@@ -18711,7 +18800,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-06-13"
+  "lastPosted": "2026-06-13",
+  "mapSearchTerms": [
+   "Business and Technology",
+   "Information Systems"
+  ]
  },
  {
   "id": "westfield-state-university____management-operations-and-supply-chain-management",

@@ -871,7 +871,8 @@
         "university-of-houston____decision-and-iis",
         "university-of-houston____om-scm",
         "university-of-houston____operations-management",
-        "university-of-houston____scm-om"
+        "university-of-houston____scm-om",
+        "university-of-houston____om-is"
       ],
       "school": "C. T. Bauer College of Business",
       "department": "Department of Decision and Information Sciences",
@@ -883,9 +884,10 @@
       "coordinateSource": "https://www.bauer.uh.edu/search/parking-directions/",
       "supportingSources": [
         "https://www.bauer.uh.edu/search/building-maps/",
-        "https://careers.uh.edu/jobs/professor-of-practice-decision-information-sciences-houston-texas-united-states-fce2c1fc-eb84-4ad7-af50-c6f6d93d7eb6"
+        "https://careers.uh.edu/jobs/professor-of-practice-decision-information-sciences-houston-texas-united-states-fce2c1fc-eb84-4ad7-af50-c6f6d93d7eb6",
+        "https://careers.uh.edu/jobs/assistant-professor-artificial-intelligence-ai-for-energy-systems-houston-texas-united-states"
       ],
-      "notes": "Department recruitment page gives Melcher Hall280 and Business Analytics hiring. University job description confirms operations management and information systems within the department. Official directions link the named Melcher/Bauer destination at4250MartinLutherKingBoulevard with these coordinates. This pin represents the main department office; some teaching can occur at Katy. The unrelated AI energy-systems posting is excluded.",
+      "notes": "Department recruitment page gives Melcher Hall280 and Business Analytics hiring. University job description confirms operations management and information systems within the department. Official directions link the named Melcher/Bauer destination at4250MartinLutherKingBoulevard with these coordinates. This pin represents the main department office; some teaching can occur at Katy. Official energy-systems vacancy494634 explicitly gives primary appointment in Decision and Information Sciences and courtesy engineering appointment; its legacy OM/IS row therefore shares this department pin.",
       "checked": "2026-10-24"
     },
     {
@@ -9954,6 +9956,471 @@
       ],
       "checked": "2026-10-25",
       "notes": "Original 2025 Operations Research tenure-track advertisement identifies Business Decisions and Analytics as the hiring department, explicitly distinct from collaboration with Statistics and Operations Research. Official department office directory and university floor plan place this department on sixth floor of Oskar-Morgenstern-Platz 1 (office 6.617, professor 6.616). Exact named 12-story university building footprint verified, rather than Kolingasse or main university coordinates. Abbreviated OR source label expanded."
+    },
+    {
+      "id": "missouri-industrial-systems-lafferre",
+      "institution": "University of Missouri (Mizzou)",
+      "rowIds": [
+        "university-of-missouri-mizzou____industrial-and-systems-engineering"
+      ],
+      "school": "College of Engineering",
+      "department": "Department of Industrial and Systems Engineering",
+      "building": "Thomas and Nell Lafferre Hall",
+      "address": "E3437 Thomas and Nell Lafferre Hall, University of Missouri, Columbia, MO 65211, United States",
+      "lat": 38.946086,
+      "lng": -92.3302494,
+      "addressSource": "https://engineering.missouri.edu/research/centers/celdi/contact/",
+      "coordinateSource": "https://www.openstreetmap.org/way/154795079",
+      "supportingSources": [
+        "https://gradschool.missouri.edu/degreecategory/industrial-systems-engineering/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department and graduate-school contact pages identify E3437 Lafferre Hall; matching named building footprint supplies point."
+    },
+    {
+      "id": "south-carolina-upstate-economics-finance-accounting-george",
+      "institution": "University of South Carolina Upstate",
+      "rowIds": [
+        "university-of-south-carolina-upstate__george-dean-johnson-jr-college-of-business-and-economics__economics-finance-and-accounting"
+      ],
+      "school": "George Dean Johnson, Jr. College of Business and Economics",
+      "department": "Department of Economics, Finance, and Accounting",
+      "building": "George Dean Johnson, Jr. College of Business and Economics Building",
+      "address": "160 East Saint John Street, Spartanburg, SC 29303, United States",
+      "lat": 34.9525837,
+      "lng": -81.9307048,
+      "addressSource": "https://uscupstate.edu/academics/george-dean-johnson-jr.-college-of-business-and-economics/",
+      "coordinateSource": "https://www.openstreetmap.org/way/101604483",
+      "supportingSources": [
+        "https://academic-catalog.uscupstate.edu/jcbe/efa/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official college page identifies downtown academic building and department; catalog confirms department and chair. Named building polygon supplies point, not main university campus."
+    },
+    {
+      "id": "houston-human-centered-artificial-intelligence-melcher",
+      "institution": "University of Houston",
+      "rowIds": [
+        "university-of-houston__c-t-bauer-college-of-business__the-bauer-human-centered-artificial-intelligence-institute"
+      ],
+      "school": "C. T. Bauer College of Business",
+      "department": "Human-Centered Artificial Intelligence Institute",
+      "building": "Leroy and Lucile Melcher Hall",
+      "address": "Leroy and Lucile Melcher Hall, 4250 Martin Luther King Boulevard, Houston, TX 77204-6021, United States",
+      "lat": 29.7207464,
+      "lng": -95.3390041,
+      "addressSource": "https://www.bauer.uh.edu/ai/",
+      "coordinateSource": "https://www.bauer.uh.edu/search/parking-directions/",
+      "supportingSources": [],
+      "notes": "Current official institute page explicitly gives Melcher Hall address. Separate institute card shares the verified Melcher building point.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "houston-bauer-college-melcher",
+      "institution": "University of Houston",
+      "rowIds": [
+        "university-of-houston__c-t-bauer-college-of-business"
+      ],
+      "school": "C. T. Bauer College of Business",
+      "department": "",
+      "building": "Leroy and Lucile Melcher Hall",
+      "address": "Leroy and Lucile Melcher Hall, 4250 Martin Luther King Boulevard, Houston, TX 77204-6021, United States",
+      "lat": 29.7207464,
+      "lng": -95.3390041,
+      "addressSource": "https://www.bauer.uh.edu/administration/office-of-dean/directory.php",
+      "coordinateSource": "https://www.bauer.uh.edu/search/parking-directions/",
+      "supportingSources": [
+        "https://www.bauer.uh.edu/images/search/melcher-hall.pdf"
+      ],
+      "notes": "School-level listing uses the official college dean office in Melcher Hall. Department and institute listings retain their own cards and identities at the same building.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "carnegie-mellon-qatar-information-systems",
+      "institution": "Carnegie Mellon University",
+      "school": "Carnegie Mellon University in Qatar",
+      "department": "Information Systems",
+      "rowIds": [
+        "carnegie-mellon-university__carnegie-mellon-university-in-qatar__information-systems"
+      ],
+      "building": "Carnegie Mellon University in Qatar Building",
+      "address": "Education City, Al Luqta Street, Al Rayyan, Qatar",
+      "country": "Qatar",
+      "lat": 25.316422,
+      "lng": 51.4401857,
+      "addressSource": "https://www.qatar.cmu.edu/about/connect-with-us/",
+      "coordinateSource": "https://maps.google.com/maps?hl=en&ie=UTF8&output=embed&q=Carnegie+Mellon+University+Doha&t=&z=14",
+      "supportingSources": [
+        "https://www.qatar.cmu.edu/academics/information-systems/"
+      ],
+      "notes": "Official Qatar program and contact page establish its Education City academic building, not Pittsburgh. University-linked Google map supplies named academic-building destination coordinates.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "aschaffenburg-digital-production-building24",
+      "institution": "Aschaffenburg University of Applied Sciences",
+      "school": "Faculty of Engineering and Computer Science",
+      "department": "Digital Production Technologies",
+      "rowIds": [
+        "aschaffenburg-university-of-applied-sciences__faculty-of-engineering-and-computer-science__digital-production-technologies"
+      ],
+      "building": "Building 24",
+      "address": "Faculty Office E06, Würzburger Straße 45, 63743 Aschaffenburg, Germany",
+      "lat": 49.9721033,
+      "lng": 9.160055,
+      "addressSource": "https://www.th-ab.de/hochschule/organisation/organisationseinheiten/fakultaet-ingenieurwissenschaften-und-informatik",
+      "coordinateSource": "https://www.openstreetmap.org/way/23895120",
+      "supportingSources": [
+        "https://www.th-ab.de/fileadmin/th-ab-redaktion/dokumente/Hochschulmarketing/standorte/standorte-campusplan-campus-1.pdf"
+      ],
+      "notes": "New professorship is mapped to its hiring faculty office, explicitly Building24 E06. No personal office assignment is asserted. Official2026 campus map identifies building24 beside Kochstrasse; named building footprint supplies coordinates.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "houston-supply-chain-logistics-engineering4",
+      "institution": "University of Houston",
+      "school": "Cullen College of Engineering",
+      "department": "Supply Chain and Logistics Technology",
+      "rowIds": [
+        "university-of-houston____ise-supply-chain-and-logistics-tech"
+      ],
+      "building": "Cullen College of Engineering Building 4",
+      "address": "Room 201C, 13858 University Boulevard, Sugar Land, TX 77479, United States",
+      "lat": 29.5763341,
+      "lng": -95.6528341,
+      "addressSource": "https://www.ise.uh.edu/faculty",
+      "coordinateSource": "https://www.openstreetmap.org/way/1390451336",
+      "supportingSources": [
+        "https://wang.egr.uh.edu/contact/",
+        "https://www.egr.uh.edu/parameters/2024-spring/cullen-college-looks-future-it-expands-new-building-uh-sugar-land-campus"
+      ],
+      "notes": "Current department directory explicitly identifies program director Jin-Kwang Bok in Building4 room201C; official lab contact confirms street address. Named address-matched building footprint supplies coordinates. Supersedes old main-campus or Brazos Hall advising addresses following the technology programs move.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "harvard-kennedy-public-policy-littauer",
+      "institution": "Harvard University",
+      "school": "Harvard Kennedy School",
+      "department": "Public Policy",
+      "rowIds": [
+        "harvard-university__harvard-kennedy-school__public-policy"
+      ],
+      "building": "Littauer Building, Harvard Kennedy School",
+      "address": "Public Policy Program Office, First Floor, 79 John F. Kennedy Street, Cambridge, MA 02138, United States",
+      "lat": 42.3710461,
+      "lng": -71.1220726,
+      "addressSource": "https://www.hks.harvard.edu/index.php/more/contact-us",
+      "coordinateSource": "https://www.openstreetmap.org/way/29935534",
+      "supportingSources": [
+        "https://www.hks.harvard.edu/sites/default/files/about_us/HKS_Campus_Map.pdf"
+      ],
+      "notes": "Official current school map locates public policy and doctoral program offices on first floor of Kennedy School Littauer. Named footprint is the Kennedy School building near the river, not the separate Economics Littauer Center on Cambridge Street. School public-policy listing uses program office, not all faculty offices.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "ewha-business-shinsegae",
+      "institution": "Ewha Womans University",
+      "rowIds": [
+        "ewha-womans-university__college-of-business-administration__business-administration"
+      ],
+      "school": "College of Business Administration",
+      "department": "Business Administration",
+      "building": "Ewha-Shinsegae Building",
+      "address": "52 Ewhayeodae-gil, Seodaemun-gu, Seoul, Republic of Korea",
+      "lat": 37.561681795602084,
+      "lng": 126.94237185381427,
+      "addressSource": "https://ewha.ac.kr/ewhaen/academics/business-administration-prof.do",
+      "coordinateSource": "https://t1.kakaocdn.net/roughmap/2ckb2.json",
+      "supportingSources": [
+        "https://biz.ewha.ac.kr/biz/about/location.do",
+        "https://www.ewha.ac.kr/ewhaen/academics/business-administration.do",
+        "https://www.openstreetmap.org/way/333180680"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official faculty directory locates business faculty including operations researchers in Ewha-Shinsegae Building; college office is room309. Official business directions embed Kakao marker2ckb2 for this building. Marker placeX487271/placeY1128379 in WCONGNAMUL were divided by2.5 and transformed from EPSG5181 to WGS84; viewport coordinates were not used. Result falls within the exact named six-storey university building footprint."
+    },
+    {
+      "id": "clarkson-information-systems-bertrand-snell",
+      "institution": "Clarkson University",
+      "rowIds": [
+        "clarkson-university____is"
+      ],
+      "school": "David D. Reh School of Business",
+      "department": "Operations and Information Systems",
+      "building": "Bertrand H. Snell Hall",
+      "address": "Bertrand H. Snell Hall, Clarkson University, Potsdam, New York 13699, United States",
+      "lat": 44.6625298,
+      "lng": -74.9965448,
+      "addressSource": "https://www.clarkson.edu/people/william-mackinnon",
+      "coordinateSource": "https://www.openstreetmap.org/way/28202829",
+      "supportingSources": [
+        "https://www.clarkson.edu/organizational-chart?depart=310",
+        "https://www.clarkson.edu/people/dennis-yu"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official directory places information systems faculty William MacKinnon in343, Shafique Chaudhry345, Boris Jukic227 and Dennis Yu313 Bertrand H. Snell Hall; operations colleagues also occupy this building. Exact named Hill Campus building footprint, not downtown Old Snell Hall. Location represents the academic unit; no newly appointed faculty office is inferred."
+    },
+    {
+      "id": "china-science-technology-management-research",
+      "institution": "University of Science and Technology of China",
+      "rowIds": [
+        "university-of-science-and-technology-of-china__school-of-management__management-science"
+      ],
+      "school": "School of Management",
+      "department": "Management Science",
+      "building": "Management Science Teaching and Research Building",
+      "address": "Management Research Building, East Campus, 96 Jinzhai Road, Hefei, Anhui 230026, China",
+      "lat": 31.843333750592844,
+      "lng": 117.26663194502218,
+      "addressSource": "https://www.teach.ustc.edu.cn/service/svc-student/4427.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/270537513",
+      "supportingSources": [
+        "https://business.ustc.edu.cn/contact/list.htm",
+        "https://som.ustc.edu.cn/2022/0111/c28769a543607/page.htm"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official teaching-office directory explicitly places Management Science department015/016 administration in Management Research Building217, confirmed by current school contact and department leadership pages. Coordinates are centroid of the exact named Management Science Teaching and Research Building footprint on East Campus, distinct from adjoining MBA Center."
+    },
+    {
+      "id": "donghua-management-science-glorious-sun",
+      "institution": "Donghua University",
+      "rowIds": [
+        "donghua-university__glorious-sun-school-of-business-and-management__operations-management-logistics-and-supply-chain-management",
+        "donghua-university____om-scm-logistics"
+      ],
+      "school": "Glorious Sun School of Economics and Management",
+      "department": "Management Science and Engineering",
+      "building": "Glorious Sun Building",
+      "address": "1882 West Yan’an Road, Changning District, Shanghai 200051, China",
+      "lat": 31.20432,
+      "lng": 121.40934,
+      "addressSource": "https://glxy.dhu.edu.cn/20112/listm.htm",
+      "coordinateSource": "https://www.openstreetmap.org/way/863165282",
+      "supportingSources": [
+        "https://english.dhu.edu.cn/_upload/article/files/d6/dd/66f2ed1f4bfb916fe04c71f663fc/164bfa31-b1c4-4ce3-9458-5db68e2d280c.pdf",
+        "https://glxy.dhu.edu.cn/2021/0426/c20164a279113/page.psp",
+        "https://news.dhu.edu.cn/2026/1013/c7759a427488/page.htm"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department page gives Management Science and Engineering offices528/529 in Glorious Sun Building; current supply-chain faculty also have offices there. School administration is room514. Official campus map identifies this as building07, distinct from newer management building08 immediately south. Coordinate lies within the distinctive I-shaped footprint corresponding to building07 south of the textile museum, corroborated against the official map and surrounding footprints. Current university news uses School of Economics and Management; former Business and Management name is an alias."
+    },
+    {
+      "id": "donghua-economics-management-glorious-sun",
+      "institution": "Donghua University",
+      "rowIds": [
+        "donghua-university__glorious-sun-school-of-economics-and-management__operations-and-logistics-information-management-decision-sci"
+      ],
+      "school": "Glorious Sun School of Economics and Management",
+      "department": "Operations and Logistics, Information Management, Decision Science, Behavioral Sciences and Financial Engineering",
+      "building": "Glorious Sun Building",
+      "address": "1882 West Yan’an Road, Changning District, Shanghai 200051, China",
+      "lat": 31.20432,
+      "lng": 121.40934,
+      "addressSource": "https://glxy.dhu.edu.cn/3253/listm.htm",
+      "coordinateSource": "https://www.openstreetmap.org/way/863165282",
+      "supportingSources": [
+        "https://english.dhu.edu.cn/_upload/article/files/d6/dd/66f2ed1f4bfb916fe04c71f663fc/164bfa31-b1c4-4ce3-9458-5db68e2d280c.pdf",
+        "https://glxy.dhu.edu.cn/2021/0426/c20164a279113/page.psp",
+        "https://news.dhu.edu.cn/2026/1013/c7759a427488/page.htm"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department page gives Management Science and Engineering offices528/529 in Glorious Sun Building; current supply-chain faculty also have offices there. School administration is room514. Official campus map identifies this as building07, distinct from newer management building08 immediately south. Coordinate lies within the distinctive I-shaped footprint corresponding to building07 south of the textile museum, corroborated against the official map and surrounding footprints. Current university news uses School of Economics and Management; former Business and Management name is an alias."
+    },
+    {
+      "id": "western-wyoming-information-systems-main-academic",
+      "institution": "Western Wyoming College",
+      "institutionKey": "Western Wyoming Community College",
+      "rowIds": [
+        "western-wyoming-community-college__business-and-technology__information-systems"
+      ],
+      "school": "Business and Technology",
+      "department": "Information Systems",
+      "building": "Main academic building, first-floor Information Systems offices and laboratory",
+      "address": "Rooms 1425, 1427 and 1448, 2500 College Drive, Rock Springs, Wyoming 82901, United States",
+      "lat": 41.591,
+      "lng": -109.2373,
+      "addressSource": "https://www.westernwyoming.edu/academics/major-programs/business-technology/business-information-systems/faculty-directory.php",
+      "coordinateSource": "https://www.openstreetmap.org/relation/3473263",
+      "supportingSources": [
+        "https://www.westernwyoming.edu/campus-map/index.php",
+        "https://www.westernwyoming.edu/student-life/campus-amenities/computer-labs.php",
+        "https://www.westernwyoming.edu/faculty/index.php",
+        "https://wwcwy.peopleadmin.com/postings/5974",
+        "https://cdn.maps.moderncampus.net/uploads/map/363/markers.json"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official Information Systems faculty directory gives rooms1425,1427 and1448; current staff directory also places instructor Ijaz Shaik in1450 on Rock Springs campus. Official campus page confirms most academic facilities are under one roof; this is the specific main academic building, not a separate business school building. Exact external building outline corroborated against official interactive map. Point is within the connected building between courtyards; room locations provided in address, geographic point is building-level. Official hiring page confirms Rock Springs campus and excludes remote appointment."
+    },
+    {
+      "id": "dakota-state-business-east-hall",
+      "institution": "Dakota State University",
+      "institutionKey": "Dakota State University",
+      "rowIds": [
+        "dakota-state-university____production-and-om"
+      ],
+      "school": "College of Business and Information Systems",
+      "department": "Production and Operations Management",
+      "building": "East Hall",
+      "address": "East Hall, Dakota State University, 820 North Washington Avenue, Madison, South Dakota 57042, United States",
+      "lat": 44.01217847,
+      "lng": -97.11033293,
+      "addressSource": "https://dsu.edu/academics/colleges/college-of-business-and-information-systems.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/188022713",
+      "supportingSources": [
+        "https://dsu.edu/directory/college-of-business-and-information-systems.html",
+        "https://dsu.edu/commencement/files/CampusParkingMap_EA.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official college page and current college faculty directory consistently place the College of Business and Information Systems offices in East Hall. Production and Operations Management is the subject area of the business vacancy, not a separately named administrative department. Exact named East Hall external building footprint matches official campus map building13 at southeast of central campus, distinct from Tunheim Classroom Building and Madison Cyber Labs. Street address is university mailing address qualified by the exact building."
+    },
+    {
+      "id": "georgia-state-management-robinson-broad",
+      "institutionKey": "Georgia State University",
+      "institution": "Georgia State University",
+      "rowIds": [
+        "georgia-state-university____operations-and-supply-chain-management"
+      ],
+      "school": "J. Mack Robinson College of Business",
+      "department": "Department of Management",
+      "building": "J. Mack Robinson College of Business Building, tenth floor",
+      "address": "35 Broad Street Northwest, tenth floor, Atlanta, Georgia 30303, United States",
+      "lat": 33.755329,
+      "lng": -84.390244,
+      "addressSource": "https://robinson.gsu.edu/academic-departments/management",
+      "coordinateSource": "https://map.concept3d.com/?id=1108#!m/187354",
+      "supportingSources": [
+        "https://robinson.gsu.edu/academic-departments/",
+        "https://facilities.gsu.edu/files/2026/03/Building_List_03312026.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official department page explicitly includes operations and supply chain management and identifies its main office at 35 Broad Street Northwest, tenth floor. Official facilities building list and campus map confirm the named Robinson College building at this address. Coordinates from the official campus map named building marker187354. Distinct from 55 Park Place, which houses other college departments."
+    },
+    {
+      "id": "monash-operations-research-econometrics-caulfield-h",
+      "institution": "Monash University",
+      "institutionKey": "Monash University",
+      "rowIds": [
+        "monash-university____or-om"
+      ],
+      "school": "Monash Business School",
+      "department": "Econometrics and Business Statistics — Operations Research and Operations Management",
+      "building": "Building H, Caulfield campus",
+      "address": "900 Dandenong Road, Caulfield East, Victoria 3145, Australia",
+      "lat": -37.8763066,
+      "lng": 145.04429475,
+      "addressSource": "https://www.monash.edu/__data/assets/pdf_file/0010/2658961/Caulfield-campus-map.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/46145432",
+      "supportingSources": [
+        "https://www.monash.edu/business/econometrics-and-business-statistics/our-people/staff-directory",
+        "https://au.indeed.com/q-monash-university-lecturer-jobs.html?vjk=aa4893afb0a56d85"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Original OR/OM posting closes 3 October 2025. Matching employer advertisement preserved by Indeed has that exact deadline, expressly names Department of Econometrics and Business Statistics and Caulfield, and seeks operations research/operations management. Official university campus plan explicitly places this department in Building H, independently corroborated by current departmental staff directory locating leadership at Caulfield. Exact named Building H footprint. This source does not belong to the separately listed Management department in Building N, nor the original generic Clayton campus coordinate."
+    },
+    {
+      "id": "dublin-business-quinn-official-directory",
+      "institution": "University College Dublin",
+      "institutionKey": "University College Dublin",
+      "rowIds": [
+        "university-college-dublin__school-of-business"
+      ],
+      "school": "School of Business",
+      "department": "",
+      "building": "Lochlann Quinn School of Business",
+      "address": "Belfield, Dublin 4, Ireland",
+      "lat": 53.304813,
+      "lng": -6.219522,
+      "addressSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
+      "coordinateSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
+      "checked": "2026-10-25",
+      "notes": "The current official staff directory identifies School of Business general enquiries and Quinn School Office Q021 in this building, with its own map marker coordinates. School-level administrative location; the separately verified graduate supply-chain faculty location remains at Blackrock."
+    },
+    {
+      "id": "dublin-management-information-systems-quinn-official-directory",
+      "institution": "University College Dublin",
+      "institutionKey": "University College Dublin",
+      "rowIds": [
+        "university-college-dublin____mis"
+      ],
+      "school": "School of Business",
+      "department": "Management Information Systems",
+      "building": "Lochlann Quinn School of Business",
+      "address": "Belfield, Dublin 4, Ireland",
+      "lat": 53.304813,
+      "lng": -6.219522,
+      "addressSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
+      "coordinateSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
+      "checked": "2026-10-25",
+      "notes": "The current official directory locates Management Information Systems professor Séamas Kelly in Q226, Sean McGarraghy in Q236 and Annunziata Esposito Amideo in Q223, and supplies exact Quinn building marker coordinates. This is the verified subject-area office location, not a university centroid or inference from teaching on two campuses."
+    },
+    {
+      "id": "andes-chile-business-el-reloj",
+      "institution": "Universidad de los Andes (Chile)",
+      "institutionKey": "Universidad de los Andes",
+      "rowIds": [
+        "universidad-de-los-andes____om-scm-mis"
+      ],
+      "country": "Chile",
+      "school": "School of Business and Economics",
+      "department": "Operations Management, Supply Chain Management and Management Information Systems",
+      "building": "Edificio del Reloj",
+      "address": "Monseñor Álvaro del Portillo 12455, Las Condes, Santiago, Chile",
+      "lat": -33.4024316,
+      "lng": -70.5078557,
+      "addressSource": "https://www.uandes.cl/wp-content/uploads/2022/05/mapa.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/162606088",
+      "supportingSources": [
+        "https://www.uandes.cl/universidad/facultades/ciencias-economicas-y-empresariales/sbe/",
+        "https://www.uandes.cl/images/noticias/2018/Agosto/21/Mapa.pdf",
+        "https://connect.informs.org/discussion/assistantassociate-professor-management-science-operations-management-supply-chain-management-management-information-systems-marketing-logistics-universidad-de-los-andes-chile",
+        "https://www.linkedin.com/posts/francisco-morales-6b47908_tenure-trackpositionsmanagementoruandes-activity-7377316978577006592-5NQl"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Corrects a wrong-country match to the unrelated university in Bogotá. The original posting explicitly says Chile; the associate dean’s identical recruitment announcement identifies the School of Business and Economics. Official university campus maps place Facultad de Ciencias Económicas y Empresariales in Edificio del Reloj (third floor in detailed map). Exact named building footprint coordinates, not the separate ESE executive business school or engineering building."
+    },
+    {
+      "id": "technical-university-munich-ai-management-heilbronn-lbau",
+      "institution": "Technical University of Munich",
+      "institutionKey": "TUM School of Management",
+      "rowIds": [
+        "tum-school-of-management____om-scm-mis-f-ai"
+      ],
+      "school": "School of Management",
+      "department": "Center for Digital Transformation — Artificial Intelligence Applications in Management",
+      "building": "L-Bau, Bildungscampus 9",
+      "address": "Bildungscampus 9, 74076 Heilbronn, Germany",
+      "lat": 49.1485191,
+      "lng": 9.2151448,
+      "addressSource": "https://chn.tum.de/research/center-for-digital-transformation",
+      "coordinateSource": "https://www.openstreetmap.org/way/443802898",
+      "supportingSources": [
+        "https://www.mgt.tum.de/fileadmin/mgt.tum.de/about/career/230722-MGT_Infopackage_AI_APP_MANAGEMENT_v7_CG_PL-72_50.pdf",
+        "https://www.mgt.tum.de/de/center-for-digital-transformation"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The original August 2025 recruitment package (page 13, deadline 19 October 2025) explicitly assigns the artificial-intelligence management professorship to the Center for Digital Transformation at Heilbronn, not Munich. Current official center contact gives Bildungscampus 9 and identifies its L-building. Exact address-matched L-Bau footprint coordinates. Maps the hiring center; no specific future appointee room is asserted."
+    },
+    {
+      "id": "kedge-operations-information-systems-bordeaux-administration",
+      "institution": "KEDGE Business School",
+      "institutionKey": "Kedge Business School",
+      "rowIds": [
+        "kedge-business-school____operations-management-and-information-systems"
+      ],
+      "school": "",
+      "department": "Operations Management and Information Systems",
+      "building": "Bordeaux campus academic building complex, Domaine de Raba",
+      "address": "680 cours de la Libération, 33405 Talence, France",
+      "lat": 44.7963331,
+      "lng": -0.6009773,
+      "addressSource": "https://student.kedge.edu/faculty/departments/operations-management-and-information-systems-mosi",
+      "coordinateSource": "https://goo.gl/maps/ka2bgsyNEyMCAPg87",
+      "supportingSources": [
+        "https://kedge.edu/l-ecole/les-campus/bordeaux",
+        "https://www.openstreetmap.org/way/784342609"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The department page explicitly places both head Armand Bajard and coordinator Emeline Pelloille at Bordeaux. Corrects its administration card from Marseille to the Bordeaux academic complex. The official Bordeaux campus page links this precise Google place marker (!3d/!4d), corroborated against the academic building footprint; not a viewport center. The department also teaches and has faculty elsewhere; this record identifies its verified departmental administration, not a claim that all faculty work only in Bordeaux."
     }
   ]
 }
