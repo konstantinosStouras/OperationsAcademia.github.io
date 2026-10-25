@@ -93,9 +93,14 @@
   function vacancyKey(row) {
     var link = advertLink(row);
     var m;
+    // Verified syndication: both full adverts name Bellarmine position
+    // 202704, Fall 2027, with identical hiring text (checked 2026-10-25).
+    // These exact advert IDs alone are aliases; similar titles prove nothing.
+    if (/^jobs\.chronicle\.com\/job\/38016580(?:[/?]|$)/.test(link) ||
+        /^higheredjobs\.com\/.*[?&]jobcode=179597757(?:&|$)/.test(link)) return 'bellarmine:202704';
     if ((m = link.match(/^higheredjobs\.com\/.*[?&]jobcode=(\d+)/))) return 'hej:' + m[1];
     if ((m = link.match(/^([^/]+\.interviewexchange\.com)\/.*[?&]jobid=(\d+)/))) return m[1] + ':' + m[2];
-    if ((m = link.match(/^apply\.interfolio\.com\/(\d+)(?:[/?]|$)/))) return 'interfolio:' + m[1];
+    if ((m = link.match(/^(?:apply\.interfolio\.com\/|dossier\.interfolio\.com\/apply\/)(\d+)(?:[/?]|$)/))) return 'interfolio:' + m[1];
     if ((m = link.match(/^((?:jobs|careers)\.[^/]+\.edu)\/postings\/(\d+)(?:[/?]|$)/))) return m[1] + ':' + m[2];
     if ((m = link.match(/^cityu\.edu\.hk\/hro\/.*[?&]ref=uac-([a-z\d]+)/))) return 'cityu:' + m[1];
     if ((m = link.match(/^([^/]+\.varbi\.com)\/.*jobid(?:%3a|:)(\d+)/))) return m[1] + ':' + m[2];
@@ -130,6 +135,28 @@
     };
   }
 
+  // Admission rule for new crawled jobs: a published advert or Posted at link is enough,
+  // regardless of the scraped institution, market year, department or rank.
+  // Callers supply published rows only; pending comparisons retain their guards.
+  // Posted at often points to a shared source board (e.g. POMS opportunities).
+  // Only a recognised vacancy ID makes that field evidence of one job.
+  function admissionLinks(row) {
+    var posted = { adUrl: row.postedAtUrl };
+    return [advertLink(row), vacancyKey(posted) ? advertLink(posted) : ''].filter(Boolean);
+  }
+  function publishedAdvertRepeat(row, published) {
+    if (!row) return null;
+    var links = admissionLinks(row);
+    if (!links.length) return null;
+    var match = (published || []).find(function (other) {
+      if (!other || (row.id && other.id && String(row.id) === String(other.id))) return false;
+      return admissionLinks(other).some(function (link) {
+        return link && links.indexOf(link) !== -1;
+      });
+    });
+    return match ? entry(match) : null;
+  }
+
   /**
    * The posting `row` is simply a repeat of, or null. See the header for why
    * each guard is there and what it measured.
@@ -153,10 +180,14 @@
       if (Number(s.year) !== Number(row.year)) continue;
       if (institutionKey(s.institution) !== key) continue;
       var sharedVacancy = sameVacancy(row, s);
+      // The incoming advert itself naming the existing application ID proves
+      // identity despite a research-area department label (Ohio State). A
+      // copied application link alone still needs compatible metadata below.
       var directVacancy = vacancyKey(row);
-      if (sharedVacancy && directVacancy && directVacancy === vacancyKey(s)) return entry(s);
-      // Cross-site application evidence still needs compatible department and
-      // rank: conflicting metadata stays available for a person to review.
+      if (sharedVacancy && directVacancy && (directVacancy === vacancyKey(s) ||
+          // Verified 2026-10-25: Ohio State R160519 / Interfolio 195349
+          // is the optimization search, also posted with its ISE department.
+          (directVacancy === 'interfolio:195349' && vacancyKeys(s).indexOf(directVacancy) !== -1))) return entry(s);
       if (!sharedVacancy && (!link || advertLink(s) !== link)) continue;
 
       var sLevels = Object.prototype.toString.call(s.levels) === '[object Array]'
@@ -223,6 +254,7 @@
 
   return {
     advertLink: advertLink,
+    publishedAdvertRepeat: publishedAdvertRepeat,
     vacancyKey: vacancyKey,
     advertRepeat: advertRepeat,
     findAdvertRepeats: findAdvertRepeats,

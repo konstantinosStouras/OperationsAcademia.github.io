@@ -1422,13 +1422,9 @@
   "institution": "Bellarmine University",
   "department": "Information Systems and Artificial Intelligence",
   "type": "University",
-  "country": "United States",
   "sources": [
-   "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-10-23",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -12821,17 +12817,6 @@
   ],
   "deptUrl": "https://fisher.osu.edu/directory?department=224",
   "deptUrlInherited": true
- },
- {
-  "id": "ohio-state-university____optimization-for-machine-learning",
-  "institution": "Ohio State University",
-  "department": "Optimization for Machine Learning",
-  "type": "University",
-  "sources": [
-   "seed"
-  ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
  },
  {
   "id": "ohio-state-university__college-of-engineering__integrated-systems-engineering",

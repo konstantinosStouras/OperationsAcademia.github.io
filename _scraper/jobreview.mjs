@@ -605,7 +605,7 @@ export function sameDups(a, b) {
    The guards, and the measurement that scoped them, are in that file's header.
    Re-exported under the same names, so nothing that imported them moved. */
 export const {
-  advertLink, advertRepeat, findAdvertRepeats, repeatNote,
+  advertLink, publishedAdvertRepeat, advertRepeat, findAdvertRepeats, repeatNote,
 } = require('../assets/oa-advert-dup.js');
 
 /* -------------------------------------------------------- business school */

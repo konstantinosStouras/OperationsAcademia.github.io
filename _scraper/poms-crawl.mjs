@@ -56,7 +56,7 @@ import { isoStamp, marketFloor, LEVELS, TYPES, PUBLIC_FIELDS, stripRowEmails, ro
 import { firestore } from './_mail.mjs';
 import {
   COLLECTION as REVIEW_COL, PENDING, APPROVED, queueDoc, duplicatesOf, businessCheck,
-  advertRepeat, sameDups, sameBiz,
+  publishedAdvertRepeat, advertRepeat, sameDups, sameBiz,
 } from './jobreview.mjs';
 import { parseAdvert, advertPlace, cacheEntry, adBlock, workdayApiUrl, GONE_RX } from './adverts.mjs';
 import { readAdvert } from './adverts-verify.mjs';
@@ -444,7 +444,7 @@ async function main() {
   /* what "already listed" means for the flags: the served postings, this
      queue's approved rows, and its pending ones (marked, so the card can say
      "under review" rather than "already published") */
-  const approvedRows = queue.docs.filter((d) => d.status === APPROVED && d.row).map((d) => d.row);
+  const approvedRows = queue.docs.filter((d) => d.status === APPROVED && d.row).map((d) => ({ ...d.row, ...d.edits }));
   const pendingRows = queue.docs.filter((d) => d.status === PENDING && d.row)
     .map((d) => ({ ...d.row, _pending: true }));
   const listedNow = [...(Array.isArray(site) ? site : []), ...approvedRows];
@@ -483,7 +483,7 @@ async function main() {
 
     /* the same advertisement already listed is never a decision to make —
        the link check above catches nearly all of these before the read */
-    const repeat = advertRepeat(row, duplicateRows);
+    const repeat = publishedAdvertRepeat(row, [...existingRows, ...approvedRows]) || advertRepeat(row, duplicateRows);
     if (repeat) {
       skippedIds++;
       log(`  x same advertisement as ${repeat.ref || repeat.id} — not queued: ${row.posted}  ${row.institution}`);
@@ -518,7 +518,9 @@ async function main() {
         if (!latest.ok) throw new Error(latest.error);
         const currentRows = [...duplicateRows, ...latest.submissionRows,
           ...latest.docs.filter((d) => d.row).map((d) => ({ ...d.row, ...d.edits }))];
-        if (latest.docs.some((d) => d.rowId === id) || advertRepeat(row, currentRows)
+        const publishedRows = [...existingRows, ...latest.submissionRows,
+          ...latest.docs.filter((d) => d.status === APPROVED && d.row).map((d) => ({ ...d.row, ...d.edits }))];
+        if (latest.docs.some((d) => d.rowId === id) || publishedAdvertRepeat(row, publishedRows) || advertRepeat(row, currentRows)
           || duplicatesOf(row, currentRows).length || nearbyPostings(row, currentRows).length) {
           warn(`duplicate found on final check, not queued: ${opp.href}`);
           continue;
@@ -670,6 +672,7 @@ const FIXTURE_HTML = `<table class="table views-table views-view-table cols-5">
 export { FIXTURE_HTML };
 
 async function selftest() {
+  await import('./published-advert-test.mjs');
   let pass = 0; const fails = [];
   const ok = (c, what) => { if (c) pass++; else fails.push(what); };
   const eq = (a, b, what) => ok(JSON.stringify(a) === JSON.stringify(b), `${what}\n      expected ${JSON.stringify(b)}\n      got      ${JSON.stringify(a)}`);

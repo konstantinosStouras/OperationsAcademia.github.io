@@ -178,6 +178,12 @@ jobs:
           if [ -n "$IN_LIMIT" ]; then set -- "$@" "--limit" "$IN_LIMIT"; fi
           node _scraper/poms-crawl.mjs "$@"
 
+      - name: Verify no published links are awaiting review
+        if: ${{ !inputs.dry_run && !inputs.scan }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node _scraper/audit-review-links.mjs
+
       # NO DOORBELL. Nothing here reaches data/: a posting the maintainer
       # approves rings the build through publishOnReview (_functions/index.js)
       # exactly as a tracking-sheet approval does.

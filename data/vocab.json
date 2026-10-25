@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25T21:24:13.714Z",
+ "generated": "2026-10-25T21:43:38.452Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -375,10 +375,6 @@
   },
   {
    "v": "Augusta University",
-   "n": 2
-  },
-  {
-   "v": "Bellarmine University",
    "n": 2
   },
   {
@@ -891,6 +887,10 @@
   },
   {
    "v": "Beijing Normal-Hong Kong Baptist University (BNBU)",
+   "n": 1
+  },
+  {
+   "v": "Bellarmine University",
    "n": 1
   },
   {
@@ -4730,10 +4730,6 @@
    "n": 1
   },
   {
-   "v": "Information Systems and Artificial Intelligence",
-   "n": 1
-  },
-  {
    "v": "Information Systems and Informatics",
    "n": 1
   },
@@ -6337,13 +6333,9 @@
     "W. Fielding Rubel School of Business"
    ],
    "units": [
-    "Business Technology and Artificial Intelligence",
-    "Information Systems and Artificial Intelligence"
+    "Business Technology and Artificial Intelligence"
    ],
    "bySchool": {
-    "": [
-     "Information Systems and Artificial Intelligence"
-    ],
     "W. Fielding Rubel School of Business": [
      "Business Technology and Artificial Intelligence"
     ]
