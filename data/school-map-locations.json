@@ -11957,6 +11957,644 @@
       ],
       "checked": "2026-10-25",
       "notes": "Original faculty advertisement explicitly locates Operations Management at the new Kamba campus. University announcement verifies the academic building; school-published 2025 campus tour places its dean and management teaching in the shared academic block. University bulletin page I-7 master plan distinguishes academic blocks, central Centre of Excellence, residences and sports buildings. Point digitized on the southwest L-shaped completed Academic Building roof, corroborating that layout against georeferenced imagery; approximate building-level precision, not the residential campus centre or the former Powai address."
+    },
+    {
+      "id": "toronto-scarborough-management-instructional-centre",
+      "school": "University of Toronto Scarborough",
+      "department": "Department of Management",
+      "building": "Instructional Centre",
+      "address": "1095 Military Trail, Toronto, ON M1C 1A4, Canada",
+      "lat": 43.786774,
+      "lng": -79.1896605,
+      "addressSource": "https://utsc.utoronto.ca/mgmt/contact",
+      "coordinateSource": "https://www.openstreetmap.org/relation/2916427",
+      "institution": "University of Toronto",
+      "rowIds": [
+        "university-of-toronto__scarborough-and-rotman-school-of-management__management"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "toronto-scarborough-rotman-management",
+      "locationGroupSource": "https://utsc.utoronto.ca/mgmt/contact",
+      "supportingSources": [
+        "https://www.rotman.utoronto.ca/the-rotman-experience/connect-with-us/",
+        "https://www.utsc.utoronto.ca/mgmt/looking-help"
+      ],
+      "notes": "The existing directory row explicitly combines Scarborough and Rotman. Represent both separately: Scarborough management office in Instructional Centre (faculty administration IC242), and Rotman main academic building at 105 St George. Official unit contact pages independently establish each building; named OpenStreetMap building geometry supplies coordinates. No claim that all faculty have offices at both campuses."
+    },
+    {
+      "id": "toronto-rotman-management-main-building",
+      "school": "Rotman School of Management",
+      "department": "Management",
+      "building": "Rotman School of Management Building",
+      "address": "105 St. George Street, Toronto, ON M5S 3E6, Canada",
+      "lat": 43.6653195,
+      "lng": -79.3984124,
+      "addressSource": "https://www.rotman.utoronto.ca/the-rotman-experience/connect-with-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/12000960",
+      "institution": "University of Toronto",
+      "rowIds": [
+        "university-of-toronto__scarborough-and-rotman-school-of-management__management"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "toronto-scarborough-rotman-management",
+      "locationGroupSource": "https://utsc.utoronto.ca/mgmt/contact",
+      "supportingSources": [
+        "https://www.rotman.utoronto.ca/the-rotman-experience/connect-with-us/",
+        "https://www.utsc.utoronto.ca/mgmt/looking-help"
+      ],
+      "notes": "The existing directory row explicitly combines Scarborough and Rotman. Represent both separately: Scarborough management office in Instructional Centre (faculty administration IC242), and Rotman main academic building at 105 St George. Official unit contact pages independently establish each building; named OpenStreetMap building geometry supplies coordinates. No claim that all faculty have offices at both campuses."
+    },
+    {
+      "id": "ie-industrial-manufacturing-madrid-tower",
+      "building": "IE Tower (Torre Caleido)",
+      "address": "Paseo de la Castellana 259E, 28046 Madrid, Spain",
+      "lat": 40.47765172,
+      "lng": -3.68914953,
+      "coordinateSource": "https://www.openstreetmap.org/way/969496210",
+      "notes": "Original university vacancy 192904 explicitly names Madrid and Segovia. Current school website confirms both cities. Madrid school Robotics and Artificial Intelligence Laboratory is on tower floor5; official faculty contact is this tower, and vice dean office4.19 corroborates. Point uses the36-storey tower footprint, not its long shopping podium.",
+      "institution": "IE University",
+      "rowIds": [
+        "ie-university__ie-school-of-science-and-technology__industrial-engineering-manufacturing-systems"
+      ],
+      "school": "IE School of Science and Technology",
+      "department": "Industrial Engineering (Manufacturing Systems)",
+      "addressSource": "https://www.ie.edu/contact/",
+      "supportingSources": [
+        "https://apply.interfolio.com/192904",
+        "https://www.ie.edu/school-science-technology/",
+        "https://www.ie.edu/school-science-technology/robotics-and-ai-lab/",
+        "https://www.ie.edu/university/"
+      ],
+      "locationGroup": "ie-industrial-manufacturing-campuses",
+      "locationGroupSource": "https://apply.interfolio.com/192904",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "ie-industrial-manufacturing-segovia-santa-cruz",
+      "building": "Convent of Santa Cruz la Real",
+      "address": "Calle Cardenal Zúñiga 12, 40003 Segovia, Spain",
+      "lat": 40.9527406,
+      "lng": -4.1194466,
+      "coordinateSource": "https://www.openstreetmap.org/node/13091365951",
+      "notes": "Original university vacancy 192904 explicitly names Madrid and Segovia. School website confirms both cities; official full-time faculty contact gives CardenalZúñiga12. University identifies this as historic ConventofSantaCruzlaReal academic building. Point is building main entrance on its southern academic wing, not generic campus acreage. No specific future faculty room has been announced.",
+      "institution": "IE University",
+      "rowIds": [
+        "ie-university__ie-school-of-science-and-technology__industrial-engineering-manufacturing-systems"
+      ],
+      "school": "IE School of Science and Technology",
+      "department": "Industrial Engineering (Manufacturing Systems)",
+      "addressSource": "https://www.ie.edu/contact/",
+      "supportingSources": [
+        "https://apply.interfolio.com/192904",
+        "https://www.ie.edu/school-science-technology/",
+        "https://www.ie.edu/school-science-technology/robotics-and-ai-lab/",
+        "https://www.ie.edu/university/"
+      ],
+      "locationGroup": "ie-industrial-manufacturing-campuses",
+      "locationGroupSource": "https://apply.interfolio.com/192904",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "lake-erie-business-college-hall",
+      "institution": "Lake Erie College",
+      "rowIds": [
+        "lake-erie-college__school-of-business__business-administration"
+      ],
+      "school": "School of Business",
+      "department": "Business Administration",
+      "building": "College Hall",
+      "address": "School of Business, Room 301, 391 West Washington Street, Painesville, OH 44077, United States",
+      "lat": 41.717711947619044,
+      "lng": -81.25187703809522,
+      "addressSource": "https://www.lec.edu/undergraduate-degrees",
+      "coordinateSource": "https://www.openstreetmap.org/way/708969471",
+      "supportingSources": [
+        "https://www.lec.edu/career-and-professional-advancement-programs",
+        "https://www.lec.edu/events/honors-scholarship-competition"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official school page gives business dean AmandaCurtis office CollegeHall301. Business faculty AibakHafeez official program page independently places him in CollegeHall. Named building footprint supplies point. Distinguishes administrative/faculty home from business classes scheduled in GarfieldCenter and HoldenCenter; does not infer faculty offices from classrooms."
+    },
+    {
+      "id": "purdue-engineering-dean-armstrong",
+      "rowIds": [
+        "purdue-university__college-of-engineering"
+      ],
+      "school": "College of Engineering",
+      "department": "",
+      "building": "Neil Armstrong Hall of Engineering",
+      "address": "Office of the Dean, Suite 3000, 701 West Stadium Avenue, West Lafayette, IN 47907-2045, United States",
+      "lat": 40.4309159,
+      "lng": -86.914992,
+      "addressSource": "https://engineering.purdue.edu/Engr/AboutUs/News/AboutUs/contact_us",
+      "coordinateSource": "https://www.openstreetmap.org/way/117146481",
+      "supportingSources": [
+        "https://www.purdue.edu/operations/emergency-preparedness/arms/"
+      ],
+      "notes": "Generic college listing uses explicitly identified dean office, independently corroborated by current2026 official building page. Individual department/recruitment rows are separately located.",
+      "institution": "Purdue University",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "purdue-gilbreth-kong-jischke",
+      "rowIds": [
+        "purdue-university__college-of-engineering__lillian-gilbreth-postdoctoral-fellowships"
+      ],
+      "school": "College of Engineering",
+      "department": "Lillian Gilbreth Postdoctoral Fellowships — Causal Foundation Models for Multimodal Precision Treatment-Response Discovery",
+      "building": "Martin C. Jischke Hall of Biomedical Engineering",
+      "address": "Nan Kong, Room 3082, 206 South Martin Jischke Drive, West Lafayette, IN 47907, United States",
+      "lat": 40.4221869,
+      "lng": -86.9211085,
+      "addressSource": "https://engineering.purdue.edu/Engr/People/ptProfile?resource_id=34627",
+      "coordinateSource": "https://www.openstreetmap.org/way/117396622",
+      "supportingSources": [
+        "https://engineering.purdue.edu/Engr/Research/GilbrethFellowships/ResearchProposals/2025-26/causal-foundation-models-for-multimodal-precision-treatmentresponse-discovery",
+        "https://engineering.purdue.edu/KongLab/people"
+      ],
+      "notes": "The linked fellowship is one specific project with NanKong as engineering co-advisor, not all Gilbreth fellowships. His current official profile gives WestLafayette MJIS3082; lab page confirms biomedical/industrial research group. Map identifies engineering host contact; pharmacy co-advisor does not imply same office.",
+      "institution": "Purdue University",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "florida-industrial-smart-manufacturing-jacksonville",
+      "institution": "University of Florida",
+      "rowIds": [
+        "university-of-florida____ise-smart-manufacturing"
+      ],
+      "school": "Herbert Wertheim College of Engineering",
+      "department": "Department of Industrial and Systems Engineering — Smart Manufacturing",
+      "building": "Jacksonville Program Offices",
+      "address": "801 West Bay Street, Jacksonville, FL 32204, United States",
+      "lat": 30.3282725,
+      "lng": -81.6683555,
+      "addressSource": "https://ise.ufl.edu/msem/about/location/",
+      "coordinateSource": "https://www.openstreetmap.org/node/8674622801",
+      "supportingSources": [
+        "https://explore.jobs.ufl.edu/en-us/listing/?page=12&page-items=20",
+        "https://ise.ufl.edu/2026/09/preparing-professionals-ise-kicks-off-new-masters-program-at-ufs-jacksonville-campus/",
+        "https://jax.ufl.edu/contact/"
+      ],
+      "notes": "Original SmartManufacturing-JAX vacancy is industrial/systems engineering Jacksonville in official archived listings. Current department Jacksonville program page explicitly says offices/classrooms at801WestBay until new campus completion; September2026 department announcement confirms operations commenced here. Point is exact801address node, not Gainesville WeilHall, Jacksonville medical campus, or future campus. SmartManufacturing specialization itself remains forthcoming.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "tecnologico-monterrey-materials-expedition",
+      "institution": "Tecnológico de Monterrey",
+      "rowIds": [
+        "tecnologico-de-monterrey__institute-for-advanced-materials-for-sustainable-manufacturi__supply-chain-and-logistics-systems"
+      ],
+      "school": "Institute for Advanced Materials for Sustainable Manufacturing",
+      "department": "Supply Chain and Logistics Systems",
+      "building": "Expedition FEMSA, Level 6",
+      "address": "Avenida Fernando García Roel, Colonia Tecnológico, Monterrey, Nuevo León 64700, Mexico",
+      "lat": 25.6522428,
+      "lng": -100.292252,
+      "addressSource": "https://distritoinnovacionmonterrey.tec.mx/en/expedition-femsa",
+      "coordinateSource": "https://www.openstreetmap.org/way/1539498725",
+      "supportingSources": [
+        "https://tecscience.tec.mx/en/business-innovation/expedition-femsa-a-new-hub-for-interdisciplinary-research/",
+        "https://jobs.tec.mx/tecnologico-de-monterrey/job/Monterrey-Faculty-position%C2%A0Supply-Chain-and-Logistics-Systems/1388837300/"
+      ],
+      "notes": "Official building directory locates institute onLevel6; university research news independently confirms. Named building outline, not genericcampus nor obsolete softball-field link in website footer. Vacancy allows flexible location: map identifies verified institute home, not a promise of the successful applicant future assignment.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "aalborg-sustainable-manufacturing-fibiger16",
+      "institution": "Aalborg University",
+      "rowIds": [
+        "aalborg-university__faculty-of-engineering-and-science__materials-and-production"
+      ],
+      "school": "Faculty of Engineering and Science",
+      "department": "Department of Materials and Production - Sustainable Manufacturing Systems",
+      "building": "Fibigerstræde 16",
+      "address": "Fibigerstræde 16, 9220 Aalborg Øst, Denmark",
+      "lat": 57.015965,
+      "lng": 9.976819,
+      "addressSource": "https://vbn.aau.dk/da/persons/kni/",
+      "coordinateSource": "https://www.openstreetmap.org/node/343003433",
+      "checked": "2026-10-25",
+      "notes": "Official vacancy 950756 names the Sustainable Manufacturing Systems group, Section of Production, and group leader Kjeld Nielsen. His current university research profile identifies Fibigerstraede 16, room 2.121. The map point is the exact number 16 address entrance from the Danish Address Register, reproduced by OpenStreetMap (osak identifier 0a3f509c-378b-32b8-e044-0003ba298018); it is not a campus centre. The vacancy itself has no assigned individual office."
+    },
+    {
+      "id": "rutgers-management-science-newark",
+      "institution": "Rutgers, The State University of New Jersey",
+      "institutionKey": "rutgers-business-school-newark-and-new-brunswick",
+      "rowIds": [
+        "rutgers-business-school-newark-and-new-brunswick____management-science-and-information-systems"
+      ],
+      "school": "Rutgers Business School",
+      "department": "Department of Management Science and Information Systems",
+      "building": "1 Washington Park",
+      "address": "1 Washington Park, Newark, New Jersey 07102",
+      "lat": 40.7450883,
+      "lng": -74.1705119,
+      "country": "United States",
+      "addressSource": "https://catalogs.rutgers.edu/generated/rbs_1820/pg211.html",
+      "coordinateSource": "https://www.openstreetmap.org/node/5002398246",
+      "supportingSources": [
+        "https://www.business.rutgers.edu/faculty-research/management-science-information-systems",
+        "https://facilities.business.rutgers.edu/home/rbs-buildings",
+        "https://ece.rutgers.edu/graduate-faculty"
+      ],
+      "locationGroup": "rutgers-management-science-office-choice",
+      "locationGroupSource": "https://jobs.rutgers.edu/postings/273747",
+      "checked": "2026-10-25",
+      "notes": "The official Assistant Professor of Professional Practice posting 26FA0360 explicitly permits the successful candidate to choose a primary office at either Newark or New Brunswick and requires teaching on both campuses. Both verified business-school buildings are therefore retained; no individual office is assigned. The university departmental directory places program coordinator Luz Kosar at 1 Washington Park, room 1068; the current department page retains her as coordinator, and the current facilities directory confirms the building. Building coordinates independently verified for the same structures in the central location evidence."
+    },
+    {
+      "id": "rutgers-management-science-new-brunswick",
+      "institution": "Rutgers, The State University of New Jersey",
+      "institutionKey": "rutgers-business-school-newark-and-new-brunswick",
+      "rowIds": [
+        "rutgers-business-school-newark-and-new-brunswick____management-science-and-information-systems"
+      ],
+      "school": "Rutgers Business School",
+      "department": "Department of Management Science and Information Systems",
+      "building": "Rutgers Business School, 100 Rockafeller Road",
+      "address": "100 Rockafeller Road, Piscataway, New Jersey 08854",
+      "lat": 40.5234232,
+      "lng": -74.4406996,
+      "country": "United States",
+      "addressSource": "https://www.business.rutgers.edu/sites/default/files/documents/faculty/cv-farid-alizadeh.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/251381974",
+      "supportingSources": [
+        "https://www.business.rutgers.edu/faculty-research/management-science-information-systems",
+        "https://facilities.business.rutgers.edu/home/rbs-buildings",
+        "https://ece.rutgers.edu/graduate-faculty"
+      ],
+      "locationGroup": "rutgers-management-science-office-choice",
+      "locationGroupSource": "https://jobs.rutgers.edu/postings/273747",
+      "checked": "2026-10-25",
+      "notes": "The official Assistant Professor of Professional Practice posting 26FA0360 explicitly permits the successful candidate to choose a primary office at either Newark or New Brunswick and requires teaching on both campuses. Both verified business-school buildings are therefore retained; no individual office is assigned. The current department chair Farid Alizadeh lists his work address as 100 Rockafeller Road. The current engineering graduate faculty directory separately places department vice chair Mert Gurbuzbalaban in room 5142 at that address. Building coordinates independently verified for the same structures in the central location evidence."
+    },
+    {
+      "id": "shanghai-finance-economics-business-wudong",
+      "institution": "Shanghai University of Finance and Economics",
+      "institutionKey": "shanghai-university-of-finance-and-economics",
+      "rowIds": [
+        "shanghai-university-of-finance-and-economics__college-of-business",
+        "shanghai-university-of-finance-and-economics__college-of-business__operations-management"
+      ],
+      "school": "College of Business",
+      "department": "Department of Operations Management",
+      "building": "College of Business Building",
+      "address": "100 Wudong Road, Yangpu District, Shanghai 200433, China",
+      "lat": 31.305061275,
+      "lng": 121.4934633,
+      "addressSource": "https://cob.sufe.edu.cn/Home/Contact",
+      "coordinateSource": "https://www.openstreetmap.org/way/498522044",
+      "checked": "2026-10-25",
+      "notes": "The official college directory lists the Operations Management department and its Wudong Road academic site. The college's Operations Management conference notice https://cob.sufe.edu.cn/Home/Detail/25755 identifies its College of Business Building at 100 Wudong Road. The university's current campus map https://www.sufe.edu.cn/dt/list.htm explicitly labels this building directly south of the Wudong athletic field, west of the Statistics and Data Science building, east of Tongbo Building and north of the Third Teaching Building. Its rectangular footprint matches OpenStreetMap way 498522044; coordinates are the center of its four corners, already WGS84. The separate Zhongshan North First Road professional-program premises are not substituted for the academic department building."
+    },
+    {
+      "id": "dongbei-supply-chain-mingzhe",
+      "institutionKey": "Dongbei University of Finance and Economics",
+      "institution": "Dongbei University of Finance and Economics",
+      "rowIds": [
+        "dongbei-university-of-finance-and-economics____institute-of-supply-chain-analytics"
+      ],
+      "school": "",
+      "department": "Institute of Supply Chain Analytics",
+      "building": "Mingzhe Building, fifth floor",
+      "address": "217 Jianshan Street, Shahekou District, Dalian, Liaoning 116025, China",
+      "lat": 38.87645385,
+      "lng": 121.54314777,
+      "addressSource": "https://isca.dufe.edu.cn/content_101564.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/233807659",
+      "supportingSources": [
+        "https://isca.dufe.edu.cn/gywm/rczp/",
+        "https://english.dufe.edu.cn/resources/map/",
+        "https://english.dufe.edu.cn/upload/image/20250825/1756090488544922-1200-400.jpg",
+        "https://graduate.dufe.edu.cn/file/f7c2ee43-c799-11ec-beb7-005056a49984/%E9%99%84%E4%BB%B62%EF%BC%9A%E5%90%84%E7%A0%94%E7%A9%B6%E7%94%9F%E5%9F%B9%E5%85%BB%E5%8D%95%E4%BD%8D%E6%96%B0%E7%94%9F%E6%A1%A3%E6%A1%88%E6%8E%A5%E6%94%B6%E4%BF%A1%E6%81%AF.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Independent institute; current October2026 institute event places it in Mingzhe517; graduate contact office501. Exact external footprint corroborated by official campus map Mingzhe11: vertical building with two east projections, south of campus hospital and southwest of Wenyuan, northwest of Zhiyuan plaza. Not generic campus pin or Surrey institute. Coordinate is WGS84 footprint, not offset Chinese map coordinates."
+    },
+    {
+      "id": "chatham-sustainable-business-braun",
+      "institutionKey": "Chatham University",
+      "institution": "Chatham University",
+      "rowIds": [
+        "chatham-university____sustainable-management"
+      ],
+      "school": "Falk College of Environment, Leadership & Management",
+      "department": "Department of Business Systems",
+      "building": "Braun Hall, Business Suites",
+      "address": "Woodland Road, Shadyside Campus, Pittsburgh, Pennsylvania 15232, United States",
+      "lat": 40.449008,
+      "lng": -79.925313,
+      "addressSource": "https://www.chatham.edu/academics/undergraduate/arts-management/faculty/deborah-delong.html",
+      "coordinateSource": "https://events.chatham.edu/braun-hall",
+      "supportingSources": [
+        "https://chatham.wd12.myworkdayjobs.com/en-US/ChathamUniversity/job/Assistant-Professor_JR00000527",
+        "https://www.chatham.edu/academics/colleges/falk-college-of-environment-leadership-and-management/",
+        "https://www.pulse.chatham.edu/blog-stories/pittsburgh-chatham-school-of-business-and-enterprise-sports-management-debbie-delong-mba",
+        "https://www.chatham.edu/academics/undergraduate/management/faculty/keratiloe-mogotsi.html"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Sustainable management is a business teaching/research subject, not a separately named department. Official assistant professor advertisement JR00000527 teaches general business, Foundations of Business and Organizational Behavior. Current college page names Department of Business Systems following August2026 merger. Business faculty/dean office and official school announcement establish Braun Hall Business Suites. Official calendar supplies named building GeoCoordinates. Eden Hall houses environmental/sustainability faculty, not the general business administrative home."
+    },
+    {
+      "id": "new-york-tech-quantitative-analytics-long-island",
+      "institutionKey": "New York Institute of Technology",
+      "institution": "New York Institute of Technology",
+      "rowIds": [
+        "new-york-institute-of-technology____ms-mis-stat"
+      ],
+      "school": "School of Management",
+      "department": "Department of Quantitative & Analytics",
+      "building": "Barbara and Peter Ferentinos Health Science Building, room 345",
+      "address": "Northern Boulevard, Old Westbury, New York 11568, United States",
+      "lat": 40.81115812,
+      "lng": -73.60412235,
+      "addressSource": "https://site.nyit.edu/files/academic_affairs/AA_SoM_ChairsCoordinators.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/595698586",
+      "supportingSources": [
+        "https://www.nyit.edu/academics/management/contact/",
+        "https://www.nyit.edu/news/articles/wisser-building-is-renamed/",
+        "https://files.nyit.edu/files/long_island/Locations_LI_CampusMap.pdf",
+        "https://site.nyit.edu/files/nyc/Locations_NYC_CampusMap.pdf",
+        "https://www.nyit.edu/about/artificial-intelligence/research/experts/"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "new-york-tech-quantitative-analytics-two-campuses",
+      "locationGroupSource": "https://site.nyit.edu/files/academic_affairs/AA_SoM_ChairsCoordinators.pdf",
+      "notes": "Official2025–26 chair list explicitly gives Rakesh Mittal departmental offices at BOTH Long Island Ferentinos345 and Manhattan26West61st505; current management contact confirms both. Former abbreviation MS/MIS/Stat resolves to current Quantitative & Analytics department. Wisser building renamed Barbara and Peter Ferentinos Health Science Building; external footprint/name node corroborated by official campus maps. Each campus retained separately rather than selecting one or averaging coordinates."
+    },
+    {
+      "id": "new-york-tech-quantitative-analytics-new-york-city",
+      "institutionKey": "New York Institute of Technology",
+      "institution": "New York Institute of Technology",
+      "rowIds": [
+        "new-york-institute-of-technology____ms-mis-stat"
+      ],
+      "school": "School of Management",
+      "department": "Department of Quantitative & Analytics",
+      "building": "26 West 61st Street, room 505",
+      "address": "26 West 61st Street, New York, New York 10023, United States",
+      "lat": 40.7700744,
+      "lng": -73.9831755,
+      "addressSource": "https://site.nyit.edu/files/academic_affairs/AA_SoM_ChairsCoordinators.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/node/2710082455",
+      "supportingSources": [
+        "https://www.nyit.edu/academics/management/contact/",
+        "https://www.nyit.edu/news/articles/wisser-building-is-renamed/",
+        "https://files.nyit.edu/files/long_island/Locations_LI_CampusMap.pdf",
+        "https://site.nyit.edu/files/nyc/Locations_NYC_CampusMap.pdf",
+        "https://www.nyit.edu/about/artificial-intelligence/research/experts/"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "new-york-tech-quantitative-analytics-two-campuses",
+      "locationGroupSource": "https://site.nyit.edu/files/academic_affairs/AA_SoM_ChairsCoordinators.pdf",
+      "notes": "Official2025–26 chair list explicitly gives Rakesh Mittal departmental offices at BOTH Long Island Ferentinos345 and Manhattan26West61st505; current management contact confirms both. Former abbreviation MS/MIS/Stat resolves to current Quantitative & Analytics department. Wisser building renamed Barbara and Peter Ferentinos Health Science Building; external footprint/name node corroborated by official campus maps. Each campus retained separately rather than selecting one or averaging coordinates."
+    },
+    {
+      "id": "it-university-copenhagen-digital-business-rued-langgaards",
+      "institutionKey": "IT University of Copenhagen",
+      "institution": "IT University of Copenhagen",
+      "rowIds": [
+        "it-university-of-copenhagen____ba"
+      ],
+      "school": "",
+      "department": "Digital Business Innovation Section",
+      "building": "Rued Langgaards Vej building, wing 3D",
+      "address": "Rued Langgaards Vej 7, 2300 Copenhagen S, Denmark",
+      "lat": 55.65955,
+      "lng": 12.5911,
+      "addressSource": "https://researcher.itu.dk/p/en/organisations/digital-business-innovation",
+      "coordinateSource": "https://www.openstreetmap.org/way/27220158",
+      "supportingSources": [
+        "https://en.itu.dk/Research/Sections-and-research-groups/Digital-Business-Innovation",
+        "https://wiki.itu.dk/computerscience/index.php/Main_Page",
+        "https://studwww.itu.dk/people/sestoft/",
+        "https://wiki.itu.dk/computerscience/images/6/6b/Pr%C3%A6sentation_af_udvidet_ITU_Campus_fredag_den_17._januar_FINAL.pdf",
+        "https://en.itu.dk/About-ITU/How-to-get-to-ITU"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "it-university-copenhagen-digital-business-two-buildings",
+      "locationGroupSource": "https://researcher.itu.dk/p/en/organisations/digital-business-innovation",
+      "notes": "Current official section research portal explicitly lists BOTH wing3D Rued Langgaards Vej and room4F25 Emil Holms Kanal. University department page and faculty address expand building abbreviations. Exact building points corroborated by official expansion presentation exterior photographs: Emil Holms building is the northwest glass office block of the DR complex beside the canal, connected by elevated passage; pin lies inside that block, not the overall DR complex centroid or concert hall. Main point lies in named Rued Langgaards building. IT University of Copenhagen is its official English name."
+    },
+    {
+      "id": "it-university-copenhagen-digital-business-emil-holms",
+      "institutionKey": "IT University of Copenhagen",
+      "institution": "IT University of Copenhagen",
+      "rowIds": [
+        "it-university-of-copenhagen____ba"
+      ],
+      "school": "",
+      "department": "Digital Business Innovation Section",
+      "building": "Emil Holms Kanal building, room 4F25",
+      "address": "Emil Holms Kanal 20, 2300 Copenhagen S, Denmark",
+      "lat": 55.65868,
+      "lng": 12.58925,
+      "addressSource": "https://researcher.itu.dk/p/en/organisations/digital-business-innovation",
+      "coordinateSource": "https://www.openstreetmap.org/way/25520993",
+      "supportingSources": [
+        "https://en.itu.dk/Research/Sections-and-research-groups/Digital-Business-Innovation",
+        "https://wiki.itu.dk/computerscience/index.php/Main_Page",
+        "https://studwww.itu.dk/people/sestoft/",
+        "https://wiki.itu.dk/computerscience/images/6/6b/Pr%C3%A6sentation_af_udvidet_ITU_Campus_fredag_den_17._januar_FINAL.pdf",
+        "https://en.itu.dk/About-ITU/How-to-get-to-ITU"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "it-university-copenhagen-digital-business-two-buildings",
+      "locationGroupSource": "https://researcher.itu.dk/p/en/organisations/digital-business-innovation",
+      "notes": "Current official section research portal explicitly lists BOTH wing3D Rued Langgaards Vej and room4F25 Emil Holms Kanal. University department page and faculty address expand building abbreviations. Exact building points corroborated by official expansion presentation exterior photographs: Emil Holms building is the northwest glass office block of the DR complex beside the canal, connected by elevated passage; pin lies inside that block, not the overall DR complex centroid or concert hall. Main point lies in named Rued Langgaards building. IT University of Copenhagen is its official English name."
+    },
+    {
+      "id": "south-carolina-integrated-information-technology-storey",
+      "institutionKey": "University of South Carolina",
+      "institution": "University of South Carolina",
+      "rowIds": [
+        "university-of-south-carolina____it"
+      ],
+      "school": "Molinaroli College of Engineering and Computing",
+      "department": "Department of Integrated Information Technology",
+      "building": "M. Bert Storey Engineering and Innovation Center, Suite 1300",
+      "address": "550 Assembly Street, Columbia, South Carolina 29201, United States",
+      "lat": 33.99235391,
+      "lng": -81.03096878,
+      "addressSource": "https://sc.edu/study/colleges_schools/engineering_and_computing/internal/documents/graduate_resources/iit_masters_graduate_handbook.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/511387414",
+      "supportingSources": [
+        "https://uscjobs.sc.edu/postings/214828/print_preview",
+        "https://cse.sc.edu/news/we-have-moved-storey-building",
+        "https://sc.edu/study/colleges_schools/engineering_and_computing/student_experience/student_spaces/index.php"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official graduate handbook explicitly locates departmental faculty and staff in Suite 1300 of Storey. Official engineering student spaces page corroborates both computing departments in this building. Coordinates are centroid of the exact named/addressed building footprint, not campus coordinates."
+    },
+    {
+      "id": "maine-augusta-business-management-randall",
+      "institutionKey": "University of Maine at Augusta",
+      "institution": "University of Maine at Augusta",
+      "rowIds": [
+        "university-of-maine-at-augusta____business-management"
+      ],
+      "school": "College of Professional Studies",
+      "department": "Business Administration - Management",
+      "building": "Richard J. Randall Student Center, business faculty offices 256-258",
+      "address": "University Drive, Augusta, Maine 04330, United States",
+      "lat": 44.33878,
+      "lng": -69.7956,
+      "addressSource": "https://www.uma.edu/directory/staff/frank-bean-iii/",
+      "coordinateSource": "https://mapcarta.com/W412100117",
+      "supportingSources": [
+        "https://www.uma.edu/academics/programs/business/faculty/",
+        "https://www.uma.edu/academics/colleges/",
+        "https://www.uma.edu/directory/staff/thomas-j-giordano/",
+        "https://www.uma.edu/locations/augusta/",
+        "https://www.uma.edu/locations/bangor/"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "maine-augusta-business-management-two-campuses",
+      "locationGroupSource": "https://www.uma.edu/academics/programs/business/faculty/",
+      "notes": "Official current business program lists Augusta and Bangor and faculty directory verifies management teaching faculty offices in Randall and Belfast respectively. Exact building geocodes corroborate named campus buildings. The old job2066 is closed; this records both verified departmental locations without inferring a campus restriction for that advertisement."
+    },
+    {
+      "id": "maine-augusta-business-management-belfast",
+      "institutionKey": "University of Maine at Augusta",
+      "institution": "University of Maine at Augusta",
+      "rowIds": [
+        "university-of-maine-at-augusta____business-management"
+      ],
+      "school": "College of Professional Studies",
+      "department": "Business Administration - Management",
+      "building": "Belfast Hall, room 225",
+      "address": "85 Texas Avenue, Bangor, Maine 04401, United States",
+      "lat": 44.80781,
+      "lng": -68.80105,
+      "addressSource": "https://www.uma.edu/directory/staff/diane-l-boone/",
+      "coordinateSource": "https://mapcarta.com/W104743509",
+      "supportingSources": [
+        "https://www.uma.edu/academics/programs/business/faculty/",
+        "https://www.uma.edu/academics/colleges/",
+        "https://www.uma.edu/directory/staff/thomas-j-giordano/",
+        "https://www.uma.edu/locations/augusta/",
+        "https://www.uma.edu/locations/bangor/"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "maine-augusta-business-management-two-campuses",
+      "locationGroupSource": "https://www.uma.edu/academics/programs/business/faculty/",
+      "notes": "Official current business program lists Augusta and Bangor and faculty directory verifies management teaching faculty offices in Randall and Belfast respectively. Exact building geocodes corroborate named campus buildings. The old job2066 is closed; this records both verified departmental locations without inferring a campus restriction for that advertisement."
+    },
+    {
+      "id": "colorado-boulder-business-analytics-machine-learning-koelbel",
+      "institution": "University of Colorado Boulder",
+      "rowIds": [
+        "university-of-colorado-boulder____ba-and-ml"
+      ],
+      "school": "Leeds School of Business",
+      "department": "Business Analytics and Machine Learning",
+      "building": "Koelbel Building",
+      "address": "995 Regent Drive, Boulder, CO 80309-0419, United States",
+      "lat": 40.005684,
+      "lng": -105.263451,
+      "addressSource": "https://www.colorado.edu/business/leeds-directory/faculty/kai-r-larsen",
+      "coordinateSource": "https://www.colorado.edu/map/?id=336#!m/136278",
+      "supportingSources": [
+        "https://www.colorado.edu/business/leeds-directory/faculty/rui-zhang",
+        "https://www.colorado.edu/business/leeds-directory/faculty/david-dobolyi",
+        "https://www.colorado.edu/business/leeds-directory/faculty/liu-liu"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official Business Analytics program director and analytics/artificial-intelligence faculty directories identify offices in Koelbel Building across the participating divisions. The job field label is expanded without inferring an unverified divisional appointment from the closed Chronicle advertisement. Coordinates are the official campus map exact Koelbel marker 136278.",
+      "institutionKey": "University of Colorado Boulder"
+    },
+    {
+      "id": "a-sharqiyah-information-systems-business-analytics-business-building",
+      "institution": "A’Sharqiyah University",
+      "institutionKey": "A’Sharqiyah University",
+      "rowIds": [
+        "a-sharqiyah-university____is-and-da"
+      ],
+      "school": "College of Business Administration",
+      "department": "Information Systems and Business Analytics",
+      "building": "College of Business Administration building",
+      "address": "Ibra, North Ash Sharqiyah, Sultanate of Oman",
+      "lat": 22.7826875,
+      "lng": 58.521296875,
+      "addressSource": "https://g.asu.edu.om/team/details/61",
+      "coordinateSource": "https://www.cybo.com/OM/ibra/higher-education-%28colleges-and-universities%29/",
+      "supportingSources": [
+        "https://www.asu.edu.om/COBA",
+        "https://www.asu.edu.om/files/PROSPECTUS-2023.pdf",
+        "https://www.openstreetmap.org/way/1568023167"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current university department listings establish the college host; the university prospectus depicts the explicitly signed College of Business Administration building. Coordinate is decoded from the external named college-building listing QGMC+3GM, Ibra, and falls inside the southern block of mapped academic-building footprint 1568023167. This is an exact named-building geocode, not the university centroid; room-level precision is not claimed."
+    },
+    {
+      "id": "a-sharqiyah-management-logistics-supply-chain-business-building",
+      "institution": "A’Sharqiyah University",
+      "institutionKey": "A’Sharqiyah University",
+      "rowIds": [
+        "a-sharqiyah-university____scm-and-logistics"
+      ],
+      "school": "College of Business Administration",
+      "department": "Management — Logistics and Supply Chain Management",
+      "building": "College of Business Administration building",
+      "address": "Ibra, North Ash Sharqiyah, Sultanate of Oman",
+      "lat": 22.7826875,
+      "lng": 58.521296875,
+      "addressSource": "https://www.asu.edu.om/files/y2024m7d8_5308.pdf",
+      "coordinateSource": "https://www.cybo.com/OM/ibra/higher-education-%28colleges-and-universities%29/",
+      "supportingSources": [
+        "https://www.asu.edu.om/COBA",
+        "https://www.asu.edu.om/files/PROSPECTUS-2023.pdf",
+        "https://www.openstreetmap.org/way/1568023167"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current university department listings establish the college host; the university prospectus depicts the explicitly signed College of Business Administration building. Coordinate is decoded from the external named college-building listing QGMC+3GM, Ibra, and falls inside the southern block of mapped academic-building footprint 1568023167. This is an exact named-building geocode, not the university centroid; room-level precision is not claimed."
+    },
+    {
+      "id": "catolica-porto-management-paraiso",
+      "institution": "Universidade Católica Portuguesa",
+      "institutionKey": "Católica Lisbon School of Business and Economics",
+      "rowIds": [
+        "catolica-lisbon-school-of-business-and-economics__school-of-management__operations-and-management-science-porto"
+      ],
+      "school": "Católica Porto School of Business and Economics",
+      "department": "Management — Operations and Management Science",
+      "building": "Edifício Paraíso — business school leadership and faculty offices",
+      "address": "Rua de Diogo Botelho 1327, 4169-005 Porto, Portugal",
+      "lat": 41.15229165,
+      "lng": -8.6718655,
+      "addressSource": "https://www.ucp.pt/sites/default/files/2025-09/mapa_campus_PT.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/523397068",
+      "supportingSources": [
+        "https://cpsbe.porto.ucp.pt/pt-pt/node/7031",
+        "https://catolicabs.porto.ucp.pt/docentes-investigacao/faculty-members?f[0]=field_areas_of_research:406&items_per_page=10&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_name]=search_person&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_display_id]=panel_pane_1&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_args]=1&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_path]=node/41&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_base_path]=node/41&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_dom_id]=7a6d43618bc03e403230c7269b7b0111&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][pager_element]=0&index_id=default_multilingual_node_index&facet_field=field_areas_of_research"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Corrects erroneous Lisbon grouping: this source row explicitly concerns Porto. The current university campus map places business-school leadership and faculty offices in Edifício Paraíso (building 3), distinct from the Américo Amorim executive-education block and Restauro research centre. Governance confirms Management as one of the school’s two academic departments. Point uses the explicitly named historic Paraíso faculty-office building footprint, matched to the official map; no individual faculty room is asserted."
+    },
+    {
+      "id": "cunef-operations-management-building-d",
+      "institution": "Colegio Universitario de Estudios Financieros (CUNEF Universidad)",
+      "institutionKey": "CUNEF University",
+      "rowIds": [
+        "cunef-university____om"
+      ],
+      "school": "School of Business, Economics and Law",
+      "department": "Business Management — Operations Management",
+      "building": "Campus Almansa, Building D — second-floor faculty offices",
+      "address": "Calle de Beatriz de Bobadilla 18, 28040 Madrid, Spain",
+      "lat": 40.4485514,
+      "lng": -3.71560935,
+      "addressSource": "https://www.cunef.edu/en/faculty-and-research/guha-reeju/",
+      "coordinateSource": "https://www.openstreetmap.org/way/340010492",
+      "supportingSources": [
+        "https://www.cunef.edu/en/faculty-and-research/donmez-mehmet/",
+        "https://www.cunef.edu/claustro-e-investigacion/maicas-lopez-juan-pablo/",
+        "https://files.griddo.cunef.edu/ais-2444-int-2025-edificiod-cunef.pdf",
+        "https://www.cunef.edu/eventos/jornada-sobre-la-simplificacion-de-la-regulacion-bancaria/",
+        "https://madrid.callejero.net/calle-beatriz-de-bobadilla_numero-18.html"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current university profiles place operations faculty Reeju Guha and Mehmet Donmez in D2-9 and department director Juan Pablo Maicas in D2-5. University Building D accessibility certificate and September 2026 event independently identify Beatriz de Bobadilla 18. Exact-address external geocode (40.4485385,-3.715689) falls inside the southwest campus building; marker uses that building footprint center. Replaces obsolete Leonardo Prieto Castro campus coordinates. Historical expanded institution name precedes current CUNEF Universidad brand."
     }
   ]
 }

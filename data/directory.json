@@ -10,7 +10,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-25"
+  "lastPosted": "2025-05-25",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Information Systems and Business Analytics"
+  ]
  },
  {
   "id": "a-sharqiyah-university____scm-and-logistics",
@@ -23,7 +27,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-25"
+  "lastPosted": "2025-05-25",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Management — Logistics and Supply Chain Management"
+  ]
  },
  {
   "id": "aalborg-university__faculty-of-engineering-and-science__materials-and-production",
@@ -37,7 +45,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-28"
+  "lastPosted": "2026-09-28",
+  "mapSearchTerms": [
+   "Faculty of Engineering and Science",
+   "Department of Materials and Production - Sustainable Manufacturing Systems"
+  ]
  },
  {
   "id": "aalto-university____production-om",
@@ -2078,6 +2090,10 @@
   "deptUrl": "https://catolicabs.porto.ucp.pt/docentes-investigacao/faculty-members?f[0]=field_areas_of_research:406&items_per_page=10&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_name]=search_person&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_display_id]=panel_pane_1&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_args]=1&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_path]=node/41&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_base_path]=node/41&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_dom_id]=7a6d43618bc03e403230c7269b7b0111&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][pager_element]=0&index_id=default_multilingual_node_index&facet_field=field_areas_of_research",
   "sources": [
    "omlist"
+  ],
+  "mapSearchTerms": [
+   "Católica Porto School of Business and Economics",
+   "Management — Operations and Management Science"
   ]
  },
  {
@@ -2193,7 +2209,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-27"
+  "lastPosted": "2026-02-27",
+  "mapSearchTerms": [
+   "Falk College of Environment, Leadership & Management",
+   "Department of Business Systems"
+  ]
  },
  {
   "id": "chicago-booth____om",
@@ -3205,7 +3225,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-22"
+  "lastPosted": "2025-06-22",
+  "mapSearchTerms": [
+   "School of Business, Economics and Law",
+   "Business Management — Operations Management"
+  ]
  },
  {
   "id": "dakota-state-university____production-and-om",
@@ -3329,7 +3353,10 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-06-04"
+  "lastPosted": "2026-06-04",
+  "mapSearchTerms": [
+   "Institute of Supply Chain Analytics"
+  ]
  },
  {
   "id": "donghua-university____om-scm-logistics",
@@ -5521,7 +5548,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-03"
+  "lastPosted": "2026-10-03",
+  "mapSearchTerms": [
+   "IE School of Science and Technology",
+   "Industrial Engineering (Manufacturing Systems)"
+  ]
  },
  {
   "id": "iese",
@@ -6087,7 +6118,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-10"
+  "lastPosted": "2026-03-10",
+  "mapSearchTerms": [
+   "Digital Business Innovation Section"
+  ]
  },
  {
   "id": "james-madison-university____ba",
@@ -6635,7 +6669,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "School of Business",
+   "Business Administration"
+  ]
  },
  {
   "id": "lancaster-university__management-school__management-science",
@@ -8175,7 +8213,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-04"
+  "lastPosted": "2026-03-04",
+  "mapSearchTerms": [
+   "School of Management",
+   "Department of Quantitative & Analytics"
+  ]
  },
  {
   "id": "new-york-university__leonard-n-stern-school-of-business",
@@ -9467,6 +9509,9 @@
   "type": "University",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "College of Engineering"
   ]
  },
  {
@@ -9481,7 +9526,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-07"
+  "lastPosted": "2026-10-07",
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Lillian Gilbreth Postdoctoral Fellowships — Causal Foundation Models for Multimodal Precision Treatment-Response Discovery"
+  ]
  },
  {
   "id": "purdue-university__college-of-engineering__one-health-intelligent-medicines",
@@ -9841,7 +9890,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-12"
+  "lastPosted": "2026-08-12",
+  "mapSearchTerms": [
+   "Rutgers Business School",
+   "Department of Management Science and Information Systems"
+  ]
  },
  {
   "id": "rutgers-university____ai-ml-ds-stats",
@@ -10412,7 +10465,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2025-09-22"
+  "lastPosted": "2025-09-22",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Operations Management"
+  ]
  },
  {
   "id": "shanghai-university-of-finance-and-economics__college-of-business__operations-management",
@@ -10432,7 +10489,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-09-27"
+  "lastPosted": "2026-09-27",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Operations Management"
+  ]
  },
  {
   "id": "shanghai-university-of-finance-and-economics__school-of-information-management-and-engineering-sime__management-science-information-systems-financial-information",
@@ -11453,7 +11514,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-11"
+  "lastPosted": "2026-10-11",
+  "mapSearchTerms": [
+   "Institute for Advanced Materials for Sustainable Manufacturing",
+   "Supply Chain and Logistics Systems"
+  ]
  },
  {
   "id": "ted-university",
@@ -14326,7 +14391,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-25"
+  "lastPosted": "2025-05-25",
+  "mapSearchTerms": [
+   "Leeds School of Business",
+   "Business Analytics and Machine Learning"
+  ]
  },
  {
   "id": "university-of-colorado-boulder____scm-analytics-om",
@@ -14534,7 +14603,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-06"
+  "lastPosted": "2025-06-06",
+  "mapSearchTerms": [
+   "Herbert Wertheim College of Engineering",
+   "Department of Industrial and Systems Engineering — Smart Manufacturing"
+  ]
  },
  {
   "id": "university-of-florida__college-of-health-and-human-performance__sport-management",
@@ -15372,7 +15445,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-12-27"
+  "lastPosted": "2025-12-27",
+  "mapSearchTerms": [
+   "College of Professional Studies",
+   "Business Administration - Management"
+  ]
  },
  {
   "id": "university-of-manitoba____supply-chain-management",
@@ -16923,7 +17000,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-27"
+  "lastPosted": "2026-01-27",
+  "mapSearchTerms": [
+   "Molinaroli College of Engineering and Computing",
+   "Department of Integrated Information Technology"
+  ]
  },
  {
   "id": "university-of-south-carolina__darla-moore-school-of-business__management-science",
@@ -17582,7 +17663,13 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2024-08-25"
+  "lastPosted": "2024-08-25",
+  "mapSearchTerms": [
+   "University of Toronto Scarborough",
+   "Department of Management",
+   "Rotman School of Management",
+   "Management"
+  ]
  },
  {
   "id": "university-of-toronto-mississauga____institute-of-communication-culture-information-and-technolog",

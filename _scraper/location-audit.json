@@ -2114,7 +2114,7 @@
       "rowIds": [
         "university-of-florida____ise-smart-manufacturing"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://explore.jobs.ufl.edu/en-us/job/536032/assistantassociatefull-professor-smart-manufacturing-jax"
@@ -2137,7 +2137,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "florida-industrial-smart-manufacturing-jacksonville"
+      ]
     },
     {
       "id": "college-of-staten-island::school:lucille and jay chazanoff school of business::40.60000,-74.15000",
@@ -3192,7 +3195,7 @@
       "rowIds": [
         "tecnologico-de-monterrey__institute-for-advanced-materials-for-sustainable-manufacturi__supply-chain-and-logistics-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.tec.mx/tecnologico-de-monterrey/job/Monterrey-Faculty-position%C2%A0Supply-Chain-and-Logistics-Systems/1388837300/"
@@ -3211,7 +3214,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "tecnologico-monterrey-materials-expedition"
+      ]
     },
     {
       "id": "new-york-university-shanghai::department:operations and business analytics::31.15100,121.47700",
@@ -3674,7 +3680,7 @@
         "purdue-university__college-of-engineering__lillian-gilbreth-postdoctoral-fellowships",
         "purdue-university__college-of-engineering__one-health-intelligent-medicines"
       ],
-      "status": "pending",
+      "status": "partially-verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://engineering.purdue.edu/Engr/Research/GilbrethFellowships/ResearchProposals/2025-26/causal-foundation-models-for-multimodal-precision-treatmentresponse-discovery",
@@ -3694,7 +3700,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "purdue-engineering-dean-armstrong",
+        "purdue-gilbreth-kong-jischke"
+      ]
     },
     {
       "id": "purdue-university::school:mitch daniels school of business::40.42500,-86.92300",
@@ -4287,7 +4297,7 @@
       "rowIds": [
         "university-of-toronto__scarborough-and-rotman-school-of-management__management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -4304,7 +4314,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "toronto-scarborough-management-instructional-centre",
+        "toronto-rotman-management-main-building"
+      ]
     },
     {
       "id": "university-of-toronto::department:mechanical and industrial engineering::43.66300,-79.39600",
@@ -5143,7 +5157,7 @@
       "rowIds": [
         "ie-university__ie-school-of-science-and-technology__industrial-engineering-manufacturing-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://apply.interfolio.com/192904"
@@ -5162,7 +5176,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "ie-industrial-manufacturing-madrid-tower",
+        "ie-industrial-manufacturing-segovia-santa-cruz"
+      ]
     },
     {
       "id": "quincy-university::school:oakley school of business::39.93944,-91.38611",
@@ -5653,7 +5671,7 @@
       "rowIds": [
         "lake-erie-college__school-of-business__business-administration"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179574134&Title=Assistant%20Professor%20of%20Business%20Administration"
@@ -5672,7 +5690,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "lake-erie-business-college-hall"
+      ]
     },
     {
       "id": "lees-mcrae-college::school:school of business and management::36.16207,-81.87567",
@@ -6295,7 +6316,7 @@
       "rowIds": [
         "aalborg-university__faculty-of-engineering-and-science__materials-and-production"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.vacancies.aau.dk/scientific-positions/show-vacancy/vacancyId/950756"
@@ -6314,7 +6335,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "aalborg-sustainable-manufacturing-fibiger16"
+      ]
     },
     {
       "id": "mississippi-state-university::school:james worth bagley college of engineering::33.45400,-88.79000",
@@ -6364,7 +6388,7 @@
         "shanghai-university-of-finance-and-economics__college-of-business",
         "shanghai-university-of-finance-and-economics__college-of-business__operations-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://drive.google.com/file/d/16P43qNvIynT1DY3rh4dBZ3Hjevbn1TZX/view?usp=drivesdk"
@@ -6383,7 +6407,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "shanghai-finance-economics-business-wudong"
+      ]
     },
     {
       "id": "north-carolina-state-university::school:college of engineering::35.78700,-78.67100",
@@ -10415,7 +10442,7 @@
       "rowIds": [
         "rutgers-business-school-newark-and-new-brunswick____management-science-and-information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.chronicle.com/job/38018595/management-science-and-information-systems-assistant-professor-of-professional-practice/?LinkSource=PremiumListing"
@@ -10434,7 +10461,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "rutgers-management-science-newark",
+        "rutgers-management-science-new-brunswick"
+      ]
     },
     {
       "id": "augsburg-university::department:business administration and economics::44.96590,-93.24160",
@@ -12799,7 +12830,7 @@
       "rowIds": [
         "dongbei-university-of-finance-and-economics____institute-of-supply-chain-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careercenter.informs.org/job/tenure-track-assistant-associate-full-professor-recruitment-dalian-liaoning-5511",
@@ -12819,7 +12850,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "dongbei-supply-chain-mingzhe"
+      ]
     },
     {
       "id": "university-of-stirling::department:project management::56.14550,-3.91950",
@@ -12901,7 +12935,7 @@
       "rowIds": [
         "university-of-colorado-boulder____ba-and-ml"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.chronicle.com/job/37835655/assistant-teaching-professor-business-analytics-and-machine-learning/"
@@ -12920,7 +12954,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "colorado-boulder-business-analytics-machine-learning-koelbel"
+      ]
     },
     {
       "id": "university-of-colorado-boulder::department:scm analytics om::40.00700,-105.26700",
@@ -14280,7 +14317,7 @@
       "rowIds": [
         "it-university-of-copenhagen____ba"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://candidate.hr-manager.net/ApplicationInit.aspx?cid=119&ProjectId=181856&DepartmentId=3439&MediaId=5"
@@ -14299,7 +14336,11 @@
         "status": 503,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "it-university-copenhagen-digital-business-rued-langgaards",
+        "it-university-copenhagen-digital-business-emil-holms"
+      ]
     },
     {
       "id": "valley-city-state-university::department:data analytics and ai::46.91889,-98.00278",
@@ -14583,7 +14624,7 @@
       "rowIds": [
         "new-york-institute-of-technology____ms-mis-stat"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -14600,7 +14641,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "new-york-tech-quantitative-analytics-long-island",
+        "new-york-tech-quantitative-analytics-new-york-city"
+      ]
     },
     {
       "id": "valdosta-state-university::department:ba::30.84697,-83.28959",
@@ -14777,7 +14822,7 @@
       "rowIds": [
         "chatham-university____sustainable-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.chronicle.com/job/37955262/assistant-professor/"
@@ -14796,7 +14841,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "chatham-sustainable-business-braun"
+      ]
     },
     {
       "id": "state-university-of-new-york-at-geneseo::department:ba::42.79570,-77.81950",
@@ -16278,7 +16326,7 @@
       "rowIds": [
         "university-of-south-carolina____it"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179348807&Title=Assistant%20Professor%2C%20Tenure%20Track%20Position%20in%20Information%20Technology"
@@ -16297,7 +16345,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "south-carolina-integrated-information-technology-storey"
+      ]
     },
     {
       "id": "abdullah-al-salem-university::department:scm logistics::29.32175,47.97193",
@@ -17143,7 +17194,7 @@
       "rowIds": [
         "university-of-maine-at-augusta____business-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179327554&Title=Assistant%20Professor%20of%20Business%20Management%20-%20Tenure%20Track%20(2066)"
@@ -17162,7 +17213,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "maine-augusta-business-management-randall",
+        "maine-augusta-business-management-belfast"
+      ]
     },
     {
       "id": "psu-behrend::department:project and scm::42.11940,-79.98877",
@@ -20887,7 +20942,7 @@
       "rowIds": [
         "cunef-university____om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://drive.google.com/file/d/1_R2JTwJks-dTXqwJPQyxoSC1467nukeN/view"
@@ -20906,7 +20961,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "cunef-operations-management-building-d"
+      ]
     },
     {
       "id": "lone-star-college-system::department:business::30.18720,-95.48950",
@@ -21425,7 +21483,7 @@
       "rowIds": [
         "a-sharqiyah-university____is-and-da"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://business.academickeys.com/job/yg0e5afr/Assistant-Professor-in-Information-Systems-and-Data-Analytics"
@@ -21444,7 +21502,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "a-sharqiyah-information-systems-business-analytics-business-building"
+      ]
     },
     {
       "id": "a-sharqiyah-university::department:scm and logistics::22.78242,58.52076",
@@ -21456,7 +21517,7 @@
       "rowIds": [
         "a-sharqiyah-university____scm-and-logistics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://business.academickeys.com/job/hs1bayt7/Assistant-Professor-in-Logistics--Supply-Chain-Management"
@@ -21475,7 +21536,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "a-sharqiyah-management-logistics-supply-chain-business-building"
+      ]
     },
     {
       "id": "kean-university::department:scm and om::40.67950,-74.23190",
@@ -22411,7 +22475,7 @@
         "catolica-lisbon-school-of-business-and-economics__school-of-management__operations-and-data-science-lisbon",
         "catolica-lisbon-school-of-business-and-economics__school-of-management__operations-and-management-science-porto"
       ],
-      "status": "partially-verified",
+      "status": "verified",
       "departmentUrls": [
         "https://clsbe.lisboa.ucp.pt/faculty-directory?f[]=field_areas_of_research:1579",
         "https://catolicabs.porto.ucp.pt/docentes-investigacao/faculty-members?f[0]=field_areas_of_research:406&items_per_page=10&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_name]=search_person&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_display_id]=panel_pane_1&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_args]=1&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_path]=node/41&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_base_path]=node/41&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][view_dom_id]=7a6d43618bc03e403230c7269b7b0111&views[views_dom_id:7a6d43618bc03e403230c7269b7b0111][pager_element]=0&index_id=default_multilingual_node_index&facet_field=field_areas_of_research"
@@ -22433,7 +22497,8 @@
         "hasCoordinateStrings": false
       },
       "verificationIds": [
-        "catolica-lisbon-operations-data-science-building-five"
+        "catolica-lisbon-operations-data-science-building-five",
+        "catolica-porto-management-paraiso"
       ]
     },
     {
@@ -24060,9 +24125,9 @@
   ],
   "summary": {
     "baseline": 714,
-    "verified": 622,
+    "verified": 641,
     "partiallyVerified": 1,
-    "pending": 91,
+    "pending": 72,
     "sourceSearches": 714
   }
 }
