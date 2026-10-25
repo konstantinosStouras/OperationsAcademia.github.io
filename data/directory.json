@@ -1150,9 +1150,13 @@
   "institution": "Bellarmine University",
   "department": "Information Systems and Artificial Intelligence",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-23"
  },
  {
   "id": "bellarmine-university__w-fielding-rubel-school-of-business__business-technology-and-artificial-intelligence",
@@ -8625,17 +8629,20 @@
   "school": "College of Science, Engineering and Technology",
   "department": "Computer Information Science",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-25",
   "mapSearchTerms": [
    "College of Science, Engineering and Technology",
    "Department of Computer Information Science"
   ],
   "mapInstitutionNames": [
    "Minnesota State University, Mankato"
-  ],
-  "country": "United States"
+  ]
  },
  {
   "id": "mississippi-state-university__james-worth-bagley-college-of-engineering__industrial-and-systems-engineering",

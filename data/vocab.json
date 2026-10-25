@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25T21:02:56.106Z",
+ "generated": "2026-10-25T21:24:13.714Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -375,6 +375,10 @@
   },
   {
    "v": "Augusta University",
+   "n": 2
+  },
+  {
+   "v": "Bellarmine University",
    "n": 2
   },
   {
@@ -890,10 +894,6 @@
    "n": 1
   },
   {
-   "v": "Bellarmine University",
-   "n": 1
-  },
-  {
    "v": "Bergen Community College",
    "n": 1
   },
@@ -1307,6 +1307,10 @@
   },
   {
    "v": "Minnesota State University",
+   "n": 1
+  },
+  {
+   "v": "Minnesota State University, Mankato",
    "n": 1
   },
   {
@@ -2138,10 +2142,6 @@
    "n": 0
   },
   {
-   "v": "Minnesota State University, Mankato",
-   "n": 0
-  },
-  {
    "v": "Missouri University of Science and Technology",
    "n": 0
   },
@@ -2885,6 +2885,10 @@
   },
   {
    "v": "College of Public Affairs and Community Service, School of Public Administration",
+   "n": 1
+  },
+  {
+   "v": "College of Science",
    "n": 1
   },
   {
@@ -4578,6 +4582,10 @@
    "n": 1
   },
   {
+   "v": "Engineering and Technology, Computer Information Science",
+   "n": 1
+  },
+  {
    "v": "Engineering Management and Decision Sciences",
    "n": 1
   },
@@ -4723,6 +4731,10 @@
   },
   {
    "v": "Information Science and Systems",
+   "n": 1
+  },
+  {
+   "v": "Information Systems and Artificial Intelligence",
    "n": 1
   },
   {
@@ -6333,9 +6345,13 @@
     "W. Fielding Rubel School of Business"
    ],
    "units": [
-    "Business Technology and Artificial Intelligence"
+    "Business Technology and Artificial Intelligence",
+    "Information Systems and Artificial Intelligence"
    ],
    "bySchool": {
+    "": [
+     "Information Systems and Artificial Intelligence"
+    ],
     "W. Fielding Rubel School of Business": [
      "Business Technology and Artificial Intelligence"
     ]
@@ -9268,12 +9284,17 @@
   },
   "Minnesota State University, Mankato": {
    "schools": [
+    "College of Science",
     "College of Science, Engineering and Technology"
    ],
    "units": [
-    "Computer Information Science"
+    "Computer Information Science",
+    "Engineering and Technology, Computer Information Science"
    ],
    "bySchool": {
+    "College of Science": [
+     "Engineering and Technology, Computer Information Science"
+    ],
     "College of Science, Engineering and Technology": [
      "Computer Information Science"
     ]
@@ -14701,6 +14722,9 @@
   ],
   "College of Public Affairs and Community Service, School of Public Administration": [
    "Nonprofit Management"
+  ],
+  "College of Science": [
+   "Engineering and Technology, Computer Information Science"
   ],
   "College of Science and Engineering": [
    "Engineering Management and Decision Sciences",
