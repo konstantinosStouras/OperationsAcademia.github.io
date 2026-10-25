@@ -46,6 +46,7 @@
    --------------------------------------------------------------------------- */
 
 import { isMain } from './_main.mjs';
+import { pomsEvidence, confirmedPomsRepeat } from './poms-evidence.mjs';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -56,7 +57,7 @@ import { isoStamp, marketFloor, LEVELS, TYPES, PUBLIC_FIELDS, stripRowEmails, ro
 import { firestore } from './_mail.mjs';
 import {
   COLLECTION as REVIEW_COL, PENDING, APPROVED, queueDoc, duplicatesOf, businessCheck,
-  publishedAdvertRepeat, advertRepeat, sameDups, sameBiz,
+  sameDups, sameBiz,
 } from './jobreview.mjs';
 import { parseAdvert, advertPlace, cacheEntry, adBlock, workdayApiUrl, GONE_RX } from './adverts.mjs';
 import { readAdvert } from './adverts-verify.mjs';
@@ -215,7 +216,7 @@ export async function fetchBytes(u, { accept = '*\u002f*', tries = 3, timeoutMs 
           ctl.abort();
           return refuse(`too large (over ${maxBytes} bytes)`, res.status, type);
         }
-        return { ok: true, bytes, type, status: res.status, error: '' };
+        return { ok: true, bytes, type, status: res.status, error: '', finalUrl: at };
       }
       if (res.body) await res.body.cancel().catch(() => {});
       last = `HTTP ${res.status}`;
@@ -267,7 +268,7 @@ export async function readOpportunityAd(opp, { render = true } = {}) {
   if (looksLikePdf(got.bytes) || /application\/pdf/i.test(got.type)) {
     const t = await pdfText(got.bytes);
     if (!t.ok) return { parsed: parseAdvertText(''), via: 'pdf', error: t.error };
-    return { parsed: parseAdvertText(t.text), via: 'pdf', error: '' };
+    return { parsed: parseAdvertText(t.text), via: 'pdf', error: '', text: t.text, finalUrl: got.finalUrl };
   }
 
   const html = got.bytes.toString('utf8');
@@ -287,7 +288,7 @@ export async function readOpportunityAd(opp, { render = true } = {}) {
       error = r.error;
     }
   }
-  return { parsed, via, error };
+  return { parsed, via, error, finalUrl: got.finalUrl };
 }
 
 /* --------------------------------------------------------------------- io */
@@ -460,14 +461,15 @@ async function main() {
   const col = queue.db ? queue.db.collection(REVIEW_COL) : null;
   let queued = 0, unread = 0, skippedIds = 0, eligible = 0, failed = 0;
 
-  for (const opp of fresh) {
+  for (const sourceOpp of fresh) {
     if (budget.left <= 0 || Date.now() > budget.until) {
       log('the read budget for this run is spent — the rest wait for the next run.');
       break;
     }
     budget.left--;
-    const read = await safeRead(opp, { render });
-    const { ad, block } = adForRow(read.parsed, read.via, { adUrl: opp.href, vocab, now });
+    const read = await safeRead(sourceOpp, { render });
+    const { opp, parsed, confirmedUrls } = pomsEvidence(sourceOpp, read);
+    const { ad, block } = adForRow(parsed, read.via, { adUrl: opp.href, vocab, now });
     if (!ad) {
       unread++;
       warn(`${opp.institution} — ${opp.title}: the advertisement could not be read` +
@@ -483,7 +485,7 @@ async function main() {
 
     /* the same advertisement already listed is never a decision to make —
        the link check above catches nearly all of these before the read */
-    const repeat = publishedAdvertRepeat(row, [...existingRows, ...approvedRows]) || advertRepeat(row, duplicateRows);
+    const repeat = confirmedPomsRepeat(row, duplicateRows, confirmedUrls);
     if (repeat) {
       skippedIds++;
       log(`  x same advertisement as ${repeat.ref || repeat.id} — not queued: ${row.posted}  ${row.institution}`);
@@ -493,11 +495,8 @@ async function main() {
 
     let dup = duplicatesOf(row, duplicateRows);
     if (!dup.length) dup = nearbyPostings(row, duplicateRows);
-    if (dup.length) {
-      skippedIds++;
-      warn(`possible duplicate, not queued: ${opp.href} — ${row.institution}; matches ${dup.map((d) => d.ref || d.id).join(', ')}`);
-      continue;
-    }
+    // Similar university, department or dates are a review flag, never proof.
+    if (dup.length) log(`possible duplicate, queued for review: ${opp.href}`);
     eligible++;
     const biz = businessCheck(row, vocab);
     const doc = queueDoc(row, { now: isoStamp(now), dup, biz });
@@ -518,13 +517,12 @@ async function main() {
         if (!latest.ok) throw new Error(latest.error);
         const currentRows = [...duplicateRows, ...latest.submissionRows,
           ...latest.docs.filter((d) => d.row).map((d) => ({ ...d.row, ...d.edits }))];
-        const publishedRows = [...existingRows, ...latest.submissionRows,
-          ...latest.docs.filter((d) => d.status === APPROVED && d.row).map((d) => ({ ...d.row, ...d.edits }))];
-        if (latest.docs.some((d) => d.rowId === id) || publishedAdvertRepeat(row, publishedRows) || advertRepeat(row, currentRows)
-          || duplicatesOf(row, currentRows).length || nearbyPostings(row, currentRows).length) {
+        if (latest.docs.some((d) => d.rowId === id) || confirmedPomsRepeat(row, currentRows, confirmedUrls)) {
           warn(`duplicate found on final check, not queued: ${opp.href}`);
           continue;
         }
+        doc.dup = duplicatesOf(row, currentRows);
+        if (!doc.dup.length) doc.dup = nearbyPostings(row, currentRows);
         await col.doc(id).create(doc);
         const saved = await col.doc(id).get();
         if (!saved.exists || saved.data().status !== PENDING) throw new Error('pending record could not be verified');
@@ -673,6 +671,7 @@ export { FIXTURE_HTML };
 
 async function selftest() {
   await import('./published-advert-test.mjs');
+  await import('./poms-confirmed-test.mjs');
   let pass = 0; const fails = [];
   const ok = (c, what) => { if (c) pass++; else fails.push(what); };
   const eq = (a, b, what) => ok(JSON.stringify(a) === JSON.stringify(b), `${what}\n      expected ${JSON.stringify(b)}\n      got      ${JSON.stringify(a)}`);

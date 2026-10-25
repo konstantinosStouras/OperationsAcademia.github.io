@@ -26268,7 +26268,7 @@ async function testPomsCrawler() {
   ok(/if \(!page\.ok\) \{[\s\S]{0,400}return 1;/.test(cli) && /no posting table was found[\s\S]{0,200}return 1;/.test(cli),
     'an unreadable page and a page without the table are errors the run reports, not quiet runs');
   ok(/queue\.ok\)[\s\S]{0,200}warn\(/.test(cli), 'and no queue is said rather than hidden');
-  ok(/advertRepeat\(row, duplicateRows\)/.test(cli) && /duplicatesOf\(row, duplicateRows\)/.test(cli) && /nearbyPostings\(row, duplicateRows\)/.test(cli)
+  ok(/confirmedPomsRepeat\(row, duplicateRows, confirmedUrls\)/.test(cli) && /duplicatesOf\(row, duplicateRows\)/.test(cli) && /nearbyPostings\(row, duplicateRows\)/.test(cli)
      && /_pending: true/.test(cli), 'repeats, duplicates and nearby postings are judged against the site AND the queue, pending rows marked');
   ok(/healCountry\(row, byCountry\)/.test(cli), 'the country the directory knows is filled before the card is drawn');
   const rr = CLI.needReread([
@@ -26315,7 +26315,7 @@ async function testPomsCrawler() {
      && /for await \(const chunk of body\)/.test(cli) && /if \(total > max\) return null;/.test(cli) && !/res\.arrayBuffer\(\)/.test(cli),
     'and reads the body against a cap, by the header where there is one and chunk by chunk where there is not, never whole into memory (a half-gigabyte body threw the run out of its loop)');
   ok(/export async function safeRead\(opp, opts\) \{\s*try \{\s*return await readOpportunityAd\(opp, opts\);\s*\} catch \(e\) \{\s*return \{ parsed: null, via: 'page', error: /.test(cli)
-     && (cli.match(/const read = await safeRead\(opp, \{ render \}\);/g) || []).length === 2 && !/= await readOpportunityAd\(opp/.test(cli),
+     && (cli.match(/const read = await safeRead\((?:opp|sourceOpp), \{ render \}\);/g) || []).length === 2 && !/= await readOpportunityAd\(opp/.test(cli),
     'both read loops go through safeRead, so one advertisement that breaks its reader is a posting queued with less and never a run that ends on that row every morning');
   const pdfSrc = bareJs(await read('_scraper/pdf-text.mjs'));
   ok(/new Worker\(new URL\(import\.meta\.url\), \{\s*workerData: \{ pdfTextJob: true, bytes: ab, maxPages \}, transferList: \[ab\],/.test(pdfSrc)
