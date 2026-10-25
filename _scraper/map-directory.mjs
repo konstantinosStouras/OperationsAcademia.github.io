@@ -72,7 +72,9 @@ export function attachDepartmentLinks(rows,verified,schoolAliases=[],officialLin
   // Apply reviewed overrides before collecting consensus, so a known obsolete
   // URL cannot defeat a reviewed replacement or spread to another alias.
   for(const row of rows){
-    const official=overrides.get(keys.get(row));
+      // A school-level location route can still have a separately reviewed
+      // department roster. Use its own exact identity, never a nearby unit.
+      const official=overrides.get(keys.get(row))||overrides.get(identity(row.institution,row.school,row.department||row.unit));
     if(!official)continue;
     for(const field of ['deptUrl','facultyUrl'])if(official[field])row[field]=official[field];
     if(official.deptUrl)delete row.deptUrlInherited;
