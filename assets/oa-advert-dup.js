@@ -130,6 +130,19 @@
     };
   }
 
+  // Admission rule for new crawled jobs: a published advert link is enough,
+  // regardless of the scraped institution, market year, department or rank.
+  // Callers supply published rows only; pending comparisons retain their guards.
+  function publishedAdvertRepeat(row, published) {
+    var link = advertLink(row);
+    if (!link) return null;
+    var match = (published || []).find(function (other) {
+      return other && !(row.id && other.id && String(row.id) === String(other.id))
+        && advertLink(other) === link;
+    });
+    return match ? entry(match) : null;
+  }
+
   /**
    * The posting `row` is simply a repeat of, or null. See the header for why
    * each guard is there and what it measured.
@@ -223,6 +236,7 @@
 
   return {
     advertLink: advertLink,
+    publishedAdvertRepeat: publishedAdvertRepeat,
     vacancyKey: vacancyKey,
     advertRepeat: advertRepeat,
     findAdvertRepeats: findAdvertRepeats,

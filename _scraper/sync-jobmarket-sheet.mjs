@@ -69,7 +69,7 @@ import { applyAdverts, emptyCache as emptyAdvertsCache } from './adverts.mjs';
 import {
   COLLECTION as REVIEW_COL, partition, needMail, PENDING, REJECTED,
   duplicatesOf, sameDups, businessCheck, sameBiz,
-  advertRepeat, findAdvertRepeats, repeatNote, clearOfCrawledIds,
+  publishedAdvertRepeat, advertRepeat, findAdvertRepeats, repeatNote, clearOfCrawledIds,
 } from './jobreview.mjs';
 import { fillSchoolFromDirectory, campusCountries, healCountry } from './vocab.mjs';
 import { shell, esc, send, transport, toPlain, firestore, SITE, CONTACT } from './_mail.mjs';
@@ -946,7 +946,7 @@ async function main() {
         const listed = [...listedNow, ...swept.keep, ...pomsPending].filter(Boolean);
         for (const doc of split.queue) {
           if (doc.status === PENDING) {
-            const repeat = advertRepeat(doc.row, listed);
+            const repeat = publishedAdvertRepeat(doc.row, listedNow) || advertRepeat(doc.row, listed);
             if (repeat) {
               doc.status = REJECTED;
               doc.reviewedAt = isoStamp(now);
