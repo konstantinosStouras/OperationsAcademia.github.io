@@ -7,6 +7,7 @@ const require=createRequire(import.meta.url);
 const {chromium}=require('playwright');
 const nav=require('../assets/oa-jobnav.js');
 const model=require('../assets/oa-map-model.js');
+require('./map-consolidation-test.cjs');
 assert.equal(model.displayName('KAIST'),'Korea Advanced Institute of Science and Technology (KAIST)');
 assert.equal(model.displayName('MIT'),'Massachusetts Institute of Technology (MIT)');
 assert.equal(model.departmentName('OR/OM'),'Operations Research, Operations Management');
@@ -103,10 +104,11 @@ try{
   const directory=JSON.parse(fs.readFileSync(path.join(root,'data/directory.json'),'utf8'));
   for(const officialName of ['University College London','Universidade Católica Portuguesa']){
     const universityPage=await pageAt('?'+new URLSearchParams({university:officialName}));
-    const visibleIds=await universityPage.evaluate(()=>testMap.shown().map(point=>point.card.id));
+    assert.match(await universityPage.locator('.oa-map-status').innerText(),/^1 university · /,officialName+' aliases count as one university');
+    const visibleIds=await universityPage.evaluate(()=>testMap.shown().flatMap(point=>point.sourceEvidenceIds||[]));
     const expected=evidence.filter(record=>record.institution===officialName);
     assert.ok(expected.length,officialName+' has verified search fixtures');
-    for(const location of expected)assert.ok(visibleIds.some(id=>id.includes(':location:'+location.id+'::')),officialName+' search includes '+location.id);
+    for(const location of expected)assert.ok(visibleIds.includes(location.id),officialName+' search includes '+location.id);
     assert.ok(await universityPage.evaluate(name=>testMap.shown().every(point=>point.card.institution===name||point.card.officialInstitution===name||(point.card.aka||'').split(' · ').includes(name)),officialName),officialName+' search excludes unrelated universities');
     await universityPage.close();
   }
@@ -122,6 +124,7 @@ try{
   await Promise.all(Array.from({length:4},async()=>{
     while(evidenceQueue.length){
       const {location,id}=evidenceQueue.shift();
+      const displayLocation=model.canonicalLocation(location,evidence);
       if(evidenceQueue.length%25===0)console.log('Department links remaining:',evidenceQueue.length);
       const row=directory.find(r=>r.id===id);
       const url=nav.furtherInfoUrl({institution:row.institution,school:row.school,unit:row.department,furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=legacy'});
@@ -130,20 +133,34 @@ try{
       catch(error){throw new Error(id+': '+await q.locator('.oa-map-status').innerText(),{cause:error});}
       if(location.locationGroup && evidence.filter(candidate=>candidate.rowIds.includes(id)).length>1){
         const options=q.locator('.oa-map-location-options');
-        assert.ok((await options.innerText()).includes(location.address),id+' offers its eligible host address');
-        await options.getByRole('button',{name:location.school+' · '+location.department+' · '+location.building,exact:true}).click();
+        assert.ok((await options.innerText()).includes(displayLocation.address),id+' offers its eligible host address');
+        await options.getByRole('button',{name:displayLocation.school+' · '+displayLocation.department+' · '+displayLocation.building,exact:true}).click();
         await q.waitForFunction(()=>document.querySelectorAll('.oa-map-popup').length===1&&!document.querySelector('.oa-map-location-options'));
       }
-      assert.ok((await q.locator('.oa-map-popup').innerText()).includes(location.address),id+' opens its verified address');
-      assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[location.lat,location.lng],id+' opens the building pin');
+      assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.address),id+' opens its verified address');
+      if(displayLocation.locationPrecision==='campus')assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.locationContext),id+' explains campus fallback');
+      assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[displayLocation.lat,displayLocation.lng],id+' opens the building pin');
+      assert.ok(await q.evaluate(evidenceId=>{const at=testMap.map._popup.getLatLng();return testMap.shown().some(p=>p.lat===at.lat&&p.lng===at.lng&&(p.sourceEvidenceIds||[]).includes(evidenceId));},location.id),id+' opened point retains original location evidence');
       await q.locator('#oaf-dept').fill(location.department||location.school||'');
-      await q.waitForFunction(expected=>testMap.shown().some(p=>p.locationVerified&&p.lat===expected.lat&&p.lng===expected.lng),location);
+      await q.waitForFunction(expected=>testMap.shown().some(p=>p.locationVerified&&p.lat===expected.lat&&p.lng===expected.lng),displayLocation);
       await q.close();
     }
   }));
 
   const all=await pageAt();
   if(process.env.MAP_AUDIT_PATH)fs.writeFileSync(process.env.MAP_AUDIT_PATH,JSON.stringify(await all.evaluate(()=>testMap.shown()),null,2)+'\n');
+  const reviewedGroups=new Map();
+  for(const location of evidence.filter(r=>r.locationIdentity)){
+    const canonical=model.canonicalLocation(location,evidence);
+    if(!reviewedGroups.has(canonical.id))reviewedGroups.set(canonical.id,[]);
+    reviewedGroups.get(canonical.id).push(location.id);
+  }
+  const visibleEvidence=await all.evaluate(()=>testMap.shown().map(p=>({ids:p.sourceEvidenceIds||[],identity:p.locationIdentity})));
+  for(const [canonicalId,ids] of reviewedGroups){
+    const matching=visibleEvidence.filter(p=>p.ids.some(id=>ids.includes(id)));
+    assert.equal(matching.length,1,canonicalId+' has one reviewed department/location card');
+    for(const id of ids)assert.ok(matching[0].ids.includes(id),canonicalId+' retains evidence '+id);
+  }
   const audit=await all.evaluate(()=>{
     const points=testMap.shown(), failures=[], groups=[];
     testMap.map.eachLayer(layer=>{if(layer instanceof L.MarkerClusterGroup)groups.push(layer);});
@@ -161,7 +178,7 @@ try{
       if(p.card.schools[0].rows.some(r=>(r.school||'')!==p.school))failures.push('wrong school '+p.card.id);
       if(!Number.isFinite(p.lat)||!Number.isFinite(p.lng))failures.push('invalid location');
     });
-    return {universities:new Set(points.map(p=>p.card.universityId)).size,locations:points.length,
+    return {universities:new Set(points.map(p=>p.card.officialInstitution||p.card.institution)).size,locations:points.length,
       approximate:points.filter(p=>p.approximate).length,clusters,failures};
   });
   assert.deepEqual(audit.failures,[]);

@@ -16,7 +16,7 @@ for(const record of audit.records){
  const matched=evidence.filter(v=>v.rowIds.some(id=>record.rowIds.includes(id)));
  // A confirmed office at one campus does not complete a known multi-campus group.
  const covered=new Set(matched.filter(v=>v.verificationScope!=='partial-group-location').flatMap(v=>v.rowIds));
- record.status=record.verificationExcluded?'excluded-by-user':record.rowIds.every(id=>covered.has(id))?'verified':matched.length?'partially-verified':'pending';
+ record.status=record.verificationExcluded?'excluded-by-user':record.rowIds.every(id=>covered.has(id))?(matched.some(v=>v.locationPrecision==='campus')?'resolved-at-campus':'verified'):matched.length?'partially-verified':'pending';
  if(matched.length)record.verificationIds=matched.map(v=>v.id);
  const search=searches.get(record.id);
  if(search){
@@ -24,6 +24,6 @@ for(const record of audit.records){
   record.sourceSearch={date:'2026-10-23',status:candidates.length?'candidates-found':'no-candidate-captured',candidates:[...new Set(candidates)].slice(0,3)};
  }
 }
-audit.summary={baseline:audit.baselineCount,excludedByUser:audit.records.filter(r=>r.status==='excluded-by-user').length,verified:audit.records.filter(r=>r.status==='verified').length,partiallyVerified:audit.records.filter(r=>r.status==='partially-verified').length,pending:audit.records.filter(r=>r.status==='pending').length,sourceSearches:audit.records.filter(r=>r.sourceSearch).length};
+audit.summary={baseline:audit.baselineCount,excludedByUser:audit.records.filter(r=>r.status==='excluded-by-user').length,verified:audit.records.filter(r=>r.status==='verified').length,campusFallback:audit.records.filter(r=>r.status==='resolved-at-campus').length,partiallyVerified:audit.records.filter(r=>r.status==='partially-verified').length,pending:audit.records.filter(r=>r.status==='pending').length,sourceSearches:audit.records.filter(r=>r.sourceSearch).length};
 fs.writeFileSync(auditFile,JSON.stringify(audit,null,2)+'\n');
 console.log(audit.summary);

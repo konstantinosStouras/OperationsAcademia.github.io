@@ -18,4 +18,4 @@ for(const r of data.records)for(const id of r.rowIds){
  rows.set(id,r);
 }
 fs.writeFileSync(target,JSON.stringify(data,null,2)+'\n');
-console.log(`Merged ${data.records.length} verified records covering ${rows.size} directory rows.`);
+console.log(`Merged ${data.records.length} evidence-backed records covering ${rows.size} directory rows.`);

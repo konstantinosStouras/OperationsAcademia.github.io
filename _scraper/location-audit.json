@@ -3691,7 +3691,7 @@
         "purdue-university__college-of-engineering__lillian-gilbreth-postdoctoral-fellowships",
         "purdue-university__college-of-engineering__one-health-intelligent-medicines"
       ],
-      "status": "partially-verified",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://engineering.purdue.edu/Engr/Research/GilbrethFellowships/ResearchProposals/2025-26/causal-foundation-models-for-multimodal-precision-treatmentresponse-discovery",
@@ -3714,7 +3714,11 @@
       },
       "verificationIds": [
         "purdue-engineering-dean-armstrong",
-        "purdue-gilbreth-kong-jischke"
+        "purdue-gilbreth-kong-jischke",
+        "purdue-one-health-industrial-grissom",
+        "purdue-one-health-chemical-forney",
+        "purdue-one-health-biomedical-jischke",
+        "purdue-one-health-biomedical-indianapolis"
       ]
     },
     {
@@ -3769,7 +3773,7 @@
       "rowIds": [
         "purdue-university____heathcare-om-included"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.purdue.edu/job/AssistantAssociate-Professor-in-Integrated-Health-Across-Lifecycle-and-Systems/39185-en_US/"
@@ -3788,7 +3792,35 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "purdue-integrated-health-mis-krannert",
+        "purdue-integrated-health-mis-rawls",
+        "purdue-integrated-health-mis-young",
+        "purdue-integrated-health-scom-krannert",
+        "purdue-integrated-health-scom-rawls",
+        "purdue-integrated-health-scom-young",
+        "purdue-integrated-health-marketing-krannert",
+        "purdue-integrated-health-marketing-rawls",
+        "purdue-integrated-health-marketing-young",
+        "purdue-integrated-health-economics-krannert",
+        "purdue-integrated-health-economics-rawls",
+        "purdue-integrated-health-economics-young",
+        "purdue-integrated-health-agricultural-economics-krannert",
+        "purdue-integrated-health-horticulture-hort",
+        "purdue-integrated-health-food-science-nlsn",
+        "purdue-integrated-health-pharmacy-practice-rhph",
+        "purdue-integrated-health-sociology-brng",
+        "purdue-integrated-health-human-development-family-science-hnly",
+        "purdue-integrated-health-health-kinesiology-lamb",
+        "purdue-integrated-health-psychological-sciences-psyc",
+        "purdue-integrated-health-public-health-mthw",
+        "purdue-integrated-health-health-sciences-hamp",
+        "purdue-integrated-health-nutrition-science-ston",
+        "purdue-integrated-health-nursing-jnsn",
+        "purdue-integrated-health-speech-language-hearing-lyle",
+        "purdue-integrated-health-pharmacy-practice-indianapolis"
+      ]
     },
     {
       "id": "university-of-puget-sound::school:school of business and leadership::47.26260,-122.48200",
@@ -4647,7 +4679,7 @@
       "rowIds": [
         "new-uzbekistan-university__school-of-management__industrial-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.timeshighereducation.com/unijobs/listing/403146/assistant-associate-visiting-professor-of-operations-management/?LinkSource=PremiumListing"
@@ -4666,7 +4698,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "new-uzbekistan-industrial-management-math",
+        "new-uzbekistan-industrial-management-uca"
+      ]
     },
     {
       "id": "university-of-southern-denmark::school:faculty of engineering::55.36900,10.42800",
@@ -4944,7 +4980,7 @@
       "rowIds": [
         "iese-business-school____managerial-decision-sciences"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://apply.interfolio.com/193916"
@@ -4963,7 +4999,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "iese-managerial-decision-sciences-barcelona-campus"
+      ]
     },
     {
       "id": "iese-business-school::department:om::41.39400,2.10800",
@@ -9779,7 +9818,7 @@
       "rowIds": [
         "miami-university____information-systems-and-technology"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179208679&Title=Visiting%20Assistant%20Professor%2FInstructor"
@@ -9798,7 +9837,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "miami-information-technology-campus-fallback"
+      ]
     },
     {
       "id": "morgan-state-university::school:earl g graves school of business and management::39.34389,-76.58472",
@@ -11313,7 +11355,7 @@
       "rowIds": [
         "hainan-bielefeld-university-of-applied-sciences____production-and-operations-management"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.hainan-biuh.edu.cn/en/job/lecturer-associate-professor-professor-in-production-and-operations-management/"
@@ -11332,7 +11374,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "hainan-production-operations-yangpu-campus-fallback"
+      ]
     },
     {
       "id": "university-of-georgia::school:terry college of business::33.95600,-83.37400",
@@ -13060,7 +13105,7 @@
       "rowIds": [
         "university-of-texas-at-arlington____ai"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://uta.peopleadmin.com/postings/33327"
@@ -13079,7 +13124,12 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "texas-arlington-ai-participating-business",
+        "texas-arlington-ai-participating-engineering",
+        "texas-arlington-ai-participating-science"
+      ]
     },
     {
       "id": "university-of-texas-at-arlington::department:business statistics::32.73100,-97.11500",
@@ -13772,7 +13822,7 @@
       "rowIds": [
         "institut-mines-telecom__institut-mines-telecom-business-school__management-marketing-and-strategy"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://drive.google.com/open?id=1iQAi8Uhj4BL7UvjAotTOLJLe4FtKiD7c",
@@ -13792,7 +13842,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "institut-mines-telecom-management-evry-campus-fallback"
+      ]
     },
     {
       "id": "institut-mines-telecom::department:supply chain logistics sustainable transport and economics::48.62516,2.44294",
@@ -13804,7 +13857,7 @@
       "rowIds": [
         "institut-mines-telecom____supply-chain-logistics-sustainable-transport-and-economics"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://institutminestelecom.recruitee.com/l/en/o/pd-en-supply-chain-logistique-cdd-12-mois"
@@ -13823,7 +13876,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "institut-mines-telecom-management-evry-campus-fallback"
+      ]
     },
     {
       "id": "cedarville-university::department:om::39.74750,-83.81111",
@@ -15098,7 +15154,7 @@
       "rowIds": [
         "san-bernardino-community-college-district____business-math"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179373190&Title=Assistant%20Professor%2C%20Business"
@@ -15117,7 +15173,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "san-bernardino-valley-business"
+      ]
     },
     {
       "id": "tusculum-university::department:supply chain management::36.17361,-82.76139",
@@ -15819,7 +15878,7 @@
       "rowIds": [
         "hec-paris____ai"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.eiasm.org/documents/JMW/opening/3504.pdf"
@@ -15838,7 +15897,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "hec-paris-artificial-intelligence-campus"
+      ]
     },
     {
       "id": "hec-paris::department:om::48.75800,2.17000",
@@ -16155,7 +16217,7 @@
       "rowIds": [
         "chicago-booth____om-scm"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://uchicago.wd5.myworkdayjobs.com/External/job/Chicago-IL/Principal-Researcher_JR32227-1"
@@ -16174,7 +16236,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "chicago-booth-operations-harper"
+      ]
     },
     {
       "id": "aalto-university::department:production om::60.18600,24.82900",
@@ -16456,7 +16521,7 @@
       "rowIds": [
         "abdullah-al-salem-university____scm-logistics"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179348991&Title=Faculty%20Member%20%E2%80%93%20Supply%20Chain%20%26%20Logistics%20Management%20(B.Sc.%20Program)"
@@ -16475,7 +16540,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "abdullah-al-salem-supply-chain-khaldiya-campus"
+      ]
     },
     {
       "id": "southwest-minnesota-state-university::department:business technology::44.45444,-95.75944",
@@ -16998,7 +17066,7 @@
       "rowIds": [
         "abu-dhabi-university____om"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179335639&Title=Assistant%20Professor%20in%20Operations%20Management%20-%20College%20of%20Business"
@@ -17017,7 +17085,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "abu-dhabi-operations-business-campus"
+      ]
     },
     {
       "id": "china-europe-international-business-school::department:om::31.20083,121.42972",
@@ -17540,7 +17611,7 @@
       "rowIds": [
         "flame-university____ba"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179316605&Title=Assistant%20Professor%20-%20Business%20Analytics"
@@ -17559,7 +17630,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "flame-operations-analytics-lavale-campus"
+      ]
     },
     {
       "id": "flame-university::department:om::18.52331,73.73174",
@@ -17571,7 +17645,7 @@
       "rowIds": [
         "flame-university____om"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179316611&Title=Assistant%20Professor%20-%20Operations"
@@ -17584,7 +17658,10 @@
           "https://jobs.flame.edu.in/apex/FLAME_Contact_Jobs_page",
           "https://www.flame.edu.in/contact-us"
         ]
-      }
+      },
+      "verificationIds": [
+        "flame-operations-analytics-lavale-campus"
+      ]
     },
     {
       "id": "rutgers-university::department:ai ml ds stats::40.50200,-74.44800",
@@ -17596,7 +17673,7 @@
       "rowIds": [
         "rutgers-university____ai-ml-ds-stats"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -17613,7 +17690,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "rutgers-artificial-intelligence-university-reference"
+      ]
     },
     {
       "id": "rutgers-university::department:ie::40.50200,-74.44800",
@@ -19164,7 +19244,7 @@
       "rowIds": [
         "howard-university____open-disciplinary-focus"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/details.cfm?JobCode=179255785&utm_source=09_30_25&utm_medium=email&utm_campaign=JobAgentEmail"
@@ -19183,7 +19263,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "howard-open-disciplinary-main-campus"
+      ]
     },
     {
       "id": "james-madison-university::department:ba::38.43844,-78.87375",
@@ -20858,7 +20941,7 @@
       "rowIds": [
         "american-university-in-the-emirates____business-intelligence-da"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179175875&Title=COBA%20-%20Full%20Time%20Faculty%20-%20Business%20Intelligence%20%2F%20Data%20Analytics%20-%20Fall%20Semester"
@@ -20877,7 +20960,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "american-emirates-business-intelligence-campus"
+      ]
     },
     {
       "id": "american-university-in-the-emirates::department:logistics supply chain::25.12300,55.41116",
@@ -20889,7 +20975,7 @@
       "rowIds": [
         "american-university-in-the-emirates____logistics-supply-chain"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179175876&Title=COBA%20-%20Full%20Time%20Faculty%20-%20Logistics%20and%20Supply%20Chain%20-%20Fall%20Semester"
@@ -20908,7 +20994,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "american-emirates-logistics-supply-chain-campus"
+      ]
     },
     {
       "id": "university-of-auckland::department:om scm::-36.85000,174.76900",
@@ -21124,7 +21213,7 @@
       "rowIds": [
         "lone-star-college-system____business"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179166289&Title=Faculty%2C%20Business"
@@ -21143,7 +21232,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "lone-star-business-system-office-fallback"
+      ]
     },
     {
       "id": "saint-louis-university::department:om and it::38.63639,-90.23417",
@@ -22966,7 +23058,7 @@
       "rowIds": [
         "ieseg____operations-management"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [
         "https://www.ieseg.fr/en/faculty-and-research/departments/operations-management/"
       ],
@@ -22985,7 +23077,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "ieseg-operations-lille-campus",
+        "ieseg-operations-paris-campus"
+      ]
     },
     {
       "id": "indiana-university-bloomington::school:kelley school of business::39.16700,-86.52100",
@@ -23201,7 +23297,7 @@
       "rowIds": [
         "microsoft____applied-science"
       ],
-      "status": "pending",
+      "status": "resolved-at-campus",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -23218,7 +23314,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "microsoft-applied-science-redmond-headquarters"
+      ]
     },
     {
       "id": "mit::school:laboratory for information and decision systems::42.35972,-71.09194",
@@ -24288,9 +24387,10 @@
   "summary": {
     "baseline": 714,
     "excludedByUser": 2,
-    "verified": 689,
-    "partiallyVerified": 1,
-    "pending": 22,
+    "verified": 695,
+    "campusFallback": 17,
+    "partiallyVerified": 0,
+    "pending": 0,
     "sourceSearches": 714
   }
 }

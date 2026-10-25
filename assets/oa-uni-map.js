@@ -146,14 +146,14 @@
       var brand=logoImage(card);if(brand)pop.appendChild(brand);
       pop.appendChild(el('h3',{text:card.officialInstitution||OAMapModel.displayName(card.institution)}));
       pop.appendChild(el('p',{text:(card.countries||[]).join(' · ')}));
-      if(point&&point.approximate)pop.appendChild(el('p',{text:'Approximate university location — school building not yet verified.'}));
+      if(point&&point.approximate&&point.locationPrecision!=='campus')pop.appendChild(el('p',{text:'Approximate university location — school building not yet verified.'}));
       if(point&&point.locationVerified){
         pop.appendChild(el('p',{text:point.address}));
         if(point.locationContext)pop.appendChild(el('p',{text:point.locationContext}));
         var evidence=el('p',{text:'Location checked '+point.checked+' · '});
         evidence.appendChild(makeLink('Official address',point.addressSource));
         evidence.appendChild(document.createTextNode(' · '));
-        evidence.appendChild(makeLink('Building map',point.coordinateSource));
+        evidence.appendChild(makeLink(point.locationPrecision==='campus'?'Campus or headquarters map':'Building map',point.coordinateSource));
         pop.appendChild(evidence);
       }
       pop.appendChild(el('p',{text:(card.schools||[]).length+((card.schools||[]).length===1?' school · ':' schools · ')+(card.schools||[]).reduce(function(n,s){return n+(s.rows||[]).length;},0)+' department listings · '+(card.n||0)+' past postings'}));
@@ -238,6 +238,7 @@
         if(ps.length)inRegion.push(c);
         ps.forEach(function(p){points.push(p);});
       });
+      points=OAMapModel.consolidatePoints(points,verified);
       var restoreFocus=!!(map._popup&&map.hasLayer(map._popup));
       map.closePopup();cluster.clearLayers();markers.clear();currentPoints=points;
       if(!keepView)frame(points);
@@ -262,25 +263,22 @@
       var sorted=points.map(function(p){return p.card;}).concat(missing).sort(function(a,b){return a.institution.localeCompare(b.institution);});
       pendingResults=sorted;resultList.replaceChildren();renderResults();
       summary.textContent='Matching school and department locations ('+sorted.length+')';
-      status.textContent=inRegion.length+(inRegion.length===1?' university · ':' universities · ')+points.length+(points.length===1?' mapped location':' mapped locations')+(missing.length?' · '+missing.length+' without coordinates (available in the list)':'')+'.'+(!sorted.length?' No matches. Try another continent or clear the search filters.':'');
+      var universityCount=new Set(points.map(function(p){return key(p.card.officialInstitution||p.card.institution);})).size;
+      status.textContent=universityCount+(universityCount===1?' university · ':' universities · ')+points.length+(points.length===1?' mapped location':' mapped locations')+(missing.length?' · '+missing.length+' without coordinates (available in the list)':'')+'.'+(!sorted.length?' No matches. Try another continent or clear the search filters.':'');
       labelClusters();
       // Deep links wait for BOTH asynchronous data sources, then open the
       // matching school location without requiring a cluster/marker click.
       if(targetUniversity && targetParams.get('focus')==='department' && (!focusApplied || restoreFocus)) {
-        var matches=layers.filter(function(m){return key(m.oaCard.institution)===key(targetUniversity) || (m.oaCard.aka||'').split(' · ').some(function(a){return key(a)===key(targetUniversity);});});
+        var matches=layers.filter(function(m){return OAMapModel.pointMatchScore(m.oaPoint,targetUniversity,'','')>0;});
         if(matches.length) {
           var target=OASchools.canonColumns({institution:targetUniversity,school:targetSchool,unit:targetDepartment});
           targetSchool=target.school;targetDepartment=target.unit;
           var chosen=null,bestScore=0,eligible=[];
-          if(targetDepartment)matches.forEach(function(m){m.oaCard.schools.forEach(function(s){s.rows.forEach(function(r){
-            var score=OAMapModel.rowMatchScore(r,targetSchool,targetDepartment);
-            // Official-name aliases broaden search, but an exact university
-            // identity wins ties when opening a specific department link.
-            if(score)score=score*10+(key(m.oaCard.institution)===key(targetUniversity)?1:0);
+          if(targetSchool||targetDepartment)matches.forEach(function(m){
+            var score=OAMapModel.pointMatchScore(m.oaPoint,targetUniversity,targetSchool,targetDepartment);
             if(score>bestScore){chosen=m;bestScore=score;eligible=[m];}
             else if(score&&score===bestScore&&eligible.indexOf(m)===-1)eligible.push(m);
-          });});});
-          chosen=chosen || matches.find(function(m){return targetSchool && m.oaCard.schools.some(function(s){return s.rows.some(function(r){return OAMapModel.matchesRow(r,targetSchool,'');});});});
+          });
           if(!chosen && !targetSchool && !targetDepartment && matches.length===1)chosen=matches[0];
           if(!chosen){status.textContent+=' The requested department is not in the directory; showing the available schools.';return;}
           focusApplied=true;autoFrame=false;

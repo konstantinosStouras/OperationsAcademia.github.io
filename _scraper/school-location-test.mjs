@@ -15,6 +15,7 @@ for(const v of verified){
  assert.match(v.checked,/^\d{4}-\d{2}-\d{2}$/);
  for(const field of ['addressSource','coordinateSource'])assert.equal(new URL(v[field]).protocol,'https:');
  assert.ok(v.rowIds.length);
+ if(v.locationPrecision==='campus')assert.ok(v.locationContext,v.id+' explains campus fallback');
  for(const id of v.rowIds){
   if(seen.has(id)) {
    assert.ok(v.locationGroup&&v.locationGroup===seen.get(id).locationGroup,'ambiguous location for '+id);
@@ -35,6 +36,8 @@ const points=model.pointsFor(card,data);
 assert.equal(points.length,3);
 assert.deepEqual(points.map(p=>p.card.schools[0].rows.length),[1,1,1]);
 assert.ok(points.find(p=>p.lat===39).approximate,'an unverified department must retain its status');
+const campusPoint=model.pointsFor(card,{...data,verified:[{...source,locationPrecision:'campus'}]}).find(p=>p.lat===40);
+assert.ok(campusPoint.approximate&&campusPoint.locationVerified,'official campus evidence must not claim an exact department building');
 assert.ok(model.matchesRow(points[0].card.schools[0].rows[0],'Engineering','Systems'),'old department links survive official name corrections');
 assert.ok(!model.matchesRow(points[1].card.schools[0].rows[0],'Engineering','Systems'),'no cross-department match');
 console.log(`${verified.length} evidence-backed locations checked; separate buildings and legacy links passed.`);
