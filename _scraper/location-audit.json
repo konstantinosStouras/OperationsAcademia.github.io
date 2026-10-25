@@ -5143,7 +5143,7 @@
       "rowIds": [
         "ie-university__ie-business-school__operations-and-business-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=29477"
       ],
@@ -5162,7 +5162,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "ie-operations-business-analytics-molina12"
+      ]
     },
     {
       "id": "ie-university::school:ie school of science and technology::40.95300,-4.11800",
@@ -5209,7 +5212,7 @@
       "rowIds": [
         "quincy-university__oakley-school-of-business__business-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179576999&Title=Full%2DTime%2C%20Tenure%2DTrack%20Business%20Analytics%20Faculty%20Position%20in%20the%20Oakley%20School%20of%20Business"
@@ -5228,7 +5231,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "quincy-business-analytics-francis-hall"
+      ]
     },
     {
       "id": "university-of-missouri-mizzou::department:industrial and systems engineering::38.94530,-92.32880",
@@ -13491,7 +13497,7 @@
       "rowIds": [
         "campbellsville-university____business-it"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179410744&Title=Assistant%2FAssociate%2FFull%20Professor%20of%20Business%20Information%20Technology"
@@ -13510,7 +13516,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "campbellsville-business-information-technology-administration"
+      ]
     },
     {
       "id": "university-at-buffalo::school:school of management::43.00000,-78.78900",
@@ -24230,9 +24239,9 @@
   "summary": {
     "baseline": 714,
     "excludedByUser": 2,
-    "verified": 672,
+    "verified": 675,
     "partiallyVerified": 1,
-    "pending": 39,
+    "pending": 36,
     "sourceSearches": 714
   }
 }

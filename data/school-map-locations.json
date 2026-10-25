@@ -13325,6 +13325,64 @@
       ],
       "checked": "2026-10-25",
       "notes": "Exact employer posting 53294-0526 names Professor Kurt Debattista as contact. Current university research team page, populated by its public SiteBuilder data endpoint, explicitly places Kurt Debattista, Alan Chalmers, Thomas Bashford-Rogers and Abhishek Goswami in the International Manufacturing Centre. The official building page confirms Lord Bhattacharyya Way address; coordinate is the exact named building footprint 28480072, not the generic university coordinate. Historical International Digital Laboratory affiliations were not used."
+    },
+    {
+      "id": "ie-operations-business-analytics-molina12",
+      "institution": "IE University",
+      "institutionKey": "ie-university",
+      "rowIds": [
+        "ie-university__ie-business-school__operations-and-business-analytics"
+      ],
+      "school": "IE Business School",
+      "department": "Operations and Business Analytics",
+      "building": "María de Molina 12 faculty offices",
+      "address": "5th floor, Calle de María de Molina 12, 28006 Madrid, Spain",
+      "lat": 40.437639,
+      "lng": -3.687494,
+      "addressSource": "https://www.ie.edu/faculty/matthias-seifert/",
+      "coordinateSource": "https://ovc.catastro.meh.es/OVCServWeb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_CPMRC?Provincia=&Municipio=&SRS=EPSG:4326&RC=1767702VK4716F",
+      "checked": "2026-10-25",
+      "notes": "Official faculty homepage explicitly identifies Matthias Seifert with the Operations and Business Analytics area and gives Maria de Molina 12, 5th floor. University-hosted 2025 greenhouse-gas certificate independently confirms active premises on both sides of floor 5 at this address: https://docs.ie.edu/sustainability/resources/2025%20CERTIFICADO%20GHG%20PROTOCOL%20Grupo%20IE%20%28Alcance%201%2C%202%29.pdf . A 2026 research paper by department colleague Yucheng Su and Seifert also gives Calle Maria de Molina 12 (SSRN7388998). Coordinates are the exact named address/parcel reference returned by the Spanish Directorate-General for Cadastre in EPSG4326, not the university campus centroid. This identifies documented department faculty premises; not every teaching venue or the business school dean office in IE Tower."
+    },
+    {
+      "id": "quincy-business-analytics-francis-hall",
+      "institution": "Quincy University",
+      "institutionKey": "quincy-university",
+      "rowIds": [
+        "quincy-university__oakley-school-of-business__business-analytics"
+      ],
+      "school": "Oakley School of Business",
+      "department": "Business Analytics",
+      "building": "Francis Hall",
+      "address": "Business Analytics Lab, Room 240, Francis Hall, 1800 College Avenue, Quincy, IL 62301, United States",
+      "lat": 39.939582,
+      "lng": -91.38626,
+      "addressSource": "https://my.quincy.edu/ICS/Catalog__Courses.jnz?portlet=Courses_being_offered&screen=Advanced+Course+Search&screenType=next",
+      "coordinateSource": "https://www.google.com/maps/d/embed?mid=1gKAWnpHVn52b5Llb-9ugHXdkBzqatY4",
+      "checked": "2026-10-25",
+      "notes": "Official public guest course search: select 2026-2027 Fall, department BUA - Business Analytics, Undergraduate. BUA301001 Introduction to Business Analytics meets in explicitly named Business Analytics Lab, Francis Hall; opening course details gives room240, August24-December10 2026, taught by Kyle Mitchell Trudell. This is the documented dedicated business analytics teaching lab, not an invented faculty office. Other Fall2026 analytics sections are online. Official campus map https://www.quincy.edu/admissions/visit-qu/campus-map/ embeds cited university Google My Maps; its named Francis Hall marker supplies coordinates (downloadable KML). Current program belongs to Oakley School of Business. Faculty Dana Walker current official profile corroborates teaching field, but does not publish office."
+    },
+    {
+      "id": "campbellsville-business-information-technology-administration",
+      "institutionKey": "Campbellsville University",
+      "institution": "Campbellsville University",
+      "rowIds": [
+        "campbellsville-university____business-it"
+      ],
+      "school": "College of Business and Enterprise",
+      "department": "Business Information Technology",
+      "building": "Administration Building, classroom 27",
+      "address": "104 University Drive, Campbellsville, Kentucky 42718, United States",
+      "lat": 37.3432661,
+      "lng": -85.3500269,
+      "addressSource": "https://www.campbellsville.edu/academics/academic-affairs/course-offerings.html",
+      "coordinateSource": "https://www.google.com/maps/place/Administration+Building/@37.3432329,-85.3522557,17.46z/data=!4m5!3m4!1s0x88687228cc6db491:0x958e51f469c0afbc!8m2!3d37.3432661!4d-85.3500269",
+      "supportingSources": [
+        "https://www.campbellsville.edu/campus-life/campus-resources/facilities/index.html",
+        "https://www.campbellsville.edu/academics/programs/bachelor-business-information-technology.html"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current Fall 2026 official course offerings place Business Information Technology BIT 340-3 in Administration Building 27, Tuesdays and Thursdays 11:00–12:15. Official facilities directory identifies the building as an academic home of Business and Enterprise at 104 University Drive and directly links the exact Google Maps building place. Coordinates are the linked place target !3d/!4d values, not the map viewport. This establishes a current programme teaching location; it does not assert all faculty offices are in that classroom. Other buildings appearing in general university faculty directories were not substituted."
     }
   ]
 }

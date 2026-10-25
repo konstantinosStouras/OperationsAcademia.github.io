@@ -1881,7 +1881,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-04-09"
+  "lastPosted": "2026-04-09",
+  "mapSearchTerms": [
+   "College of Business and Enterprise",
+   "Business Information Technology"
+  ]
  },
  {
   "id": "canadian-university-dubai____ba-ds",
@@ -5572,6 +5576,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "IE Business School",
+   "Operations and Business Analytics"
   ]
  },
  {
@@ -9771,7 +9779,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-03"
+  "lastPosted": "2026-10-03",
+  "mapSearchTerms": [
+   "Oakley School of Business",
+   "Business Analytics"
+  ]
  },
  {
   "id": "rensselaer-polytechnic-institute__lally-school-of-management__supply-chain-management-and-analytics",
