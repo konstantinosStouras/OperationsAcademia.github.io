@@ -75,6 +75,9 @@ export function hostOf(url) {
 export function buildMap(rows) {
   const claims = new Map();                       // domain -> Set(institution)
   for (const r of rows || []) {
+    // Alias link recovery helps navigation, but does not create a new claim
+    // that the alias institution owns the donor's network domain.
+    if (r && r.deptUrlInherited) continue;
     const inst = String((r && r.institution) || '').trim();
     const host = hostOf(r && r.deptUrl);
     if (!inst || !host) continue;

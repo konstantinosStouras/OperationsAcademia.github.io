@@ -1,6 +1,7 @@
 const assert=require('node:assert/strict');
 (async()=>{
   const {attachDepartmentLinks}=await import('./map-directory.mjs');
+  const {buildMap}=await import('./build-netmap.mjs');
   const location=(id,school,department,rowIds)=>({id,institution:'Link University',school,department,rowIds,lat:40,lng:-80});
   const evidence=[location('ops','Business School','Operations Management',['old','new','conflict','suppressed']),location('engineering','Engineering School','Operations Management',['engineering'])];
   const aliases=[{institution:'Link University',school:'Business School',aliases:['Business School','School of Business']}];
@@ -9,6 +10,8 @@ const assert=require('node:assert/strict');
   attachDepartmentLinks(rows,evidence,aliases);
   assert.equal(rows[1].facultyUrl,rows[0].facultyUrl,'evidence-established department aliases share the faculty page');
   assert.equal(rows[1].deptUrl,rows[0].deptUrl);
+  assert.equal(rows[1].deptUrlInherited,true);
+  assert.equal(rows[0].deptUrlInherited,undefined);
   assert.equal(rows[2].facultyUrl,undefined,'a different school never borrows the business faculty');
   assert.equal(rows[3].facultyUrl,undefined,'school-only routing does not imply departmental links');
   assert.equal(rows[4].facultyUrl,undefined,'institutions remain separate');
@@ -23,10 +26,28 @@ const assert=require('node:assert/strict');
   assert.ok(rows.every(r=>r.deptUrl==='https://example.edu/current'));
   assert.ok(rows.every(r=>r.facultyUrl==='https://example.edu/current/faculty'));
   assert.equal(rows[3].suppressFacultyLink,undefined,'reviewed faculty override lifts obsolete suppression');
+  assert.ok(rows.every(r=>!r.deptUrlInherited),'reviewed department URLs replace inherited provenance');
   const before=JSON.stringify(rows);attachDepartmentLinks(rows,evidence,aliases,official);
   assert.equal(JSON.stringify(rows),before,'a second run is deterministic');
   const reversed=JSON.parse(before).reverse();attachDepartmentLinks(reversed,evidence.slice().reverse(),aliases,official);
   assert.deepEqual(reversed.reverse(),rows,'input order cannot choose a different URL');
   assert.throws(()=>attachDepartmentLinks(rows,evidence,aliases,official.concat({...official[0],facultyUrl:'https://example.edu/conflict'})),/Conflicting official/);
+  const michigan=[
+    {id:'mi-original',institution:'University of Michigan',school:'Business School',department:'Operations',deptUrl:'https://umich.edu/operations'},
+    {id:'mi-alias',institution:'University of Michigan at Ann Arbor',school:'Business School',department:'Operations'}
+  ];
+  const originalClaims=buildMap(michigan);
+  const michiganEvidence=michigan.map((r,i)=>({id:'mi-evidence-'+i,institution:'University of Michigan',institutionKey:r.institution,school:r.school,department:r.department,rowIds:[r.id],lat:42,lng:-83}));
+  attachDepartmentLinks(michigan,michiganEvidence);
+  assert.equal(michigan[1].deptUrl,michigan[0].deptUrl,'alias navigation link is recovered');
+  assert.equal(michigan[1].deptUrlInherited,true);
+  assert.deepEqual(buildMap(michigan),originalClaims,'link recovery cannot remove an existing university domain claim');
+  const alaska={id:'alaska',institution:'University of Alaska Fairbanks',school:'College of Business and Security Management',department:'Business Administration',deptUrl:'https://old.example.edu',deptUrlInherited:true};
+  attachDepartmentLinks([alaska],[],[],[{...alaska,deptUrl:'https://www.uaf.edu/cbsm/'}]);
+  assert.equal(alaska.deptUrlInherited,undefined);
+  assert.equal(buildMap(michigan.concat(alaska)).map['uaf.edu'],'University of Alaska Fairbanks','reviewed official link creates a real network claim');
+  const conflict=buildMap(michigan.concat({institution:'Independent University',deptUrl:'https://umich.edu/other'}));
+  assert.equal(conflict.map['umich.edu'],undefined,'real original conflicting claims remain refused');
+  assert.equal(conflict.dropped.length,1);
   console.log('Department links preserve school boundaries, override only reviewed links, and recover unambiguous aliases.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

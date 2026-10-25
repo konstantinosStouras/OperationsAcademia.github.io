@@ -3,6 +3,11 @@ const model=require('../assets/oa-map-model.js');
 const schools=require('../assets/oa-schools.js');
 
 (async()=>{
+  const college='College of Science, Engineering and Technology';
+  assert.deepEqual(schools.canonColumns({institution:'Minnesota State University, Mankato',school:college,unit:'Computer Information Science'}),
+    {institution:'Minnesota State University, Mankato',school:college,unit:'Computer Information Science'});
+  assert.equal(schools.splitFused(college).school,college,'commas within an official college name do not invent another school');
+  assert.deepEqual(schools.splitFused(college+', Computer Information Science'),{school:college,unit:'Computer Information Science'});
   const {attachMapLocations}=await import('./map-directory.mjs');
   const university='Routing Integration University';
   const evidence=(id,department,extra={})=>({id,institution:university,school:'Business School',department,lat:40,lng:-80,address:id+' address',rowIds:[id+'-row'],country:'United States',...extra});

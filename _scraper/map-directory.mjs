@@ -75,6 +75,7 @@ export function attachDepartmentLinks(rows,verified,schoolAliases=[],officialLin
     const official=overrides.get(keys.get(row));
     if(!official)continue;
     for(const field of ['deptUrl','facultyUrl'])if(official[field])row[field]=official[field];
+    if(official.deptUrl)delete row.deptUrlInherited;
     if(official.facultyUrl)delete row.suppressFacultyLink;
   }
   const known=new Map();
@@ -88,7 +89,10 @@ export function attachDepartmentLinks(rows,verified,schoolAliases=[],officialLin
     const group=known.get(keys.get(row));if(!group)continue;
     for(const field of ['deptUrl','facultyUrl']){
       if(row[field]||(field==='facultyUrl'&&row.suppressFacultyLink))continue;
-      if(group[field].size===1)row[field]=Array.from(group[field])[0];
+      if(group[field].size===1){
+        row[field]=Array.from(group[field])[0];
+        if(field==='deptUrl')row.deptUrlInherited=true;
+      }
     }
   }
   return rows;
