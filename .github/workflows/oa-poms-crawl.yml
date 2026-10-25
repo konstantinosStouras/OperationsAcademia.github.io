@@ -36,6 +36,10 @@ on:
     - cron: '35 8 * * *'
   workflow_dispatch:
     inputs:
+      verify_recovery:
+        description: 'Verify the corrected Huntsville vacancy and uncertain Texas posting are pending'
+        type: boolean
+        default: false
       dry_run:
         description: 'Read everything, print what would be queued, write nothing'
         type: boolean
@@ -182,6 +186,7 @@ jobs:
         if: ${{ !inputs.dry_run && !inputs.scan }}
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VERIFY_POMS_RECOVERY: ${{ inputs.verify_recovery }}
         run: node _scraper/audit-review-links.mjs
 
       # NO DOORBELL. Nothing here reaches data/: a posting the maintainer

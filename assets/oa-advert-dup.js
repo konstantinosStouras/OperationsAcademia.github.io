@@ -104,7 +104,7 @@
     if ((m = link.match(/^((?:jobs|careers)\.[^/]+\.edu)\/postings\/(\d+)(?:[/?]|$)/))) return m[1] + ':' + m[2];
     if ((m = link.match(/^cityu\.edu\.hk\/hro\/.*[?&]ref=uac-([a-z\d]+)/))) return 'cityu:' + m[1];
     if ((m = link.match(/^([^/]+\.varbi\.com)\/.*jobid(?:%3a|:)(\d+)/))) return m[1] + ':' + m[2];
-    if ((m = link.match(/^([^/]+\.myworkdayjobs\.com)\/.*[_/](jr[\w-]+)(?:[/?]|$)/))) return m[1] + ':' + m[2];
+    if ((m = link.match(/^([^/]+\.myworkdayjobs\.com)\/.*[_/]((?:jr|req_)[\w-]+)(?:[/?]|$)/))) return m[1] + ':' + m[2];
     return '';
   }
 
