@@ -203,9 +203,13 @@
   "school": "Robert B. Willumstad School of Business",
   "department": "Decision Sciences and Marketing",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-23",
   "mapSearchTerms": [
    "Robert B. Willumstad School of Business",
    "Decision Sciences and Marketing Department"
@@ -1139,6 +1143,15 @@
   ],
   "mapInstitutionNames": [
    "Beijing Normal-Hong Kong Baptist University"
+  ]
+ },
+ {
+  "id": "bellarmine-university____information-systems-and-artificial-intelligence",
+  "institution": "Bellarmine University",
+  "department": "Information Systems and Artificial Intelligence",
+  "type": "University",
+  "sources": [
+   "seed"
   ]
  },
  {
@@ -6738,6 +6751,20 @@
   "lng": -86.5189087
  },
  {
+  "id": "indiana-university-bloomington__kelley-school-of-business__operations-and-decision-technologies",
+  "institution": "Indiana University Bloomington",
+  "school": "Kelley School of Business",
+  "department": "Operations and Decision Technologies",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-23"
+ },
+ {
   "id": "indiana-university-bloomington__kelley-school-of-business__supply-chain-and-operations",
   "institution": "Indiana University Bloomington",
   "school": "Kelley School of Business",
@@ -9645,8 +9672,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-30",
+  "n": 2,
+  "lastPosted": "2026-10-23",
   "mapSearchTerms": [
    "Willie A. Deese College of Business and Economics",
    "Department of Business Information Systems and Analytics"
@@ -10277,6 +10304,15 @@
   ]
  },
  {
+  "id": "ohio-state-university____optimization-for-machine-learning",
+  "institution": "Ohio State University",
+  "department": "Optimization for Machine Learning",
+  "type": "University",
+  "sources": [
+   "seed"
+  ]
+ },
+ {
   "id": "ohio-state-university__college-of-engineering__integrated-systems-engineering",
   "institution": "Ohio State University",
   "school": "College of Engineering",
@@ -10293,8 +10329,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-10-19",
+  "n": 2,
+  "lastPosted": "2026-10-23",
   "mapSearchTerms": [
    "College of Engineering",
    "Department of Integrated Systems Engineering"
@@ -19152,17 +19188,20 @@
   "school": "College of Engineering",
   "department": "Mechanical, Industrial and Systems Engineering",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-23",
   "mapSearchTerms": [
    "College of Engineering",
    "Department of Mechanical, Industrial and Systems Engineering"
   ],
   "mapInstitutionNames": [
    "University of Rhode Island"
-  ],
-  "country": "United States"
+  ]
  },
  {
   "id": "university-of-richmond__robins-school-of-business__management",

@@ -42,6 +42,178 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-adelphi-university-20261023",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-23",
+  "institution": "Adelphi University",
+  "department": "Robert B. Willumstad School of Business, Decision Sciences and Marketing",
+  "school": "Robert B. Willumstad School of Business",
+  "unit": "Decision Sciences and Marketing",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://phf.tbe.taleo.net/phf02/ats/careers/v2/viewRequisition?org=ADELPHI&cws=43&rid=3431",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://phf.tbe.taleo.net/phf02/ats/careers/v2/applyRequisition?org=ADELPHI&cws=43&rid=3431",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.adelphi.edu/business/faculty/decision-sciences-and-marketing/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-25T20:37:32Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-indiana-university-20261023",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-23",
+  "institution": "Indiana University Bloomington",
+  "department": "Kelley School of Business, Operations and Decision Technologies",
+  "school": "Kelley School of Business",
+  "unit": "Operations and Decision Technologies",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-09-25",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://indiana.peopleadmin.com/postings/33748",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://indiana.peopleadmin.com/postings/33748/pre_apply",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://kelley.iu.edu/faculty-research/departments/operations-decision-technologies/index.html",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-25T20:33:10Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-north-carolina-a-t-state-university-20261023",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-23",
+  "institution": "North Carolina Agricultural and Technical State University",
+  "department": "Willie A. Deese College of Business and Economics, Business Information Systems and Analytics",
+  "school": "Willie A. Deese College of Business and Economics",
+  "unit": "Business Information Systems and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179596993&Title=Assistant%2FAssociate%20Professor%20%2D%20Business%20InformationSystems%20and%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.ncat.edu/postings/41958/pre_apply",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.ncat.edu/cobe/academic-departments/bisa/index.php",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-25T20:35:03Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-ohio-state-university-20261023-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-23",
+  "institution": "Ohio State University",
+  "department": "College of Engineering, Integrated Systems Engineering",
+  "school": "College of Engineering",
+  "unit": "Integrated Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/195056",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://dossier.interfolio.com/apply/195056",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://ise.osu.edu/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-25T20:29:38Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-rhode-island-20261023",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-23",
+  "institution": "University of Rhode Island",
+  "department": "College of Engineering, Mechanical, Industrial and Systems Engineering",
+  "school": "College of Engineering",
+  "unit": "Mechanical, Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.uri.edu/postings/17217",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.uri.edu/postings/17217/pre_apply",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://web.uri.edu/mcise/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-25T20:31:57Z",
+  "owner": ""
+ },
+ {
   "id": "2027-columbia-university-ieor-20261022",
   "year": 2027,
   "years": [
