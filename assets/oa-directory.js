@@ -291,6 +291,9 @@
       var src = (held.sources || []).slice();
       (r.sources || []).forEach(function (s) { if (src.indexOf(s) === -1) src.push(s); });
       held.sources = src;
+      ['mapInstitutionNames', 'mapSearchTerms'].forEach(function (field) {
+        held[field] = Array.from(new Set((held[field] || []).concat(r[field] || [])));
+      });
       ['type', 'country', 'deptUrl', 'facultyUrl', 'address', 'mapUrl'].forEach(function (f) {
         if (!held[f] && r[f]) held[f] = r[f];
       });
@@ -347,6 +350,7 @@
         var tl = TYPE_LABEL[r.type];
         if (tl && types.indexOf(tl) === -1) types.push(tl);
         if (aka.indexOf(r.institution) === -1) aka.push(r.institution);
+        (r.mapInstitutionNames || []).forEach(function (name) { if (aka.indexOf(name) === -1) aka.push(name); });
         n += r.n || 0;
         if ((r.lastPosted || '') > lastPosted) lastPosted = r.lastPosted || '';
         if (r._edit && (!edited || r._edit.t > edited.t)) edited = r._edit;

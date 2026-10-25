@@ -149,6 +149,7 @@
       if(point&&point.approximate)pop.appendChild(el('p',{text:'Approximate university location — school building not yet verified.'}));
       if(point&&point.locationVerified){
         pop.appendChild(el('p',{text:point.address}));
+        if(point.locationContext)pop.appendChild(el('p',{text:point.locationContext}));
         var evidence=el('p',{text:'Location checked '+point.checked+' · '});
         evidence.appendChild(makeLink('Official address',point.addressSource));
         evidence.appendChild(document.createTextNode(' · '));
@@ -273,6 +274,9 @@
           var chosen=null,bestScore=0,eligible=[];
           if(targetDepartment)matches.forEach(function(m){m.oaCard.schools.forEach(function(s){s.rows.forEach(function(r){
             var score=OAMapModel.rowMatchScore(r,targetSchool,targetDepartment);
+            // Official-name aliases broaden search, but an exact university
+            // identity wins ties when opening a specific department link.
+            if(score)score=score*10+(key(m.oaCard.institution)===key(targetUniversity)?1:0);
             if(score>bestScore){chosen=m;bestScore=score;eligible=[m];}
             else if(score&&score===bestScore&&eligible.indexOf(m)===-1)eligible.push(m);
           });});});
@@ -289,6 +293,7 @@
               button.addEventListener('click',function(){map.setView(m.getLatLng(),14,{animate:false});openPopup(cardContent(m.oaCard,m.oaPoint),m.getLatLng());});
               p.appendChild(button);options.appendChild(p);
               options.appendChild(el('p',{text:m.oaPoint.address}));
+              if(m.oaPoint.locationContext)options.appendChild(el('p',{text:m.oaPoint.locationContext}));
             });
             options.appendChild(makeLink('Official location information',chosen.oaPoint.locationGroupSource));
             map.fitBounds(L.latLngBounds(eligible.map(function(m){return m.getLatLng();})),{padding:[40,40],maxZoom:14,animate:false});

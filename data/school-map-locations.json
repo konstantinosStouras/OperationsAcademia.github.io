@@ -5344,7 +5344,7 @@
     },
     {
       "id": "devinci-business-innovation-information-systems-campus-parc",
-      "institution": "EMLV (Ecole de Commerce et de Management)",
+      "institution": "De Vinci School of Business (formerly EMLV)",
       "institutionKey": "emlv-ecole-de-commerce-et-de-management",
       "rowIds": [
         "emlv-ecole-de-commerce-et-de-management__leonard-de-vinci-business-school-paris-la-defense__management-information-systems-artificial-intelligence-and-s"
@@ -13603,6 +13603,305 @@
       ],
       "checked": "2026-10-25",
       "notes": "The university-published campus plan assigns the faculty dean and academic departments to Sébastopol, 1 Place Alphonse Jourdain. The same university diagram reproduced on page17 of the March2024 faculty-organized Research Group on Collaborative Spaces symposium explicitly lists Professors in this building. The French Ministry research-unit directory, updated16April2025, confirms the research center and its Information, Operations and Decision Sciences laboratory at this address. The September2026 hiring notice confirms the Industrial Organization, Logistics and Technology division belongs to Information, Operations and Management Sciences and is based in Toulouse. Point chosen inside the exact L-shaped address1 footprint, west bend, corroborated against the university diagram. This is a building-level representative point, not an individual office. Do not use the teaching building20BoulevardLascrosses or the different residential building named Le Sebastopol at20RuePierreSalies. Current rooms are not specified; older school faculty directory placed Information faculty, including current head SergeNyawa, in this Sébastopol building."
+    },
+    {
+      "id": "ceibs-school-shanghai",
+      "institutionKey": "China Europe International Business School",
+      "institution": "China Europe International Business School",
+      "rowIds": [
+        "china-europe-international-business-school____om"
+      ],
+      "school": "China Europe International Business School",
+      "department": "Faculty positions",
+      "building": "Faculty Building",
+      "address": "699 Hongfeng Road, Pudong, Shanghai 201206, China",
+      "lat": 31.24078396,
+      "lng": 121.59297376,
+      "addressSource": "https://www.ceibs.edu/node/151",
+      "coordinateSource": "https://www.openstreetmap.org/way/1192000696",
+      "supportingSources": [
+        "https://www.ceibs.edu/node/23687",
+        "https://www.ceibs.edu/contact-ceibs",
+        "https://www.ceibs.edu/facultyCV/lchao/cv.pdf"
+      ],
+      "locationGroup": "ceibs-faculty-mainland-campuses",
+      "locationGroupSource": "https://www.ceibs.edu/node/23687",
+      "checked": "2026-10-25",
+      "notes": "Official faculty recruitment lists Shanghai, Beijing and Shenzhen. This is one of the three separately verified advertised mainland campus locations. The university campus diagram labels the double-H Faculty Building west of Academic Building IV, south of the conference buildings and north of residential facilities. The OSM polygon matches that footprint."
+    },
+    {
+      "id": "ceibs-school-beijing",
+      "institutionKey": "China Europe International Business School",
+      "institution": "China Europe International Business School",
+      "rowIds": [
+        "china-europe-international-business-school____om"
+      ],
+      "school": "China Europe International Business School",
+      "department": "Faculty positions",
+      "building": "Building 20, Zhongguancun Software Park",
+      "address": "8 Dongbeiwang West Road, Haidian District, Beijing 100193, China",
+      "lat": 40.04866399,
+      "lng": 116.28382374,
+      "addressSource": "https://cn.ceibs.edu/node/230",
+      "coordinateSource": "https://www.openstreetmap.org/way/682624027",
+      "supportingSources": [
+        "https://www.ceibs.edu/node/23687",
+        "https://www.ceibs.edu/contact-ceibs",
+        "https://www.ceibs.edu/facultyCV/lchao/cv.pdf"
+      ],
+      "locationGroup": "ceibs-faculty-mainland-campuses",
+      "locationGroupSource": "https://www.ceibs.edu/node/23687",
+      "checked": "2026-10-25",
+      "notes": "Official faculty recruitment lists Shanghai, Beijing and Shenzhen. This is one of the three separately verified advertised mainland campus locations. The current official address identifies building 20 in Zhongguancun Software Park, and the university Beijing map identifies its footprint. Current faculty Chao Liang curriculum vitae confirms this academic address."
+    },
+    {
+      "checked": "2026-10-25",
+      "id": "spartanburg-business-statistics-walker-teaching",
+      "institution": "Spartanburg Methodist College",
+      "institutionKey": "spartanburg-methodist-college",
+      "rowIds": [
+        "spartanburg-methodist-college____business-stat-da-scm-om",
+        "spartanburg-methodist-college____statistics-data-analytics"
+      ],
+      "school": "",
+      "department": "Business Statistics and Data Analytics",
+      "building": "Frank Walker Building — business statistics teaching rooms",
+      "address": "1750 Powell Mill Road, Spartanburg, SC 29301, United States",
+      "lat": 34.95489,
+      "lng": -81.972185,
+      "addressSource": "https://smcsc-ss.colleague.elluciancloud.com/Student/Courses/Search?keyword=business",
+      "coordinateSource": "https://www.openstreetmap.org/way/475479423",
+      "supportingSources": [
+        "https://www.smcsc.edu/campus-map/"
+      ],
+      "locationGroup": "spartanburg-business-academic-teaching-locations",
+      "locationGroupSource": "https://smcsc-ss.colleague.elluciancloud.com/Student/Courses/Search?keyword=business",
+      "notes": "Official public course catalogue Fall 2026 lists Business Statistics for Decision Making taught by Robin L. McCarter in Walker 103. Business Management and Introduction to Business also teach in this building. Exact named footprint corroborated with official campus plan building 7. Academic teaching location, not a claim of a faculty office; statistics teaching also uses Montgomery Science Building."
+    },
+    {
+      "checked": "2026-10-25",
+      "id": "spartanburg-business-statistics-montgomery-teaching",
+      "institution": "Spartanburg Methodist College",
+      "institutionKey": "spartanburg-methodist-college",
+      "rowIds": [
+        "spartanburg-methodist-college____business-stat-da-scm-om",
+        "spartanburg-methodist-college____statistics-data-analytics"
+      ],
+      "school": "",
+      "department": "Business Statistics and Data Analytics",
+      "building": "Walter S. Montgomery Science Building — business statistics teaching rooms",
+      "address": "1750 Powell Mill Road, Spartanburg, SC 29301, United States",
+      "lat": 34.954746,
+      "lng": -81.972682,
+      "addressSource": "https://smcsc-ss.colleague.elluciancloud.com/Student/Courses/Search?keyword=business",
+      "coordinateSource": "https://www.openstreetmap.org/way/475479422",
+      "supportingSources": [
+        "https://www.smcsc.edu/campus-map/"
+      ],
+      "locationGroup": "spartanburg-business-academic-teaching-locations",
+      "locationGroupSource": "https://smcsc-ss.colleague.elluciancloud.com/Student/Courses/Search?keyword=business",
+      "notes": "Official public course catalogue Spring 2026 lists Business Statistics for Decision Making taught by John Cogburn in Montgomery 104 and Gary E. Rhodes in Montgomery 105. Chair Maria Kithcart also teaches Business Marketing in Montgomery 115 in Fall 2026. Exact named footprint corroborated with official campus plan building 6. Academic teaching location, not an exclusive faculty office; other statistics sections use Walker Building."
+    },
+    {
+      "checked": "2026-10-25",
+      "id": "wilson-business-warfield-teaching",
+      "institution": "Wilson College",
+      "institutionKey": "wilson-college",
+      "rowIds": [
+        "wilson-college____supply-chain-management"
+      ],
+      "school": "",
+      "department": "Business — Supply Chain Management",
+      "building": "Warfield Hall — business teaching rooms",
+      "address": "1015 Philadelphia Avenue, Chambersburg, PA 17201, United States",
+      "lat": 39.949298,
+      "lng": -77.650279,
+      "addressSource": "https://wilson-ss.colleague.elluciancloud.com/Student/Courses/Search?keyword=business",
+      "coordinateSource": "https://www.openstreetmap.org/way/1156010145",
+      "supportingSources": [
+        "https://www.wilson.edu/course-schedule",
+        "https://www.wilson.edu/sites/default/files/uploaded/Wilson-College-Map-2020-21.pdf",
+        "https://mag.wilson.edu/pushing-the-envelope-on-deliverables/"
+      ],
+      "locationGroup": "wilson-business-academic-teaching-locations",
+      "locationGroupSource": "https://wilson-ss.colleague.elluciancloud.com/Student/Courses/Search?keyword=business",
+      "notes": "Official public course catalogue Spring 2026 lists BUS311 Business Environment and Public Policy in Warfield101; Fall2026 BUS326 Human Resource Management in Warfield102. Current official catalogue confirms classrooms and faculty offices in Warfield; a2024 college business-program article corroborates historical business teaching here. Footprint identified by shape and position relative to John Stewart Memorial Library and Harmony Cottage on official campus plan building18. Teaching location only, no claim that supply-chain faculty have an assigned office here. Business classes also use the Brooks Complex; specialist supply-chain classes may be online."
+    },
+    {
+      "checked": "2026-10-25",
+      "id": "wilson-business-brooks-teaching",
+      "institution": "Wilson College",
+      "institutionKey": "wilson-college",
+      "rowIds": [
+        "wilson-college____supply-chain-management"
+      ],
+      "school": "",
+      "department": "Business — Supply Chain Management",
+      "building": "Harry R. Brooks Complex for Science, Mathematics and Technology — business teaching rooms",
+      "address": "1015 Philadelphia Avenue, Chambersburg, PA 17201, United States",
+      "lat": 39.950198,
+      "lng": -77.649539,
+      "addressSource": "https://wilson-ss.colleague.elluciancloud.com/Student/Courses/Search?keyword=business",
+      "coordinateSource": "https://www.openstreetmap.org/way/654796740",
+      "supportingSources": [
+        "https://www.wilson.edu/course-schedule",
+        "https://www.wilson.edu/sites/default/files/uploaded/Wilson-College-Map-2020-21.pdf"
+      ],
+      "locationGroup": "wilson-business-academic-teaching-locations",
+      "locationGroupSource": "https://wilson-ss.colleague.elluciancloud.com/Student/Courses/Search?keyword=business",
+      "notes": "Official public course catalogue Fall2026 lists BUS216 Business Communications in Science Complex178 and BUS225 Business Law in128; Spring2026 BUS220 Entrepreneurship and Small Business Management in229. Official college classroom-code page defines SC as Science Complex. Exact large building footprint matched to official campus plan22, across the courtyard from Warfield and east of John Stewart Memorial Library. Academic business teaching location, not an exclusive faculty office or an assertion that a particular supply-chain course meets here; other business teaching occurs in Warfield."
+    },
+    {
+      "id": "fisher-boston-management-beacon118",
+      "institution": "Fisher College",
+      "institutionKey": "fisher-college",
+      "rowIds": [
+        "fisher-college____om"
+      ],
+      "school": "School of Management and Communications",
+      "department": "Management",
+      "building": "118 Beacon Street — management academic premises",
+      "address": "118 Beacon Street, Boston, MA 02116, United States",
+      "lat": 42.355297,
+      "lng": -71.074164,
+      "addressSource": "https://resources.finalsite.net/images/v1628107147/fisheredu/x5ts6nod6mtvguviws2j/Fall2021COVID-19CommunityGuide.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/405331534",
+      "supportingSources": [
+        "https://iacbe.org/memberpdf/FisherCollegeBOCDecisionLetter2025-04.pdf",
+        "https://www.fisher.edu/academics/faculty",
+        "https://www.fisher.edu/student-life/student-services"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Building-level triangulation: official2021 college guide places management director Kevin McWilliams business policy and strategic management class in118-53; April2025 accreditor letter addresses the same director and School of Management and Communications at118BeaconStreet. Current official faculty page confirms his management directorship, and current student-services page identifies118classroom laboratories. Coordinates use exact118Beacon building footprint rather than overall college grounds. No claim about2026 classroom or individual faculty-office assignment. Map source building-use tag appears residential; official college sources establish its academic use."
+    },
+    {
+      "id": "virgin-islands-decision-sciences-st-thomas-business",
+      "institution": "University of the Virgin Islands",
+      "institutionKey": "university-of-virgin-islands",
+      "rowIds": [
+        "university-of-virgin-islands____decision-sciences"
+      ],
+      "school": "School of Business",
+      "department": "Decision Sciences",
+      "building": "School of Business / Chase Auditorium — Orville E. Kean Campus",
+      "address": "2 John Brewers Bay, St. Thomas, Virgin Islands 00802",
+      "lat": 18.343881,
+      "lng": -64.973061,
+      "addressSource": "https://schedclass.uvi.edu/sttschedule.aspx?term=202501",
+      "coordinateSource": "https://cdn.maps.moderncampus.net/uploads/map/570/markers.json",
+      "supportingSources": [
+        "https://www.uvi.edu/student-life/bookstores/st-thomas/book-price-list-summer-1-2.pdf",
+        "https://uvi.edu/files/documents/Provost/2011-2012_UVIExperts.pdf",
+        "https://www.uvi.edu/about/campuses/orville-e-kean-map.html",
+        "https://www.uvi.edu/directory/faculty/glenn-a-metts.html"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "virgin-islands-decision-sciences-academic-locations",
+      "locationGroupSource": "https://uvi.edu/academics/school-business/",
+      "notes": "Current academic location for Decision Sciences at the Orville E. Kean Campus, not an exclusive assignment for expired posting 8470. The official Spring 2025 schedule places Statistics for Management Decisions (DSC 325), taught by Glenn Metts, in Business Building room 206. His current official faculty profile confirms St. Thomas affiliation. The university campus map, marker 14204, supplies the geographic building coordinates. Both principal campuses are represented in this group because the expired advertisement does not establish an exclusive host campus. No individual faculty office assignment is inferred."
+    },
+    {
+      "id": "virgin-islands-decision-sciences-st-croix-evans",
+      "institution": "University of the Virgin Islands",
+      "institutionKey": "university-of-virgin-islands",
+      "rowIds": [
+        "university-of-virgin-islands____decision-sciences"
+      ],
+      "school": "School of Business",
+      "department": "Decision Sciences",
+      "building": "Melvin H. Evans Center for Learning — Decision Sciences teaching rooms, Albert A. Sheen Campus",
+      "address": "Albert A. Sheen Campus, St. Croix, Virgin Islands 00850",
+      "lat": 17.717417,
+      "lng": -64.797387,
+      "addressSource": "https://schedclass.uvi.edu/stxschedule.aspx?term=202601",
+      "coordinateSource": "https://cdn.maps.moderncampus.net/uploads/map/569/markers.json",
+      "supportingSources": [
+        "https://www.uvi.edu/about/campuses/albert-a-sheen-map.html",
+        "https://www.uvi.edu/registrar/general-registration-information.html"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "virgin-islands-decision-sciences-academic-locations",
+      "locationGroupSource": "https://uvi.edu/academics/school-business/",
+      "notes": "Current academic teaching location for Decision Sciences at the Albert A. Sheen Campus. The official Spring 2026 schedule places Statistics for Management Decisions (DSC 325) in Evans Center room 405, Quantitative Methods (DSC 410) in room 303, and Production and Operations Management (DSC 430) in room 308. The university-linked Modern Campus map 569, marker 14169, identifies the Melvin H. Evans Center for Learning and supplies geographic coordinates. These are teaching rooms, not a claimed exclusive faculty office. Both principal campuses are represented because the expired advertisement 8470 does not establish an exclusive host campus."
+    },
+    {
+      "id": "ceibs-school-shenzhen",
+      "institutionKey": "China Europe International Business School",
+      "institution": "China Europe International Business School",
+      "rowIds": [
+        "china-europe-international-business-school____om"
+      ],
+      "school": "China Europe International Business School",
+      "department": "Faculty positions",
+      "building": "Shenzhen Campus, Building 1",
+      "address": "142 Zimao Street, Qianhai Cooperation Zone, Nanshan District, Shenzhen 518066, China",
+      "lat": 22.50856099,
+      "lng": 113.88417519,
+      "addressSource": "https://cn.ceibs.edu/facilities/shenzhen",
+      "coordinateSource": "https://www.openstreetmap.org/way/1243957755",
+      "supportingSources": [
+        "https://www.ceibs.edu/video-podcast/24405",
+        "https://cn.ceibs.edu/media/events/26018",
+        "https://www.ceibs.edu/node/23687",
+        "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=113.881,22.503,113.887,22.509&bboxSR=4326&imageSR=4326&size=1400,1400&format=jpg&f=json"
+      ],
+      "locationGroup": "ceibs-faculty-mainland-campuses",
+      "locationGroupSource": "https://www.ceibs.edu/node/23687",
+      "checked": "2026-10-25",
+      "notes": "Current university facilities page confirms the new Qianhai address and photographs; official event specifies Building 1. Exact building is established by visual matching of the university 2023 opening tour roof view (opening frame at 1 second) with georeferenced Esri imagery and the northern pentagonal OSM footprint. Distinctive tan pentagonal roof, quadrilateral skylight and two ribbed roof facets match, whereas the similar neighbouring southern low-rise has a triangular skylight and different proportions. Two independent reviewers compared these images. OSM existing name refers to the surrounding commercial development, so university evidence establishes current occupant; coordinates use the identified building footprint centroid. This is an explicit visual inference, not a geocoder campus result. The 34-storey Qianhai Free Trade Tower and obsolete Baoan/Futian campuses were rejected. Five-floor school includes lower levels beneath the landscaped terrace."
+    },
+    {
+      "id": "ceibs-operations-beijing-partial",
+      "institutionKey": "CEIBS",
+      "institution": "China Europe International Business School (CEIBS)",
+      "rowIds": [
+        "ceibs____operations-management"
+      ],
+      "school": "China Europe International Business School",
+      "department": "Operations Management",
+      "building": "Building 20, Zhongguancun Software Park",
+      "address": "8 Dongbeiwang West Road, Haidian District, Beijing 100193, China",
+      "lat": 40.04866399,
+      "lng": 116.28382374,
+      "addressSource": "https://www.ceibs.edu/facultyCV/lchao/cv.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/682624027",
+      "supportingSources": [
+        "https://www.ceibs.edu/node/23687",
+        "https://www.ceibs.edu/contact-ceibs",
+        "https://www.ceibs.edu/facultyCV/lchao/cv.pdf"
+      ],
+      "locationGroup": "ceibs-operations-faculty-locations",
+      "locationGroupSource": "https://www.ceibs.edu/faculty-profiles/by-department",
+      "checked": "2026-10-25",
+      "notes": "Official current Operations faculty directory lists Chao Liang and Xiande Zhao. Chao Liang curriculum vitae establishes the Beijing academic address; campus official contact identifies Building 20. Exact footprint corroborated against university map. Together with Shenzhen this covers the two current faculty locations; no assertion that an older posting offered both campuses."
+    },
+    {
+      "id": "ceibs-operations-shenzhen",
+      "institutionKey": "CEIBS",
+      "institution": "China Europe International Business School (CEIBS)",
+      "rowIds": [
+        "ceibs____operations-management"
+      ],
+      "school": "China Europe International Business School",
+      "department": "Operations Management",
+      "building": "Shenzhen Campus, Building 1",
+      "address": "142 Zimao Street, Qianhai Cooperation Zone, Nanshan District, Shenzhen 518066, China",
+      "lat": 22.50856099,
+      "lng": 113.88417519,
+      "addressSource": "https://cn.ceibs.edu/facilities/shenzhen",
+      "coordinateSource": "https://www.openstreetmap.org/way/1243957755",
+      "supportingSources": [
+        "https://www.ceibs.edu/video-podcast/24405",
+        "https://cn.ceibs.edu/media/events/26018",
+        "https://www.ceibs.edu/node/23687",
+        "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=113.881,22.503,113.887,22.509&bboxSR=4326&imageSR=4326&size=1400,1400&format=jpg&f=json",
+        "https://www.ceibs.edu/zhao-xiande",
+        "https://www.ceibs.edu/faculty-profiles/by-department"
+      ],
+      "locationGroup": "ceibs-operations-faculty-locations",
+      "locationGroupSource": "https://www.ceibs.edu/faculty-profiles/by-department",
+      "checked": "2026-10-25",
+      "notes": "Current university facilities page confirms the new Qianhai address and photographs; official event specifies Building 1. Exact building is established by visual matching of the university 2023 opening tour roof view (opening frame at 1 second) with georeferenced Esri imagery and the northern pentagonal OSM footprint. Distinctive tan pentagonal roof, quadrilateral skylight and two ribbed roof facets match, whereas the similar neighbouring southern low-rise has a triangular skylight and different proportions. Two independent reviewers compared these images. OSM existing name refers to the surrounding commercial development, so university evidence establishes current occupant; coordinates use the identified building footprint centroid. This is an explicit visual inference, not a geocoder campus result. The 34-storey Qianhai Free Trade Tower and obsolete Baoan/Futian campuses were rejected. Five-floor school includes lower levels beneath the landscaped terrace. Current official profile identifies Operations and Supply Chain Management Professor Xiande Zhao as Associate Dean of Shenzhen campus with Shenzhen telephone number. Independent second reviewer compared official tour roof frame with satellite footprint and confirmed the northern pentagonal building and its quadrilateral skylight, distinct from the southern triangular-skylight building."
     }
   ]
 }

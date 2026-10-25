@@ -14176,7 +14176,7 @@
       "rowIds": [
         "fisher-college____om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179388754&Title=Assistant%20Professor%20-%20Management"
@@ -14195,7 +14195,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "fisher-boston-management-beacon118"
+      ]
     },
     {
       "id": "university-of-utah::department:om scm::40.76400,-111.84600",
@@ -14786,7 +14789,7 @@
       "rowIds": [
         "spartanburg-methodist-college____business-stat-da-scm-om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.insidehighered.com/job/3469092/assistant-professor-of-business-statistics-data-analytics/"
@@ -14805,7 +14808,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "spartanburg-business-statistics-walker-teaching",
+        "spartanburg-business-statistics-montgomery-teaching"
+      ]
     },
     {
       "id": "spartanburg-methodist-college::department:statistics data analytics::34.95350,-81.97120",
@@ -14817,7 +14824,7 @@
       "rowIds": [
         "spartanburg-methodist-college____statistics-data-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179268322&Title=Assistant%20Professor%20of%20Business%20-%20Statistics%2FData%20Analytics"
@@ -14836,7 +14843,11 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "spartanburg-business-statistics-walker-teaching",
+        "spartanburg-business-statistics-montgomery-teaching"
+      ]
     },
     {
       "id": "augustana-university::department:business::43.52686,-96.73703",
@@ -15152,7 +15163,7 @@
       "rowIds": [
         "wilson-college____supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179373853&Title=Assistant%20Professor%20of%20Business%20(Full-Time%2C%20Onsite%2C%2010-Month%2C%20Tenure-Track)"
@@ -15171,7 +15182,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "wilson-business-warfield-teaching",
+        "wilson-business-brooks-teaching"
+      ]
     },
     {
       "id": "middle-georgia-state-university::department:management::32.80720,-83.73220",
@@ -17014,7 +17029,7 @@
       "rowIds": [
         "china-europe-international-business-school____om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.poms.org/sites/default/files/2026-01/CEIBS%20Invites%20Applications%20for%20Faculty%20Positions%20in%20Management%20Information%20Systems%20and%20Operations%20Management.pdf"
@@ -17033,7 +17048,12 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "ceibs-school-shanghai",
+        "ceibs-school-beijing",
+        "ceibs-school-shenzhen"
+      ]
     },
     {
       "id": "georgia-gwinnett-college::department:supply chain management::33.98120,-84.00280",
@@ -18292,7 +18312,7 @@
       "rowIds": [
         "university-of-virgin-islands____decision-sciences"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.uvi.edu/postings/8470"
@@ -18310,7 +18330,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "virgin-islands-decision-sciences-st-thomas-business",
+        "virgin-islands-decision-sciences-st-croix-evans"
+      ]
     },
     {
       "id": "university-of-alabama-birmingham::department:scm distribution mkt::33.50000,-86.80750",
@@ -22670,7 +22694,7 @@
       "rowIds": [
         "ceibs____operations-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.ceibs.edu/faculty-profiles/by-department"
       ],
@@ -22689,7 +22713,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "ceibs-operations-beijing-partial",
+        "ceibs-operations-shenzhen"
+      ]
     },
     {
       "id": "chalmers-university-of-technology::department:::57.68800,11.97700",
@@ -24260,9 +24288,9 @@
   "summary": {
     "baseline": 714,
     "excludedByUser": 2,
-    "verified": 682,
+    "verified": 689,
     "partiallyVerified": 1,
-    "pending": 29,
+    "pending": 22,
     "sourceSearches": 714
   }
 }

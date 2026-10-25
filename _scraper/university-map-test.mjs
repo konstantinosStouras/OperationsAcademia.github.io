@@ -101,6 +101,15 @@ try{
 
   const evidence=JSON.parse(fs.readFileSync(path.join(root,'data/school-map-locations.json'),'utf8')).records;
   const directory=JSON.parse(fs.readFileSync(path.join(root,'data/directory.json'),'utf8'));
+  for(const officialName of ['University College London','Universidade Católica Portuguesa']){
+    const universityPage=await pageAt('?'+new URLSearchParams({university:officialName}));
+    const visibleIds=await universityPage.evaluate(()=>testMap.shown().map(point=>point.card.id));
+    const expected=evidence.filter(record=>record.institution===officialName);
+    assert.ok(expected.length,officialName+' has verified search fixtures');
+    for(const location of expected)assert.ok(visibleIds.some(id=>id.includes(':location:'+location.id+'::')),officialName+' search includes '+location.id);
+    assert.ok(await universityPage.evaluate(name=>testMap.shown().every(point=>point.card.institution===name||point.card.officialInstitution===name||(point.card.aka||'').split(' · ').includes(name)),officialName),officialName+' search excludes unrelated universities');
+    await universityPage.close();
+  }
   const testRows=process.env.MAP_TEST_ROWS?new Set(process.env.MAP_TEST_ROWS.split(',')):null;
   const evidenceQueue=evidence.flatMap(location=>location.rowIds.map(id=>({location,id}))).filter(item=>!testRows||testRows.has(item.id));
   const dubai=evidence.find(location=>location.id==='indian-institute-management-ahmedabad-dubai');
