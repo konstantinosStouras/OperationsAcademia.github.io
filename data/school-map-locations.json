@@ -15521,6 +15521,58 @@
       ],
       "checked": "2026-10-25",
       "notes": "The official school brochure supplies the school office address on the fifteenth floor of Cheng Yu Tung Building. The official university campus map identifies the building. Its current school location supersedes the stale Pond Crescent historical marker, which otherwise duplicates this same school listing. The department retains its separate ninth-floor address evidence on the shared school card."
+    },
+    {
+      "id": "ozyegin-faculty-business-cekmekoy-campus",
+      "institution": "Özyeğin University",
+      "institutionKey": "Özyeğin University",
+      "rowIds": [
+        "ozyegin-university__faculty-of-business__operations-management"
+      ],
+      "school": "Faculty of Business",
+      "department": "Operations Management",
+      "building": "Çekmeköy Campus (Academic Building 2 footprint not confirmed)",
+      "address": "Nişantepe District, Orman Street, 34794 Çekmeköy, İstanbul, Turkey",
+      "lat": 41.0320475,
+      "lng": 29.259788,
+      "country": "Turkey",
+      "locationPrecision": "campus",
+      "locationContext": "Faculty of Business, Çekmeköy Campus. The university identifies Academic Building 2 as the faculty building; this marker shows the campus because its exact building coordinates have not been confirmed.",
+      "addressSource": "https://gsb.ozyegin.edu.tr/en/faculty-business/deans-office",
+      "coordinateSource": "https://www.openstreetmap.org/way/308715322",
+      "supportingSources": [
+        "https://www.ozyegin.edu.tr/en/contact",
+        "https://www.ozyegin.edu.tr/sites/default/files/upload/iletisim/agustos25-en.png",
+        "https://admissions.ozyegin.edu.tr/sites/default/files/handbook%20ing%202024.pdf",
+        "https://labs.ozyegin.edu.tr/socialcognition/files/2025/05/Workshop-on-Trust-and-Cognition-Program_21.05.2025.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The current official dean office page explicitly places Faculty of Business staff at Çekmeköy Campus. The university international handbook page 41 identifies Academic Building 2 as Faculty of Business, corroborated by the official 2025 workshop program. The official campus plan also labels Academic Building 2. Exact building coordinates were not resolved; the named OpenStreetMap campus polygon centroid is used transparently as the user-authorized campus fallback. The old Graduate School of Business point at 41.0347779,29.2706748 is not borrowed and no Faculty/Graduate School equivalence is asserted."
+    },
+    {
+      "id": "ozyegin-graduate-business-cekmekoy-campus",
+      "institution": "Özyeğin University",
+      "institutionKey": "Özyeğin University",
+      "rowIds": [
+        "ozyegin-university__graduate-school-of-business"
+      ],
+      "school": "Graduate School of Business",
+      "department": "",
+      "building": "Çekmeköy Campus (school admissions and research-degree campus)",
+      "address": "Nişantepe District, Orman Street 34–36, 34794 Çekmeköy, İstanbul, Turkey",
+      "lat": 41.0320475,
+      "lng": 29.259788,
+      "country": "Turkey",
+      "locationPrecision": "campus",
+      "locationContext": "Graduate School of Business admissions and research-degree campus. Exact school building coordinates are unconfirmed. The school separately lists Swissotel for business administration courses and Altunizade for Financial Engineering courses.",
+      "addressSource": "https://gsb.ozyegin.edu.tr/en/contact-us",
+      "coordinateSource": "https://www.openstreetmap.org/way/308715322",
+      "supportingSources": [
+        "https://www.ozyegin.edu.tr/sites/default/files/upload/isletmeFakultesi/1_emba_web.pdf",
+        "https://www.ozyegin.edu.tr/en/contact"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The official Graduate School contact page identifies Çekmeköy as its MSc, MS and doctoral teaching campus, and the official admissions brochure gives the Graduate School admissions office address on this campus. This corrects the existing Çekmeköy-address marker whose longitude29.2706748 was east of the campus polygon (east edge29.2626378). The named campus polygon centroid is an explicit campus fallback, not an exact office pin or a claim that all graduate programs meet here. Separate Faculty of Business identity is preserved; this evidence does not establish shared building identity."
     }
   ]
 }

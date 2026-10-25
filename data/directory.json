@@ -13022,10 +13022,17 @@
     "department": "OM"
    }
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "ozyegin-faculty-business-cekmekoy-campus"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "Faculty of Business",
+   "Operations Management",
    "OM"
+  ],
+  "mapInstitutionNames": [
+   "Özyeğin University"
   ]
  },
  {
@@ -13045,8 +13052,16 @@
   "lastPosted": "2014-09-24",
   "lat": 41.0347779,
   "lng": 29.2706748,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ozyegin-graduate-business-cekmekoy-campus"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Özyeğin University"
+  ],
+  "mapSearchTerms": [
+   "Graduate School of Business"
+  ]
  },
  {
   "id": "palm-beach-atlantic-university____data-analytics",
