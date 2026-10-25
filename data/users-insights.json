@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-25T07:00:13.608Z",
- "members": 401,
+ "generated": "2026-10-25T12:32:08.514Z",
+ "members": 402,
  "k": 3,
  "affiliation": {
-  "listed": 318,
+  "listed": 319,
   "other": 48,
   "none": 35
  },
@@ -76,6 +76,11 @@
     "members": 4
    },
    {
+    "name": "The Hong Kong University of Science and Technology",
+    "country": "Hong Kong",
+    "members": 4
+   },
+   {
     "name": "McGill University",
     "country": "Canada",
     "members": 4
@@ -142,11 +147,6 @@
    },
    {
     "name": "The Hong Kong Polytechnic University",
-    "country": "Hong Kong",
-    "members": 3
-   },
-   {
-    "name": "The Hong Kong University of Science and Technology",
     "country": "Hong Kong",
     "members": 3
    },
@@ -230,7 +230,7 @@
    },
    {
     "name": "Hong Kong",
-    "members": 12
+    "members": 13
    },
    {
     "name": "China",
