@@ -321,8 +321,15 @@
 
   // Enrich only our directory links; a poster's external URL is authoritative.
   function furtherInfoUrl(row) {
+    row = row || {};
     var url = String(row.furtherInfoUrl || '');
-    if (!/^https?:\/\/(www\.)?operationsacademia\.org\/universities(?:\.html)?\?/i.test(url)) return url;
+    var parsed;
+    try { parsed = new URL(url.trim(), 'https://www.operationsacademia.org/jobs'); }
+    catch (_) { return url; }
+    if (!/^https?:$/.test(parsed.protocol) || !/^(www\.)?operationsacademia\.org$/i.test(parsed.host)
+        || parsed.username || parsed.password || !/^\/universities(?:\.html)?\/?$/i.test(parsed.pathname)) return url;
+    // Without a posting identity, keep an existing map destination intact.
+    if (!String(row.institution || '').trim()) return url;
     var p = new URLSearchParams();
     p.set('university', row.institution || '');
     p.set('focus', 'department');

@@ -679,10 +679,19 @@
 
   /* --------------------------------------------------------------- helpers */
 
+  // Directory rendering revisits the same names thousands of times. Cache
+  // these pure string results; bound the caches for long-lived form sessions.
+  var foldedStrings = new Map(), institutionKeys = new Map();
+
   function fold(s) {
-    s = String(s == null ? '' : s).toLowerCase();
+    var input = String(s == null ? '' : s);
+    if (foldedStrings.has(input)) return foldedStrings.get(input);
+    s = input.toLowerCase();
     if (s.normalize) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');
-    return s.replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '');
+    var result = s.replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '');
+    if (foldedStrings.size >= 10000) foldedStrings.clear();
+    foldedStrings.set(input, result);
+    return result;
   }
 
   function clean(v) {
@@ -897,8 +906,13 @@
    * grouped (data/vocab.json, and the posting form reading it back).
    */
   function institutionKey(v) {
+    var input = String(v == null ? '' : v);
+    if (institutionKeys.has(input)) return institutionKeys.get(input);
     var s = dropAcronym(canonInstitution(v));
-    return fold(s).replace(/^the /, '');
+    var result = fold(s).replace(/^the /, '');
+    if (institutionKeys.size >= 5000) institutionKeys.clear();
+    institutionKeys.set(input, result);
+    return result;
   }
 
   /* ------------------------------------------- the directory row's id

@@ -35,11 +35,11 @@
     asia: 'China|Hong Kong|Taiwan|Macau|Macao|Japan|South Korea|Republic of Korea|North Korea|Mongolia|India|Pakistan|Bangladesh|Sri Lanka|Nepal|Bhutan|Maldives|Singapore|Malaysia|Indonesia|Thailand|Vietnam|Philippines|Cambodia|Laos|Myanmar|Brunei|Timor-Leste|Saudi Arabia|United Arab Emirates|Qatar|Bahrain|Kuwait|Oman|Yemen|Israel|Palestine|Jordan|Lebanon|Syria|Iraq|Iran|Turkey|Türkiye|Georgia|Armenia|Azerbaijan|Kazakhstan|Uzbekistan|Turkmenistan|Kyrgyzstan|Tajikistan|Afghanistan',
     oceania: 'Australia|New Zealand|Fiji|Papua New Guinea|Samoa|Tonga|Vanuatu|Solomon Islands|New Caledonia|Guam|French Polynesia'
   };
+  var countryRegions=new Map();
+  Object.keys(COUNTRIES).forEach(function(region){COUNTRIES[region].split('|').forEach(function(country){countryRegions.set(fold(country),region);});});
   function regionOf(r) {
     var country = fold(r.country);
-    var found = Object.keys(COUNTRIES).find(function(k) {
-      return COUNTRIES[k].split('|').some(function(c) { return fold(c) === country; });
-    });
+    var found = countryRegions.get(country);
     if (found) return found;
     if (!Number.isFinite(r.lat) || !Number.isFinite(r.lng)) return null;
     // Coordinates fill gaps in historic records; country metadata wins above.
@@ -64,7 +64,7 @@
     var resolveReady,rejectReady;
     var whenReady=new Promise(function(resolve,reject){resolveReady=resolve;rejectReady=reject;});
     var locations = new Map(), historic = new Map(), rowInstitutions = {}, verified = [], schoolAliases = [], ready = false, lastSignature = '';
-    var cachedCards=[],cachedPoints=[];
+    var cachedCards=[],cachedPoints=[],preparedData=null;
     var tabs = el('div', {class:'oa-map-regions', role:'group', 'aria-label':'Continent'});
     REGIONS.forEach(function(r) {
       var b = el('button',{type:'button','data-region':r[0],text:r[1]});
@@ -114,7 +114,7 @@
         var size=Math.min(68,40+Math.sqrt(count)*3);
         return L.divIcon({className:'oa-map-cluster',html:'<span>'+count+'</span>',iconSize:[size,size]});
       }}).addTo(map);
-    var currentPoints=[],markers=new Map(),opener=null,autoFrame=true,framing=false;
+    var currentPoints=[],currentMissing=[],currentLayers=new Set(),markerCache=new WeakMap(),pointSearchCache=new WeakMap(),drawn=false,markers=new Map(),opener=null,autoFrame=true,framing=false;
     function frame(points) {
       framing=true;autoFrame=true;
       if(region==='world') map.fitBounds([[-56,-172],[76,180]],{padding:[8,8],animate:false});
@@ -148,14 +148,14 @@
       pop.appendChild(el('h3',{text:card.officialInstitution||OAMapModel.displayName(card.institution)}));
       pop.appendChild(el('p',{text:(card.countries||[]).join(' · ')}));
       if(point&&point.approximate&&point.locationPrecision!=='campus')pop.appendChild(el('p',{text:'Approximate university location — school building not yet verified.'}));
+      if(point&&OAMapModel.located(point)){
+        var address=el('p',{class:'oa-map-address'});
+        address.appendChild(makeLink(point.address||point.building||point.label||card.officialInstitution||OAMapModel.displayName(card.institution),'https://www.google.com/maps/search/?api=1&query='+point.lat+','+point.lng));
+        pop.appendChild(address);
+      }
       if(point&&point.locationVerified){
-        pop.appendChild(el('p',{text:point.address}));
         if(point.locationContext)pop.appendChild(el('p',{text:point.locationContext}));
-        var evidence=el('p',{text:'Location checked '+point.checked+' · '});
-        evidence.appendChild(makeLink('Official address',point.addressSource));
-        evidence.appendChild(document.createTextNode(' · '));
-        evidence.appendChild(makeLink(point.locationPrecision==='campus'?'Campus or headquarters map':'Building map',point.coordinateSource));
-        pop.appendChild(evidence);
+        if(point.checked)pop.appendChild(el('p',{text:'Location checked '+point.checked}));
       }
       pop.appendChild(el('p',{text:(card.schools||[]).length+((card.schools||[]).length===1?' school · ':' schools · ')+(card.schools||[]).reduce(function(n,s){return n+(s.rows||[]).length;},0)+' department listings · '+(card.n||0)+' past postings'}));
       var schools=(card.schools||[]).slice().sort(function(a,b){return Number(fold(b.name)===fold(targetSchool))-Number(fold(a.name)===fold(targetSchool));});
@@ -166,6 +166,7 @@
           var p=el('p',selected?{class:'oa-map-selected-department'}:{}); p.appendChild(makeLink(OAMapModel.departmentName(r.department)||'School listing',r.deptUrl));
           if(r.facultyUrl) {p.appendChild(document.createTextNode(' · '));p.appendChild(makeLink('Faculty',r.facultyUrl));}
           pop.appendChild(p);
+          if(r.locationReference==='school')pop.appendChild(el('p',{class:'oa-map-location-context',text:'School location; department office not separately verified.'}));
           var sourceDetails=(r.locationSources||[]).filter(function(v){return v.sourceLocation||v.locationContext||point&&(v.address&&v.address!==point.address||v.building&&v.building!==point.building||v.lat!==point.lat||v.lng!==point.lng);});
           if(sourceDetails.length){
             var details=el('details');details.appendChild(el('summary',{text:'Department location details'}));
@@ -185,7 +186,6 @@
       [['Open university profile','universities?university='+q],['Current jobs','jobs?institution='+q],['Candidates','candidates?c_affiliation='+q],['Recent hires','recent-faculty?placement='+q],['PhD alumni','recent-faculty?alma='+q],['Past jobs','previous-markets?university='+q]].forEach(function(item){nav.appendChild(makeLink(item[0],item[1]));});
       pop.appendChild(nav);
       if(card.edited && card.edited.t)pop.appendChild(el('p',{text:'Last updated '+new Date(card.edited.t).toLocaleDateString()+(card.edited.name?' by '+card.edited.name:'')}));
-      if(point && point.mapUrl)pop.appendChild(makeLink(point.approximate?'University location':'School location',point.mapUrl));
       return pop;
     }
     function openPopup(content,latlng,source) {
@@ -211,7 +211,7 @@
     }
     cluster.on('animationend',labelClusters);map.on('moveend',labelClusters);
     function pointsFor(card) {
-      return OAMapModel.pointsFor(card,{locations:locations,historic:historic,rowInstitutions:rowInstitutions,verified:verified}).map(function(p){
+      return OAMapModel.pointsFor(card,preparedData).map(function(p){
         var schoolLogo=locations.get(key(p.school));
         p.logo=schoolLogo&&schoolLogo.logo||logoFor(card);return p;
       });
@@ -244,6 +244,9 @@
       var typeFilter=(snapshot.filters||[]).find(function(f){return f.key==='type';});
       var typeQueries=typeFilter?typeFilter.values.map(fold).filter(Boolean):[];
       if(cards.length!==cachedCards.length||cards.some(function(c,i){return c!==cachedCards[i];})){
+        var directory=[];
+        cards.forEach(function(c){c.schools.forEach(function(s){s.rows.forEach(function(r){directory.push(Object.assign({},r,{institution:c.institution,school:s.name||r.school||''}));});});});
+        preparedData=OAMapModel.prepareData({locations:locations,historic:historic,rowInstitutions:rowInstitutions,verified:verified,schoolAliases:schoolAliases,directory:directory});
         var allPoints=[];cards.forEach(function(c){allPoints.push.apply(allPoints,pointsFor(c));});
         cachedPoints=OAMapModel.mergeSchoolLocations(OAMapModel.consolidatePoints(allPoints,verified),verified,{schoolAliases:schoolAliases});
         cachedCards=cards.slice();
@@ -258,16 +261,24 @@
           var label=r.type==='Business School'?'Business school':r.type==='University'?'Non-business school':'';
           return label&&typeQueries.indexOf(fold(label))!==-1;
         });}))return;
-        var text=fold(p.school+' '+p.card.schools.map(function(s){return s.name+' '+s.rows.map(function(r){return r.department+' '+(r.mapAliases||[]).map(function(a){return a.school+' '+a.department;}).join(' ');}).join(' ');}).join(' '));
-        if(queries.length&&!queries.some(function(q){return q.split(' ').every(function(w){return text.indexOf(w)!==-1;});}))return;
+        if(queries.length){
+          var text=pointSearchCache.get(p);
+          if(text===undefined){text=fold(p.school+' '+p.card.schools.map(function(s){return s.name+' '+s.rows.map(function(r){return r.department+' '+(r.mapAliases||[]).map(function(a){return a.school+' '+a.department;}).join(' ');}).join(' ');}).join(' '));pointSearchCache.set(p,text);}
+          if(!queries.some(function(q){return q.split(' ').every(function(w){return text.indexOf(w)!==-1;});}))return;
+        }
         if(OAMapModel.located(p))points.push(p);else missing.push(p.card);
       });
+      // Resize/auth refreshes often deliver the same cards. Keep existing
+      // markers, popups and expanded accessible results in that case.
+      if(drawn&&keepView&&points.length===currentPoints.length&&points.every(function(p,i){return p===currentPoints[i];})&&missing.length===currentMissing.length&&missing.every(function(c,i){return c===currentMissing[i];}))return;
       var restoreFocus=!!(map._popup&&map.hasLayer(map._popup));
-      map.closePopup();cluster.clearLayers();markers.clear();currentPoints=points;
+      map.closePopup();markers.clear();currentPoints=points;currentMissing=missing;drawn=true;
       if(!keepView)frame(points);
       var layers=[];
       points.forEach(function(p) {
         var card=p.card;
+        var cached=markerCache.get(p);
+        if(cached){layers.push(cached);if(!markers.has(card.id))markers.set(card.id,cached);return;}
         var initials=card.institution.split(/\s+/).slice(0,2).map(function(s){return s[0];}).join('');
         var escape=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
         var html='<span class="oa-map-logo-face">'+escape(initials);
@@ -280,9 +291,17 @@
         m.oaCard=card;m.oaPoint=p;
         m.on('add',function(){var n=m.getElement();if(n){n.setAttribute('aria-label','Open '+markerName);n.setAttribute('role','button');var im=n.querySelector('img');if(im){im.addEventListener('load',function(){if(im.naturalWidth/im.naturalHeight>1.6)im.classList.add('oa-map-logo-wide');});im.addEventListener('error',function(){im.remove();});if(im.complete&&im.naturalWidth&&im.naturalWidth/im.naturalHeight>1.6)im.classList.add('oa-map-logo-wide');if(!im.getAttribute('src'))im.src=im.getAttribute('data-src');}}});
         m.on('click',function(){openPopup(cardContent(card,p),m.getLatLng(),m.getElement());});
+        markerCache.set(p,m);
         layers.push(m);if(!markers.has(card.id))markers.set(card.id,m);
       });
-      cluster.addLayers(layers);
+      var nextLayers=new Set(layers),removed=[],added=[];
+      currentLayers.forEach(function(m){if(!nextLayers.has(m))removed.push(m);});
+      nextLayers.forEach(function(m){if(!currentLayers.has(m))added.push(m);});
+      // Rebuilding the cluster tree is cheaper than hundreds of individual
+      // removals when switching from the world to a small continent/filter.
+      if(removed.length>currentLayers.size/2){cluster.clearLayers();cluster.addLayers(layers);}
+      else {if(removed.length)cluster.removeLayers(removed);if(added.length)cluster.addLayers(added);}
+      currentLayers=nextLayers;
       var sorted=points.map(function(p){return p.card;}).concat(missing).sort(function(a,b){return a.institution.localeCompare(b.institution);});
       pendingResults=sorted;resultList.replaceChildren();renderResults();
       summary.textContent='Matching school and department locations ('+sorted.length+')';
@@ -342,7 +361,7 @@
       var keep=signature===lastSignature;lastSignature=signature;draw(keep);
     }
     Promise.all([
-      fetch('/data/university-map.json?v=20261025-shared-school-cards').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
+      fetch('/data/university-map.json?v=20261025-fast-school-routing').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
       fetch('/assets/world/countries.geojson?v=20261022-mobile').then(function(r){if(!r.ok)throw Error('geography');return r.json();})
     ]).then(function(data) {
       data[0].locations.forEach(function(r){nameKeys.set(r.name,r.key);locations.set(r.key,r);});
@@ -351,7 +370,7 @@
       verified=data[0].verified||[];
       schoolAliases=data[0].schoolAliases||[];
       data[0].historic.forEach(function(r){var k=r.key;nameKeys.set(r.institution||r.name,k);if(!historic.has(k))historic.set(k,[]);historic.get(k).push(r);});
-      land=L.geoJSON(data[1],{style:palette,interactive:false}).addTo(map);land.bringToBack();
+      land=L.geoJSON(data[1],{style:palette(),interactive:false}).addTo(map);land.bringToBack();
       ready=true;draw(false);resolveReady();
     }).catch(function(err){status.textContent='Map assets could not load. Please reload the page to try again.';console.error('OAUniMap',err);rejectReady(err);});
     var resize=new ResizeObserver(function(){map.invalidateSize({pan:false});if(ready&&autoFrame&&mapEl.clientWidth)frame(currentPoints);});resize.observe(mapEl);

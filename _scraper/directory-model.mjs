@@ -164,6 +164,11 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
   const rows = new Map();          // id → row
   const display = new Map();       // instKey → { name, rank } — the card title
   const RANK = { directory: 3, seed: 2, postings: 1, omlist: 2, members: 0 };
+  function keepMergedAliases(home,row){
+    const aliases=[...(home.sourceRowAliases||[]),{school:row.school||'',department:row.department||''},...(row.sourceRowAliases||[])];
+    home.sourceRowAliases=[...new Map(aliases.map(alias=>[JSON.stringify([alias.school,alias.department]),alias])).values()]
+      .sort((a,b)=>a.school.localeCompare(b.school)||a.department.localeCompare(b.department));
+  }
 
   function claimName(institution, source) {
     const key = SCHOOLS.institutionKey(institution);
@@ -289,6 +294,8 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
     noteCharacteristics(home, row.characteristics, row.charsDay);
     if (!home.facultyUrl && row.facultyUrl) home.facultyUrl = row.facultyUrl;
     if (!home.deptUrl && row.deptUrl) home.deptUrl = row.deptUrl;
+    home.sourceRowIds = [...new Set([...(home.sourceRowIds || []), row.id, ...(row.sourceRowIds || [])])].sort();
+    keepMergedAliases(home,row);
     rows.delete(id);
   }
 
@@ -313,6 +320,7 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
     const homes = [...rows.values()].filter((h) =>
       h !== row && h.department && !ACRONYM.test(h.department)
       && SCHOOLS.institutionKey(h.institution) === instKey
+      && (!row.school || SCHOOLS.fold(h.school) === SCHOOLS.fold(row.school))
       && initialsOf(h.department) === acr);
     if (homes.length !== 1) continue;
     const home = homes[0];
@@ -326,6 +334,10 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
       home.campusVotes[c] = (home.campusVotes[c] || 0) + row.campusVotes[c];
     }
     noteCharacteristics(home, row.characteristics, row.charsDay);
+    if (!home.facultyUrl && row.facultyUrl) home.facultyUrl = row.facultyUrl;
+    if (!home.deptUrl && row.deptUrl) home.deptUrl = row.deptUrl;
+    home.sourceRowIds = [...new Set([...(home.sourceRowIds || []), row.id, ...(row.sourceRowIds || [])])].sort();
+    keepMergedAliases(home,row);
     rows.delete(id);
   }
 
@@ -362,6 +374,8 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
       sources: row.sources.slice().sort(),
       n: row.n,
       lastPosted: row.lastPosted,
+      sourceRowIds: row.sourceRowIds || [],
+      sourceRowAliases: row.sourceRowAliases || [],
     };
     if (isFinite(row.lat)) { rec.lat = row.lat; rec.lng = row.lng; }
     // an empty field is skipped, the PUBLIC_FIELDS rule — the file is served

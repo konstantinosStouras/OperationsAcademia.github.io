@@ -16438,10 +16438,10 @@ async function testClosingSoonDigest() {
     'closing: alerts.html offers the fourth tick box');
   ok(/Postings closing within 7 days\./.test(alertsHtml),
     'closing: …labelled in the words the summary line and the FAQ use');
-  ok(alertsHtml.includes('<script defer src="assets/oa-jobnav.js"></script>'),
+  ok(/<script defer src="assets\/oa-jobnav\.js(?:\?[^"\s]*)?"><\/script>/.test(alertsHtml),
     'closing: alerts.html loads the market rule, deferred like every other script');
   // on the TAGS, not the file names — the comment above the tag names it too
-  const tagAt = (f) => alertsHtml.indexOf('<script defer src="assets/' + f + '"></script>');
+  const tagAt = (f) => alertsHtml.search(new RegExp('<script defer src="assets/' + f.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"></script>'));
   ok(tagAt('oa-jobnav.js') > 0 && tagAt('oa-jobnav.js') < tagAt('oa-alert-match.js'),
     'closing: …BEFORE the matcher, whose factory is handed it');
   ok(tagAt('oa-alert-match.js') > 0 && tagAt('oa-alert-match.js') < tagAt('oa-alerts.js'),
@@ -17129,7 +17129,7 @@ async function testCalendarsWiring() {
   const claude = await read('CLAUDE.md');
   const mobile = await read('_MOBILE-STANDARDS.md');
   const log = JSON.parse(await read('changelog.json'));
-  const tagAt = (html, src) => html.indexOf(`<script defer src="${src}"></script>`);
+  const tagAt = (html, src) => html.search(new RegExp('<script defer src="' + src.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"></script>'));
   const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
   /* --- jobs.html: the deadlines ------------------------------------------ */
@@ -19120,7 +19120,7 @@ async function testJobComments() {
   }
   for (const p of ['jobs.html', 'previous-markets.html']) {
     const html = await read(p);
-    const tag = (f) => html.indexOf('<script defer src="assets/' + f + '"></script>');
+    const tag = (f) => html.search(new RegExp('<script defer src="assets/' + f.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"></script>'));
     ok(tag('oa-jobnav.js') > 0 && tag('oa-forum-markup.js') > tag('oa-jobnav.js'),
       `job comments: ${p} loads the markup module, after the module that reads it`);
     ok(/<link href="assets\/oa-editor\.css" rel="stylesheet">/.test(html),
@@ -21304,12 +21304,12 @@ async function testAffiliationPicker() {
      was committed; committed alone it would have stopped the jobs build. */
   const affFiles = (wfCode.match(/FILES='([^']*)'/) || [])[1] || '';
   for (const f of ['data/member-universities.json', 'data/vocab.json', 'data/jobs.json', 'data/jobs-meta.json',
-    'data/directory.json', 'data/directory-meta.json', 'data/university-names.json',
+    'data/directory.json', 'data/directory-meta.json', 'data/university-names.json', 'data/university-map.json',
     'data/university-domains.json', '_functions/university-domains.json', '_functions/netorg.js']) {
     ok(affFiles.split(/\s+/).includes(f), `the affiliation workflow commits ${f} with the member file`);
   }
-  eq(AF.DEPENDENTS.map((d) => d[0]), ['build-jobs.mjs', 'build-directory.mjs', 'build-netmap.mjs'],
-    '…because the pass rebuilds the vocabulary, the directory and the domain map itself');
+  eq(AF.DEPENDENTS.map((d) => d[0]), ['build-jobs.mjs', 'build-directory.mjs', 'build-map-data.mjs', 'build-netmap.mjs'],
+    '…because the pass rebuilds the vocabulary, the directory, the school map and the domain map itself');
   ok(/concurrency:\s*\n\s*group: oa-jobs-data-\$\{\{ github\.ref \}\}/.test(wfCode),
     '…and it queues behind the jobs build, the other writer of those files');
   ok(/node _scraper\/affiliations\.mjs --write\s*\n\s*if ! node _scraper\/selftest\.mjs --publishing/.test(wfCode),
@@ -23916,7 +23916,7 @@ async function testForum() {
   ok(page.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
     'forum page: the head snippet, the exact line every live page carries');
   const LOAD = ['oa-feature-badges.js', 'v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-forum-markup.js', 'oa-editor.js', 'oa-list.js', 'oa-forum.js'];
-  const tagAt = (f) => page.indexOf('<script defer src="assets/' + f + '"></script>');
+  const tagAt = (f) => page.search(new RegExp('<script defer src="assets/' + f.replace(/\./g, '\\.') + '(?:\\?[^"\\s]*)?"></script>'));
   ok(LOAD.every((f, i) => tagAt(f) > 0 && (i === 0 || tagAt(f) > tagAt(LOAD[i - 1]))),
     'forum page: the twelve scripts load in dependency order, each deferred');
   eq((page.match(/<script[^>]*\ssrc=/g) || []).length, LOAD.length, 'forum page: and no other external script');

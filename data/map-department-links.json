@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "institution": "University of Alaska Anchorage",
+      "school": "College of Business and Public Policy",
+      "department": "Department of Management, Marketing, Logistics, and Business Analytics",
+      "deptUrl": "https://www.uaa.alaska.edu/academics/college-of-business-and-public-policy/departments/mmlba/index.cshtml",
+      "facultyUrl": "https://www.uaa.alaska.edu/academics/college-of-business-and-public-policy/departments/mmlba/personnel/index.cshtml",
+      "sources": [
+        "https://www.uaa.alaska.edu/academics/college-of-business-and-public-policy/departments/mmlba/index.cshtml",
+        "https://www.uaa.alaska.edu/academics/college-of-business-and-public-policy/departments/mmlba/personnel/index.cshtml"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The official department page and its own personnel page explicitly identify this department. The faculty list includes logistics and management information systems faculty."
+    },
+    {
+      "institution": "University of Alaska Fairbanks",
+      "school": "College of Business and Security Management",
+      "department": "Business Administration",
+      "deptUrl": "https://catalog.uaf.edu/academic-departments/business-administration/",
+      "facultyUrl": "https://www.uaf.edu/cbsm/about/contact-us/faculty-directory/#business-admin",
+      "sources": [
+        "https://catalog.uaf.edu/academic-departments/business-administration/",
+        "https://www.uaf.edu/cbsm/about/contact-us/faculty-directory/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The current 2026-2027 academic department page identifies the Business Administration Program and its college. The faculty link targets the verified business-admin anchor, excluding other college disciplines."
+    },
+    {
+      "institution": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "school": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "department": "Decision Sciences",
+      "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
+      "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
+      "sources": [
+        "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
+      ],
+      "checked": "2026-10-25",
+      "notes": "This official academic-area page contains its own Faculty section, listing Decision Sciences faculty. The same department page is deliberately used for faculty rather than the unfiltered school-wide directory; no unverified fragment anchor is appended."
+    },
+    {
+      "institution": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "school": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "department": "Technology and Operations Management",
+      "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+      "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+      "sources": [
+        "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
+      ],
+      "checked": "2026-10-25",
+      "notes": "This official academic-area page contains its own Faculty section for Technology and Operations Management. The same department page is deliberately used for faculty rather than the unfiltered school-wide directory; no unverified fragment anchor is appended."
+    }
+  ]
+}

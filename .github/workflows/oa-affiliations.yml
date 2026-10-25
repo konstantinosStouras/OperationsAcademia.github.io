@@ -105,7 +105,7 @@ jobs:
           # the member file AND every file affiliations.mjs rebuilds from it
           # (DEPENDENTS): committed alone, the member file turns the jobs
           # build's first check red and the whole site stops publishing.
-          FILES='data/member-universities.json data/vocab.json data/jobs.json data/jobs-meta.json data/directory.json data/directory-meta.json data/university-names.json data/university-domains.json _functions/university-domains.json _functions/netorg.js'
+          FILES='data/member-universities.json data/vocab.json data/jobs.json data/jobs-meta.json data/directory.json data/directory-meta.json data/university-names.json data/university-map.json data/university-domains.json _functions/university-domains.json _functions/netorg.js'
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "nothing changed."
             exit 0

@@ -60,6 +60,12 @@ jobs:
           node _scraper/candidate-access-test.mjs
           node _scraper/candidate-review-test.mjs
           node _scraper/reference-test.mjs
+          node _scraper/job-map-link-test.cjs
+          node _scraper/map-routing-test.cjs
+          node _scraper/map-new-posting-test.cjs
+          node _scraper/map-new-posting-build-test.cjs
+          node _scraper/map-department-links-test.cjs
+          node _scraper/map-physical-card-test.cjs
           node _scraper/import-sheet.mjs --selftest
           node _scraper/import-legacy-tables.mjs --selftest
           node _scraper/sync-jobmarket-sheet.mjs --selftest

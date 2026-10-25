@@ -35,6 +35,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { buildDirectory, directoryStats, memberUniversities } from './directory-model.mjs';
 import { affiliationIndex, parentKeyOf } from './members-insights.mjs';
+import { attachMapLocations, attachDepartmentLinks } from './map-directory.mjs';
 
 const require = createRequire(import.meta.url);
 const AFFILIATION = require('../assets/oa-affiliation.js');
@@ -79,28 +80,11 @@ async function main() {
   const references = await readJson('data/reference-places.json', []);
 
   const { rows } = buildDirectory({ archive, seed: seed.concat(references), jobs, past, omlist, members });
-  // Building verification can resolve an old posting abbreviation to an
-  // official department. Keep stable row identities and retain both search terms.
   const locations = await readJson('data/school-map-locations.json');
-  const mapTerms = new Map();
-  const mapInstitutionNames = new Map();
-  for (const location of locations.records) for (const id of location.rowIds) {
-    mapInstitutionNames.set(id,[...new Set([...(mapInstitutionNames.get(id)||[]),location.institution].filter(Boolean))]);
-    mapTerms.set(id,[...new Set([...(mapTerms.get(id)||[]),location.school,location.department].filter(Boolean))]);
-  }
-  for (const row of rows) if (mapTerms.has(row.id)) {
-    row.mapSearchTerms = mapTerms.get(row.id);
-    row.mapInstitutionNames = mapInstitutionNames.get(row.id);
-  }
-  const mapCountries = new Map();
-  for (const location of locations.records.filter(location=>location.country)) for (const id of location.rowIds) {
-    mapCountries.set(id,[...new Set([...(mapCountries.get(id)||[]),location.country])]);
-  }
-  for (const row of rows) if (mapCountries.has(row.id)) {
-    const countries=mapCountries.get(row.id);
-    row.country = countries.length===1?countries[0]:'';
-    if(countries.length>1)row.countries=countries;else delete row.countries;
-  }
+  const cardGroups = await readJson('data/map-card-groups.json');
+  attachMapLocations(rows, locations.records, cardGroups.schoolAliases);
+  const departmentLinks = await readJson('data/map-department-links.json');
+  attachDepartmentLinks(rows, locations.records, cardGroups.schoolAliases, departmentLinks.records);
   const stats = directoryStats(rows);
 
   const body = JSON.stringify(rows, null, 1) + '\n';

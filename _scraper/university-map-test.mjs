@@ -4,11 +4,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
+import {compactLocationRecords} from './build-map-data.mjs';
 const require=createRequire(import.meta.url);
 const {chromium}=require('playwright');
 const nav=require('../assets/oa-jobnav.js');
 const model=require('../assets/oa-map-model.js');
 const schools=require('../assets/oa-schools.js');
+const routing=require('../assets/oa-map-routing.js');
 require('./map-consolidation-test.cjs');
 require('./map-physical-card-test.cjs');
 assert.equal(model.displayName('KAIST'),'Korea Advanced Institute of Science and Technology (KAIST)');
@@ -26,7 +28,7 @@ const frozenFiles=new Map(['data/school-map-locations.json','data/directory.json
 const evidence=JSON.parse(frozenFiles.get(path.join(root,'data/school-map-locations.json'))).records;
 const directory=JSON.parse(frozenFiles.get(path.join(root,'data/directory.json')));
 const generated=JSON.parse(frozenFiles.get(path.join(root,'data/university-map.json')));
-assert.equal(createHash('sha256').update(JSON.stringify(generated.verified)).digest('hex'),createHash('sha256').update(JSON.stringify(evidence)).digest('hex'),'map payload must be rebuilt from current location evidence before browser testing');
+assert.equal(createHash('sha256').update(JSON.stringify(generated.verified)).digest('hex'),createHash('sha256').update(JSON.stringify(compactLocationRecords(evidence))).digest('hex'),'map payload must be rebuilt from current location evidence before browser testing');
 const directoryIds=new Set(directory.map(row=>row.id));
 for(const location of evidence)for(const id of location.rowIds)assert.ok(directoryIds.has(id),id+' must exist in the generated directory before browser testing');
 const snapshotHashes=Object.fromEntries(Array.from(frozenFiles,([file,bytes])=>[path.relative(root,file).replaceAll('\\','/'),createHash('sha256').update(bytes).digest('hex')]));
@@ -98,6 +100,13 @@ try{
     await q.waitForSelector('.oa-map-selected-department');
     const popup=await q.locator('.oa-map-popup').innerText();
     assert.match(popup,/Gies College of Business/);
+    const addressLink=q.locator('.oa-map-popup .oa-map-address a');
+    assert.equal(await addressLink.count(),1,'the address is the map link');
+    const addressUrl=new URL(await addressLink.getAttribute('href'));
+    assert.equal(addressUrl.origin,'https://www.google.com');
+    assert.equal(addressUrl.pathname,'/maps/search/');
+    assert.equal(addressUrl.searchParams.get('query'),await q.evaluate(()=>{const at=testMap.map._popup.getLatLng();return at.lat+','+at.lng;}),'address opens the displayed school coordinates');
+    assert.equal(await q.locator('.oa-map-popup a').filter({hasText:/^(Official address|Building map|Campus or headquarters map|School location|University location)$/}).count(),0,'redundant location links are removed');
     assert.doesNotMatch(popup,/Grainger|Labor|Industrial and Enterprise/);
     assert.equal(await q.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     await q.waitForFunction(()=>{
@@ -148,10 +157,19 @@ try{
     const ids=new Set(point.card.schools.flatMap(s=>s.rows.flatMap(r=>(r.mapSources||[]).map(source=>source.rowId))));
     for(const id of ids){if(!rowCards.has(id))rowCards.set(id,[]);rowCards.get(id).push(point);}
   }
+  const repeatResolver=routing.createResolver({verified:evidence,directory,schoolAliases:generated.schoolAliases});
+  const directoryById=new Map(directory.map(row=>[row.id,row]));
   for(const [id,points] of rowCards){
     if(points.length<2)continue;
     const groups=points.map(point=>(point.locationSources||[]).filter(source=>(source.rowIds||[]).includes(id)&&source.locationGroup).map(source=>source.locationGroup));
-    assert.ok(groups[0].some(group=>groups.every(set=>set.includes(group))),id+' repeated cards require an evidenced multi-location group, not stale legacy coordinates');
+    if(groups[0].some(group=>groups.every(set=>set.includes(group))))continue;
+    const sources=points.map(point=>point.card.schools.flatMap(s=>s.rows.flatMap(r=>(r.mapSources||[]).filter(source=>source.rowId===id))));
+    const routeGroups=sources.map(list=>list.map(source=>source.mapRouteGroup).filter(Boolean));
+    assert.ok(routeGroups[0].some(group=>routeGroups.every(set=>set.includes(group))),id+' repeated cards require evidenced or explicitly routed multiple locations, not stale legacy coordinates');
+    const route=repeatResolver.resolve(directoryById.get(id));
+    assert.ok((route.kind==='department'||route.kind==='school')&&route.ids.length>1,id+' synthetic group must be reproducible by the location resolver');
+    const actualIds=[...new Set(sources.flatMap(list=>list.map(source=>source.evidenceId)))].sort();
+    assert.deepEqual(actualIds,route.ids.slice().sort(),id+' synthetic group contains exactly the eligible reviewed sites');
   }
   const dublin=await pageAt('?university='+encodeURIComponent('University College Dublin'));
   const dublinPoints=await dublin.evaluate(()=>testMap.shown());
@@ -231,6 +249,11 @@ try{
         await q.waitForFunction(()=>document.querySelectorAll('.oa-map-popup').length===1&&!document.querySelector('.oa-map-location-options'));
       }
       assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.address),id+' opens its verified address');
+      if((id.startsWith('insead__')||id.startsWith('university-of-alaska-'))&&row.department&&row.deptUrl){
+        const selected=q.locator('.oa-map-selected-department');
+        assert.equal(await selected.locator('a').first().getAttribute('href'),row.deptUrl,id+' shows the official department link');
+        if(row.facultyUrl)assert.equal(await selected.getByRole('link',{name:'Faculty',exact:true}).getAttribute('href'),row.facultyUrl,id+' shows the official faculty link');
+      }
       if(displayLocation.locationPrecision==='campus')assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.locationContext),id+' explains campus fallback');
       assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[displayLocation.lat,displayLocation.lng],id+' opens the representative school pin');
       assert.ok(await q.evaluate(evidenceId=>{const at=testMap.map._popup.getLatLng();return testMap.shown().some(p=>p.lat===at.lat&&p.lng===at.lng&&(p.sourceEvidenceIds||[]).includes(evidenceId));},location.id),id+' opened point retains original location evidence');

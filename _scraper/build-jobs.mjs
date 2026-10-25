@@ -527,7 +527,7 @@ async function healNames() {
   /* data/directory.json is merged from these rows by its own builder, which is
      offline too — so it is the other half of the same change, and saying so
      here is cheaper than a second trap. */
-  log('now run: node _scraper/build-directory.mjs && node _scraper/build-netmap.mjs');
+  log('now run: node _scraper/build-directory.mjs && node _scraper/build-map-data.mjs && node _scraper/build-netmap.mjs');
   return true;
 }
 

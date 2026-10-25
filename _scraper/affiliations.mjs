@@ -81,6 +81,7 @@ export const MEMBERS_FILE = 'member-universities.json';
 export const DEPENDENTS = [
   ['build-jobs.mjs', '--heal-names'],   // data/vocab.json (the posting form's list)
   ['build-directory.mjs'],              // directory.json, directory-meta.json, university-names.json
+  ['build-map-data.mjs'],                // university-map.json, including routing for new directory rows
   ['build-netmap.mjs'],                 // the domain map, derived from the directory
 ];
 /* the bound the rules put on both fields (str('affiliation', 300)) */
@@ -328,8 +329,8 @@ async function selftest() {
     '…including the served file');
 
   /* the member file never lands without the lists it feeds */
-  eq(DEPENDENTS, [['build-jobs.mjs', '--heal-names'], ['build-directory.mjs'], ['build-netmap.mjs']],
-    'the member file\'s dependents are rebuilt in the jobs build\'s own order: the vocabulary, the directory, the domain map');
+  eq(DEPENDENTS, [['build-jobs.mjs', '--heal-names'], ['build-directory.mjs'], ['build-map-data.mjs'], ['build-netmap.mjs']],
+    'the member file\'s dependents are rebuilt in the jobs build\'s own order: the vocabulary, the directory, the school map, the domain map');
   const memberWrite = run.indexOf('await writeFile(path.join(DATA, MEMBERS_FILE), body);');
   const rebuildCall = run.indexOf('rebuildDependents();');
   ok(memberWrite > 0 && rebuildCall > memberWrite && rebuildCall - memberWrite < 200,

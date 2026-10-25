@@ -1,10 +1,12 @@
 /* School-specific map cards. Shared by the browser and the full-directory audit. */
 (function(root,factory){
-  if(typeof module==='object'&&module.exports)module.exports=factory(require('./oa-schools.js'));
-  else root.OAMapModel=factory(root.OASchools);
-}(typeof window!=='undefined'?window:this,function(S){
+  if(typeof module==='object'&&module.exports)module.exports=factory(require('./oa-schools.js'),require('./oa-map-routing.js'));
+  else root.OAMapModel=factory(root.OASchools,root.OAMapRouting);
+}(typeof window!=='undefined'?window:this,function(S,Routing){
   'use strict';
-  function fold(s){return S.fold(String(s||''));}
+  var foldedNames=new Map(),institutionNames=new Map();
+  function fold(s){s=String(s||'');if(!foldedNames.has(s)){if(foldedNames.size>10000)foldedNames.clear();foldedNames.set(s,S.fold(s));}return foldedNames.get(s);}
+  function institutionKey(s){s=String(s||'');if(!institutionNames.has(s)){if(institutionNames.size>5000)institutionNames.clear();institutionNames.set(s,S.institutionKey(s));}return institutionNames.get(s);}
   // Display-only expansions keep existing identities and bookmarked aliases.
   function displayName(name){
     var names={
@@ -30,37 +32,61 @@
   }
   function located(p){return p&&Number.isFinite(p.lat)&&Math.abs(p.lat)<=90&&Number.isFinite(p.lng)&&Math.abs(p.lng)<=180;}
   function coord(p){return p.lat.toFixed(5)+','+p.lng.toFixed(5);}
-  var verifiedIndexes=new WeakMap(),uiucKey=S.institutionKey('University of Illinois at Urbana-Champaign');
+  var verifiedIndexes=new WeakMap(),uiucKey=institutionKey('University of Illinois at Urbana-Champaign');
   function verifiedIndex(records){
     // Detect changed membership/keys while keeping live record objects as values.
     // This avoids repeating expensive institution alias normalization for every row.
     var signature=records.map(function(v){return JSON.stringify([v.institutionKey||v.institution,v.rowIds]);}).join('|');
     var cached=verifiedIndexes.get(records);if(cached&&cached.signature===signature&&records.every(function(v,i){return v===cached.records[i];}))return cached.index;
     var index=new Map();records.forEach(function(v){
-      var key=S.institutionKey(v.institutionKey||v.institution);
+      var key=institutionKey(v.institutionKey||v.institution);
       if(!index.has(key))index.set(key,new Map());var rows=index.get(key);
       v.rowIds.forEach(function(id){if(!rows.has(id))rows.set(id,[]);rows.get(id).push(v);});
     });
     verifiedIndexes.set(records,{signature:signature,index:index,records:records.slice()});return index;
   }
+  function prepareData(data){
+    var prepared=Object.assign({},data,{verifiedLookup:verifiedIndex(data.verified||[]),evidenceById:new Map((data.verified||[]).map(function(v){return [v.id,v];}))});
+    if(Routing){
+      prepared.evidenceCountries=Routing.evidenceCountries(data.verified||[],data.directory||[]);
+      var resolver;
+      prepared.locationResolver={resolve:function(row){
+        if(row.mapLocationKind&&Array.isArray(row.mapLocationIds))return {ids:row.mapLocationIds,kind:row.mapLocationKind};
+        if(!resolver)resolver=Routing.createResolver({verified:data.verified,directory:data.directory||[],schoolAliases:data.schoolAliases||[]});
+        return resolver.resolve(row);
+      }};
+    }
+    return prepared;
+  }
   function pointsFor(card,data){
     var groups=new Map(), names=[card.institution].concat((card.aka||'').split(' · '));
-    var cardKey=S.institutionKey(card.institution),byRow=verifiedIndex(data.verified||[]).get(cardKey),uiuc=cardKey===uiucKey;
+    var cardKey=institutionKey(card.institution),byRow=(data.verifiedLookup||verifiedIndex(data.verified||[])).get(cardKey),uiuc=cardKey===uiucKey;
     (card.schools||[]).forEach(function(s){(s.rows||[]).forEach(function(r){
       if(S.directoryExcluded({institution:card.institution,school:s.name}))return;
-        var locations=byRow&&byRow.get(r.id)||[];
+        var editedFields=r._edit&&r._edit.fields||[],changed=editedFields.indexOf('school')!==-1||editedFields.indexOf('department')!==-1;
+        var locations=editedFields.indexOf('school')!==-1?[]:byRow&&byRow.get(r.id)||[],routeKind='exact';
+        if(!locations.length&&!changed&&data.locationResolver){
+          var route=data.locationResolver.resolve(Object.assign({},r,{institution:card.institution,school:s.name||'',department:r.department||''}));
+          // An existing explicit archive pin is retained unless a department match verifies its replacement.
+          if(route.kind!=='school'||!located(r)){
+            routeKind=route.kind;locations=route.ids.map(function(id){return data.evidenceById.get(id);}).filter(Boolean);
+          }
+        }
         (locations.length?locations:[null]).forEach(function(verified){
         var originalRow=r;
-      var c=S.canonColumns({institution:card.institution,school:s.name||'',unit:r.department||''});
+      var c=!uiuc&&s.name?{school:s.name,unit:r.department}:S.canonColumns({institution:card.institution,school:s.name||'',unit:r.department||''});
       var school=uiuc?c.school:(s.name||c.school), department=uiuc?c.unit:r.department;
-      var aliases=[{school:school,department:department}];
+      var aliases=[{school:school,department:department}].concat(r.sourceRowAliases||[]);
       var edited=r._edit&&r._edit.fields||[];
       if(verified){
         if(edited.indexOf('school')===-1)school=typeof verified.school==='string'?verified.school:school;
-        if(edited.indexOf('department')===-1)department=verified.department||department;
-        r=Object.assign({},r,verified,{id:r.id,locationVerified:true,mapUrl:'https://www.google.com/maps/search/?api=1&query='+verified.lat+','+verified.lng});
+        if(edited.indexOf('department')===-1&&routeKind!=='school')department=verified.department||department;
+        r=Object.assign({},r,verified,{id:r.id,locationVerified:true,locationReference:routeKind==='school'?'school':undefined,mapUrl:'https://www.google.com/maps/search/?api=1&query='+verified.lat+','+verified.lng});
+        var verifiedCountries=data.evidenceCountries&&data.evidenceCountries.get(verified.id);
+        if(verifiedCountries&&verifiedCountries.length===1)r.country=verifiedCountries[0];
       }
-      var source={rowId:originalRow.id,institution:card.institution,institutionAliases:(card.aka||'').split(' · ').filter(Boolean),school:school,department:department,mapAliases:aliases.slice(),n:originalRow.n||0,evidenceId:verified&&verified.id};
+      var source={rowId:originalRow.id,institution:card.institution,institutionAliases:(card.aka||'').split(' · ').filter(Boolean),school:school,department:department,mapAliases:aliases.slice(),n:originalRow.n||0,evidenceId:verified&&verified.id,locationReference:routeKind==='school'?'school':undefined,
+        mapRouteGroup:locations.length>1&&routeKind!=='exact'?'matched-location:'+cardKey+'::'+originalRow.id:undefined};
       var id=school?'school:'+fold(school):'department:'+fold(department);
       // Verified departments in different buildings must not inherit one another's pins.
       if(verified)id+=':location:'+verified.id;
@@ -81,7 +107,7 @@
     });});
     // An unspecified university row adds no separate department beside named ones.
     if(groups.size>1)groups.delete('department:');
-    var keys=new Set(names.filter(Boolean).map(S.institutionKey)), history=[], fallback=null;
+    var keys=new Set(names.filter(Boolean).map(institutionKey)), history=[], fallback=null;
     keys.forEach(function(k){
       if(!fallback&&located(data.locations.get(k)))fallback=data.locations.get(k);
       (data.historic.get(k)||[]).forEach(function(p){if(located(p))history.push(p);});
@@ -130,15 +156,22 @@
   }
   // Only reviewed identities merge; nearby buildings and edited rows remain independent.
   function consolidatePoints(points,verified){
-    var groups=new Map(),out=[];
+    var groups=new Map(),out=[],recordsById=new Map(),canonicalByIdentity=new Map();
+    (verified||[]).forEach(function(v){
+      recordsById.set(v.id,v);
+      if(!v.locationIdentity)return;
+      var k=identityKey(v),held=canonicalByIdentity.get(k);
+      if(!held||Number(v.id===v.locationIdentity)>Number(held.id===held.locationIdentity)||
+        Number(v.id===v.locationIdentity)===Number(held.id===held.locationIdentity)&&v.id.localeCompare(held.id)<0)canonicalByIdentity.set(k,v);
+    });
     points.forEach(function(p){
       if(!p.locationVerified||!p.locationIdentity||p.card.schools.some(function(s){return s.rows.some(function(r){return r.locationEdited;});})){out.push(p);return;}
-      var record=(verified||[]).find(function(v){return (p.sourceEvidenceIds||[]).indexOf(v.id)!==-1;});
+      var record=(p.sourceEvidenceIds||[]).map(function(id){return recordsById.get(id);}).filter(Boolean)[0];
       if(!record){out.push(p);return;}
       var k=identityKey(record);if(!groups.has(k))groups.set(k,{record:record,points:[]});groups.get(k).points.push(p);
     });
     groups.forEach(function(group,k){
-      var canonical=canonicalLocation(group.record,verified);
+      var canonical=canonicalByIdentity.get(k)||group.record;
       var ps=group.points.slice().sort(function(a,b){return a.card.id.localeCompare(b.card.id);}),base=ps[0],rows=new Map();
       ps.forEach(function(p){p.card.schools.forEach(function(s){s.rows.forEach(function(r){
         var rk=fold(r.department),held=rows.get(rk);
@@ -167,6 +200,7 @@
   }
   function pointEvidence(point,verified){
     var ids=point.sourceEvidenceIds||[];
+    if(verified instanceof Map)return ids.map(function(id){return verified.get(id);}).filter(Boolean);
     return (verified||[]).filter(function(v){return ids.indexOf(v.id)!==-1;});
   }
   function physicalPointKey(point){return (point.canonicalEvidenceId||(point.sourceEvidenceIds||[]).slice().sort()[0]||point.card.id)+'::'+point.card.id;}
@@ -180,26 +214,26 @@
   // Physical school cards are separate from evidence identities: departments keep their
   // own offices and provenance even when their nearby markers share one visible card.
   function mergeSchoolLocations(points,verified,options){
-    var buckets=new Map(),out=[];
+    var buckets=new Map(),out=[],evidenceById=new Map((verified||[]).map(function(v){return [v.id,v];}));
     function retainEvidence(p){
-      var evidence=pointEvidence(p,verified);
+      var evidence=pointEvidence(p,evidenceById);
       return Object.assign({},p,{locationSources:evidence,card:Object.assign({},p.card,{schools:p.card.schools.map(function(s){return Object.assign({},s,{rows:s.rows.map(function(r){
         var ids=(r.mapSources||[]).map(function(source){return source.evidenceId;});
         return Object.assign({},r,{locationSources:evidence.filter(function(v){return ids.indexOf(v.id)!==-1;})});
       })});})})});
     }
     function schoolFor(p){
-      var institution=S.institutionKey(p.card.officialInstitution||p.card.institution);
-      var alias=((options||{}).schoolAliases||[]).find(function(a){return S.institutionKey(a.institution)===institution&&(a.aliases||[]).concat(a.school).some(function(s){return fold(s)===fold(p.school);});});
+      var institution=institutionKey(p.card.officialInstitution||p.card.institution);
+      var alias=((options||{}).schoolAliases||[]).find(function(a){return institutionKey(a.institution)===institution&&(a.aliases||[]).concat(a.school).some(function(s){return fold(s)===fold(p.school);});});
       return alias?alias.school:p.school;
     }
     points.forEach(function(p){
       var edited=p.card.schools.some(function(s){return s.rows.some(function(r){return r.locationEdited;});});
       if(!located(p)||edited){out.push(retainEvidence(p));return;}
-      var evidence=pointEvidence(p,verified),explicit=unique(evidence.map(function(v){return v.mapCardIdentity;}).concat(p.mapCardIdentity||[]));
+      var evidence=pointEvidence(p,evidenceById),explicit=unique(evidence.map(function(v){return v.mapCardIdentity;}).concat(p.mapCardIdentity||[]));
       // Conflicting reviewed overrides must not silently absorb one another.
       if(explicit.length>1){out.push(retainEvidence(p));return;}
-      var school=fold(schoolFor(p)),institution=S.institutionKey(p.card.officialInstitution||p.card.institution);
+      var school=fold(schoolFor(p)),institution=institutionKey(p.card.officialInstitution||p.card.institution);
       if(!explicit.length&&!school){out.push(retainEvidence(p));return;}
       var k=JSON.stringify([institution,explicit.length?'explicit':'nearby',explicit[0]||school,fold(p.country)]);
       if(!buckets.has(k))buckets.set(k,{explicit:!!explicit.length,points:[]});
@@ -212,8 +246,8 @@
         if(group)group.push(p);else groups.push([p]);
       });
       groups.forEach(function(ps){
-        var anchor=representativeSchoolLocation(ps,verified),sources=unique(ps.flatMap(function(p){return p.sourceEvidenceIds||[];}));
-        var evidence=(verified||[]).filter(function(v){return sources.indexOf(v.id)!==-1;}).slice().sort(function(a,b){return a.id.localeCompare(b.id);});
+        var anchor=representativeSchoolLocation(ps,evidenceById),sources=unique(ps.flatMap(function(p){return p.sourceEvidenceIds||[];}));
+        var evidence=sources.map(function(id){return evidenceById.get(id);}).filter(Boolean).sort(function(a,b){return a.id.localeCompare(b.id);});
         ps.forEach(function(p){
           if((p.sourceEvidenceIds||[]).length)return;
           evidence.push({id:'legacy:'+p.card.id,rowIds:unique(p.card.schools.flatMap(function(s){return s.rows.flatMap(function(r){return (r.mapSources||[]).map(function(a){return a.rowId;});});})),
@@ -262,21 +296,21 @@
     return out;
   }
   function locationGroupsForTarget(point,university,school,department,verified){
-    var target=S.institutionKey(university),ids=[];
+    var target=institutionKey(university),ids=[],routeGroups=[];
     point.card.schools.forEach(function(s){s.rows.forEach(function(r){(r.mapSources||[]).forEach(function(source){
-      var related=S.institutionKey(source.institution)===target||S.institutionKey(point.card.officialInstitution||'')===target||(source.institutionAliases||[]).some(function(a){return S.institutionKey(a)===target;});
-      if(related&&rowMatchScore(source,school,department)>0)ids.push(source.evidenceId);
+      var related=institutionKey(source.institution)===target||institutionKey(point.card.officialInstitution||'')===target||(source.institutionAliases||[]).some(function(a){return institutionKey(a)===target;});
+      if(related&&rowMatchScore(source,school,department)>0){ids.push(source.evidenceId);routeGroups.push(source.mapRouteGroup);}
     });});});
-    return unique((verified||point.locationSources||[]).filter(function(v){return ids.indexOf(v.id)!==-1;}).map(function(v){return v.locationGroup;}));
+    return unique(routeGroups.concat((verified||point.locationSources||[]).filter(function(v){return ids.indexOf(v.id)!==-1;}).map(function(v){return v.locationGroup;})));
   }
   // Score each original university identity with its own row aliases, never another row's.
   function pointMatchScore(point,university,school,department){
-    var target=S.institutionKey(university),best=0;
+    var target=institutionKey(university),best=0;
     point.card.schools.forEach(function(s){s.rows.forEach(function(r){
       var sources=r.mapSources||[{institution:point.card.institution,institutionAliases:(point.card.aka||'').split(' · '),school:r.school,department:r.department,mapAliases:r.mapAliases}];
       sources.forEach(function(source){
-        var exact=S.institutionKey(source.institution)===target;
-        var related=exact||S.institutionKey(point.card.officialInstitution||'')===target||(source.institutionAliases||[]).some(function(a){return S.institutionKey(a)===target;});
+        var exact=institutionKey(source.institution)===target;
+        var related=exact||institutionKey(point.card.officialInstitution||'')===target||(source.institutionAliases||[]).some(function(a){return institutionKey(a)===target;});
         if(!related)return;
         var score=rowMatchScore(source,school,department);
         if(score)best=Math.max(best,score*10+(exact?1:0));
@@ -295,5 +329,5 @@
       return Math.max(best,1+(fold(a.school)===fold(school)?2:0));
     },0);
   }
-  return {pointsFor:pointsFor,consolidatePoints:consolidatePoints,mergeSchoolLocations:mergeSchoolLocations,representativeSchoolLocation:representativeSchoolLocation,locationGroupsForTarget:locationGroupsForTarget,canonicalLocation:canonicalLocation,pointMatchScore:pointMatchScore,located:located,displayName:displayName,departmentName:departmentName,matchesRow:matchesRow,rowMatchScore:rowMatchScore};
+  return {prepareData:prepareData,pointsFor:pointsFor,consolidatePoints:consolidatePoints,mergeSchoolLocations:mergeSchoolLocations,representativeSchoolLocation:representativeSchoolLocation,locationGroupsForTarget:locationGroupsForTarget,canonicalLocation:canonicalLocation,pointMatchScore:pointMatchScore,located:located,displayName:displayName,departmentName:departmentName,matchesRow:matchesRow,rowMatchScore:rowMatchScore};
 }));
