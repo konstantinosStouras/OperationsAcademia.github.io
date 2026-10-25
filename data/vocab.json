@@ -2134,6 +2134,10 @@
    "n": 0
   },
   {
+   "v": "Minnesota State University, Mankato",
+   "n": 0
+  },
+  {
    "v": "Missouri University of Science and Technology",
    "n": 0
   },
@@ -2359,6 +2363,10 @@
   },
   {
    "v": "University of Queensland",
+   "n": 0
+  },
+  {
+   "v": "University of Rhode Island",
    "n": 0
   },
   {
@@ -3437,6 +3445,10 @@
   },
   {
    "v": "College of Management of Technology (CMT)",
+   "n": 0
+  },
+  {
+   "v": "College of Science, Engineering and Technology",
    "n": 0
   },
   {
@@ -5494,6 +5506,10 @@
    "n": 0
   },
   {
+   "v": "Computer Information Science",
+   "n": 0
+  },
+  {
    "v": "Computing and Decision Sciences",
    "n": 0
   },
@@ -5511,6 +5527,10 @@
   },
   {
    "v": "Decision Sciences and Managerial Economics",
+   "n": 0
+  },
+  {
+   "v": "Decision Sciences and Marketing",
    "n": 0
   },
   {
@@ -5683,6 +5703,10 @@
   },
   {
    "v": "Mathematics, Analytics and Optimization",
+   "n": 0
+  },
+  {
+   "v": "Mechanical, Industrial and Systems Engineering",
    "n": 0
   },
   {
@@ -5916,10 +5940,12 @@
     "Robert B. Willumstad School of Business"
    ],
    "units": [
+    "Decision Sciences and Marketing",
     "Management"
    ],
    "bySchool": {
     "Robert B. Willumstad School of Business": [
+     "Decision Sciences and Marketing",
      "Management"
     ]
    }
@@ -9235,6 +9261,19 @@
    "bySchool": {
     "": [
      "MIS and BA"
+    ]
+   }
+  },
+  "Minnesota State University, Mankato": {
+   "schools": [
+    "College of Science, Engineering and Technology"
+   ],
+   "units": [
+    "Computer Information Science"
+   ],
+   "bySchool": {
+    "College of Science, Engineering and Technology": [
+     "Computer Information Science"
     ]
    }
   },
@@ -13166,6 +13205,19 @@
    "units": [],
    "bySchool": {}
   },
+  "University of Rhode Island": {
+   "schools": [
+    "College of Engineering"
+   ],
+   "units": [
+    "Mechanical, Industrial and Systems Engineering"
+   ],
+   "bySchool": {
+    "College of Engineering": [
+     "Mechanical, Industrial and Systems Engineering"
+    ]
+   }
+  },
   "University of Richmond": {
    "schools": [
     "Robins School of Business"
@@ -14613,6 +14665,7 @@
    "Integrated Systems Engineering",
    "Lillian Gilbreth Postdoctoral Fellowships",
    "Mechanical and Industrial Engineering",
+   "Mechanical, Industrial and Systems Engineering",
    "One Health – Intelligent Medicines",
    "Systems Engineering",
    "Wm Michael Barnes’ 64 Department of Industrial and Systems Engineering"
@@ -14650,6 +14703,9 @@
   "College of Science and Engineering": [
    "Engineering Management and Decision Sciences",
    "Engineering Technology"
+  ],
+  "College of Science, Engineering and Technology": [
+   "Computer Information Science"
   ],
   "Coller School of Management": [
    "Operational Strategy"
@@ -15237,6 +15293,7 @@
    "Supply Chain Management"
   ],
   "Robert B. Willumstad School of Business": [
+   "Decision Sciences and Marketing",
    "Management"
   ],
   "Robert H. Smith School of Business": [
