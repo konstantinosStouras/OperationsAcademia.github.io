@@ -3403,7 +3403,7 @@
     },
     {
       "id": "bocconi-management-technology-roentgen",
-      "institution": "Bocconi",
+      "institution": "Bocconi University",
       "institutionKey": "Bocconi",
       "rowIds": [
         "bocconi____management-science-department-management-and-technology"
@@ -6949,6 +6949,552 @@
       ],
       "checked": "2026-10-25",
       "notes": "Official 2026–2027 catalog locates department chair Jan Ambrose in Founders Hall 537 and places Business Systems and Analytics in this department. Official facilities page identifies Founders Hall as the business school building at Olney/Chew/Wister. Coordinates are the matching named business-building footprint center, not university coordinates or older business offices."
+    },
+    {
+      "id": "charlotte-business-information-operations-friday",
+      "institution": "University of North Carolina at Charlotte",
+      "school": "Belk College of Business",
+      "department": "Business Information Systems and Operations Management",
+      "building": "Friday Building, Room 266C",
+      "address": "9201 University City Boulevard, Charlotte, North Carolina 28223, United States",
+      "lat": 35.3063334,
+      "lng": -80.7300896,
+      "addressSource": "https://directory.charlotte.edu/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1060112742",
+      "supportingSources": [
+        "https://belkcollege.charlotte.edu/departments/bisom/"
+      ],
+      "rowIds": [
+        "university-of-north-carolina-at-charlotte__belk-college-of-business__business-information-systems-and-operations-management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "charlotte-industrial-systems-cameron",
+      "institution": "University of North Carolina at Charlotte",
+      "institutionKey": "University of North Carolina, Charlotte",
+      "school": "William States Lee College of Engineering",
+      "department": "Industrial and Systems Engineering",
+      "building": "Cameron Center, Room 206",
+      "address": "9201 University City Boulevard, Charlotte, North Carolina 28223, United States",
+      "lat": 35.3076808,
+      "lng": -80.7311466,
+      "addressSource": "https://engineering.charlotte.edu/about/facilities-map/",
+      "coordinateSource": "https://www.openstreetmap.org/way/1060166180",
+      "supportingSources": [
+        "https://directory.charlotte.edu/"
+      ],
+      "notes": "The current engineering facilities page and central campus directory both place the department administration in Cameron Center. Individual faculty pages retain Smith Building offices; this marker represents the confirmed departmental office.",
+      "rowIds": [
+        "university-of-north-carolina-charlotte__william-states-lee-college-of-engineering__industrial-and-systems-engineering"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "florida-gulf-coast-information-systems-lutgert",
+      "institution": "Florida Gulf Coast University",
+      "school": "Lutgert College of Business",
+      "department": "Information Systems, Analytics, and Supply Chain",
+      "building": "Lutgert Hall, Room 3355",
+      "address": "10501 Florida Gulf Coast University Boulevard South, Fort Myers, Florida 33965, United States",
+      "lat": 26.46368,
+      "lng": -81.77642,
+      "addressSource": "https://www.fgcu.edu/cob/directory",
+      "coordinateSource": "https://www.openstreetmap.org/way/165070157",
+      "supportingSources": [
+        "https://www.fgcu.edu/cob/programs/isasc/",
+        "https://www.fgcu.edu/campusmap/ada"
+      ],
+      "rowIds": [
+        "florida-gulf-coast-university__lutgert-college-of-business__information-systems-analytics-and-supply-chain"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "new-south-wales-information-systems-quadrangle",
+      "institution": "University of New South Wales",
+      "institutionKey": "UNSW Sydney",
+      "school": "University of New South Wales Business School",
+      "department": "School of Information Systems and Technology Management",
+      "building": "Quadrangle Building, Level 2, West Wing",
+      "address": "Kensington, New South Wales 2033, Australia",
+      "lat": -33.9172152,
+      "lng": 151.2309911,
+      "addressSource": "https://www.unsw.edu.au/business/our-schools/information-systems-technology-management/contact-us",
+      "coordinateSource": "https://www.openstreetmap.org/way/45229649",
+      "supportingSources": [
+        "https://www.estate.unsw.edu.au/sites/default/files/documents/KENCCampusMap.pdf"
+      ],
+      "rowIds": [
+        "unsw-sydney__unsw-business-school__information-systems-and-technology-management",
+        "unsw-sydney__unsw-business-school-school-of-information-systems-and-techn"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "adelphi-management-hagedorn",
+      "institution": "Adelphi University",
+      "school": "Robert B. Willumstad School of Business",
+      "department": "Management",
+      "building": "Hagedorn Hall of Enterprise, Room 335",
+      "address": "1 South Avenue, Garden City, New York 11530, United States",
+      "lat": 40.7212717,
+      "lng": -73.6512451,
+      "addressSource": "https://www.adelphi.edu/business/faculty/management/",
+      "coordinateSource": "https://www.openstreetmap.org/way/589561114",
+      "supportingSources": [
+        "https://map.adelphi.edu/"
+      ],
+      "rowIds": [
+        "adelphi-university__robert-b-willumstad-school-of-business__management"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "chapman-management-science-beckman",
+      "institution": "Chapman University",
+      "school": "George L. Argyros College of Business and Economics",
+      "department": "Management Science",
+      "building": "Beckman Hall",
+      "address": "One University Drive, Orange, California 92866, United States",
+      "lat": 33.793053,
+      "lng": -117.8523262,
+      "addressSource": "https://www.chapman.edu/our-faculty/ravi-kathuria.aspx",
+      "coordinateSource": "https://www.openstreetmap.org/way/206875567",
+      "supportingSources": [
+        "https://www.chapman.edu/research/institutes-and-centers/anderson-center/about/researchers-and-staff.aspx"
+      ],
+      "notes": "Operations management chair and management science faculty offices are in Beckman Hall.",
+      "rowIds": [
+        "chapman-university__george-l-argyros-college-of-business-and-economics__management-science"
+      ],
+      "checked": "2026-10-25"
+    },
+    {
+      "institution": "Chinese University of Hong Kong",
+      "rowIds": [
+        "chinese-university-of-hong-kong____om-is"
+      ],
+      "id": "chinese-university-hong-kong-decisions-operations-technology",
+      "school": "Business School",
+      "department": "Department of Decisions, Operations and Technology",
+      "building": "Cheng Yu Tung Building",
+      "address": "9/F, Cheng Yu Tung Building, 12 Chak Cheung Street, Shatin, New Territories, Hong Kong",
+      "lat": 22.41226337127314,
+      "lng": 114.21063244342804,
+      "addressSource": "https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/",
+      "coordinateSource": "https://www.cuhk.edu.hk/english/campus/cuhk-campus-map.html",
+      "supportingSources": [
+        "https://www.cuhk.edu.hk/english/js/campus/cuhk_location_db.js?20161006"
+      ],
+      "notes": "Current official department page explicitly covers operations and supply chain management and information systems, supplies ninth-floor address and official full department name. Official campus map database gives named Cheng Yu Tung Building marker 135; not the general university location.",
+      "checked": "2026-10-25"
+    },
+    {
+      "institution": "Henderson State University",
+      "rowIds": [
+        "henderson-state-university__college-of-business__operations-management"
+      ],
+      "id": "henderson-state-business-mooney",
+      "school": "College of Business",
+      "department": "Operations Management",
+      "building": "Mooney Hall",
+      "address": "Room 309, Mooney Hall, Brown Street, Arkadelphia, AR 71999, United States",
+      "lat": 34.1268961,
+      "lng": -93.0587644,
+      "addressSource": "https://www.hsu.edu/directory/page2",
+      "coordinateSource": "https://www.openstreetmap.org/way/679940765",
+      "supportingSources": [
+        "https://www.hsu.edu/site/assets/files/8355/campusmap.pdf"
+      ],
+      "notes": "Current official directory locates both College of Business dean Nathan Campbell and college administrator Crystal Campbell in Mooney 309. Official campus map identifies Mooney Hall as building 30; exact named building footprint supplies coordinates, rather than the university mailing address.",
+      "checked": "2026-10-25"
+    },
+    {
+      "id": "bellarmine-rubel-mcgowan",
+      "institution": "Bellarmine University",
+      "rowIds": [
+        "bellarmine-university__w-fielding-rubel-school-of-business__business-technology-and-artificial-intelligence"
+      ],
+      "school": "W. Fielding Rubel School of Business",
+      "department": "Business Technology and Artificial Intelligence",
+      "building": "Joseph J. McGowan, Jr. Hall",
+      "address": "2021 Bellarmine Boulevard, Louisville, KY 40205, United States",
+      "lat": 38.2185148,
+      "lng": -85.7048663,
+      "addressSource": "https://www.bellarmine.edu/news/article/mcgowan-hall-named-in-honor-of-former-bellarmine-president.php",
+      "coordinateSource": "https://www.openstreetmap.org/way/537811387",
+      "supportingSources": [
+        "https://bellarmine.edu/directory/haleh_karimi.php",
+        "https://www.bellarmine.edu/docs/default-source/about-docs/bellarmine-dictionary.pdf",
+        "https://www.bellarmine.edu/admissions/campus-map.php"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official university announcement identifies Rubel School and faculty offices in McGowan Hall, corroborated by current faculty office CNMH 148 and official building code/address dictionary. Exact named McGowan building footprint matches the entrance-facing building west of Horrigan in the university campus map. Distinct from older Horrigan location and the wider Centro complex."
+    },
+    {
+      "id": "hong-kong-polytechnic-logistics-hung-hom-bay",
+      "institution": "Hong Kong Polytechnic University",
+      "rowIds": [
+        "hong-kong-polytechnic-university__faculty-of-business__logistics-and-maritime-studies",
+        "hong-kong-polytechnic-university____scm-om"
+      ],
+      "school": "Faculty of Business",
+      "department": "Department of Logistics and Maritime Studies",
+      "building": "Hung Hom Bay Campus building",
+      "address": "Room 1550, 15/F, 8 Hung Lok Road, Hung Hom, Kowloon, Hong Kong",
+      "lat": 22.303367,
+      "lng": 114.184855,
+      "addressSource": "https://www.polyu.edu.hk/lms/about-lms/contact-us/?sc_lang=en",
+      "coordinateSource": "https://www.polyu.edu.hk/campus-map/?lang=en_US&locid=5bcd3714520471ab6eaf5721",
+      "supportingSources": [
+        "https://www.polyu.edu.hk/lms/people/academic-staff/?sc_lang=en",
+        "https://jobs.polyu.edu.hk/apply.php?job=260825003",
+        "https://www.polyu.edu.hk/public-data/POIs?channel=campus-map&category=AcademicOffice,Building,CoreLocation"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current department contact and all current academic staff offices are at Hung Hom Bay, rather than old Li Ka Shing Tower offices on main campus. Official department marker supplies actual building coordinates; the separate walking waypoint is not used. Current official supply chain and operations management vacancy confirms this host department."
+    },
+    {
+      "id": "hong-kong-polytechnic-fashion-textiles-core-q",
+      "institution": "Hong Kong Polytechnic University",
+      "rowIds": [
+        "hong-kong-polytechnic-university__faculty-of-business__fashion-and-textiles"
+      ],
+      "school": "School of Fashion and Textiles",
+      "department": "Fashion and Textiles",
+      "building": "Chow Yei Ching Building (Core Q)",
+      "address": "Room QT715, 7/F, Chow Yei Ching Building, Hung Hom, Kowloon, Hong Kong",
+      "lat": 22.304691,
+      "lng": 114.180664,
+      "addressSource": "https://www.polyu.edu.hk/sft/about-sft/contact-us/",
+      "coordinateSource": "https://www.polyu.edu.hk/campus-map/?lang=en_US&locid=5bcd3714520471ab6eaf571d",
+      "supportingSources": [
+        "https://www.polyu.edu.hk/hro/careers/globalsearch/sft/",
+        "https://www.polyu.edu.hk/public-data/POIs?channel=campus-map&category=AcademicOffice,Building,CoreLocation"
+      ],
+      "checked": "2026-10-25",
+      "notes": "School contact and official school-specific map marker identify QT715 and Core Q. Fashion and Textiles became an independent school in 2022 and must not remain grouped under Faculty of Business. Uses marker coordinates rather than the offset map label or walking waypoint."
+    },
+    {
+      "id": "norfolk-state-business-brown",
+      "institution": "Norfolk State University",
+      "institutionKey": "Norfolk State University",
+      "rowIds": [
+        "norfolk-state-university____ba"
+      ],
+      "school": "School of Business",
+      "department": "",
+      "building": "George William Clement Brown Memorial Hall",
+      "address": "George William Clement Brown Memorial Hall, Room 304, 700 Park Avenue, Norfolk, Virginia 23504, United States",
+      "lat": 36.84905447,
+      "lng": -76.26311506,
+      "addressSource": "https://www.nsu.edu/school-of-business/contact-us",
+      "coordinateSource": "https://www.openstreetmap.org/way/1198032952",
+      "supportingSources": [
+        "https://www.nsu.edu/business/faculty-and-staff",
+        "https://www.nsu.edu/About/Administrative-Offices-Services/Parking-Services/files/NSU-Campus-Map.aspx",
+        "https://commonwealthcalendar.virginia.gov/File/Index/8094"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current School of Business contact gives Brown Hall 304; faculty directory lists business analytics professor Hector Botello directly under school. Exact named external southern main-building footprint corroborated visually with official campus map building 30, east of Bowser and north of White House Memorial Garden. Official events page generic campus address coordinates at 36.846283,-76.259928 rejected as outside this building. Full namesake spelling from Board of Visitors naming resolution."
+    },
+    {
+      "id": "washington-st-louis-operations-knight",
+      "institution": "Washington University in St. Louis",
+      "institutionKey": "Washington University in St. Louis",
+      "rowIds": [
+        "washington-university-in-st-louis____scm-om"
+      ],
+      "school": "Olin Business School",
+      "department": "Supply Chain, Operations, and Technology",
+      "building": "Knight Hall",
+      "address": "Knight Hall, One Brookings Drive, St. Louis, Missouri 63130-4899, United States",
+      "lat": 38.649616,
+      "lng": -90.31083,
+      "addressSource": "https://bpb-us-e2.wpmucdn.com/sites.wustl.edu/dist/b/4921/files/2025/12/cv.pdf",
+      "coordinateSource": "https://happenings.washu.edu/knight_hall_413",
+      "supportingSources": [
+        "https://olin.washu.edu/faculty/fuqiang-zhang",
+        "https://sites.wustl.edu/olinvicedean/people/fuqiang-zhang/",
+        "https://olin.washu.edu/about/contact-us.php"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official faculty profile links December 2025 curriculum vitae giving area chair Fuqiang Zhang Knight Hall 435. University event venue structured coordinates identify Knight Hall itself, distinct from Knight Executive Education Center and older Simon Hall offices. Official current area name expands posting abbreviations."
+    },
+    {
+      "id": "location-verified-606",
+      "institution": "The College of New Jersey",
+      "institutionKey": "College of New Jersey",
+      "rowIds": [
+        "college-of-new-jersey____om-scm"
+      ],
+      "school": "School of Business",
+      "department": "Management — Operations and Supply Chain Management",
+      "building": "Business Building",
+      "address": "2000 Pennington Road, Ewing, NJ 08628, United States",
+      "lat": 40.2695194,
+      "lng": -74.7814347,
+      "addressSource": "https://business.tcnj.edu/academics/management/",
+      "coordinateSource": "https://www.openstreetmap.org/way/377239014",
+      "supportingSources": [
+        "https://business.tcnj.edu/2022/03/14/new-supply-chain-management-minor/",
+        "https://business.tcnj.edu/business-faculty/shengbin-wang/",
+        "https://business.tcnj.edu/wp-content/uploads/sites/219/2011/08/MGT-360-Operations-Management.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official Management department page includes Operations Management and Supply Chain Management; official program announcement names the Management department chair and supply-chain faculty Shengbin Wang. Current school and faculty contact uses Business Building, corroborating earlier operations faculty office Business Building 305. Exact named Business Building footprint coordinates, not the campus center."
+    },
+    {
+      "id": "location-verified-654",
+      "institutionKey": "University of Rochester",
+      "rowIds": [
+        "university-of-rochester__simon-business-school__operations-management"
+      ],
+      "checked": "2026-10-25",
+      "institution": "University of Rochester",
+      "school": "Simon Business School",
+      "department": "Operations Management",
+      "building": "Carol G. Simon Hall",
+      "address": "244 Hutchison Road, Rochester, NY 14627, United States",
+      "lat": 43.1270193,
+      "lng": -77.6298901,
+      "addressSource": "https://simon.rochester.edu/faculty/vera-tilson",
+      "coordinateSource": "https://www.openstreetmap.org/way/26461608",
+      "supportingSources": [
+        "https://simon.rochester.edu/faculty/yaron-shaposhnik"
+      ],
+      "notes": "Current official faculty directory places Operations Management faculty Vera Tilson in 3-349 and Yaron Shaposhnik in 3-345 Carol Simon Hall. Exact named Carol G. Simon Hall footprint coordinates, separate from Schlegel and Gleason halls."
+    },
+    {
+      "id": "location-verified-701",
+      "institutionKey": "University of Michigan at Ann Arbor",
+      "rowIds": [
+        "university-of-michigan-at-ann-arbor__stephen-m-ross-school-of-business__technology-and-operations-management"
+      ],
+      "checked": "2026-10-25",
+      "institution": "University of Michigan",
+      "school": "Stephen M. Ross School of Business",
+      "department": "Technology and Operations",
+      "building": "Ross School of Business Building, Room R5372",
+      "address": "701 Tappan Avenue, Ann Arbor, MI 48109, United States",
+      "lat": 42.2727426,
+      "lng": -83.7375413,
+      "addressSource": "https://michiganross.umich.edu/faculty-research/faculty/izak-duenyas",
+      "coordinateSource": "https://www.openstreetmap.org/way/154232149",
+      "supportingSources": [
+        "https://michiganross.umich.edu/sites/default/files/documents/umbs_directory_final.pdf"
+      ],
+      "notes": "Current official area-chair profile locates Izak Duenyas in R5372. Official campus directory distinguishes Ross R rooms from adjacent Kresge K, Executive E, and other wings. Exact named Ross building footprint coordinates, not the entire business campus or Blau Hall."
+    },
+    {
+      "id": "location-verified-694",
+      "institution": "Eindhoven University of Technology",
+      "institutionKey": "TU Eindhoven",
+      "rowIds": [
+        "tu-eindhoven____industrial-engineering-and-innovation-sciences"
+      ],
+      "school": "",
+      "department": "Industrial Engineering and Innovation Sciences",
+      "building": "Atlas",
+      "address": "De Zaale / Groene Loper, Eindhoven, Netherlands",
+      "lat": 51.4478801,
+      "lng": 5.4861188,
+      "addressSource": "https://research.tue.nl/en/organisations/information-systems-ieis/",
+      "coordinateSource": "https://www.openstreetmap.org/way/483163232",
+      "supportingSources": [
+        "https://research.tue.nl/en/organisations/technology-innovation-society/",
+        "https://www.eurandom.tue.nl/wp-content/uploads/2025/06/Eurandom_DEMO2025_Program_2530.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "University research-unit directory locates Information Systems on Atlas floor 5 and Technology Innovation Society on Atlas floor 8. Official campus map explicitly places Industrial Engineering and Innovation Sciences in Atlas, building 3. Exact named Atlas university-building footprint coordinates, not other similarly named businesses or former Paviljoen offices."
+    },
+    {
+      "id": "maryland-van-munching-decision-operations",
+      "institution": "University of Maryland, College Park",
+      "institutionKey": "University of Maryland, College Park",
+      "rowIds": [
+        "university-of-maryland-college-park__robert-h-smith-school-of-business__decision-operations-and-information-technologies"
+      ],
+      "school": "Robert H. Smith School of Business",
+      "department": "Decision, Operations and Information Technologies",
+      "building": "Van Munching Hall",
+      "address": "7699 Mowatt Lane, College Park, MD 20742, United States",
+      "lat": 38.983017,
+      "lng": -76.9470551,
+      "addressSource": "https://www.rhsmith.umd.edu/departments/decision-operations-information-technologies/contact-us",
+      "coordinateSource": "https://www.openstreetmap.org/way/24006939",
+      "checked": "2026-10-25",
+      "notes": "Current official department contact gives program managers in rooms 4340 and 4363 Van Munching Hall. Separate department record preserves its own card while sharing the building with Logistics, Business and Public Policy. Exact named building footprint, not adjacent bus stop."
+    },
+    {
+      "id": "maryland-van-munching-logistics",
+      "institution": "University of Maryland, College Park",
+      "institutionKey": "University of Maryland, College Park",
+      "rowIds": [
+        "university-of-maryland-college-park__robert-h-smith-school-of-business__logistics-business-and-public-policy"
+      ],
+      "school": "Robert H. Smith School of Business",
+      "department": "Logistics, Business and Public Policy",
+      "building": "Van Munching Hall",
+      "address": "7699 Mowatt Lane, College Park, MD 20742, United States",
+      "lat": 38.983017,
+      "lng": -76.9470551,
+      "addressSource": "https://www.rhsmith.umd.edu/directory/cristian-dezso",
+      "coordinateSource": "https://www.openstreetmap.org/way/24006939",
+      "checked": "2026-10-25",
+      "notes": "Current official department chair Cristian Dezso profile specifies room 3409 Van Munching Hall. Separate department record shares the same verified building with Decision, Operations and Information Technologies. Coordinates are exact building footprint, not adjacent bus stop."
+    },
+    {
+      "id": "location-verified-668",
+      "institutionKey": "Copenhagen Business School",
+      "rowIds": [
+        "copenhagen-business-school__school-of-business__operations-management"
+      ],
+      "checked": "2026-10-25",
+      "institution": "Copenhagen Business School",
+      "school": "",
+      "department": "Department of Operations Management",
+      "building": "Solbjerg Plads 3, Block B, floors 4 and 5",
+      "address": "Solbjerg Plads 3, 2000 Frederiksberg, Denmark",
+      "lat": 55.68165505,
+      "lng": 12.5293985,
+      "addressSource": "https://research.cbs.dk/en/organisations/department-of-operations-management/",
+      "coordinateSource": "https://www.openstreetmap.org/way/25421215",
+      "supportingSources": [
+        "https://www.cbs.dk/research/departments/department-operations-management"
+      ],
+      "notes": "Current official departmental research portal explicitly specifies Solbjerg Plads 3, B4 and B5. Coordinates are the footprint center of the single connected Solbjerg Plads university building, whose Block B contains this department; not the surrounding campus amenity polygon or a street address interpolation."
+    },
+    {
+      "id": "location-verified-693",
+      "institutionKey": "Tel Aviv University",
+      "rowIds": [
+        "tel-aviv-university__coller-school-of-management__operational-strategy"
+      ],
+      "checked": "2026-10-25",
+      "institution": "Tel Aviv University",
+      "school": "Coller School of Management",
+      "department": "Operational Strategy",
+      "building": "Recanati Building",
+      "address": "Tel Aviv University, Ramat Aviv, Tel Aviv, Israel",
+      "lat": 32.1128747,
+      "lng": 34.8036824,
+      "addressSource": "https://www.ims.tau.ac.il/Tal/Syllabus/Syllabus_L.aspx?caller=&course=1231241206&lang=EN&req=5f843073e8f6dbcb722c0d273b8d9d7070dd6ca5e605061c9af8523fd45b4c8d&year=2025",
+      "coordinateSource": "https://www.openstreetmap.org/way/48072085",
+      "supportingSources": [
+        "https://en-coller.tau.ac.il/faculty-research/departments/operational-strategy",
+        "https://maintenanceapps.tau.ac.il/documents/map/detailed-tel-aviv-university-map-english.pdf"
+      ],
+      "notes": "Official 2025–2026 Operations Management syllabus places faculty Yossi Aviv office hours in Recanati Management. Official university map identifies the Coller School in Recanati Building. Exact named building footprint coordinates; not Recanati Street or the university center."
+    },
+    {
+      "id": "location-verified-688",
+      "institution": "Saarland University",
+      "institutionKey": "Saarland University",
+      "rowIds": [
+        "saarland-university____fachrichtung-wirtschaftswissenschaft"
+      ],
+      "school": "Faculty of Human and Business Sciences",
+      "department": "Department of Economics and Business Administration",
+      "building": "Building B4 1 (Audimax)",
+      "address": "Saarbrücken Campus, Building B4 1, 66123 Saarbrücken, Germany",
+      "lat": 49.2526324,
+      "lng": 7.0402673,
+      "addressSource": "https://www.uni-saarland.de/en/department/economics.html",
+      "coordinateSource": "https://www.openstreetmap.org/relation/1316195",
+      "supportingSources": [
+        "https://www.uni-saarland.de/en/department/economics/study/services/exams-office.html",
+        "https://www.uni-saarland.de/fakultaet-p/amlap/venue.html"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official department contact and examination office both explicitly locate the department in B4 1, with office 0.10. Official 2026 venue page identifies B4 1 as Audimax. Exact full B4 1 building footprint coordinates, not the smaller auditorium room polygon or Saarbrücken city centroid."
+    },
+    {
+      "id": "location-verified-689",
+      "institution": "Seoul National University",
+      "institutionKey": "Seoul National University",
+      "rowIds": [
+        "seoul-national-university__business-school__operations-management"
+      ],
+      "school": "College of Business Administration",
+      "department": "Operations Management",
+      "building": "Building 58, SK Business Hall",
+      "address": "1 Gwanak-ro, Gwanak-gu, Seoul 08826, South Korea",
+      "lat": 37.4654274,
+      "lng": 126.9518588,
+      "addressSource": "https://cba.snu.ac.kr/en/research/faculty/professor?idx=1309&major=4",
+      "coordinateSource": "https://www.openstreetmap.org/way/185936759",
+      "supportingSources": [
+        "https://cba.snu.ac.kr/en/research/faculty/professor?idx=13141&major=4",
+        "https://cba.snu.ac.kr/en/newsroom/notice?bbsidx=25262&md=v"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official Operations faculty profiles locate Jungsuk Oh in 58-504 and Taewoo Lee in 58-510. Official 2026 admissions notice identifies building 58 as SK Business Hall. Exact matching business-building footprint coordinates, not nearby Graduate School of Business building 59 or the university center."
+    },
+    {
+      "id": "bocconi-operations-supply-chain-roentgen-661",
+      "institution": "Bocconi University",
+      "institutionKey": "Bocconi University",
+      "rowIds": [
+        "bocconi-university__sda-school-of-management__operations-and-supply-chain-management"
+      ],
+      "school": "",
+      "department": "Department of Management and Technology — Operations and Supply Chain Management",
+      "building": "Roentgen Building, fourth floor, offices 4-C3-03 and 4-C3-04",
+      "address": "Via Roentgen 1, 20136 Milan, Italy",
+      "lat": 45.4506986,
+      "lng": 9.1878068,
+      "addressSource": "https://mgmt-tech.unibocconi.eu/faculty/alberto-grando",
+      "coordinateSource": "https://www.openstreetmap.org/way/35780519",
+      "checked": "2026-10-25",
+      "notes": "Current official department profiles identify Operations and Supply Chain Management faculty Alberto Grando and Giuseppe Stabilini in Management and Technology, whose office is explicitly Via Roentgen 1, fourth floor. Uses the same exact verified Roentgen building footprint as the departmental alias; not the separate School of Management executive campus.",
+      "supportingSources": [
+        "https://mgmt-tech.unibocconi.eu/faculty/giuseppe-stabilini",
+        "https://mgmt-tech.unibocconi.eu/about"
+      ]
+    },
+    {
+      "id": "location-verified-624",
+      "institution": "Marian University",
+      "institutionKey": "Marian University",
+      "rowIds": [
+        "marian-university____business-statistics"
+      ],
+      "school": "School of Business",
+      "department": "Business Statistics",
+      "building": "Marian Hall, Room 002",
+      "address": "3200 Cold Spring Road, Indianapolis, IN 46222, United States",
+      "lat": 39.8153143,
+      "lng": -86.2024639,
+      "addressSource": "https://www.marian.edu/directory/",
+      "coordinateSource": "https://www.openstreetmap.org/way/218699504",
+      "supportingSources": [
+        "https://www.marian.edu/school-of-business/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official directory explicitly identifies Domonique Gregory as Assistant Professor of Business Statistics in Marian Hall 002. This establishes Indianapolis Marian University and the actual faculty building, not similarly named Wisconsin institution or the separate Norman business building. Exact named Marian Hall footprint coordinates."
+    },
+    {
+      "id": "location-verified-667",
+      "institution": "Chalmers University of Technology",
+      "institutionKey": "Chalmers University of Technology",
+      "rowIds": [
+        "chalmers-university-of-technology"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Chalmers Entré, University Servicecenter",
+      "address": "Chalmersplatsen 1, Gothenburg, Sweden",
+      "lat": 57.6893168,
+      "lng": 11.9736623,
+      "addressSource": "https://www.chalmers.se/en/about-chalmers/contact/chalmers-servicecenter/",
+      "coordinateSource": "https://www.openstreetmap.org/node/2384816740",
+      "supportingSources": [
+        "https://www.chalmers.se/en/about-chalmers/contact/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Source directory row is a university-only members record with no school or departmental affiliation. Preserves that university-level identity rather than inventing a business department. Current official October 2026 university contact directs visitors to Servicecenter in Chalmers Entre, Chalmersplatsen 1. Coordinates are the exact numbered building address point, not the campus centroid or nearby parcel locker."
     }
   ]
 }

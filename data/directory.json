@@ -154,7 +154,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "Robert B. Willumstad School of Business",
+   "Management"
+  ]
  },
  {
   "id": "ahmedabad-university__amrut-mody-school-of-management__data-analytics-decision-sciences-information-systems-innovat",
@@ -907,7 +911,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-18"
+  "lastPosted": "2026-07-18",
+  "mapSearchTerms": [
+   "W. Fielding Rubel School of Business",
+   "Business Technology and Artificial Intelligence"
+  ]
  },
  {
   "id": "belmont-university__jack-c-massey-college-of-business__business-systems-and-analytics",
@@ -1093,6 +1101,9 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Department of Management and Technology — Operations and Supply Chain Management"
   ]
  },
  {
@@ -2049,7 +2060,8 @@
   "type": "University",
   "sources": [
    "members"
-  ]
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "chapman-university__george-l-argyros-college-of-business-and-economics__management-science",
@@ -2063,7 +2075,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "George L. Argyros College of Business and Economics",
+   "Management Science"
+  ]
  },
  {
   "id": "chatham-university____sustainable-management",
@@ -2130,7 +2146,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-11"
+  "lastPosted": "2025-08-11",
+  "mapSearchTerms": [
+   "Business School",
+   "Department of Decisions, Operations and Technology"
+  ]
  },
  {
   "id": "chinese-university-of-hong-kong__cuhk-business-school__operations-management",
@@ -2663,6 +2683,9 @@
    "directory",
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Department of Operations Management"
   ]
  },
  {
@@ -3883,7 +3906,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-09-29"
+  "lastPosted": "2026-09-29",
+  "mapSearchTerms": [
+   "Lutgert College of Business",
+   "Information Systems, Analytics, and Supply Chain"
+  ]
  },
  {
   "id": "florida-international-university____is",
@@ -4851,7 +4878,11 @@
    "seed"
   ],
   "n": 2,
-  "lastPosted": "2026-07-18"
+  "lastPosted": "2026-07-18",
+  "mapSearchTerms": [
+   "College of Business",
+   "Operations Management"
+  ]
  },
  {
   "id": "high-point-university__earl-n-phillips-school-of-business__supply-chain-management",
@@ -4923,6 +4954,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "School of Fashion and Textiles",
+   "Fashion and Textiles"
   ]
  },
  {
@@ -4946,7 +4981,11 @@
    "seed"
   ],
   "n": 6,
-  "lastPosted": "2026-08-25"
+  "lastPosted": "2026-08-25",
+  "mapSearchTerms": [
+   "Faculty of Business",
+   "Department of Logistics and Maritime Studies"
+  ]
  },
  {
   "id": "hong-kong-university-of-science-and-technology__business-school__information-systems-business-statistics-and-operations-manag",
@@ -6650,7 +6689,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-09"
+  "lastPosted": "2025-06-09",
+  "mapSearchTerms": [
+   "School of Business",
+   "Business Statistics"
+  ]
  },
  {
   "id": "marquette-university____oscm",
@@ -7926,7 +7969,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-12-18"
+  "lastPosted": "2025-12-18",
+  "mapSearchTerms": [
+   "School of Business"
+  ]
  },
  {
   "id": "north-carolina-a-t-state-university____business-is-and-analytics",
@@ -9438,6 +9484,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Human and Business Sciences",
+   "Department of Economics and Business Administration"
   ]
  },
  {
@@ -9741,6 +9791,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Operations Management"
   ]
  },
  {
@@ -10856,6 +10910,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Coller School of Management",
+   "Operational Strategy"
   ]
  },
  {
@@ -11509,7 +11567,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-07-17"
+  "lastPosted": "2025-07-17",
+  "mapSearchTerms": [
+   "School of Business",
+   "Management — Operations and Supply Chain Management"
+  ]
  },
  {
   "id": "hebrew-university-of-jerusalem__hebrew-university-business-school__operations-research",
@@ -11542,7 +11604,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-08-02"
+  "lastPosted": "2025-08-02",
+  "mapSearchTerms": [
+   "Faculty of Business",
+   "Department of Logistics and Maritime Studies"
+  ]
  },
  {
   "id": "hong-kong-university-of-science-and-technology____isom",
@@ -12035,6 +12101,9 @@
   "department": "Industrial Engineering and Innovation Sciences",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Industrial Engineering and Innovation Sciences"
   ]
  },
  {
@@ -14715,6 +14784,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Robert H. Smith School of Business",
+   "Decision, Operations and Information Technologies"
   ]
  },
  {
@@ -14727,6 +14800,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Robert H. Smith School of Business",
+   "Logistics, Business and Public Policy"
   ]
  },
  {
@@ -14996,6 +15073,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Stephen M. Ross School of Business",
+   "Technology and Operations"
   ]
  },
  {
@@ -15449,7 +15530,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-30"
+  "lastPosted": "2026-09-30",
+  "mapSearchTerms": [
+   "Belk College of Business",
+   "Business Information Systems and Operations Management"
+  ]
  },
  {
   "id": "university-of-north-carolina-at-wilmington____supply-chain-management",
@@ -15497,7 +15582,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-13"
+  "lastPosted": "2026-10-13",
+  "mapSearchTerms": [
+   "William States Lee College of Engineering",
+   "Industrial and Systems Engineering"
+  ]
  },
  {
   "id": "university-of-north-carolina-unc-chapel-hill__kenan-flagler-business-school__operations",
@@ -15970,6 +16059,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Simon Business School",
+   "Operations Management"
   ]
  },
  {
@@ -17355,7 +17448,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-29"
+  "lastPosted": "2026-09-29",
+  "mapSearchTerms": [
+   "University of New South Wales Business School",
+   "School of Information Systems and Technology Management"
+  ]
  },
  {
   "id": "unsw-sydney__unsw-business-school-school-of-information-systems-and-techn",
@@ -17374,7 +17471,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2025-10-13"
+  "lastPosted": "2025-10-13",
+  "mapSearchTerms": [
+   "University of New South Wales Business School",
+   "School of Information Systems and Technology Management"
+  ]
  },
  {
   "id": "ut-austin-mccombs____is-ai-or-health-cluster",
@@ -17896,7 +17997,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-12-22"
+  "lastPosted": "2025-12-22",
+  "mapSearchTerms": [
+   "Olin Business School",
+   "Supply Chain, Operations, and Technology"
+  ]
  },
  {
   "id": "washington-university-in-st-louis__olin-business-school",
