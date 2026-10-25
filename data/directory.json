@@ -466,7 +466,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-13"
+  "lastPosted": "2026-10-13",
+  "mapSearchTerms": [
+   "School of Business Administration",
+   "Information Systems and Business Analytics"
+  ]
  },
  {
   "id": "appalachian-state-university____cis",
@@ -594,7 +598,7 @@
   "n": 1,
   "lastPosted": "2026-02-25",
   "mapSearchTerms": [
-   "College of Business and Economic Development — School of Business",
+   "College of Business and Economic Development â€” School of Business",
    "Management"
   ]
  },
@@ -797,7 +801,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-27"
+  "lastPosted": "2026-02-27",
+  "mapSearchTerms": [
+   "Rydell School of Business"
+  ]
  },
  {
   "id": "austin-peay-state-university____ba",
@@ -1105,7 +1112,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-10-10"
+  "lastPosted": "2025-10-10",
+  "mapSearchTerms": [
+   "BITS School of Management",
+   "Operations Management"
+  ]
  },
  {
   "id": "black-hills-state-university____ba-om",
@@ -1165,7 +1176,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-05"
+  "lastPosted": "2026-09-05",
+  "mapSearchTerms": [
+   "Woods College of Advancing Studies"
+  ]
  },
  {
   "id": "boston-college__carroll-school-of-management__business-analytics",
@@ -1749,7 +1763,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-19"
+  "lastPosted": "2026-03-19",
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Management, Information Systems and Business Analytics"
+  ]
  },
  {
   "id": "california-state-university-stanislaus____computer-information-systems",
@@ -2103,6 +2121,10 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "China Europe International Business School",
+   "Decision Sciences and Management Information Systems"
   ]
  },
  {
@@ -2544,7 +2566,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-21"
+  "lastPosted": "2026-02-21",
+  "mapSearchTerms": [
+   "Lucille and Jay Chazanoff School of Business",
+   "Department of Management"
+  ]
  },
  {
   "id": "college-of-staten-island__lucille-and-jay-chazanoff-school-of-business__information-systems-and-informatics",
@@ -2558,7 +2584,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-16"
+  "lastPosted": "2026-10-16",
+  "mapSearchTerms": [
+   "Lucille and Jay Chazanoff School of Business",
+   "Information Systems and Informatics"
+  ]
  },
  {
   "id": "college-of-william-and-mary__raymond-a-mason-school-of-business__operations-management-and-information-technology",
@@ -2828,6 +2858,9 @@
   "type": "University",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Center for Data Science for Enterprise and Society"
   ]
  },
  {
@@ -2856,7 +2889,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2026-01-31"
+  "lastPosted": "2026-01-31",
+  "mapSearchTerms": [
+   "Samuel Curtis Johnson Graduate School of Management",
+   "Operations, Technology, and Information Management Area"
+  ]
  },
  {
   "id": "cornell-university__cornell-peter-and-stephanie-nolan-school-of-hotel-administra__operations-technology-and-information-management-area",
@@ -2870,7 +2907,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-08"
+  "lastPosted": "2026-10-08",
+  "mapSearchTerms": [
+   "Peter and Stephanie Nolan School of Hotel Administration",
+   "Operations, Technology, and Information Management Area"
+  ]
  },
  {
   "id": "cornell-university__cornell-sc-johnson-college-of-business__operations-technology-and-information-management-area",
@@ -2892,7 +2933,11 @@
   "n": 2,
   "lastPosted": "2026-10-16",
   "lat": 42.4458918,
-  "lng": -76.4833009
+  "lng": -76.4833009,
+  "mapSearchTerms": [
+   "Charles H. Dyson School of Applied Economics and Management",
+   "Operations, Technology, and Information Management Area"
+  ]
  },
  {
   "id": "cornell-university__cornell-sc-johnson-college-of-business__services-management",
@@ -2936,7 +2981,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-03"
+  "lastPosted": "2026-10-03",
+  "mapSearchTerms": [
+   "David A. Duffield College of Engineering — Cornell Tech",
+   "School of Operations Research and Information Engineering"
+  ]
  },
  {
   "id": "cornell-university__school-of-operations-research-and-information-engineering-or",
@@ -3028,7 +3077,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-10"
+  "lastPosted": "2026-03-10",
+  "mapSearchTerms": [
+   "School of Business, Mathematics, Engineering and Technologies",
+   "Business Administration"
+  ]
  },
  {
   "id": "cranfield-university__cranfield-school-of-management__logistics-procurement-and-supply-chain-management",
@@ -3876,7 +3929,7 @@
   "lastPosted": "2026-01-15",
   "mapSearchTerms": [
    "College of Business and Aviation",
-   "Marketing and Management Studies — Information Systems Management"
+   "Marketing and Management Studies â€” Information Systems Management"
   ]
  },
  {
@@ -3893,7 +3946,7 @@
   "lastPosted": "2026-02-03",
   "mapSearchTerms": [
    "College of Business and Aviation",
-   "Marketing and Management Studies — Information Systems Management"
+   "Marketing and Management Studies â€” Information Systems Management"
   ]
  },
  {
@@ -4099,7 +4152,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-20"
+  "lastPosted": "2025-11-20",
+  "mapSearchTerms": [
+   "Department of Data Science and Business Analytics"
+  ]
  },
  {
   "id": "florida-state-university____is-analytics",
@@ -4361,7 +4417,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-15"
+  "lastPosted": "2025-09-15",
+  "mapSearchTerms": [
+   "McDonough School of Business",
+   "Sustainable Business (open-area faculty search)"
+  ]
  },
  {
   "id": "georgetown-university__mcdonough-school-of-business__business-of-sustainability-initiative",
@@ -4777,7 +4837,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-10-16"
+  "lastPosted": "2026-10-16",
+  "mapSearchTerms": [
+   "Hanken School of Economics",
+   "Department of Finance and Economics — Statistics"
+  ]
  },
  {
   "id": "harris-stowe-state-university__anheuser-busch-school-of-business__management-information-systems",
@@ -5517,7 +5581,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-23"
+  "lastPosted": "2026-09-23",
+  "mapSearchTerms": [
+   "IESE Business School, University of Navarra",
+   "Behavioral Lab"
+  ]
  },
  {
   "id": "iese-business-school____managerial-decision-sciences",
@@ -5688,7 +5756,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2014-08-29"
+  "lastPosted": "2014-08-29",
+  "mapSearchTerms": [
+   "Indian School of Business",
+   "Operations Management"
+  ]
  },
  {
   "id": "indian-school-of-business____operations-management",
@@ -8072,7 +8144,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-03-07"
+  "lastPosted": "2026-03-07",
+  "mapSearchTerms": [
+   "School of Liberal Arts, Sciences and Business",
+   "Department of Business"
+  ]
  },
  {
   "id": "new-uzbekistan-university__school-of-management__industrial-management",
@@ -8467,7 +8543,7 @@
   "n": 1,
   "lastPosted": "2026-01-03",
   "mapSearchTerms": [
-   "D’Amore-McKim School of Business",
+   "Dâ€™Amore-McKim School of Business",
    "Supply Chain and Information Management Group"
   ]
  },
@@ -8499,7 +8575,7 @@
    "seed"
   ],
   "mapSearchTerms": [
-   "D’Amore-McKim School of Business",
+   "Dâ€™Amore-McKim School of Business",
    "Supply Chain and Information Management Group"
   ]
  },
@@ -9433,7 +9509,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-29"
+  "lastPosted": "2026-09-29",
+  "mapSearchTerms": [
+   "Mitch Daniels School of Business",
+   "Department of Management Information Systems"
+  ]
  },
  {
   "id": "purdue-university__mitch-daniels-school-of-business__quantitative-methods",
@@ -9447,7 +9527,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-22"
+  "lastPosted": "2026-09-22",
+  "mapSearchTerms": [
+   "Mitch Daniels School of Business",
+   "Department of Quantitative Methods"
+  ]
  },
  {
   "id": "purdue-university__mitchell-e-daniels-jr-school-of-business__quantitative-methods",
@@ -10260,7 +10344,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-09-12"
+  "lastPosted": "2025-09-12",
+  "mapSearchTerms": [
+   "Antai College of Economics and Management",
+   "Department of Management Science"
+  ]
  },
  {
   "id": "shanghai-jiao-tong-university__antai-college-of-economics-and-management__data-and-business-intelligence",
@@ -10274,7 +10362,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-01"
+  "lastPosted": "2026-09-01",
+  "mapSearchTerms": [
+   "Antai College of Economics and Management",
+   "Department of Data and Business Intelligence"
+  ]
  },
  {
   "id": "shanghai-jiao-tong-university__antai-college-of-economics-and-management__management-science",
@@ -10290,7 +10382,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-01"
+  "lastPosted": "2026-09-01",
+  "mapSearchTerms": [
+   "Antai College of Economics and Management",
+   "Department of Management Science"
+  ]
  },
  {
   "id": "shanghai-university-of-finance-and-economics",
@@ -10384,7 +10480,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-18"
+  "lastPosted": "2026-02-18",
+  "mapSearchTerms": [
+   "College of Business",
+   "Business Administration"
+  ]
  },
  {
   "id": "simon-fraser-university__beedie-school-of-business__technology-and-operations-management",
@@ -11099,7 +11199,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-18"
+  "lastPosted": "2025-11-18",
+  "mapSearchTerms": [
+   "College of Business",
+   "Operations and Decision Analytics"
+  ]
  },
  {
   "id": "stony-brook-university__college-of-business__operations-and-decision-analytics",
@@ -12547,7 +12651,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-01"
+  "lastPosted": "2026-09-01",
+  "mapSearchTerms": [
+   "School of Economics and Management",
+   "Department of Management Science and Engineering"
+  ]
  },
  {
   "id": "trinity-university__neidorff-school-of-business__finance-and-business-analytics",
@@ -15115,7 +15223,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-04-29"
+  "lastPosted": "2026-04-29",
+  "mapSearchTerms": [
+   "Leeds University Business School",
+   "Analytics, Technology and Operations Department"
+  ]
  },
  {
   "id": "university-of-liverpool__management-school__operations-and-supply-chain-management",
@@ -16055,7 +16167,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-05"
+  "lastPosted": "2026-09-05",
+  "mapSearchTerms": [
+   "College of Business and Digital Innovation",
+   "Business Analytics"
+  ]
  },
  {
   "id": "university-of-new-mexico____om",
@@ -18328,7 +18444,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-11-24"
+  "lastPosted": "2025-11-24",
+  "mapSearchTerms": [
+   "Villanova School of Business",
+   "Department of Management and Operations"
+  ]
  },
  {
   "id": "villanova-university__villanova-school-of-business__accounting-and-information-systems",
@@ -18471,7 +18591,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-05-25"
+  "lastPosted": "2025-05-25",
+  "mapSearchTerms": [
+   "College of Science",
+   "Academy of Data Science"
+  ]
  },
  {
   "id": "virginia-tech____grado-department-of-industrial-and-systems-engineering",
@@ -18496,7 +18620,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-01-14"
+  "lastPosted": "2026-01-14",
+  "mapSearchTerms": [
+   "Virginia Tech Carilion School of Medicine",
+   "Department of Health Systems and Implementation Science (Smart Healthcare Hub)"
+  ]
  },
  {
   "id": "virginia-tech__grado-department-of-industrial-and-systems-engineering__operations-research",
@@ -19057,7 +19185,7 @@
   "lastPosted": "2026-03-07",
   "mapSearchTerms": [
    "College of Business",
-   "Business Administration Department — Management Information Systems"
+   "Business Administration Department â€” Management Information Systems"
   ]
  },
  {
@@ -19150,7 +19278,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-07-22"
+  "lastPosted": "2026-07-22",
+  "mapSearchTerms": [
+   "School of Intelligent Finance and Business",
+   "Supply Chain Management"
+  ]
  },
  {
   "id": "xi-an-jiaotong-university__school-of-management__is",

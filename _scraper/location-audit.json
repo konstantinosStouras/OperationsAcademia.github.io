@@ -1634,7 +1634,7 @@
       "rowIds": [
         "cornell-university__cornell-peter-and-stephanie-nolan-school-of-hotel-administra__operations-technology-and-information-management-area"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://academicjobsonline.org/ajo/jobs/33091",
@@ -1655,7 +1655,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "cornell-nolan-operations-technology-statler"
+      ]
     },
     {
       "id": "cornell-university::school:duffield college of engineering::42.44900,-76.48400",
@@ -1667,7 +1670,7 @@
       "rowIds": [
         "cornell-university__duffield-college-of-engineering__operations-research-and-information-engineering-cornell-tech"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://academicjobsonline.org/ajo/jobs/32634"
@@ -1686,7 +1689,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "cornell-tech-operations-research-bloomberg"
+      ]
     },
     {
       "id": "cornell-university::department:applied economics and management::42.44900,-76.48400",
@@ -1732,7 +1738,7 @@
       "rowIds": [
         "cornell-university____center-for-data-science-for-enterprise-and-society"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -1749,7 +1755,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "cornell-data-science-enterprise-society-rhodes"
+      ]
     },
     {
       "id": "cornell-university::department:operations research and information engineering::42.44900,-76.48400",
@@ -1797,7 +1806,7 @@
       "rowIds": [
         "cornell-university____operations-technology-and-information-management-area"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://academicjobsonline.org/ajo/jobs/33091",
@@ -1818,7 +1827,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "cornell-johnson-operations-technology-sage"
+      ]
     },
     {
       "id": "university-of-texas-at-dallas::department:om::32.98500,-96.75000",
@@ -2137,7 +2149,7 @@
       "rowIds": [
         "college-of-staten-island__lucille-and-jay-chazanoff-school-of-business__information-systems-and-informatics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179590605&Title=Assistant%2C%20Associate%20or%20Full%20Professor%20%E2%80%93%20Information%20Systems%20%26%20Informatics"
@@ -2156,7 +2168,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "staten-island-information-systems-business-3n"
+      ]
     },
     {
       "id": "college-of-staten-island::department:healthcare sustainability::40.60000,-74.15000",
@@ -2168,7 +2183,7 @@
       "rowIds": [
         "college-of-staten-island____healthcare-sustainability"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.chronicle.com/job/37951855/assistant-professor-management-/"
@@ -2187,7 +2202,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "staten-island-management-business-3n"
+      ]
     },
     {
       "id": "university-of-tampa::school:sykes college of business::27.94720,-82.46540",
@@ -2302,7 +2320,7 @@
       "rowIds": [
         "hanken-school-of-economics____finance-and-economics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://hanken.rekrytointi.com/paikat/?jid=402&o=A_A&rspvt=g10tam7mx0gg4sssck4k4w0ckk0gc80&"
@@ -2321,7 +2339,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "hanken-statistics-business-analytics-main"
+      ]
     },
     {
       "id": "valparaiso-university::school:college of business::41.46323,-87.04184",
@@ -2722,7 +2743,7 @@
       "rowIds": [
         "american-university-of-sharjah____information-systems-and-business-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179585772&Title=Assistant%20Professor%20in%20Information%20Systems%20and%20Business%20Analytics"
@@ -2741,7 +2762,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "american-sharjah-information-systems-business-building"
+      ]
     },
     {
       "id": "university-of-north-carolina-charlotte::school:william states lee college of engineering::35.30639,-80.73333",
@@ -3684,7 +3708,7 @@
         "purdue-university__mitch-daniels-school-of-business__management-information-systems",
         "purdue-university__mitch-daniels-school-of-business__quantitative-methods"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.purdue.edu/job/Assistant-Professor%2C-Management-Information-Systems/44041-en_US/",
@@ -3704,7 +3728,15 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "purdue-mis-krannert",
+        "purdue-mis-rawls",
+        "purdue-mis-young",
+        "purdue-quantitative-methods-krannert",
+        "purdue-quantitative-methods-rawls",
+        "purdue-quantitative-methods-young"
+      ]
     },
     {
       "id": "purdue-university::department:heathcare om included::40.42500,-86.92300",
@@ -4855,7 +4887,7 @@
       "rowIds": [
         "iese-business-school____iese-behavioral-lab"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -4872,7 +4904,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "iese-behavioral-lab-pearson18"
+      ]
     },
     {
       "id": "iese-business-school::department:managerial decision sciences::41.39400,2.10800",
@@ -6661,7 +6696,7 @@
       "rowIds": [
         "virginia-tech____data-science"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179143416&Title=Professor%20of%20Practice%20-%20Open%20Rank"
@@ -6680,7 +6715,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "virginia-tech-data-science-data-decisions"
+      ]
     },
     {
       "id": "virginia-tech::department:healthcare operations::37.22500,-80.42500",
@@ -6692,7 +6730,7 @@
       "rowIds": [
         "virginia-tech____healthcare-operations"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.pageuppeople.com/968/cw/en-us/job/535250?lApplicationSubSourceID=11250"
@@ -6711,7 +6749,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "virginia-tech-health-systems-jefferson"
+      ]
     },
     {
       "id": "georgia-institute-of-technology::school:college of engineering::33.77600,-84.39500",
@@ -7131,7 +7172,7 @@
       "rowIds": [
         "villanova-university____ba-ai"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.villanova.edu/postings/33341"
@@ -7150,7 +7191,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "villanova-management-operations-bartley"
+      ]
     },
     {
       "id": "emlv-ecole-de-commerce-et-de-management::school:leonard de vinci business school paris la defense::48.89270,2.22356",
@@ -7782,7 +7826,7 @@
       "rowIds": [
         "xi-an-jiaotong-liverpool-university__school-of-intelligent-finance-and-business__supply-chain-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.xjtlu.edu.cn/en/study/departments/school-of-intelligent-finance-and-business/jobs/faculty-positions-supply-chain"
@@ -7801,7 +7845,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "xian-jiaotong-liverpool-supply-chain-taicang-e"
+      ]
     },
     {
       "id": "xi-an-jiaotong-liverpool-university::department:sustainability::31.27480,120.73810",
@@ -7949,7 +7996,7 @@
       "rowIds": [
         "georgetown-university____sustainability"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -7966,7 +8013,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "georgetown-sustainable-business-hariri"
+      ]
     },
     {
       "id": "tennessee-wesleyan-university::school:goodfriend college of business and professional studies::35.44530,-84.59440",
@@ -8322,7 +8372,7 @@
       "rowIds": [
         "boston-college____business"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179547191&Title=Professor%20of%20Practice"
@@ -8341,7 +8391,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "boston-college-woods-saint-marys-south"
+      ]
     },
     {
       "id": "texas-christian-university::department:analytics business is::32.71000,-97.36300",
@@ -8520,7 +8573,7 @@
       "rowIds": [
         "university-of-new-haven__college-of-business-and-digital-innovation__business-analytics"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179548284&Title=Assistant%20Professor%20of%20Practice%20%2D%20Business%20Analytics"
@@ -8539,7 +8592,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "new-haven-riyadh-business-digital-innovation"
+      ]
     },
     {
       "id": "sabanci-university::school:sabanci business school::40.89100,29.37800",
@@ -8795,7 +8851,7 @@
         "shanghai-jiao-tong-university__antai-college-of-economics-and-management__data-and-business-intelligence",
         "shanghai-jiao-tong-university__antai-college-of-economics-and-management__management-science"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [
         "https://www.acem.sjtu.edu.cn/acem2021/en/faculty/team.html"
       ],
@@ -8817,7 +8873,11 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "shanghai-jiao-tong-management-science-bao",
+        "shanghai-jiao-tong-data-business-intelligence-bao"
+      ]
     },
     {
       "id": "shanghai-jiao-tong-university::department:ba om or stochastic models data driven ai::31.20100,121.43000",
@@ -8829,7 +8889,7 @@
       "rowIds": [
         "shanghai-jiao-tong-university____ba-om-or-stochastic-models-data-driven-ai"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://connect.informs.org/discussion/tenure-track-positions-at-antai-college-of-economic-and-management-shanghai-jiao-tong-university-8"
@@ -8848,7 +8908,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "shanghai-jiao-tong-management-science-bao"
+      ]
     },
     {
       "id": "tongji-university::school:school of economics and management::31.28270,121.50663",
@@ -8860,7 +8923,7 @@
       "rowIds": [
         "tongji-university__school-of-economics-and-management__operations-management"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careercenter.informs.org/job/join-the-research-faculty-of-tongji-shanghai-shanghai-5502"
@@ -8879,7 +8942,10 @@
         "status": null,
         "error": "fetch failed",
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "tongji-management-science-building-a"
+      ]
     },
     {
       "id": "southern-methodist-university::department:it om::32.84400,-96.78500",
@@ -13135,7 +13201,7 @@
       "rowIds": [
         "university-of-leeds-uk____optimisation-for-decision-support-in-disaster-response"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.leeds.ac.uk/vacancy.aspx?ref=BUSAT1006"
@@ -13154,7 +13220,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "leeds-disaster-optimisation-charles-thackrah"
+      ]
     },
     {
       "id": "university-of-hong-kong::school:hku business school::22.28400,114.13800",
@@ -13269,7 +13338,7 @@
       "rowIds": [
         "stony-brook-university____om-ds"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://apply.interfolio.com/174801"
@@ -13288,7 +13357,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "stony-brook-operations-harriman"
+      ]
     },
     {
       "id": "rockhurst-university::department:business intelligence and analytics::39.03160,-94.57240",
@@ -13802,7 +13874,7 @@
       "rowIds": [
         "california-state-university-sacramento____ai"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://careers.csus.edu/en-us/job/556024/tenure-track-faculty-artificial-intelligence"
@@ -13821,7 +13893,10 @@
         "status": 404,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "sacramento-management-information-business-analytics-tahoe"
+      ]
     },
     {
       "id": "university-of-evansville::department:supply chain management::37.97139,-87.53167",
@@ -14137,7 +14212,7 @@
       "rowIds": [
         "county-college-of-morris____ai"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179384125&Title=Assistant%20Professor%20of%20Business%20(Tenure%20Track)%20(Accounting%20%26amp%3B%20Business%20Information%20Systems)"
@@ -14156,7 +14231,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "county-college-morris-business-cohen"
+      ]
     },
     {
       "id": "hkust::department:ds and analytics thrust::22.89420,113.47828",
@@ -14437,7 +14515,7 @@
       "rowIds": [
         "nevada-state-university____scm-quantitative-analysis"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179380936&Title=Assistant%20Professor%20of%20Business%20(Management)"
@@ -14456,7 +14534,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "nevada-state-business-kasner"
+      ]
     },
     {
       "id": "winona-state-university::department:mis::44.04740,-91.64390",
@@ -14662,7 +14743,7 @@
       "rowIds": [
         "augustana-university____business"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://jobs.chronicle.com/job/37955810/assistant-professor-of-business-and-management/"
@@ -14681,7 +14762,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "augustana-business-madsen"
+      ]
     },
     {
       "id": "chatham-university::department:sustainable management::40.44917,-79.92583",
@@ -15250,7 +15334,7 @@
       "rowIds": [
         "shorter-university____general-business"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179368569&Title=Assistant%20Professor%20of%20Management"
@@ -15269,7 +15353,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "shorter-business-sheffield-thompson"
+      ]
     },
     {
       "id": "ajman-university::department:data analytics::25.41253,55.50661",
@@ -17630,7 +17717,7 @@
       "rowIds": [
         "florida-polytechnic-university____ba-ds"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://flpoly.wd1.myworkdayjobs.com/en-US/External-Faculty/job/JD-Alexander-Florida-Polytechnic-Main-Campus/Open-Rank-Faculty-positions-in-Business-Analytics--Engineering-Management--and-Data-Science_R2903-2?source=HigherEdJobs"
@@ -17649,7 +17736,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "florida-polytechnic-data-business-barnett"
+      ]
     },
     {
       "id": "southern-utah-university::department:ba::37.67540,-113.07200",
@@ -18402,7 +18492,7 @@
       "rowIds": [
         "bits-school-of-management____om"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.poms.org/sites/default/files/2025-10/BITSoM_faculty_recruitment_for_2025-26.pdf"
@@ -18421,7 +18511,10 @@
         "status": 404,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "bits-school-management-kamba-academic-building"
+      ]
     },
     {
       "id": "universitat-pompeu-fabra::department:om or::41.37900,2.18000",
@@ -20020,7 +20113,7 @@
       "rowIds": [
         "indian-school-of-business____operations"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -20037,7 +20130,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "indian-school-business-operations-academic-centre"
+      ]
     },
     {
       "id": "wake-forest-university::school:school of business::36.13500,-80.27700",
@@ -22350,7 +22446,7 @@
       "rowIds": [
         "ceibs____decision-sciences-and-management-information-systems"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [],
       "sourceSearch": {
@@ -22367,7 +22463,10 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "ceibs-decision-sciences-faculty-building"
+      ]
     },
     {
       "id": "ceibs::department:operations management::31.20083,121.42972",
@@ -23961,9 +24060,9 @@
   ],
   "summary": {
     "baseline": 714,
-    "verified": 591,
+    "verified": 622,
     "partiallyVerified": 1,
-    "pending": 122,
+    "pending": 91,
     "sourceSearches": 714
   }
 }
