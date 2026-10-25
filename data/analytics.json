@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-10-25T09:15:29.965Z",
+ "generated": "2026-10-25T09:45:06.780Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -6157,9 +6157,9 @@
    136
   ],
   "2026-10-25": [
-   41,
-   95,
-   95
+   43,
+   107,
+   107
   ]
  },
  "pages": [
@@ -6172,14 +6172,14 @@
   {
    "path": "/",
    "title": "",
-   "views": 5227,
+   "views": 5233,
    "avgSec": 313
   },
   {
    "path": "/candidates.html",
    "title": "",
-   "views": 1283,
-   "avgSec": 436
+   "views": 1289,
+   "avgSec": 434
   },
   {
    "path": "/universities.html",
@@ -6486,14 +6486,14 @@
   "source": "usage+ga4",
   "from": "2026-07-28",
   "to": "2026-10-25",
-  "views": 16934
+  "views": 16946
  },
  "pagesWindows": {
   "30": {
    "days": 30,
    "from": "2026-09-26",
    "to": "2026-10-25",
-   "views": 8401,
+   "views": 8413,
    "pages": [
     {
      "path": "/jobs.html",
@@ -6504,14 +6504,14 @@
     {
      "path": "/",
      "title": "",
-     "views": 2365,
-     "avgSec": 279
+     "views": 2371,
+     "avgSec": 278
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 1117,
-     "avgSec": 501
+     "views": 1123,
+     "avgSec": 498
     },
     {
      "path": "/universities.html",
@@ -6646,7 +6646,7 @@
    "days": 90,
    "from": "2026-07-28",
    "to": "2026-10-25",
-   "views": 16934,
+   "views": 16946,
    "pages": [
     {
      "path": "/jobs.html",
@@ -6657,14 +6657,14 @@
     {
      "path": "/",
      "title": "",
-     "views": 5227,
+     "views": 5233,
      "avgSec": 313
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 1283,
-     "avgSec": 436
+     "views": 1289,
+     "avgSec": 434
     },
     {
      "path": "/universities.html",
@@ -6973,7 +6973,7 @@
    "days": 365,
    "from": "2025-10-26",
    "to": "2026-10-25",
-   "views": 36004,
+   "views": 36016,
    "pages": [
     {
      "path": "/jobs.html",
@@ -6984,14 +6984,14 @@
     {
      "path": "/",
      "title": "",
-     "views": 10397,
+     "views": 10403,
      "avgSec": 157
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 4008,
-     "avgSec": 140
+     "views": 4014,
+     "avgSec": 139
     },
     {
      "path": "/placements.html",
@@ -7978,7 +7978,7 @@
    "days": 0,
    "from": "2023-06-16",
    "to": "2026-10-25",
-   "views": 139434,
+   "views": 139446,
    "pages": [
     {
      "path": "/jobs.html",
@@ -7989,13 +7989,13 @@
     {
      "path": "/",
      "title": "",
-     "views": 37152,
+     "views": 37158,
      "avgSec": 44
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 21294,
+     "views": 21300,
      "avgSec": 26
     },
     {
@@ -9695,7 +9695,7 @@
    "to": "2026-10-25",
    "metric": "visits",
    "zone": "UTC",
-   "total": 15600,
+   "total": 15612,
    "items": [
     {
      "name": "00",
@@ -9735,7 +9735,7 @@
     },
     {
      "name": "09",
-     "value": 564
+     "value": 576
     },
     {
      "name": "10",
@@ -10256,7 +10256,7 @@
   "source": "usage",
   "from": "2026-08-17",
   "to": "2026-10-25",
-  "sessions": 15600,
+  "sessions": 15612,
   "avgSessionSec": 486,
   "viewsPerSession": 1
  },
@@ -10757,8 +10757,8 @@
     "days": 30,
     "from": "2026-09-26",
     "to": "2026-10-25",
-    "seen": 4866,
-    "resolved": 1427,
+    "seen": 4869,
+    "resolved": 1430,
     "academic": 72,
     "placed": 827,
     "all": [
@@ -11048,8 +11048,8 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-10-25",
-    "seen": 7617,
-    "resolved": 2230,
+    "seen": 7620,
+    "resolved": 2233,
     "academic": 91,
     "placed": 976,
     "all": [
@@ -11371,8 +11371,8 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-10-25",
-    "seen": 7617,
-    "resolved": 2230,
+    "seen": 7620,
+    "resolved": 2233,
     "academic": 91,
     "placed": 976,
     "all": [
@@ -11694,8 +11694,8 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-10-25",
-    "seen": 7617,
-    "resolved": 2230,
+    "seen": 7620,
+    "resolved": 2233,
     "academic": 91,
     "placed": 976,
     "all": [
@@ -12015,15 +12015,15 @@
    }
   },
   "recentDays": 7,
-  "seen": 7617,
-  "resolved": 2230,
+  "seen": 7620,
+  "resolved": 2233,
   "academic": 91,
   "placed": 976
  },
  "totals": {
-  "visitors": 47748,
-  "sessions": 66228,
-  "pageviews": 139492,
+  "visitors": 47750,
+  "sessions": 66240,
+  "pageviews": 139504,
   "days": 1228,
   "universities": 78
  },
