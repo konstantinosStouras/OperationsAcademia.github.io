@@ -135,15 +135,18 @@
     };
   }
 
-  // Admission rule for new crawled jobs: a published advert link is enough,
+  // Admission rule for new crawled jobs: a published advert or Posted at link is enough,
   // regardless of the scraped institution, market year, department or rank.
   // Callers supply published rows only; pending comparisons retain their guards.
   function publishedAdvertRepeat(row, published) {
-    var link = advertLink(row);
-    if (!link) return null;
+    if (!row) return null;
+    var links = [advertLink(row), advertLink({ adUrl: row.postedAtUrl })].filter(Boolean);
+    if (!links.length) return null;
     var match = (published || []).find(function (other) {
-      return other && !(row.id && other.id && String(row.id) === String(other.id))
-        && advertLink(other) === link;
+      if (!other || (row.id && other.id && String(row.id) === String(other.id))) return false;
+      return [advertLink(other), advertLink({ adUrl: other.postedAtUrl })].some(function (link) {
+        return link && links.indexOf(link) !== -1;
+      });
     });
     return match ? entry(match) : null;
   }

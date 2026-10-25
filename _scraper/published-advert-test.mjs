@@ -21,3 +21,21 @@ const otherDepartment = { ...crawled, adUrl: generic.adUrl };
 assert.equal(publishedAdvertRepeat(otherDepartment, [generic])?.id, 'live');
 assert.equal(advertRepeat(otherDepartment, [generic]), null, 'pending comparisons keep existing guards');
 console.log('Published advert admission checks passed.');
+
+// Either field can contain the vacancy URL on either side of the comparison.
+for (const candidateField of ['adUrl', 'postedAtUrl']) {
+  for (const publishedField of ['adUrl', 'postedAtUrl']) {
+    const candidate = { ...crawled, adUrl: '', postedAtUrl: '',
+      [candidateField]: 'https://apply.interfolio.com/195349/?utm_source=sheet#apply' };
+    const published = { ...live, adUrl: 'https://drive.google.com/file/d/example/view',
+      postedAtUrl: '', [publishedField]: 'https://apply.interfolio.com/195349' };
+    assert.equal(publishedAdvertRepeat(candidate, [published])?.id, 'live');
+    assert.equal(publishedAdvertRepeat({ ...candidate,
+      [candidateField]: 'https://apply.interfolio.com/195350' }, [published]), null);
+  }
+}
+assert.equal(publishedAdvertRepeat(null, [live]), null);
+assert.equal(publishedAdvertRepeat({ id: 'empty', postedAtUrl: '' }, [live]), null);
+assert.equal(publishedAdvertRepeat({ id: 'home', postedAtUrl: 'https://operationsacademia.org/' },
+  [{ ...live, postedAtUrl: 'https://operationsacademia.org/' }]), null);
+console.log('Advert and Posted at cross-field admission checks passed.');
