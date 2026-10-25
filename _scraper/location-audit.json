@@ -6624,7 +6624,7 @@
         "university-college-london__ucl-global-business-school-for-health",
         "university-college-london__ucl-global-business-school-for-health__population-health-sciences"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://drive.google.com/file/d/1RL-4q1TEZ12m0cXvTQfohlBuESA5wF2D/view?usp=drivesdk"
@@ -6643,7 +6643,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "ucl-global-business-health-marshgate-original-university"
+      ]
     },
     {
       "id": "university-college-london::department:management science and innovation::51.52500,-0.13400",
@@ -8881,7 +8884,7 @@
       "rowIds": [
         "universidade-catolica-portuguesa__catolica-lisbon-school-of-business-and-economics__operations-and-data-science"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://drive.google.com/file/d/1rgtp-4qvFV-VWMiSy09oG6rn4CJ2dxfu/view?usp=drivesdk"
@@ -8902,7 +8905,7 @@
         "hasCoordinateStrings": false
       },
       "verificationIds": [
-        "catolica-lisbon-operations-data-science-building-five"
+        "catolica-lisbon-operations-data-science-building-five-original-university"
       ]
     },
     {
@@ -15316,7 +15319,7 @@
       "rowIds": [
         "prince-mohammad-bin-fahd-university____information-technology"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179368992&Title=Assistant%20Professor%2C%20Information%20Technology"
@@ -15335,7 +15338,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "prince-mohammad-448-male",
+        "prince-mohammad-448-female"
+      ]
     },
     {
       "id": "prince-mohammad-bin-fahd-university::department:mis::26.14728,50.09343",
@@ -15347,7 +15354,7 @@
       "rowIds": [
         "prince-mohammad-bin-fahd-university____mis"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179167354&Title=Assistant%2FAssociate%20Professor%2C%20Management%20Information%20Systems"
@@ -15366,7 +15373,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "prince-mohammad-449-male",
+        "prince-mohammad-449-female"
+      ]
     },
     {
       "id": "prince-mohammad-bin-fahd-university::department:om scm::26.14728,50.09343",
@@ -15378,7 +15389,7 @@
       "rowIds": [
         "prince-mohammad-bin-fahd-university____om-scm"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179167356&Title=Assistant%2FAssociate%20Professor%2C%20Operations%20Management%2FSupply%20Chain%20Management"
@@ -15397,7 +15408,11 @@
         "status": 200,
         "error": null,
         "hasCoordinateStrings": true
-      }
+      },
+      "verificationIds": [
+        "prince-mohammad-450-male",
+        "prince-mohammad-450-female"
+      ]
     },
     {
       "id": "university-of-south-florida::department:is::28.06000,-82.41000",
@@ -17369,7 +17384,7 @@
       "rowIds": [
         "tbs-education____information-operations-and-management-sciences"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://drive.google.com/open?id=1bhc8IGlCyfsxteG23s1_yLpqpb_vxWYR"
@@ -17388,7 +17403,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "toulouse-business-school-information-operations-sebastopol"
+      ]
     },
     {
       "id": "tbs-education::department:io om or::43.61000,1.43200",
@@ -17400,7 +17418,7 @@
       "rowIds": [
         "tbs-education____io-om-or"
       ],
-      "status": "pending",
+      "status": "verified",
       "departmentUrls": [],
       "postingUrls": [
         "https://www.poms.org/sites/default/files/2025-12/Position%20IOMS-IOLT%20TBS%20Education%20Toulouse%202026.pdf"
@@ -17419,7 +17437,10 @@
         "status": 403,
         "error": null,
         "hasCoordinateStrings": false
-      }
+      },
+      "verificationIds": [
+        "toulouse-business-school-information-operations-sebastopol"
+      ]
     },
     {
       "id": "marquette-university::department:oscm::43.03900,-87.93300",
@@ -24239,9 +24260,9 @@
   "summary": {
     "baseline": 714,
     "excludedByUser": 2,
-    "verified": 675,
+    "verified": 682,
     "partiallyVerified": 1,
-    "pending": 36,
+    "pending": 29,
     "sourceSearches": 714
   }
 }

@@ -13383,6 +13383,226 @@
       ],
       "checked": "2026-10-25",
       "notes": "Current Fall 2026 official course offerings place Business Information Technology BIT 340-3 in Administration Building 27, Tuesdays and Thursdays 11:00–12:15. Official facilities directory identifies the building as an academic home of Business and Enterprise at 104 University Drive and directly links the exact Google Maps building place. Coordinates are the linked place target !3d/!4d values, not the map viewport. This establishes a current programme teaching location; it does not assert all faculty offices are in that classroom. Other buildings appearing in general university faculty directories were not substituted."
+    },
+    {
+      "id": "catolica-lisbon-operations-data-science-building-five-original-university",
+      "institution": "Universidade Católica Portuguesa",
+      "rowIds": [
+        "universidade-catolica-portuguesa__catolica-lisbon-school-of-business-and-economics__operations-and-data-science"
+      ],
+      "school": "Católica Lisbon School of Business and Economics",
+      "department": "Operations and Data Science",
+      "building": "Building 5 — Católica Lisbon School of Business and Economics",
+      "address": "Palma de Cima, 1649-023 Lisboa, Portugal",
+      "lat": 38.7488,
+      "lng": -9.1649,
+      "addressSource": "https://www.clsbe.lisboa.ucp.pt/glance/contacts-directions",
+      "coordinateSource": "https://www.clsbe.lisboa.ucp.pt/glance/contacts-directions",
+      "supportingSources": [
+        "https://clsbe.lisboa.ucp.pt/glance/campus",
+        "https://catolicalaw.fd.lisboa.ucp.pt/about-overview/campus-0",
+        "https://www.openstreetmap.org/way/239939624"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official business school contact page supplies GPS coordinates and identifies its separate building 5. Official campus description and diagram corroborate this business school building distinct from law/theology and rectorate/library. Published point falls within building 5 footprint (OpenStreetMap way239939624), not a university centroid.",
+      "institutionKey": "universidade-catolica-portuguesa"
+    },
+    {
+      "id": "ucl-global-business-health-marshgate-original-university",
+      "institution": "University College London",
+      "rowIds": [
+        "university-college-london__ucl-global-business-school-for-health",
+        "university-college-london__ucl-global-business-school-for-health__population-health-sciences"
+      ],
+      "school": "Global Business School for Health",
+      "department": "",
+      "building": "Marshgate",
+      "address": "7 Sidings Street, Queen Elizabeth Olympic Park, London E20 2AE, United Kingdom",
+      "lat": 51.537542,
+      "lng": -0.0119821,
+      "addressSource": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/about",
+      "coordinateSource": "https://www.openstreetmap.org/way/964277509",
+      "supportingSources": [
+        "https://profiles.ucl.ac.uk/94290-susanne-gaube/grants"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Official school About page explicitly identifies its department office in Marshgate at7 Sidings Street. Exact named university building footprint; separate from School of Management at One Canada Square. Population Health Sciences is the parent faculty, not an additional department.",
+      "institutionKey": "university-college-london"
+    },
+    {
+      "id": "prince-mohammad-448-male",
+      "institutionKey": "Prince Mohammad Bin Fahd University",
+      "institution": "Prince Mohammad Bin Fahd University",
+      "rowIds": [
+        "prince-mohammad-bin-fahd-university____information-technology"
+      ],
+      "school": "College of Computer Engineering and Science",
+      "department": "Information Technology",
+      "building": "College of Computer Engineering and Science — Male Campus (map building 4)",
+      "address": "Prince Mohammad Bin Fahd University, Half Moon Bay, Al Khobar, Eastern Province, Saudi Arabia",
+      "lat": 26.1438256,
+      "lng": 50.091121,
+      "addressSource": "https://pmu.edu.sa/attachments/about/pdf/tiecsystem/cces.pdf",
+      "coordinateSource": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=50.0905,26.1434,50.0933,26.1491&bboxSR=4326&imageSR=4326&size=900,1500&format=jpg&f=json",
+      "supportingSources": [
+        "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+        "https://www.pmu.edu.sa/about/facilities",
+        "https://www.pmu.edu.sa/Attachments/HR/PMU-Handbook-May-2020.pdf"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "prince-mohammad-448-male-female-academic-buildings",
+      "locationGroupSource": "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+      "notes": "Official university map individually identifies this college building on the male campus. The official departmental structure and handbook establish provision on both male and female campuses; the archived vacancy does not establish a single assigned campus. Coordinates are manually placed on the corresponding college roof after matching the numbered official plan to georeferenced Esri World Imagery: male campus south of the paired libraries, female campus north, with the five academic wings matched in their numbered sequence. Export returned extent 50.09019,26.1434,50.09361,26.1491 at 900 by 1500 pixels. The point is the specific college wing, not the general university address or map viewport. Operations Management and Supply Chain Management are identified as Business Administration subjects by the official curriculum."
+    },
+    {
+      "id": "prince-mohammad-448-female",
+      "institutionKey": "Prince Mohammad Bin Fahd University",
+      "institution": "Prince Mohammad Bin Fahd University",
+      "rowIds": [
+        "prince-mohammad-bin-fahd-university____information-technology"
+      ],
+      "school": "College of Computer Engineering and Science",
+      "department": "Information Technology",
+      "building": "College of Computer Engineering and Science — Female Campus (map building 18)",
+      "address": "Prince Mohammad Bin Fahd University, Half Moon Bay, Al Khobar, Eastern Province, Saudi Arabia",
+      "lat": 26.148378,
+      "lng": 50.092546,
+      "addressSource": "https://pmu.edu.sa/attachments/about/pdf/tiecsystem/cces.pdf",
+      "coordinateSource": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=50.0905,26.1434,50.0933,26.1491&bboxSR=4326&imageSR=4326&size=900,1500&format=jpg&f=json",
+      "supportingSources": [
+        "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+        "https://www.pmu.edu.sa/about/facilities",
+        "https://www.pmu.edu.sa/Attachments/HR/PMU-Handbook-May-2020.pdf"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "prince-mohammad-448-male-female-academic-buildings",
+      "locationGroupSource": "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+      "notes": "Official university map individually identifies this college building on the female campus. The official departmental structure and handbook establish provision on both male and female campuses; the archived vacancy does not establish a single assigned campus. Coordinates are manually placed on the corresponding college roof after matching the numbered official plan to georeferenced Esri World Imagery: male campus south of the paired libraries, female campus north, with the five academic wings matched in their numbered sequence. Export returned extent 50.09019,26.1434,50.09361,26.1491 at 900 by 1500 pixels. The point is the specific college wing, not the general university address or map viewport. Operations Management and Supply Chain Management are identified as Business Administration subjects by the official curriculum."
+    },
+    {
+      "id": "prince-mohammad-449-male",
+      "institutionKey": "Prince Mohammad Bin Fahd University",
+      "institution": "Prince Mohammad Bin Fahd University",
+      "rowIds": [
+        "prince-mohammad-bin-fahd-university____mis"
+      ],
+      "school": "College of Business Administration",
+      "department": "Management Information Systems",
+      "building": "College of Business Administration — Male Campus (map building 6)",
+      "address": "Prince Mohammad Bin Fahd University, Half Moon Bay, Al Khobar, Eastern Province, Saudi Arabia",
+      "lat": 26.1444336,
+      "lng": 50.0914478,
+      "addressSource": "https://www.pmu.edu.sa/academics/contact_info_mis_dept_cob_udp",
+      "coordinateSource": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=50.0905,26.1434,50.0933,26.1491&bboxSR=4326&imageSR=4326&size=900,1500&format=jpg&f=json",
+      "supportingSources": [
+        "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+        "https://www.pmu.edu.sa/about/facilities",
+        "https://www.pmu.edu.sa/Attachments/HR/PMU-Handbook-May-2020.pdf"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "prince-mohammad-449-male-female-academic-buildings",
+      "locationGroupSource": "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+      "notes": "Official university map individually identifies this college building on the male campus. The official departmental structure and handbook establish provision on both male and female campuses; the archived vacancy does not establish a single assigned campus. Coordinates are manually placed on the corresponding college roof after matching the numbered official plan to georeferenced Esri World Imagery: male campus south of the paired libraries, female campus north, with the five academic wings matched in their numbered sequence. Export returned extent 50.09019,26.1434,50.09361,26.1491 at 900 by 1500 pixels. The point is the specific college wing, not the general university address or map viewport. Operations Management and Supply Chain Management are identified as Business Administration subjects by the official curriculum."
+    },
+    {
+      "id": "prince-mohammad-449-female",
+      "institutionKey": "Prince Mohammad Bin Fahd University",
+      "institution": "Prince Mohammad Bin Fahd University",
+      "rowIds": [
+        "prince-mohammad-bin-fahd-university____mis"
+      ],
+      "school": "College of Business Administration",
+      "department": "Management Information Systems",
+      "building": "College of Business Administration — Female Campus (map building 17)",
+      "address": "Prince Mohammad Bin Fahd University, Half Moon Bay, Al Khobar, Eastern Province, Saudi Arabia",
+      "lat": 26.148036,
+      "lng": 50.0923636,
+      "addressSource": "https://www.pmu.edu.sa/academics/contact_info_mis_dept_cob_udp",
+      "coordinateSource": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=50.0905,26.1434,50.0933,26.1491&bboxSR=4326&imageSR=4326&size=900,1500&format=jpg&f=json",
+      "supportingSources": [
+        "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+        "https://www.pmu.edu.sa/about/facilities",
+        "https://www.pmu.edu.sa/Attachments/HR/PMU-Handbook-May-2020.pdf"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "prince-mohammad-449-male-female-academic-buildings",
+      "locationGroupSource": "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+      "notes": "Official university map individually identifies this college building on the female campus. The official departmental structure and handbook establish provision on both male and female campuses; the archived vacancy does not establish a single assigned campus. Coordinates are manually placed on the corresponding college roof after matching the numbered official plan to georeferenced Esri World Imagery: male campus south of the paired libraries, female campus north, with the five academic wings matched in their numbered sequence. Export returned extent 50.09019,26.1434,50.09361,26.1491 at 900 by 1500 pixels. The point is the specific college wing, not the general university address or map viewport. Operations Management and Supply Chain Management are identified as Business Administration subjects by the official curriculum."
+    },
+    {
+      "id": "prince-mohammad-450-male",
+      "institutionKey": "Prince Mohammad Bin Fahd University",
+      "institution": "Prince Mohammad Bin Fahd University",
+      "rowIds": [
+        "prince-mohammad-bin-fahd-university____om-scm"
+      ],
+      "school": "College of Business Administration",
+      "department": "Business Administration — Operations Management and Supply Chain Management",
+      "building": "College of Business Administration — Male Campus (map building 6)",
+      "address": "Prince Mohammad Bin Fahd University, Half Moon Bay, Al Khobar, Eastern Province, Saudi Arabia",
+      "lat": 26.1444336,
+      "lng": 50.0914478,
+      "addressSource": "https://www.pmu.edu.sa/academics/curriculum_ba_dept_cob_udp",
+      "coordinateSource": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=50.0905,26.1434,50.0933,26.1491&bboxSR=4326&imageSR=4326&size=900,1500&format=jpg&f=json",
+      "supportingSources": [
+        "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+        "https://www.pmu.edu.sa/about/facilities",
+        "https://www.pmu.edu.sa/Attachments/HR/PMU-Handbook-May-2020.pdf"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "prince-mohammad-450-male-female-academic-buildings",
+      "locationGroupSource": "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+      "notes": "Official university map individually identifies this college building on the male campus. The official departmental structure and handbook establish provision on both male and female campuses; the archived vacancy does not establish a single assigned campus. Coordinates are manually placed on the corresponding college roof after matching the numbered official plan to georeferenced Esri World Imagery: male campus south of the paired libraries, female campus north, with the five academic wings matched in their numbered sequence. Export returned extent 50.09019,26.1434,50.09361,26.1491 at 900 by 1500 pixels. The point is the specific college wing, not the general university address or map viewport. Operations Management and Supply Chain Management are identified as Business Administration subjects by the official curriculum."
+    },
+    {
+      "id": "prince-mohammad-450-female",
+      "institutionKey": "Prince Mohammad Bin Fahd University",
+      "institution": "Prince Mohammad Bin Fahd University",
+      "rowIds": [
+        "prince-mohammad-bin-fahd-university____om-scm"
+      ],
+      "school": "College of Business Administration",
+      "department": "Business Administration — Operations Management and Supply Chain Management",
+      "building": "College of Business Administration — Female Campus (map building 17)",
+      "address": "Prince Mohammad Bin Fahd University, Half Moon Bay, Al Khobar, Eastern Province, Saudi Arabia",
+      "lat": 26.148036,
+      "lng": 50.0923636,
+      "addressSource": "https://www.pmu.edu.sa/academics/curriculum_ba_dept_cob_udp",
+      "coordinateSource": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=50.0905,26.1434,50.0933,26.1491&bboxSR=4326&imageSR=4326&size=900,1500&format=jpg&f=json",
+      "supportingSources": [
+        "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+        "https://www.pmu.edu.sa/about/facilities",
+        "https://www.pmu.edu.sa/Attachments/HR/PMU-Handbook-May-2020.pdf"
+      ],
+      "checked": "2026-10-25",
+      "locationGroup": "prince-mohammad-450-male-female-academic-buildings",
+      "locationGroupSource": "https://pmu.edu.sa/life_pmu/pdf/university%20map.pdf",
+      "notes": "Official university map individually identifies this college building on the female campus. The official departmental structure and handbook establish provision on both male and female campuses; the archived vacancy does not establish a single assigned campus. Coordinates are manually placed on the corresponding college roof after matching the numbered official plan to georeferenced Esri World Imagery: male campus south of the paired libraries, female campus north, with the five academic wings matched in their numbered sequence. Export returned extent 50.09019,26.1434,50.09361,26.1491 at 900 by 1500 pixels. The point is the specific college wing, not the general university address or map viewport. Operations Management and Supply Chain Management are identified as Business Administration subjects by the official curriculum."
+    },
+    {
+      "id": "toulouse-business-school-information-operations-sebastopol",
+      "institution": "Toulouse Business School (TBS Education)",
+      "institutionKey": "TBS Education",
+      "rowIds": [
+        "tbs-education____information-operations-and-management-sciences",
+        "tbs-education____io-om-or"
+      ],
+      "school": "Toulouse Business School",
+      "department": "Information, Operations and Management Sciences",
+      "building": "Sébastopol Building — faculty and academic departments",
+      "address": "1 Place Alphonse Jourdain, 31000 Toulouse, France",
+      "lat": 43.6108,
+      "lng": 1.42996,
+      "addressSource": "https://www.calameo.com/tbs-education/books/001821797e0ce38a22b10",
+      "coordinateSource": "https://www.openstreetmap.org/way/123032476",
+      "supportingSources": [
+        "https://rnsr.adc.education.fr/structure/200024682H",
+        "https://rgcs-owee.org/wp-content/uploads/2024/03/Slides-for-8th-RGCS-Toulouse-Final-Version-18032024.pdf",
+        "https://www.tbs-education.fr/professeurs-recherche/professeurs/departements/departement-information-operations-et-sciences-de-la-decision-2025/",
+        "https://www.poms.org/sites/default/files/2025-12/Position%20IOMS-IOLT%20TBS%20Education%20Toulouse%202026.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The university-published campus plan assigns the faculty dean and academic departments to Sébastopol, 1 Place Alphonse Jourdain. The same university diagram reproduced on page17 of the March2024 faculty-organized Research Group on Collaborative Spaces symposium explicitly lists Professors in this building. The French Ministry research-unit directory, updated16April2025, confirms the research center and its Information, Operations and Decision Sciences laboratory at this address. The September2026 hiring notice confirms the Industrial Organization, Logistics and Technology division belongs to Information, Operations and Management Sciences and is based in Toulouse. Point chosen inside the exact L-shaped address1 footprint, west bend, corroborated against the university diagram. This is a building-level representative point, not an individual office. Do not use the teaching building20BoulevardLascrosses or the different residential building named Le Sebastopol at20RuePierreSalies. Current rooms are not specified; older school faculty directory placed Information faculty, including current head SergeNyawa, in this Sébastopol building."
     }
   ]
 }

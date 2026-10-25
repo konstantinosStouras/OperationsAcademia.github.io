@@ -9476,7 +9476,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-02-19"
+  "lastPosted": "2026-02-19",
+  "mapSearchTerms": [
+   "College of Computer Engineering and Science",
+   "Information Technology"
+  ]
  },
  {
   "id": "prince-mohammad-bin-fahd-university____mis",
@@ -9489,7 +9493,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-24"
+  "lastPosted": "2025-06-24",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Management Information Systems"
+  ]
  },
  {
   "id": "prince-mohammad-bin-fahd-university____om-scm",
@@ -9502,7 +9510,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-06-24"
+  "lastPosted": "2025-06-24",
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Business Administration — Operations Management and Supply Chain Management"
+  ]
  },
  {
   "id": "princeton-university__school-of-engineering-and-applied-science__operations-research-and-financial-engineering",
@@ -11492,7 +11504,11 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2025-12-03"
+  "lastPosted": "2025-12-03",
+  "mapSearchTerms": [
+   "Toulouse Business School",
+   "Information, Operations and Management Sciences"
+  ]
  },
  {
   "id": "tbs-education____io-om-or",
@@ -11504,7 +11520,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2025-12-18"
+  "lastPosted": "2025-12-18",
+  "mapSearchTerms": [
+   "Toulouse Business School",
+   "Information, Operations and Management Sciences"
+  ]
  },
  {
   "id": "technical-university-of-munich____computer-science",
@@ -13216,7 +13236,11 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-02"
+  "lastPosted": "2026-09-02",
+  "mapSearchTerms": [
+   "Católica Lisbon School of Business and Economics",
+   "Operations and Data Science"
+  ]
  },
  {
   "id": "universitat-pompeu-fabra____om-or",
@@ -13465,7 +13489,10 @@
    "postings"
   ],
   "n": 6,
-  "lastPosted": "2026-02-23"
+  "lastPosted": "2026-02-23",
+  "mapSearchTerms": [
+   "Global Business School for Health"
+  ]
  },
  {
   "id": "university-college-london__ucl-global-business-school-for-health__population-health-sciences",
@@ -13487,7 +13514,10 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-09-23"
+  "lastPosted": "2026-09-23",
+  "mapSearchTerms": [
+   "Global Business School for Health"
+  ]
  },
  {
   "id": "university-college-london__ucl-school-of-management",
