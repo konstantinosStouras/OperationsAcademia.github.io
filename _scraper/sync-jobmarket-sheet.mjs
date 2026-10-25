@@ -795,6 +795,8 @@ async function main() {
         // An approval is not a waiver of identity checks: another copy may
         // have been published since review. Keep the existing non-sheet job,
         // or the first approved sheet row, instead of emitting both copies.
+        // Retain the original published sheet vacancy, not its later mirror.
+        split.publish.sort((a, b) => String(a.posted || '').localeCompare(String(b.posted || '')) || String(a.id).localeCompare(String(b.id)));
         const publishCheck = findAdvertRepeats(split.publish,
           site.filter((r) => r.source !== 'jobmarket-sheet'));
         rows = publishCheck.keep;
