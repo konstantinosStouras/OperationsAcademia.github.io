@@ -2,12 +2,15 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require('playwright');
 const nav=require('../assets/oa-jobnav.js');
 const model=require('../assets/oa-map-model.js');
+const schools=require('../assets/oa-schools.js');
 require('./map-consolidation-test.cjs');
+require('./map-physical-card-test.cjs');
 assert.equal(model.displayName('KAIST'),'Korea Advanced Institute of Science and Technology (KAIST)');
 assert.equal(model.displayName('MIT'),'Massachusetts Institute of Technology (MIT)');
 assert.equal(model.departmentName('OR/OM'),'Operations Research, Operations Management');
@@ -19,21 +22,33 @@ const shared=model.pointsFor({id:'same',institution:'Test University',countries:
 assert.equal(shared.length,2,'schools sharing coordinates retain separate cards');
 assert.notEqual(shared[0].card.id,shared[1].card.id);
 const root=path.resolve(import.meta.dirname,'..');
+const frozenFiles=new Map(['data/school-map-locations.json','data/directory.json','data/university-map.json'].map(name=>{const file=path.join(root,name);return [file,fs.readFileSync(file)];}));
+const evidence=JSON.parse(frozenFiles.get(path.join(root,'data/school-map-locations.json'))).records;
+const directory=JSON.parse(frozenFiles.get(path.join(root,'data/directory.json')));
+const generated=JSON.parse(frozenFiles.get(path.join(root,'data/university-map.json')));
+assert.equal(createHash('sha256').update(JSON.stringify(generated.verified)).digest('hex'),createHash('sha256').update(JSON.stringify(evidence)).digest('hex'),'map payload must be rebuilt from current location evidence before browser testing');
+const directoryIds=new Set(directory.map(row=>row.id));
+for(const location of evidence)for(const id of location.rowIds)assert.ok(directoryIds.has(id),id+' must exist in the generated directory before browser testing');
+const snapshotHashes=Object.fromEntries(Array.from(frozenFiles,([file,bytes])=>[path.relative(root,file).replaceAll('\\','/'),createHash('sha256').update(bytes).digest('hex')]));
+console.log('Frozen map data snapshot:',JSON.stringify(snapshotHashes));
 const types={'.html':'text/html','.js':'application/javascript','.css':'text/css','.json':'application/json','.geojson':'application/json','.png':'image/png','.svg':'image/svg+xml'};
 const server=http.createServer((req,res)=>{
   let file=path.join(root,decodeURIComponent(req.url.split('?')[0]));
   if(!fs.existsSync(file)&&!path.extname(file))file+='.html';
   if(!file.startsWith(root)||!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404).end();return;}
-  res.setHeader('content-type',types[path.extname(file)]||'application/octet-stream');fs.createReadStream(file).pipe(res);
+  res.setHeader('content-type',types[path.extname(file)]||'application/octet-stream');
+  if(frozenFiles.has(file))res.end(frozenFiles.get(file));else fs.createReadStream(file).pipe(res);
 });
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const base=`http://127.0.0.1:${server.address().port}`;
 const browser=await chromium.launch({headless:true,...(process.env.PW_CHROMIUM?{executablePath:process.env.PW_CHROMIUM}:{})});
+console.log('Map browser launched; checking school cards and filters.');
 const university='University of Illinois at Urbana-Champaign';
 const job={institution:university,school:'Gies College of Business',unit:'Information Systems, Operations Management, Supply Chain Management, and Analytics',furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=old'};
 assert.equal(nav.furtherInfoUrl({...job,furtherInfoUrl:'https://example.org/job'}),'https://example.org/job');
 const errors=[];
 async function pageAt(query='',mobile=false){
+  if(process.env.MAP_DEBUG_LOG)console.log('Opening map:',query||'(all)',mobile?'mobile':'desktop');
   const p=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1280,height:1000}});
   p.on('pageerror',e=>errors.push(e.message));
   await p.route('**/*',r=>{
@@ -41,7 +56,7 @@ async function pageAt(query='',mobile=false){
     let file=path.join(root,decodeURIComponent(url.pathname));
     if(!fs.existsSync(file)&&!path.extname(file))file+='.html';
     if(!file.startsWith(root)||!fs.existsSync(file)||!fs.statSync(file).isFile())return r.fulfill({status:404,body:''});
-    return r.fulfill({contentType:types[path.extname(file)]||'application/octet-stream',body:fs.readFileSync(file)});
+    return r.fulfill({contentType:types[path.extname(file)]||'application/octet-stream',body:frozenFiles.get(file)||fs.readFileSync(file)});
   });
   await p.addInitScript(()=>{
     let api;
@@ -51,6 +66,7 @@ async function pageAt(query='',mobile=false){
   });
   await p.goto(base+'/universities'+query,{waitUntil:'domcontentloaded',timeout:60000});
   await p.waitForFunction(()=>window.testMap&&window.testMap.shown().length>0);
+  if(process.env.MAP_DEBUG_LOG)console.log('Map ready:',query||'(all)');
   return p;
 }
 try{
@@ -68,6 +84,14 @@ try{
   await p.locator('#oaf-dept').fill('');
   await p.waitForFunction(()=>testMap.shown().length===2);
   await p.close();
+  for(const [types,expected] of [[['Business school'],['Gies']],[['Non-business school'],['Grainger']],[['Business school','Non-business school'],['Gies','Grainger']]]){
+    const query=new URLSearchParams({university});types.forEach(type=>query.append('type',type));
+    const filtered=await pageAt('?'+query);
+    const names=await filtered.evaluate(()=>testMap.shown().map(point=>point.school));
+    assert.equal(names.length,expected.length,'school type scopes the physical school cards');
+    expected.forEach(name=>assert.ok(names.some(school=>school.includes(name)),name+' is shown for its selected school type'));
+    await filtered.close();
+  }
 
   for(const mobile of [false,true]){
     const q=await pageAt(new URL(nav.furtherInfoUrl(job)).search,mobile);
@@ -100,8 +124,61 @@ try{
   assert.ok(await fullName.evaluate(()=>testMap.shown().every(p=>p.card.institution==='KAIST')));
   await fullName.close();
 
-  const evidence=JSON.parse(fs.readFileSync(path.join(root,'data/school-map-locations.json'),'utf8')).records;
-  const directory=JSON.parse(fs.readFileSync(path.join(root,'data/directory.json'),'utf8'));
+  console.log('School filters and mobile links passed; checking full-map provenance and Dublin.');
+  // Use the complete, rendered physical cards as the stable display baseline.
+  // Filtering must not change their representative or strip sibling departments.
+  const baselinePage=await pageAt();
+  const physicalBaseline=await baselinePage.evaluate(()=>testMap.shown());
+  await baselinePage.close();
+  const byEvidence=new Map();
+  for(const point of physicalBaseline)for(const id of point.sourceEvidenceIds||[]){
+    assert.ok(!byEvidence.has(id),id+' belongs to one physical school card');
+    byEvidence.set(id,point);
+  }
+  for(const record of evidence){
+    const point=byEvidence.get(record.id);
+    assert.ok(point,record.id+' retains a visible physical card');
+    const source=(point.locationSources||[]).find(source=>source.id===record.id);
+    assert.ok(source,record.id+' retains its original evidence');
+    assert.deepEqual([source.lat,source.lng,source.address],[record.lat,record.lng,record.address],record.id+' preserves original office evidence independently of shared marker');
+    assert.deepEqual(source.sourceLocation,record.sourceLocation,record.id+' preserves original-location correction provenance');
+  }
+  const rowCards=new Map();
+  for(const point of physicalBaseline){
+    const ids=new Set(point.card.schools.flatMap(s=>s.rows.flatMap(r=>(r.mapSources||[]).map(source=>source.rowId))));
+    for(const id of ids){if(!rowCards.has(id))rowCards.set(id,[]);rowCards.get(id).push(point);}
+  }
+  for(const [id,points] of rowCards){
+    if(points.length<2)continue;
+    const groups=points.map(point=>(point.locationSources||[]).filter(source=>(source.rowIds||[]).includes(id)&&source.locationGroup).map(source=>source.locationGroup));
+    assert.ok(groups[0].some(group=>groups.every(set=>set.includes(group))),id+' repeated cards require an evidenced multi-location group, not stale legacy coordinates');
+  }
+  const dublin=await pageAt('?university='+encodeURIComponent('University College Dublin'));
+  const dublinPoints=await dublin.evaluate(()=>testMap.shown());
+  assert.equal(dublinPoints.length,3,'Dublin exposes Smurfit, Quinn and Belfield engineering cards');
+  const smurfit=dublinPoints.find(point=>(point.sourceEvidenceIds||[]).includes('dublin-supply-chain-smurfit-verified'));
+  assert.ok(smurfit);
+  assert.deepEqual(smurfit.card.schools.flatMap(s=>s.rows.map(r=>r.department)).sort(),['Management Information Systems','Management Subject Area']);
+  for(const query of ['Information Systems','Management Area','Supply Chain']){
+    await dublin.locator('#oaf-dept').fill(query);
+    await dublin.waitForFunction(id=>testMap.shown().length===1&&testMap.shown()[0].card.id===id,smurfit.card.id);
+    const filtered=await dublin.evaluate(()=>testMap.shown()[0]);
+    assert.deepEqual(filtered.card.schools,smurfit.card.schools,query+' retains every Smurfit department and its evidence');
+    assert.deepEqual([filtered.lat,filtered.lng],[smurfit.lat,smurfit.lng],query+' retains the shared school pin');
+  }
+  await dublin.close();
+  for(const id of ['university-college-dublin','university-college-dublin____mis']){
+    const row=directory.find(r=>r.id===id),expected=byEvidence.get(evidence.find(r=>r.rowIds.includes(id)).id);
+    const link=nav.furtherInfoUrl({institution:row.institution,school:row.school,unit:row.department,furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=legacy'});
+    const linked=await pageAt(new URL(link).search);
+    await linked.waitForSelector('.oa-map-popup');
+    assert.deepEqual(await linked.evaluate(()=>{const at=testMap.map._popup.getLatLng();return [at.lat,at.lng];}),[expected.lat,expected.lng],id+' opens its shared card directly');
+    if(row.department){
+      assert.match(await linked.locator('.oa-map-selected-department').innerText(),/Management Information Systems/);
+      assert.match(await linked.locator('.oa-map-popup').innerText(),/Management Subject Area/,'department deep link retains sibling department');
+    }
+    await linked.close();
+  }
   for(const officialName of ['University College London','Universidade Católica Portuguesa']){
     const universityPage=await pageAt('?'+new URLSearchParams({university:officialName}));
     assert.match(await universityPage.locator('.oa-map-status').innerText(),/^1 university · /,officialName+' aliases count as one university');
@@ -124,28 +201,77 @@ try{
   await Promise.all(Array.from({length:4},async()=>{
     while(evidenceQueue.length){
       const {location,id}=evidenceQueue.shift();
-      const displayLocation=model.canonicalLocation(location,evidence);
+      const displayLocation=byEvidence.get(location.id);
       if(evidenceQueue.length%25===0)console.log('Department links remaining:',evidenceQueue.length);
       const row=directory.find(r=>r.id===id);
       const url=nav.furtherInfoUrl({institution:row.institution,school:row.school,unit:row.department,furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=legacy'});
       const q=await pageAt(new URL(url).search);
       try{await q.waitForSelector(row.department?'.oa-map-selected-department':'.oa-map-popup',{timeout:5000});}
       catch(error){throw new Error(id+': '+await q.locator('.oa-map-status').innerText(),{cause:error});}
-      if(location.locationGroup && evidence.filter(candidate=>candidate.rowIds.includes(id)).length>1){
+      const target=schools.canonColumns({institution:row.institution,school:row.school,unit:row.department});
+      const scored=physicalBaseline.map(point=>({point,score:model.pointMatchScore(point,row.institution,target.school,target.unit)}));
+      const best=Math.max(...scored.map(x=>x.score));
+      let eligible=scored.filter(x=>x.score&&x.score===best).map(x=>x.point);
+      if(!target.school&&!target.unit){
+        const generic=scored.filter(x=>x.score).map(x=>x.point).filter(point=>point.card.schools.some(s=>s.rows.some(r=>(r.mapSources||[]).some(source=>{
+          const related=schools.institutionKey(source.institution)===schools.institutionKey(row.institution)||schools.institutionKey(point.card.officialInstitution||'')===schools.institutionKey(row.institution)||(source.institutionAliases||[]).some(a=>schools.institutionKey(a)===schools.institutionKey(row.institution));
+          return related&&[{school:source.school,department:source.department}].concat(source.mapAliases||[]).some(a=>!schools.fold(a.school||'')&&!schools.fold(a.department||''));
+        }))));
+        if(generic.length===1)eligible=generic;
+      }
+      const groupSets=eligible.map(point=>model.locationGroupsForTarget(point,row.institution,target.school,target.unit,evidence));
+      const commonGroups=groupSets.length?groupSets[0].filter(group=>groupSets.every(set=>set.includes(group))):[];
+      if(eligible.length>1&&commonGroups.length){
         const options=q.locator('.oa-map-location-options');
-        assert.ok((await options.innerText()).includes(displayLocation.address),id+' offers its eligible host address');
-        await options.getByRole('button',{name:displayLocation.school+' · '+displayLocation.department+' · '+displayLocation.building,exact:true}).click();
+        const choices=await options.locator('button[data-map-card-id]').evaluateAll(buttons=>buttons.map(b=>b.getAttribute('data-map-card-id')));
+        assert.deepEqual(choices.slice().sort(),eligible.map(point=>point.card.id).sort(),id+' chooser lists each eligible physical card once');
+        const index=choices.indexOf(displayLocation.card.id);
+        assert.ok(index>=0,id+' offers its source school card');
+        await options.locator('button[data-map-card-id]').nth(index).click();
         await q.waitForFunction(()=>document.querySelectorAll('.oa-map-popup').length===1&&!document.querySelector('.oa-map-location-options'));
       }
       assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.address),id+' opens its verified address');
       if(displayLocation.locationPrecision==='campus')assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.locationContext),id+' explains campus fallback');
-      assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[displayLocation.lat,displayLocation.lng],id+' opens the building pin');
+      assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[displayLocation.lat,displayLocation.lng],id+' opens the representative school pin');
       assert.ok(await q.evaluate(evidenceId=>{const at=testMap.map._popup.getLatLng();return testMap.shown().some(p=>p.lat===at.lat&&p.lng===at.lng&&(p.sourceEvidenceIds||[]).includes(evidenceId));},location.id),id+' opened point retains original location evidence');
       await q.locator('#oaf-dept').fill(location.department||location.school||'');
-      await q.waitForFunction(expected=>testMap.shown().some(p=>p.locationVerified&&p.lat===expected.lat&&p.lng===expected.lng),displayLocation);
+      await q.waitForFunction(expected=>testMap.shown().some(p=>p.card.id===expected.card.id&&p.lat===expected.lat&&p.lng===expected.lng),displayLocation);
+      const filtered=await q.evaluate(cardId=>testMap.shown().find(p=>p.card.id===cardId),displayLocation.card.id);
+      assert.deepEqual(filtered.card.schools,displayLocation.card.schools,id+' department filter preserves sibling departments and provenance');
       await q.close();
     }
   }));
+
+  // Shared cards also contain older directory rows without location-evidence IDs.
+  // Exercise their original links without claiming a newly verified office for them.
+  if(!testRows||process.env.MAP_TEST_LEGACY_SHARED){
+    const legacyIds=new Set(physicalBaseline.filter(point=>point.sharedSchoolLocation).flatMap(point=>point.card.schools.flatMap(s=>s.rows.flatMap(r=>(r.mapSources||[]).filter(source=>!source.evidenceId).map(source=>source.rowId)))));
+    const legacyQueue=Array.from(legacyIds),legacyTotal=legacyQueue.length;
+    console.log('Shared legacy department links:',legacyTotal);
+    await Promise.all(Array.from({length:4},async()=>{
+      while(legacyQueue.length){
+        const id=legacyQueue.shift(),row=directory.find(r=>r.id===id);
+        assert.ok(row,id+' original directory row exists');
+        const url=nav.furtherInfoUrl({institution:row.institution,school:row.school,unit:row.department,furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=legacy'});
+        const q=await pageAt(new URL(url).search);
+        await q.waitForSelector(row.department?'.oa-map-selected-department':'.oa-map-popup');
+        const opened=await q.evaluate(rowId=>{
+          const at=testMap.map._popup.getLatLng();
+          return testMap.shown().find(point=>point.lat===at.lat&&point.lng===at.lng&&point.card.schools.some(s=>s.rows.some(r=>(r.mapSources||[]).some(source=>source.rowId===rowId))));
+        },id);
+        assert.ok(opened,id+' opens a card retaining its original legacy row');
+        const expected=physicalBaseline.find(point=>point.card.id===opened.card.id);
+        assert.ok(expected,id+' uses a stable full-directory physical card');
+        assert.deepEqual(opened.card.schools,expected.card.schools,id+' legacy link retains all sibling departments');
+        await q.locator('#oaf-dept').fill(row.department||row.school||'');
+        await q.waitForFunction(cardId=>testMap.shown().some(point=>point.card.id===cardId),opened.card.id);
+        const filtered=await q.evaluate(cardId=>testMap.shown().find(point=>point.card.id===cardId),opened.card.id);
+        assert.deepEqual(filtered.card.schools,expected.card.schools,id+' legacy department search retains all sibling rows');
+        await q.close();
+      }
+    }));
+    console.log('Shared legacy department links passed:',legacyTotal);
+  }
 
   const all=await pageAt();
   if(process.env.MAP_AUDIT_PATH)fs.writeFileSync(process.env.MAP_AUDIT_PATH,JSON.stringify(await all.evaluate(()=>testMap.shown()),null,2)+'\n');
@@ -174,8 +300,8 @@ try{
     const ids=new Set();
     points.forEach(p=>{
       if(ids.has(p.card.id))failures.push('duplicate '+p.card.id);ids.add(p.card.id);
-      if(p.card.schools.length!==1)failures.push('mixed schools '+p.card.id);
-      if(p.card.schools[0].rows.some(r=>(r.school||'')!==p.school))failures.push('wrong school '+p.card.id);
+      if(p.card.schools.length!==1&&!(p.locationSources||[]).some(s=>s.mapCardIdentity))failures.push('unreviewed mixed schools '+p.card.id);
+      p.card.schools.forEach(s=>{if(s.rows.some(r=>r.mapCardSchool!==undefined&&r.mapCardSchool!==s.name))failures.push('wrong school section '+p.card.id);});
       if(!Number.isFinite(p.lat)||!Number.isFinite(p.lng))failures.push('invalid location');
     });
     return {universities:new Set(points.map(p=>p.card.officialInstitution||p.card.institution)).size,locations:points.length,

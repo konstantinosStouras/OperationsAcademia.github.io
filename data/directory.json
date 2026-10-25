@@ -198,6 +198,23 @@
   ]
  },
  {
+  "id": "adelphi-university__robert-b-willumstad-school-of-business__decision-sciences-and-marketing",
+  "institution": "Adelphi University",
+  "school": "Robert B. Willumstad School of Business",
+  "department": "Decision Sciences and Marketing",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapSearchTerms": [
+   "Robert B. Willumstad School of Business",
+   "Decision Sciences and Marketing Department"
+  ],
+  "mapInstitutionNames": [
+   "Adelphi University"
+  ]
+ },
+ {
   "id": "adelphi-university__robert-b-willumstad-school-of-business__management",
   "institution": "Adelphi University",
   "school": "Robert B. Willumstad School of Business",
@@ -2650,6 +2667,13 @@
   "sources": [
    "omlist",
    "seed"
+  ],
+  "mapSearchTerms": [
+   "Business School",
+   "Department of Decisions, Operations and Technology"
+  ],
+  "mapInstitutionNames": [
+   "Chinese University of Hong Kong"
   ]
  },
  {
@@ -8569,6 +8593,24 @@
   ]
  },
  {
+  "id": "minnesota-state-university-mankato__college-of-science-engineering-and-technology__computer-information-science",
+  "institution": "Minnesota State University, Mankato",
+  "school": "College of Science, Engineering and Technology",
+  "department": "Computer Information Science",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapSearchTerms": [
+   "College of Science, Engineering and Technology",
+   "Department of Computer Information Science"
+  ],
+  "mapInstitutionNames": [
+   "Minnesota State University, Mankato"
+  ],
+  "country": "United States"
+ },
+ {
   "id": "mississippi-state-university__james-worth-bagley-college-of-engineering__industrial-and-systems-engineering",
   "institution": "Mississippi State University",
   "school": "James Worth Bagley College of Engineering",
@@ -13798,7 +13840,13 @@
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2014-09-19"
+  "lastPosted": "2014-09-19",
+  "mapSearchTerms": [
+   "Business School"
+  ],
+  "mapInstitutionNames": [
+   "The Chinese University of Hong Kong"
+  ]
  },
  {
   "id": "chinese-university-of-hong-kong__cuhk-business-school__decision-sciences-and-managerial-economics",
@@ -13814,7 +13862,14 @@
    "directory"
   ],
   "lat": 22.4142565,
-  "lng": 114.2086826
+  "lng": 114.2086826,
+  "mapSearchTerms": [
+   "Business School",
+   "Department of Decisions, Operations and Technology"
+  ],
+  "mapInstitutionNames": [
+   "Chinese University of Hong Kong"
+  ]
  },
  {
   "id": "chinese-university-of-hong-kong__cuhk-business-school__decisions-operations-and-technology",
@@ -13836,7 +13891,14 @@
    "seed"
   ],
   "n": 1,
-  "lastPosted": "2026-08-27"
+  "lastPosted": "2026-08-27",
+  "mapSearchTerms": [
+   "Business School",
+   "Department of Decisions, Operations and Technology"
+  ],
+  "mapInstitutionNames": [
+   "Chinese University of Hong Kong"
+  ]
  },
  {
   "id": "chinese-university-of-hong-kong__faculty-of-engineering__systems-engineering-and-engineering-management",
@@ -15079,6 +15141,10 @@
   "type": "University",
   "sources": [
    "seed"
+  ],
+  "mapSearchTerms": [],
+  "mapInstitutionNames": [
+   "University College Dublin"
   ]
  },
  {
@@ -15094,7 +15160,7 @@
   "n": 1,
   "lastPosted": "2025-06-13",
   "mapSearchTerms": [
-   "School of Business",
+   "Michael Smurfit Graduate Business School",
    "Management Information Systems"
   ],
   "mapInstitutionNames": [
@@ -15115,7 +15181,7 @@
   "lastPosted": "2025-06-13",
   "mapSearchTerms": [
    "Michael Smurfit Graduate Business School",
-   "Management Subject Area — Supply Chain Management"
+   "Management Subject Area"
   ],
   "mapInstitutionNames": [
    "University College Dublin"
@@ -15133,7 +15199,7 @@
   "n": 1,
   "lastPosted": "2014-07-04",
   "mapSearchTerms": [
-   "School of Business"
+   "Lochlann Quinn School of Business"
   ],
   "mapInstitutionNames": [
    "University College Dublin"
@@ -15167,7 +15233,14 @@
   "n": 1,
   "lastPosted": "2025-08-17",
   "lat": 53.2929508,
-  "lng": -6.1800521
+  "lng": -6.1800521,
+  "mapSearchTerms": [
+   "Michael Smurfit Graduate Business School",
+   "Management Subject Area"
+  ],
+  "mapInstitutionNames": [
+   "University College Dublin"
+  ]
  },
  {
   "id": "university-college-dublin__school-of-mechanical-and-materials-engineering",
@@ -15182,7 +15255,13 @@
    "directory"
   ],
   "lat": 53.3082648,
-  "lng": -6.2236395
+  "lng": -6.2236395,
+  "mapSearchTerms": [
+   "School of Mechanical and Materials Engineering"
+  ],
+  "mapInstitutionNames": [
+   "University College Dublin"
+  ]
  },
  {
   "id": "university-college-london",
@@ -19066,6 +19145,24 @@
   "mapInstitutionNames": [
    "The University of Queensland"
   ]
+ },
+ {
+  "id": "university-of-rhode-island__college-of-engineering__mechanical-industrial-and-systems-engineering",
+  "institution": "University of Rhode Island",
+  "school": "College of Engineering",
+  "department": "Mechanical, Industrial and Systems Engineering",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Department of Mechanical, Industrial and Systems Engineering"
+  ],
+  "mapInstitutionNames": [
+   "University of Rhode Island"
+  ],
+  "country": "United States"
  },
  {
   "id": "university-of-richmond__robins-school-of-business__management",

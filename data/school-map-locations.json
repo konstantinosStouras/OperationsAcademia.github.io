@@ -4231,7 +4231,7 @@
         "university-college-dublin____supply-chain-management"
       ],
       "school": "Michael Smurfit Graduate Business School",
-      "department": "Management Subject Area — Supply Chain Management",
+      "department": "Management Subject Area",
       "building": "Michael Smurfit Graduate Business School, Carysfort building",
       "address": "Carysfort Avenue, Blackrock, County Dublin, Ireland",
       "lat": 53.2954248,
@@ -4242,7 +4242,10 @@
         "https://www.smurfitschool.ie/t4media/Corporate%20Engagement%20UCD%20Smurfit%20Business%20School%20June%202024.2025.pdf"
       ],
       "checked": "2026-10-24",
-      "notes": "Current official profile explicitly identifies supply chain professor Donna Marshall at Graduate School of Business, Carysfort Avenue, Blackrock. Official programme guide groups Sustainable Supply Chain Management under Management. Exact university-building footprint, not broader Blackrock campus polygon or Belfield university coordinates. Faculty also teach undergraduate courses at Belfield; this record maps verified academic office base."
+      "notes": "Current official profile explicitly identifies supply chain professor Donna Marshall at Graduate School of Business, Carysfort Avenue, Blackrock. Official programme guide groups Sustainable Supply Chain Management under Management. Exact university-building footprint, not broader Blackrock campus polygon or Belfield university coordinates. Faculty also teach undergraduate courses at Belfield; this record maps verified academic office base.",
+      "mapCardIdentity": "university-college-dublin-smurfit-blackrock",
+      "mapCardSchool": "Michael Smurfit Graduate Business School",
+      "mapCardLabel": "Michael Smurfit Graduate Business School"
     },
     {
       "id": "monash-management-caulfield-verified",
@@ -7196,7 +7199,10 @@
     {
       "institution": "Chinese University of Hong Kong",
       "rowIds": [
-        "chinese-university-of-hong-kong____om-is"
+        "chinese-university-of-hong-kong____om-is",
+        "chinese-university-of-hong-kong__cuhk-business-school__decisions-operations-and-technology",
+        "chinese-university-of-hong-kong__cuhk-business-school__decision-sciences-and-managerial-economics",
+        "chinese-university-of-hong-kong__cuhk-business-school__operations-management"
       ],
       "id": "chinese-university-hong-kong-decisions-operations-technology",
       "school": "Business School",
@@ -7208,9 +7214,10 @@
       "addressSource": "https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/",
       "coordinateSource": "https://www.cuhk.edu.hk/english/campus/cuhk-campus-map.html",
       "supportingSources": [
-        "https://www.cuhk.edu.hk/english/js/campus/cuhk_location_db.js?20161006"
+        "https://www.cuhk.edu.hk/english/js/campus/cuhk_location_db.js?20161006",
+        "https://www.bschool.cuhk.edu.hk/school-news/cuhk-business-schools-department-of-decisions-operations-and-technology-renamed/"
       ],
-      "notes": "Current official department page explicitly covers operations and supply chain management and information systems, supplies ninth-floor address and official full department name. Official campus map database gives named Cheng Yu Tung Building marker 135; not the general university location.",
+      "notes": "Current official department page explicitly covers operations and supply chain management and information systems, supplies ninth-floor address and official full department name. Official campus map database gives named Cheng Yu Tung Building marker 135; not the general university location. The official 1 August 2023 announcement confirms that Decision Sciences and Managerial Economics was renamed Decisions, Operations and Technology, with Operations Management a constituent subject. These historical row aliases now use the current department location; the old Pond Crescent point is not a separate campus.",
       "checked": "2026-10-25",
       "institutionKey": "chinese-university-of-hong-kong"
     },
@@ -10487,7 +10494,7 @@
       "rowIds": [
         "university-college-dublin__school-of-business"
       ],
-      "school": "School of Business",
+      "school": "Lochlann Quinn School of Business",
       "department": "",
       "building": "Lochlann Quinn School of Business",
       "address": "Belfield, Dublin 4, Ireland",
@@ -10496,7 +10503,10 @@
       "addressSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
       "coordinateSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
       "checked": "2026-10-25",
-      "notes": "The current official staff directory identifies School of Business general enquiries and Quinn School Office Q021 in this building, with its own map marker coordinates. School-level administrative location; the separately verified graduate supply-chain faculty location remains at Blackrock."
+      "notes": "The current official staff directory identifies School of Business general enquiries and Quinn School Office Q021 in this building, with its own map marker coordinates. School-level administrative location; the separately verified graduate supply-chain faculty location remains at Blackrock.",
+      "mapCardIdentity": "university-college-dublin-quinn-belfield",
+      "mapCardSchool": "Lochlann Quinn School of Business",
+      "mapCardLabel": "Lochlann Quinn School of Business"
     },
     {
       "id": "dublin-management-information-systems-quinn-official-directory",
@@ -10505,16 +10515,35 @@
       "rowIds": [
         "university-college-dublin____mis"
       ],
-      "school": "School of Business",
+      "school": "Michael Smurfit Graduate Business School",
       "department": "Management Information Systems",
-      "building": "Lochlann Quinn School of Business",
-      "address": "Belfield, Dublin 4, Ireland",
-      "lat": 53.304813,
-      "lng": -6.219522,
-      "addressSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
-      "coordinateSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
+      "building": "Michael Smurfit Graduate Business School, Carysfort building",
+      "address": "Carysfort Avenue, Blackrock, County Dublin, Ireland",
+      "lat": 53.2954248,
+      "lng": -6.1847316,
+      "addressSource": "https://www.smurfitschool.ie/programmes/masters/",
+      "coordinateSource": "https://www.openstreetmap.org/way/220407125",
       "checked": "2026-10-25",
-      "notes": "The current official directory locates Management Information Systems professor Séamas Kelly in Q226, Sean McGarraghy in Q236 and Annunziata Esposito Amideo in Q223, and supplies exact Quinn building marker coordinates. This is the verified subject-area office location, not a university centroid or inference from teaching on two campuses."
+      "notes": "User-requested shared Michael Smurfit Graduate Business School card. The official graduate school programme page includes Management Information Systems. This is a school-level display grouping, not new verification of a faculty office at Blackrock. Original current official directory evidence for Quinn offices Q226, Q236 and Q223 is preserved in sourceLocation.",
+      "sourceLocation": {
+        "building": "Lochlann Quinn School of Business",
+        "address": "Belfield, Dublin 4, Ireland",
+        "lat": 53.304813,
+        "lng": -6.219522,
+        "addressSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
+        "coordinateSource": "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
+        "checked": "2026-10-25",
+        "notes": "The current official directory locates Management Information Systems professor Séamas Kelly in Q226, Sean McGarraghy in Q236 and Annunziata Esposito Amideo in Q223, and supplies exact Quinn building marker coordinates. This is the verified subject-area office location, not a university centroid or inference from teaching on two campuses.",
+        "explanation": "Verified faculty offices remain in the Lochlann Quinn School of Business. Displaying the subject within the shared graduate school card does not assert that those offices moved."
+      },
+      "supportingSources": [
+        "https://hub.ucd.ie/usis/W_HU_REPORTING.P_DISPLAY_QUERY?p_parameters=C41303CCBD385D05B62A6CCFA26B2A86D93150DF0C375D6AFEE1AECDF7BF21832E702193EACC1014963140B1FC41A8FFB2687D3A65BD7849D93CB252CCFC75B021FDA4ADE0E49CD6B498EA697396759E5EBC61A6C456B2D4739215765F6ACA8D09EBE98DAB6E937837DBA181768F77B070E16D5FB6D08E351163A750943E696D116B21C1C3C3A9A00194C55F2F29D240D04EC23FC6C89E7B4B5221D73D3DA32DEB5450F0434195E7EC3161F2FD86BB6A4AB8D00C4DB9E584783F82EE0B719135A61908E1F2A538FEF7FC6908922FD77F9B29EEF2F9BB2B0D7B4995A1A9A912C7&p_query=ID920-1",
+        "https://www.smurfitschool.ie/facultyresearch/subjectareas/management/"
+      ],
+      "locationContext": "Grouped under the graduate business school. Verified faculty offices are also located in the Lochlann Quinn School of Business at Belfield.",
+      "mapCardIdentity": "university-college-dublin-smurfit-blackrock",
+      "mapCardSchool": "Michael Smurfit Graduate Business School",
+      "mapCardLabel": "Michael Smurfit Graduate Business School"
     },
     {
       "id": "andes-chile-business-el-reloj",
@@ -15339,6 +15368,73 @@
       "country": "United States"
     },
     {
+      "id": "dublin-management-smurfit-directory-alias",
+      "institution": "University College Dublin",
+      "institutionKey": "University College Dublin (UCD)",
+      "rowIds": [
+        "university-college-dublin__michael-smurfit-graduate-business-school__management-area"
+      ],
+      "school": "Michael Smurfit Graduate Business School",
+      "department": "Management Subject Area",
+      "building": "Michael Smurfit Graduate Business School, Carysfort building",
+      "address": "Carysfort Avenue, Blackrock, County Dublin, Ireland",
+      "lat": 53.2954248,
+      "lng": -6.1847316,
+      "addressSource": "https://www.smurfitschool.ie/facultyresearch/subjectareas/management/",
+      "coordinateSource": "https://www.openstreetmap.org/way/220407125",
+      "supportingSources": [
+        "https://www.smurfitschool.ie/t4media/Corporate%20Engagement%20UCD%20Smurfit%20Business%20School%20June%202024.2025.pdf"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Current official Management subject page belongs to Michael Smurfit Graduate Business School and includes supply chain management. Consolidated at the verified Carysfort school building; supersedes the historical directory pin 53.2929508,-6.1800521, which does not represent that building. Full university name displayed while the legacy institution key remains available for row resolution.",
+      "mapCardIdentity": "university-college-dublin-smurfit-blackrock",
+      "mapCardSchool": "Michael Smurfit Graduate Business School",
+      "mapCardLabel": "Michael Smurfit Graduate Business School"
+    },
+    {
+      "id": "dublin-mechanical-materials-engineering-belfield",
+      "institution": "University College Dublin",
+      "institutionKey": "University College Dublin (UCD)",
+      "rowIds": [
+        "university-college-dublin__school-of-mechanical-and-materials-engineering"
+      ],
+      "school": "School of Mechanical and Materials Engineering",
+      "department": "",
+      "building": "Engineering and Materials Science Centre",
+      "address": "Engineering and Materials Science Centre, Belfield, Dublin 4, Ireland",
+      "lat": 53.306485,
+      "lng": -6.2184759,
+      "addressSource": "https://www.ucd.ie/mecheng/contact/",
+      "coordinateSource": "https://maps.app.goo.gl/K11gKgtEQaW5BAd47",
+      "checked": "2026-10-25",
+      "notes": "Current official school contact identifies the Engineering and Materials Science Centre and links the named school Google Maps destination at these coordinates. Its contact text mentions rooms 225 and 226, so this record verifies the building without resolving that room inconsistency. User-requested shared Belfield main university card; replaces the historical engineering directory pin farther northwest.",
+      "mapCardIdentity": "university-college-dublin-main-belfield-engineering",
+      "mapCardLabel": "Belfield campus — Mechanical and Materials Engineering",
+      "mapCardSchool": "School of Mechanical and Materials Engineering"
+    },
+    {
+      "id": "dublin-main-university-belfield-shared-card",
+      "institution": "University College Dublin",
+      "institutionKey": "University College Dublin",
+      "rowIds": [
+        "university-college-dublin"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Engineering and Materials Science Centre",
+      "address": "Engineering and Materials Science Centre, Belfield, Dublin 4, Ireland",
+      "lat": 53.306485,
+      "lng": -6.2184759,
+      "addressSource": "https://www.ucd.ie/mecheng/contact/",
+      "coordinateSource": "https://maps.app.goo.gl/K11gKgtEQaW5BAd47",
+      "checked": "2026-10-25",
+      "notes": "University-level directory row shares the Belfield card with its School of Mechanical and Materials Engineering, as requested. The card is anchored at the current officially linked engineering building destination rather than adding a redundant generic campus point. This is a display grouping, not a claim that every university office is in this building.",
+      "locationContext": "Belfield campus, shared with the School of Mechanical and Materials Engineering.",
+      "mapCardIdentity": "university-college-dublin-main-belfield-engineering",
+      "mapCardLabel": "Belfield campus — Mechanical and Materials Engineering",
+      "mapCardSchool": "School of Mechanical and Materials Engineering"
+    },
+    {
       "id": "minnesota-state-mankato-computer-information-science-wissink",
       "institution": "Minnesota State University, Mankato",
       "school": "College of Science, Engineering and Technology",
@@ -15402,6 +15498,29 @@
       "checked": "2026-10-25",
       "notes": "Official department directory identifies Decision Sciences and Marketing Department in room334. Current MIS and business analytics faculty are assigned to this department. Reuses the verified Hagedorn building point already used by Management, without moving that separate department.",
       "locationIdentity": "adelphi-management-hagedorn"
+    },
+    {
+      "id": "chinese-university-hong-kong-business-school-cheng-yu-tung",
+      "institution": "The Chinese University of Hong Kong",
+      "institutionKey": "Chinese University of Hong Kong",
+      "rowIds": [
+        "chinese-university-of-hong-kong__cuhk-business-school"
+      ],
+      "school": "Business School",
+      "department": "",
+      "building": "Cheng Yu Tung Building",
+      "address": "15/F, Cheng Yu Tung Building, 12 Chak Cheung Street, Shatin, Hong Kong",
+      "lat": 22.41226337127314,
+      "lng": 114.21063244342804,
+      "addressSource": "https://www.bschool.cuhk.edu.hk/wp-content/uploads/cuhk_business_JuL_2024_spread_web-compressed.pdf",
+      "coordinateSource": "https://www.cuhk.edu.hk/english/campus/cuhk-campus-map.html",
+      "supportingSources": [
+        "https://www.bschool.cuhk.edu.hk/contact-us/",
+        "https://www.bschool.cuhk.edu.hk/cuhk-business-school/milestones/",
+        "https://www.cuhk.edu.hk/english/js/campus/cuhk_location_db.js?20161006"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The official school brochure supplies the school office address on the fifteenth floor of Cheng Yu Tung Building. The official university campus map identifies the building. Its current school location supersedes the stale Pond Crescent historical marker, which otherwise duplicates this same school listing. The department retains its separate ninth-floor address evidence on the shared school card."
     }
   ]
 }

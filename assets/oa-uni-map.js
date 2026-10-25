@@ -63,7 +63,8 @@
     var focusApplied = false;
     var resolveReady,rejectReady;
     var whenReady=new Promise(function(resolve,reject){resolveReady=resolve;rejectReady=reject;});
-    var locations = new Map(), historic = new Map(), rowInstitutions = {}, verified = [], ready = false, lastSignature = '';
+    var locations = new Map(), historic = new Map(), rowInstitutions = {}, verified = [], schoolAliases = [], ready = false, lastSignature = '';
+    var cachedCards=[],cachedPoints=[];
     var tabs = el('div', {class:'oa-map-regions', role:'group', 'aria-label':'Continent'});
     REGIONS.forEach(function(r) {
       var b = el('button',{type:'button','data-region':r[0],text:r[1]});
@@ -165,6 +166,19 @@
           var p=el('p',selected?{class:'oa-map-selected-department'}:{}); p.appendChild(makeLink(OAMapModel.departmentName(r.department)||'School listing',r.deptUrl));
           if(r.facultyUrl) {p.appendChild(document.createTextNode(' · '));p.appendChild(makeLink('Faculty',r.facultyUrl));}
           pop.appendChild(p);
+          var sourceDetails=(r.locationSources||[]).filter(function(v){return v.sourceLocation||v.locationContext||point&&(v.address&&v.address!==point.address||v.building&&v.building!==point.building||v.lat!==point.lat||v.lng!==point.lng);});
+          if(sourceDetails.length){
+            var details=el('details');details.appendChild(el('summary',{text:'Department location details'}));
+            var seenLocations=new Set();
+            sourceDetails.forEach(function(v){
+              var loc=v.sourceLocation||v,signature=[loc.building,loc.address,loc.addressSource].join('|');
+              if(seenLocations.has(signature))return;seenLocations.add(signature);
+              if(v.locationContext)details.appendChild(el('p',{text:v.locationContext}));
+              details.appendChild(el('p',{text:[loc.building,loc.address].filter(Boolean).join(' · ')}));
+              details.appendChild(makeLink('Official department location',loc.addressSource));
+            });
+            pop.appendChild(details);
+          }
         });
       });
       var q=encodeURIComponent(card.institution),nav=el('p',{class:'oa-map-popup-links'});
@@ -222,23 +236,32 @@
     details.addEventListener('toggle',renderResults);
     function draw(keepView) {
       if(!ready)return;
-      var cards=snapshot.view||[],points=[],missing=[],inRegion=[];
+      var cards=snapshot.rows||snapshot.view||[],visible=new Set((snapshot.view||[]).map(function(c){return c.id;})),points=[],missing=[];
       var deptFilter=(snapshot.filters||[]).find(function(f){return f.key==='dept';});
       var queries=deptFilter?deptFilter.values.map(fold).filter(Boolean):[];
       var countryFilter=(snapshot.filters||[]).find(function(f){return f.key==='country';});
       var countryQueries=countryFilter?countryFilter.values.map(fold).filter(Boolean):[];
-      cards.forEach(function(c){
-        var ps=pointsFor(c);
-        ps=ps.filter(function(p){return region==='world'||regionOf(p)===region;});
-        if(countryQueries.length)ps=ps.filter(function(p){return countryQueries.indexOf(fold(p.country))!==-1;});
-        // A university-only search keeps all its schools. Department search
-        // narrows the actual map cards as well as the directory's university.
-        if(queries.length)ps=ps.filter(function(p){var text=fold(p.school+' '+p.card.schools[0].rows.map(function(r){return r.department+' '+(r.mapAliases||[]).map(function(a){return a.school+' '+a.department;}).join(' ');}).join(' '));return queries.some(function(q){return q.split(' ').every(function(w){return text.indexOf(w)!==-1;});});});
-        ps=ps.filter(function(p){if(OAMapModel.located(p))return true;missing.push(p.card);return false;});
-        if(ps.length)inRegion.push(c);
-        ps.forEach(function(p){points.push(p);});
+      var typeFilter=(snapshot.filters||[]).find(function(f){return f.key==='type';});
+      var typeQueries=typeFilter?typeFilter.values.map(fold).filter(Boolean):[];
+      if(cards.length!==cachedCards.length||cards.some(function(c,i){return c!==cachedCards[i];})){
+        var allPoints=[];cards.forEach(function(c){allPoints.push.apply(allPoints,pointsFor(c));});
+        cachedPoints=OAMapModel.mergeSchoolLocations(OAMapModel.consolidatePoints(allPoints,verified),verified,{schoolAliases:schoolAliases});
+        cachedCards=cards.slice();
+      }
+      // Select complete school cards only after grouping, so searching one
+      // department keeps the other departments at that location on its card.
+      cachedPoints.forEach(function(p){
+        if(!(p.sourceUniversityIds||[p.card.universityId]).some(function(id){return visible.has(id);}))return;
+        if(region!=='world'&&regionOf(p)!==region)return;
+        if(countryQueries.length&&countryQueries.indexOf(fold(p.country))===-1)return;
+        if(typeQueries.length&&!p.card.schools.some(function(s){return s.rows.some(function(r){
+          var label=r.type==='Business School'?'Business school':r.type==='University'?'Non-business school':'';
+          return label&&typeQueries.indexOf(fold(label))!==-1;
+        });}))return;
+        var text=fold(p.school+' '+p.card.schools.map(function(s){return s.name+' '+s.rows.map(function(r){return r.department+' '+(r.mapAliases||[]).map(function(a){return a.school+' '+a.department;}).join(' ');}).join(' ');}).join(' '));
+        if(queries.length&&!queries.some(function(q){return q.split(' ').every(function(w){return text.indexOf(w)!==-1;});}))return;
+        if(OAMapModel.located(p))points.push(p);else missing.push(p.card);
       });
-      points=OAMapModel.consolidatePoints(points,verified);
       var restoreFocus=!!(map._popup&&map.hasLayer(map._popup));
       map.closePopup();cluster.clearLayers();markers.clear();currentPoints=points;
       if(!keepView)frame(points);
@@ -279,21 +302,31 @@
             if(score>bestScore){chosen=m;bestScore=score;eligible=[m];}
             else if(score&&score===bestScore&&eligible.indexOf(m)===-1)eligible.push(m);
           });
-          if(!chosen && !targetSchool && !targetDepartment && matches.length===1)chosen=matches[0];
+          if(!targetSchool&&!targetDepartment){
+            var generic=matches.filter(function(m){return m.oaCard.schools.some(function(s){return s.rows.some(function(r){return (r.mapSources||[]).some(function(source){
+              var related=key(source.institution)===key(targetUniversity)||key(m.oaCard.officialInstitution||'')===key(targetUniversity)||(source.institutionAliases||[]).some(function(a){return key(a)===key(targetUniversity);});
+              return related&&[{school:source.school,department:source.department}].concat(source.mapAliases||[]).some(function(a){return !fold(a.school)&&!fold(a.department);});
+            });});});});
+            if(generic.length===1){chosen=generic[0];eligible=generic;}
+            else if(matches.length===1){chosen=matches[0];eligible=matches;}
+          }
           if(!chosen){status.textContent+=' The requested department is not in the directory; showing the available schools.';return;}
           focusApplied=true;autoFrame=false;
-          if(eligible.length>1&&eligible.every(function(m){return m.oaPoint.locationGroup&&m.oaPoint.locationGroup===eligible[0].oaPoint.locationGroup;})) {
+          var commonGroups=eligible.length?OAMapModel.locationGroupsForTarget(eligible[0].oaPoint,targetUniversity,targetSchool,targetDepartment,verified):[];
+          eligible.slice(1).forEach(function(m){var groups=OAMapModel.locationGroupsForTarget(m.oaPoint,targetUniversity,targetSchool,targetDepartment,verified);commonGroups=commonGroups.filter(function(g){return groups.indexOf(g)!==-1;});});
+          if(eligible.length>1&&commonGroups.length) {
             var options=el('div',{class:'oa-uni-pop oa-map-location-options',tabindex:'-1'});
             options.appendChild(el('h3',{text:chosen.oaCard.officialInstitution||OAMapModel.displayName(chosen.oaCard.institution)}));
             options.appendChild(el('p',{class:'oa-map-selected-department',text:'This department or posting has several academic locations. Select a location to see its card.'}));
             eligible.forEach(function(m){
-              var p=el('p'),button=el('button',{type:'button',text:m.oaPoint.school+' · '+m.oaPoint.department+' · '+m.oaPoint.building});
+              var p=el('p'),button=el('button',{type:'button','data-map-card-id':m.oaCard.id,text:[m.oaPoint.mapCardLabel||m.oaPoint.school,m.oaPoint.building].filter(Boolean).join(' · ')});
               button.addEventListener('click',function(){map.setView(m.getLatLng(),14,{animate:false});openPopup(cardContent(m.oaCard,m.oaPoint),m.getLatLng());});
               p.appendChild(button);options.appendChild(p);
               options.appendChild(el('p',{text:m.oaPoint.address}));
               if(m.oaPoint.locationContext)options.appendChild(el('p',{text:m.oaPoint.locationContext}));
             });
-            options.appendChild(makeLink('Official location information',chosen.oaPoint.locationGroupSource));
+            var groupEvidence=verified.find(function(v){return v.locationGroup===commonGroups[0]&&v.locationGroupSource;});
+            options.appendChild(makeLink('Official location information',groupEvidence&&groupEvidence.locationGroupSource));
             map.fitBounds(L.latLngBounds(eligible.map(function(m){return m.getLatLng();})),{padding:[40,40],maxZoom:14,animate:false});
             openPopup(options,map.getCenter());
             return;
@@ -309,13 +342,14 @@
       var keep=signature===lastSignature;lastSignature=signature;draw(keep);
     }
     Promise.all([
-      fetch('/data/university-map.json?v=20261023-location-evidence').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
+      fetch('/data/university-map.json?v=20261025-shared-school-cards').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
       fetch('/assets/world/countries.geojson?v=20261022-mobile').then(function(r){if(!r.ok)throw Error('geography');return r.json();})
     ]).then(function(data) {
       data[0].locations.forEach(function(r){nameKeys.set(r.name,r.key);locations.set(r.key,r);});
       data[0].logos.forEach(function(r){nameKeys.set(r.name,r.key);universityLogos.set(r.key,r);});
       rowInstitutions=data[0].rowInstitutions||{};
       verified=data[0].verified||[];
+      schoolAliases=data[0].schoolAliases||[];
       data[0].historic.forEach(function(r){var k=r.key;nameKeys.set(r.institution||r.name,k);if(!historic.has(k))historic.set(k,[]);historic.get(k).push(r);});
       land=L.geoJSON(data[1],{style:palette,interactive:false}).addTo(map);land.bringToBack();
       ready=true;draw(false);resolveReady();

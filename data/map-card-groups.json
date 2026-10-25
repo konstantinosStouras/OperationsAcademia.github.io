@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "schoolAliases": [
+    {
+      "institution": "Yale University",
+      "aliases": [
+        "Yale School of Management",
+        "School of Management"
+      ],
+      "school": "Yale School of Management",
+      "source": "https://som.yale.edu/programs/phd/overview/operations/seminar-series"
+    },
+    {
+      "institution": "Purdue University",
+      "aliases": [
+        "Mitch Daniels School of Business",
+        "Mitchell E. Daniels, Jr. School of Business"
+      ],
+      "school": "Mitch Daniels School of Business",
+      "source": "https://business.purdue.edu/academics/mis/faculty.php"
+    },
+    {
+      "institution": "Massachusetts Institute of Technology",
+      "aliases": [
+        "Sloan School of Management",
+        "MIT Sloan School of Management"
+      ],
+      "school": "Sloan School of Management",
+      "source": "https://orc.mit.edu/people/faculty/"
+    },
+    {
+      "institution": "University of Alabama",
+      "aliases": [
+        "Culverhouse College of Business",
+        "Culverhouse College of Commerce"
+      ],
+      "school": "Culverhouse College of Business",
+      "source": "https://culverhouse.ua.edu/ism/"
+    },
+    {
+      "institution": "University of Toronto",
+      "aliases": [
+        "Rotman School of Management",
+        "Joseph L. Rotman School of Management"
+      ],
+      "school": "Rotman School of Management",
+      "source": "https://www.rotman.utoronto.ca/the-rotman-experience/connect-with-us/"
+    },
+    {
+      "institution": "University of New South Wales",
+      "aliases": [
+        "University of New South Wales Business School",
+        "UNSW Business School"
+      ],
+      "school": "University of New South Wales Business School",
+      "source": "https://www.unsw.edu.au/business/our-schools/information-systems-technology-management/contact-us"
+    },
+    {
+      "institution": "University College London",
+      "aliases": [
+        "School of Management",
+        "UCL School of Management"
+      ],
+      "school": "School of Management",
+      "source": "https://www.mgmt.ucl.ac.uk/user/49"
+    },
+    {
+      "institution": "The Chinese University of Hong Kong",
+      "aliases": [
+        "Business School",
+        "CUHK Business School"
+      ],
+      "school": "Business School",
+      "source": "https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/"
+    },
+    {
+      "institution": "University of Minnesota",
+      "aliases": [
+        "Carlson School of Management",
+        "Curtis L. Carlson School of Management"
+      ],
+      "school": "Carlson School of Management",
+      "source": "https://carlsonschool.umn.edu/departments/supply-chain-operations/contact"
+    },
+    {
+      "institution": "Hong Kong University of Science and Technology",
+      "aliases": [
+        "School of Business and Management",
+        "HKUST School of Business and Management"
+      ],
+      "school": "School of Business and Management",
+      "source": "https://isom.hkust.edu.hk/sites/isom/files/course-attachments/Spring%2025-26%20%28OM%29/Syllabus_L1_ISOM2700_Spring2026.pdf"
+    },
+    {
+      "institution": "Stanford University",
+      "aliases": [
+        "Graduate School of Business",
+        "Stanford Graduate School of Business"
+      ],
+      "school": "Graduate School of Business",
+      "source": "https://web.stanford.edu/~daniancu/cv/CV.pdf"
+    },
+    {
+      "institution": "Technical University of Munich",
+      "aliases": [
+        "School of Management",
+        "TUM School of Management"
+      ],
+      "school": "School of Management",
+      "source": "https://www.mgt.tum.de/about/contact-directions"
+    },
+    {
+      "institution": "University of Cambridge",
+      "aliases": [
+        "Cambridge Judge Business School",
+        "Judge Business School"
+      ],
+      "school": "Cambridge Judge Business School",
+      "source": "https://www.jbs.cam.ac.uk/faculty-research/subject-groups/operations-technology-management/"
+    },
+    {
+      "institution": "University of Auckland",
+      "aliases": [
+        "University of Auckland Business School",
+        "Business School"
+      ],
+      "school": "University of Auckland Business School",
+      "source": "https://www.auckland.ac.nz/en/business/about-business-school/isom/contact.html"
+    },
+    {
+      "institution": "Rutgers, The State University of New Jersey",
+      "aliases": [
+        "Rutgers Business School",
+        "Rutgers Business School - Newark and New Brunswick"
+      ],
+      "school": "Rutgers Business School",
+      "source": "https://www.business.rutgers.edu/sites/default/files/documents/faculty/cv-lian-qi.pdf"
+    }
+  ]
+}
