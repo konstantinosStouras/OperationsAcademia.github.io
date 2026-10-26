@@ -55,6 +55,20 @@ async function pageAt(query='',mobile=false){
 try {
   for (const mobile of [false,true]) {
     const p=await pageAt('?view=map&filterA=INSEAD',mobile);
+    for (const [region,countries] of [
+      ['world',['France','Singapore','United Arab Emirates','United States']],
+      ['europe',['France']],['north-america',['United States']],
+      ['asia',['Singapore','United Arab Emirates']],['africa',[]],
+      ['south-america',[]],['oceania',[]],
+      ['world',['France','Singapore','United Arab Emirates','United States']]
+    ]) {
+      await p.locator('[data-region="'+region+'"]').click();
+      await p.waitForTimeout(100);
+      assert.deepEqual(await p.evaluate(()=>testMap.shown().map(p=>p.country).sort()),countries.slice().sort(),region+' shows only its INSEAD locations');
+    }
+    const campuses=await p.evaluate(()=>testMap.shown().map(p=>({country:p.country,label:p.campusLabel,address:p.address,rows:p.card.schools.flatMap(s=>s.rows.map(r=>r.department))})));
+    assert.equal(campuses.length,4);
+    for(const campus of campuses){assert.ok(campus.label);assert.ok(campus.address);assert.equal(campus.rows.length,2);}
     await p.locator('.oa-map-logo').first().scrollIntoViewIfNeeded();
     const before=await p.evaluate(()=>({zoom:testMap.map.getZoom(),center:testMap.map.getCenter(),scroll:scrollY}));
     await p.locator('.oa-map-logo').first().click();

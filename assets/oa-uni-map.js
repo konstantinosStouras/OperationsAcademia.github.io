@@ -154,6 +154,7 @@
       if(fold(title)!==fold(university))identity.appendChild(el('p',{class:'oa-map-university-name',text:university}));
       header.appendChild(identity);pop.appendChild(header);
       var location=el('div',{class:'oa-map-card-location'});
+      if(point&&point.campusLabel)location.appendChild(el('p',{class:'oa-map-campus',text:point.campusLabel}));
       location.appendChild(el('p',{class:'oa-map-country',text:[point&&point.city,(card.countries||[]).join(' · ')].filter(Boolean).join(', ')}));
       if(point&&point.approximate&&point.locationPrecision!=='campus')location.appendChild(el('p',{class:'oa-map-location-context',text:'Approximate university location — school building not yet verified.'}));
       if(point&&OAMapModel.located(point)){
@@ -404,7 +405,7 @@
       var keep=signature===lastSignature;lastSignature=signature;draw(keep);
     }
     Promise.all([
-      fetch('/data/university-map.json?v=20261025-fast-school-routing').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
+      fetch('/data/university-map.json?v=20261026-insead-campuses').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
       fetch('/assets/world/countries.geojson?v=20261022-mobile').then(function(r){if(!r.ok)throw Error('geography');return r.json();})
     ]).then(function(data) {
       data[0].locations.forEach(function(r){nameKeys.set(r.name,r.key);locations.set(r.key,r);});

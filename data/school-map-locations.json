@@ -12837,7 +12837,12 @@
       "addressSource": "https://www.insead.edu/system/files/2023-07/CV.pdf",
       "coordinateSource": "https://www.openstreetmap.org/way/289353654",
       "checked": "2026-10-25",
-      "notes": "Official faculty CV locates Spyros Zoumpoulis in Plessis Mornay 0.19; current Georgina Hall faculty website https://sites.google.com/view/georgina-hall gives PMLS 0.16. The university renamed Plessis Mornay in January 2025: https://www.insead.edu/news/octapharma-foundation-supports-inseads-europe-campus-re-imagination-transformational-eu20m-donation . Official campus map https://www.insead.edu/sites/default/files/assets/dept/centres/wicfe/docs/insead-campus-map-2022.pdf identifies faculty/admin wing 13, distinct from rotunda 12 and teaching crescent 14. Precise point selected inside the corresponding rectangular southeastern faculty wing of the exact OpenStreetMap building footprint, cross-checked against the map linked by the 2025 faculty finance symposium https://sites.google.com/view/insead-finance-symposium/2025 . Rounded to five decimals; this is a building-level faculty-wing location, not an individual office coordinate. This record covers the verified France location."
+      "notes": "Official faculty CV locates Spyros Zoumpoulis in Plessis Mornay 0.19; current Georgina Hall faculty website https://sites.google.com/view/georgina-hall gives PMLS 0.16. The university renamed Plessis Mornay in January 2025: https://www.insead.edu/news/octapharma-foundation-supports-inseads-europe-campus-re-imagination-transformational-eu20m-donation . Official campus map https://www.insead.edu/sites/default/files/assets/dept/centres/wicfe/docs/insead-campus-map-2022.pdf identifies faculty/admin wing 13, distinct from rotunda 12 and teaching crescent 14. Precise point selected inside the corresponding rectangular southeastern faculty wing of the exact OpenStreetMap building footprint, cross-checked against the map linked by the 2025 faculty finance symposium https://sites.google.com/view/insead-finance-symposium/2025 . Rounded to five decimals; this is a building-level faculty-wing location, not an individual office coordinate. This record covers the verified France location.",
+      "country": "France",
+      "city": "Fontainebleau",
+      "campusLabel": "Europe Campus",
+      "locationGroup": "insead-global-campuses",
+      "locationGroupSource": "https://www.insead.edu/about-insead/campuses"
     },
     {
       "id": "insead-france-technology-and-operations-management-octapharma",
@@ -12855,7 +12860,12 @@
       "addressSource": "https://www.insead.edu/faculty-personal-site/manuel-sosa/research",
       "coordinateSource": "https://www.openstreetmap.org/way/289353654",
       "checked": "2026-10-25",
-      "notes": "Current university-hosted Manuel Sosa research page (including July 2026 conference service) explicitly gives Europe Campus office PMLS 0.14. The university renamed Plessis Mornay in January 2025: https://www.insead.edu/news/octapharma-foundation-supports-inseads-europe-campus-re-imagination-transformational-eu20m-donation . Official campus map https://www.insead.edu/sites/default/files/assets/dept/centres/wicfe/docs/insead-campus-map-2022.pdf identifies faculty/admin wing 13, distinct from rotunda 12 and teaching crescent 14. Precise point selected inside the corresponding rectangular southeastern faculty wing of the exact OpenStreetMap building footprint, cross-checked against the map linked by the 2025 faculty finance symposium https://sites.google.com/view/insead-finance-symposium/2025 . Rounded to five decimals; this is a building-level faculty-wing location, not an individual office coordinate. This record covers the verified France location."
+      "notes": "Current university-hosted Manuel Sosa research page (including July 2026 conference service) explicitly gives Europe Campus office PMLS 0.14. The university renamed Plessis Mornay in January 2025: https://www.insead.edu/news/octapharma-foundation-supports-inseads-europe-campus-re-imagination-transformational-eu20m-donation . Official campus map https://www.insead.edu/sites/default/files/assets/dept/centres/wicfe/docs/insead-campus-map-2022.pdf identifies faculty/admin wing 13, distinct from rotunda 12 and teaching crescent 14. Precise point selected inside the corresponding rectangular southeastern faculty wing of the exact OpenStreetMap building footprint, cross-checked against the map linked by the 2025 faculty finance symposium https://sites.google.com/view/insead-finance-symposium/2025 . Rounded to five decimals; this is a building-level faculty-wing location, not an individual office coordinate. This record covers the verified France location.",
+      "country": "France",
+      "city": "Fontainebleau",
+      "campusLabel": "Europe Campus",
+      "locationGroup": "insead-global-campuses",
+      "locationGroupSource": "https://www.insead.edu/about-insead/campuses"
     },
     {
       "id": "st-thomas-florida-gus-machado-faculty-building",
@@ -15573,6 +15583,79 @@
       ],
       "checked": "2026-10-25",
       "notes": "The official Graduate School contact page identifies Çekmeköy as its MSc, MS and doctoral teaching campus, and the official admissions brochure gives the Graduate School admissions office address on this campus. This corrects the existing Çekmeköy-address marker whose longitude29.2706748 was east of the campus polygon (east edge29.2626378). The named campus polygon centroid is an explicit campus fallback, not an exact office pin or a claim that all graduate programs meet here. Separate Faculty of Business identity is preserved; this evidence does not establish shared building identity."
+    },
+    {
+      "id": "insead-singapore-campus",
+      "country": "Singapore",
+      "city": "Singapore",
+      "campusLabel": "Asia Campus",
+      "address": "1 Ayer Rajah Avenue, Singapore 138676",
+      "lat": 1.2998,
+      "lng": 103.78656,
+      "coordinateSource": "https://mapcarta.com/W334124316",
+      "institution": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "institutionKey": "insead",
+      "school": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "department": "",
+      "rowIds": [
+        "insead__school-of-business__decision-sciences",
+        "insead__school-of-business__technology-and-operations-management"
+      ],
+      "locationPrecision": "campus",
+      "addressSource": "https://www.insead.edu/about-insead/campuses",
+      "checked": "2026-10-26",
+      "locationGroup": "insead-global-campuses",
+      "locationGroupSource": "https://www.insead.edu/about-insead/campuses",
+      "locationContext": "One school across four locations. Academic-area links are school-wide; this pin identifies the campus or hub, not a separate department office."
+    },
+    {
+      "id": "insead-abu-dhabi-campus",
+      "country": "United Arab Emirates",
+      "city": "Abu Dhabi",
+      "campusLabel": "Middle East Campus",
+      "building": "Al Khatem Tower, 29th and 30th floors",
+      "address": "Al Khatem Tower, ADGM Square, Al Maryah Island, Abu Dhabi, United Arab Emirates",
+      "lat": 24.50174,
+      "lng": 54.38957,
+      "coordinateSource": "https://mapcarta.com/W218681127",
+      "institution": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "institutionKey": "insead",
+      "school": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "department": "",
+      "rowIds": [
+        "insead__school-of-business__decision-sciences",
+        "insead__school-of-business__technology-and-operations-management"
+      ],
+      "locationPrecision": "campus",
+      "addressSource": "https://www.insead.edu/about-insead/campuses",
+      "checked": "2026-10-26",
+      "locationGroup": "insead-global-campuses",
+      "locationGroupSource": "https://www.insead.edu/about-insead/campuses",
+      "locationContext": "One school across four locations. Academic-area links are school-wide; this pin identifies the campus or hub, not a separate department office."
+    },
+    {
+      "id": "insead-san-francisco-campus",
+      "country": "United States",
+      "city": "San Francisco",
+      "campusLabel": "San Francisco Hub for Business Innovation",
+      "address": "224 Townsend Street, San Francisco, CA 94107, United States",
+      "lat": 37.778311,
+      "lng": -122.393537,
+      "coordinateSource": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=224%20Townsend%20St%2C%20San%20Francisco%2C%20CA%2094107&benchmark=Public_AR_Current&format=json",
+      "institution": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "institutionKey": "insead",
+      "school": "Institut Européen d’Administration des Affaires (INSEAD)",
+      "department": "",
+      "rowIds": [
+        "insead__school-of-business__decision-sciences",
+        "insead__school-of-business__technology-and-operations-management"
+      ],
+      "locationPrecision": "campus",
+      "addressSource": "https://www.insead.edu/about-insead/campuses",
+      "checked": "2026-10-26",
+      "locationGroup": "insead-global-campuses",
+      "locationGroupSource": "https://www.insead.edu/about-insead/campuses",
+      "locationContext": "One school across four locations. Academic-area links are school-wide; this pin identifies the campus or hub, not a separate department office."
     }
   ]
 }
