@@ -26155,35 +26155,6 @@
   "mapLocationKind": "unresolved"
  },
  {
-  "id": "university-of-michigan__stephen-m-ross-school-of-business__interdisciplinary-position-management-and-organizations-stra",
-  "institution": "University of Michigan",
-  "school": "Stephen M. Ross School of Business",
-  "department": "Interdisciplinary Position (Management and Organizations, Strategy and Technology and Operations)",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2014-10-15",
-  "mapLocationIds": [
-   "location-verified-701"
-  ],
-  "mapLocationKind": "school",
-  "mapInstitutionNames": [
-   "University of Michigan"
-  ],
-  "mapSearchTerms": [
-   "Stephen M. Ross School of Business"
-  ],
-  "mapDepartmentLinks": {
-   "location-verified-701": {
-    "facultyUrl": "https://michiganross.umich.edu/faculty-research/directory"
-   }
-  },
-  "facultyUrl": "https://michiganross.umich.edu/faculty-research/directory"
- },
- {
   "id": "university-of-michigan__stephen-m-ross-school-of-business__technology-and-operations-management",
   "institution": "University of Michigan",
   "school": "Stephen M. Ross School of Business",

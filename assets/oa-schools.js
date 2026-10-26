@@ -1695,6 +1695,9 @@
     // Owner's directory scope correction, 2026-10-23. Historical jobs remain
     // intact; future rebuilds and live directory overlays share this exclusion.
     directoryExcluded: function(place) {
+      if (institutionKey(place.institution) === institutionKey('University of Michigan') &&
+          fold(place.school) === fold('Stephen M. Ross School of Business') &&
+          fold(place.department || place.unit) === fold('Interdisciplinary Position (Management and Organizations, Strategy and Technology and Operations)')) return true;
       return institutionKey(place.institution) === institutionKey('University of Illinois at Urbana-Champaign') &&
         fold(place.school) === fold('School of Labor and Employment Relations');
     },

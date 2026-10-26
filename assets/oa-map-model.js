@@ -62,7 +62,7 @@
     var groups=new Map(), names=[card.institution].concat((card.aka||'').split(' · '));
     var cardKey=institutionKey(card.institution),byRow=(data.verifiedLookup||verifiedIndex(data.verified||[])).get(cardKey),uiuc=cardKey===uiucKey;
     (card.schools||[]).forEach(function(s){(s.rows||[]).forEach(function(r){
-      if(S.directoryExcluded({institution:card.institution,school:s.name}))return;
+      if(S.directoryExcluded({institution:card.institution,school:s.name,department:r.department}))return;
         var editedFields=r._edit&&r._edit.fields||[],changed=editedFields.indexOf('school')!==-1||editedFields.indexOf('department')!==-1;
         var locations=editedFields.indexOf('school')!==-1?[]:byRow&&byRow.get(r.id)||[],routeKind='exact';
         if(!locations.length&&!changed&&data.locationResolver){
