@@ -82,6 +82,11 @@
         if(edited.indexOf('school')===-1)school=typeof verified.school==='string'?verified.school:school;
         if(edited.indexOf('department')===-1&&routeKind!=='school')department=verified.department||department;
         r=Object.assign({},r,verified,{id:r.id,locationVerified:true,locationReference:routeKind==='school'?'school':undefined,mapUrl:'https://www.google.com/maps/search/?api=1&query='+verified.lat+','+verified.lng});
+        var unitLinks=!changed&&originalRow.mapDepartmentLinks&&originalRow.mapDepartmentLinks[verified.id];
+        if(unitLinks){
+          ['deptUrl','facultyUrl'].forEach(function(field){if(unitLinks[field]&&edited.indexOf(field)===-1)r[field]=unitLinks[field];});
+          if(unitLinks.facultyUrl&&edited.indexOf('facultyUrl')===-1)delete r.suppressFacultyLink;
+        }
         var verifiedCountries=data.evidenceCountries&&data.evidenceCountries.get(verified.id);
         if(verifiedCountries&&verifiedCountries.length===1)r.country=verifiedCountries[0];
       }

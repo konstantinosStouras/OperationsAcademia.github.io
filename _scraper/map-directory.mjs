@@ -72,6 +72,16 @@ export function attachDepartmentLinks(rows,verified,schoolAliases=[],officialLin
   // Apply reviewed overrides before collecting consensus, so a known obsolete
   // URL cannot defeat a reviewed replacement or spread to another alias.
   for(const row of rows){
+    // One broad advert may represent several independently verified units.
+    // Keep each roster attached to its location identity, not to the whole advert.
+    const route=resolver.resolve(row), scoped={};
+    for(const id of route.ids){
+      const v=byId.get(id);if(!v)continue;
+      const department=route.kind==='school'?(row.department||row.unit):(v.department||row.department||row.unit);
+      const link=overrides.get(identity(v.institution,v.school,department));
+      if(link)scoped[id]={...link};
+    }
+    if(Object.keys(scoped).length)row.mapDepartmentLinks=scoped;else delete row.mapDepartmentLinks;
       // A school-level location route can still have a separately reviewed
       // department roster. Use its own exact identity, never a nearby unit.
       const official=overrides.get(keys.get(row))||overrides.get(identity(row.institution,row.school,row.department||row.unit));
