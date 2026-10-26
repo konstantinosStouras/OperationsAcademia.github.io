@@ -9805,7 +9805,7 @@
   "school": "School of Business",
   "department": "Decision Sciences",
   "type": "Business School",
-  "country": "France",
+  "country": "",
   "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
   "characteristics": [
    "Research seminars",
@@ -9830,7 +9830,10 @@
    }
   ],
   "mapLocationIds": [
-   "insead-france-decision-sciences-octapharma"
+   "insead-abu-dhabi-campus",
+   "insead-france-decision-sciences-octapharma",
+   "insead-san-francisco-campus",
+   "insead-singapore-campus"
   ],
   "mapLocationKind": "exact",
   "mapSearchTerms": [
@@ -9840,8 +9843,26 @@
   "mapInstitutionNames": [
    "Institut Européen d’Administration des Affaires (INSEAD)"
   ],
+  "countries": [
+   "United Arab Emirates",
+   "France",
+   "United States",
+   "Singapore"
+  ],
   "mapDepartmentLinks": {
+   "insead-abu-dhabi-campus": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
+   },
    "insead-france-decision-sciences-octapharma": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
+   },
+   "insead-san-francisco-campus": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
+   },
+   "insead-singapore-campus": {
     "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
     "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
    }
@@ -9855,9 +9876,10 @@
   "department": "Technology and Operations Management",
   "type": "Business School",
   "countries": [
+   "United Arab Emirates",
    "France",
-   "Singapore",
-   "United Arab Emirates"
+   "United States",
+   "Singapore"
   ],
   "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
   "sources": [
@@ -9878,7 +9900,10 @@
    }
   ],
   "mapLocationIds": [
-   "insead-france-technology-and-operations-management-octapharma"
+   "insead-abu-dhabi-campus",
+   "insead-france-technology-and-operations-management-octapharma",
+   "insead-san-francisco-campus",
+   "insead-singapore-campus"
   ],
   "mapLocationKind": "exact",
   "mapSearchTerms": [
@@ -9890,7 +9915,19 @@
   ],
   "country": "",
   "mapDepartmentLinks": {
+   "insead-abu-dhabi-campus": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
+   },
    "insead-france-technology-and-operations-management-octapharma": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
+   },
+   "insead-san-francisco-campus": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
+   },
+   "insead-singapore-campus": {
     "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
     "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
    }
