@@ -24560,5 +24560,38 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-25T21:22:36Z",
   "owner": ""
+ },
+ {
+  "id": "2027-university-of-california-berkeley-20261026",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-26",
+  "institution": "University of California, Berkeley",
+  "department": "College of Engineering, Industrial Engineering and Operations Research",
+  "school": "College of Engineering",
+  "unit": "Industrial Engineering and Operations Research",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 1, 2026",
+  "applyByDate": "2026-12-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://aprecruit.berkeley.edu/JPF05519",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://aprecruit.berkeley.edu/JPF05519",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://ieor.berkeley.edu/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-26T19:38:18Z",
+  "owner": ""
  }
 ]
