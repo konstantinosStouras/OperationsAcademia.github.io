@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25T21:43:38.452Z",
+ "generated": "2026-10-26T00:13:35.983Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1678,6 +1678,10 @@
    "n": 1
   },
   {
+   "v": "University of Alabama in Huntsville",
+   "n": 1
+  },
+  {
    "v": "University of Alaska Anchorage",
    "n": 1
   },
@@ -2473,7 +2477,7 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 21
+   "n": 22
   },
   {
    "v": "College of Engineering",
@@ -4759,6 +4763,10 @@
   },
   {
    "v": "Information Systems, Supply Chain and Decision Making",
+   "n": 1
+  },
+  {
+   "v": "Information Systems, Supply Chain, and Analytics",
    "n": 1
   },
   {
@@ -11774,6 +11782,19 @@
     ]
    }
   },
+  "University of Alabama in Huntsville": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Information Systems, Supply Chain, and Analytics"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Information Systems, Supply Chain, and Analytics"
+    ]
+   }
+  },
   "University of Alaska Anchorage": {
    "schools": [
     "College of Business and Public Policy"
@@ -14608,6 +14629,7 @@
    "Finance, Supply Chain and Transportation",
    "Information and Decision Sciences",
    "Information Systems",
+   "Information Systems, Supply Chain, and Analytics",
    "Management",
    "Management Science",
    "Management, Marketing, and Management Science",

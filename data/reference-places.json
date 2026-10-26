@@ -2705,6 +2705,11 @@
   "department": "Logistics and Supply Chain Management"
  },
  {
+  "institution": "Texas A&M University–Central Texas",
+  "school": "College of Business Administration",
+  "department": "Supply Chain Management"
+ },
+ {
   "institution": "Texas A&M University",
   "school": "",
   "department": "IS"
@@ -3028,6 +3033,11 @@
   "institution": "University of Alabama at Birmingham",
   "school": "",
   "department": "Applied Statistics and BA"
+ },
+ {
+  "institution": "University of Alabama in Huntsville",
+  "school": "College of Business",
+  "department": "Information Systems, Supply Chain, and Analytics"
  },
  {
   "institution": "University of Alabama",
