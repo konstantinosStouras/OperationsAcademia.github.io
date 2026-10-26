@@ -18190,6 +18190,27 @@
   ]
  },
  {
+  "id": "texas-a-m-university-central-texas__college-of-business-administration__supply-chain-management",
+  "institution": "Texas A&M University–Central Texas",
+  "school": "College of Business Administration",
+  "department": "Supply Chain Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [
+   "texas-am-central-texas-logistics-founders-hall"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "Texas A&M University–Central Texas"
+  ],
+  "mapSearchTerms": [
+   "College of Business Administration"
+  ],
+  "country": "United States"
+ },
+ {
   "id": "texas-a-m-university-corpus-christi__college-of-engineering-and-computer-science__industrial-engineering",
   "institution": "Texas A&M University-Corpus Christi",
   "school": "College of Engineering and Computer Science",
@@ -20793,6 +20814,22 @@
    "Collat School of Business",
    "Department of Marketing, Industrial Distribution and Economics"
   ]
+ },
+ {
+  "id": "university-of-alabama-in-huntsville__college-of-business__information-systems-supply-chain-and-analytics",
+  "institution": "University of Alabama in Huntsville",
+  "school": "College of Business",
+  "department": "Information Systems, Supply Chain, and Analytics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-23",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-alaska-anchorage__college-of-business-and-public-policy__management-marketing-logistics-and-business-analytics",

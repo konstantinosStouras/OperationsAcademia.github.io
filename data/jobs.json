@@ -214,6 +214,40 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-alabama-in-huntsville-20261023",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-23",
+  "institution": "University of Alabama in Huntsville",
+  "department": "College of Business, Information Systems, Supply Chain, and Analytics",
+  "school": "College of Business",
+  "unit": "Information Systems, Supply Chain, and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-01",
+  "comments": "Advertised as: Eminent Scholar and Professor in Management of Technology. · Eminent Scholar and Professor in Management of Technology, University of Alabama in Huntsville. Senior research and intellectual leadership, faculty mentorship, teaching and service. Vacancy log 26-27-141. Preferred application date: December 1, 2026; applications continue until filled. The POMS index incorrectly labels the university as University of Alabama; the linked employer advert identifies Huntsville. · (Read by the POMS crawler from the PDF on 2026-10-25; open the advert for the full text.)",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.poms.org/sites/default/files/2026-10/9910745.pdf",
+  "adLabel": "job ad (PDF)",
+  "postedAtUrl": "https://www.uah.edu/hr/careers/faculty-careers#BUS",
+  "postedAtLabel": "POMS job postings",
+  "furtherInfoUrl": "https://www.uah.edu/business/faculty-staff",
+  "characteristics": [],
+  "featured": false,
+  "source": "poms-opportunities",
+  "addedAt": "2026-10-26T00:10:06Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-rhode-island-20261023",
   "year": 2027,
   "years": [

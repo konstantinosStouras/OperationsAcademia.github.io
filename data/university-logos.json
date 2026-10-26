@@ -5349,6 +5349,12 @@
       "logo": "/assets/university-logos/university-of-rhode-island.png",
       "source": "https://www.uri.edu/wp-content/themes/uri-modern/images/logo-print.png",
       "checked": "2026-10-25"
+    },
+    {
+      "name": "University of Alabama in Huntsville",
+      "logo": "/assets/university-logos/university-of-alabama-in-huntsville.svg",
+      "source": "https://www.uah.edu/templates/uah/images/footer/UAH-logo-blue.svg",
+      "checked": "2026-10-26"
     }
   ]
 }
