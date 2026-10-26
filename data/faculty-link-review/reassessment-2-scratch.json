@@ -1,0 +1,237 @@
+{
+  "records": [
+    {
+      "id": "faculty-0603",
+      "institution": "Valparaiso University",
+      "school": "College of Business",
+      "department": "Business Analytics",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search=",
+      "sources": [
+        "https://www.valpo.edu/directory/?type=&department=cob&search=",
+        "https://apply.interfolio.com/195666",
+        "https://logic.interfolio.com/dossier-api/positions/195666"
+      ],
+      "evidence": "Current employer posting 195666 explicitly recruits the College of Business for an Assistant Professor of Business Analytics teaching business statistics and other analytics courses, without specifying a separate department. Browser-tested College of Business directory returns 30 faculty/staff entries, including Ata Karbasi (Information and Decision Sciences), Matthew Luth and Kirsten Bullock.",
+      "notes": "Verified parent-college roster for an advertised teaching specialization. The link applies the official College of Business filter; it includes college staff and other business fields and is not presented as an exact Business Analytics faculty-only list."
+    },
+    {
+      "id": "faculty-0237",
+      "institution": "Louisiana Tech University",
+      "school": "College of Business",
+      "department": "Department of Management — Sustainable Supply Chain Management",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.latech.edu/directory/index.php#department-of-management-and-sustainable-supply-chain-management",
+      "sources": [
+        "https://www.latech.edu/business/about/index.php",
+        "https://www.latech.edu/directory/index.php#department-of-management-and-sustainable-supply-chain-management"
+      ],
+      "evidence": "The official college page links this precise department anchor. Live browser loading applies the department filter and returns 12 entries including Jeffrey Haynie (department head), Marcia Dickerson, Matthew Roberts and Kevin Watson (Sustainable Supply Chain Management).",
+      "notes": "Exact current Department of Management and Sustainable Supply Chain Management faculty/staff roster. The verified university-provided hash filters the live directory; text-only readers incorrectly show the entire university."
+    },
+    {
+      "id": "faculty-0434",
+      "institution": "The University of Texas at Arlington",
+      "school": "College of Business",
+      "department": "Artificial Intelligence cluster",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.uta.edu/academics/schools-colleges/business/contact",
+      "sources": [
+        "https://www.uta.edu/academics/schools-colleges/business/contact",
+        "https://uta.peopleadmin.com/postings/33327"
+      ],
+      "evidence": "The official college contact directory contains faculty across its academic departments, including Chandrani Chatterjee (Accounting), Owen Parker (Management), Sanjiv Sabherwal (Finance) and Information Systems/Operations Management faculty. The recorded original requisition F00726P names Business among three eligible tenure-home colleges.",
+      "notes": "Complete participating-college faculty/staff directory for a cross-college AI hiring call. This is not a roster of an existing AI cluster and does not imply a final appointment department."
+    },
+    {
+      "id": "faculty-0442",
+      "institution": "Trinity University",
+      "school": "Michael Neidorff School of Business",
+      "department": "Department of Finance and Business Analytics",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://trinity.edu/finance/faculty",
+      "sources": [
+        "https://trinity.edu/finance",
+        "https://trinity.edu/finance/faculty"
+      ],
+      "evidence": "The current department page links its faculty subpage. It lists Diana Young, Jorge Colazo, Tianxi Dong, Kangryun Lee, Mauro Oliveira, Suning Zhu and other faculty, with Diana Young identified as current chair.",
+      "notes": "Exact current Department of Finance and Business Analytics roster; replaces the stale 2025-26 bulletin candidate."
+    },
+    {
+      "id": "faculty-0368",
+      "institution": "Shanghai University of Finance and Economics",
+      "school": "College of Business",
+      "department": "Department of Operations Management",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://cob.sufe.edu.cn/en/Faculty/Resumes",
+      "sources": [
+        "https://cob.sufe.edu.cn/en/Faculty/Resumes"
+      ],
+      "evidence": "Live browser successfully loaded the directory and selected Operations Management. The resulting 16-person roster includes Tian Zhongjun, Tao Zhijie, Wang Wenbin, Wang Lu, Guiyu Hong and Sangjo Kim. The URL remains unchanged after selection.",
+      "notes": "Verified interactive exact-department roster. Base URL opens the broader business-school roster; select Operations Management in the Department options. No persistent filter URL was observed.",
+      "directoryFilter": {
+        "label": "Department",
+        "value": "Operations Management",
+        "instructions": "Click Operations Management under Department. The directory filters in place without changing the URL."
+      }
+    },
+    {
+      "id": "faculty-0236",
+      "institution": "Longwood University",
+      "school": "College of Business and Economics",
+      "department": "Department of Accounting, Economics, Finance, and Information Systems",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.longwood.edu/business/about/faculty-staff/",
+      "sources": [
+        "https://www.longwood.edu/business/about/faculty-staff/"
+      ],
+      "evidence": "The complete official college roster explicitly identifies Darrell Carpenter as chair of Accounting, Economics, Finance and Information Systems. It labels members by those constituent disciplines: Ron Pike and Laura Poe in Information Systems/Cyber Security, Thomas PlaHovinsak and Adrienne Sudbury in Economics, Frank Bacon and Shimeng Wang in Finance, and Rebecca Wetmiller and Hanbing Xing in Accounting.",
+      "notes": "Complete school roster with explicit discipline labels representing the combined department. Other Management and Marketing faculty also appear. No working department-only link or selector is claimed.",
+      "directoryFilter": {
+        "label": "Faculty discipline/title labels",
+        "value": [
+          "Accounting",
+          "Economics",
+          "Finance",
+          "Information Systems and Cyber Security"
+        ],
+        "instructions": "Read the faculty entries labelled Accounting, Economics, Finance or Information Systems/Cyber Security; Darrell Carpenter is labelled chair of the combined department. The page also lists the separate Management and Marketing department."
+      }
+    },
+    {
+      "id": "faculty-0374",
+      "institution": "Southern Illinois University",
+      "school": "College of Business and Analytics",
+      "department": "School of Analytics, Finance, and Economics",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://faculty.siu.edu/index.php",
+      "sources": [
+        "https://faculty.siu.edu/index.php#dept=businessanalytics",
+        "https://faculty.siu.edu/index.php#dept=economics",
+        "https://faculty.siu.edu/index.php#dept=finance",
+        "https://business.siu.edu/about/people/"
+      ],
+      "evidence": "Live official finder filters show Business Analytics seven members including Gregory DeYong and Jim Nelson; Economics ten including Kevin Sylwester (school director) and Scott Gilbert; Finance nine including Xiaoxin Wang Beardsley and Tim Marlo.",
+      "notes": "Combined School of Analytics, Finance and Economics is represented through its three constituent program filters. The base directory initially includes other university faculty; each working selector creates its own hash URL, not a combined school URL.",
+      "directoryFilter": "Under Academic Programs, inspect Business Analytics, Economics and Finance in turn; use Load All for a complete filtered roster."
+    },
+    {
+      "id": "faculty-0445",
+      "institution": "Tusculum University",
+      "school": "School of Business, Education and Sport",
+      "department": "Division of Business - Supply Chain Management",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://web.tusculum.edu/directory/",
+      "sources": [
+        "https://web.tusculum.edu/directory/",
+        "https://www3.tusculum.edu/hr/2026/assistant-professor-of-supply-chain-management-program-director-of-the-ms-in-supply-chain-management/"
+      ],
+      "evidence": "Official campus directory explicitly identifies Division of Business faculty including Antonio Bos (Business Administration), Shane Davis (Marketing and Sport Management), and David Hite. Official supply-chain program-director recruitment places the program in this business academic home.",
+      "notes": "Parent Division of Business faculty, not a separately constituted supply-chain department. The complete university directory includes other units and staff, each with explicit Department labels.",
+      "directoryFilter": "Find entries labelled Department: Division of Business; other division entries are outside this program's parent unit."
+    },
+    {
+      "id": "faculty-0420",
+      "institution": "The College of New Jersey",
+      "school": "School of Business",
+      "department": "Management — Operations and Supply Chain Management",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://business.tcnj.edu/wp-content/uploads/sites/219/2026/09/Fall-2026-Faculty-Office-Hours-7.pdf",
+      "sources": [
+        "https://business.tcnj.edu/about-the-school-of-business/faculty-and-staff/",
+        "https://business.tcnj.edu/wp-content/uploads/sites/219/2026/09/Fall-2026-Faculty-Office-Hours-7.pdf"
+      ],
+      "evidence": "Current Fall 2026 school faculty list explicitly labels Management members: Brenda Ghitulescu (chair), Xu Han, Fuhe Jin, Jinsil Kim, Waheeda Lillevik, Joao Neves, Shengbin Wang and others. It includes faculty on sabbatical as well as teaching faculty.",
+      "notes": "Official current-semester faculty/office-hours list linked from the school's Faculty and Staff directory. Management entries occur on PDF pages 2-8; other departments also appear. This dated alternative is used because the interactive Management profile directory did not load successfully.",
+      "directoryFilter": "Management faculty are listed in the university's Fall 2026 faculty directory (PDF). Find Management in the Department column on pages 2-8."
+    },
+    {
+      "id": "faculty-0580",
+      "institution": "University of the Virgin Islands",
+      "school": "School of Business",
+      "department": "Decision Sciences",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.uvi.edu/directory/index.html",
+      "sources": [
+        "https://www.uvi.edu/directory/index.html",
+        "https://www.uvi.edu/academics/school-business/"
+      ],
+      "evidence": "Live Department selector School of Business produces labelled faculty such as Nathan Austin (Professor), Francisco Depusoir (Associate Professor of Accounting), Barbara Flemming (Assistant Professor of Management) and Paul Flemming (Professor of Management and interim dean). Decision Sciences is a business teaching field rather than a separately confirmed current department.",
+      "notes": "Parent School of Business roster across campuses; this does not claim a separate Decision Sciences membership list or a specific hiring campus. Directory opens university-wide and also includes staff and online faculty; use its School of Business department filter.",
+      "directoryFilter": "Choose School of Business in Department, and Faculty in Type if desired; retain all locations and use the next-page control to see the complete roster."
+    },
+    {
+      "id": "faculty-0246",
+      "institution": "Miami University",
+      "school": "",
+      "department": "Information Systems and Technology",
+      "checked": "2026-10-26",
+      "status": "needs-review",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179208679",
+        "https://miamioh.edu/fsb/academic-departments/information-systems-analytics/"
+      ],
+      "evidence": "Original hiring advertisement is expired; an exact job-code search produced no official surviving advertisement linking Information Systems Technology to a specific Miami academic unit.",
+      "notes": "Cannot distinguish Farmer Information Systems and Analytics from regional computing/information-technology units. Do not assign a guessed parent roster."
+    },
+    {
+      "id": "faculty-0628",
+      "institution": "Wingate University",
+      "school": "Porter B. Byrum School of Business",
+      "department": "Data Analytics and Business Statistics",
+      "checked": "2026-10-26",
+      "status": "needs-review",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.wingate.edu/academics/graduate/master-of-business-administration/faculty-staff",
+        "https://www.wingate.edu/quicklinks/directory",
+        "https://www.wingate.edu/academics/graduate/master-of-business-administration/academics"
+      ],
+      "evidence": "Live MBA faculty page names Katlin Cundiff, Michael Geier, Tiffanie Turner-Henderson and Zhiyan Wang; current MBA curriculum offers a Data Analytics concentration. University directory Business filter yields additional school faculty, but neither source identifies the original Data Analytics vacancy's exact parent membership.",
+      "notes": "MBA-only faculty list is not demonstrated to represent all faculty associated with the advertised Data Analytics post. Business directory filter also appears incomplete for school members classified in other disciplines. Keep unresolved rather than claim a complete exact roster."
+    },
+    {
+      "id": "faculty-0436",
+      "institution": "The University of Texas at Arlington",
+      "school": "College of Engineering",
+      "department": "Artificial Intelligence cluster",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.uta.edu/academics/faculty",
+      "sources": [
+        "https://www.uta.edu/academics/faculty",
+        "https://uta.peopleadmin.com/postings/33327"
+      ],
+      "evidence": "Live Select from list college filter returns 214 Engineering profiles, including Ashfaq Adnan (Mechanical and Aerospace Engineering), Dereje Agonafer (Materials Science and Engineering), Ishfaq Ahmad (Computer Science and Engineering), and Georgios Alexandrakis (Bioengineering). Original F00726P cluster call identifies Engineering as a participating college.",
+      "notes": "Complete participating college faculty directory, not a claimed roster of existing artificial-intelligence cluster members. The selector produces no persistent college-specific URL (only #); the initial page is university-wide and profiles are paginated.",
+      "directoryFilter": "Under Search College/Dept Name, click Select from list, go to list page 2, and choose College of Engineering. Browse the resulting profile pages."
+    },
+    {
+      "id": "faculty-0437",
+      "institution": "The University of Texas at Arlington",
+      "school": "College of Science",
+      "department": "Artificial Intelligence cluster",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.uta.edu/academics/faculty",
+      "sources": [
+        "https://www.uta.edu/academics/faculty",
+        "https://uta.peopleadmin.com/postings/33327"
+      ],
+      "evidence": "Live Select from list college filter returns 186 Science profiles, including Tuncay Aktosun and Gaik Ambartsoumian (Mathematics), Daniel Armstrong (Chemistry and Biochemistry), and Jonathan Asaadi (Physics). Original F00726P cluster call identifies Science as a participating college.",
+      "notes": "Complete participating college faculty directory, not a claimed roster of existing artificial-intelligence cluster members. The selector produces no persistent college-specific URL (only #); initial directory is university-wide and some profiles include teaching assistants or cross-appointments.",
+      "directoryFilter": "Under Search College/Dept Name, click Select from list, go to list page 2, and choose College of Science. Browse the resulting profile pages."
+    }
+  ]
+}

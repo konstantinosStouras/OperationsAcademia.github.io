@@ -1,0 +1,88 @@
+{
+  "records": [
+    {
+      "id": "faculty-0128",
+      "institution": "Dakota State University",
+      "school": "College of Business and Information Systems",
+      "department": "Production and Operations Management",
+      "checked": "2026-10-26",
+      "status": "needs-review",
+      "facultyUrl": "",
+      "sources": [
+        "https://dsu.edu/directory/college-of-business-and-information-systems.html",
+        "https://dsu.edu/academics/colleges/college-of-business-and-information-systems.html",
+        "https://dsu.edu/programs/business-management-as.html"
+      ],
+      "notes": "Reviewed official college roster and Business Management programme faculty. Named faculty include Deb Tech, Omar El-Gayar, Andy Behrens and Daniel Talley, but these pages do not identify a Production and Operations Management faculty group. This may be a hiring specialty rather than a distinct department; exact scope remains unresolved.",
+      "evidence": "Reviewed official college roster and Business Management programme faculty. Named faculty include Deb Tech, Omar El-Gayar, Andy Behrens and Daniel Talley, but these pages do not identify a Production and Operations Management faculty group. This may be a hiring specialty rather than a distinct department; exact scope remains unresolved. Second pass sought exact January 2026 Assistant Professor - Business posting and HigherEdJobs 179343964 via university and Board of Regents sources; exact original host/specialization description remains unavailable. Search results also contained wrongly attributed Black Hills State adverts, which were excluded. Existing current college faculty list is genuine but remains too broad absent specific hiring-scope proof."
+    },
+    {
+      "id": "faculty-0156",
+      "institution": "Fisher College",
+      "school": "School of Management and Communications",
+      "department": "Management",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.fisher.edu/academics/faculty",
+      "sources": [
+        "https://www.fisher.edu/academics/faculty",
+        "https://www.fisher.edu/academics/undergraduate-programs/bs-in-management"
+      ],
+      "notes": "The shared directory includes other college programs, explicitly labelled. This is a complete labelled directory, not a selected teaching sample or personal profile; it does not open prefiltered to Management.",
+      "evidence": "Current official faculty directory was inspected in a live browser. It explicitly labels Michael Lattanzio, Mohammad Agwa, Kevin McWilliams and Neil Trotta as Management; McWilliams is Management program director. The Management degree page directs users to this complete faculty directory.",
+      "directoryFilter": "College faculty directory: look for entries labelled Management."
+    },
+    {
+      "id": "faculty-0205",
+      "institution": "Indiana University Northwest",
+      "school": "School of Business and Economics",
+      "department": "Management Information Systems",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://northwest.iu.edu/business/faculty-staff/index.html",
+      "sources": [
+        "https://northwest.iu.edu/business/faculty-staff/index.html",
+        "https://northwest.iu.edu/business/index.html",
+        "https://www.linkedin.com/jobs/view/assistant-professor-of-management-information-systems-at-indiana-university-4367387545",
+        "https://indiana.peopleadmin.com/postings/31977"
+      ],
+      "notes": "Verified host-school roster for the advertised teaching specialization, not an MIS-only group. The exact university recruitment URL now says posting unavailable, but the university employer-posted LinkedIn copy retains requisition number, description, and original application URL. The separate Computer Information Systems department is unrelated and not substituted.",
+      "evidence": "Current live official school directory shows 18 Business Faculty entries and 10 Associate Faculty, including Micah Pollak, Yllka Azemi Binaku and Rajan Selladurai. The university employer-posted requisition IU-101471-2026 explicitly names IU Northwest School of Business & Economics as the Department and describes teaching in Management Information Systems and related business courses; it does not name a separate MIS department.",
+      "directoryFilter": "School faculty directory; Management Information Systems is the advertised teaching specialization."
+    },
+    {
+      "id": "faculty-0302",
+      "status": "needs-review",
+      "institution": "Park University",
+      "school": "Robert W. Plaster School of Business",
+      "department": "Robert W. Plaster Division of Business Administration and Management",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.park.edu/academics/college-of-management/",
+        "https://www.park.edu/academics/explore-programs/project-management-b-s-b-a/",
+        "https://www.innovatepark.org/scholars-at-work",
+        "https://www.park.edu/academics/undergraduate-catalog/",
+        "https://catalog.park.edu/content.php?catoid=20&navoid=6759"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Current school-labelled catalog is a promising broad source, but the named Division 4 cannot safely absorb all legacy IS/Analytics postings because the current institutional structure includes a separate Division 5. No full Division 4 membership roster established. Review current directory label before publishing an exact-division claim.",
+      "evidence": "Inspected the current official 2026-27 catalog Faculty and Administration page in a live browser. It provides a complete university full-time faculty list, with College of Management and Robert W. Plaster School labels; relevant names include Theresa Coates (Management), Sahand Hajifar and Abdelmonaem Jornaz (Information Systems and Business Analytics), and Stacy Yeager-Okosi (Graduate Information Systems and Business Analytics). Leadership separately identifies Division 4 Business Administration and Management under Adrian James and Division 5 Information and Computer Science, Mathematics, Information Systems and Analytics under Sam Chamberlin. Individual faculty entries do not assign these current divisions."
+    },
+    {
+      "id": "faculty-0333",
+      "status": "needs-review",
+      "institution": "Quincy University",
+      "school": "Oakley School of Business",
+      "department": "Business Analytics",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.quincy.edu/academics/degree-programs/business-analytics/",
+        "https://www.quincy.edu/people-directory/",
+        "https://www.quincy.edu/about/work-at-qu/job-openings/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Parent Oakley faculty roster would be acceptable for this specialization, but neither the single-person spotlight nor unfiltered university directory establishes one.",
+      "evidence": "Official hiring identifies Business Analytics as a field within Oakley School of Business. Program page features Dana Walker only; current people directory contains school labels but opens a university-wide list and live browser encounters security verification. No working school filter was confirmed. Second pass re-opened current directory through web extraction: 209 faculty/staff, ten per page, individual school labels, only Search Names control. Live browser again shows security verification. Current Business Analytics page still offers only Dana Walker Faculty Spotlight. No school-only roster or actual working Oakley selector established."
+    }
+  ]
+}

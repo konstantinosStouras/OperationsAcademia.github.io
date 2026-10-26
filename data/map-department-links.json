@@ -7456,6 +7456,36 @@
       "notes": "Verified alternative to the inaccessible departmental people page. Exact department URL; university directory includes all employee categories, not only faculty. Live official department directory renders named faculty with explicit Accounting and Business Analytics affiliation, including Sanjay Banerjee, Ivor Cribben, Karim Jamal, Armann Ingolfsson, Borzou Rostami and Saied Samiedaluie.",
       "directoryFilter": "This exact department directory also includes staff and student employees. Use the Title column to identify professors and lecturers.",
       "reviewId": "faculty-0462"
+    },
+    {
+      "institution": "Fisher College",
+      "school": "School of Management and Communications",
+      "department": "Management",
+      "facultyUrl": "https://www.fisher.edu/academics/faculty",
+      "sources": [
+        "https://www.fisher.edu/academics/faculty",
+        "https://www.fisher.edu/academics/undergraduate-programs/bs-in-management"
+      ],
+      "checked": "2026-10-26",
+      "notes": "The shared directory includes other college programs, explicitly labelled. This is a complete labelled directory, not a selected teaching sample or personal profile; it does not open prefiltered to Management. Current official faculty directory was inspected in a live browser. It explicitly labels Michael Lattanzio, Mohammad Agwa, Kevin McWilliams and Neil Trotta as Management; McWilliams is Management program director. The Management degree page directs users to this complete faculty directory.",
+      "directoryFilter": "College faculty directory: look for entries labelled Management.",
+      "reviewId": "faculty-0156"
+    },
+    {
+      "institution": "Indiana University Northwest",
+      "school": "School of Business and Economics",
+      "department": "Management Information Systems",
+      "facultyUrl": "https://northwest.iu.edu/business/faculty-staff/index.html",
+      "sources": [
+        "https://northwest.iu.edu/business/faculty-staff/index.html",
+        "https://northwest.iu.edu/business/index.html",
+        "https://www.linkedin.com/jobs/view/assistant-professor-of-management-information-systems-at-indiana-university-4367387545",
+        "https://indiana.peopleadmin.com/postings/31977"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Verified host-school roster for the advertised teaching specialization, not an MIS-only group. The exact university recruitment URL now says posting unavailable, but the university employer-posted LinkedIn copy retains requisition number, description, and original application URL. The separate Computer Information Systems department is unrelated and not substituted. Current live official school directory shows 18 Business Faculty entries and 10 Associate Faculty, including Micah Pollak, Yllka Azemi Binaku and Rajan Selladurai. The university employer-posted requisition IU-101471-2026 explicitly names IU Northwest School of Business & Economics as the Department and describes teaching in Management Information Systems and related business courses; it does not name a separate MIS department.",
+      "directoryFilter": "School faculty directory; Management Information Systems is the advertised teaching specialization.",
+      "reviewId": "faculty-0205"
     }
   ]
 }

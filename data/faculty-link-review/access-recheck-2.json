@@ -1,0 +1,85 @@
+{
+  "records": [
+    {
+      "id": "faculty-0208",
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "IS/BA",
+      "status": "needs-review",
+      "facultyUrl": "",
+      "checked": "2026-10-26",
+      "sources": [
+        "https://www.ivybusiness.iastate.edu/custom-education/directory/",
+        "https://catalog.iastate.edu/collegeofbusiness/supplychainmanagement/index.html",
+        "https://www.livegreen.iastate.edu/researchfaculty",
+        "https://www.provost.iastate.edu/faculty-success/recruitment/named-positions"
+      ],
+      "evidence": "Alternative official custom-education directory live browser returns requested URL rejected. Current catalogue describes programs rather than a complete faculty roster. Official sustainability and named-chair lists are restricted subsets, not complete department lists.",
+      "notes": "No working complete current official alternative found; did not use third-party directory or partial thematic lists."
+    },
+    {
+      "id": "faculty-0209",
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "Supply Chain Management",
+      "status": "needs-review",
+      "facultyUrl": "",
+      "checked": "2026-10-26",
+      "sources": [
+        "https://www.ivybusiness.iastate.edu/custom-education/directory/",
+        "https://catalog.iastate.edu/collegeofbusiness/supplychainmanagement/index.html",
+        "https://www.livegreen.iastate.edu/researchfaculty",
+        "https://www.provost.iastate.edu/faculty-success/recruitment/named-positions"
+      ],
+      "evidence": "Alternative official custom-education directory live browser returns requested URL rejected. Current catalogue describes programs rather than a complete faculty roster. Official sustainability and named-chair lists are restricted subsets, not complete department lists.",
+      "notes": "No working complete current official alternative found; did not use third-party directory or partial thematic lists."
+    },
+    {
+      "id": "faculty-0221",
+      "institution": "Koç University",
+      "school": "College of Administrative Sciences and Economics",
+      "department": "Operations Management and Information Systems",
+      "status": "needs-review",
+      "facultyUrl": "",
+      "checked": "2026-10-26",
+      "sources": [
+        "https://ie.ku.edu.tr/",
+        "https://case.ku.edu.tr/",
+        "https://cdn.ku.edu.tr/cdn/files/pr/web/frontier/frontier-research-news-winter-2024.html"
+      ],
+      "evidence": "Separate official engineering and administrative-sciences landing routes did not expose usable roster links in live retrieval. Searches for current official catalogue/PDF faculty lists returned historical newsletters, personal CVs and graduation lists rather than a current department roster.",
+      "notes": "No current complete official alternative established. Historical faculty mentions and third-party lists deliberately excluded; prior access-failure status remains."
+    },
+    {
+      "id": "faculty-0222",
+      "institution": "Koç University",
+      "school": "College of Engineering",
+      "department": "Department of Industrial Engineering",
+      "status": "needs-review",
+      "facultyUrl": "",
+      "checked": "2026-10-26",
+      "sources": [
+        "https://ie.ku.edu.tr/",
+        "https://case.ku.edu.tr/",
+        "https://cdn.ku.edu.tr/cdn/files/pr/web/frontier/frontier-research-news-winter-2024.html"
+      ],
+      "evidence": "Separate official engineering and administrative-sciences landing routes did not expose usable roster links in live retrieval. Searches for current official catalogue/PDF faculty lists returned historical newsletters, personal CVs and graduation lists rather than a current department roster.",
+      "notes": "No current complete official alternative established. Historical faculty mentions and third-party lists deliberately excluded; prior access-failure status remains."
+    },
+    {
+      "id": "faculty-0462",
+      "institution": "University of Alberta",
+      "school": "Alberta School of Business",
+      "department": "Department of Accounting and Business Analytics",
+      "status": "verified",
+      "facultyUrl": "https://apps.ualberta.ca/directory/search/department/140200",
+      "checked": "2026-10-26",
+      "sources": [
+        "https://apps.ualberta.ca/directory/search/department/140200"
+      ],
+      "directoryFilter": "This exact department directory also includes staff and student employees. Use the Title column to identify professors and lecturers.",
+      "evidence": "Live official department directory renders named faculty with explicit Accounting and Business Analytics affiliation, including Sanjay Banerjee, Ivor Cribben, Karim Jamal, Armann Ingolfsson, Borzou Rostami and Saied Samiedaluie.",
+      "notes": "Verified alternative to the inaccessible departmental people page. Exact department URL; university directory includes all employee categories, not only faculty."
+    }
+  ]
+}

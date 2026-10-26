@@ -1,0 +1,143 @@
+{
+  "records": [
+    {
+      "id": "faculty-0172",
+      "status": "verified",
+      "institution": "Georgia Southern University",
+      "school": "Parker College of Business",
+      "department": "Logistics and Supply Chain Management",
+      "facultyUrl": "https://directory.georgiasouthern.edu/",
+      "sources": [
+        "https://directory.georgiasouthern.edu/",
+        "https://scholars.georgiasouthern.edu/en/organisations/logistics-supply-chain-management/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Verified exact department search in official central directory. URL remains the base directory; requires the stated selector. Faculty names and titles are public; contact details require university sign-in, which was not used.",
+      "evidence": "Selected exact Logistics and Supply Chain Management department and inspected all 12 returned academic staff: William Achia, Gerard Burke, Amie Ellis, Scott Ellis (head), Christopher Faires, Mark Hanna, Marc Hatton, Deepak Iyengar, Gulver Karamemis, William Lynch Jr., Christian Rossetti and Arda Yenipazarli.",
+      "directoryFilter": "Select Department, choose Logistics and Supply Chain Management, then Search."
+    },
+    {
+      "id": "faculty-0168",
+      "status": "verified",
+      "institution": "Georgia Gwinnett College",
+      "school": "School of Business",
+      "department": "Department of Economics, Marketing and Supply Chain Management",
+      "facultyUrl": "https://www.ggc.edu/directory?name=&department_filter%5B%5D=495&department=All&school=All",
+      "sources": [
+        "https://www.ggc.edu/directory?name=&department_filter%5B%5D=495&department=All&school=All",
+        "https://www.ggc.edu/directory?name=&department_filter%5B0%5D=495&department=All&school=All&page=1"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Current department selector uses department_filter[] rather than legacy department query. Selected exact department in official live directory and inspected both result pages; includes full-time and part-time faculty.",
+      "evidence": "Working Economics, Marketing and Supply Chain Management filter returns 30 faculty across two pages, including Ibtisaama Ahmed and Hasan Uvet in Supply Chain Management, Robert Mason in Economics, and chair Amanda Wilsker. Both pages retain exact selected department."
+    },
+    {
+      "id": "faculty-0107",
+      "status": "verified",
+      "institution": "College of Charleston",
+      "school": "School of Business",
+      "department": "Department of Supply Chain and Information Management",
+      "facultyUrl": "https://charleston.edu/supply-chain-info-mgmt/faculty-staff/index.php",
+      "sources": [
+        "https://charleston.edu/school-business/about/departments.php",
+        "https://charleston.edu/supply-chain-info-mgmt/faculty-staff/index.php",
+        "https://today.charleston.edu/2026/09/01/cofc-welcomes-new-faculty-9-26/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Followed current School of Business > Academic Departments > Supply Chain and Information Management > Faculty and Staff. Working exact departmental roster includes Faculty, Staff and Adjunct Faculty. University roster still lists Kent Gourdin despite a separate retirement notice; this is recorded as source-maintenance limitation, not a claim all listed people are active.",
+      "evidence": "Current official department faculty page lists Chen-Huei Chou as chair, Olga Biedova, Sethu Das, Marvin Gonzalez, Iris Junglas, Maryam Mahdikhani and Rafael Teixeira among faculty, plus September 2026 new instructor Franklin Czwazka."
+    },
+    {
+      "id": "faculty-0093",
+      "status": "needs-review",
+      "institution": "Chatham University",
+      "school": "Falk College of Environment, Leadership & Management",
+      "department": "Department of Business Systems",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.chatham.edu/academics/colleges/falk-college-of-environment-leadership-and-management/accreditation-and-student-outcomes.html",
+        "https://www.chatham.edu/academics/faculty/listing.html",
+        "https://www.chatham.edu/academics/undergraduate/management/faculty/index.html",
+        "https://www.chatham.edu/academics/undergraduate/data-science-analytics/faculty/",
+        "https://www.chatham.edu/academics/graduate/mba/faculty/",
+        "https://www.chatham.edu/academics/undergraduate/business-majors/faculty/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official accreditation page establishes Business Systems includes Accounting, Economics, International Business, Management, Marketing and Data Science Analytics. Current programme rosters name Jungook Kim, Keratiloe Mogotsi and John Stakeley for Management, and Abhishek Viswanathan for Data Science, but no single complete Business Systems roster found. Old Business Majors faculty route now redirects to overview; a subset has not been presented as complete.",
+      "evidence": "Official accreditation page establishes Business Systems includes Accounting, Economics, International Business, Management, Marketing and Data Science Analytics. Current programme rosters name Jungook Kim, Keratiloe Mogotsi and John Stakeley for Management, and Abhishek Viswanathan for Data Science, but no single complete Business Systems roster found. Old Business Majors faculty route now redirects to overview; a subset has not been presented as complete.",
+      "recheckEvidence": "Followed current global faculty listing to Business Majors faculty route; live page has no named roster. Global All Faculty is an unlabelled alphabetic university list, while Management, Data Science and graduate Business Administration pages each cover subsets. No complete labelled Business Systems roster verified."
+    },
+    {
+      "id": "faculty-0170",
+      "status": "needs-review",
+      "institution": "Georgia Military College",
+      "school": "",
+      "department": "Mathematics, Technology and Business — Supply Chain and Logistics",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.gmc.edu/wp-content/uploads/2026/02/2025-2026-Catalog-Mid-Year-Update-Feb-2026.pdf",
+        "https://www.gmc.edu/wp-content/uploads/2025/04/FACULTY-ROSTER-2024-2025-JDG-3.6.25-1.pdf",
+        "https://www.gmc.edu/academic-programs/",
+        "https://www.gmc.edu/academic-catalog/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Current February2026 catalog identifies Business and Management division with Dave Hedge dean, Scott Dawes Supply Chain Management and Logistics coordinator, and Matthew Maestas Logistics Management and Operations coordinator. Available public faculty roster groups teachers more broadly and does not identify Supply Chain/Logistics faculty membership. Catalog coordinator list is not a full teaching roster.",
+      "evidence": "Current February2026 catalog identifies Business and Management division with Dave Hedge dean, Scott Dawes Supply Chain Management and Logistics coordinator, and Matthew Maestas Logistics Management and Operations coordinator. Available public faculty roster groups teachers more broadly and does not identify Supply Chain/Logistics faculty membership. Catalog coordinator list is not a full teaching roster.",
+      "correctedDepartment": "Business and Management — Supply Chain Management and Logistics",
+      "recheckEvidence": "Fresh official Academic Affairs and Academic Catalog navigation yields administrators and historical catalog links, not a current teaching roster. Search did not recover a newer faculty roster. The public 2024-2025 PDF has Business Management labels and Scott Dawes, but its age and generic labels do not establish current full Supply Chain/Logistics teaching membership. Retained unresolved rather than presenting a historical roster as current."
+    },
+    {
+      "id": "faculty-0392",
+      "status": "needs-review",
+      "institution": "Taejae University",
+      "school": "School of Arts, Sciences and Technology",
+      "department": "Business Innovation Program",
+      "facultyUrl": "",
+      "sources": [
+        "https://taejae.ac.kr/academics/who-learn-from",
+        "https://taejae.ac.kr/academics/programs/business-innovation",
+        "https://www.taejae.ac.kr/announcements"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Do not publish an empty dynamic directory as a working department list; further browser/API state verification needed.",
+      "evidence": "Official Business Innovation program page and current 2027 hiring announcement establish the unit, but program page contains curriculum without named faculty. The current Who Learn From page failed to render its roster during a fresh live browser check; prior dynamic contents were not a verified persistent Business Innovation-only filter.",
+      "recheckEvidence": "Official search-indexed Who Learn From page exposes eight Business Innovation-labelled members: Sam Young Chung, Jay Junghun Lee, Sungwoo Jung, Gilbert Seongkyu Park, Jeeyun Yoon, James Ostler, Sangman Han and Sanglin Han. However fresh live browser and web open return only navigation, group image and footer with loading text, no roster. Candidate is clearly relevant but not verified as presently usable.",
+      "candidateFacultyUrl": "https://taejae.ac.kr/academics/who-learn-from"
+    },
+    {
+      "id": "faculty-0483",
+      "status": "needs-review",
+      "institution": "University of Colorado Boulder",
+      "school": "Leeds School of Business",
+      "department": "Business Analytics and Machine Learning",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.colorado.edu/business/ms-programs/masters-program-business-analytics/ms-business-analytics-faculty",
+        "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Hiring-field to host-department correspondence remains unclear. Do not substitute the degree-program teaching team without evidence that it is the source unit.",
+      "evidence": "Official Business Analytics master's faculty page names Kai Larsen, Liu Liu, David Dobolyi, Quentin Andre and Fairy Gandhi across several divisions. It establishes an interdisciplinary degree-program teaching team, not a department named Business Analytics and Machine Learning. Separate Operations division roster verified for its own exact queue entry.",
+      "recheckEvidence": "Recovered exact original source job title Assistant Teaching Professor, Business Analytics and Machine Learning from May 25, 2025 listing. Current official Business Analytics degree roster spans Organizational Leadership and Information Analytics plus Marketing; no official evidence recovered that this program is the advertised hiring unit. No inferential assignment to Operations or a single faculty member made."
+    },
+    {
+      "id": "faculty-0586",
+      "status": "needs-review",
+      "institution": "University of Waikato",
+      "school": "Waikato Management School — Shandong University–University of Waikato International Business School",
+      "department": "Supply Chain Management",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.en.sdu.edu.cn/info/1157/8769.htm",
+        "https://view.sdu.edu.cn/info/2077/209576.htm",
+        "https://www.waikato.ac.nz/int/about/faculties-schools/management/our-people/",
+        "https://shxy.wh.sdu.edu.cn/szll1/jsml/axs/dzswywlx.htm",
+        "https://www.en.sdu.edu.cn/info/1157/8621.htm"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official January2026 joint-school announcement confirms Supply Chain Management and says Waikato will send faculty to China for over one-third of teaching. Neither the New Zealand management roster nor the separate Shandong electronic-commerce/logistics roster identifies which faculty belong to this joint-school programme; no assignment inferred.",
+      "evidence": "Official January2026 joint-school announcement confirms Supply Chain Management and says Waikato will send faculty to China for over one-third of teaching. Neither the New Zealand management roster nor the separate Shandong electronic-commerce/logistics roster identifies which faculty belong to this joint-school programme; no assignment inferred.",
+      "recheckEvidence": "Fresh English and Chinese joint-school searches found official 2025/2026 opening announcements and shared teaching arrangements, but no named joint Supply Chain Management roster. Existing Shandong E-Commerce/Logistics and Waikato New Zealand rosters do not establish assignment to the joint school; other institutions also use Waikato in their names, so those results were excluded."
+    }
+  ]
+}

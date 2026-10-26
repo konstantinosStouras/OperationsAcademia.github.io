@@ -1,0 +1,185 @@
+{
+  "records": [
+    {
+      "id": "faculty-0274",
+      "institution": "New York University Abu Dhabi",
+      "school": "Stern School of Business at New York University Abu Dhabi",
+      "department": "Technology, Operations and Statistics",
+      "checked": "2026-10-26",
+      "status": "needs-review",
+      "facultyUrl": "",
+      "candidateFacultyUrl": "https://stern.nyuad.nyu.edu/programs-admissions/faculty/",
+      "sources": [
+        "https://stern.nyuad.nyu.edu/programs-admissions/faculty/"
+      ],
+      "notes": "Withhold sample roster. Official footer explicitly calls this a sample faculty list subject to intake changes. It accurately labels local Technology, Operations and Statistics teachers, but does not establish a complete departmental roster.",
+      "evidence": "Independent live page inspection confirms Laurent Pauwels, Matteo Ruggiero and Harrison Lung have matching local area labels, but the same page explicitly disclaims roster completeness."
+    },
+    {
+      "id": "faculty-0520",
+      "institution": "University of Miami",
+      "school": "Miami Herbert Business School",
+      "department": "BA: FinTech, AI, Healthcare",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html",
+      "sources": [
+        "https://www.mbs.miami.edu/faculty-research/directory/index.html",
+        "https://umiami.wd1.myworkdayjobs.com/en-US/UMFaculty/job/MHBS-Assistant-Associate-Full-Professor_R100081474",
+        "https://umiami.wd1.myworkdayjobs.com/wday/cxs/umiami/UMFaculty/job/MHBS-Assistant-Associate-Full-Professor_R100081474"
+      ],
+      "notes": "Appropriate confirmed host-school roster for a broad recruitment initiative. Describe as spanning departments within the business school, rather than an initiative spanning different university schools.",
+      "evidence": "Independent browser inspection confirms an actual 24-page business-school faculty directory with department labels. Current public employer job R100081474 explicitly names Miami Herbert Business School as the appointing unit for four strategic interdisciplinary hires; no particular home department is assigned.",
+      "directoryFilter": "School faculty directory; this hiring initiative spans departments."
+    },
+    {
+      "id": "faculty-0434",
+      "institution": "The University of Texas at Arlington",
+      "school": "College of Business",
+      "department": "Artificial Intelligence cluster",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.uta.edu/academics/schools-colleges/business/contact",
+      "sources": [
+        "https://www.uta.edu/academics/schools-colleges/business/contact",
+        "https://uta.peopleadmin.com/postings/33327"
+      ],
+      "evidence": "Independent live university contact directory contains the academic faculty across the participating College of Business, with department labels. Prior exact-requisition location evidence establishes this college as one of three eligible tenure homes. Original PeopleAdmin link and workforce mirror could not be reopened during this audit; no new contrary evidence found.",
+      "notes": "Retain the verified college directory with explicit participating-college scope. It is not a list of faculty already hired into the artificial intelligence cluster. This audit confirms roster contents; host-college provenance remains the prior exact-requisition evidence.",
+      "directoryFilter": "Participating college faculty directory; the hiring call does not assign a final department."
+    },
+    {
+      "id": "faculty-0603",
+      "institution": "Valparaiso University",
+      "school": "College of Business",
+      "department": "Business Analytics",
+      "checked": "2026-10-26",
+      "status": "verified",
+      "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search=",
+      "sources": [
+        "https://www.valpo.edu/directory/?type=&department=cob&search=",
+        "https://apply.interfolio.com/195666",
+        "https://logic.interfolio.com/dossier-api/positions/195666"
+      ],
+      "evidence": "Independent browser check shows College of Business filter active and 30 records, including Ata Karbasi (Information and Decision Sciences), Kirsten Bullock (Management), Matthew Luth and college staff. Public employer position195666 confirms College of Business hosting Business Analytics teaching specialization and does not assign a separate department.",
+      "notes": "Verified parent-college roster for an advertised teaching specialization. The link applies the official College of Business filter; it includes college staff and other business fields and is not presented as an exact Business Analytics faculty-only list.",
+      "directoryFilter": "College of Business directory; includes faculty and staff across business subjects."
+    },
+    {
+      "id": "faculty-0006",
+      "status": "no-public-list",
+      "institution": "Abdullah Al Salem University",
+      "school": "College of Business and Entrepreneurship",
+      "department": "Supply Chain and Logistics Management",
+      "facultyUrl": "",
+      "sources": [
+        "https://aasu.edu.kw/colleges/View/48",
+        "https://aasu.edu.kw/JobPositions/Apply/9",
+        "https://aasu.edu.kw/media/hdilrkud/schedule-of-fall_2025_2026.pdf"
+      ],
+      "checked": "2026-10-26",
+      "notes": "No matching public faculty list found after multiple official-source searches; not an assertion that the program lacks faculty.",
+      "evidence": "Official college and recruitment pages establish Supply Chain and Logistics Management as a degree program, but neither lists its faculty. University navigation, English and Arabic department/faculty searches, and course schedule inspection did not locate a public roster.",
+      "audit": "Rechecked official college page, current recruitment description and targeted English/Arabic searches. Supply Chain and Logistics Management is a degree programme; no named college or programme faculty roster discovered. Retain no-public-list."
+    },
+    {
+      "id": "faculty-0157",
+      "status": "no-public-list",
+      "institution": "FLAME University",
+      "school": "FLAME School of Business",
+      "department": "Department of Operations & Analytics",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.flame.edu.in/academics/schools-departments/operations-and-analytics",
+        "https://www.flame.edu.in/faculty"
+      ],
+      "checked": "2026-10-26",
+      "notes": "A university-wide faculty list would mix unrelated schools and departments; no exact department roster found.",
+      "evidence": "Official Operations and Analytics department page has no roster. University-wide faculty page includes Bhavya Pande, Faizul Haque and other relevant individual profiles but offers no exact department filter or grouped roster in inspected page/search results.",
+      "audit": "Browser inspection confirms entire-university list without academic-unit selector. Listings show doctoral subjects, which cannot safely be treated as current departmental appointments. Department page has no roster; current employer advert explicitly names an actual Operations and Analytics department. Retain no-public-list."
+    },
+    {
+      "id": "faculty-0177",
+      "status": "no-public-list",
+      "institution": "Goldey-Beacom College",
+      "school": "",
+      "department": "Business Analytics",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.gbc.edu/department-directory/",
+        "https://www.gbc.edu/site-map/",
+        "https://www.gbc.edu/adjunct-faculty-opportunities/",
+        "https://campusweb.gbc.edu/ICS/Academics/BA/BA___328/2025_U-BA___328-ONLA_01/",
+        "https://campusweb.gbc.edu/ICS/Academics/BA/BA___600/2025_U-BA___600-HYB__02/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official directory explicitly requires college credentials for full faculty directory access. Official sitemap, programmes and targeted faculty searches yield individual course instructors rather than a public Business Analytics roster. No generic or single-person substitute supplied.",
+      "evidence": "The directory directs users to log into Campus Web for full faculty directories. Public course pages identify Victoria Neagoe and John Hoehn for individual analytics courses, but do not provide the unit faculty list.",
+      "audit": "Rechecked live official directory: full faculty directories explicitly require Campus Web credentials. Public single-course instructor pages do not establish a complete academic roster. Retain no-public-list."
+    },
+    {
+      "id": "faculty-0225",
+      "status": "no-public-list",
+      "institution": "Kühne Logistics University",
+      "school": "",
+      "department": "Department of Operations and Technology — Operations Management and Business Analytics",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.klu.org/faculty-research/faculty/resident-faculty",
+        "https://www.klu.org/about-klu/contacts-directory"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Actual named department exists; institution-wide resident faculty list is not substituted. No public department-specific list found.",
+      "evidence": "Official directory identifies Henrik Leopold as Head of Operations and Technology, but both Resident Faculty and Contacts pages list faculty across the institution without a department filter. Department-specific searches returned individual profiles rather than a matching roster.",
+      "audit": "Rechecked resident faculty roster, contacts, exact departmental searches and current head profile. Institution-wide list labels Henrik Leopold as department head but does not group all other members by department; research/teaching specialization titles are insufficient to recover a complete department roster. Retain no-public-list."
+    },
+    {
+      "id": "faculty-0227",
+      "status": "no-public-list",
+      "institution": "Lake Erie College",
+      "school": "School of Business",
+      "department": "Business Administration",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.lec.edu/faculty-directory",
+        "https://www.lec.edu/school-of-business/",
+        "https://www.lec.edu/school-of-business/business-administration/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "No exact public program/unit list located through these official sources. A generic university directory is not an acceptable replacement.",
+      "evidence": "Reviewed official university faculty directory, business school page and Business Administration program page, plus targeted site searches. The directory is university-wide, naming Faria Huq in quantitative methods and Mirel Marculetiu in finance among unrelated disciplines. School/program pages describe curriculum and contacts without a Business Administration faculty roster.",
+      "audit": "Rechecked current university-wide Wix faculty directory and business-school page. Directory has faculty and staff across unrelated schools and no academic-unit filter; it identifies a business dean and relevant individuals but not an isolated school/programme roster. Course-specific instructor lists are not a complete roster. Retain no-public-list."
+    },
+    {
+      "id": "faculty-0480",
+      "status": "verified",
+      "institution": "University of Central Florida",
+      "school": "Barry S. Miller College of Business",
+      "department": "Intelligent Work Systems",
+      "facultyUrl": "https://business.ucf.edu/faculty/",
+      "sources": [
+        "https://business.ucf.edu/faculty/",
+        "https://jobs.ucf.edu/es/jobs/professor-and-miller-technology-endowed-chair-in-intelligent-work-systems-the-barry-s-miller-college-of-business-orlando-florida-united-states-4c4f4cf6-e79e-4bc9-a5b5-e60d0f3d82df"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Confirmed hiring-college faculty roster for a cross-disciplinary endowed-chair theme, not a roster of an already formed Intelligent Work Systems department. The previously attempted /faculty-staff/ URL returns404; the official current /faculty/ URL is verified.",
+      "evidence": "Official Faculty Listing navigation leads to a complete college faculty/researcher roster, including Rebecca Bennett, Dane Blevins, Andrew E. Johnson and Harry Paarsch, with academic titles. Exact official R114252 hiring call identifies the Barry S. Miller College of Business as host and explicitly says its interdisciplinary chairs are not organized around traditional academic disciplines.",
+      "directoryFilter": "College faculty directory; this hiring initiative spans departments."
+    },
+    {
+      "id": "faculty-0615",
+      "status": "no-public-list",
+      "institution": "Washington University in St. Louis",
+      "school": "Olin Business School",
+      "department": "Boeing Center for Supply Chain Innovation",
+      "sources": [
+        "https://olin.washu.edu/faculty-and-research/research-centers/boeing-center/index.php",
+        "https://olin.washu.edu/faculty-and-research/research-centers/boeing-center/membership.php",
+        "https://olin.washu.edu/faculty-and-research/research-centers/boeing-center/projects.php"
+      ],
+      "checked": "2026-10-26",
+      "notes": "The current center site identifies director Panos Kouvelis but publishes no center faculty-member roster. Its membership list consists of corporate partners/advisory board members. A broad academic-area roster cannot be represented as the center membership list.",
+      "audit": "Rechecked current center site, projects page and official recent news. Projects page says12full-time faculty but does not name them; director/individual advisers and corporate membership are not the center academic roster. Retain no-public-list."
+    }
+  ]
+}

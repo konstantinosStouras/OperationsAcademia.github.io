@@ -6796,7 +6796,15 @@
   "mapSearchTerms": [
    "School of Management and Communications",
    "Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "fisher-boston-management-beacon118": {
+    "facultyUrl": "https://www.fisher.edu/academics/faculty",
+    "facultyDirectoryHint": "College faculty directory: look for entries labelled Management."
+   }
+  },
+  "facultyUrl": "https://www.fisher.edu/academics/faculty",
+  "facultyDirectoryHint": "College faculty directory: look for entries labelled Management."
  },
  {
   "id": "flame-university____ba",
@@ -9766,7 +9774,15 @@
   "mapSearchTerms": [
    "School of Business and Economics",
    "Management Information Systems"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "indiana-northwest-information-systems-dunes": {
+    "facultyUrl": "https://northwest.iu.edu/business/faculty-staff/index.html",
+    "facultyDirectoryHint": "School faculty directory; Management Information Systems is the advertised teaching specialization."
+   }
+  },
+  "facultyUrl": "https://northwest.iu.edu/business/faculty-staff/index.html",
+  "facultyDirectoryHint": "School faculty directory; Management Information Systems is the advertised teaching specialization."
  },
  {
   "id": "insead____humanitarian-research-group-hrg-social-innovation-center",

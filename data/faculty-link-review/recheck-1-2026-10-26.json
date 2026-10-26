@@ -1,0 +1,253 @@
+{
+  "records": [
+    {
+      "id": "faculty-0044",
+      "status": "verified",
+      "institution": "Belmont University",
+      "school": "Jack C. Massey College of Business",
+      "department": "Department of Business Systems and Analytics, Business Law, and Business Ethics",
+      "facultyUrl": "https://www.belmont.edu/massey/faculty-staff.html",
+      "sources": [
+        "https://www.belmont.edu/massey/faculty-staff.html"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Accepted complete parent college roster with explicit constituent discipline labels. There is no isolated department URL or selector; other college faculty appear.",
+      "evidence": "Complete official college roster explicitly labels Gary Garrison as the combined department chair, Alex Hoffman and Dan Privott in Business Systems and Analytics, Haskell Murray in Business Law and Business Ethics, and Barry Padgett in Business Ethics.",
+      "recheckEvidence": "Reassessed under accepted complete labelled parent-directory criterion; matching constituent disciplines inspected directly.",
+      "directoryFilter": "Read faculty titles for Business Systems and Analytics, Business Law, and Business Ethics. This complete college directory also includes other departments."
+    },
+    {
+      "id": "faculty-0045",
+      "status": "verified",
+      "institution": "Belmont University",
+      "school": "Jack C. Massey College of Business",
+      "department": "Department of Management, International Business, and Supply Chain Management",
+      "facultyUrl": "https://www.belmont.edu/massey/faculty-staff.html",
+      "sources": [
+        "https://www.belmont.edu/massey/faculty-staff.html"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Accepted complete parent college roster with explicit constituent discipline labels. No isolated combined-department URL or selector; other college faculty appear.",
+      "evidence": "Complete official roster names Cate Loes as chair of Management, International Business and Supply Chain Management; faculty include Doug Hales in Supply Chain Management, Alexey Semenov in International Business, and Amy Crook and Michelle McKenney Jones in Management.",
+      "recheckEvidence": "Reassessed under accepted complete labelled parent-directory criterion; matching constituent disciplines inspected directly.",
+      "directoryFilter": "Read faculty titles for Management, International Business, and Supply Chain Management. This complete college directory also includes other departments."
+    },
+    {
+      "id": "faculty-0128",
+      "status": "needs-review",
+      "institution": "Dakota State University",
+      "school": "College of Business and Information Systems",
+      "department": "Production and Operations Management",
+      "facultyUrl": "",
+      "sources": [
+        "https://dsu.edu/directory/college-of-business-and-information-systems.html",
+        "https://dsu.edu/academics/colleges/college-of-business-and-information-systems.html",
+        "https://dsu.edu/programs/business-management-as.html"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Reviewed official college roster and Business Management programme faculty. Named faculty include Deb Tech, Omar El-Gayar, Andy Behrens and Daniel Talley, but these pages do not identify a Production and Operations Management faculty group. This may be a hiring specialty rather than a distinct department; exact scope remains unresolved.",
+      "evidence": "Reviewed official college roster and Business Management programme faculty. Named faculty include Deb Tech, Omar El-Gayar, Andy Behrens and Daniel Talley, but these pages do not identify a Production and Operations Management faculty group. This may be a hiring specialty rather than a distinct department; exact scope remains unresolved.",
+      "recheckEvidence": "Current Business Administration BBA page describes Management specialization including operations and names program faculty, but no evidence yet ties historical Production and Operations Management hiring label to that specific department rather than college-level specialization."
+    },
+    {
+      "id": "faculty-0143",
+      "status": "needs-review",
+      "institution": "École des Hautes Études Commerciales de Paris (HEC Paris)",
+      "school": "",
+      "department": "Artificial Intelligence",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.hec.edu/en/faculty-research/chairs",
+        "https://hi-paris.fr/recruitment/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "No exact unit mapping established. Hi! PARIS-wide people or an unrelated AI chair must not be assumed to be the source unit.",
+      "evidence": "Official HEC chairs and jointly operated Hi! PARIS recruitment pages show AI activity spanning finance, marketing, law and cross-institutional research. The generic Artificial Intelligence source label does not identify which department or research team owns the listing.",
+      "recheckEvidence": "Reopened official chairs page; artificial intelligence remains represented across multiple academic units, so generic source label cannot establish exact roster."
+    },
+    {
+      "id": "faculty-0151",
+      "status": "verified",
+      "institution": "Fairmont State University",
+      "school": "College of Business and Aviation",
+      "department": "Marketing and Management Studies — Information Systems Management",
+      "facultyUrl": "https://www.fairmontstate.edu/coba/faculty-staff/default.aspx",
+      "sources": [
+        "https://www.fairmontstate.edu/coba/faculty-staff/default.aspx",
+        "https://www.fairmontstate.edu/academics/programs/information-systems-management.aspx"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Complete college roster with explicit discipline labels; includes Accounting, Finance and Aviation as well. Program-page chair name is older than the current roster, so current roster takes precedence.",
+      "evidence": "Official full college roster labels James Davis as Marketing and Management Studies chair, Billy Stone and Sunil Surendran in management/marketing, and Rebecca Giorcelli, Robert Cutlip and Dan Vlaisavljevic in Information Systems Management. Official program page connects Information Systems Management with Marketing and Management Studies.",
+      "recheckEvidence": "Reassessed under accepted complete labelled parent-directory criterion; matching constituent disciplines inspected directly.",
+      "directoryFilter": "Read Marketing and Management Studies, Management and Marketing, and Information Systems Management titles; other college departments also appear."
+    },
+    {
+      "id": "faculty-0156",
+      "status": "needs-review",
+      "institution": "Fisher College",
+      "school": "School of Management and Communications",
+      "department": "Management",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.fisher.edu/academics/faculty",
+        "https://www.fisher.edu/academics/undergraduate-programs/bs-in-management"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Do not confuse Fisher College with St. John Fisher University or publish a personal profile.",
+      "evidence": "Official current faculty page labels Michael Lattanzio, Mohammad Agwa, Kevin McWilliams and Neil Trotta as Management, with McWilliams program director. It is an all-university list also containing many unrelated programs; program page sends users to that shared list. No verified Management-only link/filter found.",
+      "recheckEvidence": "Followed Management program Faculty link; it redirects to shared all-college roster. Current list clearly labels Michael Lattanzio, Mohammad Agwa, Kevin McWilliams and Neil Trotta as Management, but no working exact unit selector was tested."
+    },
+    {
+      "id": "faculty-0179",
+      "status": "needs-review",
+      "institution": "Hainan Bielefeld University of Applied Sciences",
+      "school": "",
+      "department": "Production and Operations Management",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.hainan-biuh.edu.cn/%E5%B8%88%E8%B5%84%E5%9B%A2%E9%98%9F1/",
+        "https://www.hainan-biuh.edu.cn/en/job/lecturer-associate-professor-professor-in-production-and-operations-management/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Do not substitute the entire university team or infer that all logistics faculty comprise this new recruitment field.",
+      "evidence": "Reviewed the university's current Chinese faculty team page. It lists Pascal Wolff as Logistics Engineering discipline leader, Maik Lauterbach and Sebastian Pascal Reusch as German university professors, alongside mathematics, language and engineering faculty. No separately identified Production and Operations Management roster or precise host mapping was established.",
+      "recheckEvidence": "Recovered official exact Production and Operations Management job page. It lists production planning, quality, accounting and logistics teaching but no assigned department; current university-wide roster cannot safely establish exact host."
+    },
+    {
+      "id": "faculty-0182",
+      "status": "needs-review",
+      "institution": "Harris-Stowe State University",
+      "school": "Anheuser-Busch School of Business",
+      "department": "Department of Information Science and Computer Technology",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.hssu.edu/rsp_content_directory.html?wid=50&pid=0",
+        "https://www.hssu.edu/directory.cfm",
+        "https://www.hssu.edu/directory_tbl.html",
+        "https://www.hssu.edu/ae/aefiles/53/HSSU_2024_2026_Bulletin_FirstEdition_Revised.pdf"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official school programmes establish Information Science and Computer Technology with Management Information Systems emphasis. Public directory table contains school-level Business faculty with generic titles and records stamped2023, without identifying this unit. Exact department faculty membership has not been established; no unrelated Business roster substituted.",
+      "evidence": "Official school programmes establish Information Science and Computer Technology with Management Information Systems emphasis. Public directory table contains school-level Business faculty with generic titles and records stamped2023, without identifying this unit. Exact department faculty membership has not been established; no unrelated Business roster substituted.",
+      "recheckEvidence": "Official school page returns JavaScript placeholder and directory table unavailable through web. Earlier school-only faculty ambiguity remains unresolved."
+    },
+    {
+      "id": "faculty-0196",
+      "status": "needs-review",
+      "facultyUrl": "",
+      "additionalFacultyUrls": [
+        "https://www.isu.edu/marketing/our-faculty/",
+        "https://www.isu.edu/management/our-faculty/"
+      ],
+      "sources": [
+        "https://www.isu.edu/marketing/our-faculty/",
+        "https://www.isu.edu/management/our-faculty/",
+        "https://www.isu.edu/cob/faculty--staff/faculty/"
+      ],
+      "notes": "Combined Marketing and Management department publishes two separate rosters. Parent faculty page only links programs; no single roster containing both located. Do not publish only one subset for combined department.",
+      "evidence": "Marketing roster names Andreea Bujac and Nicole Hanson; Management roster names Alex Bolinger and Tyler Burch. Both identify Neil Tocher as shared department chair.",
+      "institution": "Idaho State University",
+      "school": "College of Business",
+      "department": "Marketing and Management",
+      "checked": "2026-10-26",
+      "recheckEvidence": "Reopened both complete Management and Marketing rosters and common parent Faculty page. Parent remains links-only; two verified constituent lists retained, neither alone represents combined department."
+    },
+    {
+      "id": "faculty-0205",
+      "status": "needs-review",
+      "institution": "Indiana University Northwest",
+      "school": "School of Business and Economics",
+      "department": "Management Information Systems",
+      "facultyUrl": "",
+      "sources": [
+        "https://northwest.iu.edu/business/faculty-staff/index.html",
+        "https://northwest.iu.edu/business/index.html"
+      ],
+      "checked": "2026-10-26",
+      "notes": "The separate Computer Information Systems department must not be substituted for business-school Management Information Systems.",
+      "evidence": "Followed School of Business Meet our Faculty link and rendered the current directory. The generated filter selects Business Faculty and Associate Faculty groups 460 and 487, which mix finance, economics, management and accounting. No Management Information Systems-only roster or filter was established.",
+      "recheckEvidence": "Official business directory returns filter shell only via web; previous rendered college-wide group is not an exact Management Information Systems roster."
+    },
+    {
+      "id": "faculty-0208",
+      "status": "needs-review",
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "IS/BA",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.ivybusiness.iastate.edu/directory/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Access failure is not evidence of no public roster. Keep unresolved; do not publish a guessed department parameter.",
+      "evidence": "Identified Ivy's official directory and Information Systems/Business Analytics department, but repeated direct and browser requests returned the university request-rejected support message, preventing verification of current named faculty and a functioning exact-unit filter.",
+      "recheckEvidence": "Retested current official Information Systems and Business Analytics academic department page; university Request Rejected response still prevents roster inspection."
+    },
+    {
+      "id": "faculty-0209",
+      "status": "needs-review",
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "Supply Chain Management",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Third-party discovery of the query is not official contents verification. No facultyUrl published; this is an access issue, not a no-public-list finding.",
+      "evidence": "Official Supply Chain Management directory candidate was located, but the university rejected repeated browser and direct requests. Current faculty contents and exact filter behavior could not be verified.",
+      "recheckEvidence": "Retested exact directory query and official Supply Chain Management academic department page; both return Request Rejected. Official employment ad confirms department identity but supplies no named roster."
+    },
+    {
+      "id": "faculty-0220",
+      "status": "needs-review",
+      "institution": "KIMEP University",
+      "school": "Bang College of Business",
+      "department": "Operations Management and Business Analytics",
+      "facultyUrl": "",
+      "sources": [
+        "https://hr.kimep.kz/kk-KZ/Home/Vacancy/791",
+        "https://www.kimep.kz/bang-college-of-business/kz/",
+        "https://el2019.kimep.kz/course/index.php?categoryid=12&lang=ru"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Parent college roster for advertised Operations Management/Business Analytics specialization, not a separately constituted department. Official English URL redirects to Kazakh; faculty names remain English. Open Faculty Profiles section. All 42 faculty entries were inspected in current official page; individual biographies may redirect by language. Scope caveat: official public course directory identifies Department of Operations Management and Information Systems; current college roster has no tested exact department selector. Retain needs-review rather than assert whole-college roster is exact.",
+      "evidence": "Official vacancy 791 names Bang College of Business as recruiting unit for Operations Management/Business Analytics. Current college Faculty Profiles section lists 42 named faculty, including Mustafa Yuzukirmizi, Nejat Capar, Muhammad Saleem and Jing Ruan. Official course directory associates Mustafa Yuzukirmizi with quantitative methods and Muhammad Imran with Business Analytics, Introduction to Operations Management, and Logistics and Supply Chain Management.",
+      "directoryFilter": "Open the Faculty Profiles section (Факультет профильдері); this is the parent college roster.",
+      "candidateFacultyUrl": "https://www.kimep.kz/bang-college-of-business/kz/"
+    },
+    {
+      "id": "faculty-0221",
+      "status": "needs-review",
+      "institution": "Koç University",
+      "school": "College of Administrative Sciences and Economics",
+      "department": "Operations Management and Information Systems",
+      "facultyUrl": "",
+      "sources": [
+        "https://gsb.ku.edu.tr/about-gsb/full-time/?dp=16",
+        "https://case.ku.edu.tr/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact Operations Management and Information Systems roster URL discovered, but university business sites return CloudFront HTTP403 in direct fetch and browser. Official indexed research news confirms faculty identities but is not a faculty list. A third-party roster was deliberately not accepted.",
+      "evidence": "Exact Operations Management and Information Systems roster URL discovered, but university business sites return CloudFront HTTP403 in direct fetch and browser. Official indexed research news confirms faculty identities but is not a faculty list. A third-party roster was deliberately not accepted.",
+      "recheckEvidence": "Retested exact official business roster URL; unavailable through web. No safe exact-content verification."
+    },
+    {
+      "id": "faculty-0222",
+      "status": "needs-review",
+      "institution": "Koç University",
+      "school": "College of Engineering",
+      "department": "Department of Industrial Engineering",
+      "facultyUrl": "",
+      "sources": [
+        "https://ie.ku.edu.tr/",
+        "https://oip.ku.edu.tr/mobility-programs/outgoing/students/erasmus-study/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "University engineering site returns HTTP403 in browser and direct fetch. Official international-program directory confirms Lerzan Ormeci as Industrial Engineering coordinator but does not provide a departmental faculty list. Current official library and commencement sources likewise do not supply a faculty roster.",
+      "evidence": "University engineering site returns HTTP403 in browser and direct fetch. Official international-program directory confirms Lerzan Ormeci as Industrial Engineering coordinator but does not provide a departmental faculty list. Current official library and commencement sources likewise do not supply a faculty roster.",
+      "recheckEvidence": "Retested official Industrial Engineering site; HTTP403. Official CV search results establish individuals only, not a current complete roster."
+    }
+  ]
+}

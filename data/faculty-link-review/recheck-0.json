@@ -1,0 +1,108 @@
+{
+  "records": [
+    {
+      "id": "faculty-0378",
+      "status": "verified",
+      "institution": "St John Fisher University",
+      "school": "School of Business",
+      "department": "Department of Management and Marketing",
+      "facultyUrl": "https://www.sjf.edu/schools/school-of-business/administration/",
+      "sources": [
+        "https://www.sjf.edu/schools/school-of-business/administration/",
+        "https://www.sjf.edu/major-minors/management/faculty/",
+        "https://www.sjf.edu/major-minors/marketing/faculty/",
+        "https://jobs.sjf.edu/postings/4238/print_preview"
+      ],
+      "checked": "2026-10-26",
+      "evidence": "The current school roster labels Christine Bataille as Management and Marketing chair and David Kunsch as Management and Marketing faculty; it also includes John LeCounte, Nicola Leifker, Chantz Miles, Maria Carolina Saffie Robertson, Sukruth Suresh, Amanda Coffey, Hemant Sashittal and Ronald Sicker, covering both published specialization lists.",
+      "notes": "Broader School of Business faculty and administration directory; it includes the combined department, other school departments, and administrators. No combined-department selector.",
+      "directoryFilter": "Look for Management and Marketing labels; the linked school roster also includes Accounting and Finance."
+    },
+    {
+      "id": "faculty-0399",
+      "status": "verified",
+      "institution": "Tecnológico de Monterrey",
+      "school": "Institute for Advanced Materials for Sustainable Manufacturing",
+      "department": "Supply Chain and Logistics Systems",
+      "facultyUrl": "https://research.tec.mx/vivo-tec/fac_iamsm",
+      "sources": [
+        "https://research.tec.mx/vivo-tec/fac_iamsm",
+        "https://jobs.tec.mx/tecnologico-de-monterrey/job/Monterrey-Faculty-position%C2%A0Supply-Chain-and-Logistics-Systems/1388837300/"
+      ],
+      "checked": "2026-10-26",
+      "evidence": "The official hiring call explicitly names the Institute for Advanced Materials for Sustainable Manufacturing as host and Supply Chain and Logistics Systems as the research focus. Its official faculty directory has 50 members across two pages, including Mariel Alfaro-Ponce, David Christopher Balderas-Silva and Rita Quetziquel Fuentes-Aguilar. Browser-rendered contents verified.",
+      "notes": "Host institute roster for a hiring research specialization, not a separate supply-chain department list. Directory requires JavaScript."
+    },
+    {
+      "id": "faculty-0448",
+      "status": "verified",
+      "institution": "Universidad de los Andes (Chile)",
+      "school": "School of Business and Economics",
+      "department": "Operations Management, Supply Chain Management and Management Information Systems",
+      "facultyUrl": "https://www.uandes.cl/universidad/facultades/ciencias-economicas-y-empresariales/?academicos",
+      "sources": [
+        "https://www.uandes.cl/universidad/facultades/ciencias-economicas-y-empresariales/?academicos",
+        "https://www.uandes.cl/universidad/facultades/ciencias-economicas-y-empresariales/sbe/",
+        "https://www.linkedin.com/posts/francisco-morales-6b47908_tenure-trackpositionsmanagementoruandes-activity-7377316978577006592-5NQl"
+      ],
+      "checked": "2026-10-26",
+      "evidence": "The university school page links its dedicated faculty roster using the actual ?academicos link. Browser inspection lists Ana Elisa Pereira, Francisco Morales, Leonardo David Epstein and Ignacio Inostroza-Quezada among the school faculty. The associate dean recruitment announcement names this same school and lists operations, supply chain, management information systems and related fields as hiring specializations.",
+      "notes": "Complete host-school roster for a multi-specialization recruitment call, not an independently constituted combined department. This is the Chilean School of Business and Economics, not the Colombian university or the separate ESE executive school."
+    },
+    {
+      "id": "faculty-0050",
+      "status": "needs-review",
+      "institution": "Birla Institute of Technology and Science, Pilani",
+      "school": "BITS School of Management",
+      "department": "Operations Management",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.bitsom.edu.in/faculty-directory/",
+        "https://bitsom.edu.in/faculty-directory/",
+        "https://www.bits-pilani.ac.in/about/leadership/",
+        "https://execed.bitsom.edu.in/our-program/bitsom/pgp",
+        "https://execed.bitsom.edu.in/our-program/bitsom/ai-ds"
+      ],
+      "checked": "2026-10-26",
+      "evidence": "Both canonical faculty-directory host variants return 403 in browser and direct fetch. Parent university leadership confirms Saravanan Kesavan as Dean and Professor of Operations. Official executive-education pages list Kesavan and Daniel Corsten or Dayton Steele as course instructors, but they are programme-specific selections, not the complete operations faculty roster.",
+      "notes": "Access-blocked actual directory; do not substitute executive-course instructor lists or a personal dean profile. Third-party brochure copies identify additional faculty but do not meet current official roster verification."
+    },
+    {
+      "id": "faculty-0233",
+      "status": "needs-review",
+      "institution": "Lenoir-Rhyne University",
+      "school": "Charles M. Snipes College of Business and Economics",
+      "department": "Management",
+      "facultyUrl": "",
+      "sources": [
+        "https://www.lr.edu/about/directory",
+        "https://www.lr.edu/management-ba",
+        "https://www.lr.edu/work-at-lr/assistant-professor-management-2026",
+        "https://www.lr.edu/academics/registrar/catalog",
+        "https://catalog.lr.edu/preview_program.php?catoid=20&poid=2370&returnto=482",
+        "https://www.lr.edu/news/mapping-route-entrepreneurship"
+      ],
+      "checked": "2026-10-26",
+      "evidence": "Official hiring call and management programme establish the Snipes college host. The programme page supplies only Craig Schreiber as Program Contact. University directory has name/text and campus filters, not an academic-unit selector; searching Management returned facilities/enrollment staff rather than faculty. The current 2026-2027 management catalog entry supplies courses and requirements, with no faculty list. Official entrepreneurship news names Ali Oguz, John Andrews, Jamie Strom and Craig Schreiber as project mentors, not a complete roster.",
+      "notes": "No complete public management or parent-college roster found after current programme, directory, catalog, recruitment and official-news inspection. Do not turn a single contact or selected project mentors into a faculty list."
+    },
+    {
+      "id": "faculty-0511",
+      "status": "needs-review",
+      "institution": "University of Macau",
+      "school": "Institute of Artificial Intelligence and Brain Sciences",
+      "department": "Data Science",
+      "facultyUrl": "",
+      "sources": [
+        "https://iaibs.um.edu.mo/academic-staff-v2-0/",
+        "https://iaibs.um.edu.mo/",
+        "https://cds.iaibs.um.edu.mo/",
+        "https://career.admo.um.edu.mo/iaibs_faap_ds_07_2026/",
+        "https://cds.ici.um.edu.mo/programme/postgraduate-programme/"
+      ],
+      "checked": "2026-10-26",
+      "evidence": "Current official institute navigation previously captured in the location research links Academic Staff to /academic-staff-v2-0/ and Centre for Data Science to cds.iaibs.um.edu.mo. Both current pages return administrative 403 through browser and direct fetch. Indexed predecessor programme content describes a cross-faculty data-science degree, not a named current institute roster.",
+      "notes": "Promising actual current academic-staff URL discovered, but roster contents remain unverified. Do not replace the institute with Faculty of Science and Technology or a predecessor centre affiliate list."
+    }
+  ]
+}

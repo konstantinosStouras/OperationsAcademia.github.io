@@ -1,0 +1,19 @@
+{
+  "checked": "2026-10-26",
+  "originalMapEntries": 665,
+  "distinctDepartmentIdentities": 638,
+  "departments": {
+    "verified": 603,
+    "needs-review": 27,
+    "no-public-list": 6,
+    "excluded": 2,
+    "unchecked": 0
+  },
+  "mapEntries": {
+    "verified": 630,
+    "needs-review": 27,
+    "no-public-list": 6,
+    "excluded": 2,
+    "unchecked": 0
+  }
+}

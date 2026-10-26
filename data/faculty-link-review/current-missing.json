@@ -1,0 +1,1065 @@
+{
+  "version": 1,
+  "created": "2026-10-26T09:50:36.178Z",
+  "initialMissingRows": 35,
+  "uniqueDepartments": 35,
+  "physicalCards": 777,
+  "records": [
+    {
+      "key": "[\"Abdullah Al Salem University\",\"College of Business and Entrepreneurship\",\"Supply Chain and Logistics Management\"]",
+      "institution": "Abdullah Al Salem University",
+      "school": "College of Business and Entrepreneurship",
+      "department": "Supply Chain and Logistics Management",
+      "countries": [
+        "Kuwait"
+      ],
+      "pointIds": [
+        "school-location:[\"abdullah al salem university\",\"nearby\",\"college of business and entrepreneurship\",\"kuwait\"]::abdullah-al-salem-supply-chain-khaldiya-campus::abdullah-al-salem-university::school:college of business and entrepreneurship:location:abdullah-al-salem-supply-chain-khaldiya-campus::29.32175,47.97193"
+      ],
+      "rowIds": [
+        "abdullah-al-salem-university____scm-logistics"
+      ],
+      "evidenceIds": [
+        "abdullah-al-salem-supply-chain-khaldiya-campus"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "abdullah-al-salem-university____scm-logistics",
+          "institution": "Abdullah Al Salem University (AASU)",
+          "school": "College of Business and Entrepreneurship",
+          "department": "Supply Chain and Logistics Management",
+          "evidenceId": "abdullah-al-salem-supply-chain-khaldiya-campus"
+        }
+      ],
+      "id": "faculty-0001"
+    },
+    {
+      "key": "[\"Birla Institute of Technology and Science, Pilani\",\"BITS School of Management\",\"Operations Management\"]",
+      "institution": "Birla Institute of Technology and Science, Pilani",
+      "school": "BITS School of Management",
+      "department": "Operations Management",
+      "countries": [
+        "India"
+      ],
+      "pointIds": [
+        "school-location:[\"birla institute of technology and science pilani\",\"nearby\",\"bits school of management\",\"india\"]::bits-school-management-kamba-academic-building::bits-school-of-management::school:bits school of management:location:bits-school-management-kamba-academic-building::19.25509,73.20168"
+      ],
+      "rowIds": [
+        "bits-school-of-management____om"
+      ],
+      "evidenceIds": [
+        "bits-school-management-kamba-academic-building"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "bits-school-of-management____om",
+          "institution": "BITS School of Management",
+          "school": "BITS School of Management",
+          "department": "Operations Management",
+          "evidenceId": "bits-school-management-kamba-academic-building"
+        }
+      ],
+      "id": "faculty-0002"
+    },
+    {
+      "key": "[\"Chatham University\",\"Falk College of Environment, Leadership & Management\",\"Department of Business Systems\"]",
+      "institution": "Chatham University",
+      "school": "Falk College of Environment, Leadership & Management",
+      "department": "Department of Business Systems",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"chatham university\",\"nearby\",\"falk college of environment leadership management\",\"united states\"]::chatham-sustainable-business-braun::chatham-university::school:falk college of environment leadership management:location:chatham-sustainable-business-braun::40.44901,-79.92531"
+      ],
+      "rowIds": [
+        "chatham-university____sustainable-management"
+      ],
+      "evidenceIds": [
+        "chatham-sustainable-business-braun"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "chatham-university____sustainable-management",
+          "institution": "Chatham University",
+          "school": "Falk College of Environment, Leadership & Management",
+          "department": "Department of Business Systems",
+          "evidenceId": "chatham-sustainable-business-braun"
+        }
+      ],
+      "id": "faculty-0003"
+    },
+    {
+      "key": "[\"Columbia University\",\"\",\"data-driven decision-making, optimization under uncertainty\"]",
+      "institution": "Columbia University",
+      "school": "",
+      "department": "data-driven decision-making, optimization under uncertainty",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "columbia-university::department:data driven decision making optimization under uncertainty::40.80700,-73.96200"
+      ],
+      "rowIds": [
+        "columbia-university____data-driven-decision-making-optimization-under-uncertainty"
+      ],
+      "evidenceIds": [],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "columbia-university____data-driven-decision-making-optimization-under-uncertainty",
+          "institution": "Columbia University",
+          "school": "",
+          "department": "data-driven decision-making, optimization under uncertainty",
+          "evidenceId": null
+        }
+      ],
+      "id": "faculty-0004"
+    },
+    {
+      "key": "[\"Dakota State University\",\"College of Business and Information Systems\",\"Production and Operations Management\"]",
+      "institution": "Dakota State University",
+      "school": "College of Business and Information Systems",
+      "department": "Production and Operations Management",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"dakota state university\",\"nearby\",\"college of business and information systems\",\"united states\"]::dakota-state-business-east-hall::dakota-state-university::school:college of business and information systems:location:dakota-state-business-east-hall::44.01218,-97.11033"
+      ],
+      "rowIds": [
+        "dakota-state-university____production-and-om"
+      ],
+      "evidenceIds": [
+        "dakota-state-business-east-hall"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "dakota-state-university____production-and-om",
+          "institution": "Dakota State University",
+          "school": "College of Business and Information Systems",
+          "department": "Production and Operations Management",
+          "evidenceId": "dakota-state-business-east-hall"
+        }
+      ],
+      "id": "faculty-0005"
+    },
+    {
+      "key": "[\"École des Hautes Études Commerciales de Paris (HEC Paris)\",\"\",\"Artificial Intelligence\"]",
+      "institution": "École des Hautes Études Commerciales de Paris (HEC Paris)",
+      "school": "",
+      "department": "Artificial Intelligence",
+      "countries": [
+        "France"
+      ],
+      "pointIds": [
+        "hec-paris::department:artificial intelligence:location:hec-paris-artificial-intelligence-campus::48.75802,2.16947"
+      ],
+      "rowIds": [
+        "hec-paris____ai"
+      ],
+      "evidenceIds": [
+        "hec-paris-artificial-intelligence-campus"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "hec-paris____ai",
+          "institution": "HEC Paris",
+          "school": "",
+          "department": "Artificial Intelligence",
+          "evidenceId": "hec-paris-artificial-intelligence-campus"
+        }
+      ],
+      "id": "faculty-0006"
+    },
+    {
+      "key": "[\"FLAME University\",\"FLAME School of Business\",\"Department of Operations & Analytics\"]",
+      "institution": "FLAME University",
+      "school": "FLAME School of Business",
+      "department": "Department of Operations & Analytics",
+      "countries": [
+        "India"
+      ],
+      "pointIds": [
+        "school-location:[\"flame university\",\"nearby\",\"flame school of business\",\"india\"]::flame-operations-analytics-lavale-campus::flame-university::school:flame school of business:location:flame-operations-analytics-lavale-campus::18.52331,73.73174"
+      ],
+      "rowIds": [
+        "flame-university____ba",
+        "flame-university____om"
+      ],
+      "evidenceIds": [
+        "flame-operations-analytics-lavale-campus"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "flame-university____ba",
+          "institution": "FLAME University",
+          "school": "FLAME School of Business",
+          "department": "Department of Operations & Analytics",
+          "evidenceId": "flame-operations-analytics-lavale-campus"
+        },
+        {
+          "rowId": "flame-university____om",
+          "institution": "FLAME University",
+          "school": "FLAME School of Business",
+          "department": "Department of Operations & Analytics",
+          "evidenceId": "flame-operations-analytics-lavale-campus"
+        }
+      ],
+      "id": "faculty-0007"
+    },
+    {
+      "key": "[\"Georgia Military College\",\"\",\"Mathematics, Technology and Business — Supply Chain and Logistics\"]",
+      "institution": "Georgia Military College",
+      "school": "",
+      "department": "Mathematics, Technology and Business — Supply Chain and Logistics",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "georgia-military-college::department:mathematics technology and business supply chain and logistics:location:georgia-military-business-old-capitol::33.07873,-83.22459"
+      ],
+      "rowIds": [
+        "georgia-military-college____supply-chain-and-logistics-systems"
+      ],
+      "evidenceIds": [
+        "georgia-military-business-old-capitol"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "georgia-military-college____supply-chain-and-logistics-systems",
+          "institution": "Georgia Military College",
+          "school": "",
+          "department": "Mathematics, Technology and Business — Supply Chain and Logistics",
+          "evidenceId": "georgia-military-business-old-capitol"
+        }
+      ],
+      "id": "faculty-0008"
+    },
+    {
+      "key": "[\"Goldey-Beacom College\",\"\",\"Business Analytics\"]",
+      "institution": "Goldey-Beacom College",
+      "school": "",
+      "department": "Business Analytics",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "goldey-beacom-college::department:business analytics:location:goldey-beacom-business-analytics-fulmer::39.74149,-75.68971"
+      ],
+      "rowIds": [
+        "goldey-beacom-college____ba"
+      ],
+      "evidenceIds": [
+        "goldey-beacom-business-analytics-fulmer"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "goldey-beacom-college____ba",
+          "institution": "Goldey-Beacom College",
+          "school": "",
+          "department": "Business Analytics",
+          "evidenceId": "goldey-beacom-business-analytics-fulmer"
+        }
+      ],
+      "id": "faculty-0009"
+    },
+    {
+      "key": "[\"Hainan Bielefeld University of Applied Sciences\",\"\",\"Production and Operations Management\"]",
+      "institution": "Hainan Bielefeld University of Applied Sciences",
+      "school": "",
+      "department": "Production and Operations Management",
+      "countries": [
+        "China"
+      ],
+      "pointIds": [
+        "hainan-bielefeld-university-of-applied-sciences::department:production and operations management:location:hainan-production-operations-yangpu-campus-fallback::19.77392,109.24403"
+      ],
+      "rowIds": [
+        "hainan-bielefeld-university-of-applied-sciences____production-and-operations-management"
+      ],
+      "evidenceIds": [
+        "hainan-production-operations-yangpu-campus-fallback"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "hainan-bielefeld-university-of-applied-sciences____production-and-operations-management",
+          "institution": "Hainan Bielefeld University of Applied Sciences",
+          "school": "",
+          "department": "Production and Operations Management",
+          "evidenceId": "hainan-production-operations-yangpu-campus-fallback"
+        }
+      ],
+      "id": "faculty-0010"
+    },
+    {
+      "key": "[\"Harris-Stowe State University\",\"Anheuser-Busch School of Business\",\"Department of Information Science and Computer Technology\"]",
+      "institution": "Harris-Stowe State University",
+      "school": "Anheuser-Busch School of Business",
+      "department": "Department of Information Science and Computer Technology",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"harris stowe state university\",\"nearby\",\"anheuser busch school of business\",\"united states\"]::harris-stowe-information-science-givens::harris-stowe-state-university::school:anheuser busch school of business:location:harris-stowe-information-science-givens::38.63181,-90.22397"
+      ],
+      "rowIds": [
+        "harris-stowe-state-university__anheuser-busch-school-of-business__management-information-systems"
+      ],
+      "evidenceIds": [
+        "harris-stowe-information-science-givens"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "harris-stowe-state-university__anheuser-busch-school-of-business__management-information-systems",
+          "institution": "Harris-Stowe State University",
+          "school": "Anheuser-Busch School of Business",
+          "department": "Department of Information Science and Computer Technology",
+          "evidenceId": "harris-stowe-information-science-givens"
+        }
+      ],
+      "id": "faculty-0011"
+    },
+    {
+      "key": "[\"Howard University\",\"\",\"Open disciplinary focus\"]",
+      "institution": "Howard University",
+      "school": "",
+      "department": "Open disciplinary focus",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "howard-university::department:open disciplinary focus:location:howard-open-disciplinary-main-campus::38.91912,-77.02057"
+      ],
+      "rowIds": [
+        "howard-university____open-disciplinary-focus"
+      ],
+      "evidenceIds": [
+        "howard-open-disciplinary-main-campus"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "howard-university____open-disciplinary-focus",
+          "institution": "Howard University",
+          "school": "",
+          "department": "Open disciplinary focus",
+          "evidenceId": "howard-open-disciplinary-main-campus"
+        }
+      ],
+      "id": "faculty-0012"
+    },
+    {
+      "key": "[\"Idaho State University\",\"College of Business\",\"Marketing and Management\"]",
+      "institution": "Idaho State University",
+      "school": "College of Business",
+      "department": "Marketing and Management",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"idaho state university\",\"nearby\",\"college of business\",\"united states\"]::idaho-state-marketing-management-business::idaho-state-university::school:college of business:location:idaho-state-marketing-management-business::42.86167,-112.43537"
+      ],
+      "rowIds": [
+        "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem"
+      ],
+      "evidenceIds": [
+        "idaho-state-marketing-management-business"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem",
+          "institution": "Idaho State University",
+          "school": "College of Business",
+          "department": "Marketing and Management",
+          "evidenceId": "idaho-state-marketing-management-business"
+        }
+      ],
+      "id": "faculty-0013"
+    },
+    {
+      "key": "[\"Iowa State University\",\"Debbie and Jerry Ivy College of Business\",\"IS/BA\"]",
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "IS/BA",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"iowa state university\",\"nearby\",\"debbie and jerry ivy college of business\",\"united states\"]::iowa-state-university::school:debbie and jerry ivy college of business::42.02540,-93.64447::iowa-state-university::school:debbie and jerry ivy college of business::42.02540,-93.64447"
+      ],
+      "rowIds": [
+        "iowa-state-university__ivy-college-of-business__is-ba"
+      ],
+      "evidenceIds": [
+        "legacy:iowa-state-university::school:debbie and jerry ivy college of business::42.02540,-93.64447"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "iowa-state-university__ivy-college-of-business__is-ba",
+          "institution": "Iowa State University",
+          "school": "Debbie and Jerry Ivy College of Business",
+          "department": "IS/BA",
+          "evidenceId": null
+        }
+      ],
+      "id": "faculty-0014"
+    },
+    {
+      "key": "[\"Iowa State University\",\"Debbie and Jerry Ivy College of Business\",\"Supply Chain Management\"]",
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "Supply Chain Management",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"iowa state university\",\"nearby\",\"debbie and jerry ivy college of business\",\"united states\"]::iowa-state-university::school:debbie and jerry ivy college of business::42.02540,-93.64447::iowa-state-university::school:debbie and jerry ivy college of business::42.02540,-93.64447"
+      ],
+      "rowIds": [
+        "iowa-state-university__ivy-college-of-business__supply-chain-management"
+      ],
+      "evidenceIds": [
+        "legacy:iowa-state-university::school:debbie and jerry ivy college of business::42.02540,-93.64447"
+      ],
+      "deptUrls": [
+        "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM"
+      ],
+      "sourceRows": [
+        {
+          "rowId": "iowa-state-university__ivy-college-of-business__supply-chain-management",
+          "institution": "Iowa State University",
+          "school": "Debbie and Jerry Ivy College of Business",
+          "department": "Supply Chain Management",
+          "evidenceId": null
+        }
+      ],
+      "id": "faculty-0015"
+    },
+    {
+      "key": "[\"KAIST\",\"\",\"Organization/Man. Sci\"]",
+      "institution": "KAIST",
+      "school": "",
+      "department": "Organization/Man. Sci",
+      "countries": [
+        "South Korea"
+      ],
+      "pointIds": [
+        "kaist::department:organization man sci::36.37200,127.36300"
+      ],
+      "rowIds": [
+        "kaist____organization-man-sci"
+      ],
+      "evidenceIds": [],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "kaist____organization-man-sci",
+          "institution": "KAIST",
+          "school": "",
+          "department": "Organization/Man. Sci",
+          "evidenceId": null
+        }
+      ],
+      "id": "faculty-0016"
+    },
+    {
+      "key": "[\"KIMEP University\",\"Bang College of Business\",\"Operations Management and Business Analytics\"]",
+      "institution": "KIMEP University",
+      "school": "Bang College of Business",
+      "department": "Operations Management and Business Analytics",
+      "countries": [
+        "Kazakhstan"
+      ],
+      "pointIds": [
+        "school-location:[\"kimep university\",\"nearby\",\"bang college of business\",\"kazakhstan\"]::kimep-operations-dostyk::kimep-university::school:bang college of business:location:kimep-operations-dostyk::43.24228,76.95662"
+      ],
+      "rowIds": [
+        "kimep-university__bang-college-of-business__operations-management-and-business-analytics",
+        "kimep-university____om"
+      ],
+      "evidenceIds": [
+        "kimep-operations-dostyk"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "kimep-university__bang-college-of-business__operations-management-and-business-analytics",
+          "institution": "KIMEP University",
+          "school": "Bang College of Business",
+          "department": "Operations Management and Business Analytics",
+          "evidenceId": "kimep-operations-dostyk"
+        },
+        {
+          "rowId": "kimep-university____om",
+          "institution": "KIMEP University",
+          "school": "Bang College of Business",
+          "department": "Operations Management and Business Analytics",
+          "evidenceId": "kimep-operations-dostyk"
+        }
+      ],
+      "id": "faculty-0017"
+    },
+    {
+      "key": "[\"Koç University\",\"College of Administrative Sciences and Economics\",\"Operations Management and Information Systems\"]",
+      "institution": "Koç University",
+      "school": "College of Administrative Sciences and Economics",
+      "department": "Operations Management and Information Systems",
+      "countries": [
+        "Turkey"
+      ],
+      "pointIds": [
+        "school-location:[\"koc university\",\"nearby\",\"college of administrative sciences and economics\",\"turkey\"]::koc-operations-information-systems-business-building::koc-university::school:college of administrative sciences and economics:location:koc-operations-information-systems-business-building::41.20595,29.07405"
+      ],
+      "rowIds": [
+        "koc-university__graduate-school-of-business__operations-management-and-information-systems",
+        "koc-university____om-is"
+      ],
+      "evidenceIds": [
+        "koc-operations-information-systems-business-building"
+      ],
+      "deptUrls": [
+        "https://gsb.ku.edu.tr/about-gsb/full-time/?dp=16"
+      ],
+      "sourceRows": [
+        {
+          "rowId": "koc-university__graduate-school-of-business__operations-management-and-information-systems",
+          "institution": "Koç University",
+          "school": "College of Administrative Sciences and Economics",
+          "department": "Operations Management and Information Systems",
+          "evidenceId": "koc-operations-information-systems-business-building"
+        },
+        {
+          "rowId": "koc-university____om-is",
+          "institution": "Koç University",
+          "school": "College of Administrative Sciences and Economics",
+          "department": "Operations Management and Information Systems",
+          "evidenceId": "koc-operations-information-systems-business-building"
+        }
+      ],
+      "id": "faculty-0018"
+    },
+    {
+      "key": "[\"Koç University\",\"College of Engineering\",\"Department of Industrial Engineering\"]",
+      "institution": "Koç University",
+      "school": "College of Engineering",
+      "department": "Department of Industrial Engineering",
+      "countries": [
+        "Turkey"
+      ],
+      "pointIds": [
+        "school-location:[\"koc university\",\"nearby\",\"college of engineering\",\"turkey\"]::koc-industrial-engineering-building::koc-university::school:college of engineering:location:koc-industrial-engineering-building::41.20715,29.07544"
+      ],
+      "rowIds": [
+        "koc-university__college-of-engineering__industrial-engineering"
+      ],
+      "evidenceIds": [
+        "koc-industrial-engineering-building"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "koc-university__college-of-engineering__industrial-engineering",
+          "institution": "Koç University",
+          "school": "College of Engineering",
+          "department": "Department of Industrial Engineering",
+          "evidenceId": "koc-industrial-engineering-building"
+        }
+      ],
+      "id": "faculty-0019"
+    },
+    {
+      "key": "[\"Kühne Logistics University\",\"\",\"Department of Operations and Technology — Operations Management and Business Analytics\"]",
+      "institution": "Kühne Logistics University",
+      "school": "",
+      "department": "Department of Operations and Technology — Operations Management and Business Analytics",
+      "countries": [
+        "Germany"
+      ],
+      "pointIds": [
+        "kuhne-logistics-university::department:department of operations and technology operations management and business analytics:location:location-verified-644::53.54057,9.99437"
+      ],
+      "rowIds": [
+        "kuhne-logistics-university____om-and-business-analytics"
+      ],
+      "evidenceIds": [
+        "location-verified-644"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "kuhne-logistics-university____om-and-business-analytics",
+          "institution": "Kühne Logistics University",
+          "school": "",
+          "department": "Department of Operations and Technology — Operations Management and Business Analytics",
+          "evidenceId": "location-verified-644"
+        }
+      ],
+      "id": "faculty-0020"
+    },
+    {
+      "key": "[\"Lake Erie College\",\"School of Business\",\"Business Administration\"]",
+      "institution": "Lake Erie College",
+      "school": "School of Business",
+      "department": "Business Administration",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"lake erie college\",\"nearby\",\"school of business\",\"united states\"]::lake-erie-business-college-hall::lake-erie-college::school:school of business:location:lake-erie-business-college-hall::41.71771,-81.25188"
+      ],
+      "rowIds": [
+        "lake-erie-college__school-of-business__business-administration"
+      ],
+      "evidenceIds": [
+        "lake-erie-business-college-hall"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "lake-erie-college__school-of-business__business-administration",
+          "institution": "Lake Erie College",
+          "school": "School of Business",
+          "department": "Business Administration",
+          "evidenceId": "lake-erie-business-college-hall"
+        }
+      ],
+      "id": "faculty-0021"
+    },
+    {
+      "key": "[\"Lenoir-Rhyne University\",\"Charles M. Snipes College of Business and Economics\",\"Management\"]",
+      "institution": "Lenoir-Rhyne University",
+      "school": "Charles M. Snipes College of Business and Economics",
+      "department": "Management",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"lenoir rhyne university\",\"nearby\",\"charles m snipes college of business and economics\",\"united states\"]::lenoir-rhyne-management-mauney::lenoir-rhyne-university::school:charles m snipes college of business and economics:location:lenoir-rhyne-management-mauney::35.73922,-81.32678"
+      ],
+      "rowIds": [
+        "lenoir-rhyne-university____om"
+      ],
+      "evidenceIds": [
+        "lenoir-rhyne-management-mauney"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "lenoir-rhyne-university____om",
+          "institution": "Lenoir-Rhyne University",
+          "school": "Charles M. Snipes College of Business and Economics",
+          "department": "Management",
+          "evidenceId": "lenoir-rhyne-management-mauney"
+        }
+      ],
+      "id": "faculty-0022"
+    },
+    {
+      "key": "[\"Lone Star College System\",\"\",\"Business\"]",
+      "institution": "Lone Star College System",
+      "school": "",
+      "department": "Business",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "lone-star-college-system::department:business:location:lone-star-business-system-office-fallback::30.18726,-95.48826"
+      ],
+      "rowIds": [
+        "lone-star-college-system____business"
+      ],
+      "evidenceIds": [
+        "lone-star-business-system-office-fallback"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "lone-star-college-system____business",
+          "institution": "Lone Star College System",
+          "school": "",
+          "department": "Business",
+          "evidenceId": "lone-star-business-system-office-fallback"
+        }
+      ],
+      "id": "faculty-0023"
+    },
+    {
+      "key": "[\"Miami University\",\"\",\"Information Systems and Technology\"]",
+      "institution": "Miami University",
+      "school": "",
+      "department": "Information Systems and Technology",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "miami-university::department:information systems and technology:location:miami-information-technology-campus-fallback::39.50953,-84.73449"
+      ],
+      "rowIds": [
+        "miami-university____information-systems-and-technology"
+      ],
+      "evidenceIds": [
+        "miami-information-technology-campus-fallback"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "miami-university____information-systems-and-technology",
+          "institution": "Miami University",
+          "school": "",
+          "department": "Information Systems and Technology",
+          "evidenceId": "miami-information-technology-campus-fallback"
+        }
+      ],
+      "id": "faculty-0024"
+    },
+    {
+      "key": "[\"Microsoft\",\"\",\"Applied Science\"]",
+      "institution": "Microsoft",
+      "school": "",
+      "department": "Applied Science",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "microsoft::department:applied science:location:microsoft-applied-science-redmond-headquarters::47.64354,-122.13082"
+      ],
+      "rowIds": [
+        "microsoft____applied-science"
+      ],
+      "evidenceIds": [
+        "microsoft-applied-science-redmond-headquarters"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "microsoft____applied-science",
+          "institution": "Microsoft",
+          "school": "",
+          "department": "Applied Science",
+          "evidenceId": "microsoft-applied-science-redmond-headquarters"
+        }
+      ],
+      "id": "faculty-0025"
+    },
+    {
+      "key": "[\"New York University Abu Dhabi\",\"Stern School of Business at New York University Abu Dhabi\",\"Technology, Operations and Statistics\"]",
+      "institution": "New York University Abu Dhabi",
+      "school": "Stern School of Business at New York University Abu Dhabi",
+      "department": "Technology, Operations and Statistics",
+      "countries": [
+        "United Arab Emirates"
+      ],
+      "pointIds": [
+        "school-location:[\"new york university abu dhabi\",\"nearby\",\"stern school of business at new york university abu dhabi\",\"united arab emirates\"]::new-york-abu-dhabi-stern-a6::new-york-university-abu-dhabi::school:stern school of business at new york university abu dhabi:location:new-york-abu-dhabi-stern-a6::24.52214,54.43545"
+      ],
+      "rowIds": [
+        "new-york-university-abu-dhabi____is"
+      ],
+      "evidenceIds": [
+        "new-york-abu-dhabi-stern-a6"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "new-york-university-abu-dhabi____is",
+          "institution": "New York University Abu Dhabi",
+          "school": "Stern School of Business at New York University Abu Dhabi",
+          "department": "Technology, Operations and Statistics",
+          "evidenceId": "new-york-abu-dhabi-stern-a6"
+        }
+      ],
+      "id": "faculty-0026"
+    },
+    {
+      "key": "[\"Park University\",\"Robert W. Plaster School of Business\",\"Robert W. Plaster Division of Business Administration and Management\"]",
+      "institution": "Park University",
+      "school": "Robert W. Plaster School of Business",
+      "department": "Robert W. Plaster Division of Business Administration and Management",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"park university\",\"nearby\",\"robert w plaster school of business\",\"united states\"]::park-business-plaster-center::park-university::school:robert w plaster school of business:location:park-business-plaster-center::39.18815,-94.67873"
+      ],
+      "rowIds": [
+        "park-university__robert-w-plaster-school-of-business__information-systems-and-business-analytics",
+        "park-university____scm-analytics",
+        "park-university____stat-analytics-and-scm"
+      ],
+      "evidenceIds": [
+        "park-business-plaster-center"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "park-university__robert-w-plaster-school-of-business__information-systems-and-business-analytics",
+          "institution": "Park University",
+          "school": "Robert W. Plaster School of Business",
+          "department": "Robert W. Plaster Division of Business Administration and Management",
+          "evidenceId": "park-business-plaster-center"
+        },
+        {
+          "rowId": "park-university____scm-analytics",
+          "institution": "Park University",
+          "school": "Robert W. Plaster School of Business",
+          "department": "Robert W. Plaster Division of Business Administration and Management",
+          "evidenceId": "park-business-plaster-center"
+        },
+        {
+          "rowId": "park-university____stat-analytics-and-scm",
+          "institution": "Park University",
+          "school": "Robert W. Plaster School of Business",
+          "department": "Robert W. Plaster Division of Business Administration and Management",
+          "evidenceId": "park-business-plaster-center"
+        }
+      ],
+      "id": "faculty-0027"
+    },
+    {
+      "key": "[\"Quincy University\",\"Oakley School of Business\",\"Business Analytics\"]",
+      "institution": "Quincy University",
+      "school": "Oakley School of Business",
+      "department": "Business Analytics",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"quincy university\",\"nearby\",\"oakley school of business\",\"united states\"]::quincy-business-analytics-francis-hall::quincy-university::school:oakley school of business:location:quincy-business-analytics-francis-hall::39.93958,-91.38626"
+      ],
+      "rowIds": [
+        "quincy-university__oakley-school-of-business__business-analytics"
+      ],
+      "evidenceIds": [
+        "quincy-business-analytics-francis-hall"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "quincy-university__oakley-school-of-business__business-analytics",
+          "institution": "Quincy University",
+          "school": "Oakley School of Business",
+          "department": "Business Analytics",
+          "evidenceId": "quincy-business-analytics-francis-hall"
+        }
+      ],
+      "id": "faculty-0028"
+    },
+    {
+      "key": "[\"Rutgers, The State University of New Jersey\",\"\",\"Artificial Intelligence, Machine Learning, Data Science and Statistics\"]",
+      "institution": "Rutgers, The State University of New Jersey",
+      "school": "",
+      "department": "Artificial Intelligence, Machine Learning, Data Science and Statistics",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "rutgers-university::department:artificial intelligence machine learning data science and statistics:location:rutgers-artificial-intelligence-university-reference::40.47913,-74.42603"
+      ],
+      "rowIds": [
+        "rutgers-university____ai-ml-ds-stats"
+      ],
+      "evidenceIds": [
+        "rutgers-artificial-intelligence-university-reference"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "rutgers-university____ai-ml-ds-stats",
+          "institution": "Rutgers University",
+          "school": "",
+          "department": "Artificial Intelligence, Machine Learning, Data Science and Statistics",
+          "evidenceId": "rutgers-artificial-intelligence-university-reference"
+        }
+      ],
+      "id": "faculty-0029"
+    },
+    {
+      "key": "[\"Taejae University\",\"School of Arts, Sciences and Technology\",\"Business Innovation Program\"]",
+      "institution": "Taejae University",
+      "school": "School of Arts, Sciences and Technology",
+      "department": "Business Innovation Program",
+      "countries": [
+        "South Korea"
+      ],
+      "pointIds": [
+        "school-location:[\"taejae university\",\"nearby\",\"school of arts sciences and technology\",\"south korea\"]::taejae-business-innovation-taejae-hall::taejae-university::school:school of arts sciences and technology:location:taejae-business-innovation-taejae-hall::37.58362,126.98833"
+      ],
+      "rowIds": [
+        "taejae-university__school-of-arts-sciences-and-technology__business-innovation"
+      ],
+      "evidenceIds": [
+        "taejae-business-innovation-taejae-hall"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "taejae-university__school-of-arts-sciences-and-technology__business-innovation",
+          "institution": "Taejae University",
+          "school": "School of Arts, Sciences and Technology",
+          "department": "Business Innovation Program",
+          "evidenceId": "taejae-business-innovation-taejae-hall"
+        }
+      ],
+      "id": "faculty-0030"
+    },
+    {
+      "key": "[\"University of Colorado Boulder\",\"Leeds School of Business\",\"Business Analytics and Machine Learning\"]",
+      "institution": "University of Colorado Boulder",
+      "school": "Leeds School of Business",
+      "department": "Business Analytics and Machine Learning",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"university of colorado boulder\",\"nearby\",\"leeds school of business\",\"united states\"]::colorado-boulder-business-analytics-machine-learning-koelbel::university-of-colorado-boulder::school:leeds school of business:location:colorado-boulder-business-analytics-machine-learning-koelbel::40.00568,-105.26345"
+      ],
+      "rowIds": [
+        "university-of-colorado-boulder____ba-and-ml"
+      ],
+      "evidenceIds": [
+        "colorado-boulder-business-analytics-machine-learning-koelbel"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "university-of-colorado-boulder____ba-and-ml",
+          "institution": "University of Colorado Boulder",
+          "school": "Leeds School of Business",
+          "department": "Business Analytics and Machine Learning",
+          "evidenceId": "colorado-boulder-business-analytics-machine-learning-koelbel"
+        }
+      ],
+      "id": "faculty-0031"
+    },
+    {
+      "key": "[\"University of Macau\",\"Institute of Artificial Intelligence and Brain Sciences\",\"Data Science\"]",
+      "institution": "University of Macau",
+      "school": "Institute of Artificial Intelligence and Brain Sciences",
+      "department": "Data Science",
+      "countries": [
+        "Macau"
+      ],
+      "pointIds": [
+        "school-location:[\"university of macau\",\"nearby\",\"institute of artificial intelligence and brain sciences\",\"macau\"]::macau-artificial-intelligence-brain-sciences-n21::university-of-macau::school:institute of artificial intelligence and brain sciences:location:macau-artificial-intelligence-brain-sciences-n21::22.13507,113.54556"
+      ],
+      "rowIds": [
+        "university-of-macau__institute-of-artificial-intelligence-and-brain-sciences__data-science"
+      ],
+      "evidenceIds": [
+        "macau-artificial-intelligence-brain-sciences-n21"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "university-of-macau__institute-of-artificial-intelligence-and-brain-sciences__data-science",
+          "institution": "University of Macau",
+          "school": "Institute of Artificial Intelligence and Brain Sciences",
+          "department": "Data Science",
+          "evidenceId": "macau-artificial-intelligence-brain-sciences-n21"
+        }
+      ],
+      "id": "faculty-0032"
+    },
+    {
+      "key": "[\"University of Waikato\",\"Waikato Management School — Shandong University–University of Waikato International Business School\",\"Supply Chain Management\"]",
+      "institution": "University of Waikato",
+      "school": "Waikato Management School — Shandong University–University of Waikato International Business School",
+      "department": "Supply Chain Management",
+      "countries": [
+        "China"
+      ],
+      "pointIds": [
+        "school-location:[\"university of waikato\",\"nearby\",\"waikato management school shandong university university of waikato international business school\",\"china\"]::waikato-supply-chain-weihai-beiheng::university-of-waikato::school:waikato management school shandong university university of waikato international business school:location:waikato-supply-chain-weihai-beiheng::37.52689,122.05814"
+      ],
+      "rowIds": [
+        "university-of-waikato__business-school__supply-chain-management"
+      ],
+      "evidenceIds": [
+        "waikato-supply-chain-weihai-beiheng"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "university-of-waikato__business-school__supply-chain-management",
+          "institution": "University of Waikato",
+          "school": "Waikato Management School — Shandong University–University of Waikato International Business School",
+          "department": "Supply Chain Management",
+          "evidenceId": "waikato-supply-chain-weihai-beiheng"
+        }
+      ],
+      "id": "faculty-0033"
+    },
+    {
+      "key": "[\"Washington University in St. Louis\",\"Olin Business School\",\"Boeing Center for Supply Chain Innovation\"]",
+      "institution": "Washington University in St. Louis",
+      "school": "Olin Business School",
+      "department": "Boeing Center for Supply Chain Innovation",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"washington university in st louis\",\"nearby\",\"olin business school\",\"united states\"]::washington-st-louis-operations-knight::washington-university-in-st-louis::school:olin business school:location:washington-st-louis-operations-knight::38.64962,-90.31083"
+      ],
+      "rowIds": [
+        "washington-university-in-st-louis__olin-business-school__boeing-center-for-supply-chain-innovation",
+        "washington-university-in-st-louis____scm-om"
+      ],
+      "evidenceIds": [
+        "washington-st-louis-operations-knight"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "washington-university-in-st-louis__olin-business-school__boeing-center-for-supply-chain-innovation",
+          "institution": "Washington University in St. Louis",
+          "school": "Olin Business School",
+          "department": "Boeing Center for Supply Chain Innovation",
+          "evidenceId": "washington-st-louis-operations-knight"
+        }
+      ],
+      "id": "faculty-0034"
+    },
+    {
+      "key": "[\"Wingate University\",\"Porter B. Byrum School of Business\",\"Data Analytics and Business Statistics\"]",
+      "institution": "Wingate University",
+      "school": "Porter B. Byrum School of Business",
+      "department": "Data Analytics and Business Statistics",
+      "countries": [
+        "United States"
+      ],
+      "pointIds": [
+        "school-location:[\"wingate university\",\"nearby\",\"porter b byrum school of business\",\"united states\"]::wingate-business-analytics-neu::wingate-university::school:porter b byrum school of business:location:wingate-business-analytics-neu::34.98513,-80.44847"
+      ],
+      "rowIds": [
+        "wingate-university____da-ba-business-stat"
+      ],
+      "evidenceIds": [
+        "wingate-business-analytics-neu"
+      ],
+      "deptUrls": [],
+      "sourceRows": [
+        {
+          "rowId": "wingate-university____da-ba-business-stat",
+          "institution": "Wingate University",
+          "school": "Porter B. Byrum School of Business",
+          "department": "Data Analytics and Business Statistics",
+          "evidenceId": "wingate-business-analytics-neu"
+        }
+      ],
+      "id": "faculty-0035"
+    }
+  ]
+}
