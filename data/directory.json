@@ -21,7 +21,13 @@
   "mapSearchTerms": [
    "College of Business Administration",
    "Information Systems and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "a-sharqiyah-information-systems-business-analytics-business-building": {
+    "facultyUrl": "https://www.asu.edu.om/team/?t=College%20of%20Business%20Administration"
+   }
+  },
+  "facultyUrl": "https://www.asu.edu.om/team/?t=College%20of%20Business%20Administration"
  },
  {
   "id": "a-sharqiyah-university____scm-and-logistics",
@@ -45,7 +51,13 @@
   "mapSearchTerms": [
    "College of Business Administration",
    "Management — Logistics and Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "a-sharqiyah-management-logistics-supply-chain-business-building": {
+    "facultyUrl": "https://www.asu.edu.om/team/?t=College%20of%20Business%20Administration"
+   }
+  },
+  "facultyUrl": "https://www.asu.edu.om/team/?t=College%20of%20Business%20Administration"
  },
  {
   "id": "aalborg-university__faculty-of-engineering-and-science__materials-and-production",
@@ -263,7 +275,13 @@
   "mapSearchTerms": [
    "College of Business",
    "Operations Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "abu-dhabi-operations-business-campus": {
+    "facultyUrl": "https://www.adu.ac.ae/study/colleges/college-of-business/faculty"
+   }
+  },
+  "facultyUrl": "https://www.adu.ac.ae/study/colleges/college-of-business/faculty"
  },
  {
   "id": "adelphi-university__robert-b-willumstad-school-of-business__decision-sciences-and-marketing",
@@ -381,31 +399,6 @@
    "Graduate School of Engineering and Management",
    "Department of Operational Sciences"
   ],
-  "facultyUrl": "http://www.afit.edu/ENS/facdir.cfm"
- },
- {
-  "id": "air-force-institute-of-technology__graduate-school-of-engineering-and-management__air-force-headquarters",
-  "institution": "Air Force Institute of Technology",
-  "school": "Graduate School of Engineering and Management",
-  "department": "Air Force Headquarters",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-06-04",
-  "mapLocationIds": [
-   "air-force-operational-sciences-building-641"
-  ],
-  "mapLocationKind": "school",
-  "mapInstitutionNames": [
-   "Air Force Institute of Technology"
-  ],
-  "mapSearchTerms": [
-   "Graduate School of Engineering and Management"
-  ],
   "mapDepartmentLinks": {
    "air-force-operational-sciences-building-641": {
     "facultyUrl": "https://www.afit.edu/ens/faculty.cfm"
@@ -414,18 +407,22 @@
   "facultyUrl": "https://www.afit.edu/ens/faculty.cfm"
  },
  {
-  "id": "air-force-institute-of-technology__graduate-school-of-engineering-and-management__operational-sciences",
+  "id": "air-force-institute-of-technology__graduate-school-of-engineering-and-management__air-force-headquarters",
   "institution": "Air Force Institute of Technology",
   "school": "Graduate School of Engineering and Management",
-  "department": "Operational Sciences",
+  "department": "Department of Operational Sciences",
   "type": "University",
   "country": "United States",
   "address": "2950 Hobson Way, Wright-Patterson AFB, OH 45433",
   "mapUrl": "https://goo.gl/maps/R53QXKauDD82",
-  "facultyUrl": "http://www.afit.edu/ENS/facdir.cfm",
+  "facultyUrl": "https://www.afit.edu/ens/faculty.cfm",
   "sources": [
-   "directory"
+   "directory",
+   "postings",
+   "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-06-04",
   "lat": 39.7764,
   "lng": -84.0889,
   "mapLocationIds": [
@@ -438,7 +435,12 @@
   "mapSearchTerms": [
    "Graduate School of Engineering and Management",
    "Department of Operational Sciences"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "air-force-operational-sciences-building-641": {
+    "facultyUrl": "https://www.afit.edu/ens/faculty.cfm"
+   }
+  }
  },
  {
   "id": "ajman-university____data-analytics",
@@ -552,7 +554,13 @@
   "mapSearchTerms": [
    "Alba Graduate Business School, The American College of Greece",
    "Business Analytics and Artificial Intelligence"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "alba-business-analytics-xenias": {
+    "facultyUrl": "https://alba.acg.edu/faculty-%26-research/about-alba-faculty/core-faculty/"
+   }
+  },
+  "facultyUrl": "https://alba.acg.edu/faculty-%26-research/about-alba-faculty/core-faculty/"
  },
  {
   "id": "alfaisal-university",
@@ -621,7 +629,13 @@
   "mapSearchTerms": [
    "College of Business Administration",
    "Business Intelligence and Data Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "american-emirates-business-intelligence-campus": {
+    "facultyUrl": "https://aue.ae/college-of-business-administration/"
+   }
+  },
+  "facultyUrl": "https://aue.ae/college-of-business-administration/"
  },
  {
   "id": "american-university-in-the-emirates____logistics-supply-chain",
@@ -645,7 +659,13 @@
   "mapSearchTerms": [
    "College of Business Administration",
    "Logistics and Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "american-emirates-logistics-supply-chain-campus": {
+    "facultyUrl": "https://aue.ae/college-of-business-administration/"
+   }
+  },
+  "facultyUrl": "https://aue.ae/college-of-business-administration/"
  },
  {
   "id": "american-university-kogod-school-of-business____information-technology-business-analytics-ai",
@@ -761,7 +781,13 @@
   "mapSearchTerms": [
    "Suliman S. Olayan School of Business",
    "Business Information and Decision Systems — Operations Management, Analytics and Statistics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "beirut-business-information-decision-olayan": {
+    "facultyUrl": "https://www.aub.edu.lb/osb/Pages/Faculty.aspx"
+   }
+  },
+  "facultyUrl": "https://www.aub.edu.lb/osb/Pages/Faculty.aspx"
  },
  {
   "id": "american-university-of-kurdistan____ba-mis",
@@ -785,7 +811,13 @@
   "mapSearchTerms": [
    "College of Business",
    "Business Analytics and Management Information Systems"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "american-kurdistan-business-mustafa-barzani": {
+    "facultyUrl": "https://auk.edu.krd/academics/colleges/college-of-business/faculty-2"
+   }
+  },
+  "facultyUrl": "https://auk.edu.krd/academics/colleges/college-of-business/faculty-2"
  },
  {
   "id": "american-university-of-phnom-penh____mis",
@@ -839,7 +871,13 @@
   "mapSearchTerms": [
    "School of Business Administration",
    "Information Systems and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "american-sharjah-information-systems-business-building": {
+    "facultyUrl": "https://www.aus.edu/sba/department-of-accounting?t=faculty"
+   }
+  },
+  "facultyUrl": "https://www.aus.edu/sba/department-of-accounting?t=faculty"
  },
  {
   "id": "appalachian-state-university____cis",
@@ -992,7 +1030,8 @@
   "mapLocationKind": "unresolved",
   "mapSearchTerms": [
    "IS"
-  ]
+  ],
+  "facultyUrl": "https://wpcarey.asu.edu/people/departments/information-systems"
  },
  {
   "id": "arizona-state-university__w-p-carey-school-of-business__supply-chain-management",
@@ -1233,7 +1272,13 @@
   "mapSearchTerms": [
    "Raymond J. Harbert College of Business",
    "Department of Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "auburn-supply-chain-lowder": {
+    "facultyUrl": "https://bulletin.auburn.edu/undergraduate/collegeofbusiness/schoolofsupplychainmgntscmn/#faculty"
+   }
+  },
+  "facultyUrl": "https://bulletin.auburn.edu/undergraduate/collegeofbusiness/schoolofsupplychainmgntscmn/#faculty"
  },
  {
   "id": "auburn-university__samuel-ginn-college-of-engineering__industrial-and-systems-engineering",
@@ -1639,7 +1684,8 @@
    "seed"
   ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.bellarmine.edu/rubel-school-of-business/rubel-faculty.php"
  },
  {
   "id": "bellarmine-university__w-fielding-rubel-school-of-business__business-technology-and-artificial-intelligence",
@@ -1664,7 +1710,13 @@
   "mapSearchTerms": [
    "W. Fielding Rubel School of Business",
    "Business Technology and Artificial Intelligence"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "bellarmine-rubel-mcgowan": {
+    "facultyUrl": "https://www.bellarmine.edu/rubel-school-of-business/rubel-faculty.php"
+   }
+  },
+  "facultyUrl": "https://www.bellarmine.edu/rubel-school-of-business/rubel-faculty.php"
  },
  {
   "id": "belmont-university__jack-c-massey-college-of-business__business-systems-and-analytics",
@@ -1779,7 +1831,13 @@
   "mapSearchTerms": [
    "Campbell School of Business",
    "Operations and Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "berry-operations-supply-chain-green": {
+    "facultyUrl": "https://www.berry.edu/academics/fs/departments/management"
+   }
+  },
+  "facultyUrl": "https://www.berry.edu/academics/fs/departments/management"
  },
  {
   "id": "bielefeld-university",
@@ -1942,7 +2000,13 @@
   "mapSearchTerms": [
    "College of Business",
    "Business Analytics and Operations Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "black-hills-business-meier": {
+    "facultyUrl": "https://bhsu.edu/academics/programs/business-admin-analytics.html"
+   }
+  },
+  "facultyUrl": "https://bhsu.edu/academics/programs/business-admin-analytics.html"
  },
  {
   "id": "bocconi____management-science-department-management-and-technology",
@@ -2140,7 +2204,13 @@
   ],
   "mapSearchTerms": [
    "Questrom School of Business"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "boston-operations-technology-hariri": {
+    "facultyUrl": "https://www.bu.edu/questrom/faculty/faculty-directory/"
+   }
+  },
+  "facultyUrl": "https://www.bu.edu/questrom/faculty/faculty-directory/"
  },
  {
   "id": "boston-university__questrom-school-of-business__information-systems",
@@ -3072,7 +3142,13 @@
   "mapSearchTerms": [
    "School of Business",
    "Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "calvin-business-analytics-devos": {
+    "facultyUrl": "https://calvin.edu/majors-programs/business-analytics-major-bs"
+   }
+  },
+  "facultyUrl": "https://calvin.edu/majors-programs/business-analytics-major-bs"
  },
  {
   "id": "campbellsville-university____business-it",
@@ -3096,7 +3172,13 @@
   "mapSearchTerms": [
    "College of Business and Enterprise",
    "Business Information Technology"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "campbellsville-business-information-technology-administration": {
+    "facultyUrl": "https://www.campbellsville.edu/academics/schools-and-colleges/college-of-business-and-enterprise/faculty-and-staff.html"
+   }
+  },
+  "facultyUrl": "https://www.campbellsville.edu/academics/schools-and-colleges/college-of-business-and-enterprise/faculty-and-staff.html"
  },
  {
   "id": "canadian-university-dubai____ba-ds",
@@ -3189,7 +3271,13 @@
   "mapSearchTerms": [
    "Heinz College of Information Systems and Public Policy",
    "Contextualized Evaluation of Artificial Intelligence for Healthcare"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "carnegie-mellon-healthcare-evaluation-hamburg": {
+    "facultyUrl": "https://www.heinz.cmu.edu/heinz-shared/_files/php/views/facultyresults-full.php?discipline%5B%5D=Operations+Research"
+   }
+  },
+  "facultyUrl": "https://www.heinz.cmu.edu/heinz-shared/_files/php/views/facultyresults-full.php?discipline%5B%5D=Operations+Research"
  },
  {
   "id": "carnegie-mellon-university__carnegie-mellon-university-in-qatar__information-systems",
@@ -3253,6 +3341,34 @@
   ]
  },
  {
+  "id": "carnegie-mellon-university__tepper-school-of-business__heinz-college",
+  "institution": "Carnegie Mellon University",
+  "school": "Heinz College of Information Systems and Public Policy",
+  "department": "Operations Research",
+  "type": "University",
+  "deptUrl": "https://www.heinz.cmu.edu/heinz-shared/_files/php/views/facultyresults-full.php?discipline%5B%5D=Operations+Research",
+  "sources": [
+   "omlist"
+  ],
+  "mapLocationIds": [
+   "carnegie-mellon-heinz-hamburg"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "Carnegie Mellon University"
+  ],
+  "mapSearchTerms": [
+   "Heinz College of Information Systems and Public Policy"
+  ],
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "carnegie-mellon-heinz-hamburg": {
+    "facultyUrl": "https://www.heinz.cmu.edu/heinz-shared/_files/php/views/facultyresults-full.php?discipline%5B%5D=Operations+Research"
+   }
+  },
+  "facultyUrl": "https://www.heinz.cmu.edu/heinz-shared/_files/php/views/facultyresults-full.php?discipline%5B%5D=Operations+Research"
+ },
+ {
   "id": "carnegie-mellon-university__tepper-school-of-business",
   "institution": "Carnegie Mellon University",
   "school": "Tepper School of Business",
@@ -3282,19 +3398,6 @@
   "mapLocationIds": [],
   "mapLocationKind": "unresolved",
   "facultyUrl": "https://www.cmu.edu/tepper/faculty-and-research/academic-areas/business-technologies"
- },
- {
-  "id": "carnegie-mellon-university__tepper-school-of-business__heinz-college",
-  "institution": "Carnegie Mellon University",
-  "school": "Tepper School of Business",
-  "department": "Heinz College",
-  "type": "Business School",
-  "deptUrl": "https://www.heinz.cmu.edu/heinz-shared/_files/php/views/facultyresults-full.php?discipline%5B%5D=Operations+Research",
-  "sources": [
-   "omlist"
-  ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
  },
  {
   "id": "carnegie-mellon-university__tepper-school-of-business__operations-management",
@@ -4442,7 +4545,13 @@
   "mapSearchTerms": [
    "School of Business and Computer Science",
    "Logistics and Supply Chain Resilience"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "columbia-basin-logistics-supply-chain-social-sciences": {
+    "facultyUrl": "https://www.columbiabasin.edu/directory/?sort=DisplayName&page=1&linitial=&search_phrase=Logistics"
+   }
+  },
+  "facultyUrl": "https://www.columbiabasin.edu/directory/?sort=DisplayName&page=1&linitial=&search_phrase=Logistics"
  },
  {
   "id": "columbia-business-school____om-scm",
@@ -5465,7 +5574,12 @@
   ],
   "mapSearchTerms": [
    "Waterbury Reilly School of Business"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "desales-business-gambet": {
+    "facultyUrl": "https://www.desales.edu/programs/undergrad/business-administration"
+   }
+  }
  },
  {
   "id": "dongbei-university-of-finance-and-economics____institute-of-supply-chain-analytics",
@@ -5580,7 +5694,13 @@
   "mapSearchTerms": [
    "Glorious Sun School of Economics and Management",
    "Operations and Logistics, Information Management, Decision Science, Behavioral Sciences and Financial Engineering"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "donghua-economics-management-glorious-sun": {
+    "facultyUrl": "https://glxy.dhu.edu.cn/20116/list.htm"
+   }
+  },
+  "facultyUrl": "https://glxy.dhu.edu.cn/20116/list.htm"
  },
  {
   "id": "drexel-university__lebow-college-of-business__decision-sciences-and-management-information-systems",
@@ -5745,7 +5865,13 @@
   "mapSearchTerms": [
    "College of Business",
    "Management, Marketing, and Management Science"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "east-texas-management-science-mcdowell": {
+    "facultyUrl": "https://www.etamu.edu/management-and-economics/"
+   }
+  },
+  "facultyUrl": "https://www.etamu.edu/management-and-economics/"
  },
  {
   "id": "eastern-illinois-university____om",
@@ -5984,7 +6110,13 @@
   "mapSearchTerms": [
    "De Vinci School of Business",
    "Innovation, Information Systems and Supply Chain"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "devinci-business-innovation-information-systems-campus-parc": {
+    "facultyUrl": "https://www.emlv.fr/en/research/faculty/"
+   }
+  },
+  "facultyUrl": "https://www.emlv.fr/en/research/faculty/"
  },
  {
   "id": "emory-university__goizueta-business-school__information-systems-operations-management",
@@ -6750,7 +6882,13 @@
   ],
   "mapSearchTerms": [
    "Department of Data Science and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "florida-polytechnic-data-business-barnett": {
+    "facultyUrl": "https://floridapoly.edu/faculty/"
+   }
+  },
+  "facultyUrl": "https://floridapoly.edu/faculty/"
  },
  {
   "id": "florida-state-university____is-analytics",
@@ -7415,7 +7553,13 @@
   "mapSearchTerms": [
    "Parker College of Business",
    "Information Systems and Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "georgia-southern-parker-isa": {
+    "facultyUrl": "https://scholars.georgiasouthern.edu/en/organisations/information-systems-analytics/persons/"
+   }
+  },
+  "facultyUrl": "https://scholars.georgiasouthern.edu/en/organisations/information-systems-analytics/persons/"
  },
  {
   "id": "georgia-southern-university__parker-college-of-business__logistics-and-supply-chain-management",
@@ -7474,7 +7618,13 @@
   "mapSearchTerms": [
    "College of Business and Computing",
    "Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "georgia-southwestern-management-business-history-building": {
+    "facultyUrl": "https://www.gsw.edu/college-of-business-and-computing/faculty-staff"
+   }
+  },
+  "facultyUrl": "https://www.gsw.edu/college-of-business-and-computing/faculty-staff"
  },
  {
   "id": "georgia-state-university",
@@ -7757,7 +7907,13 @@
   "mapSearchTerms": [
    "College of Science and Engineering",
    "Division of Mechanical and Industrial Engineering"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "hamad-bin-khalifa-mechanical-industrial-penrose": {
+    "facultyUrl": "https://www.hbku.edu.qa/en/cse/people"
+   }
+  },
+  "facultyUrl": "https://www.hbku.edu.qa/en/cse/people"
  },
  {
   "id": "hanken-school-of-economics____finance-and-economics",
@@ -8231,7 +8387,13 @@
   ],
   "mapInstitutionNames": [
    "Henderson State University"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "henderson-state-business-mooney": {
+    "facultyUrl": "https://www.hsu.edu/directory/department/business-innovation-and-entrepreneurship/"
+   }
+  },
+  "facultyUrl": "https://www.hsu.edu/directory/department/business-innovation-and-entrepreneurship/"
  },
  {
   "id": "high-point-university__earl-n-phillips-school-of-business__supply-chain-management",
@@ -8256,7 +8418,13 @@
   "mapSearchTerms": [
    "Earl N. Phillips School of Business",
    "Management — Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "high-point-supply-chain-phillips": {
+    "facultyUrl": "https://www.highpoint.edu/businessadministration/staff/"
+   }
+  },
+  "facultyUrl": "https://www.highpoint.edu/businessadministration/staff/"
  },
  {
   "id": "hkust____ds-and-analytics-thrust",
@@ -8830,7 +8998,13 @@
    "IE Business School",
    "Operations and Business Analytics"
   ],
-  "country": "Spain"
+  "country": "Spain",
+  "mapDepartmentLinks": {
+   "ie-operations-business-analytics-molina12": {
+    "facultyUrl": "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=29477"
+   }
+  },
+  "facultyUrl": "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=29477"
  },
  {
   "id": "ie-university__ie-school-of-science-and-technology__industrial-engineering-manufacturing-systems",
@@ -8856,7 +9030,16 @@
   "mapSearchTerms": [
    "IE School of Science and Technology",
    "Industrial Engineering (Manufacturing Systems)"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "ie-industrial-manufacturing-madrid-tower": {
+    "facultyUrl": "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=106077"
+   },
+   "ie-industrial-manufacturing-segovia-santa-cruz": {
+    "facultyUrl": "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=106077"
+   }
+  },
+  "facultyUrl": "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=106077"
  },
  {
   "id": "iese",
@@ -9658,7 +9841,13 @@
   "mapSearchTerms": [
    "Institut Mines-Télécom Business School",
    "Department of Management, Marketing and Strategy"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "institut-mines-telecom-management-evry-campus-fallback": {
+    "facultyUrl": "https://www.imt-bs.eu/faculte-recherche/annuaire-enseignants-chercheurs/?_enseignants___liste=management-marketing-et-strategie"
+   }
+  },
+  "facultyUrl": "https://www.imt-bs.eu/faculte-recherche/annuaire-enseignants-chercheurs/?_enseignants___liste=management-marketing-et-strategie"
  },
  {
   "id": "institut-mines-telecom__institut-mines-telecom-business-school__management-marketing-and-strategy",
@@ -9699,7 +9888,13 @@
   ],
   "mapInstitutionNames": [
    "Institut Mines-Télécom"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "institut-mines-telecom-management-evry-campus-fallback": {
+    "facultyUrl": "https://www.imt-bs.eu/faculte-recherche/annuaire-enseignants-chercheurs/?_enseignants___liste=management-marketing-et-strategie"
+   }
+  },
+  "facultyUrl": "https://www.imt-bs.eu/faculte-recherche/annuaire-enseignants-chercheurs/?_enseignants___liste=management-marketing-et-strategie"
  },
  {
   "id": "iowa-state-university__ivy-college-of-business__is-ba",
@@ -9936,7 +10131,13 @@
   "mapSearchTerms": [
    "College of Hospitality and Business",
    "Operations and Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "johnson-wales-operations-xavier": {
+    "facultyUrl": "https://catalog.jwu.edu/aboutjwu/academicdirectories/hospitality-business/providence/"
+   }
+  },
+  "facultyUrl": "https://catalog.jwu.edu/aboutjwu/academicdirectories/hospitality-business/providence/"
  },
  {
   "id": "judge-business-school____om-tech",
@@ -10991,7 +11192,13 @@
   "mapSearchTerms": [
    "School of Business",
    "Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "lincoln-memorial-business-analytics-cedar-bluff": {
+    "facultyUrl": "https://www.lmunet.edu/directory/"
+   }
+  },
+  "facultyUrl": "https://www.lmunet.edu/directory/"
  },
  {
   "id": "lingnan-university__faculty-of-business__computing-and-decision-sciences",
@@ -11333,7 +11540,13 @@
   "mapSearchTerms": [
    "School of Business",
    "Business Statistics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "location-verified-624": {
+    "facultyUrl": "https://www.marian.edu/school-of-business/"
+   }
+  },
+  "facultyUrl": "https://www.marian.edu/school-of-business/"
  },
  {
   "id": "marquette-university____oscm",
@@ -13151,7 +13364,16 @@
   "mapSearchTerms": [
    "School of Management",
    "Department of Quantitative & Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "new-york-tech-quantitative-analytics-long-island": {
+    "facultyUrl": "https://apps.nyit.edu/directory/"
+   },
+   "new-york-tech-quantitative-analytics-new-york-city": {
+    "facultyUrl": "https://apps.nyit.edu/directory/"
+   }
+  },
+  "facultyUrl": "https://apps.nyit.edu/directory/"
  },
  {
   "id": "new-york-university__leonard-n-stern-school-of-business",
@@ -13953,7 +14175,13 @@
   "mapSearchTerms": [
    "School of Business",
    "Management, Information Systems, and Marketing"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "northern-state-business-health-innovation": {
+    "facultyUrl": "https://northern.edu/employee-directory"
+   }
+  },
+  "facultyUrl": "https://northern.edu/employee-directory"
  },
  {
   "id": "northern-state-university__school-of-business__business-analytics-and-information-systems",
@@ -13978,7 +14206,13 @@
   "mapSearchTerms": [
    "School of Business",
    "Management, Information Systems, and Marketing"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "northern-state-business-health-innovation": {
+    "facultyUrl": "https://northern.edu/employee-directory"
+   }
+  },
+  "facultyUrl": "https://northern.edu/employee-directory"
  },
  {
   "id": "northwestern____science-and-innovation",
@@ -14145,6 +14379,12 @@
    "Operations, Technology and Innovation Management"
   ],
   "country": "Portugal",
+  "mapDepartmentLinks": {
+   "nova-operations-technology-innovation-cascais-hall": {
+    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
+   }
+  },
+  "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrlInherited": true
  },
@@ -14171,6 +14411,12 @@
    "Nova School of Business and Economics",
    "Operations, Technology and Innovation Management"
   ],
+  "mapDepartmentLinks": {
+   "nova-operations-technology-innovation-cascais-hall": {
+    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
+   }
+  },
+  "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrlInherited": true
  },
@@ -14204,6 +14450,12 @@
    "Nova School of Business and Economics",
    "Operations, Technology and Innovation Management"
   ],
+  "mapDepartmentLinks": {
+   "nova-operations-technology-innovation-cascais-hall": {
+    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
+   }
+  },
+  "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrlInherited": true
  },
@@ -14249,7 +14501,13 @@
   ],
   "mapInstitutionNames": [
    "Nova School of Business and Economics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "nova-operations-technology-innovation-cascais-hall": {
+    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
+   }
+  },
+  "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
  },
  {
   "id": "ntu____om",
@@ -14541,7 +14799,13 @@
   "mapSearchTerms": [
    "Spears School of Business",
    "Management Science and Information Systems, Center for Health Systems Innovation"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "oklahoma-state-business-158": {
+    "facultyUrl": "https://experts.okstate.edu/groups/719762/experts"
+   }
+  },
+  "facultyUrl": "https://experts.okstate.edu/groups/719762/experts"
  },
  {
   "id": "oregon-state-university____business-analytics",
@@ -15049,7 +15313,13 @@
   "mapSearchTerms": [
    "College of Business",
    "Department of Management and Marketing — Supply Chain and Quantitative Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "location-637-official-building": {
+    "facultyUrl": "https://www.pvamu.edu/business/about-us/faculty-and-staff/"
+   }
+  },
+  "facultyUrl": "https://www.pvamu.edu/business/about-us/faculty-and-staff/"
  },
  {
   "id": "prince-mohammad-bin-fahd-university____information-technology",
@@ -15108,7 +15378,16 @@
   "mapSearchTerms": [
    "College of Business Administration",
    "Management Information Systems"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "prince-mohammad-449-female": {
+    "facultyUrl": "https://faculty.pmu.edu.sa/pmufaculties/DepartmentFacultyList/3"
+   },
+   "prince-mohammad-449-male": {
+    "facultyUrl": "https://faculty.pmu.edu.sa/pmufaculties/DepartmentFacultyList/3"
+   }
+  },
+  "facultyUrl": "https://faculty.pmu.edu.sa/pmufaculties/DepartmentFacultyList/3"
  },
  {
   "id": "prince-mohammad-bin-fahd-university____om-scm",
@@ -15936,7 +16215,13 @@
   "mapSearchTerms": [
    "Crummer Graduate School of Business",
    "Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "rollins-crummer-0": {
+    "facultyUrl": "https://crummer.rollins.edu/explore-crummer/faculty/?status=&area=entrepreneurship-and-qba"
+   }
+  },
+  "facultyUrl": "https://crummer.rollins.edu/explore-crummer/faculty/?status=&area=entrepreneurship-and-qba"
  },
  {
   "id": "rollins-college__crummer-graduate-school-of-business__operations-and-supply-chain-management",
@@ -16462,7 +16747,13 @@
   "mapSearchTerms": [
    "San Bernardino Valley College",
    "Business Administration"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "san-bernardino-valley-business": {
+    "facultyUrl": "https://sbccd.edu/directory/?search_phrase=BUSINESS+ADMINISTRATION&sort=&page=1"
+   }
+  },
+  "facultyUrl": "https://sbccd.edu/directory/?search_phrase=BUSINESS+ADMINISTRATION&sort=&page=1"
  },
  {
   "id": "san-diego-state-university____ai",
@@ -16738,7 +17029,13 @@
   "mapSearchTerms": [
    "De Sole School of Business Innovation",
    "Creative Business Leadership"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "savannah-art-design-creative-business-gulfstream": {
+    "facultyUrl": "https://www.scad.edu/academics/faculty/directory/?field_academic_programs_tid=44421&title="
+   }
+  },
+  "facultyUrl": "https://www.scad.edu/academics/faculty/directory/?field_academic_programs_tid=44421&title="
  },
  {
   "id": "savannah-state-university____general-business",
@@ -17266,7 +17563,13 @@
   ],
   "mapSearchTerms": [
    "Bachelor of Applied Science in Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "skagit-valley-management-lewis": {
+    "facultyUrl": "https://skagit.edu/academics/areas-of-study/business/management.html"
+   }
+  },
+  "facultyUrl": "https://skagit.edu/academics/areas-of-study/business/management.html"
  },
  {
   "id": "skema-business-school____om",
@@ -17742,7 +18045,16 @@
   ],
   "mapSearchTerms": [
    "Business Statistics and Data Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "spartanburg-business-statistics-montgomery-teaching": {
+    "facultyUrl": "https://www.smcsc.edu/department/business/?post_type=directory"
+   },
+   "spartanburg-business-statistics-walker-teaching": {
+    "facultyUrl": "https://www.smcsc.edu/department/business/?post_type=directory"
+   }
+  },
+  "facultyUrl": "https://www.smcsc.edu/department/business/?post_type=directory"
  },
  {
   "id": "spartanburg-methodist-college____statistics-data-analytics",
@@ -17766,7 +18078,16 @@
   ],
   "mapSearchTerms": [
    "Business Statistics and Data Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "spartanburg-business-statistics-montgomery-teaching": {
+    "facultyUrl": "https://www.smcsc.edu/department/business/?post_type=directory"
+   },
+   "spartanburg-business-statistics-walker-teaching": {
+    "facultyUrl": "https://www.smcsc.edu/department/business/?post_type=directory"
+   }
+  },
+  "facultyUrl": "https://www.smcsc.edu/department/business/?post_type=directory"
  },
  {
   "id": "srm-university____operation-and-supply-chain-management",
@@ -17941,7 +18262,13 @@
   "mapSearchTerms": [
    "Gus Machado College of Business",
    "Quantitative and Statistical Analysis, Supply Chain, Operations and Logistics Management, and Managerial Economics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "st-thomas-florida-gus-machado-faculty-building": {
+    "facultyUrl": "https://www.stu.edu/business/"
+   }
+  },
+  "facultyUrl": "https://www.stu.edu/business/"
  },
  {
   "id": "stanford-gsb____om",
@@ -18577,7 +18904,13 @@
   "mapSearchTerms": [
    "School of Management",
    "Operations Research and Artificial Intelligence"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "technical-munich-operations-research-artificial-intelligence": {
+    "facultyUrl": "https://www.professoren.tum.de/en/professors/tum-schools#c56261"
+   }
+  },
+  "facultyUrl": "https://www.professoren.tum.de/en/professors/tum-schools#c56261"
  },
  {
   "id": "technical-university-of-munich__tum-school-of-management__operations-and-supply-chain-management",
@@ -18652,7 +18985,13 @@
   "mapSearchTerms": [
    "School of Management",
    "Technology Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "technical-munich-technology-management": {
+    "facultyUrl": "https://www.professoren.tum.de/en/professors/tum-schools#c56261"
+   }
+  },
+  "facultyUrl": "https://www.professoren.tum.de/en/professors/tum-schools#c56261"
  },
  {
   "id": "technion-israel-institute-of-technology__faculty-of-data-and-decision-sciences__operations-management",
@@ -19781,7 +20120,13 @@
   "mapSearchTerms": [
    "School of Data Science",
    "Operations Research"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "chinese-university-hong-kong-shenzhen-data-science-dao-yuan": {
+    "facultyUrl": "https://sds.cuhk.edu.cn/en/teacher-search?academic=31"
+   }
+  },
+  "facultyUrl": "https://sds.cuhk.edu.cn/en/teacher-search?academic=31"
  },
  {
   "id": "chinese-university-of-hong-kong-shenzhen__school-of-management-and-economics__information-systems-and-operations-management",
@@ -20526,7 +20871,13 @@
   ],
   "mapSearchTerms": [
    "Naveen Jindal School of Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "texas-dallas-healthcare-management-jindal": {
+    "facultyUrl": "https://jindal.utdallas.edu/healthcare-management/faculty-healthcare-management/"
+   }
+  },
+  "facultyUrl": "https://jindal.utdallas.edu/healthcare-management/faculty-healthcare-management/"
  },
  {
   "id": "tilburg-university",
@@ -20837,7 +21188,8 @@
   "n": 1,
   "lastPosted": "2026-08-24",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://freeman.tulane.edu/faculty-research/Management%20Science"
  },
  {
   "id": "tulane-university__a-b-freeman-school-of-business__management-science",
@@ -20892,7 +21244,13 @@
   "mapSearchTerms": [
    "School of Management",
    "Center for Digital Transformation — Artificial Intelligence Applications in Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "technical-university-munich-ai-management-heilbronn-lbau": {
+    "facultyUrl": "https://www.mgt.tum.de/center-for-digital-transformation"
+   }
+  },
+  "facultyUrl": "https://www.mgt.tum.de/center-for-digital-transformation"
  },
  {
   "id": "tusculum-university____supply-chain-management",
@@ -22396,7 +22754,13 @@
   "mapSearchTerms": [
    "University of Bristol Business School",
    "Artificial Intelligence and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "bristol-business-sloane-0": {
+    "facultyUrl": "https://www.bristol.ac.uk/business-school/people/"
+   }
+  },
+  "facultyUrl": "https://www.bristol.ac.uk/business-school/people/"
  },
  {
   "id": "university-of-bristol__university-of-bristol-business-school__technology-and-operations-management",
@@ -22452,7 +22816,13 @@
   "mapSearchTerms": [
    "Faculty of Management",
    "Operations and Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "british-columbia-management-okanagan-engineering-management-education": {
+    "facultyUrl": "https://management.ok.ubc.ca/about/contact-people/"
+   }
+  },
+  "facultyUrl": "https://management.ok.ubc.ca/about/contact-people/"
  },
  {
   "id": "university-of-british-columbia__sauder-school-of-business__operations-and-logistics",
@@ -23112,7 +23482,13 @@
   ],
   "mapSearchTerms": [
    "Booth School of Business"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "chicago-booth-operations-harper": {
+    "facultyUrl": "https://www.chicagobooth.edu/research/tolan/about"
+   }
+  },
+  "facultyUrl": "https://www.chicagobooth.edu/research/tolan/about"
  },
  {
   "id": "university-of-chicago__booth-school-of-business__operations-management",
@@ -23635,7 +24011,13 @@
   "mapSearchTerms": [
    "Warrington College of Business",
    "Information Systems and Operations Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "florida-information-operations-stuzin": {
+    "facultyUrl": "https://warrington.ufl.edu/directory/?faculty=1&organizational_unit=10"
+   }
+  },
+  "facultyUrl": "https://warrington.ufl.edu/directory/?faculty=1&organizational_unit=10"
  },
  {
   "id": "university-of-georgia__terry-college-of-business__management-information-systems",
@@ -24860,7 +25242,13 @@
   "mapSearchTerms": [
    "Faculty of Business Administration",
    "Department of Accounting and Information Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "macau-accounting-information-management-e22": {
+    "facultyUrl": "https://fba.um.edu.mo/aim/staff/"
+   }
+  },
+  "facultyUrl": "https://fba.um.edu.mo/aim/staff/"
  },
  {
   "id": "university-of-macau__institute-of-artificial-intelligence-and-brain-sciences__data-science",
@@ -25669,7 +26057,13 @@
   ],
   "mapSearchTerms": [
    "School of Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "michigan-flint-management-marketing-riverfront": {
+    "facultyUrl": "https://www.umflint.edu/som/contact-us/"
+   }
+  },
+  "facultyUrl": "https://www.umflint.edu/som/contact-us/"
  },
  {
   "id": "university-of-minnesota",
@@ -27149,11 +27543,18 @@
   "school": "Simon Business School",
   "department": "Operations Management",
   "type": "Business School",
+  "country": "United States",
+  "address": "Rochester, NY 14627",
+  "mapUrl": "https://goo.gl/maps/8qbVg",
+  "facultyUrl": "https://simon.rochester.edu/faculty-research/faculty-directory?field_dm_concentration_target_id=852",
   "deptUrl": "https://simon.rochester.edu/faculty-research/faculty-directory",
   "sources": [
+   "directory",
    "omlist",
    "seed"
   ],
+  "lat": 43.1318593,
+  "lng": -77.623931,
   "mapLocationIds": [
    "location-verified-654"
   ],
@@ -27165,36 +27566,16 @@
    "Simon Business School",
    "Operations Management"
   ],
-  "country": "United States",
   "mapDepartmentLinks": {
    "location-verified-654": {
     "facultyUrl": "https://simon.rochester.edu/faculty-research/faculty-directory?field_dm_concentration_target_id=852"
    }
-  },
-  "facultyUrl": "https://simon.rochester.edu/faculty-research/faculty-directory?field_dm_concentration_target_id=852"
- },
- {
-  "id": "university-of-rochester__w-e-simon-graduate-school-of-business-administration__operations-management",
-  "institution": "University of Rochester",
-  "school": "W. E. Simon Graduate School of Business Administration",
-  "department": "Operations Management",
-  "type": "Business School",
-  "country": "United States",
-  "address": "Rochester, NY 14627",
-  "mapUrl": "https://goo.gl/maps/8qbVg",
-  "facultyUrl": "http://www.simon.rochester.edu/faculty-and-research/faculty-directory/index.aspx",
-  "sources": [
-   "directory"
-  ],
-  "lat": 43.1318593,
-  "lng": -77.623931,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  }
  },
  {
   "id": "university-of-rochester__w-e-simon-graduate-school-of-business-administration__operations-management-and-or-economics-of-information-system",
   "institution": "University of Rochester",
-  "school": "W. E. Simon Graduate School of Business Administration",
+  "school": "Simon Business School",
   "department": "Operations Management and/or Economics of Information Systems",
   "type": "Business School",
   "country": "United States",
@@ -27203,8 +27584,22 @@
   ],
   "n": 1,
   "lastPosted": "2014-10-21",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "location-verified-654"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "University of Rochester"
+  ],
+  "mapSearchTerms": [
+   "Simon Business School"
+  ],
+  "mapDepartmentLinks": {
+   "location-verified-654": {
+    "facultyUrl": "https://simon.rochester.edu/faculty-research/faculty-directory"
+   }
+  },
+  "facultyUrl": "https://simon.rochester.edu/faculty-research/faculty-directory"
  },
  {
   "id": "university-of-san-diego",
@@ -27664,7 +28059,13 @@
   "mapSearchTerms": [
    "University of Stirling Business School",
    "Strategy, Operations, Analytics and Systems"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "stirling-strategy-operations-cottrell": {
+    "facultyUrl": "https://www.stir.ac.uk/research/hub/organisation/2286530/people?page=1"
+   }
+  },
+  "facultyUrl": "https://www.stir.ac.uk/research/hub/organisation/2286530/people?page=1"
  },
  {
   "id": "university-of-tampa__sykes-college-of-business__information-and-technology-management",
@@ -28174,7 +28575,13 @@
   ],
   "mapSearchTerms": [
    "Naveen Jindal School of Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "texas-dallas-healthcare-management-jindal": {
+    "facultyUrl": "https://jindal.utdallas.edu/faculty/#4"
+   }
+  },
+  "facultyUrl": "https://jindal.utdallas.edu/faculty/#4"
  },
  {
   "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__information-systems-and-operations-management",
@@ -28197,7 +28604,13 @@
   ],
   "mapSearchTerms": [
    "Naveen Jindal School of Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "texas-dallas-healthcare-management-jindal": {
+    "facultyUrl": "https://jindal.utdallas.edu/faculty/"
+   }
+  },
+  "facultyUrl": "https://jindal.utdallas.edu/faculty/"
  },
  {
   "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__operations-management-area",
@@ -28624,7 +29037,13 @@
   "mapSearchTerms": [
    "Faculty of Business, Economics and Statistics",
    "Business Decisions and Analytics — Operations Research"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "vienna-operations-research-business-decisions-morgenstern": {
+    "facultyUrl": "https://ufind.univie.ac.at/en/pvz_sub.html?id=380"
+   }
+  },
+  "facultyUrl": "https://ufind.univie.ac.at/en/pvz_sub.html?id=380"
  },
  {
   "id": "university-of-virgin-islands____decision-sciences",
@@ -28881,7 +29300,13 @@
   "mapSearchTerms": [
    "Faculty of Science, Engineering and Medicine",
    "Warwick Manufacturing Group, Applied Artificial Intelligence"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "warwick-applied-artificial-intelligence-imc": {
+    "facultyUrl": "https://peoplesearch.warwick.ac.uk/search?query=Applied%20Artificial%20Intelligence"
+   }
+  },
+  "facultyUrl": "https://peoplesearch.warwick.ac.uk/search?query=Applied%20Artificial%20Intelligence"
  },
  {
   "id": "university-of-warwick__warwick-business-school__operations-management",
@@ -29022,7 +29447,13 @@
   "mapSearchTerms": [
    "Milgard School of Business",
    "Supply Chain Management and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "washington-tacoma-supply-chain-analytics-dougan": {
+    "facultyUrl": "https://www.tacoma.uw.edu/business/faculty-research"
+   }
+  },
+  "facultyUrl": "https://www.tacoma.uw.edu/business/faculty-research"
  },
  {
   "id": "university-of-waterloo____management-science",
@@ -29807,7 +30238,13 @@
   "mapSearchTerms": [
    "College of Business and Management",
    "Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "vinuniversity-business-management-building-i": {
+    "facultyUrl": "https://cbm.vinuni.edu.vn/faculty-research/faculty/"
+   }
+  },
+  "facultyUrl": "https://cbm.vinuni.edu.vn/faculty-research/faculty/"
  },
  {
   "id": "virgina-darden____dads",
@@ -30323,6 +30760,12 @@
    "Olin Business School",
    "Supply Chain, Operations, and Technology"
   ],
+  "mapDepartmentLinks": {
+   "washington-st-louis-operations-knight": {
+    "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10"
+   }
+  },
+  "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10",
   "deptUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10",
   "deptUrlInherited": true
  },
@@ -30430,7 +30873,13 @@
    "Olin Business School",
    "Supply Chain, Operations, and Technology"
   ],
-  "country": "United States"
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "washington-st-louis-operations-knight": {
+    "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10"
+   }
+  },
+  "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10"
  },
  {
   "id": "wayne-state-university____supply-chain-management",
@@ -30454,7 +30903,13 @@
   "mapSearchTerms": [
    "Mike Ilitch School of Business",
    "Global Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "wayne-state-global-supply-chain-ilitch": {
+    "facultyUrl": "https://ilitchbusiness.wayne.edu/supply-chain/faculty"
+   }
+  },
+  "facultyUrl": "https://ilitchbusiness.wayne.edu/supply-chain/faculty"
  },
  {
   "id": "wayne-state-university__mike-ilitch-school-of-business__marketing-and-supply-chain-management",
@@ -31065,7 +31520,13 @@
   "mapSearchTerms": [
    "School of Intelligent Finance and Business",
    "Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "xian-jiaotong-liverpool-supply-chain-taicang-e": {
+    "facultyUrl": "https://www.xjtlu.edu.cn/en/study/departments/school-of-intelligent-finance-and-business/school-staff/academic-staff"
+   }
+  },
+  "facultyUrl": "https://www.xjtlu.edu.cn/en/study/departments/school-of-intelligent-finance-and-business/school-staff/academic-staff"
  },
  {
   "id": "xi-an-jiaotong-university__school-of-management__is",

@@ -3804,10 +3804,6 @@
    "n": 0
   },
   {
-   "v": "W. E. Simon Graduate School of Business Administration",
-   "n": 0
-  },
-  {
    "v": "Warwick Business School",
    "n": 0
   },
@@ -4262,10 +4258,6 @@
    "n": 1
   },
   {
-   "v": "Air Force Headquarters",
-   "n": 1
-  },
-  {
    "v": "Analytics",
    "n": 1
   },
@@ -4543,6 +4535,10 @@
   },
   {
    "v": "Decision, Risk and Operations",
+   "n": 1
+  },
+  {
+   "v": "Department of Operational Sciences",
    "n": 1
   },
   {
@@ -5594,10 +5590,6 @@
    "n": 0
   },
   {
-   "v": "Heinz College",
-   "n": 0
-  },
-  {
    "v": "Industrial and Enterprise Systems Engineering",
    "n": 0
   },
@@ -5723,10 +5715,6 @@
   },
   {
    "v": "Operation and Supply Chain Management",
-   "n": 0
-  },
-  {
-   "v": "Operational Sciences",
    "n": 0
   },
   {
@@ -5976,8 +5964,7 @@
     "Graduate School of Engineering and Management"
    ],
    "units": [
-    "Air Force Headquarters",
-    "Operational Sciences",
+    "Department of Operational Sciences",
     "SCM and Logistics"
    ],
    "bySchool": {
@@ -5985,8 +5972,7 @@
      "SCM and Logistics"
     ],
     "Graduate School of Engineering and Management": [
-     "Air Force Headquarters",
-     "Operational Sciences"
+     "Department of Operational Sciences"
     ]
    }
   },
@@ -6837,9 +6823,9 @@
    "units": [
     "Business Technologies",
     "Contextualized Evaluation of AI for Healthcare",
-    "Heinz College",
     "Information Systems",
-    "Operations Management"
+    "Operations Management",
+    "Operations Research"
    ],
    "bySchool": {
     "": [
@@ -6848,9 +6834,11 @@
     "Carnegie Mellon University in Qatar": [
      "Information Systems"
     ],
+    "Heinz College of Information Systems and Public Policy": [
+     "Operations Research"
+    ],
     "Tepper School of Business": [
      "Business Technologies",
-     "Heinz College",
      "Operations Management"
     ]
    }
@@ -13256,17 +13244,13 @@
   },
   "University of Rochester": {
    "schools": [
-    "Simon Business School",
-    "W. E. Simon Graduate School of Business Administration"
+    "Simon Business School"
    ],
    "units": [
     "Operations Management"
    ],
    "bySchool": {
     "Simon Business School": [
-     "Operations Management"
-    ],
-    "W. E. Simon Graduate School of Business Administration": [
      "Operations Management"
     ]
    }
@@ -14961,8 +14945,7 @@
    "Operations Management and Information Systems"
   ],
   "Graduate School of Engineering and Management": [
-   "Air Force Headquarters",
-   "Operational Sciences"
+   "Department of Operational Sciences"
   ],
   "Graduate School of Management": [
    "Business Analytics",
@@ -14994,6 +14977,9 @@
    "Supply Chain"
   ],
   "Hebrew University Business School": [
+   "Operations Research"
+  ],
+  "Heinz College of Information Systems and Public Policy": [
    "Operations Research"
   ],
   "HKU Business School": [
@@ -15531,7 +15517,6 @@
   ],
   "Tepper School of Business": [
    "Business Technologies",
-   "Heinz College",
    "Operations Management"
   ],
   "Terry College of Business": [
@@ -15585,9 +15570,6 @@
   ],
   "Volgenau School of Engineering": [
    "Systems Engineering and Operations Research"
-  ],
-  "W. E. Simon Graduate School of Business Administration": [
-   "Operations Management"
   ],
   "W. Fielding Rubel School of Business": [
    "Business Technology and Artificial Intelligence"

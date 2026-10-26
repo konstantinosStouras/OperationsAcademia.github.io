@@ -17,8 +17,8 @@
   "name": "Air Force Institute of Technology, Graduate School of Engineering and Management",
   "institution": "Air Force Institute of Technology",
   "school": "Graduate School of Engineering and Management",
-  "department": "Operational Sciences",
-  "schoolDept": "Graduate School of Engineering and Management, Operational Sciences",
+  "department": "Department of Operational Sciences",
+  "schoolDept": "Graduate School of Engineering and Management, Department of Operational Sciences",
   "address": "2950 Hobson Way, Wright-Patterson AFB, OH 45433",
   "lat": 39.7764,
   "lng": -84.0889,
@@ -2496,6 +2496,19 @@
   "facultyUrl": "http://business.uic.edu/uic-business-faculty"
  },
  {
+  "id": "university-of-illinois-at-urbana-champaign-gies",
+  "name": "University of Illinois at Urbana-Champaign, Gies College of Business",
+  "institution": "University of Illinois at Urbana-Champaign",
+  "school": "Gies College of Business",
+  "department": "Business Administration",
+  "schoolDept": "Gies College of Business, Business Administration",
+  "address": "Wohlers Hall, 1206 S 6th St #330, Champaign, IL 61820",
+  "lat": 40.1036099,
+  "lng": -88.2298467,
+  "mapUrl": "https://goo.gl/maps/mraAYvPcD2S2",
+  "facultyUrl": "https://business.illinois.edu/ba/directories/operations-management/"
+ },
+ {
   "id": "university-of-illinois-at-urbana-champaign",
   "name": "University of Illinois at Urbana-Champaign, The Grainger College of Engineering",
   "institution": "University of Illinois at Urbana-Champaign",
@@ -2509,19 +2522,6 @@
   "facultyUrl": "https://ise.illinois.edu/directory/faculty",
   "locationSource": "https://icap.sustainability.illinois.edu/all-places?page=30",
   "checked": "2026-10-23"
- },
- {
-  "id": "university-of-illinois-at-urbana-champaign-gies",
-  "name": "University of Illinois at Urbana-Champaign, Gies College of Business",
-  "institution": "University of Illinois at Urbana-Champaign",
-  "school": "Gies College of Business",
-  "department": "Business Administration",
-  "schoolDept": "Gies College of Business, Business Administration",
-  "address": "Wohlers Hall, 1206 S 6th St #330, Champaign, IL 61820",
-  "lat": 40.1036099,
-  "lng": -88.2298467,
-  "mapUrl": "https://goo.gl/maps/mraAYvPcD2S2",
-  "facultyUrl": "https://business.illinois.edu/ba/directories/operations-management/"
  },
  {
   "id": "university-of-kansas-school-of-business",
@@ -2876,11 +2876,11 @@
  },
  {
   "id": "university-of-rochester-w-e-simon-graduate-schoo",
-  "name": "University of Rochester, W. E. Simon Graduate School of Business Administration",
+  "name": "University of Rochester, Simon Business School",
   "institution": "University of Rochester",
-  "school": "W. E. Simon Graduate School of Business Administration",
+  "school": "Simon Business School",
   "department": "Operations Management",
-  "schoolDept": "W. E. Simon Graduate School of Business Administration, Operations Management",
+  "schoolDept": "Simon Business School, Operations Management",
   "address": "Rochester, NY 14627",
   "lat": 43.1318593,
   "lng": -77.623931,

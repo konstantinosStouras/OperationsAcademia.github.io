@@ -13417,9 +13417,9 @@
   ],
   "posted": "2026-06-04",
   "institution": "Air Force Institute of Technology",
-  "department": "Graduate School of Engineering and Management, Air Force Headquarters",
+  "department": "Graduate School of Engineering and Management, Department of Operational Sciences",
   "school": "Graduate School of Engineering and Management",
-  "unit": "Air Force Headquarters",
+  "unit": "Department of Operational Sciences",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -17129,8 +17129,9 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "October 5, 2026",
-  "applyByDate": "2026-10-05",
+  "applyBy": "November 5, 2026",
+  "applyByDate": "2026-11-05",
+  "reviewDate": "2026-10-05",
   "comments": "Open date: August 21, 2026 Next review date: Monday, Oct 5, 2026 at 11:59pm (Pacific Time) Apply by this date to ensure full consideration by the committee. Final date: Thursday, Nov 5, 2026 at 11:59pm (Pacific Time) Applications will continue to be accepted until this date, but those received after the review date will only be considered if the position has not yet been filled.",
   "country": "United States",
   "countries": [
@@ -21828,8 +21829,8 @@
   ],
   "posted": "2026-10-05",
   "institution": "Michigan State University",
-  "department": "Statistics and Probability",
-  "school": "",
+  "department": "College of Natural Science, Statistics and Probability",
+  "school": "College of Natural Science",
   "unit": "Statistics and Probability",
   "type": "University",
   "levels": [
@@ -22098,8 +22099,8 @@
   ],
   "posted": "2026-10-06",
   "institution": "Massachusetts Institute of Technology (MIT)",
-  "department": "Center for Transportation and Logistics",
-  "school": "",
+  "department": "School of Engineering, Center for Transportation and Logistics",
+  "school": "School of Engineering",
   "unit": "Center for Transportation and Logistics",
   "type": "University",
   "levels": [

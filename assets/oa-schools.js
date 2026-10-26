@@ -310,6 +310,9 @@
      NUS Business School, so the university has to be known before they can be
      told apart. Keyed by university, then by the name as posted. */
   var SCOPED_SCHOOL_ALIASES = {
+    'University of Rochester': {
+      'W. E. Simon Graduate School of Business Administration': 'Simon Business School'
+    },
     'University of Illinois at Urbana-Champaign': {
       'Grainger College of Engineering': 'The Grainger College of Engineering'
     },
@@ -513,6 +516,11 @@
      else the generic rule still applies, so a poster typing "Operations
      Management Department" at some other school still lands on the bare name. */
   var SCOPED_UNIT_ALIASES = {
+    // Official academic home: https://www.afit.edu/ens/faculty.cfm
+    'Air Force Institute of Technology': {
+      'Air Force Headquarters': 'Department of Operational Sciences',
+      'Operational Sciences': 'Department of Operational Sciences'
+    },
     /* Former Management and International Business department, now School
        of Management. Checked 2026-10-12: https://www.usm.edu/management/
        https://aquila.usm.edu/mang_intnlbus_fac_pubs/ */
@@ -961,6 +969,12 @@
     var universityKey = institutionKey(institution || '');
     var unitPart = (universityKey === 'texas state university' || universityKey === 'university of northern iowa') &&
       fold(unit) === 'department of management' ? 'Management' : unit;
+    // Keep saved corrections attached after repairing these legacy labels.
+    if (universityKey === 'air force institute of technology' && fold(unit) === 'department of operational sciences') unitPart = 'Air Force Headquarters';
+    if (universityKey === 'carnegie mellon university' && fold(school) === 'heinz college of information systems and public policy' && fold(unit) === 'operations research') {
+      schoolPart = 'Tepper School of Business'; unitPart = 'Heinz College';
+    }
+    if (universityKey === 'university of rochester' && fold(unit) === 'operations management and or economics of information systems') schoolPart = 'W. E. Simon Graduate School of Business Administration';
     var parts = [
       slugPart(institutionKey(institution || '')),
       slugPart(schoolPart),
@@ -1277,6 +1291,13 @@
     var school = canonSchool(fused.school || (split ? split.school : ''), institution);
 
     var unit = canonUnit(given.unit || (split && split.unit) || '', institution);
+    // Legacy archive put Heinz College in Tepper's department field.
+    // Heinz's own Operations Research roster establishes the actual home.
+    if (institutionKey(institution) === 'carnegie mellon university' &&
+        fold(school) === 'tepper school of business' && fold(unit) === 'heinz college') {
+      school = 'Heinz College of Information Systems and Public Policy';
+      unit = 'Operations Research';
+    }
     var moved = canonUnit(fused.unit, institution);
     if (moved && !unit) unit = moved;
     else if (moved && unit && fold(moved) !== fold(unit)) {
