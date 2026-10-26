@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-25T23:40:42.024Z",
- "members": 404,
+ "generated": "2026-10-26T07:06:21.607Z",
+ "members": 407,
  "k": 3,
  "affiliation": {
-  "listed": 321,
+  "listed": 324,
   "other": 48,
   "none": 35
  },
@@ -87,6 +87,11 @@
    },
    {
     "name": "Ohio State University",
+    "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "Rutgers University",
     "country": "United States",
     "members": 4
    },
@@ -204,21 +209,16 @@
     "name": "University of Miami",
     "country": "United States",
     "members": 3
-   },
-   {
-    "name": "University of Pennsylvania",
-    "country": "United States",
-    "members": 3
    }
   ],
-  "rest": 148
+  "rest": 150
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 201
+    "members": 204
    },
    {
     "name": "Canada",
