@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-25T22:29:45.900Z",
+ "generated": "2026-10-26T00:41:06.152Z",
  "sources": [
   {
    "source": "usage",
-   "days": 70,
+   "days": 71,
    "from": "",
    "to": ""
   },
@@ -14,9 +14,9 @@
    "to": ""
   }
  ],
- "days": 1228,
+ "days": 1229,
  "from": "2023-06-16",
- "to": "2026-10-25",
- "visitors": 47782,
- "pageviews": 139590
+ "to": "2026-10-26",
+ "visitors": 47798,
+ "pageviews": 139614
 }
