@@ -1635,14 +1635,20 @@
       "school": "Olin Business School",
       "department": "Boeing Center for Supply Chain Innovation",
       "checked": "2026-10-26",
-      "status": "no-public-list",
+      "status": "owner-approved",
       "sources": [
+        "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology",
         "https://olin.washu.edu/faculty-and-research/research-centers/boeing-center/index.php",
         "https://olin.washu.edu/faculty-and-research/research-centers/boeing-center/membership.php",
         "https://olin.washu.edu/faculty-and-research/research-centers/boeing-center/projects.php"
       ],
-      "notes": "The current center site identifies director Panos Kouvelis but publishes no center faculty-member roster. Its membership list consists of corporate partners/advisory board members. A broad academic-area roster cannot be represented as the center membership list.",
-      "audit": "Rechecked current center site, projects page and official recent news. Projects page says12full-time faculty but does not name them; director/individual advisers and corporate membership are not the center academic roster. Retain no-public-list."
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "audit": "Rechecked current center site, projects page and official recent news. Projects page says12full-time faculty but does not name them; director/individual advisers and corporate membership are not the center academic roster. Retain no-public-list.",
+      "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology",
+      "evidence": "Owner requested the Operations academic area instead of the Boeing research center. Official filtered directory verified in browser: correct academic area selected, 15 members including Deniz Akturk, Sergio Chayet, Lingxiu Dong and Panos Kouvelis.",
+      "publishAs": {
+        "department": "Supply Chain, Operations and Technology"
+      }
     },
     {
       "id": "faculty-0303",
@@ -1679,13 +1685,12 @@
       "school": "",
       "department": "Open disciplinary focus",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://profiles.howard.edu/",
         "https://admission.howard.edu/visit-howard"
       ],
-      "notes": "Open-disciplinary archived advert does not establish a hiring school or department. University-wide directory reviewed but cannot be presented as a particular department faculty list.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Official directory lists faculty across English, Physics, Psychology and Business; no exact hiring unit can be inferred from this entry."
     },
     {
@@ -1784,14 +1789,14 @@
       "school": "Stern School of Business at New York University Abu Dhabi",
       "department": "Technology, Operations and Statistics",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://stern.nyuad.nyu.edu/programs-admissions/faculty/",
       "candidateFacultyUrl": "https://stern.nyuad.nyu.edu/programs-admissions/faculty/",
       "sources": [
         "https://stern.nyuad.nyu.edu/programs-admissions/faculty/"
       ],
-      "notes": "Withhold sample roster. Official footer explicitly calls this a sample faculty list subject to intake changes. It accurately labels local Technology, Operations and Statistics teachers, but does not establish a complete departmental roster.",
-      "evidence": "Independent live page inspection confirms Laurent Pauwels, Matteo Ruggiero and Harrison Lung have matching local area labels, but the same page explicitly disclaims roster completeness."
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Official sample faculty list accepted by the owner; not claimed to be a complete departmental roster.",
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: Withhold sample roster. Official footer explicitly calls this a sample faculty list subject to intake changes. It accurately labels local Technology, Operations and Statistics teachers, but does not establish a complete departmental roster."
     },
     {
       "id": "faculty-0462",
@@ -1895,8 +1900,8 @@
       "school": "BITS School of Management",
       "department": "Operations Management",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://www.bitsom.edu.in/faculty-directory/",
       "sources": [
         "https://www.bitsom.edu.in/faculty-directory/",
         "https://bitsom.edu.in/faculty-directory/",
@@ -1904,8 +1909,9 @@
         "https://execed.bitsom.edu.in/our-program/bitsom/pgp",
         "https://execed.bitsom.edu.in/our-program/bitsom/ai-ds"
       ],
-      "evidence": "Both canonical faculty-directory host variants return 403 in browser and direct fetch. Parent university leadership confirms Saravanan Kesavan as Dean and Professor of Operations. Official executive-education pages list Kesavan and Daniel Corsten or Dayton Steele as course instructors, but they are programme-specific selections, not the complete operations faculty roster.",
-      "notes": "Access-blocked actual directory; do not substitute executive-course instructor lists or a personal dean profile. Third-party brochure copies identify additional faculty but do not meet current official roster verification."
+      "evidence": "Owner supplied a screenshot filtered to Operations, showing Saravanan Kesavan, Santiago Kraiselburd and Vinayak Deshpande, and selected the general faculty directory.",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "directoryFilter": "Select Operations in By Academic Area."
     },
     {
       "id": "faculty-0233",
@@ -1913,8 +1919,7 @@
       "school": "Charles M. Snipes College of Business and Economics",
       "department": "Management",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.lr.edu/about/directory",
         "https://www.lr.edu/management-ba",
@@ -1924,7 +1929,7 @@
         "https://www.lr.edu/news/mapping-route-entrepreneurship"
       ],
       "evidence": "Official hiring call and management programme establish the Snipes college host. The programme page supplies only Craig Schreiber as Program Contact. University directory has name/text and campus filters, not an academic-unit selector; searching Management returned facilities/enrollment staff rather than faculty. The current 2026-2027 management catalog entry supplies courses and requirements, with no faculty list. Official entrepreneurship news names Ali Oguz, John Andrews, Jamie Strom and Craig Schreiber as project mentors, not a complete roster.",
-      "notes": "No complete public management or parent-college roster found after current programme, directory, catalog, recruitment and official-news inspection. Do not turn a single contact or selected project mentors into a faculty list."
+      "notes": "Site owner requested removal on 2026-10-26. Entire institution excluded from the active directory and map."
     },
     {
       "id": "faculty-0511",
@@ -1932,8 +1937,7 @@
       "school": "Institute of Artificial Intelligence and Brain Sciences",
       "department": "Data Science",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://iaibs.um.edu.mo/academic-staff-v2-0/",
         "https://iaibs.um.edu.mo/",
@@ -1942,7 +1946,7 @@
         "https://cds.ici.um.edu.mo/programme/postgraduate-programme/"
       ],
       "evidence": "Current official institute navigation previously captured in the location research links Academic Staff to /academic-staff-v2-0/ and Centre for Data Science to cds.iaibs.um.edu.mo. Both current pages return administrative 403 through browser and direct fetch. Indexed predecessor programme content describes a cross-faculty data-science degree, not a named current institute roster.",
-      "notes": "Promising actual current academic-staff URL discovered, but roster contents remain unverified. Do not replace the institute with Faculty of Science and Technology or a predecessor centre affiliate list."
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
     },
     {
       "id": "faculty-0436",

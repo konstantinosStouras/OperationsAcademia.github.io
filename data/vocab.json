@@ -2628,6 +2628,10 @@
    "n": 2
   },
   {
+   "v": "Farmer School of Business",
+   "n": 2
+  },
+  {
    "v": "Fowler College of Business",
    "n": 2
   },
@@ -3212,6 +3216,10 @@
    "n": 1
   },
   {
+   "v": "Olin Business School",
+   "n": 1
+  },
+  {
    "v": "P. C. Rossin College of Engineering and Applied Science",
    "n": 1
   },
@@ -3640,10 +3648,6 @@
    "n": 0
   },
   {
-   "v": "Olin Business School",
-   "n": 0
-  },
-  {
    "v": "Otto-Beisheim School of Management",
    "n": 0
   },
@@ -3843,7 +3847,7 @@
   },
   {
    "v": "Management",
-   "n": 16
+   "n": 17
   },
   {
    "v": "Operations Management",
@@ -3906,10 +3910,6 @@
    "n": 5
   },
   {
-   "v": "Information Systems and Analytics",
-   "n": 5
-  },
-  {
    "v": "Logistics and Maritime Studies",
    "n": 5
   },
@@ -3931,6 +3931,14 @@
   },
   {
    "v": "Industrial Engineering and Operations Research",
+   "n": 4
+  },
+  {
+   "v": "Information Systems and Analytics",
+   "n": 4
+  },
+  {
+   "v": "Information Systems and Business Analytics",
    "n": 4
   },
   {
@@ -3978,10 +3986,6 @@
    "n": 3
   },
   {
-   "v": "Information Systems and Business Analytics",
-   "n": 3
-  },
-  {
    "v": "Information Systems and Technology Management",
    "n": 3
   },
@@ -4023,10 +4027,6 @@
   },
   {
    "v": "SCM and Logistics",
-   "n": 3
-  },
-  {
-   "v": "SCM/OM",
    "n": 3
   },
   {
@@ -4094,6 +4094,10 @@
    "n": 2
   },
   {
+   "v": "Department of Information Systems and Analytics",
+   "n": 2
+  },
+  {
    "v": "DS and Analytics",
    "n": 2
   },
@@ -4118,10 +4122,6 @@
    "n": 2
   },
   {
-   "v": "Information Systems and Technology",
-   "n": 2
-  },
-  {
    "v": "Information Systems, Analytics, and Supply Chain",
    "n": 2
   },
@@ -4131,10 +4131,6 @@
   },
   {
    "v": "Integrated Systems Engineering",
-   "n": 2
-  },
-  {
-   "v": "IS/BA",
    "n": 2
   },
   {
@@ -4211,6 +4207,10 @@
   },
   {
    "v": "SCM/BA",
+   "n": 2
+  },
+  {
+   "v": "SCM/OM",
    "n": 2
   },
   {
@@ -4746,6 +4746,10 @@
    "n": 1
   },
   {
+   "v": "Information Systems and Technology",
+   "n": 1
+  },
+  {
    "v": "Information Systems, Business Statistics and Operations Management",
    "n": 1
   },
@@ -4839,6 +4843,10 @@
   },
   {
    "v": "IS/Analytics",
+   "n": 1
+  },
+  {
+   "v": "IS/BA",
    "n": 1
   },
   {
@@ -4995,10 +5003,6 @@
   },
   {
    "v": "Marketing and International Business",
-   "n": 1
-  },
-  {
-   "v": "Marketing and Management, Supply Chain and Operations Management",
    "n": 1
   },
   {
@@ -5442,6 +5446,10 @@
    "n": 1
   },
   {
+   "v": "Supply Chain, Operations and Technology",
+   "n": 1
+  },
+  {
    "v": "Sustainable SCM",
    "n": 1
   },
@@ -5742,10 +5750,6 @@
    "n": 0
   },
   {
-   "v": "Operations and Manufacturing Management",
-   "n": 0
-  },
-  {
    "v": "Operations and Quantitative Methods",
    "n": 0
   },
@@ -5827,10 +5831,6 @@
   },
   {
    "v": "Supply Chain and Operations Management Faculty",
-   "n": 0
-  },
-  {
-   "v": "Supply Chain, Operations and Technology",
    "n": 0
   },
   {
@@ -8389,11 +8389,11 @@
     "College of Business"
    ],
    "units": [
-    "Marketing and Management, Supply Chain and Operations Management"
+    "Management"
    ],
    "bySchool": {
     "College of Business": [
-     "Marketing and Management, Supply Chain and Operations Management"
+     "Management"
     ]
    }
   },
@@ -8629,13 +8629,13 @@
     "Debbie and Jerry Ivy College of Business"
    ],
    "units": [
-    "IS/BA",
+    "Information Systems and Business Analytics",
     "Supply Chain and Information Systems",
     "Supply Chain Management"
    ],
    "bySchool": {
     "Debbie and Jerry Ivy College of Business": [
-     "IS/BA",
+     "Information Systems and Business Analytics",
      "Supply Chain and Information Systems",
      "Supply Chain Management"
     ]
@@ -9202,17 +9202,19 @@
    }
   },
   "Miami University": {
-   "schools": [],
+   "schools": [
+    "Farmer School of Business"
+   ],
    "units": [
-    "Emerging Technology in Business and Design",
-    "Information Systems and Analytics",
-    "Information Systems and Technology"
+    "Department of Information Systems and Analytics",
+    "Emerging Technology in Business and Design"
    ],
    "bySchool": {
     "": [
-     "Emerging Technology in Business and Design",
-     "Information Systems and Analytics",
-     "Information Systems and Technology"
+     "Emerging Technology in Business and Design"
+    ],
+    "Farmer School of Business": [
+     "Department of Information Systems and Analytics"
     ]
    }
   },
@@ -14177,16 +14179,10 @@
     "Olin Business School"
    ],
    "units": [
-    "Operations and Manufacturing Management",
-    "SCM/OM",
     "Supply Chain, Operations and Technology"
    ],
    "bySchool": {
-    "": [
-     "SCM/OM"
-    ],
     "Olin Business School": [
-     "Operations and Manufacturing Management",
      "Supply Chain, Operations and Technology"
     ]
    }
@@ -14619,7 +14615,6 @@
    "Management, Marketing, and Management Science",
    "Managerial Sciences Department, Marketing",
    "Marketing",
-   "Marketing and Management, Supply Chain and Operations Management",
    "Marketing and Supply Chain Management",
    "Operations and Decision Analytics",
    "Operations Management",
@@ -14784,7 +14779,7 @@
    "Department of Management"
   ],
   "Debbie and Jerry Ivy College of Business": [
-   "IS/BA",
+   "Information Systems and Business Analytics",
    "Supply Chain and Information Systems",
    "Supply Chain Management"
   ],
@@ -14878,6 +14873,9 @@
   ],
   "Faculty of Science, Engineering and Medicine": [
    "Warwick Manufacturing Group, Applied Artificial Intelligence"
+  ],
+  "Farmer School of Business": [
+   "Department of Information Systems and Analytics"
   ],
   "Feliciano School of Business": [
    "Information Management and Business Analytics"
@@ -15252,7 +15250,6 @@
    "Business Analytics"
   ],
   "Olin Business School": [
-   "Operations and Manufacturing Management",
    "Supply Chain, Operations and Technology"
   ],
   "Otto-Beisheim School of Management": [

@@ -1806,8 +1806,7 @@
       "school": "",
       "department": "Business Analytics",
       "checked": "2026-10-26",
-      "status": "no-public-list",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.gbc.edu/department-directory/",
         "https://www.gbc.edu/site-map/",
@@ -1815,7 +1814,7 @@
         "https://campusweb.gbc.edu/ICS/Academics/BA/BA___328/2025_U-BA___328-ONLA_01/",
         "https://campusweb.gbc.edu/ICS/Academics/BA/BA___600/2025_U-BA___600-HYB__02/"
       ],
-      "notes": "Official directory explicitly requires college credentials for full faculty directory access. Official sitemap, programmes and targeted faculty searches yield individual course instructors rather than a public Business Analytics roster. No generic or single-person substitute supplied.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "The directory directs users to log into Campus Web for full faculty directories. Public course pages identify Victoria Neagoe and John Hoehn for individual analytics courses, but do not provide the unit faculty list.",
       "audit": "Rechecked live official directory: full faculty directories explicitly require Campus Web credentials. Public single-course instructor pages do not establish a complete academic roster. Retain no-public-list."
     },
@@ -2090,15 +2089,16 @@
       "school": "College of Administrative Sciences and Economics",
       "department": "Operations Management and Information Systems",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://case.ku.edu.tr/en/about/faculty/",
       "sources": [
+        "https://case.ku.edu.tr/en/about/faculty/",
         "https://ie.ku.edu.tr/",
         "https://case.ku.edu.tr/",
         "https://cdn.ku.edu.tr/cdn/files/pr/web/frontier/frontier-research-news-winter-2024.html"
       ],
-      "evidence": "Separate official engineering and administrative-sciences landing routes did not expose usable roster links in live retrieval. Searches for current official catalogue/PDF faculty lists returned historical newsletters, personal CVs and graduation lists rather than a current department roster.",
-      "notes": "No current complete official alternative established. Historical faculty mentions and third-party lists deliberately excluded; prior access-failure status remains."
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: No current complete official alternative established. Historical faculty mentions and third-party lists deliberately excluded; prior access-failure status remains.",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
     },
     {
       "id": "faculty-0222",
@@ -2106,15 +2106,16 @@
       "school": "College of Engineering",
       "department": "Department of Industrial Engineering",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://eng.ku.edu.tr/en/industrial-engineering/people/faculty/",
       "sources": [
+        "https://eng.ku.edu.tr/en/industrial-engineering/people/faculty/",
         "https://ie.ku.edu.tr/",
         "https://case.ku.edu.tr/",
         "https://cdn.ku.edu.tr/cdn/files/pr/web/frontier/frontier-research-news-winter-2024.html"
       ],
-      "evidence": "Separate official engineering and administrative-sciences landing routes did not expose usable roster links in live retrieval. Searches for current official catalogue/PDF faculty lists returned historical newsletters, personal CVs and graduation lists rather than a current department roster.",
-      "notes": "No current complete official alternative established. Historical faculty mentions and third-party lists deliberately excluded; prior access-failure status remains."
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: No current complete official alternative established. Historical faculty mentions and third-party lists deliberately excluded; prior access-failure status remains.",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
     },
     {
       "id": "faculty-0182",
@@ -2122,15 +2123,14 @@
       "school": "Anheuser-Busch School of Business",
       "department": "Department of Information Science and Computer Technology",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.hssu.edu/rsp_content_directory.html?wid=50&pid=0",
         "https://www.hssu.edu/directory.cfm",
         "https://www.hssu.edu/directory_tbl.html",
         "https://www.hssu.edu/ae/aefiles/53/HSSU_2024_2026_Bulletin_FirstEdition_Revised.pdf"
       ],
-      "notes": "Official school programmes establish Information Science and Computer Technology with Management Information Systems emphasis. Public directory table contains school-level Business faculty with generic titles and records stamped2023, without identifying this unit. Exact department faculty membership has not been established; no unrelated Business roster substituted.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Official school programmes establish Information Science and Computer Technology with Management Information Systems emphasis. Public directory table contains school-level Business faculty with generic titles and records stamped2023, without identifying this unit. Exact department faculty membership has not been established; no unrelated Business roster substituted.",
       "recheckEvidence": "Official school page returns JavaScript placeholder and directory table unavailable through web. Earlier school-only faculty ambiguity remains unresolved."
     },
@@ -2140,15 +2140,15 @@
       "school": "College of Business and Information Systems",
       "department": "Production and Operations Management",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://dsu.edu/directory/college-of-business-and-information-systems.html",
       "sources": [
         "https://dsu.edu/directory/college-of-business-and-information-systems.html",
         "https://dsu.edu/academics/colleges/college-of-business-and-information-systems.html",
         "https://dsu.edu/programs/business-management-as.html"
       ],
-      "notes": "Reviewed official college roster and Business Management programme faculty. Named faculty include Deb Tech, Omar El-Gayar, Andy Behrens and Daniel Talley, but these pages do not identify a Production and Operations Management faculty group. This may be a hiring specialty rather than a distinct department; exact scope remains unresolved.",
-      "evidence": "Reviewed official college roster and Business Management programme faculty. Named faculty include Deb Tech, Omar El-Gayar, Andy Behrens and Daniel Talley, but these pages do not identify a Production and Operations Management faculty group. This may be a hiring specialty rather than a distinct department; exact scope remains unresolved. Second pass sought exact January 2026 Assistant Professor - Business posting and HigherEdJobs 179343964 via university and Board of Regents sources; exact original host/specialization description remains unavailable. Search results also contained wrongly attributed Black Hills State adverts, which were excluded. Existing current college faculty list is genuine but remains too broad absent specific hiring-scope proof."
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: Reviewed official college roster and Business Management programme faculty. Named faculty include Deb Tech, Omar El-Gayar, Andy Behrens and Daniel Talley, but these pages do not identify a Production and Operations Management faculty group. This may be a hiring specialty rather than a distinct department; exact scope remains unresolved."
     },
     {
       "id": "faculty-0628",
@@ -2156,15 +2156,14 @@
       "school": "Porter B. Byrum School of Business",
       "department": "Data Analytics and Business Statistics",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.wingate.edu/academics/graduate/master-of-business-administration/faculty-staff",
         "https://www.wingate.edu/quicklinks/directory",
         "https://www.wingate.edu/academics/graduate/master-of-business-administration/academics"
       ],
       "evidence": "Live MBA faculty page names Katlin Cundiff, Michael Geier, Tiffanie Turner-Henderson and Zhiyan Wang; current MBA curriculum offers a Data Analytics concentration. University directory Business filter yields additional school faculty, but neither source identifies the original Data Analytics vacancy's exact parent membership.",
-      "notes": "MBA-only faculty list is not demonstrated to represent all faculty associated with the advertised Data Analytics post. Business directory filter also appears incomplete for school members classified in other disciplines. Keep unresolved rather than claim a complete exact roster."
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
     },
     {
       "id": "faculty-0198",
@@ -2187,14 +2186,19 @@
       "school": "",
       "department": "Information Systems and Technology",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://miamioh.edu/fsb/directory/?up=/query/all/all/Information_Systems_and_Analytics/Faculty",
       "sources": [
+        "https://miamioh.edu/fsb/directory/?up=/query/all/all/Information_Systems_and_Analytics/Faculty",
         "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179208679",
         "https://miamioh.edu/fsb/academic-departments/information-systems-analytics/"
       ],
-      "evidence": "Original hiring advertisement is expired; an exact job-code search produced no official surviving advertisement linking Information Systems Technology to a specific Miami academic unit.",
-      "notes": "Cannot distinguish Farmer Information Systems and Analytics from regional computing/information-technology units. Do not assign a guessed parent roster."
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: Cannot distinguish Farmer Information Systems and Analytics from regional computing/information-technology units. Do not assign a guessed parent roster.",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "publishAs": {
+        "school": "Farmer School of Business",
+        "department": "Department of Information Systems and Analytics"
+      }
     },
     {
       "id": "faculty-0341",
@@ -2202,13 +2206,12 @@
       "school": "",
       "department": "Artificial Intelligence, Machine Learning, Data Science and Statistics",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.rutgers.edu/contact-us",
         "https://statistics.rutgers.edu/images/Job%20ad%20Rutgers-rev%201205-2025.pdf"
       ],
-      "notes": "Original record lacks an advertisement URL or school. Artificial Intelligence, Machine Learning, Data Science and Statistics is a subject collection rather than an established named department; New Brunswick, Newark and Camden academic hosts cannot be disambiguated. A university-wide roster would not resolve exact unit scope. A December 2025 New Brunswick Statistics announcement covers similar research fields, but the archived November 2025 entry has no requisition identifier or link to establish that it is the same call.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Original record lacks an advertisement URL or school. Artificial Intelligence, Machine Learning, Data Science and Statistics is a subject collection rather than an established named department; New Brunswick, Newark and Camden academic hosts cannot be disambiguated. A university-wide roster would not resolve exact unit scope."
     },
     {
@@ -2233,8 +2236,7 @@
       "school": "Waikato Management School — Shandong University–University of Waikato International Business School",
       "department": "Supply Chain Management",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.en.sdu.edu.cn/info/1157/8769.htm",
         "https://view.sdu.edu.cn/info/2077/209576.htm",
@@ -2242,7 +2244,7 @@
         "https://shxy.wh.sdu.edu.cn/szll1/jsml/axs/dzswywlx.htm",
         "https://www.en.sdu.edu.cn/info/1157/8621.htm"
       ],
-      "notes": "Official January2026 joint-school announcement confirms Supply Chain Management and says Waikato will send faculty to China for over one-third of teaching. Neither the New Zealand management roster nor the separate Shandong electronic-commerce/logistics roster identifies which faculty belong to this joint-school programme; no assignment inferred.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Official January2026 joint-school announcement confirms Supply Chain Management and says Waikato will send faculty to China for over one-third of teaching. Neither the New Zealand management roster nor the separate Shandong electronic-commerce/logistics roster identifies which faculty belong to this joint-school programme; no assignment inferred.",
       "recheckEvidence": "Fresh English and Chinese joint-school searches found official 2025/2026 opening announcements and shared teaching arrangements, but no named joint Supply Chain Management roster. Existing Shandong E-Commerce/Logistics and Waikato New Zealand rosters do not establish assignment to the joint school; other institutions also use Waikato in their names, so those results were excluded."
     },
@@ -2252,15 +2254,14 @@
       "school": "",
       "department": "Mathematics, Technology and Business — Supply Chain and Logistics",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.gmc.edu/wp-content/uploads/2026/02/2025-2026-Catalog-Mid-Year-Update-Feb-2026.pdf",
         "https://www.gmc.edu/wp-content/uploads/2025/04/FACULTY-ROSTER-2024-2025-JDG-3.6.25-1.pdf",
         "https://www.gmc.edu/academic-programs/",
         "https://www.gmc.edu/academic-catalog/"
       ],
-      "notes": "Current February2026 catalog identifies Business and Management division with Dave Hedge dean, Scott Dawes Supply Chain Management and Logistics coordinator, and Matthew Maestas Logistics Management and Operations coordinator. Available public faculty roster groups teachers more broadly and does not identify Supply Chain/Logistics faculty membership. Catalog coordinator list is not a full teaching roster.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Current February2026 catalog identifies Business and Management division with Dave Hedge dean, Scott Dawes Supply Chain Management and Logistics coordinator, and Matthew Maestas Logistics Management and Operations coordinator. Available public faculty roster groups teachers more broadly and does not identify Supply Chain/Logistics faculty membership. Catalog coordinator list is not a full teaching roster.",
       "correctedDepartment": "Business and Management — Supply Chain Management and Logistics",
       "recheckEvidence": "Fresh official Academic Affairs and Academic Catalog navigation yields administrators and historical catalog links, not a current teaching roster. Search did not recover a newer faculty roster. The public 2024-2025 PDF has Business Management labels and Scott Dawes, but its age and generic labels do not establish current full Supply Chain/Logistics teaching membership. Retained unresolved rather than presenting a historical roster as current."
@@ -2271,8 +2272,7 @@
       "school": "Falk College of Environment, Leadership & Management",
       "department": "Department of Business Systems",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.chatham.edu/academics/colleges/falk-college-of-environment-leadership-and-management/accreditation-and-student-outcomes.html",
         "https://www.chatham.edu/academics/faculty/listing.html",
@@ -2281,7 +2281,7 @@
         "https://www.chatham.edu/academics/graduate/mba/faculty/",
         "https://www.chatham.edu/academics/undergraduate/business-majors/faculty/"
       ],
-      "notes": "Official accreditation page establishes Business Systems includes Accounting, Economics, International Business, Management, Marketing and Data Science Analytics. Current programme rosters name Jungook Kim, Keratiloe Mogotsi and John Stakeley for Management, and Abhishek Viswanathan for Data Science, but no single complete Business Systems roster found. Old Business Majors faculty route now redirects to overview; a subset has not been presented as complete.",
+      "notes": "Site owner requested removal on 2026-10-26. Entire institution excluded from the active directory and map.",
       "evidence": "Official accreditation page establishes Business Systems includes Accounting, Economics, International Business, Management, Marketing and Data Science Analytics. Current programme rosters name Jungook Kim, Keratiloe Mogotsi and John Stakeley for Management, and Abhishek Viswanathan for Data Science, but no single complete Business Systems roster found. Old Business Majors faculty route now redirects to overview; a subset has not been presented as complete.",
       "recheckEvidence": "Followed current global faculty listing to Business Majors faculty route; live page has no named roster. Global All Faculty is an unlabelled alphabetic university list, while Management, Data Science and graduate Business Administration pages each cover subsets. No complete labelled Business Systems roster verified."
     },

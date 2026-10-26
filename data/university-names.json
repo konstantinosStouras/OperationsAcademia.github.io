@@ -76,7 +76,6 @@
   "Central Washington University",
   "Chalmers University of Technology",
   "Chapman University",
-  "Chatham University",
   "China Europe International Business School",
   "Chinese University of Hong Kong",
   "Chinese University of Hong Kong, Shenzhen",
@@ -133,7 +132,6 @@
   "Fayetteville State University",
   "Ferris State University",
   "Fisher College",
-  "FLAME University",
   "Florida Gulf Coast University",
   "Florida International University",
   "Florida Polytechnic University",
@@ -148,17 +146,13 @@
   "Georgia College and State University",
   "Georgia Gwinnett College",
   "Georgia Institute of Technology",
-  "Georgia Military College",
   "Georgia Southern University",
   "Georgia Southwestern State University",
   "Georgia State University",
   "Ghent University",
-  "Goldey-Beacom College",
   "Grand Valley State University",
-  "Hainan Bielefeld University of Applied Sciences",
   "Hamad Bin Khalifa University",
   "Hanken School of Economics",
-  "Harris-Stowe State University",
   "Harvard University",
   "Hebrew University of Jerusalem",
   "HEC Montréal",
@@ -200,16 +194,13 @@
   "KU Leuven",
   "Kühne Logistics University",
   "La Salle University",
-  "Lake Erie College",
   "Lancaster University",
   "Le Moyne College",
   "Lees-McRae College",
   "Lehigh University",
-  "Lenoir-Rhyne University",
   "Lincoln Memorial University",
   "Lingnan University",
   "London Business School",
-  "Lone Star College System",
   "Longwood University",
   "Louisiana Tech University",
   "Loyola University Chicago",
@@ -271,7 +262,6 @@
   "Oregon State University",
   "Özyeğin University",
   "Palm Beach Atlantic University",
-  "Park University",
   "Peking University",
   "Penn State Behrend",
   "Pennsylvania State University",
@@ -285,7 +275,6 @@
   "Qatar University",
   "Queen's University",
   "Queens University of Charlotte",
-  "Quincy University",
   "Rensselaer Polytechnic Institute (RPI)",
   "Rice University",
   "Rochester Institute of Technology",
@@ -344,7 +333,6 @@
   "Sungkyunkwan University",
   "SUNY Korea",
   "Syracuse University",
-  "Taejae University",
   "TBS Education",
   "Technical University of Munich",
   "Technion – Israel Institute of Technology",
@@ -508,7 +496,6 @@
   "University of Vienna",
   "University of Virgin Islands",
   "University of Virginia",
-  "University of Waikato",
   "University of Warwick",
   "University of Washington",
   "University of Washington Bothell",
@@ -553,7 +540,6 @@
   "Wichita State University",
   "Wilfrid Laurier University",
   "Wilson College",
-  "Wingate University",
   "Winona State University",
   "Worcester Polytechnic Institute",
   "Worcester State University",
@@ -606,10 +592,6 @@
   [
    "Anderson School of Management",
    "University of California, Los Angeles (UCLA)"
-  ],
-  [
-   "Anheuser-Busch School of Business",
-   "Harris-Stowe State University"
   ],
   [
    "Antai College of Economics and Management",
@@ -844,6 +826,10 @@
    "Ghent University"
   ],
   [
+   "Farmer School of Business",
+   "Miami University"
+  ],
+  [
    "Feliciano School of Business",
    "Montclair State University"
   ],
@@ -966,10 +952,6 @@
   [
    "Institute for Advanced Materials for Sustainable Manufacturing",
    "Tecnológico de Monterrey"
-  ],
-  [
-   "Institute of Artificial Intelligence and Brain Sciences",
-   "University of Macau"
   ],
   [
    "International Business School Suzhou",
@@ -1244,10 +1226,6 @@
    "National University of Singapore"
   ],
   [
-   "Oakley School of Business",
-   "Quincy University"
-  ],
-  [
    "Olin Business School",
    "Washington University in St. Louis"
   ],
@@ -1318,10 +1296,6 @@
   [
    "Robert Pamplin Jr. School of Business Administration (PSOBA)",
    "University of Portland"
-  ],
-  [
-   "Robert W. Plaster School of Business",
-   "Park University"
   ],
   [
    "Robins School of Business",

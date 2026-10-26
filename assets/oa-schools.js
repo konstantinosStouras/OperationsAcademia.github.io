@@ -293,6 +293,9 @@
      Keyed by the CANONICAL names, since that is what `assemble` has by the
      time it asks. */
   var UNIT_HOME = {
+    'Miami University': { 'Department of Information Systems and Analytics': 'Farmer School of Business' },
+    'Idaho State University': { 'Management': 'College of Business' },
+    'Washington University in St. Louis': { 'Supply Chain, Operations and Technology': 'Olin Business School' },
     'University of Illinois at Urbana-Champaign': {
       'Industrial and Enterprise Systems Engineering': 'The Grainger College of Engineering',
       'Business Administration': 'Gies College of Business',
@@ -516,6 +519,23 @@
      else the generic rule still applies, so a poster typing "Operations
      Management Department" at some other school still lands on the bare name. */
   var SCOPED_UNIT_ALIASES = {
+    // Owner's faculty-directory decisions, 2026-10-26. These also normalize new postings.
+    'Miami University': {
+      'Information Systems and Technology': 'Department of Information Systems and Analytics',
+      'Information Systems and Analytics': 'Department of Information Systems and Analytics'
+    },
+    'Idaho State University': {
+      'Marketing and Management': 'Management',
+      'Marketing and Management, Supply Chain and Operations Management': 'Management'
+    },
+    'Washington University in St. Louis': {
+      'Boeing Center for Supply Chain Innovation': 'Supply Chain, Operations and Technology',
+      'Operations and Manufacturing Management': 'Supply Chain, Operations and Technology',
+      'Supply Chain, Operations, and Technology': 'Supply Chain, Operations and Technology',
+      'SCM/OM': 'Supply Chain, Operations and Technology'
+    },
+    'Microsoft': { 'Applied Science': 'Applied Sciences' },
+    'Iowa State University': { 'IS/BA': 'Information Systems and Business Analytics' },
     // Official academic home: https://www.afit.edu/ens/faculty.cfm
     'Air Force Institute of Technology': {
       'Air Force Headquarters': 'Department of Operational Sciences',
@@ -1684,6 +1704,186 @@
     return out;
   }
 
+  // Owner-selected directory exclusions, 2026-10-26. Historical adverts and audit evidence remain.
+  var OWNER_DIRECTORY_EXCLUSIONS = [
+    {
+      "reviewId": "faculty-0093",
+      "institutions": [
+        "Chatham University"
+      ]
+    },
+    {
+      "reviewId": "faculty-0143",
+      "institutions": [
+        "École des Hautes Études Commerciales de Paris (HEC Paris)",
+        "HEC Paris"
+      ],
+      "departments": [
+        "Artificial Intelligence",
+        "AI"
+      ]
+    },
+    {
+      "reviewId": "faculty-0157",
+      "institutions": [
+        "FLAME University"
+      ],
+      "departments": [
+        "Department of Operations & Analytics",
+        "BA",
+        "OM"
+      ]
+    },
+    {
+      "reviewId": "faculty-0170",
+      "institutions": [
+        "Georgia Military College"
+      ],
+      "departments": [
+        "Mathematics, Technology and Business — Supply Chain and Logistics",
+        "Supply Chain and Logistics Systems"
+      ]
+    },
+    {
+      "reviewId": "faculty-0177",
+      "institutions": [
+        "Goldey-Beacom College"
+      ],
+      "departments": [
+        "Business Analytics",
+        "BA"
+      ]
+    },
+    {
+      "reviewId": "faculty-0179",
+      "institutions": [
+        "Hainan Bielefeld University of Applied Sciences",
+        "hainan-bielefeld-university-of-applied-sciences"
+      ],
+      "departments": [
+        "Production and Operations Management"
+      ]
+    },
+    {
+      "reviewId": "faculty-0182",
+      "institutions": [
+        "Harris-Stowe State University",
+        "harris-stowe-state-university"
+      ],
+      "departments": [
+        "Department of Information Science and Computer Technology",
+        "Management Information Systems"
+      ]
+    },
+    {
+      "reviewId": "faculty-0193",
+      "institutions": [
+        "Howard University"
+      ],
+      "departments": [
+        "Open disciplinary focus",
+        "open disciplinary focus"
+      ]
+    },
+    {
+      "reviewId": "faculty-0227",
+      "institutions": [
+        "Lake Erie College"
+      ]
+    },
+    {
+      "reviewId": "faculty-0233",
+      "institutions": [
+        "Lenoir-Rhyne University"
+      ]
+    },
+    {
+      "reviewId": "faculty-0235",
+      "institutions": [
+        "Lone Star College System"
+      ]
+    },
+    {
+      "reviewId": "faculty-0302",
+      "institutions": [
+        "Park University",
+        "park-university"
+      ],
+      "departments": [
+        "Robert W. Plaster Division of Business Administration and Management",
+        "SCM, Analytics",
+        "Stat, Analytics and SCM",
+        "Information Systems and Business Analytics"
+      ]
+    },
+    {
+      "reviewId": "faculty-0333",
+      "institutions": [
+        "Quincy University",
+        "quincy-university"
+      ],
+      "departments": [
+        "Business Analytics"
+      ]
+    },
+    {
+      "reviewId": "faculty-0341",
+      "institutions": [
+        "Rutgers, The State University of New Jersey",
+        "Rutgers University"
+      ],
+      "departments": [
+        "Artificial Intelligence, Machine Learning, Data Science and Statistics",
+        "AI/ML/DS/Stats"
+      ]
+    },
+    {
+      "reviewId": "faculty-0392",
+      "institutions": [
+        "Taejae University"
+      ],
+      "departments": [
+        "Business Innovation Program",
+        "Business Innovation"
+      ]
+    },
+    {
+      "reviewId": "faculty-0511",
+      "schools": ["Institute of Artificial Intelligence and Brain Sciences"],
+      "institutions": [
+        "University of Macau",
+        "university-of-macau"
+      ],
+      "departments": [
+        "Data Science"
+      ]
+    },
+    {
+      "reviewId": "faculty-0586",
+      "schools": ["Waikato Management School — Shandong University–University of Waikato International Business School", "Business School"],
+      "institutions": [
+        "University of Waikato",
+        "university-of-waikato"
+      ],
+      "departments": [
+        "Supply Chain Management"
+      ]
+    },
+    {
+      "reviewId": "faculty-0628",
+      "institutions": [
+        "Wingate University"
+      ],
+      "departments": [
+        "Data Analytics and Business Statistics",
+        "DA/BA./Business Stat"
+      ]
+    }
+  ];
+  var OWNER_DIRECTORY_EXCLUSION_KEYS = OWNER_DIRECTORY_EXCLUSIONS.map(function(rule) {
+    return { institutions: rule.institutions.map(institutionKey), schools: rule.schools && rule.schools.map(function(school) { return fold(canonSchool(school, rule.institutions[0])); }), departments: rule.departments && rule.departments.map(function(unit) { return fold(canonUnit(unit, rule.institutions[0])); }) };
+  });
+
   return {
     INSTITUTION_ALIASES: INSTITUTION_ALIASES,
     SCHOOL_LIST: SCHOOL_LIST,
@@ -1695,6 +1895,10 @@
     // Owner's directory scope correction, 2026-10-23. Historical jobs remain
     // intact; future rebuilds and live directory overlays share this exclusion.
     directoryExcluded: function(place) {
+      var key = institutionKey(place.institution || place.name), unit = fold(canonUnit(place.department || place.unit, place.institution || place.name)), school = fold(canonSchool(place.school, place.institution || place.name));
+      if (OWNER_DIRECTORY_EXCLUSION_KEYS.some(function(rule) {
+        return rule.institutions.indexOf(key) !== -1 && (!rule.schools || rule.schools.indexOf(school) !== -1) && (!rule.departments || rule.departments.indexOf(unit) !== -1);
+      })) return true;
       if (institutionKey(place.institution) === institutionKey('University of Michigan') &&
           fold(place.school) === fold('Stephen M. Ross School of Business') &&
           fold(place.department || place.unit) === fold('Interdisciplinary Position (Management and Organizations, Strategy and Technology and Operations)')) return true;

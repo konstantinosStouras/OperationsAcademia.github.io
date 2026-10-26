@@ -39,6 +39,7 @@ import { attachMapLocations, attachDepartmentLinks } from './map-directory.mjs';
 
 const require = createRequire(import.meta.url);
 const AFFILIATION = require('../assets/oa-affiliation.js');
+const SCHOOLS = require('../assets/oa-schools.js');
 const MEMBERS = 'data/member-universities.json';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
@@ -81,6 +82,7 @@ async function main() {
 
   const { rows } = buildDirectory({ archive, seed: seed.concat(references), jobs, past, omlist, members });
   const locations = await readJson('data/school-map-locations.json');
+  locations.records = locations.records.filter(record => !SCHOOLS.directoryExcluded(record));
   const cardGroups = await readJson('data/map-card-groups.json');
   attachMapLocations(rows, locations.records, cardGroups.schoolAliases);
   const departmentLinks = await readJson('data/map-department-links.json');

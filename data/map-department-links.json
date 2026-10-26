@@ -859,13 +859,16 @@
       "institution": "Miami University",
       "school": "Farmer School of Business",
       "department": "Department of Information Systems and Analytics",
-      "facultyUrl": "https://miamioh.edu/fsb/directory/?up=%2Fquery%2Fall%2Fall%2FInformation+Systems+--+Analytics%2Fall",
+      "facultyUrl": "https://miamioh.edu/fsb/directory/?up=/query/all/all/Information_Systems_and_Analytics/Faculty",
       "sources": [
-        "https://miamioh.edu/fsb/directory/?up=%2Fquery%2Fall%2Fall%2FInformation+Systems+--+Analytics%2Fall"
+        "https://miamioh.edu/fsb/directory/?up=/query/all/all/Information_Systems_and_Analytics/Faculty",
+        "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179208679",
+        "https://miamioh.edu/fsb/academic-departments/information-systems-analytics/"
       ],
-      "checked": "2026-10-25",
-      "notes": "Directory also returns some shared teaching faculty whose department labels remain visible. Working department-filtered directory names Chad Anderson, John Benamati, Arthur Carvalho and Allison Jones-Farmer, with Information Systems and Analytics affiliation.",
-      "reviewId": "faculty-0248"
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: Cannot distinguish Farmer Information Systems and Analytics from regional computing/information-technology units. Do not assign a guessed parent roster.",
+      "reviewId": "faculty-0246",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
     },
     {
       "institution": "Missouri Southern State University",
@@ -6602,13 +6605,14 @@
       "institution": "Washington University in St. Louis",
       "school": "Olin Business School",
       "department": "Supply Chain, Operations, and Technology",
-      "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10",
+      "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology",
       "sources": [
         "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10"
       ],
       "checked": "2026-10-26",
       "notes": "Exact academic-area filter tested. The browser-rendered Supply Chain, Operations and Technology filter shows 15 results including Deniz Akturk, Sergio Chayet, Lingxiu Dong and Jacob Feldman.",
-      "reviewId": "faculty-0616"
+      "reviewId": "faculty-0616",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
     },
     {
       "institution": "Wayne State University",
@@ -7138,8 +7142,7 @@
       ],
       "checked": "2026-10-26",
       "notes": "Verified parent-college roster for an advertised teaching specialization. The link applies the official College of Business filter; it includes college staff and other business fields and is not presented as an exact Business Analytics faculty-only list. Current employer posting 195666 explicitly recruits the College of Business for an Assistant Professor of Business Analytics teaching business statistics and other analytics courses, without specifying a separate department. Browser-tested College of Business directory returns 30 faculty/staff entries, including Ata Karbasi (Information and Decision Sciences), Matthew Luth and Kirsten Bullock.",
-      "reviewId": "faculty-0603",
-      "directoryFilter": "College of Business directory; includes faculty and staff across business subjects."
+      "reviewId": "faculty-0603"
     },
     {
       "institution": "Shanghai University of Finance and Economics",
@@ -7258,8 +7261,7 @@
       ],
       "checked": "2026-10-26",
       "notes": "Complete participating-college faculty/staff directory for a cross-college AI hiring call. This is not a roster of an existing AI cluster and does not imply a final appointment department. The official college contact directory contains faculty across its academic departments, including Chandrani Chatterjee (Accounting), Owen Parker (Management), Sanjiv Sabherwal (Finance) and Information Systems/Operations Management faculty. The recorded original requisition F00726P names Business among three eligible tenure-home colleges.",
-      "reviewId": "faculty-0434",
-      "directoryFilter": "Participating college faculty directory; the hiring call does not assign a final department."
+      "reviewId": "faculty-0434"
     },
     {
       "institution": "St John Fisher University",
@@ -7486,6 +7488,208 @@
       "notes": "Verified host-school roster for the advertised teaching specialization, not an MIS-only group. The exact university recruitment URL now says posting unavailable, but the university employer-posted LinkedIn copy retains requisition number, description, and original application URL. The separate Computer Information Systems department is unrelated and not substituted. Current live official school directory shows 18 Business Faculty entries and 10 Associate Faculty, including Micah Pollak, Yllka Azemi Binaku and Rajan Selladurai. The university employer-posted requisition IU-101471-2026 explicitly names IU Northwest School of Business & Economics as the Department and describes teaching in Management Information Systems and related business courses; it does not name a separate MIS department.",
       "directoryFilter": "School faculty directory; Management Information Systems is the advertised teaching specialization.",
       "reviewId": "faculty-0205"
+    },
+    {
+      "institution": "Koç University",
+      "school": "College of Administrative Sciences and Economics",
+      "department": "Operations Management and Information Systems",
+      "facultyUrl": "https://case.ku.edu.tr/en/about/faculty/",
+      "sources": [
+        "https://case.ku.edu.tr/en/about/faculty/",
+        "https://ie.ku.edu.tr/",
+        "https://case.ku.edu.tr/",
+        "https://cdn.ku.edu.tr/cdn/files/pr/web/frontier/frontier-research-news-winter-2024.html"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: No current complete official alternative established. Historical faculty mentions and third-party lists deliberately excluded; prior access-failure status remains.",
+      "reviewId": "faculty-0221",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "Koç University",
+      "school": "College of Engineering",
+      "department": "Department of Industrial Engineering",
+      "facultyUrl": "https://eng.ku.edu.tr/en/industrial-engineering/people/faculty/",
+      "sources": [
+        "https://eng.ku.edu.tr/en/industrial-engineering/people/faculty/",
+        "https://ie.ku.edu.tr/",
+        "https://case.ku.edu.tr/",
+        "https://cdn.ku.edu.tr/cdn/files/pr/web/frontier/frontier-research-news-winter-2024.html"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: No current complete official alternative established. Historical faculty mentions and third-party lists deliberately excluded; prior access-failure status remains.",
+      "reviewId": "faculty-0222",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "Dakota State University",
+      "school": "College of Business and Information Systems",
+      "department": "Production and Operations Management",
+      "facultyUrl": "https://dsu.edu/directory/college-of-business-and-information-systems.html",
+      "sources": [
+        "https://dsu.edu/directory/college-of-business-and-information-systems.html",
+        "https://dsu.edu/academics/colleges/college-of-business-and-information-systems.html",
+        "https://dsu.edu/programs/business-management-as.html"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: Reviewed official college roster and Business Management programme faculty. Named faculty include Deb Tech, Omar El-Gayar, Andy Behrens and Daniel Talley, but these pages do not identify a Production and Operations Management faculty group. This may be a hiring specialty rather than a distinct department; exact scope remains unresolved.",
+      "reviewId": "faculty-0128",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "Kühne Logistics University",
+      "school": "",
+      "department": "Department of Operations and Technology — Operations Management and Business Analytics",
+      "facultyUrl": "https://www.klu.org/faculty-research/faculty/resident-faculty",
+      "sources": [
+        "https://www.klu.org/faculty-research/faculty/resident-faculty",
+        "https://www.klu.org/about-klu/contacts-directory"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: Actual named department exists; institution-wide resident faculty list is not substituted. No public department-specific list found.",
+      "reviewId": "faculty-0225",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "Idaho State University",
+      "school": "College of Business",
+      "department": "Management",
+      "facultyUrl": "https://www.isu.edu/management/our-faculty/",
+      "sources": [
+        "https://www.isu.edu/management/our-faculty/",
+        "https://www.isu.edu/marketing/our-faculty/",
+        "https://www.isu.edu/cob/faculty--staff/faculty/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: Combined Marketing and Management department publishes two separate rosters. Parent faculty page only links programs; no single roster containing both located. Do not publish only one subset for combined department.",
+      "reviewId": "faculty-0196",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "Information Systems and Business Analytics",
+      "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=ISBA",
+      "sources": [
+        "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=ISBA",
+        "https://www.ivybusiness.iastate.edu/custom-education/directory/",
+        "https://catalog.iastate.edu/collegeofbusiness/supplychainmanagement/index.html",
+        "https://www.livegreen.iastate.edu/researchfaculty",
+        "https://www.provost.iastate.edu/faculty-success/recruitment/named-positions"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: No working complete current official alternative found; did not use third-party directory or partial thematic lists.",
+      "reviewId": "faculty-0208",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "Supply Chain Management",
+      "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM",
+      "sources": [
+        "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM",
+        "https://www.ivybusiness.iastate.edu/custom-education/directory/",
+        "https://catalog.iastate.edu/collegeofbusiness/supplychainmanagement/index.html",
+        "https://www.livegreen.iastate.edu/researchfaculty",
+        "https://www.provost.iastate.edu/faculty-success/recruitment/named-positions"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: No working complete current official alternative found; did not use third-party directory or partial thematic lists.",
+      "reviewId": "faculty-0209",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "KIMEP University",
+      "school": "Bang College of Business",
+      "department": "Operations Management and Business Analytics",
+      "facultyUrl": "https://www.kimep.kz/bang-college-of-business/en/",
+      "sources": [
+        "https://www.kimep.kz/bang-college-of-business/en/",
+        "https://hr.kimep.kz/kk-KZ/Home/Vacancy/791",
+        "https://www.kimep.kz/bang-college-of-business/kz/",
+        "https://el2019.kimep.kz/course/index.php?categoryid=12&lang=ru"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: Parent college roster for advertised Operations Management/Business Analytics specialization, not a separately constituted department. Official English URL redirects to Kazakh; faculty names remain English. Open Faculty Profiles section. All 42 faculty entries were inspected in current official page; individual biographies may redirect by language. Scope caveat: official public course directory identifies Department of Operations Management and Information Systems; current college roster has no tested exact department selector. Retain needs-review rather than assert whole-college roster is exact.",
+      "reviewId": "faculty-0220",
+      "directoryFilter": "Open Faculty Profiles on the college page.",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "Microsoft",
+      "school": "",
+      "department": "Applied Sciences",
+      "facultyUrl": "https://www.microsoft.com/applied-sciences/people",
+      "sources": [
+        "https://www.microsoft.com/applied-sciences/people",
+        "https://www.microsoft.com/en-us/research/group/odsp-applied-science/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: Do not attach a specific team roster without establishing the original hiring unit; corporate headquarters mapping does not establish that affiliation.",
+      "reviewId": "faculty-0250",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "University of Colorado Boulder",
+      "school": "Leeds School of Business",
+      "department": "Business Analytics and Machine Learning",
+      "facultyUrl": "https://www.colorado.edu/business/ms-programs/masters-program-business-analytics/ms-business-analytics-faculty",
+      "sources": [
+        "https://www.colorado.edu/business/ms-programs/masters-program-business-analytics/ms-business-analytics-faculty",
+        "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner confirmation resolves the previous access or academic-scope question. Previous audit: Hiring-field to host-department correspondence remains unclear. Do not substitute the degree-program teaching team without evidence that it is the source unit.",
+      "reviewId": "faculty-0483",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "Washington University in St. Louis",
+      "school": "Olin Business School",
+      "department": "Supply Chain, Operations and Technology",
+      "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology",
+      "sources": [
+        "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology",
+        "https://olin.washu.edu/faculty-and-research/research-centers/boeing-center/index.php",
+        "https://olin.washu.edu/faculty-and-research/research-centers/boeing-center/membership.php",
+        "https://olin.washu.edu/faculty-and-research/research-centers/boeing-center/projects.php"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner requested the Operations academic area instead of the Boeing research center. Official filtered directory verified in browser: correct academic area selected, 15 members including Deniz Akturk, Sergio Chayet, Lingxiu Dong and Panos Kouvelis.",
+      "reviewId": "faculty-0615",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "New York University Abu Dhabi",
+      "school": "Stern School of Business at New York University Abu Dhabi",
+      "department": "Technology, Operations and Statistics",
+      "facultyUrl": "https://stern.nyuad.nyu.edu/programs-admissions/faculty/",
+      "sources": [
+        "https://stern.nyuad.nyu.edu/programs-admissions/faculty/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Official sample faculty list accepted by the owner; not claimed to be a complete departmental roster. Owner confirmation resolves the previous access or academic-scope question. Previous audit: Withhold sample roster. Official footer explicitly calls this a sample faculty list subject to intake changes. It accurately labels local Technology, Operations and Statistics teachers, but does not establish a complete departmental roster.",
+      "reviewId": "faculty-0274",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "Birla Institute of Technology and Science, Pilani",
+      "school": "BITS School of Management",
+      "department": "Operations Management",
+      "facultyUrl": "https://www.bitsom.edu.in/faculty-directory/",
+      "sources": [
+        "https://www.bitsom.edu.in/faculty-directory/",
+        "https://bitsom.edu.in/faculty-directory/",
+        "https://www.bits-pilani.ac.in/about/leadership/",
+        "https://execed.bitsom.edu.in/our-program/bitsom/pgp",
+        "https://execed.bitsom.edu.in/our-program/bitsom/ai-ds"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Owner supplied a screenshot filtered to Operations, showing Saravanan Kesavan, Santiago Kraiselburd and Vinayak Deshpande, and selected the general faculty directory.",
+      "reviewId": "faculty-0050",
+      "directoryFilter": "Select Operations in By Academic Area.",
+      "approval": "Site owner selected this URL and scope on 2026-10-26"
     }
   ]
 }

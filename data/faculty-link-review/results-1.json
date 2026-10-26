@@ -1956,9 +1956,10 @@
         "https://aasu.edu.kw/JobPositions/Apply/9",
         "https://aasu.edu.kw/media/hdilrkud/schedule-of-fall_2025_2026.pdf"
       ],
-      "notes": "No matching public faculty list found after multiple official-source searches; not an assertion that the program lacks faculty.",
+      "notes": "Site owner acknowledged on 2026-10-26 that no suitable public faculty list was found. Keep the school on the map without a faculty link.",
       "evidence": "Official college and recruitment pages establish Supply Chain and Logistics Management as a degree program, but neither lists its faculty. University navigation, English and Arabic department/faculty searches, and course schedule inspection did not locate a public roster.",
-      "audit": "Rechecked official college page, current recruitment description and targeted English/Arabic searches. Supply Chain and Logistics Management is a degree programme; no named college or programme faculty roster discovered. Retain no-public-list."
+      "audit": "Rechecked official college page, current recruitment description and targeted English/Arabic searches. Supply Chain and Logistics Management is a degree programme; no named college or programme faculty roster discovered. Retain no-public-list.",
+      "ownerAcknowledged": "2026-10-26"
     },
     {
       "id": "faculty-0157",
@@ -1966,13 +1967,12 @@
       "school": "FLAME School of Business",
       "department": "Department of Operations & Analytics",
       "checked": "2026-10-26",
-      "status": "no-public-list",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.flame.edu.in/academics/schools-departments/operations-and-analytics",
         "https://www.flame.edu.in/faculty"
       ],
-      "notes": "A university-wide faculty list would mix unrelated schools and departments; no exact department roster found.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Official Operations and Analytics department page has no roster. University-wide faculty page includes Bhavya Pande, Faizul Haque and other relevant individual profiles but offers no exact department filter or grouped roster in inspected page/search results.",
       "audit": "Browser inspection confirms entire-university list without academic-unit selector. Listings show doctoral subjects, which cannot safely be treated as current departmental appointments. Department page has no roster; current employer advert explicitly names an actual Operations and Analytics department. Retain no-public-list."
     },
@@ -1982,14 +1982,14 @@
       "school": "",
       "department": "Department of Operations and Technology — Operations Management and Business Analytics",
       "checked": "2026-10-26",
-      "status": "no-public-list",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://www.klu.org/faculty-research/faculty/resident-faculty",
       "sources": [
         "https://www.klu.org/faculty-research/faculty/resident-faculty",
         "https://www.klu.org/about-klu/contacts-directory"
       ],
-      "notes": "Actual named department exists; institution-wide resident faculty list is not substituted. No public department-specific list found.",
-      "evidence": "Official directory identifies Henrik Leopold as Head of Operations and Technology, but both Resident Faculty and Contacts pages list faculty across the institution without a department filter. Department-specific searches returned individual profiles rather than a matching roster.",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: Actual named department exists; institution-wide resident faculty list is not substituted. No public department-specific list found.",
       "audit": "Rechecked resident faculty roster, contacts, exact departmental searches and current head profile. Institution-wide list labels Henrik Leopold as department head but does not group all other members by department; research/teaching specialization titles are insufficient to recover a complete department roster. Retain no-public-list."
     },
     {
@@ -2019,20 +2019,23 @@
       "school": "College of Business",
       "department": "Marketing and Management",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://www.isu.edu/management/our-faculty/",
       "additionalFacultyUrls": [
         "https://www.isu.edu/marketing/our-faculty/",
         "https://www.isu.edu/management/our-faculty/"
       ],
       "sources": [
-        "https://www.isu.edu/marketing/our-faculty/",
         "https://www.isu.edu/management/our-faculty/",
+        "https://www.isu.edu/marketing/our-faculty/",
         "https://www.isu.edu/cob/faculty--staff/faculty/"
       ],
-      "notes": "Combined Marketing and Management department publishes two separate rosters. Parent faculty page only links programs; no single roster containing both located. Do not publish only one subset for combined department.",
-      "evidence": "Marketing roster names Andreea Bujac and Nicole Hanson; Management roster names Alex Bolinger and Tyler Burch. Both identify Neil Tocher as shared department chair.",
-      "recheckEvidence": "Reopened both complete Management and Marketing rosters and common parent Faculty page. Parent remains links-only; two verified constituent lists retained, neither alone represents combined department."
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: Combined Marketing and Management department publishes two separate rosters. Parent faculty page only links programs; no single roster containing both located. Do not publish only one subset for combined department.",
+      "recheckEvidence": "Reopened both complete Management and Marketing rosters and common parent Faculty page. Parent remains links-only; two verified constituent lists retained, neither alone represents combined department.",
+      "publishAs": {
+        "department": "Management"
+      }
     },
     {
       "id": "faculty-0017",
@@ -2141,17 +2144,16 @@
     },
     {
       "id": "faculty-0235",
-      "status": "needs-review",
+      "status": "removed",
       "institution": "Lone Star College System",
       "school": "",
       "department": "Business",
-      "facultyUrl": "",
       "sources": [
         "https://www.lonestar.edu/business-administration.htm",
         "https://www.lonestar.edu/"
       ],
       "checked": "2026-10-26",
-      "notes": "Campus assignment needs resolution before choosing faculty list; no generic university homepage published as faculty URL.",
+      "notes": "Site owner requested removal on 2026-10-26. Entire institution excluded from the active directory and map.",
       "evidence": "System-level Business listing has no campus or academic unit discriminator. Lone Star operates multiple campuses; a single campus business faculty roster would not establish the intended faculty group."
     },
     {

@@ -1,0 +1,351 @@
+{
+  "date": "2026-10-26",
+  "decisions": [
+    {
+      "number": 1,
+      "reviewId": "faculty-0006",
+      "institution": "Abdullah Al Salem University",
+      "school": "College of Business and Entrepreneurship",
+      "department": "Supply Chain and Logistics Management",
+      "action": "no-public-list",
+      "facultyUrl": "",
+      "notes": "Site owner acknowledged on 2026-10-26 that no suitable public faculty list was found. Keep the school on the map without a faculty link."
+    },
+    {
+      "number": 2,
+      "reviewId": "faculty-0050",
+      "institution": "Birla Institute of Technology and Science, Pilani",
+      "school": "BITS School of Management",
+      "department": "Operations Management",
+      "action": "owner-approved",
+      "facultyUrl": "https://www.bitsom.edu.in/faculty-directory/",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 3,
+      "reviewId": "faculty-0093",
+      "institution": "Chatham University",
+      "school": "Falk College of Environment, Leadership & Management",
+      "department": "Department of Business Systems",
+      "action": "removed",
+      "scope": "institution",
+      "notes": "Site owner requested removal on 2026-10-26. Entire institution excluded from the active directory and map."
+    },
+    {
+      "number": 4,
+      "reviewId": "faculty-0128",
+      "institution": "Dakota State University",
+      "school": "College of Business and Information Systems",
+      "department": "Production and Operations Management",
+      "action": "owner-approved",
+      "facultyUrl": "https://dsu.edu/directory/college-of-business-and-information-systems.html",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 5,
+      "reviewId": "faculty-0143",
+      "institution": "École des Hautes Études Commerciales de Paris (HEC Paris)",
+      "school": "",
+      "department": "Artificial Intelligence",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 6,
+      "reviewId": "faculty-0157",
+      "institution": "FLAME University",
+      "school": "FLAME School of Business",
+      "department": "Department of Operations & Analytics",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 7,
+      "reviewId": "faculty-0170",
+      "institution": "Georgia Military College",
+      "school": "",
+      "department": "Mathematics, Technology and Business — Supply Chain and Logistics",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 8,
+      "reviewId": "faculty-0177",
+      "institution": "Goldey-Beacom College",
+      "school": "",
+      "department": "Business Analytics",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 9,
+      "reviewId": "faculty-0179",
+      "institution": "Hainan Bielefeld University of Applied Sciences",
+      "school": "",
+      "department": "Production and Operations Management",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 10,
+      "reviewId": "faculty-0182",
+      "institution": "Harris-Stowe State University",
+      "school": "Anheuser-Busch School of Business",
+      "department": "Department of Information Science and Computer Technology",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 11,
+      "reviewId": "faculty-0193",
+      "institution": "Howard University",
+      "school": "",
+      "department": "Open disciplinary focus",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 12,
+      "reviewId": "faculty-0196",
+      "institution": "Idaho State University",
+      "school": "College of Business",
+      "department": "Marketing and Management",
+      "action": "owner-approved",
+      "facultyUrl": "https://www.isu.edu/management/our-faculty/",
+      "publishAs": {
+        "department": "Management"
+      },
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 13,
+      "reviewId": "faculty-0208",
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "IS/BA",
+      "action": "owner-approved",
+      "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=ISBA",
+      "publishAs": {
+        "department": "Information Systems and Business Analytics"
+      },
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 14,
+      "reviewId": "faculty-0209",
+      "institution": "Iowa State University",
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "Supply Chain Management",
+      "action": "owner-approved",
+      "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 15,
+      "reviewId": "faculty-0220",
+      "institution": "KIMEP University",
+      "school": "Bang College of Business",
+      "department": "Operations Management and Business Analytics",
+      "action": "owner-approved",
+      "facultyUrl": "https://www.kimep.kz/bang-college-of-business/en/",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 16,
+      "reviewId": "faculty-0221",
+      "institution": "Koç University",
+      "school": "College of Administrative Sciences and Economics",
+      "department": "Operations Management and Information Systems",
+      "action": "owner-approved",
+      "facultyUrl": "https://case.ku.edu.tr/en/about/faculty/",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 17,
+      "reviewId": "faculty-0222",
+      "institution": "Koç University",
+      "school": "College of Engineering",
+      "department": "Department of Industrial Engineering",
+      "action": "owner-approved",
+      "facultyUrl": "https://eng.ku.edu.tr/en/industrial-engineering/people/faculty/",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 18,
+      "reviewId": "faculty-0225",
+      "institution": "Kühne Logistics University",
+      "school": "",
+      "department": "Department of Operations and Technology — Operations Management and Business Analytics",
+      "action": "owner-approved",
+      "facultyUrl": "https://www.klu.org/faculty-research/faculty/resident-faculty",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 19,
+      "reviewId": "faculty-0227",
+      "institution": "Lake Erie College",
+      "school": "School of Business",
+      "department": "Business Administration",
+      "action": "removed",
+      "scope": "institution",
+      "notes": "Site owner requested removal on 2026-10-26. Entire institution excluded from the active directory and map."
+    },
+    {
+      "number": 20,
+      "reviewId": "faculty-0233",
+      "institution": "Lenoir-Rhyne University",
+      "school": "Charles M. Snipes College of Business and Economics",
+      "department": "Management",
+      "action": "removed",
+      "scope": "institution",
+      "notes": "Site owner requested removal on 2026-10-26. Entire institution excluded from the active directory and map."
+    },
+    {
+      "number": 21,
+      "reviewId": "faculty-0235",
+      "institution": "Lone Star College System",
+      "school": "",
+      "department": "Business",
+      "action": "removed",
+      "scope": "institution",
+      "notes": "Site owner requested removal on 2026-10-26. Entire institution excluded from the active directory and map."
+    },
+    {
+      "number": 22,
+      "reviewId": "faculty-0246",
+      "institution": "Miami University",
+      "school": "",
+      "department": "Information Systems and Technology",
+      "action": "owner-approved",
+      "facultyUrl": "https://miamioh.edu/fsb/directory/?up=/query/all/all/Information_Systems_and_Analytics/Faculty",
+      "publishAs": {
+        "school": "Farmer School of Business",
+        "department": "Department of Information Systems and Analytics"
+      },
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 23,
+      "reviewId": "faculty-0250",
+      "institution": "Microsoft",
+      "school": "",
+      "department": "Applied Science",
+      "action": "owner-approved",
+      "facultyUrl": "https://www.microsoft.com/applied-sciences/people",
+      "publishAs": {
+        "department": "Applied Sciences"
+      },
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 24,
+      "reviewId": "faculty-0274",
+      "institution": "New York University Abu Dhabi",
+      "school": "Stern School of Business at New York University Abu Dhabi",
+      "department": "Technology, Operations and Statistics",
+      "action": "owner-approved",
+      "facultyUrl": "https://stern.nyuad.nyu.edu/programs-admissions/faculty/",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26. Official sample faculty list accepted by the owner; not claimed to be a complete departmental roster."
+    },
+    {
+      "number": 25,
+      "reviewId": "faculty-0302",
+      "institution": "Park University",
+      "school": "Robert W. Plaster School of Business",
+      "department": "Robert W. Plaster Division of Business Administration and Management",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 26,
+      "reviewId": "faculty-0333",
+      "institution": "Quincy University",
+      "school": "Oakley School of Business",
+      "department": "Business Analytics",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 27,
+      "reviewId": "faculty-0341",
+      "institution": "Rutgers, The State University of New Jersey",
+      "school": "",
+      "department": "Artificial Intelligence, Machine Learning, Data Science and Statistics",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 28,
+      "reviewId": "faculty-0392",
+      "institution": "Taejae University",
+      "school": "School of Arts, Sciences and Technology",
+      "department": "Business Innovation Program",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 29,
+      "reviewId": "faculty-0483",
+      "institution": "University of Colorado Boulder",
+      "school": "Leeds School of Business",
+      "department": "Business Analytics and Machine Learning",
+      "action": "owner-approved",
+      "facultyUrl": "https://www.colorado.edu/business/ms-programs/masters-program-business-analytics/ms-business-analytics-faculty",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 30,
+      "reviewId": "faculty-0511",
+      "institution": "University of Macau",
+      "school": "Institute of Artificial Intelligence and Brain Sciences",
+      "department": "Data Science",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 31,
+      "reviewId": "faculty-0586",
+      "institution": "University of Waikato",
+      "school": "Waikato Management School — Shandong University–University of Waikato International Business School",
+      "department": "Supply Chain Management",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    },
+    {
+      "number": 32,
+      "reviewId": "faculty-0615",
+      "institution": "Washington University in St. Louis",
+      "school": "Olin Business School",
+      "department": "Boeing Center for Supply Chain Innovation",
+      "action": "owner-approved",
+      "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology",
+      "publishAs": {
+        "department": "Supply Chain, Operations and Technology"
+      },
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
+    },
+    {
+      "number": 33,
+      "reviewId": "faculty-0628",
+      "institution": "Wingate University",
+      "school": "Porter B. Byrum School of Business",
+      "department": "Data Analytics and Business Statistics",
+      "action": "removed",
+      "scope": "reviewed entry",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain."
+    }
+  ]
+}

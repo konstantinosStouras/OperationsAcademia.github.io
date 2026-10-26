@@ -329,11 +329,13 @@
     return best;
   }
   function matchesRow(r,school,department){
-    return [{school:r.school,department:r.department}].concat(r.mapAliases||[]).some(function(a){return (!school||fold(a.school)===fold(school))&&(!department||fold(a.department)===fold(department));});
+    return rowMatchScore(r,school,department)>0;
   }
   function rowMatchScore(r,school,department){
     return [{school:r.school,department:r.department}].concat(r.mapAliases||[]).reduce(function(best,a){
-      if((school&&fold(a.school)!==fold(school))||(department&&fold(a.department)!==fold(department)))return best;
+      var sameSchool=!school||fold(a.school)===fold(school)||fold(S.canonSchool(a.school,r.institution))===fold(S.canonSchool(school,r.institution));
+      var sameDepartment=!department||fold(a.department)===fold(department)||fold(S.canonUnit(a.department,r.institution))===fold(S.canonUnit(department,r.institution));
+      if(!sameSchool||!sameDepartment)return best;
       // A legacy link with no school belongs to its original school-less row
       // before another campus that happens to use the same department name.
       return Math.max(best,1+(fold(a.school)===fold(school)?2:0));

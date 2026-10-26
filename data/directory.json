@@ -1994,7 +1994,15 @@
   "mapSearchTerms": [
    "BITS School of Management",
    "Operations Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "bits-school-management-kamba-academic-building": {
+    "facultyUrl": "https://www.bitsom.edu.in/faculty-directory/",
+    "facultyDirectoryHint": "Select Operations in By Academic Area."
+   }
+  },
+  "facultyUrl": "https://www.bitsom.edu.in/faculty-directory/",
+  "facultyDirectoryHint": "Select Operations in By Academic Area."
  },
  {
   "id": "black-hills-state-university____ba-om",
@@ -3762,30 +3770,6 @@
   "facultyUrl": "https://www.chapman.edu/business/doy-b-henley-school-of-management/about/faculty-and-staff.aspx"
  },
  {
-  "id": "chatham-university____sustainable-management",
-  "institution": "Chatham University",
-  "department": "Sustainable Management",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-02-27",
-  "mapLocationIds": [
-   "chatham-sustainable-business-braun"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Chatham University"
-  ],
-  "mapSearchTerms": [
-   "Falk College of Environment, Leadership & Management",
-   "Department of Business Systems"
-  ]
- },
- {
   "id": "chicago-booth____om",
   "institution": "Chicago Booth",
   "department": "OM",
@@ -5467,7 +5451,13 @@
   "mapSearchTerms": [
    "College of Business and Information Systems",
    "Production and Operations Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "dakota-state-business-east-hall": {
+    "facultyUrl": "https://dsu.edu/directory/college-of-business-and-information-systems.html"
+   }
+  },
+  "facultyUrl": "https://dsu.edu/directory/college-of-business-and-information-systems.html"
  },
  {
   "id": "dartmouth-college__thayer-school-of-engineering",
@@ -6807,54 +6797,6 @@
   "facultyDirectoryHint": "College faculty directory: look for entries labelled Management."
  },
  {
-  "id": "flame-university____ba",
-  "institution": "FLAME University",
-  "department": "BA",
-  "type": "University",
-  "country": "India",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-12-10",
-  "mapLocationIds": [
-   "flame-operations-analytics-lavale-campus"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "FLAME University"
-  ],
-  "mapSearchTerms": [
-   "FLAME School of Business",
-   "Department of Operations & Analytics"
-  ]
- },
- {
-  "id": "flame-university____om",
-  "institution": "FLAME University",
-  "department": "OM",
-  "type": "University",
-  "country": "India",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-12-10",
-  "mapLocationIds": [
-   "flame-operations-analytics-lavale-campus"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "FLAME University"
-  ],
-  "mapSearchTerms": [
-   "FLAME School of Business",
-   "Department of Operations & Analytics"
-  ]
- },
- {
   "id": "florida-gulf-coast-university__lutgert-college-of-business__information-systems-analytics-and-supply-chain",
   "institution": "Florida Gulf Coast University",
   "school": "Lutgert College of Business",
@@ -7576,29 +7518,6 @@
   "mapLocationKind": "unresolved"
  },
  {
-  "id": "georgia-military-college____supply-chain-and-logistics-systems",
-  "institution": "Georgia Military College",
-  "department": "Supply Chain and Logistics Systems",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-19",
-  "mapLocationIds": [
-   "georgia-military-business-old-capitol"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Georgia Military College"
-  ],
-  "mapSearchTerms": [
-   "Mathematics, Technology and Business — Supply Chain and Logistics"
-  ]
- },
- {
   "id": "georgia-southern-university__parker-college-of-business__information-systems-and-analytics",
   "institution": "Georgia Southern University",
   "school": "Parker College of Business",
@@ -7885,29 +7804,6 @@
   "facultyUrl": "https://ea18.ugent.be/static/members/index.html"
  },
  {
-  "id": "goldey-beacom-college____ba",
-  "institution": "Goldey-Beacom College",
-  "department": "BA",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-11-16",
-  "mapLocationIds": [
-   "goldey-beacom-business-analytics-fulmer"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Goldey-Beacom College"
-  ],
-  "mapSearchTerms": [
-   "Business Analytics"
-  ]
- },
- {
   "id": "grand-valley-state-university____management",
   "institution": "Grand Valley State University",
   "department": "Management",
@@ -7936,29 +7832,6 @@
    }
   },
   "facultyUrl": "https://www.gvsu.edu/seidman/form/6e5d5f89-fb66-4eb5-9eb2-50e1ccf7aed6/response?question_12671=Management"
- },
- {
-  "id": "hainan-bielefeld-university-of-applied-sciences____production-and-operations-management",
-  "institution": "Hainan Bielefeld University of Applied Sciences",
-  "department": "Production and Operations Management",
-  "type": "University",
-  "country": "China",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-07-30",
-  "mapLocationIds": [
-   "hainan-production-operations-yangpu-campus-fallback"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Hainan Bielefeld University of Applied Sciences"
-  ],
-  "mapSearchTerms": [
-   "Production and Operations Management"
-  ]
  },
  {
   "id": "hamad-bin-khalifa-university__college-of-science-and-engineering__engineering-management-and-decision-sciences",
@@ -8022,31 +7895,6 @@
    }
   },
   "facultyUrl": "https://www.hanken.fi/en/departments-centres/department-finance-and-economics/contact"
- },
- {
-  "id": "harris-stowe-state-university__anheuser-busch-school-of-business__management-information-systems",
-  "institution": "Harris-Stowe State University",
-  "school": "Anheuser-Busch School of Business",
-  "department": "Management Information Systems",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-09-05",
-  "mapLocationIds": [
-   "harris-stowe-information-science-givens"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Harris-Stowe State University"
-  ],
-  "mapSearchTerms": [
-   "Anheuser-Busch School of Business",
-   "Department of Information Science and Computer Technology"
-  ]
  },
  {
   "id": "harvard-business-school____om",
@@ -8313,28 +8161,6 @@
   ],
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
- },
- {
-  "id": "hec-paris____ai",
-  "institution": "HEC Paris",
-  "department": "AI",
-  "country": "France",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-07-04",
-  "mapLocationIds": [
-   "hec-paris-artificial-intelligence-campus"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "École des Hautes Études Commerciales de Paris (HEC Paris)"
-  ],
-  "mapSearchTerms": [
-   "Artificial Intelligence"
-  ]
  },
  {
   "id": "hec-paris____om",
@@ -8872,29 +8698,6 @@
   "facultyUrl": "https://business.howard.edu/departments/information-systems-supply-chain-management"
  },
  {
-  "id": "howard-university____open-disciplinary-focus",
-  "institution": "Howard University",
-  "department": "open disciplinary focus",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-09-30",
-  "mapLocationIds": [
-   "howard-open-disciplinary-main-campus"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Howard University"
-  ],
-  "mapSearchTerms": [
-   "Open disciplinary focus"
-  ]
- },
- {
   "id": "hull-university-business-school",
   "institution": "Hull University Business School",
   "type": "Business School",
@@ -8945,10 +8748,10 @@
   "facultyUrl": "https://huronu.ca/programs/management-and-organizational-studies/"
  },
  {
-  "id": "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem",
+  "id": "idaho-state-university__college-of-business__management",
   "institution": "Idaho State University",
   "school": "College of Business",
-  "department": "Marketing and Management, Supply Chain and Operations Management",
+  "department": "Management",
   "type": "Business School",
   "country": "United States",
   "sources": [
@@ -8966,8 +8769,14 @@
   ],
   "mapSearchTerms": [
    "College of Business",
-   "Marketing and Management"
-  ]
+   "Management"
+  ],
+  "mapDepartmentLinks": {
+   "idaho-state-marketing-management-business": {
+    "facultyUrl": "https://www.isu.edu/management/our-faculty/"
+   }
+  },
+  "facultyUrl": "https://www.isu.edu/management/our-faculty/"
  },
  {
   "id": "ie-business-school____ds",
@@ -9805,7 +9614,7 @@
   "school": "School of Business",
   "department": "Decision Sciences",
   "type": "Business School",
-  "country": "France",
+  "country": "",
   "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
   "characteristics": [
    "Research seminars",
@@ -9830,7 +9639,10 @@
    }
   ],
   "mapLocationIds": [
-   "insead-france-decision-sciences-octapharma"
+   "insead-abu-dhabi-campus",
+   "insead-france-decision-sciences-octapharma",
+   "insead-san-francisco-campus",
+   "insead-singapore-campus"
   ],
   "mapLocationKind": "exact",
   "mapSearchTerms": [
@@ -9840,8 +9652,26 @@
   "mapInstitutionNames": [
    "Institut Européen d’Administration des Affaires (INSEAD)"
   ],
+  "countries": [
+   "United Arab Emirates",
+   "France",
+   "United States",
+   "Singapore"
+  ],
   "mapDepartmentLinks": {
+   "insead-abu-dhabi-campus": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
+   },
    "insead-france-decision-sciences-octapharma": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
+   },
+   "insead-san-francisco-campus": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
+   },
+   "insead-singapore-campus": {
     "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences",
     "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/decision-sciences"
    }
@@ -9855,9 +9685,10 @@
   "department": "Technology and Operations Management",
   "type": "Business School",
   "countries": [
+   "United Arab Emirates",
    "France",
-   "Singapore",
-   "United Arab Emirates"
+   "United States",
+   "Singapore"
   ],
   "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
   "sources": [
@@ -9878,7 +9709,10 @@
    }
   ],
   "mapLocationIds": [
-   "insead-france-technology-and-operations-management-octapharma"
+   "insead-abu-dhabi-campus",
+   "insead-france-technology-and-operations-management-octapharma",
+   "insead-san-francisco-campus",
+   "insead-singapore-campus"
   ],
   "mapLocationKind": "exact",
   "mapSearchTerms": [
@@ -9890,7 +9724,19 @@
   ],
   "country": "",
   "mapDepartmentLinks": {
+   "insead-abu-dhabi-campus": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
+   },
    "insead-france-technology-and-operations-management-octapharma": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
+   },
+   "insead-san-francisco-campus": {
+    "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+    "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
+   },
+   "insead-singapore-campus": {
     "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
     "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management"
    }
@@ -9983,10 +9829,10 @@
   "facultyUrl": "https://www.imt-bs.eu/faculte-recherche/annuaire-enseignants-chercheurs/?_enseignants___liste=management-marketing-et-strategie"
  },
  {
-  "id": "iowa-state-university__ivy-college-of-business__is-ba",
+  "id": "iowa-state-university__ivy-college-of-business__information-systems-and-business-analytics",
   "institution": "Iowa State University",
   "school": "Debbie and Jerry Ivy College of Business",
-  "department": "IS/BA",
+  "department": "Information Systems and Business Analytics",
   "type": "Business School",
   "country": "United States",
   "sources": [
@@ -9996,7 +9842,8 @@
   "n": 1,
   "lastPosted": "2025-10-06",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=ISBA"
  },
  {
   "id": "iowa-state-university__ivy-college-of-business__supply-chain-and-information-systems",
@@ -10032,7 +9879,8 @@
   "n": 1,
   "lastPosted": "2026-07-14",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM"
  },
  {
   "id": "ipade-business-school____om-and-is",
@@ -10620,7 +10468,15 @@
   "mapSearchTerms": [
    "Bang College of Business",
    "Operations Management and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "kimep-operations-dostyk": {
+    "facultyUrl": "https://www.kimep.kz/bang-college-of-business/en/",
+    "facultyDirectoryHint": "Open Faculty Profiles on the college page."
+   }
+  },
+  "facultyUrl": "https://www.kimep.kz/bang-college-of-business/en/",
+  "facultyDirectoryHint": "Open Faculty Profiles on the college page."
  },
  {
   "id": "kimep-university__bang-college-of-business__operations-management-and-business-analytics",
@@ -10645,7 +10501,15 @@
   "mapSearchTerms": [
    "Bang College of Business",
    "Operations Management and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "kimep-operations-dostyk": {
+    "facultyUrl": "https://www.kimep.kz/bang-college-of-business/en/",
+    "facultyDirectoryHint": "Open Faculty Profiles on the college page."
+   }
+  },
+  "facultyUrl": "https://www.kimep.kz/bang-college-of-business/en/",
+  "facultyDirectoryHint": "Open Faculty Profiles on the college page."
  },
  {
   "id": "koc-university____om-is",
@@ -10670,6 +10534,12 @@
    "College of Administrative Sciences and Economics",
    "Operations Management and Information Systems"
   ],
+  "mapDepartmentLinks": {
+   "koc-operations-information-systems-business-building": {
+    "facultyUrl": "https://case.ku.edu.tr/en/about/faculty/"
+   }
+  },
+  "facultyUrl": "https://case.ku.edu.tr/en/about/faculty/",
   "deptUrl": "https://gsb.ku.edu.tr/about-gsb/full-time/?dp=16",
   "deptUrlInherited": true
  },
@@ -10728,7 +10598,13 @@
   "mapSearchTerms": [
    "College of Engineering",
    "Department of Industrial Engineering"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "koc-industrial-engineering-building": {
+    "facultyUrl": "https://eng.ku.edu.tr/en/industrial-engineering/people/faculty/"
+   }
+  },
+  "facultyUrl": "https://eng.ku.edu.tr/en/industrial-engineering/people/faculty/"
  },
  {
   "id": "koc-university__graduate-school-of-business__operations-management-and-information-systems",
@@ -10752,7 +10628,13 @@
    "College of Administrative Sciences and Economics",
    "Operations Management and Information Systems"
   ],
-  "country": "Turkey"
+  "country": "Turkey",
+  "mapDepartmentLinks": {
+   "koc-operations-information-systems-business-building": {
+    "facultyUrl": "https://case.ku.edu.tr/en/about/faculty/"
+   }
+  },
+  "facultyUrl": "https://case.ku.edu.tr/en/about/faculty/"
  },
  {
   "id": "kogod-school-of-business",
@@ -10932,7 +10814,13 @@
   ],
   "mapSearchTerms": [
    "Department of Operations and Technology — Operations Management and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "location-verified-644": {
+    "facultyUrl": "https://www.klu.org/faculty-research/faculty/resident-faculty"
+   }
+  },
+  "facultyUrl": "https://www.klu.org/faculty-research/faculty/resident-faculty"
  },
  {
   "id": "la-salle-university____ba",
@@ -10963,31 +10851,6 @@
    }
   },
   "facultyUrl": "https://www.lasalle.edu/people?s=&office-or-program=business-systems-and-analytics-bsba"
- },
- {
-  "id": "lake-erie-college__school-of-business__business-administration",
-  "institution": "Lake Erie College",
-  "school": "School of Business",
-  "department": "Business Administration",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-09-30",
-  "mapLocationIds": [
-   "lake-erie-business-college-hall"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Lake Erie College"
-  ],
-  "mapSearchTerms": [
-   "School of Business",
-   "Business Administration"
-  ]
  },
  {
   "id": "lancaster-university__management-school__management-science",
@@ -11233,30 +11096,6 @@
   "facultyUrl": "https://engineering.lehigh.edu/ise/faculty"
  },
  {
-  "id": "lenoir-rhyne-university____om",
-  "institution": "Lenoir-Rhyne University",
-  "department": "OM",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-02-21",
-  "mapLocationIds": [
-   "lenoir-rhyne-management-mauney"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Lenoir-Rhyne University"
-  ],
-  "mapSearchTerms": [
-   "Charles M. Snipes College of Business and Economics",
-   "Management"
-  ]
- },
- {
   "id": "lincoln-memorial-university____ba",
   "institution": "Lincoln Memorial University",
   "department": "BA",
@@ -11373,29 +11212,6 @@
   "mapSearchTerms": [
    "London Business School",
    "Management Science and Operations"
-  ]
- },
- {
-  "id": "lone-star-college-system____business",
-  "institution": "Lone Star College System",
-  "department": "Business",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-06-20",
-  "mapLocationIds": [
-   "lone-star-business-system-office-fallback"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Lone Star College System"
-  ],
-  "mapSearchTerms": [
-   "Business"
   ]
  },
  {
@@ -12010,16 +11826,17 @@
   "facultyUrl": "https://miamioh.edu/profiles/cca/etbd/"
  },
  {
-  "id": "miami-university____information-systems-and-analytics",
+  "id": "miami-university__farmer-school-of-business__department-of-information-systems-and-analytics",
   "institution": "Miami University",
-  "department": "Information Systems and Analytics",
-  "type": "University",
+  "school": "Farmer School of Business",
+  "department": "Department of Information Systems and Analytics",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings",
    "seed"
   ],
-  "n": 1,
+  "n": 2,
   "lastPosted": "2026-06-13",
   "mapLocationIds": [
    "miami-information-systems-analytics-farmer"
@@ -12034,33 +11851,10 @@
   ],
   "mapDepartmentLinks": {
    "miami-information-systems-analytics-farmer": {
-    "facultyUrl": "https://miamioh.edu/fsb/directory/?up=%2Fquery%2Fall%2Fall%2FInformation+Systems+--+Analytics%2Fall"
+    "facultyUrl": "https://miamioh.edu/fsb/directory/?up=/query/all/all/Information_Systems_and_Analytics/Faculty"
    }
   },
-  "facultyUrl": "https://miamioh.edu/fsb/directory/?up=%2Fquery%2Fall%2Fall%2FInformation+Systems+--+Analytics%2Fall"
- },
- {
-  "id": "miami-university____information-systems-and-technology",
-  "institution": "Miami University",
-  "department": "Information Systems and Technology",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-08-11",
-  "mapLocationIds": [
-   "miami-information-technology-campus-fallback"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Miami University"
-  ],
-  "mapSearchTerms": [
-   "Information Systems and Technology"
-  ]
+  "facultyUrl": "https://miamioh.edu/fsb/directory/?up=/query/all/all/Information_Systems_and_Analytics/Faculty"
  },
  {
   "id": "michigan-state-university",
@@ -12205,9 +11999,9 @@
   ]
  },
  {
-  "id": "microsoft____applied-science",
+  "id": "microsoft____applied-sciences",
   "institution": "Microsoft",
-  "department": "Applied Science",
+  "department": "Applied Sciences",
   "sources": [
    "seed"
   ],
@@ -12219,9 +12013,15 @@
    "Microsoft"
   ],
   "mapSearchTerms": [
-   "Applied Science"
+   "Applied Sciences"
   ],
-  "country": "United States"
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "microsoft-applied-science-redmond-headquarters": {
+    "facultyUrl": "https://www.microsoft.com/applied-sciences/people"
+   }
+  },
+  "facultyUrl": "https://www.microsoft.com/applied-sciences/people"
  },
  {
   "id": "middle-georgia-state-university____management",
@@ -13581,7 +13381,13 @@
   "mapSearchTerms": [
    "Stern School of Business at New York University Abu Dhabi",
    "Technology, Operations and Statistics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "new-york-abu-dhabi-stern-a6": {
+    "facultyUrl": "https://stern.nyuad.nyu.edu/programs-admissions/faculty/"
+   }
+  },
+  "facultyUrl": "https://stern.nyuad.nyu.edu/programs-admissions/faculty/"
  },
  {
   "id": "new-york-university__leonard-n-stern-school-of-business__information-operations-and-management-sciences",
@@ -15125,79 +14931,6 @@
   "facultyUrl": "https://www.pba.edu/academics/schools/rinker-business/faculty/"
  },
  {
-  "id": "park-university____scm-analytics",
-  "institution": "Park University",
-  "department": "SCM, Analytics",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-05-25",
-  "mapLocationIds": [
-   "park-business-plaster-center"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Park University"
-  ],
-  "mapSearchTerms": [
-   "Robert W. Plaster School of Business",
-   "Robert W. Plaster Division of Business Administration and Management"
-  ]
- },
- {
-  "id": "park-university____stat-analytics-and-scm",
-  "institution": "Park University",
-  "department": "Stat, Analytics and SCM",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-01-30",
-  "mapLocationIds": [
-   "park-business-plaster-center"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Park University"
-  ],
-  "mapSearchTerms": [
-   "Robert W. Plaster School of Business",
-   "Robert W. Plaster Division of Business Administration and Management"
-  ]
- },
- {
-  "id": "park-university__robert-w-plaster-school-of-business__information-systems-and-business-analytics",
-  "institution": "Park University",
-  "school": "Robert W. Plaster School of Business",
-  "department": "Information Systems and Business Analytics",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-09-22",
-  "mapLocationIds": [
-   "park-business-plaster-center"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Park University"
-  ],
-  "mapSearchTerms": [
-   "Robert W. Plaster School of Business",
-   "Robert W. Plaster Division of Business Administration and Management"
-  ]
- },
- {
   "id": "peking-university____om-and-is",
   "institution": "Peking University",
   "department": "OM and IS",
@@ -16133,31 +15866,6 @@
   "facultyUrl": "https://www.queens.edu/business/mccoll-school-of-business-dept-faculty/"
  },
  {
-  "id": "quincy-university__oakley-school-of-business__business-analytics",
-  "institution": "Quincy University",
-  "school": "Oakley School of Business",
-  "department": "Business Analytics",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-03",
-  "mapLocationIds": [
-   "quincy-business-analytics-francis-hall"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Quincy University"
-  ],
-  "mapSearchTerms": [
-   "Oakley School of Business",
-   "Business Analytics"
-  ]
- },
- {
   "id": "rensselaer-polytechnic-institute__lally-school-of-management__supply-chain-management-and-analytics",
   "institution": "Rensselaer Polytechnic Institute (RPI)",
   "school": "Lally School of Management",
@@ -16456,29 +16164,6 @@
    }
   },
   "facultyUrl": "https://www.business.rutgers.edu/faculty-research/faculty-profiles?aoe%5B69%5D=69"
- },
- {
-  "id": "rutgers-university____ai-ml-ds-stats",
-  "institution": "Rutgers University",
-  "department": "AI/ML/DS/Stats",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-11-19",
-  "mapLocationIds": [
-   "rutgers-artificial-intelligence-university-reference"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Rutgers, The State University of New Jersey"
-  ],
-  "mapSearchTerms": [
-   "Artificial Intelligence, Machine Learning, Data Science and Statistics"
-  ]
  },
  {
   "id": "rutgers-university____ie",
@@ -18919,31 +18604,6 @@
    }
   },
   "facultyUrl": "https://whitman.syracuse.edu/academic-areas/supply-chain-management/supply-chain-faculty"
- },
- {
-  "id": "taejae-university__school-of-arts-sciences-and-technology__business-innovation",
-  "institution": "Taejae University",
-  "school": "School of Arts, Sciences and Technology",
-  "department": "Business Innovation",
-  "type": "Business School",
-  "country": "South Korea",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-10-18",
-  "mapLocationIds": [
-   "taejae-business-innovation-taejae-hall"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Taejae University"
-  ],
-  "mapSearchTerms": [
-   "School of Arts, Sciences and Technology",
-   "Business Innovation Program"
-  ]
  },
  {
   "id": "tbs-education",
@@ -23903,7 +23563,13 @@
   "mapSearchTerms": [
    "Leeds School of Business",
    "Business Analytics and Machine Learning"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "colorado-boulder-business-analytics-machine-learning-koelbel": {
+    "facultyUrl": "https://www.colorado.edu/business/ms-programs/masters-program-business-analytics/ms-business-analytics-faculty"
+   }
+  },
+  "facultyUrl": "https://www.colorado.edu/business/ms-programs/masters-program-business-analytics/ms-business-analytics-faculty"
  },
  {
   "id": "university-of-colorado-boulder____scm-analytics-om",
@@ -25505,31 +25171,6 @@
    }
   },
   "facultyUrl": "https://fba.um.edu.mo/aim/staff/"
- },
- {
-  "id": "university-of-macau__institute-of-artificial-intelligence-and-brain-sciences__data-science",
-  "institution": "University of Macau",
-  "school": "Institute of Artificial Intelligence and Brain Sciences",
-  "department": "Data Science",
-  "type": "University",
-  "country": "Macau",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-07-06",
-  "mapLocationIds": [
-   "macau-artificial-intelligence-brain-sciences-n21"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Macau"
-  ],
-  "mapSearchTerms": [
-   "Institute of Artificial Intelligence and Brain Sciences",
-   "Data Science"
-  ]
  },
  {
   "id": "university-of-maine-at-augusta____business-management",
@@ -28628,8 +28269,7 @@
   ],
   "mapDepartmentLinks": {
    "texas-arlington-ai-participating-business": {
-    "facultyUrl": "https://www.uta.edu/academics/schools-colleges/business/contact",
-    "facultyDirectoryHint": "Participating college faculty directory; the hiring call does not assign a final department."
+    "facultyUrl": "https://www.uta.edu/academics/schools-colleges/business/contact"
    },
    "texas-arlington-ai-participating-engineering": {
     "facultyUrl": "https://www.uta.edu/academics/faculty",
@@ -29480,31 +29120,6 @@
   ]
  },
  {
-  "id": "university-of-waikato__business-school__supply-chain-management",
-  "institution": "University of Waikato",
-  "school": "Business School",
-  "department": "Supply Chain Management",
-  "type": "Business School",
-  "country": "China",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-08-08",
-  "mapLocationIds": [
-   "waikato-supply-chain-weihai-beiheng"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Waikato"
-  ],
-  "mapSearchTerms": [
-   "Waikato Management School — Shandong University–University of Waikato International Business School",
-   "Supply Chain Management"
-  ]
- },
- {
   "id": "university-of-warwick____is",
   "institution": "University of Warwick",
   "department": "IS",
@@ -30314,12 +29929,10 @@
   ],
   "mapDepartmentLinks": {
    "valparaiso-business-analytics-urschel": {
-    "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search=",
-    "facultyDirectoryHint": "College of Business directory; includes faculty and staff across business subjects."
+    "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search="
    }
   },
-  "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search=",
-  "facultyDirectoryHint": "College of Business directory; includes faculty and staff across business subjects."
+  "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search="
  },
  {
   "id": "vanderbilt-university__owen-graduate-school-of-management__operations-management-and-quantitative-methods",
@@ -31003,38 +30616,6 @@
   "facultyUrl": "https://www.wlu.edu/the-williams-school/departments-and-programs/business-administration-department/faculty-and-staff"
  },
  {
-  "id": "washington-university-in-st-louis____scm-om",
-  "institution": "Washington University in St. Louis",
-  "department": "SCM/OM",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2025-12-22",
-  "mapLocationIds": [
-   "washington-st-louis-operations-knight"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Washington University in St. Louis"
-  ],
-  "mapSearchTerms": [
-   "Olin Business School",
-   "Supply Chain, Operations, and Technology"
-  ],
-  "mapDepartmentLinks": {
-   "washington-st-louis-operations-knight": {
-    "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10"
-   }
-  },
-  "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10",
-  "deptUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10",
-  "deptUrlInherited": true
- },
- {
   "id": "washington-university-in-st-louis__olin-business-school",
   "institution": "Washington University in St. Louis",
   "school": "Olin Business School",
@@ -31065,12 +30646,16 @@
   ]
  },
  {
-  "id": "washington-university-in-st-louis__olin-business-school__boeing-center-for-supply-chain-innovation",
+  "id": "washington-university-in-st-louis__olin-business-school__supply-chain-operations-and-technology",
   "institution": "Washington University in St. Louis",
   "school": "Olin Business School",
-  "department": "Boeing Center for Supply Chain Innovation",
+  "department": "Supply Chain, Operations and Technology",
   "type": "Business School",
   "country": "United States",
+  "address": "1 Brookings Dr, St. Louis, MO 63130",
+  "mapUrl": "https://goo.gl/maps/o27Rw",
+  "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology",
+  "deptUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -31080,71 +30665,31 @@
    "Exec Ed"
   ],
   "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2024-10-15",
-  "mapLocationIds": [
-   "washington-st-louis-operations-knight"
-  ],
-  "mapLocationKind": "school",
-  "mapInstitutionNames": [
-   "Washington University in St. Louis"
-  ],
-  "mapSearchTerms": [
-   "Olin Business School"
-  ]
- },
- {
-  "id": "washington-university-in-st-louis__olin-business-school__operations-and-manufacturing-management",
-  "institution": "Washington University in St. Louis",
-  "school": "Olin Business School",
-  "department": "Operations and Manufacturing Management",
-  "type": "Business School",
-  "country": "United States",
-  "address": "1 Brookings Dr, St. Louis, MO 63130",
-  "mapUrl": "https://goo.gl/maps/o27Rw",
-  "facultyUrl": "http://www.olin.wustl.edu/EN-US/academic-programs/PhD/operations-and-manufacturing-management/Pages/Faculty-and-Research.aspx",
-  "sources": [
    "directory",
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2014-09-12",
-  "lat": 38.6501423,
-  "lng": -90.3117331,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
- },
- {
-  "id": "washington-university-in-st-louis__olin-business-school__supply-chain-operations-and-technology",
-  "institution": "Washington University in St. Louis",
-  "school": "Olin Business School",
-  "department": "Supply Chain, Operations and Technology",
-  "type": "Business School",
-  "deptUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10",
-  "sources": [
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 3,
+  "lastPosted": "2025-12-22",
+  "lat": 38.6501423,
+  "lng": -90.3117331,
   "mapLocationIds": [
    "washington-st-louis-operations-knight"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Washington University in St. Louis"
   ],
   "mapSearchTerms": [
    "Olin Business School",
-   "Supply Chain, Operations, and Technology"
+   "Supply Chain, Operations and Technology"
   ],
-  "country": "United States",
   "mapDepartmentLinks": {
    "washington-st-louis-operations-knight": {
-    "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10"
+    "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology"
    }
-  },
-  "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?search=&area=Supply%20Chain%20Operations%20%26%20Technology&type=&pageindex=0&pagesize=10"
+  }
  },
  {
   "id": "wayne-state-university____supply-chain-management",
@@ -31576,30 +31121,6 @@
    }
   },
   "facultyUrl": "https://www.wilson.edu/supply-chain-management-faculty"
- },
- {
-  "id": "wingate-university____da-ba-business-stat",
-  "institution": "Wingate University",
-  "department": "DA/BA./Business Stat",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-03-17",
-  "mapLocationIds": [
-   "wingate-business-analytics-neu"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Wingate University"
-  ],
-  "mapSearchTerms": [
-   "Porter B. Byrum School of Business",
-   "Data Analytics and Business Statistics"
-  ]
  },
  {
   "id": "winona-state-university____mis",

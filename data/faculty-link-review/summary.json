@@ -4,15 +4,19 @@
   "distinctDepartmentIdentities": 638,
   "departments": {
     "verified": 603,
-    "needs-review": 27,
-    "no-public-list": 6,
+    "owner-approved": 14,
+    "removed": 18,
+    "needs-review": 0,
+    "no-public-list": 1,
     "excluded": 2,
     "unchecked": 0
   },
   "mapEntries": {
     "verified": 630,
-    "needs-review": 27,
-    "no-public-list": 6,
+    "owner-approved": 14,
+    "removed": 18,
+    "needs-review": 0,
+    "no-public-list": 1,
     "excluded": 2,
     "unchecked": 0
   }

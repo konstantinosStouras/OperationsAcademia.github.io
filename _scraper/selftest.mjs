@@ -15808,7 +15808,11 @@ async function testSponsors() {
     const identities = new Set(directory.map(r => SCHOOLS.institutionKey(r.institution)));
     for (const r of served) {
       const key = SCHOOLS.institutionKey(r.institution);
-      ok(identities.has(key), `directory: published job ${r.id} maps to a university`);
+      const names = SCHOOLS.canonColumns({institution:r.institution,school:r.school,unit:r.unit});
+      // Owner exclusions apply to the active directory; historical job adverts remain readable.
+      if (!SCHOOLS.directoryExcluded(names)) {
+        ok(identities.has(key), `directory: published job ${r.id} maps to a university`);
+      }
       // Generated directory links must name the correct university. The form
       // also deliberately permits a poster's external Further info URL.
       if (ownUniversitiesLink(r.furtherInfoUrl)) {

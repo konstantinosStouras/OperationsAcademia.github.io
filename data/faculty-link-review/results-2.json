@@ -454,14 +454,13 @@
       "school": "",
       "department": "Artificial Intelligence",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.hec.edu/en/faculty-research/chairs",
         "https://hi-paris.fr/recruitment/",
         "https://www.eiasm.org/documents/JMW/opening/3504.pdf"
       ],
-      "notes": "No exact unit mapping established. Hi! PARIS-wide people or an unrelated AI chair must not be assumed to be the source unit. The original July 2025 advertisement PDF was retried directly and through the web reader; it remained inaccessible. Current Hi! PARIS marketing recruitment is a different call and cannot identify this hiring unit.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Official HEC chairs and jointly operated Hi! PARIS recruitment pages show AI activity spanning finance, marketing, law and cross-institutional research. The generic Artificial Intelligence source label does not identify which department or research team owns the listing.",
       "recheckEvidence": "Reopened official chairs page; artificial intelligence remains represented across multiple academic units, so generic source label cannot establish exact roster."
     },
@@ -618,13 +617,12 @@
       "school": "",
       "department": "Production and Operations Management",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.hainan-biuh.edu.cn/%E5%B8%88%E8%B5%84%E5%9B%A2%E9%98%9F1/",
         "https://www.hainan-biuh.edu.cn/en/job/lecturer-associate-professor-professor-in-production-and-operations-management/"
       ],
-      "notes": "Do not substitute the entire university team or infer that all logistics faculty comprise this new recruitment field.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Reviewed the university's current Chinese faculty team page. It lists Pascal Wolff as Logistics Engineering discipline leader, Maik Lauterbach and Sebastian Pascal Reusch as German university professors, alongside mathematics, language and engineering faculty. No separately identified Production and Operations Management roster or precise host mapping was established.",
       "recheckEvidence": "Recovered official exact Production and Operations Management job page. It lists production planning, quality, accounting and logistics teaching but no assigned department; current university-wide roster cannot safely establish exact host."
     },
@@ -771,16 +769,20 @@
       "school": "Debbie and Jerry Ivy College of Business",
       "department": "IS/BA",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=ISBA",
       "sources": [
+        "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=ISBA",
         "https://www.ivybusiness.iastate.edu/custom-education/directory/",
         "https://catalog.iastate.edu/collegeofbusiness/supplychainmanagement/index.html",
         "https://www.livegreen.iastate.edu/researchfaculty",
         "https://www.provost.iastate.edu/faculty-success/recruitment/named-positions"
       ],
-      "evidence": "Alternative official custom-education directory live browser returns requested URL rejected. Current catalogue describes programs rather than a complete faculty roster. Official sustainability and named-chair lists are restricted subsets, not complete department lists.",
-      "notes": "No working complete current official alternative found; did not use third-party directory or partial thematic lists."
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: No working complete current official alternative found; did not use third-party directory or partial thematic lists.",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "publishAs": {
+        "department": "Information Systems and Business Analytics"
+      }
     },
     {
       "id": "faculty-0209",
@@ -788,16 +790,17 @@
       "school": "Debbie and Jerry Ivy College of Business",
       "department": "Supply Chain Management",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM",
       "sources": [
+        "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM",
         "https://www.ivybusiness.iastate.edu/custom-education/directory/",
         "https://catalog.iastate.edu/collegeofbusiness/supplychainmanagement/index.html",
         "https://www.livegreen.iastate.edu/researchfaculty",
         "https://www.provost.iastate.edu/faculty-success/recruitment/named-positions"
       ],
-      "evidence": "Alternative official custom-education directory live browser returns requested URL rejected. Current catalogue describes programs rather than a complete faculty roster. Official sustainability and named-chair lists are restricted subsets, not complete department lists.",
-      "notes": "No working complete current official alternative found; did not use third-party directory or partial thematic lists."
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: No working complete current official alternative found; did not use third-party directory or partial thematic lists.",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26."
     },
     {
       "id": "faculty-0214",
@@ -833,17 +836,18 @@
       "school": "Bang College of Business",
       "department": "Operations Management and Business Analytics",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://www.kimep.kz/bang-college-of-business/en/",
       "sources": [
+        "https://www.kimep.kz/bang-college-of-business/en/",
         "https://hr.kimep.kz/kk-KZ/Home/Vacancy/791",
         "https://www.kimep.kz/bang-college-of-business/kz/",
         "https://el2019.kimep.kz/course/index.php?categoryid=12&lang=ru"
       ],
-      "notes": "Parent college roster for advertised Operations Management/Business Analytics specialization, not a separately constituted department. Official English URL redirects to Kazakh; faculty names remain English. Open Faculty Profiles section. All 42 faculty entries were inspected in current official page; individual biographies may redirect by language. Scope caveat: official public course directory identifies Department of Operations Management and Information Systems; current college roster has no tested exact department selector. Retain needs-review rather than assert whole-college roster is exact.",
-      "evidence": "Official vacancy 791 names Bang College of Business as recruiting unit for Operations Management/Business Analytics. Current college Faculty Profiles section lists 42 named faculty, including Mustafa Yuzukirmizi, Nejat Capar, Muhammad Saleem and Jing Ruan. Official course directory associates Mustafa Yuzukirmizi with quantitative methods and Muhammad Imran with Business Analytics, Introduction to Operations Management, and Logistics and Supply Chain Management.",
-      "directoryFilter": "Open the Faculty Profiles section (Факультет профильдері); this is the parent college roster.",
-      "candidateFacultyUrl": "https://www.kimep.kz/bang-college-of-business/kz/"
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: Parent college roster for advertised Operations Management/Business Analytics specialization, not a separately constituted department. Official English URL redirects to Kazakh; faculty names remain English. Open Faculty Profiles section. All 42 faculty entries were inspected in current official page; individual biographies may redirect by language. Scope caveat: official public course directory identifies Department of Operations Management and Information Systems; current college roster has no tested exact department selector. Retain needs-review rather than assert whole-college roster is exact.",
+      "candidateFacultyUrl": "https://www.kimep.kz/bang-college-of-business/kz/",
+      "directoryFilter": "Open Faculty Profiles on the college page."
     },
     {
       "id": "faculty-0226",
@@ -865,14 +869,13 @@
       "school": "School of Business",
       "department": "Business Administration",
       "checked": "2026-10-26",
-      "status": "no-public-list",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.lec.edu/faculty-directory",
         "https://www.lec.edu/school-of-business/",
         "https://www.lec.edu/school-of-business/business-administration/"
       ],
-      "notes": "No exact public program/unit list located through these official sources. A generic university directory is not an acceptable replacement.",
+      "notes": "Site owner requested removal on 2026-10-26. Entire institution excluded from the active directory and map.",
       "evidence": "Reviewed official university faculty directory, business school page and Business Administration program page, plus targeted site searches. The directory is university-wide, naming Faria Huq in quantitative methods and Mirel Marculetiu in finance among unrelated disciplines. School/program pages describe curriculum and contacts without a Business Administration faculty roster.",
       "audit": "Rechecked current university-wide Wix faculty directory and business-school page. Directory has faculty and staff across unrelated schools and no academic-unit filter; it identifies a business dean and relevant individuals but not an isolated school/programme roster. Course-specific instructor lists are not a complete roster. Retain no-public-list."
     },
@@ -945,18 +948,21 @@
     },
     {
       "id": "faculty-0250",
-      "status": "needs-review",
+      "status": "owner-approved",
       "institution": "Microsoft",
       "school": "",
       "department": "Applied Science",
-      "facultyUrl": "",
+      "facultyUrl": "https://www.microsoft.com/applied-sciences/people",
       "sources": [
         "https://www.microsoft.com/applied-sciences/people",
         "https://www.microsoft.com/en-us/research/group/odsp-applied-science/"
       ],
-      "checked": "2026-10-25",
-      "notes": "Do not attach a specific team roster without establishing the original hiring unit; corporate headquarters mapping does not establish that affiliation.",
-      "evidence": "Microsoft publishes an Applied Sciences team roster including Sara Abdali and Ebey Abraham, but also has a separate OneDrive/SharePoint Applied Science team led by Ryen White. The source record only says Applied Science and does not establish which team it represents."
+      "checked": "2026-10-26",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: Do not attach a specific team roster without establishing the original hiring unit; corporate headquarters mapping does not establish that affiliation.",
+      "publishAs": {
+        "department": "Applied Sciences"
+      }
     },
     {
       "id": "faculty-0252",
@@ -1179,8 +1185,7 @@
       "school": "Robert W. Plaster School of Business",
       "department": "Robert W. Plaster Division of Business Administration and Management",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.park.edu/academics/college-of-management/",
         "https://www.park.edu/academics/explore-programs/project-management-b-s-b-a/",
@@ -1188,7 +1193,7 @@
         "https://www.park.edu/academics/undergraduate-catalog/",
         "https://catalog.park.edu/content.php?catoid=20&navoid=6759"
       ],
-      "notes": "Current school-labelled catalog is a promising broad source, but the named Division 4 cannot safely absorb all legacy IS/Analytics postings because the current institutional structure includes a separate Division 5. No full Division 4 membership roster established. Review current directory label before publishing an exact-division claim.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Inspected the current official 2026-27 catalog Faculty and Administration page in a live browser. It provides a complete university full-time faculty list, with College of Management and Robert W. Plaster School labels; relevant names include Theresa Coates (Management), Sahand Hajifar and Abdelmonaem Jornaz (Information Systems and Business Analytics), and Stacy Yeager-Okosi (Graduate Information Systems and Business Analytics). Leadership separately identifies Division 4 Business Administration and Management under Adrian James and Division 5 Information and Computer Science, Mathematics, Information Systems and Analytics under Sam Chamberlin. Individual faculty entries do not assign these current divisions."
     },
     {
@@ -1506,14 +1511,13 @@
       "school": "Oakley School of Business",
       "department": "Business Analytics",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://www.quincy.edu/academics/degree-programs/business-analytics/",
         "https://www.quincy.edu/people-directory/",
         "https://www.quincy.edu/about/work-at-qu/job-openings/"
       ],
-      "notes": "Parent Oakley faculty roster would be acceptable for this specialization, but neither the single-person spotlight nor unfiltered university directory establishes one.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Official hiring identifies Business Analytics as a field within Oakley School of Business. Program page features Dana Walker only; current people directory contains school labels but opens a university-wide list and live browser encounters security verification. No working school filter was confirmed. Second pass re-opened current directory through web extraction: 209 faculty/staff, ten per page, individual school labels, only Search Names control. Live browser again shows security verification. Current Business Analytics page still offers only Dana Walker Faculty Spotlight. No school-only roster or actual working Oakley selector established."
     },
     {
@@ -1711,14 +1715,13 @@
       "school": "School of Arts, Sciences and Technology",
       "department": "Business Innovation Program",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "removed",
       "sources": [
         "https://taejae.ac.kr/academics/who-learn-from",
         "https://taejae.ac.kr/academics/programs/business-innovation",
         "https://www.taejae.ac.kr/announcements"
       ],
-      "notes": "Do not publish an empty dynamic directory as a working department list; further browser/API state verification needed.",
+      "notes": "Site owner requested removal on 2026-10-26. This reviewed entry and its source aliases are excluded; other verified academic units remain.",
       "evidence": "Official Business Innovation program page and current 2027 hiring announcement establish the unit, but program page contains curriculum without named faculty. The current Who Learn From page failed to render its roster during a fresh live browser check; prior dynamic contents were not a verified persistent Business Innovation-only filter.",
       "recheckEvidence": "Official search-indexed Who Learn From page exposes eight Business Innovation-labelled members: Sam Young Chung, Jay Junghun Lee, Sungwoo Jung, Gilbert Seongkyu Park, Jeeyun Yoon, James Ostler, Sangman Han and Sanglin Han. However fresh live browser and web open return only navigation, group image and footer with loading text, no roster. Candidate is clearly relevant but not verified as presently usable.",
       "candidateFacultyUrl": "https://taejae.ac.kr/academics/who-learn-from"
@@ -2030,14 +2033,14 @@
       "school": "Leeds School of Business",
       "department": "Business Analytics and Machine Learning",
       "checked": "2026-10-26",
-      "status": "needs-review",
-      "facultyUrl": "",
+      "status": "owner-approved",
+      "facultyUrl": "https://www.colorado.edu/business/ms-programs/masters-program-business-analytics/ms-business-analytics-faculty",
       "sources": [
         "https://www.colorado.edu/business/ms-programs/masters-program-business-analytics/ms-business-analytics-faculty",
         "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty"
       ],
-      "notes": "Hiring-field to host-department correspondence remains unclear. Do not substitute the degree-program teaching team without evidence that it is the source unit.",
-      "evidence": "Official Business Analytics master's faculty page names Kai Larsen, Liu Liu, David Dobolyi, Quentin Andre and Fairy Gandhi across several divisions. It establishes an interdisciplinary degree-program teaching team, not a department named Business Analytics and Machine Learning. Separate Operations division roster verified for its own exact queue entry.",
+      "notes": "Site owner explicitly selected this faculty URL and scope on 2026-10-26.",
+      "evidence": "Owner confirmation resolves the previous access or academic-scope question. Previous audit: Hiring-field to host-department correspondence remains unclear. Do not substitute the degree-program teaching team without evidence that it is the source unit.",
       "recheckEvidence": "Recovered exact original source job title Assistant Teaching Professor, Business Analytics and Machine Learning from May 25, 2025 listing. Current official Business Analytics degree roster spans Organizational Leadership and Information Analytics plus Marketing; no official evidence recovered that this program is the advertised hiring unit. No inferential assignment to Operations or a single faculty member made."
     },
     {

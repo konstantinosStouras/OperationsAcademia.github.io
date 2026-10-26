@@ -5308,10 +5308,12 @@
       "lng": -84.729752,
       "addressSource": "https://miamioh.edu/fsb/departments/information-systems-analytics/",
       "coordinateSource": "https://map.miamioh.edu/?id=1771#!m/306626",
-      "notes": "Current department contact explicitly identifies Farmer School 3095. Exact academic building marker, excluded accessibility entrances and restroom markers. Department partnership with McVey does not replace its stated home address.",
+      "notes": "Current department contact explicitly identifies Farmer School 3095. Exact academic building marker, excluded accessibility entrances and restroom markers. Department partnership with McVey does not replace its stated home address. Owner confirmed Information Systems and Technology is Information Systems and Analytics on 2026-10-26; the legacy campus fallback is consolidated here.",
       "institution": "Miami University",
       "rowIds": [
-        "miami-university____information-systems-and-analytics"
+        "miami-university____information-systems-and-analytics",
+        "miami-university____information-systems-and-technology",
+        "miami-university__farmer-school-of-business__department-of-information-systems-and-analytics"
       ],
       "checked": "2026-10-24",
       "institutionKey": "miami-university"
@@ -7339,10 +7341,13 @@
       "institution": "Washington University in St. Louis",
       "institutionKey": "Washington University in St. Louis",
       "rowIds": [
-        "washington-university-in-st-louis____scm-om"
+        "washington-university-in-st-louis____scm-om",
+        "washington-university-in-st-louis__olin-business-school__boeing-center-for-supply-chain-innovation",
+        "washington-university-in-st-louis__olin-business-school__operations-and-manufacturing-management",
+        "washington-university-in-st-louis__olin-business-school__supply-chain-operations-and-technology"
       ],
       "school": "Olin Business School",
-      "department": "Supply Chain, Operations, and Technology",
+      "department": "Supply Chain, Operations and Technology",
       "building": "Knight Hall",
       "address": "Knight Hall, One Brookings Drive, St. Louis, Missouri 63130-4899, United States",
       "lat": 38.649616,
@@ -7820,7 +7825,7 @@
       "id": "idaho-state-marketing-management-business",
       "institution": "Idaho State University",
       "school": "College of Business",
-      "department": "Marketing and Management",
+      "department": "Management",
       "building": "Business Administration Building, Room 441",
       "address": "755 East Carter Street, Pocatello, Idaho 83209, United States",
       "lat": 42.86167,
@@ -7832,7 +7837,8 @@
         "https://www.isu.edu/cob/programs/certificates/supply-chain-management/"
       ],
       "rowIds": [
-        "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem"
+        "idaho-state-university__college-of-business__marketing-and-management-supply-chain-and-operations-managem",
+        "idaho-state-university__college-of-business__management"
       ],
       "checked": "2026-10-25"
     },
@@ -15019,30 +15025,6 @@
       "notes": "Exact employer requisition F00726P (original posting33327) is reproduced by the official Texas workforce service as job16968121. It identifies three eligible tenure-home colleges: Business, Engineering and Science. All three current college offices are represented; no future faculty room or department is inferred. Current official contact explicitly identifies the college dean office in Life Sciences Building206,501SouthNeddermanDrive; campus map marks the College of Science in that building. Coordinates use the official university map building marker, independently checked inside the named building footprint. The separate college marker sits in a courtyard or entrance recess and was not used as the final building point."
     },
     {
-      "id": "miami-information-technology-campus-fallback",
-      "institution": "Miami University",
-      "institutionKey": "miami-university",
-      "rowIds": [
-        "miami-university____information-systems-and-technology"
-      ],
-      "school": "",
-      "department": "Information Systems and Technology",
-      "building": "School campus (department building not confirmed)",
-      "address": "Oxford campus, 501 East High Street, Oxford, OH 45056, United States",
-      "lat": 39.509529,
-      "lng": -84.734489,
-      "addressSource": "https://miamioh.edu/about/",
-      "coordinateSource": "https://map.concept3d.com/?id=1771#!m/420526",
-      "supportingSources": [
-        "https://jobs.miamioh.edu/admission-aid/admitted-students/graduate/",
-        "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179208679"
-      ],
-      "checked": "2026-10-25",
-      "locationPrecision": "campus",
-      "locationContext": "School campus location. The department building and appointment office have not been confirmed.",
-      "notes": "User-authorized university-campus fallback. Original expired posting 179208679 does not establish the hiring unit or campus. This point represents the university main Oxford campus at its administrative address, not an inferred Farmer School or department appointment. The official campus map names Roudebush Hall at the university address; no department building is claimed."
-    },
-    {
       "id": "hainan-production-operations-yangpu-campus-fallback",
       "institution": "Hainan Bielefeld University of Applied Sciences",
       "institutionKey": "hainan-bielefeld-university-of-applied-sciences",
@@ -15361,10 +15343,11 @@
       "institutionKey": "Microsoft",
       "institution": "Microsoft",
       "rowIds": [
-        "microsoft____applied-science"
+        "microsoft____applied-science",
+        "microsoft____applied-sciences"
       ],
       "school": "",
-      "department": "Applied Science",
+      "department": "Applied Sciences",
       "lat": 47.643543,
       "lng": -122.130821,
       "building": "Corporate headquarters campus (hiring team location not confirmed)",

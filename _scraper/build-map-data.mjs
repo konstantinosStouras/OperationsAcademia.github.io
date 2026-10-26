@@ -16,10 +16,10 @@ export async function buildMapData({dryRun=false}={}){
  const select=(r,fields)=>Object.fromEntries(fields.filter(k=>r[k]!==undefined&&r[k]!=='').map(k=>[k,r[k]]));
  const payload={
   rowInstitutions:locations.rowInstitutions,
-  verified:compactLocationRecords(verified.records),
+  verified:compactLocationRecords(verified.records.filter(r=>!schools.directoryExcluded(r))),
   schoolAliases:cardGroups.schoolAliases,
   locations:locations.records.map(r=>({...select(r,['name','lat','lng','country','logo','mapUrl']),key:schools.institutionKey(r.name)})),
-  historic:historic.filter(r=>Number.isFinite(r.lat)&&Number.isFinite(r.lng)).map(r=>({...select(r,['institution','name','school','department','lat','lng','country','mapUrl']),key:schools.institutionKey(r.institution||r.name)})),
+  historic:historic.filter(r=>Number.isFinite(r.lat)&&Number.isFinite(r.lng)&&!schools.directoryExcluded(r)).map(r=>({...select(r,['institution','name','school','department','lat','lng','country','mapUrl']),key:schools.institutionKey(r.institution||r.name)})),
   logos:logos.records.map(r=>({name:r.name,key:schools.institutionKey(r.name),logo:r.logo}))
  };
  if(!dryRun)await writeFile(path.join(root,'data/university-map.json'),JSON.stringify(payload)+'\n');
