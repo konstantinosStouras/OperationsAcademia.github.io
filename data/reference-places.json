@@ -1292,7 +1292,7 @@
  {
   "institution": "Idaho State University",
   "school": "College of Business",
-  "department": "Marketing and Management, Supply Chain and Operations Management"
+  "department": "Management"
  },
  {
   "institution": "IE Business School",
@@ -1422,7 +1422,7 @@
  {
   "institution": "Iowa State University",
   "school": "Debbie and Jerry Ivy College of Business",
-  "department": "IS/BA"
+  "department": "Information Systems and Business Analytics"
  },
  {
   "institution": "Iowa State University",
@@ -1696,13 +1696,8 @@
  },
  {
   "institution": "Miami University",
-  "school": "",
-  "department": "Information Systems and Analytics"
- },
- {
-  "institution": "Miami University",
-  "school": "",
-  "department": "Information Systems and Technology"
+  "school": "Farmer School of Business",
+  "department": "Department of Information Systems and Analytics"
  },
  {
   "institution": "Michigan State University",
@@ -1737,7 +1732,7 @@
  {
   "institution": "Microsoft",
   "school": "",
-  "department": "Applied Science"
+  "department": "Applied Sciences"
  },
  {
   "institution": "Middle Georgia State University",
@@ -4186,8 +4181,8 @@
  },
  {
   "institution": "Washington University in St. Louis",
-  "school": "",
-  "department": "SCM/OM"
+  "school": "Olin Business School",
+  "department": "Supply Chain, Operations and Technology"
  },
  {
   "institution": "Wayne State University",

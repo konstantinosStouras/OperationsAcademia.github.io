@@ -17129,9 +17129,8 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "November 5, 2026",
-  "applyByDate": "2026-11-05",
-  "reviewDate": "2026-10-05",
+  "applyBy": "October 5, 2026",
+  "applyByDate": "2026-10-05",
   "comments": "Open date: August 21, 2026 Next review date: Monday, Oct 5, 2026 at 11:59pm (Pacific Time) Apply by this date to ensure full consideration by the committee. Final date: Thursday, Nov 5, 2026 at 11:59pm (Pacific Time) Applications will continue to be accepted until this date, but those received after the review date will only be considered if the position has not yet been filled.",
   "country": "United States",
   "countries": [
@@ -21829,8 +21828,8 @@
   ],
   "posted": "2026-10-05",
   "institution": "Michigan State University",
-  "department": "College of Natural Science, Statistics and Probability",
-  "school": "College of Natural Science",
+  "department": "Statistics and Probability",
+  "school": "",
   "unit": "Statistics and Probability",
   "type": "University",
   "levels": [
@@ -22099,8 +22098,8 @@
   ],
   "posted": "2026-10-06",
   "institution": "Massachusetts Institute of Technology (MIT)",
-  "department": "School of Engineering, Center for Transportation and Logistics",
-  "school": "School of Engineering",
+  "department": "Center for Transportation and Logistics",
+  "school": "",
   "unit": "Center for Transportation and Logistics",
   "type": "University",
   "levels": [
@@ -23533,7 +23532,7 @@
   "countries": [
    "United States"
   ],
-  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179589694&Title=Assistant%20Professor%20Faculty%20Position%20in%20the%20Questrom%20School%20of%20Business%2C%20with%20a%20focus%20on%20the%20Future%20of%20Healthy%20Aging",
+  "adUrl": "",
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://academicjobsonline.org/ajo/jobs/32920",
   "postedAtLabel": "link",
@@ -24543,8 +24542,8 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
+  "applyBy": "May 1, 2027",
+  "applyByDate": "2027-05-01",
   "reviewDate": "2026-11-12",
   "comments": "",
   "country": "United States",
@@ -24560,6 +24559,72 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-25T21:22:36Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-insead-20261026",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-26",
+  "institution": "INSEAD",
+  "department": "Technology and Operations Management",
+  "school": "",
+  "unit": "Technology and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Singapore",
+  "countries": [
+   "Singapore"
+  ],
+  "adUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#549386",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#549386",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-26T19:42:15Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-california-berkeley-20261026",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-26",
+  "institution": "University of California, Berkeley",
+  "department": "College of Engineering, Industrial Engineering and Operations Research",
+  "school": "College of Engineering",
+  "unit": "Industrial Engineering and Operations Research",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 1, 2026",
+  "applyByDate": "2026-12-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://aprecruit.berkeley.edu/JPF05519",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://aprecruit.berkeley.edu/JPF05519",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://ieor.berkeley.edu/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-26T19:38:18Z",
   "owner": ""
  }
 ]
