@@ -67,6 +67,14 @@ export function attachDepartmentLinks(rows,verified,schoolAliases=[],officialLin
       if(held[field]&&held[field]!==record[field])throw new Error('Conflicting official department links: '+key+' '+field);
       held[field]=record[field];
     }
+    if(record.facultyUrl){
+      const filter=record.directoryFilter;
+      const hint=typeof filter==='string'?filter:filter&&filter.instructions
+        ?(Array.isArray(filter.labels)?filter.labels.join('; ')+'. ':'')+filter.instructions
+        :filter&&filter.label?'Select '+filter.label+' in the directory.':'';
+      if(hint)held.facultyDirectoryHint=hint;
+      else delete held.facultyDirectoryHint;
+    }
     overrides.set(key,held);
   }
   // Apply reviewed overrides before collecting consensus, so a known obsolete
@@ -87,6 +95,10 @@ export function attachDepartmentLinks(rows,verified,schoolAliases=[],officialLin
       const official=overrides.get(keys.get(row))||overrides.get(identity(row.institution,row.school,row.department||row.unit));
     if(!official)continue;
     for(const field of ['deptUrl','facultyUrl'])if(official[field])row[field]=official[field];
+    if(official.facultyUrl){
+      if(official.facultyDirectoryHint)row.facultyDirectoryHint=official.facultyDirectoryHint;
+      else delete row.facultyDirectoryHint;
+    }
     if(official.deptUrl)delete row.deptUrlInherited;
     if(official.facultyUrl)delete row.suppressFacultyLink;
   }

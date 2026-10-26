@@ -184,6 +184,7 @@
           p.appendChild(makeLink(department||OAMapModel.displayName(s.name)||title,faculty));
           row.appendChild(p);
           if(!faculty)row.appendChild(el('p',{class:'oa-map-card-muted',text:'Faculty page not listed'}));
+          else if(r.facultyDirectoryHint&&(!r._edit||!(r._edit.fields||[]).includes('facultyUrl')))row.appendChild(el('p',{class:'oa-map-card-muted',text:r.facultyDirectoryHint}));
           if(r.locationReference==='school')row.appendChild(el('p',{class:'oa-map-location-context',text:'School location; department office not separately verified.'}));
           var sourceDetails=(r.locationSources||[]).filter(function(v){return v.sourceLocation||v.locationContext||point&&(v.address&&v.address!==point.address||v.building&&v.building!==point.building||v.lat!==point.lat||v.lng!==point.lng);});
           if(sourceDetails.length){

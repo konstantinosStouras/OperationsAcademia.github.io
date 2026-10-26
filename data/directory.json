@@ -278,10 +278,12 @@
   ],
   "mapDepartmentLinks": {
    "abu-dhabi-operations-business-campus": {
-    "facultyUrl": "https://www.adu.ac.ae/study/colleges/college-of-business/faculty"
+    "facultyUrl": "https://www.adu.ac.ae/study/colleges/college-of-business/faculty",
+    "facultyDirectoryHint": "Select Marketing, Operations and Information Systems to show the department roster."
    }
   },
-  "facultyUrl": "https://www.adu.ac.ae/study/colleges/college-of-business/faculty"
+  "facultyUrl": "https://www.adu.ac.ae/study/colleges/college-of-business/faculty",
+  "facultyDirectoryHint": "Select Marketing, Operations and Information Systems to show the department roster."
  },
  {
   "id": "adelphi-university__robert-b-willumstad-school-of-business__decision-sciences-and-marketing",
@@ -1741,7 +1743,15 @@
   "mapSearchTerms": [
    "Jack C. Massey College of Business",
    "Department of Business Systems and Analytics, Business Law, and Business Ethics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "belmont-analytics": {
+    "facultyUrl": "https://www.belmont.edu/massey/faculty-staff.html",
+    "facultyDirectoryHint": "Read faculty titles for Business Systems and Analytics, Business Law, and Business Ethics. This complete college directory also includes other departments."
+   }
+  },
+  "facultyUrl": "https://www.belmont.edu/massey/faculty-staff.html",
+  "facultyDirectoryHint": "Read faculty titles for Business Systems and Analytics, Business Law, and Business Ethics. This complete college directory also includes other departments."
  },
  {
   "id": "belmont-university__jack-c-massey-college-of-business__supply-chain-management",
@@ -1776,7 +1786,15 @@
   ],
   "mapInstitutionNames": [
    "Belmont University"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "belmont-supply-chain": {
+    "facultyUrl": "https://www.belmont.edu/massey/faculty-staff.html",
+    "facultyDirectoryHint": "Read faculty titles for Management, International Business, and Supply Chain Management. This complete college directory also includes other departments."
+   }
+  },
+  "facultyUrl": "https://www.belmont.edu/massey/faculty-staff.html",
+  "facultyDirectoryHint": "Read faculty titles for Management, International Business, and Supply Chain Management. This complete college directory also includes other departments."
  },
  {
   "id": "bergen-community-college__division-of-mathematics-science-and-technology__computer-science-engineering-and-information-technologies",
@@ -4370,7 +4388,13 @@
   "mapSearchTerms": [
    "School of Business",
    "Department of Supply Chain and Information Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "college-of-charleston-supply-chain-information-management-beatty": {
+    "facultyUrl": "https://charleston.edu/supply-chain-info-mgmt/faculty-staff/index.php"
+   }
+  },
+  "facultyUrl": "https://charleston.edu/supply-chain-info-mgmt/faculty-staff/index.php"
  },
  {
   "id": "college-of-staten-island____healthcare-sustainability",
@@ -4751,7 +4775,13 @@
   "mapSearchTerms": [
    "College of Business",
    "Data Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "concordia-chicago-business-data-analytics-brohm": {
+    "facultyUrl": "https://www.cuchicago.edu/academics/colleges/college-of-business/about-the-college-of-business/"
+   }
+  },
+  "facultyUrl": "https://www.cuchicago.edu/academics/colleges/college-of-business/about-the-college-of-business/"
  },
  {
   "id": "copenhagen-business-school__school-of-business__operations-management",
@@ -5346,7 +5376,13 @@
   "mapSearchTerms": [
    "School of Management and Economics",
    "Operations Management — Platform Operations and Data-Driven Market Design"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "shenzhen-management-platform-operations-verified": {
+    "facultyUrl": "https://sme.cuhk.edu.cn/en/teacher-search?academic%5B216%5D=216"
+   }
+  },
+  "facultyUrl": "https://sme.cuhk.edu.cn/en/teacher-search?academic%5B216%5D=216"
  },
  {
   "id": "cunef-universidad__school-of-business-economics-and-law__business-management",
@@ -6515,7 +6551,15 @@
   "mapSearchTerms": [
    "College of Business and Aviation",
    "Marketing and Management Studies — Information Systems Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "fairmont-information-systems-jaynes": {
+    "facultyUrl": "https://www.fairmontstate.edu/coba/faculty-staff/default.aspx",
+    "facultyDirectoryHint": "Read Marketing and Management Studies, Management and Marketing, and Information Systems Management titles; other college departments also appear."
+   }
+  },
+  "facultyUrl": "https://www.fairmontstate.edu/coba/faculty-staff/default.aspx",
+  "facultyDirectoryHint": "Read Marketing and Management Studies, Management and Marketing, and Information Systems Management titles; other college departments also appear."
  },
  {
   "id": "fairmont-state-university____it-management",
@@ -6539,7 +6583,15 @@
   "mapSearchTerms": [
    "College of Business and Aviation",
    "Marketing and Management Studies — Information Systems Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "fairmont-information-systems-jaynes": {
+    "facultyUrl": "https://www.fairmontstate.edu/coba/faculty-staff/default.aspx",
+    "facultyDirectoryHint": "Read Marketing and Management Studies, Management and Marketing, and Information Systems Management titles; other college departments also appear."
+   }
+  },
+  "facultyUrl": "https://www.fairmontstate.edu/coba/faculty-staff/default.aspx",
+  "facultyDirectoryHint": "Read Marketing and Management Studies, Management and Marketing, and Information Systems Management titles; other college departments also appear."
  },
  {
   "id": "fayetteville-state-university____healthcare",
@@ -6885,10 +6937,12 @@
   ],
   "mapDepartmentLinks": {
    "florida-polytechnic-data-business-barnett": {
-    "facultyUrl": "https://floridapoly.edu/faculty/"
+    "facultyUrl": "https://floridapoly.edu/faculty/",
+    "facultyDirectoryHint": "Data Science; Business Analytics; Data Science; Business Analytics. Select each of these three Department categories to see the combined department; choose 100 per page if needed."
    }
   },
-  "facultyUrl": "https://floridapoly.edu/faculty/"
+  "facultyUrl": "https://floridapoly.edu/faculty/",
+  "facultyDirectoryHint": "Data Science; Business Analytics; Data Science; Business Analytics. Select each of these three Department categories to see the combined department; choose 100 per page if needed."
  },
  {
   "id": "florida-state-university____is-analytics",
@@ -7423,7 +7477,13 @@
   "mapSearchTerms": [
    "School of Business",
    "Department of Economics, Marketing and Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "georgia-gwinnett-supply-chain-building-w": {
+    "facultyUrl": "https://www.ggc.edu/directory?name=&department_filter%5B%5D=495&department=All&school=All"
+   }
+  },
+  "facultyUrl": "https://www.ggc.edu/directory?name=&department_filter%5B%5D=495&department=All&school=All"
  },
  {
   "id": "georgia-institute-of-technology",
@@ -7593,7 +7653,15 @@
   ],
   "mapInstitutionNames": [
    "Georgia Southern University"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "georgia-southern-parker-logistics-supply-chain-management": {
+    "facultyUrl": "https://directory.georgiasouthern.edu/",
+    "facultyDirectoryHint": "Select Department, choose Logistics and Supply Chain Management, then Search."
+   }
+  },
+  "facultyUrl": "https://directory.georgiasouthern.edu/",
+  "facultyDirectoryHint": "Select Department, choose Logistics and Supply Chain Management, then Search."
  },
  {
   "id": "georgia-southwestern-state-university__college-of-business-and-computing__management",
@@ -7910,10 +7978,12 @@
   ],
   "mapDepartmentLinks": {
    "hamad-bin-khalifa-mechanical-industrial-penrose": {
-    "facultyUrl": "https://www.hbku.edu.qa/en/cse/people"
+    "facultyUrl": "https://www.hbku.edu.qa/en/cse/people",
+    "facultyDirectoryHint": "Select Mechanical Engineering and Industrial Engineering in the directory."
    }
   },
-  "facultyUrl": "https://www.hbku.edu.qa/en/cse/people"
+  "facultyUrl": "https://www.hbku.edu.qa/en/cse/people",
+  "facultyDirectoryHint": "Select Mechanical Engineering and Industrial Engineering in the directory."
  },
  {
   "id": "hanken-school-of-economics____finance-and-economics",
@@ -11335,7 +11405,15 @@
   "mapSearchTerms": [
    "College of Business and Economics",
    "Department of Accounting, Economics, Finance, and Information Systems"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "longwood-accounting-economics-finance-information-systems-hiner": {
+    "facultyUrl": "https://www.longwood.edu/business/about/faculty-staff/",
+    "facultyDirectoryHint": "Read the faculty entries labelled Accounting, Economics, Finance or Information Systems/Cyber Security; Darrell Carpenter is labelled chair of the combined department. The page also lists the separate Management and Marketing department."
+   }
+  },
+  "facultyUrl": "https://www.longwood.edu/business/about/faculty-staff/",
+  "facultyDirectoryHint": "Read the faculty entries labelled Accounting, Economics, Finance or Information Systems/Cyber Security; Darrell Carpenter is labelled chair of the combined department. The page also lists the separate Management and Marketing department."
  },
  {
   "id": "lousiana-tech-univ____supply-chain-management",
@@ -11358,7 +11436,13 @@
   "mapSearchTerms": [
    "College of Business",
    "Department of Management — Sustainable Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "louisiana-tech-supply-chain-college-business": {
+    "facultyUrl": "https://www.latech.edu/directory/index.php#department-of-management-and-sustainable-supply-chain-management"
+   }
+  },
+  "facultyUrl": "https://www.latech.edu/directory/index.php#department-of-management-and-sustainable-supply-chain-management"
  },
  {
   "id": "loyola-university-chicago__quinlan-school-of-business",
@@ -13367,13 +13451,16 @@
   ],
   "mapDepartmentLinks": {
    "new-york-tech-quantitative-analytics-long-island": {
-    "facultyUrl": "https://apps.nyit.edu/directory/"
+    "facultyUrl": "https://apps.nyit.edu/directory/",
+    "facultyDirectoryHint": "Under Departments, select Quantitative & Analytics. The filter updates the results without changing the URL."
    },
    "new-york-tech-quantitative-analytics-new-york-city": {
-    "facultyUrl": "https://apps.nyit.edu/directory/"
+    "facultyUrl": "https://apps.nyit.edu/directory/",
+    "facultyDirectoryHint": "Under Departments, select Quantitative & Analytics. The filter updates the results without changing the URL."
    }
   },
-  "facultyUrl": "https://apps.nyit.edu/directory/"
+  "facultyUrl": "https://apps.nyit.edu/directory/",
+  "facultyDirectoryHint": "Under Departments, select Quantitative & Analytics. The filter updates the results without changing the URL."
  },
  {
   "id": "new-york-university__leonard-n-stern-school-of-business",
@@ -14178,10 +14265,12 @@
   ],
   "mapDepartmentLinks": {
    "northern-state-business-health-innovation": {
-    "facultyUrl": "https://northern.edu/employee-directory"
+    "facultyUrl": "https://northern.edu/employee-directory",
+    "facultyDirectoryHint": "Select Management and Marketing, then separately Information Systems, in the Department selector to see both constituent areas."
    }
   },
-  "facultyUrl": "https://northern.edu/employee-directory"
+  "facultyUrl": "https://northern.edu/employee-directory",
+  "facultyDirectoryHint": "Select Management and Marketing, then separately Information Systems, in the Department selector to see both constituent areas."
  },
  {
   "id": "northern-state-university__school-of-business__business-analytics-and-information-systems",
@@ -14209,10 +14298,12 @@
   ],
   "mapDepartmentLinks": {
    "northern-state-business-health-innovation": {
-    "facultyUrl": "https://northern.edu/employee-directory"
+    "facultyUrl": "https://northern.edu/employee-directory",
+    "facultyDirectoryHint": "Select Management and Marketing, then separately Information Systems, in the Department selector to see both constituent areas."
    }
   },
-  "facultyUrl": "https://northern.edu/employee-directory"
+  "facultyUrl": "https://northern.edu/employee-directory",
+  "facultyDirectoryHint": "Select Management and Marketing, then separately Information Systems, in the Department selector to see both constituent areas."
  },
  {
   "id": "northwestern____science-and-innovation",
@@ -14287,7 +14378,13 @@
   ],
   "mapSearchTerms": [
    "Kellogg School of Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "northwestern-science-innovation-sherman": {
+    "facultyUrl": "https://www.kellogg.northwestern.edu/academics-research/faculty-directory/?academicDepartments=Managerial%20Economics%20%26%20Decision%20Sciences"
+   }
+  },
+  "facultyUrl": "https://www.kellogg.northwestern.edu/academics-research/faculty-directory/?academicDepartments=Managerial%20Economics%20%26%20Decision%20Sciences"
  },
  {
   "id": "northwestern-university__kellogg-school-of-management__operations",
@@ -14381,10 +14478,12 @@
   "country": "Portugal",
   "mapDepartmentLinks": {
    "nova-operations-technology-innovation-cascais-hall": {
-    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
+    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
+    "facultyDirectoryHint": "Select Operations, Technology and Innovation Management in Area, click Apply, and use the alphabet to browse the full roster."
    }
   },
   "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
+  "facultyDirectoryHint": "Select Operations, Technology and Innovation Management in Area, click Apply, and use the alphabet to browse the full roster.",
   "deptUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrlInherited": true
  },
@@ -14413,10 +14512,12 @@
   ],
   "mapDepartmentLinks": {
    "nova-operations-technology-innovation-cascais-hall": {
-    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
+    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
+    "facultyDirectoryHint": "Select Operations, Technology and Innovation Management in Area, click Apply, and use the alphabet to browse the full roster."
    }
   },
   "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
+  "facultyDirectoryHint": "Select Operations, Technology and Innovation Management in Area, click Apply, and use the alphabet to browse the full roster.",
   "deptUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrlInherited": true
  },
@@ -14452,10 +14553,12 @@
   ],
   "mapDepartmentLinks": {
    "nova-operations-technology-innovation-cascais-hall": {
-    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
+    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
+    "facultyDirectoryHint": "Select Operations, Technology and Innovation Management in Area, click Apply, and use the alphabet to browse the full roster."
    }
   },
   "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
+  "facultyDirectoryHint": "Select Operations, Technology and Innovation Management in Area, click Apply, and use the alphabet to browse the full roster.",
   "deptUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrlInherited": true
  },
@@ -14504,10 +14607,12 @@
   ],
   "mapDepartmentLinks": {
    "nova-operations-technology-innovation-cascais-hall": {
-    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
+    "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
+    "facultyDirectoryHint": "Select Operations, Technology and Innovation Management in Area, click Apply, and use the alphabet to browse the full roster."
    }
   },
-  "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty"
+  "facultyUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
+  "facultyDirectoryHint": "Select Operations, Technology and Innovation Management in Area, click Apply, and use the alphabet to browse the full roster."
  },
  {
   "id": "ntu____om",
@@ -15099,6 +15204,12 @@
    "Guanghua School of Management",
    "Management Science and Information Systems"
   ],
+  "mapDepartmentLinks": {
+   "peking-management-science-guanghua-two": {
+    "facultyUrl": "https://en.gsm.pku.edu.cn/mis/Faculty_Directory.htm"
+   }
+  },
+  "facultyUrl": "https://en.gsm.pku.edu.cn/mis/Faculty_Directory.htm",
   "deptUrl": "https://en.gsm.pku.edu.cn/Faculty_Research/Faculty_Directory/Full_time_Professors.htm",
   "deptUrlInherited": true
  },
@@ -15124,7 +15235,13 @@
    "Guanghua School of Management",
    "Management Science and Information Systems"
   ],
-  "country": "China"
+  "country": "China",
+  "mapDepartmentLinks": {
+   "peking-management-science-guanghua-two": {
+    "facultyUrl": "https://en.gsm.pku.edu.cn/mis/Faculty_Directory.htm"
+   }
+  },
+  "facultyUrl": "https://en.gsm.pku.edu.cn/mis/Faculty_Directory.htm"
  },
  {
   "id": "peking-university__guanghua-school-of-management__management-science-and-information-systems",
@@ -15150,6 +15267,12 @@
    "Guanghua School of Management",
    "Management Science and Information Systems"
   ],
+  "mapDepartmentLinks": {
+   "peking-management-science-guanghua-two": {
+    "facultyUrl": "https://en.gsm.pku.edu.cn/mis/Faculty_Directory.htm"
+   }
+  },
+  "facultyUrl": "https://en.gsm.pku.edu.cn/mis/Faculty_Directory.htm",
   "deptUrl": "https://en.gsm.pku.edu.cn/Faculty_Research/Faculty_Directory/Full_time_Professors.htm",
   "deptUrlInherited": true
  },
@@ -17320,7 +17443,15 @@
   "mapSearchTerms": [
    "College of Business",
    "Department of Operations Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "shanghai-finance-economics-business-wudong": {
+    "facultyUrl": "https://cob.sufe.edu.cn/en/Faculty/Resumes",
+    "facultyDirectoryHint": "Click Operations Management under Department. The directory filters in place without changing the URL."
+   }
+  },
+  "facultyUrl": "https://cob.sufe.edu.cn/en/Faculty/Resumes",
+  "facultyDirectoryHint": "Click Operations Management under Department. The directory filters in place without changing the URL."
  },
  {
   "id": "shanghai-university-of-finance-and-economics__college-of-business__operations-management",
@@ -17351,7 +17482,15 @@
   "mapSearchTerms": [
    "College of Business",
    "Department of Operations Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "shanghai-finance-economics-business-wudong": {
+    "facultyUrl": "https://cob.sufe.edu.cn/en/Faculty/Resumes",
+    "facultyDirectoryHint": "Click Operations Management under Department. The directory filters in place without changing the URL."
+   }
+  },
+  "facultyUrl": "https://cob.sufe.edu.cn/en/Faculty/Resumes",
+  "facultyDirectoryHint": "Click Operations Management under Department. The directory filters in place without changing the URL."
  },
  {
   "id": "shanghai-university-of-finance-and-economics__school-of-information-management-and-engineering-sime__management-science-information-systems-financial-information",
@@ -18174,7 +18313,15 @@
   "mapSearchTerms": [
    "School of Business",
    "Department of Management and Marketing"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "st-john-fisher-management-marketing-salerno": {
+    "facultyUrl": "https://www.sjf.edu/schools/school-of-business/administration/",
+    "facultyDirectoryHint": "Look for Management and Marketing labels; the linked school roster also includes Accounting and Finance."
+   }
+  },
+  "facultyUrl": "https://www.sjf.edu/schools/school-of-business/administration/",
+  "facultyDirectoryHint": "Look for Management and Marketing labels; the linked school roster also includes Accounting and Finance."
  },
  {
   "id": "st-john-s-university____business-analytics",
@@ -19044,7 +19191,13 @@
   "mapSearchTerms": [
    "Institute for Advanced Materials for Sustainable Manufacturing",
    "Supply Chain and Logistics Systems"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "tecnologico-monterrey-materials-expedition": {
+    "facultyUrl": "https://research.tec.mx/vivo-tec/fac_iamsm"
+   }
+  },
+  "facultyUrl": "https://research.tec.mx/vivo-tec/fac_iamsm"
  },
  {
   "id": "ted-university",
@@ -19496,7 +19649,13 @@
   "mapSearchTerms": [
    "College of Business Administration"
   ],
-  "country": "United States"
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "texas-am-central-texas-logistics-founders-hall": {
+    "facultyUrl": "https://www.tamuct.edu/academics/college-of-business-administration/management-and-marketing/"
+   }
+  },
+  "facultyUrl": "https://www.tamuct.edu/academics/college-of-business-administration/management-and-marketing/"
  },
  {
   "id": "texas-a-m-university-corpus-christi__college-of-engineering-and-computer-science__industrial-engineering",
@@ -20224,7 +20383,13 @@
   ],
   "mapSearchTerms": [
    "School of Management and Economics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "shenzhen-management-platform-operations-verified": {
+    "facultyUrl": "https://sme.cuhk.edu.cn/en/teacher-search?academic%5B216%5D=216"
+   }
+  },
+  "facultyUrl": "https://sme.cuhk.edu.cn/en/teacher-search?academic%5B216%5D=216"
  },
  {
   "id": "college-of-new-jersey____om-scm",
@@ -21047,7 +21212,13 @@
   "mapSearchTerms": [
    "Michael Neidorff School of Business",
    "Department of Finance and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "trinity-finance-business-analytics-chapman": {
+    "facultyUrl": "https://trinity.edu/finance/faculty"
+   }
+  },
+  "facultyUrl": "https://trinity.edu/finance/faculty"
  },
  {
   "id": "tsinghua-university____om-is",
@@ -21469,7 +21640,13 @@
   "mapSearchTerms": [
    "United States Military Academy",
    "Department of Systems Engineering"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "united-states-military-academy-systems-engineering-mahan": {
+    "facultyUrl": "https://www.westpoint.edu/directory?field_directory_profile_type%5Bfaculty%5D=faculty&field_department_or_directorate%5B1322%5D=1322"
+   }
+  },
+  "facultyUrl": "https://www.westpoint.edu/directory?field_directory_profile_type%5Bfaculty%5D=faculty&field_department_or_directorate%5B1322%5D=1322"
  },
  {
   "id": "united-states-naval-academy",
@@ -21559,7 +21736,13 @@
   "mapSearchTerms": [
    "School of Business and Economics",
    "Operations Management, Supply Chain Management and Management Information Systems"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "andes-chile-business-el-reloj": {
+    "facultyUrl": "https://www.uandes.cl/universidad/facultades/ciencias-economicas-y-empresariales/?academicos"
+   }
+  },
+  "facultyUrl": "https://www.uandes.cl/universidad/facultades/ciencias-economicas-y-empresariales/?academicos"
  },
  {
   "id": "universidad-torcuato-di-tella__school-of-business",
@@ -24697,7 +24880,8 @@
   "n": 1,
   "lastPosted": "2026-09-22",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://business.uic.edu/academics-research/dept/department-of-information-and-decision-sciences/information-and-decision-sciences-faculty/"
  },
  {
   "id": "university-of-illinois-at-chicago__college-of-business__information-and-decision-sciences",
@@ -25736,7 +25920,8 @@
   "n": 1,
   "lastPosted": "2025-10-02",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html"
  },
  {
   "id": "university-of-miami__miami-herbert-business-school__management-area",
@@ -25780,7 +25965,9 @@
    "seed"
   ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html",
+  "facultyDirectoryHint": "In Program, select Operations Management. The directory does not preserve this filter in its URL."
  },
  {
   "id": "university-of-michigan____information",
@@ -28394,7 +28581,12 @@
    "Artificial Intelligence cluster",
    "College of Engineering",
    "College of Science"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "texas-arlington-ai-participating-business": {
+    "facultyUrl": "https://www.uta.edu/academics/schools-colleges/business/contact"
+   }
+  }
  },
  {
   "id": "university-of-texas-at-arlington____business-statistics",
@@ -30054,7 +30246,13 @@
   "mapSearchTerms": [
    "College of Business",
    "Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "valparaiso-business-analytics-urschel": {
+    "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search="
+   }
+  },
+  "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search="
  },
  {
   "id": "vanderbilt-university__owen-graduate-school-of-management__operations-management-and-quantitative-methods",

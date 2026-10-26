@@ -27,8 +27,8 @@
     return names[name]||name;
   }
   function departmentName(name){
-    var terms={OM:'Operations Management',OR:'Operations Research',SCM:'Supply Chain Management',IS:'Information Systems',MIS:'Management Information Systems',IE:'Industrial Engineering',BA:'Business Analytics',DA:'Data Analytics',DS:'Data Science',AI:'Artificial Intelligence',ML:'Machine Learning',Stats:'Statistics'};
-    return String(name||'').replace(/\b(OM|OR|SCM|IS|MIS|IE|BA|DA|DS|AI|ML|Stats)\b/g,function(t){return terms[t];}).replace(/\s*\/\s*/g,', ');
+    var terms={OM:'Operations Management',OR:'Operations Research',SCM:'Supply Chain Management',IS:'Information Systems',MIS:'Management Information Systems',IE:'Industrial Engineering',BA:'Business Analytics',DA:'Data Analytics',DS:'Data Science',AI:'Artificial Intelligence',ML:'Machine Learning',Stats:'Statistics',FinTech:'Financial Technology'};
+    return String(name||'').replace(/\b(OM|OR|SCM|IS|MIS|IE|BA|DA|DS|AI|ML|Stats|FinTech)\b/g,function(t){return terms[t];}).replace(/\s*\/\s*/g,', ');
   }
   function located(p){return p&&Number.isFinite(p.lat)&&Math.abs(p.lat)<=90&&Number.isFinite(p.lng)&&Math.abs(p.lng)<=180;}
   function coord(p){return p.lat.toFixed(5)+','+p.lng.toFixed(5);}
@@ -85,7 +85,10 @@
         var unitLinks=!changed&&originalRow.mapDepartmentLinks&&originalRow.mapDepartmentLinks[verified.id];
         if(unitLinks){
           ['deptUrl','facultyUrl'].forEach(function(field){if(unitLinks[field]&&edited.indexOf(field)===-1)r[field]=unitLinks[field];});
-          if(unitLinks.facultyUrl&&edited.indexOf('facultyUrl')===-1)delete r.suppressFacultyLink;
+          if(unitLinks.facultyUrl&&edited.indexOf('facultyUrl')===-1){
+            delete r.suppressFacultyLink;
+            r.facultyDirectoryHint=unitLinks.facultyDirectoryHint||'';
+          }
         }
         var verifiedCountries=data.evidenceCountries&&data.evidenceCountries.get(verified.id);
         if(verifiedCountries&&verifiedCountries.length===1)r.country=verifiedCountries[0];
@@ -185,6 +188,7 @@
         held.mapSources.push.apply(held.mapSources,r.mapSources||[]);
         if(!held.deptUrl&&r.deptUrl)held.deptUrl=r.deptUrl;
         if(!held.facultyUrl&&r.facultyUrl)held.facultyUrl=r.facultyUrl;
+        if(held.facultyUrl===r.facultyUrl&&!held.facultyDirectoryHint&&r.facultyDirectoryHint)held.facultyDirectoryHint=r.facultyDirectoryHint;
       });});});
       var mergedRows=Array.from(rows.values());
       mergedRows.forEach(function(r){r.mapAliases=Array.from(new Map(r.mapAliases.map(function(a){return [JSON.stringify(a),a];})).values());r.mapSources=Array.from(new Map(r.mapSources.map(function(a){return [a.rowId+'::'+a.evidenceId,a];})).values());r.n=sourceCount(r.mapSources);});
@@ -278,6 +282,7 @@
           held.locationSources.push.apply(held.locationSources,evidence.filter(function(v){return ids.indexOf(v.id)!==-1||v.locationVerified===false&&(v.rowIds||[]).some(function(id){return rowIds.indexOf(id)!==-1;});}));
           if(!held.deptUrl&&r.deptUrl)held.deptUrl=r.deptUrl;
           if(!held.facultyUrl&&r.facultyUrl)held.facultyUrl=r.facultyUrl;
+          if(held.facultyUrl===r.facultyUrl&&!held.facultyDirectoryHint&&r.facultyDirectoryHint)held.facultyDirectoryHint=r.facultyDirectoryHint;
         });});});
         var mergedRows=Array.from(rows.values()).sort(function(a,b){return fold(a.department).localeCompare(fold(b.department));});
         mergedRows.forEach(function(r){
