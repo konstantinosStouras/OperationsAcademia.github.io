@@ -46,8 +46,14 @@ body.v3 .oa-uni a.oa-map-primary-action,.oa-uni .leaflet-popup .oa-uni-pop a.oa-
 .oa-uni .leaflet-container .leaflet-bar a,.oa-uni .leaflet-bar button { width:44px;height:44px;line-height:44px;background:var(--map-surface);color:var(--map-ink);border:0;text-decoration:none;font-size:22px; }
 .oa-uni .leaflet-container .leaflet-control-attribution { color:var(--map-ink);background:var(--map-surface);font-size:11px; }
 .oa-uni .leaflet-container a.leaflet-popup-close-button { color:var(--map-ink);width:44px;height:44px;line-height:44px;text-decoration:none; }
-/* A full-width phone card must keep its close button above map controls. */
-.oa-uni.oa-map-popup-open .leaflet-top.leaflet-right { visibility:hidden; }
+/* Stationary details leave a dedicated lane for zoom and reset, even on phones. */
+.oa-map-details-pane { z-index:650;pointer-events:none; }
+.oa-map-details-pane .oa-map-popup { top:12px!important;left:12px!important;bottom:auto!important;transform:none!important;margin:0;pointer-events:auto; }
+.oa-map-details-pane .leaflet-popup-tip-container { display:none; }
+.oa-map-details-pane .leaflet-popup-content-wrapper { padding-top:52px; }
+.oa-map-details-pane .leaflet-popup-content { padding-top:0;box-sizing:border-box; }
+.oa-uni .oa-map-details-pane a.leaflet-popup-close-button { top:8px;right:8px;display:flex;align-items:center;justify-content:center;width:44px;height:44px;box-sizing:border-box;border:1px solid var(--map-rule);border-radius:10px;background:var(--map-surface);color:var(--map-ink);font-size:30px;line-height:1; }
+.oa-uni .oa-map-details-pane a.leaflet-popup-close-button:hover { background:var(--map-halo); }
 .oa-map-cluster-list { padding:0;list-style:none;max-height:220px;overflow:auto;margin:8px 0; }
 .oa-map-cluster-list button,.oa-map-expand,.oa-map-results button { min-height:44px;padding:8px 10px;border:1px solid var(--map-border);background:var(--map-surface);color:var(--map-ink);text-align:left;white-space:normal;overflow-wrap:anywhere; }
 .oa-map-cluster-list button { width:100%;border-width:0 0 1px; }

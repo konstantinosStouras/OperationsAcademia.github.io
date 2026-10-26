@@ -98,7 +98,7 @@
     reset.onAdd=function() {
       var box=el('div',{class:'leaflet-bar oa-map-reset'}), b=el('button',{type:'button','aria-label':'Reset map to selected continent',text:'↺'});
       box.appendChild(b); L.DomEvent.disableClickPropagation(box);
-      b.addEventListener('click',function(){frame(currentPoints);}); return box;
+      b.addEventListener('click',function(){map.closePopup();frame(currentPoints);}); return box;
     }; reset.addTo(map);
     var land=null;
     function palette() {
@@ -224,15 +224,18 @@
       community.addEventListener('toggle',function(){if(map._popup&&map._popup.getContent()===pop)map._popup.update();});
       return pop;
     }
+    // Keep details in a stationary pane: opening a school must not move the map.
+    map.createPane('schoolDetails',mapEl).classList.add('oa-map-details-pane');
     function popupSize() {
-      return {maxWidth:Math.min(360,mapEl.clientWidth-44),minWidth:Math.min(300,mapEl.clientWidth-44),maxHeight:Math.max(160,mapEl.clientHeight-90)};
+      var width=Math.max(120,Math.min(360,mapEl.clientWidth-108));
+      return {maxWidth:width,minWidth:width,maxHeight:Math.max(100,mapEl.clientHeight-152)};
     }
     function openPopup(content,latlng,source) {
       map.closePopup();
       opener=source||document.activeElement;
-      L.popup(Object.assign(popupSize(),{autoPanPaddingTopLeft:[6,12],autoPanPaddingBottomRight:[6,12],className:'oa-map-popup'}))
+      L.popup(Object.assign(popupSize(),{pane:'schoolDetails',autoPan:false,className:'oa-map-popup'}))
         .setLatLng(latlng).setContent(content).openOn(map);
-      setTimeout(function(){var selected=content.querySelector('.oa-map-selected-department');var link=(selected||content).querySelector('a,button'); (link||content).focus({preventScroll:true});if(selected)selected.scrollIntoView({block:'nearest'});},0);
+      setTimeout(function(){if(!content.isConnected)return;content.parentElement.scrollTop=0;content.focus({preventScroll:true});},0);
     }
     map.on('popupopen',function(){host.classList.add('oa-map-popup-open');});
     map.on('popupclose',function(e){host.classList.remove('oa-map-popup-open');if(opener && document.contains(opener) && e.popup.getElement().contains(document.activeElement))opener.focus({preventScroll:true});opener=null;});
