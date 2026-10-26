@@ -5427,6 +5427,630 @@
       "checked": "2026-10-26",
       "notes": "Department roster is presented within the combined school faculty page. The official faculty page includes a Business Administration roster listing Anthonia Allagoa-Warren, Jeff Brice, Mayur Desai, Lucy Ojode and other faculty.",
       "reviewId": "faculty-0409"
+    },
+    {
+      "institution": "Boston College",
+      "school": "Woods College of Advancing Studies",
+      "department": "Business",
+      "facultyUrl": "https://www.bc.edu/content/bc-web/schools/wcas/about/faculty-research/faculty-directory.html",
+      "sources": [
+        "https://www.bc.edu/content/bc-web/schools/wcas/about/faculty-research/faculty-directory.html",
+        "https://www.bc.edu/content/bc-web/schools/wcas/about/faculty-research/faculty-directory-folder/mary-j--cronin.html",
+        "https://www.bc.edu/content/bc-web/schools/wcas/about/faculty-research/faculty-directory-folder/drew-bonfiglio.html"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Correct Woods College roster, not Carroll School. School-wide list includes its undergraduate Business faculty; individual official profiles confirm Business as the discipline taught. No public subject filter exists on this directory. The 216-person Woods roster includes Mary J. Cronin and Drew Bonfiglio, whose linked Woods profiles explicitly identify Business teaching, plus Ed Frechette, Adam Payne and Jason Williams.",
+      "reviewId": "faculty-0055"
+    },
+    {
+      "institution": "University of Michigan",
+      "school": "School of Information",
+      "department": "Information",
+      "facultyUrl": "https://www.si.umich.edu/people/directory/faculty",
+      "sources": [
+        "https://www.si.umich.edu/people/directory/faculty"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Faculty-only school directory; includes joint and emeritus faculty, identified by titles. Official School of Information faculty roster lists Eytan Adar, Nazanin Andalibi, Elham Amini and Mohamed Abbadi with Information faculty titles.",
+      "reviewId": "faculty-0522"
+    },
+    {
+      "institution": "Wheaton College, Massachusetts",
+      "school": "",
+      "department": "Department of Business and Economics — Business Analytics",
+      "facultyUrl": "https://departments.wheatoncollege.edu/faculty/",
+      "sources": [
+        "https://departments.wheatoncollege.edu/faculty/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "College-wide faculty directory with Business and Management filter. The specific department page failed to load; this public roster itself identifies the relevant department and analytics faculty. Official Massachusetts college faculty directory explicitly lists A. Rahim Emhan as Professor of Practice in Business Analytics in Business and Economics, alongside Leanna Lawter and C. C. Chapman in the same department.",
+      "reviewId": "faculty-0625"
+    },
+    {
+      "institution": "North Idaho College",
+      "school": "Business Division",
+      "department": "Business Administration",
+      "facultyUrl": "https://www.nic.edu/directories/?searchStudioQuery=Business%20Administration&isGrid=false&facets=&orderBy=&start=0&model=directory&model=directory",
+      "sources": [
+        "https://www.nic.edu/directories/",
+        "https://catalog.nic.edu/resources/faculty"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official filtered directory includes some administrative search matches, clearly distinguished by job title. Matching department faculty are visible on the first results page. Browser-submitted Business Administration search returns Christina Barton, Kristi Mendoza, Richard Tedmon, Casey Wilhelm, Dana Mohr and Eric Sartell with Business faculty titles and explicit Business Administration department.",
+      "reviewId": "faculty-0284"
+    },
+    {
+      "institution": "College of Staten Island",
+      "school": "Lucille and Jay Chazanoff School of Business",
+      "department": "Information Systems and Informatics",
+      "facultyUrl": "https://www.csi.cuny.edu/academics-and-research/departments-programs/interdisciplinary-programs/information-systems-informatics/isi-people",
+      "sources": [
+        "https://www.csi.cuny.edu/academics-and-research/departments-programs/interdisciplinary-programs/information-systems-informatics/isi-people"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Joint Marketing and Computer Science interdisciplinary program roster, with affiliated and historical roles explicitly labelled. Program-specific faculty page lists Louis Petingi and Paolo Cappellari, then affiliated faculty Zhanyang Zhang, Feng Gu, Susan Imberman and Sarah Zelikovitz.",
+      "reviewId": "faculty-0109"
+    },
+    {
+      "institution": "University College Dublin",
+      "school": "Michael Smurfit Graduate Business School",
+      "department": "Management Information Systems",
+      "facultyUrl": "https://www.smurfitschool.ie/facultyresearch/subjectareas/mis/",
+      "sources": [
+        "https://www.smurfitschool.ie/facultyresearch/subjectareas/mis/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official subject-area roster covers Information Systems and Business Analytics and explicitly describes teaching at both Smurfit and Quinn schools. Subject-area page Our Faculty lists head Seamas Kelly, Paula Carroll, Annunziata Amideo, Michael ONeill and fourteen further named members.",
+      "reviewId": "faculty-0455"
+    },
+    {
+      "institution": "University of Illinois at Urbana-Champaign",
+      "school": "Gies College of Business",
+      "department": "Information Systems, Operations, Supply Chain, and Analytics",
+      "facultyUrl": "https://giesbusiness.illinois.edu/faculty-and-research/find-faculty?searchit=IOSA",
+      "sources": [
+        "https://giesbusiness.illinois.edu/business-administration/badm-areas-iosa",
+        "https://giesbusiness.illinois.edu/faculty-and-research/find-faculty?searchit=IOSA"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Verified that IOSA query applies the exact Information Systems / Operations / Supply Chain / Analytics unit filter; directory loads asynchronously. Official area Meet Our Faculty link opens a working browser-rendered filtered roster including Mehmet Ahsen, Gopesh Anand, Swathi Baddam, Mili Mehrotra and Sridhar Seshadri.",
+      "reviewId": "faculty-0502"
+    },
+    {
+      "institution": "University of Warwick",
+      "school": "Warwick Business School",
+      "department": "Operations Management",
+      "facultyUrl": "https://www.wbs.ac.uk/research/academics-and-research-students/?facetFields=subjectGroupNames&subjectGroupNames=Operations+Management",
+      "sources": [
+        "https://www.wbs.ac.uk/research/subject-groups/ops/",
+        "https://www.wbs.ac.uk/research/academics-and-research-students/?facetFields=subjectGroupNames&subjectGroupNames=Operations+Management"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official group-filtered directory includes faculty and research students with roles shown. Results lazy-load when scrolled into view. Browser-rendered Operations Management filter returns 21 profiles including Tom Aben, Daniella Badu, Haley Beer, Sangho Chae, Mehmet Chakkol and Mark Johnson.",
+      "reviewId": "faculty-0589"
+    },
+    {
+      "institution": "University of Warwick",
+      "school": "Warwick Business School",
+      "department": "Operations Management Group",
+      "facultyUrl": "https://www.wbs.ac.uk/research/academics-and-research-students/?facetFields=subjectGroupNames&subjectGroupNames=Operations+Management",
+      "sources": [
+        "https://www.wbs.ac.uk/research/subject-groups/ops/",
+        "https://www.wbs.ac.uk/research/academics-and-research-students/?facetFields=subjectGroupNames&subjectGroupNames=Operations+Management"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official group-filtered directory includes faculty and research students with roles shown. Results lazy-load when scrolled into view. Browser-rendered Operations Management filter returns 21 profiles including Tom Aben, Daniella Badu, Haley Beer, Sangho Chae, Mehmet Chakkol and Mark Johnson.",
+      "reviewId": "faculty-0590"
+    },
+    {
+      "institution": "University of Warwick",
+      "school": "Warwick Business School",
+      "department": "Information Systems Management and Analytics",
+      "facultyUrl": "https://www.wbs.ac.uk/research/academics-and-research-students/?facetFields=subjectGroupNames&subjectGroupNames=ISM-Analytics+%28ISMA%29",
+      "sources": [
+        "https://www.wbs.ac.uk/research/academics-and-research-students/?facetFields=subjectGroupNames&subjectGroupNames=ISM-Analytics+%28ISMA%29"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official subject-group directory includes faculty and doctoral students with explicit role labels. Results lazy-load when scrolled into view. Browser-rendered ISM-Analytics filter returns 53 profiles including Steve Alpern, Hila Lifshitz-Assaf, Nursen Aydin, Juergen Branke and Bo Chen.",
+      "reviewId": "faculty-0588"
+    },
+    {
+      "institution": "Queen’s University",
+      "school": "Smith School of Business",
+      "department": "Digital Technology",
+      "facultyUrl": "https://smith.queensu.ca/faculty_and_research/faculty.php",
+      "sources": [
+        "https://smith.queensu.ca/faculty_and_research/faculty.php",
+        "https://smith.queensu.ca/faculty_and_research/class/faculty_search_2020.php"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Select Academic Area: Digital Technology. The directory uses an in-page JavaScript filter without a persistent URL parameter. The official directory data classifies Shamel Addas, Abayomi Baiyere and Kathryn Brohman under Digital Technology; its directory script renders and filters this academic-area field.",
+      "reviewId": "faculty-0331"
+    },
+    {
+      "institution": "Texas A&M University-Corpus Christi",
+      "school": "College of Engineering and Computer Science",
+      "department": "Industrial Engineering",
+      "facultyUrl": "https://www.tamucc.edu/engineering/roster.php?program=ieen",
+      "sources": [
+        "https://www.tamucc.edu/engineering/roster.php?program=ieen",
+        "https://www.tamucc.edu/engineering/departments/engineering/index.php"
+      ],
+      "checked": "2026-10-26",
+      "notes": "The official department program list links this exact roster. A PHP notice appears above the content, but faculty names and roles render. The Industrial Engineering Program Directory names coordinator Jangwoon Park and faculty Hongwei Hsiao and Lichuan Ren.",
+      "reviewId": "faculty-0407"
+    },
+    {
+      "institution": "Tennessee Wesleyan University",
+      "school": "Goodfriend College of Business and Professional Studies",
+      "department": "Business Administration",
+      "facultyUrl": "https://www.tnwesleyan.edu/employee-directory/?_department_filter=business-administration",
+      "sources": [
+        "https://www.tnwesleyan.edu/employee-directory/?_department_filter=business-administration"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Browser-verified persistent department filter; the unit directory includes faculty and administrators. Selecting Business Administration in the official directory returns Kennedy Amofa, Martha Maddox, Anne Montgomery and other members.",
+      "reviewId": "faculty-0404"
+    },
+    {
+      "institution": "École Supérieure des Sciences Économiques et Commerciales (ESSEC)",
+      "school": "ESSEC Business School",
+      "department": "Department of Information Systems, Data Analytics and Operations",
+      "facultyUrl": "https://faculty.essec.edu/en/?pagenum=1&s=&type=cv&filter%5Bdepartment-en%5D%5B%5D=Information%20Systems%2C%20Data%20Analytics%20and%20Operations",
+      "sources": [
+        "https://faculty.essec.edu/en/?pagenum=1&s=&type=cv&filter%5Bdepartment-en%5D%5B%5D=Information%20Systems%2C%20Data%20Analytics%20and%20Operations"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Actual department filter verified, with pagination and campus labels. Browser-rendered filtered roster labels Frank Chan, Laurent Alfandari, Nicolas Prat and other faculty with Information Systems, Data Analytics and Operations.",
+      "reviewId": "faculty-0145"
+    },
+    {
+      "institution": "Özyeğin University",
+      "school": "Faculty of Business",
+      "department": "Operations Management",
+      "facultyUrl": "https://www.ozyegin.edu.tr/en/faculty-business/faculty-members",
+      "sources": [
+        "https://www.ozyegin.edu.tr/en/faculty-business/faculty-members"
+      ],
+      "checked": "2026-10-26",
+      "notes": "School-wide roster with individual subject labels; the Faculty of Business page directly links it. No unverified Graduate School equivalence assumed. The Faculty of Business roster explicitly labels Bahriye Cesaret, Burak Celik, Nagihan Comez Dolgan and Bo Wei as Operations Management faculty.",
+      "reviewId": "faculty-0300"
+    },
+    {
+      "institution": "University of California, Davis",
+      "school": "Graduate School of Management",
+      "department": "Master of Science in Business Analytics — San Francisco programme office",
+      "facultyUrl": "https://gsm.ucdavis.edu/faculty-and-research/faculty-directory?glossary_filter=All&search=&field_content_group_target_id=66",
+      "sources": [
+        "https://gsm.ucdavis.edu/faculty-and-research/faculty-directory?glossary_filter=All&search=&field_content_group_target_id=66"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Verified by selecting the university directory Group filter and waiting for asynchronous results. Includes teaching faculty and emeriti. The Business Analytics filter returns Hemant Bhargava, Jorn Boehnke, Pantelis Loupos, Catherine Yang and other listed faculty.",
+      "reviewId": "faculty-0473"
+    },
+    {
+      "institution": "University of California, Davis",
+      "school": "Graduate School of Management",
+      "department": "Operations Management",
+      "facultyUrl": "https://gsm.ucdavis.edu/faculty-and-research/faculty-directory?glossary_filter=All&search=&field_content_group_target_id=70",
+      "sources": [
+        "https://gsm.ucdavis.edu/faculty-and-research/faculty-directory?glossary_filter=All&search=&field_content_group_target_id=70"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Verified by selecting the university directory Group filter and waiting for asynchronous results. Includes teaching faculty and emeriti. The Operations Management filter returns Rachel Chen, Ed Arnheiter, David Woodruff, Yuan Yuan and other listed faculty.",
+      "reviewId": "faculty-0474"
+    },
+    {
+      "institution": "Augustana University",
+      "school": "Rydell School of Business",
+      "department": "Business",
+      "facultyUrl": "https://www.augie.edu/directory?combine=&field_directory_positions_target_id=25&field_department_name_target_id%5B0%5D=27&field_major_target_id%5B0%5D=140",
+      "sources": [
+        "https://www.augie.edu/directory?combine=&field_directory_positions_target_id=25&field_department_name_target_id%5B0%5D=27&field_major_target_id%5B0%5D=140"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official directory filtered to Faculty, Rydell School of Business, and Business academic program; inspected actual option values and results. Filtered roster names Cathy Marsh, Gregg Greenfield, Harsha Sammangi, Jaekyo Seo and Zahidul Karim with business faculty roles.",
+      "reviewId": "faculty-0036"
+    },
+    {
+      "institution": "Colorado State University",
+      "school": "College of Business",
+      "department": "Department of Management — Supply Chain Management",
+      "facultyUrl": "https://biz.colostate.edu/centers-institutes/supply-chain-management-forum/faculty",
+      "sources": [
+        "https://biz.colostate.edu/centers-institutes/supply-chain-management-forum/faculty",
+        "https://biz.colostate.edu/centers-institutes/supply-chain-management-forum"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official university-hosted Supply Chain Management faculty group roster within Management. The Supply Chain Management Forum faculty roster lists Rowan Hilend, John Macdonald, Finnegan McKinley, Haley Paluzzi and director Zachary Rogers.",
+      "reviewId": "faculty-0111"
+    },
+    {
+      "institution": "School of Knowledge Economy and Management (SKEMA Business School)",
+      "school": "",
+      "department": "Centre for Analytics and Operations — Operations Management",
+      "facultyUrl": "https://www.skema.edu/en/skema-centre-analytics-and-management-science",
+      "sources": [
+        "https://www.skema.edu/en/skema-centre-analytics-and-management-science"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Centre-level professor roster covering the named research specialization; no separate specialization-only list asserted. Team Professors names Federico Bobbio, Morteza Davari, Aida Jebali, Davide La Torre, Benjamin Legros and Bernardo Pagnoncelli; centre research includes operations and optimization.",
+      "reviewId": "faculty-0360"
+    },
+    {
+      "institution": "School of Knowledge Economy and Management (SKEMA Business School)",
+      "school": "",
+      "department": "Centre for Analytics and Operations — Optimization and Game Theory",
+      "facultyUrl": "https://www.skema.edu/en/skema-centre-analytics-and-management-science",
+      "sources": [
+        "https://www.skema.edu/en/skema-centre-analytics-and-management-science"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Centre-level professor roster covering the named research specialization; no separate specialization-only list asserted. Team Professors names Federico Bobbio, Morteza Davari, Aida Jebali, Davide La Torre, Benjamin Legros and Bernardo Pagnoncelli; centre research includes operations and optimization.",
+      "reviewId": "faculty-0361"
+    },
+    {
+      "institution": "School of Knowledge Economy and Management (SKEMA Business School)",
+      "school": "",
+      "department": "Centre for Artificial Intelligence",
+      "facultyUrl": "https://www.skema.edu/en/skema-centre-artificial-intelligence",
+      "sources": [
+        "https://www.skema.edu/en/skema-centre-artificial-intelligence"
+      ],
+      "checked": "2026-10-26",
+      "notes": "The centre page contains a Team Professors roster, distinct from its external scientific committee. Team Professors names Salma Andre, Christophe Bisson, Chitu Okoli and director Margherita Pagani.",
+      "reviewId": "faculty-0362"
+    },
+    {
+      "institution": "Grand Valley State University",
+      "school": "Seidman College of Business",
+      "department": "Management Department",
+      "facultyUrl": "https://www.gvsu.edu/seidman/form/6e5d5f89-fb66-4eb5-9eb2-50e1ccf7aed6/response?question_12671=Management",
+      "sources": [
+        "https://www.gvsu.edu/seidman/form/6e5d5f89-fb66-4eb5-9eb2-50e1ccf7aed6/response?question_12671=Management"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Official directory filtered to Management, including staff and faculty; pagination retained. The filtered table explicitly assigns Asli Akbulut, Chandresh Baid, Kyle Brink, Jean Essila and Lei Fan to Management.",
+      "reviewId": "faculty-0178"
+    },
+    {
+      "institution": "Aschaffenburg University of Applied Sciences",
+      "school": "Faculty of Engineering and Computer Science",
+      "department": "Digital Production Technologies",
+      "facultyUrl": "https://www.th-ab.de/hochschule/organisation/organisationseinheiten/labor-fuer-produktionstechnik",
+      "sources": [
+        "https://www.th-ab.de/hochschule/organisation/organisationseinheiten/labor-fuer-produktionstechnik",
+        "https://stellen.th-ab.de/jobposting/b2f7448c27f339fb58157e608988eeb3b14574c20"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Exact host laboratory page contains its named faculty leader; a one-person laboratory list, not an invented multi-person department or a personal profile. Job title is a professorship/recruitment field. Official Digital Production Technologies hiring call expressly assigns development of the production-technologies laboratory. The official laboratory page identifies its academic leader Prof. Dr.-Ing. Armin Denner and describes his production-technology research and teaching.",
+      "reviewId": "faculty-0029"
+    },
+    {
+      "institution": "New York University",
+      "school": "Leonard N. Stern School of Business",
+      "department": "OM and AI",
+      "facultyUrl": "https://www.stern.nyu.edu/experience-stern/about/departments-centers-initiatives/academic-departments/tops/faculty-staff/full-time-faculty",
+      "sources": [
+        "https://www.stern.nyu.edu/experience-stern/about/departments-centers-initiatives/academic-departments/tops/faculty-staff/full-time-faculty"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Links to the actual Operations Management group section within its parent department's roster; does not invent a separately constituted OM-and-AI department. Official indexed contents verified; direct requests intermittently return 403. Official full-time faculty page explicitly separates Operations Management Faculty from Technology and Statistics. Operations roster names Mor Armony, Jackie Baek, Srikanth Jagabathula, Clare Snyder, Wenqiang Xiao and Zhengyuan Zhou; Snyder's listed research explicitly includes Artificial Intelligence and Operations Management.",
+      "reviewId": "faculty-0272"
+    },
+    {
+      "institution": "Oakland University",
+      "school": "School of Business Administration",
+      "department": "Department of Decision and Information Sciences",
+      "facultyUrl": "https://www.oakland.edu/business/faculty-staff-directory/",
+      "sources": [
+        "https://www.oakland.edu/business/faculty-staff-directory/"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Exact department roster is in the Decision and Information Sciences tab of this shared directory. Tested native fragment #tabbed-content-65516 does not activate the tab, so it is deliberately omitted rather than represented as a working direct filter. Official directory contains a separately named Decision and Information Sciences roster, including Henry Aigbedo, Osman Aydas, Junhyun Bae, Venugopal Balijepally, department chair Vijayan Sugumaran and T. J. Wharton.",
+      "reviewId": "faculty-0292"
+    },
+    {
+      "institution": "Purdue University",
+      "school": "College of Engineering",
+      "department": "Lillian Gilbreth Postdoctoral Fellowships — Causal Foundation Models for Multimodal Precision Treatment-Response Discovery",
+      "facultyUrl": "https://engineering.purdue.edu/Engr/Research/GilbrethFellowships/ResearchProposals/2025-26/causal-foundation-models-for-multimodal-precision-treatmentresponse-discovery",
+      "sources": [
+        "https://engineering.purdue.edu/Engr/Research/GilbrethFellowships/ResearchProposals/2025-26/causal-foundation-models-for-multimodal-precision-treatmentresponse-discovery"
+      ],
+      "checked": "2026-10-25",
+      "notes": "This source entity is a specific interdisciplinary fellowship project, not a department. Its official two-person co-advisor list is the exact project faculty list; do not substitute one host department's broader roster. Official exact fellowship-project page explicitly lists both co-advisors: Nan Kong (Industrial Engineering and Biomedical Engineering) and Serena Jingchuan Guo (Pharmacy).",
+      "reviewId": "faculty-0315"
+    },
+    {
+      "institution": "Sabanci University",
+      "school": "Sabancı Business School",
+      "department": "Operations and Information Management",
+      "facultyUrl": "https://sbs.sabanciuniv.edu/en/faculty-members-research-area?group_id=261%2C262%2C264%2C265%2C266%2C267%2C1122&group_id2=1204",
+      "sources": [
+        "https://sbs.sabanciuniv.edu/en/faculty-members-research-area?group_id=261%2C262%2C264%2C265%2C266%2C267%2C1122&group_id2=1204"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Verified working official program filter; includes the university's displayed regular, visiting and network faculty categories. Selected the actual Operations Management and Information Systems program filter in a live browser. The university generated this URL and displayed Abdullah Dasci, Ayse Kocabiyikoglu, Burak Gokgur, Can Akkan, Melek Akin Ates and others, excluding the finance and marketing rosters.",
+      "reviewId": "faculty-0348"
+    },
+    {
+      "institution": "Southern Utah University",
+      "school": "Dixie L. Leavitt School of Business",
+      "department": "Department of Marketing, Entrepreneurship, Sales, and Analytics",
+      "facultyUrl": "https://www.suu.edu/business/directory.html",
+      "sources": [
+        "https://www.suu.edu/business/directory.html"
+      ],
+      "checked": "2026-10-25",
+      "notes": "The official shared directory has a complete, explicitly separated department section; no real section anchor exists, so no invented fragment was added. Live browser displayed the separately headed Department of Marketing, Entrepreneurship, Sales, and Analytics roster: chair Travis Simkins, Alexander Chaudhry, Ayesha Jamal, Xinglong Ju, Shankar Parajulee and others.",
+      "reviewId": "faculty-0375"
+    },
+    {
+      "institution": "University of Colorado Boulder",
+      "school": "Leeds School of Business",
+      "department": "Strategy, Entrepreneurship and Operations Division",
+      "facultyUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty",
+      "sources": [
+        "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty"
+      ],
+      "checked": "2026-10-25",
+      "notes": "JavaScript is required for this official directory; rendered contents verified. Live browser rendered the exact Strategy, Entrepreneurship and Operations division faculty roster, including Janet Bercovitz, Tony Tong, David Drake, Gloria Urrea, Thomas Vossen and Rui Zhang.",
+      "reviewId": "faculty-0485"
+    },
+    {
+      "institution": "Virginia Polytechnic Institute and State University",
+      "school": "College of Science",
+      "department": "Academy of Data Science",
+      "facultyUrl": "https://data.science.vt.edu/about/people.html",
+      "sources": [
+        "https://data.science.vt.edu/about/people.html"
+      ],
+      "checked": "2026-10-25",
+      "notes": "Exact Academy unit roster, not merely the master's-program subset or administrative contacts. Current official Academy of Data Science team page contains a distinct Faculty section naming Alan Lattimer, Frances McCarty, Scott Mutchler and Kurt Stein, all explicitly affiliated with the Academy. Administration is separately listed above.",
+      "reviewId": "faculty-0609"
+    },
+    {
+      "institution": "Harvard University",
+      "school": "Harvard Kennedy School",
+      "department": "Public Policy",
+      "facultyUrl": "https://www.hks.harvard.edu/faculty-profiles/faculty-list",
+      "sources": [
+        "https://www.hks.harvard.edu/faculty-profiles/faculty-list"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Public Policy is the broad hiring field at Harvard Kennedy School; this is the school faculty roster. The rendered official HKS Faculty List includes public policy professors Sharad Goel and Maya Sen, with senior, junior, emeritus and visiting faculty sections.",
+      "reviewId": "faculty-0184"
+    },
+    {
+      "institution": "The University of Hong Kong",
+      "school": "Faculty of Engineering",
+      "department": "Department of Data and Systems Engineering",
+      "facultyUrl": "https://www.dase.hku.hk/people/academic-staff",
+      "sources": [
+        "https://www.dase.hku.hk/people/academic-staff"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact department roster. The department Academic Staff list includes Y.H. Kuo, Max Z.J. Shen and F.N. Zhang, with titles and offices.",
+      "reviewId": "faculty-0430"
+    },
+    {
+      "institution": "University of Rhode Island",
+      "school": "College of Engineering",
+      "department": "Department of Mechanical, Industrial and Systems Engineering",
+      "facultyUrl": "https://web.uri.edu/mcise/people/",
+      "sources": [
+        "https://web.uri.edu/mcise/people/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact department roster. The Full-Time Faculty roster names department chair Carl-Ernst Rousseau, Manbir Sodhi and Jyh-Hone Wang, all explicitly identified with Mechanical, Industrial and Systems Engineering.",
+      "reviewId": "faculty-0556"
+    },
+    {
+      "institution": "University of Rochester",
+      "school": "Simon Business School",
+      "department": "Operations Management",
+      "facultyUrl": "https://simon.rochester.edu/faculty-research/faculty-directory?field_dm_concentration_target_id=852",
+      "sources": [
+        "https://simon.rochester.edu/faculty-research/faculty-directory?field_dm_concentration_target_id=852"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Persistent Operations Management filter tested in browser. The browser-rendered Operations Management filter lists Henri Groenevelt, Phillip Lederer, Ricky Roet-Green, Yaron Shaposhnik and Vera Tilson.",
+      "reviewId": "faculty-0557"
+    },
+    {
+      "institution": "The University of Hong Kong",
+      "school": "Faculty of Business and Economics (HKU Business School)",
+      "department": "Innovation and Information Management",
+      "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate",
+      "sources": [
+        "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact subject-area filter verified. Browser-rendered Innovation and Information Management professoriate filter lists Michael C.L. Chau, Hailiang Chen, Yulin Fang and Xing Hu, with two pages of members.",
+      "reviewId": "faculty-0429"
+    },
+    {
+      "institution": "University of Cambridge",
+      "school": "Cambridge Judge Business School",
+      "department": "Organisational Theory and Information Systems",
+      "facultyUrl": "https://www.jbs.cam.ac.uk/faculty-research/subject-groups/organisational-theory-information-systems/members/?area=3183&subject=Organisational+Theory+%26+Information+Systems",
+      "sources": [
+        "https://www.jbs.cam.ac.uk/faculty-research/subject-groups/organisational-theory-information-systems/members/?area=3183&subject=Organisational+Theory+%26+Information+Systems"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact subject-group faculty list verified. Browser-rendered subject-group faculty filter displays 14 results including Michael Barrett, Jennifer Howard-Grenville and Virginia Leavell.",
+      "reviewId": "faculty-0478"
+    },
+    {
+      "institution": "The University of Sydney",
+      "school": "The University of Sydney Business School",
+      "department": "Business Analytics",
+      "facultyUrl": "https://profiles.sydney.edu.au/groups/652445/experts",
+      "sources": [
+        "https://www.sydney.edu.au/business/schools/school-of-business-analytics-and-marketing.html",
+        "https://profiles.sydney.edu.au/groups/652445/experts"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Business Analytics is now within the combined School of Business Analytics and Marketing; the official successor unit roster includes both disciplines. The current School of Business Analytics and Marketing links directly to its 56-person academic roster. It includes Business Analytics lecturers Li Chen and Qin Fang and associate professor Boris Choy.",
+      "reviewId": "faculty-0433"
+    },
+    {
+      "institution": "Howard University",
+      "school": "School of Business",
+      "department": "Department of Information Systems and Supply Chain Management — Business Analytics",
+      "facultyUrl": "https://business.howard.edu/departments/information-systems-supply-chain-management",
+      "sources": [
+        "https://business.howard.edu/departments/information-systems-supply-chain-management"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact department faculty roster inspected. The department page contains the full linked faculty roster, including Karthik Balasubramanian, Angela Lee Jones, Iman Ghalehkhondabi and Anupam Kumar, each labelled Information Systems and Supply Chain Management.",
+      "reviewId": "faculty-0194"
+    },
+    {
+      "institution": "University of North Carolina at Charlotte",
+      "school": "William States Lee College of Engineering",
+      "department": "Industrial and Systems Engineering",
+      "facultyUrl": "https://engineering.charlotte.edu/academics/department/industrial-systems-engineering/faculty-staff/",
+      "sources": [
+        "https://engineering.charlotte.edu/academics/department/industrial-systems-engineering/faculty-staff/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact department faculty roster inspected. Official department Faculty and Staff roster lists interim chair Churlzu Lim, Zheming Gao, Simon Hsiang and Yesim Sireli with department labels and offices.",
+      "reviewId": "faculty-0540"
+    },
+    {
+      "institution": "Northwestern University",
+      "school": "Kellogg School of Management",
+      "department": "Center for Science of Science and Innovation",
+      "facultyUrl": "https://www.kellogg.northwestern.edu/academics-research/science-of-science/faculty-and-contributors/",
+      "sources": [
+        "https://www.kellogg.northwestern.edu/academics-research/science-of-science/faculty-and-contributors/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Center-specific leadership and researchers roster verified in browser. The rendered page lists Dashun Wang and Alicia Loffler as leadership and research professors Sirag Erkol, Alexander Furnas, Jari Kuusisto and Yifan Qian, followed by other researchers.",
+      "reviewId": "faculty-0289"
+    },
+    {
+      "institution": "University of South Carolina",
+      "school": "Molinaroli College of Engineering and Computing",
+      "department": "Department of Integrated Information Technology",
+      "facultyUrl": "https://sc.edu/study/colleges_schools/engineering_and_computing/departments/integrated_information_technology/our_people/index.php",
+      "sources": [
+        "https://sc.edu/study/colleges_schools/engineering_and_computing/departments/integrated_information_technology/our_people/index.php"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact department roster. The department Our People page lists chair Jorge Crichigno, Nicholas D. Boltin, Travis Dalton, Neset Hikmet and Elie Kfoury.",
+      "reviewId": "faculty-0562"
+    },
+    {
+      "institution": "Valley City State University",
+      "school": "",
+      "department": "Department of Business",
+      "facultyUrl": "https://catalog.vcsu.edu/undergraduate-catalog/departments/business/#facultytext",
+      "sources": [
+        "https://catalog.vcsu.edu/undergraduate-catalog/departments/business/#facultytext"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Current official catalog department roster; direct Faculty tab. The 2026–2027 Department of Business Faculty tab lists Sandra Dally, Wesam Helmi, Tammy Katuin, Amardeep Kaur, Zach Revier and Wesley Wright. Browser confirmed the fragment selects the Faculty tab.",
+      "reviewId": "faculty-0602"
+    },
+    {
+      "institution": "Rockhurst University",
+      "school": "College of Business and Technology",
+      "department": "Analytics and Technology",
+      "facultyUrl": "https://www.rockhurst.edu/departments-and-offices/analytics-technology",
+      "sources": [
+        "https://www.rockhurst.edu/departments-and-offices/analytics-technology"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact unit roster linked by the degree program Faculty button. The Analytics and Technology departmental directory lists Shahid Ali, Matt Heinrich, Siyuan Lin and David Lingerfelt with academic titles.",
+      "reviewId": "faculty-0336"
+    },
+    {
+      "institution": "Wilson College",
+      "school": "",
+      "department": "Business — Supply Chain Management",
+      "facultyUrl": "https://www.wilson.edu/supply-chain-management-faculty",
+      "sources": [
+        "https://www.wilson.edu/supply-chain-management-faculty"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Program-specific faculty page; one listed faculty member. The official Supply Chain Management Faculty page names Lance Cain, Assistant Professor of Business. The program navigation explicitly identifies this as its faculty page.",
+      "reviewId": "faculty-0627"
+    },
+    {
+      "institution": "Technical University of Munich",
+      "school": "School of Computation, Information and Technology",
+      "department": "Department of Computer Science",
+      "facultyUrl": "https://www.cs.cit.tum.de/en/cs/people/professors/",
+      "sources": [
+        "https://www.cs.cit.tum.de/en/cs/people/professors/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact department professors directory. The current English-language Department of Computer Science Professors roster lists Martin Bichler, Felix Brandt, Susanne Albers and many other department professors.",
+      "reviewId": "faculty-0393"
+    },
+    {
+      "institution": "Rochester Institute of Technology",
+      "school": "Saunders College of Business",
+      "department": "Department of Management",
+      "facultyUrl": "https://www.rit.edu/business/faculty-directory?term_node_tid_depth=255087",
+      "sources": [
+        "https://www.rit.edu/business/faculty-directory?term_node_tid_depth=255087"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Persistent Management department filter verified. The rendered directory states Showing Results for Management, Dept. of and lists Nikisha Alcindor, Kristin Bain, Rich DeJordy and Richard DeMartino.",
+      "reviewId": "faculty-0334"
+    },
+    {
+      "institution": "Rochester Institute of Technology",
+      "school": "Saunders College of Business",
+      "department": "Management",
+      "facultyUrl": "https://www.rit.edu/business/faculty-directory?term_node_tid_depth=255087",
+      "sources": [
+        "https://www.rit.edu/business/faculty-directory?term_node_tid_depth=255087"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Same official Management department roster for the shorter legacy label. The rendered directory states Showing Results for Management, Dept. of and lists Nikisha Alcindor, Kristin Bain, Rich DeJordy and Richard DeMartino.",
+      "reviewId": "faculty-0335"
+    },
+    {
+      "institution": "Eastern Illinois University",
+      "school": "Lumpkin College of Business and Technology",
+      "department": "School of Business",
+      "facultyUrl": "https://www.eiu.edu/business/faculty.php",
+      "sources": [
+        "https://www.eiu.edu/business/faculty.php",
+        "https://www.eiu.edu/_eiu15/include/global/profile-frame-gsm2.php?site=45"
+      ],
+      "checked": "2026-10-26",
+      "notes": "School of Business is the exact listed academic unit. Names are inside the page embedded directory. The official Faculty page embeds profile-frame-gsm2.php?site=45, whose rendered roster includes Farhad Sadeh, Mark Bayer, David Boggs, Nan Tina Wang and Larry White.",
+      "reviewId": "faculty-0140"
+    },
+    {
+      "institution": "University of Maine at Augusta",
+      "school": "College of Professional Studies",
+      "department": "Business Administration - Management",
+      "facultyUrl": "https://www.uma.edu/academics/programs/business/faculty/",
+      "sources": [
+        "https://www.uma.edu/academics/programs/business/faculty/"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Management is a Business Administration major rather than a separately listed department; this is the program faculty roster. The official Business and Financial Services Faculty list includes Business Management coordinator David Leach, management professor Frank Bean III and Assistant Professor of Business Management Andrew Marianski.",
+      "reviewId": "faculty-0512"
+    },
+    {
+      "institution": "University of Southern Indiana",
+      "school": "Romain College of Business",
+      "department": "Department of Management and Information Sciences — Computer Information Systems",
+      "facultyUrl": "https://www.usi.edu/business/computer-information-systems/faculty",
+      "sources": [
+        "https://www.usi.edu/business/computer-information-systems/faculty"
+      ],
+      "checked": "2026-10-26",
+      "notes": "Exact Computer Information Systems faculty subset within Management and Information Sciences. The official Computer Information Systems Faculty roster lists Abbas Foroughi, Jiaying Liu, Yutong Liu and Kenneth Shemroske, together with department chair Nicholas Rhew.",
+      "reviewId": "faculty-0568"
     }
   ]
 }
