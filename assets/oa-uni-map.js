@@ -74,8 +74,8 @@
     });
     var status = el('p',{class:'oa-map-status',role:'status','aria-live':'polite'});
     var mapEl = el('div',{class:'oa-uni-map',id:'oa-uni-map',role:'region','aria-label':'University locations map','aria-describedby':'oa-map-help'});
-    var help = el('p',{id:'oa-map-help',class:'oa-map-help',text:'Select a logo for school details, or a numbered group to zoom in automatically. The list below provides the same details without using the map.'});
-    var legend = el('p',{class:'oa-map-legend',text:'Logo: school or campus location · Number: grouped locations · Initials: logo unavailable. Locations are approximate.'});
+    var help = el('p',{id:'oa-map-help',class:'oa-map-help',text:'Select a logo for school details, or a numbered group to reveal its locations in one click. The list below provides the same details without using the map.'});
+    var legend = el('p',{class:'oa-map-legend',text:'Logo: school or campus location · Number: grouped locations · Initials: logo unavailable. Lines connect separated logos to their locations. Locations are approximate.'});
     var details = el('details',{class:'oa-map-results'});
     var summary = el('summary',{text:'Matching universities'}), resultList=el('ul',{});
     details.append(summary,resultList);
@@ -115,7 +115,17 @@
         return L.divIcon({className:'oa-map-cluster',html:'<span>'+count+'</span>',iconSize:[size,size]});
       }}).addTo(map);
     var currentPoints=[],currentMissing=[],currentLayers=new Set(),markerCache=new WeakMap(),pointSearchCache=new WeakMap(),drawn=false,markers=new Map(),opener=null,autoFrame=true,framing=false;
+    var expandedMarkers=[],expandedLayer=L.layerGroup().addTo(map);
+    function clearExpanded() {
+      if(!expandedMarkers.length)return;
+      expandedLayer.clearLayers();
+      var restore=expandedMarkers;expandedMarkers=[];
+      restore.forEach(function(item){item.marker.setLatLng(item.location);item.marker.setZIndexOffset(0);});
+      cluster.addLayers(restore.map(function(item){return item.marker;}));
+    }
+    map.on('zoomstart dragstart click resize',clearExpanded);
     function frame(points) {
+      clearExpanded();
       framing=true;autoFrame=true;
       if(region==='world') map.fitBounds([[-56,-172],[76,180]],{padding:[8,8],animate:false});
       else if(points.length) map.fitBounds(L.latLngBounds(points.map(function(p){return [p.lat,p.lng];})).pad(.1),{maxZoom:points.length===1?8:5,animate:false});
@@ -243,12 +253,30 @@
     mapEl.addEventListener('keydown',function(e){if(e.key==='Escape'){map.closePopup();} if((e.key===' '||e.key==='Enter')&&e.target.classList.contains('leaflet-marker-icon')){e.preventDefault();e.stopImmediatePropagation();e.target.click();}},true);
     cluster.on('clusterclick',function(e) {
       var all=e.layer.getAllChildMarkers();
-      map.closePopup();
-      if(map.getZoom()>=map.getMaxZoom() || all.every(function(m){return m.getLatLng().equals(all[0].getLatLng());})) {
-        e.layer.spiderfy();
-      } else {
-        e.layer.zoomToBounds({padding:[35,35],maxZoom:Math.min(map.getMaxZoom(),map.getZoom()+3)});
-      }
+      map.closePopup();clearExpanded();
+      // Fit the entire selected group in one step. A fixed zoom increment
+      // leaves nested clusters, while zooming to the closest pair hides distant members.
+      map.fitBounds(L.latLngBounds(all.map(function(m){return m.getLatLng();})),{paddingTopLeft:[40,40],paddingBottomRight:[80,40],maxZoom:17,animate:false});
+      cluster.removeLayers(all);
+      var size=map.getSize(),placed=[],slots=[],gap=54;
+      for(var y=32;y<=size.y-32;y+=gap)for(var x=32;x<=size.x-76;x+=gap)slots.push(L.point(x,y));
+      function free(p){return placed.every(function(q){return p.distanceTo(q)>=gap;});}
+      // Preserve the actual coordinates in the point and restore the marker
+      // before any navigation/filter change. Only crowded logo positions move.
+      all.sort(function(a,b){return a.oaCard.id.localeCompare(b.oaCard.id);});
+      all.forEach(function(m){
+        var location=m.getLatLng(),anchor=map.latLngToContainerPoint(location);
+        var position=L.point(Math.max(32,Math.min(size.x-76,anchor.x)),Math.max(32,Math.min(size.y-32,anchor.y)));
+        if(!free(position)){
+          var nearest=null,distance=Infinity;
+          slots.forEach(function(slot){var d=slot.distanceTo(anchor);if(d<distance&&free(slot)){nearest=slot;distance=d;}});
+          if(nearest)position=nearest;
+        }
+        placed.push(position);expandedMarkers.push({marker:m,location:location});
+        var display=map.containerPointToLatLng(position);
+        if(position.distanceTo(anchor)>1)L.polyline([location,display],{color:palette().color,weight:1.5,opacity:.8,interactive:false}).addTo(expandedLayer);
+        m.setLatLng(display).setZIndexOffset(1000).addTo(expandedLayer);
+      });
     });
     function labelClusters() {
       mapEl.querySelectorAll('.oa-map-cluster').forEach(function(n){n.setAttribute('role','button');n.setAttribute('aria-label',n.textContent+' grouped locations. Zoom in or expand markers');n.setAttribute('tabindex','0');});
@@ -271,7 +299,7 @@
         entry.addEventListener('toggle',function(){
           if(!entry.open||built)return;built=true;
           entry.appendChild(cardContent(c,m&&m.oaPoint));
-          if(m){var b=el('button',{type:'button',text:'Show on map'});b.addEventListener('click',function(){cluster.zoomToShowLayer(m,function(){openPopup(cardContent(c,m.oaPoint),m.getLatLng(),b);});});entry.appendChild(b);}
+          if(m){var b=el('button',{type:'button',text:'Show on map'});b.addEventListener('click',function(){clearExpanded();cluster.zoomToShowLayer(m,function(){openPopup(cardContent(c,m.oaPoint),m.getLatLng(),b);});});entry.appendChild(b);}
         });
         item.appendChild(entry);fragment.appendChild(item);
       });
@@ -316,6 +344,7 @@
       // markers, popups and expanded accessible results in that case.
       if(drawn&&keepView&&points.length===currentPoints.length&&points.every(function(p,i){return p===currentPoints[i];})&&missing.length===currentMissing.length&&missing.every(function(c,i){return c===currentMissing[i];}))return;
       var restoreFocus=!!(map._popup&&map.hasLayer(map._popup));
+      clearExpanded();
       map.closePopup();markers.clear();currentPoints=points;currentMissing=missing;drawn=true;
       if(!keepView)frame(points);
       var layers=[];
