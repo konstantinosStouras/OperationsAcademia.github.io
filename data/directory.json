@@ -17992,7 +17992,15 @@
   "mapSearchTerms": [
    "College of Business and Analytics",
    "School of Analytics, Finance, and Economics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "southern-illinois-analytics-rehn": {
+    "facultyUrl": "https://faculty.siu.edu/index.php",
+    "facultyDirectoryHint": "Under Academic Programs, inspect Business Analytics, Economics and Finance in turn; use Load All for a complete filtered roster."
+   }
+  },
+  "facultyUrl": "https://faculty.siu.edu/index.php",
+  "facultyDirectoryHint": "Under Academic Programs, inspect Business Analytics, Economics and Finance in turn; use Load All for a complete filtered roster."
  },
  {
   "id": "southern-methodist-university____it-om",
@@ -20413,7 +20421,15 @@
   "mapSearchTerms": [
    "School of Business",
    "Management — Operations and Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "location-verified-606": {
+    "facultyUrl": "https://business.tcnj.edu/wp-content/uploads/sites/219/2026/09/Fall-2026-Faculty-Office-Hours-7.pdf",
+    "facultyDirectoryHint": "Management faculty are listed in the university's Fall 2026 faculty directory (PDF). Find Management in the Department column on pages 2-8."
+   }
+  },
+  "facultyUrl": "https://business.tcnj.edu/wp-content/uploads/sites/219/2026/09/Fall-2026-Faculty-Office-Hours-7.pdf",
+  "facultyDirectoryHint": "Management faculty are listed in the university's Fall 2026 faculty directory (PDF). Find Management in the Department column on pages 2-8."
  },
  {
   "id": "hebrew-university-of-jerusalem__hebrew-university-business-school__operations-research",
@@ -21445,7 +21461,15 @@
   "mapSearchTerms": [
    "School of Business, Education and Sport",
    "Division of Business - Supply Chain Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "tusculum-business-meen": {
+    "facultyUrl": "https://web.tusculum.edu/directory/",
+    "facultyDirectoryHint": "Find entries labelled Department: Division of Business; other division entries are outside this program's parent unit."
+   }
+  },
+  "facultyUrl": "https://web.tusculum.edu/directory/",
+  "facultyDirectoryHint": "Find entries labelled Department: Division of Business; other division entries are outside this program's parent unit."
  },
  {
   "id": "ubc-sauder-school-of-business____om",
@@ -22532,6 +22556,14 @@
    "Alberta School of Business",
    "Department of Accounting and Business Analytics"
   ],
+  "mapDepartmentLinks": {
+   "alberta-accounting-business-analytics-business-building": {
+    "facultyUrl": "https://apps.ualberta.ca/directory/search/department/140200",
+    "facultyDirectoryHint": "This exact department directory also includes staff and student employees. Use the Title column to identify professors and lecturers."
+   }
+  },
+  "facultyUrl": "https://apps.ualberta.ca/directory/search/department/140200",
+  "facultyDirectoryHint": "This exact department directory also includes staff and student employees. Use the Title column to identify professors and lecturers.",
   "deptUrl": "https://www.ualberta.ca/en/accounting-business-analytics/people.html?discipline=OperationsManagement",
   "deptUrlInherited": true
  },
@@ -22555,6 +22587,14 @@
    "Department of Accounting and Business Analytics"
   ],
   "country": "Canada",
+  "mapDepartmentLinks": {
+   "alberta-accounting-business-analytics-business-building": {
+    "facultyUrl": "https://apps.ualberta.ca/directory/search/department/140200",
+    "facultyDirectoryHint": "This exact department directory also includes staff and student employees. Use the Title column to identify professors and lecturers."
+   }
+  },
+  "facultyUrl": "https://apps.ualberta.ca/directory/search/department/140200",
+  "facultyDirectoryHint": "This exact department directory also includes staff and student employees. Use the Title column to identify professors and lecturers.",
   "deptUrl": "https://www.ualberta.ca/en/accounting-business-analytics/people.html?discipline=OperationsManagement",
   "deptUrlInherited": true
  },
@@ -22591,7 +22631,15 @@
   "mapSearchTerms": [
    "Alberta School of Business",
    "Department of Accounting and Business Analytics"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "alberta-accounting-business-analytics-business-building": {
+    "facultyUrl": "https://apps.ualberta.ca/directory/search/department/140200",
+    "facultyDirectoryHint": "This exact department directory also includes staff and student employees. Use the Title column to identify professors and lecturers."
+   }
+  },
+  "facultyUrl": "https://apps.ualberta.ca/directory/search/department/140200",
+  "facultyDirectoryHint": "This exact department directory also includes staff and student employees. Use the Title column to identify professors and lecturers."
  },
  {
   "id": "university-of-alberta__alberta-school-of-business__accounting-operations-and-information-systems",
@@ -23619,7 +23667,15 @@
   "mapSearchTerms": [
    "Barry S. Miller College of Business",
    "Intelligent Work Systems"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "central-florida-intelligent-work-business1": {
+    "facultyUrl": "https://business.ucf.edu/faculty/",
+    "facultyDirectoryHint": "College faculty directory; this hiring initiative spans departments."
+   }
+  },
+  "facultyUrl": "https://business.ucf.edu/faculty/",
+  "facultyDirectoryHint": "College faculty directory; this hiring initiative spans departments."
  },
  {
   "id": "university-of-chicago__booth-school-of-business",
@@ -25921,7 +25977,8 @@
   "lastPosted": "2025-10-02",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved",
-  "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html"
+  "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html",
+  "facultyDirectoryHint": "School faculty directory; this hiring initiative spans departments."
  },
  {
   "id": "university-of-miami__miami-herbert-business-school__management-area",
@@ -28584,7 +28641,16 @@
   ],
   "mapDepartmentLinks": {
    "texas-arlington-ai-participating-business": {
-    "facultyUrl": "https://www.uta.edu/academics/schools-colleges/business/contact"
+    "facultyUrl": "https://www.uta.edu/academics/schools-colleges/business/contact",
+    "facultyDirectoryHint": "Participating college faculty directory; the hiring call does not assign a final department."
+   },
+   "texas-arlington-ai-participating-engineering": {
+    "facultyUrl": "https://www.uta.edu/academics/faculty",
+    "facultyDirectoryHint": "Under Search College/Dept Name, click Select from list, go to list page 2, and choose College of Engineering. Browse the resulting profile pages."
+   },
+   "texas-arlington-ai-participating-science": {
+    "facultyUrl": "https://www.uta.edu/academics/faculty",
+    "facultyDirectoryHint": "Under Search College/Dept Name, click Select from list, go to list page 2, and choose College of Science. Browse the resulting profile pages."
    }
   }
  },
@@ -29260,7 +29326,19 @@
   "mapSearchTerms": [
    "School of Business",
    "Decision Sciences"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "virgin-islands-decision-sciences-st-croix-evans": {
+    "facultyUrl": "https://www.uvi.edu/directory/index.html",
+    "facultyDirectoryHint": "Choose School of Business in Department, and Faculty in Type if desired; retain all locations and use the next-page control to see the complete roster."
+   },
+   "virgin-islands-decision-sciences-st-thomas-business": {
+    "facultyUrl": "https://www.uvi.edu/directory/index.html",
+    "facultyDirectoryHint": "Choose School of Business in Department, and Faculty in Type if desired; retain all locations and use the next-page control to see the complete roster."
+   }
+  },
+  "facultyUrl": "https://www.uvi.edu/directory/index.html",
+  "facultyDirectoryHint": "Choose School of Business in Department, and Faculty in Type if desired; retain all locations and use the next-page control to see the complete roster."
  },
  {
   "id": "university-of-virginia",
@@ -30249,10 +30327,12 @@
   ],
   "mapDepartmentLinks": {
    "valparaiso-business-analytics-urschel": {
-    "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search="
+    "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search=",
+    "facultyDirectoryHint": "College of Business directory; includes faculty and staff across business subjects."
    }
   },
-  "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search="
+  "facultyUrl": "https://www.valpo.edu/directory/?type=&department=cob&search=",
+  "facultyDirectoryHint": "College of Business directory; includes faculty and staff across business subjects."
  },
  {
   "id": "vanderbilt-university__owen-graduate-school-of-management__operations-management-and-quantitative-methods",
