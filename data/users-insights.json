@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-26T23:27:11.216Z",
- "members": 411,
+ "generated": "2026-10-27T02:23:40.634Z",
+ "members": 412,
  "k": 3,
  "affiliation": {
-  "listed": 327,
+  "listed": 328,
   "other": 49,
   "none": 35
  },
@@ -87,6 +87,11 @@
    },
    {
     "name": "Ohio State University",
+    "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "Pennsylvania State University",
     "country": "United States",
     "members": 4
    },
@@ -176,11 +181,6 @@
     "members": 3
    },
    {
-    "name": "Pennsylvania State University",
-    "country": "United States",
-    "members": 3
-   },
-   {
     "name": "Stanford University",
     "country": "United States",
     "members": 3
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 206
+    "members": 207
    },
    {
     "name": "Canada",
