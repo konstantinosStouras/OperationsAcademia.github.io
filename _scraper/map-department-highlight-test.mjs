@@ -40,7 +40,8 @@ async function visibleMatch(page){
   const row=document.querySelector('.oa-map-popup .oa-map-department.oa-map-selected-department');
   if(!row)return false;
   const box=row.closest('.leaflet-popup-content').getBoundingClientRect(),label=row.querySelector('.oa-map-match-label').getBoundingClientRect(),name=row.querySelector('.oa-map-department-name').getBoundingClientRect();
-  return label.top>=box.top-1&&name.bottom<=box.bottom+1;
+  const header=row.closest('.oa-uni-pop').querySelector('.oa-map-card-identity').getBoundingClientRect();
+  return header.top>=box.top-1&&header.bottom<=box.bottom&&label.top>=header.bottom&&name.bottom<=box.bottom+1;
  },null,{timeout:5000});
 }
 try{
@@ -88,11 +89,23 @@ try{
   assert.match(await page.locator('.oa-map-popup .oa-map-selected-department .oa-map-department-name').innerText(),/Industrial and Enterprise Systems Engineering/);
   assert.equal(await page.locator('.oa-map-popup .oa-map-match-label').innerText(),'Matches your search');
   await visibleMatch(page);
+  assert.match(await page.locator('.oa-map-card-identity').innerText(),/Grainger College of Engineering/);
+  assert.match(await page.locator('.oa-map-card-identity').innerText(),/University of Illinois/);
   // Job-specific highlighting is retained, but cannot leak after clearing filters.
   await page.goto(base+'/universities?view=map&filterA='+encodeURIComponent('University of Illinois at Urbana-Champaign')+'&focus=department&school='+encodeURIComponent('Gies College of Business')+'&department='+encodeURIComponent('Information Systems, Operations Management, Supply Chain Management, and Analytics'),{waitUntil:'domcontentloaded'});
   await page.waitForSelector('.oa-map-popup');assert.ok(await page.locator('.oa-map-popup .oa-map-selected-department').count()>0);
   assert.equal(await page.locator('.oa-map-popup .oa-map-match-label').first().innerText(),'Requested department');
   await visibleMatch(page);
+  assert.match(await page.locator('.oa-map-card-identity').innerText(),/Gies College of Business/);
+  assert.match(await page.locator('.oa-map-card-identity').innerText(),/University of Illinois/);
+  await page.setViewportSize({width:width<600?568:1100,height:width<600?390:700});await visibleMatch(page);
+  await page.setViewportSize({width,height});await visibleMatch(page);
+  if(process.env.MAP_SCREENSHOTS)await page.locator('.oa-map-popup').screenshot({path:path.join(process.env.MAP_SCREENSHOTS,'school-and-department-'+width+'.png')});
+  await page.locator('.oa-map-popup .leaflet-popup-content').evaluate(e=>{e.scrollTop=e.scrollHeight;});
+  assert.ok(await page.locator('.oa-map-popup .oa-map-card-identity').evaluate(e=>{
+   const r=e.getBoundingClientRect(),box=e.closest('.leaflet-popup-content').getBoundingClientRect();
+   return r.top>=box.top-1&&r.bottom<=box.bottom;
+  }),'full school identity remains visible even during manual scrolling');
   await page.getByRole('button',{name:'Clear filters',exact:true}).click();
   await page.locator('#oaf-university').fill('University of Illinois at Urbana-Champaign');
   await page.waitForFunction(()=>testMap.shown().length===2&&document.querySelectorAll('.oa-map-logo').length===2);

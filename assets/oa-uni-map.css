@@ -85,3 +85,12 @@ body.v3 .oa-uni a.oa-map-primary-action,.oa-uni .leaflet-popup .oa-uni-pop a.oa-
 .oa-uni .oa-map-department.oa-map-selected-department { background:#e7f2ed;border-radius:6px;padding:10px 12px;border-left:3px solid var(--map-link); }
 [data-theme='dark'] .oa-uni .oa-map-department.oa-map-selected-department { background:#29483f; }
 .oa-uni .oa-map-match-label { display:block;color:var(--map-ink);font-size:12px;font-weight:700;line-height:1.5;margin-bottom:4px; }
+/* Keep the full school and university names above a revealed search match. */
+.oa-uni .oa-map-has-match .oa-map-card-identity { position:sticky;top:0;z-index:2;background:var(--map-surface);padding:0 0 10px;border-bottom:1px solid var(--map-rule); }
+.oa-uni .oa-map-has-match h3 { font-size:16px;line-height:1.35; }
+@media(max-width:640px) {
+ .oa-uni.oa-map-match-open .oa-uni-map { min-height:min(580px,calc(100svh - 24px)); }
+ .oa-uni .oa-map-has-match .oa-map-card-identity .oa-map-result-logo { display:none; }
+ .oa-uni .oa-map-has-match h3 { font-size:14px; }
+ .oa-uni .oa-map-has-match .oa-map-university-name { margin-top:4px;font-size:12px; }
+}
