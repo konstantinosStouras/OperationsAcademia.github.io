@@ -89,7 +89,7 @@ try{
    await page.goto(base+'/universities?view=map&filterA='+encodeURIComponent(query),{waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>window.testMap&&testMap.shown().length>0);
    if(await page.evaluate(()=>testMap.shown().length===1)){
-    await page.locator('.oa-map-logo').click();await page.waitForSelector('.oa-map-popup');
+    await page.waitForSelector('.oa-map-popup');
     console.log(query+': single location opens directly at '+width+'px');continue;
    }
    const count=await page.evaluate(()=>testMap.shown().length);

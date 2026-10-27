@@ -242,12 +242,12 @@
       var width=Math.max(120,Math.min(360,mapEl.clientWidth-108));
       return {maxWidth:width,minWidth:width,maxHeight:Math.max(100,mapEl.clientHeight-152)};
     }
-    function openPopup(content,latlng,source) {
+    function openPopup(content,latlng,source,keepFocus) {
       map.closePopup();
       opener=source||document.activeElement;
       L.popup(Object.assign(popupSize(),{pane:'schoolDetails',autoPan:false,className:'oa-map-popup'}))
         .setLatLng(latlng).setContent(content).openOn(map);
-      setTimeout(function(){if(!content.isConnected)return;content.parentElement.scrollTop=0;content.focus({preventScroll:true});},0);
+      setTimeout(function(){if(!content.isConnected)return;content.parentElement.scrollTop=0;if(!keepFocus)content.focus({preventScroll:true});},0);
     }
     map.on('popupopen',function(){host.classList.add('oa-map-popup-open');});
     map.on('popupclose',function(e){host.classList.remove('oa-map-popup-open');if(opener && document.contains(opener) && e.popup.getElement().contains(document.activeElement))opener.focus({preventScroll:true});opener=null;});
@@ -485,7 +485,15 @@
       var hasLocationSearch=(snapshot.filters||[]).some(function(f){
         return (f.key==='university'||f.key==='dept')&&f.values.some(function(value){return !!fold(value);});
       });
-      if(hasLocationSearch)revealSearch(false);
+      if(hasLocationSearch){
+        revealSearch(false);
+        if(currentLayers.size===1&&!currentMissing.length){
+          var only=currentLayers.values().next().value;
+          // Show the sole result without interrupting typing or dismissing a
+          // phone's keyboard. Resize/unchanged-data refreshes do not reopen it.
+          openPopup(cardContent(only.oaCard,only.oaPoint),only.getLatLng(),document.activeElement,true);
+        }
+      }
     }
     function update(next) {
       snapshot=next;

@@ -25,6 +25,15 @@ async function checkLogos(page,count){
  });
  for(const a of layout.boxes){assert.ok(a.left>=layout.map.left&&a.right<=layout.map.right&&a.top>=layout.map.top&&a.bottom<=layout.map.bottom,'logo fits map');for(const b of layout.boxes)if(a!==b)assert.ok(a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top,'logos stay separate');}
 }
+async function checkSingleCard(page,searchInput){
+ await page.waitForSelector('.oa-map-popup');
+ const state=await page.evaluate(()=>{
+  const map=document.querySelector('.oa-uni-map').getBoundingClientRect(),card=document.querySelector('.oa-map-popup').getBoundingClientRect(),controls=document.querySelector('.leaflet-top.leaflet-right').getBoundingClientRect();
+  return {actual:document.querySelector('.oa-uni-pop').dataset.mapCardId,expected:testMap.shown()[0].card.id,fits:card.top>=map.top&&card.bottom<=map.bottom&&card.left>=map.left&&card.right<controls.left};
+ });
+ assert.equal(state.actual,state.expected,'the sole matching location opens its own card');assert.ok(state.fits,'automatic card fits and leaves map controls accessible');
+ if(searchInput)assert.ok(await searchInput.evaluate(e=>document.activeElement===e),'automatic card preserves typing focus');
+}
 try{
  for(const width of [1280,390,320]){
   const page=await browser.newPage({viewport:{width,height:780},isMobile:width<600,hasTouch:width<600}),errors=[];
@@ -50,23 +59,35 @@ try{
   // User navigation must remain in place on an unchanged-data refresh.
   await page.evaluate(()=>testMap.map.setZoom(4,{animate:false}));
   await page.evaluate(()=>testMap.refresh());assert.equal(await page.evaluate(()=>testMap.map.getZoom()),4);
-  await search.fill('University of Chicago');await checkLogos(page,1);
+  await search.fill('University of Chicago');await checkLogos(page,1);await checkSingleCard(page,search);
+  // An automatic card survives rotation, but a deliberately closed card stays closed.
+  await page.setViewportSize({width:width<600?568:1100,height:width<600?390:700});await checkSingleCard(page,search);
+  await page.setViewportSize({width,height:780});await checkSingleCard(page,search);
+  await page.locator('.leaflet-popup-close-button').click();await page.waitForSelector('.oa-map-popup',{state:'detached'});
+  await page.evaluate(()=>testMap.refresh());await page.setViewportSize({width,height:700});await page.waitForTimeout(350);
+  assert.equal(await page.locator('.oa-map-popup').count(),0,'closing the card survives refresh and resize');
+  await page.locator('.oa-map-logo').click();await checkSingleCard(page);
+
   await search.fill('zzzz-no-university-matches');await page.waitForFunction(()=>testMap.shown().length===0);
   assert.equal(await page.locator('.oa-map-logo').count(),0,'no stale search markers');
+  await page.waitForSelector('.oa-map-popup',{state:'detached'});
   await search.fill('');await page.waitForFunction(()=>testMap.shown().length>700);
   assert.ok(await page.locator('.oa-map-cluster').count()>0,'clearing search returns world overview');
   // School and department searches also work without a university filter.
   const department=page.locator('#oaf-dept');
   await department.fill('Kellogg');await checkLogos(page,2);
+  assert.equal(await page.locator('.oa-map-popup').count(),0,'multiple matching locations do not auto-open a card');
   assert.ok(await department.evaluate(e=>document.activeElement===e),'school typing keeps focus');
   await page.setViewportSize({width:width<600?568:1100,height:width<600?390:700});await checkLogos(page,2);
   await page.setViewportSize({width,height:780});await checkLogos(page,2);
   const schoolLogo=page.locator('.oa-map-logo').first();if(width<600)await schoolLogo.tap();else await schoolLogo.click();
   await page.waitForSelector('.oa-map-popup');assert.match(await page.locator('.oa-map-popup').innerText(),/Kellogg School of Management/);
   await page.locator('.leaflet-popup-close-button').click();await page.waitForSelector('.oa-map-popup',{state:'detached'});
-  await department.fill('Industrial and Enterprise Systems Engineering');await checkLogos(page,1);
-  await search.fill('Northw');await department.fill('McCormick');await checkLogos(page,1);
-  await search.fill('');await checkLogos(page,1);
+  await department.fill('Industrial and Enterprise Systems Engineering');await checkLogos(page,1);await checkSingleCard(page,department);
+  await search.fill('Northw');await department.fill('McCormick');await checkLogos(page,1);await checkSingleCard(page,department);
+  await search.fill('');await checkLogos(page,1);await checkSingleCard(page,search);
+  await department.fill('Kellogg');await checkLogos(page,2);
+  assert.equal(await page.locator('.oa-map-popup').count(),0,'changing from one result to several closes the automatic card');
   await department.fill('zzzz-no-department-matches');await page.waitForFunction(()=>testMap.shown().length===0);
   assert.equal(await page.locator('.oa-map-logo').count(),0);
   await department.fill('');await page.waitForFunction(()=>testMap.shown().length>700);
@@ -78,7 +99,7 @@ try{
   const broad=await page.evaluate(()=>{const map=testMap.map,bounds=map.getContainer().getBoundingClientRect();let group;map.eachLayer(l=>{if(l instanceof L.MarkerClusterGroup)group=l;});const expanded=[];map.eachLayer(l=>{if(l.oaCard&&!group.hasLayer(l))expanded.push(l);});return {total:group.getLayers().length+expanded.length,shown:testMap.shown().length,visible:expanded.every(m=>{const r=m.getElement().getBoundingClientRect();return r.left>=bounds.left&&r.right<=bounds.right&&r.top>=bounds.top&&r.bottom<=bounds.bottom;})};});
   assert.equal(broad.total,broad.shown,'broad search retains every matching location');assert.ok(broad.visible);
   await page.goto(base+'/universities?view=map&dept=Kellogg',{waitUntil:'domcontentloaded'});await checkLogos(page,2);
-  await page.goto(base+'/universities?view=map&dept='+encodeURIComponent('Industrial and Enterprise Systems Engineering'),{waitUntil:'domcontentloaded'});await checkLogos(page,1);
+  await page.goto(base+'/universities?view=map&dept='+encodeURIComponent('Industrial and Enterprise Systems Engineering'),{waitUntil:'domcontentloaded'});await checkLogos(page,1);await checkSingleCard(page);
   for(const query of ['Northw','University of Illinois at Urbana-Champaign','INSEAD']){
    await page.goto(base+'/universities?view=map&filterA='+encodeURIComponent(query),{waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>window.testMap&&testMap.shown().length>0);
@@ -91,6 +112,6 @@ try{
   await page.getByRole('button',{name:'Clear filters',exact:true}).click();
   await search.fill('Northw');await checkLogos(page,4);
   assert.equal(await page.locator('.oa-map-popup').count(),0,'a new search supersedes the job card');
-  assert.deepEqual(errors,[]);console.log('University, school, and department auto-zoom; shared links, mobile resize, broad results, clearing, and job cards passed at '+width+'px');await page.close();
+  assert.deepEqual(errors,[]);console.log('Automatic single-result cards, typing focus, dismissal, mobile resize, multi-result search, and job links passed at '+width+'px');await page.close();
  }
 }finally{await browser.close();await new Promise(r=>server.close(r));}
