@@ -157,6 +157,38 @@
       var pop=el('div',{class:'oa-uni-pop','data-map-card-id':card.id,tabindex:'-1'});
       var departmentFilter=(snapshot.filters||[]).find(function(f){return f.key==='dept';});
       var departmentQueries=departmentFilter?departmentFilter.values.map(fold).filter(Boolean):[];
+      function locationKey(loc){
+        var address=fold(loc.address||'');
+        (card.countries||[]).concat(point&&point.country||'',loc.country||'').forEach(function(country){
+          var suffix=' '+fold(country);if(suffix.length>1&&address.endsWith(suffix))address=address.slice(0,-suffix.length);
+        });
+        return address;
+      }
+      function buildingKey(value){return fold(String(value||'').split(/[,;—]/)[0]).replace(/\s+building$/,'');}
+      function departmentLocations(row){
+        var found=new Map();
+        (row.locationSources||[]).forEach(function(v){
+          var loc=v.sourceLocation||v,address=locationKey(loc),shared=locationKey(point||{});
+          if(v.locationVerified===false||!address||/^https?:\/\//i.test(loc.address)||address===shared)return;
+          var building=buildingKey(loc.building),mainBuilding=buildingKey(point&&point.building);
+          var nearby=OAMapModel.located(loc)&&OAMapModel.located(point)&&L.latLng(loc.lat,loc.lng).distanceTo(L.latLng(point.lat,point.lng))<=150;
+          // Offices, floors, mailing formats and coordinate refinements within
+          // the same building do not need a second map address.
+          if(nearby&&building&&mainBuilding&&building===mainBuilding)return;
+          if(nearby&&mainBuilding&&!building&&fold(loc.address).indexOf(mainBuilding)!==-1)return;
+          found.set(address,loc);
+        });
+        return found;
+      }
+      function appendLocations(parent,locations,label){
+        if(!locations.size)return;
+        var details=el('details',{class:'oa-map-extra-locations'});details.appendChild(el('summary',{text:label}));
+        locations.forEach(function(loc){
+          var address=el('p',{}),text=loc.building&&fold(loc.address).indexOf(fold(loc.building))===-1?loc.building+' · '+loc.address:loc.address;
+          address.appendChild(makeLink(text,OAMapModel.located(loc)?'https://www.google.com/maps/search/?api=1&query='+loc.lat+','+loc.lng:''));details.appendChild(address);
+        });
+        parent.appendChild(details);
+      }
       function selectedDepartment(row,school) {
         if(!row.department)return false;
         var aliases=row.mapAliases||[];
@@ -179,7 +211,9 @@
         return Number(bMatch)-Number(aMatch)||Number(fold(b.name)===fold(targetSchool))-Number(fold(a.name)===fold(targetSchool));
       });
       var schoolNames=Array.from(new Set(schools.map(function(s){return OAMapModel.displayName(s.name||'');}).filter(Boolean)));
-      var title=schoolNames.length===1?schoolNames[0]:university;
+      var matchingSchool=schools.find(function(s){return (s.rows||[]).some(function(r){return selectedDepartment(r,s.name);});});
+      if(matchingSchool)pop.classList.add('oa-map-has-match');
+      var title=matchingSchool&&matchingSchool.name?OAMapModel.displayName(matchingSchool.name):schoolNames.length===1?schoolNames[0]:university;
       var header=el('header',{class:'oa-map-card-identity'}),identity=el('div',{class:'oa-map-card-name'});
       var brand=logoImage(card,point);if(brand)header.appendChild(brand);
       identity.appendChild(el('h3',{text:title}));
@@ -194,20 +228,30 @@
         address.appendChild(makeLink(point.address||point.building||point.label||university,'https://www.google.com/maps/search/?api=1&query='+point.lat+','+point.lng));
         location.appendChild(address);
       }
-      if(point&&point.locationVerified&&point.locationContext)location.appendChild(el('p',{class:'oa-map-location-context',text:point.locationContext}));
+      var locationContext=point&&point.locationContext||'';
+      // These describe the data model rather than helping a visitor find a place.
+      if(locationContext==='Current academic department'||/^One school across four locations\.|^Grouped under the graduate business school\./.test(locationContext))locationContext='';
+      if(point&&point.locationVerified&&locationContext)location.appendChild(el('p',{class:'oa-map-location-context',text:locationContext}));
       pop.appendChild(location);
       var departments=el('div',{class:'oa-map-card-departments'});
       schools.forEach(function(s) {
         var section=el('section',{class:'oa-map-card-school'});
+        var rowsWithDepartments=(s.rows||[]).filter(function(r){return !!r.department;});
+        var locationsByRow=new Map(rowsWithDepartments.map(function(r){return [r,departmentLocations(r)];}));
+        var commonLocations=new Map();
+        if(rowsWithDepartments.length>1)locationsByRow.get(rowsWithDepartments[0]).forEach(function(loc,k){
+          if(rowsWithDepartments.every(function(r){return locationsByRow.get(r).has(k);}))commonLocations.set(k,loc);
+        });
         var schoolFaculty=Array.from(new Set((s.rows||[]).filter(function(r){return !r.department&&!r.suppressFacultyLink&&/^https?:\/\//i.test(r.facultyUrl||'');}).map(function(r){return r.facultyUrl;})));
-        if(s.name&&schoolNames.length>1)section.appendChild(el('h4',{text:OAMapModel.displayName(s.name)}));
+        if(s.name&&schoolNames.length>1&&fold(OAMapModel.displayName(s.name))!==fold(title))section.appendChild(el('h4',{text:OAMapModel.displayName(s.name)}));
+        appendLocations(schoolNames.length===1?location:section,commonLocations,'Additional school locations');
         (s.rows||[]).slice().sort(function(a,b){return Number(!!selectedDepartment(b,s.name))-Number(!!selectedDepartment(a,s.name));}).forEach(function(r) {
           var department=OAMapModel.departmentName(r.department);
           var faculty=!r.suppressFacultyLink&&/^https?:\/\//i.test(r.facultyUrl||'')?r.facultyUrl:'';
           // A school-only listing has no department name to invent. Its school
           // name can still lead to a reviewed school faculty directory.
           if(!department){
-            var heading=schoolNames.length===1?identity.querySelector('h3'):section.querySelector('h4');
+            var heading=fold(OAMapModel.displayName(s.name))===fold(title)?identity.querySelector('h3'):section.querySelector('h4');
             if(schoolFaculty.length===1&&heading&&!heading.querySelector('a'))heading.replaceChildren(makeLink(heading.textContent,schoolFaculty[0]));
             return;
           }
@@ -219,21 +263,9 @@
           row.appendChild(p);
           if(!faculty)row.appendChild(el('p',{class:'oa-map-card-muted',text:'Faculty page not listed'}));
           else if(r.facultyDirectoryHint&&(!r._edit||!(r._edit.fields||[]).includes('facultyUrl')))row.appendChild(el('p',{class:'oa-map-card-muted',text:r.facultyDirectoryHint}));
-          if(r.locationReference==='school')row.appendChild(el('p',{class:'oa-map-location-context',text:'School location; department office not separately verified.'}));
-          var sourceDetails=(r.locationSources||[]).filter(function(v){return v.sourceLocation||v.locationContext||point&&(v.address&&v.address!==point.address||v.building&&v.building!==point.building||v.lat!==point.lat||v.lng!==point.lng);});
-          if(sourceDetails.length){
-            var details=el('details');details.appendChild(el('summary',{text:'Department location details'}));
-            var seenLocations=new Set();
-            sourceDetails.forEach(function(v){
-              var loc=v.sourceLocation||v,signature=[loc.building,loc.address,loc.addressSource].join('|');
-              if(seenLocations.has(signature))return;seenLocations.add(signature);
-              if(v.locationContext)details.appendChild(el('p',{text:v.locationContext}));
-              var address=el('p',{}),label=[loc.building,loc.address].filter(Boolean).join(' · ');
-              address.appendChild(makeLink(label,OAMapModel.located(loc)?'https://www.google.com/maps/search/?api=1&query='+loc.lat+','+loc.lng:''));
-              details.appendChild(address);
-            });
-            row.appendChild(details);
-          }
+          var departmentAddresses=new Map(locationsByRow.get(r)||[]);
+          commonLocations.forEach(function(_,k){departmentAddresses.delete(k);});
+          appendLocations(row,departmentAddresses,'Department location details');
           section.appendChild(row);
         });
         if(section.childElementCount)departments.appendChild(section);
@@ -268,19 +300,23 @@
       var match=content.querySelector('.oa-map-department.oa-map-selected-department');
       if(!match||!content.isConnected)return;
       var scroller=content.parentElement,box=scroller.getBoundingClientRect(),row=match.getBoundingClientRect();
-      // Scroll only the card, never the page or map, and leave an already visible
-      // match in place. Long rows start at their label and faculty link.
-      if(row.top<box.top||row.bottom>box.bottom)scroller.scrollTop+=row.top-box.top-4;
+      var header=content.querySelector('.oa-map-card-identity'),top=box.top+header.getBoundingClientRect().height+8;
+      // Keep the identity pinned above the match. Scroll only the card, never
+      // the page or map; long rows start at their label and faculty link.
+      if(row.top<top||row.bottom>box.bottom)scroller.scrollTop+=row.top-top;
     }
+    var identityObserver;
     function openPopup(content,latlng,source,keepFocus) {
       map.closePopup();
       opener=source||document.activeElement;
       L.popup(Object.assign(popupSize(),{pane:'schoolDetails',autoPan:false,className:'oa-map-popup'}))
         .setLatLng(latlng).setContent(content).openOn(map);
+      var header=content.querySelector('.oa-map-card-identity');
+      if(header){identityObserver=new ResizeObserver(function(){revealPopupMatch(content);});identityObserver.observe(header);}
       setTimeout(function(){if(!content.isConnected)return;content.parentElement.scrollTop=0;revealPopupMatch(content);if(!keepFocus)content.focus({preventScroll:true});},0);
     }
-    map.on('popupopen',function(){host.classList.add('oa-map-popup-open');});
-    map.on('popupclose',function(e){host.classList.remove('oa-map-popup-open');if(opener && document.contains(opener) && e.popup.getElement().contains(document.activeElement))opener.focus({preventScroll:true});opener=null;});
+    map.on('popupopen',function(e){host.classList.add('oa-map-popup-open');host.classList.toggle('oa-map-match-open',e.popup.getContent().classList.contains('oa-map-has-match'));});
+    map.on('popupclose',function(e){if(identityObserver){identityObserver.disconnect();identityObserver=null;}host.classList.remove('oa-map-popup-open','oa-map-match-open');if(opener && document.contains(opener) && e.popup.getElement().contains(document.activeElement))opener.focus({preventScroll:true});opener=null;});
     mapEl.addEventListener('keydown',function(e){if(e.key==='Escape'){if(map._popup&&map.hasLayer(map._popup))map.closePopup();else clearExpanded();} if((e.key===' '||e.key==='Enter')&&e.target.classList.contains('leaflet-marker-icon')){e.preventDefault();e.stopImmediatePropagation();e.target.click();}},true);
     function nearbyMarkers(all,capacity) {
       // Include the whole viewport plus a logo-sized margin, so nearby points
