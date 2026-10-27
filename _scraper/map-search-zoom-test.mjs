@@ -55,6 +55,30 @@ try{
   assert.equal(await page.locator('.oa-map-logo').count(),0,'no stale search markers');
   await search.fill('');await page.waitForFunction(()=>testMap.shown().length>700);
   assert.ok(await page.locator('.oa-map-cluster').count()>0,'clearing search returns world overview');
+  // School and department searches also work without a university filter.
+  const department=page.locator('#oaf-dept');
+  await department.fill('Kellogg');await checkLogos(page,2);
+  assert.ok(await department.evaluate(e=>document.activeElement===e),'school typing keeps focus');
+  await page.setViewportSize({width:width<600?568:1100,height:width<600?390:700});await checkLogos(page,2);
+  await page.setViewportSize({width,height:780});await checkLogos(page,2);
+  const schoolLogo=page.locator('.oa-map-logo').first();if(width<600)await schoolLogo.tap();else await schoolLogo.click();
+  await page.waitForSelector('.oa-map-popup');assert.match(await page.locator('.oa-map-popup').innerText(),/Kellogg School of Management/);
+  await page.locator('.leaflet-popup-close-button').click();await page.waitForSelector('.oa-map-popup',{state:'detached'});
+  await department.fill('Industrial and Enterprise Systems Engineering');await checkLogos(page,1);
+  await search.fill('Northw');await department.fill('McCormick');await checkLogos(page,1);
+  await search.fill('');await checkLogos(page,1);
+  await department.fill('zzzz-no-department-matches');await page.waitForFunction(()=>testMap.shown().length===0);
+  assert.equal(await page.locator('.oa-map-logo').count(),0);
+  await department.fill('');await page.waitForFunction(()=>testMap.shown().length>700);
+  assert.ok(await page.locator('.oa-map-cluster').count()>0,'clearing the final search restores overview');
+  // Broad department searches must reveal usable logos and keep distant results on the map.
+  await department.fill('Operations');
+  await page.waitForFunction(()=>testMap.shown().length>40&&testMap.shown().length<700&&document.querySelectorAll('.oa-map-logo').length>1);
+  assert.equal(await page.locator('.oa-map-expanded-panel').count(),0);
+  const broad=await page.evaluate(()=>{const map=testMap.map,bounds=map.getContainer().getBoundingClientRect();let group;map.eachLayer(l=>{if(l instanceof L.MarkerClusterGroup)group=l;});const expanded=[];map.eachLayer(l=>{if(l.oaCard&&!group.hasLayer(l))expanded.push(l);});return {total:group.getLayers().length+expanded.length,shown:testMap.shown().length,visible:expanded.every(m=>{const r=m.getElement().getBoundingClientRect();return r.left>=bounds.left&&r.right<=bounds.right&&r.top>=bounds.top&&r.bottom<=bounds.bottom;})};});
+  assert.equal(broad.total,broad.shown,'broad search retains every matching location');assert.ok(broad.visible);
+  await page.goto(base+'/universities?view=map&dept=Kellogg',{waitUntil:'domcontentloaded'});await checkLogos(page,2);
+  await page.goto(base+'/universities?view=map&dept='+encodeURIComponent('Industrial and Enterprise Systems Engineering'),{waitUntil:'domcontentloaded'});await checkLogos(page,1);
   for(const query of ['Northw','University of Illinois at Urbana-Champaign','INSEAD']){
    await page.goto(base+'/universities?view=map&filterA='+encodeURIComponent(query),{waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>window.testMap&&testMap.shown().length>0);
@@ -67,6 +91,6 @@ try{
   await page.getByRole('button',{name:'Clear filters',exact:true}).click();
   await search.fill('Northw');await checkLogos(page,4);
   assert.equal(await page.locator('.oa-map-popup').count(),0,'a new search supersedes the job card');
-  assert.deepEqual(errors,[]);console.log('Automatic typed and linked searches, resize, manual navigation, empty results, and department links passed at '+width+'px');await page.close();
+  assert.deepEqual(errors,[]);console.log('University, school, and department auto-zoom; shared links, mobile resize, broad results, clearing, and job cards passed at '+width+'px');await page.close();
  }
 }finally{await browser.close();await new Promise(r=>server.close(r));}

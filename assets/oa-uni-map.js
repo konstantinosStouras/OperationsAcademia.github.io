@@ -482,8 +482,10 @@
           return;
         }
       }
-      var universityFilter=(snapshot.filters||[]).find(function(f){return f.key==='university';});
-      if(universityFilter&&universityFilter.values.some(function(value){return !!fold(value);}))revealSearch(false);
+      var hasLocationSearch=(snapshot.filters||[]).some(function(f){
+        return (f.key==='university'||f.key==='dept')&&f.values.some(function(value){return !!fold(value);});
+      });
+      if(hasLocationSearch)revealSearch(false);
     }
     function update(next) {
       snapshot=next;
