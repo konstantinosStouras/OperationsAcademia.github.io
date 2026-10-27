@@ -92,21 +92,17 @@ try{
     await page.locator('.oa-map-logo').click();await page.waitForSelector('.oa-map-popup');
     console.log(query+': single location opens directly at '+width+'px');continue;
    }
-   await page.locator('.oa-map-cluster').first().waitFor();
-   const count=Number(await page.locator('.oa-map-cluster').first().innerText());
-   await page.evaluate(()=>{window.mapEvents=[];testMap.map.on('zoomstart dragstart click resize dblclick',e=>mapEvents.push({type:e.type,zoom:testMap.map.getZoom(),target:e.originalEvent?.target?.className}));});
-   if(width<600)await page.locator('.oa-map-cluster').first().tap();else await page.locator('.oa-map-cluster').first().click();
+   const count=await page.evaluate(()=>testMap.shown().length);
    await page.waitForFunction(count=>document.querySelectorAll('.oa-map-logo').length>=count,count);
-   assert.equal(await page.locator('.oa-map-cluster').count(),0,query+' leaves no nested bubbles');
+   assert.equal(await page.locator('.oa-map-cluster').count(),0,query+' expands automatically without a bubble click');
    for(let i=0;i<count;i++){
-    if(!await page.locator('.oa-map-logo').nth(i).count())console.log('Missing logo',query,width,i,await page.evaluate(()=>mapEvents));
     const logo=page.locator('.oa-map-logo').nth(i);
     if(width<600)await logo.tap();else await logo.click();
     await page.waitForSelector('.oa-map-popup');
     if(width<600)await page.locator('.leaflet-popup-close-button').tap();else await page.locator('.leaflet-popup-close-button').click();
     await page.waitForSelector('.oa-map-popup',{state:'detached'});
    }
-   console.log(query+': '+count+' logos and cards accessible in one '+(width<600?'tap':'click')+' at '+width+'px');
+   console.log(query+': '+count+' logos revealed automatically and cards accessible at '+width+'px');
   }
   assert.deepEqual(errors,[]);await page.close();
  }

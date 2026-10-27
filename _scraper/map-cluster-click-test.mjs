@@ -27,6 +27,9 @@ try{
   await page.goto(base+'/universities?view=map&filterA=Northw',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.testMap&&testMap.shown().length===4);
   const originals=await page.evaluate(()=>testMap.shown().map(p=>({id:p.card.id,lat:p.lat,lng:p.lng})));
+  await page.waitForFunction(()=>document.querySelectorAll('.oa-map-logo').length===4);
+  await page.getByRole('button',{name:'Reset map to selected continent'}).click();
+  await page.waitForFunction(()=>document.querySelectorAll('.oa-map-cluster').length===1&&document.querySelector('.oa-map-cluster').textContent==='4');
   assert.equal(await page.locator('.oa-map-cluster').innerText(),'4');
   for(const keyboard of [false,true]){
    const group=page.locator('.oa-map-cluster');await group.scrollIntoViewIfNeeded();

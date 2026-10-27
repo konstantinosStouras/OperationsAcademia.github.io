@@ -114,7 +114,7 @@
         var size=Math.min(68,40+Math.sqrt(count)*3);
         return L.divIcon({className:'oa-map-cluster',html:'<span>'+count+'</span>',iconSize:[size,size]});
       }}).addTo(map);
-    var currentPoints=[],currentMissing=[],currentLayers=new Set(),markerCache=new WeakMap(),pointSearchCache=new WeakMap(),drawn=false,markers=new Map(),opener=null,autoFrame=true,framing=false;
+    var currentPoints=[],currentMissing=[],currentLayers=new Set(),markerCache=new WeakMap(),pointSearchCache=new WeakMap(),drawn=false,markers=new Map(),opener=null,autoFrame=true,autoSearch=false,framing=false;
     var expandedMarkers=[],expandedLayer=L.layerGroup().addTo(map),expandedDoubleClickZoom=false;
     function clearExpanded() {
       if(!expandedMarkers.length)return;
@@ -126,14 +126,14 @@
     }
     map.on('zoomstart dragstart click resize',clearExpanded);
     function frame(points) {
-      clearExpanded();
+      autoSearch=false;clearExpanded();
       framing=true;autoFrame=true;
       if(region==='world') map.fitBounds([[-56,-172],[76,180]],{padding:[8,8],animate:false});
       else if(points.length) map.fitBounds(L.latLngBounds(points.map(function(p){return [p.lat,p.lng];})).pad(.1),{maxZoom:points.length===1?8:5,animate:false});
       else map.setView([22,10],2,{animate:false});
       framing=false;
     }
-    map.on('dragstart zoomstart',function(){if(!framing)autoFrame=false;});
+    map.on('dragstart zoomstart',function(){if(!framing){autoFrame=false;autoSearch=false;}});
     function makeLink(text,href) {
       if(!href || !/^(https?:\/\/|(?:universities|jobs|candidates|recent-faculty|previous-markets)\?)/i.test(href)) return el('span',{text:text});
       var a=el('a',{text:text,href:href});
@@ -288,12 +288,12 @@
       map.setView(map.unproject(best.center,0),best.zoom,{animate:false});
       return best.markers;
     }
-    cluster.on('clusterclick',function(e) {
-      var all=e.layer.getAllChildMarkers();
-      map.closePopup();clearExpanded();
+    function expandLocations(all,keepPopup) {
+      if(!all.length)return;
+      if(!keepPopup)map.closePopup();clearExpanded();
       // Fit the entire selected group in one step. A fixed zoom increment
       // leaves nested clusters, while zooming to the closest pair hides distant members.
-      map.fitBounds(L.latLngBounds(all.map(function(m){return m.getLatLng();})),{paddingTopLeft:[40,40],paddingBottomRight:[80,40],maxZoom:17,animate:false});
+      map.fitBounds(L.latLngBounds(all.map(function(m){return m.getLatLng();})),{paddingTopLeft:[40,40],paddingBottomRight:[80,40],maxZoom:all.length===1?14:17,animate:false});
       var size=map.getSize(),placed=[],slots=[],gap=54;
       for(var y=32;y<=size.y-32;y+=gap)for(var x=32;x<=size.x-76;x+=gap)slots.push(L.point(x,y));
       all=nearbyMarkers(all,slots.length);
@@ -324,7 +324,14 @@
         if(position.distanceTo(anchor)>1)L.polyline([location,display],{color:palette().color,weight:1.5,opacity:.8,interactive:false}).addTo(expandedLayer);
         m.setLatLng(display).setZIndexOffset(1000).addTo(expandedLayer);
       });
-    });
+    }
+    cluster.on('clusterclick',function(e){expandLocations(e.layer.getAllChildMarkers());});
+    function revealSearch(keepPopup) {
+      if(!currentLayers.size)return;
+      framing=true;
+      try{expandLocations(Array.from(currentLayers),keepPopup);}finally{framing=false;}
+      autoFrame=false;autoSearch=true;
+    }
     function labelClusters() {
       mapEl.querySelectorAll('.oa-map-cluster').forEach(function(n){n.setAttribute('role','button');n.setAttribute('aria-label',n.textContent+' grouped locations. Zoom in and reveal nearby logos');n.setAttribute('tabindex','0');});
     }
@@ -430,7 +437,7 @@
       labelClusters();
       // Deep links wait for BOTH asynchronous data sources, then open the
       // matching school location without requiring a cluster/marker click.
-      if(targetUniversity && targetParams.get('focus')==='department' && (!focusApplied || restoreFocus)) {
+      if(targetUniversity && targetParams.get('focus')==='department' && (!focusApplied || keepView&&restoreFocus)) {
         var matches=layers.filter(function(m){return OAMapModel.pointMatchScore(m.oaPoint,targetUniversity,'','')>0;});
         if(matches.length) {
           var target=OASchools.canonColumns({institution:targetUniversity,school:targetSchool,unit:targetDepartment});
@@ -472,8 +479,11 @@
           }
           map.setView(chosen.getLatLng(),14,{animate:false});
           openPopup(cardContent(chosen.oaCard,chosen.oaPoint),chosen.getLatLng());
+          return;
         }
       }
+      var universityFilter=(snapshot.filters||[]).find(function(f){return f.key==='university';});
+      if(universityFilter&&universityFilter.values.some(function(value){return !!fold(value);}))revealSearch(false);
     }
     function update(next) {
       snapshot=next;
@@ -493,7 +503,7 @@
       land=L.geoJSON(data[1],{style:palette(),interactive:false}).addTo(map);land.bringToBack();
       ready=true;draw(false);resolveReady();
     }).catch(function(err){status.textContent='Map assets could not load. Please reload the page to try again.';console.error('OAUniMap',err);rejectReady(err);});
-    var resize=new ResizeObserver(function(){map.invalidateSize({pan:false});if(map._popup){Object.assign(map._popup.options,popupSize());map._popup.update();}if(ready&&autoFrame&&mapEl.clientWidth)frame(currentPoints);});resize.observe(mapEl);
+    var resize=new ResizeObserver(function(){map.invalidateSize({pan:false});if(map._popup){Object.assign(map._popup.options,popupSize());map._popup.update();}if(ready&&mapEl.clientWidth){if(autoSearch)revealSearch(true);else if(autoFrame)frame(currentPoints);}});resize.observe(mapEl);
     window.addEventListener('popstate',function(){var p=new URLSearchParams(location.search).get('region');region=REGIONS.some(function(r){return r[0]===p;})?p:'world';updateButtons();draw(false);});
     return {map:map,whenReady:whenReady,update:update,refresh:function(){draw(true);},shown:function(){return currentPoints.slice();},rows:function(){return snapshot.rows.slice();}};
   }
