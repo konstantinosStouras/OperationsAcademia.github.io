@@ -115,9 +115,11 @@
         return L.divIcon({className:'oa-map-cluster',html:'<span>'+count+'</span>',iconSize:[size,size]});
       }}).addTo(map);
     var currentPoints=[],currentMissing=[],currentLayers=new Set(),markerCache=new WeakMap(),pointSearchCache=new WeakMap(),drawn=false,markers=new Map(),opener=null,autoFrame=true,framing=false;
-    var expandedMarkers=[],expandedLayer=L.layerGroup().addTo(map);
+    var expandedMarkers=[],expandedLayer=L.layerGroup().addTo(map),expandedPanel=null,expandedDoubleClickZoom=false;
     function clearExpanded() {
+      if(expandedPanel){expandedPanel.remove();expandedPanel=null;}
       if(!expandedMarkers.length)return;
+      if(expandedDoubleClickZoom){map.doubleClickZoom.enable();expandedDoubleClickZoom=false;}
       expandedLayer.clearLayers();
       var restore=expandedMarkers;expandedMarkers=[];
       restore.forEach(function(item){item.marker.setLatLng(item.location);item.marker.setZIndexOffset(0);});
@@ -250,36 +252,75 @@
     }
     map.on('popupopen',function(){host.classList.add('oa-map-popup-open');});
     map.on('popupclose',function(e){host.classList.remove('oa-map-popup-open');if(opener && document.contains(opener) && e.popup.getElement().contains(document.activeElement))opener.focus({preventScroll:true});opener=null;});
-    mapEl.addEventListener('keydown',function(e){if(e.key==='Escape'){map.closePopup();} if((e.key===' '||e.key==='Enter')&&e.target.classList.contains('leaflet-marker-icon')){e.preventDefault();e.stopImmediatePropagation();e.target.click();}},true);
+    mapEl.addEventListener('keydown',function(e){if(e.key==='Escape'){if(map._popup&&map.hasLayer(map._popup))map.closePopup();else clearExpanded();} if((e.key===' '||e.key==='Enter')&&e.target.classList.contains('leaflet-marker-icon')){e.preventDefault();e.stopImmediatePropagation();e.target.click();}},true);
+    function showExpandedList(all) {
+      expandedPanel=el('section',{class:'oa-map-expanded-panel','aria-label':'Locations in selected group'});
+      var heading=el('div',{class:'oa-map-expanded-heading'}),title=el('h3',{text:all.length+' locations',tabindex:'-1'});
+      var close=el('button',{type:'button',text:'×','aria-label':'Close expanded group'});
+      close.addEventListener('click',function(){clearExpanded();mapEl.focus({preventScroll:true});});
+      heading.append(title,close);expandedPanel.appendChild(heading);
+      expandedPanel.appendChild(el('p',{text:'Select a logo to open its card. Scroll to see every location.'}));
+      var list=el('div',{class:'oa-map-expanded-list'});
+      all.forEach(function(m){
+        var p=m.oaPoint,card=m.oaCard;
+        var button=el('button',{type:'button','data-map-card-id':card.id});
+        var logo=logoImage(card,p);if(logo)button.appendChild(logo);
+        button.appendChild(el('span',{text:(card.officialInstitution||OAMapModel.displayName(card.institution))+' — '+OAMapModel.departmentName(p.label)+(p.campusLabel?' · '+p.campusLabel:'')}));
+        button.addEventListener('click',function(){openPopup(cardContent(card,p),m.getLatLng(),button);});
+        list.appendChild(button);
+      });
+      expandedPanel.appendChild(list);mapEl.appendChild(expandedPanel);
+      L.DomEvent.disableClickPropagation(expandedPanel);L.DomEvent.disableScrollPropagation(expandedPanel);
+      title.focus({preventScroll:true});
+    }
     cluster.on('clusterclick',function(e) {
       var all=e.layer.getAllChildMarkers();
       map.closePopup();clearExpanded();
       // Fit the entire selected group in one step. A fixed zoom increment
       // leaves nested clusters, while zooming to the closest pair hides distant members.
       map.fitBounds(L.latLngBounds(all.map(function(m){return m.getLatLng();})),{paddingTopLeft:[40,40],paddingBottomRight:[80,40],maxZoom:17,animate:false});
-      cluster.removeLayers(all);
+      // Fast successive taps on a logo and its card can be interpreted as a
+      // map double-tap after the card closes. Keep the expanded group stable.
+      expandedDoubleClickZoom=map.doubleClickZoom.enabled();map.doubleClickZoom.disable();
+      // The bundled plugin's bulk removal leaves its move listener attached:
+      // repositioning a logo then silently clusters it again. Individual
+      // removal detaches that listener before we spread out the logos.
+      all.forEach(function(m){cluster.removeLayer(m);});
       var size=map.getSize(),placed=[],slots=[],gap=54;
       for(var y=32;y<=size.y-32;y+=gap)for(var x=32;x<=size.x-76;x+=gap)slots.push(L.point(x,y));
-      function free(p){return placed.every(function(q){return p.distanceTo(q)>=gap;});}
+      function free(p){return placed.every(function(q){return Math.max(Math.abs(p.x-q.x),Math.abs(p.y-q.y))>=gap;});}
       // Preserve the actual coordinates in the point and restore the marker
       // before any navigation/filter change. Only crowded logo positions move.
       all.sort(function(a,b){return a.oaCard.id.localeCompare(b.oaCard.id);});
-      all.forEach(function(m){
-        var location=m.getLatLng(),anchor=map.latLngToContainerPoint(location);
+      // A finite screen cannot hold arbitrarily many accessible touch targets.
+      // Large groups expose every card immediately in a scrollable logo list.
+      if(all.length>slots.length){
+        expandedMarkers=all.map(function(m){return {marker:m,location:m.getLatLng()};});
+        showExpandedList(all);return;
+      }
+      var positions=all.map(function(m){
+        var anchor=map.latLngToContainerPoint(m.getLatLng());
         var position=L.point(Math.max(32,Math.min(size.x-76,anchor.x)),Math.max(32,Math.min(size.y-32,anchor.y)));
-        if(!free(position)){
-          var nearest=null,distance=Infinity;
-          slots.forEach(function(slot){var d=slot.distanceTo(anchor);if(d<distance&&free(slot)){nearest=slot;distance=d;}});
-          if(nearest)position=nearest;
-        }
-        placed.push(position);expandedMarkers.push({marker:m,location:location});
+        if(!free(position))position=slots.filter(free).sort(function(a,b){return a.distanceTo(anchor)-b.distanceTo(anchor);})[0];
+        if(position)placed.push(position);
+        return position;
+      });
+      // Greedy placement near the real coordinates can fragment free space.
+      // Repack the whole group onto distinct slots if that happens.
+      if(positions.some(function(p){return !p;})){
+        var available=slots.slice();
+        positions=all.map(function(m){var anchor=map.latLngToContainerPoint(m.getLatLng());available.sort(function(a,b){return a.distanceTo(anchor)-b.distanceTo(anchor);});return available.shift();});
+      }
+      all.forEach(function(m,index){
+        var location=m.getLatLng(),anchor=map.latLngToContainerPoint(location);
+        var position=positions[index];expandedMarkers.push({marker:m,location:location});
         var display=map.containerPointToLatLng(position);
         if(position.distanceTo(anchor)>1)L.polyline([location,display],{color:palette().color,weight:1.5,opacity:.8,interactive:false}).addTo(expandedLayer);
         m.setLatLng(display).setZIndexOffset(1000).addTo(expandedLayer);
       });
     });
     function labelClusters() {
-      mapEl.querySelectorAll('.oa-map-cluster').forEach(function(n){n.setAttribute('role','button');n.setAttribute('aria-label',n.textContent+' grouped locations. Zoom in or expand markers');n.setAttribute('tabindex','0');});
+      mapEl.querySelectorAll('.oa-map-cluster').forEach(function(n){n.setAttribute('role','button');n.setAttribute('aria-label',n.textContent+' grouped locations. Reveal all locations');n.setAttribute('tabindex','0');});
     }
     cluster.on('animationend',labelClusters);map.on('moveend',labelClusters);
     function pointsFor(card) {
