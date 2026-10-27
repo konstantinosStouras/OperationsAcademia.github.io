@@ -25135,6 +25135,17 @@
   "facultyUrl": "https://www.london.edu/faculty-and-research/management-science-and-operations"
  },
  {
+  "id": "university-of-louisville____information-systems-analytics-and-operations",
+  "institution": "University of Louisville",
+  "department": "Information Systems, Analytics and Operations",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "university-of-louisville__j-b-speed-school-of-engineering__industrial-engineering",
   "institution": "University of Louisville",
   "school": "J. B. Speed School of Engineering",
