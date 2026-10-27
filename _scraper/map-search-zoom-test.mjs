@@ -27,6 +27,11 @@ async function checkLogos(page,count){
 }
 async function checkSingleCard(page,searchInput){
  await page.waitForSelector('.oa-map-popup');
+ // ResizeObserver updates the card on the next rendering frame after rotation.
+ await page.waitForFunction(()=>{
+  const map=document.querySelector('.oa-uni-map').getBoundingClientRect(),card=document.querySelector('.oa-map-popup')?.getBoundingClientRect(),controls=document.querySelector('.leaflet-top.leaflet-right').getBoundingClientRect();
+  return card&&card.top>=map.top&&card.bottom<=map.bottom&&card.left>=map.left&&card.right<controls.left;
+ });
  const state=await page.evaluate(()=>{
   const map=document.querySelector('.oa-uni-map').getBoundingClientRect(),card=document.querySelector('.oa-map-popup').getBoundingClientRect(),controls=document.querySelector('.leaflet-top.leaflet-right').getBoundingClientRect();
   return {actual:document.querySelector('.oa-uni-pop').dataset.mapCardId,expected:testMap.shown()[0].card.id,fits:card.top>=map.top&&card.bottom<=map.bottom&&card.left>=map.left&&card.right<controls.left};
