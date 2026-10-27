@@ -173,7 +173,11 @@
       }
 
       var university=card.officialInstitution||OAMapModel.displayName(card.institution);
-      var schools=(card.schools||[]).slice().sort(function(a,b){return Number(fold(b.name)===fold(targetSchool))-Number(fold(a.name)===fold(targetSchool));});
+      var schools=(card.schools||[]).slice().sort(function(a,b){
+        var aMatch=(a.rows||[]).some(function(r){return selectedDepartment(r,a.name);});
+        var bMatch=(b.rows||[]).some(function(r){return selectedDepartment(r,b.name);});
+        return Number(bMatch)-Number(aMatch)||Number(fold(b.name)===fold(targetSchool))-Number(fold(a.name)===fold(targetSchool));
+      });
       var schoolNames=Array.from(new Set(schools.map(function(s){return OAMapModel.displayName(s.name||'');}).filter(Boolean)));
       var title=schoolNames.length===1?schoolNames[0]:university;
       var header=el('header',{class:'oa-map-card-identity'}),identity=el('div',{class:'oa-map-card-name'});
@@ -260,12 +264,20 @@
       var width=Math.max(120,Math.min(360,mapEl.clientWidth-108));
       return {maxWidth:width,minWidth:width,maxHeight:Math.max(100,mapEl.clientHeight-152)};
     }
+    function revealPopupMatch(content) {
+      var match=content.querySelector('.oa-map-department.oa-map-selected-department');
+      if(!match||!content.isConnected)return;
+      var scroller=content.parentElement,box=scroller.getBoundingClientRect(),row=match.getBoundingClientRect();
+      // Scroll only the card, never the page or map, and leave an already visible
+      // match in place. Long rows start at their label and faculty link.
+      if(row.top<box.top||row.bottom>box.bottom)scroller.scrollTop+=row.top-box.top-4;
+    }
     function openPopup(content,latlng,source,keepFocus) {
       map.closePopup();
       opener=source||document.activeElement;
       L.popup(Object.assign(popupSize(),{pane:'schoolDetails',autoPan:false,className:'oa-map-popup'}))
         .setLatLng(latlng).setContent(content).openOn(map);
-      setTimeout(function(){if(!content.isConnected)return;content.parentElement.scrollTop=0;if(!keepFocus)content.focus({preventScroll:true});},0);
+      setTimeout(function(){if(!content.isConnected)return;content.parentElement.scrollTop=0;revealPopupMatch(content);if(!keepFocus)content.focus({preventScroll:true});},0);
     }
     map.on('popupopen',function(){host.classList.add('oa-map-popup-open');});
     map.on('popupclose',function(e){host.classList.remove('oa-map-popup-open');if(opener && document.contains(opener) && e.popup.getElement().contains(document.activeElement))opener.focus({preventScroll:true});opener=null;});
@@ -532,7 +544,7 @@
       land=L.geoJSON(data[1],{style:palette(),interactive:false}).addTo(map);land.bringToBack();
       ready=true;draw(false);resolveReady();
     }).catch(function(err){status.textContent='Map assets could not load. Please reload the page to try again.';console.error('OAUniMap',err);rejectReady(err);});
-    var resize=new ResizeObserver(function(){map.invalidateSize({pan:false});if(map._popup){Object.assign(map._popup.options,popupSize());map._popup.update();}if(ready&&mapEl.clientWidth){if(autoSearch)revealSearch(true);else if(autoFrame)frame(currentPoints);}});resize.observe(mapEl);
+    var resize=new ResizeObserver(function(){map.invalidateSize({pan:false});if(map._popup){Object.assign(map._popup.options,popupSize());map._popup.update();revealPopupMatch(map._popup.getContent());}if(ready&&mapEl.clientWidth){if(autoSearch)revealSearch(true);else if(autoFrame)frame(currentPoints);}});resize.observe(mapEl);
     window.addEventListener('popstate',function(){var p=new URLSearchParams(location.search).get('region');region=REGIONS.some(function(r){return r[0]===p;})?p:'world';updateButtons();draw(false);});
     return {map:map,whenReady:whenReady,update:update,refresh:function(){draw(true);},shown:function(){return currentPoints.slice();},rows:function(){return snapshot.rows.slice();}};
   }

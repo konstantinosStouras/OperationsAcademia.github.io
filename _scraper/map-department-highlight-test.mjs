@@ -33,10 +33,20 @@ async function matches(page,names){
   assert.match(await row.locator('a').first().getAttribute('href'),/^https?:\/\//,'faculty link remains usable');
  }
  if(names.length)assert.equal(await pop.locator('.oa-map-department').first().evaluate(e=>e.classList.contains('oa-map-selected-department')),true,'matching departments appear first');
+ if(names.length)await visibleMatch(page);
+}
+async function visibleMatch(page){
+ await page.waitForFunction(()=>{
+  const row=document.querySelector('.oa-map-popup .oa-map-department.oa-map-selected-department');
+  if(!row)return false;
+  const box=row.closest('.leaflet-popup-content').getBoundingClientRect(),label=row.querySelector('.oa-map-match-label').getBoundingClientRect(),name=row.querySelector('.oa-map-department-name').getBoundingClientRect();
+  return label.top>=box.top-1&&name.bottom<=box.bottom+1;
+ },null,{timeout:5000});
 }
 try{
  for(const width of (process.env.MAP_TEST_WIDTHS||'1280,390,320').split(',').map(Number)){
-  const page=await browser.newPage({viewport:{width,height:780},isMobile:width<600,hasTouch:width<600}),errors=[];
+  const height=Number(process.env.MAP_TEST_HEIGHT||780);
+  const page=await browser.newPage({viewport:{width,height},isMobile:width<600,hasTouch:width<600}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
   await page.addInitScript(()=>{let api;Object.defineProperty(window,'OAUniMap',{configurable:true,get:()=>api,set:v=>{api=v;const mount=v.mount;v.mount=cfg=>(window.testMap=mount(cfg));}});});
@@ -60,11 +70,11 @@ try{
    assert.ok(style.labelContrast>=4.5&&style.linkContrast>=4.5,theme+' highlight text remains readable');assert.ok(style.border>=3);
    if(width<600)assert.ok(style.touchHeight>=44,'highlight preserves faculty touch target');
   }
-  await page.locator('.oa-map-popup .oa-map-selected-department').scrollIntoViewIfNeeded();
+  await visibleMatch(page);
   await page.waitForTimeout(350);
   if(process.env.MAP_SCREENSHOTS)await page.locator('.oa-map-popup').screenshot({path:path.join(process.env.MAP_SCREENSHOTS,'department-highlight-'+width+'.png')});
   await page.setViewportSize({width:width<600?568:1100,height:width<600?390:700});await matches(page,['Technology and Operations Management']);
-  await page.setViewportSize({width,height:780});
+  await page.setViewportSize({width,height});
   await input.fill('');await page.waitForSelector('.oa-map-popup',{state:'detached'});await openFirst(page);await matches(page,[]);
   // Repeated URL parameters select multiple departments using the same filter semantics.
   await page.goto(insead+'&dept=Decision%20Sciences&dept=Technology%20and%20Operations%20Management',{waitUntil:'domcontentloaded'});
@@ -77,10 +87,12 @@ try{
   await page.waitForSelector('.oa-map-popup');
   assert.match(await page.locator('.oa-map-popup .oa-map-selected-department .oa-map-department-name').innerText(),/Industrial and Enterprise Systems Engineering/);
   assert.equal(await page.locator('.oa-map-popup .oa-map-match-label').innerText(),'Matches your search');
+  await visibleMatch(page);
   // Job-specific highlighting is retained, but cannot leak after clearing filters.
   await page.goto(base+'/universities?view=map&filterA='+encodeURIComponent('University of Illinois at Urbana-Champaign')+'&focus=department&school='+encodeURIComponent('Gies College of Business')+'&department='+encodeURIComponent('Information Systems, Operations Management, Supply Chain Management, and Analytics'),{waitUntil:'domcontentloaded'});
   await page.waitForSelector('.oa-map-popup');assert.ok(await page.locator('.oa-map-popup .oa-map-selected-department').count()>0);
   assert.equal(await page.locator('.oa-map-popup .oa-map-match-label').first().innerText(),'Requested department');
+  await visibleMatch(page);
   await page.getByRole('button',{name:'Clear filters',exact:true}).click();
   await page.locator('#oaf-university').fill('University of Illinois at Urbana-Champaign');
   await page.waitForFunction(()=>testMap.shown().length===2&&document.querySelectorAll('.oa-map-logo').length===2);
