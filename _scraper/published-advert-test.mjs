@@ -47,3 +47,10 @@ assert.equal(publishedAdvertRepeat({ ...crawled, adUrl: 'https://example.edu/job
   [{ ...live, adUrl: 'https://example.edu/job-a.pdf', postedAtUrl: board }])?.id, 'live',
   'identical advert links still match when Posted at is a source board');
 console.log('Shared source-board regression checks passed.');
+// Distinct INSEAD vacancies share a page, department, rank and application email.
+const human = { ...live, id: 'human', institution: 'INSEAD', department: 'Technology and Operations Management', levels: ['Post-Doc'], adUrl: 'https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#549386' };
+const health = { ...human, id: 'health', adUrl: human.adUrl.replace('549386','684501') };
+assert.equal(advertRepeat(health, [human]), null);
+assert.equal(publishedAdvertRepeat(health, [human]), null);
+assert.equal(advertRepeat({ ...human, id: 'repeat', adUrl: human.adUrl.replace('#', '?utm_source=sheet#') }, [human])?.id, 'human');
+assert.equal(publishedAdvertRepeat({ ...human, id: 'repeat' }, [human])?.id, 'human');

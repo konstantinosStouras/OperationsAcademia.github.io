@@ -511,10 +511,12 @@
         db.collection(COL).where('status', '==', 'approved').get()
       ]).then(function (got) {
         if (!window.OAAdvertDup || !Array.isArray(got[0])) throw new Error('Duplicate check unavailable.');
-        var existing = got[0].concat(got[1].docs.map(function (d) { return judgedRow(d.data()); }));
+        var approved = got[1].docs.map(function (d) { return judgedRow(d.data()); });
         var row = judgedRow(Object.assign({}, doc, { edits: patch.edits || doc.edits || {} }));
-        var repeat = OAAdvertDup.advertRepeat(row, existing);
+        var repeat = OAAdvertDup.advertRepeat(row, got[0]);
         if (repeat) throw new Error('Already listed: ' + (repeat.ref || repeat.id) + '. Left under review.');
+        var awaiting = OAAdvertDup.advertRepeat(row, approved);
+        if (awaiting) throw new Error('Already approved, awaiting public update: ' + (awaiting.ref || awaiting.id) + '. Left under review.');
       });
     }
     return check.then(function () {
