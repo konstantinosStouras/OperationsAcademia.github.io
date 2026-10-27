@@ -74,7 +74,7 @@
     });
     var status = el('p',{class:'oa-map-status',role:'status','aria-live':'polite'});
     var mapEl = el('div',{class:'oa-uni-map',id:'oa-uni-map',role:'region','aria-label':'University locations map','aria-describedby':'oa-map-help'});
-    var help = el('p',{id:'oa-map-help',class:'oa-map-help',text:'Select a logo for school details, or a numbered group to reveal its locations in one click. The list below provides the same details without using the map.'});
+    var help = el('p',{id:'oa-map-help',class:'oa-map-help',text:'Select a logo for school details, or a numbered group to zoom in and reveal nearby logos. Distant locations stay grouped on the map. The list below provides the same details without using the map.'});
     var legend = el('p',{class:'oa-map-legend',text:'Logo: school or campus location · Number: grouped locations · Initials: logo unavailable. Lines connect separated logos to their locations. Locations are approximate.'});
     var details = el('details',{class:'oa-map-results'});
     var summary = el('summary',{text:'Matching universities'}), resultList=el('ul',{});
@@ -115,9 +115,8 @@
         return L.divIcon({className:'oa-map-cluster',html:'<span>'+count+'</span>',iconSize:[size,size]});
       }}).addTo(map);
     var currentPoints=[],currentMissing=[],currentLayers=new Set(),markerCache=new WeakMap(),pointSearchCache=new WeakMap(),drawn=false,markers=new Map(),opener=null,autoFrame=true,framing=false;
-    var expandedMarkers=[],expandedLayer=L.layerGroup().addTo(map),expandedPanel=null,expandedDoubleClickZoom=false;
+    var expandedMarkers=[],expandedLayer=L.layerGroup().addTo(map),expandedDoubleClickZoom=false;
     function clearExpanded() {
-      if(expandedPanel){expandedPanel.remove();expandedPanel=null;}
       if(!expandedMarkers.length)return;
       if(expandedDoubleClickZoom){map.doubleClickZoom.enable();expandedDoubleClickZoom=false;}
       expandedLayer.clearLayers();
@@ -253,25 +252,41 @@
     map.on('popupopen',function(){host.classList.add('oa-map-popup-open');});
     map.on('popupclose',function(e){host.classList.remove('oa-map-popup-open');if(opener && document.contains(opener) && e.popup.getElement().contains(document.activeElement))opener.focus({preventScroll:true});opener=null;});
     mapEl.addEventListener('keydown',function(e){if(e.key==='Escape'){if(map._popup&&map.hasLayer(map._popup))map.closePopup();else clearExpanded();} if((e.key===' '||e.key==='Enter')&&e.target.classList.contains('leaflet-marker-icon')){e.preventDefault();e.stopImmediatePropagation();e.target.click();}},true);
-    function showExpandedList(all) {
-      expandedPanel=el('section',{class:'oa-map-expanded-panel','aria-label':'Locations in selected group'});
-      var heading=el('div',{class:'oa-map-expanded-heading'}),title=el('h3',{text:all.length+' locations',tabindex:'-1'});
-      var close=el('button',{type:'button',text:'×','aria-label':'Close expanded group'});
-      close.addEventListener('click',function(){clearExpanded();mapEl.focus({preventScroll:true});});
-      heading.append(title,close);expandedPanel.appendChild(heading);
-      expandedPanel.appendChild(el('p',{text:'Select a logo to open its card. Scroll to see every location.'}));
-      var list=el('div',{class:'oa-map-expanded-list'});
-      all.forEach(function(m){
-        var p=m.oaPoint,card=m.oaCard;
-        var button=el('button',{type:'button','data-map-card-id':card.id});
-        var logo=logoImage(card,p);if(logo)button.appendChild(logo);
-        button.appendChild(el('span',{text:(card.officialInstitution||OAMapModel.displayName(card.institution))+' — '+OAMapModel.departmentName(p.label)+(p.campusLabel?' · '+p.campusLabel:'')}));
-        button.addEventListener('click',function(){openPopup(cardContent(card,p),m.getLatLng(),button);});
-        list.appendChild(button);
-      });
-      expandedPanel.appendChild(list);mapEl.appendChild(expandedPanel);
-      L.DomEvent.disableClickPropagation(expandedPanel);L.DomEvent.disableScrollPropagation(expandedPanel);
-      title.focus({preventScroll:true});
+    function nearbyMarkers(all,capacity) {
+      // Include the whole viewport plus a logo-sized margin, so nearby points
+      // cannot remain as bubbles underneath the expanded logos.
+      var size=map.getSize(),halfWidth=size.x/2+54,halfHeight=size.y/2+54;
+      var projected=Array.from(currentLayers).map(function(m){return {marker:m,point:map.project(m.getLatLng(),0)};});
+      var origin=map.project(map.getCenter(),0),best=null;
+      var centers=[origin].concat(all.map(function(m){return map.project(m.getLatLng(),0);}));
+      function inside(center,zoom) {
+        var scale=Math.pow(2,zoom),dx=halfWidth/scale,dy=halfHeight/scale,nearby=[];
+        for(var i=0;i<projected.length;i++){
+          var p=projected[i];
+          if(Math.abs(p.point.x-center.x)<=dx&&Math.abs(p.point.y-center.y)<=dy)nearby.push(p.marker);
+          if(nearby.length>capacity)return null;
+        }
+        return nearby;
+      }
+      var fitted=inside(origin,map.getZoom());
+      if(fitted&&fitted.length)return fitted;
+      // Find the fullest geographic viewport whose logos can all be tapped.
+      // Distant locations stay in the ordinary map layer at their true positions.
+      for(var zoom=Math.ceil(map.getZoom());zoom<=17;zoom++){
+        centers.forEach(function(center){
+          var nearby=inside(center,zoom);if(!nearby||!nearby.length)return;
+          var distance=center.distanceTo(origin);
+          if(!best||nearby.length>best.markers.length||nearby.length===best.markers.length&&(zoom<best.zoom||zoom===best.zoom&&distance<best.distance)){
+            best={markers:nearby,center:center,zoom:zoom,distance:distance};
+          }
+        });
+        if(best&&best.markers.length===capacity)break;
+      }
+      // Even pathological imports with hundreds of identical coordinates must
+      // remain on the map without crashing; normal zoom cannot split those.
+      if(!best)best={markers:all.slice(0,capacity),center:centers[1],zoom:17};
+      map.setView(map.unproject(best.center,0),best.zoom,{animate:false});
+      return best.markers;
     }
     cluster.on('clusterclick',function(e) {
       var all=e.layer.getAllChildMarkers();
@@ -279,25 +294,16 @@
       // Fit the entire selected group in one step. A fixed zoom increment
       // leaves nested clusters, while zooming to the closest pair hides distant members.
       map.fitBounds(L.latLngBounds(all.map(function(m){return m.getLatLng();})),{paddingTopLeft:[40,40],paddingBottomRight:[80,40],maxZoom:17,animate:false});
-      // Fast successive taps on a logo and its card can be interpreted as a
-      // map double-tap after the card closes. Keep the expanded group stable.
-      expandedDoubleClickZoom=map.doubleClickZoom.enabled();map.doubleClickZoom.disable();
-      // The bundled plugin's bulk removal leaves its move listener attached:
-      // repositioning a logo then silently clusters it again. Individual
-      // removal detaches that listener before we spread out the logos.
-      all.forEach(function(m){cluster.removeLayer(m);});
       var size=map.getSize(),placed=[],slots=[],gap=54;
       for(var y=32;y<=size.y-32;y+=gap)for(var x=32;x<=size.x-76;x+=gap)slots.push(L.point(x,y));
+      all=nearbyMarkers(all,slots.length);
+      // Fast successive taps on a logo and its card must not collapse the group.
+      expandedDoubleClickZoom=map.doubleClickZoom.enabled();map.doubleClickZoom.disable();
+      // Individual removal detaches the plugin's move listener. Bulk removal
+      // leaves it attached and silently re-clusters repositioned logos.
+      all.forEach(function(m){cluster.removeLayer(m);});
       function free(p){return placed.every(function(q){return Math.max(Math.abs(p.x-q.x),Math.abs(p.y-q.y))>=gap;});}
-      // Preserve the actual coordinates in the point and restore the marker
-      // before any navigation/filter change. Only crowded logo positions move.
       all.sort(function(a,b){return a.oaCard.id.localeCompare(b.oaCard.id);});
-      // A finite screen cannot hold arbitrarily many accessible touch targets.
-      // Large groups expose every card immediately in a scrollable logo list.
-      if(all.length>slots.length){
-        expandedMarkers=all.map(function(m){return {marker:m,location:m.getLatLng()};});
-        showExpandedList(all);return;
-      }
       var positions=all.map(function(m){
         var anchor=map.latLngToContainerPoint(m.getLatLng());
         var position=L.point(Math.max(32,Math.min(size.x-76,anchor.x)),Math.max(32,Math.min(size.y-32,anchor.y)));
@@ -320,7 +326,7 @@
       });
     });
     function labelClusters() {
-      mapEl.querySelectorAll('.oa-map-cluster').forEach(function(n){n.setAttribute('role','button');n.setAttribute('aria-label',n.textContent+' grouped locations. Reveal all locations');n.setAttribute('tabindex','0');});
+      mapEl.querySelectorAll('.oa-map-cluster').forEach(function(n){n.setAttribute('role','button');n.setAttribute('aria-label',n.textContent+' grouped locations. Zoom in and reveal nearby logos');n.setAttribute('tabindex','0');});
     }
     cluster.on('animationend',labelClusters);map.on('moveend',labelClusters);
     function pointsFor(card) {

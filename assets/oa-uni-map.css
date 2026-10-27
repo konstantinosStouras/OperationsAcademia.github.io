@@ -57,15 +57,6 @@ body.v3 .oa-uni a.oa-map-primary-action,.oa-uni .leaflet-popup .oa-uni-pop a.oa-
 .oa-map-cluster-list { padding:0;list-style:none;max-height:220px;overflow:auto;margin:8px 0; }
 .oa-map-cluster-list button,.oa-map-expand,.oa-map-results button { min-height:44px;padding:8px 10px;border:1px solid var(--map-border);background:var(--map-surface);color:var(--map-ink);text-align:left;white-space:normal;overflow-wrap:anywhere; }
 .oa-map-cluster-list button { width:100%;border-width:0 0 1px; }
-.oa-map-expanded-panel { position:absolute;inset:12px 68px 24px 12px;z-index:600;display:flex;flex-direction:column;padding:12px;border-radius:12px;background:var(--map-surface);color:var(--map-ink);box-shadow:0 3px 14px #0005; }
-.oa-map-expanded-heading { display:flex;align-items:center;justify-content:space-between;gap:8px; }
-.oa-map-expanded-heading h3 { margin:0;font-size:18px;color:inherit; }
-.oa-map-expanded-heading button { flex:none;min-width:44px;min-height:44px;font-size:26px; }
-.oa-map-expanded-panel p { margin:8px 0;font-size:13px; }
-.oa-map-expanded-list { overflow:auto;overscroll-behavior:contain;min-height:0; }
-.oa-map-expanded-panel button { background:var(--map-surface);color:var(--map-ink);border:1px solid var(--map-rule);border-radius:6px; }
-.oa-map-expanded-list button { display:flex;align-items:center;gap:10px;width:100%;min-height:54px;padding:8px;text-align:left;white-space:normal;overflow-wrap:anywhere; }
-.oa-map-expanded-list img { flex:none;margin:0; }
 .oa-map-results { margin-top:16px; }
 .oa-map-results summary { cursor:pointer;min-height:44px;box-sizing:border-box;padding:10px 0;overflow-wrap:anywhere; }
 .oa-map-results ul { padding-left:20px; }.oa-map-results li { margin:6px 0; }
