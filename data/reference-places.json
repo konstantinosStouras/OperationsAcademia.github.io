@@ -985,6 +985,11 @@
   "department": "OM"
  },
  {
+  "institution": "Florida Atlantic University",
+  "school": "College of Business",
+  "department": "Information Technology and Operations Management"
+ },
+ {
   "institution": "Florida Gulf Coast University",
   "school": "Lutgert College of Business",
   "department": "Information Systems, Analytics, and Supply Chain"
@@ -1408,6 +1413,16 @@
   "institution": "INSEAD",
   "school": "",
   "department": "Decision Sciences"
+ },
+ {
+  "institution": "INSEAD",
+  "school": "",
+  "department": "Technology and Operations Management"
+ },
+ {
+  "institution": "INSEAD",
+  "school": "School of Business",
+  "department": "Technology and Operations Management"
  },
  {
   "institution": "Institut Mines-Télécom",
@@ -2700,11 +2715,6 @@
   "department": "Logistics and Supply Chain Management"
  },
  {
-  "institution": "Texas A&M University–Central Texas",
-  "school": "College of Business Administration",
-  "department": "Supply Chain Management"
- },
- {
   "institution": "Texas A&M University",
   "school": "",
   "department": "IS"
@@ -3156,6 +3166,11 @@
  },
  {
   "institution": "University of California, Berkeley",
+  "school": "College of Engineering",
+  "department": "Industrial Engineering and Operations Research"
+ },
+ {
+  "institution": "University of California, Berkeley",
   "school": "Haas School of Business",
   "department": "Business and Public Policy"
  },
@@ -3423,6 +3438,11 @@
   "institution": "University of Leeds, UK",
   "school": "",
   "department": "Optimisation for Decision Support in Disaster Response"
+ },
+ {
+  "institution": "University of Lethbridge",
+  "school": "Mathematics and Computer Science",
+  "department": "Optimization Research"
  },
  {
   "institution": "University of London",
@@ -3953,6 +3973,11 @@
   "institution": "University of Utah",
   "school": "",
   "department": "Operations and Supply Chain Management"
+ },
+ {
+  "institution": "University of Utah",
+  "school": "David Eccles School of Business",
+  "department": "Operations and Information Systems"
  },
  {
   "institution": "University of Vienna",

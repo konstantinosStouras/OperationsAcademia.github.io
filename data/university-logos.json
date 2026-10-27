@@ -5355,6 +5355,18 @@
       "logo": "/assets/university-logos/university-of-alabama-in-huntsville.svg",
       "source": "https://www.uah.edu/templates/uah/images/footer/UAH-logo-blue.svg",
       "checked": "2026-10-26"
+    },
+    {
+      "name": "Florida Atlantic University",
+      "logo": "/assets/university-logos/florida-atlantic-university.png",
+      "source": "https://www.fau.edu/university-communications/images/florida-atlantic-logo-wordmark.png",
+      "checkedAt": "2026-10-27"
+    },
+    {
+      "name": "University of Lethbridge",
+      "logo": "/assets/university-logos/university-of-lethbridge.svg",
+      "source": "https://www.ulethbridge.ca/themes/custom/novalux/images/logo-header.svg",
+      "checkedAt": "2026-10-27"
     }
   ]
 }

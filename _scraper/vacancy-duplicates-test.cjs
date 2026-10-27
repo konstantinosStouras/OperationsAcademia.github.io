@@ -19,4 +19,11 @@ const conflict = {...copy,id:'other',adUrl:'https://www.higheredjobs.com/faculty
 assert.equal(D.advertRepeat({...conflict,id:'third',adUrl:conflict.adUrl.replace('111','112')},[conflict]),null);
 const swept = D.findAdvertRepeats([copy,bell],jobs);
 assert.equal(swept.drop.length,2); assert.equal(swept.keep.length,0);
+const insead = {id:'insead-humi',year:2027,institution:'INSEAD',unit:'Technology and Operations Management',levels:['Post-Doc'],adUrl:'https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#549386'};
+const healthcare = {...insead,id:'insead-hoff',adUrl:insead.adUrl.replace('549386','684501')};
+assert.equal(D.advertRepeat(healthcare,[insead]),null);
+assert.equal(D.publishedAdvertRepeat(healthcare,[insead]),null);
+assert.equal(D.advertRepeat({...insead,id:'insead-copy'},[insead]).id,insead.id);
+assert.equal(D.publishedAdvertRepeat({...insead,id:'tracked-copy',adUrl:insead.adUrl.replace('#','?utm_source=linkedin#')},[insead]).id,insead.id);
+assert.equal(D.advertLink({adUrl:'https://example.edu/job#apply'}),D.advertLink({adUrl:'https://example.edu/job#details'}));
 console.log('Vacancy regressions passed: both queue duplicates suppressed; distinct IDs, universities, seasons and generic-portal vacancies retained.');

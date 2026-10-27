@@ -77,7 +77,13 @@
     var v;
     try {
       var u = new URL(raw);
-      u.hash = '';
+      // INSEAD publishes distinct postdoc adverts as sections on one area
+      // page (verified 2026-10-27). These anchors identify vacancies, not
+      // navigation within a single advert. Other fragments stay ignored.
+      var inseadAdvert = /^(www\.)?insead\.edu$/i.test(u.hostname) &&
+        /^\/faculty-research\/academic-areas\/technology-operations-management\/?$/i.test(u.pathname) &&
+        /^#(549386|684501)$/.test(u.hash);
+      if (!inseadAdvert) u.hash = '';
       Array.from(u.searchParams.keys()).forEach(function (k) {
         if (/^(utm_.+|fbclid|gclid)$/i.test(k) ||
             (/^(www\.)?higheredjobs\.com$/i.test(u.hostname) && /^title$/i.test(k))) u.searchParams.delete(k);

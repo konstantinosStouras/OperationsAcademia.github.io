@@ -42,6 +42,221 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-florida-atlantic-university-20261026",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-26",
+  "institution": "Florida Atlantic University",
+  "department": "College of Business, Information Technology and Operations Management",
+  "school": "College of Business",
+  "unit": "Information Technology and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://fau.wd1.myworkdayjobs.com/en-US/FAU/details/Assistant-Professor_REQ23004?jobFamilyGroup=a3f4baab6db41036e7a0fc8badf74f51",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://fau.wd1.myworkdayjobs.com/en-US/FAU/job/Boca-Raton/Assistant-Professor_REQ23004",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://business.fau.edu/departments/information-technology-operations-management/index.php",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-27T09:06:27Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-insead-20261026",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-26",
+  "institution": "INSEAD",
+  "department": "School of Business, Technology and Operations Management",
+  "school": "School of Business",
+  "unit": "Technology and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "**Human–AI Collaboration and Work Design**. Reference: MFXL-HUMI-SGP. Full time, Asia Campus, Singapore. Flexible start from June 2027 onwards. One to two years, subject to renewal after year one. Applications reviewed on a rolling basis until filled. Full position description and application instructions are available in the linked INSEAD advert.",
+  "country": "Singapore",
+  "countries": [
+   "Singapore"
+  ],
+  "adUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#549386",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#549386",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-27T19:28:29Z",
+  "owner": "",
+  "applicationStatus": ""
+ },
+ {
+  "id": "2027-insead-20261026-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-26",
+  "institution": "INSEAD",
+  "department": "School of Business, Technology and Operations Management",
+  "school": "School of Business",
+  "unit": "Technology and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-01",
+  "comments": "**Healthcare Operations, AI and Digital Technology**. Reference: MFXL-HOFF-SGP. Full time, Asia Campus, Singapore. Flexible start from June 2027 onwards. Two years, subject to renewal after year one. Applications reviewed on a rolling basis until filled. Full position description and application instructions are available in the linked INSEAD advert.",
+  "country": "Singapore",
+  "countries": [
+   "Singapore"
+  ],
+  "adUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#684501",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#684501",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-27T19:28:29Z",
+  "owner": "",
+  "applicationStatus": ""
+ },
+ {
+  "id": "2027-university-of-california-berkeley-20261026",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-26",
+  "institution": "University of California, Berkeley",
+  "department": "College of Engineering, Industrial Engineering and Operations Research",
+  "school": "College of Engineering",
+  "unit": "Industrial Engineering and Operations Research",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 1, 2026",
+  "applyByDate": "2026-12-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://aprecruit.berkeley.edu/JPF05519",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://aprecruit.berkeley.edu/JPF05519",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://ieor.berkeley.edu/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-26T19:38:18Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-lethbridge-20261026",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-26",
+  "institution": "University of Lethbridge",
+  "department": "Mathematics and Computer Science, Optimization Research",
+  "school": "Mathematics and Computer Science",
+  "unit": "Optimization Research",
+  "type": "University",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "November 13, 2026",
+  "applyByDate": "2026-11-13",
+  "comments": "NOMINATION FOR PIMS POSTDOCTORAL FELLOWSHIP to be held at the University of Lethbridge (*Step 1 of a 2-Step Process)",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://drive.google.com/file/d/1CCtmmuFymU5QO9AmSgKUBF_qoKTKvZ7o/view?usp=drivesdk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Lethbridge",
+  "characteristics": [
+   "Research seminars"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-10-26T17:35:01Z",
+  "ref": "OA-JOB-261026-YA4T",
+  "owner": "897c665d6d897e12",
+  "applicationStatus": ""
+ },
+ {
+  "id": "2027-university-of-utah-20261026",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-26",
+  "institution": "University of Utah",
+  "department": "David Eccles School of Business, Operations and Information Systems",
+  "school": "David Eccles School of Business",
+  "unit": "Operations and Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Open until filled",
+  "applyByDate": "",
+  "reviewDate": "2026-10-31",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://utah.peopleadmin.com/postings/210340",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Utah",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-10-26T21:49:32Z",
+  "ref": "OA-JOB-261026-948C",
+  "owner": "9dc2e2f63dad3951",
+  "applicationStatus": ""
+ },
+ {
   "id": "2027-minnesota-state-university-mankato-20261025",
   "year": 2027,
   "years": [
@@ -998,7 +1213,7 @@
   "countries": [
    "United States"
   ],
-  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179589694&Title=Assistant%20Professor%20Faculty%20Position%20in%20the%20Questrom%20School%20of%20Business%2C%20with%20a%20focus%20on%20the%20Future%20of%20Healthy%20Aging",
+  "adUrl": "",
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://academicjobsonline.org/ajo/jobs/32920",
   "postedAtLabel": "link",
