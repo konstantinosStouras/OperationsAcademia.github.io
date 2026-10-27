@@ -6797,6 +6797,22 @@
   "facultyDirectoryHint": "College faculty directory: look for entries labelled Management."
  },
  {
+  "id": "florida-atlantic-university__college-of-business__information-technology-and-operations-management",
+  "institution": "Florida Atlantic University",
+  "school": "College of Business",
+  "department": "Information Technology and Operations Management",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-26",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "florida-gulf-coast-university__lutgert-college-of-business__information-systems-analytics-and-supply-chain",
   "institution": "Florida Gulf Coast University",
   "school": "Lutgert College of Business",
@@ -9697,8 +9713,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2014-09-15",
+  "n": 3,
+  "lastPosted": "2026-10-26",
   "sourceRowIds": [
    "insead____technology-and-operations-management"
   ],
@@ -19315,33 +19331,6 @@
   "facultyUrl": "https://www.tamuct.edu/academics/college-of-business-administration/management-and-marketing/"
  },
  {
-  "id": "texas-a-m-university-central-texas__college-of-business-administration__supply-chain-management",
-  "institution": "Texas A&M University–Central Texas",
-  "school": "College of Business Administration",
-  "department": "Supply Chain Management",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ],
-  "mapLocationIds": [
-   "texas-am-central-texas-logistics-founders-hall"
-  ],
-  "mapLocationKind": "school",
-  "mapInstitutionNames": [
-   "Texas A&M University–Central Texas"
-  ],
-  "mapSearchTerms": [
-   "College of Business Administration"
-  ],
-  "country": "United States",
-  "mapDepartmentLinks": {
-   "texas-am-central-texas-logistics-founders-hall": {
-    "facultyUrl": "https://www.tamuct.edu/academics/college-of-business-administration/management-and-marketing/"
-   }
-  },
-  "facultyUrl": "https://www.tamuct.edu/academics/college-of-business-administration/management-and-marketing/"
- },
- {
   "id": "texas-a-m-university-corpus-christi__college-of-engineering-and-computer-science__industrial-engineering",
   "institution": "Texas A&M University-Corpus Christi",
   "school": "College of Engineering and Computer Science",
@@ -22850,13 +22839,12 @@
   "facultyUrl": "http://ieor.berkeley.edu/People/Faculty/index.htm"
  },
  {
-  "id": "university-of-california-berkeley____industrial-engineering-and-operations-research",
+  "id": "university-of-california-berkeley__college-of-engineering__industrial-engineering-and-operations-research",
   "institution": "University of California, Berkeley",
+  "school": "College of Engineering",
   "department": "Industrial Engineering and Operations Research",
   "type": "University",
   "country": "United States",
-  "address": "4141 Etcheverry Hall, Berkeley, CA 94720",
-  "mapUrl": "https://goo.gl/maps/DllUI",
   "facultyUrl": "http://ieor.berkeley.edu/People/Faculty/index.htm",
   "characteristics": [
    "MBA"
@@ -22866,19 +22854,22 @@
    "postings",
    "seed"
   ],
-  "n": 3,
-  "lastPosted": "2025-10-24",
+  "n": 4,
+  "lastPosted": "2026-10-26",
   "sourceRowIds": [
-   "university-of-california-berkeley____ieor"
+   "university-of-california-berkeley____ieor",
+   "university-of-california-berkeley____industrial-engineering-and-operations-research"
   ],
   "sourceRowAliases": [
    {
     "school": "",
     "department": "IEOR"
+   },
+   {
+    "school": "",
+    "department": "Industrial Engineering and Operations Research"
    }
   ],
-  "lat": 37.8756626,
-  "lng": -122.2592805,
   "mapLocationIds": [
    "berkeley-industrial-engineering-etcheverry"
   ],
@@ -22886,7 +22877,8 @@
   "mapSearchTerms": [
    "College of Engineering",
    "Department of Industrial Engineering and Operations Research",
-   "IEOR"
+   "IEOR",
+   "Industrial Engineering and Operations Research"
   ],
   "mapInstitutionNames": [
    "University of California, Berkeley"
@@ -24984,6 +24976,25 @@
    }
   },
   "facultyUrl": "https://business.leeds.ac.uk/stafflist?categoryIDs%5B%5D=208"
+ },
+ {
+  "id": "university-of-lethbridge__mathematics-and-computer-science__optimization-research",
+  "institution": "University of Lethbridge",
+  "school": "Mathematics and Computer Science",
+  "department": "Optimization Research",
+  "type": "University",
+  "country": "Canada",
+  "characteristics": [
+   "Research seminars"
+  ],
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-26",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-liverpool__management-school__operations-and-supply-chain-management",
@@ -28884,8 +28895,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2026-02-09",
+  "n": 3,
+  "lastPosted": "2026-10-26",
   "lat": 40.7617224,
   "lng": -111.8435009,
   "mapLocationIds": [

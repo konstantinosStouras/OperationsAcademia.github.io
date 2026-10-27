@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26T00:13:35.983Z",
+ "generated": "2026-10-27T19:30:20.655Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -38,6 +38,10 @@
    "n": 7
   },
   {
+   "v": "University of California, Berkeley",
+   "n": 7
+  },
+  {
    "v": "Ohio State University",
    "n": 6
   },
@@ -47,10 +51,6 @@
   },
   {
    "v": "The Hong Kong Polytechnic University",
-   "n": 6
-  },
-  {
-   "v": "University of California, Berkeley",
    "n": 6
   },
   {
@@ -91,6 +91,10 @@
   },
   {
    "v": "University of Tennessee - Knoxville",
+   "n": 5
+  },
+  {
+   "v": "University of Utah",
    "n": 5
   },
   {
@@ -162,10 +166,6 @@
    "n": 4
   },
   {
-   "v": "University of Utah",
-   "n": 4
-  },
-  {
    "v": "Virginia Tech",
    "n": 4
   },
@@ -227,6 +227,10 @@
   },
   {
    "v": "Indiana State University",
+   "n": 3
+  },
+  {
+   "v": "INSEAD",
    "n": 3
   },
   {
@@ -1094,6 +1098,10 @@
    "n": 1
   },
   {
+   "v": "Florida Atlantic University",
+   "n": 1
+  },
+  {
    "v": "Florida International University",
    "n": 1
   },
@@ -1207,10 +1215,6 @@
   },
   {
    "v": "Indiana University Bloomington",
-   "n": 1
-  },
-  {
-   "v": "INSEAD",
    "n": 1
   },
   {
@@ -1735,6 +1739,10 @@
   },
   {
    "v": "University of Leeds, UK",
+   "n": 1
+  },
+  {
+   "v": "University of Lethbridge",
    "n": 1
   },
   {
@@ -2477,11 +2485,11 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 22
+   "n": 23
   },
   {
    "v": "College of Engineering",
-   "n": 12
+   "n": 13
   },
   {
    "v": "School of Business",
@@ -2609,6 +2617,10 @@
   },
   {
    "v": "Curtis L. Carlson School of Management",
+   "n": 2
+  },
+  {
+   "v": "David Eccles School of Business",
    "n": 2
   },
   {
@@ -2928,10 +2940,6 @@
    "n": 1
   },
   {
-   "v": "David Eccles School of Business",
-   "n": 1
-  },
-  {
    "v": "David Nazarian College of Business and Economics",
    "n": 1
   },
@@ -3165,6 +3173,10 @@
   },
   {
    "v": "Martin V. Smith School of Business and Economics",
+   "n": 1
+  },
+  {
+   "v": "Mathematics and Computer Science",
    "n": 1
   },
   {
@@ -3902,11 +3914,19 @@
    "n": 7
   },
   {
+   "v": "Technology and Operations Management",
+   "n": 7
+  },
+  {
    "v": "Business",
    "n": 6
   },
   {
    "v": "AI",
+   "n": 5
+  },
+  {
+   "v": "Industrial Engineering and Operations Research",
    "n": 5
   },
   {
@@ -3918,19 +3938,11 @@
    "n": 5
   },
   {
-   "v": "Technology and Operations Management",
-   "n": 5
-  },
-  {
    "v": "Business Analytics and Information Systems",
    "n": 4
   },
   {
    "v": "Industrial Engineering",
-   "n": 4
-  },
-  {
-   "v": "Industrial Engineering and Operations Research",
    "n": 4
   },
   {
@@ -3943,6 +3955,10 @@
   },
   {
    "v": "Information Systems, Operations, Supply Chain, and Analytics",
+   "n": 4
+  },
+  {
+   "v": "Information Technology and Operations Management",
    "n": 4
   },
   {
@@ -3990,10 +4006,6 @@
    "n": 3
   },
   {
-   "v": "Information Technology and Operations Management",
-   "n": 3
-  },
-  {
    "v": "IS and Analytics",
    "n": 3
   },
@@ -4011,6 +4023,10 @@
   },
   {
    "v": "Operations and Information Management",
+   "n": 3
+  },
+  {
+   "v": "Operations and Information Systems",
    "n": 3
   },
   {
@@ -4179,10 +4195,6 @@
   },
   {
    "v": "OM/OR",
-   "n": 2
-  },
-  {
-   "v": "Operations and Information Systems",
    "n": 2
   },
   {
@@ -5215,6 +5227,10 @@
   },
   {
    "v": "Optimization or Game Theory",
+   "n": 1
+  },
+  {
+   "v": "Optimization Research",
    "n": 1
   },
   {
@@ -7829,6 +7845,19 @@
     "": [
      "BA",
      "OM"
+    ]
+   }
+  },
+  "Florida Atlantic University": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Information Technology and Operations Management"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Information Technology and Operations Management"
     ]
    }
   },
@@ -12002,6 +12031,7 @@
   },
   "University of California, Berkeley": {
    "schools": [
+    "College of Engineering",
     "Haas School of Business"
    ],
    "units": [
@@ -12015,6 +12045,9 @@
     "": [
      "IEOR",
      "IEOR, decision analytics",
+     "Industrial Engineering and Operations Research"
+    ],
+    "College of Engineering": [
      "Industrial Engineering and Operations Research"
     ],
     "Haas School of Business": [
@@ -12487,6 +12520,19 @@
    "bySchool": {
     "": [
      "Optimisation for Decision Support in Disaster Response"
+    ]
+   }
+  },
+  "University of Lethbridge": {
+   "schools": [
+    "Mathematics and Computer Science"
+   ],
+   "units": [
+    "Optimization Research"
+   ],
+   "bySchool": {
+    "Mathematics and Computer Science": [
+     "Optimization Research"
     ]
    }
   },
@@ -14610,6 +14656,7 @@
    "Information and Decision Sciences",
    "Information Systems",
    "Information Systems, Supply Chain, and Analytics",
+   "Information Technology and Operations Management",
    "Management",
    "Management Science",
    "Management, Marketing, and Management Science",
@@ -14665,6 +14712,7 @@
    "H. Milton Stewart School of Industrial and Systems Engineering",
    "Industrial and Operations Engineering",
    "Industrial Engineering",
+   "Industrial Engineering and Operations Research",
    "Integrated Systems Engineering",
    "Lillian Gilbreth Postdoctoral Fellowships",
    "Mechanical and Industrial Engineering",
@@ -15154,6 +15202,9 @@
   ],
   "Martin V. Smith School of Business and Economics": [
    "Operations"
+  ],
+  "Mathematics and Computer Science": [
+   "Optimization Research"
   ],
   "Max M. Fisher College of Business": [
    "Management Science",
