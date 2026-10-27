@@ -80,3 +80,8 @@ body.v3 .oa-uni a.oa-map-primary-action,.oa-uni .leaflet-popup .oa-uni-pop a.oa-
 #oa-uni img[src$="ieseg.svg"] { background:#173f52; border-radius:5px; }
 .oa-uni .oa-map-selected-department { border-left:3px solid var(--map-link); padding-left:8px; font-weight:700; }
 @media(pointer:coarse) { .oa-uni .oa-map-department-name a { min-height:44px;display:flex;align-items:center;box-sizing:border-box; } }
+
+/* Search matches remain distinct in both themes without relying on color alone. */
+.oa-uni .oa-map-department.oa-map-selected-department { background:#e7f2ed;border-radius:6px;padding:10px 12px;border-left:3px solid var(--map-link); }
+[data-theme='dark'] .oa-uni .oa-map-department.oa-map-selected-department { background:#29483f; }
+.oa-uni .oa-map-match-label { display:block;color:var(--map-ink);font-size:12px;font-weight:700;line-height:1.5;margin-bottom:4px; }
