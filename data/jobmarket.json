@@ -24693,5 +24693,38 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-26T19:38:18Z",
   "owner": ""
+ },
+ {
+  "id": "2027-vrije-universiteit-amsterdam-20261028",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-28",
+  "institution": "Vrije Universiteit Amsterdam",
+  "department": "Faculty of Science, Mathematics, Analytics and Optimization",
+  "school": "Faculty of Science",
+  "unit": "Mathematics, Analytics and Optimization",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 6, 2026",
+  "applyByDate": "2026-12-06",
+  "comments": "",
+  "country": "Netherlands",
+  "countries": [
+   "Netherlands"
+  ],
+  "adUrl": "https://werkenbij.vu.nl/vacatures/assistant-professor-in-analytics-and-optimization-amsterdam-1338447",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://werkenbij.vu.nl/vacatures/assistant-professor-in-analytics-and-optimization-amsterdam-1338447/solliciteer",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://vu.nl/en/about-vu/faculties/faculty-of-science/departments/mathematics",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T06:32:52Z",
+  "owner": ""
  }
 ]
