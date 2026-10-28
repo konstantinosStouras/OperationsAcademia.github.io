@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-27T23:07:28.895Z",
- "members": 414,
+ "generated": "2026-10-28T02:09:04.099Z",
+ "members": 415,
  "k": 3,
  "affiliation": {
-  "listed": 332,
+  "listed": 333,
   "other": 48,
   "none": 34
  },
@@ -51,6 +51,11 @@
     "members": 6
    },
    {
+    "name": "McGill University",
+    "country": "Canada",
+    "members": 5
+   },
+   {
     "name": "University of Massachusetts Amherst",
     "country": "United States",
     "members": 5
@@ -78,11 +83,6 @@
    {
     "name": "The Hong Kong University of Science and Technology",
     "country": "Hong Kong",
-    "members": 4
-   },
-   {
-    "name": "McGill University",
-    "country": "Canada",
     "members": 4
    },
    {
@@ -222,7 +222,7 @@
    },
    {
     "name": "Canada",
-    "members": 23
+    "members": 24
    },
    {
     "name": "Singapore",
