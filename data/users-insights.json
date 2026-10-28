@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-28T10:30:30.415Z",
- "members": 418,
+ "generated": "2026-10-28T20:23:19.523Z",
+ "members": 421,
  "k": 3,
  "affiliation": {
-  "listed": 335,
+  "listed": 338,
   "other": 49,
   "none": 34
  },
  "universities": {
-  "count": 150,
+  "count": 151,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -66,6 +66,11 @@
     "members": 5
    },
    {
+    "name": "A’Sharqiyah University",
+    "country": "Oman",
+    "members": 4
+   },
+   {
     "name": "Duke University",
     "country": "United States",
     "members": 4
@@ -83,6 +88,11 @@
    {
     "name": "The Hong Kong University of Science and Technology",
     "country": "Hong Kong",
+    "members": 4
+   },
+   {
+    "name": "London Business School",
+    "country": "United Kingdom",
     "members": 4
    },
    {
@@ -124,11 +134,6 @@
     "name": "Yale University",
     "country": "United States",
     "members": 4
-   },
-   {
-    "name": "A’Sharqiyah University",
-    "country": "Oman",
-    "members": 3
    },
    {
     "name": "Boston University",
@@ -176,11 +181,6 @@
     "members": 3
    },
    {
-    "name": "London Business School",
-    "country": "United Kingdom",
-    "members": 3
-   },
-   {
     "name": "Stanford University",
     "country": "United States",
     "members": 3
@@ -211,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 158
+  "rest": 159
  },
  "countries": {
   "count": 16,
@@ -237,16 +237,20 @@
     "members": 10
    },
    {
-    "name": "France",
-    "members": 8
+    "name": "United Kingdom",
+    "members": 9
    },
    {
-    "name": "United Kingdom",
+    "name": "France",
     "members": 8
    },
    {
     "name": "Germany",
     "members": 7
+   },
+   {
+    "name": "Oman",
+    "members": 4
    },
    {
     "name": "Spain",
@@ -255,13 +259,9 @@
    {
     "name": "Australia",
     "members": 3
-   },
-   {
-    "name": "Oman",
-    "members": 3
    }
   ],
   "rest": 7,
-  "unknown": 103
+  "unknown": 104
  }
 }
