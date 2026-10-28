@@ -24864,6 +24864,207 @@
   "owner": ""
  },
  {
+  "id": "2027-uclouvain-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "UCLouvain",
+  "department": "Louvain School of Management, Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE",
+  "school": "Louvain School of Management",
+  "unit": "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "November 5, 2026",
+  "applyByDate": "2026-11-05",
+  "comments": "",
+  "country": "Belgium",
+  "countries": [
+   "Belgium"
+  ],
+  "adUrl": "https://jobs.uclouvain.be/PersonnelAcademique/job/An-academic-in-Optimization-and-Learning-for-Data-Driven-Decision-systems/1433460333/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=UCLouvain",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:57:44Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-louisville-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "University of Louisville",
+  "department": "College of Business, Information Systems, Analytics and Operations",
+  "school": "College of Business",
+  "unit": "Information Systems, Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-11",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://uofl.wd1.myworkdayjobs.com/en-US/UofLCareerSite/details/Assistant-Professor--tenure-track-_R109611?jobFamilyGroup=122eabeb58371000c79b8793f92f0000",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://business.louisville.edu/academics-programs/undergraduate-programs/computer-information-systems",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:57:49Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-nevada-reno-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "University of Nevada, Reno",
+  "department": "College of Engineering, Mechanical, Industrial, and Materials Engineering",
+  "school": "College of Engineering",
+  "unit": "Mechanical, Industrial, and Materials Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://nshe.wd1.myworkdayjobs.com/en-US/UNR-external/details/Assistant-Professor--Industrial-Engineering--Operations-Research-_R0154005?q=operations%20research",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Nevada%2C%20Reno",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:57:54Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-sydney-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "University of Sydney",
+  "department": "Faculty of Engineering, Engineering and AI",
+  "school": "Faculty of Engineering",
+  "unit": "Engineering and AI",
+  "type": "University",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "",
+  "country": "Australia",
+  "countries": [
+   "Australia"
+  ],
+  "adUrl": "https://usyd.wd105.myworkdayjobs.com/en-US/USYD_EXTERNAL_CAREER_SITE/job/Darlington-Campus/Multiple-Continuing--Tenure-Track--Academic-Positions---Faculty-of-Engineering--The-University-of-Sydney_0157992-1?q=engineering",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Sydney",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:58:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-toronto-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "University of Toronto",
+  "department": "Faculty of Applied Science and Engineering, Mechanical and Industrial Engineering",
+  "school": "Faculty of Applied Science and Engineering",
+  "unit": "Mechanical and Industrial Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 11, 2026",
+  "applyByDate": "2026-11-11",
+  "comments": "",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://jobs.utoronto.ca/job/Toronto-Assistant-Professor-Healthcare-Engineering-ON/606618917/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Toronto",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:58:04Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-woxsen-university-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "Woxsen University",
+  "department": "School of Business, Business Analytics",
+  "school": "School of Business",
+  "unit": "Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "India",
+  "countries": [
+   "India"
+  ],
+  "adUrl": "https://woxsen.edu.in/careers/assistant-professor-business-analytics/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://etgs.wufoo.com/forms/woxsen-job/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://woxsen.edu.in/schools/business/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:58:07Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-warwick-20261028",
   "year": 2027,
   "years": [
