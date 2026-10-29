@@ -450,7 +450,7 @@
       (dups.length ? dupHtml(dups) : '') +
       (doc.biz ? bizHtml(doc.biz) : '') +
       (doc.ad ? advertHtml(doc.ad, row) : '') +
-      '<div class="oa-rv-grid">' +
+      '<fieldset data-review-fields disabled style="border:0;margin:0;padding:0;min-width:0"><div class="oa-rv-grid">' +
         FIELDS.map(function (f, n) {
           var id = idp + '-' + n;
           /* a DIV where the box takes prose: wireComments wraps that box in
@@ -478,10 +478,10 @@
               : '') +
             '</' + tag + '>';
         }).join('') +
-      '</div>' +
+      '</div></fieldset>' +
       '<p class="oa-rv-actions">' +
         '<button type="button" class="button blue" data-act="approve">Approve &amp; publish</button> ' +
-        '<button type="button" class="button" data-act="save">Save edits</button> ' +
+        '<button type="button" class="button" data-act="edit">Edit</button> ' +
         '<button type="button" class="button" data-act="reject">Reject</button>' +
         '<span class="oa-form-msg" data-msg role="status"></span>' +
       '</p>';
@@ -1729,6 +1729,15 @@
         if (!b) return;
         var act = b.dataset.act;
         var msg = card.querySelector('[data-msg]');
+        if (act === 'edit') {
+          card.querySelector('[data-review-fields]').disabled = false;
+          b.dataset.act = 'save';
+          b.textContent = 'Save edits';
+          msg.className = 'oa-form-msg';
+          msg.textContent = 'Edit the details, then save or approve & publish.';
+          card.querySelector('[data-key]').focus();
+          return;
+        }
         var edits = readEdits(card, doc);
 
         var patch = { edits: edits, reviewedAt: new Date().toISOString() };
@@ -1751,6 +1760,9 @@
           .then(function () {
             if (act === 'save') {
               doc.edits = edits;
+              card.querySelector('[data-review-fields]').disabled = true;
+              b.dataset.act = 'edit';
+              b.textContent = 'Edit';
               msg.className = 'oa-form-msg is-ok';
               msg.textContent = 'Saved. It stays under review until you approve it.';
               Array.prototype.forEach.call(card.querySelectorAll('button'), function (x) {
