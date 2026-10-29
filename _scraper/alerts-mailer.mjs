@@ -40,6 +40,7 @@
      --selftest   offline checks of the matcher and the renderers
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -1232,7 +1233,7 @@ async function main() {
   console.log(`\n${sent} sent, ${skipped} skipped, ${failed} failed, of ${snap.size} alert(s)`);
 }
 
-main().catch((err) => {
+if (isMain(import.meta.url)) main().catch((err) => {
   console.error('alerts-mailer failed:', err);
   process.exit(1);
 });

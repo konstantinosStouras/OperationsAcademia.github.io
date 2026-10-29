@@ -1501,7 +1501,8 @@
   }
 
   function offerReview() {
-    return !!EDIT_ID && amMaintainer() && waitingForReview(EDIT_STATUS, EDIT_REVIEWED);
+    // Member postings publish automatically; administrators never need to review them.
+    return false;
   }
 
   function paintReviewed() {

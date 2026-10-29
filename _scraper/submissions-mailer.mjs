@@ -85,7 +85,8 @@ const warn = (...a) => console.log('::warning::' + a.join(' '));
 
 /** Where "somebody has posted something" goes. The maintainer's own address,
     which is also the one the Admin area's panel is gated on. */
-const TO = process.env.SUBMISSION_ALERT_TO || process.env.JOBREVIEW_ALERT_TO || CONTACT;
+// Private submitter details go only to the owner's mailbox, never an alert list.
+const TO = 'operations.academia@gmail.com';
 
 /** More than this many at once is a batch arriving, not the market ticking
     over, and is announced as one list. Same figure as the review queue's, for
@@ -125,7 +126,9 @@ function postedByHtml(doc) {
       '<a href="mailto:' + esc(who.email) + '">' + esc(who.email) + '</a>'
     : esc(who.text);
   return '<p style="margin:0 0 14px;color:#5a5f6b;font-size:13px">' +
-    '<strong style="color:#222">Posted by:</strong> ' + shown + '</p>';
+    '<strong style="color:#222">Posted by:</strong> ' + shown + '</p>' +
+    (who.kind === 'user' && doc.authEmail && doc.authEmail !== who.email
+      ? '<p>Signed-in account email: ' + esc(doc.authEmail) + '</p>' : '');
 }
 
 /**
@@ -173,7 +176,8 @@ export function renderSubmissionEmail(kind, entry,
     '<p><a href="' + esc(editUrl) + '" style="display:inline-block;background:#426394;' +
       'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
       'Open it to correct anything</a></p>' +
-    '<p><a href="' + esc(reviewUrl) + '">See everything waiting for a look</a></p>';
+    '<p><a href="' + esc(reviewUrl) + '">' +
+      (kind.key === 'job' ? 'Manage published member jobs' : 'Open the Admin area') + '</a></p>';
 
   /* manageUrl: null — THE MAINTAINER SUBSCRIBED TO NOTHING. The footer's other
      branch says "You are receiving this because you asked Operations Academia to
@@ -212,7 +216,9 @@ export function renderSubmissionDigest(items, {
       '<td style="padding:3px 12px 3px 0;vertical-align:top">' +
         esc(title || entry.id) + '</td>' +
       '<td style="padding:3px 0;vertical-align:top;color:#5a5f6b">' +
-        esc(who.text) + '</td>' +
+        esc(who.text) +
+        (who.kind === 'user' && entry.data.authEmail && entry.data.authEmail !== who.email
+          ? '<br>Account: ' + esc(entry.data.authEmail) : '') + '</td>' +
       '</tr>';
   }).join('');
 
@@ -657,6 +663,13 @@ function selftest() {
   ok(/https:\/\/x\.test\/admin-area/.test(one.html), 'and to the page listing everything waiting');
   ok(/already live/.test(one.html),
     'it says the posting is live — this is a notification, never a gate');
+
+  const identified = renderSubmissionEmail(job, {
+    ...jobDoc, data: { ...jobDoc.data, authEmail: 'account@x.edu' }
+  }, { site: 'https://x.test' });
+  ok(identified.html.includes('Ada Lovelace') && identified.html.includes('ada@x.edu') &&
+    identified.html.includes('account@x.edu'), 'admin notice identifies contact and signed-in account');
+  ok(!identified.html.includes('waiting for a look'), 'member notice requests no review');
 
   /* --- a held candidate profile ----------------------------------------- */
   const held = renderSubmissionEmail(cand, { ...candDoc, row: cand.row(candDoc.data) },

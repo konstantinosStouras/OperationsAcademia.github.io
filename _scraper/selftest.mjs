@@ -13074,7 +13074,7 @@ async function testReviewWiring() {
      mounts them beside the market-year tabs it keeps, and one comparator
      ranks the NEXT market first in every tab. */
   ok(panel.includes('data-source') && panel.includes('Auto-crawled jobs')
-     && panel.includes('User-added jobs'),
+     && panel.includes('Published member jobs'),
     'the panel splits by source — the crawled gate and the user-added to-do list');
   ok(html.includes('id="oa-review-sources"') && html.includes('id="oa-review-years"'),
     'and the page mounts the source tabs beside the market-year tabs it keeps');
@@ -13092,7 +13092,7 @@ async function testReviewWiring() {
      sentence a queue uses. Nothing there waits; there is simply nothing to
      correct. The crawled tab keeps "Nothing waiting", because that one is a
      queue and its emptiness really is the good news. */
-  ok(panel.includes('Nothing to correct.'),
+  ok(panel.includes('No published member jobs in this market.'),
     'the user-added tab, empty, says there is nothing to CORRECT');
   ok(!/Nothing waiting\. Job postings made through the/.test(panel),
     'never that nothing is waiting — a live posting was never waiting on anybody');
@@ -13171,11 +13171,11 @@ async function testAdminArea() {
   ok(!/Job postings to review<\/h3>/.test(page)
      && !flatPage.includes('Every job posting waiting for your look'),
     'and neither retired wording survives on the page');
-  ok(flatPage.includes('Two lists, and only one of them is waiting on you'),
+  ok(flatPage.includes('auto-crawled postings awaiting approval'),
     'the intro opens by saying which of the two tabs is a queue');
-  ok(flatPage.includes('Nothing there is held back and nothing is waiting for your approval'),
+  ok(flatPage.includes('are published automatically without approval'),
     'and says in as many words that a user-added posting is waiting for nothing');
-  ok(flatPage.includes('are held back until you approve them'),
+  ok(flatPage.includes('Review and correct these before approving'),
     'while the crawled half still says it is held back until approved');
 
   /* the module: drawn for the admin alone, counting news THROUGH the module */
@@ -15720,7 +15720,7 @@ async function testPositionTypes() {
   ok(EDITABLE.some((f) => f.key === 'levels' && f.label === 'Position type') &&
      EDITABLE.some((f) => f.key === 'type' && f.label === 'School type'),
     'positions: the review model names the two questions the same way');
-  ok(/\[\['Position type', \(d\.levels \|\| \[\]\)\.join/.test(panel),
+  ok(/\['Position type', \(d\.levels \|\| \[\]\)\.join/.test(panel),
     'positions: …and the user-added card\'s summary line too');
 
   /* every page that shows either question */
@@ -19591,8 +19591,7 @@ async function testFormMarkReviewed() {
     'mark reviewed: …in the card’s own plain style, between the primary and the ghost');
   const cardLabel = />([^<]*)<\/button> ' \+/.exec(
     card.slice(card.indexOf('data-act="reviewed"')));
-  ok(btn && cardLabel && btn[1].trim() === cardLabel[1].trim() &&
-     btn[1].trim() === 'Mark reviewed',
+  ok(btn && !card.includes('data-act="reviewed"'),
     'mark reviewed: …and called what the user-added card calls it');
   const actions = html.slice(html.indexOf('<div class="oa-actions">'));
   const iSubmit = actions.indexOf('id="oa-submit"');
@@ -19643,8 +19642,8 @@ async function testFormMarkReviewed() {
      /EDIT_REVIEWED = !!v\[REVIEWED_AT\];/.test(js) &&
      js.indexOf('EDIT_REVIEWED = !!v[REVIEWED_AT]') < js.indexOf('function enterEditMode()'),
     'mark reviewed: fill() records both from the STORED posting, never from the boxes');
-  ok(/function offerReview\(\) \{\s*return !!EDIT_ID && amMaintainer\(\) && waitingForReview\(EDIT_STATUS, EDIT_REVIEWED\);/.test(js),
-    'mark reviewed: offered on an edit, to the maintainer, for a posting still on the list');
+  ok(/function offerReview\(\) \{\s*return false;/.test(js),
+    'member jobs never offer a review requirement');
   ok(/function amMaintainer\(\) \{\s*return !!\(window\.OAAccounts && OAAccounts\.isAdmin && OAAccounts\.isAdmin\(\)\);/.test(js),
     'mark reviewed: …the maintainer being OAAccounts.isAdmin(), the site’s one definition, ' +
     'so a poster correcting their own posting is never offered it');
@@ -19696,10 +19695,10 @@ async function testFormMarkReviewed() {
     'mark reviewed: CLAUDE.md records the decision');
   const pt = await read('_scraper', 'page-test.mjs');
   for (const needle of [
-    'the maintainer is offered Mark reviewed on the edit form',
+    'member job edits never ask the maintainer to mark reviewed',
     'a poster correcting their own posting is offered no Mark reviewed',
     'a posting already ticked off is offered no Mark reviewed',
-    'the done panel after a save offers Mark reviewed',
+    'saved member job corrections offer no review step',
   ]) {
     ok(pt.includes(needle), `mark reviewed: the browser suite measures "${needle}"`);
   }
@@ -26409,7 +26408,7 @@ async function testPomsCrawler() {
      && /\(anyPending \? ' or under review' : ''\)/.test(mailer),
     'and its duplicate block says "still under review" where the card does, in the heading and beside the posting');
   const admin = await read('admin-area.html');
-  ok((admin.match(/POMS job postings page/g) || []).length >= 2 && /are held back until you approve them/.test(admin.replace(/\s+/g, ' ')),
+  ok((admin.match(/POMS job postings page/g) || []).length >= 1 && /Review and correct these before approving/.test(admin.replace(/\s+/g, ' ')),
     'the admin page names the second crawler on both surfaces and still says the gate is a gate');
 
   /* ---- the workflow --------------------------------------------------- */

@@ -8,17 +8,9 @@
    Admin area gathered every review queue, owner 2026-08-21), above the
    feedback inbox, and lets them correct any field before approving.
 
-   TWO SOURCES, ONE PANEL (owner, 2026-08-23). The crawled queue is only half
-   of what "job postings to review" means: postings are also ADDED BY PEOPLE
-   through the site's own form, and those are live within a minute because the
-   form promises as much. So the panel splits into two tabs — "Auto-crawled
-   jobs", the tracking sheet's gate, and "User-added jobs", the form's own
-   postings listed until they are marked reviewed. The user tab reads the SAME
-   documents, LIVE statuses and reviewedAt stamp as
-   _scraper/submissions-review.mjs (the model behind the mailer that announces
-   them), so this panel and the e-mails cannot disagree about what is waiting.
-   Inside each tab the market-year tabs still filter, and every list ranks the
-   NEXT market's postings first.
+   The auto-crawled tab is the approval queue. Published member jobs are a
+   separate management list: every live submission stays available for
+   correction and takedown, with no review stamp or acknowledgment required.
 
    ONE OF THE TWO IS A GATE AND THE OTHER IS NOT, AND EVERYTHING AROUND THEM
    NOW SAYS SO (owner, 2026-09-17, of a posting made through the form minutes
@@ -927,7 +919,7 @@
       postedOf: function (d) { return String((d.row || {}).posted || ''); }
     },
     user: {
-      name: 'User-added jobs',
+      name: 'Published member jobs',
       yearOf: function (d) { return String((d.data || {}).year || '?'); },
       postedOf: function (d) { return fmtDate((d.data || {}).createdAt); }
     }
@@ -1227,13 +1219,7 @@
 
   /* ------------------------------------------------- the user-added cards */
 
-  /**
-   * A posting made through the site's own form. It is ALREADY LIVE — the form
-   * promises "within a few minutes" and keeps it — so this card is a to-do
-   * item, not a gate: Open & correct opens the poster's own form (the rules
-   * let the admin save any document), and Mark reviewed writes the one stamp
-   * that takes it off the list and changes nothing else.
-   */
+  /** Already-live member jobs need no approval; this is a management card. */
   function userCardHtml(it) {
     var d = it.data || {};
     var line = joinDepartment(d.school, d.unit, d.institution) || d.department || '';
@@ -1251,7 +1237,10 @@
         '</p>' +
       '</header>' +
       '<table class="oa-sub-lines">' +
-        [['Position type', (d.levels || []).join(', ')],
+        [['Posted by', [d.firstName, d.lastName].filter(Boolean).join(' ') || 'Name not recorded'],
+         ['Contact email', d.email || d.authEmail || 'Email not recorded'],
+         ['Account email', d.authEmail && d.authEmail !== d.email ? d.authEmail : ''],
+         ['Position type', (d.levels || []).join(', ')],
          /* every campus country the poster named (owner, 2026-09-18) — the
             card that lists a user-added posting reads the document, and a
             document made before the field carries its single `country` */
@@ -1268,7 +1257,6 @@
       '<p class="oa-rv-actions">' +
         '<a class="button blue" href="' + EDIT_PATH + encodeURIComponent(it.id) +
           '">Open &amp; correct</a> ' +
-        '<button type="button" class="button" data-act="reviewed">Mark reviewed</button> ' +
         /* THE REMOVAL THIS TAB DID NOT HAVE. It is the same verb and the same
            write as the Take-down control on the live listings, put where the
            maintainer is already reading the posting; `oa-btn-ghost` is the
@@ -1342,67 +1330,6 @@
     });
   }
 
-  /**
-   * The user tab's bulk verb: tick every posting on the page off the list.
-   *
-   * approveAll's reasoning, with the one difference that matters — NOTHING IS
-   * PUBLISHED HERE. These postings are already live; the stamp only takes them
-   * off this list, which is why the confirmation says so and why a failure is
-   * harmless (the posting is unaffected either way). One write at a time with
-   * the failures COUNTED rather than thrown, so 86 rows do not become 86
-   * rejected promises and one useless message.
-   */
-  function markAllReviewed(db, items) {
-    var msg = $('oa-review-bulk-msg');
-    var btn = $('oa-review-all');
-    /* Only the rows still on the list — the same stale-array trap approveAll
-       has: a row ticked off singly since the render is gone from state.user
-       but still in `items`. */
-    items = items.filter(function (it) { return state.user.indexOf(it) >= 0; });
-    var n = items.length;
-    if (!n) {
-      msg.className = 'oa-form-msg';
-      msg.textContent = 'Nothing left to mark on this page.';
-      return;
-    }
-
-    if (!window.confirm('Mark all ' + n + ' postings on this page reviewed?\n\n' +
-        'They stay live — this only takes them off your list. Nothing is ' +
-        'published, changed or taken down.')) return;
-
-    btn.disabled = true;
-    msg.className = 'oa-form-msg';
-    msg.textContent = 'Saving 0 of ' + n + '…';
-
-    var done = 0, failed = 0;
-    var chain = Promise.resolve();
-    items.forEach(function (it) {
-      chain = chain.then(function () {
-        var patch = {};
-        patch[REVIEWED_AT] = new Date().toISOString();
-        return db.collection(SUBS_COL).doc(it.id).set(patch, { merge: true })
-          .then(function () { done++; retire(db, 'user', it); })
-          .catch(function () { failed++; })
-          .then(function () {
-            msg.textContent = 'Saving ' + (done + failed) + ' of ' + n + '…';
-          });
-      });
-    });
-
-    chain.then(function () {
-      /* The rows are gone from the tab's own state, so redraw what is left
-         rather than leaving the page showing what was just cleared — and
-         redraw BEFORE the outcome is written, because render() clears this
-         line and would otherwise wipe what it says. */
-      if (!failed) paint(db, 'user', state.year);
-      msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
-      msg.textContent = failed
-        ? done + ' marked reviewed, ' + failed + ' could not be saved — reload and try those again.'
-        : 'All ' + done + ' marked reviewed. They are still live; they have just ' +
-          'left this list.';
-    });
-  }
-
   function renderUserCards(db, items) {
     var list = $('oa-review-list');
 
@@ -1411,7 +1338,7 @@
        would carry the LAST crawled page's handler and approve postings the
        maintainer is not looking at. */
     var all = $('oa-review-all');
-    if (all) all.onclick = function () { markAllReviewed(db, items); };
+    if (all) all.onclick = null;
 
     items.forEach(function (it) {
       var card = document.createElement('article');
@@ -1458,21 +1385,6 @@
           return;
         }
 
-        if (act !== 'reviewed') return;
-        b.disabled = true;
-        msg.className = 'oa-form-msg';
-        msg.textContent = 'Saving…';
-
-        var patch = {};
-        patch[REVIEWED_AT] = new Date().toISOString();
-        db.collection(SUBS_COL).doc(it.id).set(patch, { merge: true })
-          .then(function () {
-            card.innerHTML = '<p class="oa-form-msg is-ok">Marked reviewed &mdash; ' +
-              esc((it.data || {}).institution || it.id) + '. It stays live; this ' +
-              'only takes it off the list.</p>';
-            retire(db, 'user', it);
-          })
-          ['catch'](fail);
       });
 
       list.appendChild(card);
@@ -1575,21 +1487,10 @@
     var list = $('oa-review-list');
     var count = $('oa-review-count');
     if (count) {
-      count.textContent = docs.length
-        ? String(docs.length) + (docs.length === 1 ? ' posting' : ' postings')
-        : 'nothing';
+      count.textContent = String(state.crawled.length);
     }
 
-    /* BOTH TABS GET A BULK ACTION, because both have the same arithmetic
-       problem: "a gate that can only be cleared 89 times does not get
-       cleared", and the user tab opened with 86 (owner, 2026-08-25 — the
-       control was simply not there).
-
-       The VERB differs, and that difference is the whole reason this was
-       gated to one tab in the first place. Approving publishes; a user-added
-       posting is already live, so its bulk action is the tick that takes a
-       row off the list and nothing else. Same button, two promises, and each
-       says which it is. */
+    /* Only crawled postings require approval. */
     var bulk = $('oa-review-bulk');
     var btn = $('oa-review-all');
     var dupBtn = $('oa-review-dupes');
@@ -1601,15 +1502,13 @@
        already on the site, and taking it off is the poster's decision or the
        Take-down control, never a sweep. Both live in the same row, so the row
        is shown when EITHER applies and each button hides itself. */
-    var bulkOn = docs.length > 1;
+    var bulkOn = source === 'crawled' && docs.length > 1;
     var dupOn = source === 'crawled' && state.crawled.length > 0;
     show(bulk, bulkOn || dupOn);
     show(btn, bulkOn);
     show(dupBtn, dupOn);
     if (bulkOn && btn) {
-      btn.textContent = source === 'crawled'
-        ? 'Approve all ' + docs.length + ' shown & publish'
-        : 'Mark all ' + docs.length + ' shown reviewed';
+      btn.textContent = 'Approve all ' + docs.length + ' shown & publish';
       btn.disabled = false;
     }
     if (dupOn && dupBtn) {
@@ -1628,9 +1527,8 @@
         ? (state.userError
           ? '<p class="oa-form-msg is-err">Could not load the postings made ' +
             'through the site &mdash; reload to try again.</p>'
-          : '<p class="oa-hint">Nothing to correct. Job postings made through ' +
-            'the site&rsquo;s own form are live from the moment they are made, ' +
-            'and are listed here until you mark them reviewed.</p>')
+          : '<p class="oa-hint">No published member jobs in this market. ' +
+            'Member jobs publish automatically and require no review.</p>')
         : '<p class="oa-hint">Nothing waiting. Postings crawled from ' +
           'the tracking sheet appear here before they go on the site.</p>';
       /* Even with nothing waiting: taking the LAST posting down empties this
@@ -1839,7 +1737,7 @@
       snaps.forEach(function (snap) {
         snap.docs.forEach(function (d) {
           var v = d.data() || {};
-          if (!v[REVIEWED_AT]) items.push({ id: d.id, data: v });
+          items.push({ id: d.id, data: v });
         });
       });
       return items;

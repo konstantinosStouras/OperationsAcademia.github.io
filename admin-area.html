@@ -203,22 +203,12 @@
                  alone (waitingJobs in assets/oa-adminarea.js). -->
             <section class="oa-panel" id="oa-review" hidden>
               <h3 class="oa-panel-h">&#128203; Job postings</h3>
-              <p class="oa-hint">Two lists, and only one of them is waiting on
-                you: <span id="oa-review-count">nothing</span> shown.
-                <strong>Auto-crawled</strong> postings come from the job market
-                tracking sheet and from the POMS job postings page (each card
-                says which) and are held back until you approve them; correct
-                anything that is wrong first, and your edits are kept and
-                re-applied every time the sheet is re-read.
-                <strong>User-added</strong> postings were made through the
-                site&rsquo;s own form and are already live. Nothing there is
-                held back and nothing is waiting for your approval; the list is
-                there so you can correct one, and Mark reviewed takes it off.</p>
-              <!-- Two sources, one panel (owner, 2026-08-23): the postings
-                   crawled from the tracking sheet (a GATE — nothing publishes
-                   until approved) and the ones people posted through the site's
-                   own form (already live — a to-do list). The tabs split them
-                   by source; filled by assets/oa-jobreview.js. -->
+              <p class="oa-hint"><span id="oa-review-count">0</span> auto-crawled postings awaiting approval.
+                <strong>Auto-crawled jobs</strong> come from the job market tracking sheet
+                and the POMS job postings page. Review and correct these before approving.
+                <strong>Published member jobs</strong> are published automatically without
+                approval. That tab is for looking up the submitter, correcting a posting,
+                or taking it down; no review or acknowledgment is required.</p>
               <div class="oa-tabs" id="oa-review-sources" hidden></div>
               <!-- Approving one at a time is right for a handful and unusable for
                    a season: the tracking sheet's own tab opened with 89 postings

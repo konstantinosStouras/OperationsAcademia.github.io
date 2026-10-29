@@ -2401,67 +2401,11 @@ for (const [name, expect] of [
     };
   });
 
-  const mrPress = await onSite('post-a-job?edit=jr', mrSeed(MR_ADMIN), async (q) => {
+  const adminOffered = await onSite('post-a-job?edit=jr', mrSeed(MR_ADMIN), async (q) => {
     await mrOpen(q);
-    const offered = await mrOffered(q);
-    await q.click('#oa-reviewed');
-    await q.waitForFunction(() =>
-      !!(window.__fb.dump()['jobSubmissions/jr'] || {}).reviewedAt, null, { timeout: 8000 });
-    await q.waitForTimeout(200);
-    return { offered, doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/jr']),
-      after: await q.evaluate(() => {
-        const back = document.getElementById('oa-reviewed-back');
-        return {
-          form: !document.getElementById('oa-job-form').hidden,
-          done: !document.getElementById('oa-done').hidden,
-          btn: !document.getElementById('oa-reviewed').hidden,
-          back: back ? back.getAttribute('href') : null,
-          focused: document.activeElement === back,
-          msg: document.getElementById('oa-msg').textContent,
-          cls: document.getElementById('oa-msg').className,
-        };
-      }) };
+    return mrOffered(q);
   });
-  eq({ shown: mrPress.offered.shown, label: mrPress.offered.label, type: mrPress.offered.type },
-    { shown: true, label: 'Mark reviewed', type: 'button' },
-    'v3 edit: the maintainer is offered Mark reviewed on the edit form, in the card’s own words');
-  ok(mrPress.offered.order && mrPress.offered.row,
-    'v3 edit: …on one row with Save changes before it and Take down after it, the card’s order');
-  ok(mrPress.offered.h >= 42,
-    `v3 edit: …and a full-size target (${mrPress.offered.h}px)`);
-  ok(typeof mrPress.doc.reviewedAt === 'string' && !Number.isNaN(Date.parse(mrPress.doc.reviewedAt)),
-    'v3 edit: pressing it stamps reviewedAt, the one field the card writes');
-  const { reviewedAt: _stamp, ...mrRest } = mrPress.doc;
-  eq(mrRest, MR_POSTING,
-    'v3 edit: …and NOTHING else on the posting moves: still published, no updatedAt, no save');
-  eq({ form: mrPress.after.form, done: mrPress.after.done, btn: mrPress.after.btn },
-    { form: true, done: false, btn: false },
-    'v3 edit: the form stays open (a correction not yet saved is never thrown away) and the button goes');
-  ok(mrPress.after.back === 'admin-area' && mrPress.after.focused,
-    'v3 edit: …the way back to the Admin area takes its place, with the keyboard on it');
-  ok(/Marked reviewed/.test(mrPress.after.msg) && /stays live/.test(mrPress.after.msg) &&
-     /is-ok/.test(mrPress.after.cls) && !/Save changes/.test(mrPress.after.msg),
-    'v3 edit: …and the line says it stays live and has only left the list, with no ' +
-    'reminder to save when nothing was typed');
-
-  /* Typed a correction, then pressed it: the stamp is written, the typing is
-     NOT saved, and the line says so rather than letting it look saved. */
-  const mrTouched = await onSite('post-a-job?edit=jr', mrSeed(MR_ADMIN), async (q) => {
-    await mrOpen(q);
-    await q.fill('#f-note', 'a correction not yet saved');
-    await q.click('#oa-reviewed');
-    await q.waitForFunction(() =>
-      !!(window.__fb.dump()['jobSubmissions/jr'] || {}).reviewedAt, null, { timeout: 8000 });
-    await q.waitForTimeout(200);
-    return { doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/jr']),
-      msg: await q.evaluate(() => document.getElementById('oa-msg').textContent),
-      note: await q.evaluate(() => document.getElementById('f-note').value) };
-  });
-  eq(mrTouched.doc.note, undefined,
-    'v3 edit: Mark reviewed never saves the form, even with a correction typed');
-  ok(/press Save changes to keep them/.test(mrTouched.msg) &&
-     mrTouched.note === 'a correction not yet saved',
-    'v3 edit: …the typing is still in the box, and the line says it still needs Save changes');
+  eq(adminOffered.shown, false, 'member job edits never ask the maintainer to mark reviewed');
 
   /* The two places it must NOT appear. */
   const mrPoster = await onSite('post-a-job?edit=jr', mrSeed(keptUser), async (q) => {
@@ -2482,37 +2426,20 @@ for (const [name, expect] of [
   eq(mrHidden.shown, false,
     'v3 edit: nor is a posting that has been taken down: the list reads live postings only');
 
-  /* The other order: a correction SAVED first, then ticked off from the done
-     panel, without a trip back to the card. */
   const mrSaved = await onSite('post-a-job?edit=jr', mrSeed(MR_ADMIN), async (q) => {
     await mrOpen(q);
     await q.fill('#f-note', 'checked the advert');
     await q.click('#oa-submit');
     await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
-    const panel = await q.evaluate(() => ({
+    return q.evaluate(() => ({
       btn: !!document.getElementById('oa-done-reviewed'),
       admin: !!document.querySelector('#oa-done a[href="admin-area"]'),
-      line: (document.getElementById('oa-done-review') || {}).textContent || '',
-      stamped: !!(window.__fb.dump()['jobSubmissions/jr'] || {}).reviewedAt,
+      doc: window.__fb.dump()['jobSubmissions/jr'],
     }));
-    await q.click('#oa-done-reviewed');
-    await q.waitForFunction(() =>
-      !!(window.__fb.dump()['jobSubmissions/jr'] || {}).reviewedAt, null, { timeout: 8000 });
-    await q.waitForTimeout(200);
-    return { panel, doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/jr']),
-      after: await q.evaluate(() => ({
-        btn: !document.getElementById('oa-done-reviewed').hidden,
-        line: document.getElementById('oa-done-review').textContent,
-      })) };
   });
-  ok(mrSaved.panel.btn && mrSaved.panel.admin && /until you mark it reviewed/.test(mrSaved.panel.line),
-    'v3 edit: the done panel after a save offers Mark reviewed, and the way back to the Admin area');
-  eq(mrSaved.panel.stamped, false,
-    'v3 edit: …saving alone ticks nothing off: the two acts stay apart');
-  ok(mrSaved.doc.note === 'checked the advert' && typeof mrSaved.doc.reviewedAt === 'string',
-    'v3 edit: …and pressing it stamps the posting whose correction has just been saved');
-  ok(!mrSaved.after.btn && /Marked reviewed/.test(mrSaved.after.line),
-    'v3 edit: …the button goes and the line says what happened');
+  ok(!mrSaved.btn && mrSaved.admin, 'saved member job corrections offer no review step');
+  ok(mrSaved.doc.note === 'checked the advert' && !mrSaved.doc.reviewedAt,
+    'corrections save without adding a review requirement');
 
   const mrPosterSaved = await onSite('post-a-job?edit=jr', mrSeed(keptUser), async (q) => {
     await mrOpen(q);
@@ -7152,7 +7079,7 @@ for (const w of [320, 360, 390, 430]) {
       const els = document.querySelectorAll('#oa-review-sources button[data-source]');
       return els.length === 2 &&
         els[0].textContent === 'Auto-crawled jobs (3)' &&
-        els[1].textContent === 'User-added jobs (2)';
+        els[1].textContent === 'Published member jobs (3)';
     }, null, { timeout: 10000 });
     ok(true, 'admin area: the two source tabs land counted — 3 crawled pending, 2 user-added waiting');
     ok(await q.$eval('#oa-review-sources button[data-source="crawled"]',
@@ -7161,7 +7088,7 @@ for (const w of [320, 360, 390, 430]) {
 
     // the default season is the NEXT market, so its one crawled posting shows
     await q.waitForFunction(() =>
-      (document.getElementById('oa-review-count') || {}).textContent === '1 posting',
+      (document.getElementById('oa-review-count') || {}).textContent === '3',
       null, { timeout: 10000 });
     eq(await q.$$eval('#oa-review-years button[data-year]',
       (els) => els.map((e) => e.textContent)),
@@ -7307,35 +7234,26 @@ for (const w of [320, 360, 390, 430]) {
           posting is live the moment the form saved it -- */
     await q.click('#oa-review-sources button[data-source="user"]');
     await q.waitForFunction(() =>
-      (document.getElementById('oa-review-count') || {}).textContent === '1 posting',
+      (document.getElementById('oa-review-count') || {}).textContent === '3',
       null, { timeout: 10000 });
     ok((await q.textContent('#oa-review-list')).indexOf('Poster University Two') !== -1,
       'admin area: the user tab opens on ITS newest market, like the gate does');
     await q.click('#oa-review-years button[data-year="*"]');
     await q.waitForFunction(() =>
-      (document.getElementById('oa-review-count') || {}).textContent === '2 postings',
+      (document.getElementById('oa-review-count') || {}).textContent === '3',
       null, { timeout: 10000 });
     const userList = await q.textContent('#oa-review-list');
     ok(userList.indexOf('Poster University Two') < userList.indexOf('Poster University One'),
       'admin area: user-added postings rank by market year too — 2027 before 2026');
-    ok(userList.indexOf('Reviewed University') === -1,
-      'admin area: a submission already marked reviewed is off the list');
+    ok(userList.indexOf('Reviewed University') !== -1,
+      'admin area: previously reviewed submissions remain manageable');
     ok(userList.indexOf('Withdrawn University') === -1,
       'admin area: a withdrawn one is not waiting for anything');
     ok(userList.indexOf('Mirror University') === -1,
       'admin area: and a tracking-sheet mirror stays with its own queue');
-    /* BOTH TABS CARRY A BULK ACTION (owner, 2026-08-25: the user tab opened
-       with 86 postings and no way to clear them). What must NEVER cross over
-       is the VERB: approving publishes, and nothing on this tab is waiting to
-       be published — its postings are already live, so the button ticks them
-       off the list and says exactly that. */
-    ok(await q.locator('#oa-review-bulk').isVisible(),
-      'admin area: the user tab has a bulk action too — 86 rows do not get cleared one at a time');
-    const userBulk = (await q.textContent('#oa-review-all') || '').toLowerCase();
-    ok(/mark all/.test(userBulk) && /reviewed/.test(userBulk),
-      `admin area: and its verb is Mark all reviewed, not Approve (read: "${userBulk}")`);
-    ok(!/approve/.test(userBulk) && !/publish/.test(userBulk),
-      'admin area: nothing on the user tab offers to approve or publish — it is already live');
+    ok(!await q.locator('#oa-review-bulk').isVisible(), 'member jobs require no bulk review');
+    eq(await q.locator('#oa-review-list button[data-act="reviewed"]').count(), 0,
+      'member jobs require no individual review');
 
     /* The season filter is DRAWN even when a tab holds one market: an empty
        space where a control belongs reads as the control being missing, which
@@ -7370,13 +7288,13 @@ for (const w of [320, 360, 390, 430]) {
        hide it. u6 is a 2026 posting, so selecting 2027 alone proves it. */
     await q.click('#oa-review-years button[data-year="2027"]');
     await q.waitForFunction(() =>
-      (document.getElementById('oa-review-count') || {}).textContent === '1 posting',
+      (document.getElementById('oa-review-count') || {}).textContent === '3',
       null, { timeout: 10000 });
     ok((await q.textContent('#oa-review-list .oa-rv-down')).indexOf('Hidden University') !== -1,
       'admin area: the drawer is not filtered by season — a 2026 take-down is still there under 2027');
     await q.click('#oa-review-years button[data-year="*"]');
     await q.waitForFunction(() =>
-      (document.getElementById('oa-review-count') || {}).textContent === '2 postings',
+      (document.getElementById('oa-review-count') || {}).textContent === '3',
       null, { timeout: 10000 });
 
     /* Taking one down: a status change and never a delete, the echo stashed
@@ -7400,8 +7318,8 @@ for (const w of [320, 360, 390, 430]) {
         (document.querySelector('#oa-review-list details.oa-rv-down summary') || {}).textContent || ''),
       null, { timeout: 10000 });
     ok(true, 'admin area: the posting moves into the drawer, with the count following');
-    ok((await q.textContent('#oa-review-count')) === '1 posting'
-       && await q.locator('#oa-review-list > article.oa-rv-card').count() === 1,
+    ok((await q.textContent('#oa-review-count')) === '3'
+       && await q.locator('#oa-review-list > article.oa-rv-card').count() === 2,
       'admin area: and off the list above, which is down to the one still waiting');
     ok(await q.locator('#oa-review-years button[data-year="*"].is-on').count() === 1,
       'admin area: the All tab the maintainer chose is still the tab they are on');
@@ -7417,7 +7335,7 @@ for (const w of [320, 360, 390, 430]) {
       return d && d.status === 'queued';
     }, null, { timeout: 10000 });
     await q.waitForFunction(() =>
-      (document.getElementById('oa-review-count') || {}).textContent === '2 postings'
+      (document.getElementById('oa-review-count') || {}).textContent === '3'
       && /Taken down by you \(1\)/.test(
         (document.querySelector('#oa-review-list details.oa-rv-down summary') || {})
           .textContent || ''),
@@ -7433,22 +7351,13 @@ for (const w of [320, 360, 390, 430]) {
       .filter((k) => k.indexOf('jobSubmissions/') === 0).length), 6,
       'admin area: and nothing was ever deleted — all six documents are still there');
 
-    // ticking one off writes the one stamp, and the tab count follows live
-    await q.click('article:has(a[href="post-a-job?edit=u1"]) button[data-act="reviewed"]');
-    await q.waitForFunction(() => {
-      const d = window.__fb.docs['jobSubmissions/u1'];
-      return d && typeof d.reviewedAt === 'string' && d.reviewedAt.length > 0;
-    }, null, { timeout: 10000 });
-    ok(true, 'admin area: Mark reviewed writes reviewedAt onto the submission itself — nothing else');
-    await q.waitForFunction(() =>
-      (document.querySelector('#oa-review-sources button[data-source="user"]') || {})
-        .textContent === 'User-added jobs (1)', null, { timeout: 10000 });
-    ok(true, 'admin area: and the tab count follows without a reload');
+    eq(await q.locator('#oa-review-list button[data-act="reviewed"]').count(), 0,
+      'restored member jobs still need no review');
 
     // the gate is untouched by any of that
     await q.click('#oa-review-sources button[data-source="crawled"]');
     await q.waitForFunction(() =>
-      (document.getElementById('oa-review-count') || {}).textContent === '1 posting',
+      (document.getElementById('oa-review-count') || {}).textContent === '3',
       null, { timeout: 10000 });
     ok(true, 'admin area: switching back lands on the gate’s newest market again');
 
@@ -7533,7 +7442,7 @@ for (const w of [320, 360, 390, 430]) {
        numbers now, and that is the point rather than a disagreement: the tile
        says what is held up, the tab says what is listed. Measured together so
        neither can drift into the other. */
-    ok(/^User-added jobs \(\d+\)$/.test(await q.$eval(
+    ok(/^Published member jobs \(\d+\)$/.test(await q.$eval(
          '#oa-review-sources button[data-source="user"]', (el) => el.textContent))
        && await q.$eval('#oa-aa-tiles .oa-aa-tile-n', (el) => el.textContent) === '3',
       'admin area: the tab still lists the user-added postings while the tile ' +
