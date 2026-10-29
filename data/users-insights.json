@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-28T20:23:19.523Z",
- "members": 421,
+ "generated": "2026-10-29T00:05:32.533Z",
+ "members": 423,
  "k": 3,
  "affiliation": {
-  "listed": 338,
+  "listed": 340,
   "other": 49,
   "none": 34
  },
@@ -116,12 +116,22 @@
     "members": 4
    },
    {
+    "name": "University of California, Berkeley",
+    "country": "United States",
+    "members": 4
+   },
+   {
     "name": "University of Mannheim",
     "country": "Germany",
     "members": 4
    },
    {
     "name": "University of Southern California",
+    "country": "United States",
+    "members": 4
+   },
+   {
+    "name": "University of Utah",
     "country": "United States",
     "members": 4
    },
@@ -186,11 +196,6 @@
     "members": 3
    },
    {
-    "name": "University of California, Berkeley",
-    "country": "United States",
-    "members": 3
-   },
-   {
     "name": "University of California, Los Angeles (UCLA)",
     "country": "United States",
     "members": 3
@@ -204,11 +209,6 @@
     "name": "University of Illinois at Urbana-Champaign",
     "country": "United States",
     "members": 3
-   },
-   {
-    "name": "University of Maryland",
-    "country": "United States",
-    "members": 3
    }
   ],
   "rest": 159
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 211
+    "members": 213
    },
    {
     "name": "Canada",
