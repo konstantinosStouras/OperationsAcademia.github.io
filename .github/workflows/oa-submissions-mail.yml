@@ -114,10 +114,7 @@ jobs:
         if: steps.gate.outputs.ready == 'true'
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          # Where "somebody has posted something" goes. Defaults to
-          # JOBREVIEW_ALERT_TO, then to CONTACT in _mail.mjs.
-          SUBMISSION_ALERT_TO: ${{ vars.SUBMISSION_ALERT_TO }}
-          JOBREVIEW_ALERT_TO: ${{ vars.JOBREVIEW_ALERT_TO }}
+          # Private submitter details go only to operations.academia@gmail.com.
           SITE_URL: ${{ vars.SITE_URL }}
           MAIL_FROM: ${{ vars.MAIL_FROM }}
           CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}

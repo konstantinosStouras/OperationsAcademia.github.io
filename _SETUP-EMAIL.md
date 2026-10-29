@@ -75,7 +75,7 @@ Settings → Secrets and variables → Actions.
 | `CONTACT_EMAIL` | the human address in every footer | `operations.academia@gmail.com` |
 | `SITE_URL` | absolute site root | `https://www.operationsacademia.org` |
 | `JOBREVIEW_ALERT_TO` | where "a posting is waiting for you to approve" goes | `CONTACT_EMAIL` |
-| `SUBMISSION_ALERT_TO` | where "somebody has posted something" goes | `JOBREVIEW_ALERT_TO`, then `CONTACT_EMAIL` |
+| Maintainer submission notices | private poster details | Fixed to `operations.academia@gmail.com`; cannot be redirected to subscribers |
 | `JOBMARKET_ALERT_TO` | where "the tracking sheet has gone quiet" goes | `CONTACT_EMAIL` |
 
 ## 3. Make the mail actually arrive
