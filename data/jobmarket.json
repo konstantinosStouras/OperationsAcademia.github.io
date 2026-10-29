@@ -25163,5 +25163,40 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-28T06:32:52Z",
   "owner": ""
+ },
+ {
+  "id": "2027-washington-university-in-st-louis-20261028",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-28",
+  "institution": "Washington University in St. Louis",
+  "department": "Olin Business School, Supply Chain, Operations and Technology",
+  "school": "Olin Business School",
+  "unit": "Supply Chain, Operations and Technology",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-14",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/196468",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://dossier.interfolio.com/apply/196468",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://olin.washu.edu/programs/doctoral/phd/phd-in-supply-chain-operations-technology.php",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-29T01:59:39Z",
+  "owner": ""
  }
 ]
