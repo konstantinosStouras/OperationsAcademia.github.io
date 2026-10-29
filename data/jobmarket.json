@@ -24795,40 +24795,6 @@
   "owner": ""
  },
  {
-  "id": "2027-rutgers-university-new-brunswick-20261027",
-  "year": 2027,
-  "years": [
-   2027
-  ],
-  "posted": "2026-10-27",
-  "institution": "Rutgers University",
-  "department": "Edward J. Bloustein School of Planning and Public Policy, Health Informatics",
-  "school": "Edward J. Bloustein School of Planning and Public Policy",
-  "unit": "Health Informatics",
-  "type": "University",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
-  "reviewDate": "2026-12-01",
-  "comments": "",
-  "country": "United States",
-  "countries": [
-   "United States"
-  ],
-  "adUrl": "https://jobs.rutgers.edu/postings/282929",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://jobs.rutgers.edu/postings/282929/pre_apply",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://bloustein.rutgers.edu/",
-  "characteristics": [],
-  "featured": false,
-  "source": "jobmarket-sheet",
-  "addedAt": "2026-10-28T08:57:23Z",
-  "owner": ""
- },
- {
   "id": "2027-solbridge-international-school-of-business-20261027",
   "year": 2027,
   "years": [
@@ -25013,14 +24979,14 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "November 11, 2026",
-  "applyByDate": "2026-11-11",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
   "comments": "",
   "country": "Canada",
   "countries": [
    "Canada"
   ],
-  "adUrl": "https://jobs.utoronto.ca/job/Toronto-Assistant-Professor-Healthcare-Engineering-ON/606618917/",
+  "adUrl": "https://jobs.rutgers.edu/postings/282929",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
