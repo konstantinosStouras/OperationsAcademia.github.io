@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-29T00:05:32.533Z",
- "members": 423,
+ "generated": "2026-10-29T21:59:26.407Z",
+ "members": 426,
  "k": 3,
  "affiliation": {
-  "listed": 340,
+  "listed": 343,
   "other": 49,
   "none": 34
  },
  "universities": {
-  "count": 151,
+  "count": 153,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -191,6 +191,11 @@
     "members": 3
    },
    {
+    "name": "New York University",
+    "country": "United States",
+    "members": 3
+   },
+   {
     "name": "Stanford University",
     "country": "United States",
     "members": 3
@@ -204,21 +209,16 @@
     "name": "University of Hong Kong",
     "country": "Hong Kong",
     "members": 3
-   },
-   {
-    "name": "University of Illinois at Urbana-Champaign",
-    "country": "United States",
-    "members": 3
    }
   ],
-  "rest": 159
+  "rest": 162
  },
  "countries": {
   "count": 16,
   "shown": [
    {
     "name": "United States",
-    "members": 213
+    "members": 215
    },
    {
     "name": "Canada",
@@ -234,7 +234,7 @@
    },
    {
     "name": "China",
-    "members": 10
+    "members": 11
    },
    {
     "name": "United Kingdom",
