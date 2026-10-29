@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-10-29T09:54:57.185Z",
+ "generated": "2026-10-29T11:04:57.171Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -6177,22 +6177,22 @@
    227
   ],
   "2026-10-29": [
-   26,
-   47,
-   47
+   27,
+   50,
+   50
   ]
  },
  "pages": [
   {
    "path": "/jobs.html",
    "title": "",
-   "views": 6968,
-   "avgSec": 642
+   "views": 6970,
+   "avgSec": 643
   },
   {
    "path": "/",
    "title": "",
-   "views": 5377,
+   "views": 5378,
    "avgSec": 311
   },
   {
@@ -6476,25 +6476,25 @@
   "source": "usage+ga4",
   "from": "2026-08-01",
   "to": "2026-10-29",
-  "views": 17454
+  "views": 17457
  },
  "pagesWindows": {
   "30": {
    "days": 30,
    "from": "2026-09-30",
    "to": "2026-10-29",
-   "views": 8201,
+   "views": 8204,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 3167,
-     "avgSec": 754
+     "views": 3169,
+     "avgSec": 755
     },
     {
      "path": "/",
      "title": "",
-     "views": 2246,
+     "views": 2247,
      "avgSec": 256
     },
     {
@@ -6636,18 +6636,18 @@
    "days": 90,
    "from": "2026-08-01",
    "to": "2026-10-29",
-   "views": 17454,
+   "views": 17457,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 6968,
-     "avgSec": 642
+     "views": 6970,
+     "avgSec": 643
     },
     {
      "path": "/",
      "title": "",
-     "views": 5377,
+     "views": 5378,
      "avgSec": 311
     },
     {
@@ -6933,18 +6933,18 @@
    "days": 365,
    "from": "2025-10-30",
    "to": "2026-10-29",
-   "views": 36071,
+   "views": 36074,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 13648,
+     "views": 13650,
      "avgSec": 328
     },
     {
      "path": "/",
      "title": "",
-     "views": 10440,
+     "views": 10441,
      "avgSec": 160
     },
     {
@@ -7932,18 +7932,18 @@
    "days": 0,
    "from": "2023-06-16",
    "to": "2026-10-29",
-   "views": 140193,
+   "views": 140196,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 48421,
-     "avgSec": 92
+     "views": 48423,
+     "avgSec": 93
     },
     {
      "path": "/",
      "title": "",
-     "views": 37361,
+     "views": 37362,
      "avgSec": 45
     },
     {
@@ -9649,7 +9649,7 @@
    "to": "2026-10-29",
    "metric": "visits",
    "zone": "UTC",
-   "total": 16359,
+   "total": 16362,
    "items": [
     {
      "name": "00",
@@ -9689,7 +9689,7 @@
     },
     {
      "name": "09",
-     "value": 594
+     "value": 597
     },
     {
      "name": "10",
@@ -10226,7 +10226,7 @@
   "source": "usage",
   "from": "2026-08-17",
   "to": "2026-10-29",
-  "sessions": 16359,
+  "sessions": 16362,
   "avgSessionSec": 485,
   "viewsPerSession": 1
  },
@@ -10707,7 +10707,7 @@
     "days": 30,
     "from": "2026-09-30",
     "to": "2026-10-29",
-    "seen": 4715,
+    "seen": 4719,
     "resolved": 1382,
     "academic": 81,
     "placed": 868,
@@ -11002,7 +11002,7 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-10-29",
-    "seen": 8069,
+    "seen": 8073,
     "resolved": 2376,
     "academic": 108,
     "placed": 1068,
@@ -11329,7 +11329,7 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-10-29",
-    "seen": 8069,
+    "seen": 8073,
     "resolved": 2376,
     "academic": 108,
     "placed": 1068,
@@ -11656,7 +11656,7 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-10-29",
-    "seen": 8069,
+    "seen": 8073,
     "resolved": 2376,
     "academic": 108,
     "placed": 1068,
@@ -11981,15 +11981,15 @@
    }
   },
   "recentDays": 7,
-  "seen": 8069,
+  "seen": 8073,
   "resolved": 2376,
   "academic": 108,
   "placed": 1068
  },
  "totals": {
-  "visitors": 48066,
-  "sessions": 66987,
-  "pageviews": 140251,
+  "visitors": 48067,
+  "sessions": 66990,
+  "pageviews": 140254,
   "days": 1232,
   "universities": 79
  },
