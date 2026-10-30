@@ -20,7 +20,7 @@ jobs:
         run: |
           node --input-type=module <<'JS'
           import {firestore} from './_scraper/_mail.mjs';
-          import {approvedRow,advertRepeat} from './_scraper/jobreview.mjs';
+          import {approvedRow,advertRepeat,publishedAdvertRepeat} from './_scraper/jobreview.mjs';
           const db=await firestore(); if(!db) throw Error('No database');
           const jobs=await (await fetch('https://www.operationsacademia.org/data/jobs.json')).json();
           const snap=await db.collection('jobReviews').where('status','==','approved').get();
@@ -28,11 +28,11 @@ jobs:
           for(const d of snap.docs) {
             const v=d.data(); if(!v.row) continue; const r=approvedRow(v.row,v);
             if(jobs.some(j=>j.id===r.id)){exact++;continue;}
-            const same=advertRepeat(r,jobs);
+            const same=publishedAdvertRepeat(r,jobs)||advertRepeat(r,jobs);
             if(same){equivalent++;console.log(JSON.stringify({outcome:'equivalent-live',id:r.id,matchingId:same.id,year:r.year}));continue;}
             missing++;
             const mirror=(await db.collection('jobSubmissions').doc(d.id).get()).data();
-            console.log(JSON.stringify({outcome:'missing',id:r.id,year:r.year,institution:r.institution,school:r.school,levels:r.levels,adUrl:r.adUrl,postedAtUrl:r.postedAtUrl,reviewedAt:typeof v.reviewedAt==='string'?v.reviewedAt:'',mirrorStatus:mirror?.status||'none',source:r.source}));
+            console.log(JSON.stringify({outcome:'missing',id:r.id,year:r.year,institution:r.institution,school:r.school,levels:r.levels,reviewedAt:typeof v.reviewedAt==='string'?v.reviewedAt:'',mirrorStatus:mirror?.status||'none',source:r.source}));
           }
           console.log(JSON.stringify({approved:snap.size,exactLive:exact,equivalentLive:equivalent,missing}));
           JS
