@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets/oa-jobreview.js'),'utf8');
 const start=src.indexOf('  function unpublishedApprovals('),end=src.indexOf('  var publicationRead',start);
-const sandbox={window:{},judgedRow:d=>({...d.row,...d.edits})};
+const sandbox={window:{},judgedRow:d=>{const r={...d.row,...d.edits};delete r.postedAtUrl;return r;},fieldValue:(d,k)=>(d.edits&&k in d.edits)?d.edits[k]:d.row[k]};
 sandbox.OAAdvertDup=require(path.join(root,'assets/oa-advert-dup.js'));sandbox.window.OAAdvertDup=sandbox.OAAdvertDup;
 vm.createContext(sandbox);vm.runInContext(src.slice(start,end),sandbox);
 const check=sandbox.unpublishedApprovals,doc={status:'approved',rowId:'a',row:{id:'a',adUrl:'https://apply.interfolio.com/12345'}};
