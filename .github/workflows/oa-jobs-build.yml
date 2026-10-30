@@ -1,9 +1,9 @@
-name: OA data â€” publish queued postings, candidates and placements
+name: OA data — publish queued postings, candidates and placements
 
 # Turns everything submitted through the site's own forms into rows in
 # data/ and commits them: job postings (post-a-job) into jobs.json,
-# candidate profiles (post-a-candidate) into candidates.json â€” held back
-# until the reveal date in candidates-reveal.json â€” and confirmed placements
+# candidate profiles (post-a-candidate) into candidates.json — held back
+# until the reveal date in candidates-reveal.json — and confirmed placements
 # (post-a-placement) into placements.json. This is what replaced Awesome
 # Tables: the data lives in this repository, and the pages read it directly.
 #
@@ -24,14 +24,14 @@ on:
   # An approval publishes in TWO steps: the sheet read writes the approved rows
   # into data/jobmarket.json, and this build merges that file into the served
   # jobs.json. Chained here, so the second step does not wait for its own
-  # schedule â€” that wait was up to twenty minutes on top of the half hour the
+  # schedule — that wait was up to twenty minutes on top of the half hour the
   # sheet read used to cost, and it is why an approved posting could take most
   # of an hour to appear. It runs on `completed` whatever the conclusion: this
   # build is idempotent and reads the file that is committed, so a sheet read
   # that failed after committing is still published, and one that wrote nothing
   # produces no commit here.
   workflow_run:
-    workflows: ["OA jobs â€” read the job market tracking sheet"]
+    workflows: ["OA jobs — read the job market tracking sheet"]
     types: [completed]
   schedule:
     # every 20 minutes, off the hour so this repo does not queue behind every
@@ -48,7 +48,7 @@ permissions:
   contents: write
 
 # One writer of data/ at a time. Overlapping fires queue and coalesce rather
-# than racing each other's commit â€” the same discipline as /lit/'s data jobs.
+# than racing each other's commit — the same discipline as /lit/'s data jobs.
 concurrency:
   group: oa-jobs-data-${{ github.ref }}
   cancel-in-progress: false
@@ -60,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          # THE TIP OF THE BRANCH WE WILL PUSH TO, named explicitly â€” not the
+          # THE TIP OF THE BRANCH WE WILL PUSH TO, named explicitly — not the
           # default, which is `github.sha`. On a `workflow_run` event that is
           # the head of the run that TRIGGERED us, and the sheet read commits
           # before it finishes, so by the time this job starts that SHA is
@@ -81,13 +81,13 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
           # Until the project exists this job has nothing to do. Checking first
-          # saves an npm install on every scheduled fire â€” ~100 no-op runs a day
+          # saves an npm install on every scheduled fire — ~100 no-op runs a day
           # while the site is still being set up.
           if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Firebase is not configured yet â€” nothing to do. See _SETUP-FIREBASE.md"
+            echo "Firebase is not configured yet — nothing to do. See _SETUP-FIREBASE.md"
           fi
 
       - name: Install the Admin SDK
@@ -104,7 +104,7 @@ jobs:
 
       # THE WHOLE BUILD, IN ONE STEP, because the Commit step below has to be
       # able to run it AGAIN. data/ is generated, so a rejected push has
-      # nothing to rebase â€” the recovery is to take the other writer's tip and
+      # nothing to rebase — the recovery is to take the other writer's tip and
       # rebuild on it, and a workflow step cannot re-run the steps before it.
       # While "what a build is" lived in four YAML steps the retry could not
       # perform one. _scraper/build-all.mjs is now the single definition; it
@@ -134,7 +134,7 @@ jobs:
         id: recheck
         run: node _scraper/selftest.mjs --publishing
 
-      # A red re-check stops the commit, which is right â€” a broken dataset must
+      # A red re-check stops the commit, which is right — a broken dataset must
       # not ship. What it must not be is QUIET: nothing is published while it
       # stays red, on this run or any later one, and from the outside that is
       # indistinguishable from a site with no new postings. It cost most of a
@@ -143,7 +143,7 @@ jobs:
         if: failure() && steps.recheck.outcome == 'failure'
         run: |
           echo "::error title=Publishing has STOPPED::The dataset was rebuilt, but the \
-          selftest failed on it, so nothing was committed â€” and nothing will publish \
+          selftest failed on it, so nothing was committed — and nothing will publish \
           until it is green. The failures above name the guard. A guard that fires on a \
           legitimate NEW posting is the guard's bug, not the posting's."
 
@@ -171,7 +171,7 @@ jobs:
           # "no change" and left the deployed function resolving against a
           # stale map, with the byte-for-byte drift pin red on master.
           if [ -z "$(git status --porcelain data _functions)" ]; then
-            echo "no change â€” nothing to commit"
+            echo "no change — nothing to commit"
             exit 0
           fi
           git config user.name  "github-actions[bot]"
@@ -185,7 +185,7 @@ jobs:
           # to sit here, and it asked git to reconcile two independently
           # GENERATED copies of the same file: data/jobs-meta.json carries a
           # `generated` timestamp and row counts, so the same lines always
-          # differ and the rebase conflicted BY CONSTRUCTION â€” the run then
+          # differ and the rebase conflicted BY CONSTRUCTION — the run then
           # died mid-rebase with git's own message (2026-08-26). Where it had
           # SUCCEEDED it would have been worse than failing: it would have
           # pushed a data/ snapshot built BEFORE the other writer's commit,
@@ -202,7 +202,7 @@ jobs:
               exit 0
             fi
 
-            echo "push rejected â€” rebuilding on the new tip (attempt $i)"
+            echo "push rejected — rebuilding on the new tip (attempt $i)"
             sleep $((i * 3))
             git fetch origin "$REF" || exit 1
             git reset --hard FETCH_HEAD || exit 1
@@ -222,7 +222,7 @@ jobs:
             # refuse.
             if ! node _scraper/selftest.mjs --publishing; then
               echo "::error title=Publishing has STOPPED::the dataset rebuilt on \
-              the new tip failed the selftest, so nothing was committed â€” and \
+              the new tip failed the selftest, so nothing was committed — and \
               nothing will publish until it is green. A guard that fires on a \
               legitimate NEW posting is the guard's bug, not the posting's."
               exit 1
@@ -231,7 +231,7 @@ jobs:
             if [ -z "$(git status --porcelain data _functions)" ]; then
               # Not a failure, and the commonest outcome of a real race: the
               # writer that beat us had already published everything we had.
-              echo "the other writer published it all â€” nothing left to commit"
+              echo "the other writer published it all — nothing left to commit"
               exit 0
             fi
             git add data _functions
@@ -240,6 +240,6 @@ jobs:
 
           echo "::error title=Publishing has STOPPED::could not push after 5 \
           attempts, so nothing was committed. Every attempt rebuilt cleanly on \
-          the newest tip, so this is contention, not a broken dataset â€” the next \
+          the newest tip, so this is contention, not a broken dataset — the next \
           scheduled run republishes."
           exit 1

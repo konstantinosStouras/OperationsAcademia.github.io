@@ -1,10 +1,10 @@
 /* ---------------------------------------------------------------------------
-   Operations Academia â€” the maintainer's review queue for the tracking sheet.
+   Operations Academia — the maintainer's review queue for the tracking sheet.
 
    Postings crawled from the job market workbook are no longer published on
    sight: they are held in the Firestore `jobReviews` collection until the
    maintainer has looked at them. This draws that queue at the top of the
-   Admin area (admin-area.html â€” it lived on the feedback page until the
+   Admin area (admin-area.html — it lived on the feedback page until the
    Admin area gathered every review queue, owner 2026-08-21), above the
    feedback inbox, and lets them correct any field before approving.
 
@@ -16,7 +16,7 @@
    NOW SAYS SO (owner, 2026-09-17, of a posting made through the form minutes
    earlier: "their posting becomes live immediately. It is also flagged to me
    to approve it later on"). Both halves of that sentence were true, and the
-   second read as a contradiction of the first â€” because the FRAME called the
+   second read as a contradiction of the first — because the FRAME called the
    user-added tab a review queue even though the tab never did. The panel was
    headed "Job postings to review", the summary tile said the same, and the
    "Admin area N" badge counted these live postings beside the ones genuinely
@@ -24,14 +24,14 @@
    when nothing was. The cards were already honest: a LIVE pill, no Approve
    button anywhere on this tab (pinned), and a Mark-reviewed stamp that writes
    one date and changes nothing else. So what moved is the wording and the
-   count â€” the panel is headed "Job postings", each tab is named for what it
+   count — the panel is headed "Job postings", each tab is named for what it
    is, and waitingJobs in assets/oa-adminarea.js counts the gate alone.
    NOTHING ABOUT WHEN A POSTING GOES LIVE CHANGED, and nothing here may start
    holding one back: the form promises "within a few minutes", the build keeps
    it, and the poster is e-mailed to say the posting is public.
 
    AUTHORISATION IS THE RULES, never this file. `jobReviews` is admin-read AND
-   admin-write in _firestore.rules â€” unlike `rowOverrides`, which is public-read,
+   admin-write in _firestore.rules — unlike `rowOverrides`, which is public-read,
    because a queued posting is by definition not yet public. Everything here
    only decides whether a panel is DRAWN: a browser that draws it for the wrong
    visitor still cannot read a single document.
@@ -49,17 +49,17 @@
   var COL = 'jobReviews';
 
   /* The user-added half: postings made through the site's own form. Keep the
-     three names in step with _scraper/submissions-review.mjs â€” the model
+     three names in step with _scraper/submissions-review.mjs — the model
      behind the mailer that announces the same documents; selftest.mjs pins
      the pairing. */
   var SUBS_COL = 'jobSubmissions';
   var EDIT_PATH = 'post-a-job?edit=';
   /* The stamp the submissions model names (REVIEWED_AT there): ticking a card
      off writes this one field onto the submission itself, so a posting marked
-     reviewed here is marked reviewed for the mailer too â€” and nothing here
+     reviewed here is marked reviewed for the mailer too — and nothing here
      ever writes the mailer's own high-water mark (announcedAt). */
   var REVIEWED_AT = 'reviewedAt';
-  /* The statuses a submission is LIVE in â€” the pair every build reads. A
+  /* The statuses a submission is LIVE in — the pair every build reads. A
      withdrawn, hidden or removed one is not waiting for anything, and `sheet`
      is a tracking-sheet mirror, whose row is the crawled tab's own. */
   var LIVE = ['queued', 'published'];
@@ -71,28 +71,28 @@
      deleting the document would leave the published row ORPHANED, carried on
      by every build with nothing on the site able to correct or remove it, the
      maintainer included. So this tab writes the same two words that file
-     writes, and the word says WHO did it â€” `hidden` is the maintainer's own
+     writes, and the word says WHO did it — `hidden` is the maintainer's own
      take-down, `withdrawn` the poster withdrawing their own. */
   var HIDDEN = 'hidden';
-  /* â€¦and putting one back is the status the form itself saves: post-a-job
+  /* …and putting one back is the status the form itself saves: post-a-job
      writes `queued` on every edit it stores, and the build publishes `queued`
      and `published`. */
   var RESTORED = 'queued';
 
-  /* The fields offered, in the order they are shown â€” THE POSTING FORM'S OWN
+  /* The fields offered, in the order they are shown — THE POSTING FORM'S OWN
      QUESTIONS, in the posting form's own words, because they are the same
      questions about the same posting and a maintainer reading a card should
      recognise what the poster answered.
 
      A SUBSET of what a posting holds: id, market year, posted date and source
-     are its identity and its bookkeeping â€” editing them would detach the
+     are its identity and its bookkeeping — editing them would detach the
      posting from the sheet row it came from, so the next sync would queue it
      again as new. Those are corrected in the workbook.
 
      TWO THINGS THIS LIST USED TO GET WRONG, and both of them were invisible:
 
-     * it offered `department` â€” the LINE the card shows, which is the school
-       and the department joined â€” beside the two names it is made of. Four
+     * it offered `department` — the LINE the card shows, which is the school
+       and the department joined — beside the two names it is made of. Four
        boxes for a place that has three, and nothing kept them in step: a
        corrected school published a row whose line still said what the workbook
        had said, and `selftest.mjs` asserts over the served file that the line
@@ -105,7 +105,7 @@
        position types the site HAS. `LEVELS` in _scraper/jobs-model.mjs is the
        list below (seven since 2026-09-23, when "RA or Pre-doc" and "PhD"
        joined it at the end, and the question was relabelled from "Entry
-       level" to "Position type"), and `cleanEdit` drops anything else â€” so
+       level" to "Position type"), and `cleanEdit` drops anything else — so
        ticking either of those saved a box that then silently did nothing.
        The site's own name for that rank is "Other Ranks", and the label is
        the posting form's.
@@ -140,7 +140,7 @@
 
   /** The line the card publishes: the school and the department joined. ONE
       definition of that join lives in _scraper/vocab.mjs and this is its
-      browser twin â€” it only ever previews what applyEdits will derive.
+      browser twin — it only ever previews what applyEdits will derive.
       A school that repeats the institution's name is dropped from it, as
       settlePlace's canonColumns() drops it on save (oa-schools.js
       schoolRepeatsInstitution): the maintainer's preview must not read
@@ -166,7 +166,7 @@
   /* A link is shown as a link, so the maintainer can open the advertisement
      they are being asked to approve. Host-validated the same way the pipeline
      validates one: anything that is not http(s) is shown as text, never as an
-     href â€” a queued row is machine-derived and this panel is the one place it
+     href — a queued row is machine-derived and this panel is the one place it
      is rendered before anyone has vetted it. */
   function safeHref(u) {
     var s = String(u || '').trim();
@@ -184,7 +184,7 @@
     if (f.list) {
       var chosen = Array.isArray(v) ? v : (v ? [v] : []);
       /* The VALUE is what the site stores and the LABEL is what a reader is
-         asked â€” they differ for one rank, exactly as on the posting form:
+         asked — they differ for one rank, exactly as on the posting form:
          "Other Ranks" covers Associate, Full and Chaired, and a tick box that
          said only "Other Ranks" would leave the maintainer guessing which of
          the three it meant. */
@@ -200,7 +200,7 @@
       return '<select id="' + id + '" data-key="' + f.key + '">' +
         f.options.map(function (o) {
           return '<option value="' + esc(o) + '"' +
-            (String(v) === o ? ' selected' : '') + '>' + esc(o || 'â€”') + '</option>';
+            (String(v) === o ? ' selected' : '') + '>' + esc(o || '—') + '</option>';
         }).join('') + '</select>';
     }
     if (f.area) {
@@ -211,7 +211,7 @@
       (f.type || 'text') + '" maxlength="' + f.max + '" value="' + esc(v) + '">';
   }
 
-  /** What the form currently says, as an edits map â€” only the fields that
+  /** What the form currently says, as an edits map — only the fields that
       DIFFER from the row the sheet gave, so an untouched posting is approved
       with an empty `edits` and stays tied to the workbook. */
   function readEdits(card, doc) {
@@ -263,7 +263,7 @@
   };
 
   /**
-   * The possible duplicates the sheet sync found for this row â€” postings
+   * The possible duplicates the sheet sync found for this row — postings
    * ALREADY ON THE SITE that look like the same job. Computed offline
    * (duplicatesOf in _scraper/jobreview.mjs) and stored on the document as
    * `dup`; this only draws it. A warning, never a decision: Approve still
@@ -271,14 +271,14 @@
    */
   function dupHtml(dups) {
     var items = dups.map(function (d) {
-      var name = [d.institution, d.department].filter(Boolean).join(' â€” ');
+      var name = [d.institution, d.department].filter(Boolean).join(' — ');
       /* WHICH PAGE, and the posting itself. This was
          `/jobs?institution=<name>`, and both halves of it were wrong: a
          flagged duplicate is by definition of the crawled row's own market
          year, which is routinely a season the jobs page cannot show, so the
          link opened a list that by construction could not hold the posting;
          and even where it could, it opened a search rather than the card. The
-         site has one answer to both â€” OAJobNav.hrefFor, the module that owns
+         site has one answer to both — OAJobNav.hrefFor, the module that owns
          `inCurrentMarket` and the `?job=` permalink, which is why `dupEntry`
          now carries the season and the closing date it reads. Without the
          module the name is drawn with NO link: a link that is right most of
@@ -316,7 +316,7 @@
   /**
    * The business-school flag the sheet sync computed (owner, 2026-08-23):
    * the crawled posting's text mentions "business", so it arrived typed
-   * Business School â€” and the site's own directory is asked which school
+   * Business School — and the site's own directory is asked which school
    * that IS at this university. Computed offline (businessCheck in
    * _scraper/jobreview.mjs, from the same vocab.json the cascade reads) and
    * stored on the document as `biz`; this only draws it. A MENTION, never a
@@ -340,14 +340,14 @@
   }
 
   /**
-   * What the posting's own advertisement says â€” read off the linked page by
+   * What the posting's own advertisement says — read off the linked page by
    * adverts-verify.mjs (or higheredjobs-verify's parser for that host) and
    * stored on the document as `ad`; this only draws it. RAISED, never
    * decided, like `dup` and `biz`: the button fills the Closing-date box for
    * the maintainer to read back, and nothing is saved until Save or Approve.
-   * `listedUntil` is shown labelled as what it is â€” when the LISTING comes
+   * `listedUntil` is shown labelled as what it is — when the LISTING comes
    * down, which on a job board can sit eighteen months past the real
-   * deadline (the validThrough lesson) â€” and is deliberately given no
+   * deadline (the validThrough lesson) — and is deliberately given no
    * button.
    */
   function advertHtml(ad, row) {
@@ -360,7 +360,7 @@
         (ad.location ? ' (' + esc(ad.location) + ')' : '') + '.');
     }
 
-    /* WHERE the page files the post â€” classified against the site's own
+    /* WHERE the page files the post — classified against the site's own
        vocabulary where that answered (`advertPlace` in _scraper/adverts.mjs:
        a hiring organisation that is really a school is filed under its
        university, the names canonicalised, an empty school settled from the
@@ -370,7 +370,7 @@
     var place = ad.place || null;
     if (place && (place.institution || place.school || place.unit)) {
       var named = [place.institution, place.school, place.unit].filter(Boolean);
-      bits.push('The site\'s vocabulary files it as <strong>' + esc(named.join(' â€” ')) +
+      bits.push('The site\'s vocabulary files it as <strong>' + esc(named.join(' — ')) +
         '</strong>. <button type="button" class="button" data-ad-place' +
         (place.institution ? ' data-ad-inst="' + esc(place.institution) + '"' : '') +
         (place.school ? ' data-ad-school="' + esc(place.school) + '"' : '') +
@@ -417,8 +417,8 @@
     var idp = 'rv' + i;
     var dups = Array.isArray(doc.dup) ? doc.dup : [];
 
-    /* The heading reads the posting as it WOULD BE PUBLISHED â€” the row with
-       any edit already made on top â€” not the raw workbook row. It used to read
+    /* The heading reads the posting as it WOULD BE PUBLISHED — the row with
+       any edit already made on top — not the raw workbook row. It used to read
        `row.department` directly, so a card whose school had just been
        corrected still carried the old line above the boxes that had corrected
        it. */
@@ -427,10 +427,10 @@
 
     return '<header>' +
         '<strong>' + esc(fieldValue(doc, 'institution') || row.id || 'Untitled posting') + '</strong>' +
-        (line ? ' <span class="oa-hint" style="display:inline">â€” ' +
+        (line ? ' <span class="oa-hint" style="display:inline">— ' +
           esc(line) + '</span>' : '') +
         '<span class="oa-fb-status is-open">' +
-          (fieldValue(doc, 'applicationStatus') === 'Expired' ? 'expired Â· under review' : 'under review') + '</span>' +
+          (fieldValue(doc, 'applicationStatus') === 'Expired' ? 'expired · under review' : 'under review') + '</span>' +
         '<p class="oa-hint">Advertised ' + esc(row.posted || '?') +
           ' &middot; market ' + esc(String(row.year || '?')) +
           ' &middot; queued ' + esc(fmtDate(doc.queuedAt) || '?') +
@@ -454,8 +454,8 @@
             '<label for="' + id + '">' + esc(f.label) + '</label>' +
             inputFor(f, fieldValue(doc, f.key), id) +
             /* What the boxes above will actually PUBLISH. Two lines on a
-               posting are derived rather than typed â€” the school and the
-               department joined, and the closing date written out â€” and the
+               posting are derived rather than typed — the school and the
+               department joined, and the closing date written out — and the
                card shows the line, not its parts, so the maintainer has to be
                able to read back what they are approving. The posting form
                shows the poster the same thing (`#f-department-preview`). */
@@ -481,9 +481,9 @@
 
   /**
    * The ONE write a decision makes. `edits` is REPLACED, never merged into:
-   * `set(â€¦, {merge:true})` deep-merges a map, so a key the maintainer had
-   * changed and then typed BACK to the sheet's value â€” which readEdits
-   * therefore leaves out â€” survived in Firestore, and approvedRow re-applied
+   * `set(…, {merge:true})` deep-merges a map, so a key the maintainer had
+   * changed and then typed BACK to the sheet's value — which readEdits
+   * therefore leaves out — survived in Firestore, and approvedRow re-applied
    * the stale edit at publish while the card said "Saved." and the echo
    * showed the reverted value: a private fiction, and the same trap
    * search-v2's contentJson records. `mergeFields` names the fields set
@@ -519,16 +519,16 @@
   /**
    * Approve the whole queue.
    *
-   * WHY THIS EXISTS. The gate is right â€” nothing from the sheet reaches the
-   * site unseen â€” but the unit of work it created is a season, not a posting:
+   * WHY THIS EXISTS. The gate is right — nothing from the sheet reaches the
+   * site unseen — but the unit of work it created is a season, not a posting:
    * the tracking sheet's "2026 Jobs" tab alone opens with 89 of them. A gate
    * that can only be cleared 89 times is one that does not get cleared, and a
    * queue nobody clears is the same outcome as the bug it was built to
    * prevent: the postings are not on the site.
    *
-   * Everything the per-card path does, it does â€” the maintainer's edits are
+   * Everything the per-card path does, it does — the maintainer's edits are
    * read off the cards first, so anything corrected and not yet saved is
-   * carried in rather than lost â€” and every posting is on the screen above
+   * carried in rather than lost — and every posting is on the screen above
    * this button to be read before it is pressed. Writes go one at a time and
    * the failures are counted rather than thrown, so one refused document
    * cannot silently cost the other eighty-eight.
@@ -540,7 +540,7 @@
        RENDERED; a card decided on since then (Approve, Reject, the duplicate
        sweep) is retired from state.crawled but the list is not redrawn, so
        the arrays still carry it. Walking them as they stand re-approved
-       every decided card â€” including one the maintainer had just REJECTED,
+       every decided card — including one the maintainer had just REJECTED,
        which the merge write then flipped to approved. */
     var pairs = [];
     docs.forEach(function (doc, i) {
@@ -560,7 +560,7 @@
 
     btn.disabled = true;
     msg.className = 'oa-form-msg';
-    msg.textContent = 'Publishing 0 of ' + n + 'â€¦';
+    msg.textContent = 'Publishing 0 of ' + n + '…';
 
     var done = 0, failed = 0;
     /* The edit handles are written alongside, not one after another: the
@@ -594,7 +594,7 @@
             if (card) card.classList.add('is-err');
           })
           .then(function () {
-            msg.textContent = 'Publishing ' + (done + failed) + ' of ' + n + 'â€¦';
+            msg.textContent = 'Publishing ' + (done + failed) + ' of ' + n + '…';
           });
       });
     });
@@ -609,7 +609,7 @@
       if (!failed) paint(db, 'crawled', state.year);
       msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
       msg.textContent = failed
-        ? done + ' approved, ' + failed + ' could not be saved â€” reload and try those again.'
+        ? done + ' approved, ' + failed + ' could not be saved — reload and try those again.'
         : 'All ' + done + ' approved. See Publication status below to verify the public update.';
       btn.disabled = !!failed;
       renderPublicationStatus(db);
@@ -624,7 +624,7 @@
    * in the list of job postings available to the public").
    *
    * Approving writes Firestore; the BUILD turns that into a row in
-   * data/jobs.json, and until it runs the posting is in neither place â€” out of
+   * data/jobs.json, and until it runs the posting is in neither place — out of
    * the queue and not yet on the site. The maintainer presses Approve, goes to
    * the jobs page and finds nothing, which reads exactly like an approval that
    * did not save.
@@ -632,7 +632,7 @@
    * So it is echoed, the way a saved EDIT already is (assets/oa-fresh.js): the
    * published row is left in this browser's localStorage and every page that
    * renders jobs.json overlays it at read time. Honest by construction, the
-   * same three ways â€” PER BROWSER (nothing here can show a visitor an
+   * same three ways — PER BROWSER (nothing here can show a visitor an
    * unpublished posting, because nothing here leaves the machine), STANDS DOWN
    * against the build rather than against hope, and echoes exactly what the
    * build will publish: `OAFresh.approvedRow` is a parity-pinned twin of
@@ -670,7 +670,7 @@
          Optional: absent, the echo does not re-spell, which is a
          spelling and never a value the build would refuse. */
       canonCountry: (window.OACountries && OACountries.canon) || null,
-      /* â€¦and the seasons the edited dates name, the build's own rule
+      /* …and the seasons the edited dates name, the build's own rule
          (applyEdits re-derives them since 2026-10-05). */
       marketYearsOf: (window.OAJobNav && OAJobNav.marketYearsOf) || null,
     });
@@ -697,7 +697,7 @@
    * next build and never the approval. And BOUNDED IN TIME (MIRROR_WAIT_MS),
    * because both approval roads wait for it before their last word: a write
    * whose acknowledgement never comes must not leave a card reading
-   * "Sendingâ€¦" over a decision that has already saved.
+   * "Sending…" over a decision that has already saved.
    */
   var MIRROR_WAIT_MS = 8000;
   function mirrorApproval(db, row) {
@@ -723,7 +723,7 @@
   /* ------------------------------------------ one advertisement, one posting */
 
   /**
-   * The row as it will PUBLISH â€” the maintainer's unsaved edits included.
+   * The row as it will PUBLISH — the maintainer's unsaved edits included.
    *
    * The sync judges the sheet's own row because that is all it has; the panel
    * has the card in front of it, so a link the maintainer has just corrected
@@ -755,7 +755,7 @@
    *
    * The sheet sync drops a crawled row whose advertisement link already
    * belongs to a posting that is live or already queued. This is the SAME
-   * rule, on demand â€” `window.OAAdvertDup`, the very file `_scraper/jobreview.mjs`
+   * rule, on demand — `window.OAAdvertDup`, the very file `_scraper/jobreview.mjs`
    * re-exports, so the button and the pipeline can never answer differently.
    *
    * Four things it does deliberately:
@@ -775,7 +775,7 @@
     var btn = $('oa-review-dupes');
     if (!window.OAAdvertDup) {
       msg.className = 'oa-form-msg is-err';
-      msg.textContent = 'The duplicate-advert rule did not load â€” reload the page.';
+      msg.textContent = 'The duplicate-advert rule did not load — reload the page.';
       return;
     }
 
@@ -785,14 +785,14 @@
 
     btn.disabled = true;
     msg.className = 'oa-form-msg';
-    msg.textContent = 'Reading the postings already on the siteâ€¦';
+    msg.textContent = 'Reading the postings already on the site…';
 
     /* WHAT COUNTS AS "ALREADY LISTED" IS NOT data/jobs.json ALONE (owner,
        2026-08-26: a Stanford MS&E posting was approved, and pressing this
        button then failed to catch its twin still under review).
 
        A posting the maintainer has APPROVED is out of the queue and not yet
-       in the served file â€” the build publishes it minutes later â€” so for that
+       in the served file — the build publishes it minutes later — so for that
        window its twin was measured against a set holding NEITHER copy and
        nothing could match. That is not a race to paper over: `data/jobs.json`
        is a built file that lags every approval by up to a build, so the
@@ -842,7 +842,7 @@
 
         var lines = drops.map(function (d) {
           return '\u2022 ' + (d.row.institution || d.doc.rowId) +
-            (d.row.department ? ' â€” ' + d.row.department : '') +
+            (d.row.department ? ' — ' + d.row.department : '') +
             '\n    repeats ' + (d.of.ref || d.of.id) +
             (d.of.institution ? ' (' + d.of.institution + ')' : '');
         }).join('\n');
@@ -853,12 +853,12 @@
             'not be queued again; nothing already on the site changes.')) {
           msg.className = 'oa-form-msg';
           msg.textContent = drops.length + ' repeated ' +
-            (drops.length === 1 ? 'advertisement' : 'advertisements') + ' found â€” nothing removed.';
+            (drops.length === 1 ? 'advertisement' : 'advertisements') + ' found — nothing removed.';
           btn.disabled = false;
           return;
         }
 
-        msg.textContent = 'Removing 0 of ' + drops.length + 'â€¦';
+        msg.textContent = 'Removing 0 of ' + drops.length + '…';
         var done = 0, failed = 0;
         var chain = Promise.resolve();
         drops.forEach(function (d) {
@@ -874,14 +874,14 @@
               .then(function () { done++; retire(db, 'crawled', d.doc); })
               .catch(function () { failed++; })
               .then(function () {
-                msg.textContent = 'Removing ' + (done + failed) + ' of ' + drops.length + 'â€¦';
+                msg.textContent = 'Removing ' + (done + failed) + ' of ' + drops.length + '…';
               });
           });
         });
 
         chain.then(function () {
-          /* REPAINT FIRST, THEN SAY WHAT HAPPENED. render() clears this line â€”
-             a message left over from another tab is worse than none â€” so an
+          /* REPAINT FIRST, THEN SAY WHAT HAPPENED. render() clears this line —
+             a message left over from another tab is worse than none — so an
              outcome written before the redraw is wiped by it, and the
              maintainer watches the queue shrink under a blank strip.
 
@@ -894,7 +894,7 @@
           } else btn.disabled = false;
           msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
           msg.textContent = failed
-            ? done + ' removed, ' + failed + ' could not be saved â€” reload and try again.'
+            ? done + ' removed, ' + failed + ' could not be saved — reload and try again.'
             : done + ' repeated ' + (done === 1 ? 'posting' : 'postings') +
               ' taken out of the queue. Nothing on the site changed.';
         });
@@ -902,7 +902,7 @@
       .catch(function (err) {
         msg.className = 'oa-form-msg is-err';
         msg.textContent = 'Could not read the postings on the site (' +
-          esc(err.message || err) + ') â€” nothing was removed.';
+          esc(err.message || err) + ') — nothing was removed.';
         btn.disabled = false;
       });
   }
@@ -926,7 +926,7 @@
   };
 
   /* What load() fetched, split by source, and which tab and season are on
-     screen â€” kept so a decision can refresh the tab counts without re-reading
+     screen — kept so a decision can refresh the tab counts without re-reading
      anything. */
   var state = {
     crawled: [], rejected: [], rejectedError: false, user: [], userError: false, source: 'crawled', year: '*',
@@ -939,7 +939,7 @@
   };
 
   /** THE NEXT MARKET LEADS (owner, 2026-08-23): 2028's postings before 2027's
-      before 2026's, and within a market the newest advertisement first â€” the
+      before 2026's, and within a market the newest advertisement first — the
       queue is read as a to-do list, and the market a posting is FOR is the one
       its review is urgent for. An unknown year sorts last. */
   function rankBy(s) {
@@ -966,7 +966,7 @@
 
   /**
    * The two source tabs: the tracking sheet's gate and the form's own
-   * postings. Always drawn once the queue has loaded â€” a tab reading (0)
+   * postings. Always drawn once the queue has loaded — a tab reading (0)
    * says "nothing from this source", where a tab that vanished would leave
    * the maintainer wondering where the user-added postings went.
    */
@@ -992,7 +992,7 @@
    * the jobs page carries: a posting approved from a closed market is correct
    * and lands on Previous markets, which is not what someone clearing this
    * queue in September is trying to do. It also keeps "approve everything
-   * here" honest â€” it approves what the tabs are showing, and never a season
+   * here" honest — it approves what the tabs are showing, and never a season
    * nobody has looked at.
    */
   function renderYears(db, all, active, s) {
@@ -1000,10 +1000,10 @@
     if (!box) return;
     var years = yearsOf(all, s);
     /* DRAWN WHENEVER THERE IS A SEASON TO NAME, not only when there are two.
-       Hiding a filter with one value reads as the filter being MISSING â€” which
+       Hiding a filter with one value reads as the filter being MISSING — which
        is what it was reported as (owner, 2026-08-25: "I don't see an option to
        filter the results by job market year"), on a tab whose 86 postings all
-       happened to belong to one market. A row saying "2025-2026 (86) Â· All"
+       happened to belong to one market. A row saying "2025-2026 (86) · All"
        answers the question the empty space could not. */
     show(box, years.length > 0);
     if (!years.length) return;
@@ -1023,7 +1023,7 @@
   }
 
   /** One pass over what is on screen: the source tab, its seasons, the list.
-      A null year means the tab's own default â€” the newest market present. */
+      A null year means the tab's own default — the newest market present. */
   function paint(db, source, year) {
     var s = SOURCES[source];
     var all = state[source];
@@ -1073,7 +1073,7 @@
         var edits = Object.assign({}, doc.edits || {});
         if (expired) edits.applicationStatus = 'Expired';
         Array.prototype.forEach.call(card.querySelectorAll('button'), function (x) { x.disabled = true; });
-        msg.textContent = 'Restoringâ€¦';
+        msg.textContent = 'Restoring…';
         writeDecision(db, doc, { status: 'pending', edits: edits, reviewedAt: new Date().toISOString() })
           .then(function () { load(db); })
           .catch(function () {
@@ -1097,8 +1097,8 @@
 
   /* The cascades mounted on the cards currently drawn.
 
-     THEY HAVE TO BE GIVEN BACK. Every picker adds a listener to `document` â€”
-     the only way to notice a click landing outside its own list â€” and the year
+     THEY HAVE TO BE GIVEN BACK. Every picker adds a listener to `document` —
+     the only way to notice a click landing outside its own list — and the year
      tabs redraw the whole queue, up to three per card. Left alone, each pass
      would leave a card's worth of listeners behind holding a detached card and
      the whole vocabulary. Nothing else on this site mounts a picker into
@@ -1121,7 +1121,7 @@
    * The SAME module the posting form mounts (assets/oa-place-picker.js), which
    * is the point: the maintainer correcting a posting and the poster making
    * one are answering the same three questions, and two implementations would
-   * have drifted. It is entirely optional â€” without the picker scripts the
+   * have drifted. It is entirely optional — without the picker scripts the
    * boxes stay ordinary text inputs and everything else on the card works.
    */
   function wirePlace(card) {
@@ -1150,7 +1150,7 @@
    * The closing date, and the line the card will show for it.
    *
    * The browser twin of `settleDeadline` in _scraper/jobreview.mjs, and it only
-   * ever PREVIEWS what that function will derive â€” the card used to offer a box
+   * ever PREVIEWS what that function will derive — the card used to offer a box
    * for the line as well, which let one posting reach the site with a closing
    * date and no line at all and stopped the whole site publishing.
    */
@@ -1191,13 +1191,13 @@
    * crawled posting and the poster writing a new one are filling in one
    * field, and the card draws its own preview by the very module the jobs
    * page draws the cell by (assets/oa-forum-markup.js). This is the surface
-   * that needs it most â€” a workbook row's Comments arrive as one unbroken
+   * that needs it most — a workbook row's Comments arrive as one unbroken
    * paragraph of an advertisement's own description, which is the screen the
    * owner sent on 2026-09-17.
    *
    * Entirely optional, like the picker: without the module the box is the
    * ordinary textarea the card already wrote, and the marks are text either
-   * way. Nothing to give back at unmount â€” every listener it adds is on the
+   * way. Nothing to give back at unmount — every listener it adds is on the
    * toolbar or the box itself, so a redrawn card takes them with it.
    */
   function wireComments(card) {
@@ -1206,7 +1206,7 @@
   }
 
   /** "2026-10-05" as the card writes it. The browser twin of `longDate` in
-      _scraper/jobs-model.mjs â€” same month names, same shape, and built from
+      _scraper/jobs-model.mjs — same month names, same shape, and built from
       the date's own parts so a timezone can never move it a day. */
   function longDate(iso) {
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '').trim());
@@ -1241,7 +1241,7 @@
          ['Contact email', d.email || d.authEmail || 'Email not recorded'],
          ['Account email', d.authEmail && d.authEmail !== d.email ? d.authEmail : ''],
          ['Position type', (d.levels || []).join(', ')],
-         /* every campus country the poster named (owner, 2026-09-18) â€” the
+         /* every campus country the poster named (owner, 2026-09-18) — the
             card that lists a user-added posting reads the document, and a
             document made before the field carries its single `country` */
          [(d.countries && d.countries.length > 1) ? 'Countries' : 'Country',
@@ -1304,7 +1304,7 @@
    *
    * THE ECHO IS THE OTHER HALF, and admin-area.html loads oa-fresh.js for it.
    * The build runs every twenty minutes, so for up to a cycle the row this
-   * panel has just taken down is still in the served data/jobs.json â€” and
+   * panel has just taken down is still in the served data/jobs.json — and
    * /jobs is exactly the page the maintainer opens next to check. So the
    * take-down is echoed the way oa-jobedit.js echoes its own (`removed`,
    * which filters the row out of what THIS browser renders), and the restore
@@ -1334,7 +1334,7 @@
     var list = $('oa-review-list');
 
     /* The bulk button is shared with the crawled tab, which wires it at the
-       end of its own render â€” so this path has to claim it, or the user tab
+       end of its own render — so this path has to claim it, or the user tab
        would carry the LAST crawled page's handler and approve postings the
        maintainer is not looking at. */
     var all = $('oa-review-all');
@@ -1368,7 +1368,7 @@
               'one press from being put back.')) return;
           b.disabled = true;
           msg.className = 'oa-form-msg';
-          msg.textContent = 'Taking it downâ€¦';
+          msg.textContent = 'Taking it down…';
           setStatus(db, it, HIDDEN)
             .then(function () {
               /* Open the drawer BEFORE the repaint that follows, so the
@@ -1393,14 +1393,14 @@
 
   /* Whether the drawer below the user tab is open, remembered across a
      repaint. render() rebuilds the element, so without this every re-read
-     snapped it shut â€” and a take-down repaints, which would fold the drawer
+     snapped it shut — and a take-down repaints, which would fold the drawer
      up at the one moment the maintainer is looking for it. The oa-news.js
      removed-updates panel keeps its own state for the same reason. */
   var downOpen = false;
 
   /**
    * THE WAY BACK. A posting the maintainer takes down leaves the list above
-   * â€” that list reads the LIVE statuses, so a hidden one cannot be in it â€”
+   * — that list reads the LIVE statuses, so a hidden one cannot be in it —
    * and would then be beyond every control on the site: /jobs does not carry
    * it either, so there would be nothing anywhere left to press. Hiding is
    * never a one-way door here (newsOverrides, rowOverrides, directoryEdits, a
@@ -1413,7 +1413,7 @@
    * filter is exactly what would hide it.
    *
    * A POSTER'S OWN WITHDRAWAL IS NOT IN IT, which is the candidates panel's
-   * own rule â€” putting that back is theirs to do. It would also be an
+   * own rule — putting that back is theirs to do. It would also be an
    * unbounded list with nothing to press: build-jobs.mjs rewrites every
    * `withdrawn` document to `removed` on its next run, so the pile
    * accumulates every posting ever withdrawn, in every season, for ever.
@@ -1425,7 +1425,7 @@
     if (state.hiddenError) {
       var p = document.createElement('p');
       p.className = 'oa-form-msg is-err';
-      p.textContent = 'Could not read the postings you have taken down â€” ' +
+      p.textContent = 'Could not read the postings you have taken down — ' +
         'reload to try again. Nothing has been deleted.';
       list.appendChild(p);
       return;
@@ -1466,7 +1466,7 @@
         var msg = card.querySelector('[data-msg]');
         b.disabled = true;
         msg.className = 'oa-form-msg';
-        msg.textContent = 'Putting it backâ€¦';
+        msg.textContent = 'Putting it back…';
         setStatus(db, it, RESTORED)
           .then(function () { return reloadUser(db); })
           ['catch'](function (err) {
@@ -1498,7 +1498,7 @@
     /* ONE POSTING IS ENOUGH FOR THE DUPLICATE CHECK, which is why it does not
        share the bulk button's `> 1`: a single queued posting can perfectly
        well repeat one that is already LIVE, and that is the case the owner
-       reported. It belongs to the crawled tab alone â€” a user-added posting is
+       reported. It belongs to the crawled tab alone — a user-added posting is
        already on the site, and taking it off is the poster's decision or the
        Take-down control, never a sweep. Both live in the same row, so the row
        is shown when EITHER applies and each button hides itself. */
@@ -1552,7 +1552,7 @@
 
       card.addEventListener('click', function (e) {
         /* The business-school note's "Use it": fill the School box with the
-           directory's name, exactly as typing it would â€” an input event so
+           directory's name, exactly as typing it would — an input event so
            the derived-line preview (and the picker, where mounted) follow.
            Nothing is written until Save or Approve, like any other edit. */
         var use = e.target.closest('button[data-biz-use]');
@@ -1568,7 +1568,7 @@
 
         /* The advertisement note's "Use this closing date": fill the
            Closing-date box with the date the ad states, exactly as typing it
-           would â€” the input event makes the derived "Apply by" preview
+           would — the input event makes the derived "Apply by" preview
            follow. Nothing is written until Save or Approve, like any other
            edit. */
         var adUse = e.target.closest('button[data-ad-use]');
@@ -1583,7 +1583,7 @@
         }
 
         /* "Use these names": adopt the vocabulary's classification of the
-           advertiser into the three name boxes â€” only the names it actually
+           advertiser into the three name boxes — only the names it actually
            settled, exactly as typing them would (input events, so the
            cascade and the derived-line preview follow). */
         var adPlace = e.target.closest('button[data-ad-place]');
@@ -1601,7 +1601,7 @@
           return;
         }
 
-        /* â€¦and the page's own stated school / department, one box each. */
+        /* …and the page's own stated school / department, one box each. */
         var adSchool = e.target.closest('button[data-ad-use-school]');
         if (adSchool) {
           var sBox = card.querySelector('[data-key="school"]');
@@ -1646,7 +1646,7 @@
           x.disabled = true;
         });
         msg.className = 'oa-form-msg';
-        msg.textContent = act === 'save' ? 'Savingâ€¦' : 'Sendingâ€¦';
+        msg.textContent = act === 'save' ? 'Saving…' : 'Sending…';
 
         writeDecision(db, doc, patch)
           .then(function () {
@@ -1673,17 +1673,17 @@
                starts now" while the Cloud Function that rings the build was
                undeployed (the `oa-jobreview-decided` dispatch had zero runs),
                so the posting waited for the schedule while the card claimed it
-               was on its way. The correction then said "at the next build" â€”
+               was on its way. The correction then said "at the next build" —
                and the owner deployed the functions on 2026-08-27, the dispatch
                has fired on every decision since, and the build is chained on
                it, so an approval publishes in about two minutes and the card
                was UNDER-promising: "the next build" read as the doorbell still
                being dead.
 
-               So it names the cadence the installation actually has â€” the
+               So it names the cadence the installation actually has — the
                echo puts the posting in front of the maintainer at once, the
                doorbell chain in front of everyone else in a couple of minutes
-               â€” and per CLAUDE.md's own rule, copy that promises a time
+               — and per CLAUDE.md's own rule, copy that promises a time
                changes with the cadence: if the functions ever come down, this
                string comes back here with them. */
             card.innerHTML = '<p class="oa-form-msg is-ok">' +
@@ -1723,12 +1723,12 @@
    *
    * Three equality reads rather than one `in` query: the smallest query
    * shape, and nothing here needs a composite index. Each half degrades on
-   * its own â€” a refused read of the live pair leaves an error on this tab and
+   * its own — a refused read of the live pair leaves an error on this tab and
    * can never take the gate down with it, and a refused read of the hidden
    * ones costs the drawer alone rather than the list it sits under.
    */
   function readUser(db) {
-    /* Live and not yet ticked off â€” the same rule as
+    /* Live and not yet ticked off — the same rule as
        _scraper/submissions-review.mjs's isWaiting. */
     var waiting = Promise.all(LIVE.map(function (status) {
       return db.collection(SUBS_COL).where('status', '==', status).get();
@@ -1743,7 +1743,7 @@
       return items;
     })['catch'](function () { return null; });
 
-    /* â€¦and the drawer's own. Deliberately NOT filtered by `reviewedAt`: this
+    /* …and the drawer's own. Deliberately NOT filtered by `reviewedAt`: this
        is everything the maintainer has taken down, and a posting they had
        also ticked off would otherwise be hidden from the one control that can
        put it back. */
@@ -1760,7 +1760,7 @@
   }
 
   /** What readUser found, in the tab's state. `null` is a read that did not
-      answer â€” unknown, never an empty list, so a refusal can never read as
+      answer — unknown, never an empty list, so a refusal can never read as
       "you have taken nothing down". */
   function setUser(r) {
     state.userError = r.items === null;
@@ -1776,7 +1776,7 @@
    * list, the season tabs, the two tab counts and the drawer below all have
    * to agree, and one read of a small collection the maintainer touches a few
    * times a season is cheaper and safer than four places kept in step by
-   * hand â€” a restored posting rejoins the list above only if it is still
+   * hand — a restored posting rejoins the list above only if it is still
    * waiting, which is a question only the documents can answer.
    *
    * It repaints on a season that still EXISTS: taking the last posting of a
@@ -1803,7 +1803,10 @@
       var row = judgedRow(doc);
       if (hidden.indexOf(doc.rowId || row.id) >= 0) return false;
       if (live.some(function (job) { return job.id === row.id; })) return false;
-      return !(window.OAAdvertDup && (OAAdvertDup.publishedAdvertRepeat(row, live) || OAAdvertDup.advertRepeat(row, live))); 
+      var officialApplication = /\/Vacancy\/\d+(?:[/?#]|$)/i.test(row.postedAtUrl || '')
+        ? Object.assign({}, row, { adUrl: row.postedAtUrl }) : null;
+      return !(window.OAAdvertDup && (OAAdvertDup.publishedAdvertRepeat(row, live) ||
+        (officialApplication && OAAdvertDup.publishedAdvertRepeat(officialApplication, live)) || OAAdvertDup.advertRepeat(row, live)));
     });
   }
 
@@ -1843,7 +1846,7 @@
 
   function load(db) {
     var list = $('oa-review-list');
-    list.innerHTML = '<p class="oa-hint">Loadingâ€¦</p>';
+    list.innerHTML = '<p class="oa-hint">Loading…</p>';
 
     /* The crawled queue: the pending documents, i.e. the gate. */
     var crawled = db.collection(COL).where('status', '==', 'pending').get()
@@ -1870,7 +1873,7 @@
       .catch(function (err) {
         list.innerHTML = '<p class="oa-form-msg is-err">Could not load the queue (' +
           esc(err.code || err.message) + '). If this says permission-denied, the ' +
-          'rules have not been deployed yet â€” see _SETUP-FIREBASE.md Â§4.</p>';
+          'rules have not been deployed yet — see _SETUP-FIREBASE.md §4.</p>';
       });
   }
 
