@@ -1618,8 +1618,17 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "baruch-newman-vertical-campus"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Baruch College, The City University of New York (CUNY)"
+  ],
+  "mapSearchTerms": [
+   "Baruch College"
+  ],
+  "country": "United States"
  },
  {
   "id": "baruch-college-the-city-university-of-new-york__zicklin-school-of-business__management",
@@ -12514,8 +12523,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "mercer-industrial-engineering-school-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Mercer University"
+  ],
+  "mapSearchTerms": [
+   "School of Engineering",
+   "Industrial Engineering and Industrial Management"
+  ],
+  "mapDepartmentLinks": {
+   "mercer-industrial-engineering-school-building": {
+    "facultyUrl": "https://engineering.mercer.edu/meet-the-faculty/",
+    "facultyDirectoryHint": "Find Industrial Engineering and Management; this page covers the whole School of Engineering."
+   }
+  },
   "facultyUrl": "https://engineering.mercer.edu/meet-the-faculty/",
   "facultyDirectoryHint": "Find Industrial Engineering and Management; this page covers the whole School of Engineering."
  },
@@ -20526,9 +20550,9 @@
   "lat": 32.7088639,
   "lng": -97.3564038,
   "mapLocationIds": [
-   "texas-christian-information-systems-supply-chain-hays"
+   "texas-christian-supply-chain-hays"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Texas Christian University"
   ],
@@ -22148,8 +22172,19 @@
   ],
   "n": 2,
   "lastPosted": "2026-04-07",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tulane-freeman-goldring-woldenberg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Tulane University"
+  ],
+  "mapSearchTerms": [
+   "A. B. Freeman School of Business",
+   "Management Science and Information Systems"
+  ],
+  "deptUrl": "https://freeman.tulane.edu/faculty-research/management-science",
+  "deptUrlInherited": true
  },
  {
   "id": "tulane-university__a-b-freeman-school-of-business__information-systems",
@@ -22171,9 +22206,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-24",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://freeman.tulane.edu/faculty-research/Management%20Science"
+  "mapLocationIds": [
+   "tulane-freeman-goldring-woldenberg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Tulane University"
+  ],
+  "mapSearchTerms": [
+   "A. B. Freeman School of Business",
+   "Management Science and Information Systems"
+  ],
+  "facultyUrl": "https://freeman.tulane.edu/faculty-research/Management%20Science",
+  "deptUrl": "https://freeman.tulane.edu/faculty-research/management-science",
+  "deptUrlInherited": true
  },
  {
   "id": "tulane-university__a-b-freeman-school-of-business__management-science",
@@ -22203,8 +22249,17 @@
   "lastPosted": "2026-08-24",
   "lat": 29.9390304,
   "lng": -90.1195362,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tulane-freeman-goldring-woldenberg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Tulane University"
+  ],
+  "mapSearchTerms": [
+   "A. B. Freeman School of Business",
+   "Management Science and Information Systems"
+  ]
  },
  {
   "id": "tum-school-of-management____om-scm-mis-f-ai",
