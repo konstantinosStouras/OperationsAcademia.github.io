@@ -23619,8 +23619,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-23",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "alabama-huntsville-information-supply-chain-analytics-business"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Alabama in Huntsville"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Information Systems, Supply Chain, and Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "alabama-huntsville-information-supply-chain-analytics-business": {
+    "facultyUrl": "https://www.uah.edu/business/faculty-staff/",
+    "facultyDirectoryHint": "See Information Systems and Management Science faculty sections; the directory covers the whole college."
+   }
+  },
   "facultyUrl": "https://www.uah.edu/business/faculty-staff/",
   "facultyDirectoryHint": "See Information Systems and Management Science faculty sections; the directory covers the whole college."
  },
@@ -26724,8 +26739,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-26",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "lethbridge-optimization-university-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Lethbridge"
+  ],
+  "mapSearchTerms": [
+   "Mathematics and Computer Science",
+   "Optimization Research"
+  ],
+  "mapDepartmentLinks": {
+   "lethbridge-optimization-university-hall": {
+    "facultyUrl": "https://www.ulethbridge.ca/artsci/math-computer-science/optimization-research-group"
+   }
+  },
   "facultyUrl": "https://www.ulethbridge.ca/artsci/math-computer-science/optimization-research-group"
  },
  {
@@ -28209,14 +28238,31 @@
   "department": "Managerial Sciences Department, Marketing",
   "type": "Business School",
   "address": "https://www.google.com/maps/place/University+of+Nevada,+Reno/@39.5436133,-119.8176292,17z/data=!4m6!1m3!3m2!1s0x809946d7874bd11f:0xe385628992fed618!2sUniversity+of+Nevada,+Reno!3m1!1s0x809946d7874bd11f:0xe385628992fed618",
-  "facultyUrl": "http://www.unr.edu/business/people/managerial-sciences-faculty",
+  "facultyUrl": "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty",
   "sources": [
    "directory"
   ],
   "lat": 39.5441917,
   "lng": -119.816397,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "nevada-reno-marketing-tulloch"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Nevada, Reno"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Marketing"
+  ],
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "nevada-reno-marketing-tulloch": {
+    "facultyUrl": "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty"
+   }
+  },
+  "deptUrl": "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-nevada-las-vegas____supply-chain-management",
@@ -28281,8 +28327,23 @@
   "sources": [
    "omlist"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "nevada-reno-marketing-tulloch"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Nevada, Reno"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Marketing"
+  ],
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "nevada-reno-marketing-tulloch": {
+    "facultyUrl": "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty"
+   }
+  },
   "facultyUrl": "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty"
  },
  {
@@ -28632,8 +28693,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-28",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "north-dakota-middleton-nistler-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of North Dakota"
+  ],
+  "mapSearchTerms": [
+   "Nistler College of Business and Public Administration",
+   "Middleton School of Entrepreneurship and Management"
+  ],
+  "mapDepartmentLinks": {
+   "north-dakota-middleton-nistler-hall": {
+    "facultyUrl": "https://business.und.edu/academics/school-of-entrepreneurship-and-management/faculty-staff-mgmt.html"
+   }
+  },
   "facultyUrl": "https://business.und.edu/academics/school-of-entrepreneurship-and-management/faculty-staff-mgmt.html"
  },
  {
@@ -32678,10 +32753,16 @@
     "department": "Mathematics, Analytics and Optimization"
    }
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "vrije-mathematics-new-university-building"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "Faculty of Science",
    "Mathematics, Analytics and Optimization"
+  ],
+  "mapInstitutionNames": [
+   "Vrije Universiteit Amsterdam"
   ]
  },
  {

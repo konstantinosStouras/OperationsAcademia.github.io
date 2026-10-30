@@ -18957,6 +18957,111 @@
       ],
       "checked": "2026-10-30",
       "notes": "Cass Business School is now Bayes Business School. The building access guide places its Faculty of Management on the fourth floor; Bayes also has other premises."
+    },
+    {
+      "id": "alabama-huntsville-information-supply-chain-analytics-business",
+      "institution": "University of Alabama in Huntsville",
+      "rowIds": [
+        "university-of-alabama-in-huntsville__college-of-business__information-systems-supply-chain-and-analytics"
+      ],
+      "school": "College of Business",
+      "department": "Department of Information Systems, Supply Chain, and Analytics",
+      "building": "Business Administration Building",
+      "address": "Room 355, 800 Ben Graves Drive NW, Huntsville, AL 35816, United States",
+      "lat": 34.72824,
+      "lng": -86.64136,
+      "addressSource": "https://www.uah.edu/business/contact",
+      "coordinateSource": "https://mapcarta.com/W413731367",
+      "supportingSources": [
+        "https://www.uah.edu/opce/contact-us",
+        "https://www.uah.edu/hr/careers/faculty-careers"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official College of Business contact gives department office room 355 and physical building address 800 Ben Graves Drive NW. The exact named Business Administration Building OpenStreetMap footprint is corroborated by official directions identifying the glass building beside the Invention to Innovation Center. The general campus mailing address and the embedded Google map viewport are not used as coordinates."
+    },
+    {
+      "id": "lethbridge-optimization-university-hall",
+      "institution": "University of Lethbridge",
+      "rowIds": [
+        "university-of-lethbridge__mathematics-and-computer-science__optimization-research"
+      ],
+      "school": "Mathematics and Computer Science",
+      "department": "Optimization Research",
+      "building": "University Hall",
+      "address": "4401 University Drive, Lethbridge, AB T1K 3M4, Canada",
+      "lat": 49.67865,
+      "lng": -112.85979,
+      "addressSource": "https://www.cs.uleth.ca/~benkoczi/wordpress/",
+      "coordinateSource": "https://mapcarta.com/W118457919",
+      "supportingSources": [
+        "https://www.ulethbridge.ca/artsci/math-computer-science/optimization-research-group",
+        "https://www.ulethbridge.ca/facilities/content/campus-buildings"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The group identifies Robert Benkoczi as a member; his faculty page gives University Hall C556. The pin is for the large University Hall complex, not his exact office."
+    },
+    {
+      "id": "nevada-reno-marketing-tulloch",
+      "institution": "University of Nevada, Reno",
+      "rowIds": [
+        "university-of-nevada-reno__college-of-business__marketing",
+        "university-of-nevada__college-of-business__managerial-sciences-department-marketing"
+      ],
+      "school": "College of Business",
+      "department": "Marketing",
+      "building": "John Tulloch Business Building",
+      "address": "201 E Ninth Street, Reno, NV 89512, United States",
+      "lat": 39.53576,
+      "lng": -119.81511,
+      "addressSource": "https://rtcwashoe.com/learn-more-about-the-university-gateway-transportation-project/",
+      "coordinateSource": "https://mapcarta.com/W1424521873",
+      "supportingSources": [
+        "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty",
+        "https://nccdevelopment.org/master-portfolio/john-tulloch-business-building-university-of-nevada-reno"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Current marketing faculty directory lists multiple faculty and department administration in TULL. John Tulloch Business Building opened in 2025; the pin is the named building footprint."
+    },
+    {
+      "id": "north-dakota-middleton-nistler-hall",
+      "institution": "University of North Dakota",
+      "rowIds": [
+        "university-of-north-dakota__nistler-college-of-business-and-public-administration__middleton-school-of-entrepreneurship-and-management"
+      ],
+      "school": "Nistler College of Business and Public Administration",
+      "department": "Middleton School of Entrepreneurship and Management",
+      "building": "Nistler Hall",
+      "address": "3125 University Avenue, Grand Forks, ND 58202, United States",
+      "lat": 47.9216,
+      "lng": -97.07293,
+      "addressSource": "https://business.und.edu/academics/school-of-entrepreneurship-and-management/meet-the-middletons.html",
+      "coordinateSource": "https://mapcarta.com/W1140288002",
+      "supportingSources": [
+        "https://und.edu/map/map-locations.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school contact identifies Nistler Hall room 301; official campus building listing confirms hall houses Nistler College. Coordinates name mapped college building."
+    },
+    {
+      "id": "vrije-mathematics-new-university-building",
+      "institution": "Vrije Universiteit Amsterdam",
+      "rowIds": [
+        "vrije-universiteit-amsterdam__faculty-of-science__mathematics-analytics-and-optimization"
+      ],
+      "school": "Faculty of Science",
+      "department": "Mathematics, Analytics and Optimization",
+      "building": "New University Building",
+      "address": "De Boelelaan 1111, 1081 HV Amsterdam, Netherlands",
+      "lat": 52.33459,
+      "lng": 4.86409,
+      "addressSource": "https://vu.nl/en/about-vu/more-about/contact-information-mathematics",
+      "coordinateSource": "https://mapcarta.com/W1163718016",
+      "supportingSources": [
+        "https://vu.nl/en/about-vu/faculties/faculty-of-science/departments/mathematics",
+        "https://vu.nl/en/about-vu/more-about/new-university-building"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University identifies Analytics & Optimization within Mathematics and places department on ninth floor of New University Building. Named building point from OSM."
     }
   ]
 }
