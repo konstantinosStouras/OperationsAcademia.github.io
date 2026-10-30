@@ -974,8 +974,16 @@
   ],
   "lat": 33.4366655,
   "lng": -111.9403254,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "asu-fulton-brickyard"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Arizona State University"
+  ],
+  "mapSearchTerms": [
+   "Ira A. Fulton Schools of Engineering"
+  ]
  },
  {
   "id": "arizona-state-university__ira-a-fulton-schools-of-engineering__computing-and-augmented-intelligence",
@@ -991,7 +999,7 @@
   "n": 3,
   "lastPosted": "2026-09-29",
   "mapLocationIds": [
-   "arizona-state-learning-optimization-brickyard"
+   "asu-fulton-brickyard"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -1001,7 +1009,7 @@
    "Ira A. Fulton Schools of Engineering"
   ],
   "mapDepartmentLinks": {
-   "arizona-state-learning-optimization-brickyard": {
+   "asu-fulton-brickyard": {
     "facultyUrl": "https://faculty.engineering.asu.edu/directory/scai/rank"
    }
   },
@@ -1610,8 +1618,17 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "baruch-newman-vertical-campus"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Baruch College, The City University of New York (CUNY)"
+  ],
+  "mapSearchTerms": [
+   "Baruch College"
+  ],
+  "country": "United States"
  },
  {
   "id": "baruch-college-the-city-university-of-new-york__zicklin-school-of-business__management",
@@ -11451,8 +11468,17 @@
    "omlist",
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "kuhne-logistics-hamburg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Kühne Logistics University"
+  ],
+  "mapSearchTerms": [
+   "Kühne Logistics University"
+  ],
+  "country": "Germany"
  },
  {
   "id": "kuhne-logistics-university____om-and-business-analytics",
@@ -12497,8 +12523,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "mercer-industrial-engineering-school-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Mercer University"
+  ],
+  "mapSearchTerms": [
+   "School of Engineering",
+   "Industrial Engineering and Industrial Management"
+  ],
+  "mapDepartmentLinks": {
+   "mercer-industrial-engineering-school-building": {
+    "facultyUrl": "https://engineering.mercer.edu/meet-the-faculty/",
+    "facultyDirectoryHint": "Find Industrial Engineering and Management; this page covers the whole School of Engineering."
+   }
+  },
   "facultyUrl": "https://engineering.mercer.edu/meet-the-faculty/",
   "facultyDirectoryHint": "Find Industrial Engineering and Management; this page covers the whole School of Engineering."
  },
@@ -17759,17 +17800,18 @@
   "n": 1,
   "lastPosted": "2026-09-23",
   "mapLocationIds": [
-   "san-jose-marketing-business-analytics-tower"
+   "sjsu-information-systems-business-tower"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
-   "San José State University"
+   "San Jose State University"
   ],
   "mapSearchTerms": [
-   "Lucas College and Graduate School of Business"
+   "Lucas College and Graduate School of Business",
+   "School of Information Systems and Technology"
   ],
   "mapDepartmentLinks": {
-   "san-jose-marketing-business-analytics-tower": {
+   "sjsu-information-systems-business-tower": {
     "facultyUrl": "https://www.sjsu.edu/isystems/about-us/contact.php"
    }
   },
@@ -17789,21 +17831,16 @@
   "n": 1,
   "lastPosted": "2026-10-11",
   "mapLocationIds": [
-   "san-jose-marketing-business-analytics-tower"
+   "sjsu-lucas-business-tower"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
-   "San José State University"
+   "San Jose State University"
   ],
   "mapSearchTerms": [
    "Lucas College and Graduate School of Business",
-   "Department of Marketing and Business Analytics"
+   "Marketing and Decision Sciences"
   ],
-  "mapDepartmentLinks": {
-   "san-jose-marketing-business-analytics-tower": {
-    "facultyUrl": "https://www.sjsu.edu/mktba/about-us/faculty-staff-contact.php"
-   }
-  },
   "facultyUrl": "https://www.sjsu.edu/mktba/about-us/faculty-staff-contact.php"
  },
  {
@@ -17884,7 +17921,7 @@
   "mapLocationIds": [
    "santa-clara-information-systems-analytics-lucas"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Santa Clara University"
   ],
@@ -18849,7 +18886,7 @@
   "mapLocationIds": [
    "southern-methodist-information-technology-miller-quadrangle"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
    "Edwin L. Cox School of Business",
    "Department of Information Technology and Operations Management",
@@ -20513,9 +20550,9 @@
   "lat": 32.7088639,
   "lng": -97.3564038,
   "mapLocationIds": [
-   "texas-christian-information-systems-supply-chain-hays"
+   "texas-christian-supply-chain-hays"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Texas Christian University"
   ],
@@ -22135,8 +22172,19 @@
   ],
   "n": 2,
   "lastPosted": "2026-04-07",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tulane-freeman-goldring-woldenberg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Tulane University"
+  ],
+  "mapSearchTerms": [
+   "A. B. Freeman School of Business",
+   "Management Science and Information Systems"
+  ],
+  "deptUrl": "https://freeman.tulane.edu/faculty-research/management-science",
+  "deptUrlInherited": true
  },
  {
   "id": "tulane-university__a-b-freeman-school-of-business__information-systems",
@@ -22158,9 +22206,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-24",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://freeman.tulane.edu/faculty-research/Management%20Science"
+  "mapLocationIds": [
+   "tulane-freeman-goldring-woldenberg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Tulane University"
+  ],
+  "mapSearchTerms": [
+   "A. B. Freeman School of Business",
+   "Management Science and Information Systems"
+  ],
+  "facultyUrl": "https://freeman.tulane.edu/faculty-research/Management%20Science",
+  "deptUrl": "https://freeman.tulane.edu/faculty-research/management-science",
+  "deptUrlInherited": true
  },
  {
   "id": "tulane-university__a-b-freeman-school-of-business__management-science",
@@ -22190,8 +22249,17 @@
   "lastPosted": "2026-08-24",
   "lat": 29.9390304,
   "lng": -90.1195362,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tulane-freeman-goldring-woldenberg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Tulane University"
+  ],
+  "mapSearchTerms": [
+   "A. B. Freeman School of Business",
+   "Management Science and Information Systems"
+  ]
  },
  {
   "id": "tum-school-of-management____om-scm-mis-f-ai",

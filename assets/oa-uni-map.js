@@ -568,7 +568,7 @@
       var keep=signature===lastSignature;lastSignature=signature;draw(keep);
     }
     Promise.all([
-      fetch('/data/university-map.json?v=20261030-directory-updates-7').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
+      fetch('/data/university-map.json?v=20261030-directory-updates-9').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
       fetch('/assets/world/countries.geojson?v=20261022-mobile').then(function(r){if(!r.ok)throw Error('geography');return r.json();})
     ]).then(function(data) {
       data[0].locations.forEach(function(r){nameKeys.set(r.name,r.key);locations.set(r.key,r);});

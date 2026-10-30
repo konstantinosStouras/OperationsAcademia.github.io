@@ -2126,7 +2126,7 @@
       "school": "Lucas College and Graduate School of Business",
       "department": "Department of Marketing and Business Analytics",
       "building": "Business Tower",
-      "address": "Room 750, One Washington Square, San José, CA 95192, United States",
+      "address": "One Washington Square, San José, CA 95192, United States",
       "lat": 37.337173,
       "lng": -121.878929,
       "addressSource": "https://www.sjsu.edu/cob/students/honors/marketing-business-analytics/faculty-contact.php",
@@ -2533,7 +2533,8 @@
       "institution": "Texas Christian University",
       "institutionKey": "Neeley School of Business (Texas Christian Univ)",
       "rowIds": [
-        "neeley-school-of-business-texas-christian-univ____supply-chain-management"
+        "neeley-school-of-business-texas-christian-univ____supply-chain-management",
+        "texas-christian-university__neeley-school-of-business__information-systems-and-supply-chain-management"
       ],
       "school": "Neeley School of Business",
       "department": "Department of Information Systems and Supply Chain Management",
@@ -4379,7 +4380,8 @@
       "id": "santa-clara-information-systems-analytics-lucas",
       "institution": "Santa Clara University",
       "rowIds": [
-        "santa-clara-university____is-and-analytics"
+        "santa-clara-university____is-and-analytics",
+        "santa-clara-university__leavey-school-of-business__information-systems-and-analytics"
       ],
       "school": "Leavey School of Business",
       "department": "Department of Information Systems and Analytics",
@@ -10879,7 +10881,8 @@
       "institution": "Southern Methodist University",
       "institutionKey": "southern-methodist-university",
       "rowIds": [
-        "southern-methodist-university____it-om"
+        "southern-methodist-university____it-om",
+        "southern-methodist-university__edwin-l-cox-school-of-business__information-technology-and-operations-management"
       ],
       "school": "Edwin L. Cox School of Business",
       "department": "Department of Information Technology and Operations Management",
@@ -16635,7 +16638,8 @@
       "id": "sjsu-lucas-business-tower",
       "institution": "San Jose State University",
       "rowIds": [
-        "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-decision-sciences"
+        "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-decision-sciences",
+        "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-business-analytics"
       ],
       "school": "Lucas College and Graduate School of Business",
       "department": "Marketing and Decision Sciences",
@@ -18162,6 +18166,131 @@
       ],
       "checked": "2026-10-30",
       "notes": "Operations and Decision Sciences lecturer identifies Lazaridis Hall office; address street verified by mapped named building."
+    },
+    {
+      "id": "kuhne-logistics-hamburg",
+      "institution": "Kühne Logistics University",
+      "rowIds": [
+        "kuhne-logistics-university"
+      ],
+      "school": "Kühne Logistics University",
+      "department": "",
+      "building": "Hamburg Campus",
+      "address": "Großer Grasbrook 17, 20457 Hamburg, Germany",
+      "lat": 53.54057,
+      "lng": 9.99437,
+      "addressSource": "https://www.klu.org/directions",
+      "coordinateSource": "https://mapcarta.com/W27568638",
+      "supportingSources": [
+        "https://www.klu.org/imprint"
+      ],
+      "checked": "2026-10-30",
+      "notes": "KLU lists this Hamburg address as its headquarters and visitor campus. The university also has a Saigon campus."
+    },
+    {
+      "id": "asu-fulton-brickyard",
+      "institution": "Arizona State University",
+      "rowIds": [
+        "arizona-state-university__ira-a-fulton-schools-of-engineering"
+      ],
+      "school": "Ira A. Fulton Schools of Engineering",
+      "department": "",
+      "building": "Brickyard Engineering",
+      "address": "699 South Mill Avenue, Tempe, AZ 85281, United States",
+      "lat": 33.4236,
+      "lng": -111.9396,
+      "addressSource": "https://ets.engineering.asu.edu/sccm-help-by209/",
+      "coordinateSource": "https://mapcarta.com/26754020",
+      "supportingSources": [
+        "https://tours.asu.edu/tempe/brickyard",
+        "https://engineering.asu.edu/contact/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "ASU identifies Brickyard Engineering as the Fulton Schools dean’s office and a school facility. The eight schools occupy multiple buildings and campuses, so this is an administrative reference."
+    },
+    {
+      "id": "sjsu-information-systems-business-tower",
+      "institution": "San Jose State University",
+      "rowIds": [
+        "san-jose-state-university__lucas-college-and-graduate-school-of-business__information-systems-and-technology"
+      ],
+      "school": "Lucas College and Graduate School of Business",
+      "department": "School of Information Systems and Technology",
+      "building": "Business Tower",
+      "address": "One Washington Square, San José, CA 95192, United States",
+      "lat": 37.33706,
+      "lng": -121.87887,
+      "addressSource": "https://wwwtest.sjsu.edu/isystems/about-us/contact.php",
+      "coordinateSource": "https://mapcarta.com/W25774833",
+      "supportingSources": [
+        "https://www.sjsu.edu/cob/about/maps.php"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The school identifies Business Tower room 250; university mailing address and existing verified Business Tower map coordinate."
+    },
+    {
+      "id": "baruch-newman-vertical-campus",
+      "institution": "Baruch College, The City University of New York (CUNY)",
+      "rowIds": [
+        "baruch-college-the-city-university-of-new-york"
+      ],
+      "school": "Baruch College",
+      "department": "",
+      "building": "William and Anita Newman Vertical Campus",
+      "address": "55 Lexington Avenue, New York, NY 10010, United States",
+      "lat": 40.74019,
+      "lng": -73.98337,
+      "addressSource": "https://www.baruch.cuny.edu/campus-map-and-directions/",
+      "coordinateSource": "https://mapcarta.com/W264761202",
+      "supportingSources": [
+        "https://adminfinance.baruch.cuny.edu/wp-content/uploads/sites/25/2026/04/Building-Addresses-Designations-1.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Baruch lists 55 Lexington Avenue as its main address and identifies it as Newman Vertical Campus. The source row names no department; this is a college contact location, not a verified department office."
+    },
+    {
+      "id": "tulane-freeman-goldring-woldenberg",
+      "institution": "Tulane University",
+      "rowIds": [
+        "tulane-university__a-b-freeman-school-of-business",
+        "tulane-university__a-b-freeman-school-of-business__information-systems",
+        "tulane-university__a-b-freeman-school-of-business__management-science"
+      ],
+      "school": "A. B. Freeman School of Business",
+      "department": "Management Science and Information Systems",
+      "building": "Goldring/Woldenberg Business Complex",
+      "address": "7 McAlister Drive, New Orleans, LA 70118, United States",
+      "lat": 29.939364,
+      "lng": -90.119878,
+      "addressSource": "https://freeman.tulane.edu/index.php/about-freeman/our-building",
+      "coordinateSource": "https://campusservices.tulane.edu/departments/capital-projects/projects/gw",
+      "supportingSources": [
+        "https://freeman.tulane.edu/faculty-research/management-science/yatish-hegde",
+        "https://freeman.tulane.edu/node/413"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The university identifies the Freeman School in this complex and publishes its project map coordinate. Management Science lecturer Yatish Hegde has office GWBC 513; information systems researcher Ian Ho has office 402J. The pin represents the complex."
+    },
+    {
+      "id": "mercer-industrial-engineering-school-building",
+      "institution": "Mercer University",
+      "rowIds": [
+        "mercer-university__school-of-engineering__industrial-engineering-and-industrial-management"
+      ],
+      "school": "School of Engineering",
+      "department": "Industrial Engineering and Industrial Management",
+      "building": "School of Engineering",
+      "address": "1501 Mercer University Drive, Macon, GA 31207, United States",
+      "lat": 32.8272,
+      "lng": -83.64874,
+      "addressSource": "https://engineering.mercer.edu/academic-programs/industrial-management/",
+      "coordinateSource": "https://mapcarta.com/W148252093",
+      "supportingSources": [
+        "https://www.mercer.edu/wp-content/uploads/2021/01/mercer-macon-campus-map.pdf",
+        "https://www.iise.org/details.aspx?id=328"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official program identifies the department and Macon School of Engineering; official campus map identifies the School of Engineering building separately from the adjacent Science and Engineering Building. Mapcarta locates Mercer Engineering Building; coordinates are building-level, not a verified department office."
     }
   ]
 }
