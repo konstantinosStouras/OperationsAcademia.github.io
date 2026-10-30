@@ -1800,7 +1800,7 @@
   function unpublishedApprovals(docs, live, hidden) {
     return docs.filter(function (doc) {
       if (!doc || doc.status !== 'approved' || !doc.row) return false;
-      var row = judgedRow(doc);
+      var row = Object.assign({}, judgedRow(doc), { postedAtUrl: fieldValue(doc, 'postedAtUrl') });
       if (hidden.indexOf(doc.rowId || row.id) >= 0) return false;
       if (live.some(function (job) { return job.id === row.id; })) return false;
       var officialApplication = /\/Vacancy\/\d+(?:[/?#]|$)/i.test(row.postedAtUrl || '')
