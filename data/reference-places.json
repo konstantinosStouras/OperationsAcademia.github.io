@@ -3000,11 +3000,6 @@
   "department": "Sustainable SCM"
  },
  {
-  "institution": "UCL Global Business School for Health",
-  "school": "",
-  "department": "Sustainable Supply Chain Management"
- },
- {
   "institution": "UCL School of Management",
   "school": "",
   "department": "OM"
@@ -3078,6 +3073,11 @@
   "institution": "University College London",
   "school": "UCL Global Business School for Health",
   "department": "Population Health Sciences"
+ },
+ {
+  "institution": "University College London",
+  "school": "UCL Global Business School for Health",
+  "department": "Sustainable Supply Chain Management"
  },
  {
   "institution": "University College London",

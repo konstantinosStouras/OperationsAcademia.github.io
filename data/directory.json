@@ -22571,19 +22571,6 @@
   }
  },
  {
-  "id": "ucl-global-business-school-for-health____sustainable-supply-chain-management",
-  "institution": "UCL Global Business School for Health",
-  "department": "Sustainable Supply Chain Management",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people",
-  "facultyDirectoryHint": "See Core Academic Staff; the page covers the whole school and other roles, not only supply chain."
- },
- {
   "id": "ucl-school-of-management____om",
   "institution": "UCL School of Management",
   "department": "OM",
@@ -23249,7 +23236,8 @@
   "type": "Business School",
   "country": "United Kingdom",
   "sources": [
-   "postings"
+   "postings",
+   "seed"
   ],
   "n": 1,
   "lastPosted": "2026-10-30",

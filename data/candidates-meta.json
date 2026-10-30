@@ -1,27 +1,27 @@
 {
- "generated": "2026-10-19T15:21:03.224Z",
- "count": 43,
+ "generated": "2026-10-30T22:34:04.900Z",
+ "count": 44,
  "years": {
-  "2027": 43
+  "2027": 44
  },
  "positions": {
   "PhD Candidate": 26,
-  "Post-Doctoral Researcher": 12,
+  "Post-Doctoral Researcher": 13,
   "Assistant Professor": 3,
   "Research Scientist": 2
  },
  "researchAreas": {
   "Machine Learning and Data Science": 20,
   "Operations Research / Optimization": 15,
+  "Empirical Operations": 14,
   "Technology, Platforms and Marketplaces": 14,
-  "Empirical Operations": 13,
-  "Service Operations": 10,
-  "Supply Chain Management": 9,
-  "Sustainable Operations": 9,
+  "Service Operations": 11,
+  "Supply Chain Management": 10,
+  "Sustainable Operations": 10,
   "Behavioral Operations": 8,
-  "Healthcare Operations": 7,
-  "Revenue Management and Pricing": 7,
-  "Innovation and New Product Development": 5,
+  "Healthcare Operations": 8,
+  "Revenue Management and Pricing": 8,
+  "Innovation and New Product Development": 6,
   "AI": 2,
   "Sequential Decision Making": 2,
   "Transportation and Logistics": 2,
@@ -56,6 +56,7 @@
   "Machine Learning": 1,
   "Market Design": 1,
   "Marketplace Aanlytics": 1,
+  "OM-Finance": 1,
   "Online Algorithms": 1,
   "Policies and Practices for Social Good": 1,
   "public sector operations": 1,
@@ -71,13 +72,13 @@
   "Trustworthy AI": 1
  },
  "informsDays": {
-  "Sunday": 17,
+  "Sunday": 18,
   "Monday": 10,
   "Tuesday": 5,
   "Wednesday": 1
  },
- "withCv": 39,
- "newestPosted": "2026-10-19",
+ "withCv": 40,
+ "newestPosted": "2026-10-30",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
  "heldCount": 0,
@@ -92,7 +93,7 @@
   },
   {
    "label": "Healthcare operations",
-   "count": 7
+   "count": 8
   }
  ]
 }
