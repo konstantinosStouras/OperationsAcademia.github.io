@@ -610,9 +610,9 @@
       msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
       msg.textContent = failed
         ? done + ' approved, ' + failed + ' could not be saved — reload and try those again.'
-        : 'All ' + done + ' approved, and on your own jobs page straight away. ' +
-          'Everyone else sees them within a couple of minutes.';
+        : 'All ' + done + ' approved. See Publication status below to verify the public update.';
       btn.disabled = !!failed;
+      renderPublicationStatus(db);
     });
   }
 
@@ -1688,11 +1688,11 @@
                string comes back here with them. */
             card.innerHTML = '<p class="oa-form-msg is-ok">' +
               (act === 'approve'
-                ? 'Approved &mdash; and on your own jobs page straight away. ' +
-                  'Everyone else sees it within a couple of minutes.'
+                ? 'Approved. Public publication is not confirmed yet; see Publication status below.'
                 : 'Rejected. It stays off the site and will not be queued again.') +
               '</p>';
             retire(db, 'crawled', doc);
+            if (act === 'approve') renderPublicationStatus(db);
           })
           .catch(function (err) {
             msg.className = 'oa-form-msg is-err';
@@ -1796,6 +1796,54 @@
     });
   }
 
+  // Approval is a decision, not proof of a successful public deployment.
+  function unpublishedApprovals(docs, live, hidden) {
+    return docs.filter(function (doc) {
+      if (!doc || doc.status !== 'approved' || !doc.row) return false;
+      var row = judgedRow(doc);
+      if (hidden.indexOf(doc.rowId || row.id) >= 0) return false;
+      if (live.some(function (job) { return job.id === row.id; })) return false;
+      var officialApplication = /\/Vacancy\/\d+(?:[/?#]|$)/i.test(row.postedAtUrl || '')
+        ? Object.assign({}, row, { adUrl: row.postedAtUrl }) : null;
+      return !(window.OAAdvertDup && (OAAdvertDup.publishedAdvertRepeat(row, live) ||
+        (officialApplication && OAAdvertDup.publishedAdvertRepeat(officialApplication, live)) || OAAdvertDup.advertRepeat(row, live)));
+    });
+  }
+
+  var publicationRead = 0;
+  function renderPublicationStatus(db) {
+    var host = $('oa-review');
+    if (!host || !OAAccounts.isAdmin()) return Promise.resolve();
+    var box = $('oa-review-publication');
+    if (!box) { box = document.createElement('section'); box.id = 'oa-review-publication'; host.appendChild(box); }
+    var read = ++publicationRead;
+    box.innerHTML = '<h4>Publication status</h4><p class="oa-hint">Checking approved postings against the public feed…</p>';
+    return Promise.all([
+      db.collection(COL).where('status', '==', 'approved').get(),
+      fetch('/data/jobs.json?publication-check=' + Date.now(), { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw new Error('public feed unavailable');
+        return r.json();
+      }),
+      db.collection(SUBS_COL).where('status', '==', HIDDEN).get()
+    ]).then(function (got) {
+      if (read !== publicationRead) return;
+      if (!Array.isArray(got[1])) throw new Error('invalid public feed');
+      var hidden = got[2].docs.map(function (d) { return d.data().sheetId || d.id; });
+      var missing = unpublishedApprovals(got[0].docs.map(function (d) { return d.data(); }), got[1], hidden);
+      box.innerHTML = '<h4>Publication status</h4>' + (missing.length
+        ? '<p class="oa-form-msg">' + missing.length + ' approved posting(s) absent from the public feed. Approval is saved, but publication is not confirmed. A failed build or a source row removed since approval can cause this; check the source before restoring an old posting.</p>' +
+          missing.map(function (doc) {
+            var row = judgedRow(doc);
+            return '<article class="oa-fb-card"><strong>' + esc(row.institution || '') + '</strong> — ' + esc(row.department || row.unit || '') +
+              '<p>Approved; not confirmed public · ' + esc(String(doc.reviewedAt || '').slice(0, 10)) + '</p><code>' + esc(row.id || doc.rowId) + '</code></article>';
+          }).join('')
+        : '<p class="oa-hint">All approved postings are represented in the public feed, apart from postings explicitly taken down.</p>');
+    }).catch(function () {
+      if (read !== publicationRead) return;
+      box.innerHTML = '<h4>Publication status</h4><p class="oa-form-msg is-err">Could not verify publication. Approved postings may still be waiting; an empty review queue does not confirm they are live. Reload to check again.</p>';
+    });
+  }
+
   function load(db) {
     var list = $('oa-review-list');
     list.innerHTML = '<p class="oa-hint">Loading…</p>';
@@ -1820,6 +1868,7 @@
         state.rejectedError = r[2] === null;
         setUser(r[1]);
         paint(db, 'crawled', null);
+        renderPublicationStatus(db);
       })
       .catch(function (err) {
         list.innerHTML = '<p class="oa-form-msg is-err">Could not load the queue (' +

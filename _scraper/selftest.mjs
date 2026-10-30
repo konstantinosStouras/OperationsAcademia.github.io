@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import './publication-status-test.cjs';
 /* ---------------------------------------------------------------------------
    Operations Academia — offline checks for the job pipeline.
 
@@ -4167,8 +4168,8 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
   /* the RUN LINES, not a mention: the step comments name build-all.mjs too,
      and a pin that matched one of those would go red on a reworded comment */
   ok(buildYml.indexOf('run: node _scraper/selftest.mjs --publishing')
-     < buildYml.indexOf('node _scraper/build-all.mjs'),
-    'and the build checks the committed tree BEFORE it rebuilds it, which is why the mode exists');
+     > buildYml.indexOf('node _scraper/build-all.mjs'),
+    'the full publishing gate validates regenerated outputs after their builders run');
 }
 
 /* -------------------------------------------- the seed of the world's schools
@@ -11806,15 +11807,13 @@ function testReviewDuplicates() {
     'the card never claims an instant nothing measures — the promise is a time');
   ok(!/at the next build/.test(rvCopy),
     'and never the retired under-promise, which read as the doorbell being dead');
-  for (const claim of ['on your own jobs page straight away',
-    'within a couple of minutes']) {
-    ok(rvCopy.indexOf(claim) >= 0, `the card says what is true instead: "${claim}"`);
-  }
-  /* BOTH decision paths carry it — approve-one and Approve-all each end on
-     their own message, and a cadence corrected on one alone would have the
-     panel disagreeing with itself. */
-  eq((rvCopy.match(/within a couple of minutes/g) || []).length, 2,
-    'both the single approval and Approve-all promise the same cadence');
+  ok(rvCopy.includes('Public publication is not confirmed yet'),
+    'single approval distinguishes the saved decision from public deployment');
+  ok(rvCopy.includes('See Publication status below to verify the public update.'),
+    'bulk approval also waits for public verification');
+  ok(rvCopy.includes('Could not verify publication.'),
+    'a failed public-feed read never reports publication success');
+
 
   const adminPage = readFileSync(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   ok(/<script defer src="assets\/oa-fresh\.js">/.test(adminPage),

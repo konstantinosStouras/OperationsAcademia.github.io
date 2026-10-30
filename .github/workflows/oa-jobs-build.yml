@@ -94,8 +94,10 @@ jobs:
         if: steps.gate.outputs.ready == 'true'
         run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
 
-      - name: Offline checks
-        run: node _scraper/selftest.mjs --publishing
+      # Validate source behavior before building; generated files are checked
+      # after rebuilding, so stale outputs cannot deadlock their own builder.
+      - name: Publication status regression checks
+        run: node _scraper/publication-status-test.cjs
 
       - name: Unpublished changes never send edit notifications
         run: node _scraper/notify-job-changes.mjs --selftest
