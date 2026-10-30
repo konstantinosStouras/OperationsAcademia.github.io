@@ -1,13 +1,10 @@
-name: Publish only verified UCL 49655
+name: Audit approved job publication
 on:
   workflow_dispatch:
 permissions:
-  contents: write
-concurrency:
-  group: oa-jobs-data-refs/heads/master
-  cancel-in-progress: false
+  contents: read
 jobs:
-  publish:
+  audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -17,71 +14,25 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-save --no-audit --no-fund firebase-admin@12
-      - name: Publish only verified UCL vacancy from its approved record
+      - name: Audit approvals without private data
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
           node --input-type=module <<'JS'
-          import assert from 'node:assert/strict';
-          import {readFile,writeFile} from 'node:fs/promises';
           import {firestore} from './_scraper/_mail.mjs';
           import {approvedRow,advertRepeat} from './_scraper/jobreview.mjs';
-          import {serialise,displayOrder,buildMeta} from './_scraper/jobs-model.mjs';
           const db=await firestore(); if(!db) throw Error('No database');
-          const id='2027-ucl-global-business-school-for-health-20261030';
-          const doc=(await db.collection('jobReviews').doc(id).get()).data();
-          assert.equal(doc.status,'approved');
-          const row=approvedRow(doc.row,doc);
-          assert.equal(row.institution,'University College London');
-          assert.equal(row.school,'UCL Global Business School for Health');
-          assert.deepEqual(row.levels,['Non-tenure track (teaching) position']);
-          assert.equal(row.applyByDate,'2026-11-30');
-          assert.equal(row.adUrl,'https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=49655');
-          assert.match(row.postedAtUrl,/49655/);
-          const jobs=JSON.parse(await readFile('data/jobs.json','utf8'));
-          assert.equal(advertRepeat(row,jobs.filter(r=>r.id!==id)),null,'Duplicate advert');
-          const reviews=await db.collection('jobReviews').where('status','==','pending').get();
-          const pending=reviews.docs.map(d=>d.data()).filter(v=>v.row?.id!==id).map(v=>approvedRow(v.row,v));
-          assert.equal(advertRepeat(row,pending),null,'Duplicate pending advert');
-          const is49655=r=>[r.adUrl,r.postedAtUrl].some(u=>/jobId=(?:Q1KFK026203F3VBQBLO8M8M07-)?49655(?:&|$)/.test(u||''));
-          assert.equal(jobs.filter(r=>is49655(r)&&r.id!==id).length,0);
-          for(const file of ['data/jobs.json','data/jobmarket.json']) {
-            const old=JSON.parse(await readFile(file,'utf8'));
-            const next=[...old.filter(r=>r.id!==id),row].sort(displayOrder);
-            assert.deepEqual(next.filter(r=>r.id!==id).sort((a,b)=>a.id.localeCompare(b.id)),old.filter(r=>r.id!==id).sort((a,b)=>a.id.localeCompare(b.id)),'Unrelated rows changed');
-            assert.equal(next.filter(is49655).length,1);
-            await writeFile(file,serialise(next));
+          const jobs=await (await fetch('https://www.operationsacademia.org/data/jobs.json')).json();
+          const snap=await db.collection('jobReviews').where('status','==','approved').get();
+          let exact=0,equivalent=0,missing=0;
+          for(const d of snap.docs) {
+            const v=d.data(); if(!v.row) continue; const r=approvedRow(v.row,v);
+            if(jobs.some(j=>j.id===r.id)){exact++;continue;}
+            const same=advertRepeat(r,jobs);
+            if(same){equivalent++;console.log(JSON.stringify({outcome:'equivalent-live',id:r.id,matchingId:same.id,year:r.year}));continue;}
+            missing++;
+            const mirror=(await db.collection('jobSubmissions').doc(d.id).get()).data();
+            console.log(JSON.stringify({outcome:'missing',id:r.id,year:r.year,institution:r.institution,school:r.school,levels:r.levels,adUrl:r.adUrl,postedAtUrl:r.postedAtUrl,reviewedAt:typeof v.reviewedAt==='string'?v.reviewedAt:'',mirrorStatus:mirror?.status||'none',source:r.source}));
           }
-          const final=JSON.parse(await readFile('data/jobs.json','utf8'));
-          await writeFile('data/jobs-meta.json',JSON.stringify(buildMeta(final,{generated:new Date().toISOString()}),null,1)+'\n');
-          const {createRequire}=await import('node:module'); const require=createRequire(import.meta.url);
-          const {buildVocab,serialiseVocab,memberVocabRows}=await import('./_scraper/vocab.mjs');
-          const {memberUniversities}=await import('./_scraper/directory-model.mjs');
-          const read=async n=>JSON.parse(await readFile('data/'+n,'utf8'));
-          const seed=require('./assets/oa-institutions.js'); const om=require('./assets/oa-omlist.js');
-          const dir=[...await read('universities.json'),...seed.directoryRows(),...om.directoryRows()];
-          const members=memberUniversities(await read('member-universities.json'));
-          const vocab=await read('vocab.json');
-          await writeFile('data/vocab.json',serialiseVocab(buildVocab(final,{generated:vocab.generated,directory:[...dir,...memberVocabRows(members,final,dir)]})));
-          const mirror=db.collection('jobSubmissions').doc(id); const ms=await mirror.get();
-          if(ms.exists) {
-            const mv=ms.data(); assert.equal(mv.status,'sheet');
-            const changes=Object.fromEntries(['institution','school','unit','department','type','levels','country','applyByDate','reviewDate','adUrl','postedAtUrl','furtherInfoUrl','applicationStatus'].filter(k=>k in row).map(k=>[k,row[k]]));
-            await mirror.update(changes);
-            const verified=(await mirror.get()).data();
-            for(const [k,v] of Object.entries(changes)) assert.deepEqual(verified[k],v);
-            assert.equal(verified.comments,mv.comments);
-          }
-          console.log(JSON.stringify({id,publishedCopies:final.filter(is49655).length,unrelatedPostingsUnchanged:true,mirrorVerified:true,commentsUnchanged:true}));
+          console.log(JSON.stringify({approved:snap.size,exactLive:exact,equivalentLive:equivalent,missing}));
           JS
-      - name: Verify publication data
-        run: node _scraper/selftest.mjs --publishing
-      - name: Commit UCL-only posting and its metadata
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/jobs.json data/jobmarket.json data/jobs-meta.json data/vocab.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'Publish verified UCL 49655 maternity-cover Lecturer posting'
-            git push origin HEAD:master
-          fi
