@@ -19942,7 +19942,7 @@
   "countries": [
    "United States"
   ],
-  "adUrl": "https://bsu.wd12.myworkdayjobs.com/External/job/Ball-State-University/Assistant-Professor-of-Information-Systems-and-Operations-Management_R-03186",
+  "adUrl": "https://bsu.wd12.myworkdayjobs.com/en-US/External/details/Assistant-Professor-of-Info-Systems---Operations-Management_R-03341",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
@@ -25230,6 +25230,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-29T01:59:39Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-luxembourg-20261030",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-30",
+  "institution": "University of Luxembourg",
+  "department": "Operations Management",
+  "school": "",
+  "unit": "Operations Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Luxembourg",
+  "countries": [
+   "Luxembourg"
+  ],
+  "adUrl": "https://connect.informs.org/discussion/assistant-associate-professorship-position-at-the-university-of-luxembourg#bmdcd646b7-9012-4f27-a3f5-688af1c01015",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Luxembourg",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-30T19:38:41Z",
   "owner": ""
  }
 ]
