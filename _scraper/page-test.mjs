@@ -7221,12 +7221,11 @@ for (const w of [320, 360, 390, 430]) {
       eq(await card.locator('[data-derived="deadline"]').textContent(),
         'Published as: October 5, 2026',
         'admin area: it shows the line that WILL be published, from the date beside it');
+      await card.locator('button[data-act="edit"]').click();
       await card.locator('[data-key="applyByDate"]').fill('');
-      await q.waitForFunction(() => {
-        const el = document.querySelector('[data-derived="deadline"]');
-        return el && el.textContent === 'Published as: Until filled.';
-      }, null, { timeout: 10000 });
-      ok(true, 'admin area: and clearing the date says what the page already calls a posting without one');
+      eq(await card.locator('[data-derived="deadline"]').textContent(),
+        'Published as: Until filled.',
+        'admin area: clearing the date updates this card to an open-ended posting');
       await card.locator('[data-key="applyByDate"]').fill('2026-10-05');
     }
 
