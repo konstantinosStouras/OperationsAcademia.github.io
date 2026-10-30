@@ -588,7 +588,6 @@
                 esc((doc.row || {}).institution || doc.rowId) + '</p>';
             }
             retire(db, 'crawled', doc);
-            if (act === 'approve') renderPublicationStatus(db);
           })
           .catch(function () {
             failed++;
@@ -1804,7 +1803,7 @@
       var row = judgedRow(doc);
       if (hidden.indexOf(doc.rowId || row.id) >= 0) return false;
       if (live.some(function (job) { return job.id === row.id; })) return false;
-      return !(window.OAAdvertDup && OAAdvertDup.advertRepeat(row, live));
+      return !(window.OAAdvertDup && (OAAdvertDup.publishedAdvertRepeat(row, live) || OAAdvertDup.advertRepeat(row, live))); 
     });
   }
 
