@@ -6911,6 +6911,33 @@
   "facultyDirectoryHint": "Data Science; Business Analytics; Data Science; Business Analytics. Select each of these three Department categories to see the combined department; choose 100 per page if needed."
  },
  {
+  "id": "florida-state-university____business-analytics-information-systems-and-supply-chain",
+  "institution": "Florida State University",
+  "department": "Business Analytics, Information Systems, and Supply Chain",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [
+   "florida-state-baissc-wertheim-verified"
+  ],
+  "mapLocationKind": "department",
+  "mapInstitutionNames": [
+   "Florida State University"
+  ],
+  "mapSearchTerms": [
+   "Herbert Wertheim College of Business",
+   "Department of Business Analytics, Information Systems and Supply Chain"
+  ],
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "florida-state-baissc-wertheim-verified": {
+    "facultyUrl": "https://wertheim.fsu.edu/faculty-staff/baissc"
+   }
+  },
+  "facultyUrl": "https://wertheim.fsu.edu/faculty-staff/baissc"
+ },
+ {
   "id": "florida-state-university____is-analytics",
   "institution": "Florida State University",
   "department": "IS/Analytics",
@@ -17042,6 +17069,17 @@
   "facultyUrl": "https://cba.snu.ac.kr/en/research/faculty/professor?major=4"
  },
  {
+  "id": "seton-hall-university____business-analytics-and-supply-chain-management",
+  "institution": "Seton Hall University",
+  "department": "Business Analytics and Supply Chain Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "seton-hall-university____it-management",
   "institution": "Seton Hall University",
   "department": "IT Management",
@@ -25286,6 +25324,17 @@
   ],
   "lat": 38.2131244,
   "lng": -85.760937,
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "university-of-luxembourg____operations-management",
+  "institution": "University of Luxembourg",
+  "department": "Operations Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },

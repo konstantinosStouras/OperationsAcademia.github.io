@@ -1007,6 +1007,11 @@
  {
   "institution": "Florida State University",
   "school": "",
+  "department": "Business Analytics, Information Systems, and Supply Chain"
+ },
+ {
+  "institution": "Florida State University",
+  "school": "",
   "department": "IS/Analytics"
  },
  {
@@ -2442,6 +2447,11 @@
  {
   "institution": "Seton Hall University",
   "school": "",
+  "department": "Business Analytics and Supply Chain Management"
+ },
+ {
+  "institution": "Seton Hall University",
+  "school": "",
   "department": "IT Management"
  },
  {
@@ -3488,6 +3498,11 @@
   "institution": "University of Louisville",
   "school": "College of Business",
   "department": "Information Systems, Analytics and Operations"
+ },
+ {
+  "institution": "University of Luxembourg",
+  "school": "",
+  "department": "Operations Management"
  },
  {
   "institution": "University of Macau",
