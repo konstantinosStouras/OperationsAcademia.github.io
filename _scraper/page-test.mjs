@@ -4643,17 +4643,17 @@ for (const [pageName, listSel] of [
           .map((v) => (v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
         return 0.2126 * r + 0.7152 * g + 0.0722 * b;
       };
-      // the nearest ancestor that actually paints — Leaflet's card
-      let bgEl = n, bg = '';
-      while (bgEl && !bg) {
-        const c = getComputedStyle(bgEl).backgroundColor;
-        if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) bg = c;
-        bgEl = bgEl.parentElement;
-      }
-      const L2 = lum(bg || 'rgb(255,255,255)');
       let low = { ratio: 99, text: '' };
       for (const el of n.querySelectorAll('td, th, a, h3')) {
         if (!el.textContent.trim()) continue;
+        // Buttons paint their own background; ordinary text uses the card.
+        let bgEl = el, bg = '';
+        while (bgEl && !bg) {
+          const c = getComputedStyle(bgEl).backgroundColor;
+          if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) bg = c;
+          bgEl = bgEl.parentElement;
+        }
+        const L2 = lum(bg || 'rgb(255,255,255)');
         const L1 = lum(getComputedStyle(el).color);
         const ratio = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
         if (ratio < low.ratio) low = { ratio, text: el.textContent.trim().slice(0, 24) };
