@@ -32985,6 +32985,20 @@
   "facultyUrl": "https://www.wlu.edu/the-williams-school/departments-and-programs/business-administration-department/faculty-and-staff"
  },
  {
+  "id": "washington-university-in-st-louis____supply-chain-operations-and-technology-ai-cluster-hire",
+  "institution": "Washington University in St. Louis",
+  "department": "Supply Chain, Operations, and Technology (AI Cluster hire)",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-28",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "washington-university-in-st-louis__olin-business-school",
   "institution": "Washington University in St. Louis",
   "school": "Olin Business School",

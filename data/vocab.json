@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-30T19:49:33.863Z",
+ "generated": "2026-10-30T22:56:44.045Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -343,6 +343,10 @@
   },
   {
    "v": "Villanova University",
+   "n": 3
+  },
+  {
+   "v": "Washington University in St. Louis",
    "n": 3
   },
   {
@@ -811,10 +815,6 @@
   },
   {
    "v": "Warwick Business School",
-   "n": 2
-  },
-  {
-   "v": "Washington University in St. Louis",
    "n": 2
   },
   {
@@ -5579,6 +5579,10 @@
   },
   {
    "v": "Supply Chain, Logistics, Sustainable Transport, and Economics",
+   "n": 1
+  },
+  {
+   "v": "Supply Chain, Operations, and Technology (AI Cluster hire)",
    "n": 1
   },
   {
@@ -14475,9 +14479,13 @@
     "Olin Business School"
    ],
    "units": [
-    "Supply Chain, Operations and Technology"
+    "Supply Chain, Operations and Technology",
+    "Supply Chain, Operations, and Technology (AI Cluster hire)"
    ],
    "bySchool": {
+    "": [
+     "Supply Chain, Operations, and Technology (AI Cluster hire)"
+    ],
     "Olin Business School": [
      "Supply Chain, Operations and Technology"
     ]
