@@ -3,7 +3,7 @@ const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets/oa-jobreview.js'),'utf8');
 const start=src.indexOf('  function unpublishedApprovals('),end=src.indexOf('  var publicationRead',start);
 const sandbox={window:{},judgedRow:d=>({...d.row,...d.edits})};
-sandbox.OAAdvertDup={advertRepeat:(r,live)=>live.find(j=>j.adUrl&&j.adUrl===r.adUrl)||null};sandbox.OAAdvertDup.publishedAdvertRepeat=(r,live)=>live.find(j=>[j.adUrl,j.postedAtUrl].filter(Boolean).some(u=>[r.adUrl,r.postedAtUrl].includes(u)))||null;sandbox.window.OAAdvertDup=sandbox.OAAdvertDup;
+sandbox.OAAdvertDup=require(path.join(root,'assets/oa-advert-dup.js'));sandbox.window.OAAdvertDup=sandbox.OAAdvertDup;
 vm.createContext(sandbox);vm.runInContext(src.slice(start,end),sandbox);
 const check=sandbox.unpublishedApprovals,doc={status:'approved',rowId:'a',row:{id:'a',adUrl:'official/1'}};
 assert.equal(check([doc],[],[]).length,1,'approved but not deployed stays visible');
