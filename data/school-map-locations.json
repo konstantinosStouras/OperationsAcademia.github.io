@@ -8689,7 +8689,8 @@
       "institutionKey": "University of Hong Kong",
       "rowIds": [
         "university-of-hong-kong__hku-business-school__business-analytics-statistics-operations-management-and-info",
-        "university-of-hong-kong____ba"
+        "university-of-hong-kong____ba",
+        "university-of-hong-kong__faculty-of-business-and-economics__information-and-innovation-management"
       ],
       "school": "Faculty of Business and Economics (HKU Business School)",
       "department": "Innovation and Information Management",
@@ -10708,7 +10709,8 @@
       "department": "Operations Management and Information Systems",
       "rowIds": [
         "koc-university__graduate-school-of-business__operations-management-and-information-systems",
-        "koc-university____om-is"
+        "koc-university____om-is",
+        "koc-university__college-of-administrative-sciences-and-economics-case__operations-management-and-information-systems"
       ],
       "building": "College of Administrative Sciences and Economics Building",
       "address": "Rumelifeneri Yolu, Sarıyer 34450, Istanbul, Türkiye",
@@ -16831,7 +16833,8 @@
       "id": "montclair-feliciano-building",
       "institution": "Montclair State University",
       "rowIds": [
-        "montclair-state-university__feliciano-school-of-business__information-management-and-business-analytics"
+        "montclair-state-university__feliciano-school-of-business__information-management-and-business-analytics",
+        "montclair-state-university____business-statistics"
       ],
       "school": "Feliciano School of Business",
       "department": "Information Management and Business Analytics",
@@ -18413,7 +18416,8 @@
       "id": "illinois-urbana-gies-operations-bif",
       "institution": "University of Illinois at Urbana-Champaign",
       "rowIds": [
-        "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-supply-chain-and-analytics"
+        "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-supply-chain-and-analytics",
+        "university-of-illinois-at-urbana-champaign____is-om-scm-ba"
       ],
       "school": "Gies College of Business",
       "department": "Information Systems, Operations, Supply Chain and Analytics",
@@ -18632,6 +18636,128 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official department names office 250 in Durham Hall; university building page confirms department, street address and exact building coordinates."
+    },
+    {
+      "id": "illinois-industrial-enterprise-transportation",
+      "institution": "University of Illinois at Urbana-Champaign",
+      "rowIds": [
+        "university-of-illinois-at-urbana-champaign____industrial-and-enterprise-systems-engineering"
+      ],
+      "school": "The Grainger College of Engineering",
+      "department": "Industrial and Enterprise Systems Engineering",
+      "building": "Transportation Building",
+      "address": "117 Transportation Building, 104 South Mathews Avenue, Urbana, IL 61801, United States",
+      "lat": 40.110649,
+      "lng": -88.225576,
+      "addressSource": "https://ise.illinois.edu/directory",
+      "coordinateSource": "https://icap.sustainability.illinois.edu/all-places?page=30",
+      "supportingSources": [
+        "https://icap.sustainability.illinois.edu/node/820"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department directory identifies its office in the Transportation Building; university geospatial campus inventory gives matching named-building address and coordinates."
+    },
+    {
+      "id": "minnesota-industrial-systems-lind",
+      "institution": "University of Minnesota",
+      "rowIds": [
+        "university-of-minnesota__school-of-science-and-engineering__industrial-and-systems-engineering-isye"
+      ],
+      "school": "College of Science and Engineering",
+      "department": "Industrial and Systems Engineering",
+      "building": "Lind Hall",
+      "address": "112 Lind Hall, 207 Church Street SE, Minneapolis, MN 55455, United States",
+      "lat": 44.97452,
+      "lng": -93.23338,
+      "addressSource": "https://cse.umn.edu/isye/connect-isye",
+      "coordinateSource": "https://mapcarta.com/W39187076",
+      "supportingSources": [
+        "https://campusmaps.umn.edu/lind-hall"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department contact gives Lind Hall 112 and university street address; university campus map and named building map corroborate."
+    },
+    {
+      "id": "michigan-information-north-quad",
+      "institution": "University of Michigan",
+      "rowIds": [
+        "university-of-michigan__school-of-information"
+      ],
+      "school": "School of Information",
+      "department": "",
+      "building": "North Quadrangle Residential and Academic Complex",
+      "address": "105 South State Street, Ann Arbor, MI 48109, United States",
+      "lat": 42.28055,
+      "lng": -83.74019,
+      "addressSource": "https://www.si.umich.edu/sites/default/files/Getting%20to%20the%20School%20of%20Information%2010-21.pdf",
+      "coordinateSource": "https://mguide.app/building/north-quadrangle-residential-and-academic-complex/",
+      "supportingSources": [
+        "https://www.si.umich.edu/people/cory-knobel"
+      ],
+      "checked": "2026-10-30",
+      "notes": "School map identifies the dean's office and faculty offices at North Quad; current faculty profile confirms a North Quad office. Building-level point represents the shared residential and academic complex."
+    },
+    {
+      "id": "minnesota-carlson-information-decision-nelson",
+      "institution": "University of Minnesota",
+      "rowIds": [
+        "university-of-minnesota__curtis-l-carlson-school-of-management__information-and-decision-sciences",
+        "university-of-minnesota__curtis-l-carlson-school-of-management__information-systems"
+      ],
+      "school": "Carlson School of Management",
+      "department": "Information and Decision Sciences",
+      "building": "Marilyn C. Nelson Hall",
+      "address": "321 Nineteenth Avenue South, Minneapolis, MN 55455, United States",
+      "lat": 44.97049,
+      "lng": -93.24461,
+      "addressSource": "https://carlsonschool.umn.edu/faculty/soumya-sen",
+      "coordinateSource": "https://mapcarta.com/W29124068",
+      "supportingSources": [
+        "https://carlsonschool.umn.edu/faculty/alok-gupta",
+        "https://carlsonschool.umn.edu/news/minnesota-carlson-celebrates-transformed-building-newly-named-marilyn-c-nelson-hall"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Current information and decision sciences faculty list Nelson Hall offices; exact building location uses the same verified building as supply chain."
+    },
+    {
+      "id": "berkeley-haas-public-policy-bakar",
+      "institution": "University of California, Berkeley",
+      "rowIds": [
+        "university-of-california-berkeley__haas-school-of-business__business-and-public-policy"
+      ],
+      "school": "Haas School of Business",
+      "department": "Business and Public Policy",
+      "building": "Gerson Bakar Faculty Building",
+      "address": "2220 Piedmont Avenue, Berkeley, CA 94720, United States",
+      "lat": 37.87195,
+      "lng": -122.25357,
+      "addressSource": "https://haas.berkeley.edu/wp-content/uploads/matilde-bombardini-cv.pdf",
+      "coordinateSource": "https://mapcarta.com/W32224854",
+      "supportingSources": [
+        "https://www.berkeley.edu/map/haas-school-of-business/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official group page or faculty CV identifies the faculty building; university identifies it as Gerson Bakar Faculty Building. Coordinates identify the building footprint, not a specific office."
+    },
+    {
+      "id": "berkeley-haas-operations-information-bakar",
+      "institution": "University of California, Berkeley",
+      "rowIds": [
+        "university-of-california-berkeley__haas-school-of-business__operations-and-information-technology-management"
+      ],
+      "school": "Haas School of Business",
+      "department": "Operations and Information Technology Management",
+      "building": "Gerson Bakar Faculty Building",
+      "address": "2220 Piedmont Avenue, Berkeley, CA 94720, United States",
+      "lat": 37.87195,
+      "lng": -122.25357,
+      "addressSource": "https://haas.berkeley.edu/oitm/",
+      "coordinateSource": "https://mapcarta.com/W32224854",
+      "supportingSources": [
+        "https://www.berkeley.edu/map/haas-school-of-business/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official group page or faculty CV identifies the faculty building; university identifies it as Gerson Bakar Faculty Building. Coordinates identify the building footprint, not a specific office."
     }
   ]
 }

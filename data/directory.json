@@ -11227,14 +11227,30 @@
   "country": "Turkey",
   "address": "Rumelifeneri Mahallesi, Rumelifeneri Yolu, 34450 Sarıyer/İstanbul, Turkey",
   "mapUrl": "https://goo.gl/maps/s57dm",
-  "facultyUrl": "https://case.ku.edu.tr/en/people/faculty/",
+  "facultyUrl": "https://case.ku.edu.tr/en/about/faculty/",
   "sources": [
    "directory"
   ],
   "lat": 41.1977964,
   "lng": 29.0673835,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "koc-operations-information-systems-business-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Koç University"
+  ],
+  "mapSearchTerms": [
+   "College of Administrative Sciences and Economics",
+   "Operations Management and Information Systems"
+  ],
+  "mapDepartmentLinks": {
+   "koc-operations-information-systems-business-building": {
+    "facultyUrl": "https://case.ku.edu.tr/en/about/faculty/"
+   }
+  },
+  "deptUrl": "https://gsb.ku.edu.tr/about-gsb/full-time/?dp=16",
+  "deptUrlInherited": true
  },
  {
   "id": "koc-university__college-of-engineering__industrial-engineering",
@@ -13196,8 +13212,17 @@
   ],
   "n": 1,
   "lastPosted": "2026-04-30",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "montclair-feliciano-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Montclair State University"
+  ],
+  "mapSearchTerms": [
+   "Feliciano School of Business",
+   "Information Management and Business Analytics"
+  ],
   "facultyUrl": "https://inside.montclair.edu/colleges-schools-research/business/school-business-department-directory/information-management-and-business-analytics-department",
   "facultyDirectoryHint": "The list includes the entire Information Management and Business Analytics department; identify Business Statistics in the titles."
  },
@@ -21676,7 +21701,7 @@
   "country": "Hong Kong",
   "address": "Pok Fu Lam, Hong Kong",
   "mapUrl": "https://goo.gl/maps/2rRYo",
-  "facultyUrl": "https://www.fbe.hku.hk/academic-areas/innovation-and-information-management",
+  "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate",
   "deptUrl": "https://www.hkubs.hku.hk/people/faculty?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate&region=hku",
   "characteristics": [
    "Research seminars",
@@ -21696,8 +21721,22 @@
   "lastPosted": "2025-09-10",
   "lat": 22.2679201,
   "lng": 114.1290719,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "hong-kong-business-innovation-kk-leung"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "The University of Hong Kong"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Business and Economics (HKU Business School)",
+   "Innovation and Information Management"
+  ],
+  "mapDepartmentLinks": {
+   "hong-kong-business-innovation-kk-leung": {
+    "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate"
+   }
+  }
  },
  {
   "id": "university-of-memphis____marketing-and-supply-chain-management",
@@ -24176,8 +24215,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-05",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "berkeley-haas-public-policy-bakar"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of California, Berkeley"
+  ],
+  "mapSearchTerms": [
+   "Haas School of Business",
+   "Business and Public Policy"
+  ],
+  "mapDepartmentLinks": {
+   "berkeley-haas-public-policy-bakar": {
+    "facultyUrl": "https://haas.berkeley.edu/bpp/faculty/"
+   }
+  },
   "facultyUrl": "https://haas.berkeley.edu/bpp/faculty/"
  },
  {
@@ -24210,10 +24263,16 @@
   ],
   "lat": 37.8715011,
   "lng": -122.2538019,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "berkeley-haas-operations-information-bakar"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "Haas School of Business",
    "Operations and Information Technology Management"
+  ],
+  "mapInstitutionNames": [
+   "University of California, Berkeley"
   ]
  },
  {
@@ -25437,7 +25496,9 @@
     "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate"
    }
   },
-  "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate"
+  "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate",
+  "deptUrl": "https://www.hkubs.hku.hk/people/faculty?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate&region=hku",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-hong-kong____data-and-systems-engineering",
@@ -25498,7 +25559,9 @@
     "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate"
    }
   },
-  "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate"
+  "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate",
+  "deptUrl": "https://www.hkubs.hku.hk/people/faculty?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate&region=hku",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-houston",
@@ -26151,8 +26214,17 @@
   ],
   "lat": 40.110649,
   "lng": -88.225576,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "illinois-industrial-enterprise-transportation"
+  ],
+  "mapLocationKind": "department",
+  "mapInstitutionNames": [
+   "University of Illinois at Urbana-Champaign"
+  ],
+  "mapSearchTerms": [
+   "The Grainger College of Engineering",
+   "Industrial and Enterprise Systems Engineering"
+  ]
  },
  {
   "id": "university-of-iowa__tippie-college-of-business__business-analytics",
@@ -27333,8 +27405,16 @@
   ],
   "lat": 42.2805505,
   "lng": -83.7402262,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "michigan-information-north-quad"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Michigan"
+  ],
+  "mapSearchTerms": [
+   "School of Information"
+  ]
  },
  {
   "id": "university-of-michigan__stephen-m-ross-school-of-business__technology-and-operations-management",
@@ -27529,17 +27609,18 @@
   "n": 1,
   "lastPosted": "2026-09-11",
   "mapLocationIds": [
-   "minnesota-carlson-supply-chain"
+   "minnesota-carlson-information-decision-nelson"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Minnesota"
   ],
   "mapSearchTerms": [
-   "Carlson School of Management"
+   "Carlson School of Management",
+   "Information and Decision Sciences"
   ],
   "mapDepartmentLinks": {
-   "minnesota-carlson-supply-chain": {
+   "minnesota-carlson-information-decision-nelson": {
     "facultyUrl": "https://carlsonschool.umn.edu/departments/information-decision-sciences/faculty"
    }
   },
@@ -27555,18 +27636,19 @@
    "seed"
   ],
   "mapLocationIds": [
-   "minnesota-carlson-supply-chain"
+   "minnesota-carlson-information-decision-nelson"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Minnesota"
   ],
   "mapSearchTerms": [
-   "Carlson School of Management"
+   "Carlson School of Management",
+   "Information and Decision Sciences"
   ],
   "country": "United States",
   "mapDepartmentLinks": {
-   "minnesota-carlson-supply-chain": {
+   "minnesota-carlson-information-decision-nelson": {
     "facultyUrl": "https://carlsonschool.umn.edu/departments/information-decision-sciences/faculty"
    }
   },
@@ -27625,8 +27707,17 @@
   ],
   "lat": 44.9755,
   "lng": -93.233224,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "minnesota-industrial-systems-lind"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Minnesota"
+  ],
+  "mapSearchTerms": [
+   "College of Science and Engineering",
+   "Industrial and Systems Engineering"
+  ]
  },
  {
   "id": "university-of-missouri____analytics-operations-scm",
