@@ -81,6 +81,29 @@ try {
   published=[{id:'public-job',ref:'test-ref'}];
   await own.reload(); await own.waitForSelector('.oa-my-status');
   assert.equal(await own.locator('.oa-my-status').textContent(),'Live');
+  for (const [jobs,cands] of [[0,0],[1,0],[0,1],[1,1]]) {
+    const rolePage = await browser.newPage();
+    const roleDocs = [];
+    if (jobs) roleDocs.push({path:'jobSubmissions/owned',data:{uid:'role-owner',institution:'Example University',status:'published',year}});
+    if (cands) roleDocs.push({path:'candidateSubmissions/owned',data:{uid:'role-owner',first:'Test',last:'Candidate',status:'published',year}});
+    await rolePage.addInitScript({content:'window.__FAKE_FB='+JSON.stringify({user:{uid:'role-owner',email:'role@example.edu',emailVerified:true,displayName:'Role Owner',providerData:[],metadata:{creationTime:'2026-10-30T00:00:00Z'}},docs:roleDocs})});
+    await rolePage.route('**/firebasejs/**',r=>r.fulfill({status:200,contentType:'text/javascript',body:shim}));
+    await rolePage.route('**/*',route => {
+      const u = new URL(route.request().url());
+      if (u.pathname.includes('/firebasejs/')) return route.fulfill({status:200,contentType:'text/javascript',body:shim});
+      return u.hostname === '127.0.0.1' ? route.continue() : route.abort();
+    });
+    await rolePage.goto('http://127.0.0.1:'+server.address().port+'/account.html',{waitUntil:'domcontentloaded'});
+    await rolePage.waitForFunction(()=>document.querySelector('#pa-n-jobs')?.textContent.match(/^\d+$/));
+    await rolePage.waitForFunction(()=>document.querySelector('#oa-menu'));
+    for (const [type,expected] of [['job',jobs],['candidate',cands]]) {
+      const links=rolePage.locator('a[href="profile-analytics?type='+type+'"]');
+      assert.equal(await links.count(),3,'desktop menu, mobile menu and personal-area card');
+      assert.deepEqual(await links.evaluateAll(xs=>xs.map(x=>!x.hidden)),[!!expected,!!expected,!!expected]);
+      if (expected) assert.deepEqual(await links.locator('[data-profile-analytics-new]').evaluateAll(xs=>xs.map(x=>!x.hidden)),[true,true,true]);
+    }
+    await rolePage.close();
+  }
   assert.deepEqual(errors,[]);
   console.log('Job poster seasons, combined filters, historical posters, and renamed job controls passed.');
 } finally { await browser.close(); server.close(); }

@@ -20,7 +20,7 @@ const badge = createRequire(import.meta.url)('../assets/oa-feature-badges.js');
 const user = when => ({ metadata: { creationTime: when } });
 assert.equal(badge.eligible(user('2026-10-01'), Date.parse('2026-11-15T23:59:59Z')), true);
 assert.equal(badge.eligible(user('2026-10-18T22:59:59Z'), Date.parse('2026-10-19')), true);
-assert.equal(badge.eligible(user('2026-10-18T23:00:00Z'), Date.parse('2026-10-19')), false);
+assert.equal(badge.eligible(user('2026-10-18T23:00:00Z'), Date.parse('2026-10-19')), true);
 assert.equal(badge.eligible(user('2026-10-01'), Date.parse('2026-11-16T00:00:00Z')), false);
 assert.equal(badge.eligible(null, Date.parse('2026-10-11')), false);
 const row = (url, country, date, count) => ({ dimensionValues: [url, country, date].map(value => ({ value })), metricValues: [{ value: String(count) }] });

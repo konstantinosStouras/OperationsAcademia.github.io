@@ -2,12 +2,8 @@
 (function (root) {
   'use strict';
   var expires = Date.parse('2026-11-16T00:00:00Z');
-  // Registration window ends at midnight on 19 October in London (BST).
-  var registrationCutoff = Date.parse('2026-10-18T23:00:00Z');
   function eligible(user, now) {
-    if (!user || (now == null ? Date.now() : now) >= expires) return false;
-    var created = Date.parse(user.metadata && user.metadata.creationTime || '');
-    return !Number.isFinite(created) || created < registrationCutoff;
+    return !!user && (now == null ? Date.now() : now) < expires;
   }
   function refresh() {
     if (!root.document) return;

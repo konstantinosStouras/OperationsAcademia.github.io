@@ -1,6 +1,18 @@
 (function () {
   'use strict';
   var root = document.getElementById('profile-analytics'), generation = 0, request = 0;
+  var requestedType = new URLSearchParams(location.search).get('type');
+  if (requestedType !== 'candidate' && requestedType !== 'job') requestedType = null;
+  function labelPage(type) {
+    var label = type === 'job' ? 'Job Posting Analytics' : type === 'candidate' ? 'Profile Analytics' : 'Your analytics';
+    document.querySelector('h1').firstChild.nodeValue = label + ' ';
+    document.title = label + ' — Operations Academia';
+    document.querySelector('.v3-lede').textContent = type === 'job'
+      ? 'See views, clicks, reading time and audience countries for your job postings.'
+      : type === 'candidate' ? 'See views, clicks, reading time and audience countries for your candidate profiles.'
+      : 'Choose one of your candidate profiles or job postings to see its private report.';
+  }
+  labelPage(requestedType);
   function el(tag, text, cls) {
     var n = document.createElement(tag); n.textContent = text == null ? '' : text;
     if (cls) n.className = cls; return n;
@@ -104,19 +116,22 @@
     if (window.OAFeatureBadges) OAFeatureBadges.refresh();
     var turn = ++generation; request++; root.replaceChildren();
     if (!user) {
-      root.appendChild(el('p', 'Sign in to see your private Job & Profile Analytics.'));
+      root.appendChild(el('p', 'Sign in to see your private analytics.'));
       var signIn = el('a', 'Sign in', 'v3-btn primary'); signIn.href = 'account'; root.appendChild(signIn); return;
     }
     root.appendChild(el('p', 'Loading your listings…'));
     try {
       var fb = await OAFB.ready(), db = fb.firestore(), admin = OAAccounts.isAdmin();
-      var groups = await Promise.all(['candidateSubmissions', 'jobSubmissions'].map(async function (col) {
+      var collections = requestedType === 'job' ? ['jobSubmissions'] : requestedType === 'candidate' ? ['candidateSubmissions'] : ['candidateSubmissions', 'jobSubmissions'];
+      var groups = await Promise.all(collections.map(async function (col) {
         var query = db.collection(col); if (!admin) query = query.where('uid', '==', user.uid);
         var snap = await query.get();
         return snap.docs.map(function (doc) { return { type: col === 'candidateSubmissions' ? 'candidate' : 'job', data: doc.data(), ref: doc.ref }; });
       }));
       if (turn !== generation) return;
       root.replaceChildren(); var listings = groups.flat();
+      var types = Array.from(new Set(listings.map(function (item) { return item.type; })));
+      labelPage(requestedType || (types.length === 1 ? types[0] : null));
       if (!listings.length) {
         root.appendChild(el('h2', 'Your reach starts here'));
         root.appendChild(el('p', 'Once you post a candidate profile or job, its private report will appear here.'));

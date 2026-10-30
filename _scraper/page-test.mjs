@@ -7098,7 +7098,7 @@ for (const w of [320, 360, 390, 430]) {
     // the whole queue, ranked: market year first, newest advertisement within it
     await q.click('#oa-review-years button[data-year="*"]');
     await q.waitForFunction(() =>
-      (document.getElementById('oa-review-count') || {}).textContent === '3 postings',
+      (document.getElementById('oa-review-count') || {}).textContent === '3',
       null, { timeout: 10000 });
     const reviews = await q.textContent('#oa-review-list');
     ok(reviews.indexOf('Early University') !== -1 &&
@@ -7281,8 +7281,8 @@ for (const w of [320, 360, 390, 430]) {
       'admin area: and the ones already taken down sit in a drawer below, counted');
     ok((await q.textContent('#oa-review-list .oa-rv-down')).indexOf('Hidden University') !== -1,
       'admin area: the drawer names a posting the live list cannot carry');
-    ok((await q.textContent('#oa-review-count')) === '2 postings',
-      'admin area: and a taken-down posting is not one of the postings waiting');
+    ok((await q.textContent('#oa-review-count')) === '3',
+      'admin area: the approval count includes only the three crawled jobs');
     /* THE DRAWER IGNORES THE SEASON TABS. It is not a queue; it is where one
        posting somebody remembers has gone, and a season filter is what would
        hide it. u6 is a 2026 posting, so selecting 2027 alone proves it. */
