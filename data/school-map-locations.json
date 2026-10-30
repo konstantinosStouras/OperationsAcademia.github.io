@@ -15639,6 +15639,496 @@
       "locationGroup": "insead-global-campuses",
       "locationGroupSource": "https://www.insead.edu/about-insead/campuses",
       "locationContext": "One school across four locations. Academic-area links are school-wide; this pin identifies the campus or hub, not a separate department office."
+    },
+    {
+      "id": "luxembourg-dem-kirchberg",
+      "institution": "University of Luxembourg",
+      "rowIds": [
+        "university-of-luxembourg____operations-management"
+      ],
+      "school": "Faculty of Law, Economics and Finance",
+      "department": "Operations Management",
+      "building": "Central Building, Kirchberg Campus",
+      "address": "6 rue Richard Coudenhove-Kalergi, L-1359 Luxembourg, Luxembourg",
+      "lat": 49.626478,
+      "lng": 6.1587877,
+      "addressSource": "https://www.uni.lu/en/about/campuses/kirchberg-campus/",
+      "coordinateSource": "https://www.hotelinmap.com/country/lu/university/",
+      "supportingSources": [
+        "https://www.uni.lu/fdef-en/research-departments/department-of-economics-and-management/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The university lists operations management within the Department of Economics and Management and locates that department in the central building. Coordinates are for Kirchberg Campus and are approximate, not a verified office pin."
+    },
+    {
+      "id": "aalto-information-service-economy-business",
+      "institution": "Aalto University",
+      "rowIds": [
+        "aalto-university__school-of-business__information-and-service-economy"
+      ],
+      "school": "School of Business",
+      "department": "Information and Service Economy",
+      "building": "School of Business",
+      "address": "Ekonominaukio 1, 02150 Espoo, Finland",
+      "lat": 60.185937,
+      "lng": 24.8233938,
+      "addressSource": "https://www.aalto.fi/en/department-of-information-and-service-management",
+      "coordinateSource": "https://www.aalto.fi/en/locations/school-of-business",
+      "supportingSources": [
+        "https://www.aalto.fi/en/department-of-information-and-service-management/logistics"
+      ],
+      "checked": "2026-10-30",
+      "notes": "School of Business location verified by official school and building sources. The posting uses a legacy department name; this is the school location rather than a separately verified department office."
+    },
+    {
+      "id": "boston-information-systems-hariri",
+      "institution": "Boston University",
+      "rowIds": [
+        "boston-university__questrom-school-of-business__information-systems"
+      ],
+      "school": "Questrom School of Business",
+      "department": "Information Systems",
+      "building": "Rafik B. Hariri Building",
+      "address": "595 Commonwealth Avenue, Boston, MA 02215, United States",
+      "lat": 42.349651,
+      "lng": -71.099571,
+      "addressSource": "https://www.bu.edu/questrom/about/contact-us/",
+      "coordinateSource": "https://maps.bu.edu/?id=647#!m/208227",
+      "notes": "Questrom identifies its school building at this address. The location is the school building, not a separately verified department office.",
+      "checked": "2026-10-30"
+    },
+    {
+      "id": "city-hong-kong-management-science",
+      "institution": "City University of Hong Kong",
+      "rowIds": [
+        "city-university-of-hong-kong__college-of-business__management-science"
+      ],
+      "school": "College of Business",
+      "department": "Management Science",
+      "building": "Lau Ming Wai Academic Building",
+      "address": "Seventh floor, Tat Chee Avenue, Kowloon Tong, Hong Kong",
+      "lat": 22.3381362,
+      "lng": 114.1722708,
+      "addressSource": "https://www.cb.cityu.edu.hk/en/dao/about-us/contact-us",
+      "coordinateSource": "https://www.openstreetmap.org/way/187134525",
+      "supportingSources": [
+        "https://www.cb.cityu.edu.hk/en/cb2025/people-and-research/people/people-details?eid=wenbjing",
+        "https://jobs1.cityu.edu.hk/apply/Default.aspx?jobtype=ACAD",
+        "https://www.cb.cityu.edu.hk/zh-hk/cb2025/people-and-research/people/people-details?eid=youhchen"
+      ],
+      "notes": "The management science chair professor is in the Department of Decision Analytics and Operations and lists the Lau Ming Wai Academic Building.",
+      "checked": "2026-10-30"
+    },
+    {
+      "id": "georgetown-operations-hariri",
+      "institution": "Georgetown University",
+      "institutionKey": "georgetown-university",
+      "rowIds": [
+        "georgetown-university__mcdonough-school-of-business__mcdonough-school-of-business-operations-and-information-mana"
+      ],
+      "school": "McDonough School of Business",
+      "department": "Operations and Information Management",
+      "building": "Rafik B. Hariri Building",
+      "address": "3851 Regents Walk, Washington, DC 20057, United States",
+      "lat": 38.9091083,
+      "lng": -77.0755211,
+      "addressSource": "https://sites.google.com/georgetown.edu/msb-home/building-operations/resources",
+      "coordinateSource": "https://www.openstreetmap.org/way/67521359",
+      "supportingSources": [
+        "https://logic.interfolio.com/dossier-api/positions/173916",
+        "https://msb.georgetown.edu/mba/faq/",
+        "https://www.poms.org/sites/default/files/2025-09/Sustainability%20TL%20faculty%20search_ad.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school building information says business faculty offices occupy Hariri; this is a school location rather than a separately verified department office."
+    },
+    {
+      "id": "georgia-state-managerial-sciences-broad",
+      "institutionKey": "Georgia State University",
+      "institution": "Georgia State University",
+      "rowIds": [
+        "georgia-state-university__j-mack-robinson-college-of-business__managerial-sciences"
+      ],
+      "school": "J. Mack Robinson College of Business",
+      "department": "Managerial Sciences",
+      "building": "J. Mack Robinson College of Business Building",
+      "address": "35 Broad Street Northwest, tenth floor, Atlanta, Georgia 30303, United States",
+      "lat": 33.755329,
+      "lng": -84.390244,
+      "addressSource": "https://robinson.gsu.edu/academic-departments/management",
+      "coordinateSource": "https://map.concept3d.com/?id=1108#!m/187354",
+      "supportingSources": [
+        "https://robinson.gsu.edu/academic-departments/",
+        "https://facilities.gsu.edu/files/2026/03/Building_List_03312026.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "School Department of Management office is at this address; this is a school location rather than a separately verified office for the legacy posting label."
+    },
+    {
+      "id": "binghamton-business-analytics-academic-a",
+      "institution": "Binghamton University",
+      "rowIds": [
+        "binghamton-university__school-of-management__business-analytics-and-operations"
+      ],
+      "school": "School of Management",
+      "department": "Business Analytics and Operations",
+      "building": "Academic Building A",
+      "address": "Binghamton University, Vestal, NY, United States",
+      "lat": 42.0886693,
+      "lng": -75.9723853,
+      "addressSource": "https://www.binghamton.edu/som/docs/cv/ssadeghz.cv.pdf",
+      "coordinateSource": "https://www.binghamton.edu/apps/data/maps/buildings.json",
+      "supportingSources": [
+        "https://www.binghamton.edu/som/about/contact/",
+        "https://www.binghamton.edu/som/about/contact/faculty.html"
+      ],
+      "notes": "Official faculty CV lists a Business Analytics and Operations professor in Academic Building A. Coordinates are from the university-published building polygon. This is building-level location, not a current office claim.",
+      "checked": "2026-10-30"
+    },
+    {
+      "id": "boston-college-carroll-business-analytics",
+      "institution": "Boston College",
+      "rowIds": [
+        "boston-college__carroll-school-of-management__business-analytics"
+      ],
+      "school": "Carroll School of Management",
+      "department": "Business Analytics",
+      "building": "Fulton Hall",
+      "address": "257 Beacon Street, Chestnut Hill, MA 02467, United States",
+      "lat": 42.334528,
+      "lng": -71.169972,
+      "addressSource": "https://events.bc.edu/event/carroll-school-graduate-programs-info-session-7068",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Boston_College_Carroll_School_of_Management",
+      "supportingSources": [
+        "https://www.bc.edu/bc-web/schools/carroll-school/about/contact.html",
+        "https://www.bc.edu/bc-web/schools/carroll-school/about/visit.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school contact identifies Fulton Hall as its home and the university event listing supplies the street address. This is a school building location, not a verified specific faculty office."
+    },
+    {
+      "id": "boston-college-carroll-operations-management",
+      "institution": "Boston College",
+      "rowIds": [
+        "boston-college__carroll-school-of-management__operations-management"
+      ],
+      "school": "Carroll School of Management",
+      "department": "Operations Management",
+      "building": "Fulton Hall",
+      "address": "257 Beacon Street, Chestnut Hill, MA 02467, United States",
+      "lat": 42.334528,
+      "lng": -71.169972,
+      "addressSource": "https://events.bc.edu/event/carroll-school-graduate-programs-info-session-7068",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Boston_College_Carroll_School_of_Management",
+      "supportingSources": [
+        "https://www.bc.edu/bc-web/schools/carroll-school/about/contact.html",
+        "https://www.bc.edu/bc-web/schools/carroll-school/about/visit.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school contact identifies Fulton Hall as its home and the university event listing supplies the street address. This is a school building location, not a verified specific faculty office."
+    },
+    {
+      "id": "lehigh-management-rauch",
+      "institution": "Lehigh University",
+      "rowIds": [
+        "lehigh-university__college-of-business__management"
+      ],
+      "school": "College of Business",
+      "department": "Management",
+      "building": "Rauch Business Center",
+      "address": "621 Taylor Street, Bethlehem, PA 18015, United States",
+      "lat": 40.6081918,
+      "lng": -75.3738608,
+      "addressSource": "https://business.lehigh.edu/sites/default/files/cv/2025-05/Subramani_CV.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/26459204",
+      "supportingSources": [
+        "https://www2.lehigh.edu/about/maps-directions/rauch-business-center",
+        "https://apply.interfolio.com/173556",
+        "https://business.lehigh.edu/departments/decision-and-technology-analytics"
+      ],
+      "notes": "Official Management professor CV identifies Rauch Business Center. This is a school building location, not a claim about every department office.",
+      "checked": "2026-10-30"
+    },
+    {
+      "id": "bucknell-holmes-general",
+      "institution": "Bucknell University",
+      "rowIds": [
+        "bucknell-university__freeman-college-of-management"
+      ],
+      "school": "Freeman College of Management",
+      "building": "Holmes Hall",
+      "address": "Corner of Coleman Hall Drive and South Campus Drive, Lewisburg, PA 17837, United States",
+      "lat": 40.95271,
+      "lng": -76.88148,
+      "addressSource": "https://www.bucknell.edu/news/organization-and-creativity-bucknell-opens-holmes-hall",
+      "coordinateSource": "https://mapcarta.com/W1396053194",
+      "supportingSources": [
+        "https://coursecatalog.bucknell.edu/archive/2022-2023/academicsupportcampuslife/campusfacilities/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University identifies Holmes Hall as home to Freeman College. The location is the school building and does not independently verify a particular department office."
+    },
+    {
+      "id": "bucknell-holmes-school__accounting-and-financial-management-area-business-analytics",
+      "institution": "Bucknell University",
+      "rowIds": [
+        "bucknell-university__freeman-college-of-management__accounting-and-financial-management-area-business-analytics"
+      ],
+      "school": "Freeman College of Management",
+      "department": "Accounting and Financial Management Area, Business Analytics",
+      "building": "Holmes Hall",
+      "address": "Corner of Coleman Hall Drive and South Campus Drive, Lewisburg, PA 17837, United States",
+      "lat": 40.95271,
+      "lng": -76.88148,
+      "addressSource": "https://www.bucknell.edu/news/organization-and-creativity-bucknell-opens-holmes-hall",
+      "coordinateSource": "https://mapcarta.com/W1396053194",
+      "supportingSources": [
+        "https://coursecatalog.bucknell.edu/archive/2022-2023/academicsupportcampuslife/campusfacilities/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University identifies Holmes Hall as home to Freeman College. The location is the school building and does not independently verify a particular department office."
+    },
+    {
+      "id": "bucknell-holmes-school__analytics-and-operations-management",
+      "institution": "Bucknell University",
+      "rowIds": [
+        "bucknell-university__freeman-college-of-management__analytics-and-operations-management"
+      ],
+      "school": "Freeman College of Management",
+      "department": "Analytics and Operations Management",
+      "building": "Holmes Hall",
+      "address": "Corner of Coleman Hall Drive and South Campus Drive, Lewisburg, PA 17837, United States",
+      "lat": 40.95271,
+      "lng": -76.88148,
+      "addressSource": "https://www.bucknell.edu/news/organization-and-creativity-bucknell-opens-holmes-hall",
+      "coordinateSource": "https://mapcarta.com/W1396053194",
+      "supportingSources": [
+        "https://coursecatalog.bucknell.edu/archive/2022-2023/academicsupportcampuslife/campusfacilities/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University identifies Holmes Hall as home to Freeman College. The location is the school building and does not independently verify a particular department office."
+    },
+    {
+      "id": "bucknell-holmes-school__business-analytics",
+      "institution": "Bucknell University",
+      "rowIds": [
+        "bucknell-university__freeman-college-of-management__business-analytics"
+      ],
+      "school": "Freeman College of Management",
+      "department": "Business Analytics",
+      "building": "Holmes Hall",
+      "address": "Corner of Coleman Hall Drive and South Campus Drive, Lewisburg, PA 17837, United States",
+      "lat": 40.95271,
+      "lng": -76.88148,
+      "addressSource": "https://www.bucknell.edu/news/organization-and-creativity-bucknell-opens-holmes-hall",
+      "coordinateSource": "https://mapcarta.com/W1396053194",
+      "supportingSources": [
+        "https://coursecatalog.bucknell.edu/archive/2022-2023/academicsupportcampuslife/campusfacilities/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University identifies Holmes Hall as home to Freeman College. The location is the school building and does not independently verify a particular department office."
+    },
+    {
+      "id": "bucknell-holmes-school__markets-innovation-and-design-mide",
+      "institution": "Bucknell University",
+      "rowIds": [
+        "bucknell-university__freeman-college-of-management__markets-innovation-and-design-mide"
+      ],
+      "school": "Freeman College of Management",
+      "department": "Markets, Innovation, and Design (MiDE)",
+      "building": "Holmes Hall",
+      "address": "Corner of Coleman Hall Drive and South Campus Drive, Lewisburg, PA 17837, United States",
+      "lat": 40.95271,
+      "lng": -76.88148,
+      "addressSource": "https://www.bucknell.edu/news/organization-and-creativity-bucknell-opens-holmes-hall",
+      "coordinateSource": "https://mapcarta.com/W1396053194",
+      "supportingSources": [
+        "https://coursecatalog.bucknell.edu/archive/2022-2023/academicsupportcampuslife/campusfacilities/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University identifies Holmes Hall as home to Freeman College. The location is the school building and does not independently verify a particular department office."
+    },
+    {
+      "id": "duke-fuqua-school",
+      "institution": "Duke University",
+      "rowIds": [
+        "duke-university__fuqua-school-of-business"
+      ],
+      "school": "Fuqua School of Business",
+      "building": "Fuqua School of Business",
+      "address": "100 Fuqua Drive, Durham, NC 27708, United States",
+      "lat": 35.99878,
+      "lng": -78.94721,
+      "addressSource": "https://fuqua.duke.edu/contact",
+      "coordinateSource": "https://mapcarta.com/W32685403",
+      "supportingSources": [
+        "https://www.fuqua.duke.edu/about/plan-your-visit"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school contact identifies the physical address; coordinates identify the named Fuqua building. This is a school building location and does not separately verify a department office."
+    },
+    {
+      "id": "duke-fuqua-decision-sciences",
+      "institution": "Duke University",
+      "rowIds": [
+        "duke-university__fuqua-school-of-business__decision-sciences"
+      ],
+      "school": "Fuqua School of Business",
+      "department": "Decision Sciences",
+      "building": "Fuqua School of Business",
+      "address": "100 Fuqua Drive, Durham, NC 27708, United States",
+      "lat": 35.99878,
+      "lng": -78.94721,
+      "addressSource": "https://fuqua.duke.edu/contact",
+      "coordinateSource": "https://mapcarta.com/W32685403",
+      "supportingSources": [
+        "https://www.fuqua.duke.edu/about/plan-your-visit"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school contact identifies the physical address; coordinates identify the named Fuqua building. This is a school building location and does not separately verify a department office."
+    },
+    {
+      "id": "duke-fuqua-operations-management",
+      "institution": "Duke University",
+      "rowIds": [
+        "duke-university__fuqua-school-of-business__operations-management"
+      ],
+      "school": "Fuqua School of Business",
+      "department": "Operations Management",
+      "building": "Fuqua School of Business",
+      "address": "100 Fuqua Drive, Durham, NC 27708, United States",
+      "lat": 35.99878,
+      "lng": -78.94721,
+      "addressSource": "https://fuqua.duke.edu/contact",
+      "coordinateSource": "https://mapcarta.com/W32685403",
+      "supportingSources": [
+        "https://www.fuqua.duke.edu/about/plan-your-visit"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school contact identifies the physical address; coordinates identify the named Fuqua building. This is a school building location and does not separately verify a department office."
+    },
+    {
+      "id": "mcgill-desautels-bronfman",
+      "institution": "McGill University",
+      "rowIds": [
+        "mcgill-university__desautels-faculty-of-management",
+        "mcgill-university__desautels-faculty-of-management__operations-management"
+      ],
+      "school": "Desautels Faculty of Management",
+      "building": "Samuel Bronfman Building",
+      "address": "1001 Sherbrooke Street West, Montreal, Quebec H3A 1G5, Canada",
+      "lat": 45.50257,
+      "lng": -73.57643,
+      "addressSource": "https://www.mcgill.ca/desautels/about/contact",
+      "coordinateSource": "https://mapcarta.com/W20169169",
+      "supportingSources": [
+        "https://www.mcgill.ca/research/bronfman-building"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The faculty identifies Bronfman as its main address; this is a school reference and does not assert a separately verified operations office."
+    },
+    {
+      "id": "rice-jones-mcnair-hall",
+      "institution": "Rice University",
+      "rowIds": [
+        "rice-university__jesse-h-jones-graduate-school-of-business__operations-management"
+      ],
+      "school": "Jesse H. Jones Graduate School of Business",
+      "department": "Operations Management",
+      "building": "Janice and Robert McNair Hall",
+      "address": "6100 Main Street, Houston, TX 77005, United States",
+      "lat": 29.7175384,
+      "lng": -95.4034911,
+      "addressSource": "https://business.rice.edu/mcnair-hall",
+      "coordinateSource": "https://elevation.maplogs.com/poi/janice_and_robert_mcnair_hall_rice_boulevard_houston_tx_usa.519067.html",
+      "supportingSources": [
+        "https://doerr.rice.edu/contact-us",
+        "https://chaocenter.rice.edu/about/location-and-contact"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official university pages identify McNair Hall as the business school building. Street address is university mailing address; the building is on campus at Alumni Drive and Laboratory Road."
+    },
+    {
+      "id": "wisconsin-madison-business-grainger",
+      "institution": "University of Wisconsin-Madison",
+      "rowIds": [
+        "university-of-wisconsin-madison__wisconsin-school-of-business__operations-and-information-management"
+      ],
+      "school": "Wisconsin School of Business",
+      "department": "Operations and Information Management",
+      "building": "Grainger Hall",
+      "address": "975 University Avenue, Madison, WI 53706, United States",
+      "lat": 43.07268,
+      "lng": -89.40156,
+      "addressSource": "https://business.wisc.edu/contact/",
+      "coordinateSource": "https://mapcarta.com/22855180",
+      "supportingSources": [
+        "https://business.wisc.edu/visit/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school contact identifies Grainger Hall as its home and says it contains faculty offices; pin is a school reference."
+    },
+    {
+      "id": "western-ivey-richard-ivey",
+      "institution": "Western University",
+      "rowIds": [
+        "western-university__ivey-business-school",
+        "western-university__ivey-business-school__management-science",
+        "western-university__ivey-business-school__operations-management"
+      ],
+      "school": "Ivey Business School",
+      "building": "Richard Ivey Building",
+      "address": "1255 Western Road, London, Ontario N6G 0N1, Canada",
+      "lat": 43.00442456664341,
+      "lng": -81.2772524774118,
+      "addressSource": "https://www.ivey.uwo.ca/about/campuses/richard-ivey-building/",
+      "coordinateSource": "https://www.uwo.ca/fm/client_services/building_info.html",
+      "supportingSources": [
+        "https://www.ivey.uwo.ca/contact/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "School address and building coordinates provided by the university; school reference for the listed areas."
+    },
+    {
+      "id": "vanderbilt-owen-management-hall",
+      "institution": "Vanderbilt University",
+      "rowIds": [
+        "vanderbilt-university__owen-graduate-school-of-management__operations-management-and-quantitative-methods"
+      ],
+      "school": "Owen Graduate School of Management",
+      "department": "Operations Management and Quantitative Methods",
+      "building": "Management Hall",
+      "address": "401 21st Avenue South, Nashville, TN 37203, United States",
+      "lat": 36.14718,
+      "lng": -86.80011,
+      "addressSource": "https://business.vanderbilt.edu/about/contact/",
+      "coordinateSource": "https://mapcarta.com/21640838",
+      "supportingSources": [
+        "https://registrar.vanderbilt.edu/registration/school-contacts.php"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University identifies school address and management hall. Pin is a school reference."
+    },
+    {
+      "id": "notre-dame-mendoza-building",
+      "institution": "University of Notre Dame",
+      "rowIds": [
+        "university-of-notre-dame__mendoza-college-of-business__information-technology-analytics-and-operations",
+        "university-of-notre-dame__mendoza-college-of-business__it-analytics-and-operations",
+        "university-of-notre-dame__mendoza-college-of-business__management"
+      ],
+      "school": "Mendoza College of Business",
+      "building": "Mendoza College of Business",
+      "address": "University of Notre Dame, Notre Dame, IN 46556, United States",
+      "lat": 41.69692,
+      "lng": -86.23615,
+      "addressSource": "https://mendoza.nd.edu/contact-us/",
+      "coordinateSource": "https://mapcarta.com/W43666502",
+      "supportingSources": [
+        "https://tour.nd.edu/locations/mendoza-college-of-business/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official university identifies Mendoza building as a business-school location; pin is a school reference."
     }
   ]
 }

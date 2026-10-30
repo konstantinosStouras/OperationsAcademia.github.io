@@ -165,8 +165,17 @@
   ],
   "lat": 60.1717819,
   "lng": 24.9231408,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "aalto-information-service-economy-business"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Aalto University"
+  ],
+  "mapSearchTerms": [
+   "School of Business",
+   "Information and Service Economy"
+  ]
  },
  {
   "id": "abdullah-al-salem-university____scm-logistics",
@@ -1969,8 +1978,17 @@
   "lastPosted": "2026-10-06",
   "lat": 42.0934421,
   "lng": -75.9719572,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "binghamton-business-analytics-academic-a"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Binghamton University"
+  ],
+  "mapSearchTerms": [
+   "School of Management",
+   "Business Analytics and Operations"
+  ]
  },
  {
   "id": "bits-school-of-management____om",
@@ -2155,10 +2173,17 @@
   ],
   "lat": 42.3303798,
   "lng": -71.166187,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "boston-college-carroll-business-analytics"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "Carroll School of Management",
+   "Business Analytics",
    "BA"
+  ],
+  "mapInstitutionNames": [
+   "Boston College"
   ]
  },
  {
@@ -2173,8 +2198,22 @@
   ],
   "n": 1,
   "lastPosted": "2014-10-21",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "boston-college-carroll-operations-management"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Boston College"
+  ],
+  "mapSearchTerms": [
+   "Carroll School of Management",
+   "Operations Management"
+  ],
+  "mapDepartmentLinks": {
+   "boston-college-carroll-operations-management": {
+    "facultyUrl": "https://www.bc.edu/bc-web/schools/carroll-school/academic-departments/business-analytics.html"
+   }
+  },
   "facultyUrl": "https://www.bc.edu/bc-web/schools/carroll-school/academic-departments/business-analytics.html"
  },
  {
@@ -2222,7 +2261,7 @@
   "n": 1,
   "lastPosted": "2026-10-17",
   "mapLocationIds": [
-   "boston-operations-technology-hariri"
+   "boston-information-systems-hariri"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -2232,7 +2271,7 @@
    "Questrom School of Business"
   ],
   "mapDepartmentLinks": {
-   "boston-operations-technology-hariri": {
+   "boston-information-systems-hariri": {
     "facultyUrl": "https://www.bu.edu/questrom/faculty/faculty-directory/"
    }
   },
@@ -2256,8 +2295,17 @@
   ],
   "lat": 42.3496315,
   "lng": -71.0996846,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "boston-information-systems-hariri"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Boston University"
+  ],
+  "mapSearchTerms": [
+   "Questrom School of Business",
+   "Information Systems"
+  ]
  },
  {
   "id": "boston-university__questrom-school-of-business__operations-and-technology-management",
@@ -2559,8 +2607,16 @@
   ],
   "n": 1,
   "lastPosted": "2025-02-05",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "bucknell-holmes-general"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Bucknell University"
+  ],
+  "mapSearchTerms": [
+   "Freeman College of Management"
+  ]
  },
  {
   "id": "bucknell-university__freeman-college-of-management__accounting-and-financial-management-area-business-analytics",
@@ -2576,8 +2632,17 @@
   ],
   "lat": 40.9569778,
   "lng": -76.892199,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "bucknell-holmes-school__accounting-and-financial-management-area-business-analytics"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Bucknell University"
+  ],
+  "mapSearchTerms": [
+   "Freeman College of Management",
+   "Accounting and Financial Management Area, Business Analytics"
+  ]
  },
  {
   "id": "bucknell-university__freeman-college-of-management__analytics-and-operations-management",
@@ -2596,8 +2661,22 @@
   ],
   "n": 2,
   "lastPosted": "2026-09-23",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "bucknell-holmes-school__analytics-and-operations-management"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Bucknell University"
+  ],
+  "mapSearchTerms": [
+   "Freeman College of Management",
+   "Analytics and Operations Management"
+  ],
+  "mapDepartmentLinks": {
+   "bucknell-holmes-school__analytics-and-operations-management": {
+    "facultyUrl": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/analytics-operations-management/faculty-staff"
+   }
+  },
   "facultyUrl": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/analytics-operations-management/faculty-staff"
  },
  {
@@ -2609,8 +2688,23 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "bucknell-holmes-school__business-analytics"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Bucknell University"
+  ],
+  "mapSearchTerms": [
+   "Freeman College of Management",
+   "Business Analytics"
+  ],
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "bucknell-holmes-school__business-analytics": {
+    "facultyUrl": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/analytics-operations-management/faculty-staff"
+   }
+  },
   "facultyUrl": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/analytics-operations-management/faculty-staff"
  },
  {
@@ -2626,8 +2720,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-04",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "bucknell-holmes-school__markets-innovation-and-design-mide"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Bucknell University"
+  ],
+  "mapSearchTerms": [
+   "Freeman College of Management",
+   "Markets, Innovation, and Design (MiDE)"
+  ],
+  "mapDepartmentLinks": {
+   "bucknell-holmes-school__markets-innovation-and-design-mide": {
+    "facultyUrl": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/markets-innovation-design/faculty-staff"
+   }
+  },
   "facultyUrl": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/markets-innovation-design/faculty-staff"
  },
  {
@@ -2752,7 +2860,8 @@
   "n": 1,
   "lastPosted": "2026-08-11",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.cpp.edu/cba/computer-information-systems/faculty/faculty-staff-directory.shtml"
  },
  {
   "id": "california-state-university-bakersfield____mis-ba-ai",
@@ -4015,8 +4124,17 @@
   "lastPosted": "2024-10-10",
   "lat": 22.337697,
   "lng": 114.172746,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "city-hong-kong-management-science"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "City University of Hong Kong"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Management Science"
+  ]
  },
  {
   "id": "city-university-of-hong-kong__college-of-business__operations-research-and-operations-management",
@@ -5768,8 +5886,16 @@
   ],
   "n": 1,
   "lastPosted": "2014-08-19",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "duke-fuqua-school"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Duke University"
+  ],
+  "mapSearchTerms": [
+   "Fuqua School of Business"
+  ]
  },
  {
   "id": "duke-university__fuqua-school-of-business__decision-sciences",
@@ -5786,8 +5912,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-04",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "duke-fuqua-decision-sciences"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Duke University"
+  ],
+  "mapSearchTerms": [
+   "Fuqua School of Business",
+   "Decision Sciences"
+  ],
+  "mapDepartmentLinks": {
+   "duke-fuqua-decision-sciences": {
+    "facultyUrl": "https://www.fuqua.duke.edu/faculty-research/directory/all?field_academic_area_target_id=105"
+   }
+  },
   "facultyUrl": "https://www.fuqua.duke.edu/faculty-research/directory/all?field_academic_area_target_id=105"
  },
  {
@@ -5818,8 +5958,17 @@
   "lastPosted": "2026-10-05",
   "lat": 35.9990792,
   "lng": -78.9473769,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "duke-fuqua-operations-management"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Duke University"
+  ],
+  "mapSearchTerms": [
+   "Fuqua School of Business",
+   "Operations Management"
+  ]
  },
  {
   "id": "durham-university__business-school__management-and-marketing",
@@ -6825,7 +6974,8 @@
   "n": 1,
   "lastPosted": "2026-10-26",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://business.fau.edu/departments/information-technology-operations-management/faculty/index.php"
  },
  {
   "id": "florida-gulf-coast-university__lutgert-college-of-business__information-systems-analytics-and-supply-chain",
@@ -6871,7 +7021,8 @@
   "n": 1,
   "lastPosted": "2026-01-18",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "deptUrl": "https://business.fiu.edu/academics/departments/isba/"
  },
  {
   "id": "florida-international-university__college-of-business-administration__decision-sciences-and-information-systems",
@@ -6969,7 +7120,8 @@
   "n": 1,
   "lastPosted": "2026-10-30",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://wertheim.fsu.edu/departments/baissc/directory"
  },
  {
   "id": "florida-state-university__college-of-business__marketing",
@@ -7311,7 +7463,7 @@
    "seed"
   ],
   "mapLocationIds": [
-   "georgetown-sustainable-business-hariri"
+   "georgetown-operations-hariri"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -7322,7 +7474,7 @@
   ],
   "country": "United States",
   "mapDepartmentLinks": {
-   "georgetown-sustainable-business-hariri": {
+   "georgetown-operations-hariri": {
     "facultyUrl": "https://businessofsustainability.georgetown.edu/faculty/"
    }
   },
@@ -7343,8 +7495,17 @@
   ],
   "lat": 38.9076848,
   "lng": -77.0716037,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "georgetown-operations-hariri"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Georgetown University"
+  ],
+  "mapSearchTerms": [
+   "McDonough School of Business",
+   "Operations and Information Management"
+  ]
  },
  {
   "id": "georgetown-university__mcdonough-school-of-business__nrf-business-of-retail-initiative",
@@ -7366,7 +7527,7 @@
   "n": 1,
   "lastPosted": "2026-02-23",
   "mapLocationIds": [
-   "georgetown-sustainable-business-hariri"
+   "georgetown-operations-hariri"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -7376,7 +7537,7 @@
    "McDonough School of Business"
   ],
   "mapDepartmentLinks": {
-   "georgetown-sustainable-business-hariri": {
+   "georgetown-operations-hariri": {
     "facultyUrl": "https://businessofretail.georgetown.edu/home-page/who-we-are/"
    }
   },
@@ -7405,7 +7566,7 @@
   "n": 2,
   "lastPosted": "2026-09-14",
   "mapLocationIds": [
-   "georgetown-sustainable-business-hariri"
+   "georgetown-operations-hariri"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -7415,7 +7576,7 @@
    "McDonough School of Business"
   ],
   "mapDepartmentLinks": {
-   "georgetown-sustainable-business-hariri": {
+   "georgetown-operations-hariri": {
     "facultyUrl": "https://msb.georgetown.edu/faculty-research/operations-analytics/"
    }
   },
@@ -7787,8 +7948,18 @@
   ],
   "lat": 33.7550642,
   "lng": -84.3899888,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "georgia-state-managerial-sciences-broad"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Georgia State University"
+  ],
+  "mapSearchTerms": [
+   "J. Mack Robinson College of Business",
+   "Managerial Sciences"
+  ],
+  "country": "United States"
  },
  {
   "id": "georgia-tech-isye____isye",
@@ -11108,8 +11279,17 @@
   "lastPosted": "2014-10-22",
   "lat": 40.6082367,
   "lng": -75.3737584,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "lehigh-management-rauch"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Lehigh University"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Management"
+  ]
  },
  {
   "id": "lehigh-university__p-c-rossin-college-of-engineering-and-applied-science__industrial-and-systems-engineering",
@@ -11706,8 +11886,16 @@
   ],
   "n": 1,
   "lastPosted": "2014-10-21",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "mcgill-desautels-bronfman"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "McGill University"
+  ],
+  "mapSearchTerms": [
+   "Desautels Faculty of Management"
+  ]
  },
  {
   "id": "mcgill-university__desautels-faculty-of-management__operations-management",
@@ -11738,8 +11926,16 @@
   "lastPosted": "2026-07-28",
   "lat": 45.5026099,
   "lng": -73.5764347,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "mcgill-desautels-bronfman"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "McGill University"
+  ],
+  "mapSearchTerms": [
+   "Desautels Faculty of Management"
+  ]
  },
  {
   "id": "mcmaster-university",
@@ -11825,7 +12021,9 @@
   "n": 1,
   "lastPosted": "2026-10-27",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://engineering.mercer.edu/meet-the-faculty/",
+  "facultyDirectoryHint": "Find Industrial Engineering and Management; this page covers the whole School of Engineering."
  },
  {
   "id": "mercy-university__school-of-business__business-administration",
@@ -12473,7 +12671,9 @@
   "n": 1,
   "lastPosted": "2026-04-30",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://inside.montclair.edu/colleges-schools-research/business/school-business-department-directory/information-management-and-business-analytics-department",
+  "facultyDirectoryHint": "The list includes the entire Information Management and Business Analytics department; identify Business Statistics in the titles."
  },
  {
   "id": "montclair-state-university__feliciano-school-of-business__information-management-and-business-analytics",
@@ -12809,7 +13009,8 @@
    "seed"
   ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
  },
  {
   "id": "national-tsing-hua-university__institute-of-technology-management__institute-of-technology-management",
@@ -12830,7 +13031,8 @@
   "n": 1,
   "lastPosted": "2026-10-28",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
  },
  {
   "id": "national-university-of-singapore",
@@ -13188,7 +13390,9 @@
   "n": 1,
   "lastPosted": "2026-01-19",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "deptUrl": "https://poole.ncsu.edu/faculty-and-research/it-analytics-operations-department/",
+  "facultyUrl": "https://poole.ncsu.edu/group/academic-departments/information-technology-analytics-and-operations/"
  },
  {
   "id": "nc-state-university__poole-college-of-management__business-management-operations-and-supply-chain",
@@ -13792,7 +13996,9 @@
   "n": 1,
   "lastPosted": "2026-10-27",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.nccu.edu/business/business-faculty-and-staff",
+  "facultyDirectoryHint": "Find the Department of Decision Sciences, Economics, and Finance; the directory also lists other departments."
  },
  {
   "id": "north-carolina-state-university____operations-and-supply-chain-management",
@@ -16053,8 +16259,17 @@
   ],
   "lat": 29.7175384,
   "lng": -95.4034911,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "rice-jones-mcnair-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Rice University"
+  ],
+  "mapSearchTerms": [
+   "Jesse H. Jones Graduate School of Business",
+   "Operations Management"
+  ]
  },
  {
   "id": "rochester-institute-of-technology__saunders-college-of-business__management",
@@ -17085,7 +17300,10 @@
   "n": 1,
   "lastPosted": "2026-10-30",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "deptUrl": "https://www.shu.edu/computing/",
+  "facultyUrl": "https://www.shu.edu/computing/faculty.html",
+  "facultyDirectoryHint": "This roster covers the whole Computing and Decision Sciences department, including areas beyond business analytics and supply chain management."
  },
  {
   "id": "seton-hall-university____it-management",
@@ -25326,7 +25544,9 @@
   "n": 1,
   "lastPosted": "2026-10-27",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://business.louisville.edu/about/leadership-organization/facultystaff-directory",
+  "facultyDirectoryHint": "Search for Information Systems, Analytics & Ops; this directory includes other college departments and staff."
  },
  {
   "id": "university-of-louisville__j-b-speed-school-of-engineering__industrial-engineering",
@@ -25358,8 +25578,27 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-30",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "luxembourg-dem-kirchberg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Luxembourg"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Law, Economics and Finance",
+   "Operations Management"
+  ],
+  "mapDepartmentLinks": {
+   "luxembourg-dem-kirchberg": {
+    "deptUrl": "https://www.uni.lu/fdef-en/research-departments/department-of-economics-and-management/",
+    "facultyUrl": "https://www.uni.lu/fdef-en/research-departments/department-of-economics-and-management/people/",
+    "facultyDirectoryHint": "This roster covers the entire Department of Economics and Management, including fields beyond operations management."
+   }
+  },
+  "deptUrl": "https://www.uni.lu/fdef-en/research-departments/department-of-economics-and-management/",
+  "facultyUrl": "https://www.uni.lu/fdef-en/research-departments/department-of-economics-and-management/people/",
+  "facultyDirectoryHint": "This roster covers the entire Department of Economics and Management, including fields beyond operations management."
  },
  {
   "id": "university-of-macau__faculty-of-business-administration__accounting-and-information-management",
@@ -26661,7 +26900,8 @@
    "omlist"
   ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty"
  },
  {
   "id": "university-of-nevada-reno__college-of-engineering__mechanical-industrial-and-materials-engineering",
@@ -27195,8 +27435,16 @@
   "lastPosted": "2026-09-16",
   "lat": 41.6971267,
   "lng": -86.2361411,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "notre-dame-mendoza-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Notre Dame"
+  ],
+  "mapSearchTerms": [
+   "Mendoza College of Business"
+  ]
  },
  {
   "id": "university-of-notre-dame__mendoza-college-of-business__it-analytics-and-operations",
@@ -27211,8 +27459,21 @@
   ],
   "n": 1,
   "lastPosted": "2025-08-13",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "notre-dame-mendoza-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Notre Dame"
+  ],
+  "mapSearchTerms": [
+   "Mendoza College of Business"
+  ],
+  "mapDepartmentLinks": {
+   "notre-dame-mendoza-building": {
+    "facultyUrl": "https://mendoza.nd.edu/mendoza-directory/?department=IT%2C+Analytics%2C+and+Operations&employeetype=Faculty"
+   }
+  },
   "facultyUrl": "https://mendoza.nd.edu/mendoza-directory/?department=IT%2C+Analytics%2C+and+Operations&employeetype=Faculty"
  },
  {
@@ -27227,8 +27488,21 @@
   ],
   "n": 1,
   "lastPosted": "2014-10-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "notre-dame-mendoza-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Notre Dame"
+  ],
+  "mapSearchTerms": [
+   "Mendoza College of Business"
+  ],
+  "mapDepartmentLinks": {
+   "notre-dame-mendoza-building": {
+    "facultyUrl": "https://mendoza.nd.edu/mendoza-directory/?department=Management+%26+Organization&employeetype=Faculty"
+   }
+  },
   "facultyUrl": "https://mendoza.nd.edu/mendoza-directory/?department=Management+%26+Organization&employeetype=Faculty"
  },
  {
@@ -29824,8 +30098,17 @@
   "lastPosted": "2025-08-19",
   "lat": 43.0726811,
   "lng": -89.4016921,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "wisconsin-madison-business-grainger"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Wisconsin-Madison"
+  ],
+  "mapSearchTerms": [
+   "Wisconsin School of Business",
+   "Operations and Information Management"
+  ]
  },
  {
   "id": "university-of-wisconsin-milwaukee__sheldon-b-lubar-school-of-business__supply-chain-operations-management-and-business-statistics",
@@ -30266,8 +30549,17 @@
   ],
   "lat": 36.147002,
   "lng": -86.799965,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "vanderbilt-owen-management-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Vanderbilt University"
+  ],
+  "mapSearchTerms": [
+   "Owen Graduate School of Management",
+   "Operations Management and Quantitative Methods"
+  ]
  },
  {
   "id": "vienna-university-of-economics-and-business____transport-and-logistics-management",
@@ -31191,8 +31483,16 @@
   "lastPosted": "2015-02-05",
   "lat": 43.0044427,
   "lng": -81.2773205,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "western-ivey-richard-ivey"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Western University"
+  ],
+  "mapSearchTerms": [
+   "Ivey Business School"
+  ]
  },
  {
   "id": "western-university__ivey-business-school__management-science",
@@ -31215,8 +31515,21 @@
   ],
   "n": 2,
   "lastPosted": "2025-05-26",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "western-ivey-richard-ivey"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Western University"
+  ],
+  "mapSearchTerms": [
+   "Ivey Business School"
+  ],
+  "mapDepartmentLinks": {
+   "western-ivey-richard-ivey": {
+    "facultyUrl": "https://www.ivey.uwo.ca/faculty_research/faculty/area-groups/management-science/"
+   }
+  },
   "facultyUrl": "https://www.ivey.uwo.ca/faculty_research/faculty/area-groups/management-science/"
  },
  {
@@ -31230,8 +31543,22 @@
    "omlist",
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "western-ivey-richard-ivey"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Western University"
+  ],
+  "mapSearchTerms": [
+   "Ivey Business School"
+  ],
+  "country": "Canada",
+  "mapDepartmentLinks": {
+   "western-ivey-richard-ivey": {
+    "facultyUrl": "https://www.ivey.uwo.ca/faculty_research/faculty/area-groups/operations-management/"
+   }
+  },
   "facultyUrl": "https://www.ivey.uwo.ca/faculty_research/faculty/area-groups/operations-management/"
  },
  {

@@ -7690,6 +7690,172 @@
       "reviewId": "faculty-0050",
       "directoryFilter": "Select Operations in By Academic Area.",
       "approval": "Site owner selected this URL and scope on 2026-10-26"
+    },
+    {
+      "institution": "University of Luxembourg",
+      "school": "Faculty of Law, Economics and Finance",
+      "department": "Operations Management",
+      "deptUrl": "https://www.uni.lu/fdef-en/research-departments/department-of-economics-and-management/",
+      "facultyUrl": "https://www.uni.lu/fdef-en/research-departments/department-of-economics-and-management/people/",
+      "directoryFilter": "This roster covers the entire Department of Economics and Management, including fields beyond operations management.",
+      "sources": [
+        "https://www.uni.lu/fdef-en/research-departments/department-of-economics-and-management/",
+        "https://www.uni.lu/fdef-en/research-departments/department-of-economics-and-management/people/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Operations management is a research area of the department; the linked roster covers the full department."
+    },
+    {
+      "institution": "Florida Atlantic University",
+      "school": "College of Business",
+      "department": "Information Technology and Operations Management",
+      "facultyUrl": "https://business.fau.edu/departments/information-technology-operations-management/faculty/index.php",
+      "notes": "Official ITOM faculty roster.",
+      "sources": [
+        "https://business.fau.edu/departments/information-technology-operations-management/faculty/index.php"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "Florida State University",
+      "school": "College of Business",
+      "department": "Business Analytics, Information Systems, and Supply Chain",
+      "facultyUrl": "https://wertheim.fsu.edu/departments/baissc/directory",
+      "notes": "Official departmental faculty and staff directory.",
+      "sources": [
+        "https://wertheim.fsu.edu/departments/baissc/directory"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "University of Louisville",
+      "school": "College of Business",
+      "department": "Information Systems, Analytics and Operations",
+      "facultyUrl": "https://business.louisville.edu/about/leadership-organization/facultystaff-directory",
+      "directoryFilter": "Search for Information Systems, Analytics & Ops; this directory includes other college departments and staff.",
+      "notes": "Official college directory includes department and staff; search by department.",
+      "sources": [
+        "https://business.louisville.edu/about/leadership-organization/facultystaff-directory"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "University of Nevada, Reno",
+      "school": "College of Business",
+      "department": "Marketing",
+      "facultyUrl": "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty",
+      "notes": "Official marketing faculty list.",
+      "sources": [
+        "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "North Carolina Central University",
+      "school": "School of Business",
+      "department": "Decision Sciences",
+      "facultyUrl": "https://www.nccu.edu/business/business-faculty-and-staff",
+      "directoryFilter": "Find the Department of Decision Sciences, Economics, and Finance; the directory also lists other departments.",
+      "notes": "Official business school directory identifies the relevant department.",
+      "sources": [
+        "https://www.nccu.edu/business/business-faculty-and-staff"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "Mercer University",
+      "school": "School of Engineering",
+      "department": "Industrial Engineering and Industrial Management",
+      "facultyUrl": "https://engineering.mercer.edu/meet-the-faculty/",
+      "directoryFilter": "Find Industrial Engineering and Management; this page covers the whole School of Engineering.",
+      "notes": "Official school directory identifies the industrial engineering and management chair.",
+      "sources": [
+        "https://engineering.mercer.edu/meet-the-faculty/"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "California State Polytechnic University, Pomona",
+      "school": "College of Business Administration",
+      "department": "Computer Information Systems",
+      "facultyUrl": "https://www.cpp.edu/cba/computer-information-systems/faculty/faculty-staff-directory.shtml",
+      "notes": "Official CIS faculty and staff directory.",
+      "sources": [
+        "https://www.cpp.edu/cba/computer-information-systems/faculty/faculty-staff-directory.shtml"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "Florida International University",
+      "school": "",
+      "department": "IS",
+      "deptUrl": "https://business.fiu.edu/academics/departments/isba/",
+      "notes": "Official ISBA department page; the linked faculty page appears empty, so the roster is withheld.",
+      "sources": [
+        "https://business.fiu.edu/academics/departments/isba/"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "Montclair State University",
+      "school": "",
+      "department": "Business Statistics",
+      "facultyUrl": "https://inside.montclair.edu/colleges-schools-research/business/school-business-department-directory/information-management-and-business-analytics-department",
+      "directoryFilter": "The list includes the entire Information Management and Business Analytics department; identify Business Statistics in the titles.",
+      "notes": "Department faculty directory includes business statistics faculty alongside other areas.",
+      "sources": [
+        "https://inside.montclair.edu/colleges-schools-research/business/school-business-department-directory/information-management-and-business-analytics-department"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "National Tsing Hua University",
+      "school": "College of Technology Management",
+      "department": "Institute of Technology Management",
+      "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/",
+      "notes": "Official institute full-time professors page.",
+      "sources": [
+        "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "National Tsing Hua University",
+      "school": "Institute of Technology Management",
+      "department": "Institute of Technology Management",
+      "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/",
+      "notes": "Same institute and official faculty roster, represented under an alternate school field.",
+      "sources": [
+        "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "Seton Hall University",
+      "school": "",
+      "department": "Business Analytics and Supply Chain Management",
+      "deptUrl": "https://www.shu.edu/computing/",
+      "facultyUrl": "https://www.shu.edu/computing/faculty.html",
+      "directoryFilter": "This roster covers the whole Computing and Decision Sciences department, including areas beyond business analytics and supply chain management.",
+      "sources": [
+        "https://www.shu.edu/computing/",
+        "https://www.shu.edu/computing/faculty.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department offers both business analytics and supply chain management programs; roster is department-wide."
+    },
+    {
+      "institution": "NC State University",
+      "school": "",
+      "department": "ITAO",
+      "deptUrl": "https://poole.ncsu.edu/faculty-and-research/it-analytics-operations-department/",
+      "facultyUrl": "https://poole.ncsu.edu/group/academic-departments/information-technology-analytics-and-operations/",
+      "sources": [
+        "https://poole.ncsu.edu/faculty-and-research/it-analytics-operations-department/",
+        "https://poole.ncsu.edu/group/academic-departments/information-technology-analytics-and-operations/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official ITAO department people directory."
     }
   ]
 }
