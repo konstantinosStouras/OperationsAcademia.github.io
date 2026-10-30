@@ -54,6 +54,15 @@ jobs:
           }
           const final=JSON.parse(await readFile('data/jobs.json','utf8'));
           await writeFile('data/jobs-meta.json',JSON.stringify(buildMeta(final,{generated:new Date().toISOString()}),null,1)+'\n');
+          const {createRequire}=await import('node:module'); const require=createRequire(import.meta.url);
+          const {buildVocab,serialiseVocab,memberVocabRows}=await import('./_scraper/vocab.mjs');
+          const {memberUniversities}=await import('./_scraper/directory-model.mjs');
+          const read=async n=>JSON.parse(await readFile('data/'+n,'utf8'));
+          const seed=require('./assets/oa-institutions.js'); const om=require('./assets/oa-omlist.js');
+          const dir=[...await read('universities.json'),...seed.directoryRows(),...om.directoryRows()];
+          const members=memberUniversities(await read('member-universities.json'));
+          const vocab=await read('vocab.json');
+          await writeFile('data/vocab.json',serialiseVocab(buildVocab(final,{generated:vocab.generated,directory:[...dir,...memberVocabRows(members,final,dir)]})));
           const mirror=db.collection('jobSubmissions').doc(id); const ms=await mirror.get();
           if(ms.exists) {
             const mv=ms.data(); assert.equal(mv.status,'sheet');
@@ -71,7 +80,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/jobs.json data/jobmarket.json data/jobs-meta.json
+          git add data/jobs.json data/jobmarket.json data/jobs-meta.json data/vocab.json
           if ! git diff --cached --quiet; then
             git commit -m 'Publish verified UCL 49655 maternity-cover Lecturer posting'
             git push origin HEAD:master
