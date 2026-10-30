@@ -7164,7 +7164,8 @@
       ],
       "rowIds": [
         "unsw-sydney__unsw-business-school__information-systems-and-technology-management",
-        "unsw-sydney__unsw-business-school-school-of-information-systems-and-techn"
+        "unsw-sydney__unsw-business-school-school-of-information-systems-and-techn",
+        "university-of-new-south-wales__unsw-business-school__information-systems-and-technology-management"
       ],
       "checked": "2026-10-25"
     },
@@ -7398,7 +7399,8 @@
       "id": "location-verified-654",
       "institutionKey": "University of Rochester",
       "rowIds": [
-        "university-of-rochester__simon-business-school__operations-management"
+        "university-of-rochester__simon-business-school__operations-management",
+        "university-of-rochester__w-e-simon-graduate-school-of-business-administration__operations-management"
       ],
       "checked": "2026-10-25",
       "institution": "University of Rochester",
@@ -18444,6 +18446,88 @@
       ],
       "checked": "2026-10-30",
       "notes": "School's official international affairs office is in Teaching Complex TxD. Coordinates reuse reviewed shenzhen-management-platform-operations-verified named D building footprint. School-level reference; individual academic office not separately verified."
+    },
+    {
+      "id": "pittsburgh-industrial-benedum-hall",
+      "institution": "University of Pittsburgh",
+      "rowIds": [
+        "university-of-pittsburgh____industrial-engineering"
+      ],
+      "school": "Swanson School of Engineering",
+      "department": "Department of Industrial Engineering",
+      "building": "Benedum Hall",
+      "address": "Room 1025, 3700 O'Hara Street, Pittsburgh, PA 15261, United States",
+      "lat": 40.4436,
+      "lng": -79.9587,
+      "addressSource": "https://www.engineering.pitt.edu/departments/industrial/contact-us/",
+      "coordinateSource": "https://mapcarta.com/26711234",
+      "supportingSources": [
+        "https://calendar.pitt.edu/benedum_hall"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official department and campus events list Benedum Hall and address; geospatial source identifies named Pittsburgh engineering building."
+    },
+    {
+      "id": "san-diego-operations-olin-hall",
+      "institution": "University of San Diego",
+      "rowIds": [
+        "university-of-san-diego____om-ba",
+        "university-of-san-diego__school-of-business__operations-scm-and-itm"
+      ],
+      "school": "Knauss School of Business",
+      "department": "Supply Chain, Operations and Information Systems",
+      "building": "Olin Hall",
+      "address": "5998 Alcalá Park, San Diego, CA 92110, United States",
+      "lat": 32.77066,
+      "lng": -117.19264,
+      "addressSource": "https://www.sandiego.edu/newscenter/97521",
+      "coordinateSource": "https://mapcarta.com/W31803684",
+      "supportingSources": [
+        "https://www.sandiego.edu/business/faculty-and-research/faculty-directory.php",
+        "https://www.sandiego.edu/business/about/biography.php?profile_id=2065"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school resource guide identifies faculty and Supply Chain Management Institute in Olin Hall; faculty directory uses OH office numbers, and chair biography identifies department. Point is named Olin Hall, not adjacent Knauss Center."
+    },
+    {
+      "id": "oxford-said-operations-park-end",
+      "institution": "University of Oxford",
+      "rowIds": [
+        "university-of-oxford__said-business-school__technology-and-operations-management"
+      ],
+      "school": "Saïd Business School",
+      "department": "Technology and Operations Management",
+      "building": "Saïd Business School, Park End Street",
+      "address": "Park End Street, Oxford OX1 1HP, United Kingdom",
+      "lat": 51.7532523,
+      "lng": -1.2682701,
+      "addressSource": "https://www.sbs.ox.ac.uk/about-us/people/matthias-holweg",
+      "coordinateSource": "https://hirespace.vercel.app/Spaces/Other/133682/Park-End-Street-Venue-Sa%C3%AFd-Business-School-University-Of-Oxford/Lecture-Theatre-VI-Eni-VIII/Business",
+      "supportingSources": [
+        "https://www.ox.ac.uk/about/how-we-are-run/equality-diversity/access-guide/academic-depts/said-business-school-building"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The operations professor and university identify Park End Street main school; coordinate is listed for the named Park End Street venue. It is not the separate Egrove Park executive education centre."
+    },
+    {
+      "id": "woosong-solbridge-business-building",
+      "institution": "Woosong University",
+      "rowIds": [
+        "woosong-university__solbridge-international-school-of-business__analytics-and-ai-for-business-operations-and-supply-chain-ma"
+      ],
+      "school": "SolBridge International School of Business",
+      "department": "Analytics and AI for Business/Operations and Supply Chain Management",
+      "building": "SolBridge International School of Business",
+      "address": "128 Uam-ro, Dong-gu, Daejeon 34613, Republic of Korea",
+      "lat": 36.33833,
+      "lng": 127.43222,
+      "addressSource": "https://solbridge.ac.kr/story/page/index.jsp?code=solbridge010601",
+      "coordinateSource": "https://en.wikipedia.org/wiki/SolBridge_International_School_of_Business",
+      "supportingSources": [
+        "https://www.aacsb.edu/accredited/s/solbridge-international-school-of-business"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school location and AACSB identify the SolBridge address. Coordinates are for the named school, rounded to approximately one second, rather than a verified department office."
     }
   ]
 }

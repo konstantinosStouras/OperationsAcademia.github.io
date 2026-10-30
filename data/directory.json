@@ -28087,7 +28087,7 @@
   "mapLocationIds": [
    "new-south-wales-information-systems-quadrangle"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of New South Wales"
   ],
@@ -28779,8 +28779,23 @@
    "omlist",
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "oxford-said-operations-park-end"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Oxford"
+  ],
+  "mapSearchTerms": [
+   "Saïd Business School",
+   "Technology and Operations Management"
+  ],
+  "country": "United Kingdom",
+  "mapDepartmentLinks": {
+   "oxford-said-operations-park-end": {
+    "facultyUrl": "https://www.sbs.ox.ac.uk/research/research-areas/technology-and-operations-management"
+   }
+  },
   "facultyUrl": "https://www.sbs.ox.ac.uk/research/research-areas/technology-and-operations-management"
  },
  {
@@ -28883,8 +28898,17 @@
   "lastPosted": "2026-10-03",
   "lat": 40.4440427,
   "lng": -79.9580026,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "pittsburgh-industrial-benedum-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Pittsburgh"
+  ],
+  "mapSearchTerms": [
+   "Swanson School of Engineering",
+   "Department of Industrial Engineering"
+  ]
  },
  {
   "id": "university-of-pittsburgh__joseph-m-katz-graduate-school-of-business__business-analytics-and-operations",
@@ -29147,8 +29171,17 @@
   ],
   "n": 1,
   "lastPosted": "2025-07-17",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "san-diego-operations-olin-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of San Diego"
+  ],
+  "mapSearchTerms": [
+   "Knauss School of Business",
+   "Supply Chain, Operations and Information Systems"
+  ],
   "facultyUrl": "https://www.sandiego.edu/business/faculty-and-research/faculty-directory.php",
   "facultyDirectoryHint": "Choose Department and find Supply Chain, Operations and Information Systems; the directory covers the whole Knauss School."
  },
@@ -29166,8 +29199,16 @@
   ],
   "n": 4,
   "lastPosted": "2025-10-17",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "san-diego-operations-olin-hall"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "University of San Diego"
+  ],
+  "mapSearchTerms": [
+   "Knauss School of Business"
+  ]
  },
  {
   "id": "university-of-san-diego__school-of-business__operations-scm-and-itm",
@@ -29183,8 +29224,17 @@
   ],
   "lat": 32.7706844,
   "lng": -117.1925992,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "san-diego-operations-olin-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of San Diego"
+  ],
+  "mapSearchTerms": [
+   "Knauss School of Business",
+   "Supply Chain, Operations and Information Systems"
+  ]
  },
  {
   "id": "university-of-science-and-technology-of-china__school-of-management__management-science",
@@ -33091,8 +33141,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "woosong-solbridge-business-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Woosong University"
+  ],
+  "mapSearchTerms": [
+   "SolBridge International School of Business",
+   "Analytics and AI for Business/Operations and Supply Chain Management"
+  ],
+  "mapDepartmentLinks": {
+   "woosong-solbridge-business-building": {
+    "facultyUrl": "https://www.solbridge.ac.kr/story/page/index.jsp?code=solbridge_n020103",
+    "facultyDirectoryHint": "Review professors’ subject specialisations; the list covers the full business school."
+   }
+  },
   "facultyUrl": "https://www.solbridge.ac.kr/story/page/index.jsp?code=solbridge_n020103",
   "facultyDirectoryHint": "Review professors’ subject specialisations; the list covers the full business school."
  },
