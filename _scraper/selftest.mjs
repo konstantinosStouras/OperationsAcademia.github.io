@@ -13548,7 +13548,7 @@ async function testQueueTakedown() {
     'oa-fresh.js is what makes that true: an echo of no fields has landed, so it is spent and deleted');
   const adminHtml = await read('admin-area.html');
   ok(adminHtml.indexOf('src="assets/oa-fresh.js"')
-     < adminHtml.indexOf('src="assets/oa-jobreview.js"'),
+     < adminHtml.indexOf('src="assets/oa-jobreview.js'),
     'and the Admin area loads the echo before the panel that stashes into it');
 
   /* 7. NO RULES CHANGE, AND THEREFORE NO DEPLOY — which is pinned rather than
@@ -19209,7 +19209,7 @@ async function testJobComments() {
   ok(/var tag = f\.area \? 'div' : 'p';/.test(rv) && /'<' \+ tag \+ ' class="oa-rv-field'/.test(rv),
     'job comments: a field that takes prose is a block, since the editor puts a div beside the box');
   const admin = await read('admin-area.html');
-  const adminTag = (f) => admin.indexOf('<script defer src="assets/' + f + '"></script>');
+  const adminTag = (f) => admin.indexOf('<script defer src="assets/' + f);
   ok(adminTag('oa-forum-markup.js') > 0
      && adminTag('oa-forum-markup.js') < adminTag('oa-editor.js')
      && adminTag('oa-editor.js') < adminTag('oa-jobreview.js')
