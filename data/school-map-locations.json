@@ -4379,7 +4379,8 @@
       "id": "santa-clara-information-systems-analytics-lucas",
       "institution": "Santa Clara University",
       "rowIds": [
-        "santa-clara-university____is-and-analytics"
+        "santa-clara-university____is-and-analytics",
+        "santa-clara-university__leavey-school-of-business__information-systems-and-analytics"
       ],
       "school": "Leavey School of Business",
       "department": "Department of Information Systems and Analytics",
@@ -10879,7 +10880,8 @@
       "institution": "Southern Methodist University",
       "institutionKey": "southern-methodist-university",
       "rowIds": [
-        "southern-methodist-university____it-om"
+        "southern-methodist-university____it-om",
+        "southern-methodist-university__edwin-l-cox-school-of-business__information-technology-and-operations-management"
       ],
       "school": "Edwin L. Cox School of Business",
       "department": "Department of Information Technology and Operations Management",
@@ -16635,7 +16637,8 @@
       "id": "sjsu-lucas-business-tower",
       "institution": "San Jose State University",
       "rowIds": [
-        "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-decision-sciences"
+        "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-decision-sciences",
+        "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-business-analytics"
       ],
       "school": "Lucas College and Graduate School of Business",
       "department": "Marketing and Decision Sciences",
@@ -18162,6 +18165,67 @@
       ],
       "checked": "2026-10-30",
       "notes": "Operations and Decision Sciences lecturer identifies Lazaridis Hall office; address street verified by mapped named building."
+    },
+    {
+      "id": "kuhne-logistics-hamburg",
+      "institution": "Kühne Logistics University",
+      "rowIds": [
+        "kuhne-logistics-university"
+      ],
+      "school": "Kühne Logistics University",
+      "department": "",
+      "building": "Hamburg Campus",
+      "address": "Großer Grasbrook 17, 20457 Hamburg, Germany",
+      "lat": 53.54057,
+      "lng": 9.99437,
+      "addressSource": "https://www.klu.org/directions",
+      "coordinateSource": "https://mapcarta.com/W27568638",
+      "supportingSources": [
+        "https://www.klu.org/imprint"
+      ],
+      "checked": "2026-10-30",
+      "notes": "KLU lists this Hamburg address as its headquarters and visitor campus. The university also has a Saigon campus."
+    },
+    {
+      "id": "asu-fulton-brickyard",
+      "institution": "Arizona State University",
+      "rowIds": [
+        "arizona-state-university__ira-a-fulton-schools-of-engineering"
+      ],
+      "school": "Ira A. Fulton Schools of Engineering",
+      "department": "",
+      "building": "Brickyard Engineering",
+      "address": "699 South Mill Avenue, Tempe, AZ 85281, United States",
+      "lat": 33.4236,
+      "lng": -111.9396,
+      "addressSource": "https://ets.engineering.asu.edu/sccm-help-by209/",
+      "coordinateSource": "https://mapcarta.com/26754020",
+      "supportingSources": [
+        "https://tours.asu.edu/tempe/brickyard",
+        "https://engineering.asu.edu/contact/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "ASU identifies Brickyard Engineering as the Fulton Schools dean’s office and a school facility. The eight schools occupy multiple buildings and campuses, so this is an administrative reference."
+    },
+    {
+      "id": "sjsu-information-systems-business-tower",
+      "institution": "San Jose State University",
+      "rowIds": [
+        "san-jose-state-university__lucas-college-and-graduate-school-of-business__information-systems-and-technology"
+      ],
+      "school": "Lucas College and Graduate School of Business",
+      "department": "School of Information Systems and Technology",
+      "building": "Business Tower",
+      "address": "Room 250, One Washington Square, San José, CA 95192, United States",
+      "lat": 37.33706,
+      "lng": -121.87887,
+      "addressSource": "https://wwwtest.sjsu.edu/isystems/about-us/contact.php",
+      "coordinateSource": "https://mapcarta.com/W25774833",
+      "supportingSources": [
+        "https://www.sjsu.edu/cob/about/maps.php"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The school identifies Business Tower room 250; university mailing address and existing verified Business Tower map coordinate."
     }
   ]
 }
