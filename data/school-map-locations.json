@@ -9466,7 +9466,9 @@
       "institution": "Tilburg University",
       "institutionKey": "Tilburg University",
       "rowIds": [
-        "tilburg-university____is"
+        "tilburg-university____is",
+        "tilburg-university__tilburg-school-of-economics-and-management__information-systems-and-operations-management",
+        "tilburg-university__tilburg-school-of-economics-and-management__management-information-and-supply-chain-management"
       ],
       "school": "Tilburg School of Economics and Management",
       "department": "Department of Information Systems and Operations Management",
@@ -11992,7 +11994,9 @@
       "institutionKey": "Stony Brook University",
       "institution": "Stony Brook University",
       "rowIds": [
-        "stony-brook-university____om-ds"
+        "stony-brook-university____om-ds",
+        "stony-brook-university__college-of-business__operations-and-decision-analytics",
+        "stony-brook-university__college-of-business__operations-management"
       ],
       "school": "College of Business",
       "department": "Operations and Decision Analytics",
@@ -17786,6 +17790,378 @@
       ],
       "checked": "2026-10-30",
       "notes": "Reuses reviewed evidence in existing location-verified-575 for the same Nanyang Business School ITOM department; official page identifies current department and existing record documented precise named place marker coordinates. The row spelling contains typographical errors."
+    },
+    {
+      "id": "lingnan-orm-simon-eleanor-kwok",
+      "institution": "Lingnan University",
+      "rowIds": [
+        "lingnan-university__faculty-of-business__computing-and-decision-sciences"
+      ],
+      "school": "Faculty of Business",
+      "department": "Computing and Decision Sciences",
+      "building": "Simon and Eleanor Kwok Building",
+      "address": "8 Castle Peak Road, Tuen Mun, Hong Kong",
+      "lat": 22.41232,
+      "lng": 113.98262,
+      "addressSource": "https://www.ln.edu.hk/chs/orm/people/faculty/prof-leng-mingming",
+      "coordinateSource": "https://mapcarta.com/W204665752",
+      "supportingSources": [
+        "https://commons.ln.edu.hk/cds/",
+        "https://www.ln.edu.hk/ocdm/facilities/campus-map",
+        "https://www.ln.edu.hk/acct/contact-us/contact-us"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Computing and Decision Sciences merged into Operations and Risk Management in 2024. University places former head and successor department chair at SEK208; its campus map identifies SEK as Simon and Eleanor Kwok Building."
+    },
+    {
+      "id": "ku-leuven-operations-hogenheuvel",
+      "institution": "KU Leuven",
+      "rowIds": [
+        "ku-leuven__faculty-of-economics-and-business-feb__research-center-for-operations-management"
+      ],
+      "school": "Faculty of Economics and Business",
+      "department": "Research Center for Operations Management",
+      "building": "Hogenheuvelcollege",
+      "address": "Naamsestraat 69, 3000 Leuven, Belgium",
+      "lat": 50.87466,
+      "lng": 4.70085,
+      "addressSource": "https://www.kuleuven.be/wieiswie/en/unit/global/57860503",
+      "coordinateSource": "https://mapcarta.com/W448309343",
+      "supportingSources": [
+        "https://feb.kuleuven.be/research/decision-sciences-and-information-management/om",
+        "https://www.kuleuven.be/kulag/en/gebouw/172-32"
+      ],
+      "checked": "2026-10-30",
+      "notes": "KU Leuven lists the Leuven Operations Management research group at Naamsestraat 69 and recent group seminars at Hogenheuvelcollege on that site; the group also has a Brussels presence. The pinpoint identifies the Leuven faculty building rather than a verified office."
+    },
+    {
+      "id": "johns-hopkins-carey-operations-harbor-east",
+      "institution": "Johns Hopkins University",
+      "rowIds": [
+        "johns-hopkins-university__carey-business-school__operations-management-and-business-analytics"
+      ],
+      "school": "Carey Business School",
+      "department": "Operations Management and Business Analytics",
+      "building": "100 International Drive",
+      "address": "100 International Drive, Baltimore, MD 21202, United States",
+      "lat": 39.2824428,
+      "lng": -76.6015967,
+      "addressSource": "https://carey.jhu.edu/about/why-carey/visit/locations/baltimore",
+      "coordinateSource": "https://www.latlong.net/poi/johns-hopkins-carey-business-school-678108",
+      "supportingSources": [
+        "https://carey.jhu.edu/faculty/faculty-directory",
+        "https://carey.jhu.edu/about/why-carey/visit/locations",
+        "https://qa.jhucareyredesign.com/sites/default/files/2024-02/xu-minghong-cv-spring-2024.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Carey identifies Harbor East as its main location; an Operations Management and Business Analytics faculty CV lists this address. Carey also operates in Washington, DC, so this pin does not imply all faculty work in Baltimore."
+    },
+    {
+      "id": "wayne-state-ilitch-marketing-supply",
+      "institution": "Wayne State University",
+      "rowIds": [
+        "wayne-state-university__mike-ilitch-school-of-business__marketing-and-supply-chain-management"
+      ],
+      "school": "Mike Ilitch School of Business",
+      "department": "Marketing and Supply Chain Management",
+      "building": "Mike Ilitch School of Business",
+      "address": "2771 Woodward Avenue, Detroit, MI 48201, United States",
+      "lat": 42.34274,
+      "lng": -83.05561,
+      "addressSource": "https://bulletins.wayne.edu/pdf/Wayne%20State%20University%20Undergraduate%20Bulletin%202024-2025.pdf",
+      "coordinateSource": "https://mapcarta.com/W678986412",
+      "supportingSources": [
+        "https://assets.wayne.edu/bulletin/archive/ug_20-21.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University bulletin lists the department at this school; an earlier bulletin specifies its office in this building."
+    },
+    {
+      "id": "texas-am-mays-wehner",
+      "institution": "Texas A&M University",
+      "rowIds": [
+        "texas-a-m-university__mays-business-school",
+        "texas-a-m-university__mays-business-school__information-and-operations-management"
+      ],
+      "school": "Mays Business School",
+      "department": "Information and Operations Management",
+      "building": "Wehner Building",
+      "address": "210 Olsen Boulevard, College Station, TX 77843, United States",
+      "lat": 30.6109,
+      "lng": -96.35079,
+      "addressSource": "https://assets.system.tamus.edu/files/budgets-acct/pdf/HUB_Solicitations/02-3279.pdf",
+      "coordinateSource": "https://www.zabalist.com/projects/EABPRJB1811993",
+      "supportingSources": [
+        "https://mays.tamu.edu/departments/information-and-operations-management/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department contact lists Wehner Room 320 and Texas A&M confirms physical address."
+    },
+    {
+      "id": "utah-eccles-ois",
+      "institution": "University of Utah",
+      "rowIds": [
+        "university-of-utah__david-eccles-school-of-business__operations-and-information-systems"
+      ],
+      "school": "David Eccles School of Business",
+      "department": "Operations and Information Systems",
+      "building": "Spencer Fox Eccles Business Building",
+      "address": "1655 East Campus Center Drive, Salt Lake City, UT 84112, United States",
+      "lat": 40.76176,
+      "lng": -111.8434,
+      "addressSource": "https://catalog.utah.edu/pages/department-OIS",
+      "coordinateSource": "https://mapcarta.com/W226303775",
+      "supportingSources": [
+        "https://eccles.utah.edu/programs/master-of-science-in-financial-technology/venue/spencer-fox-eccles-business-building/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University catalog identifies department office in room 7132 of the named building."
+    },
+    {
+      "id": "michigan-ross-technology-operations",
+      "institution": "University of Michigan",
+      "rowIds": [
+        "university-of-michigan__stephen-m-ross-school-of-business__technology-and-operations-management"
+      ],
+      "school": "Stephen M. Ross School of Business",
+      "department": "Technology and Operations",
+      "building": "Ross School of Business Building",
+      "address": "701 Tappan Street, Ann Arbor, MI 48109, United States",
+      "lat": 42.27269,
+      "lng": -83.73759,
+      "addressSource": "https://michiganross.umich.edu/about/our-campus/behavioral-lab",
+      "coordinateSource": "https://mapcarta.com/W154232149",
+      "supportingSources": [
+        "https://michiganross.umich.edu/faculty-research/faculty/vijay-pandiarajan",
+        "https://rossweb.bus.umich.edu/ross-operations/frequently-asked-questions/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Area faculty member is in R4388 and university explains R denotes the Ross Building."
+    },
+    {
+      "id": "washu-olin-bauer",
+      "institution": "Washington University in St. Louis",
+      "rowIds": [
+        "washington-university-in-st-louis__olin-business-school"
+      ],
+      "school": "Olin Business School",
+      "department": "",
+      "building": "Bauer Hall",
+      "address": "One Brookings Drive, St. Louis, MO 63130, United States",
+      "lat": 38.64951,
+      "lng": -90.31064,
+      "addressSource": "https://olin.washu.edu/about/contact-us.php",
+      "coordinateSource": "https://mapcarta.com/W911296886",
+      "supportingSources": [
+        "https://washu.edu/app/uploads/2024/09/Danforth-Campus-Map.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "One Brookings Drive is the published mailing address; Bauer Hall is one of several Olin buildings."
+    },
+    {
+      "id": "singapore-management-lee-kong-chian",
+      "institution": "Singapore Management University (SMU)",
+      "rowIds": [
+        "singapore-management-university__lee-kong-chian-school-of-business__operations-management"
+      ],
+      "school": "Lee Kong Chian School of Business",
+      "department": "Operations Management",
+      "building": "Lee Kong Chian School of Business",
+      "address": "50 Stamford Road, Singapore 178899",
+      "lat": 1.2952308,
+      "lng": 103.8505347,
+      "addressSource": "https://www.smu.edu.sg/campus-life/visiting-smu/wayfinding/lee-kong-chian-school-of-business",
+      "coordinateSource": "https://mapy.com/en/?id=1050803228&source=osm",
+      "supportingSources": [
+        "https://business.smu.edu.sg/sites/business.smu.edu.sg/files/business/OperationsManagement/Shantanu_CV_2021.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Operations area professor lists office at 50 Stamford Road; coordinate source identifies the school building."
+    },
+    {
+      "id": "vcu-information-systems-snead",
+      "institution": "Virginia Commonwealth University",
+      "rowIds": [
+        "virginia-commonwealth-university__school-of-business__information-systems"
+      ],
+      "school": "School of Business",
+      "department": "Information Systems",
+      "building": "Snead Hall",
+      "address": "301 West Main Street, Richmond, VA 23220, United States",
+      "lat": 37.54483,
+      "lng": -77.44799,
+      "addressSource": "https://townhall.virginia.gov/l/GetFile.cfm?File=C%3A%5CTownHall%5Cdocroot%5CGuidanceDocs%5C236%5CGDoc_VCU_4824_v1.pdf",
+      "coordinateSource": "https://mapcarta.com/W174327783",
+      "supportingSources": [
+        "https://business.vcu.edu/academics/information-systems/",
+        "https://business.vcu.edu/snead-hall-map-directory/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "VCU directory identifies Information Systems office B4210 in Snead Hall. Existing supply-chain record uses same building for a different department."
+    },
+    {
+      "id": "tum-management-operations-supply-chain",
+      "institution": "Technical University of Munich",
+      "rowIds": [
+        "technical-university-of-munich__tum-school-of-management__operations-and-supply-chain-management",
+        "technical-university-of-munich__tum-school-of-management__operations-and-technology"
+      ],
+      "school": "TUM School of Management",
+      "department": "Operations and Technology; Logistics and Supply Chain Management",
+      "building": "School of Management visiting entrance, Building 0505",
+      "address": "Arcisstrasse 21, entrance at Luisenstrasse / Theresienstrasse, 80333 Munich, Germany",
+      "lat": 48.148949,
+      "lng": 11.568508,
+      "addressSource": "https://www.ot.mgt.tum.de/log/home/",
+      "coordinateSource": "https://www.mgt.tum.de/about/contact-directions",
+      "supportingSources": [
+        "https://www.ot.mgt.tum.de/fileadmin/w00cjr/scm/Announcements/2022-03-17_PhD_position_Production_and_SCM.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "TUM identifies the relevant operations group and chair at Arcisstrasse 21. The coordinate is the school visitor entrance and does not identify the precise chair office."
+    },
+    {
+      "id": "toronto-mississauga-management-innovation",
+      "institution": "University of Toronto Mississauga (UTM)",
+      "rowIds": [
+        "university-of-toronto-mississauga____management"
+      ],
+      "school": "University of Toronto Mississauga",
+      "department": "Department of Management",
+      "building": "Kaneff Centre and Innovation Complex",
+      "address": "3359 Mississauga Road, Mississauga, ON L5L 1C6, Canada",
+      "lat": 43.54835972,
+      "lng": -79.66315937,
+      "addressSource": "https://www.utm.utoronto.ca/management/people/claire-westgate",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Kaneff_Centre_and_Innovation_Complex",
+      "supportingSources": [
+        "https://www.aspo.utoronto.ca/wp-content/uploads/2026/04/UTM-CampusMap-July2025.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University management director lists Innovation Complex as address; coordinate identifies the conjoined Kaneff Centre and Innovation Complex."
+    },
+    {
+      "id": "cuhk-business-cheng-yu-tung",
+      "institution": "CUHK Business School",
+      "rowIds": [
+        "cuhk-business-school"
+      ],
+      "school": "CUHK Business School",
+      "department": "",
+      "building": "Cheng Yu Tung Building",
+      "address": "12 Chak Cheung Street, Shatin, New Territories, Hong Kong",
+      "lat": 22.412217,
+      "lng": 114.210611,
+      "addressSource": "https://www.bschool.cuhk.edu.hk/contact-us/general-enquiry/",
+      "coordinateSource": "https://commons.wikimedia.org/wiki/Category:Cheng_Yu_Tung_Building,_CUHK",
+      "supportingSources": [
+        "https://bba-jd.bschool.cuhk.edu.hk/en/about-learning-environment"
+      ],
+      "checked": "2026-10-30",
+      "notes": "CUHK Business School lists Cheng Yu Tung Building as its main contact location; it also operates a town centre."
+    },
+    {
+      "id": "hull-business-esk-nidd",
+      "institution": "Hull University Business School",
+      "rowIds": [
+        "hull-university-business-school"
+      ],
+      "school": "Hull University Business School",
+      "department": "",
+      "building": "Esk and Nidd Buildings",
+      "address": "University of Hull, Cottingham Road, Hull HU6 7RX, United Kingdom",
+      "lat": 53.7699,
+      "lng": -0.3711,
+      "addressSource": "https://historicengland.org.uk/images-books/photos/item/DP176207",
+      "coordinateSource": "https://britishlistedbuildings.co.uk/101197598-university-of-hull-esk-building-and-nidd-building-bricknell-ward",
+      "supportingSources": [
+        "https://www.accessable.co.uk/university-of-hull/access-guides/esk",
+        "https://www.hull.ac.uk/life-at-hull/our-campus"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Historic England identifies the Business School entrance linking Esk and Nidd. Coordinates are for the listed building pair; the school occupies several connected buildings."
+    },
+    {
+      "id": "csu-east-bay-management-vbt",
+      "institution": "California State University, East Bay",
+      "rowIds": [
+        "california-state-university-east-bay__college-of-business-and-economics__management"
+      ],
+      "school": "College of Business and Economics",
+      "department": "Management",
+      "building": "Valley Business and Technology Center",
+      "address": "25800 Carlos Bee Boulevard, Hayward, CA 94542, United States",
+      "lat": 37.65711,
+      "lng": -122.05509,
+      "addressSource": "https://www.csueastbay.edu/management/index.html",
+      "coordinateSource": "https://mapcarta.com/W69557710",
+      "supportingSources": [
+        "https://www.csueastbay.edu/about/files/docs/hayward-hills-campus-map.pdf",
+        "https://www.csueastbay.edu/innovationfestival2025/eventlocation.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University places the Department of Management office on the fourth floor of the Valley Business and Technology Center."
+    },
+    {
+      "id": "wageningen-operations-leeuwenborch",
+      "institution": "Wageningen University",
+      "rowIds": [
+        "wageningen-university____operations-research-and-logistics"
+      ],
+      "school": "Wageningen University & Research",
+      "department": "Operations Research and Logistics",
+      "building": "Leeuwenborch, Building 201",
+      "address": "Hollandseweg 1, 6706 KN Wageningen, Netherlands",
+      "lat": 51.9804,
+      "lng": 5.67342,
+      "addressSource": "https://www.wur.nl/en/chair-groups/business-science/operations-research-and-logistics/contact",
+      "coordinateSource": "https://mapcarta.com/W297536916",
+      "supportingSources": [
+        "https://www.wur.nl/en/location/leeuwenborch-building-201"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University group contact lists Leeuwenborch sixth floor and specific visiting address."
+    },
+    {
+      "id": "weber-goddard-wattis",
+      "institution": "Weber State University",
+      "rowIds": [
+        "weber-state-university__john-b-goddard-school-of-business-and-economics__business-administration-supply-chain-management"
+      ],
+      "school": "John B. Goddard School of Business & Economics",
+      "department": "Business Administration and Marketing; Supply Chain and Management Information Systems",
+      "building": "Wattis Business Building",
+      "address": "1337 Edvalson Street, Ogden, UT 84408, United States",
+      "lat": 41.1938,
+      "lng": -111.945,
+      "addressSource": "https://www.weber.edu/business/contact.html",
+      "coordinateSource": "https://topoquest.com/map/usgs-24k/utah/ogden/32952",
+      "supportingSources": [
+        "https://apps.weber.edu/wsuimages/goddard/GSBE%20Building%20Emergency%20Plan%20rev%209-5-24.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University lists both relevant departments in Wattis. Street address is university mailing address; coordinates identify the specific building."
+    },
+    {
+      "id": "wilfrid-laurier-lazaridis-ods",
+      "institution": "Wilfrid Laurier University",
+      "rowIds": [
+        "wilfrid-laurier-university__lazaridis-school-of-business-and-economics__operations-and-decision-sciences"
+      ],
+      "school": "Lazaridis School of Business and Economics",
+      "department": "Operations and Decision Sciences",
+      "building": "Lazaridis Hall",
+      "address": "64 University Avenue West, Waterloo, ON N2L 3C7, Canada",
+      "lat": 43.47511,
+      "lng": -80.5295,
+      "addressSource": "https://www.wlu.ca/academics/faculties/lazaridis-school-of-business-and-economics/faculty-profiles/redwan-siddiqui/index.html",
+      "coordinateSource": "https://mapcarta.com/W267589632",
+      "supportingSources": [
+        "https://www.wlu.ca/campus-status/building-hours.html",
+        "https://research.monash.edu/files/686593391/684337960-oa.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Operations and Decision Sciences lecturer identifies Lazaridis Hall office; address street verified by mapped named building."
     }
   ]
 }

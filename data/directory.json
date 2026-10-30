@@ -3004,8 +3004,17 @@
   ],
   "lat": 37.6571305,
   "lng": -122.057391,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "csu-east-bay-management-vbt"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "California State University, East Bay"
+  ],
+  "mapSearchTerms": [
+   "College of Business and Economics",
+   "Management"
+  ]
  },
  {
   "id": "california-state-university-fresno____is-decision-sciences",
@@ -5518,8 +5527,17 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cuhk-business-cheng-yu-tung"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "CUHK Business School"
+  ],
+  "mapSearchTerms": [
+   "CUHK Business School"
+  ],
+  "country": "Hong Kong"
  },
  {
   "id": "cuhk-business-school____decisions-operations-and-technology",
@@ -9253,8 +9271,16 @@
   "lastPosted": "2014-05-08",
   "lat": 53.7691679,
   "lng": -0.369098,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "hull-business-esk-nidd"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Hull University Business School"
+  ],
+  "mapSearchTerms": [
+   "Hull University Business School"
+  ]
  },
  {
   "id": "huron-university__faculty-of-arts-and-social-science__management-and-organizational-studies",
@@ -10646,8 +10672,17 @@
   "lastPosted": "2026-06-05",
   "lat": 39.2825914,
   "lng": -76.6016102,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "johns-hopkins-carey-operations-harbor-east"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Johns Hopkins University"
+  ],
+  "mapSearchTerms": [
+   "Carey Business School",
+   "Operations Management and Business Analytics"
+  ]
  },
  {
   "id": "johnson-and-wales-university__college-of-hospitality-and-business__operations-and-supply-chain-management",
@@ -11396,8 +11431,17 @@
   ],
   "lat": 50.8779545,
   "lng": 4.7002953,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ku-leuven-operations-hogenheuvel"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "KU Leuven"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Economics and Business",
+   "Research Center for Operations Management"
+  ]
  },
  {
   "id": "kuhne-logistics-university",
@@ -11765,8 +11809,17 @@
   ],
   "lat": 22.4124428,
   "lng": 113.9823484,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "lingnan-orm-simon-eleanor-kwok"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Lingnan University"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Business",
+   "Computing and Decision Sciences"
+  ]
  },
  {
   "id": "london-business-school",
@@ -18342,10 +18395,17 @@
   ],
   "lat": 1.2962727,
   "lng": 103.8501578,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "singapore-management-lee-kong-chian"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "Lee Kong Chian School of Business",
+   "Operations Management",
    "OM"
+  ],
+  "mapInstitutionNames": [
+   "Singapore Management University (SMU)"
   ]
  },
  {
@@ -19531,7 +19591,7 @@
   "mapLocationIds": [
    "stony-brook-operations-harriman"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Stony Brook University"
   ],
@@ -19554,14 +19614,30 @@
   "type": "Business School",
   "country": "United States",
   "address": "Harriman Hall, #306, Stony Brook, NY 11794",
-  "facultyUrl": "http://www.stonybrook.edu/commcms/business/faculty/faculty-list.html",
+  "facultyUrl": "https://www.stonybrook.edu/business/faculty-research/faculty-directory/",
   "sources": [
    "directory"
   ],
   "lat": 40.9156267,
   "lng": -73.125016,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "stony-brook-operations-harriman"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Stony Brook University"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Operations and Decision Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "stony-brook-operations-harriman": {
+    "facultyUrl": "https://www.stonybrook.edu/business/faculty-research/faculty-directory/"
+   }
+  },
+  "deptUrl": "https://www.stonybrook.edu/commcms/business/faculty-research/research.php#view-operations",
+  "deptUrlInherited": true
  },
  {
   "id": "sungkyunkwan-university",
@@ -19794,8 +19870,19 @@
   ],
   "lat": 48.1486686,
   "lng": 11.5685941,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tum-management-operations-supply-chain"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Technical University of Munich"
+  ],
+  "mapSearchTerms": [
+   "TUM School of Management",
+   "Operations and Technology; Logistics and Supply Chain Management"
+  ],
+  "deptUrl": "https://www.mgt.tum.de/faculty-research/academic-departments/operations-technology",
+  "deptUrlInherited": true
  },
  {
   "id": "technical-university-of-munich__tum-school-of-management__operations-and-technology",
@@ -19809,25 +19896,17 @@
    "seed"
   ],
   "mapLocationIds": [
-   "technical-munich-operations-research-artificial-intelligence",
-   "technical-university-munich-ai-management-heilbronn-lbau"
+   "tum-management-operations-supply-chain"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Technical University of Munich"
   ],
   "mapSearchTerms": [
-   "School of Management"
+   "TUM School of Management",
+   "Operations and Technology; Logistics and Supply Chain Management"
   ],
   "country": "Germany",
-  "mapDepartmentLinks": {
-   "technical-munich-operations-research-artificial-intelligence": {
-    "facultyUrl": "https://www.mgt.tum.de/faculty-research/academic-departments/operations-technology"
-   },
-   "technical-university-munich-ai-management-heilbronn-lbau": {
-    "facultyUrl": "https://www.mgt.tum.de/faculty-research/academic-departments/operations-technology"
-   }
-  },
   "facultyUrl": "https://www.mgt.tum.de/faculty-research/academic-departments/operations-technology"
  },
  {
@@ -20268,15 +20347,19 @@
   "n": 1,
   "lastPosted": "2014-09-02",
   "mapLocationIds": [
-   "texas-am-information-operations-wehner"
+   "texas-am-mays-wehner"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Texas A&M University"
   ],
   "mapSearchTerms": [
-   "Mays Business School"
-  ]
+   "Mays Business School",
+   "Information and Operations Management"
+  ],
+  "deptUrl": "https://mays.tamu.edu/directory/?department=2&office=0&center=0&type=&fullname=",
+  "deptUrlInherited": true,
+  "facultyUrl": "http://mays.tamu.edu/directory/?type=faculty&department=527"
  },
  {
   "id": "texas-a-m-university__mays-business-school__information-and-operations-management",
@@ -20308,15 +20391,15 @@
   "lat": 30.611917,
   "lng": -96.3493329,
   "mapLocationIds": [
-   "texas-am-information-operations-wehner"
+   "texas-am-mays-wehner"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Texas A&M University"
   ],
   "mapSearchTerms": [
    "Mays Business School",
-   "Department of Information and Operations Management"
+   "Information and Operations Management"
   ]
  },
  {
@@ -21811,7 +21894,7 @@
   "mapLocationIds": [
    "tilburg-information-operations-koopmans"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Tilburg University"
   ],
@@ -21834,14 +21917,30 @@
   "type": "University",
   "country": "Netherlands",
   "address": "5037 AB Tilburg, Netherlands",
-  "facultyUrl": "http://www.tilburguniversity.edu/about/schools/economics-and-management/organization/departments/management/staff/",
+  "facultyUrl": "https://www.tilburguniversity.edu/about/schools/economics-and-management/organization/departments/information-systems-and-operations-management/faculty",
   "sources": [
    "directory"
   ],
   "lat": 51.5627987,
   "lng": 5.0411797,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tilburg-information-operations-koopmans"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Tilburg University"
+  ],
+  "mapSearchTerms": [
+   "Tilburg School of Economics and Management",
+   "Department of Information Systems and Operations Management"
+  ],
+  "mapDepartmentLinks": {
+   "tilburg-information-operations-koopmans": {
+    "facultyUrl": "https://www.tilburguniversity.edu/about/schools/economics-and-management/organization/departments/information-systems-and-operations-management/faculty"
+   }
+  },
+  "deptUrl": "https://www.tilburguniversity.edu/about/schools/economics-and-management/organization/departments/information-systems-and-operations-management/faculty",
+  "deptUrlInherited": true
  },
  {
   "id": "tobb-university-of-economics-and-technology____business-administration",
@@ -22957,6 +23056,21 @@
    }
   },
   "facultyUrl": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people"
+ },
+ {
+  "id": "university-college-london__ucl-global-business-school-for-health__sustainable-supply-chain-management",
+  "institution": "University College London",
+  "school": "UCL Global Business School for Health",
+  "department": "Sustainable Supply Chain Management",
+  "type": "Business School",
+  "country": "United Kingdom",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-30",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-college-london__ucl-school-of-management",
@@ -27061,9 +27175,9 @@
   "lat": 42.2727776,
   "lng": -83.737529,
   "mapLocationIds": [
-   "location-verified-701"
+   "michigan-ross-technology-operations"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Michigan"
   ],
@@ -30183,8 +30297,17 @@
   ],
   "lat": 43.5482823,
   "lng": -79.6645141,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "toronto-mississauga-management-innovation"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Toronto Mississauga (UTM)"
+  ],
+  "mapSearchTerms": [
+   "University of Toronto Mississauga",
+   "Department of Management"
+  ]
  },
  {
   "id": "university-of-toronto-scarborough____management",
@@ -30339,15 +30462,15 @@
   "lat": 40.7617224,
   "lng": -111.8435009,
   "mapLocationIds": [
-   "utah-operations-information-systems-eccles"
+   "utah-eccles-ois"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Utah"
   ],
   "mapSearchTerms": [
    "David Eccles School of Business",
-   "Department of Operations and Information Systems"
+   "Operations and Information Systems"
   ]
  },
  {
@@ -31732,17 +31855,18 @@
   "n": 1,
   "lastPosted": "2026-10-05",
   "mapLocationIds": [
-   "virginia-commonwealth-supply-chain-snead"
+   "vcu-information-systems-snead"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Virginia Commonwealth University"
   ],
   "mapSearchTerms": [
-   "School of Business"
+   "School of Business",
+   "Information Systems"
   ],
   "mapDepartmentLinks": {
-   "virginia-commonwealth-supply-chain-snead": {
+   "vcu-information-systems-snead": {
     "facultyUrl": "https://directory.business.vcu.edu/directory.php?area=Information+Systems"
    }
   },
@@ -31969,8 +32093,17 @@
   ],
   "lat": 51.9883712,
   "lng": 5.6708699,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "wageningen-operations-leeuwenborch"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Wageningen University"
+  ],
+  "mapSearchTerms": [
+   "Wageningen University & Research",
+   "Operations Research and Logistics"
+  ]
  },
  {
   "id": "wake-forest-university____business-analytics",
@@ -32185,9 +32318,9 @@
   "n": 1,
   "lastPosted": "2024-10-10",
   "mapLocationIds": [
-   "washington-st-louis-operations-knight"
+   "washu-olin-bauer"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Washington University in St. Louis"
   ],
@@ -32284,8 +32417,18 @@
   ],
   "lat": 42.342911,
   "lng": -83.055336,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "wayne-state-ilitch-marketing-supply"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Wayne State University"
+  ],
+  "mapSearchTerms": [
+   "Mike Ilitch School of Business",
+   "Marketing and Supply Chain Management"
+  ],
+  "country": "United States"
  },
  {
   "id": "weber-state-university__john-b-goddard-school-of-business-and-economics__business-administration-supply-chain-management",
@@ -32300,8 +32443,17 @@
   ],
   "lat": 41.1939116,
   "lng": -111.9451049,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "weber-goddard-wattis"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Weber State University"
+  ],
+  "mapSearchTerms": [
+   "John B. Goddard School of Business & Economics",
+   "Business Administration and Marketing; Supply Chain and Management Information Systems"
+  ]
  },
  {
   "id": "west-virginia-university__john-chambers-college-of-business-and-economics__supply-chain-management",
@@ -32641,8 +32793,17 @@
   ],
   "lat": 43.475065,
   "lng": -80.5289332,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "wilfrid-laurier-lazaridis-ods"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Wilfrid Laurier University"
+  ],
+  "mapSearchTerms": [
+   "Lazaridis School of Business and Economics",
+   "Operations and Decision Sciences"
+  ]
  },
  {
   "id": "william-and-mary____ba",
