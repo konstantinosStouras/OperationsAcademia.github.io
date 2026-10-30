@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-22",
+  "updatedAt": "2026-10-30",
   "note": "Local institutional identification assets. Trademarks belong to their owners. Source provenance is recorded per institution.",
   "records": [
     {
@@ -5367,6 +5367,54 @@
       "logo": "/assets/university-logos/university-of-lethbridge.svg",
       "source": "https://www.ulethbridge.ca/themes/custom/novalux/images/logo-header.svg",
       "checkedAt": "2026-10-27"
+    },
+    {
+      "name": "Mercer University",
+      "logo": "/assets/university-logos/mercer-university.png",
+      "source": "https://www.mercer.edu/apple-touch-icon.png",
+      "checkedAt": "2026-10-30"
+    },
+    {
+      "name": "National Tsing Hua University",
+      "logo": "/assets/university-logos/national-tsing-hua-university.png",
+      "source": "https://www.nthu.edu.tw/appletouch.png",
+      "checkedAt": "2026-10-30"
+    },
+    {
+      "name": "North Carolina Central University",
+      "logo": "/assets/university-logos/north-carolina-central-university.png",
+      "source": "https://www.nccu.edu/sites/default/files/favicons/apple-touch-icon.png",
+      "checkedAt": "2026-10-30"
+    },
+    {
+      "name": "UCLouvain",
+      "logo": "/assets/university-logos/uclouvain.svg",
+      "source": "https://uclouvain.be/themes/custom/uclouvain_theme/logo.svg",
+      "checkedAt": "2026-10-30"
+    },
+    {
+      "name": "University of Nevada, Reno",
+      "logo": "/assets/university-logos/university-of-nevada-reno.png",
+      "source": "https://www.unr.edu/Assets/Icons/other/apple-touch-icon.png",
+      "checkedAt": "2026-10-30"
+    },
+    {
+      "name": "University of North Dakota",
+      "logo": "/assets/university-logos/university-of-north-dakota.png",
+      "source": "https://und.edu/apple-touch-icon.png",
+      "checkedAt": "2026-10-30"
+    },
+    {
+      "name": "Woosong University",
+      "logo": "/assets/university-logos/woosong-university.png",
+      "source": "https://english.wsu.ac.kr/site/main_eng/images/logo.png",
+      "checkedAt": "2026-10-30"
+    },
+    {
+      "name": "Woxsen University",
+      "logo": "/assets/university-logos/woxsen-university.webp",
+      "source": "https://woxsen.edu.in/uploads/L20241112111757.webp",
+      "checkedAt": "2026-10-30"
     }
   ]
 }
