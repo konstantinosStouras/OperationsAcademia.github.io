@@ -757,7 +757,7 @@
   "country": "Lebanon",
   "address": "Beirut, Lebanon",
   "mapUrl": "https://goo.gl/maps/Jrdvt",
-  "facultyUrl": "http://www.aub.edu.lb/OSB/OSB_HOME/FACULTY/Pages/bidslist.aspx",
+  "facultyUrl": "https://www.aub.edu.lb/osb/Pages/Faculty.aspx",
   "sources": [
    "directory",
    "postings",
@@ -767,8 +767,22 @@
   "lastPosted": "2026-10-04",
   "lat": 33.8937913,
   "lng": 35.5017767,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "beirut-business-information-decision-olayan"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "American University of Beirut"
+  ],
+  "mapSearchTerms": [
+   "Suliman S. Olayan School of Business",
+   "Business Information and Decision Systems — Operations Management, Analytics and Statistics"
+  ],
+  "mapDepartmentLinks": {
+   "beirut-business-information-decision-olayan": {
+    "facultyUrl": "https://www.aub.edu.lb/osb/Pages/Faculty.aspx"
+   }
+  }
  },
  {
   "id": "american-university-of-beirut-school-of-business____om-analytics-statistics",
@@ -3695,8 +3709,17 @@
   ],
   "lat": 51.5220994,
   "lng": -0.0899586,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "bayes-management-bunhill"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Cass Business School"
+  ],
+  "mapSearchTerms": [
+   "Bayes Business School (formerly Cass)",
+   "Management"
+  ]
  },
  {
   "id": "catolica-lisbon____is-or-ds",
@@ -5305,15 +5328,29 @@
   "type": "University",
   "country": "United States",
   "address": "2 W Loop Rd, New York, NY 10044, United States",
-  "facultyUrl": "https://tech.cornell.edu/people/faculty/",
+  "facultyUrl": "https://www.duffield.cornell.edu/orie/faculty-staff/",
   "sources": [
    "directory",
    "seed"
   ],
   "lat": 40.7557727,
   "lng": -73.9562112,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cornell-tech-operations-research-bloomberg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Cornell University"
+  ],
+  "mapSearchTerms": [
+   "David A. Duffield College of Engineering — Cornell Tech",
+   "School of Operations Research and Information Engineering"
+  ],
+  "mapDepartmentLinks": {
+   "cornell-tech-operations-research-bloomberg": {
+    "facultyUrl": "https://www.duffield.cornell.edu/orie/faculty-staff/"
+   }
+  }
  },
  {
   "id": "cornell-university__duffield-college-of-engineering__operations-research-and-information-engineering-cornell-tech",
@@ -5354,15 +5391,29 @@
   "country": "United States",
   "address": "Ithaca, NY 14850",
   "mapUrl": "https://goo.gl/maps/HVtdYTMQnpj",
-  "facultyUrl": "http://www.orie.cornell.edu/orie/people/faculty.cfm",
+  "facultyUrl": "https://www.duffield.cornell.edu/orie/faculty-staff/",
   "sources": [
    "directory",
    "seed"
   ],
   "lat": 42.4439614,
   "lng": -76.5018807,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cornell-operations-research-rhodes"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Cornell University"
+  ],
+  "mapSearchTerms": [
+   "Duffield College of Engineering",
+   "School of Operations Research and Information Engineering"
+  ],
+  "mapDepartmentLinks": {
+   "cornell-operations-research-rhodes": {
+    "facultyUrl": "https://www.duffield.cornell.edu/orie/faculty-staff/"
+   }
+  }
  },
  {
   "id": "cornell-university__school-of-operations-research-and-information-engineering-or__operations-research-and-information-engineering",
@@ -5383,8 +5434,22 @@
   ],
   "n": 2,
   "lastPosted": "2026-09-30",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "cornell-operations-research-rhodes"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Cornell University"
+  ],
+  "mapSearchTerms": [
+   "Duffield College of Engineering",
+   "School of Operations Research and Information Engineering"
+  ],
+  "mapDepartmentLinks": {
+   "cornell-operations-research-rhodes": {
+    "facultyUrl": "https://www.duffield.cornell.edu/orie/faculty-staff/"
+   }
+  },
   "facultyUrl": "https://www.duffield.cornell.edu/orie/faculty-staff/"
  },
  {
@@ -5395,10 +5460,24 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://tech.cornell.edu/people/faculty/",
-  "facultyDirectoryHint": "This is the campus-wide Cornell Tech faculty and affiliated roster, covering many fields beyond operations research and information engineering."
+  "mapLocationIds": [
+   "cornell-tech-operations-research-bloomberg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Cornell University"
+  ],
+  "mapSearchTerms": [
+   "David A. Duffield College of Engineering — Cornell Tech",
+   "School of Operations Research and Information Engineering"
+  ],
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "cornell-tech-operations-research-bloomberg": {
+    "facultyUrl": "https://www.duffield.cornell.edu/orie/faculty-staff/"
+   }
+  },
+  "facultyUrl": "https://www.duffield.cornell.edu/orie/faculty-staff/"
  },
  {
   "id": "cornell-university-cornell-tech__samuel-curtis-johnson-graduate-school-of-management",
@@ -6734,7 +6813,7 @@
   "type": "Business School",
   "country": "France",
   "address": "3 Avenue Bernard Hirsch, 95021 Cergy-Pontoise, France",
-  "facultyUrl": "http://www.essec.edu/en/pages/faculty-and-research/departments/operations-management/",
+  "facultyUrl": "https://faculty.essec.edu/en/?pagenum=1&s=&type=cv&filter%5Bdepartment-en%5D%5B%5D=Information%20Systems%2C%20Data%20Analytics%20and%20Operations",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -6752,8 +6831,24 @@
   "lastPosted": "2024-09-26",
   "lat": 49.03353,
   "lng": 2.0768291,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "essec-information-systems-data-analytics-operations-nautile"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "École Supérieure des Sciences Économiques et Commerciales (ESSEC)"
+  ],
+  "mapSearchTerms": [
+   "ESSEC Business School",
+   "Department of Information Systems, Data Analytics and Operations"
+  ],
+  "mapDepartmentLinks": {
+   "essec-information-systems-data-analytics-operations-nautile": {
+    "facultyUrl": "https://faculty.essec.edu/en/?pagenum=1&s=&type=cv&filter%5Bdepartment-en%5D%5B%5D=Information%20Systems%2C%20Data%20Analytics%20and%20Operations"
+   }
+  },
+  "deptUrl": "https://faculty.essec.edu/en/?pagenum=1&s=&type=cv&filter%5Bdepartment-en%5D%5B%5D=Information%20Systems%2C%20Data%20Analytics%20and%20Operations",
+  "deptUrlInherited": true
  },
  {
   "id": "essec__essec-business-school__information-systems-data-analytics-and-operations",
@@ -9428,8 +9523,25 @@
   ],
   "n": 2,
   "lastPosted": "2026-08-31",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ie-operations-business-analytics-molina12"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "IE University"
+  ],
+  "mapSearchTerms": [
+   "IE Business School",
+   "Operations and Business Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "ie-operations-business-analytics-molina12": {
+    "facultyUrl": "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=29477"
+   }
+  },
+  "facultyUrl": "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=29477",
+  "deptUrl": "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=29477",
+  "deptUrlInherited": true
  },
  {
   "id": "ie-business-school____operations-and-technology",
@@ -9736,14 +9848,30 @@
   "country": "Spain",
   "address": "Av. de Pearson, 21, 08034 Barcelona, Spain",
   "mapUrl": "https://goo.gl/maps/5jeOh",
-  "facultyUrl": "http://www.iese.edu/en/faculty-research/departments/production-technology-operations/members/",
+  "facultyUrl": "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/",
   "sources": [
    "directory"
   ],
   "lat": 41.3933634,
   "lng": 2.1078441,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "iese-business-school-operations-building-s"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Navarra"
+  ],
+  "mapSearchTerms": [
+   "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
+   "Operations, Information and Technology"
+  ],
+  "mapDepartmentLinks": {
+   "iese-business-school-operations-building-s": {
+    "facultyUrl": "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/"
+   }
+  },
+  "deptUrl": "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/",
+  "deptUrlInherited": true
  },
  {
   "id": "ieseg____operations-management",
@@ -18379,7 +18507,7 @@
   "country": "China",
   "address": "318 Wuchuan Rd, WuJiaoChang, Yangpu Qu, Shanghai Shi, China, 200433",
   "mapUrl": "https://goo.gl/maps/Ub2wb",
-  "facultyUrl": "http://iba.shufe.edu.cn/info/iList.jsp?tm_id=55&dp=8&q=3",
+  "facultyUrl": "https://cob.sufe.edu.cn/en/Faculty/Resumes",
   "sources": [
    "directory",
    "postings"
@@ -18388,8 +18516,24 @@
   "lastPosted": "2014-10-22",
   "lat": 31.304953,
   "lng": 121.498546,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "shanghai-finance-economics-business-wudong"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Shanghai University of Finance and Economics"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Department of Operations Management"
+  ],
+  "mapDepartmentLinks": {
+   "shanghai-finance-economics-business-wudong": {
+    "facultyUrl": "https://cob.sufe.edu.cn/en/Faculty/Resumes",
+    "facultyDirectoryHint": "Click Operations Management under Department. The directory filters in place without changing the URL."
+   }
+  },
+  "facultyDirectoryHint": "Click Operations Management under Department. The directory filters in place without changing the URL."
  },
  {
   "id": "shorter-university____general-business",

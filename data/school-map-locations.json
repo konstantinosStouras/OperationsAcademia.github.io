@@ -1991,7 +1991,9 @@
       "id": "cornell-operations-research-rhodes",
       "institution": "Cornell University",
       "rowIds": [
-        "cornell-university____operations-research-and-information-engineering"
+        "cornell-university____operations-research-and-information-engineering",
+        "cornell-university__school-of-operations-research-and-information-engineering-or",
+        "cornell-university__school-of-operations-research-and-information-engineering-or__operations-research-and-information-engineering"
       ],
       "school": "Duffield College of Engineering",
       "department": "School of Operations Research and Information Engineering",
@@ -6346,7 +6348,8 @@
       "institution": "American University of Beirut",
       "institutionKey": "American University of Beirut (School of Business)",
       "rowIds": [
-        "american-university-of-beirut-school-of-business____om-analytics-statistics"
+        "american-university-of-beirut-school-of-business____om-analytics-statistics",
+        "american-university-of-beirut__suliman-s-olayan-school-of-business__business-information-and-decision-systems"
       ],
       "school": "Suliman S. Olayan School of Business",
       "department": "Business Information and Decision Systems — Operations Management, Analytics and Statistics",
@@ -11418,7 +11421,9 @@
       "checked": "2026-10-25",
       "id": "cornell-tech-operations-research-bloomberg",
       "rowIds": [
-        "cornell-university__duffield-college-of-engineering__operations-research-and-information-engineering-cornell-tech"
+        "cornell-university__duffield-college-of-engineering__operations-research-and-information-engineering-cornell-tech",
+        "cornell-university__cornell-tech__operations-research-and-information-engineering",
+        "cornell-university-cornell-tech____operations-research-and-information-engineering"
       ],
       "school": "David A. Duffield College of Engineering — Cornell Tech",
       "department": "School of Operations Research and Information Engineering",
@@ -12452,7 +12457,8 @@
       "institutionKey": "shanghai-university-of-finance-and-economics",
       "rowIds": [
         "shanghai-university-of-finance-and-economics__college-of-business",
-        "shanghai-university-of-finance-and-economics__college-of-business__operations-management"
+        "shanghai-university-of-finance-and-economics__college-of-business__operations-management",
+        "shanghai-university-of-finance-and-economics__school-of-international-business-administration__operations-management"
       ],
       "school": "College of Business",
       "department": "Department of Operations Management",
@@ -12463,7 +12469,10 @@
       "addressSource": "https://cob.sufe.edu.cn/Home/Contact",
       "coordinateSource": "https://www.openstreetmap.org/way/498522044",
       "checked": "2026-10-25",
-      "notes": "The official college directory lists the Operations Management department and its Wudong Road academic site. The college's Operations Management conference notice https://cob.sufe.edu.cn/Home/Detail/25755 identifies its College of Business Building at 100 Wudong Road. The university's current campus map https://www.sufe.edu.cn/dt/list.htm explicitly labels this building directly south of the Wudong athletic field, west of the Statistics and Data Science building, east of Tongbo Building and north of the Third Teaching Building. Its rectangular footprint matches OpenStreetMap way 498522044; coordinates are the center of its four corners, already WGS84. The separate Zhongshan North First Road professional-program premises are not substituted for the academic department building."
+      "notes": "The official college directory lists the Operations Management department and its Wudong Road academic site. The college's Operations Management conference notice https://cob.sufe.edu.cn/Home/Detail/25755 identifies its College of Business Building at 100 Wudong Road. The university's current campus map https://www.sufe.edu.cn/dt/list.htm explicitly labels this building directly south of the Wudong athletic field, west of the Statistics and Data Science building, east of Tongbo Building and north of the Third Teaching Building. Its rectangular footprint matches OpenStreetMap way 498522044; coordinates are the center of its four corners, already WGS84. The separate Zhongshan North First Road professional-program premises are not substituted for the academic department building. The former International Business Administration school merged into the current College of Business in 2018.",
+      "supportingSources": [
+        "https://cob.sufe.edu.cn/en/Home/Detail/11764"
+      ]
     },
     {
       "id": "dongbei-supply-chain-mingzhe",
@@ -12819,7 +12828,8 @@
       "institution": "École Supérieure des Sciences Économiques et Commerciales (ESSEC)",
       "institutionKey": "essec",
       "rowIds": [
-        "essec__essec-business-school__information-systems-data-analytics-and-operations"
+        "essec__essec-business-school__information-systems-data-analytics-and-operations",
+        "essec____operations-management"
       ],
       "school": "ESSEC Business School",
       "department": "Department of Information Systems, Data Analytics and Operations",
@@ -13272,7 +13282,8 @@
       "institutionKey": "IESE Business School",
       "rowIds": [
         "iese-business-school____om",
-        "iese-business-school____operations-information-and-technology"
+        "iese-business-school____operations-information-and-technology",
+        "iese-business-school____production-technology-and-operations-management"
       ],
       "locationIdentity": "iese-operations-building-s"
     },
@@ -13559,7 +13570,8 @@
       "institution": "IE University",
       "institutionKey": "ie-university",
       "rowIds": [
-        "ie-university__ie-business-school__operations-and-business-analytics"
+        "ie-university__ie-business-school__operations-and-business-analytics",
+        "ie-business-school____operations-and-business-analytics"
       ],
       "school": "IE Business School",
       "department": "Operations and Business Analytics",
@@ -18924,6 +18936,27 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official school building page identifies the Dean’s Office and other functions at R42. Staff are also in buildings H and J. Coordinates converted from published degrees, minutes, seconds and rounded to one arcsecond; building point is not an individual department office."
+    },
+    {
+      "id": "bayes-management-bunhill",
+      "institution": "Cass Business School",
+      "rowIds": [
+        "cass-business-school____management"
+      ],
+      "school": "Bayes Business School (formerly Cass)",
+      "department": "Management",
+      "building": "106 Bunhill Row",
+      "address": "106 Bunhill Row, London EC1Y 8TZ, United Kingdom",
+      "lat": 51.52204,
+      "lng": -0.09038,
+      "addressSource": "https://www.bayes.citystgeorges.ac.uk/about/contact-us",
+      "coordinateSource": "https://mapcarta.com/W48637954",
+      "supportingSources": [
+        "https://www.accessable.co.uk/city-st-georges-university-of-london/moorgate/access-guides/bayes-business-school-106-bunhill-row",
+        "https://www.bayes.citystgeorges.ac.uk/faculties-and-research/management"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Cass Business School is now Bayes Business School. The building access guide places its Faculty of Management on the fourth floor; Bayes also has other premises."
     }
   ]
 }
