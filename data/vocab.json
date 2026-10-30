@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-30T08:25:03.494Z",
+ "generated": "2026-10-30T13:30:35.685Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -2672,6 +2672,10 @@
    "n": 2
   },
   {
+   "v": "Faculty of Applied Science and Engineering",
+   "n": 2
+  },
+  {
    "v": "Farmer School of Business",
    "n": 2
   },
@@ -3013,10 +3017,6 @@
   },
   {
    "v": "ESSEC Business School",
-   "n": 1
-  },
-  {
-   "v": "Faculty of Applied Science and Engineering",
    "n": 1
   },
   {
@@ -13836,9 +13836,6 @@
     "Statistical Sciences"
    ],
    "bySchool": {
-    "": [
-     "Mechanical and Industrial Engineering"
-    ],
     "Faculty of Applied Science and Engineering": [
      "Mechanical and Industrial Engineering"
     ],
