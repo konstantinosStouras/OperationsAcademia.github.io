@@ -7291,7 +7291,7 @@ async function testAccountDeletion() {
   /* the SCRIPT TAGS, not the first mention: a panel's comment names the file
      that draws it a hundred lines above the tag that loads it */
   const iMod = adminPage.indexOf('src="assets/oa-account-delete.js"');
-  const iUsers = adminPage.indexOf('src="assets/oa-users.js"');
+  const iUsers = adminPage.search(/src="assets\/oa-users\.js(?:\?[^"\s]*)?"/);
   ok(iMod > 0 && iUsers > iMod,
     'the Admin area loads the shared module BEFORE the roster that reads it');
   ok(/oa-u-kill/.test(users) && /oa-u-unkill/.test(users),
@@ -8040,7 +8040,7 @@ async function testUsersAndMessages() {
   const admin = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   ok(admin.includes('id="oa-aa-users"') && admin.includes('assets/oa-users.js'),
     'the Admin area carries the roster panel and loads the module that draws it');
-  ok(/<script defer src="assets\/oa-users\.js">/.test(admin),
+  ok(/<script defer src="assets\/oa-users\.js(?:\?[^"\s]*)?">/.test(admin),
     '…deferred, like every other script on the page');
   ok(!/loadScript\('assets\/oa-users\.js'/.test(accts)
     && !/renderTable|csvOf|oa-u-table/.test(area),
@@ -20677,7 +20677,7 @@ async function testEmailVerification() {
   const scripts = [...vpage.matchAll(/<script (defer )?src="([^"]+)"/g)];
   ok(scripts.length >= 6 && scripts.every((m) => m[1] === 'defer '),
     'verify page: every script tag is deferred');
-  const order = scripts.map((m) => m[2]);
+  const order = scripts.map((m) => m[2].split('?')[0]);
   ok(order.indexOf('assets/oa-verify.js') > order.indexOf('assets/oa-accounts.js')
      && order.indexOf('assets/oa-accounts.js') > order.indexOf('assets/oa-firebase.js'),
     'verify page: oa-verify.js loads after the accounts module, which loads after the Firebase config');
