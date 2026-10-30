@@ -7668,7 +7668,7 @@ async function testUsersAndMessages() {
     '…and every state gets its own word');
   ok(/title="' \+ esc\(threadLabel\(t\)\) \+ '">' \+\s*esc\(threadShort\(t\)\)/.test(users),
     'the chip prints the short word and carries the long label as its title');
-  ok(/threadLabel\(r\.thread\), r\.uid\]/.test(users), 'the CSV keeps the long wording');
+  ok(/threadLabel\(r\.thread\), r\.uid,/.test(users), 'the CSV keeps the long wording');
 
   /* the JM Candidate mark: the season through the one definition, the
      statuses the build publishes, unknown marks nobody */

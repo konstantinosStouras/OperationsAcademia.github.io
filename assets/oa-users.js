@@ -311,6 +311,24 @@
     return by;
   }
 
+  // Historical posters remain findable after they take their advertisement down.
+  // Sheet mirrors have no uid and must never be attributed to the maintainer.
+  function jobYearsOf(docs, nav) {
+    var by = Object.create(null);
+    (docs || []).forEach(function (d) {
+      if (!d || !d.uid || ['queued', 'published', 'withdrawn', 'hidden', 'removed'].indexOf(d.status) < 0) return;
+      var created = d.createdAt;
+      if (created && typeof created.toDate === 'function') created = created.toDate().toISOString();
+      else if (created instanceof Date) created = created.toISOString();
+      var years = nav.marketYearsOf({ year: d.year, posted: d.postedOn || created,
+        applyByDate: d.applyByDate, reviewDate: d.reviewDate });
+      var list = by[d.uid] || (by[d.uid] = []);
+      years.forEach(function (y) { if (list.indexOf(y) < 0) list.push(y); });
+    });
+    Object.keys(by).forEach(function (uid) { by[uid].sort(function (a, b) { return a - b; }); });
+    return by;
+  }
+
   /** Fold a name for sorting so accents and case do not scatter the list.
       The same instinct as OASchools' name folding, kept local and tiny. */
   function fold(s) {
@@ -360,6 +378,7 @@
     threadLabel: threadLabel,
     threadShort: threadShort,
     candidateYearsOf: candidateYearsOf,
+    jobYearsOf: jobYearsOf,
     fold: fold,
     sortRows: sortRows
   };
@@ -407,6 +426,10 @@
         if (isCandIn(r, markYear())) {
           html += '<span class="oa-u-cand" title="Has a candidate profile for the ' +
             esc(seasonName(markYear()) || 'current') + ' job market">JM Candidate</span>';
+        }
+        if (isJobPosterIn(r, state.jobYear || state.year)) {
+          html += '<span class="oa-u-cand" title="Posted a job for the ' +
+            esc(seasonName(state.jobYear || state.year)) + ' job market">Job poster</span>';
         }
         return html;
       },
@@ -511,10 +534,12 @@
        Every season is kept, not just the one under way, because choosing a
        past one is the whole point of the control below. */
     candidates: null,
+    jobPosters: null,
     /* The season under way (OAJobNav.marketYear), and the one the CHOOSER
        names — 0 for "All accounts", which is where it opens. */
     year: 0,
     candYear: 0,
+    jobYear: 0,
     sortKey: 'seen',
     sortDir: 'desc',
     filter: '',
@@ -554,6 +579,10 @@
     return !!(year && r.candYears && r.candYears.indexOf(year) >= 0);
   }
 
+  function isJobPosterIn(r, year) {
+    return !!(year && r.jobYears && r.jobYears.indexOf(year) >= 0);
+  }
+
   function visible() {
     var q = fold(state.filter);
     var rows = state.rows.filter(function (r) {
@@ -561,6 +590,7 @@
          `markYear()` — the two are the same whenever one is chosen, and this
          way "All accounts" narrows nothing at all. */
       if (state.candYear && !isCandIn(r, state.candYear)) return false;
+      if (state.jobYear && !isJobPosterIn(r, state.jobYear)) return false;
       if (!q) return true;
       return fold(nameOf(r)).indexOf(q) >= 0 || fold(addressOf(r)).indexOf(q) >= 0 ||
         fold(r.affiliation).indexOf(q) >= 0 ||
@@ -573,7 +603,8 @@
            Kept beside the chooser rather than replaced by it: it is what the
            panel's own copy has told the maintainer to type since the mark
            shipped, and it now follows whichever season is chosen. */
-        (isCandIn(r, markYear()) && needle('jm candidate', q));
+        (isCandIn(r, markYear()) && needle('jm candidate', q)) ||
+        (isJobPosterIn(r, state.jobYear || state.year) && needle('job poster', q));
     });
     var col = COLS.filter(function (c) { return c.key === state.sortKey; })[0] || COLS[3];
     return sortRows(rows, col.sort, state.sortDir);
@@ -802,6 +833,10 @@
        maintainer did not ask for. */
     if (state.candYear && (!state.candidates ||
         candSeasons().indexOf(state.candYear) < 0)) state.candYear = 0;
+    if (state.jobYear && (!state.jobPosters ||
+        (state.jobYear !== state.year && !state.rows.some(function (r) {
+          return isJobPosterIn(r, state.jobYear);
+        })))) state.jobYear = 0;
     var rows = visible();
     var picked = pickedUids().length;
 
@@ -876,6 +911,19 @@
         }).join('') + '</select></label>';
     }
     var marked = candidateCount();
+    if (state.jobPosters && state.year) {
+      var jobSeasons = {};
+      jobSeasons[state.year] = true;
+      state.rows.forEach(function (r) { (r.jobYears || []).forEach(function (y) { jobSeasons[y] = true; }); });
+      chooser += '<label class="oa-u-year"><span>Job posters</span>' +
+        '<select id="oa-u-jobyear" aria-label="Show only job posters of one season">' +
+        '<option value=""' + (state.jobYear ? '' : ' selected') + '>All accounts</option>' +
+        Object.keys(jobSeasons).map(Number).sort(function (a, b) { return b - a; }).map(function (y) {
+          var count = state.rows.filter(function (r) { return isJobPosterIn(r, y); }).length;
+          return '<option value="' + y + '"' + (state.jobYear === y ? ' selected' : '') +
+            '>' + esc(seasonName(y)) + ' (' + count + ')</option>';
+        }).join('') + '</select></label>';
+    }
     /* HOW MANY ROWS STILL OWE SOMETHING, counted over the WHOLE roster rather
        than the rows on screen, so the number does not move as the maintainer
        types into Find — the rule the candidate counts beside it already
@@ -933,6 +981,13 @@
         if (again) { again.focus(); try { again.setSelectionRange(at, at); } catch (e) {} }
       });
     }
+    var j = $('oa-u-jobyear');
+    if (j) j.addEventListener('change', function () {
+      state.jobYear = Math.trunc(Number(j.value)) || 0;
+      renderTable();
+      var again = $('oa-u-jobyear');
+      if (again) again.focus();
+    });
     var y = $('oa-u-candyear');
     if (y) {
       y.addEventListener('change', function () {
@@ -1018,7 +1073,7 @@
 
   function downloadCsv() {
     var headings = ['Name', 'E-mail', 'Affiliation', 'JM candidate', 'Registered on',
-      'Last seen', 'Messages', 'uid'];
+      'Last seen', 'Messages', 'uid', 'Job poster'];
     var rows = visible().map(function (r) {
       /* The SEASONS rather than "Yes": one column, saying the mark and which
          market it is for. Under the chooser set to All accounts this is the
@@ -1037,7 +1092,8 @@
          about the address, and the screen is where it is marked. */
       return [nameOf(r), addressOf(r), r.affiliation || '',
         r.candYears ? r.candYears.map(seasonName).join('; ') : CANDIDATES_UNKNOWN,
-        day(r.first), day(r.seen), threadLabel(r.thread), r.uid];
+        day(r.first), day(r.seen), threadLabel(r.thread), r.uid,
+        r.jobYears ? r.jobYears.map(seasonName).join('; ') : 'Not known'];
     });
     /* THE BYTE ORDER MARK IS FOR EXCEL. It opens a .csv as the machine's own
        legacy code page unless the file announces UTF-8, so "École
@@ -1361,10 +1417,16 @@
            null rather than throwing: the roster is what this panel is for,
            and one refused collection must not empty it. */
         root.OAAccountDelete ? root.OAAccountDelete.loadRequests() : Promise.resolve(null),
-        loadCandidates(d)
+        loadCandidates(d),
+        d.collection('jobSubmissions').get().then(function (snap) {
+          var docs = [];
+          snap.forEach(function (doc) { docs.push(doc.data() || {}); });
+          return jobYearsOf(docs, root.OAJobNav);
+        })['catch'](function () { return null; })
       ]).then(function (both) {
         state.deletions = both[2];
         state.candidates = both[3];
+        state.jobPosters = both[4];
         var threads = {};
         both[1].forEach(function (doc) {
           var t = doc.data() || {};
@@ -1379,6 +1441,7 @@
           /* NULL, never an empty list, when the read could not answer: the
              two mean different things and only one of them is "no". */
           r.candYears = state.candidates ? (state.candidates[doc.id] || []) : null;
+          r.jobYears = state.jobPosters ? (state.jobPosters[doc.id] || []) : null;
           delete threads[doc.id];
           rows.push(r);
         });

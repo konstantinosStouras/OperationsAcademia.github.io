@@ -53,8 +53,14 @@ export const PUBLIC_FIELDS = [
   'id', 'year', 'years', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
   'applyBy', 'applyByDate', 'reviewDate', 'comments', 'country', 'countries',
   'adUrl', 'adPending', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
-  'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner', 'applicationStatus',
+  'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner', 'applicationStatus', 'sourceId',
 ];
+
+/** A source-scoped removal cannot hide a member posting sharing the same id. */
+export function suppressedBySource(row, rules = {}) {
+  const ids = rules[row.source];
+  return Array.isArray(ids) && ids.includes(row.sourceId || row.id);
+}
 
 /* Prose that means the search stays open. ONE definition — and it is one for
    the first time: import-sheet.mjs and jobreview.mjs IMPORT it, and the
@@ -2201,11 +2207,9 @@ export function mergeRows(existing, fresh, remove = []) {
      KEY, to its review-queue document, its mirror, and the maintainer's Edit
      and Take-down controls.
 
-     This file already records that two sources can mint one id and that the
-     later writer wins, and that fixing it would move permalinks: it is the
-     maintainer's call. What was missing is that NOTHING SAID SO -- the only
-     reason it was ever noticed is that a guard happened to name the two ids.
-     So the merge reports it, by value, and repairs nothing. */
+     uniqueIds preserves the original in sourceId, so the editor can resolve
+     the source's trusted sheetId without changing existing permalinks. The
+     report retains both ids for publication diagnostics. */
   const renamed = [];
   for (let i = 0; i < rows.length; i++) {
     if (rows[i].id !== ordered[i].id) {
@@ -2233,7 +2237,7 @@ export function uniqueIds(rows) {
     let id = r.id, n = 2;
     while (seen.has(id)) id = `${r.id}-${n++}`;
     seen.add(id);
-    return { ...r, id };
+    return { ...r, id, sourceId: r.sourceId || r.id };
   });
 }
 

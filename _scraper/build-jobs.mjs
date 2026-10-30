@@ -39,7 +39,7 @@ import {
   ownerTag,
   universitiesLink, ownUniversitiesLink,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
-  specMatches,
+  specMatches, suppressedBySource,
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE, backdatedDeadlines } from './jobmarket-sheet.mjs';
 import { SOURCE as POMS_SOURCE } from './poms.mjs';
@@ -1009,7 +1009,7 @@ async function main() {
 
   const freshVisible = fresh.map((f) => f.row)
     .concat(sheetPublished)
-    .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id));
+    .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id) && !suppressedBySource(r, hide.sources));
 
   if (stranded.length) {
     warn(`${stranded.length} posting(s) the maintainer had taken over could not be built from ` +
@@ -1091,7 +1091,7 @@ async function main() {
   }
 
   const merged = mergeRows(healed, freshVisible, applicable);
-  const visible = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+  const visible = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref) && !suppressedBySource(r, hide.sources));
 
   /* TWO SOURCES CAN MINT ONE ID, and the merge has just renamed whichever it
      saw second. An id is (market year, institution, posting date) and names no
@@ -1102,13 +1102,12 @@ async function main() {
      its mirror, and to the maintainer's Edit and Take-down controls, none of
      which follow it.
 
-     Reported, never repaired: a fix would move permalinks and every key joined
-     on them, which this file records as the maintainer's call. What was
-     missing is that nothing said so at all. */
+     sourceId now preserves the editing link while the public permalink stays
+     stable. Report both ids so collisions remain visible to maintainers. */
   for (const r of merged.renamed) {
     warn(`${r.from} was published as ${r.to}: two sources derived one id` +
          (r.source ? ` (this row came from ${r.source})` : '') +
-         ' — the id is a join key, so correct one of the two at its source');
+         ' — the id is a join key; sourceId preserves its editing record');
   }
 
   /* EVERY ROW NAMES THE COUNTRY ITS UNIVERSITY IS IN.

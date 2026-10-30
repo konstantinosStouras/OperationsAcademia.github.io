@@ -213,6 +213,7 @@ jobs:
         # only thing that skip could mean is that the install broke.
         run: |
           node _scraper/candidate-overview-browser-test.mjs
+          node _scraper/job-poster-controls-test.mjs
           node _scraper/school-location-test.mjs
           node _scraper/university-map-test.mjs
           node _scraper/page-test.mjs
