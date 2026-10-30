@@ -11819,13 +11819,13 @@ function testReviewDuplicates() {
   ok(/<script defer src="assets\/oa-fresh\.js">/.test(adminPage),
     'the Admin area loads the echo module');
   ok(adminPage.indexOf('<script defer src="assets/oa-fresh.js">')
-     < adminPage.indexOf('<script defer src="assets/oa-jobreview.js">'),
+     < adminPage.indexOf('<script defer src="assets/oa-jobreview.js'),
     'before the panel that stashes into it');
   ok(/id="oa-review-dupes"/.test(adminPage), 'the Admin area carries the button');
   /* SCRIPT TAGS, not the first mention: the panel is named in a comment two
      hundred lines above its own tag, so a bare indexOf compares a sentence
      with a script. */
-  const tagAt = (f) => adminPage.indexOf('<script defer src="assets/' + f + '">');
+  const tagAt = (f) => adminPage.indexOf('<script defer src="assets/' + f);
   ok(tagAt('oa-advert-dup.js') > tagAt('oa-schools.js'),
     'and loads the rule after oa-schools.js, whose institutionKey it folds names with');
   ok(tagAt('oa-advert-dup.js') < tagAt('oa-jobreview.js'),
