@@ -1,32 +1,57 @@
-name: Inspect UCL 49655 publication
+name: Repair UCL 49655 publication
 on:
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
+concurrency:
+  group: oa-jobs-data-refs/heads/master
+  cancel-in-progress: false
 jobs:
-  inspect:
+  repair:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: master
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - run: npm install --no-save --no-audit --no-fund firebase-admin@12
-      - name: Inspect only whitelisted UCL vacancy fields
+      - name: Correct only UCL vacancy 49655 and verify saved fields
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
           node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
           import {firestore} from './_scraper/_mail.mjs';
           const db=await firestore(); if(!db) throw Error('No database');
-          const keys=['id','institution','school','unit','type','levels','country','applyByDate','reviewDate','adUrl','postedAtUrl','furtherInfoUrl','applicationStatus','source'];
-          const clean=r=>Object.fromEntries(keys.filter(k=>r&&k in r).map(k=>[k,r[k]]));
+          const id='2027-ucl-global-business-school-for-health-20261030';
           const match=r=>[r?.adUrl,r?.postedAtUrl].some(u=>/jobId=(?:Q1KFK026203F3VBQBLO8M8M07-)?49655(?:&|$)/.test(u||''));
-          for(const c of ['jobReviews','jobSubmissions']) {
-            const s=await db.collection(c).get();
-            for(const d of s.docs) {
-              const v=d.data(); if(!match(v.row)&&!match(v)&&!match(v.edits)) continue;
-              console.log(JSON.stringify({collection:c,id:d.id,status:v.status,reviewedAt:typeof v.reviewedAt==='string'?v.reviewedAt:undefined,row:clean(v.row||v),edits:clean(v.edits)}));
-            }
-          }
+          const snap=await db.collection('jobReviews').get();
+          const matches=snap.docs.filter(d=>match(d.data().row)||match(d.data().edits));
+          assert.equal(matches.length,1,'Expected exactly one review document');
+          assert.equal(matches[0].id,id);
+          const ref=matches[0].ref; const v=matches[0].data();
+          assert.equal(v.status,'approved'); assert.equal(v.row.source,'jobmarket-sheet');
+          const pub=await (await fetch('https://www.operationsacademia.org/data/jobs.json')).json();
+          assert.equal(pub.filter(match).filter(r=>r.id!==id).length,0,'A matching vacancy is already live under another ID');
+          const patch={institution:'University College London',school:'UCL Global Business School for Health',unit:'Sustainable Supply Chain Management',type:'Business School',levels:['Non-tenure track (teaching) position'],country:'United Kingdom',applyByDate:'2026-11-30',reviewDate:'',adUrl:'https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=49655',postedAtUrl:'https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/apply?jobId=Q1KFK026203F3VBQBLO8M8M07-49655&langCode=en_GB',furtherInfoUrl:'https://www.ucl.ac.uk/population-health-sciences/global-business-school-health',applicationStatus:''};
+          await db.runTransaction(async tx=>{const s=await tx.get(ref); assert.deepEqual(s.data(),v,'Document changed during repair'); tx.update(ref,{edits:{...(v.edits||{}),...patch}});});
+          const saved=(await ref.get()).data();
+          for(const [k,val] of Object.entries(patch)) assert.deepEqual(saved.edits[k],val,'Saved field '+k);
+          assert.deepEqual(saved.row,v.row); assert.equal(saved.reviewedAt,v.reviewedAt); assert.equal(saved.status,v.status); assert.equal(saved.edits.comments,v.edits?.comments);
+          console.log(JSON.stringify({id,status:saved.status,verifiedFields:patch,commentsUnchanged:true,originalApprovalTimePreserved:true}));
           JS
+      - name: Regenerate domain outputs from committed directory
+        run: node _scraper/build-netmap.mjs
+      - name: Verify publishing checks
+        run: node _scraper/selftest.mjs --publishing
+      - name: Commit only regenerated domain outputs if needed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/university-domains.json _functions/university-domains.json _functions/netorg.js
+          if ! git diff --cached --quiet; then
+            git commit -m 'Regenerate university domains from committed directory'
+            git push origin HEAD:master
+          fi
