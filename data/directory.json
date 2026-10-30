@@ -21428,6 +21428,17 @@
   }
  },
  {
+  "id": "ucl-global-business-school-for-health____sustainable-supply-chain-management",
+  "institution": "UCL Global Business School for Health",
+  "department": "Sustainable Supply Chain Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "ucl-school-of-management____om",
   "institution": "UCL School of Management",
   "department": "OM",
