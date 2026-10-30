@@ -16646,6 +16646,306 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official school page identifies business tower and marketing/business analytics faculty contact lists tower offices. Address is university mailing address."
+    },
+    {
+      "id": "asu-supply-chain-ba",
+      "institution": "Arizona State University",
+      "rowIds": [
+        "arizona-state-university__w-p-carey-school-of-business__supply-chain-management"
+      ],
+      "school": "W. P. Carey School of Business",
+      "department": "Supply Chain Management",
+      "building": "Business Administration",
+      "address": "300 East Lemon Street, Tempe, AZ 85281, United States",
+      "lat": 33.4165566,
+      "lng": -111.9344819,
+      "addressSource": "https://wpcarey.asu.edu/people/departments/supply-chain-management",
+      "coordinateSource": "https://catalog.asu.edu/sites/g/files/litvpz1446/files/2024-08/2024-25_Academic%20Catalog%20Archive.pdf",
+      "supportingSources": [
+        "https://search.asu.edu/profile/1730262"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official NASPO department directory gives its main office as BA 445; an ASU professor identifies BA as Business Administration, 300 East Lemon. The university catalog links a map marker to this building."
+    },
+    {
+      "id": "asu-information-systems-bac",
+      "institution": "Arizona State University",
+      "rowIds": [
+        "arizona-state-university__w-p-carey-school-of-business__information-systems"
+      ],
+      "school": "W. P. Carey School of Business",
+      "department": "Information Systems",
+      "building": "Business Administration C Wing",
+      "address": "400 East Lemon Street, Tempe, AZ 85281, United States",
+      "lat": 33.41655,
+      "lng": -111.93385,
+      "addressSource": "https://www.wpcarey.asu.edu/people/departments/information-systems",
+      "coordinateSource": "https://mapcarta.com/W28821973",
+      "supportingSources": [
+        "https://tours.asu.edu/tempe/business-administration-c-wing"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official directory locates multiple Information Systems faculty in BAC, the C Wing; some faculty are in other buildings, so this pin identifies one shared departmental building."
+    },
+    {
+      "id": "iowa-state-gerdin-information-systems-and-business-analytics",
+      "institution": "Iowa State University",
+      "rowIds": [
+        "iowa-state-university__ivy-college-of-business__information-systems-and-business-analytics"
+      ],
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "Information Systems and Business Analytics",
+      "building": "Gerdin Business Building",
+      "address": "2167 Union Drive, Ames, IA 50011, United States",
+      "lat": 42.02531,
+      "lng": -93.64429,
+      "addressSource": "https://www.iastate.edu/frequent-contacts",
+      "coordinateSource": "https://mapcarta.com/W158023223",
+      "supportingSources": [
+        "https://catalog.iastate.edu/collegeofbusiness/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Iowa State lists Ivy College at the named Gerdin Business Building. This is a school building reference, not a separately verified office for this department."
+    },
+    {
+      "id": "iowa-state-gerdin-supply-chain-and-information-systems",
+      "institution": "Iowa State University",
+      "rowIds": [
+        "iowa-state-university__ivy-college-of-business__supply-chain-and-information-systems"
+      ],
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "Supply Chain and Information Systems",
+      "building": "Gerdin Business Building",
+      "address": "2167 Union Drive, Ames, IA 50011, United States",
+      "lat": 42.02531,
+      "lng": -93.64429,
+      "addressSource": "https://www.iastate.edu/frequent-contacts",
+      "coordinateSource": "https://mapcarta.com/W158023223",
+      "supportingSources": [
+        "https://catalog.iastate.edu/collegeofbusiness/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Iowa State lists Ivy College at the named Gerdin Business Building. This is a school building reference, not a separately verified office for this department."
+    },
+    {
+      "id": "iowa-state-gerdin-supply-chain-management",
+      "institution": "Iowa State University",
+      "rowIds": [
+        "iowa-state-university__ivy-college-of-business__supply-chain-management"
+      ],
+      "school": "Debbie and Jerry Ivy College of Business",
+      "department": "Supply Chain Management",
+      "building": "Gerdin Business Building",
+      "address": "2167 Union Drive, Ames, IA 50011, United States",
+      "lat": 42.02531,
+      "lng": -93.64429,
+      "addressSource": "https://www.iastate.edu/frequent-contacts",
+      "coordinateSource": "https://mapcarta.com/W158023223",
+      "supportingSources": [
+        "https://catalog.iastate.edu/collegeofbusiness/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Iowa State lists Ivy College at the named Gerdin Business Building. This is a school building reference, not a separately verified office for this department."
+    },
+    {
+      "id": "american-university-kogod-building",
+      "institution": "Kogod School of Business",
+      "rowIds": [
+        "kogod-school-of-business"
+      ],
+      "school": "Kogod School of Business",
+      "building": "Kogod School of Business Building",
+      "address": "4400 Massachusetts Avenue NW, Washington, DC 20016, United States",
+      "lat": 38.93804,
+      "lng": -77.08786,
+      "addressSource": "https://www.american.edu/directory/?d=departments&id=1176",
+      "coordinateSource": "https://mapcarta.com/W90190738",
+      "supportingSources": [
+        "https://www.american.edu/profiles/staff/christina.cfm"
+      ],
+      "checked": "2026-10-30",
+      "notes": "American University lists the Kogod School physical location as its named business school building; coordinates identify that building."
+    },
+    {
+      "id": "indiana-kelley-operations-hodge",
+      "institution": "Indiana University",
+      "rowIds": [
+        "indiana-university__kelley-school-of-business__operations-and-decision-technologies"
+      ],
+      "school": "Kelley School of Business",
+      "department": "Operations and Decision Technologies",
+      "building": "Hodge Hall",
+      "address": "1309 East Tenth Street, Bloomington, IN 47405, United States",
+      "lat": 39.17201,
+      "lng": -86.51836,
+      "addressSource": "https://kelley.iu.edu/faculty-research/departments/operations-decision-technologies/faculty/contact-us/index.html",
+      "coordinateSource": "https://mapcarta.com/W154762706",
+      "supportingSources": [
+        "https://cpf.iu.edu/capital-projects/leed-projects/gold-projects/hodge-hall.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The official department contact lists suite 4100 at 1309 East Tenth Street; Indiana University identifies that address as Hodge Hall."
+    },
+    {
+      "id": "missouri-st-engineering-management",
+      "institution": "Missouri University of Science and Technology",
+      "rowIds": [
+        "missouri-university-of-science-and-technology____engineering-management-and-systems-engineering"
+      ],
+      "school": "",
+      "department": "Engineering Management and Systems Engineering",
+      "building": "Engineering Management Building",
+      "address": "203 Engineering Management, 600 W. 14th Street, Rolla, MO 65409, United States",
+      "lat": 37.955369,
+      "lng": -91.775086,
+      "addressSource": "https://emse.mst.edu/advising/",
+      "coordinateSource": "https://designconstruction.mst.edu/media/campussupport/designconstruction/documents/Engineering%20Management%20Building%20%282%29.pdf",
+      "supportingSources": [
+        "https://designconstruction.mst.edu/floorplan/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official departmental contact identifies the office and university building plan gives GIS coordinates."
+    },
+    {
+      "id": "montclair-feliciano-building",
+      "institution": "Montclair State University",
+      "rowIds": [
+        "montclair-state-university__feliciano-school-of-business__information-management-and-business-analytics"
+      ],
+      "school": "Feliciano School of Business",
+      "department": "Information Management and Business Analytics",
+      "building": "Feliciano School of Business",
+      "address": "1 Normal Avenue, Montclair, NJ 07043, United States",
+      "lat": 40.86176,
+      "lng": -74.19985,
+      "addressSource": "https://www.montclair.edu/business/wp-content/uploads/sites/263/2024/06/FelicianoBiz_2024_FINAL.pdf",
+      "coordinateSource": "https://mapcarta.com/W375626230",
+      "supportingSources": [
+        "https://inside.montclair.edu/directory/rashmi-jain",
+        "https://inside.montclair.edu/news/feliciano-school-business-celebrates-10th-anniversary-buildings-opening"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University names and maps the school building; campus mailing address is given. The pin is a school reference."
+    },
+    {
+      "id": "nc-state-poole-nelson",
+      "institution": "NC State University",
+      "rowIds": [
+        "nc-state-university__poole-college-of-management__business-management-operations-and-supply-chain"
+      ],
+      "school": "Poole College of Management",
+      "department": "Business Management/Operations and Supply Chain",
+      "building": "Nelson Hall",
+      "address": "2801 Founders Drive, Raleigh, NC 27607, United States",
+      "lat": 35.78836,
+      "lng": -78.67397,
+      "addressSource": "https://poole.ncsu.edu/contact-development-team/",
+      "coordinateSource": "https://mapcarta.com/26734728",
+      "supportingSources": [
+        "https://scm.ncsu.edu/wp-content/uploads/sites/29/2019/08/Tim-Kraft-CV_080819.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "College contact and supply-chain faculty CV identify Nelson Hall; school reference."
+    },
+    {
+      "id": "stanford-msande-huang",
+      "institution": "Stanford University",
+      "rowIds": [
+        "stanford-university__department-of-management-science-and-engineering-ms-e"
+      ],
+      "school": "Department of Management Science and Engineering (MS&E)",
+      "department": "Management Science and Engineering",
+      "building": "Jen-Hsun Huang Engineering Center",
+      "address": "475 Via Ortega, Stanford, CA 94305, United States",
+      "lat": 37.4278806,
+      "lng": -122.1742972,
+      "addressSource": "https://msande.stanford.edu/get-involved/contact-us",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q99570321",
+      "supportingSources": [
+        "https://msande.stanford.edu/academics-admissions/student-services-office"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department contact identifies Huang Engineering Center; coordinate source cites Stanford campus map."
+    },
+    {
+      "id": "northwestern-iems-technological-institute",
+      "institution": "Northwestern University",
+      "rowIds": [
+        "northwestern-university__mccormick-school-of-engineering__industrial-engineering-and-management-sciences"
+      ],
+      "school": "McCormick School of Engineering",
+      "department": "Industrial Engineering and Management Sciences",
+      "building": "Technological Institute",
+      "address": "2145 Sheridan Road, Tech C210, Evanston, IL 60208, United States",
+      "lat": 42.05782,
+      "lng": -87.67586,
+      "addressSource": "https://informs.iems.northwestern.edu/contact-us/",
+      "coordinateSource": "https://mapcarta.com/22172240",
+      "supportingSources": [
+        "https://maps.northwestern.edu/txt/facility/132"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University chapter identifies department at Tech C210; university campus map identifies Technological Institute address."
+    },
+    {
+      "id": "oklahoma-state-iem-engineering-north",
+      "institution": "Oklahoma State University",
+      "rowIds": [
+        "oklahoma-state-university__school-of-industrial-engineering-and-management"
+      ],
+      "school": "School of Industrial Engineering and Management",
+      "department": "Industrial Engineering and Management",
+      "building": "Engineering North",
+      "address": "354 Engineering North, Stillwater, OK 74078, United States",
+      "lat": 36.12388,
+      "lng": -97.06912,
+      "addressSource": "https://ceat.okstate.edu/iem/contact-us",
+      "coordinateSource": "https://mapcarta.com/W116506570",
+      "supportingSources": [
+        "https://ceat.okstate.edu/iem/current-students/ms-iem-graduate-program-information"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official IEM contact identifies room 354 in Engineering North."
+    },
+    {
+      "id": "northeastern-mechanical-industrial-snell",
+      "institution": "Northeastern University",
+      "rowIds": [
+        "northeastern-university__college-of-engineering__mechanical-and-industrial-engineering"
+      ],
+      "school": "College of Engineering",
+      "department": "Mechanical and Industrial Engineering",
+      "building": "Snell Engineering Center",
+      "address": "334 Snell Engineering Center, 360 Huntington Avenue, Boston, MA 02115, United States",
+      "lat": 42.33829,
+      "lng": -71.08885,
+      "addressSource": "https://coe.northeastern.edu/people/gupta-surendra/",
+      "coordinateSource": "https://mapcarta.com/22248062",
+      "supportingSources": [
+        "https://coe.northeastern.edu/visit/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University engineering contact identifies Snell Engineering Center. Pin is named building location; department has multiple offices."
+    },
+    {
+      "id": "rpi-ise-low-center",
+      "institution": "Rensselaer Polytechnic Institute (RPI)",
+      "rowIds": [
+        "rensselaer-polytechnic-institute__school-of-engineering__industrial-and-systems-engineering"
+      ],
+      "school": "School of Engineering",
+      "department": "Industrial and Systems Engineering",
+      "building": "George M. Low Center for Industrial Innovation",
+      "address": "Suite 5015, 110 8th Street, Troy, NY 12180, United States",
+      "lat": 42.7292,
+      "lng": -73.6786,
+      "addressSource": "https://ise.rpi.edu/contact",
+      "coordinateSource": "https://commons.wikimedia.org/wiki/Category:George_M._Low_Center_for_Industrial_Innovation",
+      "supportingSources": [
+        "https://idea.rpi.edu/contact"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official department contact identifies its suite in Low Center; coordinates identify building."
     }
   ]
 }

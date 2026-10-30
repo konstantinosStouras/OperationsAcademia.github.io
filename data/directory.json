@@ -1037,11 +1037,23 @@
     "department": "IS"
    }
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "asu-information-systems-bac"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "W. P. Carey School of Business",
+   "Information Systems",
    "IS"
   ],
+  "mapInstitutionNames": [
+   "Arizona State University"
+  ],
+  "mapDepartmentLinks": {
+   "asu-information-systems-bac": {
+    "facultyUrl": "https://wpcarey.asu.edu/people/departments/information-systems"
+   }
+  },
   "facultyUrl": "https://wpcarey.asu.edu/people/departments/information-systems"
  },
  {
@@ -1063,8 +1075,17 @@
   "lastPosted": "2025-11-09",
   "lat": 33.4166016,
   "lng": -111.9341819,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "asu-supply-chain-ba"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Arizona State University"
+  ],
+  "mapSearchTerms": [
+   "W. P. Carey School of Business",
+   "Supply Chain Management"
+  ]
  },
  {
   "id": "arkansas-tech-university____om-scm",
@@ -9825,8 +9846,17 @@
   "lastPosted": "2026-08-21",
   "lat": 39.1734058,
   "lng": -86.5189087,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "indiana-kelley-operations-hodge"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Indiana University"
+  ],
+  "mapSearchTerms": [
+   "Kelley School of Business",
+   "Operations and Decision Technologies"
+  ]
  },
  {
   "id": "indiana-university-bloomington__kelley-school-of-business__operations-and-decision-technologies",
@@ -10203,8 +10233,22 @@
   ],
   "n": 1,
   "lastPosted": "2025-10-06",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "iowa-state-gerdin-information-systems-and-business-analytics"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Iowa State University"
+  ],
+  "mapSearchTerms": [
+   "Debbie and Jerry Ivy College of Business",
+   "Information Systems and Business Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "iowa-state-gerdin-information-systems-and-business-analytics": {
+    "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=ISBA"
+   }
+  },
   "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=ISBA"
  },
  {
@@ -10222,8 +10266,17 @@
   ],
   "lat": 42.0254011,
   "lng": -93.6444688,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "iowa-state-gerdin-supply-chain-and-information-systems"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Iowa State University"
+  ],
+  "mapSearchTerms": [
+   "Debbie and Jerry Ivy College of Business",
+   "Supply Chain and Information Systems"
+  ]
  },
  {
   "id": "iowa-state-university__ivy-college-of-business__supply-chain-management",
@@ -10240,8 +10293,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-07-14",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "iowa-state-gerdin-supply-chain-management"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Iowa State University"
+  ],
+  "mapSearchTerms": [
+   "Debbie and Jerry Ivy College of Business",
+   "Supply Chain Management"
+  ],
+  "mapDepartmentLinks": {
+   "iowa-state-gerdin-supply-chain-management": {
+    "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM"
+   }
+  },
   "facultyUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM"
  },
  {
@@ -11016,8 +11083,16 @@
   "lastPosted": "2014-04-08",
   "lat": 38.9379737,
   "lng": -77.0890599,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "american-university-kogod-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Kogod School of Business"
+  ],
+  "mapSearchTerms": [
+   "Kogod School of Business"
+  ]
  },
  {
   "id": "korea-university__korea-university-business-school__logistics-service-and-operations-management",
@@ -12671,8 +12746,16 @@
   ],
   "lat": 37.9528228,
   "lng": -91.7738192,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "missouri-st-engineering-management"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Missouri University of Science and Technology"
+  ],
+  "mapSearchTerms": [
+   "Engineering Management and Systems Engineering"
+  ]
  },
  {
   "id": "mit__laboratory-for-information-and-decision-systems__ai-ml-ds-stats",
@@ -12848,8 +12931,17 @@
   "lastPosted": "2026-09-05",
   "lat": 40.858346,
   "lng": -74.2003358,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "montclair-feliciano-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Montclair State University"
+  ],
+  "mapSearchTerms": [
+   "Feliciano School of Business",
+   "Information Management and Business Analytics"
+  ]
  },
  {
   "id": "morgan-state-university____information-science-and-systems",
@@ -13584,8 +13676,17 @@
   ],
   "lat": 35.7882864,
   "lng": -78.6739567,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "nc-state-poole-nelson"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "NC State University"
+  ],
+  "mapSearchTerms": [
+   "Poole College of Management",
+   "Business Management/Operations and Supply Chain"
+  ]
  },
  {
   "id": "neeley-school-of-business-texas-christian-univ____supply-chain-management",
@@ -14463,8 +14564,17 @@
   ],
   "lat": 42.3383072,
   "lng": -71.0887778,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "northeastern-mechanical-industrial-snell"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Northeastern University"
+  ],
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Mechanical and Industrial Engineering"
+  ]
  },
  {
   "id": "northeastern-university__d-amore-mckim-school-of-business__supply-chain-and-information-management",
@@ -14764,8 +14874,17 @@
   "lastPosted": "2026-08-12",
   "lat": 42.0574908,
   "lng": -87.6758491,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "northwestern-iems-technological-institute"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Northwestern University"
+  ],
+  "mapSearchTerms": [
+   "McCormick School of Engineering",
+   "Industrial Engineering and Management Sciences"
+  ]
  },
  {
   "id": "nova-school-of-business-and-economics",
@@ -15208,8 +15327,17 @@
   ],
   "lat": 36.1156071,
   "lng": -97.0583681,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "oklahoma-state-iem-engineering-north"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Oklahoma State University"
+  ],
+  "mapSearchTerms": [
+   "School of Industrial Engineering and Management",
+   "Industrial Engineering and Management"
+  ]
  },
  {
   "id": "oklahoma-state-university__spears-school-of-business__management-science-and-information-systems-center-for-health",
@@ -15694,7 +15822,9 @@
   "n": 1,
   "lastPosted": "2026-10-18",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.ing.uc.cl/academicos-e-investigacion/academicos-e-investigadores/",
+  "facultyDirectoryHint": "This school-wide list covers all engineering departments, including Industrial and Systems Engineering and Electrical Engineering."
  },
  {
   "id": "pontificia-universidad-catolica-de-chile__school-of-management__management-science",
@@ -16447,8 +16577,17 @@
   ],
   "lat": 42.7284117,
   "lng": -73.6917851,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "rpi-ise-low-center"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Rensselaer Polytechnic Institute (RPI)"
+  ],
+  "mapSearchTerms": [
+   "School of Engineering",
+   "Industrial and Systems Engineering"
+  ]
  },
  {
   "id": "rice-university__jesse-h-jones-graduate-school-of-business__operations-management",
@@ -18798,8 +18937,17 @@
   ],
   "lat": 37.4284807,
   "lng": -122.1704363,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "stanford-msande-huang"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Stanford University"
+  ],
+  "mapSearchTerms": [
+   "Department of Management Science and Engineering (MS&E)",
+   "Management Science and Engineering"
+  ]
  },
  {
   "id": "stanford-university__school-of-engineering__management-science-and-engineering",
@@ -32236,7 +32384,9 @@
   "n": 1,
   "lastPosted": "2026-10-27",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://woxsen.edu.in/Faculty/",
+  "facultyDirectoryHint": "This directory covers the entire university; inspect faculty specialisations and school affiliations for business analytics."
  },
  {
   "id": "wu-vienna__vienna-university-of-economics-and-business__information-systems-and-operations",

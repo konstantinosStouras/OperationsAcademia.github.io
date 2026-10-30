@@ -8030,6 +8030,31 @@
       ],
       "checked": "2026-10-30",
       "notes": "Campus-wide faculty roster verified in Chrome. Andrea Lodi’s profile confirms Cornell Tech affiliation with operations research and information engineering."
+    },
+    {
+      "institution": "Pontificia Universidad Catolica de Chile (PUC)",
+      "school": "School of Engineering",
+      "department": "Industrial and Systems Engineering and Electrical Engineering",
+      "facultyUrl": "https://www.ing.uc.cl/academicos-e-investigacion/academicos-e-investigadores/",
+      "directoryFilter": "This school-wide list covers all engineering departments, including Industrial and Systems Engineering and Electrical Engineering.",
+      "sources": [
+        "https://www.ing.uc.cl/academicos-e-investigacion/academicos-e-investigadores/",
+        "https://www.ing.uc.cl/en/academicos-e-investigacion/areas-academicas/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The School of Engineering faculty directory covers both independently listed departments."
+    },
+    {
+      "institution": "Woxsen University",
+      "school": "School of Business",
+      "department": "Business Analytics",
+      "facultyUrl": "https://woxsen.edu.in/Faculty/",
+      "directoryFilter": "This directory covers the entire university; inspect faculty specialisations and school affiliations for business analytics.",
+      "sources": [
+        "https://woxsen.edu.in/Faculty/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official university faculty directory includes school of business staff and data analytics expertise; it is not a department-specific roster."
     }
   ]
 }
