@@ -7856,6 +7856,180 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official ITAO department people directory."
+    },
+    {
+      "institution": "Saint Mary's College of California",
+      "school": "",
+      "department": "BA and DS",
+      "facultyUrl": "https://www.stmarys-ca.edu/academics/schools/economics-business-administration/faculty",
+      "directoryFilter": "Find the Business Analytics & Data Science section; other departments are also listed.",
+      "notes": "Official college roster is organized by department.",
+      "sources": [
+        "https://www.stmarys-ca.edu/academics/schools/economics-business-administration/faculty"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "Özyeğin University",
+      "school": "Faculty of Business",
+      "department": "Management Information Systems",
+      "facultyUrl": "https://www.ozyegin.edu.tr/en/management-information-systems/faculty-members",
+      "directoryFilter": "This directory also lists colleagues in other disciplines; check their subject labels.",
+      "notes": "Official MIS faculty directory.",
+      "sources": [
+        "https://www.ozyegin.edu.tr/en/management-information-systems/faculty-members"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "University of North Dakota",
+      "school": "Nistler College of Business and Public Administration",
+      "department": "Middleton School of Entrepreneurship and Management",
+      "facultyUrl": "https://business.und.edu/academics/school-of-entrepreneurship-and-management/faculty-staff-mgmt.html",
+      "notes": "Official Middleton School faculty and staff directory.",
+      "sources": [
+        "https://business.und.edu/academics/school-of-entrepreneurship-and-management/faculty-staff-mgmt.html"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "UCLouvain",
+      "school": "Louvain School of Management",
+      "department": "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE",
+      "facultyUrl": "https://uclouvain.be/en/research-institutes/lidam/directory",
+      "directoryFilter": "Use the people categories and identify CORE; this directory covers the entire LIDAM institute.",
+      "notes": "Official LIDAM people directory includes CORE alongside other research centres.",
+      "sources": [
+        "https://uclouvain.be/en/research-institutes/lidam/directory"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "University of Lethbridge",
+      "school": "Mathematics and Computer Science",
+      "department": "Optimization Research",
+      "facultyUrl": "https://www.ulethbridge.ca/artsci/math-computer-science/optimization-research-group",
+      "notes": "Official Optimization Research Group page names its faculty members.",
+      "sources": [
+        "https://www.ulethbridge.ca/artsci/math-computer-science/optimization-research-group"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "UCL Global Business School for Health",
+      "school": "",
+      "department": "Sustainable Supply Chain Management",
+      "facultyUrl": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people",
+      "directoryFilter": "See Core Academic Staff; the page covers the whole school and other roles, not only supply chain.",
+      "notes": "School people directory; official profile identifies operations and supply management as an area at the school.",
+      "sources": [
+        "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people",
+        "https://www.ucl.ac.uk/population-health-sciences/news/2022/mar/spotlight-dr-rodolfo-catena-lecturer-operations-and-supply-management"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "Woosong University",
+      "school": "SolBridge International School of Business",
+      "department": "Analytics and AI for Business/Operations and Supply Chain Management",
+      "facultyUrl": "https://www.solbridge.ac.kr/story/page/index.jsp?code=solbridge_n020103",
+      "directoryFilter": "Review professors’ subject specialisations; the list covers the full business school.",
+      "notes": "Official SolBridge professors directory lists expertise across business including operations and supply chain management.",
+      "sources": [
+        "https://www.solbridge.ac.kr/story/page/index.jsp?code=solbridge_n020103"
+      ],
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "KAIST",
+      "school": "",
+      "department": "Organization/Man. Sci",
+      "facultyUrl": "https://www.business.kaist.ac.kr/_prog/prof/index.php?menu_dvs_cd=040101&site_dvs_cd=kr",
+      "directoryFilter": "The Korean-language directory covers all business faculty; use the subject links for Technology/Organization/Strategy and Operations Strategy/Management Science.",
+      "sources": [
+        "https://www.business.kaist.ac.kr/_prog/prof/index.php?menu_dvs_cd=040101&site_dvs_cd=kr",
+        "https://www.business.kaist.ac.kr/html/en/sub05/sub05_0502.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official college roster encompasses both advertised subject areas, which are distinct research categories."
+    },
+    {
+      "institution": "University of Alabama in Huntsville",
+      "school": "College of Business",
+      "department": "Information Systems, Supply Chain, and Analytics",
+      "facultyUrl": "https://www.uah.edu/business/faculty-staff/",
+      "directoryFilter": "See Information Systems and Management Science faculty sections; the directory covers the whole college.",
+      "sources": [
+        "https://www.uah.edu/business/faculty-staff/",
+        "https://www.uah.edu/hr/careers/faculty-careers"
+      ],
+      "checked": "2026-10-30",
+      "notes": "College directory lists department chair and separates information systems and management science faculty by discipline."
+    },
+    {
+      "institution": "University of San Diego",
+      "school": "",
+      "department": "OM/BA",
+      "facultyUrl": "https://www.sandiego.edu/business/faculty-and-research/faculty-directory.php",
+      "directoryFilter": "Choose Department and find Supply Chain, Operations and Information Systems; the directory covers the whole Knauss School.",
+      "sources": [
+        "https://www.sandiego.edu/business/faculty-and-research/faculty-directory.php",
+        "https://www.sandiego.edu/newscenter/166095"
+      ],
+      "notes": "Official faculty directory; school identifies operations and business analytics within Supply Chain, Operations and Information Systems.",
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "Rutgers University",
+      "school": "Edward J. Bloustein School of Planning and Public Policy",
+      "department": "Health Informatics",
+      "facultyUrl": "https://bloustein.rutgers.edu/faculty/",
+      "directoryFilter": "This is the entire Bloustein School faculty directory, covering public policy and planning as well as health fields.",
+      "sources": [
+        "https://bloustein.rutgers.edu/faculty/",
+        "https://jobs.rutgers.edu/postings/282929"
+      ],
+      "notes": "The advertised area is within the Bloustein School and spans health administration and public informatics; school-wide directory is provided with explicit scope.",
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "University of Sydney",
+      "school": "Faculty of Engineering",
+      "department": "Engineering and AI",
+      "facultyUrl": "https://profiles.sydney.edu.au/groups/177675/experts",
+      "directoryFilter": "This directory covers all Faculty of Engineering researchers, including many fields beyond AI.",
+      "sources": [
+        "https://www.sydney.edu.au/engineering/about/our-people.html",
+        "https://profiles.sydney.edu.au/groups/177675/experts"
+      ],
+      "notes": "Official Faculty of Engineering expert directory.",
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "University of Nevada, Reno",
+      "school": "College of Engineering",
+      "department": "Mechanical, Industrial, and Materials Engineering",
+      "facultyUrl": "https://www.unr.edu/me/people",
+      "directoryFilter": "This is the mechanical engineering people page, including the head of the broader school; it may not cover every industrial and materials faculty member.",
+      "sources": [
+        "https://www.unr.edu/me/people",
+        "https://www.unr.edu/me/people/sara-shonkwiler"
+      ],
+      "notes": "The school head is identified on the official mechanical engineering people page. Industrial engineering is also offered through chemical and materials engineering; do not treat this as exhaustive.",
+      "checked": "2026-10-30"
+    },
+    {
+      "institution": "Cornell University (Cornell Tech)",
+      "school": "",
+      "department": "Operations Research and Information Engineering",
+      "facultyUrl": "https://tech.cornell.edu/people/faculty/",
+      "directoryFilter": "This is the campus-wide Cornell Tech faculty and affiliated roster, covering many fields beyond operations research and information engineering.",
+      "sources": [
+        "https://tech.cornell.edu/people/faculty/",
+        "https://tech.cornell.edu/people/andrea-lodi/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Campus-wide faculty roster verified in Chrome. Andrea Lodi’s profile confirms Cornell Tech affiliation with operations research and information engineering."
     }
   ]
 }

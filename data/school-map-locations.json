@@ -16129,6 +16129,523 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official university identifies Mendoza building as a business-school location; pin is a school reference."
+    },
+    {
+      "id": "cmu-tepper-school",
+      "institution": "Carnegie Mellon University",
+      "rowIds": [
+        "carnegie-mellon-university__tepper-school-of-business"
+      ],
+      "school": "Tepper School of Business",
+      "building": "Tepper Quadrangle",
+      "address": "4765 Forbes Avenue, Pittsburgh, PA 15213, United States",
+      "lat": 40.44513,
+      "lng": -79.94537,
+      "addressSource": "https://www.cmu.edu/tepper/directions",
+      "coordinateSource": "https://mapcarta.com/25001414",
+      "supportingSources": [
+        "https://www.cmu.edu/cdfd/buildings/tepper-quad/index.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The university identifies Tepper School building at this street address; the named school map point supplies coordinates. This is a school-level location, not a separately verified department office."
+    },
+    {
+      "id": "cmu-tepper-business-technologies",
+      "institution": "Carnegie Mellon University",
+      "rowIds": [
+        "carnegie-mellon-university__tepper-school-of-business__business-technologies"
+      ],
+      "school": "Tepper School of Business",
+      "department": "Business Technologies",
+      "building": "Tepper Quadrangle",
+      "address": "4765 Forbes Avenue, Pittsburgh, PA 15213, United States",
+      "lat": 40.44513,
+      "lng": -79.94537,
+      "addressSource": "https://www.cmu.edu/tepper/directions",
+      "coordinateSource": "https://mapcarta.com/25001414",
+      "supportingSources": [
+        "https://www.cmu.edu/cdfd/buildings/tepper-quad/index.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The university identifies Tepper School building at this street address; the named school map point supplies coordinates. This is a school-level location, not a separately verified department office."
+    },
+    {
+      "id": "cmu-tepper-operations-management",
+      "institution": "Carnegie Mellon University",
+      "rowIds": [
+        "carnegie-mellon-university__tepper-school-of-business__operations-management"
+      ],
+      "school": "Tepper School of Business",
+      "department": "Operations Management",
+      "building": "Tepper Quadrangle",
+      "address": "4765 Forbes Avenue, Pittsburgh, PA 15213, United States",
+      "lat": 40.44513,
+      "lng": -79.94537,
+      "addressSource": "https://www.cmu.edu/tepper/directions",
+      "coordinateSource": "https://mapcarta.com/25001414",
+      "supportingSources": [
+        "https://www.cmu.edu/cdfd/buildings/tepper-quad/index.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The university identifies Tepper School building at this street address; the named school map point supplies coordinates. This is a school-level location, not a separately verified department office."
+    },
+    {
+      "id": "emory-goizueta-information-operations",
+      "institution": "Emory University",
+      "rowIds": [
+        "emory-university__goizueta-business-school__information-systems-operations-management"
+      ],
+      "school": "Goizueta Business School",
+      "department": "Information Systems & Operations Management",
+      "building": "Goizueta Foundation Building",
+      "address": "1300 Clifton Road NE, Atlanta, GA 30322, United States",
+      "lat": 33.79002,
+      "lng": -84.32228,
+      "addressSource": "https://goizueta.emory.edu/contact",
+      "coordinateSource": "https://mapcarta.com/W65956875",
+      "supportingSources": [
+        "https://goizueta.emory.edu/full-time-mba/two-year-mba/admissions/events"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The school identifies its address and campus buildings. The named Foundation Building is a school-level location, not a separately verified department office."
+    },
+    {
+      "id": "harvard-kennedy-school-littauer",
+      "institution": "Harvard Kennedy School",
+      "rowIds": [
+        "harvard-kennedy-school"
+      ],
+      "school": "Harvard Kennedy School",
+      "building": "Littauer Center",
+      "address": "79 John F. Kennedy Street, Cambridge, MA 02138, United States",
+      "lat": 42.37103,
+      "lng": -71.1221,
+      "addressSource": "https://www.hks.harvard.edu/index.php/more/contact-us",
+      "coordinateSource": "https://mapcarta.com/W29935534",
+      "checked": "2026-10-30",
+      "notes": "The official contact page identifies the Kennedy School campus and Littauer Center among its principal buildings. The point identifies Littauer Center, not every office within the campus."
+    },
+    {
+      "id": "baruch-management-newman-vertical",
+      "institution": "Baruch College, The City University of New York (CUNY)",
+      "rowIds": [
+        "baruch-college-the-city-university-of-new-york__zicklin-school-of-business__management"
+      ],
+      "school": "Zicklin School of Business",
+      "department": "Management",
+      "building": "Newman Vertical Campus",
+      "address": "55 Lexington Avenue, New York, NY 10010, United States",
+      "lat": 40.74019,
+      "lng": -73.98337,
+      "addressSource": "https://zicklin.baruch.cuny.edu/faculty-research/academic-departments/management/",
+      "coordinateSource": "https://mapcarta.com/W264761202",
+      "supportingSources": [
+        "https://www.baruch.cuny.edu/campus-map-and-directions/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department contact identifies the ninth floor of Newman Vertical Campus, whose university campus map and named building map provide location."
+    },
+    {
+      "id": "cornell-services-management-statler",
+      "institution": "Cornell University",
+      "rowIds": [
+        "cornell-university__cornell-sc-johnson-college-of-business__services-management"
+      ],
+      "school": "Cornell SC Johnson College of Business",
+      "department": "Services Management",
+      "building": "Statler Hall",
+      "address": "Statler Hall, 106 Statler Drive, Ithaca, NY 14853, United States",
+      "lat": 42.44575,
+      "lng": -76.48206,
+      "addressSource": "https://business.cornell.edu/profiles/meo84/",
+      "coordinateSource": "https://mapcarta.com/26717622",
+      "supportingSources": [
+        "https://business.cornell.edu/profiles/gmt1/",
+        "https://english.cornell.edu/degree-recognition-ceremony"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official services management faculty profiles place their offices in Statler Hall; the university places the building at Statler Drive and Campus Road. Coordinates are for the named building."
+    },
+    {
+      "id": "dartmouth-tuck-operations",
+      "institution": "Dartmouth College",
+      "rowIds": [
+        "dartmouth-college__tuck-school-of-business__operations-and-management-science"
+      ],
+      "school": "Tuck School of Business",
+      "department": "Operations and Management Science",
+      "building": "Tuck Hall",
+      "address": "100 Tuck Hall, Hanover, NH 03755, United States",
+      "lat": 43.70562,
+      "lng": -72.29421,
+      "addressSource": "https://tuck.dartmouth.edu/directions",
+      "coordinateSource": "https://mapcarta.com/22533338",
+      "supportingSources": [
+        "https://www.tuck.dartmouth.edu/uploads/admitted/CoreSyllabiforAdmittedStudentsWebsite-2024.pdf",
+        "https://tuck.dartmouth.edu/courses/mgmt-om"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official Tuck directions and an operations syllabus identify Tuck Hall; the coordinates are for the named building, not a specific office."
+    },
+    {
+      "id": "georgia-tech-scheller-operations",
+      "institution": "Georgia Institute of Technology",
+      "rowIds": [
+        "georgia-institute-of-technology__scheller-college-of-business__operations-management"
+      ],
+      "school": "Scheller College of Business",
+      "department": "Operations Management",
+      "building": "Scheller College of Business",
+      "address": "800 West Peachtree Street NW, Atlanta, GA 30308, United States",
+      "lat": 33.77633,
+      "lng": -84.38807,
+      "addressSource": "https://www.scheller.gatech.edu/about-scheller/visit-campus.html",
+      "coordinateSource": "https://mapcarta.com/W42706834",
+      "checked": "2026-10-30",
+      "notes": "Official visit page identifies the college building, noting that faculty offices are distributed across the college building and Scheller Tower. This is the school reference, not a separately verified operations office."
+    },
+    {
+      "id": "frankfurt-school-campus-ba-om",
+      "institution": "Frankfurt School of Finance and Management",
+      "rowIds": [
+        "frankfurt-school-of-finance-and-management____ba-om"
+      ],
+      "school": "Frankfurt School of Finance & Management",
+      "department": "BA/OM",
+      "building": "Frankfurt School campus",
+      "address": "Adickesallee 32–34, 60322 Frankfurt am Main, Germany",
+      "lat": 50.132862,
+      "lng": 8.680787,
+      "addressSource": "https://www.frankfurt-school.de/en/about/campus/directions",
+      "coordinateSource": "https://maps.me/catalog/education/amenity-university/frankfurt-school-of-finance-management-campus-adickesallee-9223372037225393535/",
+      "checked": "2026-10-30",
+      "notes": "Official directions identify the Frankfurt campus and address. Coordinates are for the named campus and do not independently verify a particular department office."
+    },
+    {
+      "id": "frankfurt-school-campus-management",
+      "institution": "Frankfurt School of Finance and Management",
+      "rowIds": [
+        "frankfurt-school-of-finance-and-management____management"
+      ],
+      "school": "Frankfurt School of Finance & Management",
+      "department": "Management",
+      "building": "Frankfurt School campus",
+      "address": "Adickesallee 32–34, 60322 Frankfurt am Main, Germany",
+      "lat": 50.132862,
+      "lng": 8.680787,
+      "addressSource": "https://www.frankfurt-school.de/en/about/campus/directions",
+      "coordinateSource": "https://maps.me/catalog/education/amenity-university/frankfurt-school-of-finance-management-campus-adickesallee-9223372037225393535/",
+      "checked": "2026-10-30",
+      "notes": "Official directions identify the Frankfurt campus and address. Coordinates are for the named campus and do not independently verify a particular department office."
+    },
+    {
+      "id": "frankfurt-school-campus-technology-and-operations-management",
+      "institution": "Frankfurt School of Finance and Management",
+      "rowIds": [
+        "frankfurt-school-of-finance-and-management____technology-and-operations-management"
+      ],
+      "school": "Frankfurt School of Finance & Management",
+      "department": "Technology and Operations Management",
+      "building": "Frankfurt School campus",
+      "address": "Adickesallee 32–34, 60322 Frankfurt am Main, Germany",
+      "lat": 50.132862,
+      "lng": 8.680787,
+      "addressSource": "https://www.frankfurt-school.de/en/about/campus/directions",
+      "coordinateSource": "https://maps.me/catalog/education/amenity-university/frankfurt-school-of-finance-management-campus-adickesallee-9223372037225393535/",
+      "checked": "2026-10-30",
+      "notes": "Official directions identify the Frankfurt campus and address. Coordinates are for the named campus and do not independently verify a particular department office."
+    },
+    {
+      "id": "london-business-school-sussex-place",
+      "institution": "London Business School",
+      "rowIds": [
+        "london-business-school"
+      ],
+      "school": "London Business School",
+      "building": "Sussex Place",
+      "address": "Sussex Place, Regent’s Park, London NW1 4SA, United Kingdom",
+      "lat": 51.526176,
+      "lng": -0.16080325,
+      "addressSource": "https://www.london.edu/about/our-campuses-and-locations/london",
+      "coordinateSource": "https://casework.jcnas.org.uk/case/52751",
+      "supportingSources": [
+        "https://assets.london.edu/hxo16fanegqh/6wgXvQrVubZvQLaa7aPGB5/f69bb6dc0e962fad8356377308e6a063/14173_Brand_Campus_Maps_Jan_-26_v3.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official campus map identifies Sussex Place and the Management Science and Operations faculty offices. Listed-building case identifies 1–26 Sussex Place and supplies coordinates; the school has other nearby buildings."
+    },
+    {
+      "id": "esmt-berlin-management-science-campus",
+      "institution": "ESMT Berlin",
+      "rowIds": [
+        "esmt-berlin____management-science"
+      ],
+      "school": "ESMT Berlin",
+      "department": "Management Science",
+      "building": "ESMT Berlin main campus",
+      "address": "Schlossplatz 1, 10178 Berlin, Germany",
+      "lat": 52.51556,
+      "lng": 13.40111,
+      "addressSource": "https://esmt.berlin/about/campus",
+      "coordinateSource": "https://en.wikipedia.org/wiki/State_Council_Building",
+      "checked": "2026-10-30",
+      "notes": "Official ESMT page identifies the Berlin main campus at Schlossplatz 1. Coordinates identify the occupied State Council Building, not a separately verified faculty office."
+    },
+    {
+      "id": "dartmouth-thayer-maclean",
+      "institution": "Dartmouth College",
+      "rowIds": [
+        "dartmouth-college__thayer-school-of-engineering"
+      ],
+      "school": "Thayer School of Engineering",
+      "building": "MacLean Engineering Sciences Center",
+      "address": "14 Thayer Drive, Hanover, NH 03755, United States",
+      "lat": 43.70425,
+      "lng": -72.29486,
+      "addressSource": "https://engineering.dartmouth.edu/visit",
+      "coordinateSource": "https://mapcarta.com/25587792",
+      "checked": "2026-10-30",
+      "notes": "The engineering school identifies the MacLean building as its main entrance and describes three connected facilities. The named map supplies the building address and coordinates."
+    },
+    {
+      "id": "ebs-supply-chain-burg",
+      "institution": "EBS University",
+      "rowIds": [
+        "ebs-university__ebs-business-school__institute-for-supply-chain-management"
+      ],
+      "school": "EBS Business School",
+      "department": "Institute for Supply Chain Management",
+      "building": "Campus Burg",
+      "address": "Burgstraße 5, 65375 Oestrich-Winkel, Germany",
+      "lat": 50.00554,
+      "lng": 8.03208,
+      "addressSource": "https://www.ebs.edu/en/about-us/locations",
+      "coordinateSource": "https://mapcarta.com/W202640062",
+      "supportingSources": [
+        "https://www.forschungsfinder-hessen.de/forschung-management/oestrich-winkel"
+      ],
+      "checked": "2026-10-30",
+      "notes": "EBS identifies Campus Burg and says it contains faculty offices; the Hesse research directory associates a supply-chain professor with that address. This is a school reference rather than a separately confirmed institute office."
+    },
+    {
+      "id": "nebraska-lincoln-business-hawks",
+      "institution": "University of Nebraska - Lincoln",
+      "rowIds": [
+        "university-of-nebraska-lincoln__college-of-business__supply-chain-management-and-analytics"
+      ],
+      "school": "College of Business",
+      "department": "Supply Chain Management and Analytics",
+      "building": "Howard L. Hawks Hall",
+      "address": "730 N. 14th Street, Lincoln, NE 68508, United States",
+      "lat": 40.82039,
+      "lng": -96.70045,
+      "addressSource": "https://business.unl.edu/about/howard-l-hawks-hall/",
+      "coordinateSource": "https://mapcarta.com/W503004895",
+      "supportingSources": [
+        "https://business.unl.edu/news/college-business-building-be-named-howard-l-hawks-hall/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official College of Business building page and address; school reference, not a separately verified departmental office."
+    },
+    {
+      "id": "south-carolina-darla-moore-greene",
+      "institution": "University of South Carolina",
+      "rowIds": [
+        "university-of-south-carolina__darla-moore-school-of-business__management-science",
+        "university-of-south-carolina__darla-moore-school-of-business__om-scm",
+        "university-of-south-carolina__darla-moore-school-of-business__osc-empirical-healthcare-focus"
+      ],
+      "school": "Darla Moore School of Business",
+      "building": "Darla Moore School of Business",
+      "address": "1014 Greene Street, Columbia, SC 29208, United States",
+      "lat": 33.99449,
+      "lng": -81.03348,
+      "addressSource": "https://www.uscdmc.sc.edu/study/colleges_schools/moore/about/building_and_directions/index.php",
+      "coordinateSource": "https://mapcarta.com/W329014187",
+      "supportingSources": [
+        "https://www.sc.edu/study/colleges_schools/moore/documents/marketing_and_communications/map_brochure_71516.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University identifies the school building at this address. It is a school reference, not a separately verified department office."
+    },
+    {
+      "id": "toronto-rotman-st-george",
+      "institution": "University of Toronto",
+      "rowIds": [
+        "university-of-toronto__joseph-l-rotman-school-of-management__operations-management-and-statistics"
+      ],
+      "school": "Joseph L. Rotman School of Management",
+      "department": "Operations Management and Statistics",
+      "building": "Rotman School of Management",
+      "address": "105 St. George Street, Toronto, ON M5S 3E6, Canada",
+      "lat": 43.66536,
+      "lng": -79.39844,
+      "addressSource": "https://rotman.utoronto.ca/the-rotman-experience/connect-with-us/",
+      "coordinateSource": "https://mapcarta.com/W12000960",
+      "checked": "2026-10-30",
+      "notes": "University identifies the main school building; departmental office not separately verified."
+    },
+    {
+      "id": "oregon-lundquist-lillis",
+      "institution": "University of Oregon",
+      "rowIds": [
+        "university-of-oregon__charles-h-lundquist-college-of-business__operations-and-business-analytics"
+      ],
+      "school": "Charles H. Lundquist College of Business",
+      "department": "Operations and Business Analytics",
+      "building": "Lillis Business Complex",
+      "address": "955 E. 13th Avenue, Eugene, OR 97403, United States",
+      "lat": 44.046014,
+      "lng": -123.077614,
+      "addressSource": "https://business.uoregon.edu/about/lillis-complex",
+      "coordinateSource": "https://en.wikipedia.org/wiki/List_of_University_of_Oregon_buildings",
+      "supportingSources": [
+        "https://business.uoregon.edu/sites/default/files/media/undergrad-advising-course-substitution-form.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "School identifies Lillis complex and department contact in Lillis; coordinate refers to complex."
+    },
+    {
+      "id": "washington-foster-paccar",
+      "institution": "University of Washington",
+      "rowIds": [
+        "university-of-washington__michael-g-foster-school-of-business",
+        "university-of-washington__michael-g-foster-school-of-business__information-systems-and-operations-management",
+        "university-of-washington__michael-g-foster-school-of-business__marketing-and-international-business"
+      ],
+      "school": "Michael G. Foster School of Business",
+      "building": "PACCAR Hall",
+      "address": "4295 E. Stevens Way NE, Seattle, WA 98195, United States",
+      "lat": 47.6593532,
+      "lng": -122.3089425,
+      "addressSource": "https://foster.washington.edu/contacts/",
+      "coordinateSource": "https://www.latlong.net/poi/paccar-hall-680763",
+      "supportingSources": [
+        "https://www.wikidata.org/wiki/Q98447438"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official contact lists PACCAR Hall as a Foster location and says faculty offices are in it; school reference, not departmental office."
+    },
+    {
+      "id": "pittsburgh-katz-mervis",
+      "institution": "University of Pittsburgh",
+      "rowIds": [
+        "university-of-pittsburgh__joseph-m-katz-graduate-school-of-business__business-analytics-and-operations"
+      ],
+      "school": "Joseph M. Katz Graduate School of Business",
+      "department": "Business Analytics and Operations",
+      "building": "Mervis Hall",
+      "address": "3950 Roberto Clemente Drive, Pittsburgh, PA 15260, United States",
+      "lat": 40.44082,
+      "lng": -79.95333,
+      "addressSource": "https://www.business.pitt.edu/connect/contact-us/",
+      "coordinateSource": "https://mapcarta.com/26712508",
+      "supportingSources": [
+        "https://www.business.pitt.edu/professors/prakash-mirchandani/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school contact and operations faculty profile locate Katz in Mervis Hall."
+    },
+    {
+      "id": "unc-chapel-hill-kenan-mccoll",
+      "institution": "University of North Carolina (UNC) Chapel Hill",
+      "rowIds": [
+        "university-of-north-carolina-unc-chapel-hill__kenan-flagler-business-school__operations"
+      ],
+      "school": "Kenan-Flagler Business School",
+      "department": "Operations",
+      "building": "McColl Building",
+      "address": "300 Kenan Center Drive, Chapel Hill, NC 27599, United States",
+      "lat": 35.89973,
+      "lng": -79.04597,
+      "addressSource": "https://www.kenan-flagler.unc.edu/wp-content/uploads/2023/01/UNDG23-004-UBP-Recruitment-Guide-DIGITAL_FNLREVISED.pdf",
+      "coordinateSource": "https://mapcarta.com/26734692",
+      "supportingSources": [
+        "https://mbaexchange.web.unc.edu/wp-content/uploads/sites/19690/2024/01/FTMBA24-034_2023_Global_Exchange_Information_Document_FNL_Digital.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school recruiting document identifies the McColl building; reference is for the school rather than verified operations office."
+    },
+    {
+      "id": "northwestern-kellogg-operations-global-hub",
+      "institution": "Northwestern University",
+      "rowIds": [
+        "northwestern-university__kellogg-school-of-management__operations"
+      ],
+      "school": "Kellogg School of Management",
+      "department": "Operations",
+      "building": "Kellogg Global Hub",
+      "address": "2211 Campus Drive, Suite 4111, Evanston, IL 60208, United States",
+      "lat": 42.0575,
+      "lng": -87.671944,
+      "addressSource": "https://www.kellogg.northwestern.edu/academics-research/contact/",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q55596420",
+      "supportingSources": [
+        "https://www.kellogg.northwestern.edu/academics-research/academic-departments/operations/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The official department contact identifies its suite in Kellogg Global Hub; coordinates refer to building."
+    },
+    {
+      "id": "nus-business-mochtar-riady",
+      "institution": "National University of Singapore (NUS)",
+      "rowIds": [
+        "national-university-of-singapore__nus-business-school",
+        "national-university-of-singapore__nus-business-school__analytics-and-operations"
+      ],
+      "school": "NUS Business School",
+      "department": "Analytics and Operations",
+      "building": "Mochtar Riady Building",
+      "address": "15 Kent Ridge Drive, Singapore 119245",
+      "lat": 1.292647709,
+      "lng": 103.7739452,
+      "addressSource": "https://bschool.nus.edu.sg/analytics-operations/contact-us/",
+      "coordinateSource": "https://map.nus.edu.sg/index.php/search/ajax_auto",
+      "supportingSources": [
+        "https://bschool.nus.edu.sg/contact-us/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department contact identifies Level 8; official campus map assigns the building coordinates."
+    },
+    {
+      "id": "oregon-state-business-austin",
+      "institution": "Oregon State University",
+      "rowIds": [
+        "oregon-state-university__college-of-business__supply-chain-and-logistics-management"
+      ],
+      "school": "College of Business",
+      "department": "Supply Chain and Logistics Management",
+      "building": "Austin Hall",
+      "address": "2751 SW Jefferson Way, Corvallis, OR 97331, United States",
+      "lat": 44.56492,
+      "lng": -123.28195,
+      "addressSource": "https://guides.library.oregonstate.edu/buildings/austin-hall",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Austin_Hall_%28Oregon_State_University%29",
+      "supportingSources": [
+        "https://business.oregonstate.edu/about/austin-hall"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official university history identifies Austin Hall as the school of business. School reference rather than specific departmental office."
+    },
+    {
+      "id": "sjsu-lucas-business-tower",
+      "institution": "San Jose State University",
+      "rowIds": [
+        "san-jose-state-university__lucas-college-and-graduate-school-of-business__marketing-and-decision-sciences"
+      ],
+      "school": "Lucas College and Graduate School of Business",
+      "department": "Marketing and Decision Sciences",
+      "building": "Business Tower",
+      "address": "One Washington Square, San José, CA 95192, United States",
+      "lat": 37.33706,
+      "lng": -121.87887,
+      "addressSource": "https://www.sjsu.edu/cob/about/maps.php",
+      "coordinateSource": "https://mapcarta.com/W25774833",
+      "supportingSources": [
+        "https://www2.sjsu.edu/mktba/about-us/faculty-staff-contact.php"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school page identifies business tower and marketing/business analytics faculty contact lists tower offices. Address is university mailing address."
     }
   ]
 }

@@ -1621,8 +1621,17 @@
   "lastPosted": "2025-10-07",
   "lat": 40.740745,
   "lng": -73.9827734,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "baruch-management-newman-vertical"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Baruch College, The City University of New York (CUNY)"
+  ],
+  "mapSearchTerms": [
+   "Zicklin School of Business",
+   "Management"
+  ]
  },
  {
   "id": "bayes-business-school____om-ai",
@@ -3514,8 +3523,16 @@
   ],
   "n": 1,
   "lastPosted": "2014-04-28",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cmu-tepper-school"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Carnegie Mellon University"
+  ],
+  "mapSearchTerms": [
+   "Tepper School of Business"
+  ]
  },
  {
   "id": "carnegie-mellon-university__tepper-school-of-business__business-technologies",
@@ -3530,8 +3547,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-07-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "cmu-tepper-business-technologies"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Carnegie Mellon University"
+  ],
+  "mapSearchTerms": [
+   "Tepper School of Business",
+   "Business Technologies"
+  ],
+  "mapDepartmentLinks": {
+   "cmu-tepper-business-technologies": {
+    "facultyUrl": "https://www.cmu.edu/tepper/faculty-and-research/academic-areas/business-technologies"
+   }
+  },
   "facultyUrl": "https://www.cmu.edu/tepper/faculty-and-research/academic-areas/business-technologies"
  },
  {
@@ -3555,8 +3586,17 @@
   "lastPosted": "2014-10-01",
   "lat": 40.4441647,
   "lng": -79.9433725,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cmu-tepper-operations-management"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Carnegie Mellon University"
+  ],
+  "mapSearchTerms": [
+   "Tepper School of Business",
+   "Operations Management"
+  ]
  },
  {
   "id": "case-western-reserve-university__weatherhead-school-of-management__operations",
@@ -5141,8 +5181,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-04",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "cornell-services-management-statler"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Cornell University"
+  ],
+  "mapSearchTerms": [
+   "Cornell SC Johnson College of Business",
+   "Services Management"
+  ],
+  "mapDepartmentLinks": {
+   "cornell-services-management-statler": {
+    "facultyUrl": "https://business.cornell.edu/expertise/faculty-areas/services-management/"
+   }
+  },
   "facultyUrl": "https://business.cornell.edu/expertise/faculty-areas/services-management/"
  },
  {
@@ -5244,7 +5298,9 @@
    "seed"
   ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://tech.cornell.edu/people/faculty/",
+  "facultyDirectoryHint": "This is the campus-wide Cornell Tech faculty and affiliated roster, covering many fields beyond operations research and information engineering."
  },
  {
   "id": "cornell-university-cornell-tech__samuel-curtis-johnson-graduate-school-of-management",
@@ -5591,8 +5647,16 @@
   ],
   "lat": 43.704895,
   "lng": -72.295318,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "dartmouth-thayer-maclean"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Dartmouth College"
+  ],
+  "mapSearchTerms": [
+   "Thayer School of Engineering"
+  ]
  },
  {
   "id": "dartmouth-college__tuck-school-of-business__operations-and-management-science",
@@ -5611,8 +5675,17 @@
   ],
   "lat": 43.7052029,
   "lng": -72.2944812,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "dartmouth-tuck-operations"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Dartmouth College"
+  ],
+  "mapSearchTerms": [
+   "Tuck School of Business",
+   "Operations and Management Science"
+  ]
  },
  {
   "id": "depaul-university__driehaus-college-of-business__management-and-entrepreneurship",
@@ -6199,8 +6272,17 @@
   ],
   "lat": 50.0711686,
   "lng": 8.2477323,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ebs-supply-chain-burg"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "EBS University"
+  ],
+  "mapSearchTerms": [
+   "EBS Business School",
+   "Institute for Supply Chain Management"
+  ]
  },
  {
   "id": "ecole-polytechnique-federale-de-lausanne__college-of-management-cdm__chair-of-technology-and-operations-management-tom",
@@ -6329,8 +6411,17 @@
   "lastPosted": "2014-09-08",
   "lat": 33.7901628,
   "lng": -84.3217663,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "emory-goizueta-information-operations"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Emory University"
+  ],
+  "mapSearchTerms": [
+   "Goizueta Business School",
+   "Information Systems & Operations Management"
+  ]
  },
  {
   "id": "endicott-college____business",
@@ -6477,8 +6568,17 @@
   ],
   "lat": 52.5157068,
   "lng": 13.4014644,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "esmt-berlin-management-science-campus"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "ESMT Berlin"
+  ],
+  "mapSearchTerms": [
+   "ESMT Berlin",
+   "Management Science"
+  ]
  },
  {
   "id": "essec____operations-management",
@@ -7156,8 +7256,17 @@
   ],
   "n": 1,
   "lastPosted": "2025-08-21",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "frankfurt-school-campus-ba-om"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Frankfurt School of Finance and Management"
+  ],
+  "mapSearchTerms": [
+   "Frankfurt School of Finance & Management",
+   "BA/OM"
+  ]
  },
  {
   "id": "frankfurt-school-of-finance-and-management____management",
@@ -7184,8 +7293,17 @@
   "lastPosted": "2024-08-28",
   "lat": 50.13302,
   "lng": 8.68171,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "frankfurt-school-campus-management"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Frankfurt School of Finance and Management"
+  ],
+  "mapSearchTerms": [
+   "Frankfurt School of Finance & Management",
+   "Management"
+  ]
  },
  {
   "id": "frankfurt-school-of-finance-and-management____technology-and-operations-management",
@@ -7205,8 +7323,17 @@
   ],
   "n": 1,
   "lastPosted": "2024-08-23",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "frankfurt-school-campus-technology-and-operations-management"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Frankfurt School of Finance and Management"
+  ],
+  "mapSearchTerms": [
+   "Frankfurt School of Finance & Management",
+   "Technology and Operations Management"
+  ]
  },
  {
   "id": "franklin-and-marshall-college____business-organizations-and-society",
@@ -7722,8 +7849,17 @@
   "lastPosted": "2026-09-15",
   "lat": 33.7763465,
   "lng": -84.384841,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "georgia-tech-scheller-operations"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Georgia Institute of Technology"
+  ],
+  "mapSearchTerms": [
+   "Scheller College of Business",
+   "Operations Management"
+  ]
  },
  {
   "id": "georgia-southern-university__parker-college-of-business__information-systems-and-analytics",
@@ -8157,8 +8293,16 @@
   "lastPosted": "2014-09-23",
   "lat": 42.3709808,
   "lng": -71.1221527,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "harvard-kennedy-school-littauer"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Harvard Kennedy School"
+  ],
+  "mapSearchTerms": [
+   "Harvard Kennedy School"
+  ]
  },
  {
   "id": "harvard-university",
@@ -10399,7 +10543,9 @@
   "n": 1,
   "lastPosted": "2025-12-26",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.business.kaist.ac.kr/_prog/prof/index.php?menu_dvs_cd=040101&site_dvs_cd=kr",
+  "facultyDirectoryHint": "The Korean-language directory covers all business faculty; use the subject links for Technology/Organization/Strategy and Operations Strategy/Management Science."
  },
  {
   "id": "kaist__college-of-business__operations-strategy-and-management-science",
@@ -11376,8 +11522,17 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "london-business-school-sussex-place"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "London Business School"
+  ],
+  "mapSearchTerms": [
+   "London Business School"
+  ],
+  "country": "United Kingdom"
  },
  {
   "id": "london-business-school____om",
@@ -13179,8 +13334,20 @@
   ],
   "n": 1,
   "lastPosted": "2014-08-26",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "nus-business-mochtar-riady"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "National University of Singapore (NUS)"
+  ],
+  "mapSearchTerms": [
+   "NUS Business School",
+   "Analytics and Operations"
+  ],
+  "deptUrl": "https://bschool.nus.edu.sg/analytics-operations/faculty/",
+  "deptUrlInherited": true,
+  "facultyUrl": "http://bschool.nus.edu/DecisionSciences/FacultyStaff/FacultyMembers.aspx"
  },
  {
   "id": "national-university-of-singapore__school-of-computing__information-systems-and-analytics",
@@ -13302,8 +13469,17 @@
   "lastPosted": "2025-07-13",
   "lat": 1.2971101,
   "lng": 103.7777822,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "nus-business-mochtar-riady"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "National University of Singapore (NUS)"
+  ],
+  "mapSearchTerms": [
+   "NUS Business School",
+   "Analytics and Operations"
+  ]
  },
  {
   "id": "naval-postgraduate-school____acquisition-finance-and-manpower",
@@ -14486,6 +14662,7 @@
   "n": 1,
   "lastPosted": "2014-07-24",
   "mapLocationIds": [
+   "northwestern-kellogg-operations-global-hub",
    "northwestern-science-innovation-sherman"
   ],
   "mapLocationKind": "school",
@@ -14510,6 +14687,7 @@
   "n": 1,
   "lastPosted": "2026-10-11",
   "mapLocationIds": [
+   "northwestern-kellogg-operations-global-hub",
    "northwestern-science-innovation-sherman"
   ],
   "mapLocationKind": "school",
@@ -14520,6 +14698,9 @@
    "Kellogg School of Management"
   ],
   "mapDepartmentLinks": {
+   "northwestern-kellogg-operations-global-hub": {
+    "facultyUrl": "https://www.kellogg.northwestern.edu/academics-research/faculty-directory/?academicDepartments=Managerial%20Economics%20%26%20Decision%20Sciences"
+   },
    "northwestern-science-innovation-sherman": {
     "facultyUrl": "https://www.kellogg.northwestern.edu/academics-research/faculty-directory/?academicDepartments=Managerial%20Economics%20%26%20Decision%20Sciences"
    }
@@ -14553,8 +14734,17 @@
   "lastPosted": "2026-10-05",
   "lat": 42.0571541,
   "lng": -87.6716362,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "northwestern-kellogg-operations-global-hub"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Northwestern University"
+  ],
+  "mapSearchTerms": [
+   "Kellogg School of Management",
+   "Operations"
+  ]
  },
  {
   "id": "northwestern-university__mccormick-school-of-engineering__industrial-engineering-and-management-sciences",
@@ -15128,8 +15318,18 @@
   ],
   "lat": 44.5651737,
   "lng": -123.2740743,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "oregon-state-business-austin"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Oregon State University"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Supply Chain and Logistics Management"
+  ],
+  "country": "United States"
  },
  {
   "id": "ozyegin-university",
@@ -15163,7 +15363,15 @@
   ],
   "mapSearchTerms": [
    "Faculty of Business"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "ozyegin-faculty-business-cekmekoy-campus": {
+    "facultyUrl": "https://www.ozyegin.edu.tr/en/management-information-systems/faculty-members",
+    "facultyDirectoryHint": "This directory also lists colleagues in other disciplines; check their subject labels."
+   }
+  },
+  "facultyUrl": "https://www.ozyegin.edu.tr/en/management-information-systems/faculty-members",
+  "facultyDirectoryHint": "This directory also lists colleagues in other disciplines; check their subject labels."
  },
  {
   "id": "ozyegin-university__faculty-of-business__operations-management",
@@ -16632,7 +16840,9 @@
   "n": 1,
   "lastPosted": "2026-10-27",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://bloustein.rutgers.edu/faculty/",
+  "facultyDirectoryHint": "This is the entire Bloustein School faculty directory, covering public policy and planning as well as health fields."
  },
  {
   "id": "rutgers-university__school-of-business-camden__operations-management",
@@ -16866,7 +17076,9 @@
   "n": 1,
   "lastPosted": "2025-05-25",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.stmarys-ca.edu/academics/schools/economics-business-administration/faculty",
+  "facultyDirectoryHint": "Find the Business Analytics & Data Science section; other departments are also listed."
  },
  {
   "id": "saint-mary-s-college-of-california__school-of-economics-and-business-administration__operations-and-quantitative-methods",
@@ -17135,8 +17347,17 @@
   ],
   "lat": 37.3379434,
   "lng": -121.9378605,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "sjsu-lucas-business-tower"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "San Jose State University"
+  ],
+  "mapSearchTerms": [
+   "Lucas College and Graduate School of Business",
+   "Marketing and Decision Sciences"
+  ]
  },
  {
   "id": "santa-clara-university____is-and-analytics",
@@ -21654,7 +21875,9 @@
    "seed"
   ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people",
+  "facultyDirectoryHint": "See Core Academic Staff; the page covers the whole school and other roles, not only supply chain."
  },
  {
   "id": "ucl-school-of-management____om",
@@ -21697,7 +21920,9 @@
   "n": 1,
   "lastPosted": "2026-10-27",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://uclouvain.be/en/research-institutes/lidam/directory",
+  "facultyDirectoryHint": "Use the people categories and identify CORE; this directory covers the entire LIDAM institute."
  },
  {
   "id": "united-states-military-academy-west-point__united-states-military-academy__systems-engineering",
@@ -22527,7 +22752,9 @@
   "n": 1,
   "lastPosted": "2026-10-23",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.uah.edu/business/faculty-staff/",
+  "facultyDirectoryHint": "See Information Systems and Management Science faculty sections; the directory covers the whole college."
  },
  {
   "id": "university-of-alaska-anchorage__college-of-business-and-public-policy__management-marketing-logistics-and-business-analytics",
@@ -25390,7 +25617,8 @@
   "n": 1,
   "lastPosted": "2026-10-26",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.ulethbridge.ca/artsci/math-computer-science/optimization-research-group"
  },
  {
   "id": "university-of-liverpool__management-school__operations-and-supply-chain-management",
@@ -26817,8 +27045,17 @@
   "lastPosted": "2026-10-18",
   "lat": 40.8169275,
   "lng": -96.69772,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "nebraska-lincoln-business-hawks"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Nebraska - Lincoln"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Supply Chain Management and Analytics"
+  ]
  },
  {
   "id": "university-of-nevada__college-of-business__managerial-sciences-department-marketing",
@@ -26917,7 +27154,9 @@
   "n": 1,
   "lastPosted": "2026-10-27",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.unr.edu/me/people",
+  "facultyDirectoryHint": "This is the mechanical engineering people page, including the head of the broader school; it may not cover every industrial and materials faculty member."
  },
  {
   "id": "university-of-new-haven__college-of-business-and-digital-innovation__business-analytics",
@@ -27223,8 +27462,17 @@
   ],
   "lat": 35.8996959,
   "lng": -79.0462315,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "unc-chapel-hill-kenan-mccoll"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of North Carolina (UNC) Chapel Hill"
+  ],
+  "mapSearchTerms": [
+   "Kenan-Flagler Business School",
+   "Operations"
+  ]
  },
  {
   "id": "university-of-north-dakota__nistler-college-of-business-and-public-administration__middleton-school-of-entrepreneurship-and-management",
@@ -27240,7 +27488,8 @@
   "n": 1,
   "lastPosted": "2026-10-28",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://business.und.edu/academics/school-of-entrepreneurship-and-management/faculty-staff-mgmt.html"
  },
  {
   "id": "university-of-north-georgia__mike-cottrell-college-of-business__marketing-and-logistics",
@@ -27644,8 +27893,17 @@
   ],
   "lat": 44.045979,
   "lng": -123.07757,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "oregon-lundquist-lillis"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Oregon"
+  ],
+  "mapSearchTerms": [
+   "Charles H. Lundquist College of Business",
+   "Operations and Business Analytics"
+  ]
  },
  {
   "id": "university-of-oxford__said-business-school__management-science",
@@ -27799,8 +28057,18 @@
   ],
   "lat": 40.4408112,
   "lng": -79.9533354,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "pittsburgh-katz-mervis"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Pittsburgh"
+  ],
+  "mapSearchTerms": [
+   "Joseph M. Katz Graduate School of Business",
+   "Business Analytics and Operations"
+  ],
+  "country": "United States"
  },
  {
   "id": "university-of-portland__robert-pamplin-jr-school-of-business-administration-psoba__operations-and-technology-management",
@@ -28035,7 +28303,9 @@
   "n": 1,
   "lastPosted": "2025-07-17",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.sandiego.edu/business/faculty-and-research/faculty-directory.php",
+  "facultyDirectoryHint": "Choose Department and find Supply Chain, Operations and Information Systems; the directory covers the whole Knauss School."
  },
  {
   "id": "university-of-san-diego__knauss-school-of-business",
@@ -28172,8 +28442,16 @@
   "lastPosted": "2025-10-24",
   "lat": 33.9945213,
   "lng": -81.0334363,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "south-carolina-darla-moore-greene"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of South Carolina"
+  ],
+  "mapSearchTerms": [
+   "Darla Moore School of Business"
+  ]
  },
  {
   "id": "university-of-south-carolina__darla-moore-school-of-business__om-scm",
@@ -28188,8 +28466,21 @@
   ],
   "n": 1,
   "lastPosted": "2025-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "south-carolina-darla-moore-greene"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of South Carolina"
+  ],
+  "mapSearchTerms": [
+   "Darla Moore School of Business"
+  ],
+  "mapDepartmentLinks": {
+   "south-carolina-darla-moore-greene": {
+    "facultyUrl": "https://sc.edu/study/colleges_schools/moore/study/management_science/our_people/index.php"
+   }
+  },
   "facultyUrl": "https://sc.edu/study/colleges_schools/moore/study/management_science/our_people/index.php"
  },
  {
@@ -28205,8 +28496,21 @@
   ],
   "n": 1,
   "lastPosted": "2025-08-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "south-carolina-darla-moore-greene"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of South Carolina"
+  ],
+  "mapSearchTerms": [
+   "Darla Moore School of Business"
+  ],
+  "mapDepartmentLinks": {
+   "south-carolina-darla-moore-greene": {
+    "facultyUrl": "https://sc.edu/study/colleges_schools/moore/study/management_science/our_people/index.php"
+   }
+  },
   "facultyUrl": "https://sc.edu/study/colleges_schools/moore/study/management_science/our_people/index.php"
  },
  {
@@ -28492,7 +28796,9 @@
   "n": 1,
   "lastPosted": "2026-10-27",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://profiles.sydney.edu.au/groups/177675/experts",
+  "facultyDirectoryHint": "This directory covers all Faculty of Engineering researchers, including many fields beyond AI."
  },
  {
   "id": "university-of-tampa__sykes-college-of-business__information-and-technology-management",
@@ -29224,8 +29530,17 @@
   ],
   "lat": 43.6653391,
   "lng": -79.3983834,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "toronto-rotman-st-george"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Toronto"
+  ],
+  "mapSearchTerms": [
+   "Joseph L. Rotman School of Management",
+   "Operations Management and Statistics"
+  ]
  },
  {
   "id": "university-of-toronto__scarborough-and-rotman-school-of-management__management",
@@ -29817,8 +30132,16 @@
   "lastPosted": "2014-08-10",
   "lat": 47.659122,
   "lng": -122.3085061,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "washington-foster-paccar"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Washington"
+  ],
+  "mapSearchTerms": [
+   "Michael G. Foster School of Business"
+  ]
  },
  {
   "id": "university-of-washington__michael-g-foster-school-of-business__information-systems-and-operations-management",
@@ -29835,8 +30158,21 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "washington-foster-paccar"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Washington"
+  ],
+  "mapSearchTerms": [
+   "Michael G. Foster School of Business"
+  ],
+  "mapDepartmentLinks": {
+   "washington-foster-paccar": {
+    "facultyUrl": "https://foster.uw.edu/faculty-research/directory/?_profile_department=information-systems-operations-management"
+   }
+  },
   "facultyUrl": "https://foster.uw.edu/faculty-research/directory/?_profile_department=information-systems-operations-management"
  },
  {
@@ -29852,8 +30188,21 @@
   ],
   "n": 1,
   "lastPosted": "2026-06-08",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "washington-foster-paccar"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Washington"
+  ],
+  "mapSearchTerms": [
+   "Michael G. Foster School of Business"
+  ],
+  "mapDepartmentLinks": {
+   "washington-foster-paccar": {
+    "facultyUrl": "https://foster.uw.edu/faculty-research/directory/?_profile_department=marketing-international-business"
+   }
+  },
   "facultyUrl": "https://foster.uw.edu/faculty-research/directory/?_profile_department=marketing-international-business"
  },
  {
@@ -31824,7 +32173,9 @@
   "n": 1,
   "lastPosted": "2026-10-27",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.solbridge.ac.kr/story/page/index.jsp?code=solbridge_n020103",
+  "facultyDirectoryHint": "Review professors’ subject specialisations; the list covers the full business school."
  },
  {
   "id": "worcester-polytechnic-institute",
