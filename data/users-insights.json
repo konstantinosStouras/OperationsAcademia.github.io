@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-30T19:39:27.581Z",
- "members": 427,
+ "generated": "2026-10-30T23:12:25.186Z",
+ "members": 430,
  "k": 3,
  "affiliation": {
-  "listed": 345,
+  "listed": 348,
   "other": 48,
   "none": 34
  },
  "universities": {
-  "count": 154,
+  "count": 155,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -68,6 +68,11 @@
    {
     "name": "A’Sharqiyah University",
     "country": "Oman",
+    "members": 4
+   },
+   {
+    "name": "Carnegie Mellon University",
+    "country": "",
     "members": 4
    },
    {
@@ -151,11 +156,6 @@
     "members": 3
    },
    {
-    "name": "Carnegie Mellon University",
-    "country": "",
-    "members": 3
-   },
-   {
     "name": "Chinese University of Hong Kong",
     "country": "Hong Kong",
     "members": 3
@@ -211,18 +211,18 @@
     "members": 3
    }
   ],
-  "rest": 164
+  "rest": 166
  },
  "countries": {
   "count": 17,
   "shown": [
    {
     "name": "United States",
-    "members": 217
+    "members": 218
    },
    {
     "name": "Canada",
-    "members": 24
+    "members": 25
    },
    {
     "name": "Singapore",
@@ -262,6 +262,6 @@
    }
   ],
   "rest": 8,
-  "unknown": 102
+  "unknown": 103
  }
 }
