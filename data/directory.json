@@ -11781,6 +11781,22 @@
   "mapLocationKind": "unresolved"
  },
  {
+  "id": "mercer-university__school-of-engineering__industrial-engineering-and-industrial-management",
+  "institution": "Mercer University",
+  "school": "School of Engineering",
+  "department": "Industrial Engineering and Industrial Management",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "mercy-university__school-of-business__business-administration",
   "institution": "Mercy University",
   "school": "School of Business",
@@ -12753,6 +12769,43 @@
   "mapLocationKind": "unresolved"
  },
  {
+  "id": "national-tsing-hua-university__college-of-technology-management__institute-of-technology-management",
+  "institution": "National Tsing Hua University",
+  "school": "College of Technology Management",
+  "department": "Institute of Technology Management",
+  "type": "University",
+  "country": "Taiwan",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-28",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "national-tsing-hua-university__institute-of-technology-management__institute-of-technology-management",
+  "institution": "National Tsing Hua University",
+  "school": "Institute of Technology Management",
+  "department": "Institute of Technology Management",
+  "type": "University",
+  "country": "Taiwan",
+  "characteristics": [
+   "Research seminars",
+   "MBA",
+   "Undergrad"
+  ],
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-28",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "national-university-of-singapore",
   "institution": "National University of Singapore",
   "type": "University",
@@ -13697,6 +13750,22 @@
    }
   },
   "facultyUrl": "https://www.ncat.edu/cobe/academic-departments/bisa/faculty-and-staff/index.php"
+ },
+ {
+  "id": "north-carolina-central-university__school-of-business__decision-sciences",
+  "institution": "North Carolina Central University",
+  "school": "School of Business",
+  "department": "Decision Sciences",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "north-carolina-state-university____operations-and-supply-chain-management",
@@ -14838,6 +14907,30 @@
   ],
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "ozyegin-university__faculty-of-business__management-information-systems",
+  "institution": "Özyeğin University",
+  "school": "Faculty of Business",
+  "department": "Management Information Systems",
+  "type": "Business School",
+  "country": "Turkey",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
+  "mapLocationIds": [
+   "ozyegin-faculty-business-cekmekoy-campus"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "Özyeğin University"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Business"
+  ]
  },
  {
   "id": "ozyegin-university__faculty-of-business__operations-management",
@@ -16282,6 +16375,22 @@
   "facultyUrl": "https://www.business.rutgers.edu/faculty-research/faculty-profiles?aoe%5B71%5D=71",
   "deptUrl": "https://www.business.rutgers.edu/faculty-research/faculty-profiles?aoe%5B71%5D=71",
   "deptUrlInherited": true
+ },
+ {
+  "id": "rutgers-university__edward-j-bloustein-school-of-planning-and-public-policy__health-informatics",
+  "institution": "Rutgers University",
+  "school": "Edward J. Bloustein School of Planning and Public Policy",
+  "department": "Health Informatics",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "rutgers-university__school-of-business-camden__operations-management",
@@ -21304,6 +21413,22 @@
   "facultyUrl": "https://www.mgmt.ucl.ac.uk/people#operations-technology"
  },
  {
+  "id": "uclouvain__louvain-school-of-management__louvain-institute-of-data-analysis-and-modeling-in-economics",
+  "institution": "UCLouvain",
+  "school": "Louvain School of Management",
+  "department": "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE",
+  "type": "Business School",
+  "country": "Belgium",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "united-states-military-academy-west-point__united-states-military-academy__systems-engineering",
   "institution": "United States Military Academy - West Point",
   "school": "United States Military Academy",
@@ -25135,13 +25260,18 @@
   "facultyUrl": "https://www.london.edu/faculty-and-research/management-science-and-operations"
  },
  {
-  "id": "university-of-louisville____information-systems-analytics-and-operations",
+  "id": "university-of-louisville__college-of-business__information-systems-analytics-and-operations",
   "institution": "University of Louisville",
+  "school": "College of Business",
   "department": "Information Systems, Analytics and Operations",
-  "type": "University",
+  "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -26453,6 +26583,35 @@
   ]
  },
  {
+  "id": "university-of-nevada-reno__college-of-business__marketing",
+  "institution": "University of Nevada, Reno",
+  "school": "College of Business",
+  "department": "Marketing",
+  "type": "Business School",
+  "deptUrl": "https://www.unr.edu/business/departments-and-disciplines/marketing/faculty",
+  "sources": [
+   "omlist"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "university-of-nevada-reno__college-of-engineering__mechanical-industrial-and-materials-engineering",
+  "institution": "University of Nevada, Reno",
+  "school": "College of Engineering",
+  "department": "Mechanical, Industrial, and Materials Engineering",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "university-of-new-haven__college-of-business-and-digital-innovation__business-analytics",
   "institution": "University of New Haven",
   "school": "College of Business and Digital Innovation",
@@ -26756,6 +26915,22 @@
   ],
   "lat": 35.8996959,
   "lng": -79.0462315,
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "university-of-north-dakota__nistler-college-of-business-and-public-administration__middleton-school-of-entrepreneurship-and-management",
+  "institution": "University of North Dakota",
+  "school": "Nistler College of Business and Public Administration",
+  "department": "Middleton School of Entrepreneurship and Management",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-28",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -27962,6 +28137,22 @@
   "facultyUrl": "https://www.stir.ac.uk/research/hub/organisation/2286530/people?page=1"
  },
  {
+  "id": "university-of-sydney__faculty-of-engineering__engineering-and-ai",
+  "institution": "University of Sydney",
+  "school": "Faculty of Engineering",
+  "department": "Engineering and AI",
+  "type": "University",
+  "country": "Australia",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "university-of-tampa__sykes-college-of-business__information-and-technology-management",
   "institution": "University of Tampa",
   "school": "Sykes College of Business",
@@ -28602,8 +28793,9 @@
   "mapLocationKind": "unresolved"
  },
  {
-  "id": "university-of-toronto____mechanical-and-industrial-engineering",
+  "id": "university-of-toronto__faculty-of-applied-science-and-engineering__mechanical-and-industrial-engineering",
   "institution": "University of Toronto",
+  "school": "Faculty of Applied Science and Engineering",
   "department": "Mechanical and Industrial Engineering",
   "type": "University",
   "country": "Canada",
@@ -28611,18 +28803,28 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-10-01",
+  "n": 2,
+  "lastPosted": "2026-10-27",
+  "sourceRowIds": [
+   "university-of-toronto____mechanical-and-industrial-engineering"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Mechanical and Industrial Engineering"
+   }
+  ],
   "mapLocationIds": [
    "toronto-mechanical-industrial-mechanical-building"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Toronto"
-  ],
   "mapSearchTerms": [
    "Faculty of Applied Science and Engineering",
-   "Department of Mechanical and Industrial Engineering"
+   "Department of Mechanical and Industrial Engineering",
+   "Mechanical and Industrial Engineering"
+  ],
+  "mapInstitutionNames": [
+   "University of Toronto"
   ],
   "mapDepartmentLinks": {
    "toronto-mechanical-industrial-mechanical-building": {
@@ -29201,6 +29403,30 @@
    }
   },
   "facultyUrl": "https://peoplesearch.warwick.ac.uk/search?query=Applied%20Artificial%20Intelligence"
+ },
+ {
+  "id": "university-of-warwick__warwick-business-school__information-systems-and-analytics",
+  "institution": "University of Warwick",
+  "school": "Warwick Business School",
+  "department": "Information Systems and Analytics",
+  "type": "Business School",
+  "country": "United Kingdom",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-28",
+  "mapLocationIds": [
+   "university-of-warwick-operations-management-business-school"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "University of Warwick"
+  ],
+  "mapSearchTerms": [
+   "Warwick Business School"
+  ]
  },
  {
   "id": "university-of-warwick__warwick-business-school__operations-management",
@@ -30413,19 +30639,34 @@
   "facultyUrl": "https://bit.vt.edu/faculty/directory.html"
  },
  {
-  "id": "vrije-universiteit-amsterdam____mathematics-analytics-and-optimization",
+  "id": "vrije-universiteit-amsterdam__faculty-of-science__mathematics-analytics-and-optimization",
   "institution": "Vrije Universiteit Amsterdam",
+  "school": "Faculty of Science",
   "department": "Mathematics, Analytics and Optimization",
   "type": "University",
-  "address": "https://www.google.com/maps/place/VU+Amsterdam/@52.3337568,4.8657199,15z/data=!4m5!3m4!1s0x0:0x2df2d7a997eccd84!8m2!3d52.3337568!4d4.8657199",
+  "country": "Netherlands",
   "facultyUrl": "https://research.vu.nl/en/organisations/mathematics-2/persons/",
   "sources": [
-   "directory"
+   "directory",
+   "postings",
+   "seed"
   ],
-  "lat": 52.3337568,
-  "lng": 4.8657199,
+  "n": 1,
+  "lastPosted": "2026-10-28",
+  "sourceRowIds": [
+   "vrije-universiteit-amsterdam____mathematics-analytics-and-optimization"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Mathematics, Analytics and Optimization"
+   }
+  ],
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "mapSearchTerms": [
+   "Mathematics, Analytics and Optimization"
+  ]
  },
  {
   "id": "wageningen-university____operations-research-and-logistics",
@@ -30692,8 +30933,8 @@
    "postings",
    "seed"
   ],
-  "n": 3,
-  "lastPosted": "2025-12-22",
+  "n": 4,
+  "lastPosted": "2026-10-28",
   "lat": 38.6501423,
   "lng": -90.3117331,
   "mapLocationIds": [
@@ -31175,6 +31416,22 @@
   "facultyUrl": "https://www.winona.edu/academics/colleges/business/business-administration-department/faculty-staff/"
  },
  {
+  "id": "woosong-university__solbridge-international-school-of-business__analytics-and-ai-for-business-operations-and-supply-chain-ma",
+  "institution": "Woosong University",
+  "school": "SolBridge International School of Business",
+  "department": "Analytics and AI for Business/Operations and Supply Chain Management",
+  "type": "Business School",
+  "country": "South Korea",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "worcester-polytechnic-institute",
   "institution": "Worcester Polytechnic Institute",
   "type": "University",
@@ -31218,6 +31475,22 @@
    }
   },
   "facultyUrl": "https://www.worcester.edu/business-administration-economics/faculty/"
+ },
+ {
+  "id": "woxsen-university__school-of-business__business-analytics",
+  "institution": "Woxsen University",
+  "school": "School of Business",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "country": "India",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-27",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "wu-vienna__vienna-university-of-economics-and-business__information-systems-and-operations",

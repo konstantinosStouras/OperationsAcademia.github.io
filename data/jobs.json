@@ -42,6 +42,594 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-national-tsing-hua-university-20261028",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-28",
+  "institution": "National Tsing Hua University",
+  "department": "Institute of Technology Management, Institute of Technology Management",
+  "school": "Institute of Technology Management",
+  "unit": "Institute of Technology Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Applications will be reviewed on a rolling basis until the positions are filled. Early applications are strongly encouraged.",
+  "applyByDate": "",
+  "comments": "The [Institute of Technology Management (ITM)](https://www.tm.nthu.edu.tw/) at [National Tsing Hua University (NTHU)](https://nthu-en.site.nthu.edu.tw/) invites applications for one or more tenured or tenure-track faculty positions at the rank of Assistant Professor, Associate Professor, or Full Professor, with an anticipated start date of August 2027.",
+  "country": "Taiwan",
+  "countries": [
+   "Taiwan"
+  ],
+  "adUrl": "https://drive.google.com/file/d/1j9VdkUdvGVP15Bu8Gh4yN1LHZaV5vbCz/view?usp=drivesdk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://drive.google.com/file/d/1IOflq9foK-6A2E2wClmq6_h4OPZ74jha/view?usp=drive_link",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=National%20Tsing%20Hua%20University",
+  "characteristics": [
+   "Research seminars",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-10-28T08:51:02Z",
+  "ref": "OA-JOB-261028-VQ6Q",
+  "owner": "2bbaf62900030221",
+  "applicationStatus": ""
+ },
+ {
+  "id": "2027-national-tsing-hua-university-20261028-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-28",
+  "institution": "National Tsing Hua University",
+  "department": "College of Technology Management, Institute of Technology Management",
+  "school": "College of Technology Management",
+  "unit": "Institute of Technology Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Taiwan",
+  "countries": [
+   "Taiwan"
+  ],
+  "adUrl": "https://drive.google.com/file/d/1IOflq9foK-6A2E2wClmq6_h4OPZ74jha/view?usp=drive_link",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.tm.nthu.edu.tw/Education/%E6%B8%85%E8%8F%AF%E5%A4%A7%E5%AD%B8%E7%A7%91%E6%8A%80%E7%AE%A1%E7%90%86%E7%A0%94%E7%A9%B6%E6%89%80%E8%AA%A0%E5%BE%B5%E5%B0%88%E4%BB%BB%E6%95%99%E5%B8%AB/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.tm.nthu.edu.tw/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T09:32:32Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-north-dakota-20261028",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-28",
+  "institution": "University of North Dakota",
+  "department": "Nistler College of Business and Public Administration, Middleton School of Entrepreneurship and Management",
+  "school": "Nistler College of Business and Public Administration",
+  "unit": "Middleton School of Entrepreneurship and Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-16",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.und.edu/jobs/assistant-professor-of-management-tenure-track-grand-forks-north-dakota-united-states",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://careers.und.edu/jobs/assistant-professor-of-management-tenure-track-grand-forks-north-dakota-united-states#ApplyCTA",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://business.und.edu/academics/school-of-entrepreneurship-and-management/index.html",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-30T08:09:44Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-warwick-20261028",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-28",
+  "institution": "University of Warwick",
+  "department": "Warwick Business School, Information Systems and Analytics",
+  "school": "Warwick Business School",
+  "unit": "Information Systems and Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 22, 2026",
+  "applyByDate": "2026-11-22",
+  "comments": "",
+  "country": "United Kingdom",
+  "countries": [
+   "United Kingdom"
+  ],
+  "adUrl": "https://workwithus.warwick.ac.uk/job/COVENTRY-Assistant-Professor-CV4-7AL/1449096933",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Warwick",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:57:14Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-vrije-universiteit-amsterdam-20261028",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-28",
+  "institution": "Vrije Universiteit Amsterdam",
+  "department": "Faculty of Science, Mathematics, Analytics and Optimization",
+  "school": "Faculty of Science",
+  "unit": "Mathematics, Analytics and Optimization",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 6, 2026",
+  "applyByDate": "2026-12-06",
+  "comments": "",
+  "country": "Netherlands",
+  "countries": [
+   "Netherlands"
+  ],
+  "adUrl": "https://werkenbij.vu.nl/vacatures/assistant-professor-in-analytics-and-optimization-amsterdam-1338447",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://werkenbij.vu.nl/vacatures/assistant-professor-in-analytics-and-optimization-amsterdam-1338447/solliciteer",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://vu.nl/en/about-vu/faculties/faculty-of-science/departments/mathematics",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T06:32:52Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-washington-university-in-st-louis-20261028",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-28",
+  "institution": "Washington University in St. Louis",
+  "department": "Olin Business School, Supply Chain, Operations and Technology",
+  "school": "Olin Business School",
+  "unit": "Supply Chain, Operations and Technology",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Early submissions are encouraged.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-14",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://drive.google.com/file/d/1Mr4Xo8uL9iLXl2yQnPBRHApAtoWFf3JM/view?usp=drivesdk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/196468",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Washington%20University%20in%20St.%20Louis",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-10-28T20:51:05Z",
+  "ref": "OA-JOB-261028-SWP9",
+  "owner": "1e292a229201548c",
+  "applicationStatus": ""
+ },
+ {
+  "id": "2027-mercer-university-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "Mercer University",
+  "department": "School of Engineering, Industrial Engineering and Industrial Management",
+  "school": "School of Engineering",
+  "unit": "Industrial Engineering and Industrial Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://merceruniversity.wd1.myworkdayjobs.com/external/job/Macon-GA--31207/Assistant-Professor--Industrial-Engineering-and-Industrial-Management_F28-006",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://merceruniversity.wd1.myworkdayjobs.com/external/job/Macon-GA--31207/Assistant-Professor--Industrial-Engineering-and-Industrial-Management_F28-006",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://engineering.mercer.edu/academic-programs/departments/industrial-engineering-and-industrial-management/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T06:34:32Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-north-carolina-central-university-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "North Carolina Central University",
+  "department": "School of Business, Decision Sciences",
+  "school": "School of Business",
+  "unit": "Decision Sciences",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://jobs.nccu.edu/postings/38446",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.nccu.edu/postings/38554/pre_apply",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.nccu.edu/business",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T06:44:37Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-ozyegin-university-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "Özyeğin University",
+  "department": "Faculty of Business, Management Information Systems",
+  "school": "Faculty of Business",
+  "unit": "Management Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Turkey",
+  "countries": [
+   "Turkey"
+  ],
+  "adUrl": "https://www.ozyegin.edu.tr/en/insan-kaynaklari/open-rank-faculty-position-management-information-systems",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.ozyegin.edu.tr/en/insan-kaynaklari/open-rank-faculty-position-management-information-systems",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.ozyegin.edu.tr/en/faculty-business",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T06:44:54Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-rutgers-university-new-brunswick-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "Rutgers University",
+  "department": "Edward J. Bloustein School of Planning and Public Policy, Health Informatics",
+  "school": "Edward J. Bloustein School of Planning and Public Policy",
+  "unit": "Health Informatics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-01",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.rutgers.edu/postings/282929/pre_apply",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://bloustein.rutgers.edu/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:57:23Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-uclouvain-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "UCLouvain",
+  "department": "Louvain School of Management, Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE",
+  "school": "Louvain School of Management",
+  "unit": "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "November 5, 2026",
+  "applyByDate": "2026-11-05",
+  "comments": "",
+  "country": "Belgium",
+  "countries": [
+   "Belgium"
+  ],
+  "adUrl": "https://jobs.uclouvain.be/PersonnelAcademique/job/An-academic-in-Optimization-and-Learning-for-Data-Driven-Decision-systems/1433460333/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=UCLouvain",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:57:44Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-louisville-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "University of Louisville",
+  "department": "College of Business, Information Systems, Analytics and Operations",
+  "school": "College of Business",
+  "unit": "Information Systems, Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-11",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://uofl.wd1.myworkdayjobs.com/en-US/UofLCareerSite/details/Assistant-Professor--tenure-track-_R109611?jobFamilyGroup=122eabeb58371000c79b8793f92f0000",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://business.louisville.edu/academics-programs/undergraduate-programs/computer-information-systems",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:57:49Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-nevada-reno-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "University of Nevada, Reno",
+  "department": "College of Engineering, Mechanical, Industrial, and Materials Engineering",
+  "school": "College of Engineering",
+  "unit": "Mechanical, Industrial, and Materials Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://nshe.wd1.myworkdayjobs.com/en-US/UNR-external/details/Assistant-Professor--Industrial-Engineering--Operations-Research-_R0154005?q=operations%20research",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Nevada%2C%20Reno",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:57:54Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-sydney-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "University of Sydney",
+  "department": "Faculty of Engineering, Engineering and AI",
+  "school": "Faculty of Engineering",
+  "unit": "Engineering and AI",
+  "type": "University",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "",
+  "country": "Australia",
+  "countries": [
+   "Australia"
+  ],
+  "adUrl": "https://usyd.wd105.myworkdayjobs.com/en-US/USYD_EXTERNAL_CAREER_SITE/job/Darlington-Campus/Multiple-Continuing--Tenure-Track--Academic-Positions---Faculty-of-Engineering--The-University-of-Sydney_0157992-1?q=engineering",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Sydney",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:58:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-toronto-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "University of Toronto",
+  "department": "Faculty of Applied Science and Engineering, Mechanical and Industrial Engineering",
+  "school": "Faculty of Applied Science and Engineering",
+  "unit": "Mechanical and Industrial Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 11, 2026",
+  "applyByDate": "2026-11-11",
+  "comments": "",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://jobs.utoronto.ca/job/Toronto-Assistant-Professor-Healthcare-Engineering-ON/606618917/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Toronto",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:58:04Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-solbridge-international-school-of-business-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "Woosong University",
+  "department": "SolBridge International School of Business, Analytics and AI for Business/Operations and Supply Chain Management",
+  "school": "SolBridge International School of Business",
+  "unit": "Analytics and AI for Business/Operations and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-20",
+  "comments": "",
+  "country": "South Korea",
+  "countries": [
+   "South Korea"
+  ],
+  "adUrl": "https://docs.google.com/forms/d/e/1FAIpQLSeAD0m0V_CDtsVrx0avzGaBEhEhLpx7YIjR1Yh3GEyVAQgWoQ/viewform",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://docs.google.com/forms/d/e/1FAIpQLSeAD0m0V_CDtsVrx0avzGaBEhEhLpx7YIjR1Yh3GEyVAQgWoQ/viewform",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Woosong%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:57:29Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-woxsen-university-20261027",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-27",
+  "institution": "Woxsen University",
+  "department": "School of Business, Business Analytics",
+  "school": "School of Business",
+  "unit": "Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "India",
+  "countries": [
+   "India"
+  ],
+  "adUrl": "https://woxsen.edu.in/careers/assistant-professor-business-analytics/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://etgs.wufoo.com/forms/woxsen-job/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://woxsen.edu.in/schools/business/",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-28T08:58:07Z",
+  "owner": ""
+ },
+ {
   "id": "2027-florida-atlantic-university-20261026",
   "year": 2027,
   "years": [
@@ -4963,7 +5551,7 @@
   "countries": [
    "United States"
   ],
-  "adUrl": "https://lnkd.in/p/eMRqWJmj",
+  "adUrl": "https://jobs.charlotte.edu/postings/71418",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",

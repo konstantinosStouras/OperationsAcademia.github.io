@@ -215,6 +215,7 @@
   "McMaster University",
   "MEF University",
   "Memorial University of Newfoundland",
+  "Mercer University",
   "Mercy University",
   "Miami University",
   "Michigan State University",
@@ -233,6 +234,7 @@
   "Murray State University",
   "Nanyang Technological University",
   "National Chiao Tung University",
+  "National Tsing Hua University",
   "National University of Singapore",
   "Naval Postgraduate School",
   "Nazarbayev University",
@@ -247,6 +249,7 @@
   "Norfolk State University",
   "North Carolina A&T State University",
   "North Carolina Agricultural and Technical State University",
+  "North Carolina Central University",
   "North Carolina State University",
   "North Central College",
   "North Dakota State University",
@@ -360,6 +363,7 @@
   "TU Eindhoven",
   "Tulane University",
   "Tusculum University",
+  "UCLouvain",
   "United States Military Academy - West Point",
   "United States Naval Academy",
   "Universidad de Chile",
@@ -455,6 +459,7 @@
   "University of North Carolina at Chapel Hill",
   "University of North Carolina at Charlotte",
   "University of North Carolina at Wilmington",
+  "University of North Dakota",
   "University of North Georgia",
   "University of North Texas",
   "University of Northern Iowa",
@@ -543,8 +548,10 @@
   "Wilfrid Laurier University",
   "Wilson College",
   "Winona State University",
+  "Woosong University",
   "Worcester Polytechnic Institute",
   "Worcester State University",
+  "Woxsen University",
   "WU Vienna",
   "Xi'an Jiaotong-Liverpool University",
   "Xi'an Jiaotong University",
@@ -816,6 +823,10 @@
    "Texas Tech University"
   ],
   [
+   "Edward J. Bloustein School of Planning and Public Policy",
+   "Rutgers University"
+  ],
+  [
    "Edwin L. Cox School of Business",
    "Southern Methodist University"
   ],
@@ -1084,10 +1095,6 @@
    "Bridgewater State University"
   ],
   [
-   "Louvain School of Management",
-   "Université catholique de Louvain"
-  ],
-  [
    "Lucas College and Graduate School of Business",
    "San José State University"
   ],
@@ -1222,6 +1229,10 @@
   [
    "Neidorff School of Business",
    "Trinity University"
+  ],
+  [
+   "Nistler College of Business and Public Administration",
+   "University of North Dakota"
   ],
   [
    "NUS Business School",
@@ -1374,6 +1385,10 @@
   [
    "Smeal College of Business",
    "Pennsylvania State University"
+  ],
+  [
+   "SolBridge International School of Business",
+   "Woosong University"
   ],
   [
    "Solvay Brussels School of Economics and Management",

@@ -1,48 +1,48 @@
 {
- "generated": "2026-10-27T20:05:11.276Z",
- "count": 888,
+ "generated": "2026-10-30T08:25:03.494Z",
+ "count": 905,
  "years": {
   "2026": 496,
-  "2027": 391,
+  "2027": 408,
   "2028": 1
  },
  "types": {
-  "University": 446,
-  "Business School": 406
+  "University": 453,
+  "Business School": 416
  },
  "levels": {
-  "Assistant Professor": 359,
-  "Other Ranks": 199,
-  "Non-tenure track (teaching) position": 56,
+  "Assistant Professor": 374,
+  "Other Ranks": 206,
+  "Non-tenure track (teaching) position": 57,
   "Post-Doc": 22,
   "Visiting Faculty (various levels)": 16,
   "PhD": 1,
   "RA or Pre-doc": 1
  },
  "countries": {
-  "United States": 638,
+  "United States": 645,
   "China": 38,
-  "United Kingdom": 34,
+  "United Kingdom": 35,
   "Hong Kong": 21,
-  "Canada": 19,
+  "Canada": 20,
   "France": 16,
   "Singapore": 16,
   "Spain": 12,
   "Germany": 9,
-  "India": 7,
+  "India": 8,
+  "South Korea": 7,
+  "Turkey": 7,
   "United Arab Emirates": 7,
-  "South Korea": 6,
-  "Turkey": 6,
-  "Australia": 5,
+  "Australia": 6,
+  "Belgium": 4,
+  "Netherlands": 4,
   "Portugal": 4,
   "Saudi Arabia": 4,
-  "Belgium": 3,
   "Denmark": 3,
   "Finland": 3,
   "Ireland": 3,
   "Lebanon": 3,
   "Mexico": 3,
-  "Netherlands": 3,
   "Austria": 2,
   "Cambodia": 2,
   "Chile": 2,
@@ -51,6 +51,7 @@
   "Oman": 2,
   "Qatar": 2,
   "Sweden": 2,
+  "Taiwan": 2,
   "Cyprus": 1,
   "Greece": 1,
   "Iraq": 1,
@@ -61,13 +62,13 @@
   "Uzbekistan": 1
  },
  "characteristics": {
-  "Research seminars": 109,
-  "MBA": 108,
-  "Masters": 106,
-  "Undergrad": 106,
-  "PhD": 93,
-  "Exec Ed": 85
+  "Research seminars": 111,
+  "MBA": 110,
+  "Undergrad": 108,
+  "Masters": 107,
+  "PhD": 94,
+  "Exec Ed": 86
  },
  "featured": 1,
- "newestPosted": "2026-10-26"
+ "newestPosted": "2026-10-28"
 }

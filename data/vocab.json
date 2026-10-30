@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-27T20:05:11.276Z",
+ "generated": "2026-10-30T08:25:03.494Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -78,6 +78,10 @@
    "n": 5
   },
   {
+   "v": "Rutgers University",
+   "n": 5
+  },
+  {
    "v": "SKEMA Business School",
    "n": 5
   },
@@ -127,10 +131,6 @@
   },
   {
    "v": "New York University Shanghai",
-   "n": 4
-  },
-  {
-   "v": "Rutgers University",
    "n": 4
   },
   {
@@ -327,6 +327,14 @@
   },
   {
    "v": "University of South Florida",
+   "n": 3
+  },
+  {
+   "v": "University of Toronto",
+   "n": 3
+  },
+  {
+   "v": "University of Warwick",
    "n": 3
   },
   {
@@ -562,6 +570,10 @@
    "n": 2
   },
   {
+   "v": "National Tsing Hua University",
+   "n": 2
+  },
+  {
    "v": "Naval Postgraduate School",
    "n": 2
   },
@@ -583,6 +595,10 @@
   },
   {
    "v": "Oregon State University",
+   "n": 2
+  },
+  {
+   "v": "Özyeğin University",
    "n": 2
   },
   {
@@ -766,14 +782,6 @@
    "n": 2
   },
   {
-   "v": "University of Toronto",
-   "n": 2
-  },
-  {
-   "v": "University of Warwick",
-   "n": 2
-  },
-  {
    "v": "University of Washington",
    "n": 2
   },
@@ -803,6 +811,10 @@
   },
   {
    "v": "Warwick Business School",
+   "n": 2
+  },
+  {
+   "v": "Washington University in St. Louis",
    "n": 2
   },
   {
@@ -1306,6 +1318,10 @@
    "n": 1
   },
   {
+   "v": "Mercer University",
+   "n": 1
+  },
+  {
    "v": "Mercy University",
    "n": 1
   },
@@ -1386,6 +1402,10 @@
    "n": 1
   },
   {
+   "v": "North Carolina Central University",
+   "n": 1
+  },
+  {
    "v": "North Carolina State University",
    "n": 1
   },
@@ -1415,10 +1435,6 @@
   },
   {
    "v": "Oakland University",
-   "n": 1
-  },
-  {
-   "v": "Özyeğin University",
    "n": 1
   },
   {
@@ -1646,6 +1662,10 @@
    "n": 1
   },
   {
+   "v": "UCLouvain",
+   "n": 1
+  },
+  {
    "v": "United States Naval Academy",
    "n": 1
   },
@@ -1750,6 +1770,10 @@
    "n": 1
   },
   {
+   "v": "University of Louisville",
+   "n": 1
+  },
+  {
    "v": "University of Maine at Augusta",
    "n": 1
   },
@@ -1790,6 +1814,10 @@
    "n": 1
   },
   {
+   "v": "University of Nevada, Reno",
+   "n": 1
+  },
+  {
    "v": "University of New Haven",
    "n": 1
   },
@@ -1811,6 +1839,10 @@
   },
   {
    "v": "University of North Carolina, Charlotte",
+   "n": 1
+  },
+  {
+   "v": "University of North Dakota",
    "n": 1
   },
   {
@@ -1847,6 +1879,10 @@
   },
   {
    "v": "University of Stirling",
+   "n": 1
+  },
+  {
+   "v": "University of Sydney",
    "n": 1
   },
   {
@@ -1914,6 +1950,10 @@
    "n": 1
   },
   {
+   "v": "Vrije Universiteit Amsterdam",
+   "n": 1
+  },
+  {
    "v": "Wake Forest University",
    "n": 1
   },
@@ -1923,10 +1963,6 @@
   },
   {
    "v": "Washington and Lee University",
-   "n": 1
-  },
-  {
-   "v": "Washington University in St. Louis",
    "n": 1
   },
   {
@@ -1970,7 +2006,15 @@
    "n": 1
   },
   {
+   "v": "Woosong University",
+   "n": 1
+  },
+  {
    "v": "Worcester State University",
+   "n": 1
+  },
+  {
+   "v": "Woxsen University",
    "n": 1
   },
   {
@@ -2322,10 +2366,6 @@
    "n": 0
   },
   {
-   "v": "University of Louisville",
-   "n": 0
-  },
-  {
    "v": "University of Maryland, College Park",
    "n": 0
   },
@@ -2355,10 +2395,6 @@
   },
   {
    "v": "University of Nevada",
-   "n": 0
-  },
-  {
-   "v": "University of Nevada, Reno",
    "n": 0
   },
   {
@@ -2442,10 +2478,6 @@
    "n": 0
   },
   {
-   "v": "Vrije Universiteit Amsterdam",
-   "n": 0
-  },
-  {
    "v": "Wageningen University",
    "n": 0
   },
@@ -2485,15 +2517,15 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 23
-  },
-  {
-   "v": "College of Engineering",
-   "n": 13
+   "n": 24
   },
   {
    "v": "School of Business",
-   "n": 13
+   "n": 15
+  },
+  {
+   "v": "College of Engineering",
+   "n": 14
   },
   {
    "v": "A. B. Freeman School of Business",
@@ -2528,11 +2560,19 @@
    "n": 4
   },
   {
+   "v": "Faculty of Business",
+   "n": 4
+  },
+  {
    "v": "Jack C. Massey College of Business",
    "n": 4
   },
   {
    "v": "Michael F. Price College of Business",
+   "n": 4
+  },
+  {
+   "v": "School of Engineering",
    "n": 4
   },
   {
@@ -2544,11 +2584,11 @@
    "n": 3
   },
   {
-   "v": "Faculty of Business",
+   "v": "Faculty of Business Administration",
    "n": 3
   },
   {
-   "v": "Faculty of Business Administration",
+   "v": "Faculty of Engineering",
    "n": 3
   },
   {
@@ -2569,10 +2609,6 @@
   },
   {
    "v": "Max M. Fisher College of Business",
-   "n": 3
-  },
-  {
-   "v": "School of Engineering",
    "n": 3
   },
   {
@@ -2636,10 +2672,6 @@
    "n": 2
   },
   {
-   "v": "Faculty of Engineering",
-   "n": 2
-  },
-  {
    "v": "Farmer School of Business",
    "n": 2
   },
@@ -2688,6 +2720,10 @@
    "n": 2
   },
   {
+   "v": "Louvain School of Management",
+   "n": 2
+  },
+  {
    "v": "Lucas College and Graduate School of Business",
    "n": 2
   },
@@ -2725,6 +2761,10 @@
   },
   {
    "v": "NUS Business School",
+   "n": 2
+  },
+  {
+   "v": "Olin Business School",
    "n": 2
   },
   {
@@ -2912,6 +2952,10 @@
    "n": 1
   },
   {
+   "v": "College of Technology Management",
+   "n": 1
+  },
+  {
    "v": "Columbia Business School",
    "n": 1
   },
@@ -2968,7 +3012,15 @@
    "n": 1
   },
   {
+   "v": "Edward J. Bloustein School of Planning and Public Policy",
+   "n": 1
+  },
+  {
    "v": "ESSEC Business School",
+   "n": 1
+  },
+  {
+   "v": "Faculty of Applied Science and Engineering",
    "n": 1
   },
   {
@@ -2997,6 +3049,10 @@
   },
   {
    "v": "Faculty of Management",
+   "n": 1
+  },
+  {
+   "v": "Faculty of Science",
    "n": 1
   },
   {
@@ -3100,6 +3156,10 @@
    "n": 1
   },
   {
+   "v": "Institute of Technology Management",
+   "n": 1
+  },
+  {
    "v": "International Business School Suzhou",
    "n": 1
   },
@@ -3153,10 +3213,6 @@
   },
   {
    "v": "Louis M. Ricciardi College of Business",
-   "n": 1
-  },
-  {
-   "v": "Louvain School of Management",
    "n": 1
   },
   {
@@ -3224,11 +3280,11 @@
    "n": 1
   },
   {
-   "v": "Oakley School of Business",
+   "v": "Nistler College of Business and Public Administration",
    "n": 1
   },
   {
-   "v": "Olin Business School",
+   "v": "Oakley School of Business",
    "n": 1
   },
   {
@@ -3344,6 +3400,10 @@
    "n": 1
   },
   {
+   "v": "SolBridge International School of Business",
+   "n": 1
+  },
+  {
    "v": "Spears School of Business",
    "n": 1
   },
@@ -3389,6 +3449,10 @@
   },
   {
    "v": "Warrington College of Business",
+   "n": 1
+  },
+  {
+   "v": "Warwick Business School",
    "n": 1
   },
   {
@@ -3820,10 +3884,6 @@
    "n": 0
   },
   {
-   "v": "Warwick Business School",
-   "n": 0
-  },
-  {
    "v": "Weatherhead School of Management",
    "n": 0
   },
@@ -3870,12 +3930,12 @@
    "n": 15
   },
   {
-   "v": "MIS",
+   "v": "Business Analytics",
    "n": 14
   },
   {
-   "v": "Business Analytics",
-   "n": 13
+   "v": "MIS",
+   "n": 14
   },
   {
    "v": "OM/SCM",
@@ -3894,20 +3954,20 @@
    "n": 10
   },
   {
+   "v": "Management Information Systems",
+   "n": 10
+  },
+  {
    "v": "Data Analytics",
    "n": 9
   },
   {
-   "v": "Management Information Systems",
-   "n": 9
+   "v": "Decision Sciences",
+   "n": 8
   },
   {
    "v": "Operations and Supply Chain Management",
    "n": 8
-  },
-  {
-   "v": "Decision Sciences",
-   "n": 7
   },
   {
    "v": "Information Systems",
@@ -3930,6 +3990,10 @@
    "n": 5
   },
   {
+   "v": "Information Systems and Analytics",
+   "n": 5
+  },
+  {
    "v": "Logistics and Maritime Studies",
    "n": 5
   },
@@ -3943,10 +4007,6 @@
   },
   {
    "v": "Industrial Engineering",
-   "n": 4
-  },
-  {
-   "v": "Information Systems and Analytics",
    "n": 4
   },
   {
@@ -4146,6 +4206,10 @@
    "n": 2
   },
   {
+   "v": "Institute of Technology Management",
+   "n": 2
+  },
+  {
    "v": "Integrated Systems Engineering",
    "n": 2
   },
@@ -4179,6 +4243,10 @@
   },
   {
    "v": "Marketing and Supply Chain Management",
+   "n": 2
+  },
+  {
+   "v": "Mechanical and Industrial Engineering",
    "n": 2
   },
   {
@@ -4230,6 +4298,10 @@
    "n": 2
   },
   {
+   "v": "Supply Chain, Operations and Technology",
+   "n": 2
+  },
+  {
    "v": "sustainability",
    "n": 2
   },
@@ -4271,6 +4343,10 @@
   },
   {
    "v": "Analytics",
+   "n": 1
+  },
+  {
+   "v": "Analytics and AI for Business/Operations and Supply Chain Management",
    "n": 1
   },
   {
@@ -4594,6 +4670,10 @@
    "n": 1
   },
   {
+   "v": "Engineering and AI",
+   "n": 1
+  },
+  {
    "v": "Engineering Management and Decision Sciences",
    "n": 1
   },
@@ -4635,6 +4715,10 @@
   },
   {
    "v": "Health Care Policy",
+   "n": 1
+  },
+  {
+   "v": "Health Informatics",
    "n": 1
   },
   {
@@ -4691,6 +4775,10 @@
   },
   {
    "v": "Industrial Engineering (Manufacturing Systems)",
+   "n": 1
+  },
+  {
+   "v": "Industrial Engineering and Industrial Management",
    "n": 1
   },
   {
@@ -4759,6 +4847,10 @@
   },
   {
    "v": "Information Systems and Technology",
+   "n": 1
+  },
+  {
+   "v": "Information Systems, Analytics and Operations",
    "n": 1
   },
   {
@@ -4938,6 +5030,10 @@
    "n": 1
   },
   {
+   "v": "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE",
+   "n": 1
+  },
+  {
    "v": "Management (Markets, Innovation, And Design)",
    "n": 1
   },
@@ -5038,11 +5134,19 @@
    "n": 1
   },
   {
-   "v": "Mechanical and Industrial Engineering",
+   "v": "Mathematics, Analytics and Optimization",
    "n": 1
   },
   {
    "v": "Mechanical, Industrial and Systems Engineering",
+   "n": 1
+  },
+  {
+   "v": "Mechanical, Industrial, and Materials Engineering",
+   "n": 1
+  },
+  {
+   "v": "Middleton School of Entrepreneurship and Management",
    "n": 1
   },
   {
@@ -5462,10 +5566,6 @@
    "n": 1
   },
   {
-   "v": "Supply Chain, Operations and Technology",
-   "n": 1
-  },
-  {
    "v": "Sustainable SCM",
    "n": 1
   },
@@ -5727,10 +5827,6 @@
   },
   {
    "v": "Marketing and Global Supply Chain",
-   "n": 0
-  },
-  {
-   "v": "Mathematics, Analytics and Optimization",
    "n": 0
   },
   {
@@ -9217,6 +9313,19 @@
    "units": [],
    "bySchool": {}
   },
+  "Mercer University": {
+   "schools": [
+    "School of Engineering"
+   ],
+   "units": [
+    "Industrial Engineering and Industrial Management"
+   ],
+   "bySchool": {
+    "School of Engineering": [
+     "Industrial Engineering and Industrial Management"
+    ]
+   }
+  },
   "Mercy University": {
    "schools": [
     "School of Business"
@@ -9471,6 +9580,23 @@
     ]
    }
   },
+  "National Tsing Hua University": {
+   "schools": [
+    "College of Technology Management",
+    "Institute of Technology Management"
+   ],
+   "units": [
+    "Institute of Technology Management"
+   ],
+   "bySchool": {
+    "College of Technology Management": [
+     "Institute of Technology Management"
+    ],
+    "Institute of Technology Management": [
+     "Institute of Technology Management"
+    ]
+   }
+  },
   "National University of Singapore": {
    "schools": [
     "NUS Business School",
@@ -9683,6 +9809,19 @@
    "bySchool": {
     "Willie A. Deese College of Business and Economics": [
      "Business Information Systems and Analytics"
+    ]
+   }
+  },
+  "North Carolina Central University": {
+   "schools": [
+    "School of Business"
+   ],
+   "units": [
+    "Decision Sciences"
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Decision Sciences"
     ]
    }
   },
@@ -9959,14 +10098,19 @@
   },
   "Özyeğin University": {
    "schools": [
+    "Faculty of Business",
     "Graduate School of Business"
    ],
    "units": [
+    "Management Information Systems",
     "OM"
    ],
    "bySchool": {
     "": [
      "OM"
+    ],
+    "Faculty of Business": [
+     "Management Information Systems"
     ]
    }
   },
@@ -10329,10 +10473,12 @@
   },
   "Rutgers University": {
    "schools": [
+    "Edward J. Bloustein School of Planning and Public Policy",
     "School of Business-Camden"
    ],
    "units": [
     "AI/ML/DS/Stats",
+    "Health Informatics",
     "IE",
     "Operations Management",
     "SCM (second position)",
@@ -10344,6 +10490,9 @@
      "IE",
      "SCM (second position)",
      "Supply Chain Management"
+    ],
+    "Edward J. Bloustein School of Planning and Public Policy": [
+     "Health Informatics"
     ],
     "School of Business-Camden": [
      "Operations Management"
@@ -11604,6 +11753,19 @@
     ]
    }
   },
+  "UCLouvain": {
+   "schools": [
+    "Louvain School of Management"
+   ],
+   "units": [
+    "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE"
+   ],
+   "bySchool": {
+    "Louvain School of Management": [
+     "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE"
+    ]
+   }
+  },
   "United States Naval Academy": {
    "schools": [],
    "units": [
@@ -12569,12 +12731,17 @@
   },
   "University of Louisville": {
    "schools": [
+    "College of Business",
     "J. B. Speed School of Engineering"
    ],
    "units": [
-    "Industrial Engineering"
+    "Industrial Engineering",
+    "Information Systems, Analytics and Operations"
    ],
    "bySchool": {
+    "College of Business": [
+     "Information Systems, Analytics and Operations"
+    ],
     "J. B. Speed School of Engineering": [
      "Industrial Engineering"
     ]
@@ -12972,14 +13139,19 @@
   },
   "University of Nevada, Reno": {
    "schools": [
-    "College of Business"
+    "College of Business",
+    "College of Engineering"
    ],
    "units": [
-    "Marketing"
+    "Marketing",
+    "Mechanical, Industrial, and Materials Engineering"
    ],
    "bySchool": {
     "College of Business": [
      "Marketing"
+    ],
+    "College of Engineering": [
+     "Mechanical, Industrial, and Materials Engineering"
     ]
    }
   },
@@ -13085,6 +13257,19 @@
    "bySchool": {
     "William States Lee College of Engineering": [
      "Industrial and Systems Engineering"
+    ]
+   }
+  },
+  "University of North Dakota": {
+   "schools": [
+    "Nistler College of Business and Public Administration"
+   ],
+   "units": [
+    "Middleton School of Entrepreneurship and Management"
+   ],
+   "bySchool": {
+    "Nistler College of Business and Public Administration": [
+     "Middleton School of Entrepreneurship and Management"
     ]
    }
   },
@@ -13462,6 +13647,19 @@
     ]
    }
   },
+  "University of Sydney": {
+   "schools": [
+    "Faculty of Engineering"
+   ],
+   "units": [
+    "Engineering and AI"
+   ],
+   "bySchool": {
+    "Faculty of Engineering": [
+     "Engineering and AI"
+    ]
+   }
+  },
   "University of Tampa": {
    "schools": [
     "Sykes College of Business"
@@ -13636,6 +13834,7 @@
   },
   "University of Toronto": {
    "schools": [
+    "Faculty of Applied Science and Engineering",
     "Faculty of Arts and Science",
     "Joseph L. Rotman School of Management"
    ],
@@ -13646,6 +13845,9 @@
    ],
    "bySchool": {
     "": [
+     "Mechanical and Industrial Engineering"
+    ],
+    "Faculty of Applied Science and Engineering": [
      "Mechanical and Industrial Engineering"
     ],
     "Faculty of Arts and Science": [
@@ -13774,6 +13976,7 @@
     "Warwick Business School"
    ],
    "units": [
+    "Information Systems and Analytics",
     "IS",
     "Operations Management",
     "Warwick Manufacturing Group, Applied Artificial Intelligence"
@@ -13786,6 +13989,7 @@
      "Warwick Manufacturing Group, Applied Artificial Intelligence"
     ],
     "Warwick Business School": [
+     "Information Systems and Analytics",
      "Operations Management"
     ]
    }
@@ -14145,12 +14349,17 @@
    }
   },
   "Vrije Universiteit Amsterdam": {
-   "schools": [],
+   "schools": [
+    "Faculty of Science"
+   ],
    "units": [
     "Mathematics, Analytics and Optimization"
    ],
    "bySchool": {
     "": [
+     "Mathematics, Analytics and Optimization"
+    ],
+    "Faculty of Science": [
      "Mathematics, Analytics and Optimization"
     ]
    }
@@ -14423,6 +14632,19 @@
     ]
    }
   },
+  "Woosong University": {
+   "schools": [
+    "SolBridge International School of Business"
+   ],
+   "units": [
+    "Analytics and AI for Business/Operations and Supply Chain Management"
+   ],
+   "bySchool": {
+    "SolBridge International School of Business": [
+     "Analytics and AI for Business/Operations and Supply Chain Management"
+    ]
+   }
+  },
   "Worcester Polytechnic Institute": {
    "schools": [],
    "units": [],
@@ -14436,6 +14658,19 @@
    "bySchool": {
     "": [
      "Business Administration and Economics"
+    ]
+   }
+  },
+  "Woxsen University": {
+   "schools": [
+    "School of Business"
+   ],
+   "units": [
+    "Business Analytics"
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Business Analytics"
     ]
    }
   },
@@ -14655,6 +14890,7 @@
    "Finance, Supply Chain and Transportation",
    "Information and Decision Sciences",
    "Information Systems",
+   "Information Systems, Analytics and Operations",
    "Information Systems, Supply Chain, and Analytics",
    "Information Technology and Operations Management",
    "Management",
@@ -14717,6 +14953,7 @@
    "Lillian Gilbreth Postdoctoral Fellowships",
    "Mechanical and Industrial Engineering",
    "Mechanical, Industrial and Systems Engineering",
+   "Mechanical, Industrial, and Materials Engineering",
    "One Health – Intelligent Medicines",
    "Systems Engineering",
    "Wm Michael Barnes’ 64 Department of Industrial and Systems Engineering"
@@ -14757,6 +14994,9 @@
   ],
   "College of Science, Engineering and Technology": [
    "Computer Information Science"
+  ],
+  "College of Technology Management": [
+   "Institute of Technology Management"
   ],
   "Coller School of Management": [
    "Operational Strategy"
@@ -14867,6 +15107,9 @@
   "Edward E. Whitacre Jr. College of Engineering": [
    "Industrial, Manufacturing and Systems Engineering"
   ],
+  "Edward J. Bloustein School of Planning and Public Policy": [
+   "Health Informatics"
+  ],
   "Edwin L. Cox School of Business": [
    "Information Technology and Operations Management",
    "ITOM"
@@ -14877,6 +15120,9 @@
   "ESSEC Business School": [
    "Information Systems, Data Analytics and Operations"
   ],
+  "Faculty of Applied Science and Engineering": [
+   "Mechanical and Industrial Engineering"
+  ],
   "Faculty of Arts and Science": [
    "Statistical Sciences"
   ],
@@ -14886,7 +15132,8 @@
   "Faculty of Business": [
    "Computing and Decision Sciences",
    "Fashion and Textiles",
-   "Logistics and Maritime Studies"
+   "Logistics and Maritime Studies",
+   "Management Information Systems"
   ],
   "Faculty of Business Administration": [
    "Accounting and Information Management",
@@ -14903,6 +15150,7 @@
    "Research Center for Operations Management"
   ],
   "Faculty of Engineering": [
+   "Engineering and AI",
    "Industrial Engineering",
    "Systems Engineering and Engineering Management",
    "Technology and Innovation, Center for Supply Chain Digitalisation"
@@ -14918,6 +15166,9 @@
   ],
   "Faculty of Management": [
    "Operations and Supply Chain Management"
+  ],
+  "Faculty of Science": [
+   "Mathematics, Analytics and Optimization"
   ],
   "Faculty of Science, Engineering and Medicine": [
    "Warwick Manufacturing Group, Applied Artificial Intelligence"
@@ -15056,6 +15307,9 @@
   "Institute of Artificial Intelligence and Brain Sciences": [
    "Data Science"
   ],
+  "Institute of Technology Management": [
+   "Institute of Technology Management"
+  ],
   "International Business School Suzhou": [
    "Intelligent Operations and Marketing"
   ],
@@ -15165,7 +15419,8 @@
    "Management and Marketing"
   ],
   "Louvain School of Management": [
-   "Center for Operations Research and Econometrics"
+   "Center for Operations Research and Econometrics",
+   "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE"
   ],
   "Lucas College and Graduate School of Business": [
    "Information Systems and Technology",
@@ -15293,6 +15548,9 @@
   ],
   "Neidorff School of Business": [
    "Finance and Business Analytics"
+  ],
+  "Nistler College of Business and Public Administration": [
+   "Middleton School of Entrepreneurship and Management"
   ],
   "NUS Business School": [
    "Analytics and Operations"
@@ -15478,6 +15736,7 @@
    "Center for Transportation and Logistics",
    "Industrial and Systems Engineering",
    "Industrial and Systems Engineering and Electrical Engineering",
+   "Industrial Engineering and Industrial Management",
    "Management Science and Engineering"
   ],
   "School of Engineering and Applied Science": [
@@ -15547,6 +15806,9 @@
   ],
   "Smith School of Business": [
    "Management Science and Operations Management"
+  ],
+  "SolBridge International School of Business": [
+   "Analytics and AI for Business/Operations and Supply Chain Management"
   ],
   "Spears School of Business": [
    "Management Science and Information Systems, Center for Health Systems Innovation"
@@ -15630,6 +15892,7 @@
    "Information Systems and Operations Management"
   ],
   "Warwick Business School": [
+   "Information Systems and Analytics",
    "Operations Management"
   ],
   "Weatherhead School of Management": [

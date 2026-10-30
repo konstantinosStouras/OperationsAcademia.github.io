@@ -1700,6 +1700,11 @@
   "department": ""
  },
  {
+  "institution": "Mercer University",
+  "school": "School of Engineering",
+  "department": "Industrial Engineering and Industrial Management"
+ },
+ {
   "institution": "Mercy University",
   "school": "School of Business",
   "department": "Business Administration"
@@ -1850,6 +1855,16 @@
   "department": "Information Technology and Operations Management"
  },
  {
+  "institution": "National Tsing Hua University",
+  "school": "College of Technology Management",
+  "department": "Institute of Technology Management"
+ },
+ {
+  "institution": "National Tsing Hua University",
+  "school": "Institute of Technology Management",
+  "department": "Institute of Technology Management"
+ },
+ {
   "institution": "National University of Singapore (ISEM)",
   "school": "",
   "department": "simulation, sustainability, AI + X"
@@ -1988,6 +2003,11 @@
   "institution": "North Carolina Agricultural and Technical State University",
   "school": "Willie A. Deese College of Business and Economics",
   "department": "Business Information Systems and Analytics"
+ },
+ {
+  "institution": "North Carolina Central University",
+  "school": "School of Business",
+  "department": "Decision Sciences"
  },
  {
   "institution": "North Carolina State University",
@@ -2138,6 +2158,11 @@
   "institution": "Özyeğin University",
   "school": "",
   "department": "OM"
+ },
+ {
+  "institution": "Özyeğin University",
+  "school": "Faculty of Business",
+  "department": "Management Information Systems"
  },
  {
   "institution": "Palm Beach Atlantic University",
@@ -2333,6 +2358,11 @@
   "institution": "Rutgers University",
   "school": "",
   "department": "Supply Chain Management"
+ },
+ {
+  "institution": "Rutgers University",
+  "school": "Edward J. Bloustein School of Planning and Public Policy",
+  "department": "Health Informatics"
  },
  {
   "institution": "Sabanci University",
@@ -2960,6 +2990,11 @@
   "department": "OM"
  },
  {
+  "institution": "UCLouvain",
+  "school": "Louvain School of Management",
+  "department": "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE"
+ },
+ {
   "institution": "United States Naval Academy",
   "school": "",
   "department": ""
@@ -3451,7 +3486,7 @@
  },
  {
   "institution": "University of Louisville",
-  "school": "",
+  "school": "College of Business",
   "department": "Information Systems, Analytics and Operations"
  },
  {
@@ -3635,6 +3670,11 @@
   "department": ""
  },
  {
+  "institution": "University of Nevada, Reno",
+  "school": "College of Engineering",
+  "department": "Mechanical, Industrial, and Materials Engineering"
+ },
+ {
   "institution": "University of New Haven",
   "school": "College of Business and Digital Innovation",
   "department": "Business Analytics"
@@ -3673,6 +3713,11 @@
   "institution": "University of North Carolina, Charlotte",
   "school": "William States Lee College of Engineering",
   "department": "Industrial and Systems Engineering"
+ },
+ {
+  "institution": "University of North Dakota",
+  "school": "Nistler College of Business and Public Administration",
+  "department": "Middleton School of Entrepreneurship and Management"
  },
  {
   "institution": "University of North Georgia",
@@ -3855,6 +3900,11 @@
   "department": "Project Management"
  },
  {
+  "institution": "University of Sydney",
+  "school": "Faculty of Engineering",
+  "department": "Engineering and AI"
+ },
+ {
   "institution": "University of Tampa",
   "school": "Sykes College of Business",
   "department": "Information and Technology Management"
@@ -3951,6 +4001,11 @@
  },
  {
   "institution": "University of Toronto",
+  "school": "Faculty of Applied Science and Engineering",
+  "department": "Mechanical and Industrial Engineering"
+ },
+ {
+  "institution": "University of Toronto",
   "school": "Faculty of Arts and Science",
   "department": "Statistical Sciences"
  },
@@ -4033,6 +4088,11 @@
   "institution": "University of Warwick",
   "school": "Faculty of Science, Engineering and Medicine",
   "department": "Warwick Manufacturing Group, Applied Artificial Intelligence"
+ },
+ {
+  "institution": "University of Warwick",
+  "school": "Warwick Business School",
+  "department": "Information Systems and Analytics"
  },
  {
   "institution": "University of Washington Bothell",
@@ -4190,6 +4250,11 @@
   "department": "Operations Research"
  },
  {
+  "institution": "Vrije Universiteit Amsterdam",
+  "school": "Faculty of Science",
+  "department": "Mathematics, Analytics and Optimization"
+ },
+ {
   "institution": "Wake Forest University",
   "school": "",
   "department": "Business Analytics"
@@ -4275,9 +4340,19 @@
   "department": "MIS"
  },
  {
+  "institution": "Woosong University",
+  "school": "SolBridge International School of Business",
+  "department": "Analytics and AI for Business/Operations and Supply Chain Management"
+ },
+ {
   "institution": "Worcester State University",
   "school": "",
   "department": "Business Administration and Economics"
+ },
+ {
+  "institution": "Woxsen University",
+  "school": "School of Business",
+  "department": "Business Analytics"
  },
  {
   "institution": "Xi'an Jiaotong University",
