@@ -78,8 +78,16 @@
     return b;
   }
 
-  function card(id, v) {
+  function card(id, v, publishedRows) {
     var st = STATUS[v.status] || STATUS.queued;
+    if (v.status === 'published') {
+      var available = publishedRows && publishedRows.some(function (r) {
+        return v.ref ? r.ref === v.ref : r.id === (v.publishedId || id);
+      });
+      if (!available) st = publishedRows
+        ? { label: 'Pending publication', cls: 'is-pending', note: 'Your posting is saved and awaiting the website update. You can still edit it or take it down.' }
+        : { label: 'Saved', cls: 'is-pending', note: 'Your posting is saved. We could not check its public availability; please reload to check again.' };
+    }
     var wrap = el('div', 'oa-my-card');
 
     var head = el('div', 'oa-my-head');
@@ -168,16 +176,26 @@
     show($('oa-my-loading'), true);
     show($('oa-my-empty'), false);
 
-    OAFB.ready().then(function (fb) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, 8000);
+    var publication = fetch('/data/jobs.json', { cache: 'no-store', signal: controller.signal })
+      .then(function (r) { if (!r.ok) throw new Error('Publication unavailable'); return r.json(); })
+      .then(function (rows) { return Array.isArray(rows) ? rows : null; })
+      .catch(function () { return null; })
+      .finally(function () { clearTimeout(timer); });
+    var submissions = OAFB.ready().then(function (fb) {
       return fb.firestore().collection(col()).where('uid', '==', user.uid).get();
-    }).then(function (snap) {
+    });
+    Promise.all([submissions, publication]).then(function (results) {
+      if (loadedFor !== user.uid) return;
+      var snap = results[0];
       var docs = [];
       snap.forEach(function (d) { docs.push({ id: d.id, v: d.data() || {} }); });
       docs.sort(function (a, b) { return tsToMillis(b.v.createdAt) - tsToMillis(a.v.createdAt); });
 
       var list = $('oa-my-list');
       list.textContent = '';
-      docs.forEach(function (d) { list.appendChild(card(d.id, d.v)); });
+      docs.forEach(function (d) { list.appendChild(card(d.id, d.v, results[1])); });
 
       show($('oa-my-loading'), false);
       show(list, docs.length > 0);
@@ -189,6 +207,7 @@
          clicking through never shows a different number of cards. */
       if (window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('postings', docs.length);
     }).catch(function (err) {
+      if (loadedFor !== user.uid) return;
       loadedFor = null;   // a retry on the next auth event is fine
       show($('oa-my-loading'), false);
       var off = $('oa-offline');

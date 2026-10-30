@@ -99,6 +99,13 @@ try {
   await page.evaluate(() => changeUser(null));
   assert.equal(await page.locator('.pa-metric').count(), 0, 'sign-out immediately clears private figures');
   assert.match(await page.locator('#profile-analytics').innerText(), /Sign in/);
+  for (const [type, collection, label] of [['job', 'jobSubmissions', 'Job Posting Analytics'], ['candidate', 'candidateSubmissions', 'Profile Analytics']]) {
+    await page.goto('https://www.operationsacademia.org/profile-analytics?type=' + type);
+    await page.getByRole('heading', { name: 'Views over time' }).waitFor();
+    assert.equal(await page.locator('h1').innerText(), label + ' New');
+    assert.equal(await page.getByLabel('Choose a listing').count(), 0, 'type-specific link opens its own report directly');
+    assert.deepEqual(await page.evaluate(() => testQueries.map(q => q.col)), [collection]);
+  }
   assert.deepEqual(errors, []);
   await page.close();
   console.log('Profile Analytics browser: owner-scoped queries, candidate/job selection, reporting period, 32 mobile report/period/theme combinations at 320–430px with labeled, unclipped times, and logout passed.');

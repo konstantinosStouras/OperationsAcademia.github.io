@@ -230,7 +230,7 @@
       }
       var locationContext=point&&point.locationContext||'';
       // These describe the data model rather than helping a visitor find a place.
-      if(locationContext==='Current academic department'||/^One school across four locations\.|^Grouped under the graduate business school\./.test(locationContext))locationContext='';
+      if(point&&point.locationPrecision!=='campus'&&(locationContext==='Current academic department'||/^One school across four locations\.|^Grouped under the graduate business school\./.test(locationContext)))locationContext='';
       if(point&&point.locationVerified&&locationContext)location.appendChild(el('p',{class:'oa-map-location-context',text:locationContext}));
       pop.appendChild(location);
       var departments=el('div',{class:'oa-map-card-departments'});

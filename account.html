@@ -235,9 +235,13 @@
 
         <!-- signed IN: the sections of the personal area -->
         <div class="v3-pa-grid" id="pa-grid" hidden>
-          <a class="v3-pa-card" href="profile-analytics">
+          <a class="v3-pa-card" href="profile-analytics?type=candidate" data-held="cands" hidden>
             <h3>Profile Analytics <span class="oa-nav-new" data-profile-analytics-new hidden>New</span></h3>
-            <p>See the reach of your candidate profiles and job postings: views, clicks, reading time and countries.</p>
+            <p>See views, clicks, reading time and audience countries for your candidate profiles.</p>
+          </a>
+          <a class="v3-pa-card" href="profile-analytics?type=job" data-held="postings" hidden>
+            <h3>Job Posting Analytics <span class="oa-nav-new" data-profile-analytics-new hidden>New</span></h3>
+            <p>See views, clicks, reading time and audience countries for your job postings.</p>
           </a>
           <a class="v3-pa-card" href="my-postings">
             <h3><span class="v3-ico" aria-hidden="true">&#128203;</span> My postings</h3>

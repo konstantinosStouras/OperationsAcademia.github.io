@@ -44,7 +44,7 @@
   /* What a signed-in user may touch, keyed both ways: a posting migrated off
      the sheet has the row's own id as its document id, while one made through
      the form has a random document id and carries a `ref`. */
-  var perm = { ready: false, admin: false, byId: {}, byRef: {}, uid: null };
+  var perm = { ready: false, admin: false, byId: {}, byRef: {}, bySheetId: {}, uid: null };
   var list = null;   // the OAList instance, so cards can be redrawn late
 
   function isAdmin(user) {
@@ -57,6 +57,9 @@
   function docIdFor(row) {
     if (!perm.ready) return '';
     if (row.ref && perm.byRef[row.ref]) return perm.byRef[row.ref];
+    // Publication may suffix a sheet row's id when a member job shares it.
+    // Keep the source record as the editing target, before trying the URL id.
+    if (row.sourceId) return perm.bySheetId[row.sourceId] || '';
     if (perm.byId[row.id]) return perm.byId[row.id];
     return '';
   }
@@ -153,7 +156,7 @@
        another person's posting is the defect. `perm.uid` was captured for this
        and never read; identity (`perm !== mine`) is the stronger test, since
        it also covers a same-uid double fire. */
-    var mine = { ready: false, admin: false, byId: {}, byRef: {}, uid: (user && user.uid) || null };
+    var mine = { ready: false, admin: false, byId: {}, byRef: {}, bySheetId: {}, uid: (user && user.uid) || null };
     perm = mine;
 
     if (!user || !window.OAFB || !OAFB.enabled) { mine.ready = true; redraw(); return; }
@@ -172,6 +175,7 @@
         var v = d.data() || {};
         mine.byId[d.id] = d.id;
         if (v.ref) mine.byRef[v.ref] = d.id;
+        if (!v.uid && v.sheetId) mine.bySheetId[v.sheetId] = d.id;
       });
       mine.ready = true;
       redraw();
@@ -201,7 +205,7 @@
        write anything. */
     __setPermissionsForTest: function (p) {
       perm = { ready: !!p.ready, admin: !!p.admin, byId: p.byId || {},
-               byRef: p.byRef || {}, uid: p.uid || null };
+               byRef: p.byRef || {}, bySheetId: p.bySheetId || {}, uid: p.uid || null };
       redraw();
     },
 

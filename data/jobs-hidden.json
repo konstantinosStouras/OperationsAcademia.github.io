@@ -1,5 +1,8 @@
 {
  "_comment": "Postings never published, by id or by reference. The Google Sheet re-offers every row it holds on each sync, so a withdrawn or test posting has to be suppressed here rather than deleted from jobs.json — deleting it alone brings it straight back on the next run. Honoured by import-sheet.mjs and build-jobs.mjs.",
+ "sources": {
+  "jobmarket-sheet": ["2027-national-tsing-hua-university-20261028"]
+ },
  "refs": [
   "OA-JOB-260815-7T9B"
  ],

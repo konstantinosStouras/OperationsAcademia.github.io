@@ -265,7 +265,9 @@ try{
       const {location,id}=evidenceQueue.shift();
       const displayLocation=byEvidence.get(location.id);
       if(evidenceQueue.length%25===0)console.log('Department links remaining:',evidenceQueue.length);
-      const row=directory.find(r=>r.id===id);
+      const row=directory.find(r=>r.id===id||(r.sourceRowIds||[]).includes(id))||
+        directory.find(r=>(r.mapLocationIds||[]).includes(location.id));
+      assert.ok(row,id+' resolves to a current directory row');
       const url=nav.furtherInfoUrl({institution:row.institution,school:row.school,unit:row.department,furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=legacy'});
       const q=await pageAt(new URL(url).search);
       try{await q.waitForSelector(row.department?'.oa-map-selected-department':'.oa-map-popup',{timeout:5000});}

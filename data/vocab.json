@@ -570,10 +570,6 @@
    "n": 2
   },
   {
-   "v": "National Tsing Hua University",
-   "n": 2
-  },
-  {
    "v": "Naval Postgraduate School",
    "n": 2
   },
@@ -1355,6 +1351,10 @@
   },
   {
    "v": "Murray State University",
+   "n": 1
+  },
+  {
+   "v": "National Tsing Hua University",
    "n": 1
   },
   {
@@ -2952,10 +2952,6 @@
    "n": 1
   },
   {
-   "v": "College of Technology Management",
-   "n": 1
-  },
-  {
    "v": "Columbia Business School",
    "n": 1
   },
@@ -4206,10 +4202,6 @@
    "n": 2
   },
   {
-   "v": "Institute of Technology Management",
-   "n": 2
-  },
-  {
    "v": "Integrated Systems Engineering",
    "n": 2
   },
@@ -4899,6 +4891,10 @@
   },
   {
    "v": "Innovation and Entrepreneurship",
+   "n": 1
+  },
+  {
+   "v": "Institute of Technology Management",
    "n": 1
   },
   {
@@ -9582,16 +9578,12 @@
   },
   "National Tsing Hua University": {
    "schools": [
-    "College of Technology Management",
     "Institute of Technology Management"
    ],
    "units": [
     "Institute of Technology Management"
    ],
    "bySchool": {
-    "College of Technology Management": [
-     "Institute of Technology Management"
-    ],
     "Institute of Technology Management": [
      "Institute of Technology Management"
     ]
@@ -14994,9 +14986,6 @@
   ],
   "College of Science, Engineering and Technology": [
    "Computer Information Science"
-  ],
-  "College of Technology Management": [
-   "Institute of Technology Management"
   ],
   "Coller School of Management": [
    "Operational Strategy"
