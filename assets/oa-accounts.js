@@ -161,6 +161,9 @@
   function stampAuthState(signedIn) {
     try {
       document.documentElement.setAttribute('data-oa-auth', signedIn ? 'in' : 'out');
+      document.querySelectorAll('[data-oa-home-jobs]').forEach(function (link) {
+        link.setAttribute('href', signedIn ? 'jobs' : '#jobs');
+      });
     } catch (e) { /* nothing sane to do */ }
   }
 

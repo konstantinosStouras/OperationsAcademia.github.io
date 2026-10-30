@@ -55,7 +55,7 @@
         el.setAttribute('data-theme', 'light');
       }
       /* The account chip, for the same reason and in the same breath. It is
-         painted by assets/oa-accounts.js?v=20261030-posting-roles, which cannot run until the page has
+         painted by assets/oa-accounts.js?v=20261030-jobs-nav, which cannot run until the page has
          parsed — so #oa-account is empty and 0px wide for ~130ms and the whole
          header row jumps sideways when the chip lands (measured: the nav by
          62px, the theme toggle by 185px). Reserve the space it will take, from
@@ -124,7 +124,7 @@
         </a>
 
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="#jobs">Jobs</a>
+          <a href="#jobs" data-oa-home-jobs>Jobs</a>
           <a href="candidates">Candidates</a>
           <a href="forum">Forum <span class="oa-nav-new">New</span></a>
           <a href="#survey">Survey</a>
@@ -171,7 +171,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="#jobs">Jobs</a>
+        <a href="#jobs" data-oa-home-jobs>Jobs</a>
         <a href="candidates">Candidates</a>
         <a href="forum">Forum <span class="oa-nav-new">New</span></a>
         <a href="#survey">Survey</a>
@@ -913,7 +913,7 @@
     <script defer src="assets/oa-feature-badges.js?v=20261030-posting-roles"></script>
     <script defer src="assets/v3.js"></script>
     <script defer src="assets/oa-firebase.js"></script>
-    <script defer src="assets/oa-accounts.js?v=20261030-posting-roles"></script>
+    <script defer src="assets/oa-accounts.js?v=20261030-jobs-nav"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-listing-tracking.js?v=20261013-parts"></script>
     <script defer src="assets/oa-jobnav.js?v=20261025-map-routing"></script>
