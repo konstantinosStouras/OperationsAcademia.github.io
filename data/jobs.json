@@ -42,6 +42,106 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-florida-state-university-20261030",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-30",
+  "institution": "Florida State University",
+  "department": "College of Business, Business Analytics, Information Systems, and Supply Chain",
+  "school": "College of Business",
+  "unit": "Business Analytics, Information Systems, and Supply Chain",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "November 15, 2026",
+  "applyByDate": "2026-11-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://connect.informs.org/discussion/teaching-faculty-position-at-florida-state-university#bm7350abdb-9e04-4307-8315-6cfb7ecec9c3",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Florida%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-30T19:39:28Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-seton-hall-university-20261030",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-30",
+  "institution": "Seton Hall University",
+  "department": "Business Analytics and Supply Chain Management",
+  "school": "",
+  "unit": "Business Analytics and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "rolling",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179603869&Title=Assistant%20Professor%20%2D%20Business%20Analytics%20and%20Supply%20Chain%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Seton%20Hall%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-30T19:39:21Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-luxembourg-20261030",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-30",
+  "institution": "University of Luxembourg",
+  "department": "Operations Management",
+  "school": "",
+  "unit": "Operations Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Luxembourg",
+  "countries": [
+   "Luxembourg"
+  ],
+  "adUrl": "https://connect.informs.org/discussion/assistant-associate-professorship-position-at-the-university-of-luxembourg#bmdcd646b7-9012-4f27-a3f5-688af1c01015",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Luxembourg",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-30T19:38:41Z",
+  "owner": ""
+ },
+ {
   "id": "2027-national-tsing-hua-university-20261028",
   "year": 2027,
   "years": [
@@ -6336,7 +6436,7 @@
   "countries": [
    "United States"
   ],
-  "adUrl": "https://bsu.wd12.myworkdayjobs.com/External/job/Ball-State-University/Assistant-Professor-of-Information-Systems-and-Operations-Management_R-03186",
+  "adUrl": "https://bsu.wd12.myworkdayjobs.com/en-US/External/details/Assistant-Professor-of-Info-Systems---Operations-Management_R-03341",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",

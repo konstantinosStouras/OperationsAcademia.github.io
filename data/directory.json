@@ -5900,6 +5900,17 @@
   "facultyUrl": "https://www.etamu.edu/management-and-economics/"
  },
  {
+  "id": "eastern-connecticut-state-university____business-information-systems",
+  "institution": "Eastern Connecticut State University",
+  "department": "Business Information Systems",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "eastern-illinois-university____om",
   "institution": "Eastern Illinois University",
   "department": "OM",
@@ -6911,33 +6922,6 @@
   "facultyDirectoryHint": "Data Science; Business Analytics; Data Science; Business Analytics. Select each of these three Department categories to see the combined department; choose 100 per page if needed."
  },
  {
-  "id": "florida-state-university____business-analytics-information-systems-and-supply-chain",
-  "institution": "Florida State University",
-  "department": "Business Analytics, Information Systems, and Supply Chain",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ],
-  "mapLocationIds": [
-   "florida-state-baissc-wertheim-verified"
-  ],
-  "mapLocationKind": "department",
-  "mapInstitutionNames": [
-   "Florida State University"
-  ],
-  "mapSearchTerms": [
-   "Herbert Wertheim College of Business",
-   "Department of Business Analytics, Information Systems and Supply Chain"
-  ],
-  "country": "United States",
-  "mapDepartmentLinks": {
-   "florida-state-baissc-wertheim-verified": {
-    "facultyUrl": "https://wertheim.fsu.edu/faculty-staff/baissc"
-   }
-  },
-  "facultyUrl": "https://wertheim.fsu.edu/faculty-staff/baissc"
- },
- {
   "id": "florida-state-university____is-analytics",
   "institution": "Florida State University",
   "department": "IS/Analytics",
@@ -6966,6 +6950,22 @@
    }
   },
   "facultyUrl": "https://wertheim.fsu.edu/faculty-staff/baissc"
+ },
+ {
+  "id": "florida-state-university__college-of-business__business-analytics-information-systems-and-supply-chain",
+  "institution": "Florida State University",
+  "school": "College of Business",
+  "department": "Business Analytics, Information Systems, and Supply Chain",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings",
+   "seed"
+  ],
+  "n": 1,
+  "lastPosted": "2026-10-30",
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "florida-state-university__college-of-business__marketing",
@@ -17073,9 +17073,13 @@
   "institution": "Seton Hall University",
   "department": "Business Analytics and Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-30",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -25332,9 +25336,13 @@
   "institution": "University of Luxembourg",
   "department": "Operations Management",
   "type": "University",
+  "country": "Luxembourg",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-30",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },

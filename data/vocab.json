@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-30T13:30:35.685Z",
+ "generated": "2026-10-30T19:43:16.852Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -282,6 +282,10 @@
    "n": 3
   },
   {
+   "v": "Seton Hall University",
+   "n": 3
+  },
+  {
    "v": "Shanghai Jiao Tong University",
    "n": 3
   },
@@ -466,6 +470,10 @@
    "n": 2
   },
   {
+   "v": "Florida State University",
+   "n": 2
+  },
+  {
    "v": "George Mason University",
    "n": 2
   },
@@ -599,10 +607,6 @@
   },
   {
    "v": "Peking University",
-   "n": 2
-  },
-  {
-   "v": "Seton Hall University",
    "n": 2
   },
   {
@@ -1115,10 +1119,6 @@
   },
   {
    "v": "Florida Polytechnic University",
-   "n": 1
-  },
-  {
-   "v": "Florida State University",
    "n": 1
   },
   {
@@ -1771,6 +1771,10 @@
   },
   {
    "v": "University of Louisville",
+   "n": 1
+  },
+  {
+   "v": "University of Luxembourg",
    "n": 1
   },
   {
@@ -2517,7 +2521,7 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 24
+   "n": 25
   },
   {
    "v": "School of Business",
@@ -3919,7 +3923,7 @@
   },
   {
    "v": "Operations Management",
-   "n": 16
+   "n": 17
   },
   {
    "v": "Management Science",
@@ -4430,7 +4434,15 @@
    "n": 1
   },
   {
+   "v": "Business Analytics and Supply Chain Management",
+   "n": 1
+  },
+  {
    "v": "Business Analytics, Economics and Information Systems",
+   "n": 1
+  },
+  {
+   "v": "Business Analytics, Information Systems, and Supply Chain",
    "n": 1
   },
   {
@@ -7999,6 +8011,7 @@
     "College of Business"
    ],
    "units": [
+    "Business Analytics, Information Systems, and Supply Chain",
     "IS/Analytics",
     "Marketing"
    ],
@@ -8007,6 +8020,7 @@
      "IS/Analytics"
     ],
     "College of Business": [
+     "Business Analytics, Information Systems, and Supply Chain",
      "Marketing"
     ]
    }
@@ -10707,11 +10721,13 @@
   "Seton Hall University": {
    "schools": [],
    "units": [
+    "Business Analytics and Supply Chain Management",
     "IT Management",
     "SCM/BA"
    ],
    "bySchool": {
     "": [
+     "Business Analytics and Supply Chain Management",
      "IT Management",
      "SCM/BA"
     ]
@@ -12736,6 +12752,17 @@
     ],
     "J. B. Speed School of Engineering": [
      "Industrial Engineering"
+    ]
+   }
+  },
+  "University of Luxembourg": {
+   "schools": [],
+   "units": [
+    "Operations Management"
+   ],
+   "bySchool": {
+    "": [
+     "Operations Management"
     ]
    }
   },
@@ -14872,6 +14899,7 @@
   "College of Business": [
    "Business Analytics",
    "Business Analytics and Quantitative Methods",
+   "Business Analytics, Information Systems, and Supply Chain",
    "Decision Analytics and Operations",
    "Decision and Technology Analytics",
    "Decision Sciences/Operations Management",

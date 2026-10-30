@@ -870,6 +870,11 @@
   "department": "Management, Marketing, and Management Science"
  },
  {
+  "institution": "Eastern Connecticut State University",
+  "school": "",
+  "department": "Business Information Systems"
+ },
+ {
   "institution": "Eastern Illinois University",
   "school": "",
   "department": "OM"
@@ -1007,12 +1012,12 @@
  {
   "institution": "Florida State University",
   "school": "",
-  "department": "Business Analytics, Information Systems, and Supply Chain"
+  "department": "IS/Analytics"
  },
  {
   "institution": "Florida State University",
-  "school": "",
-  "department": "IS/Analytics"
+  "school": "College of Business",
+  "department": "Business Analytics, Information Systems, and Supply Chain"
  },
  {
   "institution": "Frankfurt School of Finance and Management",
