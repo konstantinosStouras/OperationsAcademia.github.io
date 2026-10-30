@@ -14,6 +14,10 @@
    "n": 9
   },
   {
+   "v": "University College London",
+   "n": 9
+  },
+  {
    "v": "National University of Singapore",
    "n": 8
   },
@@ -23,10 +27,6 @@
   },
   {
    "v": "Tulane University",
-   "n": 8
-  },
-  {
-   "v": "University College London",
    "n": 8
   },
   {
@@ -2541,7 +2541,7 @@
   },
   {
    "v": "UCL Global Business School for Health",
-   "n": 7
+   "n": 8
   },
   {
    "v": "School of Management",
@@ -5583,6 +5583,10 @@
   },
   {
    "v": "Sustainable SCM",
+   "n": 1
+  },
+  {
+   "v": "Sustainable Supply Chain Management",
    "n": 1
   },
   {
@@ -11936,11 +11940,13 @@
    ],
    "units": [
     "Operations and Technology",
-    "Population Health Sciences"
+    "Population Health Sciences",
+    "Sustainable Supply Chain Management"
    ],
    "bySchool": {
     "UCL Global Business School for Health": [
-     "Population Health Sciences"
+     "Population Health Sciences",
+     "Sustainable Supply Chain Management"
     ],
     "UCL School of Management": [
      "Operations and Technology"
@@ -15889,7 +15895,8 @@
    "Operations and Technology"
   ],
   "UCL Global Business School for Health": [
-   "Population Health Sciences"
+   "Population Health Sciences",
+   "Sustainable Supply Chain Management"
   ],
   "UCL School of Management": [
    "Operations and Technology"
