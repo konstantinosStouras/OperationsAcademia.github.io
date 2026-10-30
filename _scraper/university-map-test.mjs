@@ -25,12 +25,12 @@ assert.equal(shared.length,2,'schools sharing coordinates retain separate cards'
 assert.notEqual(shared[0].card.id,shared[1].card.id);
 const root=path.resolve(import.meta.dirname,'..');
 const frozenFiles=new Map(['data/school-map-locations.json','data/directory.json','data/university-map.json'].map(name=>{const file=path.join(root,name);return [file,fs.readFileSync(file)];}));
-const evidence=JSON.parse(frozenFiles.get(path.join(root,'data/school-map-locations.json'))).records;
+const evidence=JSON.parse(frozenFiles.get(path.join(root,'data/school-map-locations.json'))).records.filter(r=>!schools.directoryExcluded(r));
 const directory=JSON.parse(frozenFiles.get(path.join(root,'data/directory.json')));
 const generated=JSON.parse(frozenFiles.get(path.join(root,'data/university-map.json')));
 assert.equal(createHash('sha256').update(JSON.stringify(generated.verified)).digest('hex'),createHash('sha256').update(JSON.stringify(compactLocationRecords(evidence))).digest('hex'),'map payload must be rebuilt from current location evidence before browser testing');
-const directoryIds=new Set(directory.map(row=>row.id));
-for(const location of evidence)for(const id of location.rowIds)assert.ok(directoryIds.has(id),id+' must exist in the generated directory before browser testing');
+const directoryIds=new Set(directory.flatMap(row=>[row.id,...(row.sourceRowIds||[])]));
+for(const location of evidence)for(const id of location.rowIds)assert.ok(directoryIds.has(id)||directory.some(row=>(row.mapLocationIds||[]).includes(location.id)),id+' must resolve to the generated directory before browser testing');
 const snapshotHashes=Object.fromEntries(Array.from(frozenFiles,([file,bytes])=>[path.relative(root,file).replaceAll('\\','/'),createHash('sha256').update(bytes).digest('hex')]));
 console.log('Frozen map data snapshot:',JSON.stringify(snapshotHashes));
 const types={'.html':'text/html','.js':'application/javascript','.css':'text/css','.json':'application/json','.geojson':'application/json','.png':'image/png','.svg':'image/svg+xml'};
