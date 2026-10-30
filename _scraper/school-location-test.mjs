@@ -3,7 +3,9 @@ import fs from 'node:fs';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url), model=require('../assets/oa-map-model.js'), S=require('../assets/oa-schools.js');
 const read=name=>JSON.parse(fs.readFileSync(new URL(name,import.meta.url),'utf8'));
-const verified=read('../data/school-map-locations.json').records;
+// The builders omit explicitly excluded locations from both the directory and
+// the served map. Historical evidence may remain in this source file.
+const verified=read('../data/school-map-locations.json').records.filter(r=>!S.directoryExcluded(r));
 const directory=read('../data/directory.json');
 const rows=Array.isArray(directory)?directory:directory.rows;
 const seen=new Map(), ids=new Set();
@@ -11,7 +13,8 @@ assert.equal(model.displayName('WU Vienna'),'Vienna University of Economics and 
 for(const v of verified){
  assert.ok(v.id&&!ids.has(v.id),'unique location identity');ids.add(v.id);
  assert.ok(model.located(v),v.id+' coordinates');
- for(const field of ['institution','building','address','addressSource','coordinateSource','checked'])assert.ok(v[field],v.id+' '+field);
+ for(const field of ['institution','address','addressSource','coordinateSource','checked'])assert.ok(v[field],v.id+' '+field);
+ assert.ok(v.building||(v.locationPrecision==='campus'&&v.campusLabel),v.id+' building or labelled campus');
  assert.match(v.checked,/^\d{4}-\d{2}-\d{2}$/);
  for(const field of ['addressSource','coordinateSource'])assert.equal(new URL(v[field]).protocol,'https:');
  assert.ok(v.rowIds.length);
@@ -22,7 +25,11 @@ for(const v of verified){
    assert.equal(new URL(v.locationGroupSource).protocol,'https:');
   }
   seen.set(id,v);
-  const row=rows.find(r=>r.id===id);assert.ok(row,'unknown directory row '+id);
+  // Reviewed evidence retains its original row ids after a department rename.
+  // The builder records the resolved location on the canonical current row.
+  const row=rows.find(r=>r.id===id||(r.sourceRowIds||[]).includes(id))||
+   rows.find(r=>(r.mapLocationIds||[]).includes(v.id));
+  assert.ok(row,'unknown directory row or canonical location route '+id);
   assert.equal(S.institutionKey(row.institution),S.institutionKey(v.institutionKey||v.institution));
   if(v.country) assert.ok((row.countries||[row.country]).includes(v.country),'verified campus country reaches directory filters: '+v.id);
  }
