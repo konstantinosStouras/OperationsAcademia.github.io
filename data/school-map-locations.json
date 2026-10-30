@@ -3824,7 +3824,8 @@
       "id": "michigan-information-leinweber",
       "institution": "University of Michigan",
       "rowIds": [
-        "university-of-michigan____information"
+        "university-of-michigan____information",
+        "university-of-michigan__school-of-information"
       ],
       "school": "School of Information",
       "department": "",
@@ -3835,9 +3836,11 @@
       "addressSource": "https://si.umich.edu/about-umsi/getting-umsi",
       "coordinateSource": "https://leinweber.bldg.umich.edu/location/",
       "supportingSources": [
-        "https://si.umich.edu/about-umsi/contact-us"
+        "https://si.umich.edu/about-umsi/contact-us",
+        "https://www.si.umich.edu/about-umsi/getting-umsi",
+        "https://www.si.umich.edu/about-umsi/contact-us"
       ],
-      "notes": "Current school directions identify the new building openedMay2025 as headquarters and graduate-program home, superseding North Quad. Coordinates are the actual2200Hayward destination in the official building route embed, not route viewport or airport origin.",
+      "notes": "Current school directions identify the new building openedMay2025 as headquarters and graduate-program home, superseding North Quad. Coordinates are the actual2200Hayward destination in the official building route embed, not route viewport or airport origin. Current official directions identify Leinweber as the school home, superseding the North Quad school reference.",
       "checked": "2026-10-24"
     },
     {
@@ -18680,26 +18683,6 @@
       "notes": "Department contact gives Lind Hall 112 and university street address; university campus map and named building map corroborate."
     },
     {
-      "id": "michigan-information-north-quad",
-      "institution": "University of Michigan",
-      "rowIds": [
-        "university-of-michigan__school-of-information"
-      ],
-      "school": "School of Information",
-      "department": "",
-      "building": "North Quadrangle Residential and Academic Complex",
-      "address": "105 South State Street, Ann Arbor, MI 48109, United States",
-      "lat": 42.28055,
-      "lng": -83.74019,
-      "addressSource": "https://www.si.umich.edu/sites/default/files/Getting%20to%20the%20School%20of%20Information%2010-21.pdf",
-      "coordinateSource": "https://mguide.app/building/north-quadrangle-residential-and-academic-complex/",
-      "supportingSources": [
-        "https://www.si.umich.edu/people/cory-knobel"
-      ],
-      "checked": "2026-10-30",
-      "notes": "School map identifies the dean's office and faculty offices at North Quad; current faculty profile confirms a North Quad office. Building-level point represents the shared residential and academic complex."
-    },
-    {
       "id": "minnesota-carlson-information-decision-nelson",
       "institution": "University of Minnesota",
       "rowIds": [
@@ -18921,6 +18904,26 @@
       ],
       "checked": "2026-10-30",
       "notes": "Initiative associate director Şafak Yücel has office 523 in Hariri. Named-building point is shared with other McDonough units."
+    },
+    {
+      "id": "ulb-solvay-r42-dean",
+      "institution": "Universite libre de Bruxelles",
+      "rowIds": [
+        "universite-libre-de-bruxelles__solvay-brussels-school-of-economics-and-management"
+      ],
+      "school": "Solvay Brussels School of Economics and Management",
+      "department": "",
+      "building": "R42, Solbosch Campus",
+      "address": "42 Avenue Franklin Roosevelt, 1050 Brussels, Belgium",
+      "lat": 50.813889,
+      "lng": 4.378889,
+      "addressSource": "https://sbsem.ulb.be/the-school/our-buildings/building-r42",
+      "coordinateSource": "https://www.pss-archi.eu/immeubles/BE-21004-38068.html",
+      "supportingSources": [
+        "https://sbsem.ulb.be/international/contact"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school building page identifies the Dean’s Office and other functions at R42. Staff are also in buildings H and J. Coordinates converted from published degrees, minutes, seconds and rounded to one arcsecond; building point is not an individual department office."
     }
   ]
 }

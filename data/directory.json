@@ -22899,8 +22899,16 @@
   "lastPosted": "2014-10-13",
   "lat": 50.8119483,
   "lng": 4.3826168,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ulb-solvay-r42-dean"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Universite libre de Bruxelles"
+  ],
+  "mapSearchTerms": [
+   "Solvay Brussels School of Economics and Management"
+  ]
  },
  {
   "id": "university-at-buffalo____industrial-and-systems-engineering",
@@ -27454,7 +27462,7 @@
   "lat": 42.2805505,
   "lng": -83.7402262,
   "mapLocationIds": [
-   "michigan-information-north-quad"
+   "michigan-information-leinweber"
   ],
   "mapLocationKind": "exact",
   "mapInstitutionNames": [
