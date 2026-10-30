@@ -104,7 +104,7 @@
     if (window.OAFeatureBadges) OAFeatureBadges.refresh();
     var turn = ++generation; request++; root.replaceChildren();
     if (!user) {
-      root.appendChild(el('p', 'Sign in to see your private Profile Analytics.'));
+      root.appendChild(el('p', 'Sign in to see your private Job & Profile Analytics.'));
       var signIn = el('a', 'Sign in', 'v3-btn primary'); signIn.href = 'account'; root.appendChild(signIn); return;
     }
     root.appendChild(el('p', 'Loading your listings…'));
@@ -135,7 +135,7 @@
       var cached = new Map();
       async function show() {
         var ticket = ++request, item = listings[Number(chooser.value)]; heading.replaceChildren();
-        heading.append(el('p', item.type === 'candidate' ? 'Candidate profile' : 'Job posting', 'v3-kicker'), el('h2', title(item)));
+        heading.append(el('p', item.type === 'candidate' ? 'Candidate Profile Analytics' : 'Job Posting Analytics', 'v3-kicker'), el('h2', title(item)));
         content.replaceChildren(el('p', 'Loading report…'));
         try {
           var key = item.ref.path;
