@@ -16946,6 +16946,129 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official department contact identifies its suite in Low Center; coordinates identify building."
+    },
+    {
+      "id": "fau-itom-fleming-hall",
+      "institution": "Florida Atlantic University",
+      "rowIds": [
+        "florida-atlantic-university__college-of-business__information-technology-and-operations-management"
+      ],
+      "school": "College of Business",
+      "department": "Information Technology and Operations Management",
+      "building": "Fleming Hall",
+      "address": "777 Glades Road, Boca Raton, FL 33431, United States",
+      "lat": 26.37307,
+      "lng": -80.10386,
+      "addressSource": "https://business.fau.edu/departments/information-technology-operations-management/index.php",
+      "coordinateSource": "https://mapcarta.com/W327571373",
+      "supportingSources": [
+        "https://calendar.fau.edu/fleming_hall",
+        "https://www.fau.edu/facilities/osua/maps/BocaRatonMap.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department page identifies office FL(24) 219; university campus map names FL-24 Fleming Hall, and named building map provides coordinates."
+    },
+    {
+      "id": "florida-state-baissc-wertheim-center",
+      "institution": "Florida State University",
+      "rowIds": [
+        "florida-state-university__college-of-business__business-analytics-information-systems-and-supply-chain"
+      ],
+      "school": "College of Business",
+      "department": "Business Analytics, Information Systems, and Supply Chain",
+      "building": "Herbert Wertheim Center for Business Excellence",
+      "address": "402 West Gaines Street, Tallahassee, FL 32301, United States",
+      "lat": 30.436066,
+      "lng": -84.286868,
+      "addressSource": "https://forms.pdc.fsu.edu/portal/building/?bldg=4540",
+      "coordinateSource": "https://forms.pdc.fsu.edu/portal/building/?bldg=4540",
+      "supportingSources": [
+        "https://report.wertheim.fsu.edu/reports/2025-deans-annual-report/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The university building profile explicitly identifies business analytics, information systems and supply chain among occupants, and provides physical address and coordinates."
+    },
+    {
+      "id": "florida-state-marketing-wertheim-center",
+      "institution": "Florida State University",
+      "rowIds": [
+        "florida-state-university__college-of-business__marketing"
+      ],
+      "school": "College of Business",
+      "department": "Marketing",
+      "building": "Herbert Wertheim Center for Business Excellence",
+      "address": "402 West Gaines Street, Tallahassee, FL 32301, United States",
+      "lat": 30.436066,
+      "lng": -84.286868,
+      "addressSource": "https://www.wertheim.fsu.edu/faculty-staff/marketing",
+      "coordinateSource": "https://forms.pdc.fsu.edu/portal/building/?bldg=4540",
+      "supportingSources": [
+        "https://forms.pdc.fsu.edu/portal/building/?bldg=4540"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Marketing faculty directory locates faculty in WCB; FSU building registry identifies WCB as the Wertheim Center and provides address and coordinates."
+    },
+    {
+      "id": "concordia-supply-chain-molson",
+      "institution": "Concordia University",
+      "rowIds": [
+        "concordia-university__john-molson-school-of-business__supply-chain-and-business-technology-management"
+      ],
+      "school": "John Molson School of Business",
+      "department": "Supply Chain and Business Technology Management",
+      "building": "John Molson Building",
+      "address": "1450 Guy Street, Montreal, QC H3H 0A1, Canada",
+      "lat": 45.49524,
+      "lng": -73.57902,
+      "addressSource": "https://www.concordia.ca/jmsb/about/departments/supply-chain-business-technology-management/.html",
+      "coordinateSource": "https://mapcarta.com/W22080581",
+      "supportingSources": [
+        "https://www.concordia.ca/maps/buildings/mb.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official department contact identifies MB rooms 12.115 and 12.117; university campus map identifies MB as the John Molson Building at 1450 Guy Street."
+    },
+    {
+      "id": "clemson-industrial-engineering-freeman",
+      "institution": "Clemson University",
+      "rowIds": [
+        "clemson-university__college-of-engineering-computing-and-applied-sciences__industrial-engineering"
+      ],
+      "school": "College of Engineering, Computing and Applied Sciences",
+      "department": "Industrial Engineering",
+      "building": "Freeman Hall",
+      "address": "211 Fernow Street, Clemson, SC 29634, United States",
+      "lat": 34.676139,
+      "lng": -82.838,
+      "addressSource": "https://www.clemson.edu/cecas/departments/ie/index.html",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Campus_of_Clemson_University",
+      "supportingSources": [
+        "https://www.clemson.edu/caac/academics/art/about-us/visit.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Clemson department identifies Freeman Hall as its home at 211 Fernow Street. Named building coordinates are documented in the campus building list."
+    },
+    {
+      "id": "mcmaster-degroote-hamilton",
+      "institution": "McMaster University",
+      "rowIds": [
+        "mcmaster-university__degroote-school-of-business__health-policy-and-management"
+      ],
+      "school": "DeGroote School of Business",
+      "department": "Health Policy and Management",
+      "building": "DeGroote School of Business",
+      "address": "1280 Main Street West, Hamilton, ON L8S 4M4, Canada",
+      "lat": 43.26398,
+      "lng": -79.91659,
+      "addressSource": "https://degroote.mcmaster.ca/contact/",
+      "coordinateSource": "https://mapcarta.com/W183932632",
+      "supportingSources": [
+        "https://research.degroote.mcmaster.ca/academic-areas/health-policy-and-management/",
+        "https://degroote.mcmaster.ca/contact/directory/",
+        "https://library.mcmaster.ca/sites/default/files/2024-11/mcmaster_campus_map.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Health Policy and Management area faculty are listed at DSB in university directory; campus map identifies the building. Hamilton campus; not the separate Burlington location."
     }
   ]
 }

@@ -8055,6 +8055,18 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official university faculty directory includes school of business staff and data analytics expertise; it is not a department-specific roster."
+    },
+    {
+      "institution": "McMaster University",
+      "school": "DeGroote School of Business",
+      "department": "Health Policy and Management",
+      "deptUrl": "https://research.degroote.mcmaster.ca/academic-areas/health-policy-and-management/",
+      "facultyUrl": "https://research.degroote.mcmaster.ca/academic-areas/health-policy-and-management/",
+      "sources": [
+        "https://research.degroote.mcmaster.ca/academic-areas/health-policy-and-management/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official academic area page lists its faculty. Replaces earlier obsolete destination."
     }
   ]
 }

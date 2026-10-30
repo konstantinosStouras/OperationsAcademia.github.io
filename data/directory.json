@@ -4405,8 +4405,17 @@
   ],
   "lat": 34.6770566,
   "lng": -82.8378523,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "clemson-industrial-engineering-freeman"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Clemson University"
+  ],
+  "mapSearchTerms": [
+   "College of Engineering, Computing and Applied Sciences",
+   "Industrial Engineering"
+  ]
  },
  {
   "id": "clemson-university__school-of-mathematical-and-statistical-sciences__data-science-and-decision-intelligence",
@@ -4913,8 +4922,17 @@
   ],
   "lat": 45.4952779,
   "lng": -73.5790443,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "concordia-supply-chain-molson"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Concordia University"
+  ],
+  "mapSearchTerms": [
+   "John Molson School of Business",
+   "Supply Chain and Business Technology Management"
+  ]
  },
  {
   "id": "concordia-university-chicago____data-analytics",
@@ -7094,8 +7112,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-26",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "fau-itom-fleming-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Florida Atlantic University"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Information Technology and Operations Management"
+  ],
+  "mapDepartmentLinks": {
+   "fau-itom-fleming-hall": {
+    "facultyUrl": "https://business.fau.edu/departments/information-technology-operations-management/faculty/index.php"
+   }
+  },
   "facultyUrl": "https://business.fau.edu/departments/information-technology-operations-management/faculty/index.php"
  },
  {
@@ -7240,8 +7272,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-30",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "florida-state-baissc-wertheim-center"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Florida State University"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Business Analytics, Information Systems, and Supply Chain"
+  ],
+  "mapDepartmentLinks": {
+   "florida-state-baissc-wertheim-center": {
+    "facultyUrl": "https://wertheim.fsu.edu/departments/baissc/directory"
+   }
+  },
   "facultyUrl": "https://wertheim.fsu.edu/departments/baissc/directory"
  },
  {
@@ -7262,8 +7308,17 @@
   "lastPosted": "2014-10-22",
   "lat": 28.0583524,
   "lng": -82.4098796,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "florida-state-marketing-wertheim-center"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Florida State University"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Marketing"
+  ]
  },
  {
   "id": "frankfurt-school-of-finance-and-management____ba-om",
@@ -12190,14 +12245,30 @@
   "country": "Canada",
   "address": "4350 S Service Rd, Burlington, ON L7L 5R8, Canada",
   "mapUrl": "https://goo.gl/maps/2PWy5",
-  "facultyUrl": "http://www.degroote.mcmaster.ca/health-policy-and-management/",
+  "facultyUrl": "https://research.degroote.mcmaster.ca/academic-areas/health-policy-and-management/",
   "sources": [
    "directory"
   ],
   "lat": 43.3739195,
   "lng": -79.7780784,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "mcmaster-degroote-hamilton"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "McMaster University"
+  ],
+  "mapSearchTerms": [
+   "DeGroote School of Business",
+   "Health Policy and Management"
+  ],
+  "mapDepartmentLinks": {
+   "mcmaster-degroote-hamilton": {
+    "deptUrl": "https://research.degroote.mcmaster.ca/academic-areas/health-policy-and-management/",
+    "facultyUrl": "https://research.degroote.mcmaster.ca/academic-areas/health-policy-and-management/"
+   }
+  },
+  "deptUrl": "https://research.degroote.mcmaster.ca/academic-areas/health-policy-and-management/"
  },
  {
   "id": "mef-university__faculty-of-engineering__industrial-engineering",
