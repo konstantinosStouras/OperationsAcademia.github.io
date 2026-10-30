@@ -73,7 +73,8 @@ async function pageAt(query='',mobile=false){
 }
 try{
   const p=await pageAt('?university='+encodeURIComponent(university));
-  assert.equal(await p.locator('.oa-map-cluster').innerText(),'2');
+  await p.waitForFunction(()=>document.querySelectorAll('.oa-map-logo').length===2);
+  assert.equal(await p.locator('.oa-map-cluster').count(),0,'a university search reveals its school logos');
   const scoped=await p.evaluate(()=>testMap.shown().map(x=>({school:x.school,rows:x.card.schools.flatMap(s=>s.rows.map(r=>r.department)),lat:x.lat,lng:x.lng})));
   assert.equal(scoped.length,2);
   assert.equal(scoped.find(x=>/Grainger/.test(x.school)).lat,40.110649);
