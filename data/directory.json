@@ -2500,8 +2500,16 @@
   ],
   "lat": 42.3677767,
   "lng": -71.2577821,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "brandeis-heller-schneider"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Brandeis University"
+  ],
+  "mapSearchTerms": [
+   "Heller School for Social Policy and Management"
+  ]
  },
  {
   "id": "bridgewater-state-university__louis-m-ricciardi-college-of-business__management-and-marketing",
@@ -3636,8 +3644,17 @@
   ],
   "lat": 41.509959,
   "lng": -81.6080342,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "case-weatherhead-operations-lewis"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Case Western Reserve University"
+  ],
+  "mapSearchTerms": [
+   "Weatherhead School of Management",
+   "Operations"
+  ]
  },
  {
   "id": "cass-business-school____management",
@@ -4644,8 +4661,17 @@
   ],
   "lat": 37.2662723,
   "lng": -76.7182426,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "william-mary-mason-operations-miller"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "College of William and Mary"
+  ],
+  "mapSearchTerms": [
+   "Raymond A. Mason School of Business",
+   "Operations Management and Information Technology"
+  ]
  },
  {
   "id": "colorado-school-of-mines____ba-or",
@@ -4873,11 +4899,17 @@
   ],
   "lat": 40.8093788,
   "lng": -73.9599019,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "columbia-ieor-mudd"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
-   "IEOR",
-   "Industrial Engineering and Operations Research"
+   "Fu Foundation School of Engineering and Applied Science",
+   "Industrial Engineering and Operations Research",
+   "IEOR"
+  ],
+  "mapInstitutionNames": [
+   "Columbia University"
   ]
  },
  {
@@ -6096,8 +6128,17 @@
   ],
   "lat": 54.7641315,
   "lng": -1.586016,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "durham-management-marketing-waterside"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Durham University"
+  ],
+  "mapSearchTerms": [
+   "Business School",
+   "Management and Marketing"
+  ]
  },
  {
   "id": "east-tennessee-state-university____supply-chain-management",
@@ -6172,8 +6213,16 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-30",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "eastern-connecticut-bis-webb"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Eastern Connecticut State University"
+  ],
+  "mapSearchTerms": [
+   "Business Information Systems"
+  ]
  },
  {
   "id": "eastern-illinois-university____om",
@@ -7523,8 +7572,17 @@
   "lastPosted": "2026-09-29",
   "lat": 38.8415539,
   "lng": -77.3411251,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "george-mason-isom-enterprise"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "George Mason University"
+  ],
+  "mapSearchTerms": [
+   "Donald G. Costello College of Business",
+   "Information Systems and Operations Management"
+  ]
  },
  {
   "id": "george-mason-university__volgenau-school-of-engineering__systems-engineering-and-operations-research",
@@ -7541,8 +7599,17 @@
   ],
   "lat": 38.8415539,
   "lng": -77.3411251,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "george-mason-seor-nguyen"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "George Mason University"
+  ],
+  "mapSearchTerms": [
+   "Volgenau School of Engineering",
+   "Systems Engineering and Operations Research"
+  ]
  },
  {
   "id": "george-washington-university__school-of-business__decision-sciences",
@@ -8536,8 +8603,17 @@
   ],
   "lat": 45.50333,
   "lng": -73.6206714,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "hec-montreal-decision-sciences-racanelli"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "HEC Montréal"
+  ],
+  "mapSearchTerms": [
+   "HEC Montréal",
+   "Decision Sciences"
+  ]
  },
  {
   "id": "hec-montreal____logistics-and-operations-management",
@@ -8559,8 +8635,17 @@
   "lastPosted": "2026-10-06",
   "lat": 45.50333,
   "lng": -73.6206714,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "hec-montreal-logistics-and-operations-management-racanelli"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "HEC Montréal"
+  ],
+  "mapSearchTerms": [
+   "HEC Montréal",
+   "Logistics and Operations Management"
+  ]
  },
  {
   "id": "hec-montreal____management",
@@ -9681,8 +9766,17 @@
   "lastPosted": "2025-08-30",
   "lat": 51.49933,
   "lng": -0.174786,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "imperial-analytics-and-operations-business-school"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Imperial College London"
+  ],
+  "mapSearchTerms": [
+   "Imperial College Business School",
+   "Analytics and Operations"
+  ]
  },
  {
   "id": "imperial-college-london__imperial-college-business-school__operations-management",
@@ -9706,11 +9800,23 @@
     "department": "OM"
    }
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "imperial-operations-management-business-school"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "Imperial College Business School",
+   "Operations Management",
    "OM"
   ],
+  "mapInstitutionNames": [
+   "Imperial College London"
+  ],
+  "mapDepartmentLinks": {
+   "imperial-operations-management-business-school": {
+    "facultyUrl": "https://www.imperial.ac.uk/business-school/faculty-research/academic-areas/analytics-operations/people/"
+   }
+  },
   "facultyUrl": "https://www.imperial.ac.uk/business-school/faculty-research/academic-areas/analytics-operations/people/"
  },
  {
@@ -12549,9 +12655,9 @@
   "lat": 42.7270051,
   "lng": -84.4728586,
   "mapLocationIds": [
-   "michigan-state-supply-chain-north-business"
+   "michigan-state-broad-supply-chain"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Michigan State University"
   ],
@@ -13326,8 +13432,23 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "nthu-technology-management-tsmc-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "National Tsing Hua University"
+  ],
+  "mapSearchTerms": [
+   "College of Technology Management",
+   "Institute of Technology Management"
+  ],
+  "country": "Taiwan",
+  "mapDepartmentLinks": {
+   "nthu-technology-management-tsmc-building": {
+    "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
+   }
+  },
   "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
  },
  {
@@ -13348,8 +13469,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-28",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "nthu-technology-management-tsmc-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "National Tsing Hua University"
+  ],
+  "mapSearchTerms": [
+   "College of Technology Management",
+   "Institute of Technology Management"
+  ],
+  "mapDepartmentLinks": {
+   "nthu-technology-management-tsmc-building": {
+    "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
+   }
+  },
   "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
  },
  {
@@ -13697,8 +13832,17 @@
   "lastPosted": "2026-08-05",
   "lat": 36.5987214,
   "lng": -121.8773408,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "naval-postgraduate-school-or-glasgow-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Naval Postgraduate School"
+  ],
+  "mapSearchTerms": [
+   "Naval Postgraduate School",
+   "Operations Research"
+  ]
  },
  {
   "id": "nazarbayev-university",
@@ -13728,8 +13872,17 @@
   ],
   "n": 1,
   "lastPosted": "2026-01-19",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "nc-state-itao-nelson-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "NC State University"
+  ],
+  "mapSearchTerms": [
+   "Poole College of Management",
+   "Department of Information Technology, Analytics and Operations"
+  ],
   "deptUrl": "https://poole.ncsu.edu/faculty-and-research/it-analytics-operations-department/",
   "facultyUrl": "https://poole.ncsu.edu/group/academic-departments/information-technology-analytics-and-operations/"
  },
@@ -15876,8 +16029,17 @@
   "lastPosted": "2014-10-01",
   "lat": 41.3789691,
   "lng": 2.1797937,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "pompeu-fabra-economics-jaume-i"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Pompeu Fabra University"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Economics and Business",
+   "Department of Economics and Business"
+  ]
  },
  {
   "id": "pontificia-universidad-catolica-de-chile__school-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin",
@@ -17049,8 +17211,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "rutgers-bloustein-civic-square"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Rutgers University"
+  ],
+  "mapSearchTerms": [
+   "Edward J. Bloustein School of Planning and Public Policy",
+   "Health Informatics"
+  ],
+  "mapDepartmentLinks": {
+   "rutgers-bloustein-civic-square": {
+    "facultyUrl": "https://bloustein.rutgers.edu/faculty/",
+    "facultyDirectoryHint": "This is the entire Bloustein School faculty directory, covering public policy and planning as well as health fields."
+   }
+  },
   "facultyUrl": "https://bloustein.rutgers.edu/faculty/",
   "facultyDirectoryHint": "This is the entire Bloustein School faculty directory, covering public policy and planning as well as health fields."
  },
@@ -23364,15 +23541,15 @@
   "lat": -36.853303,
   "lng": 174.770931,
   "mapLocationIds": [
-   "auckland-information-systems-operations-glenn"
+   "auckland-business-isom"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Auckland"
   ],
   "mapSearchTerms": [
    "University of Auckland Business School",
-   "Department of Information Systems and Operations Management"
+   "Information Systems and Operations Management"
   ]
  },
  {
@@ -23642,8 +23819,17 @@
   "lastPosted": "2014-11-13",
   "lat": 51.077419,
   "lng": -114.12462,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "calgary-haskayne-scurfield"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Calgary"
+  ],
+  "mapSearchTerms": [
+   "Haskayne School of Business",
+   "Operations and Supply Chain Management"
+  ]
  },
  {
   "id": "university-of-california-berkeley",
@@ -23869,8 +24055,17 @@
   ],
   "lat": 33.6468337,
   "lng": -117.8380732,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "uci-merage-sb2"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of California, Irvine"
+  ],
+  "mapSearchTerms": [
+   "Paul Merage School of Business",
+   "Operations and Decision Technologies"
+  ]
  },
  {
   "id": "university-of-california-los-angeles__anderson-school-of-management__decision-operations-and-technology-management",
@@ -23892,9 +24087,20 @@
   ],
   "n": 2,
   "lastPosted": "2026-09-21",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://www.anderson.ucla.edu/faculty-and-research/decisions-operations-and-technology-management/faculty"
+  "mapLocationIds": [
+   "ucla-anderson-dotm-gold-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of California, Los Angeles (UCLA)"
+  ],
+  "mapSearchTerms": [
+   "Anderson School of Management",
+   "Decisions, Operations and Technology Management"
+  ],
+  "facultyUrl": "https://www.anderson.ucla.edu/faculty-and-research/decisions-operations-and-technology-management/faculty",
+  "deptUrl": "https://www.anderson.ucla.edu/faculty-and-research/decisions-operations-and-technology-management/faculty",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-california-los-angeles__anderson-school-of-management__decisions-operations-and-technology-management",
@@ -23924,8 +24130,17 @@
   "lastPosted": "2024-09-20",
   "lat": 34.0739537,
   "lng": -118.4430523,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ucla-anderson-dotm-gold-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of California, Los Angeles (UCLA)"
+  ],
+  "mapSearchTerms": [
+   "Anderson School of Management",
+   "Decisions, Operations and Technology Management"
+  ]
  },
  {
   "id": "university-of-california-merced__school-of-engineering",
@@ -25641,7 +25856,7 @@
   "country": "United States",
   "address": "1450 Jayhawk Blvd, Lawrence, KS 66045",
   "mapUrl": "https://goo.gl/maps/i0LUk",
-  "facultyUrl": "https://business.ku.edu/people/academic-areas/analytics-information-systems-and-operations/",
+  "facultyUrl": "https://business.ku.edu/research-and-faculty/analytics-information-operations",
   "sources": [
    "directory",
    "postings",
@@ -25660,11 +25875,25 @@
   ],
   "lat": 38.958542,
   "lng": -95.2476138,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "kansas-business-capitol-federal"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "School of Business",
+   "Analytics, Information, Operations",
    "Analytics, Information and Operations Management"
-  ]
+  ],
+  "mapInstitutionNames": [
+   "University of Kansas"
+  ],
+  "mapDepartmentLinks": {
+   "kansas-business-capitol-federal": {
+    "facultyUrl": "https://business.ku.edu/research-and-faculty/analytics-information-operations"
+   }
+  },
+  "deptUrl": "https://business.ku.edu/people/list/faculty-staff?lastname=&filter=414",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-kansas__school-of-business__analytics-information-operations",
@@ -25677,8 +25906,23 @@
    "omlist",
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "kansas-business-capitol-federal"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Kansas"
+  ],
+  "mapSearchTerms": [
+   "School of Business",
+   "Analytics, Information, Operations"
+  ],
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "kansas-business-capitol-federal": {
+    "facultyUrl": "https://business.ku.edu/research-and-faculty/analytics-information-operations"
+   }
+  },
   "facultyUrl": "https://business.ku.edu/research-and-faculty/analytics-information-operations"
  },
  {
@@ -25700,9 +25944,25 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-06",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://business.ku.edu/research-and-faculty/analytics-information-operations"
+  "mapLocationIds": [
+   "kansas-business-capitol-federal"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Kansas"
+  ],
+  "mapSearchTerms": [
+   "School of Business",
+   "Analytics, Information, Operations"
+  ],
+  "mapDepartmentLinks": {
+   "kansas-business-capitol-federal": {
+    "facultyUrl": "https://business.ku.edu/research-and-faculty/analytics-information-operations"
+   }
+  },
+  "facultyUrl": "https://business.ku.edu/research-and-faculty/analytics-information-operations",
+  "deptUrl": "https://business.ku.edu/people/list/faculty-staff?lastname=&filter=414",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-kentucky____scm-and-marketing",
@@ -26378,8 +26638,17 @@
   ],
   "lat": 42.386697,
   "lng": -72.524893,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "umass-amherst-isenberg-oim"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Massachusetts Amherst"
+  ],
+  "mapSearchTerms": [
+   "Isenberg School of Management",
+   "Operations and Information Management"
+  ]
  },
  {
   "id": "university-of-massachusetts-boston____management-science-and-information-systems",
@@ -26894,7 +27163,7 @@
   "n": 1,
   "lastPosted": "2026-09-11",
   "mapLocationIds": [
-   "minnesota-supply-chain-operations-nelson"
+   "minnesota-carlson-supply-chain"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -26904,7 +27173,7 @@
    "Carlson School of Management"
   ],
   "mapDepartmentLinks": {
-   "minnesota-supply-chain-operations-nelson": {
+   "minnesota-carlson-supply-chain": {
     "facultyUrl": "https://carlsonschool.umn.edu/departments/information-decision-sciences/faculty"
    }
   },
@@ -26920,7 +27189,7 @@
    "seed"
   ],
   "mapLocationIds": [
-   "minnesota-supply-chain-operations-nelson"
+   "minnesota-carlson-supply-chain"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -26931,7 +27200,7 @@
   ],
   "country": "United States",
   "mapDepartmentLinks": {
-   "minnesota-supply-chain-operations-nelson": {
+   "minnesota-carlson-supply-chain": {
     "facultyUrl": "https://carlsonschool.umn.edu/departments/information-decision-sciences/faculty"
    }
   },
@@ -26964,15 +27233,15 @@
   "lat": 44.9703991,
   "lng": -93.2447281,
   "mapLocationIds": [
-   "minnesota-supply-chain-operations-nelson"
+   "minnesota-carlson-supply-chain"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Minnesota"
   ],
   "mapSearchTerms": [
    "Carlson School of Management",
-   "Department of Supply Chain and Operations"
+   "Supply Chain and Operations"
   ]
  },
  {

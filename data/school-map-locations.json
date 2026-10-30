@@ -17069,6 +17069,518 @@
       ],
       "checked": "2026-10-30",
       "notes": "Health Policy and Management area faculty are listed at DSB in university directory; campus map identifies the building. Hamilton campus; not the separate Burlington location."
+    },
+    {
+      "id": "case-weatherhead-operations-lewis",
+      "institution": "Case Western Reserve University",
+      "rowIds": [
+        "case-western-reserve-university__weatherhead-school-of-management__operations"
+      ],
+      "school": "Weatherhead School of Management",
+      "department": "Operations",
+      "building": "Peter B. Lewis Building",
+      "address": "11119 Bellflower Road, Cleveland, OH 44106, United States",
+      "lat": 41.51,
+      "lng": -81.608,
+      "addressSource": "https://case.edu/weatherhead/about/faculty-staff-directory/kamlesh-mathur",
+      "coordinateSource": "https://commons.wikimedia.org/wiki/Category:Peter_B._Lewis_Building",
+      "supportingSources": [
+        "https://case.edu/weatherhead/about/faculty-and-staff-directory/george-vairaktarakis",
+        "https://case.edu/weatherhead/about/facilities/peter-b-lewis-building"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official Operations faculty profiles place the department in Peter B. Lewis Building. The named building coordinates are rounded and identify the building rather than an individual office."
+    },
+    {
+      "id": "columbia-ieor-mudd",
+      "institution": "Columbia University",
+      "rowIds": [
+        "columbia-university__fu-foundation-school-of-engineering-and-applied-science__industrial-engineering-and-operations-research"
+      ],
+      "school": "Fu Foundation School of Engineering and Applied Science",
+      "department": "Industrial Engineering and Operations Research",
+      "building": "S. W. Mudd Building",
+      "address": "500 West 120th Street, New York, NY 10027, United States",
+      "lat": 40.80935,
+      "lng": -73.95996,
+      "addressSource": "https://www.engineering.columbia.edu/academics/departments/industrial-engineering-and-operations-research-department",
+      "coordinateSource": "https://mapcarta.com/25033922",
+      "supportingSources": [
+        "https://energy.columbia.edu/content/directions"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Columbia identifies the IEOR office in S. W. Mudd; Columbia directions and the named building map confirm the address and coordinates."
+    },
+    {
+      "id": "george-mason-seor-nguyen",
+      "institution": "George Mason University",
+      "rowIds": [
+        "george-mason-university__volgenau-school-of-engineering__systems-engineering-and-operations-research"
+      ],
+      "school": "Volgenau School of Engineering",
+      "department": "Systems Engineering and Operations Research",
+      "building": "Nguyen Engineering Building",
+      "address": "4511 Patriot Circle, Fairfax, VA 22030, United States",
+      "lat": 38.8275,
+      "lng": -77.305194,
+      "addressSource": "https://seor.gmu.edu/about/contact-us",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Volgenau_School_of_Engineering",
+      "supportingSources": [
+        "https://seor.gmu.edu/program/operations-research-ms"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The official department contact locates its office in Nguyen Engineering Building and the program page supplies its street address. Coordinates identify the engineering school building."
+    },
+    {
+      "id": "george-mason-isom-enterprise",
+      "institution": "George Mason University",
+      "rowIds": [
+        "george-mason-university__costello-college-of-business__information-systems-and-operations-management"
+      ],
+      "school": "Donald G. Costello College of Business",
+      "department": "Information Systems and Operations Management",
+      "building": "Enterprise Hall",
+      "address": "4400 University Drive, Fairfax, VA 22030, United States",
+      "lat": 38.82909,
+      "lng": -77.30595,
+      "addressSource": "https://business.gmu.edu/about/contact-us",
+      "coordinateSource": "https://mapcarta.com/25032108",
+      "supportingSources": [
+        "https://business.gmu.edu/faculty-and-research/academic-areas-and-faculty/information-systems-and-operations-management-area"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Costello College lists Enterprise Hall as its location and identifies ISOM as an academic area. This is a school location rather than a separately verified office."
+    },
+    {
+      "id": "brandeis-heller-schneider",
+      "institution": "Brandeis University",
+      "rowIds": [
+        "brandeis-university__heller-school-for-social-policy-and-management"
+      ],
+      "school": "Heller School for Social Policy and Management",
+      "building": "Irving Schneider and Family Building",
+      "address": "415 South Street, Waltham, MA 02453, United States",
+      "lat": 42.369306,
+      "lng": -71.259139,
+      "addressSource": "https://heller.brandeis.edu/ihs/about/contact.html",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Heller_School_for_Social_Policy_and_Management",
+      "supportingSources": [
+        "https://heller.brandeis.edu/sillerman/about/contact.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Brandeis identifies Schneider as one of the Heller School’s two buildings; the named Heller building coordinates are approximate and not a claim about all school offices."
+    },
+    {
+      "id": "hec-montreal-decision-sciences-racanelli",
+      "institution": "HEC Montréal",
+      "rowIds": [
+        "hec-montreal____decision-sciences"
+      ],
+      "school": "HEC Montréal",
+      "department": "Decision Sciences",
+      "building": "Lise-et-Giuseppe-Racanelli Building",
+      "address": "3000 chemin de la Côte-Sainte-Catherine, Montréal, QC H3T 2A7, Canada",
+      "lat": 45.5035306,
+      "lng": -73.6214361,
+      "addressSource": "https://www.hec.ca/en/profs/denis-larocque",
+      "coordinateSource": "https://en.wikipedia.org/wiki/HEC_Montr%C3%A9al",
+      "supportingSources": [
+        "https://www.hec.ca/en/contact-us",
+        "https://mapcarta.com/W26417603"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official faculty sources place the department at 3000 Côte-Sainte-Catherine; HEC identifies this as its Racanelli building. Coordinates are for the named building."
+    },
+    {
+      "id": "hec-montreal-logistics-and-operations-management-racanelli",
+      "institution": "HEC Montréal",
+      "rowIds": [
+        "hec-montreal____logistics-and-operations-management"
+      ],
+      "school": "HEC Montréal",
+      "department": "Logistics and Operations Management",
+      "building": "Lise-et-Giuseppe-Racanelli Building",
+      "address": "3000 chemin de la Côte-Sainte-Catherine, Montréal, QC H3T 2A7, Canada",
+      "lat": 45.5035306,
+      "lng": -73.6214361,
+      "addressSource": "https://chairelogistique.hec.ca/wp-content/uploads/2024/06/cve-cordeau-1.pdf",
+      "coordinateSource": "https://en.wikipedia.org/wiki/HEC_Montr%C3%A9al",
+      "supportingSources": [
+        "https://www.hec.ca/en/contact-us",
+        "https://mapcarta.com/W26417603"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official faculty sources place the department at 3000 Côte-Sainte-Catherine; HEC identifies this as its Racanelli building. Coordinates are for the named building."
+    },
+    {
+      "id": "durham-management-marketing-waterside",
+      "institution": "Durham University",
+      "rowIds": [
+        "durham-university__business-school__management-and-marketing"
+      ],
+      "school": "Business School",
+      "department": "Management and Marketing",
+      "building": "Waterside Building",
+      "address": "Riverside Place, Durham DH1 1SL, United Kingdom",
+      "lat": 54.78031,
+      "lng": -1.57547,
+      "addressSource": "https://dur.ac.uk/business/about/our-locations/",
+      "coordinateSource": "https://mapcarta.com/W1082552917",
+      "supportingSources": [
+        "https://dur.ac.uk/business/research/centres/centre-for-research-on-organisations-work-and-society/contact-us/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official school locations page specifically places Management and Marketing at Waterside and distinguishes the second site; the named building map provides coordinates."
+    },
+    {
+      "id": "william-mary-mason-operations-miller",
+      "institution": "College of William and Mary",
+      "rowIds": [
+        "college-of-william-and-mary__raymond-a-mason-school-of-business__operations-management-and-information-technology"
+      ],
+      "school": "Raymond A. Mason School of Business",
+      "department": "Operations Management and Information Technology",
+      "building": "Alan B. Miller Hall",
+      "address": "101 Ukrop Way, Williamsburg, VA 23185, United States",
+      "lat": 37.2662,
+      "lng": -76.718,
+      "addressSource": "https://mason.wm.edu/faculty/directory/heales-j.php",
+      "coordinateSource": "https://commons.wikimedia.org/wiki/Category:Alan_B._Miller_Hall",
+      "supportingSources": [
+        "https://www.wm.edu/about/visiting/campusmap/location/miller.php",
+        "https://mason.wm.edu/faculty/directory/xia-y.php"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Operations and Information Systems faculty profiles place their offices in Miller Hall; the university identifies its street address and named building coordinates."
+    },
+    {
+      "id": "imperial-analytics-and-operations-business-school",
+      "institution": "Imperial College London",
+      "rowIds": [
+        "imperial-college-london__imperial-college-business-school__analytics-and-operations"
+      ],
+      "school": "Imperial College Business School",
+      "department": "Analytics and Operations",
+      "building": "Business School Building, South Kensington Campus",
+      "address": "Exhibition Road, London SW7 2AZ, United Kingdom",
+      "lat": 51.49931,
+      "lng": -0.17471,
+      "addressSource": "https://profiles.imperial.ac.uk/zhe.liu/about",
+      "coordinateSource": "https://mapcarta.com/W110085223",
+      "supportingSources": [
+        "https://www.imperial.ac.uk/business-school/faculty-research/academic-areas/analytics-operations/",
+        "https://www.imperial.ac.uk/business-school/about-us/contact-us/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official Analytics and Operations faculty profile locates an associate professor in the South Kensington Business School building. Imperial notes its work is distributed across two campuses; this pin identifies a verified location, not every faculty office."
+    },
+    {
+      "id": "imperial-operations-management-business-school",
+      "institution": "Imperial College London",
+      "rowIds": [
+        "imperial-college-london__imperial-college-business-school__operations-management"
+      ],
+      "school": "Imperial College Business School",
+      "department": "Operations Management",
+      "building": "Business School Building, South Kensington Campus",
+      "address": "Exhibition Road, London SW7 2AZ, United Kingdom",
+      "lat": 51.49931,
+      "lng": -0.17471,
+      "addressSource": "https://profiles.imperial.ac.uk/zhe.liu/about",
+      "coordinateSource": "https://mapcarta.com/W110085223",
+      "supportingSources": [
+        "https://www.imperial.ac.uk/business-school/faculty-research/academic-areas/analytics-operations/",
+        "https://www.imperial.ac.uk/business-school/about-us/contact-us/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official Analytics and Operations faculty profile locates an associate professor in the South Kensington Business School building. Imperial notes its work is distributed across two campuses; this pin identifies a verified location, not every faculty office."
+    },
+    {
+      "id": "eastern-connecticut-bis-webb",
+      "institution": "Eastern Connecticut State University",
+      "rowIds": [
+        "eastern-connecticut-state-university____business-information-systems"
+      ],
+      "school": "",
+      "department": "Business Information Systems",
+      "building": "Webb Hall",
+      "address": "83 Windham Street, Willimantic, CT 06226, United States",
+      "lat": 41.719967,
+      "lng": -72.218834,
+      "addressSource": "https://www.easternct.edu/accounting-business-information-systems/index.html",
+      "coordinateSource": "https://events.easternct.edu/webb-hall",
+      "supportingSources": [
+        "https://www.easternct.edu/faculty-directory/citurs.html",
+        "https://www.easternct.edu/social-work/_files/swk-pgm-app-redo-jan-2021.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department chair and assistant chair are in Webb Hall, as is a Business Information Systems professor. University publishes Webb Hall coordinates and campus mailing address; department secretary is in the Communication Building."
+    },
+    {
+      "id": "ucla-anderson-dotm-gold-hall",
+      "institution": "University of California, Los Angeles (UCLA)",
+      "rowIds": [
+        "university-of-california-los-angeles__anderson-school-of-management__decision-operations-and-technology-management",
+        "university-of-california-los-angeles__anderson-school-of-management__decisions-operations-and-technology-management"
+      ],
+      "school": "Anderson School of Management",
+      "department": "Decisions, Operations and Technology Management",
+      "building": "Leon and Toby Gold Hall",
+      "address": "110 Westwood Plaza, Gold Hall Suite B512, Los Angeles, CA 90095, United States",
+      "lat": 34.07364,
+      "lng": -118.44388,
+      "addressSource": "https://www.anderson.ucla.edu/faculty-and-research/decisions-operations-and-technology-management/contact",
+      "coordinateSource": "https://mapcarta.com/W184446757",
+      "supportingSources": [
+        "https://www.anderson.ucla.edu/sites/default/files/image/2024-03/2024impact_arcs_things_ucla_v1.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Area contact identifies Gold Hall suite B512; UCLA campus address list supplies street address and mapped coordinates identify the named building."
+    },
+    {
+      "id": "uci-merage-sb2",
+      "institution": "University of California, Irvine",
+      "rowIds": [
+        "university-of-california-irvine__paul-merage-school-of-business__operations-and-decision-technologies"
+      ],
+      "school": "Paul Merage School of Business",
+      "department": "Operations and Decision Technologies",
+      "building": "Merage School of Business II (SB2)",
+      "address": "4291 Pereira Drive, Irvine, CA 92697, United States",
+      "lat": 33.64666,
+      "lng": -117.83809,
+      "addressSource": "https://merage.uci.edu/contact-us/maps-directions.html",
+      "coordinateSource": "https://mapcarta.com/W184993856",
+      "supportingSources": [
+        "https://merage.uci.edu/research-faculty/faculty-directory/index.html",
+        "https://merage.uci.edu/_files/images/global/uci-campuscoremap.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University faculty directory lists area faculty in SB2, though members also have offices in neighboring SB1; this pin identifies one of the two school buildings."
+    },
+    {
+      "id": "michigan-state-broad-supply-chain",
+      "institution": "Michigan State University",
+      "rowIds": [
+        "michigan-state-university__eli-broad-college-of-business__supply-chain-management"
+      ],
+      "school": "Eli Broad College of Business",
+      "department": "Department of Supply Chain Management",
+      "building": "Business College Complex",
+      "address": "632 Bogue Street, Room N370, East Lansing, MI 48824, United States",
+      "lat": 42.72705,
+      "lng": -84.47298,
+      "addressSource": "https://search.msu.edu/campus-directory/index.php?q=s",
+      "coordinateSource": "https://mapcarta.com/N12219556936",
+      "supportingSources": [
+        "https://campusaddresses.msu.edu/addressing-diagrams/0080.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University directory identifies the department office in the N wing of the Business College Complex; mapped point identifies the Broad College at the same address."
+    },
+    {
+      "id": "auckland-business-isom",
+      "institution": "University of Auckland",
+      "rowIds": [
+        "university-of-auckland__business-school__information-systems-and-operations-management"
+      ],
+      "school": "University of Auckland Business School",
+      "department": "Information Systems and Operations Management",
+      "building": "Sir Owen G Glenn Building",
+      "address": "12 Grafton Road, Auckland 1010, New Zealand",
+      "lat": -36.85312875,
+      "lng": 174.77128884,
+      "addressSource": "https://www.auckland.ac.nz/en/business/about-business-school/isom/contact.html",
+      "coordinateSource": "https://www.coordinatesmarker.com/coordinates/551384-owen-g-glenn-building-auckland-cbd-auckland-new-zealand",
+      "supportingSources": [
+        "https://cdn.auckland.ac.nz/assets/auckland/on-campus/our-campuses/campus-maps/city-campus-map.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official department contact specifies Level 4 of the building; coordinate source identifies the building."
+    },
+    {
+      "id": "kansas-business-capitol-federal",
+      "institution": "University of Kansas",
+      "rowIds": [
+        "university-of-kansas__school-of-business__analytics-information-and-operations-management",
+        "university-of-kansas__school-of-business__analytics-information-operations",
+        "university-of-kansas__school-of-business__analytics-information-operations-research"
+      ],
+      "school": "School of Business",
+      "department": "Analytics, Information, Operations",
+      "building": "Capitol Federal Hall",
+      "address": "1654 Naismith Drive, Lawrence, KS 66045, United States",
+      "lat": 38.95367,
+      "lng": -95.24994,
+      "addressSource": "https://itprdfmiswb.ku.edu/public_pdf_generator/Render/GetRenderedPublicReport/DCM/DCM_Public_Reports/Locations_By_Landscape_Zone/pdf",
+      "coordinateSource": "https://mapcarta.com/W612774799",
+      "supportingSources": [
+        "https://business.ku.edu/people/david-cal-riedley",
+        "https://business.ku.edu/people/suman-mallik"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University directory identifies academic area administrator and operations professor offices in Capitol Federal Hall."
+    },
+    {
+      "id": "umass-amherst-isenberg-oim",
+      "institution": "University of Massachusetts Amherst",
+      "rowIds": [
+        "university-of-massachusetts-amherst__isenberg-school-of-management__operations-and-information-management"
+      ],
+      "school": "Isenberg School of Management",
+      "department": "Operations and Information Management",
+      "building": "Isenberg School of Management",
+      "address": "121 Presidents Drive, Amherst, MA 01003, United States",
+      "lat": 42.3867,
+      "lng": -72.5247,
+      "addressSource": "https://www.isenberg.umass.edu/programs/depts/OIM/contact-page",
+      "coordinateSource": "https://commons.wikimedia.org/wiki/Category:Isenberg_School_of_Management",
+      "supportingSources": [
+        "https://www.isenberg.umass.edu/people/carey-baldwin"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department contact specifies Room 220; coordinates from named school category."
+    },
+    {
+      "id": "minnesota-carlson-supply-chain",
+      "institution": "University of Minnesota",
+      "rowIds": [
+        "university-of-minnesota__curtis-l-carlson-school-of-management__supply-chain-and-operations"
+      ],
+      "school": "Carlson School of Management",
+      "department": "Supply Chain and Operations",
+      "building": "Marilyn C. Nelson Hall",
+      "address": "321 Nineteenth Avenue South, Suite 3-150, Minneapolis, MN 55455, United States",
+      "lat": 44.97049,
+      "lng": -93.24461,
+      "addressSource": "https://carlsonschool.umn.edu/departments/supply-chain-operations/contact",
+      "coordinateSource": "https://mapcarta.com/W29124068",
+      "supportingSources": [
+        "https://carlsonschool.umn.edu/news/minnesota-carlson-celebrates-transformed-building-newly-named-marilyn-c-nelson-hall"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University department contact provides office location; building was renamed Marilyn C. Nelson Hall in 2026."
+    },
+    {
+      "id": "calgary-haskayne-scurfield",
+      "institution": "University of Calgary",
+      "rowIds": [
+        "university-of-calgary__haskayne-school-of-business__operations-and-supply-chain-management"
+      ],
+      "school": "Haskayne School of Business",
+      "department": "Operations and Supply Chain Management",
+      "building": "Scurfield Hall",
+      "address": "215 Haskayne Place NW, Calgary, AB T2N 4V8, Canada",
+      "lat": 51.07737,
+      "lng": -114.12479,
+      "addressSource": "https://haskayne.ucalgary.ca/contacts/directory",
+      "coordinateSource": "https://mapcarta.com/W4973048",
+      "supportingSources": [
+        "https://haskayne.ucalgary.ca/contacts/services/facilities"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University directory lists the operations area chair and faculty offices in Scurfield Hall and identifies the school physical address."
+    },
+    {
+      "id": "nc-state-itao-nelson-hall",
+      "institution": "NC State University",
+      "rowIds": [
+        "nc-state-university____itao"
+      ],
+      "school": "Poole College of Management",
+      "department": "Department of Information Technology, Analytics and Operations",
+      "building": "Nelson Hall",
+      "address": "2801 Founders Drive, Raleigh, NC 27695, United States",
+      "lat": 35.78836,
+      "lng": -78.67397,
+      "addressSource": "https://poole.ncsu.edu/faculty-and-research/it-analytics-operations-department/",
+      "coordinateSource": "https://mapcarta.com/26734728",
+      "supportingSources": [
+        "https://facilities.ofa.ncsu.edu/building/n/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official ITAO contact lists room 2346 in Nelson Hall. NC State Facilities gives its street address; map coordinates are the building centroid."
+    },
+    {
+      "id": "rutgers-bloustein-civic-square",
+      "institution": "Rutgers University",
+      "rowIds": [
+        "rutgers-university__edward-j-bloustein-school-of-planning-and-public-policy__health-informatics"
+      ],
+      "school": "Edward J. Bloustein School of Planning and Public Policy",
+      "department": "Health Informatics",
+      "building": "Civic Square Building",
+      "address": "33 Livingston Avenue, New Brunswick, NJ 08901, United States",
+      "lat": 40.493704,
+      "lng": -74.443457,
+      "addressSource": "https://jobs.rutgers.edu/postings/282929",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Edward_J._Bloustein_School_of_Planning_and_Public_Policy",
+      "supportingSources": [
+        "https://bloustein.rutgers.edu/about/facilities/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The health informatics posting names the Bloustein School at 33 Livingston Avenue. The school identifies Civic Square Building as its home. Coordinates are for the school building, not an individual office."
+    },
+    {
+      "id": "nthu-technology-management-tsmc-building",
+      "institution": "National Tsing Hua University",
+      "rowIds": [
+        "national-tsing-hua-university__college-of-technology-management__institute-of-technology-management",
+        "national-tsing-hua-university__institute-of-technology-management__institute-of-technology-management"
+      ],
+      "school": "College of Technology Management",
+      "department": "Institute of Technology Management",
+      "building": "TSMC Building",
+      "address": "Room 545, TSMC Building, 101 Section 2 Kuangfu Road, Hsinchu 30013, Taiwan",
+      "lat": 24.78673,
+      "lng": 120.98814,
+      "addressSource": "https://tm.site.nthu.edu.tw/p/412-1367-3788.php?Lang=en",
+      "coordinateSource": "https://mapcarta.com/W432044412",
+      "supportingSources": [
+        "https://registra.site.nthu.edu.tw/var/file/211/1211/img/75/606064200.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Institute lists room 545 in TSMC Building. Official campus map labels 台積館 as TSMC Building and houses the College of Technology Management. Mapcarta locates 台積館."
+    },
+    {
+      "id": "naval-postgraduate-school-or-glasgow-hall",
+      "institution": "Naval Postgraduate School",
+      "rowIds": [
+        "naval-postgraduate-school____operations-research"
+      ],
+      "school": "Naval Postgraduate School",
+      "department": "Operations Research",
+      "building": "Glasgow Hall",
+      "address": "Glasgow Hall, Room 239, 1411 Cunningham Road, Monterey, CA 93943-5219, United States",
+      "lat": 36.59854,
+      "lng": -121.87715,
+      "addressSource": "https://nps.edu/web/or/contact-us",
+      "coordinateSource": "https://mapcarta.com/W151990321",
+      "supportingSources": [
+        "https://nps.edu/Images/Docs/CampusMap.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official department contact specifies Glasgow Hall building 302, second floor room 239 and postal address. Coordinates identify Glasgow Hall."
+    },
+    {
+      "id": "pompeu-fabra-economics-jaume-i",
+      "institution": "Pompeu Fabra University",
+      "rowIds": [
+        "pompeu-fabra-university____economics-and-business"
+      ],
+      "school": "Faculty of Economics and Business",
+      "department": "Department of Economics and Business",
+      "building": "Jaume I Building",
+      "address": "Ramon Trias Fargas 25–27, 08005 Barcelona, Spain",
+      "lat": 41.3898,
+      "lng": 2.19065,
+      "addressSource": "https://www.upf.edu/en/web/econ/contacte",
+      "coordinateSource": "https://commons.wikimedia.org/wiki/Category:Jaume_I_building",
+      "supportingSources": [
+        "https://www.upf.edu/web/campus/jaume-i"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official contact places the department in Jaume I, distinct from the faculty office in Roger de Llúria. Wikimedia gives 41°23′23.28″ N, 2°11′26.34″ E for Jaume I."
     }
   ]
 }
