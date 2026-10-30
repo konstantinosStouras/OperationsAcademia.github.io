@@ -29653,8 +29653,17 @@
   "lastPosted": "2026-09-05",
   "lat": 31.3300115,
   "lng": -89.3340423,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "southern-mississippi-management-scianna"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Southern Mississippi"
+  ],
+  "mapSearchTerms": [
+   "College of Business and Economic Development",
+   "School of Management"
+  ]
  },
  {
   "id": "university-of-stirling____project-management",
@@ -30292,7 +30301,7 @@
   "mapLocationIds": [
    "texas-dallas-operations-management-jindal"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Texas at Dallas"
   ],
@@ -30511,8 +30520,17 @@
   ],
   "lat": 43.5482823,
   "lng": -79.6645141,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "toronto-mississauga-iccit-cct"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Toronto Mississauga"
+  ],
+  "mapSearchTerms": [
+   "University of Toronto Mississauga",
+   "Institute of Communication, Culture, Information and Technology"
+  ]
  },
  {
   "id": "university-of-toronto-mississauga____management",
@@ -30865,7 +30883,7 @@
   "mapLocationIds": [
    "virginia-darden-data-analytics-faculty-office"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Virginia"
   ],
@@ -30913,7 +30931,7 @@
   "mapLocationIds": [
    "virginia-darden-technology-operations"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
    "Darden School of Business",
    "Technology and Operations Management"
@@ -30997,15 +31015,22 @@
   "n": 1,
   "lastPosted": "2026-10-28",
   "mapLocationIds": [
-   "university-of-warwick-operations-management-business-school"
+   "warwick-information-analytics-scarman-additional"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Warwick"
   ],
   "mapSearchTerms": [
-   "Warwick Business School"
-  ]
+   "Warwick Business School",
+   "Information Systems Management and Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "warwick-information-analytics-scarman-additional": {
+    "facultyUrl": "https://www.wbs.ac.uk/research/academics-and-research-students/?facetFields=subjectGroupNames&subjectGroupNames=ISM-Analytics+%28ISMA%29"
+   }
+  },
+  "facultyUrl": "https://www.wbs.ac.uk/research/academics-and-research-students/?facetFields=subjectGroupNames&subjectGroupNames=ISM-Analytics+%28ISMA%29"
  },
  {
   "id": "university-of-warwick__warwick-business-school__operations-management",

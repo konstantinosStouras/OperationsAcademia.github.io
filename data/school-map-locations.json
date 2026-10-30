@@ -3738,7 +3738,8 @@
       "id": "texas-dallas-operations-management-jindal",
       "institution": "University of Texas at Dallas",
       "rowIds": [
-        "university-of-texas-at-dallas____om"
+        "university-of-texas-at-dallas____om",
+        "university-of-texas-at-dallas__naveen-jindal-school-of-management__operations-management-area"
       ],
       "school": "Naveen Jindal School of Management",
       "department": "Operations Management",
@@ -8594,7 +8595,8 @@
       "institution": "University of Virginia",
       "institutionKey": "Virgina Darden",
       "rowIds": [
-        "virgina-darden____dads"
+        "virgina-darden____dads",
+        "university-of-virginia__darden-school-of-business__data-analytics-and-decision-sciences"
       ],
       "school": "Darden School of Business",
       "department": "Data Analytics and Decision Sciences",
@@ -9341,7 +9343,8 @@
       "id": "virginia-darden-technology-operations",
       "institution": "University of Virginia",
       "rowIds": [
-        "university-of-virginia____om"
+        "university-of-virginia____om",
+        "university-of-virginia__darden-school-of-business__technology-and-operations-management"
       ],
       "school": "Darden School of Business",
       "department": "Technology and Operations Management",
@@ -18528,6 +18531,67 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official school location and AACSB identify the SolBridge address. Coordinates are for the named school, rounded to approximately one second, rather than a verified department office."
+    },
+    {
+      "id": "southern-mississippi-management-scianna",
+      "institution": "University of Southern Mississippi",
+      "rowIds": [
+        "university-of-southern-mississippi__college-of-business-and-economic-development__school-of-management"
+      ],
+      "school": "College of Business and Economic Development",
+      "department": "School of Management",
+      "building": "Scianna Hall",
+      "address": "6205 US Highway 49, Hattiesburg, MS 39406, United States",
+      "lat": 31.32998,
+      "lng": -89.32981,
+      "addressSource": "https://www.usm.edu/business/scianna-hall.php",
+      "coordinateSource": "https://mapcarta.com/W618379051",
+      "supportingSources": [
+        "https://www.apps.mdah.ms.gov/Public/rpt.aspx?City=Hattiesburg&County=Any&Name=&StreetName=&StreetNo=&rpt=publicPropSearch",
+        "https://www.usm.edu/parking-transit-services/_files/hattiesburg-parking-map-2025-26.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official business-school page places School of Management on Scianna third floor. Mississippi historical resource inventory identifies Scianna as College of Business, matching exact named business footprint adjacent Scianna parking lot."
+    },
+    {
+      "id": "toronto-mississauga-iccit-cct",
+      "institution": "University of Toronto Mississauga",
+      "rowIds": [
+        "university-of-toronto-mississauga____institute-of-communication-culture-information-and-technolog"
+      ],
+      "school": "University of Toronto Mississauga",
+      "department": "Institute of Communication, Culture, Information and Technology",
+      "building": "Communication, Culture and Technology Building",
+      "address": "Third floor, 3359 Mississauga Road, Mississauga, ON L5L 1C6, Canada",
+      "lat": 43.54972,
+      "lng": -79.66303,
+      "addressSource": "https://www.utm.utoronto.ca/contact-us",
+      "coordinateSource": "https://mapcarta.com/W116411676",
+      "supportingSources": [
+        "https://www.utm.utoronto.ca/facilities/buildings/communication-culture-and-technology-building"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University contact identifies institute on third floor; building-level map point, with campus mailing address."
+    },
+    {
+      "id": "warwick-information-analytics-scarman-additional",
+      "institution": "University of Warwick",
+      "rowIds": [
+        "university-of-warwick__warwick-business-school__information-systems-and-analytics"
+      ],
+      "school": "Warwick Business School",
+      "department": "Information Systems Management and Analytics",
+      "building": "Warwick Business School, Scarman Road",
+      "address": "1 Scarman Road, Coventry CV4 7AL, United Kingdom",
+      "lat": 52.3823554,
+      "lng": -1.5656233,
+      "addressSource": "https://profiles.warwick.ac.uk/u2073423-seyoung-seol",
+      "coordinateSource": "https://www.wbs.ac.uk/events/view/8899/",
+      "supportingSources": [
+        "https://www.wbs.ac.uk/research/subject-groups/isma/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Requested research group and Scarman Road location correspond to existing verified warwick-information-systems-scarman map record; school building-level point."
     }
   ]
 }
