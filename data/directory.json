@@ -19121,8 +19121,16 @@
   ],
   "lat": 1.281908,
   "lng": 103.8476699,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "st-gallen-asia-amoy-street"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "St.Gallen Institute of Management in Asia"
+  ],
+  "mapSearchTerms": [
+   "St.Gallen Institute of Management in Asia"
+  ]
  },
  {
   "id": "st-john-fisher-university____business-analytics-operations-management-project-management",
@@ -19391,7 +19399,7 @@
   "mapLocationIds": [
    "stanford-operations-faculty-east-verified"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Stanford University"
   ],
@@ -19479,8 +19487,17 @@
   "lastPosted": "2014-12-17",
   "lat": 40.742736,
   "lng": -74.026713,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "stevens-business-babbio-center"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Stevens Institute of Technology"
+  ],
+  "mapSearchTerms": [
+   "School of Business",
+   "Operations Management"
+  ]
  },
  {
   "id": "stockholm-school-of-economics____entrepreneurship-innovation-and-technology",
@@ -21133,7 +21150,7 @@
    }
   ],
   "mapLocationIds": [
-   "shenzhen-management-platform-operations-verified"
+   "cuhk-shenzhen-sme-teaching-d"
   ],
   "mapLocationKind": "school",
   "mapSearchTerms": [
@@ -21144,7 +21161,7 @@
    "The Chinese University of Hong Kong, Shenzhen"
   ],
   "mapDepartmentLinks": {
-   "shenzhen-management-platform-operations-verified": {
+   "cuhk-shenzhen-sme-teaching-d": {
     "facultyUrl": "https://sme.cuhk.edu.cn/en/teacher-search?academic%5B216%5D=216"
    }
   },
@@ -21164,8 +21181,17 @@
   ],
   "lat": 22.720974,
   "lng": 114.246899,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cuhk-shenzhen-sme-teaching-d"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "The Chinese University of Hong Kong, Shenzhen"
+  ],
+  "mapSearchTerms": [
+   "School of Management and Economics",
+   "Management and Economics"
+  ]
  },
  {
   "id": "chinese-university-of-hong-kong-shenzhen__school-of-management-and-economics__the-research-group-of-prof-yiming-zhang",
@@ -21188,7 +21214,7 @@
   "n": 1,
   "lastPosted": "2025-06-12",
   "mapLocationIds": [
-   "shenzhen-management-platform-operations-verified"
+   "cuhk-shenzhen-sme-teaching-d"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -21198,7 +21224,7 @@
    "School of Management and Economics"
   ],
   "mapDepartmentLinks": {
-   "shenzhen-management-platform-operations-verified": {
+   "cuhk-shenzhen-sme-teaching-d": {
     "facultyUrl": "https://sme.cuhk.edu.cn/en/teacher-search?academic%5B216%5D=216"
    }
   },
@@ -21818,7 +21844,7 @@
   "mapLocationIds": [
    "texas-austin-mccombs-irom-verified"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
    "McCombs School of Business",
    "Department of Information, Risk, and Operations Management",
@@ -24117,7 +24143,7 @@
   "mapLocationIds": [
    "berkeley-industrial-engineering-etcheverry"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
    "College of Engineering",
    "Department of Industrial Engineering and Operations Research",
@@ -24441,7 +24467,9 @@
     "facultyUrl": "https://business.ucr.edu/our-faculty#operations-supply-chain"
    }
   },
-  "facultyUrl": "https://business.ucr.edu/our-faculty#operations-supply-chain"
+  "facultyUrl": "https://business.ucr.edu/our-faculty#operations-supply-chain",
+  "deptUrl": "https://business.ucr.edu/areas/oscm",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-california-riverside__school-of-business__operations-and-supply-chain-management",
@@ -24451,7 +24479,7 @@
   "type": "Business School",
   "country": "United States",
   "address": "Riverside, CA 92507",
-  "facultyUrl": "https://soba.ucr.edu/schools_areas/oscm_faculty.html",
+  "facultyUrl": "https://business.ucr.edu/our-faculty#operations-supply-chain",
   "deptUrl": "https://business.ucr.edu/areas/oscm",
   "sources": [
    "directory",
@@ -24460,8 +24488,22 @@
   ],
   "lat": 33.9734553,
   "lng": -117.3263893,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "california-riverside-operations-supply-chain-business-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of California, Riverside"
+  ],
+  "mapSearchTerms": [
+   "School of Business, A. Gary Anderson Graduate School of Management",
+   "Operations and Supply Chain Management"
+  ],
+  "mapDepartmentLinks": {
+   "california-riverside-operations-supply-chain-business-building": {
+    "facultyUrl": "https://business.ucr.edu/our-faculty#operations-supply-chain"
+   }
+  }
  },
  {
   "id": "university-of-california-san-diego__rady-school-of-management__innovation-technology-and-operations",
@@ -24546,7 +24588,7 @@
   "mapLocationIds": [
    "cambridge-judge-550"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Cambridge"
   ],
@@ -24864,7 +24906,9 @@
     "facultyUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty"
    }
   },
-  "facultyUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty"
+  "facultyUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty",
+  "deptUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty/operations-management",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-colorado-boulder__leeds-school-of-business",
@@ -24897,14 +24941,30 @@
   "country": "United States",
   "address": "Boulder, CO 80309",
   "mapUrl": "https://goo.gl/maps/fqd3F",
-  "facultyUrl": "http://www.colorado.edu/leeds/academics/management-entrepreneurship/faculty-management-entrepreneurship",
+  "facultyUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty",
   "sources": [
    "directory"
   ],
   "lat": 40.0103247,
   "lng": -105.2889726,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "colorado-boulder-strategy-entrepreneurship-operations-koelbel"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Colorado Boulder"
+  ],
+  "mapSearchTerms": [
+   "Leeds School of Business",
+   "Strategy, Entrepreneurship and Operations Division"
+  ],
+  "mapDepartmentLinks": {
+   "colorado-boulder-strategy-entrepreneurship-operations-koelbel": {
+    "facultyUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty"
+   }
+  },
+  "deptUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty/operations-management",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-colorado-boulder__leeds-school-of-business__operations-management",
@@ -24929,21 +24989,22 @@
   "n": 1,
   "lastPosted": "2024-09-17",
   "mapLocationIds": [
-   "colorado-boulder-business-analytics-machine-learning-koelbel"
+   "colorado-boulder-strategy-entrepreneurship-operations-koelbel"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Colorado Boulder"
   ],
   "mapSearchTerms": [
-   "Leeds School of Business"
+   "Leeds School of Business",
+   "Strategy, Entrepreneurship and Operations Division"
   ],
   "mapDepartmentLinks": {
-   "colorado-boulder-business-analytics-machine-learning-koelbel": {
-    "facultyUrl": "https://www.colorado.edu/business/phd-program/phd-operations"
+   "colorado-boulder-strategy-entrepreneurship-operations-koelbel": {
+    "facultyUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty"
    }
   },
-  "facultyUrl": "https://www.colorado.edu/business/phd-program/phd-operations"
+  "facultyUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty"
  },
  {
   "id": "university-of-colorado-denver____is-and-technology",
@@ -25038,8 +25099,17 @@
   "lastPosted": "2026-01-27",
   "lat": 35.1498034,
   "lng": 33.394086,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cyprus-business-public-administration-feb01"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Cyprus"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Economics and Management",
+   "Department of Business and Public Administration"
+  ]
  },
  {
   "id": "university-of-dayton__school-of-business-administration__management-information-systems-operations-supply-chain-and-b",
@@ -25258,8 +25328,16 @@
   ],
   "lat": 55.8740524,
   "lng": -4.2921628,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "glasgow-computing-alwyn-williams"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Glasgow"
+  ],
+  "mapSearchTerms": [
+   "School of Computing Science"
+  ]
  },
  {
   "id": "university-of-hartford____ba-marketing-or-scm",
@@ -25891,9 +25969,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://business.uic.edu/academics-research/dept/department-of-information-and-decision-sciences/information-and-decision-sciences-faculty/"
+  "mapLocationIds": [
+   "uic-business-university-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Illinois at Chicago"
+  ],
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Information and Decision Sciences"
+  ],
+  "facultyUrl": "https://business.uic.edu/academics-research/dept/department-of-information-and-decision-sciences/information-and-decision-sciences-faculty/",
+  "deptUrl": "https://business.uic.edu/academics-research/dept/department-of-information-and-decision-sciences/information-and-decision-sciences-faculty/",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-illinois-at-chicago__college-of-business__information-and-decision-sciences",
@@ -26020,8 +26109,22 @@
   ],
   "n": 4,
   "lastPosted": "2026-10-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "illinois-urbana-gies-operations-bif"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Illinois at Urbana-Champaign"
+  ],
+  "mapSearchTerms": [
+   "Gies College of Business",
+   "Information Systems, Operations, Supply Chain and Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "illinois-urbana-gies-operations-bif": {
+    "facultyUrl": "https://giesbusiness.illinois.edu/faculty-and-research/find-faculty?searchit=IOSA"
+   }
+  },
   "facultyUrl": "https://giesbusiness.illinois.edu/faculty-and-research/find-faculty?searchit=IOSA"
  },
  {
@@ -26255,7 +26358,7 @@
   "mapLocationIds": [
    "kentucky-marketing-supply-chain-gatton"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Kentucky"
   ],
@@ -26909,8 +27012,17 @@
   ],
   "lat": 42.3157363,
   "lng": -71.0527482,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "umass-boston-management-science-mccormack"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Massachusetts Boston"
+  ],
+  "mapSearchTerms": [
+   "College of Management",
+   "Department of Management Science and Information Systems"
+  ]
  },
  {
   "id": "university-of-massachusetts-lowell__manning-school-of-business__operations-and-information-systems",

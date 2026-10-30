@@ -526,7 +526,9 @@
       "id": "colorado-boulder-strategy-entrepreneurship-operations-koelbel",
       "institution": "University of Colorado Boulder",
       "rowIds": [
-        "university-of-colorado-boulder____scm-analytics-om"
+        "university-of-colorado-boulder____scm-analytics-om",
+        "university-of-colorado-boulder__leeds-school-of-business__operations-group-of-the-division-of-strategy-entrepreneurshi",
+        "university-of-colorado-boulder__leeds-school-of-business__operations-management"
       ],
       "school": "Leeds School of Business",
       "department": "Strategy, Entrepreneurship and Operations Division",
@@ -547,7 +549,8 @@
       "institution": "University of Cambridge",
       "institutionKey": "Judge Business School",
       "rowIds": [
-        "judge-business-school____om-tech"
+        "judge-business-school____om-tech",
+        "university-of-cambridge__judge-business-school__operations-and-technology-management"
       ],
       "school": "Cambridge Judge Business School",
       "department": "Operations and Technology Management",
@@ -907,7 +910,8 @@
       "institution": "University of California, Riverside",
       "institutionKey": "University of California Riverside",
       "rowIds": [
-        "university-of-california-riverside__a-gary-anderson-graduate-school-of-management__operations-and-supply-chain-management"
+        "university-of-california-riverside__a-gary-anderson-graduate-school-of-management__operations-and-supply-chain-management",
+        "university-of-california-riverside__school-of-business__operations-and-supply-chain-management"
       ],
       "school": "School of Business, A. Gary Anderson Graduate School of Management",
       "department": "Operations and Supply Chain Management",
@@ -3625,7 +3629,8 @@
       "institution": "The University of Texas at Austin",
       "institutionKey": "UT Austin McCombs",
       "rowIds": [
-        "ut-austin-mccombs____is-ai-or-health-cluster"
+        "ut-austin-mccombs____is-ai-or-health-cluster",
+        "university-of-texas-at-austin__mccombs-school-of-business__information-risk-and-operations-management"
       ],
       "school": "McCombs School of Business",
       "department": "Department of Information, Risk, and Operations Management",
@@ -4296,7 +4301,8 @@
       "institution": "Stanford University",
       "institutionKey": "Stanford GSB",
       "rowIds": [
-        "stanford-gsb____om"
+        "stanford-gsb____om",
+        "stanford-university__stanford-graduate-school-of-business__operations-information-and-technology-oit-area"
       ],
       "school": "Graduate School of Business",
       "department": "Operations, Information and Technology",
@@ -4548,7 +4554,8 @@
       "notes": "Official department about page lists office 4141 and directly links this Google directions destination. Used destination coordinates, not viewport center. Expanded abbreviated department label.",
       "institution": "University of California, Berkeley",
       "rowIds": [
-        "university-of-california-berkeley____ieor-decision-analytics"
+        "university-of-california-berkeley____ieor-decision-analytics",
+        "university-of-california-berkeley____industrial-engineering-and-operations-research"
       ],
       "checked": "2026-10-24",
       "institutionKey": "university-of-california-berkeley"
@@ -7692,7 +7699,8 @@
         "https://purchasing.uky.edu/sites/default/files/2026-04/uk-3151.0-1-26.pdf"
       ],
       "rowIds": [
-        "university-of-kentucky____scm-and-marketing"
+        "university-of-kentucky____scm-and-marketing",
+        "university-of-kentucky__gatton-college-of-business-and-economics__marketing-and-supply-chain"
       ],
       "checked": "2026-10-25"
     },
@@ -17697,7 +17705,8 @@
       "institution": "University of Illinois at Chicago",
       "rowIds": [
         "university-of-illinois-at-chicago__college-of-business__information-and-decision-sciences",
-        "university-of-illinois-at-chicago__college-of-business__supply-chain-and-operations-management"
+        "university-of-illinois-at-chicago__college-of-business__supply-chain-and-operations-management",
+        "university-of-illinois-at-chicago__college-of-business__enterprise-ai-and-systems"
       ],
       "school": "College of Business Administration",
       "department": "Information and Decision Sciences",
@@ -18291,6 +18300,150 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official program identifies the department and Macon School of Engineering; official campus map identifies the School of Engineering building separately from the adjacent Science and Engineering Building. Mapcarta locates Mercer Engineering Building; coordinates are building-level, not a verified department office."
+    },
+    {
+      "id": "stevens-business-babbio-center",
+      "institution": "Stevens Institute of Technology",
+      "rowIds": [
+        "stevens-institute-of-technology__wesley-j-howe-school-of-technology-management__operations-management"
+      ],
+      "school": "School of Business",
+      "department": "Operations Management",
+      "building": "Babbio Center",
+      "address": "1 Castle Point Terrace, Hoboken, NJ 07030, United States",
+      "lat": 40.74271,
+      "lng": -74.02663,
+      "addressSource": "https://www.stevens.edu/profile/clee4",
+      "coordinateSource": "https://mapcarta.com/W182954082",
+      "supportingSources": [
+        "https://assets.stevens.edu/mviowpldu823/1RHE112FrlUHseuZoPDsRM/a6feb431cdb732d2a565191de33dd298/Stevens-Campus-map-2024-web.pdf",
+        "https://www.stevens.edu/profile/gprastac"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Operations management professor Chihoon Lee and operations and supply-chain professor Gregory Prastacos list Babbio offices. University street address; exact named building coordinates from map."
+    },
+    {
+      "id": "st-gallen-asia-amoy-street",
+      "institution": "St.Gallen Institute of Management in Asia",
+      "rowIds": [
+        "st-gallen-institute-of-management-in-asia"
+      ],
+      "school": "St.Gallen Institute of Management in Asia",
+      "department": "",
+      "building": "110 Amoy Street",
+      "address": "110 Amoy Street #03-01, Singapore 069930",
+      "lat": 1.282086,
+      "lng": 103.847501,
+      "addressSource": "https://www.summerschool.unisg.ch/asia-contact",
+      "coordinateSource": "https://www.companies.sg/building/069930/TELOK-AYER-CONSERVATION-AREA",
+      "supportingSources": [
+        "https://www.ura.gov.sg/conservation/find-a-building/conservation-portal/tkay-00308/",
+        "https://www.unisg.ch/en/university/about-us/organisation/detail/person-id/da78178d-fd23-4d88-803e-2ff006c81a8c/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official institute and faculty contacts specify the floor and full street address; coordinate is published for exact postal address, a conserved building."
+    },
+    {
+      "id": "cyprus-business-public-administration-feb01",
+      "institution": "University of Cyprus",
+      "rowIds": [
+        "university-of-cyprus__school-economics-and-management__business-and-public-administration"
+      ],
+      "school": "Faculty of Economics and Management",
+      "department": "Department of Business and Public Administration",
+      "building": "Faculty of Economics and Management, FEB 01",
+      "address": "1 Panepistimiou Avenue, Aglantzia 2109, Nicosia, Cyprus",
+      "lat": 35.14505,
+      "lng": 33.41144,
+      "addressSource": "https://www.ucy.ac.cy/ts/wp-content/uploads/sites/221/2023/06/Faculty-of-Economics-and-Management.pdf",
+      "coordinateSource": "https://mapcarta.com/W797398820",
+      "supportingSources": [
+        "https://erc.ucy.ac.cy/directory/en/profile/basotir",
+        "https://libguides.library.ucy.ac.cy/prf.php?id=2ec6e654-1bf5-11ef-b755-0647746d9baf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official facilities identify department in FEB 01, corroborated by department chair office. Exact named department building point, distinct from neighbouring FEB 02."
+    },
+    {
+      "id": "glasgow-computing-alwyn-williams",
+      "institution": "University of Glasgow",
+      "rowIds": [
+        "university-of-glasgow__school-of-computing-science"
+      ],
+      "school": "School of Computing Science",
+      "department": "",
+      "building": "Sir Alwyn Williams Building",
+      "address": "Lilybank Gardens, Glasgow G12 8RZ, United Kingdom",
+      "lat": 55.8739,
+      "lng": -4.29175,
+      "addressSource": "https://www.gla.ac.uk/schools/computing/contact/",
+      "coordinateSource": "https://mapcarta.com/W242508277",
+      "supportingSources": [
+        "https://www.gla.ac.uk/schools/computing/informationforstudents/studentsupport/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official computing school contact locates the school in Sir Alwyn Williams Building at Lilybank Gardens; exact named building map point."
+    },
+    {
+      "id": "umass-boston-management-science-mccormack",
+      "institution": "University of Massachusetts Boston",
+      "rowIds": [
+        "university-of-massachusetts-boston____management-science-and-information-systems"
+      ],
+      "school": "College of Management",
+      "department": "Department of Management Science and Information Systems",
+      "building": "McCormack Hall, fifth floor",
+      "address": "100 Morrissey Boulevard, Boston, MA 02125, United States",
+      "lat": 42.31267,
+      "lng": -71.0393,
+      "addressSource": "https://www.umb.edu/business/academic-departments/management-science--information-systems/",
+      "coordinateSource": "https://mapcarta.com/W29761842",
+      "supportingSources": [
+        "https://www.umb.edu/directory/weizhang/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department contact and current professor list fifth floor McCormack Hall; coordinates identify named building."
+    },
+    {
+      "id": "illinois-urbana-gies-operations-bif",
+      "institution": "University of Illinois at Urbana-Champaign",
+      "rowIds": [
+        "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-supply-chain-and-analytics"
+      ],
+      "school": "Gies College of Business",
+      "department": "Information Systems, Operations, Supply Chain and Analytics",
+      "building": "Business Instructional Facility",
+      "address": "515 East Gregory Drive, Champaign, IL 61820, United States",
+      "lat": 40.10358,
+      "lng": -88.23096,
+      "addressSource": "https://giesbusiness.illinois.edu/profile/vanitha-virudachalam",
+      "coordinateSource": "https://mapcarta.com/W1112153050",
+      "supportingSources": [
+        "https://giesbusiness.illinois.edu/business-administration/badm-areas-iosa",
+        "https://vanitha.web.illinois.edu/vanitha_cv.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Operations faculty member's current Gies profile gives BIF room 4014; named building map identifies matching street address. Other university departments may use different buildings."
+    },
+    {
+      "id": "cuhk-shenzhen-sme-teaching-d",
+      "institution": "The Chinese University of Hong Kong, Shenzhen",
+      "rowIds": [
+        "chinese-university-of-hong-kong-shenzhen__school-of-management-and-economics__management-and-economics"
+      ],
+      "school": "School of Management and Economics",
+      "department": "Management and Economics",
+      "building": "Teaching Complex D",
+      "address": "2001 Longxiang Boulevard, Longgang District, Shenzhen, Guangdong, China",
+      "lat": 22.6913335,
+      "lng": 114.209087,
+      "addressSource": "https://sme.cuhk.edu.cn/en/page/1366",
+      "coordinateSource": "https://www.openstreetmap.org/way/544063810",
+      "supportingSources": [
+        "https://www.cuhk.edu.cn/en/page/14377"
+      ],
+      "checked": "2026-10-30",
+      "notes": "School's official international affairs office is in Teaching Complex TxD. Coordinates reuse reviewed shenzhen-management-platform-operations-verified named D building footprint. School-level reference; individual academic office not separately verified."
     }
   ]
 }
