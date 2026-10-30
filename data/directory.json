@@ -22848,8 +22848,17 @@
   ],
   "lat": 43.0004064,
   "lng": -78.7879084,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "buffalo-industrial-systems-bell"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University at Buffalo"
+  ],
+  "mapSearchTerms": [
+   "School of Engineering and Applied Sciences",
+   "Department of Industrial and Systems Engineering"
+  ]
  },
  {
   "id": "university-at-buffalo____scm-and-om",
@@ -32198,11 +32207,11 @@
   "lat": 37.2316097,
   "lng": -80.4237306,
   "mapLocationIds": [
-   "virginia-tech-grado-industrial-systems-durham"
+   "virginia-tech-industrial-systems-durham"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
-   "Virginia Polytechnic Institute and State University"
+   "Virginia Tech"
   ],
   "mapSearchTerms": [
    "College of Engineering",

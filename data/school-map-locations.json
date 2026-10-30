@@ -18592,6 +18592,46 @@
       ],
       "checked": "2026-10-30",
       "notes": "Requested research group and Scarman Road location correspond to existing verified warwick-information-systems-scarman map record; school building-level point."
+    },
+    {
+      "id": "buffalo-industrial-systems-bell",
+      "institution": "University at Buffalo",
+      "rowIds": [
+        "university-at-buffalo____industrial-and-systems-engineering"
+      ],
+      "school": "School of Engineering and Applied Sciences",
+      "department": "Department of Industrial and Systems Engineering",
+      "building": "Bell Hall",
+      "address": "342 Bell Hall, 210 Mary Talbert Way, Buffalo, NY 14260-2050, United States",
+      "lat": 43.001628,
+      "lng": -78.787044,
+      "addressSource": "https://engineering.buffalo.edu/industrial-systems/about-us/contact.html",
+      "coordinateSource": "https://engineering.buffalo.edu/industrial-systems/about-us/contact.html",
+      "supportingSources": [
+        "https://engineering.buffalo.edu/home/academics/grad/contact/department-contacts.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official department contact lists Bell Hall room 342 and provides its map coordinates; department directory confirms multiple staff Bell Hall offices."
+    },
+    {
+      "id": "virginia-tech-industrial-systems-durham",
+      "institution": "Virginia Tech",
+      "rowIds": [
+        "virginia-tech____grado-department-of-industrial-and-systems-engineering"
+      ],
+      "school": "College of Engineering",
+      "department": "Grado Department of Industrial and Systems Engineering",
+      "building": "Durham Hall",
+      "address": "250 Durham Hall, 1145 Perry Street, Blacksburg, VA 24061, United States",
+      "lat": 37.23174,
+      "lng": -80.42382,
+      "addressSource": "https://www.ise.vt.edu/academics/undergrad/seniordesign-program/contact_us.html",
+      "coordinateSource": "https://www.vt.edu/about/locations/buildings/durham-hall.html",
+      "supportingSources": [
+        "https://www.ise.vt.edu/people/faculty/shewchuk.html"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official department names office 250 in Durham Hall; university building page confirms department, street address and exact building coordinates."
     }
   ]
 }
