@@ -5904,9 +5904,13 @@
   "institution": "Eastern Connecticut State University",
   "department": "Business Information Systems",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-10-30",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },

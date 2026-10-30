@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-30T19:43:16.852Z",
+ "generated": "2026-10-30T19:49:33.863Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1075,6 +1075,10 @@
   },
   {
    "v": "East Texas A&M University",
+   "n": 1
+  },
+  {
+   "v": "Eastern Connecticut State University",
    "n": 1
   },
   {
@@ -4474,6 +4478,10 @@
    "n": 1
   },
   {
+   "v": "Business Information Systems",
+   "n": 1
+  },
+  {
    "v": "Business Information Systems and Operations Management",
    "n": 1
   },
@@ -7682,6 +7690,17 @@
    "bySchool": {
     "College of Business": [
      "Management, Marketing, and Management Science"
+    ]
+   }
+  },
+  "Eastern Connecticut State University": {
+   "schools": [],
+   "units": [
+    "Business Information Systems"
+   ],
+   "bySchool": {
+    "": [
+     "Business Information Systems"
     ]
    }
   },

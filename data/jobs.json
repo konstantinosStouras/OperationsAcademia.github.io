@@ -42,6 +42,39 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-eastern-connecticut-state-university-20261030",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-10-30",
+  "institution": "Eastern Connecticut State University",
+  "department": "Business Information Systems",
+  "school": "",
+  "unit": "Business Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Deadline as listed: 06-Nov-25",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://easternctstateuniversity.applytojob.com/apply/xwiyB3Z84V/Assistant-Professor-Of-Business-Information-System",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Eastern%20Connecticut%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-10-30T19:49:20Z",
+  "owner": ""
+ },
+ {
   "id": "2027-florida-state-university-20261030",
   "year": 2027,
   "years": [
@@ -89,14 +122,14 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "rolling",
+  "applyBy": "Until filled. rolling",
   "applyByDate": "",
   "comments": "",
   "country": "United States",
   "countries": [
    "United States"
   ],
-  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179603869&Title=Assistant%20Professor%20%2D%20Business%20Analytics%20and%20Supply%20Chain%20Management",
+  "adUrl": "https://jobs.shu.edu/jobs/assistant-professor-business-analytics-and-supply-chain-management-south-orange-new-jersey-united-states",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
@@ -105,7 +138,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-30T19:39:21Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-university-of-luxembourg-20261030",
