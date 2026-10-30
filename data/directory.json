@@ -12774,13 +12774,9 @@
   "school": "College of Technology Management",
   "department": "Institute of Technology Management",
   "type": "University",
-  "country": "Taiwan",
   "sources": [
-   "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-10-28",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
