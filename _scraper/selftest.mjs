@@ -1,5 +1,5 @@
-import './publication-status-test.cjs';
 #!/usr/bin/env node
+import './publication-status-test.cjs';
 /* ---------------------------------------------------------------------------
    Operations Academia — offline checks for the job pipeline.
 
