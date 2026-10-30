@@ -17581,6 +17581,211 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official contact places the department in Jaume I, distinct from the faculty office in Roger de Llúria. Wikimedia gives 41°23′23.28″ N, 2°11′26.34″ E for Jaume I."
+    },
+    {
+      "id": "eindhoven-industrial-engineering-atlas",
+      "institution": "Eindhoven University of Technology (TU/e)",
+      "rowIds": [
+        "eindhoven-university-of-technology-tu-e__school-of-industrial-engineering__industrial-engineering-and-innovation-sciences"
+      ],
+      "school": "School of Industrial Engineering",
+      "department": "Industrial Engineering and Innovation Sciences",
+      "building": "Atlas",
+      "address": "Groene Loper 3, 5612 AE Eindhoven, Netherlands",
+      "lat": 51.44788,
+      "lng": 5.48612,
+      "addressSource": "https://research.tue.nl/en/organisations/innovation-technology-entrepr-marketing/",
+      "coordinateSource": "https://mapcarta.com/W483163232",
+      "supportingSources": [
+        "https://research.tue.nl/en/organisations/operations-planning-accounting-and-control/network/",
+        "https://research.tue.nl/files/318838188/1-s2.0-S2405844024019303-main.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University research portal lists Industrial Engineering research groups in Atlas; published affiliation confirms Groene Loper 3. Campus map also lists other department buildings, so this is a verified departmental location, not necessarily the only location."
+    },
+    {
+      "id": "georgia-tech-isye-george-tower",
+      "institution": "Georgia Institute of Technology",
+      "rowIds": [
+        "georgia-institute-of-technology__h-milton-stewart-school-of-industrial-and-systems-engineerin"
+      ],
+      "school": "H. Milton Stewart School of Industrial and Systems Engineering",
+      "department": "",
+      "building": "George Tower",
+      "address": "55 5th Street NW, Atlanta, GA 30332-0205, United States",
+      "lat": 33.7768175,
+      "lng": -84.3879308,
+      "addressSource": "https://www.isye.gatech.edu/about/maps-directions",
+      "coordinateSource": "https://maps.app.goo.gl/dYd1cubvr1tVFDcT6",
+      "supportingSources": [
+        "https://news.gatech.edu/news/2026/09/18/georgia-tech-celebrates-completion-george-tower-scheller-tower",
+        "https://www.isye.gatech.edu/about/school/facilities"
+      ],
+      "checked": "2026-10-30",
+      "notes": "ISyE identifies George Tower as its new home and gives this address and Google Maps location. Georgia Tech announced completion in September 2026; older sources may still list Groseclose."
+    },
+    {
+      "id": "uconn-storrs-opim-business",
+      "institution": "University of Connecticut",
+      "rowIds": [
+        "university-of-connecticut__school-of-business__operations-and-information-management"
+      ],
+      "school": "School of Business",
+      "department": "Operations and Information Management",
+      "building": "School of Business",
+      "address": "2100 Hillside Road, Storrs, CT 06269, United States",
+      "lat": 41.80573419,
+      "lng": -72.25350568,
+      "addressSource": "https://www.business.uconn.edu/contact/opim/",
+      "coordinateSource": "https://energystats.fo.uconn.edu/led-map",
+      "supportingSources": [
+        "https://www.business.uconn.edu/about/campuses/storrs/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University facilities dataset provides building coordinates. Department members are also based at regional campuses."
+    },
+    {
+      "id": "usc-marshall-bridge",
+      "institution": "University of Southern California (USC)",
+      "rowIds": [
+        "university-of-southern-california__marshall-school-of-business__data-sciences-and-operations"
+      ],
+      "school": "Marshall School of Business",
+      "department": "Data Sciences and Operations",
+      "building": "Bridge Hall",
+      "address": "3670 Trousdale Parkway, Los Angeles, CA 90089, United States",
+      "lat": 34.01886,
+      "lng": -118.28579,
+      "addressSource": "https://calendar.usc.edu/bridge_hall_bri",
+      "coordinateSource": "https://mapcarta.com/W146842007",
+      "supportingSources": [
+        "https://www.marshall.usc.edu/departments/data-sciences-and-operations"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Department contact lists Bridge Hall room 308; official USC event page provides building street address."
+    },
+    {
+      "id": "cincinnati-lindner-obais",
+      "institution": "University of Cincinnati",
+      "rowIds": [
+        "university-of-cincinnati__carl-h-lindner-college-of-business__operations-business-analytics-and-information-systems"
+      ],
+      "school": "Carl H. Lindner College of Business",
+      "department": "Operations, Business Analytics and Information Systems",
+      "building": "Carl H. Lindner Hall",
+      "address": "2906 Woodside Drive, Cincinnati, OH 45221, United States",
+      "lat": 39.133978,
+      "lng": -84.514551,
+      "addressSource": "https://www.business.uc.edu/faculty-research/obais.html",
+      "coordinateSource": "https://www.uc.edu/about/maps.html",
+      "supportingSources": [
+        "https://ucdirectory.uc.edu/CampusBuildings.asp?bldgcode=LINDHALL"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University department contact identifies Lindner Hall, and university map explicitly lists its GPS coordinates."
+    },
+    {
+      "id": "uic-business-university-hall",
+      "institution": "University of Illinois at Chicago",
+      "rowIds": [
+        "university-of-illinois-at-chicago__college-of-business__information-and-decision-sciences",
+        "university-of-illinois-at-chicago__college-of-business__supply-chain-and-operations-management"
+      ],
+      "school": "College of Business Administration",
+      "department": "Information and Decision Sciences",
+      "building": "University Hall",
+      "address": "601 South Morgan Street, Chicago, IL 60607, United States",
+      "lat": 41.8737629,
+      "lng": -87.6509962,
+      "addressSource": "https://business.uic.edu/profiles/nguyen-son-the/",
+      "coordinateSource": "https://today.uic.edu/locations/university-hall/",
+      "supportingSources": [
+        "https://business.uic.edu/online/certificates/operations-and-supply-chain-management/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "UIC identifies Information and Decision Sciences offices in University Hall and its operations and supply chain courses within IDS; location coordinates provided by UIC."
+    },
+    {
+      "id": "tennessee-haslam-stokely-bas",
+      "institution": "University of Tennessee",
+      "rowIds": [
+        "university-of-tennessee__college-of-business-administration__business-analytics-and-statistics"
+      ],
+      "school": "Haslam College of Business",
+      "department": "Business Analytics and Statistics",
+      "building": "Stokely Management Center",
+      "address": "916 Volunteer Boulevard, Knoxville, TN 37996, United States",
+      "lat": 35.95621,
+      "lng": -83.92902,
+      "addressSource": "https://haslam.utk.edu/wp-content/uploads/2022/09/Yu_Jiang_CV.pdf",
+      "coordinateSource": "https://mapcarta.com/21666118",
+      "supportingSources": [
+        "https://haslam.utk.edu/people/profile/charles-cwiek/",
+        "https://haslam.utk.edu/news/ut-haslam-business-analytics-and-statistics-collaboration-space-made-possible-by-meltons/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University identifies business analytics and statistics faculty offices in Stokely Management Center."
+    },
+    {
+      "id": "yale-som-evans-operations",
+      "institution": "Yale University",
+      "rowIds": [
+        "yale-university__school-of-management__operations-department"
+      ],
+      "school": "Yale School of Management",
+      "department": "Operations",
+      "building": "Edward P. Evans Hall",
+      "address": "165 Whitney Avenue, New Haven, CT 06511, United States",
+      "lat": 41.3152,
+      "lng": -72.9202,
+      "addressSource": "https://som.yale.edu/about/contact",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Edward_P._Evans_Hall",
+      "supportingSources": [
+        "https://som.yale.edu/sites/default/files/2024-07/Manshadi_CV_Jul24.pdf",
+        "https://som.yale.edu/sites/default/files/2023-12/CV_Monachou-17.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Yale faculty CVs list operations professors offices in Evans Hall."
+    },
+    {
+      "id": "uw-milwaukee-lubar-operations",
+      "institution": "University of Wisconsin-Milwaukee",
+      "rowIds": [
+        "university-of-wisconsin-milwaukee__sheldon-b-lubar-school-of-business__supply-chain-operations-management-and-business-statistics"
+      ],
+      "school": "Sheldon B. Lubar College of Business",
+      "department": "Supply Chain, Operations Management and Business Statistics",
+      "building": "Lubar Hall",
+      "address": "3202 North Maryland Avenue, Milwaukee, WI 53211, United States",
+      "lat": 43.07605,
+      "lng": -87.88219,
+      "addressSource": "https://uwm.edu/set/locations/",
+      "coordinateSource": "https://mapcarta.com/W86701891",
+      "supportingSources": [
+        "https://uwm.edu/business/research/centers-initiatives/supply-chain-management-institute/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University faculty directory lists multiple area offices in Lubar Hall."
+    },
+    {
+      "id": "nanyang-itom-wee-cho-yaw",
+      "institution": "Nanyang Technological University",
+      "rowIds": [
+        "nanyang-technological-university__nanyang-business-school__informaton-technology-and-operatons-management"
+      ],
+      "school": "Nanyang Business School",
+      "department": "Information Technology and Operations Management",
+      "building": "Wee Cho Yaw Plaza (Gaia, Academic Building South)",
+      "address": "91 Nanyang Avenue, Singapore 639956",
+      "lat": 1.3419987,
+      "lng": 103.6833286,
+      "addressSource": "https://www.ntu.edu.sg/business/research/academic-divisions/itom",
+      "coordinateSource": "https://www.google.com/maps?cid=15609889485973217265",
+      "supportingSources": [
+        "https://blogs.ntu.edu.sg/cts2025/symposium-venue/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Reuses reviewed evidence in existing location-verified-575 for the same Nanyang Business School ITOM department; official page identifies current department and existing record documented precise named place marker coordinates. The row spelling contains typographical errors."
     }
   ]
 }

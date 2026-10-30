@@ -6444,8 +6444,17 @@
   "lastPosted": "2026-10-19",
   "lat": 51.447954,
   "lng": 5.4853079,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "eindhoven-industrial-engineering-atlas"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Eindhoven University of Technology (TU/e)"
+  ],
+  "mapSearchTerms": [
+   "School of Industrial Engineering",
+   "Industrial Engineering and Innovation Sciences"
+  ]
  },
  {
   "id": "emlv-ecole-de-commerce-et-de-management__leonard-de-vinci-business-school-paris-la-defense__management-information-systems-artificial-intelligence-and-s",
@@ -7969,8 +7978,16 @@
   ],
   "lat": 33.7728416,
   "lng": -84.390568,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "georgia-tech-isye-george-tower"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Georgia Institute of Technology"
+  ],
+  "mapSearchTerms": [
+   "H. Milton Stewart School of Industrial and Systems Engineering"
+  ]
  },
  {
   "id": "georgia-institute-of-technology__scheller-college-of-business__operations-management",
@@ -13373,17 +13390,18 @@
   "n": 1,
   "lastPosted": "2026-10-11",
   "mapLocationIds": [
-   "location-verified-575"
+   "nanyang-itom-wee-cho-yaw"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "department",
   "mapInstitutionNames": [
    "Nanyang Technological University"
   ],
   "mapSearchTerms": [
-   "Nanyang Business School"
+   "Nanyang Business School",
+   "Information Technology and Operations Management"
   ],
   "mapDepartmentLinks": {
-   "location-verified-575": {
+   "nanyang-itom-wee-cho-yaw": {
     "facultyUrl": "https://www.ntu.edu.sg/business/research/academic-divisions/itom/our-faculty"
    }
   },
@@ -13397,14 +13415,30 @@
   "type": "Business School",
   "country": "Singapore",
   "address": "Nanyang Technological University, 50 Nanyang Ave, block s3, Singapore 639798",
-  "facultyUrl": "http://www.nbs.ntu.edu.sg/Research/AcademicDivisions/Pages/InformationTechnologyOperationsManagement.aspx",
+  "facultyUrl": "https://www.ntu.edu.sg/business/research/academic-divisions/itom/our-faculty",
   "sources": [
    "directory"
   ],
   "lat": 1.3436519,
   "lng": 103.6825805,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "nanyang-itom-wee-cho-yaw"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Nanyang Technological University"
+  ],
+  "mapSearchTerms": [
+   "Nanyang Business School",
+   "Information Technology and Operations Management"
+  ],
+  "mapDepartmentLinks": {
+   "nanyang-itom-wee-cho-yaw": {
+    "facultyUrl": "https://www.ntu.edu.sg/business/research/academic-divisions/itom/our-faculty"
+   }
+  },
+  "deptUrl": "https://www.ntu.edu.sg/business/research/academic-divisions/itom/our-faculty",
+  "deptUrlInherited": true
  },
  {
   "id": "national-chiao-tung-university__college-of-management__industrial-engineering-and-management",
@@ -24550,15 +24584,15 @@
   "lat": 39.1351066,
   "lng": -84.5136814,
   "mapLocationIds": [
-   "location-622-official-building"
+   "cincinnati-lindner-obais"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "University of Cincinnati"
   ],
   "mapSearchTerms": [
    "Carl H. Lindner College of Business",
-   "Department of Operations, Business Analytics, and Information Systems"
+   "Operations, Business Analytics and Information Systems"
   ]
  },
  {
@@ -24775,8 +24809,17 @@
   ],
   "lat": 41.8077414,
   "lng": -72.2539805,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "uconn-storrs-opim-business"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Connecticut"
+  ],
+  "mapSearchTerms": [
+   "School of Business",
+   "Operations and Information Management"
+  ]
  },
  {
   "id": "university-of-cyprus",
@@ -25691,8 +25734,17 @@
   "lastPosted": "2026-09-13",
   "lat": 41.8737629,
   "lng": -87.6509962,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "uic-business-university-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Illinois at Chicago"
+  ],
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Information and Decision Sciences"
+  ]
  },
  {
   "id": "university-of-illinois-at-chicago__college-of-business__supply-chain-and-operations-management",
@@ -25715,9 +25767,20 @@
   ],
   "n": 1,
   "lastPosted": "2026-09-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://business.uic.edu/academics-research/faculty/information-and-decision-sciences-department/?profile_categories%5B%5D=80"
+  "mapLocationIds": [
+   "uic-business-university-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Illinois at Chicago"
+  ],
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Information and Decision Sciences"
+  ],
+  "facultyUrl": "https://business.uic.edu/academics-research/faculty/information-and-decision-sciences-department/?profile_categories%5B%5D=80",
+  "deptUrl": "https://business.uic.edu/academics-research/dept/department-of-information-and-decision-sciences/information-and-decision-sciences-faculty/",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-illinois-at-urbana-champaign",
@@ -29155,8 +29218,17 @@
   "lastPosted": "2014-10-28",
   "lat": 34.0188316,
   "lng": -118.2857381,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "usc-marshall-bridge"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Southern California (USC)"
+  ],
+  "mapSearchTerms": [
+   "Marshall School of Business",
+   "Data Sciences and Operations"
+  ]
  },
  {
   "id": "university-of-southern-denmark__faculty-of-engineering__technology-and-innovation-center-for-supply-chain-digitalisa",
@@ -29369,8 +29441,17 @@
   "lastPosted": "2014-10-22",
   "lat": 35.9556,
   "lng": -83.928912,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tennessee-haslam-stokely-bas"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Tennessee"
+  ],
+  "mapSearchTerms": [
+   "Haslam College of Business",
+   "Business Analytics and Statistics"
+  ]
  },
  {
   "id": "university-of-tennessee-at-chattanooga____ai-and-analytics",
@@ -30965,8 +31046,17 @@
   "lastPosted": "2015-02-10",
   "lat": 43.0760445,
   "lng": -87.8822663,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "uw-milwaukee-lubar-operations"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Wisconsin-Milwaukee"
+  ],
+  "mapSearchTerms": [
+   "Sheldon B. Lubar College of Business",
+   "Supply Chain, Operations Management and Business Statistics"
+  ]
  },
  {
   "id": "university-of-wisconsin-stout____om",
@@ -32919,15 +33009,15 @@
   "lat": 41.3149405,
   "lng": -72.9203459,
   "mapLocationIds": [
-   "location-659-official-building"
+   "yale-som-evans-operations"
   ],
-  "mapLocationKind": "department",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Yale University"
   ],
   "mapSearchTerms": [
    "Yale School of Management",
-   "Operations Management"
+   "Operations"
   ]
  },
  {
