@@ -3779,7 +3779,8 @@
       "id": "ohio-state-operations-business-analytics-fisher",
       "institution": "Ohio State University",
       "rowIds": [
-        "ohio-state-university____om-ba"
+        "ohio-state-university____om-ba",
+        "ohio-state-university__max-m-fisher-college-of-business__management-science"
       ],
       "school": "Max M. Fisher College of Business",
       "department": "Department of Operations and Business Analytics",
@@ -6166,7 +6167,8 @@
       "institution": "École polytechnique fédérale de Lausanne",
       "institutionKey": "École polytechnique fédérale de Lausanne (EPFL)",
       "rowIds": [
-        "ecole-polytechnique-federale-de-lausanne__college-of-management-cdm__chair-of-technology-and-operations-management-tom"
+        "ecole-polytechnique-federale-de-lausanne__college-of-management-cdm__chair-of-technology-and-operations-management-tom",
+        "ecole-polytechnique-federale-de-lausanne__college-of-management-of-technology-cmt__technology-and-operations-management"
       ],
       "school": "College of Management of Technology",
       "department": "Chair of Technology and Operations Management",
@@ -18758,6 +18760,167 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official group page or faculty CV identifies the faculty building; university identifies it as Gerson Bakar Faculty Building. Coordinates identify the building footprint, not a specific office."
+    },
+    {
+      "id": "illinois-gies-badm-wohlers",
+      "institution": "University of Illinois at Urbana-Champaign",
+      "rowIds": [
+        "university-of-illinois-at-urbana-champaign__gies-college-of-business__business-administration"
+      ],
+      "school": "Gies College of Business",
+      "department": "Business Administration",
+      "building": "Wohlers Hall",
+      "address": "1206 S. Sixth Street, Champaign, IL 61820, United States",
+      "lat": 40.1036,
+      "lng": -88.22974,
+      "addressSource": "https://giesbusiness.illinois.edu/about/business-campus",
+      "coordinateSource": "https://mapcarta.com/W60961625",
+      "supportingSources": [
+        "https://giesbusiness.illinois.edu/profile/gopesh-anand"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Official college campus page locates department in Wohlers Hall; department head office independently corroborates. Building reference, not individual office."
+    },
+    {
+      "id": "toledo-information-operations-stranahan",
+      "institution": "University of Toledo",
+      "rowIds": [
+        "university-of-toledo__college-of-business-and-innovation__information-operations-and-technology-management"
+      ],
+      "school": "College of Business and Innovation",
+      "department": "Information, Operations and Technology Management",
+      "building": "Stranahan Hall",
+      "address": "2801 W Bancroft St, Toledo, OH 43606, United States",
+      "lat": 41.66196,
+      "lng": -83.61268,
+      "addressSource": "https://www.utoledo.edu/business/about/faculty/euisung-jung/",
+      "coordinateSource": "https://mapcarta.com/22692054",
+      "supportingSources": [],
+      "checked": "2026-10-30",
+      "notes": "Current faculty profile identifies department professor at Stranahan Hall; map reference names building. University street address is campus mailing address."
+    },
+    {
+      "id": "florida-ise-weil",
+      "institution": "University of Florida",
+      "rowIds": [
+        "university-of-florida____industrial-and-systems-engineering"
+      ],
+      "school": "Herbert Wertheim College of Engineering",
+      "department": "Industrial and Systems Engineering",
+      "building": "Weil Hall",
+      "address": "1949 Stadium Road, Gainesville, FL 32611, United States",
+      "lat": 29.64831,
+      "lng": -82.34846,
+      "addressSource": "https://ise.ufl.edu/about/",
+      "coordinateSource": "https://mapcarta.com/W445808709",
+      "supportingSources": [],
+      "checked": "2026-10-30",
+      "notes": "Official department contact identifies 303 Weil Hall; named building footprint supplies geographic point."
+    },
+    {
+      "id": "penn-wharton-oid-huntsman",
+      "institution": "University of Pennsylvania",
+      "rowIds": [
+        "university-of-pennsylvania__wharton-school__om-is-rookie",
+        "university-of-pennsylvania__wharton-school__operation-management",
+        "university-of-pennsylvania__wharton-school__operations-and-information-management",
+        "university-of-pennsylvania__wharton-school__operations-information-and-decisions"
+      ],
+      "school": "Wharton School",
+      "department": "Operations, Information and Decisions",
+      "building": "Jon M. Huntsman Hall",
+      "address": "3730 Walnut Street, Philadelphia, PA 19104, United States",
+      "lat": 39.9529106,
+      "lng": -75.1982674,
+      "addressSource": "https://oid.wharton.upenn.edu/department-information/contact-us/",
+      "coordinateSource": "https://www.geocords.com/place/jon-m-huntsman-hall-3730-walnut-st-philadelphia-pa-19104-usa-33262/",
+      "supportingSources": [
+        "https://faculty.wharton.upenn.edu/wp-content/uploads/2016/11/Terwiesch-CV-2026.pdf"
+      ],
+      "checked": "2026-10-30",
+      "notes": "All four requested rows link to the OID faculty list; the department contact names Huntsman Hall. Row coordinates independently corroborated by named place source; includes historical department naming."
+    },
+    {
+      "id": "southern-methodist-engineering-management-caruth",
+      "institution": "Southern Methodist University",
+      "rowIds": [
+        "southern-methodist-university__lyle-school-of-engineering__engineering-management-information-and-systems"
+      ],
+      "school": "Lyle School of Engineering",
+      "department": "Engineering Management, Information, and Systems",
+      "building": "Caruth Hall",
+      "address": "3145 Dyer Street, Dallas, TX 75205, United States",
+      "lat": 32.8427,
+      "lng": -96.78293,
+      "addressSource": "https://s2.smu.edu/~mhahsler/IDA/contact.html",
+      "coordinateSource": "https://mapcarta.com/W152566454",
+      "supportingSources": [
+        "https://www.smu.edu/aboutsmu/maps/buildingindex",
+        "https://people.smu.edu/dboob/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "The university-hosted Intelligent Data Analysis Lab contact identifies Department of Engineering Management, Information, and Systems, Caruth Hall suite 337. Another faculty contact corroborates that address. Exact named SMU Caruth Hall footprint 152566454, distinct from a different Caruth Hall in Sherman. This is a lab/faculty-office building reference, not an assertion of every office in the historical department."
+    },
+    {
+      "id": "georgia-state-cis-55-park-place",
+      "institution": "Georgia State University",
+      "rowIds": [
+        "georgia-state-university__j-mack-robinson-college-of-business__computer-information-systems"
+      ],
+      "school": "J. Mack Robinson College of Business",
+      "department": "Computer Information Systems",
+      "building": "55 Park Place Building",
+      "address": "55 Park Place NE, Atlanta, GA 30303, United States",
+      "lat": 33.756,
+      "lng": -84.3872,
+      "addressSource": "https://robinson.gsu.edu/academic-departments/",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Andrew_Young_School_of_Policy_Studies",
+      "supportingSources": [
+        "https://calendar.gsu.edu/rcb_55_park_place"
+      ],
+      "checked": "2026-10-30",
+      "notes": "University directory places CIS at 55 Park Place, 17th floor, distinct from Management at 35 Broad. Coordinates are rounded to four decimals for the same named building."
+    },
+    {
+      "id": "asu-computing-augmented-intelligence-brickyard",
+      "institution": "Arizona State University",
+      "rowIds": [
+        "arizona-state-university__ira-a-fulton-schools-of-engineering__computing-and-augmented-intelligence"
+      ],
+      "school": "Ira A. Fulton Schools of Engineering",
+      "department": "School of Computing and Augmented Intelligence",
+      "building": "Brickyard Engineering",
+      "address": "699 South Mill Avenue, Tempe, AZ 85281, United States",
+      "lat": 33.4236,
+      "lng": -111.9396,
+      "addressSource": "https://scai.engineering.asu.edu/contact/",
+      "coordinateSource": "https://mapcarta.com/26754020",
+      "supportingSources": [
+        "https://engineering.asu.edu/contact/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "School business office is Suite 553 in Brickyard Engineering, per current school contact; advising also serves other campuses."
+    },
+    {
+      "id": "georgetown-business-sustainability-hariri",
+      "institution": "Georgetown University",
+      "institutionKey": "georgetown-university",
+      "rowIds": [
+        "georgetown-university__mcdonough-school-of-business__business-of-sustainability-initiative"
+      ],
+      "school": "McDonough School of Business",
+      "department": "Business of Sustainability Initiative",
+      "building": "Rafik B. Hariri Building",
+      "address": "3851 Regents Walk, Washington, DC 20057, United States",
+      "lat": 38.9091083,
+      "lng": -77.0755211,
+      "addressSource": "https://globalbusiness.georgetown.edu/profiles/safak-yucel/",
+      "coordinateSource": "https://www.openstreetmap.org/way/67521359",
+      "supportingSources": [
+        "https://businessofsustainability.georgetown.edu/annual-summit/"
+      ],
+      "checked": "2026-10-30",
+      "notes": "Initiative associate director Şafak Yücel has office 523 in Hariri. Named-building point is shared with other McDonough units."
     }
   ]
 }

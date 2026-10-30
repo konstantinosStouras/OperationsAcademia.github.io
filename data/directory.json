@@ -999,17 +999,18 @@
   "n": 3,
   "lastPosted": "2026-09-29",
   "mapLocationIds": [
-   "asu-fulton-brickyard"
+   "asu-computing-augmented-intelligence-brickyard"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Arizona State University"
   ],
   "mapSearchTerms": [
-   "Ira A. Fulton Schools of Engineering"
+   "Ira A. Fulton Schools of Engineering",
+   "School of Computing and Augmented Intelligence"
   ],
   "mapDepartmentLinks": {
-   "asu-fulton-brickyard": {
+   "asu-computing-augmented-intelligence-brickyard": {
     "facultyUrl": "https://faculty.engineering.asu.edu/directory/scai/rank"
    }
   },
@@ -6445,14 +6446,28 @@
   "country": "Switzerland",
   "address": "Route Cantonale, 1015 Lausanne, Switzerland",
   "mapUrl": "https://goo.gl/maps/94wsI",
-  "facultyUrl": "http://tom.epfl.ch/team",
+  "facultyUrl": "https://www.epfl.ch/labs/tom/team/",
   "sources": [
    "directory"
   ],
   "lat": 46.5182428,
   "lng": 6.5729056,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "epfl-technology-operations-management-odyssea"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "École polytechnique fédérale de Lausanne"
+  ],
+  "mapSearchTerms": [
+   "College of Management of Technology",
+   "Chair of Technology and Operations Management"
+  ],
+  "mapDepartmentLinks": {
+   "epfl-technology-operations-management-odyssea": {
+    "facultyUrl": "https://www.epfl.ch/labs/tom/team/"
+   }
+  }
  },
  {
   "id": "eindhoven-university-of-technology-tu-e__school-of-industrial-engineering__industrial-engineering-and-innovation-sciences",
@@ -7777,18 +7792,19 @@
    "seed"
   ],
   "mapLocationIds": [
-   "georgetown-operations-hariri"
+   "georgetown-business-sustainability-hariri"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Georgetown University"
   ],
   "mapSearchTerms": [
-   "McDonough School of Business"
+   "McDonough School of Business",
+   "Business of Sustainability Initiative"
   ],
   "country": "United States",
   "mapDepartmentLinks": {
-   "georgetown-operations-hariri": {
+   "georgetown-business-sustainability-hariri": {
     "facultyUrl": "https://businessofsustainability.georgetown.edu/faculty/"
    }
   },
@@ -7841,7 +7857,7 @@
   "n": 1,
   "lastPosted": "2026-02-23",
   "mapLocationIds": [
-   "georgetown-operations-hariri"
+   "georgetown-business-sustainability-hariri"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -7851,7 +7867,7 @@
    "McDonough School of Business"
   ],
   "mapDepartmentLinks": {
-   "georgetown-operations-hariri": {
+   "georgetown-business-sustainability-hariri": {
     "facultyUrl": "https://businessofretail.georgetown.edu/home-page/who-we-are/"
    }
   },
@@ -7880,7 +7896,7 @@
   "n": 2,
   "lastPosted": "2026-09-14",
   "mapLocationIds": [
-   "georgetown-operations-hariri"
+   "georgetown-business-sustainability-hariri"
   ],
   "mapLocationKind": "school",
   "mapInstitutionNames": [
@@ -7890,7 +7906,7 @@
    "McDonough School of Business"
   ],
   "mapDepartmentLinks": {
-   "georgetown-operations-hariri": {
+   "georgetown-business-sustainability-hariri": {
     "facultyUrl": "https://msb.georgetown.edu/faculty-research/operations-analytics/"
    }
   },
@@ -8212,18 +8228,19 @@
    "seed"
   ],
   "mapLocationIds": [
-   "georgia-state-management-robinson-broad"
+   "georgia-state-cis-55-park-place"
   ],
-  "mapLocationKind": "school",
+  "mapLocationKind": "exact",
   "mapInstitutionNames": [
    "Georgia State University"
   ],
   "mapSearchTerms": [
-   "J. Mack Robinson College of Business"
+   "J. Mack Robinson College of Business",
+   "Computer Information Systems"
   ],
   "country": "United States",
   "mapDepartmentLinks": {
-   "georgia-state-management-robinson-broad": {
+   "georgia-state-cis-55-park-place": {
     "facultyUrl": "https://robinson.gsu.edu/academic-departments/computer-information-systems/meet-our-faculty/"
    }
   },
@@ -18936,8 +18953,17 @@
   ],
   "lat": 32.8427376,
   "lng": -96.7829672,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "southern-methodist-engineering-management-caruth"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Southern Methodist University"
+  ],
+  "mapSearchTerms": [
+   "Lyle School of Engineering",
+   "Engineering Management, Information, and Systems"
+  ]
  },
  {
   "id": "southern-university-of-science-and-technology-sustech__school-of-business-analytics__information-and-operations-management",
@@ -21481,14 +21507,30 @@
   "country": "United States",
   "address": "2100 Neil Ave, Columbus, OH 43210",
   "mapUrl": "https://goo.gl/maps/2jZbsv1EYoD2",
-  "facultyUrl": "https://fisher.osu.edu/directory?department=Management%20Sciences",
+  "facultyUrl": "https://fisher.osu.edu/directory?department=224",
   "sources": [
    "directory"
   ],
   "lat": 40.0057171,
   "lng": -83.0161434,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ohio-state-operations-business-analytics-fisher"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Ohio State University"
+  ],
+  "mapSearchTerms": [
+   "Max M. Fisher College of Business",
+   "Department of Operations and Business Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "ohio-state-operations-business-analytics-fisher": {
+    "facultyUrl": "https://fisher.osu.edu/directory?department=224"
+   }
+  },
+  "deptUrl": "https://fisher.osu.edu/directory?department=224",
+  "deptUrlInherited": true
  },
  {
   "id": "ohio-state-university__max-m-fisher-college-of-business__marketing-and-logistics",
@@ -25255,8 +25297,17 @@
   ],
   "lat": 29.6483499,
   "lng": -82.3484943,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "florida-ise-weil"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Florida"
+  ],
+  "mapSearchTerms": [
+   "Herbert Wertheim College of Engineering",
+   "Industrial and Systems Engineering"
+  ]
  },
  {
   "id": "university-of-florida____ise-smart-manufacturing",
@@ -26163,8 +26214,17 @@
   "lastPosted": "2025-09-25",
   "lat": 40.1036099,
   "lng": -88.2298467,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "illinois-gies-badm-wohlers"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Illinois at Urbana-Champaign"
+  ],
+  "mapSearchTerms": [
+   "Gies College of Business",
+   "Business Administration"
+  ]
  },
  {
   "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__information-systems-operations-supply-chain-and-analytics",
@@ -28911,9 +28971,20 @@
   ],
   "n": 1,
   "lastPosted": "2025-10-14",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://oid.wharton.upenn.edu/faculty/faculty-list/"
+  "mapLocationIds": [
+   "penn-wharton-oid-huntsman"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Pennsylvania"
+  ],
+  "mapSearchTerms": [
+   "Wharton School",
+   "Operations, Information and Decisions"
+  ],
+  "facultyUrl": "https://oid.wharton.upenn.edu/faculty/faculty-list/",
+  "deptUrl": "https://oid.wharton.upenn.edu/faculty/faculty-list/",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-pennsylvania__wharton-school__operation-management",
@@ -28924,9 +28995,21 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://oid.wharton.upenn.edu/faculty/faculty-list/"
+  "mapLocationIds": [
+   "penn-wharton-oid-huntsman"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Pennsylvania"
+  ],
+  "mapSearchTerms": [
+   "Wharton School",
+   "Operations, Information and Decisions"
+  ],
+  "country": "United States",
+  "facultyUrl": "https://oid.wharton.upenn.edu/faculty/faculty-list/",
+  "deptUrl": "https://oid.wharton.upenn.edu/faculty/faculty-list/",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-pennsylvania__wharton-school__operations-and-information-management",
@@ -28940,9 +29023,20 @@
   ],
   "n": 1,
   "lastPosted": "2014-11-05",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
-  "facultyUrl": "https://oid.wharton.upenn.edu/faculty/faculty-list/"
+  "mapLocationIds": [
+   "penn-wharton-oid-huntsman"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Pennsylvania"
+  ],
+  "mapSearchTerms": [
+   "Wharton School",
+   "Operations, Information and Decisions"
+  ],
+  "facultyUrl": "https://oid.wharton.upenn.edu/faculty/faculty-list/",
+  "deptUrl": "https://oid.wharton.upenn.edu/faculty/faculty-list/",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-pennsylvania__wharton-school__operations-information-and-decisions",
@@ -28974,10 +29068,17 @@
   ],
   "lat": 39.9529106,
   "lng": -75.1982674,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "penn-wharton-oid-huntsman"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "Wharton School",
+   "Operations, Information and Decisions",
    "OID"
+  ],
+  "mapInstitutionNames": [
+   "University of Pennsylvania"
   ]
  },
  {
@@ -30459,8 +30560,17 @@
   "lastPosted": "2014-10-31",
   "lat": 41.6601347,
   "lng": -83.6145086,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "toledo-information-operations-stranahan"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Toledo"
+  ],
+  "mapSearchTerms": [
+   "College of Business and Innovation",
+   "Information, Operations and Technology Management"
+  ]
  },
  {
   "id": "university-of-toronto__faculty-of-applied-science-and-engineering__mechanical-and-industrial-engineering",
