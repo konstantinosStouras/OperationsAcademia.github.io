@@ -7039,8 +7039,16 @@
   "lastPosted": "2014-09-04",
   "lat": 37.5642551,
   "lng": 126.9503079,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ewha-school-of-business-shinsegae"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Ewha School of Business"
+  ],
+  "mapSearchTerms": [
+   "Ewha School of Business"
+  ]
  },
  {
   "id": "ewha-womans-university__college-of-business-administration__business-administration",
@@ -8936,8 +8944,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "hec-paris-jouy-campus-batiment-s"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "HEC Paris"
+  ],
+  "mapSearchTerms": [],
+  "country": "France"
  },
  {
   "id": "hec-paris____om",
@@ -9575,8 +9590,22 @@
   ],
   "n": 1,
   "lastPosted": "2025-05-18",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "ie-operations-business-analytics-molina12-ds-om"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "IE Business School"
+  ],
+  "mapSearchTerms": [
+   "Operations and Business Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "ie-operations-business-analytics-molina12-ds-om": {
+    "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+    "facultyDirectoryHint": "This roster covers the broader Operations & Business Analytics area."
+   }
+  },
   "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
   "facultyDirectoryHint": "This roster covers the broader Operations & Business Analytics area."
  },
@@ -9592,8 +9621,22 @@
   ],
   "n": 1,
   "lastPosted": "2025-05-18",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "ie-operations-business-analytics-molina12-ds-om"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "IE Business School"
+  ],
+  "mapSearchTerms": [
+   "Operations and Business Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "ie-operations-business-analytics-molina12-ds-om": {
+    "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+    "facultyDirectoryHint": "This roster covers the broader Operations & Business Analytics area."
+   }
+  },
   "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
   "facultyDirectoryHint": "This roster covers the broader Operations & Business Analytics area."
  },
@@ -9650,8 +9693,16 @@
   ],
   "lat": 40.4381107,
   "lng": -3.687284,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ie-operations-technology-molina12"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "IE Business School"
+  ],
+  "mapSearchTerms": [
+   "Operations and Technology"
+  ]
  },
  {
   "id": "ie-university____business",
@@ -15612,8 +15663,16 @@
   "lastPosted": "2014-12-03",
   "lat": 38.7222524,
   "lng": -9.1393366,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "nova-sbe-carcavelos-campus-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Nova School of Business and Economics"
+  ],
+  "mapSearchTerms": [
+   "Nova School of Business and Economics"
+  ]
  },
  {
   "id": "nova-school-of-business-and-economics____information-systems",
@@ -19005,8 +19064,14 @@
   ],
   "lat": 1.3413132,
   "lng": 103.9637565,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "sutd-somapah-campus-building-one"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Singapore University of Technology and Design (SUTD)"
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "skagit-valley-college____professional-technical-education-bachelor-of-applied-science",
@@ -19157,8 +19222,14 @@
   "lastPosted": "2014-10-17",
   "lat": 55.695548,
   "lng": 37.39054,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "skoltech-bolshoy-boulevard-30"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Skolkovo Institute of Science and Technology (Skoltech)"
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "smith-school-of-business____digital-technology",
@@ -19439,8 +19510,17 @@
   ],
   "lat": 22.593969,
   "lng": 113.99894,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "sustech-business-school-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Southern University of Science and Technology (SUSTech)"
+  ],
+  "mapSearchTerms": [
+   "School of Business, Analytics",
+   "Information, and Operations Management"
+  ]
  },
  {
   "id": "southern-utah-university____ba",
@@ -20576,8 +20656,14 @@
   ],
   "lat": 39.924038,
   "lng": 32.861431,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ted-university-kolej-campus-a-blok"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "TED University"
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "tel-aviv-university__coller-school-of-management__operational-strategy",
