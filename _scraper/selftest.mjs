@@ -11,6 +11,7 @@ import './publication-status-test.cjs';
    --------------------------------------------------------------------------- */
 
 import { isMain } from './_main.mjs';
+import './review-comments-test.mjs';
 import { BUILDERS, plan } from './build-all.mjs';
 import * as NETMAP from './build-netmap.mjs';
 import { PAIRS as VENDOR_PAIRS, drift as vendorDrift } from './build-functions-vendor.mjs';
