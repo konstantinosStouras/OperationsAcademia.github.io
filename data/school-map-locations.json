@@ -20729,6 +20729,156 @@
       ],
       "checked": "2026-10-31",
       "notes": "Institution-level campus reference, not a school or department office. The official Office of the President page gives its contact address as 'University of South Carolina, Osborne Administration Building, Columbia, SC 29208'; the university's Communications and Marketing locations page gives the building's street address as 915 Bull Street, Columbia, SC 29208. This row is the Columbia flagship: the USC system's other campuses (Aiken, Upstate, Beaufort, etc.) are separately accredited institutions and the directory already lists USC Aiken and USC Upstate as their own rows, so they are not campuses of this row. Point is the OSM footprint centroid of the 'Osborne Administration Building' (way 329014214, building=university, operator University of South Carolina); OSM tags its house number as 900 Bull Street where the university writes 915, so the official number is used. The existing Darla Moore School record was not reused."
+    },
+    {
+      "id": "city-hong-kong-institution-cheng-yick-chi",
+      "institution": "City University of Hong Kong",
+      "rowIds": [
+        "city-university-of-hong-kong"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Cheng Yick-chi Building",
+      "address": "6/F, Cheng Yick-chi Building, City University of Hong Kong, 83 Tat Chee Avenue, Kowloon Tong, Kowloon, Hong Kong",
+      "lat": 22.3370061,
+      "lng": 114.1731732,
+      "addressSource": "https://www.cityu.edu.hk/en/directories/admin",
+      "coordinateSource": "https://nominatim.openstreetmap.org/search?q=Cheng%20Yick-chi%20Building&format=jsonv2&limit=5",
+      "supportingSources": [
+        "https://www.openstreetmap.org/way/285187550",
+        "https://www.cityu.edu.hk/en/media/news/2024/04/19/ministry-education-approves-official-establishment-city-university-hong-kong-dongguan"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The university's own administrative-units directory lists the Office of the President at \"6/F, Cheng Yick-chi Building, City University of Hong Kong, 83 Tat Chee Avenue, Kowloon Tong\" (the Provost's and Senior Vice-Presidents' offices are in the same building). Coordinates are the OSM footprint centroid of way 285187550, tagged name:en \"Cheng Yick-chi Building\" on Tat Chee Avenue. CityUHK has one campus in Kowloon Tong; City University of Hong Kong (Dongguan), approved in April 2024, is a separately constituted mainland institution with its own legal status and is not treated as a second campus of this row."
+    },
+    {
+      "id": "hong-kong-polytechnic-institution-li-ka-shing-tower",
+      "institution": "The Hong Kong Polytechnic University",
+      "rowIds": [
+        "hong-kong-polytechnic-university"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Li Ka Shing Tower (Block M)",
+      "address": "Li Ka Shing Tower, The Hong Kong Polytechnic University, Hung Hom, Kowloon, Hong Kong",
+      "lat": 22.304089,
+      "lng": 114.179715,
+      "addressSource": "https://www.polyu.edu.hk/ar/staff/publications/university-calendar/the-university/introduction/",
+      "coordinateSource": "https://nominatim.openstreetmap.org/search?q=Li%20Ka%20Shing%20Tower%20Hung%20Hom&format=jsonv2&limit=5",
+      "supportingSources": [
+        "https://www.openstreetmap.org/way/121554917",
+        "https://www.polyu.edu.hk/ppoffice/web/council-and-court-secretariat/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. PolyU's University Calendar (Introduction) states that the Main Campus is in Hung Hom and that \"at the heart of the campus stands the Li Ka Shing Tower, an 18-storey building housing the University's central administration units\"; this is the official designation of the central administration building, although the President's Office page itself gives only \"Hunghom, Kowloon\" and no room. Coordinates are the OSM footprint centroid of way 121554917 (name:en \"Li Ka Shing Tower\", ref M). The same calendar page describes the adjacent Hung Hom Bay Campus as a separate site next to the Main Campus; it is treated as an annex of the one Hung Hom campus, not a second campus."
+    },
+    {
+      "id": "cuhk-shenzhen-institution-administration-building",
+      "institution": "The Chinese University of Hong Kong, Shenzhen",
+      "rowIds": [
+        "chinese-university-of-hong-kong-shenzhen"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Administration Building (行政楼)",
+      "address": "Room 715, Administration Building, The Chinese University of Hong Kong, Shenzhen, 2001 Longxiang Road, Longgang District, Shenzhen 518172, China",
+      "lat": 22.6931737,
+      "lng": 114.2093318,
+      "addressSource": "https://www.cuhk.edu.cn/zh-hans/page/106",
+      "coordinateSource": "https://nominatim.openstreetmap.org/search?q=Administration%20Building%20Longgang%20Shenzhen&format=jsonv2&limit=5",
+      "supportingSources": [
+        "https://www.cuhk.edu.cn/en/node/77",
+        "https://www.openstreetmap.org/way/556004689",
+        "https://www.cuhk.edu.cn/zh-hans/page/4908"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The university's President's Office page (校长办公室) gives its address as \"香港中文大学（深圳）行政楼715室\" (Administration Building, Room 715), and the official contact page gives the campus address as 2001 Longxiang Road, Longgang District, Shenzhen 518172. Coordinates are the OSM footprint centroid of way 556004689, tagged 行政楼 / name:en \"Administration Building\" on 龙翔大道 (Longxiang Boulevard) inside the campus. CUHK-Shenzhen has one campus, split into upper, middle and lower zones (the official campus-map page describes a shuttle linking them, including the Administration Building); no second campus exists."
+    },
+    {
+      "id": "tilburg-institution-cobbenhagen-building",
+      "institution": "Tilburg University",
+      "rowIds": [
+        "tilburg-university"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Cobbenhagen Building (C building)",
+      "address": "Cobbenhagen Building, Warandelaan 2, 5037 AB Tilburg, Netherlands",
+      "lat": 51.5618254,
+      "lng": 5.0428577,
+      "addressSource": "https://research.tilburguniversity.edu/en/persons/wim-van-de-donk",
+      "coordinateSource": "https://nominatim.openstreetmap.org/search?q=Cobbenhagen%20Tilburg&format=jsonv2&limit=5",
+      "supportingSources": [
+        "https://www.tilburguniversity.edu/contact/campus-map-and-buildings",
+        "https://www.tilburguniversity.edu/about/organization/executive-board",
+        "https://www.openstreetmap.org/relation/3729903"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The university's own research portal gives the office of the Rector Magnificus and President of the Executive Board, Wim van de Donk, as \"Warandelaan 2, Cobbenhagen Building, room C 19\"; the official campus page lists the Cobbenhagen building (C building) among the campus buildings and gives the university visiting address as Warandelaan 2, 5037 AB Tilburg. Coordinates are the OSM footprint centroid of multipolygon relation 3729903 (\"Cobbenhagen\", building=university, BAG id 0855100000227345). Tilburg University has one campus; the Deprez and MindLabs buildings in the Spoorzone district of Tilburg are satellite premises listed on the same campus page, not a second campus."
+    },
+    {
+      "id": "mannheim-institution-schloss-ostfluegel-rektorat",
+      "institution": "University of Mannheim",
+      "rowIds": [
+        "university-of-mannheim"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Schloss Mannheim (Mannheim Palace), Ostflügel (East Wing) – Rektorat",
+      "address": "Schloss Ostflügel, Raum O 31–37, 68161 Mannheim, Germany",
+      "lat": 49.4834372,
+      "lng": 8.4641847,
+      "addressSource": "https://www.uni-mannheim.de/universitaet/organisation/rektorat/team-rektorat/",
+      "coordinateSource": "https://www.openstreetmap.org/node/9946672059",
+      "supportingSources": [
+        "https://www.uni-mannheim.de/impressum/",
+        "https://www.openstreetmap.org/relation/60105",
+        "https://nominatim.openstreetmap.org/search?q=Rektorat%20Mannheim&format=jsonv2&limit=5"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The Rektorat team page gives the Rector's secretariat as \"Universität Mannheim, Rektorat, Schloss Ostflügel – Raum O 31–37, 68161 Mannheim\", and the Impressum names the Rektorat in the \"Schloss Ostflügel\". Coordinates are the OSM point tagged name \"Rektorat\", office=university, phone +49 621 1811001 and website pointing at that same team page (node 9946672059), which lies in the east wing of the palace; the whole palace is OSM relation 60105 \"Schloss Mannheim\" (centroid 49.4836786, 8.4614903), too large to use as the point. The university has one campus centred on the palace. The separate verified point for the operations area at Schloss Schneckenhof Ost was deliberately not reused."
+    },
+    {
+      "id": "tbs-education-institution-seat-sebastopol-toulouse",
+      "institution": "TBS Education",
+      "rowIds": [
+        "tbs-education"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Sébastopol Building (Lascrosses campus, Toulouse) – registered seat",
+      "address": "1 place Alphonse Jourdain, CS 66810, 31068 Toulouse Cedex 7, France",
+      "lat": 43.6108,
+      "lng": 1.42996,
+      "addressSource": "https://www.tbs-education.fr/mentions-legales/",
+      "coordinateSource": "https://www.openstreetmap.org/way/123032476",
+      "supportingSources": [
+        "https://www.tbs-education.com/en/",
+        "https://www.tbs-education.fr/professeurs-recherche/professeurs/departements/departement-information-operations-et-sciences-de-la-decision-2025/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office: this is the registered SEAT of a multi-campus school. TBS Education's legal notice (mentions légales) states the school is an \"Établissement d'Enseignement Supérieur Consulaire (EESC) ... domiciliée 1 Place Jourdain, 31000 Toulouse, immatriculée au RCS de Toulouse n°817 517 394\", and every page footer of tbs-education.com gives \"1 place Alfonse Jourdain - CS 66810, 31068 Toulouse Cedex 7\" as the school's address. The school also operates Paris, Barcelona and Casablanca campuses (and the Toulouse Entiore site), so this record marks only the registered head office in Toulouse, not the whole institution. Coordinates reuse the verified Sébastopol building point from record toulouse-business-school-information-operations-sebastopol (OSM way 123032476); the Sébastopol building at 1 place Alphonse Jourdain is the address the legal notice names, but the room of the Directrice générale was not separately verified."
+    },
+    {
+      "id": "mcmaster-institution-gilmour-hall",
+      "institution": "McMaster University",
+      "rowIds": [
+        "mcmaster-university"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Gilmour Hall",
+      "address": "Gilmour Hall, Room 238, 1280 Main Street West, Hamilton, ON L8S 4L8, Canada",
+      "lat": 43.2634286,
+      "lng": -79.9182381,
+      "addressSource": "https://president.mcmaster.ca/contact/",
+      "coordinateSource": "https://nominatim.openstreetmap.org/search?q=Gilmour%20Hall%20Hamilton&format=jsonv2&limit=5",
+      "supportingSources": [
+        "https://www.openstreetmap.org/way/259698121",
+        "https://provost.mcmaster.ca/?p=1796"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The Office of the President's contact page gives its location as \"Gilmour Hall, Room 238, 1280 Main Street West, Hamilton, Ontario, L8S 4L8\". Coordinates are the OSM footprint centroid of way 259698121 (\"Gilmour Hall\", building=university, operator McMaster University). The main campus is in Hamilton; McMaster also runs the Ron Joyce Centre in Burlington (DeGroote MBA and executive education, per the Provost's page) and regional medical-education sites in Kitchener-Waterloo, Niagara and downtown Hamilton, which are satellite sites of the one main campus rather than campuses of standing."
     }
   ]
 }

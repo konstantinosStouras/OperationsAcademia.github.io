@@ -4150,8 +4150,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "city-hong-kong-institution-cheng-yick-chi"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "City University of Hong Kong"
+  ],
+  "mapSearchTerms": [],
+  "country": "Hong Kong"
  },
  {
   "id": "city-university-of-hong-kong____om-statistics",
@@ -12779,8 +12786,14 @@
   ],
   "n": 1,
   "lastPosted": "2025-06-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "mcmaster-institution-gilmour-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "McMaster University"
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "mcmaster-university__degroote-school-of-business__health-policy-and-management",
@@ -20360,8 +20373,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tbs-education-institution-seat-sebastopol-toulouse"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "TBS Education"
+  ],
+  "mapSearchTerms": [],
+  "country": "France"
  },
  {
   "id": "tbs-education____information-operations-and-management-sciences",
@@ -21675,8 +21695,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cuhk-shenzhen-institution-administration-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "The Chinese University of Hong Kong, Shenzhen"
+  ],
+  "mapSearchTerms": [],
+  "country": "China"
  },
  {
   "id": "chinese-university-of-hong-kong-shenzhen__school-of-data-science__operations-research",
@@ -21896,8 +21923,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "hong-kong-polytechnic-institution-li-ka-shing-tower"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "The Hong Kong Polytechnic University"
+  ],
+  "mapSearchTerms": [],
+  "country": "Hong Kong"
  },
  {
   "id": "hong-kong-polytechnic-university____scm-om",
@@ -22544,8 +22578,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tilburg-institution-cobbenhagen-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Tilburg University"
+  ],
+  "mapSearchTerms": [],
+  "country": "Netherlands"
  },
  {
   "id": "tilburg-university____is",
@@ -27659,8 +27700,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "mannheim-institution-schloss-ostfluegel-rektorat"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Mannheim"
+  ],
+  "mapSearchTerms": [],
+  "country": "Germany"
  },
  {
   "id": "university-of-mannheim__business-school__chair-of-production-management",
