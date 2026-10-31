@@ -29,6 +29,10 @@ permissions:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser_suite: [pages, map]
     # A BACKSTOP, not a budget. Every step below that touches the network
     # carries its own timeout, so a stall fails THAT step — conclusion
     # "failure", naming the phase that hung — instead of being killed here,
@@ -216,15 +220,17 @@ jobs:
         # only thing that skip could mean is that the install broke.
         run: |
           result=0
-          test_pids=()
-          node _scraper/candidate-overview-browser-test.mjs & test_pids+=("$!")
-          node _scraper/job-poster-controls-test.mjs & test_pids+=("$!")
-          node _scraper/school-location-test.mjs & test_pids+=("$!")
-          node _scraper/university-map-test.mjs & test_pids+=("$!")
-          node _scraper/page-test.mjs & test_pids+=("$!")
-          for test_pid in "${test_pids[@]}"; do
-            wait "$test_pid" || result=1
-          done
+          run_check() { "$@" || result=1; }
+          # Keep both audits complete, on separate runners: the map opens
+          # many tabs and must not starve animation-frame assertions.
+          if [ '${{ matrix.browser_suite }}' = 'map' ]; then
+            run_check node _scraper/school-location-test.mjs
+            run_check node _scraper/university-map-test.mjs
+          else
+            run_check node _scraper/candidate-overview-browser-test.mjs
+            run_check node _scraper/job-poster-controls-test.mjs
+            run_check node _scraper/page-test.mjs
+          fi
           exit "$result"
 
   # THE FORUM'S FUNCTIONS AND RULES, AGAINST THE REAL EMULATOR. Its own job,
