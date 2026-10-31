@@ -1,48 +1,62 @@
-name: Scoped seven approval verification
+name: OA jobs — migrate the postings into the database
+
+# THE ONE-OFF that replaces the Google Sheet. Every posting in
+# data/jobs.json becomes a document in `jobSubmissions`, after which
+# oa-jobs-build.yml generates the served file from the database alone and a
+# posting can be edited.
+#
+# SAFE TO RUN AGAIN. Documents are keyed by the row's own id, so a second run
+# creates nothing. Nothing is ever deleted.
+#
+# IT REFUSES RATHER THAN REWRITES. Before writing anything it checks that
+# re-publishing every document reproduces the row it came from, field by field,
+# and exits 1 if any posting would change.
+#
+# Run it with dry_run first and read the output. It needs
+# FIREBASE_SERVICE_ACCOUNT; without it the script reports and does nothing.
+
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Check and report, write nothing'
+        type: boolean
+        default: true
+
 permissions:
-  contents: write
+  contents: read
+
+# Shares the group with the build: both touch the same postings, and a
+# migration racing a build would have the build read a half-migrated
+# collection.
 concurrency:
-  group: oa-jobs-data-refs/heads/master
+  group: oa-jobs-data-${{ github.ref }}
   cancel-in-progress: false
+
 jobs:
-  inspect:
+  migrate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-        with:
-          ref: master
-          fetch-depth: 1
+
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
-      - name: Scoped public job fields only
+
+      - name: Offline checks
+        run: node _scraper/selftest.mjs
+
+      - name: Install the Admin SDK
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      - name: What would happen
+        run: node _scraper/migrate-to-firestore.mjs --scan
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Migrate
         run: |
-          cat > scoped-seven.mjs <<'JS'
-          import assert from 'node:assert/strict';
-          import {firestore} from './_scraper/_mail.mjs';
-          import {rowFromSubmission,assignIds} from './_scraper/jobs-model.mjs';
-          import {approvedRow} from './_scraper/jobreview.mjs';
-          const db=await firestore();assert(db);
-          const ids=['2027-george-mason-university-20260813-2','2027-university-college-london-20260821'];
-          const published=await db.collection('jobSubmissions').where('status','in',['queued','published']).get();
-          const entries=[];
-          for(const d of published.docs){const v=d.data();const row=rowFromSubmission(v);if(row)entries.push({key:d.id,row,fixedId:!v.uid&&v.sheetId?v.sheetId:''});}
-          assignIds(entries);
-          const response=await fetch('https://www.operationsacademia.org/data/jobs.json?final='+Date.now(),{cache:'no-store'});assert(response.ok);const live=await response.json();
-          for(const id of ids){
-           const d=(await db.collection('jobSubmissions').doc(id).get()).data();const q=(await db.collection('jobReviews').doc(id).get()).data();
-           const expected=approvedRow(q.row,q);const next=entries.find(e=>e.key===id);assert(next);
-           assert.equal(next.row.id,d.publishedId);assert.equal(next.row.comments,expected.comments||'');
-           assert.equal(d.comments,expected.comments||'');assert(!d.sheetId);
-           const matches=live.filter(r=>r.adUrl===expected.adUrl||r.postedAtUrl===expected.adUrl);
-           assert.equal(matches.length,1);assert.equal(matches[0].id,d.publishedId);assert.equal(matches[0].comments,expected.comments||'');
-           assert.equal(matches[0].applyByDate,expected.applyByDate);assert.equal(matches[0].reviewDate,expected.reviewDate);
-           console.log('FINAL_VERIFIED '+JSON.stringify({approval:id,publicId:d.publishedId,copies:matches.length,nextBuildKeepsId:true,commentsPreserved:true}));
-          }
-          JS
-          node scoped-seven.mjs
+          node _scraper/migrate-to-firestore.mjs \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
