@@ -1,9 +1,9 @@
 {
   "snapshotDate": "2026-10-31",
-  "lastPublishedMapCommit": "e77eb0dcd0375a35dc7fb75adfea3e825da6ae52",
+  "lastPublishedMapCommit": "e8f16fa7db707496b26d94edc3e80999cd7d7897",
   "source": "data/directory.json",
-  "unresolvedLocationCount": 65,
-  "missingFacultyRosterCount": 3,
+  "unresolvedLocationCount": 47,
+  "missingFacultyRosterCount": 4,
   "unresolvedLocations": [
     {
       "id": "alfaisal-university",
@@ -66,16 +66,6 @@
     {
       "id": "carnegie-mellon-university",
       "institution": "Carnegie Mellon University",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "city-university-of-hong-kong",
-      "institution": "City University of Hong Kong",
       "type": "University",
       "sources": [
         "seed"
@@ -191,29 +181,6 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "iese",
-      "institution": "IESE",
-      "type": "Business School",
-      "country": "Spain",
-      "sources": [
-        "postings"
-      ],
-      "n": 1,
-      "lastPosted": "2014-07-22",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "iese-business-school",
-      "institution": "IESE Business School",
-      "type": "Business School",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "imperial-college-london",
       "institution": "Imperial College London",
       "type": "University",
@@ -269,30 +236,6 @@
     {
       "id": "lehigh-university",
       "institution": "Lehigh University",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "mcmaster-university",
-      "institution": "McMaster University",
-      "type": "University",
-      "country": "Canada",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2025-06-22",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "michigan-state-university",
-      "institution": "Michigan State University",
       "type": "University",
       "sources": [
         "seed"
@@ -392,37 +335,8 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "tbs-education",
-      "institution": "TBS Education",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "temple-university",
       "institution": "Temple University",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "chinese-university-of-hong-kong-shenzhen",
-      "institution": "The Chinese University of Hong Kong, Shenzhen",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "hong-kong-polytechnic-university",
-      "institution": "The Hong Kong Polytechnic University",
       "type": "University",
       "sources": [
         "seed"
@@ -453,16 +367,6 @@
     {
       "id": "university-of-hong-kong",
       "institution": "The University of Hong Kong",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "tilburg-university",
-      "institution": "Tilburg University",
       "type": "University",
       "sources": [
         "seed"
@@ -510,16 +414,6 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "university-of-california-berkeley",
-      "institution": "University of California, Berkeley",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "university-of-cambridge",
       "institution": "University of Cambridge",
       "type": "University",
@@ -550,32 +444,8 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "university-of-illinois-at-urbana-champaign",
-      "institution": "University of Illinois at Urbana-Champaign",
-      "type": "University",
-      "country": "United States",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2014-09-11",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "university-of-london",
       "institution": "University of London",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-mannheim",
-      "institution": "University of Mannheim",
       "type": "University",
       "sources": [
         "seed"
@@ -604,58 +474,8 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "university-of-notre-dame",
-      "institution": "University of Notre Dame",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "university-of-san-diego",
       "institution": "University of San Diego",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-south-carolina",
-      "institution": "University of South Carolina",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-texas-at-dallas",
-      "institution": "University of Texas at Dallas",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-utah",
-      "institution": "University of Utah",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-virginia",
-      "institution": "University of Virginia",
       "type": "University",
       "sources": [
         "seed"
@@ -676,16 +496,6 @@
       ],
       "lat": 30.5491387,
       "lng": -87.2185862,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-wisconsin-madison",
-      "institution": "University of Wisconsin-Madison",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -781,6 +591,27 @@
       "directoryHidden": true,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "university-of-illinois-at-urbana-champaign__the-grainger-college-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin",
+      "institution": "University of Illinois at Urbana-Champaign",
+      "school": "The Grainger College of Engineering",
+      "department": "Industrial and Systems Engineering and Electrical Engineering",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [
+        "illinois-industrial-enterprise-transportation"
+      ],
+      "mapLocationKind": "school",
+      "mapInstitutionNames": [
+        "University of Illinois at Urbana-Champaign"
+      ],
+      "mapSearchTerms": [
+        "The Grainger College of Engineering"
+      ],
+      "country": "United States"
     }
   ]
 }
