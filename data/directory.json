@@ -11086,8 +11086,17 @@
   ],
   "n": 1,
   "lastPosted": "2025-12-26",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "kaist-management-science-supex-seoul"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "KAIST"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Organization/Man. Sci"
+  ],
   "facultyUrl": "https://www.business.kaist.ac.kr/_prog/prof/index.php?menu_dvs_cd=040101&site_dvs_cd=kr",
   "facultyDirectoryHint": "The Korean-language directory covers all business faculty; use the subject links for Technology/Organization/Strategy and Operations Strategy/Management Science."
  },
@@ -11118,8 +11127,17 @@
   "lastPosted": "2025-10-22",
   "lat": 37.5933445,
   "lng": 127.0477953,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "kaist-business-supex-seoul"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "KAIST"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Operations Strategy and Management Science"
+  ]
  },
  {
   "id": "katholieke-universiteit-ku-leuven____research-center-for-operations-management",
@@ -11462,8 +11480,16 @@
   ],
   "n": 1,
   "lastPosted": "2014-11-23",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "koc-case-college-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Koç University"
+  ],
+  "mapSearchTerms": [
+   "College of Administrative Sciences and Economics (CASE)"
+  ]
  },
  {
   "id": "koc-university__college-of-administrative-sciences-and-economics-case__operations-management-and-information-systems",
@@ -17866,8 +17892,16 @@
   ],
   "lat": 40.8819197,
   "lng": 29.3807805,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "sabanci-fens-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Sabanci University"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Engineering and Natural Sciences (FENS)"
+  ]
  },
  {
   "id": "sabanci-university__sabanci-business-school__business-analytics-and-information-systems",
@@ -18904,8 +18938,16 @@
   ],
   "lat": 1.2973205,
   "lng": 103.8496144,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "smu-scis-1-stamford-road"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Singapore Management University (SMU)"
+  ],
+  "mapSearchTerms": [
+   "School of Information Systems"
+  ]
  },
  {
   "id": "singapore-university-of-technology-and-design____engineering-systems-and-design",
@@ -21521,8 +21563,17 @@
   "lastPosted": "2026-09-20",
   "lat": 22.4180479,
   "lng": 114.207961,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cuhk-seem-mong-engineering-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "The Chinese University of Hong Kong (CUHK)"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Engineering",
+   "Systems Engineering and Engineering Management"
+  ]
  },
  {
   "id": "chinese-university-of-hong-kong-shenzhen",
@@ -21888,8 +21939,17 @@
   ],
   "lat": 22.3334901,
   "lng": 114.2647245,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "hkust-ieda-academic-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "The Hong Kong University of Science and Technology (HKUST)"
+  ],
+  "mapSearchTerms": [
+   "School of Engineering",
+   "Industrial Engineering and Logistics Management"
+  ]
  },
  {
   "id": "ohio-state-university",
@@ -22511,8 +22571,16 @@
   ],
   "lat": 39.9213097,
   "lng": 32.7988233,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "tobb-etu-business-administration-main-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "TOBB University of Economics and Technology"
+  ],
+  "mapSearchTerms": [
+   "Business Administration"
+  ]
  },
  {
   "id": "tongji-university__school-of-economics-and-management__operations-management",
@@ -23694,8 +23762,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-30",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "ucl-gbsh-sustainable-scm-marshgate"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University College London"
+  ],
+  "mapSearchTerms": [
+   "UCL Global Business School for Health",
+   "Sustainable Supply Chain Management"
+  ],
+  "mapDepartmentLinks": {
+   "ucl-gbsh-sustainable-scm-marshgate": {
+    "facultyUrl": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people",
+    "facultyDirectoryHint": "See Core Academic Staff; directory covers all school disciplines."
+   }
+  },
   "facultyUrl": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people",
   "facultyDirectoryHint": "See Core Academic Staff; directory covers all school disciplines."
  },
@@ -30612,8 +30695,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "sydney-engineering-ai-dean-office-j12"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Sydney"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Engineering",
+   "Engineering and AI"
+  ],
+  "mapDepartmentLinks": {
+   "sydney-engineering-ai-dean-office-j12": {
+    "facultyUrl": "https://profiles.sydney.edu.au/groups/177675/experts",
+    "facultyDirectoryHint": "This directory covers all Faculty of Engineering researchers, including many fields beyond AI."
+   }
+  },
   "facultyUrl": "https://profiles.sydney.edu.au/groups/177675/experts",
   "facultyDirectoryHint": "This directory covers all Faculty of Engineering researchers, including many fields beyond AI."
  },
@@ -31508,8 +31606,17 @@
   ],
   "lat": 43.6095227,
   "lng": 1.4308228,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "toulouse-business-school-ioms-sebastopol-university-of-toulouse"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Toulouse"
+  ],
+  "mapSearchTerms": [
+   "Toulouse Business School",
+   "Information, Operations and Management Sciences"
+  ]
  },
  {
   "id": "university-of-utah",
