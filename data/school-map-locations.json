@@ -20501,6 +20501,50 @@
       ],
       "checked": "2026-10-31",
       "notes": "Sibling of ie-operations-business-analytics-molina12-ds-om for the row whose department is the area former name, Operations and Technology, so that the row keeps the faculty link it already carries. Reuses the building and coordinates of the existing record ie-operations-business-analytics-molina12 (IE University / IE Business School / Operations and Business Analytics). The official IE faculty page of Matthias Seifert reads 'Associate Professor of Decision Sciences, IE Business School - IE University, Operations & Business Analytics Area, Maria de Molina 12, 5th floor, 28006 Madrid', which ties Decision Sciences (the DS row; IE's own job advertisements are titled 'Tenure-Track Position in Decision Sciences' and sit in this area) to this building. IE's public faculty API for academic area 29477 (Operations & Business Analytics, the area the directory's own facultyUrl for the DS/OM rows points at) lists the operations-management faculty (Corsten, Revilla, Salvador, Ketokivi, Tenhiala, Delana...) in the same area; 'Operations and Technology' is the earlier name of that area (the row's old faculty URL now redirects to the generic faculty list). Limitation: the university-site profiles of the OM faculty carry no office address, so only the Decision Sciences tie is documented by a named office; OM and Operations and Technology are assigned by area membership. Not the IE Tower (Paseo de la Castellana 259E) or the other María de Molina buildings."
+    },
+    {
+      "id": "iese-barcelona-south-campus-headquarters-seat",
+      "institution": "IESE",
+      "rowIds": [
+        "iese"
+      ],
+      "school": "",
+      "department": "",
+      "building": "South Campus (Campus Sur), IESE headquarters, Avenida Pearson 21",
+      "address": "Avinguda de Pearson 21, 08034 Barcelona, Spain",
+      "lat": 41.3935611,
+      "lng": 2.1079674,
+      "addressSource": "https://www.iese.edu/legal-notice/",
+      "coordinateSource": "https://www.openstreetmap.org/node/2681809198",
+      "supportingSources": [
+        "https://www.iese.edu/about/campuses/barcelona/",
+        "https://www.iese.edu/contact-us/",
+        "https://nominatim.openstreetmap.org/search?q=IESE+Avinguda+de+Pearson+21+Barcelona&format=jsonv2&addressdetails=1&limit=6"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. IESE's official legal notice states the school is \"headquartered in Barcelona, Avenida Pearson, 21\" (entity: IESE Business School-University of Navarra), and the official Barcelona campus page names the Av. Pearson 21 site as the South Campus (the North Campus is at Carrer d'Arnús i de Garí 3-7). Coordinates are the OpenStreetMap named point 'IESE Business School' tagged addr Avinguda de Pearson 21, note 'Campus Sur (South Campus)' (node 2681809198), not a city or campus-polygon centroid. IESE also has campuses of standing in Madrid (Camino del Cerro del Águila 3), Munich (Maria-Theresia-Straße 15), New York (165 West 57th Street) and São Paulo (Rua Martiniano de Carvalho 573), plus offices in London, Singapore, Tokyo, Hong Kong and Shanghai; this record marks the officially designated headquarters only and makes no claim about where any department sits."
+    },
+    {
+      "id": "iese-business-school-barcelona-south-campus-headquarters-seat",
+      "institution": "IESE Business School",
+      "rowIds": [
+        "iese-business-school"
+      ],
+      "school": "",
+      "department": "",
+      "building": "South Campus (Campus Sur), IESE headquarters, Avenida Pearson 21",
+      "address": "Avinguda de Pearson 21, 08034 Barcelona, Spain",
+      "lat": 41.3935611,
+      "lng": 2.1079674,
+      "addressSource": "https://www.iese.edu/legal-notice/",
+      "coordinateSource": "https://www.openstreetmap.org/node/2681809198",
+      "supportingSources": [
+        "https://www.iese.edu/about/campuses/barcelona/",
+        "https://www.iese.edu/contact-us/",
+        "https://nominatim.openstreetmap.org/search?q=IESE+Avinguda+de+Pearson+21+Barcelona&format=jsonv2&addressdetails=1&limit=6"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. IESE's official legal notice states the school is \"headquartered in Barcelona, Avenida Pearson, 21\" (entity: IESE Business School-University of Navarra), and the official Barcelona campus page names the Av. Pearson 21 site as the South Campus (the North Campus is at Carrer d'Arnús i de Garí 3-7). Coordinates are the OpenStreetMap named point 'IESE Business School' tagged addr Avinguda de Pearson 21, note 'Campus Sur (South Campus)' (node 2681809198), not a city or campus-polygon centroid. IESE also has campuses of standing in Madrid (Camino del Cerro del Águila 3), Munich (Maria-Theresia-Straße 15), New York (165 West 57th Street) and São Paulo (Rua Martiniano de Carvalho 573), plus offices in London, Singapore, Tokyo, Hong Kong and Shanghai; this record marks the officially designated headquarters only and makes no claim about where any department sits."
     }
   ]
 }

@@ -9767,8 +9767,14 @@
   ],
   "n": 1,
   "lastPosted": "2014-07-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "iese-barcelona-south-campus-headquarters-seat"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "IESE"
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "iese__iese-business-school__operations-information-and-technology",
@@ -9817,8 +9823,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "iese-business-school-barcelona-south-campus-headquarters-seat"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "IESE Business School"
+  ],
+  "mapSearchTerms": [],
+  "country": "Spain"
  },
  {
   "id": "iese-business-school____iese-behavioral-lab",
