@@ -6,15 +6,15 @@
    "n": 12
   },
   {
+   "v": "University College London",
+   "n": 10
+  },
+  {
    "v": "Arizona State University",
    "n": 9
   },
   {
    "v": "Cornell University",
-   "n": 9
-  },
-  {
-   "v": "University College London",
    "n": 9
   },
   {
@@ -203,6 +203,10 @@
   },
   {
    "v": "Eastern New Mexico University",
+   "n": 3
+  },
+  {
+   "v": "George Mason University",
    "n": 3
   },
   {
@@ -475,10 +479,6 @@
   },
   {
    "v": "Florida State University",
-   "n": 2
-  },
-  {
-   "v": "George Mason University",
    "n": 2
   },
   {
@@ -2588,6 +2588,10 @@
    "n": 3
   },
   {
+   "v": "Donald G. Costello College of Business",
+   "n": 3
+  },
+  {
    "v": "Edwin L. Cox School of Business",
    "n": 3
   },
@@ -2673,10 +2677,6 @@
   },
   {
    "v": "Debbie and Jerry Ivy College of Business",
-   "n": 2
-  },
-  {
-   "v": "Donald G. Costello College of Business",
    "n": 2
   },
   {
@@ -2817,6 +2817,10 @@
   },
   {
    "v": "Tippie College of Business",
+   "n": 2
+  },
+  {
+   "v": "UCL School of Management",
    "n": 2
   },
   {
@@ -3436,10 +3440,6 @@
    "n": 1
   },
   {
-   "v": "UCL School of Management",
-   "n": 1
-  },
-  {
    "v": "UNSW Business School - School of Information Systems and Technology Management",
    "n": 1
   },
@@ -3946,15 +3946,15 @@
    "n": 13
   },
   {
+   "v": "Information Systems and Operations Management",
+   "n": 11
+  },
+  {
    "v": "Business Administration",
    "n": 10
   },
   {
    "v": "Industrial and Systems Engineering",
-   "n": 10
-  },
-  {
-   "v": "Information Systems and Operations Management",
    "n": 10
   },
   {
@@ -4263,6 +4263,10 @@
   },
   {
    "v": "OM/OR",
+   "n": 2
+  },
+  {
+   "v": "Operations and Technology",
    "n": 2
   },
   {
@@ -5295,10 +5299,6 @@
   },
   {
    "v": "Operations and Project Management (AI focus)",
-   "n": 1
-  },
-  {
-   "v": "Operations and Technology",
    "n": 1
   },
   {
