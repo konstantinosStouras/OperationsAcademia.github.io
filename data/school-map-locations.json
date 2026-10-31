@@ -19769,7 +19769,7 @@
         "https://nominatim.openstreetmap.org/lookup?osm_ids=W544489363&format=jsonv2"
       ],
       "checked": "2026-10-31",
-      "notes": "MEF is a single-campus university. The Faculty of Engineering's own contact page gives its address as 'Huzur Mah. Maslak Ayazağa Cad. No: 4/1, 4/1A, 4/1B Sarıyer İstanbul' (engineering@mef.edu.tr, +90 212 395 36 15), and every MEF page footer gives the campus as Huzur Mah. Maslak Ayazağa Cad. No. 4, 34396 Sarıyer. No official page names a separate block or floor for the Faculty of Engineering or Industrial Engineering, so the scope is the campus building, not a department office. Coordinates are the OSM building footprint named 'MEF Üniversitesi' (way 544489363, building=university, 6 levels); Google Maps' 'MEF Üniversitesi' pin at Maslak Ayazağa Cd. No:4 is 35 m away (41.1088445, 29.0085964)."
+      "notes": "MEF is a single-campus university. The Faculty of Engineering's own contact page gives its address as 'Huzur Mah. Maslak Ayazağa Cad. No: 4/1, 4/1A, 4/1B Sarıyer İstanbul', and every MEF page footer gives the campus as Huzur Mah. Maslak Ayazağa Cad. No. 4, 34396 Sarıyer. No official page names a separate block or floor for the Faculty of Engineering or Industrial Engineering, so the scope is the campus building, not a department office. Coordinates are the OSM building footprint named 'MEF Üniversitesi' (way 544489363, building=university, 6 levels); Google Maps' 'MEF Üniversitesi' pin at Maslak Ayazağa Cd. No:4 is 35 m away (41.1088445, 29.0085964)."
     },
     {
       "id": "mannheim-production-management-schneckenhof-ost",
@@ -19949,7 +19949,7 @@
         "https://www.eur.nl/en/ese/media/2025-06-erasmus-university-rotterdam-map"
       ],
       "checked": "2026-10-31",
-      "notes": "The Econometric Institute's official department page gives its visiting address as 'Erasmus University Rotterdam, Econometric Institute, Room: ET-18, Burg. Oudlaan 50, 3062 PA Rotterdam' (faculty support office, om.ei@ese.eur.nl / office.ei@ese.eur.nl); Erasmus School of Economics' contact page gives 'Visiting address: E building, Burgemeester Oudlaan 50', and EUR's E Building location page says 'E Building provides accommodation for the ESE faculty' on Campus Woudestein. Coordinates are the OSM building footprint named 'E-Building' (way 275591003, ref:bag 0599100010060484), a separate building from the Mandeville (RSM) record and from the Erasmus Building. The 'Operations and Supply Chain Management' group itself was not separately located; the point is the Econometric Institute's office building."
+      "notes": "The Econometric Institute's official department page gives its visiting address as 'Erasmus University Rotterdam, Econometric Institute, Room: ET-18, Burg. Oudlaan 50, 3062 PA Rotterdam'; Erasmus School of Economics' contact page gives 'Visiting address: E building, Burgemeester Oudlaan 50', and EUR's E Building location page says 'E Building provides accommodation for the ESE faculty' on Campus Woudestein. Coordinates are the OSM building footprint named 'E-Building' (way 275591003, ref:bag 0599100010060484), a separate building from the Mandeville (RSM) record and from the Erasmus Building. The 'Operations and Supply Chain Management' group itself was not separately located; the point is the Econometric Institute's office building."
     },
     {
       "id": "uclouvain-lsm-core-roman-pays",
