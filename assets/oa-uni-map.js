@@ -449,7 +449,11 @@
         if(!(p.sourceUniversityIds||[p.card.universityId]).some(function(id){return visible.has(id);}))return;
         if(region!=='world'&&regionOf(p)!==region)return;
         if(countryQueries.length&&countryQueries.indexOf(fold(p.country))===-1)return;
+        // A university-level card (an institution row with neither school nor
+        // department, placed at the university's administration building) is
+        // not a school of either type, so a school-type filter leaves it out.
         if(typeQueries.length&&!p.card.schools.some(function(s){return s.rows.some(function(r){
+          if(!s.name&&!r.department&&!r.school)return false;
           var label=r.type==='Business School'?'Business school':r.type==='University'?'Non-business school':'';
           return label&&typeQueries.indexOf(fold(label))!==-1;
         });}))return;
@@ -568,7 +572,7 @@
       var keep=signature===lastSignature;lastSignature=signature;draw(keep);
     }
     Promise.all([
-      fetch('/data/university-map.json?v=20261031-directory-updates-7').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
+      fetch('/data/university-map.json?v=20261031-directory-updates-8').then(function(r){if(!r.ok)throw Error('map data');return r.json();}),
       fetch('/assets/world/countries.geojson?v=20261022-mobile').then(function(r){if(!r.ok)throw Error('geography');return r.json();})
     ]).then(function(data) {
       data[0].locations.forEach(function(r){nameKeys.set(r.name,r.key);locations.set(r.key,r);});

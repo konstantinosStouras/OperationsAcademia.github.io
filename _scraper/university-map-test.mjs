@@ -73,10 +73,11 @@ async function pageAt(query='',mobile=false){
 }
 try{
   const p=await pageAt('?university='+encodeURIComponent(university));
-  await p.waitForFunction(()=>document.querySelectorAll('.oa-map-logo').length===2);
+  await p.waitForFunction(()=>document.querySelectorAll('.oa-map-logo').length===3);
   assert.equal(await p.locator('.oa-map-cluster').count(),0,'a university search reveals its school logos');
   const scoped=await p.evaluate(()=>testMap.shown().map(x=>({school:x.school,rows:x.card.schools.flatMap(s=>s.rows.map(r=>r.department)),lat:x.lat,lng:x.lng})));
-  assert.equal(scoped.length,2);
+  assert.equal(scoped.length,3,'two school cards plus the university-level seat card');
+  assert.equal(scoped.filter(x=>!x.school).length,1,'the university seat is one school-less card');
   assert.equal(scoped.find(x=>/Grainger/.test(x.school)).lat,40.110649);
   assert.deepEqual(scoped.find(x=>/Grainger/.test(x.school)).rows.slice().sort(),directory.filter(row=>row.institution===university&&/Grainger/.test(row.school)).map(row=>row.department).sort(),'the engineering card includes every current Grainger department and no other school');
   assert.ok(scoped.find(x=>/Gies/.test(x.school)).rows.every(x=>!/Engineering|Labor|IS\/OM/.test(x)));
@@ -85,7 +86,7 @@ try{
   await p.waitForFunction(()=>testMap.shown().length===1);
   assert.match(await p.evaluate(()=>testMap.shown()[0].school),/Grainger/);
   await p.locator('#oaf-dept').fill('');
-  await p.waitForFunction(()=>testMap.shown().length===2);
+  await p.waitForFunction(()=>testMap.shown().length===3);
   await p.close();
   for(const [types,expected] of [[['Business school'],['Gies']],[['Non-business school'],['Grainger']],[['Business school','Non-business school'],['Gies','Grainger']]]){
     const query=new URLSearchParams({university});types.forEach(type=>query.append('type',type));
