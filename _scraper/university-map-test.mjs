@@ -78,7 +78,7 @@ try{
   const scoped=await p.evaluate(()=>testMap.shown().map(x=>({school:x.school,rows:x.card.schools.flatMap(s=>s.rows.map(r=>r.department)),lat:x.lat,lng:x.lng})));
   assert.equal(scoped.length,2);
   assert.equal(scoped.find(x=>/Grainger/.test(x.school)).lat,40.110649);
-  assert.deepEqual(scoped.find(x=>/Grainger/.test(x.school)).rows,['Industrial and Enterprise Systems Engineering']);
+  assert.deepEqual(scoped.find(x=>/Grainger/.test(x.school)).rows.slice().sort(),directory.filter(row=>row.institution===university&&/Grainger/.test(row.school)).map(row=>row.department).sort(),'the engineering card includes every current Grainger department and no other school');
   assert.ok(scoped.find(x=>/Gies/.test(x.school)).rows.every(x=>!/Engineering|Labor|IS\/OM/.test(x)));
   assert.equal(await p.locator('.oa-map-popup').count(),0,'university search shows all schools');
   await p.locator('#oaf-dept').fill('Grainger');
