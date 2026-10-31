@@ -19726,6 +19726,251 @@
       ],
       "checked": "2026-10-31",
       "notes": "Resolved to the Olin Business School SCOT area building, copying the address and coordinates of the existing verified record washington-st-louis-operations-knight. Re-verified today: the Interfolio posting (Oct 27, 2026) is 'Olin Business School - Supply Chain, Operations, and Technology (SCOT)' and says the position 'is part of Washington University's university-wide AI Faculty Cluster Hire initiative', which the ai.washu.edu page describes as a provost-led, seven-school effort; the AI cluster itself is cross-university and only the SCOT seat is placed here. The December 2025 CV linked from Fuqiang Zhang's current Olin profile (Dan Broida Professor of SCOT) gives 'Knight Hall 435, Olin Business School', Olin's contact page lists Knight Hall at One Brookings Drive, and the university event venue page for Knight Hall carries structured latitude 38.649616 / longitude -90.31083. Olin's directory pages do not print office rooms, so only this one SCOT office was verified."
+    },
+    {
+      "id": "fudan-management-science-li-dasan-building",
+      "institution": "Fudan University",
+      "rowIds": [
+        "fudan-university__school-of-management__management-science"
+      ],
+      "school": "School of Management",
+      "department": "Management Science",
+      "building": "Li Dasan Building (李达三楼), School of Management, Guoshun Campus",
+      "address": "Li Dasan Building, No. 670 Guoshun Road, Yangpu District, Shanghai 200433, China",
+      "lat": 31.2966685,
+      "lng": 121.5061869,
+      "addressSource": "https://www.fdsm.fudan.edu.cn/AboutUs/contact.html",
+      "coordinateSource": "https://www.google.com/maps/place/Sch.+of+Mgt+Fudan+Univ-Lidasan+Bldg/data=!4m7!3m6!1s0x35b273c4e7aff2cd:0xb924f14f83f36246!8m2!3d31.2966685!4d121.5061869!16s%2Fg%2F12hk6lt6p",
+      "supportingSources": [
+        "https://www.fdsm.fudan.edu.cn/en/contactus/list.htm",
+        "https://www.fdsm.fudan.edu.cn/mf/en/contact.html",
+        "https://www.google.com/maps/place/%E6%9D%8E%E8%BE%BE%E4%B8%89%E6%A5%BC/data=!4m7!3m6!1s0x35b273c4e7a319e5:0xfcde9fb69971a605!8m2!3d31.296736!4d121.506169!16s%2Fg%2F113gd7dkw"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The school's official Chinese contact directory places the Guoshun campus at 670 Guoshun Road and the Dean's Office, Party Office, research office, education centre, library and alumni centre in Li Dasan Building (李达三楼); its English pages give the same building (Room 506 / Room 201, 670 Guoshun Road). This is the SCHOOL's administrative building. The same directory lists the Department of Management Science office (管理科学系) in Siyuan Building Room 522 (思源楼522室) on the same campus; that neighbouring building has no Google or OSM pin and could not be geolocated, so the point given is the school building, not the department office. The Google place 'Sch. of Mgt Fudan Univ-Lidasan Bldg' (pin 31.2966685, 121.5061869) names the building explicitly; a second Google pin '李达三楼' sits 8 m away."
+    },
+    {
+      "id": "mef-industrial-engineering-maslak-campus",
+      "institution": "MEF University",
+      "rowIds": [
+        "mef-university__faculty-of-engineering__industrial-engineering"
+      ],
+      "school": "Faculty of Engineering",
+      "department": "Industrial Engineering",
+      "building": "MEF University campus building (MEF Üniversitesi), Maslak",
+      "address": "Huzur Mah. Maslak Ayazağa Cad. No. 4, 34396 Sarıyer, İstanbul, Turkey",
+      "lat": 41.1085585,
+      "lng": 29.0085458,
+      "addressSource": "https://www.mef.edu.tr/en/fakulteler/muhendislik-fakultesi/fakulte-danisma-kurulu/hakkimizda/iletisim",
+      "coordinateSource": "https://www.openstreetmap.org/way/544489363",
+      "supportingSources": [
+        "https://www.mef.edu.tr/en/fakulteler/muhendislik-fakultesi",
+        "https://www.mef.edu.tr/en",
+        "https://nominatim.openstreetmap.org/lookup?osm_ids=W544489363&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "MEF is a single-campus university. The Faculty of Engineering's own contact page gives its address as 'Huzur Mah. Maslak Ayazağa Cad. No: 4/1, 4/1A, 4/1B Sarıyer İstanbul' (engineering@mef.edu.tr, +90 212 395 36 15), and every MEF page footer gives the campus as Huzur Mah. Maslak Ayazağa Cad. No. 4, 34396 Sarıyer. No official page names a separate block or floor for the Faculty of Engineering or Industrial Engineering, so the scope is the campus building, not a department office. Coordinates are the OSM building footprint named 'MEF Üniversitesi' (way 544489363, building=university, 6 levels); Google Maps' 'MEF Üniversitesi' pin at Maslak Ayazağa Cd. No:4 is 35 m away (41.1088445, 29.0085964)."
+    },
+    {
+      "id": "mannheim-production-management-schneckenhof-ost",
+      "institution": "University of Mannheim",
+      "rowIds": [
+        "university-of-mannheim__business-school__chair-of-production-management"
+      ],
+      "school": "Business School",
+      "department": "Chair of Production Management",
+      "building": "Schloss Schneckenhof Ost (SO), Mannheim Palace",
+      "address": "Schloss Schneckenhof Ost, Room SO 230, 68161 Mannheim, Germany",
+      "lat": 49.4826314,
+      "lng": 8.4647834,
+      "addressSource": "https://www.bwl.uni-mannheim.de/en/stolletz/",
+      "coordinateSource": "https://www.google.com/maps/place/AREA+Operations/data=!4m7!3m6!1s0x4797cc1868d5f891:0x15abab16ac98e259!8m2!3d49.4826314!4d8.4647834!16s%2Fg%2F1tgxsh2v",
+      "supportingSources": [
+        "https://www.bwl.uni-mannheim.de/stolletz/",
+        "https://www.bwl.uni-mannheim.de/en/operations/",
+        "https://www.uni-mannheim.de/en/campus/the-schloss",
+        "https://www.bib.uni-mannheim.de/en/footer/addresses-and-directions/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Chair of Production Management (Prof. Dr. Raik Stolletz) gives its address as 'University of Mannheim, Area Operations Management, Schneckenhof Ost – Room SO 230, 68161 Mannheim' on its official chair page (German page identical). The university's campus page says the Schneckenhof is the south-eastern part of the Schloss (palace); the library gives the palace's street as Bismarckstraße. Coordinates are Google Maps' named place 'AREA Operations' (the Business School's Area Operations Management, whose four chairs all list Schneckenhof Ost), 45 m east of the OSM Schneckenhof courtyard (way 29174176, 49.48285, 8.46416), i.e. in the east wing of that courtyard. OSM does not map the palace wings as separate named buildings, so the Google pin was used."
+    },
+    {
+      "id": "mannheim-supply-chain-management-schneckenhof-ost",
+      "institution": "University of Mannheim",
+      "rowIds": [
+        "university-of-mannheim__business-school__supply-chain-management"
+      ],
+      "school": "Business School",
+      "department": "Supply Chain Management",
+      "building": "Schloss Schneckenhof Ost (SO), Mannheim Palace",
+      "address": "Schloss, Schneckenhof-Ost, Room 209, 68161 Mannheim, Germany",
+      "lat": 49.4826314,
+      "lng": 8.4647834,
+      "addressSource": "https://www.bwl.uni-mannheim.de/en/fleischmann/",
+      "coordinateSource": "https://www.google.com/maps/place/AREA+Operations/data=!4m7!3m6!1s0x4797cc1868d5f891:0x15abab16ac98e259!8m2!3d49.4826314!4d8.4647834!16s%2Fg%2F1tgxsh2v",
+      "supportingSources": [
+        "https://www.bwl.uni-mannheim.de/fleischmann/",
+        "https://www.bwl.uni-mannheim.de/en/operations/",
+        "https://www.uni-mannheim.de/en/campus/the-schloss"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Chair of Supply Chain Management (Prof. Dr. Moritz Fleischmann; the row's 'Supply Chain Management') gives its address on its official chair page as 'University of Mannheim, Schloss, Schneckenhof-Ost – Room 209, 68161 Mannheim'. Same building as the Chair of Production Management (SO 230) and the rest of the Area Operations Management; coordinates are the Google Maps named place 'AREA Operations' in the east wing of the Schloss Schneckenhof courtyard. Mannheim Business School (mannheim-business-school.com) was not used as evidence."
+    },
+    {
+      "id": "mannheim-operations-management-schneckenhof-ost",
+      "institution": "University of Mannheim",
+      "rowIds": [
+        "university-of-mannheim__business-school__operations-management"
+      ],
+      "school": "Business School",
+      "department": "Operations Management",
+      "building": "Schloss Schneckenhof Ost (SO), Mannheim Palace",
+      "address": "Schloss Schneckenhof Ost, 68161 Mannheim, Germany",
+      "lat": 49.4826314,
+      "lng": 8.4647834,
+      "addressSource": "https://www.bwl.uni-mannheim.de/en/operations/",
+      "coordinateSource": "https://www.google.com/maps/place/AREA+Operations/data=!4m7!3m6!1s0x4797cc1868d5f891:0x15abab16ac98e259!8m2!3d49.4826314!4d8.4647834!16s%2Fg%2F1tgxsh2v",
+      "supportingSources": [
+        "https://www.bwl.uni-mannheim.de/en/stolletz/",
+        "https://www.bwl.uni-mannheim.de/en/fleischmann/",
+        "https://www.bwl.uni-mannheim.de/en/schoen/",
+        "https://www.uni-mannheim.de/en/campus/the-schloss"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Business School's official Area Operations Management page says the area 'consists of the chairs of Professors Christoph Bode, Moritz Fleischmann, Cornelia Schön and Raik Stolletz' (the area page itself gives only the dean's office address L 5, 5). Each of the three operations chairs verified individually lists Schloss Schneckenhof Ost: Production Management SO 230, Supply Chain Management Room 209, Service Operations Management SO 232 (search snippets also place Bode's chair at SO 205, not separately verified). The row's directory link points at mannheim-business-school.com (the MBA school), which was deliberately not used as evidence. Coordinates are Google Maps' named place 'AREA Operations' in the east wing of the Schneckenhof courtyard of the Schloss."
+    },
+    {
+      "id": "iit-bombay-ieor-building",
+      "institution": "Indian Institute of Technology (IIT) Bombay",
+      "rowIds": [
+        "indian-institute-of-technology-iit-bombay____industrial-engineering-and-operations-research"
+      ],
+      "school": "",
+      "department": "Industrial Engineering and Operations Research",
+      "building": "IEOR Building",
+      "address": "Room 105, First Floor, IEOR Building, Indian Institute of Technology Bombay, Powai, Mumbai 400076, Maharashtra, India",
+      "lat": 19.1310454,
+      "lng": 72.9180174,
+      "addressSource": "https://www.ieor.iitb.ac.in/misc/contact",
+      "coordinateSource": "https://www.openstreetmap.org/way/52511401",
+      "supportingSources": [
+        "https://www.openstreetmap.org/node/5878275164",
+        "https://www.ieor.iitb.ac.in/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The department's official contact page gives its mailing address as 'Industrial Engineering and Operations Research, Room 105, First Floor, IEOR Building, Indian Institute of Technology Bombay, Powai, Mumbai 400076' and says the department is housed in the IEOR Building (Head's office Room 108). Coordinates are the centroid of the OSM building footprint (way 52511401, building=university) that contains the OSM node named 'IEOR Library' (node 5878275164, 19.1310527, 72.9180042), between the Aerospace and Bio sciences department buildings in the academic area; the footprint itself carries no name tag in OSM, and Google Maps returned no place for the building, so this point rests on the named IEOR Library node inside the footprint. No official IITB campus map with coordinates could be found."
+    },
+    {
+      "id": "uchile-industrial-engineering-beauchef-851-torre-oriente",
+      "institution": "Universidad de Chile",
+      "rowIds": [
+        "universidad-de-chile____industrial-engineering"
+      ],
+      "school": "Facultad de Ciencias Físicas y Matemáticas",
+      "department": "Industrial Engineering",
+      "building": "Beauchef 851, Torre Oriente (Torre Ingeniería Industrial; OSM: Edificio Ingeniería y Ciencias)",
+      "address": "Beauchef 851, Santiago, Chile",
+      "lat": -33.4578628,
+      "lng": -70.6641852,
+      "addressSource": "https://www.dii.uchile.cl/campus/",
+      "coordinateSource": "https://www.openstreetmap.org/way/176856062",
+      "supportingSources": [
+        "https://www.dii.uchile.cl/contacto/",
+        "https://www.dii.uchile.cl/english/about-us/campus/",
+        "https://www.dii.uchile.cl/wp-content/uploads/2025/06/Boletin-46-junio-2014.pdf",
+        "https://www.fcfm.uchile.cl/dam/jcr:1c8d7dd2-9463-4f93-8aee-a5544ea1d78f/mapafcfm2018.pdf"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Departamento de Ingeniería Industrial's official campus page says the department is in 'una de las dos torres del edificio Beauchef 851', which it calls 'Torre Ingeniería Industrial' (its image file is labelled Torre-Oriente); the department's 2014 bulletin describes the east tower ('torre oriente ... donde se ubicará ingeniería industrial') versus the west tower for Mechanical Engineering. The DII contact page's own 'Cómo llegar' Google Maps/Waze link points at -33.457886, -70.664113, which falls inside OSM building way 176856062 'Edificio Ingeniería y Ciencias', 851 Avenida Beauchef (the east tower; the west tower is OSM 'Edificio Poniente', way 176856060, and 'Edificio Norte' is at Blanco Encalada 2120). Floor not stated; the department also uses buildings on República 701/779 and Domeyko 2313/2363 for centres and graduate programmes. The faculty (FCFM) is not named in the directory row and is supplied from the DII site."
+    },
+    {
+      "id": "puc-chile-industrial-systems-engineering-raul-deves",
+      "institution": "Pontificia Universidad Catolica de Chile (PUC)",
+      "rowIds": [
+        "pontificia-universidad-catolica-de-chile__school-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin"
+      ],
+      "school": "School of Engineering",
+      "department": "Industrial and Systems Engineering and Electrical Engineering",
+      "building": "Edificio Raúl Devés, Campus San Joaquín",
+      "address": "Av. Vicuña Mackenna 4860, Macul, Santiago, Chile",
+      "lat": -33.4996286,
+      "lng": -70.6128664,
+      "addressSource": "https://www.ing.uc.cl/en/?p=60321",
+      "coordinateSource": "https://www.openstreetmap.org/way/189781889",
+      "supportingSources": [
+        "https://www.ing.uc.cl/industrial-y-sistemas/",
+        "https://nominatim.openstreetmap.org/lookup?osm_ids=W189781889&format=jsonv2",
+        "https://www.ing.uc.cl/industrial-y-sistemas/wp-content/uploads/2015/04/newsletter-n17.pdf"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The School of Engineering's official 'General Installations' page lists the Raúl Devés Building floor by floor: 'Second Floor: Department of Industrial and Systems Engineering, offices for Masters' students, computer lab ...' and 'Third Floor: Department of Industrial and Systems Engineering, professor offices' (the Dean's Office is on the fourth floor). The department's own site names its classroom as 'Sala de clases DIIS, segundo piso, ala poniente, Edificio Raúl Devés'. Only the Industrial and Systems Engineering half of the row's combined department string was verified; Electrical Engineering is a separate department whose building was not checked. The address is the campus-wide San Joaquín mailing address (department newsletters give Av. Vicuña Mackenna 4860, Macul). Coordinates are the OSM footprint 'Edificio Raúl Deves (Facultad de Ingeniería)', 4860 Avenida Vicuña Mackenna, Macul."
+    },
+    {
+      "id": "puc-chile-school-of-management-edificio-fundacion",
+      "institution": "Pontificia Universidad Catolica de Chile (PUC)",
+      "rowIds": [
+        "pontificia-universidad-catolica-de-chile__school-of-management__management-science"
+      ],
+      "school": "School of Management",
+      "department": "Management Science",
+      "building": "Edificio Fundación (Facultad de Economía y Administración building), Campus San Joaquín",
+      "address": "Av. Vicuña Mackenna 4860, Macul, Santiago, Chile",
+      "lat": -33.4969118,
+      "lng": -70.6114624,
+      "addressSource": "https://www.uc.cl/noticias/autoridades-de-la-uc-participaron-en-la-colocacion-de-la-primera-piedra-del-edificio-de-economia/",
+      "coordinateSource": "https://www.openstreetmap.org/way/235686179",
+      "supportingSources": [
+        "https://economiayadministracion.uc.cl/en/conocenos/",
+        "https://economiayadministracion.uc.cl/contacto/",
+        "https://economiayadministracion.uc.cl/assets/uploads/2024/07/Cuenta_Facultad_FINAL.pdf",
+        "https://economiayadministracion.uc.cl/assets/uploads/2026/08/MEMORIA-UC25-8.pdf",
+        "https://www.uc.cl/universidad/nuestros-campus/san-joaquin/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Escuela de Administración (School of Management) is one of the two units of the Facultad de Economía y Administración, which says on its own site that it 'is located on the San Joaquín campus' (contact: Vicuña Mackenna 4860, Macul). UC's official news on the faculty building project says its fourth stage adds 'oficinas para académicos de la Escuela de Administración'; the faculty's annual reports name the building 'Edificio Fundación' (donated by the Fundación de Egresados) and the 2025 report records the fourth and last stage inaugurated on 14 November. Coordinates are the OSM footprint named 'Facultad de Economía y Administración' (way 235686179, operator Pontificia Universidad Católica de Chile) at Vicuña Mackenna 4860. Scope: the faculty/school building; no page names a 'Management Science' department office, and the address is the campus-wide San Joaquín mailing address. The school's own website publishes no street address or building name, so this rests on UC and faculty sources."
+    },
+    {
+      "id": "erasmus-econometric-institute-e-building",
+      "institution": "Erasmus University Rotterdam",
+      "rowIds": [
+        "erasmus-university-rotterdam__econometric-institute__operations-and-supply-chain-management"
+      ],
+      "school": "Econometric Institute",
+      "department": "Operations and Supply Chain Management",
+      "building": "E Building (E-Building), Campus Woudestein",
+      "address": "E Building, Room ET-18, Burgemeester Oudlaan 50, 3062 PA Rotterdam, Netherlands",
+      "lat": 51.9174993,
+      "lng": 4.5269959,
+      "addressSource": "https://www.eur.nl/en/ese/department-econometrics",
+      "coordinateSource": "https://www.openstreetmap.org/way/275591003",
+      "supportingSources": [
+        "https://www.eur.nl/en/ese/contact",
+        "https://eur.nl/en/campus/locations/spaces/e-building",
+        "https://www.eur.nl/en/ese/media/2025-06-erasmus-university-rotterdam-map"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Econometric Institute's official department page gives its visiting address as 'Erasmus University Rotterdam, Econometric Institute, Room: ET-18, Burg. Oudlaan 50, 3062 PA Rotterdam' (faculty support office, om.ei@ese.eur.nl / office.ei@ese.eur.nl); Erasmus School of Economics' contact page gives 'Visiting address: E building, Burgemeester Oudlaan 50', and EUR's E Building location page says 'E Building provides accommodation for the ESE faculty' on Campus Woudestein. Coordinates are the OSM building footprint named 'E-Building' (way 275591003, ref:bag 0599100010060484), a separate building from the Mandeville (RSM) record and from the Erasmus Building. The 'Operations and Supply Chain Management' group itself was not separately located; the point is the Econometric Institute's office building."
+    },
+    {
+      "id": "uclouvain-lsm-core-roman-pays",
+      "institution": "Université catholique de Louvain",
+      "rowIds": [
+        "universite-catholique-de-louvain__louvain-school-of-management__center-for-operations-research-and-econometrics"
+      ],
+      "school": "Louvain School of Management",
+      "department": "Center for Operations Research and Econometrics",
+      "building": "Center for Operations Research and Econometrics (CORE)",
+      "address": "Voie du Roman Pays 34, 1348 Louvain-la-Neuve, Belgium",
+      "lat": 50.6688327,
+      "lng": 4.6153418,
+      "addressSource": "https://uclouvain.be/en/research-institutes/lidam/core/contact",
+      "coordinateSource": "https://www.openstreetmap.org/node/3846926618",
+      "supportingSources": [
+        "https://uclouvain.be/en/research-institutes/lidam/contact",
+        "https://nominatim.openstreetmap.org/search?q=Center+for+Operations+Research+and+Econometrics+Louvain-la-Neuve&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "CORE's official contact page gives 'Center for Operations Research and Econometrics (CORE), Voie du Roman Pays, 34 - L1.03.01, 1348 Louvain-la-Neuve', located 'on the corner of Traverse d'Esope and Voie du Roman Pays', with the information office in room b.130 on floor 1. CORE is a research centre of the LIDAM institute (not of the Louvain School of Management); the row's LSM attribution reflects the posting, and this record does not claim the LSM dean's building. Coordinates are the OSM research-office node named 'Center for Operations Research and Econometrics' at 34 Voie du Roman Pays (Nominatim category office/research), the same point the existing uclouvain-lidam-core-roman-pays record uses for the UCLouvain-spelled row."
     }
   ]
 }
