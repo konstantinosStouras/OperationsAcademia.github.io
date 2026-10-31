@@ -16599,10 +16599,16 @@
   ],
   "lat": 40.3490485,
   "lng": -74.652812,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "princeton-orfe-sherrerd-hall"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "School of Engineering and Applied Science",
    "Operations Research and Financial Engineering"
+  ],
+  "mapInstitutionNames": [
+   "Princeton University"
   ]
  },
  {
@@ -16623,8 +16629,17 @@
   "lastPosted": "2014-10-21",
   "lat": 41.8441035,
   "lng": -71.4379605,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "providence-college-business-ryan-center"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Providence College"
+  ],
+  "mapSearchTerms": [
+   "School of Business",
+   "Finance"
+  ]
  },
  {
   "id": "psu-behrend____project-and-scm",
@@ -17834,8 +17849,17 @@
   ],
   "n": 1,
   "lastPosted": "2025-05-25",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "st-marys-business-analytics-galileo"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Saint Mary's College of California"
+  ],
+  "mapSearchTerms": [
+   "School of Economics and Business Administration",
+   "Business Analytics and Data Science / Operations and Quantitative Methods"
+  ],
   "facultyUrl": "https://www.stmarys-ca.edu/academics/schools/economics-business-administration/faculty",
   "facultyDirectoryHint": "Find the Business Analytics & Data Science section; other departments are also listed."
  },
@@ -17854,8 +17878,17 @@
   ],
   "lat": 37.8414569,
   "lng": -122.1107267,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "st-marys-business-analytics-galileo"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Saint Mary's College of California"
+  ],
+  "mapSearchTerms": [
+   "School of Economics and Business Administration",
+   "Business Analytics and Data Science / Operations and Quantitative Methods"
+  ]
  },
  {
   "id": "sam-houston-state-university____supply-chain-management",
@@ -18668,8 +18701,17 @@
   "lastPosted": "2014-08-20",
   "lat": 49.2800145,
   "lng": -122.9200592,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "sfu-technology-operations-west-mall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Simon Fraser University"
+  ],
+  "mapSearchTerms": [
+   "Beedie School of Business",
+   "Technology and Operations Management"
+  ]
  },
  {
   "id": "singapore-management-university__lee-kong-chian-school-of-business__operations-management",
@@ -29628,8 +29670,17 @@
   "lastPosted": "2014-10-22",
   "lat": 37.5739212,
   "lng": -77.5428644,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "richmond-management-robins"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Richmond"
+  ],
+  "mapSearchTerms": [
+   "Robins School of Business",
+   "Management"
+  ]
  },
  {
   "id": "university-of-rochester__simon-business-school__operations-management",
@@ -31125,8 +31176,16 @@
   ],
   "lat": 43.7838214,
   "lng": -79.1874902,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "university-of-toronto-scarborough-management-instructional-centre"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Toronto Scarborough (UTSC)"
+  ],
+  "mapSearchTerms": [
+   "Management"
+  ]
  },
  {
   "id": "university-of-toulouse__toulouse-business-school__information-operations-and-management-sciences",

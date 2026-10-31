@@ -19266,6 +19266,132 @@
       ],
       "checked": "2026-10-31",
       "notes": "Industrial engineering faculty office and lab are in Management Building 2. The university links to Google Maps for this building; the resolved named place URL supplies its coordinates."
+    },
+    {
+      "id": "university-of-toronto-scarborough-management-instructional-centre",
+      "institution": "University of Toronto Scarborough (UTSC)",
+      "rowIds": [
+        "university-of-toronto-scarborough____management"
+      ],
+      "school": "",
+      "department": "Management",
+      "building": "Instructional Centre",
+      "address": "1095 Military Trail, Toronto, ON M1C 1A4, Canada",
+      "lat": 43.786774,
+      "lng": -79.189776,
+      "addressSource": "https://www.utsc.utoronto.ca/mgmt/contact",
+      "coordinateSource": "https://www.openstreetmap.org/relation/2916427#map=19/43.786774/-79.189776",
+      "supportingSources": [
+        "https://utsc.utoronto.ca/hire-coop/contact-us",
+        "https://www.utsc.utoronto.ca/news-events/archived/instructional-centre-update"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The department contact page places Management in the Instructional Centre at 1095 Military Trail. The OpenStreetMap building relation names the same centre and address, and its displayed map location gives this approximate building-level point. This is the Instructional Centre, not the separate Sam Ibrahim Building, formerly Instructional Centre 2."
+    },
+    {
+      "id": "princeton-orfe-sherrerd-hall",
+      "institution": "Princeton University",
+      "rowIds": [
+        "princeton-university__school-of-engineering-and-applied-science__operations-research-and-financial-engineering"
+      ],
+      "school": "School of Engineering and Applied Science",
+      "department": "Operations Research and Financial Engineering",
+      "building": "Sherrerd Hall",
+      "address": "98 Charlton Street, Princeton, NJ 08544, United States",
+      "lat": 40.349562,
+      "lng": -74.652675,
+      "addressSource": "https://orfe.princeton.edu/graduate/handbook",
+      "coordinateSource": "https://www.openstreetmap.org/way/40717871#map=19/40.349562/-74.652675",
+      "supportingSources": [
+        "https://gradschool.princeton.edu/academics/degrees-requirements/fields-study/operations-research-and-financial-engineering",
+        "https://dof.princeton.edu/document/7611"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The graduate school and faculty directory place the department in Sherrerd Hall; the department identifies 98 Charlton Street as its delivery address. OSM identifies the named Sherrerd Hall building footprint; point is its displayed map location."
+    },
+    {
+      "id": "providence-college-business-ryan-center",
+      "institution": "Providence College",
+      "rowIds": [
+        "providence-college__school-of-business__finance"
+      ],
+      "school": "School of Business",
+      "department": "Finance",
+      "building": "Arthur F. and Patricia Ryan Center for Business Studies",
+      "address": "1 Cunningham Square, Providence, RI 02918, United States",
+      "lat": 41.8439375,
+      "lng": -71.4318125,
+      "addressSource": "https://business.providence.edu/finance/finance-faculty/",
+      "coordinateSource": "https://www.google.com/maps/search/Ryan+Center+for+Business+Studies+Providence+College/",
+      "supportingSources": [
+        "https://business.providence.edu/pcbusiness-directory/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The official faculty directory places finance faculty in the Ryan Center. Google Maps names the same building as the school of business and gives plus code RHV9+H7 Providence; the coordinate is the center of this approximately 14 m by 10 m cell, rather than a surveyed center. The street address is the general college mailing address."
+    },
+    {
+      "id": "richmond-management-robins",
+      "institution": "University of Richmond",
+      "rowIds": [
+        "university-of-richmond__robins-school-of-business__management"
+      ],
+      "school": "Robins School of Business",
+      "department": "Management",
+      "building": "Robins School of Business",
+      "address": "102 UR Drive, University of Richmond, VA 23173, United States",
+      "lat": 37.578168,
+      "lng": -77.53572,
+      "addressSource": "https://facilities.richmond.edu/about-us/campus-addresses/index.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/264349230",
+      "supportingSources": [
+        "https://robins.richmond.edu/undergraduate/departments/management/facts.html",
+        "https://robins.richmond.edu/about/deans-office/staff/index.html"
+      ],
+      "checked": "2026-10-31",
+      "notes": "University identifies the Management Department within the Robins School; coordinates are the named school building's OpenStreetMap search result."
+    },
+    {
+      "id": "st-marys-business-analytics-galileo",
+      "institution": "Saint Mary's College of California",
+      "rowIds": [
+        "saint-mary-s-college-of-california____ba-and-ds",
+        "saint-mary-s-college-of-california__school-of-economics-and-business-administration__operations-and-quantitative-methods"
+      ],
+      "school": "School of Economics and Business Administration",
+      "department": "Business Analytics and Data Science / Operations and Quantitative Methods",
+      "building": "Galileo Hall",
+      "address": "1928 Saint Mary's Road, Moraga, CA 94556, United States",
+      "lat": 37.8421013,
+      "lng": -122.1087299,
+      "addressSource": "https://scholars.stmarys-ca.edu/en/persons/ameera-ibrahim/",
+      "coordinateSource": "https://www.google.com/maps/search/Galileo+Hall+Saint+Marys+College+Moraga",
+      "supportingSources": [
+        "https://scholars.stmarys-ca.edu/en/persons/phuong-anh-nguyen/",
+        "https://www.stmarys-ca.edu/offices-services/edtech/about-edtech/galileo-hall"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Business analytics faculty office 318 Galileo; operations faculty office Galileo 305. Campus street address; Google Maps identifies Galileo Hall at Saint Mary's College."
+    },
+    {
+      "id": "sfu-technology-operations-west-mall",
+      "institution": "Simon Fraser University",
+      "rowIds": [
+        "simon-fraser-university__beedie-school-of-business__technology-and-operations-management"
+      ],
+      "school": "Beedie School of Business",
+      "department": "Technology and Operations Management",
+      "building": "West Mall Centre",
+      "address": "8888 University Drive, Burnaby, BC V5A 1S6, Canada",
+      "lat": 49.27983,
+      "lng": -122.9222047,
+      "addressSource": "https://beedie.sfu.ca/sms/admin/_DocLibrary/_cvs/c886a31c7e52a587638ec08d63f6bf38.pdf",
+      "coordinateSource": "https://www.google.com/maps/search/West+Mall+Centre+Simon+Fraser+University",
+      "supportingSources": [
+        "https://www.sfu.ca/fs/campus-maps/directory-of-buildings/west-mall-centre.html",
+        "https://beedie.sfu.ca/tracs_v3/beedie_website_iframes/Beedie_website_iframes/faculty_and_staff_directory_fetch/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Multiple technology and operations faculty list offices in West Mall Centre; university building directory identifies WMC."
     }
   ]
 }
