@@ -4150,15 +4150,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "city-hong-kong-institution-cheng-yick-chi"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "City University of Hong Kong"
-  ],
-  "mapSearchTerms": [],
-  "country": "Hong Kong"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "city-university-of-hong-kong____om-statistics",
@@ -12786,14 +12779,8 @@
   ],
   "n": 1,
   "lastPosted": "2025-06-22",
-  "mapLocationIds": [
-   "mcmaster-institution-gilmour-hall"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "McMaster University"
-  ],
-  "mapSearchTerms": []
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "mcmaster-university__degroote-school-of-business__health-policy-and-management",
@@ -13016,15 +13003,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "michigan-state-hannah-administration-institution"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Michigan State University"
-  ],
-  "mapSearchTerms": [],
-  "country": "United States"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "michigan-state-university____logistics-and-supply-chain-management",
@@ -19069,14 +19049,8 @@
   ],
   "lat": 1.3413132,
   "lng": 103.9637565,
-  "mapLocationIds": [
-   "sutd-somapah-campus-building-one"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Singapore University of Technology and Design (SUTD)"
-  ],
-  "mapSearchTerms": []
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "skagit-valley-college____professional-technical-education-bachelor-of-applied-science",
@@ -19227,14 +19201,8 @@
   "lastPosted": "2014-10-17",
   "lat": 55.695548,
   "lng": 37.39054,
-  "mapLocationIds": [
-   "skoltech-bolshoy-boulevard-30"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Skolkovo Institute of Science and Technology (Skoltech)"
-  ],
-  "mapSearchTerms": []
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "smith-school-of-business____digital-technology",
@@ -20668,14 +20636,8 @@
   ],
   "lat": 39.924038,
   "lng": 32.861431,
-  "mapLocationIds": [
-   "ted-university-kolej-campus-a-blok"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "TED University"
-  ],
-  "mapSearchTerms": []
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "tel-aviv-university__coller-school-of-management__operational-strategy",
@@ -21695,15 +21657,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "cuhk-shenzhen-institution-administration-building"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "The Chinese University of Hong Kong, Shenzhen"
-  ],
-  "mapSearchTerms": [],
-  "country": "China"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "chinese-university-of-hong-kong-shenzhen__school-of-data-science__operations-research",
@@ -21923,15 +21878,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "hong-kong-polytechnic-institution-li-ka-shing-tower"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "The Hong Kong Polytechnic University"
-  ],
-  "mapSearchTerms": [],
-  "country": "Hong Kong"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "hong-kong-polytechnic-university____scm-om",
@@ -22578,15 +22526,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "tilburg-institution-cobbenhagen-building"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Tilburg University"
-  ],
-  "mapSearchTerms": [],
-  "country": "Netherlands"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "tilburg-university____is",
@@ -24862,15 +24803,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "berkeley-california-hall-institution"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of California, Berkeley"
-  ],
-  "mapSearchTerms": [],
-  "country": "United States"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-california-berkeley____ieor-decision-analytics",
@@ -26934,14 +26868,8 @@
   ],
   "n": 1,
   "lastPosted": "2014-09-11",
-  "mapLocationIds": [
-   "illinois-urbana-swanlund-administration-institution"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Illinois at Urbana-Champaign"
-  ],
-  "mapSearchTerms": []
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__business-administration",
@@ -27700,15 +27628,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "mannheim-institution-schloss-ostfluegel-rektorat"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Mannheim"
-  ],
-  "mapSearchTerms": [],
-  "country": "Germany"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-mannheim__business-school__chair-of-production-management",
@@ -29607,15 +29528,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "notre-dame-main-building-institution"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Notre Dame"
-  ],
-  "mapSearchTerms": [],
-  "country": "United States"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-notre-dame__mendoza-college-of-business__information-technology-analytics-and-operations",
@@ -30460,15 +30374,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "south-carolina-osborne-administration-institution"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of South Carolina"
-  ],
-  "mapSearchTerms": [],
-  "country": "United States"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-south-carolina____it",
@@ -31367,15 +31274,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "texas-dallas-administration-building-institution"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Texas at Dallas"
-  ],
-  "mapSearchTerms": [],
-  "country": "United States"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-texas-at-dallas____om",
@@ -31836,15 +31736,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "utah-park-building-institution"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Utah"
-  ],
-  "mapSearchTerms": [],
-  "country": "United States"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-utah____om-scm",
@@ -32041,15 +31934,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "virginia-madison-hall-institution"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Virginia"
-  ],
-  "mapSearchTerms": [],
-  "country": "United States"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-virginia____om",
@@ -32624,15 +32510,8 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [
-   "wisconsin-madison-bascom-hall-institution"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Wisconsin-Madison"
-  ],
-  "mapSearchTerms": [],
-  "country": "United States"
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-wisconsin-madison__wisconsin-school-of-business__operations-and-information-management",
