@@ -1666,8 +1666,9 @@
         done.innerHTML =
           '<h3>The posting has been taken down.</h3>' +
           '<p>It disappears from the <a href="jobs">job postings page</a> ' +
-          OATakedown.WHEN + '. Nothing is deleted: <a href="' + back + '">open ' +
-          'it again</a> and press Save changes to put it back up.</p>' +
+          OATakedown.WHEN + '. Nothing is deleted immediately: <a href="' + back + '">open ' +
+          'it again</a> and press Save changes within 30 days to put it back up. ' +
+          'After 30 days the posting record is permanently removed from OA.</p>' +
           '<p class="oa-done-actions">' +
           '<a class="button blue" href="jobs">Back to the job postings</a> ' +
           '<a class="button oa-btn-ghost" href="' + back + '">Open it again</a></p>';

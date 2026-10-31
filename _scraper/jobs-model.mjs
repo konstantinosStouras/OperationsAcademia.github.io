@@ -1690,7 +1690,11 @@ export function specMatches(spec, row) {
   if (!spec || !row) return false;
   if (typeof spec === 'string') return !!row.ref && row.ref === spec;
   if (spec.ref) return !!row.ref && row.ref === spec.ref && (spec.owner || '') === (row.owner || '');
-  if (spec.id) return row.id === spec.id;
+  // Member postings are identified by their owner-scoped reference, never
+  // by an ID that a sheet mirror or legacy record may happen to share.
+  // The merge already separates ref:<owner>:<ref> from id:<id>; orphan
+  // filtering and removal stamps must preserve that same boundary.
+  if (spec.id) return !row.ref && row.id === spec.id;
   return false;
 }
 

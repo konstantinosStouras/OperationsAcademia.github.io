@@ -30,6 +30,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
+import { retireJobs } from './job-retention.mjs';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds, healPlace,
@@ -574,11 +575,17 @@ async function main() {
      (jobs-model.mjs, `sheetMirrorDoc`). They are deliberately outside the two
      queries above: a mirror publishes nothing and is never stamped, so it can
      only ever be read HERE, to decide whether it still matches the workbook. */
-  const [liveSnap, pulledSnap, mirrorSnap] = db ? await Promise.all([
+  const [liveSnap, pulledSnap, mirrorSnap, receiptSnap] = db ? await Promise.all([
     col.where('status', 'in', ['queued', 'published']).get(),
     col.where('status', 'in', ['withdrawn', 'hidden']).get(),
     col.where('status', '==', MIRROR_STATUS).get(),
-  ]) : [{ docs: [] }, { docs: [] }, { docs: [] }];
+    db.collection('jobRemovalReceipts').get(),
+  ]) : [{ docs: [] }, { docs: [] }, { docs: [] }, { docs: [] }];
+
+  // Private receipts contain identifiers only, never deleted posting content.
+  // Fail closed if the read fails: losing suppression must not resurrect jobs.
+  const receipts = receiptSnap.docs.map(d => d.data()).filter(r => r.version === 1 && Array.isArray(r.specs));
+  const retiredSheetIds = receipts.map(r => r.sheetId).filter(Boolean);
 
   const live = liveSnap.docs;
   const pulled = pulledSnap.docs;
@@ -815,6 +822,7 @@ async function main() {
      with only a warning in the log. A hand-over that cannot publish falls back
      to the workbook instead. */
   const claimedSheetIds = new Set(sheetDocs.keys());
+  retiredSheetIds.forEach(id => claimedSheetIds.add(id));
   if (db && sheetPresent && DRY) {
     log('--dry-run: not refreshing the tracking sheet\'s edit handles.');
   } else if (db && sheetPresent) {
@@ -931,6 +939,7 @@ async function main() {
      published in data/jobs.json, so an unscoped removal is a signed-in
      stranger deleting somebody else's advertisement. */
   const { specs: removeSpecs } = removalSpecs(pulled);
+  removeSpecs.push(...receipts.flatMap(r => r.specs));
 
   // The maintainer's committed suppression list, honoured by every writer of
   // this file (see data/jobs-hidden.json). A posting listed here is withheld
@@ -984,7 +993,7 @@ async function main() {
        posting simply disappears, and `stranded` cannot even report it, since
        the row was never claimed. */
     pulledSheetIds: pulled.map((d) => (buildOwned(d.data()) ? d.data().sheetId : ''))
-      .filter(Boolean),
+      .filter(Boolean).concat(retiredSheetIds),
     claimedSheetIds,
   });
   const { publishedFromDoc, stranded } = handover;
@@ -1479,7 +1488,10 @@ async function main() {
     }
   }
 
-  if (DRY) return;
+  if (DRY) {
+    if (db) await retireJobs(db, { now, publishedRows: existing, dryRun: true });
+    return;
+  }
 
   /* Only now stamp Firestore. A failure here is recoverable: the row is
      already in the file, and re-publishing it next run replaces it in place.
@@ -1532,6 +1544,10 @@ async function main() {
     await batch.commit();
   }
   if (writes.length) log(`stamped ${writes.length} submission(s) in Firestore`);
+  const retired = db ? await retireJobs(db, { now, publishedRows: existing }) : { deleted: 0, wouldDelete: 0, stamped: 0 };
+  if (retired.deleted || retired.wouldDelete || retired.stamped) {
+    log(`30-day job retention: ${retired.deleted} deleted, ${retired.wouldDelete} would delete, ${retired.stamped} legacy clocks started`);
+  }
 }
 
 /* Run only as the entry point, so the selftest can import syncSheetMirrors and

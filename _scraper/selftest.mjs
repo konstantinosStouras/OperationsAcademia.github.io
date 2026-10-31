@@ -13619,7 +13619,7 @@ async function testQueueTakedown() {
 
   /* 12. THE COPY SAYS WHAT IS TRUE OF THIS CONTROL, both halves: it is not a
          delete, and there is somewhere to press to undo it. */
-  ok(/Nothing is deleted: it moves to "Taken down by you" below, /.test(raw),
+  ok(/Nothing is deleted immediately: it moves to "Taken down by you" below, /.test(raw) && /within 30 days/.test(raw),
     'the confirmation says nothing is deleted and names where the posting goes');
   ok(/Off the site\. Nobody else sees these\./.test(raw)
      && /every season is listed here/.test(raw),
@@ -19394,14 +19394,14 @@ async function testJobTakedown() {
     'my-postings.html', 'post-a-job.html'];
   for (const page of PAGES) {
     const html = await read(page);
-    ok(html.includes('src="assets/oa-takedown.js"'),
+    ok(scriptIndex(html, 'assets/oa-takedown.js') >= 0,
       `takedown: ${page} loads the module`);
     ok(html.includes('src="assets/oa-fresh.js"'),
       `takedown: ...and the echo it stashes into`);
     for (const c of CONSUMERS) {
-      const at = html.indexOf(`src="assets/${c}"`);
+      const at = scriptIndex(html, `assets/${c}`);
       if (at === -1) continue;
-      ok(html.indexOf('src="assets/oa-takedown.js"') < at,
+      ok(scriptIndex(html, 'assets/oa-takedown.js') < at,
         `takedown: ...before ${c}, which calls it`);
     }
   }

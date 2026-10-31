@@ -681,6 +681,7 @@ export function partition(rows, docs, { now = '', published = null } = {}) {
 
   for (const row of rows || []) {
     const doc = byId.get(row.id);
+    if (doc && doc.status === 'retired') continue; // content removed after 30 days
 
     if (!doc) {
       /* ALREADY PUBLIC IS ALREADY REVIEWED, in the only sense that matters:

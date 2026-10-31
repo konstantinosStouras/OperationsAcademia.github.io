@@ -62,6 +62,8 @@ jobs:
           node _scraper/reference-test.mjs
           node _scraper/member-jobs-test.cjs
           node _scraper/job-controls-test.cjs
+          node _scraper/takedown-test.cjs
+          node _scraper/job-retention-test.mjs
           node _scraper/job-map-link-test.cjs
           node _scraper/map-routing-test.cjs
           node _scraper/map-new-posting-test.cjs

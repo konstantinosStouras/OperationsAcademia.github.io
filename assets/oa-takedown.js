@@ -101,8 +101,9 @@
 
   function message(row) {
     return 'Take this posting down?\n\n' + describe(row) + '\n\n' +
-      'It stops appearing on the site ' + WHEN + '. Nothing is deleted: the ' +
-      'posting keeps its record, and editing it and saving puts it back up.';
+      'It stops appearing on the site ' + WHEN + '. Nothing is deleted immediately: ' +
+      'you can restore it by editing and saving within 30 days. After 30 days, ' +
+      'the posting record is permanently removed from OA.';
   }
 
   /**

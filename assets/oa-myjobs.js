@@ -55,12 +55,12 @@
                  note: 'Goes live at the next update, normally within the hour.' },
     published: { label: 'Live',       cls: 'is-live', note: '' },
     withdrawn: { label: 'Taken down', cls: 'is-down',
-                 note: 'You took this posting down. Edit it and save to put it back up.' },
+                 note: 'You took this posting down. Edit it and save within 30 days to put it back up; after 30 days the posting is permanently removed from OA.' },
     removed:   { label: 'Taken down', cls: 'is-down',
-                 note: 'You took this posting down. Edit it and save to put it back up.' },
+                 note: 'You took this posting down. Edit it and save within 30 days to put it back up; after 30 days the posting is permanently removed from OA.' },
     hidden:    { label: 'Taken down', cls: 'is-down',
                  note: 'Taken down by the site’s maintainers — please contact us ' +
-                       'if you think this is a mistake.' },
+                       'if you think this is a mistake. The posting is permanently removed from OA after 30 days.' },
   };
 
   function el(tag, cls, text) {
@@ -154,7 +154,7 @@
         el('p', 'oa-my-note'), wrap.querySelector('.oa-card-actions'));
       note.className = 'oa-my-note';
       note.textContent = 'Taken down. It disappears from the site ' +
-        OATakedown.WHEN + ' — edit it and save to put it back up.';
+        OATakedown.WHEN + ' — edit it and save within 30 days to put it back up. After 30 days it is permanently removed from OA.';
     }).catch(function (err) {
       btn.disabled = false;
       btn.textContent = OATakedown.LABEL;

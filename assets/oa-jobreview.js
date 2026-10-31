@@ -1364,8 +1364,8 @@
           if (!window.confirm('Take this posting down?\n\n' +
               what + (line ? '\n' + line : '') + '\n\n' +
               'It stops appearing on the site within a few minutes. ' +
-              'Nothing is deleted: it moves to "Taken down by you" below, ' +
-              'one press from being put back.')) return;
+              'Nothing is deleted immediately: it moves to "Taken down by you" below, ' +
+              'one press from being put back within 30 days. After 30 days the posting record is permanently removed from OA.')) return;
           b.disabled = true;
           msg.className = 'oa-form-msg';
           msg.textContent = 'Taking it down…';
