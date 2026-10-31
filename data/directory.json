@@ -26994,6 +26994,27 @@
   ]
  },
  {
+  "id": "university-of-illinois-at-urbana-champaign__the-grainger-college-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin",
+  "institution": "University of Illinois at Urbana-Champaign",
+  "school": "The Grainger College of Engineering",
+  "department": "Industrial and Systems Engineering and Electrical Engineering",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [
+   "illinois-industrial-enterprise-transportation"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "University of Illinois at Urbana-Champaign"
+  ],
+  "mapSearchTerms": [
+   "The Grainger College of Engineering"
+  ],
+  "country": "United States"
+ },
+ {
   "id": "university-of-iowa__tippie-college-of-business__business-analytics",
   "institution": "University of Iowa",
   "school": "Tippie College of Business",
