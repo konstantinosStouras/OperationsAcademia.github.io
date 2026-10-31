@@ -106,6 +106,12 @@ for (const status of ['hidden', 'withdrawn', 'removed']) {
   for (const list of ['publish', 'queue', 'refresh', 'pending', 'rejected']) assert.equal(gate[list].length, 0,
     'retired reviews disappear from every queue and cannot be reimported');
 }
+{
+  const h = database({ target: job('hidden', { sheetId: 'old-source', publishedId: 'target' }) });
+  assert.equal((await retireJobs(h.db, { now })).deleted, 1);
+  assert.deepEqual(h.data.get('jobReviews/old-source'), { rowId: 'old-source', status: 'retired', purgedAt: now.toISOString() },
+    'a legacy source with no review record gets a content-free retirement key instead of being queued again');
+}
 // This must fail with the old unscoped ID matcher, independently of served data.
 const collision = removalSpecs([{ id: 'same', data: () => ({ uid: null, sheetId: 'same', publishedId: 'same-2' }) }]).specs;
 assert(!collision.some(s => specMatches(s, { id: 'same', ref: 'MEMBER', owner: 'member' })));

@@ -1447,9 +1447,9 @@
     /* No em dash: the panel this copies (oa-news.js's removed updates) has
        one, and the rule the site's own copy is held to elsewhere is that it
        has none. */
-    note.textContent = 'Off the site. Nobody else sees these. Nothing is ' +
-      'deleted, and every season is listed here, not just the one the tabs ' +
-      'above are showing.';
+    note.textContent = 'Off the site. Nobody else sees these. You can restore ' +
+      'a posting within 30 days; after that its record is permanently removed from OA. ' +
+      'Every season is listed here, not just the one the tabs above are showing.';
     body.appendChild(note);
 
     state.hidden.forEach(function (it) {

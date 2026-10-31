@@ -13622,7 +13622,7 @@ async function testQueueTakedown() {
   ok(/Nothing is deleted immediately: it moves to "Taken down by you" below, /.test(raw) && /within 30 days/.test(raw),
     'the confirmation says nothing is deleted and names where the posting goes');
   ok(/Off the site\. Nobody else sees these\./.test(raw)
-     && /every season is listed here/.test(raw),
+     && /Every season is listed here/.test(raw) && /within 30 days/.test(raw),
     'and the drawer says who can see them and that it is not filtered by season');
   /* NO EM DASH in either sentence this control shows. The drawer's note is
      copied from oa-news.js's removed-updates panel, which has one; the rule

@@ -66,7 +66,7 @@ export async function retireJobs(db, { now = new Date(), publishedRows = [], dry
       });
       // Retain only a retired source key so the crawler cannot queue the
       // original advertisement again. The review's content is removed too.
-      if (review && review.exists && review.data().rowId === sheetId) {
+      if (review && (!review.exists || review.data().rowId === sheetId)) {
         transaction.set(reviewRef, { rowId: sheetId, status: 'retired', purgedAt: now.toISOString() });
       }
       transaction.delete(fresh.ref || collection.doc(document.id));
