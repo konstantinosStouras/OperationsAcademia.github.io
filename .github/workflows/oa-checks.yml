@@ -216,12 +216,15 @@ jobs:
         # only thing that skip could mean is that the install broke.
         run: |
           result=0
-          run_check() { "$@" || result=1; }
-          run_check node _scraper/candidate-overview-browser-test.mjs
-          run_check node _scraper/job-poster-controls-test.mjs
-          run_check node _scraper/school-location-test.mjs
-          run_check node _scraper/university-map-test.mjs
-          run_check node _scraper/page-test.mjs
+          test_pids=()
+          node _scraper/candidate-overview-browser-test.mjs & test_pids+=("$!")
+          node _scraper/job-poster-controls-test.mjs & test_pids+=("$!")
+          node _scraper/school-location-test.mjs & test_pids+=("$!")
+          node _scraper/university-map-test.mjs & test_pids+=("$!")
+          node _scraper/page-test.mjs & test_pids+=("$!")
+          for test_pid in "${test_pids[@]}"; do
+            wait "$test_pid" || result=1
+          done
           exit "$result"
 
   # THE FORUM'S FUNCTIONS AND RULES, AGAINST THE REAL EMULATOR. Its own job,

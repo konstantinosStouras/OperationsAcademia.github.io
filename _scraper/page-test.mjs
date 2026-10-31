@@ -7656,7 +7656,7 @@ for (const w of [320, 360, 390, 430]) {
       window.__fb.docs['jobReviews/ap1'].status === 'approved', null, { timeout: 10000 });
     ok(true, 'approve now: the decision is written');
 
-    await q.waitForFunction((el) => /on your own jobs page straight away/
+    await q.waitForFunction((el) => /Approved\. Public publication is not confirmed yet/
       .test(el.textContent || ''), cardEl, { timeout: 10000 });
     ok(true, 'approve now: and the card says where to find it');
 
@@ -7732,7 +7732,7 @@ for (const w of [320, 360, 390, 430]) {
     await cardEl.$('button[data-act="approve"]').then((b) => b.click());
     /* The card says "on your own jobs page" only once the handle has landed,
        so waiting for the words is waiting for the write. */
-    await q.waitForFunction((el) => /on your own jobs page straight away/
+    await q.waitForFunction((el) => /Approved\. Public publication is not confirmed yet/
       .test(el.textContent || ''), cardEl, { timeout: 10000 });
     const handle = await q.evaluate(() => window.__fb.docs['jobSubmissions/ap2'] || null);
     const review = await q.evaluate(() => window.__fb.docs['jobReviews/ap2'] || null);
