@@ -215,11 +215,14 @@ jobs:
         # not installed" skip for a local run, but exits 1 on CI, where the
         # only thing that skip could mean is that the install broke.
         run: |
-          node _scraper/candidate-overview-browser-test.mjs
-          node _scraper/job-poster-controls-test.mjs
-          node _scraper/school-location-test.mjs
-          node _scraper/university-map-test.mjs
-          node _scraper/page-test.mjs
+          result=0
+          run_check() { "$@" || result=1; }
+          run_check node _scraper/candidate-overview-browser-test.mjs
+          run_check node _scraper/job-poster-controls-test.mjs
+          run_check node _scraper/school-location-test.mjs
+          run_check node _scraper/university-map-test.mjs
+          run_check node _scraper/page-test.mjs
+          exit "$result"
 
   # THE FORUM'S FUNCTIONS AND RULES, AGAINST THE REAL EMULATOR. Its own job,
   # so the first job's "No network" header stays true: this one installs Java
