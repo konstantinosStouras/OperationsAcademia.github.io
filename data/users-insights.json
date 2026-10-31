@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-30T23:12:25.186Z",
- "members": 430,
+ "generated": "2026-10-31T08:49:59.918Z",
+ "members": 431,
  "k": 3,
  "affiliation": {
-  "listed": 348,
+  "listed": 349,
   "other": 48,
   "none": 34
  },
@@ -131,6 +131,11 @@
     "members": 4
    },
    {
+    "name": "University of Pennsylvania",
+    "country": "United States",
+    "members": 4
+   },
+   {
     "name": "University of Southern California",
     "country": "United States",
     "members": 4
@@ -204,11 +209,6 @@
     "name": "University of California, Los Angeles (UCLA)",
     "country": "United States",
     "members": 3
-   },
-   {
-    "name": "University of Hong Kong",
-    "country": "Hong Kong",
-    "members": 3
    }
   ],
   "rest": 166
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 218
+    "members": 219
    },
    {
     "name": "Canada",
