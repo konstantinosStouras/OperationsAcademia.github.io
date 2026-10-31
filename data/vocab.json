@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-30T22:56:44.045Z",
+ "generated": "2026-10-31T22:48:15.299Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -3974,15 +3974,15 @@
    "n": 8
   },
   {
-   "v": "Information Systems",
-   "n": 7
-  },
-  {
    "v": "Technology and Operations Management",
    "n": 7
   },
   {
    "v": "Business",
+   "n": 6
+  },
+  {
+   "v": "Information Systems",
    "n": 6
   },
   {
@@ -13837,7 +13837,6 @@
    ],
    "units": [
     "Healthcare Management",
-    "Information Systems",
     "OM",
     "OM/IS (Healthcare Management)",
     "Operations Management Area"
@@ -13849,7 +13848,6 @@
     ],
     "Naveen Jindal School of Management": [
      "Healthcare Management",
-     "Information Systems",
      "Operations Management Area"
     ]
    }
@@ -15587,7 +15585,6 @@
   ],
   "Naveen Jindal School of Management": [
    "Healthcare Management",
-   "Information Systems",
    "Operations Management Area"
   ],
   "Neeley School of Business": [

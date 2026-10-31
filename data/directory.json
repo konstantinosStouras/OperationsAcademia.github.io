@@ -31422,15 +31422,13 @@
   "facultyUrl": "https://jindal.utdallas.edu/healthcare-management/ms-healthcare-management/faculty-members/"
  },
  {
-  "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__information-systems",
+  "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management",
   "institution": "University of Texas at Dallas",
   "school": "Naveen Jindal School of Management",
-  "department": "Information Systems",
   "type": "Business School",
   "country": "United States",
   "sources": [
-   "postings",
-   "seed"
+   "postings"
   ],
   "n": 1,
   "lastPosted": "2026-10-16",
@@ -31443,7 +31441,28 @@
   ],
   "mapSearchTerms": [
    "Naveen Jindal School of Management"
+  ]
+ },
+ {
+  "id": "university-of-texas-at-dallas__naveen-jindal-school-of-management__information-systems",
+  "institution": "University of Texas at Dallas",
+  "school": "Naveen Jindal School of Management",
+  "department": "Information Systems",
+  "type": "Business School",
+  "sources": [
+   "seed"
   ],
+  "mapLocationIds": [
+   "texas-dallas-healthcare-management-jindal"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "University of Texas at Dallas"
+  ],
+  "mapSearchTerms": [
+   "Naveen Jindal School of Management"
+  ],
+  "country": "United States",
   "mapDepartmentLinks": {
    "texas-dallas-healthcare-management-jindal": {
     "facultyUrl": "https://jindal.utdallas.edu/faculty/#4"
