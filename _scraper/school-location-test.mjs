@@ -30,7 +30,12 @@ for(const v of verified){
   const row=rows.find(r=>r.id===id||(r.sourceRowIds||[]).includes(id))||
    rows.find(r=>(r.mapLocationIds||[]).includes(v.id));
   assert.ok(row,'unknown directory row or canonical location route '+id);
-  assert.equal(S.institutionKey(row.institution),S.institutionKey(v.institutionKey||v.institution));
+  // Evidence may retain a legacy school/campus label after the directory
+  // adopts the university's official name. The builder's explicit location
+  // association is authoritative for those reviewed relationships.
+  assert.ok([v.institutionKey,v.institution].filter(Boolean).some(name=>
+    S.institutionKey(row.institution)===S.institutionKey(name)) ||
+    (row.mapLocationIds||[]).includes(v.id),'institution or verified canonical location route '+v.id);
   if(v.country) assert.ok((row.countries||[row.country]).includes(v.country),'verified campus country reaches directory filters: '+v.id);
  }
 }
