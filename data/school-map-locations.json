@@ -15948,26 +15948,6 @@
       "notes": "University identifies Holmes Hall as home to Freeman College. The location is the school building and does not independently verify a particular department office."
     },
     {
-      "id": "bucknell-holmes-school__business-analytics",
-      "institution": "Bucknell University",
-      "rowIds": [
-        "bucknell-university__freeman-college-of-management__business-analytics"
-      ],
-      "school": "Freeman College of Management",
-      "department": "Business Analytics",
-      "building": "Holmes Hall",
-      "address": "Corner of Coleman Hall Drive and South Campus Drive, Lewisburg, PA 17837, United States",
-      "lat": 40.95271,
-      "lng": -76.88148,
-      "addressSource": "https://www.bucknell.edu/news/organization-and-creativity-bucknell-opens-holmes-hall",
-      "coordinateSource": "https://mapcarta.com/W1396053194",
-      "supportingSources": [
-        "https://coursecatalog.bucknell.edu/archive/2022-2023/academicsupportcampuslife/campusfacilities/"
-      ],
-      "checked": "2026-10-30",
-      "notes": "University identifies Holmes Hall as home to Freeman College. The location is the school building and does not independently verify a particular department office."
-    },
-    {
       "id": "bucknell-holmes-school__markets-innovation-and-design-mide",
       "institution": "Bucknell University",
       "rowIds": [

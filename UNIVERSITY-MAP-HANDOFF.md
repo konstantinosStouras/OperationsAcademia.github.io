@@ -63,7 +63,7 @@ Generated outputs are data/directory.json and data/university-map.json; do not h
 
 ## Cache references
 
-Last published map version: 20261031-directory-updates-6. Last directory version: 20261031-rosters6. Choose new unique values for the next publication. Update all six references consistently:
+Last published map version: 20261031-directory-updates-7. Last directory version: 20261031-rosters6. Choose new unique values for the next publication. Update all six references consistently:
 
 - universities.html map-data preload
 - assets/oa-uni-map.js map-data fetch
