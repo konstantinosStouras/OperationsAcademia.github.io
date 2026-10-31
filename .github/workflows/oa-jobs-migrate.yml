@@ -24,18 +24,75 @@ jobs:
         run: |
           cat > scoped-seven.mjs <<'JS'
           import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          import {createRequire} from 'node:module';
           import {firestore} from './_scraper/_mail.mjs';
-          import {approvedRow} from './_scraper/jobreview.mjs';
-          const db=await firestore(); if(!db)throw Error('Database unavailable');
-          const fields=['id','institution','school','unit','department','levels','type','country','applyByDate','reviewDate','adUrl','postedAtUrl','furtherInfoUrl','posted','year','source','applicationStatus'];
-          const safe=r=>Object.fromEntries(fields.filter(k=>r?.[k]!==undefined).map(k=>[k,r[k]]));
-          const ids=['2026-southern-methodist-university-cox-school-of-busi-20250829','2026-university-of-miami-herbert-20251002','2027-essec-business-school-20260617','2027-george-mason-university-20260813-2','2027-hong-kong-university-of-science-and-technology-g-20260905','2027-northern-state-university-20260913','2027-university-college-london-20260821'];
-          for(const id of ids){const d=await db.collection('jobReviews').doc(id).get();const v=d.data();console.log(JSON.stringify({record:id,status:v?.status,approved:safe(v?approvedRow(v.row,v):{}),mirror:(await db.collection('jobSubmissions').doc(id).get()).exists}));}
-          const pending=await db.collection('jobReviews').where('status','==','pending').get();
-          for(const d of pending.docs){const v=d.data();if(/mason|college london|ucl/i.test(JSON.stringify(safe(v.row))))console.log(JSON.stringify({pending:d.id,row:safe(v.row),edits:safe(v.edits)}));}
-          const rows=JSON.parse(fs.readFileSync('data/jobs.json','utf8'));
-          for(const r of rows)if(/mason|college london|ucl|northern state|essec|methodist|miami/i.test(r.institution))console.log(JSON.stringify({live:safe(r)}));
-          const dirs=JSON.parse(fs.readFileSync('data/universities.json','utf8'));
-          for(const r of dirs)if(/mason|college london|ucl/i.test(JSON.stringify(r)))console.log(JSON.stringify({directory:r}));
+          import {approvedRow,publishedAdvertRepeat,advertRepeat} from './_scraper/jobreview.mjs';
+          import {submissionFromRow,rowFromSubmission,jobId,publicRow,serialise,displayOrder,buildMeta} from './_scraper/jobs-model.mjs';
+          import {buildVocab,serialiseVocab,memberVocabRows} from './_scraper/vocab.mjs';
+          import {memberUniversities} from './_scraper/directory-model.mjs';
+          const require=createRequire(import.meta.url);
+          const read=p=>JSON.parse(fs.readFileSync('data/'+p,'utf8'));
+          const now=new Date(), stamp=now.toISOString();
+          const db=await firestore(); assert(db,'Database unavailable');
+          const specs=[
+           {id:'2027-george-mason-university-20260813-2',link:'10004383',patch:{institution:'George Mason University',school:'Donald G. Costello College of Business',unit:'Information Systems and Operations Management',type:'Business School',country:'United States',levels:['Assistant Professor'],applyByDate:'',reviewDate:'2026-08-27',applicationStatus:'',adUrl:'https://listings.jobs.gmu.edu/jobs/tenure-track-assistant-professor-of-management-information-systems-fairfax-va-virginia-united-states-other',postedAtUrl:'https://listings.jobs.gmu.edu/jobs/tenure-track-assistant-professor-of-management-information-systems-fairfax-va-virginia-united-states-other#applynow',furtherInfoUrl:'https://business.gmu.edu/faculty-and-research/academic-areas-and-faculty/information-systems-and-operations-management-area'}},
+           {id:'2027-university-college-london-20260821',link:'191749',patch:{institution:'University College London',school:'UCL School of Management',unit:'Operations and Technology',type:'Business School',country:'United Kingdom',levels:['Assistant Professor','Other Ranks'],applyByDate:'2026-11-30',reviewDate:'2026-10-09',applicationStatus:'',adUrl:'https://apply.interfolio.com/191749',postedAtUrl:'https://dossier.interfolio.com/apply/191749',furtherInfoUrl:'https://www.ucl.ac.uk/management/research-and-insights'}}
+          ];
+          const existing=read('jobs.json');
+          const hidden=read('jobs-hidden.json');
+          const publicResponse=await fetch('https://www.operationsacademia.org/data/jobs.json?scoped='+Date.now(),{cache:'no-store'});assert(publicResponse.ok);const served=await publicResponse.json();
+          const queue=await db.collection('jobReviews').where('status','==','pending').get();
+          const pending=queue.docs.map(d=>{const v=d.data();return approvedRow(v.row,v)});
+          const prepared=[];
+          for(const s of specs){
+           assert(!(hidden.ids||[]).includes(s.id),'Explicitly hidden approval: stop');
+           const ref=db.collection('jobReviews').doc(s.id),snap=await ref.get(),before=snap.data();
+           assert.equal(before?.status,'approved');assert.equal(before.row.source,'jobmarket-sheet');
+           assert(!('comments' in s.patch));
+           const edits={...(before.edits||{}),...s.patch};
+           const approved=approvedRow(before.row,{...before,edits});
+           assert(!existing.some(r=>r.id===s.id));
+           assert(!publishedAdvertRepeat(approved,existing));assert(!publishedAdvertRepeat(approved,served));
+           assert(!advertRepeat(approved,pending));assert(!publishedAdvertRepeat(approved,pending));
+           // Explicitly restored by the maintainer after fresh source verification. This
+           // is a maintained publication, not an inert workbook mirror: no sheetId pin.
+           // Keep the crawler provenance and the original approval time and Comments.
+           const doc={...submissionFromRow(approved),restoredFromReview:s.id,restoredAt:stamp,updatedAt:stamp};
+           assert.equal(doc.uid,null);assert.equal(doc.status,'published');assert(!doc.sheetId);
+           const row=rowFromSubmission(doc,{now});assert(row);row.id=jobId(row);
+           assert(!existing.some(r=>r.id===row.id));assert(!served.some(r=>r.id===row.id));
+           assert.equal(row.comments,approved.comments||'');
+           assert(!publishedAdvertRepeat(row,existing));assert(!advertRepeat(row,pending));
+           const subRef=db.collection('jobSubmissions').doc(s.id);assert(!(await subRef.get()).exists,'Existing publication record: stop');
+           prepared.push({s,ref,subRef,before,edits,doc:{...doc,publishedId:row.id},row:publicRow(row)});
+          }
+          assert.equal(new Set(prepared.map(p=>p.row.id)).size,2);
+          const final=existing.concat(prepared.map(p=>p.row)).sort(displayOrder);
+          assert.deepEqual(final.filter(r=>!prepared.some(p=>p.row.id===r.id)).sort((a,b)=>a.id.localeCompare(b.id)),existing.slice().sort((a,b)=>a.id.localeCompare(b.id)));
+          fs.writeFileSync('data/jobs.json',serialise(final));
+          fs.writeFileSync('data/jobs-meta.json',JSON.stringify(buildMeta(final,{generated:stamp}),null,1)+'\n');
+          const dirs=[...read('universities.json'),...require('./assets/oa-institutions.js').directoryRows(),...require('./assets/oa-omlist.js').directoryRows()];
+          const seeded=[...dirs,...memberVocabRows(memberUniversities(read('member-universities.json')),final,dirs)];
+          fs.writeFileSync('data/vocab.json',serialiseVocab(buildVocab(final,{generated:read('vocab.json').generated,directory:seeded})));
+          // Full existing publication checks before any database write or public commit.
+          execFileSync('node',['_scraper/selftest.mjs','--publishing'],{stdio:'inherit'});
+          await db.runTransaction(async tx=>{
+           for(const p of prepared){const fresh=(await tx.get(p.ref)).data();assert.deepEqual(fresh,p.before,'Approval changed during verification');assert(!(await tx.get(p.subRef)).exists);}
+           for(const p of prepared){tx.update(p.ref,{edits:p.edits});tx.create(p.subRef,p.doc);}
+          });
+          for(const p of prepared){
+           const saved=(await p.ref.get()).data();assert.deepEqual(saved.edits,p.edits);assert.equal(saved.reviewedAt,p.before.reviewedAt);assert.equal(saved.row.comments,p.before.row.comments);assert.equal(saved.edits.comments,p.before.edits?.comments);
+           assert.deepEqual((await p.subRef.get()).data(),p.doc);
+           console.log('VERIFIED_SAVED '+JSON.stringify({approval:p.s.id,publication:p.row.id,institution:p.row.institution,school:p.row.school,unit:p.row.unit,levels:p.row.levels,closing:p.row.applyByDate,suggested:p.row.reviewDate,advert:p.row.adUrl,application:p.row.postedAtUrl,furtherInfo:p.row.furtherInfoUrl}));
+          }
+          const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
+          git('config','user.name','github-actions[bot]');git('config','user.email','41898282+github-actions[bot]@users.noreply.github.com');
+          git('add','data/jobs.json','data/jobs-meta.json','data/vocab.json');
+          git('commit','-m','Restore verified UCL and George Mason faculty vacancies only');
+          // Refuse a stale push; never overwrite concurrent work or publish other rows.
+          git('push','origin','HEAD:master');
+          console.log('SCOPED_PUBLISHED '+git('rev-parse','HEAD'));
           JS
           node scoped-seven.mjs
