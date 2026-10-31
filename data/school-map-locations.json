@@ -19168,6 +19168,104 @@
       ],
       "checked": "2026-10-31",
       "notes": "University lists school head in PE 204C and mechanical department in Palmer Engineering. Coordinates are map center for the named Palmer Engineering building footprint; address is campus mailing address."
+    },
+    {
+      "id": "qatar-university-mechanical-industrial-h07",
+      "institution": "Qatar University",
+      "rowIds": [
+        "qatar-university__college-of-engineering__mechanical-and-industrial-engineering"
+      ],
+      "school": "College of Engineering",
+      "department": "Mechanical and Industrial Engineering",
+      "building": "College of Engineering (H07)",
+      "address": "Qatar University, Doha, Qatar",
+      "lat": 25.3789495,
+      "lng": 51.4876048,
+      "addressSource": "https://business.qu.edu.qa/en-us/Colleges/engineering/academics/mie/Pages/contact-us.aspx",
+      "coordinateSource": "https://www.waze.com/live-map/directions/qa/doha-municipality/doha/college-of-engineering-%28h07%29?to=place.ChIJU1VVfhrdRT4Rrd-CBiPf82E",
+      "supportingSources": [
+        "https://engineering.qu.edu.qa/en-us/Offices/FacilitiesGeneralServices/Pages/Building-Codes.aspx"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Department contact identifies office A343 in new engineering building H07. Coordinates are the Waze listing target for College Of Engineering (H07), shown in its app link."
+    },
+    {
+      "id": "waterloo-management-science-carl-pollock",
+      "institution": "University of Waterloo",
+      "rowIds": [
+        "university-of-waterloo____management-science"
+      ],
+      "school": "Faculty of Engineering",
+      "department": "Management Science and Engineering",
+      "building": "Carl A. Pollock Hall",
+      "address": "200 University Avenue West, Waterloo, ON N2L 3G1, Canada",
+      "lat": 43.47095,
+      "lng": -80.539279,
+      "addressSource": "https://uwaterloo.ca/management-science-engineering/contact-us",
+      "coordinateSource": "https://www.openstreetmap.org/way/43250635",
+      "supportingSources": [
+        "https://uwaterloo.ca/plant-operations/floor-plans"
+      ],
+      "checked": "2026-10-31",
+      "notes": "University identifies the main office as CPH 4301; OpenStreetMap identifies Carl A. Pollock Hall, ref CPH, with this map center."
+    },
+    {
+      "id": "memorial-business-administration-gis",
+      "institution": "Memorial University of Newfoundland",
+      "rowIds": [
+        "memorial-university-of-newfoundland__faculty-of-business-administration"
+      ],
+      "school": "Faculty of Business Administration",
+      "building": "Business Administration Building",
+      "address": "Business Administration Building, Memorial University, St. John's, Newfoundland and Labrador, Canada",
+      "lat": 47.57542956552403,
+      "lng": -52.73406331791276,
+      "addressSource": "https://www.mun.ca/business/about-us/contact-us/",
+      "coordinateSource": "https://services1.arcgis.com/ZozYr1WfCwexXgcn/ArcGIS/rest/services/campus/FeatureServer/0/query?where=OBJECTID%3D24&outFields=*&outSR=4326&f=pjson",
+      "checked": "2026-10-31",
+      "notes": "University faculty contact lists BN offices. University library Map Room campus GIS identifies Business Administration building, feature 24, with this exact point."
+    },
+    {
+      "id": "university-of-louisville-college-of-business-frazier-hall",
+      "institution": "University of Louisville",
+      "rowIds": [
+        "university-of-louisville__college-of-business__information-systems-analytics-and-operations"
+      ],
+      "school": "College of Business",
+      "department": "Information Systems, Analytics and Operations",
+      "building": "Harry Frazier Hall",
+      "address": "110 W Brandeis Avenue, Louisville, KY 40208, United States",
+      "lat": 38.2191875,
+      "lng": -85.7598125,
+      "addressSource": "https://student.louisville.edu/advising/advising-academic-unit/college-business-advising",
+      "coordinateSource": "https://www.google.com/maps/search/University+of+Louisville+College+of+Business+Frazier+Hall/",
+      "supportingSources": [
+        "https://service.louisville.edu/TDClient/277/Portal/KB/Article/20344/Campus-Building-Names-and-Numbers",
+        "https://www.hmdb.org/m.asp?m=245707"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Official sources place the College of Business at Harry Frazier Hall. Google Maps named place for University of Louisville Harry Frazier Hall explicitly gives the matching street address and plus code 669R+M3 Louisville; coordinates are the center of that approximately 14 m by 11 m plus-code cell, not a surveyed building center. The nearby historical marker independently confirms the building and vicinity. This is a college-level location; no individual department office is asserted."
+    },
+    {
+      "id": "nycu-industrial-engineering-management-building-2",
+      "institution": "National Chiao Tung University",
+      "rowIds": [
+        "national-chiao-tung-university__college-of-management__industrial-engineering-and-management"
+      ],
+      "school": "College of Management",
+      "department": "Industrial Engineering and Management",
+      "building": "Management Building II",
+      "address": "No. 1001, Daxue Road, East District, Hsinchu City 300093, Taiwan",
+      "lat": 24.7851518,
+      "lng": 120.9985395,
+      "addressSource": "https://com.nycu.edu.tw/index.php?id=2037&index=7&lang=en&option=module&task=pageinfo",
+      "coordinateSource": "https://maps.google.com/?q=%E5%9C%8B%E7%AB%8B%E9%99%BD%E6%98%8E%E4%BA%A4%E9%80%9A%E5%A4%A7%E5%AD%B8%E7%AE%A1%E7%90%86%E4%BA%8C%E9%A4%A8",
+      "supportingSources": [
+        "https://princeen.web.nycu.edu.tw/lab-information/advisor/",
+        "https://www.nycu.edu.tw/com/ch/app/artwebsite/view?id=40590&module=artwebsite&serno=9ce53a91-f449-47f1-8c9e-8b8b55f669ca"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Industrial engineering faculty office and lab are in Management Building 2. The university links to Google Maps for this building; the resolved named place URL supplies its coordinates."
     }
   ]
 }

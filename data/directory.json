@@ -12716,8 +12716,16 @@
   "lastPosted": "2014-10-21",
   "lat": 47.5737975,
   "lng": -52.7329053,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "memorial-business-administration-gis"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Memorial University of Newfoundland"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Business Administration"
+  ]
  },
  {
   "id": "mercer-university__school-of-engineering__industrial-engineering-and-industrial-management",
@@ -13766,8 +13774,17 @@
   ],
   "lat": 24.7890674,
   "lng": 120.9992634,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "nycu-industrial-engineering-management-building-2"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "National Chiao Tung University"
+  ],
+  "mapSearchTerms": [
+   "College of Management",
+   "Industrial Engineering and Management"
+  ]
  },
  {
   "id": "national-tsing-hua-university__college-of-technology-management__institute-of-technology-management",
@@ -17039,8 +17056,17 @@
   ],
   "lat": 25.354826,
   "lng": 51.183884,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "qatar-university-mechanical-industrial-h07"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Qatar University"
+  ],
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Mechanical and Industrial Engineering"
+  ]
  },
  {
   "id": "queen-s-university__queen-s-school-of-business__management-science-and-operations-management",
@@ -23466,7 +23492,9 @@
   "n": 1,
   "lastPosted": "2026-10-30",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people",
+  "facultyDirectoryHint": "See Core Academic Staff; directory covers all school disciplines."
  },
  {
   "id": "university-college-london__ucl-school-of-management",
@@ -26980,8 +27008,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "university-of-louisville-college-of-business-frazier-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Louisville"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Information Systems, Analytics and Operations"
+  ],
+  "mapDepartmentLinks": {
+   "university-of-louisville-college-of-business-frazier-hall": {
+    "facultyUrl": "https://business.louisville.edu/about/leadership-organization/facultystaff-directory",
+    "facultyDirectoryHint": "Search for Information Systems, Analytics & Ops; this directory includes other college departments and staff."
+   }
+  },
   "facultyUrl": "https://business.louisville.edu/about/leadership-organization/facultystaff-directory",
   "facultyDirectoryHint": "Search for Information Systems, Analytics & Ops; this directory includes other college departments and staff."
  },
@@ -31742,8 +31785,17 @@
   "lastPosted": "2014-09-04",
   "lat": 43.4695172,
   "lng": -80.5412466,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "waterloo-management-science-carl-pollock"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Waterloo"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Engineering",
+   "Management Science and Engineering"
+  ]
  },
  {
   "id": "university-of-west-florida",
@@ -33083,7 +33135,8 @@
   "n": 1,
   "lastPosted": "2026-10-28",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology"
  },
  {
   "id": "washington-university-in-st-louis__olin-business-school",

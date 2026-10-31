@@ -8187,6 +8187,36 @@
       "checked": "2026-10-31",
       "notes": "The official department page links to a populated department-filtered directory; Chrome displayed named faculty, lecturers, staff and emeritus. It encompasses accounting and business information systems.",
       "directoryFilter": "This roster covers Accounting and Business Information Systems faculty and staff."
+    },
+    {
+      "institution": "University College London",
+      "school": "UCL Global Business School for Health",
+      "department": "Sustainable Supply Chain Management",
+      "rowIds": [
+        "university-college-london__ucl-global-business-school-for-health__sustainable-supply-chain-management"
+      ],
+      "facultyUrl": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people",
+      "directoryFilter": "See Core Academic Staff; directory covers all school disciplines.",
+      "sources": [
+        "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Current official school people page lists named core academic staff including a lecturer in sustainable supply chain management; list is school-wide, not a dedicated supply-chain roster."
+    },
+    {
+      "institution": "Washington University in St. Louis",
+      "school": "",
+      "department": "Supply Chain, Operations, and Technology (AI Cluster hire)",
+      "rowIds": [
+        "washington-university-in-st-louis____supply-chain-operations-and-technology-ai-cluster-hire"
+      ],
+      "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology",
+      "sources": [
+        "https://careercenter.informs.org/job/tenure-track-faculty-position-in-supply-chain-operations-and-technology-st-louis-missouri-5645",
+        "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The specific AI cluster vacancy is in Olin Supply Chain, Operations and Technology. Official filtered academic-area directory loaded in Chrome with 15 results; it is the existing owner-approved SCOT roster, not the cross-university AI cluster."
     }
   ]
 }
