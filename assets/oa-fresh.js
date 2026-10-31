@@ -435,6 +435,7 @@
     map[String(entry.docId)] = {
       t: now,
       ref: String(entry.ref || ''),
+      rowId: String(entry.rowId || ''),
       removed: !!entry.removed,
       added: entry.added || null,
       f: (entry.removed || entry.added) ? {} : pickFields(entry.fields || {}),
@@ -539,11 +540,24 @@
   }
 
   function rowFor(rows, entry) {
+    // References and ID-only rows are separate identities, just as they are
+    // in the publisher. A sheet's document ID may be a member job's public
+    // ID while its own posting has a collision suffix.
+    if (entry.ref) {
+      for (var j = 0; j < rows.length; j++) {
+        if (rows[j] && rows[j].ref === entry.ref) return rows[j];
+      }
+      return null;
+    }
+    if (!entry.rowId) {
+      for (var k = 0; k < rows.length; k++) {
+        if (rows[k] && !rows[k].ref && rows[k].sourceId === entry.docId) return rows[k];
+      }
+    }
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i];
-      if (!r) continue;
-      if (entry.ref && r.ref === entry.ref) return r;
-      if (String(r.id || '') === String(entry.docId)) return r;
+      if (!r || r.ref) continue;
+      if (String(r.id || '') === String(entry.rowId || entry.docId)) return r;
     }
     return null;
   }

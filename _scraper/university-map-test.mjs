@@ -273,7 +273,12 @@ try{
       try{await q.waitForSelector(row.department?'.oa-map-selected-department':'.oa-map-popup',{timeout:5000});}
       catch(error){throw new Error(id+': '+await q.locator('.oa-map-status').innerText(),{cause:error});}
       const target=schools.canonColumns({institution:row.institution,school:row.school,unit:row.department});
-      const scored=physicalBaseline.map(point=>({point,score:model.pointMatchScore(point,row.institution,target.school,target.unit)}));
+      // University filters can change the representative of a consolidated
+      // school card. Score the frozen-data points in this filtered view,
+      // rather than assuming the all-universities representative is unchanged.
+      const routePoints=await q.evaluate(()=>testMap.shown());
+      const sourceLocation=routePoints.find(point=>(point.sourceEvidenceIds||[]).includes(location.id))||displayLocation;
+      const scored=routePoints.map(point=>({point,score:model.pointMatchScore(point,row.institution,target.school,target.unit)}));
       const best=Math.max(...scored.map(x=>x.score));
       let eligible=scored.filter(x=>x.score&&x.score===best).map(x=>x.point);
       if(!target.school&&!target.unit){
@@ -289,12 +294,12 @@ try{
       // labels. Its link follows the best canonical route; it cannot select
       // each historical source independently without a location chooser.
       assert.ok(eligible.length,id+' has a canonical physical-card route');
-      const routedLocation=eligible.length>1&&commonGroups.length?displayLocation:eligible[0];
+      const routedLocation=eligible.length>1&&commonGroups.length?sourceLocation:eligible[0];
       if(eligible.length>1&&commonGroups.length){
         const options=q.locator('.oa-map-location-options');
         const choices=await options.locator('button[data-map-card-id]').evaluateAll(buttons=>buttons.map(b=>b.getAttribute('data-map-card-id')));
         assert.deepEqual(choices.slice().sort(),eligible.map(point=>point.card.id).sort(),id+' chooser lists each eligible physical card once');
-        const index=choices.indexOf(displayLocation.card.id);
+        const index=choices.indexOf(sourceLocation.card.id);
         assert.ok(index>=0,id+' offers its source school card');
         await options.locator('button[data-map-card-id]').nth(index).click();
         await q.waitForFunction(()=>document.querySelectorAll('.oa-map-popup').length===1&&!document.querySelector('.oa-map-location-options'));

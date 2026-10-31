@@ -98,6 +98,13 @@ const settle = () => new Promise(resolve => setImmediate(resolve));
       assert.equal(h.calls.filter(c => c.action === 'create-handle').length, missing ? 1 : 0);
       assert.equal(button.textContent, 'Taken down'); assert(li.has('oa-card-gone'));
       assert.equal(h.echoes.length, 1); assert.equal(h.echoes[0].docId, id); assert.equal(h.echoes[0].removed, true);
+      const echo = h.echoes[0];
+      const fresh = require(path.join(root, 'assets/oa-fresh.js'));
+      const echoNow = Date.now();
+      const echoed = fresh.overlay(jobs, { [id]: { ...echo, t: echoNow } }, { now: echoNow }).rows;
+      assert(!echoed.some(r => r.id === row.id), 'the browser hides the intended posting');
+      assert.deepEqual(echoed.map(r => r.id), jobs.filter(r => r.id !== row.id).map(r => r.id),
+        'the browser preserves every sibling, including carried-forward member postings');
       assert(li.querySelector('.oa-card-note').textContent.includes('Nothing') === false);
       const document = { id, data: () => h.docs.get(id) };
       const removal = removalSpecs([document]);
@@ -137,6 +144,16 @@ const settle = () => new Promise(resolve => setImmediate(resolve));
   b.button.click(); await settle();
   assert.equal(b.button.disabled, false); assert.equal(b.button.textContent, 'Take down');
   assert.equal(broken.calls.length, 0); assert.equal(broken.echoes.length, 0); assert(!b.li.has('oa-card-gone'));
+  const fresh = require(path.join(root, 'assets/oa-fresh.js'));
+  const echoTime = Date.now();
+  for (const row of jobs.filter(r => r.sourceId)) {
+    const legacy = fresh.overlay(jobs, { [row.sourceId]: { t: echoTime, ref: '', removed: true } }, { now: echoTime }).rows;
+    assert.deepEqual(legacy.map(r => r.id), jobs.filter(r => r.id !== row.id).map(r => r.id),
+      'old stored echoes also preserve the member sibling');
+  }
+  const referenced = [{ id: 'doc', ref: 'other' }, { id: 'target', ref: 'wanted' }];
+  assert.deepEqual(fresh.overlay(referenced, { doc: { t: echoTime, ref: 'wanted', removed: true } }, { now: echoTime }).rows,
+    [referenced[0]], 'reference identity takes precedence over a colliding document ID');
   const report = { source: 'Repository scripts with simulated DOM and database', jobs: jobs.length,
     cancelledWithoutWrites: cancellations, successfulExistingRecords: existing, successfulMissingHandleRepairs: repairs,
     refusedWritesRecover: failures, publisherCasesExecuted: publisher, normalRebuiltSiblingsProtected: 'passed', posterWithdrawal: 'passed',

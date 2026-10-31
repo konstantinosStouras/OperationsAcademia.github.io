@@ -144,7 +144,7 @@
          jobs page and find the posting they have just taken down still on it.
          Best-effort: a page that does not load the module loses the echo and
          nothing else. */
-      if (window.OAFresh) OAFresh.stash({ docId: id, ref: row.ref || '', removed: true });
+      if (window.OAFresh) OAFresh.stash({ docId: id, ref: row.ref || '', rowId: row.id || row.publishedId || '', removed: true });
       return { status: status };
     });
   }

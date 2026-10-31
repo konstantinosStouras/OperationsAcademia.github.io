@@ -11261,7 +11261,7 @@ async function testFreshEcho() {
      assets/oa-takedown.js now, so there is one place to read and every
      surface gets the echo. */
   const takedown = await readFile(path.join(HERE, '..', 'assets', 'oa-takedown.js'), 'utf8');
-  ok(/OAFresh\.stash\(\{ docId: id, ref: row\.ref \|\| '', removed: true \}\)/.test(takedown),
+  ok(/OAFresh\.stash\(\{ docId: id, ref: row\.ref \|\| '', rowId: row\.id \|\| row\.publishedId \|\| '', removed: true \}\)/.test(takedown),
     'a takedown echoes as a removal');
   for (const page of ['jobs.html', 'index.html', 'previous-markets.html', 'post-a-job.html']) {
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
@@ -11817,10 +11817,10 @@ function testReviewDuplicates() {
 
 
   const adminPage = readFileSync(path.join(HERE, '..', 'admin-area.html'), 'utf8');
-  ok(/<script defer src="assets\/oa-fresh\.js">/.test(adminPage),
+  ok(scriptIndex(adminPage, 'assets/oa-fresh.js') >= 0,
     'the Admin area loads the echo module');
-  ok(adminPage.indexOf('<script defer src="assets/oa-fresh.js">')
-     < adminPage.indexOf('<script defer src="assets/oa-jobreview.js'),
+  ok(scriptIndex(adminPage, 'assets/oa-fresh.js')
+     < scriptIndex(adminPage, 'assets/oa-jobreview.js'),
     'before the panel that stashes into it');
   ok(/id="oa-review-dupes"/.test(adminPage), 'the Admin area carries the button');
   /* SCRIPT TAGS, not the first mention: the panel is named in a comment two
@@ -13548,8 +13548,8 @@ async function testQueueTakedown() {
      && /if \(landed\) \{ spent\.push\(docId\); return; \}/.test(fresh),
     'oa-fresh.js is what makes that true: an echo of no fields has landed, so it is spent and deleted');
   const adminHtml = await read('admin-area.html');
-  ok(adminHtml.indexOf('src="assets/oa-fresh.js"')
-     < adminHtml.indexOf('src="assets/oa-jobreview.js'),
+  ok(scriptIndex(adminHtml, 'assets/oa-fresh.js')
+     < scriptIndex(adminHtml, 'assets/oa-jobreview.js'),
     'and the Admin area loads the echo before the panel that stashes into it');
 
   /* 7. NO RULES CHANGE, AND THEREFORE NO DEPLOY — which is pinned rather than
@@ -19396,7 +19396,7 @@ async function testJobTakedown() {
     const html = await read(page);
     ok(scriptIndex(html, 'assets/oa-takedown.js') >= 0,
       `takedown: ${page} loads the module`);
-    ok(html.includes('src="assets/oa-fresh.js"'),
+    ok(scriptIndex(html, 'assets/oa-fresh.js') >= 0,
       `takedown: ...and the echo it stashes into`);
     for (const c of CONSUMERS) {
       const at = scriptIndex(html, `assets/${c}`);
