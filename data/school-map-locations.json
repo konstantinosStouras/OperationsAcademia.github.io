@@ -19584,6 +19584,148 @@
       ],
       "checked": "2026-10-31",
       "notes": "Two Management Science professors list Park End Street as their Saïd address. The university identifies its main Saïd building there; the named Google Maps point matches the same address."
+    },
+    {
+      "id": "ut-austin-orie-engineering-teaching-center-ii",
+      "institution": "The University of Texas at Austin",
+      "rowIds": [
+        "university-of-texas-at-austin__cockrell-school-of-engineering__operations-research-and-industrial-engineering"
+      ],
+      "school": "Cockrell School of Engineering",
+      "department": "Operations Research and Industrial Engineering",
+      "building": "Engineering Teaching Center II (ETC)",
+      "address": "204 E. Dean Keeton Street, Austin, TX 78712, United States",
+      "lat": 30.2900024,
+      "lng": -97.735407,
+      "addressSource": "https://orie.utexas.edu/people/faculty-directory",
+      "coordinateSource": "https://www.openstreetmap.org/way/126020360",
+      "supportingSources": [
+        "https://orie.utexas.edu/about/visit-us",
+        "https://orie.utexas.edu/",
+        "https://utdirect.utexas.edu/apps/campus/buildings/nlogon/maps/UTM/ETC/",
+        "https://nominatim.openstreetmap.org/search?q=Engineering+Teaching+Center+Austin&format=jsonv2&addressdetails=1&limit=5"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The ORIE program's official faculty directory lists every faculty office as ETC 5.1xx (e.g. ETC 5.126, 5.118, 5.110) and the site footer gives the program address as 204 E. Dean Keeton Street, C2200, Austin, Texas 78712-1591; the Visit Us page says the program's on-campus facility is the Engineering Teaching Center. UT's building directory resolves ETC (building 0230) to ENGINEERING TEACHING CENTER II, 204 E DEAN KEETON ST, AUSTIN, TX 78712. Coordinates are the OSM footprint centroid of way 126020360, display_name 'Engineering Teaching Center II, 204, East Dean Keeton Street, Austin'. ORIE also uses the J.J. Pickle Research Campus in North Austin (research facility), not recorded."
+    },
+    {
+      "id": "louisville-industrial-systems-engineering-speed-building",
+      "institution": "University of Louisville",
+      "rowIds": [
+        "university-of-louisville__j-b-speed-school-of-engineering__industrial-engineering"
+      ],
+      "school": "J. B. Speed School of Engineering",
+      "department": "Industrial Engineering",
+      "building": "James B. Speed Building (JB Speed)",
+      "address": "220 Eastern Parkway, Louisville, KY 40208, United States",
+      "lat": 38.2131009,
+      "lng": -85.7608006,
+      "addressSource": "https://engineering.louisville.edu/academics/departments/industrial/",
+      "coordinateSource": "https://www.openstreetmap.org/way/334900800",
+      "supportingSources": [
+        "https://service.louisville.edu/TDClient/277/Portal/KB/Article/20344/Campus-Building-Names-and-Numbers",
+        "https://nominatim.openstreetmap.org/reverse?lat=38.213114&lon=-85.760822&format=jsonv2&zoom=18",
+        "https://www.google.com/maps/search/J.B.+Speed+Building+220+Eastern+Parkway+Louisville+KY"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The department (now styled Industrial & Systems Engineering) gives its contact as 'Industrial & Systems Engineering, JB Speed Building, #107, J. B. Speed School of Engineering, University of Louisville, Louisville, KY 40292'. UofL's official building list resolves code 0030 'JB Speed' to 'James B. Speed Building, Speed School of Engineering, 0220 Eastern Parkway, Louisville KY 40208' (Belknap Campus). Coordinates are the OSM footprint centroid of way 334900800, mapped under the building's historic name 'Speed Scientific School, 220, Eastern Parkway, Louisville 40208'; a Google Maps search for the same building returned 38.213114,-85.760822, within ~3 m. Distinct from the College of Business record at Frazier Hall and from the new Speed School Student Success & Research Building; the 40292 ZIP in the department contact is the campus-wide mailing ZIP."
+    },
+    {
+      "id": "fiu-isba-ryder-business-building",
+      "institution": "Florida International University",
+      "rowIds": [
+        "florida-international-university____is",
+        "florida-international-university__college-of-business-administration__decision-sciences-and-information-systems"
+      ],
+      "school": "College of Business",
+      "department": "IS",
+      "building": "Ryder Business Building (RB)",
+      "address": "11200 SW 8th Street, Miami, FL 33199, United States",
+      "lat": 25.7574671,
+      "lng": -80.3761248,
+      "addressSource": "https://business.fiu.edu/academics/departments/isba/",
+      "coordinateSource": "https://www.openstreetmap.org/way/112681040",
+      "supportingSources": [
+        "https://business.fiu.edu/academics/departments/isba/faculty/index.html",
+        "https://campusmaps.fiu.edu/docs/MMC.pdf",
+        "https://business.fiu.edu/about/locations/",
+        "https://nominatim.openstreetmap.org/search?q=Ryder+Business+Building+Miami&format=jsonv2&addressdetails=1&limit=5"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The official Department of Information Systems and Business Analytics (ISBA) page gives its office as 'RB 250, 11200 S.W. 8th Street, Miami, FL 33199', Modesto A. Maidique Campus, and the ISBA faculty page lists every office as RB 2xx (RB 201 to RB 276). FIU's official MMC campus map PDF expands code RB to 'Ryder Business Building' (College of Business), beside CBC 'College of Business Complex'. Coordinates are the OSM footprint centroid of way 112681040 'Ryder Business Building, Southwest 112th Avenue, Miami-Dade County, FL 33199'. The second row ('College of Business Administration / Decision Sciences and Information Systems', 2014 posting, dead faculty URL business.fiu.edu/dsis) carries a historical school and department title: Decision Sciences and Information Systems is the former name of the unit now called ISBA, so it is resolved to the same current building; the street address is the campus-wide MMC address."
+    },
+    {
+      "id": "miami-herbert-management-jenkins-building",
+      "institution": "University of Miami",
+      "rowIds": [
+        "university-of-miami__miami-herbert-business-school__operations-management",
+        "university-of-miami__miami-herbert-business-school__management-area"
+      ],
+      "school": "Miami Herbert Business School",
+      "department": "Management Area",
+      "building": "George W. Jenkins Building",
+      "address": "5250 University Drive, Coral Gables, FL 33146, United States",
+      "lat": 25.7202439,
+      "lng": -80.2767401,
+      "addressSource": "https://www.mbs.miami.edu/about/visit.html",
+      "coordinateSource": "https://www.openstreetmap.org/node/12168371004",
+      "supportingSources": [
+        "https://www.mbs.miami.edu/faculty-research/academic-departments/management/index.html",
+        "https://umpd.miami.edu/_assets/pdf/cgcampus_bluelightmap2020.pdf",
+        "https://space.miami.edu/_assets/pdf/documents/sf-gables.pdf",
+        "https://people.miami.edu/profile/834590808cadcc7d0e2ae9d9b013af09",
+        "https://nominatim.openstreetmap.org/search?q=Jenkins+Building+Coral+Gables&format=jsonv2&addressdetails=1&limit=5"
+      ],
+      "checked": "2026-10-31",
+      "notes": "SCHOOL BUILDING ONLY: the Management department's own office building was not separately verified. The official Visit page places the school at 5250 University Drive, Coral Gables, with Storer Auditorium on the ground floor and the Graduate Business Programs office at Suite 221 = '221 Jenkins Building'; UM's official campus map index lists 'Business: 219 Jenkins Building' and the Jenkins Building (George W.) as the business school's main building, and the Department of Management page says the department covers operations management and the Management Science PhD (coordinates: OSM node 12168371004 'Jenkins Building, 5250 University Drive, Coral Gables 33146'). Faculty office addresses on people.miami.edu are behind a login, so the department could not be tied to a room; UM's official space inventory shows the school also occupies the adjacent Epstein/Kosar Faculty Building (0228), Aresty Building (0227) and Stubblefield Classroom Building (0226), and Management faculty offices may be in Epstein/Kosar rather than Jenkins. The 'BA: FinTech, AI, Healthcare' row is a hiring initiative spanning departments and is deliberately not attached to this record."
+    },
+    {
+      "id": "cornell-johnson-school-sage-hall",
+      "institution": "Cornell University/ Cornell Tech",
+      "rowIds": [
+        "cornell-university-cornell-tech__samuel-curtis-johnson-graduate-school-of-management"
+      ],
+      "school": "Samuel Curtis Johnson Graduate School of Management",
+      "department": "",
+      "building": "Sage Hall",
+      "address": "Sage Hall, Johnson Graduate School of Management, Ithaca, NY 14853-6201, United States",
+      "lat": 42.4458873,
+      "lng": -76.4832494,
+      "addressSource": "https://events.cornell.edu/sage_hall",
+      "coordinateSource": "https://www.openstreetmap.org/way/310881940",
+      "supportingSources": [
+        "https://business.cornell.edu/profiles/lc785/",
+        "https://business.cornell.edu/johnson/",
+        "https://tech.cornell.edu/programs/masters-programs/johnson-cornell-tech-mba/",
+        "https://tech.cornell.edu/campus/buildings/bloomberg-center/",
+        "https://nominatim.openstreetmap.org/search?q=Sage+Hall+Ithaca&format=jsonv2&addressdetails=1&limit=5"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Cornell's official events venue page gives the address 'Johnson Graduate School-Management, 106 Sage Hall, Ithaca, NY 14853-6201', the Johnson home page pictures Sage Hall as the school's building, and a current Johnson faculty profile (Li Chen) lists office 327 Sage Hall; coordinates are the OSM footprint centroid of way 310881940 'Sage Hall, Feeney Way, Ithaca 14853'. This is the Johnson school's main building on the Ithaca campus. The directory row's institution string also names Cornell Tech: the Johnson Cornell Tech MBA is 'based at the Cornell Tech campus on Roosevelt Island', footer address 2 West Loop Road, New York, NY 10044, which is the address of the Emma and Georgina Bloomberg Center, but the official MBA page does not name a building, so the New York location is recorded here as a limitation (see existing record cornell-tech-operations-research-bloomberg for that campus) rather than as a second record; the row's existing 2 W Loop Rd address/lat-lng describe Cornell Tech, not Sage Hall."
+    },
+    {
+      "id": "washington-st-louis-scot-ai-cluster-knight-hall",
+      "institution": "Washington University in St. Louis",
+      "rowIds": [
+        "washington-university-in-st-louis____supply-chain-operations-and-technology-ai-cluster-hire"
+      ],
+      "school": "Olin Business School",
+      "department": "Supply Chain, Operations, and Technology (AI Cluster hire)",
+      "building": "Knight Hall",
+      "address": "Knight Hall, One Brookings Drive, St. Louis, Missouri 63130-4899, United States",
+      "lat": 38.649616,
+      "lng": -90.31083,
+      "addressSource": "https://bpb-us-e2.wpmucdn.com/sites.wustl.edu/dist/b/4921/files/2025/12/cv.pdf",
+      "coordinateSource": "https://happenings.washu.edu/knight_hall_413",
+      "supportingSources": [
+        "https://olin.washu.edu/faculty/fuqiang-zhang",
+        "https://olin.washu.edu/about/contact-us.php",
+        "https://apply.interfolio.com/196468",
+        "https://ai.washu.edu/about/ai-faculty-cluster-hires/",
+        "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Resolved to the Olin Business School SCOT area building, copying the address and coordinates of the existing verified record washington-st-louis-operations-knight. Re-verified today: the Interfolio posting (Oct 27, 2026) is 'Olin Business School - Supply Chain, Operations, and Technology (SCOT)' and says the position 'is part of Washington University's university-wide AI Faculty Cluster Hire initiative', which the ai.washu.edu page describes as a provost-led, seven-school effort; the AI cluster itself is cross-university and only the SCOT seat is placed here. The December 2025 CV linked from Fuqiang Zhang's current Olin profile (Dan Broida Professor of SCOT) gives 'Knight Hall 435, Olin Business School', Olin's contact page lists Knight Hall at One Brookings Drive, and the university event venue page for Knight Hall carries structured latitude 38.649616 / longitude -90.31083. Olin's directory pages do not print office rooms, so only this one SCOT office was verified."
     }
   ]
 }
