@@ -1298,7 +1298,7 @@
 
     state.list = OAList.mount({
       mount: cfg.mount,
-      data: cfg.data || '/data/directory.json',
+      data: cfg.data || '/data/directory.json?v=20261031-rosters',
       perPage: cfg.perPage || 12,
       renderCards: !cfg.mapOnly,
       // The map consumes the same filters and live correction overlay.
