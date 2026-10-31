@@ -19392,6 +19392,198 @@
       ],
       "checked": "2026-10-31",
       "notes": "Multiple technology and operations faculty list offices in West Mall Centre; university building directory identifies WMC."
+    },
+    {
+      "id": "university-of-dayton-business-miriam-hall",
+      "institution": "University of Dayton",
+      "rowIds": [
+        "university-of-dayton__school-of-business-administration__management-information-systems-operations-supply-chain-and-b",
+        "university-of-dayton__school-of-business-administration__mis-om-and-decision-sciences"
+      ],
+      "school": "School of Business Administration",
+      "department": "Management Information Systems, Operations Supply Chain and Business Analytics",
+      "building": "Miriam Hall",
+      "address": "300 College Park, Dayton, OH 45469, United States",
+      "lat": 39.740639,
+      "lng": -84.176093,
+      "addressSource": "https://libguides.udayton.edu/udhistory/buildings1960-2010",
+      "coordinateSource": "https://www.openstreetmap.org/way/404121996#map=19/39.740639/-84.176093",
+      "supportingSources": [
+        "https://ecommons.udayton.edu/stander_posters/3091/",
+        "https://udayton.edu/business/opportunities/clubs/flyer-enterprises.php"
+      ],
+      "checked": "2026-10-31",
+      "notes": "University building history states Miriam Hall houses the business school. Its 2023 MIS and operations capstone presentations took place in Miriam Hall. This represents the school building for both department-name variants; 300 College Park is the general university address. The named OSM building provides the approximate point."
+    },
+    {
+      "id": "university-of-portland-business-franz-hall",
+      "institution": "University of Portland",
+      "rowIds": [
+        "university-of-portland__robert-pamplin-jr-school-of-business-administration-psoba__operations-and-technology-management"
+      ],
+      "school": "Robert Pamplin Jr. School of Business Administration (PSOBA)",
+      "department": "Operations and Technology Management",
+      "building": "Franz Hall",
+      "address": "5000 North Willamette Boulevard, Portland, OR 97203, United States",
+      "lat": 45.57267,
+      "lng": -122.728065,
+      "addressSource": "https://calendar.up.edu/franz_hall",
+      "coordinateSource": "https://calendar.up.edu/franz_hall",
+      "supportingSources": [
+        "https://www.up.edu/files/Parkman-CV-20181.pdf"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The university official building page explicitly identifies Franz Hall as home to the business school and supplies these coordinates. The address is the university mailing address, and the point is at school level."
+    },
+    {
+      "id": "rensselaer-lally-pittsburgh-building",
+      "institution": "Rensselaer Polytechnic Institute (RPI)",
+      "rowIds": [
+        "rensselaer-polytechnic-institute__lally-school-of-management__supply-chain-management-and-analytics"
+      ],
+      "school": "Lally School of Management",
+      "department": "Supply Chain Management and Analytics",
+      "building": "Pittsburgh Building",
+      "address": "110 8th Street, Troy, NY 12180, United States",
+      "lat": 42.731168,
+      "lng": -73.683321,
+      "addressSource": "https://lally.rpi.edu/admissions/visit-lally",
+      "coordinateSource": "https://www.openstreetmap.org/way/104737191#map=19/42.731168/-73.683321",
+      "supportingSources": [
+        "https://lally.rpi.edu/student-life/student-services/lally-study-interview-spaces",
+        "https://archives.rpi.edu/blog/2019/10/30/continuing-up-the-hill-the-pittsburgh-building"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The current official Lally visit page identifies the Pittsburgh Building, and its current student spaces are there. The named OSM building provides the point. This is the school location; no specific faculty office is asserted. It is distinct from Lally Hall."
+    },
+    {
+      "id": "rutgers-camden-operations-business-science",
+      "institution": "Rutgers University",
+      "rowIds": [
+        "rutgers-university__school-of-business-camden__operations-management"
+      ],
+      "school": "School of Business-Camden",
+      "department": "Operations Management",
+      "building": "Business and Science Building",
+      "address": "227 Penn Street, Camden, NJ 08102, United States",
+      "lat": 39.9488191,
+      "lng": -75.1232135,
+      "addressSource": "https://business.camden.rutgers.edu/contact-us/",
+      "coordinateSource": "https://www.google.com/maps/search/Business+and+Science+Building+Rutgers+Camden",
+      "supportingSources": [
+        "https://camden.rutgers.edu/registrar/scheduling/classroom-inventory",
+        "https://business.camden.rutgers.edu/about/leadership_team/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "School contact identifies Business and Science Building; registrar identifies its 227 Penn address. Google Maps' named Rutgers School of Business–Camden at this address provides the point, distinct from nearby Science Building at 315 Penn."
+    },
+    {
+      "id": "loyola-chicago-quinlan-schreiber",
+      "institution": "Loyola University Chicago",
+      "rowIds": [
+        "loyola-university-chicago__quinlan-school-of-business",
+        "loyola-university-chicago__quinlan-school-of-business__information-systems-and-operations-management"
+      ],
+      "school": "Quinlan School of Business",
+      "department": "Information Systems and Operations Management",
+      "building": "Schreiber Center",
+      "address": "16 E. Pearson Street, Chicago, IL 60611, United States",
+      "lat": 41.8977838,
+      "lng": -87.6278355,
+      "addressSource": "https://www.luc.edu/quinlan/whyquinlan/contact/",
+      "coordinateSource": "https://www.google.com/maps/search/Schreiber+Center+Loyola+Chicago",
+      "supportingSources": [
+        "https://www.luc.edu/quinlan/whyquinlan/facultyandstaff/profiles/hewittmike.shtml",
+        "https://www.luc.edu/quinlan/whyquinlan/facultyandstaff/profiles/halabi-ditschmaha.shtml"
+      ],
+      "checked": "2026-10-31",
+      "notes": "School contact gives Schreiber Center, and current Information Systems and Supply Chain Management department chair's office is Schreiber 419. Named building Google Maps listing matches the university's physical address."
+    },
+    {
+      "id": "seton-hall-analytics-supply-chain-jubilee",
+      "institution": "Seton Hall University",
+      "rowIds": [
+        "seton-hall-university____business-analytics-and-supply-chain-management",
+        "seton-hall-university____scm-ba"
+      ],
+      "school": "Stillman School of Business",
+      "department": "Business Analytics and Supply Chain Management",
+      "building": "Jubilee Hall",
+      "address": "400 South Orange Avenue, South Orange, NJ 07079, United States",
+      "lat": 40.742873,
+      "lng": -74.248516,
+      "addressSource": "https://www.shu.edu/business/departments.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/378203397",
+      "supportingSources": [
+        "https://careers.pageuppeople.com/mob/763/cw/en-us/job/497543/assistant-professor-business-analytics-and-supply-chain-management",
+        "https://www.shu.edu/profiles/viswaviswanathan.html"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Job posting places business analytics and supply chain faculty within Computing and Decision Sciences; school department listing gives Jubilee Hall 681. Pin represents the named Jubilee Hall building; street address is campus address."
+    },
+    {
+      "id": "alberta-business-accounting-operations-building",
+      "institution": "University of Alberta",
+      "rowIds": [
+        "university-of-alberta__alberta-school-of-business__accounting-operations-and-information-systems"
+      ],
+      "school": "Alberta School of Business",
+      "department": "Accounting, Operations and Information Systems",
+      "building": "Business Building",
+      "address": "11211 Saskatchewan Drive NW, Edmonton, AB T6G 2R6, Canada",
+      "lat": 53.5274513,
+      "lng": -113.5218271,
+      "addressSource": "https://www.ualberta.ca/en/business/contact/index.html",
+      "coordinateSource": "https://www.google.com/maps/search/Business+Building+University+of+Alberta/",
+      "supportingSources": [
+        "https://www.ualberta.ca/en/accounting-business-analytics/contact.html"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Current school contact locates its offices and dean in Business Building at this street address. Current Accounting and Business Analytics contact lists 3-20L Business Building. This is a school-building reference for the historic combined department title, not a separately verified current operations office. Google Maps names Alberta School of Business (BUS) at the same street address and supplies the point."
+    },
+    {
+      "id": "ucsd-rady-ito-otterson-hall",
+      "institution": "University of California, San Diego (UCSD)",
+      "rowIds": [
+        "university-of-california-san-diego__rady-school-of-management__innovation-technology-and-operations"
+      ],
+      "school": "Rady School of Management",
+      "department": "Innovation, Technology and Operations",
+      "building": "Otterson Hall",
+      "address": "9500 Gilman Drive, La Jolla, CA 92093, United States",
+      "lat": 32.8865929,
+      "lng": -117.2411101,
+      "addressSource": "https://rady.ucsd.edu/faculty-research/faculty/pooyan-kazemian.html",
+      "coordinateSource": "https://www.google.com/maps/place/Otterson+Hall,+La+Jolla,+CA+92093,+USA/@32.8865929,-117.2411101,17z/data=!3m1!4b1!4m6!3m5!1s0x80dc06eb0101b45f:0x154946847479eed8!8m2!3d32.8865929!4d-117.2411101!16s%2Fg%2F1wbf_p_f",
+      "supportingSources": [
+        "https://m.ucsd.edu/maps/static/location/829?query=",
+        "https://rady.ucsd.edu/faculty-research/faculty/sanjiv-erat.html",
+        "https://rady.ucsd.edu/faculty-research/faculty/terrence-august.html",
+        "https://m.ucsd.edu/maps/static/search?id=829"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Three current ITO professors list offices in Otterson Hall. The live Google Maps named-building point is corroborated by the nearby marker in the indexed UCSD historical static map."
+    },
+    {
+      "id": "oxford-said-management-science-park-end",
+      "institution": "University of Oxford",
+      "rowIds": [
+        "university-of-oxford__said-business-school__management-science"
+      ],
+      "school": "Saïd Business School",
+      "department": "Management Science",
+      "building": "Saïd Business School",
+      "address": "Park End Street, Oxford OX1 1HP, United Kingdom",
+      "lat": 51.7532523,
+      "lng": -1.2682701,
+      "addressSource": "https://www.sbs.ox.ac.uk/about-us/people/ho-yin-mak",
+      "coordinateSource": "https://www.google.com/maps/place/Sa%C3%AFd+Business+School+(Park+End+Street)+(University+of+Oxford)/@51.7532523,-1.2682701,17z/data=!3m1!4b1!4m6!3m5!1s0x4876c6d19df140c7:0xbbcbc03b129c4eab!8m2!3d51.7532523!4d-1.2682701!16zL20vMDVkcXBk",
+      "supportingSources": [
+        "https://www.sbs.ox.ac.uk/about-us/people/kejia-hu",
+        "https://www.ox.ac.uk/about/how-we-are-run/equality-diversity/access-guide/academic-depts/said-business-school-building"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Two Management Science professors list Park End Street as their Saïd address. The university identifies its main Saïd building there; the named Google Maps point matches the same address."
     }
   ]
 }

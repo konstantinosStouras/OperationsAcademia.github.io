@@ -12217,8 +12217,18 @@
   ],
   "n": 1,
   "lastPosted": "2024-11-06",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "loyola-chicago-quinlan-schreiber"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Loyola University Chicago"
+  ],
+  "mapSearchTerms": [
+   "Quinlan School of Business",
+   "Information Systems and Operations Management"
+  ],
+  "facultyUrl": "http://www.luc.edu/quinlan/faculty/"
  },
  {
   "id": "loyola-university-chicago__quinlan-school-of-business__information-systems-and-operations-management",
@@ -12234,8 +12244,17 @@
   ],
   "lat": 41.9986479,
   "lng": -87.6578433,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "loyola-chicago-quinlan-schreiber"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Loyola University Chicago"
+  ],
+  "mapSearchTerms": [
+   "Quinlan School of Business",
+   "Information Systems and Operations Management"
+  ]
  },
  {
   "id": "maastricht-university__school-of-business-and-economics__marketing-and-supply-chain-management",
@@ -17179,8 +17198,17 @@
   ],
   "lat": 42.731156,
   "lng": -73.6854559,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "rensselaer-lally-pittsburgh-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Rensselaer Polytechnic Institute (RPI)"
+  ],
+  "mapSearchTerms": [
+   "Lally School of Management",
+   "Supply Chain Management and Analytics"
+  ]
  },
  {
   "id": "rensselaer-polytechnic-institute__school-of-engineering__industrial-and-systems-engineering",
@@ -17633,8 +17661,17 @@
   ],
   "lat": 39.9488191,
   "lng": -75.1232135,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "rutgers-camden-operations-business-science"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Rutgers University"
+  ],
+  "mapSearchTerms": [
+   "School of Business-Camden",
+   "Operations Management"
+  ]
  },
  {
   "id": "rutgers-university-at-newark-and-new-brunswick__rutgers-business-school__supply-chain-management",
@@ -18317,8 +18354,17 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-30",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "seton-hall-analytics-supply-chain-jubilee"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Seton Hall University"
+  ],
+  "mapSearchTerms": [
+   "Stillman School of Business",
+   "Business Analytics and Supply Chain Management"
+  ],
   "deptUrl": "https://www.shu.edu/computing/",
   "facultyUrl": "https://www.shu.edu/computing/faculty.html",
   "facultyDirectoryHint": "This roster covers the whole Computing and Decision Sciences department, including areas beyond business analytics and supply chain management."
@@ -18366,6 +18412,7 @@
   "n": 1,
   "lastPosted": "2026-02-03",
   "mapLocationIds": [
+   "seton-hall-analytics-supply-chain-jubilee",
    "seton-hall-computing-decision-sciences-jubilee"
   ],
   "mapLocationKind": "exact",
@@ -18374,14 +18421,14 @@
   ],
   "mapSearchTerms": [
    "Stillman School of Business",
+   "Business Analytics and Supply Chain Management",
    "Department of Computing and Decision Sciences"
   ],
   "mapDepartmentLinks": {
    "seton-hall-computing-decision-sciences-jubilee": {
     "facultyUrl": "https://www.shu.edu/computing/faculty.html"
    }
-  },
-  "facultyUrl": "https://www.shu.edu/computing/faculty.html"
+  }
  },
  {
   "id": "shandong-university-of-finance-and-economics__school-of-finance__large-language-model-research-institute",
@@ -23969,8 +24016,17 @@
   ],
   "lat": 53.527353,
   "lng": -113.521879,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "alberta-business-accounting-operations-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Alberta"
+  ],
+  "mapSearchTerms": [
+   "Alberta School of Business",
+   "Accounting, Operations and Information Systems"
+  ]
  },
  {
   "id": "university-of-amsterdam__amsterdam-business-school-amsterdam-school-of-economics__business-analytics",
@@ -24933,8 +24989,17 @@
   "lastPosted": "2014-10-13",
   "lat": 32.8824069,
   "lng": -117.2348172,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ucsd-rady-ito-otterson-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of California, San Diego (UCSD)"
+  ],
+  "mapSearchTerms": [
+   "Rady School of Management",
+   "Innovation, Technology and Operations"
+  ]
  },
  {
   "id": "university-of-cambridge",
@@ -25529,8 +25594,23 @@
    "omlist",
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "university-of-dayton-business-miriam-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Dayton"
+  ],
+  "mapSearchTerms": [
+   "School of Business Administration",
+   "Management Information Systems, Operations Supply Chain and Business Analytics"
+  ],
+  "country": "United States",
+  "mapDepartmentLinks": {
+   "university-of-dayton-business-miriam-hall": {
+    "facultyUrl": "https://udayton.edu/business/about/faculty-staff/mis-osc-analytics.php"
+   }
+  },
   "facultyUrl": "https://udayton.edu/business/about/faculty-staff/mis-osc-analytics.php"
  },
  {
@@ -25541,14 +25621,30 @@
   "type": "Business School",
   "country": "United States",
   "address": "300 College Park Dayton, OH 45469",
-  "facultyUrl": "https://udayton.edu/business/faculty-and-research/",
+  "facultyUrl": "https://udayton.edu/business/about/faculty-staff/mis-osc-analytics.php",
   "sources": [
    "directory"
   ],
   "lat": 39.7380137,
   "lng": -84.1736356,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "university-of-dayton-business-miriam-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Dayton"
+  ],
+  "mapSearchTerms": [
+   "School of Business Administration",
+   "Management Information Systems, Operations Supply Chain and Business Analytics"
+  ],
+  "mapDepartmentLinks": {
+   "university-of-dayton-business-miriam-hall": {
+    "facultyUrl": "https://udayton.edu/business/about/faculty-staff/mis-osc-analytics.php"
+   }
+  },
+  "deptUrl": "https://udayton.edu/business/about/faculty-staff/mis-osc-analytics.php",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-evansville____supply-chain-management",
@@ -29312,8 +29408,17 @@
   ],
   "lat": 51.7528146,
   "lng": -1.2679322,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "oxford-said-management-science-park-end"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Oxford"
+  ],
+  "mapSearchTerms": [
+   "Saïd Business School",
+   "Management Science"
+  ]
  },
  {
   "id": "university-of-oxford__said-business-school__technology-and-operations-management",
@@ -29541,8 +29646,17 @@
   ],
   "lat": 45.572685,
   "lng": -122.7277619,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "university-of-portland-business-franz-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Portland"
+  ],
+  "mapSearchTerms": [
+   "Robert Pamplin Jr. School of Business Administration (PSOBA)",
+   "Operations and Technology Management"
+  ]
  },
  {
   "id": "university-of-puget-sound____business-and-leadership",
