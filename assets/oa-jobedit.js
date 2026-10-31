@@ -59,9 +59,49 @@
     if (row.ref && perm.byRef[row.ref]) return perm.byRef[row.ref];
     // Publication may suffix a sheet row's id when a member job shares it.
     // Keep the source record as the editing target, before trying the URL id.
-    if (row.sourceId) return perm.bySheetId[row.sourceId] || '';
-    if (perm.byId[row.id]) return perm.byId[row.id];
-    return '';
+    if (row.sourceId && perm.bySheetId[row.sourceId]) return perm.bySheetId[row.sourceId];
+    if (!row.sourceId && perm.bySheetId[row.id]) return perm.bySheetId[row.id];
+    if (!row.sourceId && perm.byId[row.id]) return perm.byId[row.id];
+    // Carried-forward rows can outlive their mirror. Only the maintainer may
+    // repair a missing handle; posters still need an owned document.
+    var id = String(row.sourceId || row.id || '');
+    return perm.admin && /^[A-Za-z0-9._~-]+$/.test(id) ? id : '';
+  }
+
+  // Create a missing handle on use. The transaction never overwrites a
+  // submission created concurrently under the same id.
+  function ensureHandle(id, row) {
+    if (perm.byId[id]) return Promise.resolve(id);
+    var mine = perm;
+    if (!mine.admin || !window.OAFresh || !OAFresh.mirrorDoc) {
+      return Promise.reject(new Error('editing record unavailable'));
+    }
+    return OAFB.ready().then(function (fb) {
+      if (perm !== mine || !mine.admin) throw new Error('session changed');
+      var db = fb.firestore();
+      var ref = db.collection(col()).doc(id);
+      return db.runTransaction(function (tx) {
+        return tx.get(ref).then(function (snap) {
+          if (perm !== mine) throw new Error('session changed');
+          if (snap.exists) {
+            var v = snap.data() || {};
+            if (v.uid || (v.sheetId !== id && v.publishedId !== row.id)) {
+              throw new Error('editing record identity conflict');
+            }
+          } else {
+            var mirror = OAFresh.mirrorDoc(Object.assign({}, row, { id: id }), {
+              canonCountry: window.OACountries && OACountries.canon,
+            });
+            mirror.publishedId = row.id;
+            // An old form posting is not a workbook row. Giving it sheetId
+            // would make the build drop its edits when absent from the sheet.
+            if (!row.sourceId && row.source !== 'jobmarket-sheet') delete mirror.sheetId;
+            tx.set(ref, mirror);
+          }
+          return id;
+        });
+      });
+    });
   }
 
   /* ------------------------------------------------------------- the buttons */
@@ -92,8 +132,14 @@
     bar.className = 'oa-card-actions';
 
     bar.appendChild(button('Edit', 'oa-jobbtn-edit',
-      'Correct this posting', function () {
-        location.href = 'post-a-job?edit=' + encodeURIComponent(id);
+      'Correct this posting', function (btn) {
+        btn.disabled = true;
+        ensureHandle(id, row).then(function (target) {
+          location.href = 'post-a-job?edit=' + encodeURIComponent(target);
+        }).catch(function () {
+          btn.disabled = false;
+          note(li, 'We could not open this posting for editing. Please try again.', true);
+        });
       }));
 
     bar.appendChild(button(OATakedown.LABEL, 'oa-jobbtn-del',
@@ -111,7 +157,9 @@
     btn.disabled = true;
     btn.textContent = 'Taking down…';
 
-    OATakedown.run({ id: id, row: row }).then(function () {
+    ensureHandle(id, row).then(function (target) {
+      return OATakedown.run({ id: target, row: row });
+    }).then(function () {
       btn.textContent = 'Taken down';
       var li = btn.closest('.oa-card');
       if (li) li.classList.add('oa-card-gone');
@@ -168,7 +216,7 @@
          own. Both are exactly what the rules allow, so the narrower query is
          not a courtesy — a poster's broad read would simply be refused. */
       var c = fb.firestore().collection(col());
-      return (perm.admin ? c : c.where('uid', '==', user.uid)).get();
+      return (mine.admin ? c : c.where('uid', '==', user.uid)).get();
     }).then(function (snap) {
       if (perm !== mine) return;          // a later auth event owns the page now
       snap.forEach(function (d) {
