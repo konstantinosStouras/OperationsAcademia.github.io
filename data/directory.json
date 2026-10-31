@@ -13003,8 +13003,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "michigan-state-hannah-administration-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Michigan State University"
+  ],
+  "mapSearchTerms": [],
+  "country": "United States"
  },
  {
   "id": "michigan-state-university____logistics-and-supply-chain-management",
@@ -24814,8 +24821,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "berkeley-california-hall-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of California, Berkeley"
+  ],
+  "mapSearchTerms": [],
+  "country": "United States"
  },
  {
   "id": "university-of-california-berkeley____ieor-decision-analytics",
@@ -26879,8 +26893,14 @@
   ],
   "n": 1,
   "lastPosted": "2014-09-11",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "illinois-urbana-swanlund-administration-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Illinois at Urbana-Champaign"
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "university-of-illinois-at-urbana-champaign__gies-college-of-business__business-administration",
@@ -29539,8 +29559,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "notre-dame-main-building-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Notre Dame"
+  ],
+  "mapSearchTerms": [],
+  "country": "United States"
  },
  {
   "id": "university-of-notre-dame__mendoza-college-of-business__information-technology-analytics-and-operations",
@@ -30385,8 +30412,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "south-carolina-osborne-administration-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of South Carolina"
+  ],
+  "mapSearchTerms": [],
+  "country": "United States"
  },
  {
   "id": "university-of-south-carolina____it",
@@ -31285,8 +31319,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "texas-dallas-administration-building-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Texas at Dallas"
+  ],
+  "mapSearchTerms": [],
+  "country": "United States"
  },
  {
   "id": "university-of-texas-at-dallas____om",
@@ -31747,8 +31788,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "utah-park-building-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Utah"
+  ],
+  "mapSearchTerms": [],
+  "country": "United States"
  },
  {
   "id": "university-of-utah____om-scm",
@@ -31945,8 +31993,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "virginia-madison-hall-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Virginia"
+  ],
+  "mapSearchTerms": [],
+  "country": "United States"
  },
  {
   "id": "university-of-virginia____om",
@@ -32521,8 +32576,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "wisconsin-madison-bascom-hall-institution"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Wisconsin-Madison"
+  ],
+  "mapSearchTerms": [],
+  "country": "United States"
  },
  {
   "id": "university-of-wisconsin-madison__wisconsin-school-of-business__operations-and-information-management",

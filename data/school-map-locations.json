@@ -20545,6 +20545,190 @@
       ],
       "checked": "2026-10-31",
       "notes": "Institution-level campus reference, not a school or department office. IESE's official legal notice states the school is \"headquartered in Barcelona, Avenida Pearson, 21\" (entity: IESE Business School-University of Navarra), and the official Barcelona campus page names the Av. Pearson 21 site as the South Campus (the North Campus is at Carrer d'Arnús i de Garí 3-7). Coordinates are the OpenStreetMap named point 'IESE Business School' tagged addr Avinguda de Pearson 21, note 'Campus Sur (South Campus)' (node 2681809198), not a city or campus-polygon centroid. IESE also has campuses of standing in Madrid (Camino del Cerro del Águila 3), Munich (Maria-Theresia-Straße 15), New York (165 West 57th Street) and São Paulo (Rua Martiniano de Carvalho 573), plus offices in London, Singapore, Tokyo, Hong Kong and Shanghai; this record marks the officially designated headquarters only and makes no claim about where any department sits."
+    },
+    {
+      "id": "notre-dame-main-building-institution",
+      "institution": "University of Notre Dame",
+      "rowIds": [
+        "university-of-notre-dame"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Main Building (the Golden Dome)",
+      "address": "400 Main Building, Notre Dame, IN 46556, United States",
+      "lat": 41.7029958,
+      "lng": -86.2389934,
+      "addressSource": "https://president.nd.edu/contact/",
+      "coordinateSource": "https://www.openstreetmap.org/relation/16131680",
+      "supportingSources": [
+        "https://nominatim.openstreetmap.org/search?q=Main+Building+Notre+Dame+Indiana&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The Office of the President's official contact page gives its address as 400 Main Building, Notre Dame, Indiana 46556, so the Main Building is the main administration building. Notre Dame has one campus (Notre Dame, IN); its Global Gateways abroad are not campuses. Point is the OSM footprint centroid of the building named 'Main Building' (relation 16131680, building=university; Nominatim display name 'Main Building, Cavanaugh Drive, Notre Dame, IN 46556'). The address is the university's campus-wide postal form (no street number). The existing Mendoza College of Business record was deliberately not reused."
+    },
+    {
+      "id": "wisconsin-madison-bascom-hall-institution",
+      "institution": "University of Wisconsin-Madison",
+      "rowIds": [
+        "university-of-wisconsin-madison"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Bascom Hall",
+      "address": "500 Lincoln Drive, Madison, WI 53706, United States",
+      "lat": 43.0753714,
+      "lng": -89.4043607,
+      "addressSource": "https://chancellor.wisc.edu/",
+      "coordinateSource": "https://www.openstreetmap.org/relation/17672451",
+      "supportingSources": [
+        "https://nominatim.openstreetmap.org/search?q=Bascom+Hall+Madison&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The Office of the Chancellor's official site gives its contact address as 163 Bascom Hall, 500 Lincoln Drive, Madison, WI 53706, so Bascom Hall is the main administration building. UW-Madison is a single campus in Madison (the other UW universities are separate institutions, and the directory lists them under their own names). Point is the OSM footprint centroid of Bascom Hall (relation 17672451, building=university, addr 500 Lincoln Drive). The existing Wisconsin School of Business (Grainger Hall) record was not reused."
+    },
+    {
+      "id": "berkeley-california-hall-institution",
+      "institution": "University of California, Berkeley",
+      "rowIds": [
+        "university-of-california-berkeley"
+      ],
+      "school": "",
+      "department": "",
+      "building": "California Hall",
+      "address": "200 California Hall, Berkeley, CA 94720-1500, United States",
+      "lat": 37.8719943,
+      "lng": -122.2604095,
+      "addressSource": "https://chancellor.berkeley.edu/contact",
+      "coordinateSource": "https://www.openstreetmap.org/way/24024512",
+      "supportingSources": [
+        "https://nominatim.openstreetmap.org/search?q=California+Hall+Berkeley&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The Office of the Chancellor's official contact page gives its address as 200 California Hall #1500, Berkeley, CA 94720-1500, so California Hall is the main administration building. UC Berkeley is one campus in Berkeley (other UC campuses are separate universities); satellite sites such as the Richmond Field Station are research facilities, not a second campus. The address is the campus's internal 'building + mail code' form rather than a street number. Point is the OSM footprint centroid of California Hall (way 24024512, building=university; Nominatim 'California Hall, Sather Road, Berkeley'). The existing Haas and IEOR records were not reused."
+    },
+    {
+      "id": "texas-dallas-administration-building-institution",
+      "institution": "University of Texas at Dallas",
+      "rowIds": [
+        "university-of-texas-at-dallas"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Administration Building (AD)",
+      "address": "800 West Campbell Road, Richardson, TX 75080-3021, United States",
+      "lat": 32.989631,
+      "lng": -96.7483124,
+      "addressSource": "https://president.utdallas.edu/contact/",
+      "coordinateSource": "https://www.openstreetmap.org/way/221316815",
+      "supportingSources": [
+        "https://dox.utdallas.edu/map1003",
+        "https://www.utdallas.edu/about-us/offices"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The Office of the President's official contact page lists its office as 'AD 2.418', 800 West Campbell Road, Richardson, Texas 75080-3021; the university's own campus map PDF (dox.utdallas.edu/map1003, authored 'University of Texas at Dallas', 2007) expands the code 'AD' to 'Administration'. UT Dallas has a single campus in Richardson (800 W. Campbell Road is the campus-wide street address). Point is the centroid of the OSM footprint named 'Administration Building' with short_name 'AD' (way 221316815, building=university), computed from the OSM API extract. The current facilities.utdallas.edu liaison page, which also lists AD = Administration, could not be read from this environment (bot protection)."
+    },
+    {
+      "id": "illinois-urbana-swanlund-administration-institution",
+      "institution": "University of Illinois at Urbana-Champaign",
+      "rowIds": [
+        "university-of-illinois-at-urbana-champaign"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Swanlund Administration Building",
+      "address": "601 East John Street, Champaign, IL 61820, United States",
+      "lat": 40.1088389,
+      "lng": -88.2300368,
+      "addressSource": "https://chancellor.illinois.edu/about/staff/",
+      "coordinateSource": "https://www.openstreetmap.org/way/138183424",
+      "supportingSources": [
+        "https://nominatim.openstreetmap.org/search?q=Swanlund+Administration+Building+Champaign&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The Office of the Chancellor's official staff page gives its address as 517 Swanlund Admin Bldg, 601 E. John, MC-304, Champaign, IL 61820, so the Swanlund Administration Building houses the chancellor. UIUC is one campus spanning Urbana and Champaign; the University of Illinois Chicago and Springfield are separate universities of the system, not campuses of UIUC. Point is the OSM footprint centroid of the Swanlund Administration Building (way 138183424, building=university, addr 601 East John Street). The existing Gies College of Business record was not reused."
+    },
+    {
+      "id": "michigan-state-hannah-administration-institution",
+      "institution": "Michigan State University",
+      "rowIds": [
+        "michigan-state-university"
+      ],
+      "school": "",
+      "department": "",
+      "building": "John A. Hannah Administration Building",
+      "address": "426 Auditorium Road, East Lansing, MI 48824-1046, United States",
+      "lat": 42.7296601,
+      "lng": -84.4815411,
+      "addressSource": "https://president.msu.edu/contact/",
+      "coordinateSource": "https://www.openstreetmap.org/way/26072755",
+      "supportingSources": [
+        "https://nominatim.openstreetmap.org/search?q=Hannah+Administration+Building+East+Lansing&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The Office of the President's official contact page gives its address as 426 Auditorium Road, Hannah Administration Building, Room 450, East Lansing, MI 48824-1046. MSU's one campus is in East Lansing; its medical colleges keep community sites (e.g. Grand Rapids) that are not a second campus. Point is the OSM footprint centroid of the 'John A. Hannah Administration Building' (way 26072755, building=university); OSM tags the house number as 406 Auditorium Road where the university writes 426, so the official number is used in the address. The existing Broad College and Statistics records were not reused."
+    },
+    {
+      "id": "virginia-madison-hall-institution",
+      "institution": "University of Virginia",
+      "rowIds": [
+        "university-of-virginia"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Madison Hall",
+      "address": "1827 University Avenue, Charlottesville, VA 22904, United States",
+      "lat": 38.0369987,
+      "lng": -78.5027473,
+      "addressSource": "https://president.virginia.edu/contact",
+      "coordinateSource": "https://www.openstreetmap.org/way/44528323",
+      "supportingSources": [
+        "https://engagement.virginia.edu/node/3083",
+        "https://www.uvawise.edu/about/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The Office of the President's official contact page names Madison Hall as its in-person location (mailing address P.O. Box 400224, Charlottesville, VA 22904-4224, so no street number is given there); the street address 1827 University Avenue comes from the OSM footprint, which is tagged source=University of Virginia (UVA_FACILITIES layer) and named 'Madison Hall - President's Office' (way 44528323). FLAG for the coordinator: UVA also operates The University of Virginia's College at Wise, a four-year college in Wise, VA with its own chancellor; this record treats it as a branch college rather than a second campus of the directory's institution (every UVA posting in the directory is for the Charlottesville Grounds, and the president's seat is unambiguous), but if the addendum is read strictly the row is multi-campus and this record should be dropped. The existing Darden records were not reused."
+    },
+    {
+      "id": "utah-park-building-institution",
+      "institution": "University of Utah",
+      "rowIds": [
+        "university-of-utah"
+      ],
+      "school": "",
+      "department": "",
+      "building": "John R. Park Building",
+      "address": "201 Presidents Circle, Salt Lake City, UT 84112, United States",
+      "lat": 40.7649823,
+      "lng": -111.8487919,
+      "addressSource": "https://people.utah.edu/basic.hml?did=259",
+      "coordinateSource": "https://www.openstreetmap.org/way/33632418",
+      "supportingSources": [
+        "https://president.utah.edu/presidents/john-r-park/",
+        "https://asiacampus.utah.edu/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The university's official campus directory entry for the Office of the President (did=259) gives its location as JOHN R. PARK BUILDING, 201 PRESIDENTS CIR RM 203, Salt Lake City, UT 84112, and the president's own site says the Park Building 'today is used for the office of the president and other university leaders'. Point is the OSM footprint centroid of the 'John R Park Building' (way 33632418, building=university, addr 201 South Presidents Circle, short_name PARK). FLAG for the coordinator: the University of Utah also runs the U Asia Campus in Songdo, Incheon, South Korea (a degree-granting branch described on its site as part of the University of Utah, with students taking classes at both locations); this record treats it as a branch of the Salt Lake City campus rather than a second campus of standing, but under a strict reading of the addendum the row is multi-campus and this record should be dropped. The existing Eccles School records were not reused."
+    },
+    {
+      "id": "south-carolina-osborne-administration-institution",
+      "institution": "University of South Carolina",
+      "rowIds": [
+        "university-of-south-carolina"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Osborne Administration Building",
+      "address": "915 Bull Street, Columbia, SC 29208, United States",
+      "lat": 33.9993376,
+      "lng": -81.0275776,
+      "addressSource": "https://www.sc.edu/about/our_leadership/president/",
+      "coordinateSource": "https://www.openstreetmap.org/way/329014214",
+      "supportingSources": [
+        "https://www.sc.edu/about/offices_and_divisions/communications/about_us/locations/index.php",
+        "https://nominatim.openstreetmap.org/search?q=Osborne+Administration+Building+Columbia&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a school or department office. The official Office of the President page gives its contact address as 'University of South Carolina, Osborne Administration Building, Columbia, SC 29208'; the university's Communications and Marketing locations page gives the building's street address as 915 Bull Street, Columbia, SC 29208. This row is the Columbia flagship: the USC system's other campuses (Aiken, Upstate, Beaufort, etc.) are separately accredited institutions and the directory already lists USC Aiken and USC Upstate as their own rows, so they are not campuses of this row. Point is the OSM footprint centroid of the 'Osborne Administration Building' (way 329014214, building=university, operator University of South Carolina); OSM tags its house number as 900 Bull Street where the university writes 915, so the official number is used. The existing Darla Moore School record was not reused."
     }
   ]
 }
