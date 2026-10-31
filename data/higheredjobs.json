@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-30T14:19:02Z",
+ "generated": "2026-10-31T13:43:15Z",
  "ads": {
   "179138675": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179138675",
@@ -4304,6 +4304,22 @@
    "salary": "is commensurate with experience and qualifications and is subject to the terms and conditions of the applicable bargaining unit agreement or personnel plan.",
    "jobNumber": "",
    "checkedAt": "2026-10-26T14:23:08Z"
+  },
+  "179603869": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179603869",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor - Business Analytics and Supply Chain Management",
+   "institution": "Seton Hall University",
+   "location": "South Orange, NJ",
+   "type": "Full-Time",
+   "posted": "2026-10-30",
+   "applyByDate": "",
+   "applyByProse": "",
+   "category": "Business Analytics",
+   "salary": "$139,500 - $155,000 per year",
+   "jobNumber": "",
+   "checkedAt": "2026-10-31T13:43:15Z"
   }
  }
 }

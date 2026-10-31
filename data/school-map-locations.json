@@ -19584,6 +19584,923 @@
       ],
       "checked": "2026-10-31",
       "notes": "Two Management Science professors list Park End Street as their Saïd address. The university identifies its main Saïd building there; the named Google Maps point matches the same address."
+    },
+    {
+      "id": "ut-austin-orie-engineering-teaching-center-ii",
+      "institution": "The University of Texas at Austin",
+      "rowIds": [
+        "university-of-texas-at-austin__cockrell-school-of-engineering__operations-research-and-industrial-engineering"
+      ],
+      "school": "Cockrell School of Engineering",
+      "department": "Operations Research and Industrial Engineering",
+      "building": "Engineering Teaching Center II (ETC)",
+      "address": "204 E. Dean Keeton Street, Austin, TX 78712, United States",
+      "lat": 30.2900024,
+      "lng": -97.735407,
+      "addressSource": "https://orie.utexas.edu/people/faculty-directory",
+      "coordinateSource": "https://www.openstreetmap.org/way/126020360",
+      "supportingSources": [
+        "https://orie.utexas.edu/about/visit-us",
+        "https://orie.utexas.edu/",
+        "https://utdirect.utexas.edu/apps/campus/buildings/nlogon/maps/UTM/ETC/",
+        "https://nominatim.openstreetmap.org/search?q=Engineering+Teaching+Center+Austin&format=jsonv2&addressdetails=1&limit=5"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The ORIE program's official faculty directory lists every faculty office as ETC 5.1xx (e.g. ETC 5.126, 5.118, 5.110) and the site footer gives the program address as 204 E. Dean Keeton Street, C2200, Austin, Texas 78712-1591; the Visit Us page says the program's on-campus facility is the Engineering Teaching Center. UT's building directory resolves ETC (building 0230) to ENGINEERING TEACHING CENTER II, 204 E DEAN KEETON ST, AUSTIN, TX 78712. Coordinates are the OSM footprint centroid of way 126020360, display_name 'Engineering Teaching Center II, 204, East Dean Keeton Street, Austin'. ORIE also uses the J.J. Pickle Research Campus in North Austin (research facility), not recorded."
+    },
+    {
+      "id": "louisville-industrial-systems-engineering-speed-building",
+      "institution": "University of Louisville",
+      "rowIds": [
+        "university-of-louisville__j-b-speed-school-of-engineering__industrial-engineering"
+      ],
+      "school": "J. B. Speed School of Engineering",
+      "department": "Industrial Engineering",
+      "building": "James B. Speed Building (JB Speed)",
+      "address": "220 Eastern Parkway, Louisville, KY 40208, United States",
+      "lat": 38.2131009,
+      "lng": -85.7608006,
+      "addressSource": "https://engineering.louisville.edu/academics/departments/industrial/",
+      "coordinateSource": "https://www.openstreetmap.org/way/334900800",
+      "supportingSources": [
+        "https://service.louisville.edu/TDClient/277/Portal/KB/Article/20344/Campus-Building-Names-and-Numbers",
+        "https://nominatim.openstreetmap.org/reverse?lat=38.213114&lon=-85.760822&format=jsonv2&zoom=18",
+        "https://www.google.com/maps/search/J.B.+Speed+Building+220+Eastern+Parkway+Louisville+KY"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The department (now styled Industrial & Systems Engineering) gives its contact as 'Industrial & Systems Engineering, JB Speed Building, #107, J. B. Speed School of Engineering, University of Louisville, Louisville, KY 40292'. UofL's official building list resolves code 0030 'JB Speed' to 'James B. Speed Building, Speed School of Engineering, 0220 Eastern Parkway, Louisville KY 40208' (Belknap Campus). Coordinates are the OSM footprint centroid of way 334900800, mapped under the building's historic name 'Speed Scientific School, 220, Eastern Parkway, Louisville 40208'; a Google Maps search for the same building returned 38.213114,-85.760822, within ~3 m. Distinct from the College of Business record at Frazier Hall and from the new Speed School Student Success & Research Building; the 40292 ZIP in the department contact is the campus-wide mailing ZIP."
+    },
+    {
+      "id": "fiu-isba-ryder-business-building",
+      "institution": "Florida International University",
+      "rowIds": [
+        "florida-international-university____is",
+        "florida-international-university__college-of-business-administration__decision-sciences-and-information-systems"
+      ],
+      "school": "College of Business",
+      "department": "IS",
+      "building": "Ryder Business Building (RB)",
+      "address": "11200 SW 8th Street, Miami, FL 33199, United States",
+      "lat": 25.7574671,
+      "lng": -80.3761248,
+      "addressSource": "https://business.fiu.edu/academics/departments/isba/",
+      "coordinateSource": "https://www.openstreetmap.org/way/112681040",
+      "supportingSources": [
+        "https://business.fiu.edu/academics/departments/isba/faculty/index.html",
+        "https://campusmaps.fiu.edu/docs/MMC.pdf",
+        "https://business.fiu.edu/about/locations/",
+        "https://nominatim.openstreetmap.org/search?q=Ryder+Business+Building+Miami&format=jsonv2&addressdetails=1&limit=5"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The official Department of Information Systems and Business Analytics (ISBA) page gives its office as 'RB 250, 11200 S.W. 8th Street, Miami, FL 33199', Modesto A. Maidique Campus, and the ISBA faculty page lists every office as RB 2xx (RB 201 to RB 276). FIU's official MMC campus map PDF expands code RB to 'Ryder Business Building' (College of Business), beside CBC 'College of Business Complex'. Coordinates are the OSM footprint centroid of way 112681040 'Ryder Business Building, Southwest 112th Avenue, Miami-Dade County, FL 33199'. The second row ('College of Business Administration / Decision Sciences and Information Systems', 2014 posting, dead faculty URL business.fiu.edu/dsis) carries a historical school and department title: Decision Sciences and Information Systems is the former name of the unit now called ISBA, so it is resolved to the same current building; the street address is the campus-wide MMC address."
+    },
+    {
+      "id": "miami-herbert-management-jenkins-building",
+      "institution": "University of Miami",
+      "rowIds": [
+        "university-of-miami__miami-herbert-business-school__operations-management",
+        "university-of-miami__miami-herbert-business-school__management-area"
+      ],
+      "school": "Miami Herbert Business School",
+      "department": "Management Area",
+      "building": "George W. Jenkins Building",
+      "address": "5250 University Drive, Coral Gables, FL 33146, United States",
+      "lat": 25.7202439,
+      "lng": -80.2767401,
+      "addressSource": "https://www.mbs.miami.edu/about/visit.html",
+      "coordinateSource": "https://www.openstreetmap.org/node/12168371004",
+      "supportingSources": [
+        "https://www.mbs.miami.edu/faculty-research/academic-departments/management/index.html",
+        "https://umpd.miami.edu/_assets/pdf/cgcampus_bluelightmap2020.pdf",
+        "https://space.miami.edu/_assets/pdf/documents/sf-gables.pdf",
+        "https://people.miami.edu/profile/834590808cadcc7d0e2ae9d9b013af09",
+        "https://nominatim.openstreetmap.org/search?q=Jenkins+Building+Coral+Gables&format=jsonv2&addressdetails=1&limit=5"
+      ],
+      "checked": "2026-10-31",
+      "notes": "SCHOOL BUILDING ONLY: the Management department's own office building was not separately verified. The official Visit page places the school at 5250 University Drive, Coral Gables, with Storer Auditorium on the ground floor and the Graduate Business Programs office at Suite 221 = '221 Jenkins Building'; UM's official campus map index lists 'Business: 219 Jenkins Building' and the Jenkins Building (George W.) as the business school's main building, and the Department of Management page says the department covers operations management and the Management Science PhD (coordinates: OSM node 12168371004 'Jenkins Building, 5250 University Drive, Coral Gables 33146'). Faculty office addresses on people.miami.edu are behind a login, so the department could not be tied to a room; UM's official space inventory shows the school also occupies the adjacent Epstein/Kosar Faculty Building (0228), Aresty Building (0227) and Stubblefield Classroom Building (0226), and Management faculty offices may be in Epstein/Kosar rather than Jenkins. The 'BA: FinTech, AI, Healthcare' row is a hiring initiative spanning departments and is deliberately not attached to this record."
+    },
+    {
+      "id": "cornell-johnson-school-sage-hall",
+      "institution": "Cornell University/ Cornell Tech",
+      "rowIds": [
+        "cornell-university-cornell-tech__samuel-curtis-johnson-graduate-school-of-management"
+      ],
+      "school": "Samuel Curtis Johnson Graduate School of Management",
+      "department": "",
+      "building": "Sage Hall",
+      "address": "Sage Hall, Johnson Graduate School of Management, Ithaca, NY 14853-6201, United States",
+      "lat": 42.4458873,
+      "lng": -76.4832494,
+      "addressSource": "https://events.cornell.edu/sage_hall",
+      "coordinateSource": "https://www.openstreetmap.org/way/310881940",
+      "supportingSources": [
+        "https://business.cornell.edu/profiles/lc785/",
+        "https://business.cornell.edu/johnson/",
+        "https://tech.cornell.edu/programs/masters-programs/johnson-cornell-tech-mba/",
+        "https://tech.cornell.edu/campus/buildings/bloomberg-center/",
+        "https://nominatim.openstreetmap.org/search?q=Sage+Hall+Ithaca&format=jsonv2&addressdetails=1&limit=5"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Cornell's official events venue page gives the address 'Johnson Graduate School-Management, 106 Sage Hall, Ithaca, NY 14853-6201', the Johnson home page pictures Sage Hall as the school's building, and a current Johnson faculty profile (Li Chen) lists office 327 Sage Hall; coordinates are the OSM footprint centroid of way 310881940 'Sage Hall, Feeney Way, Ithaca 14853'. This is the Johnson school's main building on the Ithaca campus. The directory row's institution string also names Cornell Tech: the Johnson Cornell Tech MBA is 'based at the Cornell Tech campus on Roosevelt Island', footer address 2 West Loop Road, New York, NY 10044, which is the address of the Emma and Georgina Bloomberg Center, but the official MBA page does not name a building, so the New York location is recorded here as a limitation (see existing record cornell-tech-operations-research-bloomberg for that campus) rather than as a second record; the row's existing 2 W Loop Rd address/lat-lng describe Cornell Tech, not Sage Hall."
+    },
+    {
+      "id": "washington-st-louis-scot-ai-cluster-knight-hall",
+      "institution": "Washington University in St. Louis",
+      "rowIds": [
+        "washington-university-in-st-louis____supply-chain-operations-and-technology-ai-cluster-hire"
+      ],
+      "school": "Olin Business School",
+      "department": "Supply Chain, Operations, and Technology (AI Cluster hire)",
+      "building": "Knight Hall",
+      "address": "Knight Hall, One Brookings Drive, St. Louis, Missouri 63130-4899, United States",
+      "lat": 38.649616,
+      "lng": -90.31083,
+      "addressSource": "https://bpb-us-e2.wpmucdn.com/sites.wustl.edu/dist/b/4921/files/2025/12/cv.pdf",
+      "coordinateSource": "https://happenings.washu.edu/knight_hall_413",
+      "supportingSources": [
+        "https://olin.washu.edu/faculty/fuqiang-zhang",
+        "https://olin.washu.edu/about/contact-us.php",
+        "https://apply.interfolio.com/196468",
+        "https://ai.washu.edu/about/ai-faculty-cluster-hires/",
+        "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Resolved to the Olin Business School SCOT area building, copying the address and coordinates of the existing verified record washington-st-louis-operations-knight. Re-verified today: the Interfolio posting (Oct 27, 2026) is 'Olin Business School - Supply Chain, Operations, and Technology (SCOT)' and says the position 'is part of Washington University's university-wide AI Faculty Cluster Hire initiative', which the ai.washu.edu page describes as a provost-led, seven-school effort; the AI cluster itself is cross-university and only the SCOT seat is placed here. The December 2025 CV linked from Fuqiang Zhang's current Olin profile (Dan Broida Professor of SCOT) gives 'Knight Hall 435, Olin Business School', Olin's contact page lists Knight Hall at One Brookings Drive, and the university event venue page for Knight Hall carries structured latitude 38.649616 / longitude -90.31083. Olin's directory pages do not print office rooms, so only this one SCOT office was verified."
+    },
+    {
+      "id": "fudan-management-science-li-dasan-building",
+      "institution": "Fudan University",
+      "rowIds": [
+        "fudan-university__school-of-management__management-science"
+      ],
+      "school": "School of Management",
+      "department": "Management Science",
+      "building": "Li Dasan Building (李达三楼), School of Management, Guoshun Campus",
+      "address": "Li Dasan Building, No. 670 Guoshun Road, Yangpu District, Shanghai 200433, China",
+      "lat": 31.2966685,
+      "lng": 121.5061869,
+      "addressSource": "https://www.fdsm.fudan.edu.cn/AboutUs/contact.html",
+      "coordinateSource": "https://www.google.com/maps/place/Sch.+of+Mgt+Fudan+Univ-Lidasan+Bldg/data=!4m7!3m6!1s0x35b273c4e7aff2cd:0xb924f14f83f36246!8m2!3d31.2966685!4d121.5061869!16s%2Fg%2F12hk6lt6p",
+      "supportingSources": [
+        "https://www.fdsm.fudan.edu.cn/en/contactus/list.htm",
+        "https://www.fdsm.fudan.edu.cn/mf/en/contact.html",
+        "https://www.google.com/maps/place/%E6%9D%8E%E8%BE%BE%E4%B8%89%E6%A5%BC/data=!4m7!3m6!1s0x35b273c4e7a319e5:0xfcde9fb69971a605!8m2!3d31.296736!4d121.506169!16s%2Fg%2F113gd7dkw"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The school's official Chinese contact directory places the Guoshun campus at 670 Guoshun Road and the Dean's Office, Party Office, research office, education centre, library and alumni centre in Li Dasan Building (李达三楼); its English pages give the same building (Room 506 / Room 201, 670 Guoshun Road). This is the SCHOOL's administrative building. The same directory lists the Department of Management Science office (管理科学系) in Siyuan Building Room 522 (思源楼522室) on the same campus; that neighbouring building has no Google or OSM pin and could not be geolocated, so the point given is the school building, not the department office. The Google place 'Sch. of Mgt Fudan Univ-Lidasan Bldg' (pin 31.2966685, 121.5061869) names the building explicitly; a second Google pin '李达三楼' sits 8 m away."
+    },
+    {
+      "id": "mef-industrial-engineering-maslak-campus",
+      "institution": "MEF University",
+      "rowIds": [
+        "mef-university__faculty-of-engineering__industrial-engineering"
+      ],
+      "school": "Faculty of Engineering",
+      "department": "Industrial Engineering",
+      "building": "MEF University campus building (MEF Üniversitesi), Maslak",
+      "address": "Huzur Mah. Maslak Ayazağa Cad. No. 4, 34396 Sarıyer, İstanbul, Turkey",
+      "lat": 41.1085585,
+      "lng": 29.0085458,
+      "addressSource": "https://www.mef.edu.tr/en/fakulteler/muhendislik-fakultesi/fakulte-danisma-kurulu/hakkimizda/iletisim",
+      "coordinateSource": "https://www.openstreetmap.org/way/544489363",
+      "supportingSources": [
+        "https://www.mef.edu.tr/en/fakulteler/muhendislik-fakultesi",
+        "https://www.mef.edu.tr/en",
+        "https://nominatim.openstreetmap.org/lookup?osm_ids=W544489363&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "MEF is a single-campus university. The Faculty of Engineering's own contact page gives its address as 'Huzur Mah. Maslak Ayazağa Cad. No: 4/1, 4/1A, 4/1B Sarıyer İstanbul', and every MEF page footer gives the campus as Huzur Mah. Maslak Ayazağa Cad. No. 4, 34396 Sarıyer. No official page names a separate block or floor for the Faculty of Engineering or Industrial Engineering, so the scope is the campus building, not a department office. Coordinates are the OSM building footprint named 'MEF Üniversitesi' (way 544489363, building=university, 6 levels); Google Maps' 'MEF Üniversitesi' pin at Maslak Ayazağa Cd. No:4 is 35 m away (41.1088445, 29.0085964)."
+    },
+    {
+      "id": "mannheim-production-management-schneckenhof-ost",
+      "institution": "University of Mannheim",
+      "rowIds": [
+        "university-of-mannheim__business-school__chair-of-production-management"
+      ],
+      "school": "Business School",
+      "department": "Chair of Production Management",
+      "building": "Schloss Schneckenhof Ost (SO), Mannheim Palace",
+      "address": "Schloss Schneckenhof Ost, Room SO 230, 68161 Mannheim, Germany",
+      "lat": 49.4826314,
+      "lng": 8.4647834,
+      "addressSource": "https://www.bwl.uni-mannheim.de/en/stolletz/",
+      "coordinateSource": "https://www.google.com/maps/place/AREA+Operations/data=!4m7!3m6!1s0x4797cc1868d5f891:0x15abab16ac98e259!8m2!3d49.4826314!4d8.4647834!16s%2Fg%2F1tgxsh2v",
+      "supportingSources": [
+        "https://www.bwl.uni-mannheim.de/stolletz/",
+        "https://www.bwl.uni-mannheim.de/en/operations/",
+        "https://www.uni-mannheim.de/en/campus/the-schloss",
+        "https://www.bib.uni-mannheim.de/en/footer/addresses-and-directions/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Chair of Production Management (Prof. Dr. Raik Stolletz) gives its address as 'University of Mannheim, Area Operations Management, Schneckenhof Ost – Room SO 230, 68161 Mannheim' on its official chair page (German page identical). The university's campus page says the Schneckenhof is the south-eastern part of the Schloss (palace); the library gives the palace's street as Bismarckstraße. Coordinates are Google Maps' named place 'AREA Operations' (the Business School's Area Operations Management, whose four chairs all list Schneckenhof Ost), 45 m east of the OSM Schneckenhof courtyard (way 29174176, 49.48285, 8.46416), i.e. in the east wing of that courtyard. OSM does not map the palace wings as separate named buildings, so the Google pin was used."
+    },
+    {
+      "id": "mannheim-supply-chain-management-schneckenhof-ost",
+      "institution": "University of Mannheim",
+      "rowIds": [
+        "university-of-mannheim__business-school__supply-chain-management"
+      ],
+      "school": "Business School",
+      "department": "Supply Chain Management",
+      "building": "Schloss Schneckenhof Ost (SO), Mannheim Palace",
+      "address": "Schloss, Schneckenhof-Ost, Room 209, 68161 Mannheim, Germany",
+      "lat": 49.4826314,
+      "lng": 8.4647834,
+      "addressSource": "https://www.bwl.uni-mannheim.de/en/fleischmann/",
+      "coordinateSource": "https://www.google.com/maps/place/AREA+Operations/data=!4m7!3m6!1s0x4797cc1868d5f891:0x15abab16ac98e259!8m2!3d49.4826314!4d8.4647834!16s%2Fg%2F1tgxsh2v",
+      "supportingSources": [
+        "https://www.bwl.uni-mannheim.de/fleischmann/",
+        "https://www.bwl.uni-mannheim.de/en/operations/",
+        "https://www.uni-mannheim.de/en/campus/the-schloss"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Chair of Supply Chain Management (Prof. Dr. Moritz Fleischmann; the row's 'Supply Chain Management') gives its address on its official chair page as 'University of Mannheim, Schloss, Schneckenhof-Ost – Room 209, 68161 Mannheim'. Same building as the Chair of Production Management (SO 230) and the rest of the Area Operations Management; coordinates are the Google Maps named place 'AREA Operations' in the east wing of the Schloss Schneckenhof courtyard. Mannheim Business School (mannheim-business-school.com) was not used as evidence."
+    },
+    {
+      "id": "mannheim-operations-management-schneckenhof-ost",
+      "institution": "University of Mannheim",
+      "rowIds": [
+        "university-of-mannheim__business-school__operations-management"
+      ],
+      "school": "Business School",
+      "department": "Operations Management",
+      "building": "Schloss Schneckenhof Ost (SO), Mannheim Palace",
+      "address": "Schloss Schneckenhof Ost, 68161 Mannheim, Germany",
+      "lat": 49.4826314,
+      "lng": 8.4647834,
+      "addressSource": "https://www.bwl.uni-mannheim.de/en/operations/",
+      "coordinateSource": "https://www.google.com/maps/place/AREA+Operations/data=!4m7!3m6!1s0x4797cc1868d5f891:0x15abab16ac98e259!8m2!3d49.4826314!4d8.4647834!16s%2Fg%2F1tgxsh2v",
+      "supportingSources": [
+        "https://www.bwl.uni-mannheim.de/en/stolletz/",
+        "https://www.bwl.uni-mannheim.de/en/fleischmann/",
+        "https://www.bwl.uni-mannheim.de/en/schoen/",
+        "https://www.uni-mannheim.de/en/campus/the-schloss"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Business School's official Area Operations Management page says the area 'consists of the chairs of Professors Christoph Bode, Moritz Fleischmann, Cornelia Schön and Raik Stolletz' (the area page itself gives only the dean's office address L 5, 5). Each of the three operations chairs verified individually lists Schloss Schneckenhof Ost: Production Management SO 230, Supply Chain Management Room 209, Service Operations Management SO 232 (search snippets also place Bode's chair at SO 205, not separately verified). The row's directory link points at mannheim-business-school.com (the MBA school), which was deliberately not used as evidence. Coordinates are Google Maps' named place 'AREA Operations' in the east wing of the Schneckenhof courtyard of the Schloss."
+    },
+    {
+      "id": "iit-bombay-ieor-building",
+      "institution": "Indian Institute of Technology (IIT) Bombay",
+      "rowIds": [
+        "indian-institute-of-technology-iit-bombay____industrial-engineering-and-operations-research"
+      ],
+      "school": "",
+      "department": "Industrial Engineering and Operations Research",
+      "building": "IEOR Building",
+      "address": "Room 105, First Floor, IEOR Building, Indian Institute of Technology Bombay, Powai, Mumbai 400076, Maharashtra, India",
+      "lat": 19.1310454,
+      "lng": 72.9180174,
+      "addressSource": "https://www.ieor.iitb.ac.in/misc/contact",
+      "coordinateSource": "https://www.openstreetmap.org/way/52511401",
+      "supportingSources": [
+        "https://www.openstreetmap.org/node/5878275164",
+        "https://www.ieor.iitb.ac.in/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The department's official contact page gives its mailing address as 'Industrial Engineering and Operations Research, Room 105, First Floor, IEOR Building, Indian Institute of Technology Bombay, Powai, Mumbai 400076' and says the department is housed in the IEOR Building (Head's office Room 108). Coordinates are the centroid of the OSM building footprint (way 52511401, building=university) that contains the OSM node named 'IEOR Library' (node 5878275164, 19.1310527, 72.9180042), between the Aerospace and Bio sciences department buildings in the academic area; the footprint itself carries no name tag in OSM, and Google Maps returned no place for the building, so this point rests on the named IEOR Library node inside the footprint. No official IITB campus map with coordinates could be found."
+    },
+    {
+      "id": "uchile-industrial-engineering-beauchef-851-torre-oriente",
+      "institution": "Universidad de Chile",
+      "rowIds": [
+        "universidad-de-chile____industrial-engineering"
+      ],
+      "school": "Facultad de Ciencias Físicas y Matemáticas",
+      "department": "Industrial Engineering",
+      "building": "Beauchef 851, Torre Oriente (Torre Ingeniería Industrial; OSM: Edificio Ingeniería y Ciencias)",
+      "address": "Beauchef 851, Santiago, Chile",
+      "lat": -33.4578628,
+      "lng": -70.6641852,
+      "addressSource": "https://www.dii.uchile.cl/campus/",
+      "coordinateSource": "https://www.openstreetmap.org/way/176856062",
+      "supportingSources": [
+        "https://www.dii.uchile.cl/contacto/",
+        "https://www.dii.uchile.cl/english/about-us/campus/",
+        "https://www.dii.uchile.cl/wp-content/uploads/2025/06/Boletin-46-junio-2014.pdf",
+        "https://www.fcfm.uchile.cl/dam/jcr:1c8d7dd2-9463-4f93-8aee-a5544ea1d78f/mapafcfm2018.pdf"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Departamento de Ingeniería Industrial's official campus page says the department is in 'una de las dos torres del edificio Beauchef 851', which it calls 'Torre Ingeniería Industrial' (its image file is labelled Torre-Oriente); the department's 2014 bulletin describes the east tower ('torre oriente ... donde se ubicará ingeniería industrial') versus the west tower for Mechanical Engineering. The DII contact page's own 'Cómo llegar' Google Maps/Waze link points at -33.457886, -70.664113, which falls inside OSM building way 176856062 'Edificio Ingeniería y Ciencias', 851 Avenida Beauchef (the east tower; the west tower is OSM 'Edificio Poniente', way 176856060, and 'Edificio Norte' is at Blanco Encalada 2120). Floor not stated; the department also uses buildings on República 701/779 and Domeyko 2313/2363 for centres and graduate programmes. The faculty (FCFM) is not named in the directory row and is supplied from the DII site."
+    },
+    {
+      "id": "puc-chile-industrial-systems-engineering-raul-deves",
+      "institution": "Pontificia Universidad Catolica de Chile (PUC)",
+      "rowIds": [
+        "pontificia-universidad-catolica-de-chile__school-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin"
+      ],
+      "school": "School of Engineering",
+      "department": "Industrial and Systems Engineering and Electrical Engineering",
+      "building": "Edificio Raúl Devés, Campus San Joaquín",
+      "address": "Av. Vicuña Mackenna 4860, Macul, Santiago, Chile",
+      "lat": -33.4996286,
+      "lng": -70.6128664,
+      "addressSource": "https://www.ing.uc.cl/en/?p=60321",
+      "coordinateSource": "https://www.openstreetmap.org/way/189781889",
+      "supportingSources": [
+        "https://www.ing.uc.cl/industrial-y-sistemas/",
+        "https://nominatim.openstreetmap.org/lookup?osm_ids=W189781889&format=jsonv2",
+        "https://www.ing.uc.cl/industrial-y-sistemas/wp-content/uploads/2015/04/newsletter-n17.pdf"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The School of Engineering's official 'General Installations' page lists the Raúl Devés Building floor by floor: 'Second Floor: Department of Industrial and Systems Engineering, offices for Masters' students, computer lab ...' and 'Third Floor: Department of Industrial and Systems Engineering, professor offices' (the Dean's Office is on the fourth floor). The department's own site names its classroom as 'Sala de clases DIIS, segundo piso, ala poniente, Edificio Raúl Devés'. Only the Industrial and Systems Engineering half of the row's combined department string was verified; Electrical Engineering is a separate department whose building was not checked. The address is the campus-wide San Joaquín mailing address (department newsletters give Av. Vicuña Mackenna 4860, Macul). Coordinates are the OSM footprint 'Edificio Raúl Deves (Facultad de Ingeniería)', 4860 Avenida Vicuña Mackenna, Macul."
+    },
+    {
+      "id": "puc-chile-school-of-management-edificio-fundacion",
+      "institution": "Pontificia Universidad Catolica de Chile (PUC)",
+      "rowIds": [
+        "pontificia-universidad-catolica-de-chile__school-of-management__management-science"
+      ],
+      "school": "School of Management",
+      "department": "Management Science",
+      "building": "Edificio Fundación (Facultad de Economía y Administración building), Campus San Joaquín",
+      "address": "Av. Vicuña Mackenna 4860, Macul, Santiago, Chile",
+      "lat": -33.4969118,
+      "lng": -70.6114624,
+      "addressSource": "https://www.uc.cl/noticias/autoridades-de-la-uc-participaron-en-la-colocacion-de-la-primera-piedra-del-edificio-de-economia/",
+      "coordinateSource": "https://www.openstreetmap.org/way/235686179",
+      "supportingSources": [
+        "https://economiayadministracion.uc.cl/en/conocenos/",
+        "https://economiayadministracion.uc.cl/contacto/",
+        "https://economiayadministracion.uc.cl/assets/uploads/2024/07/Cuenta_Facultad_FINAL.pdf",
+        "https://economiayadministracion.uc.cl/assets/uploads/2026/08/MEMORIA-UC25-8.pdf",
+        "https://www.uc.cl/universidad/nuestros-campus/san-joaquin/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Escuela de Administración (School of Management) is one of the two units of the Facultad de Economía y Administración, which says on its own site that it 'is located on the San Joaquín campus' (contact: Vicuña Mackenna 4860, Macul). UC's official news on the faculty building project says its fourth stage adds 'oficinas para académicos de la Escuela de Administración'; the faculty's annual reports name the building 'Edificio Fundación' (donated by the Fundación de Egresados) and the 2025 report records the fourth and last stage inaugurated on 14 November. Coordinates are the OSM footprint named 'Facultad de Economía y Administración' (way 235686179, operator Pontificia Universidad Católica de Chile) at Vicuña Mackenna 4860. Scope: the faculty/school building; no page names a 'Management Science' department office, and the address is the campus-wide San Joaquín mailing address. The school's own website publishes no street address or building name, so this rests on UC and faculty sources."
+    },
+    {
+      "id": "erasmus-econometric-institute-e-building",
+      "institution": "Erasmus University Rotterdam",
+      "rowIds": [
+        "erasmus-university-rotterdam__econometric-institute__operations-and-supply-chain-management"
+      ],
+      "school": "Econometric Institute",
+      "department": "Operations and Supply Chain Management",
+      "building": "E Building (E-Building), Campus Woudestein",
+      "address": "E Building, Room ET-18, Burgemeester Oudlaan 50, 3062 PA Rotterdam, Netherlands",
+      "lat": 51.9174993,
+      "lng": 4.5269959,
+      "addressSource": "https://www.eur.nl/en/ese/department-econometrics",
+      "coordinateSource": "https://www.openstreetmap.org/way/275591003",
+      "supportingSources": [
+        "https://www.eur.nl/en/ese/contact",
+        "https://eur.nl/en/campus/locations/spaces/e-building",
+        "https://www.eur.nl/en/ese/media/2025-06-erasmus-university-rotterdam-map"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The Econometric Institute's official department page gives its visiting address as 'Erasmus University Rotterdam, Econometric Institute, Room: ET-18, Burg. Oudlaan 50, 3062 PA Rotterdam'; Erasmus School of Economics' contact page gives 'Visiting address: E building, Burgemeester Oudlaan 50', and EUR's E Building location page says 'E Building provides accommodation for the ESE faculty' on Campus Woudestein. Coordinates are the OSM building footprint named 'E-Building' (way 275591003, ref:bag 0599100010060484), a separate building from the Mandeville (RSM) record and from the Erasmus Building. The 'Operations and Supply Chain Management' group itself was not separately located; the point is the Econometric Institute's office building."
+    },
+    {
+      "id": "uclouvain-lsm-core-roman-pays",
+      "institution": "Université catholique de Louvain",
+      "rowIds": [
+        "universite-catholique-de-louvain__louvain-school-of-management__center-for-operations-research-and-econometrics"
+      ],
+      "school": "Louvain School of Management",
+      "department": "Center for Operations Research and Econometrics",
+      "building": "Center for Operations Research and Econometrics (CORE)",
+      "address": "Voie du Roman Pays 34, 1348 Louvain-la-Neuve, Belgium",
+      "lat": 50.6688327,
+      "lng": 4.6153418,
+      "addressSource": "https://uclouvain.be/en/research-institutes/lidam/core/contact",
+      "coordinateSource": "https://www.openstreetmap.org/node/3846926618",
+      "supportingSources": [
+        "https://uclouvain.be/en/research-institutes/lidam/contact",
+        "https://nominatim.openstreetmap.org/search?q=Center+for+Operations+Research+and+Econometrics+Louvain-la-Neuve&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "CORE's official contact page gives 'Center for Operations Research and Econometrics (CORE), Voie du Roman Pays, 34 - L1.03.01, 1348 Louvain-la-Neuve', located 'on the corner of Traverse d'Esope and Voie du Roman Pays', with the information office in room b.130 on floor 1. CORE is a research centre of the LIDAM institute (not of the Louvain School of Management); the row's LSM attribution reflects the posting, and this record does not claim the LSM dean's building. Coordinates are the OSM research-office node named 'Center for Operations Research and Econometrics' at 34 Voie du Roman Pays (Nominatim category office/research), the same point the existing uclouvain-lidam-core-roman-pays record uses for the UCLouvain-spelled row."
+    },
+    {
+      "id": "cuhk-seem-mong-engineering-building",
+      "institution": "The Chinese University of Hong Kong (CUHK)",
+      "rowIds": [
+        "chinese-university-of-hong-kong__faculty-of-engineering__systems-engineering-and-engineering-management"
+      ],
+      "school": "Faculty of Engineering",
+      "department": "Systems Engineering and Engineering Management",
+      "building": "William M. W. Mong Engineering Building (department office Room 609)",
+      "address": "William M. W. Mong Engineering Building, The Chinese University of Hong Kong, Shatin, New Territories, Hong Kong",
+      "lat": 22.4179995,
+      "lng": 114.2079495,
+      "addressSource": "https://www.se.cuhk.edu.hk/contact-us/",
+      "coordinateSource": "https://www.openstreetmap.org/way/135311808",
+      "supportingSources": [
+        "https://nominatim.openstreetmap.org/search?q=William%20M.W.%20Mong%20Engineering%20Building%2C%20Hong%20Kong&format=jsonv2",
+        "http://www.se.cuhk.edu.hk/content/academic-staff"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The department's official Contact Us page gives its address as Room 609, William M.W. Mong Engineering Building, The Chinese University of Hong Kong, Shatin, N.T. (Chinese: 蒙民偉工程學大樓609室), which is the department office itself, not a campus-wide address. The point is the OpenStreetMap footprint centroid of the named building (way 135311808, display name '蒙民偉工程學大樓 William M.W. Mong Engineering Building', Ma Liu Shui, Sha Tin). Individual faculty offices were not enumerated, but the department office is in this building on the Shatin campus."
+    },
+    {
+      "id": "hkust-ieda-academic-building",
+      "institution": "The Hong Kong University of Science and Technology (HKUST)",
+      "rowIds": [
+        "hong-kong-university-of-science-and-technology____industrial-engineering-and-logistics-management"
+      ],
+      "school": "School of Engineering",
+      "department": "Industrial Engineering and Logistics Management",
+      "building": "Academic Building, HKUST Clear Water Bay campus (department office Room 5551, 5/F via Lift 27/28)",
+      "address": "Academic Building, The Hong Kong University of Science and Technology, Clear Water Bay, Kowloon, Hong Kong",
+      "lat": 22.3370096,
+      "lng": 114.2636684,
+      "addressSource": "https://ieda.ust.hk/eng/detail.php?catid=8",
+      "coordinateSource": "https://www.openstreetmap.org/relation/3174704",
+      "supportingSources": [
+        "https://hkust.edu.hk/news/hkust-launches-department-industrial-engineering-and-decision-analytics",
+        "https://ieda.ust.hk/eng/index.php",
+        "https://nominatim.openstreetmap.org/search?q=Academic+Building&viewbox=114.255,22.345,114.275,22.325&bounded=1&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The row's department name, Industrial Engineering and Logistics Management (IELM), is the FORMER name of HKUST's Department of Industrial Engineering and Decision Analytics (IEDA): HKUST's official news of 10 January 2018 states that IELM will be renamed IEDA. The department's official Contact Us page places the general enquiry office at Room 5551 (5/F, via Lift 27/28), Academic Building, Clear Water Bay, Kowloon, Hong Kong; the department site is headed School of Engineering. The point is the OpenStreetMap centroid of the named building (relation 3174704, '學術大樓 Academic Building'), the large central academic complex of the Clear Water Bay campus; individual faculty offices were not separately verified but the department office is inside this complex."
+    },
+    {
+      "id": "smu-scis-1-stamford-road",
+      "institution": "Singapore Management University (SMU)",
+      "rowIds": [
+        "singapore-management-university__school-of-information-systems"
+      ],
+      "school": "School of Information Systems",
+      "department": "",
+      "building": "School of Computing and Information Systems 1 (SCIS 1)",
+      "address": "80 Stamford Road, Singapore 178902",
+      "lat": 1.2975488,
+      "lng": 103.8494183,
+      "addressSource": "https://computing.smu.edu.sg/contact-us",
+      "coordinateSource": "https://www.google.com/maps/place/SMU+School+of+Computing+and+Information+Systems+1/data=!4m7!3m6!1s0x31da19a340000001:0xdb2ba83d5e574a35!8m2!3d1.2975488!4d103.8494183!16s%2Fm%2F0sgb_6w",
+      "supportingSources": [
+        "https://news.smu.edu.sg/news/2021/01/16/smus-school-information-systems-renamed-school-computing-and-information-systems",
+        "https://computing.smu.edu.sg/about-us",
+        "https://www.smu.edu.sg/campus-life/visiting-smu/maps-directions"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The school was RENAMED: SMU's official news (16 January 2021) records that the School of Information Systems became the School of Computing and Information Systems (SCIS) with effect from 1 January 2021; the row keeps the old name. The school's official site (computing.smu.edu.sg, 'Where to find us') lists two buildings: School of Computing and Information Systems 1 at 80 Stamford Road, Singapore 178902, and SCIS 2 at Level 4, 90 Stamford Road, Singapore 178903. This record uses SCIS 1 (the main school building, also the address the directory row carries); the point is Google Maps' place pin for 'SMU School of Computing and Information Systems 1', 80 Stamford Rd. This is a school-building reference; no individual office was verified."
+    },
+    {
+      "id": "kaist-business-supex-seoul",
+      "institution": "KAIST",
+      "rowIds": [
+        "kaist__college-of-business__operations-strategy-and-management-science"
+      ],
+      "school": "College of Business",
+      "department": "Operations Strategy and Management Science",
+      "building": "SUPEX Building (SUPEX 경영관, Building #2), KAIST Seoul Campus",
+      "address": "85 Hoegi-ro, Dongdaemun-gu, Seoul 02455, Republic of Korea",
+      "lat": 37.5926496,
+      "lng": 127.0467442,
+      "addressSource": "https://www.business.kaist.ac.kr/faculty/bwkim",
+      "coordinateSource": "https://www.openstreetmap.org/relation/8242955",
+      "supportingSources": [
+        "https://www.business.kaist.ac.kr/faculty/sk2559",
+        "https://www.business.kaist.edu/life/070602",
+        "https://www.business.kaist.edu/about/010502",
+        "https://aiba.kaist.ac.kr/team/",
+        "https://business.kaist.edu/faculty/bwkim"
+      ],
+      "checked": "2026-10-31",
+      "notes": "KAIST College of Business is on the Seoul campus at 85 Hoegi-ro, Dongdaemun-gu (official Directions page, which guides visitors to the SUPEX building; the official campus page says 'the two main buildings that house most of the campus facilities are SUPEX (Building #2) and the Student Union Building'). The official faculty directory places Operations Strategy and Management Science professors in S-numbered rooms with the Hoegi-ro 85 address: Bowon Kim 'Office S406' (Professor, Operations Strategy and Management Science) and Sang Won Kim 'Office S410'. The S prefix is read as SUPEX: the English-site profile of Bowon Kim is indexed as 'Office SUPEX 2406' (that page answered 503 on the check date) and a KAIST lab page gives a College of Business faculty office as 'SUPEX 286'. The point is the OpenStreetMap centroid of the named building 'SUPEX 경영관' (relation 8242955), not the campus polygon."
+    },
+    {
+      "id": "kaist-management-science-supex-seoul",
+      "institution": "KAIST",
+      "rowIds": [
+        "kaist____organization-man-sci"
+      ],
+      "school": "College of Business",
+      "department": "Organization/Man. Sci",
+      "building": "SUPEX Building (SUPEX 경영관, Building #2), KAIST Seoul Campus",
+      "address": "85 Hoegi-ro, Dongdaemun-gu, Seoul 02455, Republic of Korea",
+      "lat": 37.5926496,
+      "lng": 127.0467442,
+      "addressSource": "https://www.business.kaist.ac.kr/faculty/bwkim",
+      "coordinateSource": "https://www.openstreetmap.org/relation/8242955",
+      "supportingSources": [
+        "https://www.business.kaist.ac.kr/faculty/sp",
+        "https://www.business.kaist.ac.kr/faculty/sk2559",
+        "https://www.business.kaist.ac.kr/_prog/prof/index.php?menu_dvs_cd=040101&site_dvs_cd=kr",
+        "https://www.business.kaist.edu/life/070602",
+        "https://www.business.kaist.edu/about/010502"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The row's title 'Organization/Man. Sci' is a historical posting title spanning two KAIST College of Business areas, Technology/Organization/Strategy (기술/조직/전략) and Operations Strategy and Management Science (생산전략 및 경영과학); the row's own faculty link is the College of Business directory. The official Korean faculty directory places faculty of both areas in S-numbered rooms at the Hoegi-ro 85 Seoul campus: management science professors Bowon Kim (S406) and Sang Won Kim (S410), and organization-theory professor Sang-Chan Park (기술/조직/전략, S206). The S prefix is read as the SUPEX building, which the official campus page names as the college's main building (see the sibling record kaist-business-supex-seoul for the full evidence). Resolved to the college's main building only; no separate department office exists for this merged title."
+    },
+    {
+      "id": "toulouse-business-school-ioms-sebastopol-university-of-toulouse",
+      "institution": "University of Toulouse",
+      "rowIds": [
+        "university-of-toulouse__toulouse-business-school__information-operations-and-management-sciences"
+      ],
+      "school": "Toulouse Business School",
+      "department": "Information, Operations and Management Sciences",
+      "building": "Sébastopol Building, TBS Education Lascrosses campus (faculty and academic departments)",
+      "address": "1 Place Alphonse Jourdain, 31000 Toulouse, France",
+      "lat": 43.6108,
+      "lng": 1.42996,
+      "addressSource": "https://www.tbs-education.fr/tbs/campus-partenariats/toulouse-lascrosses/",
+      "coordinateSource": "https://www.openstreetmap.org/way/123032476",
+      "supportingSources": [
+        "https://www.calameo.com/tbs-education/books/001821797e0ce38a22b10",
+        "https://www.tbs-education.fr/professeurs-recherche/professeurs/departements/departement-information-operations-et-sciences-de-la-decision-2025/",
+        "https://rnsr.adc.education.fr/structure/200024682H"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Toulouse Business School now trades as TBS Education; the row's 'University of Toulouse' reflects the school's historical association with the Université de Toulouse, and the same department is already mapped in the existing record toulouse-business-school-information-operations-sebastopol, whose coordinates are reused here. Checked today: the school's official Lascrosses campus page places the Toulouse campus in the Compans-Caffarelli district (20 boulevard Lascrosses), every page's official footer gives the school's address as 1 Place Alphonse Jourdain, 31068 Toulouse Cedex 7, and the school's own Calameo campus plan 'Plan Lascrosses' lists four buildings (Lascrosses, Sébastopol, Bosco, Alaric) with Sébastopol at 1 place Alphonse Jourdain; the IOMS department page (2025) lists every member at the Toulouse campus. No new 2024 campus was found: Lascrosses remains the main Toulouse campus (Entiore is a separate Bachelor site). The plan's legend assigning professors to Sébastopol could not be re-read today (JavaScript reader) and is taken from the existing record; the department office itself is not separately verified, so this is a building-level reference inside the OSM footprint of 1 Place Alfonse Jourdain (way 123032476)."
+    },
+    {
+      "id": "sabanci-fens-building",
+      "institution": "Sabanci University",
+      "rowIds": [
+        "sabanci-university__faculty-of-engineering-and-natural-sciences-fens"
+      ],
+      "school": "Faculty of Engineering and Natural Sciences (FENS)",
+      "department": "",
+      "building": "Faculty of Engineering and Natural Sciences (FENS) Building, building 4 on the official Tuzla campus plan",
+      "address": "Sabancı University Tuzla Campus, Orta Mahalle, Üniversite Caddesi No:27, 34956 Tuzla, Istanbul, Türkiye",
+      "lat": 40.8906054,
+      "lng": 29.3795784,
+      "addressSource": "https://www.sabanciuniv.edu/sites/default/files/kampus_haritasi.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/relation/4809141",
+      "supportingSources": [
+        "https://fens.sabanciuniv.edu/en/contact",
+        "https://www.sabanciuniv.edu/en/campus-map",
+        "https://iro.sabanciuniv.edu/sites/iro.sabanciuniv.edu/files/SU_international_students_guide_undergraduate_24-25.pdf",
+        "https://www.google.com/maps/place/Sabanc%C4%B1+%C3%9Cniversitesi+FENS+Binas%C4%B1/data=!4m7!3m6!1s0x14cad851a14c49e5:0x2126a24fd519c31!8m2!3d40.8908053!4d29.3790943!16s%2Fg%2F11c4bpvl2b"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The university's official Tuzla campus plan PDF (linked from the Campus Map page) lists building 4 as 'Mühendislik ve Doğa Bilimleri Fakültesi / Faculty of Engineering and Natural Sciences', separate from building 3, the Sabancı Business School (the existing FMAN record, which is deliberately NOT reused). The FENS Dean's Office contact page gives only the campus-wide address (Orta Mahalle, 34956 Tuzla; 'Orhanlı - Tuzla'), and the university's international student guide refers to rooms such as 'FENS G077'. The point is the OpenStreetMap centroid of the named building 'FENS' (relation 4809141, Üniversite Caddesi, Orta Mahallesi, Tuzla), about 150 m south of the FMAN building, consistent with the campus plan and with Google Maps' 'Sabancı Üniversitesi FENS Binası' pin (40.8908, 29.3791). School-building reference for a school-only row; no department office is implied."
+    },
+    {
+      "id": "tobb-etu-business-administration-main-building",
+      "institution": "TOBB University of Economics and Technology",
+      "rowIds": [
+        "tobb-university-of-economics-and-technology____business-administration"
+      ],
+      "school": "",
+      "department": "Business Administration",
+      "building": "Main Building (Ana Bina), TOBB ETÜ Söğütözü campus",
+      "address": "Söğütözü Caddesi No:43, Söğütözü, 06560 Çankaya, Ankara, Türkiye",
+      "lat": 39.9212999,
+      "lng": 32.7988913,
+      "addressSource": "https://www.etu.edu.tr/tr/bolum/isletme/akademik-kadro",
+      "coordinateSource": "https://www.openstreetmap.org/way/420303614",
+      "supportingSources": [
+        "https://www.etu.edu.tr/tr/bolum/isletme",
+        "https://www.etu.edu.tr/files/dosyalar/2017/05/02/1ad0e33f22ec0688bce21bdf537e3467.pdf",
+        "https://nominatim.openstreetmap.org/search?q=TOBB&viewbox=32.790,39.925,32.805,39.915&bounded=1&format=jsonv2"
+      ],
+      "checked": "2026-10-31",
+      "notes": "SCOPE: campus main building, not a verified department office. TOBB ETÜ has a single campus at Söğütözü Caddesi No:43 (official department pages give only this campus-wide address), and the official Business Administration staff list gives office numbers without any block name (e.g. 232/A, 233, 238, 241, 242, 243, 248, Z71). The university's own 2017 institutional self-evaluation report describes the Söğütözü campus as starting with 'ana bina' (the main building, comprising the administrative units and the teaching block), later joined by separate buildings for social facilities, foreign languages (2009), the technology centre (2013) and a medical laboratory (2014). No official page names the block the department sits in, so the point is the OpenStreetMap centroid of the building named 'Ana Bina' on Söğütözü Caddesi (way 420303614), the teaching/administration main building, rather than the campus polygon."
+    },
+    {
+      "id": "sydney-engineering-ai-dean-office-j12",
+      "institution": "University of Sydney",
+      "rowIds": [
+        "university-of-sydney__faculty-of-engineering__engineering-and-ai"
+      ],
+      "school": "Faculty of Engineering",
+      "department": "Engineering and AI",
+      "building": "Computer Science Building (J12), Office of the Dean, Faculty of Engineering, Level 5",
+      "address": "J12 Computer Science Building, 1 Cleveland Street, Darlington NSW 2008, Australia",
+      "lat": -33.888193,
+      "lng": 151.1943472,
+      "addressSource": "https://www.sydney.edu.au/engineering/about/contact-us.html",
+      "coordinateSource": "https://www.openstreetmap.org/way/175377608",
+      "supportingSources": [
+        "https://www.sydney.edu.au/engineering/news-and-events/news/2026/09/30/50-global-appointments-mark-a-remarkable-recruitment-success-for-the-faculty-of-engineering.html",
+        "https://profiles.sydney.edu.au/groups/177675/experts"
+      ],
+      "checked": "2026-10-31",
+      "notes": "FACULTY-LEVEL reference. 'Engineering and AI' is not a school or department: the Faculty of Engineering's official news of 30 September 2026 describes a faculty-wide global recruitment campaign for continuing academic positions 'across engineering', with 'AI and its intersection with engineering' as its defining focus, run by the Deputy Dean; appointees sit in the faculty's seven schools. So this row is placed at the faculty's own office building: the official Contact Us page gives the Office of the Dean as 'Level 5, J12 – Computer Science Building, The University of Sydney, NSW 2006'. The point is the OpenStreetMap centroid of the named 'Computer Science Building' at 1 Cleveland Street, Darlington (way 175377608), on the Camperdown/Darlington campus. No individual school or department office was verified for this row."
+    },
+    {
+      "id": "koc-case-college-building",
+      "institution": "Koç University",
+      "rowIds": [
+        "koc-university__college-of-administrative-sciences-and-economics-case"
+      ],
+      "school": "College of Administrative Sciences and Economics (CASE)",
+      "department": "",
+      "building": "College of Administrative Sciences and Economics Building",
+      "address": "Rumelifeneri Yolu, Sarıyer 34450, Istanbul, Türkiye",
+      "lat": 41.2059533,
+      "lng": 29.0740496,
+      "addressSource": "https://case.ku.edu.tr/en/about/deans-office/",
+      "coordinateSource": "https://www.openstreetmap.org/way/280665262",
+      "supportingSources": [
+        "https://case.ku.edu.tr/en/about/contact/",
+        "https://www.ku.edu.tr/en/contact/koc-university-campuses/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Re-verified today: the College's official Dean's Office page lists the dean's and associate deans' offices as 'CASE 249', 'CASE 247', 'CASE 232', 'CASE 226' and 'CASE 229', i.e. rooms in the CASE building, and the College's official Contact page gives the Rumelifeneri Campus address (Rumelifeneri Yolu 34450 Sarıyer, İstanbul), which the university's campuses page confirms as the main campus. The coordinates are reused from the existing record koc-operations-information-systems-business-building (OpenStreetMap way 280665262, named 'İktisadi ve İdari Bilimler Fakültesi' = College of Administrative Sciences and Economics, Koç Meydanı, Rumelifeneri; lookup repeated today). School-building reference for a school-only row; the Rumelifeneri Yolu address is campus-wide."
+    },
+    {
+      "id": "ucl-gbsh-sustainable-scm-marshgate",
+      "institution": "University College London",
+      "rowIds": [
+        "university-college-london__ucl-global-business-school-for-health__sustainable-supply-chain-management"
+      ],
+      "school": "UCL Global Business School for Health",
+      "department": "Sustainable Supply Chain Management",
+      "building": "Marshgate, UCL East (Global Business School for Health, Level 6)",
+      "address": "7 Sidings Street, Stratford, London E20 2AE, United Kingdom",
+      "lat": 51.537542,
+      "lng": -0.0119821,
+      "addressSource": "https://profiles.ucl.ac.uk/88467-rodolfo-catena",
+      "coordinateSource": "https://www.openstreetmap.org/way/964277509",
+      "supportingSources": [
+        "https://www.poms.org/sites/default/files/2026-03/Lecturer%20in%20Sustainable%20Supply%20Chain%20Management%20JD.pdf",
+        "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health"
+      ],
+      "checked": "2026-10-31",
+      "notes": "SCHOOL-BUILDING reference for a department-level row: 'Sustainable Supply Chain Management' is the subject of a 2026 lectureship at the Global Business School for Health, not a department with its own office. Re-verified today on UCL's official profile system: the operations and supply chain academic Rodolfo Catena's address reads 'University College London, Global Business School for Health, Level 6, UCL East, Marshgate, 7 Sidings Street, LONDON, E20 2AE', and the school's own job description for the Lecturer in Sustainable Supply Chain Management gives 'Department: UCL Global Business School for Health, Location: UCL East'. Coordinates reuse the existing Marshgate records (OpenStreetMap way 964277509, 'Marshgate', Stratford, E20 2AD, lookup repeated today). The ucl.ac.uk pages themselves were behind a Cloudflare check on the check date."
+    },
+    {
+      "id": "nccu-school-of-business-lawson-building",
+      "institution": "North Carolina Central University",
+      "rowIds": [
+        "north-carolina-central-university__school-of-business__decision-sciences"
+      ],
+      "school": "School of Business",
+      "department": "Decision Sciences",
+      "building": "School of Business building (new, opened 2024; campus map no. 62 \"New School of Business\")",
+      "address": "829 East Lawson Street (corner of E. Lawson Street and S. Alston Avenue), Durham, NC 27701, United States",
+      "lat": 35.9758691,
+      "lng": -78.8937744,
+      "addressSource": "https://www.nccu.edu/business/business-faculty-and-staff",
+      "coordinateSource": "https://www.openstreetmap.org/way/1126802792",
+      "supportingSources": [
+        "https://www.nccu.edu/news/nccu-introduces-innovative-school-business-building",
+        "https://sites.math.duke.edu/Tricams/NCCU-Campus-Map.pdf",
+        "https://nominatim.openstreetmap.org/search?q=829+East+Lawson+Street+Durham+NC&format=jsonv2",
+        "https://www.openstreetmap.org/changeset/130846558"
+      ],
+      "checked": "2026-10-31",
+      "notes": "NCCU's official School of Business faculty/staff directory puts the Dean (Room 370) and the Department of Decision Sciences, Economics, and Finance chair Ibrahim Salama (Decision Sciences, Room 317) and its faculty (Rooms 319-326) in the 'School of Business' building, listed separately from the 'C. T. Willis Commerce Building' where a few adjuncts remain. NCCU news (ribbon-cutting 28 Feb 2024) places the 76,000 sq ft new School of Business building at the corner of Lawson Street and South Alston Avenue; NCCU's own campus map (copy hosted by Duke) shows it as no. 62 'New School of Business' at that corner, and the construction bid address is 829 East Lawson Street (OSM address node 5949718695 at 35.97571, -78.89398 sits at its frontage). The building has no donor name yet (only the Lowe's Auditorium inside is named). Coordinates are the centroid of the UNNAMED OSM footprint tagged building=university (way 1126802792, added Jan 2023 'Added several new university buildings'), the three-winged building between E. Lawson St, S. Alston Ave and Dupree St matching the campus map's no. 62; the Willis building (map no. 18) is elsewhere and was deliberately not used."
+    },
+    {
+      "id": "um-dearborn-cob-fairlane-center-south",
+      "institution": "University of Michigan-Dearborn",
+      "rowIds": [
+        "university-of-michigan-dearborn__college-of-business__decision-sciences-operations-management"
+      ],
+      "school": "College of Business",
+      "department": "Decision Sciences/Operations Management",
+      "building": "Fairlane Center South (FCS)",
+      "address": "19000 Hubbard Drive, Dearborn, MI 48126, United States",
+      "lat": 42.3224371,
+      "lng": -83.2240861,
+      "addressSource": "https://umdearborn.edu/cob/about-college-business/contact-us",
+      "coordinateSource": "https://nominatim.openstreetmap.org/search?q=Fairlane+Center+South+Dearborn&format=jsonv2",
+      "supportingSources": [
+        "https://www.openstreetmap.org/relation/4245890",
+        "https://umdearborn.edu/cob/about/staff-directory",
+        "https://umdearborn.edu/university-unions-events/about-university-unions-events/history",
+        "https://umdearborn.edu/maps-and-directions-0",
+        "https://catalog.umd.umich.edu/undergraduate/college-business/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The College of Business (incl. its Dean's Office, 141 FCS) is at Fairlane Center South, 19000 Hubbard Drive, the former Ford Fairlane Training Center east of the main campus; this is its CURRENT home (a 2027 relocation to the main campus is planned and is NOT represented here). Coordinates are the centroid of the OSM named building relation 4245890 'Fairlane Center - South' (display_name 'Fairlane Center - South, Rouge Gateway Trail - North Campus Connector, Dearborn, MI 48124'), as returned by Nominatim; Fairlane Center North (OSM way 315559931, now closed) is a separate footprint to the north. Scope: school building only; the department (Management Studies / now 'Management and Marketing' per the 2026-27 catalog) is listed in the college's staff directory under the same FCS address but no departmental room was verified. CAVEAT: umdearborn.edu answered HTTP 403 to every fetch from this environment, so the addressSource page content was corroborated only via search-engine excerpts of those official pages (and the caller's prior research), not by loading them here."
+    },
+    {
+      "id": "uc-merced-engineering-se2",
+      "institution": "University of California, Merced",
+      "rowIds": [
+        "university-of-california-merced__school-of-engineering"
+      ],
+      "school": "School of Engineering",
+      "department": "",
+      "building": "Science & Engineering Building 2 (SE2)",
+      "address": "Science & Engineering 2, Suite 315, 5200 N. Lake Road, Merced, CA 95343, United States",
+      "lat": 37.3657887,
+      "lng": -120.4219238,
+      "addressSource": "https://directory.ucmerced.edu/department/E200",
+      "coordinateSource": "https://nominatim.openstreetmap.org/search?q=Science+%26+Engineering+Building+2+Merced&format=jsonv2",
+      "supportingSources": [
+        "https://www.openstreetmap.org/way/564489516",
+        "https://engineering.ucmerced.edu/contact-us-engineering",
+        "https://news.ucmerced.edu/news/2014/campus-expands-new-science-and-engineering-building"
+      ],
+      "checked": "2026-10-31",
+      "notes": "UC Merced's official campus directory (department E200, School of Engineering) lists Dean Rakesh Goel, the Director of Undergraduate Student Services, the Director of Personnel Services and the undergraduate academic advisors with office 'Science & Engineering 2 315', and the Director of Administration in SE2 305A; the school's own contact page (not loadable here, 403) is reported to say the Dean's Suite is on the 3rd floor of SE2, Suite 315, 5200 N. Lake Road. Coordinates are Nominatim's centroid for the OSM named building 'Science & Engineering Building 2' (way 564489516, short_name SE2), adjacent to and distinct from 'Science and Engineering Building I' (way 180831793). Scope: school dean's office; the row has no department. 5200 N. Lake Road is the campus-wide mailing address."
+    },
+    {
+      "id": "di-tella-escuela-de-negocios-edificio-alcorta",
+      "institution": "Universidad Torcuato di Tella",
+      "rowIds": [
+        "universidad-torcuato-di-tella__school-of-business"
+      ],
+      "school": "School of Business",
+      "department": "",
+      "building": "Edificio Alcorta (Campus Di Tella)",
+      "address": "Av. Figueroa Alcorta 7350, C1428BCW Ciudad Autónoma de Buenos Aires, Argentina",
+      "lat": -34.5474683,
+      "lng": -58.4467909,
+      "addressSource": "https://www.utdt.edu/campusditella/Plano-del-Campus-Di-Tella.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/377553064",
+      "supportingSources": [
+        "https://utdt.edu/campusditella",
+        "https://www.utdt.edu/campusditella/tpls/plano.tpl.htm",
+        "https://www.openstreetmap.org/way/53205084",
+        "https://www.openstreetmap.org/node/6482010674"
+      ],
+      "checked": "2026-10-31",
+      "notes": "UTDT's official campus map (Plano del Campus Di Tella, 'Mapa_Digital_2026') places the Escuela de Negocios offices in Edificio Alcorta: floor 4 'Oficinas de profesores / Escuela de Negocios: Admisiones, Coordinación' (beside the Aula Magna) and the ground-floor entrepiso 'Coordinación grado Escuela de Negocios'; the Edificio Alcorta pedestrian entrance is Av. Figueroa Alcorta 7350. The single campus also has Edificio Sáenz Valiente (classrooms; entrance Sáenz Valiente 1000 / Alcorta 7380), Edificio Monroe (Alcorta 7310) and the forthcoming Edificio Parque. Coordinates are the centroid of the UNNAMED 5-storey OSM footprint (way 377553064, building=university, height 17 m) that fronts Av. Figueroa Alcorta inside the campus polygon carrying addr 7350 (way 53205084), next to the Ecobici station '234 - Universidad Di Tella'; it was identified as Edificio Alcorta from the official plano's site plan (the long block along the avenue between Monroe and Sáenz Valiente), not from an OSM name, so treat the building attribution of the point as inferred. Scope: school offices (admissions/coordination and faculty offices); no department."
+    },
+    {
+      "id": "sustech-business-school-building",
+      "institution": "Southern University of Science and Technology (SUSTech)",
+      "rowIds": [
+        "southern-university-of-science-and-technology-sustech__school-of-business-analytics__information-and-operations-management"
+      ],
+      "school": "School of Business, Analytics",
+      "department": "Information, and Operations Management",
+      "building": "SUSTech Business School Building (南方科技大学商学院大楼)",
+      "address": "1088 Xueyuan Avenue, Nanshan District, Shenzhen, Guangdong 518055, China",
+      "lat": 22.598539,
+      "lng": 113.995616,
+      "addressSource": "https://business.sustech.edu.cn/web/aboutus.php",
+      "coordinateSource": "https://www.openstreetmap.org/way/703098307",
+      "supportingSources": [
+        "https://business.sustech.edu.cn/weben/aboutus.php",
+        "https://www.sustech.edu.cn/en/contact_us.html?lang=en",
+        "https://stat-ds.sustech.edu.cn/portal/list/staff/id/?lang=en-us"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The SUSTech Business School's official Chinese About page gives its address as 广东省深圳市南山区学苑大道1088号南方科技大学商学院大楼 (SUSTech Business School Building); the English page gives the same street address and lists the school's departments (Finance; Information Systems and Management Engineering; Accounting; Applied Economics; Entrepreneurship and Organizational Management; Marketing and Operations Management). Coordinates are the centroid of the OSM building footprint named 商学院 / College of Business (8 storeys, way 703098307) on the Nanshan campus; faculty directory entries of a sister department also give offices as 'Room 3xx, Business School Bldg.'. The row's school/department strings are an odd split of one posting line ('School of Business, Analytics, Information, and Operations Management'); the school has no department by that exact name (the nearest are Marketing and Operations Management and ISME), so this is a school-building reference and no department office was separately verified."
+    },
+    {
+      "id": "ie-operations-business-analytics-molina12-ds-om",
+      "institution": "IE Business School",
+      "rowIds": [
+        "ie-business-school____ds",
+        "ie-business-school____om"
+      ],
+      "school": "",
+      "department": "Operations and Business Analytics",
+      "building": "María de Molina 12 faculty offices",
+      "address": "5th floor, Calle de María de Molina 12, 28006 Madrid, Spain",
+      "lat": 40.437639,
+      "lng": -3.687494,
+      "addressSource": "https://www.ie.edu/faculty/matthias-seifert/",
+      "coordinateSource": "https://ovc.catastro.meh.es/OVCServWeb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_CPMRC?Provincia=&Municipio=&SRS=EPSG:4326&RC=1767702VK4716F",
+      "supportingSources": [
+        "https://public-api.thesaurus.ie.edu/list/v2/TEACHERS[filters=29477]/site/7/lang/1/page/1/items/200/order/alpha-ASC/maxItems/0/relations/full",
+        "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+        "https://www.ie.edu/university/about/faculty/matthias-seifert/",
+        "https://docs.ie.edu/sustainability/resources/2025%20CERTIFICADO%20GHG%20PROTOCOL%20Grupo%20IE%20%28Alcance%201%2C%202%29.pdf"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Covers the IE Business School rows DS and OM, both within the Operations and Business Analytics area; the Operations and Technology row has a sibling record so that it keeps its own faculty link. Reuses the building and coordinates of the existing record ie-operations-business-analytics-molina12 (IE University / IE Business School / Operations and Business Analytics). The official IE faculty page of Matthias Seifert reads 'Associate Professor of Decision Sciences, IE Business School - IE University, Operations & Business Analytics Area, Maria de Molina 12, 5th floor, 28006 Madrid', which ties Decision Sciences (the DS row; IE's own job advertisements are titled 'Tenure-Track Position in Decision Sciences' and sit in this area) to this building. IE's public faculty API for academic area 29477 (Operations & Business Analytics, the area the directory's own facultyUrl for the DS/OM rows points at) lists the operations-management faculty (Corsten, Revilla, Salvador, Ketokivi, Tenhiala, Delana...) in the same area; 'Operations and Technology' is the earlier name of that area (the row's old faculty URL now redirects to the generic faculty list). Limitation: the university-site profiles of the OM faculty carry no office address, so only the Decision Sciences tie is documented by a named office; OM and Operations and Technology are assigned by area membership. Not the IE Tower (Paseo de la Castellana 259E) or the other María de Molina buildings."
+    },
+    {
+      "id": "nova-sbe-carcavelos-campus-institution",
+      "institution": "Nova School of Business and Economics",
+      "rowIds": [
+        "nova-school-of-business-and-economics"
+      ],
+      "school": "Nova School of Business and Economics",
+      "department": "",
+      "building": "Nova SBE Carcavelos Campus - Cascais Academic Hall (Building B, faculty offices)",
+      "address": "Rua da Holanda 1, 2775-405 Carcavelos, Portugal",
+      "lat": 38.6788337,
+      "lng": -9.3267428,
+      "addressSource": "https://www.novasbe.unl.pt/en/about-us/contacts-directions",
+      "coordinateSource": "https://www.openstreetmap.org/way/496301640",
+      "supportingSources": [
+        "https://campustour.novasbe.pt/p/cascais-academic-hall",
+        "https://www.openstreetmap.org/way/179419205"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a department office. Nova SBE's official Contacts & Directions page lists a single campus, 'Nova SBE Carcavelos Campus, Rua da Holanda, no. 1, 2775-405 Carcavelos, Portugal' (every office listed sits in a building or room of that campus; no Lisbon or second campus is listed, 'Lisbon' appearing only in programme names). The building point reuses the verified Cascais Academic Hall footprint (OSM way 496301640) of the existing record nova-operations-technology-innovation-cascais-hall, whose official campus tour places faculty offices on its second floor; the campus is one integrated complex of named halls (Hovione Atrium, Santander Academic Hall, Cascais Academic Hall), so the school's seat is the campus rather than one hall."
+    },
+    {
+      "id": "ewha-school-of-business-shinsegae",
+      "institution": "Ewha School of Business",
+      "rowIds": [
+        "ewha-school-of-business"
+      ],
+      "school": "Ewha School of Business",
+      "department": "",
+      "building": "Ewha-Shinsegae Building (이화·신세계관, 경영관)",
+      "address": "52 Ewhayeodae-gil, Seodaemun-gu, Seoul 03760, Republic of Korea",
+      "lat": 37.561534,
+      "lng": 126.94236,
+      "addressSource": "https://biz.ewha.ac.kr/bizeng/about/location.do",
+      "coordinateSource": "https://www.openstreetmap.org/way/333180680",
+      "supportingSources": [
+        "https://biz.ewha.ac.kr/biz/about/location.do",
+        "https://www.ewha.ac.kr/ewhaen/academics/business-administration.do"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level reference for the Ewha School of Business (ESB, the business college of Ewha Womans University), not a department office. The school's official English location page is titled 'Ewha School of Business' and gives 'The Ewha-Shinsegae Building, 52 Ewhayeodae-gil, Seodaemun-gu, Seoul'; the Korean page gives 서울특별시 서대문구 이화여대길 52 이화·신세계관, and the university's College of Business Administration page places the college office in 'Ewha-Shinsegae Building (Business) 309호'. Coordinates are the centroid of the OSM building footprint named 이화신세계관(경영관) (six storeys, way 333180680); the existing record ewha-business-shinsegae for the university's College of Business Administration row uses the same building (Kakao marker, 37.5617, 126.9424), within a few metres."
+    },
+    {
+      "id": "hec-paris-jouy-campus-batiment-s",
+      "institution": "HEC Paris",
+      "rowIds": [
+        "hec-paris"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Bâtiment S (campus reception, MBA, General Secretariat, HEC Foundation), Jouy-en-Josas campus",
+      "address": "1 rue de la Libération, 78351 Jouy-en-Josas Cedex, France",
+      "lat": 48.7559,
+      "lng": 2.169385,
+      "addressSource": "https://www.hec.edu/en/maps-and-directions",
+      "coordinateSource": "https://www.openstreetmap.org/way/216407089",
+      "supportingSources": [
+        "https://learning-center.hec.edu/wp-content/uploads/2020/09/plan-campus-hec-pdf.pdf",
+        "https://www.hec.edu/en/campus",
+        "https://www.openstreetmap.org/way/112352426"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus-seat reference, not a department. HEC Paris's official Maps & Directions page lists only Jouy-en-Josas addresses ('HEC Paris Campus, 1, rue de la Libération, 78351 Jouy en Josas Cedex' and 'HEC Paris Le Château, 5 rue de la Libération'), and its Campus page describes the campus as located in Jouy-en-Josas, 20 km outside Paris, 341 acres; the Doha and Paris executive-education sites are not listed as campuses there. The official campus plan (Learning Center PDF) names Building S as 'Campus Reception' housing the MBA, Corporate Relations, General Secretariat, HEC Foundation and Alumni Association, and W1 as General Management (Direction Générale); S is used as the seat/entrance point. Coordinates are the centroid of the OSM building named Bâtiment S (way 216407089, building=school, amenity=university). Department rows of HEC Paris are already placed in Building V (hec-paris-information-operations-building-v)."
+    },
+    {
+      "id": "sutd-somapah-campus-building-one",
+      "institution": "Singapore University of Technology and Design (SUTD)",
+      "rowIds": [
+        "singapore-university-of-technology-and-design"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Building 1 (SUTD campus, 8 Somapah Road)",
+      "address": "8 Somapah Road, Singapore 487372",
+      "lat": 1.3402237,
+      "lng": 103.9624353,
+      "addressSource": "https://www.sutd.edu.sg/contact-us/contact-sutd/",
+      "coordinateSource": "https://www.openstreetmap.org/relation/7220785",
+      "supportingSources": [
+        "https://www.sutd.edu.sg/esd/contact-us/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a department office. SUTD's official Contact SUTD page gives a single address, '8 Somapah Road, Singapore 487372', with no other campus. The point reuses the verified Building 1 footprint of the existing record singapore-technology-design-engineering-systems-building-one (OSM relation 7220785, seven-storey 'Building 1' at 8 Somapah Road; my own recomputation of the relation's outer ring gives 1.340245, 103.962387, within 6 m). Building 1 is the first of the campus's numbered academic buildings and houses the Engineering Systems and Design pillar (official pillar contact page); it is used as the named point for the campus street address, not as a claim that the university's administration sits there."
+    },
+    {
+      "id": "skoltech-bolshoy-boulevard-30",
+      "institution": "Skolkovo Institute of Science and Technology (Skoltech)",
+      "rowIds": [
+        "skolkovo-institute-of-science-and-technology-skoltech"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Skoltech campus building (Bolshoy Boulevard 30, bld. 1, Skolkovo Innovation Center)",
+      "address": "Bolshoy Boulevard 30, bld. 1, Moscow 121205, Russia",
+      "lat": 55.699024,
+      "lng": 37.359519,
+      "addressSource": "https://www.skoltech.ru/en/contacts/",
+      "coordinateSource": "https://www.openstreetmap.org/relation/7231508",
+      "supportingSources": [
+        "https://www.openstreetmap.org/way/492439134"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a department office. Skoltech's official Contacts page gives one address, 'Skoltech, Bolshoy Boulevard, 30, bld. 1, Moscow 121205, Russia', and mentions no other campus. Coordinates are the centroid of the outer ring of the OSM building multipolygon tagged building=university, name 'Сколковский институт науки и технологии', alt_name 'Сколтех', addr Большой бульвар 30 с1 (relation 7231508), i.e. the single ring-shaped Skoltech campus building; the directory row's older 'Novaya Ulitsa 100' address predates the move into this building."
+    },
+    {
+      "id": "ted-university-kolej-campus-a-blok",
+      "institution": "TED University",
+      "rowIds": [
+        "ted-university"
+      ],
+      "school": "",
+      "department": "",
+      "building": "A Block (A Blok: entrance hall, General Secretariat, Student Affairs, Financial Affairs), Kolej Campus",
+      "address": "Ziya Gökalp Caddesi No:48, 06420 Kolej, Çankaya, Ankara, Türkiye",
+      "lat": 39.922985,
+      "lng": 32.861703,
+      "addressSource": "https://www.tedu.edu.tr/en",
+      "coordinateSource": "https://www.openstreetmap.org/way/998194019",
+      "supportingSources": [
+        "https://www.tedu.edu.tr/sites/default/files/inline-files/yer-yon-haritalari-a-blok.pdf",
+        "https://www.tedu.edu.tr/sites/default/files/inline-files/yer-yon-haritalari-d-blok.pdf",
+        "https://www.openstreetmap.org/way/1537708617"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Institution-level campus reference, not a department office. TED University's official English site gives one address, 'Ziya Gökalp Caddesi No:48 06420, Kolej Çankaya Ankara', and describes a single campus in the city centre (an Ulus entrepreneurship centre is called a 'new center', not a campus). The university's official wayfinding map for A Block shows the ground floor holding the Entrance Hall, Infodesk & Security, General Secretariat, Assistant Secretary General, Student Affairs, International Programs Office and Financial Affairs, so A Block is used as the administrative/main building; the faculties' deans' offices are in D Block (official D Block map) and the rectorate's room was not located on the maps. Coordinates are the centroid of the OSM building 'TEDU A Blok' (way 998194019), inside the OSM campus polygon 'TED Üniversitesi Kolej Kampüsü' at No:48 (way 1537708617, centroid 39.92281, 32.86174)."
+    },
+    {
+      "id": "ie-operations-technology-molina12",
+      "institution": "IE Business School",
+      "rowIds": [
+        "ie-business-school____operations-and-technology"
+      ],
+      "school": "",
+      "department": "Operations and Technology",
+      "building": "María de Molina 12 faculty offices",
+      "address": "5th floor, Calle de María de Molina 12, 28006 Madrid, Spain",
+      "lat": 40.437639,
+      "lng": -3.687494,
+      "addressSource": "https://www.ie.edu/faculty/matthias-seifert/",
+      "coordinateSource": "https://ovc.catastro.meh.es/OVCServWeb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_CPMRC?Provincia=&Municipio=&SRS=EPSG:4326&RC=1767702VK4716F",
+      "supportingSources": [
+        "https://public-api.thesaurus.ie.edu/list/v2/TEACHERS[filters=29477]/site/7/lang/1/page/1/items/200/order/alpha-ASC/maxItems/0/relations/full",
+        "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+        "https://www.ie.edu/university/about/faculty/matthias-seifert/",
+        "https://docs.ie.edu/sustainability/resources/2025%20CERTIFICADO%20GHG%20PROTOCOL%20Grupo%20IE%20%28Alcance%201%2C%202%29.pdf"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Sibling of ie-operations-business-analytics-molina12-ds-om for the row whose department is the area former name, Operations and Technology, so that the row keeps the faculty link it already carries. Reuses the building and coordinates of the existing record ie-operations-business-analytics-molina12 (IE University / IE Business School / Operations and Business Analytics). The official IE faculty page of Matthias Seifert reads 'Associate Professor of Decision Sciences, IE Business School - IE University, Operations & Business Analytics Area, Maria de Molina 12, 5th floor, 28006 Madrid', which ties Decision Sciences (the DS row; IE's own job advertisements are titled 'Tenure-Track Position in Decision Sciences' and sit in this area) to this building. IE's public faculty API for academic area 29477 (Operations & Business Analytics, the area the directory's own facultyUrl for the DS/OM rows points at) lists the operations-management faculty (Corsten, Revilla, Salvador, Ketokivi, Tenhiala, Delana...) in the same area; 'Operations and Technology' is the earlier name of that area (the row's old faculty URL now redirects to the generic faculty list). Limitation: the university-site profiles of the OM faculty carry no office address, so only the Decision Sciences tie is documented by a named office; OM and Operations and Technology are assigned by area membership. Not the IE Tower (Paseo de la Castellana 259E) or the other María de Molina buildings."
     }
   ]
 }

@@ -1,8 +1,8 @@
 {
   "snapshotDate": "2026-10-31",
-  "lastPublishedMapCommit": "8fe2e3db57c3aa123d9305d852b416995ca15d6b",
+  "lastPublishedMapCommit": "e77eb0dcd0375a35dc7fb75adfea3e825da6ae52",
   "source": "data/directory.json",
-  "unresolvedLocationCount": 110,
+  "unresolvedLocationCount": 65,
   "missingFacultyRosterCount": 3,
   "unresolvedLocations": [
     {
@@ -125,131 +125,12 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "cornell-university-cornell-tech__samuel-curtis-johnson-graduate-school-of-management",
-      "institution": "Cornell University/ Cornell Tech",
-      "school": "Samuel Curtis Johnson Graduate School of Management",
-      "type": "Business School",
-      "country": "United States",
-      "address": "2 W Loop Rd, New York, NY 10044",
-      "mapUrl": "https://goo.gl/maps/eZjjz",
-      "facultyUrl": "https://www.johnson.cornell.edu/Faculty-And-Research/Faculty-by-Discipline",
-      "sources": [
-        "directory",
-        "postings"
-      ],
-      "n": 1,
-      "lastPosted": "2014-10-21",
-      "lat": 40.755644,
-      "lng": -73.9560965,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "depauw-university",
       "institution": "DePauw University",
       "type": "University",
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "erasmus-university-rotterdam__econometric-institute__operations-and-supply-chain-management",
-      "institution": "Erasmus University Rotterdam",
-      "school": "Econometric Institute",
-      "department": "Operations and Supply Chain Management",
-      "type": "University",
-      "country": "Netherlands",
-      "address": "Burgemeester Oudlaan 50, 3062 PA Rotterdam, Netherlands",
-      "mapUrl": "https://goo.gl/maps/cYe8R",
-      "facultyUrl": "http://www.erim.eur.nl/people/",
-      "sources": [
-        "directory"
-      ],
-      "lat": 51.9168242,
-      "lng": 4.52566,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "ewha-school-of-business",
-      "institution": "Ewha School of Business",
-      "type": "Business School",
-      "country": "South Korea",
-      "address": "52 Ewhayeodae-gil, Sinchon-dong, Seodaemun-gu, Seoul, South Korea",
-      "mapUrl": "https://goo.gl/maps/IH7Mp",
-      "facultyUrl": "http://www.ewha.ac.kr/mbs/ewhaen/index.jsp",
-      "sources": [
-        "directory",
-        "postings"
-      ],
-      "n": 1,
-      "lastPosted": "2014-09-04",
-      "lat": 37.5642551,
-      "lng": 126.9503079,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "florida-international-university____is",
-      "institution": "Florida International University",
-      "department": "IS",
-      "type": "University",
-      "country": "United States",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2026-01-18",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "deptUrl": "https://business.fiu.edu/academics/departments/isba/",
-      "facultyUrl": "https://business.fiu.edu/academics/departments/isba/faculty/index.html"
-    },
-    {
-      "id": "florida-international-university__college-of-business-administration__decision-sciences-and-information-systems",
-      "institution": "Florida International University",
-      "school": "College of Business Administration",
-      "department": "Decision Sciences and Information Systems",
-      "type": "Business School",
-      "country": "United States",
-      "address": "11200 SW 8th St, Miami, FL 33174",
-      "mapUrl": "https://goo.gl/maps/z74rC",
-      "facultyUrl": "http://business.fiu.edu/dsis/faculty.cfm",
-      "sources": [
-        "directory",
-        "postings"
-      ],
-      "n": 1,
-      "lastPosted": "2014-11-17",
-      "lat": 25.7569643,
-      "lng": -80.3798661,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "fudan-university__school-of-management__management-science",
-      "institution": "Fudan University",
-      "school": "School of Management",
-      "department": "Management Science",
-      "type": "Business School",
-      "country": "China",
-      "address": "Lidasan Building WuJiaoChang, Yangpu Qu, Shanghai Shi China",
-      "mapUrl": "https://goo.gl/maps/w48xy",
-      "facultyUrl": "http://www.fdsm.fudan.edu.cn/en/teacher/profile.aspx",
-      "deptUrl": "https://www.fdsm.fudan.edu.cn/en/fr_faculty/list.htm",
-      "sources": [
-        "directory",
-        "omlist",
-        "postings",
-        "seed"
-      ],
-      "n": 2,
-      "lastPosted": "2026-09-09",
-      "lat": 31.2967376,
-      "lng": 121.506265,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -290,65 +171,6 @@
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "hec-paris",
-      "institution": "HEC Paris",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "ie-business-school____ds",
-      "institution": "IE Business School",
-      "department": "DS",
-      "type": "Business School",
-      "country": "Spain",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2025-05-18",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
-      "facultyDirectoryHint": "This roster covers the broader Operations & Business Analytics area."
-    },
-    {
-      "id": "ie-business-school____om",
-      "institution": "IE Business School",
-      "department": "OM",
-      "type": "Business School",
-      "country": "Spain",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2025-05-18",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
-      "facultyDirectoryHint": "This roster covers the broader Operations & Business Analytics area."
-    },
-    {
-      "id": "ie-business-school____operations-and-technology",
-      "institution": "IE Business School",
-      "department": "Operations and Technology",
-      "type": "Business School",
-      "country": "Spain",
-      "address": "Calle de María de Molina, 11-13-15, 28006 Madrid, Spain",
-      "facultyUrl": "https://www.ie.edu/business-school/faculty-research/faculty/operations-technology/",
-      "sources": [
-        "directory"
-      ],
-      "lat": 40.4381107,
-      "lng": -3.687284,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -402,22 +224,6 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "indian-institute-of-technology-iit-bombay____industrial-engineering-and-operations-research",
-      "institution": "Indian Institute of Technology (IIT) Bombay",
-      "department": "Industrial Engineering and Operations Research",
-      "type": "University",
-      "country": "India",
-      "address": "Academic Section, Powai, IIT Area, Greater Mumbai, Maharashtra 400076, India",
-      "facultyUrl": "http://www.ieor.iitb.ac.in/people/faculty",
-      "sources": [
-        "directory"
-      ],
-      "lat": 19.131019,
-      "lng": 72.9172156,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "indian-school-of-business",
       "institution": "Indian School of Business",
       "type": "Business School",
@@ -461,66 +267,6 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "kaist____organization-man-sci",
-      "institution": "KAIST",
-      "department": "Organization/Man. Sci",
-      "country": "South Korea",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2025-12-26",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://www.business.kaist.ac.kr/_prog/prof/index.php?menu_dvs_cd=040101&site_dvs_cd=kr",
-      "facultyDirectoryHint": "The Korean-language directory covers all business faculty; use the subject links for Technology/Organization/Strategy and Operations Strategy/Management Science."
-    },
-    {
-      "id": "kaist__college-of-business__operations-strategy-and-management-science",
-      "institution": "KAIST",
-      "school": "College of Business",
-      "department": "Operations Strategy and Management Science",
-      "type": "Business School",
-      "country": "South Korea",
-      "address": "South Korea, Seoul, Dongdaemun-gu, Cheongnyangri-dong, Hoegi-ro, 85",
-      "facultyUrl": "http://www.business.kaist.edu/_prog/prof/index.php?site_dvs_cd=en&menu_dvs_cd=0501&div_cd=C02009",
-      "deptUrl": "https://www.business.kaist.edu/_prog/prof/?site_dvs_cd=en&menu_dvs_cd=050106&div_cd=C02009",
-      "characteristics": [
-        "Research seminars",
-        "PhD",
-        "Masters",
-        "MBA",
-        "Exec Ed"
-      ],
-      "sources": [
-        "directory",
-        "omlist",
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2025-10-22",
-      "lat": 37.5933445,
-      "lng": 127.0477953,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "koc-university__college-of-administrative-sciences-and-economics-case",
-      "institution": "Koç University",
-      "school": "College of Administrative Sciences and Economics (CASE)",
-      "type": "University",
-      "country": "Turkey",
-      "sources": [
-        "postings"
-      ],
-      "n": 1,
-      "lastPosted": "2014-11-23",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "lehigh-university",
       "institution": "Lehigh University",
       "type": "University",
@@ -541,24 +287,6 @@
       ],
       "n": 1,
       "lastPosted": "2025-06-22",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "mef-university__faculty-of-engineering__industrial-engineering",
-      "institution": "MEF University",
-      "school": "Faculty of Engineering",
-      "department": "Industrial Engineering",
-      "type": "University",
-      "country": "Turkey",
-      "address": "Huzur Mh., Maslak Ayazağa Cd. No:4, 34396 Sarıyer/İstanbul, Turkey",
-      "mapUrl": "https://goo.gl/maps/9QMwsjErudL2",
-      "facultyUrl": "http://www.mef.edu.tr/Industrial_Engineering",
-      "sources": [
-        "directory"
-      ],
-      "lat": 41.1091964,
-      "lng": 29.0086093,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -609,101 +337,12 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "north-carolina-central-university__school-of-business__decision-sciences",
-      "institution": "North Carolina Central University",
-      "school": "School of Business",
-      "department": "Decision Sciences",
-      "type": "Business School",
-      "country": "United States",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2026-10-27",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://www.nccu.edu/business/business-faculty-and-staff",
-      "facultyDirectoryHint": "Find the Department of Decision Sciences, Economics, and Finance; the directory also lists other departments."
-    },
-    {
-      "id": "nova-school-of-business-and-economics",
-      "institution": "Nova School of Business and Economics",
-      "type": "Business School",
-      "country": "Portugal",
-      "address": "1099-032 Lisbon, Portugal",
-      "mapUrl": "https://goo.gl/maps/eVV6u",
-      "facultyUrl": "http://www.novasbe.unl.pt/pt/faculty-research/faculty/faculty-members",
-      "sources": [
-        "directory",
-        "postings"
-      ],
-      "n": 1,
-      "lastPosted": "2014-12-03",
-      "lat": 38.7222524,
-      "lng": -9.1393366,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "ozyegin-university",
       "institution": "Özyeğin University",
       "type": "University",
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "pontificia-universidad-catolica-de-chile__school-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin",
-      "institution": "Pontificia Universidad Catolica de Chile (PUC)",
-      "school": "School of Engineering",
-      "department": "Industrial and Systems Engineering and Electrical Engineering",
-      "type": "University",
-      "country": "Chile",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2026-10-18",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://www.ing.uc.cl/academicos-e-investigacion/academicos-e-investigadores/",
-      "facultyDirectoryHint": "This school-wide list covers all engineering departments, including Industrial and Systems Engineering and Electrical Engineering."
-    },
-    {
-      "id": "pontificia-universidad-catolica-de-chile__school-of-management__management-science",
-      "institution": "Pontificia Universidad Catolica de Chile (PUC)",
-      "school": "School of Management",
-      "department": "Management Science",
-      "type": "Business School",
-      "country": "Chile",
-      "address": "Av Libertador Bernardo O'Higgins 340, Santiago, Región Metropolitana, Chile",
-      "facultyUrl": "https://escueladeadministracion.uc.cl/escuela/business-economics-and-finance/",
-      "sources": [
-        "directory"
-      ],
-      "lat": -33.4411279,
-      "lng": -70.6407933,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "sabanci-university__faculty-of-engineering-and-natural-sciences-fens",
-      "institution": "Sabanci University",
-      "school": "Faculty of Engineering and Natural Sciences (FENS)",
-      "type": "University",
-      "country": "Turkey",
-      "address": "Orta Mahallesi, Üniversite Cd. No:27, 34956 Tuzla/İstanbul, Turkey",
-      "mapUrl": "https://goo.gl/maps/KXb48",
-      "facultyUrl": "http://fens.sabanciuniv.edu/eng/?Calisanlar/Calisanlar.php?id=281",
-      "sources": [
-        "directory"
-      ],
-      "lat": 40.8819197,
-      "lng": 29.3807805,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -736,74 +375,6 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "singapore-management-university__school-of-information-systems",
-      "institution": "Singapore Management University (SMU)",
-      "school": "School of Information Systems",
-      "type": "University",
-      "country": "Singapore",
-      "address": "80 Stamford Rd, Singapore 178902",
-      "mapUrl": "https://goo.gl/maps/vuu47UCi3692",
-      "facultyUrl": "https://sis.smu.edu.sg/faculty/full-time/research?filter%5Bprofile_type%5D%5B%5D=302&filter%5Btrack%5D=tenure##region-page-top",
-      "sources": [
-        "directory"
-      ],
-      "lat": 1.2973205,
-      "lng": 103.8496144,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "singapore-university-of-technology-and-design",
-      "institution": "Singapore University of Technology and Design (SUTD)",
-      "type": "University",
-      "country": "Singapore",
-      "address": "8 Somapah Rd, Singapore 487372",
-      "facultyUrl": "http://www.sutd.edu.sg/faculty_members.aspx",
-      "sources": [
-        "directory"
-      ],
-      "lat": 1.3413132,
-      "lng": 103.9637565,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "skolkovo-institute-of-science-and-technology-skoltech",
-      "institution": "Skolkovo Institute of Science and Technology (Skoltech)",
-      "type": "University",
-      "country": "Russia",
-      "address": "Novaya Ulitsa, 100, Scolkovo, Moskovskaya oblast', Russia, 143025",
-      "mapUrl": "https://goo.gl/maps/KFdtd",
-      "facultyUrl": "http://faculty.skoltech.ru/Faculty/(letter)/ff",
-      "sources": [
-        "directory",
-        "postings"
-      ],
-      "n": 1,
-      "lastPosted": "2014-10-17",
-      "lat": 55.695548,
-      "lng": 37.39054,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "southern-university-of-science-and-technology-sustech__school-of-business-analytics__information-and-operations-management",
-      "institution": "Southern University of Science and Technology (SUSTech)",
-      "school": "School of Business, Analytics",
-      "department": "Information, and Operations Management",
-      "type": "Business School",
-      "country": "China",
-      "address": "1088 Xueyuan Ave, Nanshan Qu, Shenzhen Shi, Guangdong Sheng, China, 518055",
-      "facultyUrl": "https://www.sustech.edu.cn/en/",
-      "sources": [
-        "directory"
-      ],
-      "lat": 22.593969,
-      "lng": 113.99894,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "srm-university____operation-and-supply-chain-management",
       "institution": "SRM University",
       "department": "Operation and Supply Chain Management",
@@ -830,49 +401,12 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "ted-university",
-      "institution": "TED University",
-      "type": "University",
-      "country": "Turkey",
-      "address": "Kültür Mahallesi, Ziya Gökalp Cd. 47-48, 06420 Çankaya/Ankara, Turkey",
-      "mapUrl": "https://goo.gl/maps/kIjmC",
-      "facultyUrl": "http://www.tedu.edu.tr/en-US/Content/Academics/Faculty_of_Engineering_and_Architecture/Department_of_Industrial_Engineering/Department_Homepage.aspx",
-      "sources": [
-        "directory"
-      ],
-      "lat": 39.924038,
-      "lng": 32.861431,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "temple-university",
       "institution": "Temple University",
       "type": "University",
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "chinese-university-of-hong-kong__faculty-of-engineering__systems-engineering-and-engineering-management",
-      "institution": "The Chinese University of Hong Kong (CUHK)",
-      "school": "Faculty of Engineering",
-      "department": "Systems Engineering and Engineering Management",
-      "type": "University",
-      "country": "Hong Kong",
-      "address": "Room 609, William M. W. Mong Engineering Building, The Chinese University of Hong Kong, Shatin, N.T., Hong Kong",
-      "facultyUrl": "http://www.se.cuhk.edu.hk/content/academic-staff",
-      "sources": [
-        "directory",
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2026-09-20",
-      "lat": 22.4180479,
-      "lng": 114.207961,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -893,23 +427,6 @@
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "hong-kong-university-of-science-and-technology____industrial-engineering-and-logistics-management",
-      "institution": "The Hong Kong University of Science and Technology (HKUST)",
-      "department": "Industrial Engineering and Logistics Management",
-      "type": "University",
-      "country": "Hong Kong",
-      "address": "Clear Water Bay, Hong Kong",
-      "mapUrl": "https://goo.gl/maps/WpqK6",
-      "facultyUrl": "https://www.ielm.ust.hk/eng/faculty.php?catid=5",
-      "sources": [
-        "directory"
-      ],
-      "lat": 22.3334901,
-      "lng": 114.2647245,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -944,46 +461,12 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "university-of-texas-at-austin__cockrell-school-of-engineering__operations-research-and-industrial-engineering",
-      "institution": "The University of Texas at Austin",
-      "school": "Cockrell School of Engineering",
-      "department": "Operations Research and Industrial Engineering",
-      "type": "University",
-      "country": "United States",
-      "address": "301 E Dean Keeton St, Austin, TX 78712",
-      "mapUrl": "https://goo.gl/maps/pNCIJ",
-      "facultyUrl": "http://www.engr.utexas.edu/directory/programs/operations",
-      "sources": [
-        "directory"
-      ],
-      "lat": 30.2889433,
-      "lng": -97.7354746,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "tilburg-university",
       "institution": "Tilburg University",
       "type": "University",
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "tobb-university-of-economics-and-technology____business-administration",
-      "institution": "TOBB University of Economics and Technology",
-      "department": "Business Administration",
-      "type": "Business School",
-      "country": "Turkey",
-      "address": "Söğütözü Mahallesi, Söğütözü Cd. No:43, 06510 Çankaya/Ankara, Turkey",
-      "facultyUrl": "https://www.etu.edu.tr/tr/bolum/isletme/akademik-kadro?l=2&",
-      "sources": [
-        "directory"
-      ],
-      "lat": 39.9213097,
-      "lng": 32.7988233,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -1008,64 +491,11 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "universidad-de-chile____industrial-engineering",
-      "institution": "Universidad de Chile",
-      "department": "Industrial Engineering",
-      "country": "Chile",
-      "address": "Av Libertador Bernardo O'Higgins 1058, Santiago, Región Metropolitana, Chile",
-      "facultyUrl": "http://ingenieria.uchile.cl/facultad/cuerpo-academico?output=js&gru_id=fcfm.industrial",
-      "sources": [
-        "directory"
-      ],
-      "lat": -33.4445011,
-      "lng": -70.650879,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "universidad-de-los-andes",
       "institution": "Universidad de los Andes",
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "universidad-torcuato-di-tella__school-of-business",
-      "institution": "Universidad Torcuato di Tella",
-      "school": "School of Business",
-      "type": "Business School",
-      "country": "Argentina",
-      "address": "Av Pres. Figueroa Alcorta 7350, C1428BCW Buenos Aires, Argentina",
-      "facultyUrl": "http://utdt.edu/ver_contenido.php?id_contenido=7916&id_item_menu=15519",
-      "sources": [
-        "directory"
-      ],
-      "lat": -34.5480059,
-      "lng": -58.4469439,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "universite-catholique-de-louvain__louvain-school-of-management__center-for-operations-research-and-econometrics",
-      "institution": "Université catholique de Louvain",
-      "school": "Louvain School of Management",
-      "department": "Center for Operations Research and Econometrics",
-      "type": "Business School",
-      "country": "Belgium",
-      "address": "Place de l'Université 1, 1348 Louvain-la-Neuve, Belgium",
-      "mapUrl": "https://goo.gl/maps/EbmwL",
-      "facultyUrl": "http://www.uclouvain.be/en-237347.html",
-      "sources": [
-        "directory",
-        "postings",
-        "seed"
-      ],
-      "n": 2,
-      "lastPosted": "2026-09-22",
-      "lat": 50.6697528,
-      "lng": 4.6152477,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -1080,47 +510,12 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "university-college-london__ucl-global-business-school-for-health__sustainable-supply-chain-management",
-      "institution": "University College London",
-      "school": "UCL Global Business School for Health",
-      "department": "Sustainable Supply Chain Management",
-      "type": "Business School",
-      "country": "United Kingdom",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2026-10-30",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://www.ucl.ac.uk/population-health-sciences/global-business-school-health/people",
-      "facultyDirectoryHint": "See Core Academic Staff; directory covers all school disciplines."
-    },
-    {
       "id": "university-of-california-berkeley",
       "institution": "University of California, Berkeley",
       "type": "University",
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-california-merced__school-of-engineering",
-      "institution": "University of California, Merced",
-      "school": "School of Engineering",
-      "type": "University",
-      "country": "United States",
-      "address": "5200 Lake Rd, Merced, CA 95340",
-      "mapUrl": "https://goo.gl/maps/GS66j",
-      "facultyUrl": "http://www.ucmerced.edu/faculty-directory",
-      "sources": [
-        "directory"
-      ],
-      "lat": 37.3637343,
-      "lng": -120.4311096,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -1179,24 +574,6 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "university-of-louisville__j-b-speed-school-of-engineering__industrial-engineering",
-      "institution": "University of Louisville",
-      "school": "J. B. Speed School of Engineering",
-      "department": "Industrial Engineering",
-      "type": "University",
-      "country": "United States",
-      "address": "132 Eastern Pkwy, Louisville, KY 40292",
-      "mapUrl": "https://goo.gl/maps/lSZCd",
-      "facultyUrl": "https://louisville.edu/speed/industrial/personnel/faculty",
-      "sources": [
-        "directory"
-      ],
-      "lat": 38.2131244,
-      "lng": -85.760937,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "university-of-mannheim",
       "institution": "University of Mannheim",
       "type": "University",
@@ -1207,165 +584,12 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "university-of-mannheim__business-school__chair-of-production-management",
-      "institution": "University of Mannheim",
-      "school": "Business School",
-      "department": "Chair of Production Management",
-      "type": "Business School",
-      "country": "Germany",
-      "address": "68131 Mannheim, Germany",
-      "mapUrl": "https://goo.gl/maps/TAFmt",
-      "facultyUrl": "http://stolletz.bwl.uni-mannheim.de/en/team/",
-      "characteristics": [
-        "PhD"
-      ],
-      "sources": [
-        "directory",
-        "postings"
-      ],
-      "n": 3,
-      "lastPosted": "2025-12-08",
-      "lat": 49.4874592,
-      "lng": 8.4660395,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-mannheim__business-school__operations-management",
-      "institution": "University of Mannheim",
-      "school": "Business School",
-      "department": "Operations Management",
-      "type": "Business School",
-      "deptUrl": "https://www.mannheim-business-school.com/en/the-mannheim-experience/faculty-research/faculty/",
-      "sources": [
-        "omlist",
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://www.bwl.uni-mannheim.de/operations/"
-    },
-    {
-      "id": "university-of-mannheim__business-school__supply-chain-management",
-      "institution": "University of Mannheim",
-      "school": "Business School",
-      "department": "Supply Chain Management",
-      "type": "Business School",
-      "country": "Germany",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2025-06-05",
-      "sourceRowIds": [
-        "university-of-mannheim____supply-chain-management"
-      ],
-      "sourceRowAliases": [
-        {
-          "school": "",
-          "department": "Supply Chain Management"
-        }
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "mapSearchTerms": [
-        "Supply Chain Management"
-      ],
-      "facultyUrl": "https://www.bwl.uni-mannheim.de/en/fleischmann/team/"
-    },
-    {
       "id": "university-of-miami",
       "institution": "University of Miami",
       "type": "University",
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-miami__miami-herbert-business-school__ba-fintech-ai-healthcare",
-      "institution": "University of Miami",
-      "school": "Miami Herbert Business School",
-      "department": "BA: FinTech, AI, Healthcare",
-      "type": "Business School",
-      "country": "United States",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2025-10-02",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html",
-      "facultyDirectoryHint": "School faculty directory; this hiring initiative spans departments."
-    },
-    {
-      "id": "university-of-miami__miami-herbert-business-school__management-area",
-      "institution": "University of Miami",
-      "school": "Miami Herbert Business School",
-      "department": "Management Area",
-      "type": "Business School",
-      "country": "United States",
-      "address": "5250 University Dr, Coral Gables, FL 33146",
-      "mapUrl": "https://goo.gl/maps/xSQox",
-      "facultyUrl": "http://bus.miami.edu/faculty-and-research/faculty-directory/management/index.html",
-      "deptUrl": "https://www.herbert.miami.edu/faculty-research/directory/index.html",
-      "characteristics": [
-        "Research seminars",
-        "PhD",
-        "Masters",
-        "MBA",
-        "Undergrad",
-        "Exec Ed"
-      ],
-      "sources": [
-        "directory",
-        "omlist",
-        "postings",
-        "seed"
-      ],
-      "n": 2,
-      "lastPosted": "2024-10-11",
-      "lat": 25.7201133,
-      "lng": -80.2763875,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-miami__miami-herbert-business-school__operations-management",
-      "institution": "University of Miami",
-      "school": "Miami Herbert Business School",
-      "department": "Operations Management",
-      "type": "Business School",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html",
-      "facultyDirectoryHint": "In Program, select Operations Management. The directory does not preserve this filter in its URL."
-    },
-    {
-      "id": "university-of-michigan-dearborn__college-of-business__decision-sciences-operations-management",
-      "institution": "University of Michigan-Dearborn",
-      "school": "College of Business",
-      "department": "Decision Sciences/Operations Management",
-      "type": "Business School",
-      "country": "United States",
-      "address": "4901 Evergreen Rd, Dearborn, MI 48128",
-      "mapUrl": "https://goo.gl/maps/r4zOp",
-      "facultyUrl": "http://umdearborn.edu/cob/department-of-management-studies/",
-      "sources": [
-        "directory",
-        "postings"
-      ],
-      "n": 1,
-      "lastPosted": "2014-10-22",
-      "lat": 42.3184187,
-      "lng": -83.2310262,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -1410,47 +634,12 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "university-of-sydney__faculty-of-engineering__engineering-and-ai",
-      "institution": "University of Sydney",
-      "school": "Faculty of Engineering",
-      "department": "Engineering and AI",
-      "type": "University",
-      "country": "Australia",
-      "sources": [
-        "postings",
-        "seed"
-      ],
-      "n": 1,
-      "lastPosted": "2026-10-27",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://profiles.sydney.edu.au/groups/177675/experts",
-      "facultyDirectoryHint": "This directory covers all Faculty of Engineering researchers, including many fields beyond AI."
-    },
-    {
       "id": "university-of-texas-at-dallas",
       "institution": "University of Texas at Dallas",
       "type": "University",
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-toulouse__toulouse-business-school__information-operations-and-management-sciences",
-      "institution": "University of Toulouse",
-      "school": "Toulouse Business School",
-      "department": "Information, Operations and Management Sciences",
-      "type": "Business School",
-      "country": "France",
-      "address": "20 Boulevard Lascrosses, 31068 Toulouse, France",
-      "facultyUrl": "http://www.tbs-education.fr/en/faculty-research/faculty/faculty-departements/information-operations-and-management-sciences",
-      "sources": [
-        "directory"
-      ],
-      "lat": 43.6095227,
-      "lng": 1.4308228,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -1518,21 +707,6 @@
       ],
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "washington-university-in-st-louis____supply-chain-operations-and-technology-ai-cluster-hire",
-      "institution": "Washington University in St. Louis",
-      "department": "Supply Chain, Operations, and Technology (AI Cluster hire)",
-      "type": "University",
-      "country": "United States",
-      "sources": [
-        "postings"
-      ],
-      "n": 1,
-      "lastPosted": "2026-10-28",
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved",
-      "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology"
     },
     {
       "id": "woxsen-university__school-of-business__business-analytics",
