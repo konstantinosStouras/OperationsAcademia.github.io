@@ -285,6 +285,11 @@ try{
       }
       const groupSets=eligible.map(point=>model.locationGroupsForTarget(point,row.institution,target.school,target.unit,evidence));
       const commonGroups=groupSets.length?groupSets[0].filter(group=>groupSets.every(set=>set.includes(group))):[];
+      // A canonical directory row can have evidence from several older school
+      // labels. Its link follows the best canonical route; it cannot select
+      // each historical source independently without a location chooser.
+      assert.ok(eligible.length,id+' has a canonical physical-card route');
+      const routedLocation=eligible.length>1&&commonGroups.length?displayLocation:eligible[0];
       if(eligible.length>1&&commonGroups.length){
         const options=q.locator('.oa-map-location-options');
         const choices=await options.locator('button[data-map-card-id]').evaluateAll(buttons=>buttons.map(b=>b.getAttribute('data-map-card-id')));
@@ -294,15 +299,15 @@ try{
         await options.locator('button[data-map-card-id]').nth(index).click();
         await q.waitForFunction(()=>document.querySelectorAll('.oa-map-popup').length===1&&!document.querySelector('.oa-map-location-options'));
       }
-      assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.address),id+' opens its verified address');
+      assert.ok((await q.locator('.oa-map-popup').innerText()).includes(routedLocation.address),id+' opens its verified canonical address');
       if((id.startsWith('insead__')||id.startsWith('university-of-alaska-'))&&row.department&&row.facultyUrl){
         const selected=q.locator('.oa-map-selected-department');
         assert.equal(await selected.locator('.oa-map-department-name a').getAttribute('href'),row.facultyUrl,id+' department name links directly to faculty');
         assert.equal(await selected.getByRole('link',{name:'Faculty',exact:true}).count(),0,'no separate faculty label');
       }
-      if(displayLocation.locationPrecision==='campus')assert.ok((await q.locator('.oa-map-popup').innerText()).includes(displayLocation.locationContext),id+' explains campus fallback');
-      assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[displayLocation.lat,displayLocation.lng],id+' opens the representative school pin');
-      assert.ok(await q.evaluate(evidenceId=>{const at=testMap.map._popup.getLatLng();return testMap.shown().some(p=>p.lat===at.lat&&p.lng===at.lng&&(p.sourceEvidenceIds||[]).includes(evidenceId));},location.id),id+' opened point retains original location evidence');
+      if(routedLocation.locationPrecision==='campus')assert.ok((await q.locator('.oa-map-popup').innerText()).includes(routedLocation.locationContext),id+' explains campus fallback');
+      assert.deepEqual(await q.evaluate(()=>{const p=testMap.map._popup.getLatLng();return [p.lat,p.lng];}),[routedLocation.lat,routedLocation.lng],id+' opens the representative school pin');
+      assert.ok(await q.evaluate(evidenceIds=>{const at=testMap.map._popup.getLatLng();return testMap.shown().some(p=>p.lat===at.lat&&p.lng===at.lng&&evidenceIds.every(id=>(p.sourceEvidenceIds||[]).includes(id)));},routedLocation.sourceEvidenceIds||[]),id+' opened point retains canonical location evidence');
       await q.locator('#oaf-dept').fill(location.department||location.school||'');
       await q.waitForFunction(expected=>testMap.shown().some(p=>p.card.id===expected.card.id&&p.lat===expected.lat&&p.lng===expected.lng),displayLocation);
       const filtered=await q.evaluate(cardId=>testMap.shown().find(p=>p.card.id===cardId),displayLocation.card.id);
