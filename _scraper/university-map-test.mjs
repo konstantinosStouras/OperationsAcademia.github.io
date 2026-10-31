@@ -304,7 +304,8 @@ try{
         await options.locator('button[data-map-card-id]').nth(index).click();
         await q.waitForFunction(()=>document.querySelectorAll('.oa-map-popup').length===1&&!document.querySelector('.oa-map-location-options'));
       }
-      assert.ok((await q.locator('.oa-map-popup').innerText()).includes(routedLocation.address),id+' opens its verified canonical address');
+      const popupText=await q.locator('.oa-map-popup').innerText();
+      assert.ok(popupText.includes(routedLocation.address),id+' opens its verified canonical address: expected '+routedLocation.address+'; rendered '+popupText.slice(0,1200));
       if((id.startsWith('insead__')||id.startsWith('university-of-alaska-'))&&row.department&&row.facultyUrl){
         const selected=q.locator('.oa-map-selected-department');
         assert.equal(await selected.locator('.oa-map-department-name a').getAttribute('href'),row.facultyUrl,id+' department name links directly to faculty');

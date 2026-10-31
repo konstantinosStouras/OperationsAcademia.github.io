@@ -5866,7 +5866,7 @@ for (const [from, hash] of [
         const row = (window.__GATE_ROWS || {})[card.id.replace(/^job-/, '')];
         if (!row) continue;
         for (const [k, v] of Object.entries(row)) {
-          if (k === 'id') continue;
+          if (k === 'id' || k === 'sourceId') continue; // public routing identifiers, not gated content
           if (typeof v !== 'string' || v.length < 12) continue;
           if (shown.includes(v)) continue;          // the head is meant to show it
           if (html.includes(v)) out2.push(card.id + ' → ' + k + ': ' + v.slice(0, 40));

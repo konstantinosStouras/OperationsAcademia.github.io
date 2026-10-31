@@ -10,6 +10,9 @@ const directory=read('../data/directory.json');
 const rows=Array.isArray(directory)?directory:directory.rows;
 const seen=new Map(), ids=new Set();
 assert.equal(model.displayName('WU Vienna'),'Vienna University of Economics and Business');
+assert.ok(model.rowMatchScore({school:'Health',department:''},'Health','')>
+ model.rowMatchScore({school:'Health',department:'Supply Chain'},'Health',''),
+ 'school-only links prefer the school row over a specific department');
 for(const v of verified){
  assert.ok(v.id&&!ids.has(v.id),'unique location identity');ids.add(v.id);
  assert.ok(model.located(v),v.id+' coordinates');

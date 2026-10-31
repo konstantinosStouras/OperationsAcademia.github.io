@@ -338,7 +338,10 @@
       if(!sameSchool||!sameDepartment)return best;
       // A legacy link with no school belongs to its original school-less row
       // before another campus that happens to use the same department name.
-      return Math.max(best,1+(fold(a.school)===fold(school)?2:0));
+      // A school-only link prefers that school's own row over a named
+      // department. Otherwise an unlocated new department can steal the
+      // link from the school's verified building at an equal score.
+      return Math.max(best,1+(fold(a.school)===fold(school)?2:0)+(!fold(department)&&!fold(a.department)?1:0));
     },0);
   }
   return {prepareData:prepareData,pointsFor:pointsFor,consolidatePoints:consolidatePoints,mergeSchoolLocations:mergeSchoolLocations,representativeSchoolLocation:representativeSchoolLocation,locationGroupsForTarget:locationGroupsForTarget,canonicalLocation:canonicalLocation,pointMatchScore:pointMatchScore,located:located,displayName:displayName,departmentName:departmentName,matchesRow:matchesRow,rowMatchScore:rowMatchScore};
