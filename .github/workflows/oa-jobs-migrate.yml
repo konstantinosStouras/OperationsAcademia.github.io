@@ -1,17 +1,41 @@
-name: Check existing map-test baseline
+name: Scoped seven approval verification
 on:
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
+concurrency:
+  group: oa-jobs-data-refs/heads/master
+  cancel-in-progress: false
 jobs:
-  baseline:
+  inspect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           ref: master
+          fetch-depth: 1
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - name: Unchanged master school-location test
-        run: node _scraper/school-location-test.mjs
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+      - name: Scoped public job fields only
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          cat > scoped-seven.mjs <<'JS'
+          import fs from 'node:fs';
+          import {firestore} from './_scraper/_mail.mjs';
+          import {approvedRow} from './_scraper/jobreview.mjs';
+          const db=await firestore(); if(!db)throw Error('Database unavailable');
+          const fields=['id','institution','school','unit','department','levels','type','country','applyByDate','reviewDate','adUrl','postedAtUrl','furtherInfoUrl','posted','year','source','applicationStatus'];
+          const safe=r=>Object.fromEntries(fields.filter(k=>r?.[k]!==undefined).map(k=>[k,r[k]]));
+          const ids=['2026-southern-methodist-university-cox-school-of-busi-20250829','2026-university-of-miami-herbert-20251002','2027-essec-business-school-20260617','2027-george-mason-university-20260813-2','2027-hong-kong-university-of-science-and-technology-g-20260905','2027-northern-state-university-20260913','2027-university-college-london-20260821'];
+          for(const id of ids){const d=await db.collection('jobReviews').doc(id).get();const v=d.data();console.log(JSON.stringify({record:id,status:v?.status,approved:safe(v?approvedRow(v.row,v):{}),mirror:(await db.collection('jobSubmissions').doc(id).get()).exists}));}
+          const pending=await db.collection('jobReviews').where('status','==','pending').get();
+          for(const d of pending.docs){const v=d.data();if(/mason|college london|ucl/i.test(JSON.stringify(safe(v.row))))console.log(JSON.stringify({pending:d.id,row:safe(v.row),edits:safe(v.edits)}));}
+          const rows=JSON.parse(fs.readFileSync('data/jobs.json','utf8'));
+          for(const r of rows)if(/mason|college london|ucl|northern state|essec|methodist|miami/i.test(r.institution))console.log(JSON.stringify({live:safe(r)}));
+          const dirs=JSON.parse(fs.readFileSync('data/universities.json','utf8'));
+          for(const r of dirs)if(/mason|college london|ucl/i.test(JSON.stringify(r)))console.log(JSON.stringify({directory:r}));
+          JS
+          node scoped-seven.mjs
