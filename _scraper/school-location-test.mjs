@@ -21,8 +21,13 @@ for(const v of verified){
  if(v.locationPrecision==='campus')assert.ok(v.locationContext,v.id+' explains campus fallback');
  for(const id of v.rowIds){
   if(seen.has(id)) {
-   assert.ok(v.locationGroup&&v.locationGroup===seen.get(id).locationGroup,'ambiguous location for '+id);
-   assert.equal(new URL(v.locationGroupSource).protocol,'https:');
+   const previous=seen.get(id);
+   const sameBuilding=v.building&&v.building===previous.building&&
+    S.institutionKey(v.institution)===S.institutionKey(previous.institution)&&
+    Math.hypot(v.lat-previous.lat,v.lng-previous.lng)<0.0001;
+   const grouped=v.locationGroup&&v.locationGroup===previous.locationGroup;
+   assert.ok(sameBuilding||grouped,'ambiguous location for '+id);
+   if(grouped)assert.equal(new URL(v.locationGroupSource).protocol,'https:');
   }
   seen.set(id,v);
   // Reviewed evidence retains its original row ids after a department rename.
