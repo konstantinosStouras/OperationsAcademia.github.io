@@ -2750,34 +2750,6 @@
   "facultyUrl": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/analytics-operations-management/faculty-staff"
  },
  {
-  "id": "bucknell-university__freeman-college-of-management__business-analytics",
-  "institution": "Bucknell University",
-  "school": "Freeman College of Management",
-  "department": "Business Analytics",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ],
-  "mapLocationIds": [
-   "bucknell-holmes-school__business-analytics"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Bucknell University"
-  ],
-  "mapSearchTerms": [
-   "Freeman College of Management",
-   "Business Analytics"
-  ],
-  "country": "United States",
-  "mapDepartmentLinks": {
-   "bucknell-holmes-school__business-analytics": {
-    "facultyUrl": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/analytics-operations-management/faculty-staff"
-   }
-  },
-  "facultyUrl": "https://www.bucknell.edu/academics/freeman-college-management/majors-departments/analytics-operations-management/faculty-staff"
- },
- {
   "id": "bucknell-university__freeman-college-of-management__markets-innovation-and-design-mide",
   "institution": "Bucknell University",
   "school": "Freeman College of Management",
@@ -27081,28 +27053,18 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-05",
-  "sourceRowIds": [
-   "university-of-kansas____analytics-information-and-operations-management"
-  ],
-  "sourceRowAliases": [
-   {
-    "school": "",
-    "department": "Analytics, Information and Operations Management"
-   }
-  ],
   "lat": 38.958542,
   "lng": -95.2476138,
   "mapLocationIds": [
    "kansas-business-capitol-federal"
   ],
   "mapLocationKind": "exact",
-  "mapSearchTerms": [
-   "School of Business",
-   "Analytics, Information, Operations",
-   "Analytics, Information and Operations Management"
-  ],
   "mapInstitutionNames": [
    "University of Kansas"
+  ],
+  "mapSearchTerms": [
+   "School of Business",
+   "Analytics, Information, Operations"
   ],
   "mapDepartmentLinks": {
    "kansas-business-capitol-federal": {
