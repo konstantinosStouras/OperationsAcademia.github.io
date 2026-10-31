@@ -2,7 +2,7 @@
   "snapshotDate": "2026-10-31",
   "lastPublishedMapCommit": "(see git log: the round 3 publication of 31 October 2026)",
   "source": "data/directory.json",
-  "unresolvedLocationCount": 65,
+  "unresolvedLocationCount": 67,
   "missingFacultyRosterCount": 4,
   "unresolvedLocations": [
     {
@@ -187,6 +187,29 @@
       ],
       "lat": 40.9528852,
       "lng": -4.1188364,
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "iese",
+      "institution": "IESE",
+      "type": "Business School",
+      "country": "Spain",
+      "sources": [
+        "postings"
+      ],
+      "n": 1,
+      "lastPosted": "2014-07-22",
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "iese-business-school",
+      "institution": "IESE Business School",
+      "type": "Business School",
+      "sources": [
+        "seed"
+      ],
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
