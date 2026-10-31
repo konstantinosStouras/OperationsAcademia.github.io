@@ -1798,11 +1798,46 @@
 
   // Approval is a decision, not proof of a successful public deployment.
   function unpublishedApprovals(docs, live, hidden) {
+    // Manually verified 2026-10-31 across source sites. These are display-only
+    // equivalences, never ingestion/approval rules. Require both the exact
+    // reviewed identity and its matching replacement in the CURRENT feed;
+    // removal or a changed advert must make the approval unconfirmed again.
+    var verifiedReplacements = [
+      { oldId: '2027-essec-business-school-20260617', liveId: '2027-essec-20260929',
+        institution: /^ESSEC(?: Business School)?$/i,
+        oldHost: 'docs.google.com', oldPath: '/forms/d/e/1FAIpQLScKGwFHes4KMhN5Kp1M6-pY1vmrwqJMKKE_u3T2E3TO2MIoEA/viewform',
+        liveHost: 'drive.google.com', livePath: '/file/d/1OrKYxVx_jfxG0MgnYRX4UKiqL9cMwgJL/view' },
+      { oldId: '2027-northern-state-university-20260913', liveId: '2027-northern-state-university-20260717',
+        institution: /^Northern State University$/i,
+        oldHost: 'higheredjobs.com', oldPath: '/faculty/details.cfm', oldJobCode: '179552277',
+        liveHost: 'yourfuture.sdbor.edu', livePath: '/postings/48998' }
+    ];
+    function verifiedLink(value, host, path, jobCode) {
+      try {
+        var parsed = new URL(value);
+        return /^https?:$/.test(parsed.protocol) &&
+          parsed.hostname.replace(/^www\./, '').toLowerCase() === host &&
+          parsed.pathname.replace(/\/$/, '') === path &&
+          (!jobCode || parsed.searchParams.get('JobCode') === jobCode);
+      } catch (_) { return false; }
+    }
+    function verifiedReplacement(row, doc) {
+      return verifiedReplacements.some(function (pair) {
+        return (doc.rowId || row.id) === pair.oldId && row.id === pair.oldId &&
+          pair.institution.test(row.institution || '') &&
+          verifiedLink(row.adUrl, pair.oldHost, pair.oldPath, pair.oldJobCode) &&
+          live.some(function (job) {
+            return job.id === pair.liveId && pair.institution.test(job.institution || '') &&
+              verifiedLink(job.adUrl, pair.liveHost, pair.livePath);
+          });
+      });
+    }
     return docs.filter(function (doc) {
       if (!doc || doc.status !== 'approved' || !doc.row) return false;
       var row = Object.assign({}, judgedRow(doc), { postedAtUrl: fieldValue(doc, 'postedAtUrl') });
       if (hidden.indexOf(doc.rowId || row.id) >= 0) return false;
       if (live.some(function (job) { return job.id === row.id; })) return false;
+      if (verifiedReplacement(row, doc)) return false;
       var officialApplication = /\/Vacancy\/\d+(?:[/?#]|$)/i.test(row.postedAtUrl || '')
         ? Object.assign({}, row, { adUrl: row.postedAtUrl }) : null;
       return !(window.OAAdvertDup && (OAAdvertDup.publishedAdvertRepeat(row, live) ||
