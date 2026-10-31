@@ -117,7 +117,7 @@ export const TYPES = ['Business School', 'University'];
 
 const MAXLEN = {
   institution: 160, department: 220, school: 160, unit: 160, country: 60, applyBy: 400,
-  comments: 1200, adUrl: 500, postedAtUrl: 500, furtherInfoUrl: 500,
+  comments: 1500, adUrl: 500, postedAtUrl: 500, furtherInfoUrl: 500,
   adLabel: 60, postedAtLabel: 60,
 };
 
